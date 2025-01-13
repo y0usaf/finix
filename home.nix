@@ -27,17 +27,6 @@
   home = {
     username = globals.username;
     homeDirectory = globals.homeDirectory;
-
-    #---------------------------------------------------------------------------
-    # Backup Configuration
-    #---------------------------------------------------------------------------
-    activation = {
-      backupConfig = lib.hm.dag.entryBefore ["checkLinkTargets"] ''
-        if [ -d "$HOME/.config" ]; then
-          $DRY_RUN_CMD mv $HOME/.config $HOME/.config.backup-$(date +%Y%m%d_%H%M%S)
-        fi
-      '';
-    };
   };
 
   #-----------------------------------------------------------------------------
@@ -166,42 +155,6 @@
     Path = {
       PathModified = "/home/y0usaf/nixos";
       Unit = "format-nix.service";
-    };
-    Install = {
-      WantedBy = ["default.target"];
-    };
-  };
-
-  #---------------------------------------------------------------------------
-  # Git Auto-Push Service
-  #---------------------------------------------------------------------------
-  systemd.user.services.git-auto-push = {
-    Unit = {
-      Description = "Push NixOS config changes after successful build";
-      After = "format-nix.service";
-    };
-    Service = {
-      Type = "oneshot";
-      ExecStart = pkgs.writeShellScript "git-auto-push" ''
-        cd /home/y0usaf/nixos
-        if git diff-index --quiet HEAD --; then
-          exit 0
-        fi
-        git add .
-        git commit -m "feat: system update $(date '+%Y-%m-%d %H:%M')"
-        git push
-      '';
-      WorkingDirectory = "/home/y0usaf/nixos";
-    };
-  };
-
-  systemd.user.paths.git-auto-push = {
-    Unit = {
-      Description = "Watch NixOS config directory for successful builds";
-    };
-    Path = {
-      PathChanged = "/home/y0usaf/nixos/result";
-      Unit = "git-auto-push.service";
     };
     Install = {
       WantedBy = ["default.target"];
