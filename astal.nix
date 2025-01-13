@@ -17,32 +17,19 @@
   # Main app configuration
   xdg.configFile."astal/app.ts" = {
     text = ''
-      import { App } from '@astal/widgets';
-      import config from './config';
-
-      export default config;
-    '';
-  };
-
-  # Main configuration file
-  xdg.configFile."astal/config.ts" = {
-    text = ''
       import { App, Widget } from '@astal/widgets';
 
-      const app = new App({
-        name: 'y0usaf-config',
-        windows: [
-          {
-            name: 'test',
-            anchor: ['top'],
-            child: Widget.Label({
-              label: 'Hello, Astal!',
-            }),
-          },
-        ],
+      const win = Widget.Window({
+        name: 'test',
+        anchor: ['top'],
+        child: Widget.Label({
+          label: 'Hello, Astal!',
+        }),
       });
 
-      export default app;
+      export default {
+        windows: [win],
+      };
     '';
   };
 
