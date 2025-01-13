@@ -25,6 +25,9 @@
   home.packages = with pkgs; [
     gobject-introspection
     gtk3
+    ninja
+    pkg-config
+    cairo
   ];
 
   # Set up virtual environment and install dependencies
@@ -44,6 +47,7 @@
       export GI_TYPELIB_PATH="${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0"
       UV_CACHE_DIR="$HOME/.config/fabric/cache" \
       UV_NO_BINARY=1 \
+      PATH="${pkgs.ninja}/bin:${pkgs.pkg-config}/bin:$PATH" \
       ${inputs.uv2nix.packages.${pkgs.system}.uv-bin}/bin/uv pip install \
         pygobject \
         dbus-python
