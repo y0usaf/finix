@@ -20,17 +20,25 @@
   globals,
   ...
 }: {
-  # Install required packages
+  # Install only gobject-introspection as system dependency
   home.packages = with pkgs; [
-    python3
-    python3Packages.pygobject3
-    python3Packages.dbus-python
     gobject-introspection
   ];
 
-  # Create Fabric configuration directory
+  # Set up virtual environment and install dependencies
   home.activation.fabricSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
     $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
+
+    # Create virtual environment if it doesn't exist
+    if [ ! -d "$HOME/.config/fabric/venv" ]; then
+      ${pkgs.uv}/bin/uv venv "$HOME/.config/fabric/venv"
+
+      # Install required packages
+      source "$HOME/.config/fabric/venv/bin/activate"
+      ${pkgs.uv}/bin/uv pip install \
+        pygobject \
+        dbus-python
+    fi
   '';
 
   # Workspace toggle script
@@ -52,11 +60,11 @@
     '';
   };
 
-  # Notifications script
+  # Update notifications script to use venv Python
   xdg.configFile."fabric/notifications.py" = {
     executable = true;
     text = ''
-      #!/usr/bin/env python3
+      #!${config.home.homeDirectory}/.config/fabric/venv/bin/python3
 
       import gi
       import dbus
