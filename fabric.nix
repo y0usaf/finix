@@ -24,11 +24,27 @@
     with ps; [
       pygobject3
       dbus-python
+      (
+        buildPythonPackage rec {
+          pname = "gi";
+          version = "1.0";
+          format = "other";
+          propagatedBuildInputs = [
+            pkgs.gobject-introspection
+            pkgs.gtk3
+            pygobject3
+          ];
+          dontUnpack = true;
+          dontBuild = true;
+          installPhase = "mkdir -p $out";
+        }
+      )
     ]);
 in {
-  # Install only gobject-introspection as system dependency
+  # Install required system dependencies
   home.packages = with pkgs; [
     gobject-introspection
+    gtk3
   ];
 
   # Create fabric config directory
@@ -55,11 +71,16 @@ in {
     '';
   };
 
-  # Update notifications script to use nix-managed Python
+  # Update notifications script with proper environment setup
   xdg.configFile."fabric/notifications.py" = {
     executable = true;
     text = ''
       #!${pythonEnv}/bin/python3
+
+      import os
+      # Set GI environment variables
+      os.environ['GI_TYPELIB_PATH'] = "${pkgs.gtk3}/lib/girepository-1.0:" + \
+                                     "${pkgs.gobject-introspection}/lib/girepository-1.0"
 
       import gi
       import dbus
@@ -84,10 +105,10 @@ in {
     '';
   };
 
-  # Update Hyprland configuration to use Fabric
+  # Update Hyprland configuration with environment variables
   wayland.windowManager.hyprland.settings = {
     exec-once = [
-      "${pythonEnv}/bin/python3 ~/.config/fabric/notifications.py"
+      "GI_TYPELIB_PATH=${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0 ${pythonEnv}/bin/python3 ~/.config/fabric/notifications.py"
       "~/.config/fabric/toggle_workspaces.sh"
     ];
 
