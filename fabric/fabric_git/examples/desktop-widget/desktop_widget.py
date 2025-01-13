@@ -1,1 +1,0 @@
-/home/y0usaf/dotfiles/.config/fabric/fabric_git/examples/desktop-widget/desktop_widget.py

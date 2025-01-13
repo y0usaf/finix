@@ -1,1 +1,0 @@
-/home/y0usaf/dotfiles/.config/fabric/workspaces.py

@@ -1,1 +1,0 @@
-/home/y0usaf/dotfiles/.config/fabric/fabric_git/examples/icon-browser/icon_browser.py

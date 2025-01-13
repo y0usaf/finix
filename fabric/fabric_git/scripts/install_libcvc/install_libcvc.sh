@@ -1,1 +1,0 @@
-/home/y0usaf/dotfiles/.config/fabric/fabric_git/scripts/install_libcvc/install_libcvc.sh
