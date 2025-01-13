@@ -15,9 +15,9 @@
   ];
 
   # Main app configuration
-  xdg.configFile."astal/app.ts" = {
+  xdg.configFile."astal/config.js" = {
     text = ''
-      import { App, Widget } from '@astal/widgets';
+      import { App, Widget } from 'resource:///com/github/Aylur/astal/widgets.js';
 
       const win = Widget.Window({
         name: 'test',
@@ -29,6 +29,7 @@
 
       export default {
         windows: [win],
+        style: './style.css',
       };
     '';
   };
