@@ -14,6 +14,17 @@
     gobject-introspection
   ];
 
+  # Main app configuration
+  xdg.configFile."astal/app.ts" = {
+    text = ''
+      import { App } from '@astal/widgets';
+      import config from './config';
+
+      export default config;
+    '';
+  };
+
+  # Main configuration file
   xdg.configFile."astal/config.ts" = {
     text = ''
       import { App, Widget } from '@astal/widgets';
@@ -73,7 +84,7 @@
     '';
   };
 
-  # Add Astal CSS
+  # Styling
   xdg.configFile."astal/style.css" = {
     text = ''
       .bar {
@@ -102,7 +113,17 @@
     '';
   };
 
-  # Add Astal to autostart
+  # Add Astal to Hyprland autostart
+  wayland.windowManager.hyprland.settings = {
+    exec-once = [
+      "astal"
+    ];
+    layerrule = [
+      "blur, astal"
+    ];
+  };
+
+  # Ensure config directory exists
   home.activation.astalSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
     $DRY_RUN_CMD mkdir -p $HOME/.config/astal
   '';
