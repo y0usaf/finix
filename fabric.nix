@@ -21,14 +21,14 @@
   inputs,
   ...
 }: let
-  pythonEnv = inputs.pyproject-nix.lib.${pkgs.system}.withPackages {
+  pythonEnv = inputs.uv2nix.lib.${pkgs.system}.mkPython {
     python = pkgs.python311;
+    requirements = ''
+      pygobject
+      dbus-python
+    '';
     propagatedBuildInputs = with pkgs; [
       gobject-introspection
-    ];
-    requirements = [
-      "pygobject"
-      "dbus-python"
     ];
   };
 in {
