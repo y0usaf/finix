@@ -20,23 +20,28 @@
   globals,
   inputs,
   ...
-}: let
-  pythonEnv = pkgs.python3.withPackages (ps:
-    with ps; [
-      pygobject3
-      dbus-python
-    ]);
-in {
+}: {
   # Install required system dependencies
   home.packages = with pkgs; [
     gobject-introspection
     gtk3
-    pythonEnv
   ];
 
-  # Create fabric config directory
+  # Set up virtual environment and install dependencies
   home.activation.fabricSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
     $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
+
+    # Create virtual environment if it doesn't exist
+    if [ ! -d "$HOME/.config/fabric/venv" ]; then
+      ${pkgs.uv-bin}/bin/uv venv "$HOME/.config/fabric/venv"
+
+      # Install required packages
+      source "$HOME/.config/fabric/venv/bin/activate"
+      export GI_TYPELIB_PATH="${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0"
+      ${pkgs.uv-bin}/bin/uv pip install \
+        pygobject \
+        dbus-python
+    fi
   '';
 
   # Workspace toggle script
@@ -58,14 +63,13 @@ in {
     '';
   };
 
-  # Update notifications script to use system Python
+  # Notifications script
   xdg.configFile."fabric/notifications.py" = {
     executable = true;
     text = ''
-      #!${pythonEnv}/bin/python3
+      #!${config.home.homeDirectory}/.config/fabric/venv/bin/python
 
       import os
-      # Set GI environment variables
       os.environ['GI_TYPELIB_PATH'] = "${pkgs.gtk3}/lib/girepository-1.0:" + \
                                      "${pkgs.gobject-introspection}/lib/girepository-1.0"
 
@@ -92,10 +96,10 @@ in {
     '';
   };
 
-  # Update Hyprland configuration with environment variables
+  # Hyprland configuration
   wayland.windowManager.hyprland.settings = {
     exec-once = [
-      "GI_TYPELIB_PATH=${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0 ${pythonEnv}/bin/python3 $HOME/.config/fabric/notifications.py"
+      "GI_TYPELIB_PATH=${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0 $HOME/.config/fabric/venv/bin/python $HOME/.config/fabric/notifications.py"
       "~/.config/fabric/toggle_workspaces.sh"
     ];
 
