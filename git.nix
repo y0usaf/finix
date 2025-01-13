@@ -82,17 +82,21 @@
     Service = {
       Type = "oneshot";
       Environment = [
-        "PATH=${pkgs.git}/bin:${pkgs.coreutils}/bin"
+        "PATH=${lib.makeBinPath [pkgs.git pkgs.coreutils pkgs.openssh]}"
         "SSH_AUTH_SOCK=%t/ssh-agent"
       ];
-      # Add explicit SSH key path
-      ExecStartPre = "${pkgs.openssh}/bin/ssh-add ${globals.homeDirectory}/Tokens/id_rsa_y0usaf";
       ExecStart = pkgs.writeShellScript "nixos-git-sync" ''
+        # Ensure SSH agent has our key
+        if ! ssh-add -l | grep -q "${globals.homeDirectory}/Tokens/id_rsa_y0usaf"; then
+          ssh-add "${globals.homeDirectory}/Tokens/id_rsa_y0usaf"
+        fi
+
         cd ${globals.homeDirectory}/nixos
-        if ! git diff --quiet HEAD; then
+        # Check if there are any changes, including untracked files
+        if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then
           git add .
           git commit -m "auto: system update $(date '+%Y-%m-%d %H:%M:%S')"
-          git push -f origin main
+          git push origin main
         fi
       '';
     };
@@ -106,7 +110,7 @@
       Description = "Watch NixOS config directory for successful builds";
     };
     Path = {
-      PathChanged = "${globals.homeDirectory}/nixos/result";
+      PathModified = "${globals.homeDirectory}/nixos";
       Unit = "nixos-git-sync.service";
     };
     Install = {
