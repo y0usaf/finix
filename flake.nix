@@ -35,6 +35,12 @@
       inputs.hyprland.follows = "hyprland";
     };
 
+    # Add Fabric Development
+    fabric = {
+      url = "github:Fabric-Development/fabric";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Python Tools
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
