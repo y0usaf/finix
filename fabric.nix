@@ -18,13 +18,13 @@
   pkgs,
   lib,
   globals,
+  inputs,
   ...
 }: {
   # Install required system dependencies
   home.packages = with pkgs; [
     gobject-introspection
     gtk3
-    uv
   ];
 
   # Create requirements.txt file
@@ -38,12 +38,12 @@
     $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
 
     # Create or update virtual environment
-    ${pkgs.uv}/bin/uv venv "$HOME/.config/fabric/venv"
+    ${inputs.uv2nix.packages.${pkgs.system}.uv-bin}/bin/uv venv "$HOME/.config/fabric/venv"
 
     # Install/update required packages
     source "$HOME/.config/fabric/venv/bin/activate"
     export GI_TYPELIB_PATH="${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0"
-    ${pkgs.uv}/bin/uv pip install -r $HOME/.config/fabric/requirements.txt --upgrade
+    ${inputs.uv2nix.packages.${pkgs.system}.uv-bin}/bin/uv pip install -r $HOME/.config/fabric/requirements.txt --upgrade
   '';
 
   # Workspace toggle script
