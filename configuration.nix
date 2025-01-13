@@ -83,7 +83,6 @@
   # Hardware Configuration
   #-----------------------------------------------------------------------------
   hardware = {
-    graphics.enable = true;
     nvidia = {
       modesetting.enable = true;
       powerManagement.enable = true;
@@ -91,9 +90,9 @@
       nvidiaSettings = true;
       package = config.boot.kernelPackages.nvidiaPackages.stable;
     };
-    opengl = {
+    graphics = {
       enable = true;
-      driSupport32Bit = true;
+      enable32Bit = true;
     };
   };
 

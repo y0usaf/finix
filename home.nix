@@ -124,6 +124,7 @@
     ./hyprland.nix
     ./zsh.nix
     ./ssh.nix
+    ./git.nix
   ];
 
   # Add systemd user service for watching .nix files
