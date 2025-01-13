@@ -27,21 +27,23 @@
     uv
   ];
 
+  # Create requirements.txt file
+  xdg.configFile."fabric/requirements.txt".text = ''
+    pygobject==3.46.0
+    dbus-python==1.3.2
+  '';
+
   # Set up virtual environment and install dependencies
   home.activation.fabricSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
     $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
 
-    # Create virtual environment if it doesn't exist
-    if [ ! -d "$HOME/.config/fabric/venv" ]; then
-      ${pkgs.uv}/bin/uv venv "$HOME/.config/fabric/venv"
+    # Create or update virtual environment
+    ${pkgs.uv}/bin/uv venv "$HOME/.config/fabric/venv"
 
-      # Install required packages
-      source "$HOME/.config/fabric/venv/bin/activate"
-      export GI_TYPELIB_PATH="${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0"
-      ${pkgs.uv}/bin/uv pip install \
-        pygobject \
-        dbus-python
-    fi
+    # Install/update required packages
+    source "$HOME/.config/fabric/venv/bin/activate"
+    export GI_TYPELIB_PATH="${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0"
+    ${pkgs.uv}/bin/uv pip install -r $HOME/.config/fabric/requirements.txt --upgrade
   '';
 
   # Workspace toggle script
