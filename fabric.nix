@@ -34,9 +34,10 @@
     # Create virtual environment if it doesn't exist
     if [ ! -d "$HOME/.config/fabric/venv" ]; then
       UV_CACHE_DIR="$HOME/.config/fabric/cache" \
-      UV_SYSTEM_PYTHON="${pkgs.python311}/bin/python3" \
       UV_NO_BINARY=1 \
-      ${inputs.uv2nix.packages.${pkgs.system}.uv-bin}/bin/uv venv "$HOME/.config/fabric/venv"
+      ${inputs.uv2nix.packages.${pkgs.system}.uv-bin}/bin/uv venv \
+        --python ${pkgs.python311}/bin/python3 \
+        "$HOME/.config/fabric/venv"
 
       # Install required packages
       source "$HOME/.config/fabric/venv/bin/activate"
