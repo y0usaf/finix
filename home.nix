@@ -21,10 +21,20 @@
   globals,
   ...
 }: {
-  home.username = globals.username;
-  home.homeDirectory = globals.homeDirectory;
+  home = {
+    username = globals.username;
+    homeDirectory = globals.homeDirectory;
 
-  programs.home-manager.enable = true;
+    # Add backup configuration here
+    activation = {
+      backupConfig = lib.hm.dag.entryBefore ["checkLinkTargets"] ''
+        if [ -d "$HOME/.config" ]; then
+          $DRY_RUN_CMD mv $HOME/.config $HOME/.config.backup-$(date +%Y%m%d_%H%M%S)
+        fi
+      '';
+    };
+  };
+
   #-----------------------------------------------------------------------------
   # User Packages
   #-----------------------------------------------------------------------------
@@ -125,6 +135,7 @@
     ./zsh.nix
     ./ssh.nix
     ./git.nix
+    ./xdg.nix
   ];
 
   # Add systemd user service for watching .nix files

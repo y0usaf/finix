@@ -35,12 +35,6 @@
   #-----------------------------------------------------------------------------
   home-manager.users.${globals.username} = {
     home.sessionVariables = {
-      # XDG Base Directories
-      XDG_DATA_HOME = "$HOME/.local/share";
-      XDG_CONFIG_HOME = "$HOME/.config";
-      XDG_CACHE_HOME = "$HOME/.cache";
-      XDG_STATE_HOME = "$HOME/.local/state";
-
       # Core Path and Editor Settings
       EDITOR = globals.defaultEditor;
       BROWSER = globals.defaultBrowser;

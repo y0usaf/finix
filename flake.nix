@@ -85,14 +85,14 @@
           home-manager.nixosModules.home-manager
           {
             home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
               extraSpecialArgs = {
                 inherit inputs;
                 hostName = "y0usaf-desktop";
                 globals = import ./globals.nix;
               };
               users.y0usaf = import ./home.nix;
+              useGlobalPkgs = true;
+              useUserPackages = true;
             };
           }
         ];
