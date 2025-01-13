@@ -6,6 +6,14 @@
   globals,
   ...
 }: {
+  home.packages = with pkgs; [
+    inputs.ags.packages.${pkgs.system}.default
+    inputs.astal.packages.${pkgs.system}.default
+    inputs.astal.packages.${pkgs.system}.astal3
+    inputs.astal.packages.${pkgs.system}.io
+    gobject-introspection
+  ];
+
   xdg.configFile."astal/config.ts" = {
     text = ''
       import { App, Widget } from '@astal/widgets';
