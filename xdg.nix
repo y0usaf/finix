@@ -22,10 +22,33 @@
     mimeApps = {
       enable = true;
       defaultApplications = {
+        # Web Handlers
         "text/html" = ["${globals.defaultBrowser}.desktop"];
         "x-scheme-handler/http" = ["${globals.defaultBrowser}.desktop"];
         "x-scheme-handler/https" = ["${globals.defaultBrowser}.desktop"];
         "x-scheme-handler/discord" = ["${globals.defaultDiscord}.desktop"];
+
+        # File Types
+        "inode/directory" = ["${globals.defaultFileManager}.desktop"];
+
+        # Media Types
+        "video/mp4" = ["mpv.desktop"];
+        "video/x-matroska" = ["mpv.desktop"];
+        "video/webm" = ["mpv.desktop"];
+
+        # Images
+        "image/jpeg" = ["imv.desktop"];
+        "image/png" = ["imv.desktop"];
+        "image/gif" = ["imv.desktop"];
+        "image/tiff" = ["imv.desktop"];
+        "image/bmp" = ["imv.desktop"];
+
+        # Archives
+        "application/zip" = ["7zFM.desktop"];
+        "application/x-7z-compressed" = ["7zFM.desktop"];
+        "application/x-tar" = ["7zFM.desktop"];
+        "application/gzip" = ["7zFM.desktop"];
+        "application/x-compressed-tar" = ["7zFM.desktop"];
       };
     };
   };
