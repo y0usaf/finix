@@ -18,6 +18,7 @@
   pkgs,
   lib,
   globals,
+  inputs,
   ...
 }: {
   # Install only gobject-introspection as system dependency
@@ -25,20 +26,34 @@
     gobject-introspection
   ];
 
-  # Set up virtual environment and install dependencies
+  # Create pyproject.toml and set up virtual environment
   home.activation.fabricSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
+        $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
 
-    # Create virtual environment if it doesn't exist
-    if [ ! -d "$HOME/.config/fabric/venv" ]; then
-      ${pkgs.uv}/bin/uv venv "$HOME/.config/fabric/venv"
+        # Create pyproject.toml if it doesn't exist
+        if [ ! -f "$HOME/.config/fabric/pyproject.toml" ]; then
+          cat > "$HOME/.config/fabric/pyproject.toml" << 'EOF'
+    [project]
+    name = "fabric-config"
+    version = "0.1.0"
+    dependencies = [
+        "pygobject",
+        "dbus-python"
+    ]
 
-      # Install required packages
-      source "$HOME/.config/fabric/venv/bin/activate"
-      ${pkgs.uv}/bin/uv pip install \
-        pygobject \
-        dbus-python
-    fi
+    [tool.uv]
+    python = "3.11"
+    EOF
+        fi
+
+        # Create and update virtual environment using uv
+        cd "$HOME/.config/fabric"
+        if [ ! -d "venv" ]; then
+          ${pkgs.uv}/bin/uv venv venv
+        fi
+
+        # Install dependencies from pyproject.toml
+        ${pkgs.uv}/bin/uv pip install --requirement pyproject.toml
   '';
 
   # Workspace toggle script
