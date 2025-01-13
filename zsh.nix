@@ -17,6 +17,8 @@
 {
   config,
   pkgs,
+  lib,
+  globals,
   ...
 }: {
   programs.zsh = {
@@ -173,9 +175,19 @@
       dotsync = "$HOME/dotfiles/scripts/dotsync.sh";
       dotpull = "$HOME/dotfiles/scripts/dotsync.sh pull";
       dotpush = "$HOME/dotfiles/scripts/dotsync.sh push";
-      sysup = ''
+      sysup = let
+        repoUrl = globals.homeManagerRepoUrl;
+      in ''
+        # Initialize git if needed
+        if [ ! -d ~/nixos/.git ]; then
+          git -C ~/nixos init && \
+          git -C ~/nixos branch -M main && \
+          git -C ~/nixos remote add origin "${repoUrl}"
+        fi && \
+
+        # Main update process
         git -C ~/nixos add . && \
-        alejandra ~/nixos && \
+        alejandra ~/nixos >/dev/null 2>&1 && \
         if nh os switch ~/nixos; then
           if ! git -C ~/nixos diff --quiet origin/main; then
             git -C ~/nixos commit -m "auto: system update $(date '+%Y-%m-%d %H:%M:%S')" && \
@@ -185,7 +197,7 @@
       '';
 
       # Build without switching
-      sysbuild = "alejandra ~/nixos && nh os build ~/nixos";
+      sysbuild = "alejandra ~/nixos >/dev/null 2>&1 && nh os build ~/nixos";
 
       # Music Downloading Aliases
       ytm4a = "$HOME/scripts/ytm4a.sh";
