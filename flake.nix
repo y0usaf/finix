@@ -69,6 +69,7 @@
     nixpkgs,
     home-manager,
     obs-image-reaction,
+    fabric,
     ...
   } @ inputs: let
     system = "x86_64-linux";
