@@ -93,6 +93,7 @@
               users.y0usaf = import ./home.nix;
               useGlobalPkgs = true;
               useUserPackages = true;
+              backupFileExtension = "backup";
             };
           }
         ];
