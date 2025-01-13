@@ -33,12 +33,12 @@
 
     # Create virtual environment if it doesn't exist
     if [ ! -d "$HOME/.config/fabric/venv" ]; then
-      ${pkgs.uv-bin}/bin/uv venv "$HOME/.config/fabric/venv"
+      ${inputs.uv2nix.packages.${pkgs.system}.uv-bin}/bin/uv venv "$HOME/.config/fabric/venv"
 
       # Install required packages
       source "$HOME/.config/fabric/venv/bin/activate"
       export GI_TYPELIB_PATH="${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0"
-      ${pkgs.uv-bin}/bin/uv pip install \
+      ${inputs.uv2nix.packages.${pkgs.system}.uv-bin}/bin/uv pip install \
         pygobject \
         dbus-python
     fi
