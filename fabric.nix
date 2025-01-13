@@ -121,4 +121,32 @@
       "blur, fabric"
     ];
   };
+
+  # Development helper script
+  xdg.configFile."fabric/dev.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+
+      # Ensure we're in the fabric directory
+      cd ~/.config/fabric
+
+      # Set up environment variables
+      export GI_TYPELIB_PATH="${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0"
+      export UV_CACHE_DIR="$HOME/.config/fabric/cache"
+
+      # Activate the venv
+      source venv/bin/activate
+
+      # If no arguments, start a shell
+      if [ $# -eq 0 ]; then
+        echo "Fabric development environment activated!"
+        echo "UV and Python are ready to use."
+        $SHELL
+      else
+        # Otherwise run the command
+        exec "$@"
+      fi
+    '';
+  };
 }
