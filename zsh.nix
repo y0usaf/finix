@@ -178,20 +178,20 @@
       sysup = let
         repoUrl = globals.homeManagerRepoUrl;
       in ''
-        # Initialize git if needed
         if [ ! -d ~/nixos/.git ]; then
           git -C ~/nixos init && \
           git -C ~/nixos branch -M main && \
-          git -C ~/nixos remote add origin "${repoUrl}"
+          git -C ~/nixos remote add origin "${repoUrl}" && \
+          git -C ~/nixos fetch origin || true
         fi && \
 
-        # Main update process
         git -C ~/nixos add . && \
         alejandra ~/nixos >/dev/null 2>&1 && \
         if nh os switch ~/nixos; then
-          if ! git -C ~/nixos diff --quiet origin/main; then
+          if ! git -C ~/nixos diff --quiet HEAD; then
             git -C ~/nixos commit -m "auto: system update $(date '+%Y-%m-%d %H:%M:%S')" && \
-            git -C ~/nixos push -f origin main
+            git -C ~/nixos push -f origin main || \
+            git -C ~/nixos push -u origin main
           fi
         fi
       '';
