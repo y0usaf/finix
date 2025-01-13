@@ -18,20 +18,19 @@
   pkgs,
   lib,
   globals,
-  inputs,
   ...
 }: let
-  pythonEnv = inputs.uv2nix.lib.${pkgs.system}.mkPython {
-    python = pkgs.python311;
-    requirements = ''
-      pygobject
+  pythonEnv = pkgs.python311.withPackages (ps:
+    with ps; [
+      pygobject3
       dbus-python
-    '';
-    propagatedBuildInputs = with pkgs; [
-      gobject-introspection
-    ];
-  };
+    ]);
 in {
+  # Install only gobject-introspection as system dependency
+  home.packages = with pkgs; [
+    gobject-introspection
+  ];
+
   # Create fabric config directory
   home.activation.fabricSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
     $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
