@@ -35,7 +35,7 @@
       inputs.hyprland.follows = "hyprland";
     };
 
-    # Add Fabric Development
+    # Fabric Development
     fabric = {
       url = "github:Fabric-Development/fabric";
       inputs.nixpkgs.follows = "nixpkgs";
