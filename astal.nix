@@ -113,16 +113,6 @@
     '';
   };
 
-  # Add Astal to Hyprland autostart
-  wayland.windowManager.hyprland.settings = {
-    exec-once = [
-      "astal"
-    ];
-    layerrule = [
-      "blur, astal"
-    ];
-  };
-
   # Ensure config directory exists
   home.activation.astalSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
     $DRY_RUN_CMD mkdir -p $HOME/.config/astal
