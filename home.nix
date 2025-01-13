@@ -91,6 +91,7 @@
     # External Inputs
     #---------------------------------------------------------------------------
     inputs.uv2nix.packages.${pkgs.system}.uv-bin
+    inputs.astal.packages.${pkgs.system}.default
   ];
 
   #-----------------------------------------------------------------------------
