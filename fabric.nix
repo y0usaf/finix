@@ -20,40 +20,21 @@
   globals,
   inputs,
   ...
-}: {
-  # Install only gobject-introspection as system dependency
-  home.packages = with pkgs; [
-    gobject-introspection
-  ];
-
-  # Create pyproject.toml and set up virtual environment
+}: let
+  pythonEnv = inputs.pyproject-nix.lib.${pkgs.system}.withPackages {
+    python = pkgs.python311;
+    propagatedBuildInputs = with pkgs; [
+      gobject-introspection
+    ];
+    requirements = [
+      "pygobject"
+      "dbus-python"
+    ];
+  };
+in {
+  # Create fabric config directory
   home.activation.fabricSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
-
-        # Create pyproject.toml if it doesn't exist
-        if [ ! -f "$HOME/.config/fabric/pyproject.toml" ]; then
-          cat > "$HOME/.config/fabric/pyproject.toml" << 'EOF'
-    [project]
-    name = "fabric-config"
-    version = "0.1.0"
-    dependencies = [
-        "pygobject",
-        "dbus-python"
-    ]
-
-    [tool.uv]
-    python = "3.11"
-    EOF
-        fi
-
-        # Create and update virtual environment using uv
-        cd "$HOME/.config/fabric"
-        if [ ! -d "venv" ]; then
-          ${pkgs.uv}/bin/uv venv venv
-        fi
-
-        # Install dependencies from pyproject.toml
-        ${pkgs.uv}/bin/uv pip install --requirement pyproject.toml
+    $DRY_RUN_CMD mkdir -p $HOME/.config/fabric
   '';
 
   # Workspace toggle script
@@ -75,11 +56,11 @@
     '';
   };
 
-  # Update notifications script to use venv Python
+  # Update notifications script to use nix-managed Python
   xdg.configFile."fabric/notifications.py" = {
     executable = true;
     text = ''
-      #!${config.home.homeDirectory}/.config/fabric/venv/bin/python3
+      #!${pythonEnv}/bin/python3
 
       import gi
       import dbus
@@ -107,7 +88,7 @@
   # Update Hyprland configuration to use Fabric
   wayland.windowManager.hyprland.settings = {
     exec-once = [
-      "python ~/.config/fabric/notifications.py"
+      "${pythonEnv}/bin/python3 ~/.config/fabric/notifications.py"
       "~/.config/fabric/toggle_workspaces.sh"
     ];
 
