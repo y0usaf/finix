@@ -27,21 +27,24 @@
       REPO_PATH="${globals.homeDirectory}/nixos"
       SSH_KEY_PATH="${globals.homeDirectory}/Tokens/id_rsa_y0usaf"
 
-      # Create SSH key if it doesn't exist
-      if [ ! -f "$SSH_KEY_PATH" ]; then
-        mkdir -p "${globals.homeDirectory}/Tokens"
-        ${pkgs.openssh}/bin/ssh-keygen -t rsa -f "$SSH_KEY_PATH" -N "" -C "${globals.gitEmail}"
-        echo "New SSH key generated. Please add this public key to your GitHub account:"
-        cat "$SSH_KEY_PATH.pub"
-        exit 1
-      fi
-
+      # Initialize git repo if needed
       mkdir -p "$REPO_PATH"
       if [ ! -d "$REPO_PATH/.git" ]; then
         $DRY_RUN_CMD git -C "$REPO_PATH" init
         $DRY_RUN_CMD git -C "$REPO_PATH" config user.email "${globals.gitEmail}"
         $DRY_RUN_CMD git -C "$REPO_PATH" config user.name "${globals.gitName}"
         $DRY_RUN_CMD git -C "$REPO_PATH" remote add origin "${globals.homeManagerRepoUrl}"
+
+        # Create initial commit if repo is empty
+        if [ -z "$(git -C "$REPO_PATH" rev-parse --verify HEAD 2>/dev/null)" ]; then
+          $DRY_RUN_CMD git -C "$REPO_PATH" add .
+          $DRY_RUN_CMD git -C "$REPO_PATH" commit -m "initial: NixOS configuration"
+
+          # Try to push, but don't fail if it doesn't work (might need manual push first time)
+          export SSH_AUTH_SOCK="/run/user/$(id -u)/ssh-agent"
+          ${pkgs.openssh}/bin/ssh-add "$SSH_KEY_PATH" 2>/dev/null
+          $DRY_RUN_CMD git -C "$REPO_PATH" push -u origin main || echo "Initial push failed - you may need to push manually first time"
+        fi
       fi
     '';
   };
