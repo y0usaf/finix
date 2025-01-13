@@ -193,4 +193,13 @@
     ];
     xdgOpenUsePortal = true;
   };
+
+  #-----------------------------------------------------------------------------
+  # Udev Rules
+  #-----------------------------------------------------------------------------
+  services.udev.extraRules = ''
+    # Vial rules for non-root access to keyboards
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
+  '';
 }
