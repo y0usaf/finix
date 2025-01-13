@@ -1,0 +1,1 @@
+/home/y0usaf/dotfiles/.config/fabric/fabric_git/examples/bluetooth-widget/bluetooth_widget.py

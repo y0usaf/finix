@@ -1,0 +1,1 @@
+/home/y0usaf/dotfiles/.config/fabric/toggle_workspaces.sh
