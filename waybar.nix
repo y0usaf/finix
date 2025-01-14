@@ -17,18 +17,21 @@
         "css" = "style.css";
         "position" = "top";
         "layer" = "top";
-        "modules-center" = [
-          "hyprland/workspaces"
-          "clock"
-          "cava"
-        ] ++ lib.optionals (globals.hostname == "y0usaf-desktop") [
-          "custom/ram"
-          "custom/cpu_temp"
-          "custom/gpu_temp"
-        ] ++ [
-          "battery"
-          "tray"
-        ];
+        "modules-center" =
+          [
+            "hyprland/workspaces"
+            "clock"
+            "cava"
+          ]
+          ++ lib.optionals (globals.hostname == "y0usaf-desktop") [
+            "custom/ram"
+            "custom/cpu_temp"
+            "custom/gpu_temp"
+          ]
+          ++ [
+            "battery"
+            "tray"
+          ];
 
         # Basic modules for all hosts
         "clock" = {
@@ -57,20 +60,21 @@
             "on-click-right" = "mode";
           };
         };
-      } // lib.optionalAttrs (globals.hostname == "y0usaf-desktop") {
-        "custom/ram" = {
+
+        # Desktop-specific modules
+        "custom/ram" = lib.mkIf (globals.hostname == "y0usaf-desktop") {
           "format" = "RAM: {} MB | ";
           "exec" = "free -m | awk '/^Mem:/{print $3}'";
           "interval" = 1;
         };
 
-        "custom/gpu_temp" = {
+        "custom/gpu_temp" = lib.mkIf (globals.hostname == "y0usaf-desktop") {
           "format" = "GPU: {}°C";
           "exec" = "${pkgs.nvidia-settings}/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
           "interval" = 1;
         };
 
-        "custom/cpu_temp" = {
+        "custom/cpu_temp" = lib.mkIf (globals.hostname == "y0usaf-desktop") {
           "format" = "CPU: {} | ";
           "exec" = "sensors | grep 'Tctl:' | awk '{print $2}'";
           "interval" = 1;
@@ -103,9 +107,11 @@
   };
 
   # Ensure required packages are installed for the custom scripts
-  home.packages = with pkgs; [
-    cava # For audio visualization
-  ] ++ lib.optionals (globals.hostname == "y0usaf-desktop") [
-    lm_sensors # For CPU temperature
-  ];
+  home.packages = with pkgs;
+    [
+      cava # For audio visualization
+    ]
+    ++ lib.optionals (globals.hostname == "y0usaf-desktop") [
+      lm_sensors # For CPU temperature
+    ];
 }
