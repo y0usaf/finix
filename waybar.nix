@@ -43,7 +43,7 @@
 
         "custom/gpu_temp" = {
           "format" = "GPU: {}°C";
-          "exec" = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
+          "exec" = "${pkgs.polkit}/bin/pkexec ${pkgs.nvidia-utils}/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
           "interval" = 1;
         };
 
@@ -105,7 +105,7 @@
 
         "custom/gpu_temp" = {
           "format" = "GPU: {}°C";
-          "exec" = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
+          "exec" = "${pkgs.polkit}/bin/pkexec ${pkgs.nvidia-utils}/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
           "interval" = 1;
         };
 
