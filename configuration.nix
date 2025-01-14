@@ -118,6 +118,17 @@
     xwayland.enable = true;
   };
 
+  # Add polkit rules
+  security.polkit.enable = true;
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.policykit.exec" &&
+          action.lookup("command_line").indexOf("nvidia-smi") >= 0) {
+          return polkit.Result.YES;
+      }
+    });
+  '';
+
   #-----------------------------------------------------------------------------
   # Global Environment Variables
   #-----------------------------------------------------------------------------
