@@ -211,14 +211,13 @@
 
       # Startup commands
       exec-once = [
-        "python ~/.config/fabric/notifications.py"
-        "~/.config/fabric/toggle_workspaces.sh"
         "syncthing --no-browser"
         "exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
         "hyprctl reload"
         "dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE"
         "swaybg -o DP-4 -i $(find $WALLPAPER_DIR -type f | shuf -n 1) -m fill"
         "swaybg -o HDMI-A-2 -i $(find $WALLPAPER_DIR -type f | shuf -n 1) -m fill"
+        "waybar"
       ];
 
       exec = [
