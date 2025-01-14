@@ -208,16 +208,6 @@
         "$mod, mouse:272, movewindow"
         "$mod, mouse:273, resizewindow"
       ];
-
-      # Startup commands
-      exec-once = [
-        "syncthing --no-browser"
-        "exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
-        "hyprctl reload"
-        "dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE"
-      exec = [
-        "udiskie"
-      ];
     };
   };
 }
