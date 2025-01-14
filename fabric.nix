@@ -45,9 +45,12 @@
       # Install required packages
       source "$HOME/.config/fabric/venv/bin/activate"
       export GI_TYPELIB_PATH="${pkgs.gtk3}/lib/girepository-1.0:${pkgs.gobject-introspection}/lib/girepository-1.0"
+      export PATH="${pkgs.ninja}/bin:${pkgs.pkg-config}/bin:${pkgs.gcc}/bin:$PATH"
+      export PKG_CONFIG_PATH="${pkgs.gtk3.dev}/lib/pkgconfig:${pkgs.cairo.dev}/lib/pkgconfig"
+      export NINJA="${pkgs.ninja}/bin/ninja"
+
       UV_CACHE_DIR="$HOME/.config/fabric/cache" \
       UV_NO_BINARY=1 \
-      PATH="${pkgs.ninja}/bin:${pkgs.pkg-config}/bin:$PATH" \
       ${inputs.uv2nix.packages.${pkgs.system}.uv-bin}/bin/uv pip install \
         pygobject \
         dbus-python
