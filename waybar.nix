@@ -70,7 +70,7 @@
 
         "custom/gpu_temp" = lib.mkIf (globals.hostname == "y0usaf-desktop") {
           "format" = "GPU: {}°C";
-          "exec" = "${pkgs.nvidia-settings}/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
+          "exec" = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
           "interval" = 1;
         };
 
@@ -113,5 +113,6 @@
     ]
     ++ lib.optionals (globals.hostname == "y0usaf-desktop") [
       lm_sensors # For CPU temperature
+      nvidia-x11 # For GPU temperature
     ];
 }
