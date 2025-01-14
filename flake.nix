@@ -53,6 +53,7 @@
       url = "github:kamadorueda/alejandra";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+  };
 
   #-----------------------------------------------------------------------------
   # System Configuration
