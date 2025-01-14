@@ -54,12 +54,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Add this section
-    fabric = {
-      url = "github:Fabric-Development/fabric";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-  };
+;
 
   #-----------------------------------------------------------------------------
   # System Configuration
