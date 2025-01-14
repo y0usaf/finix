@@ -158,4 +158,40 @@
       WantedBy = ["default.target"];
     };
   };
+
+  # Polkit Authentication Agent
+  systemd.user.services.polkit-gnome-authentication-agent-1 = {
+    Unit = {
+      Description = "polkit-gnome-authentication-agent-1";
+      WantedBy = ["graphical-session.target"];
+      After = ["graphical-session.target"];
+    };
+
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+      Restart = "on-failure";
+      RestartSec = 1;
+      TimeoutStopSec = 10;
+    };
+  };
+
+  # DBus Environment Update
+  systemd.user.services.dbus-hyprland-environment = {
+    Unit = {
+      Description = "dbus hyprland environment";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target"];
+    };
+
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE";
+      RemainAfterExit = true;
+    };
+
+    Install = {
+      WantedBy = ["graphical-session.target"];
+    };
+  };
 }
