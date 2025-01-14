@@ -76,8 +76,9 @@
   systemd.user.services.nixos-git-sync = {
     Unit = {
       Description = "Sync NixOS config changes after successful build";
-      After = "format-nix.service";
-      Requires = "ssh-agent.service";
+      # Only run after a successful home-manager switch
+      After = ["home-manager-switch.service"];
+      Requires = ["ssh-agent.service"];
     };
     Service = {
       Type = "oneshot";
@@ -86,6 +87,12 @@
         "SSH_AUTH_SOCK=%t/ssh-agent"
       ];
       ExecStart = pkgs.writeShellScript "nixos-git-sync" ''
+        # Exit if last home-manager switch failed
+        if ! systemctl --user is-active --quiet home-manager-switch.service; then
+          echo "Last home-manager switch failed, skipping git sync"
+          exit 0
+        fi
+
         # Ensure SSH agent has our key
         if ! ssh-add -l | grep -q "${globals.homeDirectory}/Tokens/id_rsa_y0usaf"; then
           ssh-add "${globals.homeDirectory}/Tokens/id_rsa_y0usaf"
@@ -105,6 +112,7 @@
     };
   };
 
+  # Update the path unit to trigger on home-manager-switch.service completion
   systemd.user.paths.nixos-git-sync = {
     Unit = {
       Description = "Watch NixOS config directory for successful builds";
