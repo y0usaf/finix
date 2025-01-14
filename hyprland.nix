@@ -208,6 +208,14 @@
         "$mod, mouse:272, movewindow"
         "$mod, mouse:273, resizewindow"
       ];
+
+      # Startup commands
+      exec-once = [
+        "hyprctl reload"
+      ];
+      exec = [
+        "udiskie"
+      ];
     };
   };
 }
