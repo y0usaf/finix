@@ -20,7 +20,6 @@
         "modules-center" = [
           "hyprland/workspaces"
           "clock"
-          "cava"
           "custom/ram"
           "custom/cpu_temp"
           "custom/gpu_temp"
@@ -36,7 +35,6 @@
         "modules-center" = [
           "hyprland/workspaces"
           "clock"
-          "cava"
           "custom/ram"
           "custom/cpu_temp"
           "custom/gpu_temp"
@@ -69,28 +67,6 @@
       "format" = "CPU: {} | ";
       "exec" = "sensors | grep 'Tctl:' | awk '{print $2}'";
       "interval" = 1;
-    };
-
-    settings.cava = {
-      "framerate" = 240;
-      "autosens" = 0;
-      "sensitivity" = 10;
-      "bars" = 52;
-      "lower_cutoff_freq" = 50;
-      "higher_cutoff_freq" = 10000;
-      "method" = "pulse";
-      "source" = "auto";
-      "stereo" = true;
-      "reverse" = false;
-      "bar_delimiter" = 0;
-      "monstercat" = true;
-      "waves" = false;
-      "noise_reduction" = 0.7;
-      "input_delay" = 0;
-      "format-icons" = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█"];
-      "actions" = {
-        "on-click-right" = "mode";
-      };
     };
 
     style = ''
