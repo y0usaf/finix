@@ -1,48 +1,54 @@
+#===============================================================================
+#                      📊 Waybar Configuration 📊
+#===============================================================================
+# 🎨 Status bar style
+# 📱 Module layout
+# 🔧 System monitors
+# 🖥️ Display config
+#===============================================================================
 {
   config,
   pkgs,
   lib,
   globals,
   ...
-}: {
+}: let
+  mkModule = name: config: {${name} = config;};
+
+  commonModules = {
+    clock = {
+      format = "{:%H:%M:%OS %d/%m }| ";
+      interval = 1;
+    };
+    battery = {};
+    tray = {};
+    "hyprland/workspaces" = {};
+  };
+
+  desktopModules = lib.optionalAttrs (globals.hostname == "y0usaf-desktop") {
+    "custom/ram" = {
+      format = "RAM: {} MB | ";
+      exec = "free -m | awk '/^Mem:/{print $3}'";
+      interval = 1;
+    };
+  };
+
+  makeBar = position:
+    {
+      css = "style.css";
+      position = position;
+      layer = "top";
+      modules-center = builtins.attrNames (commonModules // desktopModules);
+    }
+    // desktopModules
+    // commonModules;
+in {
   programs.waybar = {
     enable = true;
-    systemd = {
-      enable = true;
-      target = "hyprland-session.target";
-    };
-
+    systemd.enable = false;
     settings = [
-      {
-        "css" = "style.css";
-        "position" = "top";
-        "layer" = "top";
-        "modules-center" =
-          [
-            "hyprland/workspaces"
-            "clock"
-          ]
-          ++ lib.optionals (globals.hostname == "y0usaf-desktop") [
-            "custom/ram"
-          ]
-          ++ [
-            "battery"
-            "tray"
-          ];
-
-        # Basic modules for all hosts
-        "clock" = {
-          "format" = "{:%H:%M:%OS %d/%m }| ";
-          "interval" = 1;
-        };
-
-        # Desktop-specific modules
-        "custom/ram" = lib.mkIf (globals.hostname == "y0usaf-desktop") {
-          "format" = "RAM: {} MB | ";
-          "exec" = "free -m | awk '/^Mem:/{print $3}'";
-          "interval" = 1;
-        };
-      }
+      (makeBar "top")
+      (makeBar "bottom")
     ];
 
     style = ''

@@ -1,3 +1,27 @@
+#===============================================================================
+#
+#                     Git Configuration & Automation
+#
+# Description:
+#     Manages Git configuration and automated repository management:
+#     - Basic Git configuration (user, email, defaults)
+#     - SSH key management and integration
+#     - Automated repository initialization
+#     - Post-build synchronization
+#     - Systemd service management for Git operations
+#
+# Dependencies:
+#     - SSH configuration
+#     - Systemd services
+#     - Home Manager
+#     - globals.nix: Git credentials and paths
+#
+# Notes:
+#     - Automatically syncs configuration changes after successful builds
+#     - Handles both new and existing repository setups
+#     - Integrates with GitHub for remote management
+#
+#===============================================================================
 {
   config,
   pkgs,
@@ -76,12 +100,14 @@
   systemd.user.services.nixos-git-sync = {
     Unit = {
       Description = "Sync NixOS config changes after successful build";
-      # Only run after a successful home-manager switch
+      # Run after home-manager switch and require SSH agent
       After = ["home-manager-switch.service"];
+      Wants = ["home-manager-switch.service"];
       Requires = ["ssh-agent.service"];
     };
     Service = {
       Type = "oneshot";
+      RemainAfterExit = true;
       Environment = [
         "PATH=${lib.makeBinPath [pkgs.git pkgs.coreutils pkgs.openssh]}"
         "SSH_AUTH_SOCK=%t/ssh-agent"
@@ -108,21 +134,7 @@
       '';
     };
     Install = {
-      WantedBy = ["default.target"];
-    };
-  };
-
-  # Update the path unit to trigger on home-manager-switch.service completion
-  systemd.user.paths.nixos-git-sync = {
-    Unit = {
-      Description = "Watch NixOS config directory for successful builds";
-    };
-    Path = {
-      PathModified = "${globals.homeDirectory}/nixos";
-      Unit = "nixos-git-sync.service";
-    };
-    Install = {
-      WantedBy = ["default.target"];
+      WantedBy = ["home-manager-switch.service"];
     };
   };
 }

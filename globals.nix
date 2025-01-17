@@ -1,18 +1,12 @@
 #===============================================================================
+#                          🌍 Global Settings 🌍
+#===============================================================================
+# 👤 User Configuration
+# 🖥️ System Preferences
+# 📁 Common Paths
+# 🚀 Default Applications
 #
-#                     Global Variables Configuration
-#
-# Description:
-#     Central configuration file defining global variables used throughout
-#     the NixOS configuration. Contains:
-#     - User settings
-#     - System settings
-#     - Common paths
-#     - Default application choices
-#
-# Author: y0usaf
-# Last Modified: 2025
-#
+# 💡 Edit this file first when changing core settings
 #===============================================================================
 let
   username = "y0usaf";

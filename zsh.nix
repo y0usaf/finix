@@ -10,8 +10,8 @@
 #     - History settings
 #     - Host-specific functions
 #
-# Author: y0usaf
-# Last Modified: 2025
+#
+#
 #
 #===============================================================================
 {
@@ -29,6 +29,12 @@
     #                               ZSHENV
     #
     #===========================================================================
+    #   _____                                                      _          _
+    #  / ____|                                                    (_)        | |
+    # | (___     ___    ___      ___   _ __   __   __      _ __    _  __  __ | |
+    #  \___ \   / _ \  / _ \    / _ \ | '_ \  \ \ / /     | '_ \  | | \ \/ / | |
+    #  ____) | |  __/ |  __/   |  __/ | | | |  \ V /   _  | | | | | |  >  <  |_|
+    # |_____/   \___|  \___|    \___| |_| |_|   \_/   (_) |_| |_| |_| /_/\_\ (_)
 
     #===========================================================================
     #
@@ -47,8 +53,7 @@
           sudo nvidia-smi -pl 150
           Hyprland
       elif [ "$(hostname)" = "y0usaf-laptop" ]; then
-          Sysup &
-          Hyprland
+         Hyprland
       fi
     '';
 
@@ -84,34 +89,6 @@
               asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
           }
       fi
-
-      # Complex alias for dependency count
-      alias depcount='{
-          for pkg in $(pacman -Qq); do
-              dep_count=$(pactree -u "$pkg" | wc -l);
-              echo "$pkg $dep_count";
-          done | sort -nk2 -r
-      } && echo "Dependency count completed successfully" || echo "An error occurred."'
-
-      # NixOS management function
-      function nh-os {
-        if [ "$1" = "switch" ]; then
-          git -C ~/nixos add . && \
-          alejandra ~/nixos && \
-          if nh os switch ~/nixos; then
-            if ! git -C ~/nixos diff --quiet origin/main; then
-              git -C ~/nixos commit -m "auto: system update $(date '+%Y-%m-%d %H:%M:%S')" && \
-              git -C ~/nixos push -f origin main
-            fi
-          fi
-        elif [ "$1" = "build" ]; then
-          alejandra ~/nixos && \
-          nh os build ~/nixos
-        else
-          echo "Usage: nh-os [switch|build]"
-          return 1
-        fi
-      }
     '';
 
     history = {
@@ -127,31 +104,9 @@
     shellAliases = {
       adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
       wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
-      svn = "svn --config-dir $XDG_CONFIG_HOME/subversion";
-      yarn = "yarn --use-yarnrc $XDG_CONFIG_HOME/yarn/config";
+      svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
+      yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
       mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
-      "nh-os" = ''
-        git -C ~/nixos add . && \
-        alejandra ~/nixos && \
-      '';
-
-      # Switch subcommand
-      "nh-os switch" = ''
-        git -C ~/nixos add . && \
-        alejandra ~/nixos && \
-        if nh os switch ~/nixos; then
-          if ! git -C ~/nixos diff --quiet origin/main; then
-            git -C ~/nixos commit -m "auto: system update $(date '+%Y-%m-%d %H:%M:%S')" && \
-            git -C ~/nixos push -f origin main
-          fi
-        fi
-      '';
-
-      # Build subcommand
-      "nh-os build" = ''
-        alejandra ~/nixos && \
-        nh os build ~/nixos
-      '';
 
       # Text Editor Aliases
       aliases = "nvim $HOME/dotfiles/.config/zsh/aliases";
@@ -173,7 +128,6 @@
       # System Maintenance Aliases
       dotlink = "$HOME/dotfiles/scripts/dotlink.sh";
       dotsync = "$HOME/dotfiles/scripts/dotsync.sh";
-      dotpull = "$HOME/dotfiles/scripts/dotsync.sh pull";
       dotpush = "$HOME/dotfiles/scripts/dotsync.sh push";
 
       # Music Downloading Aliases

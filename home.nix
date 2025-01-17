@@ -1,18 +1,6 @@
-#===============================================================================
-#
-#                     Home Manager Configuration
-#
-# Description:
-#     Primary configuration file for Home Manager, managing user-specific packages
-#     and configurations. This includes:
-#     - User package installations
-#     - Program configurations (OBS, Git, etc.)
-#     - Systemd user services for file formatting and git operations
-#
-# Author: y0usaf
-# Last Modified: 2025
-#
-#===============================================================================
+#─────────────────────── 🏠 HOME MANAGER CONFIG ────────────────────────#
+# 🏠 User-specific settings | Home-manager rebuild needed for changes  #
+#──────────────────────────────────────────────────────────────────────#
 {
   config,
   pkgs,
@@ -21,37 +9,39 @@
   globals,
   ...
 }: {
-  #-----------------------------------------------------------------------------
-  # Home Manager Core Settings
-  #-----------------------------------------------------------------------------
+  #── 🏠 Core Settings ──────────────────────#
   home = {
     username = globals.username;
     homeDirectory = globals.homeDirectory;
+    stateVersion = globals.stateVersion;
+    enableNixpkgsReleaseCheck = false;
+    pointerCursor = {
+      name = "hicolor";
+      package = pkgs.hicolor-icon-theme;
+      size = 24;
+    };
   };
 
-  #-----------------------------------------------------------------------------
-  # User Packages
-  #-----------------------------------------------------------------------------
+  #── 📦 User Packages ───────────────────────#
   home.packages = with pkgs; [
-    #---------------------------------------------------------------------------
-    # Development Tools
-    #---------------------------------------------------------------------------
+    #── 🎨 Development Tools ─────────────────#
     neovim
     cmake
     meson
     bottom
     code-cursor
     alejandra
+    cpio
+    pkg-config
+    ninja
+    gcc
 
-    #---------------------------------------------------------------------------
-    # Web Applications
-    #---------------------------------------------------------------------------
+    #── 🌐 Web Applications ─────────────────#
     firefox
     vesktop
+    discord
 
-    #---------------------------------------------------------------------------
-    # Terminal and System Utilities
-    #---------------------------------------------------------------------------
+    #── 🔧 Terminal and System Utilities ────#
     foot
     pavucontrol
     nitch
@@ -62,18 +52,16 @@
     lsd
     vial
     waybar
+    p7zip
 
-    #---------------------------------------------------------------------------
-    # Gaming
-    #---------------------------------------------------------------------------
+    #── 🎮 Gaming ────────────────────────────#
     steam
     protonup-qt
     gamemode
+    protontricks
     prismlauncher
 
-    #---------------------------------------------------------------------------
-    # Media and Streaming
-    #---------------------------------------------------------------------------
+    #── 📺 Media and Streaming ──────────────#
     imv
     mpv
     vlc
@@ -81,17 +69,13 @@
     ffmpeg
     cmus
 
-    #---------------------------------------------------------------------------
-    # Wayland Utilities
-    #---------------------------------------------------------------------------
+    #── 🖥️ Wayland Utilities ───────────────#
     grim
     slurp
     wl-clipboard
   ];
 
-  #-----------------------------------------------------------------------------
-  # Program Configurations
-  #-----------------------------------------------------------------------------
+  #── 🔧 Program Configurations ────────────#
   imports = [
     ./hyprland.nix
     ./zsh.nix
@@ -100,11 +84,10 @@
     ./xdg.nix
     ./fonts.nix
     ./waybar.nix
+    ./foot.nix
   ];
 
-  #-----------------------------------------------------------------------------
-  # OBS Studio Configuration
-  #-----------------------------------------------------------------------------
+  #── 🎥 OBS Studio ────────────────────────#
   programs.obs-studio = {
     enable = true;
     plugins = with pkgs.obs-studio-plugins; [
@@ -114,28 +97,15 @@
     ];
   };
 
-  #-----------------------------------------------------------------------------
-  # Package Manager Configuration
-  #-----------------------------------------------------------------------------
+  #── 📦 Package Manager ──────────────────#
   programs.nh = {
     enable = true;
-    clean.enable = true;
-    clean.extraArgs = "--keep-since 4d --keep 3";
-    flake = "/home/y0usaf/nixos";
+    package = pkgs.nh;
   };
 
-  #-----------------------------------------------------------------------------
-  # System State and Version
-  #-----------------------------------------------------------------------------
-  home.stateVersion = globals.stateVersion;
+  #── 🔄 Systemd Services ─────────────────#
 
-  #-----------------------------------------------------------------------------
-  # Systemd User Services
-  #-----------------------------------------------------------------------------
-
-  #---------------------------------------------------------------------------
-  # Nix Format Service
-  #---------------------------------------------------------------------------
+  #── ✨ Nix Format Service ───────────────#
   systemd.user.services.format-nix = {
     Unit = {
       Description = "Format Nix files on change";
@@ -160,7 +130,7 @@
     };
   };
 
-  # Polkit Authentication Agent
+  #── 🔐 Polkit Authentication ────────────#
   systemd.user.services.polkit-gnome-authentication-agent-1 = {
     Unit = {
       Description = "polkit-gnome-authentication-agent-1";
@@ -177,7 +147,7 @@
     };
   };
 
-  # DBus Environment Update
+  #── 🚌 DBus Environment ─────────────────#
   systemd.user.services.dbus-hyprland-environment = {
     Unit = {
       Description = "dbus hyprland environment";
@@ -187,7 +157,7 @@
 
     Service = {
       Type = "oneshot";
-      ExecStart = "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE";
+      ExecStart = "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP";
       RemainAfterExit = true;
     };
 
@@ -195,4 +165,6 @@
       WantedBy = ["graphical-session.target"];
     };
   };
+
+  systemd.user.startServices = "sd-switch";
 }

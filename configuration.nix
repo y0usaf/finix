@@ -1,19 +1,6 @@
-#===============================================================================
-#
-#                     NixOS System Configuration
-#
-# Description:
-#     Primary system configuration file for NixOS. Manages:
-#     - System-wide settings
-#     - Hardware configuration
-#     - Service enablement
-#     - User management
-#     - Security settings
-#
-# Author: y0usaf
-# Last Modified: 2025
-#
-#===============================================================================
+#─────────────────────── 🛠️  NIXOS CORE CONFIG ───────────────────────#
+# ⚠️  Root access required | System rebuild needed for changes        #
+#──────────────────────────────────────────────────────────────────────#
 {
   config,
   lib,
@@ -27,16 +14,12 @@
     ./cachix.nix
   ];
 
-  #-----------------------------------------------------------------------------
-  # System Configuration
-  #-----------------------------------------------------------------------------
+  #── 🔧 System Core ─────────────────────────#
   time.timeZone = globals.timezone;
   networking.hostName = globals.hostname;
   system.stateVersion = globals.stateVersion;
 
-  #-----------------------------------------------------------------------------
-  # Nix Package Manager Settings
-  #-----------------------------------------------------------------------------
+  #── 📦 Nix & Packages ──────────────────────#
   nix = {
     package = pkgs.nixVersions.stable;
     extraOptions = ''
@@ -51,16 +34,6 @@
       trusted-users = ["root" "y0usaf"];
       builders-use-substitutes = true;
       fallback = true;
-
-      substituters = [
-        "https://cache.nixos.org"
-        "https://hyprland.cachix.org"
-      ];
-
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-      ];
     };
   };
 
@@ -68,20 +41,17 @@
     allowUnfree = true;
   };
 
-  #-----------------------------------------------------------------------------
-  # Boot Configuration
-  #-----------------------------------------------------------------------------
+  #── 🔄 Boot & Hardware ─────────────────────#
   boot = {
     loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
     };
     kernelPackages = pkgs.linuxPackages_latest;
+    kernelModules = ["kvm-amd"];
+    extraModulePackages = [];
   };
 
-  #-----------------------------------------------------------------------------
-  # Hardware Configuration
-  #-----------------------------------------------------------------------------
   hardware = {
     nvidia = {
       modesetting.enable = true;
@@ -96,9 +66,7 @@
     };
   };
 
-  #-----------------------------------------------------------------------------
-  # Audio Configuration
-  #-----------------------------------------------------------------------------
+  #── 🔊 Audio ─────────────────────────────#
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -109,29 +77,24 @@
     pulse.enable = true;
   };
 
-  #-----------------------------------------------------------------------------
-  # Desktop Environment
-  #-----------------------------------------------------------------------------
+  #── 🖥️ Desktop ───────────────────────────#
   services.xserver.videoDrivers = ["nvidia"];
-  programs.hyprland = {
+
+  #── 🛡️ Security ──────────────────────────#
+  security.polkit = {
     enable = true;
-    xwayland.enable = true;
+    extraConfig = ''
+      polkit.addRule(function(action, subject) {
+        if (action.id == "org.freedesktop.policykit.exec" &&
+            action.lookup("command_line").indexOf("nvidia-smi") >= 0) {
+            return polkit.Result.YES;
+        }
+      });
+    '';
   };
 
-  # Add polkit rules
-  security.polkit.enable = true;
-  security.polkit.extraConfig = ''
-    polkit.addRule(function(action, subject) {
-      if (action.id == "org.freedesktop.policykit.exec" &&
-          action.lookup("command_line").indexOf("nvidia-smi") >= 0) {
-          return polkit.Result.YES;
-      }
-    });
-  '';
-
-  #-----------------------------------------------------------------------------
-  # Global Environment Variables
-  #-----------------------------------------------------------------------------
+  #── 🌍 Environment ────────────────────────#
+  # Core utils, dev tools, containers, archives
   environment = {
     systemPackages = with pkgs; [
       git
@@ -144,31 +107,28 @@
           pip
           setuptools
         ]))
+      python3
+      unzip
     ];
   };
 
-  #-----------------------------------------------------------------------------
-  # System Fonts
-  #-----------------------------------------------------------------------------
-  fonts.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-emoji
-    nerd-fonts.iosevka-term-slab
-  ];
-
-  #-----------------------------------------------------------------------------
-  # User Configuration
-  #-----------------------------------------------------------------------------
+  #── 👤 User Management ───────────────────#
+  # Account, permissions, groups
   users.users.${globals.username} = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = ["wheel" "networkmanager" "video" "audio" "gamemode"];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "video"
+      "audio"
+      "gamemode"
+      "input"
+    ];
     ignoreShellProgramCheck = true;
   };
 
-  #-----------------------------------------------------------------------------
-  # Sudo Configuration
-  #-----------------------------------------------------------------------------
+  #── 🔐 Sudo Rules ────────────────────────#
   security.sudo.extraRules = [
     {
       users = ["y0usaf"];
@@ -181,36 +141,41 @@
     }
   ];
 
-  #-----------------------------------------------------------------------------
-  # System Services
-  #-----------------------------------------------------------------------------
+  #── 🌐 Services ──────────────────────────#
   networking.networkmanager.enable = true;
+
+  # XDG Desktop Portal
+  xdg.portal = {
+    enable = true;
+    wlr.enable = false;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-gtk
+      pkgs.xdg-desktop-portal-hyprland
+    ];
+    config = {
+      common = {
+        default = ["hyprland" "gtk"];
+      };
+      hyprland = {
+        default = ["hyprland" "gtk"];
+      };
+    };
+  };
 
   programs.zsh = {
     enable = false;
     enableGlobalCompInit = false;
   };
 
-  # XDG Portal Configuration
-  xdg.portal = {
-    enable = true;
-    extraPortals = [
-      pkgs.xdg-desktop-portal-hyprland
-      pkgs.xdg-desktop-portal-gtk
-    ];
-    configPackages = [
-      pkgs.xdg-desktop-portal-hyprland
-      pkgs.xdg-desktop-portal-gtk
-    ];
-    xdgOpenUsePortal = true;
-  };
-
-  #-----------------------------------------------------------------------------
-  # Udev Rules
-  #-----------------------------------------------------------------------------
+  #── 📱 Udev Rules ────────────────────────#
   services.udev.extraRules = ''
     # Vial rules for non-root access to keyboards
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
   '';
+
+  #── 💻 Virtualization ──────────────────────#
+  virtualisation = {
+    lxd.enable = true;
+  };
 }

@@ -1,25 +1,10 @@
-#===============================================================================
-#
-#                     NixOS Flake Configuration
-#
-# Description:
-#     Main flake configuration file defining the system's dependencies and
-#     structure. Manages:
-#     - Input sources and dependencies
-#     - System configuration
-#     - Home-manager integration
-#     - Package overlays
-#
-# Author: y0usaf
-# Last Modified: 2025
-#
-#===============================================================================
+#─────────────────────── ❄️  NIXOS FLAKE CONFIG ───────────────────────#
+# 🔄 System configuration and dependencies management                   #
+#──────────────────────────────────────────────────────────────────────#
 {
   description = "NixOS configuration";
 
-  #-----------------------------------------------------------------------------
-  # Input Sources
-  #-----------------------------------------------------------------------------
+  #── 📦 Input Sources ──────────────────────#
   inputs = {
     # Core Dependencies
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -28,14 +13,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Window Management
-    hyprland.url = "github:hyprwm/Hyprland";
-    hy3 = {
-      url = "github:outfoxxed/hy3";
-      inputs.hyprland.follows = "hyprland";
+    #── 🪟 Window Management ─────────────────#
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Python Tools
+    #── 🐍 Python Tools ───────────────────────#
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -45,24 +29,31 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # OBS Plugins
+    #── 🎥 OBS Plugins ────────────────────────#
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
 
-    # Development Tools
+    #── 🛠️ Development Tools ─────────────────#
     alejandra = {
       url = "github:kamadorueda/alejandra";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    #── 🔲 Hy3 ─────────────────────────────#
+    hy3 = {
+      url = "github:outfoxxed/hy3";
+      inputs.hyprland.follows = "hyprland";
+    };
   };
 
-  #-----------------------------------------------------------------------------
-  # System Configuration
-  #-----------------------------------------------------------------------------
+  #── ⚙️ System Configuration ───────────────#
   outputs = {
     self,
     nixpkgs,
     home-manager,
     obs-image-reaction,
+    hyprland,
+    alejandra,
+    hy3,
     ...
   } @ inputs: let
     system = "x86_64-linux";
@@ -70,8 +61,24 @@
       inherit system;
       config.allowUnfree = true;
     };
+
+    globals = import ./globals.nix;
+
+    mkHomeConfiguration = username: system:
+      home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        extraSpecialArgs = {
+          inherit inputs;
+          globals = import ./globals.nix;
+        };
+        modules = [
+          ./home.nix
+        ];
+      };
   in {
     formatter.${system} = pkgs.alejandra;
+
+    homeConfigurations.${globals.username} = mkHomeConfiguration globals.username system;
 
     nixosConfigurations = {
       "y0usaf-desktop" = nixpkgs.lib.nixosSystem {

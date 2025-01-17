@@ -1,3 +1,6 @@
+#─────────────────────── 🔤 FONT CONFIGURATION ───────────────────────#
+# ⚠️  Affects system-wide font rendering and availability            #
+#──────────────────────────────────────────────────────────────────────#
 {
   config,
   pkgs,
@@ -5,6 +8,7 @@
   globals,
   ...
 }: {
+  #── 📝 Font Configuration ──────────────────#
   xdg.configFile."fontconfig/fonts.conf".text = ''
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
@@ -15,7 +19,7 @@
                 <string>*</string>
             </test>
             <edit name="family" mode="prepend">
-                <string>IosevkaTermSlab Nerd Font Mono</string>
+                <string>IosevkaTermSlab NFM</string>
             </edit>
         </match>
 
@@ -23,7 +27,7 @@
         <alias>
             <family>monospace</family>
             <prefer>
-                <family>IosevkaTermSlab Nerd Font Mono</family>
+                <family>IosevkaTermSlab NFM</family>
                 <family>Symbols Nerd Font Mono</family>
                 <family>Noto Color Emoji</family>
                 <family>Noto Sans Symbols</family>
@@ -62,7 +66,7 @@
     </fontconfig>
   '';
 
-  # Ensure required fonts are installed
+  #── 📦 Font Packages ────────────────────────#
   home.packages = with pkgs; [
     noto-fonts
     noto-fonts-cjk-sans

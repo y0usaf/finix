@@ -1,17 +1,10 @@
 #===============================================================================
-#
-#                     SSH Configuration
-#
-# Description:
-#     SSH configuration file managing SSH connections and settings.
-#     Includes:
-#     - SSH key configurations
-#     - Host-specific settings
-#     - Connection parameters
-#
-# Author: y0usaf
-# Last Modified: 2025
-#
+#                       🔐 SSH Configuration 🔐
+#===============================================================================
+# 🔑 Key management
+# 🌐 Host settings
+# 🔧 Connection params
+# 🛡️ Security config
 #===============================================================================
 {
   config,
