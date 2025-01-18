@@ -131,16 +131,16 @@
         "type": "github"
       }
     },
-    "google-dot-black-cursor": {
+    "deepin-dark-v20-cursor": {
       "flake": false,
       "locked": {
         "lastModified": 1710875447,
         "narHash": "sha256-FD1H2lDJJM7bC0vn071FC0hiD4R0FB0cBEgygUnbBa8=",
-        "path": "/home/y0usaf/nixos/pkg/GoogleDotBlack",
+        "path": "/home/y0usaf/nixos/pkg/DeepinDarkV20",
         "type": "path"
       },
       "original": {
-        "path": "/home/y0usaf/nixos/pkg/GoogleDotBlack",
+        "path": "/home/y0usaf/nixos/pkg/DeepinDarkV20",
         "type": "path"
       }
     },
@@ -551,7 +551,7 @@
     "root": {
       "inputs": {
         "alejandra": "alejandra",
-        "google-dot-black-cursor": "google-dot-black-cursor",
+        "deepin-dark-v20-cursor": "deepin-dark-v20-cursor",
         "home-manager": "home-manager",
         "hy3": "hy3",
         "hyprland": "hyprland",

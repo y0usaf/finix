@@ -91,7 +91,6 @@
     WGET_HSTS_FILE = "${config.xdg.dataHome}/wget-hsts";
     PYTHON_HISTORY = "${config.xdg.stateHome}/python_history";
     HISTFILE = "${config.xdg.stateHome}/zsh/history";
-    GTK2_RC_FILES = "${config.xdg.configHome}/gtk-2.0/gtkrc";
     GNUPGHOME = "${config.xdg.dataHome}/gnupg";
     PARALLEL_HOME = "${config.xdg.configHome}/parallel";
 

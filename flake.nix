@@ -45,8 +45,8 @@
     };
 
     #── 🖱️ Cursor Theme ────────────────────────#
-    google-dot-black-cursor = {
-      url = "path:/home/y0usaf/nixos/pkg/GoogleDotBlack";
+    deepin-dark-v20-cursor = {
+      url = "path:/home/y0usaf/nixos/pkg/DeepinDarkV20";
       flake = false;
     };
   };

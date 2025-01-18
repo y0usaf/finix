@@ -23,9 +23,9 @@
     google-dot-black-hyprcursor = pkgs.stdenv.mkDerivation {
       pname = "google-dot-black-hyprcursor";
       version = "1.0";
-      cursorTheme = "GoogleDotBlack";
+      cursorTheme = "DeepinDarkV20";
 
-      src = inputs.google-dot-black-cursor;
+      src = inputs.deepin-dark-v20-cursor;
 
       phases = ["installPhase"];
       installPhase = ''
@@ -40,7 +40,7 @@
       pointerCursor = {
         hyprcursor.enable = true;
         hyprcursor.size = 24;
-        name = "GoogleDotBlack";
+        name = "DeepinDarkV20";
         package = google-dot-black-hyprcursor;
       };
       packages = [google-dot-black-hyprcursor];
