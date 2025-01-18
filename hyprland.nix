@@ -19,7 +19,33 @@
     description = "Enables xdph and its configs.";
   };
 
-  config = {
+  config = let
+    google-dot-black-hyprcursor = pkgs.stdenv.mkDerivation {
+      pname = "google-dot-black-hyprcursor";
+      version = "1.0";
+      cursorTheme = "GoogleDotBlack";
+
+      src = inputs.google-dot-black-cursor;
+
+      phases = ["installPhase"];
+      installPhase = ''
+        mkdir -p $out/share/icons/"$cursorTheme"/hyprcursors
+
+        cp -a $src/hyprcursors/* $out/share/icons/"$cursorTheme"/hyprcursors/
+        install -m644 $src/manifest.hl $out/share/icons/"$cursorTheme"/manifest.hl
+      '';
+    };
+  in {
+    home = {
+      pointerCursor = {
+        hyprcursor.enable = true;
+        hyprcursor.size = 24;
+        name = "GoogleDotBlack";
+        package = google-dot-black-hyprcursor;
+      };
+      packages = [google-dot-black-hyprcursor];
+    };
+
     wayland.windowManager.hyprland = {
       enable = true;
       systemd.enable = true;

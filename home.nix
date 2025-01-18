@@ -15,11 +15,6 @@
     homeDirectory = globals.homeDirectory;
     stateVersion = globals.stateVersion;
     enableNixpkgsReleaseCheck = false;
-    pointerCursor = {
-      name = "hicolor";
-      package = pkgs.hicolor-icon-theme;
-      size = 24;
-    };
   };
 
   #── 📦 User Packages ───────────────────────#
@@ -39,7 +34,7 @@
     #── 🌐 Web Applications ─────────────────#
     firefox
     vesktop
-    discord
+    discord-canary
 
     #── 🔧 Terminal and System Utilities ────#
     foot

@@ -50,8 +50,6 @@
         "LIBVA_DRIVER_NAME,nvidia"
         "GBM_BACKEND,nvidia-drm"
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-        "XCURSOR_SIZE,24"
-        "XCURSOR_THEME,hicolor"
       ];
     };
 

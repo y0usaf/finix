@@ -43,6 +43,12 @@
       url = "github:outfoxxed/hy3";
       inputs.hyprland.follows = "hyprland";
     };
+
+    #── 🖱️ Cursor Theme ────────────────────────#
+    google-dot-black-cursor = {
+      url = "path:/home/y0usaf/nixos/pkg/GoogleDotBlack";
+      flake = false;
+    };
   };
 
   #── ⚙️ System Configuration ───────────────#

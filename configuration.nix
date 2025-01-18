@@ -1,6 +1,15 @@
-#─────────────────────── 🛠️  NIXOS CORE CONFIG ───────────────────────#
-# ⚠️  Root access required | System rebuild needed for changes        #
-#──────────────────────────────────────────────────────────────────────#
+#===============================================================================
+#                       🛠️ NixOS Core Configuration 🛠️
+#===============================================================================
+# 🔧 System settings
+# 📦 Package management
+# 🔄 Boot configuration
+# 🎮 Hardware settings
+# 🔊 Audio setup
+# 👤 User management
+# 🔐 Security rules
+# 🌐 Network services
+#===============================================================================
 {
   config,
   lib,
@@ -14,12 +23,12 @@
     ./cachix.nix
   ];
 
-  #── 🔧 System Core ─────────────────────────#
+  #── 🔧 System Core ─────────────────────────────────────────#
   time.timeZone = globals.timezone;
   networking.hostName = globals.hostname;
   system.stateVersion = globals.stateVersion;
 
-  #── 📦 Nix & Packages ──────────────────────#
+  #── 📦 Nix & Package Management ────────────────────────────#
   nix = {
     package = pkgs.nixVersions.stable;
     extraOptions = ''
@@ -41,7 +50,7 @@
     allowUnfree = true;
   };
 
-  #── 🔄 Boot & Hardware ─────────────────────#
+  #── 🔄 Boot & Hardware Configuration ──────────────────────#
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -52,6 +61,7 @@
     extraModulePackages = [];
   };
 
+  #── 🎮 Hardware Settings ─────────────────────────────────#
   hardware = {
     nvidia = {
       modesetting.enable = true;
@@ -66,7 +76,7 @@
     };
   };
 
-  #── 🔊 Audio ─────────────────────────────#
+  #── 🔊 Audio Configuration ───────────────────────────────#
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -77,10 +87,10 @@
     pulse.enable = true;
   };
 
-  #── 🖥️ Desktop ───────────────────────────#
+  #── 🖥️ Display Settings ─────────────────────────────────#
   services.xserver.videoDrivers = ["nvidia"];
 
-  #── 🛡️ Security ──────────────────────────#
+  #── 🛡️ Security & Permissions ──────────────────────────#
   security.polkit = {
     enable = true;
     extraConfig = ''
@@ -93,8 +103,7 @@
     '';
   };
 
-  #── 🌍 Environment ────────────────────────#
-  # Core utils, dev tools, containers, archives
+  #── 🌍 System Environment ────────────────────────────────#
   environment = {
     systemPackages = with pkgs; [
       git
@@ -112,8 +121,7 @@
     ];
   };
 
-  #── 👤 User Management ───────────────────#
-  # Account, permissions, groups
+  #── 👤 User Management ───────────────────────────────────#
   users.users.${globals.username} = {
     isNormalUser = true;
     shell = pkgs.zsh;
@@ -128,7 +136,7 @@
     ignoreShellProgramCheck = true;
   };
 
-  #── 🔐 Sudo Rules ────────────────────────#
+  #── 🔐 Sudo Configuration ─────────────────────────────────#
   security.sudo.extraRules = [
     {
       users = ["y0usaf"];
@@ -141,40 +149,43 @@
     }
   ];
 
-  #── 🌐 Services ──────────────────────────#
+  #── 🌐 Network Services ──────────────────────────────────#
   networking.networkmanager.enable = true;
 
-  # XDG Desktop Portal
+  #── 🚀 Desktop Portal Services ─────────────────────────────#
   xdg.portal = {
     enable = true;
     wlr.enable = false;
     extraPortals = [
-      pkgs.xdg-desktop-portal-gtk
       pkgs.xdg-desktop-portal-hyprland
+      pkgs.xdg-desktop-portal-gtk
     ];
     config = {
       common = {
-        default = ["hyprland" "gtk"];
+        default = ["hyprland"];
       };
       hyprland = {
-        default = ["hyprland" "gtk"];
+        default = ["hyprland"];
+        "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
+        "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
       };
     };
   };
 
+  #── 🐚 Shell Configuration ────────────────────────────────#
   programs.zsh = {
     enable = false;
     enableGlobalCompInit = false;
   };
 
-  #── 📱 Udev Rules ────────────────────────#
+  #── 📱 Device Rules ──────────────────────────────────────#
   services.udev.extraRules = ''
     # Vial rules for non-root access to keyboards
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
   '';
 
-  #── 💻 Virtualization ──────────────────────#
+  #── 💻 Virtualization Support ─────────────────────────────#
   virtualisation = {
     lxd.enable = true;
   };

@@ -1,22 +1,12 @@
-#-----------------------------------------------------------------------------
-# Hardware Configuration
-#-----------------------------------------------------------------------------
-# Description:
-#     Configures hardware-specific settings and drivers:
-#     - NVIDIA driver configuration and power management
-#     - Graphics card settings and acceleration
-#     - Multi-GPU support and optimus configuration
-#
-# Dependencies:
-#     - NVIDIA drivers
-#     - Linux kernel modules
-#     - Hardware-configuration.nix
-#
-# Notes:
-#     - Power management may impact performance
-#     - Proprietary NVIDIA driver required for full functionality
-#     - Monitor configuration handled in hyprland.nix
-#-----------------------------------------------------------------------------
+#===============================================================================
+#                      🖥️ Hardware Configuration 🖥️
+#===============================================================================
+# 💽 Storage and filesystems
+# 🎮 Gaming directories
+# 🎵 Media mounts
+# 🔌 Boot and kernel modules
+# 🌐 Network interfaces
+#===============================================================================
 {
   config,
   lib,
@@ -28,63 +18,80 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  boot.initrd.availableKernelModules = ["nvme" "thunderbolt" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod"];
-  boot.initrd.kernelModules = [];
-  boot.kernelModules = ["kvm-amd"];
-  boot.extraModulePackages = [];
+  #── 🔌 Boot Configuration ─────────────────#
+  boot = {
+    initrd.availableKernelModules = [
+      "nvme"
+      "thunderbolt"
+      "xhci_pci"
+      "ahci"
+      "usbhid"
+      "usb_storage"
+      "sd_mod"
+    ];
+    initrd.kernelModules = [];
+    kernelModules = ["kvm-amd"];
+    extraModulePackages = [];
+  };
 
+  #── 💽 Root Filesystem ──────────────────#
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
     fsType = "btrfs";
     options = ["subvol=@nixos"];
   };
 
+  #── 🏠 Home Directory ──────────────────#
   fileSystems."/home" = {
     device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
     fsType = "btrfs";
     options = ["subvol=@home"];
   };
 
+  #── 🔄 Boot Partition ─────────────────#
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/31F2-1AE7";
     fsType = "vfat";
     options = ["fmask=0077" "dmask=0077"];
   };
 
+  #── 📸 Pictures Directory ─────────────#
   fileSystems."/home/y0usaf/Pictures" = {
     device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
     fsType = "btrfs";
     options = ["subvol=@pictures"];
   };
 
+  #── 📷 DCIM Directory ──────────────────#
   fileSystems."/home/y0usaf/DCIM" = {
     device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
     fsType = "btrfs";
     options = ["subvol=@dcim"];
   };
 
+  #── 🎵 Music Directory ─────────────────#
   fileSystems."/home/y0usaf/Music" = {
     device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
     fsType = "btrfs";
     options = ["subvol=@music"];
   };
 
+  #── 🎮 Steam Directory ─────────────────#
   fileSystems."/home/y0usaf/.local/share/Steam" = {
     device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
     fsType = "btrfs";
     options = ["subvol=@steam"];
   };
 
+  #── 💾 Swap Configuration ──────────────#
   swapDevices = [];
 
-  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-  # (the default) this is the recommended approach. When using systemd-networkd it's
-  # still possible to use this option, but it's recommended to use it in conjunction
-  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+  #── 🌐 Network Configuration ───────────#
   networking.useDHCP = lib.mkDefault true;
   # networking.interfaces.eno1.useDHCP = lib.mkDefault true;
   # networking.interfaces.wlp96s0.useDHCP = lib.mkDefault true;
 
+  #── 💻 Platform Settings ───────────────#
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

@@ -1,26 +1,11 @@
 #===============================================================================
-#
-#                     Git Configuration & Automation
-#
-# Description:
-#     Manages Git configuration and automated repository management:
-#     - Basic Git configuration (user, email, defaults)
-#     - SSH key management and integration
-#     - Automated repository initialization
-#     - Post-build synchronization
-#     - Systemd service management for Git operations
-#
-# Dependencies:
-#     - SSH configuration
-#     - Systemd services
-#     - Home Manager
-#     - globals.nix: Git credentials and paths
-#
-# Notes:
-#     - Automatically syncs configuration changes after successful builds
-#     - Handles both new and existing repository setups
-#     - Integrates with GitHub for remote management
-#
+#                      🔄 Git Configuration & Automation 🔄
+#===============================================================================
+# 👤 User settings
+# 🔑 SSH integration
+# 📦 Repository management
+# 🔄 Auto-sync
+# 🚀 Service automation
 #===============================================================================
 {
   config,
@@ -29,7 +14,7 @@
   globals,
   ...
 }: {
-  # Git configuration
+  #── 👤 User Configuration ─────────────────#
   programs.git = {
     enable = true;
     userName = globals.gitName;
@@ -42,10 +27,10 @@
     };
   };
 
-  # Ensure SSH agent is available
+  #── 🔑 SSH Agent Setup ───────────────────#
   services.ssh-agent.enable = true;
 
-  # Generate and configure SSH key if it doesn't exist
+  #── 📦 Repository Management ─────────────#
   home.activation = {
     setupGitRepo = lib.hm.dag.entryAfter ["writeBoundary"] ''
       REPO_PATH="${globals.homeDirectory}/nixos"
@@ -96,11 +81,10 @@
     '';
   };
 
-  # Systemd service for auto-pushing after successful builds
+  #── 🔄 Auto-Sync Service ────────────────#
   systemd.user.services.nixos-git-sync = {
     Unit = {
       Description = "Sync NixOS config changes after successful build";
-      # Run after home-manager switch and require SSH agent
       After = ["home-manager-switch.service"];
       Wants = ["home-manager-switch.service"];
       Requires = ["ssh-agent.service"];

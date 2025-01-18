@@ -1,18 +1,11 @@
 #===============================================================================
-#
-#                     Zsh Shell Configuration
-#
-# Description:
-#     Configuration file for the Zsh shell environment. Includes:
-#     - Environment variables
-#     - Shell aliases
-#     - Profile configurations
-#     - History settings
-#     - Host-specific functions
-#
-#
-#
-#
+#                      🐚 Zsh Shell Configuration 🐚
+#===============================================================================
+# 🌍 Environment variables
+# 📝 Shell aliases
+# 🔧 Profile settings
+# 📜 History configuration
+# 🖥️ Host-specific functions
 #===============================================================================
 {
   config,
@@ -24,23 +17,10 @@
   programs.zsh = {
     enable = true;
 
-    #===========================================================================
-    #
-    #                               ZSHENV
-    #
-    #===========================================================================
-    #   _____                                                      _          _
-    #  / ____|                                                    (_)        | |
-    # | (___     ___    ___      ___   _ __   __   __      _ __    _  __  __ | |
-    #  \___ \   / _ \  / _ \    / _ \ | '_ \  \ \ / /     | '_ \  | | \ \/ / | |
-    #  ____) | |  __/ |  __/   |  __/ | | | |  \ V /   _  | | | | | |  >  <  |_|
-    # |_____/   \___|  \___|    \___| |_| |_|   \_/   (_) |_| |_| |_| /_/\_\ (_)
+    #── 🌍 Environment Settings ────────────────#
+    # IN ENV.NIX!
 
-    #===========================================================================
-    #
-    #                               ZPROFILE
-    #
-    #===========================================================================
+    #── 📝 Profile Configuration ──────────────#
     profileExtra = ''
       # Start SSH agent
       eval "$(ssh-agent -s)"
@@ -57,11 +37,7 @@
       fi
     '';
 
-    #===========================================================================
-    #
-    #                               ZSHRC
-    #
-    #===========================================================================
+    #── 🔧 Shell Initialization ──────────────#
     initExtra = ''
       # Launch fetch
       nitch
@@ -91,6 +67,7 @@
       fi
     '';
 
+    #── 📜 History Settings ─────────────────#
     history = {
       size = 1000;
       save = 1000;
@@ -101,14 +78,16 @@
       extended = true;
     };
 
+    #── 🔗 Shell Aliases ──────────────────#
     shellAliases = {
+      #── 📱 XDG Compliance ────────────────#
       adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
       wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
       svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
       yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
       mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
 
-      # Text Editor Aliases
+      #── 📝 Text Editor Aliases ───────────#
       aliases = "nvim $HOME/dotfiles/.config/zsh/aliases";
       agscfg = "nvim $HOME/dotfiles/.config/ags/config.js";
       swaycfg = "nvim $HOME/dotfiles/.config/sway/*";
@@ -125,45 +104,45 @@
       zshistory = "nvim $XDG_CONFIG_HOME/zsh/.zsh_history";
       gitignore = "nvim $HOME/.gitignore";
 
-      # System Maintenance Aliases
+      #── 🔄 System Maintenance ────────────#
       dotlink = "$HOME/dotfiles/scripts/dotlink.sh";
       dotsync = "$HOME/dotfiles/scripts/dotsync.sh";
       dotpush = "$HOME/dotfiles/scripts/dotsync.sh push";
 
-      # Music Downloading Aliases
+      #── 🎵 Music Tools ──────────────────#
       ytm4a = "$HOME/scripts/ytm4a.sh";
       spotm4a = "$HOME/scripts/spotm4a.py";
 
-      # Package Management Aliases
+      #── 📦 Package Management ───────────#
       pkgs = "paru -Qq | grep";
       orphans = "pacman -Qttdq";
       pacfix = "sudo rm /var/lib/pacman/db.lck";
       filecheck = "paru -Qkk 2>&1 | grep -v \"0 altered files\"";
 
-      # Utility Aliases
+      #── 🛠️ Utility Aliases ─────────────#
       userctl = "systemctl --user";
       ooba = "/home/y0usaf/text-generation-webui/start_linux.sh";
       "nvidia-settings" = "nvidia-settings --config=\"$XDG_CONFIG_HOME\"/nvidia/settings";
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
 
-      # Directory Listing Aliases
+      #── 📁 Directory Listing ───────────#
       "l." = "lsd -A | grep -E \"^\\.\"";
       la = "lsd -A --color=always --group-dirs=first --icon=always";
       ll = "lsd -l --color=always --group-dirs=first --icon=always";
       ls = "lsd -lA --color=always --group-dirs=first --icon=always";
       lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
 
-      # Grep and Dir Aliases
+      #── 🔍 Search Tools ───────────────#
       grep = "grep --color=auto";
       dir = "dir --color=auto";
       egrep = "grep -E --color=auto";
       fgrep = "grep -F --color=auto";
 
-      # Network Aliases
+      #── 🌐 Network Tools ──────────────#
       tailup = "sudo tailscale up";
       taildown = "sudo tailscale down";
 
-      # Miscellaneous
+      #── 🎥 Media Tools ───────────────#
       compressvid = "~/dotfiles/scripts/compressvid.sh";
     };
   };
