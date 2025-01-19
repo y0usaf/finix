@@ -45,8 +45,12 @@
     };
 
     #── 🖱️ Cursor Theme ────────────────────────#
-    deepin-dark-v20-cursor = {
-      url = "path:/home/y0usaf/nixos/pkg/DeepinDarkV20";
+    deepin-dark-hyprcursor = {
+      url = "path:/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor";
+      flake = false;
+    };
+    deepin-dark-xcursor = {
+      url = "path:/home/y0usaf/nixos/pkg/deepin-dark-xcursor";
       flake = false;
     };
   };

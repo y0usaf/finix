@@ -7,11 +7,6 @@
 }: {
   gtk = {
     enable = true;
-    cursorTheme = {
-      name = "DeepinDarkV20";
-      package = config.home.pointerCursor.package;
-      size = 24;
-    };
     font = {
       name = "monospace";
       size = 11;
