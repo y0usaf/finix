@@ -48,14 +48,14 @@
           font-family: monospace;
           font-weight: bold;
           color: #FFFFFF;
-          text-shadow: -1px -1px 0 #000,
-                       1px -1px 0 #000,
-                      -1px  1px 0 #000,
-                       1px  1px 0 #000,
-                      -1px  0   0 #000,
-                       1px  0   0 #000,
-                       0   -1px 0 #000,
-                       0    1px 0 #000;
+          text-shadow: -1px -1px 0px #000000,
+                      1px -1px 0px #000000,
+                      -1px 1px 0px #000000,
+                      1px 1px 0px #000000,
+                      -1px 0px 0px #000000,
+                      1px 0px 0px #000000,
+                      0px -1px 0px #000000,
+                      0px 1px 0px #000000;
           padding: 16px;
           margin-left: auto;
       }
