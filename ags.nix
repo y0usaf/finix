@@ -15,19 +15,29 @@
     "ags/config.js".text = ''
       import App from 'resource:///com/github/Aylur/ags/app.js';
       import { systemStatsConfig } from './modules/system-stats/system-stats-config.js';
+      import { workspacesConfig } from './modules/workspaces/workspaces-config.js';
 
       // Configure the app using App.config()
       App.config({
-          style: `''${App.configDir}/modules/system-stats/system-stats-style.css`,
+          style: App.configDir + '/style.css',
           windows: [
               systemStatsConfig.window,
+              workspacesConfig.window,
           ],
       });
 
       // Export global functions from modules
-      Object.assign(globalThis, systemStatsConfig.globals);
+      Object.assign(globalThis, {
+          ...systemStatsConfig.globals,
+          ...workspacesConfig.globals,
+      });
 
       export default config;
+    '';
+
+    "ags/style.css".text = ''
+      @import 'modules/system-stats/system-stats-style.css';
+      @import 'modules/workspaces/workspaces-style.css';
     '';
 
     "ags/modules/system-stats/system-stats-config.js".text = ''
@@ -163,6 +173,89 @@
               });
           }
       });
+    '';
+
+    "ags/modules/workspaces/workspaces-config.js".text = ''
+      import Widget from 'resource:///com/github/Aylur/ags/widget.js';
+      import Workspaces from './workspaces.js';
+
+      // Create the window
+      const workspacesWindow = Widget.Window({
+          name: 'workspaces',
+          anchor: ['bottom'],
+          child: Workspaces(),
+          layer: 'overlay',
+          margins: [0, 0, 0, 0], // removed bottom margin
+      });
+
+      export const workspacesConfig = {
+          window: workspacesWindow,
+          globals: {},
+      };
+    '';
+
+    "ags/modules/workspaces/workspaces.js".text = ''
+      import Widget from 'resource:///com/github/Aylur/ags/widget.js';
+      import Service from 'resource:///com/github/Aylur/ags/service.js';
+
+      const hyprland = await Service.import('hyprland');
+
+      // Wait for hyprland service to be ready
+      const dispatch = workspace => hyprland.messageAsync(`dispatch workspace ''${workspace}`);
+
+      export default () => {
+          return Widget.Box({
+              class_name: 'workspaces',
+              children: Array.from({ length: 10 }, (_, i) => i + 1).map(i =>
+                  Widget.Button({
+                      class_name: 'workspace-btn',
+                      attribute: i,
+                      label: `''${i}`,
+                      onClicked: () => dispatch(i),
+                      setup: self => {
+                          // Update active state when workspace changes
+                          self.hook(hyprland, () => {
+                              const activeId = hyprland.active.workspace.id;
+                              const occupied = hyprland.workspaces.some(ws => ws.id === i);
+
+                              // Only show if workspace is occupied
+                              self.visible = occupied;
+
+                              // Set active class if this is the current workspace
+                              self.toggleClassName('active', activeId === i);
+                          });
+                      },
+                  })
+              ),
+          });
+      };
+    '';
+
+    "ags/modules/workspaces/workspaces-style.css".text = ''
+      .workspaces {
+          background: none;
+          padding: 0;
+      }
+
+      .workspace-btn {
+          min-width: 16px;
+          min-height: 24px;
+          margin: 0 1px;
+          font-family: monospace;
+          font-weight: bold;
+          background: none;
+          border: none;
+          box-shadow: none;
+          padding: 0;
+      }
+
+      .workspace-btn {
+          color: #666666;
+      }
+
+      .workspace-btn.active {
+          color: #FFFFFF;
+      }
     '';
   };
 }
