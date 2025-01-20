@@ -45,7 +45,7 @@
 
     "ags/style.css".text = ''
       .system-stats {
-          font-family: monospace, "Noto Color Emoji";
+          font-family: monospace;
           font-weight: bold;
           color: #FFFFFF;
           text-shadow: -1px -1px 0 #000,
@@ -57,12 +57,12 @@
                        0   -1px 0 #000,
                        0    1px 0 #000;
           padding: 16px;
-          text-align: right;
+          margin-left: auto;
       }
 
       .system-stats label {
           margin: 4px;
-          width: 100%;
+          min-width: 100px;
       }
 
       .stats-time {
@@ -132,23 +132,23 @@
                   box.children = [
                       Widget.Label({
                           class_name: 'stats-time',
-                          label: '🕒 ' + stats.time
+                          label: stats.time
                       }),
                       Widget.Label({
                           class_name: 'stats-info',
-                          label: '📅 ' + stats.date
+                          label: stats.date
                       }),
                       Widget.Label({
                           class_name: 'stats-info',
-                          label: '🌡️ CPU: ' + stats.cpu_temp
+                          label: 'CPU: ' + stats.cpu_temp
                       }),
                       Widget.Label({
                           class_name: 'stats-info',
-                          label: '🌡️ GPU: ' + stats.gpu_temp
+                          label: 'GPU: ' + stats.gpu_temp
                       }),
                       Widget.Label({
                           class_name: 'stats-info',
-                          label: '💾 RAM: ' + stats.used_ram + '/' + stats.total_ram
+                          label: 'RAM: ' + stats.used_ram + '/' + stats.total_ram
                       })
                   ];
               });
