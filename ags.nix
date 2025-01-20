@@ -56,9 +56,7 @@
                       1px 0px 0px #000000,
                       0px -1px 0px #000000,
                       0px 1px 0px #000000;
-          padding: 16px;
-          margin-left: auto;
-      }
+       }
 
       .system-stats label {
           margin: 4px;
