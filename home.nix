@@ -79,7 +79,6 @@
     ./git.nix
     ./xdg.nix
     ./fonts.nix
-    ./waybar.nix
     ./foot.nix
     ./gtk.nix
     ./cursor.nix

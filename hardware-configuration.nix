@@ -30,7 +30,11 @@
       "sd_mod"
     ];
     initrd.kernelModules = [];
-    kernelModules = ["kvm-amd"];
+    kernelModules = [
+      "kvm-amd"
+      "k10temp"
+      "nct6775"
+    ];
     extraModulePackages = [];
   };
 

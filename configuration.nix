@@ -44,7 +44,6 @@
       builders-use-substitutes = true;
       fallback = true;
     };
-    # Enable flakes and new commands
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -57,11 +56,15 @@
       efi.canTouchEfiVariables = true;
     };
     kernelPackages = pkgs.linuxPackages_latest;
-    kernelModules = ["kvm-amd"];
+    kernelModules = [
+      "kvm-amd"
+      "k10temp" # AMD CPU temperature
+      "nct6775" # Motherboard sensors
+    ];
     extraModulePackages = [];
   };
 
-  # Graphics & Display
+  #── 🎮 Graphics & Display ─────────────────#
   hardware = {
     nvidia = {
       modesetting.enable = true;
@@ -74,11 +77,12 @@
       enable = true;
       enable32Bit = true;
     };
+    i2c.enable = true;
   };
 
   services.xserver.videoDrivers = ["nvidia"];
 
-  # Audio Configuration
+  #── 🔊 Audio Configuration ────────────────#
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -93,7 +97,6 @@
   security = {
     polkit = {
       enable = true;
-      # Allow nvidia-smi without password
       extraConfig = ''
         polkit.addRule(function(action, subject) {
           if (action.id == "org.freedesktop.policykit.exec" &&
@@ -103,7 +106,6 @@
         });
       '';
     };
-    # Sudo rules
     sudo.extraRules = [
       {
         users = [globals.username];
@@ -132,35 +134,43 @@
     ignoreShellProgramCheck = true;
   };
 
-  environment.systemPackages = with pkgs; [
-    # Basic utilities
-    git
-    vim
-    curl
-    wget
-    cachix
-    unzip
-    lm_sensors
-    yt-dlp-light
-    bash
-    # Python with packages
-    (python3.withPackages (ps:
-      with ps; [
-        pip
-        setuptools
-      ]))
-    python3
-  ];
+  #── 📦 System Packages ──────────────────#
+  environment = {
+    systemPackages = with pkgs; [
+      # Basic utilities
+      git
+      vim
+      curl
+      wget
+      cachix
+      unzip
+      lm_sensors
+      yt-dlp-light
+      bash
+      # Python with packages
+      (python3.withPackages (ps:
+        with ps; [
+          pip
+          setuptools
+        ]))
+      python3
+    ];
+
+    # Sensor configuration
+    etc."sensors.d/nvidia.conf".text = ''
+      chip "nvidia-*"
+        label temp1 "GPU Temperature"
+        label fan1 "GPU Fan Speed"
+        set temp1_max 95
+        set temp1_crit 105
+    '';
+  };
 
   #── 🚀 Services & Programs ───────────────#
-  # XDG Portal Configuration
   xdg.portal = {
     enable = true;
     wlr.enable = false;
-    extraPortals = [
-      pkgs.xdg-desktop-portal-hyprland
-      pkgs.xdg-desktop-portal-gtk
-    ];
+    extraPortals = [pkgs.xdg-desktop-portal-hyprland];
     config = {
       common.default = ["hyprland"];
       hyprland = {
@@ -171,7 +181,6 @@
     };
   };
 
-  # Shell Configuration
   programs = {
     zsh = {
       enable = false;
@@ -182,7 +191,7 @@
 
   services.dbus.packages = [pkgs.dconf];
 
-  # Device Rules
+  #── 🔌 Device Rules ────────────────────#
   services.udev.extraRules = ''
     # Vial rules for non-root access to keyboards
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"

@@ -26,10 +26,10 @@
       });
 
       // Configure the app
-      App.config({
+      const config = {
           style: App.configDir + '/style.css',
           windows: [systemStatsWindow],
-      });
+      };
 
       // Add functions to global scope
       globalThis.showStats = () => {
@@ -39,6 +39,40 @@
       globalThis.hideStats = () => {
           systemStatsWindow.layer = 'background';
       };
+
+      // Export the config
+      export default config;
+    '';
+
+    "ags/style.css".text = ''
+      .system-stats {
+          font-family: monospace, "Noto Color Emoji";
+          font-weight: bold;
+          color: #FFFFFF;
+          text-shadow: -1px -1px 0 #000,
+                       1px -1px 0 #000,
+                      -1px  1px 0 #000,
+                       1px  1px 0 #000,
+                      -1px  0   0 #000,
+                       1px  0   0 #000,
+                       0   -1px 0 #000,
+                       0    1px 0 #000;
+          padding: 16px;
+          text-align: right;
+      }
+
+      .system-stats label {
+          margin: 4px;
+          width: 100%;
+      }
+
+      .stats-time {
+          font-size: 96px;
+      }
+
+      .stats-info {
+          font-size: 24px;
+      }
     '';
 
     "ags/widgets/system-stats.js".text = ''
@@ -46,15 +80,43 @@
       import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
 
       const getStats = () => {
-          const cpu_temp = exec("sensors | grep 'Tctl' | awk '{print $2}'");
+          // Get CPU temp with error handling
+          let cpu_temp = 'N/A';
+          try {
+              // Using bash -c to execute the piped command as a single string
+              cpu_temp = exec(['bash', '-c', "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"]).trim();
+
+              if (!cpu_temp) {
+                  throw new Error('No CPU temperature reading available');
+              }
+          } catch (error) {
+              console.log('Failed to get CPU stats:', error);
+              console.log('Error details:', error.message);
+          }
+
+          // Get GPU temp using nvidia-smi
+          let gpu_temp = 'N/A';
+          try {
+              gpu_temp = exec("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits").trim();
+              if (!gpu_temp) {
+                  throw new Error('No GPU temperature reading available');
+              }
+          } catch (error) {
+              console.log('Failed to get GPU stats:', error);
+          }
+
+          // Get RAM info
           const ram = exec('free -h').split('\n')[1].split(/\s+/);
           const used_ram = ram[2];
           const total_ram = ram[1];
+
+          // Get time and date
           const time = exec('date "+%H:%M:%S"');
           const date = exec('date "+%d/%m/%y"');
 
           return {
-              cpu_temp: cpu_temp.trim(),
+              cpu_temp: cpu_temp !== 'N/A' ? cpu_temp : 'N/A',
+              gpu_temp: gpu_temp !== 'N/A' ? gpu_temp + "°C" : 'N/A',
               used_ram,
               total_ram,
               time: time.trim(),
@@ -65,28 +127,29 @@
       export default () => Widget.Box({
           class_name: 'system-stats',
           vertical: true,
-          css: `
-              .system-stats {
-                  font-family: monospace;
-                  font-size: 24px;
-                  font-weight: bold;
-                  color: #FFFFFF;
-                  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
-                  padding: 10px;
-              }
-          `,
           setup: self => {
               self.poll(1000, box => {
                   const stats = getStats();
                   box.children = [
                       Widget.Label({
-                          label: `🕒 ''${stats.time} 📅 ''${stats.date}`
+                          class_name: 'stats-time',
+                          label: '🕒 ' + stats.time
                       }),
                       Widget.Label({
-                          label: `🌡️ CPU: ''${stats.cpu_temp}`
+                          class_name: 'stats-info',
+                          label: '📅 ' + stats.date
                       }),
                       Widget.Label({
-                          label: `💾 RAM: ''${stats.used_ram}/''${stats.total_ram}`
+                          class_name: 'stats-info',
+                          label: '🌡️ CPU: ' + stats.cpu_temp
+                      }),
+                      Widget.Label({
+                          class_name: 'stats-info',
+                          label: '🌡️ GPU: ' + stats.gpu_temp
+                      }),
+                      Widget.Label({
+                          class_name: 'stats-info',
+                          label: '💾 RAM: ' + stats.used_ram + '/' + stats.total_ram
                       })
                   ];
               });
