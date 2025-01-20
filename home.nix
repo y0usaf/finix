@@ -68,6 +68,7 @@
     grim
     slurp
     wl-clipboard
+    nwg-wrapper
   ];
 
   #── 🔧 Program Configurations ────────────#
@@ -82,6 +83,7 @@
     ./foot.nix
     ./gtk.nix
     ./cursor.nix
+    ./ags.nix
   ];
 
   #── 🎥 OBS Studio ────────────────────────#

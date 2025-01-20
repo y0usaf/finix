@@ -45,7 +45,7 @@
 in {
   programs.waybar = {
     enable = true;
-    systemd.enable = false;
+    systemd.enable = false; # Disable systemd integration
     settings = [
       (makeBar "top")
       (makeBar "bottom")
@@ -74,4 +74,9 @@ in {
       }
     '';
   };
+
+  # Add Hyprland exec-once for waybar
+  #wayland.windowManager.hyprland.extraConfig = ''
+  #  exec-once = waybar
+  #'';
 }

@@ -1,14 +1,15 @@
 #===============================================================================
-#                       🛠️ NixOS Core Configuration 🛠️
+#                          🖥️ NixOS Configuration 🖥️
 #===============================================================================
-# 🔧 System settings
+# 🔧 Core system settings
 # 📦 Package management
-# 🔄 Boot configuration
-# 🎮 Hardware settings
-# 🔊 Audio setup
-# 👤 User management
-# 🔐 Security rules
-# 🌐 Network services
+# 🛠️ Hardware configuration
+# 🔒 Security settings
+# 👤 User environment
+# 🚀 Services & programs
+# 🌐 Network & virtualization
+#
+# ⚠️  Root access required | System rebuild needed for changes
 #===============================================================================
 {
   config,
@@ -23,34 +24,33 @@
     ./cachix.nix
   ];
 
-  #── 🔧 System Core ─────────────────────────────────────────#
+  #── 🔧 Core System Settings ──────────────#
+  system.stateVersion = globals.stateVersion; # Do not change this value
   time.timeZone = globals.timezone;
   networking.hostName = globals.hostname;
-  system.stateVersion = globals.stateVersion;
 
-  #── 📦 Nix & Package Management ────────────────────────────#
+  #── 📦 Package Management ─────────────────#
+  nixpkgs.config.allowUnfree = true;
+
   nix = {
     package = pkgs.nixVersions.stable;
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
     settings = {
       auto-optimise-store = true;
       max-jobs = "auto";
       cores = 0;
       system-features = ["big-parallel" "kvm" "nixos-test"];
       sandbox = true;
-      trusted-users = ["root" "y0usaf"];
+      trusted-users = ["root" globals.username];
       builders-use-substitutes = true;
       fallback = true;
     };
+    # Enable flakes and new commands
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
   };
 
-  nixpkgs.config = {
-    allowUnfree = true;
-  };
-
-  #── 🔄 Boot & Hardware Configuration ──────────────────────#
+  #── 🛠️ Hardware Configuration ────────────#
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -61,7 +61,7 @@
     extraModulePackages = [];
   };
 
-  #── 🎮 Hardware Settings ─────────────────────────────────#
+  # Graphics & Display
   hardware = {
     nvidia = {
       modesetting.enable = true;
@@ -76,7 +76,9 @@
     };
   };
 
-  #── 🔊 Audio Configuration ───────────────────────────────#
+  services.xserver.videoDrivers = ["nvidia"];
+
+  # Audio Configuration
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -87,41 +89,35 @@
     pulse.enable = true;
   };
 
-  #── 🖥️ Display Settings ─────────────────────────────────#
-  services.xserver.videoDrivers = ["nvidia"];
-
-  #── 🛡️ Security & Permissions ──────────────────────────#
-  security.polkit = {
-    enable = true;
-    extraConfig = ''
-      polkit.addRule(function(action, subject) {
-        if (action.id == "org.freedesktop.policykit.exec" &&
-            action.lookup("command_line").indexOf("nvidia-smi") >= 0) {
-            return polkit.Result.YES;
-        }
-      });
-    '';
-  };
-
-  #── 🌍 System Environment ────────────────────────────────#
-  environment = {
-    systemPackages = with pkgs; [
-      git
-      vim
-      curl
-      wget
-      cachix
-      (python3.withPackages (ps:
-        with ps; [
-          pip
-          setuptools
-        ]))
-      python3
-      unzip
+  #── 🔒 Security & Permissions ────────────#
+  security = {
+    polkit = {
+      enable = true;
+      # Allow nvidia-smi without password
+      extraConfig = ''
+        polkit.addRule(function(action, subject) {
+          if (action.id == "org.freedesktop.policykit.exec" &&
+              action.lookup("command_line").indexOf("nvidia-smi") >= 0) {
+              return polkit.Result.YES;
+          }
+        });
+      '';
+    };
+    # Sudo rules
+    sudo.extraRules = [
+      {
+        users = [globals.username];
+        commands = [
+          {
+            command = "ALL";
+            options = ["NOPASSWD"];
+          }
+        ];
+      }
     ];
   };
 
-  #── 👤 User Management ───────────────────────────────────#
+  #── 👤 User Environment ─────────────────#
   users.users.${globals.username} = {
     isNormalUser = true;
     shell = pkgs.zsh;
@@ -136,23 +132,28 @@
     ignoreShellProgramCheck = true;
   };
 
-  #── 🔐 Sudo Configuration ─────────────────────────────────#
-  security.sudo.extraRules = [
-    {
-      users = ["y0usaf"];
-      commands = [
-        {
-          command = "ALL";
-          options = ["NOPASSWD"];
-        }
-      ];
-    }
+  environment.systemPackages = with pkgs; [
+    # Basic utilities
+    git
+    vim
+    curl
+    wget
+    cachix
+    unzip
+    lm_sensors
+    yt-dlp-light
+    bash
+    # Python with packages
+    (python3.withPackages (ps:
+      with ps; [
+        pip
+        setuptools
+      ]))
+    python3
   ];
 
-  #── 🌐 Network Services ──────────────────────────────────#
-  networking.networkmanager.enable = true;
-
-  #── 🚀 Desktop Portal Services ─────────────────────────────#
+  #── 🚀 Services & Programs ───────────────#
+  # XDG Portal Configuration
   xdg.portal = {
     enable = true;
     wlr.enable = false;
@@ -161,9 +162,7 @@
       pkgs.xdg-desktop-portal-gtk
     ];
     config = {
-      common = {
-        default = ["hyprland"];
-      };
+      common.default = ["hyprland"];
       hyprland = {
         default = ["hyprland"];
         "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
@@ -172,21 +171,25 @@
     };
   };
 
-  #── 🐚 Shell Configuration ────────────────────────────────#
-  programs.zsh = {
-    enable = false;
-    enableGlobalCompInit = false;
+  # Shell Configuration
+  programs = {
+    zsh = {
+      enable = false;
+      enableGlobalCompInit = false;
+    };
+    dconf.enable = true;
   };
 
-  #── 📱 Device Rules ──────────────────────────────────────#
+  services.dbus.packages = [pkgs.dconf];
+
+  # Device Rules
   services.udev.extraRules = ''
     # Vial rules for non-root access to keyboards
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
   '';
 
-  #── 💻 Virtualization Support ─────────────────────────────#
-  virtualisation = {
-    lxd.enable = true;
-  };
+  #── 🌐 Network & Virtualization ─────────#
+  networking.networkmanager.enable = true;
+  virtualisation.lxd.enable = true;
 }

@@ -144,6 +144,7 @@
 
       #── 🎥 Media Tools ───────────────#
       compressvid = "~/dotfiles/scripts/compressvid.sh";
+      hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
     };
   };
 }

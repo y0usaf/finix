@@ -113,6 +113,8 @@
           "float, center, size 300 600, class:^(launcher)"
           "float, mouse, size 300 300, title:^(Smile)"
           "float, center, class:^(hyprland-share-picker)"
+          "float, class:^(ags)$ title:^(system-stats)$"
+          "center, class:^(ags)$ title:^(system-stats)$"
         ];
 
         layerrule = [
@@ -124,7 +126,6 @@
         bind = lib.lists.flatten [
           #── 🪟 Window Management ────────────────#
           [
-            "$mod, W, exec, ~/.config/fabric/toggle_workspaces.sh"
             "$mod, Q, killactive"
             "$mod, M, exit"
             "$mod, F, fullscreen"
@@ -132,6 +133,7 @@
             "$mod, TAB, layoutmsg, orientationnext"
             "$mod, space, togglefloating"
             "$mod, P, pseudo"
+            "$mod, W, exec, ags -r 'showStats()'"
           ]
 
           #── 🔔 Monitor Controls ────────────────#
@@ -206,20 +208,12 @@
           ]
         ];
 
-        #── 🖱️ Mouse Bindings ─────────────────#
         bindm = [
           "$mod, mouse:272, movewindow"
           "$mod, mouse:273, resizewindow"
         ];
 
-        #── 🚀 Startup Applications ───────────#
-        exec-once = [
-          "waybar"
-          "hyprpm reload"
-        ];
-        exec = [
-          "udiskie"
-        ];
+        bindr = "$mod, W, exec, ags -r 'hideStats()'";
       };
     };
 
