@@ -20,7 +20,6 @@
       // Create the window
       const systemStatsWindow = Widget.Window({
           name: 'system-stats',
-          anchor: ['center', 'center'],
           child: SystemStats(),
           layer: 'background',  // Start in background
       });
