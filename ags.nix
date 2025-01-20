@@ -13,8 +13,25 @@
   # Create AGS config directory and files
   xdg.configFile = {
     "ags/config.js".text = ''
-      import SystemStats from './widgets/system-stats.js';
       import App from 'resource:///com/github/Aylur/ags/app.js';
+      import { systemStatsConfig } from './modules/system-stats/system-stats-config.js';
+
+      // Configure the app using App.config()
+      App.config({
+          style: `''${App.configDir}/modules/system-stats/system-stats-style.css`,
+          windows: [
+              systemStatsConfig.window,
+          ],
+      });
+
+      // Export global functions from modules
+      Object.assign(globalThis, systemStatsConfig.globals);
+
+      export default config;
+    '';
+
+    "ags/modules/system-stats/system-stats-config.js".text = ''
+      import SystemStats from './system-stats.js';
       import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 
       // Create the window
@@ -24,26 +41,20 @@
           layer: 'background',  // Start in background
       });
 
-      // Configure the app
-      const config = {
-          style: App.configDir + '/style.css',
-          windows: [systemStatsWindow],
+      export const systemStatsConfig = {
+          window: systemStatsWindow,
+          globals: {
+              showStats: () => {
+                  systemStatsWindow.layer = 'top';
+              },
+              hideStats: () => {
+                  systemStatsWindow.layer = 'background';
+              },
+          },
       };
-
-      // Add functions to global scope
-      globalThis.showStats = () => {
-          systemStatsWindow.layer = 'top';
-      };
-
-      globalThis.hideStats = () => {
-          systemStatsWindow.layer = 'background';
-      };
-
-      // Export the config
-      export default config;
     '';
 
-    "ags/style.css".text = ''
+    "ags/modules/system-stats/system-stats-style.css".text = ''
       .system-stats {
           font-family: monospace;
           font-weight: bold;
@@ -72,7 +83,7 @@
       }
     '';
 
-    "ags/widgets/system-stats.js".text = ''
+    "ags/modules/system-stats/system-stats.js".text = ''
       import Widget from 'resource:///com/github/Aylur/ags/widget.js';
       import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
 
