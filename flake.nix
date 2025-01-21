@@ -6,20 +6,30 @@
 
   #── 📦 Input Sources ──────────────────────#
   inputs = {
-    # Core Dependencies
+    #── 🎯 Core ────────────────────────────#
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    alejandra = {
+      url = "github:kamadorueda/alejandra";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    #── 🪟 Window Management ─────────────────#
+    #── 🪟 Desktop Environment ──────────────#
     hyprland = {
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hy3 = {
+      url = "github:outfoxxed/hy3";
+      inputs.hyprland.follows = "hyprland";
+    };
+    deepin-dark-hyprcursor.url = "path:/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor";
+    deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/pkg/deepin-dark-xcursor";
 
-    #── 🐍 Python Tools ───────────────────────#
+    #── 🛠️ Development ───────────────────────#
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -28,34 +38,9 @@
       url = "github:pyproject-nix/uv2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    #── 🎥 OBS Plugins ────────────────────────#
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
-
-    #── 🛠️ Development Tools ─────────────────#
-    alejandra = {
-      url = "github:kamadorueda/alejandra";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    #── 🔲 Hy3 ─────────────────────────────#
-    hy3 = {
-      url = "github:outfoxxed/hy3";
-      inputs.hyprland.follows = "hyprland";
-    };
-
-    #── 🖱️ Cursor Theme ────────────────────────#
-    deepin-dark-hyprcursor = {
-      url = "path:/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor";
-      flake = false;
-    };
-    deepin-dark-xcursor = {
-      url = "path:/home/y0usaf/nixos/pkg/deepin-dark-xcursor";
-      flake = false;
-    };
   };
 
-  #── ⚙️ System Configuration ───────────────#
   outputs = {
     self,
     nixpkgs,
@@ -71,9 +56,9 @@
       inherit system;
       config.allowUnfree = true;
     };
-
     globals = import ./globals.nix;
 
+    # Helper function to create home-manager configuration
     mkHomeConfiguration = username: system:
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
@@ -81,40 +66,36 @@
           inherit inputs;
           globals = import ./globals.nix;
         };
-        modules = [
-          ./home.nix
-        ];
+        modules = [./home.nix];
       };
   in {
     formatter.${system} = pkgs.alejandra;
 
     homeConfigurations.${globals.username} = mkHomeConfiguration globals.username system;
 
-    nixosConfigurations = {
-      "y0usaf-desktop" = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          inherit inputs;
-          globals = import ./globals.nix;
-        };
-        modules = [
-          ./configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              extraSpecialArgs = {
-                inherit inputs;
-                hostName = "y0usaf-desktop";
-                globals = import ./globals.nix;
-              };
-              users.y0usaf = import ./home.nix;
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              backupFileExtension = "backup";
-            };
-          }
-        ];
+    nixosConfigurations."y0usaf-desktop" = nixpkgs.lib.nixosSystem {
+      inherit system;
+      specialArgs = {
+        inherit inputs;
+        globals = import ./globals.nix;
       };
+      modules = [
+        ./configuration.nix
+        home-manager.nixosModules.home-manager
+        {
+          home-manager = {
+            extraSpecialArgs = {
+              inherit inputs;
+              hostName = "y0usaf-desktop";
+              globals = import ./globals.nix;
+            };
+            users.y0usaf = import ./home.nix;
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            backupFileExtension = "backup";
+          };
+        }
+      ];
     };
   };
 }
