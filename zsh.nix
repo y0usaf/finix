@@ -22,19 +22,16 @@
 
     #── 📝 Profile Configuration ──────────────#
     profileExtra = ''
-      # Start SSH agent
-      eval "$(ssh-agent -s)"
-
-      if [ -f /home/y0usaf/Tokens/id_rsa_y0usaf ]; then
-          ssh-add ~/Tokens/id_rsa_y0usaf
-      fi
-
-      if [ "$(hostname)" = "y0usaf-desktop" ]; then
+      # Hardware-specific settings
+      case "$(hostname)" in
+        "y0usaf-desktop")
           sudo nvidia-smi -pl 150
           Hyprland
-      elif [ "$(hostname)" = "y0usaf-laptop" ]; then
-         Hyprland
-      fi
+          ;;
+        "y0usaf-laptop")
+          Hyprland
+          ;;
+      esac
     '';
 
     #── 🔧 Shell Initialization ──────────────#
