@@ -14,8 +14,8 @@
   xdg.configFile = {
     "ags/config.js".text = ''
       import App from 'resource:///com/github/Aylur/ags/app.js';
-      import { systemStatsConfig } from './modules/system-stats/system-stats-config.js';
-      import { workspacesConfig } from './modules/workspaces/workspaces-config.js';
+      import { systemStatsConfig } from './system-stats.js';
+      import { workspacesConfig } from './workspaces.js';
 
       // Configure the app using App.config()
       App.config({
@@ -36,35 +36,7 @@
     '';
 
     "ags/style.css".text = ''
-      @import 'modules/system-stats/system-stats-style.css';
-      @import 'modules/workspaces/workspaces-style.css';
-    '';
-
-    "ags/modules/system-stats/system-stats-config.js".text = ''
-      import SystemStats from './system-stats.js';
-      import Widget from 'resource:///com/github/Aylur/ags/widget.js';
-
-      // Create the window
-      const systemStatsWindow = Widget.Window({
-          name: 'system-stats',
-          child: SystemStats(),
-          layer: 'background',  // Start in background
-      });
-
-      export const systemStatsConfig = {
-          window: systemStatsWindow,
-          globals: {
-              showStats: () => {
-                  systemStatsWindow.layer = 'top';
-              },
-              hideStats: () => {
-                  systemStatsWindow.layer = 'background';
-              },
-          },
-      };
-    '';
-
-    "ags/modules/system-stats/system-stats-style.css".text = ''
+      /* System Stats Styles */
       .system-stats {
           font-family: monospace;
           font-weight: bold;
@@ -77,7 +49,7 @@
                       1px 0px 0px #000000,
                       0px -1px 0px #000000,
                       0px 1px 0px #000000;
-       }
+      }
 
       .system-stats label {
           margin: 4px;
@@ -91,9 +63,40 @@
       .stats-info {
           font-size: 24px;
       }
+
+      /* Workspaces Styles */
+      .workspaces {
+          background: none;
+          padding: 0;
+      }
+
+      .workspace-btn {
+          min-width: 16px;
+          min-height: 24px;
+          margin: 0 1px;
+          font-family: monospace;
+          font-weight: bold;
+          background: none;
+          border: none;
+          box-shadow: none;
+          padding: 0;
+          color: #333333;
+          text-shadow: -1px -1px 0px #000000,
+                      1px -1px 0px #000000,
+                      -1px 1px 0px #000000,
+                      1px 1px 0px #000000,
+                      -1px 0px 0px #000000,
+                      1px 0px 0px #000000,
+                      0px -1px 0px #000000,
+                      0px 1px 0px #000000;
+      }
+
+      .workspace-btn.active {
+          color: #FF0000;
+      }
     '';
 
-    "ags/modules/system-stats/system-stats.js".text = ''
+    "ags/system-stats.js".text = ''
       import Widget from 'resource:///com/github/Aylur/ags/widget.js';
       import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
 
@@ -101,9 +104,7 @@
           // Get CPU temp with error handling
           let cpu_temp = 'N/A';
           try {
-              // Using bash -c to execute the piped command as a single string
               cpu_temp = exec(['bash', '-c', "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"]).trim();
-
               if (!cpu_temp) {
                   throw new Error('No CPU temperature reading available');
               }
@@ -142,7 +143,7 @@
           };
       };
 
-      export default () => Widget.Box({
+      const SystemStats = () => Widget.Box({
           class_name: 'system-stats',
           vertical: true,
           setup: self => {
@@ -173,28 +174,28 @@
               });
           }
       });
-    '';
-
-    "ags/modules/workspaces/workspaces-config.js".text = ''
-      import Widget from 'resource:///com/github/Aylur/ags/widget.js';
-      import Workspaces from './workspaces.js';
 
       // Create the window
-      const workspacesWindow = Widget.Window({
-          name: 'workspaces',
-          anchor: ['bottom'],
-          child: Workspaces(),
-          layer: 'overlay',
-          margins: [0, 0, 0, 0], // removed bottom margin
+      const systemStatsWindow = Widget.Window({
+          name: 'system-stats',
+          child: SystemStats(),
+          layer: 'background',  // Start in background
       });
 
-      export const workspacesConfig = {
-          window: workspacesWindow,
-          globals: {},
+      export const systemStatsConfig = {
+          window: systemStatsWindow,
+          globals: {
+              showStats: () => {
+                  systemStatsWindow.layer = 'top';
+              },
+              hideStats: () => {
+                  systemStatsWindow.layer = 'background';
+              },
+          },
       };
     '';
 
-    "ags/modules/workspaces/workspaces.js".text = ''
+    "ags/workspaces.js".text = ''
       import Widget from 'resource:///com/github/Aylur/ags/widget.js';
       import Service from 'resource:///com/github/Aylur/ags/service.js';
 
@@ -203,7 +204,7 @@
       // Wait for hyprland service to be ready
       const dispatch = workspace => hyprland.messageAsync(`dispatch workspace ''${workspace}`);
 
-      export default () => {
+      const Workspaces = () => {
           return Widget.Box({
               class_name: 'workspaces',
               children: Array.from({ length: 10 }, (_, i) => i + 1).map(i =>
@@ -229,33 +230,20 @@
               ),
           });
       };
-    '';
 
-    "ags/modules/workspaces/workspaces-style.css".text = ''
-      .workspaces {
-          background: none;
-          padding: 0;
-      }
+      // Create the window
+      const workspacesWindow = Widget.Window({
+          name: 'workspaces',
+          anchor: ['bottom'],
+          child: Workspaces(),
+          layer: 'overlay',
+          margins: [0, 0, 0, 0],
+      });
 
-      .workspace-btn {
-          min-width: 16px;
-          min-height: 24px;
-          margin: 0 1px;
-          font-family: monospace;
-          font-weight: bold;
-          background: none;
-          border: none;
-          box-shadow: none;
-          padding: 0;
-      }
-
-      .workspace-btn {
-          color: #666666;
-      }
-
-      .workspace-btn.active {
-          color: #FFFFFF;
-      }
+      export const workspacesConfig = {
+          window: workspacesWindow,
+          globals: {},
+      };
     '';
   };
 }
