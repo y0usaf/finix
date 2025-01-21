@@ -1,7 +1,7 @@
 #===============================================================================
 #                      🐚 Zsh Shell Configuration 🐚
 #===============================================================================
-# 🌍 Environment variables
+# 🌍 Environment variables (see env.nix)
 # 📝 Shell aliases
 # 🔧 Profile settings
 # 📜 History configuration
@@ -17,10 +17,18 @@
   programs.zsh = {
     enable = true;
 
-    #── 🌍 Environment Settings ────────────────#
-    # IN ENV.NIX!
+    #── 📜 History Settings ─────────────────#
+    history = {
+      size = 1000;
+      save = 1000;
+      path = "$HOME/.local/state/zsh/history";
+      ignoreDups = true;
+      expireDuplicatesFirst = true;
+      share = true;
+      extended = true;
+    };
 
-    #── 📝 Profile Configuration ──────────────#
+    #── 🔧 Profile Configuration ──────────────#
     profileExtra = ''
       # Hardware-specific settings
       case "$(hostname)" in
@@ -55,25 +63,12 @@
                   echo "Usage: fanspeed <percentage>"
                   return 1
               fi
-
               local speed="$1"
-
               asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f gpu
               asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
           }
       fi
     '';
-
-    #── 📜 History Settings ─────────────────#
-    history = {
-      size = 1000;
-      save = 1000;
-      path = "$HOME/.local/state/zsh/history";
-      ignoreDups = true;
-      expireDuplicatesFirst = true;
-      share = true;
-      extended = true;
-    };
 
     #── 🔗 Shell Aliases ──────────────────#
     shellAliases = {
@@ -84,7 +79,7 @@
       yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
       mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
 
-      #── 📝 Text Editor Aliases ───────────#
+      #── 📝 Config Editing ────────────────#
       aliases = "nvim $HOME/dotfiles/.config/zsh/aliases";
       agscfg = "nvim $HOME/dotfiles/.config/ags/config.js";
       swaycfg = "nvim $HOME/dotfiles/.config/sway/*";
@@ -101,35 +96,31 @@
       zshistory = "nvim $XDG_CONFIG_HOME/zsh/.zsh_history";
       gitignore = "nvim $HOME/.gitignore";
 
-      #── 🔄 System Maintenance ────────────#
+      #── 🔄 System Management ─────────────#
       dotlink = "$HOME/dotfiles/scripts/dotlink.sh";
       dotsync = "$HOME/dotfiles/scripts/dotsync.sh";
       dotpush = "$HOME/dotfiles/scripts/dotsync.sh push";
-
-      #── 🎵 Music Tools ──────────────────#
-      ytm4a = "$HOME/scripts/ytm4a.sh";
-      spotm4a = "$HOME/scripts/spotm4a.py";
-
-      #── 📦 Package Management ───────────#
       pkgs = "paru -Qq | grep";
       orphans = "pacman -Qttdq";
       pacfix = "sudo rm /var/lib/pacman/db.lck";
       filecheck = "paru -Qkk 2>&1 | grep -v \"0 altered files\"";
-
-      #── 🛠️ Utility Aliases ─────────────#
       userctl = "systemctl --user";
+      hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
+
+      #── 🎵 Media & Tools ─────────────────#
+      ytm4a = "$HOME/scripts/ytm4a.sh";
+      spotm4a = "$HOME/scripts/spotm4a.py";
+      compressvid = "~/dotfiles/scripts/compressvid.sh";
       ooba = "/home/y0usaf/text-generation-webui/start_linux.sh";
       "nvidia-settings" = "nvidia-settings --config=\"$XDG_CONFIG_HOME\"/nvidia/settings";
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
 
-      #── 📁 Directory Listing ───────────#
+      #── 📁 Directory & Search ───────────#
       "l." = "lsd -A | grep -E \"^\\.\"";
       la = "lsd -A --color=always --group-dirs=first --icon=always";
       ll = "lsd -l --color=always --group-dirs=first --icon=always";
       ls = "lsd -lA --color=always --group-dirs=first --icon=always";
       lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
-
-      #── 🔍 Search Tools ───────────────#
       grep = "grep --color=auto";
       dir = "dir --color=auto";
       egrep = "grep -E --color=auto";
@@ -138,10 +129,6 @@
       #── 🌐 Network Tools ──────────────#
       tailup = "sudo tailscale up";
       taildown = "sudo tailscale down";
-
-      #── 🎥 Media Tools ───────────────#
-      compressvid = "~/dotfiles/scripts/compressvid.sh";
-      hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
     };
   };
 }

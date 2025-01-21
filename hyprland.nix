@@ -29,16 +29,20 @@
         inputs.hy3.packages.${pkgs.system}.hy3
       ];
 
-      # Core Configuration
-      extraConfig = ''
-        # Monitor Configuration
-        monitor=DP-4,5120x1440@239.76,0x0,1
-        monitor=DP-2,5120x1440@239.76,0x0,1
-        monitor=HDMI-A-2,5120x1440@239.76,0x0,11
-      '';
-
       settings = {
-        # Variable Definitions
+        # Display Configuration
+        monitor = [
+          "DP-4,5120x1440@239.76,0x0,1"
+          "DP-2,5120x1440@239.76,0x0,1"
+          "HDMI-A-2,5120x1440@239.76,0x0,1"
+        ];
+
+        # Color Definitions
+        "$active_colour" = "ffffffff";
+        "$transparent" = "00000000";
+        "$inactive_colour" = "333333ff";
+
+        # Core Variables
         "$mod" = "SUPER";
         "$mod2" = "ALT";
         "$term" = globals.defaultTerminal;
@@ -46,13 +50,10 @@
         "$browser" = globals.defaultBrowser;
         "$discord" = globals.defaultDiscord;
         "$launcher" = globals.defaultLauncher;
-        "$active_colour" = "ffffffff";
-        "$transparent" = "00000000";
-        "$inactive_colour" = "333333ff";
         "$ide" = globals.defaultIde;
         "$obs" = "obs";
 
-        #── 🔧 Core Settings ──────────────────────#
+        # Core Settings
         general = {
           gaps_in = 10;
           gaps_out = 5;
@@ -62,7 +63,7 @@
           layout = "hy3";
         };
 
-        #── ⌨️ Input/Output ───────────────────────#
+        # Input Settings
         input = {
           kb_layout = "us";
           follow_mouse = 1;

@@ -46,40 +46,34 @@
   systemd.user.services.nixos-git-sync = {
     Unit = {
       Description = "Sync NixOS config changes after successful build";
-      After = ["home-manager-switch.service" "nixos-rebuild.service"];
-      Wants = ["home-manager-switch.service" "nixos-rebuild.service"];
-      Requires = ["ssh-agent.service"];
     };
     Service = {
       Type = "oneshot";
-      RemainAfterExit = true;
+      RemainAfterExit = false;
       Environment = [
         "PATH=${lib.makeBinPath [pkgs.git pkgs.coreutils pkgs.openssh]}"
         "SSH_AUTH_SOCK=%t/ssh-agent"
       ];
       ExecStart = pkgs.writeShellScript "nixos-git-sync" ''
-        # Exit if neither service succeeded
-        if ! (systemctl --user is-active --quiet home-manager-switch.service || systemctl is-active --quiet nixos-rebuild.service); then
-          echo "Neither home-manager switch nor nixos-rebuild succeeded, skipping git sync"
-          exit 0
-        fi
+        # Add debug logging
+        set -x
 
-        # Ensure SSH agent has our key
-        if ! ssh-add -l | grep -q "${globals.homeDirectory}/Tokens/id_rsa_y0usaf"; then
-          ssh-add "${globals.homeDirectory}/Tokens/id_rsa_y0usaf"
-        fi
+        # Sleep briefly to ensure all files are written
+        sleep 2
 
         cd ${globals.homeDirectory}/nixos
         # Check if there are any changes, including untracked files
         if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then
           git add .
-          git commit -m "auto: system update $(date '+%Y-%m-%d %H:%M:%S')"
+          git commit -m "auto: system update $(date '+%d/%m/%y@%H:%M:%S')"
           git push origin main --force
+        else
+          echo "No changes to commit"
         fi
       '';
     };
     Install = {
-      WantedBy = ["home-manager-switch.service" "nixos-rebuild.service"];
+      WantedBy = ["default.target"];
     };
   };
 }
