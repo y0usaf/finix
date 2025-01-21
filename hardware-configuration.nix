@@ -42,7 +42,7 @@
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
     fsType = "btrfs";
-    options = ["subvol=@nixos"];
+    options = ["subvol=@"];
   };
 
   #── 🏠 Home Directory ──────────────────#
@@ -88,7 +88,18 @@
   };
 
   #── 💾 Swap Configuration ──────────────#
-  swapDevices = [];
+  fileSystems."/swap" = {
+    device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+    fsType = "btrfs";
+    options = ["subvol=@swap" "nodatacow"];
+  };
+
+  swapDevices = [
+    {
+      device = "/swap/swapfile";
+      size = 32768; # Size in MB (32GB)
+    }
+  ];
 
   #── 🌐 Network Configuration ───────────#
   networking.useDHCP = lib.mkDefault true;
