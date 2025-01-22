@@ -24,8 +24,6 @@ in {
   enableHyprland = true; # Enable/disable Hyprland
   enableAgs = true; # Enable/disable AGS
   enableWayland = true; # Enable/disable Wayland support
-
-  # Hardware Settings
   enableNvidia = true;
 
   # Common Paths
