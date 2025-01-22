@@ -1,5 +1,5 @@
 #─────────────────────── 🌍 ENVIRONMENT CONFIG ────────────────────────#
-# 🔧 System and User Environment Variables Configuration              #
+# ⚙️ System and User Environment Variables Configuration              #
 #──────────────────────────────────────────────────────────────────────#
 {
   config,
@@ -8,9 +8,9 @@
   globals,
   ...
 }: {
-  #── 🔧 System-wide Environment Setup ─────────────────────────────────#
+  #── ⚙️ System-wide Environment Setup ─────────────────────────────────#
   environment.sessionVariables = {
-    # 🪟 Wayland Display Server Configuration
+    # 🖥️ Wayland Display Server Configuration
     WLR_NO_HARDWARE_CURSORS = "1";
     NIXOS_OZONE_WL = "1";
     QT_QPA_PLATFORM = "wayland";
@@ -19,15 +19,14 @@
     XDG_SESSION_DESKTOP = "Hyprland";
     XDG_SESSION_TYPE = "wayland";
 
-    #── 📱 Android Container Configuration ───────────────────────────#
-    WAYDROID_EXTRA_ARGS = "--wayland --nvidia";
-    WAYDROID_LOG_LEVEL = "debug";
+    # 🎮 NVIDIA Graphics Configuration
+    "__EGL_VENDOR_LIBRARY_FILENAMES" = "${config.hardware.nvidia.package}/share/glvnd/egl_vendor.d/10_nvidia.json";
   };
 
   #── 🏠 User Environment Configuration ─────────────────────────────────#
   home-manager.users.${globals.username} = {
     home = {
-      #── 🌐 User Session Environment ─────────────────────────────────#
+      #── ⚡ User Session Environment ─────────────────────────────────#
       sessionVariables = {
         #── 🌐 Browser & Display Protocol Settings ──────────────────#
         MOZ_ENABLE_WAYLAND = "1";
@@ -37,7 +36,7 @@
         NPM_CONFIG_TMP = "$XDG_RUNTIME_DIR/npm";
       };
 
-      #── 📁 Binary & Executable Paths ─────────────────────────────#
+      #── ⚡ Binary & Executable Paths ─────────────────────────────#
       sessionPath = [
         "$(npm root -g)/.bin"
         "$HOME/.local/bin"
@@ -45,7 +44,7 @@
       ];
     };
 
-    #── 🪟 Hyprland Compositor Settings ───────────────────────────────#
+    #── ⚡ Hyprland Compositor Settings ───────────────────────────────#
     wayland.windowManager.hyprland.settings = {
       env = [
         "LIBVA_DRIVER_NAME,nvidia"

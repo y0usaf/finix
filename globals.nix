@@ -20,6 +20,9 @@ in {
   stateVersion = "24.11";
   timezone = "America/Toronto";
 
+  # Hardware Settings
+  hasNvidia = true;
+
   # Common Paths
   musicDir = "$HOME/Music";
   dcimDir = "$HOME/DCIM";
