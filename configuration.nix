@@ -62,7 +62,6 @@
       };
     };
     kernelPackages = pkgs.linuxPackages_latest;
-    kernelParams = ["sched_ext"];
     kernelModules = [
       "kvm-amd"
       "k10temp" # AMD CPU temperature
