@@ -24,20 +24,6 @@
     ./cachix.nix
   ];
 
-  options.scx = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enables the scx service and configuration.";
-    };
-
-    scheduler = lib.mkOption {
-      type = lib.types.str;
-      default = "scx_lavd";
-      description = "Change the scheduler used by scx.";
-    };
-  };
-
   config = {
     #── 🔧 Core System Settings ─────────────────#
     system.stateVersion = globals.stateVersion;
@@ -112,9 +98,9 @@
       };
 
       #── ⚙️ SCX Service Configuration ──────────#
-      scx = lib.mkIf config.scx.enable {
+      scx = {
         enable = true;
-        scheduler = config.scx.scheduler;
+        scheduler = "scx_lavd";
         package = pkgs.scx.rustscheds;
       };
 
