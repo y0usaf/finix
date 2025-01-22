@@ -26,7 +26,7 @@ in {
   enableWayland = true; # Enable/disable Wayland support
 
   # Hardware Settings
-  gpuType = "nvidia";
+  enableNvidia = true;
 
   # Common Paths
   musicDir = "$HOME/Music";

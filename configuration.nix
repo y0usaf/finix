@@ -72,7 +72,7 @@
 
   #── 🎮 Graphics & Display ─────────────────#
   hardware = {
-    nvidia = lib.mkIf (globals.gpuType == "nvidia") {
+    nvidia = lib.mkIf globals.enableNvidia {
       modesetting.enable = true;
       powerManagement.enable = true;
       open = false;
@@ -86,7 +86,7 @@
     i2c.enable = true;
   };
 
-  services.xserver.videoDrivers = lib.mkIf (globals.gpuType == "nvidia") ["nvidia"];
+  services.xserver.videoDrivers = lib.mkIf globals.enableNvidia ["nvidia"];
 
   #── 🔊 Audio Configuration ────────────────#
   security.rtkit.enable = true;

@@ -49,7 +49,7 @@
 
     #── ⚡ Hyprland Compositor Settings ───────────────────────────────#
     wayland.windowManager.hyprland.settings = {
-      env = lib.mkIf (globals.gpuType == "nvidia") [
+      env = lib.mkIf globals.enableNvidia [
         "LIBVA_DRIVER_NAME,nvidia"
         "GBM_BACKEND,nvidia-drm"
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"
