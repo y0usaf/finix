@@ -24,7 +24,6 @@
     ./cachix.nix
   ];
 
-  # SCX Module definition
   options.scx = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -39,14 +38,14 @@
     };
   };
 
-  # Configuration
   config = {
+    #── 🔧 Core System Settings ─────────────────#
     system.stateVersion = globals.stateVersion;
     time.timeZone = globals.timezone;
     networking.hostName = globals.hostname;
-
     nixpkgs.config.allowUnfree = true;
 
+    #── 📦 Nix Package Management ──────────────#
     nix = {
       package = pkgs.nixVersions.stable;
       settings = {
@@ -64,6 +63,7 @@
       '';
     };
 
+    #── 🛠️ Hardware & Boot Configuration ───────#
     boot = {
       loader = {
         systemd-boot = {
@@ -78,12 +78,11 @@
       kernelPackages = pkgs.linuxPackages_latest;
       kernelModules = [
         "kvm-amd"
-        "k10temp" # AMD CPU temperature
-        "nct6775" # Motherboard sensors
+        "k10temp"
+        "nct6775"
       ];
     };
 
-    #── 🎮 Graphics & Display ─────────────────#
     hardware = {
       nvidia = lib.mkIf globals.enableNvidia {
         modesetting.enable = true;
@@ -99,21 +98,32 @@
       i2c.enable = true;
     };
 
-    services.xserver.videoDrivers = lib.mkIf globals.enableNvidia ["nvidia"];
+    services = {
+      xserver.videoDrivers = lib.mkIf globals.enableNvidia ["nvidia"];
 
-    #── 🔊 Audio Configuration ────────────────#
-    security.rtkit.enable = true;
-    services.pipewire = {
-      enable = true;
-      alsa = {
+      #── 🔊 Audio Configuration ────────────────#
+      pipewire = {
         enable = true;
-        support32Bit = true;
+        alsa = {
+          enable = true;
+          support32Bit = true;
+        };
+        pulse.enable = true;
       };
-      pulse.enable = true;
+
+      #── ⚙️ SCX Service Configuration ──────────#
+      scx = lib.mkIf config.scx.enable {
+        enable = true;
+        scheduler = config.scx.scheduler;
+        package = pkgs.scx.rustscheds;
+      };
+
+      dbus.packages = [pkgs.dconf];
     };
 
     #── 🔒 Security & Permissions ────────────#
     security = {
+      rtkit.enable = true;
       polkit = {
         enable = true;
         extraConfig = ''
@@ -175,7 +185,6 @@
         python3
       ];
 
-      # Sensor configuration
       etc."sensors.d/nvidia.conf".text = ''
         chip "nvidia-*"
           label temp1 "GPU Temperature"
@@ -211,8 +220,6 @@
       dconf.enable = true;
     };
 
-    services.dbus.packages = [pkgs.dconf];
-
     #── 🔌 Device Rules ────────────────────#
     services.udev.extraRules = ''
       # Vial rules for non-root access to keyboards
@@ -223,12 +230,5 @@
     #── 🌐 Network & Virtualization ─────────#
     networking.networkmanager.enable = true;
     virtualisation.lxd.enable = true;
-
-    #── 📦 SCX Configuration ────────────────#
-    services.scx = lib.mkIf config.scx.enable {
-      enable = true;
-      scheduler = config.scx.scheduler;
-      package = pkgs.scx.rustscheds;
-    };
   };
 }
