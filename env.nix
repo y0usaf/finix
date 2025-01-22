@@ -1,5 +1,5 @@
 #─────────────────────── 🌍 ENVIRONMENT CONFIG ────────────────────────#
-# ⚠️  Root access required | System rebuild needed for changes        #
+# 🔧 System and User Environment Variables Configuration              #
 #──────────────────────────────────────────────────────────────────────#
 {
   config,
@@ -8,8 +8,9 @@
   globals,
   ...
 }: {
-  #── 🔧 System Variables ──────────────────#
+  #── 🔧 System-wide Environment Setup ─────────────────────────────────#
   environment.sessionVariables = {
+    # 🪟 Wayland Display Server Configuration
     WLR_NO_HARDWARE_CURSORS = "1";
     NIXOS_OZONE_WL = "1";
     QT_QPA_PLATFORM = "wayland";
@@ -18,25 +19,25 @@
     XDG_SESSION_DESKTOP = "Hyprland";
     XDG_SESSION_TYPE = "wayland";
 
-    #── 📱 Waydroid Settings ──────────────#
+    #── 📱 Android Container Configuration ───────────────────────────#
     WAYDROID_EXTRA_ARGS = "--wayland --nvidia";
     WAYDROID_LOG_LEVEL = "debug";
   };
 
-  #── 🏠 Home Manager Config ──────────────#
+  #── 🏠 User Environment Configuration ─────────────────────────────────#
   home-manager.users.${globals.username} = {
     home = {
-      #── 🌐 Session Variables ────────────#
+      #── 🌐 User Session Environment ─────────────────────────────────#
       sessionVariables = {
-        #── 🪟 Wayland Settings ──────────#
+        #── 🌐 Browser & Display Protocol Settings ──────────────────#
         MOZ_ENABLE_WAYLAND = "1";
         LIBSEAT_BACKEND = "logind";
 
-        #── ⚡ Runtime Settings ──────────#
+        #── 📦 Package Management Settings ──────────────────────────#
         NPM_CONFIG_TMP = "$XDG_RUNTIME_DIR/npm";
       };
 
-      #── 📁 Path Configuration ──────────#
+      #── 📁 Binary & Executable Paths ─────────────────────────────#
       sessionPath = [
         "$(npm root -g)/.bin"
         "$HOME/.local/bin"
@@ -44,7 +45,7 @@
       ];
     };
 
-    #── 🪟 Hyprland Settings ─────────────#
+    #── 🪟 Hyprland Compositor Settings ───────────────────────────────#
     wayland.windowManager.hyprland.settings = {
       env = [
         "LIBVA_DRIVER_NAME,nvidia"
@@ -53,9 +54,9 @@
       ];
     };
 
-    #── 🔑 Token Management ──────────────#
+    #── 🔐 Secure Token Management ──────────────────────────────────#
     home.sessionVariables.envExtra = ''
-      # Export tokens
+      # 🔑 Auto-load tokens from files
       if [ -d "$HOME/Tokens" ]; then
         for f in "$HOME/Tokens"/*.txt; do
           [ -f "$f" ] && export "$(basename "$f" .txt)"="$(cat "$f")"
