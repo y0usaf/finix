@@ -54,11 +54,11 @@
     loader = {
       systemd-boot = {
         enable = true;
-        configurationLimit = 20; # Limit the number of configurations kept
+        configurationLimit = 20;
       };
       efi = {
         canTouchEfiVariables = true;
-        efiSysMountPoint = "/boot"; # Explicitly set EFI mount point
+        efiSysMountPoint = "/boot";
       };
     };
     kernelPackages = pkgs.linuxPackages_latest;
