@@ -4,8 +4,9 @@
   lib,
   globals,
   ...
-}: {
-  # Install AGS
+}:
+lib.mkIf globals.enableAgs {
+  # Install AGS and related packages
   home.packages = with pkgs; [
     ags
   ];

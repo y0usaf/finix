@@ -9,7 +9,7 @@
   globals,
   ...
 }: {
-  imports = [
+  imports = lib.optionals globals.enableHyprland [
     inputs.hyprland.homeManagerModules.default
   ];
 
@@ -19,7 +19,7 @@
     description = "Enables xdph and its configs.";
   };
 
-  config = {
+  config = lib.mkIf globals.enableHyprland {
     wayland.windowManager.hyprland = {
       enable = true;
       systemd.enable = true;

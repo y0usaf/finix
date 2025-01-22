@@ -18,58 +18,61 @@
   };
 
   #── 📦 User Packages ───────────────────────#
-  home.packages = with pkgs; [
-    #── 🎨 Development Tools ─────────────────#
-    neovim
-    cmake
-    meson
-    bottom
-    code-cursor
-    alejandra
-    cpio
-    pkg-config
-    ninja
-    gcc
+  home.packages = with pkgs;
+    [
+      #── 🎨 Development Tools ─────────────────#
+      neovim
+      cmake
+      meson
+      bottom
+      code-cursor
+      alejandra
+      cpio
+      pkg-config
+      ninja
+      gcc
 
-    #── 🌐 Web Applications ─────────────────#
-    firefox
-    vesktop
-    discord-canary
+      #── 🌐 Web Applications ─────────────────#
+      firefox
+      vesktop
+      discord-canary
 
-    #── 🔧 Terminal and System Utilities ────#
-    foot
-    pavucontrol
-    nitch
-    microfetch
-    sway-launcher-desktop
-    pcmanfm
-    syncthing
-    lsd
-    vial
-    waybar
-    p7zip
+      #── 🔧 Terminal and System Utilities ────#
+      foot
+      pavucontrol
+      nitch
+      microfetch
+      sway-launcher-desktop
+      pcmanfm
+      syncthing
+      lsd
+      vial
+      waybar
+      p7zip
 
-    #── 🎮 Gaming ────────────────────────────#
-    steam
-    protonup-qt
-    gamemode
-    protontricks
-    prismlauncher
+      #── 🎮 Gaming ────────────────────────────#
+      steam
+      protonup-qt
+      gamemode
+      protontricks
+      prismlauncher
 
-    #── 📺 Media and Streaming ──────────────#
-    imv
-    mpv
-    vlc
-    stremio
-    ffmpeg
-    cmus
-
-    #── 🖥️ Wayland Utilities ───────────────#
-    grim
-    slurp
-    wl-clipboard
-    nwg-wrapper
-  ];
+      #── 📺 Media and Streaming ──────────────#
+      imv
+      mpv
+      vlc
+      stremio
+      ffmpeg
+      cmus
+    ]
+    ++ lib.optionals globals.enableWayland [
+      #── 🖥️ Wayland Utilities ───────────────#
+      grim
+      slurp
+      wl-clipboard
+      nwg-wrapper
+      hyprpicker
+    ];
 
   #── 🔧 Program Configurations ────────────#
   imports =
