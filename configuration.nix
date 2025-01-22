@@ -52,8 +52,14 @@
   #── 🛠️ Hardware Configuration ────────────#
   boot = {
     loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
+      systemd-boot = {
+        enable = true;
+        configurationLimit = 20; # Limit the number of configurations kept
+      };
+      efi = {
+        canTouchEfiVariables = true;
+        efiSysMountPoint = "/boot"; # Explicitly set EFI mount point
+      };
     };
     kernelPackages = pkgs.linuxPackages_latest;
     kernelModules = [
