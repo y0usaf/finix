@@ -173,14 +173,14 @@
   };
 
   #── 🚀 Services & Programs ───────────────#
-  xdg.portal = {
+  xdg.portal = lib.mkIf globals.enableWayland {
     enable = true;
     wlr.enable = false;
-    extraPortals = [
+    extraPortals = lib.optionals globals.enableHyprland [
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
     ];
-    config = {
+    config = lib.mkIf globals.enableHyprland {
       common.default = ["hyprland"];
       hyprland = {
         default = ["hyprland"];

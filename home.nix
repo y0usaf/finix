@@ -72,18 +72,23 @@
   ];
 
   #── 🔧 Program Configurations ────────────#
-  imports = [
-    ./hyprland.nix
-    ./zsh.nix
-    ./ssh.nix
-    ./git.nix
-    ./xdg.nix
-    ./fonts.nix
-    ./foot.nix
-    ./gtk.nix
-    ./cursor.nix
-    ./ags.nix
-  ];
+  imports =
+    [
+      ./zsh.nix
+      ./ssh.nix
+      ./git.nix
+      ./xdg.nix
+      ./fonts.nix
+      ./foot.nix
+      ./gtk.nix
+      ./cursor.nix
+    ]
+    ++ lib.optionals globals.enableHyprland [
+      ./hyprland.nix
+    ]
+    ++ lib.optionals globals.enableAgs [
+      ./ags.nix
+    ];
 
   #── 🎥 OBS Studio ────────────────────────#
   programs.obs-studio = {

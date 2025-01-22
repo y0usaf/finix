@@ -9,21 +9,22 @@
   ...
 }: {
   #── ⚙️ System-wide Environment Setup ─────────────────────────────────#
-  environment.sessionVariables = {
-    # 🖥️ Wayland Display Server Configuration
-    WLR_NO_HARDWARE_CURSORS = "1";
-    NIXOS_OZONE_WL = "1";
-    QT_QPA_PLATFORM = "wayland";
-    ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-    XDG_CURRENT_DESKTOP = "Hyprland";
-    XDG_SESSION_DESKTOP = "Hyprland";
-    XDG_SESSION_TYPE = "wayland";
-
-    # 🎮 NVIDIA Graphics Configuration
-    "__EGL_VENDOR_LIBRARY_FILENAMES" =
-      lib.mkIf (globals.gpuType == "nvidia")
-      "${config.hardware.nvidia.package}/share/glvnd/egl_vendor.d/10_nvidia.json";
-  };
+  environment.sessionVariables = lib.mkMerge [
+    {
+      # Non-Wayland variables here
+    }
+    (lib.mkIf globals.enableWayland {
+      WLR_NO_HARDWARE_CURSORS = "1";
+      NIXOS_OZONE_WL = "1";
+      QT_QPA_PLATFORM = "wayland";
+      ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+      XDG_SESSION_TYPE = "wayland";
+    })
+    (lib.mkIf globals.enableHyprland {
+      XDG_CURRENT_DESKTOP = "Hyprland";
+      XDG_SESSION_DESKTOP = "Hyprland";
+    })
+  ];
 
   #── 🏠 User Environment Configuration ─────────────────────────────────#
   home-manager.users.${globals.username} = {

@@ -34,10 +34,10 @@
       case "$(hostname)" in
         "y0usaf-desktop")
           sudo nvidia-smi -pl 150
-          Hyprland
+          ${lib.optionalString globals.enableHyprland "Hyprland"}
           ;;
         "y0usaf-laptop")
-          Hyprland
+          ${lib.optionalString globals.enableHyprland "Hyprland"}
           ;;
       esac
     '';
