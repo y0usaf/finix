@@ -65,7 +65,7 @@
         # Check if there are any changes, including untracked files
         if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then
           git add .
-          git commit -m "auto: system update $(date '+%d/%m/%y@%H:%M:%S')"
+          git commit -m "🤖 Auto Update: $(date '+%d/%m/%y@%H:%M:%S')"
           git push origin main --force
         else
           echo "No changes to commit"
