@@ -62,10 +62,14 @@
       };
     };
     kernelPackages = pkgs.linuxPackages_latest;
+    kernelParams = [
+      "sched_ext"
+    ];
     kernelModules = [
       "kvm-amd"
       "k10temp" # AMD CPU temperature
       "nct6775" # Motherboard sensors
+      "sched_ext"
     ];
     extraModulePackages = [];
   };
@@ -153,6 +157,7 @@
       lm_sensors
       yt-dlp-light
       bash
+      pkgs.scx.full
       # Python with packages
       (python3.withPackages (ps:
         with ps; [
@@ -211,5 +216,8 @@
   networking.networkmanager.enable = true;
   virtualisation.lxd.enable = true;
 
-  services.scx.enable = true; # This enables the scx_rustland scheduler by default
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
 }
