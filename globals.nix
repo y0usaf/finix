@@ -21,9 +21,9 @@ in {
   timezone = "America/Toronto";
 
   # Feature Flags
-  enableHyprland = false; # Enable/disable Hyprland
-  enableAgs = false; # Enable/disable AGS
-  enableWayland = false; # Enable/disable Wayland support
+  enableHyprland = true; # Enable/disable Hyprland
+  enableAgs = true; # Enable/disable AGS
+  enableWayland = true; # Enable/disable Wayland support
 
   # Hardware Settings
   gpuType = "nvidia";
