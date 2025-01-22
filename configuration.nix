@@ -62,16 +62,11 @@
       };
     };
     kernelPackages = pkgs.linuxPackages_latest;
-    kernelParams = [
-      "sched_ext"
-    ];
     kernelModules = [
       "kvm-amd"
       "k10temp" # AMD CPU temperature
       "nct6775" # Motherboard sensors
-      "sched_ext"
     ];
-    extraModulePackages = [];
   };
 
   #── 🎮 Graphics & Display ─────────────────#
@@ -157,7 +152,6 @@
       lm_sensors
       yt-dlp-light
       bash
-      pkgs.scx.full
       # Python with packages
       (python3.withPackages (ps:
         with ps; [
@@ -215,9 +209,4 @@
   #── 🌐 Network & Virtualization ─────────#
   networking.networkmanager.enable = true;
   virtualisation.lxd.enable = true;
-
-  services.scx = {
-    enable = true;
-    scheduler = "scx_lavd";
-  };
 }
