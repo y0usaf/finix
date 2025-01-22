@@ -68,6 +68,15 @@
               asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
           }
       fi
+
+      # Temporarily add a Nix package to shell
+      temppkg() {
+        if [ -z "$1" ]; then
+          echo "Usage: temppkg package_name"
+          return 1
+        fi
+        nix-shell -p "$1" --run "exec $SHELL"
+      }
     '';
 
     #── 🔗 Shell Aliases ──────────────────#
