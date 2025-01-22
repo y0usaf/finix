@@ -61,7 +61,7 @@
         efiSysMountPoint = "/boot";
       };
     };
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_cachyos;
     kernelModules = [
       "kvm-amd"
       "k10temp" # AMD CPU temperature
@@ -210,4 +210,6 @@
   #── 🌐 Network & Virtualization ─────────#
   networking.networkmanager.enable = true;
   virtualisation.lxd.enable = true;
+
+  services.scx.enable = true; # This enables the scx_rustland scheduler by default
 }

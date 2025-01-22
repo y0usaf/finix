@@ -39,6 +39,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
   };
 
   outputs = {
@@ -49,6 +50,7 @@
     hyprland,
     alejandra,
     hy3,
+    chaotic,
     ...
   } @ inputs: let
     system = "x86_64-linux";
@@ -95,6 +97,7 @@
             backupFileExtension = "backup";
           };
         }
+        chaotic.nixosModules.default
       ];
     };
   };
