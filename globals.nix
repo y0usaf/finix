@@ -21,7 +21,7 @@ in {
   timezone = "America/Toronto";
 
   # Hardware Settings
-  hasNvidia = true;
+  gpuType = "nvidia";
 
   # Common Paths
   musicDir = "$HOME/Music";

@@ -102,8 +102,8 @@
     SSB_HOME = "${config.xdg.dataHome}/zoom";
 
     # NVIDIA
-    CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
-    __GL_SHADER_DISK_CACHE_PATH = "${config.xdg.cacheHome}/nv";
+    CUDA_CACHE_PATH = lib.mkIf (globals.gpuType == "nvidia") "${config.xdg.cacheHome}/nv";
+    __GL_SHADER_DISK_CACHE_PATH = lib.mkIf (globals.gpuType == "nvidia") "${config.xdg.cacheHome}/nv";
   };
 
   # Ensure required directories exist

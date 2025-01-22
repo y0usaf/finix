@@ -20,7 +20,9 @@
     XDG_SESSION_TYPE = "wayland";
 
     # 🎮 NVIDIA Graphics Configuration
-    "__EGL_VENDOR_LIBRARY_FILENAMES" = "${config.hardware.nvidia.package}/share/glvnd/egl_vendor.d/10_nvidia.json";
+    "__EGL_VENDOR_LIBRARY_FILENAMES" =
+      lib.mkIf (globals.gpuType == "nvidia")
+      "${config.hardware.nvidia.package}/share/glvnd/egl_vendor.d/10_nvidia.json";
   };
 
   #── 🏠 User Environment Configuration ─────────────────────────────────#
@@ -46,7 +48,7 @@
 
     #── ⚡ Hyprland Compositor Settings ───────────────────────────────#
     wayland.windowManager.hyprland.settings = {
-      env = [
+      env = lib.mkIf (globals.gpuType == "nvidia") [
         "LIBVA_DRIVER_NAME,nvidia"
         "GBM_BACKEND,nvidia-drm"
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"
