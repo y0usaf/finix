@@ -32,8 +32,6 @@ lib.mkIf globals.enableAgs {
           ...systemStatsConfig.globals,
           ...workspacesConfig.globals,
       });
-
-      export default {};
     '';
 
     "ags/style.css".text = ''
