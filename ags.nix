@@ -19,13 +19,13 @@ lib.mkIf globals.enableAgs {
       import { workspacesConfig } from './workspaces.js';
 
       // Configure the app using App.config()
-      const config = {
+      App.config({
           style: App.configDir + '/style.css',
           windows: [
               systemStatsConfig.window,
               workspacesConfig.window,
           ],
-      };
+      });
 
       // Export global functions from modules
       Object.assign(globalThis, {
@@ -33,7 +33,7 @@ lib.mkIf globals.enableAgs {
           ...workspacesConfig.globals,
       });
 
-      export default config;
+      export default {};
     '';
 
     "ags/style.css".text = ''
