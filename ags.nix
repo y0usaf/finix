@@ -20,7 +20,7 @@ lib.mkIf globals.enableAgs {
 
       // Configure the app using App.config()
       App.config({
-          style: `''${App.configDir}/system-stats.css, ''${App.configDir}/workspaces.css`,
+          style: App.configDir + '/style.css',
           windows: [
               systemStatsConfig.window,
               workspacesConfig.window,
@@ -34,7 +34,7 @@ lib.mkIf globals.enableAgs {
       });
     '';
 
-    "ags/system-stats.css".text = ''
+    "ags/style.css".text = ''
       /* System Stats Styles */
       .system-stats {
           font-family: monospace;
@@ -62,9 +62,7 @@ lib.mkIf globals.enableAgs {
       .stats-info {
           font-size: 24px;
       }
-    '';
 
-    "ags/workspaces.css".text = ''
       /* Workspaces Styles */
       .workspaces {
           background: none;
