@@ -37,78 +37,78 @@ lib.mkIf globals.enableAgs {
     "ags/system-stats-style.css".text = ''
       /* Reset all inherited styles */
       .system-stats * {
-          margin: 0 !important;
-          padding: 0 !important;
-          background: none !important;
-          border: none !important;
-          box-shadow: none !important;
-          text-shadow: none !important;
-          font-family: inherit !important;
-          font-size: inherit !important;
-          font-weight: inherit !important;
-          color: inherit !important;
+          margin: 0;
+          padding: 0;
+          background: none;
+          border: none;
+          box-shadow: none;
+          text-shadow: none;
+          font-family: inherit;
+          font-size: inherit;
+          font-weight: inherit;
+          color: inherit;
       }
 
       /* System Stats Styles */
       .system-stats {
-          font-family: monospace !important;
-          font-weight: bold !important;
-          color: #FFFFFF !important;
-          -webkit-text-stroke: 0.5em #000000 !important;
+          font-family: monospace;
+          font-weight: bold;
+          color: #FFFFFF;
+          -webkit-text-stroke: 0.5em #000000;
       }
 
       .system-stats label {
-          margin: 4px !important;
-          min-width: 100px !important;
+          margin: 4px;
+          min-width: 100px;
       }
 
       .stats-time {
-          font-size: 96px !important;
+          font-size: 96px;
       }
 
       .stats-info {
-          font-size: 24px !important;
+          font-size: 24px;
       }
     '';
 
     "ags/workspaces-style.css".text = ''
       /* Reset all inherited styles */
       .workspaces * {
-          margin: 0 !important;
-          padding: 0 !important;
-          background: none !important;
-          border: none !important;
-          box-shadow: none !important;
-          text-shadow: none !important;
-          font-family: inherit !important;
-          font-size: inherit !important;
-          font-weight: inherit !important;
-          color: inherit !important;
+          margin: 0;
+          padding: 0;
+          background: none;
+          border: none;
+          box-shadow: none;
+          text-shadow: none;
+          font-family: inherit;
+          font-size: inherit;
+          font-weight: inherit;
+          color: inherit;
       }
 
       /* Workspaces Styles */
       .workspaces {
-          background: none !important;
-          padding: 0 !important;
-          spacing: 0 !important;
+          background: none;
+          padding: 0;
+          spacing: 0;
       }
 
       .workspace-btn {
-          min-width: 16px !important;
-          min-height: 16px !important;
-          margin: 0 !important;
-          font-family: monospace !important;
-          font-weight: bold !important;
-          background: none !important;
-          border: none !important;
-          box-shadow: none !important;
-          padding: 0 !important;
-          color: #333333 !important;
-          -webkit-text-stroke: 0.5em #000000 !important;
+          min-width: 16px;
+          min-height: 16px;
+          margin: 0;
+          font-family: monospace;
+          font-weight: bold;
+          background: none;
+          border: none;
+          box-shadow: none;
+          padding: 0;
+          color: #333333;
+          -webkit-text-stroke: 0.5em #000000;
       }
 
       .workspace-btn.active {
-          color: #FFFFFF !important;
+          color: #FFFFFF;
       }
     '';
 
