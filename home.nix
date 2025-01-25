@@ -127,7 +127,7 @@
         dates = "weekly";
         extraArgs = "--keep-since 7d";
       };
-      flake = "/home/y0usaf/nixos#";
+      flake = "/home/y0usaf/nixos";
     };
 
     zsh = {
