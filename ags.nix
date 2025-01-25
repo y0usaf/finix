@@ -69,6 +69,7 @@ lib.mkIf globals.enableAgs {
       .workspaces {
           background: none;
           padding: 0;
+          spacing: 1px;
       }
 
       .workspace-btn {
