@@ -122,13 +122,12 @@
 
     nh = {
       enable = true;
-      package = pkgs.nh;
       clean = {
         enable = true;
         dates = "weekly";
         extraArgs = "--keep-since 7d";
       };
-      flake = globals.flakeDir;
+      flake = "/home/y0usaf/nixos#";
     };
 
     zsh = {
