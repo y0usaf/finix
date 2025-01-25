@@ -31,6 +31,21 @@
       pkg-config
       ninja
       gcc
+      git
+      vim
+      curl
+      wget
+      cachix
+      unzip
+      lm_sensors
+      yt-dlp-light
+      bash
+      # Single Python installation with required packages
+      (python3.withPackages (ps:
+        with ps; [
+          pip
+          setuptools
+        ]))
 
       #── 🌐 Web Applications ─────────────────#
       firefox
@@ -49,6 +64,7 @@
       vial
       waybar
       p7zip
+      dconf
 
       #── 🎮 Gaming ────────────────────────────#
       steam
@@ -104,10 +120,16 @@
   };
 
   #── 📦 Package Manager ──────────────────#
-  programs.nh = {
-    enable = true;
-    package = pkgs.nh;
+  programs = {
+    nh = {
+      enable = true;
+      package = pkgs.nh;
+    };
+    zsh.enable = true;
   };
+
+  # Enable dconf through home-manager
+  dconf.enable = true;
 
   #── 🔄 Systemd Services ─────────────────#
 

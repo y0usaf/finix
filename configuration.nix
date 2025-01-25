@@ -5,9 +5,6 @@
 # 📦 Package management
 # 🛠️ Hardware configuration
 # 🔒 Security settings
-# 👤 User environment
-# 🚀 Services & programs
-# 🌐 Network & virtualization
 #
 # ⚠️  Root access required | System rebuild needed for changes
 #===============================================================================
@@ -103,24 +100,20 @@
         scheduler = "scx_lavd";
         package = pkgs.scx.rustscheds;
       };
-
-      dbus.packages = [pkgs.dconf];
     };
 
     #── 🔒 Security & Permissions ────────────#
     security = {
       rtkit.enable = true;
-      polkit = {
-        enable = true;
-        extraConfig = ''
-          polkit.addRule(function(action, subject) {
-            if (action.id == "org.freedesktop.policykit.exec" &&
-                action.lookup("command_line").indexOf("nvidia-smi") >= 0) {
-                return polkit.Result.YES;
-            }
-          });
-        '';
-      };
+      polkit.enable = true;
+      polkit.extraConfig = ''
+        polkit.addRule(function(action, subject) {
+          if (action.id == "org.freedesktop.policykit.exec" &&
+              action.lookup("command_line").indexOf("nvidia-smi") >= 0) {
+              return polkit.Result.YES;
+          }
+        });
+      '';
       sudo.extraRules = [
         {
           users = [globals.username];
@@ -149,38 +142,11 @@
       ignoreShellProgramCheck = true;
     };
 
-    #── 📦 System Packages ──────────────────#
-    environment = {
-      systemPackages = with pkgs; [
-        # Basic utilities
-        git
-        vim
-        curl
-        wget
-        cachix
-        unzip
-        lm_sensors
-        yt-dlp-light
-        bash
-        # Python with packages
-        (python3.withPackages (ps:
-          with ps; [
-            pip
-            setuptools
-          ]))
-        python3
-      ];
+    #── 🌐 Network & Virtualization ─────────#
+    networking.networkmanager.enable = true;
+    virtualisation.lxd.enable = true;
 
-      etc."sensors.d/nvidia.conf".text = ''
-        chip "nvidia-*"
-          label temp1 "GPU Temperature"
-          label fan1 "GPU Fan Speed"
-          set temp1_max 95
-          set temp1_crit 105
-      '';
-    };
-
-    #── 🚀 Services & Programs ───────────────#
+    #── 🚀 Core Services ──────────────────#
     xdg.portal = lib.mkIf globals.enableWayland {
       enable = true;
       wlr.enable = false;
@@ -198,23 +164,10 @@
       };
     };
 
-    programs = {
-      zsh = {
-        enable = false;
-        enableGlobalCompInit = false;
-      };
-      dconf.enable = true;
-    };
-
-    #── 🔌 Device Rules ────────────────────#
     services.udev.extraRules = ''
       # Vial rules for non-root access to keyboards
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
-
-    #── 🌐 Network & Virtualization ─────────#
-    networking.networkmanager.enable = true;
-    virtualisation.lxd.enable = true;
   };
 }
