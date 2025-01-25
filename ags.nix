@@ -74,7 +74,7 @@ lib.mkIf globals.enableAgs {
       .workspace-btn {
           min-width: 16px;
           min-height: 24px;
-          margin: 0 1px;
+          margin: 0;
           font-family: monospace;
           font-weight: bold;
           background: none;
