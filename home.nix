@@ -157,6 +157,10 @@
           "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
         };
       };
+      xdgOpenUsePortal = true;
+      configPackages = lib.optionals globals.enableHyprland [
+        pkgs.xdg-desktop-portal-hyprland
+      ];
     };
   };
 
