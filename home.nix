@@ -122,7 +122,7 @@
 
     nh = {
       enable = true;
-      package = pkgs.nh;
+      flake = globals.flakeDir;
     };
 
     zsh = {
