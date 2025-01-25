@@ -40,14 +40,14 @@ lib.mkIf globals.enableAgs {
           font-family: monospace;
           font-weight: bold;
           color: #FFFFFF;
-          text-shadow: -0.25em -0.25em 0 #000000,
-                      0.25em -0.25em 0 #000000,
-                      -0.25em 0.25em 0 #000000,
-                      0.25em 0.05em 0 #000000,
-                      -0.25em 0 0 #000000,
-                      0.25em 0 0 #000000,
-                      0 -0.25em 0 #000000,
-                      0 0.25em 0 #000000;
+          text-shadow: -0.5em -0.5em 0 #000000,
+                      0.5em -0.5em 0 #000000,
+                      -0.5em 0.5em 0 #000000,
+                      0.5em 0.5em 0 #000000,
+                      -0.5em 0 0 #000000,
+                      0.5em 0 0 #000000,
+                      0 -0.5em 0 #000000,
+                      0 0.5em 0 #000000;
       }
 
       .system-stats label {
@@ -69,12 +69,12 @@ lib.mkIf globals.enableAgs {
       .workspaces {
           background: none;
           padding: 0;
-          spacing: 1px;
+          spacing: 0;
       }
 
       .workspace-btn {
           min-width: 16px;
-          min-height: 24px;
+          min-height: 16px;
           margin: 0;
           font-family: monospace;
           font-weight: bold;
@@ -83,14 +83,14 @@ lib.mkIf globals.enableAgs {
           box-shadow: none;
           padding: 0;
           color: #333333;
-          text-shadow: -0.25em -0.25em 0 #000000,
-                      0.25em -0.25em 0 #000000,
-                      -0.25em 0.25em 0 #000000,
-                      0.25em 0.25em 0 #000000,
-                      -0.25em 0 0 #000000,
-                      0.25em 0 0 #000000,
-                      0 -0.25em 0 #000000,
-                      0 0.25em 0 #000000;
+          text-shadow: -0.5em -0.5em 0 #000000,
+                      0.5em -0.5em 0 #000000,
+                      -0.5em 0.5em 0 #000000,
+                      0.5em 0.5em 0 #000000,
+                      -0.5em 0 0 #000000,
+                      0.5em 0 0 #000000,
+                      0 -0.5em 0 #000000,
+                      0 0.5em 0 #000000;
       }
 
       .workspace-btn.active {
