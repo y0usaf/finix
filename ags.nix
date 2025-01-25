@@ -35,12 +35,17 @@ lib.mkIf globals.enableAgs {
     '';
 
     "ags/system-stats-style.css".text = ''
+      /* Reset all inherited styles */
+      .system-stats * {
+          all: unset;
+      }
+
       /* System Stats Styles */
       .system-stats {
           font-family: monospace;
           font-weight: bold;
           color: #FF0000;
-          -webkit-text-stroke: 10px #000000;
+          -webkit-text-stroke: 1px #000000;
       }
 
       .system-stats label {
@@ -58,6 +63,11 @@ lib.mkIf globals.enableAgs {
     '';
 
     "ags/workspaces-style.css".text = ''
+      /* Reset all inherited styles */
+      .workspaces * {
+          all: unset;
+      }
+
       /* Workspaces Styles */
       .workspaces {
           background: none;
@@ -76,7 +86,7 @@ lib.mkIf globals.enableAgs {
           box-shadow: none;
           padding: 0;
           color: #333333;
-          -webkit-text-stroke: 20px #000000;
+          -webkit-text-stroke: 1px #000000;
       }
 
       .workspace-btn.active {
