@@ -123,6 +123,11 @@
     nh = {
       enable = true;
       flake = globals.flakeDir;
+      clean = {
+        enable = true;
+        dates = "weekly";
+        extraArgs = "--keep-since 7d";
+      };
     };
 
     zsh = {
