@@ -20,10 +20,7 @@ lib.mkIf globals.enableAgs {
 
       // Configure the app using App.config()
       App.config({
-          style: [
-              App.configDir + '/system-stats.css',
-              App.configDir + '/workspaces.css'
-          ],
+          style: App.configDir + '/system-stats.css, ' + App.configDir + '/workspaces.css',
           windows: [
               systemStatsConfig.window,
               workspacesConfig.window,
