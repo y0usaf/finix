@@ -37,60 +37,78 @@ lib.mkIf globals.enableAgs {
     "ags/system-stats-style.css".text = ''
       /* Reset all inherited styles */
       .system-stats * {
-          all: unset;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          text-shadow: none !important;
+          font-family: inherit !important;
+          font-size: inherit !important;
+          font-weight: inherit !important;
+          color: inherit !important;
       }
 
       /* System Stats Styles */
       .system-stats {
-          font-family: monospace;
-          font-weight: bold;
-          color: #FF0000;
-          -webkit-text-stroke: 1px #000000;
+          font-family: monospace !important;
+          font-weight: bold !important;
+          color: #FFFFFF !important;
+          -webkit-text-stroke: 0.5em #000000 !important;
       }
 
       .system-stats label {
-          margin: 4px;
-          min-width: 100px;
+          margin: 4px !important;
+          min-width: 100px !important;
       }
 
       .stats-time {
-          font-size: 96px;
+          font-size: 96px !important;
       }
 
       .stats-info {
-          font-size: 24px;
+          font-size: 24px !important;
       }
     '';
 
     "ags/workspaces-style.css".text = ''
       /* Reset all inherited styles */
       .workspaces * {
-          all: unset;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          text-shadow: none !important;
+          font-family: inherit !important;
+          font-size: inherit !important;
+          font-weight: inherit !important;
+          color: inherit !important;
       }
 
       /* Workspaces Styles */
       .workspaces {
-          background: none;
-          padding: 0;
-          spacing: 0;
+          background: none !important;
+          padding: 0 !important;
+          spacing: 0 !important;
       }
 
       .workspace-btn {
-          min-width: 16px;
-          min-height: 16px;
-          margin: 0;
-          font-family: monospace;
-          font-weight: bold;
-          background: none;
-          border: none;
-          box-shadow: none;
-          padding: 0;
-          color: #333333;
-          -webkit-text-stroke: 1px #000000;
+          min-width: 16px !important;
+          min-height: 16px !important;
+          margin: 0 !important;
+          font-family: monospace !important;
+          font-weight: bold !important;
+          background: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+          color: #333333 !important;
+          -webkit-text-stroke: 0.5em #000000 !important;
       }
 
       .workspace-btn.active {
-          color: #FF0000;
+          color: #FFFFFF !important;
       }
     '';
 
