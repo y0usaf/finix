@@ -27,6 +27,7 @@ in {
   enableNvidia = true;
 
   # Common Paths
+  flakeDir = "/home/${username}/nixos";
   musicDir = "$HOME/Music";
   dcimDir = "$HOME/DCIM";
   steamDir = "$HOME/.local/share/Steam";

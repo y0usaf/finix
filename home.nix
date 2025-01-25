@@ -129,6 +129,7 @@
         dates = "weekly";
         extraArgs = "--keep-since 7d";
       };
+      flake = globals.flakeDir;
     };
     zsh.enable = true;
   };
