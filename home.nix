@@ -142,24 +142,11 @@
 
   #── 🚀 XDG Portal Configuration ─────────#
   xdg = {
-    portal = lib.mkIf globals.enableWayland {
+    portal = {
       enable = true;
-      extraPortals = lib.optionals globals.enableHyprland [
-        pkgs.xdg-desktop-portal-hyprland
-        pkgs.xdg-desktop-portal-gtk
-      ];
-      config = lib.mkIf globals.enableHyprland {
-        common.default = ["hyprland"];
-        hyprland = {
-          default = ["hyprland"];
-          "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
-          "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
-        };
-      };
       xdgOpenUsePortal = true;
-      configPackages = lib.optionals globals.enableHyprland [
-        pkgs.xdg-desktop-portal-hyprland
-      ];
+      config.common.default = "hyprland";
+      extraPortals = with pkgs; [xdg-desktop-portal-gtk];
     };
   };
 
