@@ -23,7 +23,7 @@ lib.mkIf globals.enableAgs {
           style: [
               ''${App.configDir}/system-stats.css,
               ''${App.configDir}/workspaces.css
-          ].join(', '),
+          ].join(','),
           windows: [
               systemStatsConfig.window,
               workspacesConfig.window,
