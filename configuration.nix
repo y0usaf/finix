@@ -152,5 +152,17 @@
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
+
+    xdg.portal = lib.mkIf globals.enableHyprland {
+      enable = true;
+      xdgOpenUsePortal = true;
+      config.common.default = "hyprland";
+      configPackages = [
+        pkgs.xdg-desktop-portal-hyprland
+      ];
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-gtk
+      ];
+    };
   };
 }
