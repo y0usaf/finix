@@ -40,7 +40,7 @@ lib.mkIf globals.enableAgs {
           font-family: monospace;
           font-weight: bold;
           color: #FFFFFF;
-          -webkit-text-stroke: 1px #000000;
+          -webkit-text-stroke: 10px #000000;
       }
 
       .system-stats label {
@@ -76,7 +76,7 @@ lib.mkIf globals.enableAgs {
           box-shadow: none;
           padding: 0;
           color: #333333;
-          -webkit-text-stroke: 1px #000000;
+          -webkit-text-stroke: 20px #000000;
       }
 
       .workspace-btn.active {
