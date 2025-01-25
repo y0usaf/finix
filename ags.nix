@@ -17,11 +17,10 @@ lib.mkIf globals.enableAgs {
       import App from 'resource:///com/github/Aylur/ags/app.js';
       import { systemStatsConfig } from './system-stats.js';
       import { workspacesConfig } from './workspaces.js';
-      import './system-stats-style.css';
-      import './workspaces-style.css';
 
       // Configure the app using App.config()
       App.config({
+          style: `''${App.configDir}/system-stats-style.css`,
           windows: [
               systemStatsConfig.window,
               workspacesConfig.window,
