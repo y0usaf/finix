@@ -147,23 +147,6 @@
     virtualisation.lxd.enable = true;
 
     #── 🚀 Core Services ──────────────────#
-    xdg.portal = lib.mkIf globals.enableWayland {
-      enable = true;
-      wlr.enable = false;
-      extraPortals = lib.optionals globals.enableHyprland [
-        pkgs.xdg-desktop-portal-hyprland
-        pkgs.xdg-desktop-portal-gtk
-      ];
-      config = lib.mkIf globals.enableHyprland {
-        common.default = ["hyprland"];
-        hyprland = {
-          default = ["hyprland"];
-          "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
-          "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
-        };
-      };
-    };
-
     services.udev.extraRules = ''
       # Vial rules for non-root access to keyboards
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"

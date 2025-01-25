@@ -131,6 +131,23 @@
   # Enable dconf through home-manager
   dconf.enable = true;
 
+  #── 🚀 XDG Portal Configuration ─────────#
+  xdg.portal = lib.mkIf globals.enableWayland {
+    enable = true;
+    extraPortals = lib.optionals globals.enableHyprland [
+      pkgs.xdg-desktop-portal-hyprland
+      pkgs.xdg-desktop-portal-gtk
+    ];
+    config = lib.mkIf globals.enableHyprland {
+      common.default = ["hyprland"];
+      hyprland = {
+        default = ["hyprland"];
+        "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
+        "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
+      };
+    };
+  };
+
   #── 🔄 Systemd Services ─────────────────#
 
   #── ✨ Nix Format Service ───────────────#
