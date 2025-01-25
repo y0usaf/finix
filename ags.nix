@@ -17,10 +17,11 @@ lib.mkIf globals.enableAgs {
       import App from 'resource:///com/github/Aylur/ags/app.js';
       import { systemStatsConfig } from './system-stats.js';
       import { workspacesConfig } from './workspaces.js';
+      import './system-stats-style.css';
+      import './workspaces-style.css';
 
       // Configure the app using App.config()
       App.config({
-          style: App.configDir + '/style.css',
           windows: [
               systemStatsConfig.window,
               workspacesConfig.window,
@@ -34,7 +35,7 @@ lib.mkIf globals.enableAgs {
       });
     '';
 
-    "ags/style.css".text = ''
+    "ags/system-stats-style.css".text = ''
       /* System Stats Styles */
       .system-stats {
           font-family: monospace;
@@ -62,7 +63,9 @@ lib.mkIf globals.enableAgs {
       .stats-info {
           font-size: 24px;
       }
+    '';
 
+    "ags/workspaces-style.css".text = ''
       /* Workspaces Styles */
       .workspaces {
           background: none;
