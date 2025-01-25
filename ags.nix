@@ -40,14 +40,14 @@ lib.mkIf globals.enableAgs {
           font-family: monospace;
           font-weight: bold;
           color: #FFFFFF;
-          text-shadow: -1px -1px 0px #000000,
-                      1px -1px 0px #000000,
-                      -1px 1px 0px #000000,
-                      1px 1px 0px #000000,
-                      -1px 0px 0px #000000,
-                      1px 0px 0px #000000,
-                      0px -1px 0px #000000,
-                      0px 1px 0px #000000;
+          text-shadow: -0.25em -0.25em 0 #000000,
+                      0.25em -0.25em 0 #000000,
+                      -0.25em 0.25em 0 #000000,
+                      0.25em 0.05em 0 #000000,
+                      -0.25em 0 0 #000000,
+                      0.25em 0 0 #000000,
+                      0 -0.25em 0 #000000,
+                      0 0.25em 0 #000000;
       }
 
       .system-stats label {
@@ -83,14 +83,14 @@ lib.mkIf globals.enableAgs {
           box-shadow: none;
           padding: 0;
           color: #333333;
-          text-shadow: -1px -1px 0px #000000,
-                      1px -1px 0px #000000,
-                      -1px 1px 0px #000000,
-                      1px 1px 0px #000000,
-                      -1px 0px 0px #000000,
-                      1px 0px 0px #000000,
-                      0px -1px 0px #000000,
-                      0px 1px 0px #000000;
+          text-shadow: -0.25em -0.25em 0 #000000,
+                      0.25em -0.25em 0 #000000,
+                      -0.25em 0.25em 0 #000000,
+                      0.25em 0.25em 0 #000000,
+                      -0.25em 0 0 #000000,
+                      0.25em 0 0 #000000,
+                      0 -0.25em 0 #000000,
+                      0 0.25em 0 #000000;
       }
 
       .workspace-btn.active {
