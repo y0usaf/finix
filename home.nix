@@ -124,6 +124,11 @@
     nh = {
       enable = true;
       package = pkgs.nh;
+      clean = {
+        enable = true;
+        dates = "weekly";
+        extraArgs = "--keep-since 7d";
+      };
     };
     zsh.enable = true;
   };
