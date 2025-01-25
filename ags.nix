@@ -39,7 +39,7 @@ lib.mkIf globals.enableAgs {
       .system-stats {
           font-family: monospace;
           font-weight: bold;
-          color: #FFFFFF;
+          color: #FF0000;
           -webkit-text-stroke: 10px #000000;
       }
 
