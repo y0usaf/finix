@@ -109,12 +109,10 @@
       dotlink = "$HOME/dotfiles/scripts/dotlink.sh";
       dotsync = "$HOME/dotfiles/scripts/dotsync.sh";
       dotpush = "$HOME/dotfiles/scripts/dotsync.sh push";
-      pkgs = "paru -Qq | grep";
-      orphans = "pacman -Qttdq";
-      pacfix = "sudo rm /var/lib/pacman/db.lck";
-      filecheck = "paru -Qkk 2>&1 | grep -v \"0 altered files\"";
       userctl = "systemctl --user";
       hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
+      pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
+      pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
 
       #── 🎵 Media & Tools ─────────────────#
       ytm4a = "$HOME/scripts/ytm4a.sh";
