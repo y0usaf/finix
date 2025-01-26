@@ -96,6 +96,14 @@
     extraPortals = with pkgs; [
       xdg-desktop-portal-hyprland
     ];
+    config = {
+      common = {
+        default = ["hyprland"];
+      };
+      hyprland = {
+        default = ["hyprland"];
+      };
+    };
   };
 
   #── 🔧 Program Configurations ────────────#

@@ -217,7 +217,7 @@
       "${config.xdg.configHome}/hypr/xdph.conf".text = ''
         screencopy {
           max_fps = 60
-          allow_token_by_default = true
+          #allow_token_by_default = true
         }
       '';
     };

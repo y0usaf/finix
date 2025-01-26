@@ -102,14 +102,6 @@
       };
     };
 
-    #── 🚀 XDG Portal Configuration ─────────#
-    xdg.portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-      ];
-    };
-
     #── 🔒 Security & Permissions ────────────#
     security = {
       rtkit.enable = true;
