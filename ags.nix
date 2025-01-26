@@ -266,7 +266,7 @@ lib.mkIf globals.enableAgs {
           }
 
           function checkActive(active) {
-              const classes = [];
+              let classes = ["workspace-btn"];  // Always include base class
               if (active === index) classes.push("active");
               if (checkVisibility(occupiedWorkspaces.value)) classes.push("occupied");
               return classes.join(" ");
@@ -291,7 +291,7 @@ lib.mkIf globals.enableAgs {
               class_name: "workspace-btn",
               label: String(index),
               visible: occupiedWorkspaces.bind().transform(checkVisibility),
-              className: activeWorkspace.bind().transform(checkActive),
+              class_names: activeWorkspace.bind().transform(checkActive),
               onClicked: handleClick,
               setup: setupHooks
           });
