@@ -1,5 +1,5 @@
 #─────────────────────── 🪟 HYPRLAND CONFIG ───────────────────────#
-# 🎮 Core settings and plugins | Home-manager module                #
+# Core settings, plugins, and essential configuration               #
 #──────────────────────────────────────────────────────────────────#
 {
   config,
@@ -24,30 +24,13 @@
       ];
 
       settings = {
-        #── 🎯 Display Configuration ──────────────────────────────#
+        #── 🎯 Core Configuration ──────────────────────────────#
         monitor = [
           "DP-4,5120x1440@239.76,0x0,1"
           "DP-2,5120x1440@239.76,0x0,1"
           "HDMI-A-2,5120x1440@239.76,0x0,1"
         ];
 
-        #── 🎨 Color Definitions ─────────────────────────────────#
-        "$active_colour" = "ffffffff";
-        "$transparent" = "00000000";
-        "$inactive_colour" = "333333ff";
-
-        #── ⚙️ Core Variables ───────────────────────────────────#
-        "$mod" = "SUPER";
-        "$mod2" = "ALT";
-        "$term" = globals.defaultTerminal;
-        "$filemanager" = globals.defaultFileManager;
-        "$browser" = globals.defaultBrowser;
-        "$discord" = globals.defaultDiscord;
-        "$launcher" = globals.defaultLauncher;
-        "$ide" = globals.defaultIde;
-        "$obs" = "obs";
-
-        #── 🔧 Core Settings ────────────────────────────────────#
         general = {
           gaps_in = 10;
           gaps_out = 5;
@@ -57,7 +40,6 @@
           layout = "hy3";
         };
 
-        #── ⌨️ Input Settings ───────────────────────────────────#
         input = {
           kb_layout = "us";
           follow_mouse = 1;
@@ -66,15 +48,11 @@
           mouse_refocus = false;
         };
 
-        #── ⚙️ Misc Settings ──────────────────────#
-        misc = {
-          disable_hyprland_logo = true;
-          disable_splash_rendering = true;
-        };
+        #── 🎨 Theme & Colors ─────────────────────────────────#
+        "$active_colour" = "ffffffff";
+        "$transparent" = "00000000";
+        "$inactive_colour" = "333333ff";
 
-        debug.disable_logs = false;
-
-        #── 🎨 Visual Settings ─────────────────────#
         decoration = {
           rounding = 0;
           blur = {
@@ -103,7 +81,18 @@
           ];
         };
 
-        #── 🪟 Window Rules ───────────────────────#
+        #── ⚙️ Application Variables ────────────────────────────#
+        "$mod" = "SUPER";
+        "$mod2" = "ALT";
+        "$term" = globals.defaultTerminal;
+        "$filemanager" = globals.defaultFileManager;
+        "$browser" = globals.defaultBrowser;
+        "$discord" = globals.defaultDiscord;
+        "$launcher" = globals.defaultLauncher;
+        "$ide" = globals.defaultIde;
+        "$obs" = "obs";
+
+        #── 🪟 Window Management ─────────────────────────────#
         windowrulev2 = [
           "float, center, size 300 600, class:^(launcher)"
           "float, mouse, size 300 300, title:^(Smile)"
@@ -117,9 +106,9 @@
           "blur, fabric"
         ];
 
-        #── ⌨️ Key Bindings ───────────────────────#
+        #── ⌨️ Keybindings ────────────────────────────────────#
         bind = lib.lists.flatten [
-          #── 🪟 Window Management ────────────────#
+          # Essential Controls
           [
             "$mod, Q, killactive"
             "$mod, M, exit"
@@ -131,13 +120,7 @@
             "$mod, W, exec, ags -r 'showStats()'"
           ]
 
-          #── 🔔 Monitor Controls ────────────────#
-          [
-            "$mod SHIFT, S, swapactiveworkspaces, DP-4 HDMI-A-2"
-            "$mod, S, movecurrentworkspacetomonitor, +1"
-          ]
-
-          #── 🚀 Application Shortcuts ───────────#
+          # Primary Applications
           [
             "$mod, D, exec, $term"
             "$mod, E, exec, $filemanager"
@@ -150,14 +133,13 @@
             "$mod2, 5, exec, $obs"
           ]
 
-          #── 📸 Screenshot & Color Picker ───────#
+          # Monitor Management
           [
-            "$mod, G, exec, grim -g \"$(slurp -d)\" - | wl-copy -t image/png"
-            "$mod SHIFT, G, exec, grim - | wl-copy -t image/png"
-            "$mod, GRAVE, exec, hyprpicker | wl-copy"
+            "$mod SHIFT, S, swapactiveworkspaces, DP-4 HDMI-A-2"
+            "$mod, S, movecurrentworkspacetomonitor, +1"
           ]
 
-          #── 🔍 Focus & Window Movement ─────────#
+          # Window Movement
           (lib.lists.forEach ["w" "a" "s" "d"] (key: let
             direction =
               {
@@ -172,7 +154,7 @@
             "$mod2 SHIFT, ${key}, movewindow, ${direction}"
           ]))
 
-          #── 🏢 Workspace Management ───────────#
+          # Workspace Management
           (lib.lists.forEach (lib.range 1 9) (i: let
             num = toString i;
           in [
@@ -180,16 +162,7 @@
             "$mod SHIFT, ${num}, movetoworkspacesilent, ${toString i}"
           ]))
 
-          #── 🎵 Media Controls ─────────────────#
-          [
-            ", XF86AudioPlay, exec, playerctl play-pause"
-            ", XF86AudioPrev, exec, playerctl previous"
-            ", XF86AudioNext, exec, playerctl next"
-            ", XF86AudioRaiseVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ +10%"
-            ", XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -10%"
-          ]
-
-          #── 💻 System Controls ────────────────#
+          # System Controls
           [
             "Ctrl$mod2,Delete, exec, gnome-system-monitor"
             "$mod Shift, M, exec, shutdown now"
@@ -197,7 +170,14 @@
             "Ctrl,Period,exec,smile"
           ]
 
-          #── ⚡ Special Commands ───────────────#
+          # Utilities
+          [
+            "$mod, G, exec, grim -g \"$(slurp -d)\" - | wl-copy -t image/png"
+            "$mod SHIFT, G, exec, grim - | wl-copy -t image/png"
+            "$mod, GRAVE, exec, hyprpicker | wl-copy"
+          ]
+
+          # Special Commands
           [
             "$mod SHIFT, C, exec, killall mpvpaper & exec swaybg -o DP-4 -i `find $WALLPAPER_DIR -type f | shuf -n 1` -m fill & exec swaybg -o HDMI-A-2 -i `find $WALLPAPER_DIR -type f | shuf -n 1` -m fill & exec hyprctl reload"
           ]
@@ -209,10 +189,18 @@
         ];
 
         bindr = "$mod, W, exec, ags -r 'hideStats()'";
+
+        #── ⚙️ System Settings ──────────────────────#
+        misc = {
+          disable_hyprland_logo = true;
+          disable_splash_rendering = true;
+        };
+
+        debug.disable_logs = false;
       };
     };
 
-    #── 🔄 XDPH Configuration ──────────────────────────────────#
+    #── 🔄 System Integration ─────────────────────────────────#
     home.file = lib.mkIf globals.enableHyprland {
       "${config.xdg.configHome}/hypr/xdph.conf".text = ''
         screencopy {
@@ -222,7 +210,6 @@
       '';
     };
 
-    #── 🚪 XDG Portal Configuration ─────────────────────────────#
     xdg.portal = {
       enable = true;
       config.common.default = "hyprland";
