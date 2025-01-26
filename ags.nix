@@ -163,12 +163,12 @@ lib.mkIf globals.enableAgs {
       function SystemStats() {
           // Create variables to hold state
           var stats = {
-              cpu_temp: new Variable('N/A'),
-              gpu_temp: new Variable('N/A'),
-              used_ram: new Variable('N/A'),
-              total_ram: new Variable('N/A'),
-              time: new Variable('00:00:00'),
-              date: new Variable('00/00/00')
+              cpu_temp: Variable('N/A'),
+              gpu_temp: Variable('N/A'),
+              used_ram: Variable('N/A'),
+              total_ram: Variable('N/A'),
+              time: Variable('00:00:00'),
+              date: Variable('00/00/00')
           };
 
           // Update function
@@ -185,11 +185,11 @@ lib.mkIf globals.enableAgs {
               children: [
                   Widget.Label({
                       class_name: 'stats-time',
-                      label: stats.time
+                      label: stats.time.bind()
                   }),
                   Widget.Label({
                       class_name: 'stats-info',
-                      label: stats.date
+                      label: stats.date.bind()
                   }),
                   Widget.Label({
                       class_name: 'stats-info',
@@ -283,8 +283,8 @@ lib.mkIf globals.enableAgs {
       }
 
       function Workspaces() {
-          var activeWorkspace = new Variable(1);
-          var occupiedWorkspaces = new Variable(new Set([1]));
+          var activeWorkspace = Variable(1);
+          var occupiedWorkspaces = Variable(new Set([1]));
           var buttons = [];
 
           for (var i = 1; i <= 10; i++) {
