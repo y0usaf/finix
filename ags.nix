@@ -103,24 +103,12 @@ lib.mkIf globals.enableAgs {
           border: none;
           box-shadow: none;
           padding: 0;
-          color: #666666; /* Dimmed color for inactive workspaces */
+          color: #333333;
           -webkit-text-stroke: 0.5em #000000;
-          opacity: 0.5; /* Further dim inactive workspaces */
-      }
-
-      .workspace-btn.occupied {
-          color: #888888; /* Slightly brighter for occupied but inactive */
-          opacity: 0.8;
       }
 
       .workspace-btn.active {
           color: #FFFFFF;
-          opacity: 1.0;
-      }
-
-      .workspace-btn.urgent {
-          color: #FF0000;
-          opacity: 1.0;
       }
     '';
 
@@ -266,10 +254,7 @@ lib.mkIf globals.enableAgs {
           }
 
           function checkActive(active) {
-              let classes = ["workspace-btn"];  // Always include base class
-              if (active === index) classes.push("active");
-              if (checkVisibility(occupiedWorkspaces.value)) classes.push("occupied");
-              return classes.join(" ");
+              return active === index ? "active" : "";
           }
 
           function handleClick() {
@@ -291,7 +276,7 @@ lib.mkIf globals.enableAgs {
               class_name: "workspace-btn",
               label: String(index),
               visible: occupiedWorkspaces.bind().transform(checkVisibility),
-              class_names: activeWorkspace.bind().transform(checkActive),
+              className: activeWorkspace.bind().transform(checkActive),
               onClicked: handleClick,
               setup: setupHooks
           });
