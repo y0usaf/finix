@@ -13,12 +13,6 @@
     inputs.hyprland.homeManagerModules.default
   ];
 
-  options.gui.hypr.xdph.enable = lib.mkOption {
-    type = lib.types.bool;
-    default = false;
-    description = "Enables xdph and its configs.";
-  };
-
   config = lib.mkIf globals.enableHyprland {
     wayland.windowManager.hyprland = {
       enable = true;
@@ -219,7 +213,7 @@
     };
 
     #── 🔄 XDPH Configuration ──────────────────────────────────#
-    home.file = lib.mkIf config.gui.hypr.xdph.enable {
+    home.file = lib.mkIf globals.enableHyprland {
       "${config.xdg.configHome}/hypr/xdph.conf".text = ''
         screencopy {
           max_fps = 240

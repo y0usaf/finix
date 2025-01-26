@@ -102,6 +102,20 @@
       };
     };
 
+    #── 🚀 XDG Portal Configuration ─────────#
+    xdg.portal = {
+      enable = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-gtk
+        xdg-desktop-portal-hyprland
+      ];
+      config = {
+        common = {
+          default = ["hyprland" "gtk"];
+        };
+      };
+    };
+
     #── 🔒 Security & Permissions ────────────#
     security = {
       rtkit.enable = true;
@@ -148,24 +162,9 @@
 
     #── 🚀 Core Services ──────────────────#
     services.udev.extraRules = ''
-      # Vial rules for non-root access to keyboards
+      # Vial rules for n/on-root access to keyboards
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
-
-    xdg.portal = lib.mkIf globals.enableHyprland {
-      enable = true;
-      xdgOpenUsePortal = true;
-      configPackages = [
-        pkgs.xdg-desktop-portal-hyprland
-      ];
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-gtk
-      ];
-      config = {
-        common.default = ["hyprland"];
-        hyprland.default = ["hyprland"];
-      };
-    };
   };
 }

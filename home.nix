@@ -140,21 +140,6 @@
     enable = true;
   };
 
-  #── 🚀 XDG Portal Configuration ─────────#
-  xdg = {
-    portal = {
-      enable = true;
-      xdgOpenUsePortal = true;
-      config.common.default = "hyprland";
-      configPackages = [
-        pkgs.xdg-desktop-portal-hyprland
-      ];
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-gtk
-      ];
-    };
-  };
-
   #── 🔄 Systemd Services ─────────────────#
   systemd = {
     user = {
