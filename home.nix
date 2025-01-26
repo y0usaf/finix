@@ -179,6 +179,20 @@
           WorkingDirectory = "/home/y0usaf/nixos";
         };
       };
+
+      xdg-desktop-portal-hyprland = {
+        Unit = {
+          Description = "Portal service (Hyprland implementation)";
+          PartOf = ["graphical-session.target"];
+          After = ["graphical-session.target"];
+        };
+        Service = {
+          Type = "dbus";
+          BusName = "org.freedesktop.impl.portal.desktop.hyprland";
+          ExecStart = "${pkgs.xdg-desktop-portal-hyprland}/libexec/xdg-desktop-portal-hyprland";
+          Restart = "on-failure";
+        };
+      };
     };
 
     paths = {

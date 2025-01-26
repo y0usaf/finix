@@ -19,6 +19,9 @@
       QT_QPA_PLATFORM = "wayland";
       ELECTRON_OZONE_PLATFORM_HINT = "wayland";
       XDG_SESSION_TYPE = "wayland";
+      GDK_BACKEND = "wayland,x11";
+      SDL_VIDEODRIVER = "wayland";
+      CLUTTER_BACKEND = "wayland";
     })
     (lib.mkIf globals.enableHyprland {
       XDG_CURRENT_DESKTOP = "Hyprland";

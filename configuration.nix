@@ -149,11 +149,21 @@
     #── 🖥️ XDG Portal Configuration ─────────#
     xdg.portal = {
       enable = true;
-      config.common.default = "hyprland";
-      configPackages = [
-        pkgs.xdg-desktop-portal-hyprland
+      wlr.enable = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-hyprland
+        xdg-desktop-portal-gtk # Keep as fallback
       ];
-      extraPortals = with pkgs; [xdg-desktop-portal-gtk];
+      config = {
+        common = {
+          default = ["hyprland" "gtk"]; # Hyprland first
+        };
+        hyprland = {
+          default = ["hyprland"];
+          "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
+          "org.freedesktop.impl.portal.ScreenCast" = ["hyprland"];
+        };
+      };
     };
 
     #── 🚀 Core Services ──────────────────#
