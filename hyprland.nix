@@ -216,7 +216,7 @@
     home.file = lib.mkIf globals.enableHyprland {
       "${config.xdg.configHome}/hypr/xdph.conf".text = ''
         screencopy {
-          max_fps = 240
+          max_fps = 60
           allow_token_by_default = true
         }
       '';
