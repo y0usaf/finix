@@ -150,11 +150,12 @@
     xdg.portal = {
       enable = true;
       wlr.enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-        xdg-desktop-portal-gtk # Keep as fallback
-      ];
-      config = {
+      extraPortals = with pkgs;
+        lib.mkIf globals.enableWayland [
+          xdg-desktop-portal-hyprland
+          xdg-desktop-portal-gtk # Keep as fallback
+        ];
+      config = lib.mkIf globals.enableWayland {
         common = {
           default = ["hyprland" "gtk"]; # Hyprland first
         };
@@ -172,5 +173,10 @@
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
+
+    programs.hyprland = lib.mkIf globals.enableHyprland {
+      enable = true;
+      portalPackage = pkgs.xdg-desktop-portal-hyprland;
+    };
   };
 }
