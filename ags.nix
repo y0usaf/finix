@@ -254,7 +254,10 @@ lib.mkIf globals.enableAgs {
           }
 
           function checkActive(active) {
-              return active === index ? "active" : "";
+              const classes = [];
+              if (active === index) classes.push("active");
+              if (checkVisibility(occupiedWorkspaces.value)) classes.push("visible");
+              return classes.join(" ");
           }
 
           function handleClick() {
