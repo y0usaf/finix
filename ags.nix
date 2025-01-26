@@ -115,6 +115,7 @@ lib.mkIf globals.enableAgs {
     "ags/system-stats.js".text = ''
       import Widget from 'resource:///com/github/Aylur/ags/widget.js';
       import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
+      import { Variable, bind } from 'resource:///com/github/Aylur/ags/variable.js';
 
       const getStats = () => {
           // Get CPU temp with error handling
@@ -159,37 +160,57 @@ lib.mkIf globals.enableAgs {
           };
       };
 
-      const SystemStats = () => Widget.Box({
-          class_name: 'system-stats',
-          vertical: true,
-          setup: self => {
-              self.poll(1000, box => {
-                  const stats = getStats();
-                  box.children = [
-                      Widget.Label({
-                          class_name: 'stats-time',
-                          label: stats.time
-                      }),
-                      Widget.Label({
-                          class_name: 'stats-info',
-                          label: stats.date
-                      }),
-                      Widget.Label({
-                          class_name: 'stats-info',
-                          label: 'CPU: ' + stats.cpu_temp
-                      }),
-                      Widget.Label({
-                          class_name: 'stats-info',
-                          label: 'GPU: ' + stats.gpu_temp
-                      }),
-                      Widget.Label({
-                          class_name: 'stats-info',
-                          label: 'RAM: ' + stats.used_ram + '/' + stats.total_ram
-                      })
-                  ];
+      const SystemStats = () => {
+          // Create variables to hold state
+          const stats = {
+              cpu_temp: Variable('N/A'),
+              gpu_temp: Variable('N/A'),
+              used_ram: Variable('N/A'),
+              total_ram: Variable('N/A'),
+              time: Variable('00:00:00'),
+              date: Variable('00/00/00')
+          };
+
+          // Update function
+          const updateStats = () => {
+              const newStats = getStats();
+              Object.keys(newStats).forEach(key => {
+                  stats[key].value = newStats[key];
               });
-          }
-      });
+          };
+
+          return Widget.Box({
+              class_name: 'system-stats',
+              vertical: true,
+              children: [
+                  Widget.Label({
+                      class_name: 'stats-time',
+                      label: bind(stats.time)
+                  }),
+                  Widget.Label({
+                      class_name: 'stats-info',
+                      label: bind(stats.date)
+                  }),
+                  Widget.Label({
+                      class_name: 'stats-info',
+                      label: bind(stats.cpu_temp).transform(temp => "CPU: " + temp)
+                  }),
+                  Widget.Label({
+                      class_name: 'stats-info',
+                      label: bind(stats.gpu_temp).transform(temp => "GPU: " + temp)
+                  }),
+                  Widget.Label({
+                      class_name: 'stats-info',
+                      label: bind(stats.used_ram).transform(used =>
+                          "RAM: " + used + "/" + stats.total_ram.value
+                      )
+                  })
+              ],
+              setup: self => {
+                  self.poll(1000, () => updateStats());
+              }
+          });
+      };
 
       // Create the window
       const systemStatsWindow = Widget.Window({
@@ -214,52 +235,77 @@ lib.mkIf globals.enableAgs {
     "ags/workspaces.js".text = ''
       import Widget from 'resource:///com/github/Aylur/ags/widget.js';
       import Service from 'resource:///com/github/Aylur/ags/service.js';
+      import { Variable, bind } from 'resource:///com/github/Aylur/ags/variable.js';
 
-      const hyprland = await Service.import('hyprland');
+      var hyprland = await Service.import('hyprland');
 
-      // Wait for hyprland service to be ready
-      const dispatch = workspace => hyprland.messageAsync(`dispatch workspace ''${workspace}`);
+      function dispatch(workspace) {
+          return hyprland.messageAsync("dispatch workspace " + workspace);
+      }
 
-      const Workspaces = () => {
-          return Widget.Box({
-              class_name: 'workspaces',
-              children: Array.from({ length: 10 }, (_, i) => i + 1).map(i =>
-                  Widget.Button({
-                      class_name: 'workspace-btn',
-                      attribute: i,
-                      label: `''${i}`,
-                      onClicked: () => dispatch(i),
-                      setup: self => {
-                          // Update active state when workspace changes
-                          self.hook(hyprland, () => {
-                              const activeId = hyprland.active.workspace.id;
-                              const occupied = hyprland.workspaces.some(ws => ws.id === i);
+      function createWorkspaceButton(index, activeWorkspace, occupiedWorkspaces) {
+          function checkVisibility(set) {
+              return set.has(index);
+          }
 
-                              // Only show if workspace is occupied
-                              self.visible = occupied;
+          function checkActive(active) {
+              return active === index ? "active" : "";
+          }
 
-                              // Set active class if this is the current workspace
-                              self.toggleClassName('active', activeId === i);
-                          });
-                      },
-                  })
-              ),
+          function handleClick() {
+              return dispatch(index);
+          }
+
+          function setupHooks(self) {
+              self.hook(hyprland, function() {
+                  activeWorkspace.value = hyprland.active.workspace.id;
+                  occupiedWorkspaces.value = new Set(
+                      hyprland.workspaces.map(function(ws) {
+                          return ws.id;
+                      })
+                  );
+              });
+          }
+
+          return Widget.Button({
+              class_name: "workspace-btn",
+              label: String(index),
+              visible: bind(occupiedWorkspaces).transform(checkVisibility),
+              className: bind(activeWorkspace).transform(checkActive),
+              onClicked: handleClick,
+              setup: setupHooks
           });
-      };
+      }
 
-      // Create the window
-      const workspacesWindow = Widget.Window({
-          name: 'workspaces',
-          anchor: ['bottom'],
+      function Workspaces() {
+          var activeWorkspace = Variable(1);
+          var occupiedWorkspaces = Variable(new Set([1]));
+          var buttons = [];
+
+          for (var i = 1; i <= 10; i++) {
+              buttons.push(createWorkspaceButton(i, activeWorkspace, occupiedWorkspaces));
+          }
+
+          return Widget.Box({
+              class_name: "workspaces",
+              children: buttons
+          });
+      }
+
+      var workspacesWindow = Widget.Window({
+          name: "workspaces",
+          anchor: ["bottom"],
           child: Workspaces(),
-          layer: 'overlay',
-          margins: [0, 0, 0, 0],
+          layer: "overlay",
+          margins: [0, 0, 0, 0]
       });
 
-      export const workspacesConfig = {
+      var workspacesConfig = {
           window: workspacesWindow,
-          globals: {},
+          globals: {}
       };
+
+      export { workspacesConfig };
     '';
   };
 }
