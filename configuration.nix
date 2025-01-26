@@ -146,6 +146,16 @@
     networking.networkmanager.enable = true;
     virtualisation.lxd.enable = true;
 
+    #── 🖥️ XDG Portal Configuration ─────────#
+    xdg.portal = {
+      enable = true;
+      config.common.default = "hyprland";
+      configPackages = [
+        pkgs.xdg-desktop-portal-hyprland
+      ];
+      extraPortals = with pkgs; [xdg-desktop-portal-gtk];
+    };
+
     #── 🚀 Core Services ──────────────────#
     services.udev.extraRules = ''
       # Vial rules for n/on-root access to keyboards
