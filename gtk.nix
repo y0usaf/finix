@@ -24,6 +24,8 @@
         font-family: monospace;
         color: #ffffff;
         background: transparent;
+        outline-width: 0;
+        outline-offset: 0;
       }
 
       *:hover {
@@ -36,6 +38,8 @@
 
       button {
         border-radius: 4px;
+        min-height: 24px;
+        padding: 2px 6px;
       }
 
       menu {
