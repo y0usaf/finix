@@ -156,13 +156,16 @@
     xdg.portal = lib.mkIf globals.enableHyprland {
       enable = true;
       xdgOpenUsePortal = true;
-      config.common.default = "hyprland";
       configPackages = [
         pkgs.xdg-desktop-portal-hyprland
       ];
       extraPortals = with pkgs; [
         xdg-desktop-portal-gtk
       ];
+      config = {
+        common.default = ["hyprland"];
+        hyprland.default = ["hyprland"];
+      };
     };
   };
 }
