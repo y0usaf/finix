@@ -24,8 +24,6 @@
         font-family: monospace;
         color: #ffffff;
         background: transparent;
-        outline-width: 0;
-        outline-offset: 0;
       }
 
       *:hover {
