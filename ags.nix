@@ -115,11 +115,11 @@ lib.mkIf globals.enableAgs {
     "ags/system-stats.js".text = ''
       import Widget from 'resource:///com/github/Aylur/ags/widget.js';
       import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
-      import { Variable, bind } from 'resource:///com/github/Aylur/ags/variable.js';
+      import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
-      const getStats = () => {
+      function getStats() {
           // Get CPU temp with error handling
-          let cpu_temp = 'N/A';
+          var cpu_temp = 'N/A';
           try {
               cpu_temp = exec(['bash', '-c', "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"]).trim();
               if (!cpu_temp) {
@@ -131,7 +131,7 @@ lib.mkIf globals.enableAgs {
           }
 
           // Get GPU temp using nvidia-smi
-          let gpu_temp = 'N/A';
+          var gpu_temp = 'N/A';
           try {
               gpu_temp = exec("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits").trim();
               if (!gpu_temp) {
@@ -142,42 +142,42 @@ lib.mkIf globals.enableAgs {
           }
 
           // Get RAM info
-          const ram = exec('free -h').split('\n')[1].split(/\s+/);
-          const used_ram = ram[2];
-          const total_ram = ram[1];
+          var ram = exec('free -h').split('\n')[1].split(/\s+/);
+          var used_ram = ram[2];
+          var total_ram = ram[1];
 
           // Get time and date
-          const time = exec('date "+%H:%M:%S"');
-          const date = exec('date "+%d/%m/%y"');
+          var time = exec('date "+%H:%M:%S"');
+          var date = exec('date "+%d/%m/%y"');
 
           return {
               cpu_temp: cpu_temp !== 'N/A' ? cpu_temp : 'N/A',
               gpu_temp: gpu_temp !== 'N/A' ? gpu_temp + "°C" : 'N/A',
-              used_ram,
-              total_ram,
+              used_ram: used_ram,
+              total_ram: total_ram,
               time: time.trim(),
-              date: date.trim(),
+              date: date.trim()
           };
-      };
+      }
 
-      const SystemStats = () => {
+      function SystemStats() {
           // Create variables to hold state
-          const stats = {
-              cpu_temp: Variable('N/A'),
-              gpu_temp: Variable('N/A'),
-              used_ram: Variable('N/A'),
-              total_ram: Variable('N/A'),
-              time: Variable('00:00:00'),
-              date: Variable('00/00/00')
+          var stats = {
+              cpu_temp: new Variable('N/A'),
+              gpu_temp: new Variable('N/A'),
+              used_ram: new Variable('N/A'),
+              total_ram: new Variable('N/A'),
+              time: new Variable('00:00:00'),
+              date: new Variable('00/00/00')
           };
 
           // Update function
-          const updateStats = () => {
-              const newStats = getStats();
-              Object.keys(newStats).forEach(key => {
+          function updateStats() {
+              var newStats = getStats();
+              Object.keys(newStats).forEach(function(key) {
                   stats[key].value = newStats[key];
               });
-          };
+          }
 
           return Widget.Box({
               class_name: 'system-stats',
@@ -185,57 +185,62 @@ lib.mkIf globals.enableAgs {
               children: [
                   Widget.Label({
                       class_name: 'stats-time',
-                      label: bind(stats.time)
+                      label: stats.time
                   }),
                   Widget.Label({
                       class_name: 'stats-info',
-                      label: bind(stats.date)
+                      label: stats.date
                   }),
                   Widget.Label({
                       class_name: 'stats-info',
-                      label: bind(stats.cpu_temp).transform(temp => "CPU: " + temp)
+                      label: stats.cpu_temp.bind().transform(function(temp) {
+                          return "CPU: " + temp;
+                      })
                   }),
                   Widget.Label({
                       class_name: 'stats-info',
-                      label: bind(stats.gpu_temp).transform(temp => "GPU: " + temp)
+                      label: stats.gpu_temp.bind().transform(function(temp) {
+                          return "GPU: " + temp;
+                      })
                   }),
                   Widget.Label({
                       class_name: 'stats-info',
-                      label: bind(stats.used_ram).transform(used =>
-                          "RAM: " + used + "/" + stats.total_ram.value
-                      )
+                      label: stats.used_ram.bind().transform(function(used) {
+                          return "RAM: " + used + "/" + stats.total_ram.value;
+                      })
                   })
               ],
-              setup: self => {
-                  self.poll(1000, () => updateStats());
+              setup: function(self) {
+                  self.poll(1000, updateStats);
               }
           });
-      };
+      }
 
-      // Create the window
-      const systemStatsWindow = Widget.Window({
+      var systemStatsWindow = Widget.Window({
           name: 'system-stats',
           child: SystemStats(),
-          layer: 'background',  // Start in background
+          layer: 'background'
       });
 
-      export const systemStatsConfig = {
+      var systemStatsConfig = {
           window: systemStatsWindow,
           globals: {
-              showStats: () => {
+              showStats: function() {
                   systemStatsWindow.layer = 'top';
               },
-              hideStats: () => {
+              hideStats: function() {
                   systemStatsWindow.layer = 'background';
-              },
-          },
+              }
+          }
       };
+
+      export { systemStatsConfig };
     '';
 
     "ags/workspaces.js".text = ''
       import Widget from 'resource:///com/github/Aylur/ags/widget.js';
       import Service from 'resource:///com/github/Aylur/ags/service.js';
-      import { Variable, bind } from 'resource:///com/github/Aylur/ags/variable.js';
+      import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
       var hyprland = await Service.import('hyprland');
 
@@ -270,16 +275,16 @@ lib.mkIf globals.enableAgs {
           return Widget.Button({
               class_name: "workspace-btn",
               label: String(index),
-              visible: bind(occupiedWorkspaces).transform(checkVisibility),
-              className: bind(activeWorkspace).transform(checkActive),
+              visible: occupiedWorkspaces.bind().transform(checkVisibility),
+              className: activeWorkspace.bind().transform(checkActive),
               onClicked: handleClick,
               setup: setupHooks
           });
       }
 
       function Workspaces() {
-          var activeWorkspace = Variable(1);
-          var occupiedWorkspaces = Variable(new Set([1]));
+          var activeWorkspace = new Variable(1);
+          var occupiedWorkspaces = new Variable(new Set([1]));
           var buttons = [];
 
           for (var i = 1; i <= 10; i++) {
