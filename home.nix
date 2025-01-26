@@ -98,7 +98,7 @@
     ];
     config = {
       common = {
-        default = ["hyprland"];
+        default = ["*"];
       };
       hyprland = {
         default = ["hyprland"];
