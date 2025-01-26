@@ -103,12 +103,24 @@ lib.mkIf globals.enableAgs {
           border: none;
           box-shadow: none;
           padding: 0;
-          color: #333333;
+          color: #666666; /* Dimmed color for inactive workspaces */
           -webkit-text-stroke: 0.5em #000000;
+          opacity: 0.5; /* Further dim inactive workspaces */
+      }
+
+      .workspace-btn.occupied {
+          color: #888888; /* Slightly brighter for occupied but inactive */
+          opacity: 0.8;
       }
 
       .workspace-btn.active {
           color: #FFFFFF;
+          opacity: 1.0;
+      }
+
+      .workspace-btn.urgent {
+          color: #FF0000;
+          opacity: 1.0;
       }
     '';
 
@@ -256,7 +268,7 @@ lib.mkIf globals.enableAgs {
           function checkActive(active) {
               const classes = [];
               if (active === index) classes.push("active");
-              if (checkVisibility(occupiedWorkspaces.value)) classes.push("visible");
+              if (checkVisibility(occupiedWorkspaces.value)) classes.push("occupied");
               return classes.join(" ");
           }
 
