@@ -136,6 +136,15 @@
       #── 🌐 Network Tools ──────────────#
       tailup = "sudo tailscale up";
       taildown = "sudo tailscale down";
+
+      #── 🌐 Network Tools ──────────────#
+      "checkportals" = ''
+        echo "🔍 Checking XDG Portal Logs..." && \
+        journalctl -b | grep -i "xdg.*portal" | grep -i "error\|failed\|warning" | \
+        while IFS= read -r line; do
+          echo "❌ $line"
+        done || echo "✅ No portal errors found"
+      '';
     };
   };
 }
