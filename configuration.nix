@@ -146,37 +146,11 @@
     networking.networkmanager.enable = true;
     virtualisation.lxd.enable = true;
 
-    #── 🖥️ XDG Portal Configuration ─────────#
-    xdg.portal = {
-      enable = true;
-      wlr.enable = true;
-      extraPortals = with pkgs;
-        lib.mkIf globals.enableWayland [
-          xdg-desktop-portal-hyprland
-          xdg-desktop-portal-gtk # Keep as fallback
-        ];
-      config = lib.mkIf globals.enableWayland {
-        common = {
-          default = ["hyprland" "gtk"]; # Hyprland first
-        };
-        hyprland = {
-          default = ["hyprland"];
-          "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
-          "org.freedesktop.impl.portal.ScreenCast" = ["hyprland"];
-        };
-      };
-    };
-
     #── 🚀 Core Services ──────────────────#
     services.udev.extraRules = ''
       # Vial rules for n/on-root access to keyboards
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
-
-    programs.hyprland = lib.mkIf globals.enableHyprland {
-      enable = true;
-      portalPackage = pkgs.xdg-desktop-portal-hyprland;
-    };
   };
 }

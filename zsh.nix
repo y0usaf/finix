@@ -140,10 +140,10 @@
       #── 🌐 Network Tools ──────────────#
       "checkportals" = ''
         echo "🔍 Checking XDG Portal Logs..." && \
-        journalctl -b | grep -i "xdg.*portal" | grep -i "error\|failed\|warning" | \
+        journalctl -b | grep -i "xdg.*portal" | \
         while IFS= read -r line; do
-          echo "❌ $line"
-        done || echo "✅ No portal errors found"
+          echo "📋 $line"
+        done || echo "❌ No portal logs found"
       '';
     };
   };
