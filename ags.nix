@@ -35,56 +35,56 @@ lib.mkIf globals.enableAgs {
     '';
 
     "ags/style.css".text = ''
-       .system-stats *, .workspaces * {
-           margin: 0;
-           padding: 0;
-           background: none;
-           border: none;
-           box-shadow: none;
-           text-shadow: none;
-           font-family: inherit;
-           font-size: inherit;
-           font-weight: inherit;
-           color: inherit;
-       }
-
-       /* System Stats Styles */
-       .system-stats {
-           font-family: monospace;
-           font-weight: bold;
-           color: #FFFFFF;
-           -webkit-text-stroke: 0.5em #000000;
-       }
-
-       .system-stats label {
-           margin: 4px;
-           min-width: 100px;
-       }
-
-       .stats-time {
-           font-size: 96px;
-       }
-
-       .stats-info {
-           font-size: 24px;
-       }
-
-       /* Minimal Workspaces Styles */
-
-       .workspace-btn {
-           min-width: 8px;
-           min-height: 8px;
-           margin: 0 2px;
-           padding: 0;
+      .system-stats *, .workspaces * {
+          margin: 0;
+          padding: 0;
+          background: none;
+          border: none;
+          box-shadow: none;
+          text-shadow: none;
+          font-family: inherit;
+          font-size: inherit;
+          font-weight: inherit;
+          color: inherit;
       }
 
-       .workspace-btn label {
-           font-size: 0;
-       }
+      /* System Stats Styles */
+      .system-stats {
+          font-family: monospace;
+          font-weight: bold;
+          color: #FFFFFF;
+          -webkit-text-stroke: 0.5em #000000;
+      }
 
-       .workspace-btn.active {
-           background-color: rgba(255, 255, 255, 0.8);
-       }
+      .system-stats label {
+          margin: 4px;
+          min-width: 100px;
+      }
+
+      .stats-time {
+          font-size: 96px;
+      }
+
+      .stats-info {
+          font-size: 24px;
+      }
+
+      /* Minimal Workspaces Styles */
+      .workspace-btn {
+          min-width: 8px;
+          min-height: 8px;
+          margin: 0 2px;
+          padding: 0;
+      }
+
+      .workspace-btn label {
+          font-size: 12px;
+          color: #000000;
+      }
+
+      .workspace-btn.active label {
+          color: #FFFFFF;
+      }
     '';
 
     "ags/system-stats.js".text = ''
