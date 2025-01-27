@@ -269,15 +269,25 @@ lib.mkIf globals.enableAgs {
               setup: self => {
                   // Update the box children when workspaces change
                   self.hook(hyprland, () => {
+                      // Debug logging
+                      console.log('All workspaces:', hyprland.workspaces);
+
                       // Get occupied workspace IDs
                       const occupiedIds = hyprland.workspaces
-                          .filter(ws => ws.windows > 0)
-                          .map(ws => ws.id);
+                          .filter(function(ws) {
+                              console.log('Workspace ' + ws.id + ': ' + ws.windows + ' windows');
+                              return ws.windows > 0;
+                          })
+                          .map(function(ws) { return ws.id; });
+
+                      console.log('Occupied workspace IDs:', occupiedIds);
 
                       // Create buttons only for occupied workspaces
-                      const buttons = occupiedIds.map(index =>
-                          createWorkspaceButton(index, Variable(1), Variable(new Set()))
-                      );
+                      const buttons = occupiedIds.map(function(index) {
+                          return createWorkspaceButton(index, Variable(1), Variable(new Set()));
+                      });
+
+                      console.log('Created buttons:', buttons.length);
 
                       // Update the box with new buttons
                       self.children = buttons;
