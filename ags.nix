@@ -235,16 +235,11 @@ lib.mkIf globals.enableAgs {
       }
 
       function Workspaces() {
-          var activeWorkspace = Variable(1);
-          var occupiedWorkspaces = Variable(new Set([1]));
-
           return Widget.Box({
               class_name: "workspaces",
               setup: self => {
-                  self.hook(hyprland, () => {
-                      // Clear existing buttons
-                      self.children = [];
-
+                  // Create a connection to handle workspace updates
+                  const updateWorkspaces = () => {
                       // Get all workspaces with windows
                       const occupied = hyprland.workspaces
                           .filter(ws => ws.windows > 0)
@@ -253,17 +248,34 @@ lib.mkIf globals.enableAgs {
                       // Get current active workspace
                       const active = hyprland.active.workspace.id;
 
-                      // Create buttons for each occupied workspace
-                      occupied.forEach(id => {
-                          const button = Widget.Button({
+                      // Create new buttons
+                      const buttons = occupied.map(id =>
+                          Widget.Button({
                               class_name: "workspace-btn " + (id === active ? "active" : ""),
                               child: Widget.Label({
                                   label: String(id),
                               }),
                               onClicked: () => dispatch(id),
-                          });
-                          self.children.push(button);
-                      });
+                          })
+                      );
+
+                      // Update the box children
+                      self.children = buttons;
+                  };
+
+                  // Initial update
+                  updateWorkspaces();
+
+                  // Connect to workspace changes
+                  const signals = [
+                      hyprland.connect('workspace-added', updateWorkspaces),
+                      hyprland.connect('workspace-destroyed', updateWorkspaces),
+                      hyprland.connect('active-workspace-changed', updateWorkspaces),
+                  ];
+
+                  // Cleanup on destroy
+                  self.connect('destroy', () => {
+                      signals.forEach(signal => hyprland.disconnect(signal));
                   });
               }
           });
