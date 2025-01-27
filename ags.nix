@@ -266,11 +266,11 @@ lib.mkIf globals.enableAgs {
                   // Initial update
                   updateWorkspaces();
 
-                  // Connect to workspace changes
+                  // Connect to workspace changes using correct signal names
                   const signals = [
                       hyprland.connect('workspace-added', updateWorkspaces),
-                      hyprland.connect('workspace-destroyed', updateWorkspaces),
-                      hyprland.connect('active-workspace-changed', updateWorkspaces),
+                      hyprland.connect('workspaceDestroyed', updateWorkspaces),
+                      hyprland.connect('changed', updateWorkspaces),
                   ];
 
                   // Cleanup on destroy
