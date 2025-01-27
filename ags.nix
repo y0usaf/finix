@@ -69,21 +69,28 @@ lib.mkIf globals.enableAgs {
           font-size: 24px;
       }
 
-      /* Minimal Workspaces Styles */
+      /* Test Workspaces Styles */
       .workspace-btn {
-          min-width: 8px;
-          min-height: 8px;
-          margin: 0 2px;
-          padding: 0;
+          min-width: 20px;
+          min-height: 20px;
+          margin: 0 4px;
+          padding: 4px;
+          background-color: red;  /* Test background */
       }
 
       .workspace-btn label {
-          font-size: 12px;
-          color: #000000;
+          font-size: 16px;
+          font-weight: bold;
+          color: yellow;  /* Test color */
+      }
+
+      .workspace-btn.active {
+          background-color: blue;  /* Test active background */
       }
 
       .workspace-btn.active label {
-          color: #FFFFFF;
+          color: white;  /* Test active color */
+          font-size: 20px;  /* Test size difference */
       }
     '';
 
