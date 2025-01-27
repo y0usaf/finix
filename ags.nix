@@ -236,40 +236,33 @@ lib.mkIf globals.enableAgs {
 
       function createWorkspaceButton(index, activeWorkspace, occupiedWorkspaces) {
           function checkState(active, occupied) {
-              // Get both active and occupied state
               const isActive = active === index;
               const isOccupied = occupied.has(index);
 
-              // Return appropriate class string
-              return isActive ? "active" :
-                     isOccupied ? "occupied" : "";
-          }
-
-          function setupHooks(self) {
-              self.hook(hyprland, () => {
-                  // Get active workspace ID
-                  activeWorkspace.value = hyprland.active.workspace.id;
-
-                  // Get all occupied workspace IDs
-                  occupiedWorkspaces.value = new Set(
-                      hyprland.workspaces
-                          .filter(ws => ws.windows > 0)  // Only include workspaces with windows
-                          .map(ws => ws.id)
-                  );
-              });
+              // Use string concatenation with + operator
+              return "workspace-btn" +
+                     (isActive ? " active" : "") +
+                     (isOccupied ? " occupied" : "");
           }
 
           return Widget.Button({
-              class_name: Widget.Box({
-                  class_name: 'workspace-btn',
-                  css: activeWorkspace.bind().as(active =>
-                      occupiedWorkspaces.bind().as(occupied =>
-                          checkState(active, occupied)
-                      ))
-              }),
+              class_name: activeWorkspace.bind().as(active =>
+                  occupiedWorkspaces.bind().as(occupied =>
+                      checkState(active, occupied)
+                  )
+              ),
               label: String(index),
               onClicked: () => dispatch(index),
-              setup: setupHooks
+              setup: self => {
+                  self.hook(hyprland, () => {
+                      activeWorkspace.value = hyprland.active.workspace.id;
+                      occupiedWorkspaces.value = new Set(
+                          hyprland.workspaces
+                              .filter(ws => ws.windows > 0)
+                              .map(ws => ws.id)
+                      );
+                  });
+              }
           });
       }
 
