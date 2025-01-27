@@ -264,45 +264,26 @@ lib.mkIf globals.enableAgs {
       }
 
       function Workspaces() {
+          var activeWorkspace = Variable(1);
+          var occupiedWorkspaces = Variable(new Set([1]));
+          var buttons = [];
+
+          for (var i = 1; i <= 10; i++) {
+              buttons.push(createWorkspaceButton(i, activeWorkspace, occupiedWorkspaces));
+          }
+
           return Widget.Box({
               class_name: "workspaces",
-              setup: self => {
-                  // Update the box children when workspaces change
-                  self.hook(hyprland, () => {
-                      // Debug logging
-                      console.log('All workspaces:', hyprland.workspaces);
-
-                      // Get occupied workspace IDs
-                      const occupiedIds = hyprland.workspaces
-                          .filter(function(ws) {
-                              console.log('Workspace ' + ws.id + ': ' + ws.windows + ' windows');
-                              return ws.windows > 0;
-                          })
-                          .map(function(ws) { return ws.id; });
-
-                      console.log('Occupied workspace IDs:', occupiedIds);
-
-                      // Create buttons only for occupied workspaces
-                      const buttons = occupiedIds.map(function(index) {
-                          return createWorkspaceButton(index, Variable(1), Variable(new Set()));
-                      });
-
-                      console.log('Created buttons:', buttons.length);
-
-                      // Update the box with new buttons
-                      self.children = buttons;
-                  });
-              }
+              children: buttons
           });
       }
 
       var workspacesWindow = Widget.Window({
           name: "workspaces",
-          anchor: ["top", "center"],
+          anchor: ["bottom"],
           child: Workspaces(),
-          layer: "top",
-          margins: [8, 0, 0, 0],
-          exclusivity: "exclusive"
+          layer: "overlay",
+          margins: [0, 0, 0, 0]
       });
 
       var workspacesConfig = {
