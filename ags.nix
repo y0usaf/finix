@@ -255,10 +255,9 @@ lib.mkIf globals.enableAgs {
           }
 
           return Widget.Button({
-              class_name: "workspace-btn",
+              class_name: "workspace-btn " + activeWorkspace.bind().transform(checkActive),
               label: String(index),
               visible: occupiedWorkspaces.bind().transform(checkVisibility),
-              className: activeWorkspace.bind().transform(checkActive),
               onClicked: handleClick,
               setup: setupHooks
           });
