@@ -76,18 +76,20 @@ lib.mkIf globals.enableAgs {
           margin: 0 4px;
           padding: 4px;
           border-radius: 4px;
-          background-color: alpha(#ffffff, 0.1);
+          background-color: rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 0.5);  /* Dimmed color for inactive */
       }
 
       .workspace-btn label {
           font-size: 16px;
           font-weight: bold;
-          color: #ffffff;
+          color: inherit;  /* Use inherited color */
       }
 
       .workspace-btn.active {
-          background-color: alpha(#ffffff, 0.2);
-          box-shadow: inset 0 0 0 1px alpha(#ffffff, 0.3);
+          background-color: rgba(255, 255, 255, 0.3);  /* Brighter background */
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+          color: rgba(255, 255, 255, 1);  /* Full white for active */
       }
 
       .workspace-btn.active label {
