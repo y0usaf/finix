@@ -270,17 +270,28 @@ lib.mkIf globals.enableAgs {
           return Widget.Box({
               class_name: "workspaces",
               setup: self => {
-                  self.hook(hyprland, () => {
+                  // Initial setup
+                  self.hook(hyprland, (w) => {
                       // Clear existing buttons
                       self.children = [];
 
-                      // Get occupied workspaces and sort them
-                      const workspaces = hyprland.workspaces
-                          .filter(ws => ws.windows > 0)
-                          .map(ws => ws.id)
-                          .sort((a, b) => a - b);
+                      // Debug logging
+                      console.log('Workspaces update:', hyprland.workspaces);
 
-                      // Create buttons only for occupied workspaces
+                      // Always include active workspace
+                      let workspaces = new Set([hyprland.active.workspace.id]);
+
+                      // Add occupied workspaces
+                      hyprland.workspaces
+                          .filter(ws => ws.windows > 0)
+                          .forEach(ws => workspaces.add(ws.id));
+
+                      // Convert to array and sort
+                      workspaces = Array.from(workspaces).sort((a, b) => a - b);
+
+                      console.log('Creating buttons for workspaces:', workspaces);
+
+                      // Create buttons
                       workspaces.forEach(index => {
                           self.children.push(
                               createWorkspaceButton(index, activeWorkspace, occupiedWorkspaces)
