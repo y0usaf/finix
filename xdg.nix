@@ -35,28 +35,37 @@
         "x-scheme-handler/http" = ["${globals.defaultBrowser}.desktop"];
         "x-scheme-handler/https" = ["${globals.defaultBrowser}.desktop"];
         "x-scheme-handler/discord" = ["${globals.defaultDiscord}.desktop"];
+        "x-scheme-handler/ftp" = ["${globals.defaultBrowser}.desktop"];
+        "x-scheme-handler/chrome" = ["${globals.defaultBrowser}.desktop"];
 
         # File Types
         "inode/directory" = ["${globals.defaultFileManager}.desktop"];
 
         # Media Types
-        "video/mp4" = ["mpv.desktop"];
-        "video/x-matroska" = ["mpv.desktop"];
-        "video/webm" = ["mpv.desktop"];
+        "video/mp4" = ["${globals.defaultMediaPlayer}.desktop"];
+        "video/x-matroska" = ["${globals.defaultMediaPlayer}.desktop"];
+        "video/webm" = ["${globals.defaultMediaPlayer}.desktop"];
 
         # Images
-        "image/jpeg" = ["imv.desktop"];
-        "image/png" = ["imv.desktop"];
-        "image/gif" = ["imv.desktop"];
-        "image/tiff" = ["imv.desktop"];
-        "image/bmp" = ["imv.desktop"];
+        "image/jpeg" = ["${globals.defaultImageViewer}.desktop"];
+        "image/png" = ["${globals.defaultImageViewer}.desktop"];
+        "image/gif" = ["${globals.defaultImageViewer}.desktop"];
+        "image/tiff" = ["${globals.defaultImageViewer}.desktop"];
+        "image/bmp" = ["${globals.defaultImageViewer}.desktop"];
 
         # Archives
-        "application/zip" = ["7zFM.desktop"];
-        "application/x-7z-compressed" = ["7zFM.desktop"];
-        "application/x-tar" = ["7zFM.desktop"];
-        "application/gzip" = ["7zFM.desktop"];
-        "application/x-compressed-tar" = ["7zFM.desktop"];
+        "application/zip" = ["${globals.defaultArchiveManager}.desktop"];
+        "application/x-7z-compressed" = ["${globals.defaultArchiveManager}.desktop"];
+        "application/x-tar" = ["${globals.defaultArchiveManager}.desktop"];
+        "application/gzip" = ["${globals.defaultArchiveManager}.desktop"];
+        "application/x-compressed-tar" = ["${globals.defaultArchiveManager}.desktop"];
+
+        # Web Extensions
+        "application/x-extension-htm" = ["${globals.defaultBrowser}.desktop"];
+        "application/x-extension-html" = ["${globals.defaultBrowser}.desktop"];
+        "application/x-extension-shtml" = ["${globals.defaultBrowser}.desktop"];
+        "application/xhtml+xml" = ["${globals.defaultBrowser}.desktop"];
+        "application/x-extension-xhtml" = ["${globals.defaultBrowser}.desktop"];
       };
     };
   };

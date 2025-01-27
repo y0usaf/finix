@@ -42,6 +42,9 @@ in {
   defaultFileManager = "pcmanfm";
   defaultLauncher = "foot -a launcher sway-launcher-desktop";
   defaultDiscord = "vesktop";
+  defaultArchiveManager = "p7zip";
+  defaultImageViewer = "imv";
+  defaultMediaPlayer = "mpv";
 
   # Git Settings
   gitName = "y0usaf";
