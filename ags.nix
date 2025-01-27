@@ -298,10 +298,11 @@ lib.mkIf globals.enableAgs {
 
       var workspacesWindow = Widget.Window({
           name: "workspaces",
-          anchor: ["bottom"],
+          anchor: ["top", "center"],
           child: Workspaces(),
-          layer: "overlay",
-          margins: [0, 0, 0, 0]
+          layer: "top",
+          margins: [8, 0, 0, 0],
+          exclusivity: "exclusive"
       });
 
       var workspacesConfig = {
