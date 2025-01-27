@@ -35,65 +35,62 @@ lib.mkIf globals.enableAgs {
     '';
 
     "ags/style.css".text = ''
-      /* Reset all inherited styles */
-      .system-stats *, .workspaces * {
-          margin: 0;
-          padding: 0;
-          background: none;
-          border: none;
-          box-shadow: none;
-          text-shadow: none;
-          font-family: inherit;
-          font-size: inherit;
-          font-weight: inherit;
-          color: inherit;
+       /* Reset all inherited styles */
+       .system-stats *, .workspaces * {
+           margin: 0;
+           padding: 0;
+           background: none;
+           border: none;
+           box-shadow: none;
+           text-shadow: none;
+           font-family: inherit;
+           font-size: inherit;
+           font-weight: inherit;
+           color: inherit;
+       }
+
+       /* System Stats Styles */
+       .system-stats {
+           font-family: monospace;
+           font-weight: bold;
+           color: #FFFFFF;
+           -webkit-text-stroke: 0.5em #000000;
+       }
+
+       .system-stats label {
+           margin: 4px;
+           min-width: 100px;
+       }
+
+       .stats-time {
+           font-size: 96px;
+       }
+
+       .stats-info {
+           font-size: 24px;
+       }
+
+       /* Minimal Workspaces Styles */
+       .workspaces {
+           background-color: rgba(0, 0, 0, 0.3);
+           padding: 4px;
+           border-radius: 4px;
+       }
+
+       .workspace-btn {
+           min-width: 8px;
+           min-height: 8px;
+           margin: 0 2px;
+           padding: 0;
       }
 
-      /* System Stats Styles */
-      .system-stats {
-          font-family: monospace;
-          font-weight: bold;
-          color: #FFFFFF;
-          -webkit-text-stroke: 0.5em #000000;
-      }
+       .workspace-btn label {
+           font-size: 0;
+       }
 
-      .system-stats label {
-          margin: 4px;
-          min-width: 100px;
-      }
-
-      .stats-time {
-          font-size: 96px;
-      }
-
-      .stats-info {
-          font-size: 24px;
-      }
-
-      /* Workspaces Styles */
-      .workspaces {
-          background-color: rgba(0, 0, 0, 0.5);
-          padding: 8px;
-          border-radius: 8px;
-      }
-
-      .workspace-btn {
-          min-width: 24px;
-          min-height: 24px;
-          margin: 0 4px;
-          font-family: monospace;
-          font-size: 16px;
-          font-weight: bold;
-          padding: 4px;
-          color: #666666;
-          border-radius: 4px;
-          transition: all 0.2s ease;
-      }
-
-      .workspace-btn.active {
-          color: #FFFFFF;
-          background-color: rgba(255, 255, 255, 0.2);
-      }
+       .workspace-btn.active {
+           background-color: rgba(255, 255, 255, 0.8);
+       }
     '';
 
     "ags/system-stats.js".text = ''
