@@ -20,7 +20,7 @@ lib.mkIf globals.enableAgs {
 
       // Configure the app using App.config()
       App.config({
-          style: `''${App.configDir}/system-stats-style.css`,
+          style: `''${App.configDir}/style.css`,
           windows: [
               systemStatsConfig.window,
               workspacesConfig.window,
@@ -34,9 +34,9 @@ lib.mkIf globals.enableAgs {
       });
     '';
 
-    "ags/system-stats-style.css".text = ''
+    "ags/style.css".text = ''
       /* Reset all inherited styles */
-      .system-stats * {
+      .system-stats *, .workspaces * {
           margin: 0;
           padding: 0;
           background: none;
@@ -69,46 +69,30 @@ lib.mkIf globals.enableAgs {
       .stats-info {
           font-size: 24px;
       }
-    '';
-
-    "ags/workspaces-style.css".text = ''
-      /* Reset all inherited styles */
-      .workspaces * {
-          margin: 0;
-          padding: 0;
-          background: none;
-          border: none;
-          box-shadow: none;
-          text-shadow: none;
-          font-family: inherit;
-          font-size: inherit;
-          font-weight: inherit;
-          color: inherit;
-      }
 
       /* Workspaces Styles */
       .workspaces {
-          background: none;
-          padding: 0;
-          spacing: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          padding: 8px;
+          border-radius: 8px;
       }
 
       .workspace-btn {
-          min-width: 16px;
-          min-height: 16px;
-          margin: 0;
+          min-width: 24px;
+          min-height: 24px;
+          margin: 0 4px;
           font-family: monospace;
+          font-size: 16px;
           font-weight: bold;
-          background: none;
-          border: none;
-          box-shadow: none;
-          padding: 0;
-          color: #333333;
-          -webkit-text-stroke: 0.5em #000000;
+          padding: 4px;
+          color: #666666;
+          border-radius: 4px;
+          transition: all 0.2s ease;
       }
 
       .workspace-btn.active {
           color: #FFFFFF;
+          background-color: rgba(255, 255, 255, 0.2);
       }
     '';
 
