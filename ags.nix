@@ -70,6 +70,10 @@ lib.mkIf globals.enableAgs {
       }
 
       /* Workspaces Styles */
+      .workspaces {
+          margin: 4px;
+      }
+
       .workspace-btn {
           min-width: 20px;
           min-height: 20px;
@@ -77,13 +81,13 @@ lib.mkIf globals.enableAgs {
           padding: 4px;
       }
 
-      .workspace-btn label {
+      .workspaces button {
+          color: #000000;
           font-size: 16px;
           font-weight: bold;
-          color: #000000;
       }
 
-      .workspace-btn.active label {
+      .workspaces button.active {
           color: #FFFFFF;
       }
     '';
