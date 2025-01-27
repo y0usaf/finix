@@ -266,15 +266,28 @@ lib.mkIf globals.enableAgs {
       function Workspaces() {
           var activeWorkspace = Variable(1);
           var occupiedWorkspaces = Variable(new Set([1]));
-          var buttons = [];
-
-          for (var i = 1; i <= 10; i++) {
-              buttons.push(createWorkspaceButton(i, activeWorkspace, occupiedWorkspaces));
-          }
 
           return Widget.Box({
               class_name: "workspaces",
-              children: buttons
+              setup: self => {
+                  self.hook(hyprland, () => {
+                      // Clear existing buttons
+                      self.children = [];
+
+                      // Get occupied workspaces and sort them
+                      const workspaces = hyprland.workspaces
+                          .filter(ws => ws.windows > 0)
+                          .map(ws => ws.id)
+                          .sort((a, b) => a - b);
+
+                      // Create buttons only for occupied workspaces
+                      workspaces.forEach(index => {
+                          self.children.push(
+                              createWorkspaceButton(index, activeWorkspace, occupiedWorkspaces)
+                          );
+                      });
+                  });
+              }
           });
       }
 
