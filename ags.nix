@@ -235,26 +235,23 @@ lib.mkIf globals.enableAgs {
       }
 
       function createWorkspaceButton(index, activeWorkspace, occupiedWorkspaces) {
-          function checkState(active, occupied) {
-              const isActive = active === index;
-              const isOccupied = occupied.has(index);
-
-              // Use string concatenation with + operator
-              return "workspace-btn" +
-                     (isActive ? " active" : "") +
-                     (isOccupied ? " occupied" : "");
-          }
-
           return Widget.Button({
-              class_name: activeWorkspace.bind().as(active =>
-                  occupiedWorkspaces.bind().as(occupied =>
-                      checkState(active, occupied)
-                  )
-              ),
-              label: String(index),
+              class_name: "workspace-btn",
+              child: Widget.Label({
+                  label: String(index),
+              }),
               onClicked: () => dispatch(index),
               setup: self => {
                   self.hook(hyprland, () => {
+                      const isActive = hyprland.active.workspace.id === index;
+                      const isOccupied = hyprland.workspaces
+                          .filter(ws => ws.windows > 0)
+                          .map(ws => ws.id)
+                          .includes(index);
+
+                      self.toggleClassName('active', isActive);
+                      self.toggleClassName('occupied', isOccupied);
+
                       activeWorkspace.value = hyprland.active.workspace.id;
                       occupiedWorkspaces.value = new Set(
                           hyprland.workspaces
