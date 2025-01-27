@@ -35,7 +35,6 @@ lib.mkIf globals.enableAgs {
     '';
 
     "ags/style.css".text = ''
-       /* Reset all inherited styles */
        .system-stats *, .workspaces * {
            margin: 0;
            padding: 0;
@@ -71,11 +70,6 @@ lib.mkIf globals.enableAgs {
        }
 
        /* Minimal Workspaces Styles */
-       .workspaces {
-           background-color: rgba(0, 0, 0, 0.3);
-           padding: 4px;
-           border-radius: 4px;
-       }
 
        .workspace-btn {
            min-width: 8px;
