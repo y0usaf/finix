@@ -234,35 +234,6 @@ lib.mkIf globals.enableAgs {
           return hyprland.messageAsync("dispatch workspace " + workspace);
       }
 
-      function createWorkspaceButton(index, activeWorkspace, occupiedWorkspaces) {
-          return Widget.Button({
-              class_name: "workspace-btn",
-              child: Widget.Label({
-                  label: String(index),
-              }),
-              onClicked: () => dispatch(index),
-              setup: self => {
-                  self.hook(hyprland, () => {
-                      const isActive = hyprland.active.workspace.id === index;
-                      const isOccupied = hyprland.workspaces
-                          .filter(ws => ws.windows > 0)
-                          .map(ws => ws.id)
-                          .includes(index);
-
-                      self.toggleClassName('active', isActive);
-                      self.toggleClassName('occupied', isOccupied);
-
-                      activeWorkspace.value = hyprland.active.workspace.id;
-                      occupiedWorkspaces.value = new Set(
-                          hyprland.workspaces
-                              .filter(ws => ws.windows > 0)
-                              .map(ws => ws.id)
-                      );
-                  });
-              }
-          });
-      }
-
       function Workspaces() {
           var activeWorkspace = Variable(1);
           var occupiedWorkspaces = Variable(new Set([1]));
@@ -270,32 +241,28 @@ lib.mkIf globals.enableAgs {
           return Widget.Box({
               class_name: "workspaces",
               setup: self => {
-                  // Initial setup
-                  self.hook(hyprland, (w) => {
+                  self.hook(hyprland, () => {
                       // Clear existing buttons
                       self.children = [];
 
-                      // Debug logging
-                      console.log('Workspaces update:', hyprland.workspaces);
-
-                      // Always include active workspace
-                      let workspaces = new Set([hyprland.active.workspace.id]);
-
-                      // Add occupied workspaces
-                      hyprland.workspaces
+                      // Get all workspaces with windows
+                      const occupied = hyprland.workspaces
                           .filter(ws => ws.windows > 0)
-                          .forEach(ws => workspaces.add(ws.id));
+                          .map(ws => ws.id);
 
-                      // Convert to array and sort
-                      workspaces = Array.from(workspaces).sort((a, b) => a - b);
+                      // Get current active workspace
+                      const active = hyprland.active.workspace.id;
 
-                      console.log('Creating buttons for workspaces:', workspaces);
-
-                      // Create buttons
-                      workspaces.forEach(index => {
-                          self.children.push(
-                              createWorkspaceButton(index, activeWorkspace, occupiedWorkspaces)
-                          );
+                      // Create buttons for each occupied workspace
+                      occupied.forEach(id => {
+                          const button = Widget.Button({
+                              class_name: "workspace-btn " + (id === active ? "active" : ""),
+                              child: Widget.Label({
+                                  label: String(id),
+                              }),
+                              onClicked: () => dispatch(id),
+                          });
+                          self.children.push(button);
                       });
                   });
               }
