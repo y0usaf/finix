@@ -75,22 +75,24 @@ lib.mkIf globals.enableAgs {
           min-height: 20px;
           margin: 0 4px;
           padding: 4px;
-          background-color: red;  /* Test background */
+          border-radius: 4px;
+          background-color: alpha(#ffffff, 0.1);
       }
 
       .workspace-btn label {
           font-size: 16px;
           font-weight: bold;
-          color: yellow;  /* Test color */
+          color: #ffffff;
       }
 
       .workspace-btn.active {
-          background-color: blue;  /* Test active background */
+          background-color: alpha(#ffffff, 0.2);
+          box-shadow: inset 0 0 0 1px alpha(#ffffff, 0.3);
       }
 
       .workspace-btn.active label {
-          color: white;  /* Test active color */
-          font-size: 20px;  /* Test size difference */
+          color: #ffffff;
+          font-weight: bold;
       }
     '';
 
@@ -255,9 +257,10 @@ lib.mkIf globals.enableAgs {
           }
 
           return Widget.Button({
-              class_name: "workspace-btn " + activeWorkspace.bind().transform(checkActive),
+              class_name: "workspace-btn",
               label: String(index),
               visible: occupiedWorkspaces.bind().transform(checkVisibility),
+              className: activeWorkspace.bind().transform(checkActive),
               onClicked: handleClick,
               setup: setupHooks
           });
