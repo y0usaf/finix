@@ -79,11 +79,13 @@ lib.mkIf globals.enableAgs {
           min-height: 20px;
           margin: 0 4px;
           padding: 4px;
-          color: #333333;
+          color: #888888;
+          font-size: 16px;
+          font-weight: bold;
       }
 
       .workspace-btn.focused {
-          color: #FFFFFF;
+          color: #FF0000;
       }
 
       .workspaces button {
