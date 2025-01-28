@@ -28,6 +28,7 @@
       ./foot.nix
       ./gtk.nix
       ./cursor.nix
+      ./webapps.nix
     ]
     ++ lib.optionals globals.enableHyprland [
       ./hyprland.nix
@@ -199,16 +200,5 @@
     };
 
     startServices = "sd-switch";
-  };
-
-  # Add this before the final closing brace
-  xdg.desktopEntries = {
-    "keybard" = {
-      name = "Keybard";
-      exec = "${lib.getExe pkgs.chromium} --app=https://captdeaf.github.io/keybard %U";
-      terminal = false;
-      categories = ["Utility" "System"];
-      comment = "Keyboard testing utility";
-    };
   };
 }
