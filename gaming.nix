@@ -55,12 +55,12 @@
         bNvidiaReflex=False
         bXeLowLatency=False
         bDlssFrameGeneration=False
-        bFSRFrameGeneration=True
+        bFSRFrameGeneration=False
         bXeFrameGeneration=False
         MonitorIndex=0
         bEnableConsole120Fps=False
-        bUseVSync=True
-        bUseDynamicResolution=True
+        bUseVSync=False
+        bUseDynamicResolution=False
         ResolutionSizeX=2560
         ResolutionSizeY=1440
         LastUserConfirmedResolutionSizeX=2560
