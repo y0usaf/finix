@@ -108,13 +108,6 @@
       vesktop
       discord-canary
 
-      #── 🎮 Gaming ────────────────────────────#
-      steam
-      protonup-qt
-      gamemode
-      protontricks
-      prismlauncher
-
       #── 📺 Media and Streaming ──────────────#
       imv
       mpv

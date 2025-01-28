@@ -136,7 +136,6 @@
         "networkmanager"
         "video"
         "audio"
-        "gamemode"
         "input"
       ];
       ignoreShellProgramCheck = true;
