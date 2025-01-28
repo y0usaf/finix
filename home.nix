@@ -98,7 +98,6 @@
       pcmanfm
       syncthing
       lsd
-      vial
       waybar
       p7zip
       dconf
