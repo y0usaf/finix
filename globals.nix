@@ -41,7 +41,7 @@ in {
   defaultTerminal = "foot";
   defaultFileManager = "pcmanfm";
   defaultLauncher = "foot -a launcher sway-launcher-desktop";
-  defaultDiscord = "vesktop";
+  defaultDiscord = "discord-canary";
   defaultArchiveManager = "p7zip";
   defaultImageViewer = "imv";
   defaultMediaPlayer = "mpv";
