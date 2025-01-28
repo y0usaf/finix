@@ -131,13 +131,17 @@
     users.users.${globals.username} = {
       isNormalUser = true;
       shell = pkgs.zsh;
-      extraGroups = [
-        "wheel"
-        "networkmanager"
-        "video"
-        "audio"
-        "input"
-      ];
+      extraGroups =
+        [
+          "wheel"
+          "networkmanager"
+          "video"
+          "audio"
+          "input"
+        ]
+        ++ lib.optionals globals.enableGaming [
+          "gamemode"
+        ];
       ignoreShellProgramCheck = true;
     };
 

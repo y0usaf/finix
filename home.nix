@@ -35,6 +35,9 @@
     ]
     ++ lib.optionals globals.enableAgs [
       ./ags.nix
+    ]
+    ++ lib.optionals globals.enableGaming [
+      ./gaming.nix
     ];
 
   #── 📦 Core Programs ──────────────────────#
