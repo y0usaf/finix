@@ -122,6 +122,9 @@
       stremio
       ffmpeg
       cmus
+
+      # Add this to the existing packages section
+      chromium
     ]
     ++ lib.optionals globals.enableWayland [
       #── 🖥️ Wayland Utilities ───────────────#
@@ -197,5 +200,16 @@
     };
 
     startServices = "sd-switch";
+  };
+
+  # Add this before the final closing brace
+  xdg.desktopEntries = {
+    "keybard" = {
+      name = "Keybard";
+      exec = "${lib.getExe pkgs.chromium} --app=https://captdeaf.github.io/keybard %U";
+      terminal = false;
+      categories = ["Utility" "System"];
+      comment = "Keyboard testing utility";
+    };
   };
 }
