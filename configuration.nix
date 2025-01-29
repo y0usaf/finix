@@ -100,6 +100,8 @@
         scheduler = "scx_lavd";
         package = pkgs.scx.rustscheds;
       };
+
+      dbus.enable = true;
     };
 
     #── 🔒 Security & Permissions ────────────#
@@ -155,5 +157,14 @@
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
+
+    xdg.portal = {
+      enable = true;
+      xdgOpenUsePortal = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-gtk
+        # or xdg-desktop-portal-kde if you're using KDE
+      ];
+    };
   };
 }

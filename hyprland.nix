@@ -217,7 +217,12 @@
         pkgs.xdg-desktop-portal-hyprland
         pkgs.xdg-desktop-portal-gtk
       ];
-      config.common.default = "hyprland";
+      config = {
+        common.default = "hyprland";
+        hyprland = {
+          default = ["hyprland"];
+        };
+      };
     };
   };
 }
