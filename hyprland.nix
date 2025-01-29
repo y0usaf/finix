@@ -25,6 +25,11 @@
 
       settings = {
         #── 🎯 Core Configuration ──────────────────────────────#
+        exec-once = [
+          "systemctl --user import-environment XDG_SESSION_TYPE XDG_CURRENT_DESKTOP"
+          "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=hyprland"
+        ];
+
         monitor = [
           "DP-4,5120x1440@239.76,0x0,1"
           "DP-2,5120x1440@239.76,0x0,1"
@@ -210,7 +215,7 @@
       '';
     };
 
-    # Add XDG Portal configuration
+    # Add XDG Portal configuration and system integration
     xdg.portal = {
       enable = true;
       extraPortals = [
