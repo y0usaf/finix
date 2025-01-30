@@ -46,6 +46,11 @@
       '';
     };
 
+    environment.systemPackages = with pkgs; [
+      xdg-desktop-portal
+      xdg-desktop-portal-gtk
+    ];
+
     #── 🛠️ Hardware & Boot Configuration ───────#
     boot = {
       loader = {
