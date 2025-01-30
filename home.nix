@@ -109,7 +109,7 @@
       #── 🌐 Web Applications ─────────────────#
       firefox
       vesktop
-      discord-canary
+      discord-screenaudio
 
       #── 📺 Media and Streaming ──────────────#
       imv
