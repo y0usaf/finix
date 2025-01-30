@@ -115,18 +115,94 @@ lib.mkIf globals.enableNeovim {
         config = ''
           require('formatter').setup({
             filetype = {
-              typescript = { function() return { exe = 'prettier-daemon', args = { vim.api.nvim_buf_get_name(0) } } end },
-              javascript = { function() return { exe = 'prettier-daemon', args = { vim.api.nvim_buf_get_name(0) } } end },
-              json = { function() return { exe = 'prettier-daemon', args = { vim.api.nvim_buf_get_name(0) } } end },
-              css = { function() return { exe = 'prettier-daemon', args = { vim.api.nvim_buf_get_name(0) } } end },
-              scss = { function() return { exe = 'prettier-daemon', args = { vim.api.nvim_buf_get_name(0) } } end },
-              html = { function() return { exe = 'prettier-daemon', args = { vim.api.nvim_buf_get_name(0) } } end },
-              markdown = { function() return { exe = 'prettier-daemon', args = { vim.api.nvim_buf_get_name(0) } } end },
-              lua = { function() return { exe = 'stylua', args = { '--config-path', '~/.config/stylua/stylua.toml' } } end },
-              python = { function() return { exe = 'black', args = { '-' } } end },
-              sh = { function() return { exe = 'shfmt', args = { '-w' } } end },
-              vim = { function() return { exe = 'vint' } } end },
-            },
+              typescript = {
+                function()
+                  return {
+                    exe = 'prettier-daemon',
+                    args = { vim.api.nvim_buf_get_name(0) }
+                  }
+                end
+              },
+              javascript = {
+                function()
+                  return {
+                    exe = 'prettier-daemon',
+                    args = { vim.api.nvim_buf_get_name(0) }
+                  }
+                end
+              },
+              json = {
+                function()
+                  return {
+                    exe = 'prettier-daemon',
+                    args = { vim.api.nvim_buf_get_name(0) }
+                  }
+                end
+              },
+              css = {
+                function()
+                  return {
+                    exe = 'prettier-daemon',
+                    args = { vim.api.nvim_buf_get_name(0) }
+                  }
+                end
+              },
+              scss = {
+                function()
+                  return {
+                    exe = 'prettier-daemon',
+                    args = { vim.api.nvim_buf_get_name(0) }
+                  }
+                end
+              },
+              html = {
+                function()
+                  return {
+                    exe = 'prettier-daemon',
+                    args = { vim.api.nvim_buf_get_name(0) }
+                  }
+                end
+              },
+              markdown = {
+                function()
+                  return {
+                    exe = 'prettier-daemon',
+                    args = { vim.api.nvim_buf_get_name(0) }
+                  }
+                end
+              },
+              lua = {
+                function()
+                  return {
+                    exe = 'stylua',
+                    args = { '--config-path', '~/.config/stylua/stylua.toml' }
+                  }
+                end
+              },
+              python = {
+                function()
+                  return {
+                    exe = 'black',
+                    args = { '-' }
+                  }
+                end
+              },
+              sh = {
+                function()
+                  return {
+                    exe = 'shfmt',
+                    args = { '-w' }
+                  }
+                end
+              },
+              vim = {
+                function()
+                  return {
+                    exe = 'vint'
+                  }
+                end
+              }
+            }
           })
         '';
       }
