@@ -12,7 +12,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     # 🏠 Home Manager for user environment management
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # ✨ Nix code formatter

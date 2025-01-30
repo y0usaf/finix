@@ -19,9 +19,7 @@
       systemd.enable = true;
       systemd.variables = ["--all"];
       xwayland.enable = true;
-      plugins = [
-        inputs.hy3.packages.${pkgs.system}.hy3
-      ];
+      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
 
       settings = {
         monitor = [
@@ -207,15 +205,6 @@
           #allow_token_by_default = true
         }
       '';
-    };
-
-    # XDG Portal Configuration
-    xdg.portal = {
-      enable = true;
-      extraPortals = [
-        pkgs.xdg-desktop-portal-hyprland
-      ];
-      config.common.default = "*";
     };
   };
 }
