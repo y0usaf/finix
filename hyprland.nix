@@ -28,6 +28,8 @@
         exec-once = [
           "systemctl --user import-environment XDG_SESSION_TYPE XDG_CURRENT_DESKTOP"
           "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=hyprland"
+          "systemctl --user start xdg-desktop-portal-hyprland"
+          "systemctl --user start xdg-desktop-portal"
         ];
 
         monitor = [
@@ -222,7 +224,7 @@
         pkgs.xdg-desktop-portal-hyprland
         pkgs.xdg-desktop-portal-gtk
       ];
-      configPackages = [pkgs.hyprland];
+      configPackages = [inputs.hyprland.packages.${pkgs.system}.default];
       config = {
         common = {
           default = ["gtk"];
@@ -234,6 +236,7 @@
           "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
         };
       };
+      xdgOpenUsePortal = true;
     };
   };
 }

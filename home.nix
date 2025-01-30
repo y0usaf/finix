@@ -178,6 +178,65 @@
           WorkingDirectory = "/home/y0usaf/nixos";
         };
       };
+
+      xdg-desktop-portal-hyprland = {
+        Unit = {
+          Description = "Portal service (Hyprland implementation)";
+          PartOf = ["graphical-session.target"];
+          After = ["graphical-session.target"];
+        };
+        Service = {
+          Type = "dbus";
+          BusName = "org.freedesktop.impl.portal.desktop.hyprland";
+          ExecStart = "${pkgs.xdg-desktop-portal-hyprland}/libexec/xdg-desktop-portal-hyprland";
+          Restart = "always";
+          RestartSec = 1;
+          TimeoutStopSec = 5;
+        };
+        Install = {
+          WantedBy = ["graphical-session.target"];
+        };
+      };
+
+      # Add service for GTK portal
+      xdg-desktop-portal-gtk = {
+        Unit = {
+          Description = "Portal service (GTK implementation)";
+          PartOf = ["graphical-session.target"];
+          After = ["graphical-session.target"];
+        };
+        Service = {
+          Type = "dbus";
+          BusName = "org.freedesktop.impl.portal.desktop.gtk";
+          ExecStart = "${pkgs.xdg-desktop-portal-gtk}/libexec/xdg-desktop-portal-gtk";
+          Restart = "always";
+          RestartSec = 1;
+          TimeoutStopSec = 5;
+        };
+        Install = {
+          WantedBy = ["graphical-session.target"];
+        };
+      };
+
+      # Main portal service
+      xdg-desktop-portal = {
+        Unit = {
+          Description = "Portal service";
+          PartOf = ["graphical-session.target"];
+          After = ["graphical-session.target"];
+        };
+        Service = {
+          Type = "dbus";
+          BusName = "org.freedesktop.portal.Desktop";
+          ExecStart = "${pkgs.xdg-desktop-portal}/libexec/xdg-desktop-portal";
+          Restart = "always";
+          RestartSec = 1;
+          TimeoutStopSec = 5;
+        };
+        Install = {
+          WantedBy = ["graphical-session.target"];
+        };
+      };
     };
 
     paths = {

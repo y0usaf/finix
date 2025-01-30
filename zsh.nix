@@ -137,13 +137,32 @@
       tailup = "sudo tailscale up";
       taildown = "sudo tailscale down";
 
-      #── 🌐 Network Tools ──────────────#
+      #── 🌐 XDG Portal Tools ──────────────#
       "checkportals" = ''
-        echo "🔍 Checking XDG Portal Logs..." && \
-        journalctl -b | grep -iE "(xdg.*portal|portal.*xdg|portals|xdg-desktop-portal)" | \
-        while IFS= read -r line; do
-          echo "📋 $line"
-        done || echo "❌ No portal logs found"
+        echo "🔍 XDG Portal Status Check"
+        echo "══════════════════════════"
+
+        # Check service status
+        echo "📊 Service Status:"
+        for service in xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk; do
+          echo "→ $service:"
+          systemctl --user status $service | grep -E "Active:|●|○|↳" | sed 's/^/  /'
+        done
+
+        echo "\n📋 Recent Portal Logs:"
+        journalctl -b | grep -iE "(xdg.*portal|portal.*xdg)" | tail -n 10 | while IFS= read -r line; do
+          echo "  $line"
+        done
+
+        echo "\n🔌 DBus Interface Status:"
+        busctl --user list | grep portal | while IFS= read -r line; do
+          echo "  $line"
+        done
+
+        echo "\n🔍 Portal Process Check:"
+        ps aux | grep -E "[x]dg-desktop-portal" | while IFS= read -r line; do
+          echo "  $line"
+        done
       '';
     };
   };
