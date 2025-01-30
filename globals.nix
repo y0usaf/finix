@@ -25,6 +25,7 @@ in {
   enableCreative = true; # Enable creative tools (image editing, 3D, etc.)
   enableVirtualization = true; # Enable virtualization support
   enableBackup = true; # Enable backup services and configurations
+  enableNeovim = true; # Enable Neovim editor configuration
 
   #── 📁 Common Paths ───────────────────#
   flakeDir = "/home/${username}/nixos";

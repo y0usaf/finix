@@ -38,6 +38,9 @@
     ]
     ++ lib.optionals globals.enableGaming [
       ./gaming.nix
+    ]
+    ++ lib.optionals globals.enableNeovim [
+      ./nvim.nix
     ];
 
   #── 📦 Core Programs ──────────────────────#
@@ -68,7 +71,6 @@
   home.packages = with pkgs;
     [
       #── 🎨 Development Tools ─────────────────#
-      neovim
       cmake
       meson
       bottom
