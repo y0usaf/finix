@@ -20,6 +20,7 @@
       systemd.variables = ["--all"];
       xwayland.enable = true;
       package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+      portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
 
       plugins = [
         inputs.hy3.packages.${pkgs.system}.hy3

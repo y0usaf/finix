@@ -152,22 +152,6 @@
         };
       };
 
-      dbus-hyprland-environment = {
-        Unit = {
-          Description = "dbus hyprland environment";
-          PartOf = ["graphical-session.target"];
-          After = ["graphical-session.target"];
-        };
-        Service = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP";
-          RemainAfterExit = true;
-        };
-        Install = {
-          WantedBy = ["graphical-session.target"];
-        };
-      };
-
       format-nix = {
         Unit = {
           Description = "Format Nix files on change";
