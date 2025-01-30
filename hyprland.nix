@@ -24,14 +24,6 @@
       ];
 
       settings = {
-        #── 🎯 Core Configuration ──────────────────────────────#
-        exec-once = [
-          "systemctl --user import-environment XDG_SESSION_TYPE XDG_CURRENT_DESKTOP"
-          "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=hyprland"
-          "systemctl --user start xdg-desktop-portal-hyprland"
-          "systemctl --user start xdg-desktop-portal"
-        ];
-
         monitor = [
           "DP-4,5120x1440@239.76,0x0,1"
           "DP-2,5120x1440@239.76,0x0,1"
@@ -215,27 +207,6 @@
           #allow_token_by_default = true
         }
       '';
-    };
-
-    # Add XDG Portal configuration and system integration
-    xdg.portal = {
-      enable = true;
-      extraPortals = [
-        pkgs.xdg-desktop-portal-hyprland
-        pkgs.xdg-desktop-portal-gtk
-      ];
-      configPackages = [inputs.hyprland.packages.${pkgs.system}.default];
-      config = {
-        common = {
-          default = ["hyprland"];
-        };
-        hyprland = {
-          default = ["hyprland"];
-          "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
-          "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
-        };
-      };
-      xdgOpenUsePortal = true;
     };
   };
 }
