@@ -21,6 +21,10 @@
       xwayland.enable = true;
       package = inputs.hyprland.packages.${pkgs.system}.hyprland;
 
+      plugins = [
+        inputs.hy3.packages.${pkgs.system}.hy3
+      ];
+
       settings = {
         monitor = [
           "DP-4,5120x1440@239.76,0x0,1"
