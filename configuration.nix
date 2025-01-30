@@ -13,6 +13,7 @@
   lib,
   pkgs,
   globals,
+  inputs,
   ...
 }: {
   imports = [
@@ -130,6 +131,14 @@
     };
 
     #── 👤 User Environment ─────────────────#
+    programs = {
+      hyprland = lib.mkIf (globals.enableWayland && globals.enableHyprland) {
+        enable = true;
+        xwayland.enable = true;
+        package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+      };
+    };
+
     users.users.${globals.username} = {
       isNormalUser = true;
       shell = pkgs.zsh;
@@ -157,5 +166,12 @@
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
+
+    xdg.portal = lib.mkIf (globals.enableWayland && globals.enableHyprland) {
+      enable = true;
+      extraPortals = [
+        pkgs.xdg-desktop-portal-gtk
+      ];
+    };
   };
 }
