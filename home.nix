@@ -134,6 +134,13 @@
   #── 🔧 System Configurations ──────────────#
   dconf.enable = true;
 
+  xdg.portal = lib.optionals globals.enableHyprland {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-hyprland
+    ];
+  };
+
   #── 🔄 Systemd Services ─────────────────#
   systemd.user = {
     services = {
