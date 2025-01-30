@@ -227,8 +227,7 @@
       configPackages = [inputs.hyprland.packages.${pkgs.system}.default];
       config = {
         common = {
-          default = ["gtk"];
-          "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+          default = ["hyprland"];
         };
         hyprland = {
           default = ["hyprland"];
