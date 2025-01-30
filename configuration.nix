@@ -102,7 +102,13 @@
         package = pkgs.scx.rustscheds;
       };
 
-      dbus.enable = true;
+      dbus = {
+        enable = true;
+        packages = [
+          pkgs.dconf
+          pkgs.gcr
+        ];
+      };
     };
 
     #── 🔒 Security & Permissions ────────────#
@@ -169,8 +175,15 @@
 
     xdg.portal = lib.mkIf (globals.enableWayland && globals.enableHyprland) {
       enable = true;
+      xdgOpenUsePortal = true;
+      config = {
+        common.default = ["hyprland"];
+        hyprland.default = ["hyprland"];
+      };
       extraPortals = [
-        pkgs.xdg-desktop-portal-gtk
+        (pkgs.xdg-desktop-portal-hyprland.override {
+          hyprland = inputs.hyprland.packages.${pkgs.system}.hyprland;
+        })
       ];
     };
   };
