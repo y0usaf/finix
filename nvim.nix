@@ -172,8 +172,8 @@ lib.mkIf globals.enableNeovim {
                 else
                   fallback()
                 end
-              end, { 'i', 's' }),
-            }),
+              end, { 'i', 's' })
+            })
           })
         '';
       }
