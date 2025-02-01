@@ -249,35 +249,23 @@ lib.mkIf globals.enableAgs {
                           .map(ws => ws.id)
                           .includes(index);
 
-                      // Retrieve active workspace IDs from monitors using correct property names.
+                      // Retrieve active workspace IDs from monitors.
                       const activeIds = hyprland.monitors
                           .map(m => m.activeWorkspace && m.activeWorkspace.id)
                           .filter(id => id != null);
                       const isActive = activeIds.includes(index);
 
                       // Determine the focused workspace:
-                      // First try using hyprland.focused_monitor (if available), otherwise fallback to the first monitor.
                       let focusedMonitor = hyprland.focused_monitor;
                       if (!focusedMonitor && hyprland.monitors && hyprland.monitors.length > 0) {
                           focusedMonitor = hyprland.monitors[0];
                       }
-                      // Use the proper property name ("activeWorkspace")
                       const focusedWorkspace = focusedMonitor && focusedMonitor.activeWorkspace;
                       const isFocused = focusedWorkspace && focusedWorkspace.id === index;
 
-                      // Log monitors info once per update for workspace 1.
-                      if (index === 1) {
-                          console.log("Monitors: " + JSON.stringify(hyprland.monitors));
-                          console.log("Using focusedMonitor: " + JSON.stringify(focusedMonitor));
-                      }
-                      // Log only when this workspace is either occupied or focused.
-                      if (isOccupied || isFocused) {
-                          console.log("Workspace " + index + ": occupied: " + isOccupied + (isFocused ? ", focused" : ""));
-                      }
-
-                      // Make the workspace visible if it's active, occupied, or focused.
+                      // Set visibility based on active, occupied, or focused states.
                       self.visible = isActive || isOccupied || isFocused;
-                      // Mark a workspace as active only if it is focused.
+                      // Mark the workspace as active only if it is focused.
                       self.toggleClassName('active', isFocused);
                       self.toggleClassName('occupied', isOccupied);
                   });
