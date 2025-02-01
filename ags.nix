@@ -35,6 +35,13 @@ lib.mkIf globals.enableAgs {
     '';
 
     "ags/style.css".text = ''
+      :root {
+          --bg-color: #222;
+          --inactive-color: rgba(255, 255, 255, 0.4);
+          --active-color: rgba(255, 255, 255, 1.0);
+          --urgent-color: #ff5555;
+      }
+
       .system-stats *, .workspaces * {
           margin: 0;
           padding: 0;
@@ -94,7 +101,7 @@ lib.mkIf globals.enableAgs {
           min-height: 14px;         /* small box height */
           margin: 1px;              /* minimal gap */
           padding: 0 1px;           /* as minimal as possible */
-          background-color: #222;   /* hard background */
+          background-color: var(--bg-color);   /* hard background */
           border-radius: 0;         /* sharp corners */
       }
 
@@ -103,13 +110,13 @@ lib.mkIf globals.enableAgs {
           /* No extra background */
           background: none;
           /* Inactive / unfocused: lower opacity white */
-          color: rgba(255, 255, 255, 0.4);
+          color: var(--inactive-color);
           font-size: 14px;
       }
 
       /* When a workspace is active (focused) */
       .workspace-btn.active label {
-          color: rgba(255, 255, 255, 1.0);
+          color: var(--active-color);
       }
 
       /* When a workspace is marked as inactive */
@@ -119,7 +126,7 @@ lib.mkIf globals.enableAgs {
 
       /* When a workspace is urgent */
       .workspace-btn.urgent label {
-          color: #ff5555;
+          color: var(--urgent-color);
       }
     '';
 
@@ -128,46 +135,46 @@ lib.mkIf globals.enableAgs {
       import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
       import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
-      function getStats() {
-          // Get CPU temp with error handling
-          var cpu_temp = 'N/A';
+      function safeExec(command, errorMsg, defaultValue = 'N/A') {
           try {
-              cpu_temp = exec(['bash', '-c', "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"]).trim();
-              if (!cpu_temp) {
-                  throw new Error('No CPU temperature reading available');
-              }
+              const output = exec(command);
+              const result = output.trim();
+              if (!result) throw new Error('Empty result');
+              return result;
           } catch (error) {
-              console.log('Failed to get CPU stats:', error);
-              console.log('Error details:', error.message);
+              console.log(errorMsg, error);
+              return defaultValue;
           }
+      }
 
-          // Get GPU temp using nvidia-smi
-          var gpu_temp = 'N/A';
-          try {
-              gpu_temp = exec("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits").trim();
-              if (!gpu_temp) {
-                  throw new Error('No GPU temperature reading available');
-              }
-          } catch (error) {
-              console.log('Failed to get GPU stats:', error);
+      function getStats() {
+          // Get CPU temperature
+          const cpuTempCmd = ['bash', '-c', "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"];
+          const cpu_temp = safeExec(cpuTempCmd, 'Failed to get CPU stats:');
+
+          // Get GPU temperature
+          const gpuCmd = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits";
+          let gpu_temp = safeExec(gpuCmd, 'Failed to get GPU stats:');
+          if (gpu_temp !== 'N/A') {
+              gpu_temp += "°C";
           }
 
           // Get RAM info
-          var ram = exec('free -h').split('\n')[1].split(/\s+/);
-          var used_ram = ram[2];
-          var total_ram = ram[1];
+          const ramInfo = exec('free -h').split('\n')[1].split(/\s+/);
+          const used_ram = ramInfo[2];
+          const total_ram = ramInfo[1];
 
-          // Get time and date
-          var time = exec('date "+%H:%M:%S"');
-          var date = exec('date "+%d/%m/%y"');
+          // Get date and time
+          const time = safeExec('date "+%H:%M:%S"', 'Failed to get time:');
+          const date = safeExec('date "+%d/%m/%y"', 'Failed to get date:');
 
           return {
-              cpu_temp: cpu_temp !== 'N/A' ? cpu_temp : 'N/A',
-              gpu_temp: gpu_temp !== 'N/A' ? gpu_temp + "°C" : 'N/A',
-              used_ram: used_ram,
-              total_ram: total_ram,
-              time: time.trim(),
-              date: date.trim()
+               cpu_temp,
+               gpu_temp,
+               used_ram,
+               total_ram,
+               time,
+               date
           };
       }
 
@@ -268,29 +275,17 @@ lib.mkIf globals.enableAgs {
               onClicked: () => dispatch(index),
               setup: self => {
                   self.hook(hyprland, () => {
-                      // Check if the workspace is occupied (has any windows)
-                      const isOccupied = hyprland.workspaces
-                          .filter(ws => ws.windows > 0)
-                          .map(ws => ws.id)
-                          .includes(index);
-
-                      // Retrieve active workspace IDs from monitors.
+                      const isOccupied = hyprland.workspaces.some(ws => ws.windows > 0 && ws.id === index);
                       const activeIds = hyprland.monitors
                           .map(m => m.activeWorkspace && m.activeWorkspace.id)
                           .filter(id => id != null);
                       const isActive = activeIds.includes(index);
 
-                      // Determine the focused workspace:
-                      let focusedMonitor = hyprland.focused_monitor;
-                      if (!focusedMonitor && hyprland.monitors && hyprland.monitors.length > 0) {
-                          focusedMonitor = hyprland.monitors[0];
-                      }
-                      const focusedWorkspace = focusedMonitor && focusedMonitor.activeWorkspace;
-                      const isFocused = focusedWorkspace && focusedWorkspace.id === index;
+                      // Get focused monitor or fallback to the first monitor
+                      const focusedMonitor = hyprland.focused_monitor || (hyprland.monitors[0] || {});
+                      const isFocused = focusedMonitor.activeWorkspace && focusedMonitor.activeWorkspace.id === index;
 
-                      // Set visibility based on active, occupied, or focused states.
                       self.visible = isActive || isOccupied || isFocused;
-                      // Mark the workspace as active only if it is focused.
                       self.toggleClassName('active', isFocused);
                       self.toggleClassName('occupied', isOccupied);
                   });
