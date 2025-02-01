@@ -69,34 +69,57 @@ lib.mkIf globals.enableAgs {
           font-size: 24px;
       }
 
-      /* Test Workspaces Styles */
-      .workspace-btn {
-          min-width: 16px;         /* Minimal width */
-          min-height: 16px;        /* Minimal height */
-          margin: 1px;             /* Tiny margin between buttons */
-          padding: 2px;            /* Small padding */
-          border-radius: 0;        /* Sharp corners */
-          background-color: #222;  /* Hard background color */
-          color: #666;             /* Unfocused text color */
-          text-align: center;      /* Center label text */
+      /* Reset and base styling for all widgets in the workspaces container */
+      .workspaces *,
+      .workspaces {
+          margin: 0;
+          padding: 0;
+          background: none;
           border: none;
+          box-shadow: none;
+          font-size: 14px;
+          /* The default color here will be overridden on the label below */
+          color: white;
       }
 
+      /* Workspace container styling */
+      .workspaces {
+          margin: 1px;
+          background: none;
+      }
+
+      /* Workspace button styling */
+      .workspace-btn {
+          min-width: 14px;          /* small box width */
+          min-height: 14px;         /* small box height */
+          margin: 1px;              /* minimal gap */
+          padding: 0 1px;           /* as minimal as possible */
+          background-color: #222;   /* hard background */
+          border-radius: 0;         /* sharp corners */
+      }
+
+      /* Workspace label (the number inside) */
       .workspace-btn label {
-          font-size: 12px;         /* Small text size */
-          font-weight: normal;
-          color: inherit;          /* Inherit button text color */
-          margin: 0;
+          /* No extra background */
+          background: none;
+          /* Inactive / unfocused: lower opacity white */
+          color: rgba(255, 255, 255, 0.4);
+          font-size: 14px;
       }
 
       /* When a workspace is active (focused) */
-      .workspace-btn.active {
-          background-color: #333;  /* Slightly lighter background for active state */
-          color: #fff;             /* White text color */
-      }
       .workspace-btn.active label {
-          color: #fff;
-          font-weight: bold;
+          color: rgba(255, 255, 255, 1.0);
+      }
+
+      /* When a workspace is marked as inactive */
+      .workspace-btn.inactive label {
+          color: rgba(255, 255, 255, 0.5);
+      }
+
+      /* When a workspace is urgent */
+      .workspace-btn.urgent label {
+          color: #ff5555;
       }
     '';
 
