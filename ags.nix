@@ -35,13 +35,9 @@ lib.mkIf globals.enableAgs {
     '';
 
     "ags/style.css".text = ''
-      :root {
-          --bg-color: #222;
-          --inactive-color: rgba(255, 255, 255, 0.4);
-          --active-color: rgba(255, 255, 255, 1.0);
-          --urgent-color: #ff5555;
-      }
+      /* Removed :root definitions and replaced usage of CSS variables with explicit values */
 
+      /* Global reset for widgets */
       .system-stats *, .workspaces * {
           margin: 0;
           padding: 0;
@@ -85,7 +81,7 @@ lib.mkIf globals.enableAgs {
           border: none;
           box-shadow: none;
           font-size: 14px;
-          /* The default color here will be overridden on the label below */
+          /* Default color for widgets */
           color: white;
       }
 
@@ -101,22 +97,21 @@ lib.mkIf globals.enableAgs {
           min-height: 14px;         /* small box height */
           margin: 1px;              /* minimal gap */
           padding: 0 1px;           /* as minimal as possible */
-          background-color: var(--bg-color);   /* hard background */
+          background-color: #222;   /* replaced var(--bg-color) */
           border-radius: 0;         /* sharp corners */
       }
 
       /* Workspace label (the number inside) */
       .workspace-btn label {
-          /* No extra background */
           background: none;
           /* Inactive / unfocused: lower opacity white */
-          color: var(--inactive-color);
+          color: rgba(255, 255, 255, 0.4);  /* replaced var(--inactive-color) */
           font-size: 14px;
       }
 
       /* When a workspace is active (focused) */
       .workspace-btn.active label {
-          color: var(--active-color);
+          color: rgba(255, 255, 255, 1.0);  /* replaced var(--active-color) */
       }
 
       /* When a workspace is marked as inactive */
@@ -126,7 +121,7 @@ lib.mkIf globals.enableAgs {
 
       /* When a workspace is urgent */
       .workspace-btn.urgent label {
-          color: var(--urgent-color);
+          color: #ff5555;  /* replaced var(--urgent-color) */
       }
     '';
 
