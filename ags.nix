@@ -80,6 +80,7 @@ lib.mkIf globals.enableAgs {
       .system-stats label {
           margin: 4px;
           min-width: 100px;
+          text-shadow: inherit;
       }
 
       .stats-time {
