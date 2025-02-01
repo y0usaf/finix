@@ -251,23 +251,21 @@ lib.mkIf globals.enableAgs {
 
                       // Retrieve active workspace IDs from monitors.
                       const activeIds = hyprland.monitors
-                          .filter(m => m.active_workspace)
-                          .map(m => m.active_workspace.id);
+                          .map(m => m.active_workspace && m.active_workspace.id)
+                          .filter(id => id != null);
                       const isActive = activeIds.includes(index);
 
-                      // Determine the focused workspace by checking monitors
-                      const focusedMonitor = hyprland.monitors.find(m => m.focused);
+                      // Determine the focused workspace:
+                      // First try using focused_monitor (if available), else fallback to a monitor with m.focused === true.
+                      const focusedMonitor = hyprland.focused_monitor || hyprland.monitors.find(m => m.focused === true);
                       const focusedWorkspace = focusedMonitor && focusedMonitor.active_workspace;
                       const isFocused = focusedWorkspace && focusedWorkspace.id === index;
 
-                      // Reduced logging for debugging purposes
-                      console.log(
-                          `Workspace $${index}: active: $${isActive}, occupied: $${isOccupied}, focused: $${isFocused}`
-                      );
+                      // Combined minimal logging for debugging
+                      console.log(`Workspace $${index}: active: $${isActive}, occupied: $${isOccupied}, focused: $${isFocused}`);
 
-                      // Only show workspaces that are active, focused, or have windows
+                      // Set visibility and style based on active, occupation, or focus
                       self.visible = isActive || isOccupied || isFocused;
-                      // Mark the workspace as active if it is active or focused.
                       self.toggleClassName('active', isActive || isFocused);
                       self.toggleClassName('occupied', isOccupied);
                   });
