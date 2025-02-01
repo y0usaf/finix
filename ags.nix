@@ -243,33 +243,27 @@ lib.mkIf globals.enableAgs {
               onClicked: () => dispatch(index),
               setup: self => {
                   self.hook(hyprland, () => {
-                      const isActive = hyprland.active.workspace.id === index;
+                      // Get all active workspaces from monitors
+                      const activeIds = hyprland.monitors.map(m => m.active_workspace.id);
+                      const isActive = activeIds.includes(index);
                       const isOccupied = hyprland.workspaces
                           .filter(ws => ws.windows > 0)
                           .map(ws => ws.id)
                           .includes(index);
 
+                      self.visible = isActive; // Only show active workspaces
                       self.toggleClassName('active', isActive);
                       self.toggleClassName('occupied', isOccupied);
-
-                      activeWorkspace.value = hyprland.active.workspace.id;
-                      occupiedWorkspaces.value = new Set(
-                          hyprland.workspaces
-                              .filter(ws => ws.windows > 0)
-                              .map(ws => ws.id)
-                      );
                   });
               }
           });
       }
 
       function Workspaces() {
-          var activeWorkspace = Variable(1);
-          var occupiedWorkspaces = Variable(new Set([1]));
+          // Create buttons for all possible workspaces but only show active ones
           var buttons = [];
-
           for (var i = 1; i <= 10; i++) {
-              buttons.push(createWorkspaceButton(i, activeWorkspace, occupiedWorkspaces));
+              buttons.push(createWorkspaceButton(i));
           }
 
           return Widget.Box({
