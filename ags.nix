@@ -249,24 +249,35 @@ lib.mkIf globals.enableAgs {
                           .map(ws => ws.id)
                           .includes(index);
 
-                      // Determine the focused workspace using the focused-workspace property
-                      const focusedWorkspace = hyprland["focused-workspace"];
-                      const isFocused = focusedWorkspace && focusedWorkspace.id === index;
-
-                      // Log only when a workspace is either occupied or focused
-                      if (isOccupied || isFocused) {
-                          console.log("Workspace $" + index + ": occupied: $" + isOccupied + (isFocused ? ", focused" : ""));
-                      }
-
-                      // Optionally, maintain the "active" state for visibility:
+                      // Get active workspace IDs from monitors (for visibility, even if unused for focus)
                       const activeIds = hyprland.monitors
                           .map(m => m.active_workspace && m.active_workspace.id)
                           .filter(id => id != null);
-                      const isActive = activeIds.includes(index);
 
-                      // Make the workspace visible if it's active, occupied, or focused
+                      // Determine the focused workspace:
+                      // First try using hyprland.focused_monitor; if not present, fallback to the first monitor in the array.
+                      let focusedMonitor = hyprland.focused_monitor;
+                      if (!focusedMonitor && hyprland.monitors && hyprland.monitors.length > 0) {
+                          focusedMonitor = hyprland.monitors[0];
+                      }
+                      const focusedWorkspace = focusedMonitor && focusedMonitor.active_workspace;
+                      const isFocused = focusedWorkspace && focusedWorkspace.id === index;
+
+                      // Log monitors info once per update to avoid spam when processing workspace 1
+                      if (index === 1) {
+                          console.log("Monitors: " + JSON.stringify(hyprland.monitors));
+                          console.log("Using focusedMonitor: " + JSON.stringify(focusedMonitor));
+                      }
+
+                      // Log only when this workspace is either occupied or focused.
+                      if (isOccupied || isFocused) {
+                          console.log("Workspace " + index + ": occupied: " + isOccupied + (isFocused ? ", focused" : ""));
+                      }
+
+                      // Make the workspace visible if it's active, occupied, or focused.
+                      const isActive = activeIds.includes(index);
                       self.visible = isActive || isOccupied || isFocused;
-                      // Mark the workspace as active if it is focused.
+                      // In this approach, only mark a workspace as active if it is focused.
                       self.toggleClassName('active', isFocused);
                       self.toggleClassName('occupied', isOccupied);
                   });
