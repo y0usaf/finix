@@ -57,24 +57,24 @@ lib.mkIf globals.enableAgs {
           font-weight: bold;
           color: #FFFFFF;
           text-shadow:
-            /* first repetition of 0.25em offsets */
-            0.25em 0      0 #000000,
-            -0.25em 0     0 #000000,
-            0 0.25em     0 #000000,
-            0 -0.25em    0 #000000,
-            0.25em 0.25em 0 #000000,
-            -0.25em 0.25em 0 #000000,
-            0.25em -0.25em 0 #000000,
-            -0.25em -0.25em 0 #000000,
-            /* second repetition of the same offsets to build thickness */
-            0.25em 0      0 #000000,
-            -0.25em 0     0 #000000,
-            0 0.25em     0 #000000,
-            0 -0.25em    0 #000000,
-            0.25em 0.25em 0 #000000,
-            -0.25em 0.25em 0 #000000,
-            0.25em -0.25em 0 #000000,
-            -0.25em -0.25em 0 #000000;
+            /* first repetition with 4px offsets */
+            4px 0     0 #000000,
+            -4px 0    0 #000000,
+            0 4px     0 #000000,
+            0 -4px    0 #000000,
+            4px 4px   0 #000000,
+            -4px 4px  0 #000000,
+            4px -4px  0 #000000,
+            -4px -4px 0 #000000,
+            /* second repetition for extra thickness */
+            4px 0     0 #000000,
+            -4px 0    0 #000000,
+            0 4px     0 #000000,
+            0 -4px    0 #000000,
+            4px 4px   0 #000000,
+            -4px 4px  0 #000000,
+            4px -4px  0 #000000,
+            -4px -4px 0 #000000;
       }
 
       .system-stats label {
