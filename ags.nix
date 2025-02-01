@@ -57,24 +57,45 @@ lib.mkIf globals.enableAgs {
           font-weight: bold;
           color: #FFFFFF;
           text-shadow:
-            /* first repetition with 4px offsets */
-            4px 0     0 #000000,
-            -4px 0    0 #000000,
-            0 4px     0 #000000,
-            0 -4px    0 #000000,
-            4px 4px   0 #000000,
-            -4px 4px  0 #000000,
-            4px -4px  0 #000000,
-            -4px -4px 0 #000000,
-            /* second repetition for extra thickness */
-            4px 0     0 #000000,
-            -4px 0    0 #000000,
-            0 4px     0 #000000,
-            0 -4px    0 #000000,
-            4px 4px   0 #000000,
-            -4px 4px  0 #000000,
-            4px -4px  0 #000000,
-            -4px -4px 0 #000000;
+            /* 1st repetition */
+            2px 0 2px #000000,
+            -2px 0 2px #000000,
+            0 2px 2px #000000,
+            0 -2px 2px #000000,
+            2px 2px 2px #000000,
+            -2px 2px 2px #000000,
+            2px -2px 2px #000000,
+            -2px -2px 2px #000000,
+
+            /* 2nd repetition */
+            2px 0 2px #000000,
+            -2px 0 2px #000000,
+            0 2px 2px #000000,
+            0 -2px 2px #000000,
+            2px 2px 2px #000000,
+            -2px 2px 2px #000000,
+            2px -2px 2px #000000,
+            -2px -2px 2px #000000,
+
+            /* 3rd repetition */
+            2px 0 2px #000000,
+            -2px 0 2px #000000,
+            0 2px 2px #000000,
+            0 -2px 2px #000000,
+            2px 2px 2px #000000,
+            -2px 2px 2px #000000,
+            2px -2px 2px #000000,
+            -2px -2px 2px #000000,
+
+            /* 4th repetition */
+            2px 0 2px #000000,
+            -2px 0 2px #000000,
+            0 2px 2px #000000,
+            0 -2px 2px #000000,
+            2px 2px 2px #000000,
+            -2px 2px 2px #000000,
+            2px -2px 2px #000000,
+            -2px -2px 2px #000000;
       }
 
       .system-stats label {
