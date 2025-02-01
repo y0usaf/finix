@@ -55,9 +55,9 @@ lib.mkIf globals.enableAgs {
       .system-stats {
           font-family: monospace;
           font-weight: bold;
-          color: #FFFFFF;
-          -webkit-text-stroke: 0.5em #000000;
-          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+          color: #FFFFFF !important;
+          -webkit-text-stroke: 0.5em #000000 !important;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
       }
 
       .system-stats label {
@@ -123,6 +123,13 @@ lib.mkIf globals.enableAgs {
       /* When a workspace is urgent */
       .workspace-btn.urgent label {
           color: #ff5555;  /* replaced var(--urgent-color) */
+      }
+
+      /* Applying styles to descendant labels */
+      .system-stats, .system-stats * {
+          color: #FFFFFF !important;
+          -webkit-text-stroke: 0.5em #000000;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
       }
     '';
 
