@@ -23,7 +23,7 @@ lib.mkIf globals.enableAgs {
           style: `''${App.configDir}/style.css`,
           windows: [
               systemStatsConfig.window,
-              workspacesConfig.window,
+              ...workspacesConfig.windows,
           ],
       });
 
@@ -301,16 +301,26 @@ lib.mkIf globals.enableAgs {
           });
       }
 
-      var workspacesWindow = Widget.Window({
-          name: "workspaces",
+      // Create two workspace windows: one anchored at the bottom, one at the top.
+      var workspacesWindowBottom = Widget.Window({
+          name: "workspaces-bottom",
           anchor: ["bottom"],
           child: Workspaces(),
           layer: "overlay",
           margins: [0, 0, 0, 0]
       });
 
+      var workspacesWindowTop = Widget.Window({
+          name: "workspaces-top",
+          anchor: ["top"],
+          child: Workspaces(),
+          layer: "overlay",
+          margins: [0, 0, 0, 0]
+      });
+
+      // Export both windows as an array in the config.
       var workspacesConfig = {
-          window: workspacesWindow,
+          windows: [workspacesWindowBottom, workspacesWindowTop],
           globals: {}
       };
 
