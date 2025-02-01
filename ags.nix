@@ -243,27 +243,27 @@ lib.mkIf globals.enableAgs {
               onClicked: () => dispatch(index),
               setup: self => {
                   self.hook(hyprland, () => {
-                      // Get all active workspace IDs from the monitors
-                      const activeIds = hyprland.monitors
-                          .filter(m => m.active_workspace)
-                          .map(m => m.active_workspace.id);
-                      const isActive = activeIds.includes(index);
-
                       // Check if the workspace is occupied (has any windows)
                       const isOccupied = hyprland.workspaces
                           .filter(ws => ws.windows > 0)
                           .map(ws => ws.id)
                           .includes(index);
 
-                      // Also include the currently focused workspace if it's not already active/occupied.
-                      const focusedWorkspace = hyprland["focused-workspace"];
+                      // Retrieve active workspace IDs from monitors.
+                      const activeIds = hyprland.monitors
+                          .filter(m => m.active_workspace)
+                          .map(m => m.active_workspace.id);
+                      const isActive = activeIds.includes(index);
+
+                      // Determine the focused workspace by checking monitors
+                      const focusedMonitor = hyprland.monitors.find(m => m.focused);
+                      const focusedWorkspace = focusedMonitor && focusedMonitor.active_workspace;
                       const isFocused = focusedWorkspace && focusedWorkspace.id === index;
 
-                      // Logging for debugging purposes (note the escaped $ signs)
-                      console.log(`Workspace $${index} - active: $${isActive}, occupied: $${isOccupied}, focused: $${!!isFocused}`);
-                      console.log(`Active IDs: $${JSON.stringify(activeIds)}`);
-                      console.log(`Focused workspace: $${JSON.stringify(focusedWorkspace)}`);
-                      console.log(`Hyprland workspaces: $${JSON.stringify(hyprland.workspaces)}`);
+                      // Reduced logging for debugging purposes
+                      console.log(
+                          `Workspace $${index}: active: $${isActive}, occupied: $${isOccupied}, focused: $${isFocused}`
+                      );
 
                       // Only show workspaces that are active, focused, or have windows
                       self.visible = isActive || isOccupied || isFocused;
