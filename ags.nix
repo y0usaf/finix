@@ -243,8 +243,10 @@ lib.mkIf globals.enableAgs {
               onClicked: () => dispatch(index),
               setup: self => {
                   self.hook(hyprland, () => {
-                      // Get all active workspaces from monitors
-                      const activeIds = hyprland.monitors.map(m => m.active_workspace.id);
+                      // Get all active workspace IDs from monitors if defined
+                      const activeIds = hyprland.monitors
+                          .filter(m => m.active_workspace)   // only take monitors that have an active_workspace
+                          .map(m => m.active_workspace.id);
                       const isActive = activeIds.includes(index);
                       const isOccupied = hyprland.workspaces
                           .filter(ws => ws.windows > 0)
