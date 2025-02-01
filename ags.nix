@@ -71,29 +71,33 @@ lib.mkIf globals.enableAgs {
 
       /* Test Workspaces Styles */
       .workspace-btn {
-          min-width: 20px;
-          min-height: 20px;
-          margin: 0 4px;
-          padding: 4px;
-          border-radius: 4px;
-          background-color: rgba(255, 255, 255, 0.1);
-          color: rgba(255, 255, 255, 0.5);  /* Dimmed color for inactive */
+          min-width: 16px;         /* minimal width */
+          min-height: 16px;        /* minimal height */
+          margin: 1px;             /* very small margin between buttons */
+          padding: 2px;            /* small padding */
+          border-radius: 0;        /* sharp corners */
+          background-color: #222;  /* hard background color */
+          color: #666;             /* unfocused text color */
+          display: flex;
+          align-items: center;
+          justify-content: center;
       }
 
       .workspace-btn label {
-          font-size: 16px;
-          font-weight: bold;
-          color: inherit;  /* Use inherited color */
+          font-size: 12px;         /* small text size */
+          font-weight: normal;
+          color: inherit;          /* inherit color from .workspace-btn */
+          margin: 0;
       }
 
       .workspace-btn.active {
-          background-color: rgba(255, 255, 255, 0.3);  /* Brighter background */
-          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-          color: rgba(255, 255, 255, 1);  /* Full white for active */
+          background-color: #333;  /* active (focused) background slightly lighter */
+          box-shadow: none;        /* no shadow to keep it minimal */
+          color: #fff;             /* active text color */
       }
 
       .workspace-btn.active label {
-          color: #ffffff;
+          color: #fff;
           font-weight: bold;
       }
     '';
