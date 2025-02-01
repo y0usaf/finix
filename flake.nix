@@ -64,26 +64,32 @@
     hy3,
     chaotic,
     ...
-  } @ inputs: let
-    # 💻 System architecture definition
+  }: let
+    # Define the target system architecture.
     system = "x86_64-linux";
-    # 📝 Configure nixpkgs with system and allow unfree packages
+
+    # Import pkgs with the desired configuration.
     pkgs = import nixpkgs {
       inherit system;
-      config.allowUnfree = true;
+      config = {
+        allowUnfree = true;
+      };
     };
-    # 🌍 Import global variables
+
+    # Import globals once and reuse them.
     globals = import ./globals.nix;
 
-    #── 🏗️ Home Manager Configuration Builder ────────────────────────#
-    # 🔨 Function to create consistent home-manager configurations
+    # Corrected: using "inherit" to pull both inputs and globals.
+    commonSpecialArgs = {
+      inherit globals;
+      inputs = self.inputs;
+    };
+
+    # Function to create a consistent home-manager configuration.
     mkHomeConfiguration = username: system:
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        extraSpecialArgs = {
-          inherit inputs;
-          globals = import ./globals.nix;
-        };
+        extraSpecialArgs = commonSpecialArgs;
         modules = [./home.nix];
       };
   in {
@@ -96,32 +102,25 @@
     #── 🖥️ Machine-Specific Configuration ──────────────────────────#
     nixosConfigurations."y0usaf-desktop" = nixpkgs.lib.nixosSystem {
       inherit system;
-      specialArgs = {
-        inherit inputs;
-        globals = import ./globals.nix;
-      };
+      specialArgs = commonSpecialArgs;
       modules = [
-        # 📋 Main system configuration
+        # Main system configuration.
         ./configuration.nix
-        # 🏠 Home-manager integration
+        # Home Manager integration.
         home-manager.nixosModules.home-manager
         {
           home-manager = {
-            extraSpecialArgs = {
-              inherit inputs;
-              hostName = "y0usaf-desktop";
-              globals = import ./globals.nix;
-            };
-            # 👤 User-specific configuration
+            extraSpecialArgs = commonSpecialArgs;
+            # User-specific configuration.
             users.y0usaf = import ./home.nix;
-            # 🔄 Global package management
+            # Global package management settings.
             useGlobalPkgs = true;
             useUserPackages = true;
-            # 💾 Backup configuration
+            # Backup configuration.
             backupFileExtension = "backup";
           };
         }
-        # 📦 Additional package repository
+        # Additional package repository.
         chaotic.nixosModules.default
       ];
     };
