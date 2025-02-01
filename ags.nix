@@ -71,31 +71,29 @@ lib.mkIf globals.enableAgs {
 
       /* Test Workspaces Styles */
       .workspace-btn {
-          min-width: 16px;         /* minimal width */
-          min-height: 16px;        /* minimal height */
-          margin: 1px;             /* very small margin between buttons */
-          padding: 2px;            /* small padding */
-          border-radius: 0;        /* sharp corners */
-          background-color: #222;  /* hard background color */
-          color: #666;             /* unfocused text color */
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          min-width: 16px;         /* Minimal width */
+          min-height: 16px;        /* Minimal height */
+          margin: 1px;             /* Tiny margin between buttons */
+          padding: 2px;            /* Small padding */
+          border-radius: 0;        /* Sharp corners */
+          background-color: #222;  /* Hard background color */
+          color: #666;             /* Unfocused text color */
+          text-align: center;      /* Center label text */
+          border: none;
       }
 
       .workspace-btn label {
-          font-size: 12px;         /* small text size */
+          font-size: 12px;         /* Small text size */
           font-weight: normal;
-          color: inherit;          /* inherit color from .workspace-btn */
+          color: inherit;          /* Inherit button text color */
           margin: 0;
       }
 
+      /* When a workspace is active (focused) */
       .workspace-btn.active {
-          background-color: #333;  /* active (focused) background slightly lighter */
-          box-shadow: none;        /* no shadow to keep it minimal */
-          color: #fff;             /* active text color */
+          background-color: #333;  /* Slightly lighter background for active state */
+          color: #fff;             /* White text color */
       }
-
       .workspace-btn.active label {
           color: #fff;
           font-weight: bold;
