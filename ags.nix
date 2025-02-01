@@ -56,8 +56,9 @@ lib.mkIf globals.enableAgs {
           font-family: monospace;
           font-weight: bold;
           color: #FFFFFF !important;
-          -webkit-text-stroke: 0.5em #000000 !important;
-          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
+          /* Remove unsupported properties: */
+          /* -webkit-text-stroke: 0.5em #000000 !important; */
+          /* text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important; */
       }
 
       .system-stats label {
