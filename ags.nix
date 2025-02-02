@@ -235,66 +235,55 @@ lib.mkIf profile.enableAgs {
           return Widget.Box({
               class_name: 'system-stats',
               vertical: true,
+              hpack: 'start',
               children: [
-                  // ASCII Art Header
                   Widget.Label({
                       class_name: 'stats-header',
+                      hpack: 'center',
                       label: "   _  ___      ____  ____\n  / |/ (_)_ __/ __ \\/ __/\n /    / /\\ \\ / /_/ /\\ \\  \n/_/|_/_//_\\_\\\\____/___/  "
                   }),
-                  // Time and Date
                   Widget.Label({
                       class_name: 'stats-time',
-                      halign: 'center',
+                      hpack: 'center',
                       label: stats.time.bind()
                   }),
                   Widget.Label({
                       class_name: 'stats-date',
-                      halign: 'center',
+                      hpack: 'center',
                       label: stats.date.bind()
                   }),
-                  // System info box - adjusted text alignment
                   Widget.Label({
-                      halign: 'start',
-                      label: "  ╭───────────╮"
+                      label: "╭───────────╮"
                   }),
                   Widget.Label({
-                      halign: 'start',
-                      label: stats.shell.bind().transform(sh => "  │   shell  │ " + sh.padEnd(8))
+                      label: stats.shell.bind().transform(sh => "│   shell  │ " + sh.padEnd(8))
                   }),
                   Widget.Label({
-                      halign: 'start',
-                      label: stats.uptime.bind().transform(up => "  │   uptime │ " + up.padEnd(8))
+                      label: stats.uptime.bind().transform(up => "│   uptime │ " + up.padEnd(8))
                   }),
                   Widget.Label({
-                      halign: 'start',
-                      label: stats.pkgs.bind().transform(count => "  │ 󰏖  pkgs   │ " + count.padEnd(8))
+                      label: stats.pkgs.bind().transform(count => "│ 󰏖  pkgs   │ " + count.padEnd(8))
                   }),
                   Widget.Label({
-                      halign: 'start',
                       label: stats.used_ram.bind().transform(used =>
-                          "  │ 󰍛  memory │ " + (used + " | " + stats.total_ram.value + " MiB").padEnd(8))
+                          "│ 󰍛  memory │ " + (used + " | " + stats.total_ram.value + " MiB").padEnd(8))
                   }),
                   Widget.Label({
-                      halign: 'start',
                       label: stats.cpu_temp.bind().transform(temp =>
-                          "  │   cpu    │ " + temp.padEnd(8))
+                          "│   cpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
-                      halign: 'start',
                       label: stats.gpu_temp.bind().transform(temp =>
-                          "  │   gpu    │ " + temp.padEnd(8))
+                          "│   gpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
-                      halign: 'start',
-                      label: "  ├───────────┤"
+                      label: "├───────────┤"
                   }),
                   Widget.Label({
-                      halign: 'start',
-                      label: "  │ 󰏘  colors │        "
+                      label: "│ 󰏘  colors │        "
                   }),
                   Widget.Label({
-                      halign: 'start',
-                      label: "  ╰───────────╯"
+                      label: "╰───────────╯"
                   })
               ],
               setup: function(self) {
