@@ -243,6 +243,20 @@ lib.mkIf profile.enableAgs {
               shell: Variable('N/A')
           };
 
+          // Define our labels and find the longest one
+          const labels = ['shell', 'uptime', 'pkgs', 'memory', 'cpu', 'gpu', 'colors'];
+          const longestLabel = Math.max(...labels.map(l => l.length));
+
+          // Function to pad a label to match the longest label
+          function padLabel(label) {
+              return label + ' '.repeat(longestLabel - label.length);
+          }
+
+          // Function to create horizontal border
+          function horizontalBorder(char1, char2, char3) {
+              return char1 + "─".repeat(longestLabel + 6) + char3;
+          }
+
           return Widget.Box({
               class_name: 'system-stats',
               vertical: true,
@@ -262,9 +276,9 @@ lib.mkIf profile.enableAgs {
                   Widget.Label({
                       class_name: 'stats-white',
                       xalign: 0,
-                      label: "╭──────────╮"
+                      label: horizontalBorder("╭", "─", "╮")
                   }),
-                  Widget.Box({
+                  ...labels.map((currentLabel) => Widget.Box({
                       children: [
                           Widget.Label({
                               class_name: 'stats-white',
@@ -272,171 +286,38 @@ lib.mkIf profile.enableAgs {
                               label: "│ "
                           }),
                           Widget.Label({
-                              class_name: 'stats-shell',
+                              class_name: "stats-" + currentLabel,
                               xalign: 0,
                               label: "• "
                           }),
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "shell │ "
+                              label: padLabel(currentLabel) + " │ "
                           }),
                           Widget.Label({
-                              class_name: 'stats-shell',
+                              class_name: "stats-" + currentLabel,
                               xalign: 0,
-                              label: stats.shell.bind()
+                              label: (() => {
+                                  switch(currentLabel) {
+                                      case 'shell': return stats.shell.bind();
+                                      case 'uptime': return stats.uptime.bind();
+                                      case 'pkgs': return stats.pkgs.bind();
+                                      case 'memory': return stats.used_ram.bind().transform(used =>
+                                          used + " | " + stats.total_ram.value);
+                                      case 'cpu': return stats.cpu_temp.bind();
+                                      case 'gpu': return stats.gpu_temp.bind();
+                                      case 'colors': return "        ";
+                                      default: return "";
+                                  }
+                              })()
                           })
                       ]
-                  }),
-                  Widget.Box({
-                      children: [
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "│ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-uptime',
-                              xalign: 0,
-                              label: "• "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "uptime │ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-uptime',
-                              xalign: 0,
-                              label: stats.uptime.bind()
-                          })
-                      ]
-                  }),
-                  Widget.Box({
-                      children: [
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "│ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-pkgs',
-                              xalign: 0,
-                              label: "• "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "pkgs │ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-pkgs',
-                              xalign: 0,
-                              label: stats.pkgs.bind()
-                          })
-                      ]
-                  }),
-                  Widget.Box({
-                      children: [
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "│ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-memory',
-                              xalign: 0,
-                              label: "• "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "memory │ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-memory',
-                              xalign: 0,
-                              label: stats.used_ram.bind().transform(used =>
-                                  used + " | " + stats.total_ram.value)
-                          })
-                      ]
-                  }),
-                  Widget.Box({
-                      children: [
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "│ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-cpu',
-                              xalign: 0,
-                              label: "• "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "cpu │ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-cpu',
-                              xalign: 0,
-                              label: stats.cpu_temp.bind()
-                          })
-                      ]
-                  }),
-                  Widget.Box({
-                      children: [
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "│ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-gpu',
-                              xalign: 0,
-                              label: "• "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "gpu │ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-gpu',
-                              xalign: 0,
-                              label: stats.gpu_temp.bind()
-                          })
-                      ]
-                  }),
+                  })),
                   Widget.Label({
                       class_name: 'stats-white',
                       xalign: 0,
-                      label: "├──────────┤"
-                  }),
-                  Widget.Box({
-                      children: [
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "│ "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-colors',
-                              xalign: 0,
-                              label: "• "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "colors │        "
-                          })
-                      ]
-                  }),
-                  Widget.Label({
-                      class_name: 'stats-white',
-                      xalign: 0,
-                      label: "╰──────────╯"
+                      label: horizontalBorder("╰", "─", "╯")
                   })
               ],
               setup: function(self) {
