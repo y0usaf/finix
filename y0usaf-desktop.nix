@@ -24,6 +24,7 @@ in {
   enableBackup = true;
   enableNeovim = true;
   enableAndroid = true;
+  enableWebapps = true;
 
   # Common paths
   flakeDir = "/home/${username}/nixos";

@@ -138,6 +138,9 @@ in {
         android = lib.mkOption {
           type = mkFeature "Android-related settings";
         };
+        webapps = lib.mkOption {
+          type = mkFeature "Web applications and browser integration";
+        };
       };
     };
   };

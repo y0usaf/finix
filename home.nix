@@ -28,7 +28,6 @@
       ./foot.nix
       ./gtk.nix
       ./cursor.nix
-      ./webapps.nix
     ]
     ++ lib.optionals profile.enableHyprland [
       ./hyprland.nix
@@ -44,6 +43,9 @@
     ]
     ++ lib.optionals profile.enableAndroid [
       ./android.nix
+    ]
+    ++ lib.optionals profile.enableWebapps [
+      ./webapps.nix
     ];
 
   #── 📦 Core Programs ──────────────────────#
@@ -94,7 +96,6 @@
       vlc
       stremio
       cmus
-      chromium
 
       # System utilities
       grim
