@@ -1,7 +1,12 @@
 #─────────────────────────── 🌍 SYSTEM OPTIONS 🌍 ───────────────────────────#
 {lib, ...}: let
-  # Core packages that will always be installed
-  corePackages = [
+  # Common type shorthands for clarity
+  mkStr = lib.types.str;
+  mkBool = lib.types.bool;
+  mkListOfStr = lib.types.listOf lib.types.str;
+
+  # Default packages for various options
+  defaultCorePackages = [
     "git"
     "curl"
     "wget"
@@ -15,32 +20,32 @@
     "lm_sensors"
   ];
 
-  # Simplify the mkFeature helper by using more concise type definitions
+  # Helper to create a feature submodule with 'enable' and 'packages' options
   mkFeature = description:
     lib.types.submodule {
       options = {
         enable = lib.mkOption {
-          type = lib.types.bool;
+          type = mkBool;
           default = false;
-          description = "Enable ${description}";
+          description = "Enable " + description;
         };
         packages = lib.mkOption {
-          type = with lib.types; listOf str;
-          default = []; # Empty default since we'll use corePackages separately
+          type = mkListOfStr;
+          default = [];
           description = "Packages to install when this feature is enabled";
         };
       };
     };
 
-  # Simplify defaultAppModule similarly
+  # Submodule for default application configurations
   defaultAppModule = lib.types.submodule {
     options = {
       package = lib.mkOption {
-        type = lib.types.str;
+        type = mkStr;
         description = "Package name to install";
       };
       command = lib.mkOption {
-        type = lib.types.str;
+        type = mkStr;
         description = "Command to execute the application";
       };
     };
@@ -48,20 +53,8 @@
 in {
   # Core packages configuration
   corePackages = lib.mkOption {
-    type = with lib.types; listOf str;
-    default = [
-      "git"
-      "curl"
-      "wget"
-      "cachix"
-      "unzip"
-      "bash"
-      "vim"
-      "dconf"
-      "lsd"
-      "alejandra"
-      "lm_sensors"
-    ];
+    type = mkListOfStr;
+    default = defaultCorePackages;
     description = "Essential packages that will always be installed";
   };
 
@@ -70,28 +63,28 @@ in {
     type = lib.types.submodule {
       options = {
         username = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "The username for the system.";
         };
         homeDirectory = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "The path to the user's home directory.";
         };
         hostname = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "The system hostname.";
         };
         stateVersion = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "The system state version.";
         };
         timezone = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "The system timezone.";
         };
         packages = lib.mkOption {
-          type = with lib.types; listOf str;
-          default = corePackages;
+          type = mkListOfStr;
+          default = defaultCorePackages;
           description = "Core system packages that will always be installed.";
         };
       };
@@ -102,45 +95,19 @@ in {
   features = lib.mkOption {
     type = lib.types.submodule {
       options = {
-        hyprland = lib.mkOption {
-          type = mkFeature "Hyprland desktop environment";
-        };
-        ags = lib.mkOption {
-          type = mkFeature "Ags configuration";
-        };
-        wayland = lib.mkOption {
-          type = mkFeature "Wayland support";
-        };
-        nvidia = lib.mkOption {
-          type = mkFeature "Nvidia-specific configuration";
-        };
-        gaming = lib.mkOption {
-          type = mkFeature "gaming-specific configuration";
-        };
-        development = lib.mkOption {
-          type = mkFeature "development-related configuration";
-        };
-        media = lib.mkOption {
-          type = mkFeature "media-related configuration";
-        };
-        creative = lib.mkOption {
-          type = mkFeature "creative-specific configuration";
-        };
-        virtualization = lib.mkOption {
-          type = mkFeature "virtualization support";
-        };
-        backup = lib.mkOption {
-          type = mkFeature "backup solutions";
-        };
-        neovim = lib.mkOption {
-          type = mkFeature "Neovim integration";
-        };
-        android = lib.mkOption {
-          type = mkFeature "Android-related settings";
-        };
-        webapps = lib.mkOption {
-          type = mkFeature "Web applications and browser integration";
-        };
+        hyprland = lib.mkOption {type = mkFeature "Hyprland desktop environment";};
+        ags = lib.mkOption {type = mkFeature "Ags configuration";};
+        wayland = lib.mkOption {type = mkFeature "Wayland support";};
+        nvidia = lib.mkOption {type = mkFeature "Nvidia-specific configuration";};
+        gaming = lib.mkOption {type = mkFeature "gaming-specific configuration";};
+        development = lib.mkOption {type = mkFeature "development-related configuration";};
+        media = lib.mkOption {type = mkFeature "media-related configuration";};
+        creative = lib.mkOption {type = mkFeature "creative-specific configuration";};
+        virtualization = lib.mkOption {type = mkFeature "virtualization support";};
+        backup = lib.mkOption {type = mkFeature "backup solutions";};
+        neovim = lib.mkOption {type = mkFeature "Neovim integration";};
+        android = lib.mkOption {type = mkFeature "Android-related settings";};
+        webapps = lib.mkOption {type = mkFeature "Web applications and browser integration";};
       };
     };
   };
@@ -150,27 +117,27 @@ in {
     type = lib.types.submodule {
       options = {
         flake = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "The directory where the flake lives.";
         };
         music = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "Directory for music files.";
         };
         dcim = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "Directory for pictures (DCIM).";
         };
         steam = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "Directory for Steam.";
         };
         wallpaper = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "Wallpaper directory.";
         };
         wallpaperVideo = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "Wallpaper video directory.";
         };
       };
@@ -230,15 +197,15 @@ in {
     type = lib.types.submodule {
       options = {
         name = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "Git username.";
         };
         email = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "Git email address.";
         };
         homeManagerRepoUrl = lib.mkOption {
-          type = lib.types.str;
+          type = mkStr;
           description = "URL of the Home Manager repository.";
         };
       };
