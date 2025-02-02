@@ -37,9 +37,9 @@
       }
 
       button {
-        border-radius: 4px;
-        min-height: 24px;
-        padding: 2px 6px;
+        border-radius: 4pt;
+        min-height: 24pt;
+        padding: 2pt 6pt;
       }
 
       menu {
