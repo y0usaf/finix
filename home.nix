@@ -71,68 +71,71 @@
   };
 
   #── 📦 User Packages ───────────────────────#
-  home.packages = with pkgs;
-    [
-      #── 🎨 Development Tools ─────────────────#
-      cmake
-      meson
-      bottom
-      (pkgs.${profile.defaultIde.package})
-      alejandra
-      cpio
-      pkg-config
-      ninja
-      gcc
+  home.packages = with pkgs; let
+    #── 🛠️ Essential Packages ─────────────────#
+    essentialPkgs = [
+      # Core system utilities
       git
-      vim
       curl
       wget
       cachix
       unzip
-      lm_sensors
-      yt-dlp-light
       bash
+      vim
+      dconf
+      lsd
+      alejandra
+      lm_sensors
+
+      # Python with basic packages
       (python3.withPackages (ps:
         with ps; [
           pip
           setuptools
         ]))
+    ];
 
-      #── 🔧 Terminal and System Utilities ────#
-      (pkgs.${profile.defaultTerminal.package})
+    #── 📦 Optional Packages ─────────────────#
+    optionalPkgs = [
+      # Development tools
+      cmake
+      meson
+      bottom
+      cpio
+      pkg-config
+      ninja
+      gcc
+
+      # Media tools
       pavucontrol
-      nitch
-      microfetch
-      (pkgs.${profile.defaultLauncher.package})
-      (pkgs.${profile.defaultFileManager.package})
-      syncthing
-      lsd
-      waybar
-      (pkgs.${profile.defaultArchiveManager.package})
-      dconf
-
-      #── 🌐 Web Applications ─────────────────#
-      (pkgs.${profile.defaultBrowser.package})
-      (pkgs.${profile.defaultDiscord.package})
-      discord-screenaudio
-
-      #── 📺 Media and Streaming ──────────────#
-      (pkgs.${profile.defaultImageViewer.package})
-      (pkgs.${profile.defaultMediaPlayer.package})
+      ffmpeg
+      yt-dlp-light
       vlc
       stremio
-      ffmpeg
       cmus
       chromium
-    ]
-    ++ lib.optionals profile.enableWayland [
-      #── 🖥️ Wayland Utilities ───────────────#
+
+      # System utilities
       grim
       slurp
       wl-clipboard
       nwg-wrapper
       hyprpicker
     ];
+
+    #── 👤 User Profile Packages ─────────────#
+    userPkgs = [
+      (pkgs.${profile.defaultTerminal.package})
+      (pkgs.${profile.defaultBrowser.package})
+      (pkgs.${profile.defaultFileManager.package})
+      (pkgs.${profile.defaultLauncher.package})
+      (pkgs.${profile.defaultIde.package})
+      (pkgs.${profile.defaultMediaPlayer.package})
+      (pkgs.${profile.defaultImageViewer.package})
+      (pkgs.${profile.defaultDiscord.package})
+    ];
+  in
+    essentialPkgs ++ optionalPkgs ++ userPkgs;
 
   #── 🔧 System Configurations ──────────────#
   dconf.enable = true;
