@@ -44,7 +44,46 @@ lib.mkIf profile.enableAgs {
           background: none;
           border: none;
           box-shadow: none;
-          text-shadow: none;
+          text-shadow:
+              /* 1st repetition */
+              1px 0 1px #000000,
+              -1px 0 1px #000000,
+              0 1px 1px #000000,
+              0 -1px 1px #000000,
+              1px 1px 1px #000000,
+              -1px 1px 1px #000000,
+              1px -1px 1px #000000,
+              -1px -1px 1px #000000,
+
+              /* 2nd repetition */
+              1px 0 1px #000000,
+              -1px 0 1px #000000,
+              0 1px 1px #000000,
+              0 -1px 1px #000000,
+              1px 1px 1px #000000,
+              -1px 1px 1px #000000,
+              1px -1px 1px #000000,
+              -1px -1px 1px #000000,
+
+              /* 3rd repetition */
+              1px 0 1px #000000,
+              -1px 0 1px #000000,
+              0 1px 1px #000000,
+              0 -1px 1px #000000,
+              1px 1px 1px #000000,
+              -1px 1px 1px #000000,
+              1px -1px 1px #000000,
+              -1px -1px 1px #000000,
+
+              /* 4th repetition */
+              1px 0 1px #000000,
+              -1px 0 1px #000000,
+              0 1px 1px #000000,
+              0 -1px 1px #000000,
+              1px 1px 1px #000000,
+              -1px 1px 1px #000000,
+              1px -1px 1px #000000,
+              -1px -1px 1px #000000;
           font-family: inherit;
           font-size: inherit;
           font-weight: inherit;
