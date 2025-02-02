@@ -72,29 +72,9 @@
 
   #── 📦 User Packages ───────────────────────#
   home.packages = with pkgs; let
-    #── 🛠️ Essential Packages ─────────────────#
-    essentialPkgs = [
-      # Core system utilities
-      git
-      curl
-      wget
-      cachix
-      unzip
-      bash
-      vim
-      dconf
-      lsd
-      alejandra
-      lm_sensors
-      syncthing
-
-      # Python with basic packages
-      (python3.withPackages (ps:
-        with ps; [
-          pip
-          setuptools
-        ]))
-    ];
+    # Import core packages list from options.nix
+    options = import ./options.nix {inherit lib;};
+    corePackages = options.corePackages.default;
 
     #── 📦 Optional Packages ─────────────────#
     optionalPkgs = [
@@ -123,6 +103,14 @@
       nwg-wrapper
       hyprpicker
       nitch
+      syncthing
+
+      # Python with basic packages
+      (python3.withPackages (ps:
+        with ps; [
+          pip
+          setuptools
+        ]))
     ];
 
     #── 👤 User Profile Packages ─────────────#
@@ -137,7 +125,7 @@
       (pkgs.${profile.defaultDiscord.package})
     ];
   in
-    essentialPkgs ++ optionalPkgs ++ userPkgs;
+    (map (name: pkgs.${name}) corePackages) ++ optionalPkgs ++ userPkgs;
 
   #── 🔧 System Configurations ──────────────#
   dconf.enable = true;
