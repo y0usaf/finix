@@ -254,40 +254,40 @@ lib.mkIf profile.enableAgs {
                   }),
                   // Box with system information
                   Widget.Label({
-                      label: "  ╭───────────╮"
+                      label: "  ╭──────────────────╮"
                   }),
                   Widget.Label({
-                      label: stats.shell.bind().transform(function(sh) { return "  │   shell  │ " + sh; })
+                      label: stats.shell.bind().transform(function(sh) { return "  │      shell     │ " + sh; })
                   }),
                   Widget.Label({
-                      label: stats.uptime.bind().transform(function(up) { return "  │   uptime │ " + up; })
+                      label: stats.uptime.bind().transform(function(up) { return "  │     uptime    │ " + up; })
                   }),
                   Widget.Label({
-                      label: stats.pkgs.bind().transform(function(count) { return "  │ 󰏖  pkgs   │ " + count; })
+                      label: stats.pkgs.bind().transform(function(count) { return "  │   󰏖  pkgs      │ " + count; })
                   }),
                   Widget.Label({
                       label: stats.used_ram.bind().transform(function(used) {
-                          return "  │ 󰍛  memory │ " + used + " | " + stats.total_ram.value + " MiB";
+                          return "  │   󰍛  memory    │ " + used + " | " + stats.total_ram.value + " MiB";
                       })
                   }),
                   Widget.Label({
                       label: stats.cpu_temp.bind().transform(function(temp) {
-                          return "  │   cpu    │ " + temp;
+                          return "  │      cpu      │ " + temp;
                       })
                   }),
                   Widget.Label({
                       label: stats.gpu_temp.bind().transform(function(temp) {
-                          return "  │   gpu    │ " + temp;
+                          return "  │      gpu      │ " + temp;
                       })
                   }),
                   Widget.Label({
-                      label: "  ├───────────┤"
+                      label: "  ├──────────────────┤"
                   }),
                   Widget.Label({
-                      label: "  │ 󰏘  colors │        "
+                      label: "  │   󰏘  colors    │            "
                   }),
                   Widget.Label({
-                      label: "  ╰───────────╯"
+                      label: "  ╰──────────────────╯"
                   })
               ],
               setup: function(self) {
