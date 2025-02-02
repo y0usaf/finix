@@ -77,7 +77,7 @@
       cmake
       meson
       bottom
-      code-cursor
+      (pkgs.${profile.defaultIde.package})
       alejandra
       cpio
       pkg-config
@@ -99,32 +99,30 @@
         ]))
 
       #── 🔧 Terminal and System Utilities ────#
-      foot
+      (pkgs.${profile.defaultTerminal.package})
       pavucontrol
       nitch
       microfetch
-      sway-launcher-desktop
-      pcmanfm
+      (pkgs.${profile.defaultLauncher.package})
+      (pkgs.${profile.defaultFileManager.package})
       syncthing
       lsd
       waybar
-      p7zip
+      (pkgs.${profile.defaultArchiveManager.package})
       dconf
 
       #── 🌐 Web Applications ─────────────────#
-      firefox
-      vesktop
+      (pkgs.${profile.defaultBrowser.package})
+      (pkgs.${profile.defaultDiscord.package})
       discord-screenaudio
 
       #── 📺 Media and Streaming ──────────────#
-      imv
-      mpv
+      (pkgs.${profile.defaultImageViewer.package})
+      (pkgs.${profile.defaultMediaPlayer.package})
       vlc
       stremio
       ffmpeg
       cmus
-
-      # Add this to the existing packages section
       chromium
     ]
     ++ lib.optionals profile.enableWayland [

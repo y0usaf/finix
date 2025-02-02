@@ -47,8 +47,8 @@ in {
     command = "code-cursor";
   };
   defaultTerminal = {
-    package = "kitty";
-    command = "kitty";
+    package = "foot";
+    command = "foot";
   };
   defaultFileManager = {
     package = "pcmanfm";
