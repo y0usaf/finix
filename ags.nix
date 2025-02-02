@@ -184,44 +184,62 @@ lib.mkIf profile.enableAgs {
 
       function getStats() {
           // Get CPU temperature
-          const cpuTempCmd = ['bash', '-c', "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"];
-          const cpu_temp = safeExec(cpuTempCmd, 'Failed to get CPU stats:');
+          const cpuTempCmd = ["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"];
+          const cpu_temp = safeExec(cpuTempCmd, "Failed to get CPU stats:");
 
           // Get GPU temperature
           const gpuCmd = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits";
-          let gpu_temp = safeExec(gpuCmd, 'Failed to get GPU stats:');
-          if (gpu_temp !== 'N/A') {
+          let gpu_temp = safeExec(gpuCmd, "Failed to get GPU stats:");
+          if (gpu_temp !== "N/A") {
               gpu_temp += "°C";
           }
 
           // Get RAM info
-          const ramInfo = exec('free -h').split('\n')[1].split(/\s+/);
+          const ramInfo = exec("free -h").split("\n")[1].split(/\s+/);
           const used_ram = ramInfo[2];
           const total_ram = ramInfo[1];
 
           // Get date and time
-          const time = safeExec('date "+%H:%M:%S"', 'Failed to get time:');
-          const date = safeExec('date "+%d/%m/%y"', 'Failed to get date:');
+          const time = safeExec('date "+%H:%M:%S"', "Failed to get time:");
+          const date = safeExec('date "+%d/%m/%y"', "Failed to get date:");
+
+          // Fix uptime command
+          const uptime = safeExec(["uptime", "-p"], "Failed to get uptime:").replace("up ", "");
+
+          // Fix package count
+          const pkgs = safeExec(
+              ["bash", "-c", "nix-store -q --requisites /run/current-system/sw | wc -l"],
+              "Failed to get package count:"
+          ).trim();
+
+          // Get shell name without full path
+          const shell = safeExec("basename $SHELL", "Failed to get shell:");
 
           return {
-               cpu_temp,
-               gpu_temp,
-               used_ram,
-               total_ram,
-               time,
-               date
+              cpu_temp,
+              gpu_temp,
+              used_ram,
+              total_ram,
+              time,
+              date,
+              uptime,
+              pkgs,
+              shell
           };
       }
 
       function SystemStats() {
-          // Create variables to hold state
+          // Add new variables
           var stats = {
               cpu_temp: Variable('N/A'),
               gpu_temp: Variable('N/A'),
               used_ram: Variable('N/A'),
               total_ram: Variable('N/A'),
               time: Variable('00:00:00'),
-              date: Variable('00/00/00')
+              date: Variable('00/00/00'),
+              uptime: Variable('N/A'),    // Add these new variables
+              pkgs: Variable('N/A'),
+              shell: Variable('N/A')
           };
 
           // Update function
@@ -261,6 +279,21 @@ lib.mkIf profile.enableAgs {
                       label: stats.used_ram.bind().transform(function(used) {
                           return "RAM: " + used + "/" + stats.total_ram.value;
                       })
+                  }),
+                  Widget.Label({
+                      class_name: 'stats-info',
+                      halign: 'start',
+                      label: stats.uptime.bind().transform(function(up) { return "Up: " + up; })
+                  }),
+                  Widget.Label({
+                      class_name: 'stats-info',
+                      halign: 'start',
+                      label: stats.pkgs.bind().transform(function(count) { return "Pkgs: " + count; })
+                  }),
+                  Widget.Label({
+                      class_name: 'stats-info',
+                      halign: 'start',
+                      label: stats.shell.bind().transform(function(sh) { return "Shell: " + sh; })
                   })
               ],
               setup: function(self) {
