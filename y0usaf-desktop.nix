@@ -4,14 +4,14 @@
 let
   username = "y0usaf";
 in {
-  # Basic user and system settings
-  inherit username;
+  # Basic settings
+  username = username;
   homeDirectory = "/home/${username}";
   hostname = "y0usaf-desktop";
   stateVersion = "24.11";
   timezone = "America/Toronto";
 
-  # Feature flags
+  # Enable feature flags
   enableHyprland = true;
   enableAgs = true;
   enableWayland = true;
