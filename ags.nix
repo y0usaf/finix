@@ -59,29 +59,11 @@ lib.mkIf profile.enableAgs {
       }
 
       .system-stats label {
-          margin: 4px;
-          min-width: 100px;
-          text-shadow: inherit;
+          margin: 0;  /* Remove any margins */
+          padding: 0; /* Remove any padding */
       }
 
-      .stats-header {
-          font-size: 14px;
-          margin-bottom: 8px;
-          color: #00ffff; /* Cyan for the header */
-      }
-
-      .stats-time {
-          font-size: 32px;
-          margin-bottom: 4px;
-          color: #ffffff;
-      }
-
-      .stats-date {
-          font-size: 16px;
-          margin-bottom: 8px;
-          color: #ffffff;
-      }
-
+      /* Colors for different elements */
       .stats-shell { color: #ff00ff; }  /* Magenta */
       .stats-uptime { color: #0088ff; } /* Blue */
       .stats-pkgs { color: #ff0000; }   /* Red */
@@ -89,6 +71,26 @@ lib.mkIf profile.enableAgs {
       .stats-cpu { color: #00ff00; }     /* Green */
       .stats-gpu { color: #00ffff; }     /* Cyan */
       .stats-colors { color: #ffffff; }   /* White */
+      .stats-white { color: #ffffff; }    /* White */
+
+      /* Header styles */
+      .stats-header {
+          color: #00ffff;
+          font-size: 14px;
+          margin-bottom: 8px;
+      }
+
+      .stats-time {
+          color: #ffffff;
+          font-size: 32px;
+          margin-bottom: 4px;
+      }
+
+      .stats-date {
+          color: #ffffff;
+          font-size: 16px;
+          margin-bottom: 8px;
+      }
 
       /* Box characters in white */
       .stats-box { color: #ffffff; }
@@ -144,9 +146,6 @@ lib.mkIf profile.enableAgs {
       .workspace-btn.urgent label {
           color: #ff5555;  /* replaced var(--urgent-color) */
       }
-
-      /* White text for labels and borders */
-      .stats-white { color: #ffffff; }
     '';
 
     "ags/system-stats.js".text = ''
