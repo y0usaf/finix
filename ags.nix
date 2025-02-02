@@ -63,25 +63,21 @@ lib.mkIf profile.enableAgs {
           margin: 4px;
           min-width: 100px;
           text-shadow: inherit;
-          text-align: left !important;  /* Force left alignment */
       }
 
       .stats-header {
           font-size: 14px;
           margin-bottom: 8px;
-          text-align: center !important;  /* Keep header centered */
       }
 
       .stats-time {
           font-size: 32px;
           margin-bottom: 4px;
-          text-align: center !important;  /* Keep time centered */
       }
 
       .stats-date {
           font-size: 16px;
           margin-bottom: 8px;
-          text-align: center !important;  /* Keep date centered */
       }
 
       .stats-info {
