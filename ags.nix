@@ -146,6 +146,15 @@ lib.mkIf profile.enableAgs {
       .workspace-btn.urgent label {
           color: #ff5555;  /* replaced var(--urgent-color) */
       }
+
+      /* Individual color dots */
+      .stats-red { color: #ff0000; }
+      .stats-orange { color: #ff8800; }
+      .stats-yellow { color: #ffff00; }
+      .stats-green { color: #00ff00; }
+      .stats-cyan { color: #00ffff; }
+      .stats-blue { color: #0088ff; }
+      .stats-magenta { color: #ff00ff; }
     '';
 
     "ags/system-stats.js".text = ''
@@ -288,16 +297,6 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: "stats-" + currentLabel,
                               xalign: 0,
-                              label: "• "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: padLabel(currentLabel) + " │ "
-                          }),
-                          Widget.Label({
-                              class_name: "stats-" + currentLabel,
-                              xalign: 0,
                               label: (() => {
                                   switch(currentLabel) {
                                       case 'shell': return stats.shell.bind();
@@ -307,7 +306,18 @@ lib.mkIf profile.enableAgs {
                                           used + " | " + stats.total_ram.value);
                                       case 'cpu': return stats.cpu_temp.bind();
                                       case 'gpu': return stats.gpu_temp.bind();
-                                      case 'colors': return "        ";
+                                      case 'colors': return Widget.Box({
+                                          children: [
+                                              Widget.Label({ class_name: 'stats-red', label: '• ' }),
+                                              Widget.Label({ class_name: 'stats-orange', label: '• ' }),
+                                              Widget.Label({ class_name: 'stats-yellow', label: '• ' }),
+                                              Widget.Label({ class_name: 'stats-green', label: '• ' }),
+                                              Widget.Label({ class_name: 'stats-cyan', label: '• ' }),
+                                              Widget.Label({ class_name: 'stats-blue', label: '• ' }),
+                                              Widget.Label({ class_name: 'stats-magenta', label: '• ' }),
+                                              Widget.Label({ class_name: 'stats-white', label: '• ' })
+                                          ]
+                                      });
                                       default: return "";
                                   }
                               })()
