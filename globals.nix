@@ -26,6 +26,7 @@ in {
   enableVirtualization = true; # Enable virtualization support
   enableBackup = true; # Enable backup services and configurations
   enableNeovim = true; # Enable Neovim editor configuration
+  enableAndroid = true; # Enable Android/Waydroid support
 
   #── 📁 Common Paths ───────────────────#
   flakeDir = "/home/${username}/nixos";

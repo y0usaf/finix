@@ -41,6 +41,9 @@
     ]
     ++ lib.optionals globals.enableNeovim [
       ./nvim.nix
+    ]
+    ++ lib.optionals globals.enableAndroid [
+      ./android.nix
     ];
 
   #── 📦 Core Programs ──────────────────────#
