@@ -206,6 +206,19 @@ lib.mkIf profile.enableAgs {
           };
       }
 
+      function updateStats(stats) {
+          const newStats = getStats();
+          stats.cpu_temp.value = newStats.cpu_temp;
+          stats.gpu_temp.value = newStats.gpu_temp;
+          stats.used_ram.value = newStats.used_ram;
+          stats.total_ram.value = newStats.total_ram;
+          stats.time.value = newStats.time;
+          stats.date.value = newStats.date;
+          stats.uptime.value = newStats.uptime;
+          stats.pkgs.value = newStats.pkgs;
+          stats.shell.value = newStats.shell;
+      }
+
       function SystemStats() {
           var stats = {
               cpu_temp: Variable('N/A'),
@@ -278,7 +291,7 @@ lib.mkIf profile.enableAgs {
                   })
               ],
               setup: function(self) {
-                  self.poll(1000, updateStats);
+                  self.poll(1000, () => updateStats(stats));
               }
           });
       }
