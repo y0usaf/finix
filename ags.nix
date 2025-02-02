@@ -56,56 +56,28 @@ lib.mkIf profile.enableAgs {
           font-family: monospace;
           font-weight: bold;
           color: #FFFFFF;
-          text-shadow:
-            /* 1st repetition */
-            2px 0 2px #000000,
-            -2px 0 2px #000000,
-            0 2px 2px #000000,
-            0 -2px 2px #000000,
-            2px 2px 2px #000000,
-            -2px 2px 2px #000000,
-            2px -2px 2px #000000,
-            -2px -2px 2px #000000,
+          text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+      }
 
-            /* 2nd repetition */
-            2px 0 2px #000000,
-            -2px 0 2px #000000,
-            0 2px 2px #000000,
-            0 -2px 2px #000000,
-            2px 2px 2px #000000,
-            -2px 2px 2px #000000,
-            2px -2px 2px #000000,
-            -2px -2px 2px #000000,
+      .stats-header {
+          font-size: 14px;
+          margin-bottom: 8px;
+      }
 
-            /* 3rd repetition */
-            2px 0 2px #000000,
-            -2px 0 2px #000000,
-            0 2px 2px #000000,
-            0 -2px 2px #000000,
-            2px 2px 2px #000000,
-            -2px 2px 2px #000000,
-            2px -2px 2px #000000,
-            -2px -2px 2px #000000,
+      .stats-time {
+          font-size: 32px;
+          margin-bottom: 4px;
+      }
 
-            /* 4th repetition */
-            2px 0 2px #000000,
-            -2px 0 2px #000000,
-            0 2px 2px #000000,
-            0 -2px 2px #000000,
-            2px 2px 2px #000000,
-            -2px 2px 2px #000000,
-            2px -2px 2px #000000,
-            -2px -2px 2px #000000;
+      .stats-date {
+          font-size: 16px;
+          margin-bottom: 8px;
       }
 
       .system-stats label {
           margin: 4px;
           min-width: 100px;
           text-shadow: inherit;
-      }
-
-      .stats-time {
-          font-size: 96px;
       }
 
       .stats-info {
@@ -235,7 +207,6 @@ lib.mkIf profile.enableAgs {
       }
 
       function SystemStats() {
-          // Add new variables
           var stats = {
               cpu_temp: Variable('N/A'),
               gpu_temp: Variable('N/A'),
@@ -243,63 +214,67 @@ lib.mkIf profile.enableAgs {
               total_ram: Variable('N/A'),
               time: Variable('00:00:00'),
               date: Variable('00/00/00'),
-              uptime: Variable('N/A'),    // Add these new variables
+              uptime: Variable('N/A'),
               pkgs: Variable('N/A'),
               shell: Variable('N/A')
           };
-
-          // Update function
-          function updateStats() {
-              var newStats = getStats();
-              Object.keys(newStats).forEach(function(key) {
-                  stats[key].value = newStats[key];
-              });
-          }
 
           return Widget.Box({
               class_name: 'system-stats',
               vertical: true,
               children: [
+                  // ASCII Art Header
+                  Widget.Label({
+                      class_name: 'stats-header',
+                      label: "   _  ___      ____  ____\n  / |/ (_)_ __/ __ \\/ __/\n /    / /\\ \\ / /_/ /\\ \\  \n/_/|_/_//_\\_\\\\____/___/  "
+                  }),
+                  // Time and Date
                   Widget.Label({
                       class_name: 'stats-time',
+                      halign: 'center',
                       label: stats.time.bind()
                   }),
                   Widget.Label({
-                      class_name: 'stats-info',
+                      class_name: 'stats-date',
+                      halign: 'center',
                       label: stats.date.bind()
                   }),
+                  // Box with system information
                   Widget.Label({
-                      class_name: 'stats-info',
-                      label: stats.cpu_temp.bind().transform(function(temp) {
-                          return "CPU: " + temp;
-                      })
+                      label: "  ╭───────────╮"
                   }),
                   Widget.Label({
-                      class_name: 'stats-info',
-                      label: stats.gpu_temp.bind().transform(function(temp) {
-                          return "GPU: " + temp;
-                      })
+                      label: stats.shell.bind().transform(function(sh) { return "  │   shell  │ " + sh; })
                   }),
                   Widget.Label({
-                      class_name: 'stats-info',
+                      label: stats.uptime.bind().transform(function(up) { return "  │   uptime │ " + up; })
+                  }),
+                  Widget.Label({
+                      label: stats.pkgs.bind().transform(function(count) { return "  │ 󰏖  pkgs   │ " + count; })
+                  }),
+                  Widget.Label({
                       label: stats.used_ram.bind().transform(function(used) {
-                          return "RAM: " + used + "/" + stats.total_ram.value;
+                          return "  │ 󰍛  memory │ " + used + " | " + stats.total_ram.value + " MiB";
                       })
                   }),
                   Widget.Label({
-                      class_name: 'stats-info',
-                      halign: 'start',
-                      label: stats.uptime.bind().transform(function(up) { return "Up: " + up; })
+                      label: stats.cpu_temp.bind().transform(function(temp) {
+                          return "  │   cpu    │ " + temp;
+                      })
                   }),
                   Widget.Label({
-                      class_name: 'stats-info',
-                      halign: 'start',
-                      label: stats.pkgs.bind().transform(function(count) { return "Pkgs: " + count; })
+                      label: stats.gpu_temp.bind().transform(function(temp) {
+                          return "  │   gpu    │ " + temp;
+                      })
                   }),
                   Widget.Label({
-                      class_name: 'stats-info',
-                      halign: 'start',
-                      label: stats.shell.bind().transform(function(sh) { return "Shell: " + sh; })
+                      label: "  ├───────────┤"
+                  }),
+                  Widget.Label({
+                      label: "  │ 󰏘  colors │        "
+                  }),
+                  Widget.Label({
+                      label: "  ╰───────────╯"
                   })
               ],
               setup: function(self) {
