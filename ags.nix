@@ -297,6 +297,16 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: "stats-" + currentLabel,
                               xalign: 0,
+                              label: "• "
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-white',
+                              xalign: 0,
+                              label: padLabel(currentLabel) + " │ "
+                          }),
+                          Widget.Label({
+                              class_name: "stats-" + currentLabel,
+                              xalign: 0,
                               label: (() => {
                                   switch(currentLabel) {
                                       case 'shell': return stats.shell.bind();
@@ -306,7 +316,7 @@ lib.mkIf profile.enableAgs {
                                           used + " | " + stats.total_ram.value);
                                       case 'cpu': return stats.cpu_temp.bind();
                                       case 'gpu': return stats.gpu_temp.bind();
-                                      case 'colors': return "";  // Empty string for the main label
+                                      case 'colors': return "";
                                       default: return "";
                                   }
                               })()
