@@ -254,30 +254,30 @@ lib.mkIf profile.enableAgs {
                   }),
                   Widget.Label({
                       xalign: 0,
-                      label: stats.shell.bind().transform(sh => "│    shell  │ " + sh.padEnd(8))
+                      label: stats.shell.bind().transform(sh => "│ •  shell  │ " + sh.padEnd(8))
                   }),
                   Widget.Label({
                       xalign: 0,
-                      label: stats.uptime.bind().transform(up => "│    uptime │ " + up.padEnd(8))
+                      label: stats.uptime.bind().transform(up => "│ •  uptime │ " + up.padEnd(8))
                   }),
                   Widget.Label({
                       xalign: 0,
-                      label: stats.pkgs.bind().transform(count => "│ 󰏖  pkgs   │ " + count.padEnd(8))
+                      label: stats.pkgs.bind().transform(count => "│ •  pkgs   │ " + count.padEnd(8))
                   }),
                   Widget.Label({
                       xalign: 0,
                       label: stats.used_ram.bind().transform(used =>
-                          "│ ��  memory │ " + used + " | " + stats.total_ram.value)
+                          "│ •  memory │ " + used + " | " + stats.total_ram.value)
                   }),
                   Widget.Label({
                       xalign: 0,
                       label: stats.cpu_temp.bind().transform(temp =>
-                          "│    cpu    │ " + temp.padEnd(8))
+                          "│ •  cpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
                       xalign: 0,
                       label: stats.gpu_temp.bind().transform(temp =>
-                          "│    gpu    │ " + temp.padEnd(8))
+                          "│ •  gpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
                       xalign: 0,
@@ -285,7 +285,7 @@ lib.mkIf profile.enableAgs {
                   }),
                   Widget.Label({
                       xalign: 0,
-                      label: "│ 󰏘  colors │        "
+                      label: "│ •  colors │        "
                   }),
                   Widget.Label({
                       xalign: 0,
