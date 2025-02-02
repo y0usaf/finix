@@ -59,25 +59,29 @@ lib.mkIf profile.enableAgs {
           text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
       }
 
+      .system-stats label {
+          margin: 4px;
+          min-width: 100px;
+          text-shadow: inherit;
+          text-align: left !important;  /* Force left alignment */
+      }
+
       .stats-header {
           font-size: 14px;
           margin-bottom: 8px;
+          text-align: center !important;  /* Keep header centered */
       }
 
       .stats-time {
           font-size: 32px;
           margin-bottom: 4px;
+          text-align: center !important;  /* Keep time centered */
       }
 
       .stats-date {
           font-size: 16px;
           margin-bottom: 8px;
-      }
-
-      .system-stats label {
-          margin: 4px;
-          min-width: 100px;
-          text-shadow: inherit;
+          text-align: center !important;  /* Keep date centered */
       }
 
       .stats-info {
@@ -235,54 +239,60 @@ lib.mkIf profile.enableAgs {
           return Widget.Box({
               class_name: 'system-stats',
               vertical: true,
-              hpack: 'start',
               children: [
                   Widget.Label({
                       class_name: 'stats-header',
-                      hpack: 'center',
                       label: "   _  ___      ____  ____\n  / |/ (_)_ __/ __ \\/ __/\n /    / /\\ \\ / /_/ /\\ \\  \n/_/|_/_//_\\_\\\\____/___/  "
                   }),
                   Widget.Label({
                       class_name: 'stats-time',
-                      hpack: 'center',
                       label: stats.time.bind()
                   }),
                   Widget.Label({
                       class_name: 'stats-date',
-                      hpack: 'center',
                       label: stats.date.bind()
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: "╭───────────╮"
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: stats.shell.bind().transform(sh => "│   shell  │ " + sh.padEnd(8))
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: stats.uptime.bind().transform(up => "│   uptime │ " + up.padEnd(8))
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: stats.pkgs.bind().transform(count => "│ 󰏖  pkgs   │ " + count.padEnd(8))
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: stats.used_ram.bind().transform(used =>
                           "│ 󰍛  memory │ " + (used + " | " + stats.total_ram.value + " MiB").padEnd(8))
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: stats.cpu_temp.bind().transform(temp =>
                           "│   cpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: stats.gpu_temp.bind().transform(temp =>
                           "│   gpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: "├───────────┤"
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: "│ 󰏘  colors │        "
                   }),
                   Widget.Label({
+                      xalign: 0,
                       label: "╰───────────╯"
                   })
               ],
