@@ -203,8 +203,11 @@ lib.mkIf profile.enableAgs {
           const time = safeExec('date "+%H:%M:%S"', "Failed to get time:");
           const date = safeExec('date "+%d/%m/%y"', "Failed to get date:");
 
-          // Fix uptime command
-          const uptime = safeExec(["uptime", "-p"], "Failed to get uptime:").replace("up ", "");
+          // Fix uptime command - using awk to format the output
+          const uptime = safeExec(
+              ["bash", "-c", "uptime | awk -F'up |,' '{print $2}'"],
+              "Failed to get uptime:"
+          ).trim();
 
           // Fix package count
           const pkgs = safeExec(
@@ -212,8 +215,11 @@ lib.mkIf profile.enableAgs {
               "Failed to get package count:"
           ).trim();
 
-          // Get shell name without full path
-          const shell = safeExec("basename $SHELL", "Failed to get shell:");
+          // Get shell name without full path - using readlink to resolve the actual shell
+          const shell = safeExec(
+              ["bash", "-c", "basename $(readlink -f $SHELL)"],
+              "Failed to get shell:"
+          );
 
           return {
               cpu_temp,
