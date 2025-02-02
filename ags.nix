@@ -270,22 +270,22 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "│ • "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "shell"
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: " │ "
+                              label: "│ "
                           }),
                           Widget.Label({
                               class_name: 'stats-shell',
                               xalign: 0,
-                              label: stats.shell.bind().transform(sh => sh.padEnd(8))
+                              label: "•"
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-white',
+                              xalign: 0,
+                              label: "    shell  │ "
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-shell',
+                              xalign: 0,
+                              label: stats.shell.bind()
                           })
                       ]
                   }),
@@ -294,22 +294,22 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "│ • "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "uptime"
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: " │ "
+                              label: "│ "
                           }),
                           Widget.Label({
                               class_name: 'stats-uptime',
                               xalign: 0,
-                              label: stats.uptime.bind().transform(up => up.padEnd(8))
+                              label: "•"
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-white',
+                              xalign: 0,
+                              label: "    uptime │ "
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-uptime',
+                              xalign: 0,
+                              label: stats.uptime.bind()
                           })
                       ]
                   }),
@@ -318,22 +318,22 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "│ • "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "pkgs"
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: " │ "
+                              label: "│ "
                           }),
                           Widget.Label({
                               class_name: 'stats-pkgs',
                               xalign: 0,
-                              label: stats.pkgs.bind().transform(count => count.padEnd(8))
+                              label: "•"
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-white',
+                              xalign: 0,
+                              label: "    pkgs   │ "
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-pkgs',
+                              xalign: 0,
+                              label: stats.pkgs.bind()
                           })
                       ]
                   }),
@@ -342,17 +342,17 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "│ • "
+                              label: "│ "
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-memory',
+                              xalign: 0,
+                              label: "•"
                           }),
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "memory"
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: " │ "
+                              label: "    memory │ "
                           }),
                           Widget.Label({
                               class_name: 'stats-memory',
@@ -367,22 +367,22 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "│ • "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "cpu"
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: " │ "
+                              label: "│ "
                           }),
                           Widget.Label({
                               class_name: 'stats-cpu',
                               xalign: 0,
-                              label: stats.cpu_temp.bind().transform(temp => temp.padEnd(8))
+                              label: "•"
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-white',
+                              xalign: 0,
+                              label: "    cpu    │ "
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-cpu',
+                              xalign: 0,
+                              label: stats.cpu_temp.bind()
                           })
                       ]
                   }),
@@ -391,22 +391,22 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "│ • "
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: "gpu"
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: " │ "
+                              label: "│ "
                           }),
                           Widget.Label({
                               class_name: 'stats-gpu',
                               xalign: 0,
-                              label: stats.gpu_temp.bind().transform(temp => temp.padEnd(8))
+                              label: "•"
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-white',
+                              xalign: 0,
+                              label: "    gpu    │ "
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-gpu',
+                              xalign: 0,
+                              label: stats.gpu_temp.bind()
                           })
                       ]
                   }),
@@ -420,17 +420,17 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "│ • "
+                              label: "│ "
+                          }),
+                          Widget.Label({
+                              class_name: 'stats-colors',
+                              xalign: 0,
+                              label: "•"
                           }),
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "colors"
-                          }),
-                          Widget.Label({
-                              class_name: 'stats-white',
-                              xalign: 0,
-                              label: " │        "
+                              label: "    colors │        "
                           })
                       ]
                   }),
