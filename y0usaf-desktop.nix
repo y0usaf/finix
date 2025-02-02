@@ -45,7 +45,7 @@ in {
   };
   defaultIde = {
     package = "code-cursor";
-    command = "code-cursor";
+    command = "cursor";
   };
   defaultTerminal = {
     package = "foot";
