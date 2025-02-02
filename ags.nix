@@ -327,7 +327,7 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "pkgs  │ "
+                              label: "pkgs    │ "
                           }),
                           Widget.Label({
                               class_name: 'stats-pkgs',
@@ -376,7 +376,7 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "cpu  │ "
+                              label: "cpu     │ "
                           }),
                           Widget.Label({
                               class_name: 'stats-cpu',
@@ -400,7 +400,7 @@ lib.mkIf profile.enableAgs {
                           Widget.Label({
                               class_name: 'stats-white',
                               xalign: 0,
-                              label: "gpu  │ "
+                              label: "gpu     │ "
                           }),
                           Widget.Label({
                               class_name: 'stats-gpu',
