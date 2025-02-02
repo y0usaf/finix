@@ -5,7 +5,7 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }: {
   #── ⚙️ System-wide Environment Setup ─────────────────────────────────#
@@ -13,7 +13,7 @@
     {
       # Non-Wayland variables here
     }
-    (lib.mkIf globals.enableWayland {
+    (lib.mkIf profile.enableWayland {
       WLR_NO_HARDWARE_CURSORS = "1";
       NIXOS_OZONE_WL = "1";
       QT_QPA_PLATFORM = "wayland";
@@ -23,14 +23,14 @@
       SDL_VIDEODRIVER = "wayland";
       CLUTTER_BACKEND = "wayland";
     })
-    (lib.mkIf globals.enableHyprland {
+    (lib.mkIf profile.enableHyprland {
       XDG_CURRENT_DESKTOP = "Hyprland";
       XDG_SESSION_DESKTOP = "Hyprland";
     })
   ];
 
   #── 🏠 User Environment Configuration ─────────────────────────────────#
-  home-manager.users.${globals.username} = {
+  home-manager.users.${profile.username} = {
     home = {
       #── ⚡ User Session Environment ─────────────────────────────────#
       sessionVariables = {
@@ -52,7 +52,7 @@
 
     #── ⚡ Hyprland Compositor Settings ───────────────────────────────#
     wayland.windowManager.hyprland.settings = {
-      env = lib.mkIf globals.enableNvidia [
+      env = lib.mkIf profile.enableNvidia [
         "LIBVA_DRIVER_NAME,nvidia"
         "GBM_BACKEND,nvidia-drm"
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"

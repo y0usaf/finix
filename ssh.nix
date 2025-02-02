@@ -9,7 +9,7 @@
 {
   config,
   pkgs,
-  globals,
+  profile,
   ...
 }: {
   programs.ssh = {

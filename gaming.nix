@@ -9,10 +9,10 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }: {
-  config = lib.mkIf globals.enableGaming {
+  config = lib.mkIf profile.enableGaming {
     # Gaming-related packages
     home.packages = with pkgs; [
       steam
@@ -25,8 +25,8 @@
     # Marvel Rivals game settings
     home.activation = {
       setupMarvelRivals = lib.hm.dag.entryAfter ["writeBoundary"] ''
-                CONFIG_DIR="${globals.homeDirectory}/.local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows"
-                if [ -d "${globals.homeDirectory}/.local/share/Steam" ]; then
+                CONFIG_DIR="${profile.homeDirectory}/.local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows"
+                if [ -d "${profile.homeDirectory}/.local/share/Steam" ]; then
                   mkdir -p "$CONFIG_DIR"
                   cat > "$CONFIG_DIR/GameUserSettings.ini" << 'EOL'
         [Internationalization]

@@ -6,14 +6,14 @@
   pkgs,
   lib,
   inputs,
-  globals,
+  profile,
   ...
 }: {
   #── 🏠 Core Settings ──────────────────────#
   home = {
-    username = globals.username;
-    homeDirectory = globals.homeDirectory;
-    stateVersion = globals.stateVersion;
+    username = profile.username;
+    homeDirectory = profile.homeDirectory;
+    stateVersion = profile.stateVersion;
     enableNixpkgsReleaseCheck = false;
   };
 
@@ -30,19 +30,19 @@
       ./cursor.nix
       ./webapps.nix
     ]
-    ++ lib.optionals globals.enableHyprland [
+    ++ lib.optionals profile.enableHyprland [
       ./hyprland.nix
     ]
-    ++ lib.optionals globals.enableAgs [
+    ++ lib.optionals profile.enableAgs [
       ./ags.nix
     ]
-    ++ lib.optionals globals.enableGaming [
+    ++ lib.optionals profile.enableGaming [
       ./gaming.nix
     ]
-    ++ lib.optionals globals.enableNeovim [
+    ++ lib.optionals profile.enableNeovim [
       ./nvim.nix
     ]
-    ++ lib.optionals globals.enableAndroid [
+    ++ lib.optionals profile.enableAndroid [
       ./android.nix
     ];
 
@@ -52,7 +52,7 @@
 
     nh = {
       enable = true;
-      flake = globals.flakeDir;
+      flake = profile.flakeDir;
       clean = {
         enable = true;
         dates = "weekly";
@@ -127,7 +127,7 @@
       # Add this to the existing packages section
       chromium
     ]
-    ++ lib.optionals globals.enableWayland [
+    ++ lib.optionals profile.enableWayland [
       #── 🖥️ Wayland Utilities ───────────────#
       grim
       slurp

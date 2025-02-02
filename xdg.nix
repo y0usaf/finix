@@ -10,7 +10,7 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }: {
   xdg = {
@@ -22,7 +22,7 @@
       createDirectories = true;
       extraConfig = {
         XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/Pictures/Screenshots";
-        XDG_WALLPAPERS_DIR = "${globals.wallpaperDir}";
+        XDG_WALLPAPERS_DIR = "${profile.wallpaperDir}";
       };
     };
 
@@ -31,41 +31,41 @@
       enable = true;
       defaultApplications = {
         # Web Handlers
-        "text/html" = ["${globals.defaultBrowser}.desktop"];
-        "x-scheme-handler/http" = ["${globals.defaultBrowser}.desktop"];
-        "x-scheme-handler/https" = ["${globals.defaultBrowser}.desktop"];
-        "x-scheme-handler/discord" = ["${globals.defaultDiscord}.desktop"];
-        "x-scheme-handler/ftp" = ["${globals.defaultBrowser}.desktop"];
-        "x-scheme-handler/chrome" = ["${globals.defaultBrowser}.desktop"];
+        "text/html" = ["${profile.defaultBrowser}.desktop"];
+        "x-scheme-handler/http" = ["${profile.defaultBrowser}.desktop"];
+        "x-scheme-handler/https" = ["${profile.defaultBrowser}.desktop"];
+        "x-scheme-handler/discord" = ["${profile.defaultDiscord}.desktop"];
+        "x-scheme-handler/ftp" = ["${profile.defaultBrowser}.desktop"];
+        "x-scheme-handler/chrome" = ["${profile.defaultBrowser}.desktop"];
 
         # File Types
-        "inode/directory" = ["${globals.defaultFileManager}.desktop"];
+        "inode/directory" = ["${profile.defaultFileManager}.desktop"];
 
         # Media Types
-        "video/mp4" = ["${globals.defaultMediaPlayer}.desktop"];
-        "video/x-matroska" = ["${globals.defaultMediaPlayer}.desktop"];
-        "video/webm" = ["${globals.defaultMediaPlayer}.desktop"];
+        "video/mp4" = ["${profile.defaultMediaPlayer}.desktop"];
+        "video/x-matroska" = ["${profile.defaultMediaPlayer}.desktop"];
+        "video/webm" = ["${profile.defaultMediaPlayer}.desktop"];
 
         # Images
-        "image/jpeg" = ["${globals.defaultImageViewer}.desktop"];
-        "image/png" = ["${globals.defaultImageViewer}.desktop"];
-        "image/gif" = ["${globals.defaultImageViewer}.desktop"];
-        "image/tiff" = ["${globals.defaultImageViewer}.desktop"];
-        "image/bmp" = ["${globals.defaultImageViewer}.desktop"];
+        "image/jpeg" = ["${profile.defaultImageViewer}.desktop"];
+        "image/png" = ["${profile.defaultImageViewer}.desktop"];
+        "image/gif" = ["${profile.defaultImageViewer}.desktop"];
+        "image/tiff" = ["${profile.defaultImageViewer}.desktop"];
+        "image/bmp" = ["${profile.defaultImageViewer}.desktop"];
 
         # Archives
-        "application/zip" = ["${globals.defaultArchiveManager}.desktop"];
-        "application/x-7z-compressed" = ["${globals.defaultArchiveManager}.desktop"];
-        "application/x-tar" = ["${globals.defaultArchiveManager}.desktop"];
-        "application/gzip" = ["${globals.defaultArchiveManager}.desktop"];
-        "application/x-compressed-tar" = ["${globals.defaultArchiveManager}.desktop"];
+        "application/zip" = ["${profile.defaultArchiveManager}.desktop"];
+        "application/x-7z-compressed" = ["${profile.defaultArchiveManager}.desktop"];
+        "application/x-tar" = ["${profile.defaultArchiveManager}.desktop"];
+        "application/gzip" = ["${profile.defaultArchiveManager}.desktop"];
+        "application/x-compressed-tar" = ["${profile.defaultArchiveManager}.desktop"];
 
         # Web Extensions
-        "application/x-extension-htm" = ["${globals.defaultBrowser}.desktop"];
-        "application/x-extension-html" = ["${globals.defaultBrowser}.desktop"];
-        "application/x-extension-shtml" = ["${globals.defaultBrowser}.desktop"];
-        "application/xhtml+xml" = ["${globals.defaultBrowser}.desktop"];
-        "application/x-extension-xhtml" = ["${globals.defaultBrowser}.desktop"];
+        "application/x-extension-htm" = ["${profile.defaultBrowser}.desktop"];
+        "application/x-extension-html" = ["${profile.defaultBrowser}.desktop"];
+        "application/x-extension-shtml" = ["${profile.defaultBrowser}.desktop"];
+        "application/xhtml+xml" = ["${profile.defaultBrowser}.desktop"];
+        "application/x-extension-xhtml" = ["${profile.defaultBrowser}.desktop"];
       };
     };
   };
@@ -111,8 +111,8 @@
     SSB_HOME = "${config.xdg.dataHome}/zoom";
 
     # NVIDIA
-    CUDA_CACHE_PATH = lib.mkIf globals.enableNvidia "${config.xdg.cacheHome}/nv";
-    __GL_SHADER_DISK_CACHE_PATH = lib.mkIf globals.enableNvidia "${config.xdg.cacheHome}/nv";
+    CUDA_CACHE_PATH = lib.mkIf profile.enableNvidia "${config.xdg.cacheHome}/nv";
+    __GL_SHADER_DISK_CACHE_PATH = lib.mkIf profile.enableNvidia "${config.xdg.cacheHome}/nv";
   };
 
   # Ensure required directories exist

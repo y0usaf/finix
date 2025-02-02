@@ -65,10 +65,10 @@
     chaotic,
     ...
   }: let
-    # Define the target system architecture.
+    # Define the target system architecture
     system = "x86_64-linux";
 
-    # Import pkgs with the desired configuration.
+    # Import pkgs with the desired configuration
     pkgs = import nixpkgs {
       inherit system;
       config = {
@@ -76,16 +76,17 @@
       };
     };
 
-    # Import globals once and reuse them.
-    globals = import ./globals.nix;
+    # Import the options and profile configurations
+    options = import ./options.nix;
+    profile = import ./y0usaf-desktop.nix;
 
-    # Corrected: using "inherit" to pull both inputs and globals.
+    # Common special args now includes the profile
     commonSpecialArgs = {
-      inherit globals;
+      inherit profile;
       inputs = self.inputs;
     };
 
-    # Function to create a consistent home-manager configuration.
+    # Function to create a consistent home-manager configuration
     mkHomeConfiguration = username: system:
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
@@ -97,30 +98,30 @@
     formatter.${system} = pkgs.alejandra;
 
     #── 👤 User Environment Setup ──────────────────────────────────#
-    homeConfigurations.${globals.username} = mkHomeConfiguration globals.username system;
+    homeConfigurations.${profile.username} = mkHomeConfiguration profile.username system;
 
     #── 🖥️ Machine-Specific Configuration ──────────────────────────#
-    nixosConfigurations."y0usaf-desktop" = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.${profile.hostname} = nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = commonSpecialArgs;
       modules = [
-        # Main system configuration.
+        # Main system configuration
         ./configuration.nix
-        # Home Manager integration.
+        # Home Manager integration
         home-manager.nixosModules.home-manager
         {
           home-manager = {
             extraSpecialArgs = commonSpecialArgs;
-            # User-specific configuration.
-            users.y0usaf = import ./home.nix;
-            # Global package management settings.
+            # User-specific configuration
+            users.${profile.username} = import ./home.nix;
+            # Global package management settings
             useGlobalPkgs = true;
             useUserPackages = true;
-            # Backup configuration.
+            # Backup configuration
             backupFileExtension = "backup";
           };
         }
-        # Additional package repository.
+        # Additional package repository
         chaotic.nixosModules.default
       ];
     };

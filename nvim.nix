@@ -2,10 +2,10 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }:
-lib.mkIf globals.enableNeovim {
+lib.mkIf profile.enableNeovim {
   programs.neovim = {
     enable = true;
     defaultEditor = true;

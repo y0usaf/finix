@@ -11,21 +11,21 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }: {
   #── 👤 Git Configuration ─────────────────#
   programs.git = {
     enable = true;
-    userName = globals.gitName;
-    userEmail = globals.gitEmail;
+    userName = profile.gitName;
+    userEmail = profile.gitEmail;
 
     extraConfig = {
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
       url."git@github.com:".pushInsteadOf = "https://github.com/";
-      core.editor = globals.defaultEditor; # Added for consistency
+      core.editor = profile.defaultEditor; # Added for consistency
     };
   };
 
@@ -35,9 +35,9 @@
   #── 📦 Repository Setup ──────────────────#
   home.activation = {
     setupGitRepo = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      if [ ! -d "${globals.homeDirectory}/nixos" ]; then
+      if [ ! -d "${profile.homeDirectory}/nixos" ]; then
         echo "Setting up NixOS configuration repository..."
-        git clone ${globals.homeManagerRepoUrl} ${globals.homeDirectory}/nixos
+        git clone ${profile.homeManagerRepoUrl} ${profile.homeDirectory}/nixos
       fi
     '';
   };
@@ -61,7 +61,7 @@
         # Sleep briefly to ensure all files are written
         sleep 2
 
-        cd ${globals.homeDirectory}/nixos
+        cd ${profile.homeDirectory}/nixos
         # Check if there are any changes, including untracked files
         if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then
           git add .

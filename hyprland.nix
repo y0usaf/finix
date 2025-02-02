@@ -6,14 +6,14 @@
   pkgs,
   lib,
   inputs,
-  globals,
+  profile,
   ...
 }: {
-  imports = lib.optionals globals.enableHyprland [
+  imports = lib.optionals profile.enableHyprland [
     inputs.hyprland.homeManagerModules.default
   ];
 
-  config = lib.mkIf globals.enableHyprland {
+  config = lib.mkIf profile.enableHyprland {
     wayland.windowManager.hyprland = {
       enable = true;
       systemd.enable = true;
@@ -86,12 +86,12 @@
         #── ⚙️ Application Variables ────────────────────────────#
         "$mod" = "SUPER";
         "$mod2" = "ALT";
-        "$term" = globals.defaultTerminal;
-        "$filemanager" = globals.defaultFileManager;
-        "$browser" = globals.defaultBrowser;
-        "$discord" = globals.defaultDiscord;
-        "$launcher" = globals.defaultLauncher;
-        "$ide" = globals.defaultIde;
+        "$term" = profile.defaultTerminal;
+        "$filemanager" = profile.defaultFileManager;
+        "$browser" = profile.defaultBrowser;
+        "$discord" = profile.defaultDiscord;
+        "$launcher" = profile.defaultLauncher;
+        "$ide" = profile.defaultIde;
         "$obs" = "obs";
 
         #── 🪟 Window Management ─────────────────────────────#
@@ -203,7 +203,7 @@
     };
 
     #── 🔄 System Integration ─────────────────────────────────#
-    home.file = lib.mkIf globals.enableHyprland {
+    home.file = lib.mkIf profile.enableHyprland {
       "${config.xdg.configHome}/hypr/xdph.conf".text = ''
         screencopy {
           max_fps = 60

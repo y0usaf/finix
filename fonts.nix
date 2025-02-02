@@ -5,7 +5,7 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }: {
   #── 📝 Font Configuration ──────────────────#

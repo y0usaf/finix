@@ -10,7 +10,7 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }: {
   programs.foot = {

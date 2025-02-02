@@ -2,10 +2,10 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }:
-lib.mkIf globals.enableAgs {
+lib.mkIf profile.enableAgs {
   # Install AGS and related packages
   home.packages = with pkgs; [
     ags
@@ -29,8 +29,8 @@ lib.mkIf globals.enableAgs {
 
       // Export global functions from modules
       Object.assign(globalThis, {
-          ...systemStatsConfig.globals,
-          ...workspacesConfig.globals,
+          ...systemStatsConfig.profile,
+          ...workspacesConfig.profile,
       });
     '';
 
@@ -277,7 +277,7 @@ lib.mkIf globals.enableAgs {
 
       var systemStatsConfig = {
           window: systemStatsWindow,
-          globals: {
+          profile: {
               showStats: function() {
                   systemStatsWindow.layer = 'top';
               },
@@ -361,7 +361,7 @@ lib.mkIf globals.enableAgs {
       // Export both windows as an array in the config.
       var workspacesConfig = {
           windows: [workspacesWindowBottom, workspacesWindowTop],
-          globals: {}
+          profile: {}
       };
 
       export { workspacesConfig };

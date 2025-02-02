@@ -11,7 +11,7 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }: {
   programs.zsh = {
@@ -34,10 +34,10 @@
       case "$(hostname)" in
         "y0usaf-desktop")
           sudo nvidia-smi -pl 150
-          ${lib.optionalString globals.enableHyprland "Hyprland"}
+          ${lib.optionalString profile.enableHyprland "Hyprland"}
           ;;
         "y0usaf-laptop")
-          ${lib.optionalString globals.enableHyprland "Hyprland"}
+          ${lib.optionalString profile.enableHyprland "Hyprland"}
           ;;
       esac
     '';

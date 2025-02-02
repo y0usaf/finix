@@ -12,7 +12,7 @@
   config,
   lib,
   pkgs,
-  globals,
+  profile,
   inputs,
   ...
 }: {
@@ -24,9 +24,9 @@
 
   config = {
     #── 🔧 Core System Settings ─────────────────#
-    system.stateVersion = globals.stateVersion;
-    time.timeZone = globals.timezone;
-    networking.hostName = globals.hostname;
+    system.stateVersion = profile.stateVersion;
+    time.timeZone = profile.timezone;
+    networking.hostName = profile.hostname;
     nixpkgs.config.allowUnfree = true;
 
     #── 📦 Nix Package Management ──────────────#
@@ -38,7 +38,7 @@
         cores = 0;
         system-features = ["big-parallel" "kvm" "nixos-test"];
         sandbox = true;
-        trusted-users = ["root" globals.username];
+        trusted-users = ["root" profile.username];
         builders-use-substitutes = true;
         fallback = true;
       };
@@ -68,7 +68,7 @@
     };
 
     hardware = {
-      nvidia = lib.mkIf globals.enableNvidia {
+      nvidia = lib.mkIf profile.enableNvidia {
         modesetting.enable = true;
         powerManagement.enable = true;
         open = false;
@@ -83,7 +83,7 @@
     };
 
     services = {
-      xserver.videoDrivers = lib.mkIf globals.enableNvidia ["nvidia"];
+      xserver.videoDrivers = lib.mkIf profile.enableNvidia ["nvidia"];
 
       #── 🔊 Audio Configuration ────────────────#
       pipewire = {
@@ -125,7 +125,7 @@
       '';
       sudo.extraRules = [
         {
-          users = [globals.username];
+          users = [profile.username];
           commands = [
             {
               command = "ALL";
@@ -138,14 +138,14 @@
 
     #── 👤 User Environment ─────────────────#
     programs = {
-      hyprland = lib.mkIf (globals.enableWayland && globals.enableHyprland) {
+      hyprland = lib.mkIf (profile.enableWayland && profile.enableHyprland) {
         enable = true;
         xwayland.enable = true;
         package = inputs.hyprland.packages.${pkgs.system}.hyprland;
       };
     };
 
-    users.users.${globals.username} = {
+    users.users.${profile.username} = {
       isNormalUser = true;
       shell = pkgs.zsh;
       extraGroups =
@@ -156,7 +156,7 @@
           "audio"
           "input"
         ]
-        ++ lib.optionals globals.enableGaming [
+        ++ lib.optionals profile.enableGaming [
           "gamemode"
         ];
       ignoreShellProgramCheck = true;
@@ -173,7 +173,7 @@
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
 
-    xdg.portal = lib.mkIf (globals.enableWayland && globals.enableHyprland) {
+    xdg.portal = lib.mkIf (profile.enableWayland && profile.enableHyprland) {
       enable = true;
       xdgOpenUsePortal = true;
       config = {

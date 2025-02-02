@@ -2,7 +2,7 @@
   config,
   pkgs,
   lib,
-  globals,
+  profile,
   ...
 }: {
   gtk = {
