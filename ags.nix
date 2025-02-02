@@ -55,7 +55,6 @@ lib.mkIf profile.enableAgs {
       .system-stats {
           font-family: monospace;
           font-weight: bold;
-          color: #FFFFFF;
           text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
       }
 
@@ -68,21 +67,31 @@ lib.mkIf profile.enableAgs {
       .stats-header {
           font-size: 14px;
           margin-bottom: 8px;
+          color: #00ffff; /* Cyan for the header */
       }
 
       .stats-time {
           font-size: 32px;
           margin-bottom: 4px;
+          color: #ffffff;
       }
 
       .stats-date {
           font-size: 16px;
           margin-bottom: 8px;
+          color: #ffffff;
       }
 
-      .stats-info {
-          font-size: 24px;
-      }
+      .stats-shell { color: #ff00ff; }  /* Magenta */
+      .stats-uptime { color: #0088ff; } /* Blue */
+      .stats-pkgs { color: #ff0000; }   /* Red */
+      .stats-memory { color: #ffff00; }  /* Yellow */
+      .stats-cpu { color: #00ff00; }     /* Green */
+      .stats-gpu { color: #00ffff; }     /* Cyan */
+      .stats-colors { color: #ffffff; }   /* White */
+
+      /* Box characters in white */
+      .stats-box { color: #ffffff; }
 
       /* Reset and base styling for all widgets in the workspaces container */
       .workspaces *,
@@ -249,45 +258,55 @@ lib.mkIf profile.enableAgs {
                       label: stats.date.bind()
                   }),
                   Widget.Label({
+                      class_name: 'stats-box',
                       xalign: 0,
                       label: "╭───────────╮"
                   }),
                   Widget.Label({
+                      class_name: 'stats-shell',
                       xalign: 0,
                       label: stats.shell.bind().transform(sh => "│ •  shell  │ " + sh.padEnd(8))
                   }),
                   Widget.Label({
+                      class_name: 'stats-uptime',
                       xalign: 0,
                       label: stats.uptime.bind().transform(up => "│ •  uptime │ " + up.padEnd(8))
                   }),
                   Widget.Label({
+                      class_name: 'stats-pkgs',
                       xalign: 0,
                       label: stats.pkgs.bind().transform(count => "│ •  pkgs   │ " + count.padEnd(8))
                   }),
                   Widget.Label({
+                      class_name: 'stats-memory',
                       xalign: 0,
                       label: stats.used_ram.bind().transform(used =>
                           "│ •  memory │ " + used + " | " + stats.total_ram.value)
                   }),
                   Widget.Label({
+                      class_name: 'stats-cpu',
                       xalign: 0,
                       label: stats.cpu_temp.bind().transform(temp =>
                           "│ •  cpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
+                      class_name: 'stats-gpu',
                       xalign: 0,
                       label: stats.gpu_temp.bind().transform(temp =>
                           "│ •  gpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
+                      class_name: 'stats-box',
                       xalign: 0,
                       label: "├───────────┤"
                   }),
                   Widget.Label({
+                      class_name: 'stats-colors',
                       xalign: 0,
                       label: "│ •  colors │        "
                   }),
                   Widget.Label({
+                      class_name: 'stats-box',
                       xalign: 0,
                       label: "╰───────────╯"
                   })
