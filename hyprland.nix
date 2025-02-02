@@ -86,12 +86,12 @@
         #── ⚙️ Application Variables ────────────────────────────#
         "$mod" = "SUPER";
         "$mod2" = "ALT";
-        "$term" = profile.defaultTerminal;
-        "$filemanager" = profile.defaultFileManager;
-        "$browser" = profile.defaultBrowser;
-        "$discord" = profile.defaultDiscord;
-        "$launcher" = profile.defaultLauncher;
-        "$ide" = profile.defaultIde;
+        "$term" = profile.defaultTerminal.command;
+        "$filemanager" = profile.defaultFileManager.command;
+        "$browser" = profile.defaultBrowser.command;
+        "$discord" = profile.defaultDiscord.command;
+        "$launcher" = profile.defaultLauncher.command;
+        "$ide" = profile.defaultIde.command;
         "$obs" = "obs";
 
         #── 🪟 Window Management ─────────────────────────────#

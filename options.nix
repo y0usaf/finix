@@ -113,45 +113,62 @@
   };
 
   # Default applications
+  # Each default application requires:
+  # - package: The package name to be installed
+  # - command: The command to execute the application
+  defaultAppModule = types:
+    lib.types.submodule {
+      options = {
+        package = lib.mkOption {
+          type = lib.types.str;
+          description = "Package name to install";
+        };
+        command = lib.mkOption {
+          type = lib.types.str;
+          description = "Command to execute the application";
+        };
+      };
+    };
+
   defaultBrowser = lib.mkOption {
-    type = lib.types.str;
-    description = "Default web browser.";
+    type = defaultAppModule;
+    description = "Default web browser configuration.";
   };
   defaultEditor = lib.mkOption {
-    type = lib.types.str;
-    description = "Default text editor.";
+    type = defaultAppModule;
+    description = "Default text editor configuration.";
   };
   defaultIde = lib.mkOption {
-    type = lib.types.str;
-    description = "Default IDE.";
+    type = defaultAppModule;
+    description = "Default IDE configuration.";
   };
   defaultTerminal = lib.mkOption {
-    type = lib.types.str;
-    description = "Default terminal emulator.";
+    type = defaultAppModule;
+    description = "Default terminal emulator configuration.";
   };
   defaultFileManager = lib.mkOption {
-    type = lib.types.str;
-    description = "Default file manager.";
+    type = defaultAppModule;
+    description = "Default file manager configuration.";
   };
   defaultLauncher = lib.mkOption {
-    type = lib.types.str;
-    description = "Default application launcher.";
+    type = defaultAppModule;
+    description = "Default application launcher configuration.";
   };
   defaultDiscord = lib.mkOption {
-    type = lib.types.str;
-    description = "Default Discord client.";
+    type = defaultAppModule;
+    description = "Default Discord client configuration.";
   };
   defaultArchiveManager = lib.mkOption {
-    type = lib.types.str;
-    description = "Default archive manager.";
+    type = defaultAppModule;
+    description = "Default archive manager configuration.";
   };
   defaultImageViewer = lib.mkOption {
-    type = lib.types.str;
-    description = "Default image viewer.";
+    type = defaultAppModule;
+    description = "Default image viewer configuration.";
   };
   defaultMediaPlayer = lib.mkOption {
-    type = lib.types.str;
-    description = "Default media player.";
+    type = defaultAppModule;
+    description = "Default media player configuration.";
   };
 
   # Git configuration

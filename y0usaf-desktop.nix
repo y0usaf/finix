@@ -34,16 +34,46 @@ in {
   wallpaperVideoDir = "$HOME/DCIM/Wallpapers_Video";
 
   # Default applications
-  defaultBrowser = "firefox";
-  defaultEditor = "nvim";
-  defaultIde = "cursor";
-  defaultTerminal = "foot";
-  defaultFileManager = "pcmanfm";
-  defaultLauncher = "foot -a launcher sway-launcher-desktop";
-  defaultDiscord = "vesktop";
-  defaultArchiveManager = "p7zip";
-  defaultImageViewer = "imv";
-  defaultMediaPlayer = "mpv";
+  defaultBrowser = {
+    package = "firefox";
+    command = "firefox";
+  };
+  defaultEditor = {
+    package = "neovim";
+    command = "nvim";
+  };
+  defaultIde = {
+    package = "code-cursor";
+    command = "code-cursor";
+  };
+  defaultTerminal = {
+    package = "foot";
+    command = "foot";
+  };
+  defaultFileManager = {
+    package = "pcmanfm";
+    command = "pcmanfm";
+  };
+  defaultLauncher = {
+    package = "sway-launcher-desktop";
+    command = "foot -a launcher sway-launcher-desktop";
+  };
+  defaultDiscord = {
+    package = "vesktop";
+    command = "vesktop";
+  };
+  defaultArchiveManager = {
+    package = "p7zip";
+    command = "7z";
+  };
+  defaultImageViewer = {
+    package = "imv";
+    command = "imv";
+  };
+  defaultMediaPlayer = {
+    package = "mpv";
+    command = "mpv";
+  };
 
   # Git configuration
   gitName = "y0usaf";

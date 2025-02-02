@@ -31,41 +31,41 @@
       enable = true;
       defaultApplications = {
         # Web Handlers
-        "text/html" = ["${profile.defaultBrowser}.desktop"];
-        "x-scheme-handler/http" = ["${profile.defaultBrowser}.desktop"];
-        "x-scheme-handler/https" = ["${profile.defaultBrowser}.desktop"];
-        "x-scheme-handler/discord" = ["${profile.defaultDiscord}.desktop"];
-        "x-scheme-handler/ftp" = ["${profile.defaultBrowser}.desktop"];
-        "x-scheme-handler/chrome" = ["${profile.defaultBrowser}.desktop"];
+        "text/html" = ["${profile.defaultBrowser.command}.desktop"];
+        "x-scheme-handler/http" = ["${profile.defaultBrowser.command}.desktop"];
+        "x-scheme-handler/https" = ["${profile.defaultBrowser.command}.desktop"];
+        "x-scheme-handler/discord" = ["${profile.defaultDiscord.command}.desktop"];
+        "x-scheme-handler/ftp" = ["${profile.defaultBrowser.command}.desktop"];
+        "x-scheme-handler/chrome" = ["${profile.defaultBrowser.command}.desktop"];
 
         # File Types
-        "inode/directory" = ["${profile.defaultFileManager}.desktop"];
+        "inode/directory" = ["${profile.defaultFileManager.command}.desktop"];
 
         # Media Types
-        "video/mp4" = ["${profile.defaultMediaPlayer}.desktop"];
-        "video/x-matroska" = ["${profile.defaultMediaPlayer}.desktop"];
-        "video/webm" = ["${profile.defaultMediaPlayer}.desktop"];
+        "video/mp4" = ["${profile.defaultMediaPlayer.command}.desktop"];
+        "video/x-matroska" = ["${profile.defaultMediaPlayer.command}.desktop"];
+        "video/webm" = ["${profile.defaultMediaPlayer.command}.desktop"];
 
         # Images
-        "image/jpeg" = ["${profile.defaultImageViewer}.desktop"];
-        "image/png" = ["${profile.defaultImageViewer}.desktop"];
-        "image/gif" = ["${profile.defaultImageViewer}.desktop"];
-        "image/tiff" = ["${profile.defaultImageViewer}.desktop"];
-        "image/bmp" = ["${profile.defaultImageViewer}.desktop"];
+        "image/jpeg" = ["${profile.defaultImageViewer.command}.desktop"];
+        "image/png" = ["${profile.defaultImageViewer.command}.desktop"];
+        "image/gif" = ["${profile.defaultImageViewer.command}.desktop"];
+        "image/tiff" = ["${profile.defaultImageViewer.command}.desktop"];
+        "image/bmp" = ["${profile.defaultImageViewer.command}.desktop"];
 
         # Archives
-        "application/zip" = ["${profile.defaultArchiveManager}.desktop"];
-        "application/x-7z-compressed" = ["${profile.defaultArchiveManager}.desktop"];
-        "application/x-tar" = ["${profile.defaultArchiveManager}.desktop"];
-        "application/gzip" = ["${profile.defaultArchiveManager}.desktop"];
-        "application/x-compressed-tar" = ["${profile.defaultArchiveManager}.desktop"];
+        "application/zip" = ["${profile.defaultArchiveManager.command}"];
+        "application/x-7z-compressed" = ["${profile.defaultArchiveManager.command}"];
+        "application/x-tar" = ["${profile.defaultArchiveManager.command}.desktop"];
+        "application/gzip" = ["${profile.defaultArchiveManager.command}.desktop"];
+        "application/x-compressed-tar" = ["${profile.defaultArchiveManager.command}.desktop"];
 
         # Web Extensions
-        "application/x-extension-htm" = ["${profile.defaultBrowser}.desktop"];
-        "application/x-extension-html" = ["${profile.defaultBrowser}.desktop"];
-        "application/x-extension-shtml" = ["${profile.defaultBrowser}.desktop"];
-        "application/xhtml+xml" = ["${profile.defaultBrowser}.desktop"];
-        "application/x-extension-xhtml" = ["${profile.defaultBrowser}.desktop"];
+        "application/x-extension-htm" = ["${profile.defaultBrowser.command}.desktop"];
+        "application/x-extension-html" = ["${profile.defaultBrowser.command}.desktop"];
+        "application/x-extension-shtml" = ["${profile.defaultBrowser.command}.desktop"];
+        "application/xhtml+xml" = ["${profile.defaultBrowser.command}.desktop"];
+        "application/x-extension-xhtml" = ["${profile.defaultBrowser.command}.desktop"];
       };
     };
   };
