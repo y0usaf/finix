@@ -254,7 +254,7 @@ lib.mkIf profile.enableAgs {
 
           // Function to create horizontal border
           function horizontalBorder(char1, char2, char3) {
-              return char1 + "─".repeat(longestLabel + 6) + char3;
+              return char1 + "─".repeat(longestLabel + 4) + char3;
           }
 
           return Widget.Box({
