@@ -252,42 +252,49 @@ lib.mkIf profile.enableAgs {
                       halign: 'center',
                       label: stats.date.bind()
                   }),
-                  // Box with system information
+                  // System info box - adjusted text alignment
                   Widget.Label({
-                      label: "  ╭──────────────────╮"
+                      halign: 'start',
+                      label: "  ╭───────────╮"
                   }),
                   Widget.Label({
-                      label: stats.shell.bind().transform(function(sh) { return "  │      shell     │ " + sh; })
+                      halign: 'start',
+                      label: stats.shell.bind().transform(sh => "  │   shell  │ " + sh.padEnd(8))
                   }),
                   Widget.Label({
-                      label: stats.uptime.bind().transform(function(up) { return "  │     uptime    │ " + up; })
+                      halign: 'start',
+                      label: stats.uptime.bind().transform(up => "  │   uptime │ " + up.padEnd(8))
                   }),
                   Widget.Label({
-                      label: stats.pkgs.bind().transform(function(count) { return "  │   󰏖  pkgs      │ " + count; })
+                      halign: 'start',
+                      label: stats.pkgs.bind().transform(count => "  │ 󰏖  pkgs   │ " + count.padEnd(8))
                   }),
                   Widget.Label({
-                      label: stats.used_ram.bind().transform(function(used) {
-                          return "  │   󰍛  memory    │ " + used + " | " + stats.total_ram.value + " MiB";
-                      })
+                      halign: 'start',
+                      label: stats.used_ram.bind().transform(used =>
+                          "  │ 󰍛  memory │ " + (used + " | " + stats.total_ram.value + " MiB").padEnd(8))
                   }),
                   Widget.Label({
-                      label: stats.cpu_temp.bind().transform(function(temp) {
-                          return "  │      cpu      │ " + temp;
-                      })
+                      halign: 'start',
+                      label: stats.cpu_temp.bind().transform(temp =>
+                          "  │   cpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
-                      label: stats.gpu_temp.bind().transform(function(temp) {
-                          return "  │      gpu      │ " + temp;
-                      })
+                      halign: 'start',
+                      label: stats.gpu_temp.bind().transform(temp =>
+                          "  │   gpu    │ " + temp.padEnd(8))
                   }),
                   Widget.Label({
-                      label: "  ├──────────────────┤"
+                      halign: 'start',
+                      label: "  ├───────────┤"
                   }),
                   Widget.Label({
-                      label: "  │   󰏘  colors    │            "
+                      halign: 'start',
+                      label: "  │ 󰏘  colors │        "
                   }),
                   Widget.Label({
-                      label: "  ╰──────────────────╯"
+                      halign: 'start',
+                      label: "  ╰───────────╯"
                   })
               ],
               setup: function(self) {
