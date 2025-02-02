@@ -86,6 +86,7 @@
       lsd
       alejandra
       lm_sensors
+      syncthing
 
       # Python with basic packages
       (python3.withPackages (ps:
@@ -121,6 +122,7 @@
       wl-clipboard
       nwg-wrapper
       hyprpicker
+      nitch
     ];
 
     #── 👤 User Profile Packages ─────────────#
