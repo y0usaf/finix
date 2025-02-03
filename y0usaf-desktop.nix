@@ -86,8 +86,8 @@ in {
 
   # Minimal but complete font setup
   mainFont = {
-    package = ["nerd-fonts" "iosevka-term-slab"];
-    name = "IosevkaTermSlab NFM";
+    package = ["terminus_font"];
+    name = "Terminus";
   };
 
   fallbackFonts = [
