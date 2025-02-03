@@ -35,7 +35,10 @@ lib.mkIf (builtins.elem "ags" profile.features) {
     '';
 
     "ags/style.css".text = ''
-      /* Removed :root definitions and replaced usage of CSS variables with explicit values */
+      /* Set base font size */
+      html {
+        font-size: ${toString profile.baseFontSize}px;
+      }
 
       /* Global reset for widgets */
       .system-stats *, .workspaces * {
@@ -46,44 +49,44 @@ lib.mkIf (builtins.elem "ags" profile.features) {
           box-shadow: none;
           text-shadow:
               /* 1st repetition */
-              0.75pt 0 0.75pt #000000,
-              -0.75pt 0 0.75pt #000000,
-              0 0.75pt 0.75pt #000000,
-              0 -0.75pt 0.75pt #000000,
-              0.75pt 0.75pt 0.75pt #000000,
-              -0.75pt 0.75pt 0.75pt #000000,
-              0.75pt -0.75pt 0.75pt #000000,
-              -0.75pt -0.75pt 0.75pt #000000,
+              0.05rem 0 0.05rem #000000,
+              -0.05rem 0 0.05rem #000000,
+              0 0.05rem 0.05rem #000000,
+              0 -0.05rem 0.05rem #000000,
+              0.05rem 0.05rem 0.05rem #000000,
+              -0.05rem 0.05rem 0.05rem #000000,
+              0.05rem -0.05rem 0.05rem #000000,
+              -0.05rem -0.05rem 0.05rem #000000,
 
               /* 2nd repetition */
-              0.75pt 0 0.75pt #000000,
-              -0.75pt 0 0.75pt #000000,
-              0 0.75pt 0.75pt #000000,
-              0 -0.75pt 0.75pt #000000,
-              0.75pt 0.75pt 0.75pt #000000,
-              -0.75pt 0.75pt 0.75pt #000000,
-              0.75pt -0.75pt 0.75pt #000000,
-              -0.75pt -0.75pt 0.75pt #000000,
+              0.05rem 0 0.05rem #000000,
+              -0.05rem 0 0.05rem #000000,
+              0 0.05rem 0.05rem #000000,
+              0 -0.05rem 0.05rem #000000,
+              0.05rem 0.05rem 0.05rem #000000,
+              -0.05rem 0.05rem 0.05rem #000000,
+              0.05rem -0.05rem 0.05rem #000000,
+              -0.05rem -0.05rem 0.05rem #000000,
 
               /* 3rd repetition */
-              0.75pt 0 0.75pt #000000,
-              -0.75pt 0 0.75pt #000000,
-              0 0.75pt 0.75pt #000000,
-              0 -0.75pt 0.75pt #000000,
-              0.75pt 0.75pt 0.75pt #000000,
-              -0.75pt 0.75pt 0.75pt #000000,
-              0.75pt -0.75pt 0.75pt #000000,
-              -0.75pt -0.75pt 0.75pt #000000,
+              0.05rem 0 0.05rem #000000,
+              -0.05rem 0 0.05rem #000000,
+              0 0.05rem 0.05rem #000000,
+              0 -0.05rem 0.05rem #000000,
+              0.05rem 0.05rem 0.05rem #000000,
+              -0.05rem 0.05rem 0.05rem #000000,
+              0.05rem -0.05rem 0.05rem #000000,
+              -0.05rem -0.05rem 0.05rem #000000,
 
               /* 4th repetition */
-              0.75pt 0 0.75pt #000000,
-              -0.75pt 0 0.75pt #000000,
-              0 0.75pt 0.75pt #000000,
-              0 -0.75pt 0.75pt #000000,
-              0.75pt 0.75pt 0.75pt #000000,
-              -0.75pt 0.75pt 0.75pt #000000,
-              0.75pt -0.75pt 0.75pt #000000,
-              -0.75pt -0.75pt 0.75pt #000000;
+              0.05rem 0 0.05rem #000000,
+              -0.05rem 0 0.05rem #000000,
+              0 0.05rem 0.05rem #000000,
+              0 -0.05rem 0.05rem #000000,
+              0.05rem 0.05rem 0.05rem #000000,
+              -0.05rem 0.05rem 0.05rem #000000,
+              0.05rem -0.05rem 0.05rem #000000,
+              -0.05rem -0.05rem 0.05rem #000000;
           font-family: inherit;
           font-size: inherit;
           font-weight: inherit;
@@ -93,7 +96,7 @@ lib.mkIf (builtins.elem "ags" profile.features) {
       /* System Stats Styles */
       .system-stats {
           text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
-          font-size: 1rem;
+          font-size: 1rem;  /* Will be relative to html base font size */
           margin: 0.5em;
       }
 
@@ -134,10 +137,10 @@ lib.mkIf (builtins.elem "ags" profile.features) {
 
       /* Workspace button styling */
       .workspace-btn {
-          min-width: 0.75em;
-          min-height: 0.75em;
-          margin: 0.08em;
-          padding: 0 0.08em;
+          min-width: 0.75rem;
+          min-height: 0.75rem;
+          margin: 0.08rem;
+          padding: 0 0.08rem;
           background-color: #222;
           border-radius: 0;
       }
@@ -146,7 +149,7 @@ lib.mkIf (builtins.elem "ags" profile.features) {
       .workspace-btn label {
           background: none;
           color: rgba(255, 255, 255, 0.4);
-          font-size: 0.75em;
+          font-size: 0.75rem;  /* Will be relative to html base font size */
       }
 
       /* When a workspace is active (focused) */

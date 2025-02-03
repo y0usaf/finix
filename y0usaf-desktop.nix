@@ -79,6 +79,8 @@ in {
   gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
 
   dpi = 109;
+  baseFontSize = 12;
+  cursorSize = 24;
 
   mainFont = {
     package = ["terminus_font_ttf"];

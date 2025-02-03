@@ -19,7 +19,7 @@
     settings = {
       main = {
         term = "xterm-256color";
-        font = "${profile.mainFont.name}:size=16, ${lib.concatStringsSep ", " (map (font: "${font.name}:size=16") profile.fallbackFonts)}";
+        font = "${profile.mainFont.name}:size=${toString (profile.baseFontSize * 1.33)}, ${lib.concatStringsSep ", " (map (font: "${font.name}:size=${toString (profile.baseFontSize * 1.33)}") profile.fallbackFonts)}";
         dpi-aware = "yes";
       };
 

@@ -10,6 +10,7 @@
   pkgs,
   lib,
   inputs,
+  profile,
   ...
 }: let
   baseTheme = "DeepinDarkV20";
@@ -50,7 +51,7 @@ in {
     pointerCursor = {
       name = "${baseTheme}-x11";
       package = xcursorPackage;
-      size = 24;
+      size = profile.cursorSize;
 
       gtk.enable = true;
       x11.enable = true;
@@ -61,6 +62,6 @@ in {
   gtk.cursorTheme = {
     name = "${baseTheme}-x11";
     package = xcursorPackage;
-    size = 24;
+    size = profile.cursorSize;
   };
 }

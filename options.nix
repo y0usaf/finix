@@ -26,7 +26,7 @@
   # Helper for creating multiple similar options
   mkSubmoduleOptions = attrs: builtins.mapAttrs (name: desc: mkOpt defaultAppModule desc) attrs;
 
-  # Feature definitions and dependencies
+  # Feature definitions
   validFeatures = [
     "hyprland"
     "ags"
@@ -43,40 +43,6 @@
     "webapps"
     "vscode"
   ];
-
-  # Function to add dependent features
-  addDependencies = features: let
-    # Define feature dependencies
-    dependencies = {
-      hyprland = [["wayland"]];
-      ags = [["wayland"]];
-    };
-
-    # Add dependencies recursively
-    addDeps = feat: depSets:
-      if depSets == []
-      then feat
-      else
-        feat
-        ++ (builtins.concatMap (
-          dep:
-            if builtins.elem dep feat
-            then []
-            else [dep]
-        ) (builtins.head depSets));
-
-    # Process all features and their dependencies
-    result =
-      builtins.foldl' (
-        acc: feat:
-          if builtins.hasAttr feat dependencies
-          then addDeps acc (dependencies.${feat})
-          else acc
-      )
-      features
-      features;
-  in
-    lib.unique result;
 
   # Default packages (internal)
   defaultCorePackages = [
@@ -103,15 +69,14 @@ in {
   # Core packages (internal)
   corePackages = mkOptDef mkListOfStr defaultCorePackages "Essential packages that will always be installed";
 
-  # Optional features (updated with auto-dependencies)
-  features =
-    mkOptDef (t.listOf (t.enum validFeatures)) []
-    "List of enabled features"
-    (features: addDependencies features);
+  # Optional features
+  features = mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
 
   # System appearance
   mainFont = mkOpt fontModule "Primary system font configuration";
   fallbackFonts = mkOptDef (t.listOf fontModule) [] "List of fallback fonts in order of preference";
+  baseFontSize = mkOptDef t.int 12 "Base font size that other UI elements should scale from";
+  cursorSize = mkOptDef t.int 24 "Size of the system cursor";
   dpi = mkOptDef t.int 96 "Display DPI setting for the system";
 
   # Default applications
