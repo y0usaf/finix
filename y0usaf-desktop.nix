@@ -87,7 +87,7 @@ in {
   # Minimal but complete font setup
   mainFont = {
     package = ["terminus_font_ttf"];
-    name = "";
+    name = "TerminusTTF";
   };
 
   fallbackFonts = [
