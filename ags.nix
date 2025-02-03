@@ -92,8 +92,6 @@ lib.mkIf profile.enableAgs {
 
       /* System Stats Styles */
       .system-stats {
-          font-family: monospace;
-          font-weight: bold;
           text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
           font-size: 1rem;
           margin: 0.5em;
