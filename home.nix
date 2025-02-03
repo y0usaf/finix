@@ -104,10 +104,7 @@
       grim
       slurp
       wl-clipboard
-      nwg-wrapper
       hyprpicker
-      nitch
-      syncthing
 
       # Python with basic packages
       (python3.withPackages (ps:

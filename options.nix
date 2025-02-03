@@ -58,6 +58,7 @@
     "lsd"
     "alejandra"
     "lm_sensors"
+    "syncthing"
   ];
 in {
   # Core system identification
