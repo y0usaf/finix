@@ -61,21 +61,21 @@
         line5+="  \033[0;31m[moon]  \033[0m"
 
         # Yellow cat with blue name
-        line1+="\033[0;33m ⟋|､      "
+        line1+="\033[0;33m  ⟋|､      "
         line2+="(°､ ｡ 7    "
         line3+=" |､  ~ヽ   "
         line4+=" じしf_,)〳"
         line5+="  \033[0;34m[ekko]  \033[0m"
 
         # Magenta cat with yellow name
-        line1+="\033[0;35m ⟋|､      "
+        line1+="\033[0;35m   ⟋|､      "
         line2+="(°､ ｡ 7    "
         line3+=" |､  ~ヽ   "
         line4+=" じしf_,)〳"
         line5+="  \033[0;33m[tomo]  \033[0m"
 
         # Green cat with red name
-        line1+="\033[0;32m ⟋|､      "
+        line1+="\033[0;32m    ⟋|､      "
         line2+="(°､ ｡ 7    "
         line3+=" |､  ~ヽ   "
         line4+=" じしf_,)〳"
