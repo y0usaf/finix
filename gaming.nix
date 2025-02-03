@@ -12,7 +12,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf profile.enableGaming {
+  config = lib.mkIf (builtins.elem "gaming" profile.features) {
     # Gaming-related packages
     home.packages = with pkgs; [
       steam

@@ -5,7 +5,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf profile.enableWebapps {
+  config = lib.mkIf (builtins.elem "webapps" profile.features) {
     # Add chromium package
     home.packages = [pkgs.chromium];
 

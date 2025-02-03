@@ -111,8 +111,8 @@
     SSB_HOME = "${config.xdg.dataHome}/zoom";
 
     # NVIDIA
-    CUDA_CACHE_PATH = lib.mkIf profile.enableNvidia "${config.xdg.cacheHome}/nv";
-    __GL_SHADER_DISK_CACHE_PATH = lib.mkIf profile.enableNvidia "${config.xdg.cacheHome}/nv";
+    CUDA_CACHE_PATH = lib.mkIf (builtins.elem "nvidia" profile.features) "${config.xdg.cacheHome}/nv";
+    __GL_SHADER_DISK_CACHE_PATH = lib.mkIf (builtins.elem "nvidia" profile.features) "${config.xdg.cacheHome}/nv";
   };
 
   # Ensure required directories exist

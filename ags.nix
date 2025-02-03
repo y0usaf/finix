@@ -5,7 +5,7 @@
   profile,
   ...
 }:
-lib.mkIf profile.enableAgs {
+lib.mkIf (builtins.elem "ags" profile.features) {
   # Install AGS and related packages
   home.packages = with pkgs; [
     ags

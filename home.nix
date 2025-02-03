@@ -29,22 +29,22 @@
       ./gtk.nix
       ./cursor.nix
     ]
-    ++ lib.optionals profile.enableHyprland [
+    ++ lib.optionals (builtins.elem "hyprland" profile.features) [
       ./hyprland.nix
     ]
-    ++ lib.optionals profile.enableAgs [
+    ++ lib.optionals (builtins.elem "ags" profile.features) [
       ./ags.nix
     ]
-    ++ lib.optionals profile.enableGaming [
+    ++ lib.optionals (builtins.elem "gaming" profile.features) [
       ./gaming.nix
     ]
-    ++ lib.optionals profile.enableNeovim [
+    ++ lib.optionals (builtins.elem "neovim" profile.features) [
       ./nvim.nix
     ]
-    ++ lib.optionals profile.enableAndroid [
+    ++ lib.optionals (builtins.elem "android" profile.features) [
       ./android.nix
     ]
-    ++ lib.optionals profile.enableWebapps [
+    ++ lib.optionals (builtins.elem "webapps" profile.features) [
       ./webapps.nix
     ];
 

@@ -4,29 +4,28 @@
 let
   username = "y0usaf";
 in {
-  # Basic settings
   username = username;
   homeDirectory = "/home/${username}";
   hostname = "y0usaf-desktop";
   stateVersion = "24.11";
   timezone = "America/Toronto";
 
-  # Enable feature flags
-  enableHyprland = true;
-  enableAgs = true;
-  enableWayland = true;
-  enableNvidia = true;
-  enableGaming = true;
-  enableDevelopment = true;
-  enableMedia = true;
-  enableCreative = true;
-  enableVirtualization = true;
-  enableBackup = true;
-  enableNeovim = true;
-  enableAndroid = true;
-  enableWebapps = true;
+  features = [
+    "hyprland"
+    "ags"
+    "wayland"
+    "nvidia"
+    "gaming"
+    "development"
+    "media"
+    "creative"
+    "virtualization"
+    "backup"
+    "neovim"
+    "android"
+    "webapps"
+  ];
 
-  # Common paths
   flakeDir = "/home/${username}/nixos";
   musicDir = "$HOME/Music";
   dcimDir = "$HOME/DCIM";
@@ -34,7 +33,6 @@ in {
   wallpaperDir = "$HOME/DCIM/Wallpapers/32_9";
   wallpaperVideoDir = "$HOME/DCIM/Wallpapers_Video";
 
-  # Default applications
   defaultBrowser = {
     package = "firefox";
     command = "firefox";
@@ -76,32 +74,26 @@ in {
     command = "mpv";
   };
 
-  # Git configuration
   gitName = "y0usaf";
   gitEmail = "OA99@Outlook.com";
-  homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
+  gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
 
-  # Font configuration
-  dpi = 109; # Your display DPI setting
+  dpi = 109;
 
-  # Minimal but complete font setup
   mainFont = {
     package = ["terminus_font_ttf"];
     name = "Terminus (TTF)";
   };
 
   fallbackFonts = [
-    # Essential Unicode coverage
     {
       package = ["noto-fonts-emoji"];
       name = "Noto Color Emoji";
     }
-    # CJK support
     {
       package = ["noto-fonts-cjk-sans"];
       name = "Noto Sans CJK";
     }
-    # Symbols and icons
     {
       package = ["font-awesome"];
       name = "Font Awesome";

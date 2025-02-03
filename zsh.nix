@@ -34,10 +34,10 @@
       case "$(hostname)" in
         "y0usaf-desktop")
           sudo nvidia-smi -pl 150
-          ${lib.optionalString profile.enableHyprland "Hyprland"}
+          ${lib.optionalString (builtins.elem "hyprland" profile.features) "Hyprland"}
           ;;
         "y0usaf-laptop")
-          ${lib.optionalString profile.enableHyprland "Hyprland"}
+          ${lib.optionalString (builtins.elem "hyprland" profile.features) "Hyprland"}
           ;;
       esac
     '';

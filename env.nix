@@ -13,7 +13,7 @@
     {
       # Non-Wayland variables here
     }
-    (lib.mkIf profile.enableWayland {
+    (lib.mkIf (builtins.elem "wayland" profile.features) {
       WLR_NO_HARDWARE_CURSORS = "1";
       NIXOS_OZONE_WL = "1";
       QT_QPA_PLATFORM = "wayland";
@@ -23,7 +23,7 @@
       SDL_VIDEODRIVER = "wayland";
       CLUTTER_BACKEND = "wayland";
     })
-    (lib.mkIf profile.enableHyprland {
+    (lib.mkIf (builtins.elem "hyprland" profile.features) {
       XDG_CURRENT_DESKTOP = "Hyprland";
       XDG_SESSION_DESKTOP = "Hyprland";
     })
@@ -52,7 +52,7 @@
 
     #── ⚡ Hyprland Compositor Settings ───────────────────────────────#
     wayland.windowManager.hyprland.settings = {
-      env = lib.mkIf profile.enableNvidia [
+      env = lib.mkIf (builtins.elem "nvidia" profile.features) [
         "LIBVA_DRIVER_NAME,nvidia"
         "GBM_BACKEND,nvidia-drm"
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"

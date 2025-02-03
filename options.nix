@@ -1,11 +1,50 @@
 #─────────────────────────── 🌍 SYSTEM OPTIONS 🌍 ───────────────────────────#
 {lib, ...}: let
-  # Common type shorthands for clarity
-  mkStr = lib.types.str;
-  mkBool = lib.types.bool;
-  mkListOfStr = lib.types.listOf lib.types.str;
+  # Type definitions and helpers
+  t = lib.types;
+  mkStr = t.str;
+  mkBool = t.bool;
+  mkListOfStr = t.listOf t.str;
+  mkOpt = type: description: lib.mkOption {inherit type description;};
+  mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
 
-  # Default packages for various options
+  # Common submodules
+  defaultAppModule = t.submodule {
+    options = {
+      package = mkOpt mkStr "Package name to install";
+      command = mkOpt mkStr "Command to execute the application";
+    };
+  };
+
+  fontModule = t.submodule {
+    options = {
+      package = mkOpt (t.listOf mkStr) "Font package attribute path";
+      name = mkOpt mkStr "Font name as it appears to the system";
+    };
+  };
+
+  # Helper for creating multiple similar options
+  mkSubmoduleOptions = attrs: builtins.mapAttrs (name: desc: mkOpt defaultAppModule desc) attrs;
+
+  # Feature definitions
+  validFeatures = [
+    "hyprland"
+    "ags"
+    "wayland"
+    "nvidia"
+    "gaming"
+    "development"
+    "media"
+    "creative"
+    "virtualization"
+    "backup"
+    "neovim"
+    "android"
+    "webapps"
+    "vscode"
+  ];
+
+  # Default packages (internal)
   defaultCorePackages = [
     "git"
     "curl"
@@ -19,229 +58,47 @@
     "alejandra"
     "lm_sensors"
   ];
-
-  # Helper to create a feature submodule with 'enable' and 'packages' options
-  mkFeature = description:
-    lib.types.submodule {
-      options = {
-        enable = lib.mkOption {
-          type = mkBool;
-          default = false;
-          description = "Enable " + description;
-        };
-        packages = lib.mkOption {
-          type = mkListOfStr;
-          default = [];
-          description = "Packages to install when this feature is enabled";
-        };
-      };
-    };
-
-  # Submodule for default application configurations
-  defaultAppModule = lib.types.submodule {
-    options = {
-      package = lib.mkOption {
-        type = mkStr;
-        description = "Package name to install";
-      };
-      command = lib.mkOption {
-        type = mkStr;
-        description = "Command to execute the application";
-      };
-    };
-  };
-
-  # Font configuration types
-  fontModule = lib.types.submodule {
-    options = {
-      package = lib.mkOption {
-        type = lib.types.listOf mkStr; # e.g. ["nerd-fonts" "iosevka-term-slab"]
-        description = "Font package attribute path";
-      };
-      name = lib.mkOption {
-        type = mkStr; # e.g. "IosevkaTermSlab NFM"
-        description = "Font name as it appears to the system";
-      };
-    };
-  };
 in {
-  # Core packages configuration
-  corePackages = lib.mkOption {
-    type = mkListOfStr;
-    default = defaultCorePackages;
-    description = "Essential packages that will always be installed";
-  };
+  # Core system identification
+  username = mkOpt mkStr "The username for the system.";
+  hostname = mkOpt mkStr "The system hostname.";
+  homeDirectory = mkOpt mkStr "The path to the user's home directory.";
+  stateVersion = mkOpt mkStr "The system state version.";
+  timezone = mkOpt mkStr "The system timezone.";
 
-  # Basic user and system settings
-  system = lib.mkOption {
-    type = lib.types.submodule {
-      options = {
-        username = lib.mkOption {
-          type = mkStr;
-          description = "The username for the system.";
-        };
-        homeDirectory = lib.mkOption {
-          type = mkStr;
-          description = "The path to the user's home directory.";
-        };
-        hostname = lib.mkOption {
-          type = mkStr;
-          description = "The system hostname.";
-        };
-        stateVersion = lib.mkOption {
-          type = mkStr;
-          description = "The system state version.";
-        };
-        timezone = lib.mkOption {
-          type = mkStr;
-          description = "The system timezone.";
-        };
-        packages = lib.mkOption {
-          type = mkListOfStr;
-          default = defaultCorePackages;
-          description = "Core system packages that will always be installed.";
-        };
-      };
-    };
-  };
+  # Core packages (internal)
+  corePackages = mkOptDef mkListOfStr defaultCorePackages "Essential packages that will always be installed";
 
-  # Features with associated packages
-  features = lib.mkOption {
-    type = lib.types.submodule {
-      options = {
-        hyprland = lib.mkOption {type = mkFeature "Hyprland desktop environment";};
-        ags = lib.mkOption {type = mkFeature "Ags configuration";};
-        wayland = lib.mkOption {type = mkFeature "Wayland support";};
-        nvidia = lib.mkOption {type = mkFeature "Nvidia-specific configuration";};
-        gaming = lib.mkOption {type = mkFeature "gaming-specific configuration";};
-        development = lib.mkOption {type = mkFeature "development-related configuration";};
-        media = lib.mkOption {type = mkFeature "media-related configuration";};
-        creative = lib.mkOption {type = mkFeature "creative-specific configuration";};
-        virtualization = lib.mkOption {type = mkFeature "virtualization support";};
-        backup = lib.mkOption {type = mkFeature "backup solutions";};
-        neovim = lib.mkOption {type = mkFeature "Neovim integration";};
-        android = lib.mkOption {type = mkFeature "Android-related settings";};
-        webapps = lib.mkOption {type = mkFeature "Web applications and browser integration";};
-      };
-    };
-  };
+  # Optional features
+  features = mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
 
-  # Paths configuration
-  paths = lib.mkOption {
-    type = lib.types.submodule {
-      options = {
-        flake = lib.mkOption {
-          type = mkStr;
-          description = "The directory where the flake lives.";
-        };
-        music = lib.mkOption {
-          type = mkStr;
-          description = "Directory for music files.";
-        };
-        dcim = lib.mkOption {
-          type = mkStr;
-          description = "Directory for pictures (DCIM).";
-        };
-        steam = lib.mkOption {
-          type = mkStr;
-          description = "Directory for Steam.";
-        };
-        wallpaper = lib.mkOption {
-          type = mkStr;
-          description = "Wallpaper directory.";
-        };
-        wallpaperVideo = lib.mkOption {
-          type = mkStr;
-          description = "Wallpaper video directory.";
-        };
-      };
-    };
-  };
+  # System appearance
+  mainFont = mkOpt fontModule "Primary system font configuration";
+  fallbackFonts = mkOptDef (t.listOf fontModule) [] "List of fallback fonts in order of preference";
+  dpi = mkOptDef t.int 96 "Display DPI setting for the system";
 
-  # Default applications configuration
-  defaultApps = lib.mkOption {
-    type = lib.types.submodule {
-      options = {
-        browser = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default web browser configuration.";
-        };
-        editor = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default text editor configuration.";
-        };
-        ide = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default IDE configuration.";
-        };
-        terminal = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default terminal emulator configuration.";
-        };
-        fileManager = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default file manager configuration.";
-        };
-        launcher = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default application launcher configuration.";
-        };
-        discord = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default Discord client configuration.";
-        };
-        archiveManager = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default archive manager configuration.";
-        };
-        imageViewer = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default image viewer configuration.";
-        };
-        mediaPlayer = lib.mkOption {
-          type = defaultAppModule;
-          description = "Default media player configuration.";
-        };
-      };
-    };
-  };
+  # Default applications
+  defaultBrowser = mkOpt defaultAppModule "Default web browser configuration.";
+  defaultEditor = mkOpt defaultAppModule "Default text editor configuration.";
+  defaultIde = mkOpt defaultAppModule "Default IDE configuration.";
+  defaultTerminal = mkOpt defaultAppModule "Default terminal emulator configuration.";
+  defaultFileManager = mkOpt defaultAppModule "Default file manager configuration.";
+  defaultLauncher = mkOpt defaultAppModule "Default application launcher configuration.";
+  defaultDiscord = mkOpt defaultAppModule "Default Discord client configuration.";
+  defaultArchiveManager = mkOpt defaultAppModule "Default archive manager configuration.";
+  defaultImageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
+  defaultMediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
 
-  # Git configuration
-  git = lib.mkOption {
-    type = lib.types.submodule {
-      options = {
-        name = lib.mkOption {
-          type = mkStr;
-          description = "Git username.";
-        };
-        email = lib.mkOption {
-          type = mkStr;
-          description = "Git email address.";
-        };
-        homeManagerRepoUrl = lib.mkOption {
-          type = mkStr;
-          description = "URL of the Home Manager repository.";
-        };
-      };
-    };
-  };
+  # Directory configurations
+  flakeDir = mkOpt mkStr "The directory where the flake lives.";
+  musicDir = mkOpt mkStr "Directory for music files.";
+  dcimDir = mkOpt mkStr "Directory for pictures (DCIM).";
+  steamDir = mkOpt mkStr "Directory for Steam.";
+  wallpaperDir = mkOpt mkStr "Wallpaper directory.";
+  wallpaperVideoDir = mkOpt mkStr "Wallpaper video directory.";
 
-  # Font configurations
-  mainFont = lib.mkOption {
-    type = fontModule;
-    description = "Primary system font configuration";
-  };
-
-  fallbackFonts = lib.mkOption {
-    type = lib.types.listOf fontModule;
-    default = [];
-    description = "List of fallback fonts in order of preference";
-  };
-
-  # Display configuration
-  dpi = lib.mkOption {
-    type = lib.types.int;
-    default = 96;
-    description = "Display DPI setting for the system";
-  };
+  # Git configurations
+  gitName = mkOpt mkStr "Git username.";
+  gitEmail = mkOpt mkStr "Git email address.";
+  gitHomeManagerRepo = mkOpt mkStr "URL of the Home Manager repository.";
 }

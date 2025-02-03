@@ -9,11 +9,11 @@
   profile,
   ...
 }: {
-  imports = lib.optionals profile.enableHyprland [
+  imports = lib.optionals (builtins.elem "hyprland" profile.features) [
     inputs.hyprland.homeManagerModules.default
   ];
 
-  config = lib.mkIf profile.enableHyprland {
+  config = lib.mkIf (builtins.elem "hyprland" profile.features) {
     wayland.windowManager.hyprland = {
       enable = true;
       systemd.enable = true;

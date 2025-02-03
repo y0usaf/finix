@@ -37,7 +37,7 @@
     setupGitRepo = lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -d "${profile.homeDirectory}/nixos" ]; then
         echo "Setting up NixOS configuration repository..."
-        git clone ${profile.homeManagerRepoUrl} ${profile.homeDirectory}/nixos
+        git clone ${profile.gitHomeManagerRepoUrl} ${profile.homeDirectory}/nixos
       fi
     '';
   };

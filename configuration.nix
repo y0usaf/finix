@@ -68,7 +68,7 @@
     };
 
     hardware = {
-      nvidia = lib.mkIf profile.enableNvidia {
+      nvidia = lib.mkIf (builtins.elem "nvidia" profile.features) {
         modesetting.enable = true;
         powerManagement.enable = true;
         open = false;
@@ -83,7 +83,7 @@
     };
 
     services = {
-      xserver.videoDrivers = lib.mkIf profile.enableNvidia ["nvidia"];
+      xserver.videoDrivers = lib.mkIf (builtins.elem "nvidia" profile.features) ["nvidia"];
 
       #── 🔊 Audio Configuration ────────────────#
       pipewire = {
@@ -138,7 +138,7 @@
 
     #── 👤 User Environment ─────────────────#
     programs = {
-      hyprland = lib.mkIf (profile.enableWayland && profile.enableHyprland) {
+      hyprland = lib.mkIf (builtins.elem "wayland" profile.features && builtins.elem "hyprland" profile.features) {
         enable = true;
         xwayland.enable = true;
         package = inputs.hyprland.packages.${pkgs.system}.hyprland;
@@ -156,7 +156,7 @@
           "audio"
           "input"
         ]
-        ++ lib.optionals profile.enableGaming [
+        ++ lib.optionals (builtins.elem "gaming" profile.features) [
           "gamemode"
         ];
       ignoreShellProgramCheck = true;
@@ -173,7 +173,7 @@
       KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
     '';
 
-    xdg.portal = lib.mkIf (profile.enableWayland && profile.enableHyprland) {
+    xdg.portal = lib.mkIf (builtins.elem "wayland" profile.features && builtins.elem "hyprland" profile.features) {
       enable = true;
       xdgOpenUsePortal = true;
       config = {
