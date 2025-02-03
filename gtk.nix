@@ -8,7 +8,7 @@
   gtk = {
     enable = true;
     font = {
-      name = "monospace";
+      name = "${profile.mainFont.name}";
       size = 11;
     };
     gtk3.extraConfig = {
@@ -16,12 +16,12 @@
       gtk-xft-hinting = 1;
       gtk-xft-hintstyle = "hintslight";
       gtk-xft-rgba = "rgb";
-      gtk-xft-dpi = 96;
+      gtk-xft-dpi = toString profile.dpi;
       gtk-application-prefer-dark-theme = 1;
     };
     gtk3.extraCss = ''
       * {
-        font-family: monospace;
+        font-family: ${profile.mainFont.name};
         color: #ffffff;
         background: transparent;
         outline-width: 0;
