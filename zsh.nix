@@ -48,7 +48,7 @@
       print_cat() {
         local names=("moon" "ekko" "tomo" "bozo")
         local cat_colors=("36" "33" "35" "32")    # cyan, yellow, magenta, green
-        local name_colors=("31" "34" "33" "35")   # red, blue, yellow, magenta
+        local name_colors=("31" "34" "33" "36")   # red, blue, yellow, cyan
         local rand=$((RANDOM % 4))
         local name="''${names[$rand]}"
         local cat_color="''${cat_colors[$rand]}"
