@@ -11,6 +11,9 @@
   # Helper function to get package from attribute path
   getPackage = path: lib.getAttrFromPath path pkgs;
 in {
+  # Disable Home Manager's font management
+  fonts.fontconfig.enable = false;
+
   #── 📝 Font Configuration ──────────────────#
   xdg.configFile."fontconfig/fonts.conf".text = ''
     <?xml version="1.0"?>
