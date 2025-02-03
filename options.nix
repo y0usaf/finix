@@ -50,6 +50,20 @@
       };
     };
   };
+
+  # Font configuration types
+  fontModule = lib.types.submodule {
+    options = {
+      package = lib.mkOption {
+        type = lib.types.listOf mkStr; # e.g. ["nerd-fonts" "iosevka-term-slab"]
+        description = "Font package attribute path";
+      };
+      name = lib.mkOption {
+        type = mkStr; # e.g. "IosevkaTermSlab NFM"
+        description = "Font name as it appears to the system";
+      };
+    };
+  };
 in {
   # Core packages configuration
   corePackages = lib.mkOption {
@@ -210,5 +224,17 @@ in {
         };
       };
     };
+  };
+
+  # Font configurations
+  mainFont = lib.mkOption {
+    type = fontModule;
+    description = "Primary system font configuration";
+  };
+
+  fallbackFonts = lib.mkOption {
+    type = lib.types.listOf fontModule;
+    default = [];
+    description = "List of fallback fonts in order of preference";
   };
 }

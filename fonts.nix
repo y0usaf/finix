@@ -7,19 +7,22 @@
   lib,
   profile,
   ...
-}: {
+}: let
+  # Helper function to get package from attribute path
+  getPackage = path: lib.getAttrFromPath path pkgs;
+in {
   #── 📝 Font Configuration ──────────────────#
   xdg.configFile."fontconfig/fonts.conf".text = ''
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
     <fontconfig>
-        <!-- Prioritize IosevkaTermSlab for all text -->
+        <!-- Prioritize main font for all text -->
         <match>
             <test name="family">
                 <string>*</string>
             </test>
             <edit name="family" mode="prepend">
-                <string>IosevkaTermSlab NFM</string>
+                <string>${profile.mainFont.name}</string>
             </edit>
         </match>
 
@@ -27,15 +30,11 @@
         <alias>
             <family>monospace</family>
             <prefer>
-                <family>IosevkaTermSlab NFM</family>
-                <family>Symbols Nerd Font Mono</family>
-                <family>Noto Color Emoji</family>
-                <family>Noto Sans Symbols</family>
-                <family>Noto Sans Symbols 2</family>
-                <family>DejaVu Sans Mono</family>
-                <family>Font Awesome</family>
-                <family>Noto Sans CJK</family>
-                <family>Noto Sans</family>
+                <family>${profile.mainFont.name}</family>
+                ${lib.concatMapStrings (font: ''
+        <family>${font.name}</family>
+      '')
+      profile.fallbackFonts}
             </prefer>
         </alias>
 
@@ -67,13 +66,12 @@
   '';
 
   #── 📦 Font Packages ────────────────────────#
-  home.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-cjk-sans
-    noto-fonts-emoji
-    noto-fonts-extra
-    font-awesome
-    dejavu_fonts
-    nerd-fonts.iosevka-term-slab
-  ];
+  home.packages =
+    [
+      # Install main font
+      (getPackage profile.mainFont.package)
+    ]
+    ++
+    # Install all fallback fonts
+    (map (font: getPackage font.package) profile.fallbackFonts);
 }

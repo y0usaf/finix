@@ -80,4 +80,41 @@ in {
   gitName = "y0usaf";
   gitEmail = "OA99@Outlook.com";
   homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
+
+  # Font configuration
+  mainFont = {
+    package = ["nerd-fonts" "iosevka-term-slab"];
+    name = "IosevkaTermSlab NFM";
+  };
+
+  fallbackFonts = [
+    {
+      package = ["noto-fonts-emoji"];
+      name = "Noto Color Emoji";
+    }
+    {
+      package = ["noto-fonts"];
+      name = "Noto Sans Symbols";
+    }
+    {
+      package = ["noto-fonts"];
+      name = "Noto Sans Symbols 2";
+    }
+    {
+      package = ["dejavu_fonts"];
+      name = "DejaVu Sans Mono";
+    }
+    {
+      package = ["font-awesome"];
+      name = "Font Awesome";
+    }
+    {
+      package = ["noto-fonts-cjk-sans"];
+      name = "Noto Sans CJK";
+    }
+    {
+      package = ["noto-fonts"];
+      name = "Noto Sans";
+    }
+  ];
 }
