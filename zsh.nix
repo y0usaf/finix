@@ -47,8 +47,8 @@
       # Function to print the ASCII cat with random name and color
       print_cat() {
         local names=("moon" "ekko" "tomo" "bozo")
-        local cat_colors=("36" "33" "35" "32")    # cyan, yellow, magenta, green
-        local name_colors=("31" "34" "33" "36")   # red, blue, yellow, cyan
+        local cat_colors=("36" "33" "35" "35")    # cyan, yellow, magenta, magenta
+        local name_colors=("31" "34" "33" "32")   # red, blue, yellow, green
         local rand=$((RANDOM % 4))
         local name="''${names[$rand]}"
         local cat_color="''${cat_colors[$rand]}"
