@@ -44,8 +44,8 @@
 
     #── 🔧 Shell Initialization ──────────────#
     initExtra = ''
-      # Launch fetch
-      nitch
+      # Add empty lines to match nitch output position
+      echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 
       # Set up the basic prompt
       PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
