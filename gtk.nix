@@ -21,7 +21,7 @@
     };
     gtk3.extraCss = ''
       * {
-        font-family: ${profile.mainFont.name};
+        font-family: "${profile.mainFont.name}";
         color: #ffffff;
         background: transparent;
         outline-width: 0;
