@@ -46,32 +46,81 @@
     initExtra = ''
       # Function to print the ASCII cat with random name and color
       print_cat() {
-        local names=("moon" "ekko" "tomo" "bozo")
-        local cat_colors=("36" "33" "35" "35")    # cyan, yellow, magenta, magenta
-        local name_colors=("31" "34" "33" "32")   # red, blue, yellow, green
         local rand=$((RANDOM % 4))
-        local name="''${names[$rand]}"
-        local cat_color="''${cat_colors[$rand]}"
-        local name_color="''${name_colors[$rand]}"
-        local padding=$((4 - ''${#name}))  # Calculate padding based on name length
-        local spaces=$(printf "%*s" $padding "")  # Create the padding spaces
+        local cat=""
 
-        echo "\033[0;''${cat_color}m       _                        "
-        echo "       \`*-.                    "
-        echo "        )  _\`-.                 "
-        echo "       .  : \`. .                "
-        echo "       : _   '  \               "
-        echo "       ; *\` _.   \`*-._          "
-        echo "       \`-.-'          \`-.       "
-        echo "         ;       \`       \`.     "
-        echo "         :.       .        \    "
-        echo "         . \  .   :   .-'   .   "
-        echo "         '  \`+.;  ;  '      :   "
-        echo "         :  '  |    ;       ;-. "
-        echo "         ; '   : :\`-:     _.\`* ;"
-        echo "\033[0;''${name_color}m[''${name}]''${spaces}\033[0;''${cat_color}m.*' /  .*' ; .*\`- +'  \`*' "
-        echo "      \`*-*   \`*-*  \`*-*'        \033[0m"
-        echo
+        case $rand in
+          0)  # Moon - Cyan cat with red name
+            cat="\033[0;36m       _                        \n"
+            cat+="       \`*-.                    \n"
+            cat+="        )  _\`-.                 \n"
+            cat+="       .  : \`. .                \n"
+            cat+="       : _   '  \               \n"
+            cat+="       ; *\` _.   \`*-._          \n"
+            cat+="       \`-.-'          \`-.       \n"
+            cat+="         ;       \`       \`.     \n"
+            cat+="         :.       .        \    \n"
+            cat+="         . \  .   :   .-'   .   \n"
+            cat+="         '  \`+.;  ;  '      :   \n"
+            cat+="         :  '  |    ;       ;-. \n"
+            cat+="         ; '   : :\`-:     _.\`* ;\n"
+            cat+="\033[0;31m[moon]\033[0;36m.*' /  .*' ; .*\`- +'  \`*' \n"
+            cat+="      \`*-*   \`*-*  \`*-*'        \033[0m"
+            ;;
+          1)  # Ekko - Yellow cat with blue name
+            cat="\033[0;33m       _                        \n"
+            cat+="       \`*-.                    \n"
+            cat+="        )  _\`-.                 \n"
+            cat+="       .  : \`. .                \n"
+            cat+="       : _   '  \               \n"
+            cat+="       ; *\` _.   \`*-._          \n"
+            cat+="       \`-.-'          \`-.       \n"
+            cat+="         ;       \`       \`.     \n"
+            cat+="         :.       .        \    \n"
+            cat+="         . \  .   :   .-'   .   \n"
+            cat+="         '  \`+.;  ;  '      :   \n"
+            cat+="         :  '  |    ;       ;-. \n"
+            cat+="         ; '   : :\`-:     _.\`* ;\n"
+            cat+="\033[0;34m[ekko]\033[0;33m.*' /  .*' ; .*\`- +'  \`*' \n"
+            cat+="      \`*-*   \`*-*  \`*-*'        \033[0m"
+            ;;
+          2)  # Tomo - Magenta cat with yellow name
+            cat="\033[0;35m       _                        \n"
+            cat+="       \`*-.                    \n"
+            cat+="        )  _\`-.                 \n"
+            cat+="       .  : \`. .                \n"
+            cat+="       : _   '  \               \n"
+            cat+="       ; *\` _.   \`*-._          \n"
+            cat+="       \`-.-'          \`-.       \n"
+            cat+="         ;       \`       \`.     \n"
+            cat+="         :.       .        \    \n"
+            cat+="         . \  .   :   .-'   .   \n"
+            cat+="         '  \`+.;  ;  '      :   \n"
+            cat+="         :  '  |    ;       ;-. \n"
+            cat+="         ; '   : :\`-:     _.\`* ;\n"
+            cat+="\033[0;33m[tomo]\033[0;35m.*' /  .*' ; .*\`- +'  \`*' \n"
+            cat+="      \`*-*   \`*-*  \`*-*'        \033[0m"
+            ;;
+          3)  # Bozo - Green cat with red name
+            cat="\033[0;32m       _                        \n"
+            cat+="       \`*-.                    \n"
+            cat+="        )  _\`-.                 \n"
+            cat+="       .  : \`. .                \n"
+            cat+="       : _   '  \               \n"
+            cat+="       ; *\` _.   \`*-._          \n"
+            cat+="       \`-.-'          \`-.       \n"
+            cat+="         ;       \`       \`.     \n"
+            cat+="         :.       .        \    \n"
+            cat+="         . \  .   :   .-'   .   \n"
+            cat+="         '  \`+.;  ;  '      :   \n"
+            cat+="         :  '  |    ;       ;-. \n"
+            cat+="         ; '   : :\`-:     _.\`* ;\n"
+            cat+="\033[0;31m[bozo]\033[0;32m.*' /  .*' ; .*\`- +'  \`*' \n"
+            cat+="      \`*-*   \`*-*  \`*-*'        \033[0m"
+            ;;
+        esac
+
+        echo -e "$cat\n"
       }
 
       # Print the cat art and add some spacing
