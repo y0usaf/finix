@@ -157,20 +157,19 @@ lib.mkIf profile.enableAgs {
 
       /* Workspace button styling */
       .workspace-btn {
-          min-width: 1.5vh;
-          min-height: 1.5vh;
-          margin: 0.2vh;
-          padding: 0 0.2vh;
-          background-color: #222;   /* replaced var(--bg-color) */
-          border-radius: 0;         /* sharp corners */
+          min-width: 0.75em;
+          min-height: 0.75em;
+          margin: 0.08em;
+          padding: 0 0.08em;
+          background-color: #222;
+          border-radius: 0;
       }
 
       /* Workspace label (the number inside) */
       .workspace-btn label {
           background: none;
-          /* Inactive / unfocused: lower opacity white */
-          color: rgba(255, 255, 255, 0.4);  /* replaced var(--inactive-color) */
-          font-size: 0.9rem;
+          color: rgba(255, 255, 255, 0.4);
+          font-size: 0.75em;
       }
 
       /* When a workspace is active (focused) */
