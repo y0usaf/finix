@@ -82,7 +82,7 @@ in {
   homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
 
   # Font configuration
-  fontDpi = 109; # Your current DPI setting
+  dpi = 109; # Your display DPI setting
 
   # Minimal but complete font setup
   mainFont = {

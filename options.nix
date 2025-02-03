@@ -238,9 +238,10 @@ in {
     description = "List of fallback fonts in order of preference";
   };
 
-  fontDpi = lib.mkOption {
+  # Display configuration
+  dpi = lib.mkOption {
     type = lib.types.int;
     default = 96;
-    description = "Font DPI setting for the system";
+    description = "Display DPI setting for the system";
   };
 }
