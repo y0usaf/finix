@@ -95,6 +95,8 @@ lib.mkIf profile.enableAgs {
           font-family: monospace;
           font-weight: bold;
           text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
+          font-size: 1rem;
+          margin: 0.5em;
       }
 
       .system-stats label {
@@ -115,20 +117,20 @@ lib.mkIf profile.enableAgs {
       /* Header styles */
       .stats-header {
           color: #00ffff;
-          font-size: 9pt;
-          margin-bottom: 5pt;
+          font-size: 0.9rem;
+          margin-bottom: 0.5em;
       }
 
       .stats-time {
           color: #ffffff;
-          font-size: 21pt;
-          margin-bottom: 3pt;
+          font-size: 2.1rem;
+          margin-bottom: 0.3em;
       }
 
       .stats-date {
           color: #ffffff;
-          font-size: 11pt;
-          margin-bottom: 5pt;
+          font-size: 1.1rem;
+          margin-bottom: 0.5em;
       }
 
       /* Box characters in white */
@@ -155,10 +157,10 @@ lib.mkIf profile.enableAgs {
 
       /* Workspace button styling */
       .workspace-btn {
-          min-width: 9pt;          /* small box width */
-          min-height: 9pt;         /* small box height */
-          margin: 1pt;              /* minimal gap */
-          padding: 0 1pt;           /* as minimal as possible */
+          min-width: 1.5vh;
+          min-height: 1.5vh;
+          margin: 0.2vh;
+          padding: 0 0.2vh;
           background-color: #222;   /* replaced var(--bg-color) */
           border-radius: 0;         /* sharp corners */
       }
@@ -168,7 +170,7 @@ lib.mkIf profile.enableAgs {
           background: none;
           /* Inactive / unfocused: lower opacity white */
           color: rgba(255, 255, 255, 0.4);  /* replaced var(--inactive-color) */
-          font-size: 9pt;
+          font-size: 0.9rem;
       }
 
       /* When a workspace is active (focused) */

@@ -9,7 +9,7 @@
     enable = true;
     font = {
       name = "${profile.mainFont.name}";
-      size = 11;
+      size = 12;
     };
     gtk3.extraConfig = {
       gtk-xft-antialias = 1;
@@ -37,9 +37,9 @@
       }
 
       button {
-        border-radius: 3pt;
-        min-height: 16pt;
-        padding: 1pt 4pt;
+        border-radius: 2pt;
+        min-height: 12pt;
+        padding: 0.75pt 3pt;
       }
 
       menu {
