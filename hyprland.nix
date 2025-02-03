@@ -17,11 +17,11 @@
     services.hyprpaper = {
       enable = true;
       settings = {
-        preload = ["${profile.wallpaperDir}/current.jpg"];
+        preload = ["$(find ${profile.wallpaperDir} -type f | shuf -n 1)"];
         wallpaper = [
-          "DP-4,${profile.wallpaperDir}/current.jpg"
-          "DP-2,${profile.wallpaperDir}/current.jpg"
-          "HDMI-A-2,${profile.wallpaperDir}/current.jpg"
+          "DP-4,$(find ${profile.wallpaperDir} -type f | shuf -n 1)"
+          "DP-2,$(find ${profile.wallpaperDir} -type f | shuf -n 1)"
+          "HDMI-A-2,$(find ${profile.wallpaperDir} -type f | shuf -n 1)"
         ];
       };
     };
