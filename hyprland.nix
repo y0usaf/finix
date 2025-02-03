@@ -14,18 +14,6 @@
   ];
 
   config = lib.mkIf (builtins.elem "hyprland" profile.features) {
-    services.hyprpaper = {
-      enable = true;
-      settings = {
-        preload = ["$(find ${profile.wallpaperDir} -type f | shuf -n 1)"];
-        wallpaper = [
-          "DP-4,$(find ${profile.wallpaperDir} -type f | shuf -n 1)"
-          "DP-2,$(find ${profile.wallpaperDir} -type f | shuf -n 1)"
-          "HDMI-A-2,$(find ${profile.wallpaperDir} -type f | shuf -n 1)"
-        ];
-      };
-    };
-
     wayland.windowManager.hyprland = {
       enable = true;
       systemd.enable = true;
@@ -193,7 +181,7 @@
 
           # Special Commands
           [
-            "$mod SHIFT, C, exec, hyprpaper & wallust generate /path/to/wallpaper.jpg & wallust apply & hyprctl reload"
+            "$mod SHIFT, C, exec, killall swaybg; swaybg -i $(find ${profile.wallpaperDir} -type f | shuf -n 1) -m fill & wallust generate $(find ${profile.wallpaperDir} -type f | shuf -n 1) && wallust apply"
           ]
         ];
 
