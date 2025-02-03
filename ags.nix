@@ -102,37 +102,16 @@ lib.mkIf profile.enableAgs {
           padding: 0; /* Remove any padding */
       }
 
-      /* Colors for different elements */
-      .stats-shell { color: #ff00ff; }  /* Magenta */
-      .stats-uptime { color: #0088ff; } /* Blue */
-      .stats-pkgs { color: #ff0000; }   /* Red */
-      .stats-memory { color: #ffff00; }  /* Yellow */
-      .stats-cpu { color: #00ff00; }     /* Green */
-      .stats-gpu { color: #00ffff; }     /* Cyan */
-      .stats-colors { color: #ffffff; }   /* White */
-      .stats-white { color: #ffffff; }    /* White */
-
-      /* Header styles */
-      .stats-header {
-          color: #00ffff;
-          font-size: 0.9rem;
-          margin-bottom: 0.5em;
-      }
-
-      .stats-time {
-          color: #ffffff;
-          font-size: 2.1rem;
-          margin-bottom: 0.3em;
-      }
-
-      .stats-date {
-          color: #ffffff;
-          font-size: 1.1rem;
-          margin-bottom: 0.5em;
-      }
-
-      /* Box characters in white */
-      .stats-box { color: #ffffff; }
+      /* Colors for different elements (in rainbow order) */
+      .stats-time { color: #ff0000; }     /* Red */
+      .stats-date { color: #ff8800; }     /* Orange */
+      .stats-shell { color: #ffff00; }    /* Yellow */
+      .stats-uptime { color: #00ff00; }   /* Green */
+      .stats-pkgs { color: #00ff88; }     /* Blue-Green */
+      .stats-memory { color: #00ffff; }   /* Cyan */
+      .stats-cpu { color: #0088ff; }      /* Blue */
+      .stats-gpu { color: #ff00ff; }      /* Magenta */
+      .stats-colors { color: #ffffff; }    /* White */
 
       /* Reset and base styling for all widgets in the workspaces container */
       .workspaces *,
@@ -190,9 +169,11 @@ lib.mkIf profile.enableAgs {
       .stats-orange { color: #ff8800; }
       .stats-yellow { color: #ffff00; }
       .stats-green { color: #00ff00; }
+      .stats-blue-green { color: #00ff88; }
       .stats-cyan { color: #00ffff; }
       .stats-blue { color: #0088ff; }
       .stats-magenta { color: #ff00ff; }
+      .stats-white { color: #ffffff; }
     '';
 
     "ags/system-stats.js".text = ''
@@ -291,7 +272,7 @@ lib.mkIf profile.enableAgs {
           };
 
           // Define our labels and find the longest one
-          const labels = ['shell', 'uptime', 'pkgs', 'memory', 'cpu', 'gpu', 'colors'];
+          const labels = ['time', 'date', 'shell', 'uptime', 'pkgs', 'memory', 'cpu', 'gpu', 'colors'];
           const longestLabel = Math.max(...labels.map(l => l.length));
 
           // Function to pad a label to match the longest label
@@ -309,16 +290,8 @@ lib.mkIf profile.enableAgs {
               vertical: true,
               children: [
                   Widget.Label({
-                      class_name: 'stats-header',
+                      class_name: 'stats-white',
                       label: "   _  ___      ____  ____\n  / |/ (_)_ __/ __ \\/ __/\n /    / /\\ \\ / /_/ /\\ \\  \n/_/|_/_//_\\_\\\\____/___/  "
-                  }),
-                  Widget.Label({
-                      class_name: 'stats-time',
-                      label: stats.time.bind()
-                  }),
-                  Widget.Label({
-                      class_name: 'stats-date',
-                      label: stats.date.bind()
                   }),
                   Widget.Label({
                       class_name: 'stats-white',
@@ -347,6 +320,8 @@ lib.mkIf profile.enableAgs {
                               xalign: 0,
                               label: (() => {
                                   switch(currentLabel) {
+                                      case 'time': return stats.time.bind();
+                                      case 'date': return stats.date.bind();
                                       case 'shell': return stats.shell.bind();
                                       case 'uptime': return stats.uptime.bind();
                                       case 'pkgs': return stats.pkgs.bind();
@@ -364,6 +339,7 @@ lib.mkIf profile.enableAgs {
                               Widget.Label({ class_name: 'stats-orange', label: '• ' }),
                               Widget.Label({ class_name: 'stats-yellow', label: '• ' }),
                               Widget.Label({ class_name: 'stats-green', label: '• ' }),
+                              Widget.Label({ class_name: 'stats-blue-green', label: '• ' }),
                               Widget.Label({ class_name: 'stats-cyan', label: '• ' }),
                               Widget.Label({ class_name: 'stats-blue', label: '• ' }),
                               Widget.Label({ class_name: 'stats-magenta', label: '• ' }),
