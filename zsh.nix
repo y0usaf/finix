@@ -44,79 +44,31 @@
 
     #── 🔧 Shell Initialization ──────────────#
     initExtra = ''
-      # Function to print the ASCII cat with random name
+      # Function to print the ASCII cat with random name and color
       print_cat() {
+        local names=("moon" "ekko" "tomoe" "bozo")
+        local colors=("36" "33" "35" "32")  # cyan, yellow, magenta, green
         local rand=$((RANDOM % 4))
-        case $rand in
-          0) # cyan moon
-            echo "       _                        "
-            echo "       \`*-.                    "
-            echo "        )  _\`-.                 "
-            echo "       .  : \`. .                "
-            echo "       : _   '  \               "
-            echo "       ; *\` _.   \`*-._          "
-            echo "       \`-.-'          \`-.       "
-            echo "         ;       \`       \`.     "
-            echo "         :.       .        \    "
-            echo "         . \  .   :   .-'   .   "
-            echo "         '  \`+.;  ;  '      :   "
-            echo "         :  '  |    ;       ;-. "
-            echo "         ; '   : :\`-:     _.\`* ;"
-            echo "\033[36m[moon]    \033[0m.*' /  .*' ; .*\`- +'  \`*' "
-            echo "      \`*-*   \`*-*  \`*-*'        "
-            ;;
-          1) # yellow ekko
-            echo "       _                        "
-            echo "       \`*-.                    "
-            echo "        )  _\`-.                 "
-            echo "       .  : \`. .                "
-            echo "       : _   '  \               "
-            echo "       ; *\` _.   \`*-._          "
-            echo "       \`-.-'          \`-.       "
-            echo "         ;       \`       \`.     "
-            echo "         :.       .        \    "
-            echo "         . \  .   :   .-'   .   "
-            echo "         '  \`+.;  ;  '      :   "
-            echo "         :  '  |    ;       ;-. "
-            echo "         ; '   : :\`-:     _.\`* ;"
-            echo "\033[33m[ekko]    \033[0m.*' /  .*' ; .*\`- +'  \`*' "
-            echo "      \`*-*   \`*-*  \`*-*'        "
-            ;;
-          2) # magenta tomoe
-            echo "       _                        "
-            echo "       \`*-.                    "
-            echo "        )  _\`-.                 "
-            echo "       .  : \`. .                "
-            echo "       : _   '  \               "
-            echo "       ; *\` _.   \`*-._          "
-            echo "       \`-.-'          \`-.       "
-            echo "         ;       \`       \`.     "
-            echo "         :.       .        \    "
-            echo "         . \  .   :   .-'   .   "
-            echo "         '  \`+.;  ;  '      :   "
-            echo "         :  '  |    ;       ;-. "
-            echo "         ; '   : :\`-:     _.\`* ;"
-            echo "\033[35m[tomoe]   \033[0m.*' /  .*' ; .*\`- +'  \`*' "
-            echo "      \`*-*   \`*-*  \`*-*'        "
-            ;;
-          3) # green bozo
-            echo "       _                        "
-            echo "       \`*-.                    "
-            echo "        )  _\`-.                 "
-            echo "       .  : \`. .                "
-            echo "       : _   '  \               "
-            echo "       ; *\` _.   \`*-._          "
-            echo "       \`-.-'          \`-.       "
-            echo "         ;       \`       \`.     "
-            echo "         :.       .        \    "
-            echo "         . \  .   :   .-'   .   "
-            echo "         '  \`+.;  ;  '      :   "
-            echo "         :  '  |    ;       ;-. "
-            echo "         ; '   : :\`-:     _.\`* ;"
-            echo "\033[32m[bozo]    \033[0m.*' /  .*' ; .*\`- +'  \`*' "
-            echo "      \`*-*   \`*-*  \`*-*'        "
-            ;;
-        esac
+        local name="''${names[$rand]}"
+        local color="''${colors[$rand]}"
+        local padding=$((4 - ''${#name}))  # Calculate padding based on name length
+        local spaces=$(printf "%*s" $padding "")  # Create the padding spaces
+
+        echo "\033[0;''${color}m       _                        "
+        echo "       \`*-.                    "
+        echo "        )  _\`-.                 "
+        echo "       .  : \`. .                "
+        echo "       : _   '  \               "
+        echo "       ; *\` _.   \`*-._          "
+        echo "       \`-.-'          \`-.       "
+        echo "         ;       \`       \`.     "
+        echo "         :.       .        \    "
+        echo "         . \  .   :   .-'   .   "
+        echo "         '  \`+.;  ;  '      :   "
+        echo "         :  '  |    ;       ;-. "
+        echo "         ; '   : :\`-:     _.\`* ;"
+        echo "[''${name}]''${spaces}.*' /  .*' ; .*\`- +'  \`*' "
+        echo "      \`*-*   \`*-*  \`*-*'        \033[0m"
         echo
       }
 
