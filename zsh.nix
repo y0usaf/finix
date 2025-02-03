@@ -44,80 +44,46 @@
 
     #── 🔧 Shell Initialization ──────────────#
     initExtra = ''
-      # Function to print all 4 cats in a row
-      print_cats() {
-        # Store each line of the cats
-        local line1=""
-        local line2=""
-        local line3=""
-        local line4=""
-        local line5=""
+            # Function to print all 4 cats in a row
+            print_cats() {
+            echo -e "\033[0;36m ⟋|､      \033[0;33m  ⟋|､      \033[0;35m  ⟋|､      \033[0;32m  ⟋|､
+      \033[0;36m(°､ ｡ 7    \033[0;33m(°､ ｡ 7    \033[0;35m(°､ ｡ 7    \033[0;32m(°､ ｡ 7
+      \033[0;36m |､  ~ヽ   \033[0;33m |､  ~ヽ   \033[0;35m |､  ~ヽ   \033[0;32m |､  ~ヽ
+      \033[0;36m じしf_,)〳\033[0;33m じしf_,)〳\033[0;35m じしf_,)〳\033[0;32m じしf_,)〳
+      \033[0;31m  [moon]  \033[0;34m  [ekko]  \033[0;33m  [tomo]  \033[0;31m  [bozo]  \033[0m"
+            }
 
-        # Cyan cat with red name
-        line1+="\033[0;36m ⟋|､      "
-        line2+="(°､ ｡ 7    "
-        line3+=" |､  ~ヽ   "
-        line4+=" じしf_,)〳"
-        line5+="  \033[0;31m[moon]  \033[0m"
+            # Print the cats and add some spacing
+            print_cats
 
-        # Yellow cat with blue name
-        line1+="\033[0;33m  ⟋|､      "
-        line2+="(°､ ｡ 7    "
-        line3+=" |､  ~ヽ   "
-        line4+=" じしf_,)〳"
-        line5+="  \033[0;34m[ekko]  \033[0m"
+            # Set up the basic prompt
+            PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
 
-        # Magenta cat with yellow name
-        line1+="\033[0;35m   ⟋|､      "
-        line2+="(°､ ｡ 7    "
-        line3+=" |､  ~ヽ   "
-        line4+=" じしf_,)〳"
-        line5+="  \033[0;33m[tomo]  \033[0m"
+            # Enable advanced tab completion
+            zstyle ':completion:*' menu select
+            zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
-        # Green cat with red name
-        line1+="\033[0;32m    ⟋|､      "
-        line2+="(°､ ｡ 7    "
-        line3+=" |､  ~ヽ   "
-        line4+=" じしf_,)〳"
-        line5+="  \033[0;31m[bozo]  \033[0m"
+            # Host-specific functions
+            if [ "$(hostname)" = "y0usaf-laptop" ]; then
+                fanspeed() {
+                    if [ -z "$1" ]; then
+                        echo "Usage: fanspeed <percentage>"
+                        return 1
+                    fi
+                    local speed="$1"
+                    asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f gpu
+                    asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
+                }
+            fi
 
-        # Print all lines
-        echo -e "$line1\n$line2\n$line3\n$line4\n$line5"
-      }
-
-      # Print the cats and add some spacing
-      print_cats
-
-      # Set up the basic prompt
-      PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
-
-      # Enable advanced tab completion
-      zstyle ':completion:*' menu select
-      zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-
-      # Host-specific functions and aliases
-      if [ "$(hostname)" = "y0usaf-desktop" ]; then
-          alias gpupower='sudo nvidia-smi -pl'
-      elif [ "$(hostname)" = "y0usaf-laptop" ]; then
-          fanspeed() {
+            # Temporarily add a Nix package to shell
+            temppkg() {
               if [ -z "$1" ]; then
-                  echo "Usage: fanspeed <percentage>"
-                  return 1
+                echo "Usage: temppkg package_name"
+                return 1
               fi
-              local speed="$1"
-              asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f gpu
-              asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
-          }
-      fi
-
-      # Temporarily add a Nix package to shell
-      temppkg() {
-        if [ -z "$1" ]; then
-          echo "Usage: temppkg package_name"
-          return 1
-        fi
-        nix-shell -p "$1" --run "exec $SHELL"
-      }
+              nix-shell -p "$1" --run "exec $SHELL"
+            }
     '';
 
     #── 🔗 Shell Aliases ──────────────────#
@@ -205,6 +171,9 @@
           echo "  $line"
         done
       '';
+
+      #── 🔧 Hardware Management ────────────#
+      gpupower = "sudo nvidia-smi -pl";
     };
   };
 }
