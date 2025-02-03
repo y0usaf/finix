@@ -24,6 +24,7 @@ in {
     "neovim"
     "android"
     "webapps"
+    "wallust"
   ];
 
   flakeDir = "/home/${username}/nixos";

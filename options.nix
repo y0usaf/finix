@@ -42,6 +42,7 @@
     "android"
     "webapps"
     "vscode"
+    "wallust"
   ];
 
   # Default packages (internal)
