@@ -86,7 +86,7 @@ in {
 
   # Minimal but complete font setup
   mainFont = {
-    package = ["nerd-fonts" "iosevka-term-slab"];
+    package = ["terminus_font_ttf"];
     name = "";
   };
 
