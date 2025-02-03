@@ -33,11 +33,7 @@ in {
             <alias>
                     <family>monospace</family>
                     <prefer>
-                            <family>${profile.mainFont.name}</family>
-                            ${lib.concatMapStrings (font: ''
-        <family>${font.name}</family>
-      '')
-      profile.fallbackFonts}
+                            <family>${profile.mainFont.name}</family>${lib.concatMapStrings (font: "\n                        <family>${font.name}</family>") profile.fallbackFonts}
                     </prefer>
             </alias>
 
