@@ -26,7 +26,7 @@
   # Helper for creating multiple similar options
   mkSubmoduleOptions = attrs: builtins.mapAttrs (name: desc: mkOpt defaultAppModule desc) attrs;
 
-  # Feature definitions
+  # Feature definitions and dependencies
   validFeatures = [
     "hyprland"
     "ags"
@@ -43,6 +43,40 @@
     "webapps"
     "vscode"
   ];
+
+  # Function to add dependent features
+  addDependencies = features: let
+    # Define feature dependencies
+    dependencies = {
+      hyprland = [["wayland"]];
+      ags = [["wayland"]];
+    };
+
+    # Add dependencies recursively
+    addDeps = feat: depSets:
+      if depSets == []
+      then feat
+      else
+        feat
+        ++ (builtins.concatMap (
+          dep:
+            if builtins.elem dep feat
+            then []
+            else [dep]
+        ) (builtins.head depSets));
+
+    # Process all features and their dependencies
+    result =
+      builtins.foldl' (
+        acc: feat:
+          if builtins.hasAttr feat dependencies
+          then addDeps acc (dependencies.${feat})
+          else acc
+      )
+      features
+      features;
+  in
+    lib.unique result;
 
   # Default packages (internal)
   defaultCorePackages = [
@@ -69,8 +103,11 @@ in {
   # Core packages (internal)
   corePackages = mkOptDef mkListOfStr defaultCorePackages "Essential packages that will always be installed";
 
-  # Optional features
-  features = mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
+  # Optional features (updated with auto-dependencies)
+  features =
+    mkOptDef (t.listOf (t.enum validFeatures)) []
+    "List of enabled features"
+    (features: addDependencies features);
 
   # System appearance
   mainFont = mkOpt fontModule "Primary system font configuration";

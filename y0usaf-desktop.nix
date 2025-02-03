@@ -13,7 +13,6 @@ in {
   features = [
     "hyprland"
     "ags"
-    "wayland"
     "nvidia"
     "gaming"
     "development"
