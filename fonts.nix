@@ -12,7 +12,7 @@
   getPackage = path: lib.getAttrFromPath path pkgs;
 in {
   # Disable Home Manager's font management
-  fonts.fontconfig.enable = false;
+  fonts.fontconfig.enable = true;
 
   #── 📝 Font Configuration ──────────────────#
   xdg.configFile."fontconfig/fonts.conf".text = ''
