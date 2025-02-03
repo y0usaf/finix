@@ -44,8 +44,36 @@
 
     #── 🔧 Shell Initialization ──────────────#
     initExtra = ''
-      # Add empty lines to match nitch output position
-      echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+      # Function to print the ASCII cat with random name and color
+      print_cat() {
+        local names=("moon" "ekko" "tomoe" "bozo")
+        local colors=("%F{cyan}" "%F{yellow}" "%F{magenta}" "%F{green}")
+        local rand=$((RANDOM % 4))
+        local name="''${names[$rand]}"
+        local color="''${colors[$rand]}"
+        local padding=$((4 - ''${#name}))  # Calculate padding based on name length
+        local spaces=$(printf "%*s" $padding "")  # Create the padding spaces
+
+        echo "       _                        "
+        echo "       \`*-.                    "
+        echo "        )  _\`-.                 "
+        echo "       .  : \`. .                "
+        echo "       : _   '  \               "
+        echo "       ; *\` _.   \`*-._          "
+        echo "       \`-.-'          \`-.       "
+        echo "         ;       \`       \`.     "
+        echo "         :.       .        \    "
+        echo "         . \  .   :   .-'   .   "
+        echo "         '  \`+.;  ;  '      :   "
+        echo "         :  '  |    ;       ;-. "
+        echo "         ; '   : :\`-:     _.\`* ;"
+        echo "''${color}[''${name}]''${spaces}%f.*' /  .*' ; .*\`- +'  \`*' "
+        echo "      \`*-*   \`*-*  \`*-*'        "
+        echo
+      }
+
+      # Print the cat art and add some spacing
+      print_cat
 
       # Set up the basic prompt
       PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
