@@ -59,7 +59,7 @@ in {
                 <const>lcdlight</const>
             </edit>
             <edit name="dpi" mode="assign">
-                <double>109</double>
+                <double>${toString profile.fontDpi}</double>
             </edit>
         </match>
     </fontconfig>

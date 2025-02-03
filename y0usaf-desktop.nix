@@ -82,39 +82,29 @@ in {
   homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
 
   # Font configuration
+  fontDpi = 109; # Your current DPI setting
+
+  # Minimal but complete font setup
   mainFont = {
     package = ["nerd-fonts" "iosevka-term-slab"];
     name = "IosevkaTermSlab NFM";
   };
 
   fallbackFonts = [
+    # Essential Unicode coverage
     {
       package = ["noto-fonts-emoji"];
       name = "Noto Color Emoji";
     }
-    {
-      package = ["noto-fonts"];
-      name = "Noto Sans Symbols";
-    }
-    {
-      package = ["noto-fonts"];
-      name = "Noto Sans Symbols 2";
-    }
-    {
-      package = ["dejavu_fonts"];
-      name = "DejaVu Sans Mono";
-    }
-    {
-      package = ["font-awesome"];
-      name = "Font Awesome";
-    }
+    # CJK support
     {
       package = ["noto-fonts-cjk-sans"];
       name = "Noto Sans CJK";
     }
+    # Symbols and icons
     {
-      package = ["noto-fonts"];
-      name = "Noto Sans";
+      package = ["font-awesome"];
+      name = "Font Awesome";
     }
   ];
 }
