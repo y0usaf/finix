@@ -19,52 +19,52 @@ in {
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
     <fontconfig>
-        <!-- Prioritize main font for all text -->
-        <match>
-            <test name="family">
-                <string>*</string>
-            </test>
-            <edit name="family" mode="prepend">
-                <string>${profile.mainFont.name}</string>
-            </edit>
-        </match>
+            <!-- Prioritize main font for all text -->
+            <match>
+                    <test name="family">
+                            <string>*</string>
+                    </test>
+                    <edit name="family" mode="prepend">
+                            <string>${profile.mainFont.name}</string>
+                    </edit>
+            </match>
 
-        <!-- Fallback fonts for symbols and wide Unicode support -->
-        <alias>
-            <family>monospace</family>
-            <prefer>
-                <family>${profile.mainFont.name}</family>
-                ${lib.concatMapStrings (font: ''
+            <!-- Fallback fonts for symbols and wide Unicode support -->
+            <alias>
+                    <family>monospace</family>
+                    <prefer>
+                            <family>${profile.mainFont.name}</family>
+                            ${lib.concatMapStrings (font: ''
         <family>${font.name}</family>
       '')
       profile.fallbackFonts}
-            </prefer>
-        </alias>
+                    </prefer>
+            </alias>
 
-        <!-- Enable font smoothing and set font rendering options -->
-        <match target="font">
-            <edit name="antialias" mode="assign">
-                <bool>true</bool>
-            </edit>
-            <edit name="hinting" mode="assign">
-                <bool>true</bool>
-            </edit>
-            <edit name="hintstyle" mode="assign">
-                <const>hintslight</const>
-            </edit>
-            <edit name="rgba" mode="assign">
-                <const>rgb</const>
-            </edit>
-            <edit name="autohint" mode="assign">
-                <bool>true</bool>
-            </edit>
-            <edit name="lcdfilter" mode="assign">
-                <const>lcdlight</const>
-            </edit>
-            <edit name="dpi" mode="assign">
-                <double>${toString profile.dpi}</double>
-            </edit>
-        </match>
+            <!-- Enable font smoothing and set font rendering options -->
+            <match target="font">
+                    <edit name="antialias" mode="assign">
+                            <bool>true</bool>
+                    </edit>
+                    <edit name="hinting" mode="assign">
+                            <bool>true</bool>
+                    </edit>
+                    <edit name="hintstyle" mode="assign">
+                            <const>hintslight</const>
+                    </edit>
+                    <edit name="rgba" mode="assign">
+                            <const>rgb</const>
+                    </edit>
+                    <edit name="autohint" mode="assign">
+                            <bool>true</bool>
+                    </edit>
+                    <edit name="lcdfilter" mode="assign">
+                            <const>lcdlight</const>
+                    </edit>
+                    <edit name="dpi" mode="assign">
+                            <double>${toString profile.dpi}</double>
+                    </edit>
+            </match>
     </fontconfig>
   '';
 
