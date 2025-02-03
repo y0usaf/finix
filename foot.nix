@@ -19,7 +19,7 @@
     settings = {
       main = {
         term = "xterm-256color";
-        font = "monospace:size=16";
+        font = "${profile.mainFont.name}:size=16, ${lib.concatStringsSep ", " (map (font: "${font.name}:size=16") profile.fallbackFonts)}";
         dpi-aware = "yes";
       };
 
