@@ -46,15 +46,17 @@
     initExtra = ''
       # Function to print the ASCII cat with random name and color
       print_cat() {
-        local names=("moon" "ekko" "tomoe" "bozo")
-        local colors=("36" "33" "35" "32")  # cyan, yellow, magenta, green
+        local names=("moon" "ekko" "tomo" "bozo")
+        local cat_colors=("36" "33" "35" "32")    # cyan, yellow, magenta, green
+        local name_colors=("31" "34" "33" "35")   # red, blue, yellow, magenta
         local rand=$((RANDOM % 4))
         local name="''${names[$rand]}"
-        local color="''${colors[$rand]}"
+        local cat_color="''${cat_colors[$rand]}"
+        local name_color="''${name_colors[$rand]}"
         local padding=$((4 - ''${#name}))  # Calculate padding based on name length
         local spaces=$(printf "%*s" $padding "")  # Create the padding spaces
 
-        echo "\033[0;''${color}m       _                        "
+        echo "\033[0;''${cat_color}m       _                        "
         echo "       \`*-.                    "
         echo "        )  _\`-.                 "
         echo "       .  : \`. .                "
@@ -67,7 +69,7 @@
         echo "         '  \`+.;  ;  '      :   "
         echo "         :  '  |    ;       ;-. "
         echo "         ; '   : :\`-:     _.\`* ;"
-        echo "[''${name}]''${spaces}.*' /  .*' ; .*\`- +'  \`*' "
+        echo "\033[0;''${name_color}m[''${name}]''${spaces}\033[0;''${cat_color}m.*' /  .*' ; .*\`- +'  \`*' "
         echo "      \`*-*   \`*-*  \`*-*'        \033[0m"
         echo
       }
