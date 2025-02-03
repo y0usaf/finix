@@ -46,6 +46,9 @@
     ]
     ++ lib.optionals (builtins.elem "webapps" profile.features) [
       ./webapps.nix
+    ]
+    ++ lib.optionals (builtins.elem "wallust" profile.features) [
+      ./wallust.nix
     ];
 
   #── 📦 Core Programs ──────────────────────#
