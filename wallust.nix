@@ -16,6 +16,7 @@
     # Install wallust package
     home.packages = with pkgs; [
       wallust
+      hyprpaper
     ];
   };
 }
