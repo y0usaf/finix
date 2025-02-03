@@ -46,44 +46,44 @@ lib.mkIf profile.enableAgs {
           box-shadow: none;
           text-shadow:
               /* 1st repetition */
-              1px 0 1px #000000,
-              -1px 0 1px #000000,
-              0 1px 1px #000000,
-              0 -1px 1px #000000,
-              1px 1px 1px #000000,
-              -1px 1px 1px #000000,
-              1px -1px 1px #000000,
-              -1px -1px 1px #000000,
+              1pt 0 1pt #000000,
+              -1pt 0 1pt #000000,
+              0 1pt 1pt #000000,
+              0 -1pt 1pt #000000,
+              1pt 1pt 1pt #000000,
+              -1pt 1pt 1pt #000000,
+              1pt -1pt 1pt #000000,
+              -1pt -1pt 1pt #000000,
 
               /* 2nd repetition */
-              1px 0 1px #000000,
-              -1px 0 1px #000000,
-              0 1px 1px #000000,
-              0 -1px 1px #000000,
-              1px 1px 1px #000000,
-              -1px 1px 1px #000000,
-              1px -1px 1px #000000,
-              -1px -1px 1px #000000,
+              1pt 0 1pt #000000,
+              -1pt 0 1pt #000000,
+              0 1pt 1pt #000000,
+              0 -1pt 1pt #000000,
+              1pt 1pt 1pt #000000,
+              -1pt 1pt 1pt #000000,
+              1pt -1pt 1pt #000000,
+              -1pt -1pt 1pt #000000,
 
               /* 3rd repetition */
-              1px 0 1px #000000,
-              -1px 0 1px #000000,
-              0 1px 1px #000000,
-              0 -1px 1px #000000,
-              1px 1px 1px #000000,
-              -1px 1px 1px #000000,
-              1px -1px 1px #000000,
-              -1px -1px 1px #000000,
+              1pt 0 1pt #000000,
+              -1pt 0 1pt #000000,
+              0 1pt 1pt #000000,
+              0 -1pt 1pt #000000,
+              1pt 1pt 1pt #000000,
+              -1pt 1pt 1pt #000000,
+              1pt -1pt 1pt #000000,
+              -1pt -1pt 1pt #000000,
 
               /* 4th repetition */
-              1px 0 1px #000000,
-              -1px 0 1px #000000,
-              0 1px 1px #000000,
-              0 -1px 1px #000000,
-              1px 1px 1px #000000,
-              -1px 1px 1px #000000,
-              1px -1px 1px #000000,
-              -1px -1px 1px #000000;
+              1pt 0 1pt #000000,
+              -1pt 0 1pt #000000,
+              0 1pt 1pt #000000,
+              0 -1pt 1pt #000000,
+              1pt 1pt 1pt #000000,
+              -1pt 1pt 1pt #000000,
+              1pt -1pt 1pt #000000,
+              -1pt -1pt 1pt #000000;
           font-family: inherit;
           font-size: inherit;
           font-weight: inherit;
@@ -94,7 +94,7 @@ lib.mkIf profile.enableAgs {
       .system-stats {
           font-family: monospace;
           font-weight: bold;
-          text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+          text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
       }
 
       .system-stats label {
@@ -115,20 +115,20 @@ lib.mkIf profile.enableAgs {
       /* Header styles */
       .stats-header {
           color: #00ffff;
-          font-size: 14px;
-          margin-bottom: 8px;
+          font-size: 9pt;
+          margin-bottom: 5pt;
       }
 
       .stats-time {
           color: #ffffff;
-          font-size: 32px;
-          margin-bottom: 4px;
+          font-size: 21pt;
+          margin-bottom: 3pt;
       }
 
       .stats-date {
           color: #ffffff;
-          font-size: 16px;
-          margin-bottom: 8px;
+          font-size: 11pt;
+          margin-bottom: 5pt;
       }
 
       /* Box characters in white */
@@ -142,23 +142,23 @@ lib.mkIf profile.enableAgs {
           background: none;
           border: none;
           box-shadow: none;
-          font-size: 14px;
+          font-size: 9pt;
           /* Default color for widgets */
           color: white;
       }
 
       /* Workspace container styling */
       .workspaces {
-          margin: 1px;
+          margin: 1pt;
           background: none;
       }
 
       /* Workspace button styling */
       .workspace-btn {
-          min-width: 14px;          /* small box width */
-          min-height: 14px;         /* small box height */
-          margin: 1px;              /* minimal gap */
-          padding: 0 1px;           /* as minimal as possible */
+          min-width: 9pt;          /* small box width */
+          min-height: 9pt;         /* small box height */
+          margin: 1pt;              /* minimal gap */
+          padding: 0 1pt;           /* as minimal as possible */
           background-color: #222;   /* replaced var(--bg-color) */
           border-radius: 0;         /* sharp corners */
       }
@@ -168,7 +168,7 @@ lib.mkIf profile.enableAgs {
           background: none;
           /* Inactive / unfocused: lower opacity white */
           color: rgba(255, 255, 255, 0.4);  /* replaced var(--inactive-color) */
-          font-size: 14px;
+          font-size: 9pt;
       }
 
       /* When a workspace is active (focused) */
