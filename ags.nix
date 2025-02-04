@@ -365,7 +365,7 @@ lib.mkIf (builtins.elem "ags" profile.features) {
       var systemStatsWindow = Widget.Window({
           name: 'system-stats',
           child: SystemStats(),
-          layer: 'background'
+          layer: 'bottom'
       });
 
       var systemStatsConfig = {
@@ -375,7 +375,7 @@ lib.mkIf (builtins.elem "ags" profile.features) {
                   systemStatsWindow.layer = 'top';
               },
               hideStats: function() {
-                  systemStatsWindow.layer = 'background';
+                  systemStatsWindow.layer = 'bottom';
               }
           }
       };
