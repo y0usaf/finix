@@ -81,8 +81,11 @@
       "stremio"
       "cmus"
     ];
-    pyghon = [
+    python = [
       "python3"
+    ];
+    hyprland = [
+      "hyprwayland-scanner"
     ];
   };
 
