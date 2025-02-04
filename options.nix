@@ -38,6 +38,7 @@
     "gaming"
     "media"
     "creative"
+    "python"
     "virtualization"
     "backup"
     "neovim"
@@ -64,6 +65,7 @@
       "alejandra"
       "lm_sensors"
       "syncthing"
+      "bottom"
     ];
     wayland = [
       "grim"
@@ -79,14 +81,7 @@
       "stremio"
       "cmus"
     ];
-    creative = [
-      "cmake"
-      "meson"
-      "bottom"
-      "cpio"
-      "pkg-config"
-      "ninja"
-      "gcc"
+    pyghon = [
       "python3"
     ];
   };
