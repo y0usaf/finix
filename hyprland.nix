@@ -181,7 +181,7 @@
 
           # Special Commands
           [
-            "$mod SHIFT, C, exec, killall swaybg; swaybg -i $(find ${profile.wallpaperDir} -type f | shuf -n 1) -m fill & wallust generate $(find ${profile.wallpaperDir} -type f | shuf -n 1) && wallust apply"
+            "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${profile.wallpaperDir}\""
           ]
         ];
 
