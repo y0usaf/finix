@@ -9,7 +9,7 @@
   profile,
   ...
 }: {
-  #── 🏠 Core Settings ──────────────────────#
+  #── 🏠 Core Home Settings ──────────────────#
   home = {
     username = profile.username;
     homeDirectory = profile.homeDirectory;
@@ -17,9 +17,43 @@
     enableNixpkgsReleaseCheck = false;
   };
 
+  #── 📦 Package Management ─────────────────#
+  home.packages = with pkgs; let
+    options = import ./options.nix {inherit lib;};
+
+    # Core and feature-based packages
+    featurePackages = lib.flatten (
+      [options.packageSets.default.core]
+      ++ (map (
+          feature:
+            if builtins.hasAttr feature options.packageSets.default
+            then options.packageSets.default.${feature}
+            else []
+        )
+        profile.features)
+    );
+
+    # User profile-specific packages
+    userPkgs = map (app: pkgs.${app.package}) [
+      profile.defaultTerminal
+      profile.defaultBrowser
+      profile.defaultFileManager
+      profile.defaultLauncher
+      profile.defaultIde
+      profile.defaultMediaPlayer
+      profile.defaultImageViewer
+      profile.defaultDiscord
+    ];
+  in
+    (map (name: pkgs.${name}) featurePackages) ++ userPkgs;
+
   #── 🔧 Program Configurations ────────────#
-  imports =
+  imports = with lib; let
+    # Helper function to conditionally import feature configs
+    importFeature = feature: optionals (builtins.elem feature profile.features);
+  in
     [
+      # Core configurations
       ./zsh.nix
       ./ssh.nix
       ./git.nix
@@ -29,27 +63,14 @@
       ./gtk.nix
       ./cursor.nix
     ]
-    ++ lib.optionals (builtins.elem "hyprland" profile.features) [
-      ./hyprland.nix
-    ]
-    ++ lib.optionals (builtins.elem "ags" profile.features) [
-      ./ags.nix
-    ]
-    ++ lib.optionals (builtins.elem "gaming" profile.features) [
-      ./gaming.nix
-    ]
-    ++ lib.optionals (builtins.elem "neovim" profile.features) [
-      ./nvim.nix
-    ]
-    ++ lib.optionals (builtins.elem "android" profile.features) [
-      ./android.nix
-    ]
-    ++ lib.optionals (builtins.elem "webapps" profile.features) [
-      ./webapps.nix
-    ]
-    ++ lib.optionals (builtins.elem "wallust" profile.features) [
-      ./wallust.nix
-    ];
+    # Feature-based configurations
+    ++ importFeature "hyprland" [./hyprland.nix]
+    ++ importFeature "ags" [./ags.nix]
+    ++ importFeature "gaming" [./gaming.nix]
+    ++ importFeature "neovim" [./nvim.nix]
+    ++ importFeature "android" [./android.nix]
+    ++ importFeature "webapps" [./webapps.nix]
+    ++ importFeature "wallust" [./wallust.nix];
 
   #── 📦 Core Programs ──────────────────────#
   programs = {
@@ -75,44 +96,13 @@
     };
   };
 
-  #── 📦 User Packages ───────────────────────#
-  home.packages = with pkgs; let
-    options = import ./options.nix {inherit lib;};
-
-    # Get all packages based on enabled features
-    featurePackages = lib.flatten (
-      # Core packages are always included
-      [options.packageSets.default.core]
-      ++
-      # Add packages for each enabled feature
-      (map (
-          feature:
-            if builtins.hasAttr feature options.packageSets.default
-            then options.packageSets.default.${feature}
-            else []
-        )
-        profile.features)
-    );
-
-    #── 👤 User Profile Packages ─────────────#
-    userPkgs = [
-      (pkgs.${profile.defaultTerminal.package})
-      (pkgs.${profile.defaultBrowser.package})
-      (pkgs.${profile.defaultFileManager.package})
-      (pkgs.${profile.defaultLauncher.package})
-      (pkgs.${profile.defaultIde.package})
-      (pkgs.${profile.defaultMediaPlayer.package})
-      (pkgs.${profile.defaultImageViewer.package})
-      (pkgs.${profile.defaultDiscord.package})
-    ];
-  in
-    (map (name: pkgs.${name}) featurePackages) ++ userPkgs;
-
   #── 🔧 System Configurations ──────────────#
   dconf.enable = true;
 
   #── 🔄 Systemd Services ─────────────────#
   systemd.user = {
+    startServices = "sd-switch";
+
     services = {
       polkit-gnome-authentication-agent-1 = {
         Unit = {
@@ -130,9 +120,7 @@
       };
 
       format-nix = {
-        Unit = {
-          Description = "Format Nix files on change";
-        };
+        Unit.Description = "Format Nix files on change";
         Service = {
           Type = "oneshot";
           ExecStart = "${pkgs.alejandra}/bin/alejandra .";
@@ -141,21 +129,13 @@
       };
     };
 
-    paths = {
-      format-nix = {
-        Unit = {
-          Description = "Watch NixOS config directory for changes";
-        };
-        Path = {
-          PathModified = "/home/y0usaf/nixos";
-          Unit = "format-nix.service";
-        };
-        Install = {
-          WantedBy = ["default.target"];
-        };
+    paths.format-nix = {
+      Unit.Description = "Watch NixOS config directory for changes";
+      Path = {
+        PathModified = "/home/y0usaf/nixos";
+        Unit = "format-nix.service";
       };
+      Install.WantedBy = ["default.target"];
     };
-
-    startServices = "sd-switch";
   };
 }
