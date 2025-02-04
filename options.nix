@@ -102,8 +102,6 @@
   _ =
     lib.assertMsg (invalidSets == [])
     "Found package sets without corresponding features: ${builtins.toString invalidSets}";
-
-  dummy = null; # Add a dummy attribute to ensure proper structure
 in {
   ########################################
   #          Core System Options         #
