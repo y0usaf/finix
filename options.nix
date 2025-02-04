@@ -1,6 +1,8 @@
 #─────────────────────────── 🌍 SYSTEM OPTIONS 🌍 ───────────────────────────#
 {lib, ...}: let
-  # Type definitions and helpers
+  ###############################
+  #  Type Definitions & Helpers #
+  ###############################
   t = lib.types;
   mkStr = t.str;
   mkBool = t.bool;
@@ -8,7 +10,9 @@
   mkOpt = type: description: lib.mkOption {inherit type description;};
   mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
 
-  # Common submodules
+  ########################
+  #  Submodule Options   #
+  ########################
   defaultAppModule = t.submodule {
     options = {
       package = mkOpt mkStr "Package name to install";
@@ -23,10 +27,9 @@
     };
   };
 
-  # Helper for creating multiple similar options
-  mkSubmoduleOptions = attrs: builtins.mapAttrs (name: desc: mkOpt defaultAppModule desc) attrs;
-
-  # Feature definitions
+  ###############################
+  #    Valid Features List      #
+  ###############################
   validFeatures = [
     "hyprland"
     "ags"
@@ -44,7 +47,9 @@
     "wallust"
   ];
 
-  # Package groups by feature
+  ###########################################
+  #   Package Sets Grouped by Feature       #
+  ###########################################
   packageSets = {
     core = [
       "git"
@@ -60,14 +65,12 @@
       "lm_sensors"
       "syncthing"
     ];
-
     wayland = [
       "grim"
       "slurp"
       "wl-clipboard"
       "hyprpicker"
     ];
-
     media = [
       "pavucontrol"
       "ffmpeg"
@@ -76,7 +79,6 @@
       "stremio"
       "cmus"
     ];
-
     creative = [
       "cmake"
       "meson"
@@ -88,28 +90,49 @@
       "python3"
     ];
   };
+
+  ###########################################
+  #   Validation: Package Sets vs Features  #
+  ###########################################
+  invalidSets = builtins.filter (
+    setName:
+      setName != "core" && !(builtins.elem setName validFeatures)
+  ) (builtins.attrNames packageSets);
+
+  _ =
+    lib.assertMsg (invalidSets == [])
+    "Found package sets without corresponding features: ${builtins.toString invalidSets}";
+
+  dummy = null; # Add a dummy attribute to ensure proper structure
 in {
-  # Core system identification
+  ########################################
+  #          Core System Options         #
+  ########################################
   username = mkOpt mkStr "The username for the system.";
   hostname = mkOpt mkStr "The system hostname.";
   homeDirectory = mkOpt mkStr "The path to the user's home directory.";
   stateVersion = mkOpt mkStr "The system state version.";
   timezone = mkOpt mkStr "The system timezone.";
 
-  # Core packages (internal)
+  ########################################
+  #      Package Management Options      #
+  ########################################
   corePackages = mkOptDef mkListOfStr packageSets.core "Essential packages that will always be installed";
-
-  # Optional features
+  packageSets = mkOptDef (t.attrsOf (t.listOf t.str)) packageSets "Package sets organized by feature";
   features = mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
 
-  # System appearance
+  ########################################
+  #         System Appearance            #
+  ########################################
   mainFont = mkOpt fontModule "Primary system font configuration";
   fallbackFonts = mkOptDef (t.listOf fontModule) [] "List of fallback fonts in order of preference";
   baseFontSize = mkOptDef t.int 12 "Base font size that other UI elements should scale from";
   cursorSize = mkOptDef t.int 24 "Size of the system cursor";
   dpi = mkOptDef t.int 96 "Display DPI setting for the system";
 
-  # Default applications
+  ########################################
+  #       Default Applications           #
+  ########################################
   defaultBrowser = mkOpt defaultAppModule "Default web browser configuration.";
   defaultEditor = mkOpt defaultAppModule "Default text editor configuration.";
   defaultIde = mkOpt defaultAppModule "Default IDE configuration.";
@@ -121,7 +144,9 @@ in {
   defaultImageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
   defaultMediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
 
-  # Directory configurations
+  ########################################
+  #         Directory Configurations     #
+  ########################################
   flakeDir = mkOpt mkStr "The directory where the flake lives.";
   musicDir = mkOpt mkStr "Directory for music files.";
   dcimDir = mkOpt mkStr "Directory for pictures (DCIM).";
@@ -129,11 +154,10 @@ in {
   wallpaperDir = mkOpt mkStr "Wallpaper directory.";
   wallpaperVideoDir = mkOpt mkStr "Wallpaper video directory.";
 
-  # Git configurations
+  ########################################
+  #          Git Configurations          #
+  ########################################
   gitName = mkOpt mkStr "Git username.";
   gitEmail = mkOpt mkStr "Git email address.";
   gitHomeManagerRepo = mkOpt mkStr "URL of the Home Manager repository.";
-
-  # Consolidated package sets option
-  packageSets = mkOptDef (t.attrsOf (t.listOf t.str)) packageSets "Package sets organized by feature";
 }
