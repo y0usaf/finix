@@ -33,7 +33,6 @@
     "wayland"
     "nvidia"
     "gaming"
-    "development"
     "media"
     "creative"
     "virtualization"
