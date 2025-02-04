@@ -51,6 +51,12 @@
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
     # 🎁 Additional package repository
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+
+    #── 🎨 System Styling ───────────────────────────────────────────#
+    hyprpaper = {
+      url = "github:y0usaf/hyprpaper/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   #── ⚙️ System Configuration Builder ──────────────────────────────────#
@@ -63,6 +69,7 @@
     alejandra,
     hy3,
     chaotic,
+    hyprpaper,
     ...
   }: let
     # Define the target system architecture

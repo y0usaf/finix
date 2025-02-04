@@ -10,13 +10,14 @@
   pkgs,
   lib,
   profile,
+  inputs,
   ...
 }: {
   config = lib.mkIf (builtins.elem "wallust" profile.features) {
-    # Install wallust package
-    home.packages = with pkgs; [
-      wallust
-      hyprpaper
+    # Install wallust package and custom hyprpaper
+    home.packages = [
+      pkgs.wallust
+      inputs.hyprpaper.packages.${pkgs.system}.default
     ];
   };
 }
