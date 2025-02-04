@@ -44,21 +44,50 @@
     "wallust"
   ];
 
-  # Default packages (internal)
-  defaultCorePackages = [
-    "git"
-    "curl"
-    "wget"
-    "cachix"
-    "unzip"
-    "bash"
-    "vim"
-    "dconf"
-    "lsd"
-    "alejandra"
-    "lm_sensors"
-    "syncthing"
-  ];
+  # Package groups by feature
+  packageSets = {
+    core = [
+      "git"
+      "curl"
+      "wget"
+      "cachix"
+      "unzip"
+      "bash"
+      "vim"
+      "dconf"
+      "lsd"
+      "alejandra"
+      "lm_sensors"
+      "syncthing"
+    ];
+
+    wayland = [
+      "grim"
+      "slurp"
+      "wl-clipboard"
+      "hyprpicker"
+    ];
+
+    media = [
+      "pavucontrol"
+      "ffmpeg"
+      "yt-dlp-light"
+      "vlc"
+      "stremio"
+      "cmus"
+    ];
+
+    creative = [
+      "cmake"
+      "meson"
+      "bottom"
+      "cpio"
+      "pkg-config"
+      "ninja"
+      "gcc"
+      "python3"
+    ];
+  };
 in {
   # Core system identification
   username = mkOpt mkStr "The username for the system.";
@@ -68,7 +97,7 @@ in {
   timezone = mkOpt mkStr "The system timezone.";
 
   # Core packages (internal)
-  corePackages = mkOptDef mkListOfStr defaultCorePackages "Essential packages that will always be installed";
+  corePackages = mkOptDef mkListOfStr packageSets.core "Essential packages that will always be installed";
 
   # Optional features
   features = mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
@@ -104,4 +133,7 @@ in {
   gitName = mkOpt mkStr "Git username.";
   gitEmail = mkOpt mkStr "Git email address.";
   gitHomeManagerRepo = mkOpt mkStr "URL of the Home Manager repository.";
+
+  # Consolidated package sets option
+  packageSets = mkOptDef (t.attrsOf (t.listOf t.str)) packageSets "Package sets organized by feature";
 }

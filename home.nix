@@ -77,42 +77,22 @@
 
   #── 📦 User Packages ───────────────────────#
   home.packages = with pkgs; let
-    # Import core packages list from options.nix
     options = import ./options.nix {inherit lib;};
-    corePackages = options.corePackages.default;
 
-    #── 📦 Optional Packages ─────────────────#
-    optionalPkgs = [
-      # Development tools
-      cmake
-      meson
-      bottom
-      cpio
-      pkg-config
-      ninja
-      gcc
-
-      # Media tools
-      pavucontrol
-      ffmpeg
-      yt-dlp-light
-      vlc
-      stremio
-      cmus
-
-      # System utilities
-      grim
-      slurp
-      wl-clipboard
-      hyprpicker
-
-      # Python with basic packages
-      (python3.withPackages (ps:
-        with ps; [
-          pip
-          setuptools
-        ]))
-    ];
+    # Get all packages based on enabled features
+    featurePackages = lib.flatten (
+      # Core packages are always included
+      [options.packageSets.default.core]
+      ++
+      # Add packages for each enabled feature
+      (map (
+          feature:
+            if builtins.hasAttr feature options.packageSets.default
+            then options.packageSets.default.${feature}
+            else []
+        )
+        profile.features)
+    );
 
     #── 👤 User Profile Packages ─────────────#
     userPkgs = [
@@ -126,7 +106,7 @@
       (pkgs.${profile.defaultDiscord.package})
     ];
   in
-    (map (name: pkgs.${name}) corePackages) ++ optionalPkgs ++ userPkgs;
+    (map (name: pkgs.${name}) featurePackages) ++ userPkgs;
 
   #── 🔧 System Configurations ──────────────#
   dconf.enable = true;
