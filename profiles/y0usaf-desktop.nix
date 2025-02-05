@@ -102,4 +102,14 @@ in {
       name = "Font Awesome";
     }
   ];
+
+  directories = {
+    flake.path = "/home/${username}/nixos";
+    music.path = "$HOME/Music";
+    dcim.path = "$HOME/DCIM";
+    steam = {
+      path = "$HOME/.local/share/Steam";
+      create = false; # Don't create Steam dir automatically
+    };
+  };
 }
