@@ -5,13 +5,16 @@
   profile,
   ...
 }: let
-  # AGS configuration JavaScript – this configures the main AGS app
+  ###########################################################################
+  ##                     AGS MAIN APP CONFIGURATION JS                     ##
+  ###########################################################################
   configJS = ''
+    // Import the core App and the module configurations
     import App from 'resource:///com/github/Aylur/ags/app.js';
     import { systemStatsConfig } from './system-stats.js';
     import { workspacesConfig } from './workspaces.js';
 
-    // Configure the app using App.config()
+    // Configure the main AGS application with style and windows
     App.config({
         style: `''${App.configDir}/style.css`,
         windows: [
@@ -20,21 +23,27 @@
         ],
     });
 
-    // Export global functions from modules
+    // Merge exported module functions into the global namespace
     Object.assign(globalThis, {
         ...systemStatsConfig.profile,
         ...workspacesConfig.profile,
     });
   '';
 
-  # CSS for AGS – setting base font size, widget resets, colors, and workspace styles
+  ###########################################################################
+  ##                            AGS STYLE CSS                              ##
+  ###########################################################################
   styleCSS = ''
-    /* Set base font size */
+    /* --------------------------------------------------------------------- */
+    /*        Base Font Size Setting via profile.baseFontSize                 */
+    /* --------------------------------------------------------------------- */
     html {
       font-size: ${toString profile.baseFontSize}px;
     }
 
-    /* Global reset for widgets */
+    /* --------------------------------------------------------------------- */
+    /*              Global CSS Reset for Widgets (system-stats & workspaces)  */
+    /* --------------------------------------------------------------------- */
     .system-stats *, .workspaces * {
         margin: 0;
         padding: 0;
@@ -87,19 +96,22 @@
         color: inherit;
     }
 
-    /* System Stats Styles */
+    /* --------------------------------------------------------------------- */
+    /*                        System Stats Specific Styles                   */
+    /* --------------------------------------------------------------------- */
     .system-stats {
         text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
-        font-size: 1rem;  /* Will be relative to html base font size */
+        font-size: 1rem;  /* Relative to the base font size */
         margin: 0.5em;
     }
-
     .system-stats label {
-        margin: 0;  /* Remove any margins */
-        padding: 0; /* Remove any padding */
+        margin: 0;
+        padding: 0;
     }
 
-    /* Colors for different elements (in rainbow order) */
+    /* --------------------------------------------------------------------- */
+    /*            Color Assignments for Stats (rainbow order)                */
+    /* --------------------------------------------------------------------- */
     .stats-time { color: #ff0000; }     /* Red */
     .stats-date { color: #ff8800; }     /* Orange */
     .stats-shell { color: #ffff00; }    /* Yellow */
@@ -108,9 +120,11 @@
     .stats-memory { color: #00ffff; }   /* Cyan */
     .stats-cpu { color: #0088ff; }      /* Blue */
     .stats-gpu { color: #ff00ff; }      /* Magenta */
-    .stats-colors { color: #ffffff; }    /* White */
+    .stats-colors { color: #ffffff; }   /* White */
 
-    /* Reset and base styling for all widgets in the workspaces container */
+    /* --------------------------------------------------------------------- */
+    /*                      Workspaces Widget Styling                        */
+    /* --------------------------------------------------------------------- */
     .workspaces *,
     .workspaces {
         margin: 0;
@@ -119,17 +133,12 @@
         border: none;
         box-shadow: none;
         font-size: 9pt;
-        /* Default color for widgets */
         color: white;
     }
-
-    /* Workspace container styling */
     .workspaces {
         margin: 1pt;
         background: none;
     }
-
-    /* Workspace button styling */
     .workspace-btn {
         min-width: 0.75rem;
         min-height: 0.75rem;
@@ -138,30 +147,24 @@
         background-color: #222;
         border-radius: 0;
     }
-
-    /* Workspace label (the number inside) */
     .workspace-btn label {
         background: none;
         color: rgba(255, 255, 255, 0.4);
-        font-size: 0.75rem;  /* Will be relative to html base font size */
+        font-size: 0.75rem;
     }
-
-    /* When a workspace is active (focused) */
     .workspace-btn.active label {
-        color: rgba(255, 255, 255, 1.0);  /* replaced var(--active-color) */
+        color: rgba(255, 255, 255, 1.0);
     }
-
-    /* When a workspace is marked as inactive */
     .workspace-btn.inactive label {
         color: rgba(255, 255, 255, 0.5);
     }
-
-    /* When a workspace is urgent */
     .workspace-btn.urgent label {
-        color: #ff5555;  /* replaced var(--urgent-color) */
+        color: #ff5555;
     }
 
-    /* Individual color dots */
+    /* --------------------------------------------------------------------- */
+    /*                       Additional Color Dot Styling                    */
+    /* --------------------------------------------------------------------- */
     .stats-red { color: #ff0000; }
     .stats-orange { color: #ff8800; }
     .stats-yellow { color: #ffff00; }
@@ -173,12 +176,17 @@
     .stats-white { color: #ffffff; }
   '';
 
-  # JavaScript for the system stats widget – it defines how to fetch and update stats and creates a window
+  ###########################################################################
+  ##                     SYSTEM STATS WIDGET JS                            ##
+  ###########################################################################
   systemStatsJS = ''
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
+    // ---------------------------------------------------------------
+    // Safe executor for shell commands with error handling
+    // ---------------------------------------------------------------
     function safeExec(command, errorMsg, defaultValue = 'N/A') {
         try {
             const output = exec(command);
@@ -191,40 +199,41 @@
         }
     }
 
+    // ---------------------------------------------------------------
+    // Retrieves various system stats (CPU, GPU, RAM, etc.)
+    // ---------------------------------------------------------------
     function getStats() {
-        // Get CPU temperature
+        // CPU Temperature
         const cpuTempCmd = ["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"];
         const cpu_temp = safeExec(cpuTempCmd, "Failed to get CPU stats:");
 
-        // Get GPU temperature
+        // GPU Temperature
         const gpuCmd = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits";
         let gpu_temp = safeExec(gpuCmd, "Failed to get GPU stats:");
         if (gpu_temp !== "N/A") {
             gpu_temp += "°C";
         }
 
-        // Get RAM info
+        // RAM usage details using 'free'
         const ramInfo = exec("free -h").split("\n")[1].split(/\s+/);
         const used_ram = ramInfo[2];
         const total_ram = ramInfo[1];
 
-        // Get date and time
+        // Date and Time
         const time = safeExec('date "+%H:%M:%S"', "Failed to get time:");
         const date = safeExec('date "+%d/%m/%y"', "Failed to get date:");
 
-        // Fix uptime command - using awk to format the output
+        // Uptime and package count information
         const uptime = safeExec(
             ["bash", "-c", "uptime | awk -F'up |,' '{print $2}'"],
             "Failed to get uptime:"
         ).trim();
-
-        // Fix package count
         const pkgs = safeExec(
             ["bash", "-c", "nix-store -q --requisites /run/current-system/sw | wc -l"],
             "Failed to get package count:"
         ).trim();
 
-        // Get shell name without full path - using readlink to resolve the actual shell
+        // Shell name without full path
         const shell = safeExec(
             ["bash", "-c", "basename $(readlink -f $SHELL)"],
             "Failed to get shell:"
@@ -243,6 +252,9 @@
         };
     }
 
+    // ---------------------------------------------------------------
+    // Updates the widget's stats display with fresh data
+    // ---------------------------------------------------------------
     function updateStats(stats) {
         const newStats = getStats();
         stats.cpu_temp.value = newStats.cpu_temp;
@@ -256,6 +268,9 @@
         stats.shell.value = newStats.shell;
     }
 
+    // ---------------------------------------------------------------
+    // Constructs the main System Stats widget layout
+    // ---------------------------------------------------------------
     function SystemStats() {
         var stats = {
             cpu_temp: Variable('N/A'),
@@ -269,16 +284,16 @@
             shell: Variable('N/A')
         };
 
-        // Define our labels and find the longest one
+        // Define row labels and compute the longest one for padding
         const labels = ['time', 'date', 'shell', 'uptime', 'pkgs', 'memory', 'cpu', 'gpu', 'colors'];
         const longestLabel = Math.max(...labels.map(l => l.length));
 
-        // Function to pad a label to match the longest label
+        // Pad the label string for alignment
         function padLabel(label) {
             return label + ' '.repeat(longestLabel - label.length);
         }
 
-        // Function to create horizontal border
+        // Generate a horizontal border
         function horizontalBorder(char1, char2, char3) {
             return char1 + "─".repeat(longestLabel + 4) + char3;
         }
@@ -287,15 +302,18 @@
             class_name: 'system-stats',
             vertical: true,
             children: [
+                // Display the AGS logo as text
                 Widget.Label({
                     class_name: 'stats-white',
                     label: "   _  ___      ____  ____\n  / |/ (_)_ __/ __ \\/ __/\n /    / /\\ \\ / /_/ /\\ \\  \n/_/|_/_//_\\_\\\\____/___/  "
                 }),
+                // Top border line
                 Widget.Label({
                     class_name: 'stats-white',
                     xalign: 0,
                     label: horizontalBorder("╭", "─", "╮")
                 }),
+                // Create a row for each stat label
                 ...labels.map((currentLabel) => Widget.Box({
                     children: [
                         Widget.Label({
@@ -332,6 +350,7 @@
                                 }
                             })()
                         }),
+                        // Append color dots for the "colors" row only
                         ...(currentLabel === 'colors' ? [
                             Widget.Label({ class_name: 'stats-red', label: '• ' }),
                             Widget.Label({ class_name: 'stats-orange', label: '• ' }),
@@ -345,24 +364,28 @@
                         ] : [])
                     ]
                 })),
+                // Bottom border line
                 Widget.Label({
                     class_name: 'stats-white',
                     xalign: 0,
                     label: horizontalBorder("╰", "─", "╯")
                 })
             ],
+            // Set up polling to update stats every second
             setup: function(self) {
                 self.poll(1000, () => updateStats(stats));
             }
         });
     }
 
+    // ---------------------------------------------------------------
+    // Create a window for the System Stats widget and export its config
+    // ---------------------------------------------------------------
     var systemStatsWindow = Widget.Window({
         name: 'system-stats',
         child: SystemStats(),
         layer: 'bottom'
     });
-
     var systemStatsConfig = {
         window: systemStatsWindow,
         profile: {
@@ -378,18 +401,29 @@
     export { systemStatsConfig };
   '';
 
-  # JavaScript for workspaces – builds two windows (top and bottom) and buttons for each workspace
+  ###########################################################################
+  ##                         WORKSPACES WIDGET JS                          ##
+  ###########################################################################
   workspacesJS = ''
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import Service from 'resource:///com/github/Aylur/ags/service.js';
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
+    // ---------------------------------------------------------------
+    // Asynchronously import the hyprland service
+    // ---------------------------------------------------------------
     var hyprland = await Service.import('hyprland');
 
+    // ---------------------------------------------------------------
+    // Dispatches a workspace switch command
+    // ---------------------------------------------------------------
     function dispatch(workspace) {
         return hyprland.messageAsync("dispatch workspace " + workspace);
     }
 
+    // ---------------------------------------------------------------
+    // Creates a button for an individual workspace
+    // ---------------------------------------------------------------
     function createWorkspaceButton(index) {
         return Widget.Button({
             class_name: "workspace-btn",
@@ -405,7 +439,7 @@
                         .filter(id => id != null);
                     const isActive = activeIds.includes(index);
 
-                    // Get focused monitor or fallback to the first monitor
+                    // Check if the workspace is focused on the current monitor
                     const focusedMonitor = hyprland.focused_monitor || (hyprland.monitors[0] || {});
                     const isFocused = focusedMonitor.activeWorkspace && focusedMonitor.activeWorkspace.id === index;
 
@@ -417,20 +451,23 @@
         });
     }
 
+    // ---------------------------------------------------------------
+    // Constructs the workspaces container using workspace buttons
+    // ---------------------------------------------------------------
     function Workspaces() {
-        // Create buttons for all possible workspaces but only show active ones
         var buttons = [];
         for (var i = 1; i <= 10; i++) {
             buttons.push(createWorkspaceButton(i));
         }
-
         return Widget.Box({
             class_name: "workspaces",
             children: buttons
         });
     }
 
-    // Create two workspace windows: one anchored at the bottom, one at the top.
+    // ---------------------------------------------------------------
+    // Define two workspace windows (bottom and top) for the layout
+    // ---------------------------------------------------------------
     var workspacesWindowBottom = Widget.Window({
         name: "workspaces-bottom",
         anchor: ["bottom"],
@@ -438,7 +475,6 @@
         layer: "overlay",
         margins: [0, 0, 0, 0]
     });
-
     var workspacesWindowTop = Widget.Window({
         name: "workspaces-top",
         anchor: ["top"],
@@ -447,7 +483,9 @@
         margins: [0, 0, 0, 0]
     });
 
-    // Export both windows as an array in the config.
+    // ---------------------------------------------------------------
+    // Export the workspaces configuration with both windows
+    // ---------------------------------------------------------------
     var workspacesConfig = {
         windows: [workspacesWindowBottom, workspacesWindowTop],
         profile: {}
@@ -456,13 +494,16 @@
     export { workspacesConfig };
   '';
 in
+  ###########################################################################
+  ##                       AGS INSTALLATION CONFIG                         ##
+  ###########################################################################
   lib.mkIf (builtins.elem "ags" profile.features) {
-    # Install AGS and related packages
+    # Include the AGS package for installation
     home.packages = with pkgs; [
       ags
     ];
 
-    # Create AGS config directory and files
+    # Create the AGS configuration directory and files
     xdg.configFile = {
       "ags/config.js".text = configJS;
       "ags/style.css".text = styleCSS;

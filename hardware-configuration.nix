@@ -109,4 +109,9 @@
   #── 💻 Platform Settings ───────────────#
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+  powerManagement = {
+    enable = true;
+    # Further options such as laptop mode, backlight controls, etc.
+  };
 }

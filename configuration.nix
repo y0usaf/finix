@@ -15,7 +15,12 @@
   profile,
   inputs,
   ...
-}: {
+}: let
+  enableNvidia = builtins.elem "nvidia" profile.features;
+  enableWayland = builtins.elem "wayland" profile.features;
+  enableHyprland = builtins.elem "hyprland" profile.features;
+  enableGaming = builtins.elem "gaming" profile.features;
+in {
   imports = [
     ./hardware-configuration.nix
     ./modules/env.nix
@@ -88,7 +93,7 @@
     };
 
     hardware = {
-      nvidia = lib.mkIf (builtins.elem "nvidia" profile.features) {
+      nvidia = lib.mkIf enableNvidia {
         modesetting.enable = true;
         powerManagement.enable = true;
         open = false;
@@ -103,7 +108,7 @@
     };
 
     services = {
-      xserver.videoDrivers = lib.mkIf (builtins.elem "nvidia" profile.features) ["nvidia"];
+      xserver.videoDrivers = lib.mkIf enableNvidia ["nvidia"];
 
       #── 🔊 Audio Configuration ────────────────#
       pipewire = {
@@ -129,6 +134,12 @@
           pkgs.gcr
         ];
       };
+
+      udev.extraRules = ''
+        # Vial rules for n/on-root access to keyboards
+        KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
+        KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
+      '';
     };
 
     #── 🔒 Security & Permissions ────────────#
@@ -158,7 +169,7 @@
 
     #── 👤 User Environment ─────────────────#
     programs = {
-      hyprland = lib.mkIf (builtins.elem "wayland" profile.features && builtins.elem "hyprland" profile.features) {
+      hyprland = lib.mkIf (enableWayland && enableHyprland) {
         enable = true;
         xwayland.enable = true;
         package = inputs.hyprland.packages.${pkgs.system}.hyprland;
@@ -176,7 +187,7 @@
           "audio"
           "input"
         ]
-        ++ lib.optionals (builtins.elem "gaming" profile.features) [
+        ++ lib.optionals enableGaming [
           "gamemode"
         ];
       ignoreShellProgramCheck = true;
@@ -187,13 +198,7 @@
     virtualisation.lxd.enable = true;
 
     #── 🚀 Core Services ──────────────────#
-    services.udev.extraRules = ''
-      # Vial rules for n/on-root access to keyboards
-      KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
-      KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
-    '';
-
-    xdg.portal = lib.mkIf (builtins.elem "wayland" profile.features && builtins.elem "hyprland" profile.features) {
+    xdg.portal = lib.mkIf (enableWayland && enableHyprland) {
       enable = true;
       xdgOpenUsePortal = true;
       config = {

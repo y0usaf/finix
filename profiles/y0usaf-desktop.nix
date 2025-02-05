@@ -84,21 +84,21 @@ in {
   cursorSize = 24;
 
   mainFont = {
-    package = ["terminus_font_ttf"];
+    package = [["terminus_font_ttf"]];
     name = "Terminus (TTF)";
   };
 
   fallbackFonts = [
     {
-      package = ["noto-fonts-emoji"];
+      package = [["noto-fonts-emoji"]];
       name = "Noto Color Emoji";
     }
     {
-      package = ["noto-fonts-cjk-sans"];
+      package = [["noto-fonts-cjk-sans"]];
       name = "Noto Sans CJK";
     }
     {
-      package = ["font-awesome"];
+      package = [["font-awesome"]];
       name = "Font Awesome";
     }
   ];

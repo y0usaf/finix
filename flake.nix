@@ -5,61 +5,73 @@
 {
   description = "NixOS configuration";
 
-  #── 📦 Input Sources & Dependencies ─────────────────────────────────#
+  ####################################################################
+  #                         INPUT SOURCES                            #
+  ####################################################################
   inputs = {
-    #── 🎯 Core System Dependencies ──────────────────────────────────#
-    # 📚 Main nixpkgs repository - using unstable channel
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # 🏠 Home Manager for user environment management
+    ## ────── Core System Dependencies ──────
+    nixpkgs = {
+      url = "github:nixos/nixpkgs/nixos-unstable";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # ✨ Nix code formatter
+
     alejandra = {
       url = "github:kamadorueda/alejandra";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    #── 🪟 Desktop Environment & Theming ────────────────────────────#
-    # 🖥️ Hyprland Wayland compositor
+    ## ────── Desktop Environment & Theming ──────
     hyprland = {
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # 📐 Hy3 - Hyprland tiling layout plugin
+
     hy3 = {
       url = "github:outfoxxed/hy3";
       inputs.hyprland.follows = "hyprland";
     };
-    # 🖱️ Custom cursor themes
-    deepin-dark-hyprcursor.url = "path:/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor";
-    deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/pkg/deepin-dark-xcursor";
 
-    #── 🛠️ Development & Creative Tools ─────────────────────────────#
-    # 🐍 Python project management tools
+    deepin-dark-hyprcursor = {
+      url = "path:/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor";
+    };
+
+    deepin-dark-xcursor = {
+      url = "path:/home/y0usaf/nixos/pkg/deepin-dark-xcursor";
+    };
+
+    ## ────── Development & Creative Tools ──────
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # 🚀 Fast Python package installer
+
     uv2nix = {
       url = "github:pyproject-nix/uv2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # 🎥 OBS Studio plugin for image reactions
-    obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
-    # 🎁 Additional package repository
-    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 
-    #── 🎨 System Styling ───────────────────────────────────────────#
+    obs-image-reaction = {
+      url = "github:L-Nafaryus/obs-image-reaction";
+    };
+
+    chaotic = {
+      url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+    };
+
+    ## ────── System Styling ──────
     hyprpaper = {
       url = "github:y0usaf/hyprpaper/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  #── ⚙️ System Configuration Builder ──────────────────────────────────#
+  ####################################################################
+  #                        SYSTEM OUTPUTS                            #
+  ####################################################################
   outputs = {
     self,
     nixpkgs,
@@ -72,28 +84,24 @@
     hyprpaper,
     ...
   }: let
-    # Define the target system architecture
+    ## ────── System & Package Configuration ──────
     system = "x86_64-linux";
-
-    # Import pkgs with the desired configuration
     pkgs = import nixpkgs {
       inherit system;
-      config = {
-        allowUnfree = true;
-      };
+      config = {allowUnfree = true;};
     };
 
-    # Import the options and profile configurations
-    options = import ./options.nix;
+    ## ────── External Configurations ──────
+    options = import ./options.nix; # (Imported for potential option flags)
     profile = import ./profiles/y0usaf-desktop.nix;
 
-    # Common special args now includes the profile
+    ## ────── Common Special Arguments for Modules ──────
     commonSpecialArgs = {
       inherit profile;
       inputs = self.inputs;
     };
 
-    # Function to create a consistent home-manager configuration
+    ## ────── Home Manager Configuration Helper ──────
     mkHomeConfiguration = username: system:
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
@@ -101,34 +109,28 @@
         modules = [./home.nix];
       };
   in {
-    #── 🎨 System Styling ───────────────────────────────────────────#
+    ## ────── Formatter Setup ──────
     formatter.${system} = pkgs.alejandra;
 
-    #── 👤 User Environment Setup ──────────────────────────────────#
+    ## ────── User Home Manager Configuration ──────
     homeConfigurations.${profile.username} = mkHomeConfiguration profile.username system;
 
-    #── 🖥️ Machine-Specific Configuration ──────────────────────────#
+    ## ────── Machine-Specific NixOS Configuration ──────
     nixosConfigurations.${profile.hostname} = nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = commonSpecialArgs;
       modules = [
-        # Main system configuration
         ./configuration.nix
-        # Home Manager integration
         home-manager.nixosModules.home-manager
         {
           home-manager = {
             extraSpecialArgs = commonSpecialArgs;
-            # User-specific configuration
             users.${profile.username} = import ./home.nix;
-            # Global package management settings
             useGlobalPkgs = true;
             useUserPackages = true;
-            # Backup configuration
             backupFileExtension = "backup";
           };
         }
-        # Additional package repository
         chaotic.nixosModules.default
       ];
     };

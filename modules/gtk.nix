@@ -4,56 +4,105 @@
   lib,
   profile,
   ...
-}: {
+}: let
+  #############################################################
+  # Extract common variables from the profile for reusability
+  #############################################################
+  mainFontName = profile.mainFont.name;
+  baseFontSize = profile.baseFontSize;
+  dpiStr = toString profile.dpi;
+
+  #############################################################
+  # Define color constants for CSS styling
+  #############################################################
+  whiteColor = "#ffffff";
+  transparentColor = "transparent";
+  menuBackground = "#333333";
+  hoverBg = "rgba(100, 149, 237, 0.1)";
+  selectedBg = "rgba(100, 149, 237, 0.5)";
+in {
+  ######################################################################
+  # GTK Global Configuration
+  ######################################################################
   gtk = {
     enable = true;
+
+    # ---------------------------------------------------------------
+    # Overall font settings for GTK
+    # ---------------------------------------------------------------
     font = {
-      name = "${profile.mainFont.name}";
-      size = profile.baseFontSize;
+      name = mainFontName; # Use main font name from profile
+      size = baseFontSize; # Base font size from profile
     };
-    gtk3.extraConfig = {
-      gtk-xft-antialias = 1;
-      gtk-xft-hinting = 1;
-      gtk-xft-hintstyle = "hintslight";
-      gtk-xft-rgba = "rgb";
-      gtk-xft-dpi = toString profile.dpi;
-      gtk-application-prefer-dark-theme = 1;
+
+    ##################################################################
+    # GTK3 Specific Configuration
+    ##################################################################
+    gtk3 = {
+      extraConfig = {
+        gtk-xft-antialias = 1;
+        gtk-xft-hinting = 1;
+        gtk-xft-hintstyle = "hintslight";
+        gtk-xft-rgba = "rgb";
+        gtk-xft-dpi = dpiStr;
+        gtk-application-prefer-dark-theme = 1;
+      };
+
+      # ---------------------------------------------------------------
+      # Custom CSS for GTK3 applications
+      # ---------------------------------------------------------------
+      extraCss = ''
+        /* Global element styling */
+        * {
+          font-family: "${mainFontName}";
+          color: ${whiteColor};
+          background: ${transparentColor};
+          outline-width: 0;
+          outline-offset: 0;
+        }
+
+        /* Hover state for all elements */
+        *:hover {
+          background: ${hoverBg};
+        }
+
+        /* Selected state for all elements */
+        *:selected {
+          background: ${selectedBg};
+        }
+
+        /* Button styling */
+        button {
+          border-radius: 0.15rem;
+          min-height: 1rem;
+          padding: 0.05rem 0.25rem;
+        }
+
+        /* Menu background styling */
+        menu {
+          background: ${menuBackground};
+        }
+      '';
     };
-    gtk3.extraCss = ''
-      * {
-        font-family: "${profile.mainFont.name}";
-        color: #ffffff;
-        background: transparent;
-        outline-width: 0;
-        outline-offset: 0;
-      }
 
-      *:hover {
-        background: rgba(100, 149, 237, 0.1);
-      }
-
-      *:selected {
-        background: rgba(100, 149, 237, 0.5);
-      }
-
-      button {
-        border-radius: 0.15rem;
-        min-height: 1rem;
-        padding: 0.05rem 0.25rem;
-      }
-
-      menu {
-        background: #333333;
-      }
-    '';
-    gtk4.extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
+    ##################################################################
+    # GTK4 Specific Configuration
+    ##################################################################
+    gtk4 = {
+      extraConfig = {
+        gtk-application-prefer-dark-theme = 1;
+      };
     };
   };
 
-  dconf.settings = {
-    "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
+  ######################################################################
+  # DConf Settings for the GNOME Desktop Interface
+  ######################################################################
+  dconf = {
+    settings = {
+      "org/gnome/desktop/interface" = {
+        color-scheme = "prefer-dark";
+      };
     };
   };
 }

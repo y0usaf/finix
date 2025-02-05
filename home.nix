@@ -8,52 +8,79 @@
   inputs,
   profile,
   ...
-}: {
-  #── 🏠 Core Home Settings ──────────────────#
+}: let
+  ####################################################################
+  # Import external options
+  ####################################################################
+  options = import ./options.nix {inherit lib;};
+
+  ####################################################################
+  # Compute feature-based packages
+  #
+  # The "core" package set is added first
+  # Then for each feature enabled in the user profile, we check that
+  # the corresponding attribute exists in options.packageSets.default;
+  # if so, we include that set.
+  ####################################################################
+  featurePackages = lib.flatten (
+    [options.packageSets.default.core]
+    ++ (map (feature:
+      if builtins.hasAttr feature options.packageSets.default
+      then options.packageSets.default.${feature}
+      else [])
+    profile.features)
+  );
+
+  ####################################################################
+  # Compute user profile-specific packages
+  #
+  # Each package is derived from the profile settings. For each
+  # app attribute (e.g. defaultTerminal, defaultBrowser, etc.), we
+  # reference the corresponding package in pkgs.
+  ####################################################################
+  userPackages = map (app: pkgs.${app.package}) [
+    profile.defaultTerminal
+    profile.defaultBrowser
+    profile.defaultFileManager
+    profile.defaultLauncher
+    profile.defaultIde
+    profile.defaultMediaPlayer
+    profile.defaultImageViewer
+    profile.defaultDiscord
+  ];
+
+  ####################################################################
+  # Combine final package list:
+  #   - Map each feature package name to pkgs.<name>
+  #   - Concatenate with the user-specific packages computed above.
+  ####################################################################
+  finalPackages = (map (name: pkgs.${name}) featurePackages) ++ userPackages;
+
+  ####################################################################
+  # Helper function: Conditionally import modules based on profile features
+  #
+  # Returns the provided module only if the feature is enabled.
+  ####################################################################
+  importFeature = feature: lib.optionals (builtins.elem feature profile.features);
+in {
+  #─────────────────────── 🏠 Core Home Settings ──────────────────#
   home = {
     username = profile.username;
     homeDirectory = profile.homeDirectory;
     stateVersion = profile.stateVersion;
     enableNixpkgsReleaseCheck = false;
+    packages = finalPackages;
   };
 
-  #── 📦 Package Management ─────────────────#
-  home.packages = with pkgs; let
-    options = import ./options.nix {inherit lib;};
-
-    # Core and feature-based packages
-    featurePackages = lib.flatten (
-      [options.packageSets.default.core]
-      ++ (map (
-          feature:
-            if builtins.hasAttr feature options.packageSets.default
-            then options.packageSets.default.${feature}
-            else []
-        )
-        profile.features)
-    );
-
-    # User profile-specific packages
-    userPkgs = map (app: pkgs.${app.package}) [
-      profile.defaultTerminal
-      profile.defaultBrowser
-      profile.defaultFileManager
-      profile.defaultLauncher
-      profile.defaultIde
-      profile.defaultMediaPlayer
-      profile.defaultImageViewer
-      profile.defaultDiscord
-    ];
-  in
-    (map (name: pkgs.${name}) featurePackages) ++ userPkgs;
-
-  #── 🔧 Program Configurations ────────────#
-  imports = with lib; let
-    # Helper function to conditionally import feature configs
-    importFeature = feature: optionals (builtins.elem feature profile.features);
-  in
+  #──────────────────────────────────────────────────────────────#
+  #                Home-manager Module Imports
+  #
+  # Core modules are always imported.
+  # Additional modules are conditionally imported based on features.
+  #──────────────────────────────────────────────────────────────#
+  imports = with lib;
     [
-      # Core configurations
+      # Core module imports
       ./modules/zsh.nix
       ./modules/ssh.nix
       ./modules/git.nix
@@ -63,7 +90,6 @@
       ./modules/gtk.nix
       ./modules/cursor.nix
     ]
-    # Feature-based configurations
     ++ importFeature "hyprland" [./modules/hyprland.nix]
     ++ importFeature "ags" [./modules/ags.nix]
     ++ importFeature "gaming" [./modules/gaming.nix]
@@ -72,7 +98,11 @@
     ++ importFeature "webapps" [./modules/webapps.nix]
     ++ importFeature "wallust" [./modules/wallust.nix];
 
-  #── 📦 Core Programs ──────────────────────#
+  #──────────────────────────────────────────────────────────────#
+  #                     Program Configurations
+  #
+  # Configuration for various programs like zsh, nh, and obs-studio.
+  #──────────────────────────────────────────────────────────────#
   programs = {
     zsh.enable = true;
 
@@ -96,14 +126,25 @@
     };
   };
 
-  #── 🔧 System Configurations ──────────────#
+  #──────────────────────────────────────────────────────────────#
+  #                    System Configurations
+  #
+  # In this case, only dconf is enabled.
+  #──────────────────────────────────────────────────────────────#
   dconf.enable = true;
 
-  #── 🔄 Systemd Services ─────────────────#
+  #──────────────────────────────────────────────────────────────#
+  #                    Systemd User Services
+  #
+  # This section defines the user services and file system watches.
+  #──────────────────────────────────────────────────────────────#
   systemd.user = {
     startServices = "sd-switch";
 
     services = {
+      ################################################################
+      # Polkit GNOME Authentication Agent Service
+      ################################################################
       polkit-gnome-authentication-agent-1 = {
         Unit = {
           Description = "polkit-gnome-authentication-agent-1";
@@ -119,6 +160,11 @@
         };
       };
 
+      ################################################################
+      # Format Nix Files Service
+      #
+      # A oneshot service to run alejandra (a Nix formatter) on changes.
+      ################################################################
       format-nix = {
         Unit.Description = "Format Nix files on change";
         Service = {
@@ -129,6 +175,9 @@
       };
     };
 
+    ################################################################
+    # File Watch Path for auto-triggering Nix formatting
+    ################################################################
     paths.format-nix = {
       Unit.Description = "Watch NixOS config directory for changes";
       Path = {

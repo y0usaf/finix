@@ -17,7 +17,13 @@
   programs.zsh = {
     enable = true;
 
-    #── 📜 History Settings ─────────────────#
+    #===========================================================================
+    # Zsh Shell Configuration
+    #===========================================================================
+
+    #---------------------------------------------------------------------------
+    # History Settings: Configure shell history behavior.
+    #---------------------------------------------------------------------------
     history = {
       size = 1000;
       save = 1000;
@@ -28,9 +34,11 @@
       extended = true;
     };
 
-    #── 🔧 Profile Configuration ──────────────#
+    #---------------------------------------------------------------------------
+    # Profile Settings: Hardware-specific and feature-based extra commands.
+    #---------------------------------------------------------------------------
     profileExtra = ''
-      # Hardware-specific settings
+      # Hardware-specific settings based on hostname.
       case "$(hostname)" in
         "y0usaf-desktop")
           sudo nvidia-smi -pl 150
@@ -42,60 +50,81 @@
       esac
     '';
 
-    #── 🔧 Shell Initialization ──────────────#
+    #---------------------------------------------------------------------------
+    # Shell Initialization: Define functions, prompt, and additional settings.
+    #---------------------------------------------------------------------------
     initExtra = ''
-            # Function to print all 4 cats in a row
-            print_cats() {
-            echo -e "\033[0;31m ⟋|､      \033[0;34m  ⟋|､      \033[0;35m  ⟋|､      \033[0;32m  ⟋|､
+      # ----------------------------
+      # Function: print_cats
+      # ----------------------------
+      # Prints a colorful array of cats to the terminal.
+      print_cats() {
+          echo -e "\033[0;31m ⟋|､      \033[0;34m  ⟋|､      \033[0;35m  ⟋|､      \033[0;32m  ⟋|､
       \033[0;31m(°､ ｡ 7    \033[0;34m(°､ ｡ 7    \033[0;35m(°､ ｡ 7    \033[0;32m(°､ ｡ 7
       \033[0;31m |､  ~ヽ   \033[0;34m |､  ~ヽ   \033[0;35m |､  ~ヽ   \033[0;32m |､  ~ヽ
       \033[0;31m じしf_,)〳\033[0;34m じしf_,)〳\033[0;35m じしf_,)〳\033[0;32m じしf_,)〳
       \033[0;36m  [tomo]   \033[0;33m  [moon]   \033[0;32m  [ekko]   \033[0;35m  [bozo]\033[0m"
-            }
+      }
 
-            # Print the cats and add some spacing
-            print_cats
+      # Immediately print the cats on startup.
+      print_cats
 
-            # Set up the basic prompt
-            PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
+      # ----------------------------
+      # Prompt Setup
+      # ----------------------------
+      PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
 
-            # Enable advanced tab completion
-            zstyle ':completion:*' menu select
-            zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+      # ----------------------------
+      # Advanced Tab Completion
+      # ----------------------------
+      zstyle ':completion:*' menu select
+      zstyle ':completion:*' matcher-list \
+          'm:{a-zA-Z}={A-Za-z}' \
+          'r:|[._-]=* r:|=*' \
+          'l:|=* r:|=*'
 
-            # Host-specific functions
-            if [ "$(hostname)" = "y0usaf-laptop" ]; then
-                fanspeed() {
-                    if [ -z "$1" ]; then
-                        echo "Usage: fanspeed <percentage>"
-                        return 1
-                    fi
-                    local speed="$1"
-                    asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f gpu
-                    asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
-                }
-            fi
-
-            # Temporarily add a Nix package to shell
-            temppkg() {
+      # ----------------------------
+      # Host-specific Functions
+      # ----------------------------
+      # Define a "fanspeed" function only when running on the laptop.
+      if [ "$(hostname)" = "y0usaf-laptop" ]; then
+          fanspeed() {
               if [ -z "$1" ]; then
-                echo "Usage: temppkg package_name"
-                return 1
+                  echo "Usage: fanspeed <percentage>"
+                  return 1
               fi
-              nix-shell -p "$1" --run "exec $SHELL"
-            }
+              local speed="$1"
+              # Configure fan curves for both GPU and CPU.
+              asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f gpu
+              asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
+          }
+      fi
+
+      # ----------------------------
+      # Function: temppkg
+      # ----------------------------
+      # Temporarily adds a Nix package to the shell.
+      temppkg() {
+          if [ -z "$1" ]; then
+              echo "Usage: temppkg package_name"
+              return 1
+          fi
+          nix-shell -p "$1" --run "exec $SHELL"
+      }
     '';
 
-    #── 🔗 Shell Aliases ──────────────────#
+    #---------------------------------------------------------------------------
+    # Shell Aliases: Define shortcuts for common commands.
+    #---------------------------------------------------------------------------
     shellAliases = {
-      #── 📱 XDG Compliance ────────────────#
+      #----- XDG Compliance Shortcuts -----
       adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
       wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
       svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
       yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
       mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
 
-      #── 📝 Config Editing ────────────────#
+      #----- Configuration Editing Shortcuts -----
       aliases = "nvim $HOME/dotfiles/.config/zsh/aliases";
       agscfg = "nvim $HOME/dotfiles/.config/ags/config.js";
       swaycfg = "nvim $HOME/dotfiles/.config/sway/*";
@@ -112,7 +141,7 @@
       zshistory = "nvim $XDG_CONFIG_HOME/zsh/.zsh_history";
       gitignore = "nvim $HOME/.gitignore";
 
-      #── 🔄 System Management ─────────────#
+      #----- System Management Shortcuts -----
       dotlink = "$HOME/dotfiles/scripts/dotlink.sh";
       dotsync = "$HOME/dotfiles/scripts/dotsync.sh";
       dotpush = "$HOME/dotfiles/scripts/dotsync.sh push";
@@ -121,7 +150,7 @@
       pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
       pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
 
-      #── 🎵 Media & Tools ─────────────────#
+      #----- Media & Tools Shortcuts -----
       ytm4a = "$HOME/scripts/ytm4a.sh";
       spotm4a = "$HOME/scripts/spotm4a.py";
       compressvid = "~/dotfiles/scripts/compressvid.sh";
@@ -129,7 +158,7 @@
       "nvidia-settings" = "nvidia-settings --config=\"$XDG_CONFIG_HOME\"/nvidia/settings";
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
 
-      #── 📁 Directory & Search ───────────#
+      #----- Directory & Search Shortcuts -----
       "l." = "lsd -A | grep -E \"^\\.\"";
       la = "lsd -A --color=always --group-dirs=first --icon=always";
       ll = "lsd -l --color=always --group-dirs=first --icon=always";
@@ -140,39 +169,42 @@
       egrep = "grep -E --color=auto";
       fgrep = "grep -F --color=auto";
 
-      #── 🌐 Network Tools ──────────────#
+      #----- Network Tools Shortcuts -----
       tailup = "sudo tailscale up";
       taildown = "sudo tailscale down";
 
-      #── 🌐 XDG Portal Tools ──────────────#
+      #----- XDG Portal Tools -----
       "checkportals" = ''
         echo "🔍 XDG Portal Status Check"
         echo "══════════════════════════"
 
-        # Check service status
+        # Check service status for each portal.
         echo "📊 Service Status:"
         for service in xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk; do
           echo "→ $service:"
           systemctl --user status $service | grep -E "Active:|●|○|↳" | sed 's/^/  /'
         done
 
+        # Show recent portal logs.
         echo "\n📋 Recent Portal Logs:"
         journalctl -b | grep -iE "(xdg.*portal|portal.*xdg)" | tail -n 10 | while IFS= read -r line; do
           echo "  $line"
         done
 
+        # Display DBus interface status for portals.
         echo "\n🔌 DBus Interface Status:"
         busctl --user list | grep portal | while IFS= read -r line; do
           echo "  $line"
         done
 
+        # Check the portal process status.
         echo "\n🔍 Portal Process Check:"
         ps aux | grep -E "[x]dg-desktop-portal" | while IFS= read -r line; do
           echo "  $line"
         done
       '';
 
-      #── 🔧 Hardware Management ────────────#
+      #----- Hardware Management Shortcut -----
       gpupower = "sudo nvidia-smi -pl";
     };
   };

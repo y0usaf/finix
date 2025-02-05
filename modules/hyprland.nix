@@ -8,31 +8,61 @@
   inputs,
   profile,
   ...
-}: {
-  imports = lib.optionals (builtins.elem "hyprland" profile.features) [
+}:
+#────────────────────────────────────────────────────────────
+# Local Variables
+#────────────────────────────────────────────────────────────
+let
+  hyprlandEnabled = builtins.elem "hyprland" profile.features;
+  system = pkgs.system;
+in {
+  #--------------------------------------------------------------------
+  # Import the Hyprland homeManagerModule if the hyprland feature is enabled
+  #--------------------------------------------------------------------
+  imports = lib.optionals hyprlandEnabled [
     inputs.hyprland.homeManagerModules.default
   ];
 
-  config = lib.mkIf (builtins.elem "hyprland" profile.features) {
+  #--------------------------------------------------------------------
+  # Hyprland Configuration (only applied if enabled)
+  #--------------------------------------------------------------------
+  config = lib.mkIf hyprlandEnabled {
     wayland.windowManager.hyprland = {
+      #------------------------------------------------------------------
+      # Core Activation and System Settings
+      #------------------------------------------------------------------
       enable = true;
-      systemd.enable = true;
-      systemd.variables = ["--all"];
       xwayland.enable = true;
-      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-      portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
+      systemd = {
+        enable = true;
+        variables = ["--all"];
+      };
 
+      #------------------------------------------------------------------
+      # Package Definitions
+      #------------------------------------------------------------------
+      package = inputs.hyprland.packages.${system}.hyprland;
+      portalPackage = inputs.hyprland.packages.${system}.xdg-desktop-portal-hyprland;
       plugins = [
-        inputs.hy3.packages.${pkgs.system}.hy3
+        inputs.hy3.packages.${system}.hy3
       ];
 
+      #------------------------------------------------------------------
+      # Settings Configuration
+      #------------------------------------------------------------------
       settings = {
+        #==============================================================
+        # Monitor & Display Settings
+        #==============================================================
         monitor = [
           "DP-4,5120x1440@239.76,0x0,1"
           "DP-2,5120x1440@239.76,0x0,1"
           "HDMI-A-2,5120x1440@239.76,0x0,1"
         ];
 
+        #==============================================================
+        # General User Interface Settings
+        #==============================================================
         general = {
           gaps_in = 10;
           gaps_out = 5;
@@ -42,6 +72,9 @@
           layout = "hy3";
         };
 
+        #==============================================================
+        # Input Settings (keyboard & mouse)
+        #==============================================================
         input = {
           kb_layout = "us";
           follow_mouse = 1;
@@ -50,11 +83,16 @@
           mouse_refocus = false;
         };
 
-        #── 🎨 Theme & Colors ─────────────────────────────────#
+        #==============================================================
+        # Theme & Colors
+        #==============================================================
         "$active_colour" = "ffffffff";
         "$transparent" = "00000000";
         "$inactive_colour" = "333333ff";
 
+        #==============================================================
+        # Window Decoration & Effects
+        #==============================================================
         decoration = {
           rounding = 0;
           blur = {
@@ -69,6 +107,9 @@
           };
         };
 
+        #==============================================================
+        # Animation Settings
+        #==============================================================
         animations = {
           enabled = 0;
           bezier = [
@@ -83,7 +124,9 @@
           ];
         };
 
-        #── ⚙️ Application Variables ────────────────────────────#
+        #--------------------------------------------------------------
+        # Application Shortcut Variables
+        #--------------------------------------------------------------
         "$mod" = "SUPER";
         "$mod2" = "ALT";
         "$term" = profile.defaultTerminal.command;
@@ -94,7 +137,9 @@
         "$ide" = profile.defaultIde.command;
         "$obs" = "obs";
 
-        #── 🪟 Window Management ─────────────────────────────#
+        #--------------------------------------------------------------
+        # Window Management Rules
+        #--------------------------------------------------------------
         windowrulev2 = [
           "float, center, size 300 600, class:^(launcher)"
           "float, mouse, size 300 300, title:^(Smile)"
@@ -108,9 +153,11 @@
           "blur, fabric"
         ];
 
-        #── ⌨️ Keybindings ────────────────────────────────────#
+        #--------------------------------------------------------------
+        # Keybindings Configuration
+        #--------------------------------------------------------------
         bind = lib.lists.flatten [
-          # Essential Controls
+          # -- Essential Controls --
           [
             "$mod, Q, killactive"
             "$mod, M, exit"
@@ -122,7 +169,7 @@
             "$mod, W, exec, ags -r 'showStats()'"
           ]
 
-          # Primary Applications
+          # -- Primary Applications --
           [
             "$mod, D, exec, $term"
             "$mod, E, exec, $filemanager"
@@ -135,13 +182,13 @@
             "$mod2, 5, exec, $obs"
           ]
 
-          # Monitor Management
+          # -- Monitor Management --
           [
             "$mod SHIFT, S, swapactiveworkspaces, DP-4 HDMI-A-2"
             "$mod, S, movecurrentworkspacetomonitor, +1"
           ]
 
-          # Window Movement
+          # -- Window Movement (WASD keys) --
           (lib.lists.forEach ["w" "a" "s" "d"] (key: let
             direction =
               {
@@ -156,15 +203,15 @@
             "$mod2 SHIFT, ${key}, movewindow, ${direction}"
           ]))
 
-          # Workspace Management
+          # -- Workspace Management (1-9) --
           (lib.lists.forEach (lib.range 1 9) (i: let
             num = toString i;
           in [
-            "$mod, ${num}, workspace, ${toString i}"
-            "$mod SHIFT, ${num}, movetoworkspacesilent, ${toString i}"
+            "$mod, ${num}, workspace, ${num}"
+            "$mod SHIFT, ${num}, movetoworkspacesilent, ${num}"
           ]))
 
-          # System Controls
+          # -- System Controls --
           [
             "Ctrl$mod2,Delete, exec, gnome-system-monitor"
             "$mod Shift, M, exec, shutdown now"
@@ -172,27 +219,35 @@
             "Ctrl,Period,exec,smile"
           ]
 
-          # Utilities
+          # -- Utility Commands --
           [
             "$mod, G, exec, grim -g \"$(slurp -d)\" - | wl-copy -t image/png"
             "$mod SHIFT, G, exec, grim - | wl-copy -t image/png"
             "$mod, GRAVE, exec, hyprpicker | wl-copy"
           ]
 
-          # Special Commands
+          # -- Special Commands --
           [
             "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${profile.wallpaperDir}\""
           ]
         ];
 
+        #--------------------------------------------------------------
+        # Additional Mouse Bindings
+        #--------------------------------------------------------------
         bindm = [
           "$mod, mouse:272, movewindow"
           "$mod, mouse:273, resizewindow"
         ];
 
+        #--------------------------------------------------------------
+        # Single-Line Binding for Toggling Stats
+        #--------------------------------------------------------------
         bindr = "$mod, W, exec, ags -r 'hideStats()'";
 
-        #── ⚙️ System Settings ──────────────────────#
+        #--------------------------------------------------------------
+        # System & Debug Settings
+        #--------------------------------------------------------------
         misc = {
           disable_hyprland_logo = true;
           disable_splash_rendering = true;
