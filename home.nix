@@ -54,23 +54,23 @@
   in
     [
       # Core configurations
-      ./zsh.nix
-      ./ssh.nix
-      ./git.nix
-      ./xdg.nix
-      ./fonts.nix
-      ./foot.nix
-      ./gtk.nix
-      ./cursor.nix
+      ./modules/zsh.nix
+      ./modules/ssh.nix
+      ./modules/git.nix
+      ./modules/xdg.nix
+      ./modules/fonts.nix
+      ./modules/foot.nix
+      ./modules/gtk.nix
+      ./modules/cursor.nix
     ]
     # Feature-based configurations
-    ++ importFeature "hyprland" [./hyprland.nix]
-    ++ importFeature "ags" [./ags.nix]
-    ++ importFeature "gaming" [./gaming.nix]
-    ++ importFeature "neovim" [./nvim.nix]
-    ++ importFeature "android" [./android.nix]
-    ++ importFeature "webapps" [./webapps.nix]
-    ++ importFeature "wallust" [./wallust.nix];
+    ++ importFeature "hyprland" [./modules/hyprland.nix]
+    ++ importFeature "ags" [./modules/ags.nix]
+    ++ importFeature "gaming" [./modules/gaming.nix]
+    ++ importFeature "neovim" [./modules/nvim.nix]
+    ++ importFeature "android" [./modules/android.nix]
+    ++ importFeature "webapps" [./modules/webapps.nix]
+    ++ importFeature "wallust" [./modules/wallust.nix];
 
   #── 📦 Core Programs ──────────────────────#
   programs = {

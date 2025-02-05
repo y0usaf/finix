@@ -85,7 +85,7 @@
 
     # Import the options and profile configurations
     options = import ./options.nix;
-    profile = import ./y0usaf-desktop.nix;
+    profile = import ./profiles/y0usaf-desktop.nix;
 
     # Common special args now includes the profile
     commonSpecialArgs = {

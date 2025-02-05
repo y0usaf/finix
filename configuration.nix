@@ -18,7 +18,7 @@
 }: {
   imports = [
     ./hardware-configuration.nix
-    ./env.nix
+    ./modules/env.nix
     ./cachix.nix
   ];
 
