@@ -13,6 +13,12 @@
   #######################################################################
   getPackage = path: lib.getAttrFromPath path pkgs;
 
+  # Get the packages and names from the new list format
+  mainFontPackages = builtins.elemAt profile.mainFont 0;
+  mainFontNames = builtins.elemAt profile.mainFont 1;
+  fallbackPackages = builtins.elemAt profile.fallbackFonts 0;
+  fallbackNames = builtins.elemAt profile.fallbackFonts 1;
+
   #######################################################################
   # Font XML Configuration String
   #
@@ -26,48 +32,34 @@
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
     <fontconfig>
-      <!-- Main Font: Prioritize the primary font for all text -->
+      <!-- Main Font -->
       <match>
         <test name="family">
           <string>*</string>
         </test>
         <edit name="family" mode="prepend">
-          <string>${profile.mainFont.name}</string>
+          <string>${builtins.elemAt profile.mainFont.names 0}</string>
         </edit>
       </match>
 
-      <!-- Fallback Fonts: Define aliases for fallback font families -->
+      <!-- Fallback Fonts -->
       <alias>
         <family>monospace</family>
         <prefer>
-          <family>${profile.mainFont.name}</family>
-          ${lib.concatMapStrings (font: "\n                        <family>${font.name}</family>") profile.fallbackFonts}
+          <family>${builtins.elemAt profile.mainFont.names 0}</family>
+          ${lib.concatMapStrings (name: "<family>${name}</family>") profile.fallbackFonts.names}
         </prefer>
       </alias>
 
-      <!-- Font Rendering Options: Enable smoothing and subpixel rendering -->
+      <!-- Font Rendering Options -->
       <match target="font">
-        <edit name="antialias" mode="assign">
-          <bool>true</bool>
-        </edit>
-        <edit name="hinting" mode="assign">
-          <bool>true</bool>
-        </edit>
-        <edit name="hintstyle" mode="assign">
-          <const>hintslight</const>
-        </edit>
-        <edit name="rgba" mode="assign">
-          <const>rgb</const>
-        </edit>
-        <edit name="autohint" mode="assign">
-          <bool>true</bool>
-        </edit>
-        <edit name="lcdfilter" mode="assign">
-          <const>lcdlight</const>
-        </edit>
-        <edit name="dpi" mode="assign">
-          <double>${toString profile.dpi}</double>
-        </edit>
+        <edit name="antialias" mode="assign"><bool>true</bool></edit>
+        <edit name="hinting" mode="assign"><bool>true</bool></edit>
+        <edit name="hintstyle" mode="assign"><const>hintslight</const></edit>
+        <edit name="rgba" mode="assign"><const>rgb</const></edit>
+        <edit name="autohint" mode="assign"><bool>true</bool></edit>
+        <edit name="lcdfilter" mode="assign"><const>lcdlight</const></edit>
+        <edit name="dpi" mode="assign"><double>${toString profile.dpi}</double></edit>
       </match>
     </fontconfig>
   '';
@@ -89,7 +81,7 @@ in {
   #
   # Installs the main font and all fallback fonts specified in the profile.
   #######################################################################
-  home.packages =
-    (map (pkgPath: getPackage pkgPath) profile.mainFont.package)
-    ++ lib.flatten (map (font: map (pkgPath: getPackage pkgPath) font.package) profile.fallbackFonts);
+  home.packages = 
+    (map (pkg: getPackage [pkg]) profile.mainFont.packages)
+    ++ (map (pkg: getPackage [pkg]) profile.fallbackFonts.packages);
 }

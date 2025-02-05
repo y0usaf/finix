@@ -12,7 +12,7 @@
   ####################################################################
   # Import external options
   ####################################################################
-  options = import ./options.nix {inherit lib;};
+  options = import ./profiles/options.nix {inherit lib;};
 
   ####################################################################
   # Compute feature-based packages

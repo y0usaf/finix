@@ -20,13 +20,6 @@
     };
   };
 
-  fontModule = t.submodule {
-    options = {
-      package = mkOpt (t.listOf mkStr) "Font package attribute path";
-      name = mkOpt mkStr "Font name as it appears to the system";
-    };
-  };
-
   # Add a helper for directory paths
   dirModule = t.submodule {
     options = {
@@ -135,8 +128,24 @@ in {
   ########################################
   #         System Appearance            #
   ########################################
-  mainFont = mkOpt fontModule "Primary system font configuration";
-  fallbackFonts = mkOptDef (t.listOf fontModule) [] "List of fallback fonts in order of preference";
+  mainFont = mkOpt (t.submodule {
+    options = {
+      packages = mkOpt (t.listOf mkStr) "List of package names for the main fonts";
+      names = mkOpt (t.listOf mkStr) "List of font names/families for the main fonts";
+    };
+  }) "Main font configuration";
+
+  fallbackFonts =
+    mkOptDef (t.submodule {
+      options = {
+        packages = mkOpt (t.listOf mkStr) "List of package names for the fallback fonts";
+        names = mkOpt (t.listOf mkStr) "List of font names/families for the fallback fonts";
+      };
+    }) {
+      packages = [];
+      names = [];
+    } "Fallback font configuration";
+
   baseFontSize = mkOptDef t.int 12 "Base font size that other UI elements should scale from";
   cursorSize = mkOptDef t.int 24 "Size of the system cursor";
   dpi = mkOptDef t.int 96 "Display DPI setting for the system";

@@ -59,8 +59,8 @@ in {
     command = "foot -a launcher sway-launcher-desktop";
   };
   defaultDiscord = {
-    package = "vesktop";
-    command = "vesktop";
+    package = "discord";
+    command = "discord";
   };
   defaultArchiveManager = {
     package = "p7zip";
@@ -84,24 +84,14 @@ in {
   cursorSize = 24;
 
   mainFont = {
-    package = [["terminus_font_ttf"]];
-    name = "Terminus (TTF)";
+    packages = ["terminus_font_ttf"];
+    names = ["Terminus (TTF)"];
   };
 
-  fallbackFonts = [
-    {
-      package = [["noto-fonts-emoji"]];
-      name = "Noto Color Emoji";
-    }
-    {
-      package = [["noto-fonts-cjk-sans"]];
-      name = "Noto Sans CJK";
-    }
-    {
-      package = [["font-awesome"]];
-      name = "Font Awesome";
-    }
-  ];
+  fallbackFonts = {
+    packages = ["noto-fonts-emoji" "noto-fonts-cjk-sans" "font-awesome"];
+    names = ["Noto Color Emoji" "Noto Sans CJK" "Font Awesome"];
+  };
 
   directories = {
     flake.path = "/home/${username}/nixos";

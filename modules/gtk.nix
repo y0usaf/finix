@@ -8,7 +8,7 @@
   #############################################################
   # Extract common variables from the profile for reusability
   #############################################################
-  mainFontName = profile.mainFont.name;
+  mainFontName = builtins.elemAt profile.mainFont.names 0;
   baseFontSize = profile.baseFontSize;
   dpiStr = toString profile.dpi;
 
@@ -31,8 +31,8 @@ in {
     # Overall font settings for GTK
     # ---------------------------------------------------------------
     font = {
-      name = mainFontName; # Use main font name from profile
-      size = baseFontSize; # Base font size from profile
+      name = mainFontName;
+      size = baseFontSize;
     };
 
     ##################################################################

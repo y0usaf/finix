@@ -22,8 +22,8 @@ let
 
   # Build the main font configuration string, including the fallback fonts.
   mainFontConfig =
-    "${profile.mainFont.name}:size=${computedFontSize}, "
-    + lib.concatStringsSep ", " (map (font: "${font.name}:size=${computedFontSize}") profile.fallbackFonts);
+    "${builtins.elemAt profile.mainFont.names 0}:size=${computedFontSize}, "
+    + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") profile.fallbackFonts.names);
 
   #######################################################################
   #                    DEFINE INDIVIDUAL FOOT SETTINGS

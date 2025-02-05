@@ -92,7 +92,7 @@
     };
 
     ## ────── External Configurations ──────
-    options = import ./options.nix; # (Imported for potential option flags)
+    options = import ./profiles/options.nix; # (Imported for potential option flags)
     profile = import ./profiles/y0usaf-desktop.nix;
 
     ## ────── Common Special Arguments for Modules ──────
