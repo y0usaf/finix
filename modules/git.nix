@@ -32,11 +32,13 @@
     #  - Set the default editor based on the profile.
     #-----------------------------------------------------------------
     extraConfig = {
+      core = {
+        editor = profile.defaultEditor.command;
+      };
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
       url."git@github.com:".pushInsteadOf = "https://github.com/";
-      core.editor = profile.defaultEditor;
     };
   };
 

@@ -92,8 +92,14 @@
     };
 
     ## ────── External Configurations ──────
-    options = import ./profiles/options.nix; # (Imported for potential option flags)
-    profile = import ./profiles/y0usaf-desktop.nix;
+    options = import ./profiles/options.nix {
+      inherit pkgs;
+      lib = nixpkgs.lib;
+    };
+    profile = import ./profiles/y0usaf-desktop.nix {
+      lib = pkgs.lib;
+      pkgs = pkgs;
+    };
 
     ## ────── Common Special Arguments for Modules ──────
     commonSpecialArgs = {

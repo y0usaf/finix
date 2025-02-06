@@ -1,5 +1,9 @@
 #─────────────────────────── 🌍 SYSTEM OPTIONS 🌍 ───────────────────────────#
-{lib, ...}: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   ###############################
   #  Type Definitions & Helpers #
   ###############################
@@ -15,7 +19,7 @@
   ########################
   defaultAppModule = t.submodule {
     options = {
-      package = mkOptDef mkStr null "Package name to install";
+      package = mkOptDef t.pkg null "Package derivation to install";
       command = mkOptDef mkStr null "Command to execute the application. Defaults to package name if null";
     };
   };
@@ -62,42 +66,42 @@
   ###########################################
   packageSets = {
     core = [
-      "git"
-      "curl"
-      "wget"
-      "cachix"
-      "unzip"
-      "bash"
-      "vim"
-      "dconf"
-      "lsd"
-      "alejandra"
-      "lm_sensors"
-      "bottom"
-      "tree"
+      pkgs.git
+      pkgs.curl
+      pkgs.wget
+      pkgs.cachix
+      pkgs.unzip
+      pkgs.bash
+      pkgs.vim
+      pkgs.dconf
+      pkgs.lsd
+      pkgs.alejandra
+      pkgs.lm_sensors
+      pkgs.bottom
+      pkgs.tree
     ];
     wayland = [
-      "grim"
-      "slurp"
-      "wl-clipboard"
-      "hyprpicker"
+      pkgs.grim
+      pkgs.slurp
+      pkgs."wl-clipboard"
+      pkgs.hyprpicker
     ];
     media = [
-      "pavucontrol"
-      "ffmpeg"
-      "yt-dlp-light"
-      "vlc"
-      "stremio"
-      "cmus"
+      pkgs.pavucontrol
+      pkgs.ffmpeg
+      pkgs."yt-dlp-light"
+      pkgs.vlc
+      pkgs.stremio
+      pkgs.cmus
     ];
     python = [
-      "python3"
+      pkgs.python3
     ];
     hyprland = [
-      "hyprwayland-scanner"
+      pkgs.hyprwayland-scanner
     ];
     syncthing = [
-      "syncthing"
+      pkgs.syncthing
     ];
   };
 
@@ -125,8 +129,8 @@ in {
   ########################################
   #      Package Management Options      #
   ########################################
-  corePackages = mkOptDef mkListOfStr packageSets.core "Essential packages that will always be installed";
-  packageSets = mkOptDef (t.attrsOf (t.listOf t.str)) packageSets "Package sets organized by feature";
+  corePackages = mkOptDef (t.listOf t.pkg) packageSets.core "Essential packages that will always be installed";
+  packageSets = mkOptDef (t.attrsOf (t.listOf t.pkg)) packageSets "Package sets organized by feature";
   features = mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
 
   ########################################

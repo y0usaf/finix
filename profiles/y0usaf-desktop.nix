@@ -1,7 +1,7 @@
 #───────────────────────── 🖥️ DESKTOP PROFILE 🖥️ ─────────────────────────#
 # Personal configuration for y0usaf-desktop                                #
 #──────────────────────────────────────────────────────────────────────────#
-let
+{pkgs, ...}: let
   username = "y0usaf";
 in {
   username = username;
@@ -35,43 +35,43 @@ in {
   wallpaperVideoDir = "$HOME/DCIM/Wallpapers_Video";
 
   defaultBrowser = {
-    package = "firefox";
+    package = pkgs.firefox;
     command = "firefox";
   };
   defaultEditor = {
-    package = "neovim";
+    package = pkgs.neovim;
     command = "nvim";
   };
   defaultIde = {
-    package = "code-cursor";
+    package = pkgs.code-cursor;
     command = "cursor";
   };
   defaultTerminal = {
-    package = "foot";
+    package = pkgs.foot;
     command = "foot";
   };
   defaultFileManager = {
-    package = "pcmanfm";
+    package = pkgs.pcmanfm;
     command = "pcmanfm";
   };
   defaultLauncher = {
-    package = "sway-launcher-desktop";
+    package = pkgs.sway-launcher-desktop;
     command = "foot -a launcher sway-launcher-desktop";
   };
   defaultDiscord = {
-    package = "discord";
+    package = pkgs.discord;
     command = "discord";
   };
   defaultArchiveManager = {
-    package = "p7zip";
+    package = pkgs.p7zip;
     command = "7z";
   };
   defaultImageViewer = {
-    package = "imv";
+    package = pkgs.imv;
     command = "imv";
   };
   defaultMediaPlayer = {
-    package = "mpv";
+    package = pkgs.mpv;
     command = "mpv";
   };
 
@@ -84,12 +84,12 @@ in {
   cursorSize = 24;
 
   mainFont = {
-    packages = ["terminus_font_ttf"];
+    packages = [pkgs.terminus_font_ttf];
     names = ["Terminus (TTF)"];
   };
 
   fallbackFonts = {
-    packages = ["noto-fonts-emoji" "noto-fonts-cjk-sans" "font-awesome"];
+    packages = [pkgs.noto-fonts-emoji pkgs.noto-fonts-cjk-sans pkgs.font-awesome];
     names = ["Noto Color Emoji" "Noto Sans CJK" "Font Awesome"];
   };
 

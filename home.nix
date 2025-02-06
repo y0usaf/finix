@@ -12,7 +12,7 @@
   ####################################################################
   # Import external options
   ####################################################################
-  options = import ./profiles/options.nix {inherit lib;};
+  options = import ./profiles/options.nix {inherit lib pkgs;};
 
   ####################################################################
   # Compute feature-based packages
@@ -36,9 +36,9 @@
   #
   # Each package is derived from the profile settings. For each
   # app attribute (e.g. defaultTerminal, defaultBrowser, etc.), we
-  # reference the corresponding package in pkgs.
+  # get the package directly since it's already a derivation.
   ####################################################################
-  userPackages = map (app: pkgs.${app.package}) [
+  userPackages = map (app: app.package) [
     profile.defaultTerminal
     profile.defaultBrowser
     profile.defaultFileManager
@@ -51,10 +51,10 @@
 
   ####################################################################
   # Combine final package list:
-  #   - Map each feature package name to pkgs.<name>
-  #   - Concatenate with the user-specific packages computed above.
+  #   - Use feature packages directly since they're already derivations
+  #   - Concatenate with the user-specific packages
   ####################################################################
-  finalPackages = (map (name: pkgs.${name}) featurePackages) ++ userPackages;
+  finalPackages = featurePackages ++ userPackages;
 
   ####################################################################
   # Helper function: Conditionally import modules based on profile features

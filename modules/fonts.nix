@@ -8,16 +8,11 @@
   profile,
   ...
 }: let
-  #######################################################################
-  # Helper Function: Retrieve a package from its attribute path
-  #######################################################################
-  getPackage = path: lib.getAttrFromPath path pkgs;
-
-  # Get the packages and names from the new list format
-  mainFontPackages = builtins.elemAt profile.mainFont 0;
-  mainFontNames = builtins.elemAt profile.mainFont 1;
-  fallbackPackages = builtins.elemAt profile.fallbackFonts 0;
-  fallbackNames = builtins.elemAt profile.fallbackFonts 1;
+  # Get the packages and names from the profile
+  mainFontPackages = profile.mainFont.packages;
+  mainFontNames = profile.mainFont.names;
+  fallbackPackages = profile.fallbackFonts.packages;
+  fallbackNames = profile.fallbackFonts.names;
 
   #######################################################################
   # Font XML Configuration String
@@ -38,7 +33,7 @@
           <string>*</string>
         </test>
         <edit name="family" mode="prepend">
-          <string>${builtins.elemAt profile.mainFont.names 0}</string>
+          <string>${builtins.elemAt mainFontNames 0}</string>
         </edit>
       </match>
 
@@ -46,8 +41,8 @@
       <alias>
         <family>monospace</family>
         <prefer>
-          <family>${builtins.elemAt profile.mainFont.names 0}</family>
-          ${lib.concatMapStrings (name: "<family>${name}</family>") profile.fallbackFonts.names}
+          <family>${builtins.elemAt mainFontNames 0}</family>
+          ${lib.concatMapStrings (name: "<family>${name}</family>") fallbackNames}
         </prefer>
       </alias>
 
@@ -81,7 +76,5 @@ in {
   #
   # Installs the main font and all fallback fonts specified in the profile.
   #######################################################################
-  home.packages =
-    (map (pkg: getPackage [pkg]) profile.mainFont.packages)
-    ++ (map (pkg: getPackage [pkg]) profile.fallbackFonts.packages);
+  home.packages = mainFontPackages ++ fallbackPackages;
 }
