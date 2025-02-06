@@ -85,7 +85,7 @@ in {
 
   mainFont = {
     packages = [pkgs.nerd-fonts.iosevka-term-slab];
-    names = ["Terminus (TTF)"];
+    names = ["IosevkaTermSlab Nerd Font Mono"];
   };
 
   fallbackFonts = {
