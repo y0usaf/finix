@@ -54,6 +54,7 @@
     "virtualization"
     "backup"
     "webapps"
+    "syncthing"
   ];
 
   ###########################################
@@ -72,7 +73,6 @@
       "lsd"
       "alejandra"
       "lm_sensors"
-      "syncthing"
       "bottom"
       "tree"
     ];
@@ -95,6 +95,9 @@
     ];
     hyprland = [
       "hyprwayland-scanner"
+    ];
+    syncthing = [
+      "syncthing"
     ];
   };
 

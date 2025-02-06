@@ -81,7 +81,7 @@ in {
   #
   # Installs the main font and all fallback fonts specified in the profile.
   #######################################################################
-  home.packages = 
+  home.packages =
     (map (pkg: getPackage [pkg]) profile.mainFont.packages)
     ++ (map (pkg: getPackage [pkg]) profile.fallbackFonts.packages);
 }

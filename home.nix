@@ -89,6 +89,7 @@ in {
       ./modules/foot.nix
       ./modules/gtk.nix
       ./modules/cursor.nix
+      ./modules/systemd.nix
     ]
     ++ importFeature "hyprland" [./modules/hyprland.nix]
     ++ importFeature "ags" [./modules/ags.nix]
@@ -127,64 +128,14 @@ in {
   };
 
   #──────────────────────────────────────────────────────────────#
+  #                    Service Configurations
+  #──────────────────────────────────────────────────────────────#
+  services.syncthing = {
+    enable = lib.elem "syncthing" profile.features;
+  };
+
+  #──────────────────────────────────────────────────────────────#
   #                    System Configurations
-  #
-  # In this case, only dconf is enabled.
   #──────────────────────────────────────────────────────────────#
   dconf.enable = true;
-
-  #──────────────────────────────────────────────────────────────#
-  #                    Systemd User Services
-  #
-  # This section defines the user services and file system watches.
-  #──────────────────────────────────────────────────────────────#
-  systemd.user = {
-    startServices = "sd-switch";
-
-    services = {
-      ################################################################
-      # Polkit GNOME Authentication Agent Service
-      ################################################################
-      polkit-gnome-authentication-agent-1 = {
-        Unit = {
-          Description = "polkit-gnome-authentication-agent-1";
-          WantedBy = ["graphical-session.target"];
-          After = ["graphical-session.target"];
-        };
-        Service = {
-          Type = "simple";
-          ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-          Restart = "on-failure";
-          RestartSec = 1;
-          TimeoutStopSec = 10;
-        };
-      };
-
-      ################################################################
-      # Format Nix Files Service
-      #
-      # A oneshot service to run alejandra (a Nix formatter) on changes.
-      ################################################################
-      format-nix = {
-        Unit.Description = "Format Nix files on change";
-        Service = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.alejandra}/bin/alejandra .";
-          WorkingDirectory = "/home/y0usaf/nixos";
-        };
-      };
-    };
-
-    ################################################################
-    # File Watch Path for auto-triggering Nix formatting
-    ################################################################
-    paths.format-nix = {
-      Unit.Description = "Watch NixOS config directory for changes";
-      Path = {
-        PathModified = "/home/y0usaf/nixos";
-        Unit = "format-nix.service";
-      };
-      Install.WantedBy = ["default.target"];
-    };
-  };
 }
