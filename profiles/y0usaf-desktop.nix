@@ -84,7 +84,7 @@ in {
   cursorSize = 24;
 
   mainFont = {
-    packages = [pkgs.terminus_font_ttf];
+    packages = [pkgs.nerd-fonts.iosevka-term-slab];
     names = ["Terminus (TTF)"];
   };
 
