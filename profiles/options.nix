@@ -74,6 +74,7 @@
       "lm_sensors"
       "syncthing"
       "bottom"
+      "tree"
     ];
     wayland = [
       "grim"
