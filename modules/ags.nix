@@ -119,25 +119,26 @@
         background: none;
         border: none;
         box-shadow: none;
-        font-size: 2rem;  /* Reduced from 1rem */
         color: white;
     }
     .workspaces {
-        margin: 0;  /* Removed margin */
+        margin: 0;
         background: none;
     }
     .workspace-btn {
-        min-width: 0.5rem;  /* Reduced from 0.75rem */
-        min-height: 0.5rem;  /* Reduced from 0.75rem */
-        margin: 0;  /* Removed margin */
-        padding: 0;  /* Removed padding */
+        margin: 0;
+        padding: 0;
         background-color: #222;
         border-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .workspace-btn label {
         background: none;
         color: rgba(255, 255, 255, 0.4);
-        font-size: 0.5rem;  /* Reduced from 0.75rem */
+        font-size: 0.5rem;
+        padding: 0.1rem 0.2rem;
     }
     .workspace-btn.active label {
         color: rgba(255, 255, 255, 1.0);
