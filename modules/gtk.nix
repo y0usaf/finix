@@ -76,66 +76,36 @@ in {
       # Custom CSS for GTK3 applications
       # ---------------------------------------------------------------
       extraCss = ''
-        /* Global baseline styles with smooth transitions */
+        /* Global element styling */
         * {
           font-family: "${mainFontName}";
           color: ${whiteColor};
           background: ${transparentColor};
-          transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        
-        /* Apply subtle text shadow only to key text elements */
-        label, button, entry, textview {
+          outline-width: 0;
+          outline-offset: 0;
           text-shadow: ${repeatedShadow};
         }
-        
-        /* Hover and active states for interactive elements */
-        *:hover,
-        *:active {
+
+        /* Hover state for all elements */
+        *:hover {
           background: ${hoverBg};
         }
-        
-        /* Clear, minimal focus indicator for accessibility */
-        *:focus {
-          outline: 1px solid ${hoverBg};
-          outline-offset: 0;
-        }
-        
-        /* Button styling with improved interactivity */
-        button {
-          border: none;
-          border-radius: 0.15rem;
-          min-height: 1rem;
-          padding: 0.1rem 0.3rem;
-          cursor: pointer;
-          background: ${transparentColor};
-        }
-        button:hover {
-          background: ${hoverBg};
-        }
-        button:active {
+
+        /* Selected state for all elements */
+        *:selected {
           background: ${selectedBg};
         }
-        
-        /* Menu styling for a subtle appearance */
+
+        /* Button styling */
+        button {
+          border-radius: 0.15rem;
+          min-height: 1rem;
+          padding: 0.05rem 0.25rem;
+        }
+
+        /* Menu background styling */
         menu {
           background: ${menuBackground};
-        }
-        
-        /* Styling for input elements for consistency */
-        entry,
-        textview,
-        combobox,
-        spinbutton {
-          background: ${transparentColor};
-          border: 1px solid transparent;
-          padding: 0.2rem;
-        }
-        entry:focus,
-        textview:focus,
-        combobox:focus,
-        spinbutton:focus {
-          border-color: ${hoverBg};
         }
       '';
     };
