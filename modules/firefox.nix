@@ -24,19 +24,19 @@
   commonSettings = {
     # Enable userChrome customizations
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-    
+
     # Enable Browser Toolbox and development features
     "devtools.chrome.enabled" = true;
     "devtools.debugger.remote-enabled" = true;
     "devtools.debugger.prompt-connection" = false;
     "browser.enabledE10S" = false;
-    
+
     # Theme and UI settings
     "browser.tabs.drawInTitlebar" = true;
     "browser.chrome.toolbar_style" = 1;
     "browser.theme.dark-private-windows" = false;
     "browser.theme.toolbar-theme" = 0;
-    
+
     # Development settings
     "dom.webcomponents.enabled" = true;
     "layout.css.shadow-parts.enabled" = true;
@@ -85,7 +85,7 @@
         width: var(--navbar-min-width);
       }
     }
-    
+
     /* Responsive layout for medium screens (1000px - 1999px) */
     @media (min-width: 1000px) and (max-width: 1999px) {
       #TabsToolbar,
@@ -94,7 +94,7 @@
         width: calc(100vw - (100vw - var(--navbar-min-width)));
       }
     }
-    
+
     /* Responsive layout for small screens (< 1000px) */
     @media (max-width: 999px) {
       #TabsToolbar,
@@ -103,13 +103,13 @@
         width: 100vw;
       }
     }
-    
+
     /* Center scrollbox contents */
     scrollbox[smoothscroll="true"] {
       display: flex !important;
       justify-content: center !important;
     }
-    
+
     /* Center main window content */
     #main-window {
       display: flex;
@@ -118,7 +118,7 @@
       align-items: center;
       height: 100vh;
     }
-    
+
     /* URL bar styling when expanded */
     #main-window #urlbar[breakout][breakout-extend] {
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
@@ -128,23 +128,23 @@
       margin: 30vh auto 0 !important;
       justify-content: center;
     }
-    
+
     /* Remove rounded corners from URL bar */
     #urlbar-background,
     #urlbar-input-container {
       --toolbarbutton-border-radius: 0px;
     }
-    
+
     #urlbar-input-container {
       --urlbar-icon-border-radius: 0px;
     }
-    
+
     /* Center URL bar text when not focused/expanded */
     #urlbar:not([breakout][breakout-extend]) #urlbar-input,
     #urlbar:not([focused]) #urlbar-input {
       text-align: center !important;
     }
-    
+
     /* Consistent background color across all UI elements */
     #TabsToolbar,
     #main-window,
