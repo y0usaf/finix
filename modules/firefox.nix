@@ -43,58 +43,47 @@
   };
 
   userChromeCss = ''
-    /* Root variables for consistent theming */
+    /* Define custom properties for scalable values */
     :root {
-      --tab-height: 20px;
+      --tab-height: clamp(20px, 2.5vh, 30px);
       --navbar-bg-color: black;
-      --navbar-min-width: 1000px;
-      --navbar-max-width: 2000px;
+      --navbar-fixed-width: 1000px;
+      --navbar-side-padding: 1rem;
     }
 
-    /* Reset borders */
+    /* Remove borders universally */
     * {
       border: 0;
     }
 
-    /* Set consistent height for tabs and navigation bar */
+    /* Set consistent height for toolbars and tab elements */
     #TabsToolbar,
     #nav-bar,
     .tabbrowser-tab {
       height: var(--tab-height) !important;
     }
 
-    /* Apply background color to navigation elements */
+    /* Scalable layout for navigation elements:
+       Full width on small screens, fixed & centered on larger ones.
+    */
     #TabsToolbar,
     #nav-bar {
+      width: 100%;
+      max-width: var(--navbar-fixed-width);
+      margin: 0 auto;
+      padding: 0 var(--navbar-side-padding);
       background: var(--navbar-bg-color) !important;
     }
 
-    /* Responsive layout for large screens (>= 2000px) */
-    @media (min-width: 2000px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: calc((100vw - var(--navbar-min-width)) / 2);
-        width: var(--navbar-min-width);
-      }
+    /* Center the tabs using the provided sample rules */
+    /***** START of Sample Rules *****/
+    #tabbrowser-arrowscrollbox:not([overflowing]) {
+      --uc-flex-justify: center;
     }
-
-    /* Responsive layout for medium screens (1000px - 1999px) */
-    @media (min-width: 1000px) and (max-width: 1999px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: calc((100vw - var(--navbar-min-width)) / 2);
-        width: calc(100vw - (100vw - var(--navbar-min-width)));
-      }
+    scrollbox[orient="horizontal"] {
+      justify-content: var(--uc-flex-justify, initial);
     }
-
-    /* Responsive layout for small screens (< 1000px) */
-    @media (max-width: 999px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: 0;
-        width: 100vw;
-      }
-    }
+    /***** END of Sample Rules *****/
 
     /* Center scrollbox contents */
     scrollbox[smoothscroll="true"] {
@@ -109,6 +98,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background-color: var(--navbar-bg-color) !important;
     }
 
     /* URL bar styling when expanded */
@@ -121,13 +111,10 @@
       justify-content: center;
     }
 
-    /* Remove rounded corners from URL bar */
+    /* Remove rounded corners from URL bar components */
     #urlbar-background,
     #urlbar-input-container {
       --toolbarbutton-border-radius: 0px;
-    }
-
-    #urlbar-input-container {
       --urlbar-icon-border-radius: 0px;
     }
 
@@ -137,7 +124,7 @@
       text-align: center !important;
     }
 
-    /* Consistent background color across all UI elements */
+    /* Uniform background color for various UI elements */
     #TabsToolbar,
     #main-window,
     #nav-bar,
@@ -178,10 +165,11 @@
 in {
   programs.firefox = {
     enable = true;
-    profiles.${profile.username} = {
-      settings = commonSettings;
-      userChrome = userChromeCss;
-      isDefault = true;
+    profiles = {
+      "y0usaf" = {
+        settings = commonSettings;
+        userChrome = userChromeCss;
+      };
     };
   };
 }
