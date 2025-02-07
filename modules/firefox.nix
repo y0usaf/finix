@@ -43,60 +43,132 @@
   };
 
   userChromeCss = ''
-    /* Minimalist Tab Bar */
+    /* Minimalist Tabs, Hidden Addressbar, Pop-out Addressbar, and Centered Tabs */
+
+    /* 1. Root variables for consistent theming */
     :root {
-      --tab-height: 1rem;
       --tab-font-size: 0.8em;
       --tab-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --max-tab-width: none;
+      --tab-height: 1rem;  /* Reduced tab height to make tabs less massive */
+      --navbar-bg-color: black;
+      --navbar-min-width: 1000px;
+      --navbar-max-width: 2000px;
     }
 
-    .tabbrowser-tab,
+    /* 2. Reset borders */
+    * {
+      border: 0;
+    }
+
+    /* 3. Minimalist Tabs Settings */
     .tabbrowser-tab * {
       margin: 0 !important;
-      padding: 0 !important;
-      border: 0 !important;
+      border-radius: 0 !important;
       font-family: var(--tab-font-family) !important;
     }
 
     .tabbrowser-tab {
-      height: var(--tab-height) !important;
+      height: var(--tab-height);
       font-size: var(--tab-font-size) !important;
+      min-height: 0 !important;
       align-items: center !important;
-      margin-bottom: 2px !important;
+      margin-bottom: 5px !important;
     }
 
-    /* Hide extra tab elements for a cleaner look */
-    .tab-close-button,
-    .new-tab-button,
-    #firefox-view-button,
-    #tabs-newtab-button {
-      display: none !important;
+    .tabbrowser-tab[fadein]:not([pinned]) {
+      max-width: var(--max-tab-width) !important;
     }
 
-    /* Hidden-by-default Address Bar (appears on focus) */
+    .tab-icon-image {
+      height: auto !important;
+      width: calc(var(--tab-height) / 1.5) !important;
+      margin-right: 4px !important;
+    }
+
+    /* 4. Navigation and Tabs Toolbar Background and Layout */
+    #TabsToolbar,
+    #nav-bar {
+      background: var(--navbar-bg-color) !important;
+      height: var(--tab-height) !important;
+    }
+
+    /* Responsive layout for navigation toolbar */
+    @media (min-width: 2000px) {
+      #TabsToolbar,
+      #nav-bar {
+        margin-left: calc((100vw - var(--navbar-min-width)) / 2);
+        width: var(--navbar-min-width);
+      }
+    }
+
+    @media (min-width: 1000px) and (max-width: 1999px) {
+      #TabsToolbar,
+      #nav-bar {
+        margin-left: calc((100vw - var(--navbar-min-width)) / 2);
+        width: calc(100vw - (100vw - var(--navbar-min-width)));
+      }
+    }
+
+    @media (max-width: 999px) {
+      #TabsToolbar,
+      #nav-bar {
+        margin-left: 0;
+        width: 100vw;
+      }
+    }
+
+    /* 5. Hide the Addressbar by Default */
     :root:not([customizing]) #nav-bar,
     :root:not([customizing]) #urlbar[popover] {
+      pointer-events: none;
+      margin: 0 0 -40px !important;
       opacity: 0 !important;
-      pointer-events: none !important;
-      margin-top: -40px !important;
     }
 
     :root:not([customizing]) #nav-bar:focus-within,
-    :root:not([customizing]) #urlbar[popover]:focus-within {
+    :root:not([customizing]) #urlbar[popover]:focus-within,
+    :root:not([customizing]) #nav-bar:has(#urlbar[popover]:focus-within),
+    :root:not([customizing]) #nav-bar:focus-within #urlbar[popover] {
+      pointer-events: auto;
+      margin: 0 0 auto !important;
       opacity: 1 !important;
-      pointer-events: auto !important;
-      margin-top: 0 !important;
     }
 
-    /* Popout URL Bar Styling */
+    /* 6. Main Window Centring for Pop-out Addressbar */
+    #main-window {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* 7. Pop-out Addressbar Styling with scalable units */
     #urlbar[breakout][breakout-extend] {
       position: fixed !important;
       top: 30vh !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
-      width: 50vw !important;
       box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2) !important;
+      width: 50vw !important;   /* Always 50% of the viewport width */
       z-index: 1000 !important;
+    }
+
+    /* 8. Optional: Remove rounded corners from URL bar elements */
+    #urlbar-background,
+    #urlbar-input-container {
+      --toolbarbutton-border-radius: 0px;
+    }
+
+    #urlbar-input-container {
+      --urlbar-icon-border-radius: 0px;
+    }
+
+    /* 9. Center URL bar text when not expanded/focused */
+    #urlbar:not([breakout][breakout-extend]) #urlbar-input,
+    #urlbar:not([focused]) #urlbar-input {
+      text-align: center !important;
     }
 
     /* 10. Consistent background for various UI elements */
@@ -129,15 +201,6 @@
 
     /* --- Integrated Additional CSS --- */
 
-    /* Title bar */
-    .titlebar-buttonbox {
-        display: none !important;
-    }
-
-    .titlebar-spacer {
-        display: none !important;
-    }
-
     /* Tab bar */
     #navigator-toolbox {
         border: 0px !important;
@@ -155,18 +218,6 @@
     }
 
     /* URL bar */
-    #back-button {
-        display: none !important;
-    }
-
-    #forward-button {
-        display: none !important;
-    }
-
-    #tracking-protection-icon-container {
-        display: none !important;
-    }
-
     #urlbar-container {
         width: auto !important;
     }
