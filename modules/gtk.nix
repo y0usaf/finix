@@ -73,61 +73,69 @@ in {
       bookmarks = profile.bookmarks;
 
       # ---------------------------------------------------------------
-      # Updated Custom CSS for GTK3 Applications
+      # Custom CSS for GTK3 applications
       # ---------------------------------------------------------------
       extraCss = ''
-        /* Global reset and minimal styling */
+        /* Global baseline styles with smooth transitions */
         * {
           font-family: "${mainFontName}";
           color: ${whiteColor};
-          background-color: ${transparentColor};
-          /* Remove default outlines but add transitions */
-          outline: none;
+          background: ${transparentColor};
+          transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        
+        /* Apply subtle text shadow only to key text elements */
+        label, button, entry, textview {
           text-shadow: ${repeatedShadow};
-          transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
         }
-
-        /* Focus state for accessibility (subtle focus ring) */
+        
+        /* Hover and active states for interactive elements */
+        *:hover,
+        *:active {
+          background: ${hoverBg};
+        }
+        
+        /* Clear, minimal focus indicator for accessibility */
         *:focus {
-          box-shadow: 0 0 0 2px ${hoverBg};
+          outline: 1px solid ${hoverBg};
+          outline-offset: 0;
         }
-
-        /* Hover state for all elements */
-        *:hover {
-          background-color: ${hoverBg};
-        }
-
-        /* Selected state for all elements */
-        *:selected {
-          background-color: ${selectedBg};
-        }
-
-        /* Button styling with hover/active transitions */
+        
+        /* Button styling with improved interactivity */
         button {
           border: none;
           border-radius: 0.15rem;
           min-height: 1rem;
-          padding: 0.05rem 0.25rem;
-          background-color: ${transparentColor};
-          transition: background-color 0.2s ease-in-out;
+          padding: 0.1rem 0.3rem;
+          cursor: pointer;
+          background: ${transparentColor};
         }
-
         button:hover {
-          background-color: ${hoverBg};
+          background: ${hoverBg};
         }
-
         button:active {
-          background-color: ${selectedBg};
+          background: ${selectedBg};
         }
-
-        /* Menu, menubar, and menuitem styling */
-        menu, menubar, menuitem {
-          background-color: ${menuBackground};
+        
+        /* Menu styling for a subtle appearance */
+        menu {
+          background: ${menuBackground};
         }
-
-        /* Text selection styling to keep the look consistent */
-        ::selection {
-          background-color: ${hoverBg};
+        
+        /* Styling for input elements for consistency */
+        entry,
+        textview,
+        combobox,
+        spinbutton {
+          background: ${transparentColor};
+          border: 1px solid transparent;
+          padding: 0.2rem;
+        }
+        entry:focus,
+        textview:focus,
+        combobox:focus,
+        spinbutton:focus {
+          border-color: ${hoverBg};
         }
       '';
     };
