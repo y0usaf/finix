@@ -43,123 +43,259 @@
   };
 
   userChromeCss = ''
-    /* Incorporate Minima theme sizing adjustments */
 
-    :root {
-      --tab-font-size: 0.8em;
-      --tab-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --max-tab-width: none;
-      --show-titlebar-buttons: none;
-      --tab-height: 20px;
-      --navbar-bg-color: black;
-      --navbar-min-width: 1000px;
-      --navbar-max-width: 2000px;
-    }
+:root {
+    --tab-font-size: 0.8em;
+    --max-tab-width: none;
+    --show-titlebar-buttons: none;
+    --tab-height: 20px;
+    --toolbar-icon-size: calc(var(--tab-height) / 1.5)
+}
 
-    /* Reset borders for a clean slate */
-    * {
-      border: 0;
-    }
+.titlebar-buttonbox-container {
+    display: var(--show-titlebar-buttons)
+}
 
-    /* Apply slim sizing across the tab bar and navigation */
-    #TabsToolbar,
-    #nav-bar,
-    .tabbrowser-tab {
-      height: var(--tab-height) !important;
-    }
+:root:not([customizing]) #TabsToolbar {
+    margin-left: 1px!important;
+    margin-right: 1px!important;
+    border-radius: 0!important;
+    padding: 0!important;
+    min-height: 0!important
+}
 
-    /* Additional Minima rules for tabs */
-    .tabbrowser-tab {
-      font-size: var(--tab-font-size) !important;
-      min-height: 0 !important;
-      align-items: center !important;
-      margin-bottom: 5px !important;
-      font-family: var(--tab-font-family) !important;
-    }
+.tabbrowser-tab * {
+    margin: 0!important;
+    border-radius: 0!important
+}
 
-    /* Responsive layout for large screens (>= 2000px) */
-    @media (min-width: 2000px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: calc((100vw - var(--navbar-min-width)) / 2);
-        width: var(--navbar-min-width);
-      }
-    }
+.tabbrowser-tab {
+    height: var(--tab-height);
+    font-size: var(--tab-font-size)!important;
+    min-height: 0!important;
+    align-items: center!important;
+    margin-bottom: 5px!important
+}
 
-    /* Responsive layout for medium screens (1000px - 1999px) */
-    @media (min-width: 1000px) and (max-width: 1999px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: calc((100vw - var(--navbar-min-width)) / 2);
-        width: calc(100vw - (100vw - var(--navbar-min-width)));
-      }
-    }
+.tab-icon-image {
+    height: auto!important;
+    width: var(--toolbar-icon-size)!important;
+    margin-right: 4px!important
+}
 
-    /* Responsive layout for small screens (< 1000px) */
-    @media (max-width: 999px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: 0;
-        width: 100vw;
-      }
-    }
+#titlebar {
+    -moz-appearance: none!important;
+    margin-bottom: 0!important;
+    padding-bottom: 0!important;
+}
 
-    /* Center scrollbox contents */
-    scrollbox[smoothscroll="true"] {
-      display: flex !important;
-      justify-content: center !important;
-    }
+#tabbrowser-arrowscrollbox,#tabbrowser-tabs,#tabbrowser-tabs>.tabbrowser-arrowscrollbox {
+    min-height: 0!important
+}
 
-    /* Center main window content */
-    #main-window {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+:root:not([customizing]) #TabsToolbar .titlebar-button,
+:root:not([customizing]) #TabsToolbar-customization-target>.toolbarbutton-1,
+:root:not([customizing]) #tabbrowser-tabs .tabs-newtab-button,
+:root:not([customizing]) #tabs-newtab-button {
+    -moz-appearance: none!important;
+    padding-top: 0!important;
+    padding-bottom: 0!important;
+    -moz-box-align: stretch;
+    margin: 0!important
+}
 
-    /* URL bar styling when expanded */
-    #main-window #urlbar[breakout][breakout-extend] {
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-      width: 100% !important;
-      left: 0;
-      right: 0;
-      margin: 30vh auto 0 !important;
-      justify-content: center;
-    }
+#tabbrowser-tabs .tabs-newtab-button:hover,#tabs-newtab-button:hover {
+    background-color: var(--toolbarbutton-hover-background)
+}
 
-    /* Remove rounded corners from URL bar */
-    #urlbar-background,
-    #urlbar-input-container {
-      --toolbarbutton-border-radius: 0px;
-    }
+#tabbrowser-tabs .tabs-newtab-button>.toolbarbutton-icon,#tabs-newtab-button>.toolbarbutton-icon {
+    padding: 0!important;
+    transform: scale(.6);
+    background-color: transparent!important
+}
 
-    #urlbar-input-container {
-      --urlbar-icon-border-radius: 0px;
+@media (-moz-os-version:windows-win10) {
+    :root[sizemode=maximized] #navigator-toolbox {
+        padding-top: 7px!important
     }
+}
 
-    /* Center URL bar text when not focused/expanded */
-    #urlbar:not([breakout][breakout-extend]) #urlbar-input,
-    #urlbar:not([focused]) #urlbar-input {
-      text-align: center !important;
-    }
+:root[tabsintitlebar] #toolbar-menubar[autohide=true][inactive] {
+    transition: height 0ms steps(1) 80ms
+}
 
-    /* Consistent background color across all UI elements */
-    #TabsToolbar,
-    #main-window,
-    #nav-bar,
-    #navigator-toolbox,
-    body,
-    #urlbar-input,
-    #urlbar-input:focus,
-    #toolbar-menubar,
-    #toolbar-menubar:hover,
-    #urlbar-background,
-    toolbarbutton,
-    toolbarbutton:hover {
-      background-color: var(--navbar-bg-color) !important;
+#nav-bar {
+    margin-left: 0;
+    margin-right: 0;
+    min-width: 40rem;
+    height: var(--tab-height);
+    min-height: 0!important;
+    border-inline: var(--uc-window-drag-space-width) solid var(--toolbar-bgcolor);
+    margin-top: -1px!important;
+    border-top: none!important;
+}
+
+/* Add margins only when window is wide enough */
+@media (min-width: 60rem) {
+    #nav-bar {
+        margin-left: 25vw;
+        margin-right: 25vw;
     }
+}
+
+#navigator-toolbox {
+    appearance: toolbar!important;
+    margin: 0!important;
+    padding: 0!important;
+}
+
+#tabbrowser-arrowscrollbox:not([overflowing]) {
+    --uc-flex-justify: center
+}
+
+scrollbox[orient=horizontal]>slot {
+    justify-content: var(--uc-flex-justify, initial)
+}
+
+#urlbar,#urlbar-input-container {
+    height: var(--tab-height)!important
+}
+
+#urlbar,#urlbar[open] {
+    min-height: var(--tab-height)!important
+}
+
+#urlbar-input-container {
+    min-height: 0!important
+}
+
+#urlbar[open],#urlbar[open] #urlbar-input-container {
+    height: auto!important
+}
+
+#identity-icon,#page-action-buttons img,#permissions-granted-icon,#star-button-box,#tracking-protection-icon,.searchbar-search-icon,.toolbarbutton-icon,.urlbar-icon,.urlbar-page-action {
+    height: auto!important;
+    width: var(--toolbar-icon-size)!important;
+    padding: 0!important
+}
+
+.toolbarbutton-1 {
+    padding: 0 4px!important
+}
+
+/* Apply compact styling to all toolbar buttons and UI elements */
+.toolbarbutton-1,
+.toolbarbutton-icon,
+.toolbaritem-combined-buttons,
+#nav-bar toolbarbutton,
+#TabsToolbar toolbarbutton,
+#PersonalToolbar toolbarbutton,
+.titlebar-button,
+.tab-close-button,
+.urlbar-icon,
+.urlbar-page-action {
+    -moz-appearance: none!important;
+    padding-top: 0!important;
+    padding-bottom: 0!important;
+    padding-inline: 2px!important;
+    -moz-box-align: stretch;
+    margin: 0!important;
+}
+
+/* Ensure consistent icon sizing */
+.toolbarbutton-icon,
+.urlbar-icon,
+.urlbar-page-action > image,
+.tab-close-button,
+.titlebar-button > image {
+    padding: 0!important;
+    width: var(--toolbar-icon-size)!important;
+    height: auto!important;
+}
+
+/* Remove gaps between nav elements */
+#navigator-toolbox {
+    appearance: toolbar!important;
+    margin: 0!important;
+    padding: 0!important;
+}
+
+#nav-bar {
+    margin-top: -1px!important;  /* Remove gap between nav-bar and tabs */
+    border-top: none!important;
+}
+
+/* Ensure no gaps in tabs area */
+#titlebar {
+    -moz-appearance: none!important;
+    margin-bottom: 0!important;
+    padding-bottom: 0!important;
+}
+
+#TabsToolbar {
+    margin-bottom: 0!important;
+    padding-bottom: 0!important;
+}
+
+/* Remove any spacing between toolbars */
+toolbar {
+    margin-top: 0!important;
+    margin-bottom: 0!important;
+    padding: 0!important;
+}
+
+/* Compact urlbar results styling */
+.urlbarView {
+    font-size: var(--tab-font-size) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-height: calc(60vh - 40px) !important;  /* Subtract input height from max-height */
+    overflow-y: auto !important;
+}
+
+.urlbarView-row {
+    padding-block: 2px !important;
+}
+
+.urlbarView-row-inner {
+    padding-inline: 4px !important;
+}
+
+.urlbarView-title,
+.urlbarView-secondary,
+.urlbarView-url {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* URL bar styling when expanded */
+#urlbar[breakout][breakout-extend] {
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    width: 50vw !important;  /* 100% - (25vw * 2) */
+    left: 50% !important;
+    right: auto !important;
+    top: 20vh !important;
+    margin: 0 !important;
+    position: fixed !important;
+    z-index: 999 !important;
+    transform: translateX(-50%) !important;
+    max-height: 60vh !important;
+    min-height: 40px !important;
+}
+
+/* Center URL bar text when not focused/expanded */
+#urlbar:not([breakout][breakout-extend]) #urlbar-input,
+#urlbar:not([focused]) #urlbar-input {
+    text-align: center !important;
+}
+
+/* Remove rounded corners from URL bar */
+#urlbar-background,
+#urlbar-input-container {
+    --toolbarbutton-border-radius: 0px !important;
+    --urlbar-icon-border-radius: 0px !important;
+}
+
   '';
 
   # Get the profiles from the Firefox directory
