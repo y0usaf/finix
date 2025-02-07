@@ -134,7 +134,7 @@
     .workspace-btn label {
         background: none;
         color: rgba(255, 255, 255, 0.4);
-        font-size: 0.5rem;
+        font-size: 2rem;
         padding: 0.1rem 0.2rem;
     }
     .workspace-btn.active label {
