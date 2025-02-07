@@ -138,7 +138,7 @@
       background-color: var(--navbar-bg-color) !important;
     }
 
-    /* Minimalist Tabs and Hidden Addressbar */
+    /* Minimalist Tabs, Hidden Addressbar, and Pop-out Addressbar */
 
     /* 1. Minimalist Tabs Settings */
     .tabbrowser-tab * {
@@ -180,9 +180,9 @@
     }
 
     /* 2. Hide the Addressbar by Default */
-    /* When not customizing, the navigation bar (#nav-bar) and popup URL field (#urlbar[popover])
-       are hidden: they have no pointer-events, are shifted upward (via negative margin),
-       and are fully transparent (opacity: 0). */
+    /* Normally the navigation bar (#nav-bar) and popup URL field (#urlbar[popover])
+       are hidden: they don't receive pointer events, are shifted upward (via negative margin),
+       and are fully transparent */
     :root:not([customizing]) #nav-bar,
     :root:not([customizing]) #urlbar[popover] {
       pointer-events: none;
@@ -190,7 +190,7 @@
       opacity: 0 !important;
     }
 
-    /* When the address bar or navigation bar receives focus, it becomes visible and interactive */
+    /* When either the address bar or navigation bar receives focus, they become visible and interactive */
     :root:not([customizing]) #nav-bar:focus-within,
     :root:not([customizing]) #urlbar[popover]:focus-within,
     :root:not([customizing]) #nav-bar:has(#urlbar[popover]:focus-within),
@@ -198,6 +198,18 @@
       pointer-events: auto;
       margin: 0 0 auto !important;
       opacity: 1 !important;
+    }
+
+    /* 3. Pop-out Addressbar Styling */
+    /* When the address bar is in its pop-out state (using the breakout attributes),
+       it is styled to appear as a centered, prominent element */
+    #main-window #urlbar[breakout][breakout-extend] {
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      width: 100% !important;
+      left: 0;
+      right: 0;
+      margin: 30vh auto 0 !important;
+      justify-content: center;
     }
   '';
 
