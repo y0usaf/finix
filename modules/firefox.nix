@@ -178,6 +178,10 @@
 in {
   programs.firefox = {
     enable = true;
-    profiles = profileConfigs;
+    profiles.${profile.username} = {
+      settings = commonSettings;
+      userChrome = userChromeCss;
+      isDefault = true;
+    };
   };
 }
