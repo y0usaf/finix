@@ -159,13 +159,15 @@
     }
 
     /* 7. Pop-out Addressbar Styling */
-    #main-window #urlbar[breakout][breakout-extend] {
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-      width: 100% !important;
-      left: 0;
-      right: 0;
-      margin: 30vh auto 0 !important;
-      justify-content: center;
+    /* Pop-out Addressbar: Center using fixed positioning */
+    #urlbar[breakout][breakout-extend] {
+      position: fixed !important;
+      top: 30vh !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+      width: auto !important;
+      z-index: 1000 !important;
     }
 
     /* 8. Optional: Remove rounded corners from URL bar elements */
