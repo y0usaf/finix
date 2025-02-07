@@ -49,16 +49,16 @@
     :root {
       --tab-font-size: 0.8em;
       --tab-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --max-tab-width: none;
       --tab-height: 1rem;  /* Reduced tab height to make tabs less massive */
       --navbar-bg-color: black;
       --navbar-min-width: 1000px;
       --navbar-max-width: 2000px;
     }
 
-    /* 2. Reset borders */
+    /* Remove animations */
     * {
-      border: 0;
+      animation: none !important;
+      transition: none !important;
     }
 
     /* 3. Minimalist Tabs Settings */
@@ -76,8 +76,10 @@
       margin-bottom: 5px !important;
     }
 
+    /* Remove max-width settings for tabs */
     .tabbrowser-tab[fadein]:not([pinned]) {
-      max-width: var(--max-tab-width) !important;
+      min-width: 100px !important;  /* Set a reasonable minimum width */
+      max-width: 100px !important;  /* Force fixed width */
     }
 
     .tab-icon-image,
