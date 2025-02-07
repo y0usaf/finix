@@ -43,20 +43,20 @@
   };
 
   userChromeCss = ''
-    /*----------------------------------------------------------------------------------*
-     *   COMBINED CASCADE THEME (Mouse Edition) + MINIMAL ONE-LINER PROTON UI LAYOUT   *
-     *----------------------------------------------------------------------------------*/
+    /*--------------------------------------------------------------------------------------------------*
+     *     CASCADE THEME (Mouse Edition) Revised for In-line One-liner Layout (No hidden bars)         *
+     *--------------------------------------------------------------------------------------------------*/
 
     /*---------------------------------------------------------------------*
-     |                Root Variables: Colors, Sizing and Layout            |
+     |                   Root Variables (Cascade defaults)                 |
      *---------------------------------------------------------------------*/
     :root {
-      /* Cascade theme colours (Dark theme) */
+      /* Dark Theme Colours */
       --window-colour:           #1f2122;
       --secondary-colour:        #141616;
       --inverted-colour:         #FAFAFC;
 
-      /* Container Tab Colours from Cascade */
+      /* Container Tab Colours */
       --uc-identity-color-blue:      #7ED6DF;
       --uc-identity-color-turquoise: #55E6C1;
       --uc-identity-color-green:     #B8E994;
@@ -65,41 +65,37 @@
       --uc-identity-color-red:       #FC5C65;
       --uc-identity-color-pink:      #F78FB3;
       --uc-identity-color-purple:    #786FA6;
-
+        
       /* URL suggestions highlight */
       --urlbar-popup-url-color: var(--uc-identity-color-purple) !important;
-
-      /* Global border radius */
+         
+      /* Layout and sizing */
       --uc-border-radius: 0;
-
-      /* URL bar and Tab width settings */
-      --uc-urlbar-width:       clamp(250px, 50vw, 600px);
-      --uc-active-tab-width:   clamp(50px, 18vw, 220px);
+      --uc-urlbar-width: clamp(250px, 50vw, 600px);
+      --uc-active-tab-width: clamp(50px, 18vw, 220px);
       --uc-inactive-tab-width: clamp(50px, 15vw, 200px);
 
-      /* Tab close button options */
-      --show-tab-close-button:        none;
-      --show-tab-close-button-hover:  -moz-inline-box;
-
-      /* Container tabs indicator margin */
+      --show-tab-close-button: none;
+      --show-tab-close-button-hover: -moz-inline-box;
       --container-tabs-indicator-margin: 0px;
 
-      /* Minimal layout variables */
-      --tab-font-size:      0.8em;
-      --tab-font-family:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --tab-height:         1rem;
-      --navbar-bg-color:    var(--window-colour);
-      --navbar-min-width:   1000px;
-      --navbar-max-width:   2000px;
+      --tab-font-size: 0.8em;
+      --tab-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --tab-height: 1rem;
+      --navbar-bg-color: var(--window-colour);
+      --navbar-min-width: 1000px;
+      --navbar-max-width: 2000px;
 
-      /* Cascade "one-liner" extra colours */
-      --uc-theme-colour:    var(--window-colour);
-      --uc-hover-colour:    var(--secondary-colour);
+      --uc-theme-colour: var(--window-colour);
+      --uc-hover-colour: var(--secondary-colour);
       --uc-inverted-colour: var(--inverted-colour);
+
+      /* Additional variable for Cascade's one-liner layout */
+      --urlbar-min-height: 2rem;
     }
 
     /*---------------------------------------------------------------------*
-     |                           Global Resets                             |
+     |                          Global Resets                              |
      *---------------------------------------------------------------------*/
     * {
       animation: none !important;
@@ -107,14 +103,13 @@
     }
 
     /*---------------------------------------------------------------------*
-     |                        Tabs Minimalism Settings                     |
+     |                    Tabs & Minimalism Settings                       |
      *---------------------------------------------------------------------*/
     .tabbrowser-tab * {
       margin: 0 !important;
       border-radius: 0 !important;
       font-family: var(--tab-font-family) !important;
     }
-
     .tabbrowser-tab {
       height: var(--tab-height) !important;
       font-size: var(--tab-font-size) !important;
@@ -122,28 +117,24 @@
       align-items: center !important;
       margin-bottom: 5px !important;
     }
-
     .tab-icon-image,
     .tab-icon-sound,
     .tab-close-button {
       height: calc(var(--tab-height) * 0.8) !important;
-      width:  calc(var(--tab-height) * 0.8) !important;
+      width: calc(var(--tab-height) * 0.8) !important;
       padding: 2px !important;
     }
 
     /*---------------------------------------------------------------------*
-     |                   Navigation & Toolbar Layout                       |
+     |            Navigation & Toolbar Layout (Cascade Style)              |
      *---------------------------------------------------------------------*/
     #TabsToolbar,
     #nav-bar {
       background: var(--navbar-bg-color) !important;
       height: var(--tab-height) !important;
-      margin: 0 auto !important;
       width: var(--navbar-min-width) !important;
       position: relative !important;
     }
-
-    /* Responsive adjustments for nav bar and tabs toolbar */
     @media (min-width: 2000px) {
       #TabsToolbar,
       #nav-bar {
@@ -165,57 +156,17 @@
         width: 100vw !important;
       }
     }
-
-    /*---------------------------------------------------------------------*
-     |                  Pop-out URLbar & One-liner Addressbar                |
-     *---------------------------------------------------------------------*/
-    :root:not([customizing]) #nav-bar,
-    :root:not([customizing]) #urlbar[popover] {
-      pointer-events: none;
-      margin: 0 0 -40px !important;
-      opacity: 0 !important;
-    }
-    :root:not([customizing]) #nav-bar:focus-within,
-    :root:not([customizing]) #urlbar[popover]:focus-within,
-    :root:not([customizing]) #nav-bar:has(#urlbar[popover]:focus-within),
-    :root:not([customizing]) #nav-bar:focus-within #urlbar[popover] {
-      pointer-events: auto;
-      margin: 0 0 auto !important;
-      opacity: 1 !important;
-    }
-
-    /* Pop-out URLbar styling (kept from your current CSS) */
-    #urlbar[breakout][breakout-extend] {
-      position: fixed !important;
-      top: 30vh !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2) !important;
-      width: 50vw !important;
-      z-index: 1000 !important;
-    }
-
-    /* Ensure the URLbar container takes full width & remove extraneous margins */
-    #urlbar-container {
-      width: 100% !important;
-      margin: 0 !important;
-    }
-    #urlbar {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-    #urlbar[breakout-extend] {
-      width: 100vw !important;
-    }
-    /* Center the URLbar text when not expanded/focused */
-    #urlbar:not([breakout][breakout-extend]) #urlbar-input,
-    #urlbar:not([focused]) #urlbar-input {
-      text-align: center !important;
+    /* Cascade One-liner Layout Adjustments */
+    @media (min-width: 1000px) { 
+      /* move tabs bar to make room for the URL bar */
+      #TabsToolbar { margin-left: var(--uc-urlbar-width) !important; }
+      /* position the nav bar inline (instead of hiding it) */
+      #nav-bar { margin: calc((var(--urlbar-min-height) * -1) - 8px)
+                        calc(100vw - var(--uc-urlbar-width)) 0 0 !important; }
     }
 
     /*---------------------------------------------------------------------*
-     |                   Overall UI & Background Consistency               |
+     |                     Toolbar & UI Consistency                        |
      *---------------------------------------------------------------------*/
     #navigator-toolbox,
     body,
@@ -228,38 +179,11 @@
     toolbarbutton:hover {
       background-color: var(--navbar-bg-color) !important;
     }
-
-    scrollbox[smoothscroll="true"] {
-      display: flex !important;
-      justify-content: center !important;
-    }
-
-    /* Center Tabs when not overflowing */
-    #tabbrowser-arrowscrollbox:not([overflowing]) {
-      --uc-flex-justify: center;
-    }
-    scrollbox[orient="horizontal"] {
-      justify-content: var(--uc-flex-justify, initial) !important;
-    }
-
-    /*---------------------------------------------------------------------*
-     |             Additional Cascade-Specific (Minimal adjustments)       |
-     *---------------------------------------------------------------------*/
-
-    /* Remove extra borders/shadows */
-    #navigator-toolbox {
-      border: 0 !important;
-    }
-    #nav-bar {
-      background: transparent !important;
-      margin: -36px auto 0 !important;
-    }
+    #navigator-toolbox { border: 0 !important; }
+    #nav-bar { background: transparent !important; }
     #page-action-buttons,
-    #PanelUI-button {
-      display: none !important;
-    }
+    #PanelUI-button { display: none !important; }
 
-    /* Scale toolbar icons to match the minimal tab height */
     .toolbarbutton-icon,
     .urlbar-icon,
     #identity-icon,
@@ -269,8 +193,6 @@
       width: var(--tab-height) !important;
       padding: 2px !important;
     }
-
-    /* Ensure toolbar buttons align with the tabs */
     #TabsToolbar-customization-target {
       width: 100% !important;
       display: flex !important;
@@ -281,8 +203,6 @@
       align-items: center !important;
       justify-content: center !important;
     }
-
-    /* Minimal adjustments for tab backgrounds and widths */
     .tabbrowser-tab {
       margin: 0 !important;
     }
@@ -305,23 +225,107 @@
     .tabbrowser-tab:not([pinned]):hover .tab-close-button {
       display: var(--show-tab-close-button-hover) !important;
     }
-
-    /* Container tabs indicator */
     .tabbrowser-tab[usercontextid] > .tab-stack > .tab-background > .tab-context-line {
       margin: -1px var(--container-tabs-indicator-margin) 0 var(--container-tabs-indicator-margin) !important;
       border-radius: var(--uc-border-radius) !important;
     }
+    .identity-color-blue      { --identity-tab-color: var(--uc-identity-color-blue) !important;
+                                --identity-icon-color: var(--uc-identity-color-blue) !important; }
+    .identity-color-turquoise { --identity-tab-color: var(--uc-identity-color-turquoise) !important;
+                                --identity-icon-color: var(--uc-identity-color-turquoise) !important; }
+    .identity-color-green     { --identity-tab-color: var(--uc-identity-color-green) !important;
+                                --identity-icon-color: var(--uc-identity-color-green) !important; }
+    .identity-color-yellow    { --identity-tab-color: var(--uc-identity-color-yellow) !important;
+                                --identity-icon-color: var(--uc-identity-color-yellow) !important; }
+    .identity-color-orange    { --identity-tab-color: var(--uc-identity-color-orange) !important;
+                                --identity-icon-color: var(--uc-identity-color-orange) !important; }
+    .identity-color-red       { --identity-tab-color: var(--uc-identity-color-red) !important;
+                                --identity-icon-color: var(--uc-identity-color-red) !important; }
+    .identity-color-pink      { --identity-tab-color: var(--uc-identity-color-pink) !important;
+                                --identity-icon-color: var(--uc-identity-color-pink) !important; }
+    .identity-color-purple    { --identity-tab-color: var(--uc-identity-color-purple) !important;
+                                --identity-icon-color: var(--uc-identity-color-purple) !important; }
 
-    /* Identity color styling for container tabs */
-    .identity-color-blue      { --identity-tab-color: var(--uc-identity-color-blue) !important;      --identity-icon-color: var(--uc-identity-color-blue) !important; }
-    .identity-color-turquoise { --identity-tab-color: var(--uc-identity-color-turquoise) !important; --identity-icon-color: var(--uc-identity-color-turquoise) !important; }
-    .identity-color-green     { --identity-tab-color: var(--uc-identity-color-green) !important;     --identity-icon-color: var(--uc-identity-color-green) !important; }
-    .identity-color-yellow    { --identity-tab-color: var(--uc-identity-color-yellow) !important;    --identity-icon-color: var(--uc-identity-color-yellow) !important; }
-    .identity-color-orange    { --identity-tab-color: var(--uc-identity-color-orange) !important;    --identity-icon-color: var(--uc-identity-color-orange) !important; }
-    .identity-color-red       { --identity-tab-color: var(--uc-identity-color-red) !important;       --identity-icon-color: var(--uc-identity-color-red) !important; }
-    .identity-color-pink      { --identity-tab-color: var(--uc-identity-color-pink) !important;      --identity-icon-color: var(--uc-identity-color-pink) !important; }
-    .identity-color-purple    { --identity-tab-color: var(--uc-identity-color-purple) !important;    --identity-icon-color: var(--uc-identity-color-purple) !important; }
+    /*---------------------------------------------------------------------*
+     |              Cascade Button/Icon Visibility Adjustments             |
+     *---------------------------------------------------------------------*/
+    #back-button { display: -moz-inline-box !important; }
+    #forward-button, #stop-button, #reload-button { display: none !important; }
+    #star-button { display: none !important; }
+    #urlbar-zoom-button { display: none !important; }
+    #PanelUI-button { display: -moz-inline-box !important; }
+    #reader-mode-button { display: none !important; }
+    #tracking-protection-icon-container { display: none !important; }
+    #identity-permission-box { display: none !important; }
+    .tab-secondary-label { display: none !important; }
+    #pageActionButton, #page-action-buttons { display: none !important; }
 
+    /*---------------------------------------------------------------------*
+     |                    Additional UI Adjustments                        |
+     *---------------------------------------------------------------------*/
+    .titlebar-buttonbox-container { display: -moz-inline-box !important; }
+    .titlebar-spacer { display: none !important; }
+    #tabbrowser-tabs[haspinnedtabs]:not([positionpinnedtabs])
+      > #tabbrowser-arrowscrollbox
+      > .tabbrowser-tab[first-visible-unpinned-tab] { margin-inline-start: 0 !important; }
+    .tabbrowser-tab > .tab-stack > .tab-background { box-shadow: none !important; }
+    .tab-icon-image:not([pinned]) { opacity: 1 !important; }
+    .tab-icon-overlay:not([crashed]),
+    .tab-icon-overlay[pinned][crashed][selected] {
+      top: 5px !important;
+      z-index: 1 !important;
+      padding: 1.5px !important;
+      inset-inline-end: -8px !important;
+      width: 16px !important;
+      height: 16px !important;
+      border-radius: 10px !important;
+    }
+    .tab-icon-overlay:not([sharing], [crashed]):is([soundplaying], [muted], [activemedia-blocked]) {
+      stroke: transparent !important;
+      background: var(--uc-theme-colour) !important;
+      opacity: 1 !important;
+      fill-opacity: 0.8 !important;
+      color: currentColor !important;
+      stroke: var(--uc-theme-colour) !important;
+    }
+    .tabbrowser-tab[selected] .tab-icon-overlay:not([sharing], [crashed]):is([soundplaying], [muted], [activemedia-blocked]) {
+      stroke: var(--uc-hover-colour) !important;
+      background-color: var(--uc-hover-colour) !important;
+    }
+    .tab-icon-overlay:not([pinned], [sharing], [crashed]):is([soundplaying], [muted], [activemedia-blocked]) {
+      margin-inline-end: 9.5px !important;
+    }
+    .tab-icon-overlay:not([crashed])[soundplaying]:hover,
+    .tab-icon-overlay:not([crashed])[muted]:hover,
+    .tab-icon-overlay:not([crashed])[activemedia-blocked]:hover {
+      color: currentColor !important;
+      stroke: var(--uc-inverted-colour) !important;
+      background-color: var(--uc-inverted-colour) !important;
+      fill-opacity: 0.95 !important;
+    }
+    #TabsToolbar .tab-icon-overlay:not([crashed])[soundplaying],
+    #TabsToolbar .tab-icon-overlay:not([crashed])[muted],
+    #TabsToolbar .tab-icon-overlay:not([crashed])[activemedia-blocked] {
+      color: var(--uc-inverted-colour) !important;
+    }
+    #TabsToolbar .tab-icon-overlay:not([crashed])[soundplaying]:hover,
+    #TabsToolbar .tab-icon-overlay:not([crashed])[muted]:hover,
+    #TabsToolbar .tab-icon-overlay:not([crashed])[activemedia-blocked]:hover {
+      color: var(--uc-theme-colour) !important;
+    }
+    #nav-bar {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+    #navigator-toolbox { border-bottom: none !important; }
+    #urlbar, #urlbar * { box-shadow: none !important; }
+    #urlbar-background { border: var(--uc-hover-colour) !important; }
+    #urlbar[focused="true"] > #urlbar-background,
+    #urlbar:not([open]) > #urlbar-background { background: transparent !important; }
+    #urlbar[open] > #urlbar-background { background: var(--uc-theme-colour) !important; }
+    .urlbarView-row:hover > .urlbarView-row-inner,
+    .urlbarView-row[selected] > .urlbarView-row-inner { background: var(--uc-hover-colour) !important; }
   '';
 
   # Get the profiles from the Firefox directory
