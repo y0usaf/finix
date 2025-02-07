@@ -43,7 +43,7 @@
   };
 
   userChromeCss = ''
-    /* Minimalist Tabs, Navigation Controls, Hidden Addressbar Input, Pop-out Addressbar, and Centered Tabs */
+    /* Minimalist Tabs, Hidden Addressbar, Pop-out Addressbar, and Centered Tabs */
 
     /* 1. Root variables for consistent theming */
     :root {
@@ -101,7 +101,6 @@
     }
 
     /* 4. Navigation and Tabs Toolbar Background and Layout */
-    /* Both the tabs toolbar and the nav-bar (with back, forward, refresh, etc.) share the same styling */
     #TabsToolbar,
     #nav-bar {
       background: var(--navbar-bg-color) !important;
@@ -133,24 +132,24 @@
       }
     }
 
-    /* 5. Hide the Addressbar Input by Default */
-    /* This rule hides the URL bar (input field) while leaving other navigation controls visible */
-    :root:not([customizing]) #urlbar-container {
+    /* 5. Hide the Addressbar by Default */
+    :root:not([customizing]) #nav-bar,
+    :root:not([customizing]) #urlbar[popover] {
       pointer-events: none;
       margin: 0 0 -40px !important;
       opacity: 0 !important;
-      transition: opacity 0.2s ease, margin 0.2s ease;
     }
 
-    /* When the URL bar receives focus or is triggered to pop out, show it */
-    :root:not([customizing]) #urlbar-container:focus-within,
-    #urlbar[breakout][breakout-extend] {
+    :root:not([customizing]) #nav-bar:focus-within,
+    :root:not([customizing]) #urlbar[popover]:focus-within,
+    :root:not([customizing]) #nav-bar:has(#urlbar[popover]:focus-within),
+    :root:not([customizing]) #nav-bar:focus-within #urlbar[popover] {
       pointer-events: auto;
-      margin: 0 !important;
+      margin: 0 0 auto !important;
       opacity: 1 !important;
     }
 
-    /* 6. Main Window Centring for Pop-out Addressbar (used for flex-centering containers) */
+    /* 6. Main Window Centring for Pop-out Addressbar */
     #main-window {
       display: flex;
       flex-direction: column;
@@ -160,7 +159,6 @@
     }
 
     /* 7. Pop-out Addressbar Styling */
-    /* When the URL bar is triggered (has breakout attributes), position it in the center */
     #urlbar[breakout][breakout-extend] {
       position: fixed !important;
       top: 30vh !important;
@@ -200,7 +198,7 @@
       background-color: var(--navbar-bg-color) !important;
     }
 
-    /* 11. Center scrollbox contents (used for tab overflow layout) */
+    /* 11. Center scrollbox contents */
     scrollbox[smoothscroll="true"] {
       display: flex !important;
       justify-content: center !important;
@@ -240,10 +238,11 @@
 in {
   programs.firefox = {
     enable = true;
-    profiles.default = {
-      isDefault = true;
-      settings = commonSettings;
-      userChrome = userChromeCss;
+    profiles = {
+      "y0usaf" = {
+        settings = commonSettings;
+        userChrome = userChromeCss;
+      };
     };
   };
 }
