@@ -50,7 +50,7 @@
       --tab-font-size: 0.8em;
       --tab-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --max-tab-width: none;
-      --tab-height: 20px;
+      --tab-height: 1rem;  /* Reduced tab height to make tabs less massive */
       --navbar-bg-color: black;
       --navbar-min-width: 1000px;
       --navbar-max-width: 2000px;
@@ -211,6 +211,68 @@
     }
     scrollbox[orient="horizontal"] {
       justify-content: var(--uc-flex-justify, initial);
+    }
+
+    /* --- Integrated Additional CSS --- */
+
+    /* Title bar */
+    .titlebar-buttonbox {
+        display: none !important;
+    }
+
+    .titlebar-spacer {
+        display: none !important;
+    }
+
+    /* Tab bar */
+    #navigator-toolbox {
+        border: 0px !important;
+    }
+
+    #TabsToolbar {
+        margin-left: 20vw !important;
+    }
+
+    /* Nav bar */
+    #nav-bar {
+        background: transparent !important;
+        margin-right: 80vw !important;
+        margin-top: -36px !important;
+    }
+
+    /* URL bar */
+    #back-button {
+        display: none !important;
+    }
+
+    #forward-button {
+        display: none !important;
+    }
+
+    #tracking-protection-icon-container {
+        display: none !important;
+    }
+
+    #urlbar-container {
+        width: auto !important;
+    }
+
+    #urlbar {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    #urlbar[breakout-extend] {
+        width: 100vw !important;
+    }
+
+    #page-action-buttons {
+        display: none !important;
+    }
+
+    #PanelUI-button {
+        display: none !important;
     }
   '';
 
