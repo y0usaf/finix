@@ -43,57 +43,37 @@
   };
 
   userChromeCss = ''
-    /* Root variables for consistent theming */
+    /* Define custom properties for scalable values */
     :root {
-      --tab-height: 20px;
+      --tab-height: clamp(20px, 2.5vh, 30px);
       --navbar-bg-color: black;
-      --navbar-min-width: 1000px;
-      --navbar-max-width: 2000px;
+      --navbar-fixed-width: 1000px;
+      --navbar-side-padding: 1rem;
     }
 
-    /* Reset borders */
+    /* Reset borders everywhere */
     * {
       border: 0;
     }
 
-    /* Set consistent height for tabs and navigation bar */
+    /* Consistent height for tab elements */
     #TabsToolbar,
     #nav-bar,
     .tabbrowser-tab {
       height: var(--tab-height) !important;
     }
 
-    /* Apply background color to navigation elements */
+    /* Scalable navigation layout:
+       - On small screens: full available width.
+       - On larger screens: fixed (max-width) and centered.
+    */
     #TabsToolbar,
     #nav-bar {
+      width: 100%;
+      max-width: var(--navbar-fixed-width);
+      margin: 0 auto;
+      padding: 0 var(--navbar-side-padding);
       background: var(--navbar-bg-color) !important;
-    }
-
-    /* Responsive layout for large screens (>= 2000px) */
-    @media (min-width: 2000px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: calc((100vw - var(--navbar-min-width)) / 2);
-        width: var(--navbar-min-width);
-      }
-    }
-
-    /* Responsive layout for medium screens (1000px - 1999px) */
-    @media (min-width: 1000px) and (max-width: 1999px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: calc((100vw - var(--navbar-min-width)) / 2);
-        width: calc(100vw - (100vw - var(--navbar-min-width)));
-      }
-    }
-
-    /* Responsive layout for small screens (< 1000px) */
-    @media (max-width: 999px) {
-      #TabsToolbar,
-      #nav-bar {
-        margin-left: 0;
-        width: 100vw;
-      }
     }
 
     /* Center scrollbox contents */
@@ -102,16 +82,17 @@
       justify-content: center !important;
     }
 
-    /* Center main window content */
+    /* Center the main window content */
     #main-window {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background-color: var(--navbar-bg-color) !important;
     }
 
-    /* URL bar styling when expanded */
+    /* Styling for the URL bar when expanded */
     #main-window #urlbar[breakout][breakout-extend] {
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
       width: 100% !important;
@@ -121,23 +102,20 @@
       justify-content: center;
     }
 
-    /* Remove rounded corners from URL bar */
+    /* Remove rounded corners from URL bar elements */
     #urlbar-background,
     #urlbar-input-container {
       --toolbarbutton-border-radius: 0px;
-    }
-
-    #urlbar-input-container {
       --urlbar-icon-border-radius: 0px;
     }
 
-    /* Center URL bar text when not focused/expanded */
+    /* Center URL bar text when not expanded/focused */
     #urlbar:not([breakout][breakout-extend]) #urlbar-input,
     #urlbar:not([focused]) #urlbar-input {
       text-align: center !important;
     }
 
-    /* Consistent background color across all UI elements */
+    /* Uniform background color across UI elements */
     #TabsToolbar,
     #main-window,
     #nav-bar,
