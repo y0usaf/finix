@@ -158,14 +158,20 @@
       height: 100vh;
     }
 
-    /* 7. Pop-out Addressbar Styling */
+    /* 7. Pop-out Addressbar Styling with scalable units */
     #urlbar[breakout][breakout-extend] {
       position: fixed !important;
       top: 30vh !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
-      width: 400px !important;
+      box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2) !important;
+      /* 
+         The width is defined using clamp():
+         - A minimum of 20rem ensures it won't become too small.
+         - A flexible base of 40vw makes it scale relative to the viewport width.
+         - A maximum of 40rem prevents it from becoming excessively wide.
+      */
+      width: clamp(20rem, 40vw, 40rem) !important;
       z-index: 1000 !important;
     }
 
