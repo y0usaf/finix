@@ -84,7 +84,7 @@ in {
           efiSysMountPoint = "/boot";
         };
       };
-      kernelPackages = pkgs.linuxPackages_latest;
+      kernelPackages = pkgs.linuxPackages_cachyos;
       kernelModules = [
         "kvm-amd"
         "k10temp"

@@ -22,7 +22,7 @@ let
 
   # Get the main font name from the profile's font configuration
   mainFontName = builtins.elemAt (builtins.elemAt profile.fonts.main 0) 1;
-  
+
   # Get fallback font names
   fallbackFontNames = map (x: builtins.elemAt x 1) profile.fonts.fallback;
 
