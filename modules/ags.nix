@@ -119,7 +119,7 @@
         background: none;
         border: none;
         box-shadow: none;
-        font-size: 0.7rem;  /* Reduced from 1rem */
+        font-size: 2rem;  /* Reduced from 1rem */
         color: white;
     }
     .workspaces {
