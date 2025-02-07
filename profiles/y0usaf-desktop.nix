@@ -80,6 +80,16 @@ in {
   gitEmail = "OA99@Outlook.com";
   gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
 
+  bookmarks = [
+    "$HOME/Documents"
+    "$HOME/Downloads"
+    "$HOME/Pictures"
+    "$HOME/Videos"
+    "$HOME/Music"
+    "$HOME/DCIM"
+    "$HOME/nixos"
+  ];
+
   dpi = 109;
   baseFontSize = 12;
   cursorSize = 24;

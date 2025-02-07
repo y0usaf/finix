@@ -175,6 +175,7 @@ in {
   steamDir = mkOpt mkStr "Directory for Steam.";
   wallpaperDir = mkOpt mkStr "Wallpaper directory.";
   wallpaperVideoDir = mkOpt mkStr "Wallpaper video directory.";
+  bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
 
   ########################################
   #          Git Configurations          #

@@ -1,4 +1,3 @@
-
 # NixOS Desktop Profile Example
 
 This document outlines a complete system configuration for a NixOS desktop setup. It can serve as a starting point for your own custom profile, whether you're integrating it into NixOS or Home Manager.
@@ -51,6 +50,15 @@ Below is the complete configuration example:
   steamDir          = "$HOME/.local/share/Steam";         # Directory for Steam data
   wallpaperDir      = "$HOME/DCIM/Wallpapers/32_9";         # For wallpaper images
   wallpaperVideoDir = "$HOME/DCIM/Wallpapers_Video";        # For video wallpapers
+
+  # -- GTK Bookmarks --
+  bookmarks = [
+    "file:///home/exampleUser/Downloads 📥 Downloads"
+    "file:///home/exampleUser/Music 🎵 Music"
+    "file:///home/exampleUser/DCIM 📸 Camera"
+    "file:///home/exampleUser/nixos ❄️ NixOS"
+    "file:///home/exampleUser/.local/share/Steam 🎮 Steam"
+  ];
 
   # -- Default Applications --
   defaultBrowser = {
