@@ -56,63 +56,46 @@
       border: 0;
     }
 
-    /* Set consistent height for toolbars and tab elements */
-    #TabsToolbar,
-    #nav-bar,
-    .tabbrowser-tab {
-      height: var(--tab-height) !important;
-    }
-
-    /* Scalable layout for navigation elements:
-       Full width on small screens, fixed & centered on larger ones.
-    */
+    /* Toolbar and tab styling */
     #TabsToolbar,
     #nav-bar {
+      height: var(--tab-height) !important;
       width: 100%;
       max-width: var(--navbar-fixed-width);
       margin: 0 auto;
       padding: 0 var(--navbar-side-padding);
       background: var(--navbar-bg-color) !important;
     }
+    .tabbrowser-tab {
+      height: var(--tab-height) !important;
+    }
 
-    /* Enhanced tab centering rules */
+    /* Center toolbars and scroll containers */
     #tabbrowser-arrowscrollbox:not([overflowing]) {
       --uc-flex-justify: center;
     }
-    
-    #tabbrowser-tabs {
-      display: flex !important;
-      justify-content: center !important;
-    }
-    
-    .tabbrowser-arrowscrollbox {
-      display: flex !important;
-      justify-content: center !important;
-    }
-    
-    scrollbox[orient="horizontal"] {
-      justify-content: var(--uc-flex-justify, center) !important;
-    }
-
-    /* Force center even with spacers */
-    .titlebar-spacer {
-      display: none !important;
-    }
-
-    /* Center scrollbox contents */
+    #tabbrowser-tabs,
+    .tabbrowser-arrowscrollbox,
     scrollbox[smoothscroll="true"] {
       display: flex !important;
       justify-content: center !important;
     }
+    scrollbox[orient="horizontal"] {
+      justify-content: var(--uc-flex-justify, center) !important;
+    }
 
-    /* Center main window content */
+    /* Hide spacer elements */
+    .titlebar-spacer {
+      display: none !important;
+    }
+
+    /* Main window layout */
     #main-window {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: var(--navbar-bg-color) !important;
     }
 
     /* URL bar styling when expanded */
@@ -128,8 +111,8 @@
     /* Remove rounded corners from URL bar components */
     #urlbar-background,
     #urlbar-input-container {
-      --toolbarbutton-border-radius: 0px;
-      --urlbar-icon-border-radius: 0px;
+      --toolbarbutton-border-radius: 0;
+      --urlbar-icon-border-radius: 0;
     }
 
     /* Center URL bar text when not focused/expanded */
@@ -139,9 +122,7 @@
     }
 
     /* Uniform background color for various UI elements */
-    #TabsToolbar,
     #main-window,
-    #nav-bar,
     #navigator-toolbox,
     body,
     #urlbar-input,
