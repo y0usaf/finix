@@ -103,6 +103,10 @@
     syncthing = [
       pkgs.syncthing
     ];
+    creative = [
+      pkgs.pinta
+      pkgs.gimp
+    ];
   };
 
   ###########################################

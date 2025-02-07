@@ -25,6 +25,7 @@ in {
     "android"
     "webapps"
     "wallust"
+    "syncthing"
   ];
 
   flakeDir = "/home/${username}/nixos";
