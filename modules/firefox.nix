@@ -209,14 +209,15 @@
     }
 
     #TabsToolbar {
-        margin-left: 20vw !important;
+        margin: 0 auto !important;
+        width: var(--navbar-min-width) !important;
     }
 
     /* Nav bar */
     #nav-bar {
         background: transparent !important;
-        margin-right: 80vw !important;
-        margin-top: -36px !important;
+        margin: -36px auto 0 !important;
+        width: var(--navbar-min-width) !important;
     }
 
     /* URL bar */
@@ -251,6 +252,26 @@
       height: var(--tab-height) !important;
       width: var(--tab-height) !important;
       padding: 2px !important;
+    }
+
+    /* Update Tab bar positioning */
+    #TabsToolbar {
+        margin: 0 auto !important;
+        width: var(--navbar-min-width) !important;
+    }
+
+    /* Ensure toolbar buttons align with tabs */
+    #TabsToolbar-customization-target {
+        width: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Adjust toolbar buttons to match tab positioning */
+    .toolbar-items {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
   '';
 
