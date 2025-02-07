@@ -165,7 +165,7 @@
       left: 50% !important;
       transform: translateX(-50%) !important;
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
-      width: auto !important;
+      width: 400px !important;
       z-index: 1000 !important;
     }
 
