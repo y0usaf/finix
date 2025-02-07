@@ -13,6 +13,28 @@
   dpiStr = toString profile.dpi;
 
   #############################################################
+  # Text shadow configuration
+  #############################################################
+  shadowSize = "0.05rem";
+  shadowRadius = "0.05rem";
+  shadowColor = "#000000";
+
+  # Define the 8 shadow offsets as a list
+  shadowOffsets = [
+    "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+    "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+    "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
+    "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
+    "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+    "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+    "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+    "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+  ];
+
+  # Generate repeated shadow string (4 repetitions)
+  repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (i: shadowOffsets) 4));
+
+  #############################################################
   # Define color constants for CSS styling
   #############################################################
   whiteColor = "#ffffff";
@@ -59,6 +81,7 @@ in {
           background: ${transparentColor};
           outline-width: 0;
           outline-offset: 0;
+          text-shadow: ${repeatedShadow};
         }
 
         /* Hover state for all elements */
