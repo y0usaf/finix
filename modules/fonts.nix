@@ -9,10 +9,10 @@
   ...
 }: let
   # Get the packages and names from the profile
-  mainFontPackages = profile.mainFont.packages;
-  mainFontNames = profile.mainFont.names;
-  fallbackPackages = profile.fallbackFonts.packages;
-  fallbackNames = profile.fallbackFonts.names;
+  mainFontPackages = map (x: builtins.elemAt x 0) profile.fonts.main;
+  mainFontNames = map (x: builtins.elemAt x 1) profile.fonts.main;
+  fallbackPackages = map (x: builtins.elemAt x 0) profile.fonts.fallback;
+  fallbackNames = map (x: builtins.elemAt x 1) profile.fonts.fallback;
 
   #######################################################################
   # Font XML Configuration String

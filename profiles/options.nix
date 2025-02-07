@@ -136,23 +136,12 @@ in {
   ########################################
   #         System Appearance            #
   ########################################
-  mainFont = mkOpt (t.submodule {
+  fonts = mkOpt (t.submodule {
     options = {
-      packages = mkOpt (t.listOf mkStr) "List of package names for the main fonts";
-      names = mkOpt (t.listOf mkStr) "List of font names/families for the main fonts";
+      main = mkOpt (t.listOf (t.tuple [t.package mkStr])) "List of [package, fontName] tuples for main fonts";
+      fallback = mkOptDef (t.listOf (t.tuple [t.package mkStr])) [] "List of [package, fontName] tuples for fallback fonts";
     };
-  }) "Main font configuration";
-
-  fallbackFonts =
-    mkOptDef (t.submodule {
-      options = {
-        packages = mkOpt (t.listOf mkStr) "List of package names for the fallback fonts";
-        names = mkOpt (t.listOf mkStr) "List of font names/families for the fallback fonts";
-      };
-    }) {
-      packages = [];
-      names = [];
-    } "Fallback font configuration";
+  }) "System font configuration";
 
   baseFontSize = mkOptDef t.int 12 "Base font size that other UI elements should scale from";
   cursorSize = mkOptDef t.int 24 "Size of the system cursor";

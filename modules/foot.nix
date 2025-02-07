@@ -20,10 +20,16 @@ let
   # Calculate the scaled font size based on the profile's base font size.
   computedFontSize = toString (profile.baseFontSize * 1.33);
 
+  # Get the main font name from the profile's font configuration
+  mainFontName = builtins.elemAt (builtins.elemAt profile.fonts.main 0) 1;
+  
+  # Get fallback font names
+  fallbackFontNames = map (x: builtins.elemAt x 1) profile.fonts.fallback;
+
   # Build the main font configuration string, including the fallback fonts.
   mainFontConfig =
-    "${builtins.elemAt profile.mainFont.names 0}:size=${computedFontSize}, "
-    + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") profile.fallbackFonts.names);
+    "${mainFontName}:size=${computedFontSize}, "
+    + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") fallbackFontNames);
 
   #######################################################################
   #                    DEFINE INDIVIDUAL FOOT SETTINGS

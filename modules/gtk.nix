@@ -8,7 +8,7 @@
   #############################################################
   # Extract common variables from the profile for reusability
   #############################################################
-  mainFontName = builtins.elemAt profile.mainFont.names 0;
+  mainFontName = builtins.elemAt (builtins.elemAt profile.fonts.main 0) 1;
   baseFontSize = profile.baseFontSize;
   dpiStr = toString profile.dpi;
 

@@ -83,14 +83,15 @@ in {
   baseFontSize = 12;
   cursorSize = 24;
 
-  mainFont = {
-    packages = [pkgs.nerd-fonts.iosevka-term-slab];
-    names = ["IosevkaTermSlab Nerd Font Mono"];
-  };
-
-  fallbackFonts = {
-    packages = [pkgs.noto-fonts-emoji pkgs.noto-fonts-cjk-sans pkgs.font-awesome];
-    names = ["Noto Color Emoji" "Noto Sans CJK" "Font Awesome"];
+  fonts = {
+    main = [
+      [pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono"]
+    ];
+    fallback = [
+      [pkgs.noto-fonts-emoji "Noto Color Emoji"]
+      [pkgs.noto-fonts-cjk-sans "Noto Sans CJK"]
+      [pkgs.font-awesome "Font Awesome"]
+    ];
   };
 
   directories = {
