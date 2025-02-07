@@ -6,29 +6,44 @@
   ...
 }: let
   ###########################################################################
-  ##                     AGS SHARED VALUES (for DRY CSS)                   ##
+  ##                           THEME CONFIGURATION                          ##
   ###########################################################################
-  # Define common values so that you can easily adjust them in one place.
-  shadowSize = "0.05rem";
-  shadowRadius = "0.05rem";
-  shadowColor = "#000000";
-
-  # Define the 8 shadow offsets as a list (one repetition)
-  shadowOffsets = [
-    "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
-    "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
-    "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
-    "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
-    "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
-    "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
-    "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
-    "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
-  ];
-
-  # How many times do we want to repeat these values?
-  repetitionCount = 4;
-  # Use lib.genList to generate a list with the shadowOffsets repeated
-  repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (i: shadowOffsets) repetitionCount));
+  theme = {
+    fonts = {
+      base = toString profile.baseFontSize;
+      workspace = "0.75rem";
+    };
+    colors = {
+      red = "#ff0000";
+      orange = "#ff8800";
+      yellow = "#ffff00";
+      green = "#00ff00";
+      blueGreen = "#00ff88";
+      cyan = "#00ffff";
+      blue = "#0088ff";
+      magenta = "#ff00ff";
+      white = "#ffffff";
+      gray = {
+        dark = "#222222";
+      };
+    };
+    shadows = let
+      shadowSize = "0.05rem";
+      shadowRadius = "0.05rem";
+      shadowColor = "#000000";
+      shadowOffsets = [
+        "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+        "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+        "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
+        "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
+        "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+        "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+        "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+        "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+      ];
+      repetitionCount = 4;
+    in lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (i: shadowOffsets) repetitionCount));
+  };
 
   ###########################################################################
   ##                     AGS MAIN APP CONFIGURATION JS                     ##
@@ -76,7 +91,7 @@
         border: none;
         box-shadow: none;
         /* Instead of typing all offsets manually, we interpolate the shadow string */
-        text-shadow: ${repeatedShadow};
+        text-shadow: ${theme.shadows};
         font-family: inherit;
         font-size: inherit;
         font-weight: inherit;
@@ -88,7 +103,7 @@
     /* --------------------------------------------------------------------- */
     .system-stats {
         text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
-        font-size: 1rem;  /* Relative to the base font size */
+        font-size: ${theme.fonts.base}px;
         margin: 0.5em;
     }
     .system-stats label {
@@ -99,15 +114,15 @@
     /* --------------------------------------------------------------------- */
     /*            Color Assignments for Stats (rainbow order)                */
     /* --------------------------------------------------------------------- */
-    .stats-time { color: #ff0000; }     /* Red */
-    .stats-date { color: #ff8800; }     /* Orange */
-    .stats-shell { color: #ffff00; }    /* Yellow */
-    .stats-uptime { color: #00ff00; }   /* Green */
-    .stats-pkgs { color: #00ff88; }     /* Blue-Green */
-    .stats-memory { color: #00ffff; }   /* Cyan */
-    .stats-cpu { color: #0088ff; }      /* Blue */
-    .stats-gpu { color: #ff00ff; }      /* Magenta */
-    .stats-colors { color: #ffffff; }   /* White */
+    .stats-time { color: ${theme.colors.red}; }     /* Red */
+    .stats-date { color: ${theme.colors.orange}; }     /* Orange */
+    .stats-shell { color: ${theme.colors.yellow}; }    /* Yellow */
+    .stats-uptime { color: ${theme.colors.green}; }   /* Green */
+    .stats-pkgs { color: ${theme.colors.blueGreen}; }     /* Blue-Green */
+    .stats-memory { color: ${theme.colors.cyan}; }   /* Cyan */
+    .stats-cpu { color: ${theme.colors.blue}; }      /* Blue */
+    .stats-gpu { color: ${theme.colors.magenta}; }      /* Magenta */
+    .stats-colors { color: ${theme.colors.white}; }   /* White */
 
     /* --------------------------------------------------------------------- */
     /*                      Workspaces Widget Styling                        */
@@ -119,8 +134,8 @@
         background: none;
         border: none;
         box-shadow: none;
-        font-size: 9pt;
-        color: white;
+        font-size: ${theme.fonts.workspace};
+        color: ${theme.colors.white};
     }
     .workspaces {
         margin: 1pt;
@@ -131,13 +146,13 @@
         min-height: 0.75rem;
         margin: 0.08rem;
         padding: 0 0.08rem;
-        background-color: #222;
+        background-color: ${theme.colors.gray.dark};
         border-radius: 0;
     }
     .workspace-btn label {
         background: none;
         color: rgba(255, 255, 255, 0.4);
-        font-size: 0.75rem;
+        font-size: ${theme.fonts.workspace};
     }
     .workspace-btn.active label {
         color: rgba(255, 255, 255, 1.0);
@@ -146,21 +161,21 @@
         color: rgba(255, 255, 255, 0.5);
     }
     .workspace-btn.urgent label {
-        color: #ff5555;
+        color: ${theme.colors.red};
     }
 
     /* --------------------------------------------------------------------- */
     /*                       Additional Color Dot Styling                    */
     /* --------------------------------------------------------------------- */
-    .stats-red { color: #ff0000; }
-    .stats-orange { color: #ff8800; }
-    .stats-yellow { color: #ffff00; }
-    .stats-green { color: #00ff00; }
-    .stats-blue-green { color: #00ff88; }
-    .stats-cyan { color: #00ffff; }
-    .stats-blue { color: #0088ff; }
-    .stats-magenta { color: #ff00ff; }
-    .stats-white { color: #ffffff; }
+    .stats-red { color: ${theme.colors.red}; }
+    .stats-orange { color: ${theme.colors.orange}; }
+    .stats-yellow { color: ${theme.colors.yellow}; }
+    .stats-green { color: ${theme.colors.green}; }
+    .stats-blue-green { color: ${theme.colors.blueGreen}; }
+    .stats-cyan { color: ${theme.colors.cyan}; }
+    .stats-blue { color: ${theme.colors.blue}; }
+    .stats-magenta { color: ${theme.colors.magenta}; }
+    .stats-white { color: ${theme.colors.white}; }
   '';
 
   ###########################################################################
@@ -170,6 +185,49 @@
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
+    import App from 'resource:///com/github/Aylur/ags/app.js';
+
+    // Inject CSS
+    const css = App.css(`
+      .system-stats * {
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+        text-shadow: ${theme.shadows};
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        color: inherit;
+      }
+
+      .system-stats {
+        text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
+        font-size: ${theme.fonts.base}px;
+        margin: 0.5em;
+      }
+
+      .stats-time { color: ${theme.colors.red}; }
+      .stats-date { color: ${theme.colors.orange}; }
+      .stats-shell { color: ${theme.colors.yellow}; }
+      .stats-uptime { color: ${theme.colors.green}; }
+      .stats-pkgs { color: ${theme.colors.blueGreen}; }
+      .stats-memory { color: ${theme.colors.cyan}; }
+      .stats-cpu { color: ${theme.colors.blue}; }
+      .stats-gpu { color: ${theme.colors.magenta}; }
+      .stats-colors { color: ${theme.colors.white}; }
+
+      .stats-red { color: ${theme.colors.red}; }
+      .stats-orange { color: ${theme.colors.orange}; }
+      .stats-yellow { color: ${theme.colors.yellow}; }
+      .stats-green { color: ${theme.colors.green}; }
+      .stats-blue-green { color: ${theme.colors.blueGreen}; }
+      .stats-cyan { color: ${theme.colors.cyan}; }
+      .stats-blue { color: ${theme.colors.blue}; }
+      .stats-magenta { color: ${theme.colors.magenta}; }
+      .stats-white { color: ${theme.colors.white}; }
+    `);
 
     // ---------------------------------------------------------------
     // Safe executor for shell commands with error handling
@@ -395,6 +453,53 @@
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import Service from 'resource:///com/github/Aylur/ags/service.js';
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
+    import App from 'resource:///com/github/Aylur/ags/app.js';
+
+    // Inject CSS
+    const css = App.css(`
+      .workspaces *,
+      .workspaces {
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+        font-size: ${theme.fonts.workspace};
+        color: ${theme.colors.white};
+      }
+
+      .workspaces {
+        margin: 1pt;
+        background: none;
+      }
+
+      .workspace-btn {
+        min-width: 0.75rem;
+        min-height: 0.75rem;
+        margin: 0.08rem;
+        padding: 0 0.08rem;
+        background-color: ${theme.colors.gray.dark};
+        border-radius: 0;
+      }
+
+      .workspace-btn label {
+        background: none;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: ${theme.fonts.workspace};
+      }
+
+      .workspace-btn.active label {
+        color: rgba(255, 255, 255, 1.0);
+      }
+
+      .workspace-btn.inactive label {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .workspace-btn.urgent label {
+        color: ${theme.colors.red};
+      }
+    `);
 
     // ---------------------------------------------------------------
     // Asynchronously import the hyprland service
