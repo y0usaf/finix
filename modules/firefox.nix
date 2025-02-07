@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  profile,
   ...
 }: let
   # Function to read directory contents
@@ -19,7 +20,28 @@
   in
     builtins.attrNames profiles;
 
-  # Your userChrome.css content
+  # Common settings and CSS for all profiles
+  commonSettings = {
+    # Enable userChrome customizations
+    "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+    
+    # Enable Browser Toolbox and development features
+    "devtools.chrome.enabled" = true;
+    "devtools.debugger.remote-enabled" = true;
+    "devtools.debugger.prompt-connection" = false;
+    "browser.enabledE10S" = false;
+    
+    # Theme and UI settings
+    "browser.tabs.drawInTitlebar" = true;
+    "browser.chrome.toolbar_style" = 1;
+    "browser.theme.dark-private-windows" = false;
+    "browser.theme.toolbar-theme" = 0;
+    
+    # Development settings
+    "dom.webcomponents.enabled" = true;
+    "layout.css.shadow-parts.enabled" = true;
+  };
+
   userChromeCss = ''
     /* Root variables for consistent theming */
     :root {
@@ -142,26 +164,7 @@
   # Create profile configurations
   mkProfileConfig = name: {
     inherit name;
-    settings = {
-      # Enable userChrome customizations
-      "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-      
-      # Enable Browser Toolbox and development features
-      "devtools.chrome.enabled" = true;
-      "devtools.debugger.remote-enabled" = true;
-      "devtools.debugger.prompt-connection" = false;
-      "browser.enabledE10S" = false;
-      
-      # Theme and UI settings
-      "browser.tabs.drawInTitlebar" = true;
-      "browser.chrome.toolbar_style" = 1;
-      "browser.theme.dark-private-windows" = false;
-      "browser.theme.toolbar-theme" = 0;
-      
-      # Development settings
-      "dom.webcomponents.enabled" = true;
-      "layout.css.shadow-parts.enabled" = true;
-    };
+    settings = commonSettings;
     userChrome = userChromeCss;
   };
 
