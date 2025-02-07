@@ -187,47 +187,50 @@
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
     import App from 'resource:///com/github/Aylur/ags/app.js';
 
-    // Inject CSS
-    const css = App.css(`
-      .system-stats * {
-        margin: 0;
-        padding: 0;
-        background: none;
-        border: none;
-        box-shadow: none;
-        text-shadow: ${theme.shadows};
-        font-family: inherit;
-        font-size: inherit;
-        font-weight: inherit;
-        color: inherit;
-      }
+    // Add styles using Widget.StyleClass
+    Widget.StyleClass({
+      name: 'system-stats-styles',
+      css: `
+        .system-stats * {
+          margin: 0;
+          padding: 0;
+          background: none;
+          border: none;
+          box-shadow: none;
+          text-shadow: ${theme.shadows};
+          font-family: inherit;
+          font-size: inherit;
+          font-weight: inherit;
+          color: inherit;
+        }
 
-      .system-stats {
-        text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
-        font-size: ${theme.fonts.base}px;
-        margin: 0.5em;
-      }
+        .system-stats {
+          text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
+          font-size: ${theme.fonts.base}px;
+          margin: 0.5em;
+        }
 
-      .stats-time { color: ${theme.colors.red}; }
-      .stats-date { color: ${theme.colors.orange}; }
-      .stats-shell { color: ${theme.colors.yellow}; }
-      .stats-uptime { color: ${theme.colors.green}; }
-      .stats-pkgs { color: ${theme.colors.blueGreen}; }
-      .stats-memory { color: ${theme.colors.cyan}; }
-      .stats-cpu { color: ${theme.colors.blue}; }
-      .stats-gpu { color: ${theme.colors.magenta}; }
-      .stats-colors { color: ${theme.colors.white}; }
+        .stats-time { color: ${theme.colors.red}; }
+        .stats-date { color: ${theme.colors.orange}; }
+        .stats-shell { color: ${theme.colors.yellow}; }
+        .stats-uptime { color: ${theme.colors.green}; }
+        .stats-pkgs { color: ${theme.colors.blueGreen}; }
+        .stats-memory { color: ${theme.colors.cyan}; }
+        .stats-cpu { color: ${theme.colors.blue}; }
+        .stats-gpu { color: ${theme.colors.magenta}; }
+        .stats-colors { color: ${theme.colors.white}; }
 
-      .stats-red { color: ${theme.colors.red}; }
-      .stats-orange { color: ${theme.colors.orange}; }
-      .stats-yellow { color: ${theme.colors.yellow}; }
-      .stats-green { color: ${theme.colors.green}; }
-      .stats-blue-green { color: ${theme.colors.blueGreen}; }
-      .stats-cyan { color: ${theme.colors.cyan}; }
-      .stats-blue { color: ${theme.colors.blue}; }
-      .stats-magenta { color: ${theme.colors.magenta}; }
-      .stats-white { color: ${theme.colors.white}; }
-    `);
+        .stats-red { color: ${theme.colors.red}; }
+        .stats-orange { color: ${theme.colors.orange}; }
+        .stats-yellow { color: ${theme.colors.yellow}; }
+        .stats-green { color: ${theme.colors.green}; }
+        .stats-blue-green { color: ${theme.colors.blueGreen}; }
+        .stats-cyan { color: ${theme.colors.cyan}; }
+        .stats-blue { color: ${theme.colors.blue}; }
+        .stats-magenta { color: ${theme.colors.magenta}; }
+        .stats-white { color: ${theme.colors.white}; }
+      `
+    });
 
     // ---------------------------------------------------------------
     // Safe executor for shell commands with error handling
@@ -455,51 +458,54 @@
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
     import App from 'resource:///com/github/Aylur/ags/app.js';
 
-    // Inject CSS
-    const css = App.css(`
-      .workspaces *,
-      .workspaces {
-        margin: 0;
-        padding: 0;
-        background: none;
-        border: none;
-        box-shadow: none;
-        font-size: ${theme.fonts.workspace};
-        color: ${theme.colors.white};
-      }
+    // Add styles using Widget.StyleClass
+    Widget.StyleClass({
+      name: 'workspaces-styles',
+      css: `
+        .workspaces *,
+        .workspaces {
+          margin: 0;
+          padding: 0;
+          background: none;
+          border: none;
+          box-shadow: none;
+          font-size: ${theme.fonts.workspace};
+          color: ${theme.colors.white};
+        }
 
-      .workspaces {
-        margin: 1pt;
-        background: none;
-      }
+        .workspaces {
+          margin: 1pt;
+          background: none;
+        }
 
-      .workspace-btn {
-        min-width: 0.75rem;
-        min-height: 0.75rem;
-        margin: 0.08rem;
-        padding: 0 0.08rem;
-        background-color: ${theme.colors.gray.dark};
-        border-radius: 0;
-      }
+        .workspace-btn {
+          min-width: 0.75rem;
+          min-height: 0.75rem;
+          margin: 0.08rem;
+          padding: 0 0.08rem;
+          background-color: ${theme.colors.gray.dark};
+          border-radius: 0;
+        }
 
-      .workspace-btn label {
-        background: none;
-        color: rgba(255, 255, 255, 0.4);
-        font-size: ${theme.fonts.workspace};
-      }
+        .workspace-btn label {
+          background: none;
+          color: rgba(255, 255, 255, 0.4);
+          font-size: ${theme.fonts.workspace};
+        }
 
-      .workspace-btn.active label {
-        color: rgba(255, 255, 255, 1.0);
-      }
+        .workspace-btn.active label {
+          color: rgba(255, 255, 255, 1.0);
+        }
 
-      .workspace-btn.inactive label {
-        color: rgba(255, 255, 255, 0.5);
-      }
+        .workspace-btn.inactive label {
+          color: rgba(255, 255, 255, 0.5);
+        }
 
-      .workspace-btn.urgent label {
-        color: ${theme.colors.red};
-      }
-    `);
+        .workspace-btn.urgent label {
+          color: ${theme.colors.red};
+        }
+      `
+    });
 
     // ---------------------------------------------------------------
     // Asynchronously import the hyprland service
