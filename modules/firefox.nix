@@ -215,12 +215,8 @@
     /* Nav bar */
     #nav-bar {
         background: transparent !important;
-        margin: 0 !important;  /* Remove previous margins */
-        position: fixed !important;
-        top: 0 !important;
-        right: 0 !important;
-        width: auto !important;
-        height: var(--tab-height) !important;
+        margin-right: 80vw !important;
+        margin-top: -36px !important;
     }
 
     /* URL bar */
@@ -246,19 +242,7 @@
         display: none !important;
     }
 
-    /* Adjust TabsToolbar to make room for nav-bar items */
-    #TabsToolbar {
-      margin-right: 150px !important;  /* Adjust this value based on your UI elements */
-    }
-
-    /* Ensure toolbar items are properly aligned */
-    #nav-bar-customization-target {
-      height: 100% !important;
-      display: flex !important;
-      align-items: center !important;
-    }
-
-    /* Scale toolbar icons */
+    /* Scale toolbar icons to match */
     .toolbarbutton-icon,
     .urlbar-icon,
     #identity-icon,
