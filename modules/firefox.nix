@@ -80,10 +80,12 @@
       max-width: var(--max-tab-width) !important;
     }
 
-    .tab-icon-image {
-      height: auto !important;
-      width: calc(var(--tab-height) / 1.5) !important;
-      margin-right: 4px !important;
+    .tab-icon-image,
+    .tab-icon-sound,
+    .tab-close-button {
+      height: calc(var(--tab-height) * 0.8) !important;
+      width: calc(var(--tab-height) * 0.8) !important;
+      padding: 2px !important;
     }
 
     /* 4. Navigation and Tabs Toolbar Background and Layout */
@@ -238,6 +240,17 @@
 
     #PanelUI-button {
         display: none !important;
+    }
+
+    /* Scale toolbar icons to match */
+    .toolbarbutton-icon,
+    .urlbar-icon,
+    #identity-icon,
+    #tracking-protection-icon,
+    #PanelUI-menu-button {
+      height: var(--tab-height) !important;
+      width: var(--tab-height) !important;
+      padding: 2px !important;
     }
   '';
 
