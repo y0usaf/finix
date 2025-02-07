@@ -43,7 +43,7 @@
   };
 
   userChromeCss = ''
-    /* Minimalist Tabs, Hidden Addressbar, and Centered Pop-out Addressbar */
+    /* Minimalist Tabs, Hidden Addressbar, Pop-out Addressbar, and Centered Tabs */
 
     /* 1. Root variables for consistent theming */
     :root {
@@ -159,7 +159,6 @@
     }
 
     /* 7. Pop-out Addressbar Styling */
-    /* Pop-out Addressbar: Center using fixed positioning */
     #urlbar[breakout][breakout-extend] {
       position: fixed !important;
       top: 30vh !important;
@@ -203,6 +202,15 @@
     scrollbox[smoothscroll="true"] {
       display: flex !important;
       justify-content: center !important;
+    }
+
+    /***** CENTER TABS RULES *****/
+    /* When tabs are not overflowing, center them */
+    #tabbrowser-arrowscrollbox:not([overflowing]) {
+      --uc-flex-justify: center;
+    }
+    scrollbox[orient="horizontal"] {
+      justify-content: var(--uc-flex-justify, initial);
     }
   '';
 
