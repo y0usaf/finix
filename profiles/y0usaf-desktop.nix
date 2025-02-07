@@ -26,6 +26,7 @@ in {
     "webapps"
     "wallust"
     "syncthing"
+    "vscode"
   ];
 
   flakeDir = "/home/${username}/nixos";
