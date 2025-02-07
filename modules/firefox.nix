@@ -75,15 +75,29 @@
       background: var(--navbar-bg-color) !important;
     }
 
-    /* Center the tabs using the provided sample rules */
-    /***** START of Sample Rules *****/
+    /* Enhanced tab centering rules */
     #tabbrowser-arrowscrollbox:not([overflowing]) {
       --uc-flex-justify: center;
     }
-    scrollbox[orient="horizontal"] {
-      justify-content: var(--uc-flex-justify, initial);
+    
+    #tabbrowser-tabs {
+      display: flex !important;
+      justify-content: center !important;
     }
-    /***** END of Sample Rules *****/
+    
+    .tabbrowser-arrowscrollbox {
+      display: flex !important;
+      justify-content: center !important;
+    }
+    
+    scrollbox[orient="horizontal"] {
+      justify-content: var(--uc-flex-justify, center) !important;
+    }
+
+    /* Force center even with spacers */
+    .titlebar-spacer {
+      display: none !important;
+    }
 
     /* Center scrollbox contents */
     scrollbox[smoothscroll="true"] {
