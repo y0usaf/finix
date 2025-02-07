@@ -73,39 +73,61 @@ in {
       bookmarks = profile.bookmarks;
 
       # ---------------------------------------------------------------
-      # Custom CSS for GTK3 applications
+      # Updated Custom CSS for GTK3 Applications
       # ---------------------------------------------------------------
       extraCss = ''
-        /* Global element styling */
+        /* Global reset and minimal styling */
         * {
           font-family: "${mainFontName}";
           color: ${whiteColor};
-          background: ${transparentColor};
-          outline-width: 0;
-          outline-offset: 0;
+          background-color: ${transparentColor};
+          /* Remove default outlines but add transitions */
+          outline: none;
           text-shadow: ${repeatedShadow};
+          transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+        /* Focus state for accessibility (subtle focus ring) */
+        *:focus {
+          box-shadow: 0 0 0 2px ${hoverBg};
         }
 
         /* Hover state for all elements */
         *:hover {
-          background: ${hoverBg};
+          background-color: ${hoverBg};
         }
 
         /* Selected state for all elements */
         *:selected {
-          background: ${selectedBg};
+          background-color: ${selectedBg};
         }
 
-        /* Button styling */
+        /* Button styling with hover/active transitions */
         button {
+          border: none;
           border-radius: 0.15rem;
           min-height: 1rem;
           padding: 0.05rem 0.25rem;
+          background-color: ${transparentColor};
+          transition: background-color 0.2s ease-in-out;
         }
 
-        /* Menu background styling */
-        menu {
-          background: ${menuBackground};
+        button:hover {
+          background-color: ${hoverBg};
+        }
+
+        button:active {
+          background-color: ${selectedBg};
+        }
+
+        /* Menu, menubar, and menuitem styling */
+        menu, menubar, menuitem {
+          background-color: ${menuBackground};
+        }
+
+        /* Text selection styling to keep the look consistent */
+        ::selection {
+          background-color: ${hoverBg};
         }
       '';
     };
