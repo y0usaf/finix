@@ -6,6 +6,30 @@
   ...
 }: let
   ###########################################################################
+  ##                     AGS SHARED VALUES (for DRY CSS)                   ##
+  ###########################################################################
+  # Define common values so that you can easily adjust them in one place.
+  shadowSize = "0.5rem";
+  shadowColor = "#000000";
+
+  # Define the 8 shadow offsets as a list (one repetition)
+  shadowOffsets = [
+    "${shadowSize} 0 ${shadowSize} ${shadowColor}"
+    "-${shadowSize} 0 ${shadowSize} ${shadowColor}"
+    "0 ${shadowSize} ${shadowSize} ${shadowColor}"
+    "0 -${shadowSize} ${shadowSize} ${shadowColor}"
+    "${shadowSize} ${shadowSize} ${shadowSize} ${shadowColor}"
+    "-${shadowSize} ${shadowSize} ${shadowSize} ${shadowColor}"
+    "${shadowSize} -${shadowSize} ${shadowSize} ${shadowColor}"
+    "-${shadowSize} -${shadowSize} ${shadowSize} ${shadowColor}"
+  ];
+
+  # How many times do we want to repeat these values?
+  repetitionCount = 4;
+  # Use lib.genList to generate a list with the shadowOffsets repeated
+  repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (i: shadowOffsets) repetitionCount));
+
+  ###########################################################################
   ##                     AGS MAIN APP CONFIGURATION JS                     ##
   ###########################################################################
   configJS = ''
@@ -50,46 +74,8 @@
         background: none;
         border: none;
         box-shadow: none;
-        text-shadow:
-            /* 1st repetition */
-            0.05rem 0 0.05rem #000000,
-            -0.05rem 0 0.05rem #000000,
-            0 0.05rem 0.05rem #000000,
-            0 -0.05rem 0.05rem #000000,
-            0.05rem 0.05rem 0.05rem #000000,
-            -0.05rem 0.05rem 0.05rem #000000,
-            0.05rem -0.05rem 0.05rem #000000,
-            -0.05rem -0.05rem 0.05rem #000000,
-
-            /* 2nd repetition */
-            0.05rem 0 0.05rem #000000,
-            -0.05rem 0 0.05rem #000000,
-            0 0.05rem 0.05rem #000000,
-            0 -0.05rem 0.05rem #000000,
-            0.05rem 0.05rem 0.05rem #000000,
-            -0.05rem 0.05rem 0.05rem #000000,
-            0.05rem -0.05rem 0.05rem #000000,
-            -0.05rem -0.05rem 0.05rem #000000,
-
-            /* 3rd repetition */
-            0.05rem 0 0.05rem #000000,
-            -0.05rem 0 0.05rem #000000,
-            0 0.05rem 0.05rem #000000,
-            0 -0.05rem 0.05rem #000000,
-            0.05rem 0.05rem 0.05rem #000000,
-            -0.05rem 0.05rem 0.05rem #000000,
-            0.05rem -0.05rem 0.05rem #000000,
-            -0.05rem -0.05rem 0.05rem #000000,
-
-            /* 4th repetition */
-            0.05rem 0 0.05rem #000000,
-            -0.05rem 0 0.05rem #000000,
-            0 0.05rem 0.05rem #000000,
-            0 -0.05rem 0.05rem #000000,
-            0.05rem 0.05rem 0.05rem #000000,
-            -0.05rem 0.05rem 0.05rem #000000,
-            0.05rem -0.05rem 0.05rem #000000,
-            -0.05rem -0.05rem 0.05rem #000000;
+        /* Instead of typing all offsets manually, we interpolate the shadow string */
+        text-shadow: ${repeatedShadow};
         font-family: inherit;
         font-size: inherit;
         font-weight: inherit;
