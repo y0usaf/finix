@@ -10,18 +10,19 @@
   ###########################################################################
   # Define common values so that you can easily adjust them in one place.
   shadowSize = "0.5rem";
+  shadowRadius = "1px";
   shadowColor = "#000000";
 
   # Define the 8 shadow offsets as a list (one repetition)
   shadowOffsets = [
-    "${shadowSize} 0 ${shadowSize} ${shadowColor}"
-    "-${shadowSize} 0 ${shadowSize} ${shadowColor}"
-    "0 ${shadowSize} ${shadowSize} ${shadowColor}"
-    "0 -${shadowSize} ${shadowSize} ${shadowColor}"
-    "${shadowSize} ${shadowSize} ${shadowSize} ${shadowColor}"
-    "-${shadowSize} ${shadowSize} ${shadowSize} ${shadowColor}"
-    "${shadowSize} -${shadowSize} ${shadowSize} ${shadowColor}"
-    "-${shadowSize} -${shadowSize} ${shadowSize} ${shadowColor}"
+    "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+    "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+    "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
+    "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
+    "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+    "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+    "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+    "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
   ];
 
   # How many times do we want to repeat these values?
