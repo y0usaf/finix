@@ -9,8 +9,8 @@
   ##                     AGS SHARED VALUES (for DRY CSS)                   ##
   ###########################################################################
   # Define common values so that you can easily adjust them in one place.
-  shadowSize = "0.5rem";
-  shadowRadius = "1px";
+  shadowSize = "0.05rem";
+  shadowRadius = "0.05rem";
   shadowColor = "#000000";
 
   # Define the 8 shadow offsets as a list (one repetition)
