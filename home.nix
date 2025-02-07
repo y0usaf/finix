@@ -90,6 +90,7 @@ in {
       ./modules/gtk.nix
       ./modules/cursor.nix
       ./modules/systemd.nix
+      ./modules/firefox.nix
     ]
     ++ importFeature "hyprland" [./modules/hyprland.nix]
     ++ importFeature "ags" [./modules/ags.nix]
