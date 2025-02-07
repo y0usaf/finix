@@ -27,7 +27,36 @@
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
     <fontconfig>
-      <!-- Main Font -->
+      <!-- Disable all fonts by default -->
+      <selectfont>
+        <rejectfont>
+          <pattern>
+            <patelt name="family">
+              <string>*</string>
+            </patelt>
+          </pattern>
+        </rejectfont>
+      </selectfont>
+
+      <!-- Explicitly enable only our chosen fonts -->
+      <selectfont>
+        <acceptfont>
+          <pattern>
+            <patelt name="family">
+              <string>${builtins.elemAt mainFontNames 0}</string>
+            </patelt>
+          </pattern>
+          ${lib.concatMapStrings (name: ''
+            <pattern>
+              <patelt name="family">
+                <string>${name}</string>
+              </patelt>
+            </pattern>
+          '') fallbackNames}
+        </acceptfont>
+      </selectfont>
+
+      <!-- Set main font as default -->
       <match>
         <test name="family">
           <string>*</string>
@@ -37,7 +66,7 @@
         </edit>
       </match>
 
-      <!-- Fallback Fonts -->
+      <!-- Fallback font configuration -->
       <alias>
         <family>monospace</family>
         <prefer>
@@ -46,7 +75,7 @@
         </prefer>
       </alias>
 
-      <!-- Font Rendering Options -->
+      <!-- Font rendering options -->
       <match target="font">
         <edit name="antialias" mode="assign"><bool>true</bool></edit>
         <edit name="hinting" mode="assign"><bool>true</bool></edit>
