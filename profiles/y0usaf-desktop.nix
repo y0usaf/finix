@@ -3,9 +3,10 @@
 #──────────────────────────────────────────────────────────────────────────#
 {pkgs, ...}: let
   username = "y0usaf";
+  homeDir = "/home/${username}";
 in {
   username = username;
-  homeDirectory = "/home/${username}";
+  homeDirectory = homeDir;
   hostname = "y0usaf-desktop";
   stateVersion = "24.11";
   timezone = "America/Toronto";
@@ -29,13 +30,14 @@ in {
     "vscode"
   ];
 
-  flakeDir = "/home/${username}/nixos";
-  musicDir = "$HOME/Music";
-  dcimDir = "$HOME/DCIM";
-  steamDir = "$HOME/.local/share/Steam";
-  wallpaperDir = "$HOME/DCIM/Wallpapers/32_9";
-  wallpaperVideoDir = "$HOME/DCIM/Wallpapers_Video";
+  flakeDir = "${homeDir}/nixos";
+  musicDir = "${homeDir}/Music";
+  dcimDir = "${homeDir}/DCIM";
+  steamDir = "${homeDir}/.local/share/Steam";
+  wallpaperDir = "${homeDir}/DCIM/Wallpapers/32_9";
+  wallpaperVideoDir = "${homeDir}/DCIM/Wallpapers_Video";
 
+  # Default applications using attribute set format
   defaultBrowser = {
     package = pkgs.firefox;
     command = "firefox";
@@ -82,12 +84,12 @@ in {
   gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
 
   bookmarks = [
-    "file:///home/${username}/Downloads Downloads"
-    "file:///home/${username}/Music Music"
-    "file:///home/${username}/DCIM DCIM"
-    "file:///home/${username}/Pictures Pictures"
-    "file:///home/${username}/nixos NixOS"
-    "file:///home/${username}/Dev Dev"
+    "file://${homeDir}/Downloads Downloads"
+    "file://${homeDir}/Music Music"
+    "file://${homeDir}/DCIM DCIM"
+    "file://${homeDir}/Pictures Pictures"
+    "file://${homeDir}/nixos NixOS"
+    "file://${homeDir}/Dev Dev"
   ];
 
   dpi = 109;
@@ -106,11 +108,11 @@ in {
   };
 
   directories = {
-    flake.path = "/home/${username}/nixos";
-    music.path = "$HOME/Music";
-    dcim.path = "$HOME/DCIM";
+    flake.path = "${homeDir}/nixos";
+    music.path = "${homeDir}/Music";
+    dcim.path = "${homeDir}/DCIM";
     steam = {
-      path = "$HOME/.local/share/Steam";
+      path = "${homeDir}/.local/share/Steam";
       create = false; # Don't create Steam dir automatically
     };
   };

@@ -17,17 +17,12 @@
   ########################
   #  Submodule Options   #
   ########################
-  # Allow defaultAppModule to be defined either as a dictionary with keys package and command,
-  # or using the shorthand tuple syntax { pkg, "cmd" }.
-  defaultAppModule = t.union [
-    (t.submodule {
-      options = {
-        package = mkOptDef t.pkg null "Package derivation to install";
-        command = mkOptDef mkStr null "Command to execute the application; defaults to package name if null";
-      };
-    })
-    (t.tuple [ t.pkg mkStr ])
-  ];
+  defaultAppModule = t.submodule {
+    options = {
+      package = mkOptDef t.pkg null "Package derivation to install";
+      command = mkOptDef mkStr null "Command to execute the application. Defaults to package name if null";
+    };
+  };
 
   # Add a helper for directory paths
   dirModule = t.submodule {
