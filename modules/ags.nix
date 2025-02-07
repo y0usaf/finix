@@ -119,25 +119,25 @@
         background: none;
         border: none;
         box-shadow: none;
-        font-size: 1rem;  /* Changed from 9pt to 1rem */
+        font-size: 0.7rem;  /* Reduced from 1rem */
         color: white;
     }
     .workspaces {
-        margin: 0.1rem;  /* Changed from 1pt to 0.1rem */
+        margin: 0;  /* Removed margin */
         background: none;
     }
     .workspace-btn {
-        min-width: 0.75rem;
-        min-height: 0.75rem;
-        margin: 0.08rem;
-        padding: 0 0.08rem;
+        min-width: 0.5rem;  /* Reduced from 0.75rem */
+        min-height: 0.5rem;  /* Reduced from 0.75rem */
+        margin: 0;  /* Removed margin */
+        padding: 0;  /* Removed padding */
         background-color: #222;
         border-radius: 0;
     }
     .workspace-btn label {
         background: none;
         color: rgba(255, 255, 255, 0.4);
-        font-size: 0.75rem;  /* Changed from 0.75rem to maintain relative sizing */
+        font-size: 0.5rem;  /* Reduced from 0.75rem */
     }
     .workspace-btn.active label {
         color: rgba(255, 255, 255, 1.0);
