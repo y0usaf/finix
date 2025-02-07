@@ -136,6 +136,7 @@ in {
   corePackages = mkOptDef (t.listOf t.pkg) packageSets.core "Essential packages that will always be installed";
   packageSets = mkOptDef (t.attrsOf (t.listOf t.pkg)) packageSets "Package sets organized by feature";
   features = mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
+  personalPackages = mkOptDef (t.listOf t.pkg) [] "List of additional packages chosen by the user";
 
   ########################################
   #         System Appearance            #

@@ -114,4 +114,8 @@ in {
       create = false; # Don't create Steam dir automatically
     };
   };
+
+  personalPackages = with pkgs; [
+    realesrgan-ncnn-vulkan
+  ];
 }

@@ -47,12 +47,13 @@
             </patelt>
           </pattern>
           ${lib.concatMapStrings (name: ''
-            <pattern>
-              <patelt name="family">
-                <string>${name}</string>
-              </patelt>
-            </pattern>
-          '') fallbackNames}
+        <pattern>
+          <patelt name="family">
+            <string>${name}</string>
+          </patelt>
+        </pattern>
+      '')
+      fallbackNames}
         </acceptfont>
       </selectfont>
 

@@ -53,8 +53,9 @@
   # Combine final package list:
   #   - Use feature packages directly since they're already derivations
   #   - Concatenate with the user-specific packages
+  #   - Add any personal packages specified by the user
   ####################################################################
-  finalPackages = featurePackages ++ userPackages;
+  finalPackages = featurePackages ++ userPackages ++ profile.personalPackages;
 
   ####################################################################
   # Helper function: Conditionally import modules based on profile features
