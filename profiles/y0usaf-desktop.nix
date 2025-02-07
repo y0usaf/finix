@@ -81,13 +81,11 @@ in {
   gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
 
   bookmarks = [
-    "$HOME/Documents"
-    "$HOME/Downloads"
-    "$HOME/Pictures"
-    "$HOME/Videos"
-    "$HOME/Music"
-    "$HOME/DCIM"
-    "$HOME/nixos"
+    "file:///home/${username}/Downloads"
+    "file:///home/${username}/Pictures"
+    "file:///home/${username}/Music"
+    "file:///home/${username}/DCIM"
+    "file:///home/${username}/nixos"
   ];
 
   dpi = 109;
