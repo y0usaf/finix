@@ -130,9 +130,6 @@
         padding: 0;
         background-color: #222;
         border-radius: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
     .workspace-btn label {
         background: none;
