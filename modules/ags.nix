@@ -130,16 +130,13 @@
         padding: 0;
         background-color: #222;
         border-radius: 0;
-        /* Make width and height equal using font size as reference */
-        min-width: 1.2em;
-        min-height: 1.2em;
     }
     .workspace-btn label {
         background: none;
         color: rgba(255, 255, 255, 0.4);
-        font-size: 0.5rem;
+        font-size: 0.8rem;  /* Increased from 0.5rem */
         /* Center the text within the square button */
-        padding: 0.35em;
+        padding: 0.25em;
     }
     .workspace-btn.active label {
         color: rgba(255, 255, 255, 1.0);
