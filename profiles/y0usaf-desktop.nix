@@ -86,6 +86,7 @@ in {
     "file:///home/${username}/DCIM 📸 DCIM"
     "file:///home/${username}/Pictures 🖼️ Pictures" 
     "file:///home/${username}/nixos ❄️ NixOS"
+    "file:///home/${username}/Dev 💻 Dev"
   ];
 
   dpi = 109;
