@@ -70,6 +70,14 @@ in {
         gtk-application-prefer-dark-theme = 1;
       };
 
+      bookmarks = [
+        "file:///home/username/Downloads"
+        "file:///home/username/Music"
+        "file:///home/username/DCIM"
+        "file:///home/username/nixos"
+        "file:///home/username/.local/share/Steam"
+     ];
+
       # ---------------------------------------------------------------
       # Custom CSS for GTK3 applications
       # ---------------------------------------------------------------
