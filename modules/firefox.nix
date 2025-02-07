@@ -49,6 +49,9 @@
       --navbar-bg-color: black;
       --navbar-fixed-width: 1000px;
       --navbar-side-padding: 1rem;
+      --tab-font-size: 0.8em;
+      --tab-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --max-tab-width: none;
     }
 
     /* Remove borders universally */
@@ -133,6 +136,68 @@
     toolbarbutton,
     toolbarbutton:hover {
       background-color: var(--navbar-bg-color) !important;
+    }
+
+    /* Minimalist Tabs and Hidden Addressbar */
+
+    /* 1. Minimalist Tabs Settings */
+    .tabbrowser-tab * {
+      margin: 0 !important;
+      border-radius: 0 !important;
+      font-family: var(--tab-font-family) !important;
+    }
+
+    .tabbrowser-tab {
+      height: var(--tab-height);
+      font-size: var(--tab-font-size) !important;
+      min-height: 0 !important;
+      align-items: center !important;
+      margin-bottom: 5px !important;
+    }
+
+    .tabbrowser-tab[fadein]:not([pinned]) {
+      max-width: var(--max-tab-width) !important;
+    }
+
+    /* Hide extra tab elements to keep things minimalist */
+    .tab-close-button,
+    .new-tab-button,
+    #firefox-view-button,
+    #scrollbutton-up,
+    .tab-secondary-label,
+    #tabs-newtab-button,
+    #titlebar spacer,
+    #alltabs-button,
+    #scrollbutton-down,
+    #new-tab-button {
+      display: none !important;
+    }
+
+    .tab-icon-image {
+      height: auto !important;
+      width: calc(var(--tab-height) / 1.5) !important;
+      margin-right: 4px !important;
+    }
+
+    /* 2. Hide the Addressbar by Default */
+    /* When not customizing, the navigation bar (#nav-bar) and popup URL field (#urlbar[popover])
+       are hidden: they have no pointer-events, are shifted upward (via negative margin),
+       and are fully transparent (opacity: 0). */
+    :root:not([customizing]) #nav-bar,
+    :root:not([customizing]) #urlbar[popover] {
+      pointer-events: none;
+      margin: 0 0 -40px !important;
+      opacity: 0 !important;
+    }
+
+    /* When the address bar or navigation bar receives focus, it becomes visible and interactive */
+    :root:not([customizing]) #nav-bar:focus-within,
+    :root:not([customizing]) #urlbar[popover]:focus-within,
+    :root:not([customizing]) #nav-bar:has(#urlbar[popover]:focus-within),
+    :root:not([customizing]) #nav-bar:focus-within #urlbar[popover] {
+      pointer-events: auto;
+      margin: 0 0 auto !important;
+      opacity: 1 !important;
     }
   '';
 
