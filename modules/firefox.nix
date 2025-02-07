@@ -143,7 +143,24 @@
   mkProfileConfig = name: {
     inherit name;
     settings = {
+      # Enable userChrome customizations
       "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+      
+      # Enable Browser Toolbox and development features
+      "devtools.chrome.enabled" = true;
+      "devtools.debugger.remote-enabled" = true;
+      "devtools.debugger.prompt-connection" = false;
+      "browser.enabledE10S" = false;
+      
+      # Theme and UI settings
+      "browser.tabs.drawInTitlebar" = true;
+      "browser.chrome.toolbar_style" = 1;
+      "browser.theme.dark-private-windows" = false;
+      "browser.theme.toolbar-theme" = 0;
+      
+      # Development settings
+      "dom.webcomponents.enabled" = true;
+      "layout.css.shadow-parts.enabled" = true;
     };
     userChrome = userChromeCss;
   };
