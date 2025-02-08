@@ -28,6 +28,7 @@ in {
     "wallust"
     "syncthing"
     "vscode"
+    "zellij"
   ];
 
   flakeDir = "${homeDir}/nixos";
