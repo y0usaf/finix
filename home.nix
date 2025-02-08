@@ -109,6 +109,11 @@ in {
   programs = {
     zsh.enable = true;
 
+    zellij = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
     nh = {
       enable = true;
       flake = profile.flakeDir;

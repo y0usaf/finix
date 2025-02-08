@@ -1,7 +1,5 @@
 # modules/helpers.nix
-{ lib }:
-
-let
+{lib}: let
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "#000000";
@@ -15,7 +13,6 @@ let
     "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
     "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
   ];
-in
-{
+in {
   repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (i: shadowOffsets) 4));
 }
