@@ -26,31 +26,17 @@
       
       layouts = {
         music = {
-          template = {
+          tabs = [{
             direction = "vertical";
-            parts = [
+            panes = [
               {
-                direction = "vertical";
-                borderless = true;
-                split_size = {
-                  Fixed = 50;
-                };
-                run = {
-                  command = "cmus";
-                };
+                command = "cmus";
               }
               {
-                direction = "vertical";
-                borderless = true;
-                split_size = {
-                  Fixed = 50;
-                };
-                run = {
-                  command = "cava";
-                };
+                command = "cava";
               }
             ];
-          };
+          }];
         };
       };
     };
