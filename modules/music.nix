@@ -61,7 +61,7 @@
         };
 
         smoothing = {
-          noise_reduction = 100;
+          noise_reduction = 99;
           monstercat = 0;
           waves = 0;
           gravity = 80;

@@ -24,29 +24,27 @@
         white = "#ffffff"; # regular7
       };
       
-      layouts = {
-        music = {
-          tabs = [{
-            direction = "vertical";
-            panes = [
-              {
-                command = "cmus";
-              }
-              {
-                command = "cava";
-              }
-            ];
-          }];
-        };
-      };
+      layouts = { };
     };
   };
 
   xdg.configFile."zellij/layouts/music.kdl".text = ''
     layout {
-        pane split_direction="vertical" {
-            pane command="cmus"
-            pane command="cava"
+        default_tab_template {
+            pane size=1 borderless=true {
+                plugin location="zellij:tab-bar"
+            }
+            children
+            pane size=2 borderless=true {
+                plugin location="zellij:status-bar"
+            }
+        }
+        
+        tab name="Music" {
+            pane split_direction="vertical" {
+                pane command="cmus"
+                pane command="cava"
+            }
         }
     }
   '';
