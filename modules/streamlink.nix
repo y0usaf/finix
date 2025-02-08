@@ -29,9 +29,13 @@
     # Add convenient shell aliases
     programs.zsh.shellAliases = {
       twitch = ''
-        channel=$1
+        if [ -z "$1" ]; then
+          echo "Usage: twitch <channel_name>"
+          return 1
+        fi
+        channel="$1"
         firefox "https://www.twitch.tv/popout/$channel/chat?popout=" &
-        streamlink "https://twitch.tv/$channel"
+        streamlink "https://www.twitch.tv/$channel"
       '';
       youtube = "streamlink https://youtube.com/watch?v=";
     };
