@@ -29,6 +29,7 @@ in {
     "syncthing"
     "vscode"
     "zellij"
+    "music"
   ];
 
   flakeDir = "${homeDir}/nixos";

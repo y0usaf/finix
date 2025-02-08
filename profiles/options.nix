@@ -54,6 +54,7 @@
     # Use Cases
     "gaming"
     "media"
+    "music"
     "creative"
     "virtualization"
     "backup"
@@ -109,6 +110,10 @@
     creative = [
       pkgs.pinta
       pkgs.gimp
+    ];
+    music = [
+      pkgs.cmus
+      pkgs.cava
     ];
  };
 
