@@ -21,11 +21,11 @@
       enable = true;
       settings = {
         general = {
-          framerate = 60;
+          framerate = 240;
           autosens = 1;
           overshoot = 5;
           sensitivity = 50;
-          bars = 0;
+          bars = 100;
           bar_width = 2;
           bar_spacing = 1;
           lower_cutoff_freq = 50;
