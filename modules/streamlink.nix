@@ -28,8 +28,12 @@
 
     # Add convenient shell aliases
     programs.zsh.shellAliases = {
-      twitch = "streamlink twitch.tv/";
-      youtube = "streamlink youtube.com/watch?v=";
+      twitch = ''
+        channel=$1
+        firefox "https://www.twitch.tv/popout/$channel/chat?popout=" &
+        streamlink "https://twitch.tv/$channel"
+      '';
+      youtube = "streamlink https://youtube.com/watch?v=";
     };
   };
 }
