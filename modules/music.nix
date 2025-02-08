@@ -21,7 +21,7 @@
       enable = true;
       settings = {
         general = {
-          framerate = 240;
+          framerate = 60;
           autosens = 1;
           overshoot = 5;
           sensitivity = 50;
@@ -62,8 +62,8 @@
 
         smoothing = {
           noise_reduction = 90;
-          monstercat = 1;
-          waves = 1;
+          monstercat = 0;
+          waves = 0;
           gravity = 80;
         };
 
