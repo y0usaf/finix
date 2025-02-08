@@ -76,20 +76,5 @@
         };
       };
     };
-
-    # Create a systemd user service for auto-starting CAVA with the terminal
-    systemd.user.services.cava = {
-      Unit = {
-        Description = "CAVA Audio Visualizer";
-        After = ["graphical-session-pre.target"];
-        PartOf = ["graphical-session.target"];
-      };
-
-      Service = {
-        ExecStart = "${pkgs.cava}/bin/cava";
-        Restart = "always";
-        RestartSec = 3;
-      };
-    };
   };
 }
