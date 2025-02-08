@@ -34,8 +34,10 @@
           return 1
         fi
         channel="$1"
+        echo "Opening chat for channel: $channel"
         firefox "https://www.twitch.tv/popout/$channel/chat?popout=" &
-        streamlink "https://www.twitch.tv/$channel"
+        echo "Starting stream for channel: $channel"
+        streamlink "https://www.twitch.tv/$channel" best
       '';
       youtube = "streamlink https://youtube.com/watch?v=";
     };
