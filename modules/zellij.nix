@@ -24,19 +24,32 @@
         white = "#ffffff"; # regular7
       };
       
-      layouts.music = {
-        default_tab = {
-          panes = [
-            {
-              command = "cmus";
-            }
-            {
-              command = "cava";
-            }
-          ];
-          direction = "horizontal";
-          split_size = {
-            Fixed = 70;
+      layouts = {
+        music = {
+          template = {
+            direction = "vertical";
+            parts = [
+              {
+                direction = "vertical";
+                borderless = true;
+                split_size = {
+                  Fixed = 50;
+                };
+                run = {
+                  command = "cmus";
+                };
+              }
+              {
+                direction = "vertical";
+                borderless = true;
+                split_size = {
+                  Fixed = 50;
+                };
+                run = {
+                  command = "cava";
+                };
+              }
+            ];
           };
         };
       };
