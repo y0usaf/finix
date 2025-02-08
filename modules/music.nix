@@ -20,23 +20,28 @@
 
       # Color scheme
       set color_cmdline_bg=default
-      set color_cmdline_fg=default
-      set color_error=red
-      set color_info=yellow
-      set color_separator=blue
+      set color_cmdline_fg=226
+      set color_error=226
+      set color_info=226
+      set color_separator=226
       set color_statusline_bg=default
-      set color_statusline_fg=gray
-      set color_titleline_bg=blue
-      set color_titleline_fg=white
+      set color_statusline_fg=226
+      set color_titleline_bg=226
+      set color_titleline_fg=16
       set color_win_bg=default
-      set color_win_cur=blue
-      set color_win_cur_sel_bg=blue
-      set color_win_cur_sel_fg=white
-      set color_win_fg=default
-      set color_win_sel_bg=blue
-      set color_win_sel_fg=white
-      set color_win_title_bg=blue
-      set color_win_title_fg=white
+      set color_win_cur=226
+      set color_win_cur_sel_bg=226
+      set color_win_cur_sel_fg=16
+      set color_win_dir=226
+      set color_win_fg=226
+      set color_win_inactive_cur_sel_bg=default
+      set color_win_inactive_cur_sel_fg=226
+      set color_win_inactive_sel_bg=default
+      set color_win_inactive_sel_fg=226
+      set color_win_sel_bg=226
+      set color_win_sel_fg=16
+      set color_win_title_bg=226
+      set color_win_title_fg=16
 
       # Playback settings
       set continue=true
@@ -59,7 +64,7 @@
       framerate = 240
       autosens = 1
       bars = 0
-      bar_width = 1
+      bar_width = 2
       bar_spacing = 1
 
       [input]
@@ -72,18 +77,18 @@
 
       [color]
       gradient = 1
-      gradient_color_1 = '#94e2d5'
-      gradient_color_2 = '#89dceb'
-      gradient_color_3 = '#74c7ec'
-      gradient_color_4 = '#89b4fa'
-      gradient_color_5 = '#cba6f7'
-      gradient_color_6 = '#f5c2e7'
-      gradient_color_7 = '#eba0ac'
-      gradient_color_8 = '#f38ba8'
+      gradient_color_1 = '#59cc33'
+      gradient_color_2 = '#80cc33'
+      gradient_color_3 = '#a6cc33'
+      gradient_color_4 = '#cccc33'
+      gradient_color_5 = '#cca633'
+      gradient_color_6 = '#cc8033'
+      gradient_color_7 = '#cc5933'
+      gradient_color_8 = '#cc3333'
 
       [smoothing]
-      integral = 77
-      monstercat = 1
+      noise_reduction = 77
+      monstercat = 0
       waves = 0
       gravity = 100
 
