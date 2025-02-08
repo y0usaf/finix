@@ -23,7 +23,6 @@
       twitch-disable-ads
 
       # Interface settings
-      force-progress
       quiet
     '';
 
