@@ -18,14 +18,6 @@
       player-no-close
       player-continuous-http
 
-      # Quality settings
-      default-stream=best
-      stream-sorting-excludes=>4000k,>1080p
-
-      # Network settings
-      ringbuffer-size=64M
-      hls-segment-threads=3
-
       # Twitch specific
       twitch-low-latency
       twitch-disable-ads
