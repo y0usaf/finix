@@ -130,13 +130,13 @@
     wayland = [
       pkgs.grim
       pkgs.slurp
-      pkgs."wl-clipboard"
+      pkgs.wl-clipboard
       pkgs.hyprpicker
     ];
     media = [
       pkgs.pavucontrol
       pkgs.ffmpeg
-      pkgs."yt-dlp-light"
+      pkgs.yt-dlp-light
       pkgs.vlc
       pkgs.stremio
       pkgs.cmus
