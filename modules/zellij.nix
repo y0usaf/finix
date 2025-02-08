@@ -9,7 +9,7 @@
     enableZshIntegration = true;
 
     settings = {
-      theme = "custom";
+      theme = "ansi";
       themes.custom = {
         bg = "#000000";        # black
         fg = "#ffffff";        # white
