@@ -23,6 +23,23 @@
         black = "#000000"; # regular0
         white = "#ffffff"; # regular7
       };
+      
+      layouts.music = {
+        default_tab = {
+          panes = [
+            {
+              command = "cmus";
+            }
+            {
+              command = "cava";
+            }
+          ];
+          direction = "horizontal";
+          split_size = {
+            Fixed = 70;
+          };
+        };
+      };
     };
   };
 }
