@@ -41,4 +41,13 @@
       };
     };
   };
+
+  xdg.configFile."zellij/layouts/music.kdl".text = ''
+    layout {
+        pane split_direction="vertical" {
+            pane command="cmus"
+            pane command="cava"
+        }
+    }
+  '';
 }
