@@ -21,7 +21,7 @@
       enable = true;
       settings = {
         general = {
-          framerate = 60;
+          framerate = 240;
           autosens = 1;
           overshoot = 20;
           sensitivity = 100;
@@ -48,7 +48,7 @@
         };
 
         color = {
-          gradient = 1;
+          gradient = 0;
           gradient_count = 8;
           gradient_color_1 = "'#59cc33'";
           gradient_color_2 = "'#80cc33'";
