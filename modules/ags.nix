@@ -479,21 +479,17 @@
 
     export { workspacesConfig };
   '';
-in
-  ###########################################################################
-  ##                       AGS INSTALLATION CONFIG                         ##
-  ###########################################################################
-  lib.mkIf (builtins.elem "ags" profile.features) {
-    # Include the AGS package for installation
-    home.packages = with pkgs; [
-      ags
-    ];
+in {
+  # Include the AGS package for installation
+  home.packages = with pkgs; [
+    ags
+  ];
 
-    # Create the AGS configuration directory and files
-    xdg.configFile = {
-      "ags/config.js".text = configJS;
-      "ags/style.css".text = styleCSS;
-      "ags/system-stats.js".text = systemStatsJS;
-      "ags/workspaces.js".text = workspacesJS;
-    };
-  }
+  # Create the AGS configuration directory and files
+  xdg.configFile = {
+    "ags/config.js".text = configJS;
+    "ags/style.css".text = styleCSS;
+    "ags/system-stats.js".text = systemStatsJS;
+    "ags/workspaces.js".text = workspacesJS;
+  };
+}

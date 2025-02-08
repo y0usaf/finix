@@ -2,16 +2,15 @@
   config,
   pkgs,
   lib,
+  profile,
   ...
 }: {
   home.packages = with pkgs; [
-    # Android development and emulation tools
     waydroid
-    android-tools # adb, fastboot, etc.
-    scrcpy # Android screen mirroring
+    android-tools
+    scrcpy
   ];
 
-  # Waydroid systemd service
   systemd.user.services = {
     waydroid-container = {
       Unit = {
