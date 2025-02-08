@@ -122,5 +122,6 @@ in {
 
   personalPackages = with pkgs; [
     realesrgan-ncnn-vulkan
+    streamlink-twitch-gui-bin
   ];
 }
