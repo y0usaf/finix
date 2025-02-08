@@ -9,7 +9,7 @@
   config = {
     home.packages = with pkgs; [
       streamlink
-   ];
+    ];
 
     # Create Streamlink configuration
     xdg.configFile."streamlink/config".text = ''
@@ -31,7 +31,7 @@
       shellAliases = {
         youtube = "streamlink https://youtube.com/watch?v=";
       };
-      
+
       initExtra = ''
         function twitch() {
           if [ -z "$1" ]; then

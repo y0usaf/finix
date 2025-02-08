@@ -207,9 +207,14 @@ in {
     xdg.portal = lib.mkIf (enableWayland && enableHyprland) {
       enable = true;
       xdgOpenUsePortal = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-gtk
+      ];
       config = {
-        common.default = ["hyprland"];
-        hyprland.default = ["hyprland"];
+        common = {
+          default = ["gtk"];
+          "org.freedesktop.impl.portal.OpenURI" = ["gtk"];
+        };
       };
     };
   };
