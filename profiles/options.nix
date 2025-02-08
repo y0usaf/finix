@@ -33,6 +33,23 @@
   };
 
   ###############################
+  #    Feature Lists           #
+  ###############################
+  coreFeatures = [
+    "core"      # Basic system utilities
+    "zsh"       # Shell configuration
+    "ssh"       # SSH configuration
+    "git"       # Git configuration
+    "xdg"       # XDG base directories
+    "fonts"     # Font configuration
+    "foot"      # Terminal emulator
+    "gtk"       # GTK theming
+    "cursor"    # Cursor theming
+    "systemd"   # Service management
+    "firefox"   # Web browser
+  ];
+
+  ###############################
   #    Valid Features List      #
   ###############################
   validFeatures = [
@@ -65,10 +82,10 @@
     "zellij"
   ];
 
-  ###########################################
-  #   Package Sets Grouped by Feature       #
-  ###########################################
-  packageSets = {
+  ###############################
+  #    Core Package Sets        #
+  ###############################
+  corePackageSets = {
     core = [
       pkgs.git
       pkgs.curl
@@ -77,13 +94,38 @@
       pkgs.unzip
       pkgs.bash
       pkgs.vim
-      pkgs.dconf
       pkgs.lsd
       pkgs.alejandra
+      pkgs.tree
+      pkgs.dconf
       pkgs.lm_sensors
       pkgs.bottom
-      pkgs.tree
     ];
+    zsh = [
+      pkgs.zsh
+    ];
+    ssh = [
+      pkgs.openssh
+    ];
+    git = [
+      pkgs.git
+    ];
+    foot = [
+      pkgs.foot
+    ];
+    gtk = [
+      pkgs.gtk3
+      pkgs.gsettings-desktop-schemas
+    ];
+    firefox = [
+      pkgs.firefox
+    ];
+  };
+
+  ###############################
+  #    Optional Package Sets    #
+  ###############################
+  optionalPackageSets = {
     wayland = [
       pkgs.grim
       pkgs.slurp
@@ -117,12 +159,16 @@
     ];
   };
 
+  # Combine them for the actual packageSets option
+  packageSets = corePackageSets // optionalPackageSets;
+
   ###########################################
   #   Validation: Package Sets vs Features  #
   ###########################################
   invalidSets = builtins.filter (
     setName:
-      setName != "core" && !(builtins.elem setName validFeatures)
+      !(builtins.hasAttr setName corePackageSets) && 
+      !(builtins.hasAttr setName optionalPackageSets)
   ) (builtins.attrNames packageSets);
 
   _ =
@@ -143,7 +189,10 @@ in {
   ########################################
   corePackages = mkOptDef (t.listOf t.pkg) packageSets.core "Essential packages that will always be installed";
   packageSets = mkOptDef (t.attrsOf (t.listOf t.pkg)) packageSets "Package sets organized by feature";
-  features = mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
+  features = mkOptDef 
+    (t.listOf (t.enum validFeatures)) 
+    [] 
+    "List of enabled features (core features are automatically included)";
   personalPackages = mkOptDef (t.listOf t.pkg) [] "List of additional packages chosen by the user";
 
   ########################################
