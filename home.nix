@@ -75,29 +75,12 @@ in {
 
   #──────────────────────────────────────────────────────────────#
   #                Home-manager Module Imports
-  #
-  # Core modules are always imported.
-  # Additional modules are conditionally imported based on features.
   #──────────────────────────────────────────────────────────────#
-  imports = with lib;
-    [
-      # Core module imports
-      ./modules/zsh.nix
-      ./modules/ssh.nix
-      ./modules/git.nix
-      ./modules/xdg.nix
-      ./modules/fonts.nix
-      ./modules/foot.nix
-      ./modules/gtk.nix
-      ./modules/cursor.nix
-      ./modules/systemd.nix
-      ./modules/firefox.nix
-    ]
-    ++ lib.flatten (map (feature: let
-      modulePath = ./modules + "/${feature}.nix";
-    in
-      lib.optional (builtins.pathExists modulePath) modulePath)
-    profile.features);
+  imports = lib.flatten (map (feature: let
+    modulePath = ./modules + "/${feature}.nix";
+  in
+    lib.optional (builtins.pathExists modulePath) modulePath)
+  (options._coreFeatures ++ profile.features));
 
   #──────────────────────────────────────────────────────────────#
   #                     Program Configurations
@@ -105,8 +88,6 @@ in {
   # Configuration for various programs like zsh, nh, and obs-studio.
   #──────────────────────────────────────────────────────────────#
   programs = {
-    zsh.enable = true;
-
     nh = {
       enable = true;
       flake = profile.flakeDir;
@@ -115,15 +96,6 @@ in {
         dates = "weekly";
         extraArgs = "--keep-since 7d";
       };
-    };
-
-    obs-studio = {
-      enable = true;
-      plugins = with pkgs.obs-studio-plugins; [
-        obs-backgroundremoval
-        obs-vkcapture
-        inputs.obs-image-reaction.packages.${pkgs.system}.default
-      ];
     };
   };
 

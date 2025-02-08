@@ -30,6 +30,7 @@ in {
     "vscode"
     "zellij"
     "music"
+    "obs"
   ];
 
   flakeDir = "${homeDir}/nixos";

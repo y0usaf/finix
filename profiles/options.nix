@@ -35,18 +35,18 @@
   ###############################
   #    Feature Lists           #
   ###############################
-  coreFeatures = [
-    "core"      # Basic system utilities
-    "zsh"       # Shell configuration
-    "ssh"       # SSH configuration
-    "git"       # Git configuration
-    "xdg"       # XDG base directories
-    "fonts"     # Font configuration
-    "foot"      # Terminal emulator
-    "gtk"       # GTK theming
-    "cursor"    # Cursor theming
-    "systemd"   # Service management
-    "firefox"   # Web browser
+  _coreFeatures = [
+    "core" # Basic system utilities
+    "zsh" # Shell configuration
+    "ssh" # SSH configuration
+    "git" # Git configuration
+    "xdg" # XDG base directories
+    "fonts" # Font configuration
+    "foot" # Terminal emulator
+    "gtk" # GTK theming
+    "cursor" # Cursor theming
+    "systemd" # Service management
+    "firefox" # Web browser
   ];
 
   ###############################
@@ -120,6 +120,9 @@
     firefox = [
       pkgs.firefox
     ];
+    obs = [
+      pkgs.obs-studio
+    ];
   };
 
   ###############################
@@ -167,8 +170,8 @@
   ###########################################
   invalidSets = builtins.filter (
     setName:
-      !(builtins.hasAttr setName corePackageSets) && 
-      !(builtins.hasAttr setName optionalPackageSets)
+      !(builtins.hasAttr setName corePackageSets)
+      && !(builtins.hasAttr setName optionalPackageSets)
   ) (builtins.attrNames packageSets);
 
   _ =
@@ -189,10 +192,16 @@ in {
   ########################################
   corePackages = mkOptDef (t.listOf t.pkg) packageSets.core "Essential packages that will always be installed";
   packageSets = mkOptDef (t.attrsOf (t.listOf t.pkg)) packageSets "Package sets organized by feature";
-  features = mkOptDef 
-    (t.listOf (t.enum validFeatures)) 
-    [] 
+  features =
+    mkOptDef
+    (t.listOf (t.enum validFeatures))
+    []
     "List of enabled features (core features are automatically included)";
+  coreFeatures =
+    mkOptDef
+    (t.listOf t.str)
+    _coreFeatures
+    "List of core features that are always enabled";
   personalPackages = mkOptDef (t.listOf t.pkg) [] "List of additional packages chosen by the user";
 
   ########################################
@@ -241,4 +250,7 @@ in {
   gitName = mkOpt mkStr "Git username.";
   gitEmail = mkOpt mkStr "Git email address.";
   gitHomeManagerRepo = mkOpt mkStr "URL of the Home Manager repository.";
+
+  # Export the actual core features list for direct use
+  inherit _coreFeatures;
 }
