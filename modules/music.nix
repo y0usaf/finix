@@ -23,8 +23,8 @@
         general = {
           framerate = 240;
           autosens = 1;
-          overshoot = 20;
-          sensitivity = 100;
+          overshoot = 10;
+          sensitivity = 70;
           bars = 0;
           bar_width = 2;
           bar_spacing = 1;
@@ -61,7 +61,7 @@
         };
 
         smoothing = {
-          noise_reduction = 77;
+          noise_reduction = 85;
           monstercat = 0;
           waves = 0;
           gravity = 100;
