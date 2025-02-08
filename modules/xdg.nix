@@ -31,12 +31,12 @@
       enable = true;
       defaultApplications = {
         # Web Handlers
-        "text/html" = ["${profile.defaultBrowser.command}.desktop"];
-        "x-scheme-handler/http" = ["${profile.defaultBrowser.command}.desktop"];
-        "x-scheme-handler/https" = ["${profile.defaultBrowser.command}.desktop"];
-        "x-scheme-handler/discord" = ["${profile.defaultDiscord.command}.desktop"];
-        "x-scheme-handler/ftp" = ["${profile.defaultBrowser.command}.desktop"];
-        "x-scheme-handler/chrome" = ["${profile.defaultBrowser.command}.desktop"];
+        "text/html" = ["firefox.desktop"];
+        "x-scheme-handler/http" = ["firefox.desktop"];
+        "x-scheme-handler/https" = ["firefox.desktop"];
+        "x-scheme-handler/ftp" = ["firefox.desktop"];
+        "x-scheme-handler/chrome" = ["firefox.desktop"];
+        "x-scheme-handler/discord" = ["discord.desktop"];
 
         # File Types
         "inode/directory" = ["${profile.defaultFileManager.command}.desktop"];
@@ -66,6 +66,24 @@
         "application/x-extension-shtml" = ["${profile.defaultBrowser.command}.desktop"];
         "application/xhtml+xml" = ["${profile.defaultBrowser.command}.desktop"];
         "application/x-extension-xhtml" = ["${profile.defaultBrowser.command}.desktop"];
+      };
+    };
+
+    desktopEntries = {
+      firefox = {
+        name = "Firefox";
+        genericName = "Web Browser";
+        exec = "firefox %U";
+        terminal = false;
+        categories = [ "Application" "Network" "WebBrowser" ];
+        mimeType = [ 
+          "text/html"
+          "text/xml"
+          "application/xhtml+xml"
+          "x-scheme-handler/http"
+          "x-scheme-handler/https"
+          "x-scheme-handler/ftp"
+        ];
       };
     };
   };
