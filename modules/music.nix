@@ -26,7 +26,7 @@
           overshoot = 5;
           sensitivity = 50;
           bars = 100;
-          bar_width = 2;
+          bar_width = 1;
           bar_spacing = 1;
           lower_cutoff_freq = 50;
           higher_cutoff_freq = 10000;
@@ -61,7 +61,7 @@
         };
 
         smoothing = {
-          noise_reduction = 90;
+          noise_reduction = 100;
           monstercat = 0;
           waves = 0;
           gravity = 80;
