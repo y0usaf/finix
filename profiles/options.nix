@@ -38,7 +38,7 @@
   validFeatures = [
     # Development
     "python"
-    "neovim"
+    "nvim"
     "vscode"
 
     # Desktop Environment
