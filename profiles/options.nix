@@ -115,7 +115,7 @@
       pkgs.cmus
       pkgs.cava
     ];
- };
+  };
 
   ###########################################
   #   Validation: Package Sets vs Features  #

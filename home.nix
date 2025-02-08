@@ -93,14 +93,11 @@ in {
       ./modules/systemd.nix
       ./modules/firefox.nix
     ]
-    ++ importFeature "zellij" [./modules/zellij.nix]
-    ++ importFeature "hyprland" [./modules/hyprland.nix]
-    ++ importFeature "ags" [./modules/ags.nix]
-    ++ importFeature "gaming" [./modules/gaming.nix]
-    ++ importFeature "neovim" [./modules/nvim.nix]
-    ++ importFeature "android" [./modules/android.nix]
-    ++ importFeature "webapps" [./modules/webapps.nix]
-    ++ importFeature "wallust" [./modules/wallust.nix];
+    ++ lib.flatten (map (feature: let
+      modulePath = ./modules + "/${feature}.nix";
+    in
+      lib.optional (builtins.pathExists modulePath) modulePath)
+    profile.features);
 
   #──────────────────────────────────────────────────────────────#
   #                     Program Configurations
