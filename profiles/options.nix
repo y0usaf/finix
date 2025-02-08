@@ -59,6 +59,9 @@
     "backup"
     "webapps"
     "syncthing"
+
+    # Multiplexer
+    "zellij"
   ];
 
   ###########################################
@@ -107,7 +110,7 @@
       pkgs.pinta
       pkgs.gimp
     ];
-  };
+ };
 
   ###########################################
   #   Validation: Package Sets vs Features  #

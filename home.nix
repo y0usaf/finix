@@ -93,6 +93,7 @@ in {
       ./modules/systemd.nix
       ./modules/firefox.nix
     ]
+    ++ importFeature "zellij" [./modules/zellij.nix]
     ++ importFeature "hyprland" [./modules/hyprland.nix]
     ++ importFeature "ags" [./modules/ags.nix]
     ++ importFeature "gaming" [./modules/gaming.nix]
@@ -108,11 +109,6 @@ in {
   #──────────────────────────────────────────────────────────────#
   programs = {
     zsh.enable = true;
-
-    zellij = {
-      enable = true;
-      enableZshIntegration = true;
-    };
 
     nh = {
       enable = true;
