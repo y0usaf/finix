@@ -79,7 +79,9 @@ in {
   imports = lib.flatten (map (feature: let
     modulePath = ./modules + "/${feature}.nix";
   in
-    lib.optional (builtins.pathExists modulePath) modulePath)
+    lib.trace "Checking for module: ${toString modulePath}"
+    lib.optional (builtins.pathExists modulePath)
+    modulePath)
   (options._coreFeatures ++ profile.features));
 
   #──────────────────────────────────────────────────────────────#

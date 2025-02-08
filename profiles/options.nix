@@ -4,9 +4,10 @@
   pkgs,
   ...
 }: let
-  ###############################
-  #  Type Definitions & Helpers #
-  ###############################
+  ######################################################################
+  #                        Type Definitions & Helpers                    #
+  ######################################################################
+  # Use lib.types to set up helper type constructors
   t = lib.types;
   mkStr = t.str;
   mkBool = t.bool;
@@ -14,9 +15,10 @@
   mkOpt = type: description: lib.mkOption {inherit type description;};
   mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
 
-  ########################
-  #  Submodule Options   #
-  ########################
+  ######################################################################
+  #                           Submodule Options                          #
+  ######################################################################
+  # A submodule for default application configurations (e.g. browser, editor)
   defaultAppModule = t.submodule {
     options = {
       package = mkOptDef t.pkg null "Package derivation to install";
@@ -24,7 +26,7 @@
     };
   };
 
-  # Add a helper for directory paths
+  # A submodule to configure directories with an option to create them if missing
   dirModule = t.submodule {
     options = {
       path = mkOpt mkStr "Absolute path to the directory";
@@ -32,9 +34,10 @@
     };
   };
 
-  ###############################
-  #    Feature Lists           #
-  ###############################
+  ######################################################################
+  #                            Feature Lists                             #
+  ######################################################################
+  # Core features that are always enabled
   _coreFeatures = [
     "core" # Basic system utilities
     "zsh" # Shell configuration
@@ -49,9 +52,7 @@
     "firefox" # Web browser
   ];
 
-  ###############################
-  #    Valid Features List      #
-  ###############################
+  # Valid additional features that can be enabled by the user
   validFeatures = [
     # Development
     "python"
@@ -82,9 +83,10 @@
     "zellij"
   ];
 
-  ###############################
-  #    Core Package Sets        #
-  ###############################
+  ######################################################################
+  #                         Package Sets Definitions                     #
+  ######################################################################
+  # Core package sets corresponding to core features
   corePackageSets = {
     core = [
       pkgs.git
@@ -122,9 +124,7 @@
     ];
   };
 
-  ###############################
-  #    Optional Package Sets    #
-  ###############################
+  # Optional package sets for additional features
   optionalPackageSets = {
     wayland = [
       pkgs.grim
@@ -159,43 +159,46 @@
     ];
   };
 
-  # Combine them for the actual packageSets option
+  # Combine core and optional package sets into one configuration
   packageSets = corePackageSets // optionalPackageSets;
 
-  ###############################
-  #    Validation Functions     #
-  ###############################
+  ######################################################################
+  #                         Validation Functions                         #
+  ######################################################################
+  # Identify package sets that do not match any feature
   packageSetsWithoutFeatures = builtins.filter (
     setName:
       !(builtins.elem setName validFeatures)
       && !(builtins.elem setName _coreFeatures)
   ) (builtins.attrNames packageSets);
 
+  # Identify features that do not have a corresponding package set
   featuresWithoutPackageSets = builtins.filter (
     feature:
       !(builtins.hasAttr feature corePackageSets)
       && !(builtins.hasAttr feature optionalPackageSets)
   ) (validFeatures ++ _coreFeatures);
 
-  _validatePackageSets = lib.assertMsg (packageSetsWithoutFeatures == [])
+  # Validation assertions to ensure every package set has a matching feature and vice versa
+  _validatePackageSets =
+    lib.assertMsg (packageSetsWithoutFeatures == [])
     "Found package sets without corresponding features: ${builtins.toString packageSetsWithoutFeatures}";
-
-  _validateFeatures = lib.assertMsg (featuresWithoutPackageSets == [])
+  _validateFeatures =
+    lib.assertMsg (featuresWithoutPackageSets == [])
     "Found features without corresponding package sets: ${builtins.toString featuresWithoutPackageSets}";
-
 in {
-  ########################################
-  #          Core System Options         #
-  ########################################
+  ######################################################################
+  #                        Core System Options                           #
+  ######################################################################
   username = mkOpt mkStr "The username for the system.";
   hostname = mkOpt mkStr "The system hostname.";
   homeDirectory = mkOpt mkStr "The path to the user's home directory.";
   stateVersion = mkOpt mkStr "The system state version.";
   timezone = mkOpt mkStr "The system timezone.";
 
-  ########################################
-  #      Package Management Options      #
-  ########################################
+  ######################################################################
+  #                      Package Management Options                      #
+  ######################################################################
   corePackages = mkOptDef (t.listOf t.pkg) packageSets.core "Essential packages that will always be installed";
   packageSets = mkOptDef (t.attrsOf (t.listOf t.pkg)) packageSets "Package sets organized by feature";
   features =
@@ -210,23 +213,22 @@ in {
     "List of core features that are always enabled";
   personalPackages = mkOptDef (t.listOf t.pkg) [] "List of additional packages chosen by the user";
 
-  ########################################
-  #         System Appearance            #
-  ########################################
+  ######################################################################
+  #                       System Appearance Options                      #
+  ######################################################################
   fonts = mkOpt (t.submodule {
     options = {
       main = mkOpt (t.listOf (t.tuple [t.package mkStr])) "List of [package, fontName] tuples for main fonts";
       fallback = mkOptDef (t.listOf (t.tuple [t.package mkStr])) [] "List of [package, fontName] tuples for fallback fonts";
     };
   }) "System font configuration";
-
   baseFontSize = mkOptDef t.int 12 "Base font size that other UI elements should scale from";
   cursorSize = mkOptDef t.int 24 "Size of the system cursor";
   dpi = mkOptDef t.int 96 "Display DPI setting for the system";
 
-  ########################################
-  #       Default Applications           #
-  ########################################
+  ######################################################################
+  #                       Default Applications Options                     #
+  ######################################################################
   defaultBrowser = mkOpt defaultAppModule "Default web browser configuration.";
   defaultEditor = mkOpt defaultAppModule "Default text editor configuration.";
   defaultIde = mkOpt defaultAppModule "Default IDE configuration.";
@@ -238,9 +240,9 @@ in {
   defaultImageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
   defaultMediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
 
-  ########################################
-  #         Directory Configurations     #
-  ########################################
+  ######################################################################
+  #                       Directory Configurations                       #
+  ######################################################################
   directories = mkOptDef (t.attrsOf dirModule) {} "Configuration for managed directories";
   flakeDir = mkOpt mkStr "The directory where the flake lives.";
   musicDir = mkOpt mkStr "Directory for music files.";
@@ -250,13 +252,13 @@ in {
   wallpaperVideoDir = mkOpt mkStr "Wallpaper video directory.";
   bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
 
-  ########################################
-  #          Git Configurations          #
-  ########################################
+  ######################################################################
+  #                          Git Configurations                          #
+  ######################################################################
   gitName = mkOpt mkStr "Git username.";
   gitEmail = mkOpt mkStr "Git email address.";
   gitHomeManagerRepo = mkOpt mkStr "URL of the Home Manager repository.";
 
-  # Export the actual core features list for direct use
+  # Export the core features list for external use
   inherit _coreFeatures;
 }
