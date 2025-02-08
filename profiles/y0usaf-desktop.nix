@@ -22,7 +22,7 @@ in {
     "creative"
     "virtualization"
     "backup"
-    "neovim"
+    "nvim"
     "android"
     "webapps"
     "wallust"

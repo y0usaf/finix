@@ -56,7 +56,7 @@
     # Create CAVA configuration
     xdg.configFile."cava/config".text = ''
       [general]
-      framerate = 60
+      framerate = 240
       autosens = 1
       bars = 0
       bar_width = 1
