@@ -129,7 +129,7 @@
         margin: 0;
         padding: 0;
         background-color: #222;
-        border-radius: 0h;
+        border-radius: 0;
     }
     .workspace-btn label {
         background: none;
