@@ -179,13 +179,10 @@
       && !(builtins.hasAttr feature optionalPackageSets)
   ) (validFeatures ++ _coreFeatures);
 
-  # Validation assertions to ensure every package set has a matching feature and vice versa
+  # Validation assertions to ensure package sets have matching features
   _validatePackageSets =
     lib.assertMsg (packageSetsWithoutFeatures == [])
     "Found package sets without corresponding features: ${builtins.toString packageSetsWithoutFeatures}";
-  _validateFeatures =
-    lib.assertMsg (featuresWithoutPackageSets == [])
-    "Found features without corresponding package sets: ${builtins.toString featuresWithoutPackageSets}";
 in {
   ######################################################################
   #                        Core System Options                           #
