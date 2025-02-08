@@ -4,8 +4,7 @@
   lib,
   profile,
   ...
-}:
-lib.mkIf (builtins.elem "neovim" profile.features) {
+}: {
   programs.neovim = {
     enable = true;
     defaultEditor = true;
