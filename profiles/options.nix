@@ -78,6 +78,7 @@
     "backup"
     "webapps"
     "syncthing"
+    "streamlink"
 
     # Multiplexer
     "zellij"
