@@ -120,9 +120,6 @@
     firefox = [
       pkgs.firefox
     ];
-    obs = [
-      pkgs.obs-studio
-    ];
   };
 
   ###############################
@@ -165,18 +162,27 @@
   # Combine them for the actual packageSets option
   packageSets = corePackageSets // optionalPackageSets;
 
-  ###########################################
-  #   Validation: Package Sets vs Features  #
-  ###########################################
-  invalidSets = builtins.filter (
+  ###############################
+  #    Validation Functions     #
+  ###############################
+  packageSetsWithoutFeatures = builtins.filter (
     setName:
-      !(builtins.hasAttr setName corePackageSets)
-      && !(builtins.hasAttr setName optionalPackageSets)
+      !(builtins.elem setName validFeatures)
+      && !(builtins.elem setName _coreFeatures)
   ) (builtins.attrNames packageSets);
 
-  _ =
-    lib.assertMsg (invalidSets == [])
-    "Found package sets without corresponding features: ${builtins.toString invalidSets}";
+  featuresWithoutPackageSets = builtins.filter (
+    feature:
+      !(builtins.hasAttr feature corePackageSets)
+      && !(builtins.hasAttr feature optionalPackageSets)
+  ) (validFeatures ++ _coreFeatures);
+
+  _validatePackageSets = lib.assertMsg (packageSetsWithoutFeatures == [])
+    "Found package sets without corresponding features: ${builtins.toString packageSetsWithoutFeatures}";
+
+  _validateFeatures = lib.assertMsg (featuresWithoutPackageSets == [])
+    "Found features without corresponding package sets: ${builtins.toString featuresWithoutPackageSets}";
+
 in {
   ########################################
   #          Core System Options         #
