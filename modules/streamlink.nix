@@ -5,12 +5,11 @@
   profile,
   ...
 }: {
-  # Only enable if streaming feature is selected
-  config = lib.mkIf (builtins.elem "streaming" profile.features) {
+  # Only enable if streamlink feature is selected
+  config = {
     home.packages = with pkgs; [
       streamlink
-      yt-dlp  # For additional stream source support
-    ];
+   ];
 
     # Create Streamlink configuration
     xdg.configFile."streamlink/config".text = ''
