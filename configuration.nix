@@ -202,6 +202,7 @@ in {
     #── 🌐 Network & Virtualization ─────────#
     networking.networkmanager.enable = true;
     virtualisation.lxd.enable = true;
+    virtualisation.waydroid.enable = true;
 
     #── 🚀 Core Services ──────────────────#
     xdg.portal = lib.mkIf (builtins.elem "wayland" profile.features) {
