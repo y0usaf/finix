@@ -21,6 +21,25 @@ in {
           pkgs.qt6Packages.qtwayland
         ]}"
         
+        # WebGL and graphics-related environment variables
+        export QTWEBENGINE_DISABLE_SANDBOX=1
+        export LIBGL_ALWAYS_SOFTWARE=1
+        export WEBKIT_DISABLE_COMPOSITING_MODE=1
+        
+        # Audio-related environment setup
+        export PULSE_SERVER="unix:$XDG_RUNTIME_DIR/pulse/native"
+        export PULSE_COOKIE="$XDG_RUNTIME_DIR/pulse/cookie"
+        
+        # Set up config directory for persistent storage
+        export XDG_CONFIG_HOME="$HOME/.config"
+        export XDG_DATA_HOME="$HOME/.local/share"
+        export XDG_CACHE_HOME="$HOME/.cache"
+        
+        # Create necessary directories if they don't exist
+        mkdir -p "$XDG_CONFIG_HOME/ChatGPT"
+        mkdir -p "$XDG_DATA_HOME/ChatGPT"
+        mkdir -p "$XDG_CACHE_HOME/ChatGPT"
+        
         # Set up library path for Qt6 multimedia
         export LD_LIBRARY_PATH="${lib.makeLibraryPath [
           pkgs.qt6Packages.qtbase
@@ -30,10 +49,15 @@ in {
           pkgs.qt6Packages.qtdeclarative
           pkgs.qt6Packages.qtpositioning
           pkgs.qt6Packages.qtwayland
+          pkgs.libGL
+          pkgs.pulseaudio
         ]}:$LD_LIBRARY_PATH"
         
-        # Use appimage-run to handle the AppImage execution
-        exec ${pkgs.appimage-run}/bin/appimage-run ${chatgptAppImage} "$@"
+        # Use appimage-run to handle the AppImage execution with persistent home
+        exec ${pkgs.appimage-run}/bin/appimage-run \
+          --persist-config \
+          --persist-home \
+          ${chatgptAppImage} "$@"
       '')
       
       # Make sure appimage-run and required Qt packages are available
@@ -45,6 +69,8 @@ in {
       pkgs.qt6Packages.qtdeclarative
       pkgs.qt6Packages.qtpositioning
       pkgs.qt6Packages.qtwayland
+      pkgs.libGL
+      pkgs.pulseaudio
     ];
 
     xdg.desktopEntries = {
