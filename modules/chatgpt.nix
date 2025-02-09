@@ -14,12 +14,26 @@ in {
         # Ensure the AppImage is executable
         chmod +x ${chatgptAppImage}
         
+        # Set up library path for Qt6 multimedia
+        export LD_LIBRARY_PATH="${lib.makeLibraryPath [
+          pkgs.qt6Packages.qtbase
+          pkgs.qt6Packages.qtmultimedia
+          pkgs.qt6Packages.qtwebengine
+          pkgs.qt6Packages.qtwebchannel
+          pkgs.qt6Packages.qtdeclarative
+        ]}:$LD_LIBRARY_PATH"
+        
         # Use appimage-run to handle the AppImage execution
         exec ${pkgs.appimage-run}/bin/appimage-run ${chatgptAppImage} "$@"
       '')
       
-      # Make sure appimage-run is available
+      # Make sure appimage-run and required Qt packages are available
       pkgs.appimage-run
+      pkgs.qt6Packages.qtbase
+      pkgs.qt6Packages.qtmultimedia
+      pkgs.qt6Packages.qtwebengine
+      pkgs.qt6Packages.qtwebchannel
+      pkgs.qt6Packages.qtdeclarative
     ];
 
     xdg.desktopEntries = {
