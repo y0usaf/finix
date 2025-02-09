@@ -21,7 +21,6 @@ let
   # 1. SYSTEM-WIDE ENVIRONMENT VARIABLES (FEATURE-BASED)
   ###########################################################################
   # --- Base Environment Variables ------------------------------------------
-  # Place non-Wayland system variables here.
   baseEnv = {
     # Additional non-Wayland variables can be added here.
   };
@@ -44,11 +43,23 @@ let
     XDG_SESSION_DESKTOP = "Hyprland";
   };
 
+  # --- NVIDIA-Specific Environment Variables ------------------------------
+  nvidiaEnv = lib.mkIf (builtins.elem "nvidia" profile.features) {
+    NVIDIA_DRIVER_CAPABILITIES = "all";
+    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    WLR_NO_HARDWARE_CURSORS = "1";
+    # Waydroid-specific NVIDIA settings
+    WAYDROID_EXTRA_ARGS = "--gpu-mode host";
+    GALLIUM_DRIVER = "nvidia";
+    LIBGL_DRIVER_NAME = "nvidia";
+  };
+
   # --- Combined System Environment Variables -----------------------------
   combinedSystemEnv = lib.mkMerge [
     baseEnv
     waylandEnv
     hyprlandEnv
+    nvidiaEnv
   ];
 
   ###########################################################################

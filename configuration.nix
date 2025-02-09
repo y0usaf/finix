@@ -89,7 +89,12 @@ in {
         "kvm-amd"
         "k10temp"
         "nct6775"
+        "ashmem_linux"
+        "binder_linux"
       ];
+      kernel.sysctl = {
+        "kernel.unprivileged_userns_clone" = 1;
+      };
     };
 
     hardware = {
@@ -201,8 +206,12 @@ in {
 
     #── 🌐 Network & Virtualization ─────────#
     networking.networkmanager.enable = true;
-    virtualisation.lxd.enable = true;
-    virtualisation.waydroid.enable = true;
+    virtualisation = {
+      lxd.enable = true;
+      waydroid = {
+        enable = true;
+      };
+    };
 
     #── 🚀 Core Services ──────────────────#
     xdg.portal = lib.mkIf (builtins.elem "wayland" profile.features) {
