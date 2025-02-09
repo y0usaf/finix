@@ -24,6 +24,9 @@
     echo "Listing files in \$out after extraction:"
     find $out -type f
 
+    # Remove the env-vars file that could reintroduce APPDIR or APPIMAGE.
+    rm -f $out/env-vars
+
     cd $out
 
     # Locate the AppImage file at the top level.
@@ -33,7 +36,7 @@
       exit 1
     fi
 
-    # Rename if needed to ensure consistency.
+    # Rename the AppImage file if its name is not as expected.
     if [ "$(basename "$APPIMAGE")" != "chat-gpt_1.1.0_amd64.AppImage" ]; then
       mv "$APPIMAGE" chat-gpt_1.1.0_amd64.AppImage
     fi
@@ -45,7 +48,7 @@
     version = "1.1.0";
     src = "${chatgptUnpacked}/chat-gpt_1.1.0_amd64.AppImage";
     nativeBuildInputs = [ pkgs.squashfsTools ];
-    # Unset both APPDIR and APPIMAGE so that Tauri never sees them.
+    # Unset any lingering environment variables from the binary's launcher.
     postFixup = ''
       wrapProgram $out/bin/chatgpt --unset-env APPDIR --unset-env APPIMAGE
     '';
@@ -54,8 +57,8 @@ in {
   config = {
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
-        # Launch with a minimal environment (so that unwanted variables are not inherited)
-        # but pass along the necessary GUI variables.
+        # Launch with a minimal environment (so that unwanted variables, notably APPDIR and APPIMAGE, are not inherited)
+        # but pass along necessary GUI-related variables.
         exec env -i \
              PATH="$PATH" \
              HOME="$HOME" \
