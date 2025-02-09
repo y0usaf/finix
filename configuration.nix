@@ -208,14 +208,8 @@ in {
       enable = true;
       xdgOpenUsePortal = true;
       extraPortals = [
-        pkgs.xdg-desktop-portal-hyprland
+        pkgs.xdg-desktop-portal-gtk
       ];
-      config = {
-        common = {
-          default = ["hyprland"];
-          "org.freedesktop.impl.portal.OpenURI" = ["gtk"];
-        };
-      };
     };
   };
 }
