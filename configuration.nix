@@ -175,7 +175,7 @@ in {
 
     #── 👤 User Environment ─────────────────#
     programs = {
-      hyprland = lib.mkIf (enableWayland && enableHyprland) {
+      hyprland = lib.mkIf (builtins.elem "wayland" profile.features && builtins.elem "hyprland" profile.features) {
         enable = true;
         xwayland.enable = true;
         package = inputs.hyprland.packages.${pkgs.system}.hyprland;
@@ -204,11 +204,11 @@ in {
     virtualisation.lxd.enable = true;
 
     #── 🚀 Core Services ──────────────────#
-    xdg.portal = lib.mkIf (enableWayland && enableHyprland) {
+    xdg.portal = lib.mkIf (builtins.elem "wayland" profile.features) {
       enable = true;
       xdgOpenUsePortal = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-gtk
+      extraPortals = [
+        pkgs.xdg-desktop-portal-gtk
       ];
       config = {
         common = {
