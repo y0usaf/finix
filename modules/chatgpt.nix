@@ -26,14 +26,14 @@
 
     cd $out
 
-    # Find the AppImage file (looking only at the top level)
+    # Find the AppImage file (limiting search to top level)
     APPIMAGE=$(find . -maxdepth 1 -type f -iname '*.appimage' | head -n1)
     if [ -z "$APPIMAGE" ]; then
       echo "Error: No AppImage file found in the extracted archive!"
       exit 1
     fi
 
-    # Only move (rename) if its basename is different than expected.
+    # Rename only if necessary.
     if [ "$(basename "$APPIMAGE")" != "chat-gpt_1.1.0_amd64.AppImage" ]; then
       mv "$APPIMAGE" chat-gpt_1.1.0_amd64.AppImage
     fi
@@ -50,10 +50,8 @@ in {
   config = {
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
-        # Unset these variables so that the wrapped binary isn't confused.
-        unset APPDIR
-        unset APPIMAGE
-        exec ${chatgptWrapped}/bin/chatgpt "$@"
+        # Unset these variables via env -u...
+        exec env -u APPDIR -u APPIMAGE ${chatgptWrapped}/bin/chatgpt "$@"
       '')
     ];
 
