@@ -28,7 +28,7 @@ in {
   #--------------------------------------------------------------------
   config = lib.mkIf hyprlandEnabled {
     xdg.portal = {
-      xdgOpenUsePortal = true
+      xdgOpenUsePortal = true;
       configPackages = [inputs.hyprland.packages.${system}.xdg-desktop-portal-hyprland];
       enable = true;
       extraPortals = [
