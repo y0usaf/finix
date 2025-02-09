@@ -29,14 +29,14 @@
 
     cd $out
 
-    # Locate the AppImage file at the top level.
+    # Locate the AppImage file (limiting search to the top level)
     APPIMAGE=$(find . -maxdepth 1 -type f -iname '*.appimage' | head -n1)
     if [ -z "$APPIMAGE" ]; then
       echo "Error: No AppImage file found in the extracted archive!"
       exit 1
     fi
 
-    # Rename the AppImage file if its name is not as expected.
+    # Rename only if necessary.
     if [ "$(basename "$APPIMAGE")" != "chat-gpt_1.1.0_amd64.AppImage" ]; then
       mv "$APPIMAGE" chat-gpt_1.1.0_amd64.AppImage
     fi
@@ -48,17 +48,18 @@
     version = "1.1.0";
     src = "${chatgptUnpacked}/chat-gpt_1.1.0_amd64.AppImage";
     nativeBuildInputs = [ pkgs.squashfsTools ];
-    # Unset any lingering environment variables from the binary's launcher.
+    # Unset APPDIR and APPIMAGE and remove any export lines in the generated wrapper.
     postFixup = ''
       wrapProgram $out/bin/chatgpt --unset-env APPDIR --unset-env APPIMAGE
+      substituteInPlace $out/bin/chatgpt --replace 'export APPIMAGE' '# export APPIMAGE'
+      substituteInPlace $out/bin/chatgpt --replace 'export APPDIR' '# export APPDIR'
     '';
   };
 in {
   config = {
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
-        # Launch with a minimal environment (so that unwanted variables, notably APPDIR and APPIMAGE, are not inherited)
-        # but pass along necessary GUI-related variables.
+        # Launch using a clean environment while re-injecting only the necessary variables.
         exec env -i \
              PATH="$PATH" \
              HOME="$HOME" \
