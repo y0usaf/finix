@@ -67,11 +67,6 @@
       url = "github:y0usaf/hyprpaper/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    noi = {
-      url = "github:lencx/Noi";
-      flake = false;
-    };
   };
 
   ####################################################################
