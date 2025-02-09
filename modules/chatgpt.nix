@@ -53,7 +53,11 @@ in {
   config = {
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
-        exec ${chatgptWrapped}/bin/chatgpt "$@"
+        # Launch with a minimal environment so that variables like APPDIR and APPIMAGE don't leak in.
+        exec env -i \
+             PATH="$PATH" \
+             HOME="$HOME" \
+             ${chatgptWrapped}/bin/chatgpt "$@"
       '')
     ];
 
