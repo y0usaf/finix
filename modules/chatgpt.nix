@@ -36,10 +36,21 @@ in {
         export XDG_DATA_HOME="$HOME/.local/share"
         export XDG_CACHE_HOME="$HOME/.cache"
         
-        # Create necessary directories if they don't exist
+        # Debug information for storage directories
+        echo "Creating and checking permissions for storage directories..."
         mkdir -p "$XDG_CONFIG_HOME/ChatGPT"
         mkdir -p "$XDG_DATA_HOME/ChatGPT"
         mkdir -p "$XDG_CACHE_HOME/ChatGPT"
+        
+        # Ensure proper permissions
+        chmod 755 "$XDG_CONFIG_HOME/ChatGPT"
+        chmod 755 "$XDG_DATA_HOME/ChatGPT"
+        chmod 755 "$XDG_CACHE_HOME/ChatGPT"
+        
+        echo "Storage directories:"
+        ls -la "$XDG_CONFIG_HOME/ChatGPT"
+        ls -la "$XDG_DATA_HOME/ChatGPT"
+        ls -la "$XDG_CACHE_HOME/ChatGPT"
         
         # Audio and microphone permissions
         export WEBKIT_FORCE_SANDBOX=0
@@ -69,8 +80,12 @@ in {
           pkgs.gst_all_1.gst-plugins-good
         ]}:$LD_LIBRARY_PATH"
         
-        # Use appimage-run to handle the AppImage execution
+        # Use appimage-run to handle the AppImage execution with explicit home binding
         exec ${pkgs.appimage-run}/bin/appimage-run \
+          --home="$HOME" \
+          --bind="$XDG_CONFIG_HOME/ChatGPT:$HOME/.config/ChatGPT" \
+          --bind="$XDG_DATA_HOME/ChatGPT:$HOME/.local/share/ChatGPT" \
+          --bind="$XDG_CACHE_HOME/ChatGPT:$HOME/.cache/ChatGPT" \
           ${chatgptAppImage} "$@"
       '')
       
@@ -99,6 +114,7 @@ in {
         categories = ["Development" "Network" "X-AI"];
         comment = "AI Chat Client";
         icon = "chatgpt";
+        mimeType = ["x-scheme-handler/chatgpt"];
       };
     };
   };
