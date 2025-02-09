@@ -26,7 +26,7 @@
 
     cd $out
 
-    # Locate the AppImage file at the top level
+    # Locate the AppImage file at the top level.
     APPIMAGE=$(find . -maxdepth 1 -type f -iname '*.appimage' | head -n1)
     if [ -z "$APPIMAGE" ]; then
       echo "Error: No AppImage file found in the extracted archive!"
@@ -45,25 +45,23 @@
     version = "1.1.0";
     src = "${chatgptUnpacked}/chat-gpt_1.1.0_amd64.AppImage";
     nativeBuildInputs = [ pkgs.squashfsTools ];
-    # Remove APPDIR so that Tauri doesn't see it;
-    # but leave APPIMAGE in the environment so that Tauri can verify the AppImage.
+    # Unset both APPDIR and APPIMAGE so that Tauri never sees them.
     postFixup = ''
-      wrapProgram $out/bin/chatgpt --unset-env APPDIR
+      wrapProgram $out/bin/chatgpt --unset-env APPDIR --unset-env APPIMAGE
     '';
   };
 in {
   config = {
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
-        # Launch with a minimal environment. We pass along the necessary variables for GUI sessions.
-        # Note: Instead of unsetting APPIMAGE, we explicitly set it to the original AppImage file.
+        # Launch with a minimal environment (so that unwanted variables are not inherited)
+        # but pass along the necessary GUI variables.
         exec env -i \
              PATH="$PATH" \
              HOME="$HOME" \
              DISPLAY="$DISPLAY" \
              XAUTHORITY="$XAUTHORITY" \
              DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
-             APPIMAGE="${chatgptUnpacked}/chat-gpt_1.1.0_amd64.AppImage" \
              ${chatgptWrapped}/bin/chatgpt "$@"
       '')
     ];
