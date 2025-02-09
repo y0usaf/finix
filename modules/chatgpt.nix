@@ -14,29 +14,12 @@ in {
         # Ensure the AppImage is executable
         chmod +x ${chatgptAppImage}
         
-        # Set up Qt-specific environment variables and library paths
-        export QT_PLUGIN_PATH="${pkgs.qt6Packages.qtbase}/lib/qt-6/plugins"
-        export QT_QPA_PLATFORM_PLUGIN_PATH="${pkgs.qt6Packages.qtbase}/lib/qt-6/plugins/platforms"
-        export LD_LIBRARY_PATH="${pkgs.qt6Packages.qtbase}/lib:${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
-        
-        # Launch the AppImage with the necessary environment
-        exec env -i \
-             PATH="$PATH" \
-             HOME="$HOME" \
-             DISPLAY="$DISPLAY" \
-             XAUTHORITY="$XAUTHORITY" \
-             DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
-             QT_PLUGIN_PATH="$QT_PLUGIN_PATH" \
-             QT_QPA_PLATFORM_PLUGIN_PATH="$QT_QPA_PLATFORM_PLUGIN_PATH" \
-             LD_LIBRARY_PATH="$LD_LIBRARY_PATH" \
-             ${pkgs.glibc.out}/lib/ld-linux-x86-64.so.2 \
-             --library-path ${lib.makeLibraryPath [
-               pkgs.qt6Packages.qtbase
-               pkgs.stdenv.cc.cc.lib
-               pkgs.glibc
-             ]} \
-             ${chatgptAppImage} "$@"
+        # Use appimage-run to handle the AppImage execution
+        exec ${pkgs.appimage-run}/bin/appimage-run ${chatgptAppImage} "$@"
       '')
+      
+      # Make sure appimage-run is available
+      pkgs.appimage-run
     ];
 
     xdg.desktopEntries = {
