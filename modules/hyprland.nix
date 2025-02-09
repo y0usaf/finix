@@ -27,6 +27,16 @@ in {
   # Hyprland Configuration (only applied if enabled)
   #--------------------------------------------------------------------
   config = lib.mkIf hyprlandEnabled {
+    xdg.portal = {
+      xdgOpenUsePortal = true
+      configPackages = [inputs.hyprland.packages.${system}.xdg-desktop-portal-hyprland];
+      enable = true;
+      extraPortals = [
+        pkgs.xdg-desktop-portal-gtk
+      ];
+      config.common.default = "*";
+    };
+
     wayland.windowManager.hyprland = {
       #------------------------------------------------------------------
       # Core Activation and System Settings
