@@ -25,11 +25,11 @@ in {
         export QTWEBENGINE_DISABLE_SANDBOX=1
         export LIBGL_ALWAYS_SOFTWARE=1
         export WEBKIT_DISABLE_COMPOSITING_MODE=1
-        export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu"
+        export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu --use-fake-ui-for-media-stream=0 --enable-features=WebRTCAudioDeviceEnumeration,WebRTCPipeWireCapturer"
         
-        # Audio-related environment setup
-        export PULSE_SERVER="unix:$XDG_RUNTIME_DIR/pulse/native"
-        export PULSE_COOKIE="$XDG_RUNTIME_DIR/pulse/cookie"
+        # Audio-related environment setup for PipeWire
+        export PIPEWIRE_RUNTIME_DIR="$XDG_RUNTIME_DIR/pipewire"
+        export PIPEWIRE_LATENCY="128/48000"
         
         # Set up config directory for persistent storage
         export XDG_CONFIG_HOME="$HOME/.config"
@@ -41,7 +41,18 @@ in {
         mkdir -p "$XDG_DATA_HOME/ChatGPT"
         mkdir -p "$XDG_CACHE_HOME/ChatGPT"
         
-        # Set up library path for Qt6 multimedia
+        # Audio and microphone permissions
+        export WEBKIT_FORCE_SANDBOX=0
+        export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu --use-fake-ui-for-media-stream=0 --enable-features=WebRTCAudioDeviceEnumeration"
+        
+        # Additional audio configurations
+        export ALSA_PLUGIN_DIR="${pkgs.alsa-plugins}/lib/alsa-lib"
+        export GST_PLUGIN_PATH="${lib.makeSearchPath "lib/gstreamer-1.0" [
+          pkgs.gst_all_1.gst-plugins-base
+          pkgs.gst_all_1.gst-plugins-good
+        ]}"
+
+        # Set up library path for audio/media components
         export LD_LIBRARY_PATH="${lib.makeLibraryPath [
           pkgs.qt6Packages.qtbase
           pkgs.qt6Packages.qtmultimedia
@@ -51,7 +62,11 @@ in {
           pkgs.qt6Packages.qtpositioning
           pkgs.qt6Packages.qtwayland
           pkgs.libGL
-          pkgs.pulseaudio
+          pkgs.pipewire
+          pkgs.alsa-lib
+          pkgs.alsa-plugins
+          pkgs.gst_all_1.gst-plugins-base
+          pkgs.gst_all_1.gst-plugins-good
         ]}:$LD_LIBRARY_PATH"
         
         # Use appimage-run to handle the AppImage execution
@@ -69,7 +84,11 @@ in {
       pkgs.qt6Packages.qtpositioning
       pkgs.qt6Packages.qtwayland
       pkgs.libGL
-      pkgs.pulseaudio
+      pkgs.pipewire
+      pkgs.alsa-lib
+      pkgs.alsa-plugins
+      pkgs.gst_all_1.gst-plugins-base
+      pkgs.gst_all_1.gst-plugins-good
     ];
 
     xdg.desktopEntries = {
