@@ -13,13 +13,15 @@ in {
       (pkgs.writeShellScriptBin "chatgpt" ''
         # Ensure the AppImage is executable.
         chmod +x ${chatgptAppImage}
-        # Launch the AppImage with a clean environment plus the necessary GUI variables.
+        # Launch the AppImage using glibc's dynamic linker to avoid the NixOS stub-ld error.
         exec env -i \
              PATH="$PATH" \
              HOME="$HOME" \
              DISPLAY="$DISPLAY" \
              XAUTHORITY="$XAUTHORITY" \
              DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
+             ${pkgs.glibc.out}/lib/ld-linux-x86-64.so.2 \
+             --library-path ${pkgs.glibc.out}/lib \
              ${chatgptAppImage} "$@"
       '')
     ];
