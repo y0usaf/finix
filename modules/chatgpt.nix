@@ -21,6 +21,7 @@ in {
           pkgs.qt6Packages.qtwebengine
           pkgs.qt6Packages.qtwebchannel
           pkgs.qt6Packages.qtdeclarative
+          pkgs.qt6Packages.qtpositioning
         ]}:$LD_LIBRARY_PATH"
         
         # Use appimage-run to handle the AppImage execution
@@ -34,6 +35,7 @@ in {
       pkgs.qt6Packages.qtwebengine
       pkgs.qt6Packages.qtwebchannel
       pkgs.qt6Packages.qtdeclarative
+      pkgs.qt6Packages.qtpositioning
     ];
 
     xdg.desktopEntries = {
