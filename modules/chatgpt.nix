@@ -14,6 +14,13 @@ in {
         # Ensure the AppImage is executable
         chmod +x ${chatgptAppImage}
         
+        # Set up Qt-specific environment variables
+        export QT_QPA_PLATFORM=xcb
+        export QT_PLUGIN_PATH="${lib.makeSearchPath "lib/qt-6/plugins" [
+          pkgs.qt6Packages.qtbase
+          pkgs.qt6Packages.qtwayland
+        ]}"
+        
         # Set up library path for Qt6 multimedia
         export LD_LIBRARY_PATH="${lib.makeLibraryPath [
           pkgs.qt6Packages.qtbase
@@ -22,6 +29,7 @@ in {
           pkgs.qt6Packages.qtwebchannel
           pkgs.qt6Packages.qtdeclarative
           pkgs.qt6Packages.qtpositioning
+          pkgs.qt6Packages.qtwayland
         ]}:$LD_LIBRARY_PATH"
         
         # Use appimage-run to handle the AppImage execution
@@ -36,6 +44,7 @@ in {
       pkgs.qt6Packages.qtwebchannel
       pkgs.qt6Packages.qtdeclarative
       pkgs.qt6Packages.qtpositioning
+      pkgs.qt6Packages.qtwayland
     ];
 
     xdg.desktopEntries = {
