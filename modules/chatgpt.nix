@@ -45,13 +45,15 @@
     version = "1.1.0";
     src = "${chatgptUnpacked}/chat-gpt_1.1.0_amd64.AppImage";
     nativeBuildInputs = [ pkgs.squashfsTools ];
+    postFixup = ''
+      wrapProgram $out/bin/chatgpt --unset-env APPDIR --unset-env APPIMAGE
+    '';
   };
 in {
   config = {
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
-        # Unset these variables via env -u...
-        exec env -u APPDIR -u APPIMAGE ${chatgptWrapped}/bin/chatgpt "$@"
+        exec ${chatgptWrapped}/bin/chatgpt "$@"
       '')
     ];
 
