@@ -53,10 +53,14 @@ in {
   config = {
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
-        # Launch with a minimal environment so that variables like APPDIR and APPIMAGE don't leak in.
+        # Launch with a minimal environment, but explicitly pass $DISPLAY, $XAUTHORITY,
+        # and any other variables required for GUI sessions.
         exec env -i \
              PATH="$PATH" \
              HOME="$HOME" \
+             DISPLAY="$DISPLAY" \
+             XAUTHORITY="$XAUTHORITY" \
+             DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
              ${chatgptWrapped}/bin/chatgpt "$@"
       '')
     ];
