@@ -54,10 +54,8 @@ in {
           pkgs.pulseaudio
         ]}:$LD_LIBRARY_PATH"
         
-        # Use appimage-run to handle the AppImage execution with persistent home
+        # Use appimage-run to handle the AppImage execution
         exec ${pkgs.appimage-run}/bin/appimage-run \
-          --persist-config \
-          --persist-home \
           ${chatgptAppImage} "$@"
       '')
       
