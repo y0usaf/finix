@@ -50,6 +50,9 @@ in {
   config = {
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
+        # Unset these variables so that the wrapped binary isn't confused.
+        unset APPDIR
+        unset APPIMAGE
         exec ${chatgptWrapped}/bin/chatgpt "$@"
       '')
     ];
