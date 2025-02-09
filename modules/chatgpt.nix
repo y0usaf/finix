@@ -25,6 +25,7 @@ in {
         export QTWEBENGINE_DISABLE_SANDBOX=1
         export LIBGL_ALWAYS_SOFTWARE=1
         export WEBKIT_DISABLE_COMPOSITING_MODE=1
+        export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu"
         
         # Audio-related environment setup
         export PULSE_SERVER="unix:$XDG_RUNTIME_DIR/pulse/native"
