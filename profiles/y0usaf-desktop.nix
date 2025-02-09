@@ -32,6 +32,7 @@ in {
     "music"
     "obs"
     "streamlink"
+    "noi"
   ];
 
   flakeDir = "${homeDir}/nixos";

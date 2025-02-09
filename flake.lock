@@ -755,6 +755,22 @@
         "type": "github"
       }
     },
+    "noi": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1738858999,
+        "narHash": "sha256-WeQ2OV3d09jx3OMDOWVProu0ysqWUGrhjL9ufSQ30f0=",
+        "owner": "lencx",
+        "repo": "Noi",
+        "rev": "d344b522069a8f59c50471bdbfb4532efc98fd60",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lencx",
+        "repo": "Noi",
+        "type": "github"
+      }
+    },
     "obs-image-reaction": {
       "inputs": {
         "nixpkgs": "nixpkgs_3"
@@ -848,6 +864,7 @@
         "hyprland": "hyprland",
         "hyprpaper": "hyprpaper",
         "nixpkgs": "nixpkgs_2",
+        "noi": "noi",
         "obs-image-reaction": "obs-image-reaction",
         "pyproject-nix": "pyproject-nix",
         "uv2nix": "uv2nix"
