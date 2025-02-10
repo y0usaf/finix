@@ -100,7 +100,7 @@
           blur = {
             enabled = true;
             size = 10;
-            passes = 3;
+            passes = 2;
             new_optimizations = true;
             ignore_opacity = false;
             noise = 0;

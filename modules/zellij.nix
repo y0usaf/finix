@@ -27,7 +27,7 @@
   };
 
   xdg.configFile."zellij/layouts/music.kdl".text = ''
-    layout {
+    layout alias="music" {
         default_tab_template {
             pane size=1 borderless=true {
                 plugin location="zellij:tab-bar"

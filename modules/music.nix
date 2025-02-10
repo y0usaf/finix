@@ -16,21 +16,20 @@
     # Create CMUS configuration
     # Placeholder
 
-    # Create CAVA configuration
+    # Create CAVA configuration with updated settings (gradient configuration removed)
     programs.cava = {
       enable = true;
       settings = {
         general = {
-          framerate = 240;
-          autosens = 1;
-          overshoot = 5;
-          sensitivity = 50;
-          bars = 100;
-          bar_width = 1;
-          bar_spacing = 1;
-          lower_cutoff_freq = 50;
-          higher_cutoff_freq = 10000;
-          sleep_timer = 0;
+          autosens            = 1;
+          bar_spacing         = 1;
+          bar_width           = 2;
+          framerate           = 300;
+          higher_cutoff_freq  = 20000;
+          lower_cutoff_freq   = 0;
+          overshoot           = 10;
+          sensitivity         = 25;
+          sleep_timer         = 0;
         };
 
         input = {
@@ -39,40 +38,24 @@
         };
 
         output = {
-          method = "ncurses";
+          method      = "ncurses";
           orientation = "bottom";
-          channels = "stereo";
-          mono_option = "average";
-          reverse = 0;
-          alacritty_sync = 0;
-        };
-
-        color = {
-          gradient = 0;
-          gradient_count = 8;
-          gradient_color_1 = "'#59cc33'";
-          gradient_color_2 = "'#80cc33'";
-          gradient_color_3 = "'#a6cc33'";
-          gradient_color_4 = "'#cccc33'";
-          gradient_color_5 = "'#cca633'";
-          gradient_color_6 = "'#cc8033'";
-          gradient_color_7 = "'#cc5933'";
-          gradient_color_8 = "'#cc3333'";
+          channels    = "mono";
         };
 
         smoothing = {
           noise_reduction = 95;
-          monstercat = 0;
-          waves = 0;
-          gravity = 80;
+          monstercat      = 0;
+          waves           = 0;
+          gravity         = 100;
         };
 
         eq = {
-          "1" = 1;
-          "2" = 1;
+          "1" = 2;
+          "2" = 1.5;
           "3" = 1;
-          "4" = 1;
-          "5" = 1;
+          "4" = 1.5;
+          "5" = 2;
         };
       };
     };
