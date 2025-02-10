@@ -21,15 +21,15 @@
       enable = true;
       settings = {
         general = {
-          autosens            = 1;
-          bar_spacing         = 1;
-          bar_width           = 2;
-          framerate           = 300;
-          higher_cutoff_freq  = 20000;
-          lower_cutoff_freq   = 0;
-          overshoot           = 10;
-          sensitivity         = 25;
-          sleep_timer         = 0;
+          autosens = 1;
+          bar_spacing = 1;
+          bar_width = 2;
+          framerate = 300;
+          higher_cutoff_freq = 20000;
+          lower_cutoff_freq = 0;
+          overshoot = 10;
+          sensitivity = 25;
+          sleep_timer = 0;
         };
 
         input = {
@@ -38,16 +38,16 @@
         };
 
         output = {
-          method      = "ncurses";
+          method = "ncurses";
           orientation = "bottom";
-          channels    = "mono";
+          channels = "mono";
         };
 
         smoothing = {
           noise_reduction = 95;
-          monstercat      = 0;
-          waves           = 0;
-          gravity         = 100;
+          monstercat = 0;
+          waves = 0;
+          gravity = 100;
         };
 
         eq = {

@@ -34,8 +34,14 @@
       "kvm-amd"
       "k10temp"
       "nct6775"
+      "zenpower"
     ];
-    extraModulePackages = [];
+    extraModulePackages = [config.boot.kernelPackages.zenpower];
+
+    kernelParams = [
+      "amd_pstate=active"
+      "mitigations=off"
+    ];
   };
 
   #── 💽 Root Filesystem ──────────────────#
@@ -97,7 +103,7 @@
   swapDevices = [
     {
       device = "/swap/swapfile";
-      size = 32768; # Size in MB (32GB)
+      size = 96768; # Increased to match RAM size for hibernation (96GB + 768MB)
     }
   ];
 
