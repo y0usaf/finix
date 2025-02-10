@@ -42,10 +42,16 @@
       case "$(hostname)" in
         "y0usaf-desktop")
           sudo nvidia-smi -pl 150
-          ${lib.optionalString (builtins.elem "hyprland" profile.features) "Hyprland"}
+          # Only launch Hyprland if we're in a TTY and the feature is enabled
+          if [ "$(tty)" = "/dev/tty1" ] && ${lib.optionalString (builtins.elem "hyprland" profile.features) "true"}; then
+            Hyprland
+          fi
           ;;
         "y0usaf-laptop")
-          ${lib.optionalString (builtins.elem "hyprland" profile.features) "Hyprland"}
+          # Only launch Hyprland if we're in a TTY and the feature is enabled
+          if [ "$(tty)" = "/dev/tty1" ] && ${lib.optionalString (builtins.elem "hyprland" profile.features) "true"}; then
+            Hyprland
+          fi
           ;;
       esac
     '';
