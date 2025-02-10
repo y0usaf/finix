@@ -157,7 +157,7 @@
         FX.MaxCPUParticlesPerEmitter=20
         FX.MaxGPUParticlesSpawnedPerFrame=0
         r.ParticleLODBias=3
-         
+
         [/script/engine.renderersettings]
         r.DefaultFeature.LensFlare=False
         r.DefaultFeature.DepthOfField=False
