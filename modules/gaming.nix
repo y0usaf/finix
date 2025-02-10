@@ -22,187 +22,174 @@
       prismlauncher
     ];
 
-    # Marvel Rivals game settings
-    home.activation = {
-      setupMarvelRivals = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        CONFIG_DIR="${profile.homeDirectory}/.local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows"
-        if [ -d "${profile.homeDirectory}/.local/share/Steam" ]; then
-          mkdir -p "$CONFIG_DIR"
-          cat > "$CONFIG_DIR/GameUserSettings.ini" << 'EOL'
-            [Internationalization]
-            Culture=en
+    home.file = {
+      # Marvel Rivals config file
+      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini".text = ''
+        [Internationalization]
+        Culture=en
 
-            [ScalabilityGroups]
-            sg.ViewDistanceQuality=1
-            sg.ShadowQuality=0
-            sg.PostProcessQuality=0
-            sg.TextureQuality=0
-            sg.EffectsQuality=0
-            sg.FoliageQuality=0
-            sg.ShadingQuality=0
-            sg.ReflectionQuality=0
-            sg.GlobalIlluminationQuality=0
+        [ScalabilityGroups]
+        sg.ViewDistanceQuality=1
+        sg.ShadowQuality=0
+        sg.PostProcessQuality=0
+        sg.TextureQuality=0
+        sg.EffectsQuality=0
+        sg.FoliageQuality=0
+        sg.ShadingQuality=0
+        sg.ReflectionQuality=0
+        sg.GlobalIlluminationQuality=0
 
-            [/Script/Engine.GameUserSettings]
-            bUseDesiredScreenHeight=False
+        [/Script/Engine.GameUserSettings]
+        bUseDesiredScreenHeight=False
 
-            [/Script/Marvel.MarvelGameUserSettings]
-            AntiAliasingSuperSamplingMode=4
-            SuperSamplingQuality=4
-            CASSharpness=0.000000
-            ScreenPercentage=100.000000
-            VoiceLanguage=
-            bNvidiaReflex=False
-            bXeLowLatency=False
-            bDlssFrameGeneration=False
-            bFSRFrameGeneration=False
-            bXeFrameGeneration=False
-            MonitorIndex=0
-            bEnableConsole120Fps=False
-            bUseVSync=False
-            bUseDynamicResolution=False
-            ResolutionSizeX=2560
-            ResolutionSizeY=1440
-            LastUserConfirmedResolutionSizeX=2560
-            LastUserConfirmedResolutionSizeY=1440
-            WindowPosX=1716
-            WindowPosY=6
-            FullscreenMode=2
-            LastConfirmedFullscreenMode=2
-            PreferredFullscreenMode=1
-            Version=22
-            AudioQualityLevel=0
-            LastConfirmedAudioQualityLevel=0
-            FrameRateLimit=0.000000
-            DesiredScreenWidth=2560
-            DesiredScreenHeight=1440
-            LastUserConfirmedDesiredScreenWidth=2560
-            LastUserConfirmedDesiredScreenHeight=1440
-            LastRecommendedScreenWidth=-1.000000
-            LastRecommendedScreenHeight=-1.000000
-            LastCPUBenchmarkResult=-1.000000
-            LastGPUBenchmarkResult=-1.000000
-            LastGPUBenchmarkMultiplier=1.000000
-            bUseHDRDisplayOutput=False
-            HDRDisplayOutputNits=1000
+        [/Script/Marvel.MarvelGameUserSettings]
+        AntiAliasingSuperSamplingMode=4
+        SuperSamplingQuality=4
+        CASSharpness=0.000000
+        ScreenPercentage=100.000000
+        VoiceLanguage=
+        bNvidiaReflex=False
+        bXeLowLatency=False
+        bDlssFrameGeneration=False
+        bFSRFrameGeneration=False
+        bXeFrameGeneration=False
+        MonitorIndex=0
+        bEnableConsole120Fps=False
+        bUseVSync=False
+        bUseDynamicResolution=False
+        ResolutionSizeX=2560
+        ResolutionSizeY=1440
+        LastUserConfirmedResolutionSizeX=2560
+        LastUserConfirmedResolutionSizeY=1440
+        WindowPosX=1716
+        WindowPosY=6
+        FullscreenMode=2
+        LastConfirmedFullscreenMode=2
+        PreferredFullscreenMode=1
+        Version=22
+        AudioQualityLevel=0
+        LastConfirmedAudioQualityLevel=0
+        FrameRateLimit=0.000000
+        DesiredScreenWidth=2560
+        DesiredScreenHeight=1440
+        LastUserConfirmedDesiredScreenWidth=2560
+        LastUserConfirmedDesiredScreenHeight=1440
+        LastRecommendedScreenWidth=-1.000000
+        LastRecommendedScreenHeight=-1.000000
+        LastCPUBenchmarkResult=-1.000000
+        LastGPUBenchmarkResult=-1.000000
+        LastGPUBenchmarkMultiplier=1.000000
+        bUseHDRDisplayOutput=False
+        HDRDisplayOutputNits=1000
 
-            [CareerHighLight]
-            HighLightVideoSavedPath=C:\users\steamuser\Videos\MarvelRivals\Highlights
-          EOL
-        fi
+        [CareerHighLight]
+        HighLightVideoSavedPath=C:\users\steamuser\Videos\MarvelRivals\Highlights
       '';
-      
-      # Wukong game settings (writes to Engine.ini)
-      setupWukong = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        CONFIG_DIR="${profile.homeDirectory}/.local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows"
-        if [ -d "${profile.homeDirectory}/.local/share/Steam" ]; then
-          mkdir -p "$CONFIG_DIR"
-          cat > "$CONFIG_DIR/Engine.ini" << 'EOL'
-[Core.System]
-Paths=../../../Engine/Content
-Paths=%GAMEDIR%Content
-Paths=../../../Engine/Plugins/Animation/ControlRig/Content
-Paths=../../../Engine/Plugins/Animation/IKRig/Content
-Paths=../../../Engine/Plugins/Editor/SpeedTreeImporter/Content
-Paths=../../../Engine/Plugins/2D/Paper2D/Content
-Paths=../../../Engine/Plugins/Editor/GeometryMode/Content
-Paths=../../../Engine/Plugins/FX/Niagara/Content
-Paths=../../../Engine/Plugins/Bridge/Content
-Paths=../../../Engine/Plugins/Editor/ConsoleVariablesEditor/Content
-Paths=../../../Engine/Plugins/Enterprise/DatasmithContent/Content
-Paths=../../../Engine/Plugins/Developer/AnimationSharing/Content
-Paths=../../../Engine/Plugins/Animation/AnimationWarping/Content
-Paths=../../../Engine/Plugins/Animation/AnimationLocomotionLibrary/Content
-Paths=../../../Engine/Plugins/Experimental/ChaosClothEditor/Content
-Paths=../../../Engine/Plugins/FX/NiagaraFluids/Content
-Paths=../../../Engine/Plugins/Experimental/PCG/Content
-Paths=../../../Engine/Plugins/Experimental/GeometryScripting/Content
-Paths=../../../Engine/Plugins/Experimental/GeometryCollectionPlugin/Content
-Paths=../../../Engine/Plugins/Experimental/MeshModelingToolsetExp/Content
-Paths=../../../Engine/Plugins/Experimental/Volumetrics/Content
-Paths=../../../Engine/Plugins/Experimental/PythonScriptPlugin/Content
-Paths=../../../Engine/Plugins/Experimental/VirtualHeightfieldMesh/Content
-Paths=../../../Engine/Plugins/MovieScene/MovieRenderPipeline/Content
-Paths=../../../Engine/Plugins/Experimental/Water/Content
-Paths=../../../Engine/Plugins/Animation/ControlRigSpline/Content
-Paths=../../../Engine/Plugins/MovieScene/SequencerScripting/Content
-Paths=../../../Engine/Plugins/Experimental/Landmass/Content
-Paths=../../../Engine/Plugins/Media/MediaCompositing/Content
-Paths=../../../Engine/Plugins/Enterprise/DataprepEditor/Content
-Paths=../../../Engine/Plugins/Experimental/ChaosSolverPlugin/Content
-Paths=../../../Engine/Plugins/Runtime/GeometryProcessing/Content
-Paths=../../../Engine/Plugins/Runtime/Synthesis/Content
-Paths=../../../Engine/Plugins/Runtime/WebBrowserWidget/Content
-Paths=../../../Engine/Plugins/Runtime/AudioSynesthesia/Content
-Paths=../../../Engine/Plugins/Runtime/MeshModelingToolset/Content
-Paths=../../../Engine/Plugins/Runtime/HairStrands/Content
-Paths=../../../Engine/Plugins/Experimental/ChaosNiagara/Content
-Paths=../../../Engine/Plugins/Runtime/ResonanceAudio/Content
-Paths=../../../Engine/Plugins/Experimental/OpacityMicroMap/Content
-Paths=../../../Engine/Plugins/Runtime/Nvidia/NRD/Content
-Paths=../../../Engine/Plugins/Developer/Concert/ConcertSync/ConcertSyncClient/Content
-Paths=../../../Engine/Plugins/Experimental/FullBodyIK/Content
-Paths=../../../Engine/Plugins/Compositing/OpenColorIO/Content
-Paths=../../../Engine/Plugins/Runtime/Nvidia/DLSS/Content
-Paths=../../../Engine/Plugins/Experimental/CinematicPrestreaming/Content
-Paths=../../../b1/Plugins/AnimToTexture/Content
-Paths=../../../b1/Plugins/DonAINavigation/Content
-Paths=../../../b1/Plugins/GSEngineExtent/Content
-Paths=../../../b1/Plugins/GSEditorActions/Content
-Paths=../../../b1/Plugins/CustomLightSystem/Content
-Paths=../../../b1/Plugins/ConsoleVariableManager/Content
-Paths=../../../b1/Plugins/GSProceduralWorld/Content
-Paths=../../../b1/Plugins/GSAnimationKeyBlender/Content
-Paths=../../../b1/Plugins/ACLPlugin/Content
-Paths=../../../b1/Plugins/NiagaraTickManager/Content
-Paths=../../../b1/Plugins/GSCameraHelper/Content
-Paths=../../../b1/Plugins/GSSingletonApp/Content
-Paths=../../../b1/Plugins/GSSlateUtils/Content
-Paths=../../../b1/Plugins/TressFX/Content
-Paths=../../../b1/Plugins/SpiderNavigation/Content
-Paths=../../../b1/Plugins/TFXGenCards/Content
-Paths=../../../b1/Plugins/Prefabricator/Content
-Paths=../../../b1/Plugins/UMGSpline/Content
-Paths=../../../b1/Plugins/WorldCreatorBridge/Content
-Paths=../../../b1/Plugins/AsyncLoadingScreen/Content
-Paths=../../../b1/Plugins/XeSS/Content
-Paths=../../../b1/Plugins/USharp/Content
-Paths=../../../b1/Plugins/GSDynamicSDF/Content
-Paths=../../../b1/Plugins/UnrealJS/Content
-Paths=../../../b1/Plugins/TexAlphaDA/Content
-Paths=../../../b1/Plugins/NiagaraUIRenderer/Content
-Paths=../../../b1/Plugins/GSPluginTableTool/Content
-Paths=../../../b1/Plugins/GSUMGExt/Content
-Paths=../../../b1/Plugins/TurboBuild/Content
-Paths=../../../b1/Plugins/GSInputDisplay/Content
-Paths=../../../b1/Plugins/Hephaestus/Content
-Paths=../../../b1/Plugins/Wwise/Content
-Paths=../../../b1/Plugins/FSR3/Content
-Paths=../../../b1/Plugins/GSWorldBrowser/Content
-Paths=../../../b1/Plugins/HoudiniEngine/Content
-Paths=../../../b1/Plugins/GSEditorSceneViewExtension/Content
-Paths=../../../b1/Plugins/DualSenseAdaptor/Content
-Paths=../../../b1/Plugins/GSDisplayDebug/Content
-Paths=../../../b1/Plugins/NXSR/Content
 
-[SystemSettings]
-r.DefaultFeature.AntiAliasing=0
-pp.VignetteIntensity=0.0
-r.SceneColorFringeQuality=0
-r.SceneColorFringe.Max=0
-r.DepthOfFieldQuality=0
-r.DepthOfField.DepthBlur.Amount=0
-r.Tonemapper.GrainQuantization=0
-r.FilmGrain=0
-r.Tonemapper.Quality=0
-r.BloomQuality=0
-r.MotionBlurQuality=0
-r.AmbientOcclusionLevels=0
-r.AmbientOcclusionStaticFraction=0
-r.LensFlareQuality=0
-r.SSR.Quality=0
-EOL
-        fi
+      # Wukong config file
+      ".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = ''
+        [Core.System]
+        Paths=../../../Engine/Content
+        Paths=%GAMEDIR%Content
+        Paths=../../../Engine/Plugins/Animation/ControlRig/Content
+        Paths=../../../Engine/Plugins/Animation/IKRig/Content
+        Paths=../../../Engine/Plugins/Editor/SpeedTreeImporter/Content
+        Paths=../../../Engine/Plugins/2D/Paper2D/Content
+        Paths=../../../Engine/Plugins/Editor/GeometryMode/Content
+        Paths=../../../Engine/Plugins/FX/Niagara/Content
+        Paths=../../../Engine/Plugins/Bridge/Content
+        Paths=../../../Engine/Plugins/Editor/ConsoleVariablesEditor/Content
+        Paths=../../../Engine/Plugins/Enterprise/DatasmithContent/Content
+        Paths=../../../Engine/Plugins/Developer/AnimationSharing/Content
+        Paths=../../../Engine/Plugins/Animation/AnimationWarping/Content
+        Paths=../../../Engine/Plugins/Animation/AnimationLocomotionLibrary/Content
+        Paths=../../../Engine/Plugins/Experimental/ChaosClothEditor/Content
+        Paths=../../../Engine/Plugins/FX/NiagaraFluids/Content
+        Paths=../../../Engine/Plugins/Experimental/PCG/Content
+        Paths=../../../Engine/Plugins/Experimental/GeometryScripting/Content
+        Paths=../../../Engine/Plugins/Experimental/GeometryCollectionPlugin/Content
+        Paths=../../../Engine/Plugins/Experimental/MeshModelingToolsetExp/Content
+        Paths=../../../Engine/Plugins/Experimental/Volumetrics/Content
+        Paths=../../../Engine/Plugins/Experimental/PythonScriptPlugin/Content
+        Paths=../../../Engine/Plugins/Experimental/VirtualHeightfieldMesh/Content
+        Paths=../../../Engine/Plugins/MovieScene/MovieRenderPipeline/Content
+        Paths=../../../Engine/Plugins/Experimental/Water/Content
+        Paths=../../../Engine/Plugins/Animation/ControlRigSpline/Content
+        Paths=../../../Engine/Plugins/MovieScene/SequencerScripting/Content
+        Paths=../../../Engine/Plugins/Experimental/Landmass/Content
+        Paths=../../../Engine/Plugins/Media/MediaCompositing/Content
+        Paths=../../../Engine/Plugins/Enterprise/DataprepEditor/Content
+        Paths=../../../Engine/Plugins/Experimental/ChaosSolverPlugin/Content
+        Paths=../../../Engine/Plugins/Runtime/GeometryProcessing/Content
+        Paths=../../../Engine/Plugins/Runtime/Synthesis/Content
+        Paths=../../../Engine/Plugins/Runtime/WebBrowserWidget/Content
+        Paths=../../../Engine/Plugins/Runtime/AudioSynesthesia/Content
+        Paths=../../../Engine/Plugins/Runtime/MeshModelingToolset/Content
+        Paths=../../../Engine/Plugins/Runtime/HairStrands/Content
+        Paths=../../../Engine/Plugins/Experimental/ChaosNiagara/Content
+        Paths=../../../Engine/Plugins/Runtime/ResonanceAudio/Content
+        Paths=../../../Engine/Plugins/Experimental/OpacityMicroMap/Content
+        Paths=../../../Engine/Plugins/Runtime/Nvidia/NRD/Content
+        Paths=../../../Engine/Plugins/Developer/Concert/ConcertSync/ConcertSyncClient/Content
+        Paths=../../../Engine/Plugins/Experimental/FullBodyIK/Content
+        Paths=../../../Engine/Plugins/Compositing/OpenColorIO/Content
+        Paths=../../../Engine/Plugins/Runtime/Nvidia/DLSS/Content
+        Paths=../../../Engine/Plugins/Experimental/CinematicPrestreaming/Content
+        Paths=../../../b1/Plugins/AnimToTexture/Content
+        Paths=../../../b1/Plugins/DonAINavigation/Content
+        Paths=../../../b1/Plugins/GSEngineExtent/Content
+        Paths=../../../b1/Plugins/GSEditorActions/Content
+        Paths=../../../b1/Plugins/CustomLightSystem/Content
+        Paths=../../../b1/Plugins/ConsoleVariableManager/Content
+        Paths=../../../b1/Plugins/GSProceduralWorld/Content
+        Paths=../../../b1/Plugins/GSAnimationKeyBlender/Content
+        Paths=../../../b1/Plugins/ACLPlugin/Content
+        Paths=../../../b1/Plugins/NiagaraTickManager/Content
+        Paths=../../../b1/Plugins/GSCameraHelper/Content
+        Paths=../../../b1/Plugins/GSSingletonApp/Content
+        Paths=../../../b1/Plugins/GSSlateUtils/Content
+        Paths=../../../b1/Plugins/TressFX/Content
+        Paths=../../../b1/Plugins/SpiderNavigation/Content
+        Paths=../../../b1/Plugins/TFXGenCards/Content
+        Paths=../../../b1/Plugins/Prefabricator/Content
+        Paths=../../../b1/Plugins/UMGSpline/Content
+        Paths=../../../b1/Plugins/WorldCreatorBridge/Content
+        Paths=../../../b1/Plugins/AsyncLoadingScreen/Content
+        Paths=../../../b1/Plugins/XeSS/Content
+        Paths=../../../b1/Plugins/USharp/Content
+        Paths=../../../b1/Plugins/GSDynamicSDF/Content
+        Paths=../../../b1/Plugins/UnrealJS/Content
+        Paths=../../../b1/Plugins/TexAlphaDA/Content
+        Paths=../../../b1/Plugins/NiagaraUIRenderer/Content
+        Paths=../../../b1/Plugins/GSPluginTableTool/Content
+        Paths=../../../b1/Plugins/GSUMGExt/Content
+        Paths=../../../b1/Plugins/TurboBuild/Content
+        Paths=../../../b1/Plugins/GSInputDisplay/Content
+        Paths=../../../b1/Plugins/Hephaestus/Content
+        Paths=../../../b1/Plugins/Wwise/Content
+        Paths=../../../b1/Plugins/FSR3/Content
+        Paths=../../../b1/Plugins/GSWorldBrowser/Content
+        Paths=../../../b1/Plugins/GSEditorSceneViewExtension/Content
+        Paths=../../../b1/Plugins/DualSenseAdaptor/Content
+        Paths=../../../b1/Plugins/GSDisplayDebug/Content
+        Paths=../../../b1/Plugins/NXSR/Content
+
+        [SystemSettings]
+        r.DefaultFeature.AntiAliasing=0
+        pp.VignetteIntensity=0.0
+        r.SceneColorFringeQuality=0
+        r.SceneColorFringe.Max=0
+        r.DepthOfFieldQuality=0
+        r.DepthOfField.DepthBlur.Amount=0
+        r.Tonemapper.GrainQuantization=0
+        r.FilmGrain=0
+        r.Tonemapper.Quality=0
+        r.BloomQuality=0
+        r.MotionBlurQuality=0
+        r.AmbientOcclusionLevels=0
+        r.AmbientOcclusionStaticFraction=0
+        r.LensFlareQuality=0
+        r.SSR.Quality=0
       '';
     };
   };
