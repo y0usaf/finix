@@ -13,49 +13,49 @@ in {
       (pkgs.writeShellScriptBin "chatgpt" ''
         # Ensure the AppImage is executable
         chmod +x ${chatgptAppImage}
-        
+
         # Set up Qt-specific environment variables
         export QT_QPA_PLATFORM=xcb
         export QT_PLUGIN_PATH="${lib.makeSearchPath "lib/qt-6/plugins" [
           pkgs.qt6Packages.qtbase
           pkgs.qt6Packages.qtwayland
         ]}"
-        
+
         # WebGL and graphics-related environment variables
         export QTWEBENGINE_DISABLE_SANDBOX=1
         export LIBGL_ALWAYS_SOFTWARE=1
         export WEBKIT_DISABLE_COMPOSITING_MODE=1
         export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu --use-fake-ui-for-media-stream=0 --enable-features=WebRTCAudioDeviceEnumeration,WebRTCPipeWireCapturer"
-        
+
         # Audio-related environment setup for PipeWire
         export PIPEWIRE_RUNTIME_DIR="$XDG_RUNTIME_DIR/pipewire"
         export PIPEWIRE_LATENCY="128/48000"
-        
+
         # Set up config directory for persistent storage
         export XDG_CONFIG_HOME="$HOME/.config"
         export XDG_DATA_HOME="$HOME/.local/share"
         export XDG_CACHE_HOME="$HOME/.cache"
-        
+
         # Debug information for storage directories
         echo "Creating and checking permissions for storage directories..."
         mkdir -p "$XDG_CONFIG_HOME/ChatGPT"
         mkdir -p "$XDG_DATA_HOME/ChatGPT"
         mkdir -p "$XDG_CACHE_HOME/ChatGPT"
-        
+
         # Ensure proper permissions
         chmod 755 "$XDG_CONFIG_HOME/ChatGPT"
         chmod 755 "$XDG_DATA_HOME/ChatGPT"
         chmod 755 "$XDG_CACHE_HOME/ChatGPT"
-        
+
         echo "Storage directories:"
         ls -la "$XDG_CONFIG_HOME/ChatGPT"
         ls -la "$XDG_DATA_HOME/ChatGPT"
         ls -la "$XDG_CACHE_HOME/ChatGPT"
-        
+
         # Audio and microphone permissions
         export WEBKIT_FORCE_SANDBOX=0
         export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu --use-fake-ui-for-media-stream=0 --enable-features=WebRTCAudioDeviceEnumeration"
-        
+
         # Additional audio configurations
         export ALSA_PLUGIN_DIR="${pkgs.alsa-plugins}/lib/alsa-lib"
         export GST_PLUGIN_PATH="${lib.makeSearchPath "lib/gstreamer-1.0" [
@@ -79,7 +79,7 @@ in {
           pkgs.gst_all_1.gst-plugins-base
           pkgs.gst_all_1.gst-plugins-good
         ]}:$LD_LIBRARY_PATH"
-        
+
         # Use appimage-run to handle the AppImage execution with explicit home binding
         exec ${pkgs.appimage-run}/bin/appimage-run \
           --home="$HOME" \
@@ -88,7 +88,7 @@ in {
           --bind="$XDG_CACHE_HOME/ChatGPT:$HOME/.cache/ChatGPT" \
           ${chatgptAppImage} "$@"
       '')
-      
+
       # Make sure appimage-run and required Qt packages are available
       pkgs.appimage-run
       pkgs.qt6Packages.qtbase

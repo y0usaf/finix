@@ -15,30 +15,37 @@
   options = import ./profiles/options.nix {inherit lib pkgs;};
 
   ####################################################################
-  # Compute feature-based packages
+  # Define common variables for readability
+  ####################################################################
+  packageSet = options.packageSets.default;
+  features = profile.features;
+
+  ####################################################################
+  # Compute feature-based packages.
   #
-  # The "core" package set is added first
-  # Then for each feature enabled in the user profile, we check that
-  # the corresponding attribute exists in options.packageSets.default;
-  # if so, we include that set.
+  # The core package set is added first.
+  # For every feature in the profile, if it exists in the package set,
+  # its package set is used; otherwise an empty list is returned.
   ####################################################################
   featurePackages = lib.flatten (
-    [options.packageSets.default.core]
-    ++ (map (feature:
-      if builtins.hasAttr feature options.packageSets.default
-      then options.packageSets.default.${feature}
-      else [])
-    profile.features)
+    [packageSet.core]
+    ++ (map (
+        feature:
+          if builtins.hasAttr feature packageSet
+          then packageSet.${feature}
+          else []
+      )
+      features)
   );
 
   ####################################################################
-  # Compute user profile-specific packages
+  # Compute user profile-specific packages.
   #
-  # Each package is derived from the profile settings. For each
-  # app attribute (e.g. defaultTerminal, defaultBrowser, etc.), we
-  # get the package directly since it's already a derivation.
+  # Each app attribute (e.g. defaultTerminal, defaultBrowser, etc.)
+  # is expected to be a derivation. We simply map over these and extract
+  # the package.
   ####################################################################
-  userPackages = map (app: app.package) [
+  defaultApps = [
     profile.defaultTerminal
     profile.defaultBrowser
     profile.defaultFileManager
@@ -48,21 +55,21 @@
     profile.defaultImageViewer
     profile.defaultDiscord
   ];
+  userPackages = map (app: app.package) defaultApps;
 
   ####################################################################
   # Combine final package list:
-  #   - Use feature packages directly since they're already derivations
-  #   - Concatenate with the user-specific packages
-  #   - Add any personal packages specified by the user
+  #   - Features packages (already derivations)
+  #   - User-specific packages
+  #   - Any additional personal packages from the profile
   ####################################################################
   finalPackages = featurePackages ++ userPackages ++ profile.personalPackages;
 
   ####################################################################
-  # Helper function: Conditionally import modules based on profile features
-  #
-  # Returns the provided module only if the feature is enabled.
+  # Helper function: Conditionally import modules based on profile features.
+  # Returns the module only if the feature is enabled.
   ####################################################################
-  importFeature = feature: lib.optionals (builtins.elem feature profile.features);
+  importFeature = feature: lib.optionals (builtins.elem feature features);
 in {
   #─────────────────────── 🏠 Core Home Settings ──────────────────#
   home = {
@@ -76,27 +83,23 @@ in {
   #──────────────────────────────────────────────────────────────#
   #                Home-manager Module Imports
   #──────────────────────────────────────────────────────────────#
-  imports = lib.flatten (map (feature: let
-    modulePath = ./modules + "/${feature}.nix";
-  in
-    lib.optional (builtins.pathExists modulePath)
-    modulePath)
-  (options._coreFeatures ++ profile.features));
+  imports = lib.flatten (map (
+    feature: let
+      modulePath = "${./modules}/${feature}.nix";
+    in
+      lib.optional (builtins.pathExists modulePath) modulePath
+  ) (options._coreFeatures ++ features));
 
   #──────────────────────────────────────────────────────────────#
   #                     Program Configurations
-  #
-  # Configuration for various programs like zsh, nh, and obs-studio.
   #──────────────────────────────────────────────────────────────#
-  programs = {
-    nh = {
+  programs.nh = {
+    enable = true;
+    flake = profile.flakeDir;
+    clean = {
       enable = true;
-      flake = profile.flakeDir;
-      clean = {
-        enable = true;
-        dates = "weekly";
-        extraArgs = "--keep-since 7d";
-      };
+      dates = "weekly";
+      extraArgs = "--keep-since 7d";
     };
   };
 
@@ -104,7 +107,7 @@ in {
   #                    Service Configurations
   #──────────────────────────────────────────────────────────────#
   services.syncthing = {
-    enable = lib.elem "syncthing" profile.features;
+    enable = lib.elem "syncthing" features;
   };
 
   #──────────────────────────────────────────────────────────────#
