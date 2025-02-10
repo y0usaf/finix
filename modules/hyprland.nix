@@ -8,28 +8,15 @@
   inputs,
   profile,
   ...
-}:
-#────────────────────────────────────────────────────────────
-# Local Variables
-#────────────────────────────────────────────────────────────
-let
-  hyprlandEnabled = builtins.elem "hyprland" profile.features;
-  system = pkgs.system;
-in {
-  #--------------------------------------------------------------------
-  # Import the Hyprland homeManagerModule if the hyprland feature is enabled
-  #--------------------------------------------------------------------
-  imports = lib.optionals hyprlandEnabled [
+}: {
+  imports = [
     inputs.hyprland.homeManagerModules.default
   ];
 
-  #--------------------------------------------------------------------
-  # Hyprland Configuration (only applied if enabled)
-  #--------------------------------------------------------------------
-  config = lib.mkIf hyprlandEnabled {
+  config = {
     xdg.portal = {
       xdgOpenUsePortal = true;
-      configPackages = [inputs.hyprland.packages.${system}.xdg-desktop-portal-hyprland];
+      configPackages = [inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland];
       enable = true;
       extraPortals = [
         pkgs.xdg-desktop-portal-gtk
@@ -56,10 +43,10 @@ in {
       #------------------------------------------------------------------
       # Package Definitions
       #------------------------------------------------------------------
-      package = inputs.hyprland.packages.${system}.hyprland;
-      portalPackage = inputs.hyprland.packages.${system}.xdg-desktop-portal-hyprland;
+      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+      portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
       plugins = [
-        inputs.hy3.packages.${system}.hy3
+        inputs.hy3.packages.${pkgs.system}.hy3
       ];
 
       #------------------------------------------------------------------

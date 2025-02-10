@@ -5,8 +5,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "webapps" profile.features) {
-    # Add chromium package
+  config = {
     home.packages = [pkgs.chromium];
 
     xdg.desktopEntries = {
