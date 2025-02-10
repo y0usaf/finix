@@ -48,6 +48,11 @@ in {
         variables = ["--all"];
       };
 
+      # Add AGS autostart if the feature is enabled
+      extraConfig = lib.mkIf (builtins.elem "ags" profile.features) ''
+        exec-once = ags
+      '';
+
       #------------------------------------------------------------------
       # Package Definitions
       #------------------------------------------------------------------
