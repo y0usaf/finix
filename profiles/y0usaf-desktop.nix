@@ -1,128 +1,194 @@
-#───────────────────────── 🖥️ DESKTOP PROFILE 🖥️ ─────────────────────────#
-# Personal configuration for y0usaf-desktop                                #
-#──────────────────────────────────────────────────────────────────────────#
-{pkgs, ...}: let
+#───────────────────────── Aggressive Comments: DESKTOP PROFILE ─────────────────────────#
+# This file is the heart of your desktop configuration for 'y0usaf-desktop'.
+# Every setting here has been painstakingly chosen—alter ANYTHING only if you know EXACTLY what you're doing!
+# If you break something, don't say we didn't warn you. Read every single comment!
+
+{ pkgs, ... }:
+let
+  # Define the username.
+  # WARNING: Change this only if your actual Linux username DOES NOT match "y0usaf"!
   username = "y0usaf";
+
+  # Build the home directory path from the username above.
+  # MAKE SURE the resulting path is correct, or your system will cry for help.
   homeDir = "/home/${username}";
 in {
+  # Explicitly set the username in the configuration.
   username = username;
+
+  # Set the path to your home directory.
+  # This is a critical parameter; many paths in this file depend on it.
   homeDirectory = homeDir;
+
+  # Set your machine's hostname.
+  # NOTE: This should be unique across your network.
   hostname = "y0usaf-desktop";
+
+  # Define the NixOS state version.
+  # BEWARE: Changing this version may cause rebuild issues or incompatibility with existing configurations.
   stateVersion = "24.11";
+
+  # Define your timezone.
+  # CHANGE THIS if you're not in America/Toronto, or suffer the consequences.
   timezone = "America/Toronto";
 
+  #=======================================================================
+  # Feature Flags
+  #=======================================================================
+  # The following list enables specific features and modules.
+  # DO NOT fiddle with these unless you completely understand what each flag triggers.
   features = [
-    "hyprland"
-    "wayland"
-    "ags"
-    "nvidia"
-    "gaming"
-    "development"
-    "media"
-    "creative"
-    "virtualization"
-    "backup"
-    "nvim"
-    "android"
-    "webapps"
-    "wallust"
-    "syncthing"
-    "vscode"
-    "zellij"
-    "music"
-    "obs"
-    "streamlink"
-    "chatgpt"
+    "hyprland"          # Use the Hyprland compositor for a modern look.
+    "wayland"           # Enable support for the Wayland display protocol.
+    "ags"               # Custom feature (double-check your docs on this one!).
+    "nvidia"            # Enable NVIDIA GPU support—critical for NVIDIA hardware.
+    "gaming"            # Activate performance tweaks and tools for gaming.
+    "development"       # Load development tools and optimizations.
+    "media"             # Include media-related apps and settings.
+    "creative"          # Configure creative tools for design and art.
+    "virtualization"    # Enable virtualization features for VMs and containers.
+    "backup"            # Activate backup solutions—don't risk losing data!
+    "nvim"              # Set up preferences for using Neovim.
+    "android"           # Enable Android integrations (if doing Android development/work).
+    "webapps"           # Prepare the system for web applications.
+    "wallust"           # Likely for wallpaper management; verify its purpose in your docs.
+    "syncthing"         # Enable file synchronization via Syncthing.
+    "vscode"            # Integrate Visual Studio Code settings.
+    "zellij"            # Configure the Zellij terminal workspace manager.
+    "music"             # Activate any music-related services or configurations.
+    "obs"               # Prepare for streaming/recording with OBS.
+    "streamlink"        # Enable Streamlink for handling online streams.
+    "chatgpt"           # Integrate any ChatGPT-related tooling.
   ];
 
-  flakeDir = "${homeDir}/nixos";
-  musicDir = "${homeDir}/Music";
-  dcimDir = "${homeDir}/DCIM";
-  steamDir = "${homeDir}/.local/share/Steam";
-  wallpaperDir = "${homeDir}/DCIM/Wallpapers/32_9";
-  wallpaperVideoDir = "${homeDir}/DCIM/Wallpapers_Video";
+  #=======================================================================
+  # Directory Configurations
+  #=======================================================================
+  # Define important directories used in the configuration.
+  flakeDir = "${homeDir}/nixos";              # The directory where your Nix flake configuration lives.
+  musicDir = "${homeDir}/Music";              # Path to your Music folder.
+  dcimDir = "${homeDir}/DCIM";                # Where your DCIM/photos are stored.
+  steamDir = "${homeDir}/.local/share/Steam";  # Path for Steam; ensure this is correct!
+  # Wallpapers are split into static (32:9) and video types.
+  wallpaperDir = "${homeDir}/DCIM/Wallpapers/32_9";      # Directory for 32:9 wallpapers.
+  wallpaperVideoDir = "${homeDir}/DCIM/Wallpapers_Video";  # Directory for video wallpapers.
 
-  # Default applications using attribute set format
+  #=======================================================================
+  # Default Applications
+  #=======================================================================
+  # Each default application is defined with its corresponding package and command.
+  # MODIFY these ONLY if you're sure about the dependencies and behavior changes.
   defaultBrowser = {
-    package = pkgs.firefox;
-    command = "firefox";
+    package = pkgs.firefox;  # The go-to browser is Firefox.
+    command = "firefox";    # Command line trigger for Firefox.
   };
   defaultEditor = {
-    package = pkgs.neovim;
-    command = "nvim";
+    package = pkgs.neovim;   # Neovim is your editor. Trust it.
+    command = "nvim";       # Launch Neovim with the 'nvim' command.
   };
   defaultIde = {
-    package = pkgs.code-cursor;
-    command = "cursor";
+    package = pkgs.code-cursor;  # IDE for coding with a modern twist.
+    command = "cursor";          # The command that fires up the IDE.
   };
   defaultTerminal = {
-    package = pkgs.foot;
-    command = "foot";
+    package = pkgs.foot;     # Foot terminal: sleek, minimal, and Wayland-friendly.
+    command = "foot";        # Command for launching the terminal.
   };
   defaultFileManager = {
-    package = pkgs.pcmanfm;
-    command = "pcmanfm";
+    package = pkgs.pcmanfm;  # Use PCManFM for file management.
+    command = "pcmanfm";     # Command to run PCManFM.
   };
   defaultLauncher = {
-    package = pkgs.sway-launcher-desktop;
+    package = pkgs.sway-launcher-desktop;  # Sway launcher customized for your workflow.
+    # This command makes Foot launch the Sway launcher. Do NOT change unless you know the drill!
     command = "foot -a launcher sway-launcher-desktop";
   };
   defaultDiscord = {
-    package = pkgs.discord;
-    command = "discord";
+    package = pkgs.discord;  # Discord for chat and community.
+    command = "discord";     # Launch it with this command.
   };
   defaultArchiveManager = {
-    package = pkgs.p7zip;
-    command = "7z";
+    package = pkgs.p7zip;    # Use p7zip for all your archive needs.
+    command = "7z";          # Command to invoke p7zip.
   };
   defaultImageViewer = {
-    package = pkgs.imv;
-    command = "imv";
+    package = pkgs.imv;      # The image viewer of choice.
+    command = "imv";         # Run it using this command.
   };
   defaultMediaPlayer = {
-    package = pkgs.mpv;
-    command = "mpv";
+    package = pkgs.mpv;      # MPV for playing your videos.
+    command = "mpv";         # Command to start MPV.
   };
 
-  gitName = "y0usaf";
-  gitEmail = "OA99@Outlook.com";
-  gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
-
+  #=======================================================================
+  # Git and Version Control Settings
+  #=======================================================================
+  # Set up your credentials for Git. These MUST match your actual identity.
+  gitName = "y0usaf";                    # Your Git author name.
+  gitEmail = "OA99@Outlook.com";         # Your Git email. Double-check it—it's used for commit history.
+  gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";  # URL to your home manager repository.
+  
+  #=======================================================================
+  # Bookmarks
+  #=======================================================================
+  # Predefine your bookmarks for quick access in your file manager.
   bookmarks = [
-    "file://${homeDir}/Downloads Downloads"
-    "file://${homeDir}/Music Music"
-    "file://${homeDir}/DCIM DCIM"
-    "file://${homeDir}/Pictures Pictures"
-    "file://${homeDir}/nixos NixOS"
-    "file://${homeDir}/Dev Dev"
-    "file://${homeDir}/.local/share/Steam Steam"
+    "file://${homeDir}/Downloads Downloads"              # Bookmark for the Downloads folder.
+    "file://${homeDir}/Music Music"                        # Bookmark for your Music folder.
+    "file://${homeDir}/DCIM DCIM"                          # Bookmark for your DCIM/photos folder.
+    "file://${homeDir}/Pictures Pictures"                  # Bookmark for Pictures.
+    "file://${homeDir}/nixos NixOS"                        # Bookmark for your NixOS config folder.
+    "file://${homeDir}/Dev Dev"                            # Bookmark for your Development directory.
+    "file://${homeDir}/.local/share/Steam Steam"           # Bookmark for the Steam folder.
   ];
 
-  dpi = 109;
-  baseFontSize = 12;
-  cursorSize = 24;
+  #=======================================================================
+  # Appearance and UI Scaling
+  #=======================================================================
+  dpi = 109;         # Set the DPI value. A wrong value here can ruin your display scaling.
+  baseFontSize = 12; # The base font size across applications—adjust if everything looks too small or huge.
+  cursorSize = 24;   # The cursor size. Perfect for high-resolution displays; change ONLY if necessary.
 
+  #=======================================================================
+  # Font Settings
+  #=======================================================================
+  # Specify the primary and fallback fonts to prevent any missing-character disasters.
   fonts = {
     main = [
-      [pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono"]
+      # Main font: IosevkaTermSlab Nerd Font Mono gives you a clean, modern look in terminals and editors.
+      [ pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono" ]
     ];
     fallback = [
-      [pkgs.noto-fonts-emoji "Noto Color Emoji"]
-      [pkgs.noto-fonts-cjk-sans "Noto Sans CJK"]
-      [pkgs.font-awesome "Font Awesome"]
+      # Fallback for emojis. Without this, expect a lot of missing characters!
+      [ pkgs.noto-fonts-emoji "Noto Color Emoji" ]
+      # Fallback for CJK characters. Verify if you work with Asian scripts.
+      [ pkgs.noto-fonts-cjk-sans "Noto Sans CJK" ]
+      # Font Awesome for icons and symbols—essential to maintain UI consistency.
+      [ pkgs.font-awesome "Font Awesome" ]
     ];
   };
 
+  #=======================================================================
+  # Directory Structure Configuration
+  #=======================================================================
   directories = {
+    # Path to the Nix flake configuration directory.
     flake.path = "${homeDir}/nixos";
+    # Music directory path.
     music.path = "${homeDir}/Music";
+    # DCIM directory path for photos.
     dcim.path = "${homeDir}/DCIM";
+    # Configuration for the Steam directory.
     steam = {
       path = "${homeDir}/.local/share/Steam";
-      create = false; # Don't create Steam dir automatically
+      create = false; # DO NOT automatically create this directory—Steam manages it!
     };
   };
 
+  #=======================================================================
+  # Personal Packages
+  #=======================================================================
+  # Add any personal packages here. This package is for image upscaling.
   personalPackages = with pkgs; [
     realesrgan-ncnn-vulkan
   ];
