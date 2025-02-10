@@ -84,6 +84,10 @@
 
         [CareerHighLight]
         HighLightVideoSavedPath=C:\users\steamuser\Videos\MarvelRivals\Highlights
+
+        [/Script/Engine.InputSettings]
+        bEnableMouseSmoothing=False
+        bViewAccelerationEnabled=False
       '';
 
       # Wukong config file
@@ -190,6 +194,21 @@
         r.AmbientOcclusionStaticFraction=0
         r.LensFlareQuality=0
         r.SSR.Quality=0
+        r.Tonemapper.Sharpen=1.0
+        r.Atmosphere=0
+        r.VolumetricFog=0
+        r.VolumetricFog.Quality=0
+        r.EyeAdaptation.MethodOverride=0
+        r.DefaultFeature.LensFlare=0
+        r.DefaultFeature.Bloom=0
+        r.DefaultFeature.AutoExposure=0
+        r.PostProcessAAQuality=0
+        r.SSS.Quality=0
+        r.SSS.Scale=0
+        r.ChromaticAberrationStartOffset=0
+
+        [/Script/Engine.InputSettings]
+        ConsoleKey=Tilde
       '';
     };
   };
