@@ -1,100 +1,105 @@
 # NixOS Desktop Profile Example
+# WARNING: READ THIS ENTIRE DOCUMENT BEFORE YOU DO ANYTHING!
+# This is NOT a toy config file—alter with extreme caution, or expect catastrophic failures!
 
-This document outlines a complete system configuration for a NixOS desktop setup. It can serve as a starting point for your own custom profile, whether you're integrating it into NixOS or Home Manager.
+This document outlines a complete system configuration for a NixOS desktop setup. It can serve as a starting point for your own custom profile, whether you're incorporating it into NixOS or Home Manager.
 
-## Getting Started
+## GETTING STARTED - FOLLOW THESE INSTRUCTIONS TO THE LETTER
 
 1. **Copy and Customize**  
    Duplicate this file (e.g., as `profiles/my-desktop.nix` or similar) and modify it according to your needs.
+   **WARNING:** Any misconfiguration here could turn your system into an unbootable brick. Only change what you fully understand!
 
 2. **Integrate**  
-   Incorporate your customized version into your NixOS or Home Manager flake.
+   Incorporate your customized version into your NixOS or Home Manager flake. Do not skip this step or assume defaults will work magically.
 
 3. **Rebuild and Switch**  
-   Rebuild your system configuration and switch over to the new profile.
-
-For more details, refer to the [NixOS official documentation](https://nixos.org/manual/) or the [Home Manager documentation](https://nix-community.github.io/home-manager/).
+   Rebuild your system configuration and switch over to the new profile. This step is CRITICAL—failure may result in a nonfunctional system.
+   
+For more details, refer to the [NixOS official documentation](https://nixos.org/manual/) or the [Home Manager documentation](https://nix-community.github.io/home-manager/). These aren't mere suggestions—review them before proceeding!
 
 ---
 
-## Configuration Details
+## CONFIGURATION DETAILS - PROCEED WITH EXTREME CAUTION
 
-Below is the complete configuration example:
+Below is the complete configuration example. Every detail matters—modify only if you know EXACTLY what you're doing!
 
 ```
 { pkgs, lib, ... }:
 {
-  # -- Basic User Information --
-  username      = "exampleUser";         # Your system username, e.g., "alice"
-  homeDirectory = "/home/exampleUser";   # Absolute path to the user's home directory
+  # -- BASIC USER INFORMATION --
+  # THESE DETAILS ARE ESSENTIAL. DO NOT PLACE HOLDERS THAT YOU DON'T INTEND TO CHANGE.
+  username      = "exampleUser";         # Your system username. A single typo can cause major havoc!
+  homeDirectory = "/home/exampleUser";   # Absolute path to the user's home directory. Must be 100% correct!
 
-  # -- System Identification and Behavior --
-  hostname     = "example-desktop";       # The network hostname for your system
-  stateVersion = "24.11";                 # DO NOT CHANGE unless upgrading states
-  timezone     = "America/New_York";      # Set your local timezone
+  # -- SYSTEM IDENTIFICATION AND BEHAVIOR --
+  hostname     = "example-desktop";       # The network hostname for your system. Ensure it's unique!
+  stateVersion = "24.11";                 # DO NOT CHANGE unless upgrading states. Ignorance here will bite you!
+  timezone     = "America/New_York";      # Set your local timezone. Misconfiguration can mess up logging!
 
-  # -- Enabled Features --
+  # -- ENABLED FEATURES --
+  # READ THIS LIST CAREFULLY. Each feature toggles complex subsystems.
   features = [
-    "hyprland"    # Enables the Hyprland window manager configuration.
-    "wayland"     # Required for using the Wayland display server.
-    "nvidia"      # Installs Nvidia drivers (if applicable).
-    "development" # Includes development tools and languages.
-    "media"       # Multimedia support: players, codecs, etc.
-    "backup"      # Tools for backups and data recovery.
+    "hyprland"    # Enables the Hyprland window manager configuration. Modern? Yes—but fragile if misused.
+    "wayland"     # Required for using the Wayland display server. Do NOT disable lightly!
+    "nvidia"      # Installs Nvidia drivers. Necessary if your hardware demands it!
+    "development" # Installs development tools and languages. Only include if you have a genuine need.
+    "media"       # Multimedia support: players, codecs, etc. Vital for media tasks.
+    "backup"      # Tools for backups and data recovery. Neglect this and risk data loss!
   ];
 
-  # -- Directory Settings --
-  flakeDir          = "/home/exampleUser/nixos";          # Directory where your flake resides
-  musicDir          = "$HOME/Music";                      # For music files
-  dcimDir           = "$HOME/DCIM";                       # For images and photos
-  steamDir          = "$HOME/.local/share/Steam";         # Directory for Steam data
-  wallpaperDir      = "$HOME/DCIM/Wallpapers/32_9";         # For wallpaper images
-  wallpaperVideoDir = "$HOME/DCIM/Wallpapers_Video";        # For video wallpapers
+  # -- DIRECTORY SETTINGS: DOUBLE-CHECK ALL PATHS --
+  flakeDir          = "/home/exampleUser/nixos";          # Directory where your flake resides. Precision is crucial!
+  musicDir          = "$HOME/Music";                      # Directory for music files. Wrong path means no tunes!
+  dcimDir           = "$HOME/DCIM";                       # Folder for images and photos. A misstep here breaks image management!
+  steamDir          = "$HOME/.local/share/Steam";         # Directory for Steam data. Verify with utmost care!
+  wallpaperDir      = "$HOME/DCIM/Wallpapers/32_9";         # Where wallpaper images live. This MUST be correct!
+  wallpaperVideoDir = "$HOME/DCIM/Wallpapers_Video";        # For video wallpapers. Do not modify unless necessary!
 
-  # -- GTK Bookmarks --
+  # -- GTK BOOKMARKS: SET WITH PRECISION OR RISK FAILURE --
   bookmarks = [
-    "file:///home/exampleUser/Downloads 📥 Downloads"
-    "file:///home/exampleUser/Music 🎵 Music"
-    "file:///home/exampleUser/DCIM 📸 Camera"
-    "file:///home/exampleUser/nixos ❄️ NixOS"
-    "file:///home/exampleUser/.local/share/Steam 🎮 Steam"
+    "file:///home/exampleUser/Downloads 📥 Downloads"  # Essential bookmark for Downloads folder.
+    "file:///home/exampleUser/Music 🎵 Music"            # Bookmark for your Music directory.
+    "file:///home/exampleUser/DCIM 📸 Camera"            # Bookmark for images/photos.
+    "file:///home/exampleUser/nixos ❄️ NixOS"            # Bookmark for your NixOS config folder.
+    "file:///home/exampleUser/.local/share/Steam 🎮 Steam" # Bookmark for the Steam directory.
   ];
 
-  # -- Default Applications --
+  # -- DEFAULT APPLICATIONS: MINIMAL ERROR TOLERANCE --
   defaultBrowser = {
-    package = pkgs.firefox;  # Browser package from Nixpkgs.
+    package = pkgs.firefox;  # Browser package from Nixpkgs. Do NOT replace with subpar alternatives!
     command = "firefox";     # Command used to launch the browser.
   };
 
   defaultEditor = {
-    package = pkgs.neovim;   # Neovim is used as the default editor.
-    command = "nvim";        # Command for launching Neovim.
+    package = pkgs.neovim;   # Neovim is established as the default editor. USE IT OR FACE THE CONSEQUENCES!
+    command = "nvim";        # Command to launch Neovim.
   };
 
   defaultTerminal = {
-    package = pkgs.foot;     # Terminal emulator.
-    command = "foot";        # Launch command for the terminal.
+    package = pkgs.foot;     # Terminal emulator – the essential tool of power users.
+    command = "foot";        # Launch command for the terminal. A single typo here renders the terminal unusable.
   };
 
   defaultFileManager = {
-    package = pkgs.pcmanfm;  # File manager package.
-    command = "pcmanfm";     # Command used to start the file manager.
+    package = pkgs.pcmanfm;  # File manager package that must be accurate for file operations.
+    command = "pcmanfm";     # Command to start the file manager.
   };
 
   defaultMediaPlayer = {
-    package = pkgs.mpv;      # Media player package.
-    command = "mpv";         # Command used to launch the media player.
+    package = pkgs.mpv;      # Media player package required for video playback.
+    command = "mpv";         # Command to launch the media player.
   };
 
-  # -- Git Configuration --
-  gitName               = "Example User";                 # Your name for Git commits.
-  gitEmail              = "example@domain.com";             # Your email address for Git.
-  gitHomeManagerRepoUrl = "git@github.com:example/nixos.git"; # URL to your Home Manager repository.
+  # -- GIT CONFIGURATION: ENSURE ACCURACY OR SUFFER CONFUSION IN COMMITS --
+  gitName               = "Example User";                 # Your Git commit name. Incorrect values can ruin commit history!
+  gitEmail              = "example@domain.com";           # MUST be a valid email—double-check for typos!
+  gitHomeManagerRepoUrl = "git@github.com:example/nixos.git"; # URL to your Home Manager repository. THIS IS CRUCIAL!
 
-  # -- Display & Font Settings --
-  dpi          = 109;        # Display DPI for UI scaling.
-  baseFontSize = 12;         # Base font size (points) for UI elements.
-  cursorSize   = 24;         # Size for the mouse pointer.
+  # -- DISPLAY & FONT SETTINGS: NO ROOM FOR VISUAL DISASTER --
+  dpi          = 109;         # Display DPI for optimal UI scaling. A wrong number spells visual disaster!
+  baseFontSize = 12;          # Base font size for UI elements. KEEP IT CONSISTENT!
+  cursorSize   = 24;          # Mouse pointer size. Adjust only if you know how it affects the DPI scaling!
   fonts = {
     main = [
       [ pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono" ]
@@ -106,31 +111,31 @@ Below is the complete configuration example:
     ];
   };
 
-  # -- Managed Directories --
+  # -- MANAGED DIRECTORIES: FOLLOW THE PATH STRUCTURE EXACTLY --
   directories = {
     flake = {
-      path = "/home/exampleUser/nixos";  # Directory where flake configurations are stored.
+      path = "/home/exampleUser/nixos";  # Critical directory for flake configurations.
     };
     music = {
-      path = "$HOME/Music";              # Music directory path.
+      path = "$HOME/Music";              # Music directory. Verify this path meticulously!
     };
     dcim = {
-      path = "$HOME/DCIM";               # DCIM (camera/photos) directory path.
+      path = "$HOME/DCIM";               # Directory for photos and images.
     };
     steam = {
-      path   = "$HOME/.local/share/Steam"; # Steam directory path.
-      create = false;                     # Do not auto-create this directory.
+      path   = "$HOME/.local/share/Steam"; # Steam data directory. DO NOT change unless you're absolutely certain!
+      create = false;                     # Do not auto-create this directory—Steam handles it!
     };
   };
 
-  # Additional options can be added here following the same structure.
+  # ADDITIONAL OPTIONS MUST BE ADHERED TO STRICTLY. NO EXCEPTIONS!
 }
 ```
 
 ---
 
-## Final Notes
+## FINAL NOTES - THERE IS NO ROOM FOR EXCUSES!
 
-After customizing this configuration for your needs, incorporate it into your flake and rebuild your system configuration to see the changes in effect.
-
-Happy NixOS-ing!
+After customizing this configuration for your specific needs, incorporate it into your flake and rebuild your system configuration to see your changes in effect.  
+**WARNING:** Only proceed if you are completely sure that your modifications will not irrevocably break your desktop environment.  
+Happy NixOS-ing—and remember, if things go wrong, you were warned in no uncertain terms!

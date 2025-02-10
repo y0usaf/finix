@@ -130,27 +130,7 @@
       yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
       mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
 
-      #----- Configuration Editing Shortcuts -----
-      aliases = "nvim $HOME/dotfiles/.config/zsh/aliases";
-      agscfg = "nvim $HOME/dotfiles/.config/ags/config.js";
-      swaycfg = "nvim $HOME/dotfiles/.config/sway/*";
-      footcfg = "nvim $HOME/dotfiles/.config/foot/foot.ini";
-      hyprcfg = "nvim $HOME/dotfiles/.config/hypr/hyprland.conf";
-      cavacfg = "nvim $HOME/dotfiles/.config/cava/config";
-      zshrc = "nvim $HOME/dotfiles/.config/zsh/.zshrc";
-      zshenv = "nvim $HOME/dotfiles/.config/zsh/.zshenv";
-      zprofile = "nvim $HOME/dotfiles/.config/zsh/.zprofile";
-      waybarcfg = "nvim $HOME/dotfiles/.config/waybar/config";
-      waybarcss = "nvim $HOME/dotfiles/.config/waybar/style.css";
-      fontconfig = "nvim $HOME/dotfiles/.config/fontconfig/fonts.conf";
-      scripts = "nvim $HOME/dotfiles/scripts/";
-      zshistory = "nvim $XDG_CONFIG_HOME/zsh/.zsh_history";
-      gitignore = "nvim $HOME/.gitignore";
-
       #----- System Management Shortcuts -----
-      dotlink = "$HOME/dotfiles/scripts/dotlink.sh";
-      dotsync = "$HOME/dotfiles/scripts/dotsync.sh";
-      dotpush = "$HOME/dotfiles/scripts/dotsync.sh push";
       userctl = "systemctl --user";
       hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
       pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
@@ -159,7 +139,6 @@
       #----- Media & Tools Shortcuts -----
       ytm4a = "$HOME/scripts/ytm4a.sh";
       spotm4a = "$HOME/scripts/spotm4a.py";
-      compressvid = "~/dotfiles/scripts/compressvid.sh";
       ooba = "/home/y0usaf/text-generation-webui/start_linux.sh";
       "nvidia-settings" = "nvidia-settings --config=\"$XDG_CONFIG_HOME\"/nvidia/settings";
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
