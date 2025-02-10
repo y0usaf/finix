@@ -16,6 +16,7 @@
   inputs,
   ...
 }: let
+  # Feature toggles from profile.features
   enableNvidia = builtins.elem "nvidia" profile.features;
   enableWayland = builtins.elem "wayland" profile.features;
   enableHyprland = builtins.elem "hyprland" profile.features;
@@ -180,7 +181,7 @@ in {
 
     #── 👤 User Environment ─────────────────#
     programs = {
-      hyprland = lib.mkIf (builtins.elem "wayland" profile.features && builtins.elem "hyprland" profile.features) {
+      hyprland = lib.mkIf (enableWayland && enableHyprland) {
         enable = true;
         xwayland.enable = true;
         package = inputs.hyprland.packages.${pkgs.system}.hyprland;
@@ -214,7 +215,7 @@ in {
     };
 
     #── 🚀 Core Services ──────────────────#
-    xdg.portal = lib.mkIf (builtins.elem "wayland" profile.features) {
+    xdg.portal = lib.mkIf enableWayland {
       enable = true;
       xdgOpenUsePortal = true;
       extraPortals = [

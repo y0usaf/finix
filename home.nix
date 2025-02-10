@@ -23,27 +23,21 @@
   ####################################################################
   # Compute feature-based packages.
   #
-  # The core package set is added first.
-  # For every feature in the profile, if it exists in the package set,
-  # its package set is used; otherwise an empty list is returned.
+  # We start with the core package set and then append packages for each
+  # feature (if defined in the package set, otherwise nothing is added).
   ####################################################################
-  featurePackages = lib.flatten (
-    [packageSet.core]
-    ++ (map (
-        feature:
-          if builtins.hasAttr feature packageSet
-          then packageSet.${feature}
-          else []
-      )
-      features)
-  );
+  packageForFeature = feature:
+    if builtins.hasAttr feature packageSet
+    then packageSet.${feature}
+    else [];
+
+  featurePackages = lib.flatten ([packageSet.core] ++ (map packageForFeature features));
 
   ####################################################################
   # Compute user profile-specific packages.
   #
-  # Each app attribute (e.g. defaultTerminal, defaultBrowser, etc.)
-  # is expected to be a derivation. We simply map over these and extract
-  # the package.
+  # Each app attribute (e.g. defaultTerminal, defaultBrowser, etc.) should
+  # be a derivation. We simply extract the package for each.
   ####################################################################
   defaultApps = [
     profile.defaultTerminal
@@ -59,7 +53,7 @@
 
   ####################################################################
   # Combine final package list:
-  #   - Features packages (already derivations)
+  #   - Feature packages (already derivations)
   #   - User-specific packages
   #   - Any additional personal packages from the profile
   ####################################################################
