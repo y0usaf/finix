@@ -95,6 +95,7 @@ in {
     "file://${homeDir}/Pictures Pictures"
     "file://${homeDir}/nixos NixOS"
     "file://${homeDir}/Dev Dev"
+    "file://${homeDir}/.local/share/Steam Steam"
   ];
 
   dpi = 109;
