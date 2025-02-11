@@ -68,6 +68,7 @@
     uv2nix = {
       url = "github:pyproject-nix/uv2nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
     };
 
     # obs-image-reaction: Possibly a module to manage image reactions in OBS setups.
@@ -112,7 +113,13 @@
     # Import the Nix package collection using nixpkgs and set allowUnfree to true.
     pkgs = import nixpkgs {
       inherit system;
-      config = {allowUnfree = true;};
+      # Use the correct overlay path
+      overlays = [
+        (final: prev: {
+          uv2nix = uv2nix.packages.${system}.default;
+        })
+      ];
+      config.allowUnfree = true;
     };
 
     ## ────── External Configurations ──────

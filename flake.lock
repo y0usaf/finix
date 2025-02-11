@@ -816,27 +816,6 @@
         "type": "github"
       }
     },
-    "pyproject-nix_2": {
-      "inputs": {
-        "nixpkgs": [
-          "uv2nix",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1739178925,
-        "narHash": "sha256-zxHWtcTNcIiw9NCoWFvX3H4LYXY67k/B1eCvSaw7KuA=",
-        "owner": "pyproject-nix",
-        "repo": "pyproject.nix",
-        "rev": "a73f9035165484aaec8b8720a3a85c0b3e50e11e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "pyproject-nix",
-        "repo": "pyproject.nix",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "alejandra": "alejandra",
@@ -922,7 +901,9 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "pyproject-nix": "pyproject-nix_2"
+        "pyproject-nix": [
+          "pyproject-nix"
+        ]
       },
       "locked": {
         "lastModified": 1736590054,
