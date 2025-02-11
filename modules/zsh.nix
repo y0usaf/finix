@@ -138,7 +138,6 @@
 
       #----- Media & Tools Shortcuts -----
       ytm4a = "$HOME/scripts/ytm4a.sh";
-      spotm4a = "$HOME/scripts/spotm4a.py";
       ooba = "/home/y0usaf/text-generation-webui/start_linux.sh";
       "nvidia-settings" = "nvidia-settings --config=\"$XDG_CONFIG_HOME\"/nvidia/settings";
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
