@@ -47,7 +47,7 @@
   };
 
   programs.zsh.shellAliases = lib.mkIf (builtins.elem "music" profile.features) {
-    spotdl = "source ${config.home.homeDirectory}/.venv/music/bin/activate && ${config.home.homeDirectory}/.venv/music/bin/spotdl download $@ && deactivate";
-    spotm4a = "source ${config.home.homeDirectory}/.venv/music/bin/activate && ${config.home.homeDirectory}/.venv/music/bin/spotdl download --format m4a $@ && deactivate";
+    spotdl = ". ${config.home.homeDirectory}/.venv/music/bin/activate && ${config.home.homeDirectory}/.venv/music/bin/spotdl download $@ && deactivate";
+    spotm4a = ". ${config.home.homeDirectory}/.venv/music/bin/activate && ${config.home.homeDirectory}/.venv/music/bin/spotdl download --format m4a $@ && deactivate";
   };
 }
