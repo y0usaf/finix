@@ -99,7 +99,7 @@
           rounding = 0;
           blur = {
             enabled = true;
-            size = 10;
+            size = 5;
             passes = 2;
             new_optimizations = true;
             ignore_opacity = false;
@@ -256,7 +256,6 @@
         };
 
         debug.disable_logs = false;
-        enable_stdout_logs = true;
       };
     };
   };
