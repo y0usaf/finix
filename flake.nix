@@ -102,6 +102,8 @@
     hy3,
     chaotic,
     hyprpaper,
+    pyproject-nix,
+    uv2nix,
     ...
   }: let
     ## ────── System & Package Configuration ──────

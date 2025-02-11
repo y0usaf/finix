@@ -8,7 +8,6 @@
   # Every section is documented in detail to explain its purpose and structure.
   #
   #───────────────────────────────────────────────────────────────────────────────#
-  
   lib,
   pkgs,
   ...
@@ -21,21 +20,21 @@
   # option types and submodules, making the configuration more robust.
   #
   t = lib.types;
-  
+
   # Define a shorthand for string type
   mkStr = t.str;
   # Define shorthand for boolean type
   mkBool = t.bool;
   # Define shorthand for a list of strings type
   mkListOfStr = t.listOf t.str;
-  
+
   # mkOpt builds an option with a type and a description.
   # It wraps lib.mkOption and passes the type and description attributes.
-  mkOpt = type: description: lib.mkOption { inherit type description; };
-  
+  mkOpt = type: description: lib.mkOption {inherit type description;};
+
   # mkOptDef builds an option with a type, default value, and a description.
   # Useful when a default value is required.
-  mkOptDef = type: default: description: lib.mkOption { inherit type default description; };
+  mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
 
   ######################################################################
   #                           Submodule Options                          #
@@ -80,19 +79,19 @@
   #   1. _coreFeatures - features always enabled.
   #   2. validFeatures - additional optional features which a user can enable.
   #
-  
+
   # Core system features that are always enabled. They include utilities, shells,
   # theming, and basic browser support.
   _coreFeatures = [
-    "core"    # Basic system utilities and common tools.
-    "zsh"     # Z shell configuration.
-    "ssh"     # SSH client/server configuration.
-    "git"     # Git configuration and version control.
-    "xdg"     # XDG base directories compliance.
-    "fonts"   # System font configuration.
-    "foot"    # Foot terminal emulator configuration.
-    "gtk"     # GTK theming and GUI configuration.
-    "cursor"  # Cursor theming settings.
+    "core" # Basic system utilities and common tools.
+    "zsh" # Z shell configuration.
+    "ssh" # SSH client/server configuration.
+    "git" # Git configuration and version control.
+    "xdg" # XDG base directories compliance.
+    "fonts" # System font configuration.
+    "foot" # Foot terminal emulator configuration.
+    "gtk" # GTK theming and GUI configuration.
+    "cursor" # Cursor theming settings.
     "systemd" # Systemd service and daemon management.
     "firefox" # Firefox browser support.
   ];
@@ -141,42 +140,42 @@
   # Optional packages appear in optionalPackageSets and are installed based on the
   # features enabled by the user.
   #
-  
+
   # Core package sets correspond to essential features.
   corePackageSets = {
     core = [
-      pkgs.git         # Git: essential for version control.
-      pkgs.curl        # Curl: for data transfers via various protocols.
-      pkgs.wget        # Wget: tool for retrieving files over HTTP/HTTPS/FTP.
-      pkgs.cachix      # Cachix: binary caching solution.
-      pkgs.unzip       # Unzip: utility to extract compressed files.
-      pkgs.bash        # Bash: a widely-used shell.
-      pkgs.vim         # Vim: a classic text editor.
-      pkgs.lsd         # Lsd: improved ls command with icons and colorization.
-      pkgs.alejandra   # Alejandra: code formatter for shell scripts.
-      pkgs.tree        # Tree: displays directory structures in a tree-like format.
-      pkgs.dconf       # Dconf: configuration system for GNOME.
-      pkgs.lm_sensors  # LM Sensors: hardware monitoring and sensor readings.
-      pkgs.bottom      # Bottom: graphical system monitor.
+      pkgs.git # Git: essential for version control.
+      pkgs.curl # Curl: for data transfers via various protocols.
+      pkgs.wget # Wget: tool for retrieving files over HTTP/HTTPS/FTP.
+      pkgs.cachix # Cachix: binary caching solution.
+      pkgs.unzip # Unzip: utility to extract compressed files.
+      pkgs.bash # Bash: a widely-used shell.
+      pkgs.vim # Vim: a classic text editor.
+      pkgs.lsd # Lsd: improved ls command with icons and colorization.
+      pkgs.alejandra # Alejandra: code formatter for shell scripts.
+      pkgs.tree # Tree: displays directory structures in a tree-like format.
+      pkgs.dconf # Dconf: configuration system for GNOME.
+      pkgs.lm_sensors # LM Sensors: hardware monitoring and sensor readings.
+      pkgs.bottom # Bottom: graphical system monitor.
     ];
     zsh = [
-      pkgs.zsh         # Zsh: a modern shell environment.
+      pkgs.zsh # Zsh: a modern shell environment.
     ];
     ssh = [
-      pkgs.openssh     # OpenSSH: secure shell protocol suite.
+      pkgs.openssh # OpenSSH: secure shell protocol suite.
     ];
     git = [
-      pkgs.git         # Git: reiterated to ensure its availability.
+      pkgs.git # Git: reiterated to ensure its availability.
     ];
     foot = [
-      pkgs.foot        # Foot: terminal emulator.
+      pkgs.foot # Foot: terminal emulator.
     ];
     gtk = [
-      pkgs.gtk3                       # GTK3: graphical toolkit.
-      pkgs.gsettings-desktop-schemas  # Desktop schemas for GTK settings.
+      pkgs.gtk3 # GTK3: graphical toolkit.
+      pkgs.gsettings-desktop-schemas # Desktop schemas for GTK settings.
     ];
     firefox = [
-      pkgs.firefox     # Firefox: web browser.
+      pkgs.firefox # Firefox: web browser.
     ];
   };
 
@@ -185,35 +184,35 @@
   #
   optionalPackageSets = {
     wayland = [
-      pkgs.grim           # Grim: screenshot utility for Wayland.
-      pkgs.slurp          # Slurp: screen region selector tool.
-      pkgs.wl-clipboard   # WL-clipboard: clipboard utility on Wayland.
-      pkgs.hyprpicker     # Hyprpicker: specific utility likely for Hyprland.
+      pkgs.grim # Grim: screenshot utility for Wayland.
+      pkgs.slurp # Slurp: screen region selector tool.
+      pkgs.wl-clipboard # WL-clipboard: clipboard utility on Wayland.
+      pkgs.hyprpicker # Hyprpicker: specific utility likely for Hyprland.
     ];
     media = [
-      pkgs.pavucontrol  # Pavucontrol: sound mixer for PulseAudio.
-      pkgs.ffmpeg       # FFmpeg: multimedia framework.
+      pkgs.pavucontrol # Pavucontrol: sound mixer for PulseAudio.
+      pkgs.ffmpeg # FFmpeg: multimedia framework.
       pkgs.yt-dlp-light # yt-dlp-light: lightweight tool for downloading videos.
-      pkgs.vlc          # VLC: versatile media player.
-      pkgs.stremio     # Stremio: media streaming application.
-      pkgs.cmus         # cmus: terminal-based music player.
+      pkgs.vlc # VLC: versatile media player.
+      pkgs.stremio # Stremio: media streaming application.
+      pkgs.cmus # cmus: terminal-based music player.
     ];
     python = [
-      pkgs.python3      # Python3: interpreter for Python scripts.
+      pkgs.python3 # Python3: interpreter for Python scripts.
     ];
     hyprland = [
-      pkgs.hyprwayland-scanner  # Hyprwayland-scanner: tool associated with Hyprland.
+      pkgs.hyprwayland-scanner # Hyprwayland-scanner: tool associated with Hyprland.
     ];
     syncthing = [
-      pkgs.syncthing   # Syncthing: files synchronization tool.
+      pkgs.syncthing # Syncthing: files synchronization tool.
     ];
     creative = [
-      pkgs.pinta      # Pinta: simple painting application.
-      pkgs.gimp       # GIMP: feature-rich image editor.
+      pkgs.pinta # Pinta: simple painting application.
+      pkgs.gimp # GIMP: feature-rich image editor.
     ];
     music = [
-      pkgs.cmus       # cmus: command-line music player reiteration.
-      pkgs.cava       # Cava: console-based audio visualizer.
+      pkgs.cmus # cmus: command-line music player reiteration.
+      pkgs.cava # Cava: console-based audio visualizer.
     ];
   };
 
@@ -251,7 +250,6 @@
   _validatePackageSets =
     lib.assertMsg (packageSetsWithoutFeatures == [])
     "Found package sets without corresponding features: ${builtins.toString packageSetsWithoutFeatures}";
-    
 in {
   ######################################################################
   #                        Core System Options                           #
@@ -260,7 +258,7 @@ in {
   # The following options define basic system settings such as the username,
   # hostname, home directory, and more.
   #
-  
+
   # The primary username for the system.
   username = mkOpt mkStr "The username for the system.";
 
@@ -312,7 +310,7 @@ in {
   #
   # Visual and appearance settings, including fonts, DPI, and cursor sizes.
   #
-  
+
   # Font configuration using a submodule; supports both main and fallback fonts.
   fonts = mkOpt (t.submodule {
     options = {
@@ -357,28 +355,28 @@ in {
   #
   # Options for important directories; these can be automatically managed.
   #
-  
+
   # Managed directories defined as an attribute set using the directory submodule.
   directories = mkOptDef (t.attrsOf dirModule) {} "Configuration for managed directories";
 
   # Directory where the flake repository resides.
   flakeDir = mkOpt mkStr "The directory where the flake lives.";
-  
+
   # Directory for storing music files.
   musicDir = mkOpt mkStr "Directory for music files.";
-  
+
   # Directory for digital camera images (DCIM).
   dcimDir = mkOpt mkStr "Directory for pictures (DCIM).";
-  
+
   # Directory associated with Steam (gaming platform).
   steamDir = mkOpt mkStr "Directory for Steam.";
-  
+
   # Directory dedicated to wallpapers.
   wallpaperDir = mkOpt mkStr "Wallpaper directory.";
-  
+
   # Directory dedicated to wallpaper videos.
   wallpaperVideoDir = mkOpt mkStr "Wallpaper video directory.";
-  
+
   # GTK bookmarks, typically used in file managers for quick access.
   bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
 
@@ -389,7 +387,7 @@ in {
   # Configuration options related to Git. These include the user's Git name,
   # email and the URL for the Home Manager repository.
   #
-  
+
   gitName = mkOpt mkStr "Git username.";
   gitEmail = mkOpt mkStr "Git email address.";
   gitHomeManagerRepo = mkOpt mkStr "URL of the Home Manager repository.";
@@ -398,6 +396,6 @@ in {
   # Export the core features list so that it is available externally.
   #
   inherit _coreFeatures;
-  
+
   #───────────────────────── END PROFILES/OPTIONS.NIX ───────────────────────────#
 }

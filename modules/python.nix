@@ -1,16 +1,27 @@
-{ lib, pkgs, config, inputs, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  inputs,
+  ...
+}: {
+  home.packages = with pkgs; [
+    # Python and core tools
+    python3
+    python3Packages.pip
+    
+    # UV package management tools
+    uv
+    
+    # Development tools
+    python3Packages.black    # Formatter
+    python3Packages.pylint   # Linter
+    python3Packages.pytest   # Testing
+  ];
 
-let
-  # Set the path to your Python project directory containing pyproject.toml.
-  projectDir = ./my-python-project;
-
-  # Use uv2nix to build the Python package.
-  pythonPackage = inputs.uv2nix.buildPythonPackage {
-    projectDir = projectDir;
-    python = pkgs.python3;
-    # Optionally, include additional arguments such as buildInputs or overrides.
+  # Add Python-specific environment variables
+  home.sessionVariables = {
+    PYTHONPATH = "${config.home.homeDirectory}/.local/lib/python3.11/site-packages";
+    PIP_REQUIRE_VIRTUALENV = "true";  # Safety feature: require virtualenv for pip install
   };
-in {
-  # Expose the generated Python package as a system package.
-  environment.systemPackages = [ pythonPackage ];
 }
