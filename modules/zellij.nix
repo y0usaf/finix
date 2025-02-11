@@ -23,12 +23,6 @@
         black = "#000000"; # regular0
         white = "#ffffff"; # regular7
       };
-      
-      pane_frames = false;
-      ui.pane_frames = {
-        rounded_corners = false;
-        hide_session_name = true;
-      };
     };
   };
 
@@ -39,7 +33,7 @@
                 plugin location="zellij:tab-bar"
             }
             children
-            pane size=1 borderless=true {
+            pane size=2 borderless=true {
                 plugin location="zellij:status-bar"
             }
         }
