@@ -190,5 +190,6 @@ in {
   # Add any personal packages here. This package is for image upscaling.
   personalPackages = with pkgs; [
     realesrgan-ncnn-vulkan
+    uv
   ];
 }
