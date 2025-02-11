@@ -113,7 +113,7 @@
     # Import the Nix package collection using nixpkgs and set allowUnfree to true.
     pkgs = import nixpkgs {
       inherit system;
-      # Use the correct overlay path
+      # Update the overlay section to properly handle uv2nix
       overlays = [
         (final: prev: {
           inherit (uv2nix.packages.${system}) uv2nix;
@@ -121,6 +121,28 @@
       ];
       config.allowUnfree = true;
     };
+
+    # Add these new configurations after the pkgs definition
+    python = pkgs.python312;
+
+    pythonSet =
+      (pkgs.callPackage pyproject-nix.build.packages {
+        inherit python;
+      })
+      .overrideScope (
+        nixpkgs.lib.composeManyExtensions [
+          # Add necessary build system overlays
+          (final: prev: {
+            # Add system libraries needed for numpy and opencv
+            pythonBuildInputs = old:
+              old
+              ++ [
+                pkgs.stdenv.cc.cc.lib # for libstdc++
+                pkgs.zlib
+              ];
+          })
+        ]
+      );
 
     ## ────── External Configurations ──────
     # Import additional configuration options from a local file.
