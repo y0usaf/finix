@@ -1,30 +1,21 @@
 {
-  description = "Simple configuration for uv2nix";
+  config,
+  pkgs,
+  lib,
+  profile,
+  ...
+}: {
+  config = lib.mkIf (builtins.elem "python" profile.features) {
+    home.packages = [
+      pkgs.python312
+      pkgs.uv
+    ];
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
-    pyproject-nix.url = "github:pyproject-nix/pyproject.nix";
-    uv2nix = {
-      url = "github:pyproject-nix/uv2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pyproject-nix.follows = "pyproject-nix";
-    };
-  };
-
-  outputs = { self, nixpkgs, pyproject-nix, uv2nix }:
-  let
-    system = "x86_64-linux";
-    pkgs = import nixpkgs {
-      inherit system;
-      overlays = [
-        (final: prev: {
-          inherit (uv2nix.packages.${system}) uv2nix;
-        })
-      ];
-    };
-  in {
-    devShells.default = pkgs.mkShell {
-      buildInputs = [ pkgs.uv2nix ];
+    # Optional: Add Python-specific environment variables
+    home.sessionVariables = {
+      PYTHONUSERBASE = "${config.xdg.dataHome}/python";
+      PIP_CACHE_DIR = "${config.xdg.cacheHome}/pip";
+      VIRTUAL_ENV_HOME = "${config.xdg.dataHome}/venvs";
     };
   };
 }
