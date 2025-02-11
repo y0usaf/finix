@@ -139,6 +139,11 @@
               ++ [
                 pkgs.stdenv.cc.cc.lib # for libstdc++
                 pkgs.zlib
+                pkgs.libGL # OpenGL libraries for OpenCV
+                pkgs.glib # GLib for system integration
+                pkgs.xorg.libX11 # X11 support
+                pkgs.xorg.libXext # X11 extensions
+                pkgs.xorg.libXrender # X11 rendering
               ];
           })
         ]
