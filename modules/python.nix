@@ -48,10 +48,25 @@
   };
 
   # Add UV-specific shell aliases
-  programs.zsh.shellAliases = {
-    pip = "uv pip";
-    pip3 = "uv pip";
-    python-venv = "uv venv";
+  programs.zsh = {
+    enable = true;
+    shellAliases = {
+      pip = "${pkgs.uv}/bin/uv pip";
+      pip3 = "${pkgs.uv}/bin/uv pip";
+      python-venv = "${pkgs.uv}/bin/uv venv";
+    };
+
+    initExtra = ''
+      # UV initialization
+      if command -v uv &> /dev/null; then
+        eval "$(uv --generate-shell-completion zsh)"
+      fi
+
+      # Remove existing pip from PATH if it exists in ~/.local/bin
+      if [[ -f "$HOME/.local/bin/pip" ]]; then
+        rm "$HOME/.local/bin/pip"
+      fi
+    '';
   };
 
   # Create a script to initialize UV in new shells
