@@ -24,6 +24,7 @@
     xorg.libX11
     xorg.libXext
     xorg.libXrender
+    gcc-unwrapped.lib
   ];
 
   # Add Python-specific environment variables
@@ -36,15 +37,18 @@
     UV_PIP_CONFIGURE = "false";
     
     # Add LD_LIBRARY_PATH for system libraries
-    LD_LIBRARY_PATH = lib.makeLibraryPath [
-      pkgs.stdenv.cc.cc.lib
+    LD_LIBRARY_PATH = lib.makeLibraryPath ([
+      "${pkgs.stdenv.cc.cc.lib}/lib"
+      "${pkgs.stdenv.cc.cc.lib}/lib64"
+      "${pkgs.gcc-unwrapped.lib}/lib"
+      "${pkgs.gcc-unwrapped.lib}/lib64"
       pkgs.zlib
       pkgs.libGL
       pkgs.glib
       pkgs.xorg.libX11
       pkgs.xorg.libXext
       pkgs.xorg.libXrender
-    ];
+    ]);
   };
 
   # Add UV-specific shell aliases
