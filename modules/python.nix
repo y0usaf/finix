@@ -31,16 +31,23 @@
 
   # Create music-related Python virtual environment if music feature is enabled
   home.activation = lib.mkIf (builtins.elem "music" profile.features) {
-    createMusicVenv = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    createMusicEnv = lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -d "${config.home.homeDirectory}/.venv/music" ]; then
-        $DRY_RUN_CMD ${pkgs.uv}/bin/uv venv \
+        # Create a new Python environment using UV
+        ${pkgs.uv}/bin/uv venv \
           --python=${pkgs.python3}/bin/python3 \
           "${config.home.homeDirectory}/.venv/music"
-        $DRY_RUN_CMD source "${config.home.homeDirectory}/.venv/music/bin/activate"
-        $DRY_RUN_CMD ${pkgs.uv}/bin/uv pip install uv spotdl
-        $DRY_RUN_CMD deactivate
+        
+        # Install required packages
+        source "${config.home.homeDirectory}/.venv/music/bin/activate"
+        ${pkgs.uv}/bin/uv pip install uv spotdl
+        deactivate
       fi
     '';
+  };
+
+  programs.bash.shellAliases = lib.mkIf (builtins.elem "music" profile.features) {
+    spotdl = "(source ${config.home.homeDirectory}/.venv/music/bin/activate && spotdl \"$@\" && deactivate)";
   };
 
   programs.zsh.shellAliases = lib.mkIf (builtins.elem "music" profile.features) {

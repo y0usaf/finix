@@ -116,7 +116,7 @@
       # Use the correct overlay path
       overlays = [
         (final: prev: {
-          uv2nix = uv2nix.packages.${system}.default;
+          inherit (uv2nix.packages.${system}) uv2nix;
         })
       ];
       config.allowUnfree = true;
