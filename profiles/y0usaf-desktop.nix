@@ -57,7 +57,7 @@ in {
     "obs" # Prepare for streaming/recording with OBS.
     "streamlink" # Enable Streamlink for handling online streams.
     "chatgpt" # Integrate any ChatGPT-related tooling.
-    #"python" # Python setup, with UV2Nix.
+    "python" # Python setup, with UV2Nix.
   ];
 
   #=======================================================================
