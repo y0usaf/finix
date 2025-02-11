@@ -211,8 +211,10 @@
       pkgs.gimp # GIMP: feature-rich image editor.
     ];
     music = [
-      pkgs.cmus # cmus: command-line music player reiteration.
-      pkgs.cava # Cava: console-based audio visualizer.
+      pkgs.cmus # cmus: command-line music player
+      pkgs.cava # Cava: console-based audio visualizer
+      pkgs.python3 # Required for spotdl virtual environment
+      pkgs.uv # Required for managing Python virtual environments
     ];
   };
 
