@@ -37,7 +37,7 @@
         ${pkgs.uv}/bin/uv venv \
           --python=${pkgs.python3}/bin/python3 \
           "${config.home.homeDirectory}/.venv/music"
-        
+
         # Install required packages
         source "${config.home.homeDirectory}/.venv/music/bin/activate"
         ${pkgs.uv}/bin/uv pip install uv spotdl
