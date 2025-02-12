@@ -10,6 +10,15 @@
       # Python and UV
       python312
       uv
+      
+      # System libraries
+      stdenv.cc.cc.lib
+      zlib
+      libGL
+      glib
+      xorg.libX11
+      xorg.libXext
+      xorg.libXrender
     ];
 
     home.sessionVariables = {
@@ -17,16 +26,19 @@
       PIP_CACHE_DIR = "${config.xdg.cacheHome}/pip";
       VIRTUAL_ENV_HOME = "${config.xdg.dataHome}/venvs";
       
-      # Use the same libraries defined in your flake.nix
-      LD_LIBRARY_PATH = lib.makeLibraryPath [
-        pkgs.stdenv.cc.cc.lib  # libstdc++
+      # Add all library paths
+      NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [
+        pkgs.stdenv.cc.cc.lib
         pkgs.zlib
-        pkgs.libGL             # OpenGL libraries for OpenCV
-        pkgs.glib             # GLib for system integration
-        pkgs.xorg.libX11      # X11 support
-        pkgs.xorg.libXext     # X11 extensions
-        pkgs.xorg.libXrender  # X11 rendering
+        pkgs.libGL
+        pkgs.glib
+        pkgs.xorg.libX11
+        pkgs.xorg.libXext
+        pkgs.xorg.libXrender
       ];
+      
+      # Use the standard dynamic linker path for x86_64-linux
+      NIX_LD = "/lib64/ld-linux-x86-64.so.2";
     };
   };
 }
