@@ -4,31 +4,15 @@
   lib,
   profile,
   ...
-}: let
-  pythonWrapper = pkgs.writeShellScriptBin "python-wrapped" ''
-    export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [
-      pkgs.stdenv.cc.cc.lib
-      pkgs.zlib
-      pkgs.libGL
-      pkgs.glib
-    ]}:$LD_LIBRARY_PATH"
-    
-    exec ${pkgs.python312}/bin/python3 "$@"
-  '';
-in {
+}: {
   config = lib.mkIf (builtins.elem "python" profile.features) {
     home.packages = with pkgs; [
-      # Python wrapper script
-      pythonWrapper
-      
-      # UV package manager
+      # Just Python and UV
+      python312
       uv
       
-      # System libraries
+      # The essential library
       stdenv.cc.cc.lib
-      zlib
-      libGL
-      glib
     ];
 
     home.sessionVariables = {
