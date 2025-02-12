@@ -10,7 +10,7 @@
       # Python and UV
       python312
       uv
-      
+
       # System libraries
       stdenv.cc.cc.lib
       zlib
@@ -25,7 +25,7 @@
       PYTHONUSERBASE = "${config.xdg.dataHome}/python";
       PIP_CACHE_DIR = "${config.xdg.cacheHome}/pip";
       VIRTUAL_ENV_HOME = "${config.xdg.dataHome}/venvs";
-      
+
       # Add all library paths
       NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [
         pkgs.stdenv.cc.cc.lib
@@ -36,7 +36,7 @@
         pkgs.xorg.libXext
         pkgs.xorg.libXrender
       ];
-      
+
       # Use the standard dynamic linker path for x86_64-linux
       NIX_LD = "/lib64/ld-linux-x86-64.so.2";
     };

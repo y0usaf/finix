@@ -286,6 +286,53 @@
           })
         '';
       }
+
+      # Additional suggested plugins
+      {
+        plugin = indent-blankline-nvim;
+        type = "lua";
+        config = ''
+          require('ibl').setup()
+        '';
+      }
+
+      {
+        plugin = which-key-nvim;
+        type = "lua";
+        config = ''
+          require('which-key').setup{}
+        '';
+      }
+
+      {
+        plugin = gitsigns-nvim;
+        type = "lua";
+        config = ''
+          require('gitsigns').setup{
+            signs = {
+              add = { text = '+' },
+              change = { text = '~' },
+              delete = { text = '_' },
+              topdelete = { text = '‾' },
+              changedelete = { text = '~' },
+            },
+          }
+        '';
+      }
+
+      {
+        plugin = lualine-nvim;
+        type = "lua";
+        config = ''
+          require('lualine').setup{
+            options = {
+              theme = 'gruvbox-material',
+              component_separators = '|',
+              section_separators = ''''''
+            }
+          }
+        '';
+      }
     ];
 
     extraLuaConfig = ''
@@ -293,7 +340,15 @@
       vim.opt.clipboard = 'unnamedplus'
       vim.opt.number = true
       vim.g.mapleader = ','
-
+      
+      -- Theme and transparency settings
+      vim.o.termguicolors = true
+      vim.o.background = 'dark'
+      vim.g.gruvbox_material_transparent_background = 1
+      vim.g.gruvbox_material_better_performance = 1
+      vim.opt.winblend = 10  -- Make floating windows slightly transparent
+      vim.opt.pumblend = 10  -- Make popup menu slightly transparent
+      
       -- Key mappings
       local function map(mode, lhs, rhs, opts)
         local options = { noremap = true, silent = true }
