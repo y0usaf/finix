@@ -23,6 +23,7 @@
       # For telescope dependencies
       ripgrep
       fd
+      aider-chat
     ];
 
     plugins = with pkgs.vimPlugins; [
@@ -333,6 +334,25 @@
           }
         '';
       }
+
+      # Aider.nvim for AI assistance
+      {
+        plugin = aider-nvim;
+        type = "lua";
+        config = ''
+          require('aider').setup({
+            auto_manage_context = true,
+            default_bindings = true,
+            debug = false,
+            ignore_buffers = {
+              '^term:',
+              'NeogitConsole',
+              'NvimTree_',
+              'neo-tree filesystem'
+            }
+          })
+        '';
+      }
     ];
 
     extraLuaConfig = ''
@@ -340,7 +360,7 @@
       vim.opt.clipboard = 'unnamedplus'
       vim.opt.number = true
       vim.g.mapleader = ','
-      
+
       -- Theme and transparency settings
       vim.o.termguicolors = true
       vim.o.background = 'dark'
@@ -348,7 +368,7 @@
       vim.g.gruvbox_material_better_performance = 1
       vim.opt.winblend = 10  -- Make floating windows slightly transparent
       vim.opt.pumblend = 10  -- Make popup menu slightly transparent
-      
+
       -- Key mappings
       local function map(mode, lhs, rhs, opts)
         local options = { noremap = true, silent = true }
