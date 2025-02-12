@@ -328,7 +328,7 @@
             options = {
               theme = 'gruvbox-material',
               component_separators = '|',
-              section_separators = ''''''
+              section_separators = '''''' -- Using triple quotes to escape empty string
             }
           }
         '';
