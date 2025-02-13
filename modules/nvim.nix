@@ -425,9 +425,11 @@
       })
 
       -- Create command aliases for Aider
-      vim.api.nvim_create_user_command('AiderStart', 'lua require("aider").open()', {})
-      vim.api.nvim_create_user_command('AiderStop', 'lua require("aider").stop_chat()', {})
-      vim.api.nvim_create_user_command('AiderChat', 'lua require("aider").open()', {})
+      vim.api.nvim_create_user_command('AiderChat', 'terminal aider', {})
+      vim.api.nvim_create_user_command('AiderAddModifiedFiles', 'terminal aider $(git ls-files --modified)', {})
+      vim.api.nvim_create_user_command('AiderOpen', 'terminal aider', {})
+      vim.api.nvim_create_user_command('AiderOpenGPT3', 'terminal aider -3', {})
+      vim.api.nvim_create_user_command('AiderOpenNoAutoCommit', 'terminal AIDER_NO_AUTO_COMMITS=1 aider', {})
     '';
   };
 }
