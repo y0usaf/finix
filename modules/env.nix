@@ -125,6 +125,24 @@ in {
       ];
     };
 
+    programs.zsh = {
+      envExtra = ''
+        # Token management function
+        export_vars_from_files() {
+            local dir_path=$1
+            for file_path in "$dir_path"/*.txt; do
+                if [[ -f $file_path ]]; then
+                    var_name=$(basename "$file_path" .txt)
+                    export $var_name=$(cat "$file_path")
+                fi
+            done
+        }
+
+        # Export tokens
+        export_vars_from_files "$HOME/Tokens"
+      '';
+    };
+
     # -------------------------------------------------------------------------
     # Hyprland Window Manager Settings (with Conditional NVIDIA Options)
     # -------------------------------------------------------------------------
