@@ -5,14 +5,18 @@
   profile,
   ...
 }: {
+
+  # Configure Neovim via the "programs.neovim" option.
   programs.neovim = {
     enable = true;
     defaultEditor = true;
     viAlias = true;
-    vimAlias = true;
+    vimAlias  = true;
 
+    # Extra packages needed for formatters, language servers,
+    # and other utilities (such as Telescope dependencies)
     extraPackages = with pkgs; [
-      # Language servers and formatters
+      # Formatters and linters
       stylua
       black
       nodePackages.prettier
@@ -20,40 +24,49 @@
       shfmt
       vim-vint
 
-      # For telescope dependencies
+      # Utilities for Telescope (fuzzy finder) and more
       ripgrep
       fd
       aider-chat
     ];
 
+    # Define all plugins with their configurations.
     plugins = with pkgs.vimPlugins; [
-      # Basic plugins without config
+      # Basic plugins (loaded without extra configuration)
       gruvbox-material
       plenary-nvim
       cmp-buffer
       cmp-path
       cmp-nvim-lsp
 
-      # Plugins with configuration
+      # ============================================================
+      # File Explorer: nvim-tree-lua
+      # ============================================================
       {
         plugin = nvim-tree-lua;
         type = "lua";
         config = ''
+          -- Setup nvim-tree with adaptive size,
+          -- git file status highlighting and filtering out dotfiles.
           require('nvim-tree').setup {
             view = { adaptive_size = true },
             renderer = { highlight_git = true },
-            filters = { dotfiles = true }
+            filters = { dotfiles = true },
           }
         '';
       }
 
+      # ============================================================
+      # Fuzzy Finder: Telescope
+      # ============================================================
       {
         plugin = telescope-nvim;
         type = "lua";
         config = ''
+          -- Configure Telescope with fzy sorters and ignore "node_modules"
           require('telescope').setup {
             defaults = {
-              file_sorter = require('telescope.sorters').get_fzy_sorter,
+              file_sorter    = require('telescope.sorters').get_fzy_sorter,
               generic_sorter = require('telescope.sorters').get_generic_fzy_sorter,
               file_ignore_patterns = { 'node_modules' },
             },
@@ -61,26 +74,34 @@
         '';
       }
 
+      # ============================================================
+      # Syntax Highlighting & Parsing: Treesitter
+      # ============================================================
       {
         plugin = nvim-treesitter.withAllGrammars;
         type = "lua";
         config = ''
+          -- Enable Treesitter-based syntax highlighting.
           require('nvim-treesitter.configs').setup {
             highlight = { enable = true },
           }
         '';
       }
 
-      # Supermaven
+      # ============================================================
+      # AI & Snippet Assistance: Supermaven
+      # ============================================================
       {
         plugin = supermaven-nvim;
         type = "lua";
         config = ''
+          -- Setup Supermaven for inline AI code suggestions,
+          -- along with custom key mappings.
           require("supermaven-nvim").setup({
             keymaps = {
               accept_suggestion = "<Tab>",
-              clear_suggestion = "<C-]>",
-              accept_word = "<C-j>",
+              clear_suggestion  = "<C-]>",
+              accept_word       = "<C-j>",
             },
             ignore_filetypes = { cpp = true },
             color = { suggestion_color = "#ff88dd" },
@@ -90,7 +111,9 @@
         '';
       }
 
-      # Cheatsheet
+      # ============================================================
+      # Cheatsheet: Quick command reference
+      # ============================================================
       {
         plugin = cheatsheet-nvim;
         type = "lua";
@@ -99,7 +122,9 @@
         '';
       }
 
-      # Edgy
+      # ============================================================
+      # UI Management: Edgy
+      # ============================================================
       {
         plugin = edgy-nvim;
         type = "lua";
@@ -108,73 +133,37 @@
         '';
       }
 
-      # Formatter
+      # ============================================================
+      # Formatting: Formatter.nvim
+      # ============================================================
       {
         plugin = formatter-nvim;
         type = "lua";
         config = ''
+          -- Formatter configuration
+          -- Define a helper for all web-related filetypes to use Prettier.
+          local function prettier()
+            return {
+              exe  = 'prettier-daemon',
+              args = { vim.api.nvim_buf_get_name(0) }
+            }
+          end
+
           require('formatter').setup({
             filetype = {
-              typescript = {
-                function()
-                  return {
-                    exe = 'prettier-daemon',
-                    args = { vim.api.nvim_buf_get_name(0) }
-                  }
-                end
-              },
-              javascript = {
-                function()
-                  return {
-                    exe = 'prettier-daemon',
-                    args = { vim.api.nvim_buf_get_name(0) }
-                  }
-                end
-              },
-              json = {
-                function()
-                  return {
-                    exe = 'prettier-daemon',
-                    args = { vim.api.nvim_buf_get_name(0) }
-                  }
-                end
-              },
-              css = {
-                function()
-                  return {
-                    exe = 'prettier-daemon',
-                    args = { vim.api.nvim_buf_get_name(0) }
-                  }
-                end
-              },
-              scss = {
-                function()
-                  return {
-                    exe = 'prettier-daemon',
-                    args = { vim.api.nvim_buf_get_name(0) }
-                  }
-                end
-              },
-              html = {
-                function()
-                  return {
-                    exe = 'prettier-daemon',
-                    args = { vim.api.nvim_buf_get_name(0) }
-                  }
-                end
-              },
-              markdown = {
-                function()
-                  return {
-                    exe = 'prettier-daemon',
-                    args = { vim.api.nvim_buf_get_name(0) }
-                  }
-                end
-              },
+              -- Web and markup files use Prettier.
+              typescript = { prettier },
+              javascript = { prettier },
+              json       = { prettier },
+              css        = { prettier },
+              scss       = { prettier },
+              html       = { prettier },
+              markdown = { prettier },
+              -- Language-specific formatters:
               lua = {
                 function()
                   return {
-                    exe = 'stylua',
+                    exe  = 'stylua',
                     args = { '--config-path', '~/.config/stylua/stylua.toml' }
                   }
                 end
@@ -182,7 +171,7 @@
               python = {
                 function()
                   return {
-                    exe = 'black',
+                    exe  = 'black',
                     args = { '-' }
                   }
                 end
@@ -190,7 +179,7 @@
               sh = {
                 function()
                   return {
-                    exe = 'shfmt',
+                    exe  = 'shfmt',
                     args = { '-w' }
                   }
                 end
@@ -207,7 +196,9 @@
         '';
       }
 
-      # Trouble
+      # ============================================================
+      # Diagnostic Window: Trouble.nvim
+      # ============================================================
       {
         plugin = trouble-nvim;
         type = "lua";
@@ -216,7 +207,9 @@
         '';
       }
 
-      # Completion
+      # ============================================================
+      # Completion Engine: nvim-cmp
+      # ============================================================
       {
         plugin = nvim-cmp;
         type = "lua";
@@ -254,11 +247,14 @@
         '';
       }
 
-      # Obsidian
+      # ============================================================
+      # Obsidian: Note-taking integration
+      # ============================================================
       {
         plugin = obsidian-nvim;
         type = "lua";
         config = ''
+          -- Set conceallevel to improve markdown link display.
           vim.opt.conceallevel = 1
           require("obsidian").setup({
             workspaces = {
@@ -288,7 +284,9 @@
         '';
       }
 
-      # Additional suggested plugins
+      # ============================================================
+      # Indentation Guides: indent-blankline / ibl
+      # ============================================================
       {
         plugin = indent-blankline-nvim;
         type = "lua";
@@ -297,6 +295,9 @@
         '';
       }
 
+      # ============================================================
+      # Key Mapping Helper: which-key.nvim
+      # ============================================================
       {
         plugin = which-key-nvim;
         type = "lua";
@@ -305,22 +306,28 @@
         '';
       }
 
+      # ============================================================
+      # Git Signs: gitsigns.nvim
+      # ============================================================
       {
         plugin = gitsigns-nvim;
         type = "lua";
         config = ''
           require('gitsigns').setup{
             signs = {
-              add = { text = '+' },
-              change = { text = '~' },
-              delete = { text = '_' },
-              topdelete = { text = '‾' },
-              changedelete = { text = '~' },
+              add         = { text = '+' },
+              change      = { text = '~' },
+              delete      = { text = '_' },
+              topdelete   = { text = '‾' },
+              changedelete= { text = '~' },
             },
           }
         '';
       }
 
+      # ============================================================
+      # Statusline: lualine.nvim
+      # ============================================================
       {
         plugin = lualine-nvim;
         type = "lua";
@@ -329,22 +336,24 @@
             options = {
               theme = 'gruvbox-material',
               component_separators = '|',
-              section_separators = '''''' -- Using triple quotes to escape empty string
+              section_separators   = ""  -- Use double quotes to avoid ending the Nix string literal early
             }
           }
         '';
       }
 
-      # Aider.nvim for AI assistance
+      # ============================================================
+      # AI Assistance: aider.nvim
+      # ============================================================
       {
         plugin = aider-nvim;
         type = "lua";
         config = ''
           require('aider').setup({
             auto_manage_context = true,
-            default_bindings = true,
-            debug = false,
-            ignore_buffers = {
+            default_bindings     = true,
+            debug                = false,
+            ignore_buffers       = {
               '^term:',
               'NeogitConsole',
               'NvimTree_',
@@ -355,53 +364,60 @@
       }
     ];
 
+    # ===============================================
+    # Global Extra Lua Configuration for Neovim
+    # ===============================================
     extraLuaConfig = ''
-      -- Basic options
+      -- Basic settings: enable system clipboard and show line numbers.
       vim.opt.clipboard = 'unnamedplus'
       vim.opt.number = true
       vim.g.mapleader = ','
 
-      -- Theme and transparency settings
+      -- Visual theme and effects.
       vim.o.termguicolors = true
       vim.o.background = 'dark'
       vim.g.gruvbox_material_transparent_background = 1
-      vim.g.gruvbox_material_better_performance = 1
-      vim.opt.winblend = 10  -- Make floating windows slightly transparent
-      vim.opt.pumblend = 10  -- Make popup menu slightly transparent
+      vim.g.gruvbox_material_better_performance       = 1
+      vim.opt.winblend = 10   -- Slight transparency for floating windows
+      vim.opt.pumblend = 10   -- Slight transparency for popup menus
 
-      -- Key mappings
+      -- Helper for mapping keys
       local function map(mode, lhs, rhs, opts)
         local options = { noremap = true, silent = true }
-        if opts then options = vim.tbl_extend('force', options, opts) end
+        if opts then
+          options = vim.tbl_extend('force', options, opts)
+        end
         vim.keymap.set(mode, lhs, rhs, options)
       end
 
-      -- File navigation
+      -- File navigation shortcuts (Telescope and NvimTree)
       map('n', '<leader>pv', ':NvimTreeToggle<CR>')
       map('n', '<leader>ff', '<cmd>Telescope find_files<cr>')
       map('n', '<leader>fg', '<cmd>Telescope live_grep<cr>')
       map('n', '<leader>fb', '<cmd>Telescope buffers<cr>')
       map('n', '<leader>fh', '<cmd>Telescope help_tags<cr>')
 
-      -- Obsidian mappings
+      -- Obsidian note management shortcuts.
       map('n', '<leader>on', ':ObsidianNew<CR>', { desc = "New Obsidian note" })
       map('n', '<leader>oo', ':ObsidianOpen<CR>', { desc = "Open Obsidian" })
       map('n', '<leader>os', ':ObsidianQuickSwitch<CR>', { desc = "Quick Switch" })
       map('n', '<leader>of', ':ObsidianFollowLink<CR>', { desc = "Follow Link" })
       map('n', '<leader>ob', ':ObsidianBacklinks<CR>', { desc = "Show Backlinks" })
 
-      -- Theme
+      -- Set the colorscheme.
       vim.cmd('colorscheme gruvbox-material')
 
-      -- Autocommands
+      -- Create an autocommand group for custom behaviors.
       local augroup = vim.api.nvim_create_augroup("CustomAutocommands", { clear = true })
 
+      -- Autoformat on file save.
       vim.api.nvim_create_autocmd("BufWritePost", {
-        group = augroup,
+        group   = augroup,
         pattern = "*",
         command = "FormatWrite",
       })
 
+      -- Highlight yanked text briefly.
       vim.api.nvim_create_autocmd("TextYankPost", {
         group = augroup,
         callback = function()
