@@ -1,11 +1,22 @@
-#─────────────────────────── 🌍 SYSTEM OPTIONS 🌍 ───────────────────────────#
+#═══════════════════════════ 🌍 SYSTEM OPTIONS 🌍 ═══════════════════════════#
 {
   #───────────────────────── BEGIN PROFILES/OPTIONS.NIX ─────────────────────────#
   #
-  # This Nix expression defines a comprehensive set of system options using
-  # a modular approach. It sets up type definitions, helpers, submodule options,
-  # feature lists, package sets, validations, and many system configurations.
-  # Every section is documented in detail to explain its purpose and structure.
+  # This Nix expression defines the core configuration options for the entire system.
+  # It acts as a central registry of all configurable aspects, from basic system
+  # settings to complex feature toggles and package management.
+  #
+  # Key Components:
+  # - Type System: Defines strict typing for all configuration options
+  # - Feature Management: Controls which system capabilities are enabled
+  # - Package Sets: Organizes software into logical groups
+  # - Default Applications: Configures preferred programs for common tasks
+  # - Directory Structure: Manages important filesystem locations
+  # - System Identity: Handles hostname, timezone, and user information
+  #
+  # Usage:
+  # This file is imported by both configuration.nix and home.nix to ensure
+  # consistent options across the entire system configuration.
   #
   #───────────────────────────────────────────────────────────────────────────────#
   lib,
