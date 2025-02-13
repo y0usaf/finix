@@ -15,6 +15,12 @@
   ...
 }: {
   config = lib.mkIf (builtins.elem "gaming" profile.features) {
+    home.activation.debugGamingConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      echo "Gaming config path: ${gaming-config}"
+      ls -la ${gaming-config}/marvel-rivals/
+      ls -la ${gaming-config}/wukong/
+    '';
+
     # Gaming-related packages
     home.packages = with pkgs; [
       steam
