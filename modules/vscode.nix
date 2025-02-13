@@ -36,11 +36,15 @@ in {
   ];
 
   # Add our configDir mapping to the module
-  disabledModules = [ "programs/vscode.nix" ];
+  disabledModules = ["programs/vscode.nix"];
   imports = [
     (
-      { config, lib, pkgs, ... }:
       {
+        config,
+        lib,
+        pkgs,
+        ...
+      }: {
         options.programs.vscode = {
           enable = lib.mkEnableOption "Visual Studio Code";
 
@@ -76,7 +80,8 @@ in {
         };
 
         config = lib.mkIf config.programs.vscode.enable {
-          home.packages = [ config.programs.vscode.package ] 
+          home.packages =
+            [config.programs.vscode.package]
             ++ config.programs.vscode.extensions;
         };
       }
@@ -92,14 +97,14 @@ in {
     # Your current extensions
     extensions = with pkgs.vscode-extensions; [
       # Core extensions
-      vscodevim.vim  # asvetliakov.vscode-neovim
+      vscodevim.vim # asvetliakov.vscode-neovim
       bbenoist.nix
       charliermarsh.ruff
       davidanson.vscode-markdownlint
       esbenp.prettier-vscode
       ms-python.python
       ms-python.vscode-pylance
-      
+
       # Additional extensions (some might need to be added to nixpkgs or installed manually)
       # dvirtz.parquet-viewer
       # ms-toolsai.jupyter
@@ -152,4 +157,4 @@ in {
       "password-store" = "basic";
     };
   };
-} 
+}
