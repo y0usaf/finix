@@ -41,10 +41,14 @@
   #   enabled feature. For each feature, if a corresponding attribute exists
   #   in packageSet, its package is added to the list. Otherwise, nothing is added.
   ####################################################################
+  # Helper function that maps a feature name to its package list
+  # Returns:
+  # - The package list from packageSet if the feature exists
+  # - An empty list if the feature isn't defined in packageSet
   packageForFeature = feature:
-    if builtins.hasAttr feature packageSet # Check if packageSet contains the current feature.
-    then packageSet.${feature} # Return the package for the feature if available.
-    else []; # Otherwise, return an empty list.
+    if builtins.hasAttr feature packageSet
+    then packageSet.${feature}
+    else [];
 
   # Build a flat list of packages:
   #   - Start with the core package set.

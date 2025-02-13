@@ -141,10 +141,14 @@ in {
     #############################################################
     hardware = {
       nvidia = {
-        modesetting.enable = true; # Enable DRM-KMS based modesetting for improved graphical integration.
-        powerManagement.enable = true; # Enable power management for Nvidia GPUs.
-        open = false; # Use proprietary drivers (do not use open-source alternatives).
-        nvidiaSettings = true; # Enable the Nvidia settings tool.
+        # Enable DRM kernel mode setting for better Wayland compatibility
+        modesetting.enable = true;
+        # Enable NVIDIA power management features for better battery life
+        powerManagement.enable = true;
+        # Use proprietary NVIDIA drivers instead of open-source Nouveau
+        open = false;
+        # Install nvidia-settings control panel
+        nvidiaSettings = true;
         # Build the Nvidia driver (with version and checksum checks) using mkDriver from the kernel packages.
         package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
           version = "570.86.16"; # Specific version to ensure compatibility.
