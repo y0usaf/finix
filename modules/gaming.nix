@@ -11,40 +11,338 @@
   pkgs,
   lib,
   profile,
-  gaming-config,
   ...
-}: {
-  config = {
-    # Gaming-related packages
-    home.packages = with pkgs; [
-      steam
-      protonup-qt
-      gamemode
-      protontricks
-      prismlauncher
-    ];
+}:
+let
+  marvelUserSettings = ''
+    {"MasterVolume": 70, "SoundEffectVolume": 100, "MusicVolume": 0, "VoiceVolume": 100, "UserControl": "{\"0\": \"{\\\"MouseHorizontalSensitivity\\\": 5.0, \\\"MouseVerticalSensitivity\\\": 5.0, \\\"CharControlInputMappings\\\": {\\\"6\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"J\\\"}}, \\\"24\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"B\\\"}}, \\\"36\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"None\\\"}}, \\\"46\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"X\\\"}}, \\\"47\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"Z\\\"}}}, \\\"AbilityUserSettingList\\\": [{\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}], \\\"HpBarVisibleRule\\\": 1}\", \"1035\": \"{\\\"AbilityUserSettingList\\\": [{\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldSprint\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 0, \\\"Key\\\": \\\"WallRunMode\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": \\\"TowardUp\\\"}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldSprint\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 0, \\\"Key\\\": \\\"WallRunMode\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": \\\"TowardUp\\\"}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 103551, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"UseSimpleSwing\\\", \\\"AbilityID\\\": 103551, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 103551, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"UseSimpleSwing\\\", \\\"AbilityID\\\": 103551, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}]}\", \"1045\": \"{\\\"AbilityUserSettingList\\\": [{\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 104541, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 104541, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 104542, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 104542, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}]}"
+  '';
+  
+  gameUserSettingsIni = ''
+    [Internationalization]
+    Culture=en
 
-    home.file = {
-      # -------------------------------------------------------------------------
-      # Marvel Rivals: GameUserSettings.ini file in the Marvel folder
-      # -------------------------------------------------------------------------
-      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini" = {
-        source = "${gaming-config}/marvel-rivals/GameUserSettings.ini";
-      };
+    [ScalabilityGroups]
+    sg.ViewDistanceQuality=1
+    sg.ShadowQuality=0
+    sg.PostProcessQuality=0
+    sg.TextureQuality=0
+    sg.EffectsQuality=0
+    sg.FoliageQuality=0
+    sg.ShadingQuality=0
+    sg.ReflectionQuality=0
+    sg.GlobalIlluminationQuality=0
 
-      # -------------------------------------------------------------------------
-      # Marvel Rivals: Engine.ini file in the Marvel folder
-      # -------------------------------------------------------------------------
-      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini" = {
-        source = "${gaming-config}/marvel-rivals/Engine.ini";
-      };
+    [/Script/Engine.GameUserSettings]
+    bUseDesiredScreenHeight=False
 
-      # -------------------------------------------------------------------------
-      # Wukong: Engine.ini file in its designated folder
-      # -------------------------------------------------------------------------
-      ".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
-        source = "${gaming-config}/wukong/Engine.ini";
+    [/Script/Marvel.MarvelGameUserSettings]
+    AntiAliasingSuperSamplingMode=4
+    SuperSamplingQuality=4
+    CASSharpness=0.000000
+    ScreenPercentage=100.000000
+    VoiceLanguage=
+    bNvidiaReflex=False
+    bXeLowLatency=False
+    bDlssFrameGeneration=False
+    bFSRFrameGeneration=False
+    bXeFrameGeneration=False
+    MonitorIndex=0
+    bEnableConsole120Fps=False
+    bUseVSync=False
+    bUseDynamicResolution=False
+    ResolutionSizeX=2560
+    ResolutionSizeY=1440
+    LastUserConfirmedResolutionSizeX=2560
+    LastUserConfirmedResolutionSizeY=1440
+    WindowPosX=1716
+    WindowPosY=6
+    FullscreenMode=2
+    LastConfirmedFullscreenMode=2
+    PreferredFullscreenMode=1
+    Version=22
+    AudioQualityLevel=0
+    LastConfirmedAudioQualityLevel=0
+    FrameRateLimit=0.000000
+    DesiredScreenWidth=2560
+    DesiredScreenHeight=1440
+    LastUserConfirmedDesiredScreenWidth=2560
+    LastUserConfirmedDesiredScreenHeight=1440
+    LastRecommendedScreenWidth=-1.000000
+    LastRecommendedScreenHeight=-1.000000
+    LastCPUBenchmarkResult=-1.000000
+    LastGPUBenchmarkResult=-1.000000
+    LastGPUBenchmarkMultiplier=1.000000
+    bUseHDRDisplayOutput=False
+    HDRDisplayOutputNits=1000
+  '';
+  
+  marvelEngineIni = ''
+    [SystemSettings]
+    r.LevelStreamingDistanceScale=1
+    r.ViewDistanceScale=1
+    r.LandscapeLODBias=0
+    r.LandscapeLODDistributionScale=1
+    r.LandscapeLOD0DistributionScale=1
+    r.LODFadeTime=2
+    r.UITextureLODBias=-1
+    r.Streaming.Boost=1
+    r.TextureStreaming=1
+    r.Streaming.ScaleTexturesByGlobalMyBias=1
+    r.Streaming.LimitPoolSizeToVRAM=0
+    r.DefaultFeature.AmbientOcclusion=False
+    r.DefaultFeature.AmbientOcclusionStaticFraction=False
+    r.DefaultFeature.AntiAliasing=0
+    r.DefaultFeature.AutoExposure=True
+    r.DefaultFeature.Bloom=False
+    r.DefaultFeature.LensFlare=False
+    r.DefaultFeature.MotionBlur=False
+    r.DepthOfFieldQuality=0
+    r.DistanceFieldAO=0
+    r.EmitterSpawnRateScale=0
+    r.EmitterSpawnRateScale=0
+    r.FastBlurThreshold=0
+    r.LensFlareQuality=0
+    r.MaterialQualityLevel=1
+    r.RefractionQuality=0
+    r.SceneColorFormat=3
+    r.SceneColorFringeQuality=0
+    r.SeparateTranslucency=False
+    r.Shadow.CSM.MaxCascades=1
+    r.Shadow.CSM.TransitionScale=0
+    r.Shadow.DistanceScale=0
+    r.Shadow.MaxResolution=64
+    r.Shadow.RadiusThreshold=0
+    r.ShadowQuality=0
+    r.SSR.Quality=0
+    r.SSS.SampleSet=0
+    r.SSS.Scale=0
+    r.Fog=0
+    r.PostProcessAAQuality=0
+    r.MotionBlurQuality=0
+    r.BlurGBuffer=0
+    r.MaxAnisotropy=0
+    r.BloomQuality=0
+    r.LightFunction=0
+    r.DetailMode=1
+    r.TonemapperQuality=0
+    r.MaterialQuality=1
+    r.DepthOfField.MaxSize=0
+    r.SwitchGridShadow=0
+    r.Tonemapper.Sharpen=0.0
+    r.AmbientOcclusionLevels=0
+    r.VolumetricFog=0
+    r.FogDensity=0
+    r.Atmosphere=0
+    r.ParticleLightQuality=0
+    FX.MaxCPUParticlesPerEmitter=20
+    FX.MaxGPUParticlesSpawnedPerFrame=0
+    r.ParticleLODBias=3
+
+    [/script/engine.renderersettings]
+    r.DefaultFeature.LensFlare=False
+    r.DefaultFeature.DepthOfField=False
+    r.DefaultFeature.AmbientOcclusion=False
+    r.DefaultFeature.AmbientOcclusionStaticFraction=False
+    r.BloomQuality=0
+    r.MotionBlurQuality=0
+    r.FastBlurThreshold=0
+    r.TranslucencyVolumeBlur=0
+    r.AmbientOcclusionLevels=0
+    r.AmbientOcclusionRadiusScale=0
+    r.DepthofFieldQuality=0
+    r.DefaultFeature.AntiAliasing=0
+    r.DefaultFeature.Bloom=False
+    r.MobileHDR=False
+    r.Shadow.MaxResolution=0
+    r.Shadow.MaxCSMResolution=0
+    r.Streaming.Boost=0.1
+    r.SSR=0
+    r.PostProcessAAQuality=0
+    r.BlurGBuffer=0
+    r.Fog=0
+    r.TranslucentLightingVolume=0
+    r.TriangleOrderOptimization=1
+    r.Tonemapper.GrainQuantization=0
+    r.TonemapperGamma=3
+    r.Atmosphere=0
+    r.EyeAdaptationQuality=1
+    r.FullScreenMode=0
+    r.IndirectLightingCache=0
+    r.LightFunctionQuality=0
+    r.LightShafts=0
+    r.MaxCSMRadiusToAllowPerObjectShadows=0.01
+    r.MipMapLODBias=1
+    r.ReflectionEnvironment=0
+    r.Shadow.RadiusThresholdRSM=0
+    r.Shadow.TexelsPerPixel=0
+    r.SimpleDynamicLighting=0
+    r.UniformBufferPooling=1
+    r.OptimizeForUAVPerformance=0
+    r.Shadow.PerObject=1
+    r.AllowLandscapeShadows=0
+    r.AllowStaticLighting=0
+    r.DFShadowScatterTileCulling=0
+    r.ParallelShadows=0
+    r.Shadow.FadeExponent=1
+    r.Shadow.PreshadowExpand=-1
+    r.Shadow.Preshadows=0
+    r.TiledDeferredShading.MinimumCount=0
+    r.AOApplyToStaticIndirect=0
+    r.ContactShadows=0
+    r.Shadow.PerObjectCastDistanceRadiusScale=0.001
+    r.Shadow.CachePreshadow=1
+    r.Shadow.CachedShadowsCastFromMovablePrimitives=0
+    r.RayTracing.Translucency.Shadows=0
+    r.LightMaxDrawDistanceScale=0.01
+    r.CapsuleDirectShadows=0
+    r.CapsuleIndirectShadows=0
+    r.CapsuleMaxDirectOcclusionDistance=0
+    r.CapsuleMaxIndirectOcclusionDistance=0
+    r.CapsuleShadows=0
+    r.Mobile.Shadow.CSMShaderCullingMethod=0
+    r.Shadow.LightViewConvexHullCull=0
+    r.Shadow.RectLightDepthBias=9
+    r.Shadow.RectLightReceiverBias=0
+    r.Shadow.TransitionScale=9
+  '';
+  
+  wukongEngineIni = ''
+    [Core.System]
+    Paths=../../../Engine/Content
+    Paths=%GAMEDIR%Content
+    Paths=../../../Engine/Plugins/Animation/ControlRig/Content
+    Paths=../../../Engine/Plugins/Animation/IKRig/Content
+    Paths=../../../Engine/Plugins/Editor/SpeedTreeImporter/Content
+    Paths=../../../Engine/Plugins/2D/Paper2D/Content
+    Paths=../../../Engine/Plugins/Editor/GeometryMode/Content
+    Paths=../../../Engine/Plugins/FX/Niagara/Content
+    Paths=../../../Engine/Plugins/Bridge/Content
+    Paths=../../../Engine/Plugins/Editor/ConsoleVariablesEditor/Content
+    Paths=../../../Engine/Plugins/Enterprise/DatasmithContent/Content
+    Paths=../../../Engine/Plugins/Developer/AnimationSharing/Content
+    Paths=../../../Engine/Plugins/Animation/AnimationWarping/Content
+    Paths=../../../Engine/Plugins/Animation/AnimationLocomotionLibrary/Content
+    Paths=../../../Engine/Plugins/Experimental/ChaosClothEditor/Content
+    Paths=../../../Engine/Plugins/FX/NiagaraFluids/Content
+    Paths=../../../Engine/Plugins/Experimental/PCG/Content
+    Paths=../../../Engine/Plugins/Experimental/GeometryScripting/Content
+    Paths=../../../Engine/Plugins/Experimental/GeometryCollectionPlugin/Content
+    Paths=../../../Engine/Plugins/Experimental/MeshModelingToolsetExp/Content
+    Paths=../../../Engine/Plugins/Experimental/Volumetrics/Content
+    Paths=../../../Engine/Plugins/Experimental/PythonScriptPlugin/Content
+    Paths=../../../Engine/Plugins/Experimental/VirtualHeightfieldMesh/Content
+    Paths=../../../Engine/Plugins/MovieScene/MovieRenderPipeline/Content
+    Paths=../../../Engine/Plugins/Experimental/Water/Content
+    Paths=../../../Engine/Plugins/Animation/ControlRigSpline/Content
+    Paths=../../../Engine/Plugins/MovieScene/SequencerScripting/Content
+    Paths=../../../Engine/Plugins/Experimental/Landmass/Content
+    Paths=../../../Engine/Plugins/Media/MediaCompositing/Content
+    Paths=../../../Engine/Plugins/Enterprise/DataprepEditor/Content
+    Paths=../../../Engine/Plugins/Experimental/ChaosSolverPlugin/Content
+    Paths=../../../Engine/Plugins/Runtime/GeometryProcessing/Content
+    Paths=../../../Engine/Plugins/Runtime/Synthesis/Content
+    Paths=../../../Engine/Plugins/Runtime/WebBrowserWidget/Content
+    Paths=../../../Engine/Plugins/Runtime/AudioSynesthesia/Content
+    Paths=../../../Engine/Plugins/Runtime/MeshModelingToolset/Content
+    Paths=../../../Engine/Plugins/Runtime/HairStrands/Content
+    Paths=../../../Engine/Plugins/Experimental/ChaosNiagara/Content
+    Paths=../../../Engine/Plugins/Runtime/ResonanceAudio/Content
+    Paths=../../../Engine/Plugins/Experimental/OpacityMicroMap/Content
+    Paths=../../../Engine/Plugins/Runtime/Nvidia/NRD/Content
+    Paths=../../../Engine/Plugins/Developer/Concert/ConcertSync/ConcertSyncClient/Content
+    Paths=../../../Engine/Plugins/Experimental/FullBodyIK/Content
+    Paths=../../../Engine/Plugins/Compositing/OpenColorIO/Content
+    Paths=../../../Engine/Plugins/Runtime/Nvidia/DLSS/Content
+    Paths=../../../Engine/Plugins/Experimental/CinematicPrestreaming/Content
+    Paths=../../../b1/Plugins/AnimToTexture/Content
+    Paths=../../../b1/Plugins/DonAINavigation/Content
+    Paths=../../../b1/Plugins/GSEngineExtent/Content
+    Paths=../../../b1/Plugins/GSEditorActions/Content
+    Paths=../../../b1/Plugins/CustomLightSystem/Content
+    Paths=../../../b1/Plugins/ConsoleVariableManager/Content
+    Paths=../../../b1/Plugins/GSProceduralWorld/Content
+    Paths=../../../b1/Plugins/GSAnimationKeyBlender/Content
+    Paths=../../../b1/Plugins/ACLPlugin/Content
+    Paths=../../../b1/Plugins/NiagaraTickManager/Content
+    Paths=../../../b1/Plugins/GSCameraHelper/Content
+    Paths=../../../b1/Plugins/GSSingletonApp/Content
+    Paths=../../../b1/Plugins/GSSlateUtils/Content
+    Paths=../../../b1/Plugins/TressFX/Content
+    Paths=../../../b1/Plugins/SpiderNavigation/Content
+    Paths=../../../b1/Plugins/TFXGenCards/Content
+    Paths=../../../b1/Plugins/Prefabricator/Content
+    Paths=../../../b1/Plugins/UMGSpline/Content
+    Paths=../../../b1/Plugins/WorldCreatorBridge/Content
+    Paths=../../../b1/Plugins/AsyncLoadingScreen/Content
+    Paths=../../../b1/Plugins/XeSS/Content
+    Paths=../../../b1/Plugins/USharp/Content
+    Paths=../../../b1/Plugins/GSDynamicSDF/Content
+    Paths=../../../b1/Plugins/UnrealJS/Content
+    Paths=../../../b1/Plugins/TexAlphaDA/Content
+    Paths=../../../b1/Plugins/NiagaraUIRenderer/Content
+    Paths=../../../b1/Plugins/GSPluginTableTool/Content
+    Paths=../../../b1/Plugins/GSUMGExt/Content
+    Paths=../../../b1/Plugins/TurboBuild/Content
+    Paths=../../../b1/Plugins/GSInputDisplay/Content
+    Paths=../../../b1/Plugins/Hephaestus/Content
+    Paths=../../../b1/Plugins/Wwise/Content
+    Paths=../../../b1/Plugins/FSR3/Content
+    Paths=../../../b1/Plugins/GSWorldBrowser/Content
+    Paths=../../../b1/Plugins/GSEditorSceneViewExtension/Content
+    Paths=../../../b1/Plugins/DualSenseAdaptor/Content
+    Paths=../../../b1/Plugins/GSDisplayDebug/Content
+    Paths=../../../b1/Plugins/NXSR/Content
+
+    [SystemSettings]
+    r.DefaultFeature.AntiAliasing=0
+    pp.VignetteIntensity=0.0
+    r.SceneColorFringeQuality=0
+    r.SceneColorFringe.Max=0
+    r.DepthOfFieldQuality=0
+    r.DepthOfField.DepthBlur.Amount=0
+    r.Tonemapper.GrainQuantization=0
+    r.FilmGrain=0
+    r.Tonemapper.Quality=0
+    r.BloomQuality=0
+    r.MotionBlurQuality=0
+    r.AmbientOcclusionLevels=0
+    r.AmbientOcclusionStaticFraction=0
+    r.LensFlareQuality=0
+    r.SSR.Quality=0
+    r.Tonemapper.Sharpen=1.0
+    r.Atmosphere=0
+    r.VolumetricFog=0
+    r.VolumetricFog.Quality=0
+    r.EyeAdaptation.MethodOverride=0
+    r.DefaultFeature.LensFlare=0
+    r.DefaultFeature.Bloom=0
+    r.DefaultFeature.AutoExposure=0
+    r.PostProcessAAQuality=0
+    r.SSS.Quality=0
+    r.SSS.Scale=0
+    r.ChromaticAberrationStartOffset=0
+
+    [/Script/Engine.InputSettings]
+    ConsoleKey=Tilde
+  '';
+in {
+  config = lib.mkIf (builtins.elem "gaming" profile.features) (
+    {
+      home.packages = with pkgs; [
+        steam
+        protonup-qt
+        gamemode
+        protontricks
+        prismlauncher
+      ];
+      home.file = {
+        ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini".text = gameUserSettingsIni;
+        ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini".text = marvelEngineIni;
+        ".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = wukongEngineIni;
+        ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/534076462/MarvelUserSetting.ini".text = marvelUserSettings;
+        ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/1055422643/MarvelUserSetting.ini".text = marvelUserSettings;
       };
-    };
-  };
+    }
+  );
 }

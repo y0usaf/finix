@@ -194,18 +194,6 @@
         "type": "github"
       }
     },
-    "gaming-config": {
-      "locked": {
-        "lastModified": 1739455633,
-        "narHash": "sha256-YksrGsLl3tAP3qt+9PF0gW+HzchalRyLHIO/caPIUlw=",
-        "path": "/home/y0usaf/nixos/pkg/gaming-config",
-        "type": "path"
-      },
-      "original": {
-        "path": "/home/y0usaf/nixos/pkg/gaming-config",
-        "type": "path"
-      }
-    },
     "gitignore": {
       "inputs": {
         "nixpkgs": [
@@ -834,7 +822,6 @@
         "chaotic": "chaotic",
         "deepin-dark-hyprcursor": "deepin-dark-hyprcursor",
         "deepin-dark-xcursor": "deepin-dark-xcursor",
-        "gaming-config": "gaming-config",
         "home-manager": "home-manager_2",
         "hy3": "hy3",
         "hyprland": "hyprland",

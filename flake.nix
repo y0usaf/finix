@@ -88,11 +88,6 @@
       # Again, ensure that the same nixpkgs version is adhered to by following it.
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # Add gaming-config as a new input
-    gaming-config = {
-      url = "path:/home/y0usaf/nixos/pkg/gaming-config";
-    };
   };
 
   ####################################################################
@@ -110,7 +105,6 @@
     hyprpaper,
     pyproject-nix,
     uv2nix,
-    gaming-config,
     ...
   }: let
     ## ────── System & Package Configuration ──────
@@ -173,7 +167,7 @@
     # Create a set of common arguments that will be shared across several modules.
     # This simplifies passing the same arguments (like profile info and inputs) multiple times.
     commonSpecialArgs = {
-      inherit profile gaming-config;
+      inherit profile;
       inputs = self.inputs;
     };
 
