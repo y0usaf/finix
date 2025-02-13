@@ -424,6 +424,13 @@
           vim.highlight.on_yank({ higroup = "IncSearch", timeout = 150 })
         end,
       })
+
+      -- Create command aliases for Aider
+      vim.api.nvim_create_user_command('AiderStart', 'lua require("aider").start_chat()', {})
+      vim.api.nvim_create_user_command('AiderStop', 'lua require("aider").stop_chat()', {})
+      vim.api.nvim_create_user_command('AiderChat', 'lua require("aider").chat()', {})
+      vim.api.nvim_create_user_command('AiderAdd', 'lua require("aider").add_file()', {})
+      vim.api.nvim_create_user_command('AiderRemove', 'lua require("aider").remove_file()', {})
     '';
   };
 }
