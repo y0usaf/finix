@@ -158,7 +158,7 @@
     };
     # Import the main profile for your desktop configuration.
     # This file should specify details like hostname and username.
-    profile = import ./profiles/y0usaf-desktop.nix {
+    profile = import ./profiles/y0usaf-desktop {
       lib = pkgs.lib;
       pkgs = pkgs; # Pass the packages set to your profile module.
     };
@@ -196,10 +196,9 @@
     # It integrates various modules like the basic configuration, home-manager, and unstable packages.
     nixosConfigurations.${profile.hostname} = nixpkgs.lib.nixosSystem {
       inherit system;
-      specialArgs = commonSpecialArgs; # Pass in our common arguments.
+      specialArgs = commonSpecialArgs;
       modules = [
-        # Main machine configuration file – core of your NixOS setup.
-        ./configuration.nix
+        ./profiles/${profile.hostname}/configuration.nix
 
         # Include the Home Manager module for managing per-user configurations.
         home-manager.nixosModules.home-manager

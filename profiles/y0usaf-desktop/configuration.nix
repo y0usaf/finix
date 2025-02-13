@@ -39,7 +39,7 @@ in {
   #############################################################
   imports = [
     ./hardware-configuration.nix # Contains hardware-specific options and device configurations.
-    ./modules/env.nix # Contains environment-specific options and definitions.
+    ../../modules/env.nix # Contains environment-specific options and definitions.
   ];
 
   config = {

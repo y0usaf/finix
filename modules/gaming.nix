@@ -12,12 +12,11 @@
   lib,
   profile,
   ...
-}:
-let
+}: let
   marvelUserSettings = ''
     {"MasterVolume": 70, "SoundEffectVolume": 100, "MusicVolume": 0, "VoiceVolume": 100, "UserControl": "{\"0\": \"{\\\"MouseHorizontalSensitivity\\\": 5.0, \\\"MouseVerticalSensitivity\\\": 5.0, \\\"CharControlInputMappings\\\": {\\\"6\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"J\\\"}}, \\\"24\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"B\\\"}}, \\\"36\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"None\\\"}}, \\\"46\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"X\\\"}}, \\\"47\\\": {\\\"PrimaryKey\\\": {\\\"Key\\\": \\\"Z\\\"}}}, \\\"AbilityUserSettingList\\\": [{\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}], \\\"HpBarVisibleRule\\\": 1}\", \"1035\": \"{\\\"AbilityUserSettingList\\\": [{\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldSprint\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 0, \\\"Key\\\": \\\"WallRunMode\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": \\\"TowardUp\\\"}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldSprint\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 0, \\\"Key\\\": \\\"WallRunMode\\\", \\\"AbilityID\\\": 103501, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": \\\"TowardUp\\\"}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 103551, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"UseSimpleSwing\\\", \\\"AbilityID\\\": 103551, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 103551, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"UseSimpleSwing\\\", \\\"AbilityID\\\": 103551, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}]}\", \"1045\": \"{\\\"AbilityUserSettingList\\\": [{\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 104541, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 104541, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 104542, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"bIsHoldAbility\\\", \\\"AbilityID\\\": 104542, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": false, \\\"bIsDirty\\\": false, \\\"Value\\\": true}, {\\\"SettingType\\\": 1, \\\"Key\\\": \\\"WakandaUp\\\", \\\"AbilityID\\\": 200401, \\\"bIsGamepad\\\": true, \\\"bIsDirty\\\": false, \\\"Value\\\": false}]}"
   '';
-  
+
   gameUserSettingsIni = ''
     [Internationalization]
     Culture=en
@@ -76,7 +75,7 @@ let
     bUseHDRDisplayOutput=False
     HDRDisplayOutputNits=1000
   '';
-  
+
   marvelEngineIni = ''
     [SystemSettings]
     r.LevelStreamingDistanceScale=1
@@ -206,7 +205,7 @@ let
     r.Shadow.RectLightReceiverBias=0
     r.Shadow.TransitionScale=9
   '';
-  
+
   wukongEngineIni = ''
     [Core.System]
     Paths=../../../Engine/Content
@@ -327,22 +326,20 @@ let
     ConsoleKey=Tilde
   '';
 in {
-  config = lib.mkIf (builtins.elem "gaming" profile.features) (
-    {
-      home.packages = with pkgs; [
-        steam
-        protonup-qt
-        gamemode
-        protontricks
-        prismlauncher
-      ];
-      home.file = {
-        ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini".text = gameUserSettingsIni;
-        ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini".text = marvelEngineIni;
-        ".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = wukongEngineIni;
-        ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/534076462/MarvelUserSetting.ini".text = marvelUserSettings;
-        ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/1055422643/MarvelUserSetting.ini".text = marvelUserSettings;
-      };
-    }
-  );
+  config = lib.mkIf (builtins.elem "gaming" profile.features) {
+    home.packages = with pkgs; [
+      steam
+      protonup-qt
+      gamemode
+      protontricks
+      prismlauncher
+    ];
+    home.file = {
+      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini".text = gameUserSettingsIni;
+      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini".text = marvelEngineIni;
+      ".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = wukongEngineIni;
+      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/534076462/MarvelUserSetting.ini".text = marvelUserSettings;
+      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/1055422643/MarvelUserSetting.ini".text = marvelUserSettings;
+    };
+  };
 }
