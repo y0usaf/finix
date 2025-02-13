@@ -350,9 +350,9 @@
         config = ''
           require('aider').setup({
             auto_manage_context = true,
-            default_bindings     = true,
-            debug                = false,
-            ignore_buffers       = {
+            default_bindings = true,
+            debug = false,
+            ignore_buffers = {
               '^term:',
               'NeogitConsole',
               'NvimTree_',
@@ -425,11 +425,9 @@
       })
 
       -- Create command aliases for Aider
-      vim.api.nvim_create_user_command('AiderStart', 'lua require("aider").start_chat()', {})
+      vim.api.nvim_create_user_command('AiderStart', 'lua require("aider").open()', {})
       vim.api.nvim_create_user_command('AiderStop', 'lua require("aider").stop_chat()', {})
-      vim.api.nvim_create_user_command('AiderChat', 'lua require("aider").chat()', {})
-      vim.api.nvim_create_user_command('AiderAdd', 'lua require("aider").add_file()', {})
-      vim.api.nvim_create_user_command('AiderRemove', 'lua require("aider").remove_file()', {})
+      vim.api.nvim_create_user_command('AiderChat', 'lua require("aider").open()', {})
     '';
   };
 }
