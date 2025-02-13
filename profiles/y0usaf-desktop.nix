@@ -59,7 +59,6 @@ in {
     "chatgpt" # Integrate any ChatGPT-related tooling.
     "python" # Python setup, with UV2Nix.
     "sync-tokens" # Add this if you want token syncing enabled
-    "vscode" # Cursor IDE
   ];
 
   #=======================================================================

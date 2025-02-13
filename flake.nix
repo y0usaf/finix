@@ -92,6 +92,7 @@
     # Add gaming-config as a new input
     gaming-config = {
       url = "path:/home/y0usaf/nixos/pkg/gaming-config";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
