@@ -73,23 +73,6 @@ let
     NPM_CONFIG_TMP = "$XDG_RUNTIME_DIR/npm";
   };
 
-  # --- Token Loader Script -------------------------------------------------
-  tokenLoaderScript = ''
-    # Token management function
-    export_vars_from_files() {
-        local dir_path=$1
-        for file_path in "$dir_path"/*.txt; do
-            if [[ -f $file_path ]]; then
-                var_name=$(basename "$file_path" .txt)
-                export $var_name=$(cat "$file_path")
-            fi
-        done
-    }
-
-    # Export tokens
-    export_vars_from_files "$HOME/Tokens"
-  '';
-
   # --- Hyprland NVIDIA-Specific Environment Settings -----------------------
   hyprlandNvidiaEnv = lib.mkIf (builtins.elem "nvidia" profile.features) [
     "LIBVA_DRIVER_NAME,nvidia"
@@ -112,9 +95,6 @@ in {
     home = {
       sessionVariables = lib.mkMerge [
         userSessionVars
-        {
-          envExtra = tokenLoaderScript;
-        }
       ];
 
       # Define additional executable search paths for the user's session.
@@ -126,7 +106,7 @@ in {
     };
 
     programs.zsh = {
-      envExtra = ''
+      envExtra = lib.mkIf (builtins.elem "sync-tokens" profile.features) ''
         # Token management function
         export_vars_from_files() {
             local dir_path=$1

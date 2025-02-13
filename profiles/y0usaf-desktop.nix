@@ -58,6 +58,7 @@ in {
     "streamlink" # Enable Streamlink for handling online streams.
     "chatgpt" # Integrate any ChatGPT-related tooling.
     "python" # Python setup, with UV2Nix.
+    "sync-tokens" # Add this if you want token syncing enabled
   ];
 
   #=======================================================================

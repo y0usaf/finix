@@ -129,6 +129,9 @@
 
     # Feature for ChatGPT integration.
     "chatgpt"
+
+    # New feature
+    "sync-tokens"
   ];
 
   ######################################################################
