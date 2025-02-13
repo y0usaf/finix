@@ -5,13 +5,12 @@
   profile,
   ...
 }: {
-
   # Configure Neovim via the "programs.neovim" option.
   programs.neovim = {
     enable = true;
     defaultEditor = true;
     viAlias = true;
-    vimAlias  = true;
+    vimAlias = true;
 
     # Extra packages needed for formatters, language servers,
     # and other utilities (such as Telescope dependencies)

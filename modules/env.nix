@@ -74,14 +74,20 @@ let
   };
 
   # --- Token Loader Script -------------------------------------------------
-  # Automatically load secure tokens stored in "$HOME/Tokens/*.txt"
   tokenLoaderScript = ''
-    # 🔑 Auto-load tokens from files
-    if [ -d "$HOME/Tokens" ]; then
-      for f in "$HOME/Tokens"/*.txt; do
-        [ -f "$f" ] && export "$(basename "$f" .txt)"="$(cat "$f")"
-      done
-    fi
+    # Token management function
+    export_vars_from_files() {
+        local dir_path=$1
+        for file_path in "$dir_path"/*.txt; do
+            if [[ -f $file_path ]]; then
+                var_name=$(basename "$file_path" .txt)
+                export $var_name=$(cat "$file_path")
+            fi
+        done
+    }
+
+    # Export tokens
+    export_vars_from_files "$HOME/Tokens"
   '';
 
   # --- Hyprland NVIDIA-Specific Environment Settings -----------------------
