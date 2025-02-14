@@ -29,55 +29,60 @@
   };
 
   config = lib.mkIf config.btrfsSchema.enable {
-    fileSystems = {
-      "/" = {
-        device = "/dev/disk/by-uuid/${config.btrfsSchema.rootDevice}";
-        fsType = "btrfs";
-        options = ["subvol=@"];
-      };
+    # Only define the essential mounts initially
+    fileSystems = lib.mkMerge [
+      {
+        "/" = {
+          device = "/dev/disk/by-uuid/${config.btrfsSchema.rootDevice}";
+          fsType = "btrfs";
+          options = ["subvol=@"];
+        };
 
-      "/home" = {
-        device = "/dev/disk/by-uuid/${config.btrfsSchema.rootDevice}";
-        fsType = "btrfs";
-        options = ["subvol=@home"];
-      };
+        "/boot" = {
+          device = "/dev/disk/by-uuid/${config.btrfsSchema.bootDevice}";
+          fsType = "vfat";
+          options = ["fmask=0077" "dmask=0077"];
+        };
+      }
+      # Add additional mounts only if we're creating subvolumes
+      (lib.mkIf config.btrfsSchema.createSubvolumes {
+        "/home" = {
+          device = "/dev/disk/by-uuid/${config.btrfsSchema.rootDevice}";
+          fsType = "btrfs";
+          options = ["subvol=@home"];
+        };
 
-      "/boot" = {
-        device = "/dev/disk/by-uuid/${config.btrfsSchema.bootDevice}";
-        fsType = "vfat";
-        options = ["fmask=0077" "dmask=0077"];
-      };
+        "/home/y0usaf/Pictures" = {
+          device = "/dev/disk/by-uuid/${if config.btrfsSchema.mediaDevice != "" then config.btrfsSchema.mediaDevice else config.btrfsSchema.rootDevice}";
+          fsType = "btrfs";
+          options = ["subvol=@pictures"];
+        };
 
-      "/home/y0usaf/Pictures" = {
-        device = "/dev/disk/by-uuid/${if config.btrfsSchema.mediaDevice != "" then config.btrfsSchema.mediaDevice else config.btrfsSchema.rootDevice}";
-        fsType = "btrfs";
-        options = ["subvol=@pictures"];
-      };
+        "/home/y0usaf/DCIM" = {
+          device = "/dev/disk/by-uuid/${if config.btrfsSchema.mediaDevice != "" then config.btrfsSchema.mediaDevice else config.btrfsSchema.rootDevice}";
+          fsType = "btrfs";
+          options = ["subvol=@dcim"];
+        };
 
-      "/home/y0usaf/DCIM" = {
-        device = "/dev/disk/by-uuid/${if config.btrfsSchema.mediaDevice != "" then config.btrfsSchema.mediaDevice else config.btrfsSchema.rootDevice}";
-        fsType = "btrfs";
-        options = ["subvol=@dcim"];
-      };
+        "/home/y0usaf/Music" = {
+          device = "/dev/disk/by-uuid/${if config.btrfsSchema.mediaDevice != "" then config.btrfsSchema.mediaDevice else config.btrfsSchema.rootDevice}";
+          fsType = "btrfs";
+          options = ["subvol=@music"];
+        };
 
-      "/home/y0usaf/Music" = {
-        device = "/dev/disk/by-uuid/${if config.btrfsSchema.mediaDevice != "" then config.btrfsSchema.mediaDevice else config.btrfsSchema.rootDevice}";
-        fsType = "btrfs";
-        options = ["subvol=@music"];
-      };
+        "/home/y0usaf/.local/share/Steam" = {
+          device = "/dev/disk/by-uuid/${if config.btrfsSchema.mediaDevice != "" then config.btrfsSchema.mediaDevice else config.btrfsSchema.rootDevice}";
+          fsType = "btrfs";
+          options = ["subvol=@steam"];
+        };
 
-      "/home/y0usaf/.local/share/Steam" = {
-        device = "/dev/disk/by-uuid/${if config.btrfsSchema.mediaDevice != "" then config.btrfsSchema.mediaDevice else config.btrfsSchema.rootDevice}";
-        fsType = "btrfs";
-        options = ["subvol=@steam"];
-      };
-
-      "/swap" = {
-        device = "/dev/disk/by-uuid/${config.btrfsSchema.rootDevice}";
-        fsType = "btrfs";
-        options = ["subvol=@swap" "nodatacow"];
-      };
-    };
+        "/swap" = {
+          device = "/dev/disk/by-uuid/${config.btrfsSchema.rootDevice}";
+          fsType = "btrfs";
+          options = ["subvol=@swap" "nodatacow"];
+        };
+      })
+    ];
 
     systemd.services = lib.mkIf config.btrfsSchema.createSubvolumes {
       create-btrfs-subvolumes = {
