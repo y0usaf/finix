@@ -158,5 +158,22 @@ in {
     environment.variables = {
       NIXOS_PROFILE = "y0usaf-laptop";
     };
+
+    security = {
+      rtkit.enable = true;
+      polkit.enable = true;
+      # Configure sudo so that the primary user can run all commands without a password
+      sudo.extraRules = [
+        {
+          users = [profile.username];
+          commands = [
+            {
+              command = "ALL";
+              options = ["NOPASSWD"];
+            }
+          ];
+        }
+      ];
+    };
   };
 }
