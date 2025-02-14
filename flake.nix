@@ -207,7 +207,10 @@
             extraSpecialArgs = commonSpecialArgs;
             users.${profile.username} = {
               imports = [./home.nix];
-              home.stateVersion = profile.stateVersion;
+              home = {
+                stateVersion = profile.stateVersion;
+                homeDirectory = nixpkgs.lib.mkForce profile.homeDirectory;
+              };
             };
           };
         }
