@@ -171,6 +171,7 @@
       pkgs.dconf # Dconf: configuration system for GNOME.
       pkgs.lm_sensors # LM Sensors: hardware monitoring and sensor readings.
       pkgs.bottom # Bottom: graphical system monitor.
+      pkgs.networkmanager # Goes without saying.
     ];
     zsh = [
       pkgs.zsh # Zsh: a modern shell environment.
