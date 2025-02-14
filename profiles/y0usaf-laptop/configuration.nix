@@ -95,12 +95,23 @@ in {
     #############################################################
     # Boot Configuration & Kernel Modules
     #############################################################
-    boot.kernelModules = [
-      "kvm-amd" # AMD virtualization
-      "k10temp" # AMD CPU temperature monitoring
-      "amdgpu" # AMD GPU support
-      "acpi_call" # ThinkPad-specific ACPI calls
-    ];
+    boot = {
+      loader = {
+        systemd-boot = {
+          enable = true;           # Use systemd-boot as the boot loader
+          configurationLimit = 20; # Keep up to 20 generations
+        };
+        efi = {
+          canTouchEfiVariables = true;
+          efiSysMountPoint = "/boot";
+        };
+      };
+      kernelModules = [
+        "kvm-amd"     # AMD virtualization
+        "k10temp"     # AMD CPU temperature monitoring
+        "amdgpu"      # AMD GPU support
+     ];
+    };
 
     powerManagement = {
       enable = true;
