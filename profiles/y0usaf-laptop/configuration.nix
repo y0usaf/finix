@@ -46,11 +46,6 @@ in {
         enable = true;
         driSupport = true;
         driSupport32Bit = true;
-        extraPackages = with pkgs; [
-          rocm-opencl-icd
-          rocm-opencl-runtime
-          amdvlk
-        ];
       };
 
       bluetooth = {
@@ -66,15 +61,7 @@ in {
       power-profiles-daemon.enable = true;
       thermald.enable = true;
 
-      tlp = {
-        enable = true;
-        settings = {
-          CPU_SCALING_GOVERNOR_ON_AC = "performance";
-          CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-          CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-          CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-        };
-      };
+      # tlp.enable = false; # Comment out or remove TLP if using power-profiles-daemon
 
       #############################################################
       # Display Server & Input Configuration
@@ -137,5 +124,14 @@ in {
       acpi
       brightnessctl
     ];
+
+    users = {
+      users.${profile.username} = {
+        isNormalUser = true;
+        group = "${profile.username}";
+        extraGroups = [ "wheel" "networkmanager" "video" "audio" "input" ];
+      };
+      groups.${profile.username} = {};
+    };
   };
 }
