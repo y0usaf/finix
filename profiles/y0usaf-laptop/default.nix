@@ -13,6 +13,7 @@ in {
 
   features = [
     "hyprland"
+    "ags"
     "wayland"
     "gaming"
     "development"
@@ -27,6 +28,7 @@ in {
     "syncthing"
     "vscode"
     "zellij"
+    "zsh"
     "music"
     "obs"
     "streamlink"

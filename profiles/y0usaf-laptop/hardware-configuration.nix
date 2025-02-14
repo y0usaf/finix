@@ -59,16 +59,13 @@
     # AMD CPU configuration
     cpu.amd.updateMicrocode = true;
 
-    # AMD GPU configuration
-    amdgpu = {
+    opengl = {
       enable = true;
-      loadInInitrd = true;
-      opencl = true;
     };
   };
 
   # High-DPI settings if using the WQHD screen
-  hardware.video.hidpi.enable = lib.mkDefault true;
+  # hardware.video.hidpi.enable = lib.mkDefault true;
 
   networking.useDHCP = lib.mkDefault true;
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

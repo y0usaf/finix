@@ -89,6 +89,17 @@ in {
       # System Updates & Firmware
       #############################################################
       fwupd.enable = true;
+
+      # Change libinput configuration from xserver.libinput to just libinput
+      libinput = {
+        enable = true;
+        touchpad = {
+          tapping = true;
+          naturalScrolling = true;
+          middleEmulation = true;
+          disableWhileTyping = true;
+        };
+      };
     };
 
     #############################################################
