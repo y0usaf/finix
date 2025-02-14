@@ -108,12 +108,9 @@
     ...
   }: let
     ## ────── System & Package Configuration ──────
-    # Define the target system architecture; adjust if you ever need a cross-compile.
     system = "x86_64-linux";
-    # Import the Nix package collection using nixpkgs and set allowUnfree to true.
     pkgs = import nixpkgs {
       inherit system;
-      # Update the overlay section to properly handle uv2nix
       overlays = [
         (final: prev: {
           inherit (uv2nix.packages.${system}) uv2nix;
@@ -122,100 +119,62 @@
       config.allowUnfree = true;
     };
 
-    # Add these new configurations after the pkgs definition
-    python = pkgs.python312;
-
-    pythonSet =
-      (pkgs.callPackage pyproject-nix.build.packages {
-        inherit python;
-      })
-      .overrideScope (
-        nixpkgs.lib.composeManyExtensions [
-          # Add necessary build system overlays
-          (final: prev: {
-            # Add system libraries needed for numpy and opencv
-            pythonBuildInputs = old:
-              old
-              ++ [
-                pkgs.stdenv.cc.cc.lib # for libstdc++
-                pkgs.zlib
-                pkgs.libGL # OpenGL libraries for OpenCV
-                pkgs.glib # GLib for system integration
-                pkgs.xorg.libX11 # X11 support
-                pkgs.xorg.libXext # X11 extensions
-                pkgs.xorg.libXrender # X11 rendering
-              ];
-          })
-        ]
-      );
-
-    ## ────── External Configurations ──────
-    # Import additional configuration options from a local file.
-    # This file can define various options used in the rest of your configuration.
-    options = import ./profiles/options.nix {
-      inherit pkgs;
-      lib = nixpkgs.lib; # Use the library functions available in nixpkgs.
-    };
-    # Import the main profile for your desktop configuration.
-    # This file should specify details like hostname and username.
-    profile = import ./profiles/y0usaf-desktop {
-      lib = pkgs.lib;
-      pkgs = pkgs; # Pass the packages set to your profile module.
+    ## ────── Profile Selection Based on Hostname ──────
+    # Import all available profiles
+    profiles = {
+      "y0usaf-desktop" = import ./profiles/y0usaf-desktop {
+        lib = pkgs.lib;
+        inherit pkgs;
+      };
+      "y0usaf-laptop" = import ./profiles/y0usaf-laptop {
+        lib = pkgs.lib;
+        inherit pkgs;
+      };
     };
 
     ## ────── Common Special Arguments for Modules ──────
-    # Create a set of common arguments that will be shared across several modules.
-    # This simplifies passing the same arguments (like profile info and inputs) multiple times.
     commonSpecialArgs = {
-      inherit profile;
       inputs = self.inputs;
     };
 
     ## ────── Home Manager Configuration Helper ──────
-    # A helper function that instantiates a home-manager configuration for a given user and system.
-    # This abstracts the repeated pattern of passing common arguments and module paths.
     mkHomeConfiguration = username: system:
       home-manager.lib.homeManagerConfiguration {
-        inherit pkgs; # Use the same package set across configurations.
-        extraSpecialArgs = commonSpecialArgs; # Merge in our shared settings.
-        modules = [./home.nix]; # Import the main home configuration module.
+        inherit pkgs;
+        extraSpecialArgs = commonSpecialArgs;
+        modules = [./home.nix];
       };
   in {
     ## ────── Formatter Setup ──────
-    # Set up a formatting tool for the system. Here, Alejandra is assigned as the formatter.
-    # This can be used to auto-format configuration files or source code.
     formatter.${system} = pkgs.alejandra;
 
-    ## ────── User Home Manager Configuration ──────
-    # Define the home manager configuration for the user defined in your profile.
-    # This ensures that the user-specific environment is set up according to ./home.nix.
-    homeConfigurations.${profile.username} = mkHomeConfiguration profile.username system;
-
-    ## ────── Machine-Specific NixOS Configuration ──────
-    # Create the system-wide NixOS configuration for your machine.
-    # It integrates various modules like the basic configuration, home-manager, and unstable packages.
-    nixosConfigurations.${profile.hostname} = nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = commonSpecialArgs;
-      modules = [
-        ./profiles/${profile.hostname}/configuration.nix
-        home-manager.nixosModules.home-manager
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            extraSpecialArgs = commonSpecialArgs;
-            users.${profile.username} = {
-              imports = [./home.nix];
-              home = {
-                stateVersion = profile.stateVersion;
-                homeDirectory = nixpkgs.lib.mkForce profile.homeDirectory;
+    ## ────── NixOS Configurations ──────
+    nixosConfigurations =
+      builtins.mapAttrs
+      (hostname: profile:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = commonSpecialArgs // {inherit profile;};
+          modules = [
+            ./profiles/${hostname}/configuration.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = commonSpecialArgs // {inherit profile;};
+                users.${profile.username} = {
+                  imports = [./home.nix];
+                  home = {
+                    stateVersion = profile.stateVersion;
+                    homeDirectory = nixpkgs.lib.mkForce profile.homeDirectory;
+                  };
+                };
               };
-            };
-          };
-        }
-        chaotic.nixosModules.default
-      ];
-    };
+            }
+            chaotic.nixosModules.default
+          ];
+        })
+      profiles;
   };
 }
