@@ -149,31 +149,64 @@
         };
       };
 
-    nixosConfigurations = let
-      currentProfile = builtins.getEnv "NIXOS_PROFILE";
-      defaultProfile = "y0usaf-desktop"; # Fallback if env var isn't set
-      profileName =
-        if currentProfile != ""
-        then currentProfile
-        else defaultProfile;
-      profile = profiles.${profileName};
-    in {
-      ${profileName} = nixpkgs.lib.nixosSystem {
+    nixosConfigurations = {
+      # Define configurations for both profiles
+      "y0usaf-desktop" = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = commonSpecialArgs // {inherit profile;};
+        specialArgs =
+          commonSpecialArgs
+          // {
+            profile = profiles."y0usaf-desktop";
+          };
         modules = [
-          ./profiles/${profileName}/configuration.nix
+          ./profiles/y0usaf-desktop/configuration.nix
           home-manager.nixosModules.home-manager
           {
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = commonSpecialArgs // {inherit profile;};
-              users.${profile.username} = {
+              extraSpecialArgs =
+                commonSpecialArgs
+                // {
+                  profile = profiles."y0usaf-desktop";
+                };
+              users.${profiles."y0usaf-desktop".username} = {
                 imports = [./home.nix];
                 home = {
-                  stateVersion = profile.stateVersion;
-                  homeDirectory = nixpkgs.lib.mkForce profile.homeDirectory;
+                  stateVersion = profiles."y0usaf-desktop".stateVersion;
+                  homeDirectory = nixpkgs.lib.mkForce profiles."y0usaf-desktop".homeDirectory;
+                };
+              };
+            };
+          }
+          chaotic.nixosModules.default
+        ];
+      };
+
+      "y0usaf-laptop" = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs =
+          commonSpecialArgs
+          // {
+            profile = profiles."y0usaf-laptop";
+          };
+        modules = [
+          ./profiles/y0usaf-laptop/configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs =
+                commonSpecialArgs
+                // {
+                  profile = profiles."y0usaf-laptop";
+                };
+              users.${profiles."y0usaf-laptop".username} = {
+                imports = [./home.nix];
+                home = {
+                  stateVersion = profiles."y0usaf-laptop".stateVersion;
+                  homeDirectory = nixpkgs.lib.mkForce profiles."y0usaf-laptop".homeDirectory;
                 };
               };
             };
