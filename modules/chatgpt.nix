@@ -80,13 +80,9 @@ in {
           pkgs.gst_all_1.gst-plugins-good
         ]}:$LD_LIBRARY_PATH"
 
-        # Use appimage-run to handle the AppImage execution with explicit home binding
-        exec ${pkgs.appimage-run}/bin/appimage-run \
-          --home="$HOME" \
-          --bind="$XDG_CONFIG_HOME/ChatGPT:$HOME/.config/ChatGPT" \
-          --bind="$XDG_DATA_HOME/ChatGPT:$HOME/.local/share/ChatGPT" \
-          --bind="$XDG_CACHE_HOME/ChatGPT:$HOME/.cache/ChatGPT" \
-          ${chatgptAppImage} "$@"
+        # Use appimage-run to handle the AppImage execution
+        export APPIMAGE_EXTRACT_AND_RUN=1
+        exec ${pkgs.appimage-run}/bin/appimage-run ${chatgptAppImage} "$@"
       '')
 
       # Make sure appimage-run and required Qt packages are available

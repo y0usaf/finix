@@ -28,10 +28,11 @@
   # Extract feature toggles from 'profile.features'.
   # Each flag becomes true if the corresponding feature string exists.
   #############################################################
-  enableNvidia = builtins.elem "nvidia" profile.features; # Enable Nvidia-specific configurations.
-  enableWayland = builtins.elem "wayland" profile.features; # Enable Wayland support.
-  enableHyprland = builtins.elem "hyprland" profile.features; # Enable the Hyprland window manager.
-  enableGaming = builtins.elem "gaming" profile.features; # Enable gaming enhancements.
+  enableNvidia = builtins.elem "nvidia" profile.features;
+  enableAmdGpu = builtins.elem "amdgpu" profile.features;
+  enableWayland = builtins.elem "wayland" profile.features;
+  enableHyprland = builtins.elem "hyprland" profile.features;
+  enableGaming = builtins.elem "gaming" profile.features;
 in {
   #############################################################
   # Import additional configuration modules.
@@ -128,18 +129,26 @@ in {
         "nct6775" # Hardware sensor chip for voltage/temperature.
         "ashmem_linux" # Android shared memory.
         "binder_linux" # Android binder driver.
+      ] ++ lib.optionals enableAmdGpu [
+        "amdgpu"
       ];
       kernel.sysctl = {
         "kernel.unprivileged_userns_clone" = 1; # Allow unprivileged processes to create user namespaces.
       };
+      # AMD GPU kernel parameters (conditional)
+      kernelParams = lib.mkIf enableAmdGpu [
+        "amdgpu.ppfeaturemask=0xffffffff" # Enable all power features
+        "amdgpu.dpm=1" # Enable power management
+      ];
     };
 
     #############################################################
     # Hardware-Specific Settings:
-    # Configuration for specific hardware drivers like Nvidia and general graphics.
+    # Configuration for specific hardware drivers like Nvidia/AMD and general graphics.
     #############################################################
     hardware = {
-      nvidia = {
+      # Nvidia configuration (conditional)
+      nvidia = lib.mkIf enableNvidia {
         # Enable DRM kernel mode setting for better Wayland compatibility
         modesetting.enable = true;
         # Enable NVIDIA power management features for better battery life
@@ -157,11 +166,19 @@ in {
           usePersistenced = false; # Do not use persistenced; manage persistence manually.
         };
       };
-      graphics = {
-        enable = true; # Enable general graphics support.
-        enable32Bit = true; # Enable 32-bit libraries for certain legacy or proprietary apps.
+
+      # AMD GPU configuration (conditional)
+      opengl = lib.mkIf enableAmdGpu {
+        enable = true;
+        driSupport = true;
+        driSupport32Bit = true;
       };
-      i2c.enable = true; # Enable I2C support for onboard sensors and peripherals.
+
+      graphics = {
+        enable = true;
+        enable32Bit = true;
+      };
+      i2c.enable = true;
     };
 
     #############################################################
@@ -171,7 +188,10 @@ in {
     #############################################################
     services = {
       # Conditionally include the Nvidia video driver in the X server configuration.
-      xserver.videoDrivers = lib.mkIf enableNvidia ["nvidia"];
+      xserver.videoDrivers = lib.mkMerge [
+        (lib.mkIf enableNvidia ["nvidia"])
+        (lib.mkIf enableAmdGpu ["amdgpu"])
+      ];
 
       #############################################################
       # Audio via Pipewire:
