@@ -199,25 +199,18 @@
       specialArgs = commonSpecialArgs;
       modules = [
         ./profiles/${profile.hostname}/configuration.nix
-
-        # Include the Home Manager module for managing per-user configurations.
         home-manager.nixosModules.home-manager
-
         {
-          # Extended Home Manager configuration block.
           home-manager = {
-            extraSpecialArgs = commonSpecialArgs; # Forward the common special arguments.
-            # Link the user's home configuration by importing ./home.nix.
-            users.${profile.username} = import ./home.nix;
-            # The following settings decide which packages (global vs user-specific) are active.
             useGlobalPkgs = true;
             useUserPackages = true;
-            # Filename extension to use when backing up generated configuration files.
-            backupFileExtension = "backup";
+            extraSpecialArgs = commonSpecialArgs;
+            users.${profile.username} = {
+              imports = [./home.nix];
+              home.stateVersion = profile.stateVersion;
+            };
           };
         }
-
-        # Integrate the unstable packages provided by Chaotic, allowing use of cutting-edge software.
         chaotic.nixosModules.default
       ];
     };

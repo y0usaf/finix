@@ -41,7 +41,7 @@ in {
     hardware = {
       cpu.amd.updateMicrocode = true;
       enableRedistributableFirmware = true;
-      
+
       opengl = {
         enable = true;
         driSupport = true;
@@ -65,7 +65,7 @@ in {
     services = {
       power-profiles-daemon.enable = true;
       thermald.enable = true;
-      
+
       tlp = {
         enable = true;
         settings = {
@@ -85,9 +85,9 @@ in {
           enable = true;
           wayland = true;
         };
-        
+
         videoDrivers = ["amdgpu"];
-        
+
         libinput = {
           enable = true;
           touchpad = {
@@ -109,10 +109,10 @@ in {
     # Boot Configuration & Kernel Modules
     #############################################################
     boot.kernelModules = [
-      "kvm-amd"     # AMD virtualization
-      "k10temp"     # AMD CPU temperature monitoring
-      "amdgpu"      # AMD GPU support
-      "acpi_call"   # ThinkPad-specific ACPI calls
+      "kvm-amd" # AMD virtualization
+      "k10temp" # AMD CPU temperature monitoring
+      "amdgpu" # AMD GPU support
+      "acpi_call" # ThinkPad-specific ACPI calls
     ];
 
     powerManagement = {
@@ -128,14 +128,14 @@ in {
       radeontop
       corectrl
       ryzenadj
-      
+
       # System monitoring
       lm_sensors
       powertop
-      
+
       # Laptop utilities
       acpi
       brightnessctl
     ];
   };
-} 
+}
