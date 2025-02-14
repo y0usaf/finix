@@ -13,7 +13,14 @@
   profile,
   inputs,
   ...
-}: {
+}: let
+  #############################################################
+  # Extract feature toggles from 'profile.features'
+  #############################################################
+  enableWayland = builtins.elem "wayland" profile.features;
+  enableHyprland = builtins.elem "hyprland" profile.features;
+  enableGaming = builtins.elem "gaming" profile.features;
+in {
   imports = [
     ./hardware-configuration.nix
     ../../modules/env.nix
