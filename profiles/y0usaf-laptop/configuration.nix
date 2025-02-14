@@ -1,3 +1,11 @@
+#===============================================================================
+#                          💻 NixOS Laptop Configuration 💻
+#===============================================================================
+# This file details the entire NixOS system configuration for a laptop setup,
+# including power management, AMD-specific optimizations, and laptop hardware support.
+#
+# ⚠️  Root access required | System rebuild needed for changes
+#===============================================================================
 {
   config,
   lib,
@@ -12,56 +20,67 @@
   ];
 
   config = {
+    #############################################################
     # Core System Settings
+    #############################################################
     system.stateVersion = profile.stateVersion;
     time.timeZone = profile.timezone;
     networking.hostName = profile.hostname;
     nixpkgs.config.allowUnfree = true;
 
-    # AMD-specific optimizations
-    hardware.cpu.amd.updateMicrocode = true;
-    hardware.enableRedistributableFirmware = true;
+    #############################################################
+    # AMD-specific Hardware Configuration
+    #############################################################
+    hardware = {
+      cpu.amd.updateMicrocode = true;
+      enableRedistributableFirmware = true;
+      
+      opengl = {
+        enable = true;
+        driSupport = true;
+        driSupport32Bit = true;
+        extraPackages = with pkgs; [
+          rocm-opencl-icd
+          rocm-opencl-runtime
+          amdvlk
+        ];
+      };
 
-    # Graphics Configuration
-    hardware.opengl = {
-      enable = true;
-      driSupport = true;
-      driSupport32Bit = true;
-      extraPackages = with pkgs; [
-        rocm-opencl-icd
-        rocm-opencl-runtime
-        amdvlk
-      ];
+      bluetooth = {
+        enable = true;
+        powerOnBoot = true;
+      };
     };
 
-    # Power Management
-    services.power-profiles-daemon.enable = true;
-    services.thermald.enable = true;
-    powerManagement = {
-      enable = true;
-      cpuFreqGovernor = "schedutil";
-    };
-
-    # Fan Control and System Management
-    boot.kernelModules = [
-      "kvm-amd"     # AMD virtualization
-      "k10temp"     # AMD CPU temperature monitoring
-      "amdgpu"      # AMD GPU support
-      "acpi_call"   # ThinkPad-specific ACPI calls
-    ];
-
-    # Enable laptop-specific services
+    #############################################################
+    # Power Management & Thermal Control
+    #############################################################
     services = {
-      # Display
+      power-profiles-daemon.enable = true;
+      thermald.enable = true;
+      
+      tlp = {
+        enable = true;
+        settings = {
+          CPU_SCALING_GOVERNOR_ON_AC = "performance";
+          CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+          CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+          CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+        };
+      };
+
+      #############################################################
+      # Display Server & Input Configuration
+      #############################################################
       xserver = {
         enable = true;
-        displayManager.gdm.enable = true;
-        displayManager.gdm.wayland = true;
+        displayManager.gdm = {
+          enable = true;
+          wayland = true;
+        };
         
-        # AMD GPU configuration
         videoDrivers = ["amdgpu"];
         
-        # Touchpad support
         libinput = {
           enable = true;
           touchpad = {
@@ -73,26 +92,30 @@
         };
       };
 
-      # Battery and power management
-      tlp = {
-        enable = true;
-        settings = {
-          CPU_SCALING_GOVERNOR_ON_AC = "performance";
-          CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-          CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-          CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-        };
-      };
-
-      # Enable firmware updates
+      #############################################################
+      # System Updates & Firmware
+      #############################################################
       fwupd.enable = true;
     };
 
-    # Hardware-specific settings
-    hardware.bluetooth.enable = true;
-    hardware.bluetooth.powerOnBoot = true;
+    #############################################################
+    # Boot Configuration & Kernel Modules
+    #############################################################
+    boot.kernelModules = [
+      "kvm-amd"     # AMD virtualization
+      "k10temp"     # AMD CPU temperature monitoring
+      "amdgpu"      # AMD GPU support
+      "acpi_call"   # ThinkPad-specific ACPI calls
+    ];
 
-    # Additional system packages
+    powerManagement = {
+      enable = true;
+      cpuFreqGovernor = "schedutil";
+    };
+
+    #############################################################
+    # System Packages
+    #############################################################
     environment.systemPackages = with pkgs; [
       # AMD-specific tools
       radeontop
