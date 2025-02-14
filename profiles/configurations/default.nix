@@ -167,11 +167,6 @@ in {
         };
       };
 
-      # AMD GPU configuration (conditional)
-      opengl = lib.mkIf enableAmdGpu {
-        enable = true;
-      };
-
       graphics = {
         enable = true;
         enable32Bit = true;
