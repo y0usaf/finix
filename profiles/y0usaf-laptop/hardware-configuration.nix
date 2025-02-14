@@ -25,9 +25,6 @@
     kernelModules = ["kvm-amd"];
     extraModulePackages = [];
 
-    # Use latest kernel for best hardware support
-    kernelPackages = pkgs.linuxPackages_latest;
-
     # Kernel parameters for AMD GPU
     kernelParams = [
       "amdgpu.ppfeaturemask=0xffffffff" # Enable all power features

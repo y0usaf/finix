@@ -170,8 +170,6 @@ in {
       # AMD GPU configuration (conditional)
       opengl = lib.mkIf enableAmdGpu {
         enable = true;
-        driSupport = true;
-        driSupport32Bit = true;
       };
 
       graphics = {
