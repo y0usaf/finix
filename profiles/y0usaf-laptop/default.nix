@@ -105,9 +105,9 @@ in {
   ];
 
   # Display settings (adjust these based on your laptop's screen)
-  dpi = 96;
-  baseFontSize = 12;
-  cursorSize = 24;
+  dpi = 144;
+  baseFontSize = 10;
+  cursorSize = 16;
 
   # Font Configuration
   fonts = {
