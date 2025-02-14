@@ -34,6 +34,7 @@ in {
     time.timeZone = profile.timezone;
     networking.hostName = profile.hostname;
     nixpkgs.config.allowUnfree = true;
+    networking.networkmanager.enable = true;
 
     #############################################################
     # AMD-specific Hardware Configuration
