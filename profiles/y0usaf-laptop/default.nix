@@ -28,7 +28,6 @@ in {
     "syncthing"
     "vscode"
     "zellij"
-    "zsh"
     "music"
     "obs"
     "streamlink"

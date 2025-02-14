@@ -151,6 +151,7 @@ in {
         isNormalUser = true;
         group = "${profile.username}";
         extraGroups = ["wheel" "networkmanager" "video" "audio" "input"];
+        shell = pkgs.zsh;
       };
       groups.${profile.username} = {};
     };
@@ -174,6 +175,11 @@ in {
           ];
         }
       ];
+    };
+
+    programs = {
+      # Enable Zsh
+      zsh.enable = true;
     };
   };
 }
