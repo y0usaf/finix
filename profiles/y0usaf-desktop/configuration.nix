@@ -311,5 +311,9 @@ in {
         pkgs.xdg-desktop-portal-gtk # Add GTK-based portal support.
       ];
     };
+
+    environment.variables = {
+      NIXOS_PROFILE = "y0usaf-desktop";
+    };
   };
 }

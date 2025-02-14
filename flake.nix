@@ -144,37 +144,45 @@
         extraSpecialArgs = commonSpecialArgs;
         modules = [./home.nix];
       };
+
+    nixosConfigurations = let
+      currentProfile = builtins.getEnv "NIXOS_PROFILE";
+      defaultProfile = "y0usaf-desktop"; # Fallback if env var isn't set
+      profileName =
+        if currentProfile != ""
+        then currentProfile
+        else defaultProfile;
+      profile = profiles.${profileName};
+    in {
+      ${profileName} = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = commonSpecialArgs // {inherit profile;};
+        modules = [
+          ./profiles/${profileName}/configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = commonSpecialArgs // {inherit profile;};
+              users.${profile.username} = {
+                imports = [./home.nix];
+                home = {
+                  stateVersion = profile.stateVersion;
+                  homeDirectory = nixpkgs.lib.mkForce profile.homeDirectory;
+                };
+              };
+            };
+          }
+          chaotic.nixosModules.default
+        ];
+      };
+    };
   in {
     ## ────── Formatter Setup ──────
     formatter.${system} = pkgs.alejandra;
 
     ## ────── NixOS Configurations ──────
-    nixosConfigurations =
-      builtins.mapAttrs
-      (hostname: profile:
-        nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = commonSpecialArgs // {inherit profile;};
-          modules = [
-            ./profiles/${hostname}/configuration.nix
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = commonSpecialArgs // {inherit profile;};
-                users.${profile.username} = {
-                  imports = [./home.nix];
-                  home = {
-                    stateVersion = profile.stateVersion;
-                    homeDirectory = nixpkgs.lib.mkForce profile.homeDirectory;
-                  };
-                };
-              };
-            }
-            chaotic.nixosModules.default
-          ];
-        })
-      profiles;
+    nixosConfigurations = nixosConfigurations;
   };
 }

@@ -98,7 +98,7 @@ in {
     boot = {
       loader = {
         systemd-boot = {
-          enable = true;           # Use systemd-boot as the boot loader
+          enable = true; # Use systemd-boot as the boot loader
           configurationLimit = 20; # Keep up to 20 generations
         };
         efi = {
@@ -107,10 +107,10 @@ in {
         };
       };
       kernelModules = [
-        "kvm-amd"     # AMD virtualization
-        "k10temp"     # AMD CPU temperature monitoring
-        "amdgpu"      # AMD GPU support
-     ];
+        "kvm-amd" # AMD virtualization
+        "k10temp" # AMD CPU temperature monitoring
+        "amdgpu" # AMD GPU support
+      ];
     };
 
     powerManagement = {
@@ -140,9 +140,13 @@ in {
       users.${profile.username} = {
         isNormalUser = true;
         group = "${profile.username}";
-        extraGroups = [ "wheel" "networkmanager" "video" "audio" "input" ];
+        extraGroups = ["wheel" "networkmanager" "video" "audio" "input"];
       };
       groups.${profile.username} = {};
+    };
+
+    environment.variables = {
+      NIXOS_PROFILE = "y0usaf-laptop";
     };
   };
 }
