@@ -188,6 +188,11 @@
         done
       '';
 
+      #----- Home Manager Repo Aliases -----
+      # Adjust the path below to the root of your hm repository.
+      "hmpush" = "git -C ~/nixos push origin main --force";
+      "hmpull" = "git -C ~/nixos fetch origin && git -C ~/nixos reset --hard origin/main";
+
       #----- Hardware Management Shortcut -----
       gpupower = "sudo nvidia-smi -pl";
     };
