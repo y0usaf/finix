@@ -123,15 +123,17 @@ in {
       # Use a custom kernel package variant.
       kernelPackages = pkgs.linuxPackages_cachyos;
       # Load extra kernel modules for specific hardware functions.
-      kernelModules = [
-        "kvm-amd" # AMD virtualization support.
-        "k10temp" # AMD CPU temperature monitoring.
-        "nct6775" # Hardware sensor chip for voltage/temperature.
-        "ashmem_linux" # Android shared memory.
-        "binder_linux" # Android binder driver.
-      ] ++ lib.optionals enableAmdGpu [
-        "amdgpu"
-      ];
+      kernelModules =
+        [
+          "kvm-amd" # AMD virtualization support.
+          "k10temp" # AMD CPU temperature monitoring.
+          "nct6775" # Hardware sensor chip for voltage/temperature.
+          "ashmem_linux" # Android shared memory.
+          "binder_linux" # Android binder driver.
+        ]
+        ++ lib.optionals enableAmdGpu [
+          "amdgpu"
+        ];
       kernel.sysctl = {
         "kernel.unprivileged_userns_clone" = 1; # Allow unprivileged processes to create user namespaces.
       };

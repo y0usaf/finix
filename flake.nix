@@ -143,10 +143,6 @@
         inherit pkgs;
         extraSpecialArgs = commonSpecialArgs;
         modules = [./home.nix];
-        home = {
-          username = username;
-          homeDirectory = "/home/${username}";
-        };
       };
 
     nixosConfigurations = {
