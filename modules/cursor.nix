@@ -20,6 +20,8 @@
     version = "1.0";
     src = inputs.deepin-dark-hyprcursor;
 
+    dontFixTimestamps = true;
+
     installPhase = ''
       # Create theme directory for Hyprland cursors
       mkdir -p $out/share/icons/${baseTheme}-hypr
