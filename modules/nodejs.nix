@@ -12,8 +12,8 @@
       nodejs_20
     ];
 
-    # NPM global config
-    home.file.".npmrc".text = ''
+    # NPM global config - use XDG directories
+    xdg.configFile."npm/npmrc".text = ''
       prefix=${config.xdg.dataHome}/npm
       cache=${config.xdg.cacheHome}/npm
       init-module=${config.xdg.configHome}/npm/config/npm-init.js
@@ -25,10 +25,12 @@
       export PATH=$PATH:${pkgs.nodejs_20}/bin
       export NPM_CONFIG_PREFIX=${config.xdg.dataHome}/npm
       export NPM_CONFIG_CACHE=${config.xdg.cacheHome}/npm
+      export NPM_CONFIG_USERCONFIG=${config.xdg.configHome}/npm/npmrc
       
       # Ensure directories exist
       mkdir -p ${config.xdg.dataHome}/npm
       mkdir -p ${config.xdg.cacheHome}/npm
+      mkdir -p ${config.xdg.configHome}/npm/config
       
       # Install global packages if not already installed
       if ! [ -d "${config.xdg.dataHome}/npm/lib/node_modules/@anthropic-ai/claude-code" ]; then
