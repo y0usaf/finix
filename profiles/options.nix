@@ -113,6 +113,7 @@
     "python"
     "nvim"
     "vscode"
+    "nodejs"
 
     # Desktop Environment tools and compositors.
     "hyprland"

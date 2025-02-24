@@ -60,6 +60,7 @@ in {
     "python" # Python setup, with UV2Nix.
     "sync-tokens" # Add this if you want token syncing enabled
     "qbittorrent"
+    "nodejs"
   ];
 
   #=======================================================================
