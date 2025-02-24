@@ -30,6 +30,39 @@
   # Use lib.genList to generate a list with the shadowOffsets repeated
   repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (i: shadowOffsets) repetitionCount));
 
+  # Define available stats modules
+  availableStatsModules = [
+    "time"
+    "date"
+    "shell"
+    "uptime"
+    "packages"
+    "memory"
+    "cpu"
+    "gpu"
+    "colors"
+  ];
+
+  # Default enabled modules if none specified
+  defaultEnabledModules = [
+    "time"
+    "date"
+    "shell"
+    "uptime"
+    "packages"
+    "memory"
+    "cpu"
+    "colors"
+  ];
+
+  # Get enabled modules from profile or use defaults
+  enabledModules = if builtins.hasAttr "agsModules" profile
+    then profile.agsModules
+    else defaultEnabledModules;
+
+  # Helper function to check if a module is enabled
+  isModuleEnabled = module: builtins.elem module enabledModules;
+
   ###########################################################################
   ##                     AGS MAIN APP CONFIGURATION JS                     ##
   ###########################################################################
@@ -134,8 +167,7 @@
     .workspace-btn label {
         background: none;
         color: rgba(255, 255, 255, 0.4);
-        font-size: 0.8rem;  /* Increased from 0.5rem */
-        /* Center the text within the square button */
+        font-size: 0.8rem;
         padding: 0.25em;
     }
     .workspace-btn.active label {
@@ -189,53 +221,65 @@
     // Retrieves various system stats (CPU, GPU, RAM, etc.)
     // ---------------------------------------------------------------
     function getStats() {
+        const stats = {};
+
+        ${lib.optionalString (isModuleEnabled "cpu") ''
         // CPU Temperature
         const cpuTempCmd = ["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"];
-        const cpu_temp = safeExec(cpuTempCmd, "Failed to get CPU stats:");
+        stats.cpu_temp = safeExec(cpuTempCmd, "Failed to get CPU stats:");
+        ''}
 
+        ${lib.optionalString (isModuleEnabled "gpu") ''
         // GPU Temperature
         const gpuCmd = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits";
-        let gpu_temp = safeExec(gpuCmd, "Failed to get GPU stats:");
-        if (gpu_temp !== "N/A") {
-            gpu_temp += "°C";
+        stats.gpu_temp = safeExec(gpuCmd, "Failed to get GPU stats:");
+        if (stats.gpu_temp !== "N/A") {
+            stats.gpu_temp += "°C";
         }
+        ''}
 
+        ${lib.optionalString (isModuleEnabled "memory") ''
         // RAM usage details using 'free'
         const ramInfo = exec("free -h").split("\n")[1].split(/\s+/);
-        const used_ram = ramInfo[2];
-        const total_ram = ramInfo[1];
+        stats.used_ram = ramInfo[2];
+        stats.total_ram = ramInfo[1];
+        ''}
 
-        // Date and Time
-        const time = safeExec('date "+%H:%M:%S"', "Failed to get time:");
-        const date = safeExec('date "+%d/%m/%y"', "Failed to get date:");
+        ${lib.optionalString (isModuleEnabled "time") ''
+        // Time
+        stats.time = safeExec('date "+%H:%M:%S"', "Failed to get time:");
+        ''}
 
-        // Uptime and package count information
-        const uptime = safeExec(
+        ${lib.optionalString (isModuleEnabled "date") ''
+        // Date
+        stats.date = safeExec('date "+%d/%m/%y"', "Failed to get date:");
+        ''}
+
+        ${lib.optionalString (isModuleEnabled "uptime") ''
+        // Uptime
+        stats.uptime = safeExec(
             ["bash", "-c", "uptime | awk -F'up |,' '{print $2}'"],
             "Failed to get uptime:"
         ).trim();
-        const pkgs = safeExec(
+        ''}
+
+        ${lib.optionalString (isModuleEnabled "packages") ''
+        // Package count
+        stats.pkgs = safeExec(
             ["bash", "-c", "nix-store -q --requisites /run/current-system/sw | wc -l"],
             "Failed to get package count:"
         ).trim();
+        ''}
 
+        ${lib.optionalString (isModuleEnabled "shell") ''
         // Shell name without full path
-        const shell = safeExec(
+        stats.shell = safeExec(
             ["bash", "-c", "basename $(readlink -f $SHELL)"],
             "Failed to get shell:"
         );
+        ''}
 
-        return {
-            cpu_temp,
-            gpu_temp,
-            used_ram,
-            total_ram,
-            time,
-            date,
-            uptime,
-            pkgs,
-            shell
-        };
+        return stats;
     }
 
     // ---------------------------------------------------------------
@@ -243,36 +287,33 @@
     // ---------------------------------------------------------------
     function updateStats(stats) {
         const newStats = getStats();
-        stats.cpu_temp.value = newStats.cpu_temp;
-        stats.gpu_temp.value = newStats.gpu_temp;
-        stats.used_ram.value = newStats.used_ram;
-        stats.total_ram.value = newStats.total_ram;
-        stats.time.value = newStats.time;
-        stats.date.value = newStats.date;
-        stats.uptime.value = newStats.uptime;
-        stats.pkgs.value = newStats.pkgs;
-        stats.shell.value = newStats.shell;
+        for (const [key, value] of Object.entries(newStats)) {
+            if (stats[key]) {
+                stats[key].value = value;
+            }
+        }
     }
 
     // ---------------------------------------------------------------
     // Constructs the main System Stats widget layout
     // ---------------------------------------------------------------
     function SystemStats() {
-        var stats = {
-            cpu_temp: Variable('N/A'),
-            gpu_temp: Variable('N/A'),
-            used_ram: Variable('N/A'),
-            total_ram: Variable('N/A'),
-            time: Variable('00:00:00'),
-            date: Variable('00/00/00'),
-            uptime: Variable('N/A'),
-            pkgs: Variable('N/A'),
-            shell: Variable('N/A')
-        };
+        var stats = {};
+        
+        // Initialize variables for enabled modules
+        ${lib.concatMapStrings (module: ''
+        ${lib.optionalString (isModuleEnabled module) ''
+        stats.${if module == "packages" then "pkgs" else module} = Variable('N/A');
+        ''}
+        '') availableStatsModules}
 
-        // Define row labels and compute the longest one for padding
-        const labels = ['time', 'date', 'shell', 'uptime', 'pkgs', 'memory', 'cpu', 'gpu', 'colors'];
-        const longestLabel = Math.max(...labels.map(l => l.length));
+        // Define enabled modules for display
+        const enabledLabels = [
+            ${lib.concatMapStrings (module: lib.optionalString (isModuleEnabled module) 
+            ''\"${module}\",\n            '') availableStatsModules}
+        ];
+
+        const longestLabel = Math.max(...enabledLabels.map(l => l.length));
 
         // Pad the label string for alignment
         function padLabel(label) {
@@ -299,8 +340,8 @@
                     xalign: 0,
                     label: horizontalBorder("╭", "─", "╮")
                 }),
-                // Create a row for each stat label
-                ...labels.map((currentLabel) => Widget.Box({
+                // Create a row for each enabled stat label
+                ...enabledLabels.map((currentLabel) => Widget.Box({
                     children: [
                         Widget.Label({
                             class_name: 'stats-white',
@@ -322,15 +363,15 @@
                             xalign: 0,
                             label: (() => {
                                 switch(currentLabel) {
-                                    case 'time': return stats.time.bind();
-                                    case 'date': return stats.date.bind();
-                                    case 'shell': return stats.shell.bind();
-                                    case 'uptime': return stats.uptime.bind();
-                                    case 'pkgs': return stats.pkgs.bind();
-                                    case 'memory': return stats.used_ram.bind().transform(used =>
-                                        used + " | " + stats.total_ram.value);
-                                    case 'cpu': return stats.cpu_temp.bind();
-                                    case 'gpu': return stats.gpu_temp.bind();
+                                    case 'time': return stats.time?.bind() || '';
+                                    case 'date': return stats.date?.bind() || '';
+                                    case 'shell': return stats.shell?.bind() || '';
+                                    case 'uptime': return stats.uptime?.bind() || '';
+                                    case 'packages': return stats.pkgs?.bind() || '';
+                                    case 'memory': return stats.used_ram?.bind()?.transform(used =>
+                                        used + " | " + stats.total_ram?.value) || '';
+                                    case 'cpu': return stats.cpu_temp?.bind() || '';
+                                    case 'gpu': return stats.gpu_temp?.bind() || '';
                                     case 'colors': return "";
                                     default: return "";
                                 }
