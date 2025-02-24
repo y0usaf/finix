@@ -7,9 +7,9 @@
 }: {
   config = lib.mkIf (builtins.elem "nodejs" profile.features) {
     home.packages = with pkgs; [
-      nodejs_20    # Latest LTS version
-      nodePackages.npm
-      nodePackages.pnpm
+      # Use nodejs without adding npm/pnpm to avoid collisions
+      # with existing nodejs installations
+      nodejs_20
     ];
 
     # NPM global config
@@ -30,8 +30,11 @@
       mkdir -p ${config.xdg.dataHome}/npm
       mkdir -p ${config.xdg.cacheHome}/npm
       
-      # Install global packages
-      ${pkgs.nodejs_20}/bin/npm install -g @anthropic-ai/claude-code
+      # Install global packages if not already installed
+      if ! [ -d "${config.xdg.dataHome}/npm/lib/node_modules/@anthropic-ai/claude-code" ]; then
+        echo "Installing @anthropic-ai/claude-code..."
+        ${pkgs.nodejs_20}/bin/npm install -g @anthropic-ai/claude-code
+      fi
     '';
   };
 } 
