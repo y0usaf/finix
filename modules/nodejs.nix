@@ -20,6 +20,11 @@
       store-dir=${config.xdg.cacheHome}/pnpm/store
     '';
 
+    # Add npm bin directory to PATH
+    home.sessionPath = [
+      "${config.xdg.dataHome}/npm/bin"
+    ];
+
     # Install global NPM packages
     home.activation.npmPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
       # Set up environment for npm
