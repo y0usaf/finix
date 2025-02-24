@@ -99,7 +99,6 @@ in {
 
       # Define additional executable search paths for the user's session.
       sessionPath = [
-        "$(npm root -g)/.bin"
         "$HOME/.local/bin"
         "/usr/lib/google-cloud-sdk/bin"
       ];
