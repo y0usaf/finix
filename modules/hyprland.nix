@@ -24,6 +24,12 @@
       config.common.default = "*";
     };
 
+    # Add Hyprland environment variables
+    home.sessionVariables = lib.mkIf (builtins.elem "hyprland" profile.features) {
+      XDG_CURRENT_DESKTOP = "Hyprland";
+      XDG_SESSION_DESKTOP = "Hyprland";
+    };
+
     wayland.windowManager.hyprland = {
       #------------------------------------------------------------------
       # Core Activation and System Settings
@@ -256,6 +262,13 @@
         };
 
         debug.disable_logs = false;
+
+        # Add NVIDIA-specific environment settings
+        env = lib.mkIf (builtins.elem "nvidia" profile.features) [
+          "LIBVA_DRIVER_NAME,nvidia"
+          "GBM_BACKEND,nvidia-drm"
+          "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+        ];
       };
     };
 

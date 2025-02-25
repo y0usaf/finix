@@ -25,24 +25,6 @@ let
     # Additional non-Wayland variables can be added here.
   };
 
-  # --- Wayland-Specific Environment Variables ------------------------------
-  waylandEnv = lib.mkIf (builtins.elem "wayland" profile.features) {
-    WLR_NO_HARDWARE_CURSORS = "1";
-    NIXOS_OZONE_WL = "1";
-    QT_QPA_PLATFORM = "wayland";
-    ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-    XDG_SESSION_TYPE = "wayland";
-    GDK_BACKEND = "wayland,x11";
-    SDL_VIDEODRIVER = "wayland";
-    CLUTTER_BACKEND = "wayland";
-  };
-
-  # --- Hyprland-Specific Environment Variables -----------------------------
-  hyprlandEnv = lib.mkIf (builtins.elem "hyprland" profile.features) {
-    XDG_CURRENT_DESKTOP = "Hyprland";
-    XDG_SESSION_DESKTOP = "Hyprland";
-  };
-
   # --- NVIDIA-Specific Environment Variables ------------------------------
   nvidiaEnv = lib.mkIf (builtins.elem "nvidia" profile.features) {
     NVIDIA_DRIVER_CAPABILITIES = "all";
@@ -57,8 +39,6 @@ let
   # --- Combined System Environment Variables -----------------------------
   combinedSystemEnv = lib.mkMerge [
     baseEnv
-    waylandEnv
-    hyprlandEnv
     nvidiaEnv
   ];
 
@@ -68,17 +48,9 @@ let
 
   # --- User Session Environment Variables ----------------------------------
   userSessionVars = {
-    MOZ_ENABLE_WAYLAND = "1";
     LIBSEAT_BACKEND = "logind";
-    NPM_CONFIG_TMP = "$XDG_RUNTIME_DIR/npm";
   };
 
-  # --- Hyprland NVIDIA-Specific Environment Settings -----------------------
-  hyprlandNvidiaEnv = lib.mkIf (builtins.elem "nvidia" profile.features) [
-    "LIBVA_DRIVER_NAME,nvidia"
-    "GBM_BACKEND,nvidia-drm"
-    "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-  ];
 in {
   #############################################################################
   # APPLY SYSTEM-WIDE ENVIRONMENT CONFIGURATION
@@ -120,13 +92,6 @@ in {
         # Export tokens
         export_vars_from_files "$HOME/Tokens"
       '';
-    };
-
-    # -------------------------------------------------------------------------
-    # Hyprland Window Manager Settings (with Conditional NVIDIA Options)
-    # -------------------------------------------------------------------------
-    wayland.windowManager.hyprland.settings = {
-      env = hyprlandNvidiaEnv;
     };
   };
 }
