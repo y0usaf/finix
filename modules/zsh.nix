@@ -135,6 +135,7 @@
       hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
       pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
       pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
+      hwconfig = "sudo nixos-generate-config --show-hardware-config";
 
       #----- Media & Tools Shortcuts -----
       ytm4a = "$HOME/scripts/ytm4a.sh";
