@@ -258,5 +258,18 @@
         debug.disable_logs = false;
       };
     };
+
+    programs.zsh = {
+      envExtra = lib.mkIf (builtins.elem "nvidia" profile.features) ''
+        # Hyprland NVIDIA environment variables
+        export LIBVA_DRIVER_NAME=nvidia
+        export XDG_SESSION_TYPE=wayland
+        export GBM_BACKEND=nvidia-drm
+        export __GLX_VENDOR_LIBRARY_NAME=nvidia
+        export WLR_NO_HARDWARE_CURSORS=1
+        export XCURSOR_SIZE=${toString profile.cursorSize}
+        export NIXOS_OZONE_WL=1
+      '';
+    };
   };
 }

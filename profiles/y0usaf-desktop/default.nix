@@ -60,6 +60,8 @@ in {
     "sync-tokens" # Add this if you want token syncing enabled
     "qbittorrent"
     "nodejs"
+    "wayland"
+    "npm"
   ];
 
   #=======================================================================

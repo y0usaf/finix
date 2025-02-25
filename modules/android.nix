@@ -11,6 +11,15 @@
     scrcpy
   ];
 
+  # Add Android-specific environment variables
+  programs.zsh = {
+    envExtra = ''
+      # Android environment variables
+      export ANDROID_HOME="${config.xdg.dataHome}/android"
+      export ADB_VENDOR_KEY="${config.xdg.configHome}/android"
+    '';
+  };
+
   systemd.user.services = {
     waydroid-container = {
       Unit = {
