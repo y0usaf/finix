@@ -47,7 +47,6 @@ in {
     "virtualization" # Enable virtualization features for VMs and containers.
     "backup" # Activate backup solutions—don't risk losing data!
     "nvim" # Set up preferences for using Neovim.
-    "android" # Enable Android integrations (if doing Android development/work).
     "webapps" # Prepare the system for web applications.
     "wallust" # Likely for wallpaper management; verify its purpose in your docs.
     "syncthing" # Enable file synchronization via Syncthing.

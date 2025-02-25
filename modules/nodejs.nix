@@ -32,16 +32,16 @@
       export NPM_CONFIG_PREFIX=${config.xdg.dataHome}/npm
       export NPM_CONFIG_CACHE=${config.xdg.cacheHome}/npm
       export NPM_CONFIG_USERCONFIG=${config.xdg.configHome}/npm/npmrc
-      
+
       # Ensure directories exist with proper permissions
       mkdir -p ${config.xdg.dataHome}/npm
       mkdir -p ${config.xdg.cacheHome}/npm
       mkdir -p ${config.xdg.configHome}/npm/config
-      
+
       # Force reinstall claude-code package
       echo "Installing @anthropic-ai/claude-code..."
       ${pkgs.nodejs_20}/bin/npm install -g @anthropic-ai/claude-code --force
-      
+
       # Verify installation
       if [ -d "${config.xdg.dataHome}/npm/lib/node_modules/@anthropic-ai/claude-code" ]; then
         echo "✅ @anthropic-ai/claude-code installed successfully"
@@ -52,4 +52,4 @@
       fi
     '';
   };
-} 
+}

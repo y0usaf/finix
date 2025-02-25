@@ -11,5 +11,5 @@
   imports = [
     ../configurations/default.nix
     ./hardware-configuration.nix
- ];
+  ];
 }
