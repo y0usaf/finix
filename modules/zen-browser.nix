@@ -1,10 +1,9 @@
 { lib, config, pkgs, profile, ... }:
 with lib;
 let
-  logoPath = ./logo.png;
   src = builtins.fetchurl {
     url = "https://github.com/zen-browser/desktop/releases/latest/download/zen-x86_64.AppImage";
-    sha256 = "16k37ngl4qpqwwj6f9q8jpn20pk8887q8zc0l7qivshmhfib36qq";
+    sha256 = "119gxhbwabl2zzxnm4l0vd18945mk2l0k12g5rf9x8v9lzsm7knn";
   };
 
   # Basic settings for Zen Browser
@@ -44,23 +43,21 @@ let
   '';
 
 in {
-  options = {
-    bzv.zen-browser.enable = mkEnableOption "Enable zen browser app image";
-  };
-
-  config = mkIf config.bzv.zen-browser.enable {
+  config = mkIf (builtins.elem "zen-browser" profile.features) {
     # Install the wrapped Zen Browser
-    home.packages = [ zenWithConfig ];
+    home.packages = [ 
+      zenWithConfig
+      pkgs.qt6Packages.qtbase
+      pkgs.qt6Packages.qtwayland 
+    ];
 
     # Create desktop entry
-    xdg.desktopEntries = {
-      ZenBrowser = {
-        name = "Zen Browser";
-        genericName = "Zen";
-        exec = "${zenWithConfig}/bin/zen-browser";
-        terminal = false;
-        icon = logoPath;
-      };
+    xdg.desktopEntries.ZenBrowser = {
+      name = "Zen Browser";
+      genericName = "Zen";
+      exec = "${zenWithConfig}/bin/zen-browser";
+      terminal = false;
+      categories = [ "Network" "WebBrowser" ];
     };
 
     # Add Firefox-related environment variables
