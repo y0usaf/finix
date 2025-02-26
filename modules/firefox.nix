@@ -73,13 +73,13 @@
   };
 
   userChromeCss = ''
-
     :root {
         --tab-font-size: 0.8em;
         --max-tab-width: none;
         --show-titlebar-buttons: none;
         --tab-height: 20px;
-        --toolbar-icon-size: calc(var(--tab-height) / 1.5)
+        --toolbar-icon-size: calc(var(--tab-height) / 1.5);
+        --uc-bottom-toolbar-height: 20px;  /* Added for bottom toolbar */
     }
 
     .titlebar-buttonbox-container {
@@ -155,28 +155,18 @@
     }
 
     #nav-bar {
-        margin-left: 0;
-        margin-right: 0;
-        min-width: 40rem;
-        height: var(--tab-height);
-        min-height: 0!important;
-        border-inline: var(--uc-window-drag-space-width) solid var(--toolbar-bgcolor);
-        margin-top: -1px!important;
-        border-top: none!important;
         position: fixed !important;
         bottom: 0 !important;
-        width: 50vw !important;
-        left: 25vw !important;
-        z-index: 100 !important;
-        background-color: var(--toolbar-bgcolor) !important;
+        width: 100% !important;
+        height: var(--uc-bottom-toolbar-height) !important;
+        max-height: var(--uc-bottom-toolbar-height) !important;
+        margin: 0 !important;
+        z-index: 1;
     }
 
-    /* Add margins only when window is wide enough */
-    @media (min-width: 60rem) {
-        #nav-bar {
-            margin-left: 25vw;
-            margin-right: 25vw;
-        }
+    /* Add margin to browser to prevent content from being hidden behind the toolbar */
+    #browser {
+        margin-bottom: var(--uc-bottom-toolbar-height) !important;
     }
 
     #navigator-toolbox {
@@ -307,11 +297,10 @@
     /* URL bar styling when expanded */
     #urlbar[breakout][breakout-extend] {
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-        width: 50vw !important;  /* 100% - (25vw * 2) */
+        width: 50vw !important;
         left: 50% !important;
         right: auto !important;
         top: 20vh !important;
-        bottom: auto !important;
         margin: 0 !important;
         position: fixed !important;
         z-index: 999 !important;
@@ -332,7 +321,6 @@
         --toolbarbutton-border-radius: 0px !important;
         --urlbar-icon-border-radius: 0px !important;
     }
-
   '';
 
   # Get the profiles from the Firefox directory
