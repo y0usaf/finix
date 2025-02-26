@@ -7,7 +7,7 @@ let
     sha256 = "16k37ngl4qpqwwj6f9q8jpn20pk8887q8zc0l7qivshmhfib36qq";
   };
 
-  # Reuse your Firefox settings and CSS
+  # Basic settings for Zen Browser
   commonSettings = {
     # Enable userChrome customizations
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
@@ -17,13 +17,7 @@ let
     "media.hardware-video-decoding.enabled" = !(builtins.elem "nvidia" profile.features);
     "media.ffmpeg.vaapi.enabled" = !(builtins.elem "nvidia" profile.features);
     "layers.acceleration.disabled" = (builtins.elem "nvidia" profile.features);
-
-    # ... rest of your commonSettings from firefox.nix ...
   };
-
-  userChromeCss = '' 
-    # ... your existing userChromeCss content ...
-  '';
 
   # Helper function to write settings to user.js format
   mkUserJs = settings:
@@ -40,11 +34,10 @@ let
   zenWithConfig = pkgs.writeShellScriptBin "zen-browser" ''
     # Create profile directory if it doesn't exist
     PROFILE_DIR="''${HOME}/.zen-browser/default"
-    mkdir -p "$PROFILE_DIR/chrome"
+    mkdir -p "$PROFILE_DIR"
 
     # Write configurations
     echo "${mkUserJs commonSettings}" > "$PROFILE_DIR/user.js"
-    echo "${userChromeCss}" > "$PROFILE_DIR/chrome/userChrome.css"
 
     # Launch Zen Browser with this profile
     exec ${pkgs.appimage-run}/bin/appimage-run ${src} --profile "$PROFILE_DIR" "$@"
