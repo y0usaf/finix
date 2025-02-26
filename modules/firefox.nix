@@ -163,6 +163,12 @@
         border-inline: var(--uc-window-drag-space-width) solid var(--toolbar-bgcolor);
         margin-top: -1px!important;
         border-top: none!important;
+        position: fixed !important;
+        bottom: 0 !important;
+        width: 50vw !important;
+        left: 25vw !important;
+        z-index: 100 !important;
+        background-color: var(--toolbar-bgcolor) !important;
     }
 
     /* Add margins only when window is wide enough */
@@ -305,6 +311,7 @@
         left: 50% !important;
         right: auto !important;
         top: 20vh !important;
+        bottom: auto !important;
         margin: 0 !important;
         position: fixed !important;
         z-index: 999 !important;
