@@ -319,6 +319,46 @@ toolbar {
     min-height: var(--tab-height) !important;
     max-height: var(--tab-height) !important;
 }
+
+/* Remove titlebar spacing */
+#titlebar {
+    -moz-appearance: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Compact tab bar styling */
+#TabsToolbar,
+#tabbrowser-tabs,
+.tabbrowser-tab,
+.tab-stack,
+.tab-content {
+    min-height: var(--tab-height) !important;
+    max-height: var(--tab-height) !important;
+    height: var(--tab-height) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+}
+
+/* Ensure tab content is visible */
+.tab-content {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Remove any toolbar gaps */
+toolbar {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#navigator-toolbox {
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
   '';
 
   # Get the profiles from the Firefox directory
