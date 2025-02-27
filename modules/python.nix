@@ -25,6 +25,8 @@
       PYTHONUSERBASE = "${config.xdg.dataHome}/python";
       PIP_CACHE_DIR = "${config.xdg.cacheHome}/pip";
       VIRTUAL_ENV_HOME = "${config.xdg.dataHome}/venvs";
+    } // lib.optionalAttrs (builtins.elem "nvidia" profile.features) {
+      CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
     };
 
     programs.zsh = {

@@ -50,7 +50,6 @@ let
   userSessionVars = {
     LIBSEAT_BACKEND = "logind";
   };
-
 in {
   #############################################################################
   # APPLY SYSTEM-WIDE ENVIRONMENT CONFIGURATION

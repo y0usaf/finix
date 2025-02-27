@@ -11,4 +11,4 @@
       export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
     '';
   };
-} 
+}
