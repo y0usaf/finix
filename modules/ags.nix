@@ -13,7 +13,7 @@ let
   # Configure which system stats modules are shown.
   # Change this list to enable/disable/reorder modules.
   # Valid entries: "time", "date", "shell", "uptime", "pkgs", "memory", "cpu", "gpu", "colors"
-  systemStatsModules = [ "time" "date" "shell" "uptime" "pkgs" "memory" "cpu" "gpu" "colors" ];
+  systemStatsModules = [ "cpu" "gpu" "colors" ];
 
   shadowOffsets = [
     "${shared.shadowSize} 0 ${shared.shadowRadius} ${shared.shadowColor}"
