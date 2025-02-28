@@ -130,8 +130,6 @@
       SSB_HOME = "${config.xdg.dataHome}/zoom";
     }
     (lib.mkIf (builtins.elem "nvidia" profile.features) {
-      # NVIDIA-specific variables
-      CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
       __GL_SHADER_DISK_CACHE_PATH = "${config.xdg.cacheHome}/nv";
     })
   ];
