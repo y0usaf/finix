@@ -107,46 +107,16 @@
     "firefox" # Firefox browser support.
   ];
 
-  # List of valid, user-selectable features for further configuration.
-  validFeatures = [
-    # Development tools and editors.
-    "python"
-    "nvim"
-    "vscode"
-
-    # Desktop Environment tools and compositors.
-    "hyprland"
-    "ags"
-    "wayland"
-    "wallust"
-
-    # Hardware specific or support features.
-    "nvidia"
-    "android"
-
-    # Additional use cases like gaming, media playback, creative work, etc.
-    "gaming"
-    "media"
-    "music"
-    "creative"
-    "virtualization"
-    "backup"
-    "webapps"
-    "syncthing"
-    "streamlink"
-
-    # Multiplexer tool for terminal session management.
-    "zellij"
-
-    # Feature for ChatGPT integration.
-    "chatgpt"
-
-    # New feature
-    "sync-tokens"
-    "npm"
-    "wayland"
-    "zen-browser"
-  ];
+  # Dynamically get module names by reading the modules directory
+  moduleFiles = builtins.attrNames (builtins.readDir ./modules);
+  
+  # Convert filenames to feature names by removing the .nix extension
+  featureNames = builtins.map (name: builtins.elemAt (builtins.split "\\." name) 0) moduleFiles;
+  
+  # Create a list of valid features (excluding any special modules you don't want as features)
+  # You can add more exclusions to this list as needed
+  excludedModules = ["options" "ags" "cursor" "env" "fonts" "git" "gtk" "ssh" "systemd" "xdg"];
+  validFeatures = builtins.filter (name: !(builtins.elem name excludedModules)) featureNames;
 
   ######################################################################
   #                         Package Sets Definitions                     #
