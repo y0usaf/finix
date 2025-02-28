@@ -190,8 +190,11 @@
     ## ────── NixOS Configurations ──────
     nixosConfigurations = nixosConfigurations;
 
-    homeConfigurations = {
-      "y0usaf" = mkHomeConfiguration "y0usaf" system;
-    };
+    ## ────── Dynamic Home Manager Configurations ──────
+    homeConfigurations = builtins.listToAttrs (map (hostname: {
+        name = profiles.${hostname}.username;
+        value = mkHomeConfiguration profiles.${hostname}.username system;
+      })
+      profileNames);
   };
 }
