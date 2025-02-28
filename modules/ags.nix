@@ -1,5 +1,10 @@
-{ config, pkgs, lib, profile, ... }:
-let
+{
+  config,
+  pkgs,
+  lib,
+  profile,
+  ...
+}: let
   ##########################################
   # Global Configuration & Shared Utils
   ##########################################
@@ -13,7 +18,7 @@ let
   # Configure which system stats modules are shown.
   # Change this list to enable/disable/reorder modules.
   # Valid entries: "time", "date", "shell", "uptime", "pkgs", "memory", "cpu", "gpu", "colors"
-  systemStatsModules = [ "time" "date" "shell" "uptime" "pkgs" "memory" "cpu" "gpu" "colors" ];
+  systemStatsModules = ["time" "date" "shell" "uptime" "pkgs" "memory" "cpu" "gpu" "colors"];
 
   shadowOffsets = [
     "${shared.shadowSize} 0 ${shared.shadowRadius} ${shared.shadowColor}"
@@ -25,8 +30,9 @@ let
     "${shared.shadowSize} -${shared.shadowSize} ${shared.shadowRadius} ${shared.shadowColor}"
     "-${shared.shadowSize} -${shared.shadowSize} ${shared.shadowRadius} ${shared.shadowColor}"
   ];
-  repeatedShadow = lib.concatStringsSep ",\n"
-                    (lib.concatLists (lib.genList (i: shadowOffsets) shared.repetitionCount));
+  repeatedShadow =
+    lib.concatStringsSep ",\n"
+    (lib.concatLists (lib.genList (i: shadowOffsets) shared.repetitionCount));
 
   # CSS resets shared by widgets
   baseReset = ''
@@ -36,16 +42,20 @@ let
     border: none;
     box-shadow: none;
   '';
-  systemStatsReset = baseReset + ''
-    text-shadow: ${repeatedShadow};
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-  '';
-  workspacesReset = baseReset + ''
-    color: white;
-  '';
+  systemStatsReset =
+    baseReset
+    + ''
+      text-shadow: ${repeatedShadow};
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      color: inherit;
+    '';
+  workspacesReset =
+    baseReset
+    + ''
+      color: white;
+    '';
 
   ##########################################
   # AGS MAIN APP CONFIGURATION (JS)
@@ -424,13 +434,13 @@ let
   '';
 in {
   # Include the AGS package for installation
-  home.packages = with pkgs; [ ags ];
+  home.packages = with pkgs; [ags];
 
   # Create the AGS configuration directory and files
   xdg.configFile = {
-    "ags/config.js".text        = configJS;
-    "ags/style.css".text        = styleCSS;
-    "ags/system-stats.js".text   = systemStatsJS;
-    "ags/workspaces.js".text     = workspacesJS;
+    "ags/config.js".text = configJS;
+    "ags/style.css".text = styleCSS;
+    "ags/system-stats.js".text = systemStatsJS;
+    "ags/workspaces.js".text = workspacesJS;
   };
 }

@@ -119,18 +119,20 @@
       config.allowUnfree = true;
     };
 
-    ## ────── Profile Selection Based on Hostname ──────
-    # Import all available profiles
-    profiles = {
-      "y0usaf-desktop" = import ./profiles/y0usaf-desktop {
-        lib = pkgs.lib;
-        inherit pkgs;
-      };
-      "y0usaf-laptop" = import ./profiles/y0usaf-laptop {
-        lib = pkgs.lib;
-        inherit pkgs;
-      };
-    };
+    ## ────── Dynamic Profile Loading ──────
+    # Get all profile directories
+    profilesDir = ./profiles;
+    profileNames = builtins.attrNames (builtins.readDir profilesDir);
+
+    # Import all available profiles dynamically
+    profiles = builtins.listToAttrs (map (name: {
+        inherit name;
+        value = import (profilesDir + "/${name}") {
+          lib = pkgs.lib;
+          inherit pkgs;
+        };
+      })
+      profileNames);
 
     ## ────── Common Special Arguments for Modules ──────
     commonSpecialArgs = {
@@ -145,72 +147,42 @@
         modules = [./home.nix];
       };
 
-    nixosConfigurations = {
-      # Define configurations for both profiles
-      "y0usaf-desktop" = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs =
-          commonSpecialArgs
-          // {
-            profile = profiles."y0usaf-desktop";
-          };
-        modules = [
-          ./profiles/y0usaf-desktop/configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs =
-                commonSpecialArgs
-                // {
-                  profile = profiles."y0usaf-desktop";
-                };
-              users.${profiles."y0usaf-desktop".username} = {
-                imports = [./home.nix];
-                home = {
-                  stateVersion = profiles."y0usaf-desktop".stateVersion;
-                  homeDirectory = nixpkgs.lib.mkForce profiles."y0usaf-desktop".homeDirectory;
+    ## ────── Dynamic NixOS Configuration Generation ──────
+    nixosConfigurations = builtins.listToAttrs (map (hostname: {
+        name = hostname;
+        value = nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs =
+            commonSpecialArgs
+            // {
+              profile = profiles.${hostname};
+            };
+          modules = [
+            (profilesDir + "/${hostname}/configuration.nix")
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs =
+                  commonSpecialArgs
+                  // {
+                    profile = profiles.${hostname};
+                  };
+                users.${profiles.${hostname}.username} = {
+                  imports = [./home.nix];
+                  home = {
+                    stateVersion = profiles.${hostname}.stateVersion;
+                    homeDirectory = nixpkgs.lib.mkForce profiles.${hostname}.homeDirectory;
+                  };
                 };
               };
-            };
-          }
-          chaotic.nixosModules.default
-        ];
-      };
-
-      "y0usaf-laptop" = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs =
-          commonSpecialArgs
-          // {
-            profile = profiles."y0usaf-laptop";
-          };
-        modules = [
-          ./profiles/y0usaf-laptop/configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs =
-                commonSpecialArgs
-                // {
-                  profile = profiles."y0usaf-laptop";
-                };
-              users.${profiles."y0usaf-laptop".username} = {
-                imports = [./home.nix];
-                home = {
-                  stateVersion = profiles."y0usaf-laptop".stateVersion;
-                  homeDirectory = nixpkgs.lib.mkForce profiles."y0usaf-laptop".homeDirectory;
-                };
-              };
-            };
-          }
-          chaotic.nixosModules.default
-        ];
-      };
-    };
+            }
+            chaotic.nixosModules.default
+          ];
+        };
+      })
+      profileNames);
   in {
     ## ────── Formatter Setup ──────
     formatter.${system} = pkgs.alejandra;
