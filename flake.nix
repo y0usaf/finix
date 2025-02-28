@@ -122,7 +122,15 @@
     ## ────── Dynamic Profile Loading ──────
     # Get all profile directories
     profilesDir = ./profiles;
-    profileNames = builtins.attrNames (builtins.readDir profilesDir);
+    # Filter out README.md, configurations directory, and options.nix
+    profileNames = builtins.filter (
+      name:
+        name
+        != "README.md"
+        && name != "configurations"
+        && name != "options.nix"
+        && builtins.pathExists (profilesDir + "/${name}/default.nix")
+    ) (builtins.attrNames (builtins.readDir profilesDir));
 
     # Import all available profiles dynamically
     profiles = builtins.listToAttrs (map (name: {
@@ -191,9 +199,26 @@
     nixosConfigurations = nixosConfigurations;
 
     ## ────── Dynamic Home Manager Configurations ──────
-    homeConfigurations = builtins.listToAttrs (map (hostname: {
-        name = profiles.${hostname}.username;
-        value = mkHomeConfiguration profiles.${hostname}.username system;
+    homeConfigurations = builtins.listToAttrs (map (hostname: let
+        # Get the actual profile configuration by directly accessing the file
+        profilePath = profilesDir + "/${hostname}/default.nix";
+        # Import the profile directly
+        profileConfig = import profilePath {
+          lib = pkgs.lib;
+          inherit pkgs;
+        };
+      in {
+        # Access the username directly from the imported profile
+        name = profileConfig.username;
+        value = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs =
+            commonSpecialArgs
+            // {
+              profile = profileConfig;
+            };
+          modules = [./home.nix];
+        };
       })
       profileNames);
   };

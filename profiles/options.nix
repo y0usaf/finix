@@ -109,10 +109,10 @@
 
   # Dynamically get module names by reading the modules directory
   moduleFiles = builtins.attrNames (builtins.readDir ./modules);
-  
+
   # Convert filenames to feature names by removing the .nix extension
   featureNames = builtins.map (name: builtins.elemAt (builtins.split "\\." name) 0) moduleFiles;
-  
+
   # Create a list of valid features (excluding any special modules you don't want as features)
   # You can add more exclusions to this list as needed
   excludedModules = ["options" "ags" "cursor" "env" "fonts" "git" "gtk" "ssh" "systemd" "xdg"];
