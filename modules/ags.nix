@@ -13,6 +13,18 @@
     shadowRadius = "0.05rem";
     shadowColor = "#000000";
     repetitionCount = 4;
+    colors = {
+      red = "#ff0000";
+      orange = "#ff8800";
+      yellow = "#ffff00";
+      green = "#00ff00";
+      blueGreen = "#00ff88";
+      cyan = "#00ffff";
+      blue = "#0088ff";
+      magenta = "#ff00ff";
+      white = "#ffffff";
+      darkBg = "#222222";
+    };
   };
 
   # Configure which system stats modules are shown.
@@ -102,48 +114,59 @@
         margin: 0;
         padding: 0;
     }
-    .stats-time { color: #ff0000; }
-    .stats-date { color: #ff8800; }
-    .stats-shell { color: #ffff00; }
-    .stats-uptime { color: #00ff00; }
-    .stats-pkgs { color: #00ff88; }
-    .stats-memory { color: #00ffff; }
-    .stats-cpu { color: #0088ff; }
-    .stats-gpu { color: #ff00ff; }
-    .stats-colors { color: #ffffff; }
+    .stats-time { color: ${shared.colors.red}; }
+    .stats-date { color: ${shared.colors.orange}; }
+    .stats-shell { color: ${shared.colors.yellow}; }
+    .stats-uptime { color: ${shared.colors.green}; }
+    .stats-pkgs { color: ${shared.colors.blueGreen}; }
+    .stats-memory { color: ${shared.colors.cyan}; }
+    .stats-cpu { color: ${shared.colors.blue}; }
+    .stats-gpu { color: ${shared.colors.magenta}; }
+    .stats-colors { color: ${shared.colors.white}; }
 
     /* -------------------- Workspaces Widget Styles -------------------- */
     .workspaces, .workspaces * {
         ${workspacesReset}
     }
     .workspace-btn {
-        background-color: #222;
-        border-radius: 0;
+        background-color: ${shared.colors.darkBg};
+        border-radius: 0.2rem;
+        margin: 0 0.1rem;
+        transition: all 0.2s ease;
     }
     .workspace-btn label {
         background: none;
         color: rgba(255, 255, 255, 0.4);
         font-size: 0.8rem;
-        padding: 0.25em;
+        padding: 0.25em 0.5em;
+    }
+    .workspace-btn.active {
+        background-color: rgba(255, 255, 255, 0.2);
     }
     .workspace-btn.active label {
         color: rgba(255, 255, 255, 1.0);
     }
-    .workspace-btn.inactive label {
-        color: rgba(255, 255, 255, 0.5);
+    .workspace-btn.occupied:not(.active) {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    .workspace-btn.occupied label {
+        color: rgba(255, 255, 255, 0.7);
+    }
+    .workspace-btn.urgent {
+        background-color: rgba(255, 85, 85, 0.3);
     }
     .workspace-btn.urgent label {
         color: #ff5555;
     }
-    .stats-red { color: #ff0000; }
-    .stats-orange { color: #ff8800; }
-    .stats-yellow { color: #ffff00; }
-    .stats-green { color: #00ff00; }
-    .stats-blue-green { color: #00ff88; }
-    .stats-cyan { color: #00ffff; }
-    .stats-blue { color: #0088ff; }
-    .stats-magenta { color: #ff00ff; }
-    .stats-white { color: #ffffff; }
+    .stats-red { color: ${shared.colors.red}; }
+    .stats-orange { color: ${shared.colors.orange}; }
+    .stats-yellow { color: ${shared.colors.yellow}; }
+    .stats-green { color: ${shared.colors.green}; }
+    .stats-blue-green { color: ${shared.colors.blueGreen}; }
+    .stats-cyan { color: ${shared.colors.cyan}; }
+    .stats-blue { color: ${shared.colors.blue}; }
+    .stats-magenta { color: ${shared.colors.magenta}; }
+    .stats-white { color: ${shared.colors.white}; }
   '';
 
   ##########################################
@@ -172,10 +195,22 @@
         }
     }
 
+    // Cache for system stats to avoid unnecessary updates
+    const statsCache = {
+        lastUpdate: 0,
+        data: {}
+    };
+
     // ---------------------------------------------------------------
     // Retrieves various system stats (CPU, GPU, RAM, etc.)
     // ---------------------------------------------------------------
     function getStats() {
+        // Only update stats every second to avoid excessive CPU usage
+        const now = Date.now();
+        if (now - statsCache.lastUpdate < 1000 && Object.keys(statsCache.data).length > 0) {
+            return statsCache.data;
+        }
+
         const cpuTempCmd = ["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"];
         const cpu_temp = safeExec(cpuTempCmd, "Failed to get CPU stats:");
         const gpuCmd = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits";
@@ -183,9 +218,15 @@
         if (gpu_temp !== "N/A") {
             gpu_temp += "°C";
         }
-        const ramInfo = exec("free -h").split("\n")[1].split(/\s+/);
-        const used_ram = ramInfo[2];
-        const total_ram = ramInfo[1];
+        
+        // More efficient RAM info parsing
+        const ramInfo = safeExec(
+            ["bash", "-c", "free -h | awk 'NR==2 {print $3\"|\"$2}'"], 
+            "Failed to get RAM info:"
+        ).split("|");
+        const used_ram = ramInfo[0] || "N/A";
+        const total_ram = ramInfo[1] || "N/A";
+        
         const time = safeExec('date "+%H:%M:%S"', "Failed to get time:");
         const date = safeExec('date "+%d/%m/%y"', "Failed to get date:");
         const uptime = safeExec(
@@ -200,7 +241,9 @@
             ["bash", "-c", "basename $(readlink -f $SHELL)"],
             "Failed to get shell:"
         );
-        return {
+        
+        statsCache.lastUpdate = now;
+        statsCache.data = {
             cpu_temp,
             gpu_temp,
             used_ram,
@@ -211,6 +254,8 @@
             pkgs,
             shell
         };
+        
+        return statsCache.data;
     }
 
     // ---------------------------------------------------------------
@@ -372,6 +417,13 @@
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
     var hyprland = await Service.import('hyprland');
+    
+    // Cache for workspace state to avoid unnecessary updates
+    const workspaceCache = {
+        active: new Set(),
+        occupied: new Set(),
+        focused: null
+    };
 
     function dispatch(workspace) {
         return hyprland.messageAsync("dispatch workspace " + workspace);
@@ -384,16 +436,48 @@
             onClicked: () => dispatch(index),
             setup: self => {
                 self.hook(hyprland, () => {
-                    const isOccupied = hyprland.workspaces.some(ws => ws.windows > 0 && ws.id === index);
-                    const activeIds = hyprland.monitors
-                        .map(m => m.activeWorkspace && m.activeWorkspace.id)
-                        .filter(id => id != null);
-                    const isActive = activeIds.includes(index);
+                    // Get workspace states
+                    const occupiedWorkspaces = new Set(
+                        hyprland.workspaces
+                            .filter(ws => ws.windows > 0)
+                            .map(ws => ws.id)
+                    );
+                    
+                    const activeWorkspaces = new Set(
+                        hyprland.monitors
+                            .map(m => m.activeWorkspace && m.activeWorkspace.id)
+                            .filter(id => id != null)
+                    );
+                    
                     const focusedMonitor = hyprland.focused_monitor || (hyprland.monitors[0] || {});
-                    const isFocused = focusedMonitor.activeWorkspace && focusedMonitor.activeWorkspace.id === index;
-                    self.visible = isActive || isOccupied || isFocused;
-                    self.toggleClassName('active', isFocused);
-                    self.toggleClassName('occupied', isOccupied);
+                    const focusedWorkspace = focusedMonitor.activeWorkspace && focusedMonitor.activeWorkspace.id;
+                    
+                    // Only update if state has changed
+                    const isOccupied = occupiedWorkspaces.has(index);
+                    const isActive = activeWorkspaces.has(index);
+                    const isFocused = focusedWorkspace === index;
+                    
+                    // Check if state changed before updating
+                    const occupiedChanged = workspaceCache.occupied.has(index) !== isOccupied;
+                    const activeChanged = workspaceCache.active.has(index) !== isActive;
+                    const focusedChanged = workspaceCache.focused !== focusedWorkspace;
+                    
+                    if (occupiedChanged || activeChanged || focusedChanged) {
+                        // Update cache
+                        if (isOccupied) workspaceCache.occupied.add(index);
+                        else workspaceCache.occupied.delete(index);
+                        
+                        if (isActive) workspaceCache.active.add(index);
+                        else workspaceCache.active.delete(index);
+                        
+                        workspaceCache.focused = focusedWorkspace;
+                        
+                        // Update UI
+                        self.visible = isActive || isOccupied || isFocused;
+                        self.toggleClassName('active', isFocused);
+                        self.toggleClassName('occupied', isOccupied);
+                        self.toggleClassName('urgent', false); // Add logic for urgent workspaces if needed
+                    }
                 });
             }
         });
