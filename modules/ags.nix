@@ -5,9 +5,7 @@
   profile,
   ...
 }: let
-  ##########################################
-  # Global Configuration & Shared Utils
-  ##########################################
+  # Simplified shadow configuration
   shared = {
     shadowSize = "0.05rem";
     shadowRadius = "0.05rem";
@@ -15,51 +13,33 @@
     repetitionCount = 4;
   };
 
-  # Configure which system stats modules are shown.
-  # Change this list to enable/disable/reorder modules.
-  # Valid entries: "time", "date", "shell", "uptime", "pkgs", "memory", "cpu", "gpu", "colors"
+  # System stats modules configuration
   systemStatsModules = ["time" "date" "shell" "uptime" "pkgs" "memory" "cpu" "gpu" "colors"];
 
+  # Generate shadow effect more efficiently
   shadowOffsets = [
-    "${shared.shadowSize} 0 ${shared.shadowRadius} ${shared.shadowColor}"
-    "-${shared.shadowSize} 0 ${shared.shadowRadius} ${shared.shadowColor}"
-    "0 ${shared.shadowSize} ${shared.shadowRadius} ${shared.shadowColor}"
-    "0 -${shared.shadowSize} ${shared.shadowRadius} ${shared.shadowColor}"
-    "${shared.shadowSize} ${shared.shadowSize} ${shared.shadowRadius} ${shared.shadowColor}"
-    "-${shared.shadowSize} ${shared.shadowSize} ${shared.shadowRadius} ${shared.shadowColor}"
-    "${shared.shadowSize} -${shared.shadowSize} ${shared.shadowRadius} ${shared.shadowColor}"
-    "-${shared.shadowSize} -${shared.shadowSize} ${shared.shadowRadius} ${shared.shadowColor}"
+    "${shared.shadowSize} 0"
+    "-${shared.shadowSize} 0"
+    "0 ${shared.shadowSize}"
+    "0 -${shared.shadowSize}"
+    "${shared.shadowSize} ${shared.shadowSize}"
+    "-${shared.shadowSize} ${shared.shadowSize}"
+    "${shared.shadowSize} -${shared.shadowSize}"
+    "-${shared.shadowSize} -${shared.shadowSize}"
   ];
-  repeatedShadow =
-    lib.concatStringsSep ",\n"
-    (lib.concatLists (lib.genList (i: shadowOffsets) shared.repetitionCount));
+  
+  repeatedShadow = lib.concatStringsSep ", " (lib.flatten (
+    lib.genList (i: 
+      map (offset: "${offset} ${shared.shadowRadius} ${shared.shadowColor}") shadowOffsets
+    ) shared.repetitionCount
+  ));
 
-  # CSS resets shared by widgets
-  baseReset = ''
-    margin: 0;
-    padding: 0;
-    background: none;
-    border: none;
-    box-shadow: none;
-  '';
-  systemStatsReset =
-    baseReset
-    + ''
-      text-shadow: ${repeatedShadow};
-      font-family: inherit;
-      font-size: inherit;
-      font-weight: inherit;
-      color: inherit;
-    '';
-  workspacesReset =
-    baseReset
-    + ''
-      color: white;
-    '';
+  # Simplified CSS resets
+  baseReset = "margin: 0; padding: 0; background: none; border: none; box-shadow: none;";
+  systemStatsReset = "${baseReset} text-shadow: ${repeatedShadow}; font-family: inherit; font-size: inherit; font-weight: inherit; color: inherit;";
+  workspacesReset = "${baseReset} color: white;";
 
-  ##########################################
-  # AGS MAIN APP CONFIGURATION (JS)
-  ##########################################
+  # Simplified main config
   configJS = ''
     import App from 'resource:///com/github/Aylur/ags/app.js';
     import { systemStatsConfig } from './system-stats.js';
@@ -79,29 +59,22 @@
     });
   '';
 
-  ##########################################
-  # AGS STYLE CSS
-  ##########################################
+  # Simplified CSS with consistent formatting
   styleCSS = ''
-    html {
-      font-size: ${toString profile.baseFontSize}px;
-    }
+    html { font-size: ${toString profile.baseFontSize}px; }
 
-    /* Global reset for both widgets */
-    .system-stats *, .workspaces * {
-        ${systemStatsReset}
-    }
+    /* Global resets */
+    .system-stats *, .workspaces * { ${systemStatsReset} }
+    .workspaces, .workspaces * { ${workspacesReset} }
 
-    /* -------------------- System Stats Styles -------------------- */
+    /* System Stats Styles */
     .system-stats {
         text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
         font-size: 1rem;
         margin: 0.5em;
     }
-    .system-stats label {
-        margin: 0;
-        padding: 0;
-    }
+
+    /* Color classes */
     .stats-time { color: #ff0000; }
     .stats-date { color: #ff8800; }
     .stats-shell { color: #ffff00; }
@@ -111,11 +84,17 @@
     .stats-cpu { color: #0088ff; }
     .stats-gpu { color: #ff00ff; }
     .stats-colors { color: #ffffff; }
+    .stats-red { color: #ff0000; }
+    .stats-orange { color: #ff8800; }
+    .stats-yellow { color: #ffff00; }
+    .stats-green { color: #00ff00; }
+    .stats-blue-green { color: #00ff88; }
+    .stats-cyan { color: #00ffff; }
+    .stats-blue { color: #0088ff; }
+    .stats-magenta { color: #ff00ff; }
+    .stats-white { color: #ffffff; }
 
-    /* -------------------- Workspaces Widget Styles -------------------- */
-    .workspaces, .workspaces * {
-        ${workspacesReset}
-    }
+    /* Workspaces Widget Styles */
     .workspace-btn {
         background-color: #222;
         border-radius: 0;
@@ -126,114 +105,49 @@
         font-size: 0.8rem;
         padding: 0.25em;
     }
-    .workspace-btn.active label {
-        color: rgba(255, 255, 255, 1.0);
-    }
-    .workspace-btn.inactive label {
-        color: rgba(255, 255, 255, 0.5);
-    }
-    .workspace-btn.urgent label {
-        color: #ff5555;
-    }
-    .stats-red { color: #ff0000; }
-    .stats-orange { color: #ff8800; }
-    .stats-yellow { color: #ffff00; }
-    .stats-green { color: #00ff00; }
-    .stats-blue-green { color: #00ff88; }
-    .stats-cyan { color: #00ffff; }
-    .stats-blue { color: #0088ff; }
-    .stats-magenta { color: #ff00ff; }
-    .stats-white { color: #ffffff; }
+    .workspace-btn.active label { color: rgba(255, 255, 255, 1.0); }
+    .workspace-btn.inactive label { color: rgba(255, 255, 255, 0.5); }
+    .workspace-btn.urgent label { color: #ff5555; }
   '';
 
-  ##########################################
-  # SYSTEM STATS WIDGET JS MODULE
-  ##########################################
+  # Simplified system stats JS
   systemStatsJS = ''
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
-    // Inject the configured modules from Nix
+    // Configured modules from Nix
     const modulesList = ${builtins.toJSON systemStatsModules};
 
-    // ---------------------------------------------------------------
-    // Safe executor for shell commands with error handling
-    // ---------------------------------------------------------------
+    // Safe executor for shell commands
     function safeExec(command, errorMsg, defaultValue = 'N/A') {
         try {
             const output = exec(command);
-            const result = output.trim();
-            if (!result) throw new Error('Empty result');
-            return result;
+            return output.trim() || defaultValue;
         } catch (error) {
             console.log(errorMsg, error);
             return defaultValue;
         }
     }
 
-    // ---------------------------------------------------------------
-    // Retrieves various system stats (CPU, GPU, RAM, etc.)
-    // ---------------------------------------------------------------
+    // Get system stats
     function getStats() {
-        const cpuTempCmd = ["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"];
-        const cpu_temp = safeExec(cpuTempCmd, "Failed to get CPU stats:");
-        const gpuCmd = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits";
-        let gpu_temp = safeExec(gpuCmd, "Failed to get GPU stats:");
-        if (gpu_temp !== "N/A") {
-            gpu_temp += "°C";
-        }
-        const ramInfo = exec("free -h").split("\n")[1].split(/\s+/);
-        const used_ram = ramInfo[2];
-        const total_ram = ramInfo[1];
-        const time = safeExec('date "+%H:%M:%S"', "Failed to get time:");
-        const date = safeExec('date "+%d/%m/%y"', "Failed to get date:");
-        const uptime = safeExec(
-            ["bash", "-c", "uptime | awk -F'up |,' '{print $2}'"],
-            "Failed to get uptime:"
-        ).trim();
-        const pkgs = safeExec(
-            ["bash", "-c", "nix-store -q --requisites /run/current-system/sw | wc -l"],
-            "Failed to get package count:"
-        ).trim();
-        const shell = safeExec(
-            ["bash", "-c", "basename $(readlink -f $SHELL)"],
-            "Failed to get shell:"
-        );
         return {
-            cpu_temp,
-            gpu_temp,
-            used_ram,
-            total_ram,
-            time,
-            date,
-            uptime,
-            pkgs,
-            shell
+            cpu_temp: safeExec(["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"], "CPU stats error:"),
+            gpu_temp: safeExec("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits", "GPU stats error:") + "°C",
+            used_ram: exec("free -h").split("\n")[1].split(/\s+/)[2],
+            total_ram: exec("free -h").split("\n")[1].split(/\s+/)[1],
+            time: safeExec('date "+%H:%M:%S"', "Time error:"),
+            date: safeExec('date "+%d/%m/%y"', "Date error:"),
+            uptime: safeExec(["bash", "-c", "uptime | awk -F'up |,' '{print $2}'"], "Uptime error:").trim(),
+            pkgs: safeExec(["bash", "-c", "nix-store -q --requisites /run/current-system/sw | wc -l"], "Package count error:").trim(),
+            shell: safeExec(["bash", "-c", "basename $(readlink -f $SHELL)"], "Shell error:")
         };
     }
 
-    // ---------------------------------------------------------------
-    // Updates the widget's stats display with fresh data
-    // ---------------------------------------------------------------
-    function updateStats(stats) {
-        const newStats = getStats();
-        stats.cpu_temp.value = newStats.cpu_temp;
-        stats.gpu_temp.value = newStats.gpu_temp;
-        stats.used_ram.value = newStats.used_ram;
-        stats.total_ram.value = newStats.total_ram;
-        stats.time.value = newStats.time;
-        stats.date.value = newStats.date;
-        stats.uptime.value = newStats.uptime;
-        stats.pkgs.value = newStats.pkgs;
-        stats.shell.value = newStats.shell;
-    }
-
-    // ---------------------------------------------------------------
-    // Constructs the main System Stats widget layout with configurable modules
-    // ---------------------------------------------------------------
+    // Create system stats widget
     function SystemStats() {
-        var stats = {
+        const stats = {
             cpu_temp: Variable('N/A'),
             gpu_temp: Variable('N/A'),
             used_ram: Variable('N/A'),
@@ -245,70 +159,37 @@
             shell: Variable('N/A')
         };
 
-        const modules = modulesList;
-        const longestLabel = Math.max(...modules.map(l => l.length));
-
-        function padLabel(label) {
-            return label + " ".repeat(longestLabel - label.length);
-        }
-        function horizontalBorder(l, filler, r) {
-            return l + filler.repeat(longestLabel + 4) + r;
-        }
+        const longestLabel = Math.max(...modulesList.map(l => l.length));
+        const padLabel = label => label + " ".repeat(longestLabel - label.length);
+        const horizontalBorder = (l, filler, r) => l + filler.repeat(longestLabel + 4) + r;
 
         function createStatRow(module) {
             let value;
             switch(module) {
-                case "time":
-                    value = stats.time.bind();
-                    break;
-                case "date":
-                    value = stats.date.bind();
-                    break;
-                case "shell":
-                    value = stats.shell.bind();
-                    break;
-                case "uptime":
-                    value = stats.uptime.bind();
-                    break;
-                case "pkgs":
-                    value = stats.pkgs.bind();
-                    break;
-                case "memory":
-                    value = stats.used_ram.bind().transform(
-                        used => used + " | " + stats.total_ram.value
-                    );
-                    break;
-                case "cpu":
-                    value = stats.cpu_temp.bind();
-                    break;
-                case "gpu":
-                    value = stats.gpu_temp.bind();
-                    break;
-                case "colors":
-                    value = "";
-                    break;
-                default:
-                    value = "";
+                case "time": value = stats.time.bind(); break;
+                case "date": value = stats.date.bind(); break;
+                case "shell": value = stats.shell.bind(); break;
+                case "uptime": value = stats.uptime.bind(); break;
+                case "pkgs": value = stats.pkgs.bind(); break;
+                case "memory": value = stats.used_ram.bind().transform(used => used + " | " + stats.total_ram.value); break;
+                case "cpu": value = stats.cpu_temp.bind(); break;
+                case "gpu": value = stats.gpu_temp.bind(); break;
+                case "colors": value = ""; break;
+                default: value = "";
             }
+            
             const row = [
                 Widget.Label({ class_name: 'stats-white', xalign: 0, label: "│ " }),
                 Widget.Label({ class_name: "stats-" + module, xalign: 0, label: "• " }),
                 Widget.Label({ class_name: 'stats-white', xalign: 0, label: padLabel(module) + " │ " }),
                 Widget.Label({ class_name: "stats-" + module, xalign: 0, label: value })
             ];
+            
             if (module === 'colors') {
-                row.push(
-                    Widget.Label({ class_name: 'stats-red', label: '• ' }),
-                    Widget.Label({ class_name: 'stats-orange', label: '• ' }),
-                    Widget.Label({ class_name: 'stats-yellow', label: '• ' }),
-                    Widget.Label({ class_name: 'stats-green', label: '• ' }),
-                    Widget.Label({ class_name: 'stats-blue-green', label: '• ' }),
-                    Widget.Label({ class_name: 'stats-cyan', label: '• ' }),
-                    Widget.Label({ class_name: 'stats-blue', label: '• ' }),
-                    Widget.Label({ class_name: 'stats-magenta', label: '• ' }),
-                    Widget.Label({ class_name: 'stats-white', label: '• ' })
-                );
+                const colors = ['red', 'orange', 'yellow', 'green', 'blue-green', 'cyan', 'blue', 'magenta', 'white'];
+                row.push(...colors.map(color => Widget.Label({ class_name: 'stats-' + color, label: '• ' })));
             }
+            
             return Widget.Box({ children: row });
         }
 
@@ -316,81 +197,72 @@
             class_name: 'system-stats',
             vertical: true,
             children: [
-                // AGS logo as text
+                // NixOS logo
                 Widget.Label({
                     class_name: 'stats-white',
                     label: "   _  ___      ____  ____\n  / |/ (_)_ __/ __ \\/ __/\n /    / /\\ \\ / /_/ /\\ \\  \n/_/|_/_//_\\_\\\\____/___/  "
                 }),
-                // Top border line
                 Widget.Label({
                     class_name: 'stats-white',
                     xalign: 0,
                     label: horizontalBorder("╭", "─", "╮")
                 }),
-                // Generate a row for each enabled module
-                ...modules.map(createStatRow),
-                // Bottom border line
+                ...modulesList.map(createStatRow),
                 Widget.Label({
                     class_name: 'stats-white',
                     xalign: 0,
                     label: horizontalBorder("╰", "─", "╯")
                 })
             ],
-            setup: function(self) {
-                self.poll(1000, () => updateStats(stats));
+            setup: self => {
+                self.poll(1000, () => {
+                    const newStats = getStats();
+                    Object.entries(newStats).forEach(([key, value]) => {
+                        stats[key].value = value;
+                    });
+                });
             }
         });
     }
 
-    // Create a window for the System Stats widget and export its config
-    var systemStatsWindow = Widget.Window({
+    // Create and export system stats window
+    const systemStatsWindow = Widget.Window({
         name: 'system-stats',
         child: SystemStats(),
         layer: 'bottom'
     });
-    var systemStatsConfig = {
+    
+    export const systemStatsConfig = {
         window: systemStatsWindow,
         profile: {
-            showStats: function() {
-                systemStatsWindow.layer = 'top';
-            },
-            hideStats: function() {
-                systemStatsWindow.layer = 'bottom';
-            }
+            showStats: () => systemStatsWindow.layer = 'top',
+            hideStats: () => systemStatsWindow.layer = 'bottom'
         }
     };
-
-    export { systemStatsConfig };
   '';
 
-  ##########################################
-  # WORKSPACES WIDGET JS MODULE
-  ##########################################
+  # Simplified workspaces JS
   workspacesJS = ''
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import Service from 'resource:///com/github/Aylur/ags/service.js';
-    import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
-    var hyprland = await Service.import('hyprland');
-
-    function dispatch(workspace) {
-        return hyprland.messageAsync("dispatch workspace " + workspace);
-    }
+    const hyprland = await Service.import('hyprland');
 
     function createWorkspaceButton(index) {
         return Widget.Button({
             class_name: "workspace-btn",
             child: Widget.Label({ label: String(index) }),
-            onClicked: () => dispatch(index),
+            onClicked: () => hyprland.messageAsync("dispatch workspace " + index),
             setup: self => {
                 self.hook(hyprland, () => {
                     const isOccupied = hyprland.workspaces.some(ws => ws.windows > 0 && ws.id === index);
                     const activeIds = hyprland.monitors
-                        .map(m => m.activeWorkspace && m.activeWorkspace.id)
-                        .filter(id => id != null);
+                        .map(m => m.activeWorkspace?.id)
+                        .filter(Boolean);
                     const isActive = activeIds.includes(index);
-                    const focusedMonitor = hyprland.focused_monitor || (hyprland.monitors[0] || {});
-                    const isFocused = focusedMonitor.activeWorkspace && focusedMonitor.activeWorkspace.id === index;
+                    const focusedMonitor = hyprland.focused_monitor || hyprland.monitors[0] || {};
+                    const isFocused = focusedMonitor.activeWorkspace?.id === index;
+                    
                     self.visible = isActive || isOccupied || isFocused;
                     self.toggleClassName('active', isFocused);
                     self.toggleClassName('occupied', isOccupied);
@@ -400,43 +272,39 @@
     }
 
     function Workspaces() {
-        var buttons = [];
-        for (var i = 1; i <= 10; i++) {
-            buttons.push(createWorkspaceButton(i));
-        }
         return Widget.Box({
             class_name: "workspaces",
-            children: buttons
+            children: Array.from({length: 10}, (_, i) => createWorkspaceButton(i + 1))
         });
     }
 
-    var workspacesWindowBottom = Widget.Window({
-        name: "workspaces-bottom",
-        anchor: ["bottom"],
-        child: Workspaces(),
-        layer: "overlay",
-        margins: [0, 0, 0, 0]
-    });
-    var workspacesWindowTop = Widget.Window({
-        name: "workspaces-top",
-        anchor: ["top"],
-        child: Workspaces(),
-        layer: "overlay",
-        margins: [0, 0, 0, 0]
-    });
+    const workspacesWindows = [
+        Widget.Window({
+            name: "workspaces-bottom",
+            anchor: ["bottom"],
+            child: Workspaces(),
+            layer: "overlay",
+            margins: [0, 0, 0, 0]
+        }),
+        Widget.Window({
+            name: "workspaces-top",
+            anchor: ["top"],
+            child: Workspaces(),
+            layer: "overlay",
+            margins: [0, 0, 0, 0]
+        })
+    ];
 
-    var workspacesConfig = {
-        windows: [workspacesWindowBottom, workspacesWindowTop],
+    export const workspacesConfig = {
+        windows: workspacesWindows,
         profile: {}
     };
-
-    export { workspacesConfig };
   '';
 in {
-  # Include the AGS package for installation
+  # Include the AGS package
   home.packages = with pkgs; [ags];
 
-  # Create the AGS configuration directory and files
+  # Create configuration files
   xdg.configFile = {
     "ags/config.js".text = configJS;
     "ags/style.css".text = styleCSS;
