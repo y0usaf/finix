@@ -10,9 +10,7 @@
   # - Type System: Defines strict typing for all configuration options
   # - Feature Management: Controls which system capabilities are enabled
   # - Package Sets: Organizes software into logical groups
-  # - Default Applications: Configures preferred programs for common tasks
-  # - Directory Structure: Manages important filesystem locations
-  # - System Identity: Handles hostname, timezone, and user information
+  # - System Appearance: Manages fonts, DPI, and cursor settings
   #
   # Usage:
   # This file is imported by both configuration.nix and home.nix to ensure
@@ -48,40 +46,6 @@
   mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
 
   ######################################################################
-  #                           Submodule Options                          #
-  ######################################################################
-  #
-  # Submodules allow us to nest sets of options. These two submodules will be used
-  # for default application configurations and directory configurations.
-  #
-  # The defaultAppModule is used to configure default applications like browsers,
-  # editors, etc.
-  #
-  defaultAppModule = t.submodule {
-    options = {
-      # package: Specifies the Nix package derivation to install for the application.
-      package = mkOptDef t.pkg null "Package derivation to install";
-      # command: Specifies the command to run the application.
-      # If null, the default behavior is to use the package name.
-      command = mkOptDef mkStr null "Command to execute the application. Defaults to package name if null";
-    };
-  };
-
-  #
-  # The dirModule submodule is used for configuring directories. It includes
-  # settings for specifying the absolute path and whether the directory should be
-  # automatically created if missing.
-  #
-  dirModule = t.submodule {
-    options = {
-      # path: Defines the absolute path to the directory.
-      path = mkOpt mkStr "Absolute path to the directory";
-      # create: Determines if the directory should be created automatically if not found.
-      create = mkOptDef mkBool true "Whether to create the directory if it doesn't exist";
-    };
-  };
-
-  ######################################################################
   #                            Feature Lists                             #
   ######################################################################
   #
@@ -94,6 +58,7 @@
   # Core system features that are always enabled. They include utilities, shells,
   # theming, and basic browser support.
   _coreFeatures = [
+    "defaults"
     "core" # Basic system utilities and common tools.
     "zsh" # Z shell configuration.
     "ssh" # SSH client/server configuration.
@@ -281,56 +246,6 @@ in {
 
   # The system's Display DPI setting to determine scaling and clarity.
   dpi = mkOptDef t.int 96 "Display DPI setting for the system";
-
-  ######################################################################
-  #                       Default Applications Options                     #
-  ######################################################################
-  #
-  # Definitions for default application configurations are provided via the
-  # defaultAppModule submodule. These include browser, editor, IDE, terminal, etc.
-  #
-
-  defaultBrowser = mkOpt defaultAppModule "Default web browser configuration.";
-  defaultEditor = mkOpt defaultAppModule "Default text editor configuration.";
-  defaultIde = mkOpt defaultAppModule "Default IDE configuration.";
-  defaultTerminal = mkOpt defaultAppModule "Default terminal emulator configuration.";
-  defaultFileManager = mkOpt defaultAppModule "Default file manager configuration.";
-  defaultLauncher = mkOpt defaultAppModule "Default application launcher configuration.";
-  defaultDiscord = mkOpt defaultAppModule "Default Discord client configuration.";
-  defaultArchiveManager = mkOpt defaultAppModule "Default archive manager configuration.";
-  defaultImageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
-  defaultMediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
-
-  ######################################################################
-  #                       Directory Configurations                       #
-  ######################################################################
-  #
-  # Options for important directories; these can be automatically managed.
-  #
-
-  # Managed directories defined as an attribute set using the directory submodule.
-  directories = mkOptDef (t.attrsOf dirModule) {} "Configuration for managed directories";
-
-  # Directory where the flake repository resides.
-  flakeDir = mkOpt mkStr "The directory where the flake lives.";
-
-  # Directory for storing music files.
-  musicDir = mkOpt mkStr "Directory for music files.";
-
-  # Directory for digital camera images (DCIM).
-  dcimDir = mkOpt mkStr "Directory for pictures (DCIM).";
-
-  # Directory associated with Steam (gaming platform).
-  steamDir = mkOpt mkStr "Directory for Steam.";
-
-  # Directory dedicated to wallpapers.
-  wallpaperDir = mkOpt mkStr "Wallpaper directory.";
-
-  # Directory dedicated to wallpaper videos.
-  wallpaperVideoDir = mkOpt mkStr "Wallpaper video directory.";
-
-  # GTK bookmarks, typically used in file managers for quick access.
-  bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
 
   #
   # Export the core features list so that it is available externally.
