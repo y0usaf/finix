@@ -64,48 +64,50 @@
   };
 
 in {
-  ######################################################################
-  #                       Default Applications Options                   #
-  ######################################################################
+  options = {
+    ######################################################################
+    #                       Default Applications Options                   #
+    ######################################################################
+    
+    defaultBrowser = mkOpt defaultAppModule "Default web browser configuration.";
+    defaultEditor = mkOpt defaultAppModule "Default text editor configuration.";
+    defaultIde = mkOpt defaultAppModule "Default IDE configuration.";
+    defaultTerminal = mkOpt defaultAppModule "Default terminal emulator configuration.";
+    defaultFileManager = mkOpt defaultAppModule "Default file manager configuration.";
+    defaultLauncher = mkOpt defaultAppModule "Default application launcher configuration.";
+    defaultDiscord = mkOpt defaultAppModule "Default Discord client configuration.";
+    defaultArchiveManager = mkOpt defaultAppModule "Default archive manager configuration.";
+    defaultImageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
+    defaultMediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
+
+    ######################################################################
+    #                       Directory Configurations                       #
+    ######################################################################
+    
+    # Managed directories defined as an attribute set using the directory submodule.
+    directories = mkOptDef (t.attrsOf dirModule) {} "Configuration for managed directories";
+
+    # Directory where the flake repository resides.
+    flakeDir = mkOpt mkStr "The directory where the flake lives.";
+
+    # Directory for storing music files.
+    musicDir = mkOpt mkStr "Directory for music files.";
+
+    # Directory for digital camera images (DCIM).
+    dcimDir = mkOpt mkStr "Directory for pictures (DCIM).";
+
+    # Directory associated with Steam (gaming platform).
+    steamDir = mkOpt mkStr "Directory for Steam.";
+
+    # Directory dedicated to wallpapers.
+    wallpaperDir = mkOpt mkStr "Wallpaper directory.";
+
+    # Directory dedicated to wallpaper videos.
+    wallpaperVideoDir = mkOpt mkStr "Wallpaper video directory.";
+
+    # GTK bookmarks, typically used in file managers for quick access.
+    bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
+  };
   
-  defaultBrowser = mkOpt defaultAppModule "Default web browser configuration.";
-  defaultEditor = mkOpt defaultAppModule "Default text editor configuration.";
-  defaultIde = mkOpt defaultAppModule "Default IDE configuration.";
-  defaultTerminal = mkOpt defaultAppModule "Default terminal emulator configuration.";
-  defaultFileManager = mkOpt defaultAppModule "Default file manager configuration.";
-  defaultLauncher = mkOpt defaultAppModule "Default application launcher configuration.";
-  defaultDiscord = mkOpt defaultAppModule "Default Discord client configuration.";
-  defaultArchiveManager = mkOpt defaultAppModule "Default archive manager configuration.";
-  defaultImageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
-  defaultMediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
-
-  ######################################################################
-  #                       Directory Configurations                       #
-  ######################################################################
-  
-  # Managed directories defined as an attribute set using the directory submodule.
-  directories = mkOptDef (t.attrsOf dirModule) {} "Configuration for managed directories";
-
-  # Directory where the flake repository resides.
-  flakeDir = mkOpt mkStr "The directory where the flake lives.";
-
-  # Directory for storing music files.
-  musicDir = mkOpt mkStr "Directory for music files.";
-
-  # Directory for digital camera images (DCIM).
-  dcimDir = mkOpt mkStr "Directory for pictures (DCIM).";
-
-  # Directory associated with Steam (gaming platform).
-  steamDir = mkOpt mkStr "Directory for Steam.";
-
-  # Directory dedicated to wallpapers.
-  wallpaperDir = mkOpt mkStr "Wallpaper directory.";
-
-  # Directory dedicated to wallpaper videos.
-  wallpaperVideoDir = mkOpt mkStr "Wallpaper video directory.";
-
-  # GTK bookmarks, typically used in file managers for quick access.
-  bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
-
   #───────────────────────── END PROFILES/DEFAULTS.NIX ───────────────────────────#
 }

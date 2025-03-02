@@ -70,6 +70,7 @@
     "cursor" # Cursor theming settings.
     "systemd" # Systemd service and daemon management.
     "firefox" # Firefox browser support.
+    "appearance" # System appearance settings.
   ];
 
   # Dynamically get module names by reading the modules directory
@@ -80,7 +81,7 @@
 
   # Create a list of valid features (excluding any special modules you don't want as features)
   # You can add more exclusions to this list as needed
-  excludedModules = ["options" "ags" "cursor" "env" "fonts" "git" "gtk" "ssh" "systemd" "xdg"];
+  excludedModules = ["options" "ags" "cursor" "env" "fonts" "git" "gtk" "ssh" "systemd" "xdg" "appearance"];
   validFeatures = builtins.filter (name: !(builtins.elem name excludedModules)) featureNames;
 
   ######################################################################
@@ -220,32 +221,6 @@ in {
 
   # Additional user-specified packages.
   personalPackages = mkOptDef (t.listOf t.pkg) [] "List of additional packages chosen by the user";
-
-  ######################################################################
-  #                       System Appearance Options                      #
-  ######################################################################
-  #
-  # Visual and appearance settings, including fonts, DPI, and cursor sizes.
-  #
-
-  # Font configuration using a submodule; supports both main and fallback fonts.
-  fonts = mkOpt (t.submodule {
-    options = {
-      # 'main': Primary fonts specified as a list of tuples [package, fontName].
-      main = mkOpt (t.listOf (t.tuple [t.package mkStr])) "List of [package, fontName] tuples for main fonts";
-      # 'fallback': Fallback fonts if the main fonts are unavailable, defaults to an empty list.
-      fallback = mkOptDef (t.listOf (t.tuple [t.package mkStr])) [] "List of [package, fontName] tuples for fallback fonts";
-    };
-  }) "System font configuration";
-
-  # Base font size used as the reference for scaling other UI elements.
-  baseFontSize = mkOptDef t.int 12 "Base font size that other UI elements should scale from";
-
-  # The size of the mouse/system cursor.
-  cursorSize = mkOptDef t.int 24 "Size of the system cursor";
-
-  # The system's Display DPI setting to determine scaling and clarity.
-  dpi = mkOptDef t.int 96 "Display DPI setting for the system";
 
   #
   # Export the core features list so that it is available externally.
