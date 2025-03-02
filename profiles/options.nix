@@ -131,20 +131,7 @@
   # Core package sets correspond to essential features.
   corePackageSets = {
     core = [
-      pkgs.git # Git: essential for version control.
-      pkgs.curl # Curl: for data transfers via various protocols.
-      pkgs.wget # Wget: tool for retrieving files over HTTP/HTTPS/FTP.
-      pkgs.cachix # Cachix: binary caching solution.
-      pkgs.unzip # Unzip: utility to extract compressed files.
-      pkgs.bash # Bash: a widely-used shell.
-      pkgs.vim # Vim: a classic text editor.
-      pkgs.lsd # Lsd: improved ls command with icons and colorization.
-      pkgs.alejandra # Alejandra: code formatter for shell scripts.
-      pkgs.tree # Tree: displays directory structures in a tree-like format.
-      pkgs.dconf # Dconf: configuration system for GNOME.
-      pkgs.lm_sensors # LM Sensors: hardware monitoring and sensor readings.
-      pkgs.bottom # Bottom: graphical system monitor.
-      pkgs.networkmanager # Goes without saying.
+      # Core packages moved to core.nix module
     ];
     zsh = [
       pkgs.zsh # Zsh: a modern shell environment.
@@ -239,29 +226,6 @@
     lib.assertMsg (packageSetsWithoutFeatures == [])
     "Found package sets without corresponding features: ${builtins.toString packageSetsWithoutFeatures}";
 in {
-  ######################################################################
-  #                        Core System Options                           #
-  ######################################################################
-  #
-  # The following options define basic system settings such as the username,
-  # hostname, home directory, and more.
-  #
-
-  # The primary username for the system.
-  username = mkOpt mkStr "The username for the system.";
-
-  # The hostname of the system.
-  hostname = mkOpt mkStr "The system hostname.";
-
-  # The home directory path of the user.
-  homeDirectory = mkOpt mkStr "The path to the user's home directory.";
-
-  # A version string used to track the system's state and configuration migrations.
-  stateVersion = mkOpt mkStr "The system state version.";
-
-  # The system timezone (e.g., 'Europe/Berlin').
-  timezone = mkOpt mkStr "The system timezone.";
-
   ######################################################################
   #                      Package Management Options                      #
   ######################################################################
@@ -367,18 +331,6 @@ in {
 
   # GTK bookmarks, typically used in file managers for quick access.
   bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
-
-  ######################################################################
-  #                          Git Configurations                          #
-  ######################################################################
-  #
-  # Configuration options related to Git. These include the user's Git name,
-  # email and the URL for the Home Manager repository.
-  #
-
-  gitName = mkOpt mkStr "Git username.";
-  gitEmail = mkOpt mkStr "Git email address.";
-  gitHomeManagerRepo = mkOpt mkStr "URL of the Home Manager repository.";
 
   #
   # Export the core features list so that it is available externally.
