@@ -53,6 +53,11 @@ in {
     nixpkgs.config.allowUnfree = true; # Allow installation of unfree (proprietary) packages.
 
     #############################################################
+    # Enable nix-ld for running dynamically linked executables
+    #############################################################
+    programs.nix-ld.enable = true;
+
+    #############################################################
     # Nix Package Management:
     # Configure the Nix package manager for performance, caching, and build isolation.
     #############################################################
