@@ -342,10 +342,10 @@ in {
       ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/1055422643/MarvelUserSetting.ini".text = marvelUserSettings;
     };
     
-    # Create a script to copy the mod file after system activation
-    home.activation.copyModFiles = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    # Create a script to symlink the mod file after system activation
+    home.activation.symlinkModFiles = lib.hm.dag.entryAfter ["writeBoundary"] ''
       $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$HOME/.local/share/Steam/steamapps/common/MarvelRivals/MarvelGame/Marvel/Content/Paks/~mods/"
-      $DRY_RUN_CMD cp $VERBOSE_ARG "${config.home.homeDirectory}/nixos/pkg/zPochitaJeff_9999999_P.pak" "$HOME/.local/share/Steam/steamapps/common/MarvelRivals/MarvelGame/Marvel/Content/Paks/~mods/"
+      $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${config.home.homeDirectory}/nixos/pkg/zPochitaJeff_9999999_P.pak" "$HOME/.local/share/Steam/steamapps/common/MarvelRivals/MarvelGame/Marvel/Content/Paks/~mods/zPochitaJeff_9999999_P.pak"
     '';
   };
 }
