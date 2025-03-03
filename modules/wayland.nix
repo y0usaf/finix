@@ -19,13 +19,13 @@
         export CLUTTER_BACKEND=wayland
       '';
     };
-    
+
     # Add Wayland-specific packages
     home.packages = with pkgs; [
-      grim      # Screenshot utility for Wayland
-      slurp     # Screen region selector tool
-      wl-clipboard  # Clipboard utility for Wayland
-      hyprpicker    # Color picker for Hyprland
+      grim # Screenshot utility for Wayland
+      slurp # Screen region selector tool
+      wl-clipboard # Clipboard utility for Wayland
+      hyprpicker # Color picker for Hyprland
     ];
   };
 }

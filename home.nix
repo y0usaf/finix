@@ -32,7 +32,7 @@
   # Define common variables for readability:
   #   These variables simplify later references within the config.
   ####################################################################
-  packageSet = options.packageSets.default; # The default package set supplied via options.nix.
+  # Removed packageSets reference as it's no longer used
   features = profile.features; # List of enabled features specified in the user profile.
 
   ####################################################################
@@ -46,15 +46,15 @@
   # - The package list from packageSet if the feature exists
   # - An empty list if the feature isn't defined in packageSet
   packageForFeature = feature:
-    if builtins.hasAttr feature packageSet
-    then packageSet.${feature}
+    if builtins.hasAttr feature options
+    then options.${feature}
     else [];
 
   # Build a flat list of packages:
-  #   - Start with the core package set.
+  #   - Start with an empty list (previously core package set).
   #   - Append packages based on each feature enabled in the user profile.
   ####################################################################
-  featurePackages = lib.flatten ([packageSet.core] ++ (map packageForFeature features));
+  featurePackages = lib.flatten ([] ++ (map packageForFeature features));
 
   ####################################################################
   # Compute user profile-specific packages:

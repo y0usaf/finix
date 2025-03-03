@@ -17,10 +17,10 @@
       enable = true;
       tray.enable = false;
     };
-    
+
     # Add Syncthing package
     home.packages = with pkgs; [
-      syncthing  # File synchronization tool
+      syncthing # File synchronization tool
     ];
   };
-} 
+}

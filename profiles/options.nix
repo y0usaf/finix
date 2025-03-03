@@ -81,86 +81,6 @@
 
   # Create a list of valid features (excluding core features)
   validFeatures = builtins.filter (name: !(builtins.elem name _coreFeatures)) featureNames;
-
-  ######################################################################
-  #                         Package Sets Definitions                     #
-  ######################################################################
-  #
-  # Each feature (both core and optional) corresponds to a set of Nix packages.
-  # Core packages are defined in corePackageSets and are always installed.
-  # Optional packages appear in optionalPackageSets and are installed based on the
-  # features enabled by the user.
-  #
-
-  # Core package sets correspond to essential features.
-  corePackageSets = {
-    core = [
-      # Core packages moved to core.nix module
-    ];
-    zsh = [
-      pkgs.zsh # Zsh: a modern shell environment.
-    ];
-    ssh = [
-      pkgs.openssh # OpenSSH: secure shell protocol suite.
-    ];
-    git = [
-      pkgs.git # Git: reiterated to ensure its availability.
-    ];
-    foot = [
-      pkgs.foot # Foot: terminal emulator.
-    ];
-    gtk = [
-      pkgs.gtk3 # GTK3: graphical toolkit.
-      pkgs.gsettings-desktop-schemas # Desktop schemas for GTK settings.
-    ];
-    firefox = [
-      pkgs.firefox # Firefox: web browser.
-    ];
-  };
-
-  #
-  # Optional package sets allow users to enable additional features.
-  #
-  optionalPackageSets = {
-    syncthing = [
-      pkgs.syncthing # Syncthing: files synchronization tool.
-    ];
-  };
-
-  #
-  # Merge the two sets (core and optional) so that later the package sets
-  # option is initialized with a complete mapping.
-  #
-  packageSets = corePackageSets // optionalPackageSets;
-
-  ######################################################################
-  #                         Validation Functions                         #
-  ######################################################################
-  #
-  # To maintain consistency between packages and features, we perform validations:
-  #
-  # 1. packageSetsWithoutFeatures: Ensure every package set has a corresponding feature.
-  # 2. featuresWithoutPackageSets: Check that every feature has a corresponding package set.
-  #
-
-  # Scan for package sets that do not correspond to any valid or core feature.
-  packageSetsWithoutFeatures = builtins.filter (
-    setName:
-      !(builtins.elem setName validFeatures)
-      && !(builtins.elem setName _coreFeatures)
-  ) (builtins.attrNames packageSets);
-
-  # Scan for features that do not have a corresponding package set.
-  featuresWithoutPackageSets = builtins.filter (
-    feature:
-      !(builtins.hasAttr feature corePackageSets)
-      && !(builtins.hasAttr feature optionalPackageSets)
-  ) (validFeatures ++ _coreFeatures);
-
-  # Assert and throw an error if any package set is found without a matching feature.
-  _validatePackageSets =
-    lib.assertMsg (packageSetsWithoutFeatures == [])
-    "Found package sets without corresponding features: ${builtins.toString packageSetsWithoutFeatures}";
 in {
   ######################################################################
   #                      Package Management Options                      #
@@ -169,11 +89,8 @@ in {
   # Options below control which packages (and package sets) are installed.
   #
 
-  # Core packages that are always installed; drawn from the core package sets.
-  corePackages = mkOptDef (t.listOf t.pkg) packageSets.core "Essential packages that will always be installed";
-
-  # The complete mapping of package sets for different features.
-  packageSets = mkOptDef (t.attrsOf (t.listOf t.pkg)) packageSets "Package sets organized by feature";
+  # Core packages that are always installed
+  corePackages = mkOptDef (t.listOf t.pkg) [] "Essential packages that will always be installed";
 
   # List of additional features enabled by the user. Core features are automatically included.
   features =
