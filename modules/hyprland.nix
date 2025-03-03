@@ -14,6 +14,11 @@
   ];
 
   config = {
+    # Add Hyprland-specific packages
+    home.packages = lib.mkIf (builtins.elem "hyprland" profile.features) [
+      pkgs.hyprwayland-scanner  # Tool associated with Hyprland
+    ];
+    
     xdg.portal = {
       xdgOpenUsePortal = true;
       configPackages = [inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland];

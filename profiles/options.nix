@@ -122,13 +122,6 @@
   # Optional package sets allow users to enable additional features.
   #
   optionalPackageSets = {
-
-    python = [
-      pkgs.python3 # Python3: interpreter for Python scripts.
-    ];
-    hyprland = [
-      pkgs.hyprwayland-scanner # Hyprwayland-scanner: tool associated with Hyprland.
-    ];
     syncthing = [
       pkgs.syncthing # Syncthing: files synchronization tool.
     ];

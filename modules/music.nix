@@ -13,6 +13,12 @@
   ...
 }: {
   config = lib.mkIf (builtins.elem "music" profile.features) {
+    # Add music-related packages
+    home.packages = with pkgs; [
+      cmus      # Command-line music player
+      cava      # Console-based audio visualizer
+    ];
+    
     # Create CMUS configuration
     # Placeholder
 
