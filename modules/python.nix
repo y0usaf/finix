@@ -8,8 +8,9 @@
   config = lib.mkIf (builtins.elem "python" profile.features) {
     home.packages = with pkgs; [
       # Python and UV
-      python312
-      uv
+      python3      # Basic Python 3 interpreter
+      python312    # Python 3.12 specifically
+      uv           # Fast Python package installer and resolver
 
       # System libraries
       stdenv.cc.cc.lib

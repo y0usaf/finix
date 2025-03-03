@@ -122,20 +122,7 @@
   # Optional package sets allow users to enable additional features.
   #
   optionalPackageSets = {
-    wayland = [
-      pkgs.grim # Grim: screenshot utility for Wayland.
-      pkgs.slurp # Slurp: screen region selector tool.
-      pkgs.wl-clipboard # WL-clipboard: clipboard utility on Wayland.
-      pkgs.hyprpicker # Hyprpicker: specific utility likely for Hyprland.
-    ];
-    media = [
-      pkgs.pavucontrol # Pavucontrol: sound mixer for PulseAudio.
-      pkgs.ffmpeg # FFmpeg: multimedia framework.
-      pkgs.yt-dlp-light # yt-dlp-light: lightweight tool for downloading videos.
-      pkgs.vlc # VLC: versatile media player.
-      pkgs.stremio # Stremio: media streaming application.
-      pkgs.cmus # cmus: terminal-based music player.
-    ];
+
     python = [
       pkgs.python3 # Python3: interpreter for Python scripts.
     ];
@@ -144,14 +131,6 @@
     ];
     syncthing = [
       pkgs.syncthing # Syncthing: files synchronization tool.
-    ];
-    creative = [
-      pkgs.pinta # Pinta: simple painting application.
-      pkgs.gimp # GIMP: feature-rich image editor.
-    ];
-    music = [
-      pkgs.cmus # cmus: command-line music player
-      pkgs.cava # Cava: console-based audio visualizer
     ];
   };
 
