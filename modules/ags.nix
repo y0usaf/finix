@@ -27,11 +27,13 @@
     "${shared.shadowSize} -${shared.shadowSize}"
     "-${shared.shadowSize} -${shared.shadowSize}"
   ];
-  
+
   repeatedShadow = lib.concatStringsSep ", " (lib.flatten (
-    lib.genList (i: 
-      map (offset: "${offset} ${shared.shadowRadius} ${shared.shadowColor}") shadowOffsets
-    ) shared.repetitionCount
+    lib.genList (
+      i:
+        map (offset: "${offset} ${shared.shadowRadius} ${shared.shadowColor}") shadowOffsets
+    )
+    shared.repetitionCount
   ));
 
   # Simplified CSS resets
@@ -177,19 +179,19 @@
                 case "colors": value = ""; break;
                 default: value = "";
             }
-            
+
             const row = [
                 Widget.Label({ class_name: 'stats-white', xalign: 0, label: "│ " }),
                 Widget.Label({ class_name: "stats-" + module, xalign: 0, label: "• " }),
                 Widget.Label({ class_name: 'stats-white', xalign: 0, label: padLabel(module) + " │ " }),
                 Widget.Label({ class_name: "stats-" + module, xalign: 0, label: value })
             ];
-            
+
             if (module === 'colors') {
                 const colors = ['red', 'orange', 'yellow', 'green', 'blue-green', 'cyan', 'blue', 'magenta', 'white'];
                 row.push(...colors.map(color => Widget.Label({ class_name: 'stats-' + color, label: '• ' })));
             }
-            
+
             return Widget.Box({ children: row });
         }
 
@@ -231,7 +233,7 @@
         child: SystemStats(),
         layer: 'bottom'
     });
-    
+
     export const systemStatsConfig = {
         window: systemStatsWindow,
         profile: {
@@ -262,7 +264,7 @@
                     const isActive = activeIds.includes(index);
                     const focusedMonitor = hyprland.focused_monitor || hyprland.monitors[0] || {};
                     const isFocused = focusedMonitor.activeWorkspace?.id === index;
-                    
+
                     self.visible = isActive || isOccupied || isFocused;
                     self.toggleClassName('active', isFocused);
                     self.toggleClassName('occupied', isOccupied);

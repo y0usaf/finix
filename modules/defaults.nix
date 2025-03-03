@@ -21,7 +21,6 @@
   ######################################################################
   #                        Type Definitions & Helpers                    #
   ######################################################################
-  
   t = lib.types;
 
   # Define a shorthand for string type
@@ -38,7 +37,7 @@
   ######################################################################
   #                           Submodule Options                          #
   ######################################################################
-  
+
   # The defaultAppModule is used to configure default applications like browsers,
   # editors, etc.
   defaultAppModule = t.submodule {
@@ -62,13 +61,12 @@
       create = mkOptDef mkBool true "Whether to create the directory if it doesn't exist";
     };
   };
-
 in {
   options = {
     ######################################################################
     #                       Default Applications Options                   #
     ######################################################################
-    
+
     defaultBrowser = mkOpt defaultAppModule "Default web browser configuration.";
     defaultEditor = mkOpt defaultAppModule "Default text editor configuration.";
     defaultIde = mkOpt defaultAppModule "Default IDE configuration.";
@@ -83,7 +81,7 @@ in {
     ######################################################################
     #                       Directory Configurations                       #
     ######################################################################
-    
+
     # Managed directories defined as an attribute set using the directory submodule.
     directories = mkOptDef (t.attrsOf dirModule) {} "Configuration for managed directories";
 
@@ -108,6 +106,6 @@ in {
     # GTK bookmarks, typically used in file managers for quick access.
     bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
   };
-  
+
   #───────────────────────── END PROFILES/DEFAULTS.NIX ───────────────────────────#
 }

@@ -341,7 +341,7 @@ in {
       ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/534076462/MarvelUserSetting.ini".text = marvelUserSettings;
       ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/1055422643/MarvelUserSetting.ini".text = marvelUserSettings;
     };
-    
+
     # Create a script to symlink the mod file after system activation
     home.activation.symlinkModFiles = lib.hm.dag.entryAfter ["writeBoundary"] ''
       $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$HOME/.local/share/Steam/steamapps/common/MarvelRivals/MarvelGame/Marvel/Content/Paks/~mods/"
