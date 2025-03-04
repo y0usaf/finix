@@ -139,7 +139,7 @@
 
       #----- Media & Tools Shortcuts -----
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
-      ytm4a = "yt-dlp -f 'ba[ext=m4a]' -o '%(title)s.%(ext)s'";
+      ytm4a = "yt-dlp -f 'ba[ext=m4a]' -o '%(title)s.%(ext)s' --cookies-from-browser firefox --no-check-certificates";
 
       #----- Directory & Search Shortcuts -----
       "l." = "lsd -A | grep -E \"^\\.\"";
