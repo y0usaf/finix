@@ -1,7 +1,7 @@
 #===============================================================================
-#                      💬 Discord Configuration 💬
+#                      💬 Discord Canary Configuration 💬
 #===============================================================================
-# 🚀 Discord with Vencord client mods
+# 🚀 Discord Canary
 # 🔧 Performance optimizations
 # 🎨 Integration with system theme
 #===============================================================================
@@ -14,12 +14,12 @@
 }: {
   config = lib.mkIf (builtins.elem "discord" profile.features) {
     home.packages = with pkgs; [
-      # Create a wrapper script in PATH that includes Discord with Vencord
-      (writeShellScriptBin "discord" ''
-        exec ${(discord.override {
+      # Create a wrapper script in PATH for Discord Canary
+      (writeShellScriptBin "discord-canary" ''
+        exec ${(discord-canary.override {
           withOpenASAR = true;
-          withVencord = true;
-        })}/opt/Discord/Discord \
+          # No Vencord
+        })}/opt/DiscordCanary/DiscordCanary \
           --disable-smooth-scrolling \
           --disable-features=WebRtcAllowInputVolumeAdjustment \
           --enable-gpu-rasterization \
@@ -38,13 +38,13 @@
 
     # Create desktop entry with proper icon and categories
     xdg.desktopEntries = {
-      discord = {
-        name = "Discord";
-        exec = "discord %U";
+      "discord-canary" = {
+        name = "Discord Canary";
+        exec = "discord-canary %U";
         terminal = false;
         categories = ["Network" "InstantMessaging" "Chat"];
-        comment = "Discord with Vencord";
-        icon = "discord";
+        comment = "Discord Canary";
+        icon = "discord-canary";
         mimeType = ["x-scheme-handler/discord"];
       };
     };
