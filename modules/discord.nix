@@ -14,27 +14,18 @@
 }: {
   config = lib.mkIf (builtins.elem "discord" profile.features) {
     home.packages = with pkgs; [
-      (pkgs.symlinkJoin {
-        name = "discord-canary-with-flags";
-        paths = [
-          (discord-canary.override {
-            withOpenASAR = true;
-            withVencord = true;
-          })
-        ];
-        buildInputs = [ pkgs.makeWrapper ];
-        postBuild = ''
-          mkdir -p $out/bin
-          if [ ! -e $out/bin/discord-canary ]; then
-            ln -s $out/opt/DiscordCanary/DiscordCanary $out/bin/discord-canary
-          fi
-          wrapProgram $out/bin/discord-canary \
-            --add-flags "--disable-smooth-scrolling" \
-            --add-flags "--disable-features=WebRtcAllowInputVolumeAdjustment" \
-            --add-flags "--enable-gpu-rasterization" \
-            --add-flags "--enable-zero-copy"
-        '';
-      })
+      # Create a wrapper script in PATH that includes Discord with Vencord
+      (writeShellScriptBin "discord" ''
+        exec ${(discord.override {
+          withOpenASAR = true;
+          withVencord = true;
+        })}/opt/Discord/Discord \
+          --disable-smooth-scrolling \
+          --disable-features=WebRtcAllowInputVolumeAdjustment \
+          --enable-gpu-rasterization \
+          --enable-zero-copy \
+          "$@"
+      '')
     ];
 
     # Add Discord-specific environment variables
@@ -47,13 +38,13 @@
 
     # Create desktop entry with proper icon and categories
     xdg.desktopEntries = {
-      discord-canary = {
-        name = "Discord Canary";
-        exec = "discord-canary %U";
+      discord = {
+        name = "Discord";
+        exec = "discord %U";
         terminal = false;
         categories = ["Network" "InstantMessaging" "Chat"];
-        comment = "Discord Canary with Vencord";
-        icon = "discord-canary";
+        comment = "Discord with Vencord";
+        icon = "discord";
         mimeType = ["x-scheme-handler/discord"];
       };
     };
