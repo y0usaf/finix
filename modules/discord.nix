@@ -14,22 +14,27 @@
 }: {
   config = lib.mkIf (builtins.elem "discord" profile.features) {
     home.packages = with pkgs; [
-      ((discord-canary.override {
-          withOpenASAR = true;
-          withVencord = true;
-        })
-        .overrideAttrs
-        (old: {
-          nativeBuildInputs = old.nativeBuildInputs or [] ++ [pkgs.makeWrapper];
-          postInstall = ''
-            ${old.postInstall or ""}
-            wrapProgramShell $out/opt/DiscordCanary/DiscordCanary \
-              --add-flags "--disable-smooth-scrolling" \
-              --add-flags "--disable-features=WebRtcAllowInputVolumeAdjustment" \
-              --add-flags "--enable-gpu-rasterization" \
-              --add-flags "--enable-zero-copy"
-          '';
-        }))
+      (pkgs.symlinkJoin {
+        name = "discord-canary-with-flags";
+        paths = [
+          (discord-canary.override {
+            withOpenASAR = true;
+            withVencord = true;
+          })
+        ];
+        buildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          mkdir -p $out/bin
+          if [ ! -e $out/bin/discord-canary ]; then
+            ln -s $out/opt/DiscordCanary/DiscordCanary $out/bin/discord-canary
+          fi
+          wrapProgram $out/bin/discord-canary \
+            --add-flags "--disable-smooth-scrolling" \
+            --add-flags "--disable-features=WebRtcAllowInputVolumeAdjustment" \
+            --add-flags "--enable-gpu-rasterization" \
+            --add-flags "--enable-zero-copy"
+        '';
+      })
     ];
 
     # Add Discord-specific environment variables
