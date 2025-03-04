@@ -72,9 +72,9 @@
     profile.defaultImageViewer
     profile.defaultDiscord
   ];
-  # For each application, extract its package attribute.
+  # For each application, extract its package attribute and filter out nulls.
   ####################################################################
-  userPackages = map (app: app.package) defaultApps;
+  userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
 
   ####################################################################
   # Combine final package list:

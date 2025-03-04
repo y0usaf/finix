@@ -62,6 +62,7 @@ in {
     "nodejs"
     "wayland"
     "npm"
+    "discord"
   ];
 
   #=======================================================================
@@ -107,8 +108,9 @@ in {
     command = "foot -a launcher sway-launcher-desktop";
   };
   defaultDiscord = {
-    package = pkgs.discord; # Discord for chat and community.
-    command = "discord"; # Launch it with this command.
+    # Reference the command only, not the package
+    package = null; # Remove package definition to avoid collision
+    command = "discord-canary"; # Command to launch Discord Canary
   };
   defaultArchiveManager = {
     package = pkgs.p7zip; # Use p7zip for all your archive needs.

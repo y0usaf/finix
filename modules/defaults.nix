@@ -43,7 +43,8 @@
   defaultAppModule = t.submodule {
     options = {
       # package: Specifies the Nix package derivation to install for the application.
-      package = mkOptDef t.pkg null "Package derivation to install";
+      # Can be null if you only want to specify a command without installing a package.
+      package = mkOptDef (t.nullOr t.pkg) null "Package derivation to install (optional)";
       # command: Specifies the command to run the application.
       # If null, the default behavior is to use the package name.
       command = mkOptDef mkStr null "Command to execute the application. Defaults to package name if null";
