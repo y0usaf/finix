@@ -138,9 +138,6 @@
       hwconfig = "sudo nixos-generate-config --show-hardware-config";
 
       #----- Media & Tools Shortcuts -----
-      ytm4a = "$HOME/scripts/ytm4a.sh";
-      ooba = "/home/y0usaf/text-generation-webui/start_linux.sh";
-      "nvidia-settings" = "nvidia-settings --config=\"$XDG_CONFIG_HOME\"/nvidia/settings";
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
 
       #----- Directory & Search Shortcuts -----
