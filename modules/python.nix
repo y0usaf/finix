@@ -11,6 +11,9 @@
       python3 # Basic Python 3 interpreter
       python312 # Python 3.12 specifically
       uv # Fast Python package installer and resolver
+      
+      # Add CA certificates
+      cacert
 
       # System libraries
       stdenv.cc.cc.lib
@@ -26,6 +29,9 @@
       PYTHONUSERBASE = "${config.xdg.dataHome}/python";
       PIP_CACHE_DIR = "${config.xdg.cacheHome}/pip";
       VIRTUAL_ENV_HOME = "${config.xdg.dataHome}/venvs";
+      # Add SSL certificates path for Python
+      SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      REQUESTS_CA_BUNDLE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
       # Add NIX_LD_LIBRARY_PATH for nix-ld
       NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [
         pkgs.stdenv.cc.cc.lib
@@ -52,6 +58,10 @@
           pkgs.xorg.libXext
           pkgs.xorg.libXrender
         ]}:$LD_LIBRARY_PATH"
+
+        # Set SSL certificate paths for Python
+        export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+        export REQUESTS_CA_BUNDLE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
 
         # Set dynamic linker path
         export NIX_LD="${pkgs.stdenv.cc.bintools.dynamicLinker}"
