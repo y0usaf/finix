@@ -139,6 +139,7 @@
 
       #----- Media & Tools Shortcuts -----
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
+      ytm4a = "yt-dlp -f 'ba[ext=m4a]' -o '%(title)s.%(ext)s'";
 
       #----- Directory & Search Shortcuts -----
       "l." = "lsd -A | grep -E \"^\\.\"";
