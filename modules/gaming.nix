@@ -66,7 +66,11 @@
           $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/MarvelUserSettings.ini" "${mrCompatDir}/Saved/Saved/Config/default/MarvelUserSetting.ini"
         fi
 
-        $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/zPochitaJeff_9999999_P.pak" "${mrGameDir}/Content/Paks/~mods/zPochitaJeff_9999999_P.pak"
+        # Symlink all mod files from the ~mods directory
+        for modfile in $(find "${mrConfigDir}/~mods/" -type f 2>/dev/null); do
+          filename=$(basename "$modfile")
+          $DRY_RUN_CMD ln -sf $VERBOSE_ARG "$modfile" "${mrGameDir}/Content/Paks/~mods/$filename"
+        done
 
         # Wukong symlink
         $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${wkConfigDir}/Engine.ini" "${wkCompatDir}/Saved/Config/Windows/Engine.ini"
