@@ -10,84 +10,50 @@
   ####################################################################
   inputs = {
     ## ────── Core System Dependencies ──────
-    # Import the unstable branch of nixpkgs from GitHub.
-    nixpkgs = {
-      url = "github:nixos/nixpkgs/nixos-unstable";
-    };
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # Import Home Manager which provides a user-centric approach to configuration.
     home-manager = {
       url = "github:nix-community/home-manager/master";
-      # Use the same nixpkgs version as specified above to avoid mismatches.
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Import Alejandra for code formatting tasks.
     alejandra = {
       url = "github:kamadorueda/alejandra";
-      # Follow the same nixpkgs version to ensure consistency.
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     ## ────── Desktop Environment & Theming ──────
-    # Hyprland: A dynamic Wayland compositor for modern desktops.
     hyprland = {
       url = "github:hyprwm/Hyprland";
-      # Use the same nixpkgs dependency to align versioning.
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Hy3: Likely a module or configuration helper for Hyprland.
     hy3 = {
       url = "github:outfoxxed/hy3";
-      # Follow the version provided by the hyprland input, ensuring compatibility.
       inputs.hyprland.follows = "hyprland";
     };
 
-    # Deepin Dark Hyprcursor: Custom cursor theme for the Wayland-based Hyprland environment.
-    deepin-dark-hyprcursor = {
-      # Using a local path, indicating local development or customization.
-      url = "path:/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor";
-    };
-
-    # Deepin Dark Xcursor: Custom X11 cursor theme.
-    deepin-dark-xcursor = {
-      # Again, a local path is used, probably for experimental or personalized theming.
-      url = "path:/home/y0usaf/nixos/pkg/deepin-dark-xcursor";
-    };
-
-    ## ────── Development & Creative Tools ──────
-    # pyproject-nix: Tooling to help wrap Python projects with Nix.
-    pyproject-nix = {
-      url = "github:pyproject-nix/pyproject.nix";
-      # Ensure consistency by following the same version of nixpkgs.
+    deepin-dark-hyprcursor.url = "path:/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor";
+    deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/pkg/deepin-dark-xcursor";
+    hyprpaper = {
+      url = "github:y0usaf/hyprpaper/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # uv2nix: A utility that likely converts or integrates other configurations into Nix.
+    ## ────── Development & Creative Tools ──────
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     uv2nix = {
       url = "github:pyproject-nix/uv2nix";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.pyproject-nix.follows = "pyproject-nix";
     };
 
-    # obs-image-reaction: Possibly a module to manage image reactions in OBS setups.
-    obs-image-reaction = {
-      url = "github:L-Nafaryus/obs-image-reaction";
-    };
-
-    # Chaotic: Provides access to bleeding-edge or unstable package versions.
-    chaotic = {
-      url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-    };
-
-    ## ────── System Styling ──────
-    # Hyprpaper: Likely provides custom wallpapers or additional theming for your desktop.
-    hyprpaper = {
-      url = "github:y0usaf/hyprpaper/main";
-      # Again, ensure that the same nixpkgs version is adhered to by following it.
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
   };
 
   ####################################################################
@@ -97,32 +63,22 @@
     self,
     nixpkgs,
     home-manager,
-    obs-image-reaction,
-    hyprland,
-    alejandra,
-    hy3,
-    chaotic,
-    hyprpaper,
-    pyproject-nix,
-    uv2nix,
     ...
-  }: let
+  } @ inputs: let
     ## ────── System & Package Configuration ──────
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
       overlays = [
         (final: prev: {
-          inherit (uv2nix.packages.${system}) uv2nix;
+          inherit (inputs.uv2nix.packages.${system}) uv2nix;
         })
       ];
       config.allowUnfree = true;
     };
 
     ## ────── Dynamic Profile Loading ──────
-    # Get all profile directories
     profilesDir = ./profiles;
-    # Filter out README.md, configurations directory, and options.nix
     profileNames = builtins.filter (
       name:
         name
@@ -133,38 +89,32 @@
     ) (builtins.attrNames (builtins.readDir profilesDir));
 
     # Import all available profiles dynamically
-    profiles = builtins.listToAttrs (map (name: {
+    profiles = builtins.listToAttrs (
+      map
+      (name: {
         inherit name;
         value = import (profilesDir + "/${name}") {
           lib = pkgs.lib;
           inherit pkgs;
         };
       })
-      profileNames);
+      profileNames
+    );
 
     ## ────── Common Special Arguments for Modules ──────
-    commonSpecialArgs = {
-      inputs = self.inputs;
-    };
+    commonSpecialArgs = {inputs = self.inputs;};
+  in {
+    ## ────── Formatter Setup ──────
+    formatter.${system} = pkgs.alejandra;
 
-    ## ────── Home Manager Configuration Helper ──────
-    mkHomeConfiguration = username: system:
-      home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        extraSpecialArgs = commonSpecialArgs;
-        modules = [./home.nix];
-      };
-
-    ## ────── Dynamic NixOS Configuration Generation ──────
-    nixosConfigurations = builtins.listToAttrs (map (hostname: {
+    ## ────── NixOS Configurations ──────
+    nixosConfigurations = builtins.listToAttrs (
+      map
+      (hostname: {
         name = hostname;
         value = nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs =
-            commonSpecialArgs
-            // {
-              profile = profiles.${hostname};
-            };
+          specialArgs = commonSpecialArgs // {profile = profiles.${hostname};};
           modules = [
             (profilesDir + "/${hostname}/configuration.nix")
             home-manager.nixosModules.home-manager
@@ -172,11 +122,7 @@
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
-                extraSpecialArgs =
-                  commonSpecialArgs
-                  // {
-                    profile = profiles.${hostname};
-                  };
+                extraSpecialArgs = commonSpecialArgs // {profile = profiles.${hostname};};
                 users.${profiles.${hostname}.username} = {
                   imports = [./home.nix];
                   home = {
@@ -186,40 +132,30 @@
                 };
               };
             }
-            chaotic.nixosModules.default
+            inputs.chaotic.nixosModules.default
           ];
         };
       })
-      profileNames);
-  in {
-    ## ────── Formatter Setup ──────
-    formatter.${system} = pkgs.alejandra;
-
-    ## ────── NixOS Configurations ──────
-    nixosConfigurations = nixosConfigurations;
+      profileNames
+    );
 
     ## ────── Dynamic Home Manager Configurations ──────
-    homeConfigurations = builtins.listToAttrs (map (hostname: let
-        # Get the actual profile configuration by directly accessing the file
-        profilePath = profilesDir + "/${hostname}/default.nix";
-        # Import the profile directly
-        profileConfig = import profilePath {
+    homeConfigurations = builtins.listToAttrs (
+      map
+      (hostname: let
+        profileConfig = import (profilesDir + "/${hostname}/default.nix") {
           lib = pkgs.lib;
           inherit pkgs;
         };
       in {
-        # Access the username directly from the imported profile
         name = profileConfig.username;
         value = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs =
-            commonSpecialArgs
-            // {
-              profile = profileConfig;
-            };
+          extraSpecialArgs = commonSpecialArgs // {profile = profileConfig;};
           modules = [./home.nix];
         };
       })
-      profileNames);
+      profileNames
+    );
   };
 }
