@@ -72,7 +72,7 @@ in {
     "python"
     "sync-tokens"
     "qbittorrent"
-    "nodejs"
+    "npm"
     "discord"
   ];
 
