@@ -55,32 +55,11 @@
   #   2. validFeatures - additional optional features which a user can enable.
   #
 
-  # Core system features that are always enabled. They include utilities, shells,
-  # theming, and basic browser support.
-  _coreFeatures = [
-    "defaults"
-    "core" # Basic system utilities and common tools.
-    "zsh" # Z shell configuration.
-    "ssh" # SSH client/server configuration.
-    "git" # Git configuration and version control.
-    "xdg" # XDG base directories compliance.
-    "fonts" # System font configuration.
-    "foot" # Foot terminal emulator configuration.
-    "gtk" # GTK theming and GUI configuration.
-    "cursor" # Cursor theming settings.
-    "systemd" # Systemd service and daemon management.
-    "firefox" # Firefox browser support.
-    "appearance" # System appearance settings.
-  ];
-
   # Dynamically get module names by reading the modules directory
   moduleFiles = builtins.attrNames (builtins.readDir ./modules);
 
   # Convert filenames to feature names by removing the .nix extension
-  featureNames = builtins.map (name: builtins.elemAt (builtins.split "\\." name) 0) moduleFiles;
-
-  # Create a list of valid features (excluding core features)
-  validFeatures = builtins.filter (name: !(builtins.elem name _coreFeatures)) featureNames;
+  validFeatures = builtins.map (name: builtins.elemAt (builtins.split "\\." name) 0) moduleFiles;
 in {
   ######################################################################
   #                      Package Management Options                      #
@@ -92,27 +71,15 @@ in {
   # Core packages that are always installed
   corePackages = mkOptDef (t.listOf t.pkg) [] "Essential packages that will always be installed";
 
-  # List of additional features enabled by the user. Core features are automatically included.
+  # List of features enabled by the user
   features =
     mkOptDef
     (t.listOf (t.enum validFeatures))
     []
-    "List of enabled features (core features are automatically included)";
-
-  # The list of core features that are mandated to be enabled.
-  coreFeatures =
-    mkOptDef
-    (t.listOf t.str)
-    _coreFeatures
-    "List of core features that are always enabled";
+    "List of enabled features";
 
   # Additional user-specified packages.
   personalPackages = mkOptDef (t.listOf t.pkg) [] "List of additional packages chosen by the user";
-
-  #
-  # Export the core features list so that it is available externally.
-  #
-  inherit _coreFeatures;
 
   #───────────────────────── END PROFILES/OPTIONS.NIX ───────────────────────────#
 }

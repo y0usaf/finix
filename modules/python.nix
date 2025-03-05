@@ -11,7 +11,7 @@
       python3 # Basic Python 3 interpreter
       python312 # Python 3.12 specifically
       uv # Fast Python package installer and resolver
-      
+
       # Add CA certificates
       cacert
 

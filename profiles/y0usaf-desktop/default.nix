@@ -36,32 +36,43 @@ in {
   # The following list enables specific features and modules.
   # DO NOT fiddle with these unless you completely understand what each flag triggers.
   features = [
-    "hyprland" # Use the Hyprland compositor for a modern look.
-    "wayland" # Enable support for the Wayland display protocol.
-    "ags" # Custom feature (double-check your docs on this one!).
-    "nvidia" # Enable NVIDIA GPU support—critical for NVIDIA hardware.
-    "gaming" # Activate performance tweaks and tools for gaming.
-    "development" # Load development tools and optimizations.
-    "media" # Include media-related apps and settings.
-    "creative" # Configure creative tools for design and art.
-    "virtualization" # Enable virtualization features for VMs and containers.
-    "backup" # Activate backup solutions—don't risk losing data!
-    "nvim" # Set up preferences for using Neovim.
-    "webapps" # Prepare the system for web applications.
-    "wallust" # Likely for wallpaper management; verify its purpose in your docs.
-    "syncthing" # Enable file synchronization via Syncthing.
-    "vscode" # Integrate Visual Studio Code settings.
-    "zellij" # Configure the Zellij terminal workspace manager.
-    "music" # Activate any music-related services or configurations.
-    "obs" # Prepare for streaming/recording with OBS.
-    "streamlink" # Enable Streamlink for handling online streams.
-    "chatgpt" # Integrate any ChatGPT-related tooling.
-    "python" # Python setup, with UV2Nix.
-    "sync-tokens" # Add this if you want token syncing enabled
+    "defaults"
+    "core"
+    "zsh"
+    "ssh"
+    "git"
+    "xdg"
+    "fonts"
+    "foot"
+    "gtk"
+    "cursor"
+    "systemd"
+    "firefox"
+    "appearance"
+    "hyprland"
+    "wayland"
+    "ags"
+    "nvidia"
+    "gaming"
+    "development"
+    "media"
+    "creative"
+    "virtualization"
+    "backup"
+    "nvim"
+    "webapps"
+    "wallust"
+    "syncthing"
+    "vscode"
+    "zellij"
+    "music"
+    "obs"
+    "streamlink"
+    "chatgpt"
+    "python"
+    "sync-tokens"
     "qbittorrent"
     "nodejs"
-    "wayland"
-    "npm"
     "discord"
   ];
 

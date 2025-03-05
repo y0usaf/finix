@@ -109,11 +109,12 @@ in {
   # The modules are assumed to reside within the "./modules" directory and are
   # conditionally included if they exist.
   imports = lib.flatten (map (
-    feature: let
-      modulePath = "${./modules}/${feature}.nix"; # Construct the expected path for the module.
-    in
-      lib.optional (builtins.pathExists modulePath) modulePath
-  ) (options._coreFeatures ++ features));
+      feature: let
+        modulePath = "${./modules}/${feature}.nix"; # Construct the expected path for the module.
+      in
+        lib.optional (builtins.pathExists modulePath) modulePath
+    )
+    features);
 
   #──────────────────────────────────────────────────────────────#
   #                     Program Configurations
