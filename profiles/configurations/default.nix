@@ -1,14 +1,12 @@
-#===============================================================================
-#                          🖥️ NixOS Configuration 🖥️
-#===============================================================================
-# This file details the entire NixOS system configuration, including
-# core system settings, package management, boot/hardware configuration,
-# services, security policies, user settings, and more.
-#
-# Every section has been extensively commented for clarity.
-#
-# ⚠️  Root access required | System rebuild needed for changes
-#===============================================================================
+###############################################################################
+# NixOS System Configuration
+# Complete system configuration including core settings, hardware, services,
+# and user environment
+# - Core system identity and behavior
+# - Hardware and boot configuration
+# - Service management and security
+# - User accounts and environment
+###############################################################################
 {
   # The following variables are injected by the NixOS module system:
   #   - config: The cumulative system configuration.
@@ -24,59 +22,56 @@
   inputs,
   ...
 }: let
-  #############################################################
-  # Extract feature toggles from 'profile.features'.
-  # Each flag becomes true if the corresponding feature string exists.
-  #############################################################
+  ###########################################################################
+  # Feature Toggles
+  # Extract feature toggles from 'profile.features'
+  ###########################################################################
   enableNvidia = builtins.elem "nvidia" profile.features;
   enableAmdGpu = builtins.elem "amdgpu" profile.features;
   enableWayland = builtins.elem "wayland" profile.features;
   enableHyprland = builtins.elem "hyprland" profile.features;
   enableGaming = builtins.elem "gaming" profile.features;
 in {
-  #############################################################
-  # Import additional configuration modules.
-  # Splitting the configuration enhances modularity and clarity.
-  #############################################################
+  ###########################################################################
+  # Module Imports
+  # Additional configuration modules for enhanced modularity
+  ###########################################################################
   imports = [
     ../../modules/env.nix # Contains environment-specific options and definitions.
   ];
 
   config = {
-    #############################################################
-    # Core System Settings:
-    # These settings define system identity and behaviour.
-    #############################################################
+    ###########################################################################
+    # Core System Settings
+    # System identity and behavior configuration
+    ###########################################################################
     system.stateVersion = profile.stateVersion; # Ensures compatibility when upgrading.
     time.timeZone = profile.timezone; # Set the system's time zone.
     networking.hostName = profile.hostname; # Define the system's hostname.
     nixpkgs.config.allowUnfree = true; # Allow installation of unfree (proprietary) packages.
 
-    #############################################################
-    # Enable nix-ld for running dynamically linked executables
-    #############################################################
+    ###########################################################################
+    # Nix-LD Configuration
+    # Support for running dynamically linked executables
+    ###########################################################################
     programs.nix-ld.enable = true;
 
-    #############################################################
-    # Nix Package Management:
-    # Configure the Nix package manager for performance, caching, and build isolation.
-    #############################################################
+    ###########################################################################
+    # Nix Package Management
+    # Package manager configuration for performance and caching
+    ###########################################################################
     nix = {
-      package = pkgs.nixVersions.stable; # Use the stable Nix package manager.
+      package = pkgs.nixVersions.stable;
       settings = {
-        auto-optimise-store = true; # Automatically optimize the storage layout.
-        max-jobs = "auto"; # Let Nix auto-detect the optimal number of parallel jobs.
-        cores = 0; # 0 indicates using all available cores.
-        system-features = ["big-parallel" "kvm" "nixos-test"]; # Enable extra system features.
-        sandbox = true; # Run builds in a sandbox for isolation.
-        trusted-users = ["root" profile.username]; # Allow root and the specified user to perform unconfined builds.
-        builders-use-substitutes = true; # Allow builders to fetch substitute builds.
-        fallback = true; # Fall back to building if substitutes fail.
+        auto-optimise-store = true;
+        max-jobs = "auto";
+        cores = 0;
+        experimental-features = ["nix-command" "flakes"];
+        sandbox = true;
+        trusted-users = ["root" profile.username];
+        builders-use-substitutes = true;
+        fallback = true;
 
-        #############################################################
-        # Remote Caches (Substituters):
-        # These URLs point to various Cachix caches which provide pre-built binaries.
-        #############################################################
         substituters = [
           "https://cache.nixos.org"
           "https://hyprland.cachix.org"
@@ -87,10 +82,6 @@ in {
           "https://nix-gaming.cachix.org"
         ];
 
-        #############################################################
-        # Trusted Public Keys:
-        # Keys are used to verify the authenticity of binaries fetched from the substituters.
-        #############################################################
         trusted-public-keys = [
           "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
           "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
@@ -101,19 +92,13 @@ in {
           "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
         ];
       };
-      #############################################################
-      # Extra Options:
-      # Enabling experimental features such as nix-command and flakes.
-      #############################################################
-      extraOptions = ''
-        experimental-features = nix-command flakes
-      '';
+      extraOptions = "";
     };
 
-    #############################################################
-    # Boot & Hardware Configuration:
-    # Settings related to the boot loader, EFI, kernel modules, and sysctl parameters.
-    #############################################################
+    ###########################################################################
+    # Boot & Hardware Configuration
+    # Boot loader, EFI, kernel modules, and system parameters
+    ###########################################################################
     boot = {
       loader = {
         systemd-boot = {
@@ -130,29 +115,27 @@ in {
       # Load extra kernel modules for specific hardware functions.
       kernelModules =
         [
-          "kvm-amd" # AMD virtualization support.
-          "k10temp" # AMD CPU temperature monitoring.
-          "nct6775" # Hardware sensor chip for voltage/temperature.
-          "ashmem_linux" # Android shared memory.
-          "binder_linux" # Android binder driver.
+          "kvm-amd"
+          "k10temp"
+          "nct6775"
+          "ashmem_linux"
+          "binder_linux"
         ]
-        ++ lib.optionals enableAmdGpu [
-          "amdgpu"
-        ];
+        ++ lib.optionals enableAmdGpu ["amdgpu"];
       kernel.sysctl = {
         "kernel.unprivileged_userns_clone" = 1; # Allow unprivileged processes to create user namespaces.
       };
       # AMD GPU kernel parameters (conditional)
       kernelParams = lib.mkIf enableAmdGpu [
-        "amdgpu.ppfeaturemask=0xffffffff" # Enable all power features
-        "amdgpu.dpm=1" # Enable power management
+        "amdgpu.ppfeaturemask=0xffffffff"
+        "amdgpu.dpm=1"
       ];
     };
 
-    #############################################################
-    # Hardware-Specific Settings:
-    # Configuration for specific hardware drivers like Nvidia/AMD and general graphics.
-    #############################################################
+    ###########################################################################
+    # Hardware-Specific Settings
+    # Configuration for specific hardware drivers and graphics
+    ###########################################################################
     hardware = {
       # Nvidia configuration (conditional)
       nvidia = lib.mkIf enableNvidia {
@@ -181,11 +164,10 @@ in {
       i2c.enable = true;
     };
 
-    #############################################################
-    # Services Setup:
-    # Collection of daemons and services including display servers, audio,
-    # custom services, D-Bus, and device management.
-    #############################################################
+    ###########################################################################
+    # Services Setup
+    # System services including display, audio, and device management
+    ###########################################################################
     services = {
       # Conditionally include the Nvidia video driver in the X server configuration.
       xserver.videoDrivers = lib.mkMerge [
@@ -193,10 +175,10 @@ in {
         (lib.mkIf enableAmdGpu ["amdgpu"])
       ];
 
-      #############################################################
-      # Audio via Pipewire:
-      # Configure Pipewire as the primary audio server along with ARM support.
-      #############################################################
+      ###########################################################################
+      # Audio via Pipewire
+      # Modern audio server with compatibility layers
+      ###########################################################################
       pipewire = {
         enable = true;
         alsa = {
@@ -206,20 +188,20 @@ in {
         pulse.enable = true; # Enable PulseAudio emulation for compatibility.
       };
 
-      #############################################################
-      # SCX Custom Service:
-      # A specific custom service (possibly for scheduling tasks or system tuning).
-      #############################################################
+      ###########################################################################
+      # SCX Custom Service
+      # System scheduling and tuning service
+      ###########################################################################
       scx = {
         enable = true; # Activate the SCX service.
         scheduler = "scx_lavd"; # Specify the scheduler mode.
         package = pkgs.scx.rustscheds; # Use the rust-based scheduler package.
       };
 
-      #############################################################
-      # D-Bus Configuration:
-      # Enable D-Bus and include additional packages for configuration management.
-      #############################################################
+      ###########################################################################
+      # D-Bus Configuration
+      # Inter-process communication system
+      ###########################################################################
       dbus = {
         enable = true;
         packages = [
@@ -228,11 +210,10 @@ in {
         ];
       };
 
-      #############################################################
-      # Extra Udev Rules:
-      # Add custom udev rules to modify hardware device permissions.
-      # The rules below grant non-root access to specific keyboards matching a serial pattern.
-      #############################################################
+      ###########################################################################
+      # Udev Rules
+      # Device management and permissions
+      ###########################################################################
       udev.extraRules = ''
         # Vial rules for non-root access:
         KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
@@ -240,10 +221,10 @@ in {
       '';
     };
 
-    #############################################################
-    # Security & Permissions:
-    # Define security measures including Polkit rules and sudo configurations.
-    #############################################################
+    ###########################################################################
+    # Security & Permissions
+    # System security measures and access control
+    ###########################################################################
     security = {
       rtkit.enable = true; # Enable real-time priority management (often needed for audio/video tasks).
       polkit.enable = true; # Enable PolicyKit for fine-grained permission control.
@@ -270,10 +251,10 @@ in {
       ];
     };
 
-    #############################################################
-    # User Environment & Programs:
-    # Configure the main user account and conditionally enable custom programs.
-    #############################################################
+    ###########################################################################
+    # User Environment & Programs
+    # User-facing applications and environment configuration
+    ###########################################################################
     programs = {
       # Conditional configuration for the Hyprland window manager:
       # Only enable if both Wayland and Hyprland are desired features.
@@ -285,10 +266,10 @@ in {
       };
     };
 
-    #############################################################
-    # User Account Settings:
-    # Define the primary interactive user's account details, shell, and group memberships.
-    #############################################################
+    ###########################################################################
+    # User Account Settings
+    # User accounts, permissions, and shell configuration
+    ###########################################################################
     users.users.${profile.username} = {
       isNormalUser = true; # Defines the account as a standard user account.
       shell = pkgs.zsh; # Set Zsh as the default shell for this user.
@@ -306,10 +287,10 @@ in {
       ignoreShellProgramCheck = true; # Skip validating that the shell is in /etc/shells.
     };
 
-    #############################################################
-    # Networking & Virtualisation:
-    # Enable network management and container/virtualisation solutions.
-    #############################################################
+    ###########################################################################
+    # Networking & Virtualisation
+    # Network management and container/VM solutions
+    ###########################################################################
     networking.networkmanager.enable = true; # Turn on NetworkManager to manage network connections.
     virtualisation = {
       lxd.enable = true; # Enable LXD container hypervisor.
@@ -318,11 +299,10 @@ in {
       };
     };
 
-    #############################################################
-    # XDG Desktop Portal:
-    # Required for proper integration of portal services with desktop environments,
-    # especially when using Wayland.
-    #############################################################
+    ###########################################################################
+    # XDG Desktop Portal
+    # Desktop integration services for applications
+    ###########################################################################
     xdg.portal = lib.mkIf enableWayland {
       enable = true;
       xdgOpenUsePortal = true; # Route xdg-open calls through the portal for better integration.
@@ -331,6 +311,10 @@ in {
       ];
     };
 
+    ###########################################################################
+    # Environment Variables
+    # System-wide environment configuration
+    ###########################################################################
     environment.variables = {
       NIXOS_PROFILE = "y0usaf-desktop";
     };

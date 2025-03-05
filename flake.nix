@@ -1,15 +1,18 @@
-#─────────────────────── ❄️  NIXOS FLAKE CONFIG ───────────────────────#
-# 🔄 System configuration and dependencies management                   #
-# 🎯 Target: Desktop Environment for Development and Daily Use         #
-#──────────────────────────────────────────────────────────────────────#
+###############################################################################
+# NixOS Flake Configuration
+# System configuration and dependencies management for desktop environment
+# - Manages system dependencies and configurations
+# - Supports dynamic profile loading
+# - Configures desktop environment for development and daily use
+###############################################################################
 {
   description = "NixOS configuration";
 
-  ####################################################################
-  #                         INPUT SOURCES                            #
-  ####################################################################
+  ###########################################################################
+  # Input Sources
+  ###########################################################################
   inputs = {
-    ## ────── Core System Dependencies ──────
+    ## Core System Dependencies
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     home-manager = {
@@ -22,7 +25,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ## ────── Desktop Environment & Theming ──────
+    ## Desktop Environment & Theming
     hyprland = {
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -40,7 +43,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ## ────── Development & Creative Tools ──────
+    ## Development & Creative Tools
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -56,16 +59,16 @@
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
   };
 
-  ####################################################################
-  #                        SYSTEM OUTPUTS                            #
-  ####################################################################
+  ###########################################################################
+  # System Outputs
+  ###########################################################################
   outputs = {
     self,
     nixpkgs,
     home-manager,
     ...
   } @ inputs: let
-    ## ────── System & Package Configuration ──────
+    ## System & Package Configuration
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
@@ -77,7 +80,7 @@
       config.allowUnfree = true;
     };
 
-    ## ────── Dynamic Profile Loading ──────
+    ## Dynamic Profile Loading
     profilesDir = ./profiles;
     profileNames = builtins.filter (
       name:
@@ -101,13 +104,13 @@
       profileNames
     );
 
-    ## ────── Common Special Arguments for Modules ──────
+    ## Common Special Arguments for Modules
     commonSpecialArgs = {inputs = self.inputs;};
   in {
-    ## ────── Formatter Setup ──────
+    ## Formatter Setup
     formatter.${system} = pkgs.alejandra;
 
-    ## ────── NixOS Configurations ──────
+    ## NixOS Configurations
     nixosConfigurations = builtins.listToAttrs (
       map
       (hostname: {
@@ -139,7 +142,7 @@
       profileNames
     );
 
-    ## ────── Dynamic Home Manager Configurations ──────
+    ## Dynamic Home Manager Configurations
     homeConfigurations = builtins.listToAttrs (
       map
       (hostname: let

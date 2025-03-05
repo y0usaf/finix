@@ -1,17 +1,12 @@
-#─────────────────────── 🏠 HOME MANAGER CONFIG ────────────────────────#
-# This configuration file is used by Home Manager to define and assemble   #
-# user-specific settings on your Nix system. Each change in this file will    #
-# require a rebuild with Home Manager to take effect. The structure is split  #
-# into several blocks: imports, variable definitions, and final configurations.#
-#─────────────────────────────────────────────────────────────────────────────#
+###############################################################################
+# Home Manager Configuration
+# Central configuration file for user-specific settings
+# - Manages user packages and applications
+# - Configures user environment and services
+# - Handles feature-based module imports
+###############################################################################
 {
   # Parameters provided to this configuration:
-  # - config: Global configuration context from Home Manager.
-  # - pkgs: The package collection available for building derivations.
-  # - lib: Nix library containing utility functions and helper methods.
-  # - inputs: External inputs, often provided via a flake.
-  # - profile: The user's profile containing personal settings.
-  # - ...: Any additional arguments.
   config,
   pkgs,
   lib,
@@ -19,49 +14,31 @@
   profile,
   ...
 }: let
-  ####################################################################
-  # Import external options:
-  #   We bring in additional options from a separate file (./profiles/options.nix).
-  #   This external file defines package sets and other overridable options.
-  #   By using import with { inherit lib pkgs; }, we pass along the necessary
-  #   dependencies needed by options.nix.
-  ####################################################################
+  ###########################################################################
+  # Import External Options
+  ###########################################################################
   options = import ./profiles/options.nix {inherit lib pkgs;};
 
-  ####################################################################
-  # Define common variables for readability:
-  #   These variables simplify later references within the config.
-  ####################################################################
-  # Removed packageSets reference as it's no longer used
-  features = profile.features; # List of enabled features specified in the user profile.
+  ###########################################################################
+  # Define Common Variables
+  ###########################################################################
+  features = profile.features;
 
-  ####################################################################
-  # Compute feature-based packages:
-  #   Starting with a base 'core' package, we add additional packages for each
-  #   enabled feature. For each feature, if a corresponding attribute exists
-  #   in packageSet, its package is added to the list. Otherwise, nothing is added.
-  ####################################################################
+  ###########################################################################
+  # Compute Feature-based Packages
+  ###########################################################################
   # Helper function that maps a feature name to its package list
-  # Returns:
-  # - The package list from packageSet if the feature exists
-  # - An empty list if the feature isn't defined in packageSet
   packageForFeature = feature:
     if builtins.hasAttr feature options
     then options.${feature}
     else [];
 
-  # Build a flat list of packages:
-  #   - Start with an empty list (previously core package set).
-  #   - Append packages based on each feature enabled in the user profile.
-  ####################################################################
+  # Build a flat list of packages based on enabled features
   featurePackages = lib.flatten (map packageForFeature features);
 
-  ####################################################################
-  # Compute user profile-specific packages:
-  #   The profile is expected to have several default applications defined
-  #   (like terminal, browser, file manager, etc.). Each app should be a derivation
-  #   (or contain one) and we extract the package from each attribute.
-  ####################################################################
+  ###########################################################################
+  # Compute User Profile-specific Packages
+  ###########################################################################
   defaultApps = [
     profile.defaultTerminal
     profile.defaultBrowser
@@ -72,79 +49,63 @@
     profile.defaultImageViewer
     profile.defaultDiscord
   ];
-  # For each application, extract its package attribute and filter out nulls.
-  ####################################################################
+  # Extract package attribute from each app and filter out nulls
   userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
 
-  ####################################################################
-  # Combine final package list:
-  #   Merge:
-  #     1. Feature packages (computation above including core and feature-specific ones).
-  #     2. User-specific packages (extracted from default apps in the profile).
-  #     3. Any additional personal packages specified in the profile.
-  #   This final aggregate list will be handled by Home Manager.
-  ####################################################################
+  ###########################################################################
+  # Combine Final Package List
+  ###########################################################################
   finalPackages = featurePackages ++ userPackages ++ profile.personalPackages;
 
-  ####################################################################
-  # Helper function: Conditional Module Importer
-  #   Although not used directly here, this helper facilitates the conditional
-  #   import of modules based on whether a feature is enabled in the user profile.
-  ####################################################################
+  ###########################################################################
+  # Helper Function: Conditional Module Importer
+  ###########################################################################
   importFeature = feature: lib.optionals (builtins.elem feature features);
 in {
-  #─────────────────────── 🏠 Core Home Settings ──────────────────────────#
+  ###########################################################################
+  # Core Home Settings
+  ###########################################################################
   home = {
-    username = profile.username; # Specify the user's username.
-    homeDirectory = profile.homeDirectory; # Define the path to the user's home directory.
-    stateVersion = profile.stateVersion; # Indicate the state version for Home Manager's internal tracking.
-    enableNixpkgsReleaseCheck = false; # Disable release checking to avoid unexpected updates.
-    packages = finalPackages; # Provide the aggregated package list to be installed.
+    username = profile.username;
+    homeDirectory = profile.homeDirectory;
+    stateVersion = profile.stateVersion;
+    enableNixpkgsReleaseCheck = false;
+    packages = finalPackages;
   };
 
-  #──────────────────────────────────────────────────────────────#
-  #                Home-manager Module Imports
-  #──────────────────────────────────────────────────────────────#
-  # Dynamically import additional Home Manager modules based on enabled features.
-  # The modules are assumed to reside within the "./modules" directory and are
-  # conditionally included if they exist.
+  ###########################################################################
+  # Home-manager Module Imports
+  ###########################################################################
   imports = lib.flatten (map (
       feature: let
-        modulePath = "${./modules}/${feature}.nix"; # Construct the expected path for the module.
+        modulePath = "${./modules}/${feature}.nix";
       in
         lib.optional (builtins.pathExists modulePath) modulePath
     )
     features);
 
-  #──────────────────────────────────────────────────────────────#
-  #                     Program Configurations
-  #──────────────────────────────────────────────────────────────#
-  # Configure the 'nh' program (presumably a Home Manager utility) with
-  # user-specific settings.
+  ###########################################################################
+  # Program Configurations
+  ###########################################################################
   programs.nh = {
-    enable = true; # Enable the program.
-    flake = profile.flakeDir; # Specify the directory for flake configuration.
+    enable = true;
+    flake = profile.flakeDir;
     clean = {
-      # Configure cleanup behavior:
-      enable = true; # Enable periodic cleaning.
-      dates = "weekly"; # Set cleanup frequency to weekly.
-      extraArgs = "--keep-since 7d"; # Additional argument: keep items newer than 7 days.
+      enable = true;
+      dates = "weekly";
+      extraArgs = "--keep-since 7d";
     };
   };
 
-  #──────────────────────────────────────────────────────────────#
-  #                    Service Configurations
-  #──────────────────────────────────────────────────────────────#
-  # Configure the status of the Syncthing service.
-  # It is enabled only if the user profile includes "syncthing" in its features.
+  ###########################################################################
+  # Service Configurations
+  ###########################################################################
   services.syncthing = {
     enable = lib.elem "syncthing" features;
   };
 
-  #──────────────────────────────────────────────────────────────#
-  #                    System Configurations
-  #──────────────────────────────────────────────────────────────#
-  # Activate the dconf system. This is commonly used in GNOME and other desktop
-  # environments for managing configuration settings in a centralized manner.
+  ###########################################################################
+  # System Configurations
+  ###########################################################################
   dconf.enable = true;
 }
