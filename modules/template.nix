@@ -10,24 +10,21 @@
   pkgs,
   lib,
   ...
-}:
-
-let
+}: let
   cfg = config.modules.example;
-in
-{
+in {
   ###########################################################################
   # Module Options
   ###########################################################################
   options.modules.example = {
     enable = lib.mkEnableOption "example module";
-    
+
     setting1 = lib.mkOption {
       type = lib.types.str;
       default = "default value";
       description = "Description of setting1";
     };
-    
+
     setting2 = lib.mkOption {
       type = lib.types.int;
       default = 42;
