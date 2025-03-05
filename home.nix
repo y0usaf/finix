@@ -54,7 +54,7 @@
   #   - Start with an empty list (previously core package set).
   #   - Append packages based on each feature enabled in the user profile.
   ####################################################################
-  featurePackages = lib.flatten ([] ++ (map packageForFeature features));
+  featurePackages = lib.flatten (map packageForFeature features);
 
   ####################################################################
   # Compute user profile-specific packages:
