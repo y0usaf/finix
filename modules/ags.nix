@@ -1,30 +1,11 @@
-###############################################################################
-# AGS Module
-# This module provides configuration for the AGS application.
-#
-# Key features:
-# - Configures system stats widgets (time, date, shell, etc.) with custom CSS
-#   and JavaScript.
-# - Sets up workspaces for Hyprland with corresponding widget buttons.
-# - Adds a simple enable option to toggle the module.
-###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
-  builtins,
   ...
-}:
-let
-  ###########################################################################
-  # Module Settings
-  ###########################################################################
-  cfg = config.modules.ags;
-
-  ###########################################################################
-  # Shared Configuration Values
-  ###########################################################################
+}: let
+  # Simplified shadow configuration
   shared = {
     shadowSize = "0.05rem";
     shadowRadius = "0.05rem";
@@ -32,14 +13,10 @@ let
     repetitionCount = 4;
   };
 
-  ###########################################################################
-  # System Stats Modules Configuration
-  ###########################################################################
+  # System stats modules configuration
   systemStatsModules = ["time" "date" "shell" "uptime" "pkgs" "memory" "cpu" "gpu" "colors"];
 
-  ###########################################################################
-  # Shadow Offsets and Repeated Shadow Generation
-  ###########################################################################
+  # Generate shadow effect more efficiently
   shadowOffsets = [
     "${shared.shadowSize} 0"
     "-${shared.shadowSize} 0"
@@ -53,21 +30,18 @@ let
 
   repeatedShadow = lib.concatStringsSep ", " (lib.flatten (
     lib.genList (
-      i: map (offset: "${offset} ${shared.shadowRadius} ${shared.shadowColor}") shadowOffsets
+      i:
+        map (offset: "${offset} ${shared.shadowRadius} ${shared.shadowColor}") shadowOffsets
     )
     shared.repetitionCount
   ));
 
-  ###########################################################################
-  # CSS Reset and Styling Definitions
-  ###########################################################################
+  # Simplified CSS resets
   baseReset = "margin: 0; padding: 0; background: none; border: none; box-shadow: none;";
   systemStatsReset = "${baseReset} text-shadow: ${repeatedShadow}; font-family: inherit; font-size: inherit; font-weight: inherit; color: inherit;";
   workspacesReset = "${baseReset} color: white;";
 
-  ###########################################################################
-  # Configuration JavaScript for AGS
-  ###########################################################################
+  # Simplified main config
   configJS = ''
     import App from 'resource:///com/github/Aylur/ags/app.js';
     import { systemStatsConfig } from './system-stats.js';
@@ -87,9 +61,7 @@ let
     });
   '';
 
-  ###########################################################################
-  # Style CSS for AGS
-  ###########################################################################
+  # Simplified CSS with consistent formatting
   styleCSS = ''
     html { font-size: ${toString profile.baseFontSize}px; }
 
@@ -140,9 +112,7 @@ let
     .workspace-btn.urgent label { color: #ff5555; }
   '';
 
-  ###########################################################################
-  # System Stats JavaScript for AGS
-  ###########################################################################
+  # Simplified system stats JS
   systemStatsJS = ''
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
@@ -167,8 +137,8 @@ let
         return {
             cpu_temp: safeExec(["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"], "CPU stats error:"),
             gpu_temp: safeExec("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits", "GPU stats error:") + "°C",
-            used_ram: exec("free -h").split("\n")[1].split(/\\s+/)[2],
-            total_ram: exec("free -h").split("\n")[1].split(/\\s+/)[1],
+            used_ram: exec("free -h").split("\n")[1].split(/\s+/)[2],
+            total_ram: exec("free -h").split("\n")[1].split(/\s+/)[1],
             time: safeExec('date "+%H:%M:%S"', "Time error:"),
             date: safeExec('date "+%d/%m/%y"', "Date error:"),
             uptime: safeExec(["bash", "-c", "uptime | awk -F'up |,' '{print $2}'"], "Uptime error:").trim(),
@@ -273,9 +243,7 @@ let
     };
   '';
 
-  ###########################################################################
-  # Workspaces JavaScript for AGS
-  ###########################################################################
+  # Simplified workspaces JS
   workspacesJS = ''
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import Service from 'resource:///com/github/Aylur/ags/service.js';
@@ -335,30 +303,14 @@ let
     };
   '';
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
-  options.modules.ags = {
-    enable = lib.mkEnableOption "Enable the AGS module";
-  };
+  # Include the AGS package
+  home.packages = with pkgs; [ags];
 
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
-  config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Home Packages
-    ###########################################################################
-    home.packages = with pkgs; [ ags ];
-
-    ###########################################################################
-    # AGS Configuration Files
-    ###########################################################################
-    xdg.configFile = {
-      "ags/config.js".text          = configJS;
-      "ags/style.css".text          = styleCSS;
-      "ags/system-stats.js".text    = systemStatsJS;
-      "ags/workspaces.js".text      = workspacesJS;
-    };
+  # Create configuration files
+  xdg.configFile = {
+    "ags/config.js".text = configJS;
+    "ags/style.css".text = styleCSS;
+    "ags/system-stats.js".text = systemStatsJS;
+    "ags/workspaces.js".text = workspacesJS;
   };
 }
