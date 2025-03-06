@@ -74,6 +74,7 @@ in {
     "qbittorrent"
     "npm"
     "discord"
+    "cursor-ide"
   ];
 
   #=======================================================================
@@ -102,7 +103,7 @@ in {
     command = "nvim"; # Launch Neovim with the 'nvim' command.
   };
   defaultIde = {
-    package = pkgs.code-cursor; # IDE for coding with a modern twist.
+    package = null; # IDE for coding with a modern twist.
     command = "cursor"; # The command that fires up the IDE.
   };
   defaultTerminal = {
