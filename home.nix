@@ -15,9 +15,32 @@
   ...
 }: let
   ###########################################################################
-  # Import External Options
+  # BEGIN: Options Definitions (formerly in profiles/options.nix)
   ###########################################################################
-  options = import ./profiles/options.nix {inherit lib pkgs;};
+  t = lib.types;
+  mkStr = t.str;
+  mkBool = t.bool;
+  mkListOfStr = t.listOf t.str;
+  mkOpt = type: description: lib.mkOption {inherit type description;};
+  mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
+
+  # Dynamically read module filenames and compute valid feature names.
+  moduleFiles = builtins.attrNames (builtins.readDir ./modules);
+  validFeatures = builtins.map (name: builtins.elemAt (builtins.split "\\." name) 0) moduleFiles;
+
+  # Option definitions originally provided by profiles/options.nix
+  options = {
+    corePackages =
+      mkOptDef (t.listOf t.pkg) [] "Essential packages that will always be installed";
+    features =
+      mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
+    personalPackages =
+      mkOptDef (t.listOf t.pkg) [] "List of additional packages chosen by the user";
+  };
+
+  ###########################################################################
+  # END: Options Definitions (formerly in profiles/options.nix)
+  ###########################################################################
 
   ###########################################################################
   # Define Common Variables
@@ -61,6 +84,17 @@
   # Helper Function: Conditional Module Importer
   ###########################################################################
   importFeature = feature: lib.optionals (builtins.elem feature features);
+
+  ###########################################################################
+  # Home-manager Module Imports
+  ###########################################################################
+  imports = lib.flatten (map (
+      feature: let
+        modulePath = "${./modules}/${feature}.nix";
+      in
+        lib.optional (builtins.pathExists modulePath) modulePath
+    )
+    features);
 in {
   ###########################################################################
   # Core Home Settings
@@ -76,13 +110,7 @@ in {
   ###########################################################################
   # Home-manager Module Imports
   ###########################################################################
-  imports = lib.flatten (map (
-      feature: let
-        modulePath = "${./modules}/${feature}.nix";
-      in
-        lib.optional (builtins.pathExists modulePath) modulePath
-    )
-    features);
+  imports = imports;
 
   ###########################################################################
   # Program Configurations
