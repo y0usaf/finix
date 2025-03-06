@@ -74,7 +74,7 @@ in {
     "qbittorrent"
     "npm"
     "discord"
-    #"cursor-ide"
+    "cursor-ide"
     "npins"
   ];
 
