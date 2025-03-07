@@ -13,7 +13,7 @@
     home.packages = with pkgs; [
       # Use nodejs with npm
       nodejs_20
-      nodePackages.npm
+      npm
     ];
 
     # NPM global config - use XDG directories
