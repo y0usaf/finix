@@ -118,7 +118,7 @@ in {
   };
   defaultLauncher = {
     package = null; # Sway launcher customized for your workflow.
-    command = "foot -a 'launcher' sway-launcher-desktop";
+    command = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
   };
   defaultDiscord = {
     # Reference the command only, not the package
