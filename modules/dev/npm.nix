@@ -26,6 +26,7 @@
     # Add npm bin directory to PATH
     home.sessionPath = [
       "${config.xdg.dataHome}/npm/bin"
+      "${pkgs.nodePackages.npm}/bin"
     ];
 
     # Configure ZSH environment variables for NPM
