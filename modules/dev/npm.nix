@@ -27,6 +27,7 @@
     home.sessionPath = [
       "${config.xdg.dataHome}/npm/bin"
       "${pkgs.nodePackages.npm}/bin"
+      "${pkgs.nodejs}/bin"
     ];
 
     # Configure ZSH environment variables for NPM
