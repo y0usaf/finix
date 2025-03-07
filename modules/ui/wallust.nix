@@ -13,7 +13,7 @@
   inputs,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "wallust" profile.features) {
+  config = {
     # Install wallust package and custom hyprpaper
     home.packages = [
       pkgs.wallust

@@ -38,6 +38,7 @@
 
     deepin-dark-hyprcursor.url = "path:/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor";
     deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/pkg/deepin-dark-xcursor";
+
     hyprpaper = {
       url = "github:y0usaf/hyprpaper/main";
       inputs.nixpkgs.follows = "nixpkgs";
