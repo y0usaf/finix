@@ -44,6 +44,7 @@ in {
     "gtk"
     "core"
     "cursor"
+    "ssh"
     "firefox"
     "hyprland"
     "wayland"
