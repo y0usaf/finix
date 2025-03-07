@@ -298,10 +298,8 @@ describe | describe-desktop | describe-command | entries | list-entries | list-c
   ;;
 esac
 
-# Make sure file descriptor 3 is open before using it
-if ! { exec 1>&3; } 2>/dev/null; then
-  exec 3>/dev/null
-fi
+# Always ensure file descriptor 3 is open and valid
+exec 3>/dev/null
 echo "Starting launcher instance with the following providers:" "${!PROVIDERS[@]}" >&3
 
 FZFPIPE=$(mktemp -u)
