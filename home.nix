@@ -24,9 +24,31 @@
   mkOpt = type: description: lib.mkOption {inherit type description;};
   mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
 
-  # Dynamically read module filenames and compute valid feature names.
-  moduleFiles = builtins.attrNames (builtins.readDir ./modules);
-  validFeatures = builtins.map (name: builtins.elemAt (builtins.split "\\." name) 0) moduleFiles;
+  # Dynamically read module filenames and compute valid features.
+  # Recursively find all .nix files in the modules directory and its subdirectories
+  findModules = dir: let
+    contents = builtins.readDir dir;
+    handleEntry = name: type:
+      if type == "regular" && lib.hasSuffix ".nix" name
+      then ["${dir}/${name}"]
+      else if type == "directory"
+      then findModules "${dir}/${name}"
+      else [];
+    entries = lib.mapAttrsToList handleEntry contents;
+  in
+    lib.flatten entries;
+
+  moduleFiles = findModules ./modules;
+  # Extract feature names from paths, removing the .nix extension
+  validFeatures =
+    builtins.map (
+      path: let
+        fileName = builtins.baseNameOf path;
+        nameWithoutExt = builtins.elemAt (builtins.split "\\." fileName) 0;
+      in
+        nameWithoutExt
+    )
+    moduleFiles;
 
   # Option definitions originally provided by profiles/options.nix
   options = {
@@ -90,9 +112,18 @@
   ###########################################################################
   imports = lib.flatten (map (
       feature: let
-        modulePath = "${./modules}/${feature}.nix";
+        # Find all module files that match the feature name
+        matchingModules =
+          builtins.filter (
+            path: let
+              fileName = builtins.baseNameOf path;
+              nameWithoutExt = builtins.elemAt (builtins.split "\\." fileName) 0;
+            in
+              nameWithoutExt == feature
+          )
+          moduleFiles;
       in
-        lib.optional (builtins.pathExists modulePath) modulePath
+        matchingModules
     )
     features);
 in {
