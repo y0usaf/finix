@@ -11,9 +11,9 @@
 }: {
   config = lib.mkIf (builtins.elem "nodejs" profile.features) {
     home.packages = with pkgs; [
-      # Use nodejs without adding npm/pnpm to avoid collisions
-      # with existing nodejs installations
+      # Use nodejs with npm
       nodejs_20
+      nodePackages.npm
     ];
 
     # NPM global config - use XDG directories
