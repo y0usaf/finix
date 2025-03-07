@@ -3,25 +3,18 @@
   lib,
   pkgs,
   ...
-}:
-with lib; let
-  cfg = config.modules.sway-launcher-desktop;
-in {
-  options.modules.sway-launcher-desktop = {
-    enable = mkEnableOption "sway-launcher-desktop script";
-  };
-
-  config = mkIf cfg.enable {
+}: {
+  config = {
     home.packages = with pkgs; [
       fzf
     ];
 
-    xdg.configFile."scripts/sway-launcher-desktop.sh" = {
-      source = ../../pkg/scripts/sway-launcher-desktop.sh;
-      executable = true;
-      onChange = ''
-        mkdir -p $HOME/.config/scripts
-      '';
-    };
+    home.activation.symlinkSwayLauncherDesktop = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      # Create scripts directory
+      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$HOME/.config/scripts"
+
+      # Symlink the launcher script
+      $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${config.home.homeDirectory}/nixos/pkg/scripts/sway-launcher-desktop.sh" "$HOME/.config/scripts/sway-launcher-desktop.sh"
+    '';
   };
 }
