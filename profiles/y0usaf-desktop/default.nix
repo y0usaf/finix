@@ -118,7 +118,7 @@ in {
   defaultLauncher = {
     package = pkgs.sway-launcher-desktop; # Sway launcher customized for your workflow.
     # This command makes Foot launch the Sway launcher. Do NOT change unless you know the drill!
-    command = "foot launcher sway-launcher-desktop";
+    command = "foot -a 'launcher' sway-launcher-desktop";
   };
   defaultDiscord = {
     # Reference the command only, not the package
