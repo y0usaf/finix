@@ -47,11 +47,16 @@
 
     // Use absolute paths with App.configDir to ensure correct resolution
     const configDir = App.configDir;
-    import { systemStatsConfig } from `${configDir}/system-stats.js`;
-    import { workspacesConfig } from `${configDir}/workspaces.js`;
+
+    // Import modules using dynamic import
+    const systemStatsModule = await import(configDir + '/system-stats.js');
+    const workspacesModule = await import(configDir + '/workspaces.js');
+
+    const systemStatsConfig = systemStatsModule.systemStatsConfig;
+    const workspacesConfig = workspacesModule.workspacesConfig;
 
     App.config({
-        style: `${configDir}/style.css`,
+        style: configDir + '/style.css',
         windows: [
             systemStatsConfig.window,
             ...workspacesConfig.windows,
