@@ -44,8 +44,8 @@
   # Simplified main config
   configJS = ''
     import App from 'resource:///com/github/Aylur/ags/app.js';
-    import { systemStatsConfig } from './system-stats.js';
-    import { workspacesConfig } from './workspaces.js';
+    import { systemStatsConfig } from new URL('./system-stats.js', import.meta.url);
+    import { workspacesConfig } from new URL('./workspaces.js', import.meta.url);
 
     App.config({
         style: App.configDir + "/style.css",
