@@ -64,7 +64,7 @@ in {
     #"wallust"
     "syncthing"
     "vscode"
-    "zellij"
+    #"zellij"
     "music"
     "obs"
     "streamlink"
