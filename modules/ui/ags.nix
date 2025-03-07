@@ -44,11 +44,8 @@
   # Simplified main config
   configJS = ''
     import App from 'resource:///com/github/Aylur/ags/app.js';
-    import { systemStatsConfig } from './system-stats.js';
-    import { workspacesConfig } from './workspaces.js';
-
-    const systemStatsConfig = systemStatsModule.systemStatsConfig;
-    const workspacesConfig = workspacesModule.workspacesConfig;
+    import { systemStatsConfig } from 'resource:///com/github/Aylur/ags/system-stats.js';
+    import { workspacesConfig } from 'resource:///com/github/Aylur/ags/workspaces.js';
 
     App.config({
         style: configDir + '/style.css',
