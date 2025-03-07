@@ -203,27 +203,46 @@ function generate-command() {
 }
 
 function shouldAutostart() {
-    local condition="$(cat $1 | grep "AutostartCondition" | cut -d'=' -f2)"
-    local filename="${XDG_CONFIG_HOME-${HOME}/.config}/${condition#* }"
-    case $condition in
-        if-exists*)
-            [[ -e $filename ]]
+    local desktop_file="$1"
+    # Check if the file has an AutostartCondition entry
+    if ! grep -q "^AutostartCondition=" "$desktop_file"; then
+        return 0  # No condition means it should autostart
+    fi
+    
+    local condition="$(grep "^AutostartCondition=" "$desktop_file" | cut -d'=' -f2)"
+    local condition_type="${condition%% *}"
+    local file_path="${condition#* }"
+    
+    # Convert relative path to absolute using XDG config
+    local filename="${XDG_CONFIG_HOME:-${HOME}/.config}/${file_path}"
+    
+    case "$condition_type" in
+        if-exists)
+            [[ -e "$filename" ]]
             ;;
-        unless-exists*)
-            [[ ! -e $filename ]]
+        unless-exists)
+            [[ ! -e "$filename" ]]
             ;;
         *)
-            return 0
+            echo "Unknown AutostartCondition: $condition" >&3
+            return 0  # Default to starting if condition is unknown
             ;;
     esac
 }
 
 function autostart() {
+  echo "Checking autostart applications..." >&3
+  local count=0
   for application in $(list-autostart); do
-      if shouldAutostart "$application" ; then
+      if shouldAutostart "$application"; then
+          echo "Autostarting: $application" >&3
           (exec setsid /bin/sh -c "$(run-desktop "${application}")" &>/dev/null &)
+          count=$((count + 1))
+      else
+          echo "Skipping autostart for: $application (condition not met)" >&3
       fi
   done
+  echo "Autostarted $count applications" >&3
 }
 
 function list-autostart() {
