@@ -35,8 +35,8 @@
       '';
     };
 
-    # Install global NPM packages
-    home.activation.npmPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    # Set up NPM directories
+    home.activation.npmSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
       # Set up environment for npm
       export PATH=$PATH:${pkgs.nodejs_20}/bin
       export NPM_CONFIG_PREFIX=${config.xdg.dataHome}/npm
@@ -49,19 +49,6 @@
       mkdir -p ${config.xdg.cacheHome}/npm
       mkdir -p ${config.xdg.configHome}/npm/config
       mkdir -p "$XDG_RUNTIME_DIR/npm"
-
-      # Force reinstall claude-code package
-      echo "Installing @anthropic-ai/claude-code..."
-      ${pkgs.nodejs_20}/bin/npm install -g @anthropic-ai/claude-code --force
-
-      # Verify installation
-      if [ -d "${config.xdg.dataHome}/npm/lib/node_modules/@anthropic-ai/claude-code" ]; then
-        echo "✅ @anthropic-ai/claude-code installed successfully"
-      else
-        echo "❌ Failed to install @anthropic-ai/claude-code"
-        # Show npm error logs
-        cat ${config.xdg.cacheHome}/npm/_logs/$(ls -t ${config.xdg.cacheHome}/npm/_logs | head -1) || echo "No npm logs found"
-      fi
     '';
   };
 }

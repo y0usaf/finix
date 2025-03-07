@@ -77,6 +77,7 @@ in {
     "cursor-ide"
     "npins"
     "sway-launcher-desktop"
+    "claude-code"
   ];
 
   #=======================================================================
