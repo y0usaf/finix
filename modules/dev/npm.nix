@@ -9,7 +9,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "nodejs" profile.features) {
+  config = {
     home.packages = with pkgs; [
       nodejs
       nodePackages.npm
