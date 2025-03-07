@@ -44,11 +44,14 @@
   # Simplified main config
   configJS = ''
     import App from 'resource:///com/github/Aylur/ags/app.js';
-    import { systemStatsConfig } from new URL('./system-stats.js', import.meta.url);
-    import { workspacesConfig } from new URL('./workspaces.js', import.meta.url);
+
+    // Use absolute paths with App.configDir to ensure correct resolution
+    const configDir = App.configDir;
+    import { systemStatsConfig } from `${configDir}/system-stats.js`;
+    import { workspacesConfig } from `${configDir}/workspaces.js`;
 
     App.config({
-        style: App.configDir + "/style.css",
+        style: `${configDir}/style.css`,
         windows: [
             systemStatsConfig.window,
             ...workspacesConfig.windows,
