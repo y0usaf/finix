@@ -116,9 +116,13 @@ in {
     command = "pcmanfm"; # Command to run PCManFM.
   };
   defaultLauncher = {
-    package = pkgs.sway-launcher-desktop; # Sway launcher customized for your workflow.
-    # This command makes Foot launch the Sway launcher. Do NOT change unless you know the drill!
-    command = "foot 'sway-launcher-desktop'";
+    package = pkgs.writeShellScriptBin "launcher-wrapper" ''
+      #!/bin/sh
+      export ZELLIJ_AUTO_ATTACH=false
+      export ZELLIJ_AUTO_START=false
+      exec foot -a launcher ${pkgs.sway-launcher-desktop}/bin/sway-launcher-desktop
+    '';
+    command = "launcher-wrapper";
   };
   defaultDiscord = {
     # Reference the command only, not the package
