@@ -47,9 +47,6 @@
     import { systemStatsConfig } from './system-stats.js';
     import { workspacesConfig } from './workspaces.js';
 
-    const systemStatsConfig = systemStatsModule.systemStatsConfig;
-    const workspacesConfig = workspacesModule.workspacesConfig;
-
     App.config({
         style: configDir + '/style.css',
         windows: [
