@@ -43,7 +43,7 @@
 
   # Merged configuration file
   configJS = ''
-    import App from 'resource:///com/github/Aylur/ags/app.js';
+    import App from 'resource:///com/github/Aylur/ags/service/applications.js';
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import Service from 'resource:///com/github/Aylur/ags/service.js';
     import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
@@ -300,6 +300,6 @@ in {
 
   # Create configuration files
   xdg.configFile = {
-    "ags/config.js".text = configJS;
+    "ags/app.js".text = configJS;
   };
 }
