@@ -43,11 +43,16 @@
 
   # Merged configuration file
   configJS = ''
-    import App from 'resource:///com/github/Aylur/ags/service/applications.js';
+    // Import AGS libraries
     import Widget from 'resource:///com/github/Aylur/ags/widget.js';
+    import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
+    const { exec, interval } = Utils;
     import Service from 'resource:///com/github/Aylur/ags/service.js';
-    import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
     import Variable from 'resource:///com/github/Aylur/ags/variable.js';
+
+    // For App, we need to use the correct path
+    const { Application } = imports.gi.Gio;
+    const App = Application.get_default();
 
     // ===== SYSTEM STATS MODULE =====
 
