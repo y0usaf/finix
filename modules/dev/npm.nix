@@ -11,9 +11,8 @@
 }: {
   config = lib.mkIf (builtins.elem "nodejs" profile.features) {
     home.packages = with pkgs; [
-      # Use nodejs with npm
-      nodejs_20
-      npm
+      nodejs
+      nodePackages.npm
     ];
 
     # NPM global config - use XDG directories
