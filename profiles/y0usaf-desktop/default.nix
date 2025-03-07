@@ -36,15 +36,18 @@ in {
   # The following list enables specific features and modules.
   # DO NOT fiddle with these unless you completely understand what each flag triggers.
   features = [
+    "core"
+    "ssh"
+    "systemd"
+    "appearance"
+
     "zsh"
     "git"
     "xdg"
     "fonts"
     "foot"
     "gtk"
-    "core"
     "cursor"
-    "ssh"
     "firefox"
     "hyprland"
     "wayland"
