@@ -42,6 +42,7 @@ in {
     "fonts"
     "foot"
     "gtk"
+    "core"
     "cursor"
     "firefox"
     "hyprland"
