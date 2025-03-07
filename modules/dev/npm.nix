@@ -11,8 +11,7 @@
 }: {
   config = {
     home.packages = with pkgs; [
-      nodejs
-      nodePackages.npm
+      nodejs_20
     ];
 
     # NPM global config - use XDG directories
@@ -26,8 +25,6 @@
     # Add npm bin directory to PATH
     home.sessionPath = [
       "${config.xdg.dataHome}/npm/bin"
-      "${pkgs.nodePackages.npm}/bin"
-      "${pkgs.nodejs}/bin"
     ];
 
     # Configure ZSH environment variables for NPM
@@ -57,24 +54,11 @@
       echo "Installing @anthropic-ai/claude-code..."
       ${pkgs.nodejs_20}/bin/npm install -g @anthropic-ai/claude-code --force
 
-      # Install server-sequential-thinking package
-      echo "Installing @modelcontextprotocol/server-sequential-thinking..."
-      ${pkgs.nodejs_20}/bin/npm install -g @modelcontextprotocol/server-sequential-thinking --force
-
       # Verify installation
       if [ -d "${config.xdg.dataHome}/npm/lib/node_modules/@anthropic-ai/claude-code" ]; then
         echo "✅ @anthropic-ai/claude-code installed successfully"
       else
         echo "❌ Failed to install @anthropic-ai/claude-code"
-        # Show npm error logs
-        cat ${config.xdg.cacheHome}/npm/_logs/$(ls -t ${config.xdg.cacheHome}/npm/_logs | head -1) || echo "No npm logs found"
-      fi
-
-      # Verify server-sequential-thinking installation
-      if [ -d "${config.xdg.dataHome}/npm/lib/node_modules/@modelcontextprotocol/server-sequential-thinking" ]; then
-        echo "✅ @modelcontextprotocol/server-sequential-thinking installed successfully"
-      else
-        echo "❌ Failed to install @modelcontextprotocol/server-sequential-thinking"
         # Show npm error logs
         cat ${config.xdg.cacheHome}/npm/_logs/$(ls -t ${config.xdg.cacheHome}/npm/_logs | head -1) || echo "No npm logs found"
       fi
