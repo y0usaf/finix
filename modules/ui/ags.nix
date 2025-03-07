@@ -43,22 +43,15 @@
 
   # Simplified main config
   configJS = ''
-    // Import the required modules directly
-    import Widget from 'resource:///com/github/Aylur/ags/widget.js';
     import App from 'resource:///com/github/Aylur/ags/app.js';
-
-    // Use absolute paths with App.configDir to ensure correct resolution
-    const configDir = App.configDir;
-
-    // Import modules using dynamic import with proper file:// protocol
-    const systemStatsModule = await import(`file://$${configDir}/system-stats.js`);
-    const workspacesModule = await import(`file://$${configDir}/workspaces.js`);
+    import { systemStatsConfig } from './system-stats.js';
+    import { workspacesConfig } from './workspaces.js';
 
     const systemStatsConfig = systemStatsModule.systemStatsConfig;
     const workspacesConfig = workspacesModule.workspacesConfig;
 
     App.config({
-        style: `$${configDir}/style.css`,
+        style: configDir + '/style.css',
         windows: [
             systemStatsConfig.window,
             ...workspacesConfig.windows,
