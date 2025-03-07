@@ -64,7 +64,7 @@ in {
     #"wallust"
     "syncthing"
     "vscode"
-    #"zellij"
+    "zellij"
     "music"
     "obs"
     "streamlink"
@@ -76,6 +76,7 @@ in {
     "discord"
     "cursor-ide"
     "npins"
+    "sway-launcher-desktop"
   ];
 
   #=======================================================================
@@ -116,7 +117,7 @@ in {
     command = "pcmanfm"; # Command to run PCManFM.
   };
   defaultLauncher = {
-    package = pkgs.sway-launcher-desktop; # Sway launcher customized for your workflow.
+    package = null; # Sway launcher customized for your workflow.
     command = "foot -a 'launcher' sway-launcher-desktop";
   };
   defaultDiscord = {
