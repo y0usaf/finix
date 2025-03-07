@@ -43,9 +43,12 @@
 
   # Simplified main config
   configJS = ''
-    import App from 'resource:///ags/app.js';
-    import { systemStatsConfig } from 'resource:///ags/system-stats.js';
-    import { workspacesConfig } from 'resource:///ags/workspaces.js';
+    import App from 'resource:///com/github/Aylur/ags/app.js';
+    import { systemStatsConfig } from './system-stats.js';
+    import { workspacesConfig } from './workspaces.js';
+
+    const systemStatsConfig = systemStatsModule.systemStatsConfig;
+    const workspacesConfig = workspacesModule.workspacesConfig;
 
     App.config({
         style: configDir + '/style.css',
@@ -308,6 +311,7 @@ in {
 
   # Create configuration files
   xdg.configFile = {
+    "ags/app.js".text = configJS;
     "ags/style.css".text = styleCSS;
     "ags/system-stats.js".text = systemStatsJS;
     "ags/workspaces.js".text = workspacesJS;
