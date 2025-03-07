@@ -110,22 +110,33 @@
   ###########################################################################
   # Home-manager Module Imports
   ###########################################################################
-  imports = lib.flatten (map (
-      feature: let
-        # Find all module files that match the feature name
-        matchingModules =
-          builtins.filter (
-            path: let
-              fileName = builtins.baseNameOf path;
-              nameWithoutExt = builtins.elemAt (builtins.split "\\." fileName) 0;
-            in
-              nameWithoutExt == feature
-          )
-          moduleFiles;
-      in
-        matchingModules
-    )
-    features);
+  imports = let
+    # Find all core modules
+    coreModules =
+      builtins.filter (
+        path: lib.hasPrefix "${toString ./modules/core}/" path
+      )
+      moduleFiles;
+
+    # Feature-based modules
+    featureModules = lib.flatten (map (
+        feature: let
+          # Find all module files that match the feature name
+          matchingModules =
+            builtins.filter (
+              path: let
+                fileName = builtins.baseNameOf path;
+                nameWithoutExt = builtins.elemAt (builtins.split "\\." fileName) 0;
+              in
+                nameWithoutExt == feature
+            )
+            moduleFiles;
+        in
+          matchingModules
+      )
+      features);
+  in
+    coreModules ++ featureModules;
 in {
   ###########################################################################
   # Core Home Settings
