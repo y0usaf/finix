@@ -117,8 +117,8 @@ in {
   };
   defaultLauncher = {
     package = pkgs.sway-launcher-desktop; # Sway launcher customized for your workflow.
-    # This command makes Foot launch the Sway launcher directly, bypassing Zellij
-    command = "ZELLIJ_AUTO_ATTACH=false ZELLIJ_AUTO_START=false foot -a launcher sh -c 'sway-launcher-desktop'";
+    # Create a wrapper script that Hyprland can execute directly
+    command = "sh -c 'ZELLIJ_AUTO_ATTACH=false ZELLIJ_AUTO_START=false foot -a launcher sway-launcher-desktop'";
   };
   defaultDiscord = {
     # Reference the command only, not the package
