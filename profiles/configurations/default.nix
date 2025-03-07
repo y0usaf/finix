@@ -31,6 +31,7 @@
   enableWayland = builtins.elem "wayland" profile.features;
   enableHyprland = builtins.elem "hyprland" profile.features;
   enableGaming = builtins.elem "gaming" profile.features;
+  enableAndroid = builtins.elem "android" profile.features;
 in {
   ###########################################################################
   # Module Imports
@@ -294,7 +295,7 @@ in {
     networking.networkmanager.enable = true; # Turn on NetworkManager to manage network connections.
     virtualisation = {
       lxd.enable = true; # Enable LXD container hypervisor.
-      waydroid = {
+      waydroid = lib.mkIf enableAndroid {
         enable = true; # Enable Waydroid to run Android apps on NixOS.
       };
     };
