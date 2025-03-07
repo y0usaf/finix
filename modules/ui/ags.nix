@@ -308,7 +308,7 @@ in {
 
   # Create configuration files
   xdg.configFile = {
-    "ags/config.js".text = configJS;
+    "ags/app.js".text = configJS;
     "ags/style.css".text = styleCSS;
     "ags/system-stats.js".text = systemStatsJS;
     "ags/workspaces.js".text = workspacesJS;
