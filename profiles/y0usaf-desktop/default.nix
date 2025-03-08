@@ -98,7 +98,7 @@ in {
   # Each default application is defined with its corresponding package and command.
   # MODIFY these ONLY if you're sure about the dependencies and behavior changes.
   defaultBrowser = {
-    package = pkgs.firefox; # The go-to browser is Firefox.
+    package = null; # The go-to browser is Firefox.
     command = "firefox"; # Command line trigger for Firefox.
   };
   defaultEditor = {

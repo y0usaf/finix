@@ -331,6 +331,21 @@ in {
         userChrome = userChromeCss;
       };
     };
+
+    policies = {
+      DisableTelemetry = true;
+      DisableFirefoxStudies = true;
+      EnableTrackingProtection = {
+        Value = true;
+        Locked = false;
+      };
+      ExtensionSettings = {
+        "*" = {
+          installation_mode = "allowed";
+          allowed_types = ["extension" "theme"];
+        };
+      };
+    };
   };
 
   programs.zsh = {
