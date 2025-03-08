@@ -121,8 +121,21 @@
     # Feature-based modules
     featureModules = lib.flatten (map (
         feature: let
-          # Find all module files that match the feature name
-          matchingModules =
+          # Check if feature is a directory name
+          isDirectory = builtins.pathExists (./modules + "/${feature}");
+
+          # If it's a directory, include all .nix files in that directory
+          directoryModules =
+            if isDirectory
+            then
+              builtins.filter (
+                path: lib.hasPrefix "${toString ./modules}/${feature}/" path
+              )
+              moduleFiles
+            else [];
+
+          # Find all module files that match the feature name exactly
+          exactMatchModules =
             builtins.filter (
               path: let
                 fileName = builtins.baseNameOf path;
@@ -131,6 +144,9 @@
                 nameWithoutExt == feature
             )
             moduleFiles;
+
+          # Combine both types of matches
+          matchingModules = directoryModules ++ exactMatchModules;
         in
           matchingModules
       )
