@@ -12,7 +12,7 @@
   inputs,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "claude-desktop" profile.features) {
+  config = {
     # Add Claude Desktop to home packages
     home.packages = [
       # We'll use the claude-desktop-with-fhs package to ensure compatibility
@@ -26,7 +26,7 @@
         name = "Claude Desktop";
         exec = "claude-desktop %U";
         terminal = false;
-        categories = ["Development" "Utility" "AI"];
+        categories = ["Development" "Utility"];
         comment = "Anthropic's Claude AI assistant";
         # The icon is included in the package
       };
