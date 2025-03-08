@@ -15,6 +15,9 @@
     ## Core System Dependencies
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # Add flake-utils
+    flake-utils.url = "github:numtide/flake-utils";
+
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -58,6 +61,11 @@
 
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+
+    # Claude Desktop for Linux
+    claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
+    claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
+    claude-desktop.inputs.flake-utils.follows = "flake-utils";
   };
 
   ###########################################################################

@@ -78,6 +78,8 @@ in {
     "npins"
     "sway-launcher-desktop"
     "claude-code"
+    "claude-desktop"
+    "mcp"
   ];
 
   #=======================================================================
