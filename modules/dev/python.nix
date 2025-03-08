@@ -12,6 +12,11 @@
       python312 # Python 3.12 specifically
       uv # Fast Python package installer and resolver
 
+      # Build tools
+      ninja # Required for building packages like numpy
+      meson # Build system used by numpy
+      pkg-config # Helps find installed libraries
+
       # Add CA certificates
       cacert
 
