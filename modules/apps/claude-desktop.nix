@@ -26,9 +26,18 @@
         name = "Claude Desktop";
         exec = "claude-desktop %U";
         terminal = false;
-        categories = ["Development" "Utility"];
+        categories = ["Development" "Utility" "X-AI"];
         comment = "Anthropic's Claude AI assistant";
         # The icon is included in the package
+        mimeType = ["application/x-claude"]; # Custom MIME type for Claude
+      };
+    };
+
+    # Set Claude as the default application for the custom MIME type
+    xdg.mimeApps = {
+      enable = true;
+      defaultApplications = {
+        "application/x-claude" = ["claude-desktop.desktop"];
       };
     };
 
