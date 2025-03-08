@@ -23,6 +23,10 @@
       xorg.libX11
       xorg.libXext
       xorg.libXrender
+
+      # Add gcc and binutils for compilation
+      gcc
+      binutils
     ];
 
     home.sessionVariables = {
@@ -44,6 +48,9 @@
       ];
       # Set dynamic linker path
       NIX_LD = "${pkgs.stdenv.cc.bintools.dynamicLinker}";
+      # Add gcc and ld to path
+      CC = "${pkgs.gcc}/bin/gcc";
+      LD = "${pkgs.binutils}/bin/ld";
     };
 
     programs.zsh = {
