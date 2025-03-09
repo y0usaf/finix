@@ -97,14 +97,14 @@
           find "$target" -type l | while read -r link; do
               echo "Symlink: $link → $(readlink -f "$link")"
               if [ -f "$(readlink -f "$link")" ]; then
-                  bat --style=plain --paging=never "$(readlink -f "$link")"
+                  bat "$(readlink -f "$link")"
                   echo ""
               fi
           done
 
           find "$target" -type f -not -path "*/\.*" -not -type l | while read -r file; do
               echo "File: $file"
-              bat --style=plain --paging=never "$file"
+              bat "$file"
               echo ""
           done
       }
