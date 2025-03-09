@@ -14,7 +14,7 @@
     "ags/app.ts".source = pkgs.writeText "app.ts" ''
       import { App } from "astal/gtk3"
       import style from "./style.scss"
-      import TimeWidget from "./widget/TimeWidget.js"
+      import TimeWidget from "./widget/TimeWidget"
 
       App.start({
           css: style,
