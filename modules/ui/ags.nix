@@ -14,7 +14,7 @@
     "ags/app.ts".source = pkgs.writeText "app.ts" ''
       import { App } from "astal/gtk3"
       import style from "./style.scss"
-      import TimeWidget from "./widget/TimeWidget"
+      import TimeWidget from "./widget/TimeWidget.js"
 
       App.start({
           css: style,
@@ -81,11 +81,13 @@
               "strict": true,
               "target": "ES2022",
               "module": "ES2022",
-              "moduleResolution": "Bundler",
+              "moduleResolution": "node",
               // "checkJs": true,
               // "allowJs": true,
               "jsx": "react-jsx",
               "jsxImportSource": "astal/gtk3",
+              "outDir": ".",
+              "rootDir": "."
           }
       }
     '';
@@ -94,6 +96,7 @@
     "ags/package.json".source = pkgs.writeText "package.json" ''
       {
           "name": "astal-shell",
+          "type": "module",
           "dependencies": {
               "astal": "/nix/store/9c0pmm7xai3v3ghmr0mgywprrykqj64v-astal-gjs-0-unstable-2025-02-20/share/astal/gjs"
           }
