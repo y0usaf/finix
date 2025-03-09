@@ -202,7 +202,20 @@
       gpupower = "sudo nvidia-smi -pl";
 
       #----- File & Directory Tools -----
-      cattree = "bat --paging=never --style=header,grid --decorations=always";
+      cattree = ''
+        if [ -z "$1" ]; then
+          echo "Usage: cattree <directory>"
+          return 1
+        fi
+
+        if [ -d "$1" ]; then
+          # For directories, find all files and display them with bat
+          find "$1" -type f -not -path "*/\.*" | sort | xargs bat --paging=never --style=header,grid --decorations=always
+        else
+          # For individual files, just use bat directly
+          bat --paging=never --style=header,grid --decorations=always "$@"
+        fi
+      '';
     };
   };
 }
