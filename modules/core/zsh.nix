@@ -137,7 +137,7 @@
       yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
       mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
       cat = "bat";
-      cattree = "find . -type f -exec bat {} \\;";
+      cattree = "find \"$1\" -type f -exec echo \"File: {}\" \\; -exec bat {} \\; -exec echo \"\" \\;";
 
       #----- System Management Shortcuts -----
       userctl = "systemctl --user";
