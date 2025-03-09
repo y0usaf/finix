@@ -18,6 +18,8 @@
   home.packages = with pkgs; [
     bat
     lsd
+    bat-extras.batgrep
+    broot
   ];
 
   programs.zsh = {
@@ -202,20 +204,7 @@
       gpupower = "sudo nvidia-smi -pl";
 
       #----- File & Directory Tools -----
-      cattree = ''
-        if [ -z "$1" ]; then
-          echo "Usage: cattree <directory>"
-          return 1
-        fi
-
-        if [ -d "$1" ]; then
-          # For directories, find all files and display them with bat
-          find "$1" -type f -not -path "*/\.*" | sort | xargs bat --paging=never --style=header,grid --decorations=always
-        else
-          # For individual files, just use bat directly
-          bat --paging=never --style=header,grid --decorations=always "$@"
-        fi
-      '';
+      cattree = "broot";
     };
   };
 }
