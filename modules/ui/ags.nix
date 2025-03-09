@@ -11,7 +11,7 @@
   # Create configuration files
   xdg.configFile = {
     # Main TypeScript files
-    "ags/app.ts".text = ''
+    "ags/app.ts".source = pkgs.writeText "app.ts" ''
       import { App } from "astal/gtk3"
       import style from "./style.scss"
       import TimeWidget from "./widget/TimeWidget"
@@ -25,7 +25,7 @@
     '';
 
     # SCSS styling
-    "ags/style.scss".text = ''
+    "ags/style.scss".source = pkgs.writeText "style.scss" ''
       // https://gitlab.gnome.org/GNOME/gtk/-/blob/gtk-3-24/gtk/theme/Adwaita/_colors-public.scss
       $fg-color: #{"@theme_fg_color"};
       $bg-color: #{"@theme_bg_color"};
@@ -48,7 +48,7 @@
     '';
 
     # TypeScript declarations
-    "ags/env.d.ts".text = ''
+    "ags/env.d.ts".source = pkgs.writeText "env.d.ts" ''
       declare const SRC: string
 
       declare module "inline:*" {
@@ -73,7 +73,7 @@
     '';
 
     # TypeScript configuration
-    "ags/tsconfig.json".text = ''
+    "ags/tsconfig.json".source = pkgs.writeText "tsconfig.json" ''
       {
           "$schema": "https://json.schemastore.org/tsconfig",
           "compilerOptions": {
@@ -91,7 +91,7 @@
     '';
 
     # Package configuration
-    "ags/package.json".text = ''
+    "ags/package.json".source = pkgs.writeText "package.json" ''
       {
           "name": "astal-shell",
           "dependencies": {
@@ -101,13 +101,13 @@
     '';
 
     # Gitignore
-    "ags/.gitignore".text = ''
+    "ags/.gitignore".source = pkgs.writeText "gitignore" ''
       node_modules/
       @girs/
     '';
 
     # Widget directory with TimeWidget component
-    "ags/widget/TimeWidget.tsx".text = ''
+    "ags/widget/TimeWidget.tsx".source = pkgs.writeText "TimeWidget.tsx" ''
       import { App, Astal, Gtk, Gdk } from "astal/gtk3"
       import { Variable } from "astal"
 
