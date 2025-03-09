@@ -14,6 +14,12 @@
   profile,
   ...
 }: {
+  # Add bat package to the system
+  home.packages = with pkgs; [
+    bat
+    lsd
+  ];
+
   programs.zsh = {
     enable = true;
 
@@ -194,6 +200,9 @@
 
       #----- Hardware Management Shortcut -----
       gpupower = "sudo nvidia-smi -pl";
+
+      #----- File & Directory Tools -----
+      cattree = "bat --paging=never --style=header,grid --decorations=always";
     };
   };
 }
