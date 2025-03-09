@@ -83,6 +83,15 @@
       print_cats
 
       # ----------------------------
+      # Function: cattree
+      # ----------------------------
+      # Display file contents using find and bat
+      cattree() {
+          local dir="''${1:-.}"
+          find "$dir" -type f -exec echo "File: {}" \; -exec bat {} \; -exec echo "" \;
+      }
+
+      # ----------------------------
       # Prompt Setup
       # ----------------------------
       PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
