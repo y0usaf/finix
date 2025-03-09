@@ -87,8 +87,7 @@
       # ----------------------------
       # Display file contents using find and bat
       cattree() {
-          local dir="''${1:-.}"
-          find "$dir" -type f -exec echo "File: {}" \; -exec bat {} \; -exec echo "" \;
+          find "''${1:-.}" -type f -exec echo "File: {}" \; -exec bat {} \; -exec echo "" \;
       }
 
       # ----------------------------
