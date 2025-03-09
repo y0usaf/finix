@@ -41,15 +41,82 @@
   systemStatsReset = "${baseReset} text-shadow: ${repeatedShadow}; font-family: inherit; font-size: inherit; font-weight: inherit; color: inherit;";
   workspacesReset = "${baseReset} color: white;";
 
-  # Main configuration file for AGS v2
+  # Simplified main config
   configJS = ''
-    // AGS v2 main configuration file
-    import { App, Widget, Utils, Variable } from 'resource:///com/github/Aylur/ags/main.js';
-    import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
+    import App from 'resource:///com/github/Aylur/ags/app.js';
+    import { systemStatsConfig } from './system-stats.js';
+    import { workspacesConfig } from './workspaces.js';
 
-    const { exec } = Utils;
+    App.config({
+        style: App.configDir + "/style.css",
+        windows: [
+            systemStatsConfig.window,
+            ...workspacesConfig.windows,
+        ],
+    });
 
-    // ===== SYSTEM STATS MODULE =====
+    Object.assign(globalThis, {
+        ...systemStatsConfig.profile,
+        ...workspacesConfig.profile,
+    });
+  '';
+
+  # Simplified CSS with consistent formatting
+  styleCSS = ''
+    html { font-size: ${toString profile.baseFontSize}px; }
+
+    /* Global resets */
+    .system-stats *, .workspaces * { ${systemStatsReset} }
+    .workspaces, .workspaces * { ${workspacesReset} }
+
+    /* System Stats Styles */
+    .system-stats {
+        text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
+        font-size: 1rem;
+        margin: 0.5em;
+    }
+
+    /* Color classes */
+    .stats-time { color: #ff0000; }
+    .stats-date { color: #ff8800; }
+    .stats-shell { color: #ffff00; }
+    .stats-uptime { color: #00ff00; }
+    .stats-pkgs { color: #00ff88; }
+    .stats-memory { color: #00ffff; }
+    .stats-cpu { color: #0088ff; }
+    .stats-gpu { color: #ff00ff; }
+    .stats-colors { color: #ffffff; }
+    .stats-red { color: #ff0000; }
+    .stats-orange { color: #ff8800; }
+    .stats-yellow { color: #ffff00; }
+    .stats-green { color: #00ff00; }
+    .stats-blue-green { color: #00ff88; }
+    .stats-cyan { color: #00ffff; }
+    .stats-blue { color: #0088ff; }
+    .stats-magenta { color: #ff00ff; }
+    .stats-white { color: #ffffff; }
+
+    /* Workspaces Widget Styles */
+    .workspace-btn {
+        background-color: #222;
+        border-radius: 0;
+    }
+    .workspace-btn label {
+        background: none;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.8rem;
+        padding: 0.25em;
+    }
+    .workspace-btn.active label { color: rgba(255, 255, 255, 1.0); }
+    .workspace-btn.inactive label { color: rgba(255, 255, 255, 0.5); }
+    .workspace-btn.urgent label { color: #ff5555; }
+  '';
+
+  # Simplified system stats JS
+  systemStatsJS = ''
+    import Widget from 'resource:///com/github/Aylur/ags/widget.js';
+    import { exec, interval } from 'resource:///com/github/Aylur/ags/utils.js';
+    import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 
     // Configured modules from Nix
     const modulesList = ${builtins.toJSON systemStatsModules};
@@ -70,8 +137,8 @@
         return {
             cpu_temp: safeExec(["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"], "CPU stats error:"),
             gpu_temp: safeExec("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits", "GPU stats error:") + "°C",
-            used_ram: exec("free -h").split("\\n")[1].split(/\\s+/)[2],
-            total_ram: exec("free -h").split("\\n")[1].split(/\\s+/)[1],
+            used_ram: exec("free -h").split("\n")[1].split(/\s+/)[2],
+            total_ram: exec("free -h").split("\n")[1].split(/\s+/)[1],
             time: safeExec('date "+%H:%M:%S"', "Time error:"),
             date: safeExec('date "+%d/%m/%y"', "Date error:"),
             uptime: safeExec(["bash", "-c", "uptime | awk -F'up |,' '{print $2}'"], "Uptime error:").trim(),
@@ -150,36 +217,38 @@
                 })
             ],
             setup: self => {
-                Utils.interval(1000, () => {
+                self.poll(1000, () => {
                     const newStats = getStats();
                     Object.entries(newStats).forEach(([key, value]) => {
                         stats[key].value = value;
                     });
-                    return true;
                 });
             }
         });
     }
 
-    // Create system stats window
+    // Create and export system stats window
     const systemStatsWindow = Widget.Window({
         name: 'system-stats',
         child: SystemStats(),
         layer: 'bottom'
     });
 
-    const systemStatsConfig = {
+    export const systemStatsConfig = {
         window: systemStatsWindow,
         profile: {
             showStats: () => systemStatsWindow.layer = 'top',
             hideStats: () => systemStatsWindow.layer = 'bottom'
         }
     };
+  '';
 
-    // ===== WORKSPACES MODULE =====
+  # Simplified workspaces JS
+  workspacesJS = ''
+    import Widget from 'resource:///com/github/Aylur/ags/widget.js';
+    import Service from 'resource:///com/github/Aylur/ags/service.js';
 
-    // Initialize hyprland service
-    const hyprland = Hyprland();
+    const hyprland = await Service.import('hyprland');
 
     function createWorkspaceButton(index) {
         return Widget.Button({
@@ -228,84 +297,20 @@
         })
     ];
 
-    const workspacesConfig = {
+    export const workspacesConfig = {
         windows: workspacesWindows,
         profile: {}
-    };
-
-    // ===== MAIN APP CONFIG =====
-
-    // Export functions to global scope
-    Object.assign(globalThis, {
-        ...systemStatsConfig.profile,
-        ...workspacesConfig.profile,
-    });
-
-    // Use App.config for AGS v2
-    export default {
-        style: `
-            html { font-size: ${toString profile.baseFontSize}px; }
-
-            /* Global resets */
-            .system-stats *, .workspaces * { ${systemStatsReset} }
-            .workspaces, .workspaces * { ${workspacesReset} }
-
-            /* System Stats Styles */
-            .system-stats {
-                text-shadow: 1pt 1pt 1pt rgba(0,0,0,0.5);
-                font-size: 1rem;
-                margin: 0.5em;
-            }
-
-            /* Color classes */
-            .stats-time { color: #ff0000; }
-            .stats-date { color: #ff8800; }
-            .stats-shell { color: #ffff00; }
-            .stats-uptime { color: #00ff00; }
-            .stats-pkgs { color: #00ff88; }
-            .stats-memory { color: #00ffff; }
-            .stats-cpu { color: #0088ff; }
-            .stats-gpu { color: #ff00ff; }
-            .stats-colors { color: #ffffff; }
-            .stats-red { color: #ff0000; }
-            .stats-orange { color: #ff8800; }
-            .stats-yellow { color: #ffff00; }
-            .stats-green { color: #00ff00; }
-            .stats-blue-green { color: #00ff88; }
-            .stats-cyan { color: #00ffff; }
-            .stats-blue { color: #0088ff; }
-            .stats-magenta { color: #ff00ff; }
-            .stats-white { color: #ffffff; }
-
-            /* Workspaces Widget Styles */
-            .workspace-btn {
-                background-color: #222;
-                border-radius: 0;
-            }
-            .workspace-btn label {
-                background: none;
-                color: rgba(255, 255, 255, 0.4);
-                font-size: 0.8rem;
-                padding: 0.25em;
-            }
-            .workspace-btn.active label { color: rgba(255, 255, 255, 1.0); }
-            .workspace-btn.inactive label { color: rgba(255, 255, 255, 0.5); }
-            .workspace-btn.urgent label { color: #ff5555; }
-        `,
-        windows: [
-            systemStatsConfig.window,
-            ...workspacesConfig.windows,
-        ],
     };
   '';
 in {
   # Include the AGS package
-  home.packages = with pkgs; [
-    ags
-  ];
+  home.packages = with pkgs; [ags];
 
   # Create configuration files
   xdg.configFile = {
-    "ags/app.js".text = configJS;
+    "ags/config.js".text = configJS;
+    "ags/style.css".text = styleCSS;
+    "ags/system-stats.js".text = systemStatsJS;
+    "ags/workspaces.js".text = workspacesJS;
   };
 }
