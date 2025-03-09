@@ -18,8 +18,7 @@
   home.packages = with pkgs; [
     bat
     lsd
-    bat-extras.batgrep
-    broot
+    tree
   ];
 
   programs.zsh = {
