@@ -85,12 +85,38 @@
       # ----------------------------
       # Function: cattree
       # ----------------------------
-      # Display file contents using find and bat
+      # Display file contents using find and bat, following symlinks
       cattree() {
           if [ -z "$1" ]; then
-              find . -type f -exec echo "File: {}" \; -exec bat {} \; -exec echo "" \;
+              find . -type f -o -type l -not -path "*/\.*" | while read -r file; do
+                  if [ -L "$file" ]; then
+                      echo "Symlink: $file → $(readlink -f "$file")"
+                      if [ -f "$(readlink -f "$file")" ]; then
+                          bat "$(readlink -f "$file")"
+                      else
+                          echo "Cannot display content (target not a regular file)"
+                      fi
+                  else
+                      echo "File: $file"
+                      bat "$file"
+                  fi
+                  echo ""
+              done
           else
-              find "$1" -type f -exec echo "File: {}" \; -exec bat {} \; -exec echo "" \;
+              find "$1" -type f -o -type l -not -path "*/\.*" | while read -r file; do
+                  if [ -L "$file" ]; then
+                      echo "Symlink: $file → $(readlink -f "$file")"
+                      if [ -f "$(readlink -f "$file")" ]; then
+                          bat "$(readlink -f "$file")"
+                      else
+                          echo "Cannot display content (target not a regular file)"
+                      fi
+                  else
+                      echo "File: $file"
+                      bat "$file"
+                  fi
+                  echo ""
+              done
           fi
       }
 
