@@ -14,12 +14,12 @@
     "ags/app.ts".text = ''
       import { App } from "astal/gtk3"
       import style from "./style.scss"
-      import Bar from "./widget/Bar"
+      import TimeWidget from "./widget/TimeWidget"
 
       App.start({
           css: style,
           main() {
-              App.get_monitors().map(Bar)
+              App.get_monitors().map(TimeWidget)
           },
       })
     '';
@@ -30,20 +30,19 @@
       $fg-color: #{"@theme_fg_color"};
       $bg-color: #{"@theme_bg_color"};
 
-      window.Bar {
+      window.TimeWidget {
           background: transparent;
           color: $fg-color;
           font-weight: bold;
 
-          >centerbox {
+          >box {
               background: $bg-color;
               border-radius: 10px;
-              margin: 8px;
+              padding: 16px 24px;
           }
 
-          button {
-              border-radius: 8px;
-              margin: 2px;
+          label {
+              font-size: 24px;
           }
       }
     '';
@@ -107,37 +106,25 @@
       @girs/
     '';
 
-    # Widget directory with Bar component
-    "ags/widget/Bar.tsx".text = ''
+    # Widget directory with TimeWidget component
+    "ags/widget/TimeWidget.tsx".text = ''
       import { App, Astal, Gtk, Gdk } from "astal/gtk3"
       import { Variable } from "astal"
 
-      const time = Variable("").poll(1000, "date")
+      const time = Variable("").poll(1000, "date '+%H:%M:%S'")
 
-      export default function Bar(gdkmonitor: Gdk.Monitor) {
-          const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
+      export default function TimeWidget(gdkmonitor: Gdk.Monitor) {
+          const { CENTER } = Astal.WindowAnchor
 
           return <window
-              className="Bar"
+              className="TimeWidget"
               gdkmonitor={gdkmonitor}
               exclusivity={Astal.Exclusivity.EXCLUSIVE}
-              anchor={TOP | LEFT | RIGHT}
+              anchor={CENTER}
               application={App}>
-              <centerbox>
-                  <button
-                      onClicked="echo hello"
-                      halign={Gtk.Align.CENTER}
-                  >
-                      Welcome to AGS!
-                  </button>
-                  <box />
-                  <button
-                      onClicked={() => print("hello")}
-                      halign={Gtk.Align.CENTER}
-                  >
-                      <label label={time()} />
-                  </button>
-              </centerbox>
+              <box>
+                  <label label={time()} />
+              </box>
           </window>
       }
     '';
