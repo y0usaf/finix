@@ -202,9 +202,6 @@
 
       #----- Hardware Management Shortcut -----
       gpupower = "sudo nvidia-smi -pl";
-
-      #----- File & Directory Tools -----
-      cattree = "broot";
     };
   };
 }
