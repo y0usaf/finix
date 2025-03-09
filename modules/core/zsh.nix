@@ -87,37 +87,26 @@
       # ----------------------------
       # Display file contents using find and bat, following symlinks
       cattree() {
+          local target
           if [ -z "$1" ]; then
-              find . -type f -o -type l -not -path "*/\.*" | while read -r file; do
-                  if [ -L "$file" ]; then
-                      echo "Symlink: $file → $(readlink -f "$file")"
-                      if [ -f "$(readlink -f "$file")" ]; then
-                          bat "$(readlink -f "$file")"
-                      else
-                          echo "Cannot display content (target not a regular file)"
-                      fi
-                  else
-                      echo "File: $file"
-                      bat "$file"
-                  fi
-                  echo ""
-              done
+              target="$(pwd)"
           else
-              find "$1" -type f -o -type l -not -path "*/\.*" | while read -r file; do
-                  if [ -L "$file" ]; then
-                      echo "Symlink: $file → $(readlink -f "$file")"
-                      if [ -f "$(readlink -f "$file")" ]; then
-                          bat "$(readlink -f "$file")"
-                      else
-                          echo "Cannot display content (target not a regular file)"
-                      fi
-                  else
-                      echo "File: $file"
-                      bat "$file"
-                  fi
-                  echo ""
-              done
+              target="$1"
           fi
+
+          find "$target" -type l | while read -r link; do
+              echo "Symlink: $link → $(readlink -f "$link")"
+              if [ -f "$(readlink -f "$link")" ]; then
+                  bat --style=plain --paging=never "$(readlink -f "$link")"
+                  echo ""
+              fi
+          done
+
+          find "$target" -type f -not -path "*/\.*" -not -type l | while read -r file; do
+              echo "File: $file"
+              bat --style=plain --paging=never "$file"
+              echo ""
+          done
       }
 
       # ----------------------------
