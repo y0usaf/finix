@@ -41,18 +41,18 @@
   systemStatsReset = "${baseReset} text-shadow: ${repeatedShadow}; font-family: inherit; font-size: inherit; font-weight: inherit; color: inherit;";
   workspacesReset = "${baseReset} color: white;";
 
-  # Merged configuration file
+  # Merged configuration file for AGS v2/Astal
   configJS = ''
-    // Import AGS libraries
-    import Widget from 'resource:///com/github/Aylur/ags/widget.js';
-    import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
+    // Import Astal libraries
+    import { Widget } from 'astal/gtk3';
+    import { Utils, Variable, Binding } from 'astal';
     const { exec, interval } = Utils;
-    import Service from 'resource:///com/github/Aylur/ags/service.js';
-    import Variable from 'resource:///com/github/Aylur/ags/variable.js';
+
+    // For hyprland service
+    import { Hyprland } from 'astal/services/hyprland';
 
     // For App, we need to use the correct path
-    const { Application } = imports.gi.Gio;
-    const App = Application.get_default();
+    import { App } from 'astal/app';
 
     // ===== SYSTEM STATS MODULE =====
 
@@ -75,8 +75,8 @@
         return {
             cpu_temp: safeExec(["bash", "-c", "sensors k10temp-pci-00c3 | awk '/Tctl/ {print substr($2,2)}'"], "CPU stats error:"),
             gpu_temp: safeExec("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits", "GPU stats error:") + "°C",
-            used_ram: exec("free -h").split("\n")[1].split(/\s+/)[2],
-            total_ram: exec("free -h").split("\n")[1].split(/\s+/)[1],
+            used_ram: exec("free -h").split("\\n")[1].split(/\\s+/)[2],
+            total_ram: exec("free -h").split("\\n")[1].split(/\\s+/)[1],
             time: safeExec('date "+%H:%M:%S"', "Time error:"),
             date: safeExec('date "+%d/%m/%y"', "Date error:"),
             uptime: safeExec(["bash", "-c", "uptime | awk -F'up |,' '{print $2}'"], "Uptime error:").trim(),
@@ -88,15 +88,15 @@
     // Create system stats widget
     function SystemStats() {
         const stats = {
-            cpu_temp: Variable('N/A'),
-            gpu_temp: Variable('N/A'),
-            used_ram: Variable('N/A'),
-            total_ram: Variable('N/A'),
-            time: Variable('00:00:00'),
-            date: Variable('00/00/00'),
-            uptime: Variable('N/A'),
-            pkgs: Variable('N/A'),
-            shell: Variable('N/A')
+            cpu_temp: new Variable('N/A'),
+            gpu_temp: new Variable('N/A'),
+            used_ram: new Variable('N/A'),
+            total_ram: new Variable('N/A'),
+            time: new Variable('00:00:00'),
+            date: new Variable('00/00/00'),
+            uptime: new Variable('N/A'),
+            pkgs: new Variable('N/A'),
+            shell: new Variable('N/A')
         };
 
         const longestLabel = Math.max(...modulesList.map(l => l.length));
@@ -155,11 +155,12 @@
                 })
             ],
             setup: self => {
-                self.poll(1000, () => {
+                interval(1000, () => {
                     const newStats = getStats();
                     Object.entries(newStats).forEach(([key, value]) => {
                         stats[key].value = value;
                     });
+                    return true; // Continue interval
                 });
             }
         });
@@ -182,7 +183,8 @@
 
     // ===== WORKSPACES MODULE =====
 
-    const hyprland = await Service.import('hyprland');
+    // Initialize hyprland service
+    const hyprland = Hyprland();
 
     function createWorkspaceButton(index) {
         return Widget.Button({
@@ -238,7 +240,8 @@
 
     // ===== MAIN APP CONFIG =====
 
-    App.config({
+    // Use App.start instead of App.config for AGS v2
+    App.start({
         style: `
             html { font-size: ${toString profile.baseFontSize}px; }
 
@@ -294,14 +297,19 @@
         ],
     });
 
+    // Export functions to global scope
     Object.assign(globalThis, {
         ...systemStatsConfig.profile,
         ...workspacesConfig.profile,
     });
   '';
 in {
-  # Include the AGS package
-  home.packages = with pkgs; [ags];
+  # Include the AGS package and required dependencies for Astal
+  home.packages = with pkgs; [
+    ags
+    astal # Core Astal library
+    astal-hyprland # Hyprland service for Astal
+  ];
 
   # Create configuration files
   xdg.configFile = {

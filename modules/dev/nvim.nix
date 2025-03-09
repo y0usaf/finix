@@ -17,7 +17,7 @@
     extraPackages = with pkgs; [
       # Formatters and linters
       stylua
-      black
+      ruff
       nodePackages.prettier
       nodePackages.prettier-plugin-toml
       shfmt
@@ -170,7 +170,7 @@
               python = {
                 function()
                   return {
-                    exe  = 'black',
+                    exe  = 'ruff',
                     args = { '-' }
                   }
                 end
