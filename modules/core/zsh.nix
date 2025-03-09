@@ -202,6 +202,28 @@
 
       #----- Hardware Management Shortcut -----
       gpupower = "sudo nvidia-smi -pl";
+
+      #----- File & Directory Tools -----
+      cattree = ''
+        if [ -z "$1" ]; then
+          echo "Usage: cattree <directory>"
+          return 1
+        fi
+
+        # First show directory structure with tree
+        echo "📂 Directory Structure:"
+        echo "═════════════════════════"
+        tree "$1"
+        echo ""
+
+        # Then show file contents with bat
+        echo "📄 File Contents:"
+        echo "═════════════════════════"
+        find "$1" -type f -not -path "*/\.*" -not -path "*/node_modules/*" | sort | while read -r file; do
+          bat --paging=never --style=header,grid --decorations=always "$file"
+          echo ""
+        done
+      '';
     };
   };
 }
