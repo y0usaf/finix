@@ -83,33 +83,6 @@
       print_cats
 
       # ----------------------------
-      # Function: cattree
-      # ----------------------------
-      # Display file contents using find and bat, recursively showing all files including symlinks
-      cattree() {
-          local target
-          if [ -z "$1" ]; then
-              target="$(pwd)"
-          else
-              target="$1"
-          fi
-
-          # First find all files (including symlinks)
-          find "$target" \( -type f -o -type l \) -not -path "*/\.*" | sort | while read -r file; do
-              # Check if file exists and is readable (handles broken symlinks)
-              if [ -r "$file" ]; then
-                  echo "File: $file"
-                  bat "$file" || echo "Unable to display file content"
-                  echo ""
-              else
-                  echo "File: $file (not readable or broken symlink)"
-                  ls -la "$file"
-                  echo ""
-              fi
-          done
-      }
-
-      # ----------------------------
       # Prompt Setup
       # ----------------------------
       PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
@@ -164,6 +137,9 @@
       yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
       mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
       cat = "bat";
+
+      #----- Custom Scripts -----
+      cattree = "$HOME/nixos/pkg/scripts/cattree.sh";
 
       #----- System Management Shortcuts -----
       userctl = "systemctl --user";
