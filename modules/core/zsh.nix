@@ -85,7 +85,7 @@
       # ----------------------------
       # Function: cattree
       # ----------------------------
-      # Display file contents using find and bat, following symlinks
+      # Display file contents using find and bat, recursively showing all files including symlinks
       cattree() {
           local target
           if [ -z "$1" ]; then
@@ -94,26 +94,10 @@
               target="$1"
           fi
 
-          # First list all directories for context
-          echo "Directory structure:"
-          find "$target" -type d -not -path "*/\.*" | sort | while read -r dir; do
-              echo "Dir: $dir"
-          done
-          echo ""
-
-          # Then process both symlinks and regular files
           find "$target" \( -type f -o -type l \) -not -path "*/\.*" | sort | while read -r file; do
-              if [ -L "$file" ]; then
-                  echo "Symlink: $file → $(readlink -f "$file")"
-                  if [ -f "$(readlink -f "$file")" ]; then
-                      bat --style=plain "$(readlink -f "$file")"
-                      echo ""
-                  fi
-              elif [ -f "$file" ]; then
-                  echo "File: $file"
-                  bat --style=plain "$file"
-                  echo ""
-              fi
+              echo "File: $file"
+              bat "$file"
+              echo ""
           done
       }
 
