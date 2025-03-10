@@ -94,10 +94,18 @@
               target="$1"
           fi
 
+          # First find all files (including symlinks)
           find "$target" \( -type f -o -type l \) -not -path "*/\.*" | sort | while read -r file; do
-              echo "File: $file"
-              bat "$file"
-              echo ""
+              # Check if file exists and is readable (handles broken symlinks)
+              if [ -r "$file" ]; then
+                  echo "File: $file"
+                  bat "$file" || echo "Unable to display file content"
+                  echo ""
+              else
+                  echo "File: $file (not readable or broken symlink)"
+                  ls -la "$file"
+                  echo ""
+              fi
           done
       }
 
