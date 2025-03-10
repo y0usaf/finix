@@ -51,7 +51,7 @@ in {
     "firefox"
     "hyprland"
     "wayland"
-    "ags"
+    #"ags"
     "nvidia"
     "gaming"
     "development"

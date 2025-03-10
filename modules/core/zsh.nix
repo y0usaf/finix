@@ -94,17 +94,24 @@
               target="$1"
           fi
 
-          # Process both symlinks and regular files in a single pass
+          # First list all directories for context
+          echo "Directory structure:"
+          find "$target" -type d -not -path "*/\.*" | sort | while read -r dir; do
+              echo "Dir: $dir"
+          done
+          echo ""
+
+          # Then process both symlinks and regular files
           find "$target" \( -type f -o -type l \) -not -path "*/\.*" | sort | while read -r file; do
               if [ -L "$file" ]; then
                   echo "Symlink: $file → $(readlink -f "$file")"
                   if [ -f "$(readlink -f "$file")" ]; then
-                      bat "$(readlink -f "$file")"
+                      bat --style=plain "$(readlink -f "$file")"
                       echo ""
                   fi
               elif [ -f "$file" ]; then
                   echo "File: $file"
-                  bat "$file"
+                  bat --style=plain "$file"
                   echo ""
               fi
           done
