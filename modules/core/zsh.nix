@@ -94,18 +94,19 @@
               target="$1"
           fi
 
-          find "$target" -type l | while read -r link; do
-              echo "Symlink: $link → $(readlink -f "$link")"
-              if [ -f "$(readlink -f "$link")" ]; then
-                  bat "$(readlink -f "$link")"
+          # Process both symlinks and regular files in a single pass
+          find "$target" \( -type f -o -type l \) -not -path "*/\.*" | sort | while read -r file; do
+              if [ -L "$file" ]; then
+                  echo "Symlink: $file → $(readlink -f "$file")"
+                  if [ -f "$(readlink -f "$file")" ]; then
+                      bat "$(readlink -f "$file")"
+                      echo ""
+                  fi
+              elif [ -f "$file" ]; then
+                  echo "File: $file"
+                  bat "$file"
                   echo ""
               fi
-          done
-
-          find "$target" -type f -not -path "*/\.*" -not -type l | while read -r file; do
-              echo "File: $file"
-              bat "$file"
-              echo ""
           done
       }
 
