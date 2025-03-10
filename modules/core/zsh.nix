@@ -94,24 +94,18 @@
               target="$1"
           fi
 
-          echo "📁 Directory structure (top level):"
-          ls -la "$target"
-
-          echo -e "\n📁 Complete directory structure (including subdirectories):"
-          find "$target" -type l -o -type f -not -path "*/\.*" | sort
-
-          echo -e "\n📌 Symlinks found (if any):"
           find "$target" -type l | while read -r link; do
-              echo "→ $link points to $(readlink -f "$link")"
+              echo "Symlink: $link → $(readlink -f "$link")"
+              if [ -f "$(readlink -f "$link")" ]; then
+                  bat "$(readlink -f "$link")"
+                  echo ""
+              fi
           done
 
-          echo -e "\n📄 File contents (including symlinks):"
-          find "$target" -maxdepth 1 -not -path "*/\.*" -not -type d | while read -r file; do
-              if [ -f "$file" ]; then
-                  echo "File: $file"
-                  bat --style=plain --color=always --line-range :20 "$file"
-                  echo -e "\n(showing first 20 lines only)\n"
-              fi
+          find "$target" -type f -not -path "*/\.*" -not -type l | while read -r file; do
+              echo "File: $file"
+              bat "$file"
+              echo ""
           done
       }
 
