@@ -150,7 +150,10 @@
 
       #----- Media & Tools Shortcuts -----
       esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
-      ytm4a = "uv run yt-dlp -f 'ba[ext=m4a]' -o '%(title)s.%(ext)s' --cookies-from-browser firefox --no-check-certificates";
+      ytm4a = "uv run yt-dlp -f 'ba[ext=m4a]' -o '%(title)s.%(ext)s'";
+      ytmp3 = "uv run yt-dlp -f 'ba[ext=mp3]' -o '%(title)s.%(ext)s'";
+      ytmp4 = "uv run yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -o '%(title)s.%(ext)s'";
+      ytwebm = "uv run yt-dlp -f 'bv*[ext=webm]+ba[ext=webm]/b[ext=webm]' -o '%(title)s.%(ext)s'";
 
       #----- Directory & Search Shortcuts -----
       "l." = "lsd -A | grep -E \"^\\.\"";
