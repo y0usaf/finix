@@ -11,7 +11,7 @@
     settings = {
       theme = "custom";
       themes.custom = {
-        bg = "000000"; # even darker background
+        bg = "0000000"; # even darker background
         fg = "#aaaaaa"; # muted blue-green tint for better contrast
         red = "#ff5555"; # vibrant but slightly muted red
         green = "#50fa7b"; # vibrant green with blue undertone
