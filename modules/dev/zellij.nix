@@ -12,7 +12,7 @@
       theme = "custom";
       themes.custom = {
         bg = "#000000"; # even darker background
-        fg = "#333333"; # muted blue-green tint for better contrast
+        fg = "#aaaaaa"; # muted blue-green tint for better contrast
         red = "#ff5555"; # vibrant but slightly muted red
         green = "#50fa7b"; # vibrant green with blue undertone
         blue = "#bd93f9"; # purple-blue for vibrancy
@@ -21,7 +21,7 @@
         orange = "#ffb86c"; # warm vibrant orange
         cyan = "#8be9fd"; # bright cyan with blue undertone
         black = "#000000"; # pure black
-        white = "#333333"; # slightly brighter grey for tabs and status elements
+        white = "#454545"; # slightly brighter grey for tabs and status elements
 
         # Border colors
         border_fg = "#6272a4"; # subtle purple-blue border
