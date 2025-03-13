@@ -24,7 +24,7 @@
         white = "#777777"; # white (from foot)
 
         # Border colors
-        border_fg = "#777777"; # white border
+        border_fg = "#aaaaaa"; # white border
         border_bg = "#333333"; # black background
       };
 
