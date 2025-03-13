@@ -73,6 +73,13 @@
   };
 
   userChromeCss = ''
+    /* Disable all animations */
+    * {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+
     :root {
         --tab-font-size: 0.8em;
         --max-tab-width: none;
@@ -82,6 +89,30 @@
         --uc-bottom-toolbar-height: 20px
     }
 
+    /* Disable specific Firefox animations */
+    @media (prefers-reduced-motion: no-preference) {
+      * {
+        animation-duration: 0.001s !important;
+        transition-duration: 0.001s !important;
+      }
+    }
+
+    /* Disable smooth scrolling */
+    html {
+      scroll-behavior: auto !important;
+    }
+
+    /* Disable tab animations */
+    .tabbrowser-tab {
+      transition: none !important;
+    }
+
+    /* Disable toolbar animations */
+    :root[tabsintitlebar] #toolbar-menubar[autohide=true][inactive] {
+        transition: none !important;
+    }
+
+    /* Rest of your existing CSS */
     .titlebar-buttonbox-container {
         display: var(--show-titlebar-buttons)
     }
@@ -139,10 +170,6 @@
         :root[sizemode=maximized] #navigator-toolbox {
             padding-top: 7px!important
         }
-    }
-
-    :root[tabsintitlebar] #toolbar-menubar[autohide=true][inactive] {
-        transition: height 0ms steps(1) 80ms
     }
 
     #nav-bar {
