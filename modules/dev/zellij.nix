@@ -12,7 +12,7 @@
       theme = "custom";
       themes.custom = {
         bg = "#000000"; # black background (from foot)
-        fg = "#ffffff"; # white foreground (from foot)
+        fg = "#111111"; # white foreground (from foot)
         red = "#ff0000"; # red (from foot)
         green = "#00ff00"; # green (from foot)
         blue = "#1e90ff"; # blue (from foot)
@@ -21,10 +21,10 @@
         orange = "#ff5500"; # vibrant orange (not in foot, keeping this)
         cyan = "#00ffff"; # cyan (from foot)
         black = "#000000"; # black (from foot)
-        white = "#ffffff"; # white (from foot)
+        white = "#111111"; # white (from foot)
 
         # Border colors
-        border_fg = "#ffffff"; # white border
+        border_fg = "#111111"; # white border
         border_bg = "#000000"; # black background
       };
 
