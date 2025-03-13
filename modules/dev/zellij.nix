@@ -21,10 +21,10 @@
         orange = "#ff5500"; # vibrant orange (not in foot, keeping this)
         cyan = "#00ffff"; # cyan (from foot)
         black = "#000000"; # black (from foot)
-        white = "#111111"; # white (from foot)
+        white = "#333333"; # white (from foot)
 
         # Border colors
-        border_fg = "#111111"; # white border
+        border_fg = "#333333"; # white border
         border_bg = "#000000"; # black background
       };
 
