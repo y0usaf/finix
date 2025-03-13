@@ -11,8 +11,8 @@
     settings = {
       theme = "custom";
       themes.custom = {
-        bg = "#121212"; # darker background
-        fg = "#d8d8d2"; # muted grey-white for text
+        bg = "#0a0a0a"; # even darker background
+        fg = "#a0a0a0"; # darker grey for text
         red = "#ff5555"; # vibrant but slightly muted red
         green = "#50fa7b"; # vibrant green with blue undertone
         blue = "#bd93f9"; # purple-blue for vibrancy
@@ -20,12 +20,12 @@
         magenta = "#ff79c6"; # bright pink-magenta
         orange = "#ffb86c"; # warm vibrant orange
         cyan = "#8be9fd"; # bright cyan with blue undertone
-        black = "#1a1a1a"; # very dark, almost black
-        white = "#a0a0a0"; # much more muted grey instead of white
+        black = "#121212"; # very dark, almost black
+        white = "#707070"; # significantly darker grey instead of white
 
         # Border colors
         border_fg = "#6272a4"; # subtle purple-blue border
-        border_bg = "#1a1a1a"; # matching the new black
+        border_bg = "#121212"; # matching the new black
       };
 
       # Pane frame settings
