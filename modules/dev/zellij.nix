@@ -11,7 +11,7 @@
     settings = {
       theme = "custom";
       themes.custom = {
-        bg = "#00000000"; # transparent background
+        bg = "#1a1a1a"; # very dark gray background
         fg = "#d0d0d0"; # light gray foreground
         red = "#a0a0a0"; # gray (was red)
         green = "#c0c0c0"; # light gray (was green)
@@ -24,8 +24,8 @@
         white = "#f0f0f0"; # off-white
 
         # Border colors
-        border_fg = "#909090"; # medium gray border
-        border_bg = "#00000000"; # transparent background
+        border_fg = "#505050"; # medium gray border
+        border_bg = "#1a1a1a"; # very dark gray background
       };
 
       # Pane frame settings
