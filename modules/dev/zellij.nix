@@ -20,12 +20,12 @@
         magenta = "#ff00ff"; # magenta (from foot)
         orange = "#ff5500"; # vibrant orange (not in foot, keeping this)
         cyan = "#00ffff"; # cyan (from foot)
-        black = "#000000"; # black (from foot)
-        white = "#333333"; # white (from foot)
+        black = "#333333"; # black (from foot)
+        white = "#777777"; # white (from foot)
 
         # Border colors
-        border_fg = "#333333"; # white border
-        border_bg = "#000000"; # black background
+        border_fg = "#777777"; # white border
+        border_bg = "#333333"; # black background
       };
 
       # Pane frame settings
