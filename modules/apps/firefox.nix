@@ -328,25 +328,43 @@
     }
   '';
 
-  userContent = ''
-    /* Disable all animations on websites */
+  userContentCss = ''
+    /* Ultra minimalist userContent.css */
+
+    /* Remove distractions and animations from all websites */
     * {
       animation: none !important;
       transition: none !important;
+    }
+
+    /* Simplify scrollbars */
+    :root {
+      scrollbar-width: thin !important;
+      scrollbar-color: #888 #f1f1f1 !important;
+    }
+
+    /* Disable smooth scrolling globally */
+    html {
       scroll-behavior: auto !important;
     }
 
-    /* Force minimal animation duration if animations still occur */
-    @media (prefers-reduced-motion: no-preference) {
-      * {
-        animation-duration: 0.001s !important;
-        transition-duration: 0.001s !important;
-      }
+    /* Simplify form elements */
+    input, button, select, textarea {
+      border-radius: 0 !important;
+      box-shadow: none !important;
     }
 
-    /* Disable smooth scrolling */
-    html, body {
-      scroll-behavior: auto !important;
+    /* Disable sticky elements that follow you while scrolling */
+    *[style*="position: fixed"],
+    *[style*="position:fixed"],
+    *[style*="position: sticky"],
+    *[style*="position:sticky"] {
+      position: static !important;
+    }
+
+    /* Simplify fonts */
+    * {
+      font-family: sans-serif !important;
     }
   '';
 
@@ -362,7 +380,7 @@
     inherit name;
     settings = commonSettings;
     userChrome = userChromeCss;
-    userContent = userContent;
+    userContent = userContentCss;
   };
 
   # Generate profile configurations for all detected profiles
@@ -379,7 +397,7 @@ in {
       "y0usaf" = {
         settings = commonSettings;
         userChrome = userChromeCss;
-        userContent = userContent;
+        userContent = userContentCss;
       };
     };
 
