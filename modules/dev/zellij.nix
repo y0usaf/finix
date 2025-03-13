@@ -10,31 +10,27 @@
 
     settings = {
       theme = "custom";
-      themes = {
-        custom = {
-          bg = "#1a1b26"; # dark background (Tokyo Night inspired)
-          fg = "#c0caf5"; # soft white/blue foreground
-          red = "#f7768e"; # soft red
-          green = "#9ece6a"; # soft green
-          blue = "#7aa2f7"; # soft blue
-          yellow = "#e0af68"; # soft yellow
-          magenta = "#bb9af7"; # soft purple
-          orange = "#ff9e64"; # soft orange
-          cyan = "#7dcfff"; # soft cyan
-          black = "#24283b"; # slightly lighter black for contrast
-          white = "#a9b1d6"; # soft white
+      themes.custom = {
+        bg = "#1a1b26"; # dark background (Tokyo Night inspired)
+        fg = "#c0caf5"; # soft white/blue foreground
+        red = "#f7768e"; # soft red
+        green = "#9ece6a"; # soft green
+        blue = "#7aa2f7"; # soft blue
+        yellow = "#e0af68"; # soft yellow
+        magenta = "#bb9af7"; # soft purple
+        orange = "#ff9e64"; # soft orange
+        cyan = "#7dcfff"; # soft cyan
+        black = "#24283b"; # slightly lighter black for contrast
+        white = "#a9b1d6"; # soft white
 
-          # Border colors - this controls the outline
-          border_fg = "#7aa2f7"; # Change to blue instead of green
-          border_bg = "#1a1b26"; # Match background
-        };
+        # Border colors - this controls the outline
+        border_fg = "#7aa2f7"; # Change to blue instead of green
+        border_bg = "#1a1b26"; # Match background
       };
 
-      # Adjust pane frames to use thinner borders
-      pane_frames = {
-        rounded_corners = true;
-        hide_session_name = false;
-      };
+      # Pane frame settings
+      hide_session_name = false;
+      rounded_corners = true;
     };
   };
 
