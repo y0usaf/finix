@@ -66,10 +66,6 @@
     claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
     claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
     claude-desktop.inputs.flake-utils.follows = "flake-utils";
-
-    # Whisper Overlay for speech-to-text
-    whisper-overlay.url = "github:oddlama/whisper-overlay";
-    whisper-overlay.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   ###########################################################################
