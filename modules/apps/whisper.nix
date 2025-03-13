@@ -1,8 +1,7 @@
 ###############################################################################
-# Whisper Overlay Module
-# Provides real-time speech-to-text capabilities
-# - Configures the whisper-overlay service
-# - Enables real-time transcription with GPU acceleration
+# Whisper Overlay Configuration
+# - Provides real-time speech-to-text capabilities
+# - Configures the Home Manager service for whisper-overlay
 ###############################################################################
 {
   config,
@@ -11,17 +10,13 @@
   inputs,
   ...
 }: {
-  imports = [
-    inputs.whisper-overlay.homeManagerModules.default
-  ];
-
   # Enable the user service
   services.realtime-stt-server = {
     enable = true;
-    # Auto-start with graphical session
+    # Start the service automatically with graphical session
     autoStart = true;
   };
 
-  # Add the whisper-overlay package
+  # Add the whisper-overlay package to user packages
   home.packages = [pkgs.whisper-overlay];
 }
