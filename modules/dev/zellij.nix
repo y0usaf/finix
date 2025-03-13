@@ -13,18 +13,18 @@
       themes.custom = {
         bg = "#1a1a1a"; # very dark gray background
         fg = "#d8d8d8"; # light gray foreground
-        red = "#b89c9c"; # pastel gray-red
-        green = "#a8b8a8"; # pastel gray-green
-        blue = "#a0a8b8"; # pastel gray-blue
-        yellow = "#b8b8a0"; # pastel gray-yellow
-        magenta = "#b0a0b0"; # pastel gray-magenta
-        orange = "#b8a8a0"; # pastel gray-orange
-        cyan = "#a0b8b8"; # pastel gray-cyan
+        red = "#cc9999"; # soft pastel red
+        green = "#99cc99"; # soft pastel green
+        blue = "#9999cc"; # soft pastel blue
+        yellow = "#cccc99"; # soft pastel yellow
+        magenta = "#cc99cc"; # soft pastel magenta
+        orange = "#ccaa88"; # soft pastel orange
+        cyan = "#99cccc"; # soft pastel cyan
         black = "#303030"; # dark gray
         white = "#f0f0f0"; # off-white
 
         # Border colors
-        border_fg = "#606060"; # medium gray border
+        border_fg = "#7a7a7a"; # medium gray border
         border_bg = "#1a1a1a"; # very dark gray background
       };
 
