@@ -328,46 +328,6 @@
     }
   '';
 
-  userContentCss = ''
-    /* Ultra minimalist userContent.css */
-
-    /* Remove distractions and animations from all websites */
-    * {
-      animation: none !important;
-      transition: none !important;
-    }
-
-    /* Simplify scrollbars */
-    :root {
-      scrollbar-width: thin !important;
-      scrollbar-color: #888 #f1f1f1 !important;
-    }
-
-    /* Disable smooth scrolling globally */
-    html {
-      scroll-behavior: auto !important;
-    }
-
-    /* Simplify form elements */
-    input, button, select, textarea {
-      border-radius: 0 !important;
-      box-shadow: none !important;
-    }
-
-    /* Disable sticky elements that follow you while scrolling */
-    *[style*="position: fixed"],
-    *[style*="position:fixed"],
-    *[style*="position: sticky"],
-    *[style*="position:sticky"] {
-      position: static !important;
-    }
-
-    /* Simplify fonts */
-    * {
-      font-family: sans-serif !important;
-    }
-  '';
-
   # Get the profiles from the Firefox directory
   profilesPath = "${config.home.homeDirectory}/.mozilla/firefox";
   profiles =
@@ -380,7 +340,6 @@
     inherit name;
     settings = commonSettings;
     userChrome = userChromeCss;
-    userContent = userContentCss;
   };
 
   # Generate profile configurations for all detected profiles
@@ -397,7 +356,6 @@ in {
       "y0usaf" = {
         settings = commonSettings;
         userChrome = userChromeCss;
-        userContent = userContentCss;
       };
     };
 
