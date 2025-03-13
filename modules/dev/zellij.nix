@@ -54,6 +54,6 @@
   programs.zsh.shellAliases = {
     music = "zellij --layout music";
     # Kill all zellij sessions except the active one
-    zk = "zellij ka --exclude $(zellij list-sessions | grep '(current)' | awk '{print $1}')";
+    zk = "zellij kill-all-sessions --except $(zellij list-sessions | grep '(current)' | awk '{print $1}')";
   };
 }
