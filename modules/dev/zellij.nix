@@ -11,21 +11,21 @@
     settings = {
       theme = "custom";
       themes.custom = {
-        bg = "#1a1b26"; # dark background (Tokyo Night inspired)
-        fg = "#c0caf5"; # soft white/blue foreground
-        red = "#f7768e"; # soft red
-        green = "#9ece6a"; # soft green
-        blue = "#7aa2f7"; # soft blue
-        yellow = "#e0af68"; # soft yellow
-        magenta = "#bb9af7"; # soft purple
-        orange = "#ff9e64"; # soft orange
-        cyan = "#7dcfff"; # soft cyan
-        black = "#24283b"; # slightly lighter black for contrast
-        white = "#a9b1d6"; # soft white
+        bg = "#00000000"; # transparent background
+        fg = "#d0d0d0"; # light gray foreground
+        red = "#a0a0a0"; # gray (was red)
+        green = "#c0c0c0"; # light gray (was green)
+        blue = "#909090"; # medium gray (was blue)
+        yellow = "#b0b0b0"; # gray (was yellow)
+        magenta = "#808080"; # darker gray (was purple)
+        orange = "#a8a8a8"; # gray (was orange)
+        cyan = "#e0e0e0"; # very light gray (was cyan)
+        black = "#303030"; # dark gray (was black)
+        white = "#f0f0f0"; # off-white
 
-        # Border colors - this controls the outline
-        border_fg = "#7aa2f7"; # Change to blue instead of green
-        border_bg = "#1a1b26"; # Match background
+        # Border colors
+        border_fg = "#909090"; # medium gray border
+        border_bg = "#00000000"; # transparent background
       };
 
       # Pane frame settings
