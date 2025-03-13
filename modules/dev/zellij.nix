@@ -11,20 +11,20 @@
     settings = {
       theme = "custom";
       themes.custom = {
-        bg = "#000000"; # pure black background
-        fg = "#FFFFFF"; # pure white foreground
-        red = "#FF0000"; # pure red
-        green = "#00FF00"; # pure green
-        blue = "#0000FF"; # pure blue
-        yellow = "#FFFF00"; # pure yellow
-        magenta = "#FF00FF"; # pure magenta
-        orange = "#FF5500"; # vibrant orange
-        cyan = "#00FFFF"; # pure cyan
-        black = "#000000"; # black
-        white = "#FFFFFF"; # white
+        bg = "#000000"; # black background (from foot)
+        fg = "#ffffff"; # white foreground (from foot)
+        red = "#ff0000"; # red (from foot)
+        green = "#00ff00"; # green (from foot)
+        blue = "#1e90ff"; # blue (from foot)
+        yellow = "#ffff00"; # yellow (from foot)
+        magenta = "#ff00ff"; # magenta (from foot)
+        orange = "#ff5500"; # vibrant orange (not in foot, keeping this)
+        cyan = "#00ffff"; # cyan (from foot)
+        black = "#000000"; # black (from foot)
+        white = "#ffffff"; # white (from foot)
 
         # Border colors
-        border_fg = "#FFFFFF"; # white border
+        border_fg = "#ffffff"; # white border
         border_bg = "#000000"; # black background
       };
 
