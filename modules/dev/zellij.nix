@@ -11,21 +11,21 @@
     settings = {
       theme = "custom";
       themes.custom = {
-        bg = "#1a1a1a"; # very dark gray background
-        fg = "#d8d8d8"; # light gray foreground
-        red = "#cc9999"; # soft pastel red
-        green = "#99cc99"; # soft pastel green
-        blue = "#9999cc"; # soft pastel blue
-        yellow = "#cccc99"; # soft pastel yellow
-        magenta = "#cc99cc"; # soft pastel magenta
-        orange = "#ccaa88"; # soft pastel orange
-        cyan = "#99cccc"; # soft pastel cyan
-        black = "#303030"; # dark gray
-        white = "#f0f0f0"; # off-white
+        bg = "#000000"; # pure black background
+        fg = "#FFFFFF"; # pure white foreground
+        red = "#FF0000"; # pure red
+        green = "#00FF00"; # pure green
+        blue = "#0000FF"; # pure blue
+        yellow = "#FFFF00"; # pure yellow
+        magenta = "#FF00FF"; # pure magenta
+        orange = "#FF5500"; # vibrant orange
+        cyan = "#00FFFF"; # pure cyan
+        black = "#000000"; # black
+        white = "#FFFFFF"; # white
 
         # Border colors
-        border_fg = "#7a7a7a"; # medium gray border
-        border_bg = "#1a1a1a"; # very dark gray background
+        border_fg = "#FFFFFF"; # white border
+        border_bg = "#000000"; # black background
       };
 
       # Pane frame settings
