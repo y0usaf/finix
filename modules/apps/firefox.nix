@@ -299,6 +299,25 @@
         --toolbarbutton-border-radius: 0px!important;
         --urlbar-icon-border-radius: 0px!important
     }
+
+    /* Center toolbar icons */
+    #nav-bar-customization-target {
+      margin: 0 auto !important;
+      display: flex !important;
+      justify-content: center !important;
+    }
+
+    /* Give some space between centered icons and urlbar */
+    #urlbar-container {
+      margin: 0 auto !important;
+      max-width: 50% !important;
+    }
+
+    /* Ensure other toolbar items stay centered */
+    #nav-bar toolbarbutton,
+    #nav-bar toolbaritem {
+      float: none !important;
+    }
   '';
 
   # Get the profiles from the Firefox directory
