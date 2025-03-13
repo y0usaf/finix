@@ -11,21 +11,21 @@
     settings = {
       theme = "custom";
       themes.custom = {
-        bg = "#000000"; # black background (from foot)
-        fg = "#111111"; # white foreground (from foot)
-        red = "#ff0000"; # red (from foot)
-        green = "#00ff00"; # green (from foot)
-        blue = "#1e90ff"; # blue (from foot)
-        yellow = "#ffff00"; # yellow (from foot)
-        magenta = "#ff00ff"; # magenta (from foot)
-        orange = "#ff5500"; # vibrant orange (not in foot, keeping this)
-        cyan = "#00ffff"; # cyan (from foot)
-        black = "#333333"; # black (from foot)
-        white = "#777777"; # white (from foot)
+        bg = "#121212"; # darker background
+        fg = "#f8f8f2"; # brighter foreground for contrast
+        red = "#ff5555"; # vibrant but slightly muted red
+        green = "#50fa7b"; # vibrant green with blue undertone
+        blue = "#bd93f9"; # purple-blue for vibrancy
+        yellow = "#f1fa8c"; # softer yellow that's still vibrant
+        magenta = "#ff79c6"; # bright pink-magenta
+        orange = "#ffb86c"; # warm vibrant orange
+        cyan = "#8be9fd"; # bright cyan with blue undertone
+        black = "#282a36"; # not pure black, slight color tint
+        white = "#f8f8f2"; # off-white for better contrast
 
         # Border colors
-        border_fg = "#aaaaaa"; # white border
-        border_bg = "#333333"; # black background
+        border_fg = "#6272a4"; # subtle purple-blue border
+        border_bg = "#282a36"; # same as black, for consistency
       };
 
       # Pane frame settings
