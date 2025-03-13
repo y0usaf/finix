@@ -328,6 +328,28 @@
     }
   '';
 
+  userContent = ''
+    /* Disable all animations on websites */
+    * {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* Force minimal animation duration if animations still occur */
+    @media (prefers-reduced-motion: no-preference) {
+      * {
+        animation-duration: 0.001s !important;
+        transition-duration: 0.001s !important;
+      }
+    }
+
+    /* Disable smooth scrolling */
+    html, body {
+      scroll-behavior: auto !important;
+    }
+  '';
+
   # Get the profiles from the Firefox directory
   profilesPath = "${config.home.homeDirectory}/.mozilla/firefox";
   profiles =
@@ -340,6 +362,7 @@
     inherit name;
     settings = commonSettings;
     userChrome = userChromeCss;
+    userContent = userContent;
   };
 
   # Generate profile configurations for all detected profiles
@@ -356,6 +379,7 @@ in {
       "y0usaf" = {
         settings = commonSettings;
         userChrome = userChromeCss;
+        userContent = userContent;
       };
     };
 
