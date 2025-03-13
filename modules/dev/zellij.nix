@@ -12,18 +12,28 @@
       theme = "custom";
       themes = {
         custom = {
-          bg = "#000000"; # black background
-          fg = "#ffffff"; # white foreground
-          red = "#ff0000"; # regular1
-          green = "#00ff00"; # regular2
-          blue = "#1e90ff"; # regular4
-          yellow = "#ffff00"; # regular3
-          magenta = "#ff00ff"; # regular5
-          orange = "#ff8c00"; # derived from palette
-          cyan = "#00ffff"; # regular6
-          black = "#000000"; # regular0
-          white = "#ffffff"; # regular7
+          bg = "#1a1b26"; # dark background (Tokyo Night inspired)
+          fg = "#c0caf5"; # soft white/blue foreground
+          red = "#f7768e"; # soft red
+          green = "#9ece6a"; # soft green
+          blue = "#7aa2f7"; # soft blue
+          yellow = "#e0af68"; # soft yellow
+          magenta = "#bb9af7"; # soft purple
+          orange = "#ff9e64"; # soft orange
+          cyan = "#7dcfff"; # soft cyan
+          black = "#24283b"; # slightly lighter black for contrast
+          white = "#a9b1d6"; # soft white
+
+          # Border colors - this controls the outline
+          border_fg = "#7aa2f7"; # Change to blue instead of green
+          border_bg = "#1a1b26"; # Match background
         };
+      };
+
+      # Adjust pane frames to use thinner borders
+      pane_frames = {
+        rounded_corners = true;
+        hide_session_name = false;
       };
     };
   };
@@ -54,6 +64,6 @@
   programs.zsh.shellAliases = {
     music = "zellij --layout music";
     # Kill all zellij sessions except the active one
-    zk = "zellij kill-all-sessions --except $(zellij list-sessions | grep '(current)' | awk '{print $1}')";
+    zk = "for session in $(zellij list-sessions | grep -v '(current)' | awk '{print $1}'); do zellij kill-session $session; done";
   };
 }
