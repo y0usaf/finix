@@ -49,5 +49,9 @@
 
   # Add a zsh shell alias for the "music" layout as part of the zellij module.
   # When you type "music" in zsh, it will execute "zellij --layout music" to load your layout.
-  programs.zsh.shellAliases.music = "zellij --layout music";
+  programs.zsh.shellAliases = {
+    music = "zellij --layout music";
+    # Kill all zellij sessions except the active one
+    zk = "zellij ka --exclude $(zellij list-sessions | grep '(current)' | awk '{print $1}')";
+  };
 }
