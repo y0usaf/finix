@@ -12,7 +12,7 @@
       theme = "custom";
       themes.custom = {
         bg = "#000000"; # even darker background
-        fg = "#a0b0b0"; # muted blue-green tint for better contrast
+        fg = "#aaaaaa"; # muted blue-green tint for better contrast
         red = "#ff5555"; # vibrant but slightly muted red
         green = "#50fa7b"; # vibrant green with blue undertone
         blue = "#bd93f9"; # purple-blue for vibrancy
