@@ -60,6 +60,9 @@
               git
               ripgrep
               fd
+
+              # Add zsh to the environment
+              zsh
             ]
             ++ cudaPkgs;
 
@@ -83,11 +86,10 @@
 
           # Add local bin to PATH
           export PATH="$HOME/.local/bin:$PATH"
-
-          echo "🏗️ Development environment activated!"
         '';
 
-        runScript = "bash";
+        # Use zsh as the shell and print the activation message only once
+        runScript = "zsh -c 'echo \"🏗️ Development environment activated!\" && exec zsh'";
       })
     ];
 
@@ -102,6 +104,11 @@
             # ----------------------------
             # FHS Development Environment
             # ----------------------------
+
+            # Function to run UV within the FHS environment
+            uv() {
+              devenv zsh -c "uv $*"
+            }
 
             # Function to create a UV environment within the FHS env
             uv-init() {
