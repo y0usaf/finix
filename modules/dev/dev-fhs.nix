@@ -24,7 +24,7 @@
         ]
         else [];
     in [
-      (pkgs.buildFHSUserEnv {
+      (pkgs.buildFHSEnv {
         name = "devenv";
         targetPkgs = pkgs:
           with pkgs;
