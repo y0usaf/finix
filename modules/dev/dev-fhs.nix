@@ -14,47 +14,54 @@
 }: {
   config = {
     # Create the FHS environment for development
-    home.packages = [
+    home.packages = let
+      # Define CUDA packages conditionally
+      cudaPkgs =
+        if (builtins.elem "cuda" profile.features)
+        then [
+          pkgs.cudaPackages.cudatoolkit
+          pkgs.cudaPackages.cuda_nvcc
+        ]
+        else [];
+    in [
       (pkgs.buildFHSUserEnv {
         name = "devenv";
         targetPkgs = pkgs:
-          with pkgs; [
-            # Core development tools
-            gcc
-            binutils
-            gnumake
-            cmake
-            pkg-config
+          with pkgs;
+            [
+              # Core development tools
+              gcc
+              binutils
+              gnumake
+              cmake
+              pkg-config
 
-            # Python ecosystem
-            python3
-            python312
-            uv
+              # Python ecosystem
+              python3
+              python312
+              uv
 
-            # Node.js ecosystem
-            nodejs_20
+              # Node.js ecosystem
+              nodejs_20
 
-            # CUDA if enabled in profile
-            (lib.optional (builtins.elem "cuda" profile.features) cudaPackages.cudatoolkit)
-            (lib.optional (builtins.elem "cuda" profile.features) cudaPackages.cuda_nvcc)
+              # System libraries commonly needed
+              stdenv.cc.cc.lib
+              zlib
+              libGL
+              glib
+              xorg.libX11
+              xorg.libXext
+              xorg.libXrender
 
-            # System libraries commonly needed
-            stdenv.cc.cc.lib
-            zlib
-            libGL
-            glib
-            xorg.libX11
-            xorg.libXext
-            xorg.libXrender
+              # SSL certificates
+              cacert
 
-            # SSL certificates
-            cacert
-
-            # Additional useful tools
-            git
-            ripgrep
-            fd
-          ];
+              # Additional useful tools
+              git
+              ripgrep
+              fd
+            ]
+            ++ cudaPkgs;
 
         profile = ''
           # Set up Python paths
@@ -84,33 +91,45 @@
       })
     ];
 
-    # Add a shell alias for convenience
+    # Add shell aliases for convenience through the zsh module
     programs.zsh.shellAliases = {
       dev = "devenv";
+      fhs = "devenv";
     };
 
-    # Create a script to initialize a UV environment within the FHS env
-    home.file.".local/bin/uv-init" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        if [ -z "$1" ]; then
-          echo "Usage: uv-init <environment-name>"
-          exit 1
-        fi
+    # Add initialization code to zsh
+    programs.zsh.initExtra = ''
+            # ----------------------------
+            # FHS Development Environment
+            # ----------------------------
 
-        ENV_NAME="$1"
-        ENV_PATH="$HOME/.local/venvs/$ENV_NAME"
+            # Function to create a UV environment within the FHS env
+            uv-init() {
+              if [ -z "$1" ]; then
+                echo "Usage: uv-init <environment-name>"
+                return 1
+              fi
 
-        devenv bash -c "uv venv $ENV_PATH && echo 'Created UV environment at $ENV_PATH'"
+              ENV_NAME="$1"
+              ENV_PATH="$HOME/.local/venvs/$ENV_NAME"
 
-        echo "#!/usr/bin/env bash" > "$HOME/.local/bin/$ENV_NAME"
-        echo "devenv bash -c 'source $ENV_PATH/bin/activate && exec bash'" >> "$HOME/.local/bin/$ENV_NAME"
-        chmod +x "$HOME/.local/bin/$ENV_NAME"
+              mkdir -p "$HOME/.local/venvs"
 
-        echo "🚀 Created environment '$ENV_NAME'. Run '$ENV_NAME' to activate."
-      '';
-    };
+              devenv bash -c "uv venv $ENV_PATH && echo 'Created UV environment at $ENV_PATH'"
+
+              cat > "$HOME/.local/bin/$ENV_NAME" << EOF
+      #!/usr/bin/env bash
+      devenv bash -c 'source $ENV_PATH/bin/activate && exec bash'
+      EOF
+              chmod +x "$HOME/.local/bin/$ENV_NAME"
+
+              echo "🚀 Created environment '$ENV_NAME'. Run '$ENV_NAME' to activate."
+            }
+
+            # Ensure local bin directory exists and is in PATH
+            mkdir -p "$HOME/.local/bin"
+            export PATH="$HOME/.local/bin:$PATH"
+    '';
 
     # Ensure the local bin directory exists
     home.activation.createLocalBin = lib.hm.dag.entryAfter ["writeBoundary"] ''
