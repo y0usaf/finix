@@ -89,29 +89,11 @@
       config.allowUnfree = true;
     };
 
-    ## Dynamic Profile Loading
-    profilesDir = ./profiles;
-    profileNames = builtins.filter (
-      name:
-        name
-        != "README.md"
-        && name != "configurations"
-        && name != "options.nix"
-        && builtins.pathExists (profilesDir + "/${name}/default.nix")
-    ) (builtins.attrNames (builtins.readDir profilesDir));
-
-    # Import all available profiles dynamically
-    profiles = builtins.listToAttrs (
-      map
-      (name: {
-        inherit name;
-        value = import (profilesDir + "/${name}") {
-          lib = pkgs.lib;
-          inherit pkgs;
-        };
-      })
-      profileNames
-    );
+    ## Import profile utilities
+    profileUtils = import ./lib/profiles.nix {
+      lib = pkgs.lib;
+      inherit pkgs;
+    };
 
     ## Common Special Arguments for Modules
     commonSpecialArgs = {inputs = self.inputs;};
@@ -120,54 +102,15 @@
     formatter.${system} = pkgs.alejandra;
 
     ## NixOS Configurations
-    nixosConfigurations = builtins.listToAttrs (
-      map
-      (hostname: {
-        name = hostname;
-        value = nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = commonSpecialArgs // {profile = profiles.${hostname};};
-          modules = [
-            (profilesDir + "/${hostname}/configuration.nix")
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = commonSpecialArgs // {profile = profiles.${hostname};};
-                users.${profiles.${hostname}.username} = {
-                  imports = [./home.nix];
-                  home = {
-                    stateVersion = profiles.${hostname}.stateVersion;
-                    homeDirectory = nixpkgs.lib.mkForce profiles.${hostname}.homeDirectory;
-                  };
-                };
-              };
-            }
-            inputs.chaotic.nixosModules.default
-          ];
-        };
-      })
-      profileNames
-    );
+    nixosConfigurations = profileUtils.mkNixosConfigurations {
+      inputs = inputs;
+      inherit system commonSpecialArgs;
+    };
 
     ## Dynamic Home Manager Configurations
-    homeConfigurations = builtins.listToAttrs (
-      map
-      (hostname: let
-        profileConfig = import (profilesDir + "/${hostname}/default.nix") {
-          lib = pkgs.lib;
-          inherit pkgs;
-        };
-      in {
-        name = profileConfig.username;
-        value = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          extraSpecialArgs = commonSpecialArgs // {profile = profileConfig;};
-          modules = [./home.nix];
-        };
-      })
-      profileNames
-    );
+    homeConfigurations = profileUtils.mkHomeConfigurations {
+      inputs = inputs;
+      inherit pkgs commonSpecialArgs;
+    };
   };
 }
