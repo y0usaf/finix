@@ -90,7 +90,7 @@
     };
 
     ## Import profile utilities
-    profileUtils = import ./lib/profiles.nix {
+    profileUtils = import ./modules/core/profiles.nix {
       lib = pkgs.lib;
       inherit pkgs;
     };

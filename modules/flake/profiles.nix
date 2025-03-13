@@ -1,7 +1,7 @@
 {
   lib,
   pkgs,
-  profilesDir ? ../profiles,
+  profilesDir ? ../../profiles,
 }: let
   # Get all valid profile names
   profileNames = builtins.filter (
@@ -49,7 +49,7 @@ in {
                 useUserPackages = true;
                 extraSpecialArgs = commonSpecialArgs // {profile = profiles.${hostname};};
                 users.${profiles.${hostname}.username} = {
-                  imports = [../home.nix];
+                  imports = [../../home.nix];
                   home = {
                     stateVersion = profiles.${hostname}.stateVersion;
                     homeDirectory = inputs.nixpkgs.lib.mkForce profiles.${hostname}.homeDirectory;
@@ -82,7 +82,7 @@ in {
         value = inputs.home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = commonSpecialArgs // {profile = profileConfig;};
-          modules = [../home.nix];
+          modules = [../../home.nix];
         };
       })
       profileNames
