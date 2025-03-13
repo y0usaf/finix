@@ -107,7 +107,7 @@
 
             # Function to run UV within the FHS environment
             uv() {
-              devenv zsh -c "uv $*"
+              devenv zsh -c "uv ''${*:q}"
             }
 
             # Function to create a UV environment within the FHS env
