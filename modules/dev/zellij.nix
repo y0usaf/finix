@@ -12,19 +12,19 @@
       theme = "custom";
       themes.custom = {
         bg = "#1a1a1a"; # very dark gray background
-        fg = "#d0d0d0"; # light gray foreground
-        red = "#a0a0a0"; # gray (was red)
-        green = "#c0c0c0"; # light gray (was green)
-        blue = "#909090"; # medium gray (was blue)
-        yellow = "#b0b0b0"; # gray (was yellow)
-        magenta = "#808080"; # darker gray (was purple)
-        orange = "#a8a8a8"; # gray (was orange)
-        cyan = "#e0e0e0"; # very light gray (was cyan)
-        black = "#303030"; # dark gray (was black)
+        fg = "#d8d8d8"; # light gray foreground
+        red = "#b89c9c"; # pastel gray-red
+        green = "#a8b8a8"; # pastel gray-green
+        blue = "#a0a8b8"; # pastel gray-blue
+        yellow = "#b8b8a0"; # pastel gray-yellow
+        magenta = "#b0a0b0"; # pastel gray-magenta
+        orange = "#b8a8a0"; # pastel gray-orange
+        cyan = "#a0b8b8"; # pastel gray-cyan
+        black = "#303030"; # dark gray
         white = "#f0f0f0"; # off-white
 
         # Border colors
-        border_fg = "#505050"; # medium gray border
+        border_fg = "#606060"; # medium gray border
         border_bg = "#1a1a1a"; # very dark gray background
       };
 
