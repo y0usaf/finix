@@ -90,7 +90,7 @@
     };
 
     ## Import profile utilities
-    profileUtils = import ./modules/core/profiles.nix {
+    profileUtils = import ./modules/flake/profiles.nix {
       lib = pkgs.lib;
       inherit pkgs;
     };
