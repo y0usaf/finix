@@ -1,11 +1,19 @@
+###############################################################################
+# Zen Browser Module
+# Provides a privacy-focused web browser based on Firefox
+# - Configurable browser settings
+# - Hardware acceleration controls
+# - Wayland support
+###############################################################################
 {
-  lib,
   config,
   pkgs,
+  lib,
   profile,
   ...
-}:
-with lib; let
+}: let
+  cfg = config.modules.apps.zen-browser;
+
   src = builtins.fetchurl {
     url = "https://github.com/zen-browser/desktop/releases/latest/download/zen-x86_64.AppImage";
     sha256 = "119gxhbwabl2zzxnm4l0vd18945mk2l0k12g5rf9x8v9lzsm7knn";
@@ -51,15 +59,29 @@ with lib; let
     exec ${pkgs.appimage-run}/bin/appimage-run ${src} --profile "$PROFILE_DIR" "$@"
   '';
 in {
-  config = mkIf (builtins.elem "zen-browser" profile.features) {
-    # Install the wrapped Zen Browser
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.zen-browser = {
+    enable = lib.mkEnableOption "Zen Browser";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf (cfg.enable || (builtins.elem "zen-browser" profile.features)) {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = [
       zenWithConfig
       pkgs.qt6Packages.qtbase
       pkgs.qt6Packages.qtwayland
     ];
 
-    # Create desktop entry
+    ###########################################################################
+    # Desktop Entries
+    ###########################################################################
     xdg.desktopEntries.ZenBrowser = {
       name = "Zen Browser";
       genericName = "Zen";
@@ -68,8 +90,10 @@ in {
       categories = ["Network" "WebBrowser"];
     };
 
-    # Add Firefox-related environment variables
-    programs.zsh.envExtra = mkIf config.programs.zsh.enable ''
+    ###########################################################################
+    # Environment Variables
+    ###########################################################################
+    programs.zsh.envExtra = lib.mkIf config.programs.zsh.enable ''
       export MOZ_ENABLE_WAYLAND=1
       export MOZ_USE_XINPUT2=1
     '';

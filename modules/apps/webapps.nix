@@ -1,13 +1,37 @@
+###############################################################################
+# Web Applications Module
+# Provides web applications as desktop entries using Chromium
+# - Keyboard testing utility (Keybard)
+# - Google Meet video conferencing
+###############################################################################
 {
   config,
   lib,
   pkgs,
   profile,
   ...
-}: {
-  config = {
+}: let
+  cfg = config.modules.apps.webapps;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.webapps = {
+    enable = lib.mkEnableOption "web applications";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = [pkgs.chromium];
 
+    ###########################################################################
+    # Desktop Entries
+    ###########################################################################
     xdg.desktopEntries = {
       "keybard" = {
         name = "Keybard";

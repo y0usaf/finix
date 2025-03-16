@@ -1,19 +1,33 @@
-#================================================================================
-#                                modules/gaming.nix
-#      🎮 Gaming Configuration
-#================================================================================
-# 🎯 Steam settings
-# 🎮 Gaming packages
-# 🔧 Performance tweaks
-#===============================================================================
+###############################################################################
+# Gaming Module
+# Configuration for gaming-related software and optimizations
+# - Steam and Proton configuration
+# - Game-specific settings and mods
+# - Performance optimization tools
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}: {
-  config = {
+}: let
+  cfg = config.modules.apps.gaming;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.gaming = {
+    enable = lib.mkEnableOption "gaming module";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       steam
       protonup-qt
@@ -22,7 +36,9 @@
       prismlauncher
     ];
 
-    # Define paths as Nix variables
+    ###########################################################################
+    # Configuration Files
+    ###########################################################################
     home.activation.symlinkGameConfigFiles = let
       # Base directories
       configDir = "${config.home.homeDirectory}/nixos/pkg/gaming-config";

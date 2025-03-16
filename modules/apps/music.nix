@@ -1,28 +1,41 @@
-#===============================================================================
-#                      🎵 Music Configuration 🎵
-#===============================================================================
-# 🎧 CMUS music player
-# 📊 CAVA audio visualizer
-# 🎨 Theme integration
-#===============================================================================
+###############################################################################
+# Music Module
+# Configuration for music players and audio visualization
+# - CMUS command-line music player
+# - CAVA console-based audio visualizer
+# - Theme integration with system
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}: {
-  config = {
-    # Add music-related packages
+}: let
+  cfg = config.modules.apps.music;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.music = {
+    enable = lib.mkEnableOption "music applications";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       cmus # Command-line music player
       cava # Console-based audio visualizer
     ];
 
-    # Create CMUS configuration
-    # Placeholder
-
-    # Create CAVA configuration with updated settings (gradient configuration removed)
+    ###########################################################################
+    # Programs
+    ###########################################################################
     programs.cava = {
       enable = true;
       settings = {
@@ -65,5 +78,15 @@
         };
       };
     };
+
+    ###########################################################################
+    # Configuration Files
+    ###########################################################################
+    # CMUS configuration placeholder - to be implemented
+    # xdg.configFile = {
+    #   "cmus/rc".text = ''
+    #     # CMUS configuration
+    #   '';
+    # };
   };
 }

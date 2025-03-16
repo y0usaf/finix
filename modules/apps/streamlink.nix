@@ -1,17 +1,40 @@
+###############################################################################
+# Streamlink Module
+# Provides configuration for the Streamlink CLI streaming utility
+# - Configures Streamlink with optimal settings
+# - Adds convenient shell aliases for YouTube and Twitch
+# - Includes Twitch chat integration with Firefox
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}: {
-  # Only enable if streamlink feature is selected
-  config = {
+}: let
+  cfg = config.modules.apps.streamlink;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.streamlink = {
+    enable = lib.mkEnableOption "streamlink streaming utility";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       streamlink
     ];
 
-    # Create Streamlink configuration
+    ###########################################################################
+    # Configuration Files
+    ###########################################################################
     xdg.configFile."streamlink/config".text = ''
       # Player settings
       player=${profile.defaultMediaPlayer.command}
@@ -26,7 +49,9 @@
       quiet
     '';
 
-    # Add convenient shell aliases
+    ###########################################################################
+    # Shell Configuration
+    ###########################################################################
     programs.zsh = {
       shellAliases = {
         youtube = "streamlink https://youtube.com/watch?v=";

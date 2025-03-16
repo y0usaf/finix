@@ -1,19 +1,34 @@
-#===============================================================================
-#                      🎬 Media Configuration 🎬
-#===============================================================================
-# 🔊 Audio control with pavucontrol
-# 🎞️ Video playback with VLC and Stremio
-# 📥 Media downloading with yt-dlp and ffmpeg
-#===============================================================================
+###############################################################################
+# Media Module
+# Configuration for media playback, streaming, and audio control
+# - Audio control with pavucontrol
+# - Video playback with VLC and Stremio
+# - Media downloading with yt-dlp and ffmpeg
+# - Terminal music playback with cmus
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}: {
-  config = {
-    # Add media-related packages
+}: let
+  cfg = config.modules.apps.media;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.media = {
+    enable = lib.mkEnableOption "media applications";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       pavucontrol # Sound mixer for PulseAudio
       ffmpeg # Multimedia framework

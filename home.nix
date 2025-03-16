@@ -42,7 +42,6 @@
         !(lib.hasSuffix "template.nix" path)
         && !(lib.hasSuffix "env.nix" path)
         && !(lib.hasSuffix "profiles.nix" path)
-        && !(lib.hasSuffix "android.nix" path)
     )
     allFiles;
 

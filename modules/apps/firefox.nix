@@ -1,3 +1,11 @@
+###############################################################################
+# Firefox Module
+# Configures Firefox with optimized settings and custom UI
+# - Performance optimizations
+# - Custom userChrome for minimal UI
+# - Hardware acceleration controls
+# - Auto-detection of Firefox profiles
+###############################################################################
 {
   config,
   lib,
@@ -5,6 +13,8 @@
   profile,
   ...
 }: let
+  cfg = config.modules.apps.firefox;
+
   # Function to read directory contents
   readDir = path: builtins.readDir path;
 
@@ -350,36 +360,54 @@
     })
     profiles);
 in {
-  programs.firefox = {
-    enable = true;
-    profiles = {
-      "y0usaf" = {
-        settings = commonSettings;
-        userChrome = userChromeCss;
-      };
-    };
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.firefox = {
+    enable = lib.mkEnableOption "Firefox browser with optimized settings";
+  };
 
-    policies = {
-      DisableTelemetry = true;
-      DisableFirefoxStudies = true;
-      EnableTrackingProtection = {
-        Value = true;
-        Locked = false;
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Programs
+    ###########################################################################
+    programs.firefox = {
+      enable = true;
+      profiles = {
+        "y0usaf" = {
+          settings = commonSettings;
+          userChrome = userChromeCss;
+        };
       };
-      ExtensionSettings = {
-        "*" = {
-          installation_mode = "allowed";
-          allowed_types = ["extension" "theme"];
+
+      policies = {
+        DisableTelemetry = true;
+        DisableFirefoxStudies = true;
+        EnableTrackingProtection = {
+          Value = true;
+          Locked = false;
+        };
+        ExtensionSettings = {
+          "*" = {
+            installation_mode = "allowed";
+            allowed_types = ["extension" "theme"];
+          };
         };
       };
     };
-  };
 
-  programs.zsh = {
-    envExtra = ''
-      # Firefox environment variables
-      export MOZ_ENABLE_WAYLAND=1
-      export MOZ_USE_XINPUT2=1
-    '';
+    ###########################################################################
+    # Environment Variables
+    ###########################################################################
+    programs.zsh = {
+      envExtra = ''
+        # Firefox environment variables
+        export MOZ_ENABLE_WAYLAND=1
+        export MOZ_USE_XINPUT2=1
+      '';
+    };
   };
 }

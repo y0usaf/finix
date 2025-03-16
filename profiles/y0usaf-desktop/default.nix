@@ -176,6 +176,18 @@ in {
       discord.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
+      android.enable = false;
+      firefox.enable = true;
+      gaming.enable = true;
+      media.enable = true;
+      music.enable = true;
+      obs.enable = true;
+      qbittorrent.enable = true;
+      streamlink.enable = false;
+      sway-launcher-desktop.enable = true;
+      syncthing.enable = true;
+      webapps.enable = true;
+      zen-browser.enable = false;
     };
   };
 

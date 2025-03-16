@@ -1,24 +1,42 @@
-#===============================================================================
-#                      🔄 Syncthing Configuration 🔄
-#===============================================================================
+###############################################################################
+# 🔄 Syncthing Configuration
 # Continuous file synchronization program that synchronizes files between
 # multiple devices. It's secure, decentralized, and open source.
-#===============================================================================
+# - Secure file synchronization across devices
+# - Decentralized architecture (no central server)
+# - Open source and privacy-focused
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}: {
-  config = {
-    # Enable Syncthing service
+}: let
+  cfg = config.modules.apps.syncthing;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.syncthing = {
+    enable = lib.mkEnableOption "syncthing file synchronization";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Systemd Services
+    ###########################################################################
     services.syncthing = {
       enable = true;
       tray.enable = false;
     };
 
-    # Add Syncthing package
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       syncthing # File synchronization tool
     ];
