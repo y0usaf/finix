@@ -88,7 +88,6 @@
       animation: none !important;
       transition: none !important;
       scroll-behavior: auto !important;
-      text-align: center !important;
     }
 
     :root {
