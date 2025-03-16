@@ -327,9 +327,14 @@
         max-height: 60vh!important;
         min-height: 40px!important
     }
+    /* Remove toolbar springs */
+    toolbarspring, .toolbar-spring, [anonid="spring"] {
+      display: none !important;
+    }
 
     #urlbar:not([breakout][breakout-extend]) #urlbar-input,#urlbar:not([focused]) #urlbar-input {
         text-align: center!important;
+        max-width: 50vw!important;
         width: 50vw!important
     }
 
