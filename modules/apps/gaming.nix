@@ -13,7 +13,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "gaming" profile.features) {
+  config = {
     home.packages = with pkgs; [
       steam
       protonup-qt

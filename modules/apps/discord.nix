@@ -12,7 +12,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "discord" profile.features) {
+  config = {
     home.packages = with pkgs; [
       # Create a wrapper script in PATH for Discord Canary
       (writeShellScriptBin "discord-canary" ''

@@ -12,7 +12,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "media" profile.features) {
+  config = {
     # Add media-related packages
     home.packages = with pkgs; [
       pavucontrol # Sound mixer for PulseAudio

@@ -12,7 +12,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "music" profile.features) {
+  config = {
     # Add music-related packages
     home.packages = with pkgs; [
       cmus # Command-line music player

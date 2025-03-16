@@ -11,7 +11,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "syncthing" profile.features) {
+  config = {
     # Enable Syncthing service
     services.syncthing = {
       enable = true;

@@ -5,7 +5,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "wayland" profile.features) {
+  config = {
     programs.zsh = {
       envExtra = ''
         # Wayland environment variables

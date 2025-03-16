@@ -5,7 +5,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "python" profile.features) {
+  config = {
     home.packages = with pkgs; [
       # Python and UV
       python3 # Basic Python 3 interpreter

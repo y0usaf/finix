@@ -12,7 +12,7 @@
   profile,
   ...
 }: {
-  config = lib.mkIf (builtins.elem "cuda" profile.features) {
+  config = {
     # Install CUDA development packages
     home.packages = with pkgs; [
       # Core CUDA toolkit
