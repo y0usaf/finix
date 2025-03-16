@@ -334,7 +334,6 @@
 
     #urlbar:not([breakout][breakout-extend]) #urlbar-input,#urlbar:not([focused]) #urlbar-input {
         text-align: center!important;
-        max-width: 50vw!important;
         width: 50vw!important
     }
 
