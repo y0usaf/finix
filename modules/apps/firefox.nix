@@ -96,8 +96,7 @@
         --show-titlebar-buttons: none;
         --tab-height: 20px;
         --toolbar-icon-size: calc(var(--tab-height) / 1.5);
-        --uc-bottom-toolbar-height: 20px;
-        --urlbar-width: 50vw; /* Define the width for the URL bar */
+        --uc-bottom-toolbar-height: 20px
     }
 
     /* Disable specific Firefox animations */
@@ -121,11 +120,6 @@
     /* Disable toolbar animations */
     :root[tabsintitlebar] #toolbar-menubar[autohide=true][inactive] {
         transition: none !important;
-    }
-
-    /* Remove toolbar springs */
-    toolbarspring, .toolbar-spring, [anonid="spring"] {
-      display: none !important;
     }
 
     /* Rest of your existing CSS */
@@ -320,37 +314,18 @@
         margin: 0!important
     }
 
-    /* Update the urlbar width to match breakout width */
-    #urlbar-container {
-        width: var(--urlbar-width) !important;
-        margin: 0 auto !important;
-    }
-
-    #urlbar {
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    /* Center the urlbar in the navbar */
-    #nav-bar-customization-target {
-        width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
-    }
-
-    /* Keep the breakout behavior consistent with default width */
     #urlbar[breakout][breakout-extend] {
         box-shadow: 0 15px 30px rgba(0,0,0,.2);
-        width: var(--urlbar-width) !important;
-        left: 50% !important;
-        right: auto !important;
-        top: 20vh !important;
-        margin: 0 !important;
-        position: fixed !important;
-        z-index: 999 !important;
-        transform: translateX(-50%) !important;
-        max-height: 60vh !important;
-        min-height: 40px !important;
+        width: 50vw!important;
+        left: 50%!important;
+        right: auto!important;
+        top: 20vh!important;
+        margin: 0!important;
+        position: fixed!important;
+        z-index: 999!important;
+        transform: translateX(-50%)!important;
+        max-height: 60vh!important;
+        min-height: 40px!important
     }
 
     #urlbar:not([breakout][breakout-extend]) #urlbar-input,#urlbar:not([focused]) #urlbar-input {
