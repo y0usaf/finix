@@ -1,32 +1,53 @@
-#===============================================================================
-#                       🔐 SSH Configuration 🔐
-#===============================================================================
-# 🔑 Key management
-# 🌐 Host settings
-# 🔧 Connection params
-# 🛡️ Security config
-#===============================================================================
+###############################################################################
+# SSH Configuration Module
+# Configures SSH client and agent for secure remote connections
+# - SSH client configuration
+# - SSH key management
+# - GitHub connection setup
+# - SSH agent service
+###############################################################################
 {
   config,
   pkgs,
+  lib,
   profile,
   ...
-}: {
-  programs.ssh = {
-    enable = true;
-
-    extraConfig = ''
-      SetEnv TERM=xterm-256color
-    '';
-
-    matchBlocks = {
-      "github.com" = {
-        hostname = "github.com";
-        user = "git";
-        identityFile = "~/Tokens/id_rsa_y0usaf";
-      };
-    };
+}: let
+  cfg = config.modules.core.ssh;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.core.ssh = {
+    enable = lib.mkEnableOption "SSH configuration module";
   };
 
-  services.ssh-agent.enable = true;
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # SSH Client Configuration
+    ###########################################################################
+    programs.ssh = {
+      enable = true;
+
+      extraConfig = ''
+        SetEnv TERM=xterm-256color
+      '';
+
+      matchBlocks = {
+        "github.com" = {
+          hostname = "github.com";
+          user = "git";
+          identityFile = "~/Tokens/id_rsa_y0usaf";
+        };
+      };
+    };
+
+    ###########################################################################
+    # SSH Agent Service
+    ###########################################################################
+    services.ssh-agent.enable = true;
+  };
 }

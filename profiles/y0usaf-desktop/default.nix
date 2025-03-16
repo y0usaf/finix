@@ -189,6 +189,18 @@ in {
       webapps.enable = true;
       zen-browser.enable = false;
     };
+    core = {
+      ssh.enable = true;
+      xdg.enable = true;
+      zsh.enable = true;
+      systemd = {
+        enable = true;
+        autoFormatNix = {
+          enable = true;
+          directory = "${homeDir}/nixos";
+        };
+      };
+    };
   };
 
   #=======================================================================
