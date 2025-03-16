@@ -55,33 +55,33 @@ in {
           "x-scheme-handler/discord" = ["discord.desktop"];
 
           # File Types
-          "inode/directory" = ["${profile.defaultFileManager.command}.desktop"];
+          "inode/directory" = ["${profile.modules.defaults.fileManager.command}.desktop"];
 
           # Media Types
-          "video/mp4" = ["${profile.defaultMediaPlayer.command}.desktop"];
-          "video/x-matroska" = ["${profile.defaultMediaPlayer.command}.desktop"];
-          "video/webm" = ["${profile.defaultMediaPlayer.command}.desktop"];
+          "video/mp4" = ["${profile.modules.defaults.mediaPlayer.command}.desktop"];
+          "video/x-matroska" = ["${profile.modules.defaults.mediaPlayer.command}.desktop"];
+          "video/webm" = ["${profile.modules.defaults.mediaPlayer.command}.desktop"];
 
           # Images
-          "image/jpeg" = ["${profile.defaultImageViewer.command}.desktop"];
-          "image/png" = ["${profile.defaultImageViewer.command}.desktop"];
-          "image/gif" = ["${profile.defaultImageViewer.command}.desktop"];
-          "image/tiff" = ["${profile.defaultImageViewer.command}.desktop"];
-          "image/bmp" = ["${profile.defaultImageViewer.command}.desktop"];
+          "image/jpeg" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
+          "image/png" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
+          "image/gif" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
+          "image/tiff" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
+          "image/bmp" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
 
           # Archives
-          "application/zip" = ["${profile.defaultArchiveManager.command}"];
-          "application/x-7z-compressed" = ["${profile.defaultArchiveManager.command}"];
-          "application/x-tar" = ["${profile.defaultArchiveManager.command}.desktop"];
-          "application/gzip" = ["${profile.defaultArchiveManager.command}.desktop"];
-          "application/x-compressed-tar" = ["${profile.defaultArchiveManager.command}.desktop"];
+          "application/zip" = ["${profile.modules.defaults.archiveManager.command}"];
+          "application/x-7z-compressed" = ["${profile.modules.defaults.archiveManager.command}"];
+          "application/x-tar" = ["${profile.modules.defaults.archiveManager.command}.desktop"];
+          "application/gzip" = ["${profile.modules.defaults.archiveManager.command}.desktop"];
+          "application/x-compressed-tar" = ["${profile.modules.defaults.archiveManager.command}.desktop"];
 
           # Web Extensions
-          "application/x-extension-htm" = ["${profile.defaultBrowser.command}.desktop"];
-          "application/x-extension-html" = ["${profile.defaultBrowser.command}.desktop"];
-          "application/x-extension-shtml" = ["${profile.defaultBrowser.command}.desktop"];
-          "application/xhtml+xml" = ["${profile.defaultBrowser.command}.desktop"];
-          "application/x-extension-xhtml" = ["${profile.defaultBrowser.command}.desktop"];
+          "application/x-extension-htm" = ["${profile.modules.defaults.browser.command}.desktop"];
+          "application/x-extension-html" = ["${profile.modules.defaults.browser.command}.desktop"];
+          "application/x-extension-shtml" = ["${profile.modules.defaults.browser.command}.desktop"];
+          "application/xhtml+xml" = ["${profile.modules.defaults.browser.command}.desktop"];
+          "application/x-extension-xhtml" = ["${profile.modules.defaults.browser.command}.desktop"];
         };
       };
 

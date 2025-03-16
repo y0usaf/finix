@@ -53,14 +53,15 @@
   ###########################################################################
   # Extract default applications from profile
   defaultApps = [
-    profile.defaultTerminal
-    profile.defaultBrowser
-    profile.defaultFileManager
-    profile.defaultLauncher
-    profile.defaultIde
-    profile.defaultMediaPlayer
-    profile.defaultImageViewer
-    profile.defaultDiscord
+    profile.modules.defaults.terminal
+    profile.modules.defaults.browser
+    profile.modules.defaults.fileManager
+    profile.modules.defaults.launcher
+    profile.modules.defaults.ide
+    profile.modules.defaults.mediaPlayer
+    profile.modules.defaults.imageViewer
+    profile.modules.defaults.discord
+    profile.modules.defaults.archiveManager
   ];
 
   # Extract package attribute from each app and filter out nulls

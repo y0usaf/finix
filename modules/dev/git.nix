@@ -33,7 +33,7 @@
     #-----------------------------------------------------------------
     extraConfig = {
       core = {
-        editor = profile.defaultEditor.command;
+        editor = profile.modules.defaults.editor.command;
       };
       init.defaultBranch = "main";
       pull.rebase = true;

@@ -11,6 +11,9 @@
   # MAKE SURE the resulting path is correct, or your system will cry for help.
   homeDir = "/home/${username}";
 in {
+  #=======================================================================
+  # System Identity and Core Settings
+  #=======================================================================
   # Explicitly set the username in the configuration.
   username = username;
 
@@ -42,86 +45,29 @@ in {
   wallpaperDir = "${homeDir}/DCIM/Wallpapers/32_9"; # Directory for 32:9 wallpapers.
   wallpaperVideoDir = "${homeDir}/DCIM/Wallpapers_Video"; # Directory for video wallpapers.
 
-  #=======================================================================
-  # Default Applications
-  #=======================================================================
-  # Each default application is defined with its corresponding package and command.
-  # MODIFY these ONLY if you're sure about the dependencies and behavior changes.
-  defaultBrowser = {
-    package = null; # The go-to browser is Firefox.
-    command = "firefox"; # Command line trigger for Firefox.
-  };
-  defaultEditor = {
-    package = pkgs.neovim; # Neovim is your editor. Trust it.
-    command = "nvim"; # Launch Neovim with the 'nvim' command.
-  };
-  defaultIde = {
-    package = null; # IDE for coding with a modern twist.
-    command = "cursor"; # The command that fires up the IDE.
-  };
-  defaultTerminal = {
-    package = pkgs.foot; # Foot terminal: sleek, minimal, and Wayland-friendly.
-    command = "foot"; # Command for launching the terminal.
-  };
-  defaultFileManager = {
-    package = pkgs.pcmanfm; # Use PCManFM for file management.
-    command = "pcmanfm"; # Command to run PCManFM.
-  };
-  defaultLauncher = {
-    package = null; # Sway launcher customized for your workflow.
-    command = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
-  };
-  defaultDiscord = {
-    # Reference the command only, not the package
-    package = null; # Remove package definition to avoid collision
-    command = "discord-canary"; # Command to launch Discord Canary
-  };
-  defaultArchiveManager = {
-    package = pkgs.p7zip; # Use p7zip for all your archive needs.
-    command = "7z"; # Command to invoke p7zip.
-  };
-  defaultImageViewer = {
-    package = pkgs.imv; # The image viewer of choice.
-    command = "imv"; # Run it using this command.
-  };
-  defaultMediaPlayer = {
-    package = pkgs.mpv; # MPV for playing your videos.
-    command = "mpv"; # Command to start MPV.
+  # More structured directory configuration
+  directories = {
+    # Path to the Nix flake configuration directory.
+    flake.path = "${homeDir}/nixos";
+    # Music directory path.
+    music.path = "${homeDir}/Music";
+    # DCIM directory path for photos.
+    dcim.path = "${homeDir}/DCIM";
+    # Configuration for the Steam directory.
+    steam = {
+      path = "${homeDir}/.local/share/Steam";
+      create = false; # DO NOT automatically create this directory—Steam manages it!
+    };
   };
 
   #=======================================================================
-  # Git and Version Control Settings
-  #=======================================================================
-  # Set up your credentials for Git. These MUST match your actual identity.
-  gitName = "y0usaf"; # Your Git author name.
-  gitEmail = "OA99@Outlook.com"; # Your Git email. Double-check it—it's used for commit history.
-  gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git"; # URL to your home manager repository.
-
-  #=======================================================================
-  # Bookmarks
-  #=======================================================================
-  # Predefine your bookmarks for quick access in your file manager.
-  bookmarks = [
-    "file://${homeDir}/Downloads Downloads" # Bookmark for the Downloads folder.
-    "file://${homeDir}/Music Music" # Bookmark for your Music folder.
-    "file://${homeDir}/DCIM DCIM" # Bookmark for your DCIM/photos folder.
-    "file://${homeDir}/Pictures Pictures" # Bookmark for Pictures.
-    "file://${homeDir}/nixos NixOS" # Bookmark for your NixOS config folder.
-    "file://${homeDir}/Dev Dev" # Bookmark for your Development directory.
-    "file://${homeDir}/.local/share/Steam Steam" # Bookmark for the Steam folder.
-  ];
-
-  #=======================================================================
-  # Appearance and UI Scaling
+  # Appearance and UI Settings
   #=======================================================================
   dpi = 109; # Set the DPI value. A wrong value here can ruin your display scaling.
   baseFontSize = 12; # The base font size across applications—adjust if everything looks too small or huge.
   cursorSize = 24; # The cursor size. Perfect for high-resolution displays; change ONLY if necessary.
 
-  #=======================================================================
   # Font Settings
-  #=======================================================================
-  # Specify the primary and fallback fonts to prevent any missing-character disasters.
   fonts = {
     main = [
       # Main font: IosevkaTermSlab Nerd Font Mono gives you a clean, modern look in terminals and editors.
@@ -138,31 +84,53 @@ in {
   };
 
   #=======================================================================
-  # Directory Structure Configuration
+  # User Preferences and Customization
   #=======================================================================
-  directories = {
-    # Path to the Nix flake configuration directory.
-    flake.path = "${homeDir}/nixos";
-    # Music directory path.
-    music.path = "${homeDir}/Music";
-    # DCIM directory path for photos.
-    dcim.path = "${homeDir}/DCIM";
-    # Configuration for the Steam directory.
-    steam = {
-      path = "${homeDir}/.local/share/Steam";
-      create = false; # DO NOT automatically create this directory—Steam manages it!
-    };
-  };
+  # Git and Version Control Settings
+  gitName = "y0usaf"; # Your Git author name.
+  gitEmail = "OA99@Outlook.com"; # Your Git email. Double-check it—it's used for commit history.
+  gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git"; # URL to your home manager repository.
+
+  # Bookmarks for file manager
+  bookmarks = [
+    "file://${homeDir}/Downloads Downloads" # Bookmark for the Downloads folder.
+    "file://${homeDir}/Music Music" # Bookmark for your Music folder.
+    "file://${homeDir}/DCIM DCIM" # Bookmark for your DCIM/photos folder.
+    "file://${homeDir}/Pictures Pictures" # Bookmark for Pictures.
+    "file://${homeDir}/nixos NixOS" # Bookmark for your NixOS config folder.
+    "file://${homeDir}/Dev Dev" # Bookmark for your Development directory.
+    "file://${homeDir}/.local/share/Steam Steam" # Bookmark for the Steam folder.
+  ];
 
   #=======================================================================
   # Module Configurations
   #=======================================================================
   # Enable specific modules based on your needs
   modules = {
+    # UI and Display Modules
     ui = {
       hyprland.enable = true;
       wayland.enable = true;
     };
+
+    # Core System Modules
+    core = {
+      nvidia.enable = true;
+      nvidia.cuda.enable = true;
+      amdgpu.enable = false;
+      ssh.enable = true;
+      xdg.enable = true;
+      zsh.enable = true;
+      systemd = {
+        enable = true;
+        autoFormatNix = {
+          enable = true;
+          directory = "${homeDir}/nixos";
+        };
+      };
+    };
+
+    # Application Modules
     apps = {
       discord.enable = true;
       creative.enable = true;
@@ -180,28 +148,58 @@ in {
       webapps.enable = true;
       zen-browser.enable = false;
     };
-    core = {
-      nvidia.enable = true;
-      nvidia.cuda.enable = true;
-      amdgpu.enable = false;
-      ssh.enable = true;
-      xdg.enable = true;
-      zsh.enable = true;
-      systemd = {
-        enable = true;
-        autoFormatNix = {
-          enable = true;
-          directory = "${homeDir}/nixos";
-        };
-      };
-    };
+
+    # Development Modules
     dev = {
       fhs.enable = true; # Enable the FHS development environment
+    };
+
+    defaults = {
+      browser = {
+        package = null;
+        command = "firefox";
+      };
+      editor = {
+        package = pkgs.neovim;
+        command = "nvim";
+      };
+      ide = {
+        package = null;
+        command = "cursor";
+      };
+      terminal = {
+        package = pkgs.foot;
+        command = "foot";
+      };
+      fileManager = {
+        package = pkgs.pcmanfm;
+        command = "pcmanfm";
+      };
+      launcher = {
+        package = null;
+        command = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+      };
+      discord = {
+        package = null;
+        command = "discord-canary";
+      };
+      archiveManager = {
+        package = pkgs.p7zip;
+        command = "7z";
+      };
+      imageViewer = {
+        package = pkgs.imv;
+        command = "imv";
+      };
+      mediaPlayer = {
+        package = pkgs.mpv;
+        command = "mpv";
+      };
     };
   };
 
   #=======================================================================
-  # Personal Packages
+  # Additional Packages
   #=======================================================================
   # Add any personal packages here. This package is for image upscaling.
   personalPackages = with pkgs; [

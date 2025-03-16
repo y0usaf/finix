@@ -149,12 +149,12 @@ in {
         # Application Shortcut Variables
         "$mod" = "SUPER";
         "$mod2" = "ALT";
-        "$term" = profile.defaultTerminal.command;
-        "$filemanager" = profile.defaultFileManager.command;
-        "$browser" = profile.defaultBrowser.command;
-        "$discord" = profile.defaultDiscord.command;
-        "$launcher" = profile.defaultLauncher.command;
-        "$ide" = profile.defaultIde.command;
+        "$term" = profile.modules.defaults.terminal.command;
+        "$filemanager" = profile.modules.defaults.fileManager.command;
+        "$browser" = profile.modules.defaults.browser.command;
+        "$discord" = profile.modules.defaults.discord.command;
+        "$launcher" = profile.modules.defaults.launcher.command;
+        "$ide" = profile.modules.defaults.ide.command;
         "$obs" = "obs";
 
         # Window Management Rules

@@ -68,16 +68,25 @@ in {
     #                       Default Applications Options                   #
     ######################################################################
 
-    defaultBrowser = mkOpt defaultAppModule "Default web browser configuration.";
-    defaultEditor = mkOpt defaultAppModule "Default text editor configuration.";
-    defaultIde = mkOpt defaultAppModule "Default IDE configuration.";
-    defaultTerminal = mkOpt defaultAppModule "Default terminal emulator configuration.";
-    defaultFileManager = mkOpt defaultAppModule "Default file manager configuration.";
-    defaultLauncher = mkOpt defaultAppModule "Default application launcher configuration.";
-    defaultDiscord = mkOpt defaultAppModule "Default Discord client configuration.";
-    defaultArchiveManager = mkOpt defaultAppModule "Default archive manager configuration.";
-    defaultImageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
-    defaultMediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
+    # Moved defaults inside modules to match the profile's structure
+    modules = mkOpt (t.submodule {
+      options = {
+        defaults = mkOpt (t.submodule {
+          options = {
+            browser = mkOpt defaultAppModule "Default web browser configuration.";
+            editor = mkOpt defaultAppModule "Default text editor configuration.";
+            ide = mkOpt defaultAppModule "Default IDE configuration.";
+            terminal = mkOpt defaultAppModule "Default terminal emulator configuration.";
+            fileManager = mkOpt defaultAppModule "Default file manager configuration.";
+            launcher = mkOpt defaultAppModule "Default application launcher configuration.";
+            discord = mkOpt defaultAppModule "Default Discord client configuration.";
+            archiveManager = mkOpt defaultAppModule "Default archive manager configuration.";
+            imageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
+            mediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
+          };
+        }) "Default application configurations";
+      };
+    }) "Module configurations";
 
     ######################################################################
     #                       Directory Configurations                       #
