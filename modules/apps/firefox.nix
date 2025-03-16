@@ -97,7 +97,7 @@
         --tab-height: 20px;
         --toolbar-icon-size: calc(var(--tab-height) / 1.5);
         --uc-bottom-toolbar-height: 20px;
-        --urlbar-width: 50vw; /* New variable for urlbar width */
+        --urlbar-width: 50vw; /* Variable for urlbar width */
     }
 
     /* Disable specific Firefox animations */
@@ -315,6 +315,27 @@
         margin: 0!important
     }
 
+    /* Fix urlbar positioning and width */
+    #urlbar-container {
+        min-width: 0 !important;
+        width: var(--urlbar-width) !important;
+        max-width: var(--urlbar-width) !important;
+        margin: 0 auto !important; /* Center the container */
+    }
+
+    /* Remove the centering of nav-bar-customization-target that's causing issues */
+    #nav-bar-customization-target {
+        display: flex !important;
+        /* Removed justify-content: center that was causing offset issues */
+    }
+
+    /* Make the default urlbar the same size as the popup */
+    #urlbar {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Keep the popup behavior the same */
     #urlbar[breakout][breakout-extend] {
         box-shadow: 0 15px 30px rgba(0,0,0,.2);
         width: var(--urlbar-width) !important;
@@ -326,7 +347,7 @@
         z-index: 999 !important;
         transform: translateX(-50%) !important;
         max-height: 60vh !important;
-        min-height: 40px !important
+        min-height: 40px !important;
     }
 
     #urlbar:not([breakout][breakout-extend]) #urlbar-input,#urlbar:not([focused]) #urlbar-input {
@@ -336,25 +357,6 @@
     #urlbar-background,#urlbar-input-container {
         --toolbarbutton-border-radius: 0px!important;
         --urlbar-icon-border-radius: 0px!important
-    }
-
-    /* Remove urlbar springs */
-    #urlbar-container {
-        min-width: 0 !important;
-        width: var(--urlbar-width) !important;
-        max-width: var(--urlbar-width) !important;
-    }
-
-    /* Center the urlbar in the navbar */
-    #nav-bar-customization-target {
-        display: flex !important;
-        justify-content: center !important;
-    }
-
-    /* Make the default urlbar the same size as the popup */
-    #urlbar {
-        width: 100% !important;
-        max-width: 100% !important;
     }
   '';
 
