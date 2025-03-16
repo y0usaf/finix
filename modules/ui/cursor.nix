@@ -1,10 +1,10 @@
-#===============================================================================
-#                          🖱️ Cursor Configuration 🖱️
-#===============================================================================
-# 🎯 X11/Wayland cursor theme
-# 📦 Package definition
-# 🔗 System-wide links
-#===============================================================================
+###############################################################################
+# Cursor Configuration
+# Configures cursor themes for X11 and Wayland/Hyprland
+# - Custom DeepinDarkV20 cursor themes
+# - Separate X11 and Hyprland cursor packages
+# - System-wide cursor configuration
+###############################################################################
 {
   config,
   pkgs,
@@ -13,6 +13,7 @@
   profile,
   ...
 }: let
+  cfg = config.modules.ui.cursor;
   baseTheme = "DeepinDarkV20";
 
   hyprcursorPackage = pkgs.stdenv.mkDerivation {
@@ -47,10 +48,26 @@
     '';
   };
 in {
-  home = {
-    packages = [hyprcursorPackage xcursorPackage];
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.ui.cursor = {
+    enable = lib.mkEnableOption "cursor theme configuration";
+  };
 
-    pointerCursor = {
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
+    home.packages = [hyprcursorPackage xcursorPackage];
+
+    ###########################################################################
+    # Cursor Configuration
+    ###########################################################################
+    home.pointerCursor = {
       name = "${baseTheme}-x11";
       package = xcursorPackage;
       size = profile.modules.appearance.cursorSize;
@@ -59,11 +76,11 @@ in {
       x11.enable = true;
       hyprcursor.enable = true;
     };
-  };
 
-  gtk.cursorTheme = {
-    name = "${baseTheme}-x11";
-    package = xcursorPackage;
-    size = profile.modules.appearance.cursorSize;
+    gtk.cursorTheme = {
+      name = "${baseTheme}-x11";
+      package = xcursorPackage;
+      size = profile.modules.appearance.cursorSize;
+    };
   };
 }

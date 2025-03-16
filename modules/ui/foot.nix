@@ -1,22 +1,20 @@
-#===============================================================================
-#                      🖥️ Foot Terminal Configuration 🖥️
-#===============================================================================
-# 🎨 Terminal styling
-# ⌨️ Key bindings
-# 🔤 Font settings
-# 🎯 Cursor config
-#===============================================================================
+###############################################################################
+# Foot Terminal Configuration
+# Terminal emulator with focus on minimalism and performance
+# - Terminal styling and appearance
+# - Key bindings for clipboard operations
+# - Font configuration with fallback support
+# - Cursor and mouse behavior settings
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}:
-#######################################################################
-#                   COMPUTE FONT CONFIGURATION PARAMETERS
-#######################################################################
-let
+}: let
+  cfg = config.modules.ui.foot;
+
   # Calculate the scaled font size based on the profile's base font size.
   computedFontSize = toString (profile.modules.appearance.baseFontSize * 1.33);
 
@@ -30,10 +28,6 @@ let
   mainFontConfig =
     "${mainFontName}:size=${computedFontSize}, "
     + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") fallbackFontNames);
-
-  #######################################################################
-  #                    DEFINE INDIVIDUAL FOOT SETTINGS
-  #######################################################################
 
   # Main terminal settings: terminal type, font, and DPI awareness.
   footMainSettings = {
@@ -86,23 +80,31 @@ let
     clipboard-copy = "Control+c XF86Copy";
     clipboard-paste = "Control+v XF86Paste";
   };
-  #######################################################################
-  #             COMBINE ALL FOOT TERMINAL SETTINGS INTO A SINGLE OBJECT
-  #######################################################################
 in {
   ###########################################################################
-  # Foot Terminal Program Configuration
-  #   Enables foot and defines all related terminal settings.
+  # Module Options
   ###########################################################################
-  programs.foot = {
-    enable = true;
+  options.modules.ui.foot = {
+    enable = lib.mkEnableOption "foot terminal emulator";
+  };
 
-    settings = {
-      main = footMainSettings;
-      cursor = footCursorSettings;
-      mouse = footMouseSettings;
-      colors = footColorSettings;
-      key-bindings = footKeyBindings;
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Programs
+    ###########################################################################
+    programs.foot = {
+      enable = true;
+
+      settings = {
+        main = footMainSettings;
+        cursor = footCursorSettings;
+        mouse = footMouseSettings;
+        colors = footColorSettings;
+        key-bindings = footKeyBindings;
+      };
     };
   };
 }

@@ -36,6 +36,11 @@ in {
     ui = {
       hyprland.enable = true;
       wayland.enable = true;
+      ags.enable = true;
+      cursor.enable = true;
+      foot.enable = true;
+      gtk.enable = true;
+      wallust.enable = false;
     };
 
     # Appearance
