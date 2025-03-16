@@ -96,7 +96,8 @@
         --show-titlebar-buttons: none;
         --tab-height: 20px;
         --toolbar-icon-size: calc(var(--tab-height) / 1.5);
-        --uc-bottom-toolbar-height: 20px
+        --uc-bottom-toolbar-height: 20px;
+        --urlbar-width: 50vw;  /* Width for the URL bar */
     }
 
     /* Disable specific Firefox animations */
@@ -120,6 +121,11 @@
     /* Disable toolbar animations */
     :root[tabsintitlebar] #toolbar-menubar[autohide=true][inactive] {
         transition: none !important;
+    }
+
+    /* Remove toolbar springs */
+    toolbarspring, .toolbar-spring, [anonid="spring"] {
+      display: none !important;
     }
 
     /* Rest of your existing CSS */
@@ -188,7 +194,19 @@
         width: 100%!important;
         height: var(--uc-bottom-toolbar-height)!important;
         max-height: var(--uc-bottom-toolbar-height)!important;
-        z-index: 1
+        z-index: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    #urlbar-container {
+        width: var(--urlbar-width) !important;
+        margin: 0 auto !important;
+    }
+
+    #urlbar {
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
     #browser {
@@ -316,7 +334,7 @@
 
     #urlbar[breakout][breakout-extend] {
         box-shadow: 0 15px 30px rgba(0,0,0,.2);
-        width: 50vw!important;
+        width: var(--urlbar-width) !important;
         left: 50%!important;
         right: auto!important;
         top: 20vh!important;
