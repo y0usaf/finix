@@ -63,25 +63,7 @@ in {
   #=======================================================================
   # Appearance and UI Settings
   #=======================================================================
-  dpi = 109; # Set the DPI value. A wrong value here can ruin your display scaling.
-  baseFontSize = 12; # The base font size across applications—adjust if everything looks too small or huge.
-  cursorSize = 24; # The cursor size. Perfect for high-resolution displays; change ONLY if necessary.
-
-  # Font Settings
-  fonts = {
-    main = [
-      # Main font: IosevkaTermSlab Nerd Font Mono gives you a clean, modern look in terminals and editors.
-      [pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono"]
-    ];
-    fallback = [
-      # Fallback for emojis. Without this, expect a lot of missing characters!
-      [pkgs.noto-fonts-emoji "Noto Color Emoji"]
-      # Fallback for CJK characters. Verify if you work with Asian scripts.
-      [pkgs.noto-fonts-cjk-sans "Noto Sans CJK"]
-      # Font Awesome for icons and symbols—essential to maintain UI consistency.
-      [pkgs.font-awesome "Font Awesome"]
-    ];
-  };
+  # These appearance settings have been moved to modules.appearance below
 
   #=======================================================================
   # User Preferences and Customization
@@ -111,6 +93,29 @@ in {
     ui = {
       hyprland.enable = true;
       wayland.enable = true;
+    };
+
+    # Appearance settings
+    appearance = {
+      dpi = 109; # Set the DPI value. A wrong value here can ruin your display scaling.
+      baseFontSize = 12; # The base font size across applications—adjust if everything looks too small or huge.
+      cursorSize = 24; # The cursor size. Perfect for high-resolution displays; change ONLY if necessary.
+
+      # Font Settings
+      fonts = {
+        main = [
+          # Main font: IosevkaTermSlab Nerd Font Mono gives you a clean, modern look in terminals and editors.
+          [pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono"]
+        ];
+        fallback = [
+          # Fallback for emojis. Without this, expect a lot of missing characters!
+          [pkgs.noto-fonts-emoji "Noto Color Emoji"]
+          # Fallback for CJK characters. Verify if you work with Asian scripts.
+          [pkgs.noto-fonts-cjk-sans "Noto Sans CJK"]
+          # Font Awesome for icons and symbols—essential to maintain UI consistency.
+          [pkgs.font-awesome "Font Awesome"]
+        ];
+      };
     };
 
     # Core System Modules

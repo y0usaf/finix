@@ -8,9 +8,9 @@
   #############################################################
   # Extract common variables from the profile for reusability
   #############################################################
-  mainFontName = builtins.elemAt (builtins.elemAt profile.fonts.main 0) 1;
-  baseFontSize = profile.baseFontSize;
-  dpiStr = toString profile.dpi;
+  mainFontName = builtins.elemAt (builtins.elemAt profile.modules.appearance.fonts.main 0) 1;
+  baseFontSize = profile.modules.appearance.baseFontSize;
+  dpiStr = toString profile.modules.appearance.dpi;
 
   #############################################################
   # Text shadow configuration

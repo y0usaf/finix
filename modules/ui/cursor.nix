@@ -53,7 +53,7 @@ in {
     pointerCursor = {
       name = "${baseTheme}-x11";
       package = xcursorPackage;
-      size = profile.cursorSize;
+      size = profile.modules.appearance.cursorSize;
 
       gtk.enable = true;
       x11.enable = true;
@@ -64,6 +64,6 @@ in {
   gtk.cursorTheme = {
     name = "${baseTheme}-x11";
     package = xcursorPackage;
-    size = profile.cursorSize;
+    size = profile.modules.appearance.cursorSize;
   };
 }

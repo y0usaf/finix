@@ -285,7 +285,7 @@ in {
         export GBM_BACKEND=nvidia-drm
         export __GLX_VENDOR_LIBRARY_NAME=nvidia
         export WLR_NO_HARDWARE_CURSORS=1
-        export XCURSOR_SIZE=${toString profile.cursorSize}
+        export XCURSOR_SIZE=${toString profile.modules.appearance.cursorSize}
         export NIXOS_OZONE_WL=1
       '';
     };

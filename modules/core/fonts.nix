@@ -9,10 +9,10 @@
   ...
 }: let
   # Get the packages and names from the profile
-  mainFontPackages = map (x: builtins.elemAt x 0) profile.fonts.main;
-  mainFontNames = map (x: builtins.elemAt x 1) profile.fonts.main;
-  fallbackPackages = map (x: builtins.elemAt x 0) profile.fonts.fallback;
-  fallbackNames = map (x: builtins.elemAt x 1) profile.fonts.fallback;
+  mainFontPackages = map (x: builtins.elemAt x 0) profile.modules.appearance.fonts.main;
+  mainFontNames = map (x: builtins.elemAt x 1) profile.modules.appearance.fonts.main;
+  fallbackPackages = map (x: builtins.elemAt x 0) profile.modules.appearance.fonts.fallback;
+  fallbackNames = map (x: builtins.elemAt x 1) profile.modules.appearance.fonts.fallback;
 
   #######################################################################
   # Font XML Configuration String
@@ -84,7 +84,7 @@
         <edit name="rgba" mode="assign"><const>rgb</const></edit>
         <edit name="autohint" mode="assign"><bool>true</bool></edit>
         <edit name="lcdfilter" mode="assign"><const>lcdlight</const></edit>
-        <edit name="dpi" mode="assign"><double>${toString profile.dpi}</double></edit>
+        <edit name="dpi" mode="assign"><double>${toString profile.modules.appearance.dpi}</double></edit>
       </match>
     </fontconfig>
   '';
