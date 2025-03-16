@@ -172,6 +172,10 @@ in {
   #=======================================================================
   # Enable specific modules based on your needs
   modules = {
+    ui = {
+      hyprland.enable = true;
+      wayland.enable = true;
+    };
     apps = {
       discord.enable = true;
       creative.enable = true;
@@ -190,6 +194,8 @@ in {
       zen-browser.enable = false;
     };
     core = {
+      nvidia.enable = true;
+      amdgpu.enable = false;
       ssh.enable = true;
       xdg.enable = true;
       zsh.enable = true;

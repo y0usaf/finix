@@ -8,6 +8,7 @@
   t = lib.types;
   mkOpt = type: description: lib.mkOption {inherit type description;};
   mkStr = t.str;
+  mkBool = t.bool;
 in {
   options.modules.core = {
     # Core System Options
@@ -21,6 +22,15 @@ in {
     gitName = mkOpt mkStr "Git username.";
     gitEmail = mkOpt mkStr "Git email address.";
     gitHomeManagerRepo = mkOpt mkStr "URL of the Home Manager repository.";
+
+    # GPU Support Options
+    nvidia = {
+      enable = lib.mkEnableOption "NVIDIA GPU support";
+    };
+
+    amdgpu = {
+      enable = lib.mkEnableOption "AMD GPU support";
+    };
   };
 
   config = {

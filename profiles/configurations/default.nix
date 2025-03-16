@@ -26,12 +26,12 @@
   # Feature Toggles
   # Extract feature toggles from 'profile.features'
   ###########################################################################
-  enableNvidia = builtins.elem "nvidia" profile.features;
-  enableAmdGpu = builtins.elem "amdgpu" profile.features;
-  enableWayland = builtins.elem "wayland" profile.features;
-  enableHyprland = builtins.elem "hyprland" profile.features;
-  enableGaming = builtins.elem "gaming" profile.features;
-  enableAndroid = builtins.elem "android" profile.features;
+  enableNvidia = profile.modules.core.nvidia.enable;
+  enableAmdGpu = profile.modules.core.amdgpu.enable;
+  enableWayland = profile.modules.ui.wayland.enable;
+  enableHyprland = profile.modules.ui.hyprland.enable;
+  enableGaming = profile.modules.apps.gaming.enable;
+  enableAndroid = profile.modules.apps.android.enable;
 in {
   ###########################################################################
   # Module Imports

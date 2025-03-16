@@ -1,6 +1,11 @@
-#─────────────────────── 🪟 HYPRLAND CONFIG ───────────────────────#
-# Core settings, plugins, and essential configuration               #
-#──────────────────────────────────────────────────────────────────#
+###############################################################################
+# Hyprland Window Manager Module
+# Configures the Hyprland Wayland compositor with:
+# - Core settings and plugins (hy3)
+# - Customizable keybindings and window rules
+# - NVIDIA compatibility options
+# - XDG portal integration
+###############################################################################
 {
   config,
   pkgs,
@@ -8,17 +13,34 @@
   inputs,
   profile,
   ...
-}: {
+}: let
+  cfg = config.modules.ui.hyprland;
+in {
   imports = [
     inputs.hyprland.homeManagerModules.default
   ];
 
-  config = {
-    # Add Hyprland-specific packages
-    home.packages = lib.mkIf (builtins.elem "hyprland" profile.features) [
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.ui.hyprland = {
+    enable = lib.mkEnableOption "Hyprland window manager";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
+    home.packages = [
       pkgs.hyprwayland-scanner # Tool associated with Hyprland
     ];
 
+    ###########################################################################
+    # XDG Portal Configuration
+    ###########################################################################
     xdg.portal = {
       xdgOpenUsePortal = true;
       configPackages = [inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland];
@@ -29,16 +51,19 @@
       config.common.default = "*";
     };
 
-    # Add Hyprland environment variables
-    home.sessionVariables = lib.mkIf (builtins.elem "hyprland" profile.features) {
+    ###########################################################################
+    # Environment Variables
+    ###########################################################################
+    home.sessionVariables = {
       XDG_CURRENT_DESKTOP = "Hyprland";
       XDG_SESSION_DESKTOP = "Hyprland";
     };
 
+    ###########################################################################
+    # Hyprland Configuration
+    ###########################################################################
     wayland.windowManager.hyprland = {
-      #------------------------------------------------------------------
       # Core Activation and System Settings
-      #------------------------------------------------------------------
       enable = true;
       xwayland.enable = true;
       systemd = {
@@ -51,31 +76,23 @@
         exec-once = ags
       '';
 
-      #------------------------------------------------------------------
       # Package Definitions
-      #------------------------------------------------------------------
       package = inputs.hyprland.packages.${pkgs.system}.hyprland;
       portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
       plugins = [
         inputs.hy3.packages.${pkgs.system}.hy3
       ];
 
-      #------------------------------------------------------------------
       # Settings Configuration
-      #------------------------------------------------------------------
       settings = {
-        #==============================================================
         # Monitor & Display Settings
-        #==============================================================
         monitor = [
           "DP-4,highres@highrr,0x0,1"
           "DP-3,highres@highrr,0x0,1"
           "DP-2,5120x1440@239.76,0x0,1"
         ];
 
-        #==============================================================
         # General User Interface Settings
-        #==============================================================
         general = {
           gaps_in = 10;
           gaps_out = 5;
@@ -85,9 +102,7 @@
           layout = "hy3";
         };
 
-        #==============================================================
         # Input Settings (keyboard & mouse)
-        #==============================================================
         input = {
           kb_layout = "us";
           follow_mouse = 1;
@@ -96,16 +111,12 @@
           mouse_refocus = false;
         };
 
-        #==============================================================
         # Theme & Colors
-        #==============================================================
         "$active_colour" = "ffffffff";
         "$transparent" = "00000000";
         "$inactive_colour" = "333333ff";
 
-        #==============================================================
         # Window Decoration & Effects
-        #==============================================================
         decoration = {
           rounding = 0;
           blur = {
@@ -120,9 +131,7 @@
           };
         };
 
-        #==============================================================
         # Animation Settings
-        #==============================================================
         animations = {
           enabled = 0;
           bezier = [
@@ -137,9 +146,7 @@
           ];
         };
 
-        #--------------------------------------------------------------
         # Application Shortcut Variables
-        #--------------------------------------------------------------
         "$mod" = "SUPER";
         "$mod2" = "ALT";
         "$term" = profile.defaultTerminal.command;
@@ -150,9 +157,7 @@
         "$ide" = profile.defaultIde.command;
         "$obs" = "obs";
 
-        #--------------------------------------------------------------
         # Window Management Rules
-        #--------------------------------------------------------------
         windowrulev2 = [
           "float, center, size 300 600, class:^(launcher)"
           "float, mouse, size 300 300, title:^(Smile)"
@@ -166,9 +171,7 @@
           "blur, fabric"
         ];
 
-        #--------------------------------------------------------------
         # Keybindings Configuration
-        #--------------------------------------------------------------
         bind = lib.lists.flatten [
           # -- Essential Controls --
           [
@@ -245,22 +248,16 @@
           ]
         ];
 
-        #--------------------------------------------------------------
         # Additional Mouse Bindings
-        #--------------------------------------------------------------
         bindm = [
           "$mod, mouse:272, movewindow"
           "$mod, mouse:273, resizewindow"
         ];
 
-        #--------------------------------------------------------------
         # Single-Line Binding for Toggling Stats
-        #--------------------------------------------------------------
         bindr = "$mod, W, exec, ags -r 'hideStats()'";
 
-        #--------------------------------------------------------------
         # System & Debug Settings
-        #--------------------------------------------------------------
         misc = {
           disable_hyprland_logo = true;
           disable_splash_rendering = true;
@@ -277,6 +274,9 @@
       };
     };
 
+    ###########################################################################
+    # Shell Environment Configuration
+    ###########################################################################
     programs.zsh = {
       envExtra = lib.mkIf (builtins.elem "nvidia" profile.features) ''
         # Hyprland NVIDIA environment variables

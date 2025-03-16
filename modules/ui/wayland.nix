@@ -1,11 +1,33 @@
+###############################################################################
+# Wayland Module
+# Configures Wayland-specific settings and utilities
+# - Sets Wayland environment variables
+# - Installs Wayland-specific utilities
+# - Provides consistent Wayland experience across applications
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}: {
-  config = {
+}: let
+  cfg = config.modules.ui.wayland;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.ui.wayland = {
+    enable = lib.mkEnableOption "Wayland configuration";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Environment Variables
+    ###########################################################################
     programs.zsh = {
       envExtra = ''
         # Wayland environment variables
@@ -20,7 +42,9 @@
       '';
     };
 
-    # Add Wayland-specific packages
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       grim # Screenshot utility for Wayland
       slurp # Screen region selector tool
