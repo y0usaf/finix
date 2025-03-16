@@ -286,7 +286,7 @@
     }
 
     .tabbrowser-tab[fadein]{
-    max-width: 100vw !important
+    max-width: 100vw !important;
     text-align: center!important
      }
 
