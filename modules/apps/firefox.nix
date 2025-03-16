@@ -334,10 +334,10 @@
 
     #urlbar:not([breakout][breakout-extend]) #urlbar-input,#urlbar:not([focused]) #urlbar-input {
         text-align: center!important;
-        width: 50vw!important
     }
 
     #urlbar-background,#urlbar-input-container {
+        width: 50vw!important
         --toolbarbutton-border-radius: 0px!important;
         --urlbar-icon-border-radius: 0px!important
     }
