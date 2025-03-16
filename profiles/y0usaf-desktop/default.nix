@@ -118,6 +118,11 @@ in {
         "file://${homeDir}/Dev Dev" # Bookmark for your Development directory.
         "file://${homeDir}/.local/share/Steam Steam" # Bookmark for the Steam folder.
       ];
+
+      # Personal packages that should be installed
+      packages = with pkgs; [
+        realesrgan-ncnn-vulkan
+      ];
     };
 
     # Application Modules
@@ -186,12 +191,4 @@ in {
       fhs.enable = true;
     };
   };
-
-  #=======================================================================
-  # Additional Packages
-  #=======================================================================
-  # Add any personal packages here. This package is for image upscaling.
-  personalPackages = with pkgs; [
-    realesrgan-ncnn-vulkan
-  ];
 }

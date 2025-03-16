@@ -68,7 +68,7 @@
   userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
 
   # Combine all package sources
-  finalPackages = userPackages ++ profile.personalPackages;
+  finalPackages = userPackages ++ (profile.modules.user.packages or []);
 in {
   ###########################################################################
   # Core Home Settings
