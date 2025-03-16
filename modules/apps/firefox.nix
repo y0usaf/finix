@@ -285,6 +285,8 @@
         padding-bottom: 0!important
     }
 
+    .tabbrowser-tab[fadein]{ max-width: 100vw !important }
+
     #TabsToolbar,#titlebar,toolbar {
         margin-bottom: 0!important
     }
