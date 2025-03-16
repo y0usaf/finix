@@ -11,8 +11,20 @@
   lib,
   profile,
   ...
-}: {
-  config = {
+}: let
+  cfg = config.modules.apps.discord;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.discord = {
+    enable = lib.mkEnableOption "Discord Canary module";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
       # Create a wrapper script in PATH for Discord Canary
       (writeShellScriptBin "discord-canary" ''

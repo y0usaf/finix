@@ -84,6 +84,9 @@ in {
   # Import all modules
   imports = allModules;
 
+  # Pass module configurations from profile
+  modules = profile.modules or {};
+
   ###########################################################################
   # Program Configurations
   ###########################################################################

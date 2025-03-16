@@ -168,6 +168,15 @@ in {
   };
 
   #=======================================================================
+  # Module Configurations
+  #=======================================================================
+  # Enable specific modules based on your needs
+  modules = {
+    apps.discord.enable = false;
+    # Add other modules here as you create them
+  };
+
+  #=======================================================================
   # Personal Packages
   #=======================================================================
   # Add any personal packages here. This package is for image upscaling.
