@@ -17,7 +17,7 @@
     # Install wallust package and custom hyprpaper
     home.packages = [
       pkgs.wallust
-      inputs.hyprpaper.packages.${pkgs.system}.default
+      #inputs.hyprpaper.packages.${pkgs.system}.default
     ];
   };
 }

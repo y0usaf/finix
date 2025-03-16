@@ -61,7 +61,7 @@ in {
     "backup"
     "nvim"
     "webapps"
-    #"wallust"
+    "wallust"
     "syncthing"
     "vscode"
     "zellij"
