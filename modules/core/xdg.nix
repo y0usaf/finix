@@ -38,7 +38,7 @@ in {
         createDirectories = true;
         extraConfig = {
           XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/Pictures/Screenshots";
-          XDG_WALLPAPERS_DIR = "${profile.wallpaperDir}";
+          XDG_WALLPAPERS_DIR = "${profile.modules.directories.wallpapers.static.path}";
         };
       };
 

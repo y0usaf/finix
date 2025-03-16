@@ -74,9 +74,9 @@ in {
   # Core Home Settings
   ###########################################################################
   home = {
-    username = profile.username;
-    homeDirectory = profile.homeDirectory;
-    stateVersion = profile.stateVersion;
+    username = profile.modules.system.username;
+    homeDirectory = profile.modules.system.homeDirectory;
+    stateVersion = profile.modules.system.stateVersion;
     enableNixpkgsReleaseCheck = false;
     packages = finalPackages;
   };
@@ -92,7 +92,7 @@ in {
   ###########################################################################
   programs.nh = {
     enable = true;
-    flake = profile.flakeDir;
+    flake = profile.modules.directories.flake.path;
     clean = {
       enable = true;
       dates = "weekly";

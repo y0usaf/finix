@@ -48,11 +48,11 @@ in {
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 extraSpecialArgs = commonSpecialArgs // {profile = profiles.${hostname};};
-                users.${profiles.${hostname}.username} = {
+                users.${profiles.${hostname}.modules.system.username} = {
                   imports = [../../home.nix];
                   home = {
-                    stateVersion = profiles.${hostname}.stateVersion;
-                    homeDirectory = inputs.nixpkgs.lib.mkForce profiles.${hostname}.homeDirectory;
+                    stateVersion = profiles.${hostname}.modules.system.stateVersion;
+                    homeDirectory = inputs.nixpkgs.lib.mkForce profiles.${hostname}.modules.system.homeDirectory;
                   };
                 };
               };
@@ -78,7 +78,7 @@ in {
           inherit pkgs;
         };
       in {
-        name = profileConfig.username;
+        name = profileConfig.modules.system.username;
         value = inputs.home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = commonSpecialArgs // {profile = profileConfig;};

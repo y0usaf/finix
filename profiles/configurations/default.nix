@@ -46,9 +46,9 @@ in {
     # Core System Settings
     # System identity and behavior configuration
     ###########################################################################
-    system.stateVersion = profile.stateVersion; # Ensures compatibility when upgrading.
-    time.timeZone = profile.timezone; # Set the system's time zone.
-    networking.hostName = profile.hostname; # Define the system's hostname.
+    system.stateVersion = profile.modules.system.stateVersion; # Ensures compatibility when upgrading.
+    time.timeZone = profile.modules.system.timezone; # Set the system's time zone.
+    networking.hostName = profile.modules.system.hostname; # Define the system's hostname.
     nixpkgs.config.allowUnfree = true; # Allow installation of unfree (proprietary) packages.
 
     ###########################################################################
@@ -69,7 +69,7 @@ in {
         cores = 0;
         experimental-features = ["nix-command" "flakes"];
         sandbox = true;
-        trusted-users = ["root" profile.username];
+        trusted-users = ["root" profile.modules.system.username];
         builders-use-substitutes = true;
         fallback = true;
 
@@ -241,7 +241,7 @@ in {
       # Configure sudo so that the primary user can run all commands without a password.
       sudo.extraRules = [
         {
-          users = [profile.username]; # The user defined in the profile.
+          users = [profile.modules.system.username]; # The user defined in the profile.
           commands = [
             {
               command = "ALL"; # Allow all commands.
@@ -271,7 +271,7 @@ in {
     # User Account Settings
     # User accounts, permissions, and shell configuration
     ###########################################################################
-    users.users.${profile.username} = {
+    users.users.${profile.modules.system.username} = {
       isNormalUser = true; # Defines the account as a standard user account.
       shell = pkgs.zsh; # Set Zsh as the default shell for this user.
       extraGroups =

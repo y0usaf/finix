@@ -37,7 +37,7 @@ in {
     ###########################################################################
     xdg.configFile."streamlink/config".text = ''
       # Player settings
-      player=${profile.defaultMediaPlayer.command}
+      player=${profile.modules.defaults.mediaPlayer.command}
       player-no-close
       player-continuous-http
 

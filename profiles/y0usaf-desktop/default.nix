@@ -12,83 +12,32 @@
   homeDir = "/home/${username}";
 in {
   #=======================================================================
-  # System Identity and Core Settings
-  #=======================================================================
-  # Explicitly set the username in the configuration.
-  username = username;
-
-  # Set the path to your home directory.
-  # This is a critical parameter; many paths in this file depend on it.
-  homeDirectory = homeDir;
-
-  # Set your machine's hostname.
-  # NOTE: This should be unique across your network.
-  hostname = "y0usaf-desktop";
-
-  # Define the NixOS state version.
-  # BEWARE: Changing this version may cause rebuild issues or incompatibility with existing configurations.
-  stateVersion = "24.11";
-
-  # Define your timezone.
-  # CHANGE THIS if you're not in America/Toronto, or suffer the consequences.
-  timezone = "America/Toronto";
-
-  #=======================================================================
-  # Directory Configurations
-  #=======================================================================
-  # Define important directories used in the configuration.
-  flakeDir = "${homeDir}/nixos"; # The directory where your Nix flake configuration lives.
-  musicDir = "${homeDir}/Music"; # Path to your Music folder.
-  dcimDir = "${homeDir}/DCIM"; # Where your DCIM/photos are stored.
-  steamDir = "${homeDir}/.local/share/Steam"; # Path for Steam; ensure this is correct!
-  # Wallpapers are split into static (32:9) and video types.
-  wallpaperDir = "${homeDir}/DCIM/Wallpapers/32_9"; # Directory for 32:9 wallpapers.
-  wallpaperVideoDir = "${homeDir}/DCIM/Wallpapers_Video"; # Directory for video wallpapers.
-
-  # More structured directory configuration
-  directories = {
-    # Path to the Nix flake configuration directory.
-    flake.path = "${homeDir}/nixos";
-    # Music directory path.
-    music.path = "${homeDir}/Music";
-    # DCIM directory path for photos.
-    dcim.path = "${homeDir}/DCIM";
-    # Configuration for the Steam directory.
-    steam = {
-      path = "${homeDir}/.local/share/Steam";
-      create = false; # DO NOT automatically create this directory—Steam manages it!
-    };
-  };
-
-  #=======================================================================
-  # Appearance and UI Settings
-  #=======================================================================
-  # These appearance settings have been moved to modules.appearance below
-
-  #=======================================================================
-  # User Preferences and Customization
-  #=======================================================================
-  # Git and Version Control Settings
-  gitName = "y0usaf"; # Your Git author name.
-  gitEmail = "OA99@Outlook.com"; # Your Git email. Double-check it—it's used for commit history.
-  gitHomeManagerRepoUrl = "git@github.com:y0usaf/nixos.git"; # URL to your home manager repository.
-
-  # Bookmarks for file manager
-  bookmarks = [
-    "file://${homeDir}/Downloads Downloads" # Bookmark for the Downloads folder.
-    "file://${homeDir}/Music Music" # Bookmark for your Music folder.
-    "file://${homeDir}/DCIM DCIM" # Bookmark for your DCIM/photos folder.
-    "file://${homeDir}/Pictures Pictures" # Bookmark for Pictures.
-    "file://${homeDir}/nixos NixOS" # Bookmark for your NixOS config folder.
-    "file://${homeDir}/Dev Dev" # Bookmark for your Development directory.
-    "file://${homeDir}/.local/share/Steam Steam" # Bookmark for the Steam folder.
-  ];
-
-  #=======================================================================
   # Module Configurations
   #=======================================================================
   # Enable specific modules based on your needs
   modules = {
+    # System Identity and Core Settings
+    system = {
+      # Explicitly set the username in the configuration.
+      username = username;
+
+      # Set the path to your home directory.
+      # This is a critical parameter; many paths in this file depend on it.
+      homeDirectory = homeDir;
+
+      # Set your machine's hostname.
+      # NOTE: This should be unique across your network.
+      hostname = "y0usaf-desktop";
+
+      # Define the NixOS state version.
+      # BEWARE: Changing this version may cause rebuild issues or incompatibility with existing configurations.
+      stateVersion = "24.11";
+
+      # Define your timezone.
+      # CHANGE THIS if you're not in America/Toronto, or suffer the consequences.
+      timezone = "America/Toronto";
+    };
+
     # UI and Display Modules
     ui = {
       hyprland.enable = true;
@@ -135,6 +84,42 @@ in {
       };
     };
 
+    # Directory and Path Configurations
+    directories = {
+      flake.path = "${homeDir}/nixos";
+      music.path = "${homeDir}/Music";
+      dcim.path = "${homeDir}/DCIM";
+      steam = {
+        path = "${homeDir}/.local/share/Steam";
+        create = false; # DO NOT automatically create this directory—Steam manages it!
+      };
+      wallpapers = {
+        static.path = "${homeDir}/DCIM/Wallpapers/32_9";
+        video.path = "${homeDir}/DCIM/Wallpapers_Video";
+      };
+    };
+
+    # User Preferences and Customization
+    user = {
+      # Git and Version Control Settings
+      git = {
+        name = "y0usaf"; # Your Git author name.
+        email = "OA99@Outlook.com"; # Your Git email. Double-check it—it's used for commit history.
+        homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git"; # URL to your home manager repository.
+      };
+
+      # Bookmarks for file manager
+      bookmarks = [
+        "file://${homeDir}/Downloads Downloads" # Bookmark for the Downloads folder.
+        "file://${homeDir}/Music Music" # Bookmark for your Music folder.
+        "file://${homeDir}/DCIM DCIM" # Bookmark for your DCIM/photos folder.
+        "file://${homeDir}/Pictures Pictures" # Bookmark for Pictures.
+        "file://${homeDir}/nixos NixOS" # Bookmark for your NixOS config folder.
+        "file://${homeDir}/Dev Dev" # Bookmark for your Development directory.
+        "file://${homeDir}/.local/share/Steam Steam" # Bookmark for the Steam folder.
+      ];
+    };
+
     # Application Modules
     apps = {
       discord.enable = true;
@@ -152,11 +137,6 @@ in {
       syncthing.enable = true;
       webapps.enable = true;
       zen-browser.enable = false;
-    };
-
-    # Development Modules
-    dev = {
-      fhs.enable = true; # Enable the FHS development environment
     };
 
     defaults = {
@@ -200,6 +180,10 @@ in {
         package = pkgs.mpv;
         command = "mpv";
       };
+    };
+
+    dev = {
+      fhs.enable = true;
     };
   };
 

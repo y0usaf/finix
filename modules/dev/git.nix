@@ -20,8 +20,9 @@
   # Enable Git and configure user settings as defined in the profile.
   programs.git = {
     enable = true;
-    userName = profile.gitName;
-    userEmail = profile.gitEmail;
+    # Update to use the new nested structure for git user information
+    userName = profile.modules.user.git.name;
+    userEmail = profile.modules.user.git.email;
 
     #-----------------------------------------------------------------
     # Extra Git Configurations:
@@ -55,9 +56,9 @@
   home.activation = {
     setupGitRepo = lib.hm.dag.entryAfter ["writeBoundary"] ''
       # Only clone if the "nixos" directory does not exist within homeDirectory.
-      if [ ! -d "${profile.homeDirectory}/nixos" ]; then
+      if [ ! -d "${profile.modules.system.homeDirectory}/nixos" ]; then
         echo "Setting up NixOS configuration repository..."
-        git clone ${profile.gitHomeManagerRepoUrl} ${profile.homeDirectory}/nixos
+        git clone ${profile.modules.user.git.homeManagerRepoUrl} ${profile.modules.system.homeDirectory}/nixos
       fi
     '';
   };
@@ -100,7 +101,7 @@
         sleep 2
 
         # Switch to the NixOS configuration repository directory
-        cd ${profile.homeDirectory}/nixos
+        cd ${profile.modules.system.homeDirectory}/nixos
 
         # Assess if there are any changes (tracked or untracked)
         if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then

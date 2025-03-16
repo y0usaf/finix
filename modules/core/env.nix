@@ -59,7 +59,7 @@ in {
   #############################################################################
   # CONFIGURE HOME-MANAGER SETTINGS FOR USER: ${profile.username}
   #############################################################################
-  home-manager.users.${profile.username} = {
+  home-manager.users.${profile.modules.system.username} = {
     # -------------------------------------------------------------------------
     # User Home Session Variables & Executable Paths
     # -------------------------------------------------------------------------

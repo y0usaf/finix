@@ -244,7 +244,7 @@ in {
 
           # -- Special Commands --
           [
-            "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${profile.wallpaperDir}\""
+            "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${profile.modules.directories.wallpapers.static.path}\""
           ]
         ];
 

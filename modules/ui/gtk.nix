@@ -70,7 +70,7 @@ in {
         gtk-application-prefer-dark-theme = 1;
       };
 
-      bookmarks = profile.bookmarks;
+      bookmarks = profile.modules.user.bookmarks;
 
       # ---------------------------------------------------------------
       # Custom CSS for GTK3 applications
