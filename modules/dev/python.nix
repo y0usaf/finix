@@ -1,11 +1,34 @@
+###############################################################################
+# Python Development Module
+# Provides Python development environment with necessary libraries and tools
+# - Python 3 and Python 3.12 interpreters
+# - UV package manager for faster dependency resolution
+# - System libraries and build tools for Python packages
+# - Environment configuration for proper Python operation in Nix
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}: {
-  config = {
+}: let
+  cfg = config.modules.dev.python;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.dev.python = {
+    enable = lib.mkEnableOption "Python development environment";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       # Python and UV
       python3 # Basic Python 3 interpreter
@@ -34,6 +57,9 @@
       binutils
     ];
 
+    ###########################################################################
+    # Environment Variables
+    ###########################################################################
     home.sessionVariables = {
       PYTHONUSERBASE = "${config.xdg.dataHome}/python";
       PIP_CACHE_DIR = "${config.xdg.cacheHome}/pip";

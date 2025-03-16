@@ -157,6 +157,14 @@ in {
     # Development
     dev = {
       fhs.enable = true;
+      claude-code.enable = true;
+      git.enable = true;
+      mcp.enable = true;
+      npm.enable = true;
+      nvim.enable = true;
+      python.enable = true;
+      zellij.enable = true;
+      cursor-ide.enable = true;
     };
   };
 }

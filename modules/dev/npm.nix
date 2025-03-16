@@ -1,19 +1,39 @@
-#─────────────────────── 📦 NODE.JS & NPM CONFIG ───────────────────────#
-# 🔄 Node.js runtime and NPM package management                         #
-# 🎯 XDG compliance and global package installation                     #
-#──────────────────────────────────────────────────────────────────────#
+###############################################################################
+# Node.js & NPM Configuration
+# Configures Node.js runtime and NPM package management
+# - XDG compliance for NPM directories
+# - Global package installation support
+# - Proper environment variable configuration
+###############################################################################
 {
   config,
   pkgs,
   lib,
-  profile,
   ...
-}: {
-  config = {
+}: let
+  cfg = config.modules.dev.npm;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.dev.npm = {
+    enable = lib.mkEnableOption "Node.js and NPM configuration";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       nodejs_20
     ];
 
+    ###########################################################################
+    # Configuration Files
+    ###########################################################################
     # NPM global config - use XDG directories
     xdg.configFile."npm/npmrc".text = ''
       prefix=${config.xdg.dataHome}/npm
@@ -22,6 +42,9 @@
       store-dir=${config.xdg.cacheHome}/pnpm/store
     '';
 
+    ###########################################################################
+    # Environment Variables
+    ###########################################################################
     # Add npm bin directory to PATH
     home.sessionPath = [
       "${config.xdg.dataHome}/npm/bin"
@@ -35,6 +58,9 @@
       '';
     };
 
+    ###########################################################################
+    # Activation Scripts
+    ###########################################################################
     # Set up NPM directories
     home.activation.npmSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
       # Set up environment for npm
