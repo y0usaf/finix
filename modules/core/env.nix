@@ -26,7 +26,7 @@ let
   };
 
   # --- NVIDIA-Specific Environment Variables ------------------------------
-  nvidiaEnv = lib.mkIf (builtins.elem "nvidia" profile.features) {
+  nvidiaEnv = lib.mkIf (profile.modules.core.nvidia.enable) {
     NVIDIA_DRIVER_CAPABILITIES = "all";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     WLR_NO_HARDWARE_CURSORS = "1";
@@ -76,7 +76,7 @@ in {
     };
 
     programs.zsh = {
-      envExtra = lib.mkIf (builtins.elem "sync-tokens" profile.features) ''
+      envExtra = ''
         # Token management function
         export_vars_from_files() {
             local dir_path=$1

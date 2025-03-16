@@ -1,19 +1,33 @@
-#===============================================================================
-#                      🚀 CUDA Development Configuration 🚀
-#===============================================================================
-# 🧠 NVIDIA CUDA Toolkit
-# 🔧 Development libraries and tools
-# 🛠️ Environment configuration
-#===============================================================================
+###############################################################################
+# CUDA Development Module
+# Configuration for NVIDIA CUDA development environment
+# - CUDA Toolkit and development libraries
+# - Environment variables for CUDA development
+# - Library paths and compiler settings
+###############################################################################
 {
   config,
   pkgs,
   lib,
   profile,
   ...
-}: {
-  config = {
-    # Install CUDA development packages
+}: let
+  cfg = config.modules.core.nvidia.cuda;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.core.nvidia.cuda = {
+    enable = lib.mkEnableOption "CUDA development environment";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = with pkgs; [
       # Core CUDA toolkit
       cudaPackages.cudatoolkit
@@ -28,7 +42,9 @@
       cudaPackages.cuda_gdb
     ];
 
-    # Set CUDA environment variables
+    ###########################################################################
+    # Environment Variables
+    ###########################################################################
     home.sessionVariables = {
       CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
       CUDA_HOME = "${pkgs.cudaPackages.cudatoolkit}";
@@ -46,7 +62,6 @@
       "${pkgs.cudaPackages.cudatoolkit}/bin"
     ];
 
-    # Add CUDA environment variables to shell
     programs.zsh = {
       envExtra = ''
         # CUDA environment setup
@@ -65,7 +80,9 @@
       '';
     };
 
-    # Create XDG directories for CUDA
+    ###########################################################################
+    # Activation Scripts
+    ###########################################################################
     home.activation.createCudaDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
       $DRY_RUN_CMD mkdir -p ${config.xdg.cacheHome}/nv
       $DRY_RUN_CMD mkdir -p ${config.xdg.cacheHome}/nvidia

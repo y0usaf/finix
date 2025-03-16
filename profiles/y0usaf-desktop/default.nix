@@ -31,19 +31,6 @@ in {
   timezone = "America/Toronto";
 
   #=======================================================================
-  # Feature Flags
-  #=======================================================================
-  # The following list enables specific features and modules.
-  # DO NOT fiddle with these unless you completely understand what each flag triggers.
-  features = [
-    "nvidia"
-    "hyprland"
-    "wayland"
-    "gaming"
-    "sync-tokens"
-  ];
-
-  #=======================================================================
   # Directory Configurations
   #=======================================================================
   # Define important directories used in the configuration.
@@ -195,6 +182,7 @@ in {
     };
     core = {
       nvidia.enable = true;
+      nvidia.cuda.enable = true;
       amdgpu.enable = false;
       ssh.enable = true;
       xdg.enable = true;

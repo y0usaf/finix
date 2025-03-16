@@ -37,19 +37,19 @@
 
     # Disable hardware acceleration if using Nvidia
     "gfx.webrender.all" =
-      if (builtins.elem "nvidia" profile.features)
+      if profile.modules.core.nvidia.enable
       then false
       else true;
     "media.hardware-video-decoding.enabled" =
-      if (builtins.elem "nvidia" profile.features)
+      if profile.modules.core.nvidia.enable
       then false
       else true;
     "media.ffmpeg.vaapi.enabled" =
-      if (builtins.elem "nvidia" profile.features)
+      if profile.modules.core.nvidia.enable
       then false
       else true;
     "layers.acceleration.disabled" =
-      if (builtins.elem "nvidia" profile.features)
+      if profile.modules.core.nvidia.enable
       then true
       else false;
 

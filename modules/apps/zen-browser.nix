@@ -25,10 +25,10 @@
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
 
     # Nvidia-specific settings
-    "gfx.webrender.all" = !(builtins.elem "nvidia" profile.features);
-    "media.hardware-video-decoding.enabled" = !(builtins.elem "nvidia" profile.features);
-    "media.ffmpeg.vaapi.enabled" = !(builtins.elem "nvidia" profile.features);
-    "layers.acceleration.disabled" = builtins.elem "nvidia" profile.features;
+    "gfx.webrender.all" = !(profile.modules.core.nvidia.enable);
+    "media.hardware-video-decoding.enabled" = !(profile.modules.core.nvidia.enable);
+    "media.ffmpeg.vaapi.enabled" = !(profile.modules.core.nvidia.enable);
+    "layers.acceleration.disabled" = profile.modules.core.nvidia.enable;
   };
 
   # Helper function to write settings to user.js format
@@ -69,7 +69,7 @@ in {
   ###########################################################################
   # Module Configuration
   ###########################################################################
-  config = lib.mkIf (cfg.enable || (builtins.elem "zen-browser" profile.features)) {
+  config = lib.mkIf cfg.enable {
     ###########################################################################
     # Packages
     ###########################################################################

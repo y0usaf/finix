@@ -15,9 +15,9 @@
   config = {
     # Create the FHS environment for development
     home.packages = let
-      # Define CUDA packages conditionally
+      # Define CUDA packages conditionally based on nvidia.cuda.enable
       cudaPkgs =
-        if (builtins.elem "cuda" profile.features)
+        if (config.modules.core.nvidia.cuda.enable or false)
         then [
           pkgs.cudaPackages.cudatoolkit
           pkgs.cudaPackages.cuda_nvcc

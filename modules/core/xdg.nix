@@ -150,7 +150,7 @@ in {
         TEXMFVAR = "${config.xdg.cacheHome}/texlive/texmf-var";
         SSB_HOME = "${config.xdg.dataHome}/zoom";
       }
-      (lib.mkIf (builtins.elem "nvidia" profile.features) {
+      (lib.mkIf profile.modules.core.nvidia.enable {
         __GL_SHADER_DISK_CACHE_PATH = "${config.xdg.cacheHome}/nv";
       })
     ];

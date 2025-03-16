@@ -72,7 +72,7 @@ in {
       };
 
       # Add AGS autostart if the feature is enabled
-      extraConfig = lib.mkIf (builtins.elem "ags" profile.features) ''
+      extraConfig = ''
         exec-once = ags
       '';
 
@@ -266,7 +266,7 @@ in {
         debug.disable_logs = false;
 
         # Add NVIDIA-specific environment settings
-        env = lib.mkIf (builtins.elem "nvidia" profile.features) [
+        env = lib.mkIf (profile.modules.core.nvidia.enable) [
           "LIBVA_DRIVER_NAME,nvidia"
           "GBM_BACKEND,nvidia-drm"
           "__GLX_VENDOR_LIBRARY_NAME,nvidia"
@@ -278,7 +278,7 @@ in {
     # Shell Environment Configuration
     ###########################################################################
     programs.zsh = {
-      envExtra = lib.mkIf (builtins.elem "nvidia" profile.features) ''
+      envExtra = lib.mkIf (profile.modules.core.nvidia.enable) ''
         # Hyprland NVIDIA environment variables
         export LIBVA_DRIVER_NAME=nvidia
         export XDG_SESSION_TYPE=wayland
