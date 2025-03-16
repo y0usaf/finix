@@ -273,9 +273,11 @@
     }
 
     #nav-bar {
-        margin: -1px 0 0!important;
+        margin: -1px auto 0!important;
         border-top: none!important;
-        width: 50vw!important
+        width: 75vw!important;
+        left: 0!important;
+        right: 0!important;
     }
 
     #titlebar {
