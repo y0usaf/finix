@@ -3,7 +3,7 @@
 # Central configuration file for user-specific settings
 # - Manages user packages and applications
 # - Configures user environment and services
-# - Handles feature-based module imports
+# - Handles module imports
 ###############################################################################
 {
   # Parameters provided to this configuration:
@@ -15,83 +15,39 @@
   ...
 }: let
   ###########################################################################
-  # FEATURES LOGIC - Isolated for future removal
+  # Module Discovery
   ###########################################################################
-  t = lib.types;
-
-  # Module discovery logic
+  # Find all module files recursively
   findModules = dir: let
     contents = builtins.readDir dir;
-    handleEntry = name: type:
+
+    handleEntry = name: type: let
+      path = "${dir}/${name}";
+    in
       if type == "regular" && lib.hasSuffix ".nix" name
-      then ["${dir}/${name}"]
+      then [path]
       else if type == "directory"
-      then findModules "${dir}/${name}"
+      then findModules path
       else [];
   in
     lib.flatten (lib.mapAttrsToList handleEntry contents);
 
-  moduleFiles = findModules ./modules;
+  # Get all module files and filter out problematic ones
+  allFiles = findModules ./modules;
 
-  # Extract feature names from paths
-  validFeatures =
-    builtins.map (
-      path: let
-        fileName = builtins.baseNameOf path;
-        nameWithoutExt = builtins.elemAt (builtins.split "\\." fileName) 0;
-      in
-        nameWithoutExt
+  # Explicitly filter out problematic files
+  moduleFiles =
+    builtins.filter (
+      path:
+        !(lib.hasSuffix "template.nix" path)
+        && !(lib.hasSuffix "env.nix" path)
+        && !(lib.hasSuffix "profiles.nix" path)
+        && !(lib.hasSuffix "android.nix" path)
     )
-    moduleFiles;
+    allFiles;
 
-  # Feature-based package computation
-  features = profile.features;
-
-  # This function doesn't seem to be working as intended
-  # It's checking if a feature name exists as a key in options
-  # But feature names are not keys in the options attrset
-  featurePackages = []; # Simplified as the original logic appears broken
-
-  # Module imports logic
-  imports = let
-    # Core modules
-    coreModules =
-      builtins.filter (
-        path: lib.hasPrefix "${toString ./modules/core}/" path
-      )
-      moduleFiles;
-
-    # Feature-based modules
-    featureModules = lib.flatten (map (
-        feature: let
-          isDirectory = builtins.pathExists (./modules + "/${feature}");
-          directoryModules =
-            if isDirectory
-            then
-              builtins.filter (
-                path: lib.hasPrefix "${toString ./modules}/${feature}/" path
-              )
-              moduleFiles
-            else [];
-
-          exactMatchModules =
-            builtins.filter (
-              path: let
-                fileName = builtins.baseNameOf path;
-                nameWithoutExt = builtins.elemAt (builtins.split "\\." fileName) 0;
-              in
-                nameWithoutExt == feature
-            )
-            moduleFiles;
-        in
-          directoryModules ++ exactMatchModules
-      )
-      features);
-  in
-    coreModules ++ featureModules;
-  ###########################################################################
-  # END FEATURES LOGIC
-  ###########################################################################
+  # Import all modules
+  allModules = moduleFiles;
 
   ###########################################################################
   # Package Management
@@ -112,7 +68,7 @@
   userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
 
   # Combine all package sources
-  finalPackages = featurePackages ++ userPackages ++ profile.personalPackages;
+  finalPackages = userPackages ++ profile.personalPackages;
 in {
   ###########################################################################
   # Core Home Settings
@@ -125,8 +81,8 @@ in {
     packages = finalPackages;
   };
 
-  # Import modules based on features
-  imports = imports;
+  # Import all modules
+  imports = allModules;
 
   ###########################################################################
   # Program Configurations
