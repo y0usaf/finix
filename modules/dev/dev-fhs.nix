@@ -1,21 +1,31 @@
-#===============================================================================
-#                      🏗️ Universal FHS Development Environment 🏗️
-#===============================================================================
-# 🧰 Provides a standard Linux filesystem hierarchy for development tools
-# 🔄 Compatible with Python, Node.js, CUDA, and other development tools
-# 🛠️ Allows using UV for Python environment management within FHS
-#===============================================================================
+###############################################################################
+# Universal FHS Development Environment
+# Provides a standard Linux filesystem hierarchy for development tools
+# - Compatible with Python, Node.js, CUDA, and other development tools
+# - Allows using UV for Python environment management within FHS
+# - Creates a consistent development environment across NixOS systems
+###############################################################################
 {
   config,
   pkgs,
   lib,
-  profile,
   ...
-}: {
-  config = {
+}: let
+  cfg = config.modules.dev.fhs;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.dev.fhs = {
+    enable = lib.mkEnableOption "FHS development environment";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
     # Create the FHS environment for development
     home.packages = let
-      # Define CUDA packages conditionally based on nvidia.cuda.enable
       cudaPkgs =
         if (config.modules.core.nvidia.cuda.enable or false)
         then [
@@ -93,47 +103,52 @@
       })
     ];
 
-    # Add shell aliases for convenience through the zsh module
-    programs.zsh.shellAliases = {
-      dev = "devenv";
-      fhs = "devenv";
+    ###########################################################################
+    # Shell Configuration
+    ###########################################################################
+    programs.zsh = {
+      shellAliases = {
+        dev = "devenv";
+        fhs = "devenv";
+      };
+
+      initExtra = ''
+                # ----------------------------
+                # FHS Development Environment
+                # ----------------------------
+
+                # Function to create a UV environment within the FHS env
+                uv-init() {
+                  if [ -z "$1" ]; then
+                    echo "Usage: uv-init <environment-name>"
+                    return 1
+                  fi
+
+                  ENV_NAME="$1"
+                  ENV_PATH="$HOME/.local/venvs/$ENV_NAME"
+
+                  mkdir -p "$HOME/.local/venvs"
+
+                  devenv bash -c "uv venv $ENV_PATH && echo 'Created UV environment at $ENV_PATH'"
+
+                  cat > "$HOME/.local/bin/$ENV_NAME" << EOF
+        #!/usr/bin/env bash
+        devenv bash -c 'source $ENV_PATH/bin/activate && exec bash'
+        EOF
+                  chmod +x "$HOME/.local/bin/$ENV_NAME"
+
+                  echo "🚀 Created environment '$ENV_NAME'. Run '$ENV_NAME' to activate."
+                }
+
+                # Ensure local bin directory exists and is in PATH
+                mkdir -p "$HOME/.local/bin"
+                export PATH="$HOME/.local/bin:$PATH"
+      '';
     };
 
-    # Add initialization code to zsh
-    programs.zsh.initExtra = ''
-            # ----------------------------
-            # FHS Development Environment
-            # ----------------------------
-
-            # Function to create a UV environment within the FHS env
-            uv-init() {
-              if [ -z "$1" ]; then
-                echo "Usage: uv-init <environment-name>"
-                return 1
-              fi
-
-              ENV_NAME="$1"
-              ENV_PATH="$HOME/.local/venvs/$ENV_NAME"
-
-              mkdir -p "$HOME/.local/venvs"
-
-              devenv bash -c "uv venv $ENV_PATH && echo 'Created UV environment at $ENV_PATH'"
-
-              cat > "$HOME/.local/bin/$ENV_NAME" << EOF
-      #!/usr/bin/env bash
-      devenv bash -c 'source $ENV_PATH/bin/activate && exec bash'
-      EOF
-              chmod +x "$HOME/.local/bin/$ENV_NAME"
-
-              echo "🚀 Created environment '$ENV_NAME'. Run '$ENV_NAME' to activate."
-            }
-
-            # Ensure local bin directory exists and is in PATH
-            mkdir -p "$HOME/.local/bin"
-            export PATH="$HOME/.local/bin:$PATH"
-    '';
-
-    # Ensure the local bin directory exists
+    ###########################################################################
+    # Activation Scripts
+    ###########################################################################
     home.activation.createLocalBin = lib.hm.dag.entryAfter ["writeBoundary"] ''
       $DRY_RUN_CMD mkdir -p $HOME/.local/bin
       $DRY_RUN_CMD mkdir -p $HOME/.local/venvs

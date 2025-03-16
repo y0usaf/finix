@@ -195,6 +195,9 @@ in {
         };
       };
     };
+    dev = {
+      fhs.enable = true; # Enable the FHS development environment
+    };
   };
 
   #=======================================================================
