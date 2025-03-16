@@ -38,7 +38,7 @@ in {
   # Additional configuration modules for enhanced modularity
   ###########################################################################
   imports = [
-    ../../modules/core/env.nix # Contains environment-specific options and definitions.
+    ../../modules/system/env.nix # Contains environment-specific options and definitions.
   ];
 
   config = {
