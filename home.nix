@@ -15,17 +15,11 @@
   ...
 }: let
   ###########################################################################
-  # BEGIN: Options Definitions (formerly in profiles/options.nix)
+  # FEATURES LOGIC - Isolated for future removal
   ###########################################################################
   t = lib.types;
-  mkStr = t.str;
-  mkBool = t.bool;
-  mkListOfStr = t.listOf t.str;
-  mkOpt = type: description: lib.mkOption {inherit type description;};
-  mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
 
-  # Dynamically read module filenames and compute valid features.
-  # Recursively find all .nix files in the modules directory and its subdirectories
+  # Module discovery logic
   findModules = dir: let
     contents = builtins.readDir dir;
     handleEntry = name: type:
@@ -34,12 +28,12 @@
       else if type == "directory"
       then findModules "${dir}/${name}"
       else [];
-    entries = lib.mapAttrsToList handleEntry contents;
   in
-    lib.flatten entries;
+    lib.flatten (lib.mapAttrsToList handleEntry contents);
 
   moduleFiles = findModules ./modules;
-  # Extract feature names from paths, removing the .nix extension
+
+  # Extract feature names from paths
   validFeatures =
     builtins.map (
       path: let
@@ -50,40 +44,59 @@
     )
     moduleFiles;
 
-  # Option definitions originally provided by profiles/options.nix
-  options = {
-    corePackages =
-      mkOptDef (t.listOf t.pkg) [] "Essential packages that will always be installed";
-    features =
-      mkOptDef (t.listOf (t.enum validFeatures)) [] "List of enabled features";
-    personalPackages =
-      mkOptDef (t.listOf t.pkg) [] "List of additional packages chosen by the user";
-  };
-
-  ###########################################################################
-  # END: Options Definitions (formerly in profiles/options.nix)
-  ###########################################################################
-
-  ###########################################################################
-  # Define Common Variables
-  ###########################################################################
+  # Feature-based package computation
   features = profile.features;
 
-  ###########################################################################
-  # Compute Feature-based Packages
-  ###########################################################################
-  # Helper function that maps a feature name to its package list
-  packageForFeature = feature:
-    if builtins.hasAttr feature options
-    then options.${feature}
-    else [];
+  # This function doesn't seem to be working as intended
+  # It's checking if a feature name exists as a key in options
+  # But feature names are not keys in the options attrset
+  featurePackages = []; # Simplified as the original logic appears broken
 
-  # Build a flat list of packages based on enabled features
-  featurePackages = lib.flatten (map packageForFeature features);
+  # Module imports logic
+  imports = let
+    # Core modules
+    coreModules =
+      builtins.filter (
+        path: lib.hasPrefix "${toString ./modules/core}/" path
+      )
+      moduleFiles;
+
+    # Feature-based modules
+    featureModules = lib.flatten (map (
+        feature: let
+          isDirectory = builtins.pathExists (./modules + "/${feature}");
+          directoryModules =
+            if isDirectory
+            then
+              builtins.filter (
+                path: lib.hasPrefix "${toString ./modules}/${feature}/" path
+              )
+              moduleFiles
+            else [];
+
+          exactMatchModules =
+            builtins.filter (
+              path: let
+                fileName = builtins.baseNameOf path;
+                nameWithoutExt = builtins.elemAt (builtins.split "\\." fileName) 0;
+              in
+                nameWithoutExt == feature
+            )
+            moduleFiles;
+        in
+          directoryModules ++ exactMatchModules
+      )
+      features);
+  in
+    coreModules ++ featureModules;
+  ###########################################################################
+  # END FEATURES LOGIC
+  ###########################################################################
 
   ###########################################################################
-  # Compute User Profile-specific Packages
+  # Package Management
   ###########################################################################
+  # Extract default applications from profile
   defaultApps = [
     profile.defaultTerminal
     profile.defaultBrowser
@@ -94,65 +107,12 @@
     profile.defaultImageViewer
     profile.defaultDiscord
   ];
+
   # Extract package attribute from each app and filter out nulls
   userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
 
-  ###########################################################################
-  # Combine Final Package List
-  ###########################################################################
+  # Combine all package sources
   finalPackages = featurePackages ++ userPackages ++ profile.personalPackages;
-
-  ###########################################################################
-  # Helper Function: Conditional Module Importer
-  ###########################################################################
-  importFeature = feature: lib.optionals (builtins.elem feature features);
-
-  ###########################################################################
-  # Home-manager Module Imports
-  ###########################################################################
-  imports = let
-    # Find all core modules
-    coreModules =
-      builtins.filter (
-        path: lib.hasPrefix "${toString ./modules/core}/" path
-      )
-      moduleFiles;
-
-    # Feature-based modules
-    featureModules = lib.flatten (map (
-        feature: let
-          # Check if feature is a directory name
-          isDirectory = builtins.pathExists (./modules + "/${feature}");
-
-          # If it's a directory, include all .nix files in that directory
-          directoryModules =
-            if isDirectory
-            then
-              builtins.filter (
-                path: lib.hasPrefix "${toString ./modules}/${feature}/" path
-              )
-              moduleFiles
-            else [];
-
-          # Find all module files that match the feature name exactly
-          exactMatchModules =
-            builtins.filter (
-              path: let
-                fileName = builtins.baseNameOf path;
-                nameWithoutExt = builtins.elemAt (builtins.split "\\." fileName) 0;
-              in
-                nameWithoutExt == feature
-            )
-            moduleFiles;
-
-          # Combine both types of matches
-          matchingModules = directoryModules ++ exactMatchModules;
-        in
-          matchingModules
-      )
-      features);
-  in
-    coreModules ++ featureModules;
 in {
   ###########################################################################
   # Core Home Settings
@@ -165,9 +125,7 @@ in {
     packages = finalPackages;
   };
 
-  ###########################################################################
-  # Home-manager Module Imports
-  ###########################################################################
+  # Import modules based on features
   imports = imports;
 
   ###########################################################################
