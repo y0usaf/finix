@@ -172,8 +172,11 @@ in {
   #=======================================================================
   # Enable specific modules based on your needs
   modules = {
-    apps.discord.enable = false;
-    # Add other modules here as you create them
+    apps = {
+      discord.enable = true;
+      creative.enable = true;
+      chatgpt.enable = true;
+    };
   };
 
   #=======================================================================

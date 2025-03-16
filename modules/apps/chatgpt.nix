@@ -1,3 +1,10 @@
+###############################################################################
+# ChatGPT Module
+# Provides integration for the ChatGPT desktop application
+# - Configures the ChatGPT AppImage with proper environment variables
+# - Sets up desktop integration
+# - Handles audio and graphics dependencies
+###############################################################################
 {
   config,
   pkgs,
@@ -6,9 +13,23 @@
   inputs,
   ...
 }: let
+  cfg = config.modules.apps.chatgpt;
   chatgptAppImage = "/home/y0usaf/nixos/pkg/chatgpt/ChatGpt-Arch-Qt6-x86-64.AppImage";
 in {
-  config = {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.modules.apps.chatgpt = {
+    enable = lib.mkEnableOption "ChatGPT desktop application";
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
     home.packages = [
       (pkgs.writeShellScriptBin "chatgpt" ''
         # Ensure the AppImage is executable
@@ -102,6 +123,9 @@ in {
       pkgs.gst_all_1.gst-plugins-good
     ];
 
+    ###########################################################################
+    # Desktop Entries
+    ###########################################################################
     xdg.desktopEntries = {
       chatgpt = {
         name = "ChatGPT";
