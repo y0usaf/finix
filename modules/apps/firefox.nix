@@ -317,8 +317,6 @@
     #urlbar[breakout][breakout-extend] {
         box-shadow: 0 15px 30px rgba(0,0,0,.2);
         width: 50vw!important;
-        min-width: 50vw!important;
-        max-width: 50vw!important;
         left: 50%!important;
         right: auto!important;
         top: 20vh!important;
@@ -331,7 +329,8 @@
     }
 
     #urlbar:not([breakout][breakout-extend]) #urlbar-input,#urlbar:not([focused]) #urlbar-input {
-        text-align: center!important
+        text-align: center!important;
+        width: 50vw!important
     }
 
     #urlbar-background,#urlbar-input-container {
