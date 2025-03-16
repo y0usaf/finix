@@ -274,7 +274,8 @@
 
     #nav-bar {
         margin: -1px 0 0!important;
-        border-top: none!important
+        border-top: none!important;
+        width: 50vw!important
     }
 
     #titlebar {
@@ -337,7 +338,6 @@
     }
 
     #urlbar-background,#urlbar-input-container {
-        width: 50vw!important
         --toolbarbutton-border-radius: 0px!important;
         --urlbar-icon-border-radius: 0px!important
     }
