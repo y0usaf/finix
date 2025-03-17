@@ -137,6 +137,20 @@ in {
             fi
             nix-shell -p "$1" --run "exec $SHELL"
         }
+
+        # ----------------------------
+        # Function: temprun
+        # ----------------------------
+        # Temporarily runs a Nix package without installing it.
+        temprun() {
+            if [ -z "$1" ]; then
+                echo "Usage: temprun package_name [args...]"
+                return 1
+            fi
+            local pkg="$1"
+            shift
+            nix run "nixpkgs#$pkg" -- "$@"
+        }
       '';
 
       #---------------------------------------------------------------------------
@@ -178,41 +192,6 @@ in {
         dir = "dir --color=auto";
         egrep = "grep -E --color=auto";
         fgrep = "grep -F --color=auto";
-
-        #----- Network Tools Shortcuts -----
-        tailup = "sudo tailscale up";
-        taildown = "sudo tailscale down";
-
-        #----- XDG Portal Tools -----
-        "checkportals" = ''
-          echo "🔍 XDG Portal Status Check"
-          echo "══════════════════════════"
-
-          # Check service status for each portal.
-          echo "📊 Service Status:"
-          for service in xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk; do
-            echo "→ $service:"
-            systemctl --user status $service | grep -E "Active:|●|○|↳" | sed 's/^/  /'
-          done
-
-          # Show recent portal logs.
-          echo "\n📋 Recent Portal Logs:"
-          journalctl -b | grep -iE "(xdg.*portal|portal.*xdg)" | tail -n 10 | while IFS= read -r line; do
-            echo "  $line"
-          done
-
-          # Display DBus interface status for portals.
-          echo "\n🔌 DBus Interface Status:"
-          busctl --user list | grep portal | while IFS= read -r line; do
-            echo "  $line"
-          done
-
-          # Check the portal process status.
-          echo "\n🔍 Portal Process Check:"
-          ps aux | grep -E "[x]dg-desktop-portal" | while IFS= read -r line; do
-            echo "  $line"
-          done
-        '';
 
         #----- Home Manager Repo Aliases -----
         # Adjust the path below to the root of your hm repository.
