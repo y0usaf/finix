@@ -15,6 +15,12 @@ in {
 
     # Core Modules
     core = {
+      git = {
+        enable = true;
+        name = "y0usaf";
+        email = "OA99@Outlook.com";
+        homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
+      };
       nvidia = {
         enable = true;
         cuda.enable = true;
@@ -123,13 +129,20 @@ in {
       zen-browser.enable = false;
     };
 
+    # Development
+    dev = {
+      fhs.enable = true;
+      claude-code.enable = true;
+      mcp.enable = true;
+      npm.enable = true;
+      nvim.enable = true;
+      python.enable = true;
+      zellij.enable = true;
+      cursor-ide.enable = true;
+    };
+
     # User Preferences
     user = {
-      git = {
-        name = "y0usaf";
-        email = "OA99@Outlook.com";
-        homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
-      };
       bookmarks = [
         "file://${homeDir}/Downloads Downloads"
         "file://${homeDir}/Music Music"
@@ -157,19 +170,6 @@ in {
         static.path = "${homeDir}/DCIM/Wallpapers/32_9";
         video.path = "${homeDir}/DCIM/Wallpapers_Video";
       };
-    };
-
-    # Development
-    dev = {
-      fhs.enable = true;
-      claude-code.enable = true;
-      git.enable = true;
-      mcp.enable = true;
-      npm.enable = true;
-      nvim.enable = true;
-      python.enable = true;
-      zellij.enable = true;
-      cursor-ide.enable = true;
     };
   };
 }

@@ -20,15 +20,6 @@ in {
       timezone = mkOpt mkStr "The system timezone.";
     };
 
-    # User preferences and customization
-    user = {
-      git = {
-        name = mkOpt mkStr "Git username.";
-        email = mkOpt mkStr "Git email address.";
-        homeManagerRepoUrl = mkOpt mkStr "URL of the Home Manager repository.";
-      };
-    };
-
     # Core system modules
     core = {
       nvidia = {

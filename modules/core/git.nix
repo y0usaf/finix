@@ -13,13 +13,25 @@
   profile,
   ...
 }: let
-  cfg = config.modules.dev.git;
+  cfg = config.modules.core.git;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.dev.git = {
+  options.modules.core.git = {
     enable = lib.mkEnableOption "git configuration and automation";
+    name = lib.mkOption {
+      type = lib.types.str;
+      description = "Git username.";
+    };
+    email = lib.mkOption {
+      type = lib.types.str;
+      description = "Git email address.";
+    };
+    homeManagerRepoUrl = lib.mkOption {
+      type = lib.types.str;
+      description = "URL of the Home Manager repository.";
+    };
   };
 
   ###########################################################################
@@ -31,8 +43,8 @@ in {
     ###########################################################################
     programs.git = {
       enable = true;
-      userName = profile.modules.user.git.name;
-      userEmail = profile.modules.user.git.email;
+      userName = cfg.name;
+      userEmail = cfg.email;
 
       extraConfig = {
         core = {
@@ -56,9 +68,9 @@ in {
     home.activation = {
       setupGitRepo = lib.hm.dag.entryAfter ["writeBoundary"] ''
         # Only clone if the "nixos" directory does not exist within homeDirectory.
-        if [ ! -d "${profile.modules.system.homeDirectory}/nixos" ]; then
+        if [ ! -d "${config.modules.system.homeDirectory}/nixos" ]; then
           echo "Setting up NixOS configuration repository..."
-          git clone ${profile.modules.user.git.homeManagerRepoUrl} ${profile.modules.system.homeDirectory}/nixos
+          git clone ${cfg.homeManagerRepoUrl} ${config.modules.system.homeDirectory}/nixos
         fi
       '';
     };
@@ -87,7 +99,7 @@ in {
           sleep 2
 
           # Switch to the NixOS configuration repository directory
-          cd ${profile.modules.system.homeDirectory}/nixos
+          cd ${config.modules.system.homeDirectory}/nixos
 
           # Assess if there are any changes (tracked or untracked)
           if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then
