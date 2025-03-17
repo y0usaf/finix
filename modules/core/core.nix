@@ -49,6 +49,7 @@ in {
       lm_sensors
       bottom
       networkmanager
+      psmisc
     ];
   };
 }
