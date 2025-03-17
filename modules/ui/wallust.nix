@@ -1,9 +1,9 @@
 ###############################################################################
 # Wallust Color Generation
 # Wallpaper-based color scheme generation for system-wide theming
-# - 🖼️ Wallpaper-based color scheme generation
-# - 🎯 System-wide theme integration
-# - 🔄 Auto-generation on wallpaper change
+# - Wallpaper-based color scheme generation
+# - System-wide theme integration
+# - Auto-generation on wallpaper change
 ###############################################################################
 {
   config,

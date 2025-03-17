@@ -1,5 +1,5 @@
-#─────────────────────── 🌍 ENVIRONMENT CONFIG ────────────────────────#
-# ⚙️ System and User Environment Variables Configuration              #
+#───────────────────────--- ENVIRONMENT CONFIG ────────────────────────#
+#      System and User Environment Variables Configuration             #
 #──────────────────────────────────────────────────────────────────────#
 {
   config,
@@ -12,9 +12,9 @@
 # ENVIRONMENT CONFIGURATION MODULE
 #
 # This module defines:
-#   • System-wide environment variables that are feature-based.
-#   • User session environment variables to be used by home-manager.
-#   • Conditional settings for Wayland, Hyprland, and NVIDIA.
+#   - System-wide environment variables that are feature-based.
+#   - User session environment variables to be used by home-manager.
+#   - Conditional settings for Wayland, Hyprland, and NVIDIA.
 ###############################################################################
 let
   ###########################################################################
