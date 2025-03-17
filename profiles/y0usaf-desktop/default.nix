@@ -28,7 +28,13 @@ in {
       amdgpu.enable = false;
       ssh.enable = true;
       xdg.enable = true;
-      zsh.enable = true;
+      zsh = {
+        enable = true;
+        cat-fetch = true;
+        history-memory = 10000;
+        history-storage = 10000;
+        zellij.enable = true;
+      };
       systemd = {
         enable = true;
         autoFormatNix = {
@@ -137,7 +143,6 @@ in {
       npm.enable = true;
       nvim.enable = true;
       python.enable = true;
-      zellij.enable = true;
       cursor-ide.enable = true;
     };
 

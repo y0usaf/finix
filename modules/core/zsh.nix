@@ -20,6 +20,26 @@ in {
   #===========================================================================
   options.modules.core.zsh = {
     enable = lib.mkEnableOption "zsh shell configuration";
+    enableFancyPrompt = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable the custom PS1 prompt";
+    };
+    cat-fetch = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Print colorful cats on shell startup";
+    };
+    history-memory = lib.mkOption {
+      type = lib.types.int;
+      default = 1000;
+      description = "Number of history entries to keep in memory";
+    };
+    history-storage = lib.mkOption {
+      type = lib.types.int;
+      default = 1000;
+      description = "Number of history entries to save to disk";
+    };
   };
 
   #===========================================================================
@@ -45,8 +65,8 @@ in {
       # History Settings: Configure shell history behavior.
       #---------------------------------------------------------------------------
       history = {
-        size = 1000;
-        save = 1000;
+        size = cfg.history-memory;
+        save = cfg.history-storage;
         path = "$HOME/.local/state/zsh/history";
         ignoreDups = true;
         expireDuplicatesFirst = true;
@@ -80,25 +100,29 @@ in {
       # Shell Initialization: Define functions, prompt, and additional settings.
       #---------------------------------------------------------------------------
       initExtra = ''
-        # ----------------------------
-        # Function: print_cats
-        # ----------------------------
-        # Prints a colorful array of cats to the terminal.
-        print_cats() {
-            echo -e "\033[0;31m ⟋|､      \033[0;34m  ⟋|､      \033[0;35m  ⟋|､      \033[0;32m  ⟋|､
-        \033[0;31m(°､ ｡ 7    \033[0;34m(°､ ｡ 7    \033[0;35m(°､ ｡ 7    \033[0;32m(°､ ｡ 7
-        \033[0;31m |､  ~ヽ   \033[0;34m |､  ~ヽ   \033[0;35m |､  ~ヽ   \033[0;32m |､  ~ヽ
-        \033[0;31m じしf_,)〳\033[0;34m じしf_,)〳\033[0;35m じしf_,)〳\033[0;32m じしf_,)〳
-        \033[0;36m  [tomo]   \033[0;33m  [moon]   \033[0;32m  [ekko]   \033[0;35m  [bozo]\033[0m"
-        }
+        ${lib.optionalString cfg.cat-fetch ''
+          # ----------------------------
+          # Function: print_cats
+          # ----------------------------
+          # Prints a colorful array of cats to the terminal.
+          print_cats() {
+              echo -e "\033[0;31m ⟋|､      \033[0;34m  ⟋|､      \033[0;35m  ⟋|､      \033[0;32m  ⟋|､
+          \033[0;31m(°､ ｡ 7    \033[0;34m(°､ ｡ 7    \033[0;35m(°､ ｡ 7    \033[0;32m(°､ ｡ 7
+          \033[0;31m |､  ~ヽ   \033[0;34m |､  ~ヽ   \033[0;35m |､  ~ヽ   \033[0;32m |､  ~ヽ
+          \033[0;31m じしf_,)〳\033[0;34m じしf_,)〳\033[0;35m じしf_,)〳\033[0;32m じしf_,)〳
+          \033[0;36m  [tomo]   \033[0;33m  [moon]   \033[0;32m  [ekko]   \033[0;35m  [bozo]\033[0m"
+          }
 
-        # Immediately print the cats on startup.
-        print_cats
+          # Immediately print the cats on startup.
+          print_cats
+        ''}
 
-        # ----------------------------
-        # Prompt Setup
-        # ----------------------------
-        PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
+        ${lib.optionalString cfg.enableFancyPrompt ''
+          # ----------------------------
+          # Prompt Setup
+          # ----------------------------
+          PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
+        ''}
 
         # ----------------------------
         # Advanced Tab Completion
@@ -156,51 +180,53 @@ in {
       #---------------------------------------------------------------------------
       # Shell Aliases: Define shortcuts for common commands.
       #---------------------------------------------------------------------------
-      shellAliases = {
-        #----- XDG Compliance Shortcuts -----
-        adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
-        wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
-        svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
-        yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
-        mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
-        cat = "bat";
+      shellAliases = lib.mkMerge [
+        {
+          #----- XDG Compliance Shortcuts -----
+          adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
+          wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
+          svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
+          yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
+          mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
+          cat = "bat";
 
-        #----- Custom Scripts -----
-        cattree = "$HOME/nixos/pkg/scripts/cattree.sh";
+          #----- Custom Scripts -----
+          cattree = "$HOME/nixos/pkg/scripts/cattree.sh";
 
-        #----- System Management Shortcuts -----
-        userctl = "systemctl --user";
-        hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
-        pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
-        pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
-        hwconfig = "sudo nixos-generate-config --show-hardware-config";
+          #----- System Management Shortcuts -----
+          userctl = "systemctl --user";
+          hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
+          pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
+          pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
+          hwconfig = "sudo nixos-generate-config --show-hardware-config";
 
-        #----- Media & Tools Shortcuts -----
-        esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
-        ytm4a = "uv run yt-dlp -f 'ba[ext=m4a]' -o '%(title)s.%(ext)s'";
-        ytmp3 = "uv run yt-dlp -f 'ba[ext=mp3]' -o '%(title)s.%(ext)s'";
-        ytmp4 = "uv run yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -o '%(title)s.%(ext)s'";
-        ytwebm = "uv run yt-dlp -f 'bv*[ext=webm]+ba[ext=webm]/b[ext=webm]' -o '%(title)s.%(ext)s'";
+          #----- Media & Tools Shortcuts -----
+          esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
+          ytm4a = "uv run yt-dlp -f 'ba[ext=m4a]' -o '%(title)s.%(ext)s'";
+          ytmp3 = "uv run yt-dlp -f 'ba[ext=mp3]' -o '%(title)s.%(ext)s'";
+          ytmp4 = "uv run yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -o '%(title)s.%(ext)s'";
+          ytwebm = "uv run yt-dlp -f 'bv*[ext=webm]+ba[ext=webm]/b[ext=webm]' -o '%(title)s.%(ext)s'";
 
-        #----- Directory & Search Shortcuts -----
-        "l." = "lsd -A | grep -E \"^\\.\"";
-        la = "lsd -A --color=always --group-dirs=first --icon=always";
-        ll = "lsd -l --color=always --group-dirs=first --icon=always";
-        ls = "lsd -lA --color=always --group-dirs=first --icon=always";
-        lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
-        grep = "grep --color=auto";
-        dir = "dir --color=auto";
-        egrep = "grep -E --color=auto";
-        fgrep = "grep -F --color=auto";
+          #----- Directory & Search Shortcuts -----
+          "l." = "lsd -A | grep -E \"^\\.\"";
+          la = "lsd -A --color=always --group-dirs=first --icon=always";
+          ll = "lsd -l --color=always --group-dirs=first --icon=always";
+          ls = "lsd -lA --color=always --group-dirs=first --icon=always";
+          lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
+          grep = "grep --color=auto";
+          dir = "dir --color=auto";
+          egrep = "grep -E --color=auto";
+          fgrep = "grep -F --color=auto";
 
-        #----- Home Manager Repo Aliases -----
-        # Adjust the path below to the root of your hm repository.
-        "hmpush" = "git -C ~/nixos push origin main --force";
-        "hmpull" = "git -C ~/nixos fetch origin && git -C ~/nixos reset --hard origin/main";
+          #----- Home Manager Repo Aliases -----
+          # Adjust the path below to the root of your hm repository.
+          "hmpush" = "git -C ~/nixos push origin main --force";
+          "hmpull" = "git -C ~/nixos fetch origin && git -C ~/nixos reset --hard origin/main";
 
-        #----- Hardware Management Shortcut -----
-        gpupower = "sudo nvidia-smi -pl";
-      };
+          #----- Hardware Management Shortcut -----
+          gpupower = "sudo nvidia-smi -pl";
+        }
+      ];
     };
   };
 }
