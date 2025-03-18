@@ -60,19 +60,6 @@ in {
   modules = profile.modules or {};
 
   ###########################################################################
-  # Program Configurations
-  ###########################################################################
-  programs.nh = {
-    enable = true;
-    flake = profile.modules.directories.flake.path;
-    clean = {
-      enable = true;
-      dates = "weekly";
-      extraArgs = "--keep-since 7d";
-    };
-  };
-
-  ###########################################################################
   # System Configurations
   ###########################################################################
   dconf.enable = true;
