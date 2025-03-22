@@ -50,6 +50,14 @@ in {
               python3
               python312
               uv
+              python3Packages.pip
+              python3Packages.setuptools
+              python3Packages.wheel
+
+              # Build dependencies for Python packages
+              ninja
+              meson
+              ffmpeg
 
               # Node.js ecosystem
               nodejs_20
@@ -81,6 +89,9 @@ in {
           export PYTHONUSERBASE="$HOME/.local/python"
           export PIP_CACHE_DIR="$HOME/.cache/pip"
           export VIRTUAL_ENV_HOME="$HOME/.local/venvs"
+
+          # Set up build environment variables
+          export SETUPTOOLS_USE_DISTUTILS=stdlib
 
           # Set up SSL certificates
           export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
