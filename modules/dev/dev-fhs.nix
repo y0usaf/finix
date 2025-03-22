@@ -83,6 +83,12 @@ in {
 
               # Add zsh to the environment
               zsh
+
+              # Add whisper for voice-to-text
+              openai-whisper-cpp
+              pulseaudio # for audio capture
+              libnotify # for notifications
+              xdotool # for typing text into active window
             ]
             ++ cudaPkgs;
 
@@ -123,6 +129,7 @@ in {
       shellAliases = {
         dev = "devenv";
         fhs = "devenv";
+        dictate = "voice-input"; # Add alias for voice input
       };
 
       initExtra = ''
@@ -156,6 +163,38 @@ in {
                 # Ensure local bin directory exists and is in PATH
                 mkdir -p "$HOME/.local/bin"
                 export PATH="$HOME/.local/bin:$PATH"
+
+                # Function to transcribe voice to text using whisper
+                voice-to-text() {
+                  echo "🎤 Listening... (speak and then press Ctrl+C when done)"
+                  devenv whisper-cpp -m tiny -f <(arecord -f cd -t wav -d 10) -nt
+                }
+
+                # Create a voice-input script that transcribes and types the text
+                if [ ! -f "$HOME/.local/bin/voice-input" ]; then
+                  cat > "$HOME/.local/bin/voice-input" << 'EOF'
+        #!/usr/bin/env bash
+
+        # Display notification
+        notify-send "Voice Input" "🎤 Listening... (speak and press Ctrl+C when done)"
+
+        # Record audio and transcribe with whisper
+        TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m tiny -f <(arecord -f cd -t wav -d 10 2>/dev/null) -nt")
+
+        # Trim whitespace
+        TRANSCRIPTION=$(echo "$TRANSCRIPTION" | xargs)
+
+        if [ -n "$TRANSCRIPTION" ]; then
+          # Type the transcribed text into the active window
+          notify-send "Voice Input" "✓ Typing: $TRANSCRIPTION"
+          sleep 0.5  # Give time to switch back to the target window
+          xdotool type --clearmodifiers "$TRANSCRIPTION"
+        else
+          notify-send "Voice Input" "❌ No text transcribed"
+        fi
+        EOF
+                  chmod +x "$HOME/.local/bin/voice-input"
+                fi
       '';
     };
 
