@@ -49,10 +49,12 @@ in {
               # Python ecosystem
               python3
               python312
+              python311
               uv
               python3Packages.pip
               python3Packages.setuptools
               python3Packages.wheel
+              python3Packages.distutils-extra
 
               # Build dependencies for Python packages
               ninja
@@ -91,7 +93,7 @@ in {
           export VIRTUAL_ENV_HOME="$HOME/.local/venvs"
 
           # Set up build environment variables
-          export SETUPTOOLS_USE_DISTUTILS=stdlib
+          export SETUPTOOLS_USE_DISTUTILS=local
 
           # Set up SSL certificates
           export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
