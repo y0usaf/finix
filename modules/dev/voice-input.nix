@@ -68,7 +68,7 @@ in {
       openai-whisper-cpp
       pulseaudio # for audio capture
       alsa-utils # for arecord command
-      sox # for silence detection
+      sox # for silence detection and audio conversion
       libnotify # for notifications
       wtype # for typing text into active window (Wayland compatible)
       xdotool # for typing text into active window (X11 compatible)
@@ -102,8 +102,9 @@ in {
                     # Ensure model is downloaded
                     download_whisper_model
 
-                    # Create a temporary file for the audio
+                    # Create temporary files for the audio
                     TEMP_AUDIO=$(mktemp --suffix=.wav)
+                    TEMP_AUDIO_16K=$(mktemp --suffix=.wav)
                     TEMP_LOG=$(mktemp --suffix=.log)
 
                     # Record audio to the temporary file with silence detection
@@ -112,12 +113,16 @@ in {
 
                     # Check if recording was successful
                     if [ -s "$TEMP_AUDIO" ]; then
+                      # Convert audio to 16kHz (required by whisper)
+                      echo "Converting audio to 16kHz..."
+                      sox "$TEMP_AUDIO" -r 16000 -c 1 "$TEMP_AUDIO_16K"
+
                       echo "Transcribing audio..."
                       MODEL_PATH_EXPANDED=$(eval echo "${modelPath}")
-                      echo "Running: whisper-cpp -m \"$MODEL_PATH_EXPANDED\" -f \"$TEMP_AUDIO\" -nt"
+                      echo "Running: whisper-cpp -m \"$MODEL_PATH_EXPANDED\" -f \"$TEMP_AUDIO_16K\" -nt"
 
                       # Run whisper with detailed output
-                      TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m \"$MODEL_PATH_EXPANDED\" -f \"$TEMP_AUDIO\" -nt 2>&1 | tee $TEMP_LOG")
+                      TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m \"$MODEL_PATH_EXPANDED\" -f \"$TEMP_AUDIO_16K\" -nt 2>&1 | tee $TEMP_LOG")
 
                       # Display the transcription result
                       echo "Transcription result:"
@@ -138,6 +143,7 @@ in {
 
                     # Clean up
                     rm -f "$TEMP_AUDIO"
+                    rm -f "$TEMP_AUDIO_16K"
                     rm -f "$TEMP_LOG"
                   }
 
@@ -162,8 +168,9 @@ in {
       # Display notification
       notify-send "Voice Input" "🎤 Listening... (speak and then pause to auto-detect silence)"
 
-      # Create a temporary file for the audio
+      # Create temporary files for the audio
       TEMP_AUDIO=$(mktemp --suffix=.wav)
+      TEMP_AUDIO_16K=$(mktemp --suffix=.wav)
       TEMP_LOG=$(mktemp --suffix=.log)
 
       # Record audio to the temporary file with silence detection
@@ -172,12 +179,16 @@ in {
 
       # Check if recording was successful
       if [ -s "$TEMP_AUDIO" ]; then
+        # Convert audio to 16kHz (required by whisper)
+        echo "Converting audio to 16kHz..."
+        sox "$TEMP_AUDIO" -r 16000 -c 1 "$TEMP_AUDIO_16K"
+
         # Transcribe with whisper
         echo "Transcribing audio..."
-        echo "Running: whisper-cpp -m \"$MODEL_PATH\" -f \"$TEMP_AUDIO\" -nt"
+        echo "Running: whisper-cpp -m \"$MODEL_PATH\" -f \"$TEMP_AUDIO_16K\" -nt"
 
         # Run whisper with detailed output
-        TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m \"$MODEL_PATH\" -f \"$TEMP_AUDIO\" -nt 2>&1 | tee $TEMP_LOG")
+        TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m \"$MODEL_PATH\" -f \"$TEMP_AUDIO_16K\" -nt 2>&1 | tee $TEMP_LOG")
 
         # Log the transcription result
         echo "Transcription result:"
@@ -218,6 +229,7 @@ in {
 
       # Clean up
       rm -f "$TEMP_AUDIO"
+      rm -f "$TEMP_AUDIO_16K"
       rm -f "$TEMP_LOG"
       EOF
                     chmod +x "$HOME/.local/bin/voice-input"
