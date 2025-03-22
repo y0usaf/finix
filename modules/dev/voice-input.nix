@@ -55,45 +55,78 @@ in {
 
     # Add shell functions and scripts
     programs.zsh.initExtra = ''
-            # Function to transcribe voice to text using whisper
-            voice-to-text() {
-              echo "🎤 Listening... (speak and then press Ctrl+C when done)"
-              devenv bash -c "whisper-cpp -m ${cfg.model} -f <(arecord -f cd -t wav -d ${toString cfg.recordTime}) -nt"
-            }
+                  # Function to transcribe voice to text using whisper
+                  voice-to-text() {
+                    echo "🎤 Listening... (speak and then press Ctrl+C when done)"
 
-            # Create a voice-input script that transcribes and types the text
-            if [ ! -f "$HOME/.local/bin/voice-input" ]; then
-              cat > "$HOME/.local/bin/voice-input" << EOF
+                    # Create a temporary file for the audio
+                    TEMP_AUDIO=$(mktemp --suffix=.wav)
+
+                    # Record audio to the temporary file
+                    echo "Recording to $TEMP_AUDIO..."
+                    arecord -f cd -t wav -d ${toString cfg.recordTime} "$TEMP_AUDIO"
+
+                    # Check if recording was successful
+                    if [ -s "$TEMP_AUDIO" ]; then
+                      echo "Transcribing audio..."
+                      devenv bash -c "whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt"
+                    else
+                      echo "❌ Error: No audio recorded or file is empty"
+                    fi
+
+                    # Clean up
+                    rm -f "$TEMP_AUDIO"
+                  }
+
+                  # Create a voice-input script that transcribes and types the text
+                  if [ ! -f "$HOME/.local/bin/voice-input" ]; then
+                    cat > "$HOME/.local/bin/voice-input" << EOF
       #!/usr/bin/env bash
 
       # Display notification
-      notify-send "Voice Input" "🎤 Listening... (speak and press Ctrl+C when done)"
+      notify-send "Voice Input" "🎤 Listening... (speak for up to ${toString cfg.recordTime} seconds)"
 
-      # Record audio and transcribe with whisper
-      TRANSCRIPTION=\$(devenv bash -c "whisper-cpp -m ${cfg.model} -f <(arecord -f cd -t wav -d ${toString cfg.recordTime} 2>/dev/null) -nt")
+      # Create a temporary file for the audio
+      TEMP_AUDIO=\$(mktemp --suffix=.wav)
 
-      # Trim whitespace
-      TRANSCRIPTION=\$(echo "\$TRANSCRIPTION" | xargs)
+      # Record audio to the temporary file
+      echo "Recording to \$TEMP_AUDIO..."
+      arecord -f cd -t wav -d ${toString cfg.recordTime} "\$TEMP_AUDIO"
 
-      if [ -n "\$TRANSCRIPTION" ]; then
-        # Type the transcribed text into the active window
-        notify-send "Voice Input" "✓ Typing: \$TRANSCRIPTION"
-        sleep 0.5  # Give time to switch back to the target window
+      # Check if recording was successful
+      if [ -s "\$TEMP_AUDIO" ]; then
+        # Transcribe with whisper
+        echo "Transcribing audio..."
+        TRANSCRIPTION=\$(devenv bash -c "whisper-cpp -m ${cfg.model} -f \"\$TEMP_AUDIO\" -nt")
 
-        # Detect if we're running on Wayland or X11
-        if [ -n "\$WAYLAND_DISPLAY" ]; then
-          # Use wtype for Wayland
-          wtype "\$TRANSCRIPTION"
+        # Trim whitespace
+        TRANSCRIPTION=\$(echo "\$TRANSCRIPTION" | xargs)
+
+        if [ -n "\$TRANSCRIPTION" ]; then
+          # Type the transcribed text into the active window
+          notify-send "Voice Input" "✓ Typing: \$TRANSCRIPTION"
+          sleep 0.5  # Give time to switch back to the target window
+
+          # Detect if we're running on Wayland or X11
+          if [ -n "\$WAYLAND_DISPLAY" ]; then
+            # Use wtype for Wayland
+            wtype "\$TRANSCRIPTION"
+          else
+            # Use xdotool for X11
+            xdotool type --clearmodifiers "\$TRANSCRIPTION"
+          fi
         else
-          # Use xdotool for X11
-          xdotool type --clearmodifiers "\$TRANSCRIPTION"
+          notify-send "Voice Input" "❌ No text transcribed"
         fi
       else
-        notify-send "Voice Input" "❌ No text transcribed"
+        notify-send "Voice Input" "❌ Error: No audio recorded or file is empty"
       fi
+
+      # Clean up
+      rm -f "\$TEMP_AUDIO"
       EOF
-              chmod +x "$HOME/.local/bin/voice-input"
-            fi
+                    chmod +x "$HOME/.local/bin/voice-input"
+                  fi
     '';
   };
 }
