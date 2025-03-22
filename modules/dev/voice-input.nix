@@ -41,14 +41,8 @@ in {
 
     recordTime = lib.mkOption {
       type = lib.types.int;
-      default = 10;
-      description = "Maximum recording time in seconds";
-    };
-
-    silenceThreshold = lib.mkOption {
-      type = lib.types.int;
-      default = 2;
-      description = "Seconds of silence before automatically stopping recording";
+      default = 5;
+      description = "Recording time in seconds";
     };
 
     debug = lib.mkOption {
@@ -97,7 +91,7 @@ in {
 
                   # Function to transcribe voice to text using whisper
                   voice-to-text() {
-                    echo "🎤 Listening... (speak and then stop to auto-detect silence)"
+                    echo "🎤 Recording for ${toString cfg.recordTime} seconds..."
 
                     # Ensure model is downloaded
                     download_whisper_model
@@ -107,15 +101,15 @@ in {
                     TEMP_AUDIO_16K=$(mktemp --suffix=.wav)
                     TEMP_LOG=$(mktemp --suffix=.log)
 
-                    # Record audio to the temporary file with silence detection
-                    echo "Recording to $TEMP_AUDIO..."
-                    rec -t wav "$TEMP_AUDIO" silence 1 0.1 3% 1 ${toString cfg.silenceThreshold} 3%
+                    # Use arecord for a fixed duration recording
+                    echo "Recording to $TEMP_AUDIO for ${toString cfg.recordTime} seconds..."
+                    arecord -f cd -d ${toString cfg.recordTime} -t wav "$TEMP_AUDIO"
 
                     # Check if recording was successful
                     if [ -s "$TEMP_AUDIO" ]; then
-                      # Convert audio to 16kHz (required by whisper)
-                      echo "Converting audio to 16kHz..."
-                      sox "$TEMP_AUDIO" -r 16000 -c 1 "$TEMP_AUDIO_16K"
+                      # Convert audio to 16kHz (required by whisper) and add padding
+                      echo "Converting audio to 16kHz and adding padding..."
+                      sox "$TEMP_AUDIO" -r 16000 -c 1 "$TEMP_AUDIO_16K" pad 0.5 0.5
 
                       echo "Transcribing audio..."
                       MODEL_PATH_EXPANDED=$(eval echo "${modelPath}")
@@ -123,6 +117,9 @@ in {
 
                       # Run whisper with detailed output
                       TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m \"$MODEL_PATH_EXPANDED\" -f \"$TEMP_AUDIO_16K\" -nt 2>&1 | tee $TEMP_LOG")
+
+                      # Extract just the transcription text (last line)
+                      TRANSCRIPTION=$(echo "$TRANSCRIPTION" | grep -v "whisper_" | grep -v "system_info:" | grep -v "main:" | grep -v "fallbacks" | grep -v "time" | tail -n 1)
 
                       # Display the transcription result
                       echo "Transcription result:"
@@ -166,22 +163,22 @@ in {
       fi
 
       # Display notification
-      notify-send "Voice Input" "🎤 Listening... (speak and then pause to auto-detect silence)"
+      notify-send "Voice Input" "🎤 Recording for ${toString cfg.recordTime} seconds..."
 
       # Create temporary files for the audio
       TEMP_AUDIO=$(mktemp --suffix=.wav)
       TEMP_AUDIO_16K=$(mktemp --suffix=.wav)
       TEMP_LOG=$(mktemp --suffix=.log)
 
-      # Record audio to the temporary file with silence detection
-      echo "Recording to $TEMP_AUDIO..."
-      rec -t wav "$TEMP_AUDIO" silence 1 0.1 3% 1 ${toString cfg.silenceThreshold} 3%
+      # Use arecord for a fixed duration recording
+      echo "Recording to $TEMP_AUDIO for ${toString cfg.recordTime} seconds..."
+      arecord -f cd -d ${toString cfg.recordTime} -t wav "$TEMP_AUDIO"
 
       # Check if recording was successful
       if [ -s "$TEMP_AUDIO" ]; then
-        # Convert audio to 16kHz (required by whisper)
-        echo "Converting audio to 16kHz..."
-        sox "$TEMP_AUDIO" -r 16000 -c 1 "$TEMP_AUDIO_16K"
+        # Convert audio to 16kHz (required by whisper) and add padding
+        echo "Converting audio to 16kHz and adding padding..."
+        sox "$TEMP_AUDIO" -r 16000 -c 1 "$TEMP_AUDIO_16K" pad 0.5 0.5
 
         # Transcribe with whisper
         echo "Transcribing audio..."
@@ -189,6 +186,9 @@ in {
 
         # Run whisper with detailed output
         TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m \"$MODEL_PATH\" -f \"$TEMP_AUDIO_16K\" -nt 2>&1 | tee $TEMP_LOG")
+
+        # Extract just the transcription text (last line)
+        TRANSCRIPTION=$(echo "$TRANSCRIPTION" | grep -v "whisper_" | grep -v "system_info:" | grep -v "main:" | grep -v "fallbacks" | grep -v "time" | tail -n 1)
 
         # Log the transcription result
         echo "Transcription result:"
