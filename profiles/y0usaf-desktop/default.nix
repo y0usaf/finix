@@ -145,6 +145,11 @@ in {
       nvim.enable = true;
       python.enable = true;
       cursor-ide.enable = true;
+      voice-input = {
+        enable = true;
+        model = "tiny"; # Options: tiny, base, small, medium, large
+        recordTime = 10; # Maximum recording time in seconds
+      };
     };
 
     # User Preferences
