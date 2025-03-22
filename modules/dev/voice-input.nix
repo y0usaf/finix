@@ -31,6 +31,18 @@ in {
       default = 10;
       description = "Maximum recording time in seconds";
     };
+
+    silenceThreshold = lib.mkOption {
+      type = lib.types.int;
+      default = 2;
+      description = "Seconds of silence before automatically stopping recording";
+    };
+
+    debug = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable debug logging";
+    };
   };
 
   ###########################################################################
@@ -43,6 +55,7 @@ in {
       openai-whisper-cpp
       pulseaudio # for audio capture
       alsa-utils # for arecord command
+      sox # for silence detection
       libnotify # for notifications
       wtype # for typing text into active window (Wayland compatible)
       xdotool # for typing text into active window (X11 compatible)
@@ -57,25 +70,44 @@ in {
     programs.zsh.initExtra = ''
                   # Function to transcribe voice to text using whisper
                   voice-to-text() {
-                    echo "🎤 Listening... (speak and then press Ctrl+C when done)"
+                    echo "🎤 Listening... (speak and then stop to auto-detect silence)"
 
                     # Create a temporary file for the audio
                     TEMP_AUDIO=$(mktemp --suffix=.wav)
+                    TEMP_LOG=$(mktemp --suffix=.log)
 
-                    # Record audio to the temporary file
+                    # Record audio to the temporary file with silence detection
                     echo "Recording to $TEMP_AUDIO..."
-                    arecord -f cd -t wav -d ${toString cfg.recordTime} "$TEMP_AUDIO"
+                    rec -t wav "$TEMP_AUDIO" silence 1 0.1 3% 1 ${toString cfg.silenceThreshold} 3%
 
                     # Check if recording was successful
                     if [ -s "$TEMP_AUDIO" ]; then
                       echo "Transcribing audio..."
-                      devenv bash -c "whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt"
+                      echo "Running: whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt"
+
+                      # Run whisper with detailed output
+                      TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt 2>&1 | tee $TEMP_LOG")
+
+                      # Display the transcription result
+                      echo "Transcription result:"
+                      echo "$TRANSCRIPTION"
+
+                      # If debug is enabled, show the log
+                      if [ ${toString (
+        if cfg.debug
+        then "true"
+        else "false"
+      )} = "true" ]; then
+                        echo "Debug log:"
+                        cat "$TEMP_LOG"
+                      fi
                     else
                       echo "❌ Error: No audio recorded or file is empty"
                     fi
 
                     # Clean up
                     rm -f "$TEMP_AUDIO"
+                    rm -f "$TEMP_LOG"
                   }
 
                   # Create a voice-input script that transcribes and types the text
@@ -84,36 +116,54 @@ in {
       #!/usr/bin/env bash
 
       # Display notification
-      notify-send "Voice Input" "🎤 Listening... (speak for up to ${toString cfg.recordTime} seconds)"
+      notify-send "Voice Input" "🎤 Listening... (speak and then pause to auto-detect silence)"
 
       # Create a temporary file for the audio
-      TEMP_AUDIO=\$(mktemp --suffix=.wav)
+      TEMP_AUDIO=$(mktemp --suffix=.wav)
+      TEMP_LOG=$(mktemp --suffix=.log)
 
-      # Record audio to the temporary file
-      echo "Recording to \$TEMP_AUDIO..."
-      arecord -f cd -t wav -d ${toString cfg.recordTime} "\$TEMP_AUDIO"
+      # Record audio to the temporary file with silence detection
+      echo "Recording to $TEMP_AUDIO..."
+      rec -t wav "$TEMP_AUDIO" silence 1 0.1 3% 1 ${toString cfg.silenceThreshold} 3%
 
       # Check if recording was successful
-      if [ -s "\$TEMP_AUDIO" ]; then
+      if [ -s "$TEMP_AUDIO" ]; then
         # Transcribe with whisper
         echo "Transcribing audio..."
-        TRANSCRIPTION=\$(devenv bash -c "whisper-cpp -m ${cfg.model} -f \"\$TEMP_AUDIO\" -nt")
+        echo "Running: whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt"
+
+        # Run whisper with detailed output
+        TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt 2>&1 | tee $TEMP_LOG")
+
+        # Log the transcription result
+        echo "Transcription result:"
+        echo "$TRANSCRIPTION"
+
+        # If debug is enabled, show the log
+        if [ ${toString (
+        if cfg.debug
+        then "true"
+        else "false"
+      )} = "true" ]; then
+          echo "Debug log:"
+          cat "$TEMP_LOG"
+        fi
 
         # Trim whitespace
-        TRANSCRIPTION=\$(echo "\$TRANSCRIPTION" | xargs)
+        TRANSCRIPTION=$(echo "$TRANSCRIPTION" | xargs)
 
-        if [ -n "\$TRANSCRIPTION" ]; then
+        if [ -n "$TRANSCRIPTION" ]; then
           # Type the transcribed text into the active window
-          notify-send "Voice Input" "✓ Typing: \$TRANSCRIPTION"
+          notify-send "Voice Input" "✓ Typing: $TRANSCRIPTION"
           sleep 0.5  # Give time to switch back to the target window
 
           # Detect if we're running on Wayland or X11
-          if [ -n "\$WAYLAND_DISPLAY" ]; then
+          if [ -n "$WAYLAND_DISPLAY" ]; then
             # Use wtype for Wayland
-            wtype "\$TRANSCRIPTION"
+            wtype "$TRANSCRIPTION"
           else
             # Use xdotool for X11
-            xdotool type --clearmodifiers "\$TRANSCRIPTION"
+            xdotool type --clearmodifiers "$TRANSCRIPTION"
           fi
         else
           notify-send "Voice Input" "❌ No text transcribed"
@@ -123,7 +173,8 @@ in {
       fi
 
       # Clean up
-      rm -f "\$TEMP_AUDIO"
+      rm -f "$TEMP_AUDIO"
+      rm -f "$TEMP_LOG"
       EOF
                     chmod +x "$HOME/.local/bin/voice-input"
                   fi
