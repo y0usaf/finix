@@ -53,6 +53,7 @@ in {
       foot.enable = true;
       gtk.enable = true;
       wallust.enable = false;
+      mako.enable = true;
     };
 
     # Appearance
