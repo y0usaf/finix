@@ -13,6 +13,19 @@
   ...
 }: let
   cfg = config.modules.dev.voice-input;
+
+  # Define model paths
+  modelUrls = {
+    tiny = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin";
+    base = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin";
+    small = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin";
+    medium = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin";
+    large = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large.bin";
+  };
+
+  modelUrl = modelUrls.${cfg.model} or modelUrls.tiny;
+  modelDir = "$HOME/.local/share/whisper-models";
+  modelPath = "${modelDir}/ggml-${cfg.model}.bin";
 in {
   ###########################################################################
   # Module Options
@@ -21,7 +34,7 @@ in {
     enable = lib.mkEnableOption "Voice input capabilities";
 
     model = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.enum ["tiny" "base" "small" "medium" "large"];
       default = "tiny";
       description = "Whisper model to use (tiny, base, small, medium, large)";
     };
@@ -59,6 +72,7 @@ in {
       libnotify # for notifications
       wtype # for typing text into active window (Wayland compatible)
       xdotool # for typing text into active window (X11 compatible)
+      curl # for downloading model files
     ];
 
     # Add shell aliases
@@ -68,9 +82,25 @@ in {
 
     # Add shell functions and scripts
     programs.zsh.initExtra = ''
+                  # Function to download whisper model if not already present
+                  download_whisper_model() {
+                    mkdir -p "${modelDir}"
+                    if [ ! -f "${modelPath}" ]; then
+                      echo "Downloading whisper model ${cfg.model}..."
+                      curl -L "${modelUrl}" -o "${modelPath}"
+                      echo "Model downloaded to ${modelPath}"
+                    fi
+                  }
+
+                  # Ensure model is downloaded on shell init
+                  download_whisper_model
+
                   # Function to transcribe voice to text using whisper
                   voice-to-text() {
                     echo "🎤 Listening... (speak and then stop to auto-detect silence)"
+
+                    # Ensure model is downloaded
+                    download_whisper_model
 
                     # Create a temporary file for the audio
                     TEMP_AUDIO=$(mktemp --suffix=.wav)
@@ -83,10 +113,10 @@ in {
                     # Check if recording was successful
                     if [ -s "$TEMP_AUDIO" ]; then
                       echo "Transcribing audio..."
-                      echo "Running: whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt"
+                      echo "Running: whisper-cpp -m ${modelPath} -f \"$TEMP_AUDIO\" -nt"
 
                       # Run whisper with detailed output
-                      TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt 2>&1 | tee $TEMP_LOG")
+                      TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m ${modelPath} -f \"$TEMP_AUDIO\" -nt 2>&1 | tee $TEMP_LOG")
 
                       # Display the transcription result
                       echo "Transcription result:"
@@ -115,29 +145,37 @@ in {
                     cat > "$HOME/.local/bin/voice-input" << EOF
       #!/usr/bin/env bash
 
+      # Ensure whisper model is downloaded
+      mkdir -p "${modelDir}"
+      if [ ! -f "${modelPath}" ]; then
+        notify-send "Voice Input" "Downloading whisper model ${cfg.model}..."
+        curl -L "${modelUrl}" -o "${modelPath}"
+        notify-send "Voice Input" "Model downloaded to ${modelPath}"
+      fi
+
       # Display notification
       notify-send "Voice Input" "🎤 Listening... (speak and then pause to auto-detect silence)"
 
       # Create a temporary file for the audio
-      TEMP_AUDIO=$(mktemp --suffix=.wav)
-      TEMP_LOG=$(mktemp --suffix=.log)
+      TEMP_AUDIO=\$(mktemp --suffix=.wav)
+      TEMP_LOG=\$(mktemp --suffix=.log)
 
       # Record audio to the temporary file with silence detection
-      echo "Recording to $TEMP_AUDIO..."
-      rec -t wav "$TEMP_AUDIO" silence 1 0.1 3% 1 ${toString cfg.silenceThreshold} 3%
+      echo "Recording to \$TEMP_AUDIO..."
+      rec -t wav "\$TEMP_AUDIO" silence 1 0.1 3% 1 ${toString cfg.silenceThreshold} 3%
 
       # Check if recording was successful
-      if [ -s "$TEMP_AUDIO" ]; then
+      if [ -s "\$TEMP_AUDIO" ]; then
         # Transcribe with whisper
         echo "Transcribing audio..."
-        echo "Running: whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt"
+        echo "Running: whisper-cpp -m ${modelPath} -f \"\$TEMP_AUDIO\" -nt"
 
         # Run whisper with detailed output
-        TRANSCRIPTION=$(devenv bash -c "whisper-cpp -m ${cfg.model} -f \"$TEMP_AUDIO\" -nt 2>&1 | tee $TEMP_LOG")
+        TRANSCRIPTION=\$(devenv bash -c "whisper-cpp -m ${modelPath} -f \"\$TEMP_AUDIO\" -nt 2>&1 | tee \$TEMP_LOG")
 
         # Log the transcription result
         echo "Transcription result:"
-        echo "$TRANSCRIPTION"
+        echo "\$TRANSCRIPTION"
 
         # If debug is enabled, show the log
         if [ ${toString (
@@ -146,24 +184,24 @@ in {
         else "false"
       )} = "true" ]; then
           echo "Debug log:"
-          cat "$TEMP_LOG"
+          cat "\$TEMP_LOG"
         fi
 
         # Trim whitespace
-        TRANSCRIPTION=$(echo "$TRANSCRIPTION" | xargs)
+        TRANSCRIPTION=\$(echo "\$TRANSCRIPTION" | xargs)
 
-        if [ -n "$TRANSCRIPTION" ]; then
+        if [ -n "\$TRANSCRIPTION" ]; then
           # Type the transcribed text into the active window
-          notify-send "Voice Input" "✓ Typing: $TRANSCRIPTION"
+          notify-send "Voice Input" "✓ Typing: \$TRANSCRIPTION"
           sleep 0.5  # Give time to switch back to the target window
 
           # Detect if we're running on Wayland or X11
-          if [ -n "$WAYLAND_DISPLAY" ]; then
+          if [ -n "\$WAYLAND_DISPLAY" ]; then
             # Use wtype for Wayland
-            wtype "$TRANSCRIPTION"
+            wtype "\$TRANSCRIPTION"
           else
             # Use xdotool for X11
-            xdotool type --clearmodifiers "$TRANSCRIPTION"
+            xdotool type --clearmodifiers "\$TRANSCRIPTION"
           fi
         else
           notify-send "Voice Input" "❌ No text transcribed"
@@ -173,11 +211,16 @@ in {
       fi
 
       # Clean up
-      rm -f "$TEMP_AUDIO"
-      rm -f "$TEMP_LOG"
+      rm -f "\$TEMP_AUDIO"
+      rm -f "\$TEMP_LOG"
       EOF
                     chmod +x "$HOME/.local/bin/voice-input"
                   fi
+    '';
+
+    # Create the model directory
+    home.activation.createWhisperModelDir = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      $DRY_RUN_CMD mkdir -p $HOME/.local/share/whisper-models
     '';
   };
 }
