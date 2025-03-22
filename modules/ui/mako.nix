@@ -22,7 +22,7 @@ in {
       borderRadius = 5;
       borderSize = 1;
       defaultTimeout = 5000;
-      format = "<b>%s</b>\n%b";
+      format = "<b>%s</b>\\n%b";
       groupBy = null;
       height = 100;
       iconPath = null;
