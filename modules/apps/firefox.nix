@@ -307,11 +307,17 @@
     }
 
     .urlbarView-row {
-        padding-block: 1pt!important
+        padding-block: 1px!important
     }
 
     .urlbarView-row-inner {
-        padding-inline: 2pt!important
+        padding-inline: 2px!important
+    }
+
+    .urlbarView-row[label="Firefox Suggest"] {
+        margin-top: 0 !important;
+        overflow: hidden !important;
+        display: none !important; /* Hide completely */
     }
 
     .urlbarView-secondary,.urlbarView-title,.urlbarView-url {
