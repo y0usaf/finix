@@ -88,15 +88,17 @@
       animation: none !important;
       transition: none !important;
       scroll-behavior: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
     }
 
     :root {
         --tab-font-size: 0.8em;
         --max-tab-width: none;
         --show-titlebar-buttons: none;
-        --tab-height: 20px;
+        --tab-height: 18pt;
         --toolbar-icon-size: calc(var(--tab-height) / 1.5);
-        --uc-bottom-toolbar-height: 20px
+        --uc-bottom-toolbar-height: 18pt
     }
 
     /* Disable specific Firefox animations */
@@ -128,8 +130,8 @@
     }
 
     :root:not([customizing]) #TabsToolbar {
-        margin-left: 1px!important;
-        margin-right: 1px!important;
+        margin-left: 1pt!important;
+        margin-right: 1pt!important;
         border-radius: 0!important;
         padding: 0!important;
         min-height: 0!important
@@ -145,13 +147,13 @@
         font-size: var(--tab-font-size)!important;
         min-height: 0!important;
         align-items: center!important;
-        margin-bottom: 5px!important
+        margin-bottom: 2pt!important
     }
 
     .tab-icon-image {
         height: auto!important;
         width: var(--toolbar-icon-size)!important;
-        margin-right: 4px!important
+        margin-right: 2pt!important
     }
 
     #tabbrowser-arrowscrollbox,#tabbrowser-tabs,#tabbrowser-tabs>.tabbrowser-arrowscrollbox {
@@ -178,7 +180,7 @@
 
     @media (-moz-os-version:windows-win10) {
         :root[sizemode=maximized] #navigator-toolbox {
-            padding-top: 7px!important
+            padding-top: 7pt!important
         }
     }
 
@@ -226,12 +228,12 @@
     }
 
     .toolbarbutton-1 {
-        padding: 0 4px!important
+        padding: 0 2pt!important
     }
 
     .toolbarbutton-1,.toolbarbutton-icon {
         -moz-appearance: none!important;
-        padding-inline: 2px!important;
+        padding-inline: 1pt!important;
         -moz-box-align: stretch;
         margin: 0!important
     }
@@ -240,14 +242,14 @@
         -moz-appearance: none!important;
         padding-top: 0!important;
         padding-bottom: 0!important;
-        padding-inline: 2px!important;
+        padding-inline: 1pt!important;
         -moz-box-align: stretch;
         margin: 0!important
     }
 
     .tab-close-button,.urlbar-icon,.urlbar-page-action {
         -moz-appearance: none!important;
-        padding-inline: 2px!important;
+        padding-inline: 1pt!important;
         -moz-box-align: stretch;
         margin: 0!important
     }
@@ -273,7 +275,7 @@
     }
 
     #nav-bar {
-        margin: -1px auto 0!important;
+        margin: -1pt auto 0!important;
         border-top: none!important;
         width: 75vw!important;
         left: 0!important;
@@ -300,16 +302,16 @@
 
     .urlbarView {
         font-size: var(--tab-font-size)!important;
-        max-height: calc(60vh - 40px)!important;
+        max-height: calc(60vh - 40pt)!important;
         overflow-y: auto!important
     }
 
     .urlbarView-row {
-        padding-block: 2px!important
+        padding-block: 1pt!important
     }
 
     .urlbarView-row-inner {
-        padding-inline: 4px!important
+        padding-inline: 2pt!important
     }
 
     .urlbarView-secondary,.urlbarView-title,.urlbarView-url {
@@ -318,7 +320,7 @@
     }
 
     #urlbar[breakout][breakout-extend] {
-        box-shadow: 0 15px 30px rgba(0,0,0,.2);
+        box-shadow: 0 15pt 30pt rgba(0,0,0,.2);
         width: 50vw!important;
         left: 50%!important;
         right: auto!important;
@@ -328,7 +330,7 @@
         z-index: 999!important;
         transform: translateX(-50%)!important;
         max-height: 60vh!important;
-        min-height: 40px!important
+        min-height: 40pt!important
     }
     /* Remove toolbar springs */
     toolbarspring, .toolbar-spring, [anonid="spring"] {
@@ -340,8 +342,8 @@
     }
 
     #urlbar-background,#urlbar-input-container {
-        --toolbarbutton-border-radius: 0px!important;
-        --urlbar-icon-border-radius: 0px!important
+        --toolbarbutton-border-radius: 0pt!important;
+        --urlbar-icon-border-radius: 0pt!important
     }
   '';
 
