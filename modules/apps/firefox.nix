@@ -93,12 +93,12 @@
     }
 
     :root {
-        --tab-font-size: 0.8em;
+        --tab-font-size: 0.6em;
         --max-tab-width: none;
         --show-titlebar-buttons: none;
-        --tab-height: 18pt;
+        --tab-height: 9pt;
         --toolbar-icon-size: calc(var(--tab-height) / 1.5);
-        --uc-bottom-toolbar-height: 18pt
+        --uc-bottom-toolbar-height: 9pt
     }
 
     /* Disable specific Firefox animations */
