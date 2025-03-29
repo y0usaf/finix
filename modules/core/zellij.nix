@@ -3,7 +3,7 @@
 # Configures the Zellij terminal multiplexer with custom themes and layouts
 # - Custom theme configuration
 # - Music layout for cmus and cava
-# - Convenient shell aliases
+# - Convenient shella aliases
 ###############################################################################
 {
   config,
@@ -38,7 +38,8 @@ in {
             # Define UI components according to new theme specification
             ribbon_unselected = {
               bg = "#44475a"; # background
-              fg = "#282a36"; # base
+              fg = "#282a36"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#f8f8f2"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -46,7 +47,8 @@ in {
             };
             ribbon_selected = {
               bg = "#6272a4"; # background
-              fg = "#f8f8f2"; # base
+              fg = "#f8f8f2"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#f8f8f2"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -54,7 +56,8 @@ in {
             };
             text_unselected = {
               bg = "#282a36"; # background
-              fg = "#f8f8f2"; # base
+              fg = "#f8f8f2"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -62,7 +65,8 @@ in {
             };
             text_selected = {
               bg = "#44475a"; # background
-              fg = "#f8f8f2"; # base
+              fg = "#f8f8f2"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -70,7 +74,8 @@ in {
             };
             table_title = {
               bg = "#282a36"; # background
-              fg = "#f8f8f2"; # base
+              fg = "#f8f8f2"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -78,7 +83,8 @@ in {
             };
             table_cell_unselected = {
               bg = "#282a36"; # background
-              fg = "#f8f8f2"; # base
+              fg = "#f8f8f2"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -86,7 +92,8 @@ in {
             };
             table_cell_selected = {
               bg = "#44475a"; # background
-              fg = "#f8f8f2"; # base
+              fg = "#f8f8f2"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -94,7 +101,8 @@ in {
             };
             list_unselected = {
               bg = "#282a36"; # background
-              fg = "#f8f8f2"; # base
+              fg = "#f8f8f2"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -102,7 +110,8 @@ in {
             };
             list_selected = {
               bg = "#44475a"; # background
-              fg = "#f8f8f2"; # base
+              fg = "#f8f8f2"; # foreground
+              base = "#f8f8f2"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -110,7 +119,8 @@ in {
             };
             frame_selected = {
               bg = "#282a36"; # background
-              fg = "#6272a4"; # base
+              fg = "#6272a4"; # foreground
+              base = "#6272a4"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -118,7 +128,8 @@ in {
             };
             frame_highlight = {
               bg = "#282a36"; # background
-              fg = "#ff79c6"; # base
+              fg = "#ff79c6"; # foreground
+              base = "#ff79c6"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -126,7 +137,8 @@ in {
             };
             exit_code_success = {
               bg = "#282a36"; # background
-              fg = "#50fa7b"; # base
+              fg = "#50fa7b"; # foreground
+              base = "#50fa7b"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
@@ -134,7 +146,8 @@ in {
             };
             exit_code_error = {
               bg = "#282a36"; # background
-              fg = "#ff5555"; # base
+              fg = "#ff5555"; # foreground
+              base = "#ff5555"; # base (required property)
               emphasis_0 = "#ff5555"; # emphasis_0
               emphasis_1 = "#50fa7b"; # emphasis_1
               emphasis_2 = "#8be9fd"; # emphasis_2
