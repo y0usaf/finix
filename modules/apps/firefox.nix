@@ -307,11 +307,11 @@
     }
 
     .urlbarView-row {
-        padding-block: 1px!important
+        padding-block: 1pt!important
     }
 
     .urlbarView-row-inner {
-        padding-inline: 2px!important
+        padding-inline: 2pt!important
     }
 
     .urlbarView-row[label="Firefox Suggest"] {

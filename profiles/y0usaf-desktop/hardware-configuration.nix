@@ -34,9 +34,9 @@
       "kvm-amd"
       "k10temp"
       "nct6775"
-      "zenpower"
+      #      "zenpower"
     ];
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
+    #    extraModulePackages = [config.boot.kernelPackages.zenpower];
 
     kernelParams = [
       "amd_pstate=active"
