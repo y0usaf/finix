@@ -156,7 +156,6 @@ in {
             new_optimizations = false;
             ignore_opacity = false;
             noise = 0;
-            brightness = 0;
             popups = true;
           };
         };
