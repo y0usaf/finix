@@ -48,7 +48,7 @@ in {
     ui = {
       hyprland = {
         enable = true;
-        flake.enable = true;
+        flake.enable = false;
         hy3.enable = false;
       };
       wayland.enable = true;
