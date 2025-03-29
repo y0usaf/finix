@@ -152,6 +152,16 @@ in {
         package = config.boot.kernelPackages.nvidiaPackages.stable;
       };
 
+      # OpenGL configuration for hardware acceleration
+      opengl = {
+        enable = true;
+        driSupport32Bit = true;
+        extraPackages = with pkgs; [
+          vaapiVdpau
+          libvdpau-va-gl
+        ];
+      };
+
       graphics = {
         enable = true;
         enable32Bit = true;
