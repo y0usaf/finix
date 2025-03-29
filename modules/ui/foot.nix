@@ -50,7 +50,7 @@
 
   # Color scheme settings, including both the regular and bright color palettes.
   footColorSettings = {
-    alpha = 0.01;
+    alpha = 0.1;
     background = "000000";
     foreground = "ffffff";
 
