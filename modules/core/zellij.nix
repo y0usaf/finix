@@ -32,138 +32,138 @@ in {
       enableZshIntegration = true;
 
       settings = {
-        theme = "dracula-custom";
+        theme = "custom";
         themes = {
-          "dracula-custom" = {
-            # Define UI components according to new theme specification
+          "custom" = {
+            # Define UI components with clear color descriptions
             ribbon_unselected = {
-              bg = "#44475a"; # background
-              fg = "#282a36"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#f8f8f2"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#44475a"; # Dark purple-gray
+              fg = "#282a36"; # Dark background
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#f8f8f2"; # Light foreground
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             ribbon_selected = {
-              bg = "#6272a4"; # background
-              fg = "#f8f8f2"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#f8f8f2"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#6272a4"; # Brighter purple
+              fg = "#f8f8f2"; # Light foreground
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#f8f8f2"; # Light foreground
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             text_unselected = {
-              bg = "#282a36"; # background
-              fg = "#f8f8f2"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#282a36"; # Dark background
+              fg = "#f8f8f2"; # Light foreground
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             text_selected = {
-              bg = "#44475a"; # background
-              fg = "#f8f8f2"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#44475a"; # Dark purple-gray
+              fg = "#f8f8f2"; # Light foreground
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             table_title = {
-              bg = "#282a36"; # background
-              fg = "#f8f8f2"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#282a36"; # Dark background
+              fg = "#f8f8f2"; # Light foreground
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             table_cell_unselected = {
-              bg = "#282a36"; # background
-              fg = "#f8f8f2"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#282a36"; # Dark background
+              fg = "#f8f8f2"; # Light foreground
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             table_cell_selected = {
-              bg = "#44475a"; # background
-              fg = "#f8f8f2"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#44475a"; # Dark purple-gray
+              fg = "#f8f8f2"; # Light foreground
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             list_unselected = {
-              bg = "#282a36"; # background
-              fg = "#f8f8f2"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#282a36"; # Dark background
+              fg = "#f8f8f2"; # Light foreground
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             list_selected = {
-              bg = "#44475a"; # background
-              fg = "#f8f8f2"; # foreground
-              base = "#f8f8f2"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#44475a"; # Dark purple-gray
+              fg = "#f8f8f2"; # Light foreground
+              base = "#f8f8f2"; # Light foreground
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             frame_selected = {
-              bg = "#282a36"; # background
-              fg = "#6272a4"; # foreground
-              base = "#6272a4"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#282a36"; # Dark background
+              fg = "#6272a4"; # Brighter purple
+              base = "#6272a4"; # Brighter purple
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             frame_highlight = {
-              bg = "#282a36"; # background
-              fg = "#ff79c6"; # foreground
-              base = "#ff79c6"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#282a36"; # Dark background
+              fg = "#ff79c6"; # Pink
+              base = "#ff79c6"; # Pink
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             exit_code_success = {
-              bg = "#282a36"; # background
-              fg = "#50fa7b"; # foreground
-              base = "#50fa7b"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#282a36"; # Dark background
+              fg = "#50fa7b"; # Green
+              base = "#50fa7b"; # Green
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             exit_code_error = {
-              bg = "#282a36"; # background
-              fg = "#ff5555"; # foreground
-              base = "#ff5555"; # base (required property)
-              emphasis_0 = "#ff5555"; # emphasis_0
-              emphasis_1 = "#50fa7b"; # emphasis_1
-              emphasis_2 = "#8be9fd"; # emphasis_2
-              emphasis_3 = "#ff79c6"; # emphasis_3
+              bg = "#282a36"; # Dark background
+              fg = "#ff5555"; # Red
+              base = "#ff5555"; # Red
+              emphasis_0 = "#ff5555"; # Red
+              emphasis_1 = "#50fa7b"; # Green
+              emphasis_2 = "#8be9fd"; # Cyan
+              emphasis_3 = "#ff79c6"; # Pink
             };
             multiplayer_user_colors = [
-              "#ff79c6" # player_1
-              "#8be9fd" # player_2
-              "#50fa7b" # player_3
-              "#f1fa8c" # player_4
-              "#bd93f9" # player_5
-              "#ff5555" # player_6
-              "#ffb86c" # player_7
-              "#6272a4" # player_8
-              "#44475a" # player_9
-              "#282a36" # player_10
+              "#ff79c6" # Pink (player 1)
+              "#8be9fd" # Cyan (player 2)
+              "#50fa7b" # Green (player 3)
+              "#f1fa8c" # Yellow (player 4)
+              "#bd93f9" # Purple (player 5)
+              "#ff5555" # Red (player 6)
+              "#ffb86c" # Orange (player 7)
+              "#6272a4" # Brighter purple (player 8)
+              "#44475a" # Dark purple-gray (player 9)
+              "#282a36" # Dark background (player 10)
             ];
           };
         };
@@ -171,6 +171,7 @@ in {
         # Pane frame settings
         hide_session_name = false;
         rounded_corners = true;
+        show_startup_tips = false;
       };
     };
 
