@@ -148,14 +148,8 @@ in {
         open = false;
         # Install nvidia-settings control panel
         nvidiaSettings = true;
-        # Build the Nvidia driver (with version and checksum checks) using mkDriver from the kernel packages.
-        package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-          version = "570.86.16"; # Specific version to ensure compatibility.
-          sha256_64bit = "sha256-RWPqS7ZUJH9JEAWlfHLGdqrNlavhaR1xMyzs8lJhy9U="; # Checksum for 64-bit binaries.
-          openSha256 = "sha256-DuVNA63+pJ8IB7Tw2gM4HbwlOh1bcDg2AN2mbEU9VPE="; # Checksum for open variant (unused here).
-          settingsSha256 = "sha256-9rtqh64TyhDF5fFAYiWl3oDHzKJqyOW3abpcf2iNRT8="; # Checksum for the settings tool.
-          usePersistenced = false; # Do not use persistenced; manage persistence manually.
-        };
+        # Use the latest NVIDIA driver from kernel packages
+        package = config.boot.kernelPackages.nvidiaPackages.stable;
       };
 
       graphics = {

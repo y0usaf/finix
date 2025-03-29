@@ -46,7 +46,10 @@ in {
 
     # UI and Display
     ui = {
-      hyprland.enable = true;
+      hyprland = {
+        enable = true;
+        flake.enable = false;
+      };
       wayland.enable = true;
       ags.enable = true;
       cursor.enable = true;

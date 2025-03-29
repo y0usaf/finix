@@ -41,7 +41,6 @@ in {
         stylua
         ruff
         nodePackages.prettier
-        nodePackages.prettier-plugin-toml
         shfmt
         vim-vint
 

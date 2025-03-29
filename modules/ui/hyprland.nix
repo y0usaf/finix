@@ -25,6 +25,13 @@ in {
   ###########################################################################
   options.modules.ui.hyprland = {
     enable = lib.mkEnableOption "Hyprland window manager";
+    flake = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Whether to use Hyprland from flake inputs instead of nixpkgs";
+      };
+    };
   };
 
   ###########################################################################
@@ -43,7 +50,13 @@ in {
     ###########################################################################
     xdg.portal = {
       xdgOpenUsePortal = true;
-      configPackages = [inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland];
+      configPackages = [
+        (
+          if cfg.flake.enable
+          then inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland
+          else pkgs.xdg-desktop-portal-hyprland
+        )
+      ];
       enable = true;
       extraPortals = [
         pkgs.xdg-desktop-portal-gtk
@@ -77,9 +90,16 @@ in {
       '';
 
       # Package Definitions
-      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-      portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
+      package =
+        if cfg.flake.enable
+        then inputs.hyprland.packages.${pkgs.system}.hyprland
+        else pkgs.hyprland;
+      portalPackage =
+        if cfg.flake.enable
+        then inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland
+        else pkgs.xdg-desktop-portal-hyprland;
       plugins = [
+        # Always use hy3 from flake inputs since it's not available in nixpkgs
         inputs.hy3.packages.${pkgs.system}.hy3
       ];
 
