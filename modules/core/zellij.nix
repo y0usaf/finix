@@ -37,121 +37,121 @@ in {
           "dracula-custom" = {
             # Define UI components according to new theme specification
             ribbon_unselected = {
-              base = "40 42 54";
-              background = "68 71 90";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "248 248 242";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#44475a"; # background
+              fg = "#282a36"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#f8f8f2"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             ribbon_selected = {
-              base = "248 248 242";
-              background = "98 114 164";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "248 248 242";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#6272a4"; # background
+              fg = "#f8f8f2"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#f8f8f2"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             text_unselected = {
-              base = "248 248 242";
-              background = "40 42 54";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#282a36"; # background
+              fg = "#f8f8f2"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             text_selected = {
-              base = "248 248 242";
-              background = "68 71 90";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#44475a"; # background
+              fg = "#f8f8f2"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             table_title = {
-              base = "248 248 242";
-              background = "40 42 54";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#282a36"; # background
+              fg = "#f8f8f2"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             table_cell_unselected = {
-              base = "248 248 242";
-              background = "40 42 54";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#282a36"; # background
+              fg = "#f8f8f2"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             table_cell_selected = {
-              base = "248 248 242";
-              background = "68 71 90";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#44475a"; # background
+              fg = "#f8f8f2"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             list_unselected = {
-              base = "248 248 242";
-              background = "40 42 54";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#282a36"; # background
+              fg = "#f8f8f2"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             list_selected = {
-              base = "248 248 242";
-              background = "68 71 90";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#44475a"; # background
+              fg = "#f8f8f2"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             frame_selected = {
-              base = "98 114 164";
-              background = "40 42 54";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#282a36"; # background
+              fg = "#6272a4"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             frame_highlight = {
-              base = "255 121 198";
-              background = "40 42 54";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#282a36"; # background
+              fg = "#ff79c6"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             exit_code_success = {
-              base = "80 250 123";
-              background = "40 42 54";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#282a36"; # background
+              fg = "#50fa7b"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
             exit_code_error = {
-              base = "255 85 85";
-              background = "40 42 54";
-              emphasis_0 = "255 85 85";
-              emphasis_1 = "80 250 123";
-              emphasis_2 = "139 233 253";
-              emphasis_3 = "255 121 198";
+              bg = "#282a36"; # background
+              fg = "#ff5555"; # base
+              emphasis_0 = "#ff5555"; # emphasis_0
+              emphasis_1 = "#50fa7b"; # emphasis_1
+              emphasis_2 = "#8be9fd"; # emphasis_2
+              emphasis_3 = "#ff79c6"; # emphasis_3
             };
-            multiplayer_user_colors = {
-              player_1 = "255 121 198";
-              player_2 = "139 233 253";
-              player_3 = "80 250 123";
-              player_4 = "241 250 140";
-              player_5 = "189 147 249";
-              player_6 = "255 85 85";
-              player_7 = "255 184 108";
-              player_8 = "98 114 164";
-              player_9 = "68 71 90";
-              player_10 = "40 42 54";
-            };
+            multiplayer_user_colors = [
+              "#ff79c6" # player_1
+              "#8be9fd" # player_2
+              "#50fa7b" # player_3
+              "#f1fa8c" # player_4
+              "#bd93f9" # player_5
+              "#ff5555" # player_6
+              "#ffb86c" # player_7
+              "#6272a4" # player_8
+              "#44475a" # player_9
+              "#282a36" # player_10
+            ];
           };
         };
 
