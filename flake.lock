@@ -80,7 +80,7 @@
     },
     "deepin-dark-hyprcursor": {
       "locked": {
-        "lastModified": 1741315986,
+        "lastModified": 1743210043,
         "narHash": "sha256-egwVgDGUVIE9WMvEeeU+t68o2qseDC3bZuY4DBOgvhI=",
         "path": "/home/y0usaf/nixos/pkg/deepin-dark-hyprcursor",
         "type": "path"
@@ -92,7 +92,7 @@
     },
     "deepin-dark-xcursor": {
       "locked": {
-        "lastModified": 1741315995,
+        "lastModified": 1743210043,
         "narHash": "sha256-SC4W95XR+t8tpfLT33IeT0C+u8nVlwXy2FZjfVt7uCA=",
         "path": "/home/y0usaf/nixos/pkg/deepin-dark-xcursor",
         "type": "path"
