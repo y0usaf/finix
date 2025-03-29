@@ -33,7 +33,7 @@ in {
         cat-fetch = true;
         history-memory = 10000;
         history-storage = 10000;
-        zellij.enable = false;
+        zellij.enable = true;
       };
       systemd = {
         enable = true;
