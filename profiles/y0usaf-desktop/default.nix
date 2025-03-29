@@ -48,7 +48,8 @@ in {
     ui = {
       hyprland = {
         enable = true;
-        flake.enable = false;
+        flake.enable = true;
+        hy3.enable = false;
       };
       wayland.enable = true;
       ags.enable = true;

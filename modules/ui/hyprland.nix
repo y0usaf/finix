@@ -32,6 +32,13 @@ in {
         description = "Whether to use Hyprland from flake inputs instead of nixpkgs";
       };
     };
+    hy3 = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Whether to enable the hy3 tiling layout plugin";
+      };
+    };
   };
 
   ###########################################################################
@@ -98,7 +105,7 @@ in {
         if cfg.flake.enable
         then inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland
         else pkgs.xdg-desktop-portal-hyprland;
-      plugins = [
+      plugins = lib.mkIf cfg.hy3.enable [
         # Always use hy3 from flake inputs since it's not available in nixpkgs
         inputs.hy3.packages.${pkgs.system}.hy3
       ];
@@ -119,7 +126,10 @@ in {
           border_size = 1;
           "col.active_border" = "rgba($active_colour)";
           "col.inactive_border" = "rgba($inactive_colour)";
-          layout = "hy3";
+          layout =
+            if cfg.hy3.enable
+            then "hy3"
+            else "dwindle";
         };
 
         # Input Settings (keyboard & mouse)
