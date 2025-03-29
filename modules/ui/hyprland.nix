@@ -143,7 +143,7 @@ in {
 
         # Theme & Colors
         "$active_colour" = "ffffffff";
-        "$transparent" = "00000000";
+        "$transparent" = "ffffff00";
         "$inactive_colour" = "333333ff";
 
         # Window Decoration & Effects
