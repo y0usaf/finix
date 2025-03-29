@@ -151,12 +151,9 @@ in {
           rounding = 0;
           blur = {
             enabled = true;
-            size = 5;
-            passes = 1;
-            new_optimizations = true;
+            size = 3;
+            passes = 3;
             ignore_opacity = true;
-            noise = 0;
-            brightness = 0.5;
             popups = true;
           };
         };
