@@ -154,7 +154,7 @@ in {
             size = 3;
             passes = 3;
             new_optimizations = false;
-            ignore_opacity = false;
+            ignore_opacity = true;
             noise = 0;
             popups = true;
           };
