@@ -150,7 +150,7 @@ in {
         decoration = {
           rounding = 0;
           blur = {
-            enabled = false;
+            enabled = true;
             size = 3;
             passes = 3;
             new_optimizations = false;
