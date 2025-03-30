@@ -132,6 +132,7 @@ in {
       media = {
         enable = true;
         yt-dlp.enable = true;
+        spotdl.enable = true;
       };
       music.enable = true;
       obs.enable = true;
