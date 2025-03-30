@@ -129,7 +129,10 @@ in {
       android.enable = false;
       firefox.enable = true;
       gaming.enable = true;
-      media.enable = true;
+      media = {
+        enable = true;
+        yt-dlp.enable = true;
+      };
       music.enable = true;
       obs.enable = true;
       qbittorrent.enable = true;
