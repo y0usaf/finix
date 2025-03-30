@@ -69,14 +69,22 @@ in {
     inputs,
     pkgs,
     commonSpecialArgs,
-  }:
+  }: let
+    # Debug: Check if profiles have the expected structure
+    validProfileNames =
+      builtins.filter (
+        hostname:
+          builtins.hasAttr hostname profiles
+          && builtins.hasAttr "modules" profiles.${hostname}
+          && builtins.hasAttr "system" profiles.${hostname}.modules
+          && builtins.hasAttr "username" profiles.${hostname}.modules.system
+      )
+      profileNames;
+  in
     builtins.listToAttrs (
       map
       (hostname: let
-        profileConfig = import (profilesDir + "/${hostname}/default.nix") {
-          lib = pkgs.lib;
-          inherit pkgs;
-        };
+        profileConfig = profiles.${hostname};
       in {
         name = profileConfig.modules.system.username;
         value = inputs.home-manager.lib.homeManagerConfiguration {
@@ -85,6 +93,6 @@ in {
           modules = [../../home.nix];
         };
       })
-      profileNames
+      validProfileNames # Use only valid profiles
     );
 }
