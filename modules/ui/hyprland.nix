@@ -158,6 +158,11 @@ in {
           };
         };
 
+        # Rendering Settings
+        render = {
+          cm_enabled = 0;
+        };
+
         # Animation Settings
         animations = {
           enabled = 0;
