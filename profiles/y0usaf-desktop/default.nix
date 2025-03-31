@@ -52,7 +52,7 @@ in {
         hy3.enable = true;
       };
       wayland.enable = true;
-      ags.enable = true;
+      ags.enable = false;
       cursor.enable = true;
       foot.enable = true;
       gtk.enable = true;
