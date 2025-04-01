@@ -22,6 +22,9 @@
   baseFontSize = profile.modules.appearance.baseFontSize;
   dpiStr = toString profile.modules.appearance.dpi;
 
+  # Scale factor for GTK interface (used for environment variables)
+  scaleFactor = 2;
+
   #############################################################
   # Text shadow configuration
   #############################################################
@@ -150,6 +153,15 @@ in {
           color-scheme = "prefer-dark";
         };
       };
+    };
+
+    ######################################################################
+    # Set user-specific environment variables for GTK scaling
+    ######################################################################
+    home.sessionVariables = {
+      # Set GTK scaling factor (1 = 100%, 2 = 200%)
+      GDK_SCALE = toString scaleFactor;
+      GDK_DPI_SCALE = "1";
     };
   };
 }
