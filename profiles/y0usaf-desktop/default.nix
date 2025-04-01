@@ -174,6 +174,7 @@ in {
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
         bambu-studio
+        orca-slicer
       ];
     };
 
