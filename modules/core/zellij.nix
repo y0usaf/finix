@@ -32,7 +32,7 @@ in {
       enableZshIntegration = true;
 
       settings = {
-        theme = "foot";
+        theme = "default";
         themes = {
           "foot" = {
             # Theme based on foot terminal colors
@@ -47,7 +47,7 @@ in {
             cyan = "#00ffff"; # Cyan
             white = "#ffffff"; # White
             orange = "#ff8c00"; # Dark orange
-            
+
             # Define UI components with Foot terminal colors
             ribbon_unselected = {
               bg = "#000000"; # Black
@@ -179,7 +179,7 @@ in {
               "#000000" # Black (player 10)
             ];
           };
-          
+
           "custom" = {
             # Define UI components with clear color descriptions
             ribbon_unselected = {
