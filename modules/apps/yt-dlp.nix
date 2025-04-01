@@ -37,10 +37,10 @@ in {
     # Shell Aliases
     ###########################################################################
     programs.zsh.shellAliases = {
-      ytm4a = "uv run yt-dlp -x --audio-format m4a -o '%(title)s.%(ext)s'";
-      ytmp3 = "uv run yt-dlp -x --audio-format mp3 -o '%(title)s.%(ext)s'";
-      ytmp4 = "uv run yt-dlp -f 'bv*+ba/b' --recode-video mp4 --postprocessor-args 'ffmpeg:-c:v libx264 -c:a aac' -o '%(title)s.%(ext)s'";
-      ytwebm = "uv run yt-dlp -f 'bv*+ba/b' --recode-video webm -o '%(title)s.%(ext)s'";
+      ytm4a = "uvx yt-dlp -x --audio-format m4a -o '%(title)s.%(ext)s'";
+      ytmp3 = "uvx yt-dlp -x --audio-format mp3 -o '%(title)s.%(ext)s'";
+      ytmp4 = "uvx yt-dlp -f 'bv*+ba/b' --recode-video mp4 --postprocessor-args 'ffmpeg:-c:v libx264 -c:a aac' -o '%(title)s.%(ext)s'";
+      ytwebm = "uvx yt-dlp -f 'bv*+ba/b' --recode-video webm -o '%(title)s.%(ext)s'";
     };
   };
 }

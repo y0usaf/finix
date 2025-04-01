@@ -36,8 +36,8 @@ in {
     # Shell Aliases
     ###########################################################################
     programs.zsh.shellAliases = {
-      spotm4a = "uv run spotdl --format m4a --output '{title}'";
-      spotmp3 = "uv run spotdl --format mp3 --output '{title}'";
+      spotm4a = "uvx spotdl --format m4a --output '{title}'";
+      spotmp3 = "uvx spotdl --format mp3 --output '{title}'";
     };
   };
 }
