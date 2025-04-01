@@ -35,148 +35,148 @@ in {
         theme = "monochrome";
         themes = {
           "monochrome" = {
-            # Minimalist monochromatic theme with subtle shades of gray
+            # Enhanced monochromatic theme with better contrasts
             bg = "#1a1a1a"; # Dark background
-            fg = "#d0d0d0"; # Light foreground
+            fg = "#e0e0e0"; # Light foreground (brighter for better contrast)
             black = "#1a1a1a"; # Base black
-            red = "#a0a0a0"; # Light gray (replacing red)
-            green = "#b0b0b0"; # Light gray (replacing green)
-            yellow = "#c0c0c0"; # Light gray (replacing yellow)
-            blue = "#909090"; # Gray (replacing blue)
-            magenta = "#808080"; # Gray (replacing magenta)
-            cyan = "#707070"; # Dark gray (replacing cyan)
-            white = "#d0d0d0"; # Very light gray/almost white
-            orange = "#a0a0a0"; # Same as red (for monochrome consistency)
+            red = "#e0e0e0"; # Almost white (for errors/critical elements)
+            green = "#c8c8c8"; # Light gray (for success indicators)
+            yellow = "#d4d4d4"; # Light gray (for warnings/highlights)
+            blue = "#b0b0b0"; # Gray (for information)
+            magenta = "#cccccc"; # Gray (for special elements)
+            cyan = "#a8a8a8"; # Dark gray (for secondary elements)
+            white = "#f0f0f0"; # Very light gray/almost white
+            orange = "#dadada"; # Light gray (for attention elements)
             
             # Define UI components with clear color descriptions
             ribbon_unselected = {
               bg = "#404040"; # Medium-dark gray
-              fg = "#1a1a1a"; # Very dark gray/black
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#d0d0d0"; # Very light gray/almost white
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#f0f0f0"; # Very light gray/almost white
+              base = "#e0e0e0"; # Light foreground
+              emphasis_0 = "#e0e0e0"; # Almost white (for contrast)
+              emphasis_1 = "#f0f0f0"; # Very light gray/almost white
+              emphasis_2 = "#c8c8c8"; # Light gray
+              emphasis_3 = "#a8a8a8"; # Dark gray
             };
             ribbon_selected = {
-              bg = "#707070"; # Dark gray
-              fg = "#d0d0d0"; # Very light gray/almost white
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#d0d0d0"; # Very light gray/almost white
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              bg = "#606060"; # Dark gray
+              fg = "#f0f0f0"; # Very light gray/almost white
+              base = "#f0f0f0"; # Very light gray/almost white
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#f0f0f0"; # Very light gray/almost white
+              emphasis_2 = "#d4d4d4"; # Light gray
+              emphasis_3 = "#cccccc"; # Light-medium gray
             };
             text_unselected = {
               bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#d0d0d0"; # Very light gray/almost white
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#e0e0e0"; # Light foreground
+              base = "#e0e0e0"; # Light foreground
+              emphasis_0 = "#e0e0e0"; # Almost white (for contrast)
+              emphasis_1 = "#d4d4d4"; # Light gray
+              emphasis_2 = "#c8c8c8"; # Light gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             text_selected = {
-              bg = "#404040"; # Medium-dark gray
-              fg = "#d0d0d0"; # Very light gray/almost white
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              bg = "#303030"; # Medium-dark gray
+              fg = "#f0f0f0"; # Very light gray/almost white
+              base = "#f0f0f0"; # Very light gray/almost white
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#dadada"; # Light gray
+              emphasis_2 = "#cccccc"; # Light-medium gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             table_title = {
               bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#d0d0d0"; # Very light gray/almost white
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#f0f0f0"; # Very light gray/almost white
+              base = "#f0f0f0"; # Very light gray/almost white
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#dadada"; # Light gray
+              emphasis_2 = "#cccccc"; # Light-medium gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             table_cell_unselected = {
               bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#d0d0d0"; # Very light gray/almost white
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#e0e0e0"; # Light foreground
+              base = "#e0e0e0"; # Light foreground
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#d4d4d4"; # Light gray
+              emphasis_2 = "#c8c8c8"; # Light gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             table_cell_selected = {
-              bg = "#404040"; # Medium-dark gray
-              fg = "#d0d0d0"; # Very light gray/almost white
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              bg = "#303030"; # Medium-dark gray
+              fg = "#f0f0f0"; # Very light gray/almost white
+              base = "#f0f0f0"; # Very light gray/almost white
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#dadada"; # Light gray
+              emphasis_2 = "#cccccc"; # Light-medium gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             list_unselected = {
               bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#d0d0d0"; # Very light gray/almost white
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#e0e0e0"; # Light foreground
+              base = "#e0e0e0"; # Light foreground
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#d4d4d4"; # Light gray
+              emphasis_2 = "#c8c8c8"; # Light gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             list_selected = {
-              bg = "#404040"; # Medium-dark gray
-              fg = "#d0d0d0"; # Very light gray/almost white
-              base = "#d0d0d0"; # Very light gray/almost white
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              bg = "#303030"; # Medium-dark gray
+              fg = "#f0f0f0"; # Very light gray/almost white
+              base = "#f0f0f0"; # Very light gray/almost white
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#dadada"; # Light gray
+              emphasis_2 = "#cccccc"; # Light-medium gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             frame_selected = {
               bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#707070"; # Dark gray
-              base = "#707070"; # Dark gray
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#cccccc"; # Light-medium gray
+              base = "#cccccc"; # Light-medium gray
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#dadada"; # Light gray
+              emphasis_2 = "#c8c8c8"; # Light gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             frame_highlight = {
               bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#c0c0c0"; # Light gray
-              base = "#c0c0c0"; # Light gray
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#f0f0f0"; # Very light gray/almost white
+              base = "#f0f0f0"; # Very light gray/almost white
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#dadada"; # Light gray
+              emphasis_2 = "#cccccc"; # Light-medium gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             exit_code_success = {
               bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#c0c0c0"; # Light gray
-              base = "#c0c0c0"; # Light gray
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#e0e0e0"; # Almost white
+              base = "#e0e0e0"; # Almost white
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#dadada"; # Light gray
+              emphasis_2 = "#cccccc"; # Light-medium gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             exit_code_error = {
               bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#b0b0b0"; # Light gray
-              base = "#b0b0b0"; # Light gray
-              emphasis_0 = "#b0b0b0"; # Light gray
-              emphasis_1 = "#c0c0c0"; # Light gray
-              emphasis_2 = "#909090"; # Gray
-              emphasis_3 = "#707070"; # Dark gray
+              fg = "#f0f0f0"; # Very light gray/almost white
+              base = "#f0f0f0"; # Very light gray/almost white
+              emphasis_0 = "#e0e0e0"; # Almost white
+              emphasis_1 = "#dadada"; # Light gray
+              emphasis_2 = "#cccccc"; # Light-medium gray
+              emphasis_3 = "#b0b0b0"; # Medium gray
             };
             multiplayer_user_colors = [
-              "#d0d0d0" # Very light gray (player 1)
-              "#c0c0c0" # Light gray (player 2)
-              "#b0b0b0" # Light gray (player 3)
-              "#a0a0a0" # Gray (player 4)
-              "#909090" # Gray (player 5)
-              "#808080" # Medium gray (player 6)
-              "#707070" # Dark gray (player 7)
-              "#606060" # Dark gray (player 8)
-              "#404040" # Very dark gray (player 9)
-              "#1a1a1a" # Black/very dark gray (player 10)
+              "#f0f0f0" # Very light gray (player 1)
+              "#e0e0e0" # Almost white (player 2)
+              "#dadada" # Light gray (player 3)
+              "#d4d4d4" # Light gray (player 4)
+              "#cccccc" # Light-medium gray (player 5)
+              "#c8c8c8" # Light gray (player 6)
+              "#b0b0b0" # Medium gray (player 7)
+              "#a8a8a8" # Medium gray (player 8)
+              "#606060" # Dark gray (player 9)
+              "#404040" # Very dark gray (player 10)
             ];
           };
           
