@@ -32,151 +32,151 @@ in {
       enableZshIntegration = true;
 
       settings = {
-        theme = "monochrome";
+        theme = "foot";
         themes = {
-          "monochrome" = {
-            # Enhanced monochromatic theme with better contrasts
-            bg = "#1a1a1a"; # Dark background
-            fg = "#e0e0e0"; # Light foreground (brighter for better contrast)
-            black = "#1a1a1a"; # Base black
-            red = "#e0e0e0"; # Almost white (for errors/critical elements)
-            green = "#c8c8c8"; # Light gray (for success indicators)
-            yellow = "#d4d4d4"; # Light gray (for warnings/highlights)
-            blue = "#b0b0b0"; # Gray (for information)
-            magenta = "#cccccc"; # Gray (for special elements)
-            cyan = "#a8a8a8"; # Dark gray (for secondary elements)
-            white = "#f0f0f0"; # Very light gray/almost white
-            orange = "#dadada"; # Light gray (for attention elements)
+          "foot" = {
+            # Theme based on foot terminal colors
+            bg = "#000000"; # Black background
+            fg = "#ffffff"; # White foreground
+            black = "#000000"; # Black
+            red = "#ff0000"; # Red
+            green = "#00ff00"; # Green
+            yellow = "#ffff00"; # Yellow
+            blue = "#1e90ff"; # Blue (dodger blue)
+            magenta = "#ff00ff"; # Magenta
+            cyan = "#00ffff"; # Cyan
+            white = "#ffffff"; # White
+            orange = "#ff8c00"; # Dark orange
             
-            # Define UI components with clear color descriptions
+            # Define UI components with Foot terminal colors
             ribbon_unselected = {
-              bg = "#404040"; # Medium-dark gray
-              fg = "#f0f0f0"; # Very light gray/almost white
-              base = "#e0e0e0"; # Light foreground
-              emphasis_0 = "#e0e0e0"; # Almost white (for contrast)
-              emphasis_1 = "#f0f0f0"; # Very light gray/almost white
-              emphasis_2 = "#c8c8c8"; # Light gray
-              emphasis_3 = "#a8a8a8"; # Dark gray
+              bg = "#000000"; # Black
+              fg = "#808080"; # Bright black
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#1e90ff"; # Blue
             };
             ribbon_selected = {
-              bg = "#606060"; # Dark gray
-              fg = "#f0f0f0"; # Very light gray/almost white
-              base = "#f0f0f0"; # Very light gray/almost white
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#f0f0f0"; # Very light gray/almost white
-              emphasis_2 = "#d4d4d4"; # Light gray
-              emphasis_3 = "#cccccc"; # Light-medium gray
+              bg = "#1e90ff"; # Blue
+              fg = "#ffffff"; # White
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#ff00ff"; # Magenta
             };
             text_unselected = {
-              bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#e0e0e0"; # Light foreground
-              base = "#e0e0e0"; # Light foreground
-              emphasis_0 = "#e0e0e0"; # Almost white (for contrast)
-              emphasis_1 = "#d4d4d4"; # Light gray
-              emphasis_2 = "#c8c8c8"; # Light gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#000000"; # Black
+              fg = "#ffffff"; # White
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#1e90ff"; # Blue
             };
             text_selected = {
-              bg = "#303030"; # Medium-dark gray
-              fg = "#f0f0f0"; # Very light gray/almost white
-              base = "#f0f0f0"; # Very light gray/almost white
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#dadada"; # Light gray
-              emphasis_2 = "#cccccc"; # Light-medium gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#1e90ff"; # Blue
+              fg = "#ffffff"; # White
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#ff00ff"; # Magenta
             };
             table_title = {
-              bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#f0f0f0"; # Very light gray/almost white
-              base = "#f0f0f0"; # Very light gray/almost white
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#dadada"; # Light gray
-              emphasis_2 = "#cccccc"; # Light-medium gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#000000"; # Black
+              fg = "#ffffff"; # White
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#1e90ff"; # Blue
             };
             table_cell_unselected = {
-              bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#e0e0e0"; # Light foreground
-              base = "#e0e0e0"; # Light foreground
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#d4d4d4"; # Light gray
-              emphasis_2 = "#c8c8c8"; # Light gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#000000"; # Black
+              fg = "#ffffff"; # White
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#1e90ff"; # Blue
             };
             table_cell_selected = {
-              bg = "#303030"; # Medium-dark gray
-              fg = "#f0f0f0"; # Very light gray/almost white
-              base = "#f0f0f0"; # Very light gray/almost white
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#dadada"; # Light gray
-              emphasis_2 = "#cccccc"; # Light-medium gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#1e90ff"; # Blue
+              fg = "#ffffff"; # White
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#ff00ff"; # Magenta
             };
             list_unselected = {
-              bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#e0e0e0"; # Light foreground
-              base = "#e0e0e0"; # Light foreground
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#d4d4d4"; # Light gray
-              emphasis_2 = "#c8c8c8"; # Light gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#000000"; # Black
+              fg = "#ffffff"; # White
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#1e90ff"; # Blue
             };
             list_selected = {
-              bg = "#303030"; # Medium-dark gray
-              fg = "#f0f0f0"; # Very light gray/almost white
-              base = "#f0f0f0"; # Very light gray/almost white
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#dadada"; # Light gray
-              emphasis_2 = "#cccccc"; # Light-medium gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#1e90ff"; # Blue
+              fg = "#ffffff"; # White
+              base = "#ffffff"; # White
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#ff00ff"; # Magenta
             };
             frame_selected = {
-              bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#cccccc"; # Light-medium gray
-              base = "#cccccc"; # Light-medium gray
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#dadada"; # Light gray
-              emphasis_2 = "#c8c8c8"; # Light gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#000000"; # Black
+              fg = "#1e90ff"; # Blue
+              base = "#1e90ff"; # Blue
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#ffff00"; # Yellow
+              emphasis_3 = "#ff00ff"; # Magenta
             };
             frame_highlight = {
-              bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#f0f0f0"; # Very light gray/almost white
-              base = "#f0f0f0"; # Very light gray/almost white
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#dadada"; # Light gray
-              emphasis_2 = "#cccccc"; # Light-medium gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#000000"; # Black
+              fg = "#ffff00"; # Yellow
+              base = "#ffff00"; # Yellow
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#00ff00"; # Green
+              emphasis_2 = "#1e90ff"; # Blue
+              emphasis_3 = "#ff00ff"; # Magenta
             };
             exit_code_success = {
-              bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#e0e0e0"; # Almost white
-              base = "#e0e0e0"; # Almost white
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#dadada"; # Light gray
-              emphasis_2 = "#cccccc"; # Light-medium gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#000000"; # Black
+              fg = "#00ff00"; # Green
+              base = "#00ff00"; # Green
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#ffff00"; # Yellow
+              emphasis_2 = "#1e90ff"; # Blue
+              emphasis_3 = "#ff00ff"; # Magenta
             };
             exit_code_error = {
-              bg = "#1a1a1a"; # Very dark gray/black
-              fg = "#f0f0f0"; # Very light gray/almost white
-              base = "#f0f0f0"; # Very light gray/almost white
-              emphasis_0 = "#e0e0e0"; # Almost white
-              emphasis_1 = "#dadada"; # Light gray
-              emphasis_2 = "#cccccc"; # Light-medium gray
-              emphasis_3 = "#b0b0b0"; # Medium gray
+              bg = "#000000"; # Black
+              fg = "#ff0000"; # Red
+              base = "#ff0000"; # Red
+              emphasis_0 = "#ff0000"; # Red
+              emphasis_1 = "#ffff00"; # Yellow
+              emphasis_2 = "#1e90ff"; # Blue
+              emphasis_3 = "#ff00ff"; # Magenta
             };
             multiplayer_user_colors = [
-              "#f0f0f0" # Very light gray (player 1)
-              "#e0e0e0" # Almost white (player 2)
-              "#dadada" # Light gray (player 3)
-              "#d4d4d4" # Light gray (player 4)
-              "#cccccc" # Light-medium gray (player 5)
-              "#c8c8c8" # Light gray (player 6)
-              "#b0b0b0" # Medium gray (player 7)
-              "#a8a8a8" # Medium gray (player 8)
-              "#606060" # Dark gray (player 9)
-              "#404040" # Very dark gray (player 10)
+              "#ff0000" # Red (player 1)
+              "#00ff00" # Green (player 2)
+              "#ffff00" # Yellow (player 3)
+              "#1e90ff" # Blue (player 4)
+              "#ff00ff" # Magenta (player 5)
+              "#00ffff" # Cyan (player 6)
+              "#ffffff" # White (player 7)
+              "#ff8c00" # Orange (player 8)
+              "#808080" # Bright black (player 9)
+              "#000000" # Black (player 10)
             ];
           };
           
