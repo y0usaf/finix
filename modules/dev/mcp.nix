@@ -18,6 +18,11 @@ in {
   ###########################################################################
   options.modules.dev.mcp = {
     enable = lib.mkEnableOption "Model Context Protocol for Brave Search";
+    braveApiKey = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "Brave Search API key for MCP";
+    };
   };
 
   ###########################################################################
@@ -46,5 +51,9 @@ in {
     home.sessionPath = [
       "${config.xdg.dataHome}/npm/bin"
     ];
+
+    home.sessionVariables = {
+      BRAVE_API_KEY = cfg.braveApiKey;
+    };
   };
 }

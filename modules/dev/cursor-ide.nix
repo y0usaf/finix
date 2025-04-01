@@ -25,11 +25,11 @@
         command = "npx";
       };
       "Stock Trader" = {
-        args = ["TIINGO_API_KEY=$TIINGO_API_KEY" "--install-deps" "mcp-trader"];
+        args = ["TIINGO_API_KEY=$TIINGO_API_KEY" "mcp-trader"];
         command = "uvx";
       };
       "Nixos MCP" = {
-        args = ["--install-deps" "mcp-nixos"];
+        args = ["mcp-nixos"];
         command = "uvx";
       };
     };
