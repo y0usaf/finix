@@ -32,284 +32,151 @@ in {
       enableZshIntegration = true;
 
       settings = {
-        theme = "default";
+        theme = "custom";
         themes = {
-          "foot" = {
-            # Theme based on foot terminal colors
-            bg = "#000000"; # Black background
-            fg = "#ffffff"; # White foreground
-            black = "#000000"; # Black
-            red = "#ff0000"; # Red
-            green = "#00ff00"; # Green
-            yellow = "#ffff00"; # Yellow
-            blue = "#1e90ff"; # Blue (dodger blue)
-            magenta = "#ff00ff"; # Magenta
-            cyan = "#00ffff"; # Cyan
-            white = "#ffffff"; # White
-            orange = "#ff8c00"; # Dark orange
-
-            # Define UI components with Foot terminal colors
-            ribbon_unselected = {
-              bg = "#000000"; # Black
-              fg = "#808080"; # Bright black
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#1e90ff"; # Blue
-            };
-            ribbon_selected = {
-              bg = "#1e90ff"; # Blue
-              fg = "#ffffff"; # White
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#ff00ff"; # Magenta
-            };
-            text_unselected = {
-              bg = "#000000"; # Black
-              fg = "#ffffff"; # White
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#1e90ff"; # Blue
-            };
-            text_selected = {
-              bg = "#1e90ff"; # Blue
-              fg = "#ffffff"; # White
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#ff00ff"; # Magenta
-            };
-            table_title = {
-              bg = "#000000"; # Black
-              fg = "#ffffff"; # White
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#1e90ff"; # Blue
-            };
-            table_cell_unselected = {
-              bg = "#000000"; # Black
-              fg = "#ffffff"; # White
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#1e90ff"; # Blue
-            };
-            table_cell_selected = {
-              bg = "#1e90ff"; # Blue
-              fg = "#ffffff"; # White
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#ff00ff"; # Magenta
-            };
-            list_unselected = {
-              bg = "#000000"; # Black
-              fg = "#ffffff"; # White
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#1e90ff"; # Blue
-            };
-            list_selected = {
-              bg = "#1e90ff"; # Blue
-              fg = "#ffffff"; # White
-              base = "#ffffff"; # White
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#ff00ff"; # Magenta
-            };
-            frame_selected = {
-              bg = "#000000"; # Black
-              fg = "#1e90ff"; # Blue
-              base = "#1e90ff"; # Blue
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#ffff00"; # Yellow
-              emphasis_3 = "#ff00ff"; # Magenta
-            };
-            frame_highlight = {
-              bg = "#000000"; # Black
-              fg = "#ffff00"; # Yellow
-              base = "#ffff00"; # Yellow
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#00ff00"; # Green
-              emphasis_2 = "#1e90ff"; # Blue
-              emphasis_3 = "#ff00ff"; # Magenta
-            };
-            exit_code_success = {
-              bg = "#000000"; # Black
-              fg = "#00ff00"; # Green
-              base = "#00ff00"; # Green
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#ffff00"; # Yellow
-              emphasis_2 = "#1e90ff"; # Blue
-              emphasis_3 = "#ff00ff"; # Magenta
-            };
-            exit_code_error = {
-              bg = "#000000"; # Black
-              fg = "#ff0000"; # Red
-              base = "#ff0000"; # Red
-              emphasis_0 = "#ff0000"; # Red
-              emphasis_1 = "#ffff00"; # Yellow
-              emphasis_2 = "#1e90ff"; # Blue
-              emphasis_3 = "#ff00ff"; # Magenta
-            };
-            multiplayer_user_colors = [
-              "#ff0000" # Red (player 1)
-              "#00ff00" # Green (player 2)
-              "#ffff00" # Yellow (player 3)
-              "#1e90ff" # Blue (player 4)
-              "#ff00ff" # Magenta (player 5)
-              "#00ffff" # Cyan (player 6)
-              "#ffffff" # White (player 7)
-              "#ff8c00" # Orange (player 8)
-              "#808080" # Bright black (player 9)
-              "#000000" # Black (player 10)
-            ];
-          };
-
           "custom" = {
-            # Define UI components with clear color descriptions
+            # Gruvbox theme colors
+            bg = "#282828"; # Dark background
+            fg = "#ebdbb2"; # Light foreground
+            black = "#282828"; # Black
+            red = "#cc241d"; # Red
+            green = "#98971a"; # Green
+            yellow = "#d79921"; # Yellow
+            blue = "#458588"; # Blue
+            magenta = "#b16286"; # Magenta
+            cyan = "#689d6a"; # Cyan
+            white = "#ebdbb2"; # White/Cream
+            orange = "#d65d0e"; # Orange
+
+            # Define UI components with Gruvbox colors
             ribbon_unselected = {
-              bg = "#44475a"; # Dark purple-gray
-              fg = "#282a36"; # Dark background
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#f8f8f2"; # Light foreground
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#3c3836"; # Dark gray
+              fg = "#a89984"; # Gray/Medium foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#ebdbb2"; # Light foreground
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             ribbon_selected = {
-              bg = "#6272a4"; # Brighter purple
-              fg = "#f8f8f2"; # Light foreground
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#f8f8f2"; # Light foreground
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#458588"; # Blue
+              fg = "#ebdbb2"; # Light foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#ebdbb2"; # Light foreground
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             text_unselected = {
-              bg = "#282a36"; # Dark background
-              fg = "#f8f8f2"; # Light foreground
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#282828"; # Dark background
+              fg = "#ebdbb2"; # Light foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             text_selected = {
-              bg = "#44475a"; # Dark purple-gray
-              fg = "#f8f8f2"; # Light foreground
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#3c3836"; # Dark gray
+              fg = "#ebdbb2"; # Light foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             table_title = {
-              bg = "#282a36"; # Dark background
-              fg = "#f8f8f2"; # Light foreground
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#282828"; # Dark background
+              fg = "#ebdbb2"; # Light foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             table_cell_unselected = {
-              bg = "#282a36"; # Dark background
-              fg = "#f8f8f2"; # Light foreground
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#282828"; # Dark background
+              fg = "#ebdbb2"; # Light foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             table_cell_selected = {
-              bg = "#44475a"; # Dark purple-gray
-              fg = "#f8f8f2"; # Light foreground
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#3c3836"; # Dark gray
+              fg = "#ebdbb2"; # Light foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             list_unselected = {
-              bg = "#282a36"; # Dark background
-              fg = "#f8f8f2"; # Light foreground
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#282828"; # Dark background
+              fg = "#ebdbb2"; # Light foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             list_selected = {
-              bg = "#44475a"; # Dark purple-gray
-              fg = "#f8f8f2"; # Light foreground
-              base = "#f8f8f2"; # Light foreground
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#3c3836"; # Dark gray
+              fg = "#ebdbb2"; # Light foreground
+              base = "#ebdbb2"; # Light foreground
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             frame_selected = {
-              bg = "#282a36"; # Dark background
-              fg = "#6272a4"; # Brighter purple
-              base = "#6272a4"; # Brighter purple
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#282828"; # Dark background
+              fg = "#458588"; # Blue
+              base = "#458588"; # Blue
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             frame_highlight = {
-              bg = "#282a36"; # Dark background
-              fg = "#ff79c6"; # Pink
-              base = "#ff79c6"; # Pink
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#282828"; # Dark background
+              fg = "#d79921"; # Yellow
+              base = "#d79921"; # Yellow
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             exit_code_success = {
-              bg = "#282a36"; # Dark background
-              fg = "#50fa7b"; # Green
-              base = "#50fa7b"; # Green
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#282828"; # Dark background
+              fg = "#98971a"; # Green
+              base = "#98971a"; # Green
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             exit_code_error = {
-              bg = "#282a36"; # Dark background
-              fg = "#ff5555"; # Red
-              base = "#ff5555"; # Red
-              emphasis_0 = "#ff5555"; # Red
-              emphasis_1 = "#50fa7b"; # Green
-              emphasis_2 = "#8be9fd"; # Cyan
-              emphasis_3 = "#ff79c6"; # Pink
+              bg = "#282828"; # Dark background
+              fg = "#cc241d"; # Red
+              base = "#cc241d"; # Red
+              emphasis_0 = "#cc241d"; # Red
+              emphasis_1 = "#98971a"; # Green
+              emphasis_2 = "#689d6a"; # Cyan
+              emphasis_3 = "#d65d0e"; # Orange
             };
             multiplayer_user_colors = [
-              "#ff79c6" # Pink (player 1)
-              "#8be9fd" # Cyan (player 2)
-              "#50fa7b" # Green (player 3)
-              "#f1fa8c" # Yellow (player 4)
-              "#bd93f9" # Purple (player 5)
-              "#ff5555" # Red (player 6)
-              "#ffb86c" # Orange (player 7)
-              "#6272a4" # Brighter purple (player 8)
-              "#44475a" # Dark purple-gray (player 9)
-              "#282a36" # Dark background (player 10)
+              "#cc241d" # Red (player 1)
+              "#98971a" # Green (player 2)
+              "#d79921" # Yellow (player 3)
+              "#458588" # Blue (player 4)
+              "#b16286" # Magenta (player 5)
+              "#689d6a" # Cyan (player 6)
+              "#ebdbb2" # White/Cream (player 7)
+              "#d65d0e" # Orange (player 8)
+              "#a89984" # Gray (player 9)
+              "#3c3836" # Dark gray (player 10)
             ];
           };
         };
