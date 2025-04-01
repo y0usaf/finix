@@ -17,12 +17,16 @@
   mcpConfig = {
     mcpServers = {
       "Brave Search" = {
-        args = ["BRAVE_API_KEY=BSAFZkv_tdb_2PaF_kverNMM9Y5sXk8" "npx" "-y" "@modelcontextprotocol/server-brave-search"];
+        args = ["BRAVE_API_KEY=$BRAVE_API_KEY" "npx" "-y" "@modelcontextprotocol/server-brave-search"];
         command = "env";
       };
       "Filesystem" = {
         args = ["-y" "@modelcontextprotocol/server-filesystem" "~"];
         command = "npx";
+      };
+      "Stock Trader" = {
+        args = ["TIINGO_API_KEY=$TIINGO_API_KEY" "--install-deps" "mcp-trader"];
+        command = "uvx";
       };
       "Nixos MCP" = {
         args = ["--install-deps" "mcp-nixos"];
