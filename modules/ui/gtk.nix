@@ -159,11 +159,6 @@ in {
     # Set user-specific environment variables for GTK scaling
     ######################################################################
     home.sessionVariables = {
-      # Set GTK scaling factor (1 = 100%, 2 = 200%)
-      GDK_SCALE = toString scaleFactor;
-
-      # Set Electron scaling factor via flags
-      ELECTRON_FLAGS = "--force-device-scale-factor=${toString scaleFactor}";
     };
   };
 }
