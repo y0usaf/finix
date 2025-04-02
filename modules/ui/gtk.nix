@@ -161,7 +161,6 @@ in {
     home.sessionVariables = {
       # Set GTK scaling factor (1 = 100%, 2 = 200%)
       GDK_SCALE = toString scaleFactor;
-      GDK_DPI_SCALE = "1";
     };
   };
 }
