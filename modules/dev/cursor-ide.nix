@@ -15,19 +15,16 @@
   cfg = config.modules.dev.cursor-ide;
   mcpEnabled = config.modules.dev.mcp.enable;
 
-  # Get environment variables at build time
-  braveApiKey = builtins.getEnv "BRAVE_API_KEY";
-  tiingoApiKey = builtins.getEnv "TIINGO_API_KEY";
-
-  # Create JSON content directly as a string
-  mcpConfigJson = ''
+  # Create a script that generates the MCP config
+  generateMcpConfig = pkgs.writeShellScript "generate-mcp-config" ''
+    cat > ~/.cursor/mcp.json << 'EOF'
     {
       "mcpServers": {
         "Brave Search": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-brave-search"],
           "env": {
-            "BRAVE_API_KEY": "${braveApiKey}"
+            "BRAVE_API_KEY": "'$BRAVE_API_KEY'"
           }
         },
         "Filesystem": {
@@ -38,7 +35,7 @@
           "command": "uvx",
           "args": ["mcp-trader"],
           "env": {
-            "TIINGO_API_KEY": "${tiingoApiKey}"
+            "TIINGO_API_KEY": "'$TIINGO_API_KEY'"
           }
         },
         "Nixos MCP": {
@@ -47,6 +44,7 @@
         }
       }
     }
+    EOF
   '';
 in {
   ###########################################################################
@@ -70,8 +68,9 @@ in {
     ###########################################################################
     # MCP Configuration
     ###########################################################################
-    home.file.".cursor/mcp.json" = lib.mkIf mcpEnabled {
-      text = mcpConfigJson;
-    };
+    home.activation.mcpConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      $DRY_RUN_CMD mkdir -p ~/.cursor
+      $DRY_RUN_CMD ${generateMcpConfig}
+    '';
   };
 }
