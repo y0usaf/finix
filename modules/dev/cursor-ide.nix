@@ -14,29 +14,40 @@
 }: let
   cfg = config.modules.dev.cursor-ide;
   mcpEnabled = config.modules.dev.mcp.enable;
-  mcpConfig = {
-    mcpServers = {
-      "Brave Search" = {
-        command = "env";
-        args = ["BRAVE_API_KEY=${builtins.getEnv "BRAVE_API_KEY"}" "npx" "-y" "@modelcontextprotocol/server-brave-search"];
-      };
-      "Filesystem" = {
-        args = ["-y" "@modelcontextprotocol/server-filesystem" "~"];
-        command = "npx";
-      };
-      "Stock Trader" = {
-        command = "uvx";
-        args = ["TIINGO_API_KEY=${builtins.getEnv "TIINGO_API_KEY"}" "--install-deps" "mcp-trader"];
-      };
-      "Nixos MCP" = {
-        args = ["--install-deps" "mcp-nixos"];
-        command = "uvx";
-      };
-    };
-  };
 
-  # Generate MCP config file
-  mcpConfigFile = pkgs.writeText "cursor-mcp.json" (builtins.toJSON mcpConfig);
+  # Get environment variables at build time
+  braveApiKey = builtins.getEnv "BRAVE_API_KEY";
+  tiingoApiKey = builtins.getEnv "TIINGO_API_KEY";
+
+  # Create JSON content directly as a string
+  mcpConfigJson = ''
+    {
+      "mcpServers": {
+        "Brave Search": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+          "env": {
+            "BRAVE_API_KEY": "${braveApiKey}"
+          }
+        },
+        "Filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "~"]
+        },
+        "Stock Trader": {
+          "command": "uvx",
+          "args": ["mcp-trader"],
+          "env": {
+            "TIINGO_API_KEY": "${tiingoApiKey}"
+          }
+        },
+        "Nixos MCP": {
+          "command": "uvx",
+          "args": ["mcp-nixos"]
+        }
+      }
+    }
+  '';
 in {
   ###########################################################################
   # Module Options
@@ -60,7 +71,7 @@ in {
     # MCP Configuration
     ###########################################################################
     home.file.".cursor/mcp.json" = lib.mkIf mcpEnabled {
-      source = mcpConfigFile;
+      text = mcpConfigJson;
     };
   };
 }
