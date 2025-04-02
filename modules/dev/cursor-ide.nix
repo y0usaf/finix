@@ -13,39 +13,6 @@
   ...
 }: let
   cfg = config.modules.dev.cursor-ide;
-  mcpEnabled = config.modules.dev.mcp.enable;
-
-  # Create a script that generates the MCP config
-  generateMcpConfig = pkgs.writeShellScript "generate-mcp-config" ''
-    cat > ~/.cursor/mcp.json << EOF
-    {
-      "mcpServers": {
-        "Brave Search": {
-          "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-brave-search"],
-          "env": {
-            "BRAVE_API_KEY": "$BRAVE_API_KEY"
-          }
-        },
-        "Filesystem": {
-          "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-filesystem", "~"]
-        },
-        "Stock Trader": {
-          "command": "uvx",
-          "args": ["mcp-trader"],
-          "env": {
-            "TIINGO_API_KEY": "$TIINGO_API_KEY"
-          }
-        },
-        "Nixos MCP": {
-          "command": "uvx",
-          "args": ["mcp-nixos"]
-        }
-      }
-    }
-    EOF
-  '';
 in {
   ###########################################################################
   # Module Options
@@ -64,13 +31,5 @@ in {
     home.packages = with pkgs; [
       code-cursor
     ];
-
-    ###########################################################################
-    # MCP Configuration
-    ###########################################################################
-    home.activation.mcpConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD mkdir -p ~/.cursor
-      $DRY_RUN_CMD ${generateMcpConfig}
-    '';
   };
 }

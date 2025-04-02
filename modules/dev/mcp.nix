@@ -1,9 +1,10 @@
 ###############################################################################
 # Model Context Protocol (MCP) Module
-# Installs and configures the Model Context Protocol server for Brave Search
-# - Installs MCP Brave Search server via npm
+# Installs and configures the Model Context Protocol servers:
+# - Brave Search server via npm
+# - Filesystem server via npm
 # - Adds npm bin directory to PATH
-# - Provides configuration options for the MCP server
+# - Provides configuration options for the MCP servers
 ###############################################################################
 {
   config,
@@ -12,12 +13,37 @@
   ...
 }: let
   cfg = config.modules.dev.mcp;
+
+  # Create a script that generates the MCP config
+  generateMcpConfig = pkgs.writeShellScript "generate-mcp-config" ''
+    cat > ~/.cursor/mcp.json << EOF
+    {
+      "mcpServers": {
+        "Brave Search": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+          "env": {
+            "BRAVE_API_KEY": "$BRAVE_API_KEY"
+          }
+        },
+        "Filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "~"]
+        },
+        "Nixos MCP": {
+          "command": "uvx",
+          "args": ["mcp-nixos"]
+        }
+      }
+    }
+    EOF
+  '';
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
   options.modules.dev.mcp = {
-    enable = lib.mkEnableOption "Model Context Protocol for Brave Search";
+    enable = lib.mkEnableOption "Model Context Protocol servers";
     braveApiKey = lib.mkOption {
       type = lib.types.str;
       default = "";
@@ -34,6 +60,7 @@ in {
     ###########################################################################
     home.packages = with pkgs; [
       nodejs_20
+      uv
     ];
 
     ###########################################################################
@@ -43,6 +70,14 @@ in {
       # Install Model Context Protocol servers globally via npm
       ${pkgs.nodejs_20}/bin/npm install -g @modelcontextprotocol/server-brave-search
       ${pkgs.nodejs_20}/bin/npm install -g @modelcontextprotocol/server-filesystem
+    '';
+
+    ###########################################################################
+    # MCP Configuration
+    ###########################################################################
+    home.activation.mcpConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      $DRY_RUN_CMD mkdir -p ~/.cursor
+      $DRY_RUN_CMD ${generateMcpConfig}
     '';
 
     ###########################################################################
