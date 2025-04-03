@@ -146,6 +146,7 @@ in {
 
     # Development
     dev = {
+      docker.enable = true;
       fhs.enable = true;
       claude-code.enable = true;
       mcp.enable = true;

@@ -32,6 +32,7 @@
   enableHyprland = profile.modules.ui.hyprland.enable;
   enableGaming = profile.modules.apps.gaming.enable;
   enableAndroid = profile.modules.apps.android.enable;
+  enableDocker = profile.modules.dev.docker.enable;
 in {
   ###########################################################################
   # Module Imports
@@ -296,6 +297,10 @@ in {
       lxd.enable = true; # Enable LXD container hypervisor.
       waydroid = lib.mkIf enableAndroid {
         enable = true; # Enable Waydroid to run Android apps on NixOS.
+      };
+      docker = lib.mkIf enableDocker {
+        enable = true; # Enable Docker daemon
+        enableOnBoot = true; # Start Docker on boot
       };
     };
 
