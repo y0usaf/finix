@@ -302,6 +302,9 @@ in {
         enable = true; # Enable Docker daemon
         enableOnBoot = true; # Start Docker on boot
       };
+      podman = lib.mkIf enableDocker {
+        enable = true;
+      };
     };
 
     ###########################################################################
