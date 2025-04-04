@@ -71,15 +71,6 @@ in {
     ];
 
     ###########################################################################
-    # Installation
-    ###########################################################################
-    home.activation.installMCP = lib.hm.dag.entryAfter ["npmSetup"] ''
-      # Install Model Context Protocol servers globally via npm
-      ${pkgs.nodejs_20}/bin/npm install -g @modelcontextprotocol/server-brave-search
-      ${pkgs.nodejs_20}/bin/npm install -g @modelcontextprotocol/server-filesystem
-    '';
-
-    ###########################################################################
     # MCP Configuration
     ###########################################################################
     home.activation.mcpConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
