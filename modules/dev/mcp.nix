@@ -33,6 +33,13 @@
         "Nixos MCP": {
           "command": "uvx",
           "args": ["mcp-nixos"]
+        },
+        "sequential-thinking": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-sequential-thinking"
+          ]
         }
       }
     }
