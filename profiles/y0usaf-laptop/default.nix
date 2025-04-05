@@ -41,6 +41,7 @@ in {
     "python"
     "sync-tokens"
     "qbittorrent"
+    "env"
   ];
 
   # Directory Configurations

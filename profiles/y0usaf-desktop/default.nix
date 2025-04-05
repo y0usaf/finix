@@ -36,6 +36,10 @@ in {
         history-storage = 10000;
         zellij.enable = true;
       };
+      env = {
+        enable = true;
+        tokenDir = "${homeDir}/Tokens";
+      };
       systemd = {
         enable = true;
         autoFormatNix = {

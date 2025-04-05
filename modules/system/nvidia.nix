@@ -111,6 +111,12 @@
       LIBVA_DRIVER_NAME = "nvidia";
       WLR_NO_HARDWARE_CURSORS = "1";
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+      # Additional NVIDIA capabilities
+      NVIDIA_DRIVER_CAPABILITIES = "all";
+      # Waydroid-specific NVIDIA settings
+      WAYDROID_EXTRA_ARGS = "--gpu-mode host";
+      GALLIUM_DRIVER = "nvidia";
+      LIBGL_DRIVER_NAME = "nvidia";
     };
   };
 }
