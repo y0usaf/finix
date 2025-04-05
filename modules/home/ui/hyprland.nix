@@ -39,6 +39,13 @@ in {
         description = "Whether to enable the hy3 tiling layout plugin";
       };
     };
+    group = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether to enable the group layout mode";
+      };
+    };
   };
 
   ###########################################################################
@@ -129,6 +136,8 @@ in {
           layout =
             if cfg.hy3.enable
             then "hy3"
+            else if cfg.group.enable
+            then "group"
             else "dwindle";
         };
 
@@ -205,6 +214,14 @@ in {
 
         # Keybindings Configuration
         bind = lib.lists.flatten [
+          # -- Group Layout Bindings --
+          (lib.optional cfg.group.enable "$mod CTRL, G, togglegroup")
+          (lib.optional cfg.group.enable "$mod CTRL SHIFT, G, lockgroups, toggle")
+          (lib.optional cfg.group.enable "$mod CTRL, J, changegroupactive, b")
+          (lib.optional cfg.group.enable "$mod CTRL, K, changegroupactive, f")
+          (lib.optional cfg.group.enable "$mod CTRL SHIFT, J, moveintogroup, b")
+          (lib.optional cfg.group.enable "$mod CTRL SHIFT, K, moveintogroup, f")
+          (lib.optional cfg.group.enable "$mod CTRL, H, moveoutofgroup")
           # -- Essential Controls --
           [
             "$mod, Q, killactive"
