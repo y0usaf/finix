@@ -26,14 +26,4 @@
     # Core system modules - imports all modules from the system directory
     ../../modules/system
   ];
-
-  config = {
-    ###########################################################################
-    # Environment Variables
-    # System profile identification
-    ###########################################################################
-    environment.variables = {
-      NIXOS_PROFILE = "y0usaf-desktop";
-    };
-  };
 }

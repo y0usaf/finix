@@ -41,7 +41,10 @@ in {
           inherit system;
           specialArgs = commonSpecialArgs // {profile = profiles.${hostname};};
           modules = [
-            (profilesDir + "/${hostname}/configuration.nix")
+            # Import hardware configuration directly
+            (profilesDir + "/${hostname}/hardware-configuration.nix")
+            # Import the shared configurations
+            (profilesDir + "/configurations/default.nix")
             inputs.home-manager.nixosModules.home-manager
             {
               home-manager = {

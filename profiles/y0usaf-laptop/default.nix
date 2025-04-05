@@ -5,11 +5,16 @@
   # Build the home directory path
   homeDir = "/home/${username}";
 in {
-  username = username;
-  homeDirectory = homeDir;
-  hostname = "y0usaf-laptop";
-  stateVersion = "24.11";
-  timezone = "America/Toronto";
+  modules = {
+    system = {
+      username = username;
+      homeDirectory = homeDir;
+      hostname = "y0usaf-laptop";
+      stateVersion = "24.11";
+      timezone = "America/Toronto";
+      config = "default";
+    };
+  };
 
   features = [
     "hyprland"

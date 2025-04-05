@@ -11,6 +11,7 @@ in {
       hostname = "y0usaf-desktop";
       stateVersion = "24.11";
       timezone = "America/Toronto";
+      config = "default";
     };
 
     # Core Modules

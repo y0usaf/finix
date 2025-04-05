@@ -18,6 +18,7 @@ in {
       homeDirectory = mkOpt mkStr "The path to the user's home directory.";
       stateVersion = mkOpt mkStr "The system state version.";
       timezone = mkOpt mkStr "The system timezone.";
+      config = mkOpt mkStr "The system configuration type.";
     };
 
     # Core system modules
