@@ -1,0 +1,15 @@
+---
+description: Always use filesystem MCP for file operations
+globs: 
+alwaysApply: true
+---
+<FILESYSTEM_MCP>
+- ALWAYS use the Filesystem MCP when working with files or directories
+- For any file operations, use the appropriate file-related MCPs to:
+  - Browse directories
+  - Read files
+  - Understand code context
+  - Ensure complete understanding of the codebase structure
+- Never attempt to infer file contents without using filesystem tools
+- Apply filesystem exploration before making changes to code
+</FILESYSTEM_MCP>

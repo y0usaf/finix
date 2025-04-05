@@ -23,17 +23,8 @@
   # Import all system configuration modules
   ###########################################################################
   imports = [
-    # Core system modules
-    ../../modules/system/core.nix
-    ../../modules/system/boot.nix
-    ../../modules/system/hardware.nix
-    ../../modules/system/services.nix
-    ../../modules/system/security.nix
-    ../../modules/system/programs.nix
-    ../../modules/system/users.nix
-    ../../modules/system/network.nix
-    ../../modules/system/env.nix
-    ../../modules/system/nvidia.nix
+    # Core system modules - imports all modules from the system directory
+    ../../modules/system
   ];
 
   config = {
