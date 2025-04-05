@@ -54,8 +54,7 @@ in {
       hyprland = {
         enable = true;
         flake.enable = true;
-        group.enable = true;
-        #hy3.enable = true;
+        hy3.enable = true;
       };
       wayland.enable = true;
       ags.enable = false;
