@@ -1,9 +1,4 @@
 ---
-description: ALWAYS INCLUDE to HAVE Project Context
-globs: 
-alwaysApply: false
----
----
 description: ALWAYS INCLUDE to HAVE Project Context.
 globs: 
 alwaysApply: true

@@ -1,9 +1,4 @@
 ---
-description: directory structure to follow
-globs: 
-alwaysApply: false
----
----
 description: the top-level directory structure for the project
 globs: 
 alwaysApply: false

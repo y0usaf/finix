@@ -1,9 +1,4 @@
 ---
-description: Always include while DEBUGGING
-globs: 
-alwaysApply: false
----
----
 description: Include these rules while DEBUGGING.
 globs: 
 alwaysApply: true

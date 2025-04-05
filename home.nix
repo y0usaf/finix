@@ -18,7 +18,7 @@
   # Module Discovery
   ###########################################################################
   # Simply import the modules directory which will handle all imports via default.nix files
-  allModules = [./modules];
+  allModules = [./modules/home];
 
   ###########################################################################
   # Package Management
