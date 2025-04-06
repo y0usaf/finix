@@ -1,5 +1,5 @@
 ###############################################################################
-# Whisper Overlay Module
+# Whisper Overlay Module (Consolidated)
 # Provides speech-to-text via whisper-overlay
 # - Server: realtime-stt-server (systemd user service)
 # - Client: whisper-overlay application
@@ -48,13 +48,17 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    # Directly add the installed packages without trying to import modules
-    home.packages = [
-      # Add the client package if enabled
-      (lib.mkIf cfg.client.enable whisper-overlay-flake.packages.${pkgs.system}.whisper-overlay)
+    # Add packages based on enabled components
+    home.packages = lib.mkMerge [
+      # Add the client package if client is enabled
+      (lib.mkIf cfg.client.enable [
+        whisper-overlay-flake.packages.${pkgs.system}.whisper-overlay
+      ])
       
-      # Add the server package if enabled
-      (lib.mkIf cfg.server.enable whisper-overlay-flake.packages.${pkgs.system}.realtime-stt-server)
+      # Add the server package if server is enabled
+      (lib.mkIf cfg.server.enable [
+        whisper-overlay-flake.packages.${pkgs.system}.realtime-stt-server
+      ])
     ];
 
     # Configure the systemd user service for the server if enabled
@@ -72,9 +76,7 @@ in {
         };
         
         Install = {
-          WantedBy = ["graphical-session.target"];
-          # Only auto-start if configured to do so
-          Condition = lib.mkIf (!cfg.server.autoStart) "false";
+          WantedBy = lib.mkIf cfg.server.autoStart ["graphical-session.target"];
         };
       };
     };
