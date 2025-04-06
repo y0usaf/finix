@@ -13,12 +13,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.core.git;
+  cfg = config.modules.tools.git;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.core.git = {
+  options.modules.tools.git = {
     enable = lib.mkEnableOption "git configuration and automation";
     name = lib.mkOption {
       type = lib.types.str;

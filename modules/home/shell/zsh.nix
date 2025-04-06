@@ -75,6 +75,33 @@ in {
       };
 
       #---------------------------------------------------------------------------
+      # Environment Variable Loading (Tokens)
+      #---------------------------------------------------------------------------
+      # Defines and executes a script to load *.txt files from the token directory
+      # as environment variables.
+      envExtra = let
+        # Get the token directory path from the core env module options
+        tokenDir = config.modules.core.env.tokenDir;
+        # --- Common token management function (from env.nix) ---
+        tokenFunctionScript = ''
+          # Token management function
+          export_vars_from_files() {
+              local dir_path=$1
+              for file_path in "$dir_path"/*.txt; do
+                  if [[ -f $file_path ]]; then
+                      var_name=$(basename "$file_path" .txt)
+                      export $var_name=$(cat "$file_path")
+                  fi
+              done
+          }
+
+          # Export tokens using the configured directory
+          export_vars_from_files "${tokenDir}"
+        '';
+      in
+        tokenFunctionScript;
+
+      #---------------------------------------------------------------------------
       # Profile Settings: Hardware-specific and feature-based extra commands.
       #---------------------------------------------------------------------------
       profileExtra = ''

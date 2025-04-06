@@ -106,6 +106,15 @@ in {
       amdgpu = {
         enable = lib.mkEnableOption "AMD GPU support";
       };
+      # --- Environment Settings Options (from env.nix) ---
+      env = {
+        enable = lib.mkEnableOption "home environment configuration (session vars/path)";
+        tokenDir = lib.mkOption {
+          type = t.str;
+          default = "$HOME/Tokens";
+          description = "Directory containing token files to be loaded by zsh as env variables";
+        };
+      };
     };
 
     # User-defined packages (used in package calculation above)
@@ -169,6 +178,17 @@ in {
 
       # Set packages using the combined list
       packages = finalPackages;
+
+      # --- General Environment Settings (from env.nix) ---
+      # Conditionally apply session variables and path from core.env settings
+      sessionVariables = lib.mkIf config.modules.core.env.enable {
+        LIBSEAT_BACKEND = "logind";
+        # Add other user session variables here
+      };
+      sessionPath = lib.mkIf config.modules.core.env.enable [
+        "$HOME/.local/bin"
+        "/usr/lib/google-cloud-sdk/bin"
+      ];
     };
 
     # Enable dconf (Moved from home.nix)
@@ -178,5 +198,8 @@ in {
     # This assumes profile is passed to the top-level home.nix and then down
     # If home.nix doesn't pass profile.modules down as config.modules, this needs adjustment
     modules = profile.modules or {};
+
+    # --- DELETED BLOCK ---
+    # The duplicate home = lib.mkIf block that caused the error was here
   };
 }

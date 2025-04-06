@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.media.spotdl;
+  cfg = config.modules.tools.spotdl;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.media.spotdl = {
+  options.modules.tools.spotdl = {
     enable = lib.mkEnableOption "SpotDL music downloading tools";
   };
 

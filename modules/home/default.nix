@@ -1,8 +1,11 @@
 {lib, ...}: {
   imports = [
-    ./apps
     ./core
     ./dev
+    ./programs # Renamed from apps
+    ./session
+    ./shell
+    ./tools
     ./ui
   ];
 }
