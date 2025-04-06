@@ -1,9 +1,8 @@
 ###############################################################################
 # Home Manager Configuration
 # Central configuration file for user-specific settings
-# - Manages user packages and applications
-# - Configures user environment and services
-# - Handles module imports
+# - Imports user modules from ./modules/home
+# - Passes profile data down to modules
 ###############################################################################
 {
   # Parameters provided to this configuration:
@@ -11,56 +10,26 @@
   pkgs,
   lib,
   inputs,
-  profile,
+  profile, # Profile data containing user/system settings
   ...
-}: let
+}: {
   ###########################################################################
-  # Module Discovery
+  # Module Import
   ###########################################################################
-  # Simply import the modules directory which will handle all imports via default.nix files
-  allModules = [./modules/home];
+
+  # Import all modules from the ./modules/home directory.
+  # The default.nix within that structure handles recursive imports.
+  imports = [./modules/home];
 
   ###########################################################################
-  # Package Management
+  # Module Configuration Passthrough
   ###########################################################################
-  # Extract default applications from profile
-  defaultApps = [
-    profile.modules.defaults.terminal
-    profile.modules.defaults.browser
-    profile.modules.defaults.fileManager
-    profile.modules.defaults.launcher
-    profile.modules.defaults.ide
-    profile.modules.defaults.mediaPlayer
-    profile.modules.defaults.imageViewer
-    profile.modules.defaults.discord
-    profile.modules.defaults.archiveManager
-  ];
 
-  # Extract package attribute from each app and filter out nulls
-  userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
-
-  # Combine all package sources
-  finalPackages = userPackages ++ (profile.modules.user.packages or []);
-in {
-  ###########################################################################
-  # Core Home Settings
-  ###########################################################################
-  home = {
-    username = profile.modules.system.username;
-    homeDirectory = profile.modules.system.homeDirectory;
-    stateVersion = profile.modules.system.stateVersion;
-    enableNixpkgsReleaseCheck = false;
-    packages = finalPackages;
-  };
-
-  # Import all modules
-  imports = allModules;
-
-  # Pass module configurations from profile
+  # Pass the entire 'profile.modules' structure down to the imported modules.
+  # Modules (like core.nix) can then access necessary configuration
+  # values via 'config.modules.*'.
   modules = profile.modules or {};
 
-  ###########################################################################
-  # System Configurations
-  ###########################################################################
-  dconf.enable = true;
+  # Note: Core settings like home.username, home.packages, dconf.enable
+  # are now managed within nixos/modules/home/core/core.nix
 }
