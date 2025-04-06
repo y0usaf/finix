@@ -61,6 +61,12 @@
 
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+
+    # Add whisper-overlay input
+    whisper-overlay = {
+      url = "github:oddlama/whisper-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   ###########################################################################
@@ -70,6 +76,7 @@
     self,
     nixpkgs,
     home-manager,
+    whisper-overlay,
     ...
   } @ inputs: let
     ## System & Package Configuration
@@ -82,6 +89,7 @@
         })
       ];
       config.allowUnfree = true;
+      config.cudaSupport = true;
     };
 
     ## Import profile utilities
@@ -91,7 +99,10 @@
     };
 
     ## Common Special Arguments for Modules
-    commonSpecialArgs = {inputs = self.inputs;};
+    commonSpecialArgs = {
+      inputs = self.inputs;
+      whisper-overlay = inputs.whisper-overlay;
+    };
   in {
     ## Formatter Setup
     formatter.${system} = pkgs.alejandra;

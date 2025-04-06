@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.streamlink;
+  cfg = config.modules.programs.streamlink;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.streamlink = {
+  options.modules.programs.streamlink = {
     enable = lib.mkEnableOption "streamlink streaming utility";
   };
 

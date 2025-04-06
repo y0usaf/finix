@@ -13,13 +13,13 @@
   inputs,
   ...
 }: let
-  cfg = config.modules.apps.chatgpt;
+  cfg = config.modules.programs.chatgpt;
   chatgptAppImage = "/home/y0usaf/nixos/pkg/chatgpt/ChatGpt-Arch-Qt6-x86-64.AppImage";
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.chatgpt = {
+  options.modules.programs.chatgpt = {
     enable = lib.mkEnableOption "ChatGPT desktop application";
   };
 

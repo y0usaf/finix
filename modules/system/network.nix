@@ -20,7 +20,7 @@
     networking.networkmanager.enable = true; # Turn on NetworkManager to manage network connections.
     virtualisation = {
       lxd.enable = true; # Enable LXD container hypervisor.
-      waydroid = lib.mkIf profile.modules.apps.android.enable {
+      waydroid = lib.mkIf profile.modules.programs.android.enable {
         enable = true; # Enable Waydroid to run Android apps on NixOS.
       };
       docker = lib.mkIf profile.modules.dev.docker.enable {

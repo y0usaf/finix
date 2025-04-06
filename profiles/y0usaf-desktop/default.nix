@@ -16,12 +16,6 @@ in {
 
     # Core Modules
     core = {
-      git = {
-        enable = true;
-        name = "y0usaf";
-        email = "OA99@Outlook.com";
-        homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
-      };
       nvidia = {
         enable = true;
         cuda.enable = true;
@@ -127,18 +121,14 @@ in {
     };
 
     # Applications
-    apps = {
+    programs = {
       discord.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
       android.enable = false;
       firefox.enable = true;
       gaming.enable = true;
-      media = {
-        enable = true;
-        yt-dlp.enable = true;
-        spotdl.enable = true;
-      };
+      media.enable = true;
       music.enable = true;
       obs.enable = true;
       qbittorrent.enable = true;
@@ -147,6 +137,26 @@ in {
       syncthing.enable = true;
       webapps.enable = true;
       zen-browser.enable = false;
+    };
+
+    tools = {
+      git = {
+        enable = true;
+        name = "y0usaf";
+        email = "OA99@Outlook.com";
+        homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
+      };
+      spotdl.enable = true;
+      yt-dlp.enable = true;
+    };
+
+    # Programs
+    programs = {
+      whisper-overlay = {
+        enable = true;
+        server.enable = true;
+        client.enable = true;
+      };
     };
 
     # Development
@@ -178,9 +188,9 @@ in {
         "file://${homeDir}/.local/share/Steam Steam"
       ];
       packages = with pkgs; [
-        realesrgan-ncnn-vulkan
-        bambu-studio
-        orca-slicer
+        #realesrgan-ncnn-vulkan
+        #bambu-studio
+        #orca-slicer
       ];
     };
 

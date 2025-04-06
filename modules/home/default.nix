@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  lib,
+  whisper-overlay,
+  ...
+}: {
   imports = [
     ./core
     ./dev

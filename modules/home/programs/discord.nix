@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.discord;
+  cfg = config.modules.programs.discord;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.discord = {
+  options.modules.programs.discord = {
     enable = lib.mkEnableOption "Discord Canary module";
   };
 

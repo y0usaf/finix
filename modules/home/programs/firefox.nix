@@ -13,7 +13,7 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.firefox;
+  cfg = config.modules.programs.firefox;
 
   # Function to read directory contents
   readDir = path: builtins.readDir path;
@@ -378,7 +378,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.firefox = {
+  options.modules.programs.firefox = {
     enable = lib.mkEnableOption "Firefox browser with optimized settings";
   };
 

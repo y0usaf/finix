@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.music;
+  cfg = config.modules.programs.music;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.music = {
+  options.modules.programs.music = {
     enable = lib.mkEnableOption "music applications";
   };
 

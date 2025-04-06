@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.media.yt-dlp;
+  cfg = config.modules.tools.yt-dlp;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.media.yt-dlp = {
+  options.modules.tools.yt-dlp = {
     enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
 

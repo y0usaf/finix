@@ -13,12 +13,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.media;
+  cfg = config.modules.programs.media;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.media = {
+  options.modules.programs.media = {
     enable = lib.mkEnableOption "media applications";
   };
 

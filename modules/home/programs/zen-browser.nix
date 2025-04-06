@@ -12,7 +12,7 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.zen-browser;
+  cfg = config.modules.programs.zen-browser;
 
   src = builtins.fetchurl {
     url = "https://github.com/zen-browser/desktop/releases/latest/download/zen-x86_64.AppImage";
@@ -62,7 +62,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.zen-browser = {
+  options.modules.programs.zen-browser = {
     enable = lib.mkEnableOption "Zen Browser";
   };
 

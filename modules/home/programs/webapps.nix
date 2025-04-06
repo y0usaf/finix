@@ -11,12 +11,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.webapps;
+  cfg = config.modules.programs.webapps;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.webapps = {
+  options.modules.programs.webapps = {
     enable = lib.mkEnableOption "web applications";
   };
 

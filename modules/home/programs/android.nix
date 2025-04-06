@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.apps.android;
+  cfg = config.modules.programs.android;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.apps.android = {
+  options.modules.programs.android = {
     enable = lib.mkEnableOption "android tools and waydroid";
   };
 
