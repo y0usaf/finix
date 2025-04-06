@@ -10,8 +10,39 @@
   # Type definitions for options
   t = lib.types;
   mkOpt = type: description: lib.mkOption {inherit type description;};
-  mkStr = t.str;
+  # Define shorthand for boolean type
   mkBool = t.bool;
+  # Define a shorthand for string type
+  mkStr = t.str;
+
+  # mkOptDef builds an option with a type, default value, and a description.
+  mkOptDef = type: default: description: lib.mkOption {inherit type default description;};
+
+  ######################################################################
+  #                           Submodule Types                          #
+  ######################################################################
+
+  # Define common structure for default application configuration
+  defaultAppModule = t.submodule {
+    options = {
+      # package: Specifies the Nix package derivation to install for the application.
+      # Can be null if you only want to specify a command without installing a package.
+      package = mkOptDef (t.nullOr t.package) null "Package derivation to install (optional)";
+      # command: Specifies the command to run the application.
+      # If null, the default behavior is to use the package name.
+      command = mkOptDef mkStr null "Command to execute the application. Defaults to package name if null";
+    };
+  };
+
+  # Define common structure for directory configuration
+  dirModule = t.submodule {
+    options = {
+      # path: Defines the absolute path to the directory.
+      path = mkOpt mkStr "Absolute path to the directory";
+      # create: Determines if the directory should be created automatically if not found.
+      create = mkOptDef mkBool true "Whether to create the directory if it doesn't exist";
+    };
+  };
 
   # --- Package Definitions (Moved from home.nix) ---
   # Extract default applications from profile
@@ -28,8 +59,7 @@
   ];
 
   # Extract package attribute from each app and filter out nulls
-  # Now defaultApps is a list of packages (or nulls), so we just filter nulls.
-  userPackages = lib.filter (p: p != null) defaultApps;
+  userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
 
   # Combine all package sources (Base + Profile Defaults + User Defined)
   basePackages = with pkgs; [
@@ -85,57 +115,45 @@ in {
         default = [];
         description = "List of additional user-specific packages.";
       };
+
+      # --- User Specific Settings (bookmarks, git) ---
+      bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
+      git = mkOpt (t.submodule {
+        options = {
+          name = mkOpt mkStr "Git user name";
+          email = mkOpt mkStr "Git user email";
+          homeManagerRepoUrl = mkOpt mkStr "URL to home manager repository";
+        };
+      }) "Git configuration";
     };
 
     # Default applications (used in package calculation above)
-    # These should now just be packages (or null if not set)
+    # Structure defined by defaultAppModule
     defaults = {
-      terminal = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Default terminal emulator package.";
-      };
-      browser = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Default web browser package.";
-      };
-      fileManager = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Default file manager package.";
-      };
-      launcher = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Default application launcher package.";
-      };
-      ide = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Default IDE/text editor package.";
-      };
-      mediaPlayer = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Default media player package.";
-      };
-      imageViewer = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Default image viewer package.";
-      };
-      discord = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Discord package (if used).";
-      };
-      archiveManager = lib.mkOption {
-        type = t.nullOr t.package;
-        default = null;
-        description = "Default archive manager package.";
-      };
-      # editor = lib.mkOption { type = t.nullOr t.package; default = null; }; # Consider adding
+      browser = mkOpt defaultAppModule "Default web browser configuration.";
+      editor = mkOpt defaultAppModule "Default text editor configuration.";
+      ide = mkOpt defaultAppModule "Default IDE configuration.";
+      terminal = mkOpt defaultAppModule "Default terminal emulator configuration.";
+      fileManager = mkOpt defaultAppModule "Default file manager configuration.";
+      launcher = mkOpt defaultAppModule "Default application launcher configuration.";
+      discord = mkOpt defaultAppModule "Default Discord client configuration.";
+      archiveManager = mkOpt defaultAppModule "Default archive manager configuration.";
+      imageViewer = mkOpt defaultAppModule "Default image viewer configuration.";
+      mediaPlayer = mkOpt defaultAppModule "Default media player configuration.";
+    };
+
+    # Directory configurations (Structure defined by dirModule)
+    directories = {
+      flake = mkOpt dirModule "The directory where the flake lives.";
+      music = mkOpt dirModule "Directory for music files.";
+      dcim = mkOpt dirModule "Directory for pictures (DCIM).";
+      steam = mkOpt dirModule "Directory for Steam.";
+      wallpapers = mkOpt (t.submodule {
+        options = {
+          static = mkOpt dirModule "Wallpaper directory for static images.";
+          video = mkOpt dirModule "Wallpaper directory for videos.";
+        };
+      }) "Wallpaper directories configuration";
     };
   };
 
