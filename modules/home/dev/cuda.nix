@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.core.nvidia.cuda;
+  cfg = config.cfg.core.nvidia.cuda;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.core.nvidia.cuda = {
+  options.cfg.core.nvidia.cuda = {
     enable = lib.mkEnableOption "CUDA development environment";
   };
 

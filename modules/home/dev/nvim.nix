@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.dev.nvim;
+  cfg = config.cfg.dev.nvim;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.dev.nvim = {
+  options.cfg.dev.nvim = {
     enable = lib.mkEnableOption "neovim editor";
   };
 

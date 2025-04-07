@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.ui.ags;
+  cfg = config.cfg.ui.ags;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.ui.ags = {
+  options.cfg.ui.ags = {
     enable = lib.mkEnableOption "AGS (Astal GTK Shell)";
   };
 

@@ -1,4 +1,8 @@
-{lib, whisper-overlay, ...}: let
+{
+  lib,
+  whisper-overlay,
+  ...
+}: let
   # Get all .nix files in this directory
   files =
     lib.filterAttrs (n: v: v == "regular" && lib.hasSuffix ".nix" n && n != "default.nix")

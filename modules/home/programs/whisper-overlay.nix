@@ -12,16 +12,21 @@
   ...
 }: let
   # Access the whisper-overlay flake input from regular arguments or try specialArgs as fallback
-  whisper-overlay-flake = if whisper-overlay != null then whisper-overlay else 
-    (if builtins.hasAttr "specialArgs" config && builtins.hasAttr "whisper-overlay" config.specialArgs
-      then config.specialArgs.whisper-overlay
-      else throw "whisper-overlay flake input not provided");
-  cfg = config.modules.programs.whisper-overlay;
+  whisper-overlay-flake =
+    if whisper-overlay != null
+    then whisper-overlay
+    else
+      (
+        if builtins.hasAttr "specialArgs" config && builtins.hasAttr "whisper-overlay" config.specialArgs
+        then config.specialArgs.whisper-overlay
+        else throw "whisper-overlay flake input not provided"
+      );
+  cfg = config.cfg.programs.whisper-overlay;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.whisper-overlay = {
+  options.cfg.programs.whisper-overlay = {
     enable = lib.mkEnableOption "whisper-overlay speech-to-text";
 
     server = {
@@ -54,7 +59,7 @@ in {
       (lib.mkIf cfg.client.enable [
         whisper-overlay-flake.packages.${pkgs.system}.whisper-overlay
       ])
-      
+
       # Add the server package if server is enabled
       (lib.mkIf cfg.server.enable [
         whisper-overlay-flake.packages.${pkgs.system}.realtime-stt-server
@@ -69,12 +74,12 @@ in {
           After = ["graphical-session-pre.target"];
           PartOf = ["graphical-session.target"];
         };
-        
+
         Service = {
           ExecStart = "${whisper-overlay-flake.packages.${pkgs.system}.realtime-stt-server}/bin/realtime-stt-server";
           Restart = "on-failure";
         };
-        
+
         Install = {
           WantedBy = lib.mkIf cfg.server.autoStart ["graphical-session.target"];
         };

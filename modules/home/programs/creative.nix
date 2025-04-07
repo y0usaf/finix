@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.programs.creative;
+  cfg = config.cfg.programs.creative;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.creative = {
+  options.cfg.programs.creative = {
     enable = lib.mkEnableOption "creative applications module";
   };
 

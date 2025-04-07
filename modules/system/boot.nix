@@ -40,12 +40,12 @@
           "ashmem_linux"
           "binder_linux"
         ]
-        ++ lib.optionals profile.modules.core.amdgpu.enable ["amdgpu"];
+        ++ lib.optionals profile.cfg.core.amdgpu.enable ["amdgpu"];
       kernel.sysctl = {
         "kernel.unprivileged_userns_clone" = 1; # Allow unprivileged processes to create user namespaces.
       };
       # AMD GPU kernel parameters (conditional)
-      kernelParams = lib.mkIf profile.modules.core.amdgpu.enable [
+      kernelParams = lib.mkIf profile.cfg.core.amdgpu.enable [
         "amdgpu.ppfeaturemask=0xffffffff"
         "amdgpu.dpm=1"
       ];

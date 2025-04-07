@@ -51,11 +51,11 @@ in {
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 extraSpecialArgs = commonSpecialArgs // {profile = profiles.${hostname};};
-                users.${profiles.${hostname}.modules.system.username} = {
+                users.${profiles.${hostname}.cfg.system.username} = {
                   imports = [../../home.nix];
                   home = {
-                    stateVersion = profiles.${hostname}.modules.system.stateVersion;
-                    homeDirectory = inputs.nixpkgs.lib.mkForce profiles.${hostname}.modules.system.homeDirectory;
+                    stateVersion = profiles.${hostname}.cfg.system.stateVersion;
+                    homeDirectory = inputs.nixpkgs.lib.mkForce profiles.${hostname}.cfg.system.homeDirectory;
                   };
                 };
               };
@@ -80,7 +80,7 @@ in {
           builtins.hasAttr hostname profiles
           && builtins.hasAttr "modules" profiles.${hostname}
           && builtins.hasAttr "system" profiles.${hostname}.modules
-          && builtins.hasAttr "username" profiles.${hostname}.modules.system
+          && builtins.hasAttr "username" profiles.${hostname}.cfg.system
       )
       profileNames;
   in
@@ -89,7 +89,7 @@ in {
       (hostname: let
         profileConfig = profiles.${hostname};
       in {
-        name = profileConfig.modules.system.username;
+        name = profileConfig.cfg.system.username;
         value = inputs.home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = commonSpecialArgs // {profile = profileConfig;};

@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.core.systemd;
+  cfg = config.cfg.core.systemd;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.core.systemd = {
+  options.cfg.core.systemd = {
     enable = lib.mkEnableOption "systemd user services";
 
     autoFormatNix = {

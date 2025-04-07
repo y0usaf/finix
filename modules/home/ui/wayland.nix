@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.ui.wayland;
+  cfg = config.cfg.ui.wayland;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.ui.wayland = {
+  options.cfg.ui.wayland = {
     enable = lib.mkEnableOption "Wayland configuration";
   };
 

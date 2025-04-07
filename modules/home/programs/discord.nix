@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.programs.discord;
+  cfg = config.cfg.programs.discord;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.discord = {
+  options.cfg.programs.discord = {
     enable = lib.mkEnableOption "Discord Canary module";
   };
 
@@ -42,7 +42,7 @@ in {
 
     # Add Discord-specific environment variables
     programs.zsh = {
-      envExtra = lib.mkIf profile.modules.core.nvidia.enable ''
+      envExtra = lib.mkIf profile.cfg.core.nvidia.enable ''
         # Discord environment variables for NVIDIA
         export DISCORD_SKIP_HOST_VIDEO_CODEC_BLACKLIST=1
       '';

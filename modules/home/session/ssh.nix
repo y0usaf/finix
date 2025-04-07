@@ -13,12 +13,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.core.ssh;
+  cfg = config.cfg.core.ssh;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.core.ssh = {
+  options.cfg.core.ssh = {
     enable = lib.mkEnableOption "SSH configuration module";
   };
 

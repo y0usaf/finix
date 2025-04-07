@@ -5,9 +5,9 @@
   ...
 }:
 with lib; let
-  cfg = config.modules.dev.docker;
+  cfg = config.cfg.dev.docker;
 in {
-  options.modules.dev.docker = {
+  options.cfg.dev.docker = {
     enable = mkEnableOption "docker development environment";
   };
 

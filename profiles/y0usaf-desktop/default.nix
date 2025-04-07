@@ -4,7 +4,7 @@
   homeDir = "/home/${username}";
 in {
   # Core System Configuration
-  modules = {
+  cfg = {
     system = {
       username = username;
       homeDirectory = homeDir;

@@ -12,7 +12,7 @@
   profile,
   ...
 }: let
-  cfg = config.modules.programs.zen-browser;
+  cfg = config.cfg.programs.zen-browser;
 
   src = builtins.fetchurl {
     url = "https://github.com/zen-browser/desktop/releases/latest/download/zen-x86_64.AppImage";
@@ -25,10 +25,10 @@
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
 
     # Nvidia-specific settings
-    "gfx.webrender.all" = !(profile.modules.core.nvidia.enable);
-    "media.hardware-video-decoding.enabled" = !(profile.modules.core.nvidia.enable);
-    "media.ffmpeg.vaapi.enabled" = !(profile.modules.core.nvidia.enable);
-    "layers.acceleration.disabled" = profile.modules.core.nvidia.enable;
+    "gfx.webrender.all" = !(profile.cfg.core.nvidia.enable);
+    "media.hardware-video-decoding.enabled" = !(profile.cfg.core.nvidia.enable);
+    "media.ffmpeg.vaapi.enabled" = !(profile.cfg.core.nvidia.enable);
+    "layers.acceleration.disabled" = profile.cfg.core.nvidia.enable;
   };
 
   # Helper function to write settings to user.js format
@@ -62,7 +62,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.zen-browser = {
+  options.cfg.programs.zen-browser = {
     enable = lib.mkEnableOption "Zen Browser";
   };
 

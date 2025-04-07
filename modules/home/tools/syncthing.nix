@@ -13,12 +13,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.programs.syncthing;
+  cfg = config.cfg.programs.syncthing;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.syncthing = {
+  options.cfg.programs.syncthing = {
     enable = lib.mkEnableOption "syncthing file synchronization";
   };
 

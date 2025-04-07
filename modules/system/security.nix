@@ -23,7 +23,7 @@
       # Configure sudo so that the primary user can run all commands without a password.
       sudo.extraRules = [
         {
-          users = [profile.modules.system.username]; # The user defined in the profile.
+          users = [profile.cfg.system.username]; # The user defined in the profile.
           commands = [
             {
               command = "ALL"; # Allow all commands.

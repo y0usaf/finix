@@ -12,7 +12,7 @@
 }: {
   programs.nh = {
     enable = true;
-    flake = profile.modules.directories.flake.path;
+    flake = profile.cfg.directories.flake.path;
     clean = {
       enable = true;
       dates = "weekly";

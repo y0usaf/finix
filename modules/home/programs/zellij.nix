@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.modules.core.zsh.zellij;
+  cfg = config.cfg.core.zsh.zellij;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.core.zsh.zellij = {
+  options.cfg.core.zsh.zellij = {
     enable = lib.mkEnableOption "zellij terminal multiplexer";
   };
 

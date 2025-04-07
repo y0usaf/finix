@@ -12,12 +12,12 @@
   inputs,
   ...
 }: let
-  cfg = config.modules.programs.obs;
+  cfg = config.cfg.programs.obs;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.obs = {
+  options.cfg.programs.obs = {
     enable = lib.mkEnableOption "OBS Studio";
   };
 

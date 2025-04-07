@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.modules.programs.qbittorrent;
+  cfg = config.cfg.programs.qbittorrent;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.qbittorrent = {
+  options.cfg.programs.qbittorrent = {
     enable = lib.mkEnableOption "qBittorrent torrent client";
   };
 

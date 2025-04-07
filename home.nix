@@ -25,10 +25,10 @@
   # Module Configuration Passthrough
   ###########################################################################
 
-  # Pass the entire 'profile.modules' structure down to the imported modules.
+  # Pass the entire 'profile.cfg' structure down to the imported modules.
   # Modules (like core.nix) can then access necessary configuration
-  # values via 'config.modules.*'.
-  modules = profile.modules or {};
+  # values via 'config.cfg.*'.
+  cfg = profile.cfg or {};
 
   # Note: Core settings like home.username, home.packages, dconf.enable
   # are now managed within nixos/modules/home/core/core.nix

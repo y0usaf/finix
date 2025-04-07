@@ -13,12 +13,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.dev.python;
+  cfg = config.cfg.dev.python;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.dev.python = {
+  options.cfg.dev.python = {
     enable = lib.mkEnableOption "Python development environment";
   };
 

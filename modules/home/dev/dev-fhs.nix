@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.modules.dev.fhs;
+  cfg = config.cfg.dev.fhs;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.dev.fhs = {
+  options.cfg.dev.fhs = {
     enable = lib.mkEnableOption "FHS development environment";
 
     extraPackages = lib.mkOption {
@@ -33,7 +33,7 @@ in {
     # Create the FHS environment for development
     home.packages = let
       cudaPkgs =
-        if (config.modules.core.nvidia.cuda.enable or false)
+        if (config.cfg.core.nvidia.cuda.enable or false)
         then [
           pkgs.cudaPackages.cudatoolkit
           pkgs.cudaPackages.cuda_nvcc

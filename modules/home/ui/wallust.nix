@@ -13,12 +13,12 @@
   inputs,
   ...
 }: let
-  cfg = config.modules.ui.wallust;
+  cfg = config.cfg.ui.wallust;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.ui.wallust = {
+  options.cfg.ui.wallust = {
     enable = lib.mkEnableOption "wallust color generation";
   };
 

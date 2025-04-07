@@ -12,19 +12,19 @@
   profile,
   ...
 }: let
-  cfg = config.modules.tools.yt-dlp;
+  cfg = config.cfg.tools.yt-dlp;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.tools.yt-dlp = {
+  options.cfg.tools.yt-dlp = {
     enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
 
   ###########################################################################
   # Module Configuration
   ###########################################################################
-  config = lib.mkIf (cfg.enable && config.modules.dev.python.enable) {
+  config = lib.mkIf (cfg.enable && config.cfg.dev.python.enable) {
     ###########################################################################
     # Packages
     ###########################################################################

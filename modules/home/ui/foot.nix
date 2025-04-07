@@ -13,16 +13,16 @@
   profile,
   ...
 }: let
-  cfg = config.modules.ui.foot;
+  cfg = config.cfg.ui.foot;
 
   # Calculate the scaled font size based on the profile's base font size.
-  computedFontSize = toString (profile.modules.appearance.baseFontSize * 1.33);
+  computedFontSize = toString (profile.cfg.appearance.baseFontSize * 1.33);
 
   # Get the main font name from the profile's font configuration
-  mainFontName = builtins.elemAt (builtins.elemAt profile.modules.appearance.fonts.main 0) 1;
+  mainFontName = builtins.elemAt (builtins.elemAt profile.cfg.appearance.fonts.main 0) 1;
 
   # Get fallback font names
-  fallbackFontNames = map (x: builtins.elemAt x 1) profile.modules.appearance.fonts.fallback;
+  fallbackFontNames = map (x: builtins.elemAt x 1) profile.cfg.appearance.fonts.fallback;
 
   # Build the main font configuration string, including the fallback fonts.
   mainFontConfig =
@@ -84,7 +84,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.ui.foot = {
+  options.cfg.ui.foot = {
     enable = lib.mkEnableOption "foot terminal emulator";
   };
 

@@ -13,7 +13,7 @@
   profile,
   ...
 }: let
-  cfg = config.modules.ui.cursor;
+  cfg = config.cfg.ui.cursor;
   baseTheme = "DeepinDarkV20";
 
   hyprcursorPackage = pkgs.stdenv.mkDerivation {
@@ -51,7 +51,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.ui.cursor = {
+  options.cfg.ui.cursor = {
     enable = lib.mkEnableOption "cursor theme configuration";
   };
 
@@ -70,7 +70,7 @@ in {
     home.pointerCursor = {
       name = "${baseTheme}-x11";
       package = xcursorPackage;
-      size = profile.modules.appearance.cursorSize;
+      size = profile.cfg.appearance.cursorSize;
 
       gtk.enable = true;
       x11.enable = true;
@@ -80,7 +80,7 @@ in {
     gtk.cursorTheme = {
       name = "${baseTheme}-x11";
       package = xcursorPackage;
-      size = profile.modules.appearance.cursorSize;
+      size = profile.cfg.appearance.cursorSize;
     };
   };
 }

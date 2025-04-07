@@ -13,12 +13,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.core.xdg;
+  cfg = config.cfg.core.xdg;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.core.xdg = {
+  options.cfg.core.xdg = {
     enable = lib.mkEnableOption "XDG directory configuration";
   };
 
@@ -38,7 +38,7 @@ in {
         createDirectories = true;
         extraConfig = {
           XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/Pictures/Screenshots";
-          XDG_WALLPAPERS_DIR = "${profile.modules.directories.wallpapers.static.path}";
+          XDG_WALLPAPERS_DIR = "${profile.cfg.directories.wallpapers.static.path}";
         };
       };
 
@@ -55,33 +55,33 @@ in {
           "x-scheme-handler/discord" = ["discord.desktop"];
 
           # File Types
-          "inode/directory" = ["${profile.modules.defaults.fileManager.command}.desktop"];
+          "inode/directory" = ["${profile.cfg.defaults.fileManager.command}.desktop"];
 
           # Media Types
-          "video/mp4" = ["${profile.modules.defaults.mediaPlayer.command}.desktop"];
-          "video/x-matroska" = ["${profile.modules.defaults.mediaPlayer.command}.desktop"];
-          "video/webm" = ["${profile.modules.defaults.mediaPlayer.command}.desktop"];
+          "video/mp4" = ["${profile.cfg.defaults.mediaPlayer.command}.desktop"];
+          "video/x-matroska" = ["${profile.cfg.defaults.mediaPlayer.command}.desktop"];
+          "video/webm" = ["${profile.cfg.defaults.mediaPlayer.command}.desktop"];
 
           # Images
-          "image/jpeg" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
-          "image/png" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
-          "image/gif" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
-          "image/tiff" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
-          "image/bmp" = ["${profile.modules.defaults.imageViewer.command}.desktop"];
+          "image/jpeg" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
+          "image/png" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
+          "image/gif" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
+          "image/tiff" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
+          "image/bmp" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
 
           # Archives
-          "application/zip" = ["${profile.modules.defaults.archiveManager.command}"];
-          "application/x-7z-compressed" = ["${profile.modules.defaults.archiveManager.command}"];
-          "application/x-tar" = ["${profile.modules.defaults.archiveManager.command}.desktop"];
-          "application/gzip" = ["${profile.modules.defaults.archiveManager.command}.desktop"];
-          "application/x-compressed-tar" = ["${profile.modules.defaults.archiveManager.command}.desktop"];
+          "application/zip" = ["${profile.cfg.defaults.archiveManager.command}"];
+          "application/x-7z-compressed" = ["${profile.cfg.defaults.archiveManager.command}"];
+          "application/x-tar" = ["${profile.cfg.defaults.archiveManager.command}.desktop"];
+          "application/gzip" = ["${profile.cfg.defaults.archiveManager.command}.desktop"];
+          "application/x-compressed-tar" = ["${profile.cfg.defaults.archiveManager.command}.desktop"];
 
           # Web Extensions
-          "application/x-extension-htm" = ["${profile.modules.defaults.browser.command}.desktop"];
-          "application/x-extension-html" = ["${profile.modules.defaults.browser.command}.desktop"];
-          "application/x-extension-shtml" = ["${profile.modules.defaults.browser.command}.desktop"];
-          "application/xhtml+xml" = ["${profile.modules.defaults.browser.command}.desktop"];
-          "application/x-extension-xhtml" = ["${profile.modules.defaults.browser.command}.desktop"];
+          "application/x-extension-htm" = ["${profile.cfg.defaults.browser.command}.desktop"];
+          "application/x-extension-html" = ["${profile.cfg.defaults.browser.command}.desktop"];
+          "application/x-extension-shtml" = ["${profile.cfg.defaults.browser.command}.desktop"];
+          "application/xhtml+xml" = ["${profile.cfg.defaults.browser.command}.desktop"];
+          "application/x-extension-xhtml" = ["${profile.cfg.defaults.browser.command}.desktop"];
         };
       };
 
@@ -150,7 +150,7 @@ in {
         TEXMFVAR = "${config.xdg.cacheHome}/texlive/texmf-var";
         SSB_HOME = "${config.xdg.dataHome}/zoom";
       }
-      (lib.mkIf profile.modules.core.nvidia.enable {
+      (lib.mkIf profile.cfg.core.nvidia.enable {
         __GL_SHADER_DISK_CACHE_PATH = "${config.xdg.cacheHome}/nv";
       })
     ];

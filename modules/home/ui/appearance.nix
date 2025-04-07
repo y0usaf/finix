@@ -6,10 +6,10 @@
   ...
 }: let
   inherit (config.modules) options;
-  cfg = config.modules.appearance;
+  cfg = config.cfg.appearance;
   t = lib.types;
 in {
-  options.modules.appearance = {
+  options.cfg.appearance = {
     enable = lib.mkEnableOption "appearance settings";
 
     # Font configuration using a submodule; supports both main and fallback fonts.

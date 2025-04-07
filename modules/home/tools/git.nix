@@ -13,12 +13,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.tools.git;
+  cfg = config.cfg.tools.git;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.tools.git = {
+  options.cfg.tools.git = {
     enable = lib.mkEnableOption "git configuration and automation";
     name = lib.mkOption {
       type = lib.types.str;
@@ -48,7 +48,7 @@ in {
 
       extraConfig = {
         core = {
-          editor = profile.modules.defaults.editor.command;
+          editor = profile.cfg.defaults.editor.command;
         };
         init.defaultBranch = "main";
         pull.rebase = true;
@@ -68,9 +68,9 @@ in {
     home.activation = {
       setupGitRepo = lib.hm.dag.entryAfter ["writeBoundary"] ''
         # Only clone if the "nixos" directory does not exist within homeDirectory.
-        if [ ! -d "${config.modules.system.homeDirectory}/nixos" ]; then
+        if [ ! -d "${config.cfg.system.homeDirectory}/nixos" ]; then
           echo "Setting up NixOS configuration repository..."
-          git clone ${cfg.homeManagerRepoUrl} ${config.modules.system.homeDirectory}/nixos
+          git clone ${cfg.homeManagerRepoUrl} ${config.cfg.system.homeDirectory}/nixos
         fi
       '';
     };
@@ -99,7 +99,7 @@ in {
           sleep 2
 
           # Switch to the NixOS configuration repository directory
-          cd ${config.modules.system.homeDirectory}/nixos
+          cd ${config.cfg.system.homeDirectory}/nixos
 
           # Assess if there are any changes (tracked or untracked)
           if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then

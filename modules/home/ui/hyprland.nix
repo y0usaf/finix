@@ -14,7 +14,7 @@
   profile,
   ...
 }: let
-  cfg = config.modules.ui.hyprland;
+  cfg = config.cfg.ui.hyprland;
 in {
   imports = [
     inputs.hyprland.homeManagerModules.default
@@ -23,7 +23,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.ui.hyprland = {
+  options.cfg.ui.hyprland = {
     enable = lib.mkEnableOption "Hyprland window manager";
     flake = {
       enable = lib.mkOption {
@@ -190,12 +190,12 @@ in {
         # Application Shortcut Variables
         "$mod" = "SUPER";
         "$mod2" = "ALT";
-        "$term" = profile.modules.defaults.terminal.command;
-        "$filemanager" = profile.modules.defaults.fileManager.command;
-        "$browser" = profile.modules.defaults.browser.command;
-        "$discord" = profile.modules.defaults.discord.command;
-        "$launcher" = profile.modules.defaults.launcher.command;
-        "$ide" = profile.modules.defaults.ide.command;
+        "$term" = profile.cfg.defaults.terminal.command;
+        "$filemanager" = profile.cfg.defaults.fileManager.command;
+        "$browser" = profile.cfg.defaults.browser.command;
+        "$discord" = profile.cfg.defaults.discord.command;
+        "$launcher" = profile.cfg.defaults.launcher.command;
+        "$ide" = profile.cfg.defaults.ide.command;
         "$obs" = "obs";
 
         # Window Management Rules
@@ -293,7 +293,7 @@ in {
 
           # -- Special Commands --
           [
-            "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${profile.modules.directories.wallpapers.static.path}\""
+            "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${profile.cfg.directories.wallpapers.static.path}\""
           ]
         ];
 
@@ -315,7 +315,7 @@ in {
         debug.disable_logs = false;
 
         # Add NVIDIA-specific environment settings
-        env = lib.mkIf (profile.modules.core.nvidia.enable) [
+        env = lib.mkIf (profile.cfg.core.nvidia.enable) [
           "LIBVA_DRIVER_NAME,nvidia"
           "GBM_BACKEND,nvidia-drm"
           "__GLX_VENDOR_LIBRARY_NAME,nvidia"
@@ -327,14 +327,14 @@ in {
     # Shell Environment Configuration
     ###########################################################################
     programs.zsh = {
-      envExtra = lib.mkIf (profile.modules.core.nvidia.enable) ''
+      envExtra = lib.mkIf (profile.cfg.core.nvidia.enable) ''
         # Hyprland NVIDIA environment variables
         export LIBVA_DRIVER_NAME=nvidia
         export XDG_SESSION_TYPE=wayland
         export GBM_BACKEND=nvidia-drm
         export __GLX_VENDOR_LIBRARY_NAME=nvidia
         export WLR_NO_HARDWARE_CURSORS=1
-        export XCURSOR_SIZE=${toString profile.modules.appearance.cursorSize}
+        export XCURSOR_SIZE=${toString profile.cfg.appearance.cursorSize}
         export NIXOS_OZONE_WL=1
       '';
     };

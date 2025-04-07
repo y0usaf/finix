@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.programs.streamlink;
+  cfg = config.cfg.programs.streamlink;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.streamlink = {
+  options.cfg.programs.streamlink = {
     enable = lib.mkEnableOption "streamlink streaming utility";
   };
 
@@ -37,7 +37,7 @@ in {
     ###########################################################################
     xdg.configFile."streamlink/config".text = ''
       # Player settings
-      player=${profile.modules.defaults.mediaPlayer.command}
+      player=${profile.cfg.defaults.mediaPlayer.command}
       player-no-close
       player-continuous-http
 

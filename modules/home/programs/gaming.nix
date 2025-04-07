@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.programs.gaming;
+  cfg = config.cfg.programs.gaming;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.gaming = {
+  options.cfg.programs.gaming = {
     enable = lib.mkEnableOption "gaming module";
   };
 

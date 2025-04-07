@@ -12,7 +12,7 @@
   lib,
   ...
 }: let
-  cfg = config.modules.dev.mcp;
+  cfg = config.cfg.dev.mcp;
 
   # Create a script that generates the MCP config
   generateMcpConfig = pkgs.writeShellScript "generate-mcp-config" ''
@@ -49,7 +49,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.dev.mcp = {
+  options.cfg.dev.mcp = {
     enable = lib.mkEnableOption "Model Context Protocol servers";
     braveApiKey = lib.mkOption {
       type = lib.types.str;

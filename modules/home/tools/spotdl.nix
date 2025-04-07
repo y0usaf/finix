@@ -12,19 +12,19 @@
   profile,
   ...
 }: let
-  cfg = config.modules.tools.spotdl;
+  cfg = config.cfg.tools.spotdl;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.tools.spotdl = {
+  options.cfg.tools.spotdl = {
     enable = lib.mkEnableOption "SpotDL music downloading tools";
   };
 
   ###########################################################################
   # Module Configuration
   ###########################################################################
-  config = lib.mkIf (cfg.enable && config.modules.dev.python.enable) {
+  config = lib.mkIf (cfg.enable && config.cfg.dev.python.enable) {
     ###########################################################################
     # Packages
     ###########################################################################

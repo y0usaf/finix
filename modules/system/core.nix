@@ -19,9 +19,9 @@
     # Core System Settings
     # System identity and behavior configuration
     ###########################################################################
-    system.stateVersion = profile.modules.system.stateVersion; # Ensures compatibility when upgrading.
-    time.timeZone = profile.modules.system.timezone; # Set the system's time zone.
-    networking.hostName = profile.modules.system.hostname; # Define the system's hostname.
+    system.stateVersion = profile.cfg.system.stateVersion; # Ensures compatibility when upgrading.
+    time.timeZone = profile.cfg.system.timezone; # Set the system's time zone.
+    networking.hostName = profile.cfg.system.hostname; # Define the system's hostname.
     nixpkgs.config.allowUnfree = true; # Allow installation of unfree (proprietary) packages.
 
     ###########################################################################
@@ -42,7 +42,7 @@
         cores = 0;
         experimental-features = ["nix-command" "flakes"];
         sandbox = true;
-        trusted-users = ["root" profile.modules.system.username];
+        trusted-users = ["root" profile.cfg.system.username];
         builders-use-substitutes = true;
         fallback = true;
 

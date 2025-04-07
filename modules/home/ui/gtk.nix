@@ -13,14 +13,14 @@
   profile,
   ...
 }: let
-  cfg = config.modules.ui.gtk;
+  cfg = config.cfg.ui.gtk;
 
   #############################################################
   # Extract common variables from the profile for reusability
   #############################################################
-  mainFontName = builtins.elemAt (builtins.elemAt profile.modules.appearance.fonts.main 0) 1;
-  baseFontSize = profile.modules.appearance.baseFontSize;
-  dpiStr = toString profile.modules.appearance.dpi;
+  mainFontName = builtins.elemAt (builtins.elemAt profile.cfg.appearance.fonts.main 0) 1;
+  baseFontSize = profile.cfg.appearance.baseFontSize;
+  dpiStr = toString profile.cfg.appearance.dpi;
 
   # Scale factor for GTK interface (used for environment variables)
   scaleFactor = 2;
@@ -59,7 +59,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.ui.gtk = {
+  options.cfg.ui.gtk = {
     enable = lib.mkEnableOption "GTK theming and configuration";
   };
 
@@ -94,7 +94,7 @@ in {
           gtk-application-prefer-dark-theme = 1;
         };
 
-        bookmarks = profile.modules.user.bookmarks;
+        bookmarks = profile.cfg.user.bookmarks;
 
         # ---------------------------------------------------------------
         # Custom CSS for GTK3 applications

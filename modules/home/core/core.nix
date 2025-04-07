@@ -47,15 +47,15 @@
   # --- Package Definitions (Moved from home.nix) ---
   # Extract default applications from profile
   defaultApps = [
-    profile.modules.defaults.terminal
-    profile.modules.defaults.browser
-    profile.modules.defaults.fileManager
-    profile.modules.defaults.launcher
-    profile.modules.defaults.ide
-    profile.modules.defaults.mediaPlayer
-    profile.modules.defaults.imageViewer
-    profile.modules.defaults.discord
-    profile.modules.defaults.archiveManager
+    profile.cfg.defaults.terminal
+    profile.cfg.defaults.browser
+    profile.cfg.defaults.fileManager
+    profile.cfg.defaults.launcher
+    profile.cfg.defaults.ide
+    profile.cfg.defaults.mediaPlayer
+    profile.cfg.defaults.imageViewer
+    profile.cfg.defaults.discord
+    profile.cfg.defaults.archiveManager
   ];
 
   # Extract package attribute from each app and filter out nulls
@@ -70,7 +70,7 @@
     cachix
     unzip
     bash
-    vim # Or replace with profile.modules.defaults.editor.package if defined
+    vim # Or replace with profile.cfg.defaults.editor.package if defined
     lsd
     alejandra
     tree
@@ -84,10 +84,10 @@
   ];
 
   # Final list includes base, profile-derived defaults, and explicit user packages
-  finalPackages = basePackages ++ userPackages ++ (profile.modules.user.packages or []);
+  finalPackages = basePackages ++ userPackages ++ (profile.cfg.user.packages or []);
 in {
   # --- Options Definition (Existing) ---
-  options.modules = {
+  options.cfg = {
     # System identity and core settings (used by config section below)
     system = {
       username = mkOpt mkStr "The username for the system.";
@@ -170,10 +170,10 @@ in {
   config = {
     # Core Home Settings (Moved from home.nix)
     home = {
-      # Use values defined in options.modules.system, accessed via config.modules
-      username = config.modules.system.username;
-      homeDirectory = config.modules.system.homeDirectory;
-      stateVersion = config.modules.system.stateVersion;
+      # Use values defined in options.cfg.system, accessed via config.modules
+      username = config.cfg.system.username;
+      homeDirectory = config.cfg.system.homeDirectory;
+      stateVersion = config.cfg.system.stateVersion;
       enableNixpkgsReleaseCheck = false; # Keep setting from original home.nix
 
       # Set packages using the combined list
@@ -181,11 +181,11 @@ in {
 
       # --- General Environment Settings (from env.nix) ---
       # Conditionally apply session variables and path from core.env settings
-      sessionVariables = lib.mkIf config.modules.core.env.enable {
+      sessionVariables = lib.mkIf config.cfg.core.env.enable {
         LIBSEAT_BACKEND = "logind";
         # Add other user session variables here
       };
-      sessionPath = lib.mkIf config.modules.core.env.enable [
+      sessionPath = lib.mkIf config.cfg.core.env.enable [
         "$HOME/.local/bin"
         "/usr/lib/google-cloud-sdk/bin"
       ];
@@ -193,11 +193,6 @@ in {
 
     # Enable dconf (Moved from home.nix)
     dconf.enable = true;
-
-    # Pass down module config for other modules (Needed for options access)
-    # This assumes profile is passed to the top-level home.nix and then down
-    # If home.nix doesn't pass profile.modules down as config.modules, this needs adjustment
-    modules = profile.modules or {};
 
     # --- DELETED BLOCK ---
     # The duplicate home = lib.mkIf block that caused the error was here

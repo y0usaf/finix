@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.dev.claude-code;
+  cfg = config.cfg.dev.claude-code;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.dev.claude-code = {
+  options.cfg.dev.claude-code = {
     enable = lib.mkEnableOption "Claude Code AI assistant";
   };
 

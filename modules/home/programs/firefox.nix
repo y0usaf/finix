@@ -13,7 +13,7 @@
   profile,
   ...
 }: let
-  cfg = config.modules.programs.firefox;
+  cfg = config.cfg.programs.firefox;
 
   # Function to read directory contents
   readDir = path: builtins.readDir path;
@@ -37,19 +37,19 @@
 
     # Disable hardware acceleration if using Nvidia
     "gfx.webrender.all" =
-      if profile.modules.core.nvidia.enable
+      if profile.cfg.core.nvidia.enable
       then false
       else true;
     "media.hardware-video-decoding.enabled" =
-      if profile.modules.core.nvidia.enable
+      if profile.cfg.core.nvidia.enable
       then false
       else true;
     "media.ffmpeg.vaapi.enabled" =
-      if profile.modules.core.nvidia.enable
+      if profile.cfg.core.nvidia.enable
       then false
       else true;
     "layers.acceleration.disabled" =
-      if profile.modules.core.nvidia.enable
+      if profile.cfg.core.nvidia.enable
       then true
       else false;
 
@@ -378,7 +378,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.programs.firefox = {
+  options.cfg.programs.firefox = {
     enable = lib.mkEnableOption "Firefox browser with optimized settings";
   };
 

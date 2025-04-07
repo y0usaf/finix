@@ -12,12 +12,12 @@
   profile,
   ...
 }: let
-  cfg = config.modules.dev.cursor-ide;
+  cfg = config.cfg.dev.cursor-ide;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.dev.cursor-ide = {
+  options.cfg.dev.cursor-ide = {
     enable = lib.mkEnableOption "Cursor IDE";
   };
 

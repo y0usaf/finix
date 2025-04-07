@@ -5,9 +5,9 @@
   ...
 }:
 with lib; let
-  cfg = config.modules.ui.mako;
+  cfg = config.cfg.ui.mako;
 in {
-  options.modules.ui.mako = {
+  options.cfg.ui.mako = {
     enable = mkEnableOption "Mako notification daemon";
   };
 

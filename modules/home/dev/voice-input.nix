@@ -12,7 +12,7 @@
   lib,
   ...
 }: let
-  cfg = config.modules.dev.voice-input;
+  cfg = config.cfg.dev.voice-input;
 
   # Define model paths
   modelUrls = {
@@ -30,7 +30,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.modules.dev.voice-input = {
+  options.cfg.dev.voice-input = {
     enable = lib.mkEnableOption "Voice input capabilities";
 
     model = lib.mkOption {
