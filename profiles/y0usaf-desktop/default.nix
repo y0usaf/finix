@@ -127,7 +127,13 @@ in {
       chatgpt.enable = true;
       android.enable = false;
       firefox.enable = true;
-      gaming.enable = true;
+      gaming = {
+        enable = true;
+        emulation = {
+          wii-u.enable = true;
+          gcn-wii.enable = true;
+        };
+      };
       media.enable = true;
       music.enable = true;
       obs.enable = true;
