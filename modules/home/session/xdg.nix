@@ -10,7 +10,7 @@
   config,
   pkgs,
   lib,
-  profile,
+  host,
   ...
 }: let
   cfg = config.cfg.core.xdg;
@@ -38,7 +38,7 @@ in {
         createDirectories = true;
         extraConfig = {
           XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/Pictures/Screenshots";
-          XDG_WALLPAPERS_DIR = "${profile.cfg.directories.wallpapers.static.path}";
+          XDG_WALLPAPERS_DIR = "${host.cfg.directories.wallpapers.static.path}";
         };
       };
 
@@ -55,33 +55,33 @@ in {
           "x-scheme-handler/discord" = ["discord.desktop"];
 
           # File Types
-          "inode/directory" = ["${profile.cfg.defaults.fileManager.command}.desktop"];
+          "inode/directory" = ["${host.cfg.defaults.fileManager.command}.desktop"];
 
           # Media Types
-          "video/mp4" = ["${profile.cfg.defaults.mediaPlayer.command}.desktop"];
-          "video/x-matroska" = ["${profile.cfg.defaults.mediaPlayer.command}.desktop"];
-          "video/webm" = ["${profile.cfg.defaults.mediaPlayer.command}.desktop"];
+          "video/mp4" = ["${host.cfg.defaults.mediaPlayer.command}.desktop"];
+          "video/x-matroska" = ["${host.cfg.defaults.mediaPlayer.command}.desktop"];
+          "video/webm" = ["${host.cfg.defaults.mediaPlayer.command}.desktop"];
 
           # Images
-          "image/jpeg" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
-          "image/png" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
-          "image/gif" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
-          "image/tiff" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
-          "image/bmp" = ["${profile.cfg.defaults.imageViewer.command}.desktop"];
+          "image/jpeg" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
+          "image/png" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
+          "image/gif" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
+          "image/tiff" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
+          "image/bmp" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
 
           # Archives
-          "application/zip" = ["${profile.cfg.defaults.archiveManager.command}"];
-          "application/x-7z-compressed" = ["${profile.cfg.defaults.archiveManager.command}"];
-          "application/x-tar" = ["${profile.cfg.defaults.archiveManager.command}.desktop"];
-          "application/gzip" = ["${profile.cfg.defaults.archiveManager.command}.desktop"];
-          "application/x-compressed-tar" = ["${profile.cfg.defaults.archiveManager.command}.desktop"];
+          "application/zip" = ["${host.cfg.defaults.archiveManager.command}"];
+          "application/x-7z-compressed" = ["${host.cfg.defaults.archiveManager.command}"];
+          "application/x-tar" = ["${host.cfg.defaults.archiveManager.command}.desktop"];
+          "application/gzip" = ["${host.cfg.defaults.archiveManager.command}.desktop"];
+          "application/x-compressed-tar" = ["${host.cfg.defaults.archiveManager.command}.desktop"];
 
           # Web Extensions
-          "application/x-extension-htm" = ["${profile.cfg.defaults.browser.command}.desktop"];
-          "application/x-extension-html" = ["${profile.cfg.defaults.browser.command}.desktop"];
-          "application/x-extension-shtml" = ["${profile.cfg.defaults.browser.command}.desktop"];
-          "application/xhtml+xml" = ["${profile.cfg.defaults.browser.command}.desktop"];
-          "application/x-extension-xhtml" = ["${profile.cfg.defaults.browser.command}.desktop"];
+          "application/x-extension-htm" = ["${host.cfg.defaults.browser.command}.desktop"];
+          "application/x-extension-html" = ["${host.cfg.defaults.browser.command}.desktop"];
+          "application/x-extension-shtml" = ["${host.cfg.defaults.browser.command}.desktop"];
+          "application/xhtml+xml" = ["${host.cfg.defaults.browser.command}.desktop"];
+          "application/x-extension-xhtml" = ["${host.cfg.defaults.browser.command}.desktop"];
         };
       };
 
@@ -150,7 +150,7 @@ in {
         TEXMFVAR = "${config.xdg.cacheHome}/texlive/texmf-var";
         SSB_HOME = "${config.xdg.dataHome}/zoom";
       }
-      (lib.mkIf profile.cfg.core.nvidia.enable {
+      (lib.mkIf host.cfg.core.nvidia.enable {
         __GL_SHADER_DISK_CACHE_PATH = "${config.xdg.cacheHome}/nv";
       })
     ];
