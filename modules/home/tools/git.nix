@@ -10,7 +10,7 @@
   config,
   pkgs,
   lib,
-  profile,
+  host,
   ...
 }: let
   cfg = config.cfg.tools.git;
@@ -48,7 +48,7 @@ in {
 
       extraConfig = {
         core = {
-          editor = profile.cfg.defaults.editor.command;
+          editor = host.cfg.defaults.editor.command;
         };
         init.defaultBranch = "main";
         pull.rebase = true;
