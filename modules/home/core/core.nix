@@ -3,8 +3,8 @@
   config, # HM config object
   lib, # Nixpkgs library functions
   pkgs, # Nixpkgs package set
-  inputs, # Flake inputs (needed if profile comes from flake)
-  profile, # User profile data (assuming passed down)
+  inputs, # Flake inputs (needed if host comes from flake)
+  host, # User host data (assuming passed down)
   ...
 }: let
   # Type definitions for options
@@ -45,23 +45,23 @@
   };
 
   # --- Package Definitions (Moved from home.nix) ---
-  # Extract default applications from profile
+  # Extract default applications from host
   defaultApps = [
-    profile.cfg.defaults.terminal
-    profile.cfg.defaults.browser
-    profile.cfg.defaults.fileManager
-    profile.cfg.defaults.launcher
-    profile.cfg.defaults.ide
-    profile.cfg.defaults.mediaPlayer
-    profile.cfg.defaults.imageViewer
-    profile.cfg.defaults.discord
-    profile.cfg.defaults.archiveManager
+    host.cfg.defaults.terminal
+    host.cfg.defaults.browser
+    host.cfg.defaults.fileManager
+    host.cfg.defaults.launcher
+    host.cfg.defaults.ide
+    host.cfg.defaults.mediaPlayer
+    host.cfg.defaults.imageViewer
+    host.cfg.defaults.discord
+    host.cfg.defaults.archiveManager
   ];
 
   # Extract package attribute from each app and filter out nulls
   userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
 
-  # Combine all package sources (Base + Profile Defaults + User Defined)
+  # Combine all package sources (Base + Host Defaults + User Defined)
   basePackages = with pkgs; [
     # Essential CLI tools
     git
@@ -70,7 +70,7 @@
     cachix
     unzip
     bash
-    vim # Or replace with profile.cfg.defaults.editor.package if defined
+    vim # Or replace with host.cfg.defaults.editor.package if defined
     lsd
     alejandra
     tree
@@ -83,8 +83,8 @@
     networkmanager # Might be needed for applets/widgets
   ];
 
-  # Final list includes base, profile-derived defaults, and explicit user packages
-  finalPackages = basePackages ++ userPackages ++ (profile.cfg.user.packages or []);
+  # Final list includes base, host-derived defaults, and explicit user packages
+  finalPackages = basePackages ++ userPackages ++ (host.cfg.user.packages or []);
 in {
   # --- Options Definition (Existing) ---
   options.cfg = {
