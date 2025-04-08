@@ -5,14 +5,14 @@
   config,
   pkgs,
   lib,
-  profile,
+  host,
   ...
 }: let
-  # Get the packages and names from the profile
-  mainFontPackages = map (x: builtins.elemAt x 0) profile.cfg.appearance.fonts.main;
-  mainFontNames = map (x: builtins.elemAt x 1) profile.cfg.appearance.fonts.main;
-  fallbackPackages = map (x: builtins.elemAt x 0) profile.cfg.appearance.fonts.fallback;
-  fallbackNames = map (x: builtins.elemAt x 1) profile.cfg.appearance.fonts.fallback;
+  # Get the packages and names from the host
+  mainFontPackages = map (x: builtins.elemAt x 0) host.cfg.appearance.fonts.main;
+  mainFontNames = map (x: builtins.elemAt x 1) host.cfg.appearance.fonts.main;
+  fallbackPackages = map (x: builtins.elemAt x 0) host.cfg.appearance.fonts.fallback;
+  fallbackNames = map (x: builtins.elemAt x 1) host.cfg.appearance.fonts.fallback;
 
   #######################################################################
   # Font XML Configuration String
@@ -84,7 +84,7 @@
         <edit name="rgba" mode="assign"><const>rgb</const></edit>
         <edit name="autohint" mode="assign"><bool>true</bool></edit>
         <edit name="lcdfilter" mode="assign"><const>lcdlight</const></edit>
-        <edit name="dpi" mode="assign"><double>${toString profile.cfg.appearance.dpi}</double></edit>
+        <edit name="dpi" mode="assign"><double>${toString host.cfg.appearance.dpi}</double></edit>
       </match>
     </fontconfig>
   '';
@@ -104,7 +104,7 @@ in {
   #######################################################################
   # Font Package Installation
   #
-  # Installs the main font and all fallback fonts specified in the profile.
+  # Installs the main font and all fallback fonts specified in the host.
   #######################################################################
   home.packages = mainFontPackages ++ fallbackPackages;
 }
