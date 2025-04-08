@@ -8,7 +8,7 @@
   config,
   lib,
   pkgs,
-  profile,
+  host,
   inputs,
   ...
 }: {
@@ -20,7 +20,7 @@
     programs = {
       # Conditional configuration for the Hyprland window manager:
       # Only enable if both Wayland and Hyprland are desired features.
-      hyprland = lib.mkIf (profile.cfg.ui.wayland.enable && profile.cfg.ui.hyprland.enable) {
+      hyprland = lib.mkIf (host.cfg.ui.wayland.enable && host.cfg.ui.hyprland.enable) {
         enable = true;
         xwayland.enable = true; # Enable XWayland to support legacy X11 apps.
         # Use the Hyprland package corresponding to the current system.
