@@ -9,7 +9,7 @@
   config,
   pkgs,
   lib,
-  profile,
+  host,
   inputs,
   ...
 }: let

@@ -9,7 +9,7 @@
   config,
   pkgs,
   lib,
-  profile,
+  host,
   ...
 }: let
   cfg = config.cfg.programs.android;
