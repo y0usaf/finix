@@ -9,7 +9,7 @@
   config,
   lib,
   pkgs,
-  profile,
+  host,
   ...
 }: {
   config = {
@@ -34,6 +34,6 @@
     # AMD GPU X Server Configuration (conditional)
     # X server driver settings for AMD GPU
     ###########################################################################
-    services.xserver.videoDrivers = lib.mkIf profile.cfg.core.amdgpu.enable ["amdgpu"];
+    services.xserver.videoDrivers = lib.mkIf host.cfg.core.amdgpu.enable ["amdgpu"];
   };
 }
