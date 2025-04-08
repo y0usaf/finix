@@ -10,10 +10,10 @@
   config,
   lib,
   pkgs,
-  profile,
+  host,
   ...
 }: {
-  config = lib.mkIf profile.cfg.core.nvidia.enable {
+  config = lib.mkIf host.cfg.core.nvidia.enable {
     ###########################################################################
     # Kernel Parameters
     # Parameters to preserve video memory allocations for better Wayland support
