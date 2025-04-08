@@ -9,7 +9,7 @@
   config,
   pkgs,
   lib,
-  profile,
+  host,
   ...
 }: let
   cfg = config.cfg.programs.discord;
@@ -42,7 +42,7 @@ in {
 
     # Add Discord-specific environment variables
     programs.zsh = {
-      envExtra = lib.mkIf profile.cfg.core.nvidia.enable ''
+      envExtra = lib.mkIf host.cfg.core.nvidia.enable ''
         # Discord environment variables for NVIDIA
         export DISCORD_SKIP_HOST_VIDEO_CODEC_BLACKLIST=1
       '';
