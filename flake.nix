@@ -92,8 +92,8 @@
       config.cudaSupport = true;
     };
 
-    ## Import profile utilities
-    profileUtils = import ./modules/flake/profiles.nix {
+    ## Import host utilities
+    hostUtils = import ./modules/flake/hosts.nix {
       lib = pkgs.lib;
       inherit pkgs;
     };
@@ -108,13 +108,13 @@
     formatter.${system} = pkgs.alejandra;
 
     ## NixOS Configurations
-    nixosConfigurations = profileUtils.mkNixosConfigurations {
+    nixosConfigurations = hostUtils.mkNixosConfigurations {
       inputs = inputs;
       inherit system commonSpecialArgs;
     };
 
     ## Dynamic Home Manager Configurations
-    homeConfigurations = profileUtils.mkHomeConfigurations {
+    homeConfigurations = hostUtils.mkHomeConfigurations {
       inputs = inputs;
       inherit pkgs commonSpecialArgs;
     };
