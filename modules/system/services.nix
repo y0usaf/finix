@@ -10,7 +10,7 @@
   config,
   lib,
   pkgs,
-  profile,
+  host,
   ...
 }: {
   config = {

@@ -9,7 +9,7 @@
   config,
   lib,
   pkgs,
-  profile,
+  host,
   ...
 }: {
   config = {
@@ -23,7 +23,7 @@
       # Configure sudo so that the primary user can run all commands without a password.
       sudo.extraRules = [
         {
-          users = [profile.cfg.system.username]; # The user defined in the profile.
+          users = [host.cfg.system.username]; # The user defined in the host.
           commands = [
             {
               command = "ALL"; # Allow all commands.
