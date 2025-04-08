@@ -2,7 +2,7 @@
 # GTK Module
 # Configures GTK theming and appearance settings
 # - Customizes GTK3/GTK4 appearance with consistent styling
-# - Applies font configuration from profile
+# - Applies font configuration from host
 # - Adds text shadow effects for better visibility
 # - Sets DConf settings for GNOME desktop interface
 ###############################################################################
@@ -10,17 +10,17 @@
   config,
   pkgs,
   lib,
-  profile,
+  host,
   ...
 }: let
   cfg = config.cfg.ui.gtk;
 
   #############################################################
-  # Extract common variables from the profile for reusability
+  # Extract common variables from the host for reusability
   #############################################################
-  mainFontName = builtins.elemAt (builtins.elemAt profile.cfg.appearance.fonts.main 0) 1;
-  baseFontSize = profile.cfg.appearance.baseFontSize;
-  dpiStr = toString profile.cfg.appearance.dpi;
+  mainFontName = builtins.elemAt (builtins.elemAt host.cfg.appearance.fonts.main 0) 1;
+  baseFontSize = host.cfg.appearance.baseFontSize;
+  dpiStr = toString host.cfg.appearance.dpi;
 
   # Scale factor for GTK interface (used for environment variables)
   scaleFactor = 2;
@@ -94,7 +94,7 @@ in {
           gtk-application-prefer-dark-theme = 1;
         };
 
-        bookmarks = profile.cfg.user.bookmarks;
+        bookmarks = host.cfg.user.bookmarks;
 
         # ---------------------------------------------------------------
         # Custom CSS for GTK3 applications
