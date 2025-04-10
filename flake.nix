@@ -93,7 +93,7 @@
     };
 
     ## Import host utilities
-    hostUtils = import ./modules/flake/hosts.nix {
+    hostUtils = import ./modules/flake {
       lib = pkgs.lib;
       inherit pkgs;
     };
