@@ -1,6 +1,3 @@
-# Imports core HM settings
-{
-  imports = [
-    ./core.nix
-  ];
+{lib, ...}: {
+  imports = (import ../../helpers/import-modules.nix {inherit lib;}) ./.;
 }
