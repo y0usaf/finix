@@ -13,6 +13,18 @@
   ...
 }: let
   cfg = config.cfg.programs.obs;
+
+  # Create a customized background removal plugin with CUDA properly configured
+  customBackgroundRemoval = pkgs.obs-studio-plugins.obs-backgroundremoval.overrideAttrs (oldAttrs: {
+    cmakeFlags =
+      oldAttrs.cmakeFlags
+      ++ [
+        # Explicitly specify CUDA paths
+        "-DCUDA_TOOLKIT_ROOT_DIR=${pkgs.cudaPackages.cudatoolkit}"
+        # Disable GPU components that are causing issues
+        "-DDISABLE_ONNXRUNTIME_GPU=ON"
+      ];
+  });
 in {
   ###########################################################################
   # Module Options
@@ -31,7 +43,7 @@ in {
     programs.obs-studio = {
       enable = true;
       plugins = with pkgs.obs-studio-plugins; [
-        obs-backgroundremoval
+        customBackgroundRemoval
         obs-vkcapture
         inputs.obs-image-reaction.packages.${pkgs.system}.default
       ];

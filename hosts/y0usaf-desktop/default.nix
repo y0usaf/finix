@@ -176,7 +176,7 @@ in {
       python.enable = true;
       cursor-ide.enable = true;
       voice-input = {
-        enable = true;
+        enable = false;
         model = "tiny"; # Options: tiny, base, small, medium, large
         recordTime = 10; # Maximum recording time in seconds
       };
