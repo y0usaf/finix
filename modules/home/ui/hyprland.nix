@@ -207,7 +207,7 @@ in {
           "float, class:^(ags)$ title:^(system-stats)$"
           "center, class:^(ags)$ title:^(system-stats)$"
           "float, $firefox-pip"
-          "opacity 0.4 override, $firefox-pip"
+          "opacity 0.75 override, $firefox-pip"
           "noborder, $firefox-pip"
           "size 30% 30%, $firefox-pip"
         ];
