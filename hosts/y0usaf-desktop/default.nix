@@ -3,6 +3,12 @@
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
+  # Import hardware configuration and disko
+  imports = [
+    ./hardware-configuration.nix
+    ./disko.nix # Import disko configuration
+  ];
+
   # Core System Configuration
   cfg = {
     system = {

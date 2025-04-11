@@ -28,6 +28,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    ## Disk Management
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ## Desktop Environment & Theming
     hyprland = {
       url = "github:hyprwm/Hyprland";
@@ -77,6 +83,7 @@
     nixpkgs,
     home-manager,
     whisper-overlay,
+    disko,
     ...
   } @ inputs: let
     ## System & Package Configuration
@@ -102,6 +109,7 @@
     commonSpecialArgs = {
       inputs = self.inputs;
       whisper-overlay = inputs.whisper-overlay;
+      disko = inputs.disko;
     };
   in {
     ## Formatter Setup

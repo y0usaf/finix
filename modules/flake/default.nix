@@ -1,3 +1,7 @@
 # Re-export the contents of hosts.nix
-{lib, pkgs, ...}: 
+{
+  lib,
+  pkgs,
+  ...
+}:
 import ./hosts.nix {inherit lib pkgs;}
