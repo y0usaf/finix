@@ -228,4 +228,7 @@ in {
       };
     };
   };
+
+  # Add user to docker group to allow running docker commands without sudo
+  users.users.${username}.extraGroups = ["docker"];
 }

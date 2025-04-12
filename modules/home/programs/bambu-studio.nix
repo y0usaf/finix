@@ -24,6 +24,8 @@
     DATA_DIR="${cfg.dataDir}"
     PORT="${toString cfg.port}"
     DOCKER_IMAGE="lscr.io/linuxserver/bambustudio:latest"
+    MAX_RETRIES=10
+    RETRY_DELAY=3
 
     # Functions
     function check_docker() {
@@ -31,14 +33,24 @@
         echo "Error: Docker is not installed or not in PATH"
         exit 1
       fi
+
+      # Check if user can run docker without sudo
+      if ! docker info &>/dev/null; then
+        echo "Warning: You don't have permission to use Docker without sudo."
+        echo "Consider adding your user to the docker group:"
+        echo "  sudo usermod -aG docker $USER"
+        echo "You'll need to log out and back in for this to take effect."
+        echo "For now, try running: sudo bambu-studio $1"
+        exit 1
+      fi
     }
 
     function is_container_running() {
-      docker ps --filter "name=^/$CONTAINER_NAME$" --format '{{.Names}}' | grep -q "$CONTAINER_NAME"
+      docker ps --filter "name=^/$CONTAINER_NAME$" --format '{{.Names}}' | grep -q "$CONTAINER_NAME" 2>/dev/null
     }
 
     function container_exists() {
-      docker ps -a --filter "name=^/$CONTAINER_NAME$" --format '{{.Names}}' | grep -q "$CONTAINER_NAME"
+      docker ps -a --filter "name=^/$CONTAINER_NAME$" --format '{{.Names}}' | grep -q "$CONTAINER_NAME" 2>/dev/null
     }
 
     function start_container() {
@@ -61,11 +73,33 @@
       fi
 
       echo "Bambu Studio container started."
-      echo "Access the web interface at: http://localhost:$PORT"
+      echo "Waiting for web interface to become available at: http://localhost:$PORT"
+
+      # Wait for container to be fully up and running
+      local retries=0
+      while [ $retries -lt $MAX_RETRIES ]; do
+        if curl -s -o /dev/null -m 1 http://localhost:$PORT; then
+          echo "Web interface is now available!"
+          return 0
+        fi
+        echo "Waiting for web interface to initialize ($(($retries + 1))/$MAX_RETRIES)..."
+        sleep $RETRY_DELAY
+        retries=$((retries + 1))
+      done
+
+      echo "Warning: Web interface didn't respond in the expected time."
+      echo "The container might still be initializing. Try manually accessing:"
+      echo "  http://localhost:$PORT"
+      echo "or check container logs with:"
+      echo "  bambu-studio logs"
     }
 
     function stop_container() {
       echo "Stopping Bambu Studio container..."
+      if ! is_container_running; then
+        echo "Container is not running."
+        return
+      fi
       docker stop "$CONTAINER_NAME"
       echo "Bambu Studio container stopped."
     }
@@ -88,13 +122,78 @@
       if container_exists; then
         if is_container_running; then
           echo "Bambu Studio container is running."
-          echo "Access the web interface at: http://localhost:$PORT"
+          # Check if web interface is responding
+          if curl -s -o /dev/null -m 1 http://localhost:$PORT; then
+            echo "Web interface is accessible at: http://localhost:$PORT"
+          else
+            echo "Container is running, but web interface is not responding at: http://localhost:$PORT"
+            echo "The interface might still be initializing. Check logs with: bambu-studio logs"
+          fi
+
+          # Show container details
+          echo "------------------------------------"
+          echo "Container details:"
+          docker inspect --format "Created: {{.Created}}, Status: {{.State.Status}}, Started: {{.State.StartedAt}}" "$CONTAINER_NAME"
+          echo "Port mappings:"
+          docker port "$CONTAINER_NAME"
+          echo "------------------------------------"
         else
           echo "Bambu Studio container exists but is not running."
+          echo "Start it with: bambu-studio start"
         fi
       else
         echo "Bambu Studio container does not exist."
+        echo "Create and start it with: bambu-studio start"
       fi
+    }
+
+    function troubleshoot() {
+      echo "Troubleshooting Bambu Studio container..."
+      echo "------------------------------------"
+
+      # Check if Docker is running
+      if ! systemctl is-active --quiet docker; then
+        echo "Docker service is not running. Start it with:"
+        echo "  sudo systemctl start docker"
+        return
+      fi
+
+      # Check container state
+      if ! container_exists; then
+        echo "Container doesn't exist. No troubleshooting possible."
+        return
+      fi
+
+      echo "Container state:"
+      docker inspect --format "Status: {{.State.Status}}, Running: {{.State.Running}}, Error: {{.State.Error}}" "$CONTAINER_NAME"
+
+      # Check logs for errors
+      echo "Recent logs (last 20 lines):"
+      docker logs --tail 20 "$CONTAINER_NAME"
+
+      # Check network
+      echo "Network connection test:"
+      if is_container_running; then
+        echo "Port mappings:"
+        docker port "$CONTAINER_NAME"
+
+        # Test port connectivity
+        echo "Testing connection to port $PORT:"
+        if curl -s -o /dev/null -m 1 http://localhost:$PORT; then
+          echo "Port $PORT is reachable!"
+        else
+          echo "Cannot connect to port $PORT - the service might still be starting up"
+          echo "or there might be a networking issue."
+        fi
+      else
+        echo "Container is not running. Start it first with: bambu-studio start"
+      fi
+
+      echo "------------------------------------"
+      echo "Troubleshooting complete. If you still have issues:"
+      echo "1. Try restarting the container: bambu-studio restart"
+      echo "2. Make sure no other service is using port $PORT"
+      echo "3. Check your firewall settings"
     }
 
     function show_logs() {
@@ -111,19 +210,29 @@
       echo "Usage: bambu-studio COMMAND"
       echo
       echo "Commands:"
-      echo "  start      Start the Bambu Studio container"
-      echo "  stop       Stop the Bambu Studio container"
-      echo "  restart    Restart the Bambu Studio container"
-      echo "  remove     Remove the Bambu Studio container"
-      echo "  status     Show container status"
-      echo "  logs       Show container logs"
-      echo "  logs-f     Follow container logs"
-      echo "  help       Show this help message"
+      echo "  start       Start the Bambu Studio container"
+      echo "  stop        Stop the Bambu Studio container"
+      echo "  restart     Restart the Bambu Studio container"
+      echo "  status      Show container status"
+      echo "  logs        Show container logs"
+      echo "  logs-f      Follow container logs"
+      echo "  troubleshoot Check and diagnose common issues"
+      echo "  remove      Remove the Bambu Studio container"
+      echo "  open        Open the web interface in browser"
+      echo "  help        Show this help message"
       echo
     }
 
+    # Skip Docker check for certain commands
+    SKIP_DOCKER_CHECK=0
+    if [[ "$1" == "help" || "$1" == "" ]]; then
+      SKIP_DOCKER_CHECK=1
+    fi
+
     # Main execution
-    check_docker
+    if [[ $SKIP_DOCKER_CHECK -eq 0 ]]; then
+      check_docker "$1"
+    fi
 
     case "$1" in
       start)
@@ -150,15 +259,29 @@
       logs-f)
         show_logs --follow
         ;;
+      troubleshoot)
+        troubleshoot
+        ;;
       open)
         if ! is_container_running; then
           echo "Bambu Studio container is not running. Starting it now..."
           start_container
-          # Give it a moment to initialize
-          sleep 3
+        else
+          # Check if web interface is responding
+          if ! curl -s -o /dev/null -m 1 http://localhost:$PORT; then
+            echo "Web interface is not yet responding. It might still be initializing."
+            echo "Waiting a moment for it to become available..."
+            sleep 5
+          fi
         fi
+
         echo "Opening Bambu Studio web interface in your browser..."
-        xdg-open "http://localhost:$PORT" &> /dev/null || echo "Failed to open browser"
+        if xdg-open "http://localhost:$PORT" &> /dev/null; then
+          echo "Browser opened successfully."
+        else
+          echo "Failed to open browser. Try accessing this URL manually:"
+          echo "  http://localhost:$PORT"
+        fi
         ;;
       help|*)
         show_usage
@@ -204,6 +327,7 @@ in {
 
       # Dependencies
       docker
+      curl # For checking web interface availability
     ];
 
     ###########################################################################
