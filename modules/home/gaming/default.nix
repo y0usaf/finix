@@ -16,27 +16,11 @@
   cfg = config.cfg.programs.gaming;
 in {
   imports = [
+    ./options.nix
     ./mods.nix
     ./marvel-rivals
     ./wukong
   ];
-
-  ###########################################################################
-  # Module Options
-  ###########################################################################
-  options.cfg.programs.gaming = {
-    enable = lib.mkEnableOption "gaming module";
-
-    emulation = {
-      wii-u = {
-        enable = lib.mkEnableOption "Wii U emulation via Cemu";
-      };
-
-      gcn-wii = {
-        enable = lib.mkEnableOption "GameCube and Wii emulation via Dolphin";
-      };
-    };
-  };
 
   ###########################################################################
   # Module Configuration
