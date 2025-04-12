@@ -78,31 +78,31 @@ in {
         # Wukong directory
         $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "${wkCompatDir}/Saved/Config/Windows/"
 
-        # Marvel Rivals symlinks
-        $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/GameUserSettings.ini" "${mrCompatDir}/Saved/Config/Windows/GameUserSettings.ini"
-        $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/Engine.ini" "${mrCompatDir}/Saved/Config/Windows/Engine.ini"
+        # Marvel Rivals symlinks (REMOVED - Handled by separate modules)
+        # $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/GameUserSettings.ini" "${mrCompatDir}/Saved/Config/Windows/GameUserSettings.ini"
+        # $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/Engine.ini" "${mrCompatDir}/Saved/Config/Windows/Engine.ini"
 
-        # Find and symlink to all profile directories
-        for dir in $(find "${mrCompatDir}/Saved/Saved/Config/" -type d -not -path "*/\.*" 2>/dev/null || echo "${mrCompatDir}/Saved/Saved/Config/"); do
-          if [[ "$dir" != "${mrCompatDir}/Saved/Saved/Config/" ]]; then
-            $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$dir"
-            $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/MarvelUserSettings.ini" "$dir/MarvelUserSetting.ini"
-          fi
-        done
+        # Find and symlink to all profile directories (REMOVED - Handled by marvelusersettings.nix)
+        # for dir in $(find "${mrCompatDir}/Saved/Saved/Config/" -type d -not -path "*/\.*" 2>/dev/null || echo "${mrCompatDir}/Saved/Saved/Config/"); do
+        #   if [[ "$dir" != "${mrCompatDir}/Saved/Saved/Config/" ]]; then
+        #     $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$dir"
+        #     $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/MarvelUserSettings.ini" "$dir/MarvelUserSetting.ini"
+        #   fi
+        # done
 
-        # Create default profile directories if none exist
-        if [ -z "$(ls -A "${mrCompatDir}/Saved/Saved/Config/" 2>/dev/null)" ]; then
-          $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "${mrCompatDir}/Saved/Saved/Config/default/"
-          $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/MarvelUserSettings.ini" "${mrCompatDir}/Saved/Saved/Config/default/MarvelUserSetting.ini"
-        fi
+        # Create default profile directories if none exist (REMOVED - Handled by marvelusersettings.nix)
+        # if [ -z "$(ls -A "${mrCompatDir}/Saved/Saved/Config/" 2>/dev/null)" ]; then
+        #   $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "${mrCompatDir}/Saved/Saved/Config/default/"
+        #   $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${mrConfigDir}/MarvelUserSettings.ini" "${mrCompatDir}/Saved/Saved/Config/default/MarvelUserSetting.ini"
+        # fi
 
-        # Symlink all mod files from the ~mods directory
+        # Symlink all mod files from the ~mods directory (KEEPING THIS)
         for modfile in $(find "${mrConfigDir}/~mods/" -type f 2>/dev/null); do
           filename=$(basename "$modfile")
           $DRY_RUN_CMD ln -sf $VERBOSE_ARG "$modfile" "${mrGameDir}/Content/Paks/~mods/$filename"
         done
 
-        # Wukong symlink
+        # Wukong symlink (KEEPING THIS in this module for now)
         $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${wkConfigDir}/Engine.ini" "${wkCompatDir}/Saved/Config/Windows/Engine.ini"
       '';
   };
