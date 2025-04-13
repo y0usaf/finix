@@ -27,5 +27,10 @@
         package = inputs.hyprland.packages.${pkgs.system}.hyprland;
       };
     };
+    
+    # Add Bambu Studio to system packages
+    environment.systemPackages = with pkgs; [
+      bambu-studio
+    ];
   };
 }

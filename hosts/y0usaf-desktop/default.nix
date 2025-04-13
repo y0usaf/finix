@@ -128,13 +128,6 @@ in {
 
     # Applications
     programs = {
-      bambustudio = {
-        enable = true;
-        # Uncomment below options to customize (these are the defaults)
-        # dataDir = "${homeDir}/.local/share/bambustudio";
-        # port = 6080;
-        # autoStart = false;
-      };
       discord.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
@@ -207,9 +200,7 @@ in {
         "file://${homeDir}/.local/share/Steam Steam"
       ];
       packages = with pkgs; [
-        #realesrgan-ncnn-vulkan
-        #bambu-studio
-        #orca-slicer
+        realesrgan-ncnn-vulkan
       ];
     };
 
