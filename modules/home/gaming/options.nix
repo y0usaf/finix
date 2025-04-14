@@ -1,9 +1,6 @@
 # modules/home/gaming/options.nix
 # Defines the gaming module options
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   options.cfg.programs.gaming = {
     enable = lib.mkEnableOption "gaming module";
 

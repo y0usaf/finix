@@ -27,10 +27,19 @@
         package = inputs.hyprland.packages.${pkgs.system}.hyprland;
       };
     };
-    
-    # Add Bambu Studio to system packages
-    environment.systemPackages = with pkgs; [
-      bambu-studio
+
+    # Add custom version of Bambu Studio to system packages
+    environment.systemPackages = [
+      # Override Bambu Studio with specific version
+      (pkgs.bambu-studio.overrideAttrs (oldAttrs: {
+        version = "01.00.01.50";
+        src = pkgs.fetchFromGitHub {
+          owner = "bambulab";
+          repo = "BambuStudio";
+          rev = "v01.00.01.50";
+          hash = "sha256-7mkrPl2CQSfc1lRjl1ilwxdYcK5iRU//QGKmdCicK30=";
+        };
+      }))
     ];
   };
 }

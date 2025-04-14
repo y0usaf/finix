@@ -1,9 +1,6 @@
 # modules/home/gaming/wukong/default.nix
 # Black Myth: Wukong game configuration
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   imports = [
     ./engine.nix
   ];
