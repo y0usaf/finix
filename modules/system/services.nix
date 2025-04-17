@@ -62,9 +62,8 @@
         # Vial rules for non-root access:
         KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
         KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
-        # v4l2loopback/OBS virtual webcam rule:
-        KERNEL=="video[0-9]*", GROUP="video", MODE="0660"
       '';
     };
   };
 }
+
