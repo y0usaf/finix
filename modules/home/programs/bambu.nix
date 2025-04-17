@@ -41,7 +41,7 @@
         WEBKIT_DISABLE_DMABUF_RENDERER=1 \
         ${bambuStudio}/bin/bambu-studio "$@"
       '';
-    in [bambuStudioWrapper bambuStudio];
+    in [bambuStudioWrapper];
   }
   # Ensure mesa is always available when Bambu Studio is enabled
   {

@@ -128,6 +128,7 @@ in {
 
     # Applications
     programs = {
+      bambu.enable = true;
       discord.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
