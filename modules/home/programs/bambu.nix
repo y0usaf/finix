@@ -7,9 +7,8 @@
 }: {
   options.cfg.programs.bambu.enable = lib.mkEnableOption "Bambu Studio";
 
-  config = lib.mkIf config.cfg.programs.bambu.enable (lib.mkMerge [
-    {
-    home.packages = let
+  config = lib.mkIf config.cfg.programs.bambu.enable (
+    let
       _ = lib.assertMsg (builtins.pathExists "${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json")
         "FATAL: Mesa EGL vendor file is required for Bambu Studio to build. Expected at: ${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json\nThis package will not build without it. Please ensure mesa is available.";
       bambuStudio = pkgs.bambu-studio.overrideAttrs (oldAttrs: {
@@ -21,8 +20,6 @@
           hash = "sha256-7mkrPl2CQSfc1lRjl1ilwxdYcK5iRU//QGKmdCicK30=";
         };
       });
-
-      # Create a wrapper script that sets the correct environment variables
       bambuStudioWrapper = pkgs.writeShellScriptBin "bambu-studio" ''
         # Use the mesa package path for the EGL vendor file
         MESA_PATH="${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json"
@@ -51,12 +48,24 @@
           exec ${bambuStudio}/bin/bambu-studio "$@"
         fi
       '';
-    in [bambuStudioWrapper];
-  }
-  # Ensure mesa is always available when Bambu Studio is enabled
-  {
-    home.packages = pkgs.lib.mkAfter [ pkgs.mesa ];
-  }
-]);
+    in
+      lib.mkMerge [
+        {
+          home.packages = [bambuStudioWrapper];
+          home.file.".local/share/applications/bambu-studio.desktop".text = ''
+            [Desktop Entry]
+            Name=Bambu Studio
+            Comment=3D printing slicer for Bambu Lab printers
+            Exec=bambu-studio
+            Icon=${bambuStudio}/share/icons/hicolor/256x256/apps/bambu-studio.png
+            Terminal=false
+            Type=Application
+            Categories=Graphics;Engineering;3DGraphics;
+          '';
+        }
+        {
+          home.packages = pkgs.lib.mkAfter [ pkgs.mesa ];
+        }
+      ]
+  );
 }
-
