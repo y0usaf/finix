@@ -7,8 +7,11 @@
 }: {
   options.cfg.programs.bambu.enable = lib.mkEnableOption "Bambu Studio";
 
-  config = lib.mkIf config.cfg.programs.bambu.enable {
+  config = lib.mkIf config.cfg.programs.bambu.enable (lib.mkMerge [
+    {
     home.packages = let
+      _ = lib.assertMsg (builtins.pathExists "${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json")
+        "FATAL: Mesa EGL vendor file is required for Bambu Studio to build. Expected at: ${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json\nThis package will not build without it. Please ensure mesa is available.";
       bambuStudio = pkgs.bambu-studio.overrideAttrs (oldAttrs: {
         version = "01.00.01.50";
         src = pkgs.fetchFromGitHub {
@@ -25,7 +28,9 @@
         MESA_PATH="${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json"
 
         if [ ! -f "$MESA_PATH" ]; then
-          echo "Error: Could not find Mesa EGL vendor file at $MESA_PATH"
+          echo "\n\033[1;31mFATAL: Mesa EGL vendor file is required for Bambu Studio to run.\033[0m"
+          echo "Expected at: $MESA_PATH"
+          echo "This package will not run without it. Please ensure mesa is available."
           exit 1
         fi
 
@@ -37,5 +42,11 @@
         ${bambuStudio}/bin/bambu-studio "$@"
       '';
     in [bambuStudioWrapper];
-  };
+  }
+  # Ensure mesa is always available when Bambu Studio is enabled
+  {
+    home.packages = pkgs.lib.mkAfter [ pkgs.mesa ];
+  }
+]);
 }
+
