@@ -48,5 +48,6 @@ in {
         inputs.obs-image-reaction.packages.${pkgs.system}.default
       ];
     };
+    home.packages = with pkgs; [ v4l-utils ];
   };
 }

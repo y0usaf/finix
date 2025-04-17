@@ -1,14 +1,13 @@
 { config, lib, pkgs, ... }:
 {
-  # Load v4l2loopback at boot
-  boot.extraModulePackages = with config.boot.kernelPackages; [
-    v4l2loopback
-  ];
-
-  # Set v4l2loopback options for OBS compatibility
-  boot.extraModprobeConfig = ''
-    options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
-  '';
+  boot = {
+    kernelModules = ["v4l2loopback"];
+    extraModulePackages = with config.boot.kernelPackages; [v4l2loopback];
+    extraModprobeConfig = ''
+      # exclusive_caps: Chromium, Electron, etc. will only show device when actually streaming
+      options v4l2loopback exclusive_caps=1
+    '';
+  };
 
   # Udev rule for correct permissions
   services.udev.extraRules = ''
