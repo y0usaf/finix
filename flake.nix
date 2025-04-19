@@ -13,7 +13,7 @@
   ###########################################################################
   inputs = {
     ## Core System Dependencies
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-unstable";
 
     # Add flake-utils
     flake-utils.url = "github:numtide/flake-utils";
