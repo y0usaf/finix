@@ -163,15 +163,6 @@ in {
       yt-dlp.enable = true;
     };
 
-    # Programs
-    programs = {
-      whisper-overlay = {
-        enable = true;
-        server.enable = true;
-        client.enable = true;
-      };
-    };
-
     # Development
     dev = {
       docker.enable = true;
@@ -182,11 +173,6 @@ in {
       nvim.enable = true;
       python.enable = true;
       cursor-ide.enable = true;
-      voice-input = {
-        enable = false;
-        model = "tiny"; # Options: tiny, base, small, medium, large
-        recordTime = 10; # Maximum recording time in seconds
-      };
     };
 
     # User Preferences

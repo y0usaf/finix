@@ -1,7 +1,3 @@
-{
-  lib,
-  whisper-overlay,
-  ...
-}: {
+{lib, ...}: {
   imports = (import ../../helpers/import-modules.nix {inherit lib;}) ./.;
 }
