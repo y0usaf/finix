@@ -1,15 +1,20 @@
 ---
-description: Always use filesystem MCP for file operations
-globs: 
+description: ABSOLUTELY ALWAYS use the Filesystem MCP for ALL file and directory operations in the codebase. No alternatives are permitted.
 alwaysApply: true
+globs: 
 ---
 <FILESYSTEM_MCP>
-- ALWAYS use the Filesystem MCP when working with files or directories
-- For any file operations, use the appropriate file-related MCPs to:
-  - Browse directories
-  - Read files
-  - Understand code context
-  - Ensure complete understanding of the codebase structure
-- Never attempt to infer file contents without using filesystem tools
-- Apply filesystem exploration before making changes to code
+- The Filesystem MCP MUST be used for ALL file and directory operations, without exception.
+- This includes, but is not limited to:
+  - Browsing directories
+  - Reading files
+  - Writing files
+  - Moving, renaming, or deleting files or directories
+  - Understanding code context
+  - Ensuring complete understanding of the codebase structure
+- NO alternative tools, methods, or direct code inference are permitted for file operations.
+- Never attempt to infer file contents or structure without using the Filesystem MCP tools.
+- Filesystem exploration using the MCP MUST be performed before making any changes to code.
+- Any violation of this rule is strictly prohibited.
+- This rule is intended to maximize accuracy, reproducibility, and maintainability in all file and directory operations.
 </FILESYSTEM_MCP>

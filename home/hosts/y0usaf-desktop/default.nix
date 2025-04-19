@@ -1,51 +1,9 @@
-# LAPTOP HOST CONFIGURATION
+# HOME-MANAGER CONFIGURATION for y0usaf-desktop
 {pkgs, ...}: let
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
-  # Import hardware configuration and disko
-  imports = [
-    ./hardware-configuration.nix # Assuming this file exists
-    ./disko.nix # Import disko configuration
-  ];
-
-  # Core System Configuration
   cfg = {
-    system = {
-      username = username;
-      homeDirectory = homeDir;
-      hostname = "y0usaf-laptop";
-      stateVersion = "24.11";
-      timezone = "America/Toronto";
-      config = "default";
-    };
-
-    # Core Modules
-    core = {
-      nvidia.enable = false;
-      amdgpu.enable = true;
-      ssh.enable = true;
-      xdg.enable = true;
-      zsh = {
-        enable = true;
-        cat-fetch = true;
-        history-memory = 10000;
-        history-storage = 10000;
-        zellij.enable = true;
-      };
-      env = {
-        enable = true;
-        tokenDir = "${homeDir}/Tokens";
-      };
-      systemd = {
-        enable = true;
-        autoFormatNix = {
-          enable = true;
-          directory = "${homeDir}/nixos";
-        };
-      };
-    };
-
     # UI and Display
     ui = {
       hyprland = {
@@ -54,19 +12,19 @@ in {
         hy3.enable = true;
       };
       wayland.enable = true;
-      ags.enable = true;
+      ags.enable = false;
       cursor.enable = true;
       foot.enable = true;
       gtk.enable = true;
-      wallust.enable = true;
+      wallust.enable = false;
       mako.enable = true;
     };
 
     # Appearance
     appearance = {
-      dpi = 144;
-      baseFontSize = 10;
-      cursorSize = 16;
+      dpi = 109;
+      baseFontSize = 12;
+      cursorSize = 24;
       fonts = {
         main = [
           [pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono"]
@@ -82,7 +40,7 @@ in {
     # Default Applications
     defaults = {
       browser = {
-        package = pkgs.firefox;
+        package = null;
         command = "firefox";
       };
       editor = {
@@ -90,7 +48,7 @@ in {
         command = "nvim";
       };
       ide = {
-        package = pkgs.code-cursor;
+        package = null;
         command = "cursor";
       };
       terminal = {
@@ -102,12 +60,12 @@ in {
         command = "pcmanfm";
       };
       launcher = {
-        package = pkgs.sway-launcher-desktop;
-        command = "foot -a launcher sway-launcher-desktop";
+        package = null;
+        command = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
       };
       discord = {
-        package = pkgs.discord;
-        command = "discord";
+        package = null;
+        command = "discord-canary";
       };
       archiveManager = {
         package = pkgs.p7zip;
@@ -125,17 +83,24 @@ in {
 
     # Applications
     programs = {
+      bambu.enable = true;
       discord.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
-      android.enable = true;
+      android.enable = false;
       firefox.enable = true;
-      gaming.enable = true;
+      gaming = {
+        enable = true;
+        emulation = {
+          wii-u.enable = true;
+          gcn-wii.enable = true;
+        };
+      };
       media.enable = true;
       music.enable = true;
       obs.enable = true;
       qbittorrent.enable = true;
-      streamlink.enable = true;
+      streamlink.enable = false;
       sway-launcher-desktop.enable = true;
       syncthing.enable = true;
       webapps.enable = true;
@@ -158,11 +123,11 @@ in {
       docker.enable = true;
       fhs.enable = true;
       claude-code.enable = true;
+      mcp.enable = true;
       npm.enable = true;
       nvim.enable = true;
       python.enable = true;
       cursor-ide.enable = true;
-      voice-input.enable = false;
     };
 
     # User Preferences
@@ -178,6 +143,7 @@ in {
       ];
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
+        zoom-us
       ];
     };
 

@@ -100,7 +100,7 @@
     };
 
     ## Import host utilities
-    hostUtils = import ./modules/flake {
+    hostUtils = import ./lib/flake {
       lib = pkgs.lib;
       inherit pkgs;
     };

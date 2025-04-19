@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+<HOME_SYSTEM_LIB_STRUCTURE>
+- The codebase MUST maintain a clear separation between home, system, and shared (lib) code.
+- All home-manager related modules, hosts, and entrypoints should reside under the 'home/' directory.
+- All NixOS system related modules, hosts, and entrypoints should reside under the 'system/' directory.
+- All shared utilities, helpers, and flake-related logic should be placed in the 'lib/' directory at the root.
+- The root 'flake.nix' and 'flake.lock' files should reference the appropriate subdirectories for home, system, and lib code.
+- All import paths in configuration files MUST be updated to reflect this structure.
+- This structure is intended to maximize maintainability, clarity, and modularity for both home and system configurations.
+</HOME_SYSTEM_LIB_STRUCTURE>

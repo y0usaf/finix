@@ -24,6 +24,6 @@
   ###########################################################################
   imports = [
     # Core system modules - imports all modules from the system directory
-    ../modules/system
+    ../../system/modules
   ];
 }

@@ -1,54 +1,9 @@
-# DESKTOP HOST CONFIGURATION
+# HOME-MANAGER CONFIGURATION for y0usaf-laptop
 {pkgs, ...}: let
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
-  # Import hardware configuration and disko
-  imports = [
-    ./hardware-configuration.nix
-    ./disko.nix # Import disko configuration
-  ];
-
-  # Core System Configuration
   cfg = {
-    system = {
-      username = username;
-      homeDirectory = homeDir;
-      hostname = "y0usaf-desktop";
-      stateVersion = "24.11";
-      timezone = "America/Toronto";
-      config = "default";
-    };
-
-    # Core Modules
-    core = {
-      nvidia = {
-        enable = true;
-        cuda.enable = true;
-      };
-      amdgpu.enable = false;
-      ssh.enable = true;
-      xdg.enable = true;
-      zsh = {
-        enable = true;
-        cat-fetch = true;
-        history-memory = 10000;
-        history-storage = 10000;
-        zellij.enable = true;
-      };
-      env = {
-        enable = true;
-        tokenDir = "${homeDir}/Tokens";
-      };
-      systemd = {
-        enable = true;
-        autoFormatNix = {
-          enable = true;
-          directory = "${homeDir}/nixos";
-        };
-      };
-    };
-
     # UI and Display
     ui = {
       hyprland = {
@@ -57,19 +12,19 @@ in {
         hy3.enable = true;
       };
       wayland.enable = true;
-      ags.enable = false;
+      ags.enable = true;
       cursor.enable = true;
       foot.enable = true;
       gtk.enable = true;
-      wallust.enable = false;
+      wallust.enable = true;
       mako.enable = true;
     };
 
     # Appearance
     appearance = {
-      dpi = 109;
-      baseFontSize = 12;
-      cursorSize = 24;
+      dpi = 144;
+      baseFontSize = 10;
+      cursorSize = 16;
       fonts = {
         main = [
           [pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono"]
@@ -85,7 +40,7 @@ in {
     # Default Applications
     defaults = {
       browser = {
-        package = null;
+        package = pkgs.firefox;
         command = "firefox";
       };
       editor = {
@@ -93,7 +48,7 @@ in {
         command = "nvim";
       };
       ide = {
-        package = null;
+        package = pkgs.code-cursor;
         command = "cursor";
       };
       terminal = {
@@ -105,12 +60,12 @@ in {
         command = "pcmanfm";
       };
       launcher = {
-        package = null;
-        command = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+        package = pkgs.sway-launcher-desktop;
+        command = "foot -a launcher sway-launcher-desktop";
       };
       discord = {
-        package = null;
-        command = "discord-canary";
+        package = pkgs.discord;
+        command = "discord";
       };
       archiveManager = {
         package = pkgs.p7zip;
@@ -128,24 +83,17 @@ in {
 
     # Applications
     programs = {
-      bambu.enable = true;
       discord.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
-      android.enable = false;
+      android.enable = true;
       firefox.enable = true;
-      gaming = {
-        enable = true;
-        emulation = {
-          wii-u.enable = true;
-          gcn-wii.enable = true;
-        };
-      };
+      gaming.enable = true;
       media.enable = true;
       music.enable = true;
       obs.enable = true;
       qbittorrent.enable = true;
-      streamlink.enable = false;
+      streamlink.enable = true;
       sway-launcher-desktop.enable = true;
       syncthing.enable = true;
       webapps.enable = true;
@@ -168,11 +116,11 @@ in {
       docker.enable = true;
       fhs.enable = true;
       claude-code.enable = true;
-      mcp.enable = true;
       npm.enable = true;
       nvim.enable = true;
       python.enable = true;
       cursor-ide.enable = true;
+      voice-input.enable = false;
     };
 
     # User Preferences
@@ -188,7 +136,6 @@ in {
       ];
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
-        zoom-us
       ];
     };
 
@@ -207,7 +154,4 @@ in {
       };
     };
   };
-
-  # Add user to docker group to allow running docker commands without sudo
-  users.users.${username}.extraGroups = ["docker"];
 }

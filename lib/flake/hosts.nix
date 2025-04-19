@@ -1,7 +1,7 @@
 {
   lib,
   pkgs,
-  hostsDir ? ../../hosts,
+  hostsDir ? ../../system/hosts,
 }: let
   # Get all valid host names (excluding special directories and files)
   hostNames = builtins.filter (
@@ -12,14 +12,15 @@
       && builtins.pathExists (hostsDir + "/${name}/default.nix")
   ) (builtins.attrNames (builtins.readDir hostsDir));
 
-  # Import all available hosts dynamically
+  # Import all available hosts dynamically, merging system and home configs
   hosts = builtins.listToAttrs (
     map
     (name: {
       inherit name;
-      value = import (hostsDir + "/${name}/default.nix") {
-        inherit lib pkgs;
-      };
+      value = let
+        systemCfg = import (hostsDir + "/${name}/default.nix") { inherit lib pkgs; };
+        homeCfg = import (../../home/hosts/${name}/default.nix) { inherit lib pkgs; };
+      in lib.recursiveUpdate systemCfg homeCfg;
     })
     hostNames
   );
@@ -51,7 +52,7 @@ in {
                 useUserPackages = true;
                 extraSpecialArgs = commonSpecialArgs // {host = hosts.${hostname};};
                 users.${hosts.${hostname}.cfg.system.username} = {
-                  imports = [../../home.nix];
+                  imports = [../../home/home.nix];
                   home = {
                     stateVersion = hosts.${hostname}.cfg.system.stateVersion;
                     homeDirectory = inputs.nixpkgs.lib.mkForce hosts.${hostname}.cfg.system.homeDirectory;

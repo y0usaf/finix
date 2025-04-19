@@ -17,9 +17,9 @@
   # Module Import
   ###########################################################################
 
-  # Import all modules from the ./modules/home directory.
+  # Import all modules from the ./modules directory.
   # The default.nix within that structure handles recursive imports.
-  imports = [./modules/home];
+  imports = [./modules];
 
   ###########################################################################
   # Module Configuration Passthrough
