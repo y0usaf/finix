@@ -25,12 +25,8 @@
   # Define common structure for default application configuration
   defaultAppModule = t.submodule {
     options = {
-      # package: Specifies the Nix package derivation to install for the application.
-      # Can be null if you only want to specify a command without installing a package.
-      package = mkOptDef (t.nullOr t.package) null "Package derivation to install (optional)";
       # command: Specifies the command to run the application.
-      # If null, the default behavior is to use the package name.
-      command = mkOptDef mkStr null "Command to execute the application. Defaults to package name if null";
+      command = mkOpt mkStr "Command to execute the application.";
     };
   };
 
@@ -58,8 +54,7 @@
     host.cfg.defaults.archiveManager
   ];
 
-  # Extract package attribute from each app and filter out nulls
-  userPackages = lib.filter (p: p != null) (map (app: app.package) defaultApps);
+  # No longer extract package attribute from each app, as only command is required
 
   # Combine all package sources (Base + Host Defaults + User Defined)
   basePackages = with pkgs; [
@@ -83,8 +78,8 @@
     networkmanager # Might be needed for applets/widgets
   ];
 
-  # Final list includes base, host-derived defaults, and explicit user packages
-  finalPackages = basePackages ++ userPackages ++ (host.cfg.user.packages or []);
+  # Final list includes base and explicit user packages (no userPackages from defaults)
+  finalPackages = basePackages ++ (host.cfg.user.packages or []);
 in {
   # --- Options Definition (Existing) ---
   options.cfg = {

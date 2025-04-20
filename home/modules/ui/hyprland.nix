@@ -190,12 +190,12 @@ in {
         # Application Shortcut Variables
         "$mod" = "SUPER";
         "$mod2" = "ALT";
-        "$term" = host.cfg.defaults.terminal.command;
-        "$filemanager" = host.cfg.defaults.fileManager.command;
-        "$browser" = host.cfg.defaults.browser.command;
-        "$discord" = host.cfg.defaults.discord.command;
-        "$launcher" = host.cfg.defaults.launcher.command;
-        "$ide" = host.cfg.defaults.ide.command;
+        "$term" = host.cfg.defaults.terminal;
+        "$filemanager" = host.cfg.defaults.fileManager;
+        "$browser" = host.cfg.defaults.browser;
+        "$discord" = host.cfg.defaults.discord;
+        "$launcher" = host.cfg.defaults.launcher;
+        "$ide" = host.cfg.defaults.ide;
         "$obs" = "obs";
         "$firefox-pip" = "class:^(firefox)$, title:^(Picture-in-Picture)";
 

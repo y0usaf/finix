@@ -39,46 +39,16 @@ in {
 
     # Default Applications
     defaults = {
-      browser = {
-        package = null;
-        command = "firefox";
-      };
-      editor = {
-        package = pkgs.neovim;
-        command = "nvim";
-      };
-      ide = {
-        package = null;
-        command = "cursor";
-      };
-      terminal = {
-        package = pkgs.foot;
-        command = "foot";
-      };
-      fileManager = {
-        package = pkgs.pcmanfm;
-        command = "pcmanfm";
-      };
-      launcher = {
-        package = null;
-        command = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
-      };
-      discord = {
-        package = null;
-        command = "discord-canary";
-      };
-      archiveManager = {
-        package = pkgs.p7zip;
-        command = "7z";
-      };
-      imageViewer = {
-        package = pkgs.imv;
-        command = "imv";
-      };
-      mediaPlayer = {
-        package = pkgs.mpv;
-        command = "mpv";
-      };
+      browser = "firefox";
+      editor = "nvim";
+      ide = "cursor";
+      terminal = "foot";
+      fileManager = "pcmanfm";
+      launcher = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+      discord = "discord-canary";
+      archiveManager = "7z";
+      imageViewer = "imv";
+      mediaPlayer = "mpv";
     };
 
     # Applications
@@ -89,6 +59,8 @@ in {
       chatgpt.enable = true;
       android.enable = false;
       firefox.enable = true;
+      imv.enable = true;
+      pcmanfm.enable = true;
       gaming = {
         enable = true;
         emulation = {

@@ -48,7 +48,7 @@ in {
 
       extraConfig = {
         core = {
-          editor = host.cfg.defaults.editor.command;
+          editor = host.cfg.defaults.editor;
         };
         init.defaultBranch = "main";
         pull.rebase = true;

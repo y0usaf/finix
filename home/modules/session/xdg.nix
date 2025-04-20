@@ -55,33 +55,33 @@ in {
           "x-scheme-handler/discord" = ["discord.desktop"];
 
           # File Types
-          "inode/directory" = ["${host.cfg.defaults.fileManager.command}.desktop"];
+          "inode/directory" = ["${host.cfg.defaults.fileManager}.desktop"];
 
           # Media Types
-          "video/mp4" = ["${host.cfg.defaults.mediaPlayer.command}.desktop"];
-          "video/x-matroska" = ["${host.cfg.defaults.mediaPlayer.command}.desktop"];
-          "video/webm" = ["${host.cfg.defaults.mediaPlayer.command}.desktop"];
+          "video/mp4" = ["${host.cfg.defaults.mediaPlayer}.desktop"];
+          "video/x-matroska" = ["${host.cfg.defaults.mediaPlayer}.desktop"];
+          "video/webm" = ["${host.cfg.defaults.mediaPlayer}.desktop"];
 
           # Images
-          "image/jpeg" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
-          "image/png" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
-          "image/gif" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
-          "image/tiff" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
-          "image/bmp" = ["${host.cfg.defaults.imageViewer.command}.desktop"];
+          "image/jpeg" = ["${host.cfg.defaults.imageViewer}.desktop"];
+          "image/png" = ["${host.cfg.defaults.imageViewer}.desktop"];
+          "image/gif" = ["${host.cfg.defaults.imageViewer}.desktop"];
+          "image/tiff" = ["${host.cfg.defaults.imageViewer}.desktop"];
+          "image/bmp" = ["${host.cfg.defaults.imageViewer}.desktop"];
 
           # Archives
-          "application/zip" = ["${host.cfg.defaults.archiveManager.command}"];
-          "application/x-7z-compressed" = ["${host.cfg.defaults.archiveManager.command}"];
-          "application/x-tar" = ["${host.cfg.defaults.archiveManager.command}.desktop"];
-          "application/gzip" = ["${host.cfg.defaults.archiveManager.command}.desktop"];
-          "application/x-compressed-tar" = ["${host.cfg.defaults.archiveManager.command}.desktop"];
+          "application/zip" = ["${host.cfg.defaults.archiveManager}"];
+          "application/x-7z-compressed" = ["${host.cfg.defaults.archiveManager}"];
+          "application/x-tar" = ["${host.cfg.defaults.archiveManager}.desktop"];
+          "application/gzip" = ["${host.cfg.defaults.archiveManager}.desktop"];
+          "application/x-compressed-tar" = ["${host.cfg.defaults.archiveManager}.desktop"];
 
           # Web Extensions
-          "application/x-extension-htm" = ["${host.cfg.defaults.browser.command}.desktop"];
-          "application/x-extension-html" = ["${host.cfg.defaults.browser.command}.desktop"];
-          "application/x-extension-shtml" = ["${host.cfg.defaults.browser.command}.desktop"];
-          "application/xhtml+xml" = ["${host.cfg.defaults.browser.command}.desktop"];
-          "application/x-extension-xhtml" = ["${host.cfg.defaults.browser.command}.desktop"];
+          "application/x-extension-htm" = ["${host.cfg.defaults.browser}.desktop"];
+          "application/x-extension-html" = ["${host.cfg.defaults.browser}.desktop"];
+          "application/x-extension-shtml" = ["${host.cfg.defaults.browser}.desktop"];
+          "application/xhtml+xml" = ["${host.cfg.defaults.browser}.desktop"];
+          "application/x-extension-xhtml" = ["${host.cfg.defaults.browser}.desktop"];
         };
       };
 
