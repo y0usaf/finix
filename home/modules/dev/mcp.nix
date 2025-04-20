@@ -41,9 +41,15 @@
             "@modelcontextprotocol/server-sequential-thinking"
           ]
         },
-        "GitHub MCP": {
-          "command": "github-mcp-server",
-          "args": []
+        "github": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-github"
+          ],
+          "env": {
+            "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
+          }
         }
       }
     }
@@ -72,7 +78,7 @@ in {
     home.packages = with pkgs; [
       nodejs_20
       uv
-      github-mcp-server # GitHub's official MCP Server
+
     ];
 
     ###########################################################################
