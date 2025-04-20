@@ -1,5 +1,8 @@
-Rule Name: dry-nh-switch.mdc
-Description: ABSOLUTELY ALWAYS use `nh os switch --dry` for all NixOS build/switch operations. Never build/switch without the `--dry` flag.
+---
+description: 
+globs: 
+alwaysApply: true
+---
 <DRY_NH_SWITCH>
 - All NixOS build/switch operations MUST use `nh os switch --dry`.
 - NEVER perform a build or switch without the `--dry` flag.
