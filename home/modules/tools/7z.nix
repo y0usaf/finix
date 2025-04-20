@@ -14,6 +14,6 @@ in {
     enable = lib.mkEnableOption "7z (p7zip) archive manager";
   };
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [ p7zip ];
+    home.packages = with pkgs; [p7zip];
   };
 }

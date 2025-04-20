@@ -14,6 +14,6 @@ in {
     enable = lib.mkEnableOption "mpv media player";
   };
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [ mpv ];
+    home.packages = with pkgs; [mpv];
   };
 }

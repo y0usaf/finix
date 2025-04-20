@@ -15,6 +15,7 @@ globs:
 - NO alternative tools, methods, or direct code inference are permitted for file operations.
 - Never attempt to infer file contents or structure without using the Filesystem MCP tools.
 - Filesystem exploration using the MCP MUST be performed before making any changes to code.
+- The starting directory for all operations is ~/nixos, so all file and directory paths should be referenced as ~/nixos/{file} or ~/nixos/{directory}.
 - Any violation of this rule is strictly prohibited.
 - This rule is intended to maximize accuracy, reproducibility, and maintainability in all file and directory operations.
 </FILESYSTEM_MCP>

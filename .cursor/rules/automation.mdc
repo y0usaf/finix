@@ -1,0 +1,7 @@
+Rule Name: automation.mdc
+Description: ALWAYS prefer automation and non-interactive workflows.
+<AUTOMATION>
+- The AI MUST default to automated, non-interactive workflows for all tasks, minimizing user prompts for confirmation or manual intervention.
+- Only request user confirmation if absolutely necessary for safety or if required by the user’s explicit instructions.
+- This rule is intended to maximize efficiency, reduce friction, and streamline the user experience.
+</AUTOMATION>

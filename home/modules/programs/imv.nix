@@ -14,6 +14,6 @@ in {
     enable = lib.mkEnableOption "imv image viewer";
   };
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [ imv ];
+    home.packages = with pkgs; [imv];
   };
 }
