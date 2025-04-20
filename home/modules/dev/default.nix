@@ -1,3 +1,3 @@
 {lib, ...}: {
-  imports = (import ../../helpers/import-modules.nix {inherit lib;}) ./.;
+  imports = (import ../../../lib/helpers/import-modules.nix {inherit lib;}) ./.;
 }

@@ -38,7 +38,7 @@ in {
       $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$HOME/.config/scripts"
 
       # Symlink the launcher script
-      $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${config.home.homeDirectory}/nixos/pkg/scripts/sway-launcher-desktop.sh" "$HOME/.config/scripts/sway-launcher-desktop.sh"
+      $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${config.home.homeDirectory}/nixos/home/scripts/sway-launcher-desktop.sh" "$HOME/.config/scripts/sway-launcher-desktop.sh"
     '';
   };
 }

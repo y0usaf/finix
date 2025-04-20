@@ -18,9 +18,10 @@
     (name: {
       inherit name;
       value = let
-        systemCfg = import (hostsDir + "/${name}/default.nix") { inherit lib pkgs; };
-        homeCfg = import (../../home/hosts/${name}/default.nix) { inherit lib pkgs; };
-      in lib.recursiveUpdate systemCfg homeCfg;
+        systemCfg = import (hostsDir + "/${name}/default.nix") {inherit lib pkgs;};
+        homeCfg = import (../../home/hosts/${name}/default.nix) {inherit lib pkgs;};
+      in
+        lib.recursiveUpdate systemCfg homeCfg;
     })
     hostNames
   );
