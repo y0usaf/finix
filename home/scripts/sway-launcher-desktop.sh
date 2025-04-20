@@ -49,7 +49,7 @@ else
   PROVIDERS['desktop']="${0} list-entries${DEL}${0} describe-desktop \"{1}\"${DEL}${0} run-desktop '{1}' {2}${DEL}test -f '{1}' || exit 43"
   PROVIDERS['command']="${0} list-commands${DEL}${0} describe-command \"{1}\"${DEL}${TERMINAL_COMMAND} {1}${DEL}command -v '{1}' || exit 43"
   if [[ ! -v HIST_FILE ]]; then
-    HIST_FILE="${XDG_CACHE_HOME:-$HOME/.cache/${0##*/}-history.txt"
+    HIST_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/${0##*/}-history.txt"
   fi
 fi
 PROVIDERS['user']="exit${DEL}exit${DEL}{1}" # Fallback provider that simply executes the exact command if there were no matches
