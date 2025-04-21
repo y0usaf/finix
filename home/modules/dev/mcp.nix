@@ -13,39 +13,6 @@
   ...
 }: let
   cfg = config.cfg.dev.mcp;
-
-  # Create a script that generates the MCP config
-  generateMcpConfig = pkgs.writeShellScript "generate-mcp-config" ''
-    cat > ~/.cursor/mcp.json << EOF
-    {
-      "mcpServers": {
-        "Brave Search": {
-          "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-brave-search"],
-          "env": {
-            "BRAVE_API_KEY": "$BRAVE_API_KEY"
-          }
-        },
-        "Filesystem": {
-          "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-filesystem", "~"]
-        },
-        "Nixos MCP": {
-          "command": "uvx",
-          "args": ["mcp-nixos"]
-        },
-        "sequential-thinking": {
-          "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-sequential-thinking"
-          ]
-        },
-
-      }
-    }
-    EOF
-  '';
 in {
   ###########################################################################
   # Module Options
@@ -69,16 +36,34 @@ in {
     home.packages = with pkgs; [
       nodejs_20
       uv
-
     ];
 
     ###########################################################################
-    # MCP Configuration
+    # MCP Configuration (JSON file)
     ###########################################################################
-    home.activation.mcpConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD mkdir -p ~/.cursor
-      $DRY_RUN_CMD ${generateMcpConfig}
-    '';
+    home.file.".cursor/mcp.json" = {
+      text = builtins.toJSON {
+        mcpServers = {
+          "Brave Search" = {
+            command = "npx";
+            args = ["-y" "@modelcontextprotocol/server-brave-search"];
+            env = {BRAVE_API_KEY = cfg.braveApiKey;};
+          };
+          "Filesystem" = {
+            command = "npx";
+            args = ["-y" "@modelcontextprotocol/server-filesystem" "~"];
+          };
+          "Nixos MCP" = {
+            command = "uvx";
+            args = ["mcp-nixos"];
+          };
+          "sequential-thinking" = {
+            command = "npx";
+            args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
+          };
+        };
+      };
+    };
 
     ###########################################################################
     # Environment Setup
