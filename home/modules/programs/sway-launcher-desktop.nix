@@ -35,10 +35,10 @@ in {
     ###########################################################################
     home.activation.symlinkSwayLauncherDesktop = lib.hm.dag.entryAfter ["writeBoundary"] ''
       # Create scripts directory
-      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$HOME/.config/scripts"
+      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "${config.xdg.configHome}/scripts"
 
       # Symlink the launcher script
-      $DRY_RUN_CMD ln -sf $VERBOSE_ARG "${config.xdg.configHome}/nixos/lib/scripts/sway-launcher-desktop.sh" "$HOME/.config/scripts/sway-launcher-desktop.sh"
+      $DRY_RUN_CMD ln -sf $VERBOSE_ARG "$HOME/nixos/lib/scripts/sway-launcher-desktop.sh" "${config.xdg.configHome}/scripts/sway-launcher-desktop.sh"
     '';
   };
 }
