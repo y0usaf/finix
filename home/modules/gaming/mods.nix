@@ -19,7 +19,7 @@ in {
     ###########################################################################
     home.activation.symlinkGameConfigFiles = let
       # Base directories
-      configDir = "${config.home.homeDirectory}/nixos/pkg/gaming-config";
+      configDir = "${config.home.homeDirectory}/nixos/lib/resources/gaming-config";
       steamDir = "$HOME/.local/share/Steam";
 
       # Marvel Rivals paths

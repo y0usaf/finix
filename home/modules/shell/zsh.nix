@@ -218,7 +218,7 @@ in {
           cat = "bat";
 
           #----- Custom Scripts -----
-          cattree = "$HOME/nixos/pkg/scripts/cattree.sh";
+          cattree = "$HOME/nixos/lib/resources/scripts/cattree.sh";
 
           #----- System Management Shortcuts -----
           userctl = "systemctl --user";

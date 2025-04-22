@@ -9,7 +9,7 @@ in {
       hyprland = {
         enable = true;
         flake.enable = true;
-        hy3.enable = true;
+        hy3.enable = false;
       };
       wayland.enable = true;
       ags.enable = false;
