@@ -323,7 +323,7 @@ in {
         debug.disable_logs = false;
 
         # Add NVIDIA-specific environment settings
-        env = lib.mkIf (hostSystem.cfg.core.nvidia.enable) [
+        env = lib.mkIf (hostSystem.cfg.hardware.nvidia.enable) [
           "LIBVA_DRIVER_NAME,nvidia"
           "GBM_BACKEND,nvidia-drm"
           "__GLX_VENDOR_LIBRARY_NAME,nvidia"
@@ -335,7 +335,7 @@ in {
     # Shell Environment Configuration
     ###########################################################################
     programs.zsh = {
-      envExtra = lib.mkIf (hostSystem.cfg.core.nvidia.enable) ''
+      envExtra = lib.mkIf (hostSystem.cfg.hardware.nvidia.enable) ''
         # Hyprland NVIDIA environment variables
         export LIBVA_DRIVER_NAME=nvidia
         export XDG_SESSION_TYPE=wayland
