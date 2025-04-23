@@ -43,7 +43,7 @@ in {
 
     # Add Discord-specific environment variables
     programs.zsh = {
-      envExtra = lib.mkIf hostSystem.cfg.core.nvidia.enable ''
+      envExtra = lib.mkIf hostSystem.cfg.hardware.nvidia.enable ''
         # Discord environment variables for NVIDIA
         export DISCORD_SKIP_HOST_VIDEO_CODEC_BLACKLIST=1
       '';
