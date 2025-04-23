@@ -38,19 +38,19 @@
 
     # Disable hardware acceleration if using Nvidia
     "gfx.webrender.all" =
-      if hostSystem.cfg.core.nvidia.enable
+      if hostSystem.cfg.hardware.nvidia.enable
       then false
       else true;
     "media.hardware-video-decoding.enabled" =
-      if hostSystem.cfg.core.nvidia.enable
+      if hostSystem.cfg.hardware.nvidia.enable
       then false
       else true;
     "media.ffmpeg.vaapi.enabled" =
-      if hostSystem.cfg.core.nvidia.enable
+      if hostSystem.cfg.hardware.nvidia.enable
       then false
       else true;
     "layers.acceleration.disabled" =
-      if hostSystem.cfg.core.nvidia.enable
+      if hostSystem.cfg.hardware.nvidia.enable
       then true
       else false;
 
