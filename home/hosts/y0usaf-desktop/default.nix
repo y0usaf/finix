@@ -54,6 +54,7 @@ in {
     # Applications
     programs = {
       bambu.enable = true;
+      blueman.enable = true; 
       discord.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
@@ -128,6 +129,8 @@ in {
         };
       };
     };
+
+    # Additional settings may go here
 
     # User Preferences
     user = {
