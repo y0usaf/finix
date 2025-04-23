@@ -17,23 +17,30 @@ in {
   # Module Options
   ###########################################################################
   options.cfg.hardware.bluetooth = {
-    enable = lib.mkEnableOption "Bluetooth support";
-    
-    powerOnBoot = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Whether to power up the default Bluetooth controller on boot";
-    };
-    
-    # Blueman is now handled at the home level
-    
-    settings = lib.mkOption {
-      type = lib.types.attrs;
-      default = {};
-      description = "Settings for the main Bluetooth configuration";
-      example = lib.literalExpression ''
-        {
-          General = {
+  enable = lib.mkEnableOption "Bluetooth support";
+
+  powerOnBoot = lib.mkOption {
+  type = lib.types.bool;
+  default = true;
+  description = "Whether to power up the default Bluetooth controller on boot";
+  };
+  
+  # Package selection
+  package = lib.mkOption {
+    type = lib.types.package;
+  default = pkgs.bluezFull;
+  description = "The Bluetooth package to use (default: bluezFull with all plugins)";
+  };
+  
+  # Blueman is now handled at the home level
+  
+  settings = lib.mkOption {
+  type = lib.types.attrs;
+  default = {};
+  description = "Settings for the main Bluetooth configuration";
+  example = lib.literalExpression ''
+    {
+        General = {
             ControllerMode = "bredr";
             FastConnectable = true;
             JustWorksRepairing = "always";
@@ -52,10 +59,11 @@ in {
       enable = true;
       powerOnBoot = cfg.powerOnBoot;
       settings = cfg.settings;
+      package = cfg.package;
     };
-    
+
     # Blueman service is now controlled at the home level
-    
+
     # Install additional Bluetooth utilities
     environment.systemPackages = with pkgs; [
       bluez
