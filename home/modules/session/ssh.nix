@@ -58,19 +58,23 @@ in {
     services.ssh-agent.enable = true;
     
     ###########################################################################
-    # Activation Script for SSH Permissions
+    # SSH Directory Permissions with XDG integration
     ###########################################################################
+    xdg.enable = true;
+    
+    # Use Home Manager's built-in activation scripts
     home.activation = {
-      sshDirectoryPermissions = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        $DRY_RUN_CMD mkdir -p ~/.ssh
-        $DRY_RUN_CMD chmod 700 ~/.ssh
+      # This runs after files are linked but before Home Manager's shell is started
+      sshPermissionsFix = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD mkdir -p $HOME/.ssh
+        $DRY_RUN_CMD chmod 700 $HOME/.ssh
         
-        if [ -f ~/.ssh/config ]; then
-          $DRY_RUN_CMD chmod 600 ~/.ssh/config
+        if [ -f $HOME/.ssh/config ]; then
+          $DRY_RUN_CMD chmod 600 $HOME/.ssh/config
         fi
         
-        if [ -f ~/Tokens/id_rsa_y0usaf ]; then
-          $DRY_RUN_CMD chmod 600 ~/Tokens/id_rsa_y0usaf
+        if [ -f $HOME/Tokens/id_rsa_y0usaf ]; then
+          $DRY_RUN_CMD chmod 600 $HOME/Tokens/id_rsa_y0usaf
         fi
       '';
     };
