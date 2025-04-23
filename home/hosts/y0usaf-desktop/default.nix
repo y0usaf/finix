@@ -1,7 +1,6 @@
 # HOME-MANAGER CONFIGURATION for y0usaf-desktop
 {pkgs, ...}: {
   cfg = {
-    # UI and Display
     ui = {
       hyprland = {
         enable = true;
