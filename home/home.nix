@@ -26,10 +26,31 @@
   # Module Configuration
   ###########################################################################
 
-  # Use home-specific configuration only
-  # System settings should be accessed directly via hostSystem.cfg when needed
-  # This provides a cleaner separation between system and home configurations
-  cfg = hostHome.cfg or {};
+  # Minimal set of system settings merged with home configuration
+  # This keeps explicit the small set of system values we actually need
+  cfg = let
+    # These specific system settings should be pulled into home configuration
+    systemSettings = {
+      # Core system attributes needed for identifying the user
+      system = {
+        username = hostSystem.cfg.system.username or null;
+        homeDirectory = hostSystem.cfg.system.homeDirectory or null;
+        hostname = hostSystem.cfg.system.hostname or null;
+      };
+      
+      # Critical services that need to be activated in home config too
+      core = {
+        # SSH enable flag (needed for SSH config generation)
+        ssh.enable = hostSystem.cfg.core.ssh.enable or false;
+      };
+    };
+    
+    # Get home configuration
+    homeCfg = hostHome.cfg or {};
+    
+    # Start with minimal system settings, then override with home-specific settings
+    mergedConfig = lib.recursiveUpdate systemSettings homeCfg;
+  in mergedConfig;
 
   # Note: Core settings like home.username, home.packages, dconf.enable
   # are now managed within nixos/modules/home/core/core.nix

@@ -1,8 +1,5 @@
 # HOME-MANAGER CONFIGURATION for y0usaf-desktop
-{pkgs, ...}: let
-  # Helper function to get system values (to be replaced by hostSystem within modules)
-  getSystemPath = path: "/home/y0usaf${path}";
-in {
+{pkgs, ...}: {
   cfg = {
     # UI and Display
     ui = {
@@ -113,7 +110,7 @@ in {
         enable = true;
         autoFormatNix = {
           enable = true;
-          directory = "${getSystemPath("/nixos")}";
+          directory = "~/nixos";
         };
       };
       zsh = {
@@ -135,13 +132,13 @@ in {
     # User Preferences
     user = {
       bookmarks = [
-        "file://${getSystemPath("/Downloads")} Downloads"
-        "file://${getSystemPath("/Music")} Music"
-        "file://${getSystemPath("/DCIM")} DCIM"
-        "file://${getSystemPath("/Pictures")} Pictures"
-        "file://${getSystemPath("/nixos")} NixOS"
-        "file://${getSystemPath("/Dev")} Dev"
-        "file://${getSystemPath("/.local/share/Steam")} Steam"
+        "file://~/Downloads Downloads"
+        "file://~/Music Music"
+        "file://~/DCIM DCIM"
+        "file://~/Pictures Pictures"
+        "file://~/nixos NixOS"
+        "file://~/Dev Dev"
+        "file://~/.local/share/Steam Steam"
       ];
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
@@ -151,16 +148,16 @@ in {
 
     # Directories
     directories = {
-      flake.path = "${getSystemPath("/nixos")}";
-      music.path = "${getSystemPath("/Music")}";
-      dcim.path = "${getSystemPath("/DCIM")}";
+      flake.path = "~/nixos";
+      music.path = "~/Music";
+      dcim.path = "~/DCIM";
       steam = {
-        path = "${getSystemPath("/.local/share/Steam")}";
+        path = "~/.local/share/Steam";
         create = false;
       };
       wallpapers = {
-        static.path = "${getSystemPath("/DCIM/Wallpapers/32_9")}";
-        video.path = "${getSystemPath("/DCIM/Wallpapers_Video")}";
+        static.path = "~/DCIM/Wallpapers/32_9";
+        video.path = "~/DCIM/Wallpapers_Video";
       };
     };
   };
