@@ -10,19 +10,20 @@
   config,
   pkgs,
   lib,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: let
   cfg = config.cfg.ui.foot;
 
-  # Calculate the scaled font size based on the host's base font size.
-  computedFontSize = toString (host.cfg.appearance.baseFontSize * 1.33);
+  # Calculate the scaled font size based on the hostHome's base font size.
+  computedFontSize = toString (hostHome.cfg.appearance.baseFontSize * 1.33);
 
-  # Get the main font name from the host's font configuration
-  mainFontName = builtins.elemAt (builtins.elemAt host.cfg.appearance.fonts.main 0) 1;
+  # Get the main font name from the hostHome's font configuration
+  mainFontName = builtins.elemAt (builtins.elemAt hostHome.cfg.appearance.fonts.main 0) 1;
 
   # Get fallback font names
-  fallbackFontNames = map (x: builtins.elemAt x 1) host.cfg.appearance.fonts.fallback;
+  fallbackFontNames = map (x: builtins.elemAt x 1) hostHome.cfg.appearance.fonts.fallback;
 
   # Build the main font configuration string, including the fallback fonts.
   mainFontConfig =

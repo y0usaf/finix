@@ -7,12 +7,13 @@
   config,
   pkgs,
   lib,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: {
   programs.nh = {
     enable = true;
-    flake = host.cfg.directories.flake.path;
+    flake = hostHome.cfg.directories.flake.path;
     clean = {
       enable = true;
       dates = "weekly";

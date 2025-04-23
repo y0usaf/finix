@@ -8,13 +8,15 @@
   #   - config: The cumulative system configuration.
   #   - lib: Library functions for list manipulation, options handling, etc.
   #   - pkgs: The collection of available Nix packages.
-  #   - host: A user-defined host specifying many system preferences.
+  #   - hostSystem: System-specific host configuration.
+  #   - hostHome: Home-specific host configuration.
   #   - inputs: External inputs (like additional packages or modules).
   #   - ...: Any extra parameters.
   config,
   lib,
   pkgs,
-  host,
+  hostSystem,
+  hostHome,
   inputs,
   ...
 }: {

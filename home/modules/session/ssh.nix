@@ -10,7 +10,8 @@
   config,
   pkgs,
   lib,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: let
   cfg = config.cfg.core.ssh;

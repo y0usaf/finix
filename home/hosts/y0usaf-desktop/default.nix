@@ -102,6 +102,33 @@ in {
       cursor-ide.enable = true;
     };
 
+    # Core User Preferences
+    core = {
+      # Hardware-related settings are now pulled from system configuration
+      # SSH settings are pulled from system configuration
+      
+      # Local home-specific settings
+      xdg = {
+        enable = true;
+      };
+      systemd = {
+        enable = true;
+        autoFormatNix = {
+          enable = true;
+          directory = "${homeDir}/nixos";
+        };
+      };
+      zsh = {
+        enable = true;
+        cat-fetch = true;
+        history-memory = 10000;
+        history-storage = 10000;
+        zellij = {
+          enable = true;
+        };
+      };
+    };
+
     # User Preferences
     user = {
       bookmarks = [

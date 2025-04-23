@@ -11,7 +11,8 @@
   config,
   lib,
   pkgs,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: {
   config = {
@@ -19,9 +20,9 @@
     # Core System Settings
     # System identity and behavior configuration
     ###########################################################################
-    system.stateVersion = host.cfg.system.stateVersion; # Ensures compatibility when upgrading.
-    time.timeZone = host.cfg.system.timezone; # Set the system's time zone.
-    networking.hostName = host.cfg.system.hostname; # Define the system's hostname.
+    system.stateVersion = hostSystem.cfg.system.stateVersion; # Ensures compatibility when upgrading.
+    time.timeZone = hostSystem.cfg.system.timezone; # Set the system's time zone.
+    networking.hostName = hostSystem.cfg.system.hostname; # Define the system's hostname.
     nixpkgs.config.allowUnfree = true; # Allow installation of unfree (proprietary) packages.
 
     ###########################################################################
@@ -42,7 +43,7 @@
         cores = 0;
         experimental-features = ["nix-command" "flakes"];
         sandbox = true;
-        trusted-users = ["root" host.cfg.system.username];
+        trusted-users = ["root" hostSystem.cfg.system.username];
         builders-use-substitutes = true;
         fallback = true;
 

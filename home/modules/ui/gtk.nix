@@ -10,17 +10,18 @@
   config,
   pkgs,
   lib,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: let
   cfg = config.cfg.ui.gtk;
 
   #############################################################
-  # Extract common variables from the host for reusability
+  # Extract common variables from the hostHome for reusability
   #############################################################
-  mainFontName = builtins.elemAt (builtins.elemAt host.cfg.appearance.fonts.main 0) 1;
-  baseFontSize = host.cfg.appearance.baseFontSize;
-  dpiStr = toString host.cfg.appearance.dpi;
+  mainFontName = builtins.elemAt (builtins.elemAt hostHome.cfg.appearance.fonts.main 0) 1;
+  baseFontSize = hostHome.cfg.appearance.baseFontSize;
+  dpiStr = toString hostHome.cfg.appearance.dpi;
 
   # Scale factor for GTK interface (used for environment variables)
   scaleFactor = 2;
@@ -94,7 +95,7 @@ in {
           gtk-application-prefer-dark-theme = 1;
         };
 
-        bookmarks = host.cfg.user.bookmarks;
+        bookmarks = hostHome.cfg.user.bookmarks;
 
         # ---------------------------------------------------------------
         # Custom CSS for GTK3 applications

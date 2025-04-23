@@ -4,7 +4,8 @@
   lib, # Nixpkgs library functions
   pkgs, # Nixpkgs package set
   inputs, # Flake inputs (needed if host comes from flake)
-  host, # User host data (assuming passed down)
+  hostSystem, # System configuration
+  hostHome, # Home configuration
   ...
 }: let
   # Type definitions for options
@@ -41,17 +42,17 @@
   };
 
   # --- Package Definitions (Moved from home.nix) ---
-  # Extract default applications from host
+  # Extract default applications from hostHome
   defaultApps = [
-    host.cfg.defaults.terminal
-    host.cfg.defaults.browser
-    host.cfg.defaults.fileManager
-    host.cfg.defaults.launcher
-    host.cfg.defaults.ide
-    host.cfg.defaults.mediaPlayer
-    host.cfg.defaults.imageViewer
-    host.cfg.defaults.discord
-    host.cfg.defaults.archiveManager
+    hostHome.cfg.defaults.terminal
+    hostHome.cfg.defaults.browser
+    hostHome.cfg.defaults.fileManager
+    hostHome.cfg.defaults.launcher
+    hostHome.cfg.defaults.ide
+    hostHome.cfg.defaults.mediaPlayer
+    hostHome.cfg.defaults.imageViewer
+    hostHome.cfg.defaults.discord
+    hostHome.cfg.defaults.archiveManager
   ];
 
   # No longer extract package attribute from each app, as only command is required
@@ -65,7 +66,7 @@
     cachix
     unzip
     bash
-    vim # Or replace with host.cfg.defaults.editor.package if defined
+    vim # Or replace with hostHome.cfg.defaults.editor.package if defined
     lsd
     alejandra
     tree
@@ -79,18 +80,18 @@
   ];
 
   # Final list includes base and explicit user packages (no userPackages from defaults)
-  finalPackages = basePackages ++ (host.cfg.user.packages or []);
+  finalPackages = basePackages ++ (hostHome.cfg.user.packages or []);
 in {
   # --- Options Definition (Existing) ---
   options.cfg = {
     # System identity and core settings (used by config section below)
     system = {
-      username = mkOpt mkStr "The username for the system.";
-      hostname = mkOpt mkStr "The system hostname.";
-      homeDirectory = mkOpt mkStr "The path to the user's home directory.";
-      stateVersion = mkOpt mkStr "The system state version.";
-      timezone = mkOpt mkStr "The system timezone.";
-      config = mkOpt mkStr "The system configuration type.";
+      username = mkOptDef mkStr hostSystem.cfg.system.username "The username for the system.";
+      hostname = mkOptDef mkStr hostSystem.cfg.system.hostname "The system hostname.";
+      homeDirectory = mkOptDef mkStr hostSystem.cfg.system.homeDirectory "The path to the user's home directory.";
+      stateVersion = mkOptDef mkStr hostSystem.cfg.system.stateVersion "The system state version.";
+      timezone = mkOptDef mkStr hostSystem.cfg.system.timezone "The system timezone.";
+      config = mkOptDef mkStr hostSystem.cfg.system.config "The system configuration type.";
     };
 
     # Core system modules (e.g., GPU)
@@ -121,14 +122,14 @@ in {
       };
 
       # --- User Specific Settings (bookmarks, git) ---
-      bookmarks = mkOptDef (t.listOf mkStr) [] "GTK bookmarks";
-      git = mkOpt (t.submodule {
+      bookmarks = mkOptDef (t.listOf mkStr) (hostHome.cfg.user.bookmarks or []) "GTK bookmarks";
+      git = mkOptDef (t.submodule {
         options = {
           name = mkOpt mkStr "Git user name";
           email = mkOpt mkStr "Git user email";
           homeManagerRepoUrl = mkOpt mkStr "URL to home manager repository";
         };
-      }) "Git configuration";
+      }) (hostHome.cfg.tools.git or {}) "Git configuration";
     };
 
     # Default applications (used in package calculation above)

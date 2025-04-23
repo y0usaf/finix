@@ -10,7 +10,8 @@
   config,
   lib,
   pkgs,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: {
   config = {
@@ -40,12 +41,12 @@
           "ashmem_linux"
           "binder_linux"
         ]
-        ++ lib.optionals host.cfg.core.amdgpu.enable ["amdgpu"];
+        ++ lib.optionals hostSystem.cfg.core.amdgpu.enable ["amdgpu"];
       kernel.sysctl = {
         "kernel.unprivileged_userns_clone" = 1; # Allow unprivileged processes to create user namespaces.
       };
       # AMD GPU kernel parameters (conditional)
-      kernelParams = lib.mkIf host.cfg.core.amdgpu.enable [
+      kernelParams = lib.mkIf hostSystem.cfg.core.amdgpu.enable [
         "amdgpu.ppfeaturemask=0xffffffff"
         "amdgpu.dpm=1"
       ];

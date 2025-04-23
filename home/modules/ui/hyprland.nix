@@ -11,7 +11,8 @@
   pkgs,
   lib,
   inputs,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: let
   cfg = config.cfg.ui.hyprland;
@@ -190,12 +191,12 @@ in {
         # Application Shortcut Variables
         "$mod" = "SUPER";
         "$mod2" = "ALT";
-        "$term" = host.cfg.defaults.terminal;
-        "$filemanager" = host.cfg.defaults.fileManager;
-        "$browser" = host.cfg.defaults.browser;
-        "$discord" = host.cfg.defaults.discord;
-        "$launcher" = host.cfg.defaults.launcher;
-        "$ide" = host.cfg.defaults.ide;
+        "$term" = hostHome.cfg.defaults.terminal;
+        "$filemanager" = hostHome.cfg.defaults.fileManager;
+        "$browser" = hostHome.cfg.defaults.browser;
+        "$discord" = hostHome.cfg.defaults.discord;
+        "$launcher" = hostHome.cfg.defaults.launcher;
+        "$ide" = hostHome.cfg.defaults.ide;
         "$obs" = "obs";
         "$firefox-pip" = "class:^(firefox)$, title:^(Picture-in-Picture)";
 
@@ -300,7 +301,7 @@ in {
 
           # -- Special Commands --
           [
-            "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${host.cfg.directories.wallpapers.static.path}\""
+            "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${hostHome.cfg.directories.wallpapers.static.path}\""
           ]
         ];
 
@@ -322,7 +323,7 @@ in {
         debug.disable_logs = false;
 
         # Add NVIDIA-specific environment settings
-        env = lib.mkIf (host.cfg.core.nvidia.enable) [
+        env = lib.mkIf (hostSystem.cfg.core.nvidia.enable) [
           "LIBVA_DRIVER_NAME,nvidia"
           "GBM_BACKEND,nvidia-drm"
           "__GLX_VENDOR_LIBRARY_NAME,nvidia"
@@ -334,14 +335,14 @@ in {
     # Shell Environment Configuration
     ###########################################################################
     programs.zsh = {
-      envExtra = lib.mkIf (host.cfg.core.nvidia.enable) ''
+      envExtra = lib.mkIf (hostSystem.cfg.core.nvidia.enable) ''
         # Hyprland NVIDIA environment variables
         export LIBVA_DRIVER_NAME=nvidia
         export XDG_SESSION_TYPE=wayland
         export GBM_BACKEND=nvidia-drm
         export __GLX_VENDOR_LIBRARY_NAME=nvidia
         export WLR_NO_HARDWARE_CURSORS=1
-        export XCURSOR_SIZE=${toString host.cfg.appearance.cursorSize}
+        export XCURSOR_SIZE=${toString hostHome.cfg.appearance.cursorSize}
         export NIXOS_OZONE_WL=1
       '';
     };

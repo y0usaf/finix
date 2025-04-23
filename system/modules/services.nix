@@ -10,7 +10,8 @@
   config,
   lib,
   pkgs,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: {
   config = {

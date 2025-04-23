@@ -9,7 +9,8 @@
   config,
   lib,
   pkgs,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: {
   config = {
@@ -20,14 +21,14 @@
     networking.networkmanager.enable = true; # Turn on NetworkManager to manage network connections.
     virtualisation = {
       lxd.enable = true; # Enable LXD container hypervisor.
-      waydroid = lib.mkIf host.cfg.programs.android.enable {
+      waydroid = lib.mkIf hostHome.cfg.programs.android.enable {
         enable = true; # Enable Waydroid to run Android apps on NixOS.
       };
-      docker = lib.mkIf host.cfg.dev.docker.enable {
+      docker = lib.mkIf hostHome.cfg.dev.docker.enable {
         enable = true; # Enable Docker daemon
         enableOnBoot = true; # Start Docker on boot
       };
-      podman = lib.mkIf host.cfg.dev.docker.enable {
+      podman = lib.mkIf hostHome.cfg.dev.docker.enable {
         enable = true;
       };
     };
@@ -36,7 +37,7 @@
     # XDG Desktop Portal
     # Desktop integration services for applications
     ###########################################################################
-    xdg.portal = lib.mkIf host.cfg.ui.wayland.enable {
+    xdg.portal = lib.mkIf hostHome.cfg.ui.wayland.enable {
       enable = true;
       xdgOpenUsePortal = true; # Route xdg-open calls through the portal for better integration.
       extraPortals = [

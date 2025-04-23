@@ -10,7 +10,8 @@
   pkgs,
   lib,
   inputs,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: let
   cfg = config.cfg.ui.cursor;
@@ -70,7 +71,7 @@ in {
     home.pointerCursor = {
       name = "${baseTheme}-x11";
       package = xcursorPackage;
-      size = host.cfg.appearance.cursorSize;
+      size = hostHome.cfg.appearance.cursorSize;
 
       gtk.enable = true;
       x11.enable = true;
@@ -80,7 +81,7 @@ in {
     gtk.cursorTheme = {
       name = "${baseTheme}-x11";
       package = xcursorPackage;
-      size = host.cfg.appearance.cursorSize;
+      size = hostHome.cfg.appearance.cursorSize;
     };
   };
 }

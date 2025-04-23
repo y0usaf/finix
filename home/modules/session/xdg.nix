@@ -10,7 +10,8 @@
   config,
   pkgs,
   lib,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: let
   cfg = config.cfg.core.xdg;
@@ -38,7 +39,7 @@ in {
         createDirectories = true;
         extraConfig = {
           XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/Pictures/Screenshots";
-          XDG_WALLPAPERS_DIR = "${host.cfg.directories.wallpapers.static.path}";
+          XDG_WALLPAPERS_DIR = "${hostHome.cfg.directories.wallpapers.static.path}";
         };
       };
 
@@ -55,33 +56,33 @@ in {
           "x-scheme-handler/discord" = ["discord.desktop"];
 
           # File Types
-          "inode/directory" = ["${host.cfg.defaults.fileManager}.desktop"];
+          "inode/directory" = ["${hostHome.cfg.defaults.fileManager}.desktop"];
 
           # Media Types
-          "video/mp4" = ["${host.cfg.defaults.mediaPlayer}.desktop"];
-          "video/x-matroska" = ["${host.cfg.defaults.mediaPlayer}.desktop"];
-          "video/webm" = ["${host.cfg.defaults.mediaPlayer}.desktop"];
+          "video/mp4" = ["${hostHome.cfg.defaults.mediaPlayer}.desktop"];
+          "video/x-matroska" = ["${hostHome.cfg.defaults.mediaPlayer}.desktop"];
+          "video/webm" = ["${hostHome.cfg.defaults.mediaPlayer}.desktop"];
 
           # Images
-          "image/jpeg" = ["${host.cfg.defaults.imageViewer}.desktop"];
-          "image/png" = ["${host.cfg.defaults.imageViewer}.desktop"];
-          "image/gif" = ["${host.cfg.defaults.imageViewer}.desktop"];
-          "image/tiff" = ["${host.cfg.defaults.imageViewer}.desktop"];
-          "image/bmp" = ["${host.cfg.defaults.imageViewer}.desktop"];
+          "image/jpeg" = ["${hostHome.cfg.defaults.imageViewer}.desktop"];
+          "image/png" = ["${hostHome.cfg.defaults.imageViewer}.desktop"];
+          "image/gif" = ["${hostHome.cfg.defaults.imageViewer}.desktop"];
+          "image/tiff" = ["${hostHome.cfg.defaults.imageViewer}.desktop"];
+          "image/bmp" = ["${hostHome.cfg.defaults.imageViewer}.desktop"];
 
           # Archives
-          "application/zip" = ["${host.cfg.defaults.archiveManager}"];
-          "application/x-7z-compressed" = ["${host.cfg.defaults.archiveManager}"];
-          "application/x-tar" = ["${host.cfg.defaults.archiveManager}.desktop"];
-          "application/gzip" = ["${host.cfg.defaults.archiveManager}.desktop"];
-          "application/x-compressed-tar" = ["${host.cfg.defaults.archiveManager}.desktop"];
+          "application/zip" = ["${hostHome.cfg.defaults.archiveManager}"];
+          "application/x-7z-compressed" = ["${hostHome.cfg.defaults.archiveManager}"];
+          "application/x-tar" = ["${hostHome.cfg.defaults.archiveManager}.desktop"];
+          "application/gzip" = ["${hostHome.cfg.defaults.archiveManager}.desktop"];
+          "application/x-compressed-tar" = ["${hostHome.cfg.defaults.archiveManager}.desktop"];
 
           # Web Extensions
-          "application/x-extension-htm" = ["${host.cfg.defaults.browser}.desktop"];
-          "application/x-extension-html" = ["${host.cfg.defaults.browser}.desktop"];
-          "application/x-extension-shtml" = ["${host.cfg.defaults.browser}.desktop"];
-          "application/xhtml+xml" = ["${host.cfg.defaults.browser}.desktop"];
-          "application/x-extension-xhtml" = ["${host.cfg.defaults.browser}.desktop"];
+          "application/x-extension-htm" = ["${hostHome.cfg.defaults.browser}.desktop"];
+          "application/x-extension-html" = ["${hostHome.cfg.defaults.browser}.desktop"];
+          "application/x-extension-shtml" = ["${hostHome.cfg.defaults.browser}.desktop"];
+          "application/xhtml+xml" = ["${hostHome.cfg.defaults.browser}.desktop"];
+          "application/x-extension-xhtml" = ["${hostHome.cfg.defaults.browser}.desktop"];
         };
       };
 
@@ -150,7 +151,7 @@ in {
         TEXMFVAR = "${config.xdg.cacheHome}/texlive/texmf-var";
         SSB_HOME = "${config.xdg.dataHome}/zoom";
       }
-      (lib.mkIf host.cfg.core.nvidia.enable {
+      (lib.mkIf hostSystem.cfg.core.nvidia.enable {
         __GL_SHADER_DISK_CACHE_PATH = "${config.xdg.cacheHome}/nv";
       })
     ];

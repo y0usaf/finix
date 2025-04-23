@@ -10,7 +10,8 @@
   config,
   lib,
   pkgs,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: let
   cfg = config.cfg.programs.firefox;
@@ -37,19 +38,19 @@
 
     # Disable hardware acceleration if using Nvidia
     "gfx.webrender.all" =
-      if host.cfg.core.nvidia.enable
+      if hostSystem.cfg.core.nvidia.enable
       then false
       else true;
     "media.hardware-video-decoding.enabled" =
-      if host.cfg.core.nvidia.enable
+      if hostSystem.cfg.core.nvidia.enable
       then false
       else true;
     "media.ffmpeg.vaapi.enabled" =
-      if host.cfg.core.nvidia.enable
+      if hostSystem.cfg.core.nvidia.enable
       then false
       else true;
     "layers.acceleration.disabled" =
-      if host.cfg.core.nvidia.enable
+      if hostSystem.cfg.core.nvidia.enable
       then true
       else false;
 

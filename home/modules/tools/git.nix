@@ -10,7 +10,8 @@
   config,
   pkgs,
   lib,
-  host,
+  hostSystem,
+  hostHome,
   ...
 }: let
   cfg = config.cfg.tools.git;
@@ -48,7 +49,7 @@ in {
 
       extraConfig = {
         core = {
-          editor = host.cfg.defaults.editor;
+          editor = hostHome.cfg.defaults.editor;
         };
         init.defaultBranch = "main";
         pull.rebase = true;
@@ -68,9 +69,9 @@ in {
     home.activation = {
       setupGitRepo = lib.hm.dag.entryAfter ["writeBoundary"] ''
         # Only clone if the "nixos" directory does not exist within homeDirectory.
-        if [ ! -d "${config.cfg.system.homeDirectory}/nixos" ]; then
+        if [ ! -d "${hostSystem.cfg.system.homeDirectory}/nixos" ]; then
           echo "Setting up NixOS configuration repository..."
-          git clone ${cfg.homeManagerRepoUrl} ${config.cfg.system.homeDirectory}/nixos
+          git clone ${cfg.homeManagerRepoUrl} ${hostSystem.cfg.system.homeDirectory}/nixos
         fi
       '';
     };
@@ -99,7 +100,7 @@ in {
           sleep 2
 
           # Switch to the NixOS configuration repository directory
-          cd ${config.cfg.system.homeDirectory}/nixos
+          cd ${hostSystem.cfg.system.homeDirectory}/nixos
 
           # Assess if there are any changes (tracked or untracked)
           if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then

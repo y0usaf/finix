@@ -2,6 +2,7 @@
   lib,
   pkgs,
   hostsDir ? ../../system/hosts,
+  homeHostsDir ? ../../home/hosts,
 }: let
   # Get all valid host names (excluding special directories and files)
   hostNames = builtins.filter (
@@ -10,23 +11,30 @@
       != "README.md"
       && name != "default.nix"
       && builtins.pathExists (hostsDir + "/${name}/default.nix")
+      && builtins.pathExists (homeHostsDir + "/${name}/default.nix")
   ) (builtins.attrNames (builtins.readDir hostsDir));
 
-  # Import all available hosts dynamically, merging system and home configs
-  hosts = builtins.listToAttrs (
+  # Import system configurations for each host
+  systemConfigs = builtins.listToAttrs (
     map
     (name: {
       inherit name;
-      value = let
-        systemCfg = import (hostsDir + "/${name}/default.nix") {inherit lib pkgs;};
-        homeCfg = import (../../home/hosts/${name}/default.nix) {inherit lib pkgs;};
-      in
-        lib.recursiveUpdate systemCfg homeCfg;
+      value = import (hostsDir + "/${name}/default.nix") {inherit lib pkgs;};
+    })
+    hostNames
+  );
+
+  # Import home configurations for each host
+  homeConfigs = builtins.listToAttrs (
+    map
+    (name: {
+      inherit name;
+      value = import (homeHostsDir + "/${name}/default.nix") {inherit lib pkgs;};
     })
     hostNames
   );
 in {
-  inherit hostNames hosts;
+  inherit hostNames systemConfigs homeConfigs;
 
   # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {
@@ -40,7 +48,10 @@ in {
         name = hostname;
         value = inputs.nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = commonSpecialArgs // {host = hosts.${hostname};};
+          specialArgs = commonSpecialArgs // {
+            hostSystem = systemConfigs.${hostname};
+            hostHome = homeConfigs.${hostname};
+          };
           modules = [
             # Import hardware configuration directly from the host directory
             (hostsDir + "/${hostname}/hardware-configuration.nix")
@@ -51,12 +62,15 @@ in {
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
-                extraSpecialArgs = commonSpecialArgs // {host = hosts.${hostname};};
-                users.${hosts.${hostname}.cfg.system.username} = {
+                extraSpecialArgs = commonSpecialArgs // {
+                  hostSystem = systemConfigs.${hostname};
+                  hostHome = homeConfigs.${hostname};
+                };
+                users.${systemConfigs.${hostname}.cfg.system.username} = {
                   imports = [../../home/home.nix];
                   home = {
-                    stateVersion = hosts.${hostname}.cfg.system.stateVersion;
-                    homeDirectory = inputs.nixpkgs.lib.mkForce hosts.${hostname}.cfg.system.homeDirectory;
+                    stateVersion = systemConfigs.${hostname}.cfg.system.stateVersion;
+                    homeDirectory = inputs.nixpkgs.lib.mkForce systemConfigs.${hostname}.cfg.system.homeDirectory;
                   };
                 };
               };
@@ -74,27 +88,31 @@ in {
     pkgs,
     commonSpecialArgs,
   }: let
-    # Debug: Check if hosts have the expected structure
+    # Check if system configs have the expected structure
     validHostNames =
       builtins.filter (
         hostname:
-          builtins.hasAttr hostname hosts
-          && builtins.hasAttr "cfg" hosts.${hostname}
-          && builtins.hasAttr "system" hosts.${hostname}.cfg
-          && builtins.hasAttr "username" hosts.${hostname}.cfg.system
+          builtins.hasAttr hostname systemConfigs
+          && builtins.hasAttr "cfg" systemConfigs.${hostname}
+          && builtins.hasAttr "system" systemConfigs.${hostname}.cfg
+          && builtins.hasAttr "username" systemConfigs.${hostname}.cfg.system
       )
       hostNames;
   in
     builtins.listToAttrs (
       map
       (hostname: let
-        hostConfig = hosts.${hostname};
+        systemConfig = systemConfigs.${hostname};
+        homeConfig = homeConfigs.${hostname};
       in {
-        name = hostConfig.cfg.system.username;
+        name = systemConfig.cfg.system.username;
         value = inputs.home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = commonSpecialArgs // {host = hostConfig;};
-          modules = [../../home.nix];
+          extraSpecialArgs = commonSpecialArgs // {
+            hostSystem = systemConfig;
+            hostHome = homeConfig;
+          };
+          modules = [../../home/home.nix];
         };
       })
       validHostNames # Use only valid hosts
