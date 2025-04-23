@@ -1,6 +1,6 @@
 ###############################################################################
-# Bluetooth Configuration Module (Minimal System Level)
-# Provides only the essential system-level Bluetooth support
+# Bluetooth Configuration Module (Comprehensive System Level)
+# Controls all system-level Bluetooth functionality
 ###############################################################################
 {
   config,
@@ -11,45 +11,48 @@
   cfg = config.cfg.hardware.bluetooth;
 in {
   ###########################################################################
-  # Module Options (minimal system configuration)
+  # Module Options (simplified approach)
   ###########################################################################
   options.cfg.hardware.bluetooth = {
-    enable = lib.mkEnableOption "Bluetooth support";
+    # Single option to control Bluetooth functionality
+    enable = lib.mkEnableOption "Complete Bluetooth stack (hardware, services, and tools)";
     
-    powerOnBoot = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Whether to power up the default Bluetooth controller on boot";
-    };
-    
+    # Advanced settings (optional)
     settings = lib.mkOption {
       type = lib.types.attrs;
-      default = {};
+      default = {
+        General = {
+          ControllerMode = "dual";
+          FastConnectable = true;
+        };
+      };
       description = "Settings for the Bluetooth configuration";
     };
   };
 
   ###########################################################################
-  # Module Configuration (minimal system level)
+  # Module Configuration (comprehensive system level)
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    # Enable core Bluetooth support at system level
-    # This is the minimal required configuration
+    # 1. Enable hardware Bluetooth support
     hardware.bluetooth = {
       enable = true;
-      powerOnBoot = cfg.powerOnBoot;
+      powerOnBoot = true; # Always power on if Bluetooth is enabled
       settings = cfg.settings;
-      # Use standard bluez package for better compatibility
       package = pkgs.bluez;
     };
     
-    # Don't enable blueman at system level - will be handled in home config
-    # services.blueman.enable = false;
+    # 2. Enable Blueman service at system level
+    services.blueman.enable = true;
     
-    # Only install the core Bluetooth packages at system level
+    # 3. Install required system packages
     environment.systemPackages = with pkgs; [
       bluez
       bluez-tools
+      blueman
     ];
+    
+    # 4. Add user to necessary groups
+    users.users.y0usaf.extraGroups = ["dialout" "bluetooth"];
   };
 }
