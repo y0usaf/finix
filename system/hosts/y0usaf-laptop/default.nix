@@ -17,9 +17,11 @@ in {
       timezone = "America/Toronto";
       config = "default";
     };
-    core = {
+    hardware = {
       nvidia.enable = false;
       amdgpu.enable = true;
+    };
+    core = {
       ssh.enable = true;
       xdg.enable = true;
       zsh = {

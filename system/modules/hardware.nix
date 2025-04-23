@@ -15,7 +15,7 @@
   hostHome,
   ...
 }: let
-  cfg = hostSystem.cfg.hardware;
+  hardwareCfg = hostSystem.cfg.hardware;
   coreCfg = hostSystem.cfg.core;
 in {
   imports = [
@@ -45,17 +45,17 @@ in {
     # AMD GPU X Server Configuration (conditional)
     # X server driver settings for AMD GPU
     ###########################################################################
-    services.xserver.videoDrivers = lib.mkIf hostSystem.cfg.core.amdgpu.enable ["amdgpu"];
+    services.xserver.videoDrivers = lib.mkIf hostSystem.cfg.hardware.amdgpu.enable ["amdgpu"];
 
     ###########################################################################
     # Bluetooth Configuration (conditional)
     # Complete Bluetooth stack when enabled in host config
     ###########################################################################
-    hardware.bluetooth = lib.mkIf (coreCfg.bluetooth.enable or false) {
+    hardware.bluetooth = lib.mkIf (hardwareCfg.bluetooth.enable or false) {
       enable = true;
       powerOnBoot = true;
       settings =
-        coreCfg.bluetooth.settings or {
+        hardwareCfg.bluetooth.settings or {
           General = {
             ControllerMode = "dual";
             FastConnectable = true;
@@ -66,17 +66,17 @@ in {
     };
 
     # Bluetooth-related services and packages (conditional)
-    services.dbus.packages = lib.mkIf (coreCfg.bluetooth.enable or false) [pkgs.bluez];
+    services.dbus.packages = lib.mkIf (hardwareCfg.bluetooth.enable or false) [pkgs.bluez];
 
     # Add required system packages for Bluetooth
     environment.systemPackages = with pkgs;
-      lib.optionals (coreCfg.bluetooth.enable or false) [
+      lib.optionals (hardwareCfg.bluetooth.enable or false) [
         bluez
         bluez-tools
       ];
 
     # Add user to necessary groups for Bluetooth
     users.users.${hostSystem.cfg.system.username}.extraGroups =
-      lib.optionals (coreCfg.bluetooth.enable or false) ["dialout" "bluetooth" "lp"];
+      lib.optionals (hardwareCfg.bluetooth.enable or false) ["dialout" "bluetooth" "lp"];
   };
 }

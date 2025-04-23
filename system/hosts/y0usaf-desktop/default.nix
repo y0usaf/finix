@@ -17,7 +17,7 @@ in {
       timezone = "America/Toronto";
       config = "default";
     };
-    core = {
+    hardware = {
       bluetooth = {
         enable = true;
       };
@@ -26,6 +26,8 @@ in {
         cuda.enable = true;
       };
       amdgpu.enable = false;
+    };
+    core = {
       ssh.enable = true;
       xdg.enable = true;
       zsh = {

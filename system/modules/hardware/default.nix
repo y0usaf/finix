@@ -8,5 +8,6 @@
   imports = [
     ./input.nix
     ./video.nix
+    ./nvidia.nix
   ];
 }
