@@ -9,12 +9,6 @@ in {
   ];
 
   cfg = {
-    hardware = {
-      bluetooth = {
-        enable = true;
-        # Single option now controls the entire Bluetooth stack
-      };
-    };
     system = {
       username = username;
       homeDirectory = homeDir;
@@ -24,6 +18,9 @@ in {
       config = "default";
     };
     core = {
+      bluetooth = {
+        enable = true;
+      };
       nvidia = {
         enable = true;
         cuda.enable = true;
