@@ -4,6 +4,10 @@
   options.cfg.programs.gaming = {
     enable = lib.mkEnableOption "gaming module";
 
+    controllers = {
+      enable = lib.mkEnableOption "gaming controller support";
+    };
+
     emulation = {
       wii-u = {
         enable = lib.mkEnableOption "Wii U emulation via Cemu";

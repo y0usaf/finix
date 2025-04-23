@@ -17,6 +17,7 @@
 in {
   imports = [
     ./options.nix
+    ./controllers.nix
     ./mods.nix
     ./marvel-rivals
     ./wukong

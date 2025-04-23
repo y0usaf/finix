@@ -63,6 +63,7 @@ in {
       pcmanfm.enable = true;
       gaming = {
         enable = true;
+        controllers.enable = true;
         emulation = {
           wii-u.enable = true;
           gcn-wii.enable = true;
