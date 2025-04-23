@@ -13,10 +13,7 @@
     '';
   };
 
-  # Udev rule for correct permissions
-  services.udev.extraRules = ''
-    KERNEL=="video[0-9]*", GROUP="video", MODE="0660"
-  '';
+  # UDEV rules for video devices have been moved to the system/modules/hardware/video.nix file
 
   # Polkit is required for some desktop/portal integrations
   security.polkit.enable = true;

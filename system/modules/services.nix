@@ -55,15 +55,7 @@
         ];
       };
 
-      ###########################################################################
-      # Udev Rules
-      # Device management and permissions
-      ###########################################################################
-      udev.extraRules = ''
-        # Vial rules for non-root access:
-        KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users"
-        KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
-      '';
+      # UDEV rules for Vial have been moved to the system/modules/hardware/input.nix file
     };
   };
 }

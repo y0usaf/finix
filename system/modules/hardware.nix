@@ -5,6 +5,7 @@
 # - I2C bus for hardware monitoring
 # - AMD GPU configuration
 # - Bluetooth stack configuration
+# - Input/output device configurations (imported from hardware/)
 ###############################################################################
 {
   config,
@@ -17,6 +18,11 @@
   cfg = hostSystem.cfg.hardware;
   coreCfg = hostSystem.cfg.core;
 in {
+  imports = [
+    # Import additional hardware-specific modules
+    ./hardware
+  ];
+  
   config = {
     ###########################################################################
     # Hardware-Specific Settings
