@@ -1,9 +1,6 @@
 ###############################################################################
-# Bluetooth Configuration Module
-# Configures Bluetooth hardware and management utilities
-# - Bluetooth hardware support
-# - Blueman graphical manager
-# - Power-on behavior
+# Bluetooth Configuration Module (Minimal System Level)
+# Provides only the essential system-level Bluetooth support
 ###############################################################################
 {
   config,
@@ -14,57 +11,42 @@
   cfg = config.cfg.hardware.bluetooth;
 in {
   ###########################################################################
-  # Module Options
+  # Module Options (minimal system configuration)
   ###########################################################################
   options.cfg.hardware.bluetooth = {
-  enable = lib.mkEnableOption "Bluetooth support";
-
-  powerOnBoot = lib.mkOption {
-  type = lib.types.bool;
-  default = true;
-  description = "Whether to power up the default Bluetooth controller on boot";
-  };
-  
-  # Package selection
-  package = lib.mkOption {
-    type = lib.types.package;
-  default = pkgs.bluezFull;
-  description = "The Bluetooth package to use (default: bluezFull with all plugins)";
-  };
-  
-  # Blueman is now handled at the home level
-  
-  settings = lib.mkOption {
-  type = lib.types.attrs;
-  default = {};
-  description = "Settings for the main Bluetooth configuration";
-  example = lib.literalExpression ''
-    {
-        General = {
-            ControllerMode = "bredr";
-            FastConnectable = true;
-            JustWorksRepairing = "always";
-          };
-        }
-      '';
+    enable = lib.mkEnableOption "Bluetooth support";
+    
+    powerOnBoot = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Whether to power up the default Bluetooth controller on boot";
+    };
+    
+    settings = lib.mkOption {
+      type = lib.types.attrs;
+      default = {};
+      description = "Settings for the Bluetooth configuration";
     };
   };
 
   ###########################################################################
-  # Module Configuration
+  # Module Configuration (minimal system level)
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    # Enable Bluetooth hardware support
+    # Enable core Bluetooth support at system level
+    # This is the minimal required configuration
     hardware.bluetooth = {
       enable = true;
       powerOnBoot = cfg.powerOnBoot;
       settings = cfg.settings;
-      package = cfg.package;
+      # Use standard bluez package for better compatibility
+      package = pkgs.bluez;
     };
-
-    # Blueman service is now controlled at the home level
-
-    # Install additional Bluetooth utilities
+    
+    # Don't enable blueman at system level - will be handled in home config
+    # services.blueman.enable = false;
+    
+    # Only install the core Bluetooth packages at system level
     environment.systemPackages = with pkgs; [
       bluez
       bluez-tools

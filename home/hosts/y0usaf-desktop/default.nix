@@ -54,7 +54,6 @@ in {
     # Applications
     programs = {
       bambu.enable = true;
-      blueman.enable = true; 
       discord.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
@@ -130,7 +129,10 @@ in {
       };
     };
 
-    # Additional settings may go here
+    # Programs related to Bluetooth
+    programs.bluetooth = {
+      enable = true;
+    };
 
     # User Preferences
     user = {
