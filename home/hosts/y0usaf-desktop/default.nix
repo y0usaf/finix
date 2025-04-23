@@ -1,7 +1,7 @@
 # HOME-MANAGER CONFIGURATION for y0usaf-desktop
 {pkgs, ...}: let
-  username = "y0usaf";
-  homeDir = "/home/${username}";
+  # Helper function to get system values (to be replaced by hostSystem within modules)
+  getSystemPath = path: "/home/y0usaf${path}";
 in {
   cfg = {
     # UI and Display
@@ -105,9 +105,6 @@ in {
 
     # Core User Preferences
     core = {
-      # Hardware-related settings are now pulled from system configuration
-      # SSH settings are pulled from system configuration
-      
       # Local home-specific settings
       xdg = {
         enable = true;
@@ -116,7 +113,7 @@ in {
         enable = true;
         autoFormatNix = {
           enable = true;
-          directory = "${homeDir}/nixos";
+          directory = "${getSystemPath("/nixos")}";
         };
       };
       zsh = {
@@ -138,13 +135,13 @@ in {
     # User Preferences
     user = {
       bookmarks = [
-        "file://${homeDir}/Downloads Downloads"
-        "file://${homeDir}/Music Music"
-        "file://${homeDir}/DCIM DCIM"
-        "file://${homeDir}/Pictures Pictures"
-        "file://${homeDir}/nixos NixOS"
-        "file://${homeDir}/Dev Dev"
-        "file://${homeDir}/.local/share/Steam Steam"
+        "file://${getSystemPath("/Downloads")} Downloads"
+        "file://${getSystemPath("/Music")} Music"
+        "file://${getSystemPath("/DCIM")} DCIM"
+        "file://${getSystemPath("/Pictures")} Pictures"
+        "file://${getSystemPath("/nixos")} NixOS"
+        "file://${getSystemPath("/Dev")} Dev"
+        "file://${getSystemPath("/.local/share/Steam")} Steam"
       ];
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
@@ -154,16 +151,16 @@ in {
 
     # Directories
     directories = {
-      flake.path = "${homeDir}/nixos";
-      music.path = "${homeDir}/Music";
-      dcim.path = "${homeDir}/DCIM";
+      flake.path = "${getSystemPath("/nixos")}";
+      music.path = "${getSystemPath("/Music")}";
+      dcim.path = "${getSystemPath("/DCIM")}";
       steam = {
-        path = "${homeDir}/.local/share/Steam";
+        path = "${getSystemPath("/.local/share/Steam")}";
         create = false;
       };
       wallpapers = {
-        static.path = "${homeDir}/DCIM/Wallpapers/32_9";
-        video.path = "${homeDir}/DCIM/Wallpapers_Video";
+        static.path = "${getSystemPath("/DCIM/Wallpapers/32_9")}";
+        video.path = "${getSystemPath("/DCIM/Wallpapers_Video")}";
       };
     };
   };
