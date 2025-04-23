@@ -34,25 +34,29 @@ in {
   # Module Configuration (comprehensive system level)
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    # 1. Enable hardware Bluetooth support
+    # 1. Enable hardware Bluetooth support with BlueZ
     hardware.bluetooth = {
       enable = true;
       powerOnBoot = true; # Always power on if Bluetooth is enabled
       settings = cfg.settings;
-      package = pkgs.bluez;
+      # Use bluezFull for maximum compatibility with all BT protocols
+      package = pkgs.bluezFull;
     };
     
     # 2. Enable Blueman service at system level
     services.blueman.enable = true;
     
-    # 3. Install required system packages
+    # 3. Ensure proper DBus integration
+    services.dbus.packages = [ pkgs.bluez ];
+    
+    # 4. Install required system packages
     environment.systemPackages = with pkgs; [
       bluez
       bluez-tools
       blueman
     ];
     
-    # 4. Add user to necessary groups
-    users.users.y0usaf.extraGroups = ["dialout" "bluetooth"];
+    # 5. Add user to necessary groups
+    users.users.y0usaf.extraGroups = ["dialout" "bluetooth" "lp"];
   };
 }
