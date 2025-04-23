@@ -23,34 +23,13 @@
   imports = [./modules];
 
   ###########################################################################
-  # Module Configuration Passthrough
+  # Module Configuration
   ###########################################################################
 
-  # Selectively pull in system settings and merge with home configuration
-  # This allows reusing system settings while maintaining separation
-  cfg = let
-    # These specific system settings should be pulled into home configuration
-    systemSettings = {
-      # Core system attributes (username, hostname, etc.)
-      system = hostSystem.cfg.system or {};
-      
-      # Pull hardware-related settings from system
-      core = {
-        # NVIDIA/CUDA settings (hardware-specific)
-        nvidia = hostSystem.cfg.core.nvidia or {};
-        
-        # SSH enable flag (used by both system and home)
-        ssh.enable = hostSystem.cfg.core.ssh.enable or false;
-      };
-    };
-    
-    # Get home configuration
-    homeCfg = hostHome.cfg or {};
-    
-    # Start with system settings, then override with home-specific settings
-    # This way home settings take precedence when both exist
-    mergedConfig = lib.recursiveUpdate systemSettings homeCfg;
-  in mergedConfig;
+  # Use home-specific configuration only
+  # System settings should be accessed directly via hostSystem.cfg when needed
+  # This provides a cleaner separation between system and home configurations
+  cfg = hostHome.cfg or {};
 
   # Note: Core settings like home.username, home.packages, dconf.enable
   # are now managed within nixos/modules/home/core/core.nix
