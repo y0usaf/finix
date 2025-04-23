@@ -44,7 +44,7 @@
     # CUDA Support (conditional)
     # Enable CUDA support for compute applications
     ###########################################################################
-    hardware.opengl.extraPackages = lib.optionals (hostSystem.cfg.hardware.nvidia.cuda.enable or false) [
+    hardware.graphics.extraPackages = lib.optionals (hostSystem.cfg.hardware.nvidia.cuda.enable or false) [
       pkgs.cudatoolkit
       pkgs.cudaPackages.cudnn
     ];
