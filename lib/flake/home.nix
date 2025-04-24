@@ -4,10 +4,10 @@
   hostsDir ? ../../system/hosts,
   homeHostsDir ? ../../home/hosts,
 }: let
-  shared = import ./shared.nix { inherit lib pkgs hostsDir homeHostsDir; };
+  shared = import ./shared.nix {inherit lib pkgs hostsDir homeHostsDir;};
 in {
   inherit (shared) hostNames systemConfigs homeConfigs;
-  
+
   # Helper function to generate homeConfigurations
   mkHomeConfigurations = {
     inputs,
@@ -34,10 +34,12 @@ in {
         name = systemConfig.cfg.system.username;
         value = inputs.home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = commonSpecialArgs // {
-            hostSystem = systemConfig;
-            hostHome = homeConfig;
-          };
+          extraSpecialArgs =
+            commonSpecialArgs
+            // {
+              hostSystem = systemConfig;
+              hostHome = homeConfig;
+            };
           modules = [../../home/home.nix];
         };
       })

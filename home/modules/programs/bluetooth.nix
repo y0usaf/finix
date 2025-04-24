@@ -15,21 +15,21 @@ in {
   options.cfg.programs.bluetooth = {
     enable = lib.mkEnableOption "Bluetooth user tools";
   };
-  
+
   # Implementation
   config = lib.mkIf cfg.enable {
     # Install Bluetooth GUI and tools
     home.packages = with pkgs; [
       # Main Bluetooth GUI manager
       blueman
-      
+
       # Additional Bluetooth utilities
-      bluetuith  # TUI Bluetooth manager
+      bluetuith # TUI Bluetooth manager
     ];
-    
+
     # Configure autostart for Blueman applet
     xdg.configFile."autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
-    
+
     # Convenient shell aliases for Bluetooth management
     programs.zsh.shellAliases = {
       # GUI tools
@@ -37,7 +37,7 @@ in {
       bt-applet = "blueman-applet";
       bt-adapters = "blueman-adapters";
       bt-sendto = "blueman-sendto";
-      
+
       # CLI tools
       bt-status = "bluetoothctl show";
       bt-devices = "bluetoothctl devices";

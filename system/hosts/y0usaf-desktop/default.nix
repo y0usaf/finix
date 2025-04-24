@@ -28,7 +28,7 @@ in {
       amdgpu.enable = false;
     };
     core = {
-      ssh.enable = true;
+      ssh.enable = false;
       xdg.enable = true;
       zsh = {
         enable = true;

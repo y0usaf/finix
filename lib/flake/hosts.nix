@@ -14,7 +14,7 @@ in {
 
   # Re-export system-specific functions
   inherit (systemModule) mkNixosConfigurations;
-  
+
   # Re-export home-specific functions
   inherit (homeModule) mkHomeConfigurations;
 }

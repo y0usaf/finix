@@ -4,10 +4,10 @@
   hostsDir ? ../../system/hosts,
   homeHostsDir ? ../../home/hosts,
 }: let
-  shared = import ./shared.nix { inherit lib pkgs hostsDir homeHostsDir; };
+  shared = import ./shared.nix {inherit lib pkgs hostsDir homeHostsDir;};
 in {
   inherit (shared) hostNames systemConfigs homeConfigs;
-  
+
   # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {
     inputs,
@@ -20,10 +20,12 @@ in {
         name = hostname;
         value = inputs.nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = commonSpecialArgs // {
-            hostSystem = shared.systemConfigs.${hostname};
-            hostHome = shared.homeConfigs.${hostname};
-          };
+          specialArgs =
+            commonSpecialArgs
+            // {
+              hostSystem = shared.systemConfigs.${hostname};
+              hostHome = shared.homeConfigs.${hostname};
+            };
           modules = [
             # Import hardware configuration directly from the host directory
             (hostsDir + "/${hostname}/hardware-configuration.nix")
@@ -34,10 +36,12 @@ in {
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
-                extraSpecialArgs = commonSpecialArgs // {
-                  hostSystem = shared.systemConfigs.${hostname};
-                  hostHome = shared.homeConfigs.${hostname};
-                };
+                extraSpecialArgs =
+                  commonSpecialArgs
+                  // {
+                    hostSystem = shared.systemConfigs.${hostname};
+                    hostHome = shared.homeConfigs.${hostname};
+                  };
                 users.${shared.systemConfigs.${hostname}.cfg.system.username} = {
                   imports = [../../home/home.nix];
                   home = {

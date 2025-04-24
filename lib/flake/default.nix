@@ -5,13 +5,17 @@
   ...
 }: {
   # System-related functions
-  inherit (import ./system.nix {inherit lib pkgs;}) 
+  inherit
+    (import ./system.nix {inherit lib pkgs;})
     hostNames
     systemConfigs
-    mkNixosConfigurations;
+    mkNixosConfigurations
+    ;
 
   # Home-related functions
-  inherit (import ./home.nix {inherit lib pkgs;}) 
+  inherit
+    (import ./home.nix {inherit lib pkgs;})
     homeConfigs
-    mkHomeConfigurations;
+    mkHomeConfigurations
+    ;
 }

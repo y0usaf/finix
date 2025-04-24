@@ -47,7 +47,7 @@
     hardware.graphics.extraPackages = lib.optionals (hostSystem.cfg.hardware.nvidia.cuda.enable or false) [
       pkgs.cudatoolkit
     ];
-    
+
     # Make CUDA available system-wide
     environment.systemPackages = lib.optionals (hostSystem.cfg.hardware.nvidia.cuda.enable or false) [
       pkgs.cudaPackages.cudnn

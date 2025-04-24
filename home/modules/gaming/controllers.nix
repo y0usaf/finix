@@ -18,13 +18,13 @@ in {
     ###########################################################################
     # Controller Packages
     ###########################################################################
-    
+
     # General controller support including DualSense (PS5)
     home.packages = with pkgs; [
-      dualsensectl  # Command-line tool for DualSense controller
+      dualsensectl # Command-line tool for DualSense controller
       # trigger-control  # Optional GUI tool for adaptive triggers (uncomment if needed)
     ];
-    
+
     ###########################################################################
     # System Integration
     # The system module will automatically enable hardware.steam-hardware.enable

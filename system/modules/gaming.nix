@@ -14,7 +14,7 @@
 }: {
   # Import controller-specific configuration
   # Note: Controller-specific UDEV rules are now handled in system/modules/hardware/input.nix
-  
+
   # Gaming-specific system configuration
   config = {};
 }

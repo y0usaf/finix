@@ -108,6 +108,6 @@ in {
   # Installs the main font and all fallback fonts specified in the configuration.
   #######################################################################
   home.packages = mainFontPackages ++ fallbackPackages;
-  
+
   # Default font configuration is already set above
 }

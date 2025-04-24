@@ -48,10 +48,12 @@ in {
         name = hostname;
         value = inputs.nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = commonSpecialArgs // {
-            hostSystem = systemConfigs.${hostname};
-            hostHome = homeConfigs.${hostname};
-          };
+          specialArgs =
+            commonSpecialArgs
+            // {
+              hostSystem = systemConfigs.${hostname};
+              hostHome = homeConfigs.${hostname};
+            };
           modules = [
             # Import hardware configuration directly from the host directory
             (hostsDir + "/${hostname}/hardware-configuration.nix")
@@ -62,10 +64,12 @@ in {
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
-                extraSpecialArgs = commonSpecialArgs // {
-                  hostSystem = systemConfigs.${hostname};
-                  hostHome = homeConfigs.${hostname};
-                };
+                extraSpecialArgs =
+                  commonSpecialArgs
+                  // {
+                    hostSystem = systemConfigs.${hostname};
+                    hostHome = homeConfigs.${hostname};
+                  };
                 users.${systemConfigs.${hostname}.cfg.system.username} = {
                   imports = [../../home/home.nix];
                   home = {

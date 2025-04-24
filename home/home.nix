@@ -11,7 +11,7 @@
   lib,
   inputs,
   hostSystem, # System-specific host data
-  hostHome,   # Home-specific host data
+  hostHome, # Home-specific host data
   ...
 }: {
   ###########################################################################
@@ -37,20 +37,21 @@
         homeDirectory = hostSystem.cfg.system.homeDirectory or null;
         hostname = hostSystem.cfg.system.hostname or null;
       };
-      
+
       # Critical services that need to be activated in home config too
       core = {
         # SSH enable flag (needed for SSH config generation)
         ssh.enable = hostSystem.cfg.core.ssh.enable or false;
       };
     };
-    
+
     # Get home configuration
     homeCfg = hostHome.cfg or {};
-    
+
     # Start with minimal system settings, then override with home-specific settings
     mergedConfig = lib.recursiveUpdate systemSettings homeCfg;
-  in mergedConfig;
+  in
+    mergedConfig;
 
   # Note: Core settings like home.username, home.packages, dconf.enable
   # are now managed within nixos/modules/home/core/core.nix

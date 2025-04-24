@@ -33,10 +33,10 @@ in {
       (lib.mkIf (controllerCfg.enable or false) ''
         # Sony DualSense controller - standard mode
         KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", MODE="0660", TAG+="uaccess"
-        
+
         # Sony DualSense controller - bluetooth mode
         KERNEL=="hidraw*", KERNELS=="*054C:0CE6*", MODE="0660", TAG+="uaccess"
-        
+
         # Sony DualSense Edge controller
         KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0df2", MODE="0660", TAG+="uaccess"
       '')

@@ -1,5 +1,5 @@
 {
-  lib, 
+  lib,
   pkgs,
   hostsDir ? ../../system/hosts,
   homeHostsDir ? ../../home/hosts,
@@ -62,10 +62,12 @@ in {
         name = systemConfig.cfg.system.username;
         value = inputs.home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = commonSpecialArgs // {
-            hostSystem = systemConfig;
-            hostHome = homeConfig;
-          };
+          extraSpecialArgs =
+            commonSpecialArgs
+            // {
+              hostSystem = systemConfig;
+              hostHome = homeConfig;
+            };
           modules = [../../home/home.nix];
         };
       })
