@@ -110,27 +110,36 @@ in {
             # Capture list of untracked files and format them as "A" (added)
             UNTRACKED=$(git ls-files --others --exclude-standard | sed 's/^/A /')
             
-            # Combine both lists
-            DIFF_LIST="$DIFF_STATUS"
-            if [ -n "$UNTRACKED" ]; then
-              if [ -n "$DIFF_LIST" ]; then
-                DIFF_LIST="$DIFF_LIST\n$UNTRACKED"
-              else
-                DIFF_LIST="$UNTRACKED"
-              fi
-            fi
+            # Create a temporary file for the commit message
+            COMMIT_MSG_FILE=$(mktemp)
             
-            # Create commit message with timestamp and diff list
-            COMMIT_MSG="🤖 Auto Update: $(date '+%d/%m/%y@%H:%M:%S')"
-            if [ -n "$DIFF_LIST" ]; then
-              COMMIT_MSG="$COMMIT_MSG\n\nChanged files:\n$DIFF_LIST"
+            # Write the header to the commit message file
+            echo "🤖 Auto Update: $(date '+%d/%m/%y@%H:%M:%S')" > "$COMMIT_MSG_FILE"
+            
+            # If we have changes to report, add them to the commit message
+            if [ -n "$DIFF_STATUS" ] || [ -n "$UNTRACKED" ]; then
+              echo "" >> "$COMMIT_MSG_FILE"  # Add a blank line
+              echo "Changed files:" >> "$COMMIT_MSG_FILE"
+              
+              # Add tracked changes if any
+              if [ -n "$DIFF_STATUS" ]; then
+                echo "$DIFF_STATUS" >> "$COMMIT_MSG_FILE"
+              fi
+              
+              # Add untracked files if any
+              if [ -n "$UNTRACKED" ]; then
+                echo "$UNTRACKED" >> "$COMMIT_MSG_FILE"
+              fi
             fi
             
             # Stage all changes
             git add .
             
-            # Commit with the formatted message
-            git commit -m "$COMMIT_MSG"
+            # Commit with the formatted message from the file
+            git commit -F "$COMMIT_MSG_FILE"
+            
+            # Clean up temporary file
+            rm "$COMMIT_MSG_FILE"
             
             # Force push committed changes to the remote main branch
             git push origin main --force
