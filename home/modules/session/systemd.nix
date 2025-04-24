@@ -78,16 +78,17 @@ in {
         };
       };
 
-      paths.format-nix = lib.mkIf cfg.autoFormatNix.enable {
+      timers.format-nix = lib.mkIf cfg.autoFormatNix.enable {
         Unit = {
-          Description = "Watch NixOS config directory for changes";
+          Description = "Timer for formatting Nix files";
         };
-        Path = {
-          PathModified = cfg.autoFormatNix.directory;
+        Timer = {
+          OnBootSec = "1min";
+          OnUnitActiveSec = "5min";
           Unit = "format-nix.service";
         };
         Install = {
-          WantedBy = ["default.target"];
+          WantedBy = ["timers.target"];
         };
       };
     };
