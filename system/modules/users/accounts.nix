@@ -1,5 +1,5 @@
 ###############################################################################
-# User Accounts Configuration Module
+# User Accounts Configuration
 # User accounts, permissions, and shell configuration:
 # - User account creation
 # - Group memberships

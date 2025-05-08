@@ -1,9 +1,8 @@
 ###############################################################################
-# Boot Configuration Module
-# Boot loader and kernel configurations:
-# - Boot loader settings
-# - EFI configuration
-# - Kernel packages and modules
+# Kernel Configuration
+# Kernel settings and modules:
+# - Kernel packages
+# - Modules configuration
 # - System control parameters
 ###############################################################################
 {
@@ -15,21 +14,7 @@
   ...
 }: {
   config = {
-    ###########################################################################
-    # Boot & Hardware Configuration
-    # Boot loader, EFI, kernel modules, and system parameters
-    ###########################################################################
     boot = {
-      loader = {
-        systemd-boot = {
-          enable = true; # Use systemd-boot as the boot loader.
-          configurationLimit = 20; # Retain up to 20 boot configurations.
-        };
-        efi = {
-          canTouchEfiVariables = true; # Allow modifying EFI variables.
-          efiSysMountPoint = "/boot"; # Mount point for the EFI partition.
-        };
-      };
       # Use a custom kernel package variant.
       kernelPackages = pkgs.linuxPackages_cachyos;
       # Load extra kernel modules for specific hardware functions.
