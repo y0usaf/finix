@@ -57,6 +57,7 @@
       firefox.enable = true;
       imv.enable = true;
       pcmanfm.enable = true;
+      mpv.enable = true;
       gaming = {
         enable = true;
         controllers.enable = true;
