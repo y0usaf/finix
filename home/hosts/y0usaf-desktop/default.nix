@@ -1,5 +1,8 @@
 # HOME-MANAGER CONFIGURATION for y0usaf-desktop
-{pkgs, ...}: {
+{pkgs, ...}: let
+  username = "y0usaf";
+  homeDir = "/home/${username}";
+in {
   cfg = {
     ui = {
       hyprland = {
@@ -51,6 +54,7 @@
     programs = {
       bambu.enable = true;
       discord.enable = true;
+      vesktop.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
       android.enable = false;
@@ -148,16 +152,16 @@
 
     # Directories
     directories = {
-      flake.path = "~/nixos";
-      music.path = "~/Music";
-      dcim.path = "~/DCIM";
+      flake.path = "${homeDir}/nixos";
+      music.path = "${homeDir}/Music";
+      dcim.path = "${homeDir}/DCIM";
       steam = {
-        path = "~/.local/share/Steam";
+        path = "${homeDir}/.local/share/Steam";
         create = false;
       };
       wallpapers = {
-        static.path = "~/DCIM/Wallpapers/32_9";
-        video.path = "~/DCIM/Wallpapers_Video";
+        static.path = "${homeDir}/DCIM/Wallpapers/32_9";
+        video.path = "${homeDir}/DCIM/Wallpapers_Video";
       };
     };
   };
