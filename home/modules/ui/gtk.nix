@@ -24,7 +24,12 @@
   dpiStr = toString hostHome.cfg.appearance.dpi;
 
   # Scale factor for GTK interface (used for environment variables)
-  scaleFactor = 2;
+  # Can be set to fractional values like 1.25, 1.5, 1.75, or 2
+  scaleFactor = 1.5;
+  # Whether to use true fractional scaling (true) or integer scaling with fractional text (false)
+  useFractionalScaling = true;
+  # Integer scale factor (used when not using true fractional scaling)
+  intScaleFactor = if scaleFactor >= 2 then 2 else 1;
 
   #############################################################
   # Text shadow configuration
@@ -149,17 +154,46 @@ in {
     # DConf Settings for the GNOME Desktop Interface
     ######################################################################
     dconf = {
-      settings = {
-        "org/gnome/desktop/interface" = {
-          color-scheme = "prefer-dark";
-        };
-      };
+      settings = lib.mkMerge [
+        {
+          "org/gnome/desktop/interface" = {
+            color-scheme = "prefer-dark";
+          };
+        }
+        (lib.mkIf (!useFractionalScaling) {
+          "org/gnome/desktop/interface" = {
+            # Set text scaling factor for fractional scaling
+            text-scaling-factor = scaleFactor;
+            # Set integer scaling factor when not using true fractional scaling
+            scaling-factor = intScaleFactor;
+          };
+        })
+        (lib.mkIf useFractionalScaling {
+          "org/gnome/mutter" = {
+            # Enable experimental features for fractional scaling
+            experimental-features = [ "scale-monitor-framebuffer" ];
+          };
+        })
+      ];
     };
 
     ######################################################################
     # Set user-specific environment variables for GTK scaling
     ######################################################################
-    home.sessionVariables = {
-    };
+    home.sessionVariables = lib.mkMerge [
+      (lib.mkIf (!useFractionalScaling) {
+        # For integer+fractional scaling
+        GDK_SCALE = intScaleFactor;
+        GDK_DPI_SCALE = if intScaleFactor > 1 then scaleFactor / intScaleFactor else scaleFactor;
+      })
+      (lib.mkIf useFractionalScaling {
+        # For true fractional scaling in Wayland
+        GDK_DPI_SCALE_WAYLAND = scaleFactor;
+      })
+      {
+        # Cursor size scales in both cases
+        XCURSOR_SIZE = toString (24 * (if useFractionalScaling then scaleFactor else intScaleFactor));
+      }
+    ];
   };
 }
