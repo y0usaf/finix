@@ -147,6 +147,7 @@ in {
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
         zoom-us
+        obsidian
       ];
     };
 
