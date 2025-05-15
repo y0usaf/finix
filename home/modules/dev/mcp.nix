@@ -61,10 +61,6 @@ in {
             command = "npx";
             args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
           };
-          "interactive-feedback" = {
-            command = "npx";
-            args = ["-y" "@modelcontextprotocol/server-interactive-feedback"];
-          };
         };
       };
     };
