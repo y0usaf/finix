@@ -14,7 +14,10 @@ in {
       ags.enable = false;
       cursor.enable = true;
       foot.enable = true;
-      gtk.enable = true;
+      gtk = {
+        enable = true;
+        forceScalingFactor = 2;
+      };
       wallust.enable = false;
       mako.enable = true;
     };

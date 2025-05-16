@@ -25,9 +25,11 @@
 
   # Scale factor for GTK interface (used for environment variables)
   # Can be set to fractional values like 1.25, 1.5, 1.75, or 2
-  scaleFactor = 1.5;
+  # If forceScalingFactor is set, use that value (as a float)
+  scaleFactor = if cfg.forceScalingFactor != null then cfg.forceScalingFactor else 1.5;
   # Whether to use true fractional scaling (true) or integer scaling with fractional text (false)
-  useFractionalScaling = true;
+  # If forceScalingFactor is set, disable fractional scaling
+  useFractionalScaling = if cfg.forceScalingFactor != null then false else true;
   # Integer scale factor (used when not using true fractional scaling)
   intScaleFactor = if scaleFactor >= 2 then 2 else 1;
 
@@ -67,6 +69,13 @@ in {
   ###########################################################################
   options.cfg.ui.gtk = {
     enable = lib.mkEnableOption "GTK theming and configuration";
+    
+    forceScalingFactor = lib.mkOption {
+      type = lib.types.nullOr lib.types.int;
+      default = null;
+      description = "Force a specific scaling factor for GNOME desktop interface, overriding other scaling settings";
+      example = 2;
+    };
   };
 
   ###########################################################################
@@ -174,6 +183,8 @@ in {
             experimental-features = [ "scale-monitor-framebuffer" ];
           };
         })
+        # When forceScalingFactor is set, the dconf settings are already handled by
+        # the (!useFractionalScaling) branch above with the appropriate scaling-factor
       ];
     };
 
