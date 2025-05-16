@@ -16,7 +16,10 @@ in {
       foot.enable = true;
       gtk = {
         enable = true;
-        forceScalingFactor = 2;
+        fractional-scaling = {
+          enable = true;
+          factor = 2.0;
+        };
       };
       wallust.enable = false;
       mako.enable = true;

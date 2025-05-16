@@ -15,7 +15,13 @@ in {
       ags.enable = true;
       cursor.enable = true;
       foot.enable = true;
-      gtk.enable = true;
+      gtk = {
+        enable = true;
+        fractional-scaling = {
+          enable = true;
+          factor = 1.5;
+        };
+      };
       wallust.enable = true;
       mako.enable = true;
     };

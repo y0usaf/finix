@@ -23,15 +23,15 @@
   baseFontSize = hostHome.cfg.appearance.baseFontSize;
   dpiStr = toString hostHome.cfg.appearance.dpi;
 
-  # Scale factor for GTK interface (used for environment variables)
-  # Can be set to fractional values like 1.25, 1.5, 1.75, or 2
-  # If forceScalingFactor is set, use that value (as a float)
-  scaleFactor = if cfg.forceScalingFactor != null then cfg.forceScalingFactor else 1.5;
-  # Whether to use true fractional scaling (true) or integer scaling with fractional text (false)
-  # If forceScalingFactor is set, disable fractional scaling
-  useFractionalScaling = if cfg.forceScalingFactor != null then false else true;
+  # Get the scaling factor from config
+  scaleFactor = cfg.fractional-scaling.factor;
+  # Get fractional scaling enable status from config
+  useFractionalScaling = cfg.fractional-scaling.enable;
   # Integer scale factor (used when not using true fractional scaling)
-  intScaleFactor = if scaleFactor >= 2 then 2 else 1;
+  intScaleFactor =
+    if scaleFactor >= 2
+    then 2
+    else 1;
 
   #############################################################
   # Text shadow configuration
@@ -69,12 +69,20 @@ in {
   ###########################################################################
   options.cfg.ui.gtk = {
     enable = lib.mkEnableOption "GTK theming and configuration";
-    
-    forceScalingFactor = lib.mkOption {
-      type = lib.types.nullOr lib.types.int;
-      default = null;
-      description = "Force a specific scaling factor for GNOME desktop interface, overriding other scaling settings";
-      example = 2;
+
+    fractional-scaling = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable fractional scaling for GTK applications";
+      };
+
+      factor = lib.mkOption {
+        type = lib.types.float;
+        default = 2.0;
+        description = "Scaling factor to use (e.g., 1.25, 1.5, 1.75, 2.0)";
+        example = 1.5;
+      };
     };
   };
 
@@ -167,24 +175,25 @@ in {
         {
           "org/gnome/desktop/interface" = {
             color-scheme = "prefer-dark";
+            scaling-factor = lib.hm.gvariant.mkUint32 (
+              if cfg.fractional-scaling.enable
+              then 1
+              else 2
+            );
           };
         }
         (lib.mkIf (!useFractionalScaling) {
           "org/gnome/desktop/interface" = {
             # Set text scaling factor for fractional scaling
             text-scaling-factor = scaleFactor;
-            # Set integer scaling factor when not using true fractional scaling
-            scaling-factor = intScaleFactor;
           };
         })
         (lib.mkIf useFractionalScaling {
           "org/gnome/mutter" = {
             # Enable experimental features for fractional scaling
-            experimental-features = [ "scale-monitor-framebuffer" ];
+            experimental-features = ["scale-monitor-framebuffer"];
           };
         })
-        # When forceScalingFactor is set, the dconf settings are already handled by
-        # the (!useFractionalScaling) branch above with the appropriate scaling-factor
       ];
     };
 
@@ -195,7 +204,10 @@ in {
       (lib.mkIf (!useFractionalScaling) {
         # For integer+fractional scaling
         GDK_SCALE = intScaleFactor;
-        GDK_DPI_SCALE = if intScaleFactor > 1 then scaleFactor / intScaleFactor else scaleFactor;
+        GDK_DPI_SCALE =
+          if intScaleFactor > 1
+          then scaleFactor / intScaleFactor
+          else scaleFactor;
       })
       (lib.mkIf useFractionalScaling {
         # For true fractional scaling in Wayland
@@ -203,7 +215,12 @@ in {
       })
       {
         # Cursor size scales in both cases
-        XCURSOR_SIZE = toString (24 * (if useFractionalScaling then scaleFactor else intScaleFactor));
+        XCURSOR_SIZE = toString (24
+          * (
+            if useFractionalScaling
+            then scaleFactor
+            else intScaleFactor
+          ));
       }
     ];
   };
