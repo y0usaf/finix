@@ -65,6 +65,7 @@ in {
       imv.enable = true;
       pcmanfm.enable = true;
       mpv.enable = true;
+      obsidian.enable = true;
       gaming = {
         enable = true;
         controllers.enable = true;
@@ -150,7 +151,6 @@ in {
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
         zoom-us
-        obsidian
       ];
     };
 
