@@ -20,10 +20,10 @@
   computedFontSize = toString (hostHome.cfg.appearance.baseFontSize * 1.33);
 
   # Get the main font name from the hostHome's font configuration
-  mainFontName = builtins.elemAt (builtins.elemAt hostHome.cfg.appearance.fonts.main 0) 1;
+  mainFontName = (builtins.elemAt hostHome.cfg.appearance.fonts.main 0).name;
 
   # Get fallback font names
-  fallbackFontNames = map (x: builtins.elemAt x 1) hostHome.cfg.appearance.fonts.fallback;
+  fallbackFontNames = map (x: x.name) hostHome.cfg.appearance.fonts.fallback;
 
   # Build the main font configuration string, including the fallback fonts.
   mainFontConfig =

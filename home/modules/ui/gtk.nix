@@ -19,7 +19,7 @@
   #############################################################
   # Extract common variables from the hostHome for reusability
   #############################################################
-  mainFontName = builtins.elemAt (builtins.elemAt hostHome.cfg.appearance.fonts.main 0) 1;
+  mainFontName = (builtins.elemAt hostHome.cfg.appearance.fonts.main 0).name;
   baseFontSize = hostHome.cfg.appearance.baseFontSize;
   dpiStr = toString hostHome.cfg.appearance.dpi;
 

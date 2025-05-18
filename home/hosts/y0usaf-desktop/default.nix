@@ -29,12 +29,24 @@ in {
       cursorSize = 24;
       fonts = {
         main = [
-          [pkgs.nerd-fonts.iosevka-term-slab "IosevkaTermSlab Nerd Font Mono"]
+          {
+            package = pkgs.nerd-fonts.iosevka-term-slab;
+            name = "IosevkaTermSlab Nerd Font Mono";
+          }
         ];
         fallback = [
-          [pkgs.noto-fonts-emoji "Noto Color Emoji"]
-          [pkgs.noto-fonts-cjk-sans "Noto Sans CJK"]
-          [pkgs.font-awesome "Font Awesome"]
+          {
+            package = pkgs.noto-fonts-emoji;
+            name = "Noto Color Emoji";
+          }
+          {
+            package = pkgs.noto-fonts-cjk-sans;
+            name = "Noto Sans CJK";
+          }
+          {
+            package = pkgs.font-awesome;
+            name = "Font Awesome";
+          }
         ];
       };
     };

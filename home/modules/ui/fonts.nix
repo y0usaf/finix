@@ -10,10 +10,10 @@
   ...
 }: let
   # Get the packages and names from the hostHome
-  mainFontPackages = map (x: builtins.elemAt x 0) hostHome.cfg.appearance.fonts.main;
-  mainFontNames = map (x: builtins.elemAt x 1) hostHome.cfg.appearance.fonts.main;
-  fallbackPackages = map (x: builtins.elemAt x 0) hostHome.cfg.appearance.fonts.fallback;
-  fallbackNames = map (x: builtins.elemAt x 1) hostHome.cfg.appearance.fonts.fallback;
+  mainFontPackages = map (x: x.package) hostHome.cfg.appearance.fonts.main;
+  mainFontNames = map (x: x.name) hostHome.cfg.appearance.fonts.main;
+  fallbackPackages = map (x: x.package) hostHome.cfg.appearance.fonts.fallback;
+  fallbackNames = map (x: x.name) hostHome.cfg.appearance.fonts.fallback;
 
   #######################################################################
   # Font XML Configuration String

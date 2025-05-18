@@ -16,16 +16,38 @@ in {
     fonts = lib.mkOption {
       type = t.submodule {
         options = {
-          # 'main': Primary fonts specified as a list of tuples [package, fontName].
+          # 'main': Primary fonts specified as a list of attribute sets with 'package' and 'name' fields.
           main = lib.mkOption {
-            type = t.listOf (t.tuple [t.package t.str]);
-            description = "List of [package, fontName] tuples for main fonts";
+            type = t.listOf (t.submodule {
+              options = {
+                package = lib.mkOption {
+                  type = t.package;
+                  description = "Font package";
+                };
+                name = lib.mkOption {
+                  type = t.str;
+                  description = "Font name";
+                };
+              };
+            });
+            description = "List of font configurations for main fonts";
           };
           # 'fallback': Fallback fonts if the main fonts are unavailable, defaults to an empty list.
           fallback = lib.mkOption {
-            type = t.listOf (t.tuple [t.package t.str]);
+            type = t.listOf (t.submodule {
+              options = {
+                package = lib.mkOption {
+                  type = t.package;
+                  description = "Font package";
+                };
+                name = lib.mkOption {
+                  type = t.str;
+                  description = "Font name";
+                };
+              };
+            });
             default = [];
-            description = "List of [package, fontName] tuples for fallback fonts";
+            description = "List of font configurations for fallback fonts";
           };
         };
       };
