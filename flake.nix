@@ -96,7 +96,7 @@
       overlays = [
         (final: prev: {
           inherit (inputs.uv2nix.packages.${system}) uv2nix;
-          # Package fast-fonts properly following nixpkgs convention
+          # Package fast-fonts properly
           fastFonts = final.stdenvNoCC.mkDerivation {
             pname = "fast-fonts";
             version = "1.0.0";
