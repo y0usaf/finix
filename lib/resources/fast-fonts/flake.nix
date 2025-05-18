@@ -7,16 +7,16 @@
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
   in {
-    # We can expose the entire directory as a package source
-    fastFontSource = pkgs.stdenv.mkDerivation {
-      name = "fast-fonts";
-      version = "1.0.0";
-      src = self;
-      
-      installPhase = ''
-        mkdir -p $out/share/fonts/truetype
-        cp *.ttf $out/share/fonts/truetype/
-      '';
-    };
+    # Create a proper font package using font_types.mkFont
+    fastFontSource = pkgs.runCommand "fast-fonts" {} ''
+      mkdir -p $out/share/fonts/truetype
+      cp ${self}/Fast_Mono.ttf $out/share/fonts/truetype/
+      cp ${self}/Fast_Sans.ttf $out/share/fonts/truetype/
+      cp ${self}/Fast_Sans_Dotted.ttf $out/share/fonts/truetype/
+      cp ${self}/Fast_Serif.ttf $out/share/fonts/truetype/
+      mkdir -p $out/share/doc/fast-fonts
+      cp ${self}/LICENSE $out/share/doc/fast-fonts/
+      cp ${self}/README.md $out/share/doc/fast-fonts/
+    '';
   };
 }

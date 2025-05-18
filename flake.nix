@@ -97,6 +97,7 @@
       overlays = [
         (final: prev: {
           inherit (inputs.uv2nix.packages.${system}) uv2nix;
+          # Use the fast-fonts flake output directly
           fastFonts = inputs.fast-fonts.fastFontSource;
         })
       ];

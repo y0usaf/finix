@@ -33,7 +33,7 @@ in {
       cursorSize = 16;
       fonts = {
         main = [
-          { package = pkgs.fastFonts; name = "Fast Mono"; }
+          { package = pkgs.fastFonts; name = "Fast_Mono"; }
         ];
         fallback = [
           { package = pkgs.noto-fonts-emoji; name = "Noto Color Emoji"; }
