@@ -49,7 +49,6 @@
     deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/lib/resources/deepin-dark-xcursor";
     fast-fonts = {
       url = "path:/home/y0usaf/nixos/lib/resources/fast-fonts";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     hyprpaper = {
@@ -97,8 +96,31 @@
       overlays = [
         (final: prev: {
           inherit (inputs.uv2nix.packages.${system}) uv2nix;
-          # Use the fast-fonts flake output directly
-          fastFonts = inputs.fast-fonts.fastFontSource;
+          # Package fast-fonts properly following nixpkgs convention
+          fastFonts = final.stdenvNoCC.mkDerivation {
+            pname = "fast-fonts";
+            version = "1.0.0";
+            src = inputs.fast-fonts.fastFontSource;
+            
+            installPhase = ''
+              runHook preInstall
+              
+              mkdir -p $out/share/fonts/truetype
+              install -m444 -Dt $out/share/fonts/truetype $src/*.ttf
+              
+              mkdir -p $out/share/doc/fast-fonts
+              install -m444 -Dt $out/share/doc/fast-fonts $src/LICENSE $src/README.md
+              
+              runHook postInstall
+            '';
+            
+            meta = with final.lib; {
+              description = "Fast Font Collection - TTF fonts";
+              longDescription = ''Fast Font Collection provides optimized monospace and sans-serif fonts'';
+              platforms = platforms.all;
+              license = licenses.mit;
+            };
+          };
         })
       ];
       config.allowUnfree = true;
