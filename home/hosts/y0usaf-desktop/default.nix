@@ -31,7 +31,7 @@ in {
         main = [
           {
             package = pkgs.fastFonts;
-            name = "Fast Mono";
+            name = "Fast_Mono";
           }
         ];
         fallback = [
