@@ -30,8 +30,8 @@ in {
       fonts = {
         main = [
           {
-            package = pkgs.nerd-fonts.iosevka-term-slab;
-            name = "IosevkaTermSlab Nerd Font Mono";
+            package = pkgs.fastFonts;
+            name = "Fast Mono";
           }
         ];
         fallback = [

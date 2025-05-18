@@ -144,6 +144,18 @@
         "type": "github"
       }
     },
+    "fast-fonts": {
+      "locked": {
+        "lastModified": 1747577760,
+        "narHash": "sha256-DY9+L3AZm43defiWwKiwIA4QAbbrayIicWDurv6xL08=",
+        "path": "/home/y0usaf/nixos/lib/resources/fast-fonts",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/y0usaf/nixos/lib/resources/fast-fonts",
+        "type": "path"
+      }
+    },
     "fenix": {
       "inputs": {
         "nixpkgs": [
@@ -1019,6 +1031,7 @@
         "deepin-dark-hyprcursor": "deepin-dark-hyprcursor",
         "deepin-dark-xcursor": "deepin-dark-xcursor",
         "disko": "disko",
+        "fast-fonts": "fast-fonts",
         "flake-utils": "flake-utils",
         "home-manager": "home-manager_2",
         "hy3": "hy3",

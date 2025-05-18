@@ -47,6 +47,10 @@
 
     deepin-dark-hyprcursor.url = "path:/home/y0usaf/nixos/lib/resources/deepin-dark-hyprcursor";
     deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/lib/resources/deepin-dark-xcursor";
+    fast-fonts = {
+      url = "path:/home/y0usaf/nixos/lib/resources/fast-fonts";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     hyprpaper = {
       url = "github:y0usaf/hyprpaper/main";
@@ -93,6 +97,7 @@
       overlays = [
         (final: prev: {
           inherit (inputs.uv2nix.packages.${system}) uv2nix;
+          fastFonts = inputs.fast-fonts.fastFontSource;
         })
       ];
       config.allowUnfree = true;
@@ -110,6 +115,7 @@
       inputs = self.inputs;
       whisper-overlay = inputs.whisper-overlay;
       disko = inputs.disko;
+      fast-fonts = inputs.fast-fonts;
     };
   in {
     ## Formatter Setup
