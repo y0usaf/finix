@@ -160,11 +160,7 @@ in {
         "org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
           text-scaling-factor = scaleFactor;
-        };
-        
-        "org/gnome/mutter" = {
-          # Enable experimental features for fractional scaling when scale > 1.0
-          experimental-features = lib.mkIf (scaleFactor > 1.0) ["scale-monitor-framebuffer"];
+          scaling-factor = scaleFactor;
         };
       };
     };
@@ -175,7 +171,7 @@ in {
     home.sessionVariables = {
       # Simple, unified scaling approach for Wayland
       GDK_DPI_SCALE = scaleFactor;
-      
+
       # Cursor size scales proportionally
       XCURSOR_SIZE = toString (24 * scaleFactor);
     };
