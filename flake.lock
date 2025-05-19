@@ -145,14 +145,17 @@
       }
     },
     "fast-fonts": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
       "locked": {
-        "lastModified": 1747577760,
-        "narHash": "sha256-DY9+L3AZm43defiWwKiwIA4QAbbrayIicWDurv6xL08=",
-        "path": "/home/y0usaf/nixos/lib/resources/fast-fonts",
+        "lastModified": 1747663458,
+        "narHash": "sha256-RcAcqPKF/UycYbNJ837KyUXNXICHqnrrGGf3cz590wk=",
+        "path": "/home/y0usaf/nixos/lib/resources/Fast-Font",
         "type": "path"
       },
       "original": {
-        "path": "/home/y0usaf/nixos/lib/resources/fast-fonts",
+        "path": "/home/y0usaf/nixos/lib/resources/Fast-Font",
         "type": "path"
       }
     },
@@ -908,6 +911,22 @@
     },
     "nixpkgs_2": {
       "locked": {
+        "lastModified": 1747542820,
+        "narHash": "sha256-GaOZntlJ6gPPbbkTLjbd8BMWaDYafhuuYRNrxCGnPJw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "292fa7d4f6519c074f0a50394dbbe69859bb6043",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
         "lastModified": 1744932701,
         "narHash": "sha256-fusHbZCyv126cyArUwwKrLdCkgVAIaa/fQJYFlCEqiU=",
         "ref": "nixos-unstable",
@@ -923,7 +942,7 @@
         "url": "https://github.com/NixOS/nixpkgs"
       }
     },
-    "nixpkgs_3": {
+    "nixpkgs_4": {
       "locked": {
         "lastModified": 1719223410,
         "narHash": "sha256-jtIo8xR0Zp4SalIwmD+OdCwHF4l7OU6PD63UUK4ckt4=",
@@ -941,7 +960,7 @@
     },
     "obs-image-reaction": {
       "inputs": {
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_4"
       },
       "locked": {
         "lastModified": 1719314544,
@@ -1037,7 +1056,7 @@
         "hy3": "hy3",
         "hyprland": "hyprland",
         "hyprpaper": "hyprpaper",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs_3",
         "obs-image-reaction": "obs-image-reaction",
         "pyproject-nix": "pyproject-nix",
         "uv2nix": "uv2nix",

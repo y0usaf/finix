@@ -48,7 +48,7 @@
     deepin-dark-hyprcursor.url = "path:/home/y0usaf/nixos/lib/resources/deepin-dark-hyprcursor";
     deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/lib/resources/deepin-dark-xcursor";
     fast-fonts = {
-      url = "path:/home/y0usaf/nixos/lib/resources/fast-fonts";
+      url = "path:/home/y0usaf/nixos/lib/resources/Fast-Font";
     };
 
     hyprpaper = {
@@ -96,17 +96,8 @@
       overlays = [
         (final: prev: {
           inherit (inputs.uv2nix.packages.${system}) uv2nix;
-          # Simple, concise font package reference
-          fastFonts = final.stdenvNoCC.mkDerivation {
-            pname = "fast-fonts";
-            version = "1.0.0";
-            src = inputs.fast-fonts.fastFontSource;
-            
-            installPhase = ''
-              mkdir -p $out/share/fonts/truetype
-              cp $src/*.ttf $out/share/fonts/truetype/
-            '';
-          };
+          # Use the self-contained fast-fonts package
+          fastFonts = inputs.fast-fonts.packages.${system}.default;
         })
       ];
       config.allowUnfree = true;
