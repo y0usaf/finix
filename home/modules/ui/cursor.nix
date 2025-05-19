@@ -1,19 +1,12 @@
-###############################################################################
-# Cursor Configuration
-# Configures cursor themes for X11 and Wayland/Hyprland
-# - Custom DeepinDarkV20 cursor themes
-# - Separate X11 and Hyprland cursor packages
-# - System-wide cursor configuration
-###############################################################################
-{
-  config,
-  pkgs,
-  lib,
-  inputs,
-  hostSystem,
-  hostHome,
-  ...
-}: let
+# ###############################################################################
+# # Cursor Configuration
+# # Configures cursor themes for X11 and Wayland/Hyprland
+# # - Custom DeepinDarkV20 cursor themes
+# # - Separate X11 and Hyprland cursor packages
+# # - System-wide cursor configuration
+# ###############################################################################
+{ config, pkgs, lib, inputs, hostSystem, hostHome, ... }:
+let
   cfg = config.cfg.ui.cursor;
   baseTheme = "DeepinDarkV20";
 
@@ -48,40 +41,41 @@
       cp $src/index.theme $out/share/icons/${baseTheme}-x11/
     '';
   };
-in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
-  options.cfg.ui.cursor = {
-    enable = lib.mkEnableOption "cursor theme configuration";
-  };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
-  config = lib.mkIf cfg.enable {
+in
+  {
     ###########################################################################
-    # Packages
+    # Module Options
     ###########################################################################
-    home.packages = [hyprcursorPackage xcursorPackage];
-
-    ###########################################################################
-    # Cursor Configuration
-    ###########################################################################
-    home.pointerCursor = {
-      name = "${baseTheme}-x11";
-      package = xcursorPackage;
-      size = hostHome.cfg.appearance.cursorSize;
-
-      gtk.enable = true;
-      x11.enable = true;
-      hyprcursor.enable = true;
+    options.cfg.ui.cursor = {
+      enable = lib.mkEnableOption "cursor theme configuration";
     };
 
-    gtk.cursorTheme = {
-      name = "${baseTheme}-x11";
-      package = xcursorPackage;
-      size = hostHome.cfg.appearance.cursorSize;
+    ###########################################################################
+    # Module Configuration
+    ###########################################################################
+    config = lib.mkIf cfg.enable {
+      ###########################################################################
+      # Packages
+      ###########################################################################
+      home.packages = [ hyprcursorPackage xcursorPackage ];
+
+      ###########################################################################
+      # Cursor Configuration
+      ###########################################################################
+      home.pointerCursor = {
+        name = "${baseTheme}-x11";
+        package = xcursorPackage;
+        size = hostHome.cfg.appearance.cursorSize;
+
+        gtk.enable = true;
+        x11.enable = true;
+        hyprcursor.enable = true;
+      };
+
+      gtk.cursorTheme = {
+        name = "${baseTheme}-x11";
+        package = xcursorPackage;
+        size = hostHome.cfg.appearance.cursorSize;
+      };
     };
-  };
-}
+  }
