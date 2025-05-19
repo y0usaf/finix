@@ -45,8 +45,10 @@
       inputs.hyprland.follows = "hyprland";
     };
 
-    deepin-dark-hyprcursor.url = "path:/home/y0usaf/nixos/lib/resources/deepin-dark-hyprcursor";
-    deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/lib/resources/deepin-dark-xcursor";
+    # Using the cloned repo from GitHub
+    deepin-dark-hyprcursor.url = "path:/home/y0usaf/nixos/lib/resources/Deepin-Dark-hyprcursor";
+    # Using the cloned repo from GitHub
+    deepin-dark-xcursor.url = "path:/home/y0usaf/nixos/lib/resources/Deepin-Dark-xcursor";
     fast-fonts = {
       url = "path:/home/y0usaf/nixos/lib/resources/Fast-Font";
     };
