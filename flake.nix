@@ -69,11 +69,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    uv2nix = {
-      url = "github:pyproject-nix/uv2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pyproject-nix.follows = "pyproject-nix";
-    };
 
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
@@ -102,7 +97,6 @@
       inherit system;
       overlays = [
         (final: prev: {
-          inherit (inputs.uv2nix.packages.${system}) uv2nix;
           # Use the self-contained fast-fonts package
           fastFonts = inputs.fast-fonts.packages.${system}.default;
         })
