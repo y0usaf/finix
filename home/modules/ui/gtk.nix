@@ -160,7 +160,7 @@ in {
         "org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
           text-scaling-factor = scaleFactor;
-          scaling-factor = scaleFactor; # Commented out: integer-only value causes double scaling when combined with GDK_DPI_SCALE
+          scaling-factor = scaleFactor;
         };
       };
     };
@@ -169,9 +169,6 @@ in {
     # Set user-specific environment variables for GTK scaling
     ######################################################################
     home.sessionVariables = {
-      # Simple, unified scaling approach for Wayland
-      #GDK_DPI_SCALE = scaleFactor;
-
       # Cursor size scales proportionally
       XCURSOR_SIZE = toString (24 * scaleFactor);
     };
