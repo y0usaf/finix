@@ -15,30 +15,32 @@ in {
     services.mako = {
       enable = true;
       # All the standard mako settings with your preferred defaults
-      actions = true;
-      anchor = "top-right";
-      backgroundColor = "#2e3440";
-      borderColor = "#88c0d0";
-      borderRadius = 5;
-      borderSize = 1;
-      defaultTimeout = 5000;
-      format = "<b>%s</b>\\n%b";
-      groupBy = null;
-      height = 100;
-      iconPath = null;
-      icons = true;
-      ignoreTimeout = false;
-      layer = "top";
-      margin = "10";
-      markup = true;
-      maxIconSize = 64;
-      maxVisible = 5;
-      output = null;
-      padding = "5";
-      progressColor = null;
-      sort = "-time";
-      textColor = "#eceff4";
-      width = 300;
+      settings = {
+        actions = true;
+        anchor = "top-right";
+        "background-color" = "#2e3440";
+        "border-color" = "#88c0d0";
+        "border-radius" = 5;
+        "border-size" = 1;
+        "default-timeout" = 5000;
+        format = "<b>%s</b>\\n%b";
+        "group-by" = null;
+        height = 100;
+        "icon-path" = null;
+        icons = true;
+        "ignore-timeout" = false;
+        layer = "top";
+        margin = "10";
+        markup = true;
+        "max-icon-size" = 64;
+        "max-visible" = 5;
+        output = null;
+        padding = "5";
+        "progress-color" = null;
+        sort = "-time";
+        "text-color" = "#eceff4";
+        width = 300;
+      };
     };
   };
 }
