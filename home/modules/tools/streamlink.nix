@@ -57,7 +57,7 @@ in {
         youtube = "streamlink https://youtube.com/watch?v=";
       };
 
-      initExtra = ''
+      initContent = ''
         function twitch() {
           if [ -z "$1" ]; then
             echo "Usage: twitch <channel_name>"

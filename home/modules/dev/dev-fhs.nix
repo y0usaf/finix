@@ -132,7 +132,7 @@ in {
         fhs = "devenv";
       };
 
-      initExtra = ''
+      initContent = ''
                 # ----------------------------
                 # FHS Development Environment
                 # ----------------------------

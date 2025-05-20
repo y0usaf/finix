@@ -127,7 +127,7 @@ in {
       #---------------------------------------------------------------------------
       # Shell Initialization: Define functions, prompt, and additional settings.
       #---------------------------------------------------------------------------
-      initExtra = ''
+      initContent = ''
         ${lib.optionalString cfg.cat-fetch ''
           # ----------------------------
           # Function: print_cats
