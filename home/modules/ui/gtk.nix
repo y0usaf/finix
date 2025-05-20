@@ -160,7 +160,7 @@ in {
         "org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
           text-scaling-factor = scaleFactor;
-          scaling-factor = scaleFactor;
+          # scaling-factor = scaleFactor;  # Commented out: integer-only value causes double scaling when combined with GDK_DPI_SCALE
         };
       };
     };
