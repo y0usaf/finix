@@ -14,6 +14,10 @@
 }: let
   cfg = config.cfg.programs.gaming.controllers;
 in {
+  options.cfg.programs.gaming.controllers = {
+    enable = lib.mkEnableOption "gaming controller support";
+  };
+  
   config = lib.mkIf cfg.enable {
     ###########################################################################
     # Controller Packages
