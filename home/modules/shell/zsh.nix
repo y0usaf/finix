@@ -217,6 +217,7 @@ in {
           yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
           mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
           cat = "bat";
+          nhs = "clear; nh os switch";
 
           #----- Custom Scripts -----
           cattree = "$HOME/nixos/lib/resources/scripts/cattree.sh";
