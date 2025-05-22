@@ -111,11 +111,11 @@ in {
         enable = true;
         name = "y0usaf";
         email = "OA99@Outlook.com";
-        homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
-      };
-      nixos-git-sync = {
-        enable = true;
-        remoteBranch = "hjem";
+        nixos-git-sync = {
+          enable = true;
+          nixosRepoUrl = "git@github.com:y0usaf/nixos.git";
+          remoteBranch = "hjem";
+        };
       };
       spotdl.enable = true;
       yt-dlp.enable = true;

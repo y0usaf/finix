@@ -29,9 +29,26 @@ in {
       type = lib.types.str;
       description = "Git email address.";
     };
-    homeManagerRepoUrl = lib.mkOption {
-      type = lib.types.str;
-      description = "URL of the Home Manager repository.";
+    
+    nixos-git-sync = {
+      enable = lib.mkEnableOption "automatic NixOS configuration git sync";
+      
+      nixosRepoUrl = lib.mkOption {
+        type = lib.types.str;
+        description = "URL of the NixOS configuration repository.";
+      };
+      
+      repoPath = lib.mkOption {
+        type = lib.types.str;
+        default = "${hostSystem.cfg.system.homeDirectory}/nixos";
+        description = "Path to the NixOS configuration repository.";
+      };
+
+      remoteBranch = lib.mkOption {
+        type = lib.types.str;
+        default = "main";
+        description = "The remote branch to push changes to.";
+      };
     };
   };
 
@@ -66,17 +83,17 @@ in {
     ###########################################################################
     # Repository Setup
     ###########################################################################
-    home.activation = {
+    home.activation = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != null)) {
       setupGitRepo = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        # Only clone if the "nixos" directory does not exist within homeDirectory.
-        if [ ! -d "${hostSystem.cfg.system.homeDirectory}/nixos" ]; then
+        # Only clone if the specified repository directory does not exist
+        if [ ! -d "${cfg.nixos-git-sync.repoPath}" ]; then
           echo "Setting up NixOS configuration repository..."
-          git clone ${cfg.homeManagerRepoUrl} ${hostSystem.cfg.system.homeDirectory}/nixos
+          git clone ${cfg.nixos-git-sync.nixosRepoUrl} ${cfg.nixos-git-sync.repoPath}
         fi
       '';
     };
 
-    # Note: Git sync functionality has been moved to the nix-sync module
-    # See home/modules/tools/nix-sync.nix for configuration options
+    # Note: Git sync functionality is in the nixos-git-sync module
+    # See home/modules/tools/nixos-git-sync.nix for implementation
   };
 }

@@ -1,7 +1,6 @@
 ###############################################################################
 # NixOS Configuration Git Sync
-# This is the new implementation of the NixOS git sync functionality
-# The original nix-sync.nix module has been moved to nix-sync.nix.old
+# Automatic syncing of NixOS configuration changes
 ###############################################################################
 {
   config,
@@ -10,34 +9,15 @@
   hostSystem ? null,
   ...
 }: let
-  cfg = config.cfg.tools.nixos-git-sync;
-  
-  # Helper to get home directory path
-  homeDir = if hostSystem != null then hostSystem.cfg.system.homeDirectory else "/etc/nixos";
+  cfg = config.cfg.tools.git.nixos-git-sync;
+  gitCfg = config.cfg.tools.git;
 in {
-  ###########################################################################
-  # Module Options 
-  ###########################################################################
-  options.cfg.tools.nixos-git-sync = {
-    enable = lib.mkEnableOption "automatic NixOS configuration git sync";
-
-    repoPath = lib.mkOption {
-      type = lib.types.str;
-      default = "${homeDir}/nixos";
-      description = "Path to the NixOS configuration repository.";
-    };
-
-    remoteBranch = lib.mkOption {
-      type = lib.types.str;
-      default = "main";
-      description = "The remote branch to push changes to.";
-    };
-  };
+  # No options here - they're nested under the git module
 
   ###########################################################################
   # Module Configuration
   ###########################################################################
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (gitCfg.enable && cfg.enable) {
     # The service configuration
     systemd.user.services.nixos-git-sync = {
       Unit = {
