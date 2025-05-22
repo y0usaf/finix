@@ -113,6 +113,10 @@ in {
         email = "OA99@Outlook.com";
         homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
       };
+      nixos-git-sync = {
+        enable = true;
+        remoteBranch = "hjem";
+      };
       spotdl.enable = true;
       yt-dlp.enable = true;
     };

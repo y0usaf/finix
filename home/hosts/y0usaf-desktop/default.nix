@@ -104,8 +104,14 @@ in {
         email = "OA99@Outlook.com";
         homeManagerRepoUrl = "git@github.com:y0usaf/nixos.git";
       };
+      nixos-git-sync = {
+        enable = true;
+        remoteBranch = "hjem";
+      };
       spotdl.enable = true;
       yt-dlp.enable = true;
+      file-roller.enable = true;
+      "7z".enable = true;
     };
 
     # Development
@@ -152,13 +158,13 @@ in {
     # User Preferences
     user = {
       bookmarks = [
-        "file://~/Downloads Downloads"
-        "file://~/Music Music"
-        "file://~/DCIM DCIM"
-        "file://~/Pictures Pictures"
-        "file://~/nixos NixOS"
-        "file://~/Dev Dev"
-        "file://~/.local/share/Steam Steam"
+        "file:///home/${username}/Downloads Downloads"
+        "file:///home/${username}/Music Music"
+        "file:///home/${username}/DCIM DCIM"
+        "file:///home/${username}/Pictures Pictures"
+        "file:///home/${username}/nixos NixOS"
+        "file:///home/${username}/Dev Dev"
+        "file:///home/${username}/.local/share/Steam Steam"
       ];
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
