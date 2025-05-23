@@ -26,7 +26,7 @@ in {
     appearance = {
       dpi = 144;
       baseFontSize = 10;
-      cursorSize = 16;
+      cursorSize = 10;
       fonts = {
         main = [
           {
