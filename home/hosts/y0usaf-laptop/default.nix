@@ -11,7 +11,7 @@ in {
         hy3.enable = true;
       };
       wayland.enable = true;
-      agsv1.enable = true;
+      agsv1.enable = false;
       cursor.enable = true;
       foot.enable = true;
       gtk = {
@@ -168,7 +168,7 @@ in {
       ];
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
-        # Removed zoom-us and fontforge for laptop to keep it lighter
+        ags
       ];
     };
 
