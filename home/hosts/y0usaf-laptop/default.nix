@@ -169,6 +169,7 @@ in {
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
         ags
+	astal.hyprland
       ];
     };
 
