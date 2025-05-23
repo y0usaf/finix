@@ -53,7 +53,7 @@
       lib.mkMerge [
         {
           home.packages = [bambuStudioWrapper];
-          home.file.".local/share/applications/bambu-studio.desktop".text = ''
+          xdg.dataFile."applications/bambu-studio.desktop".text = ''
             [Desktop Entry]
             Name=Bambu Studio
             Comment=3D printing slicer for Bambu Lab printers
