@@ -1,3 +1,7 @@
+###############################################################################
+# System Configuration Utilities
+# Functions for generating NixOS system configurations
+###############################################################################
 {
   lib,
   pkgs,

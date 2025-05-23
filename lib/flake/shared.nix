@@ -1,3 +1,7 @@
+###############################################################################
+# Shared Flake Utilities
+# Common functionality for discovering and importing host configurations
+###############################################################################
 {
   lib,
   pkgs,

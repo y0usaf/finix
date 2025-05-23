@@ -1,21 +1,15 @@
-# Re-export the contents of system.nix and home.nix
-{
-  lib,
-  pkgs,
-  ...
-}: {
-  # System-related functions
-  inherit
-    (import ./system.nix {inherit lib pkgs;})
-    hostNames
-    systemConfigs
-    mkNixosConfigurations
-    ;
-
-  # Home-related functions
-  inherit
-    (import ./home.nix {inherit lib pkgs;})
-    homeConfigs
-    mkHomeConfigurations
-    ;
-}
+###############################################################################
+# Flake Utilities
+# Uses import-modules.nix pattern for automatic discovery and merging
+###############################################################################
+{lib, pkgs, ...}: let
+  # Get all .nix files in the current directory (excluding default.nix)
+  moduleFiles = (import ../../lib/helpers/import-modules.nix {inherit lib;}) ./.;
+  
+  # Import each module and collect the attribute sets
+  imports = map (path: import path {inherit lib pkgs;}) moduleFiles;
+  
+  # Merge all attribute sets together
+  mergeAttrs = builtins.foldl' (acc: attrs: acc // attrs) {};
+in
+  mergeAttrs imports

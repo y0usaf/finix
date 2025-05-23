@@ -1,3 +1,7 @@
+###############################################################################
+# Home Manager Configuration Utilities
+# Functions for generating Home Manager configurations
+###############################################################################
 {
   lib,
   pkgs,
