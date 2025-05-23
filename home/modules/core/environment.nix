@@ -22,6 +22,8 @@
     # Conditionally apply session variables and path from core.env settings
     sessionVariables = lib.mkIf config.cfg.core.env.enable {
       LIBSEAT_BACKEND = "logind";
+      # NH 4.0.3+ uses NH_FLAKE instead of FLAKE
+      NH_FLAKE = hostHome.cfg.directories.flake.path;
       # Add other user session variables here
     };
     sessionPath = lib.mkIf config.cfg.core.env.enable [

@@ -17,7 +17,7 @@ in {
       foot.enable = true;
       gtk = {
         enable = true;
-        scale = 1.5;
+        scale = 1;
       };
       wallust.enable = true;
       mako.enable = true;
