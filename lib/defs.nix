@@ -1,4 +1,4 @@
-{lib, ...}: {
+{lib, ...}: rec {
   # Type definitions for options
   t = lib.types;
   mkOpt = type: description: lib.mkOption {inherit type description;};

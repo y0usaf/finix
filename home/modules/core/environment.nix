@@ -8,7 +8,7 @@
   hostHome,
   ...
 }: let
-  helpers = import ./lib {inherit lib;};
+  helpers = import ../../../lib/defs.nix {inherit lib;};
   inherit (helpers) t mkOptDef mkStr;
 in {
   options.cfg.core.env = {
