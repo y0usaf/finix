@@ -7,14 +7,12 @@
   hostSystem,
   hostHome,
   ...
-}: let
-  helpers = import ../../../lib/helpers/module-defs.nix {inherit lib;};
-  inherit (helpers) t mkOptDef mkStr;
-in {
+}: {
+  # No need for module-defs import - using lib directly
   options.cfg.core.env = {
     enable = lib.mkEnableOption "home environment configuration (session vars/path)";
     tokenDir = lib.mkOption {
-      type = t.str;
+      type = lib.types.str;
       default = "$HOME/Tokens";
       description = "Directory containing token files to be loaded by zsh as env variables";
     };

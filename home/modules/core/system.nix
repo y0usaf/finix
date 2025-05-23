@@ -7,17 +7,39 @@
   hostSystem,
   hostHome,
   ...
-}: let
-  helpers = import ../../../lib/helpers/module-defs.nix {inherit lib;};
-  inherit (helpers) mkOptDef mkStr;
-in {
+}: {
+  # No need for module-defs import - using lib directly
   options.cfg.system = {
-    username = mkOptDef mkStr hostSystem.cfg.system.username "The username for the system.";
-    hostname = mkOptDef mkStr hostSystem.cfg.system.hostname "The system hostname.";
-    homeDirectory = mkOptDef mkStr hostSystem.cfg.system.homeDirectory "The path to the user's home directory.";
-    stateVersion = mkOptDef mkStr hostSystem.cfg.system.stateVersion "The system state version.";
-    timezone = mkOptDef mkStr hostSystem.cfg.system.timezone "The system timezone.";
-    config = mkOptDef mkStr hostSystem.cfg.system.config "The system configuration type.";
+    username = lib.mkOption {
+      type = lib.types.str;
+      default = hostSystem.cfg.system.username;
+      description = "The username for the system.";
+    };
+    hostname = lib.mkOption {
+      type = lib.types.str;
+      default = hostSystem.cfg.system.hostname;
+      description = "The system hostname.";
+    };
+    homeDirectory = lib.mkOption {
+      type = lib.types.str;
+      default = hostSystem.cfg.system.homeDirectory;
+      description = "The path to the user's home directory.";
+    };
+    stateVersion = lib.mkOption {
+      type = lib.types.str;
+      default = hostSystem.cfg.system.stateVersion;
+      description = "The system state version.";
+    };
+    timezone = lib.mkOption {
+      type = lib.types.str;
+      default = hostSystem.cfg.system.timezone;
+      description = "The system timezone.";
+    };
+    config = lib.mkOption {
+      type = lib.types.str;
+      default = hostSystem.cfg.system.config;
+      description = "The system configuration type.";
+    };
   };
 
   # Core GPU modules

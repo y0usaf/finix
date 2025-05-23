@@ -1,0 +1,32 @@
+# SOPS Configuration for NixOS Secrets Management
+# This file defines encryption rules for different types of secrets
+
+keys:
+  - &users:
+    # Your age public key will be added here after generation
+    # Example: age1ql3z7hjy54pw9hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+
+creation_rules:
+  # API Keys and Tokens
+  - path_regex: secrets/api-keys\.yaml$
+    key_groups:
+    - age:
+      - *users
+
+  # SSH Keys
+  - path_regex: secrets/ssh-keys\.yaml$
+    key_groups:
+    - age:
+      - *users
+
+  # Development Environment Variables
+  - path_regex: secrets/dev-env\.yaml$
+    key_groups:
+    - age:
+      - *users
+
+  # Any other secrets files
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+    - age:
+      - *users
