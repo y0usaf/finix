@@ -1,12 +1,10 @@
 ###############################################################################
-# Hardware Configuration Modules
-# Centralized hardware-specific configurations:
-# - Input devices (keyboards, controllers)
-# - Video devices (cameras, capture)
-# - Graphics configuration
-# - I2C bus for hardware monitoring
-# - AMD GPU configuration
-# - Bluetooth stack configuration
+# Core System Configuration Modules
+# Fundamental system configurations:
+# - Nix package management
+# - System-wide settings
+# - Core system utilities
+# - Dynamic linking support
 ###############################################################################
 {lib, ...}: {
   imports = (import ../../../lib/helpers/import-modules.nix {inherit lib;}) ./.;

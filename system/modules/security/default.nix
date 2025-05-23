@@ -1,14 +1,9 @@
 ###############################################################################
-# Security Modules Configuration
-# This file imports all security-related modules:
-# - Real-time kit for audio/video tasks
-# - PolicyKit for fine-grained permission control
-# - Sudo configurations
+# Networking Configuration Module
+# Network management settings:
+# - NetworkManager configuration
+# - Network-related settings
 ###############################################################################
-{
-  imports = [
-    ./rtkit.nix
-    ./polkit.nix
-    ./sudo.nix
-  ];
+{lib, ...}: {
+  imports = (import ../../../lib/helpers/import-modules.nix {inherit lib;}) ./.;
 }
