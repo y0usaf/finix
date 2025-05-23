@@ -100,7 +100,7 @@ in {
       };
 
       # Add AGS autostart if AGS is enabled
-      extraConfig = lib.mkIf hostHome.cfg.ui.ags.enable ''
+      extraConfig = lib.mkIf hostHome.cfg.ui.agsv1.enable ''
         exec-once = ags
       '';
 
@@ -240,7 +240,7 @@ in {
             "$mod, P, pseudo"
           ]
           # -- AGS Controls (conditional) --
-          (lib.optional hostHome.cfg.ui.ags.enable "$mod, W, exec, ags -r 'showStats()'")
+          (lib.optional hostHome.cfg.ui.agsv1.enable "$mod, W, exec, ags -r 'showStats()'")
 
           # -- Primary Applications --
           [
@@ -314,7 +314,7 @@ in {
         ];
 
         # Single-Line Binding for Toggling Stats (conditional on AGS)
-        bindr = lib.mkIf hostHome.cfg.ui.ags.enable "$mod, W, exec, ags -r 'hideStats()'";
+        bindr = lib.mkIf hostHome.cfg.ui.agsv1.enable "$mod, W, exec, ags -r 'hideStats()'";
 
         # System & Debug Settings
         misc = {

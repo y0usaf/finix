@@ -1,9 +1,11 @@
 ###############################################################################
-# AGS Module
-# Configures AGS (Aylur's GTK Shell) for custom desktop widgets
+# AGS v1 Module (Legacy)
+# Configures AGS v1 (Aylur's GTK Shell) for custom desktop widgets
 # - System stats widget with CPU/GPU temps, memory usage, etc.
 # - Workspaces widget for Hyprland
 # - Custom styling with rainbow colors and text shadows
+# 
+# NOTE: This is the legacy AGS v1 configuration. Consider migrating to agsv2.nix
 ###############################################################################
 {
   config,
@@ -12,7 +14,7 @@
   hostHome,
   ...
 }: let
-  cfg = config.cfg.ui.ags;
+  cfg = config.cfg.ui.agsv1;
 
   ###########################################################################
   ##                     AGS SHARED VALUES (for DRY CSS)                   ##
@@ -492,8 +494,8 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.ui.ags = {
-    enable = lib.mkEnableOption "AGS (Aylur's GTK Shell)";
+  options.cfg.ui.agsv1 = {
+    enable = lib.mkEnableOption "AGS v1 (Aylur's GTK Shell - Legacy)";
   };
 
   ###########################################################################
@@ -505,12 +507,12 @@ in {
       ags_1
     ];
 
-    # Create the AGS configuration directory and files
+    # Create the AGS v1 configuration directory and files
     xdg.configFile = {
-      "ags/config.js".text = configJS;
-      "ags/style.css".text = styleCSS;
-      "ags/system-stats.js".text = systemStatsJS;
-      "ags/workspaces.js".text = workspacesJS;
+      "agsv1/config.js".text = configJS;
+      "agsv1/style.css".text = styleCSS;
+      "agsv1/system-stats.js".text = systemStatsJS;
+      "agsv1/workspaces.js".text = workspacesJS;
     };
   };
 }
