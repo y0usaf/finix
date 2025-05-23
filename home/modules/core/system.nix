@@ -8,7 +8,7 @@
   hostHome,
   ...
 }: let
-  helpers = import ../../../lib/defs.nix {inherit lib;};
+  helpers = import ../../../lib/helpers/module-defs.nix {inherit lib;};
   inherit (helpers) mkOptDef mkStr;
 in {
   options.cfg.system = {
