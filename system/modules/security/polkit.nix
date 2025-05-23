@@ -18,6 +18,6 @@
     # PolicyKit Configuration
     # Configure fine-grained permission control for applications
     ###########################################################################
-    security.polkit.enable = true;  # Enable PolicyKit for fine-grained permission control
+    security.polkit.enable = true; # Enable PolicyKit for fine-grained permission control
   };
 }

@@ -69,7 +69,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 

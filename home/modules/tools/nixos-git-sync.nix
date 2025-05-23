@@ -55,16 +55,16 @@ in {
           if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then
             # Stage all changes
             git add .
-            
+
             # Format date for commit message
             FORMATTED_DATE=$(date '+%d/%m/%y@%H:%M:%S')
-            
+
             # Replace date placeholder in commit message format
             COMMIT_MSG="🤖 Auto Update: $FORMATTED_DATE"
-            
+
             # Commit with the formatted message
             git commit -m "$COMMIT_MSG"
-            
+
             # Push to the configured remote branch
             git push origin ${cfg.remoteBranch} --force
           else

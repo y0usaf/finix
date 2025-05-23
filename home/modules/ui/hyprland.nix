@@ -99,8 +99,8 @@ in {
         variables = ["--all"];
       };
 
-      # Add AGS autostart if the feature is enabled
-      extraConfig = ''
+      # Add AGS autostart if AGS is enabled
+      extraConfig = lib.mkIf hostHome.cfg.ui.ags.enable ''
         exec-once = ags
       '';
 
@@ -125,6 +125,7 @@ in {
           "DP-4,highres@highrr,0x0,1"
           "DP-3,highres@highrr,0x0,1"
           "DP-2,5120x1440@239.76,0x0,1"
+          "eDP-1,1920x1080@300.00,0x0,1"
         ];
 
         # General User Interface Settings
@@ -237,8 +238,9 @@ in {
             "$mod, TAB, layoutmsg, orientationnext"
             "$mod, space, togglefloating"
             "$mod, P, pseudo"
-            "$mod, W, exec, ags -r 'showStats()'"
           ]
+          # -- AGS Controls (conditional) --
+          (lib.optional hostHome.cfg.ui.ags.enable "$mod, W, exec, ags -r 'showStats()'")
 
           # -- Primary Applications --
           [
@@ -311,8 +313,8 @@ in {
           "$mod, mouse:273, resizewindow"
         ];
 
-        # Single-Line Binding for Toggling Stats
-        bindr = "$mod, W, exec, ags -r 'hideStats()'";
+        # Single-Line Binding for Toggling Stats (conditional on AGS)
+        bindr = lib.mkIf hostHome.cfg.ui.ags.enable "$mod, W, exec, ags -r 'hideStats()'";
 
         # System & Debug Settings
         misc = {

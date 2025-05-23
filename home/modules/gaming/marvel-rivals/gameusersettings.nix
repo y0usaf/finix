@@ -10,7 +10,7 @@
       "Internationalization" = {
         Culture = "en";
       };
-      
+
       "ScalabilityGroups" = {
         "sg.ViewDistanceQuality" = "1";
         "sg.ShadowQuality" = "0";
@@ -22,11 +22,11 @@
         "sg.ReflectionQuality" = "0";
         "sg.GlobalIlluminationQuality" = "0";
       };
-      
+
       "/Script/Engine.GameUserSettings" = {
         bUseDesiredScreenHeight = "False";
       };
-      
+
       "/Script/Marvel.MarvelGameUserSettings" = {
         AntiAliasingSuperSamplingMode = "4";
         SuperSamplingQuality = "4";
@@ -69,7 +69,7 @@
         bAMDAntiLag2 = "False";
         DlssFrameGenerationCount = "1";
       };
-      
+
       "CareerHighLight" = {
         HighLightVideoSavedPath = "C:\\users\\steamuser\\Videos\\MarvelRivals\\Highlights";
       };

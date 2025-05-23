@@ -20,11 +20,11 @@
     ###########################################################################
     security.sudo.extraRules = [
       {
-        users = [hostSystem.cfg.system.username];  # The user defined in the hostSystem
+        users = [hostSystem.cfg.system.username]; # The user defined in the hostSystem
         commands = [
           {
-            command = "ALL";  # Allow all commands
-            options = ["NOPASSWD"];  # No password prompt for these commands
+            command = "ALL"; # Allow all commands
+            options = ["NOPASSWD"]; # No password prompt for these commands
           }
         ];
       }

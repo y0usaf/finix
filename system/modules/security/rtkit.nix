@@ -17,6 +17,6 @@
     # RTKit Configuration
     # Enable real-time priority management for multimedia applications
     ###########################################################################
-    security.rtkit.enable = true;  # Enable real-time priority management (often needed for audio/video tasks)
+    security.rtkit.enable = true; # Enable real-time priority management (often needed for audio/video tasks)
   };
 }

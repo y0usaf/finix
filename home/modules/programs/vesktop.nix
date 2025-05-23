@@ -50,7 +50,7 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    home.packages = [ cfg.package ];
+    home.packages = [cfg.package];
     xdg.configFile."vesktop/settings.json".text = builtins.toJSON cfg.settings;
     xdg.configFile."vesktop/settings/settings.json".text = builtins.toJSON cfg.vencord.settings;
     # Themes and useSystem can be handled as needed by user

@@ -10,7 +10,7 @@
 }: let
   helpers = import ../../../lib/helpers/module-defs.nix {inherit lib;};
   inherit (helpers) t mkOpt defaultAppModule;
-  
+
   # Extract default applications from hostHome
   defaultApps = [
     hostHome.cfg.defaults.terminal
@@ -65,7 +65,7 @@ in {
 
   # Set the home packages
   config.home.packages = finalPackages;
-  
+
   # Enable dconf
   config.dconf.enable = true;
 }

@@ -13,7 +13,7 @@ in {
   options.cfg.programs.gaming = {
     enable = lib.mkEnableOption "gaming module";
   };
-  
+
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
       steam

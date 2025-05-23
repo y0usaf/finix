@@ -36,10 +36,10 @@ in {
       (writeShellScriptBin "obsidian" ''
         # Set Wayland/Ozone environment variables if enabled
         ${lib.optionalString cfg.useWayland ''
-        export NIXOS_OZONE_WL=1
-        export ELECTRON_OZONE_PLATFORM_HINT=wayland
+          export NIXOS_OZONE_WL=1
+          export ELECTRON_OZONE_PLATFORM_HINT=wayland
         ''}
-        
+
         # Launch Obsidian with performance optimizations
         exec ${obsidian}/bin/obsidian \
           --disable-smooth-scrolling \

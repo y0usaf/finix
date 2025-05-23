@@ -17,7 +17,7 @@
   cfg = config.cfg.ui.cursor;
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
-  
+
   # Get the packages directly from flake outputs
   hyprcursorPackage = inputs.deepin-dark-hyprcursor.packages.${pkgs.system}.default;
   xcursorPackage = inputs.deepin-dark-xcursor.packages.${pkgs.system}.default;

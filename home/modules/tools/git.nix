@@ -29,15 +29,15 @@ in {
       type = lib.types.str;
       description = "Git email address.";
     };
-    
+
     nixos-git-sync = {
       enable = lib.mkEnableOption "automatic NixOS configuration git sync";
-      
+
       nixosRepoUrl = lib.mkOption {
         type = lib.types.str;
         description = "URL of the NixOS configuration repository.";
       };
-      
+
       repoPath = lib.mkOption {
         type = lib.types.str;
         default = "${hostSystem.cfg.system.homeDirectory}/nixos";

@@ -11,7 +11,7 @@ in {
         hy3.enable = true;
       };
       wayland.enable = true;
-      ags.enable = false;
+      ags.enable = true;
       cursor.enable = true;
       foot.enable = true;
       gtk = {

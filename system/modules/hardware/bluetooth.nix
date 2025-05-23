@@ -21,7 +21,8 @@ in {
       enable = true;
       powerOnBoot = true;
       settings =
-        hardwareCfg.bluetooth.settings or {
+        hardwareCfg.bluetooth.settings
+        or {
           General = {
             ControllerMode = "dual";
             FastConnectable = true;

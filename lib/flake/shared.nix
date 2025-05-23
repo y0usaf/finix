@@ -50,8 +50,9 @@
     hostNames;
 
   # Common specialArgs builder
-  mkSpecialArgs = commonSpecialArgs: hostname: 
-    commonSpecialArgs // {
+  mkSpecialArgs = commonSpecialArgs: hostname:
+    commonSpecialArgs
+    // {
       hostSystem = systemConfigs.${hostname};
       hostHome = homeConfigs.${hostname};
     };

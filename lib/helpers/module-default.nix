@@ -15,15 +15,18 @@
 }: let
   # Import all modules in current directory, excluding specified files
   allImports = (import ./import-modules.nix {inherit lib;}) ./.;
-  filteredImports = builtins.filter 
+  filteredImports =
+    builtins.filter
     (path: !builtins.any (exclude: lib.hasSuffix exclude (toString path)) excludeFiles)
     allImports;
-    
-  featureList = if features == [] then "" else
-    "\n# Features:\n" + (lib.concatMapStringsSep "\n" (f: "# - ${f}") features);
+
+  featureList =
+    if features == []
+    then ""
+    else "\n# Features:\n" + (lib.concatMapStringsSep "\n" (f: "# - ${f}") features);
 in {
   imports = filteredImports;
-  
+
   # Add module metadata as comments (for documentation)
   _module.args._moduleInfo = {
     inherit description features;

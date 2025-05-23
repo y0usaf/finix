@@ -2,10 +2,7 @@
 # Black Myth: Wukong Engine Configuration
 # Optimizes graphics settings for better performance
 ###############################################################################
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   xdg.dataFile."Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
     text = lib.generators.toINI {} {
       "SystemSettings" = {

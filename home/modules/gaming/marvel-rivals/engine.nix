@@ -68,7 +68,6 @@
         "r.ParticleLODBias" = "3";
       };
 
-      
       "/script/engine.renderersettings" = {
         "r.DefaultFeature.LensFlare" = "False";
         "r.DefaultFeature.DepthOfField" = "False";
