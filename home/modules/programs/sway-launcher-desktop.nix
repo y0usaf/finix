@@ -33,12 +33,9 @@ in {
     ###########################################################################
     # Configuration Files
     ###########################################################################
-    home.activation.symlinkSwayLauncherDesktop = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      # Create scripts directory
-      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "${config.xdg.configHome}/scripts"
-
-      # Symlink the launcher script
-      $DRY_RUN_CMD ln -sf $VERBOSE_ARG "$HOME/nixos/lib/scripts/sway-launcher-desktop.sh" "${config.xdg.configHome}/scripts/sway-launcher-desktop.sh"
-    '';
+    xdg.configFile."scripts/sway-launcher-desktop.sh" = {
+      source = ../../../lib/scripts/sway-launcher-desktop.sh;
+      executable = true;
+    };
   };
 }
