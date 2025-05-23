@@ -4,7 +4,6 @@
   homeDir = "/home/${username}";
 in {
   cfg = {
-    # UI and Display
     ui = {
       hyprland = {
         enable = true;
@@ -12,18 +11,18 @@ in {
         hy3.enable = true;
       };
       wayland.enable = true;
-      ags.enable = true;
+      ags.enable = false;
       cursor.enable = true;
       foot.enable = true;
       gtk = {
         enable = true;
         scale = 1.5;
       };
-      wallust.enable = true;
+      wallust.enable = false;
       mako.enable = true;
     };
 
-    # Appearance
+    # Appearance - adjusted for laptop display
     appearance = {
       dpi = 144;
       baseFontSize = 10;
@@ -52,63 +51,46 @@ in {
       };
     };
 
-    # Default Applications
+    # Default Applications - updated to modern string format
     defaults = {
-      browser = {
-        package = pkgs.firefox;
-        command = "firefox";
-      };
-      editor = {
-        package = pkgs.neovim;
-        command = "nvim";
-      };
-      ide = {
-        package = pkgs.code-cursor;
-        command = "cursor";
-      };
-      terminal = {
-        package = pkgs.foot;
-        command = "foot";
-      };
-      fileManager = {
-        package = pkgs.pcmanfm;
-        command = "pcmanfm";
-      };
-      launcher = {
-        package = pkgs.sway-launcher-desktop;
-        command = "foot -a launcher sway-launcher-desktop";
-      };
-      discord = {
-        package = pkgs.discord;
-        command = "discord";
-      };
-      archiveManager = {
-        package = pkgs.p7zip;
-        command = "7z";
-      };
-      imageViewer = {
-        package = pkgs.imv;
-        command = "imv";
-      };
-      mediaPlayer = {
-        package = pkgs.mpv;
-        command = "mpv";
-      };
+      browser = "firefox";
+      editor = "nvim";
+      ide = "cursor";
+      terminal = "foot";
+      fileManager = "pcmanfm";
+      launcher = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+      discord = "discord-canary";
+      archiveManager = "7z";
+      imageViewer = "imv";
+      mediaPlayer = "mpv";
     };
 
     # Applications
     programs = {
+      bambu.enable = false; # Disabled for laptop
       discord.enable = true;
+      vesktop.enable = true;
       creative.enable = true;
       chatgpt.enable = true;
-      android.enable = true;
+      android.enable = true; # Enabled for laptop
       firefox.enable = true;
-      gaming.enable = true;
+      imv.enable = true;
+      pcmanfm.enable = true;
+      mpv.enable = true;
+      obsidian.enable = true;
+      gaming = {
+        enable = true;
+        controllers.enable = true;
+        emulation = {
+          wii-u.enable = false; # Disabled for laptop performance
+          gcn-wii.enable = true;
+        };
+      };
       media.enable = true;
       music.enable = true;
       obs.enable = true;
       qbittorrent.enable = true;
-      streamlink.enable = true;
+      streamlink.enable = false; # Disabled for laptop - was causing profile error
       sway-launcher-desktop.enable = true;
       syncthing.enable = true;
       webapps.enable = true;
@@ -128,6 +110,8 @@ in {
       };
       spotdl.enable = true;
       yt-dlp.enable = true;
+      file-roller.enable = true;
+      "7z".enable = true;
     };
 
     # Development
@@ -135,26 +119,56 @@ in {
       docker.enable = true;
       fhs.enable = true;
       claude-code.enable = true;
+      mcp.enable = true;
       npm.enable = true;
       nvim.enable = true;
       python.enable = true;
       cursor-ide.enable = true;
-      voice-input.enable = false;
+    };
+
+    # Core User Preferences - added missing section
+    core = {
+      # Local home-specific settings
+      xdg = {
+        enable = true;
+      };
+      systemd = {
+        enable = true;
+        autoFormatNix = {
+          enable = true;
+          directory = "~/nixos";
+        };
+      };
+      zsh = {
+        enable = true;
+        cat-fetch = true;
+        history-memory = 10000;
+        history-storage = 10000;
+        zellij = {
+          enable = true;
+        };
+      };
+    };
+
+    # Programs related to Bluetooth - added missing section
+    programs.bluetooth = {
+      enable = true;
     };
 
     # User Preferences
     user = {
       bookmarks = [
-        "file://${homeDir}/Downloads Downloads"
-        "file://${homeDir}/Music Music"
-        "file://${homeDir}/DCIM DCIM"
-        "file://${homeDir}/Pictures Pictures"
-        "file://${homeDir}/nixos NixOS"
-        "file://${homeDir}/Dev Dev"
-        "file://${homeDir}/.local/share/Steam Steam"
+        "file:///home/${username}/Downloads Downloads"
+        "file:///home/${username}/Music Music"
+        "file:///home/${username}/DCIM DCIM"
+        "file:///home/${username}/Pictures Pictures"
+        "file:///home/${username}/nixos NixOS"
+        "file:///home/${username}/Dev Dev"
+        "file:///home/${username}/.local/share/Steam Steam"
       ];
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
+        # Removed zoom-us and fontforge for laptop to keep it lighter
       ];
     };
 
@@ -173,4 +187,15 @@ in {
       };
     };
   };
+
+  # Exclude Steam directory from Home Manager file management
+  home.file = {
+    # Explicitly exclude Steam directory and subdirectories
+    ".local/share/Steam".enable = false;
+  };
+
+  # Alternative: Use systemd tmpfiles to create Steam directory if needed
+  systemd.user.tmpfiles.rules = [
+    "d ${homeDir}/.local/share/Steam 0755 ${username} users -"
+  ];
 }
