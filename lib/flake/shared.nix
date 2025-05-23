@@ -37,6 +37,27 @@
     })
     hostNames
   );
+
+  # Get valid host names with proper system config structure
+  validHostNames =
+    builtins.filter (
+      hostname:
+        builtins.hasAttr hostname systemConfigs
+        && builtins.hasAttr "cfg" systemConfigs.${hostname}
+        && builtins.hasAttr "system" systemConfigs.${hostname}.cfg
+        && builtins.hasAttr "username" systemConfigs.${hostname}.cfg.system
+    )
+    hostNames;
+
+  # Common specialArgs builder
+  mkSpecialArgs = commonSpecialArgs: hostname: 
+    commonSpecialArgs // {
+      hostSystem = systemConfigs.${hostname};
+      hostHome = homeConfigs.${hostname};
+    };
+
+  # Generic listToAttrs + map helper
+  mapToAttrs = f: list: builtins.listToAttrs (map f list);
 in {
-  inherit hostNames systemConfigs homeConfigs;
+  inherit hostNames systemConfigs homeConfigs validHostNames mkSpecialArgs mapToAttrs;
 }
