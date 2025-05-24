@@ -129,6 +129,9 @@ in {
     # Core User Preferences - added missing section
     core = {
       # Local home-specific settings
+      ssh = {
+        enable = true;
+      };
       xdg = {
         enable = true;
       };

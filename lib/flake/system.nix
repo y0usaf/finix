@@ -32,6 +32,7 @@ in {
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
+              backupFileExtension = "backup";
               extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
               users.${shared.systemConfigs.${hostname}.cfg.system.username} = {
                 imports = [../../home/home.nix];
