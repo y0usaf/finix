@@ -38,58 +38,106 @@ in {
     ###########################################################################
     xdg.configFile = {
       "ags/app.tsx".text = ''
-        import { App, Astal } from "astal/gtk3"
-        import { styles } from "./styles.tsx"
-        import { SystemStats, systemStatsVisible, systemStatsLayer } from "./system-stats.tsx"
-        import { WorkspacesWidget, workspacesVisible } from "./workspaces.tsx"
+        import { App, Astal, Gtk } from "astal/gtk3"
+        import { Variable, exec, subprocess } from "astal"
 
-        // Main app configuration
-        App.start({
-            css: styles,
-            requestHandler(request: string, ...args: any[]) {
-                switch (request) {
-                    case "showStats":
-                        systemStatsVisible.set(true);
-                        systemStatsLayer.set(Astal.Layer.TOP);
-                        return "Stats shown";
-                    case "hideStats":
-                        systemStatsLayer.set(Astal.Layer.BOTTOM);
-                        return "Stats hidden";
-                    case "toggleStats":
-                        if (systemStatsLayer.get() === Astal.Layer.TOP) {
-                            systemStatsLayer.set(Astal.Layer.BOTTOM);
-                        } else {
-                            systemStatsVisible.set(true);
-                            systemStatsLayer.set(Astal.Layer.TOP);
-                        }
-                        return "Stats toggled";
-                    case "showWorkspaces":
-                        workspacesVisible.set(true);
-                        return "Workspaces shown";
-                    case "hideWorkspaces":
-                        workspacesVisible.set(false);
-                        return "Workspaces hidden";
-                    case "toggleWorkspaces":
-                        workspacesVisible.set(!workspacesVisible.get());
-                        return "Workspaces toggled";
-                    default:
-                        return `Unknown request: ''${request}`;
+        // ============================================================================
+        // UTILITY FUNCTIONS
+        // ============================================================================
+
+        // Safe command execution helper for AGS v2
+        function safeExec(command: string, defaultValue: string = 'N/A'): string {
+            try {
+                const result = exec(["bash", "-c", command]);
+                return result.trim() || defaultValue;
+            } catch (error) {
+                console.log(`Failed to execute command: ''${command}`, error);
+                return defaultValue;
+            }
+        }
+
+        // Timer-based time updates (more efficient than polling)
+        function setupTimeUpdates(currentTime: any, currentDate: any) {
+            const updateTime = () => {
+                currentTime.set(safeExec('date "+%H:%M:%S"'));
+            };
+
+            const updateDate = () => {
+                currentDate.set(safeExec('date "+%d/%m/%y"'));
+            };
+
+            // Update immediately
+            updateTime();
+            updateDate();
+
+            // Update time every second using setTimeout instead of polling
+            const timeInterval = setInterval(updateTime, 1000);
+
+            // Update date at midnight and then every 24 hours
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            const msUntilMidnight = tomorrow.getTime() - now.getTime();
+
+            setTimeout(() => {
+                updateDate();
+                // Then update every 24 hours
+                setInterval(updateDate, 24 * 60 * 60 * 1000);
+            }, msUntilMidnight);
+        }
+
+        // Event-driven package count monitoring
+        function setupPackageMonitoring(packageCount: any) {
+            const updatePackageCount = () => {
+                const count = safeExec("which nix-store >/dev/null 2>&1 && nix-store -q --requisites /run/current-system/sw 2>/dev/null | wc -l || echo 'N/A'").trim();
+                packageCount.set(count);
+            };
+
+            updatePackageCount();
+
+            // Monitor for system rebuilds and package operations
+            subprocess([
+                "bash",
+                "-c",
+                `
+                # Monitor for NixOS rebuilds and package changes
+                while true; do
+                    inotifywait -e modify,create,delete /nix/var/nix/profiles/system* 2>/dev/null || sleep 30
+                    echo "package_change"
+                done
+                `
+            ], (output: string) => {
+                if (output.includes('package_change')) {
+                    updatePackageCount();
                 }
-            },
-            main() {
-                // Create system stats window
-                SystemStats();
+            });
+        }
 
-                // Create workspace widgets
-                WorkspacesWidget('top');
-                WorkspacesWidget('bottom');
-            },
-        })
-      '';
+        // Helper functions for SystemStats component
+        function padLabel(label: string, longestLabel: number): string {
+            return label + ' '.repeat(longestLabel - label.length);
+        }
 
-      "ags/styles.tsx".text = ''
-        // AGS v2 styles (converted from v1 CSS)
-        export const styles = `
+        function horizontalBorder(char1: string, char2: string, char3: string, longestLabel: number): string {
+            return char1 + "─".repeat(longestLabel + 4) + char3;
+        }
+
+        // Cache GPU availability check
+        const hasNvidiaGpu = (() => {
+            try {
+                exec(["bash", "-c", "which nvidia-smi >/dev/null 2>&1"]);
+                return true;
+            } catch {
+                return false;
+            }
+        })();
+
+        // ============================================================================
+        // STYLES
+        // ============================================================================
+
+        const styles = `
         /* Base font size */
         * {
             font-size: 14px;
@@ -203,29 +251,27 @@ in {
             color: #ff5555;
         }
         `
-      '';
 
-      "ags/system-stats.tsx".text = ''
-        import { App, Astal, Gtk } from "astal/gtk3"
-        import { Variable, exec } from "astal"
-        import { safeExec, setupTimeUpdates, setupPackageMonitoring, padLabel, horizontalBorder, hasNvidiaGpu } from "./utils.tsx"
+        // ============================================================================
+        // SYSTEM STATS MODULE
+        // ============================================================================
 
         // Show/hide control variables
-        export const systemStatsVisible = Variable(true);
-        export const systemStatsLayer = Variable(Astal.Layer.BOTTOM);
+        const systemStatsVisible = Variable(true);
+        const systemStatsLayer = Variable(Astal.Layer.BOTTOM);
 
         // System monitoring variables with optimized polling intervals
-        export const cpuTemp = Variable('N/A').poll(250, () => {
+        const cpuTemp = Variable('N/A').poll(250, () => {
             return safeExec("sensors 2>/dev/null | grep -E 'Tctl|Package id 0' | head -1 | awk '{print $2}' | sed 's/+//' || echo 'N/A'");
         });
 
-        export const gpuTemp = Variable('N/A').poll(250, () => {
+        const gpuTemp = Variable('N/A').poll(250, () => {
             if (!hasNvidiaGpu) return 'N/A';
             const temp = safeExec("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null || echo 'N/A'");
             return temp !== "N/A" && temp !== "" ? temp + "C" : "N/A";
         });
 
-        export const memoryInfo = Variable({ used: 'N/A', total: 'N/A' }).poll(2000, () => {
+        const memoryInfo = Variable({ used: 'N/A', total: 'N/A' }).poll(2000, () => {
             try {
                 const output = exec(["bash", "-c", "free -h | grep '^Mem:'"]);
                 const ramInfo = output.split(/\\s+/);
@@ -235,19 +281,19 @@ in {
             }
         });
 
-        export const uptime = Variable('N/A').poll(60000, () => {
+        const uptime = Variable('N/A').poll(60000, () => {
             return safeExec("uptime | sed 's/.*up \\\\([^,]*\\\\).*/\\\\1/' | xargs").trim();
         });
 
         // Timer-based time updates
-        export const currentTime = Variable('00:00:00');
-        export const currentDate = Variable('00/00/00');
+        const currentTime = Variable('00:00:00');
+        const currentDate = Variable('00/00/00');
 
         // Event-driven package count
-        export const packageCount = Variable('N/A');
+        const packageCount = Variable('N/A');
 
         // Shell name never changes during session - set once
-        export const shellName = Variable(safeExec("basename \\\"$SHELL\\\""));
+        const shellName = Variable(safeExec("basename \"$SHELL\""));
 
         // Initialize monitoring
         setupTimeUpdates(currentTime, currentDate);
@@ -258,7 +304,7 @@ in {
         const longestLabel = Math.max(...statsLabels.map(l => l.length));
 
         // System Stats Widget Component
-        export function SystemStats() {
+        function SystemStats() {
             return <window
                 className="system-stats-window"
                 layer={systemStatsLayer()}
@@ -327,139 +373,26 @@ in {
                 </box>
             </window>
         }
-      '';
 
-      "ags/tsconfig.json".text = ''
-        {
-          "compilerOptions": {
-            "target": "ES2022",
-            "module": "ES2022",
-            "lib": ["ES2022"],
-            "allowJs": true,
-            "strict": true,
-            "esModuleInterop": true,
-            "skipLibCheck": true,
-            "forceConsistentCasingInFileNames": true,
-            "moduleResolution": "node",
-            "jsx": "react-jsx",
-            "jsxImportSource": "astal/gtk3/jsx-runtime"
-          },
-          "include": ["**/*.ts", "**/*.tsx"],
-          "exclude": ["node_modules"]
-        }
-      '';
-
-      "ags/utils.tsx".text = ''
-        import { exec, subprocess } from "astal"
-
-        // Safe command execution helper for AGS v2
-        export function safeExec(command: string, defaultValue: string = 'N/A'): string {
-            try {
-                const result = exec(["bash", "-c", command]);
-                return result.trim() || defaultValue;
-            } catch (error) {
-                console.log(`Failed to execute command: ''${command}`, error);
-                return defaultValue;
-            }
-        }
-
-        // Timer-based time updates (more efficient than polling)
-        export function setupTimeUpdates(currentTime: any, currentDate: any) {
-            const updateTime = () => {
-                currentTime.set(safeExec('date "+%H:%M:%S"'));
-            };
-
-            const updateDate = () => {
-                currentDate.set(safeExec('date "+%d/%m/%y"'));
-            };
-
-            // Update immediately
-            updateTime();
-            updateDate();
-
-            // Update time every second using setTimeout instead of polling
-            const timeInterval = setInterval(updateTime, 1000);
-
-            // Update date at midnight and then every 24 hours
-            const now = new Date();
-            const tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(0, 0, 0, 0);
-            const msUntilMidnight = tomorrow.getTime() - now.getTime();
-
-            setTimeout(() => {
-                updateDate();
-                // Then update every 24 hours
-                setInterval(updateDate, 24 * 60 * 60 * 1000);
-            }, msUntilMidnight);
-        }
-
-        // Event-driven package count monitoring
-        export function setupPackageMonitoring(packageCount: any) {
-            const updatePackageCount = () => {
-                const count = safeExec("which nix-store >/dev/null 2>&1 && nix-store -q --requisites /run/current-system/sw 2>/dev/null | wc -l || echo 'N/A'").trim();
-                packageCount.set(count);
-            };
-
-            updatePackageCount();
-
-            // Monitor for system rebuilds and package operations
-            subprocess([
-                "bash",
-                "-c",
-                `
-                # Monitor for NixOS rebuilds and package changes
-                while true; do
-                    inotifywait -e modify,create,delete /nix/var/nix/profiles/system* 2>/dev/null || sleep 30
-                    echo "package_change"
-                done
-                `
-            ], (output: string) => {
-                if (output.includes('package_change')) {
-                    updatePackageCount();
-                }
-            });
-        }
-
-        // Helper functions for SystemStats component
-        export function padLabel(label: string, longestLabel: number): string {
-            return label + ' '.repeat(longestLabel - label.length);
-        }
-
-        export function horizontalBorder(char1: string, char2: string, char3: string, longestLabel: number): string {
-            return char1 + "─".repeat(longestLabel + 4) + char3;
-        }
-
-        // Cache GPU availability check
-        export const hasNvidiaGpu = (() => {
-            try {
-                exec(["bash", "-c", "which nvidia-smi >/dev/null 2>&1"]);
-                return true;
-            } catch {
-                return false;
-            }
-        })();
-      '';
-
-      "ags/workspaces.tsx".text = ''
-        import { App, Astal, Gtk } from "astal/gtk3"
-        import { Variable, exec, subprocess } from "astal"
+        // ============================================================================
+        // WORKSPACES MODULE
+        // ============================================================================
 
         // Show/hide control variable
-        export const workspacesVisible = Variable(true);
+        const workspacesVisible = Variable(true);
 
         // Hyprland workspace management with real-time events
-        export const workspaces = Variable<any[]>([]);
-        export const activeWorkspace = Variable<number>(1);
+        const workspaces = Variable<any[]>([]);
+        const activeWorkspace = Variable<number>(1);
 
         // Create a single derived variable for workspace state to optimize subscriptions
-        export const workspaceState = Variable.derive([workspaces, activeWorkspace], (ws, active) => ({
+        const workspaceState = Variable.derive([workspaces, activeWorkspace], (ws, active) => ({
             workspaces: ws,
             activeWorkspace: active
         }));
 
         // Helper function to switch workspace using hyprctl
-        export function switchWorkspace(workspaceId: number) {
+        function switchWorkspace(workspaceId: number) {
             try {
                 exec(["hyprctl", "dispatch", "workspace", workspaceId.toString()]);
             } catch (error) {
@@ -477,7 +410,7 @@ in {
             }
 
             try {
-                const output = exec(["bash", "-c", "hyprctl activeworkspace -j 2>/dev/null || echo '{\\\"id\\\":1}'"]);
+                const output = exec(["bash", "-c", "hyprctl activeworkspace -j 2>/dev/null || echo '{\"id\":1}'"]);
                 const parsed = JSON.parse(output);
                 activeWorkspace.set(parsed.id || 1);
             } catch {
@@ -542,7 +475,7 @@ in {
         setupHyprlandEvents();
 
         // Workspaces Widget Component
-        export function WorkspacesWidget(position: 'top' | 'bottom') {
+        function WorkspacesWidget(position: 'top' | 'bottom') {
             const anchor = position === 'top'
                 ? Astal.WindowAnchor.TOP
                 : Astal.WindowAnchor.BOTTOM;
@@ -597,6 +530,75 @@ in {
                     {workspaceButtons}
                 </box>
             </window>
+        }
+
+        // ============================================================================
+        // MAIN APPLICATION
+        // ============================================================================
+
+        // Main app configuration
+        App.start({
+            css: styles,
+            requestHandler(request: string, ...args: any[]) {
+                switch (request) {
+                    case "showStats":
+                        systemStatsVisible.set(true);
+                        systemStatsLayer.set(Astal.Layer.TOP);
+                        return "Stats shown";
+                    case "hideStats":
+                        systemStatsLayer.set(Astal.Layer.BOTTOM);
+                        return "Stats hidden";
+                    case "toggleStats":
+                        if (systemStatsLayer.get() === Astal.Layer.TOP) {
+                            systemStatsLayer.set(Astal.Layer.BOTTOM);
+                        } else {
+                            systemStatsVisible.set(true);
+                            systemStatsLayer.set(Astal.Layer.TOP);
+                        }
+                        return "Stats toggled";
+                    case "showWorkspaces":
+                        workspacesVisible.set(true);
+                        return "Workspaces shown";
+                    case "hideWorkspaces":
+                        workspacesVisible.set(false);
+                        return "Workspaces hidden";
+                    case "toggleWorkspaces":
+                        workspacesVisible.set(!workspacesVisible.get());
+                        return "Workspaces toggled";
+                    default:
+                        return `Unknown request: ''${request}`;
+                }
+            },
+            main() {
+                // Create system stats window
+                SystemStats();
+
+                // Create workspace widgets
+                WorkspacesWidget('top');
+                WorkspacesWidget('bottom');
+            },
+        })
+      '';
+
+
+
+      "ags/tsconfig.json".text = ''
+        {
+          "compilerOptions": {
+            "target": "ES2022",
+            "module": "ES2022",
+            "lib": ["ES2022"],
+            "allowJs": true,
+            "strict": true,
+            "esModuleInterop": true,
+            "skipLibCheck": true,
+            "forceConsistentCasingInFileNames": true,
+            "moduleResolution": "node",
+            "jsx": "react-jsx",
+            "jsxImportSource": "astal/gtk3/jsx-runtime"
+          },
+          "include": ["**/*.ts", "**/*.tsx"],
+          "exclude": ["node_modules"]
         }
       '';
     };
