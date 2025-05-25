@@ -23,13 +23,15 @@ in {
     ###########################################################################
     wayland.windowManager.hyprland.settings = {
       # AGS-specific keybindings
-      bind = [
-        # Win+W to show system stats (like the old ags)
-      ] ++ lib.optionals hostHome.cfg.ui.ags.enable [
-        "$mod, W, exec, ags request showStats"
-        # Alt+Tab to toggle workspace indicators
-        "$mod2, TAB, exec, ags request toggleWorkspaces"
-      ];
+      bind =
+        [
+          # Win+W to show system stats (like the old ags)
+        ]
+        ++ lib.optionals hostHome.cfg.ui.ags.enable [
+          "$mod, W, exec, ags request showStats"
+          # Alt+Tab to toggle workspace indicators
+          "$mod2, TAB, exec, ags request toggleWorkspaces"
+        ];
 
       # Additional AGS bindings for show/hide functionality
       bindr = lib.mkIf hostHome.cfg.ui.ags.enable [
