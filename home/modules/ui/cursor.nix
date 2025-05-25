@@ -42,8 +42,8 @@ in {
     # Cursor Configuration
     ###########################################################################
     home.pointerCursor = {
-      name = x11ThemeName;
-      package = xcursorPackage;
+      name = hyprThemeName;
+      package = hyprcursorPackage;
       size = hostHome.cfg.appearance.cursorSize;
 
       gtk.enable = true;
@@ -51,10 +51,19 @@ in {
       hyprcursor.enable = true;
     };
 
+    # Separate GTK cursor configuration for X11 compatibility
     gtk.cursorTheme = {
       name = x11ThemeName;
       package = xcursorPackage;
       size = hostHome.cfg.appearance.cursorSize;
+    };
+
+    # Environment variables for proper Hyprland cursor support
+    home.sessionVariables = {
+      HYPRCURSOR_THEME = lib.mkForce hyprThemeName;
+      HYPRCURSOR_SIZE = lib.mkForce (toString hostHome.cfg.appearance.cursorSize);
+      XCURSOR_THEME = lib.mkForce x11ThemeName;
+      XCURSOR_SIZE = lib.mkForce (toString hostHome.cfg.appearance.cursorSize);
     };
   };
 }
