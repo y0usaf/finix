@@ -58,26 +58,8 @@ in {
     services.ssh-agent.enable = true;
 
     ###########################################################################
-    # SSH Directory Permissions with XDG integration
+    # XDG integration
     ###########################################################################
     xdg.enable = true;
-
-    # Use Home Manager's built-in activation scripts
-    home.activation = {
-      # This runs after files are linked but before Home Manager's shell is started
-      sshPermissionsFix = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        $DRY_RUN_CMD mkdir -p $HOME/.ssh
-        $DRY_RUN_CMD chmod 700 $HOME/.ssh
-
-        # Only chmod config if it's not a symlink (Home Manager manages symlinked files)
-        if [ -f $HOME/.ssh/config ] && [ ! -L $HOME/.ssh/config ]; then
-          $DRY_RUN_CMD chmod 600 $HOME/.ssh/config
-        fi
-
-        if [ -f $HOME/Tokens/id_rsa_y0usaf ]; then
-          $DRY_RUN_CMD chmod 600 $HOME/Tokens/id_rsa_y0usaf
-        fi
-      '';
-    };
   };
 }
