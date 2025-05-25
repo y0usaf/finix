@@ -69,7 +69,8 @@ in {
         $DRY_RUN_CMD mkdir -p $HOME/.ssh
         $DRY_RUN_CMD chmod 700 $HOME/.ssh
 
-        if [ -f $HOME/.ssh/config ]; then
+        # Only chmod config if it's not a symlink (Home Manager manages symlinked files)
+        if [ -f $HOME/.ssh/config ] && [ ! -L $HOME/.ssh/config ]; then
           $DRY_RUN_CMD chmod 600 $HOME/.ssh/config
         fi
 
