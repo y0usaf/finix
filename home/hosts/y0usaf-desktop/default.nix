@@ -124,6 +124,7 @@ in {
       nvim.enable = true;
       python.enable = true;
       cursor-ide.enable = true;
+      latex.enable = true;
     };
 
     # Core User Preferences
