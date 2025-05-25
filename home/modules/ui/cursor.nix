@@ -42,13 +42,12 @@ in {
     # Cursor Configuration
     ###########################################################################
     home.pointerCursor = {
-      name = hyprThemeName;
-      package = hyprcursorPackage;
+      name = x11ThemeName;
+      package = xcursorPackage;
       size = hostHome.cfg.appearance.cursorSize;
 
       gtk.enable = true;
       x11.enable = true;
-      hyprcursor.enable = true;
     };
 
     # Separate GTK cursor configuration for X11 compatibility
