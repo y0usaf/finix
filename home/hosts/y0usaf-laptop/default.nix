@@ -11,7 +11,7 @@ in {
         hy3.enable = true;
       };
       wayland.enable = true;
-      agsv1.enable = false;
+      ags.enable = true;
       cursor.enable = true;
       foot.enable = true;
       gtk = {
@@ -172,7 +172,7 @@ in {
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
         ags
-	astal.hyprland
+        astal.hyprland
       ];
     };
 
