@@ -207,15 +207,8 @@ in {
       # Create mods directory
       mkdir -p "${balatroModsPath}"
       
-      # Clean existing mods (remove broken symlinks)
-      find "${balatroModsPath}" -type l ! -exec test -e {} \; -delete 2>/dev/null || true
-      
-      # Remove old mod directories/files that aren't symlinks
-      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: mod: ''
-        if [ -e "${balatroModsPath}/${mod.name}" ] && [ ! -L "${balatroModsPath}/${mod.name}" ]; then
-          rm -rf "${balatroModsPath}/${mod.name}"
-        fi
-      '') mods)}
+      # Clean existing mods - remove ALL existing symlinks and directories first
+      find "${balatroModsPath}" -mindepth 1 -maxdepth 1 -exec rm -rf {} \; 2>/dev/null || true
       
       # Symlink enabled mods from Nix store
       ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: mod: ''
