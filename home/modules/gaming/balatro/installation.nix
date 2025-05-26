@@ -22,10 +22,7 @@
     if modDef.type == "repo" then {
       inherit (modDef) name type;
       src = pkgs.fetchFromGitHub {
-        owner = modDef.owner;
-        repo = modDef.repo;
-        rev = modDef.rev;
-        sha256 = modDef.sha256;
+        inherit (modDef) owner repo rev sha256;
       };
     } else if modDef.type == "file" then {
       inherit (modDef) name type;
