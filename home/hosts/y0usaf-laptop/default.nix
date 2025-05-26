@@ -85,6 +85,11 @@ in {
           wii-u.enable = false; # Disabled for laptop performance
           gcn-wii.enable = true;
         };
+        balatro = {
+          enable = true;
+          enableLovelyInjector = true;
+          enabledMods = ["steamodded" "talisman" "cryptid" "morespeeds" "overlay" "cardsleeves" "multiplayer"];
+        };
       };
       media.enable = true;
       music.enable = true;
