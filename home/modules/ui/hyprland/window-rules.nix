@@ -21,10 +21,7 @@ in {
       ###########################################################################
       windowrulev2 = [
         "float, center, size 300 600, class:^(launcher)"
-        "float, mouse, size 300 300, title:^(Smile)"
         "float, center, class:^(hyprland-share-picker)"
-        "float, class:^(ags)$ title:^(system-stats)$"
-        "center, class:^(ags)$ title:^(system-stats)$"
         "float, $firefox-pip"
         "opacity 0.75 override, $firefox-pip"
         "noborder, $firefox-pip"
@@ -38,7 +35,6 @@ in {
       ###########################################################################
       layerrule = [
         "blur, notifications"
-        "blur, fabric"
       ];
     };
   };
