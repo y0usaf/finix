@@ -85,6 +85,11 @@ in {
           wii-u.enable = true;
           gcn-wii.enable = true;
         };
+        balatro = {
+          enable = true;
+          enableLovelyInjector = true;
+          enabledMods = [ "steamodded" "talisman" "cryptid" "morespeeds" "overlay" ];
+        };
       };
       media.enable = true;
       music.enable = true;
