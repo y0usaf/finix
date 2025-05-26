@@ -1,6 +1,6 @@
 ###############################################################################
-# Balatro Mods Installation Module - npins Version
-# GitHub repos managed by npins, simple fetchurl for .lua files
+# Balatro Mods Installation Module - Pure npins Version
+# All dependencies managed by npins (GitHub repos + file repos)
 ###############################################################################
 {
   config,
@@ -10,25 +10,14 @@
 }: let
   cfg = config.cfg.programs.gaming.balatro;
 
-  # Import npins sources for GitHub repositories
+  # Import npins sources - everything managed by npins now!
   sources = import ./npins;
 
   # Define Steam paths for Balatro using XDG
   balatroModsPath = "${config.xdg.dataHome}/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods";
   balatroGamePath = "${config.xdg.dataHome}/Steam/steamapps/common/Balatro";
 
-  # Simple fetchurl for .lua files (npins doesn't handle raw files well)
-  moreSpeedsLua = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/Steamodded/examples/refs/heads/master/Mods/MoreSpeeds.lua";
-    sha256 = "1xj4mjr9firv24l115ldbxsyr0grpf1h4f22y8jrzvcw97d2xrlv";
-  };
-
-  overlayLua = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/cantlookback/BalatrOverlay/refs/heads/main/balatroverlay.lua";
-    sha256 = "1dx9sy84w1w77klfqmkmnalfvagpb1p9biazm6sakdz6d44470b7";
-  };
-
-  # Available mods - much simpler than before!
+  # Available mods - completely uniform now!
   availableMods = {
     steamodded = {
       src = sources.steamodded;
@@ -52,18 +41,18 @@
     };
     jokerdisplay = {
       src = sources.jokerdisplay;
-      name = "JokerDisplay-1.8.4.1";
+      name = "JokerDisplay";
     };
     pokermon = {
       src = sources.pokermon;
       name = "Pokermon";
     };
     morespeeds = {
-      src = moreSpeedsLua;
+      src = "${sources.steamodded-examples}/Mods/MoreSpeeds.lua";
       name = "MoreSpeeds.lua";
     };
     overlay = {
-      src = overlayLua;
+      src = "${sources.balatroverlay}/balatroverlay.lua";
       name = "balatroverlay.lua";
     };
   };
@@ -82,10 +71,10 @@
       enabledMods)}
   '';
 
-  # Lovely Injector using fetchzip (no manual unzip needed!)
-  lovelyInjectorPackage = pkgs.fetchzip {
+  # Lovely Injector using fetchZip (no manual unzip needed!)
+  lovelyInjectorPackage = pkgs.fetchZip {
     url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.7.1/lovely-x86_64-pc-windows-msvc.zip";
-    sha256 = "sha256-KjWSJugIfUOfWHZctEDKWGvNERXDzjW1+Ty5kJtEJlw=";
+    sha256 = "04zbhsh8qsn0mqw302p6wamrfw8snkrbl6x6r1pbqxfiiclgv0z7";
     stripRoot = false;
   };
 in {
@@ -115,8 +104,8 @@ in {
         - cardsleeves: larswijn/CardSleeves
         - jokerdisplay: nh6574/JokerDisplay (shows joker calculations)
         - pokermon: InertSteak/Pokermon (Pokemon-themed jokers)
-        - morespeeds: MoreSpeeds.lua (single file)
-        - overlay: BalatrOverlay.lua (single file)
+        - morespeeds: MoreSpeeds.lua (from Steamodded/examples)
+        - overlay: BalatrOverlay.lua (from cantlookback/BalatrOverlay)
       '';
     };
   };
