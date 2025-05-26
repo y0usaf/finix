@@ -29,6 +29,8 @@ in {
         "opacity 0.75 override, $firefox-pip"
         "noborder, $firefox-pip"
         "size 30% 30%, $firefox-pip"
+        # Hide Lovely mod injector window
+        "workspace special:hidden, title:^(Lovely.*)"
       ];
 
       ###########################################################################
