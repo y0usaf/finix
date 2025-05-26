@@ -88,7 +88,7 @@ in {
         balatro = {
           enable = true;
           enableLovelyInjector = true;
-          enabledMods = ["steamodded" "talisman" "cryptid" "morespeeds" "overlay" "cardsleeves" "multiplayer"];
+          enabledMods = ["steamodded" "talisman" "cryptid" "morespeeds" "overlay" "cardsleeves" "multiplayer" "jokerdisplay"];
         };
       };
       media.enable = true;
