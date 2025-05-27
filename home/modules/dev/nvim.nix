@@ -1,9 +1,9 @@
 ###############################################################################
-# Neovim Configuration Module
-# Configures Neovim with plugins and settings for development
-# - Rich plugin ecosystem with syntax highlighting, completion, and git integration
-# - AI assistance with Supermaven and Aider
-# - Obsidian integration for note-taking
+# Neovim Configuration Module - Minimalist Edition
+# Clean, fast Neovim setup focused on core functionality
+# - Essential plugins for development workflow
+# - No background AI processes that cause shutdown delays
+# - Streamlined configuration for better performance
 ###############################################################################
 {
   config,
@@ -34,45 +34,89 @@ in {
       viAlias = true;
       vimAlias = true;
 
-      # Extra packages needed for formatters, language servers,
-      # and other utilities (such as Telescope dependencies)
+      # Essential packages for development
       extraPackages = with pkgs; [
         # Formatters and linters
         stylua
         ruff
         nodePackages.prettier
         shfmt
-        vim-vint
 
-        # Utilities for Telescope (fuzzy finder) and more
+        # Core utilities
         ripgrep
         fd
-        aider-chat
+        # Removed aider-chat to reduce complexity
       ];
 
-      # Define all plugins with their configurations.
+      # Streamlined plugin selection
       plugins = with pkgs.vimPlugins; [
-        # Basic plugins (loaded without extra configuration)
+        # Core plugins
         gruvbox-material
         plenary-nvim
+
+        # Completion
         cmp-buffer
         cmp-path
         cmp-nvim-lsp
+        nvim-cmp
 
         # ============================================================
-        # File Explorer: nvim-tree-lua
+        # File Explorer: nvim-tree-lua (Always Visible)
         # ============================================================
         {
           plugin = nvim-tree-lua;
           type = "lua";
           config = ''
-            -- Setup nvim-tree with adaptive size,
-            -- git file status highlighting and filtering out dotfiles.
             require('nvim-tree').setup {
-              view = { adaptive_size = true },
-              renderer = { highlight_git = true },
-              filters = { dotfiles = true },
+              -- Auto-open on startup
+              view = {
+                adaptive_size = true,
+                width = 30,
+                side = "left",
+                preserve_window_proportions = true,
+              },
+              renderer = {
+                highlight_git = true,
+                icons = {
+                  show = {
+                    file = true,
+                    folder = true,
+                    folder_arrow = true,
+                    git = true,
+                  },
+                },
+              },
+              filters = {
+                dotfiles = false,  -- Show dotfiles by default
+                custom = { ".git", "node_modules", ".cache" },
+              },
+              git = {
+                enable = true,
+                ignore = false,
+              },
+              actions = {
+                open_file = {
+                  quit_on_open = false,  -- Keep tree open when opening files
+                  resize_window = true,
+                },
+              },
+              update_focused_file = {
+                enable = true,
+                update_root = false,
+              },
+              -- Auto-open behavior
+              hijack_directories = {
+                enable = true,
+                auto_open = true,
+              },
             }
+            
+            -- Auto-open nvim-tree on startup
+            local function open_nvim_tree()
+              require("nvim-tree.api").tree.open()
+            end
+            
+            vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = open_nvim_tree })
           '';
         }
 
@@ -83,10 +127,9 @@ in {
           plugin = telescope-nvim;
           type = "lua";
           config = ''
-            -- Configure Telescope with fzy sorters and ignore "node_modules"
             require('telescope').setup {
               defaults = {
-                file_sorter    = require('telescope.sorters').get_fzy_sorter,
+                file_sorter = require('telescope.sorters').get_fzy_sorter,
                 generic_sorter = require('telescope.sorters').get_generic_fzy_sorter,
                 file_ignore_patterns = { 'node_modules' },
               },
@@ -95,61 +138,16 @@ in {
         }
 
         # ============================================================
-        # Syntax Highlighting & Parsing: Treesitter
+        # Syntax Highlighting: Treesitter
         # ============================================================
         {
           plugin = nvim-treesitter.withAllGrammars;
           type = "lua";
           config = ''
-            -- Enable Treesitter-based syntax highlighting.
             require('nvim-treesitter.configs').setup {
               highlight = { enable = true },
+              indent = { enable = true },
             }
-          '';
-        }
-
-        # ============================================================
-        # AI & Snippet Assistance: Supermaven
-        # ============================================================
-        {
-          plugin = supermaven-nvim;
-          type = "lua";
-          config = ''
-            -- Setup Supermaven for inline AI code suggestions,
-            -- along with custom key mappings.
-            require("supermaven-nvim").setup({
-              keymaps = {
-                accept_suggestion = "<Tab>",
-                clear_suggestion  = "<C-]>",
-                accept_word       = "<C-j>",
-              },
-              ignore_filetypes = { cpp = true },
-              color = { suggestion_color = "#ff88dd" },
-              use_default_keymaps = false,
-              enable_cmp = true,
-            })
-          '';
-        }
-
-        # ============================================================
-        # Cheatsheet: Quick command reference
-        # ============================================================
-        {
-          plugin = cheatsheet-nvim;
-          type = "lua";
-          config = ''
-            require('cheatsheet').setup()
-          '';
-        }
-
-        # ============================================================
-        # UI Management: Edgy
-        # ============================================================
-        {
-          plugin = edgy-nvim;
-          type = "lua";
-          config = ''
-            require('edgy').setup({})
           '';
         }
 
@@ -160,70 +158,51 @@ in {
           plugin = formatter-nvim;
           type = "lua";
           config = ''
-            -- Formatter configuration
-            -- Define a helper for all web-related filetypes to use Prettier.
             local function prettier()
               return {
-                exe  = 'prettier-daemon',
-                args = { vim.api.nvim_buf_get_name(0) }
+                exe = 'prettier',
+                args = { '--stdin-filepath', vim.api.nvim_buf_get_name(0) },
+                stdin = true
               }
             end
 
             require('formatter').setup({
               filetype = {
-                -- Web and markup files use Prettier.
                 typescript = { prettier },
                 javascript = { prettier },
-                json       = { prettier },
-                css        = { prettier },
-                scss       = { prettier },
-                html       = { prettier },
+                json = { prettier },
+                css = { prettier },
+                html = { prettier },
                 markdown = { prettier },
-                -- Language-specific formatters:
                 lua = {
                   function()
                     return {
-                      exe  = 'stylua',
-                      args = { '--config-path', '~/.config/stylua/stylua.toml' }
+                      exe = 'stylua',
+                      args = { '--stdin-filepath', vim.api.nvim_buf_get_name(0), '-' },
+                      stdin = true
                     }
                   end
                 },
                 python = {
                   function()
                     return {
-                      exe  = 'ruff',
-                      args = { '-' }
+                      exe = 'ruff',
+                      args = { 'format', '-' },
+                      stdin = true
                     }
                   end
                 },
                 sh = {
                   function()
                     return {
-                      exe  = 'shfmt',
-                      args = { '-w' }
-                    }
-                  end
-                },
-                vim = {
-                  function()
-                    return {
-                      exe = 'vint'
+                      exe = 'shfmt',
+                      args = { '-' },
+                      stdin = true
                     }
                   end
                 }
               }
             })
-          '';
-        }
-
-        # ============================================================
-        # Diagnostic Window: Trouble.nvim
-        # ============================================================
-        {
-          plugin = trouble-nvim;
-          type = "lua";
-          config = ''
-            require('trouble').setup({})
           '';
         }
 
@@ -240,7 +219,6 @@ in {
                 { name = 'nvim_lsp' },
                 { name = 'buffer' },
                 { name = 'path' },
-                { name = 'supermaven' },
               }),
               mapping = cmp.mapping.preset.insert({
                 ['<C-b>'] = cmp.mapping.scroll_docs(-4),
@@ -268,13 +246,12 @@ in {
         }
 
         # ============================================================
-        # Obsidian: Note-taking integration
+        # Obsidian: Minimal note-taking integration
         # ============================================================
         {
           plugin = obsidian-nvim;
           type = "lua";
           config = ''
-            -- Set conceallevel to improve markdown link display.
             vim.opt.conceallevel = 1
             require("obsidian").setup({
               workspaces = {
@@ -284,28 +261,48 @@ in {
                 },
               },
               notes_subdir = "notes",
+              
+              -- Disable automatic daily notes creation
               daily_notes = {
                 folder = "notes/dailies",
                 date_format = "%Y-%m-%d",
+                template = nil,  -- No template
               },
+              disable_frontmatter = true,  -- Disable frontmatter creation
+              
               completion = {
-                nvim_cmp = pcall(require, 'cmp'),
+                nvim_cmp = true,
                 min_chars = 2,
               },
               new_notes_location = "notes_subdir",
+              
+              -- Simplified link handling
               wiki_link_func = function(opts)
                 return require("obsidian.util").wiki_link_id_prefix(opts)
               end,
               preferred_link_style = "wiki",
+              
               ui = {
                 enable = true,
+                update_debounce = 200,
+                checkboxes = {},  -- Disable checkbox rendering
               },
+              
+              -- Disable automatic features that create files/dirs
+              attachments = {
+                img_folder = "assets/imgs",
+              },
+              
+              -- Don't auto-create directories
+              note_id_func = function(title)
+                return title
+              end,
             })
           '';
         }
 
         # ============================================================
-        # Indentation Guides: indent-blankline / ibl
+        # Essential UI plugins
         # ============================================================
         {
           plugin = indent-blankline-nvim;
@@ -315,9 +312,6 @@ in {
           '';
         }
 
-        # ============================================================
-        # Key Mapping Helper: which-key.nvim
-        # ============================================================
         {
           plugin = which-key-nvim;
           type = "lua";
@@ -326,80 +320,55 @@ in {
           '';
         }
 
-        # ============================================================
-        # Git Signs: gitsigns.nvim
-        # ============================================================
         {
           plugin = gitsigns-nvim;
           type = "lua";
           config = ''
             require('gitsigns').setup{
               signs = {
-                add         = { text = '+' },
-                change      = { text = '~' },
-                delete      = { text = '_' },
-                topdelete   = { text = '‾' },
-                changedelete= { text = '~' },
+                add = { text = '+' },
+                change = { text = '~' },
+                delete = { text = '_' },
+                topdelete = { text = '‾' },
+                changedelete = { text = '~' },
               },
             }
           '';
         }
 
-        # ============================================================
-        # Statusline: lualine.nvim
-        # ============================================================
         {
           plugin = lualine-nvim;
           type = "lua";
           config = ''
-            require('lualine').setup{
+            require("lualine").setup{
               options = {
-                theme = 'gruvbox-material',
-                component_separators = '|',
-                section_separators   = ""  -- Use double quotes to avoid ending the Nix string literal early
+                theme = "gruvbox-material",
+                component_separators = "|",
+                section_separators = ""
               }
             }
-          '';
-        }
-
-        # ============================================================
-        # AI Assistance: aider.nvim
-        # ============================================================
-        {
-          plugin = aider-nvim;
-          type = "lua";
-          config = ''
-            require('aider').setup({
-              auto_manage_context = true,
-              default_bindings = true,
-              debug = false,
-              ignore_buffers = {
-                '^term:',
-                'NeogitConsole',
-                'NvimTree_',
-                'neo-tree filesystem'
-              }
-            })
           '';
         }
       ];
 
       # ===============================================
-      # Global Extra Lua Configuration for Neovim
+      # Clean Lua Configuration
       # ===============================================
       extraLuaConfig = ''
-        -- Basic settings: enable system clipboard and show line numbers.
+        -- Basic settings
         vim.opt.clipboard = 'unnamedplus'
         vim.opt.number = true
+        vim.opt.relativenumber = true
+        vim.opt.expandtab = true
+        vim.opt.shiftwidth = 2
+        vim.opt.tabstop = 2
         vim.g.mapleader = ','
 
-        -- Visual theme and effects.
+        -- Visual theme
         vim.o.termguicolors = true
         vim.o.background = 'dark'
         vim.g.gruvbox_material_transparent_background = 1
-        vim.g.gruvbox_material_better_performance       = 1
-        vim.opt.winblend = 10   -- Slight transparency for floating windows
-        vim.opt.pumblend = 10   -- Slight transparency for popup menus
+        vim.g.gruvbox_material_better_performance = 1
 
         -- Helper for mapping keys
         local function map(mode, lhs, rhs, opts)
@@ -410,34 +379,37 @@ in {
           vim.keymap.set(mode, lhs, rhs, options)
         end
 
-        -- File navigation shortcuts (Telescope and NvimTree)
-        map('n', '<leader>pv', ':NvimTreeToggle<CR>')
-        map('n', '<leader>ff', '<cmd>Telescope find_files<cr>')
-        map('n', '<leader>fg', '<cmd>Telescope live_grep<cr>')
-        map('n', '<leader>fb', '<cmd>Telescope buffers<cr>')
-        map('n', '<leader>fh', '<cmd>Telescope help_tags<cr>')
+        -- File navigation shortcuts
+        map('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = "Toggle file explorer" })
+        map('n', '<leader>ef', ':NvimTreeFocus<CR>', { desc = "Focus file explorer" })
+        map('n', '<leader>er', ':NvimTreeRefresh<CR>', { desc = "Refresh file explorer" })
+        map('n', '<leader>ff', '<cmd>Telescope find_files<cr>', { desc = "Find files" })
+        map('n', '<leader>fg', '<cmd>Telescope live_grep<cr>', { desc = "Live grep" })
+        map('n', '<leader>fb', '<cmd>Telescope buffers<cr>', { desc = "Find buffers" })
+        map('n', '<leader>fh', '<cmd>Telescope help_tags<cr>', { desc = "Help tags" })
 
-        -- Obsidian note management shortcuts.
-        map('n', '<leader>on', ':ObsidianNew<CR>', { desc = "New Obsidian note" })
-        map('n', '<leader>oo', ':ObsidianOpen<CR>', { desc = "Open Obsidian" })
-        map('n', '<leader>os', ':ObsidianQuickSwitch<CR>', { desc = "Quick Switch" })
-        map('n', '<leader>of', ':ObsidianFollowLink<CR>', { desc = "Follow Link" })
-        map('n', '<leader>ob', ':ObsidianBacklinks<CR>', { desc = "Show Backlinks" })
+        -- Obsidian shortcuts (simplified)
+        map('n', '<leader>on', ':ObsidianNew<CR>', { desc = "New note" })
+        map('n', '<leader>os', ':ObsidianQuickSwitch<CR>', { desc = "Quick switch" })
+        map('n', '<leader>of', ':ObsidianFollowLink<CR>', { desc = "Follow link" })
 
-        -- Set the colorscheme.
+        -- Formatting shortcut
+        map('n', '<leader>f', ':Format<CR>', { desc = "Format file" })
+
+        -- Set colorscheme
         vim.cmd('colorscheme gruvbox-material')
 
-        -- Create an autocommand group for custom behaviors.
-        local augroup = vim.api.nvim_create_augroup("CustomAutocommands", { clear = true })
+        -- Autocommand group
+        local augroup = vim.api.nvim_create_augroup("MinimalNvim", { clear = true })
 
-        -- Autoformat on file save.
+        -- Auto-format on save
         vim.api.nvim_create_autocmd("BufWritePost", {
-          group   = augroup,
+          group = augroup,
           pattern = "*",
           command = "FormatWrite",
         })
 
-        -- Highlight yanked text briefly.
+        -- Highlight yanked text
         vim.api.nvim_create_autocmd("TextYankPost", {
           group = augroup,
           callback = function()
@@ -445,12 +417,14 @@ in {
           end,
         })
 
-        -- Create command aliases for Aider
-        vim.api.nvim_create_user_command('AiderChat', 'terminal aider', {})
-        vim.api.nvim_create_user_command('AiderAddModifiedFiles', 'terminal aider $(git ls-files --modified)', {})
-        vim.api.nvim_create_user_command('AiderOpen', 'terminal aider', {})
-        vim.api.nvim_create_user_command('AiderOpenGPT3', 'terminal aider -3', {})
-        vim.api.nvim_create_user_command('AiderOpenNoAutoCommit', 'terminal AIDER_NO_AUTO_COMMITS=1 aider', {})
+        -- Clean exit (no background processes to worry about!)
+        vim.api.nvim_create_autocmd("VimLeavePre", {
+          group = augroup,
+          callback = function()
+            -- Just save all buffers, no complex cleanup needed
+            pcall(vim.cmd, 'wall')
+          end,
+        })
       '';
     };
   };

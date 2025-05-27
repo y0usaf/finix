@@ -29,7 +29,7 @@
 
     # Add useful systemd analysis tools to system packages
     environment.systemPackages = with pkgs; [
-      systemd-analyze # For analyzing boot and shutdown performance
+      systemd # For systemd-analyze and other systemd tools
       (writeShellScriptBin "shutdown-tracker" (builtins.readFile ../../../lib/scripts/shutdown-tracker.sh))
     ];
 

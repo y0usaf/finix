@@ -15,7 +15,7 @@ in {
     # AGS Autostart Configuration
     ###########################################################################
     wayland.windowManager.hyprland.extraConfig = lib.mkIf hostHome.cfg.ui.ags.enable ''
-      exec-once = 'ags run'
+      exec-once = 'exec ags run'
     '';
 
     ###########################################################################

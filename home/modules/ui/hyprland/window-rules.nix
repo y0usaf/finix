@@ -27,7 +27,7 @@ in {
         "noborder, $firefox-pip"
         "size 30% 30%, $firefox-pip"
         # Move Lovely mod injector to special workspace
-        "workspace special:lovely, title:^(Lovely.*)"
+        "workspace special, title:^(Lovely.*)"
       ];
 
       ###########################################################################
