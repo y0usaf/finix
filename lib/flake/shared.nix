@@ -33,12 +33,14 @@
       inherit name;
       value = {
         cfg = {
-          system = unifiedConfigs.${name}.cfg.system;
+          system = unifiedConfigs.${name}.cfg.system // {
+            # Move imports into system scope to avoid HM exposure
+            imports = unifiedConfigs.${name}.imports or [];
+          };
           hardware = unifiedConfigs.${name}.cfg.system.hardware;
           core = unifiedConfigs.${name}.cfg.core;
         };
         users = unifiedConfigs.${name}.users or {};
-        imports = unifiedConfigs.${name}.imports or [];
       };
     })
     hostNames

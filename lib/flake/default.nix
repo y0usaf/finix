@@ -1,19 +1,66 @@
 ###############################################################################
 # Flake Utilities
-# Uses import-modules.nix pattern for automatic discovery and merging
+# Complete flake outputs and configuration functions
 ###############################################################################
 {
   lib,
   pkgs,
   ...
 }: let
-  # Get all .nix files in the current directory (excluding default.nix)
-  moduleFiles = (import ../../lib/helpers/import-modules.nix {inherit lib;}) ./.;
+  # Import individual modules
+  shared = import ./shared.nix {inherit lib pkgs;};
+  home = import ./home.nix {inherit lib pkgs;};
+  system = import ./system.nix {inherit lib pkgs;};
+in {
+  # Export configuration functions
+  inherit (shared) hostNames systemConfigs homeConfigs;
+  inherit (home) mkHomeConfigurations;
+  inherit (system) mkNixosConfigurations;
+  
+  # Complete outputs function
+  mkOutputs = inputs: let
+    ## System Configuration
+    system = "x86_64-linux";
+    
+    ## Package Configuration
+    pkgs = import inputs.nixpkgs {
+      inherit system;
+      overlays = [
+        (final: prev: {
+          fastFonts = inputs.fast-fonts.packages.${system}.default;
+        })
+      ];
+      config.allowUnfree = true;
+      config.cudaSupport = true;
+    };
 
-  # Import each module and collect the attribute sets
-  imports = map (path: import path {inherit lib pkgs;}) moduleFiles;
+    ## Import host utilities (self-reference to get the functions)
+    hostUtils = import ./. {
+      lib = pkgs.lib;
+      inherit pkgs;
+    };
 
-  # Merge all attribute sets together
-  mergeAttrs = builtins.foldl' (acc: attrs: acc // attrs) {};
-in
-  mergeAttrs imports
+    ## Common Special Arguments for Modules
+    commonSpecialArgs = {
+      inputs = inputs;
+      whisper-overlay = inputs.whisper-overlay;
+      disko = inputs.disko;
+      fast-fonts = inputs.fast-fonts;
+    };
+  in {
+    ## Formatter Setup
+    formatter.${system} = pkgs.alejandra;
+
+    ## NixOS Configurations
+    nixosConfigurations = hostUtils.mkNixosConfigurations {
+      inputs = inputs;
+      inherit system commonSpecialArgs;
+    };
+
+    ## Dynamic Home Manager Configurations
+    homeConfigurations = hostUtils.mkHomeConfigurations {
+      inputs = inputs;
+      inherit pkgs commonSpecialArgs;
+    };
+  };
+}

@@ -27,6 +27,22 @@ in {
           # Import the shared configurations
           (hostsDir + "/default.nix")
           inputs.home-manager.nixosModules.home-manager
+          # Add system-specific imports that shouldn't be exposed to HM
+        ] ++ (shared.systemConfigs.${hostname}.cfg.system.imports or []) ++ [
+          # Apply system configuration from hostSystem
+          {
+            networking.hostName = shared.systemConfigs.${hostname}.cfg.system.hostname;
+            time.timeZone = shared.systemConfigs.${hostname}.cfg.system.timezone;
+            system.stateVersion = shared.systemConfigs.${hostname}.cfg.system.stateVersion;
+            
+            # Apply users configuration  
+            inherit (shared.systemConfigs.${hostname}) users;
+            
+            # Hardware configuration
+            hardware = {
+              bluetooth.enable = shared.systemConfigs.${hostname}.cfg.hardware.bluetooth.enable or false;
+            };
+          }
           {
             home-manager = {
               useGlobalPkgs = true;

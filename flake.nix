@@ -1,9 +1,6 @@
 ###############################################################################
 # NixOS Flake Configuration
 # System configuration and dependencies management for desktop environment
-# - Manages system dependencies and configurations
-# - Supports dynamic profile loading
-# - Configures desktop environment for development and daily use
 ###############################################################################
 {
   description = "NixOS configuration";
@@ -14,8 +11,6 @@
   inputs = {
     ## Core System Dependencies
     nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-unstable";
-
-    # Add flake-utils
     flake-utils.url = "github:numtide/flake-utils";
 
     home-manager = {
@@ -45,7 +40,7 @@
       inputs.hyprland.follows = "hyprland";
     };
 
-    # Using our custom cursor flakes from GitHub
+    ## Custom Resources
     deepin-dark-hyprcursor = {
       url = "github:y0usaf/Deepin-Dark-hyprcursor/9d7db02";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -54,10 +49,7 @@
       url = "github:y0usaf/Deepin-Dark-xcursor/b3df394";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    fast-fonts = {
-      url = "github:y0usaf/Fast-Font";
-    };
-
+    fast-fonts.url = "github:y0usaf/Fast-Font";
     hyprpaper = {
       url = "github:y0usaf/hyprpaper/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -68,11 +60,8 @@
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-
-    # Add whisper-overlay input
     whisper-overlay = {
       url = "github:oddlama/whisper-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -82,55 +71,6 @@
   ###########################################################################
   # System Outputs
   ###########################################################################
-  outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    whisper-overlay,
-    disko,
-    ...
-  } @ inputs: let
-    ## System & Package Configuration
-    system = "x86_64-linux";
-    pkgs = import nixpkgs {
-      inherit system;
-      overlays = [
-        (final: prev: {
-          # Use the self-contained fast-fonts package
-          fastFonts = inputs.fast-fonts.packages.${system}.default;
-        })
-      ];
-      config.allowUnfree = true;
-      config.cudaSupport = true;
-    };
-
-    ## Import host utilities
-    hostUtils = import ./lib/flake {
-      lib = pkgs.lib;
-      inherit pkgs;
-    };
-
-    ## Common Special Arguments for Modules
-    commonSpecialArgs = {
-      inputs = self.inputs;
-      whisper-overlay = inputs.whisper-overlay;
-      disko = inputs.disko;
-      fast-fonts = inputs.fast-fonts;
-    };
-  in {
-    ## Formatter Setup
-    formatter.${system} = pkgs.alejandra;
-
-    ## NixOS Configurations
-    nixosConfigurations = hostUtils.mkNixosConfigurations {
-      inputs = inputs;
-      inherit system commonSpecialArgs;
-    };
-
-    ## Dynamic Home Manager Configurations
-    homeConfigurations = hostUtils.mkHomeConfigurations {
-      inputs = inputs;
-      inherit pkgs commonSpecialArgs;
-    };
-  };
+  outputs = inputs:
+    import ./lib/flake/outputs.nix inputs;
 }
