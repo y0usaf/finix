@@ -42,7 +42,6 @@ in {
         wayland.enable = true;
         ags.enable = true;
         cursor.enable = true;
-        foot.enable = true;
         kitty.enable = true;
         gtk = {
           enable = true;
@@ -86,9 +85,9 @@ in {
         browser = "firefox";
         editor = "nvim";
         ide = "cursor";
-        terminal = "foot";
+        terminal = "kitty";
         fileManager = "pcmanfm";
-        launcher = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+        launcher = "kitty --app-id='launcher' ~/.config/scripts/sway-launcher-desktop.sh";
         discord = "discord-canary";
         archiveManager = "7z";
         imageViewer = "imv";

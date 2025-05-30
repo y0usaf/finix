@@ -3,6 +3,7 @@
 # A simple application launcher for Sway using fzf
 # - Provides a desktop application launcher script
 # - Creates the launcher script directly in ~/.config/scripts
+# "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh"
 ###############################################################################
 {
   config,
@@ -246,14 +247,14 @@ in {
             if ! grep -q "^AutostartCondition=" "$desktop_file"; then
                 return 0  # No condition means it should autostart
             fi
-            
+
             local condition="$(grep "^AutostartCondition=" "$desktop_file" | cut -d'=' -f2)"
             local condition_type="''${condition%% *}"
             local file_path="''${condition#* }"
-            
+
             # Convert relative path to absolute using XDG config
             local filename="''${XDG_CONFIG_HOME:-''${HOME}/.config}/''${file_path}"
-            
+
             case "$condition_type" in
                 if-exists)
                     [[ -e "$filename" ]]
