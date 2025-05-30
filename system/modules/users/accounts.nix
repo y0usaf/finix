@@ -29,7 +29,7 @@
           "audio" # Provides access to audio subsystems.
           "input" # Necessary for access to keyboard and mouse devices.
         ]
-        ++ lib.optionals hostHome.cfg.programs.gaming.enable [
+        ++ lib.optionals hostHome.cfg.gaming.enable [
           "gamemode" # Optionally include the 'gamemode' group for performance tweaks during gaming.
         ];
       ignoreShellProgramCheck = true; # Skip validating that the shell is in /etc/shells.

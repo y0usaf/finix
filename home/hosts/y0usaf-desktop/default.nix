@@ -78,19 +78,6 @@ in {
       pcmanfm.enable = true;
       mpv.enable = true;
       obsidian.enable = true;
-      gaming = {
-        enable = true;
-        controllers.enable = true;
-        emulation = {
-          wii-u.enable = true;
-          gcn-wii.enable = true;
-        };
-        balatro = {
-          enable = true;
-          enableLovelyInjector = true;
-          enabledMods = ["steamodded" "talisman" "morespeeds" "overlay" "cardsleeves" "multiplayer" "jokerdisplay" "cryptid"];
-        };
-      };
       media.enable = true;
       music.enable = true;
       obs.enable = true;
@@ -100,6 +87,21 @@ in {
       syncthing.enable = true;
       webapps.enable = true;
       zen-browser.enable = false;
+    };
+
+    # Gaming
+    gaming = {
+      enable = true;
+      controllers.enable = true;
+      emulation = {
+        wii-u.enable = true;
+        gcn-wii.enable = true;
+      };
+      balatro = {
+        enable = true;
+        enableLovelyInjector = true;
+        enabledMods = ["steamodded" "talisman" "morespeeds" "overlay" "cardsleeves" "multiplayer" "jokerdisplay" "cryptid"];
+      };
     };
 
     tools = {

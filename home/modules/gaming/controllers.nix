@@ -12,9 +12,9 @@
   hostSystem,
   ...
 }: let
-  cfg = config.cfg.programs.gaming.controllers;
+  cfg = config.cfg.gaming.controllers;
 in {
-  options.cfg.programs.gaming.controllers = {
+  options.cfg.gaming.controllers = {
     enable = lib.mkEnableOption "gaming controller support";
   };
 

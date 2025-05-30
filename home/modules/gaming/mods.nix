@@ -8,7 +8,7 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.programs.gaming;
+  cfg = config.cfg.gaming;
 in {
   ###########################################################################
   # Module Configuration

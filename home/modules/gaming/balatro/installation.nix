@@ -8,7 +8,7 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.programs.gaming.balatro;
+  cfg = config.cfg.gaming.balatro;
 
   # Import npins sources for GitHub repositories
   sources = import ./npins;
@@ -85,7 +85,7 @@
     stripRoot = false;
   };
 in {
-  options.cfg.programs.gaming.balatro = {
+  options.cfg.gaming.balatro = {
     enable = lib.mkEnableOption "Balatro mod management";
 
     enableLovelyInjector = lib.mkOption {

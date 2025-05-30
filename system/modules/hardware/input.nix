@@ -14,7 +14,7 @@
 }: let
   # Get the gaming configuration from the home config
   homeCfg = hostHome.cfg or {};
-  gamingCfg = homeCfg.programs.gaming or {};
+  gamingCfg = homeCfg.gaming or {};
   controllerCfg = gamingCfg.controllers or {};
 in {
   config = {

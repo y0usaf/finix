@@ -8,7 +8,7 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.programs.gaming.emulation.gcn-wii;
+  cfg = config.cfg.gaming.emulation.gcn-wii;
 in {
   config = lib.mkIf cfg.enable {
     home.packages = [
