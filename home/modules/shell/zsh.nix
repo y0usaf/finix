@@ -209,51 +209,62 @@ in {
       # Shell Aliases: Define shortcuts for common commands.
       #---------------------------------------------------------------------------
       shellAliases = lib.mkMerge [
-        {
-          #----- XDG Compliance Shortcuts -----
-          adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
-          wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
-          svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
-          yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
-          mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
-          cat = "bat";
+      {
+      #----- XDG Compliance Shortcuts -----
+      adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
+      wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
+      svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
+      yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
+      mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
+      cat = "bat";
 
-          #----- Custom Scripts -----
-          cattree = "$HOME/nixos/lib/resources/scripts/cattree.sh";
+      #----- Custom Scripts -----
+      cattree = "$HOME/nixos/lib/resources/scripts/cattree.sh";
 
-          #----- System Management Shortcuts -----
-          userctl = "systemctl --user";
-          hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
-          pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
-          pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
-          hwconfig = "sudo nixos-generate-config --show-hardware-config";
+      #----- System Management Shortcuts -----
+      userctl = "systemctl --user";
+      hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
+      pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
+      pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
+      hwconfig = "sudo nixos-generate-config --show-hardware-config";
 
-          #----- Media & Tools Shortcuts -----
-          esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
+      #----- Media & Tools Shortcuts -----
+      esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
 
-          #----- Directory & Search Shortcuts -----
-          "l." = "lsd -A | grep -E \"^\\.\"";
-          la = "lsd -A --color=always --group-dirs=first --icon=always";
-          ll = "lsd -l --color=always --group-dirs=first --icon=always";
-          ls = "lsd -lA --color=always --group-dirs=first --icon=always";
-          lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
-          grep = "grep --color=auto";
-          dir = "dir --color=auto";
-          egrep = "grep -E --color=auto";
-          fgrep = "grep -F --color=auto";
+      #----- Directory & Search Shortcuts -----
+      "l." = "lsd -A | grep -E \"^\\.\""; 
+      la = "lsd -A --color=always --group-dirs=first --icon=always";
+      ll = "lsd -l --color=always --group-dirs=first --icon=always";
+      ls = "lsd -lA --color=always --group-dirs=first --icon=always";
+      lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
+      grep = "grep --color=auto";
+      dir = "dir --color=auto";
+      egrep = "grep -E --color=auto";
+      fgrep = "grep -F --color=auto";
 
-          #----- Home Manager Repo Aliases -----
-          # Adjust the path below to the root of your hm repository.
-          "hmpush" = "git -C ~/nixos push origin main --force";
-          "hmpull" = "git -C ~/nixos fetch origin && git -C ~/nixos reset --hard origin/main";
+      #----- Home Manager Repo Aliases -----
+      # Adjust the path below to the root of your hm repository.
+      "hmpush" = "git -C ~/nixos push origin main --force";
+      "hmpull" = "git -C ~/nixos fetch origin && git -C ~/nixos reset --hard origin/main";
 
-          #----- Hardware Management Shortcut -----
-          gpupower = "sudo nvidia-smi -pl";
-
-          #----- Kitty Panel (Proper Kitten) -----
-          "kitty-panel" = "kitty +kitten panel";
-          "kpanel" = "kitty +kitten panel";
-        }
+      #----- Hardware Management Shortcut -----
+      gpupower = "sudo nvidia-smi -pl";
+      }
+        
+        # Kitty Panel Aliases (conditional on kittens module being enabled)
+        (lib.mkIf (config.cfg.ui.kittens.enable or false) {
+          # Main panel alias using kitty panel protocol
+          kitty-panel = "kitty +kitten panel --edge=top ~/.local/bin/kitty-panel-script";
+          
+          # Alternative panel positions
+          kpanel = "kitty +kitten panel --edge=top ~/.local/bin/kitty-panel-script";
+          kpanel-bottom = "kitty +kitten panel --edge=bottom ~/.local/bin/kitty-panel-script";
+          kpanel-left = "kitty +kitten panel --edge=left ~/.local/bin/kitty-panel-script";
+          kpanel-right = "kitty +kitten panel --edge=right ~/.local/bin/kitty-panel-script";
+          
+          # Standalone script for testing
+          panel-test = "~/.local/bin/kitty-panel-script";
+        })
       ];
     };
   };
