@@ -5,10 +5,9 @@
 {
   lib,
   pkgs,
-  hostsDir ? ../../system/hosts,
-  homeHostsDir ? ../../home/hosts,
+  hostsDir ? ../../hosts,
 }: let
-  shared = import ./shared.nix {inherit lib pkgs hostsDir homeHostsDir;};
+  shared = import ./shared.nix {inherit lib pkgs hostsDir;};
 in {
   # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {
@@ -23,7 +22,7 @@ in {
         inherit system;
         specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
         modules = [
-          # Import hardware configuration directly from the host directory
+          # Import hardware configuration directly from the unified host directory
           (hostsDir + "/${hostname}/hardware-configuration.nix")
           # Import the shared configurations
           (hostsDir + "/default.nix")
@@ -40,6 +39,8 @@ in {
                   stateVersion = shared.systemConfigs.${hostname}.cfg.system.stateVersion;
                   homeDirectory = inputs.nixpkgs.lib.mkForce shared.systemConfigs.${hostname}.cfg.system.homeDirectory;
                 };
+                # Apply unified home configuration
+                cfg = shared.homeConfigs.${hostname}.cfg;
               };
             };
           }

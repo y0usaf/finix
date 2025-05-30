@@ -1,12 +1,11 @@
 ###############################################################################
 # Shared Flake Utilities
-# Common functionality for discovering and importing host configurations
+# Common functionality for discovering and importing unified host configurations
 ###############################################################################
 {
   lib,
   pkgs,
-  hostsDir ? ../../system/hosts,
-  homeHostsDir ? ../../home/hosts,
+  hostsDir ? ../../hosts,
 }: let
   # Get all valid host names (excluding special directories and files)
   hostNames = builtins.filter (
@@ -15,11 +14,10 @@
       != "README.md"
       && name != "default.nix"
       && builtins.pathExists (hostsDir + "/${name}/default.nix")
-      && builtins.pathExists (homeHostsDir + "/${name}/default.nix")
   ) (builtins.attrNames (builtins.readDir hostsDir));
 
-  # Import system configurations for each host
-  systemConfigs = builtins.listToAttrs (
+  # Import unified configurations for each host
+  unifiedConfigs = builtins.listToAttrs (
     map
     (name: {
       inherit name;
@@ -28,12 +26,35 @@
     hostNames
   );
 
-  # Import home configurations for each host
+  # Extract system configurations from unified configs
+  systemConfigs = builtins.listToAttrs (
+    map
+    (name: {
+      inherit name;
+      value = {
+        cfg = {
+          system = unifiedConfigs.${name}.cfg.system;
+          hardware = unifiedConfigs.${name}.cfg.system.hardware;
+          core = unifiedConfigs.${name}.cfg.core;
+        };
+        users = unifiedConfigs.${name}.users or {};
+        imports = unifiedConfigs.${name}.imports or [];
+      };
+    })
+    hostNames
+  );
+
+  # Extract home configurations from unified configs
   homeConfigs = builtins.listToAttrs (
     map
     (name: {
       inherit name;
-      value = import (homeHostsDir + "/${name}/default.nix") {inherit lib pkgs;};
+      value = {
+        cfg = unifiedConfigs.${name}.cfg.home // {
+          # Include shared core config in home as well
+          core = unifiedConfigs.${name}.cfg.core;
+        };
+      };
     })
     hostNames
   );
