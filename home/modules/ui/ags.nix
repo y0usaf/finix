@@ -273,16 +273,16 @@ in {
 
         const memoryInfo = Variable({ used: 'N/A', total: 'N/A' }).poll(2000, () => {
             try {
-                const output = exec(["bash", "-c", "free -h | grep '^Mem:'"]);
-                const ramInfo = output.split(/\\s+/);
-                return { used: ramInfo[2] || 'N/A', total: ramInfo[1] || 'N/A' };
+                const output = exec(["bash", "-c", "free -h | awk '/^Mem:/ {print $3 \"|\" $2}'"]);
+                const parts = output.trim().split('|');
+                return { used: parts[0] || 'N/A', total: parts[1] || 'N/A' };
             } catch {
                 return { used: 'N/A', total: 'N/A' };
             }
         });
 
         const uptime = Variable('N/A').poll(60000, () => {
-            return safeExec("uptime | sed 's/.*up \\\\([^,]*\\\\).*/\\\\1/' | xargs").trim();
+            return safeExec("uptime -p | sed 's/up //' | sed 's/ hours*/h/' | sed 's/ minutes*/m/' | sed 's/ seconds*/s/' | sed 's/,//g'").trim();
         });
 
         // Timer-based time updates
@@ -312,10 +312,10 @@ in {
                 visible={systemStatsVisible()}
                 application={App}>
                 <box className="system-stats" vertical>
-                    {/* AGS Logo */}
+                    {/* NixOS Logo */}
                     <label
                         className="stats-white"
-                        label="   _  ___      ____  ____&#10;  / |/ (_)_ __/ __ \\/ __/&#10; /    / /\\ \\ / /_/ /\\ \\  &#10;/_/|_/_//_\\_\\\\____/___/  "
+                        label="    \\  \\ //&#10;   ==\\__\\/ //&#10;     //   \\\\==&#10;/_/|_/_//_\\_\\\\____/___/  "
                     />
 
                     {/* Top border */}
