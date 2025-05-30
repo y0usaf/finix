@@ -282,7 +282,7 @@ in {
         });
 
         const uptime = Variable('N/A').poll(60000, () => {
-            return safeExec("uptime | sed 's/.*up //' | sed 's/, [0-9]* user.*//' | sed 's/ days*/d/' | sed 's/ hours*/h/' | sed 's/ minutes*/m/'").trim();
+            return safeExec("uptime | sed 's/.*up *//' | sed 's/,.*user.*//' | sed 's/^ *//' | sed 's/ *$//' | sed 's/ day/d/' | sed 's/ days/d/'").trim();
         });
 
         // Timer-based time updates
