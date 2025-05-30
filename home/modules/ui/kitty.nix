@@ -43,8 +43,8 @@
     mouse_hide_wait = "-1"; # Never hide cursor (equivalent to hide-when-typing = "no")
     wheel_scroll_multiplier = "5.0"; # Enable smooth scrolling (similar to alternate-scroll-mode)
     
-    # Background and foreground colors
-    background_opacity = "1.0"; # Equivalent to alpha = 0 (fully opaque)
+    # Background and foreground colors with transparency
+    background_opacity = "0.85"; # 85% opaque, 15% transparent for nice transparency effect
     background = "#000000";
     foreground = "#ffffff";
     
