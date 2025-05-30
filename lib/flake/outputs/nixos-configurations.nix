@@ -1,6 +1,6 @@
 ###############################################################################
-# Flake Outputs
-# All output generation logic for the flake
+# NixOS Configurations
+# Host system configurations for NixOS
 ###############################################################################
 inputs: let
   ## System Configuration
@@ -19,7 +19,7 @@ inputs: let
   };
 
   ## Import host utilities
-  hostUtils = import ./default.nix {
+  hostUtils = import ../default.nix {
     lib = pkgs.lib;
     inherit pkgs;
   };
@@ -32,18 +32,9 @@ inputs: let
     fast-fonts = inputs.fast-fonts;
   };
 in {
-  ## Formatter Setup
-  formatter.${system} = pkgs.alejandra;
-
   ## NixOS Configurations
   nixosConfigurations = hostUtils.mkNixosConfigurations {
     inputs = inputs;
     inherit system commonSpecialArgs;
-  };
-
-  ## Dynamic Home Manager Configurations
-  homeConfigurations = hostUtils.mkHomeConfigurations {
-    inputs = inputs;
-    inherit pkgs commonSpecialArgs;
   };
 }

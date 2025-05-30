@@ -72,5 +72,5 @@
   # System Outputs
   ###########################################################################
   outputs = inputs:
-    import ./lib/flake/outputs.nix inputs;
+    import ./lib/flake/outputs inputs;
 }
