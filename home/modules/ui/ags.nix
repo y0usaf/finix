@@ -273,8 +273,8 @@ in {
 
         const memoryInfo = Variable({ used: 'N/A', total: 'N/A' }).poll(2000, () => {
             try {
-                const output = exec(["bash", "-c", "free -h | awk '/^Mem:/ {print $3 \"|\" $2}'"]);
-                const parts = output.trim().split('|');
+                const output = exec(["bash", "-c", "free -h | grep '^Mem:' | awk '{print $3 \"/\" $2}'"]);
+                const parts = output.trim().split('/');
                 return { used: parts[0] || 'N/A', total: parts[1] || 'N/A' };
             } catch {
                 return { used: 'N/A', total: 'N/A' };
@@ -282,7 +282,7 @@ in {
         });
 
         const uptime = Variable('N/A').poll(60000, () => {
-            return safeExec("uptime -p | sed 's/up //' | sed 's/ hours*/h/' | sed 's/ minutes*/m/' | sed 's/ seconds*/s/' | sed 's/,//g'").trim();
+            return safeExec("uptime | sed 's/.*up //' | sed 's/, [0-9]* user.*//' | sed 's/ days*/d/' | sed 's/ hours*/h/' | sed 's/ minutes*/m/'").trim();
         });
 
         // Timer-based time updates
@@ -341,7 +341,7 @@ in {
                                         case 'shell': return shellName();
                                         case 'uptime': return uptime();
                                         case 'pkgs': return packageCount();
-                                        case 'memory': return `''${memoryInfo.get().used} | ''${memoryInfo.get().total}`;
+                                        case 'memory': return `''${memoryInfo.get().used}/''${memoryInfo.get().total}`;
                                         case 'cpu': return cpuTemp();
                                         case 'gpu': return gpuTemp();
                                         case 'colors': return "";
