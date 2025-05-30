@@ -250,10 +250,10 @@ in {
           #----- Hardware Management Shortcut -----
           gpupower = "sudo nvidia-smi -pl";
 
-          #----- Kitty Panel -----
-          "kitty-panel" = "kitty +kitten panel --edge=top bash -c 'tty-clock -c -s &; echo; echo; nitch; wait'";
-          "kitty-panel-bg" = "kitty +kitten panel --edge=background bash -c 'tty-clock -c -s &; echo; echo; nitch; wait'";
-          "kitty-panel-center" = "kitty +kitten panel --edge=center bash -c 'tty-clock -c -s &; echo; echo; nitch; wait'";
+          #----- Kitty Panel (Simple Window Approach) -----
+          "kitty-panel" = "kitty --title='System Panel' -o background_opacity=0.9 -o window_padding_width=10 bash -c 'clear; echo \"═══ System Panel ═══\"; echo; tty-clock -c -s & sleep 3; echo; echo; nitch; echo; echo \"Press Ctrl+C to exit\"; wait'";
+          "kitty-clock" = "kitty --title='Clock' -o background_opacity=0.9 tty-clock -c -s";
+          "kitty-info" = "kitty --title='System Info' -o background_opacity=0.9 bash -c 'nitch; echo; echo \"Press Enter to exit\"; read'";
           "kclock" = "tty-clock -c -s";
           "kinfo" = "nitch";
         }
