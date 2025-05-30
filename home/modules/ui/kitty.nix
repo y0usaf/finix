@@ -25,8 +25,7 @@
   # Get fallback font names
   fallbackFontNames = map (x: x.name) hostHome.cfg.appearance.fonts.fallback;
 
-  # Build the font features string for fallback fonts
-  fontFeatures = lib.concatStringsSep " " (map (name: "symbol_map U+0000-U+FFFF ${name}") fallbackFontNames);
+  # Note: Kitty handles font fallbacks automatically, so we don't need explicit symbol_map
 
   # Main terminal settings
   kittyMainSettings = {
@@ -85,12 +84,9 @@
     "ctrl+v" = "paste_from_clipboard";
   };
 
-  # Extra configuration for font fallbacks
+  # Extra configuration for additional features
   kittyExtraConfig = ''
-    # Font fallback configuration
-    ${lib.concatStringsSep "\n" (map (name: "symbol_map U+0000-U+FFFF ${name}") fallbackFontNames)}
-    
-    # Additional performance optimizations
+    # Audio and visual bell settings
     enable_audio_bell no
     visual_bell_duration 0.0
     window_alert_on_bell no
