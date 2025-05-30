@@ -249,6 +249,13 @@ in {
 
           #----- Hardware Management Shortcut -----
           gpupower = "sudo nvidia-smi -pl";
+
+          #----- Kitty Panel -----
+          "kitty-panel" = "kitty +kitten panel --edge=top bash -c 'tty-clock -c -s &; echo; echo; nitch; wait'";
+          "kitty-panel-bg" = "kitty +kitten panel --edge=background bash -c 'tty-clock -c -s &; echo; echo; nitch; wait'";
+          "kitty-panel-center" = "kitty +kitten panel --edge=center bash -c 'tty-clock -c -s &; echo; echo; nitch; wait'";
+          "kclock" = "tty-clock -c -s";
+          "kinfo" = "nitch";
         }
       ];
     };
