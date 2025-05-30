@@ -86,7 +86,7 @@ in {
         browser = "firefox";
         editor = "nvim";
         ide = "cursor";
-        terminal = "kitty";
+        terminal = "foot";
         fileManager = "pcmanfm";
         launcher = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
         discord = "discord-canary";
