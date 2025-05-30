@@ -178,8 +178,6 @@ in {
         packages = with pkgs; [
           realesrgan-ncnn-vulkan
           fontforge
-          tty-clock
-          nitch
         ];
       };
 

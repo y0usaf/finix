@@ -4,6 +4,7 @@
 # - Provides a desktop application launcher script
 # - Creates the launcher script directly in ~/.config/scripts
 # "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh"
+# "kitty --app-id='launcher' ~/.config/scripts/sway-launcher-desktop.sh"
 ###############################################################################
 {
   config,
