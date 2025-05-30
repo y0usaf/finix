@@ -15,6 +15,7 @@ in {
       # Application Shortcut Variables
       ###########################################################################
       "$firefox-pip" = "class:^(firefox)$, title:^(Picture-in-Picture)";
+      "$kitty" = "class:^(kitty)$";
 
       ###########################################################################
       # Window Management Rules
@@ -26,6 +27,8 @@ in {
         "opacity 0.75 override, $firefox-pip"
         "noborder, $firefox-pip"
         "size 30% 30%, $firefox-pip"
+        # Kitty transparency
+        "opacity 0.90 override, $kitty"
         # Move Lovely mod injector to special workspace
         "workspace special:lovely, title:^(Lovely.*)"
       ];
