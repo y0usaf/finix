@@ -61,6 +61,10 @@ in {
             command = "npx";
             args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
           };
+          "Memory" = {
+            command = "npx";
+            args = ["-y" "@modelcontextprotocol/server-memory"];
+          };
         };
       };
     };
