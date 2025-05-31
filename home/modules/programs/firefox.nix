@@ -83,7 +83,7 @@
     "layout.css.shadow-parts.enabled" = true;
   };
 
-  legacyUserChromeCss = ''
+  userChromeCss = ''
     /* Disable all animations */
     * {
       animation: none !important;
@@ -354,11 +354,6 @@
     }
   '';
 
-  # --- Improved minimalist CSS ---
-  userChromeCss = ''
-  /*\n    Minimalist refined Firefox userChrome.css\n    Author: y0usaf (generated)\n    Purpose: Provide a clean, modern, and unobtrusive interface while keeping performance in mind.\n  */\n\n  :root {\n    --radius: 4px;\n    --toolbar-height: 28px;\n    --icon-size: 18px;\n    --clr-bg: rgba(28,28,30,0.9);\n    --clr-bg-hover: rgba(46,46,48,0.9);\n    --clr-fg: #e0e0e0;\n  }\n\n  /* Global resets ------------------------------------------------------ */\n  *,\n  *::before,\n  *::after {\n    animation: none !important;\n    transition: none !important;\n    box-sizing: border-box !important;\n    margin: 0 !important;\n    padding: 0 !important;\n  }\n\n  toolbarspring,\n  .toolbar-spring,\n  [anonid="spring"],\n  .separator,\n  .spacer {\n    display: none !important;\n  }\n\n  /* Tabs --------------------------------------------------------------- */\n  .tabbrowser-tab {\n    min-height: var(--toolbar-height) !important;\n    padding-inline: 8px !important;\n    border-radius: var(--radius) !important;\n    background: transparent !important;\n    color: var(--clr-fg) !important;\n  }\n\n  .tabbrowser-tab[selected],\n  .tabbrowser-tab:hover {\n    background: var(--clr-bg-hover) !important;\n  }\n\n  .tab-close-button {\n    visibility: hidden !important;\n  }\n\n  .tabbrowser-tab:hover .tab-close-button {\n    visibility: visible !important;\n  }\n\n  /* Toolbars ----------------------------------------------------------- */\n  #TabsToolbar,\n  #nav-bar,\n  #PersonalToolbar {\n    background: var(--clr-bg) !important;\n    backdrop-filter: blur(6px) !important;\n    border: 1px solid rgba(255,255,255,0.08) !important;\n    border-radius: var(--radius) !important;\n    padding: 0 4px !important;\n  }\n\n  /* Address bar -------------------------------------------------------- */\n  #urlbar,\n  #urlbar-input-container {\n    min-height: var(--toolbar-height) !important;\n  }\n\n  #urlbar:not([breakout][breakout-extend]) #urlbar-input {\n    text-align: center !important;\n  }\n\n  /* Icons -------------------------------------------------------------- */\n  .toolbarbutton-icon,\n  .tab-icon-image,\n  .urlbar-icon,\n  .urlbar-page-action > image,\n  .titlebar-button > image {\n    width: var(--icon-size) !important;\n    height: var(--icon-size) !important;\n  }\n  '';
-
-
   # Get the profiles from the Firefox directory
   profilesPath = "${config.home.homeDirectory}/.mozilla/firefox";
   profiles =
@@ -400,7 +395,7 @@ in {
       profiles = {
         "y0usaf" = {
           settings = commonSettings;
-          userChrome = userChromeCss;
+          #          userChrome = userChromeCss;
         };
       };
 
