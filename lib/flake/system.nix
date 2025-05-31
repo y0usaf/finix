@@ -50,7 +50,7 @@ in {
               backupFileExtension = "backup";
               extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
               users.${shared.systemConfigs.${hostname}.cfg.system.username} = {
-                imports = [../../home/home.nix];
+                imports = [../../home];
                 home = {
                   stateVersion = shared.systemConfigs.${hostname}.cfg.system.stateVersion;
                   homeDirectory = inputs.nixpkgs.lib.mkForce shared.systemConfigs.${hostname}.cfg.system.homeDirectory;

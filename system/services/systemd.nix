@@ -30,7 +30,7 @@
     # Add useful systemd analysis tools to system packages
     environment.systemPackages = with pkgs; [
       systemd # For systemd-analyze and other systemd tools
-      (writeShellScriptBin "shutdown-tracker" (builtins.readFile ../../../lib/scripts/shutdown-tracker.sh))
+      (writeShellScriptBin "shutdown-tracker" (builtins.readFile ../../lib/scripts/shutdown-tracker.sh))
     ];
 
     # Configure journald for better logging retention

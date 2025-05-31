@@ -22,7 +22,7 @@ in {
         inherit pkgs;
         extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
         modules = [
-          ../../home/home.nix
+          ../../home
           {
             home = {
               username = shared.systemConfigs.${hostname}.cfg.system.username;

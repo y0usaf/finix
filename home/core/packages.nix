@@ -8,7 +8,7 @@
   hostHome,
   ...
 }: let
-  helpers = import ../../../lib/helpers/module-defs.nix {inherit lib;};
+  helpers = import ../../lib/helpers/module-defs.nix {inherit lib;};
   inherit (helpers) t mkOpt defaultAppModule;
 
   # Extract default applications from hostHome
