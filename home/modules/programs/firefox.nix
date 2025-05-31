@@ -354,16 +354,6 @@
     }
   '';
 
-  LegacyuserChromeCss = ''
-      * {
-      animation: none !important;
-      transition: none !important;
-      scroll-behavior: auto !important;
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-  '';
-
   # Get the profiles from the Firefox directory
   profilesPath = "${config.home.homeDirectory}/.mozilla/firefox";
   profiles =
@@ -405,7 +395,7 @@ in {
       profiles = {
         "y0usaf" = {
           settings = commonSettings;
-          userChrome = LegacyuserChromeCss;
+          userChrome = userChromeCss;
         };
       };
 
