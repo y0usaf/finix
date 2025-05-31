@@ -78,6 +78,7 @@
     // {
       hostSystem = systemConfigs.${hostname};
       hostHome = homeConfigs.${hostname};
+      helpers = pkgs.helpers;
     };
 
   # Generic listToAttrs + map helper

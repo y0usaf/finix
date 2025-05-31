@@ -10,6 +10,10 @@ inputs: let
     overlays = [
       (final: prev: {
         fastFonts = inputs.fast-fonts.packages.${system}.default;
+        helpers = {
+          importDirs = import ../../helpers/import-dirs.nix { lib = prev.lib; };
+          importModules = import ../../helpers/import-modules.nix { lib = prev.lib; };
+        };
       })
     ];
     config.allowUnfree = true;
