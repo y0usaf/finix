@@ -5,6 +5,7 @@
 {
   lib,
   pkgs,
+  helpers,
   hostsDir ? ../../hosts,
 }: let
   # Get all valid host names (excluding special directories and files)
@@ -82,7 +83,7 @@
     // {
       hostSystem = systemConfigs.${hostname};
       hostHome = homeConfigs.${hostname};
-      inherit (pkgs) helpers;
+      inherit helpers;
     };
 
   # Generic listToAttrs + map helper

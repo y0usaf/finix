@@ -10,26 +10,30 @@ inputs: let
     overlays = [
       (_final: prev: {
         fastFonts = inputs.fast-fonts.packages.${system}.default;
-        helpers = {
-          importDirs = import ../../helpers/import-dirs.nix {inherit (prev) lib;};
-          importModules = import ../../helpers/import-modules.nix {inherit (prev) lib;};
-        };
       })
     ];
     config.allowUnfree = true;
     config.cudaSupport = true;
   };
 
+  ## Define helpers separately
+  helpers = {
+    importDirs = import ../../helpers/import-dirs.nix {lib = pkgs.lib;};
+    importModules = import ../../helpers/import-modules.nix {lib = pkgs.lib;};
+  };
+
   ## Import host utilities
   hostUtils = import ../default.nix {
     inherit (pkgs) lib;
     inherit pkgs;
+    inherit helpers;
   };
 
   ## Common Special Arguments for Modules
   commonSpecialArgs = {
     inherit inputs;
     inherit (inputs) whisper-overlay disko fast-fonts;
+    inherit helpers;
   };
 in {
   ## Formatter Setup

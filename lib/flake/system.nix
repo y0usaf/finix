@@ -5,9 +5,10 @@
 {
   lib,
   pkgs,
+  helpers,
   hostsDir ? ../../hosts,
 }: let
-  shared = import ./shared.nix {inherit lib pkgs hostsDir;};
+  shared = import ./shared.nix {inherit lib pkgs helpers hostsDir;};
 in {
   # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {

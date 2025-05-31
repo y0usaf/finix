@@ -5,12 +5,13 @@
 {
   lib,
   pkgs,
+  helpers,
   ...
 }: let
   # Import individual modules
-  shared = import ./shared.nix {inherit lib pkgs;};
-  home = import ./home.nix {inherit lib pkgs;};
-  system = import ./system.nix {inherit lib pkgs;};
+  shared = import ./shared.nix {inherit lib pkgs helpers;};
+  home = import ./home.nix {inherit lib pkgs helpers;};
+  system = import ./system.nix {inherit lib pkgs helpers;};
 in {
   # Export configuration functions
   inherit (shared) hostNames systemConfigs homeConfigs;
