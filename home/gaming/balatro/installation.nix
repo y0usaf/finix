@@ -54,6 +54,18 @@
       src = sources.pokermon;
       name = "Pokermon";
     };
+    stickersalwaysshown = {
+      src = sources."Balatro-Stickers-Always-Shown";
+      name = "StickersAlwaysShown";
+    };
+    handybalatro = {
+      src = sources."HandyBalatro";
+      name = "HandyBalatro";
+    };
+    aura = {
+      src = sources."Aura";
+      name = "Aura";
+    };
     morespeeds = {
       # This is handled via xdg.dataFile, not src
       name = "MoreSpeeds.lua";
@@ -101,7 +113,7 @@ in {
     enabledMods = lib.mkOption {
       type = lib.types.listOf (lib.types.enum (lib.attrNames availableMods));
       default = [];
-      example = ["steamodded" "talisman" "cryptid" "multiplayer" "cardsleeves" "jokerdisplay" "morespeeds" "overlay"];
+      example = ["steamodded" "talisman" "cryptid" "multiplayer" "cardsleeves" "jokerdisplay" "pokermon" "stickersalwaysshown" "handybalatro" "aura" "morespeeds" "overlay"];
       description = ''
         List of mod names to enable. Available mods:
         - steamodded: Steamodded/smods (core modding framework)
@@ -111,6 +123,9 @@ in {
         - cardsleeves: larswijn/CardSleeves
         - jokerdisplay: nh6574/JokerDisplay (shows joker calculations)
         - pokermon: InertSteak/Pokermon (Pokemon-themed jokers)
+        - stickersalwaysshown: SirMaiquis/Balatro-Stickers-Always-Shown (keeps stickers visible on jokers)
+        - handybalatro: SleepyG11/HandyBalatro (Quality of Life controls and shortcuts)
+        - aura: SpectralPack/Aura (visual enhancement mod)
         - morespeeds: MoreSpeeds.lua (custom speed options)
         - overlay: BalatrOverlay.lua (single file)
       '';
