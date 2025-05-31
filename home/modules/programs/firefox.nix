@@ -83,7 +83,7 @@
     "layout.css.shadow-parts.enabled" = true;
   };
 
-  legacyuserChromeCss = ''
+  userChromeCss = ''
     /* Disable all animations */
     * {
       animation: none !important;
@@ -354,7 +354,7 @@
     }
   '';
 
-  userChromeCss = ''
+  LegacyuserChromeCss = ''
       * {
       animation: none !important;
       transition: none !important;
