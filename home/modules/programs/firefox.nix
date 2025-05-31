@@ -83,7 +83,7 @@
     "layout.css.shadow-parts.enabled" = true;
   };
 
-  userChromeCss = ''
+  legacyuserChromeCss = ''
     /* Disable all animations */
     * {
       animation: none !important;
@@ -351,6 +351,16 @@
     #urlbar-background,#urlbar-input-container {
         --toolbarbutton-border-radius: 0pt!important;
         --urlbar-icon-border-radius: 0pt!important
+    }
+  '';
+
+  userChromeCss = ''
+      * {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
     }
   '';
 
