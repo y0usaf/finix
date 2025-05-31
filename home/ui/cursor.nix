@@ -34,20 +34,27 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Configuration
     ###########################################################################
-    home.packages = [hyprcursorPackage xcursorPackage];
+    home = {
+      packages = [hyprcursorPackage xcursorPackage];
 
-    ###########################################################################
-    # Cursor Configuration
-    ###########################################################################
-    home.pointerCursor = {
-      name = x11ThemeName;
-      package = xcursorPackage;
-      size = hostHome.cfg.appearance.cursorSize;
+      pointerCursor = {
+        name = x11ThemeName;
+        package = xcursorPackage;
+        size = hostHome.cfg.appearance.cursorSize;
 
-      gtk.enable = true;
-      x11.enable = true;
+        gtk.enable = true;
+        x11.enable = true;
+      };
+
+      # Environment variables for proper Hyprland cursor support
+      sessionVariables = {
+        HYPRCURSOR_THEME = lib.mkForce hyprThemeName;
+        HYPRCURSOR_SIZE = lib.mkForce (toString hostHome.cfg.appearance.cursorSize);
+        XCURSOR_THEME = lib.mkForce x11ThemeName;
+        XCURSOR_SIZE = lib.mkForce (toString hostHome.cfg.appearance.cursorSize);
+      };
     };
 
     # Separate GTK cursor configuration for X11 compatibility
@@ -55,14 +62,6 @@ in {
       name = x11ThemeName;
       package = xcursorPackage;
       size = hostHome.cfg.appearance.cursorSize;
-    };
-
-    # Environment variables for proper Hyprland cursor support
-    home.sessionVariables = {
-      HYPRCURSOR_THEME = lib.mkForce hyprThemeName;
-      HYPRCURSOR_SIZE = lib.mkForce (toString hostHome.cfg.appearance.cursorSize);
-      XCURSOR_THEME = lib.mkForce x11ThemeName;
-      XCURSOR_SIZE = lib.mkForce (toString hostHome.cfg.appearance.cursorSize);
     };
   };
 }

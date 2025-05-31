@@ -123,7 +123,7 @@ in {
     # Shell Environment Configuration
     ###########################################################################
     programs.zsh = {
-      envExtra = lib.mkIf (hostSystem.cfg.hardware.nvidia.enable) ''
+      envExtra = lib.mkIf hostSystem.cfg.hardware.nvidia.enable ''
         # Hyprland NVIDIA environment variables
         export LIBVA_DRIVER_NAME=nvidia
         export XDG_SESSION_TYPE=wayland

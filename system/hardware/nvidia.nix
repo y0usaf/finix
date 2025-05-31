@@ -48,52 +48,70 @@
       pkgs.cudatoolkit
     ];
 
-    # Make CUDA available system-wide
-    environment.systemPackages = lib.optionals (hostSystem.cfg.hardware.nvidia.cuda.enable or false) [
-      pkgs.cudaPackages.cudnn
-    ];
+    ###########################################################################
+    # Environment Configuration
+    ###########################################################################
+    environment = {
+      # Make CUDA available system-wide
+      systemPackages = lib.optionals (hostSystem.cfg.hardware.nvidia.cuda.enable or false) [
+        pkgs.cudaPackages.cudnn
+      ];
 
-    ###########################################################################
-    # NVIDIA Application Profiles
-    # Create the NVIDIA application profiles configuration file
-    # This creates a custom profile for preventing video memory reuse
-    ###########################################################################
-    environment.etc = {
-      # Use lib.mkForce to override any conflicting settings
-      "nvidia/nvidia-application-profiles-rc".text = lib.mkForce ''
-        {
-          "rules": [
-            {
-              "pattern": {
-                "feature": "procname",
-                "matches": ".Hyprland-wrapped"
+      # NVIDIA Application Profiles
+      # Create the NVIDIA application profiles configuration file
+      # This creates a custom profile for preventing video memory reuse
+      etc = {
+        # Use lib.mkForce to override any conflicting settings
+        "nvidia/nvidia-application-profiles-rc".text = lib.mkForce ''
+          {
+            "rules": [
+              {
+                "pattern": {
+                  "feature": "procname",
+                  "matches": ".Hyprland-wrapped"
+                },
+                "profile": "No VidMem Reuse"
               },
-              "profile": "No VidMem Reuse"
-            },
-            {
-              "pattern": {
-                "feature": "procname",
-                "matches": "electron"
+              {
+                "pattern": {
+                  "feature": "procname",
+                  "matches": "electron"
+                },
+                "profile": "No VidMem Reuse"
               },
-              "profile": "No VidMem Reuse"
-            },
-            {
-              "pattern": {
-                "feature": "procname",
-                "matches": ".firefox-wrapped"
+              {
+                "pattern": {
+                  "feature": "procname",
+                  "matches": ".firefox-wrapped"
+                },
+                "profile": "No VidMem Reuse"
               },
-              "profile": "No VidMem Reuse"
-            },
-            {
-              "pattern": {
-                "feature": "procname",
-                "matches": "firefox"
-              },
-              "profile": "No VidMem Reuse"
-            }
-          ]
-        }
-      '';
+              {
+                "pattern": {
+                  "feature": "procname",
+                  "matches": "firefox"
+                },
+                "profile": "No VidMem Reuse"
+              }
+            ]
+          }
+        '';
+      };
+
+      # NVIDIA-specific environment settings for Wayland compatibility
+      variables = {
+        # Enable NVIDIA on Wayland
+        GBM_BACKEND = "nvidia-drm";
+        LIBVA_DRIVER_NAME = "nvidia";
+        WLR_NO_HARDWARE_CURSORS = "1";
+        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+        # Additional NVIDIA capabilities
+        NVIDIA_DRIVER_CAPABILITIES = "all";
+        # Waydroid-specific NVIDIA settings
+        WAYDROID_EXTRA_ARGS = "--gpu-mode host";
+        GALLIUM_DRIVER = "nvidia";
+        LIBGL_DRIVER_NAME = "nvidia";
+      };
     };
 
     ###########################################################################
@@ -114,23 +132,5 @@
         }
       });
     '';
-
-    ###########################################################################
-    # Environment Variables
-    # NVIDIA-specific environment settings for Wayland compatibility
-    ###########################################################################
-    environment.variables = {
-      # Enable NVIDIA on Wayland
-      GBM_BACKEND = "nvidia-drm";
-      LIBVA_DRIVER_NAME = "nvidia";
-      WLR_NO_HARDWARE_CURSORS = "1";
-      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-      # Additional NVIDIA capabilities
-      NVIDIA_DRIVER_CAPABILITIES = "all";
-      # Waydroid-specific NVIDIA settings
-      WAYDROID_EXTRA_ARGS = "--gpu-mode host";
-      GALLIUM_DRIVER = "nvidia";
-      LIBGL_DRIVER_NAME = "nvidia";
-    };
   };
 }

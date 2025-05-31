@@ -37,8 +37,8 @@
             # Move imports into system scope to avoid HM exposure
             imports = unifiedConfigs.${name}.imports or [];
           };
-          hardware = unifiedConfigs.${name}.cfg.system.hardware;
-          core = unifiedConfigs.${name}.cfg.core;
+          inherit (unifiedConfigs.${name}.cfg.system) hardware;
+          inherit (unifiedConfigs.${name}.cfg) core;
         };
         users = unifiedConfigs.${name}.users or {};
       };
@@ -54,7 +54,7 @@
       value = {
         cfg = unifiedConfigs.${name}.cfg.home // {
           # Include shared core config in home as well
-          core = unifiedConfigs.${name}.cfg.core;
+          inherit (unifiedConfigs.${name}.cfg) core;
         };
       };
     })
@@ -78,7 +78,7 @@
     // {
       hostSystem = systemConfigs.${hostname};
       hostHome = homeConfigs.${hostname};
-      helpers = pkgs.helpers;
+      inherit (pkgs) helpers;
     };
 
   # Generic listToAttrs + map helper

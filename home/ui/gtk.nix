@@ -20,7 +20,7 @@
   # Extract common variables from the hostHome for reusability
   #############################################################
   mainFontName = (builtins.elemAt hostHome.cfg.appearance.fonts.main 0).name;
-  baseFontSize = hostHome.cfg.appearance.baseFontSize;
+  inherit (hostHome.cfg.appearance) baseFontSize;
   dpiStr = toString hostHome.cfg.appearance.dpi;
 
   # Get the scaling factor from config (defaults to 1.0)
@@ -102,7 +102,7 @@ in {
           gtk-application-prefer-dark-theme = 1;
         };
 
-        bookmarks = hostHome.cfg.user.bookmarks;
+        inherit (hostHome.cfg.user) bookmarks;
 
         # ---------------------------------------------------------------
         # Custom CSS for GTK3 applications

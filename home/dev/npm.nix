@@ -25,15 +25,35 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Configuration
     ###########################################################################
-    home.packages = with pkgs; [
-      nodejs_20
-    ];
+    home = {
+      packages = with pkgs; [
+        nodejs_20
+      ];
 
-    ###########################################################################
-    # Configuration Files
-    ###########################################################################
+      # Add npm bin directory to PATH
+      sessionPath = [
+        "${config.xdg.dataHome}/npm/bin"
+      ];
+
+      # Set up NPM directories
+      activation.npmSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        # Set up environment for npm
+        export PATH=$PATH:${pkgs.nodejs_20}/bin
+        export NPM_CONFIG_PREFIX=${config.xdg.dataHome}/npm
+        export NPM_CONFIG_CACHE=${config.xdg.cacheHome}/npm
+        export NPM_CONFIG_USERCONFIG=${config.xdg.configHome}/npm/npmrc
+        export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
+
+        # Ensure directories exist with proper permissions
+        mkdir -p ${config.xdg.dataHome}/npm
+        mkdir -p ${config.xdg.cacheHome}/npm
+        mkdir -p ${config.xdg.configHome}/npm/config
+        mkdir -p "$XDG_RUNTIME_DIR/npm"
+      '';
+    };
+
     # NPM global config - use XDG directories
     xdg.configFile."npm/npmrc".text = ''
       prefix=${config.xdg.dataHome}/npm
@@ -42,14 +62,6 @@ in {
       store-dir=${config.xdg.cacheHome}/pnpm/store
     '';
 
-    ###########################################################################
-    # Environment Variables
-    ###########################################################################
-    # Add npm bin directory to PATH
-    home.sessionPath = [
-      "${config.xdg.dataHome}/npm/bin"
-    ];
-
     # Configure ZSH environment variables for NPM
     programs.zsh = {
       envExtra = ''
@@ -57,24 +69,5 @@ in {
         export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
       '';
     };
-
-    ###########################################################################
-    # Activation Scripts
-    ###########################################################################
-    # Set up NPM directories
-    home.activation.npmSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      # Set up environment for npm
-      export PATH=$PATH:${pkgs.nodejs_20}/bin
-      export NPM_CONFIG_PREFIX=${config.xdg.dataHome}/npm
-      export NPM_CONFIG_CACHE=${config.xdg.cacheHome}/npm
-      export NPM_CONFIG_USERCONFIG=${config.xdg.configHome}/npm/npmrc
-      export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
-
-      # Ensure directories exist with proper permissions
-      mkdir -p ${config.xdg.dataHome}/npm
-      mkdir -p ${config.xdg.cacheHome}/npm
-      mkdir -p ${config.xdg.configHome}/npm/config
-      mkdir -p "$XDG_RUNTIME_DIR/npm"
-    '';
   };
 }

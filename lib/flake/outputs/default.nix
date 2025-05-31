@@ -1,5 +1,5 @@
 inputs: let
-  lib = inputs.nixpkgs.lib;
+  inherit (inputs.nixpkgs) lib;
   
   ## Shared Configuration
   system = "x86_64-linux";
@@ -11,8 +11,8 @@ inputs: let
       (final: prev: {
         fastFonts = inputs.fast-fonts.packages.${system}.default;
         helpers = {
-          importDirs = import ../../helpers/import-dirs.nix { lib = prev.lib; };
-          importModules = import ../../helpers/import-modules.nix { lib = prev.lib; };
+          importDirs = import ../../helpers/import-dirs.nix { inherit (prev) lib; };
+          importModules = import ../../helpers/import-modules.nix { inherit (prev) lib; };
         };
       })
     ];
@@ -22,16 +22,14 @@ inputs: let
 
   ## Import host utilities
   hostUtils = import ../default.nix {
-    lib = pkgs.lib;
+    inherit (pkgs) lib;
     inherit pkgs;
   };
 
   ## Common Special Arguments for Modules
   commonSpecialArgs = {
-    inputs = inputs;
-    whisper-overlay = inputs.whisper-overlay;
-    disko = inputs.disko;
-    fast-fonts = inputs.fast-fonts;
+    inherit inputs;
+    inherit (inputs) whisper-overlay disko fast-fonts;
   };
 in {
   ## Formatter Setup
@@ -39,13 +37,11 @@ in {
 
   ## NixOS Configurations
   nixosConfigurations = hostUtils.mkNixosConfigurations {
-    inputs = inputs;
-    inherit system commonSpecialArgs;
+    inherit inputs system commonSpecialArgs;
   };
 
   ## Dynamic Home Manager Configurations
   homeConfigurations = hostUtils.mkHomeConfigurations {
-    inputs = inputs;
-    inherit pkgs commonSpecialArgs;
+    inherit inputs pkgs commonSpecialArgs;
   };
 }

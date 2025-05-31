@@ -223,20 +223,22 @@ in {
     ###########################################################################
     # Shell Configuration
     ###########################################################################
-    programs.zsh.shellAliases = {
-      music = "zellij --layout music";
-      # Kill all zellij sessions except the active one
-      zk = "for session in $(zellij list-sessions | grep -v '(current)' | awk '{print $1}'); do zellij kill-session $session; done";
-      # Kill ALL zellij sessions (for shutdown)
-      zka = "zellij kill-all-sessions";
-      # Clean shutdown of zellij
-      zq = "zellij kill-all-sessions && pkill -f zellij";
+    programs.zsh = {
+      shellAliases = {
+        music = "zellij --layout music";
+        # Kill all zellij sessions except the active one
+        zk = "for session in $(zellij list-sessions | grep -v '(current)' | awk '{print $1}'); do zellij kill-session $session; done";
+        # Kill ALL zellij sessions (for shutdown)
+        zka = "zellij kill-all-sessions";
+        # Clean shutdown of zellij
+        zq = "zellij kill-all-sessions && pkill -f zellij";
+      };
+      
+      # Add cleanup to shell logout
+      logoutExtra = ''
+        # Clean up Zellij sessions on logout
+        zellij kill-all-sessions 2>/dev/null || true
+      '';
     };
-    
-    # Add cleanup to shell logout
-    programs.zsh.logoutExtra = ''
-      # Clean up Zellij sessions on logout
-      zellij kill-all-sessions 2>/dev/null || true
-    '';
   };
 }

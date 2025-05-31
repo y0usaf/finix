@@ -25,9 +25,9 @@
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
 
     # Nvidia-specific settings
-    "gfx.webrender.all" = !(profile.cfg.core.nvidia.enable);
-    "media.hardware-video-decoding.enabled" = !(profile.cfg.core.nvidia.enable);
-    "media.ffmpeg.vaapi.enabled" = !(profile.cfg.core.nvidia.enable);
+    "gfx.webrender.all" = !profile.cfg.core.nvidia.enable;
+    "media.hardware-video-decoding.enabled" = !profile.cfg.core.nvidia.enable;
+    "media.ffmpeg.vaapi.enabled" = !profile.cfg.core.nvidia.enable;
     "layers.acceleration.disabled" = profile.cfg.core.nvidia.enable;
   };
 

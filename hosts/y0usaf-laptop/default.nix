@@ -6,7 +6,7 @@ in {
   cfg = {
     # SYSTEM CONFIGURATION (includes hardware)
     system = {
-      username = username;
+      inherit username;
       homeDirectory = homeDir;
       hostname = "y0usaf-laptop";
       stateVersion = "24.11";

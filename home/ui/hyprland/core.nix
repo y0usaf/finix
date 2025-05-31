@@ -106,7 +106,7 @@ in {
       ###########################################################################
       # NVIDIA-specific environment settings
       ###########################################################################
-      env = lib.mkIf (hostSystem.cfg.hardware.nvidia.enable) [
+      env = lib.mkIf hostSystem.cfg.hardware.nvidia.enable [
         "LIBVA_DRIVER_NAME,nvidia"
         "GBM_BACKEND,nvidia-drm"
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"

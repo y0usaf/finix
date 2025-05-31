@@ -53,9 +53,7 @@
   };
 
   config.home = {
-    username = config.cfg.system.username;
-    homeDirectory = config.cfg.system.homeDirectory;
-    stateVersion = config.cfg.system.stateVersion;
+    inherit (config.cfg.system) username homeDirectory stateVersion;
     enableNixpkgsReleaseCheck = false;
   };
 }

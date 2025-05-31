@@ -31,53 +31,58 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Configuration
     ###########################################################################
-    home.packages = with pkgs; [
-      nodejs_20
-      uv
-    ];
+    home = {
+      ###########################################################################
+      # Packages
+      ###########################################################################
+      packages = with pkgs; [
+        nodejs_20
+        uv
+      ];
 
-    ###########################################################################
-    # MCP Configuration (JSON file)
-    ###########################################################################
-    home.file.".cursor/mcp.json" = {
-      text = builtins.toJSON {
-        mcpServers = {
-          "Brave Search" = {
-            command = "npx";
-            args = ["-y" "@modelcontextprotocol/server-brave-search"];
-            env = {BRAVE_API_KEY = cfg.braveApiKey;};
-          };
-          "Filesystem" = {
-            command = "npx";
-            args = ["-y" "@modelcontextprotocol/server-filesystem" "~"];
-          };
-          "Nixos MCP" = {
-            command = "uvx";
-            args = ["mcp-nixos"];
-          };
-          "sequential-thinking" = {
-            command = "npx";
-            args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
-          };
-          "Memory" = {
-            command = "npx";
-            args = ["-y" "@modelcontextprotocol/server-memory"];
+      ###########################################################################
+      # MCP Configuration (JSON file)
+      ###########################################################################
+      file.".cursor/mcp.json" = {
+        text = builtins.toJSON {
+          mcpServers = {
+            "Brave Search" = {
+              command = "npx";
+              args = ["-y" "@modelcontextprotocol/server-brave-search"];
+              env = {BRAVE_API_KEY = cfg.braveApiKey;};
+            };
+            "Filesystem" = {
+              command = "npx";
+              args = ["-y" "@modelcontextprotocol/server-filesystem" "~"];
+            };
+            "Nixos MCP" = {
+              command = "uvx";
+              args = ["mcp-nixos"];
+            };
+            "sequential-thinking" = {
+              command = "npx";
+              args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
+            };
+            "Memory" = {
+              command = "npx";
+              args = ["-y" "@modelcontextprotocol/server-memory"];
+            };
           };
         };
       };
-    };
 
-    ###########################################################################
-    # Environment Setup
-    ###########################################################################
-    home.sessionPath = [
-      "${config.xdg.dataHome}/npm/bin"
-    ];
+      ###########################################################################
+      # Environment Setup
+      ###########################################################################
+      sessionPath = [
+        "${config.xdg.dataHome}/npm/bin"
+      ];
 
-    home.sessionVariables = {
-      BRAVE_API_KEY = cfg.braveApiKey;
+      sessionVariables = {
+        BRAVE_API_KEY = cfg.braveApiKey;
+      };
     };
   };
 }

@@ -66,7 +66,7 @@ in {
 
       extraConfig = {
         core = {
-          editor = hostHome.cfg.defaults.editor;
+          inherit (hostHome.cfg.defaults) editor;
         };
         init.defaultBranch = "main";
         pull.rebase = true;

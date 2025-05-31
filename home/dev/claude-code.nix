@@ -26,26 +26,22 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Configuration
     ###########################################################################
-    home.packages = with pkgs; [
-      nodejs_20
-    ];
+    home = {
+      packages = with pkgs; [
+        nodejs_20
+      ];
 
-    ###########################################################################
-    # Installation
-    ###########################################################################
-    home.activation.installClaudeCode = lib.hm.dag.entryAfter ["npmSetup"] ''
-      # Install Claude Code and Brave Search globally via npm
-      ${pkgs.nodejs_20}/bin/npm install -g @anthropic-ai/claude-code @modelcontextprotocol/server-brave-search
-    '';
+      activation.installClaudeCode = lib.hm.dag.entryAfter ["npmSetup"] ''
+        # Install Claude Code and Brave Search globally via npm
+        ${pkgs.nodejs_20}/bin/npm install -g @anthropic-ai/claude-code @modelcontextprotocol/server-brave-search
+      '';
 
-    ###########################################################################
-    # Environment Configuration
-    ###########################################################################
-    # Add npm bin directory to PATH to ensure claude-code is accessible
-    home.sessionPath = [
-      "${config.xdg.dataHome}/npm/bin"
-    ];
+      # Add npm bin directory to PATH to ensure claude-code is accessible
+      sessionPath = [
+        "${config.xdg.dataHome}/npm/bin"
+      ];
+    };
   };
 }

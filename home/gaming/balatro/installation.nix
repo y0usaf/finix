@@ -211,44 +211,47 @@ end
 ------------MOD CODE END----------------------
       '';
     };
-    # Symlink enabled mods from Nix store
-    home.activation.balatroMods = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      # Create mods directory
-      mkdir -p "${balatroModsPath}"
-
-      # Clean existing mods - remove ALL existing symlinks and directories first
-      find "${balatroModsPath}" -mindepth 1 -maxdepth 1 -exec rm -rf {} \; 2>/dev/null || true
-
+    # Configuration
+    home = {
       # Symlink enabled mods from Nix store
-      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: mod: ''
-          if [ -e "${balatroModsPackage}/${mod.name}" ]; then
-            ln -sf "${balatroModsPackage}/${mod.name}" "${balatroModsPath}/${mod.name}"
-          fi
-        '')
-        enabledMods)}
+      activation.balatroMods = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        # Create mods directory
+        mkdir -p "${balatroModsPath}"
 
-      echo "Balatro mods installed: ${lib.concatStringsSep ", " cfg.enabledMods}"
-    '';
+        # Clean existing mods - remove ALL existing symlinks and directories first
+        find "${balatroModsPath}" -mindepth 1 -maxdepth 1 -exec rm -rf {} \; 2>/dev/null || true
 
-    # Lovely Injector activation
-    home.activation.lovelyInjector = lib.mkIf cfg.enableLovelyInjector (
-      lib.hm.dag.entryAfter ["writeBoundary"] ''
-        # Create game directory
-        mkdir -p "${balatroGamePath}"
+        # Symlink enabled mods from Nix store
+        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: mod: ''
+            if [ -e "${balatroModsPackage}/${mod.name}" ]; then
+              ln -sf "${balatroModsPackage}/${mod.name}" "${balatroModsPath}/${mod.name}"
+            fi
+          '')
+          enabledMods)}
 
-        # Symlink version.dll from Nix store
-        ln -sf "${lovelyInjectorPackage}/version.dll" "${balatroGamePath}/version.dll"
+        echo "Balatro mods installed: ${lib.concatStringsSep ", " cfg.enabledMods}"
+      '';
 
-        echo "Lovely Injector installed"
-      ''
-    );
+      # Lovely Injector activation
+      activation.lovelyInjector = lib.mkIf cfg.enableLovelyInjector (
+        lib.hm.dag.entryAfter ["writeBoundary"] ''
+          # Create game directory
+          mkdir -p "${balatroGamePath}"
 
-    # Add packages to environment
-    home.packages = with pkgs;
-      [
-        # The mod package itself
-        balatroModsPackage
-      ]
-      ++ lib.optional cfg.enableLovelyInjector lovelyInjectorPackage;
+          # Symlink version.dll from Nix store
+          ln -sf "${lovelyInjectorPackage}/version.dll" "${balatroGamePath}/version.dll"
+
+          echo "Lovely Injector installed"
+        ''
+      );
+
+      # Add packages to environment
+      packages = with pkgs;
+        [
+          # The mod package itself
+          balatroModsPackage
+        ]
+        ++ lib.optional cfg.enableLovelyInjector lovelyInjectorPackage;
+    };
   };
 }

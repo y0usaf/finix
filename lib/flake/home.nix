@@ -25,9 +25,7 @@ in {
           ../../home
           {
             home = {
-              username = shared.systemConfigs.${hostname}.cfg.system.username;
-              homeDirectory = shared.systemConfigs.${hostname}.cfg.system.homeDirectory;
-              stateVersion = shared.systemConfigs.${hostname}.cfg.system.stateVersion;
+              inherit (shared.systemConfigs.${hostname}.cfg.system) username homeDirectory stateVersion;
             };
           }
         ];

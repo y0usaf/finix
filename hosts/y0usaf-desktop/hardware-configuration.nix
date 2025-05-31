@@ -44,60 +44,63 @@
     ];
   };
 
-  #── 💽 Root Filesystem ──────────────────#
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
-    fsType = "btrfs";
-    options = ["subvol=@"];
-  };
+  #── 💽 Filesystem Configuration ──────────────────#
+  fileSystems = {
+    #── 💽 Root Filesystem ──────────────────#
+    "/" = {
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      fsType = "btrfs";
+      options = ["subvol=@"];
+    };
 
-  #── 🏠 Home Directory ──────────────────#
-  fileSystems."/home" = {
-    device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
-    fsType = "btrfs";
-    options = ["subvol=@home"];
-  };
+    #── 🏠 Home Directory ──────────────────#
+    "/home" = {
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      fsType = "btrfs";
+      options = ["subvol=@home"];
+    };
 
-  #── 🔄 Boot Partition ─────────────────#
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/31F2-1AE7";
-    fsType = "vfat";
-    options = ["fmask=0077" "dmask=0077"];
-  };
+    #── 🔄 Boot Partition ─────────────────#
+    "/boot" = {
+      device = "/dev/disk/by-uuid/31F2-1AE7";
+      fsType = "vfat";
+      options = ["fmask=0077" "dmask=0077"];
+    };
 
-  #── 📸 Pictures Directory ─────────────#
-  fileSystems."/home/y0usaf/Pictures" = {
-    device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
-    fsType = "btrfs";
-    options = ["subvol=@pictures"];
-  };
+    #── 📸 Pictures Directory ─────────────#
+    "/home/y0usaf/Pictures" = {
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
+      fsType = "btrfs";
+      options = ["subvol=@pictures"];
+    };
 
-  #── 📷 DCIM Directory ──────────────────#
-  fileSystems."/home/y0usaf/DCIM" = {
-    device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
-    fsType = "btrfs";
-    options = ["subvol=@dcim"];
-  };
+    #── 📷 DCIM Directory ──────────────────#
+    "/home/y0usaf/DCIM" = {
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
+      fsType = "btrfs";
+      options = ["subvol=@dcim"];
+    };
 
-  #── 🎵 Music Directory ─────────────────#
-  fileSystems."/home/y0usaf/Music" = {
-    device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
-    fsType = "btrfs";
-    options = ["subvol=@music"];
-  };
+    #── 🎵 Music Directory ─────────────────#
+    "/home/y0usaf/Music" = {
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
+      fsType = "btrfs";
+      options = ["subvol=@music"];
+    };
 
-  #── 🎮 Steam Directory ─────────────────#
-  fileSystems."/home/y0usaf/.local/share/Steam" = {
-    device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
-    fsType = "btrfs";
-    options = ["subvol=@steam"];
-  };
+    #── 🎮 Steam Directory ─────────────────#
+    "/home/y0usaf/.local/share/Steam" = {
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
+      fsType = "btrfs";
+      options = ["subvol=@steam"];
+    };
 
-  #── 💾 Swap Configuration ──────────────#
-  fileSystems."/swap" = {
-    device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
-    fsType = "btrfs";
-    options = ["subvol=@swap" "nodatacow"];
+    #── 💾 Swap Configuration ──────────────#
+    "/swap" = {
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      fsType = "btrfs";
+      options = ["subvol=@swap" "nodatacow"];
+    };
   };
 
   swapDevices = [

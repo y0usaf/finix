@@ -27,41 +27,49 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Configuration
     ###########################################################################
-    home.packages = with pkgs; [
-      # Core CUDA toolkit
-      cudaPackages.cudatoolkit
-      # Development tools
-      cudaPackages.cuda_nvcc
-      # Additional libraries
-      cudaPackages.libcublas
-      cudaPackages.libcufft
-      cudaPackages.libcurand
-      cudaPackages.libcusparse
-      # Debugging and profiling
-      cudaPackages.cuda_gdb
-    ];
+    home = {
+      packages = with pkgs; [
+        # Core CUDA toolkit
+        cudaPackages.cudatoolkit
+        # Development tools
+        cudaPackages.cuda_nvcc
+        # Additional libraries
+        cudaPackages.libcublas
+        cudaPackages.libcufft
+        cudaPackages.libcurand
+        cudaPackages.libcusparse
+        # Debugging and profiling
+        cudaPackages.cuda_gdb
+      ];
 
-    ###########################################################################
-    # Environment Variables
-    ###########################################################################
-    home.sessionVariables = {
-      CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
-      CUDA_HOME = "${pkgs.cudaPackages.cudatoolkit}";
-      # Add CUDA to library path
-      LD_LIBRARY_PATH =
-        lib.makeLibraryPath [
-          "${pkgs.cudaPackages.cudatoolkit}/lib"
-          "${pkgs.cudaPackages.libcublas}/lib"
-        ]
-        + ":$LD_LIBRARY_PATH";
+      sessionVariables = {
+        CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
+        CUDA_HOME = "${pkgs.cudaPackages.cudatoolkit}";
+        # Add CUDA to library path
+        LD_LIBRARY_PATH =
+          lib.makeLibraryPath [
+            "${pkgs.cudaPackages.cudatoolkit}/lib"
+            "${pkgs.cudaPackages.libcublas}/lib"
+          ]
+          + ":$LD_LIBRARY_PATH";
+      };
+
+      # Add CUDA to PATH
+      sessionPath = [
+        "${pkgs.cudaPackages.cudatoolkit}/bin"
+      ];
+
+      ###########################################################################
+      # Activation Scripts
+      ###########################################################################
+      activation.createCudaDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD mkdir -p ${config.xdg.cacheHome}/nv
+        $DRY_RUN_CMD mkdir -p ${config.xdg.cacheHome}/nvidia
+        $DRY_RUN_CMD mkdir -p ${config.xdg.dataHome}/cuda
+      '';
     };
-
-    # Add CUDA to PATH
-    home.sessionPath = [
-      "${pkgs.cudaPackages.cudatoolkit}/bin"
-    ];
 
     programs.zsh = {
       envExtra = ''
@@ -80,14 +88,5 @@ in {
         export LIBRARY_PATH="${pkgs.cudaPackages.cudatoolkit}/lib:$LIBRARY_PATH"
       '';
     };
-
-    ###########################################################################
-    # Activation Scripts
-    ###########################################################################
-    home.activation.createCudaDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD mkdir -p ${config.xdg.cacheHome}/nv
-      $DRY_RUN_CMD mkdir -p ${config.xdg.cacheHome}/nvidia
-      $DRY_RUN_CMD mkdir -p ${config.xdg.dataHome}/cuda
-    '';
   };
 }

@@ -52,11 +52,11 @@ in {
               users.${shared.systemConfigs.${hostname}.cfg.system.username} = {
                 imports = [../../home];
                 home = {
-                  stateVersion = shared.systemConfigs.${hostname}.cfg.system.stateVersion;
+                  inherit (shared.systemConfigs.${hostname}.cfg.system) stateVersion;
                   homeDirectory = inputs.nixpkgs.lib.mkForce shared.systemConfigs.${hostname}.cfg.system.homeDirectory;
                 };
                 # Apply unified home configuration
-                cfg = shared.homeConfigs.${hostname}.cfg;
+                inherit (shared.homeConfigs.${hostname}) cfg;
               };
             };
           }

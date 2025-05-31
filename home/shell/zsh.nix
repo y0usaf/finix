@@ -82,7 +82,7 @@ in {
       # as environment variables.
       envExtra = let
         # Get the token directory path from the core env module options
-        tokenDir = config.cfg.core.env.tokenDir;
+        inherit (config.cfg.core.env) tokenDir;
         # --- Common token management function (from env.nix) ---
         tokenFunctionScript = ''
           # Token management function
@@ -111,13 +111,13 @@ in {
           "y0usaf-desktop")
             sudo nvidia-smi -pl 150
             # Only launch Hyprland if we're in a TTY and the feature is enabled
-            if [ "$(tty)" = "/dev/tty1" ] && ${lib.optionalString (hostHome.cfg.ui.hyprland.enable) "true"}; then
+            if [ "$(tty)" = "/dev/tty1" ] && ${lib.optionalString hostHome.cfg.ui.hyprland.enable "true"}; then
               Hyprland
             fi
             ;;
           "y0usaf-laptop")
             # Only launch Hyprland if we're in a TTY and the feature is enabled
-            if [ "$(tty)" = "/dev/tty1" ] && ${lib.optionalString (hostHome.cfg.ui.hyprland.enable) "true"}; then
+            if [ "$(tty)" = "/dev/tty1" ] && ${lib.optionalString hostHome.cfg.ui.hyprland.enable "true"}; then
               Hyprland
             fi
             ;;
