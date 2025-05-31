@@ -131,7 +131,7 @@ in {
         balatro = {
           enable = true;
           enableLovelyInjector = true;
-          enabledMods = ["steamodded" "talisman" "morespeeds" "overlay" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "handybalatro" "stickersalwaysshown"];
+          enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "handybalatro" "stickersalwaysshown"];
         };
       };
 

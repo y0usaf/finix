@@ -19,11 +19,6 @@
 
   # Simple fetchurl for .lua files (npins doesn't handle raw files well)
 
-  overlayLua = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/cantlookback/BalatrOverlay/refs/heads/main/balatroverlay.lua";
-    sha256 = "1dx9sy84w1w77klfqmkmnalfvagpb1p9biazm6sakdz6d44470b7";
-  };
-
   # Available mods - much simpler than before!
   availableMods = {
     steamodded = {
@@ -70,10 +65,6 @@
       # This is handled via xdg.dataFile, not src
       name = "MoreSpeeds.lua";
     };
-    overlay = {
-      src = overlayLua;
-      name = "balatroverlay.lua";
-    };
   };
 
   # Get enabled mods based on the list (excluding morespeeds which is handled via xdg.dataFile)
@@ -113,7 +104,7 @@ in {
     enabledMods = lib.mkOption {
       type = lib.types.listOf (lib.types.enum (lib.attrNames availableMods));
       default = [];
-      example = ["steamodded" "talisman" "cryptid" "multiplayer" "cardsleeves" "jokerdisplay" "pokermon" "stickersalwaysshown" "handybalatro" "aura" "morespeeds" "overlay"];
+      example = ["steamodded" "talisman" "cryptid" "multiplayer" "cardsleeves" "jokerdisplay" "pokermon" "stickersalwaysshown" "handybalatro" "aura" "morespeeds"];
       description = ''
         List of mod names to enable. Available mods:
         - steamodded: Steamodded/smods (core modding framework)
@@ -127,7 +118,6 @@ in {
         - handybalatro: SleepyG11/HandyBalatro (Quality of Life controls and shortcuts)
         - aura: SpectralPack/Aura (visual enhancement mod)
         - morespeeds: MoreSpeeds.lua (custom speed options)
-        - overlay: BalatrOverlay.lua (single file)
       '';
     };
   };

@@ -45,18 +45,6 @@
       "url": "https://api.github.com/repos/SleepyG11/HandyBalatro/tarball/v1.4.2",
       "hash": "080qhrqp7bh7ckxwhvkrpiqpzq41qijn92swvqp423cr558iwjv3"
     },
-    "balatroverlay": {
-      "type": "Git",
-      "repository": {
-        "type": "Git",
-        "url": "https://github.com/cantlookback/BalatrOverlay.git"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "abeacd973e126e6090c89ffb6d74de238a54b9f5",
-      "url": null,
-      "hash": "0q4ry98j21q47gg6p41557gi0sj5gnk0zqgs3kjcq2asikklzm6y"
-    },
     "cardsleeves": {
       "type": "Git",
       "repository": {
