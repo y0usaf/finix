@@ -2,17 +2,13 @@
   config,
   lib,
   pkgs,
-  host,
   ...
 }: {
   options.cfg.programs.bambu.enable = lib.mkEnableOption "Bambu Studio";
 
   config = lib.mkIf config.cfg.programs.bambu.enable (
     let
-      _ =
-        lib.assertMsg (builtins.pathExists "${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json")
-        "FATAL: Mesa EGL vendor file is required for Bambu Studio to build. Expected at: ${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json\nThis package will not build without it. Please ensure mesa is available.";
-      bambuStudio = pkgs.bambu-studio.overrideAttrs (oldAttrs: {
+      bambuStudio = pkgs.bambu-studio.overrideAttrs (_oldAttrs: {
         version = "01.00.01.50";
         src = pkgs.fetchFromGitHub {
           owner = "bambulab";

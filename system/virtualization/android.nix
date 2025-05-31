@@ -4,10 +4,7 @@
 # - Waydroid Android emulation
 ###############################################################################
 {
-  config,
   lib,
-  pkgs,
-  hostSystem,
   hostHome,
   ...
 }: {

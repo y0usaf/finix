@@ -1,10 +1,6 @@
 # /home/y0usaf/nixos/modules/home/gaming/marvel-rivals/gameusersettings.nix
 # Manages the Marvel Rivals GameUserSettings.ini file
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{lib, ...}: {
   xdg.dataFile."Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini" = {
     text = lib.generators.toINI {} {
       "Internationalization" = {

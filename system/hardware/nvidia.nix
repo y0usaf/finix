@@ -11,7 +11,6 @@
   lib,
   pkgs,
   hostSystem,
-  hostHome,
   ...
 }: {
   config = lib.mkIf hostSystem.cfg.hardware.nvidia.enable {

@@ -1,22 +1,9 @@
 # Y0usaf-Laptop Disko Configuration - Fixed to match actual hardware
 {
-  lib,
-  config,
   pkgs,
   disko,
   ...
-}: let
-  username = config.cfg.system.username or "y0usaf";
-  homeDir = config.cfg.system.homeDirectory or "/home/${username}";
-
-  # Configurable options - single disk for laptop
-  disks = {
-    systemDisk = "/dev/nvme0n1"; # Update this based on actual laptop hardware
-  };
-
-  # Swap size for laptop (adjust based on RAM size)
-  swapSize = 16384; # 16GB - adjust based on your laptop's RAM
-in {
+}: {
   imports = [
     disko.nixosModules.disko
   ];

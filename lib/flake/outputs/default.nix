@@ -1,18 +1,18 @@
 inputs: let
   inherit (inputs.nixpkgs) lib;
-  
+
   ## Shared Configuration
   system = "x86_64-linux";
-  
+
   ## Package Configuration
   pkgs = import inputs.nixpkgs {
     inherit system;
     overlays = [
-      (final: prev: {
+      (_final: prev: {
         fastFonts = inputs.fast-fonts.packages.${system}.default;
         helpers = {
-          importDirs = import ../../helpers/import-dirs.nix { inherit (prev) lib; };
-          importModules = import ../../helpers/import-modules.nix { inherit (prev) lib; };
+          importDirs = import ../../helpers/import-dirs.nix {inherit (prev) lib;};
+          importModules = import ../../helpers/import-modules.nix {inherit (prev) lib;};
         };
       })
     ];

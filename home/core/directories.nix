@@ -1,13 +1,5 @@
 #═══════════════════════════ 🔧 DIRECTORIES MODULE 🔧 ═══════════════════════════#
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  hostSystem,
-  hostHome,
-  ...
-}: let
+{lib, ...}: let
   helpers = import ../../lib/helpers/module-defs.nix {inherit lib;};
   inherit (helpers) t mkOpt dirModule;
 in {

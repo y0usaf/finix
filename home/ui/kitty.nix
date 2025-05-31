@@ -8,9 +8,7 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
-  hostSystem,
   hostHome,
   ...
 }: let
@@ -22,8 +20,7 @@
   # Get the main font name from the hostHome's font configuration
   mainFontName = (builtins.elemAt hostHome.cfg.appearance.fonts.main 0).name;
 
-  # Get fallback font names
-  fallbackFontNames = map (x: x.name) hostHome.cfg.appearance.fonts.fallback;
+
 
   # Note: Kitty handles font fallbacks automatically, so we don't need explicit symbol_map
 

@@ -4,14 +4,7 @@
 # - Boot loader settings
 # - EFI configuration
 ###############################################################################
-{
-  config,
-  lib,
-  pkgs,
-  hostSystem,
-  hostHome,
-  ...
-}: {
+_: {
   config = {
     boot.loader = {
       systemd-boot = {

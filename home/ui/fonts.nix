@@ -2,10 +2,7 @@
 # ⚠️  Affects system-wide font rendering and availability            #
 #──────────────────────────────────────────────────────────────────────#
 {
-  config,
-  pkgs,
   lib,
-  hostSystem,
   hostHome,
   ...
 }: let

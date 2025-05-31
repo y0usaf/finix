@@ -4,14 +4,7 @@
 # - Enables real-time priority for audio/video applications
 # - Ensures smoother multimedia performance
 ###############################################################################
-{
-  config,
-  lib,
-  pkgs,
-  hostSystem,
-  hostHome,
-  ...
-}: {
+_: {
   config = {
     ###########################################################################
     # RTKit Configuration

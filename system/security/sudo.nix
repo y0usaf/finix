@@ -6,11 +6,7 @@
 # - Fine-grained command permissions
 ###############################################################################
 {
-  config,
-  lib,
-  pkgs,
   hostSystem,
-  hostHome,
   ...
 }: {
   config = {

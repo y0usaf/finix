@@ -1,12 +1,5 @@
 # This module configures Nix-LD.
-{
-  config,
-  lib,
-  pkgs,
-  hostSystem,
-  hostHome,
-  ...
-}: {
+_: {
   config = {
     programs.nix-ld.enable = true;
   };

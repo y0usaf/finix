@@ -5,7 +5,6 @@
 # - Merges with home-specific configuration
 ###############################################################################
 {
-  config,
   lib,
   hostSystem ? {},
   hostHome ? {},

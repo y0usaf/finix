@@ -10,10 +10,8 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
   hostSystem,
-  hostHome,
   ...
 }: let
   cfg = config.cfg.ui.hyprland;

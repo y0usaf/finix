@@ -33,10 +33,12 @@
       inherit name;
       value = {
         cfg = {
-          system = unifiedConfigs.${name}.cfg.system // {
-            # Move imports into system scope to avoid HM exposure
-            imports = unifiedConfigs.${name}.imports or [];
-          };
+          system =
+            unifiedConfigs.${name}.cfg.system
+            // {
+              # Move imports into system scope to avoid HM exposure
+              imports = unifiedConfigs.${name}.imports or [];
+            };
           inherit (unifiedConfigs.${name}.cfg.system) hardware;
           inherit (unifiedConfigs.${name}.cfg) core;
         };
@@ -52,10 +54,12 @@
     (name: {
       inherit name;
       value = {
-        cfg = unifiedConfigs.${name}.cfg.home // {
-          # Include shared core config in home as well
-          inherit (unifiedConfigs.${name}.cfg) core;
-        };
+        cfg =
+          unifiedConfigs.${name}.cfg.home
+          // {
+            # Include shared core config in home as well
+            inherit (unifiedConfigs.${name}.cfg) core;
+          };
       };
     })
     hostNames

@@ -8,7 +8,6 @@
   config,
   lib,
   pkgs,
-  profile,
   ...
 }: let
   cfg = config.cfg.programs.webapps;

@@ -1,10 +1,6 @@
 #═══════════════════════════ 🔧 USER CONFIGURATION MODULE 🔧 ═══════════════════════════#
 {
-  config,
   lib,
-  pkgs,
-  inputs,
-  hostSystem,
   hostHome,
   ...
 }: let

@@ -6,7 +6,6 @@
   config,
   lib,
   pkgs,
-  hostSystem,
   ...
 }: let
   cfg = config.cfg.programs.bluetooth;

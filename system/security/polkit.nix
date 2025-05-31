@@ -5,14 +5,7 @@
 # - Granular authentication policies
 # - Secure access to system services
 ###############################################################################
-{
-  config,
-  lib,
-  pkgs,
-  hostSystem,
-  hostHome,
-  ...
-}: {
+_: {
   config = {
     ###########################################################################
     # PolicyKit Configuration

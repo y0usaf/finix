@@ -76,7 +76,9 @@ in {
               "s" = "d";
               "d" = "r";
             }
-            .${key};
+            .${
+              key
+            };
         in [
           "$mod2, ${key}, movefocus, ${direction}"
           "$mod2 SHIFT, ${key}, movewindow, ${direction}"

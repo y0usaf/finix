@@ -1,10 +1,7 @@
 # This module configures Nix package management.
 {
-  config,
-  lib,
   pkgs,
   hostSystem,
-  hostHome,
   ...
 }: {
   config = {

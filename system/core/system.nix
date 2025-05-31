@@ -1,10 +1,6 @@
 # This module configures the core system settings.
 {
-  config,
-  lib,
-  pkgs,
   hostSystem,
-  hostHome,
   ...
 }: {
   config = {

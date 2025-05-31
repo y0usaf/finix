@@ -8,10 +8,7 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
-  hostSystem,
-  hostHome,
   ...
 }: let
   cfg = config.cfg.core.ssh;

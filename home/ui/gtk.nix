@@ -8,9 +8,7 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
-  hostSystem,
   hostHome,
   ...
 }: let
@@ -46,7 +44,7 @@
   ];
 
   # Generate repeated shadow string (4 repetitions)
-  repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (i: shadowOffsets) 4));
+  repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (_: shadowOffsets) 4));
 
   #############################################################
   # Define color constants for CSS styling

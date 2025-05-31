@@ -1,10 +1,6 @@
 # /home/y0usaf/nixos/modules/home/gaming/marvel-rivals/marvelusersettings.nix
 # Manages the Marvel Rivals MarvelUserSettings.ini files
-{
-  pkgs,
-  lib,
-  ...
-}: {
+_: {
   # Add the settings file to both the default profile and a specific profile location
   xdg.dataFile."Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/default/MarvelUserSetting.ini" = {
     text = ''

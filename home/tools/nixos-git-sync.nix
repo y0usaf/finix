@@ -6,7 +6,6 @@
   config,
   pkgs,
   lib,
-  hostSystem ? null,
   ...
 }: let
   cfg = config.cfg.tools.git.nixos-git-sync;

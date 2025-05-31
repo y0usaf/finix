@@ -4,7 +4,6 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
   ...
 }: let
@@ -29,7 +28,7 @@ in {
       mrGameDir = "${steamDir}/steamapps/common/MarvelRivals/MarvelGame/Marvel";
 
       # Wukong paths
-      wkConfigDir = "${configDir}/wukong";
+
       wkSteamId = "2358720";
       wkCompatDir = "${steamDir}/steamapps/compatdata/${wkSteamId}/pfx/drive_c/users/steamuser/AppData/Local/b1";
     in

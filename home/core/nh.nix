@@ -4,14 +4,7 @@
 # - Configures automatic cleaning
 # - Provides Pacman-like aliases for nh commands
 #═════════════════════════════════════════════════════════════════════#
-{
-  config,
-  pkgs,
-  lib,
-  hostSystem,
-  hostHome,
-  ...
-}: {
+{hostHome, ...}: {
   #===========================================================================
   # NH Configuration
   #===========================================================================

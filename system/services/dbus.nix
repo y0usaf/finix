@@ -5,11 +5,7 @@
 # - Package dependencies
 ###############################################################################
 {
-  config,
-  lib,
   pkgs,
-  hostSystem,
-  hostHome,
   ...
 }: {
   config = {

@@ -9,7 +9,6 @@
   config,
   pkgs,
   lib,
-  host,
   ...
 }: let
   cfg = config.cfg.dev.nvim;
@@ -110,12 +109,12 @@ in {
                 auto_open = true,
               },
             }
-            
+
             -- Auto-open nvim-tree on startup
             local function open_nvim_tree()
               require("nvim-tree.api").tree.open()
             end
-            
+
             vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = open_nvim_tree })
           '';
         }
@@ -261,7 +260,7 @@ in {
                 },
               },
               notes_subdir = "notes",
-              
+
               -- Disable automatic daily notes creation
               daily_notes = {
                 folder = "notes/dailies",
@@ -269,30 +268,30 @@ in {
                 template = nil,  -- No template
               },
               disable_frontmatter = true,  -- Disable frontmatter creation
-              
+
               completion = {
                 nvim_cmp = true,
                 min_chars = 2,
               },
               new_notes_location = "notes_subdir",
-              
+
               -- Simplified link handling
               wiki_link_func = function(opts)
                 return require("obsidian.util").wiki_link_id_prefix(opts)
               end,
               preferred_link_style = "wiki",
-              
+
               ui = {
                 enable = true,
                 update_debounce = 200,
                 checkboxes = {},  -- Disable checkbox rendering
               },
-              
+
               -- Disable automatic features that create files/dirs
               attachments = {
                 img_folder = "assets/imgs",
               },
-              
+
               -- Don't auto-create directories
               note_id_func = function(title)
                 return title

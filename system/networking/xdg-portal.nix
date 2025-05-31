@@ -3,10 +3,8 @@
 # Desktop integration services for applications
 ###############################################################################
 {
-  config,
   lib,
   pkgs,
-  hostSystem,
   hostHome,
   ...
 }: {

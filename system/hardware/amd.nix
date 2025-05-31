@@ -3,9 +3,7 @@
 # - X server driver settings for AMD GPU
 ###############################################################################
 {
-  config,
   lib,
-  pkgs,
   hostSystem,
   ...
 }: {

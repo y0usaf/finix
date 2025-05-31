@@ -2,9 +2,6 @@
 {
   config,
   lib,
-  pkgs,
-  inputs,
-  hostSystem,
   hostHome,
   ...
 }: {

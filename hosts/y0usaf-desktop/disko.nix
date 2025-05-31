@@ -1,6 +1,5 @@
 # Y0usaf-Desktop Disko Configuration
 {
-  lib,
   config,
   pkgs,
   disko,

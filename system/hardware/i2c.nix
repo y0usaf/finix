@@ -2,12 +2,7 @@
 # I2C Bus Configuration Module
 # - I2C bus settings for hardware monitoring
 ###############################################################################
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
+_: {
   config = {
     ###########################################################################
     # I2C Configuration

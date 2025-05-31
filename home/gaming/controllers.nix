@@ -8,8 +8,6 @@
   config,
   lib,
   pkgs,
-  host,
-  hostSystem,
   ...
 }: let
   cfg = config.cfg.gaming.controllers;

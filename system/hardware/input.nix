@@ -5,10 +5,7 @@
 # - Controller support and permissions
 ###############################################################################
 {
-  config,
   lib,
-  pkgs,
-  hostSystem,
   hostHome,
   ...
 }: let

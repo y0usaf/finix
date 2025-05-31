@@ -2,10 +2,7 @@
 {
   config,
   lib,
-  pkgs,
-  inputs,
   hostSystem,
-  hostHome,
   ...
 }: {
   # No need for module-defs import - using lib directly

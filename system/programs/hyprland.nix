@@ -5,10 +5,8 @@
 # - XWayland support
 ###############################################################################
 {
-  config,
   lib,
   pkgs,
-  hostSystem,
   hostHome,
   inputs,
   ...

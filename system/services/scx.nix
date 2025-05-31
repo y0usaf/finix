@@ -4,11 +4,7 @@
 # - SCX scheduler configuration
 ###############################################################################
 {
-  config,
-  lib,
   pkgs,
-  hostSystem,
-  hostHome,
   ...
 }: {
   config = {

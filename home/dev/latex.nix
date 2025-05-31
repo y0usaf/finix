@@ -6,7 +6,6 @@
   config,
   pkgs,
   lib,
-  host,
   ...
 }: let
   cfg = config.cfg.dev.latex;

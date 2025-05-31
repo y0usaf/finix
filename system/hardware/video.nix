@@ -4,12 +4,7 @@
 # - Camera and video device permissions
 # - Capture device settings
 ###############################################################################
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
+_: {
   config = {
     ###########################################################################
     # Video Device Rules

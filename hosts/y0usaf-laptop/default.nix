@@ -12,13 +12,13 @@ in {
       stateVersion = "24.11";
       timezone = "America/Toronto";
       config = "default";
-      
+
       # Move imports inside system configuration to avoid HM exposure
       imports = [
         ./hardware-configuration.nix
         ./disko.nix
       ];
-      
+
       hardware = {
         bluetooth = {
           enable = true;

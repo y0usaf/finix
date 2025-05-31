@@ -3,26 +3,11 @@
   config,
   lib,
   pkgs,
-  inputs,
-  hostSystem,
   hostHome,
   ...
 }: let
   helpers = import ../../lib/helpers/module-defs.nix {inherit lib;};
-  inherit (helpers) t mkOpt defaultAppModule;
-
-  # Extract default applications from hostHome
-  defaultApps = [
-    hostHome.cfg.defaults.terminal
-    hostHome.cfg.defaults.browser
-    hostHome.cfg.defaults.fileManager
-    hostHome.cfg.defaults.launcher
-    hostHome.cfg.defaults.ide
-    hostHome.cfg.defaults.mediaPlayer
-    hostHome.cfg.defaults.imageViewer
-    hostHome.cfg.defaults.discord
-    hostHome.cfg.defaults.archiveManager
-  ];
+  inherit (helpers) mkOpt defaultAppModule;
 
   # Base packages all users should have
   basePackages = with pkgs; [

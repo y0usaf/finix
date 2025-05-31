@@ -4,14 +4,7 @@
 # - Pipewire audio server
 # - ALSA and PulseAudio compatibility
 ###############################################################################
-{
-  config,
-  lib,
-  pkgs,
-  hostSystem,
-  hostHome,
-  ...
-}: {
+_: {
   config = {
     ###########################################################################
     # Audio via Pipewire

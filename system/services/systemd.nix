@@ -6,11 +6,7 @@
 # - Reasonable timeout configurations
 ###############################################################################
 {
-  config,
-  lib,
   pkgs,
-  hostSystem,
-  hostHome,
   ...
 }: {
   config = {
@@ -18,7 +14,7 @@
     # Systemd Configuration
     # Enhanced logging and debugging for shutdown issues
     ###########################################################################
-    
+
     # Enable debug logging for systemd to track shutdown issues
     systemd.extraConfig = ''
       LogLevel=debug

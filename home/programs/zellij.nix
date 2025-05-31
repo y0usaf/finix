@@ -7,7 +7,6 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
   ...
 }: let
@@ -185,11 +184,11 @@ in {
         hide_session_name = false;
         rounded_corners = true;
         show_startup_tips = false;
-        
+
         # Session management settings
         session_serialization = false;
         pane_frames = true;
-        
+
         # Improve shutdown behavior
         on_force_close = "quit";
         simplified_ui = false;
@@ -233,7 +232,7 @@ in {
         # Clean shutdown of zellij
         zq = "zellij kill-all-sessions && pkill -f zellij";
       };
-      
+
       # Add cleanup to shell logout
       logoutExtra = ''
         # Clean up Zellij sessions on logout

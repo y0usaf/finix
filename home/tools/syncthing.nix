@@ -10,7 +10,6 @@
   config,
   pkgs,
   lib,
-  profile,
   ...
 }: let
   cfg = config.cfg.programs.syncthing;

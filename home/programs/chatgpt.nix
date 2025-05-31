@@ -9,8 +9,6 @@
   config,
   pkgs,
   lib,
-  host,
-  inputs,
   ...
 }: let
   cfg = config.cfg.programs.chatgpt;

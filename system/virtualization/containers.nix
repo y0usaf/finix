@@ -5,10 +5,7 @@
 # - Podman container engine
 ###############################################################################
 {
-  config,
   lib,
-  pkgs,
-  hostSystem,
   hostHome,
   ...
 }: {

@@ -3,14 +3,7 @@
 # Network management service settings:
 # - NetworkManager configuration
 ###############################################################################
-{
-  config,
-  lib,
-  pkgs,
-  hostSystem,
-  hostHome,
-  ...
-}: {
+_: {
   config = {
     ###########################################################################
     # Networking Configuration

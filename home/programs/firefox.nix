@@ -9,9 +9,7 @@
 {
   config,
   lib,
-  pkgs,
   hostSystem,
-  hostHome,
   ...
 }: let
   cfg = config.cfg.programs.firefox;
@@ -360,21 +358,6 @@
     if builtins.pathExists profilesPath
     then getProfiles profilesPath
     else [];
-
-  # Create profile configurations
-  mkProfileConfig = name: {
-    inherit name;
-    settings = commonSettings;
-    userChrome = userChromeCss;
-  };
-
-  # Generate profile configurations for all detected profiles
-  profileConfigs = builtins.listToAttrs (map
-    (name: {
-      inherit name;
-      value = mkProfileConfig name;
-    })
-    profiles);
 in {
   ###########################################################################
   # Module Options

@@ -6,11 +6,9 @@
 # - System control parameters
 ###############################################################################
 {
-  config,
   lib,
   pkgs,
   hostSystem,
-  hostHome,
   ...
 }: {
   config = {
