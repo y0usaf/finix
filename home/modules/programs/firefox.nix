@@ -405,7 +405,7 @@ in {
       profiles = {
         "y0usaf" = {
           settings = commonSettings;
-          #          userChrome = userChromeCss;
+          userChrome = LegacyuserChromeCss;
         };
       };
 
