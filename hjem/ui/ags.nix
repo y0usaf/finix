@@ -29,7 +29,7 @@ in {
     ###########################################################################
     # AGS v2 Configuration Files
     ###########################################################################
-    hjem.users.${config.user.name}.files = {
+    files = {
       ".config/ags/app.tsx" = {
         text = ''
           import { App, Astal, Gtk } from "astal/gtk3"

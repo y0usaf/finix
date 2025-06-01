@@ -76,10 +76,13 @@ in {
               # Configure hjem for this user
               hjem = {
                 specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
-                users.${shared.systemConfigs.${hostname}.cfg.system.username} = {
-                  imports = [../../hjem];
-                  clobberFiles = shared.hjemConfigs.${hostname}.cfg.hjem.clobberFiles or false;
-                };
+                users.${shared.systemConfigs.${hostname}.cfg.system.username} = lib.mkMerge [
+                  {
+                    imports = [../../hjem];
+                    clobberFiles = shared.hjemConfigs.${hostname}.cfg.hjem.clobberFiles or false;
+                  }
+                  (lib.filterAttrs (name: _: name != "clobberFiles") (shared.hjemConfigs.${hostname}.cfg.hjem or {}))
+                ];
               };
             }
             inputs.chaotic.nixosModules.default
