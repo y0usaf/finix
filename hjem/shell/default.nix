@@ -1,7 +1,7 @@
 ###############################################################################
-# Hjem Modules Collection
-# Imports all Hjem modules for use in the system configuration
+# Shell Modules Collection
+# Imports all shell-related Hjem modules
 ###############################################################################
 {helpers, ...}: {
-  imports = helpers.importDirs ./. ++ helpers.importModules ./.;
+  imports = helpers.importModules ./.;
 }

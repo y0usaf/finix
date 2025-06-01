@@ -79,9 +79,8 @@ in {
                 users.${shared.systemConfigs.${hostname}.cfg.system.username} = lib.mkMerge [
                   {
                     imports = [../../hjem];
-                    clobberFiles = shared.hjemConfigs.${hostname}.cfg.hjem.clobberFiles or false;
                   }
-                  (lib.filterAttrs (name: _: name != "clobberFiles") (shared.hjemConfigs.${hostname}.cfg.hjem or {}))
+                  (shared.hjemConfigs.${hostname}.cfg.hjem or {})
                 ];
               };
             }
