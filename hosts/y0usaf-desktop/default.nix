@@ -35,16 +35,10 @@ in {
       };
     };
 
-    # HJEM CONFIGURATION - just enable the test module
-    hjem = {
-      # Enable file overwriting
-      clobberFiles = lib.mkForce true;
-    };
-
     # Hjem user config - only options here, no direct files
     hjome = {
       # Enable the test module
-      test.enable = false;
+      test.enable = true;
     };
 
     # HOME-MANAGER CONFIGURATION
