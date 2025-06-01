@@ -9,6 +9,7 @@
   hostsDir ? ../../hosts,
 }: let
   shared = import ./shared.nix {inherit lib pkgs helpers hostsDir;};
+  hjem = import ./hjem.nix {inherit lib pkgs helpers;};
 in {
   # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {
@@ -29,6 +30,7 @@ in {
             # Import the shared configurations
             (hostsDir + "/default.nix")
             inputs.home-manager.nixosModules.home-manager
+            inputs.hjem.nixosModules.default
             # Add system-specific imports that shouldn't be exposed to HM
           ]
           ++ (shared.systemConfigs.${hostname}.cfg.system.imports or [])
@@ -62,6 +64,14 @@ in {
                   # Apply unified home configuration
                   inherit (shared.homeConfigs.${hostname}) cfg;
                 };
+              };
+            }
+            # Apply hjem configuration if it exists
+            {
+              hjem = {
+                users.${shared.systemConfigs.${hostname}.cfg.system.username} =
+                  lib.mkIf (shared.hjemConfigs ? ${hostname})
+                  (hjem.processHjemConfig shared.hjemConfigs.${hostname}.cfg);
               };
             }
             inputs.chaotic.nixosModules.default

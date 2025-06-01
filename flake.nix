@@ -18,6 +18,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    hjem = {
+      url = "github:feel-co/hjem";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     alejandra = {
       url = "github:kamadorueda/alejandra";
       inputs.nixpkgs.follows = "nixpkgs";

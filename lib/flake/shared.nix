@@ -66,6 +66,18 @@
     hostNames
   );
 
+  # Extract hjem configurations from unified configs
+  hjemConfigs = builtins.listToAttrs (
+    map
+    (name: {
+      inherit name;
+      value = {
+        cfg = unifiedConfigs.${name}.cfg.hjem or {};
+      };
+    })
+    hostNames
+  );
+
   # Get valid host names with proper system config structure
   validHostNames =
     builtins.filter (
@@ -83,11 +95,12 @@
     // {
       hostSystem = systemConfigs.${hostname};
       hostHome = homeConfigs.${hostname};
+      hostHjem = hjemConfigs.${hostname};
       inherit helpers;
     };
 
   # Generic listToAttrs + map helper
   mapToAttrs = f: list: builtins.listToAttrs (map f list);
 in {
-  inherit hostNames systemConfigs homeConfigs validHostNames mkSpecialArgs mapToAttrs;
+  inherit hostNames systemConfigs homeConfigs hjemConfigs validHostNames mkSpecialArgs mapToAttrs;
 }

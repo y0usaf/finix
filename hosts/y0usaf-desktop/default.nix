@@ -31,6 +31,32 @@ in {
       };
     };
 
+    # HJEM CONFIGURATION
+    hjem = {
+      # Enable this when migrating files to allow overwriting existing files
+      clobberFiles = true;
+
+      # Packages to install for the user
+      packages = with pkgs; [
+        # Add packages here to migrate from Home Manager
+      ];
+
+      # Files to manage directly
+      files = {
+        # Example: Create a simple text file
+        # ".config/example.txt".text = "Hello from Hjem!";
+
+        # Example: Link an existing file
+        # ".config/existing-config.conf".source = pkgs.writeText "existing-config.conf" "configuration = value";
+      };
+
+      # Environment variables
+      environment.sessionVariables = {
+        # Add environment variables here
+        # EDITOR = "nvim";
+      };
+    };
+
     # HOME-MANAGER CONFIGURATION
     home = {
       ui = {
