@@ -69,6 +69,12 @@ in {
               command = "npx";
               args = ["-y" "@modelcontextprotocol/server-memory"];
             };
+            "hjem Docs" = {
+              url = "https://gitmcp.io/feel-co/hjem/";
+            };
+            "nix Docs" = {
+              url = "https://gitmcp.io/NixOS/nix";
+            };
           };
         };
       };
