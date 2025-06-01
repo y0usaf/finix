@@ -73,7 +73,6 @@
       inherit name;
       value = {
         cfg = {
-          hjem = unifiedConfigs.${name}.cfg.hjem or {};
           hjome = unifiedConfigs.${name}.cfg.hjome or {};
         };
       };

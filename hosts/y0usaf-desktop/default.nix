@@ -35,16 +35,13 @@ in {
       };
     };
 
-    # HJEM CONFIGURATION - using hjome alias for simple configuration
-    hjem = {
-      # Global hjem settings
-      clobberFiles = lib.mkForce true;
-    };
-
-    # HJOME CONFIGURATION - simple interface like Home Manager  
+    # HJOME CONFIGURATION - simple interface like Home Manager
     hjome = {
+      # Global Hjem settings
+      clobberFiles = true;
+
       test.enable = true;
-      
+
       # UI modules
       ui = {
         ags.enable = true;
