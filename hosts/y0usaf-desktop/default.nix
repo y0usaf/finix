@@ -35,16 +35,20 @@ in {
       };
     };
 
-    # HJEM CONFIGURATION - flat structure
+    # HJEM CONFIGURATION - follows Home Manager pattern
     hjem = {
       # Global hjem settings
       clobberFiles = lib.mkForce true;
 
-      # User modules directly in hjem (not nested)
-      test.enable = true;
-
-      # UI modules
-      ags.enable = true;
+      # User modules following the same structure as Home Manager
+      cfg = {
+        test.enable = true;
+        
+        # UI modules
+        ui = {
+          ags.enable = true;
+        };
+      };
     };
 
     # HOME-MANAGER CONFIGURATION

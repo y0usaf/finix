@@ -1,6 +1,7 @@
 ###############################################################################
-# AGS v2 Module (Astal Framework)
+# AGS v2 Module (Astal Framework) - Hjem Version
 # Installs AGS v2 as a regular package and creates configuration files
+# Follows the same pattern as Home Manager modules
 ###############################################################################
 {
   config,
@@ -8,13 +9,17 @@
   lib,
   ...
 }: let
-  cfg = config.ags;
+  cfg = config.cfg.ui.ags;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.ags = {
-    enable = lib.mkEnableOption "AGS v2 (Astal Framework)";
+  options.cfg.ui.ags = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable AGS v2 (Astal Framework)";
+    };
   };
 
   ###########################################################################

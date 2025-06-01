@@ -1,4 +1,4 @@
-# A simple test module for Hjem
+# A simple test module for Hjem - follows Home Manager pattern
 {
   config,
   lib,
@@ -6,10 +6,10 @@
   ...
 }:
 with lib; let
-  cfg = config.test;
+  cfg = config.cfg.test;
 in {
   # Define module options
-  options.test = {
+  options.cfg.test = {
     enable = mkEnableOption "test module";
   };
 
