@@ -42,6 +42,9 @@ in {
 
       # User modules directly in hjem (not nested)
       test.enable = true;
+
+      # UI modules
+      ags.enable = true;
     };
 
     # HOME-MANAGER CONFIGURATION
