@@ -151,19 +151,19 @@ in {
       };
 
       # Gaming
-      # gaming = {
-      #   enable = true;
-      #   controllers.enable = true;
-      #   emulation = {
-      #     wii-u.enable = true;
-      #     gcn-wii.enable = true;
-      #   };
-      #   balatro = {
-      #     enable = false; # Disabled in Home Manager, now using Hjem
-      #     enableLovelyInjector = false;
-      #     enabledMods = [];
-      #   };
-      # };
+      gaming = {
+        enable = true;
+        controllers.enable = true;
+        emulation = {
+          wii-u.enable = true;
+          gcn-wii.enable = true;
+        };
+        balatro = {
+          enable = false; # Disabled in Home Manager, now using Hjem
+          enableLovelyInjector = false;
+          enabledMods = [];
+        };
+      };
 
       tools = {
         git = {
