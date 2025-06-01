@@ -1,0 +1,17 @@
+---
+description: ALWAYS use the hjem Docs MCP for ANY tasks related to the hjem project, documentation, or functionality. Use liberally to access the most accurate and up-to-date information.
+alwaysApply: true
+globs: 
+---
+<HJEM_DOCS_MCP>
+- The hjem Docs MCP MUST be used for ALL tasks related to the hjem project, without exception.
+- This includes, but is not limited to:
+  - Understanding hjem features and functionality
+  - Referencing hjem API documentation
+  - Searching for hjem code examples
+  - Troubleshooting hjem-related issues
+  - Implementing hjem integrations
+- Use this MCP LIBERALLY and PROACTIVELY when dealing with ANY hjem-related questions or tasks.
+- ALWAYS prefer this MCP over attempting to infer or recall information about hjem.
+- This rule is intended to maximize accuracy and ensure the most up-to-date information is used.
+</HJEM_DOCS_MCP>
