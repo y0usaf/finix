@@ -1,5 +1,5 @@
 # UNIFIED HOST CONFIGURATION for y0usaf-desktop
-{pkgs, ...}: let
+{pkgs, lib, ...}: let
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
@@ -34,20 +34,22 @@ in {
     # HJEM CONFIGURATION
     hjem = {
       # Enable this when migrating files to allow overwriting existing files
-      clobberFiles = true;
+      clobberFiles = lib.mkForce true;
 
       # Packages to install for the user
       packages = with pkgs; [
         # Add packages here to migrate from Home Manager
       ];
+      
+      # Enable our test module
+      test = {
+        enable = true;
+      };
 
       # Files to manage directly
       files = {
-        # Example: Create a simple text file
-        # ".config/example.txt".text = "Hello from Hjem!";
-
-        # Example: Link an existing file
-        # ".config/existing-config.conf".source = pkgs.writeText "existing-config.conf" "configuration = value";
+        # Test file for Hjem
+        ".config/HJEM.TXT".text = "TEST";
       };
 
       # Environment variables

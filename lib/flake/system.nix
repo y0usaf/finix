@@ -69,9 +69,12 @@ in {
             # Apply hjem configuration if it exists
             {
               hjem = {
-                users.${shared.systemConfigs.${hostname}.cfg.system.username} =
-                  lib.mkIf (shared.hjemConfigs ? ${hostname})
-                  (hjem.processHjemConfig shared.hjemConfigs.${hostname}.cfg);
+                specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
+                users.${shared.systemConfigs.${hostname}.cfg.system.username} = {
+                  imports = [../../hjem];
+                  # Process unified hjem configuration
+                  inherit (hjem.processHjemConfig shared.hjemConfigs.${hostname}.cfg) packages files environment clobberFiles;
+                };
               };
             }
             inputs.chaotic.nixosModules.default
