@@ -18,8 +18,8 @@ inputs: let
 
   ## Define helpers separately
   helpers = {
-    importDirs = import ../../helpers/import-dirs.nix {lib = pkgs.lib;};
-    importModules = import ../../helpers/import-modules.nix {lib = pkgs.lib;};
+    importDirs = import ../../helpers/import-dirs.nix {inherit (pkgs) lib;};
+    importModules = import ../../helpers/import-modules.nix {inherit (pkgs) lib;};
   };
 
   ## Import host utilities

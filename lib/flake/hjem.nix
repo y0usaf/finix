@@ -9,9 +9,20 @@
   hostsDir ? ../../hosts,
 }: let
   shared = import ./shared.nix {inherit lib pkgs helpers hostsDir;};
+
+  # Known global Hjem settings
+  globalSettings = ["clobberFiles"];
+
+  # Extract global settings
+  getGlobalSettings = cfg:
+    lib.filterAttrs (name: _: builtins.elem name globalSettings) cfg;
+
+  # Extract user settings
+  getUserSettings = cfg:
+    lib.filterAttrs (name: _: !(builtins.elem name globalSettings)) cfg;
 in {
   # Flake outputs
-  flakeOutputs = { };
+  flakeOutputs = {};
 
   # Helper function to create hjem configurations
   mkHjemConfigurations = {
@@ -26,13 +37,15 @@ in {
         modules = [
           ../../hjem
           {
-            # Common options that apply to all hjem users
+            # Apply global settings directly from cfg.hjem
             clobberFiles = shared.hjemConfigs.${hostname}.cfg.hjem.clobberFiles or false;
-            
-            # This module provides the alias from hjome -> hjem.users.username 
-            # which is used in the host configuration
+
+            # Apply all non-global settings to hjem.users.<username>
             imports = [
-              (lib.mkAliasOptionModule ["hjome"] ["hjem" "users" shared.systemConfigs.${hostname}.cfg.system.username])
+              {
+                hjem.users.${shared.systemConfigs.${hostname}.cfg.system.username} =
+                  getUserSettings (shared.hjemConfigs.${hostname}.cfg.hjem or {});
+              }
             ];
           }
         ];

@@ -1,9 +1,11 @@
 # A simple test module for Hjem
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.test;
 in {
   # Define module options
@@ -11,9 +13,9 @@ in {
     enable = mkEnableOption "test module";
   };
 
-  # Config section - only applied when enabled
+  # Config section with files
   config = mkIf cfg.enable {
-    # Create test files when the module is enabled
+    # Define files
     files = {
       ".config/TEST_MODULE.TXT" = {
         text = "This file is created by the test module";

@@ -35,16 +35,16 @@ in {
       };
     };
 
-    # HJEM CONFIGURATION - just enable the test module
+    # HJEM CONFIGURATION - flat structure
     hjem = {
-      # Enable file overwriting
+      # Global hjem settings
       clobberFiles = lib.mkForce true;
-    };
 
-    # Hjem user config - only options here, no direct files
-    hjome = {
-      # Enable the test module
+      # User modules directly in hjem (not nested)
       test.enable = true;
+
+      # UI modules
+      ags.enable = true;
     };
 
     # HOME-MANAGER CONFIGURATION
@@ -56,7 +56,7 @@ in {
           hy3.enable = true;
         };
         wayland.enable = true;
-        ags.enable = true;
+        ags.enable = false; # Disabled in Home Manager, now using Hjem
         cursor.enable = true;
         kitty.enable = false;
         foot.enable = true;
@@ -243,5 +243,20 @@ in {
     };
   };
 
-  users.users.${username}.extraGroups = ["docker"];
+  users.users.${username} = {
+    extraGroups = ["docker"];
+    packages = with pkgs; [
+      # Add any packages you want installed for your user here
+      curl
+      gh
+      gitui
+      kitty
+      neofetch
+      ripgrep
+      jq
+      nh
+      # Add AGS here since it's not properly installed through Hjem
+      ags
+    ];
+  };
 }
