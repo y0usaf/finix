@@ -1,21 +1,18 @@
-# A simple test module for Hjem - follows Home Manager pattern
+# A simple test module for Hjem - uses hjome alias for simple configuration
 {
   config,
   lib,
   pkgs,
   ...
 }:
-with lib; let
-  cfg = config.cfg.test;
-in {
+with lib; {
   # Define module options
-  options.cfg.test = {
+  options.cfg.hjome.test = {
     enable = mkEnableOption "test module";
   };
 
-  # Config section with files
-  config = mkIf cfg.enable {
-    # Define files
+  # Config section - module is imported into hjem user config
+  config = mkIf config.cfg.hjome.test.enable {
     files = {
       ".config/TEST_MODULE.TXT" = {
         text = "This file is created by the test module";

@@ -43,8 +43,12 @@ in {
             # Apply all non-global settings to hjem.users.<username>
             imports = [
               {
-                hjem.users.${shared.systemConfigs.${hostname}.cfg.system.username} =
-                  getUserSettings (shared.hjemConfigs.${hostname}.cfg.hjem or {});
+                hjem.users.${shared.systemConfigs.${hostname}.cfg.system.username} = lib.mkMerge [
+                  # Apply hjem settings
+                  (getUserSettings (shared.hjemConfigs.${hostname}.cfg.hjem or {}))
+                  # Apply hjome settings directly
+                  (shared.hjemConfigs.${hostname}.cfg.hjome or {})
+                ];
               }
             ];
           }

@@ -81,6 +81,9 @@ in {
                     imports = [../../hjem];
                   }
                   (shared.hjemConfigs.${hostname}.cfg.hjem or {})
+                  {
+                    cfg.hjome = shared.hjemConfigs.${hostname}.cfg.hjome or {};
+                  }
                 ];
               };
             }

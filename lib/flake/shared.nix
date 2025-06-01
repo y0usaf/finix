@@ -72,7 +72,10 @@
     (name: {
       inherit name;
       value = {
-        cfg = unifiedConfigs.${name}.cfg.hjem or {};
+        cfg = {
+          hjem = unifiedConfigs.${name}.cfg.hjem or {};
+          hjome = unifiedConfigs.${name}.cfg.hjome or {};
+        };
       };
     })
     hostNames
