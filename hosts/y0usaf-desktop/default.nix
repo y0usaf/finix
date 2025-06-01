@@ -1,5 +1,9 @@
 # UNIFIED HOST CONFIGURATION for y0usaf-desktop
-{pkgs, lib, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
@@ -31,32 +35,16 @@ in {
       };
     };
 
-    # HJEM CONFIGURATION
+    # HJEM CONFIGURATION - just enable the test module
     hjem = {
-      # Enable this when migrating files to allow overwriting existing files
+      # Enable file overwriting
       clobberFiles = lib.mkForce true;
+    };
 
-      # Packages to install for the user
-      packages = with pkgs; [
-        # Add packages here to migrate from Home Manager
-      ];
-      
-      # Enable our test module
-      test = {
-        enable = true;
-      };
-
-      # Files to manage directly
-      files = {
-        # Test file for Hjem
-        ".config/HJEM.TXT".text = "TEST";
-      };
-
-      # Environment variables
-      environment.sessionVariables = {
-        # Add environment variables here
-        # EDITOR = "nvim";
-      };
+    # Hjem user config - only options here, no direct files
+    hjome = {
+      # Enable the test module
+      test.enable = false;
     };
 
     # HOME-MANAGER CONFIGURATION

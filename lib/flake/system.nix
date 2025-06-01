@@ -9,7 +9,7 @@
   hostsDir ? ../../hosts,
 }: let
   shared = import ./shared.nix {inherit lib pkgs helpers hostsDir;};
-  hjem = import ./hjem.nix {inherit lib pkgs helpers;};
+  hjem = import ./hjem.nix {inherit lib pkgs helpers hostsDir;};
 in {
   # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {
@@ -68,12 +68,17 @@ in {
             }
             # Apply hjem configuration if it exists
             {
+              # Add the alias from hjome to hjem.users.username
+              imports = [
+                (lib.mkAliasOptionModule ["hjome"] ["hjem" "users" shared.systemConfigs.${hostname}.cfg.system.username])
+              ];
+              
+              # Configure hjem for this user
               hjem = {
                 specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
                 users.${shared.systemConfigs.${hostname}.cfg.system.username} = {
                   imports = [../../hjem];
-                  # Process unified hjem configuration
-                  inherit (hjem.processHjemConfig shared.hjemConfigs.${hostname}.cfg) packages files environment clobberFiles;
+                  clobberFiles = shared.hjemConfigs.${hostname}.cfg.hjem.clobberFiles or false;
                 };
               };
             }

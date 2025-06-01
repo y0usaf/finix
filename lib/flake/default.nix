@@ -18,5 +18,5 @@ in {
   inherit (shared) hostNames systemConfigs homeConfigs hjemConfigs validHostNames mkSpecialArgs mapToAttrs;
   inherit (home) mkHomeConfigurations;
   inherit (system) mkNixosConfigurations;
-  inherit (hjem) modules mkHjemModule processHjemConfig;
+  inherit (hjem) flakeOutputs mkHjemConfigurations;
 }
