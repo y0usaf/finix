@@ -46,6 +46,19 @@ in {
       ui = {
         ags.enable = true;
       };
+
+      # Gaming modules
+      gaming = {
+        marvel-rivals = {
+          gameusersettings.enable = true;
+          marvelusersettings.enable = true;
+        };
+        balatro = {
+          enable = true;
+          enableLovelyInjector = true;
+          enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "handybalatro" "stickersalwaysshown"];
+        };
+      };
     };
 
     # HOME-MANAGER CONFIGURATION
@@ -138,19 +151,19 @@ in {
       };
 
       # Gaming
-      gaming = {
-        enable = true;
-        controllers.enable = true;
-        emulation = {
-          wii-u.enable = true;
-          gcn-wii.enable = true;
-        };
-        balatro = {
-          enable = true;
-          enableLovelyInjector = true;
-          enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "handybalatro" "stickersalwaysshown"];
-        };
-      };
+      # gaming = {
+      #   enable = true;
+      #   controllers.enable = true;
+      #   emulation = {
+      #     wii-u.enable = true;
+      #     gcn-wii.enable = true;
+      #   };
+      #   balatro = {
+      #     enable = false; # Disabled in Home Manager, now using Hjem
+      #     enableLovelyInjector = false;
+      #     enabledMods = [];
+      #   };
+      # };
 
       tools = {
         git = {
