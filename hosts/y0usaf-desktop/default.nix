@@ -78,6 +78,7 @@ in {
         };
         minecraft = {
           enable = true;
+          servers.skyfactory5.enable = true;
         };
       };
     };
