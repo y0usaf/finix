@@ -71,6 +71,12 @@
       url = "github:oddlama/whisper-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    ## Gaming
+    nix-minecraft = {
+      url = "github:Infinidoge/nix-minecraft";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   ###########################################################################

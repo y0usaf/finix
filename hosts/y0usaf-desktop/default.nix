@@ -76,6 +76,9 @@ in {
         wukong = {
           enable = true;
         };
+        minecraft = {
+          enable = true;
+        };
       };
     };
 

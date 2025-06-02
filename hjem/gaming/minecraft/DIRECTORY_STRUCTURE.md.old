@@ -1,0 +1,115 @@
+# Minecraft Server Directory Structure
+
+This module supports flexible directory organization for your Minecraft servers.
+
+## Directory Options
+
+### Option 1: Games Directory (Default)
+```
+~/Games/Minecraft/Servers/
+├── SkyFactory5/
+│   ├── mods/
+│   ├── config/
+│   ├── world/
+│   ├── server.properties
+│   └── logs/
+└── (other servers)/
+```
+
+**Configuration:**
+```nix
+cfg.hjome.gaming.minecraft = {
+  dataDir = "$HOME/Games/Minecraft/Servers";
+  useXdgDataDir = false;
+};
+```
+
+### Option 2: XDG Data Directory
+```
+~/.local/share/Minecraft/Servers/
+├── SkyFactory5/
+│   ├── mods/
+│   ├── config/
+│   ├── world/
+│   ├── server.properties
+│   └── logs/
+└── (other servers)/
+```
+
+**Configuration:**
+```nix
+cfg.hjome.gaming.minecraft = {
+  useXdgDataDir = true;
+  # dataDir is automatically set to ${config.xdg.dataHome}/Minecraft/Servers
+};
+```
+
+### Option 3: Custom Directory
+```
+/path/to/your/custom/location/
+├── SkyFactory5/
+└── (other servers)/
+```
+
+**Configuration:**
+```nix
+cfg.hjome.gaming.minecraft = {
+  dataDir = "/path/to/your/custom/location";
+  useXdgDataDir = false;
+};
+```
+
+## Per-Server Structure
+
+Each server gets its own subdirectory with the following structure:
+
+```
+{ServerName}/
+├── mods/                 # Symlinked from modpack
+├── config/               # Symlinked from modpack  
+├── world/                # Generated game world
+├── server.properties     # Server configuration
+├── logs/                 # Server logs
+├── banned-ips.json       # IP bans
+├── banned-players.json   # Player bans
+├── ops.json              # Server operators
+├── whitelist.json        # Whitelisted players
+└── usercache.json        # User cache
+```
+
+## Benefits
+
+✅ **Organized**: Clean separation of different servers  
+✅ **User-friendly**: Servers stored in user directories, not system directories  
+✅ **XDG Compliant**: Optional XDG Base Directory specification support  
+✅ **Flexible**: Support for custom directory locations  
+✅ **Secure**: Proper file permissions and ownership  
+
+## File Permissions
+
+- **Owner**: `minecraft` user
+- **Group**: `minecraft` group  
+- **Permissions**: `755` for directories, appropriate permissions for files
+- **Access**: The minecraft user runs the server processes
+
+## Backup Considerations
+
+With this structure, backing up your servers is easy:
+
+```bash
+# Backup specific server
+tar -czf skyfactory5-backup.tar.gz ~/Games/Minecraft/Servers/SkyFactory5/
+
+# Backup all servers
+tar -czf minecraft-servers-backup.tar.gz ~/Games/Minecraft/Servers/
+```
+
+## Migration
+
+To migrate from the default `/var/lib/minecraft` to user directories:
+
+1. Stop the minecraft server: `sudo systemctl stop minecraft-server-skyfactory5`
+2. Copy data: `sudo cp -r /var/lib/minecraft/* ~/Games/Minecraft/Servers/SkyFactory5/`
+3. Update configuration with the new directory settings
+4. Rebuild and switch: `nh os switch --dry`
+5. Start the server: `sudo systemctl start minecraft-server-skyfactory5`

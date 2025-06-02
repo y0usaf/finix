@@ -1,0 +1,120 @@
+###############################################################################
+# SkyFactory 5 Minecraft Server Module
+# Declarative configuration for SkyFactory 5 modded server
+###############################################################################
+{
+  config,
+  lib,
+  pkgs,
+  nix-minecraft,
+  ...
+}:
+with lib; let
+  cfg = config.cfg.hjome.gaming.minecraft.servers.skyfactory5;
+  mcCfg = config.cfg.hjome.gaming.minecraft;
+  
+  # SkyFactory 5 uses Minecraft 1.20.1 with Forge
+  mcVersion = "1.20.1";
+  forgeVersion = "47.3.0"; # This may need to be updated based on the actual modpack
+  
+  # Determine the data directory based on user preference
+  baseDataDir = if mcCfg.useXdgDataDir 
+    then "\${config.xdg.dataHome}/Minecraft/Servers"
+    else mcCfg.dataDir;
+  serverDataDir = "${baseDataDir}/SkyFactory5";
+  
+  # Helper to convert difficulty setting to numeric value for server.properties
+  difficultyValue = {
+    peaceful = 0;
+    easy = 1;
+    normal = 2;
+    hard = 3;
+  };
+
+  # SkyFactory 5 modpack (automatically imported from CurseForge using packwiz)
+  # See SKYFACTORY5_SETUP.md for complete setup instructions
+  skyFactoryModpack = nix-minecraft.lib.fetchPackwizModpack {
+    # Replace with your actual packwiz modpack URL after following the setup guide
+    url = "https://github.com/yourusername/skyfactory5-packwiz/raw/main/pack.toml";
+    # Get this hash by running:
+    # nix run github:Infinidoge/nix-minecraft#nix-packwiz-prefetch -- <your-pack-url>
+    packHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # Update this!
+  };
+in {
+  config = mkIf cfg.enable {
+    # Create the minecraft servers directory structure
+    hjem.users.${config.user.name or "minecraft"}.files = {
+      "${serverDataDir}/.keep".text = "# SkyFactory 5 server directory\n";
+    };
+
+    # Configure NixOS minecraft-servers service
+    services.minecraft-servers = {
+      enable = true;
+      eula = true; # Accept EULA
+      
+      servers.skyfactory5 = {
+        enable = true;
+        package = nix-minecraft.packages.${pkgs.system}.forge-server.override {
+          version = mcVersion;
+          forgeVersion = forgeVersion;
+        };
+
+        # Set custom data directory
+        dataDir = serverDataDir;
+
+        # Server configuration
+        serverProperties = {
+          server-port = cfg.port;
+          max-players = cfg.maxPlayers;
+          motd = cfg.motd;
+          difficulty = difficultyValue.${cfg.difficulty};
+          gamemode = "survival";
+          level-name = "world";
+          level-type = "skyfactory_5"; # Custom world type for skyblock
+          spawn-protection = 0; # Disable spawn protection for skyblock
+          enable-command-block = true; # Often needed for modded servers
+          op-permission-level = 4;
+          white-list = false; # Set to true if you want whitelist
+        };
+
+        # JVM arguments for better performance with modded servers
+        jvmOpts = cfg.jvmOpts;
+
+        # Symlink the modpack
+        symlinks = {
+          "mods" = "${skyFactoryModpack}/mods";
+          "config" = "${skyFactoryModpack}/config";
+          # Include other modpack directories as needed
+          "kubejs" = mkIf (pathExists "${skyFactoryModpack}/kubejs") "${skyFactoryModpack}/kubejs";
+          "defaultconfigs" = mkIf (pathExists "${skyFactoryModpack}/defaultconfigs") "${skyFactoryModpack}/defaultconfigs";
+        };
+      };
+    };
+
+    # Optional: Open firewall port
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ cfg.port ];
+
+    # Optional: Auto-start the server
+    systemd.services.minecraft-server-skyfactory5 = mkIf cfg.autoStart {
+      wantedBy = [ "multi-user.target" ];
+    };
+
+    # Create minecraft user and group if needed
+    users.users.minecraft = {
+      description = "Minecraft server user";
+      group = "minecraft";
+      isSystemUser = true;
+      createHome = true;
+      home = serverDataDir;
+    };
+    users.groups.minecraft = {};
+
+    # Ensure proper ownership of the server directory
+    systemd.tmpfiles.rules = [
+      "d ${serverDataDir} 0755 minecraft minecraft -"
+      "d ${serverDataDir}/mods 0755 minecraft minecraft -"
+      "d ${serverDataDir}/config 0755 minecraft minecraft -"
+      "d ${serverDataDir}/world 0755 minecraft minecraft -"
+    ];
+  };
+}

@@ -19,5 +19,9 @@
     emulation = {
       # Options will be defined in respective module files
     };
+
+    minecraft = {
+      enable = lib.mkEnableOption "Minecraft client and server support";
+    };
   };
 }
