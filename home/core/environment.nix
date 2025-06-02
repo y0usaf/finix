@@ -8,11 +8,7 @@
   # No need for module-defs import - using lib directly
   options.cfg.core.env = {
     enable = lib.mkEnableOption "home environment configuration (session vars/path)";
-    tokenDir = lib.mkOption {
-      type = lib.types.str;
-      default = "$HOME/Tokens";
-      description = "Directory containing token files to be loaded by zsh as env variables";
-    };
+    # tokenDir now comes from cfg.shared.tokenDir - removed from core options
   };
 
   config.home = {

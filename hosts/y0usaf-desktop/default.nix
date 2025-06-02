@@ -12,6 +12,19 @@ in {
       stateVersion = "24.11";
       timezone = "America/Toronto";
       config = "default";
+
+      # User preferences shared across modules
+      tokenDir = "${homeDir}/Tokens";
+
+      # Zsh user preferences - now properly shared between system and home modules
+      zsh = {
+        cat-fetch = true;
+        history-memory = 10000;
+        history-storage = 10000;
+        zellij = {
+          enable = true;
+        };
+      };
     };
     # SYSTEM CONFIGURATION (includes hardware)
     system = {
@@ -68,6 +81,28 @@ in {
 
     # HOME-MANAGER CONFIGURATION
     home = {
+      # Core module enables (former cfg.core - now organized under cfg.home)
+      core = {
+        xdg = {
+          enable = true;
+        };
+        systemd = {
+          enable = true;
+          autoFormatNix = {
+            enable = true;
+            directory = "~/nixos";
+          };
+        };
+        zsh = {
+          enable = true;
+          # User preferences now come from cfg.shared.zsh
+        };
+        env = {
+          enable = true;
+          # tokenDir now comes from cfg.shared.tokenDir
+        };
+      };
+
       ui = {
         hyprland = {
           enable = true;
@@ -217,34 +252,6 @@ in {
           static.path = "${homeDir}/DCIM/Wallpapers/32_9";
           video.path = "${homeDir}/DCIM/Wallpapers_Video";
         };
-      };
-    };
-
-    # SHARED CONFIGURATION (both system and home)
-    core = {
-      # Local home-specific settings
-      xdg = {
-        enable = true;
-      };
-      systemd = {
-        enable = true;
-        autoFormatNix = {
-          enable = true;
-          directory = "~/nixos";
-        };
-      };
-      zsh = {
-        enable = true;
-        cat-fetch = true;
-        history-memory = 10000;
-        history-storage = 10000;
-        zellij = {
-          enable = true;
-        };
-      };
-      env = {
-        enable = true;
-        tokenDir = "${homeDir}/Tokens";
       };
     };
   };

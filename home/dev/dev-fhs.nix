@@ -31,15 +31,7 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     # Create the FHS environment for development
-    home.packages = let
-      cudaPkgs =
-        if (config.cfg.core.nvidia.cuda.enable or false)
-        then [
-          pkgs.cudaPackages.cudatoolkit
-          pkgs.cudaPackages.cuda_nvcc
-        ]
-        else [];
-    in [
+    home.packages = [
       (pkgs.buildFHSEnv {
         name = "devenv";
         targetPkgs = pkgs:
@@ -90,7 +82,6 @@ in {
               # Add zsh to the environment
               zsh
             ]
-            ++ cudaPkgs
             ++ cfg.extraPackages;
 
         profile = ''

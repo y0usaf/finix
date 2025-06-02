@@ -41,16 +41,6 @@
     };
   };
 
-  # Core GPU modules
-  options.cfg.core = {
-    nvidia = {
-      enable = lib.mkEnableOption "NVIDIA GPU support";
-    };
-    amdgpu = {
-      enable = lib.mkEnableOption "AMD GPU support";
-    };
-  };
-
   # Configuration
   config = {
     system.stateVersion = config.cfg.shared.stateVersion;

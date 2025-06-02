@@ -14,6 +14,8 @@
   ...
 }: let
   cfg = config.cfg.core.zsh;
+  # Get shared user preferences
+  sharedZsh = config.cfg.shared.zsh;
 in {
   #===========================================================================
   # Module Options
@@ -25,21 +27,7 @@ in {
       default = true;
       description = "Enable the custom PS1 prompt";
     };
-    cat-fetch = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Print colorful cats on shell startup";
-    };
-    history-memory = lib.mkOption {
-      type = lib.types.int;
-      default = 1000;
-      description = "Number of history entries to keep in memory";
-    };
-    history-storage = lib.mkOption {
-      type = lib.types.int;
-      default = 1000;
-      description = "Number of history entries to save to disk";
-    };
+    # User preferences (cat-fetch, history settings, zellij) now come from cfg.shared.zsh
   };
 
   #===========================================================================
@@ -65,8 +53,8 @@ in {
       # History Settings: Configure shell history behavior.
       #---------------------------------------------------------------------------
       history = {
-        size = cfg.history-memory;
-        save = cfg.history-storage;
+        size = sharedZsh.history-memory;
+        save = sharedZsh.history-storage;
         path = "$HOME/.local/state/zsh/history";
         ignoreDups = true;
         expireDuplicatesFirst = true;
@@ -80,8 +68,8 @@ in {
       # Defines and executes a script to load *.txt files from the token directory
       # as environment variables.
       envExtra = let
-        # Get the token directory path from the core env module options
-        inherit (config.cfg.core.env) tokenDir;
+        # Get the token directory path from shared config
+        tokenDir = config.cfg.shared.tokenDir;
         # --- Common token management function (from env.nix) ---
         tokenFunctionScript = ''
           # Token management function
@@ -127,7 +115,7 @@ in {
       # Shell Initialization: Define functions, prompt, and additional settings.
       #---------------------------------------------------------------------------
       initContent = ''
-        ${lib.optionalString cfg.cat-fetch ''
+        ${lib.optionalString sharedZsh.cat-fetch ''
           # ----------------------------
           # Function: print_cats
           # ----------------------------

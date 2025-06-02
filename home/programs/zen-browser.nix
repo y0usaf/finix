@@ -24,11 +24,11 @@
     # Enable userChrome customizations
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
 
-    # Nvidia-specific settings
-    "gfx.webrender.all" = !profile.cfg.core.nvidia.enable;
-    "media.hardware-video-decoding.enabled" = !profile.cfg.core.nvidia.enable;
-    "media.ffmpeg.vaapi.enabled" = !profile.cfg.core.nvidia.enable;
-    "layers.acceleration.disabled" = profile.cfg.core.nvidia.enable;
+    # Default graphics settings (removed nvidia-specific logic)
+    "gfx.webrender.all" = true;
+    "media.hardware-video-decoding.enabled" = true;
+    "media.ffmpeg.vaapi.enabled" = true;
+    "layers.acceleration.disabled" = false;
   };
 
   # Helper function to write settings to user.js format

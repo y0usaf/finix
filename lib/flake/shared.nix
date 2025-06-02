@@ -41,7 +41,6 @@
             imports = unifiedConfigs.${name}.imports or [];
             inherit (unifiedConfigs.${name}.cfg.system) hardware;
           };
-          inherit (unifiedConfigs.${name}.cfg) core;
         };
         users = unifiedConfigs.${name}.users or {};
       };
@@ -55,12 +54,7 @@
     (name: {
       inherit name;
       value = {
-        cfg =
-          unifiedConfigs.${name}.cfg.home
-          // {
-            # Include shared core config in home as well
-            inherit (unifiedConfigs.${name}.cfg) core;
-          };
+        cfg = unifiedConfigs.${name}.cfg.home;
       };
     })
     hostNames
@@ -104,7 +98,10 @@
   # Generic listToAttrs + map helper
   mapToAttrs = f: list: builtins.listToAttrs (map f list);
   # Universal shared module function
-  mkSharedModule = {hostname, hostsDir ? hostsDir}: {
+  mkSharedModule = {
+    hostname,
+    hostsDir ? hostsDir,
+  }: {
     lib,
     config,
     pkgs,
@@ -155,6 +152,49 @@
         description = "Configuration profile identifier";
         default = "default";
         example = "desktop";
+      };
+
+      tokenDir = lib.mkOption {
+        type = lib.types.str;
+        description = "Directory containing token files to be loaded as environment variables";
+        example = "/home/alice/Tokens";
+      };
+
+      zsh = lib.mkOption {
+        type = lib.types.submodule {
+          options = {
+            cat-fetch = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Print colorful cats on shell startup";
+            };
+            history-memory = lib.mkOption {
+              type = lib.types.int;
+              default = 1000;
+              description = "Number of history entries to keep in memory";
+            };
+            history-storage = lib.mkOption {
+              type = lib.types.int;
+              default = 1000;
+              description = "Number of history entries to save to disk";
+            };
+            zellij = lib.mkOption {
+              type = lib.types.submodule {
+                options = {
+                  enable = lib.mkOption {
+                    type = lib.types.bool;
+                    default = false;
+                    description = "Enable zellij terminal multiplexer";
+                  };
+                };
+              };
+              default = {};
+              description = "Zellij terminal multiplexer configuration";
+            };
+          };
+        };
+        default = {};
+        description = "Zsh shell configuration options";
       };
     };
 
