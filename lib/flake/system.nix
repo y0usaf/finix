@@ -24,7 +24,7 @@ in {
         inherit system;
         specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname // {
           inherit hostname;
-          hostsDir = hostsDir;
+          inherit hostsDir;
         };
         modules =
           [
@@ -61,7 +61,7 @@ in {
                 backupFileExtension = "backup";
                 extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname // {
                   inherit hostname;
-                  hostsDir = hostsDir;
+                  inherit hostsDir;
                 };
                 users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = {
                   imports = [../../home (shared.mkSharedModule { inherit hostname hostsDir; })];
@@ -85,7 +85,7 @@ in {
               hjem = {
                 specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname // {
                   inherit hostname;
-                  hostsDir = hostsDir;
+                  inherit hostsDir;
                 };
                 users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = lib.mkMerge [
                   {
