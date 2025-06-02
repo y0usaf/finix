@@ -3,6 +3,11 @@
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
+  # Firewall configuration
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 25565 ];  # Minecraft server
+  };
   cfg = {
     # SHARED CONFIGURATION - used by all module systems
     shared = {
