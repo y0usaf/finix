@@ -1,4 +1,4 @@
-# SkyFactory 5 Server - Direct system configuration
+# SkyFactory 5 Server - Simple working configuration
 {
   pkgs,
   nix-minecraft,
@@ -16,11 +16,7 @@
     
     servers.skyfactory5 = {
       enable = true;
-      
-      package = nix-minecraft.packages.${pkgs.system}.fabric-server.override {
-        version = "1.20.1";
-        loaderVersion = "0.14.24";
-      };
+      package = pkgs.fabricServers.fabric-1_20_1;
       
       serverProperties = {
         server-port = 25565;
@@ -34,20 +30,6 @@
       };
 
       jvmOpts = "-Xms4G -Xmx8G -XX:+UseG1GC";
-      dataDir = "/var/lib/minecraft/skyfactory5";
     };
   };
-
-  users.users.minecraft = {
-    description = "Minecraft server user";
-    group = "minecraft";
-    isSystemUser = true;
-    createHome = true;
-    home = "/var/lib/minecraft";
-  };
-  users.groups.minecraft = {};
-
-  systemd.tmpfiles.rules = [
-    "d /var/lib/minecraft/skyfactory5 0755 minecraft minecraft -"
-  ];
 }
