@@ -9,7 +9,6 @@
 {
   config,
   lib,
-
   hostHome,
   ...
 }: let

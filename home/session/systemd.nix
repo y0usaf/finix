@@ -9,7 +9,6 @@
   config,
   pkgs,
   lib,
-
   ...
 }: let
   cfg = config.cfg.core.systemd;

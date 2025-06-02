@@ -1,5 +1,57 @@
-# This module configures the core system settings.
-{config, ...}: {
+###############################################################################
+# System Configuration Options
+# Defines system-level configuration options used by system modules and host configs
+###############################################################################
+{
+  config,
+  lib,
+  ...
+}: {
+  # System-level configuration options
+  options.cfg.system = {
+    username = lib.mkOption {
+      type = lib.types.str;
+      default = config.cfg.shared.username;
+      description = "The username for the system.";
+    };
+    hostname = lib.mkOption {
+      type = lib.types.str;
+      default = config.cfg.shared.hostname;
+      description = "The system hostname.";
+    };
+    homeDirectory = lib.mkOption {
+      type = lib.types.str;
+      default = config.cfg.shared.homeDirectory;
+      description = "The path to the user's home directory.";
+    };
+    stateVersion = lib.mkOption {
+      type = lib.types.str;
+      default = config.cfg.shared.stateVersion;
+      description = "The system state version.";
+    };
+    timezone = lib.mkOption {
+      type = lib.types.str;
+      default = config.cfg.shared.timezone;
+      description = "The system timezone.";
+    };
+    config = lib.mkOption {
+      type = lib.types.str;
+      default = config.cfg.shared.config;
+      description = "The system configuration type.";
+    };
+  };
+
+  # Core GPU modules
+  options.cfg.core = {
+    nvidia = {
+      enable = lib.mkEnableOption "NVIDIA GPU support";
+    };
+    amdgpu = {
+      enable = lib.mkEnableOption "AMD GPU support";
+    };
+  };
+
+  # Configuration
   config = {
     system.stateVersion = config.cfg.shared.stateVersion;
     time.timeZone = config.cfg.shared.timezone;

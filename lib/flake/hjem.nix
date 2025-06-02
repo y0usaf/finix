@@ -26,15 +26,14 @@ in {
     (hostname: {
       name = "${shared.unifiedConfigs.${hostname}.cfg.shared.username}@${hostname}";
       value = {
-        specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
+        specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname // {
+          inherit hostname;
+          hostsDir = ../../hosts;
+        };
         modules = [
           ../../hjem
-          (../../lib/shared/core.nix)
+(shared.mkSharedModule { inherit hostname; hostsDir = ../../hosts; })
           {
-            # Apply shared configuration and global settings
-            cfg = {
-              inherit (shared.unifiedConfigs.${hostname}.cfg) shared;
-            };
             # Apply global settings directly from cfg.hjem
             clobberFiles = shared.hjemConfigs.${hostname}.cfg.hjem.clobberFiles or false;
 

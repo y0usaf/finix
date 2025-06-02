@@ -21,18 +21,19 @@ in {
       name = "${shared.unifiedConfigs.${hostname}.cfg.shared.username}@${hostname}";
       value = inputs.home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
+        extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname // {
+          inherit hostname;
+          hostsDir = ../../hosts;
+        };
         modules = [
           ../../home
-          (../../lib/shared/core.nix)
+(shared.mkSharedModule { inherit hostname; hostsDir = ../../hosts; })
           {
             home = {
               inherit (shared.unifiedConfigs.${hostname}.cfg.shared) username homeDirectory stateVersion;
             };
-            # Apply unified home configuration with shared config
-            cfg = shared.homeConfigs.${hostname}.cfg // {
-              inherit (shared.unifiedConfigs.${hostname}.cfg) shared;
-            };
+            # Apply unified home configuration
+            inherit (shared.homeConfigs.${hostname}) cfg;
           }
         ];
       };

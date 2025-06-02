@@ -22,7 +22,10 @@ in {
       name = hostname;
       value = inputs.nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
+        specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname // {
+          inherit hostname;
+          hostsDir = hostsDir;
+        };
         modules =
           [
             # Import hardware configuration directly from the unified host directory
@@ -30,20 +33,15 @@ in {
             # Import the shared configurations
             (hostsDir + "/default.nix")
             ../../system
-            (../../lib/shared/core.nix)
+(shared.mkSharedModule { inherit hostname hostsDir; })
             inputs.home-manager.nixosModules.home-manager
             inputs.hjem.nixosModules.default
             # Add system-specific imports that shouldn't be exposed to HM
           ]
           ++ (shared.systemConfigs.${hostname}.cfg.system.imports or [])
           ++ [
-            # Apply system configuration from cfg.shared
-            ({ config, ... }: {
-              # Apply shared configuration to the shared core module
-              cfg = {
-                inherit (shared.unifiedConfigs.${hostname}.cfg) shared;
-              };
-              
+            # Apply system configuration
+            ({config, ...}: {
               networking.hostName = config.cfg.shared.hostname;
               time.timeZone = config.cfg.shared.timezone;
               system.stateVersion = config.cfg.shared.stateVersion;
@@ -61,17 +59,18 @@ in {
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 backupFileExtension = "backup";
-                extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
+                extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname // {
+                  inherit hostname;
+                  hostsDir = hostsDir;
+                };
                 users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = {
-                  imports = [../../home (../../lib/shared/core.nix)];
+                  imports = [../../home (shared.mkSharedModule { inherit hostname hostsDir; })];
                   home = {
                     inherit (shared.unifiedConfigs.${hostname}.cfg.shared) stateVersion;
-                    homeDirectory = inputs.nixpkgs.lib.mkForce shared.unifiedConfigs.${hostname}.cfg.shared.homeDirectory;
+                    homeDirectory = lib.mkForce shared.unifiedConfigs.${hostname}.cfg.shared.homeDirectory;
                   };
-                  # Apply unified home configuration with shared config
-                  cfg = shared.homeConfigs.${hostname}.cfg // {
-                    inherit (shared.unifiedConfigs.${hostname}.cfg) shared;
-                  };
+                  # Apply unified home configuration
+                  inherit (shared.homeConfigs.${hostname}) cfg;
                 };
               };
             }
@@ -84,10 +83,13 @@ in {
 
               # Configure hjem for this user
               hjem = {
-                specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
+                specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname // {
+                  inherit hostname;
+                  hostsDir = hostsDir;
+                };
                 users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = lib.mkMerge [
                   {
-                    imports = [../../hjem];
+                    imports = [../../hjem (shared.mkSharedModule { inherit hostname hostsDir; })];
                   }
                   {
                     cfg.hjome = shared.hjemConfigs.${hostname}.cfg.hjome or {};
