@@ -1,8 +1,31 @@
-# /home/y0usaf/nixos/modules/home/gaming/marvel-rivals/engine.nix
-# Manages the Marvel Rivals Engine.ini file
-{lib, ...}: {
-  xdg.dataFile."Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini" = {
-    text = lib.generators.toINI {} {
+###############################################################################
+# Marvel Rivals Engine Configuration
+# Optimizes graphics settings for better performance
+###############################################################################
+{
+  config,
+  lib,
+  xdg,
+  ...
+}: let
+  cfg = config.cfg.hjome.gaming.marvel-rivals;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.cfg.hjome.gaming.marvel-rivals.engine = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Marvel Rivals engine configuration";
+    };
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.engine.enable {
+    files.${xdg.dataFile "Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini"}.text = lib.generators.toINI {} {
       "SystemSettings" = {
         "r.LevelStreamingDistanceScale" = "1";
         "r.ViewDistanceScale" = "1";

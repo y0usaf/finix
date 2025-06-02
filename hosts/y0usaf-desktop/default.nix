@@ -33,6 +33,10 @@ in {
         };
         amdgpu.enable = false;
       };
+
+      gaming = {
+        enable = false; # Moved to hjome.gaming
+      };
     };
 
     # HJOME CONFIGURATION - simple interface like Home Manager
@@ -47,9 +51,16 @@ in {
         ags.enable = true;
       };
 
-      # Gaming modules
+      # Gaming modules - ALL gaming config in one place!
       gaming = {
+        enable = true;
+        controllers.enable = true;
+        emulation = {
+          wii-u.enable = true;
+          gcn-wii.enable = true;
+        };
         marvel-rivals = {
+          engine.enable = true;
           gameusersettings.enable = true;
           marvelusersettings.enable = true;
         };
@@ -57,6 +68,9 @@ in {
           enable = true;
           enableLovelyInjector = true;
           enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "handybalatro" "stickersalwaysshown"];
+        };
+        wukong = {
+          enable = true;
         };
       };
     };
@@ -150,20 +164,7 @@ in {
         bluetooth.enable = true;
       };
 
-      # Gaming
-      gaming = {
-        enable = true;
-        controllers.enable = true;
-        emulation = {
-          wii-u.enable = true;
-          gcn-wii.enable = true;
-        };
-        balatro = {
-          enable = false; # Disabled in Home Manager, now using Hjem
-          enableLovelyInjector = false;
-          enabledMods = [];
-        };
-      };
+      # Gaming - now fully handled by Hjem
 
       tools = {
         git = {
@@ -271,6 +272,8 @@ in {
       nh
       # Add AGS here since it's not properly installed through Hjem
       ags
+      
+      # Gaming packages are now automatically installed by hjem/gaming modules
     ];
   };
 }

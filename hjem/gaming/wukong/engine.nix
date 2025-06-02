@@ -2,9 +2,30 @@
 # Black Myth: Wukong Engine Configuration
 # Optimizes graphics settings for better performance
 ###############################################################################
-{lib, ...}: {
-  xdg.dataFile."Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
-    text = lib.generators.toINI {} {
+{
+  config,
+  lib,
+  xdg,
+  ...
+}: let
+  cfg = config.cfg.hjome.gaming.wukong;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.cfg.hjome.gaming.wukong = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Black Myth: Wukong configuration";
+    };
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    files.${xdg.dataFile "Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini"}.text = lib.generators.toINI {} {
       "SystemSettings" = {
         "r.DefaultFeature.AntiAliasing" = "0";
         "pp.VignetteIntensity" = "0.0";

@@ -1,6 +1,6 @@
 ###############################################################################
-# Dolphin Emulator Module
-# Configuration for GameCube and Wii emulation
+# Core Gaming Module
+# Base configuration for gaming-related software
 ###############################################################################
 {
   config,
@@ -8,11 +8,15 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.gaming.emulation.gcn-wii;
+  cfg = config.cfg.hjome.gaming;
 in {
   config = lib.mkIf cfg.enable {
-    home.packages = [
-      pkgs.dolphin-emu
+    packages = with pkgs; [
+      steam
+      protonup-qt
+      gamemode
+      protontricks
+      prismlauncher
     ];
   };
 }

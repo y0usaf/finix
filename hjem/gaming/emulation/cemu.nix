@@ -8,10 +8,14 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.gaming.emulation.wii-u;
+  cfg = config.cfg.hjome.gaming.emulation.wii-u;
 in {
+  options.cfg.hjome.gaming.emulation.wii-u = {
+    enable = lib.mkEnableOption "Wii U emulation via Cemu";
+  };
+
   config = lib.mkIf cfg.enable {
-    home.packages = [
+    packages = [
       pkgs.cemu
     ];
   };
