@@ -18,16 +18,23 @@ in {
   }:
     shared.mapToAttrs
     (hostname: {
-      name = "${shared.systemConfigs.${hostname}.cfg.system.username}@${hostname}";
+      name = "${shared.unifiedConfigs.${hostname}.cfg.shared.username}@${hostname}";
       value = inputs.home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
         modules = [
           ../../home
+          (../../lib/shared/core.nix)
           {
             home = {
-              inherit (shared.systemConfigs.${hostname}.cfg.system) username homeDirectory stateVersion;
+              inherit (shared.unifiedConfigs.${hostname}.cfg.shared) username homeDirectory stateVersion;
             };
+            # Apply shared configuration
+            cfg.shared = shared.unifiedConfigs.${hostname}.cfg.shared;
+          }
+          {
+            # Apply unified home configuration
+            inherit (shared.homeConfigs.${hostname}) cfg;
           }
         ];
       };

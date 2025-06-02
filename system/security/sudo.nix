@@ -5,7 +5,7 @@
 # - Password-less sudo for specific users
 # - Fine-grained command permissions
 ###############################################################################
-{hostSystem, ...}: {
+{config, ...}: {
   config = {
     ###########################################################################
     # Sudo Configuration
@@ -13,7 +13,7 @@
     ###########################################################################
     security.sudo.extraRules = [
       {
-        users = [hostSystem.cfg.system.username]; # The user defined in the hostSystem
+        users = [config.cfg.shared.username]; # The user defined in the shared config
         commands = [
           {
             command = "ALL"; # Allow all commands

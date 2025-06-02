@@ -1,7 +1,7 @@
 # This module configures Nix package management.
 {
+  config,
   pkgs,
-  hostSystem,
   ...
 }: {
   config = {
@@ -13,7 +13,7 @@
         cores = 0;
         experimental-features = ["nix-command" "flakes"];
         sandbox = true;
-        trusted-users = ["root" hostSystem.cfg.system.username];
+        trusted-users = ["root" config.cfg.shared.username];
         builders-use-substitutes = true;
         fallback = true;
 

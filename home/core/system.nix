@@ -2,39 +2,39 @@
 {
   config,
   lib,
-  hostSystem,
+
   ...
 }: {
   # No need for module-defs import - using lib directly
   options.cfg.system = {
     username = lib.mkOption {
       type = lib.types.str;
-      default = hostSystem.cfg.system.username;
+      default = config.cfg.shared.username;
       description = "The username for the system.";
     };
     hostname = lib.mkOption {
       type = lib.types.str;
-      default = hostSystem.cfg.system.hostname;
+      default = config.cfg.shared.hostname;
       description = "The system hostname.";
     };
     homeDirectory = lib.mkOption {
       type = lib.types.str;
-      default = hostSystem.cfg.system.homeDirectory;
+      default = config.cfg.shared.homeDirectory;
       description = "The path to the user's home directory.";
     };
     stateVersion = lib.mkOption {
       type = lib.types.str;
-      default = hostSystem.cfg.system.stateVersion;
+      default = config.cfg.shared.stateVersion;
       description = "The system state version.";
     };
     timezone = lib.mkOption {
       type = lib.types.str;
-      default = hostSystem.cfg.system.timezone;
+      default = config.cfg.shared.timezone;
       description = "The system timezone.";
     };
     config = lib.mkOption {
       type = lib.types.str;
-      default = hostSystem.cfg.system.config;
+      default = config.cfg.shared.config;
       description = "The system configuration type.";
     };
   };

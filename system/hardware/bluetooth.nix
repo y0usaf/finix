@@ -7,6 +7,7 @@
   config,
   lib,
   pkgs,
+
   hostSystem,
   ...
 }: let
@@ -43,7 +44,7 @@ in {
       ];
 
     # Add user to necessary groups for Bluetooth
-    users.users.${hostSystem.cfg.system.username}.extraGroups =
+    users.users.${config.cfg.shared.username}.extraGroups =
       lib.optionals (hardwareCfg.bluetooth.enable or false) ["dialout" "bluetooth" "lp"];
   };
 }

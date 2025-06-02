@@ -29,40 +29,47 @@ in {
             (hostsDir + "/${hostname}/hardware-configuration.nix")
             # Import the shared configurations
             (hostsDir + "/default.nix")
+            ../../system
+            (../../lib/shared/core.nix)
             inputs.home-manager.nixosModules.home-manager
             inputs.hjem.nixosModules.default
             # Add system-specific imports that shouldn't be exposed to HM
           ]
           ++ (shared.systemConfigs.${hostname}.cfg.system.imports or [])
           ++ [
-            # Apply system configuration from hostSystem
-            {
-              networking.hostName = shared.systemConfigs.${hostname}.cfg.system.hostname;
-              time.timeZone = shared.systemConfigs.${hostname}.cfg.system.timezone;
-              system.stateVersion = shared.systemConfigs.${hostname}.cfg.system.stateVersion;
+            # Apply system configuration from cfg.shared
+            ({ config, ... }: {
+              # Apply shared configuration to the shared core module
+              cfg.shared = shared.unifiedConfigs.${hostname}.cfg.shared;
+              
+              networking.hostName = config.cfg.shared.hostname;
+              time.timeZone = config.cfg.shared.timezone;
+              system.stateVersion = config.cfg.shared.stateVersion;
 
               # Apply users configuration
               inherit (shared.systemConfigs.${hostname}) users;
 
               # Hardware configuration
               hardware = {
-                bluetooth.enable = shared.systemConfigs.${hostname}.cfg.hardware.bluetooth.enable or false;
+                bluetooth.enable = shared.systemConfigs.${hostname}.cfg.system.hardware.bluetooth.enable or false;
               };
-            }
+            })
             {
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 backupFileExtension = "backup";
                 extraSpecialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
-                users.${shared.systemConfigs.${hostname}.cfg.system.username} = {
-                  imports = [../../home];
+                users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = {
+                  imports = [../../home (../../lib/shared/core.nix)];
                   home = {
-                    inherit (shared.systemConfigs.${hostname}.cfg.system) stateVersion;
-                    homeDirectory = inputs.nixpkgs.lib.mkForce shared.systemConfigs.${hostname}.cfg.system.homeDirectory;
+                    inherit (shared.unifiedConfigs.${hostname}.cfg.shared) stateVersion;
+                    homeDirectory = inputs.nixpkgs.lib.mkForce shared.unifiedConfigs.${hostname}.cfg.shared.homeDirectory;
                   };
-                  # Apply unified home configuration
-                  inherit (shared.homeConfigs.${hostname}) cfg;
+                  # Apply unified home configuration with shared config
+                  cfg = shared.homeConfigs.${hostname}.cfg // {
+                    shared = shared.unifiedConfigs.${hostname}.cfg.shared;
+                  };
                 };
               };
             }
@@ -70,13 +77,13 @@ in {
             {
               # Add the alias from hjome to hjem.users.username
               imports = [
-                (lib.mkAliasOptionModule ["hjome"] ["hjem" "users" shared.systemConfigs.${hostname}.cfg.system.username])
+                (lib.mkAliasOptionModule ["hjome"] ["hjem" "users" shared.unifiedConfigs.${hostname}.cfg.shared.username])
               ];
 
               # Configure hjem for this user
               hjem = {
                 specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;
-                users.${shared.systemConfigs.${hostname}.cfg.system.username} = lib.mkMerge [
+                users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = lib.mkMerge [
                   {
                     imports = [../../hjem];
                   }

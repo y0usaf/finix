@@ -34,13 +34,13 @@
       inherit name;
       value = {
         cfg = {
-          system =
-            unifiedConfigs.${name}.cfg.system
-            // {
-              # Move imports into system scope to avoid HM exposure
-              imports = unifiedConfigs.${name}.imports or [];
-            };
+          # Move hardware to top level for system modules
           inherit (unifiedConfigs.${name}.cfg.system) hardware;
+          system = {
+            # Move imports into system scope to avoid HM exposure
+            imports = unifiedConfigs.${name}.imports or [];
+            inherit (unifiedConfigs.${name}.cfg.system) hardware;
+          };
           inherit (unifiedConfigs.${name}.cfg) core;
         };
         users = unifiedConfigs.${name}.users or {};
@@ -80,14 +80,14 @@
     hostNames
   );
 
-  # Get valid host names with proper system config structure
+  # Get valid host names with proper config structure
   validHostNames =
     builtins.filter (
       hostname:
-        builtins.hasAttr hostname systemConfigs
-        && builtins.hasAttr "cfg" systemConfigs.${hostname}
-        && builtins.hasAttr "system" systemConfigs.${hostname}.cfg
-        && builtins.hasAttr "username" systemConfigs.${hostname}.cfg.system
+        builtins.hasAttr hostname unifiedConfigs
+        && builtins.hasAttr "cfg" unifiedConfigs.${hostname}
+        && builtins.hasAttr "shared" unifiedConfigs.${hostname}.cfg
+        && builtins.hasAttr "username" unifiedConfigs.${hostname}.cfg.shared
     )
     hostNames;
 
@@ -104,5 +104,5 @@
   # Generic listToAttrs + map helper
   mapToAttrs = f: list: builtins.listToAttrs (map f list);
 in {
-  inherit hostNames systemConfigs homeConfigs hjemConfigs validHostNames mkSpecialArgs mapToAttrs;
+  inherit hostNames unifiedConfigs systemConfigs homeConfigs hjemConfigs validHostNames mkSpecialArgs mapToAttrs;
 }

@@ -6,6 +6,7 @@
 ###############################################################################
 {
   lib,
+  config,
   hostSystem ? {},
   hostHome ? {},
   ...
@@ -18,8 +19,8 @@
     # Only the absolute essentials from system config
     essentialSystemSettings = {
       system = {
-        username = hostSystem.cfg.system.username or null;
-        homeDirectory = hostSystem.cfg.system.homeDirectory or null;
+        username = config.cfg.shared.username or null;
+        homeDirectory = config.cfg.shared.homeDirectory or null;
       };
     };
 

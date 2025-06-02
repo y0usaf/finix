@@ -4,15 +4,17 @@
   homeDir = "/home/${username}";
 in {
   cfg = {
-    # SYSTEM CONFIGURATION (includes hardware)
-    system = {
+    # SHARED CONFIGURATION - used by all module systems
+    shared = {
       inherit username;
       homeDirectory = homeDir;
       hostname = "y0usaf-desktop";
       stateVersion = "24.11";
       timezone = "America/Toronto";
       config = "default";
-
+    };
+    # SYSTEM CONFIGURATION (includes hardware)
+    system = {
       # Move imports inside system configuration to avoid HM exposure
       imports = [
         ./hardware-configuration.nix

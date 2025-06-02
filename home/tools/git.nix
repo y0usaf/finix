@@ -9,7 +9,7 @@
 {
   config,
   lib,
-  hostSystem,
+
   hostHome,
   ...
 }: let
@@ -39,7 +39,7 @@ in {
 
       repoPath = lib.mkOption {
         type = lib.types.str;
-        default = "${hostSystem.cfg.system.homeDirectory}/nixos";
+        default = "${config.cfg.shared.homeDirectory}/nixos";
         description = "Path to the NixOS configuration repository.";
       };
 

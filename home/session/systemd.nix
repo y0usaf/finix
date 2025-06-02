@@ -9,7 +9,7 @@
   config,
   pkgs,
   lib,
-  hostSystem,
+
   ...
 }: let
   cfg = config.cfg.core.systemd;
@@ -25,7 +25,7 @@ in {
 
       directory = lib.mkOption {
         type = lib.types.str;
-        default = "${hostSystem.cfg.system.homeDirectory}/nixos";
+        default = "${config.cfg.shared.homeDirectory}/nixos";
         description = "Directory to watch for Nix file changes";
       };
     };
