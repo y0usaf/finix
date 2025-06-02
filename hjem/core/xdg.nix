@@ -2,7 +2,7 @@
 # XDG Base Directory Utilities for Hjem
 # Provides helper functions for managing XDG-compliant paths
 ###############################################################################
-{lib, ...}: {
+_: {
   # Provide XDG path helpers as module arguments
   config._module.args = {
     xdg = rec {

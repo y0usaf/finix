@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: {
   # Define the option for collecting packages from modules

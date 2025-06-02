@@ -13,10 +13,6 @@
   # Known global Hjem settings
   globalSettings = ["clobberFiles"];
 
-  # Extract global settings
-  getGlobalSettings = cfg:
-    lib.filterAttrs (name: _: builtins.elem name globalSettings) cfg;
-
   # Extract user settings
   getUserSettings = cfg:
     lib.filterAttrs (name: _: !(builtins.elem name globalSettings)) cfg;
@@ -25,10 +21,7 @@ in {
   flakeOutputs = {};
 
   # Helper function to create hjem configurations
-  mkHjemConfigurations = {
-    inputs,
-    commonSpecialArgs,
-  }:
+  mkHjemConfigurations = {commonSpecialArgs, ...}:
     shared.mapToAttrs
     (hostname: {
       name = "${shared.systemConfigs.${hostname}.cfg.system.username}@${hostname}";

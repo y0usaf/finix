@@ -1,8 +1,5 @@
 # This module configures the core system settings.
-{
-  hostSystem,
-  ...
-}: {
+{hostSystem, ...}: {
   config = {
     system.stateVersion = hostSystem.cfg.system.stateVersion;
     time.timeZone = hostSystem.cfg.system.timezone;

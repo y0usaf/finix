@@ -1,9 +1,5 @@
 # UNIFIED HOST CONFIGURATION for y0usaf-desktop
-{
-  pkgs,
-  lib,
-  ...
-}: let
+{pkgs, ...}: let
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
@@ -44,9 +40,6 @@ in {
       # Global Hjem settings
       clobberFiles = true;
 
-      test.enable = true;
-
-      # UI modules
       ui = {
         ags.enable = true;
       };
@@ -270,9 +263,6 @@ in {
       ripgrep
       jq
       nh
-      # Add AGS here since it's not properly installed through Hjem
-      ags
-      
       # Gaming packages are now automatically installed by hjem/gaming modules
     ];
   };

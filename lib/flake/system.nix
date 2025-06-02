@@ -72,7 +72,7 @@ in {
               imports = [
                 (lib.mkAliasOptionModule ["hjome"] ["hjem" "users" shared.systemConfigs.${hostname}.cfg.system.username])
               ];
-              
+
               # Configure hjem for this user
               hjem = {
                 specialArgs = shared.mkSpecialArgs commonSpecialArgs hostname;

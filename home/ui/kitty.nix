@@ -20,8 +20,6 @@
   # Get the main font name from the hostHome's font configuration
   mainFontName = (builtins.elemAt hostHome.cfg.appearance.fonts.main 0).name;
 
-
-
   # Note: Kitty handles font fallbacks automatically, so we don't need explicit symbol_map
 
   # Main terminal settings

@@ -3,10 +3,7 @@
 # System scheduling and tuning service:
 # - SCX scheduler configuration
 ###############################################################################
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   config = {
     ###########################################################################
     # SCX Custom Service

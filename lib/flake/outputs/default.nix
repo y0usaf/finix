@@ -8,7 +8,7 @@ inputs: let
   pkgs = import inputs.nixpkgs {
     inherit system;
     overlays = [
-      (_final: prev: {
+      (_final: _prev: {
         fastFonts = inputs.fast-fonts.packages.${system}.default;
       })
     ];

@@ -5,10 +5,7 @@
 # - Verbose service status reporting
 # - Reasonable timeout configurations
 ###############################################################################
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   config = {
     ###########################################################################
     # Systemd Configuration

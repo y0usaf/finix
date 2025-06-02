@@ -5,8 +5,8 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   xdg,
   ...
 }: {
@@ -26,8 +26,14 @@
   ###########################################################################
   config = lib.mkIf config.cfg.hjome.ui.ags.enable {
     ###########################################################################
-    # Add AGS configuration files directly to hjem user
-    # Note: AGS package should be installed via users.users.packages
+    # Install AGS package
+    ###########################################################################
+    packages = [
+      pkgs.ags
+    ];
+
+    ###########################################################################
+    # Add AGS configuration files
     ###########################################################################
     files = {
       ${xdg.configFile "ags/app.tsx"}.text = ''

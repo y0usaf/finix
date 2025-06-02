@@ -5,10 +5,7 @@
 # - Password-less sudo for specific users
 # - Fine-grained command permissions
 ###############################################################################
-{
-  hostSystem,
-  ...
-}: {
+{hostSystem, ...}: {
   config = {
     ###########################################################################
     # Sudo Configuration
