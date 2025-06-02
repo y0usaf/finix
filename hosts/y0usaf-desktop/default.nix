@@ -239,6 +239,9 @@ in {
         packages = with pkgs; [
           realesrgan-ncnn-vulkan
           fontforge
+          # Minecraft support
+          prismlauncher
+          temurin-bin-17  # Java 17 for most modern MC versions (PrismLauncher can manage others)
         ];
       };
 
