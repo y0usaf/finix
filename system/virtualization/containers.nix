@@ -3,12 +3,16 @@
 # Docker and Podman container engines:
 # - Docker daemon
 # - Podman container engine
+# - Docker user group management
 ###############################################################################
 {
   lib,
   hostHome,
+  hostSystem,
   ...
-}: {
+}: let
+  dockerEnabled = hostHome.cfg.dev.docker.enable or false;
+in {
   config = {
     ###########################################################################
     # Container Virtualization
@@ -16,13 +20,21 @@
     ###########################################################################
     virtualisation = {
       lxd.enable = true; # Enable LXD container hypervisor.
-      docker = lib.mkIf hostHome.cfg.dev.docker.enable {
+      docker = lib.mkIf dockerEnabled {
         enable = true; # Enable Docker daemon
         enableOnBoot = true; # Start Docker on boot
       };
-      podman = lib.mkIf hostHome.cfg.dev.docker.enable {
+      podman = lib.mkIf dockerEnabled {
         enable = true;
       };
+    };
+
+    ###########################################################################
+    # Docker User Group Management
+    # Automatically add user to docker group when docker is enabled
+    ###########################################################################
+    users.users.${hostSystem.cfg.system.username} = lib.mkIf dockerEnabled {
+      extraGroups = ["docker"];
     };
   };
 }

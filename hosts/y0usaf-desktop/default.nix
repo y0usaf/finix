@@ -29,10 +29,6 @@ in {
         };
         amdgpu.enable = false;
       };
-
-      gaming = {
-        enable = false; # Moved to hjome.gaming
-      };
     };
 
     # HJOME CONFIGURATION - simple interface like Home Manager
@@ -249,21 +245,5 @@ in {
         tokenDir = "${homeDir}/Tokens";
       };
     };
-  };
-
-  users.users.${username} = {
-    extraGroups = ["docker"];
-    packages = with pkgs; [
-      # Add any packages you want installed for your user here
-      curl
-      gh
-      gitui
-      kitty
-      neofetch
-      ripgrep
-      jq
-      nh
-      # Gaming packages are now automatically installed by hjem/gaming modules
-    ];
   };
 }

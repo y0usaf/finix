@@ -26,6 +26,7 @@
         "audio" # Provides access to audio subsystems.
         "input" # Necessary for access to keyboard and mouse devices.
         "gamemode" # Include gamemode group for gaming performance tweaks.
+        # Docker group is now managed by system/virtualization/containers.nix
       ];
       ignoreShellProgramCheck = true; # Skip validating that the shell is in /etc/shells.
     };
