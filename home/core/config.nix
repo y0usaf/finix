@@ -7,7 +7,6 @@
 {
   lib,
   config,
-  hostSystem ? {},
   hostHome ? {},
   ...
 }: {

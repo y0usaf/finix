@@ -40,7 +40,9 @@ in {
             # Apply system configuration from cfg.shared
             ({ config, ... }: {
               # Apply shared configuration to the shared core module
-              cfg.shared = shared.unifiedConfigs.${hostname}.cfg.shared;
+              cfg = {
+                inherit (shared.unifiedConfigs.${hostname}.cfg) shared;
+              };
               
               networking.hostName = config.cfg.shared.hostname;
               time.timeZone = config.cfg.shared.timezone;
@@ -68,7 +70,7 @@ in {
                   };
                   # Apply unified home configuration with shared config
                   cfg = shared.homeConfigs.${hostname}.cfg // {
-                    shared = shared.unifiedConfigs.${hostname}.cfg.shared;
+                    inherit (shared.unifiedConfigs.${hostname}.cfg) shared;
                   };
                 };
               };

@@ -29,12 +29,10 @@ in {
             home = {
               inherit (shared.unifiedConfigs.${hostname}.cfg.shared) username homeDirectory stateVersion;
             };
-            # Apply shared configuration
-            cfg.shared = shared.unifiedConfigs.${hostname}.cfg.shared;
-          }
-          {
-            # Apply unified home configuration
-            inherit (shared.homeConfigs.${hostname}) cfg;
+            # Apply unified home configuration with shared config
+            cfg = shared.homeConfigs.${hostname}.cfg // {
+              inherit (shared.unifiedConfigs.${hostname}.cfg) shared;
+            };
           }
         ];
       };

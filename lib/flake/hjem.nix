@@ -31,8 +31,10 @@ in {
           ../../hjem
           (../../lib/shared/core.nix)
           {
-            # Apply shared configuration
-            cfg.shared = shared.unifiedConfigs.${hostname}.cfg.shared;
+            # Apply shared configuration and global settings
+            cfg = {
+              inherit (shared.unifiedConfigs.${hostname}.cfg) shared;
+            };
             # Apply global settings directly from cfg.hjem
             clobberFiles = shared.hjemConfigs.${hostname}.cfg.hjem.clobberFiles or false;
 
