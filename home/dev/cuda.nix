@@ -5,8 +5,6 @@
 ###############################################################################
 {
   config,
-  pkgs,
-  lib,
   ...
 }: {
   # This module is disabled - CUDA configuration has moved to system level

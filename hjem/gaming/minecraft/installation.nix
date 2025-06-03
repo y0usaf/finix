@@ -6,7 +6,6 @@
   config,
   lib,
   pkgs,
-  nix-minecraft,
   ...
 }: let
   cfg = config.cfg.hjome.gaming.minecraft;

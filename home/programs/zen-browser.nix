@@ -9,7 +9,6 @@
   config,
   pkgs,
   lib,
-  profile,
   ...
 }: let
   cfg = config.cfg.programs.zen-browser;

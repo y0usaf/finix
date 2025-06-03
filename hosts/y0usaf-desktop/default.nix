@@ -83,7 +83,7 @@ in {
         };
         minecraft = {
           enable = true;
-          servers.skyfactory5.enable = true;
+          servers.skyfactory5.enable = false;  # Disabled - running manually
         };
       };
     };

@@ -3,7 +3,6 @@
 # Merges host-specific home configuration
 ###############################################################################
 {
-  lib,
   hostHome ? {},
   ...
 }: {

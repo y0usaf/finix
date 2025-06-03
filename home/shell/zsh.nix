@@ -69,7 +69,7 @@ in {
       # as environment variables.
       envExtra = let
         # Get the token directory path from shared config
-        tokenDir = config.cfg.shared.tokenDir;
+        inherit (config.cfg.shared) tokenDir;
         # --- Common token management function (from env.nix) ---
         tokenFunctionScript = ''
           # Token management function
