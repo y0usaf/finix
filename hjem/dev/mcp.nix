@@ -67,6 +67,9 @@ in {
           "nix Docs" = {
             url = "https://gitmcp.io/NixOS/nix";
           };
+          "home-manager Docs" = {
+            url = "https://gitmcp.io/nix-community/home-manager";
+          };
         };
       };
     };

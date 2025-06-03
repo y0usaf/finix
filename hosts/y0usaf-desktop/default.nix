@@ -223,12 +223,10 @@ in {
       dev = {
         docker.enable = true;
         fhs.enable = true;
-        claude-code.enable = false;
-        mcp.enable = false;
+        claude-code.enable = true;
         npm.enable = true;
         nvim.enable = true;
         python.enable = true;
-        cursor-ide.enable = true;
         latex.enable = true;
       };
 
