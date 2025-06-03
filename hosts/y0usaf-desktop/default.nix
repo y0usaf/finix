@@ -31,7 +31,7 @@ in {
         };
       };
     };
-    # SYSTEM CONFIGURATION (includes hardware)
+
     system = {
       # Move imports inside system configuration to avoid HM exposure
       imports = [
