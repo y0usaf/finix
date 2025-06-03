@@ -82,6 +82,11 @@ in {
           enable = true;
         };
       };
+
+      dev = {
+        mcp.enable = true;
+        cursor-ide.enable = true;
+      };
     };
 
     # HOME-MANAGER CONFIGURATION
@@ -218,8 +223,8 @@ in {
       dev = {
         docker.enable = true;
         fhs.enable = true;
-        claude-code.enable = true;
-        mcp.enable = true;
+        claude-code.enable = false;
+        mcp.enable = false;
         npm.enable = true;
         nvim.enable = true;
         python.enable = true;
