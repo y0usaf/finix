@@ -6,7 +6,7 @@ in {
   # Firewall configuration
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 25565 ];  # Minecraft server
+    allowedTCPPorts = [25565]; # Minecraft server
   };
   cfg = {
     # SHARED CONFIGURATION - used by all module systems
@@ -80,10 +80,6 @@ in {
         };
         wukong = {
           enable = true;
-        };
-        minecraft = {
-          enable = true;
-          servers.skyfactory5.enable = false;  # Disabled - running manually
         };
       };
     };
@@ -247,7 +243,7 @@ in {
           fontforge
           # Minecraft support
           prismlauncher
-          temurin-bin-17  # Java 17 for most modern MC versions (PrismLauncher can manage others)
+          temurin-bin-17 # Java 17 for most modern MC versions (PrismLauncher can manage others)
         ];
       };
 
