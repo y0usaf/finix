@@ -45,26 +45,33 @@ lib: let
         else let
           # Check if this section has special ordering rules
           hasOrderingRules = builtins.hasAttr n sectionOrderingRules;
-          
+
           # Apply special ordering if rules exist
-          processedAttrs = if hasOrderingRules then let
-            orderingRule = sectionOrderingRules.${n};
-            allKeys = builtins.attrNames attrs;
-            
-            # Separate keys into ordered and unordered
-            orderedKeys = builtins.filter (key: builtins.elem key orderingRule) allKeys;
-            unorderedKeys = builtins.filter (key: !(builtins.elem key orderingRule)) allKeys;
-            
-            # Sort ordered keys according to the rule
-            sortedOrderedKeys = builtins.filter (ruleKey: builtins.elem ruleKey orderedKeys) orderingRule;
-            
-            # Combine in the correct order: sorted ordered keys first, then unordered keys
-            finalKeyOrder = sortedOrderedKeys ++ unorderedKeys;
-            
-            # Reconstruct attrs in the correct order
-            orderedAttrs = lib.listToAttrs (map (key: { name = key; value = attrs.${key}; }) finalKeyOrder);
-          in orderedAttrs
-          else attrs;
+          processedAttrs =
+            if hasOrderingRules
+            then let
+              orderingRule = sectionOrderingRules.${n};
+              allKeys = builtins.attrNames attrs;
+
+              # Separate keys into ordered and unordered
+              orderedKeys = builtins.filter (key: builtins.elem key orderingRule) allKeys;
+              unorderedKeys = builtins.filter (key: !(builtins.elem key orderingRule)) allKeys;
+
+              # Sort ordered keys according to the rule
+              sortedOrderedKeys = builtins.filter (ruleKey: builtins.elem ruleKey orderedKeys) orderingRule;
+
+              # Combine in the correct order: sorted ordered keys first, then unordered keys
+              finalKeyOrder = sortedOrderedKeys ++ unorderedKeys;
+
+              # Reconstruct attrs in the correct order
+              orderedAttrs = lib.listToAttrs (map (key: {
+                  name = key;
+                  value = attrs.${key};
+                })
+                finalKeyOrder);
+            in
+              orderedAttrs
+            else attrs;
         in ''
           ${indent}${n} {
           ${toHyprconf' "  ${indent}" processedAttrs}${indent}}
@@ -88,12 +95,19 @@ lib: let
         false
         importantPrefixes;
 
+      # Check if field should come before sections (like bezier)
+      isEarlyField = n: _: n == "bezier";
+
       # Separate important fields (variables, etc.) to be placed first
       importantFields = filterAttrs isImportantField allFields;
-      regularFields = removeAttrs allFields (mapAttrsToList (n: _: n) importantFields);
+      # Separate early fields (like bezier) to be placed before sections
+      earlyFields = filterAttrs isEarlyField (removeAttrs allFields (mapAttrsToList (n: _: n) importantFields));
+      # Regular fields come after sections
+      regularFields = removeAttrs allFields (mapAttrsToList (n: _: n) (importantFields // earlyFields));
     in
-      # Order: important fields first, then sections, then regular fields
+      # Order: important fields first, then early fields (bezier), then sections, then regular fields
       mkFields importantFields
+      + mkFields earlyFields
       + concatStringsSep "\n" (mapAttrsToList mkSection sections)
       + mkFields regularFields;
   in
