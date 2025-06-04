@@ -1,10 +1,9 @@
 ###############################################################################
-# Media Module
-# Configuration for media playback, streaming, and audio control
-# - Audio control with pavucontrol
-# - Video playback with VLC and Stremio
-# - Media downloading with yt-dlp and ffmpeg
-# - Terminal music playback with cmus
+# Creative Applications Module
+# Provides creative and image editing applications
+# - Simple painting tools
+# - Advanced image editing
+# - Digital art creation
 ###############################################################################
 {
   config,
@@ -12,13 +11,13 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.programs.media;
+  cfg = config.cfg.hjome.programs.creative;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.programs.media = {
-    enable = lib.mkEnableOption "media applications";
+  options.cfg.hjome.programs.creative = {
+    enable = lib.mkEnableOption "creative applications module";
   };
 
   ###########################################################################
@@ -28,12 +27,9 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    home.packages = with pkgs; [
-      pavucontrol # Sound mixer for PulseAudio
-      ffmpeg # Multimedia framework
-      vlc # Versatile media player
-      stremio # Media streaming application
-      cmus # Terminal-based music player
+    packages = with pkgs; [
+      pinta # Simple painting application
+      gimp # Feature-rich image editor
     ];
   };
 }

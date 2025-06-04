@@ -92,6 +92,13 @@ in {
         mcp.enable = true;
         cursor-ide.enable = true;
       };
+
+      programs = {
+        creative.enable = true;
+        imv.enable = true;
+        media.enable = true;
+        qbittorrent.enable = true;
+      };
     };
 
     # HOME-MANAGER CONFIGURATION
@@ -180,18 +187,14 @@ in {
         bambu.enable = true;
         discord.enable = true;
         vesktop.enable = true;
-        creative.enable = true;
         chatgpt.enable = true;
         android.enable = false;
         firefox.enable = true;
-        imv.enable = true;
         pcmanfm.enable = true;
         mpv.enable = true;
         obsidian.enable = true;
-        media.enable = true;
         music.enable = true;
         obs.enable = true;
-        qbittorrent.enable = true;
         streamlink.enable = false;
         sway-launcher-desktop.enable = true;
         syncthing.enable = true;

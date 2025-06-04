@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.programs.imv;
+  cfg = config.cfg.hjome.programs.imv;
 in {
-  options.cfg.programs.imv = {
+  options.cfg.hjome.programs.imv = {
     enable = lib.mkEnableOption "imv image viewer";
   };
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [imv];
+    packages = with pkgs; [imv];
   };
 }

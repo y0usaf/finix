@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.programs.qbittorrent;
+  cfg = config.cfg.hjome.programs.qbittorrent;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.programs.qbittorrent = {
+  options.cfg.hjome.programs.qbittorrent = {
     enable = lib.mkEnableOption "qBittorrent torrent client";
   };
 
@@ -27,7 +27,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    home.packages = with pkgs; [
+    packages = with pkgs; [
       qbittorrent
     ];
   };
