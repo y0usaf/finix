@@ -88,14 +88,18 @@ in {
       };
 
       ###########################################################################
+      # Bezier Curves (must be defined before animations)
+      ###########################################################################
+      bezier = [
+        "in-out,.65,-0.01,0,.95"
+        "woa,0,0,0,1"
+      ];
+
+      ###########################################################################
       # Animation Settings
       ###########################################################################
       animations = {
         enabled = 0;
-        bezier = [
-          "in-out,.65,-0.01,0,.95"
-          "woa,0,0,0,1"
-        ];
         animation = [
           "windows,1,2,woa,popin"
           "border,1,10,default"
@@ -117,7 +121,8 @@ in {
       ###########################################################################
       # NVIDIA-specific environment settings
       ###########################################################################
-      env = lib.mkIf hostSystem.cfg.hardware.nvidia.enable [
+    } // lib.optionalAttrs hostSystem.cfg.hardware.nvidia.enable {
+      env = [
         "LIBVA_DRIVER_NAME,nvidia"
         "GBM_BACKEND,nvidia-drm"
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"
