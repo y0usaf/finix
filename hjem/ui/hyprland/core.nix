@@ -14,7 +14,7 @@
   hostSystem,
   cfg,
   ...
-}:
+}: 
 ###########################################################################
 # Core Hyprland Configuration
 ###########################################################################
@@ -106,9 +106,7 @@
   ###########################################################################
   # NVIDIA-specific environment settings
   ###########################################################################
-}
-// lib.optionalAttrs hostSystem.cfg.hardware.nvidia.enable {
-  env = [
+  env = lib.optionals hostSystem.cfg.hardware.nvidia.enable [
     "LIBVA_DRIVER_NAME,nvidia"
     "GBM_BACKEND,nvidia-drm"
     "__GLX_VENDOR_LIBRARY_NAME,nvidia"
