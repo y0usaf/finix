@@ -10,7 +10,6 @@
   config,
   pkgs,
   lib,
-  hostHome,
   ...
 }: let
   cfg = config.cfg.core.zsh;

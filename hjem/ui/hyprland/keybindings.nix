@@ -3,7 +3,6 @@
 # Contains all keybindings for Hyprland (excluding AGS-specific bindings)
 ###############################################################################
 {
-  config,
   lib,
   hostHome,
   cfg,

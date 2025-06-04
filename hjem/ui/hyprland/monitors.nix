@@ -2,12 +2,7 @@
 # Hyprland Monitor Configuration Module (Hjem Version)
 # Contains monitor setup and display configuration
 ###############################################################################
-{
-  config,
-  lib,
-  cfg,
-  ...
-}:
+_:
 ###########################################################################
 # Monitor Configuration
 ###########################################################################

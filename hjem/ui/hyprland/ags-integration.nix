@@ -3,7 +3,6 @@
 # Contains AGS-specific configuration and keybindings
 ###############################################################################
 {
-  config,
   lib,
   hostHome,
   cfg,
@@ -12,28 +11,28 @@
   # Safely check if AGS is enabled
   agsEnabled = hostHome.cfg.ui.ags.enable or false;
 in
-###########################################################################
-# AGS Integration Configuration
-###########################################################################
-{
   ###########################################################################
-  # AGS Autostart Configuration
+  # AGS Integration Configuration
   ###########################################################################
-  "exec-once" = lib.optionals agsEnabled [
-    "exec ags run"
-  ];
+  {
+    ###########################################################################
+    # AGS Autostart Configuration
+    ###########################################################################
+    "exec-once" = lib.optionals agsEnabled [
+      "exec ags run"
+    ];
 
-  ###########################################################################
-  # AGS Keybindings
-  ###########################################################################
-  bind = lib.optionals agsEnabled [
-    "$mod, W, exec, ags request showStats"
-    # Alt+Tab to toggle workspace indicators
-    "$mod2, TAB, exec, ags request toggleWorkspaces"
-  ];
+    ###########################################################################
+    # AGS Keybindings
+    ###########################################################################
+    bind = lib.optionals agsEnabled [
+      "$mod, W, exec, ags request showStats"
+      # Alt+Tab to toggle workspace indicators
+      "$mod2, TAB, exec, ags request toggleWorkspaces"
+    ];
 
-  # Additional AGS bindings for show/hide functionality
-  bindr = lib.optionals agsEnabled [
-    "$mod, W, exec, ags request hideStats"
-  ];
-}
+    # Additional AGS bindings for show/hide functionality
+    bindr = lib.optionals agsEnabled [
+      "$mod, W, exec, ags request hideStats"
+    ];
+  }
