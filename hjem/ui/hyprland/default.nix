@@ -14,18 +14,13 @@
   hostSystem,
   hostHome,
   xdg,
+  helpers,
   ...
 }: let
   cfg = config.cfg.hjome.ui.hyprland;
   generators = import ../../../lib/generators/toHyprconf.nix lib;
 in {
-  imports = [
-    ./core.nix
-    ./keybindings.nix
-    ./window-rules.nix
-    ./monitors.nix
-    ./ags-integration.nix
-  ];
+  imports = helpers.importModules ./.;
 
   ###########################################################################
   # Module Options
