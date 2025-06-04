@@ -6,45 +6,31 @@
   config,
   lib,
   hostHome,
+  cfg,
   ...
-}: let
-  cfg = config.cfg.hjome.ui.hyprland;
-in {
+}:
+###########################################################################
+# AGS Integration Configuration
+###########################################################################
+{
   ###########################################################################
-  # Internal Configuration Storage
+  # AGS Autostart Configuration
   ###########################################################################
-  options.cfg.hjome.ui.hyprland.agsIntegration = lib.mkOption {
-    type = lib.types.attrs;
-    internal = true;
-    default = {};
-    description = "Hyprland AGS integration configuration attributes";
-  };
+  "exec-once" = lib.optionals hostHome.cfg.ui.ags.enable [
+    "exec ags run"
+  ];
 
   ###########################################################################
-  # Module Configuration
+  # AGS Keybindings
   ###########################################################################
-  config = lib.mkIf cfg.enable {
-    cfg.hjome.ui.hyprland.agsIntegration = {
-      ###########################################################################
-      # AGS Autostart Configuration
-      ###########################################################################
-      "exec-once" = lib.optionals hostHome.cfg.ui.ags.enable [
-        "exec ags run"
-      ];
+  bind = lib.optionals hostHome.cfg.ui.ags.enable [
+    "$mod, W, exec, ags request showStats"
+    # Alt+Tab to toggle workspace indicators
+    "$mod2, TAB, exec, ags request toggleWorkspaces"
+  ];
 
-      ###########################################################################
-      # AGS Keybindings
-      ###########################################################################
-      bind = lib.optionals hostHome.cfg.ui.ags.enable [
-        "$mod, W, exec, ags request showStats"
-        # Alt+Tab to toggle workspace indicators
-        "$mod2, TAB, exec, ags request toggleWorkspaces"
-      ];
-
-      # Additional AGS bindings for show/hide functionality
-      bindr = lib.optionals hostHome.cfg.ui.ags.enable [
-        "$mod, W, exec, ags request hideStats"
-      ];
-    };
-  };
+  # Additional AGS bindings for show/hide functionality
+  bindr = lib.optionals hostHome.cfg.ui.ags.enable [
+    "$mod, W, exec, ags request hideStats"
+  ];
 }

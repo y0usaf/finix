@@ -12,7 +12,7 @@ _: {
     networking.firewall = {
       enable = true;
       allowedTCPPorts = [
-        25565  # Minecraft server
+        25565 # Minecraft server
       ];
       allowedUDPPorts = [
         # Add UDP ports if needed

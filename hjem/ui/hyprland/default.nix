@@ -14,14 +14,18 @@
   hostSystem,
   hostHome,
   xdg,
-  helpers,
   ...
 }: let
   cfg = config.cfg.hjome.ui.hyprland;
   generators = import ../../../lib/generators/toHyprconf.nix lib;
+  
+  # Import all module configurations directly
+  coreConfig = import ./core.nix { inherit config lib hostSystem cfg; };
+  keybindingsConfig = import ./keybindings.nix { inherit config lib hostHome cfg; };
+  windowRulesConfig = import ./window-rules.nix { inherit config lib cfg; };
+  monitorsConfig = import ./monitors.nix { inherit config lib cfg; };
+  agsConfig = import ./ags-integration.nix { inherit config lib hostHome cfg; };
 in {
-  imports = helpers.importModules ./.;
-
   ###########################################################################
   # Module Options
   ###########################################################################
@@ -72,13 +76,13 @@ in {
     files = {
       # Main Hyprland configuration
       ${xdg.configFile "hypr/hyprland.conf"}.text = let
-        # Collect all configuration from imported modules
+        # Collect all configuration from modules
         hyprlandConfig = lib.foldl lib.recursiveUpdate {} [
-          config.cfg.hjome.ui.hyprland.core
-          config.cfg.hjome.ui.hyprland.keybindings
-          config.cfg.hjome.ui.hyprland.windowRules
-          config.cfg.hjome.ui.hyprland.monitors
-          config.cfg.hjome.ui.hyprland.agsIntegration
+          coreConfig
+          keybindingsConfig
+          windowRulesConfig
+          monitorsConfig
+          agsConfig
         ];
 
         # Generate plugins configuration if hy3 is enabled
@@ -104,11 +108,5 @@ in {
         ipc = on
       '';
     };
-
-    ###########################################################################
-    # Environment Variables (via shell configuration)
-    ###########################################################################
-    # Note: In Hjem, we can't directly set session variables like Home Manager
-    # These would need to be set at the system level or via shell configuration
   };
 }
