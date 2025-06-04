@@ -8,7 +8,10 @@
   hostHome,
   cfg,
   ...
-}:
+}: let
+  # Safely check if AGS is enabled
+  agsEnabled = hostHome.cfg.ui.ags.enable or false;
+in
 ###########################################################################
 # AGS Integration Configuration
 ###########################################################################
@@ -16,21 +19,21 @@
   ###########################################################################
   # AGS Autostart Configuration
   ###########################################################################
-  "exec-once" = lib.optionals hostHome.cfg.ui.ags.enable [
+  "exec-once" = lib.optionals agsEnabled [
     "exec ags run"
   ];
 
   ###########################################################################
   # AGS Keybindings
   ###########################################################################
-  bind = lib.optionals hostHome.cfg.ui.ags.enable [
+  bind = lib.optionals agsEnabled [
     "$mod, W, exec, ags request showStats"
     # Alt+Tab to toggle workspace indicators
     "$mod2, TAB, exec, ags request toggleWorkspaces"
   ];
 
   # Additional AGS bindings for show/hide functionality
-  bindr = lib.optionals hostHome.cfg.ui.ags.enable [
+  bindr = lib.optionals agsEnabled [
     "$mod, W, exec, ags request hideStats"
   ];
 }
