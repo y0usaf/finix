@@ -20,6 +20,12 @@ lib: let
     ;
   inherit (lib.types) package;
 
+  # Special ordering rules for certain sections
+  # Some attributes need to be defined before others within the same section
+  sectionOrderingRules = {
+    animations = ["bezier" "animation"];
+  };
+
   # Core Hyprland configuration generator
   toHyprconf = {
     attrs,
@@ -32,13 +38,36 @@ lib: let
       # Separate sections (nested attribute sets or lists of attribute sets)
       sections = filterAttrs (_: v: isAttrs v || (isList v && all isAttrs v)) attrs;
 
-      # Generate section configuration
+      # Generate section configuration with special ordering
       mkSection = n: attrs:
         if isList attrs
         then (concatMapStringsSep "\n" (a: mkSection n a) attrs)
-        else ''
+        else let
+          # Check if this section has special ordering rules
+          hasOrderingRules = builtins.hasAttr n sectionOrderingRules;
+          
+          # Apply special ordering if rules exist
+          processedAttrs = if hasOrderingRules then let
+            orderingRule = sectionOrderingRules.${n};
+            allKeys = builtins.attrNames attrs;
+            
+            # Separate keys into ordered and unordered
+            orderedKeys = builtins.filter (key: builtins.elem key orderingRule) allKeys;
+            unorderedKeys = builtins.filter (key: !(builtins.elem key orderingRule)) allKeys;
+            
+            # Sort ordered keys according to the rule
+            sortedOrderedKeys = builtins.filter (ruleKey: builtins.elem ruleKey orderedKeys) orderingRule;
+            
+            # Combine in the correct order: sorted ordered keys first, then unordered keys
+            finalKeyOrder = sortedOrderedKeys ++ unorderedKeys;
+            
+            # Reconstruct attrs in the correct order
+            orderedAttrs = lib.listToAttrs (map (key: { name = key; value = attrs.${key}; }) finalKeyOrder);
+          in orderedAttrs
+          else attrs;
+        in ''
           ${indent}${n} {
-          ${toHyprconf' "  ${indent}" attrs}${indent}}
+          ${toHyprconf' "  ${indent}" processedAttrs}${indent}}
         '';
 
       # Generate key-value fields
