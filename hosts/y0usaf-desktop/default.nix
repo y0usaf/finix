@@ -58,6 +58,11 @@ in {
 
       ui = {
         ags.enable = true;
+        hyprland = {
+          enable = true;
+          flake.enable = true;
+          hy3.enable = true;
+        };
       };
 
       # Gaming modules - ALL gaming config in one place!
@@ -114,11 +119,6 @@ in {
       };
 
       ui = {
-        hyprland = {
-          enable = true;
-          flake.enable = true;
-          hy3.enable = true;
-        };
         wayland.enable = true;
         ags.enable = false; # Disabled in Home Manager, now using Hjem
         cursor.enable = true;

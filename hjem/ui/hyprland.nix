@@ -1,9 +1,9 @@
 ###############################################################################
-# UI Modules Collection
-# Imports all UI-related Hjem modules
+# Hyprland Window Manager Module (Hjem Version)
+# This file imports the modularized Hyprland configuration for Hjem
 ###############################################################################
-{helpers, ...}: {
-  imports = helpers.importModules ./. ++ [
-    ./hyprland.nix
+{
+  imports = [
+    ./hyprland/default.nix
   ];
 }
