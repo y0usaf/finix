@@ -98,6 +98,14 @@ in {
         imv.enable = true;
         media.enable = true;
         qbittorrent.enable = true;
+        obs.enable = true;
+        pcmanfm.enable = true;
+        obsidian.enable = true;
+        vesktop.enable = true;
+      };
+      tools = {
+        spotdl.enable = true;
+        yt-dlp.enable = true;
       };
     };
 
@@ -186,20 +194,18 @@ in {
       programs = {
         bambu.enable = true;
         discord.enable = true;
-        vesktop.enable = true;
+
         chatgpt.enable = true;
         android.enable = false;
         firefox.enable = true;
-        pcmanfm.enable = true;
         mpv.enable = true;
-        obsidian.enable = true;
+
         music.enable = true;
-        obs.enable = true;
         streamlink.enable = false;
         sway-launcher-desktop.enable = true;
         syncthing.enable = true;
         webapps.enable = true;
-        zen-browser.enable = false;
+
         bluetooth.enable = true;
       };
 
@@ -216,8 +222,6 @@ in {
             remoteBranch = "hjem";
           };
         };
-        spotdl.enable = true;
-        yt-dlp.enable = true;
         file-roller.enable = true;
         "7z".enable = true;
       };

@@ -95,24 +95,22 @@ in {
       programs = {
         bambu.enable = false; # Disabled for laptop
         discord.enable = true;
-        vesktop.enable = true;
+
         creative.enable = true;
         chatgpt.enable = true;
         android.enable = true; # Enabled for laptop
         firefox.enable = true;
         imv.enable = true;
-        pcmanfm.enable = true;
         mpv.enable = true;
-        obsidian.enable = true;
+
         media.enable = true;
         music.enable = true;
-        obs.enable = true;
         qbittorrent.enable = true;
         streamlink.enable = false; # Disabled for laptop
         sway-launcher-desktop.enable = true;
         syncthing.enable = true;
         webapps.enable = true;
-        zen-browser.enable = false;
+
         bluetooth.enable = true;
       };
 
@@ -142,8 +140,7 @@ in {
             remoteBranch = "hjem";
           };
         };
-        spotdl.enable = true;
-        yt-dlp.enable = true;
+
         file-roller.enable = true;
         "7z".enable = true;
       };
@@ -217,6 +214,20 @@ in {
       env = {
         enable = true;
         tokenDir = "${homeDir}/Tokens";
+      };
+    };
+
+    # HJOME CONFIGURATION
+    hjome = {
+      programs = {
+        obs.enable = true;
+        pcmanfm.enable = true;
+        obsidian.enable = true;
+        vesktop.enable = true;
+      };
+      tools = {
+        spotdl.enable = true;
+        yt-dlp.enable = true;
       };
     };
   };

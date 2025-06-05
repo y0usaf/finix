@@ -1,9 +1,6 @@
 ###############################################################################
-# SpotDL Module
-# Provides tools for downloading music from Spotify
-# - Requires Python module for UV package manager
-# - Provides convenient aliases for different audio formats
-# - Integrates with ffmpeg for conversion
+# YouTube-DLP Module
+# Tools for downloading and converting media from YouTube and other sites
 ###############################################################################
 {
   config,
@@ -11,32 +8,25 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.tools.spotdl;
+  cfg = config.cfg.hjome.tools.yt-dlp;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.tools.spotdl = {
-    enable = lib.mkEnableOption "SpotDL music downloading tools";
+  options.cfg.hjome.tools.yt-dlp = {
+    enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
 
   ###########################################################################
   # Module Configuration
   ###########################################################################
-  config = lib.mkIf (cfg.enable && config.cfg.dev.python.enable) {
+  config = lib.mkIf cfg.enable {
     ###########################################################################
     # Packages
     ###########################################################################
-    home.packages = with pkgs; [
+    packages = with pkgs; [
+      yt-dlp-light # Lightweight tool for downloading videos
       ffmpeg # Required for media conversion
     ];
-
-    ###########################################################################
-    # Shell Aliases
-    ###########################################################################
-    programs.zsh.shellAliases = {
-      spotm4a = "uvx spotdl --format m4a --output '{title}'";
-      spotmp3 = "uvx spotdl --format mp3 --output '{title}'";
-    };
   };
 }

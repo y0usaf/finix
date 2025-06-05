@@ -1,22 +1,19 @@
-#===============================================================================
-#                      📝 Obsidian Configuration 📝
-#===============================================================================
-# 🚀 Obsidian Knowledge Base
-# 🔧 Performance optimizations
-# 🎨 Wayland/Ozone support
-#===============================================================================
+###############################################################################
+# Obsidian Module
+# Knowledge base application with Wayland support
+###############################################################################
 {
   config,
   pkgs,
   lib,
   ...
 }: let
-  cfg = config.cfg.programs.obsidian;
+  cfg = config.cfg.hjome.programs.obsidian;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.programs.obsidian = {
+  options.cfg.hjome.programs.obsidian = {
     enable = lib.mkEnableOption "Obsidian module";
     useWayland = lib.mkOption {
       type = lib.types.bool;
@@ -29,8 +26,11 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
-      # Create a wrapper script in PATH for Obsidian
+    ###########################################################################
+    # Packages
+    ###########################################################################
+    packages = with pkgs; [
+      # Create a wrapper script for Obsidian with Wayland support
       (writeShellScriptBin "obsidian" ''
         # Set Wayland/Ozone environment variables if enabled
         ${lib.optionalString cfg.useWayland ''
@@ -47,26 +47,5 @@ in {
           "$@"
       '')
     ];
-
-    # Add Obsidian-specific environment variables
-    programs.zsh = {
-      envExtra = lib.mkIf cfg.useWayland ''
-        # Obsidian environment variables for Wayland/Ozone
-        export OBSIDIAN_USE_WAYLAND=1
-      '';
-    };
-
-    # Create desktop entry with proper icon and categories
-    xdg.desktopEntries = {
-      "obsidian" = {
-        name = "Obsidian";
-        exec = "obsidian %U";
-        terminal = false;
-        categories = ["Office" "TextEditor" "Utility"];
-        comment = "Knowledge base that works on top of a local folder of Markdown files";
-        icon = "obsidian";
-        mimeType = ["x-scheme-handler/obsidian"];
-      };
-    };
   };
 }

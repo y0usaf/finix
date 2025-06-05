@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.programs.pcmanfm;
+  cfg = config.cfg.hjome.programs.pcmanfm;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.programs.pcmanfm = {
+  options.cfg.hjome.programs.pcmanfm = {
     enable = lib.mkEnableOption "pcmanfm file manager";
   };
 
@@ -24,7 +24,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    home.packages = with pkgs; [
+    packages = with pkgs; [
       pcmanfm
     ];
   };

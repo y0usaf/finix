@@ -14,7 +14,7 @@
   hostSystem,
   ...
 }: let
-  cfg = config.cfg.programs.obs;
+  cfg = config.cfg.hjome.programs.obs;
 
   # Check if NVIDIA and CUDA are enabled in the system configuration
   nvidiaCudaEnabled = hostSystem.cfg.hardware.nvidia.enable && (hostSystem.cfg.hardware.nvidia.cuda.enable or false);
@@ -40,7 +40,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.programs.obs = {
+  options.cfg.hjome.programs.obs = {
     enable = lib.mkEnableOption "OBS Studio";
   };
 
@@ -49,18 +49,19 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Programs
+    # Packages
     ###########################################################################
-    programs.obs-studio = {
-      enable = true;
-      # Use the CUDA-enabled package if NVIDIA+CUDA are enabled
-      package = obsPackage;
-      plugins = with pkgs.obs-studio-plugins; [
-        customBackgroundRemoval
-        obs-vkcapture
-        inputs.obs-image-reaction.packages.${pkgs.system}.default
-      ];
-    };
-    home.packages = with pkgs; [v4l-utils];
+    packages = with pkgs; [
+      # Main OBS package with conditional CUDA support
+      obsPackage
+      
+      # OBS plugins
+      obs-studio-plugins.obs-backgroundremoval
+      obs-studio-plugins.obs-vkcapture
+      inputs.obs-image-reaction.packages.${pkgs.system}.default
+      
+      # Additional utilities
+      v4l-utils
+    ];
   };
 }

@@ -1,9 +1,6 @@
 ###############################################################################
 # Zen Browser Module
-# Provides a privacy-focused web browser based on Firefox
-# - Configurable browser settings
-# - Hardware acceleration controls
-# - Wayland support
+# Privacy-focused web browser based on Firefox
 ###############################################################################
 {
   config,
@@ -11,7 +8,7 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.programs.zen-browser;
+  cfg = config.cfg.hjome.programs.zen-browser;
 
   src = builtins.fetchurl {
     url = "https://github.com/zen-browser/desktop/releases/latest/download/zen-x86_64.AppImage";
@@ -23,7 +20,7 @@
     # Enable userChrome customizations
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
 
-    # Default graphics settings (removed nvidia-specific logic)
+    # Default graphics settings
     "gfx.webrender.all" = true;
     "media.hardware-video-decoding.enabled" = true;
     "media.ffmpeg.vaapi.enabled" = true;
@@ -61,7 +58,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.programs.zen-browser = {
+  options.cfg.hjome.programs.zen-browser = {
     enable = lib.mkEnableOption "Zen Browser";
   };
 
@@ -72,29 +69,10 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    home.packages = [
+    packages = [
       zenWithConfig
       pkgs.qt6Packages.qtbase
       pkgs.qt6Packages.qtwayland
     ];
-
-    ###########################################################################
-    # Desktop Entries
-    ###########################################################################
-    xdg.desktopEntries.ZenBrowser = {
-      name = "Zen Browser";
-      genericName = "Zen";
-      exec = "${zenWithConfig}/bin/zen-browser";
-      terminal = false;
-      categories = ["Network" "WebBrowser"];
-    };
-
-    ###########################################################################
-    # Environment Variables
-    ###########################################################################
-    programs.zsh.envExtra = lib.mkIf config.programs.zsh.enable ''
-      export MOZ_ENABLE_WAYLAND=1
-      export MOZ_USE_XINPUT2=1
-    '';
   };
 }
