@@ -111,6 +111,7 @@ in {
       tools = {
         spotdl.enable = true;
         yt-dlp.enable = true;
+        nh.enable = true;
       };
 
       shell = {
