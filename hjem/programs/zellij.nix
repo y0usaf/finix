@@ -220,10 +220,15 @@ in {
     '';
 
     # Zellij auto-start integration (replaces enableZshIntegration from Home Manager)
-    # Uses Zellij's own auto-start generation instead of manual implementation
-    fileRegistry.content.zshrc.zellij-integration = ''
-      eval "$(zellij setup --generate-auto-start zsh)"
-    '';
+    # Pre-generate the auto-start script at build time to avoid shell startup delay
+    fileRegistry.content.zshrc.zellij-integration = 
+      let
+        # Generate the auto-start script at build time to avoid runtime delay
+        autoStartScript = pkgs.runCommand "zellij-auto-start-zsh" {} ''
+          ${pkgs.zellij}/bin/zellij setup --generate-auto-start zsh > $out
+        '';
+      in 
+        builtins.readFile autoStartScript;
 
     # Add logout cleanup to zsh logout script (if file exists in registry)
     fileRegistry.content.zlogout.zellij-cleanup = ''
