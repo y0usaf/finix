@@ -219,16 +219,11 @@ in {
       alias zq="zellij kill-all-sessions && pkill -f zellij"
     '';
 
-    # Zellij auto-start integration (replaces enableZshIntegration from Home Manager)
-    # Pre-generate the auto-start script at build time to avoid shell startup delay
-    fileRegistry.content.zshrc.zellij-integration = 
-      let
-        # Generate the auto-start script at build time to avoid runtime delay
-        autoStartScript = pkgs.runCommand "zellij-auto-start-zsh" {} ''
-          ${pkgs.zellij}/bin/zellij setup --generate-auto-start zsh > $out
-        '';
-      in 
-        builtins.readFile autoStartScript;
+    # Zellij auto-start integration - placed at the TOP of zshrc for optimal performance
+    # Uses the new early registry to ensure Zellij starts before other shell config loads
+    fileRegistry.early.zshrc.zellij-integration = ''
+      eval "$(zellij setup --generate-auto-start zsh)"
+    '';
 
     # Add logout cleanup to zsh logout script (if file exists in registry)
     fileRegistry.content.zlogout.zellij-cleanup = ''

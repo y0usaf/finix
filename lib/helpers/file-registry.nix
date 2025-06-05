@@ -38,15 +38,37 @@
       description = "Add content sections to declared files";
       example = {
         zshrc.aliases = "alias ll='ls -la'";
+        zshrc.early.zellij = "eval \"$(zellij setup --generate-auto-start zsh)\"";
         gitconfig.user = "[user]\n  name = John";
+      };
+    };
+    
+    # Add early content: fileRegistry.early.filename.section = "content" (placed before baseContent)
+    fileRegistry.early = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.lines);
+      default = {};
+      description = "Add early content sections (placed before base content)";
+      example = {
+        zshrc.zellij = "eval \"$(zellij setup --generate-auto-start zsh)\"";
+      };
+    };
+    
+    # Add late content: fileRegistry.late.filename.section = "content" (placed after regular content)
+    fileRegistry.late = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.lines);
+      default = {};
+      description = "Add late content sections (placed after regular content)";
+      example = {
+        zshrc.cleanup = "# Cleanup code";
       };
     };
   };
   
   #=============================================================================
   # Auto-builder: Build all declared files with their content
+  # Order: early sections → base content → regular sections → late sections
   #=============================================================================
-  buildRegisteredFiles = { declarations, content, username }: let
+  buildRegisteredFiles = { declarations, content, early ? {}, late ? {}, username }: let
     # Normalize declarations to { filename, baseContent }
     normalize = name: decl: 
       if lib.isString decl 
@@ -55,10 +77,14 @@
     
     normalizedDecls = lib.mapAttrs normalize declarations;
     
-    # Build each file
+    # Build each file with proper ordering
     buildFile = name: decl: let
-      sections = lib.attrValues (content.${name} or {});
-      allContent = [decl.baseContent] ++ sections;
+      earlySections = lib.attrValues (early.${name} or {});
+      regularSections = lib.attrValues (content.${name} or {});
+      lateSections = lib.attrValues (late.${name} or {});
+      
+      # Order: early → base → regular → late
+      allContent = earlySections ++ [decl.baseContent] ++ regularSections ++ lateSections;
       validContent = lib.filter (s: s != "" && s != null) allContent;
       finalContent = lib.concatStringsSep "\n\n" validContent;
     in lib.optionalAttrs (finalContent != "") {

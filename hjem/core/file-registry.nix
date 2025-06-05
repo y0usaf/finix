@@ -20,6 +20,8 @@ in {
   config = registry.buildRegisteredFiles {
     declarations = config.fileRegistry.declare;
     content = config.fileRegistry.content;
+    early = config.fileRegistry.early;
+    late = config.fileRegistry.late;
     username = config.cfg.shared.username;
   };
 }
