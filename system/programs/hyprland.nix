@@ -8,6 +8,7 @@
   lib,
   pkgs,
   hostHome,
+  hostHjem,
   inputs,
   config,
   ...
@@ -17,7 +18,7 @@
     # Hyprland Window Manager
     # Tiling window manager for Wayland
     ###########################################################################
-    programs.hyprland = lib.mkIf hostHome.cfg.ui.wayland.enable {
+    programs.hyprland = lib.mkIf (hostHjem.cfg.hjome.ui.wayland.enable or true) {
       enable = true;
       xwayland.enable = true; # Enable XWayland to support legacy X11 apps.
       # Use the Hyprland package corresponding to the current system.

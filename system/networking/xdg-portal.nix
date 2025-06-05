@@ -6,6 +6,7 @@
   lib,
   pkgs,
   hostHome,
+  hostHjem,
   ...
 }: {
   config = {
@@ -13,7 +14,7 @@
     # XDG Desktop Portal
     # Desktop integration services for applications
     ###########################################################################
-    xdg.portal = lib.mkIf hostHome.cfg.ui.wayland.enable {
+    xdg.portal = lib.mkIf (hostHjem.cfg.hjome.ui.wayland.enable or true) {
       enable = true;
       xdgOpenUsePortal = true; # Route xdg-open calls through the portal for better integration.
       extraPortals = [

@@ -51,10 +51,10 @@ in {
     inherit inputs system commonSpecialArgs;
   };
 
-  ## Dynamic Home Manager Configurations
-  homeConfigurations = hostUtils.mkHomeConfigurations {
-    inherit inputs pkgs commonSpecialArgs;
-  };
+  ## Dynamic Home Manager Configurations (disabled for Hjem migration)
+  # homeConfigurations = hostUtils.mkHomeConfigurations {
+  #   inherit inputs pkgs commonSpecialArgs;
+  # };
 
   ## Hjem Configurations
   hjemConfigurations = hjemUtils.mkHjemConfigurations {

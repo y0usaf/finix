@@ -48,13 +48,13 @@
     hostNames
   );
 
-  # Extract home configurations from unified configs
+  # Extract home configurations from unified configs (disabled for Hjem migration)
   homeConfigs = builtins.listToAttrs (
     map
     (name: {
       inherit name;
       value = {
-        cfg = unifiedConfigs.${name}.cfg.home;
+        cfg = unifiedConfigs.${name}.cfg.home or {};
       };
     })
     hostNames

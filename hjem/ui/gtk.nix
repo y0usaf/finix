@@ -29,6 +29,20 @@
   scaleFactor = cfg.scale;
 
   #############################################################
+  # DConf settings configuration
+  #############################################################
+  dconfSettings = {
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+      text-scaling-factor = scaleFactor;
+      scaling-factor = scaleFactor;
+    };
+  };
+
+  # Generate INI content for dconf (similar to Home Manager approach)
+  dconfIni = lib.generators.toINI {} dconfSettings;
+
+  #############################################################
   # Text shadow configuration
   #############################################################
   shadowSize = "0.05rem";
@@ -172,6 +186,49 @@ in {
     files.".zshenv".text = lib.mkAfter ''
       # GTK cursor size scales proportionally with the scaling factor
       export XCURSOR_SIZE="${toString (24 * scaleFactor)}"
+    '';
+
+    ######################################################################
+    # DConf Settings (proper INI generation + dconf load like Home Manager)
+    ######################################################################
+    
+    # Generate the dconf settings INI file
+    files.".config/dconf-settings.ini".text = dconfIni;
+    
+    # Create loader script that uses dconf load (like Home Manager)
+    files.".local/bin/load-dconf-settings".text = ''
+      #!/usr/bin/env bash
+      # Load dconf settings from INI file (similar to Home Manager activation)
+      
+      # Check if dconf is available
+      if ! command -v dconf &> /dev/null; then
+        exit 0
+      fi
+      
+      # Check if settings file exists
+      SETTINGS_FILE="$HOME/.config/dconf-settings.ini"
+      if [[ ! -f "$SETTINGS_FILE" ]]; then
+        exit 0
+      fi
+      
+      # Load settings using dconf load (same as Home Manager)
+      if [[ -v DBUS_SESSION_BUS_ADDRESS ]]; then
+        dconf load / < "$SETTINGS_FILE"
+      else
+        ${pkgs.dbus}/bin/dbus-run-session --dbus-daemon=${pkgs.dbus}/bin/dbus-daemon -- dconf load / < "$SETTINGS_FILE"
+      fi
+    '';
+    
+    # Make the loader script executable
+    files.".local/bin/load-dconf-settings".executable = true;
+    
+    # Auto-load dconf settings on shell startup
+    files.".zshrc".text = lib.mkAfter ''
+      
+      # Load dconf settings if they exist
+      if [[ -x "$HOME/.local/bin/load-dconf-settings" ]]; then
+        "$HOME/.local/bin/load-dconf-settings" 2>/dev/null
+      fi
     '';
   };
 }

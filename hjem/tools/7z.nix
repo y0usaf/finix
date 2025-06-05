@@ -1,5 +1,5 @@
 ###############################################################################
-# 7z (p7zip) Archive Manager Module
+# 7z (p7zip) Archive Manager Module (Hjem Version)
 # Provides the 7z command via p7zip
 ###############################################################################
 {

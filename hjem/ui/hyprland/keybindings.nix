@@ -17,12 +17,12 @@
   ###########################################################################
   "$mod" = "SUPER";
   "$mod2" = "ALT";
-  "$term" = hostHome.cfg.defaults.terminal;
-  "$filemanager" = hostHome.cfg.defaults.fileManager;
-  "$browser" = hostHome.cfg.defaults.browser;
-  "$discord" = hostHome.cfg.defaults.discord;
-  "$launcher" = hostHome.cfg.defaults.launcher;
-  "$ide" = hostHome.cfg.defaults.ide;
+  "$term" = hostHjem.cfg.hjome.core.defaults.terminal;
+  "$filemanager" = hostHjem.cfg.hjome.core.defaults.fileManager;
+  "$browser" = hostHjem.cfg.hjome.core.defaults.browser;
+  "$discord" = hostHjem.cfg.hjome.core.defaults.discord;
+  "$launcher" = hostHjem.cfg.hjome.core.defaults.launcher;
+  "$ide" = hostHjem.cfg.hjome.core.defaults.ide;
   "$obs" = "obs";
 
   ###########################################################################

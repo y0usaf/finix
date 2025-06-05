@@ -36,7 +36,7 @@ in {
             (hostsDir + "/default.nix")
             ../../system
             (shared.mkSharedModule {inherit hostname hostsDir;})
-            inputs.home-manager.nixosModules.home-manager
+            # inputs.home-manager.nixosModules.home-manager  # DISABLED FOR HJEM MIGRATION
             inputs.hjem.nixosModules.default
             # Add system-specific imports that shouldn't be exposed to HM
           ]
@@ -56,28 +56,29 @@ in {
                 bluetooth.enable = shared.systemConfigs.${hostname}.cfg.system.hardware.bluetooth.enable or false;
               };
             })
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                backupFileExtension = "backup";
-                extraSpecialArgs =
-                  shared.mkSpecialArgs commonSpecialArgs hostname
-                  // {
-                    inherit hostname;
-                    inherit hostsDir;
-                  };
-                users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = {
-                  imports = [../../home (shared.mkSharedModule {inherit hostname hostsDir;})];
-                  home = {
-                    inherit (shared.unifiedConfigs.${hostname}.cfg.shared) stateVersion;
-                    homeDirectory = lib.mkForce shared.unifiedConfigs.${hostname}.cfg.shared.homeDirectory;
-                  };
-                  # Apply unified home configuration
-                  inherit (shared.homeConfigs.${hostname}) cfg;
-                };
-              };
-            }
+            # HOME MANAGER CONFIGURATION - DISABLED FOR HJEM MIGRATION
+            # {
+            #   home-manager = {
+            #     useGlobalPkgs = true;
+            #     useUserPackages = true;
+            #     backupFileExtension = "backup";
+            #     extraSpecialArgs =
+            #       shared.mkSpecialArgs commonSpecialArgs hostname
+            #       // {
+            #         inherit hostname;
+            #         inherit hostsDir;
+            #       };
+            #     users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = {
+            #       imports = [../../home (shared.mkSharedModule {inherit hostname hostsDir;})];
+            #       home = {
+            #         inherit (shared.unifiedConfigs.${hostname}.cfg.shared) stateVersion;
+            #         homeDirectory = lib.mkForce shared.unifiedConfigs.${hostname}.cfg.shared.homeDirectory;
+            #       };
+            #       # Apply unified home configuration
+            #       inherit (shared.homeConfigs.${hostname}) cfg;
+            #     };
+            #   };
+            # }
             # Apply hjem configuration if it exists
             {
               # Add the alias from hjome to hjem.users.username

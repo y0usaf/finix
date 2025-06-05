@@ -56,14 +56,20 @@ in {
       # Global Hjem settings
       clobberFiles = true;
 
-      ui = {
-        ags.enable = true;
-        hyprland = {
-          enable = true;
-          flake.enable = true;
-          hy3.enable = true;
-        };
-      };
+      # Core configuration - DISABLED FOR BASIC TESTING
+      # core = {
+      #   environment.enable = true;
+      # };
+
+      # ui = {
+      #   wayland.enable = true;
+      #   ags.enable = true;
+      #   hyprland = {
+      #     enable = true;
+      #     flake.enable = true;
+      #     hy3.enable = true;
+      #   };
+      # };
 
       # Gaming modules - ALL gaming config in one place!
       gaming = {
@@ -115,6 +121,19 @@ in {
           enable = true;
           flake = "${homeDir}/nixos";
         };
+        git = {
+          enable = true;
+          name = "y0usaf";
+          email = "OA99@Outlook.com";
+          nixos-git-sync = {
+            enable = true;
+            nixosRepoUrl = "git@github.com:y0usaf/nixos.git";
+            remoteBranch = "hjem";
+          };
+        };
+        # Archive management tools
+        "7z".enable = true;
+        file-roller.enable = true;
       };
 
       shell = {
@@ -122,7 +141,8 @@ in {
       };
     };
 
-    # HOME-MANAGER CONFIGURATION
+    # HOME-MANAGER CONFIGURATION - COMMENTED OUT FOR HJEM TESTING
+    /*
     home = {
       # Core module enables (former cfg.core - now organized under cfg.home)
       core = {
@@ -139,10 +159,6 @@ in {
         zsh = {
           enable = false;
           # User preferences now come from cfg.shared.zsh
-        };
-        env = {
-          enable = true;
-          # tokenDir now comes from cfg.shared.tokenDir
         };
       };
 
@@ -211,29 +227,15 @@ in {
         firefox.enable = true;
 
         music.enable = true;
-        streamlink.enable = false;
         sway-launcher-desktop.enable = true;
-        syncthing.enable = true;
+        # streamlink and syncthing moved to user packages for simplicity
 
         bluetooth.enable = true;
       };
 
       # Gaming - now fully handled by Hjem
 
-      tools = {
-        git = {
-          enable = true;
-          name = "y0usaf";
-          email = "OA99@Outlook.com";
-          nixos-git-sync = {
-            enable = true;
-            nixosRepoUrl = "git@github.com:y0usaf/nixos.git";
-            remoteBranch = "hjem";
-          };
-        };
-        file-roller.enable = true;
-        "7z".enable = true;
-      };
+      # tools directory removed - all tools now handled by Hjem
 
       # Development
       dev = {
@@ -260,6 +262,7 @@ in {
         packages = with pkgs; [
           realesrgan-ncnn-vulkan
           fontforge
+          syncthing # File synchronization
           # Minecraft support
           prismlauncher
           temurin-bin-17 # Java 17 for most modern MC versions (PrismLauncher can manage others)
@@ -280,6 +283,6 @@ in {
           video.path = "${homeDir}/DCIM/Wallpapers_Video";
         };
       };
-    };
+    */
   };
 }

@@ -106,9 +106,8 @@ in {
         media.enable = true;
         music.enable = true;
         qbittorrent.enable = true;
-        streamlink.enable = false; # Disabled for laptop
         sway-launcher-desktop.enable = true;
-        syncthing.enable = true;
+        # streamlink disabled for laptop, syncthing moved to user packages
         webapps.enable = true;
 
         bluetooth.enable = true;
@@ -129,21 +128,7 @@ in {
         };
       };
 
-      tools = {
-        git = {
-          enable = true;
-          name = "y0usaf";
-          email = "OA99@Outlook.com";
-          nixos-git-sync = {
-            enable = true;
-            nixosRepoUrl = "git@github.com:y0usaf/nixos.git";
-            remoteBranch = "hjem";
-          };
-        };
-
-        file-roller.enable = true;
-        "7z".enable = true;
-      };
+      # tools directory removed - all tools now handled by Hjem
 
       # Development
       dev = {
@@ -170,6 +155,7 @@ in {
         ];
         packages = with pkgs; [
           realesrgan-ncnn-vulkan
+          syncthing # File synchronization
           ags
           astal.hyprland
         ];
@@ -219,6 +205,8 @@ in {
 
     # HJOME CONFIGURATION
     hjome = {
+
+
       programs = {
         obs.enable = true;
         pcmanfm.enable = true;
@@ -228,6 +216,19 @@ in {
       tools = {
         spotdl.enable = true;
         yt-dlp.enable = true;
+        git = {
+          enable = true;
+          name = "y0usaf";
+          email = "OA99@Outlook.com";
+          nixos-git-sync = {
+            enable = true;
+            nixosRepoUrl = "git@github.com:y0usaf/nixos.git";
+            remoteBranch = "hjem";
+          };
+        };
+        # Archive management tools
+        "7z".enable = true;
+        file-roller.enable = true;
       };
     };
   };
