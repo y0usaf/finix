@@ -231,7 +231,7 @@ in {
         # Try to attach to existing session or create new one
         if zellij list-sessions 2>/dev/null | grep -q "."; then
           # Sessions exist, attach to the first available
-          exec zellij attach \$(zellij list-sessions | head -1 | awk '{print \$1}')
+          exec zellij attach \$(zellij list-sessions | head -1 | awk '{print $1}')
         else
           # No sessions exist, create a new one
           exec zellij
