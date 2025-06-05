@@ -205,7 +205,10 @@ in {
 
     # HJOME CONFIGURATION
     hjome = {
-
+      ui = {
+        wayland.enable = true;
+        foot.enable = true;
+      };
 
       programs = {
         obs.enable = true;
