@@ -102,6 +102,10 @@ in {
         pcmanfm.enable = true;
         obsidian.enable = true;
         vesktop.enable = true;
+        # Migrated from Home Manager
+        mpv.enable = true;
+        bambu.enable = true;
+        webapps.enable = true;
       };
       tools = {
         spotdl.enable = true;
@@ -192,19 +196,15 @@ in {
 
       # Applications
       programs = {
-        bambu.enable = true;
         discord.enable = true;
 
-        chatgpt.enable = true;
         android.enable = false;
         firefox.enable = true;
-        mpv.enable = true;
 
         music.enable = true;
         streamlink.enable = false;
         sway-launcher-desktop.enable = true;
         syncthing.enable = true;
-        webapps.enable = true;
 
         bluetooth.enable = true;
       };
