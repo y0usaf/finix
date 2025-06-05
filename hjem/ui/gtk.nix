@@ -21,7 +21,7 @@
   mainFontName = (builtins.elemAt hostHome.cfg.appearance.fonts.main 0).name;
   inherit (hostHome.cfg.appearance) baseFontSize;
   dpiStr = toString hostHome.cfg.appearance.dpi;
-  
+
   # Get user bookmarks from host configuration
   inherit (hostHome.cfg.user) bookmarks;
 
@@ -167,11 +167,11 @@ in {
     };
 
     ######################################################################
-    # Environment Variables (if needed for scaling)
+    # Environment Variables (via .zshenv for scaling)
     ######################################################################
-    sessionVariables = {
-      # Cursor size scales proportionally with the scaling factor
-      XCURSOR_SIZE = toString (24 * scaleFactor);
-    };
+    files.".zshenv".text = lib.mkAfter ''
+      # GTK cursor size scales proportionally with the scaling factor
+      export XCURSOR_SIZE="${toString (24 * scaleFactor)}"
+    '';
   };
 }

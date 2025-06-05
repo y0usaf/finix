@@ -1,7 +1,7 @@
 let
   lib = import <nixpkgs/lib>;
   generators = import ./lib/generators/toHyprconf.nix lib;
-  
+
   # Test configuration with bezier at top level and animations as separate section
   testConfig = {
     "$test" = "value";
@@ -21,7 +21,7 @@ let
       "$mod, Q, killactive"
     ];
   };
-  
+
   result = generators.toHyprconf {
     attrs = testConfig;
     importantPrefixes = ["$"];

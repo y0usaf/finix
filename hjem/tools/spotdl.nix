@@ -29,9 +29,13 @@ in {
     ];
 
     ###########################################################################
-    # Shell Aliases
+    # Shell Aliases (added to .zshrc)
     ###########################################################################
-    fileRegistry.content.zshrc.spotdl-aliases = ''
+    files.".zshrc".text = lib.mkAfter ''
+
+      # ----------------------------
+      # SpotDL Aliases
+      # ----------------------------
       # SpotDL aliases for downloading music
       alias spotm4a="uvx spotdl --format m4a --output '{title}'"
       alias spotmp3="uvx spotdl --format mp3 --output '{title}'"

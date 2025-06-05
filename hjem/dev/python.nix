@@ -26,7 +26,7 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages (same as before, just different attribute)
+    # Packages
     ###########################################################################
     packages = with pkgs; [
       python3
@@ -48,7 +48,7 @@ in {
     ];
 
     ###########################################################################
-    # Session Variables (minimal change: home.sessionVariables → environment.sessionVariables)
+    # Session Variables
     ###########################################################################
     environment.sessionVariables = {
       PYTHONUSERBASE = "${config.xdg.dataHome}/python";
@@ -71,13 +71,50 @@ in {
     };
 
     ###########################################################################
-    # Shell Environment - TODO: Migrate to file registry
+    # Shell Environment
     ###########################################################################
-    # cfg.hjome.shell.zsh.envExtra = lib.mkAfter ''...''; # Old API - needs migration
-    # 
-    # New file registry approach:
-    # fileRegistry.content.zshenv.python-env = ''...'';
-    
-    # Disabled until migration is complete
+    files.".zshenv".text = lib.mkAfter ''
+      # Python development environment
+      export PATH="$PYTHONUSERBASE/bin:$PATH"
+      export PYTHONPATH="$PYTHONUSERBASE/lib/python3.12/site-packages:$PYTHONPATH"
+    '';
+
+    files.".zshrc".text = lib.mkAfter ''
+      # Python development aliases
+      alias py="python3"
+      alias pip="pip3"
+      alias venv="python3 -m venv"
+      alias activate="source venv/bin/activate"
+      
+      # UV aliases
+      alias uv-init="uv init"
+      alias uv-add="uv add"
+      alias uv-run="uv run"
+      
+      # Virtual environment helpers
+      mkvenv() {
+        if [[ -z "$1" ]]; then
+          python3 -m venv venv
+        else
+          python3 -m venv "$1"
+        fi
+      }
+      
+      workon() {
+        if [[ -z "$1" ]]; then
+          if [[ -d "venv" ]]; then
+            source venv/bin/activate
+          else
+            echo "No venv directory found"
+          fi
+        else
+          if [[ -d "$VIRTUAL_ENV_HOME/$1" ]]; then
+            source "$VIRTUAL_ENV_HOME/$1/bin/activate"
+          else
+            echo "Virtual environment $1 not found"
+          fi
+        fi
+      }
+    '';
   };
 }

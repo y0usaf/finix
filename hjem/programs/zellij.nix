@@ -3,7 +3,7 @@
 # Configures the Zellij terminal multiplexer with custom themes and layouts
 # - Custom theme configuration
 # - Music layout for cmus and cava
-# - Convenient shell aliases via file registry
+# - Convenient shell aliases
 ###############################################################################
 {
   config,
@@ -203,32 +203,31 @@ in {
             }
         }
       '';
+
+      # Combine all zsh configuration into one definition
+      ".zshrc".text = lib.mkMerge [
+        # Auto-start integration (early)
+        (lib.mkBefore ''
+          eval "$(zellij setup --generate-auto-start zsh)"
+        '')
+        # Aliases (after)
+        (lib.mkAfter ''
+          # Zellij aliases
+          alias music="zellij --layout music"
+          # Kill all zellij sessions except the active one
+          alias zk="for session in \$(zellij list-sessions | grep -v '(current)' | awk '{print \$1}'); do zellij kill-session \$session; done"
+          # Kill ALL zellij sessions (for shutdown)
+          alias zka="zellij kill-all-sessions"
+          # Clean shutdown of zellij
+          alias zq="zellij kill-all-sessions && pkill -f zellij"
+        '')
+      ];
+
+      # Add logout cleanup to zsh logout script
+      ".zlogout".text = ''
+        # Clean up Zellij sessions on logout
+        zellij kill-all-sessions 2>/dev/null || true
+      '';
     };
-
-    ###########################################################################
-    # Shell Integration via File Registry
-    ###########################################################################
-    fileRegistry.content.zshrc.zellij-aliases = ''
-      # Zellij aliases
-      alias music="zellij --layout music"
-      # Kill all zellij sessions except the active one
-      alias zk="for session in \$(zellij list-sessions | grep -v '(current)' | awk '{print \$1}'); do zellij kill-session \$session; done"
-      # Kill ALL zellij sessions (for shutdown)
-      alias zka="zellij kill-all-sessions"
-      # Clean shutdown of zellij
-      alias zq="zellij kill-all-sessions && pkill -f zellij"
-    '';
-
-    # Zellij auto-start integration - placed at the TOP of zshrc for optimal performance
-    # Uses the new early registry to ensure Zellij starts before other shell config loads
-    fileRegistry.early.zshrc.zellij-integration = ''
-      eval "$(zellij setup --generate-auto-start zsh)"
-    '';
-
-    # Add logout cleanup to zsh logout script (if file exists in registry)
-    fileRegistry.content.zlogout.zellij-cleanup = ''
-      # Clean up Zellij sessions on logout
-      zellij kill-all-sessions 2>/dev/null || true
-    '';
   };
 }

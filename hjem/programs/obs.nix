@@ -54,12 +54,12 @@ in {
     packages = with pkgs; [
       # Main OBS package with conditional CUDA support
       obsPackage
-      
+
       # OBS plugins
       obs-studio-plugins.obs-backgroundremoval
       obs-studio-plugins.obs-vkcapture
       inputs.obs-image-reaction.packages.${pkgs.system}.default
-      
+
       # Additional utilities
       v4l-utils
     ];

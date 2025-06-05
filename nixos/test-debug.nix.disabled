@@ -9,7 +9,7 @@
 in {
   imports = [
     # Test just the file registry
-    { options = registry.mkFileRegistryOptions; }
+    {options = registry.mkFileRegistryOptions;}
   ];
 
   config = {
@@ -17,7 +17,7 @@ in {
     fileRegistry.declare = {
       testfile = ".testfile";
     };
-    
+
     # Test content
     fileRegistry.content = {
       testfile.section1 = "# Section 1\necho test1";

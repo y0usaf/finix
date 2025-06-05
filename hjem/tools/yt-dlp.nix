@@ -30,9 +30,13 @@ in {
     ];
 
     ###########################################################################
-    # Shell Aliases
+    # Shell Aliases (added to .zshrc)
     ###########################################################################
-    fileRegistry.content.zshrc.yt-dlp-aliases = ''
+    files.".zshrc".text = lib.mkAfter ''
+
+      # ----------------------------
+      # YouTube-DLP Aliases
+      # ----------------------------
       # YouTube-DLP aliases for various formats
       alias ytm4a="uvx yt-dlp -x --audio-format m4a -o '%(title)s.%(ext)s'"
       alias ytmp3="uvx yt-dlp -x --audio-format mp3 -o '%(title)s.%(ext)s'"

@@ -32,9 +32,9 @@ in {
     ];
 
     ###########################################################################
-    # Shell Integration via File Registry
+    # Shell Integration
     ###########################################################################
-    fileRegistry.content.zshrc.nh-function = ''
+    files.".zshrc".text = lib.mkAfter ''
       # NixOS rebuild/switch function with proper argument parsing
       nhs() {
         clear
@@ -57,10 +57,7 @@ in {
         # Execute nh command with appropriate flags and pass any remaining arguments
         nh os switch $update $dry "$@"
       }
-    '';
 
-    # Add helpful NH aliases
-    fileRegistry.content.zshrc.nh-aliases = ''
       # NH convenience aliases
       alias nhd="nhs -d"        # Dry run
       alias nhu="nhs -u"        # Update flake inputs

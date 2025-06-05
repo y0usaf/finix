@@ -24,19 +24,28 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    # Contribute to environment variables (Hjem already supports this)
+    # Contribute to environment variables
     environment.sessionVariables = {
       EDITOR = "code";
       BROWSER = "firefox";
     };
-    
-    # TODO: Migrate to file registry system
-    # Old API:
-    # cfg.hjome.shell.zsh.files.".zshrc".text = lib.mkAfter ''...''; 
-    #
-    # New file registry approach:
-    # fileRegistry.content.zshrc.dev-aliases = ''...'';
-    
-    # Disabled until migration is complete
+
+    # Development-specific aliases and functions
+    files.".zshrc".text = lib.mkAfter ''
+      # Development tool aliases
+      alias code.="code ."
+      alias idea.="idea ."
+      
+      # Project management functions
+      proj() {
+        if [[ -z "$1" ]]; then
+          echo "Usage: proj <project-name>"
+          return 1
+        fi
+        mkdir -p ~/Dev/"$1"
+        cd ~/Dev/"$1"
+        code .
+      }
+    '';
   };
 }

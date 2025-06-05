@@ -43,58 +43,54 @@ in {
     ];
 
     #=========================================================================
-    # Declare Zsh Files
+    # Zsh Configuration Files
     #=========================================================================
-    fileRegistry.declare = {
-      zshenv = {
-        filename = ".zshenv";
-        baseContent = let
-          # Get the token directory path from shared config
-          inherit (config.cfg.shared) tokenDir;
-          # Token management function (from original envExtra)
-          tokenFunctionScript = ''
-            # Token management function
-            export_vars_from_files() {
-                local dir_path=$1
-                for file_path in "$dir_path"/*.txt; do
-                    if [[ -f $file_path ]]; then
-                        var_name=$(basename "$file_path" .txt)
-                        export $var_name=$(cat "$file_path")
-                    fi
-                done
-            }
+    files = {
+      ".zshenv".text = let
+        # Get the token directory path from shared config
+        inherit (config.cfg.shared) tokenDir;
+        # Token management function (from original envExtra)
+        tokenFunctionScript = ''
+          # Token management function
+          export_vars_from_files() {
+              local dir_path=$1
+              for file_path in "$dir_path"/*.txt; do
+                  if [[ -f $file_path ]]; then
+                      var_name=$(basename "$file_path" .txt)
+                      export $var_name=$(cat "$file_path")
+                  fi
+              done
+          }
 
-            # Export tokens using the configured directory
-            export_vars_from_files "${tokenDir}"
-          '';
-        in tokenFunctionScript;
-      };
-      
-      zprofile = {
-        filename = ".zprofile";
-        baseContent = ''
-          # Hardware-specific settings based on hostname.
-          case "$(hostname)" in
-            "y0usaf-desktop")
-              sudo nvidia-smi -pl 150
-              # Only launch Hyprland if we're in a TTY
-              if [ "$(tty)" = "/dev/tty1" ]; then
-                Hyprland
-              fi
-              ;;
-            "y0usaf-laptop")
-              # Only launch Hyprland if we're in a TTY
-              if [ "$(tty)" = "/dev/tty1" ]; then
-                Hyprland
-              fi
-              ;;
-          esac
+          # Export tokens using the configured directory
+          export_vars_from_files "${tokenDir}"
         '';
-      };
-      
-      zshrc = {
-        filename = ".zshrc";
-        baseContent = ''
+      in
+        tokenFunctionScript;
+
+      ".zprofile".text = ''
+        # Hardware-specific settings based on hostname.
+        case "$(hostname)" in
+          "y0usaf-desktop")
+            sudo nvidia-smi -pl 150
+            # Only launch Hyprland if we're in a TTY
+            if [ "$(tty)" = "/dev/tty1" ]; then
+              Hyprland
+            fi
+            ;;
+          "y0usaf-laptop")
+            # Only launch Hyprland if we're in a TTY
+            if [ "$(tty)" = "/dev/tty1" ]; then
+              Hyprland
+            fi
+            ;;
+        esac
+      '';
+
+      # Combine all .zshrc content using lib.mkMerge
+      ".zshrc".text = lib.mkMerge [
+        # Base configuration
+        ''
           # History configuration
           HISTSIZE=${toString sharedZsh.history-memory}
           SAVEHIST=${toString sharedZsh.history-storage}
@@ -181,60 +177,66 @@ in {
               shift
               nix run "nixpkgs#$pkg" -- "$@"
           }
-        '';
-      };
+        ''
+        
+        # Aliases (added after base config)
+        (lib.mkAfter (let
+          baseAliases = {
+            #----- XDG Compliance Shortcuts -----
+            adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
+            wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
+            svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
+            yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
+            mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
+            cat = "bat";
+
+            #----- Custom Scripts -----
+            cattree = "$HOME/nixos/lib/resources/scripts/cattree.sh";
+
+            #----- System Management Shortcuts -----
+            userctl = "systemctl --user";
+            hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
+            pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
+            pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
+            hwconfig = "sudo nixos-generate-config --show-hardware-config";
+
+            #----- Media & Tools Shortcuts -----
+            esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
+
+            #----- Directory & Search Shortcuts -----
+            "l." = "lsd -A | grep -E \"^\\.\"";
+            la = "lsd -A --color=always --group-dirs=first --icon=always";
+            ll = "lsd -l --color=always --group-dirs=first --icon=always";
+            ls = "lsd -lA --color=always --group-dirs=first --icon=always";
+            lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
+            grep = "grep --color=auto";
+            dir = "dir --color=auto";
+            egrep = "grep -E --color=auto";
+            fgrep = "grep -F --color=auto";
+
+            #----- Home Manager Repo Aliases -----
+            "hmpush" = "git -C ~/nixos push origin main --force";
+            "hmpull" = "git -C ~/nixos fetch origin && git -C ~/nixos reset --hard origin/main";
+
+            #----- Hardware Management Shortcut -----
+            gpupower = "sudo nvidia-smi -pl";
+          };
+
+          # Note: Kitty Panel aliases disabled until kittens module is available
+          kittyAliases = {};
+
+          allAliases = baseAliases // kittyAliases;
+          
+          aliasSection = ''
+
+            # ----------------------------
+            # Shell Aliases
+            # ----------------------------
+            ${lib.concatStringsSep "\n" 
+              (lib.mapAttrsToList (name: value: "alias ${name}='${value}'") allAliases)}
+          '';
+        in aliasSection))
+      ];
     };
-
-    #=========================================================================
-    # Add Shell Aliases
-    #=========================================================================
-    fileRegistry.content.zshrc.aliases = let
-      baseAliases = {
-        #----- XDG Compliance Shortcuts -----
-        adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
-        wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
-        svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
-        yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
-        mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
-        cat = "bat";
-
-        #----- Custom Scripts -----
-        cattree = "$HOME/nixos/lib/resources/scripts/cattree.sh";
-
-        #----- System Management Shortcuts -----
-        userctl = "systemctl --user";
-        hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
-        pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
-        pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
-        hwconfig = "sudo nixos-generate-config --show-hardware-config";
-
-        #----- Media & Tools Shortcuts -----
-        esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
-
-        #----- Directory & Search Shortcuts -----
-        "l." = "lsd -A | grep -E \"^\\.\"";
-        la = "lsd -A --color=always --group-dirs=first --icon=always";
-        ll = "lsd -l --color=always --group-dirs=first --icon=always";
-        ls = "lsd -lA --color=always --group-dirs=first --icon=always";
-        lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
-        grep = "grep --color=auto";
-        dir = "dir --color=auto";
-        egrep = "grep -E --color=auto";
-        fgrep = "grep -F --color=auto";
-
-        #----- Home Manager Repo Aliases -----
-        "hmpush" = "git -C ~/nixos push origin main --force";
-        "hmpull" = "git -C ~/nixos fetch origin && git -C ~/nixos reset --hard origin/main";
-
-        #----- Hardware Management Shortcut -----
-        gpupower = "sudo nvidia-smi -pl";
-      };
-
-      # Note: Kitty Panel aliases disabled until kittens module is available
-      kittyAliases = {};
-
-      allAliases = baseAliases // kittyAliases;
-    in lib.concatStringsSep "\n" 
-      (lib.mapAttrsToList (name: value: "alias ${name}='${value}'") allAliases);
   };
 }

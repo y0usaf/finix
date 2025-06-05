@@ -1,6 +1,5 @@
 ###############################################################################
 # Development Shell Integration Module
-# Example of how other modules can contribute to shell configuration
 # Adds development-specific environment variables, aliases, and functions
 ###############################################################################
 {
@@ -26,12 +25,31 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    # TODO: Update this module to use the new file registry system
-    # For now, this module is disabled while we get the basic system working
-    
-    # Example of how to migrate to file registry:
-    # fileRegistry.content.zshenv.dev-env = ''...'';  
-    # fileRegistry.content.zshrc.dev-functions = ''...'';  
-    # fileRegistry.content.zshrc.dev-aliases = ''...'';
+    # Development-specific environment variables
+    environment.sessionVariables = {
+      DEVEL = "1";
+      DEBUG = "1";
+    };
+
+    # Development shell functions and aliases
+    files.".zshrc".text = lib.mkAfter ''
+      # Development aliases
+      alias dev="cd ~/Dev"
+      alias build="nix build"
+      alias dev-shell="nix develop"
+      alias fmt="alejandra ."
+      
+      # Development functions
+      mkdev() {
+        mkdir -p ~/Dev/"$1"
+        cd ~/Dev/"$1"
+      }
+      
+      # Git development shortcuts
+      alias gc="git commit"
+      alias gp="git push"
+      alias gl="git log --oneline"
+      alias gs="git status"
+    '';
   };
 }
