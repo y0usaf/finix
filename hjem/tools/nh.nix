@@ -54,6 +54,9 @@ in {
     # Shell Integration
     ###########################################################################
     files.".zshrc".text = lib.mkAfter ''
+      # Set NH_FLAKE environment variable
+      export NH_FLAKE="${toString cfg.flake}"
+      
       # NixOS rebuild/switch function with proper argument parsing
       nhs() {
         clear
