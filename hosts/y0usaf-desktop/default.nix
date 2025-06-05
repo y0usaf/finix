@@ -56,22 +56,23 @@ in {
       # Global Hjem settings
       clobberFiles = true;
 
+      # Default Applications
+      defaults = {
+        browser = "firefox";
+        editor = "nvim";
+        ide = "cursor";
+        terminal = "foot";
+        fileManager = "pcmanfm";
+        launcher = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+        discord = "discord-canary";
+        archiveManager = "7z";
+        imageViewer = "imv";
+        mediaPlayer = "mpv";
+      };
+
       # Core configuration
       core = {
         # environment.enable = true;
-        defaults = {
-          enable = true;
-          browser = "firefox";
-          editor = "nvim";
-          ide = "cursor";
-          terminal = "foot";
-          fileManager = "pcmanfm";
-          launcher = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
-          discord = "discord-canary";
-          archiveManager = "7z";
-          imageViewer = "imv";
-          mediaPlayer = "mpv";
-        };
         appearance = {
           dpi = 109;
           baseFontSize = 12;

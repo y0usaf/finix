@@ -18,12 +18,12 @@
   ###########################################################################
   "$mod" = "SUPER";
   "$mod2" = "ALT";
-  "$term" = hostHjem.cfg.hjome.core.defaults.terminal;
-  "$filemanager" = hostHjem.cfg.hjome.core.defaults.fileManager;
-  "$browser" = hostHjem.cfg.hjome.core.defaults.browser;
-  "$discord" = hostHjem.cfg.hjome.core.defaults.discord;
-  "$launcher" = hostHjem.cfg.hjome.core.defaults.launcher;
-  "$ide" = hostHjem.cfg.hjome.core.defaults.ide;
+  "$term" = hostHjem.cfg.hjome.defaults.terminal;
+  "$filemanager" = hostHjem.cfg.hjome.defaults.fileManager;
+  "$browser" = hostHjem.cfg.hjome.defaults.browser;
+  "$discord" = hostHjem.cfg.hjome.defaults.discord;
+  "$launcher" = hostHjem.cfg.hjome.defaults.launcher;
+  "$ide" = hostHjem.cfg.hjome.defaults.ide;
   "$obs" = "obs";
 
   ###########################################################################

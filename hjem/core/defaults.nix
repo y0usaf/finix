@@ -8,13 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.core.defaults;
+  cfg = config.cfg.hjome.defaults;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.core.defaults = {
-    enable = lib.mkEnableOption "default applications configuration";
+  options.cfg.hjome.defaults = {
     
     browser = lib.mkOption {
       type = lib.types.str;
@@ -80,7 +79,7 @@ in {
   ###########################################################################
   # Module Configuration  
   ###########################################################################
-  config = lib.mkIf cfg.enable {
+  config = {
     # No packages or files needed - this is just option definitions
   };
 }

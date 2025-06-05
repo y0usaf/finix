@@ -13,6 +13,7 @@
   inputs,
   hostSystem,
   hostHome,
+  hostHjem,
   xdg,
   ...
 }: let
@@ -86,7 +87,7 @@
 
   # Import all module configurations directly
   coreConfig = import ./core.nix {inherit config lib hostSystem cfg;};
-  keybindingsConfig = import ./keybindings.nix {inherit config lib hostHome cfg;};
+  keybindingsConfig = import ./keybindings.nix {inherit config lib hostHome hostHjem cfg;};
   windowRulesConfig = import ./window-rules.nix {inherit config lib cfg;};
   monitorsConfig = import ./monitors.nix {inherit config lib cfg;};
   agsConfig = import ./ags-integration.nix {inherit config lib hostHome cfg;};
