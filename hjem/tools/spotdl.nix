@@ -27,5 +27,14 @@ in {
     packages = with pkgs; [
       ffmpeg # Required for media conversion
     ];
+
+    ###########################################################################
+    # Shell Aliases
+    ###########################################################################
+    fileRegistry.content.zshrc.spotdl-aliases = ''
+      # SpotDL aliases for downloading music
+      alias spotm4a="uvx spotdl --format m4a --output '{title}'"
+      alias spotmp3="uvx spotdl --format mp3 --output '{title}'"
+    '';
   };
 }

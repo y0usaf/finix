@@ -111,6 +111,10 @@ in {
         spotdl.enable = true;
         yt-dlp.enable = true;
       };
+
+      shell = {
+        zsh.enable = false;
+      };
     };
 
     # HOME-MANAGER CONFIGURATION
