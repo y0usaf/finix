@@ -56,10 +56,37 @@ in {
       # Global Hjem settings
       clobberFiles = true;
 
-      # Core configuration - DISABLED FOR BASIC TESTING
-      # core = {
-      #   environment.enable = true;
-      # };
+      # Core configuration
+      core = {
+        # environment.enable = true;
+        appearance = {
+          dpi = 109;
+          baseFontSize = 12;
+          cursorSize = 36;
+          fonts = {
+            main = [
+              {
+                package = pkgs.fastFonts;
+                name = "Fast_Mono";
+              }
+            ];
+            fallback = [
+              {
+                package = pkgs.noto-fonts-emoji;
+                name = "Noto Color Emoji";
+              }
+              {
+                package = pkgs.noto-fonts-cjk-sans;
+                name = "Noto Sans CJK";
+              }
+              {
+                package = pkgs.font-awesome;
+                name = "Font Awesome";
+              }
+            ];
+          };
+        };
+      };
 
       ui = {
         wayland.enable = true;
