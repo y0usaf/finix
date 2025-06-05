@@ -27,7 +27,7 @@ in {
         history-memory = 10000;
         history-storage = 10000;
         zellij = {
-          enable = true;
+          enable = false;
         };
       };
     };
@@ -106,6 +106,7 @@ in {
         mpv.enable = true;
         bambu.enable = true;
         webapps.enable = true;
+        zellij.enable = true;
       };
       tools = {
         spotdl.enable = true;
