@@ -168,8 +168,8 @@ in {
 
       # Hyprpaper configuration (if needed)
       ${xdg.configFile "hypr/hyprpaper.conf"}.text = ''
-        preload = ${hostHome.cfg.directories.wallpapers.static.path}
-        wallpaper = ,${hostHome.cfg.directories.wallpapers.static.path}
+        preload = ${hostHjem.cfg.hjome.directories.wallpapers.static.path}
+        wallpaper = ,${hostHjem.cfg.hjome.directories.wallpapers.static.path}
         splash = false
         ipc = on
       '';

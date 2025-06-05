@@ -110,7 +110,7 @@
 
     # -- Special Commands --
     [
-      "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${hostHome.cfg.directories.wallpapers.static.path}\""
+      "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${hostHjem.cfg.hjome.directories.wallpapers.static.path}\""
     ]
   ];
 

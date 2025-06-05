@@ -70,6 +70,21 @@ in {
         mediaPlayer = "mpv";
       };
 
+      # Directories
+      directories = {
+        flake.path = "${homeDir}/nixos";
+        music.path = "${homeDir}/Music";
+        dcim.path = "${homeDir}/DCIM";
+        steam = {
+          path = "${homeDir}/.local/share/Steam";
+          create = false;
+        };
+        wallpapers = {
+          static.path = "${homeDir}/DCIM/Wallpapers/32_9";
+          video.path = "${homeDir}/DCIM/Wallpapers_Video";
+        };
+      };
+
       # Core configuration
       core = {
         # environment.enable = true;
