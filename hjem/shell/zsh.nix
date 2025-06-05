@@ -230,20 +230,8 @@ in {
         gpupower = "sudo nvidia-smi -pl";
       };
 
-      # Kitty Panel Aliases (conditional)
-      kittyAliases = lib.optionalAttrs (config.cfg.ui.kittens.enable or false) {
-        # Main panel alias using kitty panel protocol
-        kitty-panel = "kitty +kitten panel --edge=top ~/.local/bin/kitty-panel-script";
-
-        # Alternative panel positions
-        kpanel = "kitty +kitten panel --edge=top ~/.local/bin/kitty-panel-script";
-        kpanel-bottom = "kitty +kitten panel --edge=bottom ~/.local/bin/kitty-panel-script";
-        kpanel-left = "kitty +kitten panel --edge=left ~/.local/bin/kitty-panel-script";
-        kpanel-right = "kitty +kitten panel --edge=right ~/.local/bin/kitty-panel-script";
-
-        # Standalone script for testing
-        panel-test = "~/.local/bin/kitty-panel-script";
-      };
+      # Note: Kitty Panel aliases disabled until kittens module is available
+      kittyAliases = {};
 
       allAliases = baseAliases // kittyAliases;
     in lib.concatStringsSep "\n" 

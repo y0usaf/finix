@@ -113,7 +113,7 @@ in {
       };
 
       shell = {
-        zsh.enable = false;
+        zsh.enable = true;
       };
     };
 
@@ -132,7 +132,7 @@ in {
           };
         };
         zsh = {
-          enable = true;
+          enable = false;
           # User preferences now come from cfg.shared.zsh
         };
         env = {
