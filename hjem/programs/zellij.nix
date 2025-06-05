@@ -220,23 +220,9 @@ in {
     '';
 
     # Zellij auto-start integration (replaces enableZshIntegration from Home Manager)
+    # Uses Zellij's own auto-start generation instead of manual implementation
     fileRegistry.content.zshrc.zellij-integration = ''
-      # Zellij auto-start integration
-      # Only start Zellij if:
-      # 1. We're in an interactive shell
-      # 2. Not already inside a Zellij session
-      # 3. Not in an SSH session
-      # 4. Terminal supports it
-      if [[ $- == *i* ]] && [[ -z "$ZELLIJ" ]] && [[ -z "$SSH_CONNECTION" ]] && [[ "$TERM" != "dumb" ]]; then
-        # Try to attach to existing session or create new one
-        if zellij list-sessions 2>/dev/null | grep -q "."; then
-          # Sessions exist, attach to the first available
-          exec zellij attach \$(zellij list-sessions | head -1 | awk '{print $1}')
-        else
-          # No sessions exist, create a new one
-          exec zellij
-        fi
-      fi
+      eval "$(zellij setup --generate-auto-start zsh)"
     '';
 
     # Add logout cleanup to zsh logout script (if file exists in registry)
