@@ -19,12 +19,12 @@ in {
   ###########################################################################
   options.cfg.hjome.tools.git = {
     enable = lib.mkEnableOption "git configuration and automation";
-    
+
     name = lib.mkOption {
       type = lib.types.str;
       description = "Git username.";
     };
-    
+
     email = lib.mkOption {
       type = lib.types.str;
       description = "Git email address.";
@@ -71,98 +71,97 @@ in {
     ];
 
     ###########################################################################
-    # Git Configuration
+    # Configuration Files
     ###########################################################################
-    files.".gitconfig".text = ''
-      [user]
-        name = ${cfg.name}
-        email = ${cfg.email}
-      
-      [core]
-        editor = ${cfg.editor}
-      
-      [init]
-        defaultBranch = main
-      
-      [pull]
-        rebase = true
-      
-      [push]
-        autoSetupRemote = true
-      
-      [url "git@github.com:"]
-        pushInsteadOf = https://github.com/
-    '';
+    files = {
+      # Git Configuration
+      ".gitconfig".text = ''
+        [user]
+          name = ${cfg.name}
+          email = ${cfg.email}
 
-    ###########################################################################
-    # Repository Setup Script
-    ###########################################################################
-    files.".local/bin/setup-nixos-repo".text = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) ''
-      #!/bin/bash
-      # Setup NixOS repository if it doesn't exist
-      if [ ! -d "${cfg.nixos-git-sync.repoPath}" ]; then
-        echo "Setting up NixOS configuration repository..."
-        git clone ${cfg.nixos-git-sync.nixosRepoUrl} ${cfg.nixos-git-sync.repoPath}
-      fi
-    '';
+        [core]
+          editor = ${cfg.editor}
 
-    files.".local/bin/setup-nixos-repo".executable = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) true;
+        [init]
+          defaultBranch = main
 
-    ###########################################################################
-    # Git Sync Script
-    ###########################################################################
-    files.".local/bin/nixos-git-sync".text = lib.mkIf cfg.nixos-git-sync.enable ''
-      #!/bin/bash
-      # Enable debug output for logging
-      set -x
+        [pull]
+          rebase = true
 
-      # Sleep briefly to ensure all file writes are complete
-      sleep 2
+        [push]
+          autoSetupRemote = true
 
-      # Get repository path
-      REPO_PATH="${cfg.nixos-git-sync.repoPath}"
+        [url "git@github.com:"]
+          pushInsteadOf = https://github.com/
+      '';
 
-      # Check if repository exists
-      if [ ! -d "$REPO_PATH" ]; then
-        echo "Repository directory does not exist: $REPO_PATH"
-        exit 1
-      fi
+      # Repository Setup Script
+      ".local/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
+        text = ''
+          #!/bin/bash
+          # Setup NixOS repository if it doesn't exist
+          if [ ! -d "${cfg.nixos-git-sync.repoPath}" ]; then
+            echo "Setting up NixOS configuration repository..."
+            git clone ${cfg.nixos-git-sync.nixosRepoUrl} ${cfg.nixos-git-sync.repoPath}
+          fi
+        '';
+        executable = true;
+      };
 
-      # Switch to the NixOS configuration repository directory
-      cd "$REPO_PATH"
+      # Git Sync Script
+      ".local/bin/nixos-git-sync" = lib.mkIf cfg.nixos-git-sync.enable {
+        text = ''
+          #!/bin/bash
+          # Enable debug output for logging
+          set -x
 
-      # Assess if there are any changes (tracked or untracked)
-      if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then
-        # Stage all changes
-        git add .
+          # Sleep briefly to ensure all file writes are complete
+          sleep 2
 
-        # Format date for commit message
-        FORMATTED_DATE=$(date '+%d/%m/%y@%H:%M:%S')
+          # Get repository path
+          REPO_PATH="${cfg.nixos-git-sync.repoPath}"
 
-        # Replace date placeholder in commit message format
-        COMMIT_MSG="🤖 Auto Update: $FORMATTED_DATE"
+          # Check if repository exists
+          if [ ! -d "$REPO_PATH" ]; then
+            echo "Repository directory does not exist: $REPO_PATH"
+            exit 1
+          fi
 
-        # Commit with the formatted message
-        git commit -m "$COMMIT_MSG"
+          # Switch to the NixOS configuration repository directory
+          cd "$REPO_PATH"
 
-        # Push to the configured remote branch
-        git push origin ${cfg.nixos-git-sync.remoteBranch} --force
-      else
-        echo "No changes to commit"
-      fi
-    '';
+          # Assess if there are any changes (tracked or untracked)
+          if ! git diff --quiet HEAD || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+            # Stage all changes
+            git add .
 
-    files.".local/bin/nixos-git-sync".executable = lib.mkIf cfg.nixos-git-sync.enable true;
+            # Format date for commit message
+            FORMATTED_DATE=$(date '+%d/%m/%y@%H:%M:%S')
 
-    ###########################################################################
-    # Shell Integration
-    ###########################################################################
-    files.".zshrc".text = lib.mkIf cfg.nixos-git-sync.enable ''
-      
-      # Git sync function
-      git-sync() {
-        ~/.local/bin/nixos-git-sync
-      }
-    '';
+            # Replace date placeholder in commit message format
+            COMMIT_MSG="🤖 Auto Update: $FORMATTED_DATE"
+
+            # Commit with the formatted message
+            git commit -m "$COMMIT_MSG"
+
+            # Push to the configured remote branch
+            git push origin ${cfg.nixos-git-sync.remoteBranch} --force
+          else
+            echo "No changes to commit"
+          fi
+        '';
+        executable = true;
+      };
+
+      # Shell Integration
+      ".zshrc".text = lib.mkIf cfg.nixos-git-sync.enable ''
+
+        # Git sync function
+        git-sync() {
+          ~/.local/bin/nixos-git-sync
+        }
+      '';
+    };
   };
 }

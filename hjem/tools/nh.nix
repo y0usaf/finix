@@ -18,13 +18,13 @@ in {
   ###########################################################################
   options.cfg.hjome.tools.nh = {
     enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
-    
+
     flake = lib.mkOption {
       type = with lib.types; nullOr (either singleLineStr path);
       default = null;
       description = ''
         The path that will be used for the NH_FLAKE environment variable.
-        
+
         NH_FLAKE is used by nh as the default flake for performing actions,
         like 'nh os switch'. If not set, nh will look for a flake in the current
         directory or prompt for the flake path.
@@ -56,7 +56,7 @@ in {
     files.".zshrc".text = lib.mkAfter ''
       # Set NH_FLAKE environment variable for NH (Nix Helper)
       export NH_FLAKE="/home/y0usaf/nixos"
-      
+
       # NixOS rebuild/switch function with proper argument parsing
       nhs() {
         clear

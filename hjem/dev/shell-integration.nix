@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.cfg.hjome.dev.shell-integration;
@@ -38,13 +37,13 @@ in {
       alias build="nix build"
       alias dev-shell="nix develop"
       alias fmt="alejandra ."
-      
+
       # Development functions
       mkdev() {
         mkdir -p ~/Dev/"$1"
         cd ~/Dev/"$1"
       }
-      
+
       # Git development shortcuts
       alias gc="git commit"
       alias gp="git push"

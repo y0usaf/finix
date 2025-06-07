@@ -25,17 +25,8 @@
     then pkgs.obs-studio.override {cudaSupport = true;}
     else pkgs.obs-studio;
 
-  # Create a customized background removal plugin with CUDA properly configured
-  customBackgroundRemoval = pkgs.obs-studio-plugins.obs-backgroundremoval.overrideAttrs (oldAttrs: {
-    cmakeFlags =
-      oldAttrs.cmakeFlags
-      ++ [
-        # Explicitly specify CUDA paths
-        "-DCUDA_TOOLKIT_ROOT_DIR=${pkgs.cudaPackages.cudatoolkit}"
-        # Disable GPU components that are causing issues
-        "-DDISABLE_ONNXRUNTIME_GPU=ON"
-      ];
-  });
+  # Note: Custom background removal plugin configuration available if needed
+  # but currently using the default package
 in {
   ###########################################################################
   # Module Options

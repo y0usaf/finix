@@ -121,11 +121,11 @@ in {
         wayland.enable = true;
         foot.enable = true;
         ags.enable = true;
-         hyprland = {
-           enable = true;
-           flake.enable = true;
-           hy3.enable = true;
-         };
+        hyprland = {
+          enable = true;
+          flake.enable = true;
+          hy3.enable = true;
+        };
       };
 
       # Gaming modules - ALL gaming config in one place!

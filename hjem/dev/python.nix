@@ -85,12 +85,12 @@ in {
       alias pip="pip3"
       alias venv="python3 -m venv"
       alias activate="source venv/bin/activate"
-      
+
       # UV aliases
       alias uv-init="uv init"
       alias uv-add="uv add"
       alias uv-run="uv run"
-      
+
       # Virtual environment helpers
       mkvenv() {
         if [[ -z "$1" ]]; then
@@ -99,7 +99,7 @@ in {
           python3 -m venv "$1"
         fi
       }
-      
+
       workon() {
         if [[ -z "$1" ]]; then
           if [[ -d "venv" ]]; then

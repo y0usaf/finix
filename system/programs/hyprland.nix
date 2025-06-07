@@ -7,7 +7,6 @@
 {
   lib,
   pkgs,
-  hostHome,
   hostHjem,
   inputs,
   config,

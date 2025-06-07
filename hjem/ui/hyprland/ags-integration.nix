@@ -4,12 +4,14 @@
 ###############################################################################
 {
   lib,
-  hostHome,
+  hostHjem,
   cfg,
   ...
 }: let
   # Safely check if AGS is enabled
-  agsEnabled = hostHome.cfg.ui.ags.enable or false;
+  agsEnabled = hostHjem.cfg.hjome.ui.ags.enable or false;
+
+
 in
   ###########################################################################
   # AGS Integration Configuration

@@ -4,7 +4,6 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
   ...
 }: let
@@ -15,7 +14,7 @@ in {
   ###########################################################################
   options.cfg.hjome.core.user = {
     enable = lib.mkEnableOption "user configuration (packages and bookmarks)";
-    
+
     packages = lib.mkOption {
       type = lib.types.listOf lib.types.package;
       default = [];

@@ -178,7 +178,7 @@ in {
               nix run "nixpkgs#$pkg" -- "$@"
           }
         ''
-        
+
         # Aliases (added after base config)
         (lib.mkAfter (let
           baseAliases = {
@@ -226,16 +226,17 @@ in {
           kittyAliases = {};
 
           allAliases = baseAliases // kittyAliases;
-          
+
           aliasSection = ''
 
             # ----------------------------
             # Shell Aliases
             # ----------------------------
-            ${lib.concatStringsSep "\n" 
+            ${lib.concatStringsSep "\n"
               (lib.mapAttrsToList (name: value: "alias ${name}='${value}'") allAliases)}
           '';
-        in aliasSection))
+        in
+          aliasSection))
       ];
     };
   };

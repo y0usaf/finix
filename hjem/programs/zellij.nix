@@ -12,8 +12,6 @@
   ...
 }: let
   cfg = config.cfg.hjome.programs.zellij;
-  # Get shared user preferences
-  sharedZsh = config.cfg.shared.zsh;
 in {
   ###########################################################################
   # Module Options

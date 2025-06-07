@@ -35,7 +35,7 @@ in {
       # Development tool aliases
       alias code.="code ."
       alias idea.="idea ."
-      
+
       # Project management functions
       proj() {
         if [[ -z "$1" ]]; then
