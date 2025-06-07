@@ -4,8 +4,8 @@
   homeDir = "/home/${username}";
 in {
   cfg = {
-    # SYSTEM CONFIGURATION (includes hardware)
-    system = {
+    # SHARED CONFIGURATION - used by all module systems
+    shared = {
       inherit username;
       homeDirectory = homeDir;
       hostname = "y0usaf-laptop";
@@ -13,6 +13,22 @@ in {
       timezone = "America/Toronto";
       config = "default";
 
+      # User preferences shared across modules
+      tokenDir = "${homeDir}/Tokens";
+
+      # Zsh user preferences - now properly shared between system and home modules
+      zsh = {
+        cat-fetch = true;
+        history-memory = 10000;
+        history-storage = 10000;
+        zellij = {
+          enable = true;
+        };
+      };
+    };
+
+    # SYSTEM CONFIGURATION (includes hardware)
+    system = {
       # Move imports inside system configuration to avoid HM exposure
       imports = [
         ./hardware-configuration.nix
@@ -28,54 +44,10 @@ in {
       };
     };
 
-    # HOME-MANAGER CONFIGURATION
-    home = {
-      ui = {
-        hyprland = {
-          enable = true;
-          flake.enable = true;
-          hy3.enable = true;
-        };
-        wayland.enable = true;
-        ags.enable = true;
-        cursor.enable = true;
-        foot.enable = true;
-        gtk = {
-          enable = true;
-          scale = 1.5;
-        };
-        wallust.enable = false;
-        mako.enable = true;
-      };
-
-      # Appearance - adjusted for laptop display
-      appearance = {
-        dpi = 144;
-        baseFontSize = 10;
-        cursorSize = 24;
-        fonts = {
-          main = [
-            {
-              package = pkgs.fastFonts;
-              name = "Fast_Mono";
-            }
-          ];
-          fallback = [
-            {
-              package = pkgs.noto-fonts-emoji;
-              name = "Noto Color Emoji";
-            }
-            {
-              package = pkgs.noto-fonts-cjk-sans;
-              name = "Noto Sans CJK";
-            }
-            {
-              package = pkgs.font-awesome;
-              name = "Font Awesome";
-            }
-          ];
-        };
-      };
+    # HJOME CONFIGURATION - simple interface like Home Manager
+    hjome = {
+      # Global Hjem settings
+      clobberFiles = true;
 
       # Default Applications
       defaults = {
@@ -89,76 +61,6 @@ in {
         archiveManager = "7z";
         imageViewer = "imv";
         mediaPlayer = "mpv";
-      };
-
-      # Applications
-      programs = {
-        bambu.enable = false; # Disabled for laptop
-        discord.enable = true;
-
-        creative.enable = true;
-        chatgpt.enable = true;
-        android.enable = true; # Enabled for laptop
-        firefox.enable = true;
-        imv.enable = true;
-        mpv.enable = true;
-
-        media.enable = true;
-        music.enable = true;
-        qbittorrent.enable = true;
-        sway-launcher-desktop.enable = true;
-        # streamlink disabled for laptop, syncthing moved to user packages
-        webapps.enable = true;
-
-        bluetooth.enable = true;
-      };
-
-      # Gaming
-      gaming = {
-        enable = true;
-        controllers.enable = true;
-        emulation = {
-          wii-u.enable = false; # Disabled for laptop performance
-          gcn-wii.enable = true;
-        };
-        balatro = {
-          enable = true;
-          enableLovelyInjector = true;
-          enabledMods = ["steamodded" "talisman" "cryptid" "morespeeds" "overlay" "cardsleeves" "multiplayer" "jokerdisplay"];
-        };
-      };
-
-      # tools directory removed - all tools now handled by Hjem
-
-      # Development
-      dev = {
-        docker.enable = true;
-        fhs.enable = true;
-        claude-code.enable = true;
-        mcp.enable = true;
-        npm.enable = true;
-        nvim.enable = true;
-        python.enable = true;
-        cursor-ide.enable = true;
-      };
-
-      # User Preferences
-      user = {
-        bookmarks = [
-          "file:///home/${username}/Downloads Downloads"
-          "file:///home/${username}/Music Music"
-          "file:///home/${username}/DCIM DCIM"
-          "file:///home/${username}/Pictures Pictures"
-          "file:///home/${username}/nixos NixOS"
-          "file:///home/${username}/Dev Dev"
-          "file:///home/${username}/.local/share/Steam Steam"
-        ];
-        packages = with pkgs; [
-          realesrgan-ncnn-vulkan
-          syncthing # File synchronization
-          ags
-          astal.hyprland
-        ];
       };
 
       # Directories
@@ -175,50 +77,110 @@ in {
           video.path = "${homeDir}/DCIM/Wallpapers_Video";
         };
       };
-    };
 
-    # SHARED CONFIGURATION (both system and home)
-    core = {
-      ssh.enable = true;
-      xdg.enable = true;
-      systemd = {
-        enable = true;
-        autoFormatNix = {
-          enable = true;
-          directory = "${homeDir}/nixos";
+      # Core configuration
+      core = {
+        appearance = {
+          dpi = 144;
+          baseFontSize = 10;
+          cursorSize = 24;
+          fonts = {
+            main = [
+              {
+                package = pkgs.fastFonts;
+                name = "Fast_Mono";
+              }
+            ];
+            fallback = [
+              {
+                package = pkgs.noto-fonts-emoji;
+                name = "Noto Color Emoji";
+              }
+              {
+                package = pkgs.noto-fonts-cjk-sans;
+                name = "Noto Sans CJK";
+              }
+              {
+                package = pkgs.font-awesome;
+                name = "Font Awesome";
+              }
+            ];
+          };
+        };
+
+        # User Preferences
+        user = {
+          bookmarks = [
+            "file:///home/${username}/Downloads Downloads"
+            "file:///home/${username}/Music Music"
+            "file:///home/${username}/DCIM DCIM"
+            "file:///home/${username}/Pictures Pictures"
+            "file:///home/${username}/nixos NixOS"
+            "file:///home/${username}/Dev Dev"
+            "file:///home/${username}/.local/share/Steam Steam"
+          ];
+          packages = with pkgs; [
+            realesrgan-ncnn-vulkan
+            syncthing # File synchronization
+            ags
+            astal.hyprland
+          ];
         };
       };
-      zsh = {
-        enable = true;
-        cat-fetch = true;
-        history-memory = 10000;
-        history-storage = 10000;
-        zellij = {
-          enable = true;
-        };
-      };
-      env = {
-        enable = true;
-        tokenDir = "${homeDir}/Tokens";
-      };
-    };
 
-    # HJOME CONFIGURATION
-    hjome = {
       ui = {
+        hyprland = {
+          enable = true;
+          flake.enable = true;
+          hy3.enable = true;
+        };
         wayland.enable = true;
+        ags.enable = true;
         foot.enable = true;
       };
 
+      # Gaming modules - adjusted for laptop
+      gaming = {
+        enable = true;
+        controllers.enable = true;
+        emulation = {
+          wii-u.enable = false; # Disabled for laptop performance
+          gcn-wii.enable = true;
+        };
+        balatro = {
+          enable = true;
+          enableLovelyInjector = true;
+          enabledMods = ["steamodded" "talisman" "cryptid" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay"];
+        };
+      };
+
+      dev = {
+        mcp.enable = true;
+        cursor-ide.enable = true;
+      };
+
       programs = {
+        bambu.enable = false; # Disabled for laptop
+        creative.enable = true;
+        imv.enable = true;
+        mpv.enable = true;
+        media.enable = true;
+        qbittorrent.enable = true;
+        webapps.enable = true;
         obs.enable = true;
         pcmanfm.enable = true;
         obsidian.enable = true;
         vesktop.enable = true;
+        zellij.enable = true;
       };
+
       tools = {
         spotdl.enable = true;
         yt-dlp.enable = true;
+        nh = {
+          enable = true;
+          flake = "${homeDir}/nixos";
+        };
         git = {
           enable = true;
           name = "y0usaf";
@@ -232,6 +194,10 @@ in {
         # Archive management tools
         "7z".enable = true;
         file-roller.enable = true;
+      };
+
+      shell = {
+        zsh.enable = true;
       };
     };
   };
