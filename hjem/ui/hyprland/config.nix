@@ -15,7 +15,7 @@
 }: let
   cfg = config.cfg.hjome.ui.hyprland;
   generators = import ../../../lib/generators/toHyprconf.nix lib;
-  
+
   # Hyprland Configuration Merge Helper
   hyprlandMerge = let
     # Attributes that should have their lists concatenated instead of replaced

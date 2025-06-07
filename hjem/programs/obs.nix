@@ -24,7 +24,6 @@
     if nvidiaCudaEnabled
     then pkgs.obs-studio.override {cudaSupport = true;}
     else pkgs.obs-studio;
-
   # Note: Custom background removal plugin configuration available if needed
   # but currently using the default package
 in {

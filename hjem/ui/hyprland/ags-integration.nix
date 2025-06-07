@@ -10,8 +10,6 @@
 }: let
   # Safely check if AGS is enabled
   agsEnabled = hostHjem.cfg.hjome.ui.ags.enable or false;
-
-
 in
   ###########################################################################
   # AGS Integration Configuration
