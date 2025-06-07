@@ -172,6 +172,8 @@ in {
         obsidian.enable = true;
         vesktop.enable = true;
         zellij.enable = true;
+        firefox.enable = true;
+        discord.enable = true;
       };
 
       tools = {

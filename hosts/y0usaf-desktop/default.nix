@@ -170,6 +170,8 @@ in {
         bambu.enable = true;
         webapps.enable = true;
         zellij.enable = true;
+        firefox.enable = true;
+        discord.enable = true;
       };
       tools = {
         spotdl.enable = true;

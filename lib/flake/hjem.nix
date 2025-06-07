@@ -48,8 +48,8 @@ in {
                 hjem.users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = lib.mkMerge [
                   # Apply hjem settings
                   (getUserSettings (shared.hjemConfigs.${hostname}.cfg.hjem or {}))
-                  # Apply hjome settings directly
-                  (shared.hjemConfigs.${hostname}.cfg.hjome or {})
+                  # Apply hjome settings directly (extract hjome without cfg wrapper)
+                  (shared.unifiedConfigs.${hostname}.cfg.hjome or {})
                 ];
               }
             ];
