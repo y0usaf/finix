@@ -9,7 +9,6 @@
   config,
   pkgs,
   lib,
-  hostSystem,
   ...
 }: let
   cfg = config.cfg.hjome.programs.discord;
