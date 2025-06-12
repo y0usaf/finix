@@ -9,7 +9,7 @@
   ...
 }: let
   cfg = config.cfg.hjome.core.packages;
-  
+
   # Base packages all users should have
   basePackages = with pkgs; [
     # Essential CLI tools

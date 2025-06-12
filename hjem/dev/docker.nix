@@ -24,7 +24,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    packageCollector.packages = with pkgs; [
       docker
       docker-compose
       docker-buildx
@@ -41,8 +41,6 @@ in {
         currentContext = "default";
         plugins = {};
       };
-
-
     };
   };
 }
