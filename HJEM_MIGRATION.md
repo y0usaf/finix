@@ -170,13 +170,12 @@ This document tracks the migration of Home Manager modules from `home/` to `hjem
 **Date**: $(date +"%Y-%m-%d %H:%M:%S")
 
 ### Final Statistics:
-- **Total Modules Analyzed**: 22
+- **Total Modules Analyzed**: 20
 - **Successfully Migrated to Hjem**: 8 modules
 - **Migrated to System Services**: 1 module (split into 2 files)
-- **Deleted/Disabled**: 2 modules (parity achieved)
 - **Remaining in Home Manager**: 8 modules (complex configurations)
-- **Previously Migrated**: 5 modules
-- **Migration Success Rate**: 73% (16/22 modules migrated or handled)
+- **Previously Migrated**: 3 modules
+- **Migration Success Rate**: 75% (15/20 modules migrated or handled)
 
 ### Next Steps:
 1. **Test Build**: ✅ Completed - `nh os switch --dry` successful

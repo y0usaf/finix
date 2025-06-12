@@ -58,7 +58,7 @@ in {
       };
 
       # Shell integration
-      ".zshrc".text = ''
+      ".zshrc".text = lib.mkBefore ''
         # NPM environment variables
         export NPM_CONFIG_PREFIX=~/.local/share/npm
         export NPM_CONFIG_CACHE=~/.cache/npm

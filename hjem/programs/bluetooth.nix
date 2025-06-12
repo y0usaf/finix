@@ -39,24 +39,7 @@ in {
       # Configure autostart for Blueman applet
       ".config/autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
 
-      # Shell integration with Bluetooth aliases
-      ".zshrc".text = ''
-        # Bluetooth aliases
-        # GUI tools
-        alias bt-manager="blueman-manager"
-        alias bt-applet="blueman-applet"
-        alias bt-adapters="blueman-adapters"
-        alias bt-sendto="blueman-sendto"
 
-        # CLI tools
-        alias bt-status="bluetoothctl show"
-        alias bt-devices="bluetoothctl devices"
-        alias bt-scan="bluetoothctl scan on"
-        alias bt-pair="bluetoothctl pair"
-        alias bt-connect="bluetoothctl connect"
-        alias bt-disconnect="bluetoothctl disconnect"
-        alias bt-bluetuith="bluetuith"
-      '';
     };
   };
 }

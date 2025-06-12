@@ -35,23 +35,49 @@ in {
     # Configuration Files
     ###########################################################################
     files = {
-      # NPM setup script for Claude Code installation
-      ".local/bin/install-claude-code" = {
+      # NPM setup and Claude Code installation script
+      ".local/bin/setup-claude-code" = {
         text = ''
           #!/bin/bash
+          # Set up NPM environment
+          export NPM_CONFIG_PREFIX=~/.local/share/npm
+          export NPM_CONFIG_CACHE=~/.cache/npm
+          export NPM_CONFIG_USERCONFIG=~/.config/npm/npmrc
+          export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
+          export PATH="$HOME/.local/share/npm/bin:$PATH"
+          
+          # Create directories
+          mkdir -p ~/.local/share/npm
+          mkdir -p ~/.cache/npm
+          mkdir -p ~/.config/npm/config
+          mkdir -p "$XDG_RUNTIME_DIR/npm"
+          
           # Install Claude Code and Brave Search globally via npm
           ${pkgs.nodejs_20}/bin/npm install -g @anthropic-ai/claude-code @modelcontextprotocol/server-brave-search
         '';
         executable = true;
       };
 
+      # NPM configuration for XDG compliance
+      ".config/npm/npmrc".text = ''
+        prefix=~/.local/share/npm
+        cache=~/.cache/npm
+        init-module=~/.config/npm/config/npm-init.js
+        store-dir=~/.cache/pnpm/store
+      '';
+
       # Shell integration
-      ".zshrc".text = ''
+      ".zshrc".text = lib.mkBefore ''
+        # NPM environment variables
+        export NPM_CONFIG_PREFIX=~/.local/share/npm
+        export NPM_CONFIG_CACHE=~/.cache/npm
+        export NPM_CONFIG_USERCONFIG=~/.config/npm/npmrc
+        export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
+        
         # Add npm bin directory to PATH for claude-code
         export PATH="$HOME/.local/share/npm/bin:$PATH"
 
-        # Claude Code aliases
-        alias claude-code='npx @anthropic-ai/claude-code'
+
       '';
     };
   };

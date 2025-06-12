@@ -154,6 +154,10 @@ in {
       dev = {
         mcp.enable = true;
         cursor-ide.enable = true;
+        claude-code.enable = true;
+        docker.enable = true;
+        npm.enable = true;
+        latex.enable = true;
       };
 
       programs = {
