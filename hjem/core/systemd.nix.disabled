@@ -1,0 +1,93 @@
+###############################################################################
+# Systemd Module (Hjem Version)
+# Configures systemd user services and paths
+# - Polkit authentication agent
+# - Automatic Nix file formatting
+# - Path watching for Nix configuration
+###############################################################################
+{
+  config,
+  pkgs,
+  lib,
+  hostHjem ? {},
+  ...
+}: let
+  cfg = config.cfg.hjome.core.systemd;
+in {
+  ###########################################################################
+  # Module Options
+  ###########################################################################
+  options.cfg.hjome.core.systemd = {
+    enable = lib.mkEnableOption "systemd user services";
+
+    autoFormatNix = {
+      enable = lib.mkEnableOption "automatic Nix file formatting with alejandra";
+
+      directory = lib.mkOption {
+        type = lib.types.str;
+        default = "${config.cfg.shared.homeDirectory}/nixos";
+        description = "Directory to watch for Nix file changes";
+      };
+    };
+  };
+
+  ###########################################################################
+  # Module Configuration
+  ###########################################################################
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Packages
+    ###########################################################################
+    packages = lib.mkIf cfg.autoFormatNix.enable (with pkgs; [
+      alejandra
+    ]);
+
+    ###########################################################################
+    # Systemd User Configuration Files
+    ###########################################################################
+    files = {
+      # Polkit authentication agent service
+      ".config/systemd/user/polkit-gnome-authentication-agent-1.service".text = ''
+        [Unit]
+        Description=polkit-gnome-authentication-agent-1
+        WantedBy=graphical-session.target
+        After=graphical-session.target
+
+        [Service]
+        Type=simple
+        ExecStart=${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1
+        Restart=on-failure
+        RestartSec=1
+        TimeoutStopSec=10
+
+        [Install]
+        WantedBy=graphical-session.target
+      '';
+    } // lib.optionalAttrs cfg.autoFormatNix.enable {
+      # Nix formatting service
+      ".config/systemd/user/format-nix.service".text = ''
+        [Unit]
+        Description=Format Nix files on change
+
+        [Service]
+        Type=oneshot
+        ExecStart=${pkgs.alejandra}/bin/alejandra .
+        WorkingDirectory=${cfg.autoFormatNix.directory}
+      '';
+
+      # Nix formatting timer
+      ".config/systemd/user/format-nix.timer".text = ''
+        [Unit]
+        Description=Timer for formatting Nix files
+
+        [Timer]
+        OnBootSec=1min
+        OnUnitActiveSec=5min
+        Unit=format-nix.service
+
+        [Install]
+        WantedBy=timers.target
+      '';
+    };
+  };
+}
