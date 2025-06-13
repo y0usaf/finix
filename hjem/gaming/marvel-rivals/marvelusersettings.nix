@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  xdg,
   ...
 }: let
   # JSON settings content (shared between both file locations)
@@ -33,10 +32,10 @@ in {
     ###########################################################################
     files = {
       # Default profile location
-      ${xdg.dataFile "Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/default/MarvelUserSetting.ini"}.text = settingsContent;
+      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/default/MarvelUserSetting.ini".text = settingsContent;
 
       # Current profile location
-      ${xdg.dataFile "Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/current/MarvelUserSetting.ini"}.text = settingsContent;
+      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/current/MarvelUserSetting.ini".text = settingsContent;
     };
   };
 }

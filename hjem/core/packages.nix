@@ -25,7 +25,7 @@
     tree
     bottom
     psmisc
-
+    kitty
     # System interaction
     dconf
     lm_sensors
@@ -59,7 +59,7 @@ in {
   config = lib.mkMerge [
     # Always add the collected packages to the top-level packages attribute
     {
-      packages = config.packageCollector.packages;
+      inherit (config.packageCollector) packages;
     }
     # Add base packages when enabled
     (lib.mkIf cfg.enable {

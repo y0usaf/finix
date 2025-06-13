@@ -86,9 +86,6 @@ This document tracks the migration of Home Manager modules from `home/` to `hjem
 - [x] Migration (→ `system/services/format-nix.nix` + `system/services/polkit-gnome.nix`)
 - [ ] Parity
 
-### xdg.nix
-- [x] Migration (→ `hjem/core/xdg.nix`)
-- [ ] Parity
 
 ---
 

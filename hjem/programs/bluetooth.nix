@@ -37,9 +37,7 @@ in {
     ###########################################################################
     files = {
       # Configure autostart for Blueman applet
-      ".config/autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
-
-
+      "${config.xdg.configDirectory}/autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
     };
   };
 }

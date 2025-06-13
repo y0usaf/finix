@@ -88,6 +88,8 @@ in {
 
               # Configure hjem for this user
               hjem = {
+                clobberByDefault = false; # Use symlinks to prevent smfh freezing
+                linker = inputs.smfh.packages.${pkgs.system}.default;
                 specialArgs =
                   shared.mkSpecialArgs commonSpecialArgs hostname
                   // {

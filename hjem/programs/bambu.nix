@@ -9,7 +9,6 @@
   config,
   lib,
   pkgs,
-  xdg,
   ...
 }: let
   cfg = config.cfg.hjome.programs.bambu;
@@ -78,7 +77,7 @@ in {
     # Desktop Entries
     ###########################################################################
     files = {
-      ${xdg.dataFile "applications/bambu-studio.desktop"}.text = ''
+      "${config.xdg.dataDirectory}/applications/bambu-studio.desktop".text = ''
         [Desktop Entry]
         Name=Bambu Studio
         Exec=bambu-studio %F

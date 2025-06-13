@@ -18,8 +18,13 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
+    smfh = {
+      url = "github:Gerg-L/smfh";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hjem = {
-      url = "github:feel-co/hjem";
+      url = "github:y0usaf/hjem";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

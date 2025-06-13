@@ -51,9 +51,9 @@ in {
     # Session Variables
     ###########################################################################
     environment.sessionVariables = {
-      PYTHONUSERBASE = "${config.xdg.dataHome}/python";
-      PIP_CACHE_DIR = "${config.xdg.cacheHome}/pip";
-      VIRTUAL_ENV_HOME = "${config.xdg.dataHome}/venvs";
+      PYTHONUSERBASE = "${config.xdg.dataDirectory}/python";
+      PIP_CACHE_DIR = "${config.xdg.cacheDirectory}/pip";
+      VIRTUAL_ENV_HOME = "${config.xdg.dataDirectory}/venvs";
       SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
       REQUESTS_CA_BUNDLE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
       NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [

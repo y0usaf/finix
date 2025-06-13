@@ -36,22 +36,22 @@ in {
     ###########################################################################
     files = {
       # NPM global config - use XDG directories
-      ".config/npm/npmrc".text = ''
-        prefix=~/.local/share/npm
-        cache=~/.cache/npm
-        init-module=~/.config/npm/config/npm-init.js
-        store-dir=~/.cache/pnpm/store
+      "${config.xdg.configDirectory}/npm/npmrc".text = ''
+        prefix=${config.xdg.dataDirectory}/npm
+        cache=${config.xdg.cacheDirectory}/npm
+        init-module=${config.xdg.configDirectory}/npm/config/npm-init.js
+        store-dir=${config.xdg.cacheDirectory}/pnpm/store
       '';
 
       # NPM setup script
-      ".local/bin/npm-setup" = {
+      "${config.xdg.dataDirectory}/bin/npm-setup" = {
         text = ''
           #!/bin/bash
           # Set up NPM directories
-          mkdir -p ~/.local/share/npm
-          mkdir -p ~/.cache/npm
-          mkdir -p ~/.config/npm/config
-          mkdir -p ~/.cache/pnpm/store
+          mkdir -p ${config.xdg.dataDirectory}/npm
+          mkdir -p ${config.xdg.cacheDirectory}/npm
+          mkdir -p ${config.xdg.configDirectory}/npm/config
+          mkdir -p ${config.xdg.cacheDirectory}/pnpm/store
           mkdir -p "$XDG_RUNTIME_DIR/npm"
         '';
         executable = true;
@@ -60,13 +60,13 @@ in {
       # Shell integration
       ".zshrc".text = lib.mkBefore ''
         # NPM environment variables
-        export NPM_CONFIG_PREFIX=~/.local/share/npm
-        export NPM_CONFIG_CACHE=~/.cache/npm
-        export NPM_CONFIG_USERCONFIG=~/.config/npm/npmrc
+        export NPM_CONFIG_PREFIX=${config.xdg.dataDirectory}/npm
+        export NPM_CONFIG_CACHE=${config.xdg.cacheDirectory}/npm
+        export NPM_CONFIG_USERCONFIG=${config.xdg.configDirectory}/npm/npmrc
         export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
 
         # Add npm bin directory to PATH
-        export PATH="$HOME/.local/share/npm/bin:$PATH"
+        export PATH="${config.xdg.dataDirectory}/npm/bin:$PATH"
       '';
     };
   };

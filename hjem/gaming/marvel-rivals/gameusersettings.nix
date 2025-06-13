@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  xdg,
   ...
 }: {
   ###########################################################################
@@ -27,7 +26,7 @@
     # Marvel Rivals GameUserSettings.ini
     ###########################################################################
     files = {
-      ${xdg.dataFile "Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini"}.text = lib.generators.toINI {} {
+      ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini".text = lib.generators.toINI {} {
         "Internationalization" = {
           Culture = "en";
         };

@@ -36,7 +36,7 @@ in {
     ###########################################################################
     files = {
       # Main Zellij configuration
-      ".config/zellij/config.kdl".text = ''
+      "${config.xdg.configDirectory}/zellij/config.kdl".text = ''
         hide_session_name false
         on_force_close "quit"
         pane_frames true
@@ -181,7 +181,7 @@ in {
       '';
 
       # Music layout
-      ".config/zellij/layouts/music.kdl".text = ''
+      "${config.xdg.configDirectory}/zellij/layouts/music.kdl".text = ''
         layout alias="music" {
             default_tab_template {
                 pane size=1 borderless=true {

@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  xdg,
   ...
 }: let
   cfg = config.cfg.hjome.gaming.wukong;
@@ -25,7 +24,7 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    files.${xdg.dataFile "Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini"}.text = lib.generators.toINI {} {
+    files.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
       "SystemSettings" = {
         "r.DefaultFeature.AntiAliasing" = "0";
         "pp.VignetteIntensity" = "0.0";

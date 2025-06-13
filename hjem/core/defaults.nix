@@ -45,7 +45,7 @@ in {
 
     launcher = lib.mkOption {
       type = lib.types.str;
-      default = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+      default = "foot -a 'launcher' ${config.xdg.configDirectory}/scripts/sway-launcher-desktop.sh";
       description = "Default application launcher";
     };
 

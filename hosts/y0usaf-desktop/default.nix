@@ -53,9 +53,6 @@ in {
 
     # HJOME CONFIGURATION - simple interface like Home Manager
     hjome = {
-      # Global Hjem settings
-      clobberFiles = true;
-
       # Default Applications
       defaults = {
         browser = "firefox";
@@ -123,7 +120,7 @@ in {
         ags.enable = true;
         hyprland = {
           enable = true;
-          flake.enable = true;
+          flake.enable = false;
           hy3.enable = true;
         };
       };
@@ -158,6 +155,7 @@ in {
         docker.enable = true;
         npm.enable = true;
         latex.enable = true;
+        nvim.enable = true;
       };
 
       programs = {
@@ -176,6 +174,7 @@ in {
         zellij.enable = true;
         firefox.enable = true;
         discord.enable = true;
+        sway-launcher-desktop.enable = true;
       };
       tools = {
         spotdl.enable = true;

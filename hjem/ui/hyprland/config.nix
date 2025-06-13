@@ -10,7 +10,6 @@
   hostSystem,
   hostHome,
   hostHjem,
-  xdg,
   ...
 }: let
   cfg = config.cfg.hjome.ui.hyprland;
@@ -108,38 +107,45 @@ in {
     ###########################################################################
     files = {
       # Main Hyprland configuration
-      ${xdg.configFile "hypr/hyprland.conf"}.text = let
-        # Collect all configuration from modules using proper merge function
-        hyprlandConfig = hyprlandMerge.mergeMultipleConfigs [
-          coreConfig
-          keybindingsConfig
-          windowRulesConfig
-          monitorsConfig
-          agsConfig
-        ];
+      "${config.xdg.configDirectory}/hypr/hyprland.conf" = {
+        clobber = false;
+        text = let
+          # Collect all configuration from modules using proper merge function
+          hyprlandConfig = hyprlandMerge.mergeMultipleConfigs [
+            coreConfig
+            keybindingsConfig
+            windowRulesConfig
+            monitorsConfig
+            agsConfig
+          ];
 
-        # Generate plugins configuration if hy3 is enabled
-        pluginsConfig = lib.optionalString cfg.hy3.enable (
-          generators.pluginsToHyprconf [
-            inputs.hy3.packages.${pkgs.system}.hy3
-          ] ["$"]
-        );
+          # Generate plugins configuration if hy3 is enabled
+          pluginsConfig = lib.optionalString cfg.hy3.enable (
+            generators.pluginsToHyprconf [
+              inputs.hy3.packages.${pkgs.system}.hy3
+            ] ["$"]
+          );
 
-        # Generate main configuration
-        mainConfig = generators.toHyprconf {
-          attrs = hyprlandConfig;
-          importantPrefixes = ["$" "exec" "source"];
-        };
-      in
-        mainConfig + lib.optionalString (pluginsConfig != "") "\n${pluginsConfig}";
+          # Generate main configuration
+          mainConfig = generators.toHyprconf {
+            attrs = hyprlandConfig;
+            importantPrefixes = ["$" "exec" "source"];
+          };
+        in
+          mainConfig + lib.optionalString (pluginsConfig != "") "\n${pluginsConfig}";
+      };
 
       # Hyprpaper configuration (if needed)
-      ${xdg.configFile "hypr/hyprpaper.conf"}.text = ''
-        preload = ${hostHjem.cfg.hjome.directories.wallpapers.static.path}
-        wallpaper = ,${hostHjem.cfg.hjome.directories.wallpapers.static.path}
-        splash = false
-        ipc = on
-      '';
+
+      "${config.xdg.configDirectory}/hypr/hyprpaper.conf" = {
+        clobber = false;
+        text = ''
+          preload = ${hostHjem.cfg.hjome.directories.wallpapers.static.path}
+          wallpaper = ,${hostHjem.cfg.hjome.directories.wallpapers.static.path}
+          splash = false
+          ipc = on
+        '';
+      };
     };
   };
 }

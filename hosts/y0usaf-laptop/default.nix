@@ -46,8 +46,7 @@ in {
 
     # HJOME CONFIGURATION - simple interface like Home Manager
     hjome = {
-      # Global Hjem settings
-      clobberFiles = true;
+      # Global Hjem settings removed - using hjem default (symlinks)
 
       # Default Applications
       defaults = {

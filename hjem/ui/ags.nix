@@ -7,7 +7,6 @@
   config,
   lib,
   pkgs,
-  xdg,
   ...
 }: {
   ###########################################################################
@@ -36,7 +35,7 @@
     # Add AGS configuration files
     ###########################################################################
     files = {
-      ${xdg.configFile "ags/app.tsx"}.text = ''
+      "${config.xdg.configDirectory}/ags/app.tsx".text = ''
         import { App, Astal, Gtk } from "astal/gtk3"
         import { Variable, exec, subprocess } from "astal"
 
@@ -579,7 +578,7 @@
         })
       '';
 
-      ${xdg.configFile "ags/tsconfig.json"}.text = ''
+      "${config.xdg.configDirectory}/ags/tsconfig.json".text = ''
         {
           "compilerOptions": {
             "target": "ES2022",

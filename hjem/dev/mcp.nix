@@ -36,7 +36,7 @@ in {
     # Environment Variables
     ###########################################################################
     environment.sessionVariables = {
-      NODE_PATH = "${config.xdg.dataHome or "~/.local/share"}/npm/lib/node_modules";
+      NODE_PATH = "${config.xdg.dataDirectory}/npm/lib/node_modules";
     };
 
     ###########################################################################
@@ -62,13 +62,16 @@ in {
             args = ["-y" "@modelcontextprotocol/server-memory"];
           };
           "hjem Docs" = {
-            url = "https://gitmcp.io/feel-co/hjem/";
+            command = "npx";
+            args = ["mcp-remote" "https://gitmcp.io/y0usaf/hjem"];
           };
           "nix Docs" = {
-            url = "https://gitmcp.io/NixOS/nix";
+            command = "npx";
+            args = ["mcp-remote" "https://gitmcp.io/NixOS/nix"];
           };
           "home-manager Docs" = {
-            url = "https://gitmcp.io/nix-community/home-manager";
+            command = "npx";
+            args = ["mcp-remote" "https://gitmcp.io/nix-community/home-manager"];
           };
         };
       };

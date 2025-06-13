@@ -6,7 +6,6 @@
   config,
   pkgs,
   lib,
-  xdg,
   ...
 }: let
   cfg = config.cfg.hjome.gaming.balatro;
@@ -123,7 +122,7 @@ in {
     files =
       # MoreSpeeds mod content
       (lib.optionalAttrs (lib.elem "morespeeds" cfg.enabledMods) {
-        ${xdg.dataFile "Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua"}.text = ''
+        ".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua".text = ''
           --- STEAMODDED HEADER
           --- MOD_NAME: More Speed
           --- MOD_ID: MoreSpeed
@@ -213,13 +212,13 @@ in {
       // (lib.mapAttrs' (
           name: mod:
             lib.nameValuePair
-            (xdg.dataFile "Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}")
+            ".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
             {source = mod.src;}
         )
         enabledMods)
       # Lovely Injector version.dll
       // (lib.optionalAttrs cfg.enableLovelyInjector {
-        ${xdg.dataFile "Steam/steamapps/common/Balatro/version.dll"}.source = "${lovelyInjectorPackage}/version.dll";
+        ".local/share/Steam/steamapps/common/Balatro/version.dll".source = "${lovelyInjectorPackage}/version.dll";
       });
   };
 }

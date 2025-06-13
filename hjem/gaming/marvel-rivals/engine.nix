@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  xdg,
   ...
 }: let
   cfg = config.cfg.hjome.gaming.marvel-rivals;
@@ -25,7 +24,7 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.engine.enable {
-    files.${xdg.dataFile "Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini"}.text = lib.generators.toINI {} {
+    files.".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
       "SystemSettings" = {
         "r.LevelStreamingDistanceScale" = "1";
         "r.ViewDistanceScale" = "1";

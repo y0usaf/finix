@@ -23,6 +23,7 @@
   "$discord" = hostHjem.cfg.hjome.defaults.discord;
   "$launcher" = hostHjem.cfg.hjome.defaults.launcher;
   "$ide" = hostHjem.cfg.hjome.defaults.ide;
+  "$notepad" = "${hostHjem.cfg.hjome.defaults.terminal} -e ${hostHjem.cfg.hjome.defaults.editor}";
   "$obs" = "obs";
 
   ###########################################################################
