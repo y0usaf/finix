@@ -3,13 +3,13 @@
 # Contains AGS-specific configuration and keybindings
 ###############################################################################
 {
+  config,
   lib,
-  hostHjem,
   cfg,
   ...
 }: let
   # Safely check if AGS is enabled
-  agsEnabled = hostHjem.cfg.hjome.ui.ags.enable or false;
+  agsEnabled = config.cfg.hjome.ui.ags.enable or false;
 in
   ###########################################################################
   # AGS Integration Configuration

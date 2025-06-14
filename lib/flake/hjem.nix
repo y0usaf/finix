@@ -11,7 +11,7 @@
   shared = import ./shared.nix {inherit lib pkgs helpers hostsDir;};
 
   # Known global Hjem settings
-  globalSettings = ["clobberFiles"];
+  globalSettings = [];
 
   # Extract user settings
   getUserSettings = cfg:
@@ -20,7 +20,33 @@ in {
   # Flake outputs
   flakeOutputs = {};
 
-  # Helper function to create hjem configurations
+  # Helper function to create hjem NixOS module
+  mkHjemNixosModule = {
+    inputs,
+    hostname,
+    commonSpecialArgs,
+  }: {
+    imports = [
+      (lib.mkAliasOptionModule ["hjome"] ["hjem" "users" shared.unifiedConfigs.${hostname}.cfg.shared.username])
+    ];
+
+    hjem = {
+      clobberByDefault = true;
+      linker = inputs.smfh.packages.${pkgs.system}.default;
+      specialArgs =
+        shared.mkSpecialArgs commonSpecialArgs hostname
+        // {
+          inherit hostname;
+          inherit hostsDir;
+        };
+      users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = {
+        imports = [../../hjem (shared.mkSharedModule {inherit hostname hostsDir;})];
+        cfg.hjome = shared.hjemConfigs.${hostname}.cfg.hjome or {};
+      };
+    };
+  };
+
+  # Helper function to create standalone hjem configurations
   mkHjemConfigurations = {commonSpecialArgs, ...}:
     shared.mapToAttrs
     (hostname: {
@@ -39,10 +65,6 @@ in {
             hostsDir = ../../hosts;
           })
           {
-            # Apply global settings directly from cfg.hjem
-            clobberFiles = shared.hjemConfigs.${hostname}.cfg.hjem.clobberFiles or false;
-
-            # Apply all non-global settings to hjem.users.<username>
             imports = [
               {
                 hjem.users.${shared.unifiedConfigs.${hostname}.cfg.shared.username} = lib.mkMerge [
