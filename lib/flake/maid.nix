@@ -1,39 +1,46 @@
-# MAID INTEGRATION UTILITIES
-# Provides complete nix-maid integration for NixOS configurations
+###############################################################################
+# Maid Integration Module
+# Handles nix-maid integration and home module configuration
+###############################################################################
 {
-  inputs,
   lib,
-  ...
+  pkgs,
+  helpers,
+  hostsDir ? ../../hosts,
+  inputs,
 }: let
-  inherit (lib) mkOption types;
+  shared = import ./shared.nix {inherit lib pkgs helpers hostsDir inputs;};
 in {
-  # Create a complete NixOS module for maid integration
+  # Create NixOS module for maid integration
   mkNixosModule = {
     inputs,
     hostname,
     commonSpecialArgs,
-    ...
   }: {
     config,
+    lib,
     pkgs,
     ...
   }: let
-    # Hardcode username for now - will be configurable later
-    username = "y0usaf";
+    # Read the host configuration directly
+    hostConfig = import (hostsDir + "/${hostname}/default.nix") {inherit pkgs inputs;};
+    
+    # Extract home configuration from host config
+    homeConfig = hostConfig.cfg.home or {};
   in {
     # Import nix-maid module
-    imports = [inputs.nix-maid.nixosModules.default];
-
-    # Create md alias for cleaner access to maid configuration
-    options.md = mkOption {
-      type = types.attrs;
-      default = {};
-      description = "Alias for users.users.${username}.maid configuration";
-    };
-
+    imports = [
+      inputs.nix-maid.nixosModules.default
+    ];
+    
+    # Apply home configuration to cfg.home
     config = {
-      # Forward md configuration to actual maid config
-      users.users.${username}.maid = config.md;
+      cfg.home = homeConfig;
+      
+      # Initialize maid for the user
+      users.users.y0usaf.maid = {
+        packages = [];
+      };
     };
   };
 }

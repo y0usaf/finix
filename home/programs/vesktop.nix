@@ -9,7 +9,6 @@
   ...
 }: let
   cfg = config.cfg.home.programs.vesktop;
-  md = config.md;
 in {
   ###########################################################################
   # Module Options
@@ -25,6 +24,6 @@ in {
     ###########################################################################
     # Maid Configuration
     ###########################################################################
-    md.packages = [pkgs.vesktop];
+    users.users.y0usaf.maid.packages = [pkgs.vesktop];
   };
 }
