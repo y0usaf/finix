@@ -53,6 +53,7 @@ in {
 
     # HJOME CONFIGURATION - simple interface like Home Manager
     hjome = {
+
       # Default Applications
       defaults = {
         browser = "firefox";
@@ -120,8 +121,8 @@ in {
         ags.enable = true;
         hyprland = {
           enable = true;
-          flake.enable = false;
-          hy3.enable = true;
+          flake.enable = true;
+          hy3.enable = false;
         };
       };
 
