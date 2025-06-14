@@ -1,6 +1,6 @@
 ###############################################################################
-# Firefox Module for Hjem
-# Simple Firefox installation for Hjem
+# Firefox Module (Maid)
+# Simple Firefox installation
 ###############################################################################
 {
   config,
@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.firefox;
+  cfg = config.cfg.home.programs.firefox;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.firefox = {
+  options.cfg.home.programs.firefox = {
     enable = lib.mkEnableOption "Firefox web browser";
   };
 
@@ -22,9 +22,9 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Maid Configuration
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       firefox
     ];
   };

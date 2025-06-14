@@ -1,5 +1,5 @@
 #===============================================================================
-#                      💬 Discord Canary Configuration 💬
+#                      💬 Discord Configuration (Maid) 💬
 #===============================================================================
 # 🚀 Discord Canary
 # 🔧 Performance optimizations
@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.discord;
+  cfg = config.cfg.home.programs.discord;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.discord = {
+  options.cfg.home.programs.discord = {
     enable = lib.mkEnableOption "Discord module";
     variant = lib.mkOption {
       type = lib.types.enum ["canary" "stable"];
@@ -29,7 +29,10 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    packages = with pkgs; [
+    ###########################################################################
+    # Maid Configuration
+    ###########################################################################
+    users.users.y0usaf.maid.packages = with pkgs; [
       (
         if cfg.variant == "canary"
         then

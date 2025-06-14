@@ -23,7 +23,7 @@ This document outlines the systematic migration from Hjem to nix-maid for compre
 #### 2.2 Programs (Priority: HIGH)
 - [ ] `programs/firefox.nix` → Simple package install
 - [ ] `programs/discord.nix` → Simple package install  
-- [ ] `programs/vesktop.nix` → Simple package install
+- [x] `programs/vesktop.nix` → Simple package install
 - [ ] `programs/obsidian.nix` → Simple package install
 - [ ] `programs/zen-browser.nix` → Simple package install
 - [ ] `programs/bluetooth.nix` → Simple package install

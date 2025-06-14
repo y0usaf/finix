@@ -168,13 +168,13 @@ in {
         pcmanfm.enable = true;
         obsidian.enable = true;
         # vesktop.enable = true; # Migrated to home
+        # webapps.enable = true; # Migrated to home
+        # firefox.enable = true; # Migrated to home
+        # discord.enable = true; # Migrated to home
         # Migrated from Home Manager
         mpv.enable = true;
         bambu.enable = true;
-        webapps.enable = true;
         zellij.enable = true;
-        firefox.enable = true;
-        discord.enable = true;
         sway-launcher-desktop.enable = true;
       };
       tools = {
@@ -208,6 +208,9 @@ in {
     home = {
       programs = {
         vesktop.enable = true;
+        webapps.enable = true;
+        firefox.enable = true;
+        discord.enable = true;
       };
     };
 
