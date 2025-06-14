@@ -57,21 +57,9 @@ in {
             command = "npx";
             args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
           };
-          "Memory" = {
+          "GitHub Repo MCP" = {
             command = "npx";
-            args = ["-y" "@modelcontextprotocol/server-memory"];
-          };
-          "hjem Docs" = {
-            command = "npx";
-            args = ["mcp-remote" "https://gitmcp.io/y0usaf/hjem"];
-          };
-          "nix Docs" = {
-            command = "npx";
-            args = ["mcp-remote" "https://gitmcp.io/NixOS/nix"];
-          };
-          "home-manager Docs" = {
-            command = "npx";
-            args = ["mcp-remote" "https://gitmcp.io/nix-community/home-manager"];
+            args = ["-y" "github-repo-mcp"];
           };
         };
       };
