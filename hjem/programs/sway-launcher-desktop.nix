@@ -34,7 +34,7 @@ in {
     # Configuration Files
     ###########################################################################
     files = {
-      "${config.xdg.configDirectory}/scripts/sway-launcher-desktop.sh" = {
+      ".config/scripts/sway-launcher-desktop.sh" = {
         executable = true;
         text = ''
           #!/usr/bin/env bash

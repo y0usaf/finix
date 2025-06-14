@@ -172,12 +172,12 @@ in {
     ######################################################################
     files = {
       # GTK-3.0 configuration files
-      "${config.xdg.configDirectory}/gtk-3.0/settings.ini".text = lib.generators.toINI {} gtk3Settings;
-      "${config.xdg.configDirectory}/gtk-3.0/gtk.css".text = gtkCss;
-      "${config.xdg.configDirectory}/gtk-3.0/bookmarks".text = bookmarksContent;
+      ".config/gtk-3.0/settings.ini".text = lib.generators.toINI {} gtk3Settings;
+      ".config/gtk-3.0/gtk.css".text = gtkCss;
+      ".config/gtk-3.0/bookmarks".text = bookmarksContent;
 
       # GTK-4.0 configuration files
-      "${config.xdg.configDirectory}/gtk-4.0/settings.ini".text = lib.generators.toINI {} gtk4Settings;
+      ".config/gtk-4.0/settings.ini".text = lib.generators.toINI {} gtk4Settings;
     };
 
     ######################################################################
@@ -193,10 +193,10 @@ in {
     ######################################################################
 
     # Generate the dconf settings INI file
-    files."${config.xdg.configDirectory}/dconf-settings.ini".text = dconfIni;
+    files.".config/dconf-settings.ini".text = dconfIni;
 
     # Create loader script that uses dconf load (like Home Manager)
-    files."${config.xdg.dataDirectory}/bin/load-dconf-settings".text = ''
+    files.".local/share/bin/load-dconf-settings".text = ''
       #!/usr/bin/env bash
       # Load dconf settings from INI file (similar to Home Manager activation)
 
@@ -206,7 +206,7 @@ in {
       fi
 
       # Check if settings file exists
-      SETTINGS_FILE="${config.xdg.configDirectory}/dconf-settings.ini"
+      SETTINGS_FILE="$HOME/.config/dconf-settings.ini"
       if [[ ! -f "$SETTINGS_FILE" ]]; then
         exit 0
       fi
@@ -220,14 +220,14 @@ in {
     '';
 
     # Make the loader script executable
-    files."${config.xdg.dataDirectory}/bin/load-dconf-settings".executable = true;
+    files.".local/share/bin/load-dconf-settings".executable = true;
 
     # Auto-load dconf settings on shell startup
     files.".zshrc".text = lib.mkAfter ''
 
       # Load dconf settings if they exist
-      if [[ -x "${config.xdg.dataDirectory}/bin/load-dconf-settings" ]]; then
-        "${config.xdg.dataDirectory}/bin/load-dconf-settings" 2>/dev/null
+      if [[ -x "$HOME/.local/share/bin/load-dconf-settings" ]]; then
+        "$HOME/.local/share/bin/load-dconf-settings" 2>/dev/null
       fi
     '';
   };

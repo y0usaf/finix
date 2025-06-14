@@ -36,7 +36,7 @@ in {
     # Environment Variables
     ###########################################################################
     environment.sessionVariables = {
-      NODE_PATH = "${config.xdg.dataDirectory}/npm/lib/node_modules";
+      NODE_PATH = "$HOME/.local/share/npm/lib/node_modules";
     };
 
     ###########################################################################

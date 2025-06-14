@@ -36,21 +36,21 @@ in {
     ###########################################################################
     files = {
       # NPM global config - use XDG directories
-      "${config.xdg.configDirectory}/npm/npmrc".text = ''
-        prefix=${config.xdg.dataDirectory}/npm
+      ".config/npm/npmrc".text = ''
+        prefix=$HOME/.local/share/npm
         cache=${config.xdg.cacheDirectory}/npm
-        init-module=${config.xdg.configDirectory}/npm/config/npm-init.js
+        init-module=$HOME/.config/npm/config/npm-init.js
         store-dir=${config.xdg.cacheDirectory}/pnpm/store
       '';
 
       # NPM setup script
-      "${config.xdg.dataDirectory}/bin/npm-setup" = {
+      ".local/share/bin/npm-setup" = {
         text = ''
           #!/bin/bash
           # Set up NPM directories
-          mkdir -p ${config.xdg.dataDirectory}/npm
+          mkdir -p $HOME/.local/share/npm
           mkdir -p ${config.xdg.cacheDirectory}/npm
-          mkdir -p ${config.xdg.configDirectory}/npm/config
+          mkdir -p $HOME/.config/npm/config
           mkdir -p ${config.xdg.cacheDirectory}/pnpm/store
           mkdir -p "$XDG_RUNTIME_DIR/npm"
         '';
@@ -60,13 +60,13 @@ in {
       # Shell integration
       ".zshrc".text = lib.mkBefore ''
         # NPM environment variables
-        export NPM_CONFIG_PREFIX=${config.xdg.dataDirectory}/npm
+        export NPM_CONFIG_PREFIX=$HOME/.local/share/npm
         export NPM_CONFIG_CACHE=${config.xdg.cacheDirectory}/npm
-        export NPM_CONFIG_USERCONFIG=${config.xdg.configDirectory}/npm/npmrc
+        export NPM_CONFIG_USERCONFIG=$HOME/.config/npm/npmrc
         export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
 
         # Add npm bin directory to PATH
-        export PATH="${config.xdg.dataDirectory}/npm/bin:$PATH"
+        export PATH="$HOME/.local/share/npm/bin:$PATH"
       '';
     };
   };

@@ -77,7 +77,7 @@ in {
     # Desktop Entries
     ###########################################################################
     files = {
-      "${config.xdg.dataDirectory}/applications/bambu-studio.desktop".text = ''
+      ".local/share/applications/bambu-studio.desktop".text = ''
         [Desktop Entry]
         Name=Bambu Studio
         Exec=bambu-studio %F

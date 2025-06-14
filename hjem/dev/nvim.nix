@@ -423,6 +423,6 @@ in {
     ###########################################################################
     # Configuration Files
     ###########################################################################
-    files."${config.xdg.configDirectory}/nvim/init.lua".text = lib.generators.toLua {} nvimConfig;
+    files.".config/nvim/init.lua".text = lib.generators.toLua {} nvimConfig;
   };
 }

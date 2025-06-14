@@ -100,6 +100,6 @@ in {
     ###########################################################################
     # Configuration Files
     ###########################################################################
-    files."${config.xdg.configDirectory}/foot/foot.ini".text = lib.mkAfter (lib.generators.toINI {} footConfig);
+    files.".config/foot/foot.ini".text = lib.mkAfter (lib.generators.toINI {} footConfig);
   };
 }

@@ -97,7 +97,7 @@ in {
       '';
 
       # Repository Setup Script
-      "${config.xdg.dataDirectory}/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
+      ".local/share/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
         text = ''
           #!/bin/bash
           # Setup NixOS repository if it doesn't exist
@@ -110,7 +110,7 @@ in {
       };
 
       # Git Sync Script
-      "${config.xdg.dataDirectory}/bin/nixos-git-sync" = lib.mkIf cfg.nixos-git-sync.enable {
+      ".local/share/bin/nixos-git-sync" = lib.mkIf cfg.nixos-git-sync.enable {
         text = ''
           #!/bin/bash
           # Enable debug output for logging
@@ -159,7 +159,7 @@ in {
 
         # Git sync function
         git-sync() {
-          ${config.xdg.dataDirectory}/bin/nixos-git-sync
+          $HOME/.local/share/bin/nixos-git-sync
         }
       '';
     };

@@ -32,7 +32,7 @@ in {
     # Desktop Entries
     ###########################################################################
     files = {
-      "${config.xdg.dataDirectory}/applications/keybard.desktop".text = ''
+      ".local/share/applications/keybard.desktop".text = ''
         [Desktop Entry]
         Name=Keybard
         Exec=${lib.getExe pkgs.chromium} --app=https://captdeaf.github.io/keybard %U
@@ -42,7 +42,7 @@ in {
         Comment=Keyboard testing utility
       '';
 
-      "${config.xdg.dataDirectory}/applications/google-meet.desktop".text = ''
+      ".local/share/applications/google-meet.desktop".text = ''
         [Desktop Entry]
         Name=Google Meet
         Exec=${lib.getExe pkgs.chromium} --app=https://meet.google.com %U
