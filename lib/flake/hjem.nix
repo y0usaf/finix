@@ -7,8 +7,9 @@
   pkgs,
   helpers,
   hostsDir ? ../../hosts,
+  inputs ? null,
 }: let
-  shared = import ./shared.nix {inherit lib pkgs helpers hostsDir;};
+  shared = import ./shared.nix {inherit lib pkgs helpers hostsDir inputs;};
 
   # Known global Hjem settings
   globalSettings = [];
@@ -20,13 +21,14 @@ in {
   # Flake outputs
   flakeOutputs = {};
 
-  # Helper function to create hjem NixOS module
-  mkHjemNixosModule = {
+  # Complete NixOS module for hjem integration
+  mkNixosModule = {
     inputs,
     hostname,
     commonSpecialArgs,
   }: {
     imports = [
+      inputs.hjem.nixosModules.default
       (lib.mkAliasOptionModule ["hjome"] ["hjem" "users" shared.unifiedConfigs.${hostname}.cfg.shared.username])
     ];
 

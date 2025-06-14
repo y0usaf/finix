@@ -7,6 +7,7 @@
   pkgs,
   helpers,
   hostsDir ? ../../hosts,
+  inputs ? null,
 }: let
   # Get all valid host names (excluding special directories and files)
   hostNames = builtins.filter (
@@ -22,7 +23,7 @@
     map
     (name: {
       inherit name;
-      value = import (hostsDir + "/${name}/default.nix") {inherit lib pkgs;};
+      value = import (hostsDir + "/${name}/default.nix") {inherit lib pkgs inputs;};
     })
     hostNames
   );
@@ -110,7 +111,7 @@
     # Read the host configuration directly
     hostConfig =
       if hostname != null
-      then import (hostsDir + "/${hostname}/default.nix") {inherit pkgs;}
+      then import (hostsDir + "/${hostname}/default.nix") {inherit pkgs; inputs = null;}
       else throw "hostname must be provided to shared core module";
 
     # Extract shared configuration from host config

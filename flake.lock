@@ -958,6 +958,21 @@
         "type": "github"
       }
     },
+    "nix-maid": {
+      "locked": {
+        "lastModified": 1749569414,
+        "narHash": "sha256-0U8yfhCjpcuQq5057UukuPsUtbW9OyIL/a+J/M4MI3Y=",
+        "owner": "viperML",
+        "repo": "nix-maid",
+        "rev": "5f5c84256dfba42ac7786fd3ef17849ac0c7b788",
+        "type": "github"
+      },
+      "original": {
+        "owner": "viperML",
+        "repo": "nix-maid",
+        "type": "github"
+      }
+    },
     "nix-minecraft": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -1171,6 +1186,7 @@
         "hy3": "hy3",
         "hyprland": "hyprland",
         "hyprpaper": "hyprpaper",
+        "nix-maid": "nix-maid",
         "nix-minecraft": "nix-minecraft",
         "nixpkgs": "nixpkgs_3",
         "obs-image-reaction": "obs-image-reaction",
