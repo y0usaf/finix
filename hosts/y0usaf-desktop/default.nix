@@ -212,6 +212,10 @@ in {
         firefox.enable = true;
         discord.enable = true;
       };
+      services = {
+        polkitAgent.enable = true;
+        formatNix.enable = true;
+      };
     };
 
     # HOME-MANAGER CONFIGURATION - COMMENTED OUT FOR HJEM TESTING

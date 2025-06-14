@@ -30,7 +30,6 @@
 
     nix-maid = {
       url = "github:viperML/nix-maid";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     alejandra = {

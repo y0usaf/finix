@@ -8,6 +8,7 @@
     ./dev
     ./gaming
     ./programs
+    ./services
     ./shell
     ./tools
     ./ui

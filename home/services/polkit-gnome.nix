@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.services.polkitGnome;
+  cfg = config.cfg.home.services.polkitGnome;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.services.polkitGnome = {
+  options.cfg.home.services.polkitGnome = {
     enable = lib.mkEnableOption "polkit GNOME authentication agent";
   };
 
@@ -22,25 +22,22 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # System Packages
+    # Maid Configuration
     ###########################################################################
-    environment.systemPackages = with pkgs; [
-      polkit_gnome
-    ];
-
-    ###########################################################################
-    # Systemd User Service
-    ###########################################################################
-    systemd.user.services.polkit-gnome-authentication-agent-1 = {
-      description = "polkit-gnome-authentication-agent-1";
-      wantedBy = ["graphical-session.target"];
-      after = ["graphical-session.target"];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-        Restart = "on-failure";
-        RestartSec = 1;
-        TimeoutStopSec = 10;
+    users.users.y0usaf.maid = {
+      packages = [pkgs.polkit_gnome];
+      
+      systemd.services.polkit-gnome-authentication-agent-1 = {
+        description = "polkit-gnome-authentication-agent-1";
+        wantedBy = ["graphical-session.target"];
+        after = ["graphical-session.target"];
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+          Restart = "on-failure";
+          RestartSec = 1;
+          TimeoutStopSec = 10;
+        };
       };
     };
   };
