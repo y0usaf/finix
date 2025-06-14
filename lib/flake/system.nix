@@ -43,6 +43,9 @@ in {
             (hjemIntegration.mkNixosModule {inherit inputs hostname commonSpecialArgs;})
             (maidIntegration.mkNixosModule {inherit inputs hostname commonSpecialArgs;})
             
+            # Home modules (maid-based)
+            ../../home
+            
             # External modules
             inputs.chaotic.nixosModules.default
           ]

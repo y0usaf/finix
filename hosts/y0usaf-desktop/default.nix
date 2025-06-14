@@ -167,7 +167,7 @@ in {
         obs.enable = true;
         pcmanfm.enable = true;
         obsidian.enable = true;
-        vesktop.enable = true;
+        # vesktop.enable = true; # Migrated to home
         # Migrated from Home Manager
         mpv.enable = true;
         bambu.enable = true;
@@ -201,6 +201,13 @@ in {
 
       shell = {
         zsh.enable = true;
+      };
+    };
+
+    # HOME CONFIGURATION - Maid-based modules
+    home = {
+      programs = {
+        vesktop.enable = true;
       };
     };
 
