@@ -1,5 +1,5 @@
 ###############################################################################
-# Hyprland Window Manager Module (Hjem Version)
+# Hyprland Window Manager Module (Maid Version)
 # Modular configuration for the Hyprland Wayland compositor
 ###############################################################################
 {...}: {

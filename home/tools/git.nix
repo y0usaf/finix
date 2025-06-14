@@ -1,5 +1,5 @@
 ###############################################################################
-# Git Configuration & Automation (Hjem Version)
+# Git Configuration & Automation (Maid Version)
 # Manages Git setup, SSH integration, and repository automation
 # - User configuration (name, email, editor)
 # - SSH agent integration via systemd
@@ -12,12 +12,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.tools.git;
+  cfg = config.cfg.home.tools.git;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.tools.git = {
+  options.cfg.home.tools.git = {
     enable = lib.mkEnableOption "git configuration and automation";
 
     name = lib.mkOption {
@@ -62,20 +62,21 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Packages
-    ###########################################################################
-    packages = with pkgs; [
-      git
-      openssh
-    ];
+    users.users.y0usaf.maid = {
+      ###########################################################################
+      # Packages
+      ###########################################################################
+      packages = with pkgs; [
+        git
+        openssh
+      ];
 
-    ###########################################################################
-    # Configuration Files
-    ###########################################################################
-    files = {
-      # Git Configuration
-      ".gitconfig".text = ''
+      ###########################################################################
+      # Configuration Files
+      ###########################################################################
+      file.home = {
+        # Git Configuration
+        ".gitconfig".text = ''
         [user]
           name = ${cfg.name}
           email = ${cfg.email}
@@ -94,11 +95,11 @@ in {
 
         [url "git@github.com:"]
           pushInsteadOf = https://github.com/
-      '';
+        '';
 
-      # Repository Setup Script
-      ".local/share/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
-        text = ''
+        # Repository Setup Script
+        ".local/share/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
+          text = ''
           #!/bin/bash
           # Setup NixOS repository if it doesn't exist
           if [ ! -d "${cfg.nixos-git-sync.repoPath}" ]; then
@@ -106,12 +107,12 @@ in {
             git clone ${cfg.nixos-git-sync.nixosRepoUrl} ${cfg.nixos-git-sync.repoPath}
           fi
         '';
-        executable = true;
-      };
+          executable = true;
+        };
 
-      # Git Sync Script
-      ".local/share/bin/nixos-git-sync" = lib.mkIf cfg.nixos-git-sync.enable {
-        text = ''
+        # Git Sync Script
+        ".local/share/bin/nixos-git-sync" = lib.mkIf cfg.nixos-git-sync.enable {
+          text = ''
           #!/bin/bash
           # Enable debug output for logging
           set -x
@@ -151,17 +152,18 @@ in {
             echo "No changes to commit"
           fi
         '';
-        executable = true;
-      };
+          executable = true;
+        };
 
-      # Shell Integration
-      ".zshrc".text = lib.mkIf cfg.nixos-git-sync.enable ''
+        # Shell Integration
+        ".zshrc".text = lib.mkIf cfg.nixos-git-sync.enable ''
 
         # Git sync function
         git-sync() {
           $HOME/.local/share/bin/nixos-git-sync
         }
-      '';
+        '';
+      };
     };
   };
 }

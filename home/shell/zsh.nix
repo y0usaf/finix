@@ -12,14 +12,14 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.shell.zsh;
+  cfg = config.cfg.home.shell.zsh;
   # Get shared user preferences
   sharedZsh = config.cfg.shared.zsh;
 in {
   #===========================================================================
   # Module Options
   #===========================================================================
-  options.cfg.hjome.shell.zsh = {
+  options.cfg.home.shell.zsh = {
     enable = lib.mkEnableOption "zsh shell configuration";
     enableFancyPrompt = lib.mkOption {
       type = lib.types.bool;
@@ -35,7 +35,7 @@ in {
     #=========================================================================
     # Packages
     #=========================================================================
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       zsh
       bat
       lsd
@@ -45,7 +45,7 @@ in {
     #=========================================================================
     # Zsh Configuration Files
     #=========================================================================
-    files = {
+    users.users.y0usaf.maid.file.home = {
       ".zshenv".text = let
         # Get the token directory path from shared config
         inherit (config.cfg.shared) tokenDir;
@@ -94,7 +94,7 @@ in {
           # History configuration
           HISTSIZE=${toString sharedZsh.history-memory}
           SAVEHIST=${toString sharedZsh.history-storage}
-          HISTFILE="${config.xdg.stateDirectory}/zsh/history"
+          HISTFILE="{{xdg_state_home}}/zsh/history"
           setopt HIST_IGNORE_DUPS
           setopt HIST_IGNORE_ALL_DUPS
           setopt HIST_IGNORE_SPACE

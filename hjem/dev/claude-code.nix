@@ -1,14 +1,11 @@
 ###############################################################################
-# Claude Code IDE Configuration (Hjem Version)
-# Installs and configures Claude Code AI assistant for development
-# - Installs Claude Code via npm
-# - Installs Brave Search integration
-# - Configures PATH for global npm binaries
+# Claude Code Development Environment (Hjem Version)
+# Provides Claude Code integration and development tools
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.cfg.hjome.dev.claude-code;
@@ -17,7 +14,7 @@ in {
   # Module Options
   ###########################################################################
   options.cfg.hjome.dev.claude-code = {
-    enable = lib.mkEnableOption "Claude Code AI assistant";
+    enable = lib.mkEnableOption "claude code development environment";
   };
 
   ###########################################################################
@@ -27,8 +24,8 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packageCollector.packages = with pkgs; [
-      claude-code
+    packages = with pkgs; [
+      # Claude Code dependencies would go here
     ];
   };
 }

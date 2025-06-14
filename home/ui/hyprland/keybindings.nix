@@ -1,10 +1,10 @@
 ###############################################################################
-# Hyprland Keybindings Module (Hjem Version)
+# Hyprland Keybindings Module (Maid Version)
 # Contains all keybindings for Hyprland (excluding AGS-specific bindings)
 ###############################################################################
 {
   lib,
-  hostHjem,
+  defaults,
   cfg,
   ...
 }:
@@ -17,13 +17,13 @@
   ###########################################################################
   "$mod" = "SUPER";
   "$mod2" = "ALT";
-  "$term" = hostHjem.cfg.hjome.defaults.terminal;
-  "$filemanager" = hostHjem.cfg.hjome.defaults.fileManager;
-  "$browser" = hostHjem.cfg.hjome.defaults.browser;
-  "$discord" = hostHjem.cfg.hjome.defaults.discord;
-  "$launcher" = hostHjem.cfg.hjome.defaults.launcher;
-  "$ide" = hostHjem.cfg.hjome.defaults.ide;
-  "$notepad" = "${hostHjem.cfg.hjome.defaults.terminal} -e ${hostHjem.cfg.hjome.defaults.editor}";
+  "$term" = defaults.terminal;
+  "$filemanager" = defaults.fileManager;
+  "$browser" = defaults.browser;
+  "$discord" = defaults.discord;
+  "$launcher" = defaults.launcher;
+  "$ide" = defaults.ide;
+  "$notepad" = "${defaults.terminal} -e ${defaults.editor}";
   "$obs" = "obs";
 
   ###########################################################################
@@ -110,7 +110,7 @@
 
     # -- Special Commands --
     [
-      "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"${hostHjem.cfg.hjome.directories.wallpapers.static.path}\""
+      "$mod SHIFT, C, exec, hyprctl hyprpaper wallpaper DP-4,\"/home/y0usaf/DCIM/Wallpapers/32_9\""
     ]
   ];
 

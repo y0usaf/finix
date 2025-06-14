@@ -7,12 +7,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.defaults;
+  cfg = config.cfg.home.core.defaults;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.defaults = {
+  options.cfg.home.core.defaults = {
     browser = lib.mkOption {
       type = lib.types.str;
       default = "firefox";

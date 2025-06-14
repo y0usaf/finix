@@ -3,5 +3,8 @@
 # Imports all ui-related Home modules
 ###############################################################################
 {helpers, ...}: {
-  imports = helpers.importModules ./.;
+  imports = [
+    ./foot.nix
+    ./hyprland
+  ];
 }

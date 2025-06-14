@@ -13,7 +13,7 @@
   hostHjem,
   ...
 }: let
-  cfg = config.cfg.hjome.ui.foot;
+  cfg = config.cfg.home.ui.foot;
 
   # Calculate the scaled font size based on the hostHjem's base font size.
   computedFontSize = toString (hostHjem.cfg.hjome.core.appearance.baseFontSize * 1.33);
@@ -82,7 +82,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.ui.foot = {
+  options.cfg.home.ui.foot = {
     enable = lib.mkEnableOption "foot terminal emulator";
   };
 
@@ -93,13 +93,13 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       foot
     ];
 
     ###########################################################################
     # Configuration Files
     ###########################################################################
-    files.".config/foot/foot.ini".text = lib.mkAfter (lib.generators.toINI {} footConfig);
+    users.users.y0usaf.maid.file.xdg_config."foot/foot.ini".text = lib.mkAfter (lib.generators.toINI {} footConfig);
   };
 }

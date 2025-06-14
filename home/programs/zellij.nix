@@ -11,12 +11,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.zellij;
+  cfg = config.cfg.home.programs.zellij;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.zellij = {
+  options.cfg.home.programs.zellij = {
     enable = lib.mkEnableOption "zellij terminal multiplexer";
   };
 
@@ -27,16 +27,16 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       zellij
     ];
 
     ###########################################################################
     # Configuration Files
     ###########################################################################
-    files = {
+    users.users.y0usaf.maid.file.xdg_config = {
       # Main Zellij configuration
-      ".config/zellij/config.kdl".text = ''
+      "zellij/config.kdl".text = ''
         hide_session_name false
         on_force_close "quit"
         pane_frames true
@@ -181,7 +181,7 @@ in {
       '';
 
       # Music layout
-      ".config/zellij/layouts/music.kdl".text = ''
+      "zellij/layouts/music.kdl".text = ''
         layout alias="music" {
             default_tab_template {
                 pane size=1 borderless=true {
@@ -202,30 +202,8 @@ in {
         }
       '';
 
-      # Combine all zsh configuration into one definition
-      ".zshrc".text = lib.mkMerge [
-        # Auto-start integration (early)
-        (lib.mkBefore ''
-          eval "$(zellij setup --generate-auto-start zsh)"
-        '')
-        # Aliases (after)
-        (lib.mkAfter ''
-          # Zellij aliases
-          alias music="zellij --layout music"
-          # Kill all zellij sessions except the active one
-          alias zk="for session in \$(zellij list-sessions | grep -v '(current)' | awk '{print \$1}'); do zellij kill-session \$session; done"
-          # Kill ALL zellij sessions (for shutdown)
-          alias zka="zellij kill-all-sessions"
-          # Clean shutdown of zellij
-          alias zq="zellij kill-all-sessions && pkill -f zellij"
-        '')
-      ];
-
-      # Add logout cleanup to zsh logout script
-      ".zlogout".text = ''
-        # Clean up Zellij sessions on logout
-        zellij kill-all-sessions 2>/dev/null || true
-      '';
+      # Note: Shell configuration (zshrc, zlogout) should be handled by shell modules
+      # Keeping only zellij-specific config files here
     };
   };
 }

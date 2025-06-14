@@ -1,5 +1,5 @@
 ###############################################################################
-# Hyprland Configuration Implementation
+# Hyprland Configuration Implementation (Maid Version)
 # Main configuration logic for packages, files, and Hyprland setup
 ###############################################################################
 {
@@ -12,14 +12,15 @@
   hostHjem,
   ...
 }: let
-  cfg = config.cfg.hjome.ui.hyprland;
+  cfg = config.cfg.home.ui.hyprland;
+  defaults = config.cfg.home.core.defaults;
   generators = import ../../../lib/generators/toHyprconf.nix lib;
 
 
 
   # Import all module configurations directly
   coreConfig = import ./core.nix {inherit config lib hostSystem cfg;};
-  keybindingsConfig = import ./keybindings.nix {inherit lib hostHjem cfg;};
+  keybindingsConfig = import ./keybindings.nix {inherit lib defaults cfg;};
   windowRulesConfig = import ./window-rules.nix {inherit config lib cfg;};
   monitorsConfig = import ./monitors.nix {inherit config lib cfg;};
   agsConfig = import ./ags-integration.nix {inherit config lib cfg;};
@@ -28,24 +29,25 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Packages
-    ###########################################################################
-    packages = [
-      pkgs.hyprwayland-scanner # Tool associated with Hyprland
-      (
-        if cfg.flake.enable
-        then inputs.hyprland.packages.${pkgs.system}.hyprland
-        else pkgs.hyprland
-      )
-    ];
+    users.users.y0usaf.maid = {
+      ###########################################################################
+      # Packages
+      ###########################################################################
+      packages = [
+        pkgs.hyprwayland-scanner # Tool associated with Hyprland
+        (
+          if cfg.flake.enable
+          then inputs.hyprland.packages.${pkgs.system}.hyprland
+          else pkgs.hyprland
+        )
+      ];
 
-    ###########################################################################
-    # Hyprland Configuration Files
-    ###########################################################################
-    files = {
-      # Main Hyprland configuration
-      ".config/hypr/hyprland.conf" = {
+      ###########################################################################
+      # Hyprland Configuration Files
+      ###########################################################################
+      file.xdg_config = {
+        # Main Hyprland configuration
+        "hypr/hyprland.conf" = {
         text = let
           # Merge all configuration from modules with proper list concatenation
           hyprlandConfig = let
@@ -66,15 +68,15 @@ in {
               "$mod, P, pseudo"
               
               # Primary Applications
-              "$mod, D, exec, $term"
-              "$mod, E, exec, $filemanager"
-              "$mod, R, exec, $launcher"
-              "$mod, O, exec, $notepad"
-              "$mod2, 1, exec, $ide"
-              "$mod2, 2, exec, $browser"
-              "$mod2, 3, exec, $discord"
+              "$mod, D, exec, ${defaults.terminal}"
+              "$mod, E, exec, ${defaults.fileManager}"
+              "$mod, R, exec, ${defaults.launcher}"
+              "$mod, O, exec, ${defaults.terminal} -e ${defaults.editor}"
+              "$mod2, 1, exec, ${defaults.ide}"
+              "$mod2, 2, exec, ${defaults.browser}"
+              "$mod2, 3, exec, ${defaults.discord}"
               "$mod2, 4, exec, steam"
-              "$mod2, 5, exec, $obs"
+              "$mod2, 5, exec, obs"
               
               # Window Movement (WASD keys)
               "$mod2, w, movefocus, u"
@@ -148,17 +150,17 @@ in {
           };
         in
           mainConfig + lib.optionalString (pluginsConfig != "") "\n${pluginsConfig}";
-      };
+        };
 
-      # Hyprpaper configuration (if needed)
-
-      ".config/hypr/hyprpaper.conf" = {
-        text = ''
-          preload = ${hostHjem.cfg.hjome.directories.wallpapers.static.path}
-          wallpaper = ,${hostHjem.cfg.hjome.directories.wallpapers.static.path}
-          splash = false
-          ipc = on
-        '';
+        # Hyprpaper configuration (if needed)
+        "hypr/hyprpaper.conf" = {
+          text = ''
+            preload = ${hostHjem.cfg.hjome.directories.wallpapers.static.path}
+            wallpaper = ,${hostHjem.cfg.hjome.directories.wallpapers.static.path}
+            splash = false
+            ipc = on
+          '';
+        };
       };
     };
   };

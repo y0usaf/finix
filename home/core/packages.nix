@@ -1,5 +1,5 @@
 ###############################################################################
-# Core Packages Module for Hjem
+# Core Packages Module (Maid Version)
 # Provides essential packages and default application configurations
 ###############################################################################
 {
@@ -8,7 +8,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.core.packages;
+  cfg = config.cfg.home.core.packages;
 
   # Base packages all users should have
   basePackages = with pkgs; [
@@ -35,7 +35,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.core.packages = {
+  options.cfg.home.core.packages = {
     enable = lib.mkEnableOption "core packages and base system tools";
     extraPackages = lib.mkOption {
       type = lib.types.listOf lib.types.package;
@@ -44,26 +44,13 @@ in {
     };
   };
 
-  # Define the option for collecting packages from modules
-  options.packageCollector = {
-    packages = lib.mkOption {
-      type = lib.types.listOf lib.types.package;
-      default = [];
-      description = "Packages to collect from all modules";
-    };
-  };
-
   ###########################################################################
   # Module Configuration
   ###########################################################################
-  config = lib.mkMerge [
-    # Always add the collected packages to the top-level packages attribute
-    {
-      inherit (config.packageCollector) packages;
-    }
-    # Add base packages when enabled
-    (lib.mkIf cfg.enable {
-      packageCollector.packages = basePackages ++ cfg.extraPackages;
-    })
-  ];
+  config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Maid Configuration
+    ###########################################################################
+    users.users.y0usaf.maid.packages = basePackages ++ cfg.extraPackages;
+  };
 }

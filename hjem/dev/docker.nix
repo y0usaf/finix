@@ -24,7 +24,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packageCollector.packages = with pkgs; [
+    packages = with pkgs; [
       docker
       docker-compose
       docker-buildx
