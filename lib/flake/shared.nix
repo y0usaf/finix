@@ -179,6 +179,11 @@
               default = 1000;
               description = "Number of history entries to save to disk";
             };
+            enableFancyPrompt = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Enable the custom PS1 prompt";
+            };
             zellij = lib.mkOption {
               type = lib.types.submodule {
                 options = {

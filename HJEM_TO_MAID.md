@@ -17,13 +17,9 @@ This document outlines the systematic migration from Hjem to nix-maid for compre
 **Objective**: Migrate straightforward package installation modules
 
 #### 2.1 Core Packages (Priority: HIGH)
-- [ ] `core/packages.nix` → Base system packages
 - [ ] `core/user.nix` → User-specific packages
 
 #### 2.2 Programs (Priority: HIGH)
-- [ ] `programs/firefox.nix` → Simple package install
-- [ ] `programs/discord.nix` → Simple package install  
-- [x] `programs/vesktop.nix` → Simple package install
 - [ ] `programs/obsidian.nix` → Simple package install
 - [ ] `programs/zen-browser.nix` → Simple package install
 - [ ] `programs/bluetooth.nix` → Simple package install
@@ -31,7 +27,11 @@ This document outlines the systematic migration from Hjem to nix-maid for compre
 - [ ] `programs/media.nix` → Simple package install
 - [ ] `programs/obs.nix` → Simple package install
 - [ ] `programs/bambu.nix` → Simple package install
-- [ ] `programs/webapps.nix` → Simple package install
+- [ ] `programs/imv.nix` → Simple package install
+- [ ] `programs/mpv.nix` → Simple package install
+- [ ] `programs/pcmanfm.nix` → Simple package install
+- [ ] `programs/qbittorrent.nix` → Simple package install
+- [ ] `programs/sway-launcher-desktop.nix` → Simple package install
 
 #### 2.3 Tools (Priority: HIGH)
 - [ ] `tools/7z.nix` → Simple package install
@@ -60,7 +60,7 @@ This document outlines the systematic migration from Hjem to nix-maid for compre
 - [ ] `dev/shell-integration.nix` → Shell integration
 
 #### 3.2 Tools with Configuration (Priority: HIGH)
-- [ ] `tools/git.nix` → Git config + sync scripts (complex)
+- [ ] `tools/advanced-config.nix` → Complex tool configurations
 
 #### 3.3 Programs with Configuration (Priority: MEDIUM)
 - [ ] `programs/mpv.nix` → Media player config
@@ -68,10 +68,9 @@ This document outlines the systematic migration from Hjem to nix-maid for compre
 - [ ] `programs/pcmanfm.nix` → File manager config
 - [ ] `programs/qbittorrent.nix` → Torrent client config
 - [ ] `programs/sway-launcher-desktop.nix` → Launcher config
-- [ ] `programs/zellij.nix` → Terminal multiplexer config
 
 #### 3.4 Shell Configuration (Priority: HIGH)
-- [ ] `shell/zsh.nix` → ZSH configuration
+- [ ] `shell/advanced-config.nix` → Advanced shell configurations
 
 ### Phase 4: Complex UI Modules (Complex - 5% of modules)
 **Objective**: Migrate sophisticated UI configurations with computed values
@@ -82,21 +81,18 @@ This document outlines the systematic migration from Hjem to nix-maid for compre
 - [ ] `core/defaults.nix` → Default applications
 
 #### 4.2 UI Components (Priority: HIGH)
-- [ ] `ui/foot.nix` → Terminal with computed font config
 - [ ] `ui/gtk.nix` → GTK theming with DConf integration
 - [ ] `ui/wallust.nix` → Wallpaper management
 - [ ] `ui/wayland.nix` → Wayland utilities
 - [ ] `ui/ags.nix` → AGS configuration
 
 #### 4.3 Hyprland (Priority: CRITICAL - Most Complex)
-- [ ] `ui/hyprland/core.nix` → Base Hyprland config
 - [ ] `ui/hyprland/options.nix` → Hyprland options
 - [ ] `ui/hyprland/monitors.nix` → Monitor configuration
 - [ ] `ui/hyprland/keybindings.nix` → Keybinding management
 - [ ] `ui/hyprland/window-rules.nix` → Window rules
 - [ ] `ui/hyprland/ags-integration.nix` → AGS integration
 - [ ] `ui/hyprland/config.nix` → Main config generator
-- [ ] `ui/hyprland.nix` → Module wrapper
 
 ### Phase 5: Gaming Configurations (Priority: LOW)
 **Objective**: Migrate game-specific configurations

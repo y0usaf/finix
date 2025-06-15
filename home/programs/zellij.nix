@@ -12,6 +12,8 @@
   ...
 }: let
   cfg = config.cfg.home.programs.zellij;
+  # Get shared user preferences for zellij auto-start
+  sharedZsh = config.cfg.shared.zsh;
 in {
   ###########################################################################
   # Module Options
@@ -205,5 +207,19 @@ in {
       # Note: Shell configuration (zshrc, zlogout) should be handled by shell modules
       # Keeping only zellij-specific config files here
     };
+
+    ###########################################################################
+    # Shell Integration - Auto-start Zellij
+    ###########################################################################
+    users.users.y0usaf.maid.file.home.".zshrc".text = lib.mkBefore (lib.optionalString sharedZsh.zellij.enable ''
+      # ----------------------------
+      # Zellij Auto-start
+      # ----------------------------
+      # Automatically start Zellij if not already in a session
+      if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" ]]; then
+          exec zellij
+      fi
+
+    '');
   };
 }

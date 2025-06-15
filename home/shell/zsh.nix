@@ -21,11 +21,6 @@ in {
   #===========================================================================
   options.cfg.home.shell.zsh = {
     enable = lib.mkEnableOption "zsh shell configuration";
-    enableFancyPrompt = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Enable the custom PS1 prompt";
-    };
   };
 
   #===========================================================================
@@ -119,7 +114,7 @@ in {
             print_cats
           ''}
 
-          ${lib.optionalString cfg.enableFancyPrompt ''
+          ${lib.optionalString sharedZsh.enableFancyPrompt ''
             # ----------------------------
             # Prompt Setup
             # ----------------------------
