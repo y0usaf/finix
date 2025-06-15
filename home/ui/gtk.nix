@@ -1,46 +1,32 @@
 ###############################################################################
-# GTK Module for Hjem
-# Configures GTK theming and appearance settings using Hjem file management
+# GTK Module for Maid
+# Configures GTK theming and appearance settings using nix-maid file management
 # - Generates GTK3/GTK4 settings.ini files using toINI
 # - Creates custom CSS for enhanced theming
 # - Manages GTK bookmarks from shared configuration
 # - Supports DPI and scaling configuration
+# - Uses nix-maid's native dconf and gsettings support
 ###############################################################################
 {
   config,
   lib,
   pkgs,
-  hostHome,
   ...
 }: let
-  cfg = config.cfg.hjome.ui.gtk;
+  cfg = config.cfg.home.ui.gtk;
 
   #############################################################
-  # Extract common variables from the hostHome for reusability
+  # Extract common variables from the appearance config
   #############################################################
-  mainFontName = (builtins.elemAt hostHome.cfg.appearance.fonts.main 0).name;
-  inherit (hostHome.cfg.appearance) baseFontSize;
-  dpiStr = toString hostHome.cfg.appearance.dpi;
+  mainFontName = (builtins.elemAt config.cfg.home.core.appearance.fonts.main 0).name;
+  inherit (config.cfg.home.core.appearance) baseFontSize;
+  dpiStr = toString config.cfg.home.core.appearance.dpi;
 
-  # Get user bookmarks from host configuration
-  inherit (hostHome.cfg.user) bookmarks;
+  # Get user bookmarks from user config
+  inherit (config.cfg.home.core.user) bookmarks;
 
   # Get the scaling factor from config (defaults to 1.0)
   scaleFactor = cfg.scale;
-
-  #############################################################
-  # DConf settings configuration
-  #############################################################
-  dconfSettings = {
-    "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
-      text-scaling-factor = scaleFactor;
-      scaling-factor = scaleFactor;
-    };
-  };
-
-  # Generate INI content for dconf (similar to Home Manager approach)
-  dconfIni = lib.generators.toINI {} dconfSettings;
 
   #############################################################
   # Text shadow configuration
@@ -144,8 +130,8 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.ui.gtk = {
-    enable = lib.mkEnableOption "GTK theming and configuration using Hjem";
+  options.cfg.home.ui.gtk = {
+    enable = lib.mkEnableOption "GTK theming and configuration using nix-maid";
 
     scale = lib.mkOption {
       type = lib.types.float;
@@ -162,73 +148,47 @@ in {
     ######################################################################
     # Package Installation
     ######################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       gtk3
       gtk4
     ];
 
     ######################################################################
-    # Hjem File Management
+    # nix-maid File Management
     ######################################################################
-    files = {
+    users.users.y0usaf.maid.file.xdg_config = {
       # GTK-3.0 configuration files
-      ".config/gtk-3.0/settings.ini".text = lib.generators.toINI {} gtk3Settings;
-      ".config/gtk-3.0/gtk.css".text = gtkCss;
-      ".config/gtk-3.0/bookmarks".text = bookmarksContent;
+      "gtk-3.0/settings.ini".text = lib.generators.toINI {} gtk3Settings;
+      "gtk-3.0/gtk.css".text = gtkCss;
+      "gtk-3.0/bookmarks".text = bookmarksContent;
 
       # GTK-4.0 configuration files
-      ".config/gtk-4.0/settings.ini".text = lib.generators.toINI {} gtk4Settings;
+      "gtk-4.0/settings.ini".text = lib.generators.toINI {} gtk4Settings;
     };
 
     ######################################################################
     # Environment Variables (via .zshenv for scaling)
     ######################################################################
-    files.".zshenv".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home.".zshenv".text = lib.mkAfter ''
       # GTK cursor size scales proportionally with the scaling factor
       export XCURSOR_SIZE="${toString (24 * scaleFactor)}"
     '';
 
     ######################################################################
-    # DConf Settings (proper INI generation + dconf load like Home Manager)
+    # Native nix-maid DConf and GSettings Support
     ######################################################################
+    users.users.y0usaf.maid.gsettings.settings = {
+      org.gnome.desktop.interface = {
+        color-scheme = "prefer-dark";
+        text-scaling-factor = scaleFactor;
+        scaling-factor = scaleFactor;
+      };
+    };
 
-    # Generate the dconf settings INI file
-    files.".config/dconf-settings.ini".text = dconfIni;
-
-    # Create loader script that uses dconf load (like Home Manager)
-    files.".local/share/bin/load-dconf-settings".text = ''
-      #!/usr/bin/env bash
-      # Load dconf settings from INI file (similar to Home Manager activation)
-
-      # Check if dconf is available
-      if ! command -v dconf &> /dev/null; then
-        exit 0
-      fi
-
-      # Check if settings file exists
-      SETTINGS_FILE="$HOME/.config/dconf-settings.ini"
-      if [[ ! -f "$SETTINGS_FILE" ]]; then
-        exit 0
-      fi
-
-      # Load settings using dconf load (same as Home Manager)
-      if [[ -v DBUS_SESSION_BUS_ADDRESS ]]; then
-        dconf load / < "$SETTINGS_FILE"
-      else
-        ${pkgs.dbus}/bin/dbus-run-session --dbus-daemon=${pkgs.dbus}/bin/dbus-daemon -- dconf load / < "$SETTINGS_FILE"
-      fi
-    '';
-
-    # Make the loader script executable
-    files.".local/share/bin/load-dconf-settings".executable = true;
-
-    # Auto-load dconf settings on shell startup
-    files.".zshrc".text = lib.mkAfter ''
-
-      # Load dconf settings if they exist
-      if [[ -x "$HOME/.local/share/bin/load-dconf-settings" ]]; then
-        "$HOME/.local/share/bin/load-dconf-settings" 2>/dev/null
-      fi
-    '';
+    users.users.y0usaf.maid.dconf.settings = {
+      "/org/gnome/desktop/interface/color-scheme" = "prefer-dark";
+      "/org/gnome/desktop/interface/text-scaling-factor" = scaleFactor;
+      "/org/gnome/desktop/interface/scaling-factor" = scaleFactor;
+    };
   };
 }

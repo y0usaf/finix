@@ -1,5 +1,5 @@
 ###############################################################################
-# Wallust Color Generation (Hjem Version)
+# Wallust Color Generation (Maid Version)
 # Wallpaper-based color scheme generation for system-wide theming
 # - Wallpaper-based color scheme generation
 # - System-wide theme integration
@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.ui.wallust;
+  cfg = config.cfg.home.ui.wallust;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.ui.wallust = {
+  options.cfg.home.ui.wallust = {
     enable = lib.mkEnableOption "wallust color generation";
   };
 
@@ -27,7 +27,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       wallust
     ];
   };

@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.ui.wayland;
+  cfg = config.cfg.home.ui.wayland;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.ui.wayland = {
+  options.cfg.home.ui.wayland = {
     enable = lib.mkEnableOption "Wayland configuration";
   };
 
@@ -27,7 +27,7 @@ in {
     ###########################################################################
     # Environment Variables (via .zshenv for Wayland)
     ###########################################################################
-    files.".zshenv".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home.".zshenv".text = lib.mkAfter ''
       # Wayland environment variables
       export WLR_NO_HARDWARE_CURSORS=1
       export NIXOS_OZONE_WL=1
@@ -42,7 +42,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       grim # Screenshot utility for Wayland
       slurp # Screen region selector tool
       wl-clipboard # Clipboard utility for Wayland

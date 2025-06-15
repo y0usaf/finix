@@ -1,18 +1,20 @@
 ###############################################################################
-# AGS v2 Module (Astal Framework) - Hjem Version
+# AGS v2 Module (Astal Framework) - Maid Version
 # Installs AGS v2 as a regular package and creates configuration files
-# Uses hjome alias for simple configuration like Home Manager
+# Uses nix-maid for simple configuration like Home Manager
 ###############################################################################
 {
   config,
   lib,
   pkgs,
   ...
-}: {
+}: let
+  cfg = config.cfg.home.ui.ags;
+in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.ui.ags = {
+  options.cfg.home.ui.ags = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -23,19 +25,19 @@
   ###########################################################################
   # Module Configuration
   ###########################################################################
-  config = lib.mkIf config.cfg.hjome.ui.ags.enable {
+  config = lib.mkIf cfg.enable {
     ###########################################################################
     # Install AGS package
     ###########################################################################
-    packages = [
+    users.users.y0usaf.maid.packages = [
       pkgs.ags
     ];
 
     ###########################################################################
     # Add AGS configuration files
     ###########################################################################
-    files = {
-      ".config/ags/app.tsx".text = ''
+    users.users.y0usaf.maid.file.xdg_config = {
+      "ags/app.tsx".text = ''
         import { App, Astal, Gtk } from "astal/gtk3"
         import { Variable, exec, subprocess } from "astal"
 
@@ -578,7 +580,7 @@
         })
       '';
 
-      ".config/ags/tsconfig.json".text = ''
+      "ags/tsconfig.json".text = ''
         {
           "compilerOptions": {
             "target": "ES2022",

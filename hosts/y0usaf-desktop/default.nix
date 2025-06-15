@@ -49,12 +49,14 @@ in {
 
     # HJOME CONFIGURATION - simple interface like Home Manager
     hjome = {
-      ui = {
-        wayland.enable = true;
-        # foot.enable = true; # Migrated to home
-        ags.enable = true;
-        # hyprland migrated to home
-      };
+      # UI modules - All migrated to home
+      # ui = {
+      #   ags.enable = true;
+      #   gtk.enable = true;
+      #   wallust.enable = true;
+      #   wayland.enable = true;
+      #   hyprland.enable = true;
+      # };
 
       # Gaming modules - Migrated to home
       # gaming = {
@@ -161,12 +163,16 @@ in {
         };
       };
       ui = {
+        ags.enable = true;
         foot.enable = true;
+        gtk.enable = true;
         hyprland = {
           enable = true;
           flake.enable = true;
           hy3.enable = false;
         };
+        wallust.enable = true;
+        wayland.enable = true;
       };
       programs = {
         vesktop.enable = true;
