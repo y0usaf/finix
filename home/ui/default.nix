@@ -3,5 +3,15 @@
 # Imports all ui-related Home modules
 ###############################################################################
 {helpers, ...}: {
-  imports = helpers.importModules ./. ++ helpers.importDirs ./.;
+  imports = [
+    ./ags.nix
+    ./cursor.nix
+    ./fonts.nix
+    ./foot.nix
+    ./gtk.nix
+    ./hyprland
+    ./mako.nix
+    ./wallust.nix
+    ./wayland.nix
+  ];
 }

@@ -164,6 +164,8 @@ in {
       };
       ui = {
         ags.enable = true;
+        cursor.enable = true;
+        fonts.enable = true;
         foot.enable = true;
         gtk.enable = true;
         hyprland = {
