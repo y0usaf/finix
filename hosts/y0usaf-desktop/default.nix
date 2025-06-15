@@ -140,11 +140,11 @@ in {
 
       programs = {
         # creative.enable = true; # Migrated to home
-        imv.enable = true;
+        # imv.enable = true; # Migrated to home
         # media.enable = true; # Migrated to home
-        qbittorrent.enable = true;
+        # qbittorrent.enable = true; # Migrated to home
         # obs.enable = true; # Migrated to home
-        pcmanfm.enable = true;
+        # pcmanfm.enable = true; # Migrated to home
         # obsidian.enable = true; # Migrated to home
         # zen-browser.enable = true; # Migrated to home
         # bluetooth.enable = true; # Migrated to home
@@ -153,23 +153,14 @@ in {
         # firefox.enable = true; # Migrated to home
         # discord.enable = true; # Migrated to home
         # Migrated from Home Manager
-        mpv.enable = true;
-        bambu.enable = true;
+        # mpv.enable = true; # Migrated to home
+        # bambu.enable = true; # Migrated to home
         # zellij.enable = true; # Migrated to home
         sway-launcher-desktop.enable = true;
       };
-      tools = {
-        # spotdl.enable = true; # Migrated to home
-        yt-dlp.enable = true;
-        # nh = { # Migrated to home
-        #   enable = true;
-        #   flake = "${homeDir}/nixos";
-        # };
-        # git.enable = true; # Migrated to home
-        # Archive management tools
-        # "7z".enable = true; # Migrated to home
-        # file-roller.enable = true; # Migrated to home
-      };
+      # tools = {
+      #   # All tools migrated to home
+      # };
 
       # shell = {
       #   # zsh.enable = true; # Migrated to home
@@ -213,6 +204,11 @@ in {
         # zen-browser.enable = true; # Removed due to hash issues
         bluetooth.enable = true;
         obs.enable = true;
+        bambu.enable = true;
+        imv.enable = true;
+        mpv.enable = true;
+        pcmanfm.enable = true;
+        qbittorrent.enable = true;
       };
       shell = {
         zsh.enable = true;
@@ -235,6 +231,7 @@ in {
         "7z".enable = true;
         file-roller.enable = true;
         spotdl.enable = true;
+        yt-dlp.enable = true;
       };
       services = {
         polkitAgent.enable = true;

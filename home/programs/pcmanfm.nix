@@ -1,23 +1,20 @@
 ###############################################################################
-# qBittorrent Module
-# Provides the qBittorrent torrent client
-# - Lightweight BitTorrent client
-# - Web UI for remote management
-# - Advanced torrent management features
+# PCManFM Module
+# Provides the pcmanfm file manager
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.qbittorrent;
+  cfg = config.cfg.home.programs.pcmanfm;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.qbittorrent = {
-    enable = lib.mkEnableOption "qBittorrent torrent client";
+  options.cfg.home.programs.pcmanfm = {
+    enable = lib.mkEnableOption "pcmanfm file manager";
   };
 
   ###########################################################################
@@ -27,8 +24,8 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
-      qbittorrent
+    users.users.y0usaf.maid.packages = with pkgs; [
+      pcmanfm
     ];
   };
 }

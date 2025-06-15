@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.mpv;
+  cfg = config.cfg.home.programs.mpv;
 in {
-  options.cfg.hjome.programs.mpv = {
+  options.cfg.home.programs.mpv = {
     enable = lib.mkEnableOption "mpv media player";
   };
   config = lib.mkIf cfg.enable {
-    packages = with pkgs; [mpv];
+    users.users.y0usaf.maid.packages = with pkgs; [mpv];
   };
 }

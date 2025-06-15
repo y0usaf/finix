@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.tools.yt-dlp;
+  cfg = config.cfg.home.tools.yt-dlp;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.tools.yt-dlp = {
+  options.cfg.home.tools.yt-dlp = {
     enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
 
@@ -24,7 +24,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       yt-dlp-light # Lightweight tool for downloading videos
       ffmpeg # Required for media conversion
     ];
@@ -32,7 +32,7 @@ in {
     ###########################################################################
     # Shell Aliases (added to .zshrc)
     ###########################################################################
-    files.".zshrc".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home.".zshrc".text = lib.mkAfter ''
 
       # ----------------------------
       # YouTube-DLP Aliases

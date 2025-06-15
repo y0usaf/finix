@@ -11,7 +11,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.bambu;
+  cfg = config.cfg.home.programs.bambu;
 
   # Custom Bambu Studio package with specific version
   bambuStudio = pkgs.bambu-studio.overrideAttrs (_oldAttrs: {
@@ -57,7 +57,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.bambu = {
+  options.cfg.home.programs.bambu = {
     enable = lib.mkEnableOption "Bambu Studio 3D printing slicer";
   };
 
@@ -68,26 +68,11 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = [
+    users.users.y0usaf.maid.packages = [
       bambuStudioWrapper
       pkgs.mesa
     ];
 
-    ###########################################################################
-    # Desktop Entries
-    ###########################################################################
-    files = {
-      ".local/share/applications/bambu-studio.desktop".text = ''
-        [Desktop Entry]
-        Name=Bambu Studio
-        Exec=bambu-studio %F
-        Terminal=false
-        Type=Application
-        Categories=Graphics;Engineering;3DGraphics;
-        Comment=3D printing slicer for Bambu Lab printers
-        Icon=${bambuStudio}/share/icons/hicolor/256x256/apps/bambu-studio.png
-        MimeType=model/stl;application/x-3mf;
-      '';
-    };
+    # Desktop entry handled by home-manager
   };
 }
