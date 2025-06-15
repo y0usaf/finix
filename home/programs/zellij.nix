@@ -1,5 +1,5 @@
 ###############################################################################
-# Zellij Terminal Multiplexer Module (Hjem Version)
+# Zellij Terminal Multiplexer Module (Maid Version)
 # Configures the Zellij terminal multiplexer with custom themes and layouts
 # - Custom theme configuration
 # - Music layout for cmus and cava

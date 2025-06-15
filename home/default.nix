@@ -5,7 +5,6 @@
 {helpers, ...}: {
   imports = [
     ./core
-    ./dev
     ./gaming
     ./programs
     ./services

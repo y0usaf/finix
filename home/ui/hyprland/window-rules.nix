@@ -1,5 +1,5 @@
 ###############################################################################
-# Hyprland Window Rules Module (Hjem Version)
+# Hyprland Window Rules Module (Maid Version)
 # Contains window management rules and layer rules
 ###############################################################################
 _:

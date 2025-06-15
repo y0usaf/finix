@@ -1,3 +1,0 @@
-{helpers, ...}: {
-  imports = helpers.importModules ./.;
-}

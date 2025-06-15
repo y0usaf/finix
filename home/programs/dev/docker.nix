@@ -1,5 +1,5 @@
 ###############################################################################
-# Docker Development Environment (Hjem Version)
+# Docker Development Environment (Maid Version)
 # Installs Docker tools and provides convenient aliases
 ###############################################################################
 {
@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.dev.docker;
+  cfg = config.cfg.home.programs.dev.docker;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.dev.docker = {
+  options.cfg.home.programs.dev.docker = {
     enable = lib.mkEnableOption "docker development environment";
   };
 
@@ -22,24 +22,26 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Maid Configuration
     ###########################################################################
-    packages = with pkgs; [
-      docker
-      docker-compose
-      docker-buildx
-      docker-credential-helpers
-    ];
+    users.users.y0usaf.maid = {
+      packages = with pkgs; [
+        docker
+        docker-compose
+        docker-buildx
+        docker-credential-helpers
+      ];
 
-    ###########################################################################
-    # Configuration Files
-    ###########################################################################
-    files = {
-      # Docker configuration
-      ".docker/config.json".text = builtins.toJSON {
-        credsStore = "pass";
-        currentContext = "default";
-        plugins = {};
+      ###########################################################################
+      # Configuration Files
+      ###########################################################################
+      file.home = {
+        # Docker configuration
+        ".docker/config.json".text = builtins.toJSON {
+          credsStore = "pass";
+          currentContext = "default";
+          plugins = {};
+        };
       };
     };
   };

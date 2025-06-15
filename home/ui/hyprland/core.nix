@@ -1,5 +1,5 @@
 ###############################################################################
-# Hyprland Core Settings Module (Hjem Version)
+# Hyprland Core Settings Module (Maid Version)
 # Contains core Hyprland configuration including:
 # - General UI settings (gaps, borders, layout)
 # - Input settings (keyboard, mouse)

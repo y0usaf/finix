@@ -1,20 +1,20 @@
 ###############################################################################
-# Cursor IDE Hjem Module
-# Installs Cursor IDE using Hjem's package management
+# LaTeX Development Module (Maid Version)
+# Provides LaTeX development environment with essential packages and editors
 ###############################################################################
 {
   config,
-  lib,
   pkgs,
+  lib,
   ...
 }: let
-  cfg = config.cfg.hjome.dev.cursor-ide;
+  cfg = config.cfg.home.programs.dev.latex;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.dev.cursor-ide = {
-    enable = lib.mkEnableOption "Cursor IDE";
+  options.cfg.home.programs.dev.latex = {
+    enable = lib.mkEnableOption "LaTeX development environment";
   };
 
   ###########################################################################
@@ -22,10 +22,17 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Maid Configuration
     ###########################################################################
-    packages = with pkgs; [
-      code-cursor
+    users.users.y0usaf.maid.packages = with pkgs; [
+      # LaTeX Distribution
+      texliveFull # Comprehensive TeX Live distribution
+
+      # LaTeX Editors
+      texstudio # Feature-rich LaTeX editor
+
+      # Additional Tools
+      tectonic
     ];
   };
 }

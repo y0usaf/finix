@@ -29,12 +29,7 @@ inputs: let
     inherit helpers;
   };
 
-  ## Import Hjem utilities
-  hjemUtils = import ../hjem.nix {
-    inherit (pkgs) lib;
-    inherit pkgs;
-    inherit helpers;
-  };
+
 
   ## Common Special Arguments for Modules
   commonSpecialArgs = {
@@ -51,13 +46,8 @@ in {
     inherit inputs system commonSpecialArgs;
   };
 
-  ## Dynamic Home Manager Configurations (disabled for Hjem migration)
+  ## Dynamic Home Manager Configurations (disabled for migration)
   # homeConfigurations = hostUtils.mkHomeConfigurations {
   #   inherit inputs pkgs commonSpecialArgs;
   # };
-
-  ## Hjem Configurations
-  hjemConfigurations = hjemUtils.mkHjemConfigurations {
-    inherit inputs commonSpecialArgs;
-  };
 }

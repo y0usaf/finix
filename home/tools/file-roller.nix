@@ -1,5 +1,5 @@
 ###############################################################################
-# File Roller (Archive Manager) Module (Hjem Version)
+# File Roller (Archive Manager) Module (Maid Version)
 # Provides the file-roller GUI archive manager
 ###############################################################################
 {

@@ -23,11 +23,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hjem = {
-      url = "github:y0usaf/hjem";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nix-maid = {
       url = "github:viperML/nix-maid";
     };

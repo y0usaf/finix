@@ -1,5 +1,5 @@
 ###############################################################################
-# Bluetooth Program Module (Hjem Version)
+# Bluetooth Program Module (Maid Version)
 # Configure Bluetooth UI tools and utilities
 ###############################################################################
 {

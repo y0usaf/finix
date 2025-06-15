@@ -1,5 +1,5 @@
 ###############################################################################
-# Claude Code Development Environment (Hjem Version)
+# Claude Code Development Environment (Maid Version)
 # Provides Claude Code integration and development tools
 ###############################################################################
 {
@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.dev.claude-code;
+  cfg = config.cfg.home.programs.dev.claude-code;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.dev.claude-code = {
+  options.cfg.home.programs.dev.claude-code = {
     enable = lib.mkEnableOption "claude code development environment";
   };
 
@@ -22,9 +22,9 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Maid Configuration
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       # Claude Code dependencies would go here
     ];
   };

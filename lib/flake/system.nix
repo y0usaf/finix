@@ -17,7 +17,6 @@ in {
     commonSpecialArgs,
   }: let
     sharedWithInputs = import ./shared.nix {inherit lib pkgs helpers hostsDir inputs;};
-    hjemIntegration = import ./hjem.nix {inherit lib pkgs helpers hostsDir inputs;};
     maidIntegration = import ./maid.nix {inherit lib pkgs helpers hostsDir inputs;};
   in
     sharedWithInputs.mapToAttrs
@@ -40,7 +39,6 @@ in {
             (sharedWithInputs.mkSharedModule {inherit hostname hostsDir;})
             
             # Integration modules - each handles its own setup
-            (hjemIntegration.mkNixosModule {inherit inputs hostname commonSpecialArgs;})
             (maidIntegration.mkNixosModule {inherit inputs hostname commonSpecialArgs;})
             
             # Home modules (maid-based)

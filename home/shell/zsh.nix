@@ -1,5 +1,5 @@
 #===============================================================================
-# 🐚 Zsh Shell Configuration Module for Hjem 🐚
+# 🐚 Zsh Shell Configuration Module for Maid 🐚
 # Configures the Z shell with custom settings and functionality
 # - Shell history management
 # - Hardware-specific profile settings

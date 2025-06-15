@@ -204,7 +204,7 @@ in {
           nixos-git-sync = {
             enable = true;
             nixosRepoUrl = "git@github.com:y0usaf/nixos.git";
-            remoteBranch = "hjem";
+            remoteBranch = "main";
           };
         };
         nh = {
@@ -221,7 +221,7 @@ in {
         formatNix.enable = true;
         nixosGitSync = {
           enable = true;
-          remoteBranch = "hjem";
+          remoteBranch = "main";
         };
       };
       gaming = {

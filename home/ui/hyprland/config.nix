@@ -9,7 +9,7 @@
   inputs,
   hostSystem,
   hostHome,
-  hostHjem,
+
   ...
 }: let
   cfg = config.cfg.home.ui.hyprland;

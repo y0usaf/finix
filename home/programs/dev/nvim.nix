@@ -1,6 +1,6 @@
 ###############################################################################
-# Neovim Hjem Module
-# Installs Neovim and essential development tools using Hjem's package management
+# Neovim Development Module (Maid Version)
+# Installs Neovim and essential development tools using nix-maid package management
 ###############################################################################
 {
   config,
@@ -8,7 +8,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.dev.nvim;
+  cfg = config.cfg.home.programs.dev.nvim;
 
   # Configuration using toLua with data and mkLuaInline
   nvimConfig = {
@@ -397,7 +397,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.dev.nvim = {
+  options.cfg.home.programs.dev.nvim = {
     enable = lib.mkEnableOption "Neovim editor";
   };
 
@@ -406,23 +406,27 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Maid Configuration
     ###########################################################################
-    packages = with pkgs; [
-      neovim
+    users.users.y0usaf.maid = {
+      packages = with pkgs; [
+        neovim
 
-      # Essential development tools
-      ripgrep
-      fd
-      stylua
-      ruff
-      nodePackages.prettier
-      shfmt
-    ];
+        # Essential development tools
+        ripgrep
+        fd
+        stylua
+        ruff
+        nodePackages.prettier
+        shfmt
+      ];
 
-    ###########################################################################
-    # Configuration Files
-    ###########################################################################
-    files.".config/nvim/init.lua".text = lib.generators.toLua {} nvimConfig;
+      ###########################################################################
+      # Configuration Files
+      ###########################################################################
+      file.xdg_config = {
+        "nvim/init.lua".text = lib.generators.toLua {} nvimConfig;
+      };
+    };
   };
 }

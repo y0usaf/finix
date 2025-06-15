@@ -49,7 +49,7 @@
     hostNames
   );
 
-  # Extract home configurations from unified configs (disabled for Hjem migration)
+  # Extract home configurations from unified configs (disabled for migration)
   homeConfigs = builtins.listToAttrs (
     map
     (name: {
@@ -61,19 +61,7 @@
     hostNames
   );
 
-  # Extract hjem configurations from unified configs
-  hjemConfigs = builtins.listToAttrs (
-    map
-    (name: {
-      inherit name;
-      value = {
-        cfg = {
-          hjome = unifiedConfigs.${name}.cfg.hjome or {};
-        };
-      };
-    })
-    hostNames
-  );
+
 
   # Get valid host names with proper config structure
   validHostNames =
@@ -92,7 +80,7 @@
     // {
       hostSystem = systemConfigs.${hostname};
       hostHome = homeConfigs.${hostname};
-      hostHjem = hjemConfigs.${hostname};
+
       inherit helpers hostname;
     };
 
@@ -222,5 +210,5 @@
     };
   };
 in {
-  inherit hostNames unifiedConfigs systemConfigs homeConfigs hjemConfigs validHostNames mkSpecialArgs mapToAttrs mkSharedModule;
+  inherit hostNames unifiedConfigs systemConfigs homeConfigs validHostNames mkSpecialArgs mapToAttrs mkSharedModule;
 }

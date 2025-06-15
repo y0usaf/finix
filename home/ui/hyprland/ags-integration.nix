@@ -1,5 +1,5 @@
 ###############################################################################
-# Hyprland AGS Integration Module (Hjem Version)
+# Hyprland AGS Integration Module (Maid Version)
 # Contains AGS-specific configuration and keybindings
 ###############################################################################
 {

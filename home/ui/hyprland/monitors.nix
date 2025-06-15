@@ -1,5 +1,5 @@
 ###############################################################################
-# Hyprland Monitor Configuration Module (Hjem Version)
+# Hyprland Monitor Configuration Module (Maid Version)
 # Contains monitor setup and display configuration
 ###############################################################################
 _:
