@@ -44,32 +44,32 @@ in {
     ];
 
     ###########################################################################
-    # Home Manager Configuration
+    # Configuration Files
     ###########################################################################
-    home-manager.users.y0usaf = {
-      home.pointerCursor = {
-        name = x11ThemeName;
-        package = xcursorPackage;
-        size = config.cfg.home.core.appearance.cursorSize;
+    users.users.y0usaf.maid.file.home = {
+      ".profile".text = lib.mkAfter ''
+        export HYPRCURSOR_THEME="${hyprThemeName}"
+        export HYPRCURSOR_SIZE="${toString config.cfg.home.core.appearance.cursorSize}"
+        export XCURSOR_THEME="${x11ThemeName}"
+        export XCURSOR_SIZE="${toString config.cfg.home.core.appearance.cursorSize}"
+      '';
+      ".Xresources".text = lib.mkAfter ''
+        Xcursor.theme: ${x11ThemeName}
+        Xcursor.size: ${toString config.cfg.home.core.appearance.cursorSize}
+      '';
+    };
 
-        gtk.enable = true;
-        x11.enable = true;
-      };
-
-      # Environment variables for proper Hyprland cursor support
-      home.sessionVariables = {
-        HYPRCURSOR_THEME = lib.mkForce hyprThemeName;
-        HYPRCURSOR_SIZE = lib.mkForce (toString config.cfg.home.core.appearance.cursorSize);
-        XCURSOR_THEME = lib.mkForce x11ThemeName;
-        XCURSOR_SIZE = lib.mkForce (toString config.cfg.home.core.appearance.cursorSize);
-      };
-
-      # Separate GTK cursor configuration for X11 compatibility
-      gtk.cursorTheme = {
-        name = x11ThemeName;
-        package = xcursorPackage;
-        size = config.cfg.home.core.appearance.cursorSize;
-      };
+    users.users.y0usaf.maid.file.xdg_config = {
+      "gtk-3.0/settings.ini".text = lib.mkAfter ''
+        [Settings]
+        gtk-cursor-theme-name=${x11ThemeName}
+        gtk-cursor-theme-size=${toString config.cfg.home.core.appearance.cursorSize}
+      '';
+      "gtk-4.0/settings.ini".text = lib.mkAfter ''
+        [Settings]
+        gtk-cursor-theme-name=${x11ThemeName}
+        gtk-cursor-theme-size=${toString config.cfg.home.core.appearance.cursorSize}
+      '';
     };
   };
 }

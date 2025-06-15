@@ -112,16 +112,10 @@ in {
     users.users.y0usaf.maid.packages = mainFontPackages ++ fallbackPackages;
 
     #######################################################################
-    # Home Manager Configuration
+    # Fontconfig Configuration File
     #######################################################################
-    home-manager.users.y0usaf = {
-      # Enable fontconfig management in the system and disable Home Manager's.
-      fonts.fontconfig.enable = true;
-
-      #######################################################################
-      # Fontconfig File: Provide the generated XML configuration
-      #######################################################################
-      xdg.configFile."fontconfig/fonts.conf".text = fontXmlConfig;
+    users.users.y0usaf.maid.file.xdg_config = {
+      "fontconfig/fonts.conf".text = fontXmlConfig;
     };
   };
 }
