@@ -20,11 +20,8 @@ This document outlines the systematic migration from Hjem to nix-maid for compre
 - [ ] `core/user.nix` → User-specific packages
 
 #### 2.2 Programs (Priority: HIGH)
-- [ ] `programs/obsidian.nix` → Simple package install
 - [ ] `programs/zen-browser.nix` → Simple package install
 - [ ] `programs/bluetooth.nix` → Simple package install
-- [ ] `programs/creative.nix` → Simple package install
-- [ ] `programs/media.nix` → Simple package install
 - [ ] `programs/obs.nix` → Simple package install
 - [ ] `programs/bambu.nix` → Simple package install
 - [ ] `programs/imv.nix` → Simple package install
@@ -34,9 +31,7 @@ This document outlines the systematic migration from Hjem to nix-maid for compre
 - [ ] `programs/sway-launcher-desktop.nix` → Simple package install
 
 #### 2.3 Tools (Priority: HIGH)
-- [ ] `tools/7z.nix` → Simple package install
 - [ ] `tools/file-roller.nix` → Simple package install
-- [ ] `tools/nh.nix` → Simple package install
 - [ ] `tools/spotdl.nix` → Simple package install
 - [ ] `tools/yt-dlp.nix` → Simple package install
 

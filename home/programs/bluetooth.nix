@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.bluetooth;
+  cfg = config.cfg.home.programs.bluetooth;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.bluetooth = {
+  options.cfg.home.programs.bluetooth = {
     enable = lib.mkEnableOption "Bluetooth user tools";
   };
 
@@ -24,7 +24,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       # Main Bluetooth GUI manager
       blueman
 
@@ -35,9 +35,6 @@ in {
     ###########################################################################
     # Configuration Files
     ###########################################################################
-    files = {
-      # Configure autostart for Blueman applet
-      ".config/autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
-    };
+    users.users.y0usaf.maid.file.xdg_config."autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
   };
 }

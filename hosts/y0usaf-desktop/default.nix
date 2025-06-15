@@ -3,11 +3,6 @@
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
-  # Firewall configuration
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [25565]; # Minecraft server
-  };
   cfg = {
     # SHARED CONFIGURATION - used by all module systems
     shared = {
@@ -54,7 +49,6 @@ in {
 
     # HJOME CONFIGURATION - simple interface like Home Manager
     hjome = {
-
       # Default Applications - Migrated to home
 
       # Directories
@@ -149,9 +143,11 @@ in {
         imv.enable = true;
         # media.enable = true; # Migrated to home
         qbittorrent.enable = true;
-        obs.enable = true;
+        # obs.enable = true; # Migrated to home
         pcmanfm.enable = true;
         # obsidian.enable = true; # Migrated to home
+        # zen-browser.enable = true; # Migrated to home
+        # bluetooth.enable = true; # Migrated to home
         # vesktop.enable = true; # Migrated to home
         # webapps.enable = true; # Migrated to home
         # firefox.enable = true; # Migrated to home
@@ -163,7 +159,7 @@ in {
         sway-launcher-desktop.enable = true;
       };
       tools = {
-        spotdl.enable = true;
+        # spotdl.enable = true; # Migrated to home
         yt-dlp.enable = true;
         # nh = { # Migrated to home
         #   enable = true;
@@ -172,7 +168,7 @@ in {
         # git.enable = true; # Migrated to home
         # Archive management tools
         # "7z".enable = true; # Migrated to home
-        file-roller.enable = true;
+        # file-roller.enable = true; # Migrated to home
       };
 
       # shell = {
@@ -214,6 +210,9 @@ in {
         obsidian.enable = true;
         creative.enable = true;
         media.enable = true;
+        # zen-browser.enable = true; # Removed due to hash issues
+        bluetooth.enable = true;
+        obs.enable = true;
       };
       shell = {
         zsh.enable = true;
@@ -234,6 +233,8 @@ in {
           flake = "${homeDir}/nixos";
         };
         "7z".enable = true;
+        file-roller.enable = true;
+        spotdl.enable = true;
       };
       services = {
         polkitAgent.enable = true;
@@ -244,7 +245,5 @@ in {
         };
       };
     };
-
-
   };
 }

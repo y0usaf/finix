@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.tools.spotdl;
+  cfg = config.cfg.home.tools.spotdl;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.tools.spotdl = {
+  options.cfg.home.tools.spotdl = {
     enable = lib.mkEnableOption "SpotDL music downloading tools";
   };
 
@@ -24,14 +24,14 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       ffmpeg # Required for media conversion
     ];
 
     ###########################################################################
     # Shell Aliases (added to .zshrc)
     ###########################################################################
-    files.".zshrc".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home.".zshrc".text = lib.mkAfter ''
 
       # ----------------------------
       # SpotDL Aliases

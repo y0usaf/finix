@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.tools.file-roller;
+  cfg = config.cfg.home.tools.file-roller;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.tools.file-roller = {
+  options.cfg.home.tools.file-roller = {
     enable = lib.mkEnableOption "file-roller (archive manager)";
   };
 
@@ -24,7 +24,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       file-roller
     ];
   };
