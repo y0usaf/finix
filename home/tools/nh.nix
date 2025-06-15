@@ -1,5 +1,5 @@
 ###############################################################################
-# NH (Nix Helper) Tool Module (Hjem Version)
+# NH (Nix Helper) Tool Module (Nix-Maid Version)
 # Provides shell integration and aliases for the NH flake helper
 # - Custom nhs() function with option parsing
 # - Convenient rebuild aliases
@@ -11,12 +11,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.tools.nh;
+  cfg = config.cfg.home.tools.nh;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.tools.nh = {
+  options.cfg.home.tools.nh = {
     enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
 
     flake = lib.mkOption {
@@ -39,21 +39,14 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       nh
     ];
 
     ###########################################################################
-    # Environment Variables
-    ###########################################################################
-    environment.sessionVariables = lib.mkIf (cfg.flake != null) {
-      NH_FLAKE = toString cfg.flake;
-    };
-
-    ###########################################################################
     # Shell Integration
     ###########################################################################
-    files.".zshrc".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home.".zshrc".text = lib.mkAfter ''
       # Set NH_FLAKE environment variable for NH (Nix Helper)
       export NH_FLAKE="/home/y0usaf/nixos"
 

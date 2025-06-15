@@ -1,5 +1,5 @@
 ###############################################################################
-# 7z (p7zip) Archive Manager Module (Hjem Version)
+# 7z (p7zip) Archive Manager Module (Nix-Maid Version)
 # Provides the 7z command via p7zip
 ###############################################################################
 {
@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.tools."7z";
+  cfg = config.cfg.home.tools."7z";
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.tools."7z" = {
+  options.cfg.home.tools."7z" = {
     enable = lib.mkEnableOption "7z (p7zip) archive manager";
   };
 
@@ -24,7 +24,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       p7zip
     ];
   };

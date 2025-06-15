@@ -1,5 +1,5 @@
 ###############################################################################
-# Obsidian Module
+# Obsidian Module (Nix-Maid Version)
 # Knowledge base application with Wayland support
 ###############################################################################
 {
@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.obsidian;
+  cfg = config.cfg.home.programs.obsidian;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.obsidian = {
+  options.cfg.home.programs.obsidian = {
     enable = lib.mkEnableOption "Obsidian module";
     useWayland = lib.mkOption {
       type = lib.types.bool;
@@ -29,7 +29,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       # Create a wrapper script for Obsidian with Wayland support
       (writeShellScriptBin "obsidian" ''
         # Set Wayland/Ozone environment variables if enabled

@@ -145,13 +145,13 @@ in {
       # };
 
       programs = {
-        creative.enable = true;
+        # creative.enable = true; # Migrated to home
         imv.enable = true;
-        media.enable = true;
+        # media.enable = true; # Migrated to home
         qbittorrent.enable = true;
         obs.enable = true;
         pcmanfm.enable = true;
-        obsidian.enable = true;
+        # obsidian.enable = true; # Migrated to home
         # vesktop.enable = true; # Migrated to home
         # webapps.enable = true; # Migrated to home
         # firefox.enable = true; # Migrated to home
@@ -165,13 +165,13 @@ in {
       tools = {
         spotdl.enable = true;
         yt-dlp.enable = true;
-        nh = {
-          enable = true;
-          flake = "${homeDir}/nixos";
-        };
+        # nh = { # Migrated to home
+        #   enable = true;
+        #   flake = "${homeDir}/nixos";
+        # };
         # git.enable = true; # Migrated to home
         # Archive management tools
-        "7z".enable = true;
+        # "7z".enable = true; # Migrated to home
         file-roller.enable = true;
       };
 
@@ -211,6 +211,9 @@ in {
         firefox.enable = true;
         discord.enable = true;
         zellij.enable = true;
+        obsidian.enable = true;
+        creative.enable = true;
+        media.enable = true;
       };
       shell = {
         zsh.enable = true;
@@ -226,6 +229,11 @@ in {
             remoteBranch = "hjem";
           };
         };
+        nh = {
+          enable = true;
+          flake = "${homeDir}/nixos";
+        };
+        "7z".enable = true;
       };
       services = {
         polkitAgent.enable = true;

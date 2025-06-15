@@ -1,5 +1,5 @@
 ###############################################################################
-# Creative Applications Module
+# Creative Applications Module (Nix-Maid Version)
 # Provides creative and image editing applications
 # - Simple painting tools
 # - Advanced image editing
@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.creative;
+  cfg = config.cfg.home.programs.creative;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.creative = {
+  options.cfg.home.programs.creative = {
     enable = lib.mkEnableOption "creative applications module";
   };
 
@@ -27,7 +27,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       pinta # Simple painting application
       gimp # Feature-rich image editor
     ];

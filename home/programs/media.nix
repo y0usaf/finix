@@ -1,5 +1,5 @@
 ###############################################################################
-# Media Module
+# Media Module (Nix-Maid Version)
 # Configuration for media playback, streaming, and audio control
 # - Audio control with pavucontrol
 # - Video playback with VLC and Stremio
@@ -12,12 +12,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.programs.media;
+  cfg = config.cfg.home.programs.media;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.programs.media = {
+  options.cfg.home.programs.media = {
     enable = lib.mkEnableOption "media applications";
   };
 
@@ -28,7 +28,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       pavucontrol # Sound mixer for PulseAudio
       ffmpeg # Multimedia framework
       vlc # Versatile media player
