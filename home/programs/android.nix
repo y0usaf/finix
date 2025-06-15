@@ -1,5 +1,5 @@
 ###############################################################################
-# Android Module
+# Android Module (Maid)
 # Provides Android development and interaction tools
 # - Waydroid for running Android in a container
 # - Android debugging tools (adb, fastboot)
@@ -7,16 +7,16 @@
 ###############################################################################
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: let
-  cfg = config.cfg.programs.android;
+  cfg = config.cfg.home.programs.android;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.programs.android = {
+  options.cfg.home.programs.android = {
     enable = lib.mkEnableOption "android tools and waydroid";
   };
 
@@ -27,7 +27,7 @@ in {
     ###########################################################################
     # Packages
     ###########################################################################
-    home.packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       waydroid
       android-tools
       scrcpy
@@ -36,18 +36,18 @@ in {
     ###########################################################################
     # Environment Variables
     ###########################################################################
-    programs.zsh = {
-      envExtra = ''
+    users.users.y0usaf.maid.file.home = {
+      ".android_env".text = ''
         # Android environment variables
-        export ANDROID_HOME="${config.xdg.dataHome}/android"
-        export ADB_VENDOR_KEY="${config.xdg.configHome}/android"
+        export ANDROID_HOME="$XDG_DATA_HOME/android"
+        export ADB_VENDOR_KEY="$XDG_CONFIG_HOME/android"
       '';
     };
 
     ###########################################################################
     # Systemd Services
     ###########################################################################
-    systemd.user.services = {
+    users.users.y0usaf.maid.systemd.user.services = {
       waydroid-container = {
         Unit = {
           Description = "Waydroid Container";

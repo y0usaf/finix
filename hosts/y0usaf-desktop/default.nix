@@ -1,5 +1,5 @@
 # UNIFIED HOST CONFIGURATION for y0usaf-desktop
-{pkgs, ...}: let
+{pkgs, inputs, ...}: let
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {
@@ -127,7 +127,7 @@ in {
           fonts = {
             main = [
               {
-                package = pkgs.fastFonts;
+                package = inputs.fast-fonts.packages.x86_64-linux.default;
                 name = "Fast_Mono";
               }
             ];
@@ -194,6 +194,7 @@ in {
         pcmanfm.enable = true;
         qbittorrent.enable = true;
         sway-launcher-desktop.enable = true;
+        # android.enable = true; # TODO: Debug import issue
       };
       shell = {
         zsh.enable = true;

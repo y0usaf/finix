@@ -7,6 +7,7 @@
   ...
 }: let
   cfg = config.cfg.home.ui.fonts;
+  username = config.cfg.shared.username;
   
   # Get the packages and names from the host appearance config
   mainFontPackages = map (x: x.package) config.cfg.home.core.appearance.fonts.main;
@@ -105,17 +106,14 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     #######################################################################
-    # Font Package Installation
-    #
-    # Installs the main font and all fallback fonts specified in the configuration.
+    # Maid Configuration
     #######################################################################
-    users.users.y0usaf.maid.packages = mainFontPackages ++ fallbackPackages;
-
-    #######################################################################
-    # Fontconfig Configuration File
-    #######################################################################
-    users.users.y0usaf.maid.file.xdg_config = {
-      "fontconfig/fonts.conf".text = fontXmlConfig;
+    users.users.${username}.maid = {
+      packages = mainFontPackages ++ fallbackPackages;
+      
+      file.xdg_config = {
+        "fontconfig/fonts.conf".text = fontXmlConfig;
+      };
     };
   };
 }
