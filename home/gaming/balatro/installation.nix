@@ -1,6 +1,6 @@
 ###############################################################################
-# Balatro Mods Installation Module - Hjem Version
-# GitHub repos managed by npins, files managed by Hjem
+# Balatro Mods Installation Module - Nix-Maid Version
+# GitHub repos managed by npins, files managed by nix-maid
 ###############################################################################
 {
   config,
@@ -8,7 +8,7 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.gaming.balatro;
+  cfg = config.cfg.home.gaming.balatro;
 
   # Import npins sources for GitHub repositories
   sources = import ./npins;
@@ -74,7 +74,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.gaming.balatro = {
+  options.cfg.home.gaming.balatro = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -119,7 +119,7 @@ in {
     ###########################################################################
     # Balatro Mods and Lovely Injector Files
     ###########################################################################
-    files =
+    users.users.y0usaf.maid.file.home =
       # MoreSpeeds mod content
       (lib.optionalAttrs (lib.elem "morespeeds" cfg.enabledMods) {
         ".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua".text = ''

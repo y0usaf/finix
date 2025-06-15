@@ -1,5 +1,5 @@
 ###############################################################################
-# Cemu Emulator Module
+# Cemu Emulator Module - Nix-Maid Version
 # Configuration for Wii U emulation
 ###############################################################################
 {
@@ -8,14 +8,14 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.gaming.emulation.wii-u;
+  cfg = config.cfg.home.gaming.emulation.wii-u;
 in {
-  options.cfg.hjome.gaming.emulation.wii-u = {
+  options.cfg.home.gaming.emulation.wii-u = {
     enable = lib.mkEnableOption "Wii U emulation via Cemu";
   };
 
   config = lib.mkIf cfg.enable {
-    packages = [
+    users.users.y0usaf.maid.packages = [
       pkgs.cemu
     ];
   };

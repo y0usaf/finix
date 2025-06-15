@@ -1,5 +1,5 @@
 ###############################################################################
-# Gaming Controllers Module
+# Gaming Controllers Module - Nix-Maid Version
 # Configuration for game controllers and peripherals
 # - General controller support including DualSense (PS5)
 # - Automatically enables system-level controller support
@@ -10,15 +10,19 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.hjome.gaming.controllers;
+  cfg = config.cfg.home.gaming.controllers;
 in {
+  options.cfg.home.gaming.controllers = {
+    enable = lib.mkEnableOption "gaming controller support";
+  };
+
   config = lib.mkIf cfg.enable {
     ###########################################################################
     # Controller Packages
     ###########################################################################
 
     # General controller support including DualSense (PS5)
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       dualsensectl # Command-line tool for DualSense controller
       # trigger-control  # Optional GUI tool for adaptive triggers (uncomment if needed)
     ];

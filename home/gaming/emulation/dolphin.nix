@@ -1,5 +1,5 @@
 ###############################################################################
-# Dolphin Emulator Module
+# Dolphin Emulator Module - Nix-Maid Version
 # Configuration for GameCube and Wii emulation
 ###############################################################################
 {
@@ -8,14 +8,14 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.gaming.emulation.gcn-wii;
+  cfg = config.cfg.home.gaming.emulation.gcn-wii;
 in {
-  options.cfg.hjome.gaming.emulation.gcn-wii = {
+  options.cfg.home.gaming.emulation.gcn-wii = {
     enable = lib.mkEnableOption "GameCube and Wii emulation via Dolphin";
   };
 
   config = lib.mkIf cfg.enable {
-    packages = [
+    users.users.y0usaf.maid.packages = [
       pkgs.dolphin-emu
     ];
   };

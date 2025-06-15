@@ -105,28 +105,28 @@ in {
         # hyprland migrated to home
       };
 
-      # Gaming modules - ALL gaming config in one place!
-      gaming = {
-        enable = true;
-        controllers.enable = true;
-        emulation = {
-          wii-u.enable = true;
-          gcn-wii.enable = true;
-        };
-        marvel-rivals = {
-          engine.enable = true;
-          gameusersettings.enable = true;
-          marvelusersettings.enable = true;
-        };
-        balatro = {
-          enable = true;
-          enableLovelyInjector = true;
-          enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "handybalatro" "stickersalwaysshown"];
-        };
-        wukong = {
-          enable = true;
-        };
-      };
+      # Gaming modules - Migrated to home
+      # gaming = {
+      #   enable = true;
+      #   controllers.enable = true;
+      #   emulation = {
+      #     wii-u.enable = true;
+      #     gcn-wii.enable = true;
+      #   };
+      #   marvel-rivals = {
+      #     engine.enable = true;
+      #     gameusersettings.enable = true;
+      #     marvelusersettings.enable = true;
+      #   };
+      #   balatro = {
+      #     enable = true;
+      #     enableLovelyInjector = true;
+      #     enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "handybalatro" "stickersalwaysshown"];
+      #   };
+      #   wukong = {
+      #     enable = true;
+      #   };
+      # };
 
       # dev = {
       #   mcp.enable = true;
@@ -223,6 +223,27 @@ in {
         nixosGitSync = {
           enable = true;
           remoteBranch = "hjem";
+        };
+      };
+      gaming = {
+        core.enable = true;
+        controllers.enable = true;
+        emulation = {
+          wii-u.enable = true;
+          gcn-wii.enable = true;
+        };
+        marvel-rivals = {
+          engine.enable = true;
+          gameusersettings.enable = true;
+          marvelusersettings.enable = true;
+        };
+        balatro = {
+          enable = true;
+          enableLovelyInjector = true;
+          enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "handybalatro" "stickersalwaysshown"];
+        };
+        wukong = {
+          enable = true;
         };
       };
     };

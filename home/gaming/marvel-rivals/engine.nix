@@ -1,5 +1,5 @@
 ###############################################################################
-# Marvel Rivals Engine Configuration
+# Marvel Rivals Engine Configuration - Nix-Maid Version
 # Optimizes graphics settings for better performance
 ###############################################################################
 {
@@ -7,12 +7,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.gaming.marvel-rivals;
+  cfg = config.cfg.home.gaming.marvel-rivals.engine;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.gaming.marvel-rivals.engine = {
+  options.cfg.home.gaming.marvel-rivals.engine = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -23,8 +23,8 @@ in {
   ###########################################################################
   # Module Configuration
   ###########################################################################
-  config = lib.mkIf cfg.engine.enable {
-    files.".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
+  config = lib.mkIf cfg.enable {
+    users.users.y0usaf.maid.file.home.".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
       "SystemSettings" = {
         "r.LevelStreamingDistanceScale" = "1";
         "r.ViewDistanceScale" = "1";

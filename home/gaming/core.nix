@@ -1,5 +1,5 @@
 ###############################################################################
-# Core Gaming Module
+# Core Gaming Module - Nix-Maid Version
 # Base configuration for gaming-related software
 ###############################################################################
 {
@@ -8,10 +8,14 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.gaming;
+  cfg = config.cfg.home.gaming.core;
 in {
+  options.cfg.home.gaming.core = {
+    enable = lib.mkEnableOption "core gaming packages";
+  };
+
   config = lib.mkIf cfg.enable {
-    packages = with pkgs; [
+    users.users.y0usaf.maid.packages = with pkgs; [
       steam
       protonup-qt
       gamemode

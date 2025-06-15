@@ -1,5 +1,5 @@
 ###############################################################################
-# Black Myth: Wukong Engine Configuration
+# Black Myth: Wukong Engine Configuration - Nix-Maid Version
 # Optimizes graphics settings for better performance
 ###############################################################################
 {
@@ -7,12 +7,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.gaming.wukong;
+  cfg = config.cfg.home.gaming.wukong;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.gaming.wukong = {
+  options.cfg.home.gaming.wukong = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -24,7 +24,7 @@ in {
   # Module Configuration
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    files.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
+    users.users.y0usaf.maid.file.home.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
       "SystemSettings" = {
         "r.DefaultFeature.AntiAliasing" = "0";
         "pp.VignetteIntensity" = "0.0";
