@@ -5,10 +5,10 @@
   ...
 }: let
   inherit (config.modules) options;
-  cfg = config.cfg.hjome.core.appearance;
+  cfg = config.cfg.home.core.appearance;
   t = lib.types;
 in {
-  options.cfg.hjome.core.appearance = {
+  options.cfg.home.core.appearance = {
     enable = lib.mkEnableOption "appearance settings";
 
     # Font configuration using a submodule; supports both main and fallback fonts.

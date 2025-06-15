@@ -3,7 +3,7 @@
   helpers = import ../../lib/helpers/module-defs.nix {inherit lib;};
   inherit (helpers) t mkOpt dirModule;
 in {
-  options.cfg.hjome.directories = {
+  options.cfg.home.directories = {
     flake = mkOpt dirModule "The directory where the flake lives.";
     music = mkOpt dirModule "Directory for music files.";
     dcim = mkOpt dirModule "Directory for pictures (DCIM).";

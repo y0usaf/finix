@@ -49,55 +49,6 @@ in {
 
     # HJOME CONFIGURATION - simple interface like Home Manager
     hjome = {
-      # Default Applications - Migrated to home
-
-      # Directories
-      directories = {
-        flake.path = "${homeDir}/nixos";
-        music.path = "${homeDir}/Music";
-        dcim.path = "${homeDir}/DCIM";
-        steam = {
-          path = "${homeDir}/.local/share/Steam";
-          create = false;
-        };
-        wallpapers = {
-          static.path = "${homeDir}/DCIM/Wallpapers/32_9";
-          video.path = "${homeDir}/DCIM/Wallpapers_Video";
-        };
-      };
-
-      # Core configuration
-      core = {
-        # environment.enable = true;
-        appearance = {
-          dpi = 109;
-          baseFontSize = 12;
-          cursorSize = 36;
-          fonts = {
-            main = [
-              {
-                package = pkgs.fastFonts;
-                name = "Fast_Mono";
-              }
-            ];
-            fallback = [
-              {
-                package = pkgs.noto-fonts-emoji;
-                name = "Noto Color Emoji";
-              }
-              {
-                package = pkgs.noto-fonts-cjk-sans;
-                name = "Noto Sans CJK";
-              }
-              {
-                package = pkgs.font-awesome;
-                name = "Font Awesome";
-              }
-            ];
-          };
-        };
-      };
-
       ui = {
         wayland.enable = true;
         # foot.enable = true; # Migrated to home
@@ -165,6 +116,48 @@ in {
           archiveManager = "7z";
           imageViewer = "imv";
           mediaPlayer = "mpv";
+        };
+        appearance = {
+          enable = true;
+          dpi = 109;
+          baseFontSize = 12;
+          cursorSize = 36;
+          fonts = {
+            main = [
+              {
+                package = pkgs.fastFonts;
+                name = "Fast_Mono";
+              }
+            ];
+            fallback = [
+              {
+                package = pkgs.noto-fonts-emoji;
+                name = "Noto Color Emoji";
+              }
+              {
+                package = pkgs.noto-fonts-cjk-sans;
+                name = "Noto Sans CJK";
+              }
+              {
+                package = pkgs.font-awesome;
+                name = "Font Awesome";
+              }
+            ];
+          };
+        };
+        user.enable = true;
+      };
+      directories = {
+        flake.path = "${homeDir}/nixos";
+        music.path = "${homeDir}/Music";
+        dcim.path = "${homeDir}/DCIM";
+        steam = {
+          path = "${homeDir}/.local/share/Steam";
+          create = false;
+        };
+        wallpapers = {
+          static.path = "${homeDir}/DCIM/Wallpapers/32_9";
+          video.path = "${homeDir}/DCIM/Wallpapers_Video";
         };
       };
       ui = {

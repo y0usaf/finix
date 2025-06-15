@@ -7,12 +7,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.hjome.core.user;
+  cfg = config.cfg.home.core.user;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.hjome.core.user = {
+  options.cfg.home.core.user = {
     enable = lib.mkEnableOption "user configuration (packages and bookmarks)";
 
     packages = lib.mkOption {

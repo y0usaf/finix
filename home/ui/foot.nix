@@ -10,19 +10,18 @@
   config,
   lib,
   pkgs,
-  hostHjem,
   ...
 }: let
   cfg = config.cfg.home.ui.foot;
 
-  # Calculate the scaled font size based on the hostHjem's base font size.
-  computedFontSize = toString (hostHjem.cfg.hjome.core.appearance.baseFontSize * 1.33);
+  # Calculate the scaled font size based on the appearance configuration.
+  computedFontSize = toString (config.cfg.home.core.appearance.baseFontSize * 1.33);
 
-  # Get the main font name from the hostHjem's font configuration
-  mainFontName = (builtins.elemAt hostHjem.cfg.hjome.core.appearance.fonts.main 0).name;
+  # Get the main font name from the appearance configuration
+  mainFontName = (builtins.elemAt config.cfg.home.core.appearance.fonts.main 0).name;
 
   # Get fallback font names
-  fallbackFontNames = map (x: x.name) hostHjem.cfg.hjome.core.appearance.fonts.fallback;
+  fallbackFontNames = map (x: x.name) config.cfg.home.core.appearance.fonts.fallback;
 
   # Build the main font configuration string, including the fallback fonts.
   mainFontConfig =
