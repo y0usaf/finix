@@ -138,26 +138,9 @@ in {
       #   nvim.enable = true;
       # };
 
-      programs = {
-        # creative.enable = true; # Migrated to home
-        # imv.enable = true; # Migrated to home
-        # media.enable = true; # Migrated to home
-        # qbittorrent.enable = true; # Migrated to home
-        # obs.enable = true; # Migrated to home
-        # pcmanfm.enable = true; # Migrated to home
-        # obsidian.enable = true; # Migrated to home
-        # zen-browser.enable = true; # Migrated to home
-        # bluetooth.enable = true; # Migrated to home
-        # vesktop.enable = true; # Migrated to home
-        # webapps.enable = true; # Migrated to home
-        # firefox.enable = true; # Migrated to home
-        # discord.enable = true; # Migrated to home
-        # Migrated from Home Manager
-        # mpv.enable = true; # Migrated to home
-        # bambu.enable = true; # Migrated to home
-        # zellij.enable = true; # Migrated to home
-        sway-launcher-desktop.enable = true;
-      };
+      # programs = {
+      #   # All programs migrated to home
+      # };
       # tools = {
       #   # All tools migrated to home
       # };
@@ -209,6 +192,7 @@ in {
         mpv.enable = true;
         pcmanfm.enable = true;
         qbittorrent.enable = true;
+        sway-launcher-desktop.enable = true;
       };
       shell = {
         zsh.enable = true;
