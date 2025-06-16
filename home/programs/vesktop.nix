@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.programs.vesktop;
+  cfg = config.home.programs.vesktop;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.vesktop = {
+  options.home.programs.vesktop = {
     enable = lib.mkEnableOption "Vesktop (Discord client) module";
   };
 

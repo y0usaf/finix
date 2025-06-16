@@ -12,14 +12,14 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.shell.zsh;
+  cfg = config.home.shell.zsh;
   # Get shared user preferences
-  sharedZsh = config.cfg.shared.zsh;
+  sharedZsh = config.shared.zsh;
 in {
   #===========================================================================
   # Module Options
   #===========================================================================
-  options.cfg.home.shell.zsh = {
+  options.home.shell.zsh = {
     enable = lib.mkEnableOption "zsh shell configuration";
   };
 
@@ -43,7 +43,7 @@ in {
     users.users.y0usaf.maid.file.home = {
       ".zshenv".text = let
         # Get the token directory path from shared config
-        inherit (config.cfg.shared) tokenDir;
+        inherit (config.shared) tokenDir;
         # Token management function (from original envExtra)
         tokenFunctionScript = ''
           # Token management function

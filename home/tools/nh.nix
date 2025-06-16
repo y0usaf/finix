@@ -11,12 +11,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.tools.nh;
+  cfg = config.home.tools.nh;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.tools.nh = {
+  options.home.tools.nh = {
     enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
 
     flake = lib.mkOption {

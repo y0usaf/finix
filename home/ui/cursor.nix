@@ -12,8 +12,8 @@
   inputs,
   ...
 }: let
-  cfg = config.cfg.home.ui.cursor;
-  inherit (config.cfg.shared) username;
+  cfg = config.home.ui.cursor;
+  inherit (config.shared) username;
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
 
@@ -24,7 +24,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.ui.cursor = {
+  options.home.ui.cursor = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -48,9 +48,9 @@ in {
       file.home = {
         ".profile".text = lib.mkAfter ''
           export HYPRCURSOR_THEME="${hyprThemeName}"
-          export HYPRCURSOR_SIZE="${toString config.cfg.home.core.appearance.cursorSize}"
+          export HYPRCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
           export XCURSOR_THEME="${x11ThemeName}"
-          export XCURSOR_SIZE="${toString config.cfg.home.core.appearance.cursorSize}"
+          export XCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
         '';
       };
 
@@ -58,12 +58,12 @@ in {
         "gtk-3.0/settings.ini".text = lib.mkAfter ''
           [Settings]
           gtk-cursor-theme-name=${x11ThemeName}
-          gtk-cursor-theme-size=${toString config.cfg.home.core.appearance.cursorSize}
+          gtk-cursor-theme-size=${toString config.home.core.appearance.cursorSize}
         '';
         "gtk-4.0/settings.ini".text = lib.mkAfter ''
           [Settings]
           gtk-cursor-theme-name=${x11ThemeName}
-          gtk-cursor-theme-size=${toString config.cfg.home.core.appearance.cursorSize}
+          gtk-cursor-theme-size=${toString config.home.core.appearance.cursorSize}
         '';
       };
     };

@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.tools.yt-dlp;
+  cfg = config.home.tools.yt-dlp;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.tools.yt-dlp = {
+  options.home.tools.yt-dlp = {
     enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
 

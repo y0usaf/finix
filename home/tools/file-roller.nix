@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.tools.file-roller;
+  cfg = config.home.tools.file-roller;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.tools.file-roller = {
+  options.home.tools.file-roller = {
     enable = lib.mkEnableOption "file-roller (archive manager)";
   };
 

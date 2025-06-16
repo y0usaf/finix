@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.services.nixosGitSync;
+  cfg = config.home.services.nixosGitSync;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.services.nixosGitSync = {
+  options.home.services.nixosGitSync = {
     enable = lib.mkEnableOption "NixOS configuration git sync service";
 
     repoPath = lib.mkOption {

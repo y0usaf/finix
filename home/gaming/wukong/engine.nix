@@ -7,12 +7,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.gaming.wukong;
+  cfg = config.home.gaming.wukong;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.gaming.wukong = {
+  options.home.gaming.wukong = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

@@ -14,10 +14,10 @@
   hostSystem,
   ...
 }: let
-  cfg = config.cfg.home.programs.obs;
+  cfg = config.home.programs.obs;
 
   # Check if NVIDIA and CUDA are enabled in the system configuration
-  nvidiaCudaEnabled = hostSystem.cfg.hardware.nvidia.enable && (hostSystem.cfg.hardware.nvidia.cuda.enable or false);
+  nvidiaCudaEnabled = hostSystem.hardware.nvidia.enable && (hostSystem.hardware.nvidia.cuda.enable or false);
 
   # Create a CUDA-enabled OBS package if NVIDIA and CUDA are enabled
   obsPackage =
@@ -30,7 +30,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.obs = {
+  options.home.programs.obs = {
     enable = lib.mkEnableOption "OBS Studio";
   };
 

@@ -6,14 +6,14 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.ui.fonts;
-  inherit (config.cfg.shared) username;
+  cfg = config.home.ui.fonts;
+  inherit (config.shared) username;
 
   # Get the packages and names from the host appearance config
-  mainFontPackages = map (x: x.package) config.cfg.home.core.appearance.fonts.main;
-  mainFontNames = map (x: x.name) config.cfg.home.core.appearance.fonts.main;
-  fallbackPackages = map (x: x.package) config.cfg.home.core.appearance.fonts.fallback;
-  fallbackNames = map (x: x.name) config.cfg.home.core.appearance.fonts.fallback;
+  mainFontPackages = map (x: x.package) config.home.core.appearance.fonts.main;
+  mainFontNames = map (x: x.name) config.home.core.appearance.fonts.main;
+  fallbackPackages = map (x: x.package) config.home.core.appearance.fonts.fallback;
+  fallbackNames = map (x: x.name) config.home.core.appearance.fonts.fallback;
 
   #######################################################################
   # Font XML Configuration String
@@ -85,7 +85,7 @@
         <edit name="rgba" mode="assign"><const>rgb</const></edit>
         <edit name="autohint" mode="assign"><bool>true</bool></edit>
         <edit name="lcdfilter" mode="assign"><const>lcdlight</const></edit>
-        <edit name="dpi" mode="assign"><double>${toString config.cfg.home.core.appearance.dpi}</double></edit>
+        <edit name="dpi" mode="assign"><double>${toString config.home.core.appearance.dpi}</double></edit>
       </match>
     </fontconfig>
   '';
@@ -93,7 +93,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.ui.fonts = {
+  options.home.ui.fonts = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

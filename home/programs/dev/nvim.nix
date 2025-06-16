@@ -8,7 +8,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.dev.nvim;
+  cfg = config.home.programs.dev.nvim;
 
   # Configuration using toLua with data and mkLuaInline
   nvimConfig = {
@@ -397,7 +397,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.dev.nvim = {
+  options.home.programs.dev.nvim = {
     enable = lib.mkEnableOption "Neovim editor";
   };
 

@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.ui.mako;
+  cfg = config.home.ui.mako;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.ui.mako = {
+  options.home.ui.mako = {
     enable = lib.mkEnableOption "Mako notification daemon";
   };
 

@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.tools.spotdl;
+  cfg = config.home.tools.spotdl;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.tools.spotdl = {
+  options.home.tools.spotdl = {
     enable = lib.mkEnableOption "SpotDL music downloading tools";
   };
 

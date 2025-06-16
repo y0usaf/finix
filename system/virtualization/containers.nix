@@ -11,7 +11,7 @@
   hostHome,
   ...
 }: let
-  dockerEnabled = hostHome.cfg.dev.docker.enable or false;
+  dockerEnabled = hostHome.dev.docker.enable or false;
 in {
   config = {
     ###########################################################################
@@ -33,7 +33,7 @@ in {
     # Docker User Group Management
     # Automatically add user to docker group when docker is enabled
     ###########################################################################
-    users.users.${config.cfg.shared.username} = lib.mkIf dockerEnabled {
+    users.users.${config.shared.username} = lib.mkIf dockerEnabled {
       extraGroups = ["docker"];
     };
   };

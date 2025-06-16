@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.ui.wallust;
+  cfg = config.home.ui.wallust;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.ui.wallust = {
+  options.home.ui.wallust = {
     enable = lib.mkEnableOption "wallust color generation";
   };
 

@@ -12,8 +12,8 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.firefox;
-  inherit (config.cfg.shared) username;
+  cfg = config.home.programs.firefox;
+  inherit (config.shared) username;
 
   # Common settings for Firefox profiles
   commonSettings = {
@@ -22,19 +22,19 @@
 
     # Disable hardware acceleration if using Nvidia
     "gfx.webrender.all" =
-      if config.cfg.system.hardware.nvidia.enable or false
+      if config.system.hardware.nvidia.enable or false
       then false
       else true;
     "media.hardware-video-decoding.enabled" =
-      if config.cfg.system.hardware.nvidia.enable or false
+      if config.system.hardware.nvidia.enable or false
       then false
       else true;
     "media.ffmpeg.vaapi.enabled" =
-      if config.cfg.system.hardware.nvidia.enable or false
+      if config.system.hardware.nvidia.enable or false
       then false
       else true;
     "layers.acceleration.disabled" =
-      if config.cfg.system.hardware.nvidia.enable or false
+      if config.system.hardware.nvidia.enable or false
       then true
       else false;
 
@@ -381,7 +381,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.firefox = {
+  options.home.programs.firefox = {
     enable = lib.mkEnableOption "Firefox browser with optimized settings";
   };
 

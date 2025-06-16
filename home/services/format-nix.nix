@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.services.formatNix;
+  cfg = config.home.services.formatNix;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.services.formatNix = {
+  options.home.services.formatNix = {
     enable = lib.mkEnableOption "automatic Nix file formatting with alejandra";
 
     directory = lib.mkOption {

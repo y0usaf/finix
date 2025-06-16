@@ -10,12 +10,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.sway-launcher-desktop;
+  cfg = config.home.programs.sway-launcher-desktop;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.sway-launcher-desktop = {
+  options.home.programs.sway-launcher-desktop = {
     enable = lib.mkEnableOption "sway launcher desktop";
   };
 

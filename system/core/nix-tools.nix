@@ -2,7 +2,7 @@
 # Core Nix Tools
 # Essential Nix maintenance and development tools (always enabled)
 # - alejandra: Nix code formatter
-# - statix: Nix linter for best practices  
+# - statix: Nix linter for best practices
 # - deadnix: Dead code elimination for Nix
 ###############################################################################
 {pkgs, ...}: {
@@ -12,8 +12,8 @@
     ###########################################################################
     environment.systemPackages = with pkgs; [
       alejandra # Nix code formatter
-      statix    # Nix linter for best practices
-      deadnix   # Dead code elimination for Nix
+      statix # Nix linter for best practices
+      deadnix # Dead code elimination for Nix
     ];
   };
 }

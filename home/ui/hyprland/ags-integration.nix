@@ -9,7 +9,7 @@
   ...
 }: let
   # Safely check if AGS is enabled
-  agsEnabled = config.cfg.home.ui.ags.enable or false;
+  agsEnabled = config.home.ui.ags.enable or false;
 in
   ###########################################################################
   # AGS Integration Configuration

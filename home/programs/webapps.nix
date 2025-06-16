@@ -10,12 +10,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.webapps;
+  cfg = config.home.programs.webapps;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.webapps = {
+  options.home.programs.webapps = {
     enable = lib.mkEnableOption "web applications via Chromium";
   };
 

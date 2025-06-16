@@ -13,7 +13,7 @@
   hostSystem,
   ...
 }: {
-  config = lib.mkIf hostSystem.cfg.hardware.nvidia.enable {
+  config = lib.mkIf hostSystem.hardware.nvidia.enable {
     ###########################################################################
     # Kernel Parameters
     # Parameters to preserve video memory allocations for better Wayland support
@@ -43,7 +43,7 @@
     # CUDA Support (conditional)
     # Enable CUDA support for compute applications
     ###########################################################################
-    hardware.graphics.extraPackages = lib.optionals (hostSystem.cfg.hardware.nvidia.cuda.enable or false) [
+    hardware.graphics.extraPackages = lib.optionals (hostSystem.hardware.nvidia.cuda.enable or false) [
       pkgs.cudatoolkit
     ];
 
@@ -52,7 +52,7 @@
     ###########################################################################
     environment = {
       # Make CUDA available system-wide
-      systemPackages = lib.optionals (hostSystem.cfg.hardware.nvidia.cuda.enable or false) [
+      systemPackages = lib.optionals (hostSystem.hardware.nvidia.cuda.enable or false) [
         pkgs.cudaPackages.cudnn
       ];
 

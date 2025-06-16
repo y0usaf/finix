@@ -8,9 +8,9 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.gaming.core;
+  cfg = config.home.gaming.core;
 in {
-  options.cfg.home.gaming.core = {
+  options.home.gaming.core = {
     enable = lib.mkEnableOption "core gaming packages";
   };
 

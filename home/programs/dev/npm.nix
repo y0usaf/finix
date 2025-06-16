@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.programs.dev.npm;
+  cfg = config.home.programs.dev.npm;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.dev.npm = {
+  options.home.programs.dev.npm = {
     enable = lib.mkEnableOption "Node.js and NPM configuration";
   };
 

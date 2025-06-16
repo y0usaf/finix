@@ -11,7 +11,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.bambu;
+  cfg = config.home.programs.bambu;
 
   # Custom Bambu Studio package with specific version
   bambuStudio = pkgs.bambu-studio.overrideAttrs (_oldAttrs: {
@@ -57,7 +57,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.bambu = {
+  options.home.programs.bambu = {
     enable = lib.mkEnableOption "Bambu Studio 3D printing slicer";
   };
 

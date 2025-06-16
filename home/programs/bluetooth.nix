@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.bluetooth;
+  cfg = config.home.programs.bluetooth;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.bluetooth = {
+  options.home.programs.bluetooth = {
     enable = lib.mkEnableOption "Bluetooth user tools";
   };
 

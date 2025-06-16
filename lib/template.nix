@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.example;
+  cfg = config.example;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.example = {
+  options.example = {
     enable = lib.mkEnableOption "example module";
 
     setting1 = lib.mkOption {

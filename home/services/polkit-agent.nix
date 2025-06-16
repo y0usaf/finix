@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.services.polkitAgent;
+  cfg = config.home.services.polkitAgent;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.services.polkitAgent = {
+  options.home.services.polkitAgent = {
     enable = lib.mkEnableOption "polkit authentication agent";
   };
 

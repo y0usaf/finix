@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.tools."7z";
+  cfg = config.home.tools."7z";
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.tools."7z" = {
+  options.home.tools."7z" = {
     enable = lib.mkEnableOption "7z (p7zip) archive manager";
   };
 

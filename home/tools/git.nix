@@ -12,12 +12,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.tools.git;
+  cfg = config.home.tools.git;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.tools.git = {
+  options.home.tools.git = {
     enable = lib.mkEnableOption "git configuration and automation";
 
     name = lib.mkOption {
@@ -46,7 +46,7 @@ in {
 
       repoPath = lib.mkOption {
         type = lib.types.str;
-        default = "${config.cfg.shared.homeDirectory}/nixos";
+        default = "${config.shared.homeDirectory}/nixos";
         description = "Path to the NixOS configuration repository.";
       };
 

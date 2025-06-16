@@ -8,9 +8,9 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.imv;
+  cfg = config.home.programs.imv;
 in {
-  options.cfg.home.programs.imv = {
+  options.home.programs.imv = {
     enable = lib.mkEnableOption "imv image viewer";
   };
   config = lib.mkIf cfg.enable {

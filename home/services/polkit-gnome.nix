@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.services.polkitGnome;
+  cfg = config.home.services.polkitGnome;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.services.polkitGnome = {
+  options.home.services.polkitGnome = {
     enable = lib.mkEnableOption "polkit GNOME authentication agent";
   };
 

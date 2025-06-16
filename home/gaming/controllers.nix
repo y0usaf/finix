@@ -10,9 +10,9 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.gaming.controllers;
+  cfg = config.home.gaming.controllers;
 in {
-  options.cfg.home.gaming.controllers = {
+  options.home.gaming.controllers = {
     enable = lib.mkEnableOption "gaming controller support";
   };
 
