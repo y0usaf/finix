@@ -38,7 +38,7 @@ in {
       ./hardware-configuration.nix
       # ./disko.nix  # Temporarily disabled - partitions not created yet
     ];
-    
+
     # Hardware configuration - host-level options
     hardware = {
       bluetooth = {
@@ -70,6 +70,7 @@ in {
       };
       appearance = {
         enable = true;
+        #animations.enable = false;
         dpi = 109;
         baseFontSize = 12;
         cursorSize = 36;

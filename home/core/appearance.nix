@@ -73,6 +73,21 @@ in {
       default = 96;
       description = "Display DPI setting for the system";
     };
+
+    # Global animation settings for all applications
+    animations = lib.mkOption {
+      type = t.submodule {
+        options = {
+          enable = lib.mkOption {
+            type = t.bool;
+            default = true;
+            description = "Whether to enable animations globally across all applications";
+          };
+        };
+      };
+      default = {};
+      description = "Global animation configuration for the system";
+    };
   };
 
   config = lib.mkIf cfg.enable {

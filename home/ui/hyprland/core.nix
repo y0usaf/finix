@@ -9,6 +9,7 @@
 # - Environment variables
 ###############################################################################
 {
+  config,
   lib,
   hostSystem,
   cfg,
@@ -85,7 +86,10 @@
   # Animation Settings
   ###########################################################################
   animations = {
-    enabled = 0;
+    enabled =
+      if config.home.core.appearance.animations.enable
+      then 1
+      else 0;
     animation = [
       "windows,1,2,woa,popin"
       "border,1,10,default"
