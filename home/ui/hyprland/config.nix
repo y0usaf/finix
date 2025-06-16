@@ -8,12 +8,10 @@
   lib,
   inputs,
   hostSystem,
-  hostHome,
-
   ...
 }: let
   cfg = config.cfg.home.ui.hyprland;
-  defaults = config.cfg.home.core.defaults;
+  inherit (config.cfg.home.core) defaults;
   generators = import ../../../lib/generators/toHyprconf.nix lib;
 
   # Import all module configurations directly
@@ -141,9 +139,6 @@ in {
                 )
               ] ["$"]
             );
-
-            # Debug: Write the merged config to a debug file
-            debugConfig = builtins.toJSON hyprlandConfig;
 
             # Generate main configuration
             mainConfig = generators.toHyprconf {

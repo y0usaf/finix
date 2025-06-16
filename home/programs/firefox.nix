@@ -13,7 +13,7 @@
   ...
 }: let
   cfg = config.cfg.home.programs.firefox;
-  username = config.cfg.shared.username;
+  inherit (config.cfg.shared) username;
 
   # Common settings for Firefox profiles
   commonSettings = {
@@ -340,16 +340,24 @@
 
   # Generate user.js content for Firefox profile
   userJsContent = lib.concatStringsSep "\n" (
-    lib.mapAttrsToList (key: value: 
-      let
-        jsValue = 
-          if builtins.isBool value then (if value then "true" else "false")
-          else if builtins.isInt value then toString value
-          else if builtins.isString value then ''"${value}"''
+    lib.mapAttrsToList (
+      key: value: let
+        jsValue =
+          if builtins.isBool value
+          then
+            (
+              if value
+              then "true"
+              else "false"
+            )
+          else if builtins.isInt value
+          then toString value
+          else if builtins.isString value
+          then ''"${value}"''
           else toString value;
-      in
-        ''user_pref("${key}", ${jsValue});''
-    ) commonSettings
+      in ''user_pref("${key}", ${jsValue});''
+    )
+    commonSettings
   );
 
   # Firefox policies.json content
@@ -388,7 +396,7 @@ in {
       packages = with pkgs; [
         firefox
       ];
-      
+
       file.home = {
         # Environment variables
         ".profile".text = lib.mkAfter ''
@@ -396,17 +404,17 @@ in {
           export MOZ_ENABLE_WAYLAND=1
           export MOZ_USE_XINPUT2=1
         '';
-        
+
         # Default profile user.js (will be created if profile exists)
         ".mozilla/firefox/${username}.default/user.js".text = userJsContent;
-        
+
         # Default profile userChrome.css
         ".mozilla/firefox/${username}.default/chrome/userChrome.css".text = userChromeCss;
-        
+
         # Alternative profile paths (Firefox creates different profile names)
         ".mozilla/firefox/${username}.default-release/user.js".text = userJsContent;
         ".mozilla/firefox/${username}.default-release/chrome/userChrome.css".text = userChromeCss;
-        
+
         # Firefox Policies (system-wide)
         ".mozilla/firefox/policies/policies.json".text = policiesContent;
       };

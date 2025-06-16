@@ -61,8 +61,6 @@
     hostNames
   );
 
-
-
   # Get valid host names with proper config structure
   validHostNames =
     builtins.filter (
@@ -99,7 +97,11 @@
     # Read the host configuration directly
     hostConfig =
       if hostname != null
-      then import (hostsDir + "/${hostname}/default.nix") {inherit pkgs; inputs = null;}
+      then
+        import (hostsDir + "/${hostname}/default.nix") {
+          inherit pkgs;
+          inputs = null;
+        }
       else throw "hostname must be provided to shared core module";
 
     # Extract shared configuration from host config

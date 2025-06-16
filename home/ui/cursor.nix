@@ -13,7 +13,7 @@
   ...
 }: let
   cfg = config.cfg.home.ui.cursor;
-  username = config.cfg.shared.username;
+  inherit (config.cfg.shared) username;
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
 

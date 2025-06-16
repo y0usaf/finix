@@ -146,49 +146,56 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ######################################################################
-    # Package Installation
+    # Maid Configuration
     ######################################################################
-    users.users.y0usaf.maid.packages = with pkgs; [
-      gtk3
-      gtk4
-    ];
+    users.users.y0usaf.maid = {
+      ######################################################################
+      # Package Installation
+      ######################################################################
+      packages = with pkgs; [
+        gtk3
+        gtk4
+      ];
 
-    ######################################################################
-    # nix-maid File Management
-    ######################################################################
-    users.users.y0usaf.maid.file.xdg_config = {
-      # GTK-3.0 configuration files
-      "gtk-3.0/settings.ini".text = lib.generators.toINI {} gtk3Settings;
-      "gtk-3.0/gtk.css".text = gtkCss;
-      "gtk-3.0/bookmarks".text = bookmarksContent;
+      ######################################################################
+      # File Management
+      ######################################################################
+      file = {
+        xdg_config = {
+          # GTK-3.0 configuration files
+          "gtk-3.0/settings.ini".text = lib.generators.toINI {} gtk3Settings;
+          "gtk-3.0/gtk.css".text = gtkCss;
+          "gtk-3.0/bookmarks".text = bookmarksContent;
 
-      # GTK-4.0 configuration files
-      "gtk-4.0/settings.ini".text = lib.generators.toINI {} gtk4Settings;
-    };
+          # GTK-4.0 configuration files
+          "gtk-4.0/settings.ini".text = lib.generators.toINI {} gtk4Settings;
+        };
 
-    ######################################################################
-    # Environment Variables (via .zshenv for scaling)
-    ######################################################################
-    users.users.y0usaf.maid.file.home.".zshenv".text = lib.mkAfter ''
-      # GTK cursor size scales proportionally with the scaling factor
-      export XCURSOR_SIZE="${toString (24 * scaleFactor)}"
-    '';
-
-    ######################################################################
-    # Native nix-maid DConf and GSettings Support
-    ######################################################################
-    users.users.y0usaf.maid.gsettings.settings = {
-      org.gnome.desktop.interface = {
-        color-scheme = "prefer-dark";
-        text-scaling-factor = scaleFactor;
-        scaling-factor = scaleFactor;
+        ######################################################################
+        # Environment Variables (via .zshenv for scaling)
+        ######################################################################
+        home.".zshenv".text = lib.mkAfter ''
+          # GTK cursor size scales proportionally with the scaling factor
+          export XCURSOR_SIZE="${toString (24 * scaleFactor)}"
+        '';
       };
-    };
 
-    users.users.y0usaf.maid.dconf.settings = {
-      "/org/gnome/desktop/interface/color-scheme" = "prefer-dark";
-      "/org/gnome/desktop/interface/text-scaling-factor" = scaleFactor;
-      "/org/gnome/desktop/interface/scaling-factor" = scaleFactor;
+      ######################################################################
+      # Native nix-maid DConf and GSettings Support
+      ######################################################################
+      gsettings.settings = {
+        org.gnome.desktop.interface = {
+          color-scheme = "prefer-dark";
+          text-scaling-factor = scaleFactor;
+          scaling-factor = scaleFactor;
+        };
+      };
+
+      dconf.settings = {
+        "/org/gnome/desktop/interface/color-scheme" = "prefer-dark";
+        "/org/gnome/desktop/interface/text-scaling-factor" = scaleFactor;
+        "/org/gnome/desktop/interface/scaling-factor" = scaleFactor;
+      };
     };
   };
 }

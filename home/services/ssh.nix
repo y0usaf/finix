@@ -59,7 +59,7 @@ in {
       ###########################################################################
       systemd.services.ssh-agent = {
         description = "SSH key agent";
-        wantedBy = [ "default.target" ];
+        wantedBy = ["default.target"];
         serviceConfig = {
           Type = "forking";
           Environment = "SSH_AUTH_SOCK=%t/ssh-agent";

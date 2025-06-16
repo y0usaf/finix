@@ -2,11 +2,7 @@
 # XDG Desktop Portal Configuration
 # Desktop integration services for applications
 ###############################################################################
-{
-  lib,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   config = {
     ###########################################################################
     # XDG Desktop Portal

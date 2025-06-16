@@ -1,6 +1,8 @@
 ###############################################################################
-# Polkit Authentication Agent Service
-# Provides polkit authentication for desktop applications
+# Nix Development Tools
+# Linting and analysis tools for Nix code
+# - statix: Nix linter for best practices
+# - deadnix: Dead code elimination for Nix
 ###############################################################################
 {
   config,
@@ -8,13 +10,18 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.services.polkitAgent;
+  cfg = config.cfg.home.programs.dev.nixTools;
+  inherit (config.cfg.shared) username;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.services.polkitAgent = {
-    enable = lib.mkEnableOption "polkit authentication agent";
+  options.cfg.home.programs.dev.nixTools = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Nix development tools (statix, deadnix)";
+    };
   };
 
   ###########################################################################
@@ -24,21 +31,11 @@ in {
     ###########################################################################
     # Maid Configuration
     ###########################################################################
-    users.users.y0usaf.maid = {
-      packages = [pkgs.polkit_gnome];
-
-      systemd.services.polkit-gnome-authentication-agent-1 = {
-        description = "polkit-gnome-authentication-agent-1";
-        wantedBy = ["graphical-session.target"];
-        after = ["graphical-session.target"];
-        serviceConfig = {
-          Type = "simple";
-          ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-          Restart = "on-failure";
-          RestartSec = 1;
-          TimeoutStopSec = 10;
-        };
-      };
+    users.users.${username}.maid = {
+      packages = with pkgs; [
+        statix  # Nix linter for best practices
+        deadnix # Dead code elimination for Nix
+      ];
     };
   };
 }

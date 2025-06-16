@@ -28,7 +28,7 @@ in {
     ###########################################################################
     users.users.y0usaf.maid = {
       packages = [pkgs.chromium];
-      
+
       file = {
         home."{{xdg_data_home}}/applications/keybard.desktop".text = ''
           [Desktop Entry]

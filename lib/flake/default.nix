@@ -11,7 +11,6 @@
   # Import individual modules
   shared = import ./shared.nix {inherit lib pkgs helpers;};
   system = import ./system.nix {inherit lib pkgs helpers;};
-
 in {
   # Export configuration functions
   inherit (shared) hostNames systemConfigs homeConfigs validHostNames mkSpecialArgs mapToAttrs;

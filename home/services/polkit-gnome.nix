@@ -26,7 +26,7 @@ in {
     ###########################################################################
     users.users.y0usaf.maid = {
       packages = [pkgs.polkit_gnome];
-      
+
       systemd.services.polkit-gnome-authentication-agent-1 = {
         description = "polkit-gnome-authentication-agent-1";
         wantedBy = ["graphical-session.target"];

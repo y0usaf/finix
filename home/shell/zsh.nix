@@ -89,7 +89,7 @@ in {
           # History configuration
           HISTSIZE=${toString sharedZsh.history-memory}
           SAVEHIST=${toString sharedZsh.history-storage}
-          HISTFILE="{{xdg_state_home}}/zsh/history"
+          HISTFILE="$HOME/.local/state/zsh/history"
           setopt HIST_IGNORE_DUPS
           setopt HIST_IGNORE_ALL_DUPS
           setopt HIST_IGNORE_SPACE
@@ -215,6 +215,10 @@ in {
 
             #----- Hardware Management Shortcut -----
             gpupower = "sudo nvidia-smi -pl";
+
+            #----- Nix Linting Shortcuts -----
+            lintcheck = "clear; statix check .; deadnix .";
+            lintfix = "clear; statix fix .; deadnix .";
           };
 
           # Note: Kitty Panel aliases disabled until kittens module is available

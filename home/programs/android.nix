@@ -25,52 +25,57 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Packages
+    # Maid Configuration
     ###########################################################################
-    users.users.y0usaf.maid.packages = with pkgs; [
-      waydroid
-      android-tools
-      scrcpy
-    ];
+    users.users.y0usaf.maid = {
+      ###########################################################################
+      # Packages
+      ###########################################################################
+      packages = with pkgs; [
+        waydroid
+        android-tools
+        scrcpy
+      ];
 
-    ###########################################################################
-    # Environment Variables
-    ###########################################################################
-    users.users.y0usaf.maid.file.home = {
-      ".android_env".text = ''
-        # Android environment variables
-        export ANDROID_HOME="$XDG_DATA_HOME/android"
-        export ADB_VENDOR_KEY="$XDG_CONFIG_HOME/android"
-      '';
-    };
+      ###########################################################################
+      # File Configuration
+      ###########################################################################
+      file.home = {
+        ".android_env".text = ''
+          # Android environment variables
+          export ANDROID_HOME="$XDG_DATA_HOME/android"
+          export ADB_VENDOR_KEY="$XDG_CONFIG_HOME/android"
+        '';
+      };
 
-    ###########################################################################
-    # Systemd Services
-    ###########################################################################
-    users.users.y0usaf.maid.systemd.user.services = {
-      waydroid-container = {
-        Unit = {
-          Description = "Waydroid Container";
-          After = ["graphical-session.target"];
-          PartOf = ["graphical-session.target"];
-          Requires = ["waydroid-container.service"];
-        };
-        Service = {
-          Type = "simple";
-          Environment = [
-            "WAYDROID_EXTRA_ARGS=--gpu-mode host"
-            "LIBGL_DRIVER_NAME=nvidia"
-            "GBM_BACKEND=nvidia-drm"
-            "__GLX_VENDOR_LIBRARY_NAME=nvidia"
-          ];
-          ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
-          ExecStart = "${pkgs.waydroid}/bin/waydroid session start";
-          ExecStop = "${pkgs.waydroid}/bin/waydroid session stop";
-          Restart = "on-failure";
-          RestartSec = "5s";
-        };
-        Install = {
-          WantedBy = ["graphical-session.target"];
+      ###########################################################################
+      # Systemd Services
+      ###########################################################################
+      systemd.user.services = {
+        waydroid-container = {
+          Unit = {
+            Description = "Waydroid Container";
+            After = ["graphical-session.target"];
+            PartOf = ["graphical-session.target"];
+            Requires = ["waydroid-container.service"];
+          };
+          Service = {
+            Type = "simple";
+            Environment = [
+              "WAYDROID_EXTRA_ARGS=--gpu-mode host"
+              "LIBGL_DRIVER_NAME=nvidia"
+              "GBM_BACKEND=nvidia-drm"
+              "__GLX_VENDOR_LIBRARY_NAME=nvidia"
+            ];
+            ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
+            ExecStart = "${pkgs.waydroid}/bin/waydroid session start";
+            ExecStop = "${pkgs.waydroid}/bin/waydroid session stop";
+            Restart = "on-failure";
+            RestartSec = "5s";
+          };
+          Install = {
+            WantedBy = ["graphical-session.target"];
+          };
         };
       };
     };

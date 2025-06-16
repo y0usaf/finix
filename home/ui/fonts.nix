@@ -7,8 +7,8 @@
   ...
 }: let
   cfg = config.cfg.home.ui.fonts;
-  username = config.cfg.shared.username;
-  
+  inherit (config.cfg.shared) username;
+
   # Get the packages and names from the host appearance config
   mainFontPackages = map (x: x.package) config.cfg.home.core.appearance.fonts.main;
   mainFontNames = map (x: x.name) config.cfg.home.core.appearance.fonts.main;
@@ -110,7 +110,7 @@ in {
     #######################################################################
     users.users.${username}.maid = {
       packages = mainFontPackages ++ fallbackPackages;
-      
+
       file.xdg_config = {
         "fontconfig/fonts.conf".text = fontXmlConfig;
       };

@@ -1,6 +1,6 @@
 ###############################################################################
-# Format Nix Service
-# Automatic Nix file formatting with alejandra
+# System Nix Formatting Service
+# Automatic system-level Nix file formatting with alejandra
 ###############################################################################
 {
   config,
@@ -8,17 +8,17 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.services.formatNix;
+  cfg = config.cfg.system.services.formatNix;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.services.formatNix = {
-    enable = lib.mkEnableOption "automatic Nix file formatting with alejandra";
+  options.cfg.system.services.formatNix = {
+    enable = lib.mkEnableOption "automatic system-level Nix file formatting with alejandra";
 
     directory = lib.mkOption {
       type = lib.types.str;
-      default = "{{home}}/nixos";
+      default = "/etc/nixos";
       description = "Directory to watch for Nix file changes";
     };
   };
@@ -28,29 +28,25 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # Maid Configuration
+    # System Service Configuration
     ###########################################################################
-    users.users.y0usaf.maid = {
-      packages = [pkgs.alejandra];
-
-      systemd.services.format-nix = {
-        description = "Format Nix files on change";
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.alejandra}/bin/alejandra .";
-          WorkingDirectory = "{{home}}/nixos";
-        };
+    systemd.services.format-nix = {
+      description = "Format Nix files on change";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.alejandra}/bin/alejandra ${cfg.directory}";
+        User = "root";
       };
+    };
 
-      systemd.timers.format-nix = {
-        description = "Timer for formatting Nix files";
-        timerConfig = {
-          OnBootSec = "1min";
-          OnUnitActiveSec = "5min";
-          Unit = "format-nix.service";
-        };
-        wantedBy = ["timers.target"];
+    systemd.timers.format-nix = {
+      description = "Timer for formatting Nix files";
+      timerConfig = {
+        OnBootSec = "1min";
+        OnUnitActiveSec = "5min";
+        Unit = "format-nix.service";
       };
+      wantedBy = ["timers.target"];
     };
   };
 }

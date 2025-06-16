@@ -8,7 +8,10 @@
   helpers,
   hostsDir ? ../../hosts,
 }: let
-  shared = import ./shared.nix {inherit lib pkgs helpers hostsDir; inputs = null;};
+  shared = import ./shared.nix {
+    inherit lib pkgs helpers hostsDir;
+    inputs = null;
+  };
 in {
   # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {
@@ -37,13 +40,13 @@ in {
             (hostsDir + "/default.nix")
             ../../system
             (sharedWithInputs.mkSharedModule {inherit hostname hostsDir;})
-            
+
             # Integration modules - each handles its own setup
             (maidIntegration.mkNixosModule {inherit inputs hostname commonSpecialArgs;})
-            
+
             # Home modules (maid-based)
             ../../home
-            
+
             # External modules
             inputs.chaotic.nixosModules.default
           ]
