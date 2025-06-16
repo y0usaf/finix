@@ -29,7 +29,7 @@ in {
         enable = true;
       };
     };
-  } 
+  };
 
   system = {
     # Move imports inside system configuration to avoid HM exposure
