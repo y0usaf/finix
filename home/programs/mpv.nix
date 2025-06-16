@@ -8,9 +8,9 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.mpv;
+  cfg = config.home.programs.mpv;
 in {
-  options.cfg.home.programs.mpv = {
+  options.home.programs.mpv = {
     enable = lib.mkEnableOption "mpv media player";
   };
   config = lib.mkIf cfg.enable {

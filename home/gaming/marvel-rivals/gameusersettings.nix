@@ -7,12 +7,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.gaming.marvel-rivals.gameusersettings;
+  cfg = config.home.gaming.marvel-rivals.gameusersettings;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.gaming.marvel-rivals.gameusersettings = {
+  options.home.gaming.marvel-rivals.gameusersettings = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

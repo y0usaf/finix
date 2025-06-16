@@ -12,12 +12,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.services.ssh;
+  cfg = config.home.services.ssh;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.services.ssh = {
+  options.home.services.ssh = {
     enable = lib.mkEnableOption "SSH configuration module";
   };
 

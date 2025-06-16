@@ -107,7 +107,7 @@
   ###########################################################################
   # NVIDIA-specific environment settings
   ###########################################################################
-  env = lib.optionals hostSystem.cfg.hardware.nvidia.enable [
+  env = lib.optionals hostSystem.hardware.nvidia.enable [
     "LIBVA_DRIVER_NAME,nvidia"
     "GBM_BACKEND,nvidia-drm"
     "__GLX_VENDOR_LIBRARY_NAME,nvidia"

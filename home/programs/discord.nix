@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.programs.discord;
+  cfg = config.home.programs.discord;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.discord = {
+  options.home.programs.discord = {
     enable = lib.mkEnableOption "Discord module";
     variant = lib.mkOption {
       type = lib.types.enum ["canary" "stable"];

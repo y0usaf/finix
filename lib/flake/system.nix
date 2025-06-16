@@ -36,9 +36,6 @@ in {
         modules =
           [
             # Core system modules
-            (hostsDir + "/${hostname}/hardware-configuration.nix")
-            (hostsDir + "/default.nix")
-            ../../system
             (sharedWithInputs.mkSharedModule {inherit hostname hostsDir;})
 
             # Integration modules - each handles its own setup
@@ -50,21 +47,18 @@ in {
             # External modules
             inputs.chaotic.nixosModules.default
           ]
-          ++ (sharedWithInputs.systemConfigs.${hostname}.cfg.system.imports or [])
+          ++ (sharedWithInputs.systemConfigs.${hostname}.system.imports or [])
           ++ [
             # Apply core system configuration
             ({config, ...}: {
-              networking.hostName = config.cfg.shared.hostname;
-              time.timeZone = config.cfg.shared.timezone;
-              system.stateVersion = config.cfg.shared.stateVersion;
+              networking.hostName = config.shared.hostname;
+              time.timeZone = config.shared.timezone;
+              system.stateVersion = config.shared.stateVersion;
 
               # Apply users configuration
               inherit (sharedWithInputs.systemConfigs.${hostname}) users;
 
-              # Hardware configuration
-              hardware = {
-                bluetooth.enable = sharedWithInputs.systemConfigs.${hostname}.cfg.system.hardware.bluetooth.enable or false;
-              };
+              # Note: Hardware configuration is available via hostSystem.hardware for hardware modules
             })
           ];
       };

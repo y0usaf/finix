@@ -11,12 +11,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.android;
+  cfg = config.home.programs.android;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.android = {
+  options.home.programs.android = {
     enable = lib.mkEnableOption "android tools and waydroid";
   };
 

@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.programs.dev.latex;
+  cfg = config.home.programs.dev.latex;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.dev.latex = {
+  options.home.programs.dev.latex = {
     enable = lib.mkEnableOption "LaTeX development environment";
   };
 

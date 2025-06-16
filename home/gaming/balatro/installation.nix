@@ -8,7 +8,7 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.gaming.balatro;
+  cfg = config.home.gaming.balatro;
 
   # Import npins sources for GitHub repositories
   sources = import ./npins;
@@ -74,7 +74,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.gaming.balatro = {
+  options.home.gaming.balatro = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

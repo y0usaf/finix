@@ -10,7 +10,7 @@
   hostSystem,
   ...
 }: let
-  hardwareCfg = hostSystem.cfg.hardware;
+  hardwareCfg = hostSystem.hardware;
 in {
   config = {
     ###########################################################################
@@ -43,7 +43,7 @@ in {
       ];
 
     # Add user to necessary groups for Bluetooth
-    users.users.${config.cfg.shared.username}.extraGroups =
+    users.users.${config.shared.username}.extraGroups =
       lib.optionals (hardwareCfg.bluetooth.enable or false) ["dialout" "bluetooth" "lp"];
   };
 }

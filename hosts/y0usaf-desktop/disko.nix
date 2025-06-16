@@ -5,8 +5,8 @@
   disko,
   ...
 }: let
-  username = config.cfg.system.username or "y0usaf";
-  homeDir = config.cfg.system.homeDirectory or "/home/${username}";
+  username = config.system.username or "y0usaf";
+  homeDir = config.system.homeDirectory or "/home/${username}";
 
   # Configurable options
   disks = {

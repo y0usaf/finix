@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.programs.obsidian;
+  cfg = config.home.programs.obsidian;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.obsidian = {
+  options.home.programs.obsidian = {
     enable = lib.mkEnableOption "Obsidian module";
     useWayland = lib.mkOption {
       type = lib.types.bool;

@@ -10,8 +10,8 @@
   hostSystem,
   ...
 }: let
-  cfg = config.cfg.home.ui.hyprland;
-  inherit (config.cfg.home.core) defaults;
+  cfg = config.home.ui.hyprland;
+  inherit (config.home.core) defaults;
   generators = import ../../../lib/generators/toHyprconf.nix lib;
 
   # Import all module configurations directly
@@ -152,8 +152,8 @@ in {
         # Hyprpaper configuration (if needed)
         "hypr/hyprpaper.conf" = {
           text = ''
-            preload = ${config.cfg.home.directories.wallpapers.static.path}
-            wallpaper = ,${config.cfg.home.directories.wallpapers.static.path}
+            preload = ${config.home.directories.wallpapers.static.path}
+            wallpaper = ,${config.home.directories.wallpapers.static.path}
             splash = false
             ipc = on
           '';

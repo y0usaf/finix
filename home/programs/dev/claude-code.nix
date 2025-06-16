@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.dev.claude-code;
+  cfg = config.home.programs.dev.claude-code;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.dev.claude-code = {
+  options.home.programs.dev.claude-code = {
     enable = lib.mkEnableOption "claude code development environment";
   };
 

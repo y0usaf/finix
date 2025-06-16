@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.dev.docker;
+  cfg = config.home.programs.dev.docker;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.dev.docker = {
+  options.home.programs.dev.docker = {
     enable = lib.mkEnableOption "docker development environment";
   };
 

@@ -13,17 +13,17 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.ui.gtk;
+  cfg = config.home.ui.gtk;
 
   #############################################################
   # Extract common variables from the appearance config
   #############################################################
-  mainFontName = (builtins.elemAt config.cfg.home.core.appearance.fonts.main 0).name;
-  inherit (config.cfg.home.core.appearance) baseFontSize;
-  dpiStr = toString config.cfg.home.core.appearance.dpi;
+  mainFontName = (builtins.elemAt config.home.core.appearance.fonts.main 0).name;
+  inherit (config.home.core.appearance) baseFontSize;
+  dpiStr = toString config.home.core.appearance.dpi;
 
   # Get user bookmarks from user config
-  inherit (config.cfg.home.core.user) bookmarks;
+  inherit (config.home.core.user) bookmarks;
 
   # Get the scaling factor from config (defaults to 1.0)
   scaleFactor = cfg.scale;
@@ -130,7 +130,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.ui.gtk = {
+  options.home.ui.gtk = {
     enable = lib.mkEnableOption "GTK theming and configuration using nix-maid";
 
     scale = lib.mkOption {
