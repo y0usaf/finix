@@ -11,17 +11,6 @@
   inputs = {
     ## Core System Dependencies
     nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-
-    # home-manager = {
-    #   url = "github:nix-community/home-manager/master";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    smfh = {
-      url = "github:Gerg-L/smfh";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     nix-maid = {
       url = "github:viperML/nix-maid";
@@ -65,16 +54,8 @@
     };
 
     ## Development & Creative Tools
-    pyproject-nix = {
-      url = "github:pyproject-nix/pyproject.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     obs-image-reaction.url = "github:L-Nafaryus/obs-image-reaction";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-    whisper-overlay = {
-      url = "github:oddlama/whisper-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     ## Gaming
     nix-minecraft = {
