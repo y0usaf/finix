@@ -2,9 +2,7 @@
 # Maid Integration Module
 # Handles nix-maid integration and home module configuration
 ###############################################################################
-{
-  hostsDir ? ../../hosts,
-}: {
+{hostsDir ? ../../hosts}: {
   # Create NixOS module for maid integration
   mkNixosModule = {
     inputs,

@@ -36,6 +36,10 @@ in {
           then inputs.hyprland.packages.${pkgs.system}.hyprland
           else pkgs.hyprland
         )
+        # Screenshot tools
+        pkgs.grim
+        pkgs.slurp
+        pkgs.wl-clipboard
       ];
 
       ###########################################################################

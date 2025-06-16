@@ -9,14 +9,8 @@
   hostsDir ? ../../hosts,
   inputs ? null,
 }: let
-  # Get all valid host names (excluding special directories and files)
-  hostNames = builtins.filter (
-    name:
-      name
-      != "README.md"
-      && name != "default.nix"
-      && builtins.pathExists (hostsDir + "/${name}/default.nix")
-  ) (builtins.attrNames (builtins.readDir hostsDir));
+  # Explicit host list - no filesystem scanning
+  hostNames = ["y0usaf-desktop"];
 
   # Import unified configurations for each host
   unifiedConfigs = builtins.listToAttrs (
@@ -56,29 +50,15 @@
     hostNames
   );
 
-  # Get valid host names with proper config structure
-  validHostNames =
-    builtins.filter (
-      hostname:
-        builtins.hasAttr hostname unifiedConfigs
-        && builtins.hasAttr "shared" unifiedConfigs.${hostname}
-        && builtins.hasAttr "username" unifiedConfigs.${hostname}.shared
-    )
-    hostNames;
-
   # Common specialArgs builder
   mkSpecialArgs = commonSpecialArgs: hostname:
     commonSpecialArgs
     // {
       hostSystem = systemConfigs.${hostname};
       hostHome = homeConfigs.${hostname};
-
       inherit helpers hostname;
     };
-
-  # Generic listToAttrs + map helper
-  mapToAttrs = f: list: builtins.listToAttrs (map f list);
-  # Universal shared module function
+  # Simplified shared module function - just imports options and sets config
   mkSharedModule = {
     hostname,
     hostsDir ? hostsDir,
@@ -105,68 +85,50 @@
       username = lib.mkOption {
         type = lib.types.str;
         description = "System username for the primary user account";
-        example = "alice";
       };
-
       hostname = lib.mkOption {
         type = lib.types.str;
         description = "System hostname";
-        example = "alice-laptop";
       };
-
       homeDirectory = lib.mkOption {
         type = lib.types.path;
         description = "Path to the user's home directory";
-        example = "/home/alice";
       };
-
       stateVersion = lib.mkOption {
         type = lib.types.str;
         description = "NixOS state version for compatibility";
-        example = "24.11";
       };
-
       timezone = lib.mkOption {
         type = lib.types.str;
         description = "System timezone";
-        example = "America/New_York";
       };
-
       config = lib.mkOption {
         type = lib.types.str;
         description = "Configuration profile identifier";
         default = "default";
-        example = "desktop";
       };
-
       tokenDir = lib.mkOption {
         type = lib.types.str;
-        description = "Directory containing token files to be loaded as environment variables";
-        example = "/home/alice/Tokens";
+        description = "Directory containing token files";
       };
-
       zsh = lib.mkOption {
         type = lib.types.submodule {
           options = {
             cat-fetch = lib.mkOption {
               type = lib.types.bool;
               default = true;
-              description = "Print colorful cats on shell startup";
             };
             history-memory = lib.mkOption {
               type = lib.types.int;
               default = 1000;
-              description = "Number of history entries to keep in memory";
             };
             history-storage = lib.mkOption {
               type = lib.types.int;
               default = 1000;
-              description = "Number of history entries to save to disk";
             };
             enableFancyPrompt = lib.mkOption {
               type = lib.types.bool;
               default = true;
-              description = "Enable the custom PS1 prompt";
             };
             zellij = lib.mkOption {
               type = lib.types.submodule {
@@ -174,25 +136,19 @@
                   enable = lib.mkOption {
                     type = lib.types.bool;
                     default = false;
-                    description = "Enable zellij terminal multiplexer";
                   };
                 };
               };
               default = {};
-              description = "Zellij terminal multiplexer configuration";
             };
           };
         };
         default = {};
-        description = "Zsh shell configuration options";
       };
     };
 
-    # Automatically set the shared configuration from host config
     config = {
       shared = sharedConfig;
-
-      # Add any shared assertions, warnings, or common config here
       assertions = [
         {
           assertion = config.shared.username != "";
@@ -206,5 +162,5 @@
     };
   };
 in {
-  inherit hostNames unifiedConfigs systemConfigs homeConfigs validHostNames mkSpecialArgs mapToAttrs mkSharedModule;
+  inherit hostNames unifiedConfigs systemConfigs homeConfigs mkSpecialArgs mkSharedModule;
 }

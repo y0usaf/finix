@@ -22,46 +22,46 @@ in {
     sharedWithInputs = import ./shared.nix {inherit lib pkgs helpers hostsDir inputs;};
     maidIntegration = import ./maid.nix {inherit hostsDir;};
   in
-    sharedWithInputs.mapToAttrs
-    (hostname: {
-      name = hostname;
-      value = inputs.nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs =
-          sharedWithInputs.mkSpecialArgs commonSpecialArgs hostname
-          // {
-            inherit hostname;
-            inherit hostsDir;
-          };
-        modules =
-          [
-            # Core system modules
-            (sharedWithInputs.mkSharedModule {inherit hostname hostsDir;})
+    builtins.listToAttrs (map
+      (hostname: {
+        name = hostname;
+        value = inputs.nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs =
+            sharedWithInputs.mkSpecialArgs commonSpecialArgs hostname
+            // {
+              inherit hostname;
+              inherit hostsDir;
+            };
+          modules =
+            [
+              # Core system modules
+              (sharedWithInputs.mkSharedModule {inherit hostname hostsDir;})
 
-            # Integration modules - each handles its own setup
-            (maidIntegration.mkNixosModule {inherit inputs hostname;})
+              # Integration modules - each handles its own setup
+              (maidIntegration.mkNixosModule {inherit inputs hostname;})
 
-            # Home modules (maid-based)
-            ../../home
+              # Home modules (maid-based)
+              ../../home
 
-            # External modules
-            inputs.chaotic.nixosModules.default
-          ]
-          ++ (sharedWithInputs.systemConfigs.${hostname}.system.imports or [])
-          ++ [
-            # Apply core system configuration
-            ({config, ...}: {
-              networking.hostName = config.shared.hostname;
-              time.timeZone = config.shared.timezone;
-              system.stateVersion = config.shared.stateVersion;
+              # External modules
+              inputs.chaotic.nixosModules.default
+            ]
+            ++ (sharedWithInputs.systemConfigs.${hostname}.system.imports or [])
+            ++ [
+              # Apply core system configuration
+              ({config, ...}: {
+                networking.hostName = config.shared.hostname;
+                time.timeZone = config.shared.timezone;
+                system.stateVersion = config.shared.stateVersion;
 
-              # Apply users configuration
-              inherit (sharedWithInputs.systemConfigs.${hostname}) users;
+                # Apply users configuration
+                inherit (sharedWithInputs.systemConfigs.${hostname}) users;
 
-              # Note: Hardware configuration is available via hostSystem.hardware for hardware modules
-            })
-          ];
-      };
-    })
-    sharedWithInputs.hostNames;
+                # Note: Hardware configuration is available via hostSystem.hardware for hardware modules
+              })
+            ];
+        };
+      })
+      sharedWithInputs.hostNames);
 }
