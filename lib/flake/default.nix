@@ -13,6 +13,6 @@
   system = import ./system.nix {inherit lib pkgs helpers;};
 in {
   # Export configuration functions
-  inherit (shared) hostNames systemConfigs homeConfigs validHostNames mkSpecialArgs mapToAttrs;
+  inherit (shared) hostNames systemConfigs homeConfigs mkSpecialArgs;
   inherit (system) mkNixosConfigurations;
 }
