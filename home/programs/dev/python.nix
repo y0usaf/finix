@@ -8,12 +8,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.programs.dev.python;
+  cfg = config.home.programs.dev.python;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.dev.python = {
+  options.home.programs.dev.python = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

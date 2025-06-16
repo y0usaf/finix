@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.session.xdg;
+  cfg = config.home.session.xdg;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.session.xdg = {
+  options.home.session.xdg = {
     enable = lib.mkEnableOption "XDG directory configuration";
   };
 
@@ -153,21 +153,21 @@ in {
             x-scheme-handler/ftp=firefox.desktop
           '';
 
-        ###########################################################################
-        # Desktop Entries
-        ###########################################################################
-        xdg_data."applications/firefox.desktop".text = ''
-          [Desktop Entry]
-          Name=Firefox
-          GenericName=Web Browser
-          Exec=firefox %U
-          Terminal=false
-          Type=Application
-          Categories=Application;Network;WebBrowser;
-          MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
-          Icon=firefox
-          StartupNotify=true
-        '';
+          ###########################################################################
+          # Desktop Entries
+          ###########################################################################
+          xdg_data."applications/firefox.desktop".text = ''
+            [Desktop Entry]
+            Name=Firefox
+            GenericName=Web Browser
+            Exec=firefox %U
+            Terminal=false
+            Type=Application
+            Categories=Application;Network;WebBrowser;
+            MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
+            Icon=firefox
+            StartupNotify=true
+          '';
 
           # Python RC Configuration
           "python/pythonrc".text = ''

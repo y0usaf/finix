@@ -9,12 +9,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.ui.ags;
+  cfg = config.home.ui.ags;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.ui.ags = {
+  options.home.ui.ags = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

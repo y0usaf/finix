@@ -11,12 +11,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.ui.wayland;
+  cfg = config.home.ui.wayland;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.ui.wayland = {
+  options.home.ui.wayland = {
     enable = lib.mkEnableOption "Wayland configuration";
   };
 

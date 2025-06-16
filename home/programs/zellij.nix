@@ -11,14 +11,14 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.programs.zellij;
+  cfg = config.home.programs.zellij;
   # Get shared user preferences for zellij auto-start
-  sharedZsh = config.cfg.shared.zsh;
+  sharedZsh = config.shared.zsh;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.programs.zellij = {
+  options.home.programs.zellij = {
     enable = lib.mkEnableOption "zellij terminal multiplexer";
   };
 

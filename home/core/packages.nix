@@ -8,7 +8,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.cfg.home.core.packages;
+  cfg = config.home.core.packages;
 
   # Base packages all users should have
   basePackages = with pkgs; [
@@ -35,7 +35,7 @@ in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.core.packages = {
+  options.home.core.packages = {
     enable = lib.mkEnableOption "core packages and base system tools";
     extraPackages = lib.mkOption {
       type = lib.types.listOf lib.types.package;

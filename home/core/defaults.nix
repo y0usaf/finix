@@ -7,12 +7,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.core.defaults;
+  cfg = config.home.core.defaults;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.core.defaults = {
+  options.home.core.defaults = {
     browser = lib.mkOption {
       type = lib.types.str;
       default = "firefox";

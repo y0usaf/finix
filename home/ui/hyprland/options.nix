@@ -6,7 +6,7 @@
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.ui.hyprland = {
+  options.home.ui.hyprland = {
     enable = lib.mkEnableOption "Hyprland window manager";
     flake = {
       enable = lib.mkOption {

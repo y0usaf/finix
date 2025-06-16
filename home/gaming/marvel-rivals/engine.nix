@@ -7,12 +7,12 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.gaming.marvel-rivals.engine;
+  cfg = config.home.gaming.marvel-rivals.engine;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.cfg.home.gaming.marvel-rivals.engine = {
+  options.home.gaming.marvel-rivals.engine = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

@@ -34,14 +34,11 @@
     (name: {
       inherit name;
       value = {
-        cfg = {
-          # Move hardware to top level for system modules
-          inherit (unifiedConfigs.${name}.cfg.system) hardware;
-          system = {
-            # Move imports into system scope to avoid HM exposure
-            imports = unifiedConfigs.${name}.imports or [];
-            inherit (unifiedConfigs.${name}.cfg.system) hardware;
-          };
+        # Hardware configuration from system
+        inherit (unifiedConfigs.${name}.system) hardware;
+        system = {
+          # Move imports into system scope to avoid HM exposure
+          imports = unifiedConfigs.${name}.system.imports or [];
         };
         users = unifiedConfigs.${name}.users or {};
       };
@@ -54,9 +51,7 @@
     map
     (name: {
       inherit name;
-      value = {
-        cfg = unifiedConfigs.${name}.cfg.home or {};
-      };
+      value = unifiedConfigs.${name}.home or {};
     })
     hostNames
   );
@@ -66,9 +61,8 @@
     builtins.filter (
       hostname:
         builtins.hasAttr hostname unifiedConfigs
-        && builtins.hasAttr "cfg" unifiedConfigs.${hostname}
-        && builtins.hasAttr "shared" unifiedConfigs.${hostname}.cfg
-        && builtins.hasAttr "username" unifiedConfigs.${hostname}.cfg.shared
+        && builtins.hasAttr "shared" unifiedConfigs.${hostname}
+        && builtins.hasAttr "username" unifiedConfigs.${hostname}.shared
     )
     hostNames;
 
@@ -105,9 +99,9 @@
       else throw "hostname must be provided to shared core module";
 
     # Extract shared configuration from host config
-    sharedConfig = hostConfig.cfg.shared;
+    sharedConfig = hostConfig.shared;
   in {
-    options.cfg.shared = {
+    options.shared = {
       username = lib.mkOption {
         type = lib.types.str;
         description = "System username for the primary user account";
@@ -196,16 +190,16 @@
 
     # Automatically set the shared configuration from host config
     config = {
-      cfg.shared = sharedConfig;
+      shared = sharedConfig;
 
       # Add any shared assertions, warnings, or common config here
       assertions = [
         {
-          assertion = config.cfg.shared.username != "";
+          assertion = config.shared.username != "";
           message = "Username cannot be empty";
         }
         {
-          assertion = config.cfg.shared.hostname != "";
+          assertion = config.shared.hostname != "";
           message = "Hostname cannot be empty";
         }
       ];

@@ -8,9 +8,9 @@
   lib,
   ...
 }: let
-  cfg = config.cfg.home.gaming.emulation.gcn-wii;
+  cfg = config.home.gaming.emulation.gcn-wii;
 in {
-  options.cfg.home.gaming.emulation.gcn-wii = {
+  options.home.gaming.emulation.gcn-wii = {
     enable = lib.mkEnableOption "GameCube and Wii emulation via Dolphin";
   };
 

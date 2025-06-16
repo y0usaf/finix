@@ -8,44 +8,39 @@
   ...
 }: {
   # System-level configuration options
-  options.cfg.system = {
+  options.system = {
     username = lib.mkOption {
       type = lib.types.str;
-      default = config.cfg.shared.username;
+      default = config.shared.username;
       description = "The username for the system.";
     };
     hostname = lib.mkOption {
       type = lib.types.str;
-      default = config.cfg.shared.hostname;
+      default = config.shared.hostname;
       description = "The system hostname.";
     };
     homeDirectory = lib.mkOption {
       type = lib.types.str;
-      default = config.cfg.shared.homeDirectory;
+      default = config.shared.homeDirectory;
       description = "The path to the user's home directory.";
-    };
-    stateVersion = lib.mkOption {
-      type = lib.types.str;
-      default = config.cfg.shared.stateVersion;
-      description = "The system state version.";
     };
     timezone = lib.mkOption {
       type = lib.types.str;
-      default = config.cfg.shared.timezone;
+      default = config.shared.timezone;
       description = "The system timezone.";
     };
     config = lib.mkOption {
       type = lib.types.str;
-      default = config.cfg.shared.config;
+      default = config.shared.config;
       description = "The system configuration type.";
     };
   };
 
   # Configuration
   config = {
-    system.stateVersion = config.cfg.shared.stateVersion;
-    time.timeZone = config.cfg.shared.timezone;
-    networking.hostName = config.cfg.shared.hostname;
+    system.stateVersion = config.shared.stateVersion;
+    time.timeZone = config.shared.timezone;
+    networking.hostName = config.shared.hostname;
     nixpkgs.config.allowUnfree = true;
   };
 }

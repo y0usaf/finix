@@ -44,6 +44,7 @@
   };
 
   #── 💽 Filesystem Configuration ──────────────────#
+  # NOTE: Filesystem definitions restored from disko.nix
   fileSystems = {
     #── 💽 Root Filesystem ──────────────────#
     "/" = {
