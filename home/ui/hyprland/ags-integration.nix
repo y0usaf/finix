@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  cfg,
   ...
 }: let
   # Safely check if AGS is enabled

@@ -32,7 +32,7 @@ inputs: let
   ## Common Special Arguments for Modules
   commonSpecialArgs = {
     inherit inputs;
-    inherit (inputs) whisper-overlay disko fast-fonts nix-minecraft;
+    inherit (inputs) disko fast-fonts nix-minecraft;
     inherit helpers;
   };
 in {
@@ -43,9 +43,4 @@ in {
   nixosConfigurations = hostUtils.mkNixosConfigurations {
     inherit inputs system commonSpecialArgs;
   };
-
-  ## Dynamic Home Manager Configurations (disabled for migration)
-  # homeConfigurations = hostUtils.mkHomeConfigurations {
-  #   inherit inputs pkgs commonSpecialArgs;
-  # };
 }
