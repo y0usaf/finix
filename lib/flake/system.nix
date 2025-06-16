@@ -20,7 +20,7 @@ in {
     commonSpecialArgs,
   }: let
     sharedWithInputs = import ./shared.nix {inherit lib pkgs helpers hostsDir inputs;};
-    maidIntegration = import ./maid.nix {inherit lib pkgs helpers hostsDir inputs;};
+    maidIntegration = import ./maid.nix {inherit hostsDir;};
   in
     sharedWithInputs.mapToAttrs
     (hostname: {
@@ -39,7 +39,7 @@ in {
             (sharedWithInputs.mkSharedModule {inherit hostname hostsDir;})
 
             # Integration modules - each handles its own setup
-            (maidIntegration.mkNixosModule {inherit inputs hostname commonSpecialArgs;})
+            (maidIntegration.mkNixosModule {inherit inputs hostname;})
 
             # Home modules (maid-based)
             ../../home

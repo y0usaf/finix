@@ -70,7 +70,6 @@ in {
       };
       appearance = {
         enable = true;
-        #animations.enable = false;
         dpi = 109;
         baseFontSize = 12;
         cursorSize = 36;
@@ -135,7 +134,6 @@ in {
       obsidian.enable = true;
       creative.enable = true;
       media.enable = true;
-      # zen-browser.enable = true; # Removed due to hash issues
       bluetooth.enable = true;
       obs.enable = true;
       bambu.enable = true;
@@ -144,7 +142,6 @@ in {
       pcmanfm.enable = true;
       qbittorrent.enable = true;
       sway-launcher-desktop.enable = true;
-      # android.enable = true; # TODO: Debug import issue
     };
     shell = {
       zsh.enable = true;
