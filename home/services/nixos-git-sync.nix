@@ -66,8 +66,8 @@ in {
             # Format date for commit message
             FORMATTED_DATE=$(date '+%d/%m/%y@%H:%M:%S')
 
-            # Get list of changed files
-            CHANGED_FILES=$(git diff --cached --name-only | sed 's/^/- /')
+            # Get list of changed files with status
+            CHANGED_FILES=$(git diff --cached --name-status | sed 's/^\(.*\)\t\(.*\)$/- [\1] \2/')
 
             # Create commit message with file list
             COMMIT_MSG="🤖 Auto Update: $FORMATTED_DATE
