@@ -66,7 +66,7 @@
     Settings = {
       gtk-application-prefer-dark-theme = 1;
       gtk-cursor-theme-name = "DeepinDarkV20-x11";
-      gtk-cursor-theme-size = toString (24 * scaleFactor);
+      gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
       gtk-font-name = "${mainFontName} ${toString baseFontSize}";
       gtk-xft-antialias = 1;
       gtk-xft-dpi = dpiStr;
@@ -80,7 +80,7 @@
     Settings = {
       gtk-application-prefer-dark-theme = 1;
       gtk-cursor-theme-name = "DeepinDarkV20-x11";
-      gtk-cursor-theme-size = toString (24 * scaleFactor);
+      gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
       gtk-font-name = "${mainFontName} ${toString baseFontSize}";
     };
   };
@@ -176,7 +176,7 @@ in {
         ######################################################################
         home.".zshenv".text = lib.mkAfter ''
           # GTK cursor size scales proportionally with the scaling factor
-          export XCURSOR_SIZE="${toString (24 * scaleFactor)}"
+          export XCURSOR_SIZE="${toString (builtins.floor (24 * scaleFactor))}"
         '';
       };
 

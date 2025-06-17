@@ -18,7 +18,7 @@ in {
 
     repoPath = lib.mkOption {
       type = lib.types.str;
-      default = "{{home}}/nixos";
+      default = "/home/y0usaf/nixos";
       description = "Path to the NixOS configuration repository";
     };
 
@@ -81,7 +81,7 @@ in {
         serviceConfig.Type = "oneshot";
         path = with pkgs; [git coreutils openssh];
         environment = {
-          SSH_AUTH_SOCK = "{{xdg_runtime_dir}}/ssh-agent";
+          SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/ssh-agent";
         };
         wantedBy = ["default.target"];
       };
