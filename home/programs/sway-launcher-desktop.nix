@@ -42,9 +42,8 @@ in {
         # https://gist.github.com/Biont/40ef59652acf3673520c7a03c9f22d2a
         shopt -s nullglob globstar
         set -o pipefail
-        if ! { exec 0>&3; } 1>/dev/null 2>&1; then
-          exec 3>/dev/null # If file descriptor 3 is unused in parent shell, output to /dev/null
-        fi
+        # Ensure file descriptor 3 is available for debug output
+        exec 3>/dev/null 2>/dev/null || true
         # shellcheck disable=SC2154
         trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
         IFS=$'\n\t'
