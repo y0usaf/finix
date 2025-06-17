@@ -27,7 +27,7 @@ in {
     # Maid Configuration
     ###########################################################################
     users.users.y0usaf.maid = {
-      packages = [pkgs.chromium];
+      packages = [pkgs.ungoogled-chromium];
 
       file = {
         home.".local/share/applications/keybard.desktop".text = ''
