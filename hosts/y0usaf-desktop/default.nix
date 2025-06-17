@@ -171,7 +171,7 @@ in {
       formatNix.enable = true;
       nixosGitSync = {
         enable = true;
-        remoteBranch = "main";
+        remoteBranch = "nix-maid";
       };
     };
     gaming = {
