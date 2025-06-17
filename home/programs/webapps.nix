@@ -30,7 +30,7 @@ in {
       packages = [pkgs.chromium];
 
       file = {
-        home."{{xdg_data_home}}/applications/keybard.desktop".text = ''
+        home.".local/share/applications/keybard.desktop".text = ''
           [Desktop Entry]
           Name=Keybard
           Exec=${lib.getExe pkgs.chromium} --app=https://captdeaf.github.io/keybard %U
@@ -40,7 +40,7 @@ in {
           Comment=Keyboard testing utility
         '';
 
-        home."{{xdg_data_home}}/applications/google-meet.desktop".text = ''
+        home.".local/share/applications/google-meet.desktop".text = ''
           [Desktop Entry]
           Name=Google Meet
           Exec=${lib.getExe pkgs.chromium} --app=https://meet.google.com %U
