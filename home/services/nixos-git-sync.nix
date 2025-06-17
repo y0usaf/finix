@@ -66,8 +66,14 @@ in {
             # Format date for commit message
             FORMATTED_DATE=$(date '+%d/%m/%y@%H:%M:%S')
 
-            # Replace date placeholder in commit message format
-            COMMIT_MSG="🤖 Auto Update: $FORMATTED_DATE"
+            # Get list of changed files
+            CHANGED_FILES=$(git diff --cached --name-only | sed 's/^/- /')
+
+            # Create commit message with file list
+            COMMIT_MSG="🤖 Auto Update: $FORMATTED_DATE
+
+Files changed:
+$CHANGED_FILES"
 
             # Commit with the formatted message
             git commit -m "$COMMIT_MSG"
