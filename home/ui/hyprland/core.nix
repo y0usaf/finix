@@ -109,11 +109,20 @@
   debug.disable_logs = false;
 
   ###########################################################################
-  # NVIDIA-specific environment settings
+  # Environment Variables
   ###########################################################################
-  env = lib.optionals hostSystem.hardware.nvidia.enable [
-    "LIBVA_DRIVER_NAME,nvidia"
-    "GBM_BACKEND,nvidia-drm"
-    "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-  ];
+  env = 
+    # Cursor configuration
+    [
+      "HYPRCURSOR_THEME,DeepinDarkV20-hypr"
+      "HYPRCURSOR_SIZE,${toString config.home.core.appearance.cursorSize}"
+      "XCURSOR_THEME,DeepinDarkV20-x11"
+      "XCURSOR_SIZE,${toString config.home.core.appearance.cursorSize}"
+    ]
+    # NVIDIA-specific environment settings
+    ++ lib.optionals hostSystem.hardware.nvidia.enable [
+      "LIBVA_DRIVER_NAME,nvidia"
+      "GBM_BACKEND,nvidia-drm"
+      "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+    ];
 }
