@@ -22,7 +22,38 @@
   # Create MNW-based Neovim package using proper module system
   mnwNeovim = inputs.mnw.lib.wrap pkgs {
     neovim = pkgs.neovim-unwrapped;
-    initLua = "require('init')";
+    initLua = ''
+      vim.g.mapleader = " "
+      
+      -- Basic LSP setup
+      local lsp = require('lspconfig')
+      local capabilities = require('cmp_nvim_lsp').default_capabilities()
+      
+      lsp.lua_ls.setup{ capabilities = capabilities }
+      lsp.nil_ls.setup{ capabilities = capabilities }
+      lsp.pyright.setup{ capabilities = capabilities }
+      lsp.rust_analyzer.setup{ capabilities = capabilities }
+      lsp.ts_ls.setup{ capabilities = capabilities }
+      
+      -- Basic completion
+      local cmp = require('cmp')
+      cmp.setup({
+        mapping = cmp.mapping.preset.insert({
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        }),
+        sources = {
+          { name = 'nvim_lsp' },
+          { name = 'buffer' },
+        }
+      })
+      
+      -- Basic telescope keymaps
+      vim.keymap.set('n', '<leader>ff', ':Telescope find_files<CR>')
+      vim.keymap.set('n', '<leader>fg', ':Telescope live_grep<CR>')
+      
+      print("MNW configuration loaded successfully!")
+    '';
     
     plugins = {
       start = with pkgs.vimPlugins; [
