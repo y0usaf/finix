@@ -28,6 +28,7 @@ in {
       file.home = {
         ".config/neovide/config.toml".text = ''
           # Font configuration only
+          scale = 1.0
           [font]
           normal = ["${mainFontName}"]
           size = ${fontSize}.0
