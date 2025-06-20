@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.programs.dev.cursor-ide;
+  cfg = config.home.dev.cursor-ide;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.home.programs.dev.cursor-ide = {
+  options.home.dev.cursor-ide = {
     enable = lib.mkEnableOption "Cursor IDE";
   };
 

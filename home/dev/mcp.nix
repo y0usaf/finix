@@ -11,12 +11,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.programs.dev.mcp;
+  cfg = config.home.dev.mcp;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.home.programs.dev.mcp = {
+  options.home.dev.mcp = {
     enable = lib.mkEnableOption "Model Context Protocol configuration";
   };
 
