@@ -48,7 +48,7 @@ in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid = {
       packages = [
-        mnwNeovim pkgs.lazygit pkgs.ripgrep pkgs.fd pkgs.tree-sitter pkgs.fzf pkgs.bat pkgs.delta
+        pkgs.lazygit pkgs.ripgrep pkgs.fd pkgs.tree-sitter pkgs.fzf pkgs.bat pkgs.delta mnwNeovim
       ];
 
       file.xdg_config = {
