@@ -36,7 +36,7 @@ in {
           vim.g.mapleader = " "
           
           -- Bootstrap jetpack
-          local jetpack_path = vim.fn.stdpath('data') .. '/site/pack/jetpack/start/vim-jetpack'
+          local jetpack_path = vim.fn.stdpath('data') .. '/site/pack/jetpack/opt/vim-jetpack'
           if vim.fn.empty(vim.fn.glob(jetpack_path)) > 0 then
             vim.fn.system({
               'git', 'clone', '--depth', '1',
@@ -44,7 +44,9 @@ in {
               jetpack_path
             })
           end
-          vim.opt.rtp:prepend(jetpack_path)
+          
+          -- Add jetpack to runtime path and load it
+          vim.cmd('packadd vim-jetpack')
           
           -- Load jetpack and setup plugins
           require('jetpack').startup(function(use)
