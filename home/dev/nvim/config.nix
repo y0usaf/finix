@@ -45,49 +45,18 @@ in {
           
           vim.cmd('packadd vim-jetpack')
           require('jetpack').setup {
-            -- Core functionality
             'neovim/nvim-lspconfig',
             'hrsh7th/nvim-cmp',
-            'hrsh7th/cmp-nvim-lsp', 
+            'hrsh7th/cmp-nvim-lsp',
             'hrsh7th/cmp-buffer',
             'hrsh7th/cmp-path',
             'L3MON4D3/LuaSnip',
             'saadparwaiz1/cmp_luasnip',
-            'nvim-treesitter/nvim-treesitter',
             'nvim-lua/plenary.nvim',
-            'nvim-tree/nvim-web-devicons',
-            'nvim-lualine/lualine.nvim',
-            'lukas-reineke/indent-blankline.nvim',
-            'folke/which-key.nvim',
             'nvim-telescope/telescope.nvim',
-            'nvim-telescope/telescope-fzf-native.nvim',
             'nvim-neo-tree/neo-tree.nvim',
-            'akinsho/bufferline.nvim',
             'MunifTanjim/nui.nvim',
             'lewis6991/gitsigns.nvim',
-            'kdheepak/lazygit.nvim',
-            'numToStr/Comment.nvim',
-            'windwp/nvim-autopairs',
-            'echasnovski/mini.indentscope',
-            'stevearc/conform.nvim',
-            'folke/trouble.nvim',
-            'akinsho/toggleterm.nvim',
-            'folke/persistence.nvim',
-            
-            -- ADHD-friendly enhancements
-            'goolord/alpha-nvim',
-            'rcarriga/nvim-notify',
-            'folke/noice.nvim',
-            'stevearc/dressing.nvim',
-            'norcalli/nvim-colorizer.lua',
-            'folke/zen-mode.nvim',
-            'folke/twilight.nvim',
-            'karb94/neoscroll.nvim',
-            'HiPhish/rainbow-delimiters.nvim',
-            'j-hui/fidget.nvim',
-            'RRethy/vim-illuminate',
-            'folke/todo-comments.nvim',
-            'kevinhwang91/nvim-hlslens',
           }
           
           -- Basic LSP setup
