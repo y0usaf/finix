@@ -13,7 +13,7 @@
   
   # Get font configuration from appearance module
   mainFontName = (builtins.elemAt config.home.core.appearance.fonts.main 0).name;
-  fontSize = toString (config.home.core.appearance.baseFontSize * 1.0);
+  fontSize = toString config.home.core.appearance.baseFontSize;
 in {
   ###########################################################################
   # Minimal Neovide Configuration (when enabled via nvim.neovide option)
