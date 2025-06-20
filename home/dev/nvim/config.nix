@@ -26,11 +26,17 @@
     
     plugins = {
       start = with pkgs.vimPlugins; [
+        # Core functionality
         nvim-lspconfig nvim-cmp cmp-nvim-lsp cmp-buffer cmp-path cmp_luasnip luasnip
         nvim-treesitter.withAllGrammars plenary-nvim nvim-web-devicons lualine-nvim
         indent-blankline-nvim which-key-nvim telescope-nvim telescope-fzf-native-nvim
         neo-tree-nvim bufferline-nvim nui-nvim gitsigns-nvim lazygit-nvim comment-nvim
         nvim-autopairs mini-indentscope conform-nvim trouble-nvim toggleterm-nvim persistence-nvim
+        
+        # ADHD-friendly enhancements
+        alpha-nvim nvim-notify noice-nvim dressing-nvim nvim-colorizer-lua
+        zen-mode-nvim twilight-nvim neoscroll-nvim rainbow-delimiters-nvim
+        fidget-nvim vim-illuminate todo-comments-nvim nvim-hlslens
       ];
     };
     
@@ -58,6 +64,203 @@ in {
           require('config.plugins')
           require('config.autocmds')
           require('config.neovide')
+          require('config.adhd-enhancements')
+        '';
+
+        "nvim/lua/config/adhd-enhancements.lua".text = ''
+          -- ADHD-Friendly Neovim Enhancements
+          -- Dashboard/Startup Screen
+          pcall(function()
+            local alpha = require("alpha")
+            local dashboard = require("alpha.themes.dashboard")
+            
+            dashboard.section.header.val = {
+              [[┌──────┬──────┬──────┬──────┐]],
+              [[│  🌈  │  🚀  │  ✨  │  🎯  │]],
+              [[├──────┼──────┼──────┼──────┤]],
+              [[│   ADHD-FRIENDLY NEOVIM    │]],
+              [[│    Focus \u2022 Flow \u2022 Fun     │]],
+              [[└────────────────────────┘]],
+            }
+            
+            dashboard.section.buttons.val = {
+              dashboard.button("f", "🔍  Find file", ":Telescope find_files <CR>"),
+              dashboard.button("e", "🌳  New file", ":ene <BAR> startinsert <CR>"),
+              dashboard.button("r", "🕑  Recently used files", ":Telescope oldfiles <CR>"),
+              dashboard.button("t", "🔍  Find text", ":Telescope live_grep <CR>"),
+              dashboard.button("z", "🧞  Zen Mode", ":ZenMode<CR>"),
+              dashboard.button("c", "⚙️   Configuration", ":e ~/.config/nvim/init.lua <CR>"),
+              dashboard.button("q", "😴  Quit Neovim", ":qa<CR>"),
+            }
+            
+            dashboard.section.footer.val = "Ready to be awesome! 🚀"
+            alpha.setup(dashboard.opts)
+          end)
+          
+          -- Notification System
+          pcall(function()
+            require("notify").setup({
+              background_colour = "#000000",
+              fps = 60,
+              icons = {
+                DEBUG = "🐛",
+                ERROR = "❌",
+                INFO = "ℹ️",
+                TRACE = "✨",
+                WARN = "⚠️"
+              },
+              level = 2,
+              minimum_width = 50,
+              render = "compact",
+              stages = "fade_in_slide_out",
+              timeout = 3000,
+              top_down = true
+            })
+            vim.notify = require("notify")
+          end)
+          
+          -- Noice UI Enhancements
+          pcall(function()
+            require("noice").setup({
+              lsp = {
+                override = {
+                  ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+                  ["vim.lsp.util.stylize_markdown"] = true,
+                  ["cmp.entry.get_documentation"] = true,
+                },
+              },
+              presets = {
+                bottom_search = true,
+                command_palette = true,
+                long_message_to_split = true,
+                inc_rename = false,
+                lsp_doc_border = false,
+              },
+            })
+          end)
+          
+          -- Smooth Scrolling
+          pcall(function()
+            require('neoscroll').setup({
+              mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
+              hide_cursor = true,
+              stop_eof = true,
+              respect_scrolloff = false,
+              cursor_scrolls_alone = true,
+              easing_function = "quadratic",
+            })
+          end)
+          
+          -- Zen Mode Configuration
+          pcall(function()
+            require("zen-mode").setup({
+              window = {
+                backdrop = 0.95,
+                width = 120,
+                height = 1,
+                options = {
+                  signcolumn = "no",
+                  number = false,
+                  relativenumber = false,
+                  cursorline = false,
+                  cursorcolumn = false,
+                  foldcolumn = "0",
+                  list = false,
+                },
+              },
+              plugins = {
+                options = { enabled = true, ruler = false, showcmd = false },
+                twilight = { enabled = true },
+                gitsigns = { enabled = false },
+                tmux = { enabled = false },
+              },
+            })
+          end)
+          
+          -- Twilight Dimming
+          pcall(function()
+            require("twilight").setup({
+              dimming = { alpha = 0.25, color = { "Normal", "#ffffff" }, term_bg = "#000000", inactive = false },
+              context = 10,
+              treesitter = true,
+              expand = { "function", "method", "table", "if_statement" },
+              exclude = {},
+            })
+          end)
+          
+          -- Color Highlighting
+          pcall(function()
+            require('colorizer').setup({
+              filetypes = { "*" },
+              user_default_options = {
+                RGB = true, RRGGBB = true, names = true, RRGGBBAA = true, AARRGGBB = true,
+                rgb_fn = true, hsl_fn = true, css = true, css_fn = true, mode = "background",
+                tailwind = true, sass = { enable = true, parsers = { "css" } }, virtualtext = "●",
+              },
+            })
+          end)
+          
+          -- TODO Comments
+          pcall(function()
+            require("todo-comments").setup({
+              signs = true,
+              sign_priority = 8,
+              keywords = {
+                FIX = { icon = " ", color = "error", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+                TODO = { icon = " ", color = "info" },
+                HACK = { icon = " ", color = "warning" },
+                WARN = { icon = " ", color = "warning", alt = { "WARNING", "XXX" } },
+                PERF = { icon = " ", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+                NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
+                TEST = { icon = "⏲ ", color = "test", alt = { "TESTING", "PASSED", "FAILED" } },
+              },
+              gui_style = { fg = "NONE", bg = "BOLD" },
+              merge_keywords = true,
+              highlight = {
+                multiline = true, multiline_pattern = "^.", multiline_context = 10,
+                before = "", keyword = "wide", after = "fg",
+                pattern = [[.*<(KEYWORDS)\\s*:]], comments_only = true,
+                max_line_len = 400, exclude = {},
+              },
+              colors = {
+                error = { "DiagnosticError", "ErrorMsg", "#DC2626" },
+                warning = { "DiagnosticWarn", "WarningMsg", "#FBBF24" },
+                info = { "DiagnosticInfo", "#2563EB" },
+                hint = { "DiagnosticHint", "#10B981" },
+                default = { "Identifier", "#7C3AED" },
+                test = { "Identifier", "#FF006E" }
+              },
+              search = {
+                command = "rg", args = { "--color=never", "--no-heading", "--with-filename", "--line-number", "--column" },
+                pattern = [=[\\b(KEYWORDS):]],
+              },
+            })
+          end)
+          
+          -- Enhanced Search with HLSLens
+          pcall(function() require('hlslens').setup() end)
+          
+          -- Progress indicators for LSP
+          pcall(function() 
+            require("fidget").setup({
+              progress = { display = { done_icon = "✓", progress_icon = { pattern = "dots", period = 1 } } },
+              notification = { window = { winblend = 100 } },
+            })
+          end)
+          
+          -- Rainbow Delimiters
+          pcall(function() require("rainbow-delimiters.setup").setup() end)
+          
+          -- Vim Illuminate
+          pcall(function()
+            require('illuminate').configure({
+              providers = { 'lsp', 'treesitter', 'regex' },
+              delay = 100, under_cursor = true, min_count_to_highlight = 1,
+            })
+          end)
+          
+          -- Note: satellite-nvim and smoothcursor-nvim are not available in nixpkgs
+          -- Alternative: built-in scrollbar visualization and cursor highlighting via illuminate
         '';
 
         "nvim/lua/config/options.lua".text = ''
@@ -121,6 +324,11 @@ in {
           opt.listchars = "tab:→ ,eol:↲,nbsp:␣,trail:•,extends:⟩,precedes:⟨"
           opt.fillchars = "eob: ,fold: ,foldopen:▾,foldsep: ,foldclose:▸"
 
+          -- ADHD-friendly settings
+          opt.cursorcolumn = false -- Can be distracting
+          opt.colorcolumn = "80,120" -- Visual guides
+          opt.smoothscroll = true -- Smooth scrolling
+          
           -- Completion
           opt.completeopt = "menu,menuone,noselect"
         '';
@@ -178,27 +386,48 @@ in {
 
           -- Formatting
           keymap("n", "<leader>mp", function() require("conform").format({ lsp_fallback = true }) end, { desc = "Format document" })
+          
+          -- ADHD-friendly shortcuts
+          keymap("n", "<leader>z", ":ZenMode<CR>", { desc = "Toggle Zen Mode" })
+          keymap("n", "<leader>tw", ":Twilight<CR>", { desc = "Toggle Twilight" })
+          keymap("n", "<leader>td", ":TodoTelescope<CR>", { desc = "Find TODOs" })
+          keymap("n", "<leader>tn", function() require("todo-comments").jump_next() end, { desc = "Next TODO" })
+          keymap("n", "<leader>tp", function() require("todo-comments").jump_prev() end, { desc = "Prev TODO" })
+          
+          -- Visual search enhancements
+          keymap("n", "n", "<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>", { desc = "Next search result" })
+          keymap("n", "N", "<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>", { desc = "Prev search result" })
         '';
 
         "nvim/lua/config/theme.lua".text = ''
-          -- Obsidian Elegance Theme
+          -- ADHD-Friendly Vibrant Theme
           local colors = {
             bg = "NONE",
-            bg_highlight = "#1a1a25",
-            bg_visual = "#2d2d42",
-            fg = "#e8e8f0",
-            fg_dark = "#c0c0d0",
-            fg_gutter = "#4a4a60",
-            blue = "#6bb6ff",
-            cyan = "#4fd6be", 
-            green = "#7dd65a",
-            magenta = "#c68aee",
-            red = "#ff6b85",
-            orange = "#ffb347",
-            yellow = "#f0c674",
-            purple = "#b19cd9",
-            border = "#404055",
-            comment = "#6a6a80",
+            bg_highlight = "#1e1e2e",
+            bg_visual = "#313244",
+            fg = "#cdd6f4",
+            fg_dark = "#bac2de",
+            fg_gutter = "#585b70",
+            
+            -- Vibrant, high-contrast colors for ADHD
+            blue = "#89b4fa",      -- Bright blue for functions
+            cyan = "#94e2d5",      -- Teal for constants
+            green = "#a6e3a1",     -- Bright green for strings
+            magenta = "#f5c2e7",   -- Pink for keywords
+            red = "#f38ba8",       -- Coral red for errors
+            orange = "#fab387",    -- Peach for warnings
+            yellow = "#f9e2af",    -- Yellow for search
+            purple = "#cba6f7",    -- Lavender for types
+            pink = "#eba0ac",      -- Pink for special
+            maroon = "#f2cdcd",    -- Light pink for hints
+            
+            border = "#6c7086",
+            comment = "#7f849c",
+            
+            -- Special ADHD colors
+            focus = "#89dceb",     -- Sky blue for focus
+            urgent = "#fab387",    -- Orange for urgent items
+            calm = "#a6e3a1",      -- Green for calm
           }
 
           vim.cmd("highlight clear")
@@ -215,27 +444,40 @@ in {
             vim.cmd(cmd)
           end
 
-          -- Base highlights
+          -- Base highlights with ADHD-friendly styling
           hl("Normal", { fg = colors.fg, bg = colors.bg })
           hl("Comment", { fg = colors.comment, style = "italic" })
-          hl("Constant", { fg = colors.orange, style = "bold" })
+          hl("Constant", { fg = colors.cyan, style = "bold" })
           hl("String", { fg = colors.green, style = "italic" })
           hl("Function", { fg = colors.blue, style = "bold" })
-          hl("Keyword", { fg = colors.purple, style = "italic,bold" })
-          hl("Type", { fg = colors.blue, style = "italic,bold" })
+          hl("Keyword", { fg = colors.magenta, style = "italic,bold" })
+          hl("Type", { fg = colors.purple, style = "italic,bold" })
+          hl("Identifier", { fg = colors.pink })
+          hl("Special", { fg = colors.orange, style = "bold" })
+          hl("PreProc", { fg = colors.pink, style = "bold" })
           
-          -- UI elements
+          -- UI elements with enhanced visibility
           hl("CursorLine", { bg = colors.bg_highlight })
-          hl("CursorLineNr", { fg = colors.orange, style = "bold" })
+          hl("CursorLineNr", { fg = colors.focus, style = "bold" })
           hl("LineNr", { fg = colors.fg_gutter })
-          hl("Visual", { bg = colors.bg_visual })
-          hl("Search", { fg = colors.bg, bg = colors.yellow, style = "bold" })
+          hl("Visual", { bg = colors.bg_visual, style = "bold" })
+          hl("Search", { fg = "#11111b", bg = colors.yellow, style = "bold" })
+          hl("IncSearch", { fg = "#11111b", bg = colors.focus, style = "bold" })
+          hl("ColorColumn", { bg = colors.bg_highlight })
           
-          -- Diagnostics
-          hl("DiagnosticError", { fg = colors.red })
-          hl("DiagnosticWarn", { fg = colors.orange })
+          -- Enhanced diagnostics
+          hl("DiagnosticError", { fg = colors.red, style = "bold" })
+          hl("DiagnosticWarn", { fg = colors.orange, style = "bold" })
           hl("DiagnosticInfo", { fg = colors.blue })
-          hl("DiagnosticHint", { fg = colors.cyan })
+          hl("DiagnosticHint", { fg = colors.maroon })
+          
+          -- TODO comments highlighting
+          hl("TodoBgTODO", { fg = "#11111b", bg = colors.blue, style = "bold" })
+          hl("TodoFgTODO", { fg = colors.blue, style = "bold" })
+          hl("TodoBgFIX", { fg = "#11111b", bg = colors.red, style = "bold" })
+          hl("TodoFgFIX", { fg = colors.red, style = "bold" })
+          hl("TodoBgNOTE", { fg = "#11111b", bg = colors.green, style = "bold" })
+          hl("TodoFgNOTE", { fg = colors.green, style = "bold" })
         '';
 
         "nvim/lua/config/lsp.lua".text = ''
