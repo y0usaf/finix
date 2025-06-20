@@ -144,17 +144,27 @@
       -- Clear search highlighting
       keymap("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 
-      -- File explorer
+      -- File explorer with enhanced Git integration
       keymap("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle file explorer" })
       keymap("n", "<leader>ge", ":Neotree git_status<CR>", { desc = "Git explorer" })
       keymap("n", "<leader>be", ":Neotree buffers<CR>", { desc = "Buffer explorer" })
+      keymap("n", "<leader>gf", ":Neotree focus git_status<CR>", { desc = "Focus Git status" })
+      keymap("n", "<leader>gb", ":Gitsigns blame_line<CR>", { desc = "Git blame line" })
+      keymap("n", "<leader>gd", ":Gitsigns diffthis<CR>", { desc = "Git diff" })
+      keymap("n", "<leader>gp", ":Gitsigns preview_hunk<CR>", { desc = "Preview hunk" })
+      keymap("n", "<leader>gr", ":Gitsigns reset_hunk<CR>", { desc = "Reset hunk" })
+      keymap("n", "<leader>gs", ":Gitsigns stage_hunk<CR>", { desc = "Stage hunk" })
 
-      -- Telescope
+      -- Telescope with enhanced project navigation
       keymap("n", "<leader>ff", ":Telescope find_files<CR>", { desc = "Find files" })
       keymap("n", "<leader>fw", ":Telescope live_grep<CR>", { desc = "Find word" })
       keymap("n", "<leader>fb", ":Telescope buffers<CR>", { desc = "Find buffers" })
       keymap("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Find help" })
       keymap("n", "<leader>fr", ":Telescope oldfiles<CR>", { desc = "Find recent files" })
+      keymap("n", "<leader>fs", ":Telescope lsp_document_symbols<CR>", { desc = "Find symbols" })
+      keymap("n", "<leader>fS", ":Telescope lsp_workspace_symbols<CR>", { desc = "Find workspace symbols" })
+      keymap("n", "<leader>fc", ":Telescope commands<CR>", { desc = "Find commands" })
+      keymap("n", "<leader>fk", ":Telescope keymaps<CR>", { desc = "Find keymaps" })
 
       -- Buffer navigation
       keymap("n", "<S-h>", "<cmd>BufferLineCyclePrev<cr>", { desc = "Prev buffer" })
@@ -200,12 +210,12 @@
       
       -- Define our custom color palette
       local colors = {
-        -- Base colors: deep, sophisticated grays and blacks
+        -- Base colors: transparent with refined accents
         bg = "NONE",
-        bg_dark = "#0a0a0f",
-        bg_darker = "#050507",
-        bg_light = "#1a1a25",
-        bg_highlight = "#252530",
+        bg_dark = "NONE",
+        bg_darker = "NONE", 
+        bg_light = "NONE",
+        bg_highlight = "#1a1a25",
         bg_visual = "#2d2d42",
         
         -- Foreground: crisp, clean whites and light grays
@@ -330,21 +340,21 @@
       hl("FoldColumn", { fg = colors.fg_gutter, bg = colors.bg })
       hl("SignColumn", { fg = colors.fg_gutter, bg = colors.bg })
       
-      hl("Pmenu", { fg = colors.fg, bg = colors.bg_dark })
+      hl("Pmenu", { fg = colors.fg, bg = "NONE" })
       hl("PmenuSel", { fg = colors.bg, bg = colors.blue })
       hl("PmenuSbar", { bg = colors.bg_highlight })
       hl("PmenuThumb", { bg = colors.fg_gutter })
       
-      hl("StatusLine", { fg = colors.fg, bg = colors.bg })
-      hl("StatusLineNC", { fg = colors.fg_dark, bg = colors.bg })
-      hl("WinSeparator", { fg = colors.border, bg = colors.bg })
-      hl("VertSplit", { fg = colors.border, bg = colors.bg })
+      hl("StatusLine", { fg = colors.fg, bg = "NONE" })
+      hl("StatusLineNC", { fg = colors.fg_dark, bg = "NONE" })
+      hl("WinSeparator", { fg = colors.border, bg = "NONE" })
+      hl("VertSplit", { fg = colors.border, bg = "NONE" })
       
-      hl("TabLine", { fg = colors.fg_dark, bg = colors.bg })
-      hl("TabLineFill", { fg = colors.fg_dark, bg = colors.bg })
+      hl("TabLine", { fg = colors.fg_dark, bg = "NONE" })
+      hl("TabLineFill", { fg = colors.fg_dark, bg = "NONE" })
       hl("TabLineSel", { fg = colors.fg, bg = colors.bg_highlight })
       
-      hl("FloatBorder", { fg = colors.border, bg = colors.bg })
+      hl("FloatBorder", { fg = colors.border, bg = "NONE" })
       hl("FloatTitle", { fg = colors.cyan, style = "bold" })
       
       -- ============================================================================
@@ -723,21 +733,21 @@
           },
           git_status = {
             symbols = {
-              added     = "",
-              modified  = "",
+              added     = "✚",
+              modified  = "~",
               deleted   = "✖",
-              renamed   = "",
-              untracked = "",
-              ignored   = "",
-              unstaged  = "",
-              staged    = "",
+              renamed   = "➜",
+              untracked = "★",
+              ignored   = "◌",
+              unstaged  = "✗",
+              staged    = "✓",
               conflict  = "",
             }
           },
         },
         window = {
           position = "left",
-          width = 40,
+          width = 45,
           mapping_options = {
             noremap = true,
             nowait = true,
@@ -748,6 +758,8 @@
               nowait = false,
             },
             ["<2-LeftMouse>"] = "open",
+            ["<RightMouse>"] = "show_help",
+            ["<MiddleMouse>"] = "open_tabnew",
             ["<cr>"] = "open",
             ["<esc>"] = "revert_preview",
             ["P"] = { "toggle_preview", config = { use_float = true } },
@@ -845,6 +857,8 @@
           window = {
             position = "float",
             mappings = {
+              ["<2-LeftMouse>"] = "git_add_file",
+              ["<RightMouse>"] = "show_help",
               ["A"]  = "git_add_all",
               ["gu"] = "git_unstage_file",
               ["ga"] = "git_add_file",
@@ -852,6 +866,8 @@
               ["gc"] = "git_commit",
               ["gp"] = "git_push",
               ["gg"] = "git_commit_and_push",
+              ["gd"] = "git_diff",
+              ["gb"] = "git_blame",
             }
           }
         }
@@ -923,12 +939,44 @@
       if gitsigns_ok then
       gitsigns.setup({
         signs = {
-          add = { text = '+' },
-          change = { text = '~' },
-          delete = { text = '_' },
-          topdelete = { text = '‾' },
-          changedelete = { text = '~' },
+          add = { text = '▎' },
+          change = { text = '▎' },
+          delete = { text = '▶' },
+          topdelete = { text = '▶' },
+          changedelete = { text = '▎' },
+          untracked = { text = '▎' },
         },
+        signs_staged = {
+          add = { text = '▎' },
+          change = { text = '▎' },
+          delete = { text = '▶' },
+          topdelete = { text = '▶' },
+          changedelete = { text = '▎' },
+        },
+        current_line_blame = true,
+        current_line_blame_opts = {
+          virt_text = true,
+          virt_text_pos = 'eol',
+          delay = 300,
+          ignore_whitespace = false,
+        },
+        preview_config = {
+          border = 'rounded',
+          style = 'minimal',
+          relative = 'cursor',
+          row = 0,
+          col = 1
+        },
+        on_attach = function(bufnr)
+          local function map(mode, lhs, rhs, opts)
+            opts = opts or {}
+            opts.buffer = bufnr
+            vim.keymap.set(mode, lhs, rhs, opts)
+          end
+          
+          -- Mouse support for git signs
+          map('n', '<LeftMouse>', '<LeftMouse><cmd>Gitsigns preview_hunk<CR>')
+        end
       })
       end -- End of gitsigns_ok conditional
 
