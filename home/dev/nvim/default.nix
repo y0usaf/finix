@@ -1,7 +1,11 @@
 ###############################################################################
 # Enhanced Neovim Configuration with MNW + nix-maid
-# Modular configuration for modern Neovim development environment  
+# Modular configuration for modern Neovim development environment
 ###############################################################################
 {...}: {
-  imports = [ ./nvim ];
+  imports = [
+    ./options.nix
+    ./config.nix
+    ./neovide.nix
+  ];
 }
