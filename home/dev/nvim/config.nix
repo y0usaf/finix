@@ -52,36 +52,101 @@ in {
           
           -- Setup lazy with plugins
           require("lazy").setup({
-            -- Theme (cyberpunk aesthetic)
+            -- Theme (Cyberpunk Aesthetic with Animations)
             {
-              "folke/tokyonight.nvim",
+              "scottmckendry/cyberdream.nvim",
               lazy = false,
               priority = 1000,
               opts = {
-                style = "storm",
+                transparent = false,
+                italic_comments = true,
+                hide_fillchars = true,
+                borderless_telescope = true,
                 terminal_colors = true,
-                styles = {
-                  comments = { italic = true },
-                  keywords = { italic = true },
-                  functions = { bold = true },
-                  variables = {},
+                cache = true,
+                theme = {
+                  variant = "auto",
+                  highlights = {
+                    Comment = { fg = "#7aa2f7", italic = true },
+                    LineNr = { fg = "#565f89" },
+                    CursorLineNr = { fg = "#ff9e64", bold = true },
+                    Visual = { bg = "#283457" },
+                    Search = { bg = "#ff9e64", fg = "#1a1b26" },
+                    IncSearch = { bg = "#bb9af7", fg = "#1a1b26" },
+                  },
                 },
-                on_colors = function(colors)
-                  colors.bg = "#0d1117"
-                  colors.bg_dark = "#010409"
-                  colors.bg_float = "#161b22"
-                  colors.bg_sidebar = "#161b22"
-                end,
-                on_highlights = function(highlights, colors)
-                  highlights.Normal = { bg = colors.bg }
-                  highlights.NormalFloat = { bg = colors.bg_float }
-                  highlights.FloatBorder = { fg = colors.blue }
-                end,
               },
               config = function(_, opts)
-                require("tokyonight").setup(opts)
-                vim.cmd.colorscheme("tokyonight-storm")
+                require("cyberdream").setup(opts)
+                vim.cmd.colorscheme("cyberdream")
               end,
+            },
+            
+            -- Smooth Scrolling & Animations
+            {
+              "karb94/neoscroll.nvim",
+              event = "VeryLazy",
+              opts = {
+                mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
+                hide_cursor = true,
+                stop_eof = true,
+                respect_scrolloff = false,
+                cursor_scrolls_alone = true,
+                easing_function = "quadratic",
+                pre_hook = nil,
+                post_hook = nil,
+              },
+            },
+            
+            -- Enhanced Notifications & UI
+            {
+              "folke/noice.nvim",
+              event = "VeryLazy",
+              dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
+              opts = {
+                lsp = {
+                  override = {
+                    ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+                    ["vim.lsp.util.stylize_markdown"] = true,
+                    ["cmp.entry.get_documentation"] = true,
+                  },
+                },
+                presets = {
+                  bottom_search = true,
+                  command_palette = true,
+                  long_message_to_split = true,
+                  inc_rename = false,
+                  lsp_doc_border = true,
+                },
+                views = {
+                  cmdline_popup = {
+                    border = { style = "rounded" },
+                    filter_options = {},
+                    win_options = { winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder" },
+                  },
+                },
+              },
+            },
+            
+            {
+              "rcarriga/nvim-notify",
+              opts = {
+                background_colour = "#000000",
+                fps = 60,
+                icons = {
+                  DEBUG = "🐛",
+                  ERROR = "✘",
+                  INFO = "ℹ",
+                  TRACE = "✎",
+                  WARN = "⚠",
+                },
+                level = 2,
+                minimum_width = 50,
+                render = "wrapped-compact",
+                stages = "fade_in_slide_out",
+                timeout = 3000,
+                top_down = true,
+              },
             },
             
             -- UI Enhancements
@@ -90,9 +155,9 @@ in {
               event = "VeryLazy",
               opts = {
                 options = {
-                  theme = "tokyonight",
+                  theme = "cyberdream",
                   globalstatus = true,
-                  component_separators = { left = "", right = "" },
+                  component_separators = { left = "│", right = "│" },
                   section_separators = { left = "", right = "" },
                 },
                 sections = {
@@ -252,13 +317,13 @@ in {
               },
             },
             
-            -- Syntax highlighting
+            -- Syntax highlighting with Nix+Lua injection
             {
               "nvim-treesitter/nvim-treesitter",
               build = ":TSUpdate",
               event = { "BufReadPost", "BufNewFile" },
               opts = {
-                highlight = { enable = true },
+                highlight = { enable = true, additional_vim_regex_highlighting = false },
                 indent = { enable = true },
                 ensure_installed = {
                   "lua", "nix", "python", "rust", "typescript", "javascript",
@@ -321,7 +386,7 @@ in {
             },
           })
           
-          -- Basic vim options
+          -- Basic vim options with visual enhancements
           vim.opt.number = true
           vim.opt.relativenumber = true
           vim.opt.signcolumn = "yes"
@@ -338,7 +403,16 @@ in {
           vim.opt.scrolloff = 8
           vim.opt.sidescrolloff = 8
           vim.opt.cursorline = true
+          vim.opt.cursorlineopt = "both"
           vim.opt.mouse = "a"
+          vim.opt.pumheight = 10
+          vim.opt.pumblend = 10
+          vim.opt.winblend = 0
+          vim.opt.conceallevel = 2
+          vim.opt.concealcursor = "niv"
+          vim.opt.showmode = false
+          vim.opt.laststatus = 3
+          vim.opt.cmdheight = 0
           
           -- Keymaps
           local keymap = vim.keymap.set
