@@ -62,6 +62,12 @@
       url = "github:Infinidoge/nix-minecraft";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    ## Editor
+    mnw = {
+      url = "github:Gerg-L/mnw";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   ###########################################################################
