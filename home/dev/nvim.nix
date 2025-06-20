@@ -1082,8 +1082,8 @@ in {
         
         -- Enhanced folding
         vim.opt.fillchars = {
-          foldopen = "",
-          foldclose = "",
+          foldopen = "▾",
+          foldclose = "▸",
           fold = " ",
           foldsep = " ",
           diff = "╱",
