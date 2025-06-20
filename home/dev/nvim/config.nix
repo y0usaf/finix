@@ -48,55 +48,43 @@ in {
           -- Add jetpack to runtime path and load it
           vim.cmd('packadd vim-jetpack')
           
-          -- Load jetpack and setup plugins
-          require('jetpack').startup(function(use)
-            -- Plugin manager
-            use 'tani/vim-jetpack'
-            
-            -- LSP and completion
-            use 'neovim/nvim-lspconfig'
-            use 'hrsh7th/nvim-cmp'
-            use 'hrsh7th/cmp-nvim-lsp'
-            use 'hrsh7th/cmp-buffer'
-            use 'hrsh7th/cmp-path'
-            use 'L3MON4D3/LuaSnip'
-            use 'saadparwaiz1/cmp_luasnip'
-            
-            -- File management
-            use 'nvim-lua/plenary.nvim'
-            use 'nvim-telescope/telescope.nvim'
-            use 'nvim-neo-tree/neo-tree.nvim'
-            use 'MunifTanjim/nui.nvim'
-            use 'nvim-tree/nvim-web-devicons'
-            
-            -- UI enhancements
-            use 'nvim-lualine/lualine.nvim'
-            use 'akinsho/bufferline.nvim'
-            use 'lukas-reineke/indent-blankline.nvim'
-            use 'folke/which-key.nvim'
-            use 'goolord/alpha-nvim'
-            use 'rcarriga/nvim-notify'
-            use 'stevearc/dressing.nvim'
-            
-            -- Git integration
-            use 'lewis6991/gitsigns.nvim'
-            use 'kdheepak/lazygit.nvim'
-            
-            -- Syntax and treesitter
-            use 'nvim-treesitter/nvim-treesitter'
-            use 'nvim-treesitter/nvim-treesitter-textobjects'
-            
-            -- Utilities
-            use 'numToStr/Comment.nvim'
-            use 'windwp/nvim-autopairs'
-            use 'folke/trouble.nvim'
-            use 'akinsho/toggleterm.nvim'
-            use 'folke/todo-comments.nvim'
-            
-            -- Themes
-            use 'folke/tokyonight.nvim'
-            use 'catppuccin/nvim'
-          end)
+          -- Setup jetpack with correct API
+          vim.cmd('Jetpack! tani/vim-jetpack')
+          
+          -- Configure plugins using jetpack
+          vim.cmd('Jetpack neovim/nvim-lspconfig')
+          vim.cmd('Jetpack hrsh7th/nvim-cmp')
+          vim.cmd('Jetpack hrsh7th/cmp-nvim-lsp')
+          vim.cmd('Jetpack hrsh7th/cmp-buffer')
+          vim.cmd('Jetpack hrsh7th/cmp-path')
+          vim.cmd('Jetpack L3MON4D3/LuaSnip')
+          vim.cmd('Jetpack saadparwaiz1/cmp_luasnip')
+          vim.cmd('Jetpack nvim-lua/plenary.nvim')
+          vim.cmd('Jetpack nvim-telescope/telescope.nvim')
+          vim.cmd('Jetpack nvim-neo-tree/neo-tree.nvim')
+          vim.cmd('Jetpack MunifTanjim/nui.nvim')
+          vim.cmd('Jetpack nvim-tree/nvim-web-devicons')
+          vim.cmd('Jetpack nvim-lualine/lualine.nvim')
+          vim.cmd('Jetpack akinsho/bufferline.nvim')
+          vim.cmd('Jetpack lukas-reineke/indent-blankline.nvim')
+          vim.cmd('Jetpack folke/which-key.nvim')
+          vim.cmd('Jetpack goolord/alpha-nvim')
+          vim.cmd('Jetpack rcarriga/nvim-notify')
+          vim.cmd('Jetpack stevearc/dressing.nvim')
+          vim.cmd('Jetpack lewis6991/gitsigns.nvim')
+          vim.cmd('Jetpack kdheepak/lazygit.nvim')
+          vim.cmd('Jetpack nvim-treesitter/nvim-treesitter')
+          vim.cmd('Jetpack nvim-treesitter/nvim-treesitter-textobjects')
+          vim.cmd('Jetpack numToStr/Comment.nvim')
+          vim.cmd('Jetpack windwp/nvim-autopairs')
+          vim.cmd('Jetpack folke/trouble.nvim')
+          vim.cmd('Jetpack akinsho/toggleterm.nvim')
+          vim.cmd('Jetpack folke/todo-comments.nvim')
+          vim.cmd('Jetpack folke/tokyonight.nvim')
+          vim.cmd('Jetpack catppuccin/nvim')
+          
+          -- Install plugins
+          vim.cmd('JetpackSync')
           
           -- Theme setup
           vim.cmd.colorscheme('tokyonight-night')
