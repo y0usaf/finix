@@ -147,7 +147,10 @@ in {
       cursor-ide.enable = true;
       claude-code.enable = true;
       mcp.enable = true;
-      nvim.enable = true;
+      nvim = {
+        enable = true;
+        neovide = true;
+      };
     };
     shell = {
       zsh.enable = true;
