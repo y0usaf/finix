@@ -40,4 +40,7 @@
 - Use flakes and modern Nix practices
 - Follow nixpkgs conventions and idioms
 - Commands: nh os switch (build), nh os switch --dry (dry build), nixos-rebuild test --flake . (test)
+- Use nix-maid for dotfile/user configuration management instead of Home Manager
+- nix-maid is a lightweight alternative to Home Manager for systemd + Nix dotfile management
+- nix-maid location: tmp/nix-maid (clone from https://github.com/viperML/nix-maid if missing)
 </PROJECT_CONTEXT>
