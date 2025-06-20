@@ -49,9 +49,8 @@ in {
         pkgs.lazygit pkgs.ripgrep pkgs.fd pkgs.tree-sitter pkgs.fzf pkgs.bat pkgs.delta mnwNeovim
       ];
 
-      file.xdg_config = {
-        # Note: mnw handles lua config via its own module system
-        # Remove this section once mnw is working properly
+      # Note: mnw handles all Lua configuration through its module system
+      # No need for manual file.xdg_config when using mnw properly
         "nvim/lua/init.lua".text = ''
           vim.g.mapleader = " "
           vim.g.maplocalleader = "\\"
