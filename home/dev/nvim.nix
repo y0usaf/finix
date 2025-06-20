@@ -886,7 +886,7 @@
           theme = 'auto',
           globalstatus = true,
           component_separators = { left = '|', right = '|' },
-          section_separators = { left = '\\ue0b0', right = '\\ue0b2' },
+          section_separators = { left = "", right = "" },
         },
         sections = {
           lualine_a = {'mode'},
