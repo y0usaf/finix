@@ -65,21 +65,24 @@ in {
 
       ".zprofile".text = ''
         # Hardware-specific settings based on hostname.
-        case "$(hostname)" in
-          "y0usaf-desktop")
-            sudo nvidia-smi -pl 150
-            # Only launch Hyprland if we're in a TTY
-            if [ "$(tty)" = "/dev/tty1" ]; then
-              Hyprland
-            fi
-            ;;
-          "y0usaf-laptop")
-            # Only launch Hyprland if we're in a TTY
-            if [ "$(tty)" = "/dev/tty1" ]; then
-              Hyprland
-            fi
-            ;;
-        esac
+        # Only run for interactive shells
+        if [[ $- == *i* ]]; then
+          case "$(hostname)" in
+            "y0usaf-desktop")
+              sudo nvidia-smi -pl 150
+              # Only launch Hyprland if we're in a TTY
+              if [ "$(tty)" = "/dev/tty1" ]; then
+                Hyprland
+              fi
+              ;;
+            "y0usaf-laptop")
+              # Only launch Hyprland if we're in a TTY
+              if [ "$(tty)" = "/dev/tty1" ]; then
+                Hyprland
+              fi
+              ;;
+          esac
+        fi
       '';
 
       # Combine all .zshrc content using lib.mkMerge
