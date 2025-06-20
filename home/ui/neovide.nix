@@ -48,15 +48,18 @@ in {
             # Font configuration
             font = {
               normal = ["JetBrainsMono Nerd Font"];
-              size = 12.0;
+              size = 18.0;  # 12.0 * 1.5 = 18.0 for 1.5x scaling
               hinting = "full";
               edging = "antialias";
             };
             
             # Theme and appearance
             theme = "auto";
-            transparency = 0.95;
+            transparency = 0.85;  # More transparent (0.0 = fully transparent, 1.0 = opaque)
             blur = true;
+            
+            # Window scaling
+            scale_factor = 1.5;
             
             # Animation settings
             cursor = {
