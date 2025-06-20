@@ -60,7 +60,6 @@ in {
       ###########################################################################
       file.home = {
         ".cursor/mcp.json".text = builtins.toJSON mcpServersConfig;
-      } // lib.optionalAttrs config.home.dev.claude-code.enable {
         ".claude/mcp_config.json".text = builtins.toJSON mcpServersConfig;
       };
     };
