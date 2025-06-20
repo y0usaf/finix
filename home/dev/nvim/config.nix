@@ -52,33 +52,44 @@ in {
           
           -- Setup lazy with plugins
           require("lazy").setup({
-            -- Theme (Cyberpunk Aesthetic with Animations)
+            -- Theme (Tokyo Night - Modern & Beautiful)
             {
-              "scottmckendry/cyberdream.nvim",
+              "folke/tokyonight.nvim",
               lazy = false,
               priority = 1000,
               opts = {
-                transparent = false,
-                italic_comments = true,
-                hide_fillchars = true,
-                borderless_telescope = true,
+                style = "night", -- night, storm, day, moon
+                transparent = true,
                 terminal_colors = true,
-                cache = true,
-                theme = {
-                  variant = "auto",
-                  highlights = {
-                    Comment = { fg = "#7aa2f7", italic = true },
-                    LineNr = { fg = "#565f89" },
-                    CursorLineNr = { fg = "#ff9e64", bold = true },
-                    Visual = { bg = "#283457" },
-                    Search = { bg = "#ff9e64", fg = "#1a1b26" },
-                    IncSearch = { bg = "#bb9af7", fg = "#1a1b26" },
-                  },
+                styles = {
+                  comments = { italic = true },
+                  keywords = { italic = true },
+                  functions = { bold = true },
+                  variables = {},
+                  sidebars = "transparent",
+                  floats = "transparent",
                 },
+                sidebars = { "qf", "help", "vista_kind", "terminal", "packer" },
+                day_brightness = 0.3,
+                hide_inactive_statusline = false,
+                dim_inactive = false,
+                lualine_bold = true,
+                on_colors = function(colors)
+                  colors.border = "#1a1b26"
+                  colors.bg_statusline = "#16161e"
+                end,
+                on_highlights = function(highlights, colors)
+                  highlights.CursorLineNr = { fg = colors.orange, bold = true }
+                  highlights.LineNr = { fg = colors.dark3 }
+                  highlights.FloatBorder = { fg = colors.border_highlight }
+                  highlights.TelescopeBorder = { fg = colors.border_highlight }
+                  highlights.WhichKeyFloat = { bg = colors.bg_dark }
+                  highlights.LspFloatWinBorder = { fg = colors.border_highlight }
+                end,
               },
               config = function(_, opts)
-                require("cyberdream").setup(opts)
-                vim.cmd.colorscheme("cyberdream")
+                require("tokyonight").setup(opts)
+                vim.cmd.colorscheme("tokyonight-night")
               end,
             },
             
@@ -155,7 +166,7 @@ in {
               event = "VeryLazy",
               opts = {
                 options = {
-                  theme = "cyberdream",
+                  theme = "tokyonight",
                   globalstatus = true,
                   component_separators = { left = "│", right = "│" },
                   section_separators = { left = "", right = "" },
@@ -386,7 +397,7 @@ in {
             },
           })
           
-          -- Basic vim options with visual enhancements
+          -- Enhanced vim options with Tokyo Night visual improvements
           vim.opt.number = true
           vim.opt.relativenumber = true
           vim.opt.signcolumn = "yes"
@@ -405,14 +416,21 @@ in {
           vim.opt.cursorline = true
           vim.opt.cursorlineopt = "both"
           vim.opt.mouse = "a"
-          vim.opt.pumheight = 10
-          vim.opt.pumblend = 10
-          vim.opt.winblend = 0
+          vim.opt.pumheight = 15
+          vim.opt.pumblend = 15
+          vim.opt.winblend = 15
           vim.opt.conceallevel = 2
           vim.opt.concealcursor = "niv"
           vim.opt.showmode = false
           vim.opt.laststatus = 3
           vim.opt.cmdheight = 0
+          vim.opt.fillchars = { eob = " ", fold = " ", foldopen = "", foldsep = " ", foldclose = "", diff = "╱" }
+          vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+          vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
+          vim.opt.splitbelow = true
+          vim.opt.splitright = true
+          vim.opt.splitkeep = "screen"
+          vim.opt.smoothscroll = true
           
           -- Keymaps
           local keymap = vim.keymap.set
