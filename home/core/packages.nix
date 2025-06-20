@@ -19,7 +19,6 @@
     cachix
     unzip
     bash
-    vim
     lsd
     alejandra
     tree
