@@ -19,7 +19,7 @@
     dockerfile-language-server-nodejs stylua alejandra black prettier rustfmt
   ];
 
-  # Create MNW-based Neovim package
+  # Create MNW-based Neovim package using proper module system
   mnwNeovim = inputs.mnw.lib.wrap pkgs {
     neovim = pkgs.neovim-unwrapped;
     initLua = "require('init')";
@@ -32,8 +32,6 @@
         indent-blankline-nvim which-key-nvim telescope-nvim telescope-fzf-native-nvim
         neo-tree-nvim bufferline-nvim nui-nvim gitsigns-nvim lazygit-nvim comment-nvim
         nvim-autopairs mini-indentscope conform-nvim trouble-nvim toggleterm-nvim persistence-nvim
-        
-        # Extra eye candy (using available plugins only)
         
         # ADHD-friendly enhancements
         alpha-nvim nvim-notify noice-nvim dressing-nvim nvim-colorizer-lua
@@ -52,6 +50,8 @@ in {
       ];
 
       file.xdg_config = {
+        # Note: mnw handles lua config via its own module system
+        # Remove this section once mnw is working properly
         "nvim/lua/init.lua".text = ''
           vim.g.mapleader = " "
           vim.g.maplocalleader = "\\"
