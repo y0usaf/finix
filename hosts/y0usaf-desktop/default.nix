@@ -26,7 +26,7 @@ in {
       history-storage = 10000;
       enableFancyPrompt = true;
       zellij = {
-        enable = true;
+        enable = false;
       };
     };
   };
