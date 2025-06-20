@@ -1118,41 +1118,46 @@
     initLua = initLuaContent;
     
     # Essential plugins required by our configuration
-    plugins = with pkgs.vimPlugins; [
-      # Core functionality
-      nvim-lspconfig
-      nvim-cmp
-      cmp-nvim-lsp
-      cmp-buffer
-      cmp-path
-      cmp_luasnip
-      luasnip
-      nvim-treesitter.withAllGrammars
-      plenary-nvim
-      nvim-web-devicons
-      
-      # UI enhancements
-      lualine-nvim
-      indent-blankline-nvim
-      which-key-nvim
-      telescope-nvim
-      telescope-fzf-native-nvim
-      neo-tree-nvim
-      bufferline-nvim
-      
-      # Git integration
-      gitsigns-nvim
-      lazygit-nvim
-      
-      # Additional tools
-      comment-nvim
-      nvim-autopairs
-      mini-indentscope
-      conform-nvim
-      trouble-nvim
-      toggleterm-nvim
-      persistence-nvim
-    ];
+    plugins = {
+      start = with pkgs.vimPlugins; [
+        # Core functionality
+        nvim-lspconfig
+        nvim-cmp
+        cmp-nvim-lsp
+        cmp-buffer
+        cmp-path
+        cmp_luasnip
+        luasnip
+        nvim-treesitter.withAllGrammars
+        plenary-nvim
+        nvim-web-devicons
+        
+        # UI enhancements
+        lualine-nvim
+        indent-blankline-nvim
+        which-key-nvim
+        telescope-nvim
+        telescope-fzf-native-nvim
+        neo-tree-nvim
+        bufferline-nvim
+        nui-nvim  # Required by neo-tree
+        
+        # Git integration
+        gitsigns-nvim
+        lazygit-nvim
+        
+        # Additional tools
+        comment-nvim
+        nvim-autopairs
+        mini-indentscope
+        conform-nvim
+        trouble-nvim
+        toggleterm-nvim
+        persistence-nvim
+      ];
+      opt = [];
+      dev = {};
+    };
     
     extraBinPath = lspPackages;
   };
