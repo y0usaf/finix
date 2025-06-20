@@ -12,6 +12,28 @@
   ...
 }: let
   cfg = config.home.dev.mcp;
+  
+  # Shared MCP servers configuration
+  mcpServersConfig = {
+    mcpServers = {
+      "Filesystem" = {
+        command = "npx";
+        args = ["-y" "@modelcontextprotocol/server-filesystem" "~"];
+      };
+      "Nixos MCP" = {
+        command = "uvx";
+        args = ["mcp-nixos"];
+      };
+      "sequential-thinking" = {
+        command = "npx";
+        args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
+      };
+      "GitHub Repo MCP" = {
+        command = "npx";
+        args = ["-y" "github-repo-mcp"];
+      };
+    };
+  };
 in {
   ###########################################################################
   # Module Options
@@ -34,29 +56,12 @@ in {
       ];
 
       ###########################################################################
-      # MCP Configuration File
+      # MCP Configuration Files
       ###########################################################################
       file.home = {
-        ".cursor/mcp.json".text = builtins.toJSON {
-          mcpServers = {
-            "Filesystem" = {
-              command = "npx";
-              args = ["-y" "@modelcontextprotocol/server-filesystem" "~"];
-            };
-            "Nixos MCP" = {
-              command = "uvx";
-              args = ["mcp-nixos"];
-            };
-            "sequential-thinking" = {
-              command = "npx";
-              args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
-            };
-            "GitHub Repo MCP" = {
-              command = "npx";
-              args = ["-y" "github-repo-mcp"];
-            };
-          };
-        };
+        ".cursor/mcp.json".text = builtins.toJSON mcpServersConfig;
+      } // lib.optionalAttrs config.home.dev.claude-code.enable {
+        ".claude/mcp_config.json".text = builtins.toJSON mcpServersConfig;
       };
     };
 
