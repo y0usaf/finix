@@ -54,11 +54,5 @@ in {
         '';
       };
     };
-    
-    # Environment variables for Neovide
-    home.sessionVariables = {
-      NEOVIDE_MULTIGRID = "1";
-      NEOVIDE_FRAME = "full";
-    };
   };
 }
