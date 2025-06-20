@@ -47,7 +47,7 @@
 
       -- Set leader keys early
       vim.g.mapleader = " "
-      vim.g.maplocalleader = "\\"
+      vim.g.maplocalleader = "\\\\"
 
       -- Disable builtin plugins
       vim.g.loaded_netrw = 1
@@ -964,7 +964,7 @@
 
       require("toggleterm").setup({
         size = 20,
-        open_mapping = [[<c-\>]],
+        open_mapping = [[<c-\\>]],
         hide_numbers = true,
         shade_filetypes = {},
         shade_terminals = true,
@@ -1037,7 +1037,7 @@
       autocmd("BufWritePre", {
         group = "RemoveWhitespace",
         pattern = "*",
-        command = ":%s/\\s\\+$//e",
+        command = ":%s/\\\\s\\\\+$//e",
       })
 
       -- Close certain windows with q
