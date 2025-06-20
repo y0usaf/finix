@@ -34,12 +34,8 @@
     rustfmt
   ];
 
-  # Create MNW-based Neovim package
-  mnwNeovim = inputs.mnw.lib.wrap pkgs {
-    neovim = pkgs.neovim-unwrapped;
-    
-    # Main Lua configuration
-    initLua = ''
+  # Main Lua configuration content
+  initLuaContent = ''
       -- ============================================================================
       -- Enhanced Neovim Configuration with MNW
       -- Modern, feature-rich setup with hot reloading capabilities
@@ -1116,7 +1112,10 @@
       ];
     };
 
-    # Just the essentials for MNW
+  # Create MNW-based Neovim package using the content defined above
+  mnwNeovim = inputs.mnw.lib.wrap pkgs {
+    neovim = pkgs.neovim-unwrapped;
+    initLua = initLuaContent;
     extraBinPath = lspPackages;
   };
 in {
@@ -1132,20 +1131,25 @@ in {
   # Module Configuration - MNW package via nix-maid
   ###########################################################################
   config = lib.mkIf cfg.enable {
-    users.users.${username}.maid.packages = [
-      # MNW-built Neovim package
-      mnwNeovim
-      
-      # Additional tools for development workflow
-      pkgs.lazygit
-      pkgs.ripgrep
-      pkgs.fd
-      pkgs.tree-sitter
-      pkgs.fzf
-      pkgs.bat
-      pkgs.delta
-    ] ++ lib.optionals cfg.neovide [
-      pkgs.neovide
-    ];
+    users.users.${username}.maid = {
+      packages = [
+        # MNW-built Neovim package
+        mnwNeovim
+        
+        # Additional tools for development workflow
+        pkgs.lazygit
+        pkgs.ripgrep
+        pkgs.fd
+        pkgs.tree-sitter
+        pkgs.fzf
+        pkgs.bat
+        pkgs.delta
+      ] ++ lib.optionals cfg.neovide [
+        pkgs.neovide
+      ];
+
+      # Deploy nvim configuration files  
+      file.xdg_config."nvim/init.lua".text = initLuaContent;
+    };
   };
 }
