@@ -66,7 +66,6 @@
     ## Editor
     mnw = {
       url = "github:Gerg-L/mnw";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
