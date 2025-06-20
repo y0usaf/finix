@@ -224,7 +224,8 @@ in {
           # Zellij Auto-start
           # ----------------------------
           # Automatically start Zellij if not already in a session
-          if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" ]]; then
+          # Skip if in nvim, vscode, or SSH connection
+          if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" && -z "$NVIM" ]]; then
               exec zellij
           fi
 

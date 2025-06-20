@@ -26,7 +26,7 @@ in {
       history-storage = 10000;
       enableFancyPrompt = true;
       zellij = {
-        enable = false;
+        enable = true;
       };
     };
   };
@@ -149,7 +149,7 @@ in {
       mcp.enable = true;
       nvim = {
         enable = true;
-        neovide = true;
+        neovide = false;
       };
     };
     shell = {
