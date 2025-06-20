@@ -313,19 +313,67 @@ in {
               },
             },
             
-            -- Git
+            -- Enhanced Git with animations
             {
               "lewis6991/gitsigns.nvim",
               event = { "BufReadPre", "BufNewFile" },
               opts = {
                 signs = {
-                  add = { text = "▎" },
-                  change = { text = "▎" },
-                  delete = { text = "" },
-                  topdelete = { text = "" },
-                  changedelete = { text = "▎" },
+                  add = { text = "┃" },
+                  change = { text = "┃" },
+                  delete = { text = "▁" },
+                  topdelete = { text = "▔" },
+                  changedelete = { text = "~" },
+                  untracked = { text = "┆" },
+                },
+                signs_staged = {
+                  add = { text = "┃" },
+                  change = { text = "┃" },
+                  delete = { text = "▁" },
+                  topdelete = { text = "▔" },
+                  changedelete = { text = "~" },
+                  untracked = { text = "┆" },
+                },
+                signs_staged_enable = true,
+                signcolumn = true,
+                numhl = false,
+                linehl = false,
+                word_diff = false,
+                watch_gitdir = {
+                  follow_files = true,
+                },
+                auto_attach = true,
+                attach_to_untracked = false,
+                current_line_blame = true,
+                current_line_blame_opts = {
+                  virt_text = true,
+                  virt_text_pos = "eol",
+                  delay = 300,
+                  ignore_whitespace = false,
+                  virt_text_priority = 100,
+                },
+                current_line_blame_formatter = "<author>, <author_time:%R> - <summary>",
+                sign_priority = 6,
+                update_debounce = 100,
+                status_formatter = nil,
+                max_file_length = 40000,
+                preview_config = {
+                  border = "rounded",
+                  style = "minimal",
+                  relative = "cursor",
+                  row = 0,
+                  col = 1,
                 },
               },
+              config = function(_, opts)
+                require("gitsigns").setup(opts)
+                
+                -- Custom highlight groups for animated git signs
+                vim.api.nvim_set_hl(0, "GitSignsAdd", { fg = "#98be65", bold = true })
+                vim.api.nvim_set_hl(0, "GitSignsChange", { fg = "#ECBE7B", bold = true })
+                vim.api.nvim_set_hl(0, "GitSignsDelete", { fg = "#EC5F67", bold = true })
+                vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#565f89", italic = true })
+              end,
             },
             
             -- Syntax highlighting with Nix+Lua injection
@@ -346,6 +394,193 @@ in {
               end,
             },
             
+            -- Winbar with breadcrumbs
+            {
+              "utilyre/barbecue.nvim",
+              name = "barbecue",
+              version = "*",
+              dependencies = {
+                "SmiteshP/nvim-navic",
+                "nvim-tree/nvim-web-devicons",
+              },
+              opts = {
+                theme = "tokyonight",
+                show_dirname = false,
+                show_basename = false,
+                create_autocmd = false,
+                attach_navic = false,
+                symbols = {
+                  separator = "",
+                },
+                kinds = {
+                  File = "",
+                  Module = "",
+                  Namespace = "",
+                  Package = "",
+                  Class = "",
+                  Method = "",
+                  Property = "",
+                  Field = "",
+                  Constructor = "",
+                  Enum = "",
+                  Interface = "",
+                  Function = "",
+                  Variable = "",
+                  Constant = "",
+                  String = "",
+                  Number = "",
+                  Boolean = "",
+                  Array = "",
+                  Object = "",
+                  Key = "",
+                  Null = "",
+                  EnumMember = "",
+                  Struct = "",
+                  Event = "",
+                  Operator = "",
+                  TypeParameter = "",
+                },
+              },
+              config = function(_, opts)
+                require("barbecue").setup(opts)
+                vim.api.nvim_create_autocmd({
+                  "WinScrolled",
+                  "BufWinEnter",
+                  "CursorHold",
+                  "InsertLeave",
+                }, {
+                  group = vim.api.nvim_create_augroup("barbecue.updater", {}),
+                  callback = function()
+                    require("barbecue.ui").update()
+                  end,
+                })
+              end,
+            },
+            
+            -- Holographic cursor and animations
+            {
+              "gen740/SmoothCursor.nvim",
+              event = "VeryLazy",
+              opts = {
+                type = "default",
+                cursor = "",
+                texthl = "SmoothCursor",
+                linehl = nil,
+                fancy = {
+                  enable = true,
+                  head = { cursor = "▷", texthl = "SmoothCursor", linehl = nil },
+                  body = {
+                    { cursor = "󰝥", texthl = "SmoothCursorRed" },
+                    { cursor = "󰝥", texthl = "SmoothCursorOrange" },
+                    { cursor = "●", texthl = "SmoothCursorYellow" },
+                    { cursor = "●", texthl = "SmoothCursorGreen" },
+                    { cursor = "•", texthl = "SmoothCursorAqua" },
+                    { cursor = ".", texthl = "SmoothCursorBlue" },
+                    { cursor = ".", texthl = "SmoothCursorPurple" },
+                  },
+                  tail = { cursor = nil, texthl = "SmoothCursor" },
+                },
+                matrix = {
+                  head = {
+                    cursor = require("smoothcursor.matrix_chars")[math.random(#require("smoothcursor.matrix_chars"))],
+                    texthl = "SmoothCursor",
+                    linehl = nil,
+                  },
+                  body = {
+                    length = 6,
+                    cursor = require("smoothcursor.matrix_chars")[math.random(#require("smoothcursor.matrix_chars"))],
+                    texthl = "SmoothCursorGreen",
+                  },
+                  tail = {
+                    cursor = nil,
+                    texthl = "SmoothCursor",
+                  },
+                  unstop = false,
+                },
+                autostart = true,
+                always_redraw = true,
+                flyin_effect = nil,
+                speed = 25,
+                intervals = 35,
+                priority = 10,
+                timeout = 3000,
+                threshold = 3,
+                disable_float_win = false,
+                enabled_filetypes = nil,
+                disabled_filetypes = nil,
+              },
+              config = function(_, opts)
+                require("smoothcursor").setup(opts)
+                
+                -- Define highlight groups for cursor trail
+                local colors = {
+                  "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#98D8C8"
+                }
+                for i, color in ipairs(colors) do
+                  vim.api.nvim_set_hl(0, "SmoothCursor" .. (i == 1 and "Red" or i == 2 and "Orange" or i == 3 and "Yellow" or i == 4 and "Green" or i == 5 and "Aqua" or i == 6 and "Blue" or "Purple"), { fg = color })
+                end
+                vim.api.nvim_set_hl(0, "SmoothCursor", { fg = "#8aa2d3" })
+              end,
+            },
+            
+            -- Rainbow brackets
+            {
+              "HiPhish/rainbow-delimiters.nvim",
+              event = { "BufReadPost", "BufNewFile" },
+              config = function()
+                local rainbow_delimiters = require("rainbow-delimiters")
+                vim.g.rainbow_delimiters = {
+                  strategy = {
+                    [""] = rainbow_delimiters.strategy["global"],
+                    vim = rainbow_delimiters.strategy["local"],
+                  },
+                  query = {
+                    [""] = "rainbow-delimiters",
+                    lua = "rainbow-blocks",
+                  },
+                  priority = {
+                    [""] = 110,
+                    lua = 210,
+                  },
+                  highlight = {
+                    'RainbowDelimiterRed',
+                    'RainbowDelimiterYellow',
+                    'RainbowDelimiterBlue',
+                    'RainbowDelimiterOrange',
+                    'RainbowDelimiterGreen',
+                    'RainbowDelimiterViolet',
+                    'RainbowDelimiterCyan',
+                  },
+                }
+              end,
+            },
+            
+            -- Minimap
+            {
+              "gorbit99/codewindow.nvim",
+              event = { "BufReadPost", "BufNewFile" },
+              opts = {
+                auto_enable = false,
+                minimap_width = 20,
+                relative = "editor",
+                border = "rounded",
+                window_border = "rounded",
+                show_cursor = true,
+                screen_bounds = "lines",
+                use_lsp = true,
+                use_treesitter = true,
+                use_git = true,
+                width_multiplier = 4,
+                z_index = 1,
+                show_fold = true,
+              },
+              config = function(_, opts)
+                local codewindow = require("codewindow")
+                codewindow.setup(opts)
+                vim.keymap.set("n", "<leader>mo", codewindow.toggle_minimap, { desc = "Toggle minimap" })
+              end,
+            },
+            
             -- Utilities
             { "numToStr/Comment.nvim", event = "VeryLazy", opts = {} },
             { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
@@ -355,21 +590,70 @@ in {
               event = { "BufReadPost", "BufNewFile" },
               main = "ibl",
               opts = {
-                indent = { char = "▏" },
-                scope = { enabled = false },
+                indent = { 
+                  char = "▏",
+                  tab_char = "▏",
+                  highlight = { "RainbowRed", "RainbowYellow", "RainbowBlue", "RainbowOrange", "RainbowGreen", "RainbowViolet", "RainbowCyan" },
+                },
+                scope = { 
+                  enabled = true,
+                  show_start = true,
+                  show_end = true,
+                  highlight = { "Function", "Label" },
+                },
+                exclude = {
+                  filetypes = { "help", "alpha", "dashboard", "neo-tree", "Trouble", "lazy", "mason", "notify", "toggleterm", "lazyterm" },
+                },
               },
             },
             
-            -- Terminal
+            -- Enhanced Terminal with blur
             {
               "akinsho/toggleterm.nvim",
               cmd = { "ToggleTerm", "TermExec" },
               opts = {
                 size = 20,
                 open_mapping = [[<c-\>]],
-                direction = "horizontal",
+                direction = "float",
                 shade_terminals = false,
+                float_opts = {
+                  border = "curved",
+                  width = math.floor(vim.o.columns * 0.8),
+                  height = math.floor(vim.o.lines * 0.8),
+                  winblend = 20,
+                  highlights = {
+                    border = "Normal",
+                    background = "Normal",
+                  },
+                },
+                highlights = {
+                  Normal = { guibg = "#1a1b26" },
+                  NormalFloat = { link = "Normal" },
+                  FloatBorder = { guifg = "#7aa2f7", guibg = "#1a1b26" },
+                },
               },
+              config = function(_, opts)
+                require("toggleterm").setup(opts)
+                
+                -- Custom terminal with matrix effect
+                local Terminal = require("toggleterm.terminal").Terminal
+                local matrix_term = Terminal:new({
+                  cmd = "cmatrix -C blue",
+                  direction = "float",
+                  float_opts = {
+                    border = "curved",
+                    width = math.floor(vim.o.columns * 0.6),
+                    height = math.floor(vim.o.lines * 0.6),
+                    winblend = 30,
+                  },
+                  on_open = function(term)
+                    vim.cmd("startinsert!")
+                    vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
+                  end,
+                })
+                
+                vim.keymap.set("n", "<leader>tm", function() matrix_term:toggle() end, { desc = "Toggle matrix terminal" })
+              end,
             },
             
             -- Diagnostics
@@ -424,7 +708,7 @@ in {
           vim.opt.showmode = false
           vim.opt.laststatus = 3
           vim.opt.cmdheight = 0
-          vim.opt.fillchars = { eob = " ", fold = " ", foldopen = "", foldsep = " ", foldclose = "", diff = "╱" }
+          vim.opt.fillchars = { eob = " ", fold = " ", foldopen = "", foldsep = " ", foldclose = "", diff = "/" }
           vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
           vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
           vim.opt.splitbelow = true
