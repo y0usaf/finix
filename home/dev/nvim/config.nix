@@ -57,6 +57,7 @@ in {
           require('config.lsp')
           require('config.plugins')
           require('config.autocmds')
+          require('config.neovide')
         '';
 
         "nvim/lua/config/options.lua".text = ''
@@ -447,6 +448,8 @@ in {
             command = "tabdo wincmd =",
           })
         '';
+
+
       };
     };
   };
