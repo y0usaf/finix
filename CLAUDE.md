@@ -39,5 +39,5 @@
 - This is a NixOS configuration repository
 - Use flakes and modern Nix practices
 - Follow nixpkgs conventions and idioms
-- Commands: nixos-rebuild switch --flake . (build), nixos-rebuild test --flake . (test)
+- Commands: nh os switch (build), nh os switch --dry (dry build), nixos-rebuild test --flake . (test)
 </PROJECT_CONTEXT>
