@@ -12,7 +12,7 @@
   ...
 }: let
   cfg = config.home.dev.mcp;
-  
+
   # Shared MCP servers configuration
   mcpServersConfig = {
     mcpServers = {
