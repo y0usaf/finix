@@ -8,12 +8,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.programs.dev.claude-code;
+  cfg = config.home.dev.claude-code;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.home.programs.dev.claude-code = {
+  options.home.dev.claude-code = {
     enable = lib.mkEnableOption "claude code development environment";
   };
 
@@ -25,7 +25,7 @@ in {
     # Maid Configuration
     ###########################################################################
     users.users.y0usaf.maid.packages = with pkgs; [
-      # Claude Code dependencies would go here
+      claude-code
     ];
   };
 }

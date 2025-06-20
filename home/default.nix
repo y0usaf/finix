@@ -1,15 +1,5 @@
-###############################################################################
-# Home Modules Collection (Maid)
-# Imports all home-related modules for nix-maid integration
-###############################################################################
-{...}: {
-  imports = [
-    ./core
-    ./gaming
-    ./programs
-    ./services
-    ./shell
-    ./tools
-    ./ui
-  ];
+{lib, ...}: {
+  imports =
+    (import ../lib/helpers/import-dirs.nix {inherit lib;})
+    ./.;
 }

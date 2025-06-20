@@ -143,6 +143,12 @@ in {
       qbittorrent.enable = true;
       sway-launcher-desktop.enable = true;
     };
+    dev = {
+      cursor-ide.enable = true;
+      claude-code.enable = true;
+      mcp.enable = true;
+      nvim.enable = true;
+    };
     shell = {
       zsh.enable = true;
     };
