@@ -22,6 +22,8 @@
     vscode-langservers-extracted # html, css, json
     bash-language-server
     marksman # Markdown LSP
+    yaml-language-server
+    dockerfile-language-server-nodejs
     
     # Formatters
     stylua
@@ -29,6 +31,7 @@
     black
     prettier
     rustfmt
+
   ];
 in {
   ###########################################################################
@@ -50,12 +53,13 @@ in {
         ripgrep
         fd
         tree-sitter
+        fzf
+        bat
+        delta
         
         # Standard Neovim package
         neovim
-      ] ++ lspPackages ++ lib.optionals cfg.neovide [
-        neovide
-      ];
+      ] ++ lspPackages;
 
       # Dotfiles configuration
       file.home = {
@@ -296,6 +300,7 @@ in {
                       ["rust-analyzer"] = {
                         cargo = { buildScripts = { enable = true } },
                         procMacro = { enable = true },
+                        checkOnSave = { command = "clippy" },
                       },
                     },
                   },
@@ -305,6 +310,8 @@ in {
                   jsonls = {},
                   bashls = {},
                   marksman = {},
+                  yamlls = {},
+                  dockerls = {},
                 }
 
                 for server, config in pairs(servers) do
@@ -774,7 +781,7 @@ in {
                     theme = 'auto',
                     globalstatus = true,
                     component_separators = { left = '|', right = '|' },
-                    section_separators = { left = '▶', right = '◀' },
+                    section_separators = { left = '\ue0b0', right = '\ue0b2' },
                   },
                   sections = {
                     lualine_a = {'mode'},
@@ -872,6 +879,7 @@ in {
                     html = { "prettier" },
                     css = { "prettier" },
                     json = { "prettier" },
+                    yaml = { "prettier" },
                     markdown = { "prettier" },
                   },
                   format_on_save = {
