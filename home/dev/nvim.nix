@@ -469,9 +469,16 @@
       hl("NotifyDEBUGTitle", { fg = colors.comment })
       hl("NotifyTRACETitle", { fg = colors.purple })
 
-      -- LSP setup
-      local lspconfig = require('lspconfig')
-      local capabilities = require('cmp_nvim_lsp').default_capabilities()
+      -- LSP setup (with error handling)
+      local lspconfig_ok, lspconfig = pcall(require, 'lspconfig')
+      local cmp_nvim_lsp_ok, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
+      
+      if not lspconfig_ok then
+        vim.notify("LSP configuration disabled: lspconfig not found", vim.log.levels.WARN)
+        return
+      end
+      
+      local capabilities = cmp_nvim_lsp_ok and cmp_nvim_lsp.default_capabilities() or vim.lsp.protocol.make_client_capabilities()
 
       -- Enhanced capabilities
       capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -534,9 +541,11 @@
         end,
       })
 
-      -- Completion setup
-      local cmp = require('cmp')
-      local luasnip = require('luasnip')
+      -- Completion setup (with error handling)
+      local cmp_ok, cmp = pcall(require, 'cmp')
+      local luasnip_ok, luasnip = pcall(require, 'luasnip')
+      
+      if cmp_ok then
 
       cmp.setup({
         snippet = {
@@ -583,9 +592,12 @@
           ghost_text = true,
         },
       })
+      end -- End of cmp_ok conditional
 
-      -- Other plugin configurations
-      require("bufferline").setup({
+      -- Other plugin configurations (with error handling)
+      local bufferline_ok, bufferline = pcall(require, "bufferline")
+      if bufferline_ok then
+      bufferline.setup({
         options = {
           mode = "buffers",
           themable = true,
@@ -656,13 +668,19 @@
           },
         },
       })
+      end -- End of bufferline_ok conditional
 
-      require("mini.indentscope").setup({
+      local mini_indentscope_ok, mini_indentscope = pcall(require, "mini.indentscope")
+      if mini_indentscope_ok then
+      mini_indentscope.setup({
         symbol = "│",
         options = { try_as_border = true },
       })
+      end
 
-      require('neo-tree').setup({
+      local neo_tree_ok, neo_tree = pcall(require, 'neo-tree')
+      if neo_tree_ok then
+      neo_tree.setup({
         close_if_last_window = false,
         popup_border_style = "rounded",
         enable_git_status = true,
@@ -899,8 +917,11 @@
           spelling = { enabled = true, suggestions = 20 },
         },
       })
+      end -- End of neo_tree_ok conditional
 
-      require('gitsigns').setup({
+      local gitsigns_ok, gitsigns = pcall(require, 'gitsigns')
+      if gitsigns_ok then
+      gitsigns.setup({
         signs = {
           add = { text = '+' },
           change = { text = '~' },
@@ -909,18 +930,27 @@
           changedelete = { text = '~' },
         },
       })
+      end -- End of gitsigns_ok conditional
 
-      require('nvim-autopairs').setup({
+      local autopairs_ok, autopairs = pcall(require, 'nvim-autopairs')
+      if autopairs_ok then
+      autopairs.setup({
         check_ts = true,
         ts_config = {
           lua = {'string', 'source'},
           javascript = {'string', 'template_string'},
         },
       })
+      end -- End of autopairs_ok conditional
 
-      require('Comment').setup()
+      local comment_ok, comment = pcall(require, 'Comment')
+      if comment_ok then
+      comment.setup()
+      end
 
-      require('conform').setup({
+      local conform_ok, conform = pcall(require, 'conform')
+      if conform_ok then
+      conform.setup({
         formatters_by_ft = {
           lua = { "stylua" },
           nix = { "alejandra" },
@@ -939,8 +969,11 @@
           lsp_fallback = true,
         },
       })
+      end -- End of conform_ok conditional
 
-      require("trouble").setup({
+      local trouble_ok, trouble = pcall(require, "trouble")
+      if trouble_ok then
+      trouble.setup({
         modes = {
           preview_float = {
             mode = "diagnostics",
@@ -1004,6 +1037,7 @@
           prefix = "",
         },
       })
+      end -- End of trouble_ok conditional
 
       -- LSP diagnostic signs
       local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
