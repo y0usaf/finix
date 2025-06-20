@@ -1116,6 +1116,44 @@
   mnwNeovim = inputs.mnw.lib.wrap pkgs {
     neovim = pkgs.neovim-unwrapped;
     initLua = initLuaContent;
+    
+    # Essential plugins required by our configuration
+    plugins = with pkgs.vimPlugins; [
+      # Core functionality
+      nvim-lspconfig
+      nvim-cmp
+      cmp-nvim-lsp
+      cmp-buffer
+      cmp-path
+      cmp_luasnip
+      luasnip
+      nvim-treesitter.withAllGrammars
+      plenary-nvim
+      nvim-web-devicons
+      
+      # UI enhancements
+      lualine-nvim
+      indent-blankline-nvim
+      which-key-nvim
+      telescope-nvim
+      telescope-fzf-native-nvim
+      neo-tree-nvim
+      bufferline-nvim
+      
+      # Git integration
+      gitsigns-nvim
+      lazygit-nvim
+      
+      # Additional tools
+      comment-nvim
+      nvim-autopairs
+      mini-indentscope
+      conform-nvim
+      trouble-nvim
+      toggleterm-nvim
+      persistence-nvim
+    ];
+    
     extraBinPath = lspPackages;
   };
 in {
