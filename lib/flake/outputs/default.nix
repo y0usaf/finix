@@ -32,7 +32,7 @@ inputs: let
   ## Common Special Arguments for Modules
   commonSpecialArgs = {
     inherit inputs;
-    inherit (inputs) disko fast-fonts nix-minecraft;
+    inherit (inputs) disko fast-fonts nix-minecraft nixvim;
     inherit helpers;
   };
 in {
