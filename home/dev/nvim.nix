@@ -10,12 +10,14 @@
   ...
 }: let
   cfg = config.home.dev.nvim;
+  inherit (config.shared) username;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
   options.home.dev.nvim = {
     enable = lib.mkEnableOption "NixVim editor";
+    neovide = lib.mkEnableOption "Neovide GUI for Neovim";
   };
 
   ###########################################################################
@@ -26,6 +28,17 @@ in {
   ];
   
   config = lib.mkIf cfg.enable {
+    ###########################################################################
+    # Maid Configuration
+    ###########################################################################
+    users.users.${username}.maid = {
+      packages = with pkgs; [
+        # Conditionally add neovide package
+      ] ++ lib.optionals cfg.neovide [
+        neovide
+      ];
+    };
+    
     ###########################################################################
     # NixVim Configuration
     ###########################################################################
