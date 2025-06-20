@@ -126,7 +126,7 @@ in {
         showmode = false;  # Mode shown in lualine
         list = true;
         listchars = "tab:→ ,eol:↲,nbsp:␣,trail:•,extends:⟩,precedes:⟨";
-        fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldclose:";
+        fillchars = "eob: ,fold: ,foldopen:▾,foldsep: ,foldclose:▸";
       };
 
       ###########################################################################
