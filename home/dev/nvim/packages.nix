@@ -18,6 +18,8 @@ in {
       pkgs.bat
       pkgs.delta
       pkgs.neovim
+      pkgs.gnumake
+      pkgs.gcc
 
       # LSP servers
       pkgs.lua-language-server
