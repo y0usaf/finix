@@ -42,7 +42,6 @@ in {
       # Dashboard configuration
       xdg_config."nvim/lua/dashboard.lua".text = ''
         local dashboard = require("alpha.themes.dashboard")
-        local themes = require("alpha.themes")
 
         dashboard.section.header.val = {
           [[                               __                ]],
