@@ -126,6 +126,9 @@ in {
                     ["<C-j>"] = "move_selection_next",
                   },
                 },
+                preview = {
+                  treesitter = false,
+                },
               },
             })
             telescope.load_extension("fzf")
