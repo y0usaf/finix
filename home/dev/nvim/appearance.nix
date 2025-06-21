@@ -39,48 +39,98 @@ in {
         vim.opt.smoothscroll = true
       '';
 
+      # Dashboard configuration
+      xdg_config."nvim/lua/dashboard.lua".text = ''
+        local dashboard = require("alpha.themes.dashboard")
+        local themes = require("alpha.themes")
+
+        dashboard.section.header.val = {
+          [[                               __                ]],
+          [[  ____  _________  ____  ____/ /___  ____  _____]],
+          [[ / __ \/ ___/ __ \/ __ \/ __  / __ \/ __ \/ ___/]],
+          [[/ /_/ / /  / /_/ / /_/ / /_/ / /_/ / /_/ (__  ) ]],
+          [[\____/_/   \____/ .___/\__,_/\____/\____/____/  ]],
+          [[               /_/                             ]],
+        }
+
+        dashboard.section.buttons.val = {
+          dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
+          dashboard.button("f", "  Find file", ":Telescope find_files <CR>"),
+          dashboard.button("r", "  Recent files", ":Telescope oldfiles <CR>"),
+          dashboard.button("g", "  Find text", ":Telescope live_grep <CR>"),
+          dashboard.button("c", "  Config", ":e ~/.config/nix/home/dev/nvim/appearance.nix<CR>"),
+          dashboard.button("q", "  Quit", ":qa<CR>"),
+        }
+
+        require("alpha").setup(dashboard.opts)
+
+        vim.api.nvim_create_autocmd("User", {
+          pattern = "LazyVimStarted",
+          callback = function()
+            local theme = themes["startify"]
+            local stats = require("lazy").stats()
+            local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+            theme.section.footer.val = "⚡ Neovim loaded " .. stats.count .. " plugins in " .. ms .. "ms"
+            pcall(require("alpha").setup, theme.opts)
+          end,
+        })
+      '';
+
       # Appearance-related plugins
       xdg_config."nvim/lua/plugins_appearance.lua".text = ''
         return {
           -- Theme
           {
-            "folke/tokyonight.nvim",
+            "scottmckendry/cyberdream.nvim",
             lazy = false,
             priority = 1000,
             opts = {
-              style = "night",
               transparent = true,
-              terminal_colors = true,
-              styles = {
-                comments = { italic = true },
-                keywords = { italic = true },
-                functions = { bold = true },
-                variables = {},
-                sidebars = "transparent",
-                floats = "transparent",
-              },
-              sidebars = { "qf", "help", "vista_kind", "terminal", "packer" },
-              day_brightness = 0.3,
-              hide_inactive_statusline = false,
-              dim_inactive = false,
-              lualine_bold = true,
-              on_colors = function(colors)
-                colors.border = "#1a1b26"
-                colors.bg_statusline = "#16161e"
-              end,
-              on_highlights = function(highlights, colors)
-                highlights.CursorLineNr = { fg = colors.orange, bold = true }
-                highlights.LineNr = { fg = colors.dark3 }
-                highlights.FloatBorder = { fg = colors.border_highlight }
-                highlights.TelescopeBorder = { fg = colors.border_highlight }
-                highlights.WhichKeyFloat = { bg = colors.bg_dark }
-                highlights.LspFloatWinBorder = { fg = colors.border_highlight }
-              end,
+              italic_comments = true,
+              borderless_pickers = true,
             },
             config = function(_, opts)
-              require("tokyonight").setup(opts)
-              vim.cmd.colorscheme("tokyonight-night")
+              require("cyberdream").setup(opts)
+              vim.cmd.colorscheme("cyberdream")
             end,
+          },
+
+          -- Dashboard
+          {
+            "goolord/alpha-nvim",
+            event = "VimEnter",
+            config = function()
+              require("dashboard")
+            end,
+            dependencies = { "nvim-tree/nvim-web-devicons" },
+          },
+
+          -- Notifications
+          {
+            "rcarriga/nvim-notify",
+            config = function()
+              vim.notify = require("notify")
+              require("notify").setup({
+                background_colour = "#000000",
+                timeout = 3000,
+              })
+            end,
+          },
+
+          -- Indent lines
+          {
+            "lukas-reineke/indent-blankline.nvim",
+            main = "ibl",
+            opts = {
+              indent = {
+                char = "│",
+              },
+              scope = {
+                enabled = true,
+                show_start = false,
+                show_end = false,
+              },
+            },
           },
 
           -- File management UI
@@ -107,7 +157,7 @@ in {
             event = "VeryLazy",
             opts = {
               options = {
-                theme = "tokyonight",
+                theme = "auto",
                 globalstatus = true,
                 component_separators = { left = "│", right = "│" },
                 section_separators = { left = "", right = "" },
