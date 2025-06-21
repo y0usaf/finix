@@ -36,7 +36,6 @@ in {
         vim.opt.cmdheight = 1
         vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
         vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
-        vim.opt.smoothscroll = true
       '';
 
       # Dashboard configuration
@@ -54,9 +53,9 @@ in {
 
         dashboard.section.buttons.val = {
           dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
-          dashboard.button("f", "  Find file", ":lua require('fzf-lua').files()<CR>"),
-          dashboard.button("r", "  Recent files", ":lua require('fzf-lua').oldfiles()<CR>"),
-          dashboard.button("g", "  Find text", ":lua require('fzf-lua').live_grep()<CR>"),
+          dashboard.button("f", "  Find file", ":Telescope find_files<CR>"),
+          dashboard.button("r", "  Recent files", ":Telescope oldfiles<CR>"),
+          dashboard.button("g", "  Find text", ":Telescope live_grep<CR>"),
           dashboard.button("c", "  Config", ":e ~/.config/nix/home/dev/nvim/appearance.nix<CR>"),
           dashboard.button("q", "  Quit", ":qa<CR>"),
         }
@@ -88,6 +87,7 @@ in {
                 transparent = true,
                 italic_comments = true,
                 borderless_pickers = true,
+                lualine_style = "default",
               })
               vim.cmd.colorscheme("cyberdream")
             end,
@@ -121,6 +121,13 @@ in {
                 inc_rename = false,
                 lsp_doc_border = false,
               },
+              views = {
+                mini = {
+                  win_options = {
+                    winblend = 0,
+                  },
+                },
+              },
             },
             dependencies = {
               "MunifTanjim/nui.nvim",
@@ -137,12 +144,14 @@ in {
             main = "ibl",
             opts = {
               indent = {
-                char = "│",
+                char = "▏",
+                tab_char = "▏",
               },
               scope = {
                 enabled = true,
-                show_start = false,
-                show_end = false,
+                char = "─",
+                show_start = true,
+                show_end = true,
               },
             },
           },
@@ -174,8 +183,8 @@ in {
               options = {
                 theme = "cyberdream",
                 globalstatus = true,
-                component_separators = { left = "│", right = "│" },
-                section_separators = { left = "", right = "" },
+                component_separators = { left = '', right = '' },
+                section_separators = { left = '', right = '' },
               },
               sections = {
                 lualine_a = { { "mode", fmt = function(str) return str:sub(1,1) end } },

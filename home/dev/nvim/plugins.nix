@@ -106,17 +106,29 @@ in {
 
         -- File management
         {
-          "ibhagwan/fzf-lua",
-          -- Load on key press
+          "nvim-telescope/telescope.nvim",
           event = "VeryLazy",
-          dependencies = { "nvim-tree/nvim-web-devicons" },
+          dependencies = {
+            "nvim-lua/plenary.nvim",
+            {
+              "nvim-telescope/telescope-fzf-native.nvim",
+              build = "make",
+            },
+          },
           config = function()
-            require("fzf-lua").setup({
-              winopts = {
-                height = 0.9,
-                width = 0.9,
+            local telescope = require("telescope")
+            telescope.setup({
+              defaults = {
+                path_display = { "truncate" },
+                mappings = {
+                  i = {
+                    ["<C-k>"] = "move_selection_previous",
+                    ["<C-j>"] = "move_selection_next",
+                  },
+                },
               },
             })
+            telescope.load_extension("fzf")
           end,
         },
 
@@ -139,7 +151,18 @@ in {
         },
 
         -- Utilities
-        { "folke/flash.nvim", event = "VeryLazy", opts = {} },
+        {
+          "folke/flash.nvim",
+          event = "VeryLazy",
+          ---@type Flash.Config
+          opts = {
+            modes = {
+              char = {
+                autohide = true,
+              },
+            },
+          },
+        },
         { "numToStr/Comment.nvim", event = "VeryLazy", opts = {} },
         { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
         { "folke/which-key.nvim", event = "VeryLazy", opts = {} },
