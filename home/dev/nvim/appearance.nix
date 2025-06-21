@@ -159,6 +159,7 @@ in {
           {
             "nvim-lualine/lualine.nvim",
             event = "VeryLazy",
+            dependencies = { "utilyre/barbecue.nvim" },
             opts = {
               options = {
                 theme = "kanagawa",
@@ -173,6 +174,22 @@ in {
                 lualine_x = { "diagnostics", "encoding", "filetype" },
                 lualine_y = { "progress" },
                 lualine_z = { "location" },
+              },
+              winbar = {
+                lualine_c = {
+                  {
+                    "b:barbecue.get_context",
+                    icon = "",
+                  },
+                },
+              },
+              inactive_winbar = {
+                lualine_c = {
+                  {
+                    "b:barbecue.get_context",
+                    icon = "",
+                  },
+                },
               },
             },
           },
