@@ -83,7 +83,12 @@
         --show-titlebar-buttons: none;
         --tab-height: 12pt;
         --toolbar-icon-size: calc(var(--tab-height) / 1.5);
-        --uc-bottom-toolbar-height: 12pt
+        --uc-bottom-toolbar-height: 12pt;
+        --uc-spacing-small: 1pt;
+        --uc-spacing-medium: 2pt;
+        --uc-navbar-width: 75vw;
+        --uc-urlbar-width: 50vw;
+        --uc-urlbar-bottom-offset: calc(var(--uc-bottom-toolbar-height) + var(--uc-spacing-medium))
     }
 
     /* Disable specific Firefox animations */
@@ -115,8 +120,8 @@
     }
 
     :root:not([customizing]) #TabsToolbar {
-        margin-left: 1pt!important;
-        margin-right: 1pt!important;
+        margin-left: var(--uc-spacing-small)!important;
+        margin-right: var(--uc-spacing-small)!important;
         border-radius: 0!important;
         padding: 0!important;
         min-height: 0!important
@@ -132,13 +137,13 @@
         font-size: var(--tab-font-size)!important;
         min-height: 0!important;
         align-items: center!important;
-        margin-bottom: 2pt!important
+        margin-bottom: var(--uc-spacing-medium)!important
     }
 
     .tab-icon-image {
         height: auto!important;
         width: var(--toolbar-icon-size)!important;
-        margin-right: 2pt!important
+        margin-right: var(--uc-spacing-medium)!important
     }
 
     #tabbrowser-arrowscrollbox,#tabbrowser-tabs,#tabbrowser-tabs>.tabbrowser-arrowscrollbox {
@@ -172,9 +177,13 @@
     #nav-bar {
         position: fixed!important;
         bottom: 0!important;
-        width: 100%!important;
+        width: var(--uc-navbar-width)!important;
         height: var(--uc-bottom-toolbar-height)!important;
         max-height: var(--uc-bottom-toolbar-height)!important;
+        margin: -1pt auto 0!important;
+        border-top: none!important;
+        left: 0!important;
+        right: 0!important;
         z-index: 1
     }
 
@@ -213,12 +222,12 @@
     }
 
     .toolbarbutton-1 {
-        padding: 0 2pt!important
+        padding: 0 var(--uc-spacing-medium)!important
     }
 
     .toolbarbutton-1,.toolbarbutton-icon {
         -moz-appearance: none!important;
-        padding-inline: 1pt!important;
+        padding-inline: var(--uc-spacing-small)!important;
         -moz-box-align: stretch;
         margin: 0!important
     }
@@ -227,14 +236,14 @@
         -moz-appearance: none!important;
         padding-top: 0!important;
         padding-bottom: 0!important;
-        padding-inline: 1pt!important;
+        padding-inline: var(--uc-spacing-small)!important;
         -moz-box-align: stretch;
         margin: 0!important
     }
 
     .tab-close-button,.urlbar-icon,.urlbar-page-action {
         -moz-appearance: none!important;
-        padding-inline: 1pt!important;
+        padding-inline: var(--uc-spacing-small)!important;
         -moz-box-align: stretch;
         margin: 0!important
     }
@@ -259,13 +268,6 @@
         appearance: toolbar!important
     }
 
-    #nav-bar {
-        margin: -1pt auto 0!important;
-        border-top: none!important;
-        width: 75vw!important;
-        left: 0!important;
-        right: 0!important;
-    }
 
     #titlebar {
         -moz-appearance: none!important;
@@ -292,11 +294,11 @@
     }
 
     .urlbarView-row {
-        padding-block: 1px!important
+        padding-block: var(--uc-spacing-small)!important
     }
 
     .urlbarView-row-inner {
-        padding-inline: 2px!important
+        padding-inline: var(--uc-spacing-medium)!important
     }
 
     .urlbarView-row[label="Firefox Suggest"] {
@@ -312,10 +314,10 @@
 
     #urlbar[breakout][breakout-extend] {
         box-shadow: 0 15pt 30pt rgba(0,0,0,.2);
-        width: 50vw!important;
+        width: var(--uc-urlbar-width)!important;
         left: 50%!important;
         right: auto!important;
-        top: 20vh!important;
+        bottom: var(--uc-urlbar-bottom-offset)!important;
         margin: 0!important;
         position: fixed!important;
         z-index: 999!important;
