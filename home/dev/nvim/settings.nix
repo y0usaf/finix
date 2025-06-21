@@ -30,7 +30,12 @@ in {
       vim.opt.number = true
       vim.opt.relativenumber = true
       vim.opt.signcolumn = "yes"
-      vim.opt.wrap = false
+      -- Advanced line wrapping configuration
+      vim.opt.wrap = true
+      vim.opt.linebreak = true        -- Break at word boundaries
+      vim.opt.breakindent = true      -- Preserve indentation
+      vim.opt.showbreak = "↪ "         -- Visual indicator for wrapped lines
+      vim.opt.textwidth = 0           -- Don't auto-break while typing
       vim.opt.expandtab = true
       vim.opt.tabstop = 2
       vim.opt.shiftwidth = 2
