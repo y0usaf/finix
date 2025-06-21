@@ -80,15 +80,16 @@ in {
         return {
           -- Theme
           {
-            "rebelot/kanagawa.nvim",
-            name = "kanagawa",
+            "scottmckendry/cyberdream.nvim",
+            lazy = false,
             priority = 1000,
             config = function()
-              require("kanagawa").setup({
+              require("cyberdream").setup({
                 transparent = true,
-                globalStatus = true,
+                italic_comments = true,
+                borderless_pickers = true,
               })
-              vim.cmd.colorscheme("kanagawa-wave")
+              vim.cmd.colorscheme("cyberdream")
             end,
           },
 
@@ -108,15 +109,25 @@ in {
             opts = {},
           },
 
-          -- Notifications
+          -- UI
           {
-            "rcarriga/nvim-notify",
-            config = function()
-              vim.notify = require("notify")
-              require("notify").setup({
-                background_colour = "#000000",
-                timeout = 3000,
-              })
+            "folke/noice.nvim",
+            event = "VeryLazy",
+            opts = {
+              presets = {
+                bottom_search = true,
+                command_palette = true,
+                long_message_to_split = true,
+                inc_rename = false,
+                lsp_doc_border = false,
+              },
+            },
+            dependencies = {
+              "MunifTanjim/nui.nvim",
+              "rcarriga/nvim-notify",
+            },
+            config = function(_, opts)
+              require("noice").setup(opts)
             end,
           },
 
@@ -161,7 +172,7 @@ in {
             dependencies = { "utilyre/barbecue.nvim" },
             opts = {
               options = {
-                theme = "kanagawa",
+                theme = "cyberdream",
                 globalstatus = true,
                 component_separators = { left = "│", right = "│" },
                 section_separators = { left = "", right = "" },
