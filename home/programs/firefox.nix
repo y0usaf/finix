@@ -70,48 +70,58 @@
   userChromeCss = ''
     /* Disable all animations */
     * {
-      animation: none !important;
-      transition: none !important;
-      scroll-behavior: auto !important;
-      padding: 0 !important;
-      margin: 0 !important;
+      animation: none;
+      transition: none;
+      scroll-behavior: auto;
+      padding: 0;
+      margin: 0;
     }
 
     :root {
+        /* Base sizing variables */
         --tab-font-size: 0.8em;
         --max-tab-width: none;
         --show-titlebar-buttons: none;
         --tab-height: 12pt;
         --toolbar-icon-size: calc(var(--tab-height) / 1.5);
-        --uc-bottom-toolbar-height: 12pt;
+        
+        /* Spacing variables */
         --uc-spacing-small: 1pt;
         --uc-spacing-medium: 2pt;
+        --uc-spacing-large: 4pt;
+        
+        /* Layout variables */
+        --uc-bottom-toolbar-height: 12pt;
         --uc-navbar-width: 75vw;
         --uc-urlbar-width: 50vw;
-        --uc-urlbar-bottom-offset: calc(var(--uc-bottom-toolbar-height) + var(--uc-spacing-medium))
+        --uc-urlbar-bottom-offset: calc(var(--uc-bottom-toolbar-height) + var(--uc-spacing-medium));
+        
+        /* Animation control */
+        --uc-animation-duration: 0.001s;
+        --uc-transition-duration: 0.001s;
     }
 
     /* Disable specific Firefox animations */
     @media (prefers-reduced-motion: no-preference) {
       * {
-        animation-duration: 0.001s !important;
-        transition-duration: 0.001s !important;
+        animation-duration: var(--uc-animation-duration);
+        transition-duration: var(--uc-transition-duration);
       }
     }
 
     /* Disable smooth scrolling */
     html {
-      scroll-behavior: auto !important;
+      scroll-behavior: auto;
     }
 
     /* Disable tab animations */
     .tabbrowser-tab {
-      transition: none !important;
+      transition: none;
     }
 
     /* Disable toolbar animations */
     :root[tabsintitlebar] #toolbar-menubar[autohide=true][inactive] {
-        transition: none !important;
+        transition: none;
     }
 
     /* Rest of your existing CSS */
@@ -120,75 +130,82 @@
     }
 
     :root:not([customizing]) #TabsToolbar {
-        margin-left: var(--uc-spacing-small)!important;
-        margin-right: var(--uc-spacing-small)!important;
-        border-radius: 0!important;
-        padding: 0!important;
-        min-height: 0!important
+        margin-left: var(--uc-spacing-small);
+        margin-right: var(--uc-spacing-small);
+        border-radius: 0;
+        padding: 0;
+        min-height: 0;
     }
 
     .tabbrowser-tab * {
-        margin: 0!important;
-        border-radius: 0!important
+        margin: 0;
+        border-radius: 0;
     }
 
     .tabbrowser-tab {
         height: var(--tab-height);
-        font-size: var(--tab-font-size)!important;
-        min-height: 0!important;
-        align-items: center!important;
-        margin-bottom: var(--uc-spacing-medium)!important
+        font-size: var(--tab-font-size);
+        min-height: 0;
+        align-items: center;
+        margin-bottom: var(--uc-spacing-medium);
     }
 
     .tab-icon-image {
-        height: auto!important;
-        width: var(--toolbar-icon-size)!important;
-        margin-right: var(--uc-spacing-medium)!important
+        height: auto;
+        width: var(--toolbar-icon-size);
+        margin-right: var(--uc-spacing-medium);
     }
 
-    #tabbrowser-arrowscrollbox,#tabbrowser-tabs,#tabbrowser-tabs>.tabbrowser-arrowscrollbox {
-        min-height: 0!important
+    #tabbrowser-arrowscrollbox,
+    #tabbrowser-tabs,
+    #tabbrowser-tabs > .tabbrowser-arrowscrollbox {
+        min-height: 0;
     }
 
-    :root:not([customizing]) #TabsToolbar .titlebar-button,:root:not([customizing]) #TabsToolbar-customization-target>.toolbarbutton-1,:root:not([customizing]) #tabbrowser-tabs .tabs-newtab-button,:root:not([customizing]) #tabs-newtab-button {
-        -moz-appearance: none!important;
-        padding-top: 0!important;
-        padding-bottom: 0!important;
+    :root:not([customizing]) #TabsToolbar .titlebar-button,
+    :root:not([customizing]) #TabsToolbar-customization-target > .toolbarbutton-1,
+    :root:not([customizing]) #tabbrowser-tabs .tabs-newtab-button,
+    :root:not([customizing]) #tabs-newtab-button {
+        -moz-appearance: none;
+        padding-top: 0;
+        padding-bottom: 0;
         -moz-box-align: stretch;
-        margin: 0!important
+        margin: 0;
     }
 
-    #tabbrowser-tabs .tabs-newtab-button:hover,#tabs-newtab-button:hover {
-        background-color: var(--toolbarbutton-hover-background)
+    #tabbrowser-tabs .tabs-newtab-button:hover,
+    #tabs-newtab-button:hover {
+        background-color: var(--toolbarbutton-hover-background);
     }
 
-    #tabbrowser-tabs .tabs-newtab-button>.toolbarbutton-icon,#tabs-newtab-button>.toolbarbutton-icon {
-        padding: 0!important;
-        transform: scale(.6);
-        background-color: transparent!important
+    #tabbrowser-tabs .tabs-newtab-button > .toolbarbutton-icon,
+    #tabs-newtab-button > .toolbarbutton-icon {
+        padding: 0;
+        transform: scale(0.6);
+        background-color: transparent;
     }
 
-    @media (-moz-os-version:windows-win10) {
+    @media (-moz-os-version: windows-win10) {
         :root[sizemode=maximized] #navigator-toolbox {
-            padding-top: 7pt!important
+            padding-top: calc(var(--uc-spacing-large) + var(--uc-spacing-medium));
         }
     }
 
     #nav-bar {
-        position: fixed!important;
-        bottom: 0!important;
-        width: var(--uc-navbar-width)!important;
-        height: var(--uc-bottom-toolbar-height)!important;
-        max-height: var(--uc-bottom-toolbar-height)!important;
-        margin: -1pt auto 0!important;
-        border-top: none!important;
-        left: 0!important;
-        right: 0!important;
-        z-index: 1
+        position: fixed;
+        bottom: 0;
+        width: var(--uc-navbar-width);
+        height: var(--uc-bottom-toolbar-height);
+        max-height: var(--uc-bottom-toolbar-height);
+        margin: calc(-1 * var(--uc-spacing-small)) auto 0;
+        border-top: none;
+        left: 0;
+        right: 0;
+        z-index: 1;
     }
 
     #browser {
-        margin-bottom: var(--uc-bottom-toolbar-height)!important
+        margin-bottom: var(--uc-bottom-toolbar-height);
     }
 
     #tabbrowser-arrowscrollbox:not([overflowing]) {
@@ -199,144 +216,173 @@
         justify-content: var(--uc-flex-justify, initial)
     }
 
-    #urlbar,#urlbar-input-container {
-        height: var(--tab-height)!important
+    #urlbar,
+    #urlbar-input-container {
+        height: var(--tab-height);
     }
 
-    #urlbar,#urlbar[open] {
-        min-height: var(--tab-height)!important
+    #urlbar,
+    #urlbar[open] {
+        min-height: var(--tab-height);
     }
 
     #urlbar-input-container {
-        min-height: 0!important
+        min-height: 0;
     }
 
-    #urlbar[open],#urlbar[open] #urlbar-input-container {
-        height: auto!important
+    #urlbar[open],
+    #urlbar[open] #urlbar-input-container {
+        height: auto;
     }
 
-    #identity-icon,#page-action-buttons img,#permissions-granted-icon,#star-button-box,#tracking-protection-icon,.searchbar-search-icon,.urlbar-page-action {
-        height: auto!important;
-        width: var(--toolbar-icon-size)!important;
-        padding: 0!important
+    #identity-icon,
+    #page-action-buttons img,
+    #permissions-granted-icon,
+    #star-button-box,
+    #tracking-protection-icon,
+    .searchbar-search-icon,
+    .urlbar-page-action {
+        height: auto;
+        width: var(--toolbar-icon-size);
+        padding: 0;
     }
 
     .toolbarbutton-1 {
-        padding: 0 var(--uc-spacing-medium)!important
+        padding: 0 var(--uc-spacing-medium);
     }
 
-    .toolbarbutton-1,.toolbarbutton-icon {
-        -moz-appearance: none!important;
-        padding-inline: var(--uc-spacing-small)!important;
+    .toolbarbutton-1,
+    .toolbarbutton-icon {
+        -moz-appearance: none;
+        padding-inline: var(--uc-spacing-small);
         -moz-box-align: stretch;
-        margin: 0!important
+        margin: 0;
     }
 
-    #PersonalToolbar toolbarbutton,#TabsToolbar toolbarbutton,#nav-bar toolbarbutton,.titlebar-button,.toolbaritem-combined-buttons {
-        -moz-appearance: none!important;
-        padding-top: 0!important;
-        padding-bottom: 0!important;
-        padding-inline: var(--uc-spacing-small)!important;
+    #PersonalToolbar toolbarbutton,
+    #TabsToolbar toolbarbutton,
+    #nav-bar toolbarbutton,
+    .titlebar-button,
+    .toolbaritem-combined-buttons {
+        -moz-appearance: none;
+        padding-top: 0;
+        padding-bottom: 0;
+        padding-inline: var(--uc-spacing-small);
         -moz-box-align: stretch;
-        margin: 0!important
+        margin: 0;
     }
 
-    .tab-close-button,.urlbar-icon,.urlbar-page-action {
-        -moz-appearance: none!important;
-        padding-inline: var(--uc-spacing-small)!important;
+    .tab-close-button,
+    .urlbar-icon,
+    .urlbar-page-action {
+        -moz-appearance: none;
+        padding-inline: var(--uc-spacing-small);
         -moz-box-align: stretch;
-        margin: 0!important
+        margin: 0;
     }
 
     .urlbar-page-action {
-        padding-top: 0!important;
-        padding-bottom: 0!important
+        padding-top: 0;
+        padding-bottom: 0;
     }
 
-    .tab-close-button,.titlebar-button>image,.toolbarbutton-icon,.urlbar-icon,.urlbar-page-action>image {
-        padding: 0!important;
-        width: var(--toolbar-icon-size)!important;
-        height: auto!important
+    .tab-close-button,
+    .titlebar-button > image,
+    .toolbarbutton-icon,
+    .urlbar-icon,
+    .urlbar-page-action > image {
+        padding: 0;
+        width: var(--toolbar-icon-size);
+        height: auto;
     }
 
-    #navigator-toolbox,.urlbarView {
-        margin: 0!important;
-        padding: 0!important
+    #navigator-toolbox,
+    .urlbarView {
+        margin: 0;
+        padding: 0;
     }
 
     #navigator-toolbox {
-        appearance: toolbar!important
+        appearance: toolbar;
     }
 
 
     #titlebar {
-        -moz-appearance: none!important;
-        padding-bottom: 0!important
+        -moz-appearance: none;
+        padding-bottom: 0;
     }
 
-    #TabsToolbar,#titlebar,toolbar {
-        margin-bottom: 0!important
+    #TabsToolbar,
+    #titlebar,
+    toolbar {
+        margin-bottom: 0;
     }
 
     #TabsToolbar {
-        padding-bottom: 0!important
+        padding-bottom: 0;
     }
 
     toolbar {
-        margin-top: 0!important;
-        padding: 0!important
+        margin-top: 0;
+        padding: 0;
     }
 
     .urlbarView {
-        font-size: var(--tab-font-size)!important;
-        max-height: calc(60vh - 40pt)!important;
-        overflow-y: auto!important
+        font-size: var(--tab-font-size);
+        max-height: calc(60vh - calc(var(--tab-height) * 3));
+        overflow-y: auto;
     }
 
     .urlbarView-row {
-        padding-block: var(--uc-spacing-small)!important
+        padding-block: var(--uc-spacing-small);
     }
 
     .urlbarView-row-inner {
-        padding-inline: var(--uc-spacing-medium)!important
+        padding-inline: var(--uc-spacing-medium);
     }
 
     .urlbarView-row[label="Firefox Suggest"] {
-        margin-top: 0 !important;
-        overflow: hidden !important;
-        display: none !important; /* Hide completely */
+        margin-top: 0;
+        overflow: hidden;
+        display: none; /* Hide completely */
     }
 
-    .urlbarView-secondary,.urlbarView-title,.urlbarView-url {
-        padding: 0!important;
-        margin: 0!important
+    .urlbarView-secondary,
+    .urlbarView-title,
+    .urlbarView-url {
+        padding: 0;
+        margin: 0;
     }
 
     #urlbar[breakout][breakout-extend] {
-        box-shadow: 0 15pt 30pt rgba(0,0,0,.2);
-        width: var(--uc-urlbar-width)!important;
-        left: 50%!important;
-        right: auto!important;
-        bottom: var(--uc-urlbar-bottom-offset)!important;
-        margin: 0!important;
-        position: fixed!important;
-        z-index: 999!important;
-        transform: translateX(-50%)!important;
-        max-height: 60vh!important;
-        min-height: 40pt!important
+        box-shadow: 0 var(--uc-spacing-large) calc(var(--uc-spacing-large) * 2) rgba(0, 0, 0, 0.2);
+        width: var(--uc-urlbar-width);
+        left: 50%;
+        right: auto;
+        bottom: var(--uc-urlbar-bottom-offset);
+        margin: 0;
+        position: fixed;
+        z-index: 999;
+        transform: translateX(-50%);
+        max-height: 60vh;
+        min-height: calc(var(--tab-height) * 3);
     }
     /* Remove toolbar springs */
-    toolbarspring, .toolbar-spring, [anonid="spring"] {
-      display: none !important;
+    toolbarspring,
+    .toolbar-spring,
+    [anonid="spring"] {
+        display: none;
     }
 
-    #urlbar:not([breakout][breakout-extend]) #urlbar-input,#urlbar:not([focused]) #urlbar-input {
-        text-align: center!important;
+    #urlbar:not([breakout][breakout-extend]) #urlbar-input,
+    #urlbar:not([focused]) #urlbar-input {
+        text-align: center;
     }
 
-    #urlbar-background,#urlbar-input-container {
-        --toolbarbutton-border-radius: 0pt!important;
-        --urlbar-icon-border-radius: 0pt!important
+    #urlbar-background,
+    #urlbar-input-container {
+        --toolbarbutton-border-radius: 0;
+        --urlbar-icon-border-radius: 0;
     }
   '';
 
