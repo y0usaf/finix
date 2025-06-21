@@ -57,7 +57,7 @@ in {
               "git",
               "clone",
               "--filter=blob:none",
-              "https://github.com/folke/lazy.nvim.git",
+              "httpshttps://github.com/folke/lazy.nvim.git",
               "--branch=stable",
               lazypath,
             })
@@ -138,7 +138,7 @@ in {
                 },
                 presets = {
                   bottom_search = true,
-                  command_palette = true,
+                  command_palette = true,.
                   long_message_to_split = true,
                   inc_rename = false,
                   lsp_doc_border = true,
@@ -335,7 +335,7 @@ in {
                 signs = {
                   add = { text = "┃" },
                   change = { text = "┃" },
-                  delete = { text = "▁" },
+                  delete = { text = " " },
                   topdelete = { text = "▔" },
                   changedelete = { text = "~" },
                   untracked = { text = "┆" },
@@ -343,7 +343,7 @@ in {
                 signs_staged = {
                   add = { text = "┃" },
                   change = { text = "┃" },
-                  delete = { text = "▁" },
+                  delete = { text = " " },
                   topdelete = { text = "▔" },
                   changedelete = { text = "~" },
                   untracked = { text = "┆" },
@@ -496,13 +496,13 @@ in {
                 },
                 matrix = {
                   head = {
-                    cursor = require("smoothcursor.matrix_chars")[math.random(#require("smoothcursor.matrix_chars"))],
+                    cursor = { "ア", "イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", "サ", "シ", "ス", "セ", "ソ", "タ", "チ", "ツ", "テ", "ト", "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", "マ", "ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ", "リ", "ル", "レ", "ロ", "ワ", "ヲ", "ン" },
                     texthl = "SmoothCursor",
                     linehl = nil,
                   },
                   body = {
                     length = 6,
-                    cursor = require("smoothcursor.matrix_chars")[math.random(#require("smoothcursor.matrix_chars"))],
+                    cursor = { "ア", "イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", "サ", "シ", "ス", "セ", "ソ", "タ", "チ", "ツ", "テ", "ト", "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", "マ", "ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ", "リ", "ル", "レ", "ロ", "ワ", "ヲ", "ン" },
                     texthl = "SmoothCursorGreen",
                   },
                   tail = {
