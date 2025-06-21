@@ -80,17 +80,14 @@ in {
         return {
           -- Theme
           {
-            "scottmckendry/cyberdream.nvim",
-            lazy = false,
+            "rebelot/kanagawa.nvim",
+            name = "kanagawa",
             priority = 1000,
-            opts = {
-              transparent = true,
-              italic_comments = true,
-              borderless_pickers = true,
-            },
-            config = function(_, opts)
-              require("cyberdream").setup(opts)
-              vim.cmd.colorscheme("cyberdream")
+            config = function()
+              require("kanagawa").setup({
+                transparent = true,
+              })
+              vim.cmd.colorscheme("kanagawa-wave")
             end,
           },
 
@@ -104,17 +101,29 @@ in {
             dependencies = { "nvim-tree/nvim-web-devicons" },
           },
 
-          -- Notifications
+          -- UI
           {
-            "rcarriga/nvim-notify",
-            config = function()
-              vim.notify = require("notify")
-              require("notify").setup({
-                background_colour = "#000000",
-                timeout = 3000,
-              })
+            "folke/noice.nvim",
+            event = "VeryLazy",
+            opts = {
+              presets = {
+                bottom_search = true,
+                command_palette = true,
+                long_message_to_split = true,
+                inc_rename = false,
+                lsp_doc_border = false,
+              },
+            },
+            dependencies = {
+              "MunifTanjim/nui.nvim",
+              "rcarriga/nvim-notify",
+            },
+            config = function(_, opts)
+              require("noice").setup(opts)
             end,
           },
+
+          { "echasnovski/mini.animate", event = "VeryLazy", opts = {} },
 
           -- Indent lines
           {
