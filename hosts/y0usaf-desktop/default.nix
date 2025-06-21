@@ -122,6 +122,7 @@ in {
         flake.enable = true;
         hy3.enable = false;
       };
+      quickshell.enable = true;
       wallust.enable = true;
       wayland.enable = true;
     };
