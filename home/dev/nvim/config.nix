@@ -12,22 +12,36 @@
   cfg = config.home.dev.nvim;
   inherit (config.shared) username;
 
-
   # Simple Neovim with jetpack plugin manager
   simpleNeovim = pkgs.neovim;
-
 in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid = {
       packages = [
-        pkgs.lazygit pkgs.ripgrep pkgs.fd pkgs.tree-sitter pkgs.fzf pkgs.bat pkgs.delta 
+        pkgs.lazygit
+        pkgs.ripgrep
+        pkgs.fd
+        pkgs.tree-sitter
+        pkgs.fzf
+        pkgs.bat
+        pkgs.delta
         simpleNeovim
         # LSP servers for jetpack to use
-        pkgs.lua-language-server pkgs.nil pkgs.pyright pkgs.rust-analyzer 
-        pkgs.typescript-language-server pkgs.vscode-langservers-extracted
-        pkgs.bash-language-server pkgs.marksman pkgs.yaml-language-server
-        pkgs.dockerfile-language-server-nodejs pkgs.stylua pkgs.alejandra 
-        pkgs.black pkgs.prettier pkgs.rustfmt
+        pkgs.lua-language-server
+        pkgs.nil
+        pkgs.pyright
+        pkgs.rust-analyzer
+        pkgs.typescript-language-server
+        pkgs.vscode-langservers-extracted
+        pkgs.bash-language-server
+        pkgs.marksman
+        pkgs.yaml-language-server
+        pkgs.dockerfile-language-server-nodejs
+        pkgs.stylua
+        pkgs.alejandra
+        pkgs.black
+        pkgs.prettier
+        pkgs.rustfmt
       ];
 
       # Jetpack-based Neovim configuration
@@ -35,7 +49,7 @@ in {
         "nvim/init.lua".text = ''
           vim.g.mapleader = " "
           vim.g.maplocalleader = "\\"
-          
+
           -- Bootstrap lazy.nvim
           local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
           if not vim.loop.fs_stat(lazypath) then
@@ -49,7 +63,7 @@ in {
             })
           end
           vim.opt.rtp:prepend(lazypath)
-          
+
           -- Setup lazy with plugins
           require("lazy").setup({
             -- Theme (Tokyo Night - Modern & Beautiful)
@@ -92,7 +106,7 @@ in {
                 vim.cmd.colorscheme("tokyonight-night")
               end,
             },
-            
+
             -- Smooth Scrolling & Animations
             {
               "karb94/neoscroll.nvim",
@@ -108,7 +122,7 @@ in {
                 post_hook = nil,
               },
             },
-            
+
             -- Enhanced Notifications & UI
             {
               "folke/noice.nvim",
@@ -138,7 +152,7 @@ in {
                 },
               },
             },
-            
+
             {
               "rcarriga/nvim-notify",
               opts = {
@@ -159,7 +173,7 @@ in {
                 top_down = true,
               },
             },
-            
+
             -- UI Enhancements
             {
               "nvim-lualine/lualine.nvim",
@@ -181,7 +195,7 @@ in {
                 },
               },
             },
-            
+
             {
               "akinsho/bufferline.nvim",
               event = "VeryLazy",
@@ -196,7 +210,7 @@ in {
                 },
               },
             },
-            
+
             -- LSP
             {
               "neovim/nvim-lspconfig",
@@ -207,7 +221,7 @@ in {
               config = function()
                 local lspconfig = require("lspconfig")
                 local capabilities = require("cmp_nvim_lsp").default_capabilities()
-                
+
                 local on_attach = function(client, bufnr)
                   local opts = { buffer = bufnr, silent = true }
                   vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -218,7 +232,7 @@ in {
                   vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
                   vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
                 end
-                
+
                 -- Setup servers
                 local servers = { "lua_ls", "nil_ls", "pyright", "rust_analyzer", "tsserver", "bashls", "marksman" }
                 for _, server in ipairs(servers) do
@@ -232,7 +246,7 @@ in {
                 end
               end,
             },
-            
+
             -- Completion
             {
               "hrsh7th/nvim-cmp",
@@ -247,7 +261,7 @@ in {
               config = function()
                 local cmp = require("cmp")
                 local luasnip = require("luasnip")
-                
+
                 cmp.setup({
                   snippet = {
                     expand = function(args)
@@ -280,7 +294,7 @@ in {
                 })
               end,
             },
-            
+
             -- File management
             {
               "nvim-telescope/telescope.nvim",
@@ -295,7 +309,7 @@ in {
                 },
               },
             },
-            
+
             {
               "nvim-neo-tree/neo-tree.nvim",
               cmd = "Neotree",
@@ -312,7 +326,7 @@ in {
                 window = { width = 35 },
               },
             },
-            
+
             -- Enhanced Git with animations
             {
               "lewis6991/gitsigns.nvim",
@@ -367,7 +381,7 @@ in {
               },
               config = function(_, opts)
                 require("gitsigns").setup(opts)
-                
+
                 -- Custom highlight groups for animated git signs
                 vim.api.nvim_set_hl(0, "GitSignsAdd", { fg = "#98be65", bold = true })
                 vim.api.nvim_set_hl(0, "GitSignsChange", { fg = "#ECBE7B", bold = true })
@@ -375,7 +389,7 @@ in {
                 vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#565f89", italic = true })
               end,
             },
-            
+
             -- Syntax highlighting with Nix+Lua injection
             {
               "nvim-treesitter/nvim-treesitter",
@@ -393,7 +407,7 @@ in {
                 require("nvim-treesitter.configs").setup(opts)
               end,
             },
-            
+
             -- Winbar with breadcrumbs
             {
               "utilyre/barbecue.nvim",
@@ -456,7 +470,7 @@ in {
                 })
               end,
             },
-            
+
             -- Holographic cursor and animations
             {
               "gen740/SmoothCursor.nvim",
@@ -511,7 +525,7 @@ in {
               },
               config = function(_, opts)
                 require("smoothcursor").setup(opts)
-                
+
                 -- Define highlight groups for cursor trail
                 local colors = {
                   "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#98D8C8"
@@ -522,7 +536,7 @@ in {
                 vim.api.nvim_set_hl(0, "SmoothCursor", { fg = "#8aa2d3" })
               end,
             },
-            
+
             -- Rainbow brackets
             {
               "HiPhish/rainbow-delimiters.nvim",
@@ -554,7 +568,7 @@ in {
                 }
               end,
             },
-            
+
             -- Minimap
             {
               "gorbit99/codewindow.nvim",
@@ -580,7 +594,7 @@ in {
                 vim.keymap.set("n", "<leader>mo", codewindow.toggle_minimap, { desc = "Toggle minimap" })
               end,
             },
-            
+
             -- Utilities
             { "numToStr/Comment.nvim", event = "VeryLazy", opts = {} },
             { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
@@ -590,12 +604,12 @@ in {
               event = { "BufReadPost", "BufNewFile" },
               main = "ibl",
               opts = {
-                indent = { 
+                indent = {
                   char = "▏",
                   tab_char = "▏",
                   highlight = { "RainbowRed", "RainbowYellow", "RainbowBlue", "RainbowOrange", "RainbowGreen", "RainbowViolet", "RainbowCyan" },
                 },
-                scope = { 
+                scope = {
                   enabled = true,
                   show_start = true,
                   show_end = true,
@@ -606,7 +620,7 @@ in {
                 },
               },
             },
-            
+
             -- Enhanced Terminal with blur
             {
               "akinsho/toggleterm.nvim",
@@ -634,7 +648,7 @@ in {
               },
               config = function(_, opts)
                 require("toggleterm").setup(opts)
-                
+
                 -- Custom terminal with matrix effect
                 local Terminal = require("toggleterm.terminal").Terminal
                 local matrix_term = Terminal:new({
@@ -651,11 +665,11 @@ in {
                     vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
                   end,
                 })
-                
+
                 vim.keymap.set("n", "<leader>tm", function() matrix_term:toggle() end, { desc = "Toggle matrix terminal" })
               end,
             },
-            
+
             -- Diagnostics
             {
               "folke/trouble.nvim",
@@ -680,7 +694,7 @@ in {
               },
             },
           })
-          
+
           -- Enhanced vim options with Tokyo Night visual improvements
           vim.opt.number = true
           vim.opt.relativenumber = true
@@ -715,42 +729,42 @@ in {
           vim.opt.splitright = true
           vim.opt.splitkeep = "screen"
           vim.opt.smoothscroll = true
-          
+
           -- Keymaps
           local keymap = vim.keymap.set
-          
+
           -- File operations
           keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
           keymap("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", { desc = "Live grep" })
           keymap("n", "<leader>fb", "<cmd>Telescope buffers<cr>", { desc = "Find buffers" })
           keymap("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Recent files" })
           keymap("n", "<leader>e", "<cmd>Neotree toggle<cr>", { desc = "File explorer" })
-          
+
           -- Buffer navigation
           keymap("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
           keymap("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
           keymap("n", "<leader>bd", "<cmd>bdelete<cr>", { desc = "Delete buffer" })
-          
+
           -- Window navigation
           keymap("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
           keymap("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
           keymap("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
           keymap("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
-          
+
           -- Diagnostics
           keymap("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Toggle diagnostics" })
           keymap("n", "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = "Buffer diagnostics" })
-          
+
           -- Quick actions
           keymap("n", "<leader>w", "<cmd>w<cr>", { desc = "Save file" })
           keymap("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })
           keymap("n", "<leader>/", function() require("Comment.api").toggle.linewise.current() end, { desc = "Toggle comment" })
           keymap("v", "<leader>/", "<esc><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<cr>", { desc = "Toggle comment" })
-          
+
           -- Better up/down
           keymap({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
           keymap({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
-          
+
           -- Move Lines
           keymap("n", "<A-j>", "<cmd>m .+1<cr>==", { desc = "Move down" })
           keymap("n", "<A-k>", "<cmd>m .-2<cr>==", { desc = "Move up" })
@@ -758,11 +772,11 @@ in {
           keymap("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move up" })
           keymap("v", "<A-j>", ":m '>+1<cr>gv=gv", { desc = "Move down" })
           keymap("v", "<A-k>", ":m '<-2<cr>gv=gv", { desc = "Move up" })
-          
+
           -- Better indenting
           keymap("v", "<", "<gv")
           keymap("v", ">", ">gv")
-          
+
           -- Auto-install missing parsers when entering buffer
           vim.api.nvim_create_autocmd("FileType", {
             callback = function()
@@ -775,7 +789,7 @@ in {
               end
             end,
           })
-          
+
           print("🚀 Modern Neovim IDE loaded!")
         '';
       };
