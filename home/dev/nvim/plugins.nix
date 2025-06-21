@@ -8,50 +8,9 @@
   inherit (config.shared) username;
 in {
   config = lib.mkIf cfg.enable {
-    users.users.${username}.maid.file.xdg_config."nvim/init.lua".text = ''
+    users.users.${username}.maid.file.xdg_config."nvim/lua/plugins.lua".text = ''
       -- Setup lazy with plugins
-      require("lazy").setup({
-        -- Theme (Tokyo Night - Modern & Beautiful)
-        {
-          "folke/tokyonight.nvim",
-          lazy = false,
-          priority = 1000,
-          opts = {
-            style = "night", -- night, storm, day, moon
-            transparent = true,
-            terminal_colors = true,
-            styles = {
-              comments = { italic = true },
-              keywords = { italic = true },
-              functions = { bold = true },
-              variables = {},
-              sidebars = "transparent",
-              floats = "transparent",
-            },
-            sidebars = { "qf", "help", "vista_kind", "terminal", "packer" },
-            day_brightness = 0.3,
-            hide_inactive_statusline = false,
-            dim_inactive = false,
-            lualine_bold = true,
-            on_colors = function(colors)
-              colors.border = "#1a1b26"
-              colors.bg_statusline = "#16161e"
-            end,
-            on_highlights = function(highlights, colors)
-              highlights.CursorLineNr = { fg = colors.orange, bold = true }
-              highlights.LineNr = { fg = colors.dark3 }
-              highlights.FloatBorder = { fg = colors.border_highlight }
-              highlights.TelescopeBorder = { fg = colors.border_highlight }
-              highlights.WhichKeyFloat = { bg = colors.bg_dark }
-              highlights.LspFloatWinBorder = { fg = colors.border_highlight }
-            end,
-          },
-          config = function(_, opts)
-            require("tokyonight").setup(opts)
-            vim.cmd.colorscheme("tokyonight-night")
-          end,
-        },
-
+      return {
         -- LSP
         {
           "neovim/nvim-lspconfig",
@@ -151,62 +110,6 @@ in {
           },
         },
 
-        {
-          "nvim-neo-tree/neo-tree.nvim",
-          cmd = "Neotree",
-          dependencies = {
-            "nvim-lua/plenary.nvim",
-            "nvim-tree/nvim-web-devicons",
-            "MunifTanjim/nui.nvim",
-          },
-          opts = {
-            filesystem = {
-              follow_current_file = { enabled = true },
-              hijack_netrw_behavior = "open_current",
-            },
-            window = { width = 35 },
-          },
-        },
-
-        -- UI Enhancements
-        {
-          "nvim-lualine/lualine.nvim",
-          event = "VeryLazy",
-          opts = {
-            options = {
-              theme = "tokyonight",
-              globalstatus = true,
-              component_separators = { left = "│", right = "│" },
-              section_separators = { left = "", right = "" },
-            },
-            sections = {
-              lualine_a = { { "mode", fmt = function(str) return str:sub(1,1) end } },
-              lualine_b = { "branch", "diff" },
-              lualine_c = { { "filename", path = 1 } },
-              lualine_x = { "diagnostics", "encoding", "filetype" },
-              lualine_y = { "progress" },
-              lualine_z = { "location" },
-            },
-          },
-        },
-
-        -- Git integration
-        {
-          "lewis6991/gitsigns.nvim",
-          event = { "BufReadPre", "BufNewFile" },
-          opts = {
-            signs = {
-              add = { text = "┃" },
-              change = { text = "┃" },
-              delete = { text = " " },
-              topdelete = { text = "▔" },
-              changedelete = { text = "~" },
-              untracked = { text = "┆" },
-            },
-            current_line_blame = true,
-          },
-        },
-
         -- Syntax highlighting
         {
           "nvim-treesitter/nvim-treesitter",
@@ -236,13 +139,7 @@ in {
           cmd = { "Trouble", "TroubleToggle" },
           opts = { use_diagnostic_signs = true },
         },
-      }, {
-        ui = {
-          border = "rounded",
-        },
-      })
-
-      print("🚀 Modern Neovim IDE loaded!")
+      }
     '';
   };
 }
