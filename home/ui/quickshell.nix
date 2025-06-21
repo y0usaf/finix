@@ -32,6 +32,7 @@ in {
     users.users.${username}.maid = {
       packages = with pkgs; [
         quickshell
+        cava
       ];
     };
   };
