@@ -18,7 +18,7 @@ in {
       pkgs.bat
       pkgs.delta
       pkgs.neovim
-      
+
       # LSP servers
       pkgs.lua-language-server
       pkgs.nil
@@ -30,7 +30,7 @@ in {
       pkgs.marksman
       pkgs.yaml-language-server
       pkgs.dockerfile-language-server-nodejs
-      
+
       # Formatters
       pkgs.stylua
       pkgs.alejandra
