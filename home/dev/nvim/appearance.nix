@@ -16,6 +16,7 @@ in {
 
         vim.opt.number = true
         vim.opt.relativenumber = true
+        vim.opt.numberwidth = 4
         vim.opt.signcolumn = "yes"
         vim.opt.wrap = true
         vim.opt.linebreak = true
@@ -27,13 +28,13 @@ in {
         vim.opt.cursorline = true
         vim.opt.cursorlineopt = "both"
         vim.opt.pumheight = 15
-        vim.opt.pumblend = 15
-        vim.opt.winblend = 15
+        vim.opt.pumblend = 0
+        vim.opt.winblend = 0
         vim.opt.conceallevel = 2
         vim.opt.concealcursor = "niv"
         vim.opt.showmode = false
-        vim.opt.laststatus = 3
-        vim.opt.cmdheight = 0
+        vim.opt.laststatus = 2
+        vim.opt.cmdheight = 1
         vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
         vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
         vim.opt.smoothscroll = true
@@ -101,29 +102,17 @@ in {
             dependencies = { "nvim-tree/nvim-web-devicons" },
           },
 
-          -- UI
+          -- Notifications
           {
-            "folke/noice.nvim",
-            event = "VeryLazy",
-            opts = {
-              presets = {
-                bottom_search = true,
-                command_palette = true,
-                long_message_to_split = true,
-                inc_rename = false,
-                lsp_doc_border = false,
-              },
-            },
-            dependencies = {
-              "MunifTanjim/nui.nvim",
-              "rcarriga/nvim-notify",
-            },
-            config = function(_, opts)
-              require("noice").setup(opts)
+            "rcarriga/nvim-notify",
+            config = function()
+              vim.notify = require("notify")
+              require("notify").setup({
+                background_colour = "#000000",
+                timeout = 3000,
+              })
             end,
           },
-
-          { "echasnovski/mini.animate", event = "VeryLazy", opts = {} },
 
           -- Indent lines
           {
@@ -165,8 +154,8 @@ in {
             event = "VeryLazy",
             opts = {
               options = {
-                theme = "auto",
-                globalstatus = true,
+                theme = "kanagawa",
+                globalstatus = false,
                 component_separators = { left = "│", right = "│" },
                 section_separators = { left = "", right = "" },
               },
