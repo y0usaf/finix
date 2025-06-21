@@ -67,7 +67,7 @@ in {
         vim.api.nvim_create_autocmd("User", {
           pattern = "LazyVimStarted",
           callback = function()
-            local theme = themes["startify"]
+            local theme = require("alpha.themes.startify")
             local stats = require("lazy").stats()
             local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
             theme.section.footer.val = "⚡ Neovim loaded " .. stats.count .. " plugins in " .. ms .. "ms"

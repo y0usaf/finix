@@ -34,7 +34,7 @@ in {
             end
 
             -- Setup servers
-            local servers = { "lua_ls", "nil_ls", "pyright", "rust_analyzer", "tsserver", "bashls", "marksman" }
+            local servers = { "lua_ls", "nil_ls", "pyright", "rust_analyzer", "ts_ls", "bashls", "marksman" }
             for _, server in ipairs(servers) do
               lspconfig[server].setup({
                 capabilities = capabilities,

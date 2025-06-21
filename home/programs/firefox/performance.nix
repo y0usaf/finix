@@ -9,7 +9,7 @@
   ...
 }: let
   inherit (config.shared) username;
-  
+
   # Common settings for Firefox profiles
   commonSettings = {
     # Enable userChrome customizations (needed for the CSS)
@@ -61,7 +61,7 @@
     "dom.webcomponents.enabled" = true;
     "layout.css.shadow-parts.enabled" = true;
   };
-  
+
   # Generate user.js content for Firefox profile
   userJsContent = lib.concatStringsSep "\n" (
     lib.mapAttrsToList (
