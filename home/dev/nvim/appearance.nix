@@ -16,7 +16,6 @@ in {
 
         vim.opt.number = true
         vim.opt.relativenumber = true
-        vim.opt.numberwidth = 4
         vim.opt.signcolumn = "yes"
         vim.opt.wrap = true
         vim.opt.linebreak = true
