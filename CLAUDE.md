@@ -3,6 +3,35 @@
 ## Core Philosophy
 Every task gets delegated to specialized subagents for maximum parallel execution. No direct action - always delegate to the appropriate specialist.
 
+## System Architecture Context
+
+### **Nix-Maid Configuration Management**
+This system uses **nix-maid** for dotfile and user-level configuration management, **NOT Home Manager**.
+
+**Key Differences from Home Manager:**
+- **🪶 Lightweight**: Pure-nix library that defers execution to native tools (systemd, tmpfiles)
+- **🌐 Portable**: Mustache templating with `{{home}}` and `{{xdg_config_dir}}` variables
+- **🚫 Low-level**: Direct systemd-user services and tmpfiles configuration
+- **⚡ Fast**: Static directory approach with faster rollbacks
+
+**Configuration Pattern:**
+```nix
+users.users.${username}.maid = {
+  packages = [ pkgs.firefox ];
+  
+  file.home.".gitconfig".text = ''...''
+  file.xdg_config."app/config".source = ./config.txt;
+  
+  systemd.services.waybar = {
+    path = [ pkgs.waybar ];
+    script = "exec waybar";
+    wantedBy = [ "graphical-session.target" ];
+  };
+}
+```
+
+**Never assume Home Manager modules or syntax**. All user configurations go through `users.users.${username}.maid.*` structure.
+
 ## Subagent Roster
 
 ### The Thinker 🧠
@@ -86,24 +115,24 @@ Each subagent operates independently and reports back with:
 
 ## NixOS-Specific Subagent Workflows
 
-**Configuration Changes**:
-1. The Researcher: Map existing config patterns
-2. The NixOS Specialist: Implement nix-maid integration
-3. The Implementer: Make file changes
+**Nix-Maid Configuration Changes**:
+1. The Researcher: Map existing config patterns in `users.users.${username}.maid.*`
+2. The NixOS Specialist: Design nix-maid integration (file.home, file.xdg_config, systemd.services)
+3. The Implementer: Create modular .nix files with maid structure
 4. The Reviewer: Test with `nh os switch --dry`
 
 **Package Management**:
 1. The Researcher: Find package requirements
 2. The NixOS Specialist: Research nixpkgs options
-3. The Implementer: Update flake inputs
+3. The Implementer: Add to `maid.packages = [ pkgs.* ];` 
 4. The Reviewer: Validate build
 
-**Module Development**:
-1. The Architect: Design module structure
-2. The Researcher: Study existing module patterns
-3. The Implementer: Create module files
-4. The NixOS Specialist: Ensure NixOS compliance
-5. The Reviewer: Test integration
+**Module Development (Nix-Maid Style)**:
+1. The Architect: Design module structure using nix-maid patterns
+2. The Researcher: Study existing maid module patterns (file.home, systemd services)
+3. The Implementer: Create module files with proper maid integration
+4. The NixOS Specialist: Ensure nix-maid compliance and mustache templating
+5. The Reviewer: Test integration and file generation
 
 ## Maximum Efficiency Rules
 

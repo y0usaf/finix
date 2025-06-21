@@ -3,5 +3,5 @@
 # Imports all program-related Home modules
 ###############################################################################
 {helpers, ...}: {
-  imports = helpers.importModules ./.;
+  imports = helpers.importModules ./. ++ helpers.importDirs ./.;
 }
