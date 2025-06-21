@@ -33,21 +33,22 @@ in {
 
         -- Neovide-specific options
         vim.g.neovide_scale_factor = 1.0
-        vim.g.neovide_transparency = 0.0
-        vim.g.neovide_window_blurred = false
+        vim.g.neovide_transparency = 0.8
+        vim.g.neovide_window_blurred = true
 
         -- Cursor animation
-        vim.g.neovide_cursor_animation_length = 0.1
-        vim.g.neovide_cursor_trail_size = 0.8
+        vim.g.neovide_cursor_animation_length = 0.13
+        vim.g.neovide_cursor_trail_size = 0.9
         vim.g.neovide_cursor_antialiasing = true
         vim.g.neovide_cursor_animate_in_insert_mode = true
         vim.g.neovide_cursor_animate_command_line = true
 
         -- Cursor particles
-        vim.g.neovide_cursor_vfx_mode = "railgun"
+        vim.g.neovide_cursor_vfx_mode = "pixiedust"
         vim.g.neovide_cursor_vfx_opacity = 200.0
-        vim.g.neovide_cursor_vfx_particle_density = 10.0
-        vim.g.neovide_cursor_vfx_particle_lifetime = 1.2
+        vim.g.neovide_cursor_vfx_particle_density = 12.0
+        vim.g.neovide_cursor_vfx_particle_lifetime = 1.5
+        vim.g.neovide_cursor_vfx_particle_speed = 15.0
 
         -- Scroll animation
         vim.g.neovide_scroll_animation_length = 0.3
