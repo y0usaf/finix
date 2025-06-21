@@ -106,17 +106,18 @@ in {
 
         -- File management
         {
-          "nvim-telescope/telescope.nvim",
-          cmd = "Telescope",
-          dependencies = { "nvim-lua/plenary.nvim" },
-          opts = {
-            defaults = {
-              file_ignore_patterns = { "node_modules", ".git/" },
-              layout_config = {
-                horizontal = { preview_width = 0.6 },
+          "ibhagwan/fzf-lua",
+          -- Load on key press
+          event = "VeryLazy",
+          dependencies = { "nvim-tree/nvim-web-devicons" },
+          config = function()
+            require("fzf-lua").setup({
+              winopts = {
+                height = 0.9,
+                width = 0.9,
               },
-            },
-          },
+            })
+          end,
         },
 
         -- Syntax highlighting
@@ -138,6 +139,7 @@ in {
         },
 
         -- Utilities
+        { "folke/flash.nvim", event = "VeryLazy", opts = {} },
         { "numToStr/Comment.nvim", event = "VeryLazy", opts = {} },
         { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
         { "folke/which-key.nvim", event = "VeryLazy", opts = {} },

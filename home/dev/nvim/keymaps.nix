@@ -13,10 +13,10 @@ in {
       local keymap = vim.keymap.set
 
       -- File operations
-      keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
-      keymap("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", { desc = "Live grep" })
-      keymap("n", "<leader>fb", "<cmd>Telescope buffers<cr>", { desc = "Find buffers" })
-      keymap("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Recent files" })
+      keymap("n", "<leader>ff", "<cmd>lua require('fzf-lua').files()<cr>", { desc = "Find files" })
+      keymap("n", "<leader>fg", "<cmd>lua require('fzf-lua').live_grep()<cr>", { desc = "Live grep" })
+      keymap("n", "<leader>fb", "<cmd>lua require('fzf-lua').buffers()<cr>", { desc = "Find buffers" })
+      keymap("n", "<leader>fr", "<cmd>lua require('fzf-lua').oldfiles()<cr>", { desc = "Recent files" })
       keymap("n", "<leader>e", "<cmd>Neotree toggle<cr>", { desc = "File explorer" })
 
       -- Buffer navigation
@@ -29,6 +29,10 @@ in {
       keymap("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
       keymap("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
       keymap("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+
+      -- Flash
+      keymap({ "n", "x", "o" }, "s", function() require("flash").jump() end, { desc = "Flash" })
+      keymap({ "n", "x", "o" }, "S", function() require("flash").treesitter() end, { desc = "Flash Treesitter" })
 
       -- Diagnostics
       keymap("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Toggle diagnostics" })
