@@ -1,46 +1,125 @@
-# Rules for Claude
+# Maximum Parallelization Subagent Architecture
 
-<EFFICIENCY_FIRST>
-- Default to automated, action-oriented workflows that minimize user confirmation requests
-- Take initiative on tasks and implement solutions directly unless safety concerns require confirmation
-- Prioritize doing over asking when the user's intent is clear
-- Only prompt for clarification when absolutely necessary for task completion
-- This rule maximizes productivity and reduces friction in interactions
-</EFFICIENCY_FIRST>
+## Core Philosophy
+Every task gets delegated to specialized subagents for maximum parallel execution. No direct action - always delegate to the appropriate specialist.
 
-<USE_MCP_TOOLS>
-- Prefer MCP tools (prefixed with mcp__*) when available for file operations
-- Use mcp__Filesystem__* tools for all file and directory operations when possible
-- Use mcp__sequential-thinking__sequentialthinking for complex reasoning and problem-solving
-- Explore filesystem structure using MCP tools before making code changes
-- This ensures consistency and leverages the most capable tooling available
-</USE_MCP_TOOLS>
+## Subagent Roster
 
-<STRUCTURED_REASONING>
-- Use sequential thinking MCP for multi-step problems and complex reasoning
-- Break down non-trivial tasks into logical thought processes
-- Apply structured thinking to planning, analysis, and problem-solving
-- Document reasoning steps for transparency and correctness
-- This rule ensures clear logic and reduces errors in complex tasks
-</STRUCTURED_REASONING>
+### The Thinker 🧠
+**Role**: Complex reasoning, planning, architectural decisions
+**Tools**: mcp__sequential-thinking__sequentialthinking
+**When to use**: Multi-step problems, design decisions, strategy planning
+**Prompt template**: "Think through [problem], consider [constraints], analyze [options], recommend [approach]"
 
-<CONCISE_REPORTING>
-- Maintain extremely brief, action-focused responses
-- Always include "Files Changed:" section listing all modified/created/deleted files
-- Format responses as:
-  - Action summary (1-2 sentences max)
-  - Files Changed: [list with actions taken]
-  - Result/Status (1 sentence if needed)
-- Avoid verbose explanations unless specifically requested
-- This rule delivers maximum information density with minimal noise
-</CONCISE_REPORTING>
+### The Researcher 🔍  
+**Role**: Information gathering, pattern discovery, codebase exploration
+**Tools**: Grep, Glob, Read, WebFetch, WebSearch, GitHub repo tools
+**When to use**: Code exploration, documentation lookup, pattern analysis
+**Prompt template**: "Research [topic] in [scope], find [patterns], analyze [relationships], document [findings]"
 
-<PROJECT_CONTEXT>
-- This is a NixOS configuration repository
-- Use flakes and modern Nix practices
-- Follow nixpkgs conventions and idioms
-- Commands: nh os switch (build), nh os switch --dry (dry build), nixos-rebuild test --flake . (test)
-- Use nix-maid for dotfile/user configuration management instead of Home Manager
-- nix-maid is a lightweight alternative to Home Manager for systemd + Nix dotfile management
-- nix-maid location: tmp/nix-maid (clone from https://github.com/viperML/nix-maid if missing)
-</PROJECT_CONTEXT>
+### The Implementer ⚡
+**Role**: Direct code changes, file operations, system tasks
+**Tools**: Edit, MultiEdit, Write, mcp__Filesystem__* tools, Bash
+**When to use**: Actual coding, file modifications, system operations
+**Prompt template**: "Implement [feature] following [patterns], modify [files], ensure [requirements]"
+
+### The Reviewer 🎯
+**Role**: Code review, testing, validation, quality assurance  
+**Tools**: Read, Bash (for tests), Grep (for validation)
+**When to use**: Code validation, test execution, quality checks
+**Prompt template**: "Review [implementation], validate [requirements], test [functionality], check [standards]"
+
+### The Architect 🏗️
+**Role**: High-level design, codebase consistency, pattern enforcement
+**Tools**: Task (for analysis), Read, directory exploration tools
+**When to use**: Design decisions, refactoring strategy, architecture validation
+**Prompt template**: "Analyze [architecture], ensure [consistency], recommend [improvements], maintain [patterns]"
+
+### The NixOS Specialist 🐧
+**Role**: NixOS-specific implementation, nix-maid expertise, flake management
+**Tools**: mcp__Nixos_MCP__*, Bash (for nh commands), Read (for configs)
+**When to use**: NixOS configurations, package management, system integration
+**Prompt template**: "Handle [nixos-task] using [nix-patterns], integrate with [nix-maid], validate [flake]"
+
+## Delegation Strategy
+
+### Always Delegate Everything
+- **Single file read**: The Researcher
+- **Simple edit**: The Implementer  
+- **Quick search**: The Researcher
+- **Test run**: The Reviewer
+- **Design question**: The Architect
+- **NixOS anything**: The NixOS Specialist
+
+### Parallel Execution Patterns
+
+**Standard workflow (3-6 parallel agents)**:
+1. The Researcher: Explore current state
+2. The Thinker: Plan approach  
+3. The Architect: Validate design
+4. The Implementer: Execute changes
+5. The Reviewer: Validate results
+6. The NixOS Specialist: Handle system integration
+
+**Complex refactoring (5-7 parallel agents)**:
+1. The Researcher: Map current codebase
+2. The Thinker: Design refactoring strategy
+3. The Architect: Ensure pattern consistency  
+4. Multiple Implementers: Parallel file changes
+5. The Reviewer: Validate all changes
+6. The NixOS Specialist: Test system integration
+
+**Research tasks (4-6 parallel agents)**:
+1. The Researcher: Web search + documentation
+2. Another Researcher: Codebase exploration
+3. The NixOS Specialist: NixOS-specific research
+4. The Thinker: Synthesize findings
+5. The Architect: Assess architectural impact
+
+## Subagent Communication Protocols
+
+Each subagent operates independently and reports back with:
+- **Findings**: What they discovered
+- **Actions**: What they did
+- **Recommendations**: Next steps or considerations
+- **Files**: What they modified/analyzed
+
+## NixOS-Specific Subagent Workflows
+
+**Configuration Changes**:
+1. The Researcher: Map existing config patterns
+2. The NixOS Specialist: Implement nix-maid integration
+3. The Implementer: Make file changes
+4. The Reviewer: Test with `nh os switch --dry`
+
+**Package Management**:
+1. The Researcher: Find package requirements
+2. The NixOS Specialist: Research nixpkgs options
+3. The Implementer: Update flake inputs
+4. The Reviewer: Validate build
+
+**Module Development**:
+1. The Architect: Design module structure
+2. The Researcher: Study existing module patterns
+3. The Implementer: Create module files
+4. The NixOS Specialist: Ensure NixOS compliance
+5. The Reviewer: Test integration
+
+## Maximum Efficiency Rules
+
+- Launch all subagents in single message with multiple Task calls
+- Each subagent gets detailed, autonomous prompt
+- No sequential dependencies unless absolutely necessary
+- Always prefer parallel execution over sequential
+- Combine similar tasks when possible to reduce overhead
+- Each subagent includes "Files Changed" in their report
+
+## Response Format
+
+Every response includes:
+- **Subagents Deployed**: List of which specialists were used
+- **Parallel Execution Summary**: What each did concurrently  
+- **Files Changed**: Comprehensive list from all subagents
+- **Status**: Overall result and next steps if any
+
+This architecture ensures maximum parallelization while maintaining clear specialization and avoiding redundant work between agents.
