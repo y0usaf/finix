@@ -722,7 +722,7 @@ in {
           vim.opt.showmode = false
           vim.opt.laststatus = 3
           vim.opt.cmdheight = 0
-          vim.opt.fillchars = { eob = " ", fold = " ", foldopen = "", foldsep = " ", foldclose = "", diff = "/" }
+          vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
           vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
           vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
           vim.opt.splitbelow = true
