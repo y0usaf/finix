@@ -87,6 +87,7 @@ in {
             config = function()
               require("kanagawa").setup({
                 transparent = true,
+                globalStatus = true,
               })
               vim.cmd.colorscheme("kanagawa-wave")
             end,
@@ -100,6 +101,12 @@ in {
               require("dashboard")
             end,
             dependencies = { "nvim-tree/nvim-web-devicons" },
+          },
+
+          {
+            "stevearc/dressing.nvim",
+            event = "VeryLazy",
+            opts = {},
           },
 
           -- Notifications
@@ -155,7 +162,7 @@ in {
             opts = {
               options = {
                 theme = "kanagawa",
-                globalstatus = false,
+                globalstatus = true,
                 component_separators = { left = "│", right = "│" },
                 section_separators = { left = "", right = "" },
               },
