@@ -5,7 +5,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   inherit (config.shared) username;

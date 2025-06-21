@@ -1,4 +1,4 @@
-{helpers, ...}: {
+{...}: {
   imports = [
     ./config.nix
     ./packages.nix
