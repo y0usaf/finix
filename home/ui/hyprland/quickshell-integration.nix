@@ -22,12 +22,20 @@ in
     ];
 
     ###########################################################################
-    # Quickshell Keybindings
+    # Quickshell Keybindings (Signal-based)
     ###########################################################################
     bind = lib.optionals quickshellEnabled [
-      # Hold Super for 500ms to show workspace overview
-      "$mod, $mod_L, exec, quickshell-ipc toggle-overview"
-      # Alternative: Manual toggle with Super+O
-      "$mod, O, exec, quickshell-ipc toggle-overview"
+      # Manual toggle workspace overview with Super+O
+      "$mod, O, exec, hyprctl notify 1 0 \"overview>>toggle\""
+      # Alternative: Super+Tab for quick toggle
+      "$mod, TAB, exec, hyprctl notify 1 0 \"overview>>toggle\""
+    ];
+    
+    # Hold mod key bindings for overview
+    bindr = lib.optionals quickshellEnabled [
+      # Show overview while holding Super key (left)
+      "$mod, $mod_L, exec, hyprctl notify 1 0 \"overview>>show\""
+      # Show overview while holding Super key (right)  
+      "$mod, $mod_R, exec, hyprctl notify 1 0 \"overview>>show\""
     ];
   }
