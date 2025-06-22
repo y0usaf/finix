@@ -20,6 +20,7 @@
   windowRulesConfig = import ./window-rules.nix {inherit config lib cfg;};
   monitorsConfig = import ./monitors.nix {inherit config lib cfg;};
   agsConfig = import ./ags-integration.nix {inherit config lib cfg;};
+  quickshellConfig = import ./quickshell-integration.nix {inherit config lib cfg;};
 in {
   ###########################################################################
   # Module Configuration
@@ -127,6 +128,7 @@ in {
               baseConfig
               // keybindingsConfig
               // agsConfig
+              // quickshellConfig
               // {
                 bind = allBinds;
                 bindm = allBindm;

@@ -24,13 +24,10 @@ in
     ###########################################################################
     # Quickshell Keybindings
     ###########################################################################
-    # Hold Super for 500ms to show workspace overview
     bind = lib.optionals quickshellEnabled [
+      # Hold Super for 500ms to show workspace overview
       "$mod, $mod_L, exec, quickshell-ipc toggle-overview"
-    ];
-
-    # Alternative: Manual toggle with Super+O
-    bind = lib.optionals quickshellEnabled [
+      # Alternative: Manual toggle with Super+O
       "$mod, O, exec, quickshell-ipc toggle-overview"
     ];
   }
