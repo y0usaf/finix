@@ -121,9 +121,9 @@ in {
               ];
 
               # Manually combine bind lists
-              allBinds = essentialBinds ++ (agsConfig.bind or []);
-              allBindm = (keybindingsConfig.bindm or []) ++ (agsConfig.bindm or []);
-              allBindr = (keybindingsConfig.bindr or []) ++ (agsConfig.bindr or []);
+              allBinds = essentialBinds ++ (agsConfig.bind or []) ++ (quickshellConfig.bind or []);
+              allBindm = (keybindingsConfig.bindm or []) ++ (agsConfig.bindm or []) ++ (quickshellConfig.bindm or []);
+              allBindr = (keybindingsConfig.bindr or []) ++ (agsConfig.bindr or []) ++ (quickshellConfig.bindr or []);
             in
               baseConfig
               // keybindingsConfig
