@@ -22,20 +22,20 @@ in
     ];
 
     ###########################################################################
-    # Quickshell Keybindings (Signal-based)
+    # Quickshell Keybindings (Process Signal-based)  
     ###########################################################################
     bind = lib.optionals quickshellEnabled [
       # Manual toggle workspace overview with Super+O
-      "$mod, O, exec, hyprctl notify 1 0 \"overview>>toggle\""
+      "$mod, O, exec, pkill -USR1 quickshell"
       # Alternative: Super+Tab for quick toggle
-      "$mod, TAB, exec, hyprctl notify 1 0 \"overview>>toggle\""
+      "$mod, TAB, exec, pkill -USR1 quickshell"
     ];
     
     # Hold mod key bindings for overview
     bindr = lib.optionals quickshellEnabled [
       # Show overview while holding Super key (left)
-      "$mod, $mod_L, exec, hyprctl notify 1 0 \"overview>>show\""
+      "$mod, $mod_L, exec, pkill -USR2 quickshell"
       # Show overview while holding Super key (right)  
-      "$mod, $mod_R, exec, hyprctl notify 1 0 \"overview>>show\""
+      "$mod, $mod_R, exec, pkill -USR2 quickshell"
     ];
   }
