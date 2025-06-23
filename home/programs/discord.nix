@@ -40,7 +40,7 @@ in {
           (writeShellScriptBin "discord-canary" ''
             exec ${(discord-canary.override {
               withOpenASAR = true;
-              # No Vencord
+              withVencord = true;
             })}/opt/DiscordCanary/DiscordCanary \
               --disable-smooth-scrolling \
               --disable-features=WebRtcAllowInputVolumeAdjustment \
@@ -51,7 +51,10 @@ in {
         else
           # Create a wrapper script in PATH for Discord Stable
           (writeShellScriptBin "discord" ''
-            exec ${discord}/bin/discord \
+            exec ${(discord.override {
+              withOpenASAR = true;
+              withVencord = true;
+            })}/bin/discord \
               --disable-smooth-scrolling \
               --disable-features=WebRtcAllowInputVolumeAdjustment \
               --enable-gpu-rasterization \
