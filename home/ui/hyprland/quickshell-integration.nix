@@ -32,12 +32,12 @@ in
     # Hold mod key bindings for overview
     binds = lib.optionals quickshellEnabled [
       # Show overview when pressing Super key
-      "$mod,, exec, quickshell ipc call overview display"
+      "$mod, SUPER_L, exec, quickshell ipc call overview display"
     ];
     
     # Release mod key bindings for overview
     bindr = lib.optionals quickshellEnabled [
       # Hide overview when releasing Super key
-      "$mod,, exec, quickshell ipc call overview dismiss"
+      "$mod, SUPER_L, exec, quickshell ipc call overview dismiss"
     ];
   }
