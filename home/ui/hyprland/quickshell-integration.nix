@@ -22,18 +22,22 @@ in
     ];
 
     ###########################################################################
-    # Quickshell Keybindings (Process Signal-based)  
+    # Quickshell Keybindings
     ###########################################################################
     bind = lib.optionals quickshellEnabled [
-      # Manual toggle workspace overview with Super+O
-      "$mod, O, exec, pkill -USR1 quickshell"
-      # Alternative: Super+Tab for quick toggle
-      "$mod, TAB, exec, pkill -USR1 quickshell"
+      # Toggle workspace overview with Super+Tab
+      "$mod, TAB, exec, quickshell ipc call overview toggle"
     ];
     
     # Hold mod key bindings for overview
+    binds = lib.optionals quickshellEnabled [
+      # Show overview when pressing Super key
+      "SUPER_L, exec, quickshell ipc call overview display"
+    ];
+    
+    # Release mod key bindings for overview
     bindr = lib.optionals quickshellEnabled [
-      # Show overview while holding Super key
-      "SUPER_L, exec, pkill -USR2 quickshell"
+      # Hide overview when releasing Super key
+      "SUPER_L, exec, quickshell ipc call overview dismiss"
     ];
   }
