@@ -125,6 +125,7 @@ in {
               allBindm = (keybindingsConfig.bindm or []) ++ (agsConfig.bindm or []) ++ (quickshellConfig.bindm or []);
               allBindr = (keybindingsConfig.bindr or []) ++ (agsConfig.bindr or []) ++ (quickshellConfig.bindr or []);
               allBinds_hold = (keybindingsConfig.binds or []) ++ (agsConfig.binds or []) ++ (quickshellConfig.binds or []);
+              allBinde = (keybindingsConfig.binde or []) ++ (agsConfig.binde or []) ++ (quickshellConfig.binde or []);
             in
               baseConfig
               // keybindingsConfig
@@ -135,6 +136,7 @@ in {
                 bindm = allBindm;
                 bindr = allBindr;
                 binds = allBinds_hold;
+                binde = allBinde;
               };
 
             # Generate plugins configuration if hy3 is enabled
