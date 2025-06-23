@@ -33,9 +33,7 @@ in
     
     # Hold mod key bindings for overview
     bindr = lib.optionals quickshellEnabled [
-      # Show overview while holding Super key (left)
-      "$mod, $mod_L, exec, pkill -USR2 quickshell"
-      # Show overview while holding Super key (right)  
-      "$mod, $mod_R, exec, pkill -USR2 quickshell"
+      # Show overview while holding Super key
+      "SUPER_L, exec, pkill -USR2 quickshell"
     ];
   }
