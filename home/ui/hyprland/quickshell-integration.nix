@@ -28,12 +28,12 @@ in
       # Toggle workspace overview with Super+Tab
       "$mod, TAB, exec, quickshell ipc call overview toggle"
       # Show overview when pressing Super key
-      "Super, Super_L exec, quickshell ipc call overview display"
+      "Super, Super_L, exec, quickshell ipc call overview display"
     ];
     
     # Release key bindings for overview
     bindr = lib.optionals quickshellEnabled [
       # Hide overview when releasing Super key
-      "Super, Super_L exec, quickshell ipc call overview dismiss"
+      "Super, Super_L, exec, quickshell ipc call overview dismiss"
     ];
   }
