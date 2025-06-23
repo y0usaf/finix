@@ -20,6 +20,7 @@
       xwayland.enable = true; # Enable XWayland to support legacy X11 apps.
       # Use the Hyprland package corresponding to the current system.
       package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+      portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
     };
   };
 }
