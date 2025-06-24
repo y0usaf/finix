@@ -32,7 +32,7 @@ in
       # Alt+Tab to toggle workspace indicators (like AGS)
       "$mod2, TAB, exec, quickshell ipc call workspaces toggle"
     ];
-    
+
     # Release key bindings for overview
     bindr = lib.optionals quickshellEnabled [
       # Hide overview when releasing Super key
