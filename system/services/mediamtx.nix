@@ -65,13 +65,18 @@ in {
 
         # Allow publishing to all paths - enables streaming from any source
         paths = {
-          all_others = {
-            # Allow all sources to publish
+          "~^.*" = {
+            # Completely disable authentication
+            source = "publisher";
+            sourceFingerprint = "";
+            sourceOnDemand = false;
+
+            # Publishing settings
             publishUser = "";
             publishPass = "";
             publishIps = [];
 
-            # Allow all to read
+            # Reading settings
             readUser = "";
             readPass = "";
             readIps = [];
