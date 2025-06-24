@@ -38,6 +38,23 @@ in {
     services.mediamtx = {
       enable = true;
       settings = {
+        # API settings for management
+        api = true;
+        apiAddress = "127.0.0.1:9997";
+
+        # RTSP Configuration
+        rtsp = true;
+        rtspAddress = ":8554";
+
+        # RTMP Configuration
+        rtmp = true;
+        rtmpAddress = ":1935";
+
+        # HLS Configuration (for web viewing)
+        hls = true;
+        hlsAddress = ":8888";
+        hlsAllowOrigin = "*";
+
         # WebRTC Configuration
         webrtc = true;
         webrtcAddress = ":${port}";
@@ -60,10 +77,6 @@ in {
             readIps = [];
           };
         };
-
-        # API settings for management
-        api = true;
-        apiAddress = "127.0.0.1:9997";
       };
     };
 
@@ -74,10 +87,15 @@ in {
     networking.firewall = {
       allowedTCPPorts = [
         (lib.toInt port) # WebRTC signaling
+        8554 # RTSP
+        1935 # RTMP
+        8888 # HLS
         9997 # API port (localhost only)
       ];
       allowedUDPPorts = [
         (lib.toInt port) # WebRTC media
+        8000 # RTSP RTP
+        8001 # RTSP RTCP
       ];
     };
 
