@@ -4,7 +4,10 @@
 MediaMTX is now configured as a system service for WebRTC streaming with OBS. The configuration automatically detects your public IP and sets up firewall rules.
 
 ## Configuration Details
-- **WebRTC Port**: 4200 (TCP/UDP)
+- **WebRTC Port**: 4200 (TCP/UDP) - For OBS streaming and browser viewing
+- **HLS Port**: 8888 (TCP) - For web browser viewing (alternative)
+- **RTMP Port**: 1935 (TCP) - Traditional streaming
+- **RTSP Port**: 8554 (TCP) - Professional streaming
 - **API Port**: 9997 (localhost only)
 - **Config File**: `/etc/mediamtx.yaml`
 - **Public IP**: Auto-detected via api.ipify.org
@@ -36,16 +39,22 @@ sudo cat /etc/mediamtx.yaml
 #### Install WebRTC Plugin (if not already installed)
 The OBS WebRTC plugin should be available through your OBS installation.
 
-#### Stream Setup in OBS:
+#### Method 1: WebRTC (Recommended)
 1. **Go to Settings → Stream**
 2. **Service**: Custom
 3. **Server**: `http://localhost:4200/stream_name/whip` 
    - Replace `stream_name` with your desired stream name
-4. **Stream Key**: Leave empty (no authentication required)
+4. **Stream Key**: Leave empty
 
-#### Alternative - Manual WHIP URL:
-- **WHIP Endpoint**: `http://YOUR_PUBLIC_IP:4200/stream_name/whip`
-- **WHEP Endpoint**: `http://YOUR_PUBLIC_IP:4200/stream_name/whep` (for viewing)
+#### Method 2: RTMP (Traditional)
+1. **Go to Settings → Stream**
+2. **Service**: Custom
+3. **Server**: `rtmp://localhost:1935/stream_name`
+4. **Stream Key**: Leave empty
+
+#### Public URLs:
+- **WebRTC**: `http://142.198.182.118:4200/stream_name/whip`
+- **RTMP**: `rtmp://142.198.182.118:1935/stream_name`
 
 ### 4. Test Stream
 
@@ -55,8 +64,16 @@ The OBS WebRTC plugin should be available through your OBS installation.
 3. You should see connection logs
 
 #### View Stream:
-- Open browser to: `http://YOUR_PUBLIC_IP:4200/stream_name`
-- Or use WHEP: `http://YOUR_PUBLIC_IP:4200/stream_name/whep`
+
+**Local Viewing**:
+- WebRTC: `http://localhost:4200/stream_name`
+- HLS: `http://localhost:8888/stream_name/index.m3u8`
+
+**Public Viewing**:
+- WebRTC: `http://142.198.182.118:4200/stream_name`
+- HLS: `http://142.198.182.118:8888/stream_name/index.m3u8`
+
+**Note**: HLS streams can be played in any HLS-compatible player or browser with HLS support
 
 ### 5. Firewall Verification
 ```bash
@@ -89,10 +106,14 @@ sudo systemctl restart mediamtx
 ```
 
 ### Connection Issues
-1. **Check firewall rules are applied**
-2. **Verify router port forwarding** (if behind NAT)
-3. **Check MediaMTX logs** for connection attempts
-4. **Test local streaming first** using `localhost:4200`
+1. **No stream available**: You must start streaming from OBS first
+2. **Page not found**: This is normal when no stream is active
+3. **Check firewall rules are applied**
+4. **Test different protocols**:
+   - Try RTMP if WebRTC fails: `rtmp://localhost:1935/test`
+   - Use HLS for viewing: `http://localhost:8888/test/index.m3u8`
+5. **Verify router port forwarding** (if behind NAT)
+6. **Check MediaMTX logs** for connection attempts
 
 ### Network Configuration
 If you're behind a router, you may need to:
