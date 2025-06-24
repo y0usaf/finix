@@ -52,7 +52,7 @@ in {
 
         # HLS Configuration (for web viewing)
         hls = true;
-        hlsAddress = ":8888";
+        hlsAddress = ":8080";
         hlsAllowOrigin = "*";
 
         # WebRTC Configuration
@@ -79,7 +79,7 @@ in {
         (lib.toInt port) # WebRTC signaling
         8554 # RTSP
         1935 # RTMP
-        8888 # HLS
+        8080 # HLS
         9997 # API port (localhost only)
       ];
       allowedUDPPorts = [

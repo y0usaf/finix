@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Stream Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            background: #000;
+            border-radius: 8px;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 400px;
+            border: 1px solid #444;
+            background: #333;
+            color: white;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .status.success { background: #1a5d1a; }
+        .status.error { background: #5d1a1a; }
+        .status.info { background: #1a1a5d; }
+        .presets {
+            margin: 10px 0;
+        }
+        .presets button {
+            background: #444;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 WebRTC Stream Viewer</h1>
+        
+        <video id="video" controls autoplay muted playsinline>
+            Your browser does not support the video tag.
+        </video>
+        
+        <div class="controls">
+            <div class="presets">
+                <strong>Quick Access:</strong><br>
+                <button onclick="connectToStream('smya', 'localhost')">Local: smya</button>
+                <button onclick="connectToStream('smya', '142.198.182.118')">Public: smya</button>
+                <button onclick="connectToStream('test', 'localhost')">Local: test</button>
+                <button onclick="connectToStream('test', '142.198.182.118')">Public: test</button>
+                <button onclick="connectToStream('livestream', '142.198.182.118')">Public: livestream</button>
+            </div>
+            
+            <div style="margin: 10px 0;">
+                <input type="text" id="streamPath" placeholder="Stream name (e.g., smya)" value="smya">
+                <input type="text" id="serverHost" placeholder="Server IP/hostname" value="142.198.182.118">
+                <button onclick="connectFromInputs()">Connect</button>
+                <button onclick="disconnect()">Disconnect</button>
+            </div>
+        </div>
+        
+        <div id="status" class="status info">Ready to connect...</div>
+        
+        <div style="margin-top: 30px;">
+            <h3>📋 WebRTC URLs</h3>
+            <p><strong>Local:</strong> http://localhost:4200/STREAM_NAME</p>
+            <p><strong>Public:</strong> http://142.198.182.118:4200/STREAM_NAME</p>
+            <p><em>Note: This viewer uses WebRTC WHEP protocol for low-latency streaming</em></p>
+        </div>
+    </div>
+
+    <script>
+        let pc = null;
+        const video = document.getElementById('video');
+        const statusDiv = document.getElementById('status');
+
+        function showStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        async function connectToStream(streamName, host) {
+            document.getElementById('streamPath').value = streamName;
+            document.getElementById('serverHost').value = host;
+            await connectFromInputs();
+        }
+
+        async function connectFromInputs() {
+            const streamName = document.getElementById('streamPath').value.trim();
+            const host = document.getElementById('serverHost').value.trim();
+            
+            if (!streamName || !host) {
+                showStatus('Please enter both stream name and server host', 'error');
+                return;
+            }
+
+            await connect(streamName, host);
+        }
+
+        async function connect(streamName, host) {
+            try {
+                showStatus('Connecting...', 'info');
+                
+                // Clean up existing connection
+                if (pc) {
+                    pc.close();
+                }
+
+                // Create new RTCPeerConnection
+                pc = new RTCPeerConnection({
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' }
+                    ]
+                });
+
+                // Handle incoming tracks
+                pc.ontrack = (event) => {
+                    video.srcObject = event.streams[0];
+                    showStatus('Stream connected successfully!', 'success');
+                };
+
+                // Handle connection state changes
+                pc.onconnectionstatechange = () => {
+                    showStatus(`Connection state: ${pc.connectionState}`, 'info');
+                    if (pc.connectionState === 'failed') {
+                        showStatus('Connection failed. Please try again.', 'error');
+                    }
+                };
+
+                // Create offer
+                const offer = await pc.createOffer({
+                    offerToReceiveVideo: true,
+                    offerToReceiveAudio: true
+                });
+                
+                await pc.setLocalDescription(offer);
+
+                // Send offer to MediaMTX WHEP endpoint
+                const whepUrl = `http://${host}:4200/${streamName}/whep`;
+                
+                const response = await fetch(whepUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/sdp',
+                    },
+                    body: offer.sdp
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const answerSdp = await response.text();
+                
+                await pc.setRemoteDescription({
+                    type: 'answer',
+                    sdp: answerSdp
+                });
+
+                showStatus('WebRTC handshake completed, waiting for media...', 'info');
+
+            } catch (error) {
+                console.error('Connection error:', error);
+                showStatus(`Connection failed: ${error.message}`, 'error');
+                
+                if (error.message.includes('Failed to fetch')) {
+                    showStatus('Cannot reach server. Check if the stream is running and ports are open.', 'error');
+                }
+            }
+        }
+
+        function disconnect() {
+            if (pc) {
+                pc.close();
+                pc = null;
+            }
+            video.srcObject = null;
+            showStatus('Disconnected', 'info');
+        }
+
+        // Auto-connect to public smya stream on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                connectToStream('smya', '142.198.182.118');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
