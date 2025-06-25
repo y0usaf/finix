@@ -31,26 +31,21 @@ in {
           local bracket_colors=("0;36" "0;33" "0;32" "0;35")  # cyan yellow green magenta
           local names=("tomo" "moon" "ekko" "bozo")
           
-          declare -a lines
-          lines[0]=""
-          lines[1]=""
-          lines[2]=""
-          lines[3]=""
-          lines[4]=""
+          local line1="" line2="" line3="" line4="" line5=""
           
           for i in {0..3}; do
               local color="$${colors[$$i]}"
               local bracket_color="$${bracket_colors[$$i]}"
               local name="$${names[$$i]}"
               
-              lines[0]+=" \033[$${color}m ⟋|､      "
-              lines[1]+="\033[$${color}m(°､ ｡ 7    "
-              lines[2]+="\033[$${color}m |､  ~ヽ   "
-              lines[3]+="\033[$${color}m じしf_,)〳"
-              lines[4]+="\033[$${bracket_color}m  [$${name}]   "
+              line1+=" \033[$${color}m ⟋|､      "
+              line2+="\033[$${color}m(°､ ｡ 7    "
+              line3+="\033[$${color}m |､  ~ヽ   "
+              line4+="\033[$${color}m じしf_,)〳"
+              line5+="\033[$${bracket_color}m  [$${name}]   "
           done
           
-          printf "%s\n%s\n%s\n%s\n%s\033[0m\n" "$${lines[0]}" "$${lines[1]}" "$${lines[2]}" "$${lines[3]}" "$${lines[4]}"
+          printf "%s\n%s\n%s\n%s\n%s\033[0m\n" "$$line1" "$$line2" "$$line3" "$$line4" "$$line5"
       }
 
       # Immediately print the cats on startup.
