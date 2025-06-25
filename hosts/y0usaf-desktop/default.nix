@@ -131,7 +131,7 @@ in {
       webapps.enable = true;
       firefox.enable = true;
       discord.enable = true;
-      zellij.enable = true;
+
       obsidian.enable = true;
       creative.enable = true;
       media.enable = true;
@@ -155,6 +155,8 @@ in {
     };
     shell = {
       zsh.enable = true;
+      cat-fetch.enable = true;
+      zellij.enable = true;
     };
     tools = {
       git = {
