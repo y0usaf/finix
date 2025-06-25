@@ -25,13 +25,27 @@ in {
       # ----------------------------
       # Function: print_cats
       # ----------------------------
-      # Prints a colorful array of cats to the terminal.
+      # Prints a colorful array of cats to the terminal using template approach.
       print_cats() {
-          echo -e "\033[0;31m ⟋|､      \033[0;34m  ⟋|､      \033[0;35m  ⟋|､      \033[0;32m  ⟋|､
-      \033[0;31m(°､ ｡ 7    \033[0;34m(°､ ｡ 7    \033[0;35m(°､ ｡ 7    \033[0;32m(°､ ｡ 7
-      \033[0;31m |､  ~ヽ   \033[0;34m |､  ~ヽ   \033[0;35m |､  ~ヽ   \033[0;32m |､  ~ヽ
-      \033[0;31m じしf_,)〳\033[0;34m じしf_,)〳\033[0;35m じしf_,)〳\033[0;32m じしf_,)〳
-      \033[0;36m  [tomo]   \033[0;33m  [moon]   \033[0;32m  [ekko]   \033[0;35m  [bozo]\033[0m"
+          local colors=("0;31" "0;34" "0;35" "0;32")  # red blue magenta green
+          local bracket_colors=("0;36" "0;33" "0;32" "0;35")  # cyan yellow green magenta
+          local names=("tomo" "moon" "ekko" "bozo")
+          
+          local lines=("" "" "" "" "")
+          
+          for i in {0..3}; do
+              local color="$${colors[$$i]}"
+              local bracket_color="$${bracket_colors[$$i]}"
+              local name="$${names[$$i]}"
+              
+              lines[1]+=" \033[$${color}m ⟋|､      "
+              lines[2]+="\033[$${color}m(°､ ｡ 7    "
+              lines[3]+="\033[$${color}m |､  ~ヽ   "
+              lines[4]+="\033[$${color}m じしf_,)〳"
+              lines[5]+="\033[$${bracket_color}m  [$${name}]   "
+          done
+          
+          printf "%s\n%s\n%s\n%s\n%s\033[0m\n" "$${lines[1]}" "$${lines[2]}" "$${lines[3]}" "$${lines[4]}" "$${lines[5]}"
       }
 
       # Immediately print the cats on startup.
