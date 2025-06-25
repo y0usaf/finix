@@ -31,7 +31,12 @@ in {
           local bracket_colors=("0;36" "0;33" "0;32" "0;35")  # cyan yellow green magenta
           local names=("tomo" "moon" "ekko" "bozo")
           
-          local lines=("" "" "" "" "")
+          local lines
+          lines[0]=""
+          lines[1]=""
+          lines[2]=""
+          lines[3]=""
+          lines[4]=""
           
           for i in {0..3}; do
               local color="$${colors[$$i]}"
