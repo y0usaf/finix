@@ -891,13 +891,12 @@
         "narHash": "sha256-Z0djmTa1YmnGMfE9jEe05oO4zggjDmxOGKwt844bUhE=",
         "ref": "nixos-unstable",
         "rev": "4b1164c3215f018c4442463a27689d973cffd750",
-        "shallow": true,
+        "revCount": 820697,
         "type": "git",
         "url": "https://github.com/NixOS/nixpkgs"
       },
       "original": {
         "ref": "nixos-unstable",
-        "shallow": true,
         "type": "git",
         "url": "https://github.com/NixOS/nixpkgs"
       }
