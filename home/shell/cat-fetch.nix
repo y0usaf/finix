@@ -31,7 +31,7 @@ in {
           local bracket_colors=("0;36" "0;33" "0;32" "0;35")  # cyan yellow green magenta
           local names=("tomo" "moon" "ekko" "bozo")
           
-          local lines
+          declare -a lines
           lines[0]=""
           lines[1]=""
           lines[2]=""
