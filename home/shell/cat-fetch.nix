@@ -38,14 +38,14 @@ in {
               local bracket_color="$${bracket_colors[$$i]}"
               local name="$${names[$$i]}"
               
-              lines[1]+=" \033[$${color}m ⟋|､      "
-              lines[2]+="\033[$${color}m(°､ ｡ 7    "
-              lines[3]+="\033[$${color}m |､  ~ヽ   "
-              lines[4]+="\033[$${color}m じしf_,)〳"
-              lines[5]+="\033[$${bracket_color}m  [$${name}]   "
+              lines[0]+=" \033[$${color}m ⟋|､      "
+              lines[1]+="\033[$${color}m(°､ ｡ 7    "
+              lines[2]+="\033[$${color}m |､  ~ヽ   "
+              lines[3]+="\033[$${color}m じしf_,)〳"
+              lines[4]+="\033[$${bracket_color}m  [$${name}]   "
           done
           
-          printf "%s\n%s\n%s\n%s\n%s\033[0m\n" "$${lines[1]}" "$${lines[2]}" "$${lines[3]}" "$${lines[4]}" "$${lines[5]}"
+          printf "%s\n%s\n%s\n%s\n%s\033[0m\n" "$${lines[0]}" "$${lines[1]}" "$${lines[2]}" "$${lines[3]}" "$${lines[4]}"
       }
 
       # Immediately print the cats on startup.
