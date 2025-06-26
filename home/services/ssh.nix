@@ -71,7 +71,7 @@ in {
       ###########################################################################
       # Shell Integration
       ###########################################################################
-      file.home.".zshenv".text = lib.mkAfter ''
+      file.home."{{xdg_config_home}}/zsh/.zshenv".text = lib.mkAfter ''
         # SSH Agent Integration
         export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
       '';
