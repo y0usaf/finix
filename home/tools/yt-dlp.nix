@@ -32,7 +32,7 @@ in {
     ###########################################################################
     # Shell Aliases (added to .zshrc)
     ###########################################################################
-    users.users.y0usaf.maid.file.home.".zshrc".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkAfter ''
 
       # ----------------------------
       # YouTube-DLP Aliases

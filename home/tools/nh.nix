@@ -46,7 +46,7 @@ in {
     ###########################################################################
     # Shell Integration
     ###########################################################################
-    users.users.y0usaf.maid.file.home.".zshrc".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkAfter ''
       # Set NH_FLAKE environment variable for NH (Nix Helper)
       export NH_FLAKE="/home/y0usaf/nixos"
 

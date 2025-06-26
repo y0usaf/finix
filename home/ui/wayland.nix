@@ -27,7 +27,7 @@ in {
     ###########################################################################
     # Environment Variables (via .zshenv for Wayland)
     ###########################################################################
-    users.users.y0usaf.maid.file.home.".zshenv".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home."{{xdg_config_home}}/zsh/.zshenv".text = lib.mkAfter ''
       # Wayland environment variables
       export WLR_NO_HARDWARE_CURSORS=1
       export NIXOS_OZONE_WL=1
