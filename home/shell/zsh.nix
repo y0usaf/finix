@@ -15,6 +15,8 @@
   cfg = config.home.shell.zsh;
   # Get shared user preferences
   sharedZsh = config.shared.zsh;
+  # XDG paths using shared config
+  xdgConfigHome = "${config.shared.homeDirectory}/.config";
 in {
   #===========================================================================
   # Module Options
@@ -37,20 +39,20 @@ in {
     programs.zsh.enable = true;
 
     #=========================================================================
-    # Packages
+    # User Configuration
     #=========================================================================
-    users.users.y0usaf.maid.packages = with pkgs; [
-      zsh
-      bat
-      lsd
-      tree
-    ];
+    users.users.${config.shared.username}.maid = {
+      # Packages
+      packages = with pkgs; [
+        zsh
+        bat
+        lsd
+        tree
+      ];
 
-    #=========================================================================
-    # Zsh Configuration Files
-    #=========================================================================
-    users.users.y0usaf.maid.file.home = {
-      "{{xdg_config_home}}/zsh/.zshenv".text = let
+      # Configuration Files
+      file.home = {
+      "${xdgConfigHome}/zsh/.zshenv".text = let
         # Get the token directory path from shared config
         inherit (config.shared) tokenDir;
         # Token management function (from original envExtra)
@@ -72,7 +74,7 @@ in {
       in
         tokenFunctionScript;
 
-      "{{xdg_config_home}}/zsh/.zprofile".text = ''
+      "${xdgConfigHome}/zsh/.zprofile".text = ''
         # Hardware-specific settings based on hostname.
         # Only run for interactive shells
         if [[ $- == *i* ]]; then
@@ -95,7 +97,7 @@ in {
       '';
 
       # Combine all .zshrc content using lib.mkMerge
-      "{{xdg_config_home}}/zsh/.zshrc".text = lib.mkMerge [
+      "${xdgConfigHome}/zsh/.zshrc".text = lib.mkMerge [
         # Base configuration
         ''
           # History configuration
@@ -234,6 +236,7 @@ in {
         in
           aliasSection))
       ];
-    };
+      }; # end file.home
+    }; # end maid
   };
 }
