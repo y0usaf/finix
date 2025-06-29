@@ -52,7 +52,7 @@ in {
       # Shell Configuration Files
       ###########################################################################
       file.home = {
-        ".zshenv".text = ''
+        "{{xdg_config_home}}/zsh/.zshenv".text = lib.mkAfter ''
           # Python development environment
           export PYTHONUSERBASE="$HOME/.local/share/python"
           export PIP_CACHE_DIR="{{xdg_cache_home}}/pip"
@@ -75,7 +75,7 @@ in {
           export PYTHONPATH="$PYTHONUSERBASE/lib/python3.12/site-packages:$PYTHONPATH"
         '';
 
-        ".zshrc".text = ''
+        "{{xdg_config_home}}/zsh/.zshrc".text = lib.mkAfter ''
           # Python development aliases
           alias py="python3"
           alias pip="pip3"

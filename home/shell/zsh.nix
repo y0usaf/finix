@@ -28,6 +28,15 @@ in {
   #===========================================================================
   config = lib.mkIf cfg.enable {
     #=========================================================================
+    # System-level ZSH Configuration
+    #=========================================================================
+    # Set ZDOTDIR to point ZSH to XDG config directory
+    environment.variables.ZDOTDIR = "$HOME/.config/zsh";
+    
+    # Enable system-level ZSH features
+    programs.zsh.enable = true;
+
+    #=========================================================================
     # Packages
     #=========================================================================
     users.users.y0usaf.maid.packages = with pkgs; [
@@ -41,7 +50,7 @@ in {
     # Zsh Configuration Files
     #=========================================================================
     users.users.y0usaf.maid.file.home = {
-      ".zshenv".text = let
+      "{{xdg_config_home}}/zsh/.zshenv".text = let
         # Get the token directory path from shared config
         inherit (config.shared) tokenDir;
         # Token management function (from original envExtra)
@@ -63,7 +72,7 @@ in {
       in
         tokenFunctionScript;
 
-      ".zprofile".text = ''
+      "{{xdg_config_home}}/zsh/.zprofile".text = ''
         # Hardware-specific settings based on hostname.
         # Only run for interactive shells
         if [[ $- == *i* ]]; then
@@ -86,7 +95,7 @@ in {
       '';
 
       # Combine all .zshrc content using lib.mkMerge
-      ".zshrc".text = lib.mkMerge [
+      "{{xdg_config_home}}/zsh/.zshrc".text = lib.mkMerge [
         # Base configuration
         ''
           # History configuration

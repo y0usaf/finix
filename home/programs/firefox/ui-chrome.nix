@@ -301,7 +301,13 @@
         margin-bottom: 0;
     }
 
-    #urlbar-background,
+    #urlbar-background {
+        --toolbarbutton-border-radius: 0;
+        --urlbar-icon-border-radius: 0;
+        backdrop-filter: blur(10px);
+        background-color: transparent !important;
+    }
+
     #urlbar-input-container {
         --toolbarbutton-border-radius: 0;
         --urlbar-icon-border-radius: 0;
