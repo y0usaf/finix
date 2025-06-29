@@ -52,7 +52,7 @@ in {
 
       # Configuration Files
       file.home = {
-      "${xdgConfigHome}/zsh/.zshenv".text = let
+      "{{xdg_config_home}}/zsh/.zshenv".text = let
         # Get the token directory path from shared config
         inherit (config.shared) tokenDir;
         # Token management function (from original envExtra)
@@ -74,7 +74,7 @@ in {
       in
         tokenFunctionScript;
 
-      "${xdgConfigHome}/zsh/.zprofile".text = ''
+      "{{xdg_config_home}}/zsh/.zprofile".text = ''
         # Hardware-specific settings based on hostname.
         # Only run for interactive shells
         if [[ $- == *i* ]]; then
@@ -97,7 +97,7 @@ in {
       '';
 
       # Combine all .zshrc content using lib.mkMerge
-      "${xdgConfigHome}/zsh/.zshrc".text = lib.mkMerge [
+      "{{xdg_config_home}}/zsh/.zshrc".text = lib.mkMerge [
         # Base configuration
         ''
           # History configuration
