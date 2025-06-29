@@ -156,7 +156,7 @@ in {
         };
 
         # Shell Integration
-        ".zshrc".text = lib.mkIf cfg.nixos-git-sync.enable ''
+        "{{xdg_config_home}}/zsh/.zshrc".text = lib.mkIf cfg.nixos-git-sync.enable ''
 
           # Git sync function
           git-sync() {

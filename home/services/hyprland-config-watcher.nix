@@ -28,8 +28,14 @@ in {
 
     reloadDelay = lib.mkOption {
       type = lib.types.int;
-      default = 1;
+      default = 3;
       description = "Delay in seconds before reloading Hyprland after detecting changes";
+    };
+
+    startupDelay = lib.mkOption {
+      type = lib.types.int;
+      default = 5;
+      description = "Delay in seconds before starting to watch (wait for Hyprland to be ready)";
     };
   };
 
@@ -47,49 +53,83 @@ in {
           # Enable debug output for logging
           set -x
 
+          # Wait for Hyprland to be ready
+          echo "Waiting ${toString cfg.startupDelay} seconds for Hyprland to be ready..."
+          sleep ${toString cfg.startupDelay}
+
           # Function to reload Hyprland
           reload_hyprland() {
             echo "Detected config change, reloading Hyprland in ${toString cfg.reloadDelay} seconds..."
             sleep ${toString cfg.reloadDelay}
 
-            # Try to reload via hyprctl first
+            # Get Hyprland instance signature
+            local instance_sig
+            if [[ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
+              instance_sig="$HYPRLAND_INSTANCE_SIGNATURE"
+            else
+              # Try to auto-detect the instance
+              instance_sig=$(ls /tmp/hypr/ 2>/dev/null | head -n 1)
+            fi
+
+            echo "Using Hyprland instance: $instance_sig"
+
+            # Try to reload via hyprctl
             if command -v hyprctl >/dev/null 2>&1; then
-              if hyprctl reload 2>/dev/null; then
-                echo "Hyprland reloaded successfully via hyprctl"
+              if [[ -n "$instance_sig" ]]; then
+                export HYPRLAND_INSTANCE_SIGNATURE="$instance_sig"
+              fi
+              
+              if hyprctl reload 2>&1; then
+                echo "Hyprland reloaded successfully"
                 return 0
               else
-                echo "hyprctl reload failed, trying dispatch reload"
-                if hyprctl dispatch exec "hyprctl reload" 2>/dev/null; then
-                  echo "Hyprland reloaded successfully via dispatch"
-                  return 0
-                fi
+                echo "hyprctl reload failed"
               fi
             fi
 
-            echo "Failed to reload Hyprland - hyprctl not available or failed"
+            echo "Failed to reload Hyprland"
             return 1
           }
 
+          # Ensure config directory exists and is readable
+          if [[ ! -d "${cfg.configPath}" ]]; then
+            echo "Config directory ${cfg.configPath} does not exist, creating it..."
+            mkdir -p "${cfg.configPath}"
+          fi
+
           # Watch for changes to the Hyprland config directory
-          # Using inotify to watch for symlink changes, file modifications, and moves
           echo "Starting to watch ${cfg.configPath} for changes..."
 
+          # Use inotifywait to monitor for file system events
           inotifywait -m -r \
             --event modify \
             --event create \
             --event delete \
             --event move \
             --event attrib \
-            --format '%w%f %e' \
+            --event delete_self \
+            --event move_self \
+            --format '%w%f %e %T' \
+            --timefmt '%Y-%m-%d %H:%M:%S' \
             "${cfg.configPath}" 2>/dev/null | \
-          while read -r file event; do
-            echo "Detected event: $event on $file"
+          while read -r file event timestamp; do
+            echo "[$timestamp] Event: $event on $file"
 
-            # Filter for relevant events (symlink changes, config file modifications)
+            # Debounce rapid changes (skip if another reload is already running)
+            if pgrep -f "reload_hyprland" >/dev/null; then
+              echo "Reload already in progress, skipping..."
+              continue
+            fi
+
+            # Filter for relevant events and files
             case "$event" in
               *MODIFY*|*CREATE*|*DELETE*|*MOVED*|*ATTRIB*)
-                # Check if it's a config file or symlink change
-                if [[ "$file" =~ \.(conf|json|toml)$ ]] || [[ -L "$file" ]] || [[ "$event" =~ ATTRIB ]]; then
+                # Check if it's a relevant config file
+                if [[ "$file" =~ \.(conf|json|toml)$ ]] || \
+                   [[ "$(basename "$file")" == "hyprland.conf" ]] || \
+                   [[ -L "$file" ]] || \
+                   [[ "$event" =~ (ATTRIB|DELETE_SELF|MOVE_SELF) ]]; then
+                  echo "Triggering reload for: $file ($event)"
                   reload_hyprland &
                 fi
                 ;;
@@ -100,11 +140,12 @@ in {
         serviceConfig = {
           Type = "simple";
           Restart = "always";
-          RestartSec = 3;
+          RestartSec = 5;
           User = "y0usaf";
           Environment = [
-            "HYPRLAND_INSTANCE_SIGNATURE="
             "XDG_RUNTIME_DIR=/run/user/1000"
+            "WAYLAND_DISPLAY=wayland-1"
+            "PATH=/run/current-system/sw/bin"
           ];
         };
 
@@ -113,11 +154,13 @@ in {
           hyprland
           coreutils
           procps
+          gnugrep
+          util-linux
         ];
 
-        wantedBy = ["graphical-session.target"];
-        after = ["graphical-session.target"];
-        partOf = ["graphical-session.target"];
+        wantedBy = ["hyprland-session.target"];
+        after = ["hyprland-session.target"];
+        partOf = ["hyprland-session.target"];
       };
     };
   };

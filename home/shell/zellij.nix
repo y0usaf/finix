@@ -219,7 +219,7 @@ in {
         ###########################################################################
         # Shell Integration - Auto-start Zellij
         ###########################################################################
-        home.".zshrc".text = lib.mkBefore (lib.optionalString sharedZsh.zellij.enable ''
+        home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkBefore (lib.optionalString sharedZsh.zellij.enable ''
           # ----------------------------
           # Zellij Auto-start
           # ----------------------------
