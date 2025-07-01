@@ -44,8 +44,9 @@ in {
             })}/opt/DiscordCanary/DiscordCanary \
               --disable-smooth-scrolling \
               --disable-features=WebRtcAllowInputVolumeAdjustment \
-              --enable-gpu-rasterization \
-              --enable-zero-copy \
+              --disable-gpu-sandbox \
+              --ignore-gpu-blocklist \
+              --use-gl=swiftshader \
               "$@"
           '')
         else
