@@ -78,7 +78,7 @@ in {
               if [[ -n "$instance_sig" ]]; then
                 export HYPRLAND_INSTANCE_SIGNATURE="$instance_sig"
               fi
-              
+
               if hyprctl reload 2>&1; then
                 echo "Hyprland reloaded successfully"
                 return 0
