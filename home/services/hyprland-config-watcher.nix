@@ -141,7 +141,6 @@ in {
           Type = "simple";
           Restart = "always";
           RestartSec = 5;
-          User = "y0usaf";
           Environment = [
             "XDG_RUNTIME_DIR=/run/user/1000"
             "WAYLAND_DISPLAY=wayland-1"
