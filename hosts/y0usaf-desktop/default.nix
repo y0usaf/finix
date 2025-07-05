@@ -169,6 +169,11 @@ in {
           remoteBranch = "main";
         };
       };
+      jujutsu = {
+        enable = true;
+        name = "y0usaf";
+        email = "OA99@Outlook.com";
+      };
       nh = {
         enable = true;
         flake = "${homeDir}/nixos";
