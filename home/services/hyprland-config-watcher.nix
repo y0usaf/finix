@@ -158,9 +158,9 @@ in {
           util-linux
         ];
 
-        wantedBy = ["hyprland-session.target"];
-        after = ["hyprland-session.target"];
-        partOf = ["hyprland-session.target"];
+        wantedBy = ["default.target"];
+        after = ["graphical-session.target"];
+        partOf = ["graphical-session.target"];
       };
     };
   };
