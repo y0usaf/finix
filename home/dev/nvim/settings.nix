@@ -10,9 +10,41 @@ in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid.file = {
       xdg_config."nvim/init.lua".text = ''
-        -- Load core settings
-        require("appearance")
-        require("core")
+        -- Leader keys
+        vim.g.mapleader = " "
+        vim.g.maplocalleader = "\\"
+
+        -- Core settings
+        vim.opt.number = true
+        vim.opt.relativenumber = true
+        vim.opt.signcolumn = "yes"
+        vim.opt.wrap = true
+        vim.opt.linebreak = true
+        vim.opt.breakindent = true
+        vim.opt.showbreak = "↪ "
+        vim.opt.termguicolors = true
+        vim.opt.scrolloff = 8
+        vim.opt.sidescrolloff = 8
+        vim.opt.cursorline = true
+        vim.opt.pumheight = 15
+        vim.opt.showmode = false
+        vim.opt.laststatus = 2
+        vim.opt.cmdheight = 1
+        vim.opt.expandtab = true
+        vim.opt.tabstop = 2
+        vim.opt.shiftwidth = 2
+        vim.opt.clipboard = "unnamedplus"
+        vim.opt.ignorecase = true
+        vim.opt.smartcase = true
+        vim.opt.updatetime = 250
+        vim.opt.timeoutlen = 300
+        vim.opt.mouse = "a"
+        vim.opt.splitbelow = true
+        vim.opt.splitright = true
+        vim.opt.splitkeep = "screen"
+        vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
+        vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
+        vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
         -- Bootstrap lazy.nvim
         local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -36,30 +68,10 @@ in {
         end
 
         require("lazy").setup(plugins, {
-          ui = {
-            border = "rounded",
-          },
+          ui = { border = "rounded" },
         })
 
-        print("🚀 Modern Neovim IDE loaded!")
-      '';
-
-      xdg_config."nvim/lua/core.lua".text = ''
-        vim.opt.expandtab = true
-        vim.opt.tabstop = 2
-        vim.opt.shiftwidth = 2
-        vim.opt.clipboard = "unnamedplus"
-        vim.opt.ignorecase = true
-        vim.opt.smartcase = true
-        vim.opt.updatetime = 250
-        vim.opt.timeoutlen = 300
-        vim.opt.mouse = "a"
-        vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
-        vim.opt.splitbelow = true
-        vim.opt.splitright = true
-        vim.opt.splitkeep = "screen"
-
-        -- Auto-install missing parsers when entering buffer
+        -- Auto-install missing parsers
         vim.api.nvim_create_autocmd("FileType", {
           callback = function()
             local parsers = require("nvim-treesitter.parsers")
