@@ -39,6 +39,10 @@ in {
       pkgs.black
       pkgs.prettier
       pkgs.rustfmt
+
+      # Leetcode dependencies
+      pkgs.curl
+      pkgs.jq
     ];
   };
 }
