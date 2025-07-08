@@ -42,6 +42,12 @@ in {
       keymap("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Toggle diagnostics" })
       keymap("n", "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = "Buffer diagnostics" })
 
+      -- Leetcode
+      keymap("n", "<leader>lq", "<cmd>Leet<cr>", { desc = "Leetcode menu" })
+      keymap("n", "<leader>ll", "<cmd>Leet list<cr>", { desc = "Leetcode list" })
+      keymap("n", "<leader>lt", "<cmd>Leet test<cr>", { desc = "Leetcode test" })
+      keymap("n", "<leader>ls", "<cmd>Leet submit<cr>", { desc = "Leetcode submit" })
+
       -- Quick actions
       keymap("n", "<leader>w", "<cmd>w<cr>", { desc = "Save file" })
       keymap("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })

@@ -176,6 +176,27 @@ in {
           cmd = { "Trouble", "TroubleToggle" },
           opts = { use_diagnostic_signs = true },
         },
+
+        -- Leetcode
+        {
+          "kawre/leetcode.nvim",
+          cmd = { "Leet" },
+          dependencies = {
+            "nvim-telescope/telescope.nvim",
+            "nvim-lua/plenary.nvim",
+            "MunifTanjim/nui.nvim",
+          },
+          opts = {
+            lang = "python3",
+            directory = "~/leetcode/",
+            logging = false,
+            injector = {
+              ["python3"] = {
+                before = true,
+              },
+            },
+          },
+        },
       }
     '';
   };
