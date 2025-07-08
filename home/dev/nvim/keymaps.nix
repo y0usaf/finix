@@ -47,6 +47,7 @@ in {
       keymap("n", "<leader>ll", "<cmd>Leet list<cr>", { desc = "Leetcode list" })
       keymap("n", "<leader>lt", "<cmd>Leet test<cr>", { desc = "Leetcode test" })
       keymap("n", "<leader>ls", "<cmd>Leet submit<cr>", { desc = "Leetcode submit" })
+      keymap("n", "<leader>ln", "<cmd>messages<cr>", { desc = "View messages" })
 
       -- Quick actions
       keymap("n", "<leader>w", "<cmd>w<cr>", { desc = "Save file" })

@@ -180,7 +180,7 @@ in {
         -- Leetcode
         {
           "kawre/leetcode.nvim",
-          cmd = { "Leet" },
+          cmd = "Leet",
           dependencies = {
             "nvim-telescope/telescope.nvim",
             "nvim-lua/plenary.nvim",
