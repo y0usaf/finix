@@ -9,7 +9,6 @@
 in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid.file.xdg_config."nvim/lua/plugins.lua".text = ''
-      -- Setup lazy with plugins
       return {
         -- LSP
         {
@@ -197,6 +196,8 @@ in {
             },
           },
         },
+
+
       }
     '';
   };

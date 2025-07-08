@@ -78,20 +78,20 @@ in {
           "recent" = "heads(::@ & recent(5))"
 
           ${lib.optionalString cfg.enableAliases ''
-          [aliases]
-          l = ["log", "-r", "recent"]
-          ll = ["log", "-r", "::@"]
-          s = ["status"]
-          d = ["diff"]
-          c = ["commit"]
-          ca = ["commit", "--amend"]
-          co = ["checkout"]
-          n = ["new"]
-          e = ["edit"]
-          b = ["branch"]
-          rb = ["rebase"]
-          sp = ["split"]
-          sq = ["squash"]
+            [aliases]
+            l = ["log", "-r", "recent"]
+            ll = ["log", "-r", "::@"]
+            s = ["status"]
+            d = ["diff"]
+            c = ["commit"]
+            ca = ["commit", "--amend"]
+            co = ["checkout"]
+            n = ["new"]
+            e = ["edit"]
+            b = ["branch"]
+            rb = ["rebase"]
+            sp = ["split"]
+            sq = ["squash"]
           ''}
         '';
 
