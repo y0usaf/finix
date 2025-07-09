@@ -187,7 +187,9 @@ in {
           },
           opts = {
             lang = "python3",
-            directory = "~/leetcode/",
+            storage = {
+              home = "~/leetcode/",
+            },
             logging = true,
             injector = {
               ["python3"] = {

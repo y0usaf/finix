@@ -176,7 +176,7 @@ in {
         ######################################################################
         home.".zshenv".text = lib.mkAfter ''
           # GTK cursor size scales proportionally with the scaling factor
-          export XCURSOR_SIZE="${toString (builtins.floor (24 * scaleFactor))}"
+          export XCURSOR_SIZE="${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * scaleFactor)))}"
         '';
       };
 
