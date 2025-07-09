@@ -14,6 +14,20 @@ in {
       pkgs.ripgrep
       pkgs.fd
       pkgs.tree-sitter
+      (pkgs.tree-sitter.withPlugins (p:
+        with p; [
+          tree-sitter-nix
+          tree-sitter-lua
+          tree-sitter-python
+          tree-sitter-rust
+          tree-sitter-typescript
+          tree-sitter-javascript
+          tree-sitter-bash
+          tree-sitter-markdown
+          tree-sitter-json
+          tree-sitter-yaml
+          tree-sitter-toml
+        ]))
       pkgs.fzf
       pkgs.bat
       pkgs.delta
