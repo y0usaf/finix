@@ -60,8 +60,8 @@
     rounding = 0;
     blur = {
       enabled = true;
-      size = 5;
-      passes = 5;
+      size = 10;
+      passes = 3;
       ignore_opacity = true;
       popups = true;
     };
