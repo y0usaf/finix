@@ -110,7 +110,7 @@
 
     # -- Special Commands --
     [
-      "$mod SHIFT, C, exec, for monitor in $(hyprctl monitors -j | jq -r '.[].name'); do wall=$(find /home/y0usaf/DCIM/Wallpapers/32_9 -type f | shuf -n 1); hyprctl hyprpaper preload $wall; hyprctl hyprpaper wallpaper $monitor,$wall; done; hyprctl reload"
+      "$mod SHIFT, C, exec, killall swaybg; for monitor in $(hyprctl monitors -j | jq -r '.[].name'); do wall=$(find /home/y0usaf/DCIM/Wallpapers/32_9 -type f | shuf -n 1); swaybg -o $monitor -i $wall -m fill & done"
     ]
   ];
 

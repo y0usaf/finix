@@ -41,8 +41,9 @@ in {
         pkgs.grim
         pkgs.slurp
         pkgs.wl-clipboard
-        # Wallpaper cycling dependency
+        # Wallpaper cycling dependencies
         pkgs.jq
+        pkgs.swaybg
       ];
 
       ###########################################################################
