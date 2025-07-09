@@ -234,7 +234,7 @@
               onClicked: workspaceOverview.visible = false
           }
       }
-    ''}}
+    ''}
 
         // IPC for external control
         Component.onCompleted: {
