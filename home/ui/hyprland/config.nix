@@ -41,6 +41,8 @@ in {
         pkgs.grim
         pkgs.slurp
         pkgs.wl-clipboard
+        # Wallpaper cycling dependency
+        pkgs.jq
       ];
 
       ###########################################################################
@@ -166,6 +168,8 @@ in {
             ipc = on
           '';
         };
+
+
       };
     };
   };
