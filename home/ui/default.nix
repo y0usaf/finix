@@ -11,7 +11,7 @@
     ./gtk.nix
     ./hyprland
     ./mako.nix
-    ./quickshell.nix
+    ./quickshell
     ./wallust.nix
     ./wayland.nix
   ];
