@@ -24,7 +24,7 @@
     ShellRoot {
         ${lib.optionalString cfg.statusBar.enable ''
       // Status Bar
-      PanelInterface {
+      PanelWindow {
           id: statusBar
           anchors {
               top: ${
