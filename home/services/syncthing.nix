@@ -30,27 +30,28 @@ in {
       ];
 
       ###########################################################################
-      # Syncthing User Service
+      # Syncthing Configuration
       ###########################################################################
-      systemd.services.syncthing = {
-        description = "Syncthing - Open Source Continuous File Synchronization";
-        after = ["graphical-session.target"];
-        wantedBy = ["default.target"];
-        serviceConfig = {
-          Type = "simple";
-          ExecStart = "${pkgs.syncthing}/bin/syncthing -no-browser -no-restart -logflags=0";
-          Restart = "on-failure";
-          RestartSec = "1";
-          SuccessExitStatus = "3 4";
-          RestartForceExitStatus = "3 4";
-          User = "y0usaf";
-          Group = "users";
-          Environment = [
-            "STNORESTART=1"
-            "STNOUPGRADE=1"
-          ];
-        };
-      };
+      file.xdg_config."syncthing/config.xml".text = ''
+        <configuration version="37">
+          <gui enabled="true" tls="false" debugging="false">
+            <address>127.0.0.1:8384</address>
+            <apikey></apikey>
+            <theme>default</theme>
+          </gui>
+          <options>
+            <startBrowser>false</startBrowser>
+          </options>
+        </configuration>
+      '';
+    };
+
+    ###########################################################################
+    # Enable system syncthing user service
+    ###########################################################################
+    systemd.user.services.syncthing = {
+      enable = true;
+      wantedBy = ["default.target"];
     };
   };
 }
