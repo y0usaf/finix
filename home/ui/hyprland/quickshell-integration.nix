@@ -27,15 +27,7 @@ in
     bind = lib.optionals quickshellEnabled [
       # Toggle workspace overview with Super+Tab
       "$mod, TAB, exec, quickshell ipc call overview toggle"
-      # Show overview when pressing Super key (like AGS pattern)
-      "$mod, Super_L, exec, quickshell ipc call overview display"
       # Alt+Tab to toggle workspace indicators (like AGS)
       "$mod2, TAB, exec, quickshell ipc call workspaces toggle"
-    ];
-
-    # Release key bindings for overview
-    bindr = lib.optionals quickshellEnabled [
-      # Hide overview when releasing Super key
-      "$mod, Super_L, exec, quickshell ipc call overview dismiss"
     ];
   }
