@@ -65,7 +65,7 @@
                               Layout.preferredHeight: 20
 
                               color: modelData.active ? "#89b4fa" : "#313244"
-                              borderRadius: 4
+                              radius: 4
 
                               Text {
                                   anchors.centerIn: parent
