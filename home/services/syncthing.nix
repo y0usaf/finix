@@ -30,20 +30,9 @@ in {
       ];
 
       ###########################################################################
-      # Syncthing Configuration
+      # Syncthing Configuration Directory
       ###########################################################################
-      file.xdg_config."syncthing/config.xml".text = ''
-        <configuration version="37">
-          <gui enabled="true" tls="false" debugging="false">
-            <address>127.0.0.1:8384</address>
-            <apikey></apikey>
-            <theme>default</theme>
-          </gui>
-          <options>
-            <startBrowser>false</startBrowser>
-          </options>
-        </configuration>
-      '';
+      file.xdg_config."syncthing/.keep".text = "";
     };
 
     ###########################################################################
@@ -52,6 +41,31 @@ in {
     systemd.user.services.syncthing = {
       enable = true;
       wantedBy = ["default.target"];
+      after = ["network.target"];
+      serviceConfig = {
+        ExecStart = "${pkgs.syncthing}/bin/syncthing serve --no-browser --no-restart --logflags=0";
+        Restart = "on-failure";
+        RestartSec = "5s";
+        User = "y0usaf";
+        Group = "users";
+        WorkingDirectory = "/home/y0usaf";
+        StateDirectory = "syncthing";
+        StateDirectoryMode = "0700";
+        ProtectSystem = "strict";
+        ProtectHome = "read-only";
+        ReadWritePaths = ["/home/y0usaf"];
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        RestrictRealtime = true;
+        RestrictSUIDSGID = true;
+        LockPersonality = true;
+        RestrictAddressFamilies = ["AF_UNIX" "AF_INET" "AF_INET6"];
+        SystemCallFilter = "@system-service";
+        SystemCallErrorNumber = "EPERM";
+      };
     };
   };
 }
