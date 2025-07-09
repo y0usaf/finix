@@ -144,8 +144,10 @@ in {
           Environment = [
             "XDG_RUNTIME_DIR=/run/user/1000"
             "WAYLAND_DISPLAY=wayland-1"
-            "PATH=/run/current-system/sw/bin"
+            "PATH=${lib.makeBinPath (with pkgs; [inotify-tools hyprland coreutils procps gnugrep util-linux])}:/run/current-system/sw/bin"
           ];
+          User = "y0usaf";
+          Group = "users";
         };
 
         path = with pkgs; [
@@ -157,7 +159,7 @@ in {
           util-linux
         ];
 
-        wantedBy = ["default.target"];
+        wantedBy = ["graphical-session.target"];
         after = ["graphical-session.target"];
         partOf = ["graphical-session.target"];
       };
