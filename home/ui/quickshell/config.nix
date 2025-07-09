@@ -25,6 +25,14 @@ in {
       ];
 
       file.xdg_config = {
+        "quickshell/qmldir".text = ''
+          WorkspaceState 1.0 WorkspaceState.qml
+          SystemMonitor 1.0 SystemMonitor.qml
+          TempDisplay 1.0 TempDisplay.qml
+          WorkspaceBar 1.0 WorkspaceBar.qml
+          WorkspaceOverview 1.0 WorkspaceOverview.qml
+        '';
+
         "quickshell/shell.qml".text = ''
           import QtQuick
           import Quickshell
