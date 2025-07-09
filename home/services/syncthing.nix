@@ -46,8 +46,7 @@ in {
         ExecStart = "${pkgs.syncthing}/bin/syncthing serve --no-browser --no-restart --logflags=0";
         Restart = "on-failure";
         RestartSec = "5s";
-        User = "y0usaf";
-        Group = "users";
+        # User/Group handled by systemd --user
         WorkingDirectory = "/home/y0usaf";
         StateDirectory = "syncthing";
         StateDirectoryMode = "0700";
