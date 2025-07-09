@@ -30,6 +30,10 @@ in {
           import Quickshell
           import Quickshell.Io
 
+          // Component imports handled by QML loader
+          import "./core"
+          import "./components"
+
           ShellRoot {
               // =====================================================================
               // CORE STATE MANAGEMENT
@@ -97,7 +101,12 @@ in {
           }
         '';
 
-        "quickshell/WorkspaceState.qml".text = ''
+        "quickshell/core/qmldir".text = ''
+          WorkspaceState 1.0 WorkspaceState.qml
+          SystemMonitor 1.0 SystemMonitor.qml
+        '';
+
+        "quickshell/core/WorkspaceState.qml".text = ''
           import QtQuick
           import Quickshell.Hyprland
           import Quickshell.Io
@@ -217,7 +226,7 @@ in {
           }
         '';
 
-        "quickshell/SystemMonitor.qml".text = ''
+        "quickshell/core/SystemMonitor.qml".text = ''
           import QtQuick
           import Quickshell.Io
 
@@ -301,7 +310,13 @@ in {
           }
         '';
 
-        "quickshell/TempDisplay.qml".text = ''
+        "quickshell/components/qmldir".text = ''
+          WorkspaceBar 1.0 WorkspaceBar.qml
+          WorkspaceOverview 1.0 WorkspaceOverview.qml
+          TempDisplay 1.0 TempDisplay.qml
+        '';
+
+        "quickshell/components/TempDisplay.qml".text = ''
           import QtQuick
 
           // Minimal temperature display component
@@ -379,7 +394,7 @@ in {
           }
         '';
 
-        "quickshell/WorkspaceBar.qml".text = ''
+        "quickshell/components/WorkspaceBar.qml".text = ''
           import QtQuick
           import Quickshell
           import Quickshell.Hyprland
@@ -520,7 +535,7 @@ in {
           }
         '';
 
-        "quickshell/WorkspaceOverview.qml".text = ''
+        "quickshell/components/WorkspaceOverview.qml".text = ''
           import QtQuick
           import Quickshell
           import Quickshell.Hyprland
