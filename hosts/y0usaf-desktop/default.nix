@@ -190,6 +190,7 @@ in {
         enable = true;
         remoteBranch = "nix-maid";
       };
+      syncthing.enable = true;
     };
     gaming = {
       core.enable = true;
