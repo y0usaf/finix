@@ -143,8 +143,6 @@
           width: 800
           height: 600
 
-          anchors.centerIn: parent
-
           Rectangle {
               anchors.fill: parent
               color: "#1e1e2e"
