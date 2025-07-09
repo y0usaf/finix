@@ -146,8 +146,6 @@ in {
             "WAYLAND_DISPLAY=wayland-1"
             "PATH=${lib.makeBinPath (with pkgs; [inotify-tools hyprland coreutils procps gnugrep util-linux])}:/run/current-system/sw/bin"
           ];
-          User = "y0usaf";
-          Group = "users";
         };
 
         path = with pkgs; [
