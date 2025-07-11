@@ -36,35 +36,14 @@ in {
           end,
         },
 
-        -- Route notifications through fidget
+        -- Route notifications through fidget (simplified)
         {
-          "rcarriga/nvim-notify",
-          event = "VeryLazy",
-          config = function()
-            -- Override vim.notify to use fidget
-            vim.notify = function(msg, level, opts)
-              local fidget = require("fidget")
-              local level_map = {
-                [vim.log.levels.ERROR] = "error",
-                [vim.log.levels.WARN] = "warn",
-                [vim.log.levels.INFO] = "info",
-                [vim.log.levels.DEBUG] = "debug",
-                [vim.log.levels.TRACE] = "trace",
-              }
-
-              fidget.notify(msg, {
-                level = level_map[level] or "info",
-                title = opts and opts.title or "Notification",
-                key = opts and opts.key,
-                on_open = opts and opts.on_open,
-                on_close = opts and opts.on_close,
-              })
-            end
-          end,
+        "rcarriga/nvim-notify",
+        enabled = false, -- disable nvim-notify, use fidget instead
         },
         {
           "Bekaboo/dropbar.nvim",
-          event = "VeryLazy",
+          event = "UIEnter",
           opts = {
             bar = {
               padding = {
@@ -89,7 +68,7 @@ in {
         -- Window management for tiling WMs
         {
           "nvim-focus/focus.nvim",
-          event = "VeryLazy",
+          event = "UIEnter",
           opts = {
             enable = true,
             commands = true,
@@ -123,7 +102,7 @@ in {
         },
         {
           "anuvyklack/windows.nvim",
-          event = "VeryLazy",
+          event = "UIEnter",
           dependencies = {
             "anuvyklack/middleclass",
           },
