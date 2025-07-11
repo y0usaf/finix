@@ -258,6 +258,11 @@ in {
               },
             },
           },
+          config = function(_, opts)
+            require("fidget").setup(opts)
+            -- Route vim.notify to fidget
+            vim.notify = require("fidget").notify
+          end,
         },
         {
           "RRethy/vim-illuminate",
