@@ -184,23 +184,23 @@ in {
             require("mini.animate").setup({
               cursor = {
                 enable = true,
-                timing = function() return 100 end,
+                timing = function() return 25 end,
               },
               scroll = {
                 enable = true,
-                timing = function() return 150 end,
+                timing = function() return 50 end,
               },
               resize = {
                 enable = true,
-                timing = function() return 100 end,
+                timing = function() return 25 end,
               },
               open = {
                 enable = true,
-                timing = function() return 150 end,
+                timing = function() return 50 end,
               },
               close = {
                 enable = true,
-                timing = function() return 150 end,
+                timing = function() return 50 end,
               },
             })
           end,
