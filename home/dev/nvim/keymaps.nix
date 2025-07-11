@@ -34,13 +34,17 @@ in {
       keymap("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
       keymap("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 
-      -- Flash
-      keymap({ "n", "x", "o" }, "s", function() require("flash").jump() end, { desc = "Flash" })
-      keymap({ "n", "x", "o" }, "S", function() require("flash").treesitter() end, { desc = "Flash Treesitter" })
+      -- Visual enhancements
+      keymap("n", "<leader>ut", "<cmd>Twilight<cr>", { desc = "Toggle twilight" })
+      keymap("n", "zR", function() require("ufo").openAllFolds() end, { desc = "Open all folds" })
+      keymap("n", "zM", function() require("ufo").closeAllFolds() end, { desc = "Close all folds" })
+      keymap("n", "zr", function() require("ufo").openFoldsExceptKinds() end, { desc = "Open folds except kinds" })
+      keymap("n", "zm", function() require("ufo").closeFoldsWith() end, { desc = "Close folds with" })
+      keymap("n", "zp", function() require("ufo").peekFoldedLinesUnderCursor() end, { desc = "Peek folded lines" })
 
-      -- Diagnostics
-      keymap("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Toggle diagnostics" })
-      keymap("n", "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = "Buffer diagnostics" })
+      -- Diagnostics (using telescope instead of trouble)
+      keymap("n", "<leader>xx", builtin.diagnostics, { desc = "Diagnostics" })
+      keymap("n", "<leader>xd", function() builtin.diagnostics({ bufnr = 0 }) end, { desc = "Buffer diagnostics" })
 
       -- Leetcode
       keymap("n", "<leader>lq", "<cmd>Leet<cr>", { desc = "Leetcode menu" })
