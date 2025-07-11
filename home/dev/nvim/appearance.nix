@@ -21,6 +21,16 @@ in {
               italic_comments = true,
               borderless_pickers = true,
               lualine_style = "default",
+              theme = {
+                variant = "default",
+                highlights = {
+                  -- Enhanced visual feedback
+                  CursorLine = { bg = "#1e1e2e" },
+                  Visual = { bg = "#313244" },
+                  Search = { bg = "#f9e2af", fg = "#11111b" },
+                  IncSearch = { bg = "#fab387", fg = "#11111b" },
+                },
+              },
             })
             vim.cmd.colorscheme("cyberdream")
           end,

@@ -32,8 +32,8 @@ in {
               vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
             end
 
-            -- Setup servers
-            local servers = { "lua_ls", "nil_ls", "pyright", "rust_analyzer", "ts_ls", "bashls", "marksman" }
+            -- Setup servers (minimal essential set)
+            local servers = { "lua_ls", "nil_ls", "pyright" }
             for _, server in ipairs(servers) do
               lspconfig[server].setup({
                 capabilities = capabilities,
@@ -153,30 +153,99 @@ in {
         },
 
         -- Utilities
+        { "numToStr/Comment.nvim", event = "VeryLazy", opts = {} },
+        { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
+
+        -- Visual enhancements for ADHD focus
         {
-          "folke/flash.nvim",
+          "NvChad/nvim-colorizer.lua",
           event = "VeryLazy",
-          ---@type Flash.Config
           opts = {
-            modes = {
-              char = {
-                autohide = true,
+            user_default_options = {
+              RGB = true,
+              RRGGBB = true,
+              names = true,
+              RRGGBBAA = true,
+              css = true,
+              css_fn = true,
+              mode = "background",
+              tailwind = true,
+              sass = { enable = true },
+            },
+          },
+        },
+        {
+          "utilyre/barbecue.nvim",
+          event = "VeryLazy",
+          dependencies = {
+            "SmiteshP/nvim-navic",
+            "nvim-tree/nvim-web-devicons",
+          },
+          opts = {
+            theme = "cyberdream",
+            show_dirname = false,
+            show_basename = false,
+          },
+        },
+        {
+          "echasnovski/mini.animate",
+          event = "VeryLazy",
+          opts = {
+            cursor = { timing = { duration = 100, unit = "total" } },
+            scroll = { timing = { duration = 150, unit = "total" } },
+            resize = { timing = { duration = 100, unit = "total" } },
+            open = { timing = { duration = 150, unit = "total" } },
+            close = { timing = { duration = 150, unit = "total" } },
+          },
+        },
+        {
+          "kevinhwang91/nvim-ufo",
+          event = "VeryLazy",
+          dependencies = "kevinhwang91/promise-async",
+          opts = {
+            provider_selector = function()
+              return { "treesitter", "indent" }
+            end,
+          },
+          init = function()
+            vim.o.foldcolumn = "1"
+            vim.o.foldlevel = 99
+            vim.o.foldlevelstart = 99
+            vim.o.foldenable = true
+          end,
+        },
+        {
+          "j-hui/fidget.nvim",
+          event = "LspAttach",
+          opts = {
+            notification = {
+              window = {
+                winblend = 0,
+                border = "rounded",
+              },
+            },
+            progress = {
+              display = {
+                render_limit = 3,
+                done_ttl = 2,
               },
             },
           },
         },
-        { "numToStr/Comment.nvim", event = "VeryLazy", opts = {} },
-        { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
-        { "folke/which-key.nvim", event = "VeryLazy", opts = {} },
-
-        -- Diagnostics
         {
-          "folke/trouble.nvim",
-          cmd = { "Trouble", "TroubleToggle" },
-          opts = { use_diagnostic_signs = true },
+          "folke/twilight.nvim",
+          cmd = "Twilight",
+          opts = {
+            dimming = {
+              alpha = 0.25,
+              color = { "Normal", "#ffffff" },
+            },
+            context = 15,
+            treesitter = true,
+          },
         },
 
-        -- Leetcode
+        -- Leetcode (kept for motivation)
         {
           "kawre/leetcode.nvim",
           cmd = "Leet",
