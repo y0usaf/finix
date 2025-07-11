@@ -160,19 +160,22 @@ in {
         {
           "NvChad/nvim-colorizer.lua",
           event = "VeryLazy",
-          opts = {
-            user_default_options = {
-              RGB = true,
-              RRGGBB = true,
-              names = true,
-              RRGGBBAA = true,
-              css = true,
-              css_fn = true,
-              mode = "background",
-              tailwind = true,
-              sass = { enable = true },
-            },
-          },
+          config = function()
+            require("colorizer").setup({
+              filetypes = { "*" },
+              user_default_options = {
+                RGB = true,
+                RRGGBB = true,
+                names = true,
+                RRGGBBAA = true,
+                css = true,
+                css_fn = true,
+                mode = "background",
+                tailwind = true,
+                sass = { enable = true },
+              },
+            })
+          end,
         },
         {
           "utilyre/barbecue.nvim",
@@ -190,28 +193,30 @@ in {
         {
           "echasnovski/mini.animate",
           event = "VeryLazy",
-          opts = {
-            cursor = {
-              enable = true,
-              timing = function() return 100 end,
-            },
-            scroll = {
-              enable = true,
-              timing = function() return 150 end,
-            },
-            resize = {
-              enable = true,
-              timing = function() return 100 end,
-            },
-            open = {
-              enable = true,
-              timing = function() return 150 end,
-            },
-            close = {
-              enable = true,
-              timing = function() return 150 end,
-            },
-          },
+          config = function()
+            require("mini.animate").setup({
+              cursor = {
+                enable = true,
+                timing = function() return 100 end,
+              },
+              scroll = {
+                enable = true,
+                timing = function() return 150 end,
+              },
+              resize = {
+                enable = true,
+                timing = function() return 100 end,
+              },
+              open = {
+                enable = true,
+                timing = function() return 150 end,
+              },
+              close = {
+                enable = true,
+                timing = function() return 150 end,
+              },
+            })
+          end,
         },
         {
           "kevinhwang91/nvim-ufo",
