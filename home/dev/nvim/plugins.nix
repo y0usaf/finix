@@ -191,11 +191,26 @@ in {
           "echasnovski/mini.animate",
           event = "VeryLazy",
           opts = {
-            cursor = { timing = { duration = 100, unit = "total" } },
-            scroll = { timing = { duration = 150, unit = "total" } },
-            resize = { timing = { duration = 100, unit = "total" } },
-            open = { timing = { duration = 150, unit = "total" } },
-            close = { timing = { duration = 150, unit = "total" } },
+            cursor = {
+              enable = true,
+              timing = function() return 100 end,
+            },
+            scroll = {
+              enable = true,
+              timing = function() return 150 end,
+            },
+            resize = {
+              enable = true,
+              timing = function() return 100 end,
+            },
+            open = {
+              enable = true,
+              timing = function() return 150 end,
+            },
+            close = {
+              enable = true,
+              timing = function() return 150 end,
+            },
           },
         },
         {
