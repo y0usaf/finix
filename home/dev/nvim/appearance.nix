@@ -36,32 +36,114 @@ in {
           end,
         },
 
-        -- UI
+        -- Route notifications through fidget
         {
-          "folke/noice.nvim",
+          "rcarriga/nvim-notify",
+          event = "VeryLazy",
+          config = function()
+            -- Override vim.notify to use fidget
+            vim.notify = function(msg, level, opts)
+              local fidget = require("fidget")
+              local level_map = {
+                [vim.log.levels.ERROR] = "error",
+                [vim.log.levels.WARN] = "warn",
+                [vim.log.levels.INFO] = "info",
+                [vim.log.levels.DEBUG] = "debug",
+                [vim.log.levels.TRACE] = "trace",
+              }
+
+              fidget.notify(msg, {
+                level = level_map[level] or "info",
+                title = opts and opts.title or "Notification",
+                key = opts and opts.key,
+                on_open = opts and opts.on_open,
+                on_close = opts and opts.on_close,
+              })
+            end
+          end,
+        },
+        {
+          "Bekaboo/dropbar.nvim",
           event = "VeryLazy",
           opts = {
-            presets = {
-              bottom_search = true,
-              command_palette = true,
-              long_message_to_split = true,
-              inc_rename = false,
-              lsp_doc_border = false,
+            bar = {
+              padding = {
+                left = 1,
+                right = 1,
+              },
             },
-            views = {
-              mini = {
-                win_options = {
-                  winblend = 0,
-                },
+            menu = {
+              preview = false,
+            },
+            sources = {
+              path = {
+                relative_to = function()
+                  return vim.fn.getcwd()
+                end,
               },
             },
           },
-          dependencies = {
-            "MunifTanjim/nui.nvim",
-            "rcarriga/nvim-notify",
-          },
         },
         { "stevearc/dressing.nvim", event = "VeryLazy", opts = {} },
+
+        -- Window management for tiling WMs
+        {
+          "nvim-focus/focus.nvim",
+          event = "VeryLazy",
+          opts = {
+            enable = true,
+            commands = true,
+            autoresize = {
+              enable = true,
+              width = 0,
+              height = 0,
+              minwidth = 0,
+              minheight = 0,
+              height_quickfix = 10,
+            },
+            split = {
+              bufnew = false,
+              tmux = false,
+            },
+            ui = {
+              number = false,
+              relativenumber = false,
+              hybridnumber = false,
+              absolutenumber_unfocussed = false,
+              cursorline = true,
+              cursorcolumn = false,
+              colorcolumn = {
+                enable = false,
+                list = "+1",
+              },
+              signcolumn = true,
+              winhighlight = false,
+            },
+          },
+        },
+        {
+          "anuvyklack/windows.nvim",
+          event = "VeryLazy",
+          dependencies = {
+            "anuvyklack/middleclass",
+          },
+          opts = {
+            autowidth = {
+              enable = true,
+              winwidth = 5,
+              filetype = {
+                help = 2,
+              },
+            },
+            ignore = {
+              buftype = { "quickfix" },
+              filetype = { "NvimTree", "neo-tree", "undotree", "gundo" },
+            },
+          },
+          config = function(_, opts)
+            require("windows").setup(opts)
+          end,
+        },
 
         -- File management UI
         {

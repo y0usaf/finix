@@ -205,12 +205,50 @@ in {
         },
         {
           "j-hui/fidget.nvim",
-          event = "LspAttach",
+          event = "VeryLazy",
           opts = {
             notification = {
               window = {
                 winblend = 0,
                 border = "rounded",
+                max_width = 0,
+                max_height = 0,
+              },
+              view = {
+                stack_upwards = true,
+                icon_separator = " ",
+                group_separator = "---",
+                group_separator_hl = "Comment",
+              },
+              configs = {
+                default = {
+                  name = "Notification",
+                  ttl = 5,
+                  group_key = nil,
+                  icon = "💬",
+                  annote = nil,
+                  priority = 30,
+                  skip_history = false,
+                  update_hook = nil,
+                },
+                error = {
+                  name = "Error",
+                  icon = "❌",
+                  ttl = 8,
+                  priority = 100,
+                },
+                warn = {
+                  name = "Warning",
+                  icon = "⚠️",
+                  ttl = 6,
+                  priority = 80,
+                },
+                info = {
+                  name = "Info",
+                  icon = "ℹ️",
+                  ttl = 4,
+                  priority = 50,
+                },
               },
             },
             progress = {
