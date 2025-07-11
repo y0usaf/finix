@@ -178,30 +178,12 @@ in {
           },
         },
         {
-          "echasnovski/mini.animate",
+          "lukas-reineke/indent-blankline.nvim",
           event = "VeryLazy",
           config = function()
-            require("mini.animate").setup({
-              cursor = {
-                enable = true,
-                timing = function() return 25 end,
-              },
-              scroll = {
-                enable = true,
-                timing = function() return 50 end,
-              },
-              resize = {
-                enable = true,
-                timing = function() return 25 end,
-              },
-              open = {
-                enable = true,
-                timing = function() return 50 end,
-              },
-              close = {
-                enable = true,
-                timing = function() return 50 end,
-              },
+            require("ibl").setup({
+              indent = { char = "▏" },
+              scope = { enabled = false },
             })
           end,
         },
@@ -238,6 +220,19 @@ in {
               },
             },
           },
+        },
+        {
+          "RRethy/vim-illuminate",
+          event = "VeryLazy",
+          config = function()
+            require("illuminate").configure({
+              delay = 100,
+              large_file_cutoff = 2000,
+              large_file_overrides = {
+                providers = { "lsp" },
+              },
+            })
+          end,
         },
         {
           "folke/twilight.nvim",
