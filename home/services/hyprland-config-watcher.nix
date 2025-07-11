@@ -157,9 +157,9 @@ in {
           util-linux
         ];
 
-        wantedBy = ["graphical-session.target"];
-        after = ["graphical-session.target"];
-        partOf = ["graphical-session.target"];
+        wantedBy = ["default.target"];
+        after = ["default.target"];
+        partOf = ["default.target"];
       };
     };
   };
