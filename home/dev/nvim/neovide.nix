@@ -9,8 +9,21 @@
   inherit (config.shared) username;
 in {
   config = lib.mkIf (cfg.enable && cfg.neovide) {
-    users.users.${username}.maid.packages = with pkgs; [
-      neovide
-    ];
+    users.users.${username}.maid = {
+      packages = with pkgs; [
+        neovide
+      ];
+
+      file.xdg_config."neovide/config.toml".text = ''
+        [font]
+        size = 14
+
+        [window]
+        transparency = 0.9
+
+        [input]
+        ime = true
+      '';
+    };
   };
 }
