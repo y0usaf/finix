@@ -150,7 +150,7 @@ in {
       mcp.enable = true;
       nvim = {
         enable = true;
-        neovide = false;
+        neovide = true;
       };
     };
     shell = {
