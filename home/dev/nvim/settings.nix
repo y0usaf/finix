@@ -1,4 +1,3 @@
-# Basic Neovim settings and bootstrap module
 {
   config,
   lib,
@@ -10,11 +9,11 @@ in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid.file = {
       xdg_config."nvim/init.lua".text = ''
-        -- Leader keys
+
         vim.g.mapleader = " "
         vim.g.maplocalleader = "\\"
 
-        -- Core settings
+
         vim.opt.number = true
         vim.opt.relativenumber = true
         vim.opt.signcolumn = "yes"
@@ -46,7 +45,7 @@ in {
         vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
         vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
-        -- Bootstrap lazy.nvim
+
         local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
         if not vim.loop.fs_stat(lazypath) then
           vim.fn.system({
@@ -60,7 +59,7 @@ in {
         end
         vim.opt.rtp:prepend(lazypath)
 
-        -- Load plugins
+
         local plugins = require("plugins")
         local appearance_plugins = require("plugins_appearance")
         for _, plugin in ipairs(appearance_plugins) do
@@ -71,7 +70,7 @@ in {
           ui = { border = "rounded" },
         })
 
-        -- Auto-install missing parsers
+
         vim.api.nvim_create_autocmd("FileType", {
           callback = function()
             local parsers = require("nvim-treesitter.parsers")
