@@ -1,4 +1,3 @@
-# All Neovim plugins configuration module
 {
   config,
   lib,
@@ -10,7 +9,7 @@ in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid.file.xdg_config."nvim/lua/plugins.lua".text = ''
       return {
-        -- LSP
+
         {
           "neovim/nvim-lspconfig",
           event = { "BufReadPre", "BufNewFile" },
@@ -32,7 +31,7 @@ in {
               vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
             end
 
-            -- Setup servers (minimal essential set)
+
             local servers = { "lua_ls", "nil_ls", "pyright" }
             for _, server in ipairs(servers) do
               lspconfig[server].setup({
@@ -46,7 +45,7 @@ in {
           end,
         },
 
-        -- Completion
+
         {
           "hrsh7th/nvim-cmp",
           event = "InsertEnter",
@@ -86,11 +85,11 @@ in {
                 end, { "i", "s" }),
               }),
               sources = cmp.config.sources({
-                { name = "nvim_lsp" },
-                { name = "luasnip" },
+                { name = "nvim_lsp", priority = 1000 },
+                { name = "luasnip", priority = 750 },
               }, {
-                { name = "buffer" },
-                { name = "path" },
+                { name = "buffer", priority = 500, max_item_count = 5 },
+                { name = "path", priority = 250, max_item_count = 3 },
               }),
               formatting = {
                 format = lspkind.cmp_format({
@@ -103,7 +102,7 @@ in {
           end,
         },
 
-        -- File management
+
         {
           "nvim-telescope/telescope.nvim",
           event = "VeryLazy",
@@ -134,7 +133,7 @@ in {
           end,
         },
 
-        -- Syntax highlighting
+
         {
           "nvim-treesitter/nvim-treesitter",
           build = ":TSUpdate",
@@ -152,11 +151,11 @@ in {
           end,
         },
 
-        -- Utilities
+
         { "numToStr/Comment.nvim", event = "VeryLazy", opts = {} },
         { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
 
-        -- Visual enhancements for ADHD focus
+
         {
           "NvChad/nvim-colorizer.lua",
           event = "VeryLazy",
@@ -165,28 +164,8 @@ in {
           end,
         },
         {
-          "utilyre/barbecue.nvim",
-          event = "VeryLazy",
-          dependencies = {
-            "SmiteshP/nvim-navic",
-            "nvim-tree/nvim-web-devicons",
-          },
-          opts = {
-            theme = "cyberdream",
-            show_dirname = false,
-            show_basename = false,
-          },
-        },
-        {
-          "lukas-reineke/indent-blankline.nvim",
-          event = "VeryLazy",
-          config = function()
-            require("ibl").setup({
-              indent = { char = "▏" },
-              scope = { enabled = false },
-            })
-          end,
-        },
+
+
         {
           "kevinhwang91/nvim-ufo",
           event = "VeryLazy",
@@ -260,7 +239,7 @@ in {
           },
           config = function(_, opts)
             require("fidget").setup(opts)
-            -- Route vim.notify to fidget
+
             vim.notify = require("fidget").notify
           end,
         },
@@ -290,7 +269,7 @@ in {
           },
         },
 
-        -- Leetcode (kept for motivation)
+
         {
           "kawre/leetcode.nvim",
           cmd = "Leet",

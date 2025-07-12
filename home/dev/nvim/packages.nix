@@ -1,4 +1,3 @@
-# Neovim packages module
 {
   config,
   lib,
@@ -23,17 +22,14 @@ in {
         ]))
       pkgs.neovim
 
-      # LSP servers (minimal essential set)
       pkgs.lua-language-server
       pkgs.nil
       pkgs.pyright
 
-      # Formatters (essential only)
       pkgs.stylua
       pkgs.alejandra
       pkgs.black
 
-      # Leetcode dependencies
       pkgs.curl
       pkgs.jq
     ];
