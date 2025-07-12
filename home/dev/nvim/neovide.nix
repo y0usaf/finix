@@ -16,13 +16,14 @@ in {
 
       file.xdg_config."neovide/config.toml".text = ''
         [font]
+        normal = ["FiraCode Nerd Font", "monospace"]
         size = 14
 
         [window]
         transparency = 0.9
 
         [input]
-        ime = true
+          ime = true
       '';
     };
   };
