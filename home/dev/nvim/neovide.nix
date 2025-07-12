@@ -16,14 +16,14 @@ in {
 
       file.xdg_config."neovide/config.toml".text = ''
         [font]
-        normal = []
+        normal = ["Fast_Mono"]
         size = 14.0
 
         [window]
         transparency = 0.9
 
         [input]
-          ime = true
+        ime = true
       '';
     };
   };
