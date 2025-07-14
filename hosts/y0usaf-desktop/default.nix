@@ -49,6 +49,23 @@ in {
         cuda.enable = true;
       };
       amdgpu.enable = false;
+      display.outputs = {
+        "DP-4" = {
+          mode = "5120x1440@239.76";
+        };
+        "DP-3" = {
+          mode = "5120x1440@239.76";
+        };
+        "DP-2" = {
+          mode = "5120x1440@239.76";
+        };
+        "DP-1" = {
+          mode = "5120x1440@239.76";
+        };
+        "eDP-1" = {
+          mode = "1920x1080@300.00";
+        };
+      };
     };
   };
 
