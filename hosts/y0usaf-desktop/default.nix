@@ -165,6 +165,7 @@ in {
       cursor-ide.enable = true;
       claude-code.enable = true;
       mcp.enable = true;
+      docker.enable = true;
       nvim = {
         enable = true;
         neovide = false;
