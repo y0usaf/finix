@@ -9,7 +9,7 @@ in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid.file.xdg_config."nvim/lua/plugins.lua".text = ''
       return {
-
+        -- LSP
         {
           "neovim/nvim-lspconfig",
           event = { "BufReadPre", "BufNewFile" },
@@ -108,28 +108,11 @@ in {
           event = "VeryLazy",
           dependencies = {
             "nvim-lua/plenary.nvim",
-            {
-              "nvim-telescope/telescope-fzf-native.nvim",
-              build = "make",
-            },
+            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
           },
           config = function()
-            local telescope = require("telescope")
-            telescope.setup({
-              defaults = {
-                path_display = { "truncate" },
-                mappings = {
-                  i = {
-                    ["<C-k>"] = "move_selection_previous",
-                    ["<C-j>"] = "move_selection_next",
-                  },
-                },
-                preview = {
-                  treesitter = false,
-                },
-              },
-            })
-            telescope.load_extension("fzf")
+            require("telescope").setup({})
+            require("telescope").load_extension("fzf")
           end,
         },
 
@@ -139,16 +122,9 @@ in {
           build = ":TSUpdate",
           event = { "BufReadPost", "BufNewFile" },
           opts = {
-            highlight = { enable = true, additional_vim_regex_highlighting = false },
+            highlight = { enable = true },
             indent = { enable = true },
-            ensure_installed = {
-              "lua", "nix", "python", "rust", "typescript", "javascript",
-              "bash", "markdown", "json", "yaml", "toml"
-            },
           },
-          config = function(_, opts)
-            require("nvim-treesitter.configs").setup(opts)
-          end,
         },
 
 
@@ -156,22 +132,12 @@ in {
         { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
 
 
-        {
-          "NvChad/nvim-colorizer.lua",
-          event = "VeryLazy",
-          config = function()
-            require("colorizer").setup()
-          end,
-        },
+
         {
           "kevinhwang91/nvim-ufo",
           event = "VeryLazy",
           dependencies = "kevinhwang91/promise-async",
-          opts = {
-            provider_selector = function()
-              return { "treesitter", "indent" }
-            end,
-          },
+          opts = {},
           init = function()
             vim.o.foldcolumn = "1"
             vim.o.foldlevel = 99
