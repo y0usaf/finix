@@ -29,6 +29,13 @@ in {
         claude-code
         gemini-cli
       ];
+
+      ###########################################################################
+      # Global Claude Configuration
+      ###########################################################################
+      file.home = {
+        ".claude/CLAUDE.md".text = builtins.readFile ../../CLAUDE.md;
+      };
     };
   };
 }
