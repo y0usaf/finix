@@ -61,15 +61,15 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
-    # System Activation Script for writable .claude.json
+    # System Activation Script for writable Claude Code settings
     ###########################################################################
     system.activationScripts.write-claude-config = ''
-      mkdir -p /home/y0usaf
-      cat > /home/y0usaf/.claude.json << 'EOF'
+      mkdir -p /home/y0usaf/.claude-code
+      cat > /home/y0usaf/.claude-code/settings.json << 'EOF'
       ${builtins.toJSON mcpServersConfig}
       EOF
-      chown y0usaf:users /home/y0usaf/.claude.json 2>/dev/null || true
-      chmod 644 /home/y0usaf/.claude.json
+      chown y0usaf:users /home/y0usaf/.claude-code/settings.json 2>/dev/null || true
+      chmod 644 /home/y0usaf/.claude-code/settings.json
     '';
     ###########################################################################
     # Maid Configuration
