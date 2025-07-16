@@ -25,9 +25,7 @@ in
     # Quickshell Keybindings
     ###########################################################################
     bind = lib.optionals quickshellEnabled [
-      # Toggle workspace overview with Super+Tab
-      "$mod, TAB, exec, quickshell ipc call overview toggle"
-      # Alt+Tab to toggle workspace indicators (like AGS)
+      # Alt+Tab to toggle workspace indicators
       "$mod2, TAB, exec, quickshell ipc call workspaces toggle"
     ];
   }
