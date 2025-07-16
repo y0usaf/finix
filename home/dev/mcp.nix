@@ -119,5 +119,41 @@ in {
     users.users.y0usaf.maid.systemd.tmpfiles.dynamicRules = [
       "d {{home}}/.local/share/npm/lib/node_modules 0755 {{user}} {{group}} - -"
     ];
+
+    ###########################################################################
+    # System Activation Script - Use Claude CLI to add MCP servers
+    ###########################################################################
+    system.activationScripts.setupClaudeMcp = {
+      text = ''
+        echo "Setting up Claude MCP servers via CLI..."
+        
+        # Function to add MCP server if not already present
+        add_mcp_server() {
+          local name="$1"
+          local type="$2"
+          local command="$3"
+          shift 3
+          local args="$@"
+          
+          # Check if server already exists
+          if ! sudo -u y0usaf ${pkgs.claude-code}/bin/claude mcp list | grep -q "$name"; then
+            echo "Adding MCP server: $name"
+            sudo -u y0usaf ${pkgs.claude-code}/bin/claude mcp add "$name" "$type" "$command" $args
+          else
+            echo "MCP server already exists: $name"
+          fi
+        }
+        
+        # Add all MCP servers
+        add_mcp_server "Filesystem" "stdio" "npx" "-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"
+        add_mcp_server "Nixos MCP" "stdio" "uvx" "mcp-nixos"
+        add_mcp_server "sequential-thinking" "stdio" "npx" "-y" "@modelcontextprotocol/server-sequential-thinking"
+        add_mcp_server "GitHub Repo MCP" "stdio" "npx" "-y" "github-repo-mcp"
+        add_mcp_server "Gemini MCP" "stdio" "npx" "-y" "gemini-mcp-tool"
+        
+        echo "Claude MCP servers setup complete"
+      '';
+      deps = [];
+    };
   };
 }
