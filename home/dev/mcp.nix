@@ -48,6 +48,40 @@
       };
     };
   };
+
+  # Claude Code specific format (just the servers, no wrapper)
+  claudeCodeServers = {
+    "Filesystem" = {
+      type = "stdio";
+      command = "npx";
+      args = ["-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"];
+      env = {};
+    };
+    "Nixos MCP" = {
+      type = "stdio";
+      command = "uvx";
+      args = ["mcp-nixos"];
+      env = {};
+    };
+    "sequential-thinking" = {
+      type = "stdio";
+      command = "npx";
+      args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
+      env = {};
+    };
+    "GitHub Repo MCP" = {
+      type = "stdio";
+      command = "npx";
+      args = ["-y" "github-repo-mcp"];
+      env = {};
+    };
+    "Gemini MCP" = {
+      type = "stdio";
+      command = "npx";
+      args = ["-y" "gemini-mcp-tool"];
+      env = {};
+    };
+  };
 in {
   ###########################################################################
   # Module Options
@@ -75,7 +109,7 @@ in {
       file.home = {
         ".cursor/mcp.json".text = builtins.toJSON mcpServersConfig;
         ".claude/mcp_config.json".text = builtins.toJSON mcpServersConfig;
-        ".claude/mcp_servers.json".text = builtins.toJSON mcpServersConfig;
+        ".claude/mcp_servers.json".text = builtins.toJSON claudeCodeServers;
       };
     };
 
