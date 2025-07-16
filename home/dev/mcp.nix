@@ -136,9 +136,9 @@ in {
           local args="$@"
           
           # Check if server already exists
-          if ! sudo -u y0usaf ${pkgs.claude-code}/bin/claude mcp list | grep -q "$name"; then
+          if ! runuser -u y0usaf -- ${pkgs.claude-code}/bin/claude mcp list | grep -q "$name"; then
             echo "Adding MCP server: $name"
-            sudo -u y0usaf ${pkgs.claude-code}/bin/claude mcp add "$name" "$type" "$command" $args
+            runuser -u y0usaf -- ${pkgs.claude-code}/bin/claude mcp add "$name" "$type" "$command" $args
           else
             echo "MCP server already exists: $name"
           fi
