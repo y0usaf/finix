@@ -40,6 +40,12 @@
         args = ["-y" "github-repo-mcp"];
         env = {};
       };
+      "Gemini MCP" = {
+        type = "stdio";
+        command = "npx";
+        args = ["-y" "gemini-mcp-tool"];
+        env = {};
+      };
     };
   };
 in {
@@ -55,6 +61,17 @@ in {
   ###########################################################################
   config = lib.mkIf cfg.enable {
     ###########################################################################
+    # System Activation Script for writable .claude.json
+    ###########################################################################
+    system.activationScripts.write-claude-config = ''
+      mkdir -p /home/y0usaf
+      cat > /home/y0usaf/.claude.json << 'EOF'
+      ${builtins.toJSON mcpServersConfig}
+      EOF
+      chown y0usaf:users /home/y0usaf/.claude.json 2>/dev/null || true
+      chmod 644 /home/y0usaf/.claude.json
+    '';
+    ###########################################################################
     # Maid Configuration
     ###########################################################################
     users.users.y0usaf.maid = {
@@ -69,7 +86,6 @@ in {
       file.home = {
         ".cursor/mcp.json".text = builtins.toJSON mcpServersConfig;
         ".claude/mcp_config.json".text = builtins.toJSON mcpServersConfig;
-        ".claude.json".text = builtins.toJSON mcpServersConfig;
       };
     };
 
