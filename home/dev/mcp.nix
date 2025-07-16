@@ -137,13 +137,13 @@ in {
           # Check if server already exists
           if ! runuser -u y0usaf -- ${pkgs.claude-code}/bin/claude mcp list | grep -q "$name"; then
             echo "Adding MCP server: $name"
-            runuser -u y0usaf -- ${pkgs.claude-code}/bin/claude mcp add "$name" "$command" $args
+            runuser -u y0usaf -- ${pkgs.claude-code}/bin/claude mcp add --scope user "$name" "$command" $args
           else
             echo "MCP server already exists: $name"
           fi
         }
         
-        # Add all MCP servers
+        # Add all MCP servers to user scope for global access
         add_mcp_server "Filesystem" "npx" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"
         add_mcp_server "sequential-thinking" "npx" "@modelcontextprotocol/server-sequential-thinking"
         add_mcp_server "GitHub Repo MCP" "npx" "github-repo-mcp"
