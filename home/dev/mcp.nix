@@ -144,10 +144,10 @@ in {
         }
         
         # Add all MCP servers
-        add_mcp_server "Filesystem" "npx" "-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"
-        add_mcp_server "sequential-thinking" "npx" "-y" "@modelcontextprotocol/server-sequential-thinking"
-        add_mcp_server "GitHub Repo MCP" "npx" "-y" "github-repo-mcp"
-        add_mcp_server "Gemini MCP" "npx" "-y" "gemini-mcp-tool"
+        add_mcp_server "Filesystem" "npx" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"
+        add_mcp_server "sequential-thinking" "npx" "@modelcontextprotocol/server-sequential-thinking"
+        add_mcp_server "GitHub Repo MCP" "npx" "github-repo-mcp"
+        add_mcp_server "Gemini MCP" "npx" "gemini-mcp-tool"
         
         echo "Claude MCP servers setup complete"
       '';
