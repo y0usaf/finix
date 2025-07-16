@@ -17,20 +17,28 @@
   mcpServersConfig = {
     mcpServers = {
       "Filesystem" = {
+        type = "stdio";
         command = "npx";
-        args = ["-y" "@modelcontextprotocol/server-filesystem" "~"];
+        args = ["-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"];
+        env = {};
       };
       "Nixos MCP" = {
+        type = "stdio";
         command = "uvx";
         args = ["mcp-nixos"];
+        env = {};
       };
       "sequential-thinking" = {
+        type = "stdio";
         command = "npx";
         args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
+        env = {};
       };
       "GitHub Repo MCP" = {
+        type = "stdio";
         command = "npx";
         args = ["-y" "github-repo-mcp"];
+        env = {};
       };
     };
   };
@@ -61,6 +69,7 @@ in {
       file.home = {
         ".cursor/mcp.json".text = builtins.toJSON mcpServersConfig;
         ".claude/mcp_config.json".text = builtins.toJSON mcpServersConfig;
+        ".claude.json".text = builtins.toJSON mcpServersConfig;
       };
     };
 
