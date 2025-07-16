@@ -1,6 +1,6 @@
 ###############################################################################
-# Claude Code Development Environment (Maid Version)
-# Provides Claude Code integration and development tools
+# Claude Code Development Module (Maid Version)
+# Configures Claude Code and related tools using nix-maid
 ###############################################################################
 {
   config,
@@ -14,7 +14,7 @@ in {
   # Module Options
   ###########################################################################
   options.home.dev.claude-code = {
-    enable = lib.mkEnableOption "claude code development environment";
+    enable = lib.mkEnableOption "Claude Code development tools";
   };
 
   ###########################################################################
@@ -24,8 +24,11 @@ in {
     ###########################################################################
     # Maid Configuration
     ###########################################################################
-    users.users.y0usaf.maid.packages = with pkgs; [
-      claude-code
-    ];
+    users.users.y0usaf.maid = {
+      packages = with pkgs; [
+        claude-code
+        gemini-cli
+      ];
+    };
   };
 }
