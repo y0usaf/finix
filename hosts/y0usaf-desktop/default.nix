@@ -206,7 +206,7 @@ in {
       formatNix.enable = true;
       nixosGitSync = {
         enable = true;
-        remoteBranch = "nix-maid";
+        remoteBranch = "main";
       };
       syncthing.enable = true;
     };
