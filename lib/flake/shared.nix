@@ -5,7 +5,6 @@
 {
   lib,
   pkgs,
-  helpers,
   hostsDir ? ../../hosts,
   inputs ? null,
 }: let
@@ -56,7 +55,7 @@
     // {
       hostSystem = systemConfigs.${hostname};
       hostHome = homeConfigs.${hostname};
-      inherit helpers hostname;
+      inherit hostname;
     };
   # Simplified shared module function - just imports options and sets config
   mkSharedModule = {
