@@ -1,7 +1,6 @@
 #═══════════════════════════ 🔧 DIRECTORIES MODULE 🔧 ═══════════════════════════#
 {lib, ...}: let
-  helpers = import ../../lib/helpers/module-defs.nix {inherit lib;};
-  inherit (helpers) t mkOpt dirModule;
+  inherit (lib) t mkOpt dirModule;
 in {
   options.home.directories = {
     flake = mkOpt dirModule "The directory where the flake lives.";
