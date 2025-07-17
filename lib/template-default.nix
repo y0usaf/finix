@@ -1,1 +1,1 @@
-{helpers, ...}: {imports = helpers.importDirs ./.;}
+{lib, ...}: {imports = lib.importDirs ./.;}

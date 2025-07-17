@@ -5,11 +5,10 @@
 {
   lib,
   pkgs,
-  helpers,
   hostsDir ? ../../hosts,
 }: let
   shared = import ./shared.nix {
-    inherit lib pkgs helpers hostsDir;
+    inherit lib pkgs hostsDir;
     inputs = null;
   };
 in {
@@ -19,7 +18,7 @@ in {
     system,
     commonSpecialArgs,
   }: let
-    sharedWithInputs = import ./shared.nix {inherit lib pkgs helpers hostsDir inputs;};
+    sharedWithInputs = import ./shared.nix {inherit lib pkgs hostsDir inputs;};
     maidIntegration = import ./maid.nix {inherit hostsDir;};
   in
     builtins.listToAttrs (map
@@ -32,6 +31,7 @@ in {
             // {
               inherit hostname;
               inherit hostsDir;
+              lib = pkgs.lib;  # Use the extended lib with our overlay
             };
           modules =
             [
