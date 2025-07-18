@@ -5,16 +5,16 @@
 ###############################################################################
 {
   lib,
-  hostHome,
+  hostSystem,
   ...
 }: {
   config = {
     ###########################################################################
     # Android Virtualization
-    # Waydroid Android emulation
+    # Waydroid Android emulation - enabled based on host capability
     ###########################################################################
-    virtualisation.waydroid = lib.mkIf (hostHome.programs.android.enable or false) {
-      enable = true; # Enable Waydroid to run Android apps on NixOS.
+    virtualisation.waydroid = lib.mkIf (hostSystem.services.waydroid.enable or false) {
+      enable = true; # Enable Waydroid to run Android apps on NixOS
     };
   };
 }

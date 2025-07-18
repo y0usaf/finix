@@ -29,6 +29,8 @@
       value = {
         # Hardware configuration from system
         inherit (unifiedConfigs.${name}.system) hardware;
+        # Service declarations from system
+        inherit (unifiedConfigs.${name}.system) services;
         system = {
           # Move imports into system scope to avoid HM exposure
           imports = unifiedConfigs.${name}.system.imports or [];

@@ -6,14 +6,9 @@
 ###############################################################################
 {
   lib,
-  hostHome,
+  hostSystem,
   ...
-}: let
-  # Get the gaming configuration from the home config
-  homeCfg = hostHome.cfg or {};
-  gamingCfg = homeCfg.gaming or {};
-  controllerCfg = gamingCfg.controllers or {};
-in {
+}: {
   config = {
     ###########################################################################
     # Vial Keyboard Rules
@@ -26,8 +21,8 @@ in {
         KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", TAG+="uaccess"
       ''
 
-      # DualSense controller rules (only if controllers are enabled)
-      (lib.mkIf (controllerCfg.enable or false) ''
+      # DualSense controller rules (only if controllers are enabled by host)
+      (lib.mkIf (hostSystem.services.controllers.enable or false) ''
         # Sony DualSense controller - standard mode
         KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", MODE="0660", TAG+="uaccess"
 
