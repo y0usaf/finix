@@ -8,7 +8,7 @@
   pkgs,
   ...
 }: let
-  inherit (config.shared) username;
+  username = "y0usaf";
 in {
   config = lib.mkIf config.home.programs.firefox.enable {
     users.users.${username}.maid = {

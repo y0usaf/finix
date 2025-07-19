@@ -7,7 +7,7 @@
   lib,
   ...
 }: let
-  inherit (config.shared) username;
+  username = "y0usaf";
 
   userChromeCss = ''
     /* Disable all animations */

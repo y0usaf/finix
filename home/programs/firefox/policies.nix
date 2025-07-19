@@ -7,7 +7,7 @@
   lib,
   ...
 }: let
-  inherit (config.shared) username;
+  username = "y0usaf";
 
   # Firefox policies.json content
   policiesContent = builtins.toJSON {

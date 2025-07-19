@@ -62,7 +62,7 @@ inputs: let
     config.cudaSupport = true;
   };
 
-  ## Import host utilities
+  ## Import host utilities (new system without shared dependencies)
   hostUtils = import ../default.nix {
     inherit (pkgs) lib;
     inherit pkgs;
@@ -71,7 +71,7 @@ inputs: let
   ## Common Special Arguments for Modules
   commonSpecialArgs = {
     inherit inputs;
-    inherit (inputs) disko fast-fonts nix-minecraft nixvim;
+    inherit (inputs) disko fast-fonts nix-minecraft;
   };
 in {
   ## Formatter Setup

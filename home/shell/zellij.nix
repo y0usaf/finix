@@ -12,8 +12,12 @@
   ...
 }: let
   cfg = config.home.shell.zellij;
-  # Get shared user preferences for zellij auto-start
-  sharedZsh = config.shared.zsh;
+  # ZSH configuration for zellij auto-start
+  zshConfig = {
+    zellij = {
+      enable = false;
+    };
+  };
 in {
   ###########################################################################
   # Module Options
@@ -219,7 +223,7 @@ in {
         ###########################################################################
         # Shell Integration - Auto-start Zellij
         ###########################################################################
-        home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkBefore (lib.optionalString sharedZsh.zellij.enable ''
+        home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkBefore (lib.optionalString zshConfig.zellij.enable ''
           # ----------------------------
           # Zellij Auto-start
           # ----------------------------
