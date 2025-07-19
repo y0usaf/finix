@@ -6,7 +6,7 @@
   ...
 }: let
   cfg = config.home.dev.nvim;
-  inherit (config.shared) username;
+  username = "y0usaf";
 in {
   config = lib.mkIf (cfg.enable && cfg.neovide) {
     users.users.${username}.maid = {

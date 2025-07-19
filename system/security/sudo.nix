@@ -13,7 +13,7 @@
     ###########################################################################
     security.sudo.extraRules = [
       {
-        users = [config.shared.username]; # The user defined in the shared config
+        users = [config.hostSystem.username]; # The user defined in the host config
         commands = [
           {
             command = "ALL"; # Allow all commands

@@ -46,7 +46,7 @@ in {
 
       repoPath = lib.mkOption {
         type = lib.types.str;
-        default = "${config.shared.homeDirectory}/nixos";
+        default = "/home/y0usaf/nixos";
         description = "Path to the NixOS configuration repository.";
       };
 
