@@ -38,8 +38,8 @@ in {
       # YouTube-DLP Aliases
       # ----------------------------
       # YouTube-DLP aliases for various formats
-      alias ytm4a="yt-dlp --extractor-args 'youtube:player_client=android' -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s'"
-      alias ytmp3="yt-dlp --extractor-args 'youtube:player_client=android' -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s'"
+      alias ytm4a="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s'"
+      alias ytmp3="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s'"
       # Discord-compatible MP4 (H.264/AAC, smaller size)
       alias ytmp4="yt-dlp --extractor-args 'youtube:player_client=android' -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -vf scale=-2:720' -o '%(title)s.%(ext)s'"
       # Discord-compatible smaller MP4 for larger videos
