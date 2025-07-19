@@ -7,11 +7,9 @@
   pkgs,
   ...
 }: let
-  # Import individual modules
-  shared = import ./shared.nix {inherit lib pkgs;};
+  # Import system configuration utilities (no shared dependencies)
   system = import ./system.nix {inherit lib pkgs;};
 in {
   # Export configuration functions
-  inherit (shared) hostNames systemConfigs homeConfigs mkSpecialArgs;
   inherit (system) mkNixosConfigurations;
 }

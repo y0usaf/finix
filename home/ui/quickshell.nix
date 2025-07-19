@@ -9,7 +9,7 @@
   ...
 }: let
   cfg = config.home.ui.quickshell;
-  inherit (config.shared) username;
+  username = "y0usaf";
 in {
   ###########################################################################
   # Module Options

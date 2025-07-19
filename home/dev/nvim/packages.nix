@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.home.dev.nvim;
-  inherit (config.shared) username;
+  username = "y0usaf";
 in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid.packages = [

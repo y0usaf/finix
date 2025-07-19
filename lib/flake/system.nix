@@ -1,67 +1,69 @@
 ###############################################################################
 # System Configuration Utilities
-# Functions for generating NixOS system configurations
+# Functions for generating NixOS system configurations without shared dependencies
 ###############################################################################
 {
   lib,
   pkgs,
   hostsDir ? ../../hosts,
-}: let
-  shared = import ./shared.nix {
-    inherit lib pkgs hostsDir;
-    inputs = null;
-  };
-in {
+}: {
   # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {
     inputs,
     system,
     commonSpecialArgs,
   }: let
-    sharedWithInputs = import ./shared.nix {inherit lib pkgs hostsDir inputs;};
+    hostNames = ["y0usaf-desktop"];
+    
     maidIntegration = import ./maid.nix {inherit hostsDir;};
   in
     builtins.listToAttrs (map
-      (hostname: {
+      (hostname: let
+        # Import host configuration
+        hostConfig = import (hostsDir + "/${hostname}/default.nix") {
+          inherit pkgs inputs;
+        };
+      in {
         name = hostname;
         value = inputs.nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs =
-            sharedWithInputs.mkSpecialArgs commonSpecialArgs hostname
-            // {
-              inherit hostname;
-              inherit hostsDir;
-              lib = pkgs.lib;  # Use the extended lib with our overlay
-            };
-          modules =
-            [
-              # Core system modules
-              (sharedWithInputs.mkSharedModule {inherit hostname hostsDir;})
+          specialArgs = commonSpecialArgs // {
+            inherit hostname hostsDir;
+            inherit (pkgs) lib;
+            # Make host configuration available to modules
+            hostConfig = hostConfig;
+            # Pass hostSystem for hardware modules (for backward compatibility)
+            hostSystem = hostConfig.system;
+          };
+          modules = [
+            # System configuration with direct values (no shared dependency)
+            ({config, ...}: {
+              # Import system modules from host config
+              imports = hostConfig.system.imports;
+              
+              # Configure system options directly from host config
+              hostSystem = {
+                username = hostConfig.system.username;
+                hostname = hostConfig.system.hostname;
+                homeDirectory = hostConfig.system.homeDirectory;
+                stateVersion = hostConfig.system.stateVersion;
+                timezone = hostConfig.system.timezone;
+                profile = hostConfig.system.profile or "default";
+                hardware = hostConfig.system.hardware or {};
+                services = hostConfig.system.services or {};
+              };
+            })
 
-              # Integration modules - each handles its own setup
-              (maidIntegration.mkNixosModule {inherit inputs hostname;})
+            # Integration modules
+            (maidIntegration.mkNixosModule {inherit inputs hostname;})
 
-              # Home modules (maid-based)
-              ../../home
+            # Home modules (maid-based)
+            ../../home
 
-              # External modules
-              inputs.chaotic.nixosModules.default
-            ]
-            ++ (sharedWithInputs.systemConfigs.${hostname}.system.imports or [])
-            ++ [
-              # Apply core system configuration
-              ({config, ...}: {
-                networking.hostName = config.shared.hostname;
-                time.timeZone = config.shared.timezone;
-                system.stateVersion = config.shared.stateVersion;
-
-                # Apply users configuration
-                inherit (sharedWithInputs.systemConfigs.${hostname}) users;
-
-                # Note: Hardware configuration is available via hostSystem.hardware for hardware modules
-              })
-            ];
+            # External modules
+            inputs.chaotic.nixosModules.default
+          ];
         };
       })
-      sharedWithInputs.hostNames);
+      hostNames);
 }

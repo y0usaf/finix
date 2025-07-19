@@ -21,7 +21,7 @@
   );
 
   # MediaMTX doesn't support IPv6 and fails if one is present, so filter for IPv4 only
-  nameservers = config.networking.nameservers;
+  inherit (config.networking) nameservers;
   isIPv4 = addr: builtins.match "^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$" addr != null;
   ipv4Nameservers = builtins.filter isIPv4 nameservers;
 

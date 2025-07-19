@@ -15,7 +15,7 @@
     # User Account Settings
     # User accounts, permissions, and shell configuration
     ###########################################################################
-    users.users.${config.shared.username} = {
+    users.users.${config.hostSystem.username} = {
       isNormalUser = true; # Defines the account as a standard user account.
       shell = pkgs.zsh; # Set Zsh as the default shell for this user.
       extraGroups = [

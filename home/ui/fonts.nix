@@ -7,7 +7,7 @@
   ...
 }: let
   cfg = config.home.ui.fonts;
-  inherit (config.shared) username;
+  username = "y0usaf";
 
   # Get the packages and names from the host appearance config
   mainFontPackages = map (x: x.package) config.home.core.appearance.fonts.main;

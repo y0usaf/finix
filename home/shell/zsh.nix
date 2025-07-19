@@ -13,10 +13,22 @@
   ...
 }: let
   cfg = config.home.shell.zsh;
-  # Get shared user preferences
-  sharedZsh = config.shared.zsh;
-  # XDG paths using shared config
-  xdgConfigHome = "${config.shared.homeDirectory}/.config";
+  # User preferences (formerly from shared config)
+  username = "y0usaf";
+  homeDirectory = "/home/y0usaf";
+  tokenDir = "/home/y0usaf/Tokens";
+  xdgConfigHome = "${homeDirectory}/.config";
+  
+  # ZSH configuration options (formerly from shared.zsh)
+  zshConfig = {
+    cat-fetch = true;
+    history-memory = 10000;
+    history-storage = 10000;
+    enableFancyPrompt = true;
+    zellij = {
+      enable = false;
+    };
+  };
 in {
   #===========================================================================
   # Module Options
@@ -41,7 +53,7 @@ in {
     #=========================================================================
     # User Configuration
     #=========================================================================
-    users.users.${config.shared.username}.maid = {
+    users.users.${username}.maid = {
       # Packages
       packages = with pkgs; [
         zsh
@@ -53,8 +65,8 @@ in {
       # Configuration Files
       file.home = {
         "{{xdg_config_home}}/zsh/.zshenv".text = let
-          # Get the token directory path from shared config
-          inherit (config.shared) tokenDir;
+          # Token directory path
+          inherit tokenDir;
           # Token management function (from original envExtra)
           tokenFunctionScript = ''
             # Token management function
@@ -101,8 +113,8 @@ in {
           # Base configuration
           ''
             # History configuration
-            HISTSIZE=${toString sharedZsh.history-memory}
-            SAVEHIST=${toString sharedZsh.history-storage}
+            HISTSIZE=${toString zshConfig.history-memory}
+            SAVEHIST=${toString zshConfig.history-storage}
             HISTFILE="$HOME/.local/state/zsh/history"
             setopt HIST_IGNORE_DUPS
             setopt HIST_IGNORE_ALL_DUPS
@@ -113,7 +125,7 @@ in {
 
 
 
-            ${lib.optionalString sharedZsh.enableFancyPrompt ''
+            ${lib.optionalString zshConfig.enableFancyPrompt ''
               # ----------------------------
               # Prompt Setup
               # ----------------------------

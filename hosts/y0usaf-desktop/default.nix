@@ -1,4 +1,5 @@
-# UNIFIED HOST CONFIGURATION for y0usaf-desktop
+# HOST CONFIGURATION for y0usaf-desktop
+# Separated system and home configurations - no shared dependencies
 {
   pkgs,
   inputs,
@@ -6,38 +7,26 @@
 }: let
   username = "y0usaf";
   homeDir = "/home/${username}";
+  hostname = "y0usaf-desktop";
+  stateVersion = "24.11";
+  timezone = "America/Toronto";
 in {
-  # SHARED CONFIGURATION - used by all module systems
-  shared = {
-    inherit username;
-    homeDirectory = homeDir;
-    hostname = "y0usaf-desktop";
-    stateVersion = "24.11";
-    timezone = "America/Toronto";
-    config = "default";
-
-    # User preferences shared across modules
-    tokenDir = "${homeDir}/Tokens";
-
-    # Zsh user preferences - now properly shared between system and home modules
-    zsh = {
-      cat-fetch = true;
-      history-memory = 10000;
-      history-storage = 10000;
-      enableFancyPrompt = true;
-      zellij = {
-        enable = false;
-      };
-    };
-  };
-
+  # SYSTEM CONFIGURATION - self-contained, no home dependencies
   system = {
-    # Move imports inside system configuration to avoid HM exposure
+    # Module imports for system-level configuration
     imports = [
       ../../system
       ./hardware-configuration.nix
       # ./disko.nix  # Temporarily disabled - partitions not created yet
     ];
+
+    # Core system identity and settings
+    username = username;
+    hostname = hostname;
+    homeDirectory = homeDir;
+    stateVersion = stateVersion;
+    timezone = timezone;
+    profile = "default";
 
     # Hardware configuration - host-level options
     hardware = {
@@ -76,7 +65,8 @@ in {
     };
   };
 
-  # HOME CONFIGURATION - Maid-based modules
+  # HOME CONFIGURATION - Keep existing structure for now
+  # TODO: Update home modules to use systemValues instead of shared
   home = {
     core = {
       packages.enable = true;
@@ -155,7 +145,6 @@ in {
       webapps.enable = true;
       firefox.enable = true;
       discord.enable = true;
-
       obsidian.enable = true;
       creative.enable = true;
       media.enable = true;
