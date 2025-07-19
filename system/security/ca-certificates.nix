@@ -6,10 +6,6 @@
   ###########################################################################
   # CA Certificates
   ###########################################################################
-  security.ca-derivations = {
-    enable = true;
-  };
-
   # System-wide CA certificates
   security.pki.certificates = [];
 
