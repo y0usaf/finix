@@ -11,12 +11,12 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.tools.jujutsu;
+  cfg = config.home.tools.jj;
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
-  options.home.tools.jujutsu = {
+  options.home.tools.jj = {
     enable = lib.mkEnableOption "jujutsu version control system";
 
     name = lib.mkOption {

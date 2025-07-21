@@ -184,7 +184,7 @@ in {
           remoteBranch = "main";
         };
       };
-      jujutsu = {
+      jj = {
         enable = true;
         name = "y0usaf";
         email = "OA99@Outlook.com";
