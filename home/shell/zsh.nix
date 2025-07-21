@@ -18,7 +18,7 @@
   homeDirectory = "/home/y0usaf";
   tokenDir = "/home/y0usaf/Tokens";
   xdgConfigHome = "${homeDirectory}/.config";
-  
+
   # ZSH configuration options (formerly from shared.zsh)
   zshConfig = {
     cat-fetch = true;

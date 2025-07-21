@@ -14,28 +14,28 @@
       type = lib.types.str;
       description = "Primary system username";
     };
-    
+
     hostname = lib.mkOption {
       type = lib.types.str;
       description = "System hostname";
     };
-    
+
     homeDirectory = lib.mkOption {
       type = lib.types.path;
       description = "Primary user home directory path";
     };
-    
+
     # System settings
     stateVersion = lib.mkOption {
       type = lib.types.str;
       description = "NixOS state version for compatibility";
     };
-    
+
     timezone = lib.mkOption {
       type = lib.types.str;
       description = "System timezone";
     };
-    
+
     # Configuration metadata
     profile = lib.mkOption {
       type = lib.types.str;
@@ -63,10 +63,10 @@
     system.stateVersion = config.hostSystem.stateVersion;
     time.timeZone = config.hostSystem.timezone;
     networking.hostName = config.hostSystem.hostname;
-    
+
     # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
-    
+
     # Validation
     assertions = [
       {
