@@ -223,11 +223,7 @@ in {
                     plugin location="zellij:tab-bar"
                 }
                 pane split_direction="horizontal" {
-                    pane size="20%" {
-                        command "nvim"
-                        args "+Neotree"
-                    }
-                    pane size="50%" {
+                    pane size="70%" {
                         command "nvim"
                         args "."
                     }
