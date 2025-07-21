@@ -13,7 +13,7 @@
     nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable";
 
     nix-maid = {
-      url = "github:viperML/nix-maid";
+      url = "github:y0usaf/nix-maid/smfh-integration";
     };
 
     alejandra = {
