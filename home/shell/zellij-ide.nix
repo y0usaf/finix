@@ -11,7 +11,6 @@
   ###########################################################################
   home.shell.zellij.layouts.ide = ''
     layout {
-        simplified_ui true
         cwd "/home/y0usaf"
         tab name="Tab #1" focus=true hide_floating_panes=true {
             pane split_direction="vertical" {
