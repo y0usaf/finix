@@ -166,6 +166,7 @@ in {
         enable = true;
         neovide = false;
       };
+      repomix.enable = true;
     };
     shell = {
       zsh.enable = true;
