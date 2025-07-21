@@ -230,6 +230,9 @@ in {
               #----- Nix Linting Shortcuts -----
               lintcheck = "clear; statix check .; deadnix .";
               lintfix = "clear; statix fix .; deadnix .";
+
+              #----- IDE Layout Shortcut -----
+              ide = "zellij --layout ~/.config/zellij/layouts/ide.kdl";
             };
 
             # Note: Kitty Panel aliases disabled until kittens module is available
