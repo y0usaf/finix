@@ -99,7 +99,7 @@ layout {
 EOF
     
     # Check if session already exists
-    if zellij list-sessions 2>/dev/null | grep -q "^$session_name"; then
+    if zellij list-sessions 2>/dev/null | grep -q "$session_name" 2>/dev/null; then
       echo "Session '$session_name' already exists. Attaching..."
       zellij attach "$session_name"
       exit 0
