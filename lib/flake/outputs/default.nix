@@ -57,6 +57,8 @@ inputs: let
           };
         });
       })
+      # Neovim nightly overlay
+      inputs.neovim-nightly-overlay.overlays.default
       # Custom packages
       (_final: _prev: {
         fastFonts = inputs.fast-fonts.packages.${system}.default;
