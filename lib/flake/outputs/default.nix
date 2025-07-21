@@ -12,23 +12,27 @@ inputs: let
       (final: prev: {
         lib = prev.lib.extend (libfinal: libprev: {
           importDirs = dir: let
-            dirs = libprev.filterAttrs (n: v: v == "directory" && n != ".git")
-                   (builtins.readDir dir);
+            dirs =
+              libprev.filterAttrs (n: v: v == "directory" && n != ".git")
+              (builtins.readDir dir);
             dirPaths = libprev.mapAttrsToList (name: _: dir + "/${name}/default.nix") dirs;
-          in libprev.filter (path: builtins.pathExists path) dirPaths;
-          
+          in
+            libprev.filter (path: builtins.pathExists path) dirPaths;
+
           importModules = dir: let
-            files = libprev.filterAttrs (n: v: v == "regular" && libprev.hasSuffix ".nix" n && n != "default.nix")
-                    (builtins.readDir dir);
-          in map (name: dir + "/${name}") (builtins.attrNames files);
-          
+            files =
+              libprev.filterAttrs (n: v: v == "regular" && libprev.hasSuffix ".nix" n && n != "default.nix")
+              (builtins.readDir dir);
+          in
+            map (name: dir + "/${name}") (builtins.attrNames files);
+
           # Module definition helpers
           t = libprev.types;
           mkOpt = type: description: libprev.mkOption {inherit type description;};
           mkBool = libprev.types.bool;
           mkStr = libprev.types.str;
           mkOptDef = type: default: description: libprev.mkOption {inherit type default description;};
-          
+
           defaultAppModule = libprev.types.submodule {
             options = {
               command = libprev.mkOption {
@@ -37,7 +41,7 @@ inputs: let
               };
             };
           };
-          
+
           dirModule = libprev.types.submodule {
             options = {
               path = libprev.mkOption {

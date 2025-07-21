@@ -126,14 +126,14 @@ in {
     system.activationScripts.setupClaudeMcp = {
       text = ''
         echo "Setting up Claude MCP servers via CLI..."
-        
+
         # Function to add MCP server if not already present
         add_mcp_server() {
           local name="$1"
           local command="$2"
           shift 2
           local args="$@"
-          
+
           # Check if server already exists
           if ! runuser -u y0usaf -- ${pkgs.claude-code}/bin/claude mcp list | grep -q "$name"; then
             echo "Adding MCP server: $name"
@@ -142,13 +142,13 @@ in {
             echo "MCP server already exists: $name"
           fi
         }
-        
+
         # Add all MCP servers to user scope for global access
         add_mcp_server "Filesystem" "npx" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"
         add_mcp_server "sequential-thinking" "npx" "@modelcontextprotocol/server-sequential-thinking"
         add_mcp_server "GitHub Repo MCP" "npx" "github-repo-mcp"
         add_mcp_server "Gemini MCP" "npx" "gemini-mcp-tool"
-        
+
         echo "Claude MCP servers setup complete"
       '';
       deps = [];
