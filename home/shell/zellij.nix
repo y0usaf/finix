@@ -216,6 +216,30 @@ in {
             }
           '';
 
+          # IDE layout
+          "zellij/layouts/ide.kdl".text = ''
+            layout {
+                pane size=1 borderless=true {
+                    plugin location="zellij:tab-bar"
+                }
+                pane {
+                    pane split_direction="horizontal" {
+                        pane size="70%" {
+                            command "nvim"
+                            args "."
+                        }
+                        pane split_direction="vertical" size="30%" {
+                            pane
+                            pane
+                        }
+                    }
+                }
+                pane size=2 borderless=true {
+                    plugin location="zellij:status-bar"
+                }
+            }
+          '';
+
           # Note: Shell configuration (zshrc, zlogout) should be handled by shell modules
           # Keeping only zellij-specific config files here
         };
