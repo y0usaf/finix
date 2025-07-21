@@ -224,7 +224,11 @@ in {
                 }
                 pane {
                     pane split_direction="horizontal" {
-                        pane size="70%" {
+                        pane size="20%" {
+                            command "nvim"
+                            args "+Neotree"
+                        }
+                        pane size="50%" {
                             command "nvim"
                             args "."
                         }
