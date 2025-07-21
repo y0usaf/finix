@@ -18,12 +18,21 @@
       enable = false;
     };
   };
+  # Import IDE layout
+  ideLayout = import ./zellij-ide.nix { inherit lib; };
 in {
   ###########################################################################
   # Module Options
   ###########################################################################
   options.home.shell.zellij = {
     enable = lib.mkEnableOption "zellij terminal multiplexer";
+    layouts = {
+      ide = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        description = "IDE layout configuration";
+      };
+    };
   };
 
   ###########################################################################
@@ -57,7 +66,7 @@ in {
             rounded_corners true
             session_serialization false
             show_startup_tips false
-            simplified_ui false
+            simplified_ui true
             theme "custom"
             themes {
             	custom {
@@ -217,30 +226,7 @@ in {
           '';
 
           # IDE layout
-          "zellij/layouts/ide.kdl".text = ''
-            layout {
-                pane size=1 borderless=true {
-                    plugin location="zellij:tab-bar"
-                }
-                pane split_direction="horizontal" {
-                    pane size="20%" {
-                        command "nvim"
-                        args "-c" "Neotree show"
-                    }
-                    pane size="50%" {
-                        command "nvim"
-                        args "."
-                    }
-                    pane split_direction="vertical" size="30%" {
-                        pane
-                        pane
-                    }
-                }
-                pane size=2 borderless=true {
-                    plugin location="zellij:status-bar"
-                }
-            }
-          '';
+          "zellij/layouts/ide.kdl".text = ideLayout.home.shell.zellij.layouts.ide;
 
 
 
