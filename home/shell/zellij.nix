@@ -94,6 +94,17 @@ in {
           # IDE layout
           "zellij/layouts/ide.kdl".text = ideLayout.home.shell.zellij.layouts.ide;
 
+          # IDE config with simplified UI
+          "zellij/config-ide.kdl".text = ''
+            hide_session_name false
+            on_force_close "quit"
+            pane_frames true
+            rounded_corners true
+            session_serialization false
+            show_startup_tips false
+            simplified_ui true
+          '';
+
 
 
           # Note: Shell configuration (zshrc, zlogout) should be handled by shell modules
