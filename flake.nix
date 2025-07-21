@@ -67,6 +67,10 @@
     mnw = {
       url = "github:Gerg-L/mnw";
     };
+    neovim-nightly-overlay = {
+      url = "github:nix-community/neovim-nightly-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   ###########################################################################
