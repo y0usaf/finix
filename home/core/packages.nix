@@ -15,7 +15,7 @@
     #!/usr/bin/env bash
     
     # Nvide - NeoVim IDE with Neotree and split terminals
-    # Inspired by Zide but using tmux + nvim instead of zellij
+    # Using Zellij for terminal multiplexing
     
     HELP_TEXT="Usage: nvide [OPTIONS] [working_dir]
     
@@ -73,39 +73,45 @@
     working_dir=$(cd "$working_dir" && pwd)  # Get absolute path
     session_name=''${session_name:-$(basename "$working_dir")}
     
-    # Check if tmux session already exists
-    if tmux has-session -t "$session_name" 2>/dev/null; then
+    # Create nvide layout file
+    layout_file="/tmp/nvide-layout-$session_name.kdl"
+    cat > "$layout_file" << 'EOF'
+layout {
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+    pane {
+        pane split_direction="horizontal" {
+            pane size="70%" {
+                command "nvim"
+                args "."
+            }
+            pane split_direction="vertical" size="30%" {
+                pane
+                pane
+            }
+        }
+    }
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+}
+EOF
+    
+    # Check if session already exists
+    if zellij list-sessions 2>/dev/null | grep -q "^$session_name"; then
       echo "Session '$session_name' already exists. Attaching..."
-      tmux attach-session -t "$session_name"
+      zellij attach "$session_name"
       exit 0
     fi
     
-    # Create new tmux session
+    # Create new zellij session
     echo "Creating nvide session: $session_name"
     echo "Working directory: $working_dir"
     
-    # Start tmux session with nvim
-    tmux new-session -d -s "$session_name" -c "$working_dir" -x 120 -y 30
-    
-    # Split the window: main pane (nvim) and right pane for terminals
-    tmux split-window -h -t "$session_name" -c "$working_dir" -p 30
-    
-    # Split the right pane horizontally to create two terminal panes
-    tmux split-window -v -t "$session_name:0.1" -c "$working_dir"
-    
-    # Start nvim in the main (left) pane with Neotree auto-open
-    tmux send-keys -t "$session_name:0.0" "nvim ." Enter
-    
-    # Set pane titles
-    tmux select-pane -t "$session_name:0.0" -T "NeoVim"
-    tmux select-pane -t "$session_name:0.1" -T "Terminal 1"
-    tmux select-pane -t "$session_name:0.2" -T "Terminal 2"
-    
-    # Focus on the nvim pane
-    tmux select-pane -t "$session_name:0.0"
-    
-    # Attach to the session
-    tmux attach-session -t "$session_name"
+    # Start zellij session with custom layout
+    cd "$working_dir"
+    zellij --session "$session_name" --layout "$layout_file"
   '';
 
   # Base packages all users should have
@@ -129,7 +135,6 @@
     networkmanager
     # IDE tools
     nvide-script
-    tmux
   ];
 in {
   ###########################################################################
