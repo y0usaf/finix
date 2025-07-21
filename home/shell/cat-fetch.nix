@@ -21,7 +21,7 @@ in {
   #===========================================================================
   config = lib.mkIf cfg.enable {
     # Add cat fetch function to zsh startup
-    users.users.y0usaf.maid.file.home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkAfter ''
+    users.users.y0usaf.maid.file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
       # ----------------------------
       # Function: print_cats
       # ----------------------------
