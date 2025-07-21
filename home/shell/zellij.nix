@@ -222,20 +222,18 @@ in {
                 pane size=1 borderless=true {
                     plugin location="zellij:tab-bar"
                 }
-                pane {
-                    pane split_direction="horizontal" {
-                        pane size="20%" {
-                            command "nvim"
-                            args "+Neotree"
-                        }
-                        pane size="50%" {
-                            command "nvim"
-                            args "."
-                        }
-                        pane split_direction="vertical" size="30%" {
-                            pane
-                            pane
-                        }
+                pane split_direction="horizontal" {
+                    pane size="20%" {
+                        command "nvim"
+                        args "+Neotree"
+                    }
+                    pane size="50%" {
+                        command "nvim"
+                        args "."
+                    }
+                    pane split_direction="vertical" size="30%" {
+                        pane
+                        pane
                     }
                 }
                 pane size=2 borderless=true {
