@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }: let
   cfg = config.home.dev.nvim;
@@ -20,7 +21,7 @@ in {
           tree-sitter-markdown
           tree-sitter-json
         ]))
-      pkgs.neovim
+      inputs.neovim-nightly-overlay.packages.${pkgs.system}.default
 
       pkgs.lua-language-server
       pkgs.nil
