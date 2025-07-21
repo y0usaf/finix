@@ -18,12 +18,12 @@
     ###########################################################################
     virtualisation = {
       lxd.enable = true; # Enable LXD container hypervisor
-      
+
       docker = lib.mkIf (hostSystem.services.docker.enable or false) {
         enable = true; # Enable Docker daemon
         enableOnBoot = true; # Start Docker on boot
       };
-      
+
       podman = lib.mkIf (hostSystem.services.docker.enable or false) {
         enable = true; # Enable Podman as Docker alternative
       };

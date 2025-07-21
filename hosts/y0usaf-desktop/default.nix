@@ -59,9 +59,9 @@ in {
 
     # System-wide service declarations - what this host supports
     services = {
-      docker.enable = true;        # Container development
-      waydroid.enable = false;     # Android emulation (disabled - doesn't work with Nvidia)
-      controllers.enable = true;   # Gaming controller support
+      docker.enable = true; # Container development
+      waydroid.enable = false; # Android emulation (disabled - doesn't work with Nvidia)
+      controllers.enable = true; # Gaming controller support
     };
   };
 
