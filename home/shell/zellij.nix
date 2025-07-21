@@ -240,6 +240,8 @@ in {
             }
           '';
 
+
+
           # Note: Shell configuration (zshrc, zlogout) should be handled by shell modules
           # Keeping only zellij-specific config files here
         };
