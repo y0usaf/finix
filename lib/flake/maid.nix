@@ -27,6 +27,9 @@
     config = {
       home = homeConfig;
 
+      # Enable SMFH linker for atomic file operations
+      maid.linker = inputs.nix-maid.packages.${pkgs.system}.smfh;
+
       # Initialize maid for the user
       users.users.y0usaf.maid = {
         packages = [];
