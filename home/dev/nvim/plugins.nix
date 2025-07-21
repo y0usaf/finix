@@ -255,6 +255,135 @@ in {
           },
         },
 
+        -- File Explorer
+        {
+          "nvim-neo-tree/neo-tree.nvim",
+          branch = "v3.x",
+          cmd = "Neotree",
+          dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-tree/nvim-web-devicons",
+            "MunifTanjim/nui.nvim",
+          },
+          opts = {
+            close_if_last_window = false,
+            popup_border_style = "rounded",
+            enable_git_status = true,
+            enable_diagnostics = true,
+            filesystem = {
+              filtered_items = {
+                visible = false,
+                hide_dotfiles = false,
+                hide_gitignored = false,
+              },
+              follow_current_file = {
+                enabled = true,
+                leave_dirs_open = false,
+              },
+              group_empty_dirs = false,
+              hijack_netrw_behavior = "open_default",
+              use_libuv_file_watcher = true,
+            },
+            window = {
+              position = "left",
+              width = 30,
+              mapping_options = {
+                noremap = true,
+                nowait = true,
+              },
+              mappings = {
+                ["<space>"] = "none",
+                ["[g"] = "prev_git_modified",
+                ["]g"] = "next_git_modified",
+              },
+            },
+            default_component_configs = {
+              indent = {
+                indent_size = 2,
+                padding = 1,
+                with_markers = true,
+                indent_marker = "│",
+                last_indent_marker = "└",
+                highlight = "NeoTreeIndentMarker",
+                with_expanders = nil,
+                expander_collapsed = "",
+                expander_expanded = "",
+                expander_highlight = "NeoTreeExpander",
+              },
+              icon = {
+                folder_closed = "",
+                folder_open = "",
+                folder_empty = "ﰊ",
+                default = "*",
+                highlight = "NeoTreeFileIcon"
+              },
+              modified = {
+                symbol = "[+]",
+                highlight = "NeoTreeModified",
+              },
+              name = {
+                trailing_slash = false,
+                use_git_status_colors = true,
+                highlight = "NeoTreeFileName",
+              },
+              git_status = {
+                symbols = {
+                  added     = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
+                  modified  = "", -- or "", but this is redundant info if you use git_status_colors on the name
+                  deleted   = "✖",-- this can only be used in the git_status source
+                  renamed   = "󰁕",-- this can only be used in the git_status source
+                  untracked = "",
+                  ignored   = "",
+                  unstaged  = "󰄱",
+                  staged    = "",
+                  conflict  = "",
+                }
+              },
+            },
+          },
+          init = function()
+            -- Auto-open Neotree on startup
+            vim.api.nvim_create_autocmd("VimEnter", {
+              callback = function()
+                if vim.fn.argc() == 0 then
+                  vim.cmd("Neotree show")
+                elseif vim.fn.argc() == 1 and vim.fn.isdirectory(vim.fn.argv(0)) == 1 then
+                  vim.cmd("Neotree show")
+                  vim.cmd("cd " .. vim.fn.argv(0))
+                end
+              end,
+            })
+          end,
+        },
+
+        -- Terminal
+        {
+          "akinsho/toggleterm.nvim",
+          version = "*",
+          opts = {
+            size = 20,
+            open_mapping = [[<c-\>]],
+            hide_numbers = true,
+            shade_filetypes = {},
+            shade_terminals = true,
+            shading_factor = 2,
+            start_in_insert = true,
+            insert_mappings = true,
+            persist_size = true,
+            direction = "float",
+            close_on_exit = true,
+            shell = vim.o.shell,
+            float_opts = {
+              border = "curved",
+              winblend = 0,
+              highlights = {
+                border = "Normal",
+                background = "Normal",
+              },
+            },
+          },
+        },
+
 
       }
     '';
