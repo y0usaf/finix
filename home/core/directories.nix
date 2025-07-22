@@ -1,5 +1,20 @@
 {lib, ...}: let
-  inherit (lib) t mkOpt dirModule;
+  # Define custom lib functions locally
+  t = lib.types;
+  mkOpt = type: description: lib.mkOption {inherit type description;};
+  dirModule = lib.types.submodule {
+    options = {
+      path = lib.mkOption {
+        type = lib.types.str;
+        description = "Absolute path to the directory";
+      };
+      create = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Whether to create the directory if it doesn't exist";
+      };
+    };
+  };
 in {
   options.home.directories = {
     flake = mkOpt dirModule "The directory where the flake lives.";

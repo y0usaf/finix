@@ -11,11 +11,13 @@
     homeConfig = hostConfig.home or {};
   in {
     imports = [
-      inputs.nix-maid.nixosModules.default
+      (import (inputs.nix-maid.outPath + "/src/nixos") {
+        smfh = null; # We'll handle smfh differently
+      })
     ];
     config = {
       home = homeConfig;
-      maid.linker = inputs.nix-maid.packages.${pkgs.system}.smfh;
+      maid.linker = (import inputs.nix-maid.outPath {inherit (pkgs) system;}).packages.${pkgs.system}.smfh;
       users.users.y0usaf.maid = {
         packages = [];
       };
