@@ -1,7 +1,3 @@
-###############################################################################
-# Mako Notification Daemon (Maid Version)
-# Wayland notification daemon with customizable appearance
-###############################################################################
 {
   config,
   lib,
@@ -10,33 +6,19 @@
 }: let
   cfg = config.home.ui.mako;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.ui.mako = {
     enable = lib.mkEnableOption "Mako notification daemon";
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Maid Configuration
-    ###########################################################################
     users.users.y0usaf.maid = {
       packages = with pkgs; [
         mako
       ];
-
-      ###########################################################################
-      # Configuration Files
-      ###########################################################################
       file.xdg_config."mako/config".text = ''
         actions=true
         anchor=top-right
-        background-color=#2e3440
-        border-color=#88c0d0
+        background-color=
+        border-color=
         border-radius=5
         border-size=1
         default-timeout=5000
@@ -55,13 +37,9 @@ in {
         padding=5
         progress-color=
         sort=-time
-        text-color=#eceff4
+        text-color=
         width=300
       '';
-
-      ###########################################################################
-      # User Systemd Service
-      ###########################################################################
       systemd.services.mako = {
         description = "Mako notification daemon";
         documentation = ["man:mako(1)"];

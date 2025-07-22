@@ -1,7 +1,3 @@
-###############################################################################
-# Steam Shader Cache Configuration - Nix-Maid Version
-# Simple shader background processing thread configuration
-###############################################################################
 {
   config,
   pkgs,

@@ -1,7 +1,3 @@
-###############################################################################
-# Balatro Mods Installation Module - Nix-Maid Version
-# GitHub repos managed by npins, files managed by nix-maid
-###############################################################################
 {
   config,
   pkgs,
@@ -9,11 +5,7 @@
   ...
 }: let
   cfg = config.home.gaming.balatro;
-
-  # Import npins sources for GitHub repositories
   sources = import ./npins;
-
-  # Available mods - much simpler than before!
   availableMods = {
     steamodded = {
       src = sources.steamodded;
@@ -56,31 +48,22 @@
       name = "Aura";
     };
     morespeeds = {
-      # This is handled via files, not src
       name = "MoreSpeeds.lua";
     };
   };
-
-  # Get enabled mods based on the list (excluding morespeeds which is handled via files)
   enabledMods = lib.filterAttrs (name: _mod: lib.elem name cfg.enabledMods && name != "morespeeds") availableMods;
-
-  # Lovely Injector using fetchzip (no manual unzip needed!)
   lovelyInjectorPackage = pkgs.fetchzip {
     url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.7.1/lovely-x86_64-pc-windows-msvc.zip";
     sha256 = "sha256-KjWSJugIfUOfWHZctEDKWGvNERXDzjW1+Ty5kJtEJlw=";
     stripRoot = false;
   };
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.gaming.balatro = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
       description = "Enable Balatro mod management";
     };
-
     enableLovelyInjector = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -90,7 +73,6 @@ in {
         Required for most Balatro mods to work.
       '';
     };
-
     enabledMods = lib.mkOption {
       type = lib.types.listOf (lib.types.enum (lib.attrNames availableMods));
       default = [];
@@ -111,16 +93,8 @@ in {
       '';
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Balatro Mods and Lovely Injector Files
-    ###########################################################################
     users.users.y0usaf.maid.file.home =
-      # MoreSpeeds mod content
       (lib.optionalAttrs (lib.elem "morespeeds" cfg.enabledMods) {
         ".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua".text = ''
           --- STEAMODDED HEADER
@@ -129,16 +103,11 @@ in {
           --- MOD_AUTHOR: [Steamo]
           --- MOD_DESCRIPTION: More Speed options!
           --- This mod is deprecated, use Nopeus instead: https://github.com/jenwalter666/JensBalatroCollection/tree/main/Nopeus
-
           ----------------------------------------------
           ------------MOD CODE -------------------------
-
-
-
           local setting_tabRef = G.UIDEF.settings_tab
           function G.UIDEF.settings_tab(tab)
               local setting_tab = setting_tabRef(tab)
-
               if tab == 'Game' then
                   local speeds = create_option_cycle({label = localize('b_set_gamespeed'), scale = 0.8, options = {0.25, 0.5, 1, 2, 3, 4, 8, 16, 32, 64, 128, 1000}, opt_callback = 'change_gamespeed', current_option = (
                       G.SETTINGS.GAMESPEED == 0.25 and 1 or
@@ -155,7 +124,6 @@ in {
                       G.SETTINGS.GAMESPEED == 1000 and 12 or
                       3 -- Default to 1 if none match, adjust as necessary
                   )})
-
                   local free_speed_text = {
                       n = G.UIT.R,
                       config = {
@@ -174,7 +142,6 @@ in {
                           }
                       }
                   }
-
                   local free_speed_box = {
                       n = G.UIT.R,
                       config = {
@@ -203,12 +170,10 @@ in {
               end
               return setting_tab
           end
-
           ----------------------------------------------
           ------------MOD CODE END----------------------
         '';
       })
-      # Enabled mod directories as symlinks
       // (lib.mapAttrs' (
           name: mod:
             lib.nameValuePair
@@ -216,7 +181,6 @@ in {
             {source = mod.src;}
         )
         enabledMods)
-      # Lovely Injector version.dll
       // (lib.optionalAttrs cfg.enableLovelyInjector {
         ".local/share/Steam/steamapps/common/Balatro/version.dll".source = "${lovelyInjectorPackage}/version.dll";
       });

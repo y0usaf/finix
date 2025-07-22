@@ -1,12 +1,3 @@
-#===============================================================================
-#                      🖥️ Hardware Configuration 🖥️
-#===============================================================================
-# 💽 Storage and filesystems
-# 🎮 Gaming directories
-# 🎵 Media mounts
-# 🔌 Boot and kernel modules
-# 🌐 Network interfaces
-#===============================================================================
 {
   config,
   lib,
@@ -16,8 +7,6 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
-
-  #── 🔌 Boot Configuration ─────────────────#
   boot = {
     initrd.availableKernelModules = [
       "nvme"
@@ -36,91 +25,63 @@
       "zenpower"
     ];
     extraModulePackages = [config.boot.kernelPackages.zenpower];
-
     kernelParams = [
       "amd_pstate=active"
       "mitigations=off"
     ];
   };
-
-  #── 💽 Filesystem Configuration ──────────────────#
-  # NOTE: Filesystem definitions restored from disko.nix
   fileSystems = {
-    #── 💽 Root Filesystem ──────────────────#
     "/" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
       options = ["subvol=@"];
     };
-
-    #── 🏠 Home Directory ──────────────────#
     "/home" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
       options = ["subvol=@home"];
     };
-
-    #── 🔄 Boot Partition ─────────────────#
     "/boot" = {
       device = "/dev/disk/by-uuid/31F2-1AE7";
       fsType = "vfat";
       options = ["fmask=0077" "dmask=0077"];
     };
-
-    #── 📸 Pictures Directory ─────────────#
     "/home/y0usaf/Pictures" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = ["subvol=@pictures"];
     };
-
-    #── 📷 DCIM Directory ──────────────────#
     "/home/y0usaf/DCIM" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = ["subvol=@dcim"];
     };
-
-    #── 🎵 Music Directory ─────────────────#
     "/home/y0usaf/Music" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = ["subvol=@music"];
     };
-
-    #── 🎮 Steam Directory ─────────────────#
     "/home/y0usaf/.local/share/Steam" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = ["subvol=@steam"];
     };
-
-    #── 💾 Swap Configuration ──────────────#
     "/swap" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
       options = ["subvol=@swap" "nodatacow"];
     };
   };
-
   swapDevices = [
     {
       device = "/swap/swapfile";
-      size = 96768; # Increased to match RAM size for hibernation (96GB + 768MB)
+      size = 96768;
     }
   ];
-
-  #── 🌐 Network Configuration ───────────#
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.eno1.useDHCP = lib.mkDefault true;
-  # networking.interfaces.wlp96s0.useDHCP = lib.mkDefault true;
-
-  #── 💻 Platform Settings ───────────────#
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-
   powerManagement = {
     enable = true;
-    # Further options such as laptop mode, backlight controls, etc.
   };
 }

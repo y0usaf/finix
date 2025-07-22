@@ -19,15 +19,12 @@ in {
         "https://github.com/L3MON4D3/LuaSnip",
         "https://github.com/saadparwaiz1/cmp_luasnip",
         "https://github.com/onsails/lspkind.nvim",
-
         -- File Navigation & Search
         "https://github.com/nvim-telescope/telescope.nvim",
         "https://github.com/nvim-lua/plenary.nvim",
         { src = "https://github.com/nvim-telescope/telescope-fzf-native.nvim" },
-
         -- Syntax & Highlighting
         "https://github.com/nvim-treesitter/nvim-treesitter",
-
         -- Utilities
         "https://github.com/numToStr/Comment.nvim",
         "https://github.com/windwp/nvim-autopairs",
@@ -37,15 +34,12 @@ in {
         "https://github.com/RRethy/vim-illuminate",
         "https://github.com/folke/twilight.nvim",
         "https://github.com/m4xshen/hardtime.nvim",
-
         -- File Explorer
         "https://github.com/nvim-neo-tree/neo-tree.nvim",
         "https://github.com/nvim-tree/nvim-web-devicons",
         "https://github.com/MunifTanjim/nui.nvim",
-
         -- Terminal
         "https://github.com/akinsho/toggleterm.nvim",
-
         -- Theme & UI
         "https://github.com/scottmckendry/cyberdream.nvim",
         "https://github.com/Bekaboo/dropbar.nvim",
@@ -57,16 +51,13 @@ in {
         "https://github.com/lukas-reineke/indent-blankline.nvim",
         "https://github.com/folke/flash.nvim",
         "https://github.com/echasnovski/mini.hipatterns",
-
         -- Specialized
         "https://github.com/kawre/leetcode.nvim",
       })
-
       -- LSP Configuration
       local function setup_lsp()
         local lspconfig = require("lspconfig")
         local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
         local on_attach = function(client, bufnr)
           local opts = { buffer = bufnr, silent = true }
           vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -77,7 +68,6 @@ in {
           vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
           vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
         end
-
         local servers = { "lua_ls", "nil_ls", "pyright" }
         for _, server in ipairs(servers) do
           lspconfig[server].setup({
@@ -89,13 +79,11 @@ in {
           })
         end
       end
-
       -- Completion Configuration
       local function setup_completion()
         local cmp = require("cmp")
         local luasnip = require("luasnip")
         local lspkind = require("lspkind")
-
         cmp.setup({
           snippet = {
             expand = function(args)
@@ -134,13 +122,11 @@ in {
           },
         })
       end
-
       -- Telescope Configuration
       local function setup_telescope()
         require("telescope").setup({})
         pcall(require("telescope").load_extension, "fzf")
       end
-
       -- Treesitter Configuration
       local function setup_treesitter()
         require("nvim-treesitter.configs").setup({
@@ -148,7 +134,6 @@ in {
           indent = { enable = true },
         })
       end
-
       -- Theme Configuration
       local function setup_theme()
         require("cyberdream").setup({
@@ -159,23 +144,21 @@ in {
           theme = {
             variant = "default",
             highlights = {
-              CursorLine = { bg = "#1e1e2e" },
-              Visual = { bg = "#313244" },
-              Search = { bg = "#f9e2af", fg = "#11111b" },
-              IncSearch = { bg = "#fab387", fg = "#11111b" },
+              CursorLine = { bg = "
+              Visual = { bg = "
+              Search = { bg = "
+              IncSearch = { bg = "
             },
           },
         })
         vim.cmd.colorscheme("cyberdream")
       end
-
       -- UI Configuration
       local function setup_ui()
         -- Lualine
         require("lualine").setup({
           options = { theme = "cyberdream", globalstatus = true },
         })
-
         -- Gitsigns
         require("gitsigns").setup({
           signs = {
@@ -188,19 +171,15 @@ in {
           },
           current_line_blame = true,
         })
-
         -- Indent Blankline
         require("ibl").setup({
           indent = { char = "▏", tab_char = "▏" },
           scope = { enabled = true, char = "─", show_start = true, show_end = true },
         })
-
         -- Dropbar
         require("dropbar").setup({ menu = { preview = false } })
-
         -- Dressing
         require("dressing").setup({})
-
         -- Windows
         require("windows").setup({
           autowidth = { enable = true, winwidth = 5, filetype = { help = 2 } },
@@ -209,10 +188,8 @@ in {
             filetype = { "NvimTree", "neo-tree", "undotree", "gundo" },
           },
         })
-
         -- Flash
         require("flash").setup({})
-
         -- Mini Hipatterns
         local hipatterns = require("mini.hipatterns")
         hipatterns.setup({
@@ -225,18 +202,14 @@ in {
           },
         })
       end
-
       -- Other Plugin Configurations
       local function setup_other_plugins()
         -- Comment
         require("Comment").setup({})
-
         -- Autopairs
         require("nvim-autopairs").setup({})
-
         -- UFO (Folding)
         require("ufo").setup({})
-
         -- Fidget (Notifications)
         require("fidget").setup({
           notification = {
@@ -244,7 +217,6 @@ in {
           },
         })
         vim.notify = require("fidget").notify
-
         -- Illuminate
         require("illuminate").configure({
           delay = 100,
@@ -253,17 +225,15 @@ in {
             providers = { "lsp" },
           },
         })
-
         -- Twilight
         require("twilight").setup({
           dimming = {
             alpha = 0.25,
-            color = { "Normal", "#ffffff" },
+            color = { "Normal", "
           },
           context = 15,
           treesitter = true,
         })
-
         -- Hardtime (Vim motion learning)
         require("hardtime").setup({
           disabled_filetypes = { "neo-tree", "lazy", "mason", "oil" },
@@ -271,7 +241,6 @@ in {
           restriction_mode = "hint",
           disable_mouse = false,
         })
-
         -- Neo-tree
         require("neo-tree").setup({
           close_if_last_window = false,
@@ -349,7 +318,6 @@ in {
             },
           },
         })
-
         -- ToggleTerm
         require("toggleterm").setup({
           size = 20,
@@ -373,7 +341,6 @@ in {
             },
           },
         })
-
         -- Leetcode
         require("leetcode").setup({
           lang = "python3",
@@ -388,7 +355,6 @@ in {
           },
         })
       end
-
       -- Setup plugins after pack operations or immediately if already available
       local function initialize_config()
         setup_lsp()
@@ -399,14 +365,12 @@ in {
         setup_ui()
         setup_other_plugins()
       end
-
       -- PackChanged autocmd triggers when vim.pack installs/updates plugins
       vim.api.nvim_create_autocmd("PackChanged", {
         callback = function()
           vim.schedule(initialize_config)
         end,
       })
-
       -- Setup immediately if plugins are already available
       vim.schedule(function()
         if pcall(require, "lspconfig") then

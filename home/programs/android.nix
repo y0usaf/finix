@@ -1,10 +1,3 @@
-###############################################################################
-# Android Module (Maid)
-# Provides Android development and interaction tools
-# - Waydroid for running Android in a container
-# - Android debugging tools (adb, fastboot)
-# - Screen mirroring with scrcpy
-###############################################################################
 {
   config,
   lib,
@@ -13,44 +6,22 @@
 }: let
   cfg = config.home.programs.android;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.programs.android = {
     enable = lib.mkEnableOption "android tools and waydroid";
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Maid Configuration
-    ###########################################################################
     users.users.y0usaf.maid = {
-      ###########################################################################
-      # Packages
-      ###########################################################################
       packages = with pkgs; [
         waydroid
         android-tools
         scrcpy
       ];
-
-      ###########################################################################
-      # File Configuration
-      ###########################################################################
       file.home = {
         ".android_env".text = ''
-          # Android environment variables
           export ANDROID_HOME="$XDG_DATA_HOME/android"
           export ADB_VENDOR_KEY="$XDG_CONFIG_HOME/android"
         '';
       };
-
-      ###########################################################################
-      # Systemd Services
-      ###########################################################################
       systemd.user.services = {
         waydroid-container = {
           Unit = {

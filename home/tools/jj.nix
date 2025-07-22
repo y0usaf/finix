@@ -1,10 +1,3 @@
-###############################################################################
-# Jujutsu Configuration
-# Git-compatible DVCS with saner defaults and better UX
-# - Basic configuration (user, editor)
-# - SSH integration for remotes
-# - Aliases for common operations
-###############################################################################
 {
   config,
   lib,
@@ -13,70 +6,47 @@
 }: let
   cfg = config.home.tools.jj;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.tools.jj = {
     enable = lib.mkEnableOption "jujutsu version control system";
-
     name = lib.mkOption {
       type = lib.types.str;
       description = "Jujutsu username.";
     };
-
     email = lib.mkOption {
       type = lib.types.str;
       description = "Jujutsu email address.";
     };
-
     editor = lib.mkOption {
       type = lib.types.str;
       default = "nvim";
       description = "Default editor for jujutsu.";
     };
-
     enableAliases = lib.mkOption {
       type = lib.types.bool;
       default = true;
       description = "Enable common jujutsu aliases.";
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
     users.users.y0usaf.maid = {
-      ###########################################################################
-      # Packages
-      ###########################################################################
       packages = with pkgs; [
         jujutsu
       ];
-
-      ###########################################################################
-      # Configuration Files
-      ###########################################################################
       file.home = {
-        # Jujutsu Configuration
         ".config/jj/config.toml".text = ''
           [user]
           name = "${cfg.name}"
           email = "${cfg.email}"
-
           [ui]
           default-command = "status"
           editor = "${cfg.editor}"
           diff-editor = "${cfg.editor}"
-
           [git]
           auto-local-branch = true
           push-branch-prefix = ""
-
           [revset-aliases]
           "mine" = "author(${cfg.email})"
           "recent" = "heads(::@ & recent(5))"
-
           ${lib.optionalString cfg.enableAliases ''
             [aliases]
             l = ["log", "-r", "recent"]
@@ -94,11 +64,7 @@ in {
             sq = ["squash"]
           ''}
         '';
-
-        # Shell Integration
         ".config/zsh/.zshrc".text = lib.mkIf cfg.enableAliases ''
-
-          # Jujutsu aliases
           alias jl='jj log -r recent'
           alias jll='jj log -r ::@'
           alias js='jj status'

@@ -1,4 +1,3 @@
-# Y0usaf-Desktop Disko Configuration
 {
   config,
   pkgs,
@@ -7,8 +6,6 @@
 }: let
   username = config.system.username or "y0usaf";
   homeDir = config.system.homeDirectory or "/home/${username}";
-
-  # Configurable options
   disks = {
     systemDisk = "/dev/nvme0n1";
     dataDisk = "/dev/nvme1n1";
@@ -17,16 +14,11 @@ in {
   imports = [
     disko.nixosModules.disko
   ];
-
-  # Add disko to the system packages
   environment.systemPackages = [
     pkgs.disko
   ];
-
-  # Define disk configuration
   disko.devices = {
     disk = {
-      # Main system disk
       system = {
         device = disks.systemDisk;
         type = "disk";
@@ -36,7 +28,7 @@ in {
             boot = {
               name = "boot";
               size = "1G";
-              type = "EF00"; # EFI System Partition
+              type = "EF00";
               content = {
                 type = "filesystem";
                 format = "vfat";
@@ -49,19 +41,16 @@ in {
               size = "100%";
               content = {
                 type = "btrfs";
-                extraArgs = ["-f"]; # Force formatting
+                extraArgs = ["-f"];
                 subvolumes = {
-                  # Root filesystem
                   "@" = {
                     mountpoint = "/";
                     mountOptions = ["compress=zstd" "noatime"];
                   };
-                  # Home directory
                   "@home" = {
                     mountpoint = "/home";
                     mountOptions = ["compress=zstd" "noatime"];
                   };
-                  # Swap directory
                   "@swap" = {
                     mountpoint = "/swap";
                     mountOptions = ["nodatacow" "noatime"];
@@ -72,16 +61,13 @@ in {
           };
         };
       };
-
-      # Secondary data disk
       data = {
         device = disks.dataDisk;
         type = "disk";
         content = {
           type = "btrfs";
-          extraArgs = ["-f"]; # Force formatting
+          extraArgs = ["-f"];
           subvolumes = {
-            # Media subvolumes
             "@pictures" = {
               mountpoint = "${homeDir}/Pictures";
               mountOptions = ["compress=zstd" "noatime"];
@@ -94,7 +80,6 @@ in {
               mountpoint = "${homeDir}/Music";
               mountOptions = ["compress=zstd" "noatime"];
             };
-            # Steam directory
             "@steam" = {
               mountpoint = "${homeDir}/.local/share/Steam";
               mountOptions = ["compress=zstd" "noatime"];
@@ -104,12 +89,10 @@ in {
       };
     };
   };
-
-  # Swap file configuration - could be moved to the host's default.nix if preferred
   swapDevices = [
     {
       device = "/swap/swapfile";
-      size = 96768; # 96GB + 768MB for hibernation
+      size = 96768;
     }
   ];
 }

@@ -1,17 +1,10 @@
-###############################################################################
-# Shared Flake Utilities
-# Common functionality for discovering and importing unified host configurations
-###############################################################################
 {
   lib,
   pkgs,
   hostsDir ? ../../hosts,
   inputs ? null,
 }: let
-  # Explicit host list - no filesystem scanning
   hostNames = ["y0usaf-desktop"];
-
-  # Import unified configurations for each host
   unifiedConfigs = builtins.listToAttrs (
     map
     (name: {
@@ -20,19 +13,14 @@
     })
     hostNames
   );
-
-  # Extract system configurations from unified configs
   systemConfigs = builtins.listToAttrs (
     map
     (name: {
       inherit name;
       value = {
-        # Hardware configuration from system
         inherit (unifiedConfigs.${name}.system) hardware;
-        # Service declarations from system
         inherit (unifiedConfigs.${name}.system) services;
         system = {
-          # Move imports into system scope to avoid HM exposure
           imports = unifiedConfigs.${name}.system.imports or [];
         };
         users = unifiedConfigs.${name}.users or {};
@@ -40,8 +28,6 @@
     })
     hostNames
   );
-
-  # Extract home configurations from unified configs (disabled for migration)
   homeConfigs = builtins.listToAttrs (
     map
     (name: {
@@ -50,8 +36,6 @@
     })
     hostNames
   );
-
-  # Common specialArgs builder
   mkSpecialArgs = commonSpecialArgs: hostname:
     commonSpecialArgs
     // {
@@ -59,7 +43,6 @@
       hostHome = homeConfigs.${hostname};
       inherit hostname;
     };
-  # Simplified shared module function - just imports options and sets config
   mkSharedModule = {
     hostname,
     hostsDir ? hostsDir,
@@ -69,7 +52,6 @@
     pkgs,
     ...
   }: let
-    # Read the host configuration directly
     hostConfig =
       if hostname != null
       then
@@ -78,8 +60,6 @@
           inputs = null;
         }
       else throw "hostname must be provided to shared core module";
-
-    # Extract shared configuration from host config
     sharedConfig = hostConfig.shared;
   in {
     options.shared = {
@@ -147,7 +127,6 @@
         default = {};
       };
     };
-
     config = {
       shared = sharedConfig;
       assertions = [

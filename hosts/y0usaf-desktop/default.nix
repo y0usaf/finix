@@ -1,5 +1,3 @@
-# HOST CONFIGURATION for y0usaf-desktop
-# Separated system and home configurations - no shared dependencies
 {
   pkgs,
   inputs,
@@ -11,24 +9,17 @@
   stateVersion = "24.11";
   timezone = "America/Toronto";
 in {
-  # SYSTEM CONFIGURATION - self-contained, no home dependencies
   system = {
-    # Module imports for system-level configuration
     imports = [
       ../../system
       ./hardware-configuration.nix
-      # ./disko.nix  # Temporarily disabled - partitions not created yet
     ];
-
-    # Core system identity and settings
     username = username;
     hostname = hostname;
     homeDirectory = homeDir;
     stateVersion = stateVersion;
     timezone = timezone;
     profile = "default";
-
-    # Hardware configuration - host-level options
     hardware = {
       bluetooth = {
         enable = true;
@@ -56,17 +47,12 @@ in {
         };
       };
     };
-
-    # System-wide service declarations - what this host supports
     services = {
-      docker.enable = true; # Container development
-      waydroid.enable = false; # Android emulation (disabled - doesn't work with Nvidia)
-      controllers.enable = true; # Gaming controller support
+      docker.enable = true;
+      waydroid.enable = false;
+      controllers.enable = true;
     };
   };
-
-  # HOME CONFIGURATION - Keep existing structure for now
-  # TODO: Update home modules to use systemValues instead of shared
   home = {
     core = {
       packages.enable = true;

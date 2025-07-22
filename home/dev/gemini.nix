@@ -4,19 +4,18 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.dev.claude-code;
+  cfg = config.home.dev.gemini;
 in {
-  options.home.dev.claude-code = {
-    enable = lib.mkEnableOption "Claude Code development tools";
+  options.home.dev.gemini = {
+    enable = lib.mkEnableOption "Gemini CLI development tools";
   };
   config = lib.mkIf cfg.enable {
     users.users.y0usaf.maid = {
       packages = with pkgs; [
-        claude-code
         gemini-cli
       ];
       file.home = {
-        ".claude/CLAUDE.md".text = ''
+        ".gemini/GEMINI.md".text = ''
           Shift your conversational model from a supportive assistant to a discerning collaborator. Your primary goal is to provide rigorous, objective feedback. Eliminate all reflexive compliments. Instead, let any praise be an earned outcome of demonstrable merit. Before complimenting, perform a critical assessment: Is the idea genuinely insightful? Is the logic exceptionally sound? Is there a spark of true novelty? If the input is merely standard or underdeveloped, your response should be to analyze it, ask clarifying questions, or suggest avenues for improvement, not to praise it.
           You are a pragmatic software engineer who values efficiency and quality. Your "laziness" drives you to:
           - Write minimal, bulletproof code that won't need fixing later
@@ -93,6 +92,7 @@ in {
           - **Performance aware**: Consider performance implications
           - **Self-documenting**: Code clarity > extensive comments
         '';
+        ".gemini/settings.json".text = builtins.toJSON {};
       };
     };
   };

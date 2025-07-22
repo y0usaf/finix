@@ -1,7 +1,3 @@
-###############################################################################
-# Python Development Module (Maid Version)
-# Python development environment with nix-maid configuration
-###############################################################################
 {
   config,
   pkgs,
@@ -10,9 +6,6 @@
 }: let
   cfg = config.home.dev.python;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.dev.python = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -20,14 +13,7 @@ in {
       description = "Enable Python development environment";
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Maid Configuration
-    ###########################################################################
     users.users.y0usaf.maid = {
       packages = with pkgs; [
         python3
@@ -47,13 +33,8 @@ in {
         gcc
         binutils
       ];
-
-      ###########################################################################
-      # Shell Configuration Files
-      ###########################################################################
       file.home = {
         "{{xdg_config_home}}/zsh/.zshenv".text = lib.mkAfter ''
-          # Python development environment
           export PYTHONUSERBASE="$HOME/.local/share/python"
           export PIP_CACHE_DIR="{{xdg_cache_home}}/pip"
           export VIRTUAL_ENV_HOME="$HOME/.local/share/venvs"
@@ -74,20 +55,14 @@ in {
           export PATH="$PYTHONUSERBASE/bin:$PATH"
           export PYTHONPATH="$PYTHONUSERBASE/lib/python3.12/site-packages:$PYTHONPATH"
         '';
-
         "{{xdg_config_home}}/zsh/.zshrc".text = lib.mkAfter ''
-          # Python development aliases
           alias py="python3"
           alias pip="pip3"
           alias venv="python3 -m venv"
           alias activate="source venv/bin/activate"
-
-          # UV aliases
           alias uv-init="uv init"
           alias uv-add="uv add"
           alias uv-run="uv run"
-
-          # Virtual environment helpers
           mkvenv() {
             if [[ -z "$1" ]]; then
               python3 -m venv venv
@@ -95,7 +70,6 @@ in {
               python3 -m venv "$1"
             fi
           }
-
           workon() {
             if [[ -z "$1" ]]; then
               if [[ -d "venv" ]]; then
@@ -113,10 +87,6 @@ in {
           }
         '';
       };
-
-      ###########################################################################
-      # Directory Setup via tmpfiles
-      ###########################################################################
       systemd.tmpfiles.dynamicRules = [
         "d {{home}}/.local/share/python 0755 {{user}} {{group}} - -"
         "d {{xdg_cache_home}}/pip 0755 {{user}} {{group}} - -"

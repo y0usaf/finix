@@ -1,7 +1,3 @@
-###############################################################################
-# Format Nix Service
-# Automatic Nix file formatting with alejandra
-###############################################################################
 {
   config,
   pkgs,
@@ -9,47 +5,50 @@
   ...
 }: let
   cfg = config.home.services.formatNix;
+  
+  formatScript = pkgs.writeShellScript "format-nix-watcher" ''
+    set -e
+    WATCH_DIR="${cfg.watchDirectory}"
+    cd "$WATCH_DIR"
+    
+    echo "Starting Nix file watcher on $WATCH_DIR..."
+    
+    ${pkgs.inotify-tools}/bin/inotifywait -m -r -e modify,create,move \
+      --include='.*\.nix$' \
+      "$WATCH_DIR" | while read path action file; do
+      
+      if [[ "$file" =~ \.nix$ ]]; then
+        echo "Detected $action on $file, formatting..."
+        ${pkgs.alejandra}/bin/alejandra "$path$file"
+        echo "✅ Formatted $file"
+      fi
+    done
+  '';
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.services.formatNix = {
     enable = lib.mkEnableOption "automatic Nix file formatting with alejandra";
-
-    directory = lib.mkOption {
+    watchDirectory = lib.mkOption {
       type = lib.types.str;
-      default = "{{home}}/nixos";
+      default = "/home/y0usaf/nixos";
       description = "Directory to watch for Nix file changes";
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
+  
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Maid Configuration
-    ###########################################################################
     users.users.y0usaf.maid = {
-      packages = [pkgs.alejandra];
-
-      systemd.services.format-nix = {
-        description = "Format Nix files on change";
+      packages = [pkgs.alejandra pkgs.inotify-tools];
+      
+      systemd.services.format-nix-watcher = {
+        description = "Watch and format Nix files on change";
+        after = ["graphical-session.target"];
+        wantedBy = ["default.target"];
+        
         serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.alejandra}/bin/alejandra .";
-          WorkingDirectory = "{{home}}/nixos";
+          Type = "simple";
+          ExecStart = formatScript;
+          Restart = "always";
+          RestartSec = "5";
         };
-      };
-
-      systemd.timers.format-nix = {
-        description = "Timer for formatting Nix files";
-        timerConfig = {
-          OnBootSec = "1min";
-          OnUnitActiveSec = "5min";
-          Unit = "format-nix.service";
-        };
-        wantedBy = ["timers.target"];
       };
     };
   };

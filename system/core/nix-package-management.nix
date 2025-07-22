@@ -1,4 +1,3 @@
-# This module configures Nix package management.
 {
   config,
   pkgs,
@@ -16,11 +15,9 @@
         trusted-users = ["root" config.hostSystem.username];
         builders-use-substitutes = true;
         fallback = true;
-
         substituters = [
           "https://cache.nixos.org"
         ];
-
         trusted-public-keys = [
           "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         ];

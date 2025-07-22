@@ -1,15 +1,9 @@
-###############################################################################
-# Firefox Policies Module
-# Simple Firefox enterprise policies configuration
-###############################################################################
 {
   config,
   lib,
   ...
 }: let
   username = "y0usaf";
-
-  # Firefox policies.json content
   policiesContent = builtins.toJSON {
     policies = {
       DisableTelemetry = true;
@@ -30,7 +24,6 @@ in {
   config = lib.mkIf config.home.programs.firefox.enable {
     users.users.${username}.maid = {
       file.home = {
-        # Firefox Policies (system-wide)
         ".mozilla/firefox/policies/policies.json".text = policiesContent;
       };
     };

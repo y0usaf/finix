@@ -1,11 +1,4 @@
-###############################################################################
-# Hyprland Module Options
-# Defines all configuration options for the Hyprland window manager
-###############################################################################
 {lib, ...}: {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.ui.hyprland = {
     enable = lib.mkEnableOption "Hyprland window manager";
     flake = {

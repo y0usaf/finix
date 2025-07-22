@@ -1,9 +1,3 @@
-###############################################################################
-# Sway Launcher Desktop Module
-# A simple application launcher for Sway using fzf
-# - Creates the launcher script in ~/.config/scripts/
-# - Handles executable permissions properly
-###############################################################################
 {
   config,
   lib,
@@ -12,59 +6,34 @@
 }: let
   cfg = config.home.programs.sway-launcher-desktop;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.programs.sway-launcher-desktop = {
     enable = lib.mkEnableOption "sway launcher desktop";
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Packages
-    ###########################################################################
     users.users.y0usaf.maid.packages = with pkgs; [
       fzf
     ];
-
-    ###########################################################################
-    # Configuration Files
-    ###########################################################################
     users.users.y0usaf.maid.file.xdg_config."scripts/sway-launcher-desktop.sh" = {
       executable = true;
       text = ''
-        #!/usr/bin/env bash
-        # terminal application launcher for sway, using fzf
-        # Based on: https://gitlab.com/FlyingWombat/my-scripts/blob/master/sway-launcher
-        # https://gist.github.com/Biont/40ef59652acf3673520c7a03c9f22d2a
         shopt -s nullglob globstar
         set -o pipefail
-        # Ensure file descriptor 3 is available for debug output
         exec 3>/dev/null 2>/dev/null || true
-        # shellcheck disable=SC2154
         trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
         IFS=$'\n\t'
         DEL=$'\34'
-
         FZF_COMMAND="''${FZF_COMMAND:=fzf}"
         TERMINAL_COMMAND="''${TERMINAL_COMMAND:="$TERMINAL -e"}"
         GLYPH_COMMAND="''${GLYPH_COMMAND-  }"
         GLYPH_DESKTOP="''${GLYPH_DESKTOP-  }"
         CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/sway-launcher-desktop"
         PROVIDERS_FILE="''${PROVIDERS_FILE:=providers.conf}"
-        if [[ "''${PROVIDERS_FILE#/}" == "''${PROVIDERS_FILE}" ]]; then
-          # $PROVIDERS_FILE is a relative path, prepend $CONFIG_DIR
+        if [[ "''${PROVIDERS_FILE
           PROVIDERS_FILE="''${CONFIG_DIR}/''${PROVIDERS_FILE}"
         fi
         if [[ ! -v PREVIEW_WINDOW ]]; then
             PREVIEW_WINDOW=up:2:noborder
         fi
-
-        # Provider config entries are separated by the field separator \034 and have the following structure:
-        # list_cmd,preview_cmd,launch_cmd,purge_cmd
         declare -A PROVIDERS
         if [ -f "''${PROVIDERS_FILE}" ]; then
           eval "$(awk -F= '
@@ -84,26 +53,22 @@ in {
             }
           }' "''${PROVIDERS_FILE}")"
           if [[ ! -v HIST_FILE ]]; then
-            HIST_FILE="''${XDG_CACHE_HOME:-$HOME/.cache}/''${0##*/}-''${PROVIDERS_FILE##*/}-history.txt"
+            HIST_FILE="''${XDG_CACHE_HOME:-$HOME/.cache}/''${0
           fi
         else
           PROVIDERS['desktop']="''${0} list-entries''${DEL}''${0} describe-desktop \"{1}\"''${DEL}''${0} run-desktop '{1}' {2}''${DEL}test -f '{1}' || exit 43"
           PROVIDERS['command']="''${0} list-commands''${DEL}''${0} describe-command \"{1}\"''${DEL}''${TERMINAL_COMMAND} {1}''${DEL}command -v '{1}' || exit 43"
           if [[ ! -v HIST_FILE ]]; then
-            HIST_FILE="''${XDG_CACHE_HOME:-$HOME/.cache}/''${0##*/}-history.txt"
+            HIST_FILE="''${XDG_CACHE_HOME:-$HOME/.cache}/''${0
           fi
         fi
-        PROVIDERS['user']="exit''${DEL}exit''${DEL}{1}" # Fallback provider that simply executes the exact command if there were no matches
-
+        PROVIDERS['user']="exit''${DEL}exit''${DEL}{1}"
         if [[ -n "''${HIST_FILE}" ]]; then
           mkdir -p "''${HIST_FILE%/*}" && touch "$HIST_FILE"
           readarray HIST_LINES <"$HIST_FILE"
         fi
-
         function describe() {
-          # shellcheck disable=SC2086
           readarray -d ''${DEL} -t PROVIDER_ARGS <<<''${PROVIDERS[''${1}]}
-          # shellcheck disable=SC2086
           [ -n "''${PROVIDER_ARGS[1]}" ] && eval "''${PROVIDER_ARGS[1]//\\{1\\}/''${2}}"
         }
         function describe-desktop() {
@@ -114,13 +79,11 @@ in {
         function describe-command() {
           readarray arr < <(whatis -l "$1" 2>/dev/null)
           description="''${arr[0]}"
-          description="''${description#* - }"
+          description="''${description
           echo -e "\033[33m''${1}\033[0m"
           echo "''${description:-No description}"
         }
-
         function provide() {
-          # shellcheck disable=SC2086
           readarray -d ''${DEL} -t PROVIDER_ARGS <<<''${PROVIDERS[$1]}
           eval "''${PROVIDER_ARGS[0]}"
         }
@@ -132,8 +95,6 @@ in {
           done | sort -u
         }
         function list-entries() {
-          # Get locations of desktop application folders according to spec
-          # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
           IFS=':' read -ra DIRS <<<"''${XDG_DATA_HOME-''${HOME}/.local/share}:''${XDG_DATA_DIRS-/usr/local/share:/usr/share}"
           for i in "''${!DIRS[@]}"; do
             if [[ ! -d "''${DIRS[i]}" ]]; then
@@ -142,12 +103,9 @@ in {
               DIRS[$i]="''${DIRS[i]}/applications/**/*.desktop"
             fi
           done
-
-          # shellcheck disable=SC2068
           entries ''${DIRS[@]} | sort -k2
         }
         function entries() {
-          # shellcheck disable=SC2068
           awk -v pre="$GLYPH_DESKTOP" -F= '
             function desktopFileID(filename){
               sub("^.*applications/", "", filename);
@@ -159,7 +117,6 @@ in {
               hidden=0;
               block="";
               a=0
-
               id=desktopFileID(FILENAME)
               if(id in fileIds){
                 nextfile;
@@ -196,7 +153,6 @@ in {
               }
             }' \
             $@ </dev/null
-          # the empty stdin is needed in case no *.desktop files
         }
         function run-desktop() {
           CMD="$("''${0}" generate-command "$@" 2>&3)"
@@ -204,17 +160,11 @@ in {
           eval "''${CMD}"
         }
         function generate-command() {
-          # Define the search pattern that specifies the block to search for within the .desktop file
           PATTERN="^\\\\[Desktop Entry\\\\]"
           if [[ -n $2 ]]; then
             PATTERN="^\\\\[Desktop Action ''${2}\\\\]"
           fi
           echo "Searching for pattern: ''${PATTERN}" >&3
-          # 1. We see a line starting [Desktop, but we're already searching: deactivate search again
-          # 2. We see the specified pattern: start search
-          # 3. We see an Exec= line during search: remove field codes and set variable
-          # 3. We see a Path= line during search: set variable
-          # 4. Finally, build command line
           awk -v pattern="''${PATTERN}" -v terminal_cmd="''${TERMINAL_COMMAND}" -F= '
             BEGIN{a=0;exec=0;path=0}
                /^\[Desktop/{
@@ -242,10 +192,9 @@ in {
               print exec
             }' "$1"
         }
-
         function shouldAutostart() {
             local condition="$(cat $1 | grep "AutostartCondition" | cut -d'=' -f2)"
-            local filename="''${XDG_CONFIG_HOME-''${HOME}/.config}/''${condition#* }"
+            local filename="''${XDG_CONFIG_HOME-''${HOME}/.config}/''${condition
             case $condition in
                 if-exists*)
                     [[ -e $filename ]]
@@ -258,7 +207,6 @@ in {
                     ;;
             esac
         }
-
         function autostart() {
           for application in $(list-autostart); do
               if shouldAutostart "$application" ; then
@@ -266,10 +214,7 @@ in {
               fi
           done
         }
-
         function list-autostart() {
-          # Get locations of desktop application folders according to spec
-          # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
           IFS=':' read -ra DIRS <<<"''${XDG_CONFIG_HOME-''${HOME}/.config}:''${XDG_CONFIG_DIRS-/etc/xdg}"
           for i in "''${!DIRS[@]}"; do
             if [[ ! -d "''${DIRS[i]}" ]]; then
@@ -278,8 +223,6 @@ in {
               DIRS[$i]="''${DIRS[i]}/autostart/*.desktop"
             fi
           done
-
-          # shellcheck disable=SC2068
           awk -v pre="$GLYPH_DESKTOP" -F= '
             function desktopFileID(filename){
               sub("^.*autostart/", "", filename);
@@ -291,7 +234,6 @@ in {
               block="";
               disabled=0;
               a=0
-
               id=desktopFileID(FILENAME)
               if(id in fileIds){
                 nextfile;
@@ -310,9 +252,7 @@ in {
             }' \
             ''${DIRS[@]} </dev/null
         }
-
         purge() {
-         # shellcheck disable=SC2188
          > "''${HIST_FILE}"
          declare -A PURGE_CMDS
          for PROVIDER_NAME in "''${!PROVIDERS[@]}"; do
@@ -321,17 +261,16 @@ in {
            [ -z "''${PURGE_CMD}" ] && PURGE_CMD='test -f "{1}" || exit 43'
            PURGE_CMDS[$PROVIDER_NAME]="''${PURGE_CMD%$'\n'}"
           done
-          for HIST_LINE in "''${HIST_LINES[@]#*' '}"; do
+          for HIST_LINE in "''${HIST_LINES[@]
             readarray -td $'\034' HIST_ENTRY <<<''${HIST_LINE}
             ENTRY=''${HIST_ENTRY[1]}
             readarray -td ' ' FILTER <<<''${PURGE_CMDS[$ENTRY]//\{1\}/''${HIST_ENTRY[0]}}
-            (eval "''${FILTER[@]}" 1>/dev/null) # Run filter command discarding output. We only want the exit status
+            (eval "''${FILTER[@]}" 1>/dev/null)
             if [[ $? -ne 43 ]]; then
               echo "1 ''${HIST_LINE[@]%$'\n'}" >> "''${HIST_FILE}"
             fi
           done
         }
-
         case "$1" in
         describe | describe-desktop | describe-command | entries | list-entries | list-commands | list-autostart | generate-command | autostart | run-desktop | provide | purge)
           "$@"
@@ -339,44 +278,31 @@ in {
           ;;
         esac
         echo "Starting launcher instance with the following providers:" "''${!PROVIDERS[@]}" >&3
-
         FZFPIPE=$(mktemp -u)
         mkfifo "$FZFPIPE"
         trap 'rm "$FZFPIPE"' EXIT INT
-
-        # Append Launcher History, removing usage count
-        (printf '%s' "''${HIST_LINES[@]#* }" >>"$FZFPIPE") &
-
-        # Iterate over providers and run their list-command
+        (printf '%s' "''${HIST_LINES[@]
         for PROVIDER_NAME in "''${!PROVIDERS[@]}"; do
           (bash -c "''${0} provide ''${PROVIDER_NAME}" >>"$FZFPIPE") &
         done
-
         readarray -t COMMAND_STR <<<$(
           ''${FZF_COMMAND} --ansi +s -x -d '\034' --nth ..3 --with-nth 3 \
             --print-query \
             --preview "$0 describe {2} {1}" \
             --preview-window="''${PREVIEW_WINDOW}" \
             --no-multi --cycle \
-            --prompt="''${GLYPH_PROMPT-# }" \
+            --prompt="''${GLYPH_PROMPT-
             --header="" --no-info --margin="1,2" \
             --color='16,gutter:-1' \
             <"$FZFPIPE"
         ) || exit 1
-        # Get the last line of the fzf output. If there were no matches, it contains the query which we'll treat as a custom command
-        # If there were matches, it contains the selected item
         COMMAND_STR=$(printf '%s\n' "''${COMMAND_STR[@]: -1}")
-        # We still need to format the query to conform to our fallback provider.
-        # We check for the presence of field separator character to determine if we're dealing with a custom command
         if [[ $COMMAND_STR != *$'\034'* ]]; then
             COMMAND_STR="''${COMMAND_STR}"$'\034user\034'"''${COMMAND_STR}"$'\034'
-            SKIP_HIST=1 # I chose not to include custom commands in the history. If this is a bad idea, open an issue please
+            SKIP_HIST=1
         fi
-
         [ -z "$COMMAND_STR" ] && exit 1
-
         if [[ -n "''${HIST_FILE}" && ! "$SKIP_HIST" ]]; then
-          # update history
           for i in "''${!HIST_LINES[@]}"; do
             if [[ "''${HIST_LINES[i]}" == *" $COMMAND_STR"$'\n' ]]; then
               HIST_COUNT=''${HIST_LINES[i]%% *}
@@ -388,19 +314,13 @@ in {
           if ! ((match)); then
             HIST_LINES+=("1 $COMMAND_STR"$'\n')
           fi
-
           printf '%s' "''${HIST_LINES[@]}" | sort -nr >"$HIST_FILE"
         fi
-
-        # shellcheck disable=SC2086
         readarray -d $'\034' -t PARAMS <<<''${COMMAND_STR}
-        # shellcheck disable=SC2086
         readarray -d ''${DEL} -t PROVIDER_ARGS <<<''${PROVIDERS[''${PARAMS[1]}]}
-        # Substitute {1}, {2} etc with the correct values
         COMMAND=''${PROVIDER_ARGS[2]//\{1\}/''${PARAMS[0]}}
         COMMAND=''${COMMAND//\{2\}/''${PARAMS[3]}}
         COMMAND=''${COMMAND%%[[:space:]]}
-
         if [ -t 1 ]; then
           echo "Launching command: ''${COMMAND}" >&3
           setsid /bin/sh -c "''${COMMAND}" >&/dev/null </dev/null &
