@@ -2,7 +2,7 @@
   lib,
   pkgs,
   sources,
-  hostsDir ? ../../hosts,
+  hostsDir ? ../hosts,
 }: {
   mkNixosConfigurations = {
     inputs,
@@ -10,7 +10,7 @@
     commonSpecialArgs,
   }: let
     hostNames = ["y0usaf-desktop"];
-    maidIntegration = import ./maid.nix {inherit hostsDir;};
+    maidIntegration = import ./flake/maid.nix {inherit hostsDir;};
   in
     builtins.listToAttrs (map
       (hostname: let
@@ -22,6 +22,8 @@
         value = import (sources.nixpkgs + "/nixos") {
           inherit system;
           configuration = {
+            # Override nixpkgs to use our extended lib
+            nixpkgs.lib = lib;
             imports = [
               ({config, ...}: {
                 imports = hostConfig.system.imports;
@@ -37,15 +39,17 @@
                 };
               })
               (maidIntegration.mkNixosModule {inherit inputs hostname;})
-              ../../home
+              ../home
               inputs.chaotic.outPath
             ];
-            _module.args = commonSpecialArgs // {
-              inherit hostname hostsDir;
-              inherit (pkgs) lib;
-              hostConfig = hostConfig;
-              hostSystem = hostConfig.system;
-            };
+            _module.args =
+              commonSpecialArgs
+              // {
+                inherit hostname hostsDir;
+                lib = lib; # Use the extended lib passed to npins-system.nix
+                hostConfig = hostConfig;
+                hostSystem = hostConfig.system;
+              };
           };
         };
       })

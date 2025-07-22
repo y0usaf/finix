@@ -142,7 +142,7 @@ in {
               shift
               nix run "nixpkgs#$pkg" -- "$@"
           }
-          
+
           ${lib.concatStringsSep "\n"
             (lib.mapAttrsToList (name: value: "alias ${name}='${value}'") baseAliases)}
         '';
