@@ -1,13 +1,13 @@
 {
   description = "Minimal flake wrapper for npins-based NixOS configuration";
-  
+
   # No inputs - everything comes from npins
   inputs = {};
-  
-  outputs = { self }: {
+
+  outputs = {self}: {
     # Just expose our npins-based nixosConfigurations
     nixosConfigurations = (import ./default.nix).nixosConfigurations;
-    
+
     # Expose formatter for flake check compatibility
     formatter.x86_64-linux = (import ./default.nix).formatter.x86_64-linux;
   };
