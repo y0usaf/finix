@@ -1,24 +1,14 @@
-{
-  pkgs,
-  inputs,
-  ...
-}: let
-  username = "y0usaf";
-  homeDir = "/home/${username}";
-  hostname = "y0usaf-desktop";
-  stateVersion = "24.11";
-  timezone = "America/Toronto";
-in {
+{pkgs, ...}: {
   system = {
     imports = [
       ../../system
       ./hardware-configuration.nix
     ];
-    username = username;
-    hostname = hostname;
-    homeDirectory = homeDir;
-    stateVersion = stateVersion;
-    timezone = timezone;
+    username = "y0usaf";
+    hostname = "y0usaf-desktop";
+    homeDirectory = "/home/y0usaf";
+    stateVersion = "24.11";
+    timezone = "America/Toronto";
     profile = "default";
     hardware = {
       bluetooth = {
@@ -99,16 +89,16 @@ in {
       user.enable = true;
     };
     directories = {
-      flake.path = "${homeDir}/nixos";
-      music.path = "${homeDir}/Music";
-      dcim.path = "${homeDir}/DCIM";
+      flake.path = "/home/y0usaf/nixos";
+      music.path = "/home/y0usaf/Music";
+      dcim.path = "/home/y0usaf/DCIM";
       steam = {
-        path = "${homeDir}/.local/share/Steam";
+        path = "/home/y0usaf/.local/share/Steam";
         create = false;
       };
       wallpapers = {
-        static.path = "${homeDir}/DCIM/Wallpapers/32_9";
-        video.path = "${homeDir}/DCIM/Wallpapers_Video";
+        static.path = "/home/y0usaf/DCIM/Wallpapers/32_9";
+        video.path = "/home/y0usaf/DCIM/Wallpapers_Video";
       };
     };
     ui = {
@@ -177,7 +167,7 @@ in {
       };
       nh = {
         enable = true; # Re-enabled with minimal flake wrapper
-        flake = "${homeDir}/nixos";
+        flake = "/home/y0usaf/nixos";
       };
       npins-build = {
         enable = true;
