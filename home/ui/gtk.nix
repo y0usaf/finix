@@ -183,19 +183,21 @@ in {
       ######################################################################
       # Native nix-maid DConf and GSettings Support
       ######################################################################
-      gsettings.settings = {
-        org.gnome.desktop.interface = {
-          color-scheme = "prefer-dark";
-          text-scaling-factor = scaleFactor;
-          scaling-factor = scaleFactor;
-        };
-      };
+      # Temporarily disabled - schemas not available
+      # gsettings.settings = {
+      #   org.gnome.desktop.interface = {
+      #     color-scheme = "prefer-dark";
+      #     text-scaling-factor = scaleFactor;
+      #     scaling-factor = scaleFactor;
+      #   };
+      # };
 
-      dconf.settings = {
-        "/org/gnome/desktop/interface/color-scheme" = "prefer-dark";
-        "/org/gnome/desktop/interface/text-scaling-factor" = scaleFactor;
-        "/org/gnome/desktop/interface/scaling-factor" = scaleFactor;
-      };
+      # Temporarily disabled - may be causing issues
+      # dconf.settings = {
+      #   "/org/gnome/desktop/interface/color-scheme" = "prefer-dark";
+      #   "/org/gnome/desktop/interface/text-scaling-factor" = scaleFactor;
+      #   "/org/gnome/desktop/interface/scaling-factor" = scaleFactor;
+      # };
     };
   };
 }
