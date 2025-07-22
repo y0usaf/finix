@@ -176,7 +176,7 @@ in {
         email = "OA99@Outlook.com";
       };
       nh = {
-        enable = false; # Disabled for npins migration
+        enable = true; # Re-enabled with minimal flake wrapper
         flake = "${homeDir}/nixos";
       };
       npins-build = {
