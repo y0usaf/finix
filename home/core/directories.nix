@@ -1,4 +1,3 @@
-#═══════════════════════════ 🔧 DIRECTORIES MODULE 🔧 ═══════════════════════════#
 {lib, ...}: let
   inherit (lib) t mkOpt dirModule;
 in {

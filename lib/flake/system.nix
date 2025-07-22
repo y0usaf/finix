@@ -1,25 +1,18 @@
-###############################################################################
-# System Configuration Utilities
-# Functions for generating NixOS system configurations without shared dependencies
-###############################################################################
 {
   lib,
   pkgs,
   hostsDir ? ../../hosts,
 }: {
-  # Helper function to generate nixosConfigurations
   mkNixosConfigurations = {
     inputs,
     system,
     commonSpecialArgs,
   }: let
     hostNames = ["y0usaf-desktop"];
-
     maidIntegration = import ./maid.nix {inherit hostsDir;};
   in
     builtins.listToAttrs (map
       (hostname: let
-        # Import host configuration
         hostConfig = import (hostsDir + "/${hostname}/default.nix") {
           inherit pkgs inputs;
         };
@@ -32,18 +25,12 @@
             // {
               inherit hostname hostsDir;
               inherit (pkgs) lib;
-              # Make host configuration available to modules
               hostConfig = hostConfig;
-              # Pass hostSystem for hardware modules (for backward compatibility)
               hostSystem = hostConfig.system;
             };
           modules = [
-            # System configuration with direct values (no shared dependency)
             ({config, ...}: {
-              # Import system modules from host config
               imports = hostConfig.system.imports;
-
-              # Configure system options directly from host config
               hostSystem = {
                 username = hostConfig.system.username;
                 hostname = hostConfig.system.hostname;
@@ -55,14 +42,8 @@
                 services = hostConfig.system.services or {};
               };
             })
-
-            # Integration modules
             (maidIntegration.mkNixosModule {inherit inputs hostname;})
-
-            # Home modules (maid-based)
             ../../home
-
-            # External modules
             inputs.chaotic.nixosModules.default
           ];
         };

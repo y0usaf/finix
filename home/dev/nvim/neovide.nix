@@ -1,4 +1,3 @@
-# Simple Neovide package installation
 {
   config,
   lib,
@@ -13,15 +12,12 @@ in {
       packages = with pkgs; [
         neovide
       ];
-
       file.xdg_config."neovide/config.toml".text = ''
         [font]
         normal = ["Fast_Mono"]
         size = 14.0
-
         [window]
         transparency = 0.9
-
         [input]
         ime = true
       '';

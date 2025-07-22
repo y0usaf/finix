@@ -1,7 +1,3 @@
-###############################################################################
-# Marvel Rivals Engine Configuration - Nix-Maid Version
-# Optimizes graphics settings for better performance
-###############################################################################
 {
   config,
   lib,
@@ -9,9 +5,6 @@
 }: let
   cfg = config.home.gaming.marvel-rivals.engine;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.gaming.marvel-rivals.engine = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -19,10 +12,6 @@ in {
       description = "Enable Marvel Rivals engine configuration";
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
     users.users.y0usaf.maid.file.home.".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
       "SystemSettings" = {
@@ -85,7 +74,6 @@ in {
         "FX.MaxGPUParticlesSpawnedPerFrame" = "0";
         "r.ParticleLODBias" = "3";
       };
-
       "/script/engine.renderersettings" = {
         "r.DefaultFeature.LensFlare" = "False";
         "r.DefaultFeature.DepthOfField" = "False";
