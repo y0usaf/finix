@@ -45,6 +45,12 @@ in {
         vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
         vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
+        -- UFO folding settings
+        vim.opt.foldcolumn = "1"
+        vim.opt.foldlevel = 99
+        vim.opt.foldlevelstart = 99
+        vim.opt.foldenable = true
+
 
         -- Load vim.pack configuration
         require("vim-pack-config")
@@ -78,6 +84,7 @@ in {
 
         -- Utility
         keymap("n", "<leader>ut", "<cmd>Twilight<cr>", { desc = "Toggle twilight" })
+        keymap("n", "<leader>uh", function() require("hardtime").toggle() end, { desc = "Toggle hardtime" })
         keymap("n", "<C-\\", "<cmd>ToggleTerm<cr>", { desc = "Toggle terminal" })
         keymap("t", "<C-\\", "<cmd>ToggleTerm<cr>", { desc = "Toggle terminal" })
         keymap("n", "zR", function() require("ufo").openAllFolds() end, { desc = "Open all folds" })

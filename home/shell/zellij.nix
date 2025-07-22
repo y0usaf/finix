@@ -19,7 +19,7 @@
     };
   };
   # Import IDE layout
-  ideLayout = import ./zellij-ide.nix { inherit lib; };
+  ideLayout = import ./zellij-ide.nix {inherit lib;};
 in {
   ###########################################################################
   # Module Options
@@ -104,8 +104,6 @@ in {
             show_startup_tips false
             simplified_ui true
           '';
-
-
 
           # Note: Shell configuration (zshrc, zlogout) should be handled by shell modules
           # Keeping only zellij-specific config files here

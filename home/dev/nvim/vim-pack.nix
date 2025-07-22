@@ -14,20 +14,20 @@ in {
         "https://github.com/neovim/nvim-lspconfig",
         "https://github.com/hrsh7th/nvim-cmp",
         "https://github.com/hrsh7th/cmp-nvim-lsp",
-        "https://github.com/hrsh7th/cmp-buffer", 
+        "https://github.com/hrsh7th/cmp-buffer",
         "https://github.com/hrsh7th/cmp-path",
         "https://github.com/L3MON4D3/LuaSnip",
         "https://github.com/saadparwaiz1/cmp_luasnip",
         "https://github.com/onsails/lspkind.nvim",
-        
+
         -- File Navigation & Search
         "https://github.com/nvim-telescope/telescope.nvim",
         "https://github.com/nvim-lua/plenary.nvim",
         { src = "https://github.com/nvim-telescope/telescope-fzf-native.nvim" },
-        
+
         -- Syntax & Highlighting
         "https://github.com/nvim-treesitter/nvim-treesitter",
-        
+
         -- Utilities
         "https://github.com/numToStr/Comment.nvim",
         "https://github.com/windwp/nvim-autopairs",
@@ -36,18 +36,19 @@ in {
         "https://github.com/j-hui/fidget.nvim",
         "https://github.com/RRethy/vim-illuminate",
         "https://github.com/folke/twilight.nvim",
-        
+        "https://github.com/m4xshen/hardtime.nvim",
+
         -- File Explorer
         "https://github.com/nvim-neo-tree/neo-tree.nvim",
         "https://github.com/nvim-tree/nvim-web-devicons",
         "https://github.com/MunifTanjim/nui.nvim",
-        
+
         -- Terminal
         "https://github.com/akinsho/toggleterm.nvim",
-        
+
         -- Theme & UI
         "https://github.com/scottmckendry/cyberdream.nvim",
-        "https://github.com/Bekaboo/dropbar.nvim", 
+        "https://github.com/Bekaboo/dropbar.nvim",
         "https://github.com/stevearc/dressing.nvim",
         "https://github.com/anuvyklack/windows.nvim",
         "https://github.com/anuvyklack/middleclass",
@@ -56,16 +57,16 @@ in {
         "https://github.com/lukas-reineke/indent-blankline.nvim",
         "https://github.com/folke/flash.nvim",
         "https://github.com/echasnovski/mini.hipatterns",
-        
+
         -- Specialized
         "https://github.com/kawre/leetcode.nvim",
       })
-      
+
       -- LSP Configuration
       local function setup_lsp()
         local lspconfig = require("lspconfig")
         local capabilities = require("cmp_nvim_lsp").default_capabilities()
-        
+
         local on_attach = function(client, bufnr)
           local opts = { buffer = bufnr, silent = true }
           vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -76,7 +77,7 @@ in {
           vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
           vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
         end
-        
+
         local servers = { "lua_ls", "nil_ls", "pyright" }
         for _, server in ipairs(servers) do
           lspconfig[server].setup({
@@ -88,13 +89,13 @@ in {
           })
         end
       end
-      
-      -- Completion Configuration  
+
+      -- Completion Configuration
       local function setup_completion()
         local cmp = require("cmp")
         local luasnip = require("luasnip")
         local lspkind = require("lspkind")
-        
+
         cmp.setup({
           snippet = {
             expand = function(args)
@@ -133,13 +134,13 @@ in {
           },
         })
       end
-      
+
       -- Telescope Configuration
       local function setup_telescope()
         require("telescope").setup({})
         pcall(require("telescope").load_extension, "fzf")
       end
-      
+
       -- Treesitter Configuration
       local function setup_treesitter()
         require("nvim-treesitter.configs").setup({
@@ -147,7 +148,7 @@ in {
           indent = { enable = true },
         })
       end
-      
+
       -- Theme Configuration
       local function setup_theme()
         require("cyberdream").setup({
@@ -167,14 +168,14 @@ in {
         })
         vim.cmd.colorscheme("cyberdream")
       end
-      
+
       -- UI Configuration
       local function setup_ui()
         -- Lualine
         require("lualine").setup({
           options = { theme = "cyberdream", globalstatus = true },
         })
-        
+
         -- Gitsigns
         require("gitsigns").setup({
           signs = {
@@ -187,19 +188,19 @@ in {
           },
           current_line_blame = true,
         })
-        
+
         -- Indent Blankline
         require("ibl").setup({
           indent = { char = "▏", tab_char = "▏" },
           scope = { enabled = true, char = "─", show_start = true, show_end = true },
         })
-        
+
         -- Dropbar
         require("dropbar").setup({ menu = { preview = false } })
-        
+
         -- Dressing
         require("dressing").setup({})
-        
+
         -- Windows
         require("windows").setup({
           autowidth = { enable = true, winwidth = 5, filetype = { help = 2 } },
@@ -208,10 +209,10 @@ in {
             filetype = { "NvimTree", "neo-tree", "undotree", "gundo" },
           },
         })
-        
+
         -- Flash
         require("flash").setup({})
-        
+
         -- Mini Hipatterns
         local hipatterns = require("mini.hipatterns")
         hipatterns.setup({
@@ -224,77 +225,26 @@ in {
           },
         })
       end
-      
+
       -- Other Plugin Configurations
       local function setup_other_plugins()
         -- Comment
         require("Comment").setup({})
-        
+
         -- Autopairs
         require("nvim-autopairs").setup({})
-        
+
         -- UFO (Folding)
         require("ufo").setup({})
-        vim.o.foldcolumn = "1"
-        vim.o.foldlevel = 99
-        vim.o.foldlevelstart = 99
-        vim.o.foldenable = true
-        
+
         -- Fidget (Notifications)
         require("fidget").setup({
           notification = {
-            window = {
-              winblend = 0,
-              border = "rounded",
-              max_width = 0,
-              max_height = 0,
-            },
-            view = {
-              stack_upwards = true,
-              icon_separator = " ",
-              group_separator = "---",
-              group_separator_hl = "Comment",
-            },
-            configs = {
-              default = {
-                name = "Notification",
-                ttl = 5,
-                group_key = nil,
-                icon = "💬",
-                annote = nil,
-                priority = 30,
-                skip_history = false,
-                update_hook = nil,
-              },
-              error = {
-                name = "Error",
-                icon = "❌",
-                ttl = 8,
-                priority = 100,
-              },
-              warn = {
-                name = "Warning",
-                icon = "⚠️",
-                ttl = 6,
-                priority = 80,
-              },
-              info = {
-                name = "Info",
-                icon = "ℹ️",
-                ttl = 4,
-                priority = 50,
-              },
-            },
-          },
-          progress = {
-            display = {
-              render_limit = 3,
-              done_ttl = 2,
-            },
+            window = { border = "rounded" },
           },
         })
         vim.notify = require("fidget").notify
-        
+
         -- Illuminate
         require("illuminate").configure({
           delay = 100,
@@ -303,7 +253,7 @@ in {
             providers = { "lsp" },
           },
         })
-        
+
         -- Twilight
         require("twilight").setup({
           dimming = {
@@ -313,7 +263,15 @@ in {
           context = 15,
           treesitter = true,
         })
-        
+
+        -- Hardtime (Vim motion learning)
+        require("hardtime").setup({
+          disabled_filetypes = { "neo-tree", "lazy", "mason", "oil" },
+          max_count = 3,
+          restriction_mode = "hint",
+          disable_mouse = false,
+        })
+
         -- Neo-tree
         require("neo-tree").setup({
           close_if_last_window = false,
@@ -391,7 +349,7 @@ in {
             },
           },
         })
-        
+
         -- ToggleTerm
         require("toggleterm").setup({
           size = 20,
@@ -415,7 +373,7 @@ in {
             },
           },
         })
-        
+
         -- Leetcode
         require("leetcode").setup({
           lang = "python3",
@@ -430,35 +388,29 @@ in {
           },
         })
       end
-      
+
+      -- Setup plugins after pack operations or immediately if already available
+      local function initialize_config()
+        setup_lsp()
+        setup_completion()
+        setup_telescope()
+        setup_treesitter()
+        setup_theme()
+        setup_ui()
+        setup_other_plugins()
+      end
+
       -- PackChanged autocmd triggers when vim.pack installs/updates plugins
       vim.api.nvim_create_autocmd("PackChanged", {
         callback = function()
-          -- Setup plugins after pack operations complete
-          vim.schedule(function()
-            setup_lsp()
-            setup_completion()
-            setup_telescope()
-            setup_treesitter()
-            setup_theme()
-            setup_ui()
-            setup_other_plugins()
-          end)
+          vim.schedule(initialize_config)
         end,
       })
-      
-      -- Also setup immediately if plugins are already available
+
+      -- Setup immediately if plugins are already available
       vim.schedule(function()
-        -- Check if core plugins are available before setting up
-        local has_lsp = pcall(require, "lspconfig")
-        if has_lsp then
-          setup_lsp()
-          setup_completion()
-          setup_telescope()
-          setup_treesitter()
-          setup_theme()
-          setup_ui()
-          setup_other_plugins()
+        if pcall(require, "lspconfig") then
+          initialize_config()
         end
       end)
     '';
