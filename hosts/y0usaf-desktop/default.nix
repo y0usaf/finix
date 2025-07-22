@@ -176,8 +176,11 @@ in {
         email = "OA99@Outlook.com";
       };
       nh = {
-        enable = true;
+        enable = false; # Disabled for npins migration
         flake = "${homeDir}/nixos";
+      };
+      npins-build = {
+        enable = true;
       };
       "7z".enable = true;
       file-roller.enable = true;
