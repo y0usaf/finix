@@ -40,7 +40,6 @@
   };
   render = {
     cm_enabled = 0;
-    explicit_sync = 1;
   };
   bezier = [
     "in-out,.65,-0.01,0,.95"
