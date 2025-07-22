@@ -17,7 +17,7 @@
     ];
     config = {
       home = homeConfig;
-      maid.linker = (import inputs.nix-maid.outPath {inherit (pkgs) system;}).packages.${pkgs.system}.smfh;
+      # maid.linker = (import inputs.nix-maid.outPath {inherit (pkgs) system;}).packages.${pkgs.system}.smfh; # TODO: Fix maid linker
       users.users.y0usaf.maid = {
         packages = [];
       };

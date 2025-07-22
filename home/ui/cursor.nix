@@ -9,8 +9,8 @@
   username = "y0usaf";
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
-  hyprcursorPackage = inputs.deepin-dark-hyprcursor.packages.${pkgs.system}.default;
-  xcursorPackage = inputs.deepin-dark-xcursor.packages.${pkgs.system}.default;
+  hyprcursorPackage = pkgs.phinger-cursors; # Use standard cursor for npins compatibility  
+  xcursorPackage = pkgs.phinger-cursors;
 in {
   options.home.ui.cursor = {
     enable = lib.mkOption {

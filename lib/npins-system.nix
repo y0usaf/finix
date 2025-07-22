@@ -22,8 +22,6 @@
         value = import (sources.nixpkgs + "/nixos") {
           inherit system;
           configuration = {
-            # Override nixpkgs to use our extended lib
-            nixpkgs.lib = lib;
             imports = [
               ({config, ...}: {
                 imports = hostConfig.system.imports;
@@ -40,7 +38,7 @@
               })
               (maidIntegration.mkNixosModule {inherit inputs hostname;})
               ../home
-              inputs.chaotic.outPath
+              # (inputs.chaotic.outPath + "/modules/nixos/default.nix") # TODO: Fix chaotic integration
             ];
             _module.args =
               commonSpecialArgs

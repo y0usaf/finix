@@ -20,11 +20,7 @@ in {
     users.users.y0usaf.maid = {
       packages = [
         pkgs.hyprwayland-scanner
-        (
-          if cfg.flake.enable
-          then inputs.hyprland.packages.${pkgs.system}.hyprland
-          else pkgs.hyprland
-        )
+        pkgs.hyprland # Use nixpkgs version for npins compatibility
         pkgs.grim
         pkgs.slurp
         pkgs.wl-clipboard
