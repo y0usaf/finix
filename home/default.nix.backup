@@ -66,16 +66,16 @@ let
     config.cudaSupport = true;
   };
 
-  # Import npins system utilities
-  npinsUtils = import ./lib/npins-system.nix {
-    inherit sources pkgs;
-    lib = pkgs.lib;
-  };
+  # Create nixosSystem function for npins compatibility
+  nixosSystem = import ./lib/npins-system.nix { inherit sources; lib = pkgs.lib; };
   
   # Create inputs-like structure from npins sources
   inputs = {
     nixpkgs = nixpkgs // {
-      lib = pkgs.lib;
+      lib = nixpkgs.lib // {
+        # Add the nixosSystem function to lib for compatibility
+        nixosSystem = nixosSystem;
+      };
       # Pass the source path for modules that need to import nixpkgs
       outPath = sources.nixpkgs;
     };
@@ -95,7 +95,11 @@ let
     neovim-nightly-overlay = { outPath = sources.neovim-nightly-overlay; };
   };
   
-  # Use npins system utilities directly
+  # Import host utilities
+  hostUtils = import ./lib/flake {
+    inherit (pkgs) lib;
+    inherit pkgs;
+  };
   
   # Common special args for all hosts
   commonSpecialArgs = {
@@ -107,7 +111,7 @@ in {
   formatter.${system} = pkgs.alejandra;
   
   # NixOS configurations
-  nixosConfigurations = npinsUtils.mkNixosConfigurations {
+  nixosConfigurations = hostUtils.mkNixosConfigurations {
     inherit inputs system commonSpecialArgs;
   };
 }
