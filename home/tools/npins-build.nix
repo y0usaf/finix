@@ -9,17 +9,17 @@ in {
   options.home.tools.npins-build = {
     enable = lib.mkEnableOption "npins build helpers and shell integration";
   };
-  
+
   config = lib.mkIf cfg.enable {
     users.users.y0usaf.maid.packages = with pkgs; [
       npins
       alejandra
     ];
-    
+
     users.users.y0usaf.maid.file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
       # Npins build helpers
       export NIXOS_CONFIG_PATH="/home/y0usaf/nixos"
-      
+
       # Build system with npins
       nbs() {
         clear
@@ -32,12 +32,12 @@ in {
           esac
         done
         shift $((OPTIND-1))
-        
+
         cd "$NIXOS_CONFIG_PATH"
         echo "Building NixOS configuration with npins..."
         nix-build -E '(import ./default.nix).nixosConfigurations.y0usaf-desktop.config.system.build.toplevel' $dry "$@"
       }
-      
+
       # Switch system (requires sudo)
       nbswitch() {
         clear
@@ -52,26 +52,26 @@ in {
           return 1
         fi
       }
-      
+
       # Format nix files
       nbfmt() {
         cd "$NIXOS_CONFIG_PATH"
         echo "Formatting Nix files..."
         alejandra .
       }
-      
+
       # Update npins sources
       nbupdate() {
         cd "$NIXOS_CONFIG_PATH"
         echo "Updating npins sources..."
         npins update
       }
-      
+
       # Combined format and build
       nbfb() {
         nbfmt && nbs "$@"
       }
-      
+
       # Aliases for convenience
       alias nbd="nbs -d"               # dry build
       alias nbf="nbfmt"                # format
