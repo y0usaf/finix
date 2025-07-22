@@ -46,8 +46,10 @@ in {
         exec 3>/dev/null 2>/dev/null || true
         # shellcheck disable=SC2154
         trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
-        IFS=$'\n\t'
-        DEL=$'\34'
+        IFS=
+\n\t'
+        DEL=
+\34'
 
         FZF_COMMAND="''${FZF_COMMAND:=fzf}"
         TERMINAL_COMMAND="''${TERMINAL_COMMAND:="$TERMINAL -e"}"
@@ -69,7 +71,7 @@ in {
         if [ -f "''${PROVIDERS_FILE}" ]; then
           eval "$(awk -F= '
           BEGINFILE{ provider=""; }
-          /^\[.*\]/{sub("^\\[", "");sub("\\]$", "");provider=$0}
+          /^\\[.*\\]/{sub("^\\\\[", "");sub("\\\\]$", "");provider=$0}
           /^(launch|list|preview|purge)_cmd/{st = index($0,"=");providers[provider][$1] = substr($0,st+1)}
           ENDFILE{
             for (key in providers){
@@ -167,18 +169,18 @@ in {
                 fileIds[id]=0
               }
             }
-            /^\[Desktop Entry\]/{block="entry"}
+            /^\\[Desktop Entry\\]/{block="entry"}
             /^Type=Application/{application=1}
-            /^\[Desktop Action/{
-              sub("^\\[Desktop Action ", "");
-              sub("\\]$", "");
+            /^\\[Desktop Action/{n
+              sub("^\\\\[Desktop Action ", "");
+              sub("\\\\]$", "");
               block="action";
               a++;
               actions[a,"key"]=$0
             }
-            /^\[X-/{
-              sub("^\\[X-", "");
-              sub("\\]$", "");
+            /^\\[X-/{n
+              sub("^\\\\[X-", "");
+              sub("\\\\]$", "");
               block="action";
               a++;
               actions[a,"key"]=$0
@@ -217,22 +219,22 @@ in {
           # 4. Finally, build command line
           awk -v pattern="''${PATTERN}" -v terminal_cmd="''${TERMINAL_COMMAND}" -F= '
             BEGIN{a=0;exec=0;path=0}
-               /^\[Desktop/{
+               /^\\[Desktop/{
                 if(a){ a=0 }
                }
               $0 ~ pattern{ a=1 }
-              /^Terminal=/{
+              /^Terminal=/{n
                 sub("^Terminal=", "");
                 if ($0 == "true") { terminal=1 }
               }
-              /^Exec=/{
+              /^Exec=/{n
                 if(a && !exec){
                   sub("^Exec=", "");
                   gsub(" ?%[cDdFfikmNnUuv]", "");
                   exec=$0;
                 }
               }
-              /^Path=/{
+              /^Path=/{n
                 if(a && !path){ path=$2 }
                }
             END{
@@ -299,7 +301,7 @@ in {
                 fileIds[id]=0
               }
             }
-            /^\[Desktop Entry\]/{block="entry"}
+            /^\\[Desktop Entry\\]/{block="entry"}
             /^Type=Application/{application=1}
             /^Name=/{ iname=$2 }
             /^Hidden=true/{disabled=1}
@@ -319,15 +321,18 @@ in {
            readarray -td ''${DEL} PROVIDER_ARGS <<<''${PROVIDERS[''${PROVIDER_NAME}]}
            PURGE_CMD=''${PROVIDER_ARGS[3]}
            [ -z "''${PURGE_CMD}" ] && PURGE_CMD='test -f "{1}" || exit 43'
-           PURGE_CMDS[$PROVIDER_NAME]="''${PURGE_CMD%$'\n'}"
+           PURGE_CMDS[$PROVIDER_NAME]="''${PURGE_CMD%
+\n'}"
           done
           for HIST_LINE in "''${HIST_LINES[@]#*' '}"; do
-            readarray -td $'\034' HIST_ENTRY <<<''${HIST_LINE}
+            readarray -td 
+\034' HIST_ENTRY <<<''${HIST_LINE}
             ENTRY=''${HIST_ENTRY[1]}
             readarray -td ' ' FILTER <<<''${PURGE_CMDS[$ENTRY]//\{1\}/''${HIST_ENTRY[0]}}
             (eval "''${FILTER[@]}" 1>/dev/null) # Run filter command discarding output. We only want the exit status
             if [[ $? -ne 43 ]]; then
-              echo "1 ''${HIST_LINE[@]%$'\n'}" >> "''${HIST_FILE}"
+              echo "1 ''${HIST_LINE[@]%
+\n'}" >> "''${HIST_FILE}"
             fi
           done
         }
@@ -352,7 +357,7 @@ in {
           (bash -c "''${0} provide ''${PROVIDER_NAME}" >>"$FZFPIPE") &
         done
 
-        readarray -t COMMAND_STR <<<$(
+        readarray -t COMMAND_STR <<<$(n
           ''${FZF_COMMAND} --ansi +s -x -d '\034' --nth ..3 --with-nth 3 \
             --print-query \
             --preview "$0 describe {2} {1}" \
@@ -368,8 +373,11 @@ in {
         COMMAND_STR=$(printf '%s\n' "''${COMMAND_STR[@]: -1}")
         # We still need to format the query to conform to our fallback provider.
         # We check for the presence of field separator character to determine if we're dealing with a custom command
-        if [[ $COMMAND_STR != *$'\034'* ]]; then
-            COMMAND_STR="''${COMMAND_STR}"$'\034user\034'"''${COMMAND_STR}"$'\034'
+        if [[ $COMMAND_STR != *
+\034'* ]]; then
+            COMMAND_STR="''${COMMAND_STR}"
+\034user\034'"''${COMMAND_STR}"
+\034'
             SKIP_HIST=1 # I chose not to include custom commands in the history. If this is a bad idea, open an issue please
         fi
 
@@ -378,22 +386,26 @@ in {
         if [[ -n "''${HIST_FILE}" && ! "$SKIP_HIST" ]]; then
           # update history
           for i in "''${!HIST_LINES[@]}"; do
-            if [[ "''${HIST_LINES[i]}" == *" $COMMAND_STR"$'\n' ]]; then
+            if [[ "''${HIST_LINES[i]}" == *" $COMMAND_STR"
+\n' ]]; then
               HIST_COUNT=''${HIST_LINES[i]%% *}
-              HIST_LINES[$i]="$((HIST_COUNT + 1)) $COMMAND_STR"$'\n'
+              HIST_LINES[$i]="$((HIST_COUNT + 1)) $COMMAND_STR"
+\n'
               match=1
               break
             fi
           done
           if ! ((match)); then
-            HIST_LINES+=("1 $COMMAND_STR"$'\n')
+            HIST_LINES+=("1 $COMMAND_STR"
+\n')
           fi
 
           printf '%s' "''${HIST_LINES[@]}" | sort -nr >"$HIST_FILE"
         fi
 
         # shellcheck disable=SC2086
-        readarray -d $'\034' -t PARAMS <<<''${COMMAND_STR}
+        readarray -d 
+\034' -t PARAMS <<<''${COMMAND_STR}
         # shellcheck disable=SC2086
         readarray -d ''${DEL} -t PROVIDER_ARGS <<<''${PROVIDERS[''${PARAMS[1]}]}
         # Substitute {1}, {2} etc with the correct values
