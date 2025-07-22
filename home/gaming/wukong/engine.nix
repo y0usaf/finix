@@ -1,7 +1,3 @@
-###############################################################################
-# Black Myth: Wukong Engine Configuration - Nix-Maid Version
-# Optimizes graphics settings for better performance
-###############################################################################
 {
   config,
   lib,
@@ -9,9 +5,6 @@
 }: let
   cfg = config.home.gaming.wukong;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.gaming.wukong = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -19,10 +12,6 @@ in {
       description = "Enable Black Myth: Wukong configuration";
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
     users.users.y0usaf.maid.file.home.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
       "SystemSettings" = {

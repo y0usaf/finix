@@ -1,18 +1,8 @@
-###############################################################################
-# Zellij IDE Layout Module
-# Provides the IDE layout configuration for Zellij
-# - Neovim editor pane
-# - Claude terminal pane
-# - Lazygit pane for version control
-###############################################################################
 {lib, ...}: {
-  ###########################################################################
-  # IDE Layout Configuration
-  ###########################################################################
   home.shell.zellij.layouts.ide = ''
     layout {
         cwd "/home/y0usaf"
-        tab name="Tab #1" focus=true hide_floating_panes=true {
+        tab name="Tab
             pane split_direction="vertical" {
                 pane size="25%" command="bash" {
                     args "-c" "while true; do echo 'File browser pane - implement file browser here'; sleep 60; done"
@@ -31,14 +21,7 @@
         }
     }
   '';
-
-  ###########################################################################
-  # IDE Shell Integration
-  ###########################################################################
   users.users.y0usaf.maid.file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
-    # ----------------------------
-    # IDE Alias
-    # ----------------------------
     alias ide='zellij --layout ~/.config/zellij/layouts/ide.kdl'
   '';
 }

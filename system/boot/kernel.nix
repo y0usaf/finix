@@ -1,10 +1,3 @@
-###############################################################################
-# Kernel Configuration
-# Kernel settings and modules:
-# - Kernel packages
-# - Modules configuration
-# - System control parameters
-###############################################################################
 {
   lib,
   pkgs,
@@ -13,9 +6,7 @@
 }: {
   config = {
     boot = {
-      # Use a custom kernel package variant.
       kernelPackages = pkgs.linuxPackages_cachyos;
-      # Load extra kernel modules for specific hardware functions.
       kernelModules =
         [
           "kvm-amd"
@@ -26,9 +17,8 @@
         ]
         ++ lib.optionals hostSystem.hardware.amdgpu.enable ["amdgpu"];
       kernel.sysctl = {
-        "kernel.unprivileged_userns_clone" = 1; # Allow unprivileged processes to create user namespaces.
+        "kernel.unprivileged_userns_clone" = 1;
       };
-      # AMD GPU kernel parameters (conditional)
       kernelParams = lib.mkIf hostSystem.hardware.amdgpu.enable [
         "amdgpu.ppfeaturemask=0xffffffff"
         "amdgpu.dpm=1"

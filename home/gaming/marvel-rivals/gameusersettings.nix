@@ -1,7 +1,3 @@
-###############################################################################
-# Marvel Rivals GameUserSettings.ini - Nix-Maid Version
-# Manages the Marvel Rivals GameUserSettings.ini file
-###############################################################################
 {
   config,
   lib,
@@ -9,9 +5,6 @@
 }: let
   cfg = config.home.gaming.marvel-rivals.gameusersettings;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.gaming.marvel-rivals.gameusersettings = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -19,19 +12,11 @@ in {
       description = "Enable Marvel Rivals GameUserSettings.ini configuration";
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Marvel Rivals GameUserSettings.ini
-    ###########################################################################
     users.users.y0usaf.maid.file.home.".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini".text = lib.generators.toINI {} {
       "Internationalization" = {
         Culture = "en";
       };
-
       "ScalabilityGroups" = {
         "sg.ViewDistanceQuality" = "1";
         "sg.ShadowQuality" = "0";
@@ -43,11 +28,9 @@ in {
         "sg.ReflectionQuality" = "0";
         "sg.GlobalIlluminationQuality" = "0";
       };
-
       "/Script/Engine.GameUserSettings" = {
         bUseDesiredScreenHeight = "False";
       };
-
       "/Script/Marvel.MarvelGameUserSettings" = {
         AntiAliasingSuperSamplingMode = "4";
         SuperSamplingQuality = "4";
@@ -90,7 +73,6 @@ in {
         bAMDAntiLag2 = "False";
         DlssFrameGenerationCount = "1";
       };
-
       "CareerHighLight" = {
         HighLightVideoSavedPath = "C:\\users\\steamuser\\Videos\\MarvelRivals\\Highlights";
       };

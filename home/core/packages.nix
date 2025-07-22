@@ -1,7 +1,3 @@
-###############################################################################
-# Core Packages Module (Maid Version)
-# Provides essential packages and default application configurations
-###############################################################################
 {
   config,
   lib,
@@ -9,38 +5,24 @@
   ...
 }: let
   cfg = config.home.core.packages;
-
-  # Nvide script
   nvide-script = pkgs.writeShellScriptBin "nvide" ''
-        #!/usr/bin/env bash
-
-        # Nvide - NeoVim IDE with Neotree and split terminals
-        # Using Zellij for terminal multiplexing
-
         HELP_TEXT="Usage: nvide [OPTIONS] [working_dir]
-
         Arguments:
           working_dir    Directory to open (default: current directory)
-
         Options:
           -h, --help     Show this help message
           -n, --name     Session name (default: basename of working directory)
-
         Description:
           Creates an IDE-like environment with:
           - Neotree file explorer on the left
           - NeoVim in the center
           - Two terminal panes split vertically on the right
         "
-
         show_help() {
           echo "$HELP_TEXT"
         }
-
-        # Parse arguments
         session_name=""
         working_dir=""
-
         while [[ $# -gt 0 ]]; do
           case "$1" in
             -h|--help)
@@ -67,13 +49,9 @@
               ;;
           esac
         done
-
-        # Set defaults
         working_dir=''${working_dir:-$(pwd)}
-        working_dir=$(cd "$working_dir" && pwd)  # Get absolute path
+        working_dir=$(cd "$working_dir" && pwd)
         session_name=''${session_name:-$(basename "$working_dir")}
-
-        # Create nvide layout file
         layout_file="/tmp/nvide-layout-$session_name.kdl"
         cat > "$layout_file" << 'EOF'
     layout {
@@ -97,26 +75,17 @@
         }
     }
     EOF
-
-        # Check if session already exists
         if zellij list-sessions 2>/dev/null | grep -q "^$session_name$"; then
           echo "Session '$session_name' already exists. Attaching..."
           zellij attach "$session_name"
           exit 0
         fi
-
-        # Create new zellij session
         echo "Creating nvide session: $session_name"
         echo "Working directory: $working_dir"
-
-        # Start zellij session with custom layout
         cd "$working_dir"
         zellij --session "$session_name" --layout "$layout_file"
   '';
-
-  # Base packages all users should have
   basePackages = with pkgs; [
-    # Essential CLI tools
     git
     curl
     wget
@@ -129,17 +98,12 @@
     bottom
     psmisc
     kitty
-    # System interaction
     dconf
     lm_sensors
     networkmanager
-    # IDE tools
     nvide-script
   ];
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.core.packages = {
     enable = lib.mkEnableOption "core packages and base system tools";
     extraPackages = lib.mkOption {
@@ -148,14 +112,7 @@ in {
       description = "Additional packages to install";
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Maid Configuration
-    ###########################################################################
     users.users.y0usaf.maid.packages = basePackages ++ cfg.extraPackages;
   };
 }

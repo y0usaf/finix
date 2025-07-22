@@ -1,9 +1,3 @@
-###############################################################################
-# Web Applications Module (Maid)
-# Provides Chromium browser for web applications with desktop entries
-# - Keyboard testing utility (Keybard)
-# - Google Meet video conferencing
-###############################################################################
 {
   config,
   lib,
@@ -12,23 +6,12 @@
 }: let
   cfg = config.home.programs.webapps;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.programs.webapps = {
     enable = lib.mkEnableOption "web applications via Chromium";
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Maid Configuration
-    ###########################################################################
     users.users.y0usaf.maid = {
       packages = [pkgs.ungoogled-chromium];
-
       file = {
         home.".local/share/applications/keybard.desktop".text = ''
           [Desktop Entry]
@@ -39,7 +22,6 @@ in {
           Categories=Utility;System;
           Comment=Keyboard testing utility
         '';
-
         home.".local/share/applications/google-meet.desktop".text = ''
           [Desktop Entry]
           Name=Google Meet

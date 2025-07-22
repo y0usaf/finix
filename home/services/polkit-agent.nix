@@ -1,7 +1,3 @@
-###############################################################################
-# Polkit Authentication Agent Service
-# Provides polkit authentication for desktop applications
-###############################################################################
 {
   config,
   pkgs,
@@ -10,23 +6,12 @@
 }: let
   cfg = config.home.services.polkitAgent;
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.services.polkitAgent = {
     enable = lib.mkEnableOption "polkit authentication agent";
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    ###########################################################################
-    # Maid Configuration
-    ###########################################################################
     users.users.y0usaf.maid = {
       packages = [pkgs.polkit_gnome];
-
       systemd.services.polkit-gnome-authentication-agent-1 = {
         description = "polkit-gnome-authentication-agent-1";
         wantedBy = ["graphical-session.target"];

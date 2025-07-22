@@ -1,6 +1,3 @@
-#─────────────────────── 🔤 FONT CONFIGURATION ───────────────────────#
-# ⚠️  Affects system-wide font rendering and availability            #
-#──────────────────────────────────────────────────────────────────────#
 {
   config,
   lib,
@@ -8,22 +5,10 @@
 }: let
   cfg = config.home.ui.fonts;
   username = "y0usaf";
-
-  # Get the packages and names from the host appearance config
   mainFontPackages = map (x: x.package) config.home.core.appearance.fonts.main;
   mainFontNames = map (x: x.name) config.home.core.appearance.fonts.main;
   fallbackPackages = map (x: x.package) config.home.core.appearance.fonts.fallback;
   fallbackNames = map (x: x.name) config.home.core.appearance.fonts.fallback;
-
-  #######################################################################
-  # Font XML Configuration String
-  #
-  # This string sets up the fontconfig rules:
-  #  • Prioritizes the main font for all text.
-  #  • Defines fallback fonts for symbols and extended Unicode support.
-  #  • Configures font rendering options such as antialiasing, hinting,
-  #    subpixel rendering, and DPI settings.
-  #######################################################################
   fontXmlConfig = ''
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
@@ -38,7 +23,6 @@
           </pattern>
         </rejectfont>
       </selectfont>
-
       <!-- Explicitly enable only our chosen fonts -->
       <selectfont>
         <acceptfont>
@@ -57,7 +41,6 @@
       fallbackNames}
         </acceptfont>
       </selectfont>
-
       <!-- Set main font as default -->
       <match>
         <test name="family">
@@ -67,7 +50,6 @@
           <string>${builtins.elemAt mainFontNames 0}</string>
         </edit>
       </match>
-
       <!-- Fallback font configuration -->
       <alias>
         <family>monospace</family>
@@ -76,7 +58,6 @@
           ${lib.concatMapStrings (name: "<family>${name}</family>") fallbackNames}
         </prefer>
       </alias>
-
       <!-- Font rendering options -->
       <match target="font">
         <edit name="antialias" mode="assign"><bool>true</bool></edit>
@@ -90,9 +71,6 @@
     </fontconfig>
   '';
 in {
-  ###########################################################################
-  # Module Options
-  ###########################################################################
   options.home.ui.fonts = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -100,17 +78,9 @@ in {
       description = "Enable font configuration with string substitution";
     };
   };
-
-  ###########################################################################
-  # Module Configuration
-  ###########################################################################
   config = lib.mkIf cfg.enable {
-    #######################################################################
-    # Maid Configuration
-    #######################################################################
     users.users.${username}.maid = {
       packages = mainFontPackages ++ fallbackPackages;
-
       file.xdg_config = {
         "fontconfig/fonts.conf".text = fontXmlConfig;
       };

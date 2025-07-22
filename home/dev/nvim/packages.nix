@@ -22,15 +22,12 @@ in {
           tree-sitter-json
         ]))
       inputs.neovim-nightly-overlay.packages.${pkgs.system}.default
-
       pkgs.lua-language-server
       pkgs.nil
       pkgs.pyright
-
       pkgs.stylua
       pkgs.alejandra
       pkgs.black
-
       pkgs.curl
       pkgs.jq
     ];
