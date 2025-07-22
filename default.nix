@@ -1,12 +1,12 @@
 let
   # Import npins sources
   sources = import ./npins;
-  
+
   system = "x86_64-linux";
-  
+
   # Import nixpkgs first to get lib with nixosSystem
-  nixpkgs = import sources.nixpkgs { inherit system; };
-  
+  nixpkgs = import sources.nixpkgs {inherit system;};
+
   # Import nixpkgs with overlays for pkgs
   pkgs = import sources.nixpkgs {
     inherit system;
@@ -71,32 +71,34 @@ let
     inherit sources pkgs;
     lib = pkgs.lib;
   };
-  
+
   # Create inputs-like structure from npins sources
   inputs = {
-    nixpkgs = nixpkgs // {
-      lib = pkgs.lib;
-      # Pass the source path for modules that need to import nixpkgs
-      outPath = sources.nixpkgs;
-    };
-    nix-maid = { outPath = sources.nix-maid; };
-    alejandra = { outPath = sources.alejandra; };
-    disko = { outPath = sources.disko; };
-    hyprland = { outPath = sources.Hyprland; };
-    hy3 = { outPath = sources.hy3; };
-    deepin-dark-hyprcursor = { outPath = sources.Deepin-Dark-hyprcursor; };
-    deepin-dark-xcursor = { outPath = sources.Deepin-Dark-xcursor; };
-    fast-fonts = { outPath = sources.Fast-Font; };
-    hyprpaper = { outPath = sources.hyprpaper; };
-    obs-image-reaction = { outPath = sources.obs-image-reaction; };
-    chaotic = { outPath = sources.nyx; };
-    nix-minecraft = { outPath = sources.nix-minecraft; };
-    mnw = { outPath = sources.mnw; };
-    neovim-nightly-overlay = { outPath = sources.neovim-nightly-overlay; };
+    nixpkgs =
+      nixpkgs
+      // {
+        lib = pkgs.lib;
+        # Pass the source path for modules that need to import nixpkgs
+        outPath = sources.nixpkgs;
+      };
+    nix-maid = {outPath = sources.nix-maid;};
+    alejandra = {outPath = sources.alejandra;};
+    disko = {outPath = sources.disko;};
+    hyprland = {outPath = sources.Hyprland;};
+    hy3 = {outPath = sources.hy3;};
+    deepin-dark-hyprcursor = {outPath = sources.Deepin-Dark-hyprcursor;};
+    deepin-dark-xcursor = {outPath = sources.Deepin-Dark-xcursor;};
+    fast-fonts = {outPath = sources.Fast-Font;};
+    hyprpaper = {outPath = sources.hyprpaper;};
+    obs-image-reaction = {outPath = sources.obs-image-reaction;};
+    chaotic = {outPath = sources.nyx;};
+    nix-minecraft = {outPath = sources.nix-minecraft;};
+    mnw = {outPath = sources.mnw;};
+    neovim-nightly-overlay = {outPath = sources.neovim-nightly-overlay;};
   };
-  
+
   # Use npins system utilities directly
-  
+
   # Common special args for all hosts
   commonSpecialArgs = {
     inherit inputs;
@@ -105,7 +107,7 @@ let
 in {
   # Formatter
   formatter.${system} = pkgs.alejandra;
-  
+
   # NixOS configurations
   nixosConfigurations = npinsUtils.mkNixosConfigurations {
     inherit inputs system commonSpecialArgs;
