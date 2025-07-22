@@ -76,7 +76,7 @@ in {
         fonts = {
           main = [
             {
-              package = pkgs.jetbrains-mono; # Use standard font for npins compatibility
+              package = pkgs.jetbrains-mono; # Fast-Font needs flake-compat fix
               name = "JetBrains Mono";
             }
           ];
