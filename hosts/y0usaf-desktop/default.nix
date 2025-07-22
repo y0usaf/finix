@@ -76,8 +76,8 @@ in {
         fonts = {
           main = [
             {
-              package = inputs.fast-fonts.packages.x86_64-linux.default;
-              name = "Fast_Mono";
+              package = pkgs.jetbrains-mono; # Use standard font for npins compatibility
+              name = "JetBrains Mono";
             }
           ];
           fallback = [

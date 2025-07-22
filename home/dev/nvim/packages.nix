@@ -21,7 +21,7 @@ in {
           tree-sitter-markdown
           tree-sitter-json
         ]))
-      inputs.neovim-nightly-overlay.packages.${pkgs.system}.default
+      pkgs.neovim-unwrapped # Use nixpkgs version for npins compatibility
       pkgs.lua-language-server
       pkgs.nil
       pkgs.pyright
