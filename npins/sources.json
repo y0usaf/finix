@@ -1,0 +1,209 @@
+{
+  "pins": {
+    "Deepin-Dark-hyprcursor": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "y0usaf",
+        "repo": "Deepin-Dark-hyprcursor"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "9d7db0295c36bbe5325331048efd748b1fb2df90",
+      "url": "https://github.com/y0usaf/Deepin-Dark-hyprcursor/archive/9d7db0295c36bbe5325331048efd748b1fb2df90.tar.gz",
+      "hash": "072040frd74nafgsxmdpvszp754g6f7x4g3rmilq55y4nx8rc25y"
+    },
+    "Deepin-Dark-xcursor": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "y0usaf",
+        "repo": "Deepin-Dark-xcursor"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "b3df394dd67ab93ead5ba08db3b3bb46132e0d8c",
+      "url": "https://github.com/y0usaf/Deepin-Dark-xcursor/archive/b3df394dd67ab93ead5ba08db3b3bb46132e0d8c.tar.gz",
+      "hash": "1254ixygmaqhynj9cyc3d4aw7dkp2c18qlfjbdpplg8p8chscil5"
+    },
+    "Fast-Font": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "y0usaf",
+        "repo": "Fast-Font"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "0fedb4d14f298154489cab4163a0aae3dcc2c373",
+      "url": "https://github.com/y0usaf/Fast-Font/archive/0fedb4d14f298154489cab4163a0aae3dcc2c373.tar.gz",
+      "hash": "1snw63dp4h3d9c1009jp7mpf9h4if9wx38kk4gs0b7znmbkdj9xa"
+    },
+    "Hyprland": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "hyprwm",
+        "repo": "Hyprland"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v0.50.1",
+      "revision": "4e242d086e20b32951fdc0ebcbfb4d41b5be8dcc",
+      "url": "https://api.github.com/repos/hyprwm/Hyprland/tarball/v0.50.1",
+      "hash": "12fx7nrhw0h5s3c5jydxwfjcq5glrf1gc1b16arhm2gm99hp76cz"
+    },
+    "alejandra": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "kamadorueda",
+        "repo": "alejandra"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "4.0.0",
+      "revision": "3e2a85506627062313e131bf8a85315f3387c8e0",
+      "url": "https://api.github.com/repos/kamadorueda/alejandra/tarball/4.0.0",
+      "hash": "12ddx22yn2jnm0ibg4d8h124imqm6sdfg5wfg4bg1qq5fzd6fb9s"
+    },
+    "disko": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "disko"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v1.12.0",
+      "revision": "7121f74b976481bc36877abaf52adab2a178fcbe",
+      "url": "https://api.github.com/repos/nix-community/disko/tarball/v1.12.0",
+      "hash": "0wbx518d2x54yn4xh98cgm65wvj0gpy6nia6ra7ns4j63hx14fkq"
+    },
+    "hy3": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "outfoxxed",
+        "repo": "hy3"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "b813c13a10cc39c60eada511f6e6a7947d941aab",
+      "url": "https://github.com/outfoxxed/hy3/archive/b813c13a10cc39c60eada511f6e6a7947d941aab.tar.gz",
+      "hash": "05ykv7yqnd2rvgcn5gi5vxpgya8klwdic5dmcf68l9p0jzm9da23"
+    },
+    "hyprpaper": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "y0usaf",
+        "repo": "hyprpaper"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "bf38a169400eed81b605f1f54ed9590c295b895f",
+      "url": "https://github.com/y0usaf/hyprpaper/archive/bf38a169400eed81b605f1f54ed9590c295b895f.tar.gz",
+      "hash": "0qfdjq1qr9ap8rshwz4r3plbzx9dwprp6k8yfacnwggprsw4mdvy"
+    },
+    "mnw": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Gerg-L",
+        "repo": "mnw"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "cff958a4e050f8d917a6ff3a5624bc4681c6187d",
+      "url": "https://github.com/Gerg-L/mnw/archive/cff958a4e050f8d917a6ff3a5624bc4681c6187d.tar.gz",
+      "hash": "0989skdz5qxv7fhssg3b5rhz3i7ynajnirrx1hyy1nfqgp4bd6vr"
+    },
+    "neovim-nightly-overlay": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "neovim-nightly-overlay"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "e63079523e06e0b7d8d766d40573409d2c5ecc9d",
+      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/e63079523e06e0b7d8d766d40573409d2c5ecc9d.tar.gz",
+      "hash": "174rmx1awz7lc4z5a3s3rk5jlc3b7kixmvsha262q1k0aldj1dgk"
+    },
+    "nix-maid": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "y0usaf",
+        "repo": "nix-maid"
+      },
+      "branch": "smfh-integration",
+      "submodules": false,
+      "revision": "5c02e0db0b3aa6155b71bdb7a5fdf31eef4e38ea",
+      "url": "https://github.com/y0usaf/nix-maid/archive/5c02e0db0b3aa6155b71bdb7a5fdf31eef4e38ea.tar.gz",
+      "hash": "06k112p0c3ncc91ajblp7yv815rzizn42svh1llg8mjgd8pn78ff"
+    },
+    "nix-minecraft": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Infinidoge",
+        "repo": "nix-minecraft"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "95db5df2b845b360d0a9b79cbec9f95290a93de9",
+      "url": "https://github.com/Infinidoge/nix-minecraft/archive/95db5df2b845b360d0a9b79cbec9f95290a93de9.tar.gz",
+      "hash": "1vvpnl4y4c043kwngm663zz3q5hhkqlkfbcydxlr52rc54pjcj6w"
+    },
+    "nixpkgs": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-unstable",
+      "submodules": false,
+      "revision": "c87b95e25065c028d31a94f06a62927d18763fdf",
+      "url": "https://github.com/NixOS/nixpkgs/archive/c87b95e25065c028d31a94f06a62927d18763fdf.tar.gz",
+      "hash": "0dr3sicmyizjflsykzgmymlxflqd0bs743i11bkymi157ln82bim"
+    },
+    "nyx": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "chaotic-cx",
+        "repo": "nyx"
+      },
+      "branch": "nyxpkgs-unstable",
+      "submodules": false,
+      "revision": "02b3c2a45f6ddbd704f797c5730bc2d161f10ce0",
+      "url": "https://github.com/chaotic-cx/nyx/archive/02b3c2a45f6ddbd704f797c5730bc2d161f10ce0.tar.gz",
+      "hash": "0n32hpznf7qsz4ppkgz6cwikjfg7g5mac8f02bgci0rk6lw9ffav"
+    },
+    "obs-image-reaction": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "L-Nafaryus",
+        "repo": "obs-image-reaction"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "0dcb3c27de5782dfdf95cb047ccceb3e65360e6b",
+      "url": "https://github.com/L-Nafaryus/obs-image-reaction/archive/0dcb3c27de5782dfdf95cb047ccceb3e65360e6b.tar.gz",
+      "hash": "0y7l8qc12klyc6zjr2373yyhv0v86c617gmxymzslb44cgxvg5hr"
+    }
+  },
+  "version": 5
+}
