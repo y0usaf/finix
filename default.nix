@@ -56,7 +56,7 @@ let
         });
       })
       # Neovim nightly overlay
-      (import (sources.neovim-nightly-overlay + "/overlay.nix"))
+      (import sources.neovim-nightly-overlay)
       # Fast fonts overlay
       (_final: _prev: {
         fastFonts = (import sources.Fast-Font).packages.x86_64-linux.default;
