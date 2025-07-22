@@ -59,7 +59,7 @@ in {
       ###########################################################################
       file.home = {
         # Jujutsu Configuration
-        "{{xdg_config_home}}/jj/config.toml".text = ''
+        ".config/jj/config.toml".text = ''
           [user]
           name = "${cfg.name}"
           email = "${cfg.email}"
@@ -96,7 +96,7 @@ in {
         '';
 
         # Shell Integration
-        "{{xdg_config_home}}/zsh/.zshrc".text = lib.mkIf cfg.enableAliases ''
+        ".config/zsh/.zshrc".text = lib.mkIf cfg.enableAliases ''
 
           # Jujutsu aliases
           alias jl='jj log -r recent'
