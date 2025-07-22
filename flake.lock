@@ -1,0 +1,16 @@
+{
+  "nodes": {
+    "root": {
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "type": "inline"
+      },
+      "original": {
+        "type": "inline"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
