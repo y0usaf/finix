@@ -76,8 +76,8 @@ in {
         fonts = {
           main = [
             {
-              package = pkgs.jetbrains-mono; # fastFonts overlay not accessible to host config
-              name = "Fast_Mono"; # Use Fast_Mono since it's available via fc-list
+              package = pkgs.fastFonts;
+              name = "Fast_Mono";
             }
           ];
           fallback = [

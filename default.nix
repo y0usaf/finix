@@ -58,8 +58,32 @@ let
       # Neovim nightly overlay
       (import sources.neovim-nightly-overlay)
       # Fast fonts overlay
-      (_final: _prev: {
-        fastFonts = (import sources.Fast-Font).packages.x86_64-linux.default;
+      (final: _prev: {
+        fastFonts = final.stdenvNoCC.mkDerivation {
+          pname = "fast-fonts";
+          version = "1.0.0";
+          src = sources.Fast-Font;
+
+          installPhase = ''
+            mkdir -p $out/share/fonts/truetype
+            install -m444 -Dt $out/share/fonts/truetype *.ttf
+            mkdir -p $out/share/doc/fast-fonts
+            if [ -f LICENSE ]; then
+              install -m444 -Dt $out/share/doc/fast-fonts LICENSE
+            fi
+            if [ -f README.md ]; then
+              install -m444 -Dt $out/share/doc/fast-fonts README.md
+            fi
+          '';
+
+          meta = with final.lib; {
+            description = "Fast Font Collection - TTF fonts";
+            longDescription = "Fast Font Collection provides optimized monospace and sans-serif fonts";
+            homepage = "https://github.com/y0usaf/Fast-Font";
+            platforms = platforms.all;
+            license = licenses.mit;
+          };
+        };
       })
     ];
     config.allowUnfree = true;

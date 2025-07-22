@@ -9,7 +9,7 @@
   username = "y0usaf";
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
-  hyprcursorPackage = pkgs.phinger-cursors; # Use standard cursor for npins compatibility  
+  hyprcursorPackage = pkgs.phinger-cursors; # Use standard cursor for npins compatibility
   xcursorPackage = pkgs.phinger-cursors;
 in {
   options.home.ui.cursor = {
