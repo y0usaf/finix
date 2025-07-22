@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+_: {
   system = {
     imports = [
       ../../system
@@ -58,33 +58,12 @@
         imageViewer = "imv";
         mediaPlayer = "mpv";
       };
+      fonts.preset = "fast-mono";
       appearance = {
         enable = true;
         dpi = 109;
         baseFontSize = 12;
         cursorSize = 36;
-        fonts = {
-          main = [
-            {
-              package = pkgs.fastFonts;
-              name = "Fast_Mono";
-            }
-          ];
-          fallback = [
-            {
-              package = pkgs.noto-fonts-emoji;
-              name = "Noto Color Emoji";
-            }
-            {
-              package = pkgs.noto-fonts-cjk-sans;
-              name = "Noto Sans CJK";
-            }
-            {
-              package = pkgs.font-awesome;
-              name = "Font Awesome";
-            }
-          ];
-        };
       };
       user.enable = true;
     };
