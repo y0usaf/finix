@@ -105,8 +105,8 @@ let
     };
   };
 
-  # Import npins system utilities
-  npinsUtils = import ./lib/npins-system.nix {
+  # Import NixOS configuration builder
+  nixosBuilder = import ./lib/builders/nixos.nix {
     inherit sources pkgs userConfigs;
     lib = pkgs.lib;
   };
@@ -148,7 +148,7 @@ in {
   formatter.${system} = pkgs.alejandra;
 
   # NixOS configurations
-  nixosConfigurations = npinsUtils.mkNixosConfigurations {
+  nixosConfigurations = nixosBuilder.mkNixosConfigurations {
     inherit inputs system commonSpecialArgs;
   };
 }
