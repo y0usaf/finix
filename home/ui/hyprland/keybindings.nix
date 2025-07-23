@@ -45,13 +45,13 @@
       "$mod SHIFT, S, swapactiveworkspaces, DP-4 HDMI-A-2"
       "$mod, S, movecurrentworkspacetomonitor, +1"
     ]
-    (lib.lists.forEach ["w" "a" "s" "d"] (key: let
+    (lib.lists.forEach ["h" "j" "k" "l"] (key: let
       direction =
         {
-          "w" = "u";
-          "a" = "l";
-          "s" = "d";
-          "d" = "r";
+          "k" = "u";
+          "h" = "l";
+          "j" = "d";
+          "l" = "r";
         }
         .${
           key
