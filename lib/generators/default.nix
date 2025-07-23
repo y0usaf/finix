@@ -1,3 +1,5 @@
-{helpers, ...}: {
-  imports = helpers.importModules ./.;
+{...}: {
+  imports = [
+    ./toHyprconf.nix
+  ];
 }
