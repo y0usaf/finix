@@ -5,7 +5,6 @@ _: {
     shell = "zsh";
     extraGroups = ["networkmanager" "video" "audio"];
     homeDirectory = "/home/guest";
-    hashedPassword = "";
   };
   core = {
     packages.enable = true;
