@@ -77,6 +77,7 @@ _: {
   dev = {
     cursor-ide.enable = true;
     claude-code.enable = true;
+    gemini-cli.enable = true;
     mcp.enable = true;
     docker.enable = true;
     nvim = {

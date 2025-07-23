@@ -3,7 +3,7 @@
     ./claude-code.nix
     ./cursor-ide.nix
     ./docker.nix
-    ./gemini.nix
+    ./gemini-cli.nix
     ./latex.nix
     ./mcp.nix
     ./npm.nix
