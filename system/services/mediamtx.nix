@@ -70,8 +70,8 @@ in {
         fi
       '';
     };
-    environment.systemPackages = with pkgs; [
-      mediamtx
+    environment.systemPackages = [
+      pkgs.mediamtx
     ];
   };
 }

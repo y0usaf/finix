@@ -1,9 +1,9 @@
 {pkgs, ...}: {
   config = {
-    environment.systemPackages = with pkgs; [
-      alejandra
-      statix
-      deadnix
+    environment.systemPackages = [
+      pkgs.alejandra
+      pkgs.statix
+      pkgs.deadnix
     ];
   };
 }

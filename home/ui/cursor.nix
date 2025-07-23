@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  inputs,
   ...
 }: let
   cfg = config.home.ui.cursor;
