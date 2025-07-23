@@ -75,7 +75,6 @@ _: {
     sway-launcher-desktop.enable = true;
   };
   dev = {
-    cursor-ide.enable = true;
     claude-code.enable = true;
     gemini-cli.enable = true;
     mcp.enable = true;
