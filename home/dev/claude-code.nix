@@ -13,7 +13,6 @@ in {
     users.users.y0usaf.maid = {
       packages = with pkgs; [
         claude-code
-        gemini-cli
       ];
       file.home = {
         ".claude/CLAUDE.md".text = ''
