@@ -16,6 +16,7 @@
         shell = pkgs.${systemConfig.shell or "zsh"};
         extraGroups = systemConfig.extraGroups or ["networkmanager" "video" "audio"];
         home = systemConfig.homeDirectory or "/home/${username}";
+        hashedPassword = systemConfig.hashedPassword or null;
         password = systemConfig.password or null;
         ignoreShellProgramCheck = true;
       }))
