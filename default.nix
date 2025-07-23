@@ -10,49 +10,7 @@ let
   # Consolidated overlays function
   mkOverlays = sources: [
     # Extended lib overlay with helper functions
-    (final: prev: {
-      lib = prev.lib.extend (libfinal: libprev: {
-        importDirs = dir: let
-          dirs =
-            libprev.filterAttrs (n: v: v == "directory" && n != ".git")
-            (builtins.readDir dir);
-          dirPaths = libprev.mapAttrsToList (name: _: dir + "/${name}/default.nix") dirs;
-        in
-          libprev.filter (path: builtins.pathExists path) dirPaths;
-        importModules = dir: let
-          files =
-            libprev.filterAttrs (n: v: v == "regular" && libprev.hasSuffix ".nix" n && n != "default.nix")
-            (builtins.readDir dir);
-        in
-          map (name: dir + "/${name}") (builtins.attrNames files);
-        t = libprev.types;
-        mkOpt = type: description: libprev.mkOption {inherit type description;};
-        mkBool = libprev.types.bool;
-        mkStr = libprev.types.str;
-        mkOptDef = type: default: description: libprev.mkOption {inherit type default description;};
-        defaultAppModule = libprev.types.submodule {
-          options = {
-            command = libprev.mkOption {
-              type = libprev.types.str;
-              description = "Command to execute the application.";
-            };
-          };
-        };
-        dirModule = libprev.types.submodule {
-          options = {
-            path = libprev.mkOption {
-              type = libprev.types.str;
-              description = "Absolute path to the directory";
-            };
-            create = libprev.mkOption {
-              type = libprev.types.bool;
-              default = true;
-              description = "Whether to create the directory if it doesn't exist";
-            };
-          };
-        };
-      });
-    })
+    (import ./lib/overlays/lib-extensions.nix)
     # Neovim nightly overlay
     (import sources.neovim-nightly-overlay)
     # Fast fonts overlay
@@ -105,50 +63,116 @@ let
     };
   };
 
-  # Import NixOS configuration builder
-  nixosBuilder = import ./lib/builders/nixos.nix {
-    inherit sources pkgs userConfigs;
-    lib = pkgs.lib;
-  };
+  # Build NixOS configurations directly
+  mkNixosConfigurations = {
+    inputs,
+    system,
+    commonSpecialArgs,
+  }: let
+    hostNames = ["y0usaf-desktop"];
+    overlays = import ./lib/overlays sources;
 
-  # Create inputs-like structure from npins sources
-  inputs = {
-    nixpkgs =
-      nixpkgs
-      // {
-        lib = pkgs.lib;
-        # Pass the source path for modules that need to import nixpkgs
-        outPath = sources.nixpkgs;
+    mkHostConfig = hostname: let
+      hostConfig = import (./hosts + "/${hostname}/default.nix") {
+        inherit pkgs inputs;
       };
-    nix-maid = {outPath = sources.nix-maid;};
-    alejandra = {outPath = sources.alejandra;};
-    disko = {outPath = sources.disko;};
-    hyprland = {outPath = sources.Hyprland;};
-    hy3 = {outPath = sources.hy3;};
-    deepin-dark-hyprcursor = {outPath = sources.Deepin-Dark-hyprcursor;};
-    deepin-dark-xcursor = {outPath = sources.Deepin-Dark-xcursor;};
-    fast-fonts = {outPath = sources.Fast-Font;};
-    hyprpaper = {outPath = sources.hyprpaper;};
-    obs-image-reaction = {outPath = sources.obs-image-reaction;};
-    chaotic = {outPath = sources.nyx;};
-    nix-minecraft = {outPath = sources.nix-minecraft;};
-    mnw = {outPath = sources.mnw;};
-    neovim-nightly-overlay = {outPath = sources.neovim-nightly-overlay;};
+      users = hostConfig.users;
+      hostUserConfigs = pkgs.lib.genAttrs users (username: userConfigs.${username});
+    in {
+      name = hostname;
+      value = import (sources.nixpkgs + "/nixos") {
+        inherit system;
+        configuration = {
+          imports = [
+            # Host system configuration
+            ({config, ...}: {
+              imports = hostConfig.imports;
+              hostSystem = {
+                users = hostConfig.users;
+                hostname = hostConfig.hostname;
+                homeDirectory = hostConfig.homeDirectory;
+                stateVersion = hostConfig.stateVersion;
+                timezone = hostConfig.timezone;
+                profile = hostConfig.profile or "default";
+                hardware = hostConfig.hardware or {};
+                services = hostConfig.services or {};
+              };
+              # Configure nixpkgs with overlays
+              nixpkgs.overlays = overlays;
+              nixpkgs.config.allowUnfree = true;
+              nixpkgs.config.cudaSupport = true;
+            })
+            # User home configurations via maid
+            ({
+              config,
+              pkgs,
+              lib,
+              ...
+            }: {
+              imports = [
+                (import (sources.nix-maid + "/src/nixos") {
+                  smfh = null; # We'll handle smfh differently
+                })
+              ];
+              config = {
+                # Use proper NixOS module merging instead of manual attribute manipulation
+                home = lib.mkMerge (
+                  lib.mapAttrsToList (
+                    username: userConfig:
+                    # Remove system-specific config that doesn't belong in home
+                      lib.filterAttrs (name: _: name != "system") userConfig
+                  )
+                  hostUserConfigs
+                );
+                # Configure maid for each user
+                users.users = lib.genAttrs users (username: {
+                  maid = {
+                    packages = [];
+                  };
+                });
+              };
+            })
+            # Import home manager
+            ./home
+          ];
+          _module.args =
+            commonSpecialArgs
+            // {
+              inherit hostname users;
+              lib = pkgs.lib;
+              hostConfig = hostConfig;
+              userConfigs = hostUserConfigs;
+              hostSystem = hostConfig;
+              hostsDir = ./hosts;
+            };
+        };
+      };
+    };
+  in
+    builtins.listToAttrs (map mkHostConfig hostNames);
+
+  # Pass sources directly instead of fake flake inputs
+  # Keep minimal inputs structure only for compatibility with modules that expect it
+  inputs = {
+    nixpkgs = sources.nixpkgs;
+    disko = sources.disko;
+    nix-maid = sources.nix-maid;
   };
 
   # Use npins system utilities directly
 
   # Common special args for all hosts
   commonSpecialArgs = {
-    inherit inputs;
-    inherit (inputs) disko fast-fonts nix-minecraft;
+    inherit sources inputs;
+    # Direct access to commonly used sources
+    inherit (sources) disko nix-minecraft Fast-Font;
   };
 in {
   # Formatter
   formatter.${system} = pkgs.alejandra;
 
   # NixOS configurations
-  nixosConfigurations = nixosBuilder.mkNixosConfigurations {
+  nixosConfigurations = mkNixosConfigurations {
     inherit inputs system commonSpecialArgs;
   };
 }
