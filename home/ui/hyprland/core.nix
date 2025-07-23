@@ -22,8 +22,8 @@
       else "dwindle";
   };
   dwindle = {
-    single_window_aspect_ratio = "1.77";
-    single_window_aspect_ratio_tolerance = "0.1";
+    single_window_aspect_ratio = "1.77 1.0";
+    single_window_aspect_ratio_tolerance = 0.1;
   };
   input = {
     kb_layout = "us";
