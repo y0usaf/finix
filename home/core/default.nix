@@ -9,7 +9,9 @@
   in
     lib.filter (path: builtins.pathExists path) dirPaths;
 in {
-  imports = (importModules ./.) ++ (importDirs ./.)
+  imports =
+    (importModules ./.)
+    ++ (importDirs ./.)
     ++ [
       ./fonts
     ];
