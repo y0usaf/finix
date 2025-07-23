@@ -7,6 +7,7 @@
     ./gtk.nix
     ./hyprland
     ./mako.nix
+    ./qutebrowser.nix
     ./quickshell.nix
     ./wallust.nix
     ./wayland.nix
