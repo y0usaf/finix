@@ -1,8 +1,12 @@
-{lib, ...}: let
-  importModules = dir: let
-    files = lib.filterAttrs (n: v: v == "regular" && lib.hasSuffix ".nix" n && n != "default.nix") (builtins.readDir dir);
-  in
-    map (name: dir + "/${name}") (builtins.attrNames files);
-in {
-  imports = importModules ./.;
+{...}: {
+  imports = [
+    ./7z.nix
+    ./file-roller.nix
+    ./git.nix
+    ./jj.nix
+    ./nh.nix
+    ./npins-build.nix
+    ./spotdl.nix
+    ./yt-dlp.nix
+  ];
 }
