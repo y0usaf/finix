@@ -144,10 +144,10 @@ in {
           theme = {
             variant = "default",
             highlights = {
-              CursorLine = { bg = "
-              Visual = { bg = "
-              Search = { bg = "
-              IncSearch = { bg = "
+              CursorLine = { bg = "#1e1e2e" },
+              Visual = { bg = "#313244" },
+              Search = { bg = "#f9e2af" },
+              IncSearch = { bg = "#fab387" },
             },
           },
         })
@@ -229,7 +229,7 @@ in {
         require("twilight").setup({
           dimming = {
             alpha = 0.25,
-            color = { "Normal", "
+            color = { "Normal", "#1e1e2e" },
           },
           context = 15,
           treesitter = true,

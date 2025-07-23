@@ -1,0 +1,47 @@
+# Extended lib overlay with helper functions
+final: prev: {
+  lib = prev.lib.extend (libfinal: libprev: {
+    # Directory and module importers
+    importDirs = dir: let
+      dirs = libprev.filterAttrs (n: v: v == "directory" && n != ".git") (builtins.readDir dir);
+      dirPaths = libprev.mapAttrsToList (name: _: dir + "/${name}/default.nix") dirs;
+    in
+      libprev.filter (path: builtins.pathExists path) dirPaths;
+
+    importModules = dir: let
+      files = libprev.filterAttrs (n: v: v == "regular" && libprev.hasSuffix ".nix" n && n != "default.nix") (builtins.readDir dir);
+    in
+      map (name: dir + "/${name}") (builtins.attrNames files);
+
+    # Type shortcuts
+    t = libprev.types;
+    mkOpt = type: description: libprev.mkOption {inherit type description;};
+    mkBool = libprev.types.bool;
+    mkStr = libprev.types.str;
+    mkOptDef = type: default: description: libprev.mkOption {inherit type default description;};
+
+    # Common module types
+    defaultAppModule = libprev.types.submodule {
+      options = {
+        command = libprev.mkOption {
+          type = libprev.types.str;
+          description = "Command to execute the application.";
+        };
+      };
+    };
+
+    dirModule = libprev.types.submodule {
+      options = {
+        path = libprev.mkOption {
+          type = libprev.types.str;
+          description = "Absolute path to the directory";
+        };
+        create = libprev.mkOption {
+          type = libprev.types.bool;
+          default = true;
+          description = "Whether to create the directory if it doesn't exist";
+        };
+      };
+    };
+  });
+}
