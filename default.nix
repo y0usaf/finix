@@ -93,9 +93,21 @@ let
     config.cudaSupport = true;
   };
 
+  # Import user configurations
+  userConfigs = {
+    y0usaf = import ./users/y0usaf/default.nix {
+      pkgs = pkgs;
+      inputs = inputs;
+    };
+    guest = import ./users/guest/default.nix {
+      pkgs = pkgs;
+      inputs = inputs;
+    };
+  };
+
   # Import npins system utilities
   npinsUtils = import ./lib/npins-system.nix {
-    inherit sources pkgs;
+    inherit sources pkgs userConfigs;
     lib = pkgs.lib;
   };
 
