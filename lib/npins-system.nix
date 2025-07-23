@@ -2,6 +2,7 @@
   lib,
   pkgs,
   sources,
+  userConfigs,
   hostsDir ? ../hosts,
 }: {
   mkNixosConfigurations = {
@@ -17,6 +18,10 @@
         hostConfig = import (hostsDir + "/${hostname}/default.nix") {
           inherit pkgs inputs;
         };
+        # Get users from host config
+        users = hostConfig.users;
+        # Create user configs for all users
+        userConfigs' = lib.genAttrs users (username: userConfigs.${username});
       in {
         name = hostname;
         value = import (sources.nixpkgs + "/nixos") {
@@ -24,16 +29,16 @@
           configuration = {
             imports = [
               ({config, ...}: {
-                imports = hostConfig.system.imports;
+                imports = hostConfig.imports;
                 hostSystem = {
-                  username = hostConfig.system.username;
-                  hostname = hostConfig.system.hostname;
-                  homeDirectory = hostConfig.system.homeDirectory;
-                  stateVersion = hostConfig.system.stateVersion;
-                  timezone = hostConfig.system.timezone;
-                  profile = hostConfig.system.profile or "default";
-                  hardware = hostConfig.system.hardware or {};
-                  services = hostConfig.system.services or {};
+                  users = hostConfig.users;
+                  hostname = hostConfig.hostname;
+                  homeDirectory = hostConfig.homeDirectory;
+                  stateVersion = hostConfig.stateVersion;
+                  timezone = hostConfig.timezone;
+                  profile = hostConfig.profile or "default";
+                  hardware = hostConfig.hardware or {};
+                  services = hostConfig.services or {};
                 };
                 # Configure nixpkgs to use our overlays
                 nixpkgs.overlays = let
@@ -118,17 +123,21 @@
                 nixpkgs.config.allowUnfree = true;
                 nixpkgs.config.cudaSupport = true;
               })
-              (maidIntegration.mkNixosModule {inherit inputs hostname;})
+              (maidIntegration.mkNixosModule {
+                inherit inputs hostname users;
+                userConfigs = userConfigs';
+              })
               ../home
               # (inputs.chaotic.outPath + "/modules/nixos/default.nix") # TODO: Fix chaotic integration
             ];
             _module.args =
               commonSpecialArgs
               // {
-                inherit hostname hostsDir;
+                inherit hostname hostsDir users;
                 lib = lib; # Use the extended lib passed to npins-system.nix
                 hostConfig = hostConfig;
-                hostSystem = hostConfig.system;
+                userConfigs = userConfigs';
+                hostSystem = hostConfig;
               };
           };
         };

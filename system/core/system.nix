@@ -4,9 +4,14 @@
   ...
 }: {
   options.hostSystem = {
+    users = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      description = "System usernames";
+    };
     username = lib.mkOption {
       type = lib.types.str;
-      description = "Primary system username";
+      description = "Primary system username (derived from first user)";
+      default = builtins.head config.hostSystem.users;
     };
     hostname = lib.mkOption {
       type = lib.types.str;
