@@ -22,11 +22,10 @@ in {
       package = pkgs.bluez;
     };
     services.dbus.packages = lib.mkIf (hardwareCfg.bluetooth.enable or false) [pkgs.bluez];
-    environment.systemPackages =
-      lib.optionals (hardwareCfg.bluetooth.enable or false) [
-        pkgs.bluez
-        pkgs.bluez-tools
-      ];
+    environment.systemPackages = lib.optionals (hardwareCfg.bluetooth.enable or false) [
+      pkgs.bluez
+      pkgs.bluez-tools
+    ];
     users.users.${config.hostSystem.username}.extraGroups =
       lib.optionals (hardwareCfg.bluetooth.enable or false) ["dialout" "bluetooth" "lp"];
   };
