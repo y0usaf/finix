@@ -21,6 +21,10 @@
       then "group"
       else "dwindle";
   };
+  dwindle = {
+    single_window_aspect_ratio = "1.77";
+    single_window_aspect_ratio_tolerance = "0.1";
+  };
   input = {
     kb_layout = "us";
     follow_mouse = 1;
