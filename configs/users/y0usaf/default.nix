@@ -76,6 +76,7 @@ _: {
   };
   dev = {
     claude-code.enable = true;
+    claude-code-router.enable = true;
     gemini-cli.enable = true;
     mcp.enable = true;
     docker.enable = true;
