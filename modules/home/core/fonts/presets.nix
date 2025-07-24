@@ -127,8 +127,8 @@ in {
         ];
       }
       else {
-        main = cfg.customFonts.main;
-        fallback = cfg.customFonts.fallback;
+        inherit (cfg.customFonts) main;
+        inherit (cfg.customFonts) fallback;
       };
   };
 }

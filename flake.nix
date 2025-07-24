@@ -6,7 +6,7 @@
 
   outputs = {self}: {
     # Just expose our npins-based nixosConfigurations
-    nixosConfigurations = (import ./lib).nixosConfigurations;
+    inherit ((import ./lib)) nixosConfigurations;
 
     # Expose formatter for flake check compatibility
     formatter.x86_64-linux = (import ./lib).formatter.x86_64-linux;
