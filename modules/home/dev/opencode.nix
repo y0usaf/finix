@@ -40,14 +40,19 @@
     };
   };
 
+  mcpConfig =
+    if cfg.enableMcpServers
+    then lib.attrValues mcpServers
+    else null;
+
   # Global opencode configuration
   globalConfig = {
     "$schema" = "https://opencode.ai/config.json";
-    inherit (cfg) theme;
-    inherit (cfg) model;
+    theme = cfg.theme;
+    model = cfg.model;
     autoupdate = true;
     share = "manual";
-    mcp = lib.mkIf cfg.enableMcpServers (lib.attrValues mcpServers);
+    mcp = mcpConfig;
     instructions = [
       ".cursor/rules/*.md"
       "{file:/home/y0usaf/.config/opencode/claude-instructions.md}"
