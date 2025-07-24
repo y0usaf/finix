@@ -9,32 +9,42 @@
   # MCP servers configuration for opencode
   mcpServers = {
     "Filesystem" = {
-      type = "local";
-      command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"];
+      content = {
+        type = "local";
+        command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"];
+      };
       enabled = true;
       environment = {};
     };
     "Nixos MCP" = {
-      type = "local";
-      command = ["uvx" "mcp-nixos"];
+      content = {
+        type = "local";
+        command = ["uvx" "mcp-nixos"];
+      };
       enabled = true;
       environment = {};
     };
     "sequential-thinking" = {
-      type = "local";
-      command = ["npx" "-y" "@modelcontextprotocol/server-sequential-thinking"];
+      content = {
+        type = "local";
+        command = ["npx" "-y" "@modelcontextprotocol/server-sequential-thinking"];
+      };
       enabled = true;
       environment = {};
     };
     "GitHub Repo MCP" = {
-      type = "local";
-      command = ["npx" "-y" "github-repo-mcp"];
+      content = {
+        type = "local";
+        command = ["npx" "-y" "github-repo-mcp"];
+      };
       enabled = true;
       environment = {};
     };
     "Gemini MCP" = {
-      type = "local";
-      command = ["npx" "-y" "gemini-mcp-tool"];
+      content = {
+        type = "local";
+        command = ["npx" "-y" "gemini-mcp-tool"];
+      };
       enabled = true;
       environment = {};
     };
@@ -47,7 +57,6 @@
     model = cfg.model;
     autoupdate = true;
     share = "manual";
-    log_level = "INFO";
     mcp = lib.mkIf cfg.enableMcpServers mcpServers;
     instructions = [
       ".cursor/rules/*.md"
