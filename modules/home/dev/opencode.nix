@@ -14,6 +14,9 @@ in {
       nodejs
     ];
     
+    # Shell alias for convenient access
+    programs.zsh.shellAliases.opencode = "/home/y0usaf/.npm-global/bin/opencode";
+    
     systemd.services.opencode-install = {
       description = "Install OpenCode via npm";
       wantedBy = [ "multi-user.target" ];
