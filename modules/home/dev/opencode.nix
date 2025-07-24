@@ -56,7 +56,7 @@
     }
     // (lib.optionalAttrs cfg.enableMcpServers {
       mcp = {
-        servers = lib.attrValues mcpServers;
+        servers = mcpServers;
       };
     });
 
