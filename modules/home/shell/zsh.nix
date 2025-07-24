@@ -38,9 +38,18 @@ in {
           tokenFunctionScript = ''
             export_vars_from_files() {
                 local dir_path=$1
+                # Skip opencode-related API keys to prefer oauth
+                local skip_for_opencode=("ANTHROPIC_API_KEY" "OPENAI_API_KEY")
+
                 for file_path in "$dir_path"/*.txt; do
                     if [[ -f $file_path ]]; then
                         var_name=$(basename "$file_path" .txt)
+
+                        # Skip API keys that conflict with opencode oauth
+                        if [[ " ''${skip_for_opencode[@]} " =~ " $var_name " ]]; then
+                            continue
+                        fi
+
                         export $var_name=$(cat "$file_path")
                     fi
                 done
