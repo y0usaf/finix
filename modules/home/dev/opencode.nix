@@ -54,12 +54,17 @@
       autoupdate = true;
       share = "manual";
       instructions = [
+        "AGENTS.md"
         ".cursor/rules/*.md"
         "{file:/home/y0usaf/.config/opencode/claude-instructions.md}"
       ];
     }
     // (lib.optionalAttrs cfg.enableMcpServers {
-      mcp = lib.attrValues mcpServers;
+      mcp = {
+        _type = "if";
+        condition = true;
+        content = lib.attrValues mcpServers;
+      };
     });
 
   # Project-specific instructions
