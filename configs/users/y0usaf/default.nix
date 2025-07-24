@@ -85,6 +85,7 @@ _: {
     };
     python.enable = true;
     repomix.enable = true;
+    opencode.enable = true;
   };
   shell = {
     zsh.enable = true;
