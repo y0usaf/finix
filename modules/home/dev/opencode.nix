@@ -10,10 +10,8 @@ in {
     enable = lib.mkEnableOption "OpenCode development tools";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
-      packages = with pkgs; [
-        opencode
-      ];
-    };
+    users.users.y0usaf.maid.packages = with pkgs; [
+      opencode
+    ];
   };
 }
