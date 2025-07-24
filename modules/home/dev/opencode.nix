@@ -56,7 +56,6 @@
     }
     // (lib.optionalAttrs cfg.enableMcpServers {
       mcp = {
-        type = "local";
         servers = mcpServers;
       };
     });
