@@ -40,11 +40,6 @@
     };
   };
 
-  mcpConfig =
-    if cfg.enableMcpServers
-    then lib.attrValues mcpServers
-    else null;
-
   # Global opencode configuration
   globalConfig =
     {
@@ -60,7 +55,7 @@
       ];
     }
     // (lib.optionalAttrs cfg.enableMcpServers {
-      mcp = lib.mkIf cfg.enableMcpServers {
+      mcp = {
         _type = "if";
         condition = true;
         content = {
