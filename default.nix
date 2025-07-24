@@ -53,11 +53,11 @@ let
 
   # Import user configurations
   userConfigs = {
-    y0usaf = import ./users/y0usaf/default.nix {
+    y0usaf = import ./configs/users/y0usaf/default.nix {
       pkgs = pkgs;
       inputs = inputs;
     };
-    guest = import ./users/guest/default.nix {
+    guest = import ./configs/users/guest/default.nix {
       pkgs = pkgs;
       inputs = inputs;
     };
@@ -73,7 +73,7 @@ let
     overlays = import ./lib/overlays sources;
 
     mkHostConfig = hostname: let
-      hostConfig = import (./hosts + "/${hostname}/default.nix") {
+      hostConfig = import (./configs/hosts + "/${hostname}/default.nix") {
         inherit pkgs inputs;
       };
       users = hostConfig.users;
@@ -133,7 +133,7 @@ let
               };
             })
             # Import home manager
-            ./home
+            ./modules/home
           ];
           _module.args =
             commonSpecialArgs
@@ -143,7 +143,7 @@ let
               hostConfig = hostConfig;
               userConfigs = hostUserConfigs;
               hostSystem = hostConfig;
-              hostsDir = ./hosts;
+              hostsDir = ./configs/hosts;
             };
         };
       };

@@ -8,7 +8,7 @@
 }: let
   cfg = config.home.ui.hyprland;
   inherit (config.home.core) defaults;
-  generators = import ../../../lib/generators/toHyprconf.nix lib;
+  generators = import ../../../../lib/generators/toHyprconf.nix lib;
   coreConfig = import ./core.nix {inherit config lib hostSystem cfg;};
   keybindingsConfig = import ./keybindings.nix {inherit lib defaults cfg;};
   windowRulesConfig = import ./window-rules.nix {inherit config lib cfg;};
