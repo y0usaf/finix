@@ -19,6 +19,7 @@ in {
         "https://github.com/L3MON4D3/LuaSnip",
         "https://github.com/saadparwaiz1/cmp_luasnip",
         "https://github.com/onsails/lspkind.nvim",
+        "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
         -- File Navigation & Search
         "https://github.com/nvim-telescope/telescope.nvim",
         "https://github.com/nvim-lua/plenary.nvim",
@@ -58,6 +59,14 @@ in {
       local function setup_lsp()
         local lspconfig = require("lspconfig")
         local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+        -- Setup lsp_lines.nvim
+        require("lsp_lines").setup()
+        -- Disable virtual_text since lsp_lines replaces it
+        vim.diagnostic.config({
+          virtual_text = false,
+        })
+
         local on_attach = function(client, bufnr)
           local opts = { buffer = bufnr, silent = true }
           vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -67,6 +76,8 @@ in {
           vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
           vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
           vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+          -- Toggle lsp_lines
+          vim.keymap.set("n", "<leader>l", require("lsp_lines").toggle, opts)
         end
         local servers = { "lua_ls", "nil_ls", "pyright" }
         for _, server in ipairs(servers) do
