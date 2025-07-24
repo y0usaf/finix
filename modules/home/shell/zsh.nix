@@ -96,6 +96,7 @@ in {
             lintcheck = "clear; statix check .; deadnix .";
             lintfix = "clear; statix fix .; deadnix .";
             ide = "zellij --layout ~/.config/zellij/layouts/ide.kdl";
+            opencode = "~/.npm-global/bin/opencode";
           };
         in ''
           HISTSIZE=${toString zshConfig.history-memory}
