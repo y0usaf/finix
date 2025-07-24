@@ -9,42 +9,32 @@
   # MCP servers configuration for opencode
   mcpServers = {
     "Filesystem" = {
-      content = {
-        type = "local";
-        command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"];
-      };
+      type = "local";
+      command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"];
       enabled = true;
       environment = {};
     };
     "Nixos MCP" = {
-      content = {
-        type = "local";
-        command = ["uvx" "mcp-nixos"];
-      };
+      type = "local";
+      command = ["uvx" "mcp-nixos"];
       enabled = true;
       environment = {};
     };
     "sequential-thinking" = {
-      content = {
-        type = "local";
-        command = ["npx" "-y" "@modelcontextprotocol/server-sequential-thinking"];
-      };
+      type = "local";
+      command = ["npx" "-y" "@modelcontextprotocol/server-sequential-thinking"];
       enabled = true;
       environment = {};
     };
     "GitHub Repo MCP" = {
-      content = {
-        type = "local";
-        command = ["npx" "-y" "github-repo-mcp"];
-      };
+      type = "local";
+      command = ["npx" "-y" "github-repo-mcp"];
       enabled = true;
       environment = {};
     };
     "Gemini MCP" = {
-      content = {
-        type = "local";
-        command = ["npx" "-y" "gemini-mcp-tool"];
-      };
+      type = "local";
+      command = ["npx" "-y" "gemini-mcp-tool"];
       enabled = true;
       environment = {};
     };
@@ -53,8 +43,8 @@
   # Global opencode configuration
   globalConfig = {
     "$schema" = "https://opencode.ai/config.json";
-    theme = cfg.theme;
-    model = cfg.model;
+    inherit (cfg) theme;
+    inherit (cfg) model;
     autoupdate = true;
     share = "manual";
     mcp = lib.mkIf cfg.enableMcpServers {

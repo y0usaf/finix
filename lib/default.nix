@@ -15,9 +15,9 @@ let
 
   # Keep minimal inputs structure for compatibility
   inputs = {
-    nixpkgs = sources.nixpkgs;
-    disko = sources.disko;
-    nix-maid = sources.nix-maid;
+    inherit (sources) nixpkgs;
+    inherit (sources) disko;
+    inherit (sources) nix-maid;
   };
 
   # Build NixOS configurations
