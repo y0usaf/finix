@@ -11,7 +11,7 @@
     hostConfig = import (../../configs/hosts + "/${hostname}/default.nix") {
       inherit pkgs inputs;
     };
-    users = hostConfig.users;
+    inherit (hostConfig) users;
     hostUserConfigs = pkgs.lib.genAttrs users (username: userConfigs.${username});
   in {
     name = hostname;
@@ -21,13 +21,13 @@
         imports = [
           # Host system configuration
           ({config, ...}: {
-            imports = hostConfig.imports;
+            inherit (hostConfig) imports;
             hostSystem = {
-              users = hostConfig.users;
-              hostname = hostConfig.hostname;
-              homeDirectory = hostConfig.homeDirectory;
-              stateVersion = hostConfig.stateVersion;
-              timezone = hostConfig.timezone;
+              inherit (hostConfig) users;
+              inherit (hostConfig) hostname;
+              inherit (hostConfig) homeDirectory;
+              inherit (hostConfig) stateVersion;
+              inherit (hostConfig) timezone;
               profile = hostConfig.profile or "default";
               hardware = hostConfig.hardware or {};
               services = hostConfig.services or {};
@@ -72,8 +72,8 @@
         ];
         _module.args = {
           inherit hostname users sources inputs;
-          lib = pkgs.lib;
-          hostConfig = hostConfig;
+          inherit (pkgs) lib;
+          inherit hostConfig;
           userConfigs = hostUserConfigs;
           hostSystem = hostConfig;
           hostsDir = ../../configs/hosts;
