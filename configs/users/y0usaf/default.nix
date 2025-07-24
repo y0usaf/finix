@@ -83,6 +83,7 @@ _: {
       enable = true;
       neovide = false;
     };
+    python.enable = true;
     repomix.enable = true;
   };
   shell = {
