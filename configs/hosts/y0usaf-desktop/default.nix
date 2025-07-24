@@ -1,6 +1,6 @@
 _: {
   imports = [
-    ../../system
+    ../../../modules/system
     ./hardware-configuration.nix
   ];
   users = ["y0usaf" "guest"];
