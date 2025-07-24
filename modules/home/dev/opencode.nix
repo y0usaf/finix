@@ -46,18 +46,21 @@
     else null;
 
   # Global opencode configuration
-  globalConfig = {
-    "$schema" = "https://opencode.ai/config.json";
-    theme = cfg.theme;
-    model = cfg.model;
-    autoupdate = true;
-    share = "manual";
-    mcp = mcpConfig;
-    instructions = [
-      ".cursor/rules/*.md"
-      "{file:/home/y0usaf/.config/opencode/claude-instructions.md}"
-    ];
-  };
+  globalConfig =
+    {
+      "$schema" = "https://opencode.ai/config.json";
+      theme = cfg.theme;
+      model = cfg.model;
+      autoupdate = true;
+      share = "manual";
+      instructions = [
+        ".cursor/rules/*.md"
+        "{file:/home/y0usaf/.config/opencode/claude-instructions.md}"
+      ];
+    }
+    // (lib.optionalAttrs cfg.enableMcpServers {
+      mcp = lib.attrValues mcpServers;
+    });
 
   # Project-specific instructions
   projectInstructions = ''
