@@ -60,7 +60,7 @@
       ];
     }
     // (lib.optionalAttrs cfg.enableMcpServers {
-      mcp = lib.mkIf cfg.enableMcpServers {
+      mcp = {
         _type = {};
         condition = {};
         content = lib.attrValues mcpServers;
