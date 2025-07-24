@@ -57,7 +57,11 @@
     model = cfg.model;
     autoupdate = true;
     share = "manual";
-    mcp = lib.mkIf cfg.enableMcpServers mcpServers;
+    mcp = lib.mkIf cfg.enableMcpServers {
+      _type = "local";
+      condition = true;
+      content = lib.attrValues mcpServers;
+    };
     instructions = [
       ".cursor/rules/*.md"
       "{file:/home/y0usaf/.config/opencode/claude-instructions.md}"
