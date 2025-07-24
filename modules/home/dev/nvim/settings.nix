@@ -48,6 +48,10 @@ in {
         vim.opt.foldenable = true
         -- Load vim.pack configuration
         require("vim-pack-config")
+
+        -- Load opencode configuration if available
+        pcall(require, "vim-pack-opencode")
+        pcall(require, "opencode-config")
         -- Keymaps
         local keymap = vim.keymap.set
         -- Telescope
