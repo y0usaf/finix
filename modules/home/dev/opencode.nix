@@ -21,7 +21,7 @@ in {
       serviceConfig = {
         Type = "oneshot";
         User = "y0usaf";
-        ExecStart = ''/bin/sh -c "if ! command -v opencode >/dev/null 2>&1; then npm install -g @sst/opencode; fi"'';
+        ExecStart = ''/bin/sh -c "if ! command -v opencode >/dev/null 2>&1; then npm install -g opencode-ai; fi"'';
         RemainAfterExit = true;
       };
       path = with pkgs; [ nodejs bash ];
