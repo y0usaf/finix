@@ -118,7 +118,7 @@ in {
 
     enableMcpServers = lib.mkOption {
       type = lib.types.bool;
-      default = true;
+      default = false;
       description = "Enable MCP servers for enhanced functionality";
     };
   };
