@@ -14,14 +14,17 @@ in {
       nodejs
     ];
     
-    system.activationScripts.opencode = {
-      text = ''
-        if ! sudo -u y0usaf command -v opencode &> /dev/null; then
-          echo "Installing opencode via npm for user y0usaf..."
-          sudo -u y0usaf npm install -g @sst/opencode
-        fi
-      '';
-      deps = [];
+    systemd.services.opencode-install = {
+      description = "Install OpenCode via npm";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = "y0usaf";
+        ExecStart = ''/bin/sh -c "if ! command -v opencode >/dev/null 2>&1; then npm install -g @sst/opencode; fi"'';
+        RemainAfterExit = true;
+      };
+      path = with pkgs; [ nodejs bash ];
     };
   };
 }
