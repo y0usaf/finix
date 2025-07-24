@@ -10,16 +10,6 @@ in {
   config = lib.mkIf (cfg.enable && opencodeCfg.enable) {
     users.users.${username}.maid.file = {
       xdg_config."nvim/lua/opencode-config.lua".text = ''
-        -- OpenCode.nvim Configuration
-        local function setup_opencode()
-          print("Attempting to setup opencode...")
-          local success, opencode = pcall(require, "opencode")
-          if not success then
-            print("Failed to require opencode module: " .. tostring(opencode))
-            return
-          end
-          
-          print("OpenCode module loaded successfully, setting up keymaps...")
 
           opencode.setup({
             -- API configuration
@@ -83,7 +73,7 @@ in {
           vim.keymap.set("n", "<leader>ox", function()
             opencode.fix_diagnostics()
           end, vim.tbl_extend("force", opts, { desc = "OpenCode: Fix diagnostics" }))
-          
+
           print("OpenCode keymaps registered successfully!")
 
           -- Create Which-Key mappings if available
@@ -133,7 +123,7 @@ in {
         vim.pack.add({
           "https://github.com/NickvanDyke/opencode.nvim",
         })
-        
+
         -- Setup opencode.nvim with proper configuration
         vim.schedule(function()
           local success, opencode = pcall(require, "opencode")
@@ -141,47 +131,47 @@ in {
             -- Setup the plugin with default config
             opencode.setup({
               model_id = "gpt-4.1",
-              provider_id = "github-copilot", 
+              provider_id = "github-copilot",
               auto_reload = false,
             })
-            
+
             -- Set up keymaps as shown in the documentation
             local opts = { noremap = true, silent = true }
-            
-            vim.keymap.set({"n", "v"}, "<leader>ca", function() 
-              require("opencode").ask() 
+
+            vim.keymap.set({"n", "v"}, "<leader>ca", function()
+              require("opencode").ask()
             end, vim.tbl_extend("force", opts, { desc = "Ask opencode" }))
-            
-            vim.keymap.set({"n", "v"}, "<leader>cA", function() 
-              require("opencode").ask("@file ") 
+
+            vim.keymap.set({"n", "v"}, "<leader>cA", function()
+              require("opencode").ask("@file ")
             end, vim.tbl_extend("force", opts, { desc = "Ask opencode about current file" }))
-            
-            vim.keymap.set("n", "<leader>ce", function() 
-              require("opencode").prompt("Explain @cursor and its context") 
+
+            vim.keymap.set("n", "<leader>ce", function()
+              require("opencode").prompt("Explain @cursor and its context")
             end, vim.tbl_extend("force", opts, { desc = "Explain code near cursor" }))
-            
-            vim.keymap.set("n", "<leader>cr", function() 
-              require("opencode").prompt("Review @file for correctness and readability") 
+
+            vim.keymap.set("n", "<leader>cr", function()
+              require("opencode").prompt("Review @file for correctness and readability")
             end, vim.tbl_extend("force", opts, { desc = "Review file" }))
-            
-            vim.keymap.set("n", "<leader>cf", function() 
-              require("opencode").prompt("Fix these @diagnostics") 
+
+            vim.keymap.set("n", "<leader>cf", function()
+              require("opencode").prompt("Fix these @diagnostics")
             end, vim.tbl_extend("force", opts, { desc = "Fix errors" }))
-            
-            vim.keymap.set("v", "<leader>co", function() 
-              require("opencode").prompt("Optimize @selection for performance and readability") 
+
+            vim.keymap.set("v", "<leader>co", function()
+              require("opencode").prompt("Optimize @selection for performance and readability")
             end, vim.tbl_extend("force", opts, { desc = "Optimize selection" }))
-            
-            vim.keymap.set("v", "<leader>cd", function() 
-              require("opencode").prompt("Add documentation comments for @selection") 
+
+            vim.keymap.set("v", "<leader>cd", function()
+              require("opencode").prompt("Add documentation comments for @selection")
             end, vim.tbl_extend("force", opts, { desc = "Document selection" }))
-            
-            vim.keymap.set("v", "<leader>ct", function() 
-              require("opencode").prompt("Add tests for @selection") 
+
+            vim.keymap.set("v", "<leader>ct", function()
+              require("opencode").prompt("Add tests for @selection")
             end, vim.tbl_extend("force", opts, { desc = "Test selection" }))
-            
+
             print("OpenCode.nvim loaded and configured successfully!")
-            
+
             -- Create Which-Key mappings if available
             if pcall(require, "which-key") then
               require("which-key").register({
@@ -193,7 +183,7 @@ in {
                   r = "Review file",
                   f = "Fix errors",
                   o = "Optimize selection",
-                  d = "Document selection", 
+                  d = "Document selection",
                   t = "Test selection",
                 }
               })
