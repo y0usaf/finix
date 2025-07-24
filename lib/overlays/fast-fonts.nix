@@ -1,6 +1,4 @@
-sources:
-# Fast fonts overlay
-final: _prev: {
+sources: final: _prev: {
   fastFonts = final.stdenvNoCC.mkDerivation {
     pname = "fast-fonts";
     version = "1.0.0";
