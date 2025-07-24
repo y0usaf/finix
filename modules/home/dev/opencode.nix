@@ -52,6 +52,7 @@
     instructions = [
       "AGENTS.md"
       ".cursor/rules/*.md"
+      "{file:~/.claude/CLAUDE.md}"
     ];
   };
 
