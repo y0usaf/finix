@@ -56,7 +56,7 @@
     }
     // (lib.optionalAttrs cfg.enableMcpServers {
       mcp = {
-        servers = lib.mapAttrs (name: server: removeAttrs server ["type"]) mcpServers // { type = "local"; };
+        servers = lib.attrValues (lib.mapAttrs (name: server: server // { name = name; }) mcpServers);
       };
     });
 
