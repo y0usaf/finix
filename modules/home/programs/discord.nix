@@ -19,27 +19,15 @@ in {
       (
         if cfg.variant == "canary"
         then
-          (writeShellScriptBin "discord-canary" ''
-            export DISPLAY=:0
-            exec ${(discord-canary.override {
-              withOpenASAR = true;
-              withVencord = true;
-            })}/opt/DiscordCanary/DiscordCanary \
-              --disable-smooth-scrolling \
-              --disable-features=WebRtcAllowInputVolumeAdjustment \
-              "$@"
-          '')
+          (discord-canary.override {
+            withOpenASAR = true;
+            withVencord = true;
+          })
         else
-          (writeShellScriptBin "discord" ''
-            export DISPLAY=:0
-            exec ${(discord.override {
-              withOpenASAR = true;
-              withVencord = true;
-            })}/bin/discord \
-              --disable-smooth-scrolling \
-              --disable-features=WebRtcAllowInputVolumeAdjustment \
-              "$@"
-          '')
+          (discord.override {
+            withOpenASAR = true;
+            withVencord = true;
+          })
       )
     ];
   };
