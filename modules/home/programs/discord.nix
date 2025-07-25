@@ -24,12 +24,8 @@ in {
               withOpenASAR = true;
               withVencord = true;
             })}/opt/DiscordCanary/DiscordCanary \
-              --enable-features=UseOzonePlatform,WaylandWindowDecorations \
-              --ozone-platform=wayland \
               --disable-smooth-scrolling \
               --disable-features=WebRtcAllowInputVolumeAdjustment \
-              --disable-gpu-sandbox \
-              --enable-gpu-rasterization \
               "$@"
           '')
         else
@@ -38,11 +34,7 @@ in {
               withOpenASAR = true;
               withVencord = true;
             })}/bin/discord \
-              --enable-features=UseOzonePlatform \
-              --ozone-platform=wayland \
               --disable-smooth-scrolling \
-              --enable-gpu-rasterization \
-              --enable-zero-copy \
               --disable-features=WebRtcAllowInputVolumeAdjustment \
               "$@"
           '')
