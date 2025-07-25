@@ -1,35 +1,111 @@
 let
-  # Import npins sources
   sources = import ../npins;
   system = "x86_64-linux";
 
-  # Build packages with overlays
-  pkgs = import ./builders/pkgs.nix {
-    inherit sources system;
+  # Direct overlays import
+  overlays = import ./overlays sources;
+
+  # Direct pkgs with overlays
+  pkgs = import sources.nixpkgs {
+    inherit system;
+    inherit overlays;
+    config = {
+      allowUnfree = true;
+      cudaSupport = true;
+    };
   };
 
-  # Import user configurations
-  userConfigs = import ./builders/user-configs.nix {
-    inherit pkgs inputs;
+  # Direct user configs import
+  userConfigs = {
+    y0usaf = import ../configs/users/y0usaf {inherit pkgs;};
+    guest = import ../configs/users/guest {inherit pkgs;};
   };
 
-  # Keep minimal inputs structure for compatibility
-  inputs = {
-    inherit (sources) nixpkgs;
-    inherit (sources) disko;
-    inherit (sources) nix-maid;
-  };
-
-  # Build NixOS configurations
-  mkNixosConfigurations = import ./builders/nixos-config.nix {
-    inherit sources pkgs system inputs userConfigs;
-  };
-
-  hostNames = ["y0usaf-desktop"];
+  # Host config
+  hostConfig = import ../configs/hosts/y0usaf-desktop {inherit pkgs;};
+  inherit (hostConfig) users;
+  hostUserConfigs = pkgs.lib.genAttrs users (username: userConfigs.${username});
 in {
-  # Formatter
   formatter.${system} = pkgs.alejandra;
 
-  # NixOS configurations
-  nixosConfigurations = mkNixosConfigurations hostNames;
+  nixosConfigurations.y0usaf-desktop = import (sources.nixpkgs + "/nixos") {
+    inherit system;
+    configuration = {
+      imports = [
+        # Host system configuration
+        ({config, ...}: {
+          inherit (hostConfig) imports;
+          hostSystem = {
+            inherit (hostConfig) users;
+            inherit (hostConfig) hostname;
+            inherit (hostConfig) homeDirectory;
+            inherit (hostConfig) stateVersion;
+            inherit (hostConfig) timezone;
+            profile = hostConfig.profile or "default";
+            hardware = hostConfig.hardware or {};
+            services = hostConfig.services or {};
+          };
+          # Set user configuration from primary user
+          user = let
+            primaryUser = builtins.head hostConfig.users;
+          in {
+            name = primaryUser;
+            inherit (hostConfig) homeDirectory;
+          };
+          # Configure nixpkgs with overlays
+          nixpkgs = {
+            inherit overlays;
+            config = {
+              allowUnfree = true;
+              cudaSupport = true;
+            };
+          };
+        })
+        # User home configurations via maid
+        ({
+          config,
+          lib,
+          ...
+        }: {
+          imports = [
+            (import (sources.nix-maid + "/src/nixos") {
+              smfh = null;
+            })
+          ];
+          config = {
+            # Use proper NixOS module merging
+            home = lib.mkMerge (
+              lib.mapAttrsToList (
+                _username: userConfig:
+                # Remove system-specific config that doesn't belong in home
+                  lib.filterAttrs (name: _: name != "system") userConfig
+              )
+              hostUserConfigs
+            );
+            # Configure maid for each user
+            users.users = lib.genAttrs users (_username: {
+              maid = {
+                packages = [];
+              };
+            });
+          };
+        })
+        # Import user configuration abstraction
+        ./user-config.nix
+        # Import home manager
+        ../modules/home
+      ];
+      _module.args = {
+        inherit (hostConfig) hostname;
+        inherit users sources;
+        inherit (pkgs) lib;
+        inherit hostConfig;
+        userConfigs = hostUserConfigs;
+        hostSystem = hostConfig;
+        hostsDir = ../configs/hosts;
+        # Direct access to commonly used sources
+        inherit (sources) disko nix-minecraft Fast-Font;
+      };
+    };
+  };
 }
