@@ -40,8 +40,6 @@ in {
         "https://github.com/nvim-tree/nvim-web-devicons",
         -- UI Components (required by leetcode.nvim)
         "https://github.com/MunifTanjim/nui.nvim",
-        "https://github.com/folke/noice.nvim",
-
         -- Terminal
         "https://github.com/akinsho/toggleterm.nvim",
         -- Theme & UI
