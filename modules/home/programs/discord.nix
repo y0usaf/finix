@@ -24,13 +24,12 @@ in {
               withOpenASAR = true;
               withVencord = true;
             })}/opt/DiscordCanary/DiscordCanary \
-              --enable-features=UseOzonePlatform \
+              --enable-features=UseOzonePlatform,WaylandWindowDecorations \
               --ozone-platform=wayland \
               --disable-smooth-scrolling \
               --disable-features=WebRtcAllowInputVolumeAdjustment \
               --disable-gpu-sandbox \
-              --ignore-gpu-blocklist \
-              --use-gl=swiftshader \
+              --enable-gpu-rasterization \
               "$@"
           '')
         else
