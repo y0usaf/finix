@@ -5,9 +5,9 @@
     ./docker.nix
     ./latex.nix
     ./npm.nix
-    ./nvim
     ./nvim.nix
     ./python.nix
     ./repomix.nix
+    ./upscale.nix
   ];
 }
