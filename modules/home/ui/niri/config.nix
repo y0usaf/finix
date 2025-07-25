@@ -112,25 +112,25 @@ in {
                 Mod+Space { center-column; }
                 Mod+F { maximize-column; }
 
-                // Focus movement (Niri defaults - arrows and vim keys)
+                // Focus movement (arrows and vim keys with Alt)
                 Mod+Left { focus-column-left; }
                 Mod+Right { focus-column-right; }
                 Mod+Up { focus-window-up; }
                 Mod+Down { focus-window-down; }
-                Mod+H { focus-column-left; }
-                Mod+L { focus-column-right; }
-                Mod+J { focus-window-down; }
-                Mod+K { focus-window-up; }
+                Alt+H { focus-column-left; }
+                Alt+L { focus-column-right; }
+                Alt+J { focus-window-down; }
+                Alt+K { focus-window-up; }
 
-                // Window movement (Niri defaults)
+                // Window movement
                 Mod+Ctrl+Left { move-column-left; }
                 Mod+Ctrl+Right { move-column-right; }
                 Mod+Ctrl+Up { move-window-up; }
                 Mod+Ctrl+Down { move-window-down; }
-                Mod+Ctrl+H { move-column-left; }
-                Mod+Ctrl+L { move-column-right; }
-                Mod+Ctrl+J { move-window-down; }
-                Mod+Ctrl+K { move-window-up; }
+                Alt+Shift+H { move-column-left; }
+                Alt+Shift+L { move-column-right; }
+                Alt+Shift+J { move-window-down; }
+                Alt+Shift+K { move-window-up; }
 
                 // Workspace switching (Niri defaults)
                 Mod+Page_Up { focus-workspace-up; }
