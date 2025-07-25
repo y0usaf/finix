@@ -41,13 +41,13 @@ in {
             }
 
             output "DP-4" {
-                mode "2560x1440@240.000"
+                mode "5120x1440@239.761"
                 position x=0 y=0
             }
             
             output "HDMI-A-2" {
                 mode "1920x1080@60.000"
-                position x=2560 y=0
+                position x=5120 y=0
             }
 
             layout {

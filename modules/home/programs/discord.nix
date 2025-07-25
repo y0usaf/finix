@@ -24,6 +24,8 @@ in {
               withOpenASAR = true;
               withVencord = true;
             })}/opt/DiscordCanary/DiscordCanary \
+              --enable-features=UseOzonePlatform \
+              --ozone-platform=wayland \
               --disable-smooth-scrolling \
               --disable-features=WebRtcAllowInputVolumeAdjustment \
               --disable-gpu-sandbox \
@@ -37,6 +39,8 @@ in {
               withOpenASAR = true;
               withVencord = true;
             })}/bin/discord \
+              --enable-features=UseOzonePlatform \
+              --ozone-platform=wayland \
               --disable-smooth-scrolling \
               --enable-gpu-rasterization \
               --enable-zero-copy \
