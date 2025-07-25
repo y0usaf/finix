@@ -17,7 +17,7 @@ in {
         pkgs.jq
         pkgs.swaybg
       ];
-      
+
       file.xdg_config = {
         "niri/config.kdl" = {
           text = ''
@@ -27,14 +27,14 @@ in {
                         layout "us"
                     }
                 }
-                
+
                 touchpad {
                     tap
                     dwt
                     natural-scroll
                     accel-speed 0.2
                 }
-                
+
                 mouse {
                     accel-speed 0.2
                 }
@@ -44,7 +44,7 @@ in {
                 mode "5120x1440@239.761"
                 position x=0 y=0
             }
-            
+
             output "HDMI-A-2" {
                 mode "1920x1080@60.000"
                 position x=5120 y=0
@@ -101,18 +101,17 @@ in {
             binds {
                 // Default Niri bindings
                 Mod+Shift+Slash { show-hotkey-overlay; }
-                
+
                 // Terminal and launcher (Niri defaults)
                 Mod+T { spawn "${defaults.terminal}"; }
                 Mod+D { spawn "${defaults.launcher}"; }
-                
+
                 // Window management (Niri defaults)
                 Mod+Q { close-window; }
                 Mod+Shift+F { fullscreen-window; }
-                Mod+V { toggle-window-floating; }
+                Mod+Space { center-column; }
                 Mod+F { maximize-column; }
-                Mod+W { toggle-column-tabbed; }
-                
+
                 // Focus movement (Niri defaults - arrows and vim keys)
                 Mod+Left { focus-column-left; }
                 Mod+Right { focus-column-right; }
@@ -122,7 +121,7 @@ in {
                 Mod+L { focus-column-right; }
                 Mod+J { focus-window-down; }
                 Mod+K { focus-window-up; }
-                
+
                 // Window movement (Niri defaults)
                 Mod+Ctrl+Left { move-column-left; }
                 Mod+Ctrl+Right { move-column-right; }
@@ -132,7 +131,7 @@ in {
                 Mod+Ctrl+L { move-column-right; }
                 Mod+Ctrl+J { move-window-down; }
                 Mod+Ctrl+K { move-window-up; }
-                
+
                 // Workspace switching (Niri defaults)
                 Mod+Page_Up { focus-workspace-up; }
                 Mod+Page_Down { focus-workspace-down; }
@@ -147,7 +146,7 @@ in {
                 Mod+7 { focus-workspace 7; }
                 Mod+8 { focus-workspace 8; }
                 Mod+9 { focus-workspace 9; }
-                
+
                 // Move to workspace (Niri defaults)
                 Mod+Ctrl+Page_Up { move-column-to-workspace-up; }
                 Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
@@ -162,7 +161,7 @@ in {
                 Mod+Ctrl+7 { move-column-to-workspace 7; }
                 Mod+Ctrl+8 { move-column-to-workspace 8; }
                 Mod+Ctrl+9 { move-column-to-workspace 9; }
-                
+
                 // Layout controls (Niri defaults)
                 Mod+R { switch-preset-column-width; }
                 Mod+Shift+R { switch-preset-window-height; }
@@ -170,23 +169,23 @@ in {
                 Mod+Period { expel-window-from-column; }
                 Mod+BracketLeft { consume-or-expel-window-left; }
                 Mod+BracketRight { consume-or-expel-window-right; }
-                
-                // Screenshots (Niri defaults)
-                Print { screenshot-screen; }
-                Ctrl+Print { screenshot; }
-                Alt+Print { screenshot-window; }
-                
+
+                // Screenshots (using grim/slurp)
+                Print { spawn "grim" "-g" "$(slurp -d)" "-" "|" "wl-copy" "-t" "image/png"; }
+                Ctrl+Print { spawn "grim" "-" "|" "wl-copy" "-t" "image/png"; }
+                Alt+Print { spawn "grim" "-g" "$(slurp -w)" "-" "|" "wl-copy" "-t" "image/png"; }
+
                 // System (Niri defaults)
                 Mod+Shift+E { quit; }
                 Mod+O { toggle-overview; }
-                
+
                 // Custom app bindings (preserved)
                 Alt+1 { spawn "${defaults.ide}"; }
                 Alt+2 { spawn "${defaults.browser}"; }
-                Alt+3 { spawn "${defaults.discord}"; }
+                Alt+3 { spawn "vesktop"; }
                 Alt+4 { spawn "steam"; }
                 Alt+5 { spawn "obs"; }
-                
+
                 // Additional useful bindings
                 Mod+E { spawn "${defaults.fileManager}"; }
                 Mod+Shift+O { spawn "${defaults.terminal}" "-e" "${defaults.editor}"; }
@@ -200,8 +199,6 @@ in {
           '';
         };
       };
-
-
     };
   };
 }
