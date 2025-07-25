@@ -36,11 +36,11 @@
       "$mod, E, exec, $filemanager"
       "$mod, R, exec, $launcher"
       "$mod, O, exec, $notepad"
-      "$mod2, 1, exec, $ide"
-      "$mod2, 2, exec, $browser"
-      "$mod2, 3, exec, vesktop"
-      "$mod2, 4, exec, steam"
-      "$mod2, 5, exec, $obs"
+      "$mod 1, exec, $ide"
+      "$mod, 2, exec, $browser"
+      "$mod, 3, exec, vesktop"
+      "$mod, 4, exec, steam"
+      "$mod, 5, exec, $obs"
     ]
     [
       "$mod SHIFT, S, swapactiveworkspaces, DP-4 HDMI-A-2"
