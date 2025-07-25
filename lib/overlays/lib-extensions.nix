@@ -21,7 +21,7 @@ _final: prev: {
     mkOptDef = type: default: description: libprev.mkOption {inherit type default description;};
 
     # User configuration helpers
-    mkUserMaidConfig = config: username: userConfig: {
+    mkUserMaidConfig = username: userConfig: {
       users.users.${username}.maid = userConfig;
     };
 
