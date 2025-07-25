@@ -71,42 +71,16 @@ in {
             esac
           fi
         '';
-        ".config/zsh/.zshrc".text = let
-          baseAliases = {
-            adb = "HOME=\"$XDG_DATA_HOME/android\" adb";
-            wget = "wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"";
-            svn = "svn --config-dir \"$XDG_CONFIG_HOME/subversion\"";
-            yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
-            mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
-            cat = "bat";
-            cattree = "${config.user.nixosConfigDirectory}/lib/scripts/cattree.sh";
-            userctl = "systemctl --user";
-            hmfail = "journalctl -u home-manager-${name}.service -n 20 --no-pager";
-            pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
-            pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
-            hwconfig = "sudo nixos-generate-config --show-hardware-config";
-            esrgan = "realesrgan-ncnn-vulkan -i ${homeDirectory}/Pictures/Upscale/Input -o ${homeDirectory}/Pictures/Upscale/Output";
-            "l." = "lsd -A | grep -E \"^\\.\"";
-            la = "lsd -A --color=always --group-dirs=first --icon=always";
-            ll = "lsd -l --color=always --group-dirs=first --icon=always";
-            ls = "lsd -lA --color=always --group-dirs=first --icon=always";
-            lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
-            grep = "grep --color=auto";
-            dir = "dir --color=auto";
-            egrep = "grep -E --color=auto";
-            fgrep = "grep -F --color=auto";
-            "hmpush" = "git -C ${config.user.nixosConfigDirectory} push origin main --force";
-            "hmpull" = "git -C ${config.user.nixosConfigDirectory} fetch origin && git -C ${config.user.nixosConfigDirectory} reset --hard origin/main";
-            gpupower = "sudo nvidia-smi -pl";
-            lintcheck = "clear; statix check .; deadnix .";
-            lintfix = "clear; statix fix .; deadnix .";
-            ide = "zellij --layout ${config.user.configDirectory}/zellij/layouts/ide.kdl";
-            opencode = "${homeDirectory}/.npm-global/bin/opencode";
-          };
-        in ''
+        ".config/zsh/.zshrc".text = ''
+          # Source all files in the aliases directory
+          for alias_file in ''${ZDOTDIR:-$HOME/.config/zsh}/aliases/*.zsh; do
+            source "$alias_file"
+          done
+
           HISTSIZE=${toString zshConfig.history-memory}
           SAVEHIST=${toString zshConfig.history-storage}
-           HISTFILE="${homeDirectory}/.local/state/zsh/history"          setopt HIST_IGNORE_DUPS
+           HISTFILE="${homeDirectory}/.local/state/zsh/history"
+          setopt HIST_IGNORE_DUPS
           setopt HIST_IGNORE_ALL_DUPS
           setopt HIST_IGNORE_SPACE
           setopt HIST_EXPIRE_DUPS_FIRST
@@ -147,9 +121,6 @@ in {
               shift
               nix run "nixpkgs#$pkg" -- "$@"
           }
-
-          ${lib.concatStringsSep "\n"
-            (lib.mapAttrsToList (name: value: "alias ${name}='${value}'") baseAliases)}
         '';
       };
     };

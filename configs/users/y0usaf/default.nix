@@ -88,9 +88,11 @@ _: {
     repomix.enable = true;
     opencode.enable = true;
     latex.enable = true;
+    upscale.enable = true;
   };
   shell = {
     zsh.enable = true;
+    aliases.enable = true;
     cat-fetch.enable = true;
     zellij = {
       enable = true;
