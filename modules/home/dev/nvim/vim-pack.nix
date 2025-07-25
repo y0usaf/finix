@@ -40,6 +40,8 @@ in {
         "https://github.com/nvim-tree/nvim-web-devicons",
         -- UI Components (required by leetcode.nvim)
         "https://github.com/MunifTanjim/nui.nvim",
+        "https://github.com/gelguy/wilder.nvim",
+
         -- Terminal
         "https://github.com/akinsho/toggleterm.nvim",
         -- Theme & UI
@@ -403,6 +405,20 @@ in {
 
         -- Delay leetcode setup to ensure all dependencies are loaded
         vim.defer_fn(setup_leetcode, 100)
+
+        -- Wilder.nvim setup for centered cmdline
+        local wilder = require('wilder')
+        wilder.setup({modes = {':', '/', '?'}})
+
+        wilder.set_option('renderer', wilder.popupmenu_renderer(
+          wilder.popupmenu_palette_theme({
+            border = 'rounded',
+            max_height = '75%',
+            min_height = 0,
+            prompt_position = 'top',
+            reverse = 0,
+          })
+        ))
       end
       -- Setup plugins after pack operations or immediately if already available
       local function initialize_config()
