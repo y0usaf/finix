@@ -110,9 +110,9 @@ in {
                 // Now Mod = Alt, so these are Alt-based default Niri bindings
                 Mod+Shift+Slash { show-hotkey-overlay; }
 
-                // Terminal and launcher (now Alt+T, Alt+D)
+                // Terminal and launcher (now Alt+T, Super+R for launcher)
                 Mod+T { spawn "${defaults.terminal}"; }
-                Mod+D { spawn "${defaults.launcher}"; }
+                Super+R { spawn "${defaults.launcher}"; }
 
                 // Window management (now Alt-based)
                 Mod+Q { close-window; }
