@@ -38,9 +38,9 @@ in {
               withVencord = true;
             })}/bin/discord \
               --disable-smooth-scrolling \
-              --disable-features=WebRtcAllowInputVolumeAdjustment \
               --enable-gpu-rasterization \
               --enable-zero-copy \
+              --disable-features=WebRtcAllowInputVolumeAdjustment \
               "$@"
           '')
       )
