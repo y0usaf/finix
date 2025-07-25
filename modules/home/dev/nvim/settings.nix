@@ -62,8 +62,9 @@ in {
         keymap("n", "<leader>fr", builtin.oldfiles, { desc = "Recent files" })
         keymap("n", "<leader>fh", builtin.help_tags, { desc = "Help tags" })
         keymap("n", "<leader>fo", builtin.git_status, { desc = "Git status" })
-        -- File explorer
-        keymap("n", "<leader>e", "<cmd>Neotree toggle<cr>", { desc = "File explorer" })
+        -- File navigation
+        keymap("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+        keymap("n", "<leader>-", "<CMD>Oil .<CR>", { desc = "Open current directory" })
         -- Buffer navigation
         keymap("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
         keymap("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
@@ -111,18 +112,18 @@ in {
         keymap("v", "<", "<gv")
         keymap("v", ">", ">gv")
         keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")
-        -- Auto-install treesitter parsers
-        vim.api.nvim_create_autocmd("FileType", {
-          callback = function()
-            local parsers = require("nvim-treesitter.parsers")
-            local lang = parsers.get_buf_lang()
-            if parsers.get_parser_configs()[lang] and not parsers.has_parser(lang) then
-              vim.schedule(function()
-                vim.cmd("TSInstall " .. lang)
-              end)
-            end
-          end,
-        })
+        -- Disable auto-install treesitter parsers (managed by nix)
+        -- vim.api.nvim_create_autocmd("FileType", {
+        --   callback = function()
+        --     local parsers = require("nvim-treesitter.parsers")
+        --     local lang = parsers.get_buf_lang()
+        --     if parsers.get_parser_configs()[lang] and not parsers.has_parser(lang) then
+        --       vim.schedule(function()
+        --         vim.cmd("TSInstall " .. lang)
+        --       end)
+        --     end
+        --   end,
+        -- })
       '';
     };
   };

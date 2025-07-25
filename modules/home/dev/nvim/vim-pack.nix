@@ -35,10 +35,9 @@ in {
         "https://github.com/RRethy/vim-illuminate",
         "https://github.com/folke/twilight.nvim",
         "https://github.com/m4xshen/hardtime.nvim",
-        -- File Explorer
-        "https://github.com/nvim-neo-tree/neo-tree.nvim",
+        -- File Navigation
+        "https://github.com/stevearc/oil.nvim",
         "https://github.com/nvim-tree/nvim-web-devicons",
-        "https://github.com/MunifTanjim/nui.nvim",
         -- Terminal
         "https://github.com/akinsho/toggleterm.nvim",
         -- Theme & UI
@@ -247,85 +246,112 @@ in {
         })
         -- Hardtime (Vim motion learning)
         require("hardtime").setup({
-          disabled_filetypes = { "neo-tree", "lazy", "mason", "oil" },
+          disabled_filetypes = { "oil", "lazy", "mason" },
           max_count = 3,
           restriction_mode = "hint",
           disable_mouse = false,
         })
-        -- Neo-tree
-        require("neo-tree").setup({
-          close_if_last_window = false,
-          popup_border_style = "rounded",
-          enable_git_status = true,
-          enable_diagnostics = true,
-          filesystem = {
-            filtered_items = {
-              visible = false,
-              hide_dotfiles = false,
-              hide_gitignored = false,
-            },
-            follow_current_file = {
-              enabled = true,
-              leave_dirs_open = false,
-            },
-            group_empty_dirs = false,
-            hijack_netrw_behavior = "open_default",
-            use_libuv_file_watcher = true,
+        -- Oil.nvim (Directory editor)
+        require("oil").setup({
+          default_file_explorer = true,
+          columns = {
+            "icon",
+            "permissions",
+            "size",
+            "mtime",
           },
-          window = {
-            position = "left",
-            width = 30,
-            mapping_options = {
-              noremap = true,
-              nowait = true,
-            },
-            mappings = {
-              ["<space>"] = "none",
-              ["[g"] = "prev_git_modified",
-              ["]g"] = "next_git_modified",
+          buf_options = {
+            buflisted = false,
+            bufhidden = "hide",
+          },
+          win_options = {
+            wrap = false,
+            signcolumn = "no",
+            cursorcolumn = false,
+            foldcolumn = "0",
+            spell = false,
+            list = false,
+            conceallevel = 3,
+            concealcursor = "nvic",
+          },
+          delete_to_trash = true,
+          skip_confirm_for_simple_edits = false,
+          prompt_save_on_select_new_entry = true,
+          cleanup_delay_ms = 2000,
+          lsp_file_operations = {
+            enabled = true,
+            autosave_changes = false,
+          },
+          constrain_cursor = "editable",
+          experimental_watch_for_changes = false,
+          keymaps = {
+            ["g?"] = "actions.show_help",
+            ["<CR>"] = "actions.select",
+            ["<C-s>"] = "actions.select_vsplit",
+            ["<C-h>"] = "actions.select_split",
+            ["<C-t>"] = "actions.select_tab",
+            ["<C-p>"] = "actions.preview",
+            ["<C-c>"] = "actions.close",
+            ["<C-l>"] = "actions.refresh",
+            ["-"] = "actions.parent",
+            ["_"] = "actions.open_cwd",
+            ["`"] = "actions.cd",
+            ["~"] = "actions.tcd",
+            ["gs"] = "actions.change_sort",
+            ["gx"] = "actions.open_external",
+            ["g."] = "actions.toggle_hidden",
+            ["g\\"] = "actions.toggle_trash",
+          },
+          use_default_keymaps = true,
+          view_options = {
+            show_hidden = false,
+            is_hidden_file = function(name, bufnr)
+              return vim.startswith(name, ".")
+            end,
+            is_always_hidden = function(name, bufnr)
+              return false
+            end,
+            sort = {
+              { "type", "asc" },
+              { "name", "asc" },
             },
           },
-          default_component_configs = {
-            indent = {
-              indent_size = 2,
-              padding = 1,
-              with_markers = true,
-              indent_marker = "│",
-              last_indent_marker = "└",
-              highlight = "NeoTreeIndentMarker",
-              with_expanders = nil,
-              expander_collapsed = "",
-              expander_expanded = "",
-              expander_highlight = "NeoTreeExpander",
+          float = {
+            padding = 2,
+            max_width = 0,
+            max_height = 0,
+            border = "rounded",
+            win_options = {
+              winblend = 0,
             },
-            icon = {
-              folder_closed = "",
-              folder_open = "",
-              folder_empty = "ﰊ",
-              default = "*",
-              highlight = "NeoTreeFileIcon"
+            override = function(conf)
+              return conf
+            end,
+          },
+          preview = {
+            max_width = 0.9,
+            min_width = { 40, 0.4 },
+            width = nil,
+            max_height = 0.9,
+            min_height = { 5, 0.1 },
+            height = nil,
+            border = "rounded",
+            win_options = {
+              winblend = 0,
             },
-            modified = {
-              symbol = "[+]",
-              highlight = "NeoTreeModified",
-            },
-            name = {
-              trailing_slash = false,
-              use_git_status_colors = true,
-              highlight = "NeoTreeFileName",
-            },
-            git_status = {
-              symbols = {
-                added     = "",
-                modified  = "",
-                deleted   = "✖",
-                renamed   = "󰁕",
-                untracked = "",
-                ignored   = "",
-                unstaged  = "󰄱",
-                staged    = "",
-                conflict  = "",
-              }
+            update_on_cursor_moved = true,
+          },
+          progress = {
+            max_width = 0.9,
+            min_width = { 40, 0.4 },
+            width = nil,
+            max_height = { 10, 0.9 },
+            min_height = { 5, 0.1 },
+            height = nil,
+            border = "rounded",
+            minimized_border = "none",
+            win_options = {
+              winblend = 0,
             },
           },
         })
