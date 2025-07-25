@@ -44,8 +44,8 @@
   globalConfig =
     {
       "$schema" = "https://opencode.ai/config.json";
-      theme = cfg.theme;
-      model = cfg.model;
+      inherit (cfg) theme;
+      inherit (cfg) model;
       autoupdate = true;
       share = "manual";
       disabled_providers = ["openai" "huggingface"];
@@ -57,7 +57,7 @@
     }
     // (lib.optionalAttrs cfg.enableMcpServers {
       mcp = {
-        servers = lib.attrValues (lib.mapAttrs (name: server: server // {name = name;}) mcpServers);
+        servers = lib.attrValues (lib.mapAttrs (name: server: server // {inherit name;}) mcpServers);
       };
     });
 

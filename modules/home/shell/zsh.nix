@@ -6,9 +6,7 @@
 }: let
   cfg = config.home.shell.zsh;
   username = "y0usaf";
-  homeDirectory = "/home/y0usaf";
   tokenDir = "/home/y0usaf/Tokens";
-  xdgConfigHome = "${homeDirectory}/.config";
   zshConfig = {
     cat-fetch = true;
     history-memory = 10000;

@@ -1,6 +1,6 @@
 # Extended lib overlay with helper functions
-final: prev: {
-  lib = prev.lib.extend (libfinal: libprev: {
+_final: prev: {
+  lib = prev.lib.extend (_libfinal: libprev: {
     # Directory and module importers
     importDirs = dir: let
       dirs = libprev.filterAttrs (n: v: v == "directory" && n != ".git") (builtins.readDir dir);

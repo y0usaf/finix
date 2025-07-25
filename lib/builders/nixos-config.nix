@@ -33,14 +33,17 @@
               services = hostConfig.services or {};
             };
             # Configure nixpkgs with overlays
-            nixpkgs.overlays = overlays;
-            nixpkgs.config.allowUnfree = true;
-            nixpkgs.config.cudaSupport = true;
+            nixpkgs = {
+              overlays = overlays;
+              config = {
+                allowUnfree = true;
+                cudaSupport = true;
+              };
+            };
           })
           # User home configurations via maid
           ({
             config,
-            pkgs,
             lib,
             ...
           }: {
@@ -53,14 +56,14 @@
               # Use proper NixOS module merging instead of manual attribute manipulation
               home = lib.mkMerge (
                 lib.mapAttrsToList (
-                  username: userConfig:
+                  _username: userConfig:
                   # Remove system-specific config that doesn't belong in home
                     lib.filterAttrs (name: _: name != "system") userConfig
                 )
                 hostUserConfigs
               );
               # Configure maid for each user
-              users.users = lib.genAttrs users (username: {
+              users.users = lib.genAttrs users (_username: {
                 maid = {
                   packages = [];
                 };

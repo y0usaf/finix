@@ -38,6 +38,8 @@ in {
         -- File Navigation
         "https://github.com/stevearc/oil.nvim",
         "https://github.com/nvim-tree/nvim-web-devicons",
+        -- UI Components (required by leetcode.nvim)
+        "https://github.com/MunifTanjim/nui.nvim",
         -- Terminal
         "https://github.com/akinsho/toggleterm.nvim",
         -- Theme & UI
@@ -378,19 +380,29 @@ in {
             },
           },
         })
-        -- Leetcode
-        require("leetcode").setup({
-          lang = "python3",
-          storage = {
-            home = "~/leetcode/",
-          },
-          logging = true,
-          injector = {
-            ["python3"] = {
-              before = true,
-            },
-          },
-        })
+        -- Leetcode (with proper dependency handling)
+        local function setup_leetcode()
+          local ok, leetcode = pcall(require, "leetcode")
+          if ok then
+            leetcode.setup({
+              lang = "python3",
+              storage = {
+                home = "~/leetcode/",
+              },
+              logging = true,
+              injector = {
+                ["python3"] = {
+                  before = true,
+                },
+              },
+            })
+          else
+            vim.notify("Leetcode.nvim disabled: dependency issues", vim.log.levels.WARN)
+          end
+        end
+
+        -- Delay leetcode setup to ensure all dependencies are loaded
+        vim.defer_fn(setup_leetcode, 100)
       end
       -- Setup plugins after pack operations or immediately if already available
       local function initialize_config()
