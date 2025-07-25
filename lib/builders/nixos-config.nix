@@ -37,11 +37,11 @@
               primaryUser = builtins.head hostConfig.users;
             in {
               name = primaryUser;
-              homeDirectory = hostConfig.homeDirectory;
+              inherit (hostConfig) homeDirectory;
             };
             # Configure nixpkgs with overlays
             nixpkgs = {
-              overlays = overlays;
+              inherit overlays;
               config = {
                 allowUnfree = true;
                 cudaSupport = true;
