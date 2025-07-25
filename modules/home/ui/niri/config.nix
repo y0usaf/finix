@@ -41,7 +41,7 @@ in {
             }
 
             output "DP-4" {
-                mode "2560x1440@165.003"
+                mode "2560x1440@240.000"
                 position x=0 y=0
             }
             
