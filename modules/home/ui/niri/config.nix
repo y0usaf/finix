@@ -27,7 +27,7 @@ in {
                         layout "us"
                     }
                 }
-                
+
                 // Set Alt as primary mod key
                 mod-key "Alt"
             }
@@ -105,11 +105,11 @@ in {
             binds {
                 // Now Mod = Alt, so these are Alt-based default Niri bindings
                 Mod+Shift+Slash { show-hotkey-overlay; }
-                
+
                 // Terminal and launcher (now Alt+T, Alt+D)
                 Mod+T { spawn "${defaults.terminal}"; }
                 Mod+D { spawn "${defaults.launcher}"; }
-                
+
                 // Window management (now Alt-based)
                 Mod+Q { close-window; }
                 Mod+Shift+F { fullscreen-window; }
