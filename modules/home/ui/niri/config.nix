@@ -101,6 +101,12 @@ in {
                 opacity 1.0
             }
 
+            window-rule {
+                match app-id="launcher"
+                open-floating
+                default-column-width { fixed 800; }
+            }
+
             binds {
                 // Now Mod = Alt, so these are Alt-based default Niri bindings
                 Mod+Shift+Slash { show-hotkey-overlay; }
