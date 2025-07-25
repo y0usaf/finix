@@ -410,7 +410,9 @@ in {
         require("noice").setup({
           cmdline = {
             view = "cmdline_popup",
-            opts = {
+          },
+          views = {
+            cmdline_popup = {
               position = "center",
               size = {
                 width = 0.6,
