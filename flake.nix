@@ -4,7 +4,7 @@
   # No inputs - everything comes from npins
   inputs = {};
 
-  outputs = {self, ...}: {
+  outputs = _: {
     # Just expose our npins-based nixosConfigurations
     inherit ((import ./lib)) nixosConfigurations;
 
