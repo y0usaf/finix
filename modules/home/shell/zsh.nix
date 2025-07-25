@@ -51,6 +51,11 @@ in {
                 done
             }
             export_vars_from_files "${tokensDirectory}"
+
+            # Set default applications
+            export TERMINAL="${config.home.core.defaults.terminal}"
+            export BROWSER="${config.home.core.defaults.browser}"
+            export EDITOR="${config.home.core.defaults.editor}"
           '';
         in
           tokenFunctionScript;
@@ -72,6 +77,11 @@ in {
           fi
         '';
         ".config/zsh/.zshrc".text = ''
+          # Set default applications
+          export TERMINAL="${config.home.core.defaults.terminal}"
+          export BROWSER="${config.home.core.defaults.browser}"
+          export EDITOR="${config.home.core.defaults.editor}"
+
           # Source all files in the aliases directory
           for alias_file in ''${ZDOTDIR:-$HOME/.config/zsh}/aliases/*.zsh; do
             source "$alias_file"
