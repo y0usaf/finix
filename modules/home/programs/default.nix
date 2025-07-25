@@ -12,6 +12,7 @@
     ./obsidian.nix
     ./pcmanfm.nix
     ./qbittorrent.nix
+    ./stremio.nix
     ./sway-launcher-desktop.nix
     ./vesktop.nix
     ./webapps.nix
