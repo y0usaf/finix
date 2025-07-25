@@ -36,7 +36,7 @@
       "$mod, E, exec, $filemanager"
       "$mod, R, exec, $launcher"
       "$mod, O, exec, $notepad"
-      "$mod 1, exec, $ide"
+      "$mod, 1, exec, $ide"
       "$mod, 2, exec, $browser"
       "$mod, 3, exec, vesktop"
       "$mod, 4, exec, steam"
@@ -58,8 +58,8 @@
           key
         };
     in [
-      "$mod2, ${key}, movefocus, ${direction}"
-      "$mod2 SHIFT, ${key}, movewindow, ${direction}"
+      "$mod, ${key}, movefocus, ${direction}"
+      "$mod SHIFT, ${key}, movewindow, ${direction}"
     ]))
     (lib.lists.forEach (lib.range 1 9) (i: let
       num = toString i;
