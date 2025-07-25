@@ -10,12 +10,14 @@ in {
     enable = lib.mkEnableOption "SpotDL music downloading tools";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid.packages = with pkgs; [
-      ffmpeg
-    ];
-    users.users.y0usaf.maid.file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
-      alias spotm4a="uvx spotdl --format m4a --output '{title}'"
-      alias spotmp3="uvx spotdl --format mp3 --output '{title}'"
-    '';
+    users.users.${config.user.name}.maid = {
+      packages = with pkgs; [
+        ffmpeg
+      ];
+      file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
+        alias spotm4a="uvx spotdl --format m4a --output '{title}'"
+        alias spotmp3="uvx spotdl --format mp3 --output '{title}'"
+      '';
+    };
   };
 }

@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "Syncthing service";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         syncthing
       ];
@@ -24,12 +24,12 @@ in {
         ExecStart = "${pkgs.syncthing}/bin/syncthing serve --no-browser --no-restart --logflags=0";
         Restart = "on-failure";
         RestartSec = "5s";
-        WorkingDirectory = "/home/y0usaf";
+        WorkingDirectory = config.user.homeDirectory;
         StateDirectory = "syncthing";
         StateDirectoryMode = "0700";
         ProtectSystem = "strict";
         ProtectHome = "read-only";
-        ReadWritePaths = ["/home/y0usaf"];
+        ReadWritePaths = [config.user.homeDirectory];
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectKernelTunables = true;

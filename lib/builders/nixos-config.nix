@@ -32,6 +32,13 @@
               hardware = hostConfig.hardware or {};
               services = hostConfig.services or {};
             };
+            # Set user configuration from primary user
+            user = let
+              primaryUser = builtins.head hostConfig.users;
+            in {
+              name = primaryUser;
+              homeDirectory = hostConfig.homeDirectory;
+            };
             # Configure nixpkgs with overlays
             nixpkgs = {
               overlays = overlays;
@@ -70,6 +77,8 @@
               });
             };
           })
+          # Import user configuration abstraction
+          ../user-config.nix
           # Import home manager
           ../../modules/home
         ];

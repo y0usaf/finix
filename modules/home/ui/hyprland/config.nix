@@ -10,14 +10,14 @@
   inherit (config.home.core) defaults;
   generators = import ../../../../lib/generators/toHyprconf.nix lib;
   coreConfig = import ./core.nix {inherit config lib hostSystem cfg;};
-  keybindingsConfig = import ./keybindings.nix {inherit lib defaults cfg;};
+  keybindingsConfig = import ./keybindings.nix {inherit lib config defaults cfg;};
   windowRulesConfig = import ./window-rules.nix {inherit config lib cfg;};
   monitorsConfig = import ./monitors.nix {inherit config lib cfg;};
   agsConfig = import ./ags-integration.nix {inherit config lib cfg;};
   quickshellConfig = import ./quickshell-integration.nix {inherit config lib cfg;};
 in {
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = [
         pkgs.hyprwayland-scanner
         pkgs.hyprland # Use nixpkgs version for npins compatibility

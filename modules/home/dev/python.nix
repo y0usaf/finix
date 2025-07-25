@@ -14,7 +14,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         python3
         python312
@@ -35,9 +35,9 @@ in {
       ];
       file.home = {
         "{{xdg_config_home}}/zsh/.zshenv".text = lib.mkAfter ''
-          export PYTHONUSERBASE="$HOME/.local/share/python"
+          export PYTHONUSERBASE="{{home}}/.local/share/python"
           export PIP_CACHE_DIR="{{xdg_cache_home}}/pip"
-          export VIRTUAL_ENV_HOME="$HOME/.local/share/venvs"
+          export VIRTUAL_ENV_HOME="{{home}}/.local/share/venvs"
           export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
           export REQUESTS_CA_BUNDLE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
           export NIX_LD_LIBRARY_PATH="${lib.makeLibraryPath [

@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "SSH configuration module";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         openssh
       ];
@@ -26,7 +26,7 @@ in {
         Host github.com
             HostName github.com
             User git
-            IdentityFile ~/Tokens/id_rsa_y0usaf
+            IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
       '';
       systemd.services.ssh-agent = {
         description = "SSH key agent";
