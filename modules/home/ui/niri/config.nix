@@ -104,7 +104,6 @@ in {
             window-rule {
                 match app-id="launcher"
                 open-floating
-                default-column-width { fixed 800; }
             }
 
             binds {
