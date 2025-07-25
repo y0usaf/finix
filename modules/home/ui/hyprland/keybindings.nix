@@ -64,8 +64,8 @@
     (lib.lists.forEach (lib.range 1 9) (i: let
       num = toString i;
     in [
-      "$mod, ${num}, workspace, ${num}"
-      "$mod SHIFT, ${num}, movetoworkspacesilent, ${num}"
+      "$mod2, ${num}, workspace, ${num}"
+      "$mod2 SHIFT, ${num}, movetoworkspacesilent, ${num}"
     ]))
     [
       "Ctrl$mod2,Delete, exec, gnome-system-monitor"
