@@ -53,6 +53,7 @@ _: {
       flake.enable = true;
       hy3.enable = false;
     };
+    niri.enable = true;
     quickshell.enable = true;
     wallust.enable = true;
     wayland.enable = true;
