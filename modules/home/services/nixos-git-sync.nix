@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "NixOS configuration git sync service";
     repoPath = lib.mkOption {
       type = lib.types.str;
-      default = "/home/y0usaf/nixos";
+      default = config.user.nixosConfigDirectory;
       description = "Path to the NixOS configuration repository";
     };
     remoteBranch = lib.mkOption {
@@ -20,7 +20,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       systemd.services."nixos-git-sync" = {
         description = "Sync NixOS configuration changes after successful build";
         script = ''

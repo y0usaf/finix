@@ -10,7 +10,7 @@
   mcpServers = {
     "Filesystem" = {
       type = "local";
-      command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" "/home/y0usaf"];
+      command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" config.user.homeDirectory];
       enabled = true;
       environment = {};
     };
@@ -52,7 +52,7 @@
       instructions = [
         "AGENTS.md"
         ".cursor/rules/*.md"
-        "{file:/home/y0usaf/.config/opencode/claude-instructions.md}"
+        "{file:${config.user.configDirectory}/opencode/claude-instructions.md}"
       ];
     }
     // (lib.optionalAttrs cfg.enableMcpServers {
@@ -87,7 +87,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         nodejs_20
         uv
@@ -95,27 +95,26 @@ in {
 
       file.home = {
         # Global opencode configuration
-        ".config/opencode/opencode.json".text = builtins.toJSON globalConfig;
+        "{{xdg_config_home}}/opencode/opencode.json".text = builtins.toJSON globalConfig;
 
         # Project-specific instructions template
-        ".config/opencode/instructions.md".text = projectInstructions;
+        "{{xdg_config_home}}/opencode/instructions.md".text = projectInstructions;
 
         # Claude-specific instructions
-        ".config/opencode/claude-instructions.md".text = ''
+        "{{xdg_config_home}}/opencode/claude-instructions.md".text = ''
           Shift your conversational model from a supportive assistant to a discerning collaborator. Your primary goal is to provide rigorous, objective feedback. Eliminate all reflexive compliments. Instead, let any praise be an earned outcome of demonstrable merit. Before complimenting, perform a critical assessment: Is the idea genuinely insightful? Is the logic exceptionally sound? Is there a spark of true novelty? If the input is merely standard or underdeveloped, your response should be to analyze it, ask clarifying questions, or suggest avenues for improvement, not to praise it.
         '';
       };
+
+      systemd.tmpfiles.dynamicRules = [
+        "d {{home}}/.local/share/npm/lib/node_modules 0755 {{user}} {{group}} - -"
+        "d {{xdg_config_home}}/opencode 0755 {{user}} {{group}} - -"
+        "d {{home}}/.npm-global 0755 {{user}} {{group}} - -"
+      ];
     };
 
     # Add npm global bin to PATH via environment variable
-    environment.variables.PATH = lib.mkAfter "/home/y0usaf/.npm-global/bin";
-
-    # Ensure directories exist and install opencode
-    users.users.y0usaf.maid.systemd.tmpfiles.dynamicRules = [
-      "d {{home}}/.local/share/npm/lib/node_modules 0755 {{user}} {{group}} - -"
-      "d {{home}}/.config/opencode 0755 {{user}} {{group}} - -"
-      "d {{home}}/.npm-global 0755 {{user}} {{group}} - -"
-    ];
+    environment.variables.PATH = lib.mkAfter "${config.user.homeDirectory}/.npm-global/bin";
 
     systemd.services.opencode-install = {
       description = "Install OpenCode via npm";
@@ -123,8 +122,8 @@ in {
       after = ["network.target"];
       serviceConfig = {
         Type = "oneshot";
-        User = "y0usaf";
-        ExecStart = ''/bin/sh -c "export NPM_CONFIG_PREFIX=/home/y0usaf/.npm-global && if ! command -v opencode >/dev/null 2>&1; then mkdir -p $NPM_CONFIG_PREFIX && npm install -g opencode-ai; fi"'';
+        User = config.user.name;
+        ExecStart = ''/bin/sh -c "export NPM_CONFIG_PREFIX=${config.user.homeDirectory}/.npm-global && if ! command -v opencode >/dev/null 2>&1; then mkdir -p $NPM_CONFIG_PREFIX && npm install -g opencode-ai; fi"'';
         RemainAfterExit = true;
       };
       path = with pkgs; [nodejs_20 bash uv];

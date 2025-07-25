@@ -4,7 +4,7 @@
   ...
 }: let
   cfg = config.home.ui.fonts;
-  username = "y0usaf";
+  username = config.user.name;
   mainFontPackages = map (x: x.package) config.home.core.appearance.fonts.main;
   mainFontNames = map (x: x.name) config.home.core.appearance.fonts.main;
   fallbackPackages = map (x: x.package) config.home.core.appearance.fonts.fallback;

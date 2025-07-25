@@ -29,7 +29,7 @@ in {
       };
       repoPath = lib.mkOption {
         type = lib.types.str;
-        default = "/home/y0usaf/nixos";
+        default = config.user.nixosConfigDirectory;
         description = "Path to the NixOS configuration repository.";
       };
       remoteBranch = lib.mkOption {
@@ -40,7 +40,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         git
         openssh
@@ -94,7 +94,7 @@ in {
         };
         ".config/zsh/.zshrc".text = lib.mkIf cfg.nixos-git-sync.enable ''
           git-sync() {
-            $HOME/.local/share/bin/nixos-git-sync
+            ${config.user.homeDirectory}/.local/share/bin/nixos-git-sync
           }
         '';
       };

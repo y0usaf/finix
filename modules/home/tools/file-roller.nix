@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "file-roller (archive manager)";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid.packages = with pkgs; [
+    users.users.${config.user.name}.maid.packages = with pkgs; [
       file-roller
     ];
   };

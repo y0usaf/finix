@@ -5,15 +5,15 @@
   ...
 }: let
   cfg = config.home.shell.zellij;
-  zshConfig = {
-    zellij = {
-      enable = false;
-    };
-  };
-  ideLayout = import ./zellij-ide.nix {inherit lib;};
+  ideLayout = import ./zellij-ide.nix {inherit lib config;};
 in {
   options.home.shell.zellij = {
     enable = lib.mkEnableOption "zellij terminal multiplexer";
+    autoStart = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Automatically start zellij when opening zsh";
+    };
     layouts = {
       ide = lib.mkOption {
         type = lib.types.str;
@@ -23,7 +23,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         zellij
       ];
@@ -68,7 +68,7 @@ in {
             simplified_ui true
           '';
         };
-        home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkBefore (lib.optionalString zshConfig.zellij.enable ''
+        home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkBefore (lib.optionalString cfg.autoStart ''
           if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" && -z "$NVIM" ]]; then
               exec zellij
           fi

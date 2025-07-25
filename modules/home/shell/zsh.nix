@@ -5,8 +5,7 @@
   ...
 }: let
   cfg = config.home.shell.zsh;
-  username = "y0usaf";
-  tokenDir = "/home/y0usaf/Tokens";
+  inherit (config.user) name homeDirectory tokensDirectory;
   zshConfig = {
     cat-fetch = true;
     history-memory = 10000;
@@ -21,9 +20,9 @@ in {
     enable = lib.mkEnableOption "zsh shell configuration";
   };
   config = lib.mkIf cfg.enable {
-    environment.variables.ZDOTDIR = "$HOME/.config/zsh";
+    environment.variables.ZDOTDIR = "${config.user.configDirectory}/zsh";
     programs.zsh.enable = true;
-    users.users.${username}.maid = {
+    users.users.${name}.maid = {
       packages = with pkgs; [
         zsh
         bat
@@ -32,7 +31,6 @@ in {
       ];
       file.home = {
         ".config/zsh/.zshenv".text = let
-          inherit tokenDir;
           tokenFunctionScript = ''
             export_vars_from_files() {
                 local dir_path=$1
@@ -52,20 +50,20 @@ in {
                     fi
                 done
             }
-            export_vars_from_files "${tokenDir}"
+            export_vars_from_files "${tokensDirectory}"
           '';
         in
           tokenFunctionScript;
         ".config/zsh/.zprofile".text = ''
           if [[ $- == *i* ]]; then
             case "$(hostname)" in
-              "y0usaf-desktop")
+              "${config.user.name}-desktop")
                 sudo nvidia-smi -pl 150
                 if [ "$(tty)" = "/dev/tty1" ]; then
                   Hyprland
                 fi
                 ;;
-              "y0usaf-laptop")
+              "${config.user.name}-laptop")
                 if [ "$(tty)" = "/dev/tty1" ]; then
                   Hyprland
                 fi
@@ -81,13 +79,13 @@ in {
             yarn = "yarn --use-yarnrc \"$XDG_CONFIG_HOME/yarn/config\"";
             mocp = "mocp -M \"$XDG_CONFIG_HOME/moc\" -O MOCDir=\"$XDG_CONFIG_HOME/moc\"";
             cat = "bat";
-            cattree = "$HOME/nixos/lib/resources/scripts/cattree.sh";
+            cattree = "${config.user.nixosConfigDirectory}/lib/scripts/cattree.sh";
             userctl = "systemctl --user";
-            hmfail = "journalctl -u home-manager-y0usaf.service -n 20 --no-pager";
+            hmfail = "journalctl -u home-manager-${name}.service -n 20 --no-pager";
             pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i";
             pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
             hwconfig = "sudo nixos-generate-config --show-hardware-config";
-            esrgan = "realesrgan-ncnn-vulkan -i ~/Pictures/Upscale/Input -o ~/Pictures/Upscale/Output";
+            esrgan = "realesrgan-ncnn-vulkan -i ${homeDirectory}/Pictures/Upscale/Input -o ${homeDirectory}/Pictures/Upscale/Output";
             "l." = "lsd -A | grep -E \"^\\.\"";
             la = "lsd -A --color=always --group-dirs=first --icon=always";
             ll = "lsd -l --color=always --group-dirs=first --icon=always";
@@ -97,19 +95,18 @@ in {
             dir = "dir --color=auto";
             egrep = "grep -E --color=auto";
             fgrep = "grep -F --color=auto";
-            "hmpush" = "git -C ~/nixos push origin main --force";
-            "hmpull" = "git -C ~/nixos fetch origin && git -C ~/nixos reset --hard origin/main";
+            "hmpush" = "git -C ${config.user.nixosConfigDirectory} push origin main --force";
+            "hmpull" = "git -C ${config.user.nixosConfigDirectory} fetch origin && git -C ${config.user.nixosConfigDirectory} reset --hard origin/main";
             gpupower = "sudo nvidia-smi -pl";
             lintcheck = "clear; statix check .; deadnix .";
             lintfix = "clear; statix fix .; deadnix .";
-            ide = "zellij --layout ~/.config/zellij/layouts/ide.kdl";
-            opencode = "~/.npm-global/bin/opencode";
+            ide = "zellij --layout ${config.user.configDirectory}/zellij/layouts/ide.kdl";
+            opencode = "${homeDirectory}/.npm-global/bin/opencode";
           };
         in ''
           HISTSIZE=${toString zshConfig.history-memory}
           SAVEHIST=${toString zshConfig.history-storage}
-          HISTFILE="$HOME/.local/state/zsh/history"
-          setopt HIST_IGNORE_DUPS
+           HISTFILE="${homeDirectory}/.local/state/zsh/history"          setopt HIST_IGNORE_DUPS
           setopt HIST_IGNORE_ALL_DUPS
           setopt HIST_IGNORE_SPACE
           setopt HIST_EXPIRE_DUPS_FIRST
@@ -123,7 +120,7 @@ in {
               'm:{a-zA-Z}={A-Za-z}' \
               'r:|[._-]=* r:|=*' \
               'l:|=* r:|=*'
-          if [ "$(hostname)" = "y0usaf-laptop" ]; then
+          if [ "$(hostname)" = "${config.user.name}-laptop" ]; then
               fanspeed() {
                   if [ -z "$1" ]; then
                       echo "Usage: fanspeed <percentage>"

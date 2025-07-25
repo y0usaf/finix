@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.home.ui.cursor;
-  username = "y0usaf";
+  username = config.user.name;
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
   hyprcursorPackage = pkgs.phinger-cursors; # Use standard cursor for npins compatibility

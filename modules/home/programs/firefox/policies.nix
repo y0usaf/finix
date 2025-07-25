@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  username = "y0usaf";
+  username = config.user.name;
   policiesContent = builtins.toJSON {
     policies = {
       DisableTelemetry = true;

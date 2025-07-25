@@ -1,7 +1,11 @@
-{lib, ...}: {
+{
+  lib,
+  config,
+  ...
+}: {
   home.shell.zellij.layouts.ide = ''
     layout {
-        cwd "/home/y0usaf"
+        cwd "${config.user.homeDirectory}"
         tab name="Tab
             pane split_direction="vertical" {
                 pane size="25%" command="bash" {
@@ -21,7 +25,7 @@
         }
     }
   '';
-  users.users.y0usaf.maid.file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
-    alias ide='zellij --layout ~/.config/zellij/layouts/ide.kdl'
+  users.users.${config.user.name}.maid.file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
+    alias ide='zellij --layout ${config.user.configDirectory}/zellij/layouts/ide.kdl'
   '';
 }
