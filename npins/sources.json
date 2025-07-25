@@ -135,9 +135,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "e63079523e06e0b7d8d766d40573409d2c5ecc9d",
-      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/e63079523e06e0b7d8d766d40573409d2c5ecc9d.tar.gz",
-      "hash": "174rmx1awz7lc4z5a3s3rk5jlc3b7kixmvsha262q1k0aldj1dgk"
+      "revision": "57acedd7c9b2b2e6d23cc4c3110e541061a3b6d9",
+      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/57acedd7c9b2b2e6d23cc4c3110e541061a3b6d9.tar.gz",
+      "hash": "1s59h5h3a151lz12gi83q59s0p6kkq1f2j9s81v4nl685i0m2was"
     },
     "nix-maid": {
       "type": "Git",
@@ -161,9 +161,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "95db5df2b845b360d0a9b79cbec9f95290a93de9",
-      "url": "https://github.com/Infinidoge/nix-minecraft/archive/95db5df2b845b360d0a9b79cbec9f95290a93de9.tar.gz",
-      "hash": "1vvpnl4y4c043kwngm663zz3q5hhkqlkfbcydxlr52rc54pjcj6w"
+      "revision": "64ca2cbbf9c65dd3bd98192d74872a80e8dcb871",
+      "url": "https://github.com/Infinidoge/nix-minecraft/archive/64ca2cbbf9c65dd3bd98192d74872a80e8dcb871.tar.gz",
+      "hash": "0pllq3296fpbxkvpsmdhvpl1sv1wyjsn579nd4l20cqbavyyyyw9"
     },
     "nixpkgs": {
       "type": "Git",
@@ -174,9 +174,9 @@
       },
       "branch": "nixos-unstable",
       "submodules": false,
-      "revision": "c87b95e25065c028d31a94f06a62927d18763fdf",
-      "url": "https://github.com/NixOS/nixpkgs/archive/c87b95e25065c028d31a94f06a62927d18763fdf.tar.gz",
-      "hash": "0dr3sicmyizjflsykzgmymlxflqd0bs743i11bkymi157ln82bim"
+      "revision": "fc02ee70efb805d3b2865908a13ddd4474557ecf",
+      "url": "https://github.com/NixOS/nixpkgs/archive/fc02ee70efb805d3b2865908a13ddd4474557ecf.tar.gz",
+      "hash": "0ny3wzyzaz25s9wci5hmgj2ai3495jp6mx0q3wqgz66gd9br1q4b"
     },
     "nyx": {
       "type": "Git",
@@ -187,9 +187,9 @@
       },
       "branch": "nyxpkgs-unstable",
       "submodules": false,
-      "revision": "02b3c2a45f6ddbd704f797c5730bc2d161f10ce0",
-      "url": "https://github.com/chaotic-cx/nyx/archive/02b3c2a45f6ddbd704f797c5730bc2d161f10ce0.tar.gz",
-      "hash": "0n32hpznf7qsz4ppkgz6cwikjfg7g5mac8f02bgci0rk6lw9ffav"
+      "revision": "e8e28d053b45299a4aef1da2e9d5d1e742025c12",
+      "url": "https://github.com/chaotic-cx/nyx/archive/e8e28d053b45299a4aef1da2e9d5d1e742025c12.tar.gz",
+      "hash": "0xrxiqlzg9drxj94pwfg2bymkmy4sbfvfy67k2kxxmvrmvzzxjj3"
     },
     "obs-image-reaction": {
       "type": "Git",
