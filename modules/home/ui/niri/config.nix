@@ -72,9 +72,6 @@ in {
                 horizontal-view-movement {
                     spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
                 }
-                vertical-view-movement {
-                    spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
-                }
                 window-movement {
                     spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
                 }
