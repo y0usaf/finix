@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  username = "y0usaf";
+  username = config.user.name;
 in {
   config = lib.mkIf config.home.programs.firefox.enable {
     users.users.${username}.maid = {

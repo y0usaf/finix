@@ -15,7 +15,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid.packages = with pkgs; [
+    users.users.${config.user.name}.maid.packages = with pkgs; [
       (
         if cfg.variant == "canary"
         then

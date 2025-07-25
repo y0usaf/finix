@@ -13,7 +13,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid.file.home.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
+    users.users.${config.user.name}.maid.file.home.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini".text = lib.generators.toINI {} {
       "SystemSettings" = {
         "r.DefaultFeature.AntiAliasing" = "0";
         "pp.VignetteIntensity" = "0.0";

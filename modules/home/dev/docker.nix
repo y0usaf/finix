@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "docker development environment";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         docker
         docker-compose

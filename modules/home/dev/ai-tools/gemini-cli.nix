@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "Gemini CLI development tools";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         gemini-cli
       ];

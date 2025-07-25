@@ -10,6 +10,6 @@ in {
     enable = lib.mkEnableOption "imv image viewer";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid.packages = with pkgs; [imv];
+    users.users.${config.user.name}.maid.packages = with pkgs; [imv];
   };
 }

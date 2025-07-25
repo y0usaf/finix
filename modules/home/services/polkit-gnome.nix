@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "polkit GNOME authentication agent";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = [pkgs.polkit_gnome];
       systemd.services.polkit-gnome-authentication-agent-1 = {
         description = "polkit-gnome-authentication-agent-1";

@@ -94,7 +94,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid.file.home =
+    users.users.${config.user.name}.maid.file.home =
       (lib.optionalAttrs (lib.elem "morespeeds" cfg.enabledMods) {
         ".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua".text = ''
           --- STEAMODDED HEADER

@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.home.dev.nvim;
-  username = "y0usaf";
+  username = config.user.name;
 in {
   config = lib.mkIf cfg.enable {
     users.users.${username}.maid.packages = [

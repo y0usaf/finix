@@ -14,7 +14,7 @@ in {
     };
     configPath = lib.mkOption {
       type = lib.types.str;
-      default = "/home/y0usaf/.config/hypr";
+      default = "${config.user.configDirectory}/hypr";
       description = "Path to the Hyprland configuration directory to watch";
     };
     reloadDelay = lib.mkOption {
@@ -29,7 +29,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       systemd.services."hyprland-config-watcher" = {
         description = "Watch Hyprland config directory for symlink changes and reload";
         script = ''
@@ -100,7 +100,7 @@ in {
           Restart = "always";
           RestartSec = 5;
           Environment = [
-            "XDG_RUNTIME_DIR=/run/user/1000"
+            "XDG_RUNTIME_DIR=/run/user/${toString config.users.users.${config.user.name}.uid}"
             "WAYLAND_DISPLAY=wayland-1"
             "PATH=${lib.makeBinPath (with pkgs; [inotify-tools hyprland coreutils procps gnugrep util-linux])}:/run/current-system/sw/bin"
           ];

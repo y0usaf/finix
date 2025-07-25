@@ -1,5 +1,6 @@
 {
   lib,
+  config,
   defaults,
   cfg,
   ...
@@ -78,7 +79,7 @@
       "$mod, GRAVE, exec, hyprpicker | wl-copy"
     ]
     [
-      "$mod SHIFT, C, exec, killall swaybg; for monitor in $(hyprctl monitors -j | jq -r '.[].name'); do wall=$(find /home/y0usaf/DCIM/Wallpapers/32_9 -type f | shuf -n 1); swaybg -o $monitor -i $wall -m fill & done"
+      "$mod SHIFT, C, exec, killall swaybg; for monitor in $(hyprctl monitors -j | jq -r '.[].name'); do wall=$(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1); swaybg -o $monitor -i $wall -m fill & done"
     ]
   ];
   bindm = [

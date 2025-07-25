@@ -5,7 +5,7 @@
 }: let
   cfg = config.home.dev.nvim;
   opencodeCfg = config.home.dev.opencode;
-  username = "y0usaf";
+  username = config.user.name;
 in {
   config = lib.mkIf (cfg.enable && opencodeCfg.enable) {
     users.users.${username}.maid.file = {

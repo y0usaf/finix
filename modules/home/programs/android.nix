@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "android tools and waydroid";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         waydroid
         android-tools

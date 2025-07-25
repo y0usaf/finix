@@ -43,7 +43,7 @@ in {
     enable = lib.mkEnableOption "Bambu Studio 3D printing slicer";
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid.packages = [
+    users.users.${config.user.name}.maid.packages = [
       bambuStudioWrapper
       pkgs.mesa
     ];

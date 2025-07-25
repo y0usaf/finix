@@ -20,6 +20,33 @@ _final: prev: {
     mkStr = libprev.types.str;
     mkOptDef = type: default: description: libprev.mkOption {inherit type default description;};
 
+    # User configuration helpers
+    mkUserMaidConfig = config: username: userConfig: {
+      users.users.${username}.maid = userConfig;
+    };
+
+    # Package option helper
+    mkPackageOption = description:
+      libprev.mkOption {
+        type = libprev.types.package;
+        inherit description;
+      };
+
+    # Service module pattern
+    mkServiceModule = {
+      name,
+      description ? "Enable ${name}",
+      extraOptions ? {},
+    }:
+      {
+        enable = libprev.mkEnableOption description;
+        package = libprev.mkOption {
+          type = libprev.types.package;
+          description = "Package for ${name}";
+        };
+      }
+      // extraOptions;
+
     # Common module types
     defaultAppModule = libprev.types.submodule {
       options = {

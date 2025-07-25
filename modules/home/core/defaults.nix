@@ -31,7 +31,7 @@
     };
     launcher = lib.mkOption {
       type = lib.types.str;
-      default = "foot -a 'launcher' $HOME/.config/scripts/sway-launcher-desktop.sh";
+      default = "foot -a 'launcher' ${config.user.configDirectory}/scripts/sway-launcher-desktop.sh";
       description = "Default application launcher";
     };
     discord = lib.mkOption {

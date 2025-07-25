@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  username = "y0usaf";
+  username = config.user.name;
   commonSettings = {
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
     "gfx.webrender.all" =

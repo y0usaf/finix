@@ -29,13 +29,13 @@ in {
     enable = lib.mkEnableOption "automatic Nix file formatting with alejandra";
     watchDirectory = lib.mkOption {
       type = lib.types.str;
-      default = "/home/y0usaf/nixos";
+      default = config.user.nixosConfigDirectory;
       description = "Directory to watch for Nix file changes";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = [pkgs.alejandra pkgs.inotify-tools];
 
       systemd.services.format-nix-watcher = {

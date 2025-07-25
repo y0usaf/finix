@@ -91,7 +91,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.y0usaf.maid = {
+    users.users.${config.user.name}.maid = {
       packages = with pkgs; [
         gtk3
         gtk4
