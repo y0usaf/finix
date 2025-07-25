@@ -73,6 +73,7 @@ _: {
     mpv.enable = true;
     pcmanfm.enable = true;
     qbittorrent.enable = true;
+    stremio.enable = true;
     sway-launcher-desktop.enable = true;
   };
   dev = {

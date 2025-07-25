@@ -28,10 +28,6 @@ in {
                     }
                 }
 
-                // Set Alt as primary mod key
-                mod-key "Alt"
-            }
-
                 touchpad {
                     tap
                     dwt
@@ -43,6 +39,9 @@ in {
                     accel-speed 0.2
                 }
             }
+
+            // Set Alt as primary mod key
+            mod-key "Alt"
 
             output "DP-4" {
                 mode "5120x1440@239.761"
