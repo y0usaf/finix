@@ -403,26 +403,6 @@ in {
 
         -- Delay leetcode setup to ensure all dependencies are loaded
         vim.defer_fn(setup_leetcode, 100)
-
-        -- Noice.nvim setup for centered cmdline
-        require("noice").setup({
-          cmdline = {
-            view = "cmdline_popup",
-          },
-          views = {
-            cmdline_popup = {
-              position = "center",
-              size = {
-                width = 0.6,
-                height = "auto",
-              },
-            },
-          },
-          presets = {
-            bottom_search = false, -- Disable classic bottom cmdline for search
-            command_palette = true, -- Position cmdline and popupmenu together
-          },
-        })
       end
       -- Setup plugins after pack operations or immediately if already available
       local function initialize_config()
