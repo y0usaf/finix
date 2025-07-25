@@ -27,6 +27,10 @@ in {
                         layout "us"
                     }
                 }
+                
+                // Set Alt as primary mod key
+                mod-key "Alt"
+            }
 
                 touchpad {
                     tap
@@ -99,40 +103,40 @@ in {
             }
 
             binds {
-                // Default Niri bindings
+                // Now Mod = Alt, so these are Alt-based default Niri bindings
                 Mod+Shift+Slash { show-hotkey-overlay; }
-
-                // Terminal and launcher (Niri defaults)
+                
+                // Terminal and launcher (now Alt+T, Alt+D)
                 Mod+T { spawn "${defaults.terminal}"; }
                 Mod+D { spawn "${defaults.launcher}"; }
-
-                // Window management (Niri defaults)
+                
+                // Window management (now Alt-based)
                 Mod+Q { close-window; }
                 Mod+Shift+F { fullscreen-window; }
-                Mod+Space { center-column; }
                 Mod+F { maximize-column; }
+                Mod+Space { center-column; }
 
-                // Focus movement (arrows and vim keys with Alt)
+                // Focus movement (now Alt+HJKL as desired)
                 Mod+Left { focus-column-left; }
                 Mod+Right { focus-column-right; }
                 Mod+Up { focus-window-up; }
                 Mod+Down { focus-window-down; }
-                Alt+H { focus-column-left; }
-                Alt+L { focus-column-right; }
-                Alt+J { focus-window-down; }
-                Alt+K { focus-window-up; }
+                Mod+H { focus-column-left; }
+                Mod+L { focus-column-right; }
+                Mod+J { focus-window-down; }
+                Mod+K { focus-window-up; }
 
-                // Window movement
+                // Window movement (Alt+Ctrl)
                 Mod+Ctrl+Left { move-column-left; }
                 Mod+Ctrl+Right { move-column-right; }
                 Mod+Ctrl+Up { move-window-up; }
                 Mod+Ctrl+Down { move-window-down; }
-                Alt+Shift+H { move-column-left; }
-                Alt+Shift+L { move-column-right; }
-                Alt+Shift+J { move-window-down; }
-                Alt+Shift+K { move-window-up; }
+                Mod+Ctrl+H { move-column-left; }
+                Mod+Ctrl+L { move-column-right; }
+                Mod+Ctrl+J { move-window-down; }
+                Mod+Ctrl+K { move-window-up; }
 
-                // Workspace switching (Niri defaults)
+                // Workspace switching (Alt+numbers)
                 Mod+Page_Up { focus-workspace-up; }
                 Mod+Page_Down { focus-workspace-down; }
                 Mod+U { focus-workspace-up; }
@@ -147,7 +151,7 @@ in {
                 Mod+8 { focus-workspace 8; }
                 Mod+9 { focus-workspace 9; }
 
-                // Move to workspace (Niri defaults)
+                // Move to workspace (Alt+Ctrl+numbers)
                 Mod+Ctrl+Page_Up { move-column-to-workspace-up; }
                 Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
                 Mod+Ctrl+U { move-column-to-workspace-up; }
@@ -162,7 +166,7 @@ in {
                 Mod+Ctrl+8 { move-column-to-workspace 8; }
                 Mod+Ctrl+9 { move-column-to-workspace 9; }
 
-                // Layout controls (Niri defaults)
+                // Layout controls (Alt+R, Alt+comma, etc.)
                 Mod+R { switch-preset-column-width; }
                 Mod+Shift+R { switch-preset-window-height; }
                 Mod+Comma { consume-window-into-column; }
@@ -170,27 +174,26 @@ in {
                 Mod+BracketLeft { consume-or-expel-window-left; }
                 Mod+BracketRight { consume-or-expel-window-right; }
 
-                // Screenshots (using grim/slurp)
+                // Screenshots
                 Print { spawn "grim" "-g" "$(slurp -d)" "-" "|" "wl-copy" "-t" "image/png"; }
                 Ctrl+Print { spawn "grim" "-" "|" "wl-copy" "-t" "image/png"; }
-                Alt+Print { spawn "grim" "-g" "$(slurp -w)" "-" "|" "wl-copy" "-t" "image/png"; }
+                Shift+Print { spawn "grim" "-g" "$(slurp -w)" "-" "|" "wl-copy" "-t" "image/png"; }
 
-                // System (Niri defaults)
+                // System (Alt+Shift+E to quit, Alt+O for overview)
                 Mod+Shift+E { quit; }
                 Mod+O { toggle-overview; }
 
-                // Custom app bindings (preserved)
-                Alt+1 { spawn "${defaults.ide}"; }
-                Alt+2 { spawn "${defaults.browser}"; }
-                Alt+3 { spawn "vesktop"; }
-                Alt+4 { spawn "steam"; }
-                Alt+5 { spawn "obs"; }
+                // Custom app bindings using Super key (to avoid conflicts)
+                Super+1 { spawn "${defaults.ide}"; }
+                Super+2 { spawn "${defaults.browser}"; }
+                Super+3 { spawn "vesktop"; }
+                Super+4 { spawn "steam"; }
+                Super+5 { spawn "obs"; }
 
                 // Additional useful bindings
                 Mod+E { spawn "${defaults.fileManager}"; }
                 Mod+Shift+O { spawn "${defaults.terminal}" "-e" "${defaults.editor}"; }
             }
-
             spawn-at-startup "${pkgs.xwayland-satellite}/bin/xwayland-satellite"
 
             environment {

@@ -5,8 +5,8 @@
   cfg,
   ...
 }: {
-  "$mod" = "SUPER";
-  "$mod2" = "ALT";
+  "$mod" = "ALT";
+  "$mod2" = "SUPER";
   "$term" = defaults.terminal;
   "$filemanager" = defaults.fileManager;
   "$browser" = defaults.browser;
@@ -38,7 +38,7 @@
       "$mod, O, exec, $notepad"
       "$mod2, 1, exec, $ide"
       "$mod2, 2, exec, $browser"
-      "$mod2, 3, exec, $discord"
+      "$mod2, 3, exec, vesktop"
       "$mod2, 4, exec, steam"
       "$mod2, 5, exec, $obs"
     ]
