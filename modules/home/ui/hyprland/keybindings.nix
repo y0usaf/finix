@@ -32,7 +32,7 @@
       "$mod, P, pseudo"
     ]
     [
-      "$mod, D, exec, $term"
+      "$mod, T, exec, $term"
       "$mod, E, exec, $filemanager"
       "$mod, R, exec, $launcher"
       "$mod, O, exec, $notepad"
