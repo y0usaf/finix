@@ -103,7 +103,7 @@ in {
 
             window-rule {
                 match app-id="launcher"
-                open-floating
+                open-floating true
             }
 
             binds {
