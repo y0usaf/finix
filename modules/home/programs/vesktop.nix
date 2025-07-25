@@ -10,6 +10,11 @@ in {
     enable = lib.mkEnableOption "Vesktop (Discord client) module";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid.packages = [pkgs.vesktop];
+    users.users.${config.user.name}.maid.packages = [
+      (pkgs.writeShellScriptBin "vesktop" ''
+        export DISPLAY=:0
+        exec ${pkgs.vesktop}/bin/vesktop "$@"
+      '')
+    ];
   };
 }

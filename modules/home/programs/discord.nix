@@ -20,6 +20,7 @@ in {
         if cfg.variant == "canary"
         then
           (writeShellScriptBin "discord-canary" ''
+            export DISPLAY=:0
             exec ${(discord-canary.override {
               withOpenASAR = true;
               withVencord = true;
@@ -30,6 +31,7 @@ in {
           '')
         else
           (writeShellScriptBin "discord" ''
+            export DISPLAY=:0
             exec ${(discord.override {
               withOpenASAR = true;
               withVencord = true;
