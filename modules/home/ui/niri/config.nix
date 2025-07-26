@@ -39,11 +39,17 @@ in {
             output = {
               "DP-4" = {
                 mode = "5120x1440@239.761";
-                position = { x = 0; y = 0; };
+                position = {
+                  x = 0;
+                  y = 0;
+                };
               };
               "HDMI-A-2" = {
                 mode = "1920x1080@60.000";
-                position = { x = 5120; y = 0; };
+                position = {
+                  x = 5120;
+                  y = 0;
+                };
               };
             };
 
@@ -51,9 +57,9 @@ in {
               gaps = 16;
               center-focused-column = "never";
               preset-column-widths = [
-                { proportion = 0.33333; }
-                { proportion = 0.5; }
-                { proportion = 0.66667; }
+                {proportion = 0.33333;}
+                {proportion = 0.5;}
+                {proportion = 0.66667;}
               ];
               default-column-width.proportion = 0.5;
             };
@@ -191,7 +197,7 @@ in {
               "Mod+Shift+O".spawn = [defaults.terminal "-e" defaults.editor];
             };
 
-            spawn-at-startup = "${pkgs.xwayland-satellite}/bin/xwayland-satellite";
+            spawn-at-startup = ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"];
 
             environment = {
               DISPLAY = ":0";
