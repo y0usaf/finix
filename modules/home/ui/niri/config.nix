@@ -6,6 +6,7 @@
 }: let
   cfg = config.home.ui.niri;
   inherit (config.home.core) defaults;
+  inherit (lib.generators) toKDL;
 in {
   config = lib.mkIf cfg.enable {
     users.users.${config.user.name}.maid = {
