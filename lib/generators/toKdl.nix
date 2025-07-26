@@ -45,7 +45,7 @@ lib: let
     # KDL keywords that must be quoted
     keywords = ["true" "false" "null" "inf" "-inf" "nan"];
     # Characters that require quoting
-    specialChars = ["(" ")" "{" "}" "[" "]" "/" "\\" "\"" "#" ";" "=" " " "\t" "\n" ":"];
+    specialChars = ["(" ")" "{" "}" "[" "]" "/" "\\" "\"" "#" ";" "=" " " "\t" "\n" ":" "-"];
     hasSpecialChar = lib.any (char: lib.hasInfix char str) specialChars;
     isKeyword = lib.elem str keywords;
     startsWithDigit =
@@ -81,9 +81,9 @@ lib: let
         && (name
           == "position"
           || name == "offset"
-          || name == "size"
-          || (builtins.all (v: !isAttrs v && !isList v) (builtins.attrValues value)
-            && builtins.length (builtins.attrNames value) <= 4));
+          || name == "size")
+        && (builtins.all (v: !isAttrs v && !isList v) (builtins.attrValues value)
+          && builtins.length (builtins.attrNames value) <= 4);
 
       # Separate properties fields from other attrs
       propertiesFields = filterAttrs isPropertiesField attrs;
