@@ -36,10 +36,10 @@ in {
                     tap
                     dwt
                     natural-scroll
-                    accel-speed 0.2
+                    accel-speed 0
                 }
                 mouse {
-                    accel-speed 0.2
+                    accel-speed 0
                 }
                 mod-key "Alt"
             }
