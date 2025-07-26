@@ -25,7 +25,11 @@ let
   hostConfig = import ../configs/hosts/y0usaf-desktop {inherit pkgs;};
   inherit (hostConfig) users;
   hostUserConfigs = pkgs.lib.genAttrs users (username: userConfigs.${username});
+
+  # Create the lib that will be exported with proper overlay application
+  lib = pkgs.lib;
 in {
+  inherit lib;
   formatter.${system} = pkgs.alejandra;
 
   nixosConfigurations.y0usaf-desktop = import (sources.nixpkgs + "/nixos") {
@@ -98,7 +102,7 @@ in {
       _module.args = {
         inherit (hostConfig) hostname;
         inherit users sources;
-        inherit (pkgs) lib;
+        lib = lib;
         inherit hostConfig;
         userConfigs = hostUserConfigs;
         hostSystem = hostConfig;
