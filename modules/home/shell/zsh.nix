@@ -64,14 +64,8 @@ in {
             case "$(hostname)" in
               "${config.user.name}-desktop")
                 sudo nvidia-smi -pl 150
-                if [ "$(tty)" = "/dev/tty1" ]; then
-                  Hyprland
-                fi
                 ;;
               "${config.user.name}-laptop")
-                if [ "$(tty)" = "/dev/tty1" ]; then
-                  Hyprland
-                fi
                 ;;
             esac
           fi
