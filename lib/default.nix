@@ -27,7 +27,7 @@ let
   hostUserConfigs = pkgs.lib.genAttrs users (username: userConfigs.${username});
 
   # Create the lib that will be exported with proper overlay application
-  lib = pkgs.lib;
+  inherit (pkgs) lib;
 in {
   inherit lib;
   formatter.${system} = pkgs.alejandra;
@@ -102,7 +102,7 @@ in {
       _module.args = {
         inherit (hostConfig) hostname;
         inherit users sources;
-        lib = lib;
+        lib = pkgs.lib;
         inherit hostConfig;
         userConfigs = hostUserConfigs;
         hostSystem = hostConfig;
