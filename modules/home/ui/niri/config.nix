@@ -71,12 +71,7 @@ in {
 
             animations {
                 slowdown 1.0
-            horizontal-view-movement {
-                spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
-            }
-            window-movement {
-                spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
-            }                window-open {
+                window-open {
                     duration-ms 150
                     curve "ease-out-expo"
                 }
