@@ -216,6 +216,22 @@
       "revision": "0dcb3c27de5782dfdf95cb047ccceb3e65360e6b",
       "url": "https://github.com/L-Nafaryus/obs-image-reaction/archive/0dcb3c27de5782dfdf95cb047ccceb3e65360e6b.tar.gz",
       "hash": "0y7l8qc12klyc6zjr2373yyhv0v86c617gmxymzslb44cgxvg5hr"
+    },
+    "smfh": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "feel-co",
+        "repo": "smfh"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "1.1",
+      "revision": "39f5c06153f63100376bc607b1465850b6df77fd",
+      "url": "https://api.github.com/repos/feel-co/smfh/tarball/1.1",
+      "hash": "03319rrh1jd37cz5ramknnrrnfrm0hy38ryk11grr8hq97bv1mgz"
     }
   },
   "version": 5

@@ -95,10 +95,14 @@ in {
               };
             });
             # Configure hjem for each user (parallel to maid for now)
-            hjem.users = lib.genAttrs users (_username: {
-              packages = [];
-              files = {};
-            });
+            hjem = {
+              # Use SMFH manifest linker instead of systemd-tmpfiles
+              linker = pkgs.callPackage (sources.smfh + "/package.nix") {};
+              users = lib.genAttrs users (_username: {
+                packages = [];
+                files = {};
+              });
+            };
           };
         })
         # Import user configuration abstraction
