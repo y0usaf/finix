@@ -6,7 +6,7 @@
 }: let
   cfg = config.home.ui.niri;
   inherit (config.home.core) defaults;
-  # Force rebuild
+  # Force rebuild - updated launcher command
 in {
   config = lib.mkIf cfg.enable {
     users.users.${config.user.name}.maid = {
@@ -133,7 +133,7 @@ in {
                 "Mod+Shift+Slash" { show-hotkey-overlay }
 
                 "Mod+T" { spawn "${defaults.terminal}" }
-                "Super+R" { spawn "${defaults.launcher}" }
+                "Super+R" { spawn "foot" "-a" "launcher" "/home/y0usaf/.config/scripts/sway-launcher-desktop.sh" }
 
                 "Mod+Q" { close-window }
                 "Mod+Shift+F" { fullscreen-window }

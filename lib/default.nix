@@ -102,7 +102,7 @@ in {
       _module.args = {
         inherit (hostConfig) hostname;
         inherit users sources;
-        lib = pkgs.lib;
+        inherit (pkgs) lib;
         inherit hostConfig;
         userConfigs = hostUserConfigs;
         hostSystem = hostConfig;
