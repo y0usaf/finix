@@ -148,9 +148,9 @@
       },
       "branch": "smfh-integration",
       "submodules": false,
-      "revision": "5c02e0db0b3aa6155b71bdb7a5fdf31eef4e38ea",
-      "url": "https://github.com/y0usaf/nix-maid/archive/5c02e0db0b3aa6155b71bdb7a5fdf31eef4e38ea.tar.gz",
-      "hash": "06k112p0c3ncc91ajblp7yv815rzizn42svh1llg8mjgd8pn78ff"
+      "revision": "1faf991fefc415c3820667bc769edc8ae34ccc18",
+      "url": "https://github.com/y0usaf/nix-maid/archive/1faf991fefc415c3820667bc769edc8ae34ccc18.tar.gz",
+      "hash": "1246pnywi3sa2h4r9mnr31wqbb6p5l3cs5zwrabbyfg4943gr91b"
     },
     "nix-minecraft": {
       "type": "Git",
