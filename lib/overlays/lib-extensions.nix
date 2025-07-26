@@ -1,6 +1,23 @@
 # Extended lib overlay with helper functions
 _final: prev: {
-  lib = prev.lib.extend (_libfinal: libprev: {
+  lib = prev.lib.extend (_libfinal: libprev: let
+    # Import generators
+    generators = import ../generators {lib = libprev;};
+  in {
+    # Add generators to lib
+    generators =
+      libprev.generators
+      // {
+        # KDL generators (standard pattern)
+        inherit (generators) toKDL toKDLWithOptions mergeKDLConfigs;
+        # Niri-specific helpers
+        inherit (generators) mkNiriConfig formatKdlValue;
+        # Legacy KDL aliases
+        inherit (generators) toKdl mergeKdlConfigs;
+        # Hyprland generators
+        inherit (generators) toHyprconf pluginsToHyprconf toHyprconfAdvanced mergeHyprconfigs mkHyprlandConfig;
+      };
+
     # Directory and module importers
     importDirs = dir: let
       dirs = libprev.filterAttrs (n: v: v == "directory" && n != ".git") (builtins.readDir dir);
