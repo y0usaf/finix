@@ -133,7 +133,7 @@ in {
                 "Mod+Shift+Slash" { show-hotkey-overlay }
 
                 "Mod+T" { spawn "${defaults.terminal}" }
-                "Super+R" { spawn ${defaults.launcher} }
+                "Super+R" { spawn "${defaults.launcher}" }
 
                 "Mod+Q" { close-window }
                 "Mod+Shift+F" { fullscreen-window }
