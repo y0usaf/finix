@@ -8,6 +8,7 @@
   inherit (config.home.core) defaults;
   kdlGenerators = import ../../../../lib/generators/toKdl.nix lib;
   inherit (kdlGenerators) toKDL;
+  # Force rebuild
 in {
   config = lib.mkIf cfg.enable {
     users.users.${config.user.name}.maid = {
