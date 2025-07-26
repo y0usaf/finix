@@ -79,13 +79,7 @@ in {
                     duration-ms 150
                     curve "ease-out-expo"
                 }
-                config-notification-open-close {
-                    spring {
-                        damping-ratio 0.6
-                        stiffness 1000
-                        epsilon 0.001
-                    }
-                }
+
             }
 
             window-rule {
