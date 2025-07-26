@@ -200,14 +200,14 @@ in {
                 "Mod+Shift+E" { quit; }
                 "Mod+O" { toggle-overview; }
 
-                "Super+1" { spawn "${defaults.ide}" }
-                "Super+2" { spawn "${defaults.browser}" }
+                "Super+1" { spawn "${defaults.ide}"; }
+                "Super+2" { spawn "${defaults.browser}"; }
                 "Super+3" { spawn "vesktop"; }
                 "Super+4" { spawn "steam"; }
                 "Super+5" { spawn "obs"; }
 
-                "Mod+E" { spawn "${defaults.fileManager}" }
-                "Mod+Shift+O" { spawn "${defaults.terminal}" "-e" "${defaults.editor}" }
+                "Mod+E" { spawn "${defaults.fileManager}"; }
+                "Mod+Shift+O" { spawn "${defaults.terminal}" "-e" "${defaults.editor}"; }
             }
 
             environment {
