@@ -87,6 +87,19 @@
       "url": "https://api.github.com/repos/nix-community/disko/tarball/v1.12.0",
       "hash": "0wbx518d2x54yn4xh98cgm65wvj0gpy6nia6ra7ns4j63hx14fkq"
     },
+    "hjem": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "feel-co",
+        "repo": "hjem"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "3093a74542b30f8155954d585d0ae2401e3adbe5",
+      "url": "https://github.com/feel-co/hjem/archive/3093a74542b30f8155954d585d0ae2401e3adbe5.tar.gz",
+      "hash": "1mqbmyv7bw8gjzljr7z7yfwg1hpwcgm6lykyr2bbf0l0all26fig"
+    },
     "hy3": {
       "type": "Git",
       "repository": {

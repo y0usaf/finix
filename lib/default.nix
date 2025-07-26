@@ -75,6 +75,8 @@ in {
             (import (sources.nix-maid + "/src/nixos") {
               smfh = null;
             })
+            # Add hjem for migration testing
+            (sources.hjem + "/modules/nixos")
           ];
           config = {
             # Use proper NixOS module merging
@@ -91,6 +93,11 @@ in {
               maid = {
                 packages = [];
               };
+            });
+            # Configure hjem for each user (parallel to maid for now)
+            hjem.users = lib.genAttrs users (_username: {
+              packages = [];
+              files = {};
             });
           };
         })
