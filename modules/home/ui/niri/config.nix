@@ -130,7 +130,7 @@ in {
             }
 
             binds {
-                "Mod+Shift+Slash" { show-hotkey-overlay }
+                "Mod+Shift+Slash" { show-hotkey-overlay; }
 
                 "Mod+T" { spawn "${defaults.terminal}" }
                 "Super+R" { spawn "foot" "-a" "launcher" "/home/y0usaf/.config/scripts/sway-launcher-desktop.sh" }
