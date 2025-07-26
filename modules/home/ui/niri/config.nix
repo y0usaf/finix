@@ -36,10 +36,10 @@ in {
                     tap
                     dwt
                     natural-scroll
-                    accel-speed 0
+                    accel-speed 0.0
                 }
                 mouse {
-                    accel-speed 0
+                    accel-speed 0.0
                 }
                 mod-key "Alt"
             }
@@ -62,11 +62,7 @@ in {
                 }
                 preset-column-widths {
                     proportion 0.33333
-                }
-                preset-column-widths {
                     proportion 0.5
-                }
-                preset-column-widths {
                     proportion 0.66667
                 }
             }
