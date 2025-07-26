@@ -113,7 +113,7 @@ lib: let
               ${indent}${name} {
               ${content}
               ${indent}}''
-            else "" # Skip empty sections
+            else "${indent}${name} {}" # Empty sections become empty braces
         else
           # Handle simple values as arguments to the node
           "${indent}${name} ${formatKdlValue value}";
