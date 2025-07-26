@@ -192,7 +192,9 @@ in {
 
             spawn-at-startup = "${pkgs.xwayland-satellite}/bin/xwayland-satellite";
 
-            environment.DISPLAY = ":0";
+            environment = {
+              DISPLAY = ":0";
+            };
           };
         };
       };
