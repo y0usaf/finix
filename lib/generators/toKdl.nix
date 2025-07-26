@@ -45,7 +45,7 @@ lib: let
     # KDL keywords that must be quoted
     keywords = ["true" "false" "null" "inf" "-inf" "nan"];
     # Characters that require quoting
-    specialChars = ["(" ")" "{" "}" "[" "]" "/" "\\" "\"" "#" ";" "=" " " "\t" "\n"];
+    specialChars = ["(" ")" "{" "}" "[" "]" "/" "\\" "\"" "#" ";" "=" " " "\t" "\n" ":"];
     hasSpecialChar = lib.any (char: lib.hasInfix char str) specialChars;
     isKeyword = lib.elem str keywords;
     startsWithDigit =
