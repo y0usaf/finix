@@ -16,7 +16,7 @@ in {
     enable = lib.mkEnableOption "OBS Studio";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid.packages = with pkgs; [
+    hjem.users.${config.user.name}.packages = with pkgs; [
       obsPackage
       obs-studio-plugins.obs-backgroundremoval
       obs-studio-plugins.obs-vkcapture

@@ -15,9 +15,14 @@ in {
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
       ];
-      file.home.".config/zsh/aliases/esrgan.zsh".text = ''
-        alias esrgan="realesrgan-ncnn-vulkan -i ${config.user.homeDirectory}/Pictures/Upscale/Input -o ${config.user.homeDirectory}/Pictures/Upscale/Output"
-      '';
+    };
+    hjem.users.${config.user.name}.files = {
+      ".config/zsh/aliases/esrgan.zsh" = {
+        text = ''
+          alias esrgan="realesrgan-ncnn-vulkan -i ${config.user.homeDirectory}/Pictures/Upscale/Input -o ${config.user.homeDirectory}/Pictures/Upscale/Output"
+        '';
+        clobber = true;
+      };
     };
   };
 }

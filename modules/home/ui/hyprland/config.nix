@@ -17,7 +17,7 @@
   quickshellConfig = import ./quickshell-integration.nix {inherit config lib cfg;};
 in {
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = [
         pkgs.hyprwayland-scanner
         pkgs.hyprland # Use nixpkgs version for npins compatibility
@@ -27,8 +27,9 @@ in {
         pkgs.jq
         pkgs.swaybg
       ];
-      file.xdg_config = {
-        "hypr/hyprland.conf" = {
+      files = {
+        ".config/hypr/hyprland.conf" = {
+          clobber = true;
           text = let
             hyprlandConfig = let
               baseConfig = lib.foldl lib.recursiveUpdate {} [
@@ -67,7 +68,8 @@ in {
           in
             mainConfig + lib.optionalString (pluginsConfig != "") "\n${pluginsConfig}";
         };
-        "hypr/hyprpaper.conf" = {
+        ".config/hypr/hyprpaper.conf" = {
+          clobber = true;
           text = ''
             preload = ${config.home.directories.wallpapers.static.path}
             wallpaper = ,${config.home.directories.wallpapers.static.path}

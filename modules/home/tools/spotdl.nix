@@ -14,10 +14,15 @@ in {
       packages = with pkgs; [
         ffmpeg
       ];
-      file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
-        alias spotm4a="uvx spotdl --format m4a --output '{title}'"
-        alias spotmp3="uvx spotdl --format mp3 --output '{title}'"
-      '';
+    };
+    hjem.users.${config.user.name}.files = {
+      ".config/zsh/.zshrc" = {
+        text = lib.mkAfter ''
+          alias spotm4a="uvx spotdl --format m4a --output '{title}'"
+          alias spotmp3="uvx spotdl --format mp3 --output '{title}'"
+        '';
+        clobber = true;
+      };
     };
   };
 }

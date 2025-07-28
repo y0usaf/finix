@@ -11,20 +11,23 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         nodejs_20
       ];
 
-      file.home = {
-        ".claude-code-router/.keep".text = "";
+      files = {
+        ".claude-code-router/.keep" = {
+          text = "";
+          clobber = true;
+        };
       };
-
-      systemd.tmpfiles.dynamicRules = [
-        "d {{home}}/.npm-global 0755 {{user}} {{group}} - -"
-        "d {{home}}/.claude-code-router 0755 {{user}} {{group}} - -"
-      ];
     };
+
+    users.users.${config.user.name}.maid.systemd.tmpfiles.dynamicRules = [
+      "d {{home}}/.npm-global 0755 {{user}} {{group}} - -"
+      "d {{home}}/.claude-code-router 0755 {{user}} {{group}} - -"
+    ];
 
     # Add npm global bin to PATH
     environment.variables.PATH = lib.mkAfter "${config.user.homeDirectory}/.npm-global/bin";

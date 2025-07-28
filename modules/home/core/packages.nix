@@ -113,6 +113,6 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid.packages = basePackages ++ cfg.extraPackages;
+    hjem.users.${config.user.name}.packages = basePackages ++ cfg.extraPackages;
   };
 }

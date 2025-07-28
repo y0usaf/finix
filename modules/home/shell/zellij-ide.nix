@@ -25,7 +25,12 @@
         }
     }
   '';
-  users.users.${config.user.name}.maid.file.home.".config/zsh/.zshrc".text = lib.mkAfter ''
-    alias ide='zellij --layout ${config.user.configDirectory}/zellij/layouts/ide.kdl'
-  '';
+  hjem.users.${config.user.name}.files = {
+    ".config/zsh/.zshrc" = {
+      text = lib.mkAfter ''
+        alias ide='zellij --layout ${config.user.configDirectory}/zellij/layouts/ide.kdl'
+      '';
+      clobber = true;
+    };
+  };
 }

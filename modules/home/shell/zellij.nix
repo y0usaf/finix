@@ -23,13 +23,14 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         zellij
       ];
-      file = {
-        xdg_config = {
-          "zellij/config.kdl".text = ''
+      files = {
+        ".config/zellij/config.kdl" = {
+          clobber = true;
+          text = ''
             hide_session_name false
             on_force_close "quit"
             pane_frames true
@@ -38,7 +39,10 @@ in {
             show_startup_tips false
             simplified_ui false
           '';
-          "zellij/layouts/music.kdl".text = ''
+        };
+        ".config/zellij/layouts/music.kdl" = {
+          clobber = true;
+          text = ''
             layout alias="music" {
                 default_tab_template {
                     pane size=1 borderless=true {
@@ -57,8 +61,14 @@ in {
                 }
             }
           '';
-          "zellij/layouts/ide.kdl".text = ideLayout.home.shell.zellij.layouts.ide;
-          "zellij/config-ide.kdl".text = ''
+        };
+        ".config/zellij/layouts/ide.kdl" = {
+          clobber = true;
+          text = ideLayout.home.shell.zellij.layouts.ide;
+        };
+        ".config/zellij/config-ide.kdl" = {
+          clobber = true;
+          text = ''
             hide_session_name false
             on_force_close "quit"
             pane_frames true
@@ -68,11 +78,14 @@ in {
             simplified_ui true
           '';
         };
-        home."{{xdg_config_home}}/zsh/.zshrc".text = lib.mkBefore (lib.optionalString cfg.autoStart ''
-          if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" && -z "$NVIM" ]]; then
-              exec zellij
-          fi
-        '');
+        ".config/zsh/.zshrc" = {
+          clobber = true;
+          text = lib.mkBefore (lib.optionalString cfg.autoStart ''
+            if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" && -z "$NVIM" ]]; then
+                exec zellij
+            fi
+          '');
+        };
       };
     };
   };

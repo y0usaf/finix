@@ -15,7 +15,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.${username}.maid = {
+    hjem.users.${username} = {
       packages = with pkgs; [
         quickshell
         cava

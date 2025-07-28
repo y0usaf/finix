@@ -16,11 +16,12 @@ in {
     enable = lib.mkEnableOption "sway launcher desktop";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         fzf
       ];
-      file.xdg_config."scripts/sway-launcher-desktop.sh" = {
+      files.".config/scripts/sway-launcher-desktop.sh" = {
+        clobber = true;
         executable = true;
         text = ''
           #!/usr/bin/env bash

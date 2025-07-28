@@ -40,28 +40,32 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         git
         openssh
       ];
-      file.home = {
-        ".gitconfig".text = ''
-          [user]
-            name = ${cfg.name}
-            email = ${cfg.email}
-          [core]
-            editor = ${cfg.editor}
-          [init]
-            defaultBranch = main
-          [pull]
-            rebase = true
-          [push]
-            autoSetupRemote = true
-          [url "git@github.com:"]
-            pushInsteadOf = https://github.com/
-        '';
+      files = {
+        ".gitconfig" = {
+          clobber = true;
+          text = ''
+            [user]
+              name = ${cfg.name}
+              email = ${cfg.email}
+            [core]
+              editor = ${cfg.editor}
+            [init]
+              defaultBranch = main
+            [pull]
+              rebase = true
+            [push]
+              autoSetupRemote = true
+            [url "git@github.com:"]
+              pushInsteadOf = https://github.com/
+          '';
+        };
         ".local/share/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
+          clobber = true;
           text = ''
             if [ ! -d "${cfg.nixos-git-sync.repoPath}" ]; then
               echo "Setting up NixOS configuration repository..."
@@ -71,6 +75,7 @@ in {
           executable = true;
         };
         ".local/share/bin/nixos-git-sync" = lib.mkIf cfg.nixos-git-sync.enable {
+          clobber = true;
           text = ''
             set -x
             sleep 2
@@ -92,11 +97,14 @@ in {
           '';
           executable = true;
         };
-        ".config/zsh/.zshrc".text = lib.mkIf cfg.nixos-git-sync.enable ''
-          git-sync() {
-            ${config.user.homeDirectory}/.local/share/bin/nixos-git-sync
-          }
-        '';
+        ".config/zsh/.zshrc" = lib.mkIf cfg.nixos-git-sync.enable {
+          clobber = true;
+          text = ''
+            git-sync() {
+              ${config.user.homeDirectory}/.local/share/bin/nixos-git-sync
+            }
+          '';
+        };
       };
     };
   };

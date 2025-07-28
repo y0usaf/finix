@@ -10,11 +10,6 @@ in {
     enable = lib.mkEnableOption "file-roller (archive manager)";
   };
   config = lib.mkIf cfg.enable {
-    # nix-maid (legacy)
-    users.users.${config.user.name}.maid.packages = with pkgs; [
-      file-roller
-    ];
-    # hjem (new)
     hjem.users.${config.user.name}.packages = with pkgs; [
       file-roller
     ];

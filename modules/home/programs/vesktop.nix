@@ -10,6 +10,6 @@ in {
     enable = lib.mkEnableOption "Vesktop (Discord client) module";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid.packages = [pkgs.vesktop];
+    hjem.users.${config.user.name}.packages = [pkgs.vesktop];
   };
 }
