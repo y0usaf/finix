@@ -11,7 +11,7 @@ in {
   };
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.packages = [pkgs.polkit_gnome];
-    users.users.${config.user.name}.maid.systemd.services.polkit-gnome-authentication-agent-1 = {
+    systemd.user.services.polkit-gnome-authentication-agent-1 = {
       description = "polkit-gnome-authentication-agent-1";
       wantedBy = ["graphical-session.target"];
       after = ["graphical-session.target"];

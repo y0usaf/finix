@@ -29,7 +29,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid.systemd.services."hyprland-config-watcher" = {
+    systemd.user.services."hyprland-config-watcher" = {
       description = "Watch Hyprland config directory for symlink changes and reload";
       script = ''
         set -x
