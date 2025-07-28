@@ -69,7 +69,7 @@ in {
             - **Reading files from GitHub repos**: Access files without cloning
             - **Exploring project structure**: Navigate directories in remote repositories
             - **NOT for**: Local git operations (use regular git commands via Bash tool)
-            - Uses nix-maid (NOT home-manager)
+            - Uses hjem (NOT home-manager)
             - Check flake.nix for available inputs
             - Clone external repos to `tmp/` folder (in gitignore)
             - Rebuild with `nh os switch` after configuration changes

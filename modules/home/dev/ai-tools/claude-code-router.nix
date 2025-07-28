@@ -24,9 +24,9 @@ in {
       };
     };
 
-    users.users.${config.user.name}.maid.systemd.tmpfiles.dynamicRules = [
-      "d {{home}}/.npm-global 0755 {{user}} {{group}} - -"
-      "d {{home}}/.claude-code-router 0755 {{user}} {{group}} - -"
+    systemd.tmpfiles.rules = [
+      "d ${config.user.homeDirectory}/.npm-global 0755 ${config.user.name} users - -"
+      "d ${config.user.homeDirectory}/.claude-code-router 0755 ${config.user.name} users - -"
     ];
 
     # Add npm global bin to PATH

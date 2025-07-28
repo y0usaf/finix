@@ -8,7 +8,7 @@
 in {
   options.home.shell.aliases = {enable = lib.mkEnableOption "Enable base aliases";};
   config = lib.mkIf cfg.enable {
-    # hjem (migrated from nix-maid)
+    # hjem configuration
     hjem.users.${name}.files = {
       ".config/zsh/aliases/android.zsh" = {
         text = ''alias adb="HOME=\"$XDG_DATA_HOME/android\" adb"'';

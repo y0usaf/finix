@@ -38,8 +38,8 @@ _final: prev: {
     mkOptDef = type: default: description: libprev.mkOption {inherit type default description;};
 
     # User configuration helpers
-    mkUserMaidConfig = username: userConfig: {
-      users.users.${username}.maid = userConfig;
+    mkUserHjemConfig = username: userConfig: {
+      hjem.users.${username} = userConfig;
     };
 
     # Package option helper

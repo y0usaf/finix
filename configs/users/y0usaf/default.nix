@@ -88,7 +88,10 @@ _: {
     };
     python.enable = true;
     repomix.enable = true;
-    opencode.enable = true;
+    opencode = {
+      enable = true;
+      enableMcpServers = true;
+    };
     latex.enable = true;
     upscale.enable = true;
   };
