@@ -11,17 +11,17 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         realesrgan-ncnn-vulkan
       ];
-    };
-    hjem.users.${config.user.name}.files = {
-      ".config/zsh/aliases/esrgan.zsh" = {
-        text = ''
-          alias esrgan="realesrgan-ncnn-vulkan -i ${config.user.homeDirectory}/Pictures/Upscale/Input -o ${config.user.homeDirectory}/Pictures/Upscale/Output"
-        '';
-        clobber = true;
+      files = {
+        ".config/zsh/aliases/esrgan.zsh" = {
+          text = ''
+            alias esrgan="realesrgan-ncnn-vulkan -i ${config.user.homeDirectory}/Pictures/Upscale/Input -o ${config.user.homeDirectory}/Pictures/Upscale/Output"
+          '';
+          clobber = true;
+        };
       };
     };
   };

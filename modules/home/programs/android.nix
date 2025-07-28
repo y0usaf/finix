@@ -26,7 +26,7 @@ in {
         };
       };
     };
-    users.users.${config.user.name}.maid.systemd.user.services = {
+    systemd.user.services = {
       waydroid-container = {
         Unit = {
           Description = "Waydroid Container";

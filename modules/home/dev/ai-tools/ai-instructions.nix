@@ -11,7 +11,7 @@
   - "If you can't explain it simply, you don't understand it well enough"
 
   **NixOS Project Context:**
-  - Uses nix-maid (NOT home-manager)
+  - Uses hjem (NOT home-manager)
   - Check flake.nix for available inputs
   - Clone external repos to `tmp/` folder (in gitignore)
   - Rebuild with `nh os switch` after configuration changes
