@@ -63,10 +63,16 @@
   );
 in {
   config = lib.mkIf config.home.programs.firefox.enable {
-    users.users.${username}.maid = {
-      file.home = {
-        ".mozilla/firefox/${username}.default/user.js".text = userJsContent;
-        ".mozilla/firefox/${username}.default-release/user.js".text = userJsContent;
+    hjem.users.${username} = {
+      files = {
+        ".mozilla/firefox/${username}.default/user.js" = {
+          text = userJsContent;
+          clobber = true;
+        };
+        ".mozilla/firefox/${username}.default-release/user.js" = {
+          text = userJsContent;
+          clobber = true;
+        };
       };
     };
   };

@@ -10,12 +10,15 @@ in {
     enable = lib.mkEnableOption "Bluetooth user tools";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         blueman
         bluetuith
       ];
-      file.xdg_config."autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
+      files.".config/autostart/blueman.desktop" = {
+        clobber = true;
+        source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
+      };
     };
   };
 }

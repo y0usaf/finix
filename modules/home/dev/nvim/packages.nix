@@ -5,10 +5,9 @@
   ...
 }: let
   cfg = config.home.dev.nvim;
-  username = config.user.name;
 in {
   config = lib.mkIf cfg.enable {
-    users.users.${username}.maid.packages = [
+    hjem.users.${config.user.name}.packages = [
       pkgs.ripgrep
       pkgs.fd
       pkgs.tree-sitter
