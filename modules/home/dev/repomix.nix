@@ -14,7 +14,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         repomix
       ];

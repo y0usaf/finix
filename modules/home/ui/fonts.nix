@@ -79,10 +79,11 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.${username}.maid = {
+    hjem.users.${username} = {
       packages = mainFontPackages ++ fallbackPackages;
-      file.xdg_config = {
-        "fontconfig/fonts.conf".text = fontXmlConfig;
+      files.".config/fontconfig/fonts.conf" = {
+        clobber = true;
+        text = fontXmlConfig;
       };
     };
   };

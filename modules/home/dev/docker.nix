@@ -10,18 +10,21 @@ in {
     enable = lib.mkEnableOption "docker development environment";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         docker
         docker-compose
         docker-buildx
         docker-credential-helpers
       ];
-      file.home = {
-        ".docker/config.json".text = builtins.toJSON {
-          credsStore = "pass";
-          currentContext = "default";
-          plugins = {};
+      files = {
+        ".docker/config.json" = {
+          clobber = true;
+          text = builtins.toJSON {
+            credsStore = "pass";
+            currentContext = "default";
+            plugins = {};
+          };
         };
       };
     };

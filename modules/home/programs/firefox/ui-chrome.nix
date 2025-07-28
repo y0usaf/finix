@@ -229,10 +229,16 @@
   '';
 in {
   config = lib.mkIf config.home.programs.firefox.enable {
-    users.users.${username}.maid = {
-      file.home = {
-        ".mozilla/firefox/${username}.default/chrome/userChrome.css".text = userChromeCss;
-        ".mozilla/firefox/${username}.default-release/chrome/userChrome.css".text = userChromeCss;
+    hjem.users.${username} = {
+      files = {
+        ".mozilla/firefox/${username}.default/chrome/userChrome.css" = {
+          text = userChromeCss;
+          clobber = true;
+        };
+        ".mozilla/firefox/${username}.default-release/chrome/userChrome.css" = {
+          text = userChromeCss;
+          clobber = true;
+        };
       };
     };
   };

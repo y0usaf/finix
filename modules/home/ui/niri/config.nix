@@ -9,7 +9,7 @@
   # Force rebuild - updated launcher command
 in {
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = [
         pkgs.niri
         pkgs.grim
@@ -18,9 +18,8 @@ in {
         pkgs.jq
         pkgs.swaybg
       ];
-
-      file.xdg_config = {
-        "niri/config.kdl" = {
+      files = {
+        ".config/niri/config.kdl" = {
           text = ''
             prefer-no-csd
 
@@ -109,7 +108,7 @@ in {
                 "Mod+Shift+Slash" { show-hotkey-overlay; }
 
                 "Mod+T" { spawn "${defaults.terminal}"; }
-                "Super+R" { spawn "foot" "-a" "launcher" "/home/y0usaf/.config/scripts/sway-launcher-desktop.sh"; }
+                "Super+R" { spawn "foot" "-a" "launcher" "${config.user.configDirectory}/scripts/sway-launcher-desktop.sh"; }
 
                 "Mod+Q" { close-window; }
                 "Mod+Shift+F" { fullscreen-window; }
@@ -190,6 +189,7 @@ in {
                 DISPLAY ":0"
             }
           '';
+          clobber = true;
         };
       };
     };

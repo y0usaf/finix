@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "media applications";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid.packages = with pkgs; [
+    hjem.users.${config.user.name}.packages = with pkgs; [
       pavucontrol
       ffmpeg
       vlc

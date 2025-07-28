@@ -19,30 +19,37 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    users.users.${username}.maid = {
+    hjem.users.${username} = {
       packages = with pkgs; [
         hyprcursorPackage
         xcursorPackage
       ];
-      file.home = {
-        ".profile".text = lib.mkAfter ''
-          export HYPRCURSOR_THEME="${hyprThemeName}"
-          export HYPRCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
-          export XCURSOR_THEME="${x11ThemeName}"
-          export XCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
-        '';
-      };
-      file.xdg_config = {
-        "gtk-3.0/settings.ini".text = lib.mkAfter ''
-          [Settings]
-          gtk-cursor-theme-name=${x11ThemeName}
-          gtk-cursor-theme-size=${toString config.home.core.appearance.cursorSize}
-        '';
-        "gtk-4.0/settings.ini".text = lib.mkAfter ''
-          [Settings]
-          gtk-cursor-theme-name=${x11ThemeName}
-          gtk-cursor-theme-size=${toString config.home.core.appearance.cursorSize}
-        '';
+      files = {
+        ".profile" = {
+          text = lib.mkAfter ''
+            export HYPRCURSOR_THEME="${hyprThemeName}"
+            export HYPRCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
+            export XCURSOR_THEME="${x11ThemeName}"
+            export XCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
+          '';
+          clobber = true;
+        };
+        ".config/gtk-3.0/settings.ini" = {
+          text = lib.mkAfter ''
+            [Settings]
+            gtk-cursor-theme-name=${x11ThemeName}
+            gtk-cursor-theme-size=${toString config.home.core.appearance.cursorSize}
+          '';
+          clobber = true;
+        };
+        ".config/gtk-4.0/settings.ini" = {
+          text = lib.mkAfter ''
+            [Settings]
+            gtk-cursor-theme-name=${x11ThemeName}
+            gtk-cursor-theme-size=${toString config.home.core.appearance.cursorSize}
+          '';
+          clobber = true;
+        };
       };
     };
   };

@@ -76,20 +76,30 @@ in {
     enable = lib.mkEnableOption "Model Context Protocol configuration";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         nodejs_20
         uv
       ];
-      file.home = {
-        ".cursor/mcp.json".text = builtins.toJSON mcpServersConfig;
-        ".claude/mcp_config.json".text = builtins.toJSON mcpServersConfig;
-        ".claude/mcp_servers.json".text = builtins.toJSON claudeCodeServers;
+      files = {
+        ".cursor/mcp.json" = {
+          text = builtins.toJSON mcpServersConfig;
+          clobber = true;
+        };
+        ".claude/mcp_config.json" = {
+          text = builtins.toJSON mcpServersConfig;
+          clobber = true;
+        };
+        ".claude/mcp_servers.json" = {
+          text = builtins.toJSON claudeCodeServers;
+          clobber = true;
+        };
       };
-      systemd.tmpfiles.dynamicRules = [
-        "d {{home}}/.local/share/npm/lib/node_modules 0755 {{user}} {{group}} - -"
-      ];
     };
+
+    users.users.${config.user.name}.maid.systemd.tmpfiles.dynamicRules = [
+      "d {{home}}/.local/share/npm/lib/node_modules 0755 {{user}} {{group}} - -"
+    ];
     system.activationScripts.setupClaudeMcp = {
       text = ''
         echo "Setting up Claude MCP servers via CLI..."

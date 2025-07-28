@@ -10,11 +10,14 @@ in {
     enable = lib.mkEnableOption "Syncthing service";
   };
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         syncthing
       ];
-      file.xdg_config."syncthing/.keep".text = '''';
+      files.".config/syncthing/.keep" = {
+        clobber = true;
+        text = '''';
+      };
     };
     systemd.user.services.syncthing = {
       enable = true;
