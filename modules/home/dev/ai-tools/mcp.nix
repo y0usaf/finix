@@ -97,8 +97,8 @@ in {
       };
     };
 
-    users.users.${config.user.name}.maid.systemd.tmpfiles.dynamicRules = [
-      "d {{home}}/.local/share/npm/lib/node_modules 0755 {{user}} {{group}} - -"
+    systemd.tmpfiles.rules = [
+      "d ${config.user.homeDirectory}/.local/share/npm/lib/node_modules 0755 ${config.user.name} users - -"
     ];
     system.activationScripts.setupClaudeMcp = {
       text = ''

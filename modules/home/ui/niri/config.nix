@@ -24,6 +24,7 @@ in {
             prefer-no-csd
 
             spawn-at-startup "${pkgs.xwayland-satellite}/bin/xwayland-satellite"
+            spawn-at-startup "sh" "-c" "swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill"
 
             input {
                 keyboard {
@@ -82,26 +83,20 @@ in {
             }
 
             window-rule {
-                match {
-                    app-id "firefox"
-                }
+                match app-id="firefox"
                 default-column-width {
                     proportion 0.75
                 }
             }
 
             window-rule {
-                match {
-                    app-id "foot"
-                }
+                match app-id="foot"
                 opacity 1.0
             }
 
             window-rule {
-                match {
-                    app-id "launcher"
-                }
-                open-floating
+                match app-id="launcher"
+                open-floating true
             }
 
             binds {
@@ -124,42 +119,42 @@ in {
                 "Mod+J" { focus-window-down; }
                 "Mod+K" { focus-window-up; }
 
-                "Mod+Ctrl+Left" { move-column-left; }
-                "Mod+Ctrl+Right" { move-column-right; }
-                "Mod+Ctrl+Up" { move-window-up; }
-                "Mod+Ctrl+Down" { move-window-down; }
-                "Mod+Ctrl+H" { move-column-left; }
-                "Mod+Ctrl+L" { move-column-right; }
-                "Mod+Ctrl+J" { move-window-down; }
-                "Mod+Ctrl+K" { move-window-up; }
+                "Mod+Shift+Left" { move-column-left; }
+                "Mod+Shift+Right" { move-column-right; }
+                "Mod+Shift+Up" { move-window-up; }
+                "Mod+Shift+Down" { move-window-down; }
+                "Mod+Shift+H" { move-column-left; }
+                "Mod+Shift+L" { move-column-right; }
+                "Mod+Shift+J" { move-window-down; }
+                "Mod+Shift+K" { move-window-up; }
 
                 "Mod+Page_Up" { focus-workspace-up; }
                 "Mod+Page_Down" { focus-workspace-down; }
                 "Mod+U" { focus-workspace-up; }
                 "Mod+I" { focus-workspace-down; }
-                "Mod+1" { focus-workspace 1; }
-                "Mod+2" { focus-workspace 2; }
-                "Mod+3" { focus-workspace 3; }
-                "Mod+4" { focus-workspace 4; }
-                "Mod+5" { focus-workspace 5; }
-                "Mod+6" { focus-workspace 6; }
-                "Mod+7" { focus-workspace 7; }
-                "Mod+8" { focus-workspace 8; }
-                "Mod+9" { focus-workspace 9; }
+                "Super+1" { focus-workspace 1; }
+                "Super+2" { focus-workspace 2; }
+                "Super+3" { focus-workspace 3; }
+                "Super+4" { focus-workspace 4; }
+                "Super+5" { focus-workspace 5; }
+                "Super+6" { focus-workspace 6; }
+                "Super+7" { focus-workspace 7; }
+                "Super+8" { focus-workspace 8; }
+                "Super+9" { focus-workspace 9; }
 
                 "Mod+Ctrl+Page_Up" { move-column-to-workspace-up; }
                 "Mod+Ctrl+Page_Down" { move-column-to-workspace-down; }
                 "Mod+Ctrl+U" { move-column-to-workspace-up; }
                 "Mod+Ctrl+I" { move-column-to-workspace-down; }
-                "Mod+Ctrl+1" { move-column-to-workspace 1; }
-                "Mod+Ctrl+2" { move-column-to-workspace 2; }
-                "Mod+Ctrl+3" { move-column-to-workspace 3; }
-                "Mod+Ctrl+4" { move-column-to-workspace 4; }
-                "Mod+Ctrl+5" { move-column-to-workspace 5; }
-                "Mod+Ctrl+6" { move-column-to-workspace 6; }
-                "Mod+Ctrl+7" { move-column-to-workspace 7; }
-                "Mod+Ctrl+8" { move-column-to-workspace 8; }
-                "Mod+Ctrl+9" { move-column-to-workspace 9; }
+                "Super+Shift+1" { move-column-to-workspace 1; }
+                "Super+Shift+2" { move-column-to-workspace 2; }
+                "Super+Shift+3" { move-column-to-workspace 3; }
+                "Super+Shift+4" { move-column-to-workspace 4; }
+                "Super+Shift+5" { move-column-to-workspace 5; }
+                "Super+Shift+6" { move-column-to-workspace 6; }
+                "Super+Shift+7" { move-column-to-workspace 7; }
+                "Super+Shift+8" { move-column-to-workspace 8; }
+                "Super+Shift+9" { move-column-to-workspace 9; }
 
                 "Mod+R" { switch-preset-column-width; }
                 "Mod+Shift+R" { switch-preset-window-height; }
@@ -168,21 +163,22 @@ in {
                 "Mod+BracketLeft" { consume-or-expel-window-left; }
                 "Mod+BracketRight" { consume-or-expel-window-right; }
 
-                "Print" { spawn "grim" "-g" "$(slurp -d)" "-" "|" "wl-copy" "-t" "image/png"; }
-                "Ctrl+Print" { spawn "grim" "-" "|" "wl-copy" "-t" "image/png"; }
-                "Shift+Print" { spawn "grim" "-g" "$(slurp -w)" "-" "|" "wl-copy" "-t" "image/png"; }
+                "Mod+G" { spawn "sh" "-c" "grim -g \"$(slurp -d)\" - | wl-copy -t image/png"; }
+                "Mod+Shift+G" { spawn "sh" "-c" "grim - | wl-copy -t image/png"; }
 
                 "Mod+Shift+E" { quit; }
                 "Mod+O" { toggle-overview; }
 
-                "Super+1" { spawn "${defaults.ide}"; }
-                "Super+2" { spawn "${defaults.browser}"; }
-                "Super+3" { spawn "vesktop"; }
-                "Super+4" { spawn "steam"; }
-                "Super+5" { spawn "obs"; }
+                "Mod+1" { spawn "${defaults.ide}"; }
+                "Mod+2" { spawn "${defaults.browser}"; }
+                "Mod+3" { spawn "vesktop"; }
+                "Mod+4" { spawn "steam"; }
+                "Mod+5" { spawn "obs"; }
 
                 "Mod+E" { spawn "${defaults.fileManager}"; }
                 "Mod+Shift+O" { spawn "${defaults.terminal}" "-e" "${defaults.editor}"; }
+
+                "Mod+Shift+C" { spawn "sh" "-c" "killall swaybg; swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill &"; }
             }
 
             environment {
