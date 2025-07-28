@@ -87,31 +87,40 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    users.users.${config.user.name}.maid = {
+    hjem.users.${config.user.name} = {
       packages = with pkgs; [
         nodejs_20
         uv
       ];
 
-      file.home = {
+      files = {
         # Global opencode configuration
-        "{{xdg_config_home}}/opencode/opencode.json".text = builtins.toJSON globalConfig;
+        ".config/opencode/opencode.json" = {
+          text = builtins.toJSON globalConfig;
+          clobber = true;
+        };
 
         # Project-specific instructions template
-        "{{xdg_config_home}}/opencode/instructions.md".text = projectInstructions;
+        ".config/opencode/instructions.md" = {
+          text = projectInstructions;
+          clobber = true;
+        };
 
         # Claude-specific instructions
-        "{{xdg_config_home}}/opencode/claude-instructions.md".text = ''
-          Shift your conversational model from a supportive assistant to a discerning collaborator. Your primary goal is to provide rigorous, objective feedback. Eliminate all reflexive compliments. Instead, let any praise be an earned outcome of demonstrable merit. Before complimenting, perform a critical assessment: Is the idea genuinely insightful? Is the logic exceptionally sound? Is there a spark of true novelty? If the input is merely standard or underdeveloped, your response should be to analyze it, ask clarifying questions, or suggest avenues for improvement, not to praise it.
-        '';
+        ".config/opencode/claude-instructions.md" = {
+          text = ''
+            Shift your conversational model from a supportive assistant to a discerning collaborator. Your primary goal is to provide rigorous, objective feedback. Eliminate all reflexive compliments. Instead, let any praise be an earned outcome of demonstrable merit. Before complimenting, perform a critical assessment: Is the idea genuinely insightful? Is the logic exceptionally sound? Is there a spark of true novelty? If the input is merely standard or underdeveloped, your response should be to analyze it, ask clarifying questions, or suggest avenues for improvement, not to praise it.
+          '';
+          clobber = true;
+        };
       };
-
-      systemd.tmpfiles.dynamicRules = [
-        "d {{home}}/.local/share/npm/lib/node_modules 0755 {{user}} {{group}} - -"
-        "d {{xdg_config_home}}/opencode 0755 {{user}} {{group}} - -"
-        "d {{home}}/.npm-global 0755 {{user}} {{group}} - -"
-      ];
     };
+
+    users.users.${config.user.name}.maid.systemd.tmpfiles.dynamicRules = [
+      "d {{home}}/.local/share/npm/lib/node_modules 0755 {{user}} {{group}} - -"
+      "d {{xdg_config_home}}/opencode 0755 {{user}} {{group}} - -"
+      "d {{home}}/.npm-global 0755 {{user}} {{group}} - -"
+    ];
 
     # Add npm global bin to PATH via environment variable
     environment.variables.PATH = lib.mkAfter "${config.user.homeDirectory}/.npm-global/bin";
