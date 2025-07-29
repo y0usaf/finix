@@ -30,7 +30,7 @@ in {
           text = ''
             # /fix-issue
             Analyze and fix GitHub issue: $ARGUMENTS
-            1. Use `gh issue view` to get issue details  
+            1. Use `gh issue view` to get issue details
             2. Search codebase for relevant files
             3. Understand the problem context
             4. Implement necessary changes
