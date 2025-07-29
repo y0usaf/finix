@@ -95,6 +95,19 @@ in {
           '';
           clobber = true;
         };
+        ".config/claude/claude_desktop_config.json" = {
+          text = ''
+            {
+              "mcpServers": {
+                "Context7": {
+                  "command": "npx",
+                  "args": ["-y", "@upstash/context7-mcp"]
+                }
+              }
+            }
+          '';
+          clobber = true;
+        };
       };
     };
   };
