@@ -16,6 +16,12 @@
   - Clone external repos to `tmp/` folder (in gitignore)
   - Rebuild with `nh os switch` after configuration changes
 
+  **Documentation & Context:**
+  - Use Context7 MCP for up-to-date library documentation
+  - When working with frameworks/libraries, use `get-library-docs` with Context7 IDs
+  - Example: `get-library-docs /nixpkgs/manual` or `get-library-docs /rust/std`
+  - Context7 provides version-specific, official documentation directly in context
+
   **Build Commands:**
   ```bash
   alejandra .
