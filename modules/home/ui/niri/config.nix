@@ -41,6 +41,7 @@ in {
                 mouse {
                     accel-speed 0.0
                 }
+                focus-follows-mouse max-scroll-amount="0%"
                 mod-key "Alt"
             }
 
@@ -55,8 +56,9 @@ in {
             }
 
             layout {
-                gaps 16
+                gaps 10
                 center-focused-column "never"
+                default-column-display "tabbed"
                 default-column-width {
                     proportion 0.5
                 }
@@ -64,6 +66,26 @@ in {
                     proportion 0.33333
                     proportion 0.5
                     proportion 0.66667
+                }
+
+                border {
+                width 0.5
+                active-color "#ffffff"
+                inactive-color "#333333"
+                }
+
+                focus-ring {
+                    width 0.5
+                    active-color "#ffffff"
+                    inactive-color "#333333"
+                }
+
+                tab-indicator {
+                    width 4
+                    gap 6
+                    active-color "#ffffff"
+                    inactive-color "#666666"
+                    position "left"
                 }
             }
 
@@ -109,6 +131,7 @@ in {
                 "Mod+Shift+F" { fullscreen-window; }
                 "Mod+F" { maximize-column; }
                 "Mod+Space" { center-column; }
+                "Super+Space" { toggle-window-floating; }
 
                 "Mod+Left" { focus-column-left; }
                 "Mod+Right" { focus-column-right; }
