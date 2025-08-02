@@ -40,6 +40,22 @@ _: {
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = true;
-    pxe-server-secure.enable = true;
+    tftpd = {
+      enable = true;
+      path = "/srv/tftp";
+    };
+    nginx = {
+      enable = true;
+      virtualHosts."pxe" = {
+        listen = [
+          {
+            addr = "192.168.2.28";
+            port = 8080;
+          }
+        ];
+        root = "/srv/tftp";
+        locations."/".extraConfig = "autoindex on;";
+      };
+    };
   };
 }
