@@ -40,5 +40,6 @@ _: {
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = true;
+    pxe-server-secure.enable = true;
   };
 }
