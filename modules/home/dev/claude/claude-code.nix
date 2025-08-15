@@ -78,6 +78,7 @@ in {
             nh os switch --dry
             nh os switch
             ```
+            - **ALWAYS commit after every successful `nh os switch`**
             - Check status: `git status`
             - Review changes: `git diff`
             - Commit with descriptive messages
