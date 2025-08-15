@@ -4,7 +4,7 @@
     ./cursor.nix
     ./fonts.nix
     ./foot.nix
-    ./gtk.nix
+    ./gtk
     ./hyprland
     ./mako.nix
     ./niri

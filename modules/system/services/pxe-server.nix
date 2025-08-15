@@ -37,51 +37,54 @@ in {
       "d /var/lib/pxe/http 0755 root root -"
     ];
 
-    # TFTP server for PXE boot files
-    services.atftpd = {
-      enable = true;
-      root = "/var/lib/pxe/tftp";
-    };
+    # Services configuration
+    services = {
+      # TFTP server for PXE boot files
+      atftpd = {
+        enable = true;
+        root = "/var/lib/pxe/tftp";
+      };
 
-    # DHCP server with PXE options (SECURITY RISK - see warning below)
-    services.dhcpd4 = {
-      enable = true;
-      interfaces = [cfg.interface];
-      extraConfig = ''
-        option space pxelinux;
-        option pxelinux.magic code 208 = string;
-        option pxelinux.configfile code 209 = text;
-        option pxelinux.pathprefix code 210 = text;
-        option pxelinux.reboottime code 211 = unsigned integer 32;
-        option architecture-type code 93 = unsigned integer 16;
+      # DHCP server with PXE options (SECURITY RISK - see warning below)
+      dhcpd4 = {
+        enable = true;
+        interfaces = [cfg.interface];
+        extraConfig = ''
+          option space pxelinux;
+          option pxelinux.magic code 208 = string;
+          option pxelinux.configfile code 209 = text;
+          option pxelinux.pathprefix code 210 = text;
+          option pxelinux.reboottime code 211 = unsigned integer 32;
+          option architecture-type code 93 = unsigned integer 16;
 
-        subnet 192.168.1.0 netmask 255.255.255.0 {
-          range ${cfg.dhcpRange};
-          option routers ${cfg.serverIP};
-          option domain-name-servers 8.8.8.8;
+          subnet 192.168.1.0 netmask 255.255.255.0 {
+            range ${cfg.dhcpRange};
+            option routers ${cfg.serverIP};
+            option domain-name-servers 8.8.8.8;
 
-          class "pxeclients" {
-            match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
-            next-server ${cfg.serverIP};
-            filename "pxelinux.0";
+            class "pxeclients" {
+              match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
+              next-server ${cfg.serverIP};
+              filename "pxelinux.0";
+            }
           }
-        }
-      '';
-    };
+        '';
+      };
 
-    # HTTP server for NixOS ISO
-    services.nginx = {
-      enable = true;
-      virtualHosts."pxe-server" = {
-        listen = [
-          {
-            addr = cfg.serverIP;
-            port = 80;
-          }
-        ];
-        root = "/var/lib/pxe/http";
-        locations."/" = {
-          extraConfig = "autoindex on;";
+      # HTTP server for NixOS ISO
+      nginx = {
+        enable = true;
+        virtualHosts."pxe-server" = {
+          listen = [
+            {
+              addr = cfg.serverIP;
+              port = 80;
+            }
+          ];
+          root = "/var/lib/pxe/http";
+          locations."/" = {
+            extraConfig = "autoindex on;";
+          };
         };
       };
     };

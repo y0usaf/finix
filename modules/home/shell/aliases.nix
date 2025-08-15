@@ -43,7 +43,7 @@ in {
         clobber = true;
       };
       ".config/zsh/aliases/development.zsh" = {
-        text = ''alias lintcheck="clear; statix check .; deadnix ." alias lintfix="clear; statix fix .; deadnix ." alias ide="zellij --layout ${config.user.configDirectory}/zellij/layouts/ide.kdl" alias opencode="${homeDirectory}/.npm-global/bin/opencode" '';
+        text = ''alias lintcheck="clear; statix check .; deadnix ." alias lintfix="clear; statix fix .; deadnix ." alias ide="zellij --layout ${config.user.configDirectory}/zellij/layouts/ide.kdl" alias opencode="${homeDirectory}/.npm-global/bin/opencode" alias clauded="claude --dangerously-skip-permissions" '';
         clobber = true;
       };
     };

@@ -108,6 +108,14 @@ in {
           '';
           clobber = true;
         };
+        ".claude/settings.json" = {
+          text = ''
+            {
+              "includeCoAuthoredBy": false
+            }
+          '';
+          clobber = true;
+        };
       };
     };
   };
