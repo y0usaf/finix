@@ -26,7 +26,7 @@
       alternate-scroll-mode = "yes";
     };
     colors = {
-      alpha = 0;
+      alpha = 1.0 - config.home.core.appearance.opacity;
       background = "000000";
       foreground = "ffffff";
       regular0 = "000000";
