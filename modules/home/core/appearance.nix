@@ -75,6 +75,11 @@ in {
       default = {};
       description = "Global animation configuration for the system";
     };
+    opacity = lib.mkOption {
+      type = t.float;
+      default = 0.1;
+      description = "Global UI opacity setting (0.0 = fully transparent, 1.0 = fully opaque)";
+    };
   };
   config =
     lib.mkIf cfg.enable {

@@ -20,9 +20,11 @@
     "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
   ];
   repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (_: shadowOffsets) 4));
+  opacity = toString config.home.core.appearance.opacity;
   whiteColor = "white";
+  backgroundColor = "rgba(0, 0, 0, ${opacity})";
   transparentColor = "transparent";
-  menuBackground = "rgba(0, 0, 0, 0.8)";
+  menuBackground = "rgba(0, 0, 0, ${opacity})";
   hoverBg = "rgba(100, 149, 237, 0.1)";
   selectedBg = "rgba(100, 149, 237, 0.5)";
 in {
@@ -31,7 +33,7 @@ in {
     * {
       font-family: "${mainFontName}";
       color: ${whiteColor};
-      background: ${transparentColor};
+      background: ${backgroundColor};
       outline-width: 0;
       outline-offset: 0;
       text-shadow: ${repeatedShadow};
