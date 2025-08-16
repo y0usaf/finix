@@ -115,8 +115,8 @@ in {
               "includeCoAuthoredBy": false,
               "model": "claude-3-7-sonnet-latest",
               "statusLine": {
-                "type": "text",
-                "text": "Claude 3.7 Sonnet | NixOS Config"
+                "type": "command",
+                "command": "~/.claude/statusline.sh"
               }
             }
           '';
