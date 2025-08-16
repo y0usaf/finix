@@ -7,231 +7,277 @@
   userChromeCss = ''
     /* Disable all animations */
     * {
-      animation: none;
-      transition: none;
-      scroll-behavior: auto;
-      padding: 0;
-      margin: 0;
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
     }
+
     :root {
-        /* Base sizing variables */
         --tab-font-size: 0.8em;
         --max-tab-width: none;
         --show-titlebar-buttons: none;
         --tab-height: 12pt;
         --toolbar-icon-size: calc(var(--tab-height) / 1.5);
-        /* Spacing variables */
-        --uc-spacing-small: 1pt;
-        --uc-spacing-medium: 2pt;
-        --uc-spacing-large: 4pt;
-        /* Layout variables */
-        --uc-bottom-toolbar-height: 12pt;
-        --uc-navbar-width: 75vw;
-        --uc-urlbar-width: 50vw;
-        --uc-urlbar-bottom-offset: calc(var(--uc-bottom-toolbar-height) + var(--uc-spacing-medium));
-        /* Animation control */
-        --uc-animation-duration: 0.001s;
-        --uc-transition-duration: 0.001s;
+        --uc-bottom-toolbar-height: 12pt
     }
+
     /* Disable specific Firefox animations */
     @media (prefers-reduced-motion: no-preference) {
       * {
-        animation-duration: var(--uc-animation-duration);
-        transition-duration: var(--uc-transition-duration);
+        animation-duration: 0.001s !important;
+        transition-duration: 0.001s !important;
       }
     }
+
     /* Disable smooth scrolling */
     html {
-      scroll-behavior: auto;
+      scroll-behavior: auto !important;
     }
+
     /* Disable tab animations */
     .tabbrowser-tab {
-      transition: none;
+      transition: none !important;
     }
+
     /* Disable toolbar animations */
-    :root[tabsintitlebar]
-        transition: none;
+    :root[tabsintitlebar] #toolbar-menubar[autohide=true][inactive] {
+        transition: none !important;
     }
+
     /* Rest of your existing CSS */
     .titlebar-buttonbox-container {
         display: var(--show-titlebar-buttons)
     }
-    :root:not([customizing])
-        margin-left: var(--uc-spacing-small);
-        margin-right: var(--uc-spacing-small);
-        border-radius: 0;
-        padding: 0;
-        min-height: 0;
+
+    :root:not([customizing]) #TabsToolbar {
+        margin-left: 1pt!important;
+        margin-right: 1pt!important;
+        border-radius: 0!important;
+        padding: 0!important;
+        min-height: 0!important
     }
+
     .tabbrowser-tab * {
-        margin: 0;
-        border-radius: 0;
+        margin: 0!important;
+        border-radius: 0!important
     }
+
     .tabbrowser-tab {
         height: var(--tab-height);
-        font-size: var(--tab-font-size);
-        min-height: 0;
-        align-items: center;
-        margin-bottom: var(--uc-spacing-medium);
+        font-size: var(--tab-font-size)!important;
+        min-height: 0!important;
+        align-items: center!important;
+        margin-bottom: 2pt!important
     }
+
     .tab-icon-image {
-        height: auto;
-        width: var(--toolbar-icon-size);
-        margin-right: var(--uc-spacing-medium);
+        height: auto!important;
+        width: var(--toolbar-icon-size)!important;
+        margin-right: 2pt!important
     }
-        min-height: 0;
+
+    #tabbrowser-arrowscrollbox,#tabbrowser-tabs,#tabbrowser-tabs>.tabbrowser-arrowscrollbox {
+        min-height: 0!important
     }
-    :root:not([customizing])
-    :root:not([customizing])
-    :root:not([customizing])
-    :root:not([customizing])
-        -moz-appearance: none;
-        padding-top: 0;
-        padding-bottom: 0;
+
+    :root:not([customizing]) #TabsToolbar .titlebar-button,:root:not([customizing]) #TabsToolbar-customization-target>.toolbarbutton-1,:root:not([customizing]) #tabbrowser-tabs .tabs-newtab-button,:root:not([customizing]) #tabs-newtab-button {
+        -moz-appearance: none!important;
+        padding-top: 0!important;
+        padding-bottom: 0!important;
         -moz-box-align: stretch;
-        margin: 0;
+        margin: 0!important
     }
-        background-color: var(--toolbarbutton-hover-background);
+
+    #tabbrowser-tabs .tabs-newtab-button:hover,#tabs-newtab-button:hover {
+        background-color: var(--toolbarbutton-hover-background)
     }
-        padding: 0;
-        transform: scale(0.6);
-        background-color: transparent;
+
+    #tabbrowser-tabs .tabs-newtab-button>.toolbarbutton-icon,#tabs-newtab-button>.toolbarbutton-icon {
+        padding: 0!important;
+        transform: scale(.6);
+        background-color: transparent!important
     }
-    @media (-moz-os-version: windows-win10) {
-        :root[sizemode=maximized]
-            padding-top: calc(var(--uc-spacing-large) + var(--uc-spacing-medium));
+
+    @media (-moz-os-version:windows-win10) {
+        :root[sizemode=maximized] #navigator-toolbox {
+            padding-top: 7pt!important
         }
     }
-        position: fixed;
-        bottom: 0;
-        width: var(--uc-navbar-width);
-        height: var(--uc-bottom-toolbar-height);
-        max-height: var(--uc-bottom-toolbar-height);
-        margin: calc(-1 * var(--uc-spacing-small)) auto 0;
-        border-top: none;
-        left: 0;
-        right: 0;
-        z-index: 3;
+
+    #nav-bar {
+        position: fixed!important;
+        bottom: 0!important;
+        width: 100%!important;
+        height: var(--uc-bottom-toolbar-height)!important;
+        max-height: var(--uc-bottom-toolbar-height)!important;
+        z-index: 1
     }
-        margin-bottom: var(--uc-bottom-toolbar-height);
+
+    #browser {
+        margin-bottom: var(--uc-bottom-toolbar-height)!important
     }
+
+    #tabbrowser-arrowscrollbox:not([overflowing]) {
         --uc-flex-justify: center
     }
+
     scrollbox[orient=horizontal]>slot {
         justify-content: var(--uc-flex-justify, initial)
     }
-        height: var(--tab-height);
+
+    #urlbar,#urlbar-input-container {
+        height: var(--tab-height)!important
     }
-        min-height: var(--tab-height);
+
+    #urlbar,#urlbar[open] {
+        min-height: var(--tab-height)!important
     }
-        min-height: 0;
+
+    #urlbar-input-container {
+        min-height: 0!important
     }
-        height: auto;
+
+    #urlbar[open],#urlbar[open] #urlbar-input-container {
+        height: auto!important
     }
-    .searchbar-search-icon,
-    .urlbar-page-action {
-        height: auto;
-        width: var(--toolbar-icon-size);
-        padding: 0;
+
+    #identity-icon,#page-action-buttons img,#permissions-granted-icon,#star-button-box,#tracking-protection-icon,.searchbar-search-icon,.urlbar-page-action {
+        height: auto!important;
+        width: var(--toolbar-icon-size)!important;
+        padding: 0!important
     }
+
     .toolbarbutton-1 {
-        padding: 0 var(--uc-spacing-medium);
+        padding: 0 2pt!important
     }
-    .toolbarbutton-1,
-    .toolbarbutton-icon {
-        -moz-appearance: none;
-        padding-inline: var(--uc-spacing-small);
+
+    .toolbarbutton-1,.toolbarbutton-icon {
+        -moz-appearance: none!important;
+        padding-inline: 1pt!important;
         -moz-box-align: stretch;
-        margin: 0;
+        margin: 0!important
     }
-    .titlebar-button,
-    .toolbaritem-combined-buttons {
-        -moz-appearance: none;
-        padding-top: 0;
-        padding-bottom: 0;
-        padding-inline: var(--uc-spacing-small);
+
+    #PersonalToolbar toolbarbutton,#TabsToolbar toolbarbutton,#nav-bar toolbarbutton,.titlebar-button,.toolbaritem-combined-buttons {
+        -moz-appearance: none!important;
+        padding-top: 0!important;
+        padding-bottom: 0!important;
+        padding-inline: 1pt!important;
         -moz-box-align: stretch;
-        margin: 0;
+        margin: 0!important
     }
-    .tab-close-button,
-    .urlbar-icon,
+
+    .tab-close-button,.urlbar-icon,.urlbar-page-action {
+        -moz-appearance: none!important;
+        padding-inline: 1pt!important;
+        -moz-box-align: stretch;
+        margin: 0!important
+    }
+
     .urlbar-page-action {
-        -moz-appearance: none;
-        padding-inline: var(--uc-spacing-small);
-        -moz-box-align: stretch;
-        margin: 0;
+        padding-top: 0!important;
+        padding-bottom: 0!important
     }
-    .urlbar-page-action {
-        padding-top: 0;
-        padding-bottom: 0;
+
+    .tab-close-button,.titlebar-button>image,.toolbarbutton-icon,.urlbar-icon,.urlbar-page-action>image {
+        padding: 0!important;
+        width: var(--toolbar-icon-size)!important;
+        height: auto!important
     }
-    .tab-close-button,
-    .titlebar-button > image,
-    .toolbarbutton-icon,
-    .urlbar-icon,
-    .urlbar-page-action > image {
-        padding: 0;
-        width: var(--toolbar-icon-size);
-        height: auto;
+
+    #navigator-toolbox,.urlbarView {
+        margin: 0!important;
+        padding: 0!important
     }
-        -moz-appearance: none;
-        background: none;
-        border: none;
-        box-shadow: none;
+
+    #navigator-toolbox {
+        appearance: toolbar!important
     }
-    :root[tabsintitlebar]
-        padding-right: 0;
-        padding-left: 0;
+
+    #nav-bar {
+        margin: -1pt auto 0!important;
+        border-top: none!important;
+        width: 75vw!important;
+        left: 0!important;
+        right: 0!important;
     }
-    :root[tabsintitlebar]
-        padding-right: 0;
-        padding-left: 0;
+
+    #titlebar {
+        -moz-appearance: none!important;
+        padding-bottom: 0!important
     }
-        display: none;
+
+    #TabsToolbar,#titlebar,toolbar {
+        margin-bottom: 0!important
     }
-        height: calc(100vh - var(--uc-bottom-toolbar-height));
+
+    #TabsToolbar {
+        padding-bottom: 0!important
     }
-        max-height: calc(100vh - var(--uc-bottom-toolbar-height));
+
+    toolbar {
+        margin-top: 0!important;
+        padding: 0!important
     }
-    @media screen and (max-width: 1000px) {
-            width: 100vw;
-        }
-        :root {
-            --uc-navbar-width: 100vw;
-        }
+
+    .urlbarView {
+        font-size: var(--tab-font-size)!important;
+        max-height: calc(60vh - 40pt)!important;
+        overflow-y: auto!important
     }
-    .tab-content {
-        padding-inline-start: var(--uc-spacing-small);
-        padding-inline-end: var(--uc-spacing-small);
+
+    .urlbarView-row {
+        padding-block: 1px!important
     }
-    .tab-label {
-        margin-inline-end: 0;
+
+    .urlbarView-row-inner {
+        padding-inline: 2px!important
     }
-    .tab-icon-sound {
-        margin-inline-start: var(--uc-spacing-small);
+
+    .urlbarView-row[label="Firefox Suggest"] {
+        margin-top: 0 !important;
+        overflow: hidden !important;
+        display: none !important; /* Hide completely */
     }
-    :root[customizing]
-        position: initial;
-        width: initial;
-        background: var(--toolbar-bgcolor);
+
+    .urlbarView-secondary,.urlbarView-title,.urlbarView-url {
+        padding: 0!important;
+        margin: 0!important
     }
-    :root[customizing]
-        margin-bottom: 0;
+
+    #urlbar[breakout][breakout-extend] {
+        box-shadow: 0 15pt 30pt rgba(0,0,0,.2);
+        width: 50vw!important;
+        left: 50%!important;
+        right: auto!important;
+        top: 20vh!important;
+        margin: 0!important;
+        position: fixed!important;
+        z-index: 999!important;
+        transform: translateX(-50%)!important;
+        max-height: 60vh!important;
+        min-height: 40pt!important
     }
-        --toolbarbutton-border-radius: 0;
-        --urlbar-icon-border-radius: 0;
-        backdrop-filter: blur(10px);
-        background-color: transparent !important;
+    /* Remove toolbar springs */
+    toolbarspring, .toolbar-spring, [anonid="spring"] {
+      display: none !important;
     }
-        --toolbarbutton-border-radius: 0;
-        --urlbar-icon-border-radius: 0;
+
+    #urlbar:not([breakout][breakout-extend]) #urlbar-input,#urlbar:not([focused]) #urlbar-input {
+        text-align: center!important;
     }
-  '';
+
+    #urlbar-background,#urlbar-input-container {
+        --toolbarbutton-border-radius: 0pt!important;
+        --urlbar-icon-border-radius: 0pt!important
+    }  '';
 in {
   config = lib.mkIf config.home.programs.firefox.enable {
     hjem.users.${username} = {
       files = {
-        ".mozilla/firefox/${username}.default/chrome/userChrome.css" = {
+        ".mozilla/firefox/${username}/chrome/userChrome.css" = {
           text = userChromeCss;
           clobber = true;
         };
