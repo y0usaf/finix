@@ -112,7 +112,15 @@ in {
         ".claude/settings.json" = {
           text = ''
             {
-              "includeCoAuthoredBy": false
+              "includeCoAuthoredBy": false,
+              "defaultModel": "claude-3-7-sonnet-latest",
+              "thinking": {
+                "type": "disabled"
+              },
+              "statusLine": {
+                "type": "command",
+                "command": "npx -y ccusage statusline"
+              }
             }
           '';
           clobber = true;
