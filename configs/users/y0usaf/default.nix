@@ -68,7 +68,6 @@ _: {
     media.enable = true;
     bluetooth.enable = true;
     obs.enable = true;
-    bambu.enable = true;
     imv.enable = true;
     mpv.enable = true;
     pcmanfm.enable = true;

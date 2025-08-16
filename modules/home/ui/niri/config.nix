@@ -105,13 +105,6 @@ in {
             }
 
             window-rule {
-                match app-id="firefox"
-                default-column-width {
-                    proportion 0.75
-                }
-            }
-
-            window-rule {
                 match app-id="foot"
                 opacity 1.0
             }
