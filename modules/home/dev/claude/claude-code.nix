@@ -113,10 +113,7 @@ in {
           text = ''
             {
               "includeCoAuthoredBy": false,
-              "defaultModel": "claude-3-7-sonnet-latest",
-              "thinking": {
-                "type": "disabled"
-              },
+              "model": "claude-3-7-sonnet-latest",
               "statusLine": {
                 "type": "command",
                 "command": "npx -y ccusage statusline"
