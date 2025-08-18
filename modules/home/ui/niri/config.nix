@@ -48,6 +48,7 @@ in {
             output "DP-4" {
                 mode "5120x1440@239.761"
                 position x=0 y=0
+                variable-refresh-rate
             }
 
             output "HDMI-A-2" {
