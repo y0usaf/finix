@@ -7,6 +7,7 @@
     ./discord.nix
     ./imv.nix
     ./media.nix
+    ./mimeapps.nix
     ./mpv.nix
     ./obs.nix
     ./obsidian.nix
@@ -16,6 +17,7 @@
     ./sway-launcher-desktop.nix
     ./vesktop.nix
     ./webapps.nix
+    ./zoom.nix
     ./firefox
   ];
 }
