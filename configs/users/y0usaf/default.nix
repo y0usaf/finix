@@ -69,11 +69,13 @@ _: {
     bluetooth.enable = true;
     obs.enable = true;
     imv.enable = true;
+    mimeapps.enable = true;
     mpv.enable = true;
     pcmanfm.enable = true;
     qbittorrent.enable = true;
     stremio.enable = true;
     sway-launcher-desktop.enable = true;
+    zoom.enable = true;
   };
   dev = {
     claude-code.enable = true;
