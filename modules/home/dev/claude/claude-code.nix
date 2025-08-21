@@ -116,7 +116,7 @@ in {
               "model": "claude-3-7-sonnet-latest",
               "statusLine": {
                 "type": "command",
-                "command": "~/.claude/statusline.sh"
+                "command": "npx ccusage"
               }
             }
           '';
