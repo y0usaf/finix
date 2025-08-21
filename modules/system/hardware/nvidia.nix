@@ -2,10 +2,10 @@
   config,
   lib,
   pkgs,
-  hostSystem,
+  hostConfig,
   ...
 }: {
-  config = lib.mkIf hostSystem.hardware.nvidia.enable {
+  config = lib.mkIf hostConfig.hardware.nvidia.enable {
     boot.kernelParams = [
       "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
     ];
@@ -16,11 +16,11 @@
       nvidiaSettings = true;
       package = config.boot.kernelPackages.nvidiaPackages.stable;
     };
-    hardware.graphics.extraPackages = lib.optionals (hostSystem.hardware.nvidia.cuda.enable or false) [
+    hardware.graphics.extraPackages = lib.optionals (hostConfig.hardware.nvidia.cuda.enable or false) [
       pkgs.cudatoolkit
     ];
     environment = {
-      systemPackages = lib.optionals (hostSystem.hardware.nvidia.cuda.enable or false) [
+      systemPackages = lib.optionals (hostConfig.hardware.nvidia.cuda.enable or false) [
         pkgs.cudaPackages.cudnn
       ];
       etc = {
