@@ -14,6 +14,11 @@ in {
       default = false;
       description = "Automatically start zellij when opening zsh";
     };
+    fastStartup = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Optimize configuration for faster startup times";
+    };
     layouts = {
       ide = lib.mkOption {
         type = lib.types.str;
@@ -33,11 +38,14 @@ in {
           text = ''
             hide_session_name false
             on_force_close "quit"
-            pane_frames true
-            rounded_corners true
+            pane_frames ${if cfg.fastStartup then "false" else "true"}
+            rounded_corners ${if cfg.fastStartup then "false" else "true"}
             session_serialization false
             show_startup_tips false
-            simplified_ui false
+            simplified_ui ${if cfg.fastStartup then "true" else "false"}
+            ${lib.optionalString cfg.fastStartup "auto_layout false"}
+            ${lib.optionalString cfg.fastStartup "copy_on_select false"}
+            ${lib.optionalString cfg.fastStartup "mouse_mode false"}
           '';
         };
         ".config/zellij/layouts/music.kdl" = {
@@ -83,7 +91,8 @@ in {
           text = lib.optionalString cfg.autoStart ''
             # Auto-start zellij if not already running and not in special environments
             if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" && -z "$NVIM" ]]; then
-                exec zellij
+                # Try to attach to existing session, create new one if none exists
+                exec zellij attach --create
             fi
           '';
         };
