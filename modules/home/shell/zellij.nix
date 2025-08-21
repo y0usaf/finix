@@ -80,22 +80,11 @@ in {
         };
         ".config/zsh/aliases/zellij.zsh" = {
           clobber = true;
-          text = ''
-            # Zellij aliases and functions
-            alias zj="zellij"
-            alias zja="zellij attach"
-            alias zjl="zellij list-sessions"
-            alias zjk="zellij kill-session"
-            alias zjd="zellij delete-session"
-            alias zji="zellij --layout ide"
-            alias zjm="zellij --layout music"
-            
-            ${lib.optionalString cfg.autoStart ''
+          text = lib.optionalString cfg.autoStart ''
             # Auto-start zellij if not already running and not in special environments
             if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" && -z "$NVIM" ]]; then
                 exec zellij
             fi
-            ''}
           '';
         };
       };
