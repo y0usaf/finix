@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  hostConfig,
   ...
 }: {
   config = {
@@ -12,7 +13,7 @@
         cores = 0;
         experimental-features = ["nix-command" "flakes"];
         sandbox = true;
-        trusted-users = ["root" config.hostSystem.username];
+        trusted-users = ["root" (builtins.head hostConfig.users)];
         builders-use-substitutes = true;
         fallback = true;
         substituters = [

@@ -1,17 +1,17 @@
 {
   lib,
   config,
-  hostSystem,
+  hostConfig,
   ...
 }: {
   config = {
     virtualisation = {
       lxd.enable = false;
-      docker = lib.mkIf (hostSystem.services.docker.enable or false) {
+      docker = lib.mkIf (hostConfig.services.docker.enable or false) {
         enable = true;
         enableOnBoot = true;
       };
-      podman = lib.mkIf (hostSystem.services.docker.enable or false) {
+      podman = lib.mkIf (hostConfig.services.docker.enable or false) {
         enable = true;
       };
     };

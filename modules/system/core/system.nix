@@ -1,66 +1,25 @@
 {
   config,
   lib,
+  hostConfig,
   ...
 }: {
-  options.hostSystem = {
-    users = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      description = "System usernames";
-    };
-    username = lib.mkOption {
-      type = lib.types.str;
-      description = "Primary system username (derived from first user)";
-      default = builtins.head config.hostSystem.users;
-    };
-    hostname = lib.mkOption {
-      type = lib.types.str;
-      description = "System hostname";
-    };
-    homeDirectory = lib.mkOption {
-      type = lib.types.path;
-      description = "Primary user home directory path";
-    };
-    stateVersion = lib.mkOption {
-      type = lib.types.str;
-      description = "NixOS state version for compatibility";
-    };
-    timezone = lib.mkOption {
-      type = lib.types.str;
-      description = "System timezone";
-    };
-    profile = lib.mkOption {
-      type = lib.types.str;
-      description = "Configuration profile identifier";
-      default = "default";
-    };
-    hardware = lib.mkOption {
-      type = lib.types.attrs;
-      description = "Hardware configuration options";
-      default = {};
-    };
-    services = lib.mkOption {
-      type = lib.types.attrs;
-      description = "System services configuration";
-      default = {};
-    };
-  };
   config = {
-    system.stateVersion = config.hostSystem.stateVersion;
-    time.timeZone = config.hostSystem.timezone;
-    networking.hostName = config.hostSystem.hostname;
+    system.stateVersion = hostConfig.stateVersion;
+    time.timeZone = hostConfig.timezone;
+    networking.hostName = hostConfig.hostname;
     nixpkgs.config.allowUnfree = true;
     assertions = [
       {
-        assertion = config.hostSystem.username != "";
+        assertion = (builtins.head hostConfig.users) != "";
         message = "System username cannot be empty";
       }
       {
-        assertion = config.hostSystem.hostname != "";
+        assertion = hostConfig.hostname != "";
         message = "System hostname cannot be empty";
       }
       {
-        assertion = lib.hasPrefix "/" (toString config.hostSystem.homeDirectory);
+        assertion = lib.hasPrefix "/" (toString hostConfig.homeDirectory);
         message = "Home directory must be an absolute path";
       }
     ];

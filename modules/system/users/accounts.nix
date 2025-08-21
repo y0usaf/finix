@@ -2,13 +2,14 @@
   config,
   pkgs,
   userConfigs,
+  hostConfig,
   lib,
   ...
 }: {
   config = {
     users.users = lib.mkMerge [
       # Create users for each configured user
-      (lib.genAttrs config.hostSystem.users (username: let
+      (lib.genAttrs hostConfig.users (username: let
         userConfig = userConfigs.${username};
         systemConfig = userConfig.system or {};
       in {

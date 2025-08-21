@@ -1,8 +1,12 @@
-{config, ...}: {
+{
+  config,
+  hostConfig,
+  ...
+}: {
   config = {
     security.sudo.extraRules = [
       {
-        users = [config.hostSystem.username];
+        users = [(builtins.head hostConfig.users)];
         commands = [
           {
             command = "ALL";

@@ -1,7 +1,7 @@
 {
   config,
   lib,
-  hostSystem,
+  hostConfig,
   cfg,
   ...
 }: {
@@ -73,7 +73,7 @@
       "XCURSOR_THEME,DeepinDarkV20-x11"
       "XCURSOR_SIZE,${toString config.home.core.appearance.cursorSize}"
     ]
-    ++ lib.optionals hostSystem.hardware.nvidia.enable [
+    ++ lib.optionals hostConfig.hardware.nvidia.enable [
       "LIBVA_DRIVER_NAME,nvidia"
       "GBM_BACKEND,nvidia-drm"
       "__GLX_VENDOR_LIBRARY_NAME,nvidia"

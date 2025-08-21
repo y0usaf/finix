@@ -15,16 +15,14 @@ let
     };
   };
 
-  # Direct user configs import
+  # Host config - system-level configuration only
+  hostConfig = import ../configs/hosts/y0usaf-desktop {inherit pkgs;};
+
+  # User configs - home folder management only (separate from host)
   userConfigs = {
     y0usaf = import ../configs/users/y0usaf {inherit pkgs;};
     guest = import ../configs/users/guest {inherit pkgs;};
   };
-
-  # Host config
-  hostConfig = import ../configs/hosts/y0usaf-desktop {inherit pkgs;};
-  inherit (hostConfig) users;
-  hostUserConfigs = pkgs.lib.genAttrs users (username: userConfigs.${username});
 
   # Create the lib that will be exported with proper overlay application
   inherit (pkgs) lib;
@@ -39,16 +37,6 @@ in {
         # Host system configuration
         ({config, ...}: {
           inherit (hostConfig) imports;
-          hostSystem = {
-            inherit (hostConfig) users;
-            inherit (hostConfig) hostname;
-            inherit (hostConfig) homeDirectory;
-            inherit (hostConfig) stateVersion;
-            inherit (hostConfig) timezone;
-            profile = hostConfig.profile or "default";
-            hardware = hostConfig.hardware or {};
-            services = hostConfig.services or {};
-          };
           # Set user configuration from primary user
           user = let
             primaryUser = builtins.head hostConfig.users;
@@ -76,23 +64,25 @@ in {
             (sources.hjem + "/modules/nixos")
           ];
           config = {
-            # Use proper NixOS module merging
+            # Use proper NixOS module merging for all user configs
             home = lib.mkMerge (
               lib.mapAttrsToList (
                 _username: userConfig:
                 # Remove system-specific config that doesn't belong in home
                   lib.filterAttrs (name: _: name != "system") userConfig
               )
-              hostUserConfigs
+              userConfigs
             );
-            # Configure hjem for each user
+            # Configure hjem for each user (independent of host)
             hjem = {
               # Use SMFH manifest linker instead of systemd-tmpfiles
               linker = pkgs.callPackage (sources.smfh + "/package.nix") {};
-              users = lib.genAttrs users (_username: {
-                packages = [];
-                files = {};
-              });
+              users =
+                lib.mapAttrs (_username: _userConfig: {
+                  packages = [];
+                  files = {};
+                })
+                userConfigs;
             };
           };
         })
@@ -102,13 +92,8 @@ in {
         ../modules/home
       ];
       _module.args = {
-        inherit (hostConfig) hostname;
-        inherit users sources;
+        inherit hostConfig userConfigs sources;
         inherit (pkgs) lib;
-        inherit hostConfig;
-        userConfigs = hostUserConfigs;
-        hostSystem = hostConfig;
-        hostsDir = ../configs/hosts;
         # Direct access to commonly used sources
         inherit (sources) disko nix-minecraft Fast-Font;
       };
