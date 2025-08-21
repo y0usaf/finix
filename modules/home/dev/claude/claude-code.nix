@@ -103,6 +103,10 @@ in {
                 "Context7": {
                   "command": "npx",
                   "args": ["-y", "@upstash/context7-mcp"]
+                },
+                "ParallelTasks": {
+                  "command": "npx",
+                  "args": ["-y", "@captaincrouton89/claude-parallel-tasks-mcp"]
                 }
               }
             }
@@ -116,7 +120,7 @@ in {
               "model": "claude-3-7-sonnet-latest",
               "statusLine": {
                 "type": "command",
-                "command": "npx ccusage"
+                "command": "npx ccusage statusline"
               }
             }
           '';
