@@ -100,7 +100,7 @@ _: {
     cat-fetch.enable = true;
     zellij = {
       enable = true;
-      autoStart = false;
+      autoStart = true;
     };
   };
   tools = {
