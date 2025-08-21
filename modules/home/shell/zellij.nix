@@ -38,14 +38,11 @@ in {
           text = ''
             hide_session_name false
             on_force_close "quit"
-            pane_frames ${if cfg.fastStartup then "false" else "true"}
-            rounded_corners ${if cfg.fastStartup then "false" else "true"}
+            pane_frames true
+            rounded_corners true
             session_serialization false
             show_startup_tips false
-            simplified_ui ${if cfg.fastStartup then "true" else "false"}
-            ${lib.optionalString cfg.fastStartup "auto_layout false"}
-            ${lib.optionalString cfg.fastStartup "copy_on_select false"}
-            ${lib.optionalString cfg.fastStartup "mouse_mode false"}
+            simplified_ui false
           '';
         };
         ".config/zellij/layouts/music.kdl" = {
