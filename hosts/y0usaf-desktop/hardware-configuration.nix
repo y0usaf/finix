@@ -19,10 +19,10 @@
     ];
     initrd.kernelModules = [];
     kernelModules = [
-      "kvm-amd"
       "k10temp"
       "nct6775"
       "zenpower"
+      # "kvm-amd" # Temporarily commented out to fix build error with spice package
     ];
     extraModulePackages = [config.boot.kernelPackages.zenpower];
     kernelParams = [

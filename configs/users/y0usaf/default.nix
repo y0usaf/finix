@@ -75,7 +75,6 @@ _: {
     qbittorrent.enable = true;
     stremio.enable = true;
     sway-launcher-desktop.enable = true;
-    zoom.enable = true;
   };
   dev = {
     claude-code.enable = true;
@@ -88,7 +87,6 @@ _: {
       neovide = false;
     };
     python.enable = true;
-    repomix.enable = true;
     opencode = {
       enable = true;
       enableMcpServers = true;

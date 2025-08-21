@@ -58,4 +58,8 @@ _: {
       };
     };
   };
+
+  virtualisation = {
+    qemu.enable = false;
+  };
 }
