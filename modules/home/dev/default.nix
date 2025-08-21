@@ -8,7 +8,6 @@
     ./npm.nix
     ./nvim.nix
     ./python.nix
-    ./repomix.nix
     ./upscale.nix
   ];
 }

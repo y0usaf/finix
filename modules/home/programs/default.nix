@@ -17,7 +17,6 @@
     ./sway-launcher-desktop.nix
     ./vesktop.nix
     ./webapps.nix
-    ./zoom.nix
     ./firefox
   ];
 }
