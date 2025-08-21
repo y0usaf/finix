@@ -8,14 +8,8 @@ _final: prev: {
     generators =
       libprev.generators
       // {
-        # KDL generators (standard pattern)
-        inherit (generators) toKDL toKDLWithOptions mergeKDLConfigs;
-        # Niri-specific helpers
-        inherit (generators) mkNiriConfig formatKdlValue;
-        # Legacy KDL aliases
-        inherit (generators) toKdl mergeKdlConfigs;
-        # Hyprland generators
-        inherit (generators) toHyprconf pluginsToHyprconf toHyprconfAdvanced mergeHyprconfigs mkHyprlandConfig;
+        # Hyprland generators (only the used ones)
+        inherit (generators) toHyprconf pluginsToHyprconf;
       };
 
     # Directory and module importers
