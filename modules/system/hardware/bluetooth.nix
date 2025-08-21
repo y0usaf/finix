@@ -2,10 +2,10 @@
   config,
   lib,
   pkgs,
-  hostSystem,
+  hostConfig,
   ...
 }: let
-  hardwareCfg = hostSystem.hardware;
+  hardwareCfg = hostConfig.hardware;
 in {
   config = {
     hardware.bluetooth = lib.mkIf (hardwareCfg.bluetooth.enable or false) {
@@ -26,7 +26,7 @@ in {
       pkgs.bluez
       pkgs.bluez-tools
     ];
-    users.users.${config.hostSystem.username}.extraGroups =
+    users.users.${builtins.head hostConfig.users}.extraGroups =
       lib.optionals (hardwareCfg.bluetooth.enable or false) ["dialout" "bluetooth" "lp"];
   };
 }
