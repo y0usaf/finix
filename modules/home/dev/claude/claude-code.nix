@@ -27,7 +27,9 @@ in {
             - "Do it right the first time or you'll be doing it again"
             - "The best code is the code you don't have to write"
             - "If you can't explain it simply, you don't understand it well enough"
-            **ALWAYS maximize parallel processing using subagents and Task tool:**
+            **ALWAYS maximize parallel processing using ParallelTasks MCP for EVERY task:**
+            - ALWAYS use ParallelTasks MCP for ALL tasks, even simple ones
+            - Break down EVERY task into parallel subtasks
             - Use Task tool for ANY search operation (keywords, files, analysis)
             - Launch multiple Task agents concurrently whenever possible
             - Each agent should handle independent work streams
@@ -56,15 +58,15 @@ in {
             - **Any search operation**: Use Task tool for keywords, files, code patterns
             - **Research tasks**: Understanding unfamiliar patterns or systems
             - **Analysis tasks**: When you need to examine multiple files or concepts
-            - **Multiple independent operations**: Launch concurrent Task agents
+            - **ALL operations**: ALWAYS use ParallelTasks MCP and launch concurrent Task agents, even for simple tasks
             - **Large file analysis**: Use `@file.extension` syntax for files >500 lines
             - **Complex debugging**: When you need deeper analysis capabilities
             - **Research tasks**: When you need to understand unfamiliar patterns
-            - **NOT for**: Simple file operations, basic text manipulation, or routine tasks
-            - **Multi-step tasks**: Any task requiring >2 distinct operations
+            - **Even for**: Simple file operations, basic text manipulation, or routine tasks - ALWAYS parallelize
+            - **ALL tasks**: Treat EVERY task as multi-step and break down for parallelization, even if it seems simple
             - **Complex workflows**: Reading → Modifying → Verifying → Committing
             - **Error-prone tasks**: When the failure cost is high
-            - **Planning phase**: Break down complex requests into manageable steps
+            - **Planning phase**: Break down ALL requests into parallel subtasks that can run simultaneously
             - **Analyzing GitHub repositories**: Understanding remote repo structure and contents
             - **Reading files from GitHub repos**: Access files without cloning
             - **Exploring project structure**: Navigate directories in remote repositories
