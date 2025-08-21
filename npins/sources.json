@@ -96,9 +96,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "46c06ba2fc5f14772a3f64a6e6e4adbff17b1d9f",
-      "url": "https://github.com/feel-co/hjem/archive/46c06ba2fc5f14772a3f64a6e6e4adbff17b1d9f.tar.gz",
-      "hash": "0b5g1m7lpb0llj98n5jyvrvvhxzz2zqjnki73gg1i3gwldkhxdnv"
+      "revision": "565a15366d7b5aa5483ebe101fbc0ea27f0516b7",
+      "url": "https://github.com/feel-co/hjem/archive/565a15366d7b5aa5483ebe101fbc0ea27f0516b7.tar.gz",
+      "hash": "0x0d4w6za9539xry7jdb76i3b38wd2ndxw5b0m5m5r53sxwdayg1"
     },
     "hy3": {
       "type": "Git",
@@ -135,9 +135,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "cff958a4e050f8d917a6ff3a5624bc4681c6187d",
-      "url": "https://github.com/Gerg-L/mnw/archive/cff958a4e050f8d917a6ff3a5624bc4681c6187d.tar.gz",
-      "hash": "0989skdz5qxv7fhssg3b5rhz3i7ynajnirrx1hyy1nfqgp4bd6vr"
+      "revision": "93edfdc3015f2c6aaddba074ed8ae0e78569fff7",
+      "url": "https://github.com/Gerg-L/mnw/archive/93edfdc3015f2c6aaddba074ed8ae0e78569fff7.tar.gz",
+      "hash": "1j5l57lx3ghx2mnhilkrfjhkhvib02rsa698j1vjlx4szrfh4wdz"
     },
     "neovim-nightly-overlay": {
       "type": "Git",
@@ -148,9 +148,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "73fca33ad4ddc8fe41192e23dae9af0544798653",
-      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/73fca33ad4ddc8fe41192e23dae9af0544798653.tar.gz",
-      "hash": "1hcjxpxk31857ysdvyxfd17vfvbhxqd1sjx9j1y42mgck1n22mwc"
+      "revision": "5641059389861748206f278bc40a1f072c581261",
+      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/5641059389861748206f278bc40a1f072c581261.tar.gz",
+      "hash": "174njdisfgrqhws29qghmkd4mc2x76vl4gbr8y1fs876avzm5p41"
     },
     "nix-minecraft": {
       "type": "Git",
@@ -161,9 +161,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "cedd99dd11cb48b4fdf40d69fbcba42acab1b629",
-      "url": "https://github.com/Infinidoge/nix-minecraft/archive/cedd99dd11cb48b4fdf40d69fbcba42acab1b629.tar.gz",
-      "hash": "1xjk770dm3qhbc3ky83klyxzhvi4f3lkns8mxwihiw02kqihskbq"
+      "revision": "a13d8cd9cef44144db3bc7333882916f4454aa91",
+      "url": "https://github.com/Infinidoge/nix-minecraft/archive/a13d8cd9cef44144db3bc7333882916f4454aa91.tar.gz",
+      "hash": "1kd2mrjznk0g8ixf6zwgsl4nzz91yjhl734dzzica4kqvwnzq4sw"
     },
     "nixpkgs": {
       "type": "Git",
@@ -174,9 +174,9 @@
       },
       "branch": "nixos-unstable",
       "submodules": false,
-      "revision": "fbcf476f790d8a217c3eab4e12033dc4a0f6d23c",
-      "url": "https://github.com/NixOS/nixpkgs/archive/fbcf476f790d8a217c3eab4e12033dc4a0f6d23c.tar.gz",
-      "hash": "0ah1hwz0gg9xn5bl1f4d25a2443k7r5vmk1ikmw9539nmgwbgly0"
+      "revision": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "url": "https://github.com/NixOS/nixpkgs/archive/7fd36ee82c0275fb545775cc5e4d30542899511d.tar.gz",
+      "hash": "0f96j87nsrsj5pjx5zdkjscsj5v8q8msadz0zv82fwbpzvizw7pn"
     },
     "nyx": {
       "type": "Git",
@@ -187,9 +187,9 @@
       },
       "branch": "nyxpkgs-unstable",
       "submodules": false,
-      "revision": "8190e278ff0ab6b46812b3568d476367dcc8d014",
-      "url": "https://github.com/chaotic-cx/nyx/archive/8190e278ff0ab6b46812b3568d476367dcc8d014.tar.gz",
-      "hash": "1a16crzyzxfzzsjxd2xf4ciq183pas5wrdwn686lk3r2dh5fc58f"
+      "revision": "f14fadaa130cc0e222271acde3dddc3596b97c69",
+      "url": "https://github.com/chaotic-cx/nyx/archive/f14fadaa130cc0e222271acde3dddc3596b97c69.tar.gz",
+      "hash": "12y29i9vnk6nzkrqpmgvix9xb2qb2xb4w5mw14kkmwifbdv9znpx"
     },
     "obs-image-reaction": {
       "type": "Git",
