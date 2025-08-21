@@ -35,7 +35,7 @@ in {
         clobber = true;
       };
       ".config/zsh/aliases/system.zsh" = {
-        text = ''alias userctl="systemctl --user" alias hmfail="journalctl -u home-manager-${name}.service -n 20 --no-pager" alias pkgs="nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i" alias pkgcount="nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l" alias hwconfig="sudo nixos-generate-config --show-hardware-config" alias gpupower="sudo nvidia-smi -pl" '';
+        text = ''alias userctl="systemctl --user" alias pkgs="nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i" alias pkgcount="nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l" alias hwconfig="sudo nixos-generate-config --show-hardware-config" alias gpupower="sudo nvidia-smi -pl" '';
         clobber = true;
       };
       ".config/zsh/aliases/search.zsh" = {

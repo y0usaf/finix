@@ -21,7 +21,6 @@ in {
       obs-studio-plugins.obs-backgroundremoval
       obs-studio-plugins.obs-vkcapture
       obs-studio-plugins.obs-pipewire-audio-capture
-      # inputs.obs-image-reaction.packages.${pkgs.system}.default # TODO: Fix for npins
       v4l-utils
     ];
   };

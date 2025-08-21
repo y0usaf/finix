@@ -90,96 +90,9 @@ lib: let
       };
       inherit importantPrefixes;
     };
-  toHyprconfAdvanced = {
-    attrs,
-    indentLevel ? 0,
-    importantPrefixes ? ["$"],
-    validateConfig ? false,
-    sortSections ? true,
-  }: let
-    validateAttrs = attrs:
-      if validateConfig
-      then attrs
-      else attrs;
-    sortedAttrs =
-      if sortSections
-      then let
-        sortedKeys = builtins.sort (a: b: a < b) (builtins.attrNames attrs);
-      in
-        lib.genAttrs sortedKeys (key: attrs.${key})
-      else attrs;
-    processedAttrs = validateAttrs sortedAttrs;
-  in
-    toHyprconf {
-      inherit indentLevel importantPrefixes;
-      attrs = processedAttrs;
-    };
-  mergeHyprconfigs = configs:
-    lib.foldl lib.recursiveUpdate {} configs;
-  mkHyprlandConfig = {
-    general ? {},
-    decoration ? {},
-    animations ? {},
-    input ? {},
-    gestures ? {},
-    misc ? {},
-    binds ? {},
-    windowrule ? [],
-    windowrulev2 ? [],
-    layerrule ? [],
-    workspace ? [],
-    monitor ? [],
-    exec-once ? [],
-    exec ? [],
-    env ? [],
-    plugins ? [],
-    source ? [],
-    ...
-  } @ config: let
-    knownSections = [
-      "general"
-      "decoration"
-      "animations"
-      "input"
-      "gestures"
-      "misc"
-      "binds"
-      "windowrule"
-      "windowrulev2"
-      "layerrule"
-      "workspace"
-      "monitor"
-      "exec-once"
-      "exec"
-      "env"
-      "plugins"
-      "source"
-    ];
-    extraConfig = removeAttrs config knownSections;
-    baseConfig =
-      {
-        inherit general decoration animations input gestures misc binds;
-        inherit windowrule windowrulev2 layerrule workspace monitor;
-        "exec-once" = exec-once;
-        inherit exec env source;
-      }
-      // extraConfig;
-  in
-    toHyprconf {
-      attrs = baseConfig;
-      importantPrefixes = ["$" "exec" "source"];
-    }
-    + (
-      if plugins != []
-      then "\n" + pluginsToHyprconf plugins ["$"]
-      else ""
-    );
 in {
   inherit
     toHyprconf
     pluginsToHyprconf
-    toHyprconfAdvanced
-    mergeHyprconfigs
-    mkHyprlandConfig
     ;
 }
