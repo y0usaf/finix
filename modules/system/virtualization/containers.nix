@@ -6,7 +6,7 @@
 }: {
   config = {
     virtualisation = {
-      lxd.enable = true;
+      lxd.enable = false;
       docker = lib.mkIf (hostSystem.services.docker.enable or false) {
         enable = true;
         enableOnBoot = true;
