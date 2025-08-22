@@ -247,35 +247,29 @@ in {
           clobber = true;
         };
         ".config/claude/claude_desktop_config.json" = {
-          text = ''
-            {
-              "mcpServers": {
-                "Context7": {
-                  "command": "npx",
-                  "args": ["-y", "@upstash/context7-mcp"]
-                },
-                "ParallelTasks": {
-                  "command": "npx",
-                  "args": ["-y", "@captaincrouton89/claude-parallel-tasks-mcp"]
-                }
-              }
-            }
-          '';
+          text = builtins.toJSON {
+            mcpServers = {
+              Context7 = {
+                command = "npx";
+                args = ["-y" "@upstash/context7-mcp"];
+              };
+              ParallelTasks = {
+                command = "npx";
+                args = ["-y" "@captaincrouton89/claude-parallel-tasks-mcp"];
+              };
+            };
+          };
           clobber = true;
         };
         ".claude/settings.json" = {
-          text = ''
-            {
-              "includeCoAuthoredBy": false,
-              "outputStyle": {
-                "name": "structured"
-              },
-              "statusLine": {
-                "type": "command",
-                "command": "npx ccusage statusline"
-              }
-            }
-          '';
+          text = builtins.toJSON {
+            includeCoAuthoredBy = false;
+            outputStyle = "structured";
+            statusLine = {
+              type = "command";
+              command = "npx ccusage statusline";
+            };
+          };
           clobber = true;
         };
         ".claude/statusline.sh" = {

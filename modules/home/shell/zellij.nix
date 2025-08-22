@@ -92,9 +92,16 @@ in {
           clobber = true;
           text = lib.optionalString cfg.autoStart ''
             # Auto-start zellij if not already running and not in special environments
+            # Skip for login TTYs (tty1-tty6) and SSH connections
             if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" && -z "$NVIM" ]]; then
-                # Try to attach to existing session, create new one if none exists
-                exec zellij
+                # Check if we're on a login TTY
+                if [[ "$TTY" =~ ^/dev/tty[0-9]+$ ]]; then
+                    # We're on a login TTY, don't auto-start
+                    :
+                elif [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
+                    # We're in a graphical terminal, safe to auto-start
+                    exec zellij
+                fi
             fi
           '';
         };
