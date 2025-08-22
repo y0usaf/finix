@@ -13,12 +13,7 @@
         args = ["-y" "@modelcontextprotocol/server-filesystem" config.user.homeDirectory];
         env = {};
       };
-      "Nixos MCP" = {
-        type = "stdio";
-        command = "uvx";
-        args = ["mcp-nixos"];
-        env = {};
-      };
+
       "sequential-thinking" = {
         type = "stdio";
         command = "npx";
@@ -46,12 +41,7 @@
       args = ["-y" "@modelcontextprotocol/server-filesystem" config.user.homeDirectory];
       env = {};
     };
-    "Nixos MCP" = {
-      type = "stdio";
-      command = "uvx";
-      args = ["mcp-nixos"];
-      env = {};
-    };
+
     "sequential-thinking" = {
       type = "stdio";
       command = "npx";
