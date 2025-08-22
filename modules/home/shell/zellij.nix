@@ -36,13 +36,15 @@ in {
         ".config/zellij/config.kdl" = {
           clobber = true;
           text = ''
-            hide_session_name false
-            on_force_close "quit"
-            pane_frames true
-            rounded_corners true
-            session_serialization false
-            show_startup_tips false
-            simplified_ui false
+                        hide_session_name false
+                        on_force_close "quit"
+                        pane_frames true
+                        rounded_corners true
+                        session_serialization false
+                        show_startup_tips false
+                        simplified_ui false
+
+            // Using default keybindings for now
           '';
         };
         ".config/zellij/layouts/music.kdl" = {
@@ -67,6 +69,7 @@ in {
             }
           '';
         };
+
         ".config/zellij/layouts/ide.kdl" = {
           clobber = true;
           text = ideLayout.home.shell.zellij.layouts.ide;
@@ -74,13 +77,15 @@ in {
         ".config/zellij/config-ide.kdl" = {
           clobber = true;
           text = ''
-            hide_session_name false
-            on_force_close "quit"
-            pane_frames true
-            rounded_corners true
-            session_serialization false
-            show_startup_tips false
-            simplified_ui true
+                        hide_session_name false
+                        on_force_close "quit"
+                        pane_frames true
+                        rounded_corners true
+                        session_serialization false
+                        show_startup_tips false
+                        simplified_ui true
+
+            // Using default keybindings for now
           '';
         };
         ".config/zsh/aliases/zellij.zsh" = {
@@ -89,7 +94,7 @@ in {
             # Auto-start zellij if not already running and not in special environments
             if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && "$TERM_PROGRAM" != "vscode" && -z "$NVIM" ]]; then
                 # Try to attach to existing session, create new one if none exists
-                exec zellij attach --create
+                exec zellij
             fi
           '';
         };
