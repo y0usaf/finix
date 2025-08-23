@@ -4,13 +4,13 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.ui.ags;
+  cfg = config.home.ui.ags.fetch-widget;
 in {
-  options.home.ui.ags = {
+  options.home.ui.ags.fetch-widget = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Enable AGS v2 (Astal Framework)";
+      description = "Enable AGS v2 Fetch Widget (Complex system stats and workspaces)";
     };
   };
   config = lib.mkIf cfg.enable {
@@ -19,7 +19,7 @@ in {
         pkgs.ags
       ];
       files = {
-        ".config/ags/app.tsx" = {
+        ".config/ags-fetch-widget/app.tsx" = {
           clobber = true;
           text = ''
             import { App, Astal, Gtk } from "astal/gtk3"
@@ -257,7 +257,7 @@ in {
                         {/* NixOS Logo */}
                         <label
                             className="stats-white"
-                            label="   _  ___      ____  ____&
+                            label="   _  ___      ____  ____"
                         />
                         {/* Top border */}
                         <label
@@ -494,7 +494,7 @@ in {
             })
           '';
         };
-        ".config/ags/tsconfig.json" = {
+        ".config/ags-fetch-widget/tsconfig.json" = {
           clobber = true;
           text = ''
             {
