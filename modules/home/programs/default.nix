@@ -1,7 +1,5 @@
 {...}: {
   imports = [
-    ./android.nix
-    ./bambu.nix
     ./bluetooth.nix
     ./creative.nix
     ./discord.nix
