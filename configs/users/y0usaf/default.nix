@@ -26,6 +26,7 @@ _: {
       dpi = 109;
       baseFontSize = 12;
       cursorSize = 36;
+      opacity = 0.15;
     };
     user.enable = true;
   };

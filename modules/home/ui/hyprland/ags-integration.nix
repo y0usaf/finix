@@ -7,7 +7,7 @@
 in {
   "exec-once" =
     lib.optionals agsEnabled [
-      "exec ags run"
+      "exec ags run ~/.config/ags/bar-overlay.tsx"
     ]
     ++ [
       # Initial wallpaper setup
