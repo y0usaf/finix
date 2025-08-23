@@ -22,8 +22,8 @@ in {
         claude-code
       ];
       files = {
-        ".claude/output-styles/structured.md" = {
-          text = outputStyles.structuredOutputStyle;
+        ".claude/output-styles/explanatory.md" = {
+          text = outputStyles.explanatoryOutputStyle;
           clobber = true;
         };
         ".claude/CLAUDE.md" = {
