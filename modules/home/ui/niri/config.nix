@@ -6,6 +6,7 @@
 }: let
   cfg = config.home.ui.niri;
   inherit (config.home.core) defaults;
+  agsEnabled = config.home.ui.ags.enable or false;
   # Force rebuild - updated launcher command
 in {
   config = lib.mkIf cfg.enable {
@@ -25,6 +26,7 @@ in {
 
             spawn-at-startup "${pkgs.xwayland-satellite}/bin/xwayland-satellite"
             spawn-at-startup "sh" "-c" "swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill"
+            ${lib.optionalString agsEnabled ''spawn-at-startup "ags" "run" "~/.config/ags/bar-overlay.tsx"''}
 
             input {
                 keyboard {
