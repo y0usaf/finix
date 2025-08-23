@@ -19,7 +19,7 @@ in {
         pkgs.ags
       ];
       files = {
-        ".config/ags-fetch-widget/app.tsx" = {
+        ".config/ags/fetch-widget.tsx" = {
           clobber = true;
           text = ''
             import { App, Astal, Gtk } from "astal/gtk3"
@@ -492,28 +492,6 @@ in {
                     WorkspacesWidget('bottom');
                 },
             })
-          '';
-        };
-        ".config/ags-fetch-widget/tsconfig.json" = {
-          clobber = true;
-          text = ''
-            {
-              "compilerOptions": {
-                "target": "ES2022",
-                "module": "ES2022",
-                "lib": ["ES2022"],
-                "allowJs": true,
-                "strict": true,
-                "esModuleInterop": true,
-                "skipLibCheck": true,
-                "forceConsistentCasingInFileNames": true,
-                "moduleResolution": "node",
-                "jsx": "react-jsx",
-                "jsxImportSource": "astal/gtk3/jsx-runtime"
-              },
-              "include": ["**/*.ts", "**/*.tsx"],
-              "exclude": ["node_modules"]
-            }
           '';
         };
       };
