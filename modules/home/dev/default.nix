@@ -2,7 +2,7 @@
   imports = [
     ./ai-tools
     ./claude
-    ./cursor-ide.nix
+
     ./docker.nix
     ./latex.nix
     ./npm.nix

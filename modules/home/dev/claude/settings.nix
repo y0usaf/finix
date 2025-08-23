@@ -6,7 +6,8 @@
 }: {
   claudeSettings = {
     includeCoAuthoredBy = false;
-    outputStyle = "structured";
+    outputStyle = "explanatory";
+    model = "claude-sonnet-4-20250514";
     statusLine = {
       type = "command";
       command = "npx ccusage statusline";
