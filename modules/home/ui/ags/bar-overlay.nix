@@ -19,7 +19,7 @@ in {
         pkgs.ags
       ];
       files = {
-        ".config/ags-bar-overlay/app.tsx" = {
+        ".config/ags/bar-overlay.tsx" = {
           clobber = true;
           text = ''
             import { App, Astal, Gtk } from "astal/gtk3"
@@ -122,27 +122,25 @@ in {
             })
           '';
         };
-        ".config/ags-bar-overlay/tsconfig.json" = {
+        ".config/ags/tsconfig.json" = {
           clobber = true;
-          text = ''
-            {
-              "compilerOptions": {
-                "target": "ES2022",
-                "module": "ES2022",
-                "lib": ["ES2022"],
-                "allowJs": true,
-                "strict": true,
-                "esModuleInterop": true,
-                "skipLibCheck": true,
-                "forceConsistentCasingInFileNames": true,
-                "moduleResolution": "node",
-                "jsx": "react-jsx",
-                "jsxImportSource": "astal/gtk3/jsx-runtime"
-              },
-              "include": ["**/*.ts", "**/*.tsx"],
-              "exclude": ["node_modules"]
-            }
-          '';
+          text = builtins.toJSON {
+            compilerOptions = {
+              target = "ES2022";
+              module = "ES2022";
+              lib = ["ES2022"];
+              allowJs = true;
+              strict = true;
+              esModuleInterop = true;
+              skipLibCheck = true;
+              forceConsistentCasingInFileNames = true;
+              moduleResolution = "node";
+              jsx = "react-jsx";
+              jsxImportSource = "astal/gtk3/jsx-runtime";
+            };
+            include = ["**/*.ts" "**/*.tsx"];
+            exclude = ["node_modules"];
+          };
         };
       };
     };
