@@ -1,8 +1,11 @@
-_: {
+{pkgs, ...}: {
   imports = [
     ../../../modules/system
     ./hardware-configuration.nix
   ];
+
+  # Install Fast Font system-wide
+  fonts.packages = [pkgs.fastFonts];
   users = ["y0usaf" "guest"];
   hostname = "y0usaf-desktop";
   homeDirectory = "/home/y0usaf";
