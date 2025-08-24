@@ -65,7 +65,7 @@ in {
         fonts = {
           main = [
             {
-              package = inputs.fast-fonts.packages.x86_64-linux.default;
+              package = pkgs.fastFonts;
               name = "Fast_Mono";
             }
           ];
