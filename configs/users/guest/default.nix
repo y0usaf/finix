@@ -21,7 +21,7 @@ _: {
     fonts.preset = "fast-mono";
     appearance = {
       enable = true;
-      dpi = 109;
+      dpi = 144;
       baseFontSize = 12;
       cursorSize = 36;
     };

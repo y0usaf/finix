@@ -59,7 +59,6 @@ in {
       };
       appearance = {
         enable = true;
-        dpi = 144;
         baseFontSize = 10;
         cursorSize = 24;
         fonts = {
@@ -107,7 +106,6 @@ in {
       foot.enable = true;
       gtk = {
         enable = true;
-        scale = 1.5;
       };
       hyprland = {
         enable = true;
