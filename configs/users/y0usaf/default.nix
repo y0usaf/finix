@@ -23,7 +23,7 @@ _: {
     fonts.preset = "fast-mono";
     appearance = {
       enable = true;
-      dpi = 109;
+      dpi = 144;
       baseFontSize = 12;
       cursorSize = 36;
       opacity = 0.15;
@@ -48,7 +48,10 @@ _: {
     cursor.enable = true;
     fonts.enable = true;
     foot.enable = true;
-    gtk.enable = true;
+    gtk = {
+      enable = true;
+      scale = 1.5;
+    };
     hyprland = {
       enable = true;
       flake.enable = true;
