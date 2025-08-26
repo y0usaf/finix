@@ -5,6 +5,7 @@
   ...
 }: let
   cfg = config.home.ui.wayland;
+  gtkCfg = config.home.ui.gtk;
 in {
   options.home.ui.wayland = {
     enable = lib.mkEnableOption "Wayland configuration";
@@ -28,6 +29,7 @@ in {
             export GDK_BACKEND=wayland,x11
             export SDL_VIDEODRIVER=wayland
             export CLUTTER_BACKEND=wayland
+            export GDK_DPI_SCALE=${toString gtkCfg.scale}
           '';
           clobber = true;
         };
