@@ -12,7 +12,7 @@ in {
         firefox
       ];
       files = {
-        ".profile" = {
+        ".config/zsh/.zprofile" = {
           text = lib.mkAfter ''
             export MOZ_ENABLE_WAYLAND=1
             export MOZ_USE_XINPUT2=1
