@@ -25,7 +25,7 @@ in {
         xcursorPackage
       ];
       files = {
-        ".profile" = {
+        ".config/zsh/.zprofile" = {
           text = lib.mkAfter ''
             export HYPRCURSOR_THEME="${hyprThemeName}"
             export HYPRCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
