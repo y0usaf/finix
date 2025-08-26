@@ -19,7 +19,7 @@ in {
         hyprpicker
       ];
       files = {
-        ".config/zsh/.zshenv" = {
+        ".config/zsh/.zprofile" = {
           text = lib.mkAfter ''
             export WLR_NO_HARDWARE_CURSORS=1
             export NIXOS_OZONE_WL=1
