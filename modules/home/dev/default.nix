@@ -1,6 +1,6 @@
 {...}: {
   imports = [
-    ./ai-tools
+    ./opencode/ai-tools
     ./claude
 
     ./docker.nix
