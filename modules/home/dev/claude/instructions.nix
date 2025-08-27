@@ -20,9 +20,7 @@
         <tool name="Task" usage="mandatory">
           Use Task tool for search, analysis, research. If Task tool unavailable, STOP and inform user - do not proceed.
         </tool>
-        <tool name="mcp__Filesystem" usage="mandatory">
-          NEVER use Read/Write/Edit tools. ONLY use mcp__Filesystem__* tools. If MCP filesystem tools error, STOP and inform user - do not proceed.
-        </tool>
+
         <tool name="TodoWrite" usage="required">
           Use for complex tasks. Mark in_progress BEFORE starting, completed IMMEDIATELY after finishing. Only ONE in_progress at a time. If TodoWrite unavailable, STOP and inform user - do not proceed.
         </tool>
