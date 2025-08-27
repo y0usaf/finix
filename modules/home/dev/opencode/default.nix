@@ -1,3 +1,6 @@
-{...}: {
-  # Empty opencode module for future development
+{
+  imports = [
+    ./opencode.nix
+    ./opencode-nvim.nix
+  ];
 }
