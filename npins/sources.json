@@ -191,6 +191,22 @@
       "url": "https://github.com/chaotic-cx/nyx/archive/f14fadaa130cc0e222271acde3dddc3596b97c69.tar.gz",
       "hash": "12y29i9vnk6nzkrqpmgvix9xb2qb2xb4w5mw14kkmwifbdv9znpx"
     },
+    "obs-backgroundremoval": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "royshil",
+        "repo": "obs-backgroundremoval"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "1.2.0",
+      "revision": "34098a7e0e06a89e9c4e99497974caa867377094",
+      "url": "https://api.github.com/repos/royshil/obs-backgroundremoval/tarball/1.2.0",
+      "hash": "141ym5snb49bn2g2qb2lva6k975w6vfn6krzqi3f7js3hm13cif1"
+    },
     "obs-image-reaction": {
       "type": "Git",
       "repository": {
@@ -203,6 +219,38 @@
       "revision": "0dcb3c27de5782dfdf95cb047ccceb3e65360e6b",
       "url": "https://github.com/L-Nafaryus/obs-image-reaction/archive/0dcb3c27de5782dfdf95cb047ccceb3e65360e6b.tar.gz",
       "hash": "0y7l8qc12klyc6zjr2373yyhv0v86c617gmxymzslb44cgxvg5hr"
+    },
+    "obs-pipewire-audio-capture": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "dimtpap",
+        "repo": "obs-pipewire-audio-capture"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "1.2.0",
+      "revision": "ae0b72e52ed54ed4547cad68c66298ec3ccab2bb",
+      "url": "https://api.github.com/repos/dimtpap/obs-pipewire-audio-capture/tarball/1.2.0",
+      "hash": "1yql01id96khvaijxmqx141p1crxwwv0my8184qla49chc17yiwy"
+    },
+    "obs-vkcapture": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nowrep",
+        "repo": "obs-vkcapture"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v1.5.3",
+      "revision": "47748dfd46bc451d31b62e013fa683b99c9e9eef",
+      "url": "https://api.github.com/repos/nowrep/obs-vkcapture/tarball/v1.5.3",
+      "hash": "14mmmylfjyx60xqfvr4izfkzgwr08ngyj0409g5g6l970rzvpdnf"
     },
     "smfh": {
       "type": "GitRelease",
