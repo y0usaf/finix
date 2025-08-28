@@ -13,7 +13,7 @@
     ./qbittorrent.nix
     ./stremio.nix
     ./sway-launcher-desktop.nix
-    ./vesktop.nix
+    ./vesktop
     ./webapps.nix
     ./firefox
   ];
