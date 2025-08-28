@@ -255,6 +255,10 @@ in {
             max_count = 3,
             restriction_mode = "hint",
             disable_mouse = false,
+            allowed_keys = {
+              ["i"] = { "h", "j", "k", "l", "<LEFT>", "<DOWN>", "<UP>", "<RIGHT>" },
+              ["v"] = { "h", "j", "k", "l", "<LEFT>", "<DOWN>", "<UP>", "<RIGHT>" },
+            },
           })
           -- Oil.nvim (Directory editor)
           require("oil").setup({
