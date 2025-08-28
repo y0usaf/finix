@@ -18,22 +18,11 @@ in {
         ".config/npm/npmrc" = {
           clobber = true;
           text = ''
-            prefix={{home}}/.local/share/npm
-            cache={{xdg_cache_home}}/npm
-            init-module={{xdg_config_home}}/npm/config/npm-init.js
-            store-dir={{xdg_cache_home}}/pnpm/store
+            prefix=${config.user.dataDirectory}/npm
+            cache=${config.user.cacheDirectory}/npm
+            init-module=${config.user.configDirectory}/npm/config/npm-init.js
+            store-dir=${config.user.cacheDirectory}/pnpm/store
           '';
-        };
-        ".local/share/bin/npm-setup" = {
-          clobber = true;
-          text = ''
-            mkdir -p {{home}}/.local/share/npm
-            mkdir -p {{xdg_cache_home}}/npm
-            mkdir -p {{xdg_config_home}}/npm/config
-            mkdir -p {{xdg_cache_home}}/pnpm/store
-            mkdir -p "{{xdg_runtime_dir}}/npm"
-          '';
-          executable = true;
         };
       };
     };
@@ -42,7 +31,7 @@ in {
       "d ${config.user.homeDirectory}/.cache/npm 0755 ${config.user.name} ${config.user.name} - -"
       "d ${config.user.homeDirectory}/.config/npm/config 0755 ${config.user.name} ${config.user.name} - -"
       "d ${config.user.homeDirectory}/.cache/pnpm/store 0755 ${config.user.name} ${config.user.name} - -"
-      "d /run/user/1000/npm 0755 ${config.user.name} ${config.user.name} - -"
+      "d /run/user/%i/npm 0755 ${config.user.name} ${config.user.name} - -"
     ];
   };
 }
