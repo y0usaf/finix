@@ -39,6 +39,7 @@ in {
           vim.opt.splitbelow = true
           vim.opt.splitright = true
           vim.opt.splitkeep = "screen"
+          vim.opt.virtualedit = "onemore"
           vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
           vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
           vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
