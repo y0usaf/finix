@@ -1,6 +1,7 @@
 {
   config = {
     nix.settings = {
+      use-xdg-base-directories = true;
       substituters = [
         "https://hyprland.cachix.org"
         "https://chaotic-nyx.cachix.org"
