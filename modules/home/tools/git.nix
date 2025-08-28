@@ -46,7 +46,7 @@ in {
         openssh
       ];
       files = {
-        ".gitconfig" = {
+        ".config/git/config" = {
           clobber = true;
           text = ''
             [user]
