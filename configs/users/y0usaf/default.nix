@@ -8,6 +8,17 @@ _: {
   };
   core = {
     packages.enable = true;
+    user = {
+      enable = true;
+      bookmarks = [
+        "file:///home/y0usaf/Downloads Downloads"
+        "file:///home/y0usaf/Documents Documents"
+        "file:///home/y0usaf/Music Music"
+        "file:///home/y0usaf/DCIM Pictures"
+        "file:///home/y0usaf/nixos NixOS"
+        "file:///tmp tmp"
+      ];
+    };
     defaults = {
       browser = "firefox";
       editor = "nvim";
@@ -28,7 +39,6 @@ _: {
       cursorSize = 36;
       opacity = 0.15;
     };
-    user.enable = true;
   };
   directories = {
     flake.path = "/home/y0usaf/nixos";
