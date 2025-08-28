@@ -17,10 +17,13 @@ in {
   };
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.packages = with pkgs; [
-      obsPackage
-      obs-studio-plugins.obs-backgroundremoval
-      obs-studio-plugins.obs-vkcapture
-      obs-studio-plugins.obs-pipewire-audio-capture
+      (wrapOBS {
+        plugins = with obs-studio-plugins; [
+          obs-backgroundremoval
+          obs-vkcapture
+          obs-pipewire-audio-capture
+        ];
+      })
       v4l-utils
     ];
   };
