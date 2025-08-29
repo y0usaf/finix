@@ -84,7 +84,6 @@
         /* panel labels */
         --panel-labels: on; /* off: default, on: add labels to panels */
         --label-color: var(--text-muted); /* color of labels */
-        --label-font-weight: 500; /* font weight of labels */
     }
 
     /* color options */
@@ -224,7 +223,7 @@
             background: linear-gradient(to right, var(--brand-360) 0%, var(--background-accent) 25%, var(--background-accent) 75%, var(--brand-360) 100%);
             background-clip: text;
             color: transparent;
-            background-size: 200% auto;
+            background-size: 100% auto;
             animation: textShine 1.5s linear infinite reverse;
         }
         .text_a2f514 {
