@@ -7,7 +7,6 @@
     ./programs
     ./security
     ./services
-    ./users
     ./virtualization
   ];
 }

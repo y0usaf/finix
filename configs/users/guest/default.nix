@@ -1,10 +1,11 @@
-_: {
-  # User system configuration
-  system = {
+{pkgs, ...}: {
+  # Direct NixOS user configuration
+  users.users.guest = {
     isNormalUser = true;
-    shell = "zsh";
+    shell = pkgs.zsh;
     extraGroups = ["networkmanager" "video" "audio"];
-    homeDirectory = "/home/guest";
+    home = "/home/guest";
+    ignoreShellProgramCheck = true;
   };
   core = {
     packages.enable = true;
