@@ -3,9 +3,7 @@
   lib,
   ...
 }: let
-  cfg = config.home.ui.gtk;
   mainFontName = (builtins.elemAt config.home.core.appearance.fonts.main 0).name;
-  scaleFactor = cfg.scale;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
@@ -23,7 +21,6 @@
   opacity = toString config.home.core.appearance.opacity;
   whiteColor = "white";
   backgroundColor = "rgba(0, 0, 0, ${opacity})";
-  transparentColor = "transparent";
   menuBackground = "rgba(0, 0, 0, ${opacity})";
   hoverBg = "rgba(100, 149, 237, 0.1)";
   selectedBg = "rgba(100, 149, 237, 0.5)";
