@@ -132,6 +132,7 @@ in {
                 "Mod+Q" { close-window; }
                 "Mod+Shift+F" { fullscreen-window; }
                 "Mod+F" { maximize-column; }
+                "Super+F" { toggle-windowed-fullscreen; }
                 "Mod+Space" { center-column; }
                 "Super+Space" { toggle-window-floating; }
 

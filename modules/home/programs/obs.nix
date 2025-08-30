@@ -2,15 +2,9 @@
   config,
   pkgs,
   lib,
-  hostConfig,
   ...
 }: let
   cfg = config.home.programs.obs;
-  nvidiaCudaEnabled = hostConfig.hardware.nvidia.enable && (hostConfig.hardware.nvidia.cuda.enable or false);
-  obsPackage =
-    if nvidiaCudaEnabled
-    then pkgs.obs-studio.override {cudaSupport = true;}
-    else pkgs.obs-studio;
 in {
   options.home.programs.obs = {
     enable = lib.mkEnableOption "OBS Studio";

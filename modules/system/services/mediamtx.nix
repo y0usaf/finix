@@ -13,8 +13,16 @@
   inherit (config.networking) nameservers;
   isIPv4 = addr: builtins.match "^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$" addr != null;
   ipv4Nameservers = builtins.filter isIPv4 nameservers;
-  getPublicIP = pkgs.writeShellScript "get-public-ip" ''
-    ${pkgs.curl}/bin/curl -s https://api.ipify.org || echo "127.0.0.1"
+
+  publicIPScript = pkgs.writeShellScript "update-mediamtx-env" ''
+    PUBLIC_IP=$(${pkgs.curl}/bin/curl -s https://api.ipify.org || echo "127.0.0.1")
+    ENV_FILE="/etc/mediamtx.env"
+
+    if [ -n "$PUBLIC_IP" ] && [ "$PUBLIC_IP" != "127.0.0.1" ]; then
+      echo "MTX_WEBRTCADDITIONALHOSTS=$PUBLIC_IP" > "$ENV_FILE"
+    else
+      echo "# No public IP available" > "$ENV_FILE"
+    fi
   '';
 in {
   config = {
@@ -33,13 +41,25 @@ in {
         webrtc = true;
         webrtcAddress = ":${port}";
         webrtcLocalUDPAddress = ":${port}";
-        webrtcAdditionalHosts =
-          ipv4Nameservers ++ localips;
+        webrtcAdditionalHosts = ipv4Nameservers ++ localips;
         paths = {
           all_others = {};
         };
       };
     };
+
+    systemd.services.mediamtx.serviceConfig.EnvironmentFile = "/etc/mediamtx.env";
+
+    systemd.services.mediamtx-update-ip = {
+      description = "Update MediaMTX public IP";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = publicIPScript;
+      };
+      before = ["mediamtx.service"];
+      wantedBy = ["multi-user.target"];
+    };
+
     networking.firewall = {
       allowedTCPPorts = [
         (lib.toInt port)
@@ -54,22 +74,7 @@ in {
         8001
       ];
     };
-    system.activationScripts.mediamtx-public-ip = {
-      text = ''
-        PUBLIC_IP=$(${getPublicIP})
-        CONFIG_FILE="/etc/mediamtx.yaml"
-        if [ -f "$CONFIG_FILE" ] && [ -n "$PUBLIC_IP" ] && [ "$PUBLIC_IP" != "127.0.0.1" ]; then
-          echo "Updating MediaMTX with public IP: $PUBLIC_IP"
-          ${pkgs.yq-go}/bin/yq eval ".webrtcAdditionalHosts += [\"$PUBLIC_IP\"]" "$CONFIG_FILE" > "$CONFIG_FILE.tmp"
-          mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
-          if ${pkgs.systemd}/bin/systemctl is-active mediamtx.service >/dev/null 2>&1; then
-            ${pkgs.systemd}/bin/systemctl restart mediamtx.service
-          fi
-        else
-          echo "Could not determine public IP or config file not found"
-        fi
-      '';
-    };
+
     environment.systemPackages = [
       pkgs.mediamtx
     ];
