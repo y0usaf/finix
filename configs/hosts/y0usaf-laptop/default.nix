@@ -1,9 +1,5 @@
 # UNIFIED HOST CONFIGURATION for y0usaf-laptop
-{
-  pkgs,
-  inputs,
-  ...
-}: let
+{pkgs, ...}: let
   username = "y0usaf";
   homeDir = "/home/${username}";
 in {

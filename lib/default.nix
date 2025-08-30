@@ -54,7 +54,7 @@ in {
           };
         })
         # Direct user configurations - extract only users.users part
-        ({...}: {
+        (_: {
           users = lib.mkMerge (
             builtins.attrValues (
               lib.mapAttrs (
