@@ -53,6 +53,18 @@ in {
             };
           };
         })
+        # Direct user configurations - extract only users.users part
+        ({...}: {
+          users = lib.mkMerge (
+            builtins.attrValues (
+              lib.mapAttrs (
+                _username: userConfig:
+                  userConfig.users or {}
+              )
+              userConfigs
+            )
+          );
+        })
         # User home configurations via hjem
         ({
           config,
@@ -64,12 +76,12 @@ in {
             (sources.hjem + "/modules/nixos")
           ];
           config = {
-            # Use proper NixOS module merging for all user configs
+            # Use proper NixOS module merging for all user configs (excluding users.users)
             home = lib.mkMerge (
               lib.mapAttrsToList (
                 _username: userConfig:
-                # Remove system-specific config that doesn't belong in home
-                  lib.filterAttrs (name: _: name != "system") userConfig
+                # Remove users.users config that doesn't belong in home
+                  lib.filterAttrs (name: _: name != "users") userConfig
               )
               userConfigs
             );
