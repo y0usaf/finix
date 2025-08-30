@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
+_: {
   statuslineScript = ''
     #!/bin/bash
     # Read JSON input from stdin
