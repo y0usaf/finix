@@ -1,10 +1,11 @@
-_: {
-  # User system configuration
-  system = {
+{pkgs, ...}: {
+  # Direct NixOS user configuration
+  users.users.y0usaf = {
     isNormalUser = true;
-    shell = "zsh";
+    shell = pkgs.zsh;
     extraGroups = ["wheel" "networkmanager" "video" "audio" "input" "gamemode" "dialout" "bluetooth" "lp" "docker"];
-    homeDirectory = "/home/y0usaf";
+    home = "/home/y0usaf";
+    ignoreShellProgramCheck = true;
   };
   core = {
     packages.enable = true;
