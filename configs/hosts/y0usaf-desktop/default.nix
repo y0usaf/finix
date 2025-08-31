@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     ../../../modules/system
     ./hardware-configuration.nix
@@ -21,23 +25,13 @@
       cuda.enable = true;
     };
     amdgpu.enable = false;
-    display.outputs = {
-      "DP-4" = {
-        mode = "5120x1440@239.76";
+    display.outputs =
+      (lib.genAttrs ["DP-1" "DP-2" "DP-3" "DP-4"] (_: {mode = "5120x1440@239.76";}))
+      // {
+        "eDP-1" = {
+          mode = "1920x1080@300.00";
+        };
       };
-      "DP-3" = {
-        mode = "5120x1440@239.76";
-      };
-      "DP-2" = {
-        mode = "5120x1440@239.76";
-      };
-      "DP-1" = {
-        mode = "5120x1440@239.76";
-      };
-      "eDP-1" = {
-        mode = "1920x1080@300.00";
-      };
-    };
   };
   services = {
     docker.enable = true;
