@@ -30,7 +30,8 @@ in {
       files = {
         ".config/hypr/hyprland.conf" = {
           clobber = true;
-          text = let
+          generator = generators.toHyprconf;
+          value = let
             hyprlandConfig = let
               baseConfig = lib.foldl lib.recursiveUpdate {} [
                 coreConfig
@@ -61,12 +62,11 @@ in {
                 )
               ] ["$"]
             );
-            mainConfig = generators.toHyprconf {
-              attrs = hyprlandConfig;
-              importantPrefixes = ["$" "exec" "source"];
-            };
-          in
-            mainConfig + lib.optionalString (pluginsConfig != "") "\n${pluginsConfig}";
+          in {
+            attrs = hyprlandConfig;
+            importantPrefixes = ["$" "exec" "source"];
+            pluginsSuffix = lib.optionalString (pluginsConfig != "") "\n${pluginsConfig}";
+          };
         };
         ".config/hypr/hyprpaper.conf" = {
           clobber = true;

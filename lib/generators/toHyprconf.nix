@@ -24,6 +24,7 @@ lib: let
     attrs,
     indentLevel ? 0,
     importantPrefixes ? ["$"],
+    pluginsSuffix ? "",
   }: let
     initialIndent = concatStrings (replicate indentLevel "  ");
     toHyprconf' = indent: attrs: let
@@ -76,7 +77,7 @@ lib: let
       + concatStringsSep "\n" (mapAttrsToList mkSection sections)
       + mkFields regularFields;
   in
-    toHyprconf' initialIndent attrs;
+    toHyprconf' initialIndent attrs + pluginsSuffix;
   pluginsToHyprconf = plugins: importantPrefixes:
     toHyprconf {
       attrs = {
