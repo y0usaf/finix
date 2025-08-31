@@ -1,0 +1,1 @@
+/nix/store/bpdiqn9gs5rq7k8cfs6zaaxzig9bb246-config-nvim-lua-opencode-config.lua
