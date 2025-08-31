@@ -48,30 +48,28 @@ in {
       files = {
         ".config/git/config" = {
           clobber = true;
-          text = let
-            gitConfig = {
-              user = {
-                name = cfg.name;
-                email = cfg.email;
-              };
-              core = {
-                editor = cfg.editor;
-              };
-              init = {
-                defaultBranch = "main";
-              };
-              pull = {
-                rebase = true;
-              };
-              push = {
-                autoSetupRemote = true;
-              };
-              "url \"git@github.com:\"" = {
-                pushInsteadOf = "https://github.com/";
-              };
+          generator = lib.generators.toINI {};
+          value = {
+            user = {
+              name = cfg.name;
+              email = cfg.email;
             };
-          in
-            lib.generators.toINI {} gitConfig;
+            core = {
+              editor = cfg.editor;
+            };
+            init = {
+              defaultBranch = "main";
+            };
+            pull = {
+              rebase = true;
+            };
+            push = {
+              autoSetupRemote = true;
+            };
+            "url \"git@github.com:\"" = {
+              pushInsteadOf = "https://github.com/";
+            };
+          };
         };
         ".local/share/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
           clobber = true;
