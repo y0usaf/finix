@@ -15,8 +15,11 @@ let
     };
   };
 
-  # Host config - system-level configuration only
-  hostConfig = import ../configs/hosts/y0usaf-desktop {inherit pkgs;};
+  # Host configs - system-level configuration only
+  hostConfigs = {
+    y0usaf-desktop = import ../configs/hosts/y0usaf-desktop {inherit pkgs lib;};
+    y0usaf-laptop = import ../configs/hosts/y0usaf-laptop/system.nix {inherit pkgs lib;};
+  };
 
   # User configs - home folder management only (separate from host)
   userConfigs = {
@@ -30,85 +33,82 @@ in {
   inherit lib;
   formatter.${system} = pkgs.alejandra;
 
-  nixosConfigurations.y0usaf-desktop = import (sources.nixpkgs + "/nixos") {
-    inherit system;
-    configuration = {
-      imports = [
-        # Host system configuration
-        ({config, ...}: {
-          inherit (hostConfig) imports;
-          # Set user configuration from primary user
-          user = let
-            primaryUser = builtins.head hostConfig.users;
-          in {
-            name = primaryUser;
-            inherit (hostConfig) homeDirectory;
-          };
-          # Configure nixpkgs with overlays
-          nixpkgs = {
-            inherit overlays;
+  nixosConfigurations = lib.mapAttrs (hostName: hostConfig:
+    import (sources.nixpkgs + "/nixos") {
+      inherit system;
+      configuration = {
+        imports = [
+          # Host system configuration
+          ({config, ...}: {
+            inherit (hostConfig) imports;
+            # Set user configuration from primary user
+            user = let
+              primaryUser = builtins.head hostConfig.users;
+            in {
+              name = primaryUser;
+              inherit (hostConfig) homeDirectory;
+            };
+            # Configure nixpkgs with overlays
+            nixpkgs = {
+              inherit overlays;
+              config = {
+                allowUnfree = true;
+                cudaSupport = true;
+              };
+            };
+          })
+          # Direct user configurations - hardcoded imports
+          (_: {
+            users = lib.mkMerge [
+              (userConfigs.y0usaf.users or {})
+              (userConfigs.guest.users or {})
+            ];
+          })
+          # User home configurations via hjem
+          ({
+            config,
+            lib,
+            ...
+          }: {
+            imports = [
+              # Use hjem for home management
+              (sources.hjem + "/modules/nixos")
+            ];
             config = {
-              allowUnfree = true;
-              cudaSupport = true;
+              # Hardcoded home configs (excluding users.users)
+              home = lib.mkMerge [
+                (lib.filterAttrs (name: _: name != "users") userConfigs.y0usaf)
+                (lib.filterAttrs (name: _: name != "users") userConfigs.guest)
+              ];
+              # Configure hjem for each user (independent of host)
+              hjem = {
+                # Use SMFH manifest linker instead of systemd-tmpfiles
+                linker = pkgs.callPackage (sources.smfh + "/package.nix") {};
+                users = {
+                  y0usaf = {
+                    packages = [];
+                    files = {};
+                  };
+                  guest = {
+                    packages = [];
+                    files = {};
+                  };
+                };
+              };
             };
-          };
-        })
-        # Direct user configurations - extract only users.users part
-        (_: {
-          users = lib.mkMerge (
-            builtins.attrValues (
-              lib.mapAttrs (
-                _username: userConfig:
-                  userConfig.users or {}
-              )
-              userConfigs
-            )
-          );
-        })
-        # User home configurations via hjem
-        ({
-          config,
-          lib,
-          ...
-        }: {
-          imports = [
-            # Use hjem for home management
-            (sources.hjem + "/modules/nixos")
-          ];
-          config = {
-            # Use proper NixOS module merging for all user configs (excluding users.users)
-            home = lib.mkMerge (
-              lib.mapAttrsToList (
-                _username: userConfig:
-                # Remove users.users config that doesn't belong in home
-                  lib.filterAttrs (name: _: name != "users") userConfig
-              )
-              userConfigs
-            );
-            # Configure hjem for each user (independent of host)
-            hjem = {
-              # Use SMFH manifest linker instead of systemd-tmpfiles
-              linker = pkgs.callPackage (sources.smfh + "/package.nix") {};
-              users =
-                lib.mapAttrs (_username: _userConfig: {
-                  packages = [];
-                  files = {};
-                })
-                userConfigs;
-            };
-          };
-        })
-        # Import user configuration abstraction
-        ./user-config.nix
-        # Import home manager
-        ../modules/home
-      ];
-      _module.args = {
-        inherit hostConfig userConfigs sources;
-        inherit (pkgs) lib;
-        # Direct access to commonly used sources
-        inherit (sources) disko nix-minecraft Fast-Font;
+          })
+          # Import user configuration abstraction
+          ./user-config.nix
+          # Import home manager
+          ../modules/home
+        ];
+        _module.args = {
+          inherit hostConfig userConfigs sources;
+          inherit (pkgs) lib;
+          # Direct access to commonly used sources
+          inherit (sources) disko nix-minecraft Fast-Font;
+        };
       };
-    };
-  };
+    })
+  hostConfigs;
 }
