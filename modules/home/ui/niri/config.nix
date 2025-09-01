@@ -98,9 +98,9 @@
       };
 
       tab-indicator = {
-        width = 10;
+        width = 1;
         gap = -5;
-        active-color = "#ffffff";
+        active-color = "#aaaaaa";
         inactive-color = "#666666";
         position = "bottom";
       };
@@ -235,26 +235,6 @@
 
   # Merge default settings with user settings
   finalSettings = lib.recursiveUpdate defaultSettings cfg.settings;
-
-  # Extract outputs separately for special handling
-  outputSettings = finalSettings.output or {};
-  settingsWithoutOutput = builtins.removeAttrs finalSettings ["output"];
-
-  # Generate output nodes separately
-  generateOutputNodes = outputs:
-    lib.concatStringsSep "\n" (lib.mapAttrsToList (
-        name: config:
-          "output \"${name}\" {\n"
-          + lib.concatStringsSep "\n" (lib.mapAttrsToList (
-              key: value:
-                if key == "position"
-                then "\tposition x=${toString value.x} y=${toString value.y}"
-                else "\t${key} \"${toString value}\""
-            )
-            config)
-          + "\n}"
-      )
-      outputs);
 in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name} = {
@@ -268,15 +248,11 @@ in {
       ];
       files = {
         ".config/niri/config.kdl" = {
-          text =
-            # Generate output nodes first
-            (generateOutputNodes outputSettings)
-            + "\n\n"
-            +
-            # Then generate the rest of the configuration
-            (generators.toKDL {} settingsWithoutOutput)
-            + lib.optionalString (cfg.extraConfig != "") ("\n\n" + cfg.extraConfig);
           clobber = true;
+          generator = generators.toNiriconf;
+          value = finalSettings // lib.optionalAttrs (cfg.extraConfig != "") {
+            _extraConfig = cfg.extraConfig;
+          };
         };
       };
     };
