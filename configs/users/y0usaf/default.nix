@@ -68,7 +68,20 @@
       flake.enable = true;
       hy3.enable = false;
     };
-    niri.enable = true;
+    niri = {
+      enable = true;
+      extraConfig = ''
+        window-rule {
+          match app-id="foot"
+          opacity 1.0
+        }
+        
+        window-rule {
+          match app-id="launcher"
+          open-floating true
+        }
+      '';
+    };
     quickshell.enable = true;
     wallust.enable = true;
     wayland.enable = true;

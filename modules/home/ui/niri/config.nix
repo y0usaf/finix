@@ -13,7 +13,7 @@
 
   # Default configuration merged with user settings
   defaultSettings = {
-    prefer-no-csd = true;
+    prefer-no-csd = {};
 
     spawn-at-startup =
       ["${pkgs.xwayland-satellite}/bin/xwayland-satellite" "sh" "-c" "swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
@@ -40,39 +40,29 @@
       mod-key = "Alt";
     };
 
-# Output configurations as root-level nodes
-    _children = [
-      {
-        output = {
-          _args = ["DP-4"];
-          mode = "5120x1440@239.761";
-          position = {
-            x = 0;
-            y = 0;
-          };
+    output = {
+      "DP-4" = {
+        mode = "5120x1440@239.761";
+        position = {
+          x = 0;
+          y = 0;
         };
-      }
-      {
-        output = {
-          _args = ["DP-2"];
-          mode = "5120x1440@239.761";
-          position = {
-            x = 0;
-            y = 0;
-          };
+      };
+      "DP-2" = {
+        mode = "5120x1440@239.761";
+        position = {
+          x = 0;
+          y = 0;
         };
-      }
-      {
-        output = {
-          _args = ["HDMI-A-2"];
-          mode = "1920x1080@60.000";
-          position = {
-            x = 5120;
-            y = 0;
-          };
+      };
+      "HDMI-A-2" = {
+        mode = "1920x1080@60.000";
+        position = {
+          x = 5120;
+          y = 0;
         };
-      }
-    ];
+      };
+    };
 
     layout = {
       gaps = 10;
@@ -124,22 +114,8 @@
       };
     };
 
-    window-rule = {
-      _children = [
-        {
-          match = {
-            _props = {app-id = "foot";};
-          };
-          opacity = 1.0;
-        }
-        {
-          match = {
-            _props = {app-id = "launcher";};
-          };
-          open-floating = true;
-        }
-      ];
-    };
+    # Using extraConfig for proper window-rule syntax until KDL generator supports multiple root-level nodes
+    window-rule = {}; # Placeholder to prevent missing key errors
 
     binds = {
       "Mod+Shift+Slash" = {show-hotkey-overlay = {};};
@@ -253,6 +229,26 @@
 
   # Merge default settings with user settings
   finalSettings = lib.recursiveUpdate defaultSettings cfg.settings;
+
+  # Extract outputs separately for special handling
+  outputSettings = finalSettings.output or {};
+  settingsWithoutOutput = builtins.removeAttrs finalSettings ["output"];
+
+  # Generate output nodes separately
+  generateOutputNodes = outputs:
+    lib.concatStringsSep "\n" (lib.mapAttrsToList (
+        name: config:
+          "output \"${name}\" {\n"
+          + lib.concatStringsSep "\n" (lib.mapAttrsToList (
+              key: value:
+                if key == "position"
+                then "\tposition x=${toString value.x} y=${toString value.y}"
+                else "\t${key} \"${toString value}\""
+            )
+            config)
+          + "\n}"
+      )
+      outputs);
 in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name} = {
@@ -267,7 +263,12 @@ in {
       files = {
         ".config/niri/config.kdl" = {
           text =
-            generators.toKDL {} finalSettings
+            # Generate output nodes first
+            (generateOutputNodes outputSettings)
+            + "\n\n"
+            +
+            # Then generate the rest of the configuration
+            (generators.toKDL {} settingsWithoutOutput)
             + lib.optionalString (cfg.extraConfig != "") ("\n\n" + cfg.extraConfig);
           clobber = true;
         };
