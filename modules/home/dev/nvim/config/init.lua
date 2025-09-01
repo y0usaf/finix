@@ -1,1 +1,0 @@
-/nix/store/xzvrf88nqmffcgfr0i9d99hvcmxzqiv0-config-nvim-init.lua
