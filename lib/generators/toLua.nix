@@ -30,6 +30,7 @@ lib: let
   - multiline: whether to format multiline (default: true)
   - indent: current indentation level (default: "")
   - asBindings: whether to generate variable bindings (default: false)
+  - asStatements: whether to generate sequential statements (default: false)
 
   Value: the Nix value to convert
   */
@@ -37,6 +38,7 @@ lib: let
     multiline ? true,
     indent ? "",
     asBindings ? false,
+    asStatements ? false,
   } @ args: v: let
     innerIndent = "${indent}  ";
     introSpace =
@@ -51,10 +53,11 @@ lib: let
       args
       // {
         indent =
-          if asBindings
+          if asBindings || asStatements
           then indent
           else innerIndent;
         asBindings = false;
+        asStatements = false;
       };
     concatItems = concatStringsSep ",${introSpace}";
 
@@ -63,12 +66,25 @@ lib: let
     generatedBindings = assert assertMsg (badVarNames == []) "Bad Lua var names: ${toPretty {} badVarNames}";
       concatStrings (mapAttrsToList (key: value: "${indent}${key} = ${toLua innerArgs value}\n") v);
 
+    generatedStatements = concatStrings (mapAttrsToList (
+        key: value:
+          if isLuaInline value
+          then "${indent}${value.expr}\n"
+          else "${indent}${toLua innerArgs value}\n"
+      )
+      v);
+
     # Lua variable name validation
     matchVarName = match "[[:alpha:]_][[:alnum:]_]*(\\.[[:alpha:]_][[:alnum:]_]*)*";
-    badVarNames = filter (name: matchVarName name == null) (attrNames v);
+    badVarNames =
+      if asStatements
+      then []
+      else filter (name: matchVarName name == null) (attrNames v);
   in
     if asBindings
     then generatedBindings
+    else if asStatements
+    then generatedStatements
     else if v == null
     then "nil"
     else if isInt v || isFloat v || isString v || isBool v
@@ -100,4 +116,6 @@ lib: let
   };
 in {
   inherit toLua mkLuaInline;
+  # Alternative name to avoid nixpkgs conflicts
+  toLuaStatements = toLua;
 }

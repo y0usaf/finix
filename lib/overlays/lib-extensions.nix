@@ -4,12 +4,12 @@ _final: prev: {
     # Import generators
     generators = import ../generators {lib = libprev;};
   in {
-    # Add generators to lib
+    # Add generators to lib - our custom generators override nixpkgs ones
     generators =
       libprev.generators
       // {
         # Custom generators
-        inherit (generators) toHyprconf pluginsToHyprconf toLua mkLuaInline;
+        inherit (generators) toHyprconf pluginsToHyprconf toLua mkLuaInline toLuaStatements;
       };
 
     # Directory and module importers
