@@ -16,8 +16,11 @@
     prefer-no-csd = {};
 
     spawn-at-startup =
-      ["${pkgs.xwayland-satellite}/bin/xwayland-satellite" "sh" "-c" "swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
-      ++ lib.optional agsEnabled "${pkgs.ags}/bin/ags run /home/${config.user.name}/.config/ags/bar-overlay.tsx";
+      [
+        ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"]
+        ["sh" "-c" "swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
+      ]
+      ++ lib.optional agsEnabled ["${pkgs.ags}/bin/ags" "run" "/home/${config.user.name}/.config/ags/bar-overlay.tsx"];
 
     input = {
       keyboard = {
@@ -250,9 +253,11 @@ in {
         ".config/niri/config.kdl" = {
           clobber = true;
           generator = generators.toNiriconf;
-          value = finalSettings // lib.optionalAttrs (cfg.extraConfig != "") {
-            _extraConfig = cfg.extraConfig;
-          };
+          value =
+            finalSettings
+            // lib.optionalAttrs (cfg.extraConfig != "") {
+              _extraConfig = cfg.extraConfig;
+            };
         };
       };
     };
