@@ -80,9 +80,17 @@
       };
 
       border = {
-        width = 0.1;
-        active-color = "#ffffff";
-        inactive-color = "#333333";
+        width = 4;
+        active-gradient = {
+          _props = {
+            from = "#ff0066";
+            to = "#66ff00";
+            angle = 45;
+            "in" = "oklch longer hue";
+            "relative-to" = "workspace-view";
+          };
+        };
+        inactive-color = "#404040";
       };
 
       focus-ring = {
@@ -92,11 +100,11 @@
       };
 
       tab-indicator = {
-        width = 1;
-        gap = 5;
+        width = 10;
+        gap = -5;
         active-color = "#ffffff";
         inactive-color = "#666666";
-        position = "left";
+        position = "bottom";
       };
     };
 
