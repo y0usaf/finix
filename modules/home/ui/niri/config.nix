@@ -80,7 +80,7 @@
       };
 
       border = {
-        width = 4;
+        width = 1;
         active-gradient = {
           _props = {
             from = "#ff0066";
@@ -90,13 +90,11 @@
             "relative-to" = "workspace-view";
           };
         };
-        inactive-color = "#404040";
+        inactive-color = "#444444";
       };
 
       focus-ring = {
-        width = 0.1;
-        active-color = "#ffffff";
-        inactive-color = "#333333";
+        off = {};
       };
 
       tab-indicator = {
