@@ -48,7 +48,7 @@ in {
       files = {
         ".config/git/config" = {
           clobber = true;
-          generator = lib.generators.toINI {};
+          generator = lib.generators.toGitINI;
           value = {
             user = {
               name = cfg.name;
@@ -66,9 +66,7 @@ in {
             push = {
               autoSetupRemote = true;
             };
-            "url \"git@github.com:\"" = {
-              pushInsteadOf = "https://github.com/";
-            };
+            url."git@github.com:".pushInsteadOf = "https://github.com/";
           };
         };
         ".local/share/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
