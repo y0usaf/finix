@@ -9,7 +9,7 @@
   agsEnabled = config.home.ui.ags.enable or false;
 
   # Import local generators
-  generators = import ../../../../lib/generators.nix {inherit lib;};
+  generators = import ../../../../lib/generators {inherit lib;};
 
   # Default configuration merged with user settings
   defaultSettings = {
@@ -80,20 +80,20 @@
       };
 
       border = {
-        width = 0.5;
+        width = 0.1;
         active-color = "#ffffff";
         inactive-color = "#333333";
       };
 
       focus-ring = {
-        width = 0.5;
+        width = 0.1;
         active-color = "#ffffff";
         inactive-color = "#333333";
       };
 
       tab-indicator = {
-        width = 4;
-        gap = 6;
+        width = 1;
+        gap = 5;
         active-color = "#ffffff";
         inactive-color = "#666666";
         position = "left";

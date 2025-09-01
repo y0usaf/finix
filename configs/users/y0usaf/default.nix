@@ -75,7 +75,7 @@
           match app-id="foot"
           opacity 1.0
         }
-        
+
         window-rule {
           match app-id="launcher"
           open-floating true
