@@ -1,94 +1,14 @@
-lib: let
-  inherit
-    (lib)
-    concatStringsSep
-    splitString
-    mapAttrsToList
-    any
-    ;
-  inherit (builtins) typeOf replaceStrings elem;
+{lib}: {
+  toKDL = {}: let
+    inherit
+      (lib)
+      concatStringsSep
+      splitString
+      mapAttrsToList
+      any
+      ;
+    inherit (builtins) typeOf replaceStrings elem;
 
-  /**
-  Convert a Nix value to KDL (KubeConfig Document Language) format.
-
-  KDL is a document language with a node-based structure that's designed to be
-  both human-readable and machine-parseable. It's used by tools like Zellij and Niri.
-
-  # Inputs
-
-  Options:
-  - Currently no options, but structured for future extensibility
-
-  Value: the Nix value to convert
-
-  # Type
-
-  ```
-  toKDL :: AttrSet -> Any -> String
-  ```
-
-  # Examples
-  :::{.example}
-  ## `lib.generators.toKDL` usage example
-
-  ```nix
-  generators.toKDL {} {
-    input = {
-      keyboard = {
-        xkb = {
-          layout = "us";
-        };
-      };
-      mouse = {
-        accel-speed = 0.0;
-      };
-    };
-  }
-  ->
-  input {
-  	keyboard {
-  		xkb {
-  			layout "us"
-  		}
-  	}
-  	mouse {
-  		accel-speed 0.0
-  	}
-  }
-  ```
-
-  The generator supports special attributes for advanced KDL features:
-  - `_args`: List of positional arguments
-  - `_props`: Attribute set of properties (key=value format)
-  - `_children`: List of child nodes (for explicit ordering)
-
-  ```nix
-  generators.toKDL {} {
-    tab = {
-      _props = {
-        name = "Project";
-        focus = true;
-      };
-      _children = [
-        {
-          pane = {
-            command = "nvim";
-          };
-        }
-      ];
-    };
-  }
-  ->
-  tab focus=true name="Project" {
-  	pane {
-  		command "nvim"
-  	}
-  }
-  ```
-
-  :::
-  */
-  toKDL = {} @ args: let
     # ListOf String -> String
     indentStrings = let
       # Although the input of this function is a list of strings,
@@ -96,12 +16,15 @@ lib: let
       # to normalize the list by joining and resplitting them.
       unlines = lib.splitString "\n";
       lines = lib.concatStringsSep "\n";
-      indentAll = lines: concatStringsSep "\n" (map (x: "	" + x) lines);
+      indentAll = lines: concatStringsSep "\n" (map (x: "\t" + x) lines);
     in
       stringsWithNewlines: indentAll (unlines (lines stringsWithNewlines));
 
     # String -> String
-    sanitizeString = replaceStrings ["\n" ''"''] ["\\n" ''\"''];
+    sanitizeString = str:
+    # Only escape newlines and quotes for KDL
+    # Dollar signs don't need escaping in KDL strings
+      replaceStrings ["\n" ''"''] ["\\n" ''\\"''] str;
 
     # OneOf [Int Float String Bool Null] -> String
     literalValueToString = element:
@@ -139,24 +62,31 @@ lib: let
         lib.flatten
       ];
       unorderedChildren = lib.pipe attrs [
-        (lib.filterAttrs (name: _:
-          !(elem name [
-            "_args"
-            "_props"
-            "_children"
-          ])))
+        (lib.filterAttrs (
+          name: _:
+            !(elem name [
+              "_args"
+              "_props"
+              "_children"
+            ])
+        ))
         (mapAttrsToList convertAttributeToKDL)
       ];
       children = orderedChildren ++ unorderedChildren;
-      optChildren = lib.optional (children != []) ''
-        {
-        ${indentStrings children}
-        }'';
+      optChildren =
+        if children != []
+        then [
+          ''
+            {
+            ${indentStrings children}
+            }''
+        ]
+        else ["{}"];
     in
       lib.concatStringsSep " " ([name] ++ optArgs ++ optProps ++ optChildren);
 
     # List Conversion
-    # String -> ListOf (OneOf [Int Float String Bool Null]) -> String
+    # String -> ListOf (OneOf [Int Float String Bool Null])  -> String
     convertListOfFlatAttrsToKDL = name: list: let
       flatElements = map literalValueToString list;
     in "${name} ${concatStringsSep " " flatElements}";
@@ -167,14 +97,16 @@ lib: let
       ${indentStrings (map (x: convertAttributeToKDL "-" x) list)}
       }'';
 
-    # String -> ListOf Anything -> String
+    # String -> ListOf Anything  -> String
     convertListToKDL = name: list: let
       elementsAreFlat =
-        !any (el:
-          elem (typeOf el) [
-            "list"
-            "set"
-          ])
+        !any (
+          el:
+            elem (typeOf el) [
+              "list"
+              "set"
+            ]
+        )
         list;
     in
       if elementsAreFlat
@@ -182,7 +114,7 @@ lib: let
       else convertListOfNonFlatAttrsToKDL name list;
 
     # Combined Conversion
-    # String -> Anything -> String
+    # String -> Anything  -> String
     convertAttributeToKDL = name: value: let
       vType = typeOf value;
     in
@@ -208,42 +140,4 @@ lib: let
     attrs: ''
       ${concatStringsSep "\n" (mapAttrsToList convertAttributeToKDL attrs)}
     '';
-
-  /**
-  Mark string as KDL inline expression.
-
-  This is useful for inserting raw KDL that should not be processed by the generator.
-
-  # Inputs
-
-  `expr`: The raw KDL string to inline
-
-  # Type
-
-  ```
-  mkKDLInline :: String -> AttrSet
-  ```
-
-  # Examples
-  :::{.example}
-  ## `lib.generators.mkKDLInline` usage example
-
-  ```nix
-  generators.toKDL {} {
-    some-complex-node = generators.mkKDLInline ''
-      custom-syntax "with" "special" {
-        formatting
-      }
-    '';
-  }
-  ```
-
-  :::
-  */
-  mkKDLInline = expr: {
-    _type = "kdl-inline";
-    inherit expr;
-  };
-in {
-  inherit toKDL mkKDLInline;
 }
