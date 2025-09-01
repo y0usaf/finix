@@ -55,7 +55,10 @@
       stringsWithNewlines: indentAll (unlines (lines stringsWithNewlines));
 
     # String -> String
-    sanitizeString = replaceStrings ["\n" ''"''] ["\\n" ''\"''];
+    sanitizeString = str:
+    # Only escape newlines and quotes for KDL
+    # Dollar signs don't need escaping in KDL strings
+      replaceStrings ["\n" ''"''] ["\\n" ''\\"''] str;
 
     # OneOf [Int Float String Bool Null] -> String
     literalValueToString = element:
@@ -104,10 +107,15 @@
         (mapAttrsToList convertAttributeToKDL)
       ];
       children = orderedChildren ++ unorderedChildren;
-      optChildren = lib.optional (children != []) ''
-        {
-        ${indentStrings children}
-        }'';
+      optChildren =
+        if children != []
+        then [
+          ''
+            {
+            ${indentStrings children}
+            }''
+        ]
+        else ["{}"];
     in
       lib.concatStringsSep " " ([name] ++ optArgs ++ optProps ++ optChildren);
 
