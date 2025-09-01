@@ -8,8 +8,8 @@ _final: prev: {
     generators =
       libprev.generators
       // {
-        # Hyprland generators (only the used ones)
-        inherit (generators) toHyprconf pluginsToHyprconf;
+        # Custom generators
+        inherit (generators) toHyprconf pluginsToHyprconf toLua mkLuaInline;
       };
 
     # Directory and module importers
