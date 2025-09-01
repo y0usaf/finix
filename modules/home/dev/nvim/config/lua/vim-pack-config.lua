@@ -1,1 +1,0 @@
-/nix/store/znw013r2ammq93yfb5637xz6hygs58ga-config-nvim-lua-vim-pack-config.lua

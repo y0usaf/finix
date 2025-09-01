@@ -1,1 +1,0 @@
-/nix/store/9ngbwbxmap4r1axypx9hk64vcsf0h05j-config-nvim-lua-vim-pack-opencode.lua
