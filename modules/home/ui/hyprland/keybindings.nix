@@ -4,7 +4,6 @@
   ...
 }: let
   cfg = config.home.ui.hyprland;
-  inherit (config.home.core) defaults;
   generators = import ../../../../lib/generators/toHyprconf.nix lib;
 
   keybindingsConfig = {

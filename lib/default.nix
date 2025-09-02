@@ -33,7 +33,7 @@ in {
   inherit lib;
   formatter.${system} = pkgs.alejandra;
 
-  nixosConfigurations = lib.mapAttrs (hostName: hostConfig:
+  nixosConfigurations = lib.mapAttrs (_hostName: hostConfig:
     import (sources.nixpkgs + "/nixos") {
       inherit system;
       configuration = {
