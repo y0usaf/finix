@@ -85,9 +85,10 @@ in {
       "Mod+BracketLeft" = {consume-or-expel-window-left = {};};
       "Mod+BracketRight" = {consume-or-expel-window-right = {};};
 
-      # Screenshots
-      "Mod+G" = {spawn = ["sh" "-c" "grim -g $(slurp) - | wl-copy"];};
-      "Mod+Shift+G" = {spawn = ["sh" "-c" "grim - | wl-copy"];};
+      # Screenshots (Native Niri)
+      "Print" = {screenshot = {};}; # Interactive area selection
+      "Mod+Print" = {screenshot-screen = {};}; # Full screen
+      "Mod+Shift+Print" = {screenshot-window = {};};
 
       # System
       "Mod+Shift+E" = {quit = {};};
