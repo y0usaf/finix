@@ -9,6 +9,11 @@ in {
   imports = [
     ./options.nix
     ./config.nix
+    ./input.nix
+    ./monitors.nix
+    ./layout.nix
+    ./keybindings.nix
+    ./environment.nix
   ];
 
   config = lib.mkIf cfg.enable {
