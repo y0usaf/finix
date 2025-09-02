@@ -1,5 +1,5 @@
 {lib}: {
-  toKDL = {}: let
+  toKDL = _: let
     inherit
       (lib)
       concatStringsSep
@@ -40,9 +40,9 @@
       (
         if typeOf element == "null"
         then "null"
-        else if element == false
+        else if typeOf element == "bool" && !element
         then "false"
-        else if element == true
+        else if typeOf element == "bool" && element
         then "true"
         else if typeOf element == "string"
         then ''"${sanitizeString element}"''
