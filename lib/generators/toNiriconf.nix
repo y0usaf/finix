@@ -1,17 +1,10 @@
 lib: let
   inherit
     (builtins)
-    all
-    isAttrs
     isList
     hasAttr
-    attrNames
-    elem
-    filter
-    mapAttrs
     ;
-  inherit (lib.attrsets) filterAttrs mapAttrsToList;
-  inherit (lib.lists) concatMap;
+  inherit (lib.attrsets) mapAttrsToList;
   inherit
     (lib.strings)
     concatStringsSep

@@ -67,7 +67,7 @@ lib: let
       concatStrings (mapAttrsToList (key: value: "${indent}${key} = ${toLua innerArgs value}\n") v);
 
     generatedStatements = concatStrings (mapAttrsToList (
-        key: value:
+        _key: value:
           if isLuaInline value
           then "${indent}${value.expr}\n"
           else "${indent}${toLua innerArgs value}\n"
