@@ -1,7 +1,7 @@
 {lib, ...}: {
   options.home.shell.zellij = {
     enable = lib.mkEnableOption "zellij terminal multiplexer";
-    
+
     autoStart = lib.mkOption {
       type = lib.types.bool;
       default = false;

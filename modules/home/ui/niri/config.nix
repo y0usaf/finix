@@ -126,12 +126,12 @@
     animations = {
       slowdown = 1.0;
       window-open = {
-        duration-ms = 150;
-        curve = "ease-out-expo";
+        duration-ms = 120;
+        curve = "cubic-bezier(0.68, -0.55, 0.265, 1.55)"; # Snappy with slight overshoot
       };
       window-close = {
-        duration-ms = 150;
-        curve = "ease-out-expo";
+        duration-ms = 100;
+        curve = "cubic-bezier(0.55, 0.06, 0.68, 0.19)"; # Quick snap out
       };
     };
 
