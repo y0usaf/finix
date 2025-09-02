@@ -84,16 +84,8 @@
 
       border = {
         width = 1;
-        active-gradient = {
-          _props = {
-            from = "#ff0066";
-            to = "#66ff00";
-            angle = 45;
-            "in" = "oklch longer hue";
-            "relative-to" = "workspace-view";
-          };
-        };
-        inactive-color = "#444444";
+        active-color = "ffffff";
+        inactive-color = "#000000";
       };
 
       focus-ring = {
@@ -105,35 +97,16 @@
         gap = -5;
         length = {
           _props = {
-            "total-proportion" = 0.2;
-          };
-        };
-        inactive-gradient = {
-          _props = {
-            from = "#ff0066";
-            to = "#66ff00";
-            angle = 0;
-            "relative-to" = "workspace-view";
+            "total-proportion" = 0.01;
           };
         };
         active-color = "#ffffff";
+        inactive-color = "aaaaaa";
         position = "bottom";
       };
     };
 
     hotkey-overlay = {};
-
-    animations = {
-      slowdown = 1.0;
-      window-open = {
-        duration-ms = 120;
-        curve = "cubic-bezier(0.68, -0.55, 0.265, 1.55)"; # Snappy with slight overshoot
-      };
-      window-close = {
-        duration-ms = 100;
-        curve = "cubic-bezier(0.55, 0.06, 0.68, 0.19)"; # Quick snap out
-      };
-    };
 
     # Using extraConfig for proper window-rule syntax until KDL generator supports multiple root-level nodes
     window-rule = {}; # Placeholder to prevent missing key errors
