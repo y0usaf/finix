@@ -2,7 +2,7 @@
   imports = [
     ./aliases.nix
     ./cat-fetch.nix
-    ./zellij.nix
+    ./zellij
     ./zsh.nix
   ];
 }
