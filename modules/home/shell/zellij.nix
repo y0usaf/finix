@@ -6,6 +6,65 @@
 }: let
   cfg = config.home.shell.zellij;
   ideLayout = import ./zellij-ide.nix {inherit lib config;};
+  toKDL = import ../../../lib/generators/toKDL.nix {inherit lib;};
+
+  # Base zellij configuration
+  baseConfig = {
+    hide_session_name = false;
+    on_force_close = "quit";
+    pane_frames = true;
+    rounded_corners = true;
+    session_serialization = false;
+    show_startup_tips = false;
+  };
+
+  # Music layout configuration
+  musicLayout = {
+    layout = {
+      _args = ["alias=music"];
+      default_tab_template = {
+        _children = [
+          {
+            pane = {
+              _args = ["size=1" "borderless=true"];
+              plugin = {
+                _args = ["location=zellij:tab-bar"];
+              };
+            };
+          }
+          {
+            children = {};
+          }
+          {
+            pane = {
+              _args = ["size=2" "borderless=true"];
+              plugin = {
+                _args = ["location=zellij:status-bar"];
+              };
+            };
+          }
+        ];
+      };
+      tab = {
+        _args = ["name=Music"];
+        pane = {
+          _args = ["split_direction=vertical"];
+          _children = [
+            {
+              pane = {
+                _args = ["command=cmus"];
+              };
+            }
+            {
+              pane = {
+                _args = ["command=cava"];
+              };
+            }
+          ];
+        };
+      };
+    };
+  };
 in {
   options.home.shell.zellij = {
     enable = lib.mkEnableOption "zellij terminal multiplexer";
@@ -35,39 +94,16 @@ in {
       files = {
         ".config/zellij/config.kdl" = {
           clobber = true;
-          text = ''
-                        hide_session_name false
-                        on_force_close "quit"
-                        pane_frames true
-                        rounded_corners true
-                        session_serialization false
-                        show_startup_tips false
-                        simplified_ui false
-
-            // Using default keybindings for now
-          '';
+          text =
+            toKDL.toKDL {} (baseConfig
+              // {
+                simplified_ui = false;
+              })
+            + "\n\n// Using default keybindings for now\n";
         };
         ".config/zellij/layouts/music.kdl" = {
           clobber = true;
-          text = ''
-            layout alias="music" {
-                default_tab_template {
-                    pane size=1 borderless=true {
-                        plugin location="zellij:tab-bar"
-                    }
-                    children
-                    pane size=2 borderless=true {
-                        plugin location="zellij:status-bar"
-                    }
-                }
-                tab name="Music" {
-                    pane split_direction="vertical" {
-                        pane command="cmus"
-                        pane command="cava"
-                    }
-                }
-            }
-          '';
+          text = toKDL.toKDL {} musicLayout;
         };
 
         ".config/zellij/layouts/ide.kdl" = {
@@ -76,17 +112,12 @@ in {
         };
         ".config/zellij/config-ide.kdl" = {
           clobber = true;
-          text = ''
-                        hide_session_name false
-                        on_force_close "quit"
-                        pane_frames true
-                        rounded_corners true
-                        session_serialization false
-                        show_startup_tips false
-                        simplified_ui true
-
-            // Using default keybindings for now
-          '';
+          text =
+            toKDL.toKDL {} (baseConfig
+              // {
+                simplified_ui = true;
+              })
+            + "\n\n// Using default keybindings for now\n";
         };
         ".config/zsh/aliases/zellij.zsh" = {
           clobber = true;
