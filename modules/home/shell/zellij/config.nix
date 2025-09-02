@@ -17,13 +17,15 @@
       copy_on_select = true;
       show_startup_tips = false;
       theme = "neon_dark";
-    }
-    // cfg.settings
-    // lib.optionalAttrs cfg.performanceMode {
-      # Optimization settings
+      # Disable all session persistence
       session_serialization = false;
       pane_viewport_serialization = false;
       scrollback_lines_to_serialize = 0;
+      disable_session_metadata = true;
+    }
+    // cfg.settings
+    // lib.optionalAttrs cfg.performanceMode {
+      # Additional performance optimizations when performanceMode is enabled
     };
 in {
   config = lib.mkIf cfg.enable {
