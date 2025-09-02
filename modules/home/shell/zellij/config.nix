@@ -169,8 +169,8 @@ in {
           ".config/zsh/aliases/zellij.zsh" = {
             clobber = true;
             text = ''
-              # Auto-start zellij if not already in a session
-              if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && -z "$TMUX" ]]; then
+              # Auto-start zellij if not already in a session and not in TTY
+              if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && -z "$TMUX" && ! "$TERM" =~ ^(linux|console)$ ]]; then
                 exec zellij
               fi
             '';
