@@ -14,9 +14,9 @@
   baseConfig =
     {
       hide_session_name = false;
-      theme = "gruvbox-dark";
       default_shell = "zsh";
-      copy_on_select = false;
+      copy_on_select = true;
+      show_startup_tips = false;
     }
     // cfg.settings
     // lib.optionalAttrs cfg.performanceMode {
