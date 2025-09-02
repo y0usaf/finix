@@ -101,10 +101,22 @@
       };
 
       tab-indicator = {
-        width = 1;
+        width = 10;
         gap = -5;
-        active-color = "#aaaaaa";
-        inactive-color = "#666666";
+        length = {
+          _props = {
+            "total-proportion" = 0.2;
+          };
+        };
+        inactive-gradient = {
+          _props = {
+            from = "#ff0066";
+            to = "#66ff00";
+            angle = 0;
+            "relative-to" = "workspace-view";
+          };
+        };
+        active-color = "#ffffff";
         position = "bottom";
       };
     };
