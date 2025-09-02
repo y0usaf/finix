@@ -14,6 +14,8 @@ in {
     home.ui.niri.settings = {
       prefer-no-csd = {};
 
+      screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
+
       spawn-at-startup =
         [
           ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"]
