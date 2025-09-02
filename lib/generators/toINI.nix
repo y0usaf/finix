@@ -1,6 +1,6 @@
 {lib}: {
   # INI configuration generator
-  toINI = {}: let
+  toINI = _: let
     inherit (lib) concatStringsSep mapAttrsToList;
     inherit (builtins) typeOf toString;
 

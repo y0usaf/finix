@@ -1,6 +1,6 @@
 {lib}: {
   # Shell script generator with proper escaping
-  toShell = {}: let
+  toShell = _: let
     inherit (lib) concatStringsSep escapeShellArg;
     inherit (builtins) typeOf;
 

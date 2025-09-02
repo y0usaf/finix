@@ -51,11 +51,11 @@ in {
           generator = lib.generators.toGitINI;
           value = {
             user = {
-              name = cfg.name;
-              email = cfg.email;
+              inherit (cfg) name;
+              inherit (cfg) email;
             };
             core = {
-              editor = cfg.editor;
+              inherit (cfg) editor;
             };
             init = {
               defaultBranch = "main";
