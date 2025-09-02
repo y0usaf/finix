@@ -86,8 +86,8 @@ in {
       "Mod+BracketRight" = {consume-or-expel-window-right = {};};
 
       # Screenshots
-      "Mod+G" = {spawn = ["sh" "-c" "grim -g $(slurp) - | wl-copy"];};
-      "Mod+Shift+G" = {spawn = ["sh" "-c" "grim - | wl-copy"];};
+      "Mod+G" = {screenshot = {};};
+      "Mod+Shift+G" = {screenshot-screen = {};};
 
       # System
       "Mod+Shift+E" = {quit = {};};
