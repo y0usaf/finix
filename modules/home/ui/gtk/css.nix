@@ -17,11 +17,11 @@
     "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
     "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
   ];
-  repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (_: shadowOffsets) 4));
-  opacity = toString config.home.core.appearance.opacity;
-  whiteColor = "white";
-  backgroundColor = "rgba(0, 0, 0, ${opacity})";
-  menuBackground = "rgba(0, 0, 0, ${opacity})";
+  strokeLayers = 4;
+  repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (_: shadowOffsets) strokeLayers));
+  baseOpacity = toString (config.home.core.appearance.opacity / 3);
+  textColor = "white";
+  backgroundColor = "rgba(0, 0, 0, ${baseOpacity})";
   hoverBg = "rgba(100, 149, 237, 0.1)";
   selectedBg = "rgba(100, 149, 237, 0.5)";
 in {
@@ -29,7 +29,7 @@ in {
     /* Global element styling */
     * {
       font-family: "${mainFontName}";
-      color: ${whiteColor};
+      color: ${textColor};
       background: ${backgroundColor};
       outline-width: 0;
       outline-offset: 0;
@@ -51,7 +51,7 @@ in {
     }
     /* Menu background styling */
     menu {
-      background: ${menuBackground};
+      background: ${backgroundColor};
     }
   '';
 }
