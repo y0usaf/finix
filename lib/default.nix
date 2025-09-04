@@ -71,6 +71,14 @@ in {
             ...
           }: {
             imports = [
+              # Provide hjem-lib module argument
+              ({
+                lib,
+                pkgs,
+                ...
+              }: {
+                _module.args.hjem-lib = import (sources.hjem + "/lib.nix") {inherit lib pkgs;};
+              })
               # Use hjem for home management
               (sources.hjem + "/modules/nixos")
             ];
