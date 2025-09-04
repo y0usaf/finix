@@ -17,13 +17,7 @@
       copy_on_select = true;
       show_startup_tips = false;
     }
-    // cfg.settings
-    // lib.optionalAttrs cfg.performanceMode {
-      # Optimization settings
-      session_serialization = false;
-      pane_viewport_serialization = false;
-      scrollback_lines_to_serialize = 0;
-    };
+    // cfg.settings;
 in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name} = {
