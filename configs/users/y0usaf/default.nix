@@ -38,7 +38,7 @@
       dpi = 144;
       baseFontSize = 12;
       cursorSize = 36;
-      opacity = 0.5;
+      opacity = 0.7;
     };
   };
   directories = {
