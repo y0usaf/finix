@@ -29,29 +29,21 @@
       alpha = config.home.core.appearance.opacity;
       background = "000000";
       foreground = "ffffff";
-      # Black/Gray
       regular0 = "000000";
+      regular1 = "ff0000";
+      regular2 = "00ff00";
+      regular3 = "ffff00";
+      regular4 = "1e90ff";
+      regular5 = "ff00ff";
+      regular6 = "00ffff";
+      regular7 = "ffffff";
       bright0 = "808080";
-      # Red/Pink (errors)
-      regular1 = "ff0064";
-      bright1 = "ff007f";
-      # Green (success)
-      regular2 = "00ff64";
-      bright2 = "00ff7f";
-      # Yellow/Orange
-      regular3 = "ff6400";
-      bright3 = "ff7f00";
-      # Blue/Cyan (highlights)
-      regular4 = "00c8ff";
-      bright4 = "00dcff";
-      # Magenta/Purple
-      regular5 = "c800ff";
-      bright5 = "dc00ff";
-      # Cyan/Teal (active states)
-      regular6 = "00ff96";
-      bright6 = "00ffaa";
-      # White
-      regular7 = "b4b4b4";
+      bright1 = "ff0000";
+      bright2 = "00ff00";
+      bright3 = "ffff00";
+      bright4 = "1e90ff";
+      bright5 = "ff00ff";
+      bright6 = "00ffff";
       bright7 = "ffffff";
     };
     key-bindings = {
