@@ -71,6 +71,11 @@
       fsType = "btrfs";
       options = ["subvol=@swap" "nodatacow"];
     };
+    "/home/y0usaf/.cache" = {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = ["size=2G" "uid=1000" "gid=100" "mode=0755"];
+    };
   };
   swapDevices = [
     {
