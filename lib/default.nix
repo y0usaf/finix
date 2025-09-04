@@ -2,17 +2,19 @@ let
   sources = import ../npins;
   system = "x86_64-linux";
 
+  # Shared nixpkgs config
+  nixpkgsConfig = {
+    allowUnfree = true;
+    cudaSupport = true;
+  };
+
   # Direct overlays import
   overlays = import ./overlays sources;
 
   # Direct pkgs with overlays
   pkgs = import sources.nixpkgs {
-    inherit system;
-    inherit overlays;
-    config = {
-      allowUnfree = true;
-      cudaSupport = true;
-    };
+    inherit system overlays;
+    config = nixpkgsConfig;
   };
 
   # Host configs - system-level configuration only
@@ -25,6 +27,20 @@ let
   userConfigs = {
     y0usaf = import ../configs/users/y0usaf {inherit pkgs;};
     guest = import ../configs/users/guest {inherit pkgs;};
+  };
+
+  # Hjem module with lib - replicates hjem flake's nixosModules.hjem
+  hjemModule = {
+    lib,
+    pkgs,
+    ...
+  }: {
+    imports = [
+      ({...}: {
+        _module.args.hjem-lib = import (sources.hjem + "/lib.nix") {inherit lib pkgs;};
+      })
+      (sources.hjem + "/modules/nixos")
+    ];
   };
 
   # Create the lib that will be exported with proper overlay application
@@ -51,18 +67,12 @@ in {
             # Configure nixpkgs with overlays
             nixpkgs = {
               inherit overlays;
-              config = {
-                allowUnfree = true;
-                cudaSupport = true;
-              };
+              config = nixpkgsConfig;
             };
           })
           # Direct user configurations - hardcoded imports
           (_: {
-            users = lib.mkMerge [
-              (userConfigs.y0usaf.users or {})
-              (userConfigs.guest.users or {})
-            ];
+            users = lib.mkMerge (lib.mapAttrsToList (_: cfg: cfg.users or {}) userConfigs);
           })
           # User home configurations via hjem
           ({
@@ -70,24 +80,10 @@ in {
             lib,
             ...
           }: {
-            imports = [
-              # Provide hjem-lib module argument
-              ({
-                lib,
-                pkgs,
-                ...
-              }: {
-                _module.args.hjem-lib = import (sources.hjem + "/lib.nix") {inherit lib pkgs;};
-              })
-              # Use hjem for home management
-              (sources.hjem + "/modules/nixos")
-            ];
+            imports = [hjemModule];
             config = {
               # Hardcoded home configs (excluding users.users)
-              home = lib.mkMerge [
-                (lib.filterAttrs (name: _: name != "users") userConfigs.y0usaf)
-                (lib.filterAttrs (name: _: name != "users") userConfigs.guest)
-              ];
+              home = lib.mkMerge (lib.mapAttrsToList (_: cfg: lib.filterAttrs (name: _: name != "users") cfg) userConfigs);
               # Configure hjem for each user (independent of host)
               hjem = {
                 # Use SMFH manifest linker instead of systemd-tmpfiles
