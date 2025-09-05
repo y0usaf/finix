@@ -1,4 +1,8 @@
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   # Direct NixOS user configuration
   users.users.y0usaf = {
     isNormalUser = true;
