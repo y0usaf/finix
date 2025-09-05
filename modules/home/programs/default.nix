@@ -16,5 +16,6 @@
     ./vesktop
     ./webapps.nix
     ./firefox
+    ./librewolf
   ];
 }

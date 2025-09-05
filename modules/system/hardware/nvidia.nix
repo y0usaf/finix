@@ -37,6 +37,13 @@
               {
                 "pattern": {
                   "feature": "procname",
+                  "matches": "niri"
+                },
+                "profile": "No VidMem Reuse"
+              },
+              {
+                "pattern": {
+                  "feature": "procname",
                   "matches": "electron"
                 },
                 "profile": "No VidMem Reuse"

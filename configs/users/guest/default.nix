@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, lib, ...}: {
   # Direct NixOS user configuration
   users.users.guest = {
     isNormalUser = true;
@@ -10,14 +10,14 @@
   core = {
     packages.enable = true;
     defaults = {
-      browser = "firefox";
-      editor = "nvim";
-      terminal = "foot";
-      fileManager = "pcmanfm";
-      launcher = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
-      archiveManager = "7z";
-      imageViewer = "imv";
-      mediaPlayer = "mpv";
+      browser = lib.mkDefault "firefox";
+      editor = lib.mkDefault "nvim";
+      terminal = lib.mkDefault "foot";
+      fileManager = lib.mkDefault "pcmanfm";
+      launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+      archiveManager = lib.mkDefault "7z";
+      imageViewer = lib.mkDefault "imv";
+      mediaPlayer = lib.mkDefault "mpv";
     };
     fonts.preset = "fast-mono";
     appearance = {

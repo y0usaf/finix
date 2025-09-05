@@ -28,8 +28,8 @@ let
 
   # User configs - home folder management only (separate from host)
   userConfigs = {
-    y0usaf = import ../configs/users/y0usaf {inherit pkgs;};
-    guest = import ../configs/users/guest {inherit pkgs;};
+    y0usaf = import ../configs/users/y0usaf {inherit pkgs lib;};
+    guest = import ../configs/users/guest {inherit pkgs lib;};
   };
 
   # Hjem module with lib - replicates hjem flake's nixosModules.hjem
