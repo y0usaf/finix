@@ -16,6 +16,7 @@ in {
           obs-backgroundremoval
           obs-vkcapture
           obs-pipewire-audio-capture
+          obs-image-reaction
         ];
       })
       v4l-utils

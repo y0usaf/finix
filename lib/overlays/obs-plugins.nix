@@ -11,5 +11,23 @@ sources: _final: prev: {
       obs-pipewire-audio-capture = prev.obs-studio-plugins.obs-pipewire-audio-capture.overrideAttrs (_: {
         src = sources.obs-pipewire-audio-capture;
       });
+      obs-image-reaction = prev.callPackage ({
+        lib,
+        stdenv,
+        fetchFromGitHub,
+        cmake,
+        obs-studio,
+        qt6,
+      }:
+        stdenv.mkDerivation rec {
+          pname = "obs-image-reaction";
+          version = "1.2.0";
+          src = sources.obs-image-reaction;
+          nativeBuildInputs = [cmake qt6.wrapQtAppsHook];
+          buildInputs = [obs-studio qt6.qtbase];
+          cmakeFlags = [
+            "-DCMAKE_INSTALL_PREFIX=${placeholder "out"}"
+          ];
+        }) {};
     };
 }
