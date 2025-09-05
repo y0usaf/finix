@@ -7,7 +7,7 @@
   policiesContent = builtins.toJSON {
     policies = {
       DisableTelemetry = true;
-      DisableFirefoxStudies = true;
+      DisableLibreWolfStudies = true;
       EnableTrackingProtection = {
         Value = true;
         Locked = false;
@@ -19,22 +19,22 @@
         };
         # uBlock Origin
         "uBlock0@raymondhill.net" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+          install_url = "https://addons.mozilla.org/librewolf/downloads/latest/ublock-origin/latest.xpi";
           installation_mode = "force_installed";
         };
         # Dark Reader
         "addon@darkreader.org" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi";
+          install_url = "https://addons.mozilla.org/librewolf/downloads/latest/darkreader/latest.xpi";
           installation_mode = "force_installed";
         };
       };
     };
   };
 in {
-  config = lib.mkIf config.home.programs.firefox.enable {
+  config = lib.mkIf config.home.programs.librewolf.enable {
     hjem.users.${username} = {
       files = {
-        ".mozilla/firefox/policies/policies.json" = {
+        ".mozilla/librewolf/policies/policies.json" = {
           text = policiesContent;
           clobber = true;
         };

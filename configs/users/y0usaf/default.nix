@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, lib, ...}: {
   # Direct NixOS user configuration
   users.users.y0usaf = {
     isNormalUser = true;
@@ -21,16 +21,16 @@
       ];
     };
     defaults = {
-      browser = "firefox";
-      editor = "nvim";
-      ide = "cursor";
-      terminal = "foot";
-      fileManager = "pcmanfm";
-      launcher = "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
-      discord = "discord-canary";
-      archiveManager = "7z";
-      imageViewer = "imv";
-      mediaPlayer = "mpv";
+      browser = "librewolf";
+      editor = lib.mkDefault "nvim";
+      ide = lib.mkDefault "cursor";
+      terminal = lib.mkDefault "foot";
+      fileManager = lib.mkDefault "pcmanfm";
+      launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+      discord = lib.mkDefault "discord-canary";
+      archiveManager = lib.mkDefault "7z";
+      imageViewer = lib.mkDefault "imv";
+      mediaPlayer = lib.mkDefault "mpv";
     };
     fonts.preset = "fast-mono";
     appearance = {
@@ -89,7 +89,7 @@
   programs = {
     vesktop.enable = true;
     webapps.enable = true;
-    firefox.enable = true;
+    librewolf.enable = true;
     discord.enable = true;
     obsidian.enable = true;
     creative.enable = true;
