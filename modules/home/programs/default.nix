@@ -15,7 +15,6 @@
     ./sway-launcher-desktop.nix
     ./vesktop
     ./webapps.nix
-    ./firefox
-    ./librewolf
+    ../browsers
   ];
 }

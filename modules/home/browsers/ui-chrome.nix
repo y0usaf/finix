@@ -23,7 +23,7 @@
         --uc-bottom-toolbar-height: 12pt
     }
 
-    /* Disable specific Firefox animations */
+    /* Disable specific LibreWolf animations */
     @media (prefers-reduced-motion: no-preference) {
       * {
         animation-duration: 0.001s !important;
@@ -236,7 +236,7 @@
         padding-inline: 2px!important
     }
 
-    .urlbarView-row[label="Firefox Suggest"] {
+    .urlbarView-row[label="LibreWolf Suggest"] {
         margin-top: 0 !important;
         overflow: hidden !important;
         display: none !important; /* Hide completely */
@@ -274,14 +274,10 @@
         --urlbar-icon-border-radius: 0pt!important
     }  '';
 in {
-  config = lib.mkIf config.home.programs.firefox.enable {
+  config = lib.mkIf config.home.programs.librewolf.enable {
     hjem.users.${username} = {
       files = {
-        ".mozilla/firefox/${username}/chrome/userChrome.css" = {
-          text = userChromeCss;
-          clobber = true;
-        };
-        ".mozilla/firefox/${username}.default-release/chrome/userChrome.css" = {
+        ".librewolf/${username}/chrome/userChrome.css" = {
           text = userChromeCss;
           clobber = true;
         };
