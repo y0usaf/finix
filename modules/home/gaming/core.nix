@@ -12,7 +12,7 @@ in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.packages = with pkgs; [
       steam
-      protonup
+      protonup-qt
       gamemode
       protontricks
       prismlauncher
