@@ -1,4 +1,8 @@
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   # Direct NixOS user configuration
   users.users.guest = {
     isNormalUser = true;
@@ -10,7 +14,7 @@
   core = {
     packages.enable = true;
     defaults = {
-      browser = lib.mkDefault "firefox";
+      browser = lib.mkDefault "librewolf";
       editor = lib.mkDefault "nvim";
       terminal = lib.mkDefault "foot";
       fileManager = lib.mkDefault "pcmanfm";
@@ -45,7 +49,8 @@
     wayland.enable = true;
   };
   programs = {
-    firefox.enable = true;
+    firefox.enable = false;
+    librewolf.enable = true;
     media.enable = true;
     imv.enable = true;
     mpv.enable = true;
