@@ -121,7 +121,7 @@
       enable = true;
       enableMcpServers = true;
     };
-    latex.enable = true;
+    latex.enable = false;
     upscale.enable = true;
   };
   shell = {
