@@ -1,5 +1,13 @@
 {
-  config = {
+  config,
+  lib,
+  ...
+}: {
+  options = {
+    var-cache = lib.mkEnableOption "Use /var/cache/nix for nix cache directory";
+  };
+
+  config = lib.mkIf config.var-cache {
     nix.settings = {
       # Move cache out of userland to system directory
       cache-dir = "/var/cache/nix";
