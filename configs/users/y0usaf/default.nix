@@ -68,9 +68,7 @@
       scale = 1.5;
     };
     hyprland = {
-      enable = true;
-      flake.enable = true;
-      hy3.enable = false;
+      enable = false;
     };
     niri = {
       enable = true;

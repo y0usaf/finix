@@ -39,7 +39,7 @@ let
     ...
   }: {
     imports = [
-      ({...}: {
+      (_: {
         _module.args.hjem-lib = import (sources.hjem + "/lib.nix") {inherit lib pkgs;};
       })
       (sources.hjem + "/modules/nixos")

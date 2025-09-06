@@ -18,9 +18,7 @@
       "col.active_border" = "rgba($active_colour)";
       "col.inactive_border" = "rgba($inactive_colour)";
       layout =
-        if cfg.hy3.enable
-        then "hy3"
-        else if cfg.group.enable
+        if cfg.group.enable
         then "group"
         else "dwindle";
     };

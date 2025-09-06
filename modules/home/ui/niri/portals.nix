@@ -13,7 +13,7 @@ in {
         xdg-desktop-portal-gtk
         xdg-desktop-portal-gnome
       ];
-      
+
       files.".config/xdg-desktop-portal/niri-portals.conf" = {
         text = generators.toINI {} {
           preferred = {

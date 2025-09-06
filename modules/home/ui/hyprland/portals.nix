@@ -13,7 +13,7 @@ in {
         xdg-desktop-portal-hyprland
         xdg-desktop-portal-gtk
       ];
-      
+
       files.".config/xdg-desktop-portal/hyprland-portals.conf" = {
         text = generators.toINI {} {
           preferred = {

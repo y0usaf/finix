@@ -42,9 +42,7 @@
     foot.enable = true;
     gtk.enable = true;
     hyprland = {
-      enable = true;
-      flake.enable = true;
-      hy3.enable = false;
+      enable = false;
     };
     wayland.enable = true;
   };
