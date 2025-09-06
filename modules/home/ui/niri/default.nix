@@ -14,6 +14,7 @@ in {
     ./layout.nix
     ./keybindings.nix
     ./environment.nix
+    ./portals.nix
   ];
 
   config = lib.mkIf cfg.enable {
