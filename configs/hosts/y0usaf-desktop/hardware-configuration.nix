@@ -91,11 +91,11 @@
       fsType = "btrfs";
       options = ["subvol=@music"];
     };
-    "/home/y0usaf/.cache" = {
-      device = "tmpfs";
-      fsType = "tmpfs";
-      options = ["size=2G" "uid=1001" "gid=100" "mode=0755"];
-    };
+    #  "/home/y0usaf/.cache" = {
+    #    device = "tmpfs";
+    #    fsType = "tmpfs";
+    #    options = ["size=2G" "uid=1001" "gid=100" "mode=0755"];
+    #  };
   };
   swapDevices = [
     {

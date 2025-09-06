@@ -12,9 +12,7 @@ sources: _final: prev: {
         src = sources.obs-pipewire-audio-capture;
       });
       obs-image-reaction = prev.callPackage ({
-        lib,
         stdenv,
-        fetchFromGitHub,
         cmake,
         obs-studio,
         qt6,
