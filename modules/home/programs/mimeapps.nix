@@ -9,7 +9,7 @@ in {
     enable = lib.mkEnableOption "XDG mime applications associations";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = {
     hjem.users.${config.user.name}.files = {
       ".config/mimeapps.list" = {
         clobber = true;

@@ -35,6 +35,8 @@ in {
         };
       };
 
+      files.".config/systemd/user/graphical-session.target.wants/xdg-desktop-portal-gtk.service".text = "";
+
       files.".config/systemd/user/xdg-desktop-portal-gnome.service.d/ordering.conf" = {
         generator = generators.toINI {};
         value = {
@@ -44,6 +46,8 @@ in {
           };
         };
       };
+
+      files.".config/systemd/user/graphical-session.target.wants/xdg-desktop-portal-gnome.service".text = "";
     };
   };
 }

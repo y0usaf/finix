@@ -164,10 +164,6 @@
   services = {
     polkitAgent.enable = true;
     formatNix.enable = true;
-    nixosGitSync = {
-      enable = true;
-      remoteBranch = "main";
-    };
     syncthing.enable = true;
   };
   gaming = {
