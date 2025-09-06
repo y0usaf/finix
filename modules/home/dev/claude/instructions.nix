@@ -29,6 +29,17 @@ _: {
         </nixos>
       </workflows>
 
+      <syntax-conventions>
+        <hjem>
+          Use consistent syntax for file generation:
+          files."path/to/file" = {
+            generator = generators.toFormat {};
+            value = { /* structured data */ };
+          };
+          NOT: text = generators.toFormat {} { /* data */ };
+        </hjem>
+      </syntax-conventions>
+
       <code-standards>
         <standard>Consistent naming: clear, concise variables</standard>
         <standard>Proper error handling: fail fast with clear messages</standard>
