@@ -12,7 +12,7 @@ in {
     hjem.users.${config.user.name} = {
       packages = [
         pkgs.hyprwayland-scanner
-        pkgs.hyprland # Use nixpkgs version for npins compatibility
+        pkgs.hyprland
         pkgs.grim
         pkgs.slurp
         pkgs.wl-clipboard
