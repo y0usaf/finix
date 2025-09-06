@@ -32,7 +32,7 @@
       fileManager = lib.mkDefault "pcmanfm";
       launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
       discord = lib.mkDefault "discord-canary";
-      archiveManager = lib.mkDefault "7z";
+      archiveManager = lib.mkDefault "file-roller";
       imageViewer = lib.mkDefault "imv";
       mediaPlayer = lib.mkDefault "mpv";
     };
