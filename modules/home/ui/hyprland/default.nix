@@ -9,5 +9,6 @@
     ./window-rules.nix
     ./ags-integration.nix
     ./quickshell-integration.nix
+    ./portals.nix
   ];
 }
