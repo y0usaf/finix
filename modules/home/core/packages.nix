@@ -95,7 +95,7 @@
     lsd
     alejandra
     tree
-    bottom
+    btop
     psmisc
     kitty
     dconf
