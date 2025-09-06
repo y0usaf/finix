@@ -7,5 +7,6 @@
     ./nix-package-management.nix
     ./nix-tools.nix
     ./system.nix
+    ./xdg-portal.nix
   ];
 }
