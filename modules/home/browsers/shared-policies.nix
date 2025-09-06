@@ -32,30 +32,36 @@
       "uBlock0@raymondhill.net" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
         installation_mode = "force_installed";
+        allowed_in_private_browsing = true;
       };
       "addon@darkreader.org" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi";
         installation_mode = "force_installed";
+        allowed_in_private_browsing = true;
       };
       # Vimium C
       "vimium-c@gdh1995.cn" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/vimium-c/latest.xpi";
         installation_mode = "force_installed";
+        allowed_in_private_browsing = true;
       };
       # Violentmonkey
       "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/violentmonkey/latest.xpi";
         installation_mode = "force_installed";
+        allowed_in_private_browsing = true;
       };
       # Twitch 5 (Alternate Player for Twitch.tv)
       "twitch5@coolcmd" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/twitch_5/latest.xpi";
         installation_mode = "force_installed";
+        allowed_in_private_browsing = true;
       };
       # SponsorBlock
       "sponsorBlocker@ajay.app" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
         installation_mode = "force_installed";
+        allowed_in_private_browsing = true;
       };
     };
     Preferences = {
