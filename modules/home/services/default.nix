@@ -5,5 +5,6 @@
     ./polkit-gnome.nix
     ./ssh.nix
     ./syncthing.nix
+    ./xdg-portals.nix
   ];
 }
