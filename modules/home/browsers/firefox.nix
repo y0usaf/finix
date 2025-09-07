@@ -5,11 +5,10 @@
   ...
 }: let
   username = config.user.name;
-  sharedPolicies = import ./shared-policies.nix {inherit config lib;};
+  sharedPolicies = import ./policies.nix {inherit config lib;};
 in {
   imports = [
     ./config.nix
-    ./performance.nix
     ./ui-chrome.nix
   ];
 

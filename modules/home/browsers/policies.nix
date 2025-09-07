@@ -1,11 +1,10 @@
-{config, ...}: {
+{config, lib, ...}: {
   browserPolicies = {
     DisableTelemetry = true;
     DisablePocket = true;
     DisableFormHistory = true;
     NoDefaultBookmarks = true;
     NewTabPage = false;
-    SkipOnboarding = true;
     EnableTrackingProtection = {
       Value = true;
       Locked = false;
@@ -79,23 +78,6 @@
         Value = 1;
         Status = "locked";
       };
-      # Font settings - force all fonts to use monospace
-      "font.default.x-western" = {
-        Value = "monospace";
-        Status = "locked";
-      };
-      "font.name.sans-serif.x-western" = {
-        Value = config.fonts.fontconfig.defaultFonts.monospace or ["monospace"];
-        Status = "locked";
-      };
-      "font.name.serif.x-western" = {
-        Value = config.fonts.fontconfig.defaultFonts.monospace or ["monospace"];
-        Status = "locked";
-      };
-      "font.name.monospace.x-western" = {
-        Value = config.fonts.fontconfig.defaultFonts.monospace or ["monospace"];
-        Status = "locked";
-      };
       # Disable "Allow pages to choose their own fonts"
       "browser.display.use_document_fonts" = {
         Value = 0;
@@ -118,6 +100,75 @@
       # Hide bookmarks toolbar
       "browser.toolbars.bookmarks.visibility" = {
         Value = "never";
+        Status = "locked";
+      };
+      # Performance settings from performance.nix
+      "gfx.webrender.all" = {
+        Value = if config.system.hardware.nvidia.enable or false then false else true;
+        Status = "locked";
+      };
+      "media.hardware-video-decoding.enabled" = {
+        Value = if config.system.hardware.nvidia.enable or false then false else true;
+        Status = "locked";
+      };
+      "media.ffmpeg.vaapi.enabled" = {
+        Value = if config.system.hardware.nvidia.enable or false then false else true;
+        Status = "locked";
+      };
+      "layers.acceleration.disabled" = {
+        Value = if config.system.hardware.nvidia.enable or false then true else false;
+        Status = "locked";
+      };
+      "browser.sessionstore.interval" = {
+        Value = 15000;
+        Status = "locked";
+      };
+      "network.http.max-persistent-connections-per-server" = {
+        Value = 10;
+        Status = "locked";
+      };
+      "browser.cache.disk.enable" = {
+        Value = false;
+        Status = "locked";
+      };
+      "browser.cache.memory.enable" = {
+        Value = true;
+        Status = "locked";
+      };
+      "browser.cache.memory.capacity" = {
+        Value = 1048576;
+        Status = "locked";
+      };
+      "browser.sessionhistory.max_entries" = {
+        Value = 50;
+        Status = "locked";
+      };
+      "network.prefetch-next" = {
+        Value = true;
+        Status = "locked";
+      };
+      "network.dns.disablePrefetch" = {
+        Value = false;
+        Status = "locked";
+      };
+      "network.predictor.enabled" = {
+        Value = true;
+        Status = "locked";
+      };
+      "browser.enabledE10S" = {
+        Value = false;
+        Status = "locked";
+      };
+      "browser.theme.dark-private-windows" = {
+        Value = false;
+        Status = "locked";
+      };
+      "dom.webcomponents.enabled" = {
+        Value = true;
+        Status = "locked";
+      };
+      "layout.css.shadow-parts.enabled" = {
+        Value = true;
         Status = "locked";
       };
     };
