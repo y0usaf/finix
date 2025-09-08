@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{lib, ...}: {
   options.home.core.defaults = {
     browser = lib.mkOption {
       type = lib.types.str;

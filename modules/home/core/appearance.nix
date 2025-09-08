@@ -3,7 +3,6 @@
   lib,
   ...
 }: let
-  inherit (config.modules) options;
   cfg = config.home.core.appearance;
   t = lib.types;
 in {

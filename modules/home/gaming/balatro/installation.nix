@@ -178,7 +178,7 @@ in {
         };
       })
       // (lib.mapAttrs' (
-          name: mod:
+          _name: mod:
             lib.nameValuePair
             ".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
             {
