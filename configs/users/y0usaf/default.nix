@@ -11,7 +11,8 @@
     home = "/home/y0usaf";
     ignoreShellProgramCheck = true;
   };
-  core = {
+  home = {
+    core = {
     packages.enable = true;
     user = {
       enable = true;
@@ -45,7 +46,7 @@
       opacity = 0.7;
     };
   };
-  directories = {
+    directories = {
     flake.path = "/home/y0usaf/nixos";
     music.path = "/home/y0usaf/Music";
     dcim.path = "/home/y0usaf/DCIM";
@@ -58,7 +59,7 @@
       video.path = "/home/y0usaf/DCIM/Wallpapers_Video";
     };
   };
-  ui = {
+    ui = {
     ags.enable = true;
     cursor.enable = true;
     fonts.enable = true;
@@ -88,7 +89,7 @@
     wallust.enable = true;
     wayland.enable = true;
   };
-  programs = {
+    programs = {
     vesktop.enable = true;
     webapps.enable = true;
     librewolf.enable = true;
@@ -106,7 +107,7 @@
     stremio.enable = true;
     sway-launcher-desktop.enable = true;
   };
-  dev = {
+    dev = {
     claude-code.enable = true;
 
     gemini-cli.enable = true;
@@ -124,7 +125,7 @@
     latex.enable = false;
     upscale.enable = true;
   };
-  shell = {
+    shell = {
     zsh.enable = true;
     aliases.enable = true;
     cat-fetch.enable = true;
@@ -133,7 +134,7 @@
       autoStart = true;
     };
   };
-  tools = {
+    tools = {
     git = {
       enable = true;
       name = "y0usaf";
@@ -161,12 +162,12 @@
     spotdl.enable = true;
     yt-dlp.enable = true;
   };
-  services = {
+    services = {
     polkitAgent.enable = true;
     formatNix.enable = true;
     syncthing.enable = true;
   };
-  gaming = {
+    gaming = {
     core.enable = true;
     controllers.enable = true;
     emulation = {
@@ -186,5 +187,6 @@
     wukong = {
       enable = true;
     };
+  };
   };
 }

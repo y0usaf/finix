@@ -42,6 +42,11 @@
       options = ["fmask=0077" "dmask=0077"];
     };
     "/btrfs" = {
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      fsType = "btrfs";
+      options = ["subvolid=5"];
+    };
+    "/btrfs/data" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = ["subvolid=5"];
@@ -70,11 +75,6 @@
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = ["subvol=@steam"];
-    };
-    "/home/y0usaf/.mozilla" = {
-      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
-      fsType = "btrfs";
-      options = ["subvol=@mozilla"];
     };
     "/home/y0usaf/Pictures" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
