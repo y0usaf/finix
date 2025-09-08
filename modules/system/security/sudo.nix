@@ -1,4 +1,4 @@
-{hostConfig, ...}: {
+{...}: {
   config = {
     security.sudo.extraRules = [
       {
