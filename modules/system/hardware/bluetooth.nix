@@ -26,7 +26,5 @@ in {
       pkgs.bluez
       pkgs.bluez-tools
     ];
-    users.users.${builtins.head hostConfig.users}.extraGroups =
-      lib.optionals (hardwareCfg.bluetooth.enable or false) ["dialout" "bluetooth" "lp"];
   };
 }

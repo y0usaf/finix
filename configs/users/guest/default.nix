@@ -11,7 +11,8 @@
     home = "/home/guest";
     ignoreShellProgramCheck = true;
   };
-  core = {
+  home = {
+    core = {
     packages.enable = true;
     defaults = {
       browser = lib.mkDefault "librewolf";
@@ -32,11 +33,11 @@
     };
     user.enable = true;
   };
-  directories = {
+    directories = {
     music.path = "/home/guest/Music";
     dcim.path = "/home/guest/DCIM";
   };
-  ui = {
+    ui = {
     cursor.enable = true;
     fonts.enable = true;
     foot.enable = true;
@@ -46,7 +47,7 @@
     };
     wayland.enable = true;
   };
-  programs = {
+    programs = {
     firefox.enable = false;
     librewolf.enable = true;
     media.enable = true;
@@ -54,15 +55,16 @@
     mpv.enable = true;
     pcmanfm.enable = true;
   };
-  shell = {
+    shell = {
     zsh.enable = true;
     cat-fetch.enable = true;
   };
-  tools = {
+    tools = {
     "7z".enable = true;
     file-roller.enable = true;
   };
-  services = {
-    polkitAgent.enable = true;
+    services = {
+      polkitAgent.enable = true;
+    };
   };
 }
