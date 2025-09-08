@@ -6,7 +6,7 @@
   config = {
     security.sudo.extraRules = [
       {
-        users = [(builtins.head hostConfig.users)];
+        users = ["y0usaf"];
         commands = [
           {
             command = "ALL";

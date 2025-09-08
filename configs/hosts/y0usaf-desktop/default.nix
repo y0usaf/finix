@@ -6,12 +6,14 @@
   imports = [
     ../../../modules/system
     ./hardware-configuration.nix
+    ../../users/y0usaf
+    ../../users/guest
   ];
 
   # Install Fast Font system-wide
   fonts.packages = [pkgs.fastFonts];
-  users = ["y0usaf" "guest"];
   hostname = "y0usaf-desktop";
+  trustedUsers = ["y0usaf"];
   homeDirectory = "/home/y0usaf";
   stateVersion = "24.11";
   timezone = "America/Toronto";

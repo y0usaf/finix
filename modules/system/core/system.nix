@@ -11,10 +11,6 @@
     nixpkgs.config.allowUnfree = true;
     assertions = [
       {
-        assertion = (builtins.head hostConfig.users) != "";
-        message = "System username cannot be empty";
-      }
-      {
         assertion = hostConfig.hostname != "";
         message = "System hostname cannot be empty";
       }
