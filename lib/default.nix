@@ -52,7 +52,7 @@ in {
       configuration = {
         imports = [
           # Host system configuration
-          ({config, ...}: {
+          (_: {
             inherit (hostConfig) imports;
             # Set user configuration from primary user
             user = {
@@ -66,11 +66,7 @@ in {
             };
           })
           # User home configurations via hjem
-          ({
-            config,
-            lib,
-            ...
-          }: {
+          ({...}: {
             imports = [hjemModule];
             config = {
               # Configure hjem for each user (independent of host)
