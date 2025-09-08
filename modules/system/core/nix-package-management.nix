@@ -13,7 +13,7 @@
         cores = 0;
         experimental-features = ["nix-command" "flakes"];
         sandbox = true;
-        trusted-users = ["root" (builtins.head hostConfig.users)];
+        trusted-users = ["root"] ++ (hostConfig.trustedUsers or []);
         builders-use-substitutes = true;
         fallback = true;
         substituters = [
