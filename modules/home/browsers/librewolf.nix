@@ -20,7 +20,6 @@ in {
             sharedPolicies.browserPolicies
             // {
               DisableFirefoxAccounts = false;
-              DisableLibreWolfStudies = true;
             };
         })
       ];
