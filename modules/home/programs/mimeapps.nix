@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.programs.mimeapps;
-in {
+}: {
   options.home.programs.mimeapps = {
     enable = lib.mkEnableOption "XDG mime applications associations";
   };
