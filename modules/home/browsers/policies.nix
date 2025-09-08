@@ -1,10 +1,27 @@
-{config, lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   browserPolicies = {
     DisableTelemetry = true;
     DisablePocket = true;
     DisableFormHistory = true;
     NoDefaultBookmarks = true;
     NewTabPage = false;
+    FirefoxHome = {
+      Search = false;
+      TopSites = false;
+      Highlights = false;
+      Pocket = false;
+      Snippets = false;
+      Locked = true;
+    };
+    Homepage = {
+      URL = "about:blank";
+      Locked = true;
+      StartPage = "homepage";
+    };
     EnableTrackingProtection = {
       Value = true;
       Locked = false;
@@ -92,9 +109,9 @@
         Value = true;
         Status = "locked";
       };
-      # Show titlebar
+      # Show separate titlebar by default
       "browser.tabs.drawInTitlebar" = {
-        Value = false;
+        Value = true;
         Status = "locked";
       };
       # Hide bookmarks toolbar
@@ -104,19 +121,31 @@
       };
       # Performance settings from performance.nix
       "gfx.webrender.all" = {
-        Value = if config.system.hardware.nvidia.enable or false then false else true;
+        Value =
+          if config.system.hardware.nvidia.enable or false
+          then false
+          else true;
         Status = "locked";
       };
       "media.hardware-video-decoding.enabled" = {
-        Value = if config.system.hardware.nvidia.enable or false then false else true;
+        Value =
+          if config.system.hardware.nvidia.enable or false
+          then false
+          else true;
         Status = "locked";
       };
       "media.ffmpeg.vaapi.enabled" = {
-        Value = if config.system.hardware.nvidia.enable or false then false else true;
+        Value =
+          if config.system.hardware.nvidia.enable or false
+          then false
+          else true;
         Status = "locked";
       };
       "layers.acceleration.disabled" = {
-        Value = if config.system.hardware.nvidia.enable or false then true else false;
+        Value =
+          if config.system.hardware.nvidia.enable or false
+          then true
+          else false;
         Status = "locked";
       };
       "browser.sessionstore.interval" = {
@@ -168,6 +197,31 @@
         Status = "locked";
       };
       "layout.css.shadow-parts.enabled" = {
+        Value = true;
+        Status = "locked";
+      };
+      # Force individual extensions to work in private browsing
+      "extensions.webextensions.uBlock0@raymondhill.net.privateBrowsingAllowed" = {
+        Value = true;
+        Status = "locked";
+      };
+      "extensions.webextensions.addon@darkreader.org.privateBrowsingAllowed" = {
+        Value = true;
+        Status = "locked";
+      };
+      "extensions.webextensions.vimium-c@gdh1995.cn.privateBrowsingAllowed" = {
+        Value = true;
+        Status = "locked";
+      };
+      "extensions.webextensions.{aecec67f-0d10-4fa7-b7c7-609a2db280cf}.privateBrowsingAllowed" = {
+        Value = true;
+        Status = "locked";
+      };
+      "extensions.webextensions.twitch5@coolcmd.privateBrowsingAllowed" = {
+        Value = true;
+        Status = "locked";
+      };
+      "extensions.webextensions.sponsorBlocker@ajay.app.privateBrowsingAllowed" = {
         Value = true;
         Status = "locked";
       };
