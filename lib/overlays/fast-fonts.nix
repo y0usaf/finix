@@ -1,4 +1,4 @@
-sources: final: prev: {
+sources: _final: prev: {
   fastFonts = prev.stdenvNoCC.mkDerivation {
     pname = "fast-fonts";
     version = "1.0.0";

@@ -5,10 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-  }: let
+  outputs = _: let
     lib-file = import ./lib;
   in {
     # Just expose our npins-based nixosConfigurations
