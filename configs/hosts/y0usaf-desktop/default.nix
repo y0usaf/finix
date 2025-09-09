@@ -7,7 +7,7 @@
     ../../../modules/system
     ./hardware-configuration.nix
     ../../users/y0usaf
-    ../../users/guest
+    # ../../users/guest
   ];
 
   # Install Fast Font system-wide
