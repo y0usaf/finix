@@ -34,12 +34,12 @@ in {
         binutils
       ];
       files = {
-        "{{xdg_config_home}}/zsh/.zshenv" = {
+        ".config/zsh/.zshenv" = {
           clobber = true;
           text = lib.mkAfter ''
-            export PYTHONUSERBASE="{{home}}/.local/share/python"
-            export PIP_CACHE_DIR="{{xdg_cache_home}}/pip"
-            export VIRTUAL_ENV_HOME="{{home}}/.local/share/venvs"
+            export PYTHONUSERBASE="${config.user.homeDirectory}/.local/share/python"
+            export PIP_CACHE_DIR="${config.user.homeDirectory}/.cache/pip"
+            export VIRTUAL_ENV_HOME="${config.user.homeDirectory}/.local/share/venvs"
             export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             export REQUESTS_CA_BUNDLE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             export NIX_LD_LIBRARY_PATH="${lib.makeLibraryPath [
@@ -58,7 +58,7 @@ in {
             export PYTHONPATH="$PYTHONUSERBASE/lib/python3.12/site-packages:$PYTHONPATH"
           '';
         };
-        "{{xdg_config_home}}/zsh/.zshrc" = {
+        ".config/zsh/.zshrc" = {
           clobber = true;
           text = lib.mkAfter ''
             alias py="python3"
