@@ -6,8 +6,11 @@
     ../../users/guest
   ];
 
-  # Install Fast Font system-wide (matching desktop)
-  fonts.packages = [pkgs.fastFonts];
+  # Install Fast Font system-wide
+  fonts = {
+    packages = [pkgs.fastFonts];
+    fontDir.enable = true;
+  };
   hostname = "y0usaf-laptop";
   trustedUsers = ["y0usaf"];
   homeDirectory = "/home/y0usaf";

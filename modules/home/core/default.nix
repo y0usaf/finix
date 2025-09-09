@@ -6,6 +6,5 @@
     ./packages.nix
     ./user.nix
     ./session
-    ./fonts
   ];
 }
