@@ -12,6 +12,9 @@
 
   # Install Fast Font system-wide
   fonts.packages = [pkgs.fastFonts];
+  
+  # Also add to system packages to ensure proper linking
+  environment.systemPackages = [pkgs.fastFonts];
   hostname = "y0usaf-desktop";
   trustedUsers = ["y0usaf"];
   homeDirectory = "/home/y0usaf";
