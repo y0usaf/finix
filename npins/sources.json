@@ -26,18 +26,18 @@
       "url": "https://github.com/y0usaf/Deepin-Dark-xcursor/archive/b3df394dd67ab93ead5ba08db3b3bb46132e0d8c.tar.gz",
       "hash": "1254ixygmaqhynj9cyc3d4aw7dkp2c18qlfjbdpplg8p8chscil5"
     },
-    "Fast-Font": {
+    "Fast-Fonts": {
       "type": "Git",
       "repository": {
         "type": "GitHub",
         "owner": "y0usaf",
-        "repo": "Fast-Font"
+        "repo": "Fast-Fonts"
       },
       "branch": "main",
       "submodules": false,
-      "revision": "25de00844f7f66252b26d3aab0a7ff2c33bb4f3d",
-      "url": "https://github.com/y0usaf/Fast-Font/archive/25de00844f7f66252b26d3aab0a7ff2c33bb4f3d.tar.gz",
-      "hash": "108x8lb0ypi7hpc37j7jp1nylxkczlpqncm916yasqxlrrfj6wy8"
+      "revision": "bad1b89e81062941f46a3c046a5c53adea3f6b8f",
+      "url": "https://github.com/y0usaf/Fast-Fonts/archive/bad1b89e81062941f46a3c046a5c53adea3f6b8f.tar.gz",
+      "hash": "1m93cs97h7f85k496ab4a3nw8iwqmsgylz7raanpv1l0n4p1rwgf"
     },
     "Hyprland": {
       "type": "GitRelease",
