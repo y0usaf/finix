@@ -15,8 +15,8 @@ in {
       prefer-no-csd = {};
 
       cursor = {
-        theme = "DeepinDarkV20-x11";
-        size = config.home.core.appearance.cursorSize;
+        xcursor-theme = "DeepinDarkV20-x11";
+        xcursor-size = config.home.core.appearance.cursorSize;
       };
 
       screenshot-path = null;
