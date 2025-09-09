@@ -1,5 +1,5 @@
-sources: final: _prev: {
-  fastFonts = final.stdenvNoCC.mkDerivation {
+sources: final: prev: {
+  fastFonts = prev.stdenvNoCC.mkDerivation {
     pname = "fast-fonts";
     version = "1.0.0";
     src = sources.Fast-Fonts + "/fonts";
@@ -9,8 +9,8 @@ sources: final: _prev: {
       find . -name "*.ttf" -exec install -m444 {} $out/share/fonts/truetype/ \;
     '';
 
-    meta = with final.lib; {
-      description = "Custom fast reading fonts by y0usaf";
+    meta = with prev.lib; {
+      description = "Fast reading fonts by y0usaf";
       homepage = "https://github.com/y0usaf/Fast-Fonts";
       platforms = platforms.all;
       license = licenses.mit;
