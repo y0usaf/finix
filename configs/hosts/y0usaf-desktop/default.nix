@@ -11,7 +11,14 @@
   ];
 
   # Install Fast Font system-wide
-  fonts.packages = [pkgs.fastFonts];
+  fonts = {
+    packages = with pkgs; [
+      fastFonts
+      # Also add a working font package for comparison
+      dejavu_fonts
+    ];
+    fontDir.enable = true;
+  };
   hostname = "y0usaf-desktop";
   trustedUsers = ["y0usaf"];
   homeDirectory = "/home/y0usaf";
