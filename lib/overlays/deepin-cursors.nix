@@ -1,4 +1,4 @@
-sources: final: prev: {
+sources: _final: prev: {
   deepin-dark-hyprcursor = prev.stdenv.mkDerivation {
     name = "deepin-dark-hyprcursor";
     src = sources.Deepin-Dark-hyprcursor;
