@@ -8,8 +8,9 @@
   username = config.user.name;
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
-  hyprcursorPackage = pkgs.phinger-cursors; # Use standard cursor for npins compatibility
-  xcursorPackage = pkgs.phinger-cursors;
+  xcursorPackage = pkgs.deepin-dark-xcursor;
+  hyprcursorPackage = null;
+  # hyprcursorPackage = pkgs.deepin-dark-hyprcursor; # Uncomment to enable hyprcursor support
 in {
   options.home.ui.cursor = {
     enable = lib.mkOption {
@@ -20,18 +21,23 @@ in {
   };
   config = lib.mkIf cfg.enable {
     hjem.users.${username} = {
-      packages = with pkgs; [
-        hyprcursorPackage
-        xcursorPackage
-      ];
+      packages = with pkgs;
+        [
+          xcursorPackage
+        ]
+        ++ lib.optionals (hyprcursorPackage != null) [
+          hyprcursorPackage
+        ];
       files = {
         ".config/zsh/.zprofile" = {
-          text = lib.mkAfter ''
-            export HYPRCURSOR_THEME="${hyprThemeName}"
-            export HYPRCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
-            export XCURSOR_THEME="${x11ThemeName}"
-            export XCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
-          '';
+          text = lib.mkAfter (''
+              export XCURSOR_THEME="${x11ThemeName}"
+              export XCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
+            ''
+            + lib.optionalString (hyprcursorPackage != null) ''
+              export HYPRCURSOR_THEME="${hyprThemeName}"
+              export HYPRCURSOR_SIZE="${toString config.home.core.appearance.cursorSize}"
+            '');
           clobber = true;
         };
         ".config/gtk-3.0/settings.ini" = {
