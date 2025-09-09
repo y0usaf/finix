@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "mcp__GitHub_Repo_MCP__getRepoFile"
+    ],
+    "additionalDirectories": [
+      "/home/y0usaf"
+    ]
+  }
+}
