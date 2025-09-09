@@ -6,7 +6,7 @@ sources: final: _prev: {
 
     installPhase = ''
       mkdir -p $out/share/fonts/truetype
-      install -m444 -Dt $out/share/fonts/truetype fonts/*.ttf
+      cp -r fonts/* $out/share/fonts/truetype/
       mkdir -p $out/share/doc/fast-fonts
       if [ -f LICENSE ]; then
         install -m444 -Dt $out/share/doc/fast-fonts LICENSE

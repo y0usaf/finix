@@ -86,7 +86,7 @@ in {
           inherit hostConfig sources;
           inherit (pkgs) lib;
           # Direct access to commonly used sources
-          inherit (sources) disko nix-minecraft Fast-Font;
+          inherit (sources) disko nix-minecraft Fast-Fonts;
         };
       };
     })
