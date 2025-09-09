@@ -2,23 +2,15 @@ sources: final: _prev: {
   fastFonts = final.stdenvNoCC.mkDerivation {
     pname = "fast-fonts";
     version = "1.0.0";
-    src = sources.Fast-Fonts;
+    src = sources.Fast-Fonts + "/fonts";
 
     installPhase = ''
       mkdir -p $out/share/fonts/truetype
-      cp -r fonts/* $out/share/fonts/truetype/
-      mkdir -p $out/share/doc/fast-fonts
-      if [ -f LICENSE ]; then
-        install -m444 -Dt $out/share/doc/fast-fonts LICENSE
-      fi
-      if [ -f README.md ]; then
-        install -m444 -Dt $out/share/doc/fast-fonts README.md
-      fi
+      find . -name "*.ttf" -exec install -m444 {} $out/share/fonts/truetype/ \;
     '';
 
     meta = with final.lib; {
-      description = "Fast Font Collection - TTF fonts";
-      longDescription = "Fast Font Collection provides optimized monospace and sans-serif fonts";
+      description = "Custom fast reading fonts by y0usaf";
       homepage = "https://github.com/y0usaf/Fast-Fonts";
       platforms = platforms.all;
       license = licenses.mit;
