@@ -37,13 +37,34 @@
         imageViewer = lib.mkDefault "imv";
         mediaPlayer = lib.mkDefault "mpv";
       };
-      fonts.preset = "fast-mono";
       appearance = {
         enable = true;
         dpi = 144;
         baseFontSize = 12;
         cursorSize = 36;
         opacity = 0.7;
+        fonts = {
+          main = [
+            {
+              package = pkgs.fastFonts;
+              name = "Fast IosevkaSlab";
+            }
+          ];
+          fallback = [
+            {
+              package = pkgs.noto-fonts-emoji;
+              name = "Noto Color Emoji";
+            }
+            {
+              package = pkgs.noto-fonts-cjk-sans;
+              name = "Noto Sans CJK";
+            }
+            {
+              package = pkgs.font-awesome;
+              name = "Font Awesome";
+            }
+          ];
+        };
       };
     };
     directories = {
