@@ -1,4 +1,4 @@
-{fast-fonts ? null}: let
+let
   sources = import ../npins;
   system = "x86_64-linux";
 
@@ -11,17 +11,8 @@
     ];
   };
 
-  # Direct overlays import with fast-fonts overlay
-  overlays =
-    import ./overlays sources
-    ++ [
-      (final: prev: {
-        fastFonts =
-          if fast-fonts != null
-          then fast-fonts.packages.${system}.custom-fast-fonts
-          else throw "fast-fonts flake input is null";
-      })
-    ];
+  # Direct overlays import
+  overlays = import ./overlays sources;
 
   # Direct pkgs with overlays
   pkgs = import sources.nixpkgs {
