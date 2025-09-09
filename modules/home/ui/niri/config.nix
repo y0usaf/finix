@@ -14,6 +14,11 @@ in {
     home.ui.niri.settings = {
       prefer-no-csd = {};
 
+      cursor = {
+        theme = "DeepinDarkV20-x11";
+        size = config.home.core.appearance.cursorSize;
+      };
+
       screenshot-path = null;
 
       spawn-at-startup =
