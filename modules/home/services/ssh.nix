@@ -32,7 +32,7 @@ in {
                 IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
           '';
         };
-        "{{xdg_config_home}}/zsh/.zshenv" = {
+        ".config/zsh/.zshenv" = {
           clobber = true;
           text = lib.mkAfter ''
             export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
