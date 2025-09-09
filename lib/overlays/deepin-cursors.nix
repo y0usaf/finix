@@ -12,8 +12,8 @@ sources: _final: prev: {
     name = "deepin-dark-xcursor";
     src = sources.Deepin-Dark-xcursor;
     installPhase = ''
-      mkdir -p $out/share/icons
-      cp -r * $out/share/icons/
+      mkdir -p $out/share/icons/DeepinDarkV20-x11
+      cp -r cursors index.theme $out/share/icons/DeepinDarkV20-x11/
     '';
   };
 }
