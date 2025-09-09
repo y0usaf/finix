@@ -6,7 +6,7 @@
 }: {
   config = {
     boot = {
-      kernelPackages = pkgs.linuxPackages_latest; # TODO: Re-enable linuxPackages_cachyos when chaotic is fixed
+      kernelPackages = pkgs.linuxPackages_latest;
       kernelModules =
         [
           "kvm-amd"
