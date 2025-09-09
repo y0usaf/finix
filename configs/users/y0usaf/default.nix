@@ -41,7 +41,7 @@
         enable = true;
         dpi = 144;
         baseFontSize = 12;
-        cursorSize = 36;
+        cursorSize = 18;
         opacity = 0.7;
         fonts = {
           main = [
