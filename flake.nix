@@ -2,19 +2,14 @@
   description = "Minimal flake wrapper for npins-based NixOS configuration";
 
   inputs = {
-    fast-fonts = {
-      url = "github:y0usaf/Fast-Fonts";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   outputs = {
     self,
     nixpkgs,
-    fast-fonts,
   }: let
-    lib-file = import ./lib {inherit fast-fonts;};
+    lib-file = import ./lib;
   in {
     # Just expose our npins-based nixosConfigurations
     inherit (lib-file) nixosConfigurations;
