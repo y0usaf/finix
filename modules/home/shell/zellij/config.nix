@@ -16,6 +16,8 @@
       default_shell = "zsh";
       copy_on_select = true;
       show_startup_tips = false;
+      on_force_close = "quit";
+      session_serialization = false;
     }
     // cfg.settings;
 in {
