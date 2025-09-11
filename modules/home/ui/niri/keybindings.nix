@@ -105,6 +105,10 @@ in {
 
       # Change wallpaper
       "Mod+Shift+C" = {spawn = ["sh" "-c" "killall swaybg; swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill &"];};
+
+      # Monitor controls
+      "Mod+6" = {spawn = ["sh" "-c" "niri msg output DP-4 on; niri msg output DP-2 on; niri msg output HDMI-A-2 on"];};
+      "Mod+7" = {spawn = ["sh" "-c" "niri msg output DP-4 off; niri msg output DP-2 off; niri msg output HDMI-A-2 off"];};
     };
   };
 }
