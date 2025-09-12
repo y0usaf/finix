@@ -10,6 +10,6 @@ in {
     enable = lib.mkEnableOption "Stremio media center";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [stremio];
+    usr.packages = with pkgs; [stremio];
   };
 }

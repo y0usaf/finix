@@ -4,7 +4,7 @@
   ...
 }: {
   config = {
-    hjem.users.${config.user.name} = {
+    usr = {
       files = {
         ".local/share/xdg-desktop-portal/portals/gnome.portal" = {
           generator = lib.generators.toINI {};

@@ -56,7 +56,7 @@ in {
     enable = lib.mkEnableOption "foot terminal emulator";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         foot
       ];

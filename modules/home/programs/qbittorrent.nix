@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "qBittorrent torrent client";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [
+    usr.packages = with pkgs; [
       qbittorrent
     ];
   };

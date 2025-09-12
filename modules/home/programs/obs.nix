@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "OBS Studio";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [
+    usr.packages = with pkgs; [
       (wrapOBS {
         plugins = with obs-studio-plugins; [
           obs-backgroundremoval

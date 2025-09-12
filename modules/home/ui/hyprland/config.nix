@@ -7,7 +7,7 @@
   cfg = config.home.ui.hyprland;
 in {
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = [
         pkgs.hyprwayland-scanner
         pkgs.hyprland

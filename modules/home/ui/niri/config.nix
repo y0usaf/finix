@@ -30,7 +30,7 @@ in {
       window-rule = {};
     };
 
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = [
         pkgs.niri
         pkgs.grim

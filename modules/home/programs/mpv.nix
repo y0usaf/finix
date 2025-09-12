@@ -10,6 +10,6 @@ in {
     enable = lib.mkEnableOption "mpv media player";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [mpv];
+    usr.packages = with pkgs; [mpv];
   };
 }

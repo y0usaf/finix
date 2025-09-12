@@ -66,7 +66,7 @@ in {
     enable = lib.mkEnableOption "Model Context Protocol configuration";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         nodejs_20
         uv

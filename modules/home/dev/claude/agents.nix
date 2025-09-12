@@ -10,7 +10,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       files = {
         # Code Review Agent
         ".claude/agents/code-reviewer.md" = {
