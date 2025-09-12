@@ -10,7 +10,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       files = {
         # NixOS specific commands
         ".claude/commands/nixos-build.md" = {

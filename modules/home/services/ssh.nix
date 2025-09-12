@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "SSH configuration module";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         openssh
       ];

@@ -7,7 +7,7 @@
   cfg = config.home.ui.hyprland;
 in {
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         xdg-desktop-portal
         xdg-desktop-portal-hyprland

@@ -9,7 +9,7 @@ in {
     enable = lib.mkEnableOption "cat fetch display on shell startup";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.files = {
+    usr.files = {
       ".config/zsh/.zshrc" = {
         text = lib.mkAfter ''
           print_cats() {
