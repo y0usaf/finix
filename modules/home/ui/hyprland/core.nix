@@ -2,6 +2,7 @@
   config,
   lib,
   hostConfig,
+  genLib,
   ...
 }: let
   cfg = config.home.ui.hyprland;
@@ -82,7 +83,7 @@
 in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
-      generator = lib.generators.toHyprconf {
+      generator = genLib.toHyprconf {
         importantPrefixes = ["$" "exec" "source"];
       };
       value = coreConfig;

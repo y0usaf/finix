@@ -2,7 +2,7 @@
   config,
   pkgs,
   lib,
-  generators,
+  genLib,
   ...
 }: let
   cfg = config.home.ui.niri;
@@ -42,7 +42,7 @@ in {
       files = {
         ".config/niri/config.kdl" = {
           clobber = true;
-          generator = generators.toNiriconf;
+          generator = genLib.toNiriconf;
           value =
             cfg.settings
             // lib.optionalAttrs (cfg.extraConfig != "") {

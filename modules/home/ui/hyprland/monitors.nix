@@ -1,10 +1,10 @@
 {
   config,
   lib,
+  genLib,
   ...
 }: let
   cfg = config.home.ui.hyprland;
-  generators = import ../../../../lib/generators/toHyprconf.nix lib;
 
   monitorsConfig = {
     monitor = [
@@ -19,7 +19,7 @@ in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
       clobber = true;
-      text = lib.mkAfter (generators.toHyprconf {
+      text = lib.mkAfter (genLib.toHyprconf {
         attrs = monitorsConfig;
         importantPrefixes = ["$" "exec" "source"];
       });

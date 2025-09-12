@@ -1,10 +1,10 @@
 {
   config,
   lib,
+  genLib,
   ...
 }: let
   cfg = config.home.ui.hyprland;
-  generators = import ../../../../lib/generators/toHyprconf.nix lib;
 
   windowRulesConfig = {
     "$firefox-pip" = "class:^(firefox)$, title:^(Picture-in-Picture)";
@@ -26,7 +26,7 @@ in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
       clobber = true;
-      text = lib.mkAfter (generators.toHyprconf {
+      text = lib.mkAfter (genLib.toHyprconf {
         attrs = windowRulesConfig;
         importantPrefixes = ["$" "exec" "source"];
       });

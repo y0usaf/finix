@@ -1,11 +1,11 @@
 {
   lib,
   config,
+  genLib,
   ...
 }: let
   cfg = config.home.ui.hyprland;
   inherit (config.home.core) defaults;
-  generators = import ../../../../lib/generators/toHyprconf.nix lib;
 
   variablesConfig = {
     "$mod" = "ALT";
@@ -23,7 +23,7 @@ in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
       clobber = true;
-      text = lib.mkBefore (generators.toHyprconf {
+      text = lib.mkBefore (genLib.toHyprconf {
         attrs = variablesConfig;
         importantPrefixes = ["$" "exec" "source"];
       });
