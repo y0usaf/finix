@@ -82,7 +82,7 @@
   };
 in {
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
+    usr.files.".config/hypr/hyprland.conf" = {
       generator = genLib.toHyprconf {
         importantPrefixes = ["$" "exec" "source"];
       };

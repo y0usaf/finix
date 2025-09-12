@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "web applications via Chromium";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = [pkgs.ungoogled-chromium];
       files = {
         ".local/share/applications/keybard.desktop" = {

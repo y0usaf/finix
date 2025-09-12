@@ -4,7 +4,7 @@
   ...
 }: {
   config = {
-    hjem.users.${config.user.name}.files = {
+    usr.files = {
       ".config/zsh/.zshenv" = {
         clobber = true;
         text = lib.mkAfter ''

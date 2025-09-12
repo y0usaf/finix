@@ -14,7 +14,7 @@ in {
   };
 
   config = mkIf config.home.programs.vesktop.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = [pkgs.vesktop];
 
       files = {

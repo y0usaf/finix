@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "file-roller (archive manager)";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [
+    usr.packages = with pkgs; [
       file-roller
     ];
   };

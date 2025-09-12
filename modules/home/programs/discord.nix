@@ -15,7 +15,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [
+    usr.packages = with pkgs; [
       (
         if cfg.variant == "canary"
         then

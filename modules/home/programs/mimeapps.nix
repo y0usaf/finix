@@ -8,7 +8,7 @@
   };
 
   config = {
-    hjem.users.${config.user.name}.files = {
+    usr.files = {
       ".config/mimeapps.list" = {
         clobber = true;
         text = ''

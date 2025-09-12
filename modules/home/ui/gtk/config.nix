@@ -39,7 +39,7 @@
   bookmarksContent = lib.concatStringsSep "\n" bookmarks;
 in {
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         gtk3
         gtk4

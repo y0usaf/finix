@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         yt-dlp-light
         ffmpeg

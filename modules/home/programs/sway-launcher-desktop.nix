@@ -16,7 +16,7 @@ in {
     enable = lib.mkEnableOption "sway launcher desktop";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         fzf
       ];

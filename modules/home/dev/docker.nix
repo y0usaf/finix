@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "docker development environment";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         docker
         docker-compose

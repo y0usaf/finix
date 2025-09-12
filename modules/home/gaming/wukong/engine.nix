@@ -13,7 +13,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.files.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
+    usr.files.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
       clobber = true;
       text = lib.generators.toINI {} {
         "SystemSettings" = {

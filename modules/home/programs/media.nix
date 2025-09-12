@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "media applications";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [
+    usr.packages = with pkgs; [
       pulsemixer
       ffmpeg
       vlc
