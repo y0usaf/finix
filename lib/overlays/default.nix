@@ -1,7 +1,4 @@
 sources: [
-  # Extended lib overlay with helper functions
-  (import ./lib-extensions.nix)
-
   # Fast-Fonts overlay
   (import ./fast-fonts.nix sources)
 

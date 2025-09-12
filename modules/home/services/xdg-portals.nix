@@ -2,32 +2,34 @@
   config,
   lib,
   ...
-}: let
-  generators = import ../../../lib/generators {inherit lib;};
-in {
+}: {
   config = {
     hjem.users.${config.user.name} = {
       files = {
         ".local/share/xdg-desktop-portal/portals/gnome.portal" = {
-          text = ''
-            [portal]
-            DBusName=org.freedesktop.impl.portal.desktop.gnome
-            Interfaces=org.freedesktop.impl.portal.ScreenCast;org.freedesktop.impl.portal.Screenshot;org.freedesktop.impl.portal.RemoteDesktop;
-            UseIn=niri;gnome;
-          '';
+          generator = lib.generators.toINI {};
+          value = {
+            portal = {
+              DBusName = "org.freedesktop.impl.portal.desktop.gnome";
+              Interfaces = "org.freedesktop.impl.portal.ScreenCast;org.freedesktop.impl.portal.Screenshot;org.freedesktop.impl.portal.RemoteDesktop;";
+              UseIn = "niri;gnome;";
+            };
+          };
         };
 
         ".local/share/xdg-desktop-portal/portals/gtk.portal" = {
-          text = ''
-            [portal]
-            DBusName=org.freedesktop.impl.portal.desktop.gtk
-            Interfaces=org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;
-            UseIn=niri;gtk;
-          '';
+          generator = lib.generators.toINI {};
+          value = {
+            portal = {
+              DBusName = "org.freedesktop.impl.portal.desktop.gtk";
+              Interfaces = "org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;";
+              UseIn = "niri;gtk;";
+            };
+          };
         };
 
         ".config/systemd/user/xdg-desktop-portal-gnome.service.d/environment.conf" = {
-          generator = generators.toINI {};
+          generator = lib.generators.toINI {};
           value = {
             Service = {
               PassEnvironment = "WAYLAND_DISPLAY XDG_CURRENT_DESKTOP";
@@ -36,7 +38,7 @@ in {
         };
 
         ".config/systemd/user/xdg-desktop-portal-gnome.service.d/override.conf" = {
-          generator = generators.toINI {};
+          generator = lib.generators.toINI {};
           value = {
             Service = {
               Restart = "always";
@@ -48,7 +50,7 @@ in {
         };
 
         ".config/systemd/user/xdg-desktop-portal-gtk.service.d/override.conf" = {
-          generator = generators.toINI {};
+          generator = lib.generators.toINI {};
           value = {
             Service = {
               Restart = "always";
@@ -61,7 +63,7 @@ in {
         };
 
         ".config/systemd/user/xdg-desktop-portal.service.d/override.conf" = {
-          generator = generators.toINI {};
+          generator = lib.generators.toINI {};
           value = {
             Service = {
               Restart = "always";
