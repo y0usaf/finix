@@ -5,7 +5,6 @@
   ...
 }: let
   cfg = config.home.ui.hyprland;
-  generators = import ../../../../lib/generators/toHyprconf.nix lib;
 
   coreConfig = {
     "$active_colour" = "ffffffff";
@@ -83,11 +82,10 @@
 in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
-      clobber = true;
-      text = lib.mkAfter (generators.toHyprconf {
-        attrs = coreConfig;
+      generator = lib.generators.toHyprconf {
         importantPrefixes = ["$" "exec" "source"];
-      });
+      };
+      value = coreConfig;
     };
   };
 }
