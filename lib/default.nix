@@ -41,7 +41,10 @@ let
   };
 
   # Create the lib that will be exported with proper overlay application
-  inherit (pkgs) lib;
+  # Extend lib with custom generators
+  lib = pkgs.lib.extend (final: prev: {
+    generators = prev.generators // (import ./generators final);
+  });
 in {
   inherit lib;
   formatter.${system} = pkgs.alejandra;

@@ -7,9 +7,6 @@
   cfg = config.home.ui.niri;
   agsEnabled = config.home.ui.ags.enable or false;
 
-  # Import local generators
-  toNiriconf = (import ../../../../lib/generators/toNiriconf.nix lib).toNiriconf;
-  toKDL = (import ../../../../lib/generators/toKDL.nix {inherit lib;}).toKDL;
 in {
   config = lib.mkIf cfg.enable {
     home.ui.niri.settings = {
@@ -45,7 +42,7 @@ in {
       files = {
         ".config/niri/config.kdl" = {
           clobber = true;
-          generator = toNiriconf;
+          generator = lib.generators.toNiriconf;
           value =
             cfg.settings
             // lib.optionalAttrs (cfg.extraConfig != "") {
