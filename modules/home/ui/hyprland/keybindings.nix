@@ -1,10 +1,10 @@
 {
   lib,
   config,
+  genLib,
   ...
 }: let
   cfg = config.home.ui.hyprland;
-  generators = import ../../../../lib/generators/toHyprconf.nix lib;
 
   keybindingsConfig = {
     bind = lib.lists.flatten [
@@ -83,7 +83,7 @@ in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
       clobber = true;
-      text = lib.mkAfter (generators.toHyprconf {
+      text = lib.mkAfter (genLib.toHyprconf {
         attrs = keybindingsConfig;
         importantPrefixes = ["$" "exec" "source"];
       });

@@ -1,9 +1,5 @@
-lib: 
-let
-  niriModule = import ./toNiriconf.nix lib;
-  kdlModule = import ./toKDL.nix {inherit lib;};
-in {
+lib: {
   toHyprconf = import ./toHyprconf.nix lib;
-  inherit (niriModule) toNiriconf;
-  inherit (kdlModule) toKDL;
+  inherit ((import ./toNiriconf.nix lib)) toNiriconf;
+  inherit ((import ./toKDL.nix {inherit lib;})) toKDL;
 }

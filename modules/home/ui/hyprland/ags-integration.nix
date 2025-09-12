@@ -1,11 +1,11 @@
 {
   config,
   lib,
+  genLib,
   ...
 }: let
   cfg = config.home.ui.hyprland;
   agsEnabled = config.home.ui.ags.enable or false;
-  generators = import ../../../../lib/generators/toHyprconf.nix lib;
 
   agsConfig = {
     "exec-once" =
@@ -28,7 +28,7 @@ in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
       clobber = true;
-      text = lib.mkAfter (generators.toHyprconf {
+      text = lib.mkAfter (genLib.toHyprconf {
         attrs = agsConfig;
         importantPrefixes = ["$" "exec" "source"];
       });

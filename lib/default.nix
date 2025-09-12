@@ -20,10 +20,10 @@ let
     config = nixpkgsConfig;
   };
 
-  # Simple lib extension with custom generators
-  lib = pkgs.lib.extend (final: prev: {
-    generators = prev.generators // (import ./generators final);
-  });
+  lib = pkgs.lib;
+
+  # Custom generators library
+  genLib = import ./generators lib;
 
   # Host configs
   hostConfigs = {
@@ -51,7 +51,7 @@ in {
               config = nixpkgsConfig;
             };
           })
-          # Hjem with extended lib
+          # Hjem
           ({...}: {
             imports = [
               (_: {
@@ -68,10 +68,8 @@ in {
           ../modules/home
         ];
         _module.args = {
-          inherit hostConfig sources lib;
+          inherit hostConfig sources lib genLib;
           inherit (sources) disko nix-minecraft Fast-Fonts;
-          # Pass generators directly to bypass lib scoping issues
-          generators = lib.generators;
         };
       };
     })

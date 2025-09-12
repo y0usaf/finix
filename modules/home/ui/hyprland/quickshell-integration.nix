@@ -1,11 +1,11 @@
 {
   config,
   lib,
+  genLib,
   ...
 }: let
   cfg = config.home.ui.hyprland;
   quickshellEnabled = config.home.ui.quickshell.enable or false;
-  generators = import ../../../../lib/generators/toHyprconf.nix lib;
 
   quickshellConfig = {
     "exec-once" = lib.optionals quickshellEnabled [
@@ -19,7 +19,7 @@ in {
   config = lib.mkIf cfg.enable {
     hjem.users.${config.user.name}.files.".config/hypr/hyprland.conf" = {
       clobber = true;
-      text = lib.mkAfter (generators.toHyprconf {
+      text = lib.mkAfter (genLib.toHyprconf {
         attrs = quickshellConfig;
         importantPrefixes = ["$" "exec" "source"];
       });
