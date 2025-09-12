@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "Syncthing service";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = with pkgs; [
         syncthing
       ];

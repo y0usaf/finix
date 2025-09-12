@@ -113,6 +113,6 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = basePackages ++ cfg.extraPackages;
+    usr.packages = basePackages ++ cfg.extraPackages;
   };
 }

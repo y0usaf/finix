@@ -35,7 +35,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = [pkgs.alejandra pkgs.inotify-tools];
+    usr.packages = [pkgs.alejandra pkgs.inotify-tools];
 
     systemd.user.services.format-nix-watcher = {
       description = "Watch and format Nix files on change";

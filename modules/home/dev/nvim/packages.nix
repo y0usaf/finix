@@ -7,7 +7,7 @@
   cfg = config.home.dev.nvim;
 in {
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = [
+    usr.packages = [
       pkgs.ripgrep
       pkgs.fd
       pkgs.tree-sitter

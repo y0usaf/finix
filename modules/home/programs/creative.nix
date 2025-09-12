@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "creative applications module";
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [
+    usr.packages = with pkgs; [
       pinta
       gimp
     ];

@@ -15,7 +15,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.packages = with pkgs; [
+    usr.packages = with pkgs; [
       (writeShellScriptBin "obsidian" ''
         ${lib.optionalString cfg.useWayland ''
           export NIXOS_OZONE_WL=1

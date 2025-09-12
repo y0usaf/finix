@@ -16,7 +16,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name}.files = {
+    usr.files = {
       ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/default/MarvelUserSetting.ini" = {
         clobber = true;
         text = settingsContent;

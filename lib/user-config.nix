@@ -5,6 +5,9 @@
   config,
   ...
 }: {
+  imports = [
+    (lib.modules.mkAliasOptionModule ["usr"] ["hjem" "users" config.user.name])
+  ];
   options = {
     # User configuration options
     user = {

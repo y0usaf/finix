@@ -14,7 +14,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${config.user.name} = {
+    usr = {
       packages = [
         pkgs.ags
       ];
