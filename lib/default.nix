@@ -20,31 +20,16 @@ let
     config = nixpkgsConfig;
   };
 
-  # Host configs - system-level configuration only
+  # Simple lib extension with custom generators
+  lib = pkgs.lib.extend (final: prev: {
+    generators = prev.generators // (import ./generators final);
+  });
+
+  # Host configs
   hostConfigs = {
     y0usaf-desktop = import ../configs/hosts/y0usaf-desktop {inherit pkgs lib;};
     y0usaf-laptop = import ../configs/hosts/y0usaf-laptop {inherit pkgs lib;};
   };
-
-  # Hjem module with lib - replicates hjem flake's nixosModules.hjem
-  hjemModule = {
-    lib,
-    pkgs,
-    ...
-  }: {
-    imports = [
-      (_: {
-        _module.args.hjem-lib = import (sources.hjem + "/lib.nix") {inherit lib pkgs;};
-      })
-      (sources.hjem + "/modules/nixos")
-    ];
-  };
-
-  # Create the lib that will be exported with proper overlay application
-  # Extend lib with custom generators
-  lib = pkgs.lib.extend (final: prev: {
-    generators = prev.generators // (import ./generators final);
-  });
 in {
   inherit lib;
   formatter.${system} = pkgs.alejandra;
@@ -57,39 +42,36 @@ in {
           # Host system configuration
           (_: {
             inherit (hostConfig) imports;
-            # Set user configuration from primary user
             user = {
               name = "y0usaf";
               inherit (hostConfig) homeDirectory;
             };
-            # Configure nixpkgs with overlays
             nixpkgs = {
               inherit overlays;
               config = nixpkgsConfig;
             };
           })
-          # User home configurations via hjem
+          # Hjem with extended lib
           ({...}: {
-            imports = [hjemModule];
-            config = {
-              # Configure hjem for each user (independent of host)
-              hjem = {
-                # Use SMFH manifest linker instead of systemd-tmpfiles
-                linker = pkgs.callPackage (sources.smfh + "/package.nix") {};
-                users = {};
-              };
+            imports = [
+              (_: {
+                _module.args.hjem-lib = import (sources.hjem + "/lib.nix") {inherit lib pkgs;};
+              })
+              (sources.hjem + "/modules/nixos")
+            ];
+            config.hjem = {
+              linker = pkgs.callPackage (sources.smfh + "/package.nix") {};
+              users = {};
             };
           })
-          # Import user configuration abstraction
           ./user-config.nix
-          # Import home manager
           ../modules/home
         ];
         _module.args = {
-          inherit hostConfig sources;
-          inherit (pkgs) lib;
-          # Direct access to commonly used sources
+          inherit hostConfig sources lib;
           inherit (sources) disko nix-minecraft Fast-Fonts;
+          # Pass generators directly to bypass lib scoping issues
+          generators = lib.generators;
         };
       };
     })

@@ -2,11 +2,11 @@
   config,
   pkgs,
   lib,
+  generators,
   ...
 }: let
   cfg = config.home.ui.niri;
   agsEnabled = config.home.ui.ags.enable or false;
-
 in {
   config = lib.mkIf cfg.enable {
     home.ui.niri.settings = {
@@ -42,7 +42,7 @@ in {
       files = {
         ".config/niri/config.kdl" = {
           clobber = true;
-          generator = lib.generators.toNiriconf;
+          generator = generators.toNiriconf;
           value =
             cfg.settings
             // lib.optionalAttrs (cfg.extraConfig != "") {
