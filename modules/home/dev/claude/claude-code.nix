@@ -17,10 +17,10 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      claude-code
+    ];
     usr = {
-      packages = with pkgs; [
-        claude-code
-      ];
       files = {
         ".claude/output-styles/explanatory.md" = {
           text = outputStyles.explanatoryOutputStyle;

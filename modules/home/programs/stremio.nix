@@ -10,6 +10,6 @@ in {
     enable = lib.mkEnableOption "Stremio media center";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [stremio];
+    environment.systemPackages = with pkgs; [stremio];
   };
 }

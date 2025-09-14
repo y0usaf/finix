@@ -10,11 +10,11 @@ in {
     enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      yt-dlp-light
+      ffmpeg
+    ];
     usr = {
-      packages = with pkgs; [
-        yt-dlp-light
-        ffmpeg
-      ];
       files = {
         ".config/zsh/.zshrc" = {
           text = lib.mkAfter ''

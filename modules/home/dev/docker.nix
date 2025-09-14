@@ -10,13 +10,13 @@ in {
     enable = lib.mkEnableOption "docker development environment";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      docker
+      docker-compose
+      docker-buildx
+      docker-credential-helpers
+    ];
     usr = {
-      packages = with pkgs; [
-        docker
-        docker-compose
-        docker-buildx
-        docker-credential-helpers
-      ];
       files = {
         ".docker/config.json" = {
           clobber = true;
