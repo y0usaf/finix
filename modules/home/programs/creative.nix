@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "creative applications module";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       pinta
       gimp
     ];

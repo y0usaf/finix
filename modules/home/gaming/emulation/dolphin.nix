@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "GameCube and Wii emulation via Dolphin";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = [
+    environment.systemPackages = [
       pkgs.dolphin-emu
     ];
   };

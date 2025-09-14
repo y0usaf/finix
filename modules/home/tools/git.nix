@@ -40,11 +40,11 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      git
+      openssh
+    ];
     usr = {
-      packages = with pkgs; [
-        git
-        openssh
-      ];
       files = {
         ".config/git/config" = {
           clobber = true;

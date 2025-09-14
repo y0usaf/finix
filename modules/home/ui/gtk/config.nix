@@ -39,11 +39,11 @@
   bookmarksContent = lib.concatStringsSep "\n" bookmarks;
 in {
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      gtk3
+      gtk4
+    ];
     usr = {
-      packages = with pkgs; [
-        gtk3
-        gtk4
-      ];
       files = {
         ".config/gtk-3.0/settings.ini" = {
           clobber = true;

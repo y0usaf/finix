@@ -11,13 +11,13 @@ in {
     enable = lib.mkEnableOption "Wayland configuration";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      grim
+      slurp
+      wl-clipboard
+      hyprpicker
+    ];
     usr = {
-      packages = with pkgs; [
-        grim
-        slurp
-        wl-clipboard
-        hyprpicker
-      ];
       files = {
         ".config/zsh/.zprofile" = {
           text = lib.mkAfter ''

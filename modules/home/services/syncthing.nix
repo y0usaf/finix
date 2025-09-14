@@ -10,10 +10,10 @@ in {
     enable = lib.mkEnableOption "Syncthing service";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      syncthing
+    ];
     usr = {
-      packages = with pkgs; [
-        syncthing
-      ];
       files.".config/syncthing/.keep" = {
         clobber = true;
         text = '''';

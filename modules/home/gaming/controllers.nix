@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "gaming controller support";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       dualsensectl
     ];
   };

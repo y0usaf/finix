@@ -15,7 +15,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       (
         if cfg.variant == "canary"
         then

@@ -81,13 +81,12 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      opencode
+      nodejs_20
+      uv
+    ];
     usr = {
-      packages = with pkgs; [
-        opencode
-        nodejs_20
-        uv
-      ];
-
       files = {
         # Global opencode configuration
         ".config/opencode/opencode.json" = {

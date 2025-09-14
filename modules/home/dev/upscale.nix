@@ -11,10 +11,10 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      realesrgan-ncnn-vulkan
+    ];
     usr = {
-      packages = with pkgs; [
-        realesrgan-ncnn-vulkan
-      ];
       files = {
         ".config/zsh/aliases/esrgan.zsh" = {
           text = ''

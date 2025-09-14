@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "media applications";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       pulsemixer
       ffmpeg
       vlc

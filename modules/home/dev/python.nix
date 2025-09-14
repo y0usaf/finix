@@ -14,25 +14,25 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      python3
+      python312
+      uv
+      ninja
+      meson
+      pkg-config
+      cacert
+      stdenv.cc.cc.lib
+      zlib
+      libGL
+      glib
+      xorg.libX11
+      xorg.libXext
+      xorg.libXrender
+      gcc
+      binutils
+    ];
     usr = {
-      packages = with pkgs; [
-        python3
-        python312
-        uv
-        ninja
-        meson
-        pkg-config
-        cacert
-        stdenv.cc.cc.lib
-        zlib
-        libGL
-        glib
-        xorg.libX11
-        xorg.libXext
-        xorg.libXrender
-        gcc
-        binutils
-      ];
       files = {
         ".config/zsh/.zshenv" = {
           clobber = true;

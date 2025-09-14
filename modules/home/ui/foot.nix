@@ -56,10 +56,10 @@ in {
     enable = lib.mkEnableOption "foot terminal emulator";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      foot
+    ];
     usr = {
-      packages = with pkgs; [
-        foot
-      ];
       files.".config/foot/foot.ini" = {
         clobber = true;
         text = lib.mkAfter (lib.generators.toINI {} footConfig);
