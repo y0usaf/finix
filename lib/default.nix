@@ -20,7 +20,7 @@ let
     config = nixpkgsConfig;
   };
 
-  lib = pkgs.lib;
+  inherit (pkgs) lib;
 
   # Custom generators library
   genLib = import ./generators lib;
