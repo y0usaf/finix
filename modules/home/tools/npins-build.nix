@@ -11,11 +11,11 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      npins
+      alejandra
+    ];
     usr = {
-      packages = with pkgs; [
-        npins
-        alejandra
-      ];
       files = {
         ".config/zsh/.zshrc" = {
           text = lib.mkAfter ''

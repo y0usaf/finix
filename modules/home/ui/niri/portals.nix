@@ -7,13 +7,12 @@
   cfg = config.home.ui.niri;
 in {
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      xdg-desktop-portal
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-gnome
+    ];
     usr = {
-      packages = with pkgs; [
-        xdg-desktop-portal
-        xdg-desktop-portal-gtk
-        xdg-desktop-portal-gnome
-      ];
-
       files.".config/xdg-desktop-portal/niri-portals.conf" = {
         generator = lib.generators.toINI {};
         value = {
