@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "LaTeX development environment";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       texliveFull
       texstudio
       tectonic

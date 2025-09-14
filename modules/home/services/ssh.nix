@@ -10,10 +10,10 @@ in {
     enable = lib.mkEnableOption "SSH configuration module";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      openssh
+    ];
     usr = {
-      packages = with pkgs; [
-        openssh
-      ];
       files = {
         ".ssh/config" = {
           clobber = true;

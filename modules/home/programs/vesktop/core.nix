@@ -14,9 +14,8 @@ in {
   };
 
   config = mkIf config.home.programs.vesktop.enable {
+    environment.systemPackages = [pkgs.vesktop];
     usr = {
-      packages = [pkgs.vesktop];
-
       files = {
         ".config/vesktop/settings.json" = {
           source = settingsFormat.generate "vesktop-settings.json" {

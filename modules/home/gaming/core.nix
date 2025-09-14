@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "core gaming packages";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       steam
       protonup-rs
       gamemode

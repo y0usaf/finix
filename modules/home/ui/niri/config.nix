@@ -30,15 +30,15 @@ in {
       window-rule = {};
     };
 
+    environment.systemPackages = [
+      pkgs.niri
+      pkgs.grim
+      pkgs.slurp
+      pkgs.wl-clipboard
+      pkgs.jq
+      pkgs.swaybg
+    ];
     usr = {
-      packages = [
-        pkgs.niri
-        pkgs.grim
-        pkgs.slurp
-        pkgs.wl-clipboard
-        pkgs.jq
-        pkgs.swaybg
-      ];
       files = {
         ".config/niri/config.kdl" = {
           clobber = true;

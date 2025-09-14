@@ -22,10 +22,10 @@
     // cfg.settings;
 in {
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      zellij
+    ];
     usr = {
-      packages = with pkgs; [
-        zellij
-      ];
       files =
         {
           ".config/zellij/config.kdl" = {

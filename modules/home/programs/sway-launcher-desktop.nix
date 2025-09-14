@@ -16,10 +16,10 @@ in {
     enable = lib.mkEnableOption "sway launcher desktop";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      fzf
+    ];
     usr = {
-      packages = with pkgs; [
-        fzf
-      ];
       files.".config/scripts/sway-launcher-desktop.sh" = {
         clobber = true;
         executable = true;

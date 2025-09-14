@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "OBS Studio";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       (wrapOBS {
         plugins = with obs-studio-plugins; [
           obs-backgroundremoval

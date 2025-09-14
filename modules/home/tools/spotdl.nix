@@ -10,10 +10,10 @@ in {
     enable = lib.mkEnableOption "SpotDL music downloading tools";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      ffmpeg
+    ];
     usr = {
-      packages = with pkgs; [
-        ffmpeg
-      ];
       files = {
         ".config/zsh/.zshrc" = {
           text = lib.mkAfter ''

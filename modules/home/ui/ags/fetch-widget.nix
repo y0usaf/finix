@@ -14,10 +14,10 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [
+      pkgs.ags
+    ];
     usr = {
-      packages = [
-        pkgs.ags
-      ];
       files = {
         ".config/ags/fetch-widget.tsx" = {
           clobber = true;

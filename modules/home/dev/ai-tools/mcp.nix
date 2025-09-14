@@ -66,11 +66,11 @@ in {
     enable = lib.mkEnableOption "Model Context Protocol configuration";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      nodejs_20
+      uv
+    ];
     usr = {
-      packages = with pkgs; [
-        nodejs_20
-        uv
-      ];
       files = {
         ".cursor/mcp.json" = {
           text = builtins.toJSON mcpServersConfig;

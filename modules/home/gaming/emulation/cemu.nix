@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "Wii U emulation via Cemu";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = [
+    environment.systemPackages = [
       pkgs.cemu
     ];
   };

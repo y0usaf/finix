@@ -10,10 +10,10 @@ in {
     enable = lib.mkEnableOption "Node.js and NPM configuration";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      nodejs_20
+    ];
     usr = {
-      packages = with pkgs; [
-        nodejs_20
-      ];
       files = {
         ".config/npm/npmrc" = {
           clobber = true;

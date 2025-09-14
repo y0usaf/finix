@@ -20,10 +20,10 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      nh
+    ];
     usr = {
-      packages = with pkgs; [
-        nh
-      ];
       files = {
         ".config/zsh/.zshrc" = {
           text = lib.mkAfter ''

@@ -10,8 +10,8 @@ in {
     enable = lib.mkEnableOption "web applications via Chromium";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [pkgs.ungoogled-chromium];
     usr = {
-      packages = [pkgs.ungoogled-chromium];
       files = {
         ".local/share/applications/keybard.desktop" = {
           clobber = true;

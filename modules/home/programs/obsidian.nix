@@ -15,7 +15,7 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       (writeShellScriptBin "obsidian" ''
         ${lib.optionalString cfg.useWayland ''
           export NIXOS_OZONE_WL=1

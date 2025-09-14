@@ -14,10 +14,10 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [
+      pkgs.ags
+    ];
     usr = {
-      packages = [
-        pkgs.ags
-      ];
       files = {
         ".config/ags/bar-overlay.tsx".source = ./config/bar-overlay.tsx;
         ".config/ags/tsconfig.json".source = ./config/tsconfig.json;

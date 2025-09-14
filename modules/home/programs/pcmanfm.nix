@@ -10,7 +10,7 @@ in {
     enable = lib.mkEnableOption "pcmanfm file manager";
   };
   config = lib.mkIf cfg.enable {
-    usr.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
       pcmanfm
     ];
   };

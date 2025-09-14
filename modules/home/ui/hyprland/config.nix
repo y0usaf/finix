@@ -7,16 +7,16 @@
   cfg = config.home.ui.hyprland;
 in {
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [
+      pkgs.hyprwayland-scanner
+      pkgs.hyprland
+      pkgs.grim
+      pkgs.slurp
+      pkgs.wl-clipboard
+      pkgs.jq
+      pkgs.swaybg
+    ];
     usr = {
-      packages = [
-        pkgs.hyprwayland-scanner
-        pkgs.hyprland
-        pkgs.grim
-        pkgs.slurp
-        pkgs.wl-clipboard
-        pkgs.jq
-        pkgs.swaybg
-      ];
       files = {
         ".config/hypr/hyprland.conf" = {
           clobber = true;

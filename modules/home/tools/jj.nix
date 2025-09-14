@@ -28,10 +28,10 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      jujutsu
+    ];
     usr = {
-      packages = with pkgs; [
-        jujutsu
-      ];
       files =
         {
           ".config/jj/config.toml" = {

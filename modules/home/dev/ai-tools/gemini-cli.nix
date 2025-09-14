@@ -10,10 +10,10 @@ in {
     enable = lib.mkEnableOption "Gemini CLI development tools";
   };
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [
+      gemini-cli
+    ];
     usr = {
-      packages = with pkgs; [
-        gemini-cli
-      ];
       files = {
         ".gemini/GEMINI.md" = {
           text = ''
