@@ -53,8 +53,8 @@
   };
   enabledMods = lib.filterAttrs (name: _mod: lib.elem name cfg.enabledMods && name != "morespeeds") availableMods;
   lovelyInjectorPackage = pkgs.fetchzip {
-    url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.7.1/lovely-x86_64-pc-windows-msvc.zip";
-    sha256 = "sha256-KjWSJugIfUOfWHZctEDKWGvNERXDzjW1+Ty5kJtEJlw=";
+    url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
+    sha256 = "sha256-tFDiYDRW5arGz92Knug6XnyhxYatUQ7iR/Wxfz6Hjw4=";
     stripRoot = false;
   };
 in {
@@ -192,6 +192,7 @@ in {
           clobber = true;
           source = "${lovelyInjectorPackage}/version.dll";
         };
-      });
+      })
+;
   };
 }
