@@ -40,10 +40,10 @@
       "version_upper_bound": null,
       "release_prefix": null,
       "submodules": false,
-      "version": "v1.4.2",
-      "revision": "65572c5c54162944d55671358adbbebff58c4699",
-      "url": "https://api.github.com/repos/SleepyG11/HandyBalatro/tarball/v1.4.2",
-      "hash": "080qhrqp7bh7ckxwhvkrpiqpzq41qijn92swvqp423cr558iwjv3"
+      "version": "v1.5.1",
+      "revision": "534b4e0219c577e940fb9a7f134c3ffcea47d5a1",
+      "url": "https://api.github.com/repos/SleepyG11/HandyBalatro/tarball/v1.5.1",
+      "hash": "1bv663n6qns9mi7cgvimkynymig2b06qykryzmskcjlbvl587h37"
     },
     "cardsleeves": {
       "type": "Git",
@@ -53,9 +53,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "4250089ca52d4cb2d3cf6c2fd7d0d6ae66428650",
+      "revision": "c2a22f091fe92d1bcbd547297a837791b6eae771",
       "url": null,
-      "hash": "0szl3b5j7zcjq4kh95prxnc34x0b6bgva244zbshcxd49yf6xfjp"
+      "hash": "1nbrkhvzlk7y89rgbb6dp385hw85i417xnba4z3p4aqjdpgh9zd5"
     },
     "cryptid": {
       "type": "Git",
@@ -65,9 +65,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "1da26300f239d77be0a9ffd24a75a9f7b6af724a",
+      "revision": "bca501cbeea487b8ca80198c46e3a4a198856de0",
       "url": null,
-      "hash": "1mqlq8ykw7v1pl4dlyliw6820aaxlx2djv7ddhqpayj7dyjs21w3"
+      "hash": "1psdh0hryhj942b1i6i5pnmxiw1phil6q27apycapyhi0mp3ahs6"
     },
     "jokerdisplay": {
       "type": "Git",
@@ -77,9 +77,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "f29d18bdfbfc02f831f1e1e5292df72b9c263add",
+      "revision": "7d7a61761b13894820270f9664d33685f54ec82a",
       "url": null,
-      "hash": "0zrn87n95x54w69qc6ly1nwkccpwfyipxjbvpvqfgvngf71i0m8d"
+      "hash": "0x2y4rljh75yc93ql3b3vpq4y7xwqnrw7zkmlgk17dff8nzbw9i2"
     },
     "multiplayer": {
       "type": "Git",
@@ -89,15 +89,15 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "495f515806f0f07a8668a6fa3221ce4cc183356b",
+      "revision": "c7b1c210f0d6699819222b1767ee9469878d1c52",
       "url": null,
-      "hash": "1b408g8y40s5386wcjyrnrxj8wn47g0160gz2ff374ilhjicdgmv"
+      "hash": "0b133p8m64kqdjc9lnznzn12gi84xrllwpzfxw2aissx6bnd0hdc"
     },
     "nixpkgs": {
       "type": "Channel",
       "name": "nixpkgs-unstable",
-      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.11pre805949.bdac72d387dc/nixexprs.tar.xz",
-      "hash": "1qkzpspsc5c7m4sz499f9ixnavzi7bpild068542vssrahh5v9q3"
+      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.11pre861040.6d7ec06d6868/nixexprs.tar.xz",
+      "hash": "08f1n0a92c8vs702vkfm24s5bw4c2p8vq9smssj9a49mk4nfp35p"
     },
     "pokermon": {
       "type": "Git",
@@ -107,9 +107,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "403a1ca7a74f38de522ee546a0efb0a01c78a9db",
+      "revision": "98a06f49be978052bc74a6cba80b08d38f607fd2",
       "url": null,
-      "hash": "1z7fnlgkzvya2cvwgxdpggbybdnlw740vjlmx20qs82pb1rx1pbh"
+      "hash": "1gqinb21dpqfvy42g2avz01q2r6jqjcn176kyk8b1c61pj3lliyf"
     },
     "steamodded": {
       "type": "Git",
@@ -119,9 +119,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "b163d0c0a04bdbc97559939952660cb3f185bb93",
+      "revision": "9bb34e88cbc7d3122944baa038a7b2e5bb3efd10",
       "url": null,
-      "hash": "1da439lfkwax1xc229ljp6mcz4whdnd6zdqv95xv05sb86g10kik"
+      "hash": "1m1c6r021hr55w5rxp5sfad13g9n97lfx6bmynri2d08rj16gq37"
     },
     "steamodded-examples": {
       "type": "Git",
@@ -143,9 +143,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "f2911d467e660033c4d62c9f6aade2edb7ecc155",
+      "revision": "372d66c64bf987987cffbe31f731b3d1732526f3",
       "url": null,
-      "hash": "0y1x8mn61my12vy4h77vvyhvkm04sww6ivgvy458ddl6m11bzxlj"
+      "hash": "0gfni4dmqxmf7cbzh778sh9w47jqk312gi0vagxlihmwfi41xwf6"
     }
   },
   "version": 5
