@@ -192,7 +192,6 @@ in {
           clobber = true;
           source = "${lovelyInjectorPackage}/version.dll";
         };
-      })
-;
+      });
   };
 }
