@@ -105,9 +105,9 @@
         Value = true;
         Status = "locked";
       };
-      # Show separate titlebar by default
-      "browser.tabs.drawInTitlebar" = {
-        Value = true;
+      # Show separate titlebar (0 = show title bar, 1 = replace with tab bar, 2 = platform default)
+      "browser.tabs.inTitlebar" = {
+        Value = 0;
         Status = "locked";
       };
       # Hide bookmarks toolbar
