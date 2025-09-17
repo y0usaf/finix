@@ -1,7 +1,4 @@
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   config = {
     usr = {
       files = {
