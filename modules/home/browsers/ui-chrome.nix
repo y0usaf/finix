@@ -197,8 +197,8 @@
         overflow-y: auto !important;
     }
 
-    .urlbarView-row { padding-block: var(--spacing-xs) !important; }
-    .urlbarView-row-inner { padding-inline: var(--spacing-sm) !important; }
+    .urlbarView-row { padding-block: 0 !important; }
+    .urlbarView-row-inner { padding-inline: var(--spacing-xs) !important; }
 
     /* --- ICON AND BUTTON STYLING -------------------------- */
     .tab-icon-image,
