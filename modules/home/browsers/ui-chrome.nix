@@ -51,8 +51,8 @@
         --margin-label: 1rem;
 
         /* Padding system */
-        --padding-toolbar: 0.3em 0;
-        --padding-nav: 0.4em 0 0.1em;
+        --padding-toolbar: 0;
+        --padding-nav: 0;
         --padding-label: 0 2px;
         --padding-toolbar-button: 0pt;
         --padding-windows: 7px;
@@ -185,7 +185,7 @@
         font-size: var(--font-size)!important;
         min-height: 0!important;
         align-items: center!important;
-        margin-bottom: var(--spacing-sm)!important
+        margin-bottom: 0!important
     }
 
     /* Tab background colors */
@@ -210,8 +210,7 @@
     /* Tab toolbar button styling */
     :root:not([customizing]) #TabsToolbar .titlebar-button,:root:not([customizing]) #TabsToolbar-customization-target>.toolbarbutton-1,:root:not([customizing]) #tabbrowser-tabs .tabs-newtab-button,:root:not([customizing]) #tabs-newtab-button {
         -moz-appearance: none!important;
-        padding-top: 0!important;
-        padding-bottom: 0!important;
+        padding: 0!important;
         -moz-box-align: stretch;
         margin: 0!important
     }
@@ -336,7 +335,7 @@
 
     /* URL bar input field */
     #urlbar-input {
-        margin: 0 var(--spacing-md)!important;
+        margin: 0!important;
         text-align: center!important
     }
 
@@ -377,7 +376,7 @@
     }
 
     .urlbarView-row-inner {
-        padding-inline: var(--spacing-xs)!important
+        padding-inline: 0!important
     }
 
     /* === ICON AND BUTTON STYLING === */
@@ -397,7 +396,7 @@
     #PersonalToolbar toolbarbutton,#TabsToolbar toolbarbutton,#nav-bar toolbarbutton,.toolbarbutton-1,toolbar .toolbarbutton-1 {
         -moz-appearance: none!important;
         margin: 0!important;
-        padding: 0 var(--spacing-sm)!important
+        padding: 0!important
     }
 
     /* === GENERAL CLEANUP === */
