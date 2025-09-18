@@ -52,7 +52,7 @@
 
         /* Padding system */
         --padding-toolbar: 0;
-        --padding-nav: 0.6em 0;
+        --padding-nav: 0;
         --padding-label: 0 2px;
         --padding-toolbar-button: 0pt;
         --padding-windows: 7px;
@@ -261,9 +261,7 @@
 
     /* Navigation bar flex container */
     #nav-bar-customization-target {
-        -webkit-box-flex: 1;
-        display: flex;
-        align-items: center
+        -webkit-box-flex: 1
     }
 
     /* Hover states for main elements */
@@ -277,8 +275,8 @@
         background-color: var(--toolbar-bg);
         position: absolute;
         left: 50%;
-        top: 0;
         transform: translateX(-50%);
+        margin-top: var(--offset-label-top);
         padding: var(--padding-label);
         color: var(--color-border-inactive);
         transition: color 0.2s ease
