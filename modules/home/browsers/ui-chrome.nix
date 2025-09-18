@@ -166,7 +166,8 @@
         font-size: var(--font-size);
         font-family: var(--font-family);
         color: var(--color-border-inactive);
-        transition: color 0.2s ease
+        transition: color 0.2s ease;
+        z-index: 9999!important
     }
 
     /* Tab toolbar label hover */
@@ -279,7 +280,8 @@
         top: var(--offset-label-bottom);
         padding: var(--padding-label);
         color: var(--color-border-inactive);
-        transition: color 0.2s ease
+        transition: color 0.2s ease;
+        z-index: 9999!important
     }
 
     /* Label hover states */
@@ -318,7 +320,8 @@
         margin: var(--offset-label-margin);
         padding: var(--padding-label);
         color: var(--color-border-inactive);
-        transition: color 0.2s ease
+        transition: color 0.2s ease;
+        z-index: 9999!important
     }
 
     /* Panel sizing fix */
