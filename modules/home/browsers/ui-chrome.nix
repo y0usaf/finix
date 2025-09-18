@@ -300,10 +300,24 @@
         position: relative!important
     }
 
-    /* Remove bottom margin in fullscreen mode */
+    /* Remove all chrome elements in fullscreen mode */
     :root[inFullscreen] #browser,
     :root[inFullscreen] #customization-container {
-        margin-bottom: var(--margin-toolbar)!important
+        margin: 0!important;
+        border: none!important
+    }
+
+    /* Hide all labels in fullscreen mode */
+    :root[inFullscreen] #browser::before,
+    :root[inFullscreen] #nav-bar::before,
+    :root[inFullscreen] #TabsToolbar::before {
+        display: none!important
+    }
+
+    /* Hide navbar and tabs borders in fullscreen mode */
+    :root[inFullscreen] #nav-bar,
+    :root[inFullscreen] #TabsToolbar {
+        border: none!important
     }
 
     /* Font inheritance for labels and containers */
