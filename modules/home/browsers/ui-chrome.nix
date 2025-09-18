@@ -281,7 +281,7 @@
         padding: var(--padding-label);
         color: var(--color-border-inactive);
         transition: color 0.2s ease;
-        z-index: 9999!important
+        z-index: 99999!important
     }
 
     /* Label hover states */
