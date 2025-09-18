@@ -274,14 +274,14 @@
     #nav-bar::before {
         content: "nav";
         background-color: var(--toolbar-bg);
-        position: absolute;
+        position: fixed;
         left: 50%;
         transform: translateX(-50%);
-        top: -0.5rem;
+        top: calc(var(--margin-toolbar) + var(--tab-height) - 0.5rem);
         padding: var(--padding-label);
         color: var(--color-border-inactive);
         transition: color 0.2s ease;
-        z-index: 99999!important
+        z-index: 2147483647!important
     }
 
     /* Label hover states */
