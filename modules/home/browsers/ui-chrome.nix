@@ -277,7 +277,7 @@
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        top: var(--offset-label-bottom);
+        top: var(--offset-label-top);
         padding: var(--padding-label);
         color: var(--color-border-inactive);
         transition: color 0.2s ease;
