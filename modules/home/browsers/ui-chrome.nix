@@ -276,7 +276,7 @@
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        margin-top: var(--offset-label-top);
+        top: var(--offset-label-bottom);
         padding: var(--padding-label);
         color: var(--color-border-inactive);
         transition: color 0.2s ease
@@ -296,6 +296,12 @@
         border-radius: var(--border-radius)!important;
         transition: border-color 0.2s ease!important;
         position: relative!important
+    }
+
+    /* Remove bottom margin in fullscreen mode */
+    :root[inFullscreen] #browser,
+    :root[inFullscreen] #customization-container {
+        margin-bottom: var(--margin-toolbar)!important
     }
 
     /* Font inheritance for labels and containers */
