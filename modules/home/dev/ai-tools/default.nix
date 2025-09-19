@@ -1,6 +1,7 @@
 {...}: {
   imports = [
-    ../claude/claude-code.nix
+    ./claude-code
+    ./opencode
     ./gemini-cli.nix
     ./mcp.nix
   ];
