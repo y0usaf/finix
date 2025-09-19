@@ -20,14 +20,16 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
+    # Cursor packages installed at system level
+    environment.systemPackages = with pkgs;
+      [
+        xcursorPackage
+      ]
+      ++ lib.optionals (hyprcursorPackage != null) [
+        hyprcursorPackage
+      ];
+
     hjem.users.${username} = {
-      packages = with pkgs;
-        [
-          xcursorPackage
-        ]
-        ++ lib.optionals (hyprcursorPackage != null) [
-          hyprcursorPackage
-        ];
       files = {
         ".config/zsh/.zprofile" = {
           text = lib.mkAfter (''

@@ -15,11 +15,10 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    hjem.users.${username} = {
-      packages = with pkgs; [
-        quickshell
-        cava
-      ];
-    };
+    # Desktop shell packages installed at system level
+    environment.systemPackages = with pkgs; [
+      quickshell
+      cava
+    ];
   };
 }

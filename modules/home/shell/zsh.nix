@@ -22,13 +22,16 @@ in {
   config = lib.mkIf cfg.enable {
     environment.variables.ZDOTDIR = "${config.user.configDirectory}/zsh";
     programs.zsh.enable = true;
+
+    # Shell packages installed at system level
+    environment.systemPackages = with pkgs; [
+      zsh
+      bat
+      lsd
+      tree
+    ];
+
     hjem.users.${name} = {
-      packages = with pkgs; [
-        zsh
-        bat
-        lsd
-        tree
-      ];
       files = {
         ".config/zsh/.zshenv" = {
           text = let

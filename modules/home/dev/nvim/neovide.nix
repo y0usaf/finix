@@ -8,10 +8,11 @@
   username = config.user.name;
 in {
   config = lib.mkIf (cfg.enable && cfg.neovide) {
+    # Package installed at system level via environment.systemPackages
+    environment.systemPackages = with pkgs; [
+      neovide
+    ];
     hjem.users.${username} = {
-      packages = with pkgs; [
-        neovide
-      ];
       files.".config/neovide/config.toml" = {
         clobber = true;
         text = ''
