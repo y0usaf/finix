@@ -13,16 +13,17 @@ in {
   ];
 
   config = lib.mkIf config.home.programs.firefox.enable {
+    # Package installed at system level via environment.systemPackages
+    environment.systemPackages = with pkgs; [
+      (wrapFirefox firefox-unwrapped {
+        extraPolicies =
+          sharedPolicies.browserPolicies
+          // {
+            DisableFirefoxStudies = true;
+          };
+      })
+    ];
     hjem.users.${username} = {
-      packages = with pkgs; [
-        (wrapFirefox firefox-unwrapped {
-          extraPolicies =
-            sharedPolicies.browserPolicies
-            // {
-              DisableFirefoxStudies = true;
-            };
-        })
-      ];
       files = {
         ".config/zsh/.zprofile" = {
           text = lib.mkAfter ''
