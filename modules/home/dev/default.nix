@@ -1,10 +1,10 @@
 {...}: {
   imports = [
     ./ai-tools
-    ./opencode
-    ./claude
+    ./codex
 
     ./docker.nix
+    ./gcloud.nix
     ./latex.nix
     ./npm.nix
     ./nvim.nix
