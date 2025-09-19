@@ -15,17 +15,19 @@ sources: _final: prev: {
         stdenv,
         cmake,
         obs-studio,
-        qt6,
       }:
         stdenv.mkDerivation rec {
           pname = "obs-image-reaction";
-          version = "1.2.0";
+          version = "1.3";
           src = sources.obs-image-reaction;
-          nativeBuildInputs = [cmake qt6.wrapQtAppsHook];
-          buildInputs = [obs-studio qt6.qtbase];
-          cmakeFlags = [
-            "-DCMAKE_INSTALL_PREFIX=${placeholder "out"}"
-          ];
+          nativeBuildInputs = [cmake];
+          buildInputs = [obs-studio];
+          postInstall = ''
+            mkdir $out/lib $out/share
+            mv $out/obs-plugins/64bit $out/lib/obs-plugins
+            rm -rf $out/obs-plugins
+            mv $out/data $out/share/obs
+          '';
         }) {};
     };
 }
