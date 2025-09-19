@@ -11,7 +11,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ pkgs.google-cloud-sdk ];
+    environment.systemPackages = [pkgs.google-cloud-sdk];
   };
 }
-
