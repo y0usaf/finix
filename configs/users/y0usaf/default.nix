@@ -134,6 +134,7 @@
       gemini-cli.enable = true;
       mcp.enable = true;
       docker.enable = true;
+      gcloud.enable = true;
       nvim = {
         enable = true;
         neovide = false;
@@ -143,6 +144,7 @@
         enable = true;
         enableMcpServers = true;
       };
+      codex.enable = true;
       latex.enable = false;
       upscale.enable = true;
     };
