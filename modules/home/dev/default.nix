@@ -7,7 +7,7 @@
     ./gcloud.nix
     ./latex.nix
     ./npm.nix
-    ./nvim.nix
+    ./nvim
     ./python.nix
     ./upscale.nix
   ];
