@@ -40,16 +40,26 @@ in {
 
                   local skip_for_opencode=("ANTHROPIC_API_KEY" "OPENAI_API_KEY")
 
-                  for file_path in "$dir_path"
+                  for file_path in "$dir_path"/*; do
                       if [[ -f $file_path ]]; then
                           var_name=$(basename "$file_path" .txt)
 
+                          # Skip if variable name is invalid
+                          if [[ ! $var_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+                              continue
+                          fi
 
                           if [[ " ''${skip_for_opencode[@]} " =~ " $var_name " ]]; then
                               continue
                           fi
 
-                          export $var_name=$(cat "$file_path")
+                          # Read file content and skip if it contains problematic characters
+                          local content=$(cat "$file_path")
+                          if [[ $content =~ [[:cntrl:]] ]] || [[ $content == *"-----"* ]]; then
+                              continue
+                          fi
+
+                          export $var_name="$content"
                       fi
                   done
               }
@@ -86,7 +96,7 @@ in {
             export EDITOR="${config.home.core.defaults.editor}"
 
 
-            for alias_file in ''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases
+            for alias_file in ''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases/*; do
               source "$alias_file"
             done
 
