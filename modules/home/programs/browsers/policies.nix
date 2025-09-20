@@ -47,25 +47,25 @@
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
       };
-      # Vimium C
+
       "vimium-c@gdh1995.cn" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/vimium-c/latest.xpi";
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
       };
-      # Violentmonkey
+
       "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/violentmonkey/latest.xpi";
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
       };
-      # Twitch 5 (Alternate Player for Twitch.tv)
+
       "twitch5@coolcmd" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/twitch_5/latest.xpi";
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
       };
-      # SponsorBlock
+
       "sponsorBlocker@ajay.app" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
         installation_mode = "force_installed";
@@ -77,7 +77,7 @@
         Value = true;
         Status = "locked";
       };
-      # Dark theme
+
       "browser.theme.content-theme" = {
         Value = 0;
         Status = "locked";
@@ -86,17 +86,17 @@
         Value = 0;
         Status = "locked";
       };
-      # Compact UI density
+
       "browser.uidensity" = {
         Value = 1;
         Status = "locked";
       };
-      # Disable "Allow pages to choose their own fonts"
+
       "browser.display.use_document_fonts" = {
         Value = 0;
         Status = "default";
       };
-      # Allow extensions to run
+
       "extensions.webextensions.restrictedDomains" = {
         Value = "";
         Status = "locked";
@@ -105,17 +105,17 @@
         Value = true;
         Status = "locked";
       };
-      # Show separate titlebar by default
+
       "browser.tabs.drawInTitlebar" = {
         Value = true;
         Status = "locked";
       };
-      # Hide bookmarks toolbar
+
       "browser.toolbars.bookmarks.visibility" = {
         Value = "never";
         Status = "locked";
       };
-      # Performance settings from performance.nix
+
       "gfx.webrender.all" = {
         Value =
           if config.system.hardware.nvidia.enable or false
@@ -196,29 +196,29 @@
         Value = true;
         Status = "locked";
       };
-      # Force individual extensions to work in private browsing
-      "extensions.webextensions.uBlock0@raymondhill.net.privateBrowsingAllowed" = {
-        Value = true;
+
+      "browser.ml.enable" = {
+        Value = false;
         Status = "locked";
       };
-      "extensions.webextensions.addon@darkreader.org.privateBrowsingAllowed" = {
-        Value = true;
+      "browser.ml.chat.enabled" = {
+        Value = false;
         Status = "locked";
       };
-      "extensions.webextensions.vimium-c@gdh1995.cn.privateBrowsingAllowed" = {
-        Value = true;
+      "extensions.ml.enabled" = {
+        Value = false;
         Status = "locked";
       };
-      "extensions.webextensions.{aecec67f-0d10-4fa7-b7c7-609a2db280cf}.privateBrowsingAllowed" = {
-        Value = true;
+      "browser.ml.linkPreview.enabled" = {
+        Value = false;
         Status = "locked";
       };
-      "extensions.webextensions.twitch5@coolcmd.privateBrowsingAllowed" = {
-        Value = true;
+      "browser.tabs.groups.smart.enabled" = {
+        Value = false;
         Status = "locked";
       };
-      "extensions.webextensions.sponsorBlocker@ajay.app.privateBrowsingAllowed" = {
-        Value = true;
+      "browser.tabs.groups.smart.userEnabled" = {
+        Value = false;
         Status = "locked";
       };
     };

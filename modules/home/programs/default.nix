@@ -15,6 +15,6 @@
     ./sway-launcher-desktop.nix
     ./vesktop
     ./webapps.nix
-    ../browsers
+    ./browsers
   ];
 }

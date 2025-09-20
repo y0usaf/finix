@@ -15,7 +15,6 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    # Desktop shell packages installed at system level
     environment.systemPackages = with pkgs; [
       quickshell
       cava

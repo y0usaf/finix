@@ -13,7 +13,7 @@ in {
   ];
 
   config = lib.mkIf config.home.programs.firefox.enable {
-    # Package installed at system level via environment.systemPackages
+
     environment.systemPackages = with pkgs; [
       (wrapFirefox firefox-unwrapped {
         extraPolicies =
