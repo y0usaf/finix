@@ -79,7 +79,6 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    # Font packages installed at system level
     environment.systemPackages = mainFontPackages ++ fallbackPackages;
 
     hjem.users.${username} = {

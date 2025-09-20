@@ -3,7 +3,6 @@
   lib,
   ...
 }: {
-  # Direct NixOS user configuration
   users.users.y0usaf = {
     isNormalUser = true;
     shell = pkgs.zsh;
@@ -174,7 +173,7 @@
         email = "OA99@Outlook.com";
       };
       nh = {
-        enable = true; # Re-enabled with minimal flake wrapper
+        enable = true;
         flake = "/home/y0usaf/nixos";
       };
       npins-build = {

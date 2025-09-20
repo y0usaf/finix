@@ -23,7 +23,6 @@ in {
     environment.variables.ZDOTDIR = "${config.user.configDirectory}/zsh";
     programs.zsh.enable = true;
 
-    # Shell packages installed at system level
     environment.systemPackages = with pkgs; [
       zsh
       bat
@@ -38,14 +37,14 @@ in {
             tokenFunctionScript = ''
               export_vars_from_files() {
                   local dir_path=$1
-                  # Skip opencode-related API keys to prefer oauth
+
                   local skip_for_opencode=("ANTHROPIC_API_KEY" "OPENAI_API_KEY")
 
-                  for file_path in "$dir_path"/*.txt; do
+                  for file_path in "$dir_path"
                       if [[ -f $file_path ]]; then
                           var_name=$(basename "$file_path" .txt)
 
-                          # Skip API keys that conflict with opencode oauth
+
                           if [[ " ''${skip_for_opencode[@]} " =~ " $var_name " ]]; then
                               continue
                           fi
@@ -56,7 +55,7 @@ in {
               }
               export_vars_from_files "${tokensDirectory}"
 
-              # Set default applications
+
               export TERMINAL="${config.home.core.defaults.terminal}"
               export BROWSER="${config.home.core.defaults.browser}"
               export EDITOR="${config.home.core.defaults.editor}"
@@ -81,13 +80,13 @@ in {
         };
         ".config/zsh/.zshrc" = {
           text = ''
-            # Set default applications
+
             export TERMINAL="${config.home.core.defaults.terminal}"
             export BROWSER="${config.home.core.defaults.browser}"
             export EDITOR="${config.home.core.defaults.editor}"
 
-            # Source all files in the aliases directory
-            for alias_file in ''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases/*.zsh; do
+
+            for alias_file in ''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases
               source "$alias_file"
             done
 
