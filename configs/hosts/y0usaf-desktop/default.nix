@@ -7,15 +7,11 @@
     ../../../modules/system
     ./hardware-configuration.nix
     ../../users/y0usaf
-    # ../../users/guest
   ];
 
-  # Install Fast Font system-wide
   fonts = {
     packages = with pkgs; [
       fastFonts
-      # Also add a working font package for comparison
-      dejavu_fonts
     ];
     fontDir.enable = true;
   };

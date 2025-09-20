@@ -1,6 +1,6 @@
 {...}: {
   imports = [
-    ./ai-tools
+    ./ai-dev
     ./codex
 
     ./docker.nix

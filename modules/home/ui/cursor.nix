@@ -10,7 +10,6 @@
   x11ThemeName = "DeepinDarkV20-x11";
   xcursorPackage = pkgs.deepin-dark-xcursor;
   hyprcursorPackage = null;
-  # hyprcursorPackage = pkgs.deepin-dark-hyprcursor; # Uncomment to enable hyprcursor support
 in {
   options.home.ui.cursor = {
     enable = lib.mkOption {
@@ -20,7 +19,6 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    # Cursor packages installed at system level
     environment.systemPackages = with pkgs;
       [
         xcursorPackage
