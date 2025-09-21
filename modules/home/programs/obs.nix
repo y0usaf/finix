@@ -17,6 +17,7 @@ in {
           obs-vkcapture
           obs-pipewire-audio-capture
           obs-image-reaction
+          obs-aitum-multistream
         ];
       })
       v4l-utils
