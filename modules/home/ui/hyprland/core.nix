@@ -47,7 +47,7 @@
       cm_enabled = 0;
     };
     bezier = [
-      "in-out,.65,-0.01,0,.95"
+      "in_out,.65,-0.01,0,.95"
       "woa,0,0,0,1"
     ];
     animations = {
@@ -59,7 +59,7 @@
         "windows,1,2,woa,popin"
         "border,1,10,default"
         "fade,1,10,default"
-        "workspaces,1,5,in-out,slide"
+        "workspaces,1,5,in_out,slide"
       ];
     };
     misc = {
@@ -83,11 +83,11 @@
 in {
   config = lib.mkIf cfg.enable {
     usr.files.".config/hypr/hyprland.conf" = {
-      generator = genLib.toHyprconf;
-      value = {
+      clobber = true;
+      text = lib.mkAfter (genLib.toHyprconf {
         attrs = coreConfig;
         importantPrefixes = ["$" "exec" "source"];
-      };
+      });
     };
   };
 }
