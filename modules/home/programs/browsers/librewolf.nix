@@ -13,7 +13,6 @@ in {
   ];
 
   config = lib.mkIf config.home.programs.librewolf.enable {
-
     environment.systemPackages = with pkgs; [
       (wrapFirefox librewolf-unwrapped {
         extraPolicies =
