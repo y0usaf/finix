@@ -15,13 +15,10 @@ in {
       pkgs.wl-clipboard
       pkgs.jq
       pkgs.swaybg
+      pkgs.xwayland
     ];
     usr = {
       files = {
-        ".config/hypr/hyprland.conf" = {
-          clobber = true;
-          text = "";
-        };
         ".config/hypr/hyprpaper.conf" = {
           clobber = true;
           text = ''
