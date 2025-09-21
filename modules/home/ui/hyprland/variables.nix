@@ -23,7 +23,7 @@ in {
   config = lib.mkIf cfg.enable {
     usr.files.".config/hypr/hyprland.conf" = {
       clobber = true;
-      text = lib.mkBefore (genLib.toHyprconf {
+      text = lib.mkBefore (genLib.toHyprconf.toHyprconf {
         attrs = variablesConfig;
         importantPrefixes = ["$" "exec" "source"];
       });
