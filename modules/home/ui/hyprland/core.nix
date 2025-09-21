@@ -83,7 +83,7 @@
 in {
   config = lib.mkIf cfg.enable {
     usr.files.".config/hypr/hyprland.conf" = {
-      generator = genLib.toHyprconf.toHyprconf;
+      generator = genLib.toHyprconf;
       value = {
         attrs = coreConfig;
         importantPrefixes = ["$" "exec" "source"];
