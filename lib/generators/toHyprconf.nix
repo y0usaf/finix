@@ -1,65 +1,48 @@
+# basically 1:1 taken from https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix
 lib: let
-  inherit
-    (builtins)
-    all
-    isAttrs
-    isList
-    removeAttrs
-    ;
-  inherit (lib.attrsets) filterAttrs mapAttrsToList;
-  inherit (lib.generators) toKeyValue;
-  inherit (lib.lists) foldl replicate;
-  inherit
-    (lib.strings)
-    concatStrings
-    concatStringsSep
-    concatMapStringsSep
-    hasPrefix
-    ;
-  inherit (lib.types) package;
-  sectionOrderingRules = {
-    animations = ["bezier" "animation"];
-  };
   toHyprconf = {
     attrs,
     indentLevel ? 0,
     importantPrefixes ? ["$"],
-    pluginsSuffix ? "",
   }: let
+    inherit
+      (builtins)
+      all
+      isAttrs
+      isList
+      removeAttrs
+      ;
+    inherit (lib.attrsets) filterAttrs mapAttrsToList;
+    inherit (lib.generators) toKeyValue;
+    inherit (lib.lists) foldl replicate;
+    inherit
+      (lib.strings)
+      concatStrings
+      concatStringsSep
+      concatMapStringsSep
+      hasPrefix
+      ;
+
     initialIndent = concatStrings (replicate indentLevel "  ");
+
     toHyprconf' = indent: attrs: let
       sections = filterAttrs (_: v: isAttrs v || (isList v && all isAttrs v)) attrs;
+
       mkSection = n: attrs:
-        if isList attrs
+        if lib.isList attrs
         then (concatMapStringsSep "\n" (a: mkSection n a) attrs)
-        else let
-          hasOrderingRules = builtins.hasAttr n sectionOrderingRules;
-          processedAttrs =
-            if hasOrderingRules
-            then let
-              orderingRule = sectionOrderingRules.${n};
-              allKeys = builtins.attrNames attrs;
-              orderedKeys = builtins.filter (key: builtins.elem key orderingRule) allKeys;
-              unorderedKeys = builtins.filter (key: !(builtins.elem key orderingRule)) allKeys;
-              sortedOrderedKeys = builtins.filter (ruleKey: builtins.elem ruleKey orderedKeys) orderingRule;
-              finalKeyOrder = sortedOrderedKeys ++ unorderedKeys;
-              orderedAttrs = lib.listToAttrs (map (key: {
-                  name = key;
-                  value = attrs.${key};
-                })
-                finalKeyOrder);
-            in
-              orderedAttrs
-            else attrs;
-        in ''
+        else ''
           ${indent}${n} {
-          ${toHyprconf' "  ${indent}" processedAttrs}${indent}}
+          ${toHyprconf' "  ${indent}" attrs}${indent}}
         '';
+
       mkFields = toKeyValue {
         listsAsDuplicateKeys = true;
         inherit indent;
       };
+
       allFields = filterAttrs (_: v: !(isAttrs v || (isList v && all isAttrs v))) attrs;
+
       isImportantField = n: _:
         foldl (acc: prev:
           if hasPrefix prev n
@@ -67,23 +50,24 @@ lib: let
           else acc)
         false
         importantPrefixes;
-      isEarlyField = n: _: n == "bezier";
+
       importantFields = filterAttrs isImportantField allFields;
-      earlyFields = filterAttrs isEarlyField (removeAttrs allFields (mapAttrsToList (n: _: n) importantFields));
-      regularFields = removeAttrs allFields (mapAttrsToList (n: _: n) (importantFields // earlyFields));
+
+      fields = removeAttrs allFields (mapAttrsToList (n: _: n) importantFields);
     in
       mkFields importantFields
-      + mkFields earlyFields
       + concatStringsSep "\n" (mapAttrsToList mkSection sections)
-      + mkFields regularFields;
+      + mkFields fields;
   in
-    toHyprconf' initialIndent attrs + pluginsSuffix;
+    toHyprconf' initialIndent attrs;
+
+  # taken from https://github.com/hyprwm/Hyprland/blob/f4b148df1e2d8edc96bd878a4cfde32ca6515ac8/nix/module.nix#L185-L197
   pluginsToHyprconf = plugins: importantPrefixes:
     toHyprconf {
       attrs = {
         plugin = let
           mkEntry = entry:
-            if package.check entry
+            if lib.types.package.check entry
             then "${entry}/lib/lib${entry.pname}.so"
             else entry;
         in
@@ -92,8 +76,5 @@ lib: let
       inherit importantPrefixes;
     };
 in {
-  inherit
-    toHyprconf
-    pluginsToHyprconf
-    ;
+  inherit toHyprconf pluginsToHyprconf;
 }
