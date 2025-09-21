@@ -5,7 +5,6 @@
   ...
 }: let
   cfg = config.home.ui.quickshell;
-  username = config.user.name;
 in {
   options.home.ui.quickshell = {
     enable = lib.mkOption {

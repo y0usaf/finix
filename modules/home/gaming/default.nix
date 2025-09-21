@@ -7,5 +7,6 @@
     ./emulation
     ./marvel-rivals
     ./wukong
+    ./clairobscur.nix
   ];
 }

@@ -13,7 +13,6 @@ in {
   ];
 
   config = lib.mkIf config.home.programs.firefox.enable {
-
     environment.systemPackages = with pkgs; [
       (wrapFirefox firefox-unwrapped {
         extraPolicies =
