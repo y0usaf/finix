@@ -11,6 +11,10 @@
     "$active_colour" = "ffffffff";
     "$transparent" = "ffffff00";
     "$inactive_colour" = "333333ff";
+    bezier = [
+      "in_out,.65,-0.01,0,.95"
+      "woa,0,0,0,1"
+    ];
     general = {
       gaps_in = 10;
       gaps_out = 5;
@@ -46,10 +50,6 @@
     render = {
       cm_enabled = 0;
     };
-    bezier = [
-      "in_out,.65,-0.01,0,.95"
-      "woa,0,0,0,1"
-    ];
     animations = {
       enabled =
         if config.home.core.appearance.animations.enable
