@@ -24,13 +24,13 @@ in {
   config = lib.mkIf cfg.enable {
     usr.files = {
       # Install the ASI plugin
-      ".local/share/Steam/steamapps/common/Clair Obscur Expedition 33/ClairObscurFix.asi" = {
+      ".local/share/Steam/steamapps/common/Expedition 33/ClairObscurFix.asi" = {
         clobber = true;
         source = "${clairobscurfix}/ClairObscurFix.asi";
       };
 
       # Install the configuration file
-      ".local/share/Steam/steamapps/common/Clair Obscur Expedition 33/ClairObscurFix.ini" = {
+      ".local/share/Steam/steamapps/common/Expedition 33/ClairObscurFix.ini" = {
         clobber = true;
         generator = lib.generators.toINI {};
         value = {
