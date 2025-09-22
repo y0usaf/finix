@@ -8,6 +8,7 @@ in {
   imports = [
     ./gameusersettings.nix
     ./plugin.nix
+    ./engine.nix
   ];
 
   options.home.gaming.clair-obscur = {
@@ -21,5 +22,6 @@ in {
   config = lib.mkIf cfg.enable {
     home.gaming.clair-obscur.gameusersettings.enable = true;
     home.gaming.clair-obscur.plugin.enable = true;
+    home.gaming.clair-obscur.engine.enable = true;
   };
 }
