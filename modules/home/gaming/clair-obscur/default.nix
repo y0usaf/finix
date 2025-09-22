@@ -14,18 +14,12 @@ in {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Enable Clair Obscur configuration";
-    };
-    
-    enablePlugin = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable ClairObscurFix plugin installation";
+      description = "Enable Clair Obscur configuration and ClairObscurFix plugin";
     };
   };
 
   config = lib.mkIf cfg.enable {
     home.gaming.clair-obscur.gameusersettings.enable = true;
-    home.gaming.clair-obscur.plugin.enable = cfg.enablePlugin;
+    home.gaming.clair-obscur.plugin.enable = true;
   };
 }
