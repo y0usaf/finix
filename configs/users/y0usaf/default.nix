@@ -89,7 +89,7 @@
         scale = 1.5;
       };
       hyprland = {
-        enable = true;
+        enable = false;
       };
       niri = {
         enable = true;
@@ -209,7 +209,7 @@
       wukong = {
         enable = true;
       };
-      clairobscur.enable = true;
+      clair-obscur.enable = true;
     };
   };
 }
