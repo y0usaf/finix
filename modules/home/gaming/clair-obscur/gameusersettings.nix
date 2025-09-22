@@ -18,7 +18,7 @@ in {
       generator = lib.generators.toINI {};
       value = {
         "ScalabilityGroups" = {
-          "sg.ResolutionQuality" = "100";
+          "sg.ResolutionQuality" = "75";
           "sg.ViewDistanceQuality" = "0";
           "sg.AntiAliasingQuality" = "0";
           "sg.ShadowQuality" = "0";
@@ -49,7 +49,7 @@ in {
           WindowPosY = "0";
           FullscreenMode = "2";
           LastConfirmedFullscreenMode = "2";
-          PreferredFullscreenMode = "1";
+          PreferredFullscreenMode = "2";
           Version = "5";
           AudioQualityLevel = "0";
           LastConfirmedAudioQualityLevel = "0";
