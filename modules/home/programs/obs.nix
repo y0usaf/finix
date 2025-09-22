@@ -11,16 +11,26 @@ in {
   };
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      (wrapOBS {
-        plugins = with obs-studio-plugins; [
-          obs-backgroundremoval
-          obs-vkcapture
-          obs-pipewire-audio-capture
-          obs-image-reaction
-          obs-aitum-multistream
-          obs-vertical-canvas
-          obs-scale-to-sound
+      (symlinkJoin {
+        name = "obs-studio-with-cuda";
+        paths = [
+          (wrapOBS {
+            plugins = with obs-studio-plugins; [
+              obs-backgroundremoval
+              obs-vkcapture
+              obs-pipewire-audio-capture
+              obs-image-reaction
+              obs-aitum-multistream
+              obs-vertical-canvas
+              obs-scale-to-sound
+            ];
+          })
         ];
+        buildInputs = [makeWrapper];
+        postBuild = ''
+          wrapProgram $out/bin/obs \
+            --prefix LD_LIBRARY_PATH : /run/opengl-driver/lib:/run/opengl-driver-32/lib
+        '';
       })
       v4l-utils
     ];
