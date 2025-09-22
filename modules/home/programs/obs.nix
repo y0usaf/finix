@@ -19,6 +19,7 @@ in {
           obs-image-reaction
           obs-aitum-multistream
           obs-vertical-canvas
+          obs-scale-to-sound
         ];
       })
       v4l-utils
