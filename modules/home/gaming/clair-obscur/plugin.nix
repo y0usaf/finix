@@ -7,39 +7,10 @@
   cfg = config.home.gaming.clair-obscur.plugin;
   sources = import ./npins;
 
-  clairobscurfix = pkgs.stdenv.mkDerivation rec {
-    pname = "clairobscurfix";
-    version = sources.ClairObscurFix.version;
-
-    src = sources.ClairObscurFix;
-
-    nativeBuildInputs = with pkgs; [
-      xmake
-    ];
-
-    buildPhase = ''
-      runHook preBuild
-      xmake config --mode=release
-      xmake build
-      runHook postBuild
-    '';
-
-    installPhase = ''
-      runHook preInstall
-      mkdir -p $out/bin
-      # Copy the built ASI plugin
-      cp build/*/release/*.asi $out/bin/ || true
-      # Copy configuration file if it exists
-      cp *.ini $out/bin/ || true
-      runHook postInstall
-    '';
-
-    meta = with lib; {
-      description = "ClairObscurFix - Performance and visual improvements for Clair Obscur: Expedition 33";
-      homepage = "https://codeberg.org/Lyall/ClairObscurFix";
-      license = licenses.mit;
-      platforms = platforms.all;
-    };
+  clairobscurfix = pkgs.fetchzip {
+    url = "https://codeberg.org/Lyall/ClairObscurFix/releases/download/${sources.ClairObscurFix.version}/ClairObscurFix_${sources.ClairObscurFix.version}.zip";
+    sha256 = sources.ClairObscurFix.hash;
+    stripRoot = false;
   };
 in {
   options.home.gaming.clair-obscur.plugin = {
@@ -55,7 +26,7 @@ in {
       # Install the ASI plugin
       ".local/share/Steam/steamapps/common/Clair Obscur Expedition 33/ClairObscurFix.asi" = {
         clobber = true;
-        source = "${clairobscurfix}/bin/ClairObscurFix.asi";
+        source = "${clairobscurfix}/ClairObscurFix.asi";
       };
 
       # Install the configuration file
