@@ -9,7 +9,7 @@
 
   clairobscurfix = pkgs.fetchzip {
     url = "https://codeberg.org/Lyall/ClairObscurFix/releases/download/${sources.ClairObscurFix.version}/ClairObscurFix_${sources.ClairObscurFix.version}.zip";
-    sha256 = sources.ClairObscurFix.hash;
+    sha256 = "160xv8gb95rn2kpcwv65j3q8fsi1wiayqchgn4gnkrh6g909qzrb";
     stripRoot = false;
   };
 in {
