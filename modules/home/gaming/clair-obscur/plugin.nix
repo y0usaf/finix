@@ -40,17 +40,34 @@ in {
         clobber = true;
         generator = lib.generators.toINI {};
         value = {
-          Settings = {
-            # Remove 30fps cap in cutscenes
-            RemoveCutsceneFPSCap = true;
-            # Disable game sharpening
-            DisableSharpening = true;
-            # Skip intro logos
-            SkipIntroLogos = true;
-            # Enable developer console
-            EnableConsole = true;
-            # Ultrawide/aspect ratio fixes
-            UltrawideSupport = true;
+          "Developer Console" = {
+            Enabled = true;
+          };
+          "Skip Intro Logos" = {
+            Enabled = true;
+          };
+          "Uncap Cutscene FPS" = {
+            Enabled = true;
+            AllowFrameGen = false;
+          };
+          "Adjust Resolution Checks" = {
+            Enabled = true;
+          };
+          "Maximum Timer Resolution" = {
+            Enabled = true;
+          };
+          "Cutscenes" = {
+            DisableLetterboxing = false;
+            DisablePillarboxing = true;
+          };
+          "Fix Movies" = {
+            Enabled = true;
+          };
+          "Disable Subtitle Blur" = {
+            Enabled = false;
+          };
+          "Sharpening" = {
+            Strength = "0";
           };
         };
       };
