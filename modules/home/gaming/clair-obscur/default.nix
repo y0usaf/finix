@@ -9,6 +9,7 @@ in {
     ./gameusersettings.nix
     ./plugin.nix
     ./engine.nix
+    ./scalability.nix
   ];
 
   options.home.gaming.clair-obscur = {
@@ -23,5 +24,6 @@ in {
     home.gaming.clair-obscur.gameusersettings.enable = true;
     home.gaming.clair-obscur.plugin.enable = true;
     home.gaming.clair-obscur.engine.enable = true;
+    home.gaming.clair-obscur.scalability.enable = true;
   };
 }
