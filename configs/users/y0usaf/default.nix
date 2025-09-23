@@ -196,11 +196,6 @@
         wii-u.enable = true;
         gcn-wii.enable = true;
       };
-      marvel-rivals = {
-        engine.enable = true;
-        gameusersettings.enable = true;
-        marvelusersettings.enable = true;
-      };
       balatro = {
         enable = true;
         enableLovelyInjector = true;
@@ -209,7 +204,12 @@
       wukong = {
         enable = true;
       };
-      clair-obscur.enable = true;
+      clair-obscur = {
+        gameusersettings.enable = true;
+        plugin.enable = true;
+        engine.enable = true;
+        scalability.enable = true;
+      };
     };
   };
 }
