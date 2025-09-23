@@ -221,6 +221,10 @@
         Value = false;
         Status = "locked";
       };
+      "privacy.resistfingerprinting" = {
+        Value = false;
+        Status = "locked";
+      };
     };
   };
 }
