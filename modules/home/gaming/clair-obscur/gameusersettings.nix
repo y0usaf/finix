@@ -18,21 +18,21 @@ in {
       generator = lib.generators.toINI {};
       value = {
         "ScalabilityGroups" = {
-          "sg.ResolutionQuality" = "75";
-          "sg.ViewDistanceQuality" = "0";
-          "sg.AntiAliasingQuality" = "0";
-          "sg.ShadowQuality" = "0";
-          "sg.GlobalIlluminationQuality" = "0";
-          "sg.ReflectionQuality" = "0";
-          "sg.PostProcessQuality" = "0";
-          "sg.TextureQuality" = "0";
-          "sg.EffectsQuality" = "0";
-          "sg.FoliageQuality" = "0";
-          "sg.ShadingQuality" = "0";
-          "sg.LandscapeQuality" = "0";
+          "sg.ResolutionQuality" = "100";
+          "sg.ViewDistanceQuality" = "2";
+          "sg.AntiAliasingQuality" = "2";
+          "sg.ShadowQuality" = "2";
+          "sg.GlobalIlluminationQuality" = "2";
+          "sg.ReflectionQuality" = "2";
+          "sg.PostProcessQuality" = "2";
+          "sg.TextureQuality" = "2";
+          "sg.EffectsQuality" = "2";
+          "sg.FoliageQuality" = "2";
+          "sg.ShadingQuality" = "2";
+          "sg.LandscapeQuality" = "2";
         };
         "/Script/SandFall.ConfigurableGameUserSettings" = {
-          SettingsData = "(bEnableSubtitles=True,SubtitlesSize=0,bEnableSubtitlesSpeakerDisplay=True,bEnableSubtitlesSpeakerPersonalColor=False,bEnableTutorials=True,bEnableCustomizationDuringCinematics=True,bEnableAutoSkipLinesDuringDialogues=False,bEnableControllerForceFeedback=True,bInvertCameraPitch=False,bInvertCameraYaw=False,CameraYawInputMultiplier=1.000000,CameraPitchInputMultiplier=1.000000,CameraInputMultiplier=1.000000,bEnableHoldInputToSprint=True,bEnableHoldInputToAim=True,MasterVolume=0.400000,MusicVolume=1.000000,MusicVolume_Combat=1.000000,MusicVolume_Exploration=1.000000,VoiceVolume=1.000000,VoiceVolume_Combat=1.000000,VoiceVolume_Exploration=1.000000,UserInterfaceVolume=1.000000,SpecialEffectsVolume=1.000000,SpecialEffectsVolume_Combat=1.000000,SpecialEffectsVolume_Exploration=1.000000,NotFocusedVolume=0.000000,bEnableMotionBlur=True,bEnableFilmGrain=True,bEnableChromaticAberration=True,bEnableVignette=True,GammaValue=1.000000,ContrastValue=1.000000,BrightnessValue=1.000000,bEnableCameraShakes=True,bCameraMovement=True,bPersistentCenterDot=False,bEnableAutomaticBattleQTE=False,ColorVisionDeficiency=NormalVision,ColorVisionDeficiencyCorrectionSeverity=1.000000,ApplicationScale=1.000000,MenuUltrawideConstrain=(X=0,Y=0),BattleUltrawideConstrain=(X=0,Y=0),ConsoleGraphicPreset=0)";
+          SettingsData = "(bEnableSubtitles=True,SubtitlesSize=0,bEnableSubtitlesSpeakerDisplay=True,bEnableSubtitlesSpeakerPersonalColor=False,bEnableTutorials=True,bEnableCustomizationDuringCinematics=True,bEnableAutoSkipLinesDuringDialogues=False,bEnableControllerForceFeedback=True,bInvertCameraPitch=False,bInvertCameraYaw=False,CameraYawInputMultiplier=1.000000,CameraPitchInputMultiplier=1.000000,CameraInputMultiplier=1.000000,bEnableHoldInputToSprint=True,bEnableHoldInputToAim=True,MasterVolume=0.400000,MusicVolume=1.000000,MusicVolume_Combat=1.000000,MusicVolume_Exploration=1.000000,VoiceVolume=1.000000,VoiceVolume_Combat=1.000000,VoiceVolume_Exploration=1.000000,UserInterfaceVolume=1.000000,SpecialEffectsVolume=1.000000,SpecialEffectsVolume_Combat=1.000000,SpecialEffectsVolume_Exploration=1.000000,NotFocusedVolume=0.000000,bEnableMotionBlur=True,bEnableFilmGrain=True,bEnableChromaticAberration=False,bEnableVignette=True,GammaValue=1.000000,ContrastValue=1.000000,BrightnessValue=1.000000,bEnableCameraShakes=True,bCameraMovement=True,bPersistentCenterDot=False,bEnableAutomaticBattleQTE=False,ColorVisionDeficiency=NormalVision,ColorVisionDeficiencyCorrectionSeverity=1.000000,ApplicationScale=1.000000,MenuUltrawideConstrain=(X=0,Y=0),BattleUltrawideConstrain=(X=0,Y=0),ConsoleGraphicPreset=0)";
           CurrentSelectedMonitorIDName = ''"MONITOR\\Default_Monitor\\{4D36E96E-E325-11CE-BFC1-08002BE10318}\\0000Default_Monitor"'';
           CurrentSelectedUpscaler = "DLSS";
           CurrentSelectedUpscalerQualityMode = "2";

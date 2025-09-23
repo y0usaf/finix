@@ -29,6 +29,12 @@ in {
         source = "${clairobscurfix}/ClairObscurFix.asi";
       };
 
+      # Install the ASI loader (required for .asi files to work)
+      ".local/share/Steam/steamapps/common/Expedition 33/dsound.dll" = {
+        clobber = true;
+        source = "${clairobscurfix}/dsound.dll";
+      };
+
       # Install the configuration file
       ".local/share/Steam/steamapps/common/Expedition 33/ClairObscurFix.ini" = {
         clobber = true;
