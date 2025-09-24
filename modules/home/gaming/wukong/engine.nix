@@ -15,7 +15,8 @@ in {
   config = lib.mkIf cfg.enable {
     usr.files.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
       clobber = true;
-      text = lib.generators.toINI {} {
+      generator = lib.generators.toINI {};
+      value = {
         "SystemSettings" = {
           "r.DefaultFeature.AntiAliasing" = "0";
           "pp.VignetteIntensity" = "0.0";
