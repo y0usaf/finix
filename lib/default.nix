@@ -3,7 +3,13 @@ let
   system = "x86_64-linux";
 
   # Centralized nixpkgs config
-  nixpkgsConfig = import ./nixpkgs-config.nix;
+  nixpkgsConfig = {
+    allowUnfree = true;
+    cudaSupport = true;
+    permittedInsecurePackages = [
+      "qtwebengine-5.15.19"
+    ];
+  };
 
   # Direct overlays import
   overlays = import ./overlays sources;
