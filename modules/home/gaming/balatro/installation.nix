@@ -2,49 +2,49 @@
   config,
   pkgs,
   lib,
-  sources,
   ...
 }: let
   cfg = config.home.gaming.balatro;
+  sources = import ./npins;
   availableMods = {
     steamodded = {
-      src = sources.balatro-steamodded;
+      src = sources.steamodded;
       name = "smods";
     };
     talisman = {
-      src = sources.balatro-talisman;
+      src = sources.talisman;
       name = "Talisman";
     };
     cryptid = {
-      src = sources.balatro-cryptid;
+      src = sources.cryptid;
       name = "Cryptid";
     };
     multiplayer = {
-      src = sources.balatro-multiplayer;
+      src = sources.multiplayer;
       name = "BalatroMultiplayer";
     };
     cardsleeves = {
-      src = sources.balatro-cardsleeves;
+      src = sources.cardsleeves;
       name = "CardSleeves";
     };
     jokerdisplay = {
-      src = sources.balatro-jokerdisplay;
+      src = sources.jokerdisplay;
       name = "JokerDisplay-1.8.4.1";
     };
     pokermon = {
-      src = sources.balatro-pokermon;
+      src = sources.pokermon;
       name = "Pokermon";
     };
     stickersalwaysshown = {
-      src = sources.balatro-stickers-always-shown;
+      src = sources."Balatro-Stickers-Always-Shown";
       name = "StickersAlwaysShown";
     };
     handybalatro = {
-      src = sources.balatro-handybalatro;
+      src = sources."HandyBalatro";
       name = "HandyBalatro";
     };
     aura = {
-      src = sources.balatro-aura;
+      src = sources."Aura";
       name = "Aura";
     };
     morespeeds = {
