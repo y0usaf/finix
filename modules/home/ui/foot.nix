@@ -62,7 +62,8 @@ in {
     usr = {
       files.".config/foot/foot.ini" = {
         clobber = true;
-        text = lib.mkAfter (lib.generators.toINI {} footConfig);
+        generator = lib.generators.toINI {};
+        value = footConfig;
       };
     };
   };

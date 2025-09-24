@@ -15,7 +15,8 @@ in {
   config = lib.mkIf cfg.enable {
     usr.files.".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini" = {
       clobber = true;
-      text = lib.generators.toINI {} {
+      generator = lib.generators.toINI {};
+      value = {
         "Internationalization" = {
           Culture = "en";
         };

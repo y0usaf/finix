@@ -47,7 +47,8 @@ in {
       files = {
         ".config/gtk-3.0/settings.ini" = {
           clobber = true;
-          text = lib.generators.toINI {} gtk3Settings;
+          generator = lib.generators.toINI {};
+          value = gtk3Settings;
         };
         ".config/gtk-3.0/gtk.css" = {
           clobber = true;
@@ -59,7 +60,8 @@ in {
         };
         ".config/gtk-4.0/settings.ini" = {
           clobber = true;
-          text = lib.generators.toINI {} gtk4Settings;
+          generator = lib.generators.toINI {};
+          value = gtk4Settings;
         };
         ".zshenv" = {
           clobber = true;
