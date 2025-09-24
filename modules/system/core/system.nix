@@ -7,7 +7,6 @@
     system.stateVersion = hostConfig.stateVersion;
     time.timeZone = hostConfig.timezone;
     networking.hostName = hostConfig.hostname;
-    nixpkgs.config.allowUnfree = true;
     assertions = [
       {
         assertion = hostConfig.hostname != "";
