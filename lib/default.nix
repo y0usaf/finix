@@ -2,14 +2,8 @@ let
   sources = import ../npins;
   system = "x86_64-linux";
 
-  # Shared nixpkgs config
-  nixpkgsConfig = {
-    allowUnfree = true;
-    cudaSupport = true;
-    permittedInsecurePackages = [
-      "qtwebengine-5.15.19"
-    ];
-  };
+  # Centralized nixpkgs config
+  nixpkgsConfig = import ./nixpkgs-config.nix;
 
   # Direct overlays import
   overlays = import ./overlays sources;
