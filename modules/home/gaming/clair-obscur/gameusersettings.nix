@@ -41,8 +41,8 @@ in {
           CurrentSelectedLowLatencyMode = "1";
           bUseVSync = "False";
           bUseDynamicResolution = "False";
-          ResolutionSizeX = "2560";
-          ResolutionSizeY = "1440";
+          ResolutionSizeX = "2543";
+          ResolutionSizeY = "1418";
           WindowPosX = "0";
           WindowPosY = "0";
           FullscreenMode = "2";
@@ -52,8 +52,8 @@ in {
           AudioQualityLevel = "0";
           LastConfirmedAudioQualityLevel = "0";
           FrameRateLimit = "0.000000";
-          DesiredScreenWidth = "2560";
-          DesiredScreenHeight = "1440";
+          DesiredScreenWidth = "2543";
+          DesiredScreenHeight = "1418";
           bUseHDRDisplayOutput = "False";
           HDRDisplayOutputNits = "1000";
         };
