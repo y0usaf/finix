@@ -15,12 +15,6 @@
       environment = {};
     };
 
-    "sequential-thinking" = {
-      type = "local";
-      command = ["npx" "-y" "@modelcontextprotocol/server-sequential-thinking"];
-      enabled = true;
-      environment = {};
-    };
     "GitHub-Repo-MCP" = {
       type = "local";
       command = ["npx" "-y" "github-repo-mcp"];
@@ -157,12 +151,6 @@ in {
 
             ## Tool Selection Guide
 
-            ### **Filesystem Operations (PRIORITY)**
-            - **ALWAYS use** `mcp__Filesystem__*` tools for file operations
-            - **NEVER use** Read/Write/Edit tools when MCP Filesystem tools are available
-            - Use `mcp__Filesystem__read_file` to understand context first
-            - Use `mcp__Filesystem__edit_file` for targeted changes
-            - Use `mcp__Filesystem__write_file` for new files or complete rewrites
 
             ### **Task Delegation**
             - **Any search operation**: Use Task tool for keywords, files, code patterns
@@ -226,11 +214,9 @@ in {
 
             The following MCP servers are configured and available:
 
-            1. **Filesystem** - File operations, directory listing, file management
-            2. **NixOS MCP** - NixOS-specific operations and package management
-            3. **Sequential Thinking** - Step-by-step reasoning and planning
-            4. **GitHub Repo MCP** - Remote repository analysis and file access
-            5. **Gemini MCP** - Additional AI capabilities and analysis
+            1. **GitHub Repo MCP** - Remote repository analysis and file access
+            2. **Gemini MCP** - Additional AI capabilities and analysis
+            3. **Context7** - Up-to-date library documentation and code examples
 
             Use these tools strategically to maximize efficiency and code quality.
           '';
