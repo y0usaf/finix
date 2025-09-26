@@ -14,12 +14,6 @@
         env = {};
       };
 
-      "sequential-thinking" = {
-        type = "stdio";
-        command = "npx";
-        args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
-        env = {};
-      };
       "GitHub Repo MCP" = {
         type = "stdio";
         command = "npx";
@@ -42,12 +36,6 @@
       env = {};
     };
 
-    "sequential-thinking" = {
-      type = "stdio";
-      command = "npx";
-      args = ["-y" "@modelcontextprotocol/server-sequential-thinking"];
-      env = {};
-    };
     "GitHub Repo MCP" = {
       type = "stdio";
       command = "npx";
