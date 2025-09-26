@@ -10,6 +10,19 @@
     home = "/home/y0usaf";
     ignoreShellProgramCheck = true;
   };
+
+  # Personal sudo configuration
+  security.sudo.extraRules = [
+    {
+      users = ["y0usaf"];
+      commands = [
+        {
+          command = "ALL";
+          options = ["NOPASSWD"];
+        }
+      ];
+    }
+  ];
   home = {
     core = {
       packages.enable = true;
