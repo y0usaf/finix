@@ -8,8 +8,12 @@
 in {
   config = lib.mkIf cfg.enable {
     home.ui.niri.settings.binds = {
+      # System & Help
       "Mod+Shift+Slash" = {show-hotkey-overlay = {};};
+      "Mod+Shift+E" = {quit = {};};
+      "Mod+O" = {toggle-overview = {};};
 
+      # Core Applications
       "Mod+T" = {spawn = defaults.terminal;};
       "Super+R" = {
         spawn = [
@@ -19,33 +23,36 @@ in {
           "${config.user.configDirectory}/scripts/sway-launcher-desktop.sh"
         ];
       };
+      "Mod+E" = {spawn = defaults.fileManager;};
+      "Super+Shift+O" = {spawn = "${defaults.terminal} -e ${defaults.editor}";};
 
+      # Window Management
       "Mod+Q" = {close-window = {};};
-      "Mod+Shift+F" = {fullscreen-window = {};};
       "Mod+F" = {maximize-column = {};};
+      "Mod+Shift+F" = {fullscreen-window = {};};
       "Super+F" = {toggle-windowed-fullscreen = {};};
       "Mod+Space" = {center-column = {};};
       "Super+Space" = {toggle-window-floating = {};};
 
-      # Navigation
-      "Mod+Left" = {focus-column-left = {};};
-      "Mod+Right" = {focus-column-right = {};};
-      "Mod+Up" = {focus-window-up = {};};
-      "Mod+Down" = {focus-window-down = {};};
+      # Navigation - Focus
       "Mod+H" = {focus-column-left = {};};
       "Mod+L" = {focus-column-right = {};};
       "Mod+J" = {focus-window-down = {};};
       "Mod+K" = {focus-window-up = {};};
+      "Mod+Left" = {focus-column-left = {};};
+      "Mod+Right" = {focus-column-right = {};};
+      "Mod+Up" = {focus-window-up = {};};
+      "Mod+Down" = {focus-window-down = {};};
 
-      # Moving windows
-      "Mod+Shift+Left" = {move-column-left = {};};
-      "Mod+Shift+Right" = {move-column-right = {};};
-      "Mod+Shift+Up" = {move-window-up = {};};
-      "Mod+Shift+Down" = {move-window-down = {};};
+      # Window Movement
       "Mod+Shift+H" = {move-column-left = {};};
       "Mod+Shift+L" = {move-column-right = {};};
       "Mod+Shift+J" = {move-window-down = {};};
       "Mod+Shift+K" = {move-window-up = {};};
+      "Mod+Shift+Left" = {move-column-left = {};};
+      "Mod+Shift+Right" = {move-column-right = {};};
+      "Mod+Shift+Up" = {move-window-up = {};};
+      "Mod+Shift+Down" = {move-window-down = {};};
 
       # Workspaces
       "Mod+Page_Up" = {focus-workspace-up = {};};
@@ -85,14 +92,6 @@ in {
       "Mod+BracketLeft" = {consume-or-expel-window-left = {};};
       "Mod+BracketRight" = {consume-or-expel-window-right = {};};
 
-      # Screenshots
-      "Mod+G" = {screenshot = {};};
-      "Mod+Shift+G" = {screenshot-screen = {};};
-
-      # System
-      "Mod+Shift+E" = {quit = {};};
-      "Mod+O" = {toggle-overview = {};};
-
       # Applications
       "Mod+1" = {spawn = defaults.ide;};
       "Mod+2" = {spawn = defaults.browser;};
@@ -100,10 +99,12 @@ in {
       "Mod+4" = {spawn = "steam";};
       "Mod+5" = {spawn = "obs";};
 
-      "Mod+E" = {spawn = defaults.fileManager;};
-      "Mod+Shift+O" = {spawn = "${defaults.terminal} -e ${defaults.editor}";};
+      # Screenshots & Media
+      "Mod+G" = {screenshot = {};};
+      "Mod+Shift+G" = {screenshot-screen = {};};
 
-      # Change wallpaper
+      # Utilities
+      "Alt+grave" = {spawn = ["bash" "-c" "niri msg pick-color | grep Hex: | cut -d' ' -f2 | wl-copy"];};
       "Mod+Shift+C" = {spawn = ["sh" "-c" "killall swaybg; swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill &"];};
 
       # Monitor controls
