@@ -57,7 +57,7 @@ in {
             Enabled = true;
           };
           "Cutscenes" = {
-            DisableLetterboxing = false;
+            DisableLetterboxing = true;
             DisablePillarboxing = true;
           };
           "Fix Movies" = {
