@@ -38,8 +38,23 @@
     };
   };
 
+  # ZRAM configuration - hardware-level memory management
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50; # Scales with laptop RAM amount
+    algorithm = "zstd"; # Optimal compression
+    priority = 100; # Higher priority than disk swap
+  };
+
+  # Aggressive swappiness for ZRAM systems
+  boot.kernel.sysctl."vm.swappiness" = 180;
+
+  # Keep existing disk swap as fallback + hibernation support
   swapDevices = [
-    {device = "/dev/disk/by-uuid/be858002-6caa-4bca-8160-75cc21c1836e";}
+    {
+      device = "/dev/disk/by-uuid/be858002-6caa-4bca-8160-75cc21c1836e";
+      priority = 10; # Lower priority than ZRAM
+    }
   ];
 
   networking.useDHCP = lib.mkDefault true;

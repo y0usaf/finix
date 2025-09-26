@@ -97,12 +97,18 @@
     #    options = ["size=2G" "uid=1001" "gid=100" "mode=0755"];
     #  };
   };
-  swapDevices = [
-    {
-      device = "/swap/swapfile";
-      size = 96768;
-    }
-  ];
+  # ZRAM configuration - hardware-level memory management
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50; # 48GB ZRAM for 96GB system
+    algorithm = "zstd"; # Optimal compression
+  };
+
+  # Aggressive swappiness for ZRAM systems
+  boot.kernel.sysctl."vm.swappiness" = 180;
+
+  # No disk swap needed on 96GB desktop system
+  swapDevices = [];
   networking.useDHCP = lib.mkDefault true;
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
