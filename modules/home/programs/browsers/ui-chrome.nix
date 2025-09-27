@@ -73,7 +73,7 @@
         border-radius: 0!important;
         padding: 0!important;
         min-height: 0!important;
-        max-height: calc(1em + 0.2em)!important
+        max-height: 2.4em!important
     }
 
     .tabbrowser-tab * {
@@ -82,11 +82,10 @@
     }
 
     .tabbrowser-tab {
-        height: calc(1em + 0.2em);
+        height: 2.4em;
         font-size: var(--font-size)!important;
         align-items: center!important;
-        margin-bottom: 0.5em!important;
-        padding: 0.1em 0!important
+        margin-bottom: 0.5em!important
     }
 
     #tabbrowser-tabs>.tabbrowser-arrowscrollbox,.tabbrowser-tab {
@@ -123,8 +122,8 @@
         position: fixed!important;
         bottom: 0!important;
         width: var(--bar-width)!important;
-        height: calc(1em + 0.4em)!important;
-        max-height: calc(1em + 0.4em)!important;
+        height: 2.2em!important;
+        max-height: 2.2em!important;
         margin: -0.25em auto 0!important;
         border-top: none!important;
         left: 0!important;
@@ -133,7 +132,7 @@
     }
 
     #browser {
-        margin-bottom: calc(1em + 0.4em)!important
+        margin-bottom: 2.2em!important
     }
 
     :root[inFullscreen] #nav-bar {
@@ -152,9 +151,8 @@
     }
 
     #urlbar {
-        min-height: calc(1em + 0.2em)!important;
-        border-color: transparent!important;
-        padding: 0.1em 0!important
+        min-height: 2.4em!important;
+        border-color: transparent!important
     }
 
     #urlbar-input {
