@@ -17,6 +17,19 @@
       "url": "https://codeberg.org/api/v1/repos/Lyall/ClairObscurFix/archive/0.0.13.tar.gz",
       "hash": "0pn17w7hhhg6dvk59g5bfbkgq7vda24q9z4ckjr1bkp1jjvipzq1"
     },
+    "Expedition-33-Mods": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "y0usaf",
+        "repo": "Expedition-33-Mods"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "f2c9138bca96a70819bbd9e3ec916b83fff5a658",
+      "url": "https://github.com/y0usaf/Expedition-33-Mods/archive/f2c9138bca96a70819bbd9e3ec916b83fff5a658.tar.gz",
+      "hash": "1raaw8ryvzzjp63qq41a4vadfzfry8z0c43rzwksv9brw3pzkgcr"
+    },
     "nixpkgs": {
       "type": "Channel",
       "name": "nixpkgs-unstable",

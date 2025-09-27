@@ -1,8 +1,9 @@
 {
   imports = [
     ./gameusersettings.nix
-    ./plugin.nix
+    ./clairobscurfix.nix
     ./engine.nix
     ./scalability.nix
+    ./mods.nix
   ];
 }
