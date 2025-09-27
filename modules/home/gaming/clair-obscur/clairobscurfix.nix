@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  cfg = config.home.gaming.clair-obscur.plugin;
+  cfg = config.home.gaming.clair-obscur.clairobscurfix;
   sources = import ./npins;
 
   clairobscurfix = pkgs.fetchzip {
@@ -13,7 +13,7 @@
     stripRoot = false;
   };
 in {
-  options.home.gaming.clair-obscur.plugin = {
+  options.home.gaming.clair-obscur.clairobscurfix = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
