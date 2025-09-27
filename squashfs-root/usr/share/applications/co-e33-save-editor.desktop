@@ -1,0 +1,8 @@
+[Desktop Entry]
+Categories=
+Comment=A Tauri App
+Exec=CO-E33_Save_Editor
+Icon=CO-E33_Save_Editor
+Name=co-e33-save-editor
+Terminal=false
+Type=Application

@@ -26,9 +26,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "f2c9138bca96a70819bbd9e3ec916b83fff5a658",
-      "url": "https://github.com/y0usaf/Expedition-33-Mods/archive/f2c9138bca96a70819bbd9e3ec916b83fff5a658.tar.gz",
-      "hash": "1raaw8ryvzzjp63qq41a4vadfzfry8z0c43rzwksv9brw3pzkgcr"
+      "revision": "8abb878f4121d33b1b2314d19871ae458efbba4b",
+      "url": "https://github.com/y0usaf/Expedition-33-Mods/archive/8abb878f4121d33b1b2314d19871ae458efbba4b.tar.gz",
+      "hash": "11gk2kwjdwdphs308dyxizhh7sch1vilrg6wblb67nzd5xvdj92h"
     },
     "nixpkgs": {
       "type": "Channel",

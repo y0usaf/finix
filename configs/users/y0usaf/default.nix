@@ -219,9 +219,13 @@
       };
       clair-obscur = {
         gameusersettings.enable = true;
-        plugin.enable = true;
+        clairobscurfix.enable = true;
         engine.enable = true;
         scalability.enable = true;
+        mods = {
+          enable = true;
+          installAll = true;
+        };
       };
     };
   };
