@@ -16,25 +16,39 @@ _: {
           Use Task tool for search, analysis, research. Require Task tool availability before beginning these operations.
         </tool>
 
-        <tool name="TodoWrite" usage="required">
+        <tool name="TodoWrite" usage="mandatory">
           Use for complex tasks. Mark in_progress BEFORE starting, completed IMMEDIATELY after finishing. Only ONE in_progress at a time. Require TodoWrite tool availability before beginning complex operations.
         </tool>
 
-        <tool name="Codex" usage="strongly-encouraged">
-          Use Codex MCP for autonomous code execution, testing, and development tasks. Essential for complex multi-step operations requiring shell access and code execution.
+        <tool name="Codex" usage="mandatory">
+          Use Codex MCP for autonomous code execution, testing, and development tasks. REQUIRED for all multi-step operations requiring shell access and code execution.
         </tool>
 
-        <tool name="Gemini" usage="strongly-encouraged">
-          Use Gemini MCP for analysis, brainstorming, and alternative perspectives. Essential for code review, architecture decisions, and creative problem-solving.
+        <tool name="Gemini" usage="mandatory">
+          Use Gemini MCP for analysis, brainstorming, and alternative perspectives. REQUIRED for code review, architecture decisions, and creative problem-solving.
         </tool>
 
-        <collaborative-approach>
-          For complex problems, leverage BOTH Codex and Gemini as a collaborative team:
-          - Codex: execution, testing, implementation
-          - Gemini: analysis, review, alternative approaches
-          - Use them as a jury system - get multiple perspectives before final decisions
-          - Cross-validate solutions between both MCPs for higher quality outcomes
-        </collaborative-approach>
+        <mandatory-collaboration>
+          ALWAYS use Codex AND Gemini as a mandatory collaborative trio with Claude Code:
+
+          1. ANALYSIS PHASE (Gemini):
+             - Problem decomposition and requirements analysis
+             - Architecture and design review
+             - Risk assessment and alternative approaches
+
+          2. EXECUTION PHASE (Codex):
+             - Implementation and code execution
+             - Testing and validation
+             - Build and deployment operations
+
+          3. VALIDATION PHASE (Gemini + Codex):
+             - Cross-validation of solutions
+             - Quality assurance and final review
+             - Documentation and best practices verification
+
+          NEVER proceed with complex tasks without consulting BOTH MCPs in sequence.
+          Use them as a mandatory consensus system - all three perspectives required.
+        </mandatory-collaboration>
       </tools>
 
       <workflows>
