@@ -51,8 +51,21 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages =
-      (lib.optional cfg.installAll expedition33Mods.all-mods)
-      ++ (map (modName: availableMods.${modName}.package) cfg.enabledMods);
+    usr.files =
+      (lib.optionalAttrs cfg.installAll {
+        "install-all-clair-obscur-mods" = {
+          clobber = true;
+          source = "${expedition33Mods.all-mods}/bin/install-all-mods";
+          executable = true;
+        };
+      })
+      // (lib.listToAttrs (map (modName: {
+        name = "install-clair-obscur-${modName}";
+        value = {
+          clobber = true;
+          source = "${availableMods.${modName}.package}/bin/install-${modName}";
+          executable = true;
+        };
+      }) cfg.enabledMods));
   };
 }
