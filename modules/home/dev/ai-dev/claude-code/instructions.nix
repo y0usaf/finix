@@ -19,6 +19,22 @@ _: {
         <tool name="TodoWrite" usage="required">
           Use for complex tasks. Mark in_progress BEFORE starting, completed IMMEDIATELY after finishing. Only ONE in_progress at a time. Require TodoWrite tool availability before beginning complex operations.
         </tool>
+
+        <tool name="Codex" usage="strongly-encouraged">
+          Use Codex MCP for autonomous code execution, testing, and development tasks. Essential for complex multi-step operations requiring shell access and code execution.
+        </tool>
+
+        <tool name="Gemini" usage="strongly-encouraged">
+          Use Gemini MCP for analysis, brainstorming, and alternative perspectives. Essential for code review, architecture decisions, and creative problem-solving.
+        </tool>
+
+        <collaborative-approach>
+          For complex problems, leverage BOTH Codex and Gemini as a collaborative team:
+          - Codex: execution, testing, implementation
+          - Gemini: analysis, review, alternative approaches
+          - Use them as a jury system - get multiple perspectives before final decisions
+          - Cross-validate solutions between both MCPs for higher quality outcomes
+        </collaborative-approach>
       </tools>
 
       <workflows>
