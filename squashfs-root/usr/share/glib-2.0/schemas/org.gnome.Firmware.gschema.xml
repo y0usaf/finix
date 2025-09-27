@@ -1,0 +1,11 @@
+<schemalist>
+  <schema id="org.gnome.Firmware" path="/org/gnome/firmware/" gettext-domain="gnome-firmware">
+    <key name="report-device-list-timestamp" type="x">
+      <default>0</default>
+      <!-- TRANSLATORS: schema summary -->
+      <summary>Timestamp of the last device list request</summary>
+      <!-- TRANSLATORS: schema description -->
+      <description>The timestamp of the last time we uploaded the device list.</description>
+    </key>
+  </schema>
+</schemalist>
