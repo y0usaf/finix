@@ -24,6 +24,7 @@ _: {
 
       <nixos>
         Uses hjem. Check flake.nix for inputs. Clone external repos to tmp/.
+        All packages are system-level (environment.systemPackages), not user-level.
         Rebuild: alejandra . && nh os switch --dry && nh os switch
         Commit after successful switch.
       </nixos>
