@@ -60,12 +60,13 @@ in {
         };
       })
       // (lib.listToAttrs (map (modName: {
-        name = "install-clair-obscur-${modName}";
-        value = {
-          clobber = true;
-          source = "${availableMods.${modName}.package}/bin/install-${modName}";
-          executable = true;
-        };
-      }) cfg.enabledMods));
+          name = "install-clair-obscur-${modName}";
+          value = {
+            clobber = true;
+            source = "${availableMods.${modName}.package}/bin/install-${modName}";
+            executable = true;
+          };
+        })
+        cfg.enabledMods));
   };
 }
