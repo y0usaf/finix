@@ -32,6 +32,7 @@ in {
 
           -- Telescope
           "https://github.com/nvim-telescope/telescope.nvim",
+          "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
 
           -- LSP and Completion
           "https://github.com/neovim/nvim-lspconfig",
@@ -215,6 +216,7 @@ in {
         -- Plugin configurations
         -- Telescope setup
         require("telescope").setup({})
+        pcall(require("telescope").load_extension, "fzf")
 
         -- LSP setup
         local lspconfig = require("lspconfig")
