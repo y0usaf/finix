@@ -21,7 +21,7 @@
     dconf
     lm_sensors
     networkmanager
-    skim
+    fzf
     ripgrep
   ];
 in {
