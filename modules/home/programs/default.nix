@@ -12,7 +12,6 @@
     ./pcmanfm.nix
     ./qbittorrent.nix
     ./stremio.nix
-    ./sway-launcher-desktop.nix
     ./tui-launcher.nix
     ./vesktop
     ./webapps.nix

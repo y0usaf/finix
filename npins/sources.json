@@ -38,38 +38,6 @@
       "url": null,
       "hash": "055k5fbif6rss42al3swy0210nrr86fwxmyi237z3z9xkjdl4752"
     },
-    "Hyprland": {
-      "type": "GitRelease",
-      "repository": {
-        "type": "GitHub",
-        "owner": "hyprwm",
-        "repo": "Hyprland"
-      },
-      "pre_releases": false,
-      "version_upper_bound": null,
-      "release_prefix": null,
-      "submodules": false,
-      "version": "v0.51.1",
-      "revision": "71a1216abcc7031776630a6d88f105605c4dc1c9",
-      "url": "https://api.github.com/repos/hyprwm/Hyprland/tarball/v0.51.1",
-      "hash": "0phqjcs6j6wwpq7byjdyybiv91d1vksb43mqy1mq3p2bimk3kdbq"
-    },
-    "alejandra": {
-      "type": "GitRelease",
-      "repository": {
-        "type": "GitHub",
-        "owner": "kamadorueda",
-        "repo": "alejandra"
-      },
-      "pre_releases": false,
-      "version_upper_bound": null,
-      "release_prefix": null,
-      "submodules": false,
-      "version": "4.0.0",
-      "revision": "3e2a85506627062313e131bf8a85315f3387c8e0",
-      "url": "https://api.github.com/repos/kamadorueda/alejandra/tarball/4.0.0",
-      "hash": "12ddx22yn2jnm0ibg4d8h124imqm6sdfg5wfg4bg1qq5fzd6fb9s"
-    },
     "disko": {
       "type": "GitRelease",
       "repository": {
@@ -99,45 +67,6 @@
       "url": "https://github.com/feel-co/hjem/archive/627b34efad55fd42d6dd52c19c796604d2b8e8bd.tar.gz",
       "hash": "1d4h4kj58ibz8jrvis0s2rw2fvvc1z1h8s7b8jsfahnfpk2cp7mb"
     },
-    "hy3": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "outfoxxed",
-        "repo": "hy3"
-      },
-      "branch": "master",
-      "submodules": false,
-      "revision": "af94b011af255de87b2b026121fab1e6f2c56c6d",
-      "url": "https://github.com/outfoxxed/hy3/archive/af94b011af255de87b2b026121fab1e6f2c56c6d.tar.gz",
-      "hash": "0qyh8z20c61a6akdgx90hbn93r8pd2r749lfgk1kvnjzlincxqd7"
-    },
-    "hyprpaper": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "y0usaf",
-        "repo": "hyprpaper"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "bf38a169400eed81b605f1f54ed9590c295b895f",
-      "url": "https://github.com/y0usaf/hyprpaper/archive/bf38a169400eed81b605f1f54ed9590c295b895f.tar.gz",
-      "hash": "0qfdjq1qr9ap8rshwz4r3plbzx9dwprp6k8yfacnwggprsw4mdvy"
-    },
-    "mnw": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "Gerg-L",
-        "repo": "mnw"
-      },
-      "branch": "master",
-      "submodules": false,
-      "revision": "cfbc7d1cc832e318d0863a5fc91d940a96034001",
-      "url": "https://github.com/Gerg-L/mnw/archive/cfbc7d1cc832e318d0863a5fc91d940a96034001.tar.gz",
-      "hash": "0s369nzhlxnzj82l64nxi711a8kaibzikmlxrbcsigbwh5ijzck3"
-    },
     "neovim-nightly-overlay": {
       "type": "Git",
       "repository": {
@@ -151,19 +80,6 @@
       "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/c208a2bebc96e5bc9db3780ef4d62511ebd83c51.tar.gz",
       "hash": "07vr4pdf5maf7wg7dxfykrhjxnfb65imivk5ylhqi5hl2plirmg0"
     },
-    "nix-minecraft": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "Infinidoge",
-        "repo": "nix-minecraft"
-      },
-      "branch": "master",
-      "submodules": false,
-      "revision": "5a6c66b90ab4519b7578b54300abc308008c544e",
-      "url": "https://github.com/Infinidoge/nix-minecraft/archive/5a6c66b90ab4519b7578b54300abc308008c544e.tar.gz",
-      "hash": "1d73nkdl5z7p3w917d8dkylh74ag7fv62j68rkxpy9hl2va3ddd2"
-    },
     "nixpkgs": {
       "type": "Git",
       "repository": {
@@ -176,19 +92,6 @@
       "revision": "e9f00bd893984bc8ce46c895c3bf7cac95331127",
       "url": "https://github.com/NixOS/nixpkgs/archive/e9f00bd893984bc8ce46c895c3bf7cac95331127.tar.gz",
       "hash": "0s2mhbrgzxlgkg2yxb0q0hpk8lby1a7w67dxvfmaz4gsmc0bnvfj"
-    },
-    "nyx": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "chaotic-cx",
-        "repo": "nyx"
-      },
-      "branch": "nyxpkgs-unstable",
-      "submodules": false,
-      "revision": "dd1af56ad79c965ee20c236ba6adbb2135ac02af",
-      "url": "https://github.com/chaotic-cx/nyx/archive/dd1af56ad79c965ee20c236ba6adbb2135ac02af.tar.gz",
-      "hash": "0hxlr6f54lnxmz7jgbkljlh144cxpzs06j3p3rf7glj0crghkxb4"
     },
     "obs-backgroundremoval": {
       "type": "GitRelease",
