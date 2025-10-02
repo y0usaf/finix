@@ -7,7 +7,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.home.programs.tui-launcher;
