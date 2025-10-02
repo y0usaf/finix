@@ -75,9 +75,10 @@ in {
           PROVIDERS['user']="exit''${DEL}exit''${DEL}{1}" # Fallback provider that simply executes the exact command if there were no matches
 
           function describe() {
+            [[ -z "''${1}" || -z "''${PROVIDERS[''${1}]+x}" ]] && return 0
             readarray -d ''${DEL} -t PROVIDER_ARGS <<<"''${PROVIDERS[''${1}]}"
             local cmd="''${PROVIDER_ARGS[1]/\{1\}/''${2}}"
-            [ -n "$cmd" ] && bash -c "$cmd"
+            [ -n "$cmd" ] && bash -c "$cmd" 2>/dev/null
           }
           function describe-desktop() {
             local name description generic
@@ -93,6 +94,7 @@ in {
           }
 
           function provide() {
+            [[ -z "$1" || -z "''${PROVIDERS[$1]+x}" ]] && return 0
             readarray -d ''${DEL} -t PROVIDER_ARGS <<<"''${PROVIDERS[$1]}"
             bash -c "''${PROVIDER_ARGS[0]}"
           }
