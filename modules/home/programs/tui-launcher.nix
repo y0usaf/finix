@@ -21,7 +21,7 @@ in {
         executable = true;
         text = ''
           #!/usr/bin/env bash
-          # terminal application launcher for sway, using fzf
+          # terminal application launcher for sway, using skim
           # Based on: https://gitlab.com/FlyingWombat/my-scripts/blob/master/sway-launcher
           # https://gist.github.com/Biont/40ef59652acf3673520c7a03c9f22d2a
           shopt -s nullglob globstar
@@ -33,7 +33,7 @@ in {
           IFS=$'\n\t'
           DEL=$'\34'
 
-          FZF_COMMAND="''${FZF_COMMAND:=fzf}"
+          FZF_COMMAND="''${FZF_COMMAND:=sk}"
           TERMINAL_COMMAND="''${TERMINAL_COMMAND:=''${TERMINAL:+$TERMINAL -e}}"
           TERMINAL_COMMAND="''${TERMINAL_COMMAND:-alacritty -e}"
           GLYPH_COMMAND="''${GLYPH_COMMAND- }"
