@@ -20,7 +20,7 @@ in {
           "foot"
           "-a"
           "launcher"
-          "${config.user.configDirectory}/scripts/sway-launcher-desktop.sh"
+          "${config.user.configDirectory}/scripts/tui-launcher.sh"
         ];
       };
       "Mod+E" = {spawn = defaults.fileManager;};
