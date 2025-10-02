@@ -230,7 +230,7 @@ in {
           done
 
           readarray -t COMMAND_STR <<<$(
-            ''${FZF_COMMAND} --ansi --no-sort -d '\034' --nth ..3 --with-nth 3 \
+            ''${FZF_COMMAND} --ansi --no-sort -d "$DEL" --nth ..3 --with-nth 3 \
               --print-query \
               --preview "$0 describe {2} {1}" \
               --preview-window="''${PREVIEW_WINDOW}" \
