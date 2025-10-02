@@ -21,6 +21,8 @@
     dconf
     lm_sensors
     networkmanager
+    fzf
+    ripgrep
   ];
 in {
   options.home.core.packages = {

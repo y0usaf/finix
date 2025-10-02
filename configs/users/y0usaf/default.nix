@@ -139,6 +139,7 @@
       qbittorrent.enable = true;
       stremio.enable = true;
       sway-launcher-desktop.enable = true;
+      tui-launcher.enable = true;
     };
     dev = {
       claude-code.enable = true;
