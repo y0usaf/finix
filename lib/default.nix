@@ -31,9 +31,6 @@ let
     y0usaf-laptop = import ../configs/hosts/y0usaf-laptop {inherit pkgs lib;};
   };
 in {
-  inherit lib;
-  formatter.${system} = pkgs.alejandra;
-
   nixosConfigurations = lib.mapAttrs (_hostName: hostConfig:
     import (sources.nixpkgs + "/nixos") {
       inherit system;
@@ -69,7 +66,7 @@ in {
         ];
         _module.args = {
           inherit hostConfig sources lib genLib;
-          inherit (sources) disko nix-minecraft Fast-Fonts;
+          inherit (sources) disko;
         };
       };
     })

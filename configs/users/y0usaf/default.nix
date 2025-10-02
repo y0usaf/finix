@@ -43,7 +43,7 @@
         ide = lib.mkDefault "cursor";
         terminal = lib.mkDefault "foot";
         fileManager = lib.mkDefault "pcmanfm";
-        launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/sway-launcher-desktop.sh";
+        launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
         discord = lib.mkDefault "discord-canary";
         archiveManager = lib.mkDefault "file-roller";
         imageViewer = lib.mkDefault "imv";
@@ -138,7 +138,6 @@
       pcmanfm.enable = true;
       qbittorrent.enable = true;
       stremio.enable = true;
-      sway-launcher-desktop.enable = true;
       tui-launcher.enable = true;
     };
     dev = {
