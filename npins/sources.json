@@ -49,10 +49,10 @@
       "version_upper_bound": null,
       "release_prefix": null,
       "submodules": false,
-      "version": "v0.51.0",
-      "revision": "46174f78b374b6cea669c48880877a8bdcf7802f",
-      "url": "https://api.github.com/repos/hyprwm/Hyprland/tarball/v0.51.0",
-      "hash": "11lnx8kdffzh42ymgyf0lp4mhj9ib7gqs7i9kfipmc3zragj8i96"
+      "version": "v0.51.1",
+      "revision": "71a1216abcc7031776630a6d88f105605c4dc1c9",
+      "url": "https://api.github.com/repos/hyprwm/Hyprland/tarball/v0.51.1",
+      "hash": "0phqjcs6j6wwpq7byjdyybiv91d1vksb43mqy1mq3p2bimk3kdbq"
     },
     "alejandra": {
       "type": "GitRelease",
@@ -108,9 +108,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "3f314c62b6980074a1a1bade7da422b6e6e1d4be",
-      "url": "https://github.com/outfoxxed/hy3/archive/3f314c62b6980074a1a1bade7da422b6e6e1d4be.tar.gz",
-      "hash": "0yr5f23wa5k9nr5sm4dyn63yzyf6vpmj3jg2hxg2c9in7dwmi44v"
+      "revision": "af94b011af255de87b2b026121fab1e6f2c56c6d",
+      "url": "https://github.com/outfoxxed/hy3/archive/af94b011af255de87b2b026121fab1e6f2c56c6d.tar.gz",
+      "hash": "0qyh8z20c61a6akdgx90hbn93r8pd2r749lfgk1kvnjzlincxqd7"
     },
     "hyprpaper": {
       "type": "Git",
@@ -134,9 +134,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "ed6cc3e48557ba18266e598a5ebb6602499ada16",
-      "url": "https://github.com/Gerg-L/mnw/archive/ed6cc3e48557ba18266e598a5ebb6602499ada16.tar.gz",
-      "hash": "0qcw9k6rb94p6spswqwfpz3hhzdjajpr0dnxv36ahi1slkhn395z"
+      "revision": "cfbc7d1cc832e318d0863a5fc91d940a96034001",
+      "url": "https://github.com/Gerg-L/mnw/archive/cfbc7d1cc832e318d0863a5fc91d940a96034001.tar.gz",
+      "hash": "0s369nzhlxnzj82l64nxi711a8kaibzikmlxrbcsigbwh5ijzck3"
     },
     "neovim-nightly-overlay": {
       "type": "Git",
@@ -147,9 +147,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "8b7e0b6092af1aeba5ac3ceebc0d975522958235",
-      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/8b7e0b6092af1aeba5ac3ceebc0d975522958235.tar.gz",
-      "hash": "197l4mxg75yinq6cykiy4zn0bf1l6x4gg94rqfx7cbpzkram8svp"
+      "revision": "c208a2bebc96e5bc9db3780ef4d62511ebd83c51",
+      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/c208a2bebc96e5bc9db3780ef4d62511ebd83c51.tar.gz",
+      "hash": "07vr4pdf5maf7wg7dxfykrhjxnfb65imivk5ylhqi5hl2plirmg0"
     },
     "nix-minecraft": {
       "type": "Git",
@@ -160,9 +160,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "45b53297fe17bcacbdb78761c52384ed84acd27f",
-      "url": "https://github.com/Infinidoge/nix-minecraft/archive/45b53297fe17bcacbdb78761c52384ed84acd27f.tar.gz",
-      "hash": "0lz6qp1k3ma7wvy69hm5a4pzipl46wnxk87nc7rr7dpsqkjz3qwl"
+      "revision": "5a6c66b90ab4519b7578b54300abc308008c544e",
+      "url": "https://github.com/Infinidoge/nix-minecraft/archive/5a6c66b90ab4519b7578b54300abc308008c544e.tar.gz",
+      "hash": "1d73nkdl5z7p3w917d8dkylh74ag7fv62j68rkxpy9hl2va3ddd2"
     },
     "nixpkgs": {
       "type": "Git",
@@ -173,9 +173,9 @@
       },
       "branch": "nixos-unstable",
       "submodules": false,
-      "revision": "8eaee110344796db060382e15d3af0a9fc396e0e",
-      "url": "https://github.com/NixOS/nixpkgs/archive/8eaee110344796db060382e15d3af0a9fc396e0e.tar.gz",
-      "hash": "1k5zyljqg8fp99hzgjkvkawhmbwlfsnz4viisfcfdjyky9zrc8c8"
+      "revision": "e9f00bd893984bc8ce46c895c3bf7cac95331127",
+      "url": "https://github.com/NixOS/nixpkgs/archive/e9f00bd893984bc8ce46c895c3bf7cac95331127.tar.gz",
+      "hash": "0s2mhbrgzxlgkg2yxb0q0hpk8lby1a7w67dxvfmaz4gsmc0bnvfj"
     },
     "nyx": {
       "type": "Git",
@@ -186,9 +186,9 @@
       },
       "branch": "nyxpkgs-unstable",
       "submodules": false,
-      "revision": "b3efa297b9c6a9e55a44f3b6905d55f80738704f",
-      "url": "https://github.com/chaotic-cx/nyx/archive/b3efa297b9c6a9e55a44f3b6905d55f80738704f.tar.gz",
-      "hash": "0gwr3i6c6wbx73jshv1lmqzgxr8l5h3zli3k9zbm2b4nng0gc0d1"
+      "revision": "dd1af56ad79c965ee20c236ba6adbb2135ac02af",
+      "url": "https://github.com/chaotic-cx/nyx/archive/dd1af56ad79c965ee20c236ba6adbb2135ac02af.tar.gz",
+      "hash": "0hxlr6f54lnxmz7jgbkljlh144cxpzs06j3p3rf7glj0crghkxb4"
     },
     "obs-backgroundremoval": {
       "type": "GitRelease",
@@ -262,10 +262,10 @@
       "version_upper_bound": null,
       "release_prefix": null,
       "submodules": false,
-      "version": "1.1",
-      "revision": "39f5c06153f63100376bc607b1465850b6df77fd",
-      "url": "https://api.github.com/repos/feel-co/smfh/tarball/1.1",
-      "hash": "03319rrh1jd37cz5ramknnrrnfrm0hy38ryk11grr8hq97bv1mgz"
+      "version": "1.2",
+      "revision": "3674b5482a00701d424a38089380f411725862fc",
+      "url": "https://api.github.com/repos/feel-co/smfh/tarball/1.2",
+      "hash": "0rrvg74gakz4q1xyrb5vvnz5nczbl2gnscp9vmjrsih3pzkyw4ig"
     }
   },
   "version": 5
