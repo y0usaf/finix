@@ -33,7 +33,7 @@ in {
           IFS=$'\n\t'
           DEL=$'\34'
 
-          FZF_COMMAND="''${FZF_COMMAND:=sk}"
+          FZF_COMMAND="''${FZF_COMMAND:=fzf}"
           TERMINAL_COMMAND="''${TERMINAL_COMMAND:=''${TERMINAL:+$TERMINAL -e}}"
           TERMINAL_COMMAND="''${TERMINAL_COMMAND:-alacritty -e}"
           GLYPH_COMMAND="''${GLYPH_COMMAND- }"
@@ -232,13 +232,14 @@ in {
           done
 
           readarray -t COMMAND_STR <<<$(
-            ''${FZF_COMMAND} --ansi --no-sort -d "$DEL" --nth ..3 --with-nth 3 \
+            ''${FZF_COMMAND} --ansi +s -x -d '\034' --nth ..3 --with-nth 3 \
               --print-query \
               --preview "$0 describe {2} {1}" \
               --preview-window="''${PREVIEW_WINDOW}" \
-              --no-multi \
+              --no-multi --cycle \
               --prompt="''${GLYPH_PROMPT}" \
-              --layout=reverse \
+              --border="rounded" \
+              --header="" --no-info \
               <"$FZFPIPE"
           ) || exit 1
           # Get the last line of the fzf output. If there were no matches, it contains the query which we'll treat as a custom command
