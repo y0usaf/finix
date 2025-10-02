@@ -230,14 +230,13 @@ in {
           done
 
           readarray -t COMMAND_STR <<<$(
-            ''${FZF_COMMAND} --ansi +s -x -d '\034' --nth ..3 --with-nth 3 \
+            ''${FZF_COMMAND} --ansi --no-sort -d '\034' --nth ..3 --with-nth 3 \
               --print-query \
               --preview "$0 describe {2} {1}" \
               --preview-window="''${PREVIEW_WINDOW}" \
-              --no-multi --cycle \
+              --no-multi \
               --prompt="''${GLYPH_PROMPT}" \
-              --border="rounded" \
-              --header="" --no-info \
+              --layout=reverse \
               <"$FZFPIPE"
           ) || exit 1
           # Get the last line of the fzf output. If there were no matches, it contains the query which we'll treat as a custom command
