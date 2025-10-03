@@ -27,7 +27,11 @@ in {
         ++ lib.optional agsEnabled ["${pkgs.ags}/bin/ags" "run" "/home/${config.user.name}/.config/ags/bar-overlay.tsx"];
 
       hotkey-overlay = {};
-      window-rule = {};
+      window-rule = {
+        match._props.app-id = "^launcher$";
+        default-column-width.fixed = 800;
+        default-window-height.fixed = 600;
+      };
     };
 
     environment.systemPackages = [
