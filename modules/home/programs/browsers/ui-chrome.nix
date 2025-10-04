@@ -73,7 +73,7 @@
         border-radius: 0!important;
         padding: 0!important;
         min-height: 0!important;
-        max-height: 2.4em!important
+        max-height: 1.2em!important
     }
 
     .tabbrowser-tab * {
@@ -82,10 +82,10 @@
     }
 
     .tabbrowser-tab {
-        height: 2.4em;
+        height: 1.2em;
         font-size: var(--font-size)!important;
         align-items: center!important;
-        margin-bottom: 0.5em!important
+        margin-bottom: 0.2em!important
     }
 
     #tabbrowser-tabs>.tabbrowser-arrowscrollbox,.tabbrowser-tab {
@@ -189,13 +189,13 @@
     }
 
     .tab-icon-image,.toolbarbutton-icon,.urlbar-icon {
-        width: 1.4em!important;
+        width: 0.8em!important;
         height: auto!important;
         padding: 0!important
     }
 
     .tab-icon-image {
-        margin-right: 0.5em!important
+        margin-right: 0.3em!important
     }
 
     #PersonalToolbar toolbarbutton,#TabsToolbar toolbarbutton,#nav-bar toolbarbutton,.toolbarbutton-1,toolbar .toolbarbutton-1 {
