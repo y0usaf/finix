@@ -29,6 +29,12 @@
     options = ["subvol=@home"];
   };
 
+  fileSystems."/btrfs" = {
+    device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+    fsType = "btrfs";
+    options = ["subvolid=5"];
+  };
+
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/41B0-E342";
     fsType = "vfat";
