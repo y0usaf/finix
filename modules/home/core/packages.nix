@@ -17,7 +17,6 @@
     tree
     btop
     psmisc
-    kitty
     dconf
     lm_sensors
     networkmanager
