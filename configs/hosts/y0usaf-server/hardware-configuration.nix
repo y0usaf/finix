@@ -4,7 +4,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }: {
@@ -12,10 +11,13 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "sd_mod"];
-  boot.initrd.kernelModules = [];
-  boot.kernelModules = ["kvm-intel"];
-  boot.extraModulePackages = [];
+  boot = {
+    initrd.availableKernelModules = ["xhci_pci" "ahci" "sd_mod"];
+    initrd.kernelModules = [];
+    kernelModules = ["kvm-intel"];
+    extraModulePackages = [];
+    kernel.sysctl."vm.swappiness" = 100;
+  };
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/f02825db-5bdc-42b7-a5fa-2eb0ec6494d4";
@@ -32,8 +34,6 @@
     memoryPercent = 50;
     algorithm = "zstd";
   };
-
-  boot.kernel.sysctl."vm.swappiness" = 100;
 
   swapDevices = [];
 
