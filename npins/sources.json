@@ -63,9 +63,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "627b34efad55fd42d6dd52c19c796604d2b8e8bd",
-      "url": "https://github.com/feel-co/hjem/archive/627b34efad55fd42d6dd52c19c796604d2b8e8bd.tar.gz",
-      "hash": "1d4h4kj58ibz8jrvis0s2rw2fvvc1z1h8s7b8jsfahnfpk2cp7mb"
+      "revision": "126eb4cf9808af3447241d1c83fa74468950e734",
+      "url": "https://github.com/feel-co/hjem/archive/126eb4cf9808af3447241d1c83fa74468950e734.tar.gz",
+      "hash": "1xbiigcda4glfi5shf7snrbqi8kjwi9d4aip618ry1hgbnyv0mfz"
     },
     "neovim-nightly-overlay": {
       "type": "Git",
@@ -76,9 +76,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "c208a2bebc96e5bc9db3780ef4d62511ebd83c51",
-      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/c208a2bebc96e5bc9db3780ef4d62511ebd83c51.tar.gz",
-      "hash": "07vr4pdf5maf7wg7dxfykrhjxnfb65imivk5ylhqi5hl2plirmg0"
+      "revision": "00e7d4ab17e88a4c342555c18ad09faefb6f4901",
+      "url": "https://github.com/nix-community/neovim-nightly-overlay/archive/00e7d4ab17e88a4c342555c18ad09faefb6f4901.tar.gz",
+      "hash": "0r5h2pv72qx5qp5z44zhs7lpwhgpyhq8m1riyrsfb0cafv3bb9fr"
     },
     "nixpkgs": {
       "type": "Git",
@@ -89,9 +89,9 @@
       },
       "branch": "nixos-unstable",
       "submodules": false,
-      "revision": "e9f00bd893984bc8ce46c895c3bf7cac95331127",
-      "url": "https://github.com/NixOS/nixpkgs/archive/e9f00bd893984bc8ce46c895c3bf7cac95331127.tar.gz",
-      "hash": "0s2mhbrgzxlgkg2yxb0q0hpk8lby1a7w67dxvfmaz4gsmc0bnvfj"
+      "revision": "7df7ff7d8e00218376575f0acdcc5d66741351ee",
+      "url": "https://github.com/NixOS/nixpkgs/archive/7df7ff7d8e00218376575f0acdcc5d66741351ee.tar.gz",
+      "hash": "02w5j06nl2gddh9ifz1647b8bilhzkqg9c93f14cl4k0kq9c8fl1"
     },
     "obs-backgroundremoval": {
       "type": "GitRelease",
