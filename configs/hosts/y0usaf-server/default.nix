@@ -31,6 +31,10 @@
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = false;
+    n8n = {
+      enable = true;
+      openFirewall = true;
+    };
   };
 
   networking.firewall = {
