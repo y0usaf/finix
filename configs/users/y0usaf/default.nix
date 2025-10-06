@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: {
   users.users.y0usaf = {
@@ -200,7 +201,56 @@
     services = {
       polkitAgent.enable = true;
       formatNix.enable = true;
-      syncthing.enable = true;
+      syncthing = {
+        enable = true;
+
+        # Define all devices
+        devices = {
+          desktop = {
+            id = "KII4S2Y-KWA6M4K-MCQAUOO-C6PMX4L-V5JVDPW-HHZF52D-HP57BNH-EKCCZQC";
+          };
+          laptop = {
+            id = "EAHAPON-XKBJVGI-44SGTXR-WU6BF5U-WZKHJXS-7QNTBHQ-D4ICOVA-I346HQ7";
+          };
+          phone = {
+            id = "JYAIN4T-MXQYDAP-2M6CSKX-KKRYVJC-5GMSRYP-LSZRRRV-QSOWY7W-YNQGOAC";
+            compression = "never";
+          };
+        };
+
+        # Define folders with per-host configuration
+        folders =
+          {
+            # Tokens folder - shared on all devices
+            tokens = {
+              id = "bv79n-fh4kx";
+              label = "Tokens";
+              path = "~/Tokens";
+              devices = ["desktop" "laptop" "phone"];
+            };
+          }
+          // lib.optionalAttrs (config.networking.hostName == "y0usaf-desktop") {
+            # Desktop-specific folders
+            music = {
+              id = "oty33-aq3dt";
+              label = "Music";
+              path = "~/Music";
+              devices = ["desktop" "phone"];
+            };
+            dcim = {
+              id = "ti9yk-zu3xs";
+              label = "DCIM";
+              path = "~/DCIM";
+              devices = ["desktop" "phone"];
+            };
+            pictures = {
+              id = "zbxzv-35v4e";
+              label = "Pictures";
+              path = "~/Pictures";
+              devices = ["desktop" "phone"];
+            };
+          };
+      };
     };
     gaming = {
       core.enable = true;
