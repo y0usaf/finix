@@ -87,6 +87,33 @@
     };
     services = {
       formatNix.enable = true;
+      syncthing = {
+        enable = true;
+
+        # Define all devices
+        devices = {
+          desktop = {
+            id = "KII4S2Y-KWA6M4K-MCQAUOO-C6PMX4L-V5JVDPW-HHZF52D-HP57BNH-EKCCZQC";
+          };
+          laptop = {
+            id = "EAHAPON-XKBJVGI-44SGTXR-WU6BF5U-WZKHJXS-7QNTBHQ-D4ICOVA-I346HQ7";
+          };
+          phone = {
+            id = "JYAIN4T-MXQYDAP-2M6CSKX-KKRYVJC-5GMSRYP-LSZRRRV-QSOWY7W-YNQGOAC";
+            compression = "never";
+          };
+        };
+
+        # Define folders - for now just Tokens shared with all devices
+        folders = {
+          tokens = {
+            id = "bv79n-fh4kx";
+            label = "Tokens";
+            path = "~/Tokens";
+            devices = ["desktop" "laptop" "phone"];
+          };
+        };
+      };
     };
   };
 }

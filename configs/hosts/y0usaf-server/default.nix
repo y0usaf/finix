@@ -39,7 +39,8 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [22];
+    allowedTCPPorts = [22 22000]; # SSH and Syncthing
+    allowedUDPPorts = [22000 21027]; # Syncthing sync and discovery
   };
 
   systemd.services.sshd = {
