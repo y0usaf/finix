@@ -35,11 +35,12 @@
       enable = true;
       openFirewall = true;
     };
+    forgejo.enable = true;
   };
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [22 22000]; # SSH and Syncthing
+    allowedTCPPorts = [22 3000 22000]; # SSH, Forgejo, and Syncthing
     allowedUDPPorts = [22000 21027]; # Syncthing sync and discovery
   };
 
