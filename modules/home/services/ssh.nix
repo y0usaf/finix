@@ -26,6 +26,11 @@ in {
             ControlPath %d/.ssh/master-%r@%h:%p
             ControlPersist 10m
             SetEnv TERM=xterm-256color
+            Host server
+                HostName 192.168.2.66
+                User y0usaf
+                ForwardAgent yes
+
             Host github.com
                 HostName github.com
                 User git

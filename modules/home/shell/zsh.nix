@@ -38,6 +38,11 @@ in {
               export_vars_from_files() {
                   local dir_path=$1
 
+                  # Check if directory exists
+                  if [[ ! -d "$dir_path" ]]; then
+                      return 0
+                  fi
+
                   local skip_for_opencode=("ANTHROPIC_API_KEY" "OPENAI_API_KEY")
 
                   for file_path in "$dir_path"/*; do
@@ -54,8 +59,8 @@ in {
                           fi
 
                           # Read file content and skip if it contains problematic characters
-                          local content=$(cat "$file_path")
-                          if [[ $content =~ [[:cntrl:]] ]] || [[ $content == *"-----"* ]]; then
+                          local content=$(cat "$file_path" 2>/dev/null || echo "")
+                          if [[ -z "$content" ]] || [[ $content =~ [[:cntrl:]] ]] || [[ $content == *"-----"* ]]; then
                               continue
                           fi
 
@@ -96,9 +101,11 @@ in {
             export EDITOR="${config.home.core.defaults.editor}"
 
 
-            for alias_file in ''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases/*; do
-              source "$alias_file"
-            done
+            if [[ -d "''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases" ]]; then
+              for alias_file in ''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases/*; do
+                [[ -f "$alias_file" ]] && source "$alias_file"
+              done
+            fi
 
             HISTSIZE=${toString zshConfig.history-memory}
             SAVEHIST=${toString zshConfig.history-storage}
