@@ -1,49 +1,42 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.home.services.syncthing;
 in {
   options.home.services.syncthing = {
     enable = lib.mkEnableOption "Syncthing service";
-  };
-  config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      syncthing
-    ];
-    usr = {
-      files.".config/syncthing/.keep" = {
-        clobber = true;
-        text = '''';
-      };
+
+    user = lib.mkOption {
+      type = lib.types.str;
+      default = config.user.name;
+      description = "User to run Syncthing as";
     };
-    systemd.user.services.syncthing = {
+
+    devices = lib.mkOption {
+      type = lib.types.attrsOf lib.types.attrs;
+      default = {};
+      description = "Syncthing devices configuration";
+    };
+
+    folders = lib.mkOption {
+      type = lib.types.attrsOf lib.types.attrs;
+      default = {};
+      description = "Syncthing folders configuration";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    services.syncthing = {
       enable = true;
-      wantedBy = ["default.target"];
-      after = ["network.target"];
-      serviceConfig = {
-        ExecStart = "${pkgs.syncthing}/bin/syncthing serve --no-browser --no-restart --logflags=0";
-        Restart = "on-failure";
-        RestartSec = "5s";
-        WorkingDirectory = config.user.homeDirectory;
-        StateDirectory = "syncthing";
-        StateDirectoryMode = "0700";
-        ProtectSystem = "strict";
-        ProtectHome = "read-only";
-        ReadWritePaths = [config.user.homeDirectory];
-        NoNewPrivileges = true;
-        PrivateTmp = true;
-        ProtectKernelTunables = true;
-        ProtectKernelModules = true;
-        ProtectControlGroups = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        LockPersonality = true;
-        RestrictAddressFamilies = ["AF_UNIX" "AF_INET" "AF_INET6"];
-        SystemCallFilter = "@system-service";
-        SystemCallErrorNumber = "EPERM";
+      user = cfg.user;
+      dataDir = config.user.homeDirectory;
+      configDir = "${config.user.homeDirectory}/.config/syncthing";
+
+      settings = {
+        devices = cfg.devices;
+        folders = cfg.folders;
       };
     };
   };
