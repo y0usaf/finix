@@ -3,11 +3,7 @@
 # - RAM: 16GB
 # - Storage: 477GB SSD
 # - GPU: None (headless)
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{lib, ...}: {
   imports = [
     ../../../modules/system
     ./hardware-configuration.nix
