@@ -1,3 +1,8 @@
+# Hardware:
+# - CPU: AMD Ryzen 9 7950X (16C/32T)
+# - RAM: 96GB
+# - Storage: 2× 3.6TB NVMe
+# - GPU: RTX 4090 + Raphael iGPU
 {
   pkgs,
   lib,

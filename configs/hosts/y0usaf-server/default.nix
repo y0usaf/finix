@@ -1,3 +1,8 @@
+# Hardware:
+# - CPU: Intel N100 (4C/4T)
+# - RAM: 16GB
+# - Storage: 477GB SSD
+# - GPU: None (headless)
 {
   pkgs,
   lib,
