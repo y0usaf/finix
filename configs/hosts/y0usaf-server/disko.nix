@@ -1,16 +1,6 @@
-{
-  config,
-  pkgs,
-  disko,
-  ...
-}: let
-  username = config.user.name or "y0usaf";
-  homeDir = config.user.homeDirectory or "/home/${username}";
+{pkgs, ...}: let
   disk = "/dev/sda";
 in {
-  imports = [
-    disko.nixosModules.disko
-  ];
   environment.systemPackages = [
     pkgs.disko
   ];
