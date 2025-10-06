@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   hostConfig,
   ...
 }: let
@@ -12,8 +13,11 @@ in {
       settings = cfg.settings or {};
     };
 
-    systemd.services.n8n.environment = {
-      N8N_SECURE_COOKIE = "false";
+    systemd.services.n8n = {
+      path = with pkgs; [nodejs];
+      environment = {
+        N8N_SECURE_COOKIE = "false";
+      };
     };
   };
 }
