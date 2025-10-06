@@ -49,6 +49,8 @@ in {
               config = nixpkgsConfig;
             };
           })
+          # Disko
+          (sources.disko + "/module.nix")
           # Hjem
           ({...}: {
             imports = [
