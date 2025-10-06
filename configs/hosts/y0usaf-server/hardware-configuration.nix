@@ -27,6 +27,14 @@
     fsType = "autofs";
   };
 
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+    algorithm = "zstd";
+  };
+
+  boot.kernel.sysctl."vm.swappiness" = 100;
+
   swapDevices = [];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
