@@ -29,6 +29,7 @@ let
   hostConfigs = {
     y0usaf-desktop = import ../configs/hosts/y0usaf-desktop {inherit pkgs lib;};
     y0usaf-laptop = import ../configs/hosts/y0usaf-laptop {inherit pkgs lib;};
+    y0usaf-server = import ../configs/hosts/y0usaf-server {inherit pkgs lib;};
   };
 in {
   nixosConfigurations = lib.mapAttrs (_hostName: hostConfig:
