@@ -6,6 +6,7 @@
 {lib, ...}: {
   imports = [
     ../../../modules/system
+    ./disko.nix
     ./hardware-configuration.nix
     ../../users/server
   ];
