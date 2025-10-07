@@ -199,6 +199,7 @@
       yt-dlp.enable = true;
     };
     services = {
+      ssh.enable = true;
       polkitAgent.enable = true;
       formatNix.enable = true;
       syncthing = {
