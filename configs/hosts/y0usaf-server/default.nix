@@ -36,19 +36,12 @@
       openFirewall = true;
     };
     forgejo.enable = true;
+    openssh.enable = lib.mkForce true;
   };
 
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [22 3000 22000]; # SSH, Forgejo, and Syncthing
     allowedUDPPorts = [22000 21027]; # Syncthing sync and discovery
-  };
-
-  systemd.services.sshd = {
-    wantedBy = lib.mkForce ["multi-user.target"];
-    serviceConfig = {
-      Restart = "always";
-      RestartSec = "5s";
-    };
   };
 }
