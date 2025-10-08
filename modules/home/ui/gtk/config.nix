@@ -4,12 +4,11 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.ui.gtk;
   mainFontName = (builtins.elemAt config.home.core.appearance.fonts.main 0).name;
   inherit (config.home.core.appearance) baseFontSize;
   dpiStr = toString config.home.core.appearance.dpi;
   inherit (config.home.core.user) bookmarks;
-  scaleFactor = cfg.scale;
+  scaleFactor = config.home.ui.gtk.scale;
 
   styles = import ./css.nix {inherit config lib;};
 
@@ -38,7 +37,7 @@
 
   bookmarksContent = lib.concatStringsSep "\n" bookmarks;
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.gtk.enable {
     environment.systemPackages = [
       pkgs.gtk3
       pkgs.gtk4

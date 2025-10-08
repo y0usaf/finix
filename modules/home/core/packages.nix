@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.core.packages;
   basePackages = [
     pkgs.git
     pkgs.curl
@@ -32,7 +31,7 @@ in {
       description = "Additional packages to install";
     };
   };
-  config = lib.mkIf cfg.enable {
-    environment.systemPackages = basePackages ++ cfg.extraPackages;
+  config = lib.mkIf config.home.core.packages.enable {
+    environment.systemPackages = basePackages ++ config.home.core.packages.extraPackages;
   };
 }

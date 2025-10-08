@@ -5,8 +5,6 @@
   genLib,
   ...
 }: let
-  cfg = config.home.ui.hyprland;
-
   coreConfig = {
     "$active_colour" = "ffffffff";
     "$transparent" = "ffffff00";
@@ -22,7 +20,7 @@
       "col.active_border" = "rgba($active_colour)";
       "col.inactive_border" = "rgba($inactive_colour)";
       layout =
-        if cfg.group.enable
+        if config.home.ui.hyprland.group.enable
         then "group"
         else "dwindle";
     };
@@ -81,7 +79,7 @@
       ];
   };
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.hyprland.enable {
     usr.files.".config/hypr/hyprland.conf" = {
       clobber = true;
       text = lib.mkAfter (genLib.toHyprconf {

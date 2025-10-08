@@ -4,8 +4,6 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.dev.claude-code;
-
   instructions = import ./instructions.nix {inherit config lib pkgs;};
   outputStyles = import ./output-styles.nix {inherit config lib pkgs;};
   mcpConfig = import ./mcp-config.nix {inherit config lib pkgs;};
@@ -16,7 +14,7 @@ in {
     enable = lib.mkEnableOption "Claude Code development tools";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.claude-code.enable {
     environment.systemPackages = [
       pkgs.claude-code
     ];

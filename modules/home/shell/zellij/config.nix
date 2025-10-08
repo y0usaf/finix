@@ -4,8 +4,6 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.shell.zellij;
-
   # Import local generators
   toKDL = import ../../../../lib/generators/toKDL.nix {inherit lib;};
 
@@ -19,9 +17,9 @@
       on_force_close = "quit";
       session_serialization = false;
     }
-    // cfg.settings;
+    // config.home.shell.zellij.settings;
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.shell.zellij.enable {
     environment.systemPackages = [
       pkgs.zellij
     ];
@@ -35,7 +33,7 @@ in {
               + "\n\n// Using default keybindings for now\n";
           };
         }
-        // lib.optionalAttrs cfg.autoStart {
+        // lib.optionalAttrs config.home.shell.zellij.autoStart {
           ".config/zsh/aliases/zellij.zsh" = {
             clobber = true;
             text = ''

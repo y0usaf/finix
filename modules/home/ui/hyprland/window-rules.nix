@@ -4,8 +4,6 @@
   genLib,
   ...
 }: let
-  cfg = config.home.ui.hyprland;
-
   windowRulesConfig = {
     "$firefox-pip" = "class:^(firefox)$, title:^(Picture-in-Picture)";
     "$kitty" = "class:^(kitty)$";
@@ -23,7 +21,7 @@
     ];
   };
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.hyprland.enable {
     usr.files.".config/hypr/hyprland.conf" = {
       clobber = true;
       text = lib.mkAfter (genLib.toHyprconf {
