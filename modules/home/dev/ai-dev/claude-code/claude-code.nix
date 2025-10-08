@@ -17,8 +17,8 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      claude-code
+    environment.systemPackages = [
+      pkgs.claude-code
     ];
     usr = {
       files = {

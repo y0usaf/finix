@@ -14,9 +14,9 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      quickshell
-      cava
+    environment.systemPackages = [
+      pkgs.quickshell
+      pkgs.cava
     ];
   };
 }

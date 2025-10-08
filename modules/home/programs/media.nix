@@ -10,12 +10,12 @@ in {
     enable = lib.mkEnableOption "media applications";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      pulsemixer
-      ffmpeg
-      vlc
-      stremio
-      cmus
+    environment.systemPackages = [
+      pkgs.pulsemixer
+      pkgs.ffmpeg
+      pkgs.vlc
+      pkgs.stremio
+      pkgs.cmus
     ];
   };
 }

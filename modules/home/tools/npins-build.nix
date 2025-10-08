@@ -11,9 +11,9 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      npins
-      alejandra
+    environment.systemPackages = [
+      pkgs.npins
+      pkgs.alejandra
     ];
     usr = {
       files = {

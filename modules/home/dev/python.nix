@@ -14,23 +14,23 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      python3
-      python312
-      uv
-      ninja
-      meson
-      pkg-config
-      cacert
-      stdenv.cc.cc.lib
-      zlib
-      libGL
-      glib
-      xorg.libX11
-      xorg.libXext
-      xorg.libXrender
-      gcc
-      binutils
+    environment.systemPackages = [
+      pkgs.python3
+      pkgs.python312
+      pkgs.uv
+      pkgs.ninja
+      pkgs.meson
+      pkgs.pkg-config
+      pkgs.cacert
+      pkgs.stdenv.cc.cc.lib
+      pkgs.zlib
+      pkgs.libGL
+      pkgs.glib
+      pkgs.xorg.libX11
+      pkgs.xorg.libXext
+      pkgs.xorg.libXrender
+      pkgs.gcc
+      pkgs.binutils
     ];
     usr = {
       files = {

@@ -22,9 +22,9 @@ in {
 
   config = lib.mkIf (cfg.enable && !cfg.headless) {
     # Core desktop packages (from services.graphical-desktop)
-    environment.systemPackages = with pkgs; [
-      nixos-icons
-      xdg-utils
+    environment.systemPackages = [
+      pkgs.nixos-icons
+      pkgs.xdg-utils
     ];
 
     fonts.enableDefaultPackages = lib.mkDefault true;

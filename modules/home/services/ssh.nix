@@ -10,8 +10,8 @@ in {
     enable = lib.mkEnableOption "SSH configuration module";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      openssh
+    environment.systemPackages = [
+      pkgs.openssh
     ];
     usr = {
       files = {

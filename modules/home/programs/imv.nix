@@ -10,6 +10,6 @@ in {
     enable = lib.mkEnableOption "imv image viewer";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [imv];
+    environment.systemPackages = [pkgs.imv];
   };
 }
