@@ -4,7 +4,6 @@
   genLib,
   ...
 }: let
-  cfg = config.home.ui.hyprland;
   inherit (config.home.core) defaults;
 
   variablesConfig = {
@@ -20,7 +19,7 @@
     "$obs" = "obs";
   };
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.hyprland.enable {
     usr.files.".config/hypr/hyprland.conf" = {
       clobber = true;
       text = lib.mkBefore (genLib.toHyprconf {

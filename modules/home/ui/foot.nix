@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.ui.foot;
   computedFontSize = toString (config.home.core.appearance.baseFontSize * 1.33);
   mainFontName = (builtins.elemAt config.home.core.appearance.fonts.main 0).name;
   fallbackFontNames = map (x: x.name) config.home.core.appearance.fonts.fallback;
@@ -55,7 +54,7 @@ in {
   options.home.ui.foot = {
     enable = lib.mkEnableOption "foot terminal emulator";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.foot.enable {
     environment.systemPackages = [
       pkgs.foot
     ];

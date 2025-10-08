@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  cfg = config.home.gaming.balatro;
   sources = import ./npins;
   availableMods = {
     steamodded = {
@@ -51,7 +50,7 @@
       name = "MoreSpeeds.lua";
     };
   };
-  enabledMods = lib.filterAttrs (name: _mod: lib.elem name cfg.enabledMods && name != "morespeeds") availableMods;
+  enabledMods = lib.filterAttrs (name: _mod: lib.elem name config.home.gaming.balatro.enabledMods && name != "morespeeds") availableMods;
   lovelyInjectorPackage = pkgs.fetchzip {
     url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
     sha256 = "sha256-tFDiYDRW5arGz92Knug6XnyhxYatUQ7iR/Wxfz6Hjw4=";
@@ -93,9 +92,9 @@ in {
       '';
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.gaming.balatro.enable {
     usr.files =
-      (lib.optionalAttrs (lib.elem "morespeeds" cfg.enabledMods) {
+      (lib.optionalAttrs (lib.elem "morespeeds" config.home.gaming.balatro.enabledMods) {
         ".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua" = {
           clobber = true;
           text = ''
@@ -187,7 +186,7 @@ in {
             }
         )
         enabledMods)
-      // (lib.optionalAttrs cfg.enableLovelyInjector {
+      // (lib.optionalAttrs config.home.gaming.balatro.enableLovelyInjector {
         ".local/share/Steam/steamapps/common/Balatro/version.dll" = {
           clobber = true;
           source = "${lovelyInjectorPackage}/version.dll";

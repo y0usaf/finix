@@ -3,7 +3,6 @@
   lib,
   ...
 }: let
-  cfg = config.home.ui.fonts;
   username = config.user.name;
   mainFontPackages = map (x: x.package) config.home.core.appearance.fonts.main;
   mainFontNames = map (x: x.name) config.home.core.appearance.fonts.main;
@@ -78,7 +77,7 @@ in {
       description = "Enable font configuration with string substitution";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.fonts.enable {
     environment.systemPackages = mainFontPackages ++ fallbackPackages;
 
     hjem.users.${username} = {
