@@ -4,25 +4,29 @@
   lib,
   ...
 }: let
-  cfg = config.home.services.formatNix;
-
   formatScript = pkgs.writeShellScript "format-nix-watcher" ''
-    set -e
-    WATCH_DIR="${cfg.watchDirectory}"
+    set -euo pipefail
+
+    WATCH_DIR="${config.home.services.formatNix.watchDirectory}"
     cd "$WATCH_DIR"
 
-    echo "Starting Nix file watcher on $WATCH_DIR..."
+    echo "Watching $WATCH_DIR for .nix updates"
 
-    ${pkgs.inotify-tools}/bin/inotifywait -m -r -e modify,create,move \
-      --include='.*\.nix$' \
-      "$WATCH_DIR" | while read path action file; do
-
-      if [[ "$file" =~ \.nix$ ]]; then
-        echo "Detected $action on $file, formatting..."
-        ${pkgs.alejandra}/bin/alejandra "$path$file"
-        echo "✅ Formatted $file"
-      fi
-    done
+    ${pkgs.inotify-tools}/bin/inotifywait \
+      -m \
+      -r \
+      -e close_write \
+      --format '%w%f' \
+      "$WATCH_DIR" | while read -r file; do
+        case "$file" in
+          *.nix)
+            echo "Formatting $file"
+            if ! ${pkgs.alejandra}/bin/alejandra "$file"; then
+              echo "alejandra failed for $file" >&2
+            fi
+            ;;
+        esac
+      done
   '';
 in {
   options.home.services.formatNix = {
@@ -34,7 +38,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.services.formatNix.enable {
     environment.systemPackages = [pkgs.alejandra pkgs.inotify-tools];
 
     systemd.user.services.format-nix-watcher = {
@@ -45,8 +49,8 @@ in {
       serviceConfig = {
         Type = "simple";
         ExecStart = formatScript;
-        Restart = "always";
-        RestartSec = "5";
+        Restart = "on-failure";
+        RestartSec = "2";
       };
     };
   };
