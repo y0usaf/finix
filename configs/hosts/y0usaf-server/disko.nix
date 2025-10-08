@@ -1,13 +1,11 @@
-{pkgs, ...}: let
-  disk = "/dev/sda";
-in {
+{pkgs, ...}: {
   environment.systemPackages = [
     pkgs.disko
   ];
   disko.devices = {
     disk = {
       main = {
-        device = disk;
+        device = "/dev/sda";
         type = "disk";
         content = {
           type = "gpt";

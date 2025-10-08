@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  cfg = config.home.ui.cursor;
   username = config.user.name;
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
@@ -18,7 +17,7 @@ in {
       description = "Enable cursor theme configuration";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.cursor.enable {
     environment.systemPackages =
       [
         xcursorPackage

@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  cfg = config.home.gaming.clair-obscur.mods;
   sources = import ./npins;
 
   expedition33Mods = pkgs.callPackage sources.Expedition-33-Mods {};
@@ -50,9 +49,9 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.gaming.clair-obscur.mods.enable {
     usr.files =
-      (lib.optionalAttrs cfg.installAll {
+      (lib.optionalAttrs config.home.gaming.clair-obscur.mods.installAll {
         "install-all-clair-obscur-mods" = {
           clobber = true;
           source = "${expedition33Mods.all-mods}/bin/install-all-mods";
@@ -67,6 +66,6 @@ in {
             executable = true;
           };
         })
-        cfg.enabledMods));
+        config.home.gaming.clair-obscur.mods.enabledMods));
   };
 }

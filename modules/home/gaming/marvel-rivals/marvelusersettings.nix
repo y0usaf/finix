@@ -3,7 +3,6 @@
   lib,
   ...
 }: let
-  cfg = config.home.gaming.marvel-rivals.marvelusersettings;
   settingsData = {
     MasterVolume = 70;
     SoundEffectVolume = 100;
@@ -202,7 +201,7 @@ in {
       description = "Enable Marvel Rivals MarvelUserSettings.ini configuration";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.gaming.marvel-rivals.marvelusersettings.enable {
     usr.files =
       lib.genAttrs [
         ".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/default/MarvelUserSetting.ini"

@@ -4,11 +4,8 @@
   lib,
   genLib,
   ...
-}: let
-  cfg = config.home.ui.niri;
-  agsEnabled = config.home.ui.ags.enable or false;
-in {
-  config = lib.mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.home.ui.niri.enable {
     home.ui.niri.settings = {
       prefer-no-csd = {};
 
@@ -24,7 +21,7 @@ in {
           ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"]
           ["sh" "-c" "swaybg -i $(find ${config.home.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
         ]
-        ++ lib.optional agsEnabled ["${pkgs.ags}/bin/ags" "run" "/home/${config.user.name}/.config/ags/bar-overlay.tsx"];
+        ++ lib.optional (config.home.ui.ags.enable or false) ["${pkgs.ags}/bin/ags" "run" "/home/${config.user.name}/.config/ags/bar-overlay.tsx"];
 
       hotkey-overlay = {};
       window-rule = {
@@ -48,9 +45,9 @@ in {
           clobber = true;
           generator = genLib.toNiriconf;
           value =
-            cfg.settings
-            // lib.optionalAttrs (cfg.extraConfig != "") {
-              _extraConfig = cfg.extraConfig;
+            config.home.ui.niri.settings
+            // lib.optionalAttrs (config.home.ui.niri.extraConfig != "") {
+              _extraConfig = config.home.ui.niri.extraConfig;
             };
         };
       };

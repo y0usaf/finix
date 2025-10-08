@@ -3,15 +3,14 @@
   pkgs,
   hostConfig,
   ...
-}: let
-  hardwareCfg = hostConfig.hardware;
-in {
+}: {
   config = {
-    hardware.bluetooth = lib.mkIf (hardwareCfg.bluetooth.enable or false) {
+    hardware.bluetooth = lib.mkIf (lib.attrByPath ["hardware" "bluetooth" "enable"] false hostConfig) {
       enable = true;
       powerOnBoot = true;
       settings =
-        hardwareCfg.bluetooth.settings
+        lib.attrByPath ["hardware" "bluetooth" "settings"] null
+        hostConfig
         or {
           General = {
             ControllerMode = "dual";
@@ -20,8 +19,8 @@ in {
         };
       package = pkgs.bluez;
     };
-    services.dbus.packages = lib.mkIf (hardwareCfg.bluetooth.enable or false) [pkgs.bluez];
-    environment.systemPackages = lib.optionals (hardwareCfg.bluetooth.enable or false) [
+    services.dbus.packages = lib.mkIf (lib.attrByPath ["hardware" "bluetooth" "enable"] false hostConfig) [pkgs.bluez];
+    environment.systemPackages = lib.optionals (lib.attrByPath ["hardware" "bluetooth" "enable"] false hostConfig) [
       pkgs.bluez
       pkgs.bluez-tools
     ];

@@ -3,10 +3,9 @@
   lib,
   ...
 }: let
-  cfg = config.home.ui.niri;
   inherit (config.home.core) defaults;
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.niri.enable {
     home.ui.niri.settings.binds = {
       # System & Help
       "Mod+Shift+Slash" = {show-hotkey-overlay = {};};

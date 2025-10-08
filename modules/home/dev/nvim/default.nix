@@ -2,18 +2,15 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.dev.nvim;
-  username = config.user.name;
-in {
+}: {
   imports = [
     ./neovide.nix
     ./options.nix
     ./packages.nix
   ];
 
-  config = lib.mkIf cfg.enable {
-    hjem.users.${username}.files = {
+  config = lib.mkIf config.home.dev.nvim.enable {
+    hjem.users.${config.user.name}.files = {
       # Core nvim configuration using text approach (hjem doesn't require generator for text)
       ".config/nvim/init.lua".text = ''
         -- Leader keys

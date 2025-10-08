@@ -4,17 +4,15 @@
   genLib,
   ...
 }: let
-  cfg = config.home.ui.hyprland;
-
   keybindingsConfig = {
     bind = lib.lists.flatten [
-      (lib.optional cfg.group.enable "$mod CTRL, G, togglegroup")
-      (lib.optional cfg.group.enable "$mod CTRL SHIFT, G, lockgroups, toggle")
-      (lib.optional cfg.group.enable "$mod CTRL, J, changegroupactive, b")
-      (lib.optional cfg.group.enable "$mod CTRL, K, changegroupactive, f")
-      (lib.optional cfg.group.enable "$mod CTRL SHIFT, J, moveintogroup, b")
-      (lib.optional cfg.group.enable "$mod CTRL SHIFT, K, moveintogroup, f")
-      (lib.optional cfg.group.enable "$mod CTRL, H, moveoutofgroup")
+      (lib.optional config.home.ui.hyprland.group.enable "$mod CTRL, G, togglegroup")
+      (lib.optional config.home.ui.hyprland.group.enable "$mod CTRL SHIFT, G, lockgroups, toggle")
+      (lib.optional config.home.ui.hyprland.group.enable "$mod CTRL, J, changegroupactive, b")
+      (lib.optional config.home.ui.hyprland.group.enable "$mod CTRL, K, changegroupactive, f")
+      (lib.optional config.home.ui.hyprland.group.enable "$mod CTRL SHIFT, J, moveintogroup, b")
+      (lib.optional config.home.ui.hyprland.group.enable "$mod CTRL SHIFT, K, moveintogroup, f")
+      (lib.optional config.home.ui.hyprland.group.enable "$mod CTRL, H, moveoutofgroup")
       [
         "$mod, Q, killactive"
         "$mod, M, exit"
@@ -80,7 +78,7 @@
     ];
   };
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.hyprland.enable {
     usr.files.".config/hypr/hyprland.conf" = {
       clobber = true;
       text = lib.mkAfter (genLib.toHyprconf {

@@ -4,8 +4,6 @@
   genLib,
   ...
 }: let
-  cfg = config.home.ui.hyprland;
-
   monitorsConfig = {
     monitor = [
       "DP-4,highres@highrr,0x0,1"
@@ -16,7 +14,7 @@
     ];
   };
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.hyprland.enable {
     usr.files.".config/hypr/hyprland.conf" = {
       clobber = true;
       text = lib.mkAfter (genLib.toHyprconf {

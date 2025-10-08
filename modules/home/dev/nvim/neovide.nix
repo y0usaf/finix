@@ -3,16 +3,13 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.dev.nvim;
-  username = config.user.name;
-in {
-  config = lib.mkIf (cfg.enable && cfg.neovide) {
+}: {
+  config = lib.mkIf (config.home.dev.nvim.enable && config.home.dev.nvim.neovide) {
     # Package installed at system level via environment.systemPackages
     environment.systemPackages = [
       pkgs.neovide
     ];
-    hjem.users.${username} = {
+    hjem.users.${config.user.name} = {
       files.".config/neovide/config.toml" = {
         clobber = true;
         text = ''

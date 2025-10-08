@@ -3,14 +3,11 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.ui.wayland;
-  gtkCfg = config.home.ui.gtk;
-in {
+}: {
   options.home.ui.wayland = {
     enable = lib.mkEnableOption "Wayland configuration";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.wayland.enable {
     environment.systemPackages = [
       pkgs.grim
       pkgs.slurp
@@ -29,7 +26,7 @@ in {
             export GDK_BACKEND=wayland
             export SDL_VIDEODRIVER=wayland,x11
             export CLUTTER_BACKEND=wayland
-            export GDK_DPI_SCALE=${toString gtkCfg.scale}
+            export GDK_DPI_SCALE=${toString config.home.ui.gtk.scale}
           '';
           clobber = true;
         };
