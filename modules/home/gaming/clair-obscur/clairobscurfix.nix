@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  cfg = config.home.gaming.clair-obscur.clairobscurfix;
   sources = import ./npins;
 
   clairobscurfix = pkgs.fetchzip {
@@ -21,7 +20,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.gaming.clair-obscur.clairobscurfix.enable {
     usr.files = {
       # Install the ASI plugin
       ".local/share/Steam/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {

@@ -3,11 +3,10 @@
   lib,
   ...
 }: let
-  cfg = config.home.shell.aliases;
   inherit (config.user) name homeDirectory nixosConfigDirectory;
 in {
   options.home.shell.aliases = {enable = lib.mkEnableOption "Enable base aliases";};
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.shell.aliases.enable {
     # hjem configuration
     hjem.users.${name}.files = {
       ".config/zsh/aliases/android.zsh" = {

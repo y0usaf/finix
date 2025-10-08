@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  cfg = config.home.shell.zsh;
   inherit (config.user) name homeDirectory tokensDirectory;
   zshConfig = {
     cat-fetch = true;
@@ -19,7 +18,7 @@ in {
   options.home.shell.zsh = {
     enable = lib.mkEnableOption "zsh shell configuration";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.shell.zsh.enable {
     environment.variables.ZDOTDIR = "${config.user.configDirectory}/zsh";
     programs.zsh.enable = true;
 

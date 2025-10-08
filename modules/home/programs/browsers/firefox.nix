@@ -3,10 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  username = config.user.name;
-  sharedPolicies = import ./policies.nix {inherit config lib;};
-in {
+}: {
   imports = [
     ./config.nix
     ./ui-chrome.nix
@@ -16,13 +13,13 @@ in {
     environment.systemPackages = [
       (pkgs.wrapFirefox pkgs.firefox-unwrapped {
         extraPolicies =
-          sharedPolicies.browserPolicies
+          (import ./policies.nix {inherit config lib;}).browserPolicies
           // {
             DisableFirefoxStudies = true;
           };
       })
     ];
-    hjem.users.${username} = {
+    hjem.users.${config.user.name} = {
       files = {
         ".config/zsh/.zprofile" = {
           text = lib.mkAfter ''
@@ -37,7 +34,7 @@ in {
             Profile0 = {
               Name = "default";
               IsRelative = 1;
-              Path = username;
+              Path = config.user.name;
               Default = 1;
             };
             General = {
