@@ -2,10 +2,8 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.ui.niri;
-in {
-  config = lib.mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.home.ui.niri.enable {
     home.ui.niri.settings.layout = {
       gaps = 10;
       center-focused-column = "never";

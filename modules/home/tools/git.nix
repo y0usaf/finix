@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.tools.git;
-in {
+}: {
   options.home.tools.git = {
     enable = lib.mkEnableOption "git configuration and automation";
     name = lib.mkOption {
@@ -39,7 +37,7 @@ in {
       };
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.tools.git.enable {
     environment.systemPackages = [
       pkgs.git
       pkgs.openssh
@@ -51,11 +49,11 @@ in {
           generator = lib.generators.toGitINI;
           value = {
             user = {
-              inherit (cfg) name;
-              inherit (cfg) email;
+              inherit (config.home.tools.git) name;
+              inherit (config.home.tools.git) email;
             };
             core = {
-              inherit (cfg) editor;
+              inherit (config.home.tools.git) editor;
             };
             init = {
               defaultBranch = "main";
@@ -69,22 +67,22 @@ in {
             url."git@github.com:".pushInsteadOf = "https://github.com/";
           };
         };
-        ".local/share/bin/setup-nixos-repo" = lib.mkIf (cfg.nixos-git-sync.enable && (cfg.nixos-git-sync.nixosRepoUrl != "")) {
+        ".local/share/bin/setup-nixos-repo" = lib.mkIf (config.home.tools.git.nixos-git-sync.enable && (config.home.tools.git.nixos-git-sync.nixosRepoUrl != "")) {
           clobber = true;
           text = ''
-            if [ ! -d "${cfg.nixos-git-sync.repoPath}" ]; then
+            if [ ! -d "${config.home.tools.git.nixos-git-sync.repoPath}" ]; then
               echo "Setting up NixOS configuration repository..."
-              git clone ${cfg.nixos-git-sync.nixosRepoUrl} ${cfg.nixos-git-sync.repoPath}
+              git clone ${config.home.tools.git.nixos-git-sync.nixosRepoUrl} ${config.home.tools.git.nixos-git-sync.repoPath}
             fi
           '';
           executable = true;
         };
-        ".local/share/bin/nixos-git-sync" = lib.mkIf cfg.nixos-git-sync.enable {
+        ".local/share/bin/nixos-git-sync" = lib.mkIf config.home.tools.git.nixos-git-sync.enable {
           clobber = true;
           text = ''
             set -x
             sleep 2
-            REPO_PATH="${cfg.nixos-git-sync.repoPath}"
+            REPO_PATH="${config.home.tools.git.nixos-git-sync.repoPath}"
             if [ ! -d "$REPO_PATH" ]; then
               echo "Repository directory does not exist: $REPO_PATH"
               exit 1
@@ -95,14 +93,14 @@ in {
               FORMATTED_DATE=$(date '+%d/%m/%y@%H:%M:%S')
               COMMIT_MSG="🤖 Auto Update: $FORMATTED_DATE"
               git commit -m "$COMMIT_MSG"
-              git push origin ${cfg.nixos-git-sync.remoteBranch} --force
+              git push origin ${config.home.tools.git.nixos-git-sync.remoteBranch} --force
             else
               echo "No changes to commit"
             fi
           '';
           executable = true;
         };
-        ".config/zsh/.zshrc" = lib.mkIf cfg.nixos-git-sync.enable {
+        ".config/zsh/.zshrc" = lib.mkIf config.home.tools.git.nixos-git-sync.enable {
           clobber = true;
           text = ''
             git-sync() {

@@ -3,14 +3,12 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.dev.codex;
-in {
+}: {
   options.home.dev.codex = {
     enable = lib.mkEnableOption "OpenAI Codex";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.codex.enable {
     environment.systemPackages = [
       pkgs.codex
     ];

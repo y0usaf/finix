@@ -8,13 +8,11 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.programs.tui-launcher;
-in {
+}: {
   options.home.programs.tui-launcher = {
     enable = lib.mkEnableOption "tui launcher";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.programs.tui-launcher.enable {
     usr = {
       files.".config/scripts/tui-launcher.sh" = {
         clobber = true;

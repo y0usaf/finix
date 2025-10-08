@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.home.dev.mcp;
@@ -54,8 +55,8 @@ in {
   };
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
-      nodejs_20
-      uv
+      pkgs.nodejs_20
+      pkgs.uv
     ];
     usr = {
       files = {

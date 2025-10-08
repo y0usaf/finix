@@ -3,13 +3,11 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.tools.yt-dlp;
-in {
+}: {
   options.home.tools.yt-dlp = {
     enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.tools.yt-dlp.enable {
     environment.systemPackages = [
       pkgs.yt-dlp-light
       pkgs.ffmpeg
