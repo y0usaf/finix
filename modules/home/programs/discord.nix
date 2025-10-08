@@ -3,9 +3,7 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.programs.discord;
-in {
+}: {
   options.home.programs.discord = {
     enable = lib.mkEnableOption "Discord module";
     variant = lib.mkOption {
@@ -14,10 +12,10 @@ in {
       description = "Which Discord variant to install (canary or stable)";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.programs.discord.enable {
     environment.systemPackages = [
       (
-        if cfg.variant == "canary"
+        if config.home.programs.discord.variant == "canary"
         then
           (pkgs.discord-canary.override {
             withOpenASAR = true;

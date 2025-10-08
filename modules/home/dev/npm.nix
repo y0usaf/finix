@@ -3,13 +3,11 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.dev.npm;
-in {
+}: {
   options.home.dev.npm = {
     enable = lib.mkEnableOption "Node.js and NPM configuration";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.npm.enable {
     environment.systemPackages = [
       pkgs.nodejs_20
     ];

@@ -3,10 +3,8 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.ui.hyprland;
-in {
-  config = lib.mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.home.ui.hyprland.enable {
     xdg.portal = {
       enable = true;
       extraPortals = [

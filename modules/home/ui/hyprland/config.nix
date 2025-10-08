@@ -3,10 +3,8 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.ui.hyprland;
-in {
-  config = lib.mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.home.ui.hyprland.enable {
     environment.systemPackages = [
       pkgs.hyprwayland-scanner
       pkgs.hyprland

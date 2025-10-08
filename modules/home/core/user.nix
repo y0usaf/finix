@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.core.user;
-in {
+}: {
   options.home.core.user = {
     enable = lib.mkEnableOption "user configuration (packages and bookmarks)";
     packages = lib.mkOption {
@@ -19,6 +17,6 @@ in {
     };
   };
   config =
-    lib.mkIf cfg.enable {
+    lib.mkIf config.home.core.user.enable {
     };
 }

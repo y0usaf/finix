@@ -2,14 +2,12 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.dev.claude.slash-commands;
-in {
+}: {
   options.home.dev.claude.slash-commands = {
     enable = lib.mkEnableOption "Claude slash commands";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.claude.slash-commands.enable {
     usr = {
       files = {
         # NixOS specific commands

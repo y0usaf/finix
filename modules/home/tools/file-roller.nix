@@ -3,13 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.tools.file-roller;
-in {
+}: {
   options.home.tools.file-roller = {
     enable = lib.mkEnableOption "file-roller (archive manager)";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.tools.file-roller.enable {
     environment.systemPackages = [
       pkgs.file-roller
     ];

@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.ui.quickshell;
-in {
+}: {
   options.home.ui.quickshell = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -13,7 +11,7 @@ in {
       description = "Enable Quickshell desktop shell";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.quickshell.enable {
     environment.systemPackages = [
       pkgs.quickshell
       pkgs.cava

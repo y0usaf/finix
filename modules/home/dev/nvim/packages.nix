@@ -3,10 +3,8 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.dev.nvim;
-in {
-  config = lib.mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.home.dev.nvim.enable {
     environment.systemPackages = [
       pkgs.ripgrep
       pkgs.fd

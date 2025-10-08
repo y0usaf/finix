@@ -2,14 +2,12 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.dev.claude.agents;
-in {
+}: {
   options.home.dev.claude.agents = {
     enable = lib.mkEnableOption "Claude declarative agents";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.claude.agents.enable {
     usr = {
       files = {
         # Code Review Agent

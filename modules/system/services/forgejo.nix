@@ -2,10 +2,8 @@
   lib,
   hostConfig,
   ...
-}: let
-  cfg = hostConfig.services.forgejo or {};
-in {
-  config = lib.mkIf (cfg.enable or false) {
+}: {
+  config = lib.mkIf (lib.attrByPath ["services" "forgejo" "enable"] false hostConfig) {
     services.forgejo = {
       enable = true;
       database.type = "postgres";
@@ -18,7 +16,7 @@ in {
             ROOT_URL = "http://localhost:3000/";
           };
         }
-        (cfg.settings or {})
+        (lib.attrByPath ["services" "forgejo" "settings"] {} hostConfig)
       ];
     };
 

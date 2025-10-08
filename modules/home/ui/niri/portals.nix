@@ -3,10 +3,8 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.ui.niri;
-in {
-  config = lib.mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.home.ui.niri.enable {
     xdg.portal = {
       enable = true;
       extraPortals = [

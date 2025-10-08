@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.home.dev.opencode;
@@ -75,9 +76,9 @@ in {
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
-      opencode
-      nodejs_20
-      uv
+      pkgs.opencode
+      pkgs.nodejs_20
+      pkgs.uv
     ];
     usr = {
       files = {

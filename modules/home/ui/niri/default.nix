@@ -1,10 +1,9 @@
 {
   config,
   lib,
+  pkgs,
   ...
-}: let
-  cfg = config.home.ui.niri;
-in {
+}: {
   imports = [
     ./options.nix
     ./config.nix
@@ -16,9 +15,9 @@ in {
     ./portals.nix
   ];
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.niri.enable {
     environment.systemPackages = [
-      xwayland-satellite
+      pkgs.xwayland-satellite
     ];
   };
 }

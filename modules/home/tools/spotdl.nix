@@ -3,13 +3,11 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.tools.spotdl;
-in {
+}: {
   options.home.tools.spotdl = {
     enable = lib.mkEnableOption "SpotDL music downloading tools";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.tools.spotdl.enable {
     environment.systemPackages = [
       pkgs.ffmpeg
     ];

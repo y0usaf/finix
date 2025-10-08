@@ -3,9 +3,7 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.dev.python;
-in {
+}: {
   options.home.dev.python = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -13,7 +11,7 @@ in {
       description = "Enable Python development environment";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.python.enable {
     environment.systemPackages = [
       pkgs.python3
       pkgs.python312

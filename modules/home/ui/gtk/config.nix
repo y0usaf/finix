@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.home.ui.gtk;
@@ -39,8 +40,8 @@
 in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
-      gtk3
-      gtk4
+      pkgs.gtk3
+      pkgs.gtk4
     ];
     usr = {
       files = {

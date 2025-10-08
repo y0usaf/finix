@@ -3,13 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.dev.docker;
-in {
+}: {
   options.home.dev.docker = {
     enable = lib.mkEnableOption "docker development environment";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.docker.enable {
     environment.systemPackages = [
       pkgs.docker
       pkgs.docker-compose

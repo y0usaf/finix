@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.ui.ags.bar-overlay;
-in {
+}: {
   options.home.ui.ags.bar-overlay = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -13,7 +11,7 @@ in {
       description = "Enable AGS v2 Bar Overlay (Minimal time/date bars)";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.ags.bar-overlay.enable {
     environment.systemPackages = [
       pkgs.ags
     ];

@@ -3,13 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.programs.google-meet;
-in {
+}: {
   options.home.programs.google-meet = {
     enable = lib.mkEnableOption "Google Meet webapp";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.programs.google-meet.enable {
     usr = {
       files = {
         ".local/share/applications/google-meet.desktop" = {

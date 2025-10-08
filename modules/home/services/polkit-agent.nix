@@ -3,13 +3,11 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.services.polkitAgent;
-in {
+}: {
   options.home.services.polkitAgent = {
     enable = lib.mkEnableOption "polkit authentication agent";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.services.polkitAgent.enable {
     environment.systemPackages = [pkgs.polkit_gnome];
     systemd.user.services.polkit-gnome-authentication-agent-1 = {
       description = "polkit-gnome-authentication-agent-1";

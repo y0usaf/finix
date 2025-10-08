@@ -3,13 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.services.ssh;
-in {
+}: {
   options.home.services.ssh = {
     enable = lib.mkEnableOption "SSH configuration module";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.services.ssh.enable {
     environment.systemPackages = [
       pkgs.openssh
     ];

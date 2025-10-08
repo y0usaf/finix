@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.gaming.wukong;
-in {
+}: {
   options.home.gaming.wukong = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -12,7 +10,7 @@ in {
       description = "Enable Black Myth: Wukong configuration";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.gaming.wukong.enable {
     usr.files.".local/share/Steam/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
       clobber = true;
       generator = lib.generators.toINI {};
