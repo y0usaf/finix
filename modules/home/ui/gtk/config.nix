@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.home.ui.gtk;
@@ -39,7 +38,7 @@
   bookmarksContent = lib.concatStringsSep "\n" bookmarks;
 in {
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
+    environment.systemPackages = [
       gtk3
       gtk4
     ];

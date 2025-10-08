@@ -14,7 +14,7 @@ in {
     };
 
     systemd.services.n8n = {
-      path = with pkgs; [nodejs];
+      path = [pkgs.nodejs];
       environment = {
         N8N_SECURE_COOKIE = "false";
       };

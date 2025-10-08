@@ -15,8 +15,8 @@
   ];
 
   fonts = {
-    packages = with pkgs; [
-      fastFonts
+    packages = [
+      pkgs.fastFonts
     ];
     fontDir.enable = true;
   };
