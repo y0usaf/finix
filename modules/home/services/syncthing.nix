@@ -30,13 +30,12 @@ in {
   config = lib.mkIf cfg.enable {
     services.syncthing = {
       enable = true;
-      user = cfg.user;
+      inherit (cfg) user;
       dataDir = config.user.homeDirectory;
       configDir = "${config.user.homeDirectory}/.config/syncthing";
 
       settings = {
-        devices = cfg.devices;
-        folders = cfg.folders;
+        inherit (cfg) devices folders;
       };
     };
   };

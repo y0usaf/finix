@@ -28,8 +28,8 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      jujutsu
+    environment.systemPackages = [
+      pkgs.jujutsu
     ];
     usr = {
       files =

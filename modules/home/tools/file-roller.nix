@@ -10,8 +10,8 @@ in {
     enable = lib.mkEnableOption "file-roller (archive manager)";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      file-roller
+    environment.systemPackages = [
+      pkgs.file-roller
     ];
   };
 }

@@ -20,8 +20,8 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      nh
+    environment.systemPackages = [
+      pkgs.nh
     ];
     usr = {
       files = {
