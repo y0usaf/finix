@@ -3,13 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.programs.pcmanfm;
-in {
+}: {
   options.home.programs.pcmanfm = {
     enable = lib.mkEnableOption "pcmanfm file manager";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.programs.pcmanfm.enable {
     environment.systemPackages = [
       pkgs.pcmanfm
     ];

@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.services.syncthing;
-in {
+}: {
   options.home.services.syncthing = {
     enable = lib.mkEnableOption "Syncthing service";
 
@@ -27,15 +25,15 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.services.syncthing.enable {
     services.syncthing = {
       enable = true;
-      inherit (cfg) user;
+      inherit (config.home.services.syncthing) user;
       dataDir = config.user.homeDirectory;
       configDir = "${config.user.homeDirectory}/.config/syncthing";
 
       settings = {
-        inherit (cfg) devices folders;
+        inherit (config.home.services.syncthing) devices folders;
       };
     };
   };

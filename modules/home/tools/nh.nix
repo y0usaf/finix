@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.tools.nh;
-in {
+}: {
   options.home.tools.nh = {
     enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
     flake = lib.mkOption {
@@ -19,7 +17,7 @@ in {
       '';
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.tools.nh.enable {
     environment.systemPackages = [
       pkgs.nh
     ];

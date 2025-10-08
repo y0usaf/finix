@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.programs.webapps;
-in {
+}: {
   imports = [
     ./webapps/keybard.nix
     ./webapps/google-meet.nix
@@ -15,7 +13,7 @@ in {
     enable = lib.mkEnableOption "web applications via Chromium";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.programs.webapps.enable {
     environment.systemPackages = [pkgs.ungoogled-chromium];
     home.programs = {
       keybard.enable = lib.mkDefault true;

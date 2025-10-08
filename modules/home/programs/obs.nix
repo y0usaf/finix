@@ -3,13 +3,11 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.programs.obs;
-in {
+}: {
   options.home.programs.obs = {
     enable = lib.mkEnableOption "OBS Studio";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.programs.obs.enable {
     environment.systemPackages = [
       (pkgs.symlinkJoin {
         name = "obs-studio-with-cuda";

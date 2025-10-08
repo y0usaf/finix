@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.ui.ags.fetch-widget;
-in {
+}: {
   options.home.ui.ags.fetch-widget = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -13,7 +11,7 @@ in {
       description = "Enable AGS v2 Fetch Widget (Complex system stats and workspaces)";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.ui.ags.fetch-widget.enable {
     environment.systemPackages = [
       pkgs.ags
     ];

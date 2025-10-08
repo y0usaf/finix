@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.gaming.clair-obscur.gameusersettings;
-in {
+}: {
   options.home.gaming.clair-obscur.gameusersettings = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -12,7 +10,7 @@ in {
       description = "Enable Clair Obscur GameUserSettings.ini configuration";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.gaming.clair-obscur.gameusersettings.enable {
     usr.files.".local/share/Steam/steamapps/compatdata/1903340/pfx/drive_c/users/steamuser/AppData/Local/Sandfall/Saved/Config/Windows/GameUserSettings.ini" = {
       clobber = true;
       generator = lib.generators.toINI {};

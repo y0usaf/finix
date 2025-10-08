@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.gaming.marvel-rivals.gameusersettings;
-in {
+}: {
   options.home.gaming.marvel-rivals.gameusersettings = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -12,7 +10,7 @@ in {
       description = "Enable Marvel Rivals GameUserSettings.ini configuration";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.gaming.marvel-rivals.gameusersettings.enable {
     usr.files.".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/GameUserSettings.ini" = {
       clobber = true;
       generator = lib.generators.toINI {};

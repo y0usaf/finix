@@ -3,9 +3,7 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.programs.obsidian;
-in {
+}: {
   options.home.programs.obsidian = {
     enable = lib.mkEnableOption "Obsidian module";
     useWayland = lib.mkOption {
@@ -14,10 +12,10 @@ in {
       description = "Whether to enable Wayland/Ozone support for Obsidian";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.programs.obsidian.enable {
     environment.systemPackages = [
       (pkgs.writeShellScriptBin "obsidian" ''
-        ${lib.optionalString cfg.useWayland ''
+        ${lib.optionalString config.home.programs.obsidian.useWayland ''
           export NIXOS_OZONE_WL=1
           export ELECTRON_OZONE_PLATFORM_HINT=wayland
         ''}
@@ -25,7 +23,7 @@ in {
           --disable-smooth-scrolling \
           --enable-gpu-rasterization \
           --enable-zero-copy \
-          ${lib.optionalString cfg.useWayland "--ozone-platform-hint=wayland"} \
+          ${lib.optionalString config.home.programs.obsidian.useWayland "--ozone-platform-hint=wayland"} \
           "$@"
       '')
     ];

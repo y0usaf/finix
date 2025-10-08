@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.tools.jj;
-in {
+}: {
   options.home.tools.jj = {
     enable = lib.mkEnableOption "jujutsu version control system";
     name = lib.mkOption {
@@ -27,7 +25,7 @@ in {
       description = "Enable common jujutsu aliases.";
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.tools.jj.enable {
     environment.systemPackages = [
       pkgs.jujutsu
     ];
@@ -37,19 +35,19 @@ in {
           ".config/jj/config.toml" = {
             text = ''
               [user]
-              name = "${cfg.name}"
-              email = "${cfg.email}"
+              name = "${config.home.tools.jj.name}"
+              email = "${config.home.tools.jj.email}"
               [ui]
               default-command = "status"
-              editor = "${cfg.editor}"
-              diff-editor = "${cfg.editor}"
+              editor = "${config.home.tools.jj.editor}"
+              diff-editor = "${config.home.tools.jj.editor}"
               [git]
               auto-local-branch = true
               push-branch-prefix = ""
               [revset-aliases]
-              "mine" = "author(${cfg.email})"
+              "mine" = "author(${config.home.tools.jj.email})"
               "recent" = "heads(::@ & recent(5))"
-              ${lib.optionalString cfg.enableAliases ''
+              ${lib.optionalString config.home.tools.jj.enableAliases ''
                 [aliases]
                 l = ["log", "-r", "recent"]
                 ll = ["log", "-r", "::@"]
@@ -69,7 +67,7 @@ in {
             clobber = true;
           };
         }
-        // lib.optionalAttrs cfg.enableAliases {
+        // lib.optionalAttrs config.home.tools.jj.enableAliases {
           ".config/zsh/.zshrc" = {
             text = ''
               alias jl='jj log -r recent'

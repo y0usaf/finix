@@ -3,13 +3,11 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.gaming.core;
-in {
+}: {
   options.home.gaming.core = {
     enable = lib.mkEnableOption "core gaming packages";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.gaming.core.enable {
     environment.systemPackages = [
       pkgs.steam
       pkgs.gamescope
