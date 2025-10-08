@@ -10,8 +10,8 @@ in {
     enable = lib.mkEnableOption "SpotDL music downloading tools";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      ffmpeg
+    environment.systemPackages = [
+      pkgs.ffmpeg
     ];
     usr = {
       files = {

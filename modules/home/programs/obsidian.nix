@@ -15,13 +15,13 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      (writeShellScriptBin "obsidian" ''
+    environment.systemPackages = [
+      (pkgs.writeShellScriptBin "obsidian" ''
         ${lib.optionalString cfg.useWayland ''
           export NIXOS_OZONE_WL=1
           export ELECTRON_OZONE_PLATFORM_HINT=wayland
         ''}
-        exec ${obsidian}/bin/obsidian \
+        exec ${pkgs.obsidian}/bin/obsidian \
           --disable-smooth-scrolling \
           --enable-gpu-rasterization \
           --enable-zero-copy \

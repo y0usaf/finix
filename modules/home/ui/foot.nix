@@ -56,8 +56,8 @@ in {
     enable = lib.mkEnableOption "foot terminal emulator";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      foot
+    environment.systemPackages = [
+      pkgs.foot
     ];
     usr = {
       files.".config/foot/foot.ini" = {

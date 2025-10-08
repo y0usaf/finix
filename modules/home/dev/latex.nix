@@ -10,10 +10,10 @@ in {
     enable = lib.mkEnableOption "LaTeX development environment";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      texliveFull
-      texstudio
-      tectonic
+    environment.systemPackages = [
+      pkgs.texliveFull
+      pkgs.texstudio
+      pkgs.tectonic
     ];
   };
 }

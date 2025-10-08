@@ -11,8 +11,8 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      codex
+    environment.systemPackages = [
+      pkgs.codex
     ];
   };
 }

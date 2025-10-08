@@ -15,16 +15,16 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
+    environment.systemPackages = [
       (
         if cfg.variant == "canary"
         then
-          (discord-canary.override {
+          (pkgs.discord-canary.override {
             withOpenASAR = true;
             withVencord = true;
           })
         else
-          (discord.override {
+          (pkgs.discord.override {
             withOpenASAR = true;
             withVencord = true;
           })

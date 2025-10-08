@@ -10,8 +10,8 @@ in {
     enable = lib.mkEnableOption "Node.js and NPM configuration";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      nodejs_20
+    environment.systemPackages = [
+      pkgs.nodejs_20
     ];
     usr = {
       files = {

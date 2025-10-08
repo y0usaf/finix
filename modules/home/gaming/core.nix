@@ -10,13 +10,13 @@ in {
     enable = lib.mkEnableOption "core gaming packages";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      steam
-      gamescope
-      protonup-rs
-      gamemode
-      protontricks
-      prismlauncher
+    environment.systemPackages = [
+      pkgs.steam
+      pkgs.gamescope
+      pkgs.protonup-rs
+      pkgs.gamemode
+      pkgs.protontricks
+      pkgs.prismlauncher
     ];
   };
 }

@@ -23,11 +23,11 @@ in {
     environment.variables.ZDOTDIR = "${config.user.configDirectory}/zsh";
     programs.zsh.enable = true;
 
-    environment.systemPackages = with pkgs; [
-      zsh
-      bat
-      lsd
-      tree
+    environment.systemPackages = [
+      pkgs.zsh
+      pkgs.bat
+      pkgs.lsd
+      pkgs.tree
     ];
 
     hjem.users.${name} = {

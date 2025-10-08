@@ -11,11 +11,11 @@ in {
     enable = lib.mkEnableOption "Wayland configuration";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      grim
-      slurp
-      wl-clipboard
-      hyprpicker
+    environment.systemPackages = [
+      pkgs.grim
+      pkgs.slurp
+      pkgs.wl-clipboard
+      pkgs.hyprpicker
     ];
     usr = {
       files = {

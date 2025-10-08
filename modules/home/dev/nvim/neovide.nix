@@ -9,8 +9,8 @@
 in {
   config = lib.mkIf (cfg.enable && cfg.neovide) {
     # Package installed at system level via environment.systemPackages
-    environment.systemPackages = with pkgs; [
-      neovide
+    environment.systemPackages = [
+      pkgs.neovide
     ];
     hjem.users.${username} = {
       files.".config/neovide/config.toml" = {

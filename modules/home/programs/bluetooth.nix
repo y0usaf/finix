@@ -10,9 +10,9 @@ in {
     enable = lib.mkEnableOption "Bluetooth user tools";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      blueman
-      bluetuith
+    environment.systemPackages = [
+      pkgs.blueman
+      pkgs.bluetuith
     ];
     usr = {
       files.".config/autostart/blueman.desktop" = {

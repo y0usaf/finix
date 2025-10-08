@@ -11,8 +11,8 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      realesrgan-ncnn-vulkan
+    environment.systemPackages = [
+      pkgs.realesrgan-ncnn-vulkan
     ];
     usr = {
       files = {

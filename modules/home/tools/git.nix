@@ -40,9 +40,9 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      git
-      openssh
+    environment.systemPackages = [
+      pkgs.git
+      pkgs.openssh
     ];
     usr = {
       files = {

@@ -10,8 +10,8 @@ in {
     enable = lib.mkEnableOption "wallust color generation";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      wallust
+    environment.systemPackages = [
+      pkgs.wallust
     ];
   };
 }

@@ -5,23 +5,23 @@
   ...
 }: let
   cfg = config.home.core.packages;
-  basePackages = with pkgs; [
-    git
-    curl
-    wget
-    cachix
-    unzip
-    bash
-    lsd
-    alejandra
-    tree
-    btop
-    psmisc
-    dconf
-    lm_sensors
-    networkmanager
-    fzf
-    ripgrep
+  basePackages = [
+    pkgs.git
+    pkgs.curl
+    pkgs.wget
+    pkgs.cachix
+    pkgs.unzip
+    pkgs.bash
+    pkgs.lsd
+    pkgs.alejandra
+    pkgs.tree
+    pkgs.btop
+    pkgs.psmisc
+    pkgs.dconf
+    pkgs.lm_sensors
+    pkgs.networkmanager
+    pkgs.fzf
+    pkgs.ripgrep
   ];
 in {
   options.home.core.packages = {

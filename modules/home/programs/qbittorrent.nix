@@ -10,8 +10,8 @@ in {
     enable = lib.mkEnableOption "qBittorrent torrent client";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      qbittorrent
+    environment.systemPackages = [
+      pkgs.qbittorrent
     ];
   };
 }

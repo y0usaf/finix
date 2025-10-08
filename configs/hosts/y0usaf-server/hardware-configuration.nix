@@ -17,46 +17,48 @@
     kernel.sysctl."vm.swappiness" = 100;
   };
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
-    fsType = "btrfs";
-    options = ["subvol=@"];
-  };
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@"];
+    };
 
-  fileSystems."/home" = {
-    device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
-    fsType = "btrfs";
-    options = ["subvol=@home"];
-  };
+    "/home" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@home"];
+    };
 
-  fileSystems."/btrfs" = {
-    device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
-    fsType = "btrfs";
-    options = ["subvolid=5"];
-  };
+    "/btrfs" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvolid=5"];
+    };
 
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/41B0-E342";
-    fsType = "vfat";
-    options = ["fmask=0022" "dmask=0022"];
-  };
+    "/boot" = {
+      device = "/dev/disk/by-uuid/41B0-E342";
+      fsType = "vfat";
+      options = ["fmask=0022" "dmask=0022"];
+    };
 
-  fileSystems."/home/y0usaf/Music" = {
-    device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
-    fsType = "btrfs";
-    options = ["subvol=@music"];
-  };
+    "/home/y0usaf/Music" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@music"];
+    };
 
-  fileSystems."/home/y0usaf/DCIM" = {
-    device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
-    fsType = "btrfs";
-    options = ["subvol=@dcim"];
-  };
+    "/home/y0usaf/DCIM" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@dcim"];
+    };
 
-  fileSystems."/home/y0usaf/Pictures" = {
-    device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
-    fsType = "btrfs";
-    options = ["subvol=@pictures"];
+    "/home/y0usaf/Pictures" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@pictures"];
+    };
   };
 
   zramSwap = {

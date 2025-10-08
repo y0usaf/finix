@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.home.dev.mcp;
@@ -54,7 +53,7 @@ in {
     enable = lib.mkEnableOption "Model Context Protocol configuration";
   };
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
+    environment.systemPackages = [
       nodejs_20
       uv
     ];
