@@ -3,14 +3,12 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.tools.npins-build;
-in {
+}: {
   options.home.tools.npins-build = {
     enable = lib.mkEnableOption "npins build helpers and shell integration";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.tools.npins-build.enable {
     environment.systemPackages = [
       pkgs.npins
       pkgs.alejandra

@@ -3,13 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.home.dev.gemini-cli;
-in {
+}: {
   options.home.dev.gemini-cli = {
     enable = lib.mkEnableOption "Gemini CLI development tools";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.gemini-cli.enable {
     environment.systemPackages = [
       pkgs.gemini-cli
     ];

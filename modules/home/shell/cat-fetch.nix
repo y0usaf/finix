@@ -2,13 +2,11 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.shell.cat-fetch;
-in {
+}: {
   options.home.shell.cat-fetch = {
     enable = lib.mkEnableOption "cat fetch display on shell startup";
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.shell.cat-fetch.enable {
     usr.files = {
       ".config/zsh/.zshrc" = {
         text = lib.mkAfter ''

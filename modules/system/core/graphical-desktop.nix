@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.core.graphicalDesktop;
-in {
+}: {
   options.core.graphicalDesktop = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -20,7 +18,7 @@ in {
     };
   };
 
-  config = lib.mkIf (cfg.enable && !cfg.headless) {
+  config = lib.mkIf (config.core.graphicalDesktop.enable && !config.core.graphicalDesktop.headless) {
     # Core desktop packages (from services.graphical-desktop)
     environment.systemPackages = [
       pkgs.nixos-icons

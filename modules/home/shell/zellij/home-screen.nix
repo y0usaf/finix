@@ -2,10 +2,8 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.home.shell.zellij;
-in {
-  config = lib.mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.home.shell.zellij.enable {
     usr.files = {
       ".config/zellij/layouts/home-screen.kdl" = {
         clobber = true;

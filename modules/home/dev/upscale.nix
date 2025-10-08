@@ -3,14 +3,12 @@
   pkgs,
   lib,
   ...
-}: let
-  cfg = config.home.dev.upscale;
-in {
+}: {
   options.home.dev.upscale = {
     enable = lib.mkEnableOption "realesrgan-ncnn-vulkan for upscaling";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.upscale.enable {
     environment.systemPackages = [
       pkgs.realesrgan-ncnn-vulkan
     ];
