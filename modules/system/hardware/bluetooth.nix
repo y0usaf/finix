@@ -3,15 +3,16 @@
   pkgs,
   hostConfig,
   ...
-}: {
+}: let
+  bluetoothCfg = lib.attrByPath ["hardware" "bluetooth"] {} hostConfig;
+  bluetoothEnabled = bluetoothCfg.enable or false;
+in {
   config = {
-    hardware.bluetooth = lib.mkIf (lib.attrByPath ["hardware" "bluetooth" "enable"] false hostConfig) {
+    hardware.bluetooth = lib.mkIf bluetoothEnabled {
       enable = true;
       powerOnBoot = true;
       settings =
-        lib.attrByPath ["hardware" "bluetooth" "settings"] null
-        hostConfig
-        or {
+        bluetoothCfg.settings or {
           General = {
             ControllerMode = "dual";
             FastConnectable = true;
@@ -19,8 +20,8 @@
         };
       package = pkgs.bluez;
     };
-    services.dbus.packages = lib.mkIf (lib.attrByPath ["hardware" "bluetooth" "enable"] false hostConfig) [pkgs.bluez];
-    environment.systemPackages = lib.optionals (lib.attrByPath ["hardware" "bluetooth" "enable"] false hostConfig) [
+    services.dbus.packages = lib.mkIf bluetoothEnabled [pkgs.bluez];
+    environment.systemPackages = lib.optionals bluetoothEnabled [
       pkgs.bluez
       pkgs.bluez-tools
     ];
