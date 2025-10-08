@@ -4,37 +4,25 @@
   pkgs,
   ...
 }: let
-  cfg = config.home.dev.opencode;
+  mcpServerSpecs = import ../mcp-servers.nix {inherit config;};
 
   # MCP servers configuration for opencode
-  mcpServers = {
-    "Filesystem" = {
-      type = "local";
-      command = ["npx" "-y" "@modelcontextprotocol/server-filesystem" config.user.homeDirectory];
-      enabled = true;
-      environment = {};
-    };
-
-    "GitHub-Repo-MCP" = {
-      type = "local";
-      command = ["npx" "-y" "github-repo-mcp"];
-      enabled = true;
-      environment = {};
-    };
-    "Gemini-MCP" = {
-      type = "local";
-      command = ["npx" "-y" "gemini-mcp-tool"];
-      enabled = true;
-      environment = {};
-    };
-  };
+  mcpServers = lib.listToAttrs (map
+    (spec:
+      lib.nameValuePair spec.name {
+        type = "local";
+        command = [spec.command] ++ spec.args;
+        enabled = true;
+        environment = spec.environment;
+      })
+    mcpServerSpecs);
 
   # Global opencode configuration
   globalConfig =
     {
       "$schema" = "https://opencode.ai/config.json";
-      inherit (cfg) theme;
-      inherit (cfg) model;
+      inherit (config.home.dev.opencode) theme;
+      inherit (config.home.dev.opencode) model;
       autoupdate = true;
       share = "manual";
       disabled_providers = ["openai" "huggingface"];
@@ -45,7 +33,7 @@
         "{file:${config.user.configDirectory}/opencode/opencode-instructions.md}"
       ];
     }
-    // (lib.optionalAttrs cfg.enableMcpServers {
+    // (lib.optionalAttrs config.home.dev.opencode.enableMcpServers {
       mcp = mcpServers;
     });
 
@@ -74,7 +62,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.home.dev.opencode.enable {
     environment.systemPackages = [
       pkgs.opencode
       pkgs.nodejs_20
