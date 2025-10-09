@@ -59,11 +59,6 @@
       url = "github:y0usaf/Fast-Fonts";
       flake = false;
     };
-
-    determinate = {
-      url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = {

@@ -58,8 +58,6 @@ in {
             })
           # Disko
           (inputs.disko + "/module.nix")
-          # Determinate Nix
-          inputs.determinate.nixosModules.default
           # Hjem
           ({...}: {
             imports = [
