@@ -12,7 +12,7 @@
 
   config = {
     nix = {
-      package = pkgs.nixVersions.stable;
+      package = lib.mkDefault pkgs.nixVersions.stable;
       settings = {
         auto-optimise-store = true;
         max-jobs = "auto";
