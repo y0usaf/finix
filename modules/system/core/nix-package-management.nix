@@ -1,8 +1,15 @@
 {
+  config,
+  lib,
   pkgs,
-  hostConfig,
   ...
 }: {
+  options.trustedUsers = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [];
+    description = "Additional trusted Nix users";
+  };
+
   config = {
     nix = {
       package = pkgs.nixVersions.stable;
@@ -12,7 +19,7 @@
         cores = 0;
         experimental-features = ["nix-command" "flakes"];
         sandbox = true;
-        trusted-users = ["root"] ++ (hostConfig.trustedUsers or []);
+        trusted-users = ["root"] ++ config.trustedUsers;
         builders-use-substitutes = true;
         fallback = true;
         substituters = [

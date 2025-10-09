@@ -25,7 +25,6 @@
   homeDirectory = "/home/y0usaf";
   stateVersion = "24.11";
   timezone = "America/Toronto";
-  profile = "default";
   var-cache = true;
   hardware = {
     bluetooth = {

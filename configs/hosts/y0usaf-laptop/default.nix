@@ -16,7 +16,6 @@
   homeDirectory = "/home/y0usaf";
   stateVersion = "24.11";
   timezone = "America/Toronto";
-  profile = "default";
 
   # Laptop-specific hardware
   hardware = {

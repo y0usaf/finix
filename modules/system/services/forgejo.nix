@@ -1,25 +1,21 @@
 {
+  config,
   lib,
-  hostConfig,
   ...
 }: {
-  config = lib.mkIf (lib.attrByPath ["services" "forgejo" "enable"] false hostConfig) {
+  config = lib.mkIf config.services.forgejo.enable {
     services.forgejo = {
-      enable = true;
-      database.type = "postgres";
-      lfs.enable = true;
-      settings = lib.mkMerge [
-        {
-          server = {
-            HTTP_PORT = 3000;
-            DOMAIN = "localhost";
-            ROOT_URL = "http://localhost:3000/";
-          };
-        }
-        (lib.attrByPath ["services" "forgejo" "settings"] {} hostConfig)
-      ];
+      database.type = lib.mkDefault "postgres";
+      lfs.enable = lib.mkDefault true;
+      settings = lib.mkDefault {
+        server = {
+          HTTP_PORT = 3000;
+          DOMAIN = "localhost";
+          ROOT_URL = "http://localhost:3000/";
+        };
+      };
     };
 
-    services.postgresql.enable = true;
+    services.postgresql.enable = lib.mkDefault true;
   };
 }
