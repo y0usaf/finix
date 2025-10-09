@@ -1,9 +1,11 @@
 {
+  config,
   lib,
-  hostConfig,
   ...
 }: {
+  options.hardware.amdgpu.enable = lib.mkEnableOption "AMD GPU support";
+
   config = {
-    services.xserver.videoDrivers = lib.mkIf hostConfig.hardware.amdgpu.enable ["amdgpu"];
+    services.xserver.videoDrivers = lib.mkIf config.hardware.amdgpu.enable ["amdgpu"];
   };
 }
