@@ -11,7 +11,7 @@
     home = "/home/guest";
     ignoreShellProgramCheck = true;
   };
-  home = {
+  user = {
     core = {
       packages.enable = true;
       defaults = {
