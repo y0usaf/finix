@@ -38,17 +38,19 @@ in {
       configuration = {
         imports = [
           # Host system configuration
-          (_: {
-            inherit (hostConfig) imports;
-            user = {
-              name = "y0usaf";
-              inherit (hostConfig) homeDirectory;
-            };
-            nixpkgs = {
-              inherit overlays;
-              config = nixpkgsConfig;
-            };
-          })
+          (_:
+            (removeAttrs hostConfig ["imports" "homeDirectory"])
+            // {
+              inherit (hostConfig) imports;
+              user = {
+                name = "y0usaf";
+                inherit (hostConfig) homeDirectory;
+              };
+              nixpkgs = {
+                inherit overlays;
+                config = nixpkgsConfig;
+              };
+            })
           # Disko
           (sources.disko + "/module.nix")
           # Hjem
