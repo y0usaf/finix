@@ -1,16 +1,10 @@
 {
+  config,
   lib,
   pkgs,
-  hostConfig,
   ...
 }: {
-  config = lib.mkIf (lib.attrByPath ["services" "n8n" "enable"] false hostConfig) {
-    services.n8n = {
-      enable = true;
-      openFirewall = lib.attrByPath ["services" "n8n" "openFirewall"] false hostConfig;
-      settings = lib.attrByPath ["services" "n8n" "settings"] {} hostConfig;
-    };
-
+  config = lib.mkIf config.services.n8n.enable {
     systemd.services.n8n = {
       path = [pkgs.nodejs];
       environment = {
