@@ -24,7 +24,7 @@
       ];
     }
   ];
-  home = {
+  user = {
     core = {
       packages.enable = true;
       user = {
