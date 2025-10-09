@@ -1,21 +1,26 @@
-let
-  sources = import ../npins;
-  system = "x86_64-linux";
-
-  # Centralized nixpkgs config
-  nixpkgsConfig = {
-    allowUnfree = true;
-    cudaSupport = true;
-    permittedInsecurePackages = [
-      "qtwebengine-5.15.19"
-    ];
+{
+  inputs,
+  system,
+  nixpkgsConfig,
+}: let
+  # Create sources compatibility layer for overlays
+  # Map flake inputs to the old sources.* pattern
+  sources = {
+    Fast-Fonts = inputs.fast-fonts;
+    "Deepin-Dark-hyprcursor" = inputs.deepin-dark-hyprcursor;
+    "Deepin-Dark-xcursor" = inputs.deepin-dark-xcursor;
+    neovim-nightly-overlay = inputs.neovim-nightly-overlay;
+    obs-backgroundremoval = inputs.obs-backgroundremoval;
+    obs-image-reaction = inputs.obs-image-reaction;
+    obs-pipewire-audio-capture = inputs.obs-pipewire-audio-capture;
+    obs-vkcapture = inputs.obs-vkcapture;
   };
 
   # Direct overlays import
   overlays = import ./overlays sources;
 
   # Direct pkgs with overlays
-  pkgs = import sources.nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system overlays;
     config = nixpkgsConfig;
   };
@@ -33,7 +38,7 @@ let
   };
 in {
   nixosConfigurations = lib.mapAttrs (_hostName: hostConfig:
-    import (sources.nixpkgs + "/nixos") {
+    import (inputs.nixpkgs + "/nixos") {
       inherit system;
       configuration = {
         imports = [
@@ -52,17 +57,17 @@ in {
               };
             })
           # Disko
-          (sources.disko + "/module.nix")
+          (inputs.disko + "/module.nix")
           # Hjem
           ({...}: {
             imports = [
               (_: {
-                _module.args.hjem-lib = import (sources.hjem + "/lib.nix") {inherit lib pkgs;};
+                _module.args.hjem-lib = import (inputs.hjem + "/lib.nix") {inherit lib pkgs;};
               })
-              (sources.hjem + "/modules/nixos")
+              (inputs.hjem + "/modules/nixos")
             ];
             config.hjem = {
-              linker = pkgs.callPackage (sources.smfh + "/package.nix") {};
+              linker = pkgs.callPackage (inputs.smfh + "/package.nix") {};
               users = {};
             };
           })
@@ -70,8 +75,12 @@ in {
           ../modules/user
         ];
         _module.args = {
-          inherit hostConfig sources lib genLib;
-          inherit (sources) disko;
+          inherit hostConfig lib genLib;
+          # Pass inputs for modules that might need them
+          flakeInputs = inputs;
+          # Legacy compatibility
+          sources = sources;
+          disko = inputs.disko;
         };
       };
     })
