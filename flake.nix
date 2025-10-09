@@ -2,7 +2,8 @@
   description = "y0usaf's NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Pin to same revision as npins had
+    nixpkgs.url = "github:NixOS/nixpkgs/7df7ff7d8e00218376575f0acdcc5d66741351ee";
 
     disko = {
       url = "github:nix-community/disko";
