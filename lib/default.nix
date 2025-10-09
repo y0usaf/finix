@@ -67,7 +67,7 @@ in {
             };
           })
           ./user-config.nix
-          ../modules/home
+          ../modules/user
         ];
         _module.args = {
           inherit hostConfig sources lib genLib;

@@ -36,7 +36,7 @@
     openFirewall = true;
   };
 
-  home = {
+  user = {
     core = {
       packages.enable = true;
       user = {
