@@ -1,0 +1,20 @@
+{
+  config,
+  lib,
+  ...
+}: {
+  options.services.tailscale.enableVPN = lib.mkEnableOption "Enable Tailscale VPN mesh network";
+
+  config = lib.mkIf config.services.tailscale.enableVPN {
+    services.tailscale = {
+      enable = true;
+      # Allow incoming connections on the Tailscale interface
+      openFirewall = true;
+    };
+
+    # Optional: Enable Tailscale exit node capability
+    # Uncomment to allow this device to route traffic for other Tailscale devices
+    # boot.kernel.sysctl."net.ipv4.ip_forward" = true;
+    # boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = true;
+  };
+}
