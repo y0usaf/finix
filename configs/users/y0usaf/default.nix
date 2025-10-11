@@ -168,6 +168,7 @@
       zellij = {
         enable = true;
         autoStart = true;
+        zjstatus.enable = true;
       };
     };
     tools = {

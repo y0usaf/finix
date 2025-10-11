@@ -16,6 +16,10 @@
       show_startup_tips = false;
       on_force_close = "quit";
       session_serialization = false;
+      pane_frames = true;
+    }
+    // lib.optionalAttrs config.user.shell.zellij.zjstatus.enable {
+      default_layout = "zjstatus";
     }
     // config.user.shell.zellij.settings;
 in {
@@ -27,7 +31,7 @@ in {
       files =
         {
           ".config/zellij/config.kdl" = {
-            clobber = true;
+            clobber = false;
             text =
               toKDL.toKDL {} baseConfig
               + "\n\n// Using default keybindings for now\n";
