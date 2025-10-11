@@ -36,6 +36,7 @@
     };
     forgejo.enable = true;
     openssh.enable = lib.mkForce true;
+    tailscale.enableVPN = true;
   };
 
   networking.firewall = {
