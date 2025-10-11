@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: let
   # Import local generators
@@ -22,6 +23,8 @@
       default_layout = "zjstatus";
     }
     // config.user.shell.zellij.settings;
+
+  zjstatusHintsConfig = "";
 in {
   config = lib.mkIf config.user.shell.zellij.enable {
     environment.systemPackages = [
@@ -34,7 +37,8 @@ in {
             clobber = false;
             text =
               toKDL.toKDL {} baseConfig
-              + "\n\n// Using default keybindings for now\n";
+              + "\n\n// Using default keybindings for now\n"
+              + zjstatusHintsConfig;
           };
         }
         // lib.optionalAttrs config.user.shell.zellij.autoStart {

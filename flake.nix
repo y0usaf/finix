@@ -64,6 +64,11 @@
       url = "github:dj95/zjstatus";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    zjstatus-hints = {
+      url = "github:y0usaf/zjstatus-hints";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
