@@ -1,7 +1,6 @@
 {...}: {
   imports = [
     ./ai-dev
-    ./codex
 
     ./docker.nix
     ./gcloud.nix
