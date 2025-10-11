@@ -59,6 +59,11 @@
       url = "github:y0usaf/Fast-Fonts";
       flake = false;
     };
+
+    zjstatus = {
+      url = "github:dj95/zjstatus";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
