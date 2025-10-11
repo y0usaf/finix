@@ -47,6 +47,7 @@
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = true;
+    tailscale.enableVPN = true;
     tftpd = {
       enable = true;
       path = "/srv/tftp";
