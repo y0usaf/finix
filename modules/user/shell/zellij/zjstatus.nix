@@ -9,7 +9,7 @@
 
   zjstatusBar = ''
     plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
-      format_left   "{command_zjstatus_hints}"
+      format_left   "{pipe_zjstatus_hints}"
       format_center "#[bg=#00ff64,fg=#000000,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} {datetime}"
       format_right  ""
       format_space  ""
@@ -47,10 +47,7 @@
       datetime        "#[bg=#00ff64,fg=#000000,bold] {format} "
       datetime_format "%d/%m/%y %H:%M:%S"
 
-      command_zjstatus_hints_command "cat /tmp/zjstatus_hints"
-      command_zjstatus_hints_format  "{stdout}"
-      command_zjstatus_hints_interval "1"
-      command_zjstatus_hints_rendermode "static"
+      pipe_zjstatus_hints_format "{output}"
     }
   '';
 in {
