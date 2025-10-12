@@ -54,14 +54,15 @@
   zjstatusHintsBar = ''
     plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
       format_left   ""
-      format_center "{pipe_zjstatus_hints}"
+      format_center "#[fg=#00ff64,bg=#0f0f0f]{pipe_zjstatus_hints}"
       format_right  ""
       format_space  ""
 
       border_enabled  "false"
       hide_frame_for_single_pane "false"
 
-      pipe_zjstatus_hints_format "{output}"
+      pipe_zjstatus_hints_format "#[fg=#00ff64,bg=#000000,bold]{output}"
+      pipe_zjstatus_hints_rendermode "raw"
     }
   '';
 in {
