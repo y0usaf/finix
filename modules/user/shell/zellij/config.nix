@@ -24,7 +24,21 @@
     }
     // config.user.shell.zellij.settings;
 
-  zjstatusHintsConfig = "";
+  zjstatusHintsConfig = let
+    cfg = config.user.shell.zellij;
+  in
+    lib.optionalString (cfg.zjstatusHints.enable or false) ''
+      plugins {
+        zjstatus-hints location="file:${flakeInputs.zjstatus-hints.packages.${config.nixpkgs.system}.default}/bin/zjstatus-hints.wasm" {
+          max_length ${toString (cfg.zjstatusHints.maxLength or 0)}
+          pipe_name "${cfg.zjstatusHints.pipeName or "zjstatus_hints"}"
+        }
+      }
+
+      load_plugins {
+        zjstatus-hints
+      }
+    '';
 in {
   config = lib.mkIf config.user.shell.zellij.enable {
     environment.systemPackages = [

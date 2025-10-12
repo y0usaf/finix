@@ -53,15 +53,6 @@
       command_zjstatus_hints_rendermode "static"
     }
   '';
-
-  zjstatusHintsPane = lib.optionalString cfg.zjstatusHints.enable ''
-    pane size=0 borderless=true {
-      plugin location="file:${flakeInputs.zjstatus-hints.packages.${config.nixpkgs.system}.default}/bin/zjstatus-hints.wasm" {
-        max_length ${toString cfg.zjstatusHints.maxLength}
-        pipe_name "${cfg.zjstatusHints.pipeName}"
-      }
-    }
-  '';
 in {
   options.user.shell.zellij.zjstatus = {
     enable = lib.mkEnableOption "zjstatus plugin for zellij";
@@ -71,7 +62,6 @@ in {
       default = ''
         layout {
           default_tab_template {
-            ${zjstatusHintsPane}
             children
             pane size=1 borderless=true {
               ${zjstatusBar}
