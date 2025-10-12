@@ -7,9 +7,10 @@
   cfg = config.user.shell.zellij;
   zjstatusPackage = flakeInputs.zjstatus.packages.${config.nixpkgs.system}.default;
 
-  zjstatusBar = ''
+  # Top status bar - main status info
+  zjstatusTopBar = ''
     plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
-      format_left   "{pipe_zjstatus_hints}"
+      format_left   ""
       format_center "#[bg=#00ff64,fg=#000000,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} {datetime}"
       format_right  ""
       format_space  ""
@@ -46,6 +47,19 @@
 
       datetime        "#[bg=#00ff64,fg=#000000,bold] {format} "
       datetime_format "%d/%m/%y %H:%M:%S"
+    }
+  '';
+
+  # Bottom status bar - centered hints
+  zjstatusHintsBar = ''
+    plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
+      format_left   ""
+      format_center "{pipe_zjstatus_hints}"
+      format_right  ""
+      format_space  ""
+
+      border_enabled  "false"
+      hide_frame_for_single_pane "false"
 
       pipe_zjstatus_hints_format "{output}"
     }
@@ -59,9 +73,12 @@ in {
       default = ''
         layout {
           default_tab_template {
+            pane size=1 borderless=true {
+              ${zjstatusTopBar}
+            }
             children
             pane size=1 borderless=true {
-              ${zjstatusBar}
+              ${zjstatusHintsBar}
             }
           }
         }
