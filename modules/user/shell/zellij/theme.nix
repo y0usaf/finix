@@ -116,7 +116,7 @@
 
   uiConfig = {
     ui.pane_frames = {
-      rounded_corners = true;
+      rounded_corners = false;
       hide_session_name = false;
     };
   };
