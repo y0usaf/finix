@@ -37,12 +37,12 @@
       mode_prompt        "#[bg=#3c3c3c,fg=#00ff64,bold] PROMPT "
       mode_tmux          "#[bg=#3c3c3c,fg=#ff6400,bold] TMUX "
 
-      tab_normal              "#[bg=#3c3c3c,fg=#b4b4b4] {index} {name} {floating_indicator}"
-      tab_normal_fullscreen   "#[bg=#3c3c3c,fg=#b4b4b4] {index} {name} [] {floating_indicator}"
-      tab_normal_sync         "#[bg=#3c3c3c,fg=#b4b4b4] {index} {name} <> {floating_indicator}"
-      tab_active              "#[bg=#505050,fg=#00ff96,bold,italic] {index} {name} {floating_indicator}"
-      tab_active_fullscreen   "#[bg=#505050,fg=#00ff96,bold,italic] {index} {name} [] {floating_indicator}"
-      tab_active_sync         "#[bg=#505050,fg=#00ff96,bold,italic] {index} {name} <> {floating_indicator}"
+      tab_normal              "#[bg=#3c3c3c,fg=#b4b4b4] {name} {floating_indicator}"
+      tab_normal_fullscreen   "#[bg=#3c3c3c,fg=#b4b4b4] {name} [] {floating_indicator}"
+      tab_normal_sync         "#[bg=#3c3c3c,fg=#b4b4b4] {name} <> {floating_indicator}"
+      tab_active              "#[bg=#3c3c3c,fg=#00ff96,bold,italic] {name} {floating_indicator}"
+      tab_active_fullscreen   "#[bg=#3c3c3c,fg=#00ff96,bold,italic] {name} [] {floating_indicator}"
+      tab_active_sync         "#[bg=#3c3c3c,fg=#00ff96,bold,italic] {name} <> {floating_indicator}"
       tab_floating_indicator  "⬚ "
 
       datetime        "#[bg=#3c3c3c,fg=#00ff64,bold] {format} "
