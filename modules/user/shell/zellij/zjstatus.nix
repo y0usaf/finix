@@ -10,10 +10,10 @@
   # Top status bar - main status info
   zjstatusTopBar = ''
     plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
-      format_left   "#[bg=#3c3c3c,fg=#00ff64,bold] {session} "
-      format_center "{mode} {tabs}"
-      format_right  " #[bg=#3c3c3c,fg=#00ff64,bold] {datetime}"
-      format_space  " "
+      format_left   ""
+      format_center "#[bg=#3c3c3c,fg=#00ff64,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} #[bg=#3c3c3c,fg=#00ff64,bold] {datetime}"
+      format_right  ""
+      format_space  ""
 
       session "{name}"
       format_hide_on_overlength "true"
