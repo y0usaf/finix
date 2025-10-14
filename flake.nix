@@ -71,11 +71,7 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    ...
-  } @ inputs: let
+  outputs = {nixpkgs, ...} @ inputs: let
     system = "x86_64-linux";
 
     # Centralized nixpkgs config

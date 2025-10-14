@@ -9,11 +9,11 @@
     Fast-Fonts = inputs.fast-fonts;
     "Deepin-Dark-hyprcursor" = inputs.deepin-dark-hyprcursor;
     "Deepin-Dark-xcursor" = inputs.deepin-dark-xcursor;
-    neovim-nightly-overlay = inputs.neovim-nightly-overlay;
-    obs-backgroundremoval = inputs.obs-backgroundremoval;
-    obs-image-reaction = inputs.obs-image-reaction;
-    obs-pipewire-audio-capture = inputs.obs-pipewire-audio-capture;
-    obs-vkcapture = inputs.obs-vkcapture;
+    inherit (inputs) neovim-nightly-overlay;
+    inherit (inputs) obs-backgroundremoval;
+    inherit (inputs) obs-image-reaction;
+    inherit (inputs) obs-pipewire-audio-capture;
+    inherit (inputs) obs-vkcapture;
   };
 
   # Direct overlays import
@@ -79,8 +79,8 @@ in {
           # Pass inputs for modules that might need them
           flakeInputs = inputs;
           # Legacy compatibility
-          sources = sources;
-          disko = inputs.disko;
+          inherit sources;
+          inherit (inputs) disko;
         };
       };
     })

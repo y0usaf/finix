@@ -45,7 +45,7 @@
       tab_active_sync         "#[bg=#3c3c3c,fg=#00ff96,bold,italic] {name} <> {floating_indicator}"
       tab_floating_indicator  "⬚ "
 
-      datetime        "#[bg=#3c3c3c,fg=#00ff64,bold] {format} "
+      datetime        "#[bg=#3c3c3c,fg=#00ff64,bold]{format} "
       datetime_format "%d/%m/%y %H:%M:%S"
     }
   '';
