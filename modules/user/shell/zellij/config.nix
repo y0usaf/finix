@@ -3,11 +3,9 @@
   lib,
   pkgs,
   flakeInputs,
+  genLib,
   ...
 }: let
-  # Import local generators
-  toKDL = import ../../../../lib/generators/toKDL.nix {inherit lib;};
-
   # Base zellij configuration
   baseConfig =
     {
@@ -50,7 +48,7 @@ in {
           ".config/zellij/config.kdl" = {
             clobber = false;
             text =
-              toKDL.toKDL {} baseConfig
+              genLib.toKDL {} baseConfig
               + "\n\n// Using default keybindings for now\n"
               + zjstatusHintsConfig;
           };

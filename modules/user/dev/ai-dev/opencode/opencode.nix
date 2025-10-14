@@ -13,7 +13,7 @@
         type = "local";
         command = [spec.command] ++ spec.args;
         enabled = true;
-        environment = spec.environment;
+        inherit (spec) environment;
       })
     mcpServerSpecs);
 
