@@ -143,7 +143,7 @@
     };
     dev = {
       claude-code.enable = true;
-
+      crush.enable = true;
       gemini-cli.enable = true;
       mcp.enable = true;
       docker.enable = true;
@@ -241,19 +241,19 @@
               id = "oty33-aq3dt";
               label = "Music";
               path = "~/Music";
-              devices = ["desktop" "phone"];
+              devices = ["desktop" "server" "phone"];
             };
             dcim = {
               id = "ti9yk-zu3xs";
               label = "DCIM";
               path = "~/DCIM";
-              devices = ["desktop" "phone"];
+              devices = ["desktop" "server" "phone"];
             };
             pictures = {
               id = "zbxzv-35v4e";
               label = "Pictures";
               path = "~/Pictures";
-              devices = ["desktop" "phone"];
+              devices = ["desktop" "server" "phone"];
             };
           };
       };
