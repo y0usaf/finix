@@ -5,5 +5,6 @@
     ./opencode
     ./gemini-cli.nix
     ./mcp.nix
+    ./crush.nix
   ];
 }
