@@ -302,11 +302,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1760727914,
-        "narHash": "sha256-nwTn/BnYl4R0xT8vIdA9SYx1IBP1UGgPd3xkmtTOi/E=",
+        "lastModified": 1760728031,
+        "narHash": "sha256-TqHqxEonfaiNb4HdayQ8zv4VaRIyD+XH4sqImy0ni88=",
         "owner": "y0usaf",
         "repo": "obs-image-reaction",
-        "rev": "e51a1ab444a778cc888738ef13a08b9a413e9cdb",
+        "rev": "c08fadfa9b4ed08596c1d5629795cef844ff5491",
         "type": "github"
       },
       "original": {
