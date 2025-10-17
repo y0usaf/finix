@@ -37,7 +37,7 @@
             Host forgejo
                 HostName y0usaf-server
                 Port 2222
-                User git
+                User forgejo
                 IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
                 IdentitiesOnly yes
           '';
