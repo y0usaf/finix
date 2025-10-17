@@ -20,6 +20,7 @@
               pkgs.obs-studio-plugins.obs-aitum-multistream
               pkgs.obs-studio-plugins.obs-vertical-canvas
               pkgs.obs-studio-plugins.obs-scale-to-sound
+              pkgs.obs-image-reaction
             ];
           })
         ];
