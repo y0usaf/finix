@@ -5,6 +5,8 @@
     # Pin to same revision as npins had
     nixpkgs.url = "github:NixOS/nixpkgs/7df7ff7d8e00218376575f0acdcc5d66741351ee";
 
+    flake-utils.url = "github:numtide/flake-utils";
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -43,6 +45,12 @@
     zjstatus-hints = {
       url = "github:y0usaf/zjstatus-hints";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    obs-image-reaction = {
+      url = "github:y0usaf/obs-image-reaction";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
     };
   };
 
