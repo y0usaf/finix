@@ -2,6 +2,8 @@
   config,
   pkgs,
   lib,
+  flakeInputs,
+  system,
   ...
 }: {
   options.user.programs.obs = {
@@ -20,7 +22,7 @@
               pkgs.obs-studio-plugins.obs-aitum-multistream
               pkgs.obs-studio-plugins.obs-vertical-canvas
               pkgs.obs-studio-plugins.obs-scale-to-sound
-              pkgs.obs-image-reaction
+              flakeInputs.obs-image-reaction.outputs.packages.${system}.default
             ];
           })
         ];
