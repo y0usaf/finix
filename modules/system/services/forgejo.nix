@@ -16,6 +16,9 @@
           START_SSH_SERVER = true;
           SSH_PORT = 2222;
         };
+        repository = {
+          ENABLE_PUSH_CREATE_USER = true;
+        };
       };
     };
 
