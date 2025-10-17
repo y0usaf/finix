@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  flakeInputs,
+  system,
+  ...
+}: {
   imports = [
     ../../../modules/system
     ./hardware-configuration.nix
@@ -7,7 +11,7 @@
 
   # Install Fast Font system-wide
   fonts = {
-    packages = [pkgs.fastFonts];
+    packages = [flakeInputs.fast-fonts.packages.${system}.default];
     fontDir.enable = true;
   };
   hostname = "y0usaf-laptop";

@@ -17,7 +17,6 @@
               pkgs.obs-studio-plugins.obs-backgroundremoval
               pkgs.obs-studio-plugins.obs-vkcapture
               pkgs.obs-studio-plugins.obs-pipewire-audio-capture
-              pkgs.obs-studio-plugins.obs-image-reaction
               pkgs.obs-studio-plugins.obs-aitum-multistream
               pkgs.obs-studio-plugins.obs-vertical-canvas
               pkgs.obs-studio-plugins.obs-scale-to-sound
