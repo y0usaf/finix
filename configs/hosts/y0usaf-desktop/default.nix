@@ -6,6 +6,8 @@
 {
   pkgs,
   lib,
+  flakeInputs,
+  system,
   ...
 }: {
   imports = [
@@ -16,7 +18,7 @@
 
   fonts = {
     packages = [
-      pkgs.fastFonts
+      flakeInputs.fast-fonts.packages.${system}.default
     ];
     fontDir.enable = true;
   };

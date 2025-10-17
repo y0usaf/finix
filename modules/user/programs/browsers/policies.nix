@@ -22,6 +22,21 @@
       Value = true;
       Locked = false;
     };
+    SearchEngines = {
+      PreventInstalls = true;
+      Add = [
+        {
+          Name = "Google";
+          URLTemplate = "https://www.google.com/search?q={searchTerms}";
+        }
+      ];
+      Remove = [
+        "DuckDuckGo"
+        "Wikipedia (en)"
+        "Bing"
+      ];
+      Default = "Google";
+    };
     SanitizeOnShutdown = {
       History = true;
       FormData = true;
@@ -70,160 +85,6 @@
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
-      };
-    };
-    Preferences = {
-      "toolkit.legacyUserProfileCustomizations.stylesheets" = {
-        Value = true;
-        Status = "locked";
-      };
-
-      "browser.theme.content-theme" = {
-        Value = 0;
-        Status = "locked";
-      };
-      "browser.theme.toolbar-theme" = {
-        Value = 0;
-        Status = "locked";
-      };
-
-      "browser.uidensity" = {
-        Value = 1;
-        Status = "locked";
-      };
-
-      "browser.display.use_document_fonts" = {
-        Value = 0;
-        Status = "default";
-      };
-
-      "extensions.webextensions.restrictedDomains" = {
-        Value = "";
-        Status = "locked";
-      };
-      "extensions.webextensions.remote" = {
-        Value = true;
-        Status = "locked";
-      };
-      # Show separate titlebar (0 = show title bar, 1 = replace with tab bar, 2 = platform default)
-      "browser.tabs.inTitlebar" = {
-        Value = 0;
-        Status = "locked";
-      };
-
-      "browser.toolbars.bookmarks.visibility" = {
-        Value = "never";
-        Status = "locked";
-      };
-
-      "gfx.webrender.all" = {
-        Value =
-          if config.system.hardware.nvidia.enable or false
-          then false
-          else true;
-        Status = "locked";
-      };
-      "media.hardware-video-decoding.enabled" = {
-        Value =
-          if config.system.hardware.nvidia.enable or false
-          then false
-          else true;
-        Status = "locked";
-      };
-      "media.ffmpeg.vaapi.enabled" = {
-        Value =
-          if config.system.hardware.nvidia.enable or false
-          then false
-          else true;
-        Status = "locked";
-      };
-      "layers.acceleration.disabled" = {
-        Value =
-          if config.system.hardware.nvidia.enable or false
-          then true
-          else false;
-        Status = "locked";
-      };
-      "browser.sessionstore.interval" = {
-        Value = 15000;
-        Status = "locked";
-      };
-      "network.http.max-persistent-connections-per-server" = {
-        Value = 10;
-        Status = "locked";
-      };
-      "browser.cache.disk.enable" = {
-        Value = false;
-        Status = "locked";
-      };
-      "browser.cache.memory.enable" = {
-        Value = true;
-        Status = "locked";
-      };
-      "browser.cache.memory.capacity" = {
-        Value = 1048576;
-        Status = "locked";
-      };
-      "browser.sessionhistory.max_entries" = {
-        Value = 50;
-        Status = "locked";
-      };
-      "network.prefetch-next" = {
-        Value = true;
-        Status = "locked";
-      };
-      "network.dns.disablePrefetch" = {
-        Value = false;
-        Status = "locked";
-      };
-      "network.predictor.enabled" = {
-        Value = true;
-        Status = "locked";
-      };
-      "browser.enabledE10S" = {
-        Value = false;
-        Status = "locked";
-      };
-      "browser.theme.dark-private-windows" = {
-        Value = false;
-        Status = "locked";
-      };
-      "dom.webcomponents.enabled" = {
-        Value = true;
-        Status = "locked";
-      };
-      "layout.css.shadow-parts.enabled" = {
-        Value = true;
-        Status = "locked";
-      };
-
-      "browser.ml.enable" = {
-        Value = false;
-        Status = "locked";
-      };
-      "browser.ml.chat.enabled" = {
-        Value = false;
-        Status = "locked";
-      };
-      "extensions.ml.enabled" = {
-        Value = false;
-        Status = "locked";
-      };
-      "browser.ml.linkPreview.enabled" = {
-        Value = false;
-        Status = "locked";
-      };
-      "browser.tabs.groups.smart.enabled" = {
-        Value = false;
-        Status = "locked";
-      };
-      "browser.tabs.groups.smart.userEnabled" = {
-        Value = false;
-        Status = "locked";
-      };
-      "privacy.resistfingerprinting" = {
-        Value = false;
-        Status = "locked";
       };
     };
   };

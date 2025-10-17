@@ -3,25 +3,9 @@
   system,
   nixpkgsConfig,
 }: let
-  # Create sources compatibility layer for overlays
-  # Map flake inputs to the old sources.* pattern
-  sources = {
-    Fast-Fonts = inputs.fast-fonts;
-    "Deepin-Dark-hyprcursor" = inputs.deepin-dark-hyprcursor;
-    "Deepin-Dark-xcursor" = inputs.deepin-dark-xcursor;
-    inherit (inputs) neovim-nightly-overlay;
-    inherit (inputs) obs-backgroundremoval;
-    inherit (inputs) obs-image-reaction;
-    inherit (inputs) obs-pipewire-audio-capture;
-    inherit (inputs) obs-vkcapture;
-  };
-
-  # Direct overlays import
-  overlays = import ./overlays sources;
-
-  # Direct pkgs with overlays
+  # Direct pkgs without overlays
   pkgs = import inputs.nixpkgs {
-    inherit system overlays;
+    inherit system;
     config = nixpkgsConfig;
   };
 
@@ -32,9 +16,9 @@
 
   # Host configs
   hostConfigs = {
-    y0usaf-desktop = import ../configs/hosts/y0usaf-desktop {inherit pkgs lib;};
-    y0usaf-laptop = import ../configs/hosts/y0usaf-laptop {inherit pkgs lib;};
-    y0usaf-server = import ../configs/hosts/y0usaf-server {inherit pkgs lib;};
+    y0usaf-desktop = import ../configs/hosts/y0usaf-desktop {inherit pkgs lib system inputs; flakeInputs = inputs;};
+    y0usaf-laptop = import ../configs/hosts/y0usaf-laptop {inherit pkgs lib system inputs; flakeInputs = inputs;};
+    y0usaf-server = import ../configs/hosts/y0usaf-server {inherit pkgs lib system inputs; flakeInputs = inputs;};
   };
 in {
   nixosConfigurations = lib.mapAttrs (_hostName: hostConfig:
@@ -52,7 +36,6 @@ in {
                 inherit (hostConfig) homeDirectory;
               };
               nixpkgs = {
-                inherit overlays;
                 config = nixpkgsConfig;
               };
             })
@@ -75,11 +58,9 @@ in {
           ../modules/user
         ];
         _module.args = {
-          inherit hostConfig lib genLib;
+          inherit hostConfig lib genLib system;
           # Pass inputs for modules that might need them
           flakeInputs = inputs;
-          # Legacy compatibility
-          inherit sources;
           inherit (inputs) disko;
         };
       };

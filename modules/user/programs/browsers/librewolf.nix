@@ -3,7 +3,27 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  inherit (lib) concatMapAttrsStringSep;
+  inherit (builtins) toJSON isBool isInt isString toString;
+
+  # Import preferences
+  prefs = import ./prefs.nix {inherit config lib;};
+
+  # Convert preference value to JSON
+  prefValue = pref:
+    toJSON (
+      if isBool pref || isInt pref || isString pref
+      then pref
+      else toString pref
+    );
+
+  # Convert attrs to JS pref calls
+  attrsToLines = f: attrs: concatMapAttrsStringSep "\n" f attrs;
+  lockedPrefs = attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") prefs.locked;
+  defaultPrefs = attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") prefs.default;
+  jsPrefs = lockedPrefs + "\n" + defaultPrefs;
+in {
   imports = [
     ./config.nix
     ./ui-chrome.nix
@@ -11,7 +31,8 @@
 
   config = lib.mkIf config.user.programs.librewolf.enable {
     environment.systemPackages = [
-      (pkgs.wrapFirefox pkgs.librewolf-unwrapped {
+      (pkgs.librewolf-bin.override {
+        extraPrefs = jsPrefs;
         extraPolicies =
           (import ./policies.nix {inherit config lib;}).browserPolicies
           // {

@@ -2,12 +2,14 @@
   config,
   pkgs,
   lib,
+  flakeInputs,
+  system,
   ...
 }: let
   username = config.user.name;
   hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
-  xcursorPackage = pkgs.deepin-dark-xcursor;
+  xcursorPackage = flakeInputs.deepin-dark-xcursor.packages.${system}.default;
   hyprcursorPackage = null;
 in {
   options.user.ui.cursor = {

@@ -2,6 +2,8 @@
   pkgs,
   lib,
   config,
+  flakeInputs,
+  system,
   ...
 }: {
   users.users.y0usaf = {
@@ -59,7 +61,7 @@
         fonts = {
           main = [
             {
-              package = pkgs.fastFonts;
+              package = flakeInputs.fast-fonts.packages.${system}.default;
               name = "Fast IosevkaSlab";
             }
           ];

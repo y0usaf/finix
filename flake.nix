@@ -20,44 +20,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    neovim-nightly-overlay = {
-      url = "github:nix-community/neovim-nightly-overlay";
+    fast-fonts = {
+      url = "github:y0usaf/Fast-Fonts";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    obs-backgroundremoval = {
-      url = "github:royshil/obs-backgroundremoval";
-      flake = false;
-    };
-
-    obs-image-reaction = {
-      url = "github:L-Nafaryus/obs-image-reaction";
-      flake = false;
-    };
-
-    obs-pipewire-audio-capture = {
-      url = "github:dimtpap/obs-pipewire-audio-capture";
-      flake = false;
-    };
-
-    obs-vkcapture = {
-      url = "github:nowrep/obs-vkcapture";
-      flake = false;
-    };
-
-    deepin-dark-hyprcursor = {
-      url = "github:y0usaf/Deepin-Dark-hyprcursor";
-      flake = false;
     };
 
     deepin-dark-xcursor = {
       url = "github:y0usaf/Deepin-Dark-xcursor";
-      flake = false;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    fast-fonts = {
-      url = "github:y0usaf/Fast-Fonts";
-      flake = false;
+    expedition-33-mods = {
+      url = "github:y0usaf/Expedition-33-Mods";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     zjstatus = {

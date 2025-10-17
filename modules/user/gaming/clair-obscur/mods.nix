@@ -1,24 +1,23 @@
 {
   config,
-  pkgs,
   lib,
+  flakeInputs,
+  system,
   ...
 }: let
-  sources = import ./npins;
-
-  expedition33Mods = pkgs.callPackage sources.Expedition-33-Mods {};
+  modsFlake = flakeInputs.expedition-33-mods.packages.${system};
 
   availableMods = {
     enhanced-descriptions = {
-      package = expedition33Mods.enhanced-descriptions;
+      package = modsFlake.enhanced-descriptions;
       description = "Enhanced Descriptions with percentages";
     };
     gustave-weapon-skills = {
-      package = expedition33Mods.gustave-weapon-skills;
+      package = modsFlake.gustave-weapon-skills;
       description = "Gustave Weapon Skills mod";
     };
     gustave-weapon-skill-rework = {
-      package = expedition33Mods.gustave-weapon-skill-rework;
+      package = modsFlake.gustave-weapon-skill-rework;
       description = "Gustave Weapon Skill Rework mod";
     };
   };
@@ -54,7 +53,7 @@ in {
       (lib.optionalAttrs config.user.gaming.clair-obscur.mods.installAll {
         "install-all-clair-obscur-mods" = {
           clobber = true;
-          source = "${expedition33Mods.all-mods}/bin/install-all-mods";
+          source = "${modsFlake.all-mods}/bin/install-all-mods";
           executable = true;
         };
       })

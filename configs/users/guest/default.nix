@@ -1,6 +1,8 @@
 {
   pkgs,
   lib,
+  flakeInputs,
+  system,
   ...
 }: {
   # Direct NixOS user configuration
@@ -32,7 +34,7 @@
         fonts = {
           main = [
             {
-              package = pkgs.fastFonts;
+              package = flakeInputs.fast-fonts.packages.${system}.default;
               name = "Fast IosevkaSlab";
             }
           ];
