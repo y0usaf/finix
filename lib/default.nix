@@ -31,29 +31,6 @@
   };
 in {
   nixosConfigurations = lib.mapAttrs (_hostName: hostConfig:
-    let
-      # Overlay to add custom packages
-      customOverlay = final: prev: {
-        obs-image-reaction = (inputs.obs-image-reaction.outputs.packages.${system}.default).overrideAttrs (attrs: {
-          postInstall = ''
-            mkdir -p $out/lib/obs-plugins
-            mkdir -p $out/share/obs/obs-plugins/obs-image-reaction
-
-            # Copy plugin
-            cp libimage-reaction.so $out/lib/obs-plugins/
-
-            # Copy data files
-            cp -r ../data $out/share/obs/obs-plugins/obs-image-reaction/
-          '';
-        });
-      };
-
-      pkgsWithOverlay = import inputs.nixpkgs {
-        inherit system;
-        config = nixpkgsConfig;
-        overlays = [ customOverlay ];
-      };
-    in
     import (inputs.nixpkgs + "/nixos") {
       inherit system;
       configuration = {
@@ -69,7 +46,6 @@ in {
               };
               nixpkgs = {
                 config = nixpkgsConfig;
-                overlays = [ customOverlay ];
               };
             })
           # Disko
