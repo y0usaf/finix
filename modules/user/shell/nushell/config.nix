@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (config.user) name homeDirectory tokensDirectory nixosConfigDirectory;
-  aliasesData = import ./aliases.nix { };
+  aliasesData = import ./aliases.nix {};
 in {
   options.user.shell.nushell = {
     enable = lib.mkEnableOption "nushell shell configuration";
@@ -81,8 +81,8 @@ in {
             def lintfix [] { clear; statix fix .; deadnix . }
             def pkgs [...args] { nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i ...$args }
             def pkgcount [] { nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l }
-            def spotm4a [] { ^uvx spotdl --format m4a --output '{title}' }
-            def spotmp3 [] { ^uvx spotdl --format mp3 --output '{title}' }
+            def spotm4a [...args] { ^uvx spotdl --format m4a --output '{title}' ...$args }
+            def spotmp3 [...args] { ^uvx spotdl --format mp3 --output '{title}' ...$args }
             def ytm4a [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s' }
             def ytmp3 [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s' }
             def ytmp4 [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -vf scale=-2:720' -o '%(title)s.%(ext)s' }
