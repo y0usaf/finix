@@ -8,7 +8,7 @@
 }: {
   users.users.y0usaf = {
     isNormalUser = true;
-    shell = pkgs.zsh;
+    shell = pkgs.nushell;
     extraGroups = ["wheel" "networkmanager" "video" "audio" "input" "gamemode" "dialout" "bluetooth" "lp" "docker"];
     home = "/home/y0usaf";
     ignoreShellProgramCheck = true;
@@ -165,7 +165,7 @@
     };
     shell = {
       zsh.enable = true;
-      aliases.enable = true;
+      nushell.enable = true;
       cat-fetch.enable = true;
       zellij = {
         enable = true;
@@ -185,17 +185,9 @@
           remoteBranch = "main";
         };
       };
-      jj = {
-        enable = true;
-        name = "y0usaf";
-        email = "OA99@Outlook.com";
-      };
       nh = {
         enable = true;
         flake = "/home/y0usaf/nixos";
-      };
-      npins-build = {
-        enable = true;
       };
       "7z".enable = true;
       file-roller.enable = true;
