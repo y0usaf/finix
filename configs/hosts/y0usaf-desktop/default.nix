@@ -4,7 +4,6 @@
 # - Storage: 2× 3.6TB NVMe
 # - GPU: RTX 4090 + Raphael iGPU
 {
-  pkgs,
   lib,
   flakeInputs,
   system,
