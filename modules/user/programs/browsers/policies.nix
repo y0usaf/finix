@@ -1,4 +1,4 @@
-{config, ...}: {
+{...}: {
   browserPolicies = {
     DisableTelemetry = true;
     DisablePocket = true;

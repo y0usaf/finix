@@ -4,15 +4,17 @@
   lib,
   ...
 }: let
-  inherit (config.user) name homeDirectory tokensDirectory;
+  inherit (config.user) name homeDirectory tokensDirectory nixosConfigDirectory;
   zshConfig = {
     cat-fetch = true;
     history-memory = 10000;
     history-storage = 10000;
-    enableFancyPrompt = true;
     zellij = {
       enable = false;
     };
+  };
+  aliasesData = import ./aliases.nix {
+    inherit nixosConfigDirectory;
   };
 in {
   options.user.shell.zsh = {
@@ -31,6 +33,12 @@ in {
 
     hjem.users.${name} = {
       files = {
+        ".config/zsh/aliases.zsh" = {
+          text = lib.concatStringsSep "\n" (
+            lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") aliasesData
+          );
+          clobber = true;
+        };
         ".config/zsh/.zshenv" = {
           text = let
             tokenFunctionScript = ''
@@ -99,12 +107,8 @@ in {
             export BROWSER="${config.user.core.defaults.browser}"
             export EDITOR="${config.user.core.defaults.editor}"
 
-
-            if [[ -d "''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases" ]]; then
-              for alias_file in ''${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/aliases/*; do
-                [[ -f "$alias_file" ]] && source "$alias_file"
-              done
-            fi
+            # Load aliases
+            source "$ZDOTDIR/aliases.zsh"
 
             HISTSIZE=${toString zshConfig.history-memory}
             SAVEHIST=${toString zshConfig.history-storage}
@@ -115,9 +119,7 @@ in {
             setopt HIST_EXPIRE_DUPS_FIRST
             setopt SHARE_HISTORY
             setopt EXTENDED_HISTORY
-            ${lib.optionalString zshConfig.enableFancyPrompt ''
-              PS1='%F{blue}%~ %(?.%F{green}.%F{red})%#%f '
-            ''}
+            PS1='%F{blue}%~%(?.%F{green}.%F{red})> %f'
             zstyle ':completion:*' menu select
             zstyle ':completion:*' matcher-list \
                 'm:{a-zA-Z}={A-Za-z}' \
