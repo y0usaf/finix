@@ -71,28 +71,28 @@ in {
           text = ''
             source aliases.nu
 
-            def adb [] { HOME="$XDG_DATA_HOME/android" ^adb }
-            def wget [] { ^wget --hsts-file="$XDG_DATA_HOME/wget-hsts" }
-            def nvidia-settings [] { ^nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings" }
-            def mocp [] { ^mocp -M "$XDG_CONFIG_HOME/moc" -O MOCDir="$XDG_CONFIG_HOME/moc" }
-            def yarn [] { ^yarn --use-yarnrc "$XDG_CONFIG_HOME/yarn/config" }
-            def svn [] { ^svn --config-dir "$XDG_CONFIG_HOME/subversion" }
+            def adb [...args] { HOME="$XDG_DATA_HOME/android" ^adb ...$args }
+            def wget [...args] { ^wget --hsts-file="$XDG_DATA_HOME/wget-hsts" ...$args }
+            def nvidia-settings [...args] { ^nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings" ...$args }
+            def mocp [...args] { ^mocp -M "$XDG_CONFIG_HOME/moc" -O MOCDir="$XDG_CONFIG_HOME/moc" ...$args }
+            def yarn [...args] { ^yarn --use-yarnrc "$XDG_CONFIG_HOME/yarn/config" ...$args }
+            def svn [...args] { ^svn --config-dir "$XDG_CONFIG_HOME/subversion" ...$args }
             def lintcheck [] { clear; statix check .; deadnix . }
             def lintfix [] { clear; statix fix .; deadnix . }
             def pkgs [...args] { nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i ...$args }
             def pkgcount [] { nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l }
             def spotm4a [...args] { ^uvx spotdl --format m4a --output '{title}' ...$args }
             def spotmp3 [...args] { ^uvx spotdl --format mp3 --output '{title}' ...$args }
-            def ytm4a [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s' }
-            def ytmp3 [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s' }
-            def ytmp4 [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -vf scale=-2:720' -o '%(title)s.%(ext)s' }
-            def ytmp4s [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=480]+ba/b[height<=480]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 26 -preset faster -c:a aac -b:a 96k -vf scale=-2:480' -o '%(title)s.%(ext)s' }
-            def ytwebm [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video webm --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libvpx-vp9 -crf 30 -b:v 0 -c:a libopus -vf scale=-2:720' -o '%(title)s.%(ext)s' }
-            def ytdiscord [] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 28 -preset faster -c:a aac -b:a 96k -vf scale=-2:min(720,ih) -fs 7.8M' -o '%(title)s_discord.%(ext)s' }
-            def py [] { ^python3 }
-            def pip [] { ^pip3 }
-            def venv [] { ^python3 -m venv }
-            def cat [] { bat }
+            def ytm4a [...args] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s' ...$args }
+            def ytmp3 [...args] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s' ...$args }
+            def ytmp4 [...args] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -vf scale=-2:720' -o '%(title)s.%(ext)s' ...$args }
+            def ytmp4s [...args] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=480]+ba/b[height<=480]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 26 -preset faster -c:a aac -b:a 96k -vf scale=-2:480' -o '%(title)s.%(ext)s' ...$args }
+            def ytwebm [...args] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video webm --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libvpx-vp9 -crf 30 -b:v 0 -c:a libopus -vf scale=-2:720' -o '%(title)s.%(ext)s' ...$args }
+            def ytdiscord [...args] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 28 -preset faster -c:a aac -b:a 96k -vf scale=-2:min(720,ih) -fs 7.8M' -o '%(title)s_discord.%(ext)s' ...$args }
+            def py [...args] { ^python3 ...$args }
+            def pip [...args] { ^pip3 ...$args }
+            def venv [...args] { ^python3 -m venv ...$args }
+            def cat [...args] { bat ...$args }
             def ide [] { zellij --layout ${homeDirectory}/.config/zellij/layouts/ide.kdl }
             def temppkg [package_name] {
               if ($package_name == "") {
