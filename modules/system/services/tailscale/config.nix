@@ -3,8 +3,6 @@
   lib,
   ...
 }: {
-  options.services.tailscale.enableVPN = lib.mkEnableOption "Enable Tailscale VPN mesh network";
-
   config = lib.mkIf config.services.tailscale.enableVPN {
     services.tailscale = {
       enable = true;
