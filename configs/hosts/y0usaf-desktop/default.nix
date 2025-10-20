@@ -49,6 +49,7 @@
     waydroid.enable = false;
     controllers.enable = true;
     tailscale.enableVPN = true;
+    nginx-reverse-proxy = true;
     tftpd = {
       enable = true;
       path = "/srv/tftp";

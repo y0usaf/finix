@@ -30,11 +30,12 @@
     # No display outputs config for laptop (uses built-in screen)
   };
 
-  # Services (same as desktop but no PXE/nginx stuff)
+  # Services
   services = {
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = true;
-    # No tftpd/nginx - desktop-specific
+    tailscale.enableVPN = true;
+    nginx-reverse-proxy = true;
   };
 }

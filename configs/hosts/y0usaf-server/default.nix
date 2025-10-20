@@ -37,6 +37,7 @@
     forgejo.enable = true;
     openssh.enable = lib.mkForce true;
     tailscale.enableVPN = true;
+    nginx-reverse-proxy = true;
   };
 
   networking.firewall = {
