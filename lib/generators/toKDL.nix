@@ -1,5 +1,5 @@
 {lib}: {
-  toKDL = _: let
+  toKDL = {}: let
     inherit
       (lib)
       concatStringsSep
@@ -15,15 +15,12 @@
       # to normalize the list by joining and resplitting them.
       unlines = lib.splitString "\n";
       lines = lib.concatStringsSep "\n";
-      indentAll = lines: concatStringsSep "\n" (map (x: "\t" + x) lines);
+      indentAll = lines: concatStringsSep "\n" (map (x: "	" + x) lines);
     in
       stringsWithNewlines: indentAll (unlines (lines stringsWithNewlines));
 
     # String -> String
-    sanitizeString = str:
-    # Only escape newlines and quotes for KDL
-    # Dollar signs don't need escaping in KDL strings
-      replaceStrings ["\n" ''"''] ["\\n" ''\\"''] str;
+    sanitizeString = replaceStrings ["\n" ''"''] ["\\n" ''\"''];
 
     # OneOf [Int Float String Bool Null] -> String
     literalValueToString = element:
@@ -39,9 +36,9 @@
       (
         if typeOf element == "null"
         then "null"
-        else if typeOf element == "bool" && !element
+        else if element == false
         then "false"
-        else if typeOf element == "bool" && element
+        else if element == true
         then "true"
         else if typeOf element == "string"
         then ''"${sanitizeString element}"''
@@ -72,15 +69,10 @@
         (mapAttrsToList convertAttributeToKDL)
       ];
       children = orderedChildren ++ unorderedChildren;
-      optChildren =
-        if children != []
-        then [
-          ''
-            {
-            ${indentStrings children}
-            }''
-        ]
-        else ["{}"];
+      optChildren = lib.optional (children != []) ''
+        {
+        ${indentStrings children}
+        }'';
     in
       lib.concatStringsSep " " ([name] ++ optArgs ++ optProps ++ optChildren);
 
