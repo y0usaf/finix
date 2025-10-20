@@ -67,7 +67,6 @@
     };
     shell = {
       zsh.enable = true;
-      aliases.enable = true;
       zellij = {
         enable = true;
         autoStart = false;
