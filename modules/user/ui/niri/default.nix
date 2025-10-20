@@ -1,9 +1,4 @@
 {
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
   imports = [
     ./options.nix
     ./config.nix
@@ -14,10 +9,4 @@
     ./environment.nix
     ./portals.nix
   ];
-
-  config = lib.mkIf config.user.ui.niri.enable {
-    environment.systemPackages = [
-      pkgs.xwayland-satellite
-    ];
-  };
 }
