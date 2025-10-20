@@ -38,4 +38,13 @@
     tailscale.enableVPN = true;
     nginx-reverse-proxy = true;
   };
+
+  services.nginx = {
+    virtualHosts."syncthing-laptop" = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8384";
+        proxyWebsockets = true;
+      };
+    };
+  };
 }
