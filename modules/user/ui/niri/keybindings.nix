@@ -1,12 +1,13 @@
 {
   config,
   lib,
+  genLib,
   ...
 }: let
   inherit (config.user.core) defaults;
 in {
   config = lib.mkIf config.user.ui.niri.enable {
-    user.ui.niri.settings.binds = {
+    usr.files.".config/niri/config.kdl".value.binds = {
       # System & Help
       "Mod+Shift+Slash" = {show-hotkey-overlay = {};};
       "Mod+Shift+E" = {quit = {};};
