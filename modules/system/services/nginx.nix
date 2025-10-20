@@ -30,19 +30,20 @@
       };
     };
 
-    # Generate self-signed certificate on first boot
+    # Generate self-signed certificate and ensure proper permissions
     systemd.services.nginx-selfsigned-cert = {
-      description = "Generate self-signed certificate for Nginx";
+      description = "Generate and fix permissions for Nginx self-signed certificate";
       before = ["nginx.service"];
       wantedBy = ["multi-user.target"];
       script = ''
         mkdir -p /var/lib/nginx
         if [ ! -f /var/lib/nginx/forgejo.key ]; then
           ${pkgs.openssl}/bin/openssl req -x509 -newkey rsa:2048 -keyout /var/lib/nginx/forgejo.key -out /var/lib/nginx/forgejo.crt -days 365 -nodes -subj "/CN=forgejo"
-          chmod 644 /var/lib/nginx/forgejo.key
-          chmod 644 /var/lib/nginx/forgejo.crt
-          chown nginx:nginx /var/lib/nginx/forgejo.key /var/lib/nginx/forgejo.crt
         fi
+        # Always ensure correct permissions so nginx can read the key
+        chmod 644 /var/lib/nginx/forgejo.key
+        chmod 644 /var/lib/nginx/forgejo.crt
+        chown nginx:nginx /var/lib/nginx/forgejo.key /var/lib/nginx/forgejo.crt
       '';
       serviceConfig.Type = "oneshot";
       serviceConfig.RemainAfterExit = true;
