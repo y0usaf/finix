@@ -37,7 +37,6 @@
     forgejo.enable = true;
     openssh.enable = lib.mkForce true;
     tailscale.enableVPN = true;
-    nginx-reverse-proxy = true;
   };
 
   networking.firewall = {
@@ -47,6 +46,7 @@
   };
 
   services.nginx = {
+    enable = true;
     virtualHosts."syncthing-server" = {
       locations."/" = {
         proxyPass = "http://127.0.0.1:8384";
