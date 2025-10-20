@@ -42,7 +42,7 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [22 80 443 2222 3000 22000]; # SSH, HTTP, HTTPS, Forgejo SSH, Forgejo HTTP, and Syncthing
+    allowedTCPPorts = [22 80 443 2222 3000 22000]; # SSH, HTTP, HTTPS, Forgejo SSH, Forgejo HTTP, Syncthing
     allowedUDPPorts = [22000 21027]; # Syncthing sync and discovery
   };
 }
