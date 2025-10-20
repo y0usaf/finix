@@ -32,30 +32,30 @@
       dataDir = config.user.homeDirectory;
       configDir = "${config.user.homeDirectory}/.config/syncthing";
 
-      settings = let
-        serverBackupFolders = lib.optionalAttrs (config.hostname == "y0usaf-server") {
-          music = {
-            id = "oty33-aq3dt";
-            label = "Music";
-            path = "${config.user.homeDirectory}/Music";
-            devices = ["desktop" "server" "phone"];
-          };
-          dcim = {
-            id = "ti9yk-zu3xs";
-            label = "DCIM";
-            path = "${config.user.homeDirectory}/DCIM";
-            devices = ["desktop" "server" "phone"];
-          };
-          pictures = {
-            id = "zbxzv-35v4e";
-            label = "Pictures";
-            path = "${config.user.homeDirectory}/Pictures";
-            devices = ["desktop" "server" "phone"];
-          };
-        };
-      in {
+      settings = {
         inherit (config.user.services.syncthing) devices;
-        folders = serverBackupFolders // config.user.services.syncthing.folders;
+        folders =
+          lib.optionalAttrs (config.hostname == "y0usaf-server") {
+            music = {
+              id = "oty33-aq3dt";
+              label = "Music";
+              path = "${config.user.homeDirectory}/Music";
+              devices = ["desktop" "server" "phone"];
+            };
+            dcim = {
+              id = "ti9yk-zu3xs";
+              label = "DCIM";
+              path = "${config.user.homeDirectory}/DCIM";
+              devices = ["desktop" "server" "phone"];
+            };
+            pictures = {
+              id = "zbxzv-35v4e";
+              label = "Pictures";
+              path = "${config.user.homeDirectory}/Pictures";
+              devices = ["desktop" "server" "phone"];
+            };
+          }
+          // config.user.services.syncthing.folders;
       };
     };
   };

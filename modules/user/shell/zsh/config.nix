@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  inherit (config.user) name homeDirectory tokensDirectory nixosConfigDirectory;
+  inherit (config.user) name tokensDirectory nixosConfigDirectory;
   aliasesData = import ./aliases.nix {
     inherit nixosConfigDirectory;
   };
@@ -80,20 +80,6 @@ in {
             tokenFunctionScript;
           clobber = true;
         };
-        ".config/zsh/.zprofile" = {
-          text = ''
-            if [[ $- == *i* ]]; then
-              case "$(hostname)" in
-                "${config.user.name}-desktop")
-                  sudo nvidia-smi -pl 150
-                  ;;
-                "${config.user.name}-laptop")
-                  ;;
-              esac
-            fi
-          '';
-          clobber = true;
-        };
         ".config/zsh/.zshrc" = {
           text = lib.concatStringsSep "\n" [
             # Environment variables
@@ -116,6 +102,16 @@ in {
             functionsData.temprun
             functionsData.fanspeed
           ];
+          clobber = true;
+        };
+      }
+      // lib.optionalAttrs (config.networking.hostName == "y0usaf-desktop") {
+        ".config/zsh/.zprofile" = {
+          text = ''
+            if [[ $- == *i* ]]; then
+              sudo nvidia-smi -pl 150
+            fi
+          '';
           clobber = true;
         };
       };
