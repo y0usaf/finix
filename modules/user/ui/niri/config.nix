@@ -33,7 +33,6 @@
 
     environment.systemPackages = [
       pkgs.niri
-      pkgs.xwayland-satellite
       pkgs.grim
       pkgs.slurp
       pkgs.wl-clipboard
