@@ -39,8 +39,9 @@
         mkdir -p /var/lib/nginx
         if [ ! -f /var/lib/nginx/forgejo.key ]; then
           ${pkgs.openssl}/bin/openssl req -x509 -newkey rsa:2048 -keyout /var/lib/nginx/forgejo.key -out /var/lib/nginx/forgejo.crt -days 365 -nodes -subj "/CN=forgejo"
-          chmod 600 /var/lib/nginx/forgejo.key
+          chmod 644 /var/lib/nginx/forgejo.key
           chmod 644 /var/lib/nginx/forgejo.crt
+          chown nginx:nginx /var/lib/nginx/forgejo.key /var/lib/nginx/forgejo.crt
         fi
       '';
       serviceConfig.Type = "oneshot";
