@@ -79,8 +79,8 @@ in {
             def svn [...args] { ^svn --config-dir "$XDG_CONFIG_HOME/subversion" ...$args }
             def lintcheck [] { clear; statix check .; deadnix . }
             def lintfix [] { clear; statix fix .; deadnix . }
-            def pkgs [...args] { nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | grep -i ...$args }
-            def pkgcount [] { nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l }
+            def pkgs [...args] { nix-store --query --requisites /run/current-system | cut -d- -f2- | lines | sort | uniq | grep -i ...$args }
+            def pkgcount [] { nix-store --query --requisites /run/current-system | cut -d- -f2- | lines | sort | uniq | wc -l }
             def spotm4a [...args] { ^uvx spotdl --format m4a --output '{title}' ...$args }
             def spotmp3 [...args] { ^uvx spotdl --format mp3 --output '{title}' ...$args }
             def ytm4a [...args] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s' ...$args }
