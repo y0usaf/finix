@@ -15,15 +15,9 @@
       recommendedTlsSettings = true;
 
       virtualHosts."forgejo" = {
+        addSSL = true;
         forceSSL = false;
         enableACME = false;
-        onlySSL = false;
-        listen = [
-          { addr = "0.0.0.0"; port = 80; }
-          { addr = "0.0.0.0"; port = 443; ssl = true; }
-          { addr = "[::]"; port = 80; }
-          { addr = "[::]"; port = 443; ssl = true; }
-        ];
 
         # Self-signed certificate for private Tailscale network
         sslCertificate = "/var/lib/nginx/forgejo.crt";
