@@ -1,9 +1,7 @@
-{config}: let
-  inherit (config.user) name;
-in {
+{config}: {
   fanspeed = ''
     ${
-      if config.user.name == "y0usaf" && "$(hostname)" == "${name}-laptop"
+      if config.user.name == "y0usaf" && "$(hostname)" == "${config.user.name}-laptop"
       then ''
         fanspeed() {
             if [ -z "$1" ]; then

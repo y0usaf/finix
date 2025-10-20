@@ -5,17 +5,11 @@
   ...
 }: let
   inherit (config.user) name homeDirectory tokensDirectory nixosConfigDirectory;
-  zshConfig = {
-    cat-fetch = true;
-    history-memory = 10000;
-    history-storage = 10000;
-    zellij = {
-      enable = false;
-    };
-  };
   aliasesData = import ./aliases.nix {
     inherit nixosConfigDirectory;
   };
+  functionsData = import ./functions.nix {inherit config;};
+  settingsData = import ./settings.nix {inherit config;};
 in {
   options.user.shell.zsh = {
     enable = lib.mkEnableOption "zsh shell configuration";
@@ -101,58 +95,27 @@ in {
           clobber = true;
         };
         ".config/zsh/.zshrc" = {
-          text = ''
-
-            export TERMINAL="${config.user.core.defaults.terminal}"
-            export BROWSER="${config.user.core.defaults.browser}"
-            export EDITOR="${config.user.core.defaults.editor}"
+          text = lib.concatStringsSep "\n" [
+            # Environment variables
+            settingsData.environment
 
             # Load aliases
-            source "$ZDOTDIR/aliases.zsh"
+            "source \"$ZDOTDIR/aliases.zsh\""
 
-            HISTSIZE=${toString zshConfig.history-memory}
-            SAVEHIST=${toString zshConfig.history-storage}
-             HISTFILE="${homeDirectory}/.local/state/zsh/history"
-            setopt HIST_IGNORE_DUPS
-            setopt HIST_IGNORE_ALL_DUPS
-            setopt HIST_IGNORE_SPACE
-            setopt HIST_EXPIRE_DUPS_FIRST
-            setopt SHARE_HISTORY
-            setopt EXTENDED_HISTORY
-            PS1='%F{blue}%~%(?.%F{green}.%F{red})> %f'
-            zstyle ':completion:*' menu select
-            zstyle ':completion:*' matcher-list \
-                'm:{a-zA-Z}={A-Za-z}' \
-                'r:|[._-]=* r:|=*' \
-                'l:|=* r:|=*'
-            if [ "$(hostname)" = "${config.user.name}-laptop" ]; then
-                fanspeed() {
-                    if [ -z "$1" ]; then
-                        echo "Usage: fanspeed <percentage>"
-                        return 1
-                    fi
-                    local speed="$1"
-                    asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f gpu
-                    asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
-                }
-            fi
-            temppkg() {
-                if [ -z "$1" ]; then
-                    echo "Usage: temppkg package_name"
-                    return 1
-                fi
-                nix-shell -p "$1" --run "exec $SHELL"
-            }
-            temprun() {
-                if [ -z "$1" ]; then
-                    echo "Usage: temprun package_name [args...]"
-                    return 1
-                fi
-                local pkg="$1"
-                shift
-                nix run "nixpkgs#$pkg" -- "$@"
-            }
-          '';
+            # History settings
+            settingsData.history
+
+            # Completion settings
+            settingsData.completion
+
+            # Prompt
+            settingsData.prompt
+
+            # Functions
+            functionsData.temppkg
+            functionsData.temprun
+            functionsData.fanspeed
+          ];
           clobber = true;
         };
       };

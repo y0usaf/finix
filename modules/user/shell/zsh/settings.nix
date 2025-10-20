@@ -1,10 +1,8 @@
-{config}: let
-  inherit (config.user) homeDirectory;
-in {
+{config}: {
   history = ''
     HISTSIZE=10000
     SAVEHIST=10000
-    HISTFILE="${homeDirectory}/.local/state/zsh/history"
+    HISTFILE="${config.user.homeDirectory}/.local/state/zsh/history"
     setopt HIST_IGNORE_DUPS
     setopt HIST_IGNORE_ALL_DUPS
     setopt HIST_IGNORE_SPACE
