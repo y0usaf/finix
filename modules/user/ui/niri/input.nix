@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    user.ui.niri.settings.input = {
+    usr.files.".config/niri/config.kdl".value.input = {
       keyboard = {
         xkb = {
           layout = "us";
