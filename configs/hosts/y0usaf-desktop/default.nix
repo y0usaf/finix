@@ -66,6 +66,12 @@
         root = "/srv/tftp";
         locations."/".extraConfig = "autoindex on;";
       };
+      virtualHosts."syncthing-desktop" = {
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:8384";
+          proxyWebsockets = true;
+        };
+      };
     };
   };
 }
