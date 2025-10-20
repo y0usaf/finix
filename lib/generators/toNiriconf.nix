@@ -1,97 +1,61 @@
 lib: let
-  inherit
-    (builtins)
-    isList
-    hasAttr
-    ;
+  inherit (builtins) isList hasAttr;
   inherit (lib.attrsets) mapAttrsToList;
-  inherit
-    (lib.strings)
-    concatStringsSep
-    concatMapStringsSep
-    ;
+  inherit (lib.strings) concatStringsSep concatMapStringsSep;
 
   # Convert Nix attributes to KDL format specifically for niri
   toNiriconf = attrs: let
-    # Handle special output nodes that need string arguments
+    kdlGenerator = import ./toKDL.nix {inherit lib;};
+
+    # Format output nodes: output "name" { ... }
+    formatOutput = name: config: let
+      position =
+        if hasAttr "position" config
+        then "\tposition x=${toString config.position.x} y=${toString config.position.y}"
+        else "";
+      mode =
+        if hasAttr "mode" config
+        then "\tmode \"${toString config.mode}\""
+        else "";
+      otherConfig = lib.filterAttrs (k: _: k != "position" && k != "mode") config;
+      otherLines = mapAttrsToList (key: value: "\t${key} \"${toString value}\"") otherConfig;
+      content = lib.filter (s: s != "") ([position mode] ++ otherLines);
+    in ''      output "${name}" {
+              ${concatStringsSep "\n" content}
+              }'';
+
     outputNodes =
       if hasAttr "output" attrs
-      then
-        concatStringsSep "\n" (mapAttrsToList (
-            name: config:
-              ''output "${name}" {''
-              + "\n"
-              + concatStringsSep "\n" (mapAttrsToList (
-                  key: value:
-                    if key == "position"
-                    then "\tposition x=${toString value.x} y=${toString value.y}"
-                    else "\t${key} \"${toString value}\""
-                )
-                config)
-              + "\n}"
-          )
-          attrs.output)
+      then concatStringsSep "\n" (mapAttrsToList formatOutput attrs.output)
       else "";
 
-    # Handle spawn-at-startup specially - convert list of commands to KDL format
+    # Format spawn-at-startup: spawn-at-startup "arg1" "arg2" ...
+    formatSpawnCmd = cmd:
+      "spawn-at-startup "
+      + concatMapStringsSep " " (arg: "\"${toString arg}\"") (
+        if isList cmd
+        then cmd
+        else [cmd]
+      );
+
     spawnAtStartupNodes =
       if hasAttr "spawn-at-startup" attrs
-      then let
-        commands = attrs.spawn-at-startup;
-        formatCommand = cmd:
-          if isList cmd
-          then concatMapStringsSep " " (arg: "\"${toString arg}\"") cmd
-          else "\"${toString cmd}\"";
-      in
-        concatStringsSep "\n" (map (cmd: "spawn-at-startup " + formatCommand cmd) commands)
+      then concatStringsSep "\n" (map formatSpawnCmd attrs.spawn-at-startup)
       else "";
 
-    # Extract extraConfig if present
+    # Main config without special attrs
+    specialAttrs = ["output" "spawn-at-startup" "_extraConfig"];
+    mainAttrs = lib.filterAttrs (k: _: !lib.elem k specialAttrs) attrs;
+    mainConfig = kdlGenerator.toKDL {} mainAttrs;
+
+    # Extra config appended as-is
     extraConfig =
       if hasAttr "_extraConfig" attrs
       then attrs._extraConfig
       else "";
-
-    # Remove special handled attrs from main config
-    mainAttrs = builtins.removeAttrs attrs (
-      (
-        if hasAttr "output" attrs
-        then ["output"]
-        else []
-      )
-      ++ (
-        if hasAttr "spawn-at-startup" attrs
-        then ["spawn-at-startup"]
-        else []
-      )
-      ++ (
-        if hasAttr "_extraConfig" attrs
-        then ["_extraConfig"]
-        else []
-      )
-    );
-
-    # Import the KDL generator directly
-    kdlGenerator = import ./toKDL.nix {inherit lib;};
-
-    # Generate main config using KDL generator
-    mainConfig = kdlGenerator.toKDL {} mainAttrs;
   in
-    mainConfig
-    + (
-      if outputNodes != ""
-      then "\n\n" + outputNodes
-      else ""
-    )
-    + (
-      if spawnAtStartupNodes != ""
-      then "\n\n" + spawnAtStartupNodes
-      else ""
-    )
-    + (
-      if extraConfig != ""
-      then "\n\n" + extraConfig
-      else ""
+    lib.concatStringsSep "\n\n" (
+      lib.filter (s: s != "") [mainConfig outputNodes spawnAtStartupNodes extraConfig]
     );
 in {
   inherit toNiriconf;
