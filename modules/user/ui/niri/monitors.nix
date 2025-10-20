@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    user.ui.niri.settings.output = {
+    usr.files.".config/niri/config.kdl".value.output = {
       "DP-4" = {
         mode = "5120x1440@239.761";
         position = {

@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    user.ui.niri.settings.layout = {
+    usr.files.".config/niri/config.kdl".value.layout = {
       gaps = 10;
       center-focused-column = "never";
       default-column-display = "tabbed";
