@@ -7,6 +7,7 @@ _: {
     ./n8n.nix
     ./nginx.nix
     ./scx.nix
+    ./syncthing-proxy.nix
     ./tailscale
   ];
 }
