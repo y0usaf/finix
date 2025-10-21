@@ -28,35 +28,47 @@ in {
       ];
 
     hjem.users.${username} = {
-      files = {
-        ".config/zsh/.zprofile" = {
-          text = lib.mkAfter (''
-              export XCURSOR_THEME="${x11ThemeName}"
-              export XCURSOR_SIZE="${toString config.user.core.appearance.cursorSize}"
-            ''
-            + lib.optionalString (hyprcursorPackage != null) ''
-              export HYPRCURSOR_THEME="${hyprThemeName}"
-              export HYPRCURSOR_SIZE="${toString config.user.core.appearance.cursorSize}"
-            '');
-          clobber = true;
+      files =
+        {
+          ".config/gtk-3.0/settings.ini" = {
+            text = lib.mkAfter ''
+              [Settings]
+              gtk-cursor-theme-name=${x11ThemeName}
+              gtk-cursor-theme-size=${toString config.user.core.appearance.cursorSize}
+            '';
+            clobber = true;
+          };
+          ".config/gtk-4.0/settings.ini" = {
+            text = lib.mkAfter ''
+              [Settings]
+              gtk-cursor-theme-name=${x11ThemeName}
+              gtk-cursor-theme-size=${toString config.user.core.appearance.cursorSize}
+            '';
+            clobber = true;
+          };
+        }
+        // lib.optionalAttrs config.user.shell.zsh.enable {
+          ".config/zsh/.zprofile" = {
+            text = lib.mkAfter (''
+                export XCURSOR_THEME="${x11ThemeName}"
+                export XCURSOR_SIZE="${toString config.user.core.appearance.cursorSize}"
+              ''
+              + lib.optionalString (hyprcursorPackage != null) ''
+                export HYPRCURSOR_THEME="${hyprThemeName}"
+                export HYPRCURSOR_SIZE="${toString config.user.core.appearance.cursorSize}"
+              '');
+            clobber = true;
+          };
+        }
+        // lib.optionalAttrs config.user.shell.nushell.enable {
+          ".config/nushell/env.nu" = {
+            text = lib.mkAfter ''
+              $env.XCURSOR_THEME = "${x11ThemeName}"
+              $env.XCURSOR_SIZE = "${toString config.user.core.appearance.cursorSize}"
+            '';
+            clobber = true;
+          };
         };
-        ".config/gtk-3.0/settings.ini" = {
-          text = lib.mkAfter ''
-            [Settings]
-            gtk-cursor-theme-name=${x11ThemeName}
-            gtk-cursor-theme-size=${toString config.user.core.appearance.cursorSize}
-          '';
-          clobber = true;
-        };
-        ".config/gtk-4.0/settings.ini" = {
-          text = lib.mkAfter ''
-            [Settings]
-            gtk-cursor-theme-name=${x11ThemeName}
-            gtk-cursor-theme-size=${toString config.user.core.appearance.cursorSize}
-          '';
-          clobber = true;
-        };
-      };
     };
   };
 }
