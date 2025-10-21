@@ -36,15 +36,9 @@
     waydroid.enable = false;
     controllers.enable = true;
     tailscale.enableVPN = true;
-  };
-
-  services.nginx = {
-    enable = true;
-    virtualHosts."syncthing-laptop" = {
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:8384";
-        proxyWebsockets = true;
-      };
+    syncthing-proxy = {
+      enable = true;
+      virtualHostName = "syncthing-laptop";
     };
   };
 }

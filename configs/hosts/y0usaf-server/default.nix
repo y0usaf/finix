@@ -37,21 +37,15 @@
     forgejo.enable = true;
     openssh.enable = lib.mkForce true;
     tailscale.enableVPN = true;
+    syncthing-proxy = {
+      enable = true;
+      virtualHostName = "syncthing-server";
+    };
   };
 
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [22 80 443 2222 3000 22000]; # SSH, HTTP, HTTPS, Forgejo SSH, Forgejo HTTP, Syncthing
     allowedUDPPorts = [22000 21027]; # Syncthing sync and discovery
-  };
-
-  services.nginx = {
-    enable = true;
-    virtualHosts."syncthing-server" = {
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:8384";
-        proxyWebsockets = true;
-      };
-    };
   };
 }
