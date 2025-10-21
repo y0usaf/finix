@@ -22,7 +22,7 @@ in {
       files = {
         ".config/nushell/aliases.nu" = {
           text = lib.concatStringsSep "\n" (
-            lib.mapAttrsToList (k: v: "alias ${k} = ${v}") (import ./aliases.nix {})
+            lib.mapAttrsToList (k: v: "alias ${k} = ${v}") (import ./aliases.nix {inherit config;})
           );
           clobber = true;
         };
