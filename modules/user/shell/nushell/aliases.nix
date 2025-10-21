@@ -4,4 +4,5 @@ _: {
   dir = "dir --color=auto";
   egrep = "rg --color auto";
   fgrep = "rg -F --color auto";
+  gpupower = "sudo nvidia-smi -pl";
 }
