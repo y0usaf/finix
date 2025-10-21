@@ -5,7 +5,6 @@
   ...
 }: let
   inherit (config.user) name homeDirectory tokensDirectory;
-  aliasesData = import ./aliases.nix {};
 in {
   options.user.shell.nushell = {
     enable = lib.mkEnableOption "nushell shell configuration";
@@ -23,7 +22,7 @@ in {
       files = {
         ".config/nushell/aliases.nu" = {
           text = lib.concatStringsSep "\n" (
-            lib.mapAttrsToList (k: v: "alias ${k} = ${v}") aliasesData
+            lib.mapAttrsToList (k: v: "alias ${k} = ${v}") (import ./aliases.nix {})
           );
           clobber = true;
         };

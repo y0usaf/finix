@@ -5,9 +5,6 @@
   ...
 }: let
   inherit (config.user) name tokensDirectory nixosConfigDirectory;
-  aliasesData = import ./aliases.nix {
-    inherit nixosConfigDirectory;
-  };
   functionsData = import ./functions.nix {inherit config;};
   settingsData = import ./settings.nix {inherit config;};
 in {
@@ -30,7 +27,7 @@ in {
         {
           ".config/zsh/aliases.zsh" = {
             text = lib.concatStringsSep "\n" (
-              lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") aliasesData
+              lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") (import ./aliases.nix {inherit nixosConfigDirectory;})
             );
             clobber = true;
           };

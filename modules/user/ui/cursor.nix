@@ -5,8 +5,6 @@
   system,
   ...
 }: let
-  username = config.user.name;
-  hyprThemeName = "DeepinDarkV20-hypr";
   x11ThemeName = "DeepinDarkV20-x11";
   xcursorPackage = flakeInputs.deepin-dark-xcursor.packages.${system}.default;
   hyprcursorPackage = null;
@@ -27,7 +25,7 @@ in {
         hyprcursorPackage
       ];
 
-    hjem.users.${username} = {
+    hjem.users.${config.user.name} = {
       files =
         {
           ".config/gtk-3.0/settings.ini" = {
@@ -54,7 +52,7 @@ in {
                 export XCURSOR_SIZE="${toString config.user.core.appearance.cursorSize}"
               ''
               + lib.optionalString (hyprcursorPackage != null) ''
-                export HYPRCURSOR_THEME="${hyprThemeName}"
+                export HYPRCURSOR_THEME="DeepinDarkV20-hypr"
                 export HYPRCURSOR_SIZE="${toString config.user.core.appearance.cursorSize}"
               '');
             clobber = true;
