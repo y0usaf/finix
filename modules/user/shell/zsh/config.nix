@@ -80,9 +80,6 @@ in {
           };
           ".config/zsh/.zshrc" = {
             text = lib.concatStringsSep "\n" [
-              # Environment variables
-              settingsData.environment
-
               # Load aliases
               "source \"$ZDOTDIR/aliases.zsh\""
 

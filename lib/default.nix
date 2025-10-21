@@ -57,7 +57,6 @@ in {
             inherit hostConfig lib genLib system;
             # Pass inputs for modules that might need them
             flakeInputs = inputs;
-            inherit (inputs) disko;
           };
         };
       })

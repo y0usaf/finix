@@ -47,7 +47,7 @@ in {
           ".config/zellij/config.kdl" = {
             clobber = false;
             text =
-              genLib.toKDL {} baseConfig
+              genLib.toKDL baseConfig
               + "\n\n// Using default keybindings for now\n"
               + zjstatusHintsConfig;
           };

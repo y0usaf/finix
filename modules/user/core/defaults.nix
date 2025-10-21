@@ -51,6 +51,4 @@
       description = "Default media player";
     };
   };
-  config = {
-  };
 }

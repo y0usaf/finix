@@ -1,5 +1,5 @@
 {lib}: {
-  toKDL = _: let
+  toKDL = let
     inherit
       (lib)
       concatStringsSep

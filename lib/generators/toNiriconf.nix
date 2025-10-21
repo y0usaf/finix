@@ -46,7 +46,7 @@ lib: let
     # Main config without special attrs
     specialAttrs = ["output" "spawn-at-startup" "_extraConfig"];
     mainAttrs = lib.filterAttrs (k: _: !lib.elem k specialAttrs) attrs;
-    mainConfig = kdlGenerator.toKDL {} mainAttrs;
+    mainConfig = kdlGenerator.toKDL mainAttrs;
 
     # Extra config appended as-is
     extraConfig =
