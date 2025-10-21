@@ -73,7 +73,6 @@ in {
     enabledMods = lib.mkOption {
       type = lib.types.listOf (lib.types.enum ((lib.attrNames availableMods) ++ ["morespeeds"]));
       default = [];
-      example = ["steamodded" "talisman" "cryptid" "multiplayer" "cardsleeves" "jokerdisplay" "pokermon" "stickersalwaysshown" "handybalatro" "aura" "morespeeds"];
       description = ''
         List of mod names to enable. Available mods:
         - steamodded: Steamodded/smods (core modding framework)

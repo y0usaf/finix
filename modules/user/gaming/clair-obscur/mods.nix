@@ -32,7 +32,6 @@ in {
     enabledMods = lib.mkOption {
       type = lib.types.listOf (lib.types.enum (lib.attrNames availableMods));
       default = [];
-      example = ["enhanced-descriptions" "gustave-weapon-skills" "gustave-weapon-skill-rework"];
       description = ''
         List of mod names to enable. Available mods:
         - enhanced-descriptions: Enhanced Descriptions with percentages

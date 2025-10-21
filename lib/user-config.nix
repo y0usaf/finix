@@ -14,13 +14,11 @@
       name = lib.mkOption {
         type = lib.types.str;
         description = "Primary username for the system";
-        example = "alice";
       };
 
       homeDirectory = lib.mkOption {
         type = lib.types.path;
         description = "Home directory path for the user";
-        example = "/home/alice";
       };
 
       configDirectory = lib.mkOption {
