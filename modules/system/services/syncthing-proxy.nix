@@ -10,7 +10,6 @@ in {
     virtualHostName = lib.mkOption {
       type = lib.types.str;
       description = "Name of the nginx virtual host for syncthing proxy";
-      example = "syncthing-desktop";
     };
   };
 
