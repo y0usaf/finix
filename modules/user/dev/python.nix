@@ -31,7 +31,7 @@
       pkgs.binutils
     ];
     usr = {
-      files = {
+      files = lib.optionalAttrs config.user.shell.zsh.enable {
         ".config/zsh/.zshenv" = {
           clobber = true;
           text = lib.mkAfter ''
