@@ -1,4 +1,4 @@
-{...}: {
+_: {
   imports = [
     ./format-nix.nix
     ./polkit-agent.nix
