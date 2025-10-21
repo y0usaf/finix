@@ -33,6 +33,12 @@
       configDir = "${config.user.homeDirectory}/.config/syncthing";
 
       settings = {
+        gui.address = [
+          "127.0.0.1:8384"
+          "localhost:8384"
+          "syncthing-desktop:8384"
+          "syncthing-server:8384"
+        ];
         inherit (config.user.services.syncthing) devices;
         folders =
           lib.optionalAttrs (config.hostname == "y0usaf-server") {
