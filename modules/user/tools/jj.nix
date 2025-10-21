@@ -67,7 +67,7 @@
             clobber = true;
           };
         }
-        // lib.optionalAttrs config.user.tools.jj.enableAliases {
+        // lib.optionalAttrs (config.user.tools.jj.enableAliases && config.user.shell.zsh.enable) {
           ".config/zsh/.zshrc" = {
             text = ''
               alias jl='jj log -r recent'

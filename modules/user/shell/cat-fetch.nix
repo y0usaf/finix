@@ -7,7 +7,7 @@
     enable = lib.mkEnableOption "cat fetch display on shell startup";
   };
   config = lib.mkIf config.user.shell.cat-fetch.enable {
-    usr.files = {
+    usr.files = lib.optionalAttrs config.user.shell.zsh.enable {
       ".config/zsh/.zshrc" = {
         text = lib.mkAfter ''
           print_cats() {

@@ -13,7 +13,7 @@
       pkgs.ffmpeg
     ];
     usr = {
-      files = {
+      files = lib.optionalAttrs config.user.shell.zsh.enable {
         ".config/zsh/.zshrc" = {
           text = lib.mkAfter ''
             alias ytm4a="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s'"
