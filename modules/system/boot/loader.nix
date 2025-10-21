@@ -1,10 +1,8 @@
 _: {
   config = {
     boot.loader = {
-      systemd-boot = {
-        enable = true;
-        configurationLimit = 20;
-      };
+      systemd-boot.enable = false;
+      limine.enable = true;
       efi = {
         canTouchEfiVariables = true;
         efiSysMountPoint = "/boot";
