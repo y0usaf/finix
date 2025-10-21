@@ -12,43 +12,46 @@
       pkgs.openssh
     ];
     usr = {
-      files = {
-        ".ssh/config" = {
-          clobber = true;
-          text = ''
-            ForwardAgent yes
-            AddKeysToAgent yes
-            ServerAliveInterval 60
-            ServerAliveCountMax 5
-            ControlMaster auto
-            ControlPath %d/.ssh/master-%r@%h:%p
-            ControlPersist 10m
-            SetEnv TERM=xterm-256color
-            Host server
-                HostName 192.168.2.66
-                User y0usaf
-                ForwardAgent yes
+      files =
+        {
+          ".ssh/config" = {
+            clobber = true;
+            text = ''
+              ForwardAgent yes
+              AddKeysToAgent yes
+              ServerAliveInterval 60
+              ServerAliveCountMax 5
+              ControlMaster auto
+              ControlPath %d/.ssh/master-%r@%h:%p
+              ControlPersist 10m
+              SetEnv TERM=xterm-256color
+              Host server
+                  HostName 192.168.2.66
+                  User y0usaf
+                  ForwardAgent yes
 
-            Host github.com
-                HostName github.com
-                User git
-                IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
+              Host github.com
+                  HostName github.com
+                  User git
+                  IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
 
-            Host forgejo
-                HostName y0usaf-server
-                Port 2222
-                User forgejo
-                IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
-                IdentitiesOnly yes
-          '';
+              Host forgejo
+                  HostName y0usaf-server
+                  Port 2222
+                  User forgejo
+                  IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
+                  IdentitiesOnly yes
+            '';
+          };
+        }
+        // lib.optionalAttrs config.user.shell.zsh.enable {
+          ".config/zsh/.zshenv" = {
+            clobber = true;
+            text = lib.mkAfter ''
+              export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
+            '';
+          };
         };
-        ".config/zsh/.zshenv" = {
-          clobber = true;
-          text = lib.mkAfter ''
-            export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
-          '';
-        };
-      };
     };
     systemd.user.services.ssh-agent = {
       description = "SSH key agent";

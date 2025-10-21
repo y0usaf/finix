@@ -52,7 +52,7 @@ in {
               + zjstatusHintsConfig;
           };
         }
-        // lib.optionalAttrs config.user.shell.zellij.autoStart {
+        // lib.optionalAttrs (config.user.shell.zellij.autoStart && config.user.shell.zsh.enable) {
           ".config/zsh/aliases/zellij.zsh" = {
             clobber = true;
             text = ''

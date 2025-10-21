@@ -100,7 +100,7 @@
           '';
           executable = true;
         };
-        ".config/zsh/.zshrc" = lib.mkIf config.user.tools.git.nixos-git-sync.enable {
+        ".config/zsh/.zshrc" = lib.mkIf (config.user.tools.git.nixos-git-sync.enable && config.user.shell.zsh.enable) {
           clobber = true;
           text = ''
             git-sync() {

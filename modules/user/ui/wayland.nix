@@ -15,7 +15,7 @@
       pkgs.hyprpicker
     ];
     usr = {
-      files = {
+      files = lib.optionalAttrs config.user.shell.zsh.enable {
         ".config/zsh/.zprofile" = {
           text = lib.mkAfter ''
             export WLR_NO_HARDWARE_CURSORS=1
