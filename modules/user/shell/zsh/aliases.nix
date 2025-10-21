@@ -1,8 +1,20 @@
-{nixosConfigDirectory}: {
+{
+  config,
+  nixosConfigDirectory,
+}:
+{
   # XDG compliance
   wget = ''wget --hsts-file="$XDG_DATA_HOME/wget-hsts"'';
-  nvidia-settings = ''nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings"'';
-
+}
+// (
+  if config.hardware.nvidia.enable
+  then {
+    nvidia-settings = ''nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings"'';
+    gpupower = "sudo nvidia-smi -pl";
+  }
+  else {}
+)
+// {
   # Android
   adb = ''HOME="$XDG_DATA_HOME/android" adb'';
 
@@ -33,7 +45,6 @@
   # System
   pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i";
   pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
-  gpupower = "sudo nvidia-smi -pl";
 
   # Version control
   svn = ''svn --config-dir "$XDG_CONFIG_HOME/subversion"'';
