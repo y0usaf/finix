@@ -43,32 +43,44 @@ in {
       pkgs.gtk4
     ];
     usr = {
-      files = {
-        ".config/gtk-3.0/settings.ini" = {
-          clobber = true;
-          generator = lib.generators.toINI {};
-          value = gtk3Settings;
+      files =
+        {
+          ".config/gtk-3.0/settings.ini" = {
+            clobber = true;
+            generator = lib.generators.toINI {};
+            value = gtk3Settings;
+          };
+          ".config/gtk-3.0/gtk.css" = {
+            clobber = true;
+            text = styles.gtkCss;
+          };
+          ".config/gtk-3.0/bookmarks" = {
+            clobber = true;
+            text = bookmarksContent;
+          };
+          ".config/gtk-4.0/settings.ini" = {
+            clobber = true;
+            generator = lib.generators.toINI {};
+            value = gtk4Settings;
+          };
+        }
+        // lib.optionalAttrs config.user.shell.zsh.enable {
+          ".zshenv" = {
+            clobber = true;
+            text = lib.mkAfter ''
+              export XCURSOR_SIZE="${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * scaleFactor)))}"
+              export GDK_DPI_SCALE="${toString scaleFactor}"
+            '';
+          };
+        }
+        // lib.optionalAttrs config.user.shell.nushell.enable {
+          ".config/nushell/env.nu" = {
+            clobber = true;
+            text = lib.mkAfter ''
+              $env.GDK_DPI_SCALE = "${toString scaleFactor}"
+            '';
+          };
         };
-        ".config/gtk-3.0/gtk.css" = {
-          clobber = true;
-          text = styles.gtkCss;
-        };
-        ".config/gtk-3.0/bookmarks" = {
-          clobber = true;
-          text = bookmarksContent;
-        };
-        ".config/gtk-4.0/settings.ini" = {
-          clobber = true;
-          generator = lib.generators.toINI {};
-          value = gtk4Settings;
-        };
-        ".zshenv" = {
-          clobber = true;
-          text = lib.mkAfter ''
-            export XCURSOR_SIZE="${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * scaleFactor)))}"
-          '';
-        };
-      };
     };
   };
 }
