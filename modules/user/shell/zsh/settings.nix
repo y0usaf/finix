@@ -22,10 +22,4 @@
   prompt = ''
     PS1='%F{blue}%~%(?.%F{green}.%F{red})> %f'
   '';
-
-  environment = ''
-    export TERMINAL="${config.user.core.defaults.terminal}"
-    export BROWSER="${config.user.core.defaults.browser}"
-    export EDITOR="${config.user.core.defaults.editor}"
-  '';
 }
