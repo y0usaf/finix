@@ -64,7 +64,7 @@ in {
             };
           })
           # nvf module for neovim
-          (inputs.nvf.nixosModules.default)
+          inputs.nvf.nixosModules.default
           ./user-config.nix
           ../modules/user
         ];
