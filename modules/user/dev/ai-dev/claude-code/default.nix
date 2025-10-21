@@ -1,4 +1,4 @@
-{...}: {
+_: {
   imports = [
     ./agents.nix
     ./claude-code.nix
