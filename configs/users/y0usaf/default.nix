@@ -179,11 +179,6 @@
         enable = true;
         name = "y0usaf";
         email = "OA99@Outlook.com";
-        nixos-git-sync = {
-          enable = true;
-          nixosRepoUrl = "git@github.com:y0usaf/nixos.git";
-          remoteBranch = "main";
-        };
       };
       nh = {
         enable = true;
