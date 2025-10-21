@@ -33,6 +33,7 @@
   # System
   pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i";
   pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
+  gpupower = "sudo nvidia-smi -pl";
 
   # Version control
   svn = ''svn --config-dir "$XDG_CONFIG_HOME/subversion"'';
