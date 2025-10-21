@@ -1,7 +1,4 @@
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   imports = [
     ./config.nix
     ./hosts.nix

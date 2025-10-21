@@ -37,7 +37,10 @@
         if typeOf element == "null"
         then "null"
         else if typeOf element == "bool"
-        then if element then "true" else "false"
+        then
+          if element
+          then "true"
+          else "false"
         else if typeOf element == "string"
         then ''"${sanitizeString element}"''
         else toString element
@@ -46,20 +49,22 @@
     # Attrset Conversion
     # String -> AttrsOf Anything -> String
     convertAttrsToKDL = name: attrs: let
-      children = (lib.pipe (attrs._children or []) [
-        (map (child: mapAttrsToList convertAttributeToKDL child))
-        lib.flatten
-      ]) ++ (lib.pipe attrs [
-        (lib.filterAttrs (
-          name: _:
-            !(elem name [
-              "_args"
-              "_props"
-              "_children"
-            ])
-        ))
-        (mapAttrsToList convertAttributeToKDL)
-      ]);
+      children =
+        (lib.pipe (attrs._children or []) [
+          (map (child: mapAttrsToList convertAttributeToKDL child))
+          lib.flatten
+        ])
+        ++ (lib.pipe attrs [
+          (lib.filterAttrs (
+            name: _:
+              !(elem name [
+                "_args"
+                "_props"
+                "_children"
+              ])
+          ))
+          (mapAttrsToList convertAttributeToKDL)
+        ]);
     in
       lib.concatStringsSep " " (
         [name]
@@ -73,8 +78,7 @@
 
     # List Conversion
     # String -> ListOf (OneOf [Int Float String Bool Null])  -> String
-    convertListOfFlatAttrsToKDL = name: list:
-      "${name} ${concatStringsSep " " (map literalValueToString list)}";
+    convertListOfFlatAttrsToKDL = name: list: "${name} ${concatStringsSep " " (map literalValueToString list)}";
 
     # String -> ListOf Anything -> String
     convertListOfNonFlatAttrsToKDL = name: list: ''
