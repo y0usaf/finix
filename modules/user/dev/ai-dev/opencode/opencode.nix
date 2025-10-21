@@ -36,9 +36,6 @@
     // (lib.optionalAttrs config.user.dev.opencode.enableMcpServers {
       mcp = mcpServers;
     });
-
-  # Project-specific instructions
-  projectInstructions = import ./ai-instructions.nix;
 in {
   options.user.dev.opencode = {
     enable = lib.mkEnableOption "opencode AI coding agent";
@@ -78,7 +75,7 @@ in {
 
         # Project-specific instructions template
         ".config/opencode/instructions.md" = {
-          text = projectInstructions;
+          text = import ./ai-instructions.nix;
           clobber = true;
         };
 

@@ -46,16 +46,10 @@
     # Attrset Conversion
     # String -> AttrsOf Anything -> String
     convertAttrsToKDL = name: attrs: let
-      optArgs = map literalValueToString (attrs._args or []);
-      optProps = lib.mapAttrsToList (name: value: "${name}=${literalValueToString value}") (
-        attrs._props or {}
-      );
-
-      orderedChildren = lib.pipe (attrs._children or []) [
+      children = (lib.pipe (attrs._children or []) [
         (map (child: mapAttrsToList convertAttributeToKDL child))
         lib.flatten
-      ];
-      unorderedChildren = lib.pipe attrs [
+      ]) ++ (lib.pipe attrs [
         (lib.filterAttrs (
           name: _:
             !(elem name [
@@ -65,20 +59,22 @@
             ])
         ))
         (mapAttrsToList convertAttributeToKDL)
-      ];
-      children = orderedChildren ++ unorderedChildren;
-      optChildren = lib.optional (children != []) ''
-        {
-        ${indentStrings children}
-        }'';
+      ]);
     in
-      lib.concatStringsSep " " ([name] ++ optArgs ++ optProps ++ optChildren);
+      lib.concatStringsSep " " (
+        [name]
+        ++ map literalValueToString (attrs._args or [])
+        ++ lib.mapAttrsToList (name: value: "${name}=${literalValueToString value}") (attrs._props or {})
+        ++ lib.optional (children != []) ''
+          {
+          ${indentStrings children}
+          }''
+      );
 
     # List Conversion
     # String -> ListOf (OneOf [Int Float String Bool Null])  -> String
-    convertListOfFlatAttrsToKDL = name: list: let
-      flatElements = map literalValueToString list;
-    in "${name} ${concatStringsSep " " flatElements}";
+    convertListOfFlatAttrsToKDL = name: list:
+      "${name} ${concatStringsSep " " (map literalValueToString list)}";
 
     # String -> ListOf Anything -> String
     convertListOfNonFlatAttrsToKDL = name: list: ''
@@ -87,8 +83,8 @@
       }'';
 
     # String -> ListOf Anything  -> String
-    convertListToKDL = name: list: let
-      elementsAreFlat =
+    convertListToKDL = name: list:
+      if
         !any (
           el:
             elem (typeOf el) [
@@ -96,9 +92,7 @@
               "set"
             ]
         )
-        list;
-    in
-      if elementsAreFlat
+        list
       then convertListOfFlatAttrsToKDL name list
       else convertListOfNonFlatAttrsToKDL name list;
 

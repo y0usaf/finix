@@ -3,10 +3,7 @@
   lib,
   ...
 }: let
-  username = config.user.name;
-  mainFontPackages = map (x: x.package) config.user.core.appearance.fonts.main;
   mainFontNames = map (x: x.name) config.user.core.appearance.fonts.main;
-  fallbackPackages = map (x: x.package) config.user.core.appearance.fonts.fallback;
   fallbackNames = map (x: x.name) config.user.core.appearance.fonts.fallback;
   fontXmlConfig = ''
     <?xml version="1.0"?>
@@ -78,9 +75,9 @@ in {
     };
   };
   config = lib.mkIf config.user.ui.fonts.enable {
-    environment.systemPackages = mainFontPackages ++ fallbackPackages;
+    environment.systemPackages = (map (x: x.package) config.user.core.appearance.fonts.main) ++ (map (x: x.package) config.user.core.appearance.fonts.fallback);
 
-    hjem.users.${username} = {
+    hjem.users.${config.user.name} = {
       files.".config/fontconfig/fonts.conf" = {
         clobber = true;
         text = fontXmlConfig;

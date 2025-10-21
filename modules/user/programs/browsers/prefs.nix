@@ -3,9 +3,10 @@
   lib,
 }: let
   # Build font list from user appearance config
-  mainFont = (builtins.elemAt config.user.core.appearance.fonts.main 0).name;
-  fallbackFonts = map (f: f.name) config.user.core.appearance.fonts.fallback;
-  fontList = lib.concatStringsSep ", " ([mainFont] ++ fallbackFonts);
+  fontList = lib.concatStringsSep ", " (
+    [(builtins.elemAt config.user.core.appearance.fonts.main 0).name]
+    ++ map (f: f.name) config.user.core.appearance.fonts.fallback
+  );
 in {
   # Locked preferences (user cannot change)
   locked = {
