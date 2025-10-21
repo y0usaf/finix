@@ -20,9 +20,6 @@
 
   # Convert attrs to JS pref calls
   attrsToLines = f: attrs: concatMapAttrsStringSep "\n" f attrs;
-  lockedPrefs = attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") prefs.locked;
-  defaultPrefs = attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") prefs.default;
-  jsPrefs = lockedPrefs + "\n" + defaultPrefs;
 in {
   imports = [
     ./config.nix
@@ -32,7 +29,7 @@ in {
   config = lib.mkIf config.user.programs.librewolf.enable {
     environment.systemPackages = [
       (pkgs.librewolf-bin.override {
-        extraPrefs = jsPrefs;
+        extraPrefs = (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") prefs.locked) + "\n" + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") prefs.default);
         extraPolicies =
           (import ./policies.nix {inherit config lib;}).browserPolicies
           // {

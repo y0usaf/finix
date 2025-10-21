@@ -5,9 +5,6 @@
   ...
 }: let
   inherit (lib) mkEnableOption mkIf;
-
-  settingsFormat = pkgs.formats.json {};
-  stateFormat = pkgs.formats.json {};
 in {
   options.user.programs.vesktop = {
     enable = mkEnableOption "Vesktop (Discord client) module";
@@ -18,7 +15,7 @@ in {
     usr = {
       files = {
         ".config/vesktop/settings.json" = {
-          source = settingsFormat.generate "vesktop-settings.json" {
+          source = (pkgs.formats.json {}).generate "vesktop-settings.json" {
             discordBranch = "stable";
             minimizeToTray = false;
             arRPC = false;
@@ -91,7 +88,7 @@ in {
         };
 
         ".config/vesktop/state.json" = {
-          source = stateFormat.generate "vesktop-state.json" {
+          source = (pkgs.formats.json {}).generate "vesktop-state.json" {
             firstLaunch = false;
             windowBounds = {
               x = 0;

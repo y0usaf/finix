@@ -18,10 +18,6 @@
       (spec: lib.nameValuePair spec.name (mkStdIOServer spec))
       mcpServerSpecs);
   };
-
-  claudeCodeServers = lib.listToAttrs (map
-    (spec: lib.nameValuePair spec.name (mkStdIOServer spec))
-    mcpServerSpecs);
 in {
   options.user.dev.mcp = {
     enable = lib.mkEnableOption "Model Context Protocol configuration";
@@ -42,7 +38,9 @@ in {
           clobber = true;
         };
         ".claude/mcp_servers.json" = {
-          text = builtins.toJSON claudeCodeServers;
+          text = builtins.toJSON (lib.listToAttrs (map
+            (spec: lib.nameValuePair spec.name (mkStdIOServer spec))
+            mcpServerSpecs));
           clobber = true;
         };
       };
