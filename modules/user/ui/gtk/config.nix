@@ -6,7 +6,6 @@
 }: let
   mainFontName = (builtins.elemAt config.user.core.appearance.fonts.main 0).name;
   inherit (config.user.core.appearance) baseFontSize;
-  dpiStr = toString config.user.core.appearance.dpi;
   inherit (config.user.core.user) bookmarks;
   scaleFactor = config.user.ui.gtk.scale;
 
@@ -19,7 +18,7 @@
       gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
       gtk-font-name = "${mainFontName} ${toString baseFontSize}";
       gtk-xft-antialias = 1;
-      gtk-xft-dpi = dpiStr;
+      gtk-xft-dpi = toString config.user.core.appearance.dpi;
       gtk-xft-hinting = 1;
       gtk-xft-hintstyle = "hintslight";
       gtk-xft-rgba = "rgb";
@@ -34,8 +33,6 @@
       gtk-font-name = "${mainFontName} ${toString baseFontSize}";
     };
   };
-
-  bookmarksContent = lib.concatStringsSep "\n" bookmarks;
 in {
   config = lib.mkIf config.user.ui.gtk.enable {
     environment.systemPackages = [
@@ -56,7 +53,7 @@ in {
           };
           ".config/gtk-3.0/bookmarks" = {
             clobber = true;
-            text = bookmarksContent;
+            text = lib.concatStringsSep "\n" bookmarks;
           };
           ".config/gtk-4.0/settings.ini" = {
             clobber = true;
