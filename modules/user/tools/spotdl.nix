@@ -12,7 +12,7 @@
       pkgs.ffmpeg
     ];
     usr = {
-      files = {
+      files = lib.optionalAttrs config.user.shell.zsh.enable {
         ".config/zsh/.zshrc" = {
           text = lib.mkAfter ''
             alias spotm4a="uvx spotdl --format m4a --output '{title}'"
