@@ -9,7 +9,7 @@
       clobber = false;
       text =
         "\n// Neon theme configuration\n"
-        + genLib.toKDL {} {
+        + genLib.toKDL {
           themes.neon = {
             text_unselected = {
               base = [180 180 180]; # #b4b4b4
@@ -118,7 +118,7 @@
           };
         }
         + "\n"
-        + genLib.toKDL {} {
+        + genLib.toKDL {
           ui.pane_frames = {
             rounded_corners = false;
             hide_session_name = false;
