@@ -1,4 +1,4 @@
-{}: {
+_: {
   clauded = "claude --dangerously-skip-permissions";
   grep = "rg --color auto";
   dir = "dir --color=auto";

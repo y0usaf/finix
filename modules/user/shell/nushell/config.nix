@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  inherit (config.user) name homeDirectory tokensDirectory nixosConfigDirectory;
+  inherit (config.user) name homeDirectory tokensDirectory;
   aliasesData = import ./aliases.nix {};
 in {
   options.user.shell.nushell = {

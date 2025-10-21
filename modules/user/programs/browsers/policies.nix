@@ -1,4 +1,4 @@
-{...}: {
+_: {
   browserPolicies = {
     DisableTelemetry = true;
     DisablePocket = true;

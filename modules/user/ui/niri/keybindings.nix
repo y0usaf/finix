@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  genLib,
   ...
 }: let
   inherit (config.user.core) defaults;
