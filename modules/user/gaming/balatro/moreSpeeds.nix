@@ -74,9 +74,6 @@
                     }
                 }
                 setting_tab.nodes[1] = speeds
-                -- TODO fix this
-                --table.insert(setting_tab.nodes, 2, free_speed_text)
-                --table.insert(setting_tab.nodes, 3, free_speed_box)
             end
             return setting_tab
         end
