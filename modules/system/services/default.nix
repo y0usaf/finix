@@ -1,4 +1,4 @@
-{...}: {
+_: {
   imports = [
     ./audio.nix
     ./dbus.nix

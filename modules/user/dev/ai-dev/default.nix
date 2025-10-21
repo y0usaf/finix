@@ -1,4 +1,4 @@
-{...}: {
+_: {
   imports = [
     ./claude-code
     ./codex

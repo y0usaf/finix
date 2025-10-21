@@ -1,4 +1,4 @@
-{...}: {
+_: {
   imports = [
     ./appearance.nix
     ./defaults.nix
