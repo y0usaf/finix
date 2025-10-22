@@ -1,6 +1,5 @@
 {lib, ...}: let
   # Define custom lib functions locally
-  t = lib.types;
   mkOpt = type: description: lib.mkOption {inherit type description;};
   dirModule = lib.types.submodule {
     options = {
@@ -21,7 +20,7 @@ in {
     music = mkOpt dirModule "Directory for music files.";
     dcim = mkOpt dirModule "Directory for pictures (DCIM).";
     steam = mkOpt dirModule "Directory for Steam.";
-    wallpapers = mkOpt (t.submodule {
+    wallpapers = mkOpt (lib.types.submodule {
       options = {
         static = mkOpt dirModule "Wallpaper directory for static images.";
         video = mkOpt dirModule "Wallpaper directory for videos.";

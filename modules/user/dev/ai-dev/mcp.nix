@@ -8,8 +8,8 @@
 
   mkStdIOServer = spec: {
     type = "stdio";
-    inherit (spec) command;
-    inherit (spec) args;
+    command = spec.command;
+    args = spec.args;
     env = spec.environment;
   };
 

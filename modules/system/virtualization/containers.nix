@@ -10,13 +10,13 @@
     default = {};
   };
 
-  config = {
+  config = lib.mkIf config.services.docker.enable {
     virtualisation = {
-      docker = lib.mkIf config.services.docker.enable {
+      docker = {
         enable = true;
         enableOnBoot = true;
       };
-      podman = lib.mkIf config.services.docker.enable {
+      podman = {
         enable = true;
       };
     };
