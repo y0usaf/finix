@@ -44,7 +44,7 @@
           };
         }
         // lib.optionalAttrs (config.user.ui.niri.extraConfig != "") {
-          _extraConfig = config.user.ui.niri.extraConfig;
+          inherit (config.user.ui.niri) extraConfig;
         };
     };
   };

@@ -4,8 +4,8 @@
   pkgs,
   ...
 }: {
-  config = {
-    hardware.bluetooth = lib.mkIf config.hardware.bluetooth.enable {
+  config = lib.mkIf config.hardware.bluetooth.enable {
+    hardware.bluetooth = {
       powerOnBoot = lib.mkDefault true;
       settings = lib.mkDefault {
         General = {
@@ -15,8 +15,8 @@
       };
       package = lib.mkDefault pkgs.bluez;
     };
-    services.dbus.packages = lib.mkIf config.hardware.bluetooth.enable [pkgs.bluez];
-    environment.systemPackages = lib.optionals config.hardware.bluetooth.enable [
+    services.dbus.packages = [pkgs.bluez];
+    environment.systemPackages = [
       pkgs.bluez
       pkgs.bluez-tools
     ];

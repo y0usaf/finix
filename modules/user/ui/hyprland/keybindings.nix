@@ -57,6 +57,7 @@
         "$mod2, ${num}, workspace, ${num}"
         "$mod2 SHIFT, ${num}, movetoworkspacesilent, ${num}"
       ]))
+
       [
         "Ctrl$mod2,Delete, exec, gnome-system-monitor"
         "$mod Shift, M, exec, shutdown now"

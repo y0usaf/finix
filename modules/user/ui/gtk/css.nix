@@ -22,8 +22,6 @@
   baseOpacity = toString (config.user.core.appearance.opacity / 3);
   textColor = "white";
   backgroundColor = "rgba(0, 0, 0, ${baseOpacity})";
-  hoverBg = "rgba(100, 149, 237, 0.1)";
-  selectedBg = "rgba(100, 149, 237, 0.5)";
 in {
   gtkCss = ''
     /* Global element styling */
@@ -37,11 +35,11 @@ in {
     }
     /* Hover state for all elements */
     *:hover {
-      background: ${hoverBg};
+      background: rgba(100, 149, 237, 0.1);
     }
     /* Selected state for all elements */
     *:selected {
-      background: ${selectedBg};
+      background: rgba(100, 149, 237, 0.5);
     }
     /* Button styling */
     button {

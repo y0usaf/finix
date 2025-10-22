@@ -3,10 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  # Enable all AMD GPU power play features
-  amdgpuFeatureMask = "0xffffffff";
-in {
+}: {
   config = {
     boot = {
       kernelPackages = pkgs.linuxPackages_latest;
@@ -23,7 +20,7 @@ in {
         "kernel.unprivileged_userns_clone" = 1;
       };
       kernelParams = lib.mkIf config.hardware.amdgpu.enable [
-        "amdgpu.ppfeaturemask=${amdgpuFeatureMask}"
+        "amdgpu.ppfeaturemask=0xffffffff"
         "amdgpu.dpm=1"
       ];
     };

@@ -4,7 +4,6 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.shell.zellij;
   zjstatusHintsPackage = flakeInputs.zjstatus-hints.packages.${config.nixpkgs.system}.default;
 in {
   options.user.shell.zellij.zjstatusHints = {
@@ -23,7 +22,7 @@ in {
     };
   };
 
-  config = lib.mkIf (cfg.enable && cfg.zjstatus.enable && cfg.zjstatusHints.enable) {
+  config = lib.mkIf (config.user.shell.zellij.enable && config.user.shell.zellij.zjstatus.enable && config.user.shell.zellij.zjstatusHints.enable) {
     usr.files.".config/zellij/plugins/zjstatus-hints.wasm" = {
       clobber = true;
       source = "${zjstatusHintsPackage}/bin/zjstatus-hints.wasm";
