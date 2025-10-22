@@ -30,7 +30,7 @@ _: {
       </nixos>
 
       <hjem-syntax>
-        files."path" = { generator = generators.toFormat {}; value = {}; };
+        files."path" = { generator = lib.generators.toFormat {}; value = {}; };
       </hjem-syntax>
 
       <standards>

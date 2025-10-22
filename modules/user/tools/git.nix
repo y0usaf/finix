@@ -32,11 +32,11 @@
           generator = lib.generators.toGitINI;
           value = {
             user = {
-              inherit (config.user.tools.git) name;
-              inherit (config.user.tools.git) email;
+              name = config.user.tools.git.name;
+              email = config.user.tools.git.email;
             };
             core = {
-              inherit (config.user.tools.git) editor;
+              editor = config.user.tools.git.editor;
             };
             init = {
               defaultBranch = "main";

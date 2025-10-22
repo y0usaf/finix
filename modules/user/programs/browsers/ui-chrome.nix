@@ -3,7 +3,6 @@
   lib,
   ...
 }: let
-  username = config.user.name;
   userChromeCss = ''
     :root {
         /* Single theme color - change this to customize entire theme */
@@ -226,9 +225,9 @@
   '';
 in {
   config = lib.mkIf config.user.programs.librewolf.enable {
-    hjem.users.${username} = {
+    hjem.users.${config.user.name} = {
       files = {
-        ".librewolf/${username}/chrome/userChrome.css" = {
+        ".librewolf/${config.user.name}/chrome/userChrome.css" = {
           text = userChromeCss;
           clobber = true;
         };

@@ -4,7 +4,6 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.shell.zellij;
   zjstatusPackage = flakeInputs.zjstatus.packages.${config.nixpkgs.system}.default;
 
   # Top status bar - main status info
@@ -88,10 +87,10 @@ in {
     };
   };
 
-  config = lib.mkIf (cfg.enable && cfg.zjstatus.enable) {
+  config = lib.mkIf (config.user.shell.zellij.enable && config.user.shell.zellij.zjstatus.enable) {
     usr.files.".config/zellij/layouts/zjstatus.kdl" = {
       clobber = true;
-      text = cfg.zjstatus.layout;
+      text = config.user.shell.zellij.zjstatus.layout;
     };
   };
 }
