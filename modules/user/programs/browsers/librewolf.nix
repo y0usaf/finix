@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  inherit (lib) concatMapAttrsStringSep;
   inherit (builtins) toJSON isBool isInt isString toString;
 
   # Import preferences
@@ -19,7 +18,7 @@
     );
 
   # Convert attrs to JS pref calls
-  attrsToLines = f: attrs: concatMapAttrsStringSep "\n" f attrs;
+  attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
 in {
   imports = [
     ./config.nix
