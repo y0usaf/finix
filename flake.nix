@@ -72,11 +72,11 @@
     };
 
     # Import lib with flake inputs
-    lib = import ./lib {
+    nixosLib = import ./nixos/lib {
       inherit inputs system nixpkgsConfig;
     };
   in {
-    inherit (lib) nixosConfigurations;
+    inherit (nixosLib) nixosConfigurations;
 
     # Expose for easier access
     formatter.${system} = nixpkgs.legacyPackages.${system}.alejandra;
