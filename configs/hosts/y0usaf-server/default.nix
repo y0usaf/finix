@@ -5,7 +5,7 @@
 # - GPU: None (headless)
 {lib, ...}: {
   imports = [
-    ../../../modules/system
+    ../../../nixos
     ./hardware-configuration.nix
     ../../users/server
   ];
