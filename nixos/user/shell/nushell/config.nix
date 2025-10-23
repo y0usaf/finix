@@ -61,6 +61,10 @@ in {
 
               export_vars_from_files "${tokensDirectory}"
 
+              let hostname = (sys | get host.name)
+              $env.HOST = $hostname
+              $env.HOSTNAME = $hostname
+
               $env.TERMINAL = "${config.user.defaults.terminal}"
               $env.BROWSER = "${config.user.defaults.browser}"
               $env.EDITOR = "${config.user.defaults.editor}"
