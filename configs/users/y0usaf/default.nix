@@ -157,7 +157,7 @@
       upscale.enable = true;
     };
     shell = {
-      zsh.enable = true;
+      zsh.enable = false;
       nushell.enable = true;
       cat-fetch.enable = true;
       zellij = {
