@@ -83,6 +83,9 @@ in {
 
               $env.config.completions.use_ls_colors = true
               $env.config.completions.algorithm = "prefix"
+
+              $env.config.show_banner = false
+              uname
             '';
             clobber = true;
           };
