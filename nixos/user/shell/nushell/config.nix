@@ -143,7 +143,7 @@ in {
         }
         // lib.optionalAttrs config.user.shell.zellij.enable {
           ".config/nushell/zellij.nu" = {
-            source = ./nushell/zellij.nu;
+            source = ./zellij.nu;
           };
         };
     };
