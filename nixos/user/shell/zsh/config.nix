@@ -79,25 +79,34 @@ in {
             clobber = true;
           };
           ".config/zsh/.zshrc" = {
-            text = lib.concatStringsSep "\n" [
-              # Load aliases
-              "source \"$ZDOTDIR/aliases.zsh\""
+            text = lib.concatStringsSep "\n" (
+              [
+                # Load aliases
+                "source \"$ZDOTDIR/aliases.zsh\""
+              ]
+              ++ lib.optional config.user.shell.zellij.enable "source \"$ZDOTDIR/zellij.zsh\""
+              ++ [
+                # History settings
+                settingsData.history
 
-              # History settings
-              settingsData.history
+                # Completion settings
+                settingsData.completion
 
-              # Completion settings
-              settingsData.completion
+                # Prompt
+                settingsData.prompt
 
-              # Prompt
-              settingsData.prompt
-
-              # Functions
-              functionsData.temppkg
-              functionsData.temprun
-              functionsData.fanspeed
-            ];
+                # Functions
+                functionsData.temppkg
+                functionsData.temprun
+                functionsData.fanspeed
+              ]
+            );
             clobber = true;
+          };
+        }
+        // lib.optionalAttrs config.user.shell.zellij.enable {
+          ".config/zsh/zellij.zsh" = {
+            source = ./zsh/zellij.zsh;
           };
         }
         // lib.optionalAttrs (config.networking.hostName == "y0usaf-desktop") {
