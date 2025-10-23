@@ -85,7 +85,7 @@ in {
               $env.config.completions.algorithm = "prefix"
 
               $env.config.show_banner = false
-              ({User: $env.USER, Host: (hostname)} | merge (uname | reject kernel-version | rename kernel-name Kernel | rename kernel-release "Kernel-Release" | rename operating-system "Operating-System" | rename machine Machine)) | select User Host Kernel "Kernel-Release" "Operating-System" Machine
+              uname | reject kernel-version | rename kernel-name Kernel | rename kernel-release "Kernel-Release" | rename operating-system "Operating-System" | rename machine Machine | insert User $env.USER | insert Host (hostname) | select User Host Kernel "Kernel-Release" "Operating-System" Machine
             '';
             clobber = true;
           };
