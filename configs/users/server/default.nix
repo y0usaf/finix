@@ -37,25 +37,20 @@
   };
 
   user = {
-    core = {
-      packages.enable = true;
-      user = {
-        enable = true;
-      };
-      defaults = {
-        editor = lib.mkDefault "nvim";
-        terminal = lib.mkDefault "foot";
-        browser = lib.mkDefault "firefox";
-        discord = lib.mkDefault "discord";
-        fileManager = lib.mkDefault "pcmanfm";
-        mediaPlayer = lib.mkDefault "mpv";
-        imageViewer = lib.mkDefault "imv";
-        archiveManager = lib.mkDefault "file-roller";
-        launcher = lib.mkDefault "foot";
-        ide = lib.mkDefault "nvim";
-      };
+    packages.enable = true;
+    defaults = {
+      editor = lib.mkDefault "nvim";
+      terminal = lib.mkDefault "foot";
+      browser = lib.mkDefault "firefox";
+      discord = lib.mkDefault "discord";
+      fileManager = lib.mkDefault "pcmanfm";
+      mediaPlayer = lib.mkDefault "mpv";
+      imageViewer = lib.mkDefault "imv";
+      archiveManager = lib.mkDefault "file-roller";
+      launcher = lib.mkDefault "foot";
+      ide = lib.mkDefault "nvim";
     };
-    directories = {
+    paths = {
       flake.path = "/home/y0usaf/nixos";
     };
     dev = {

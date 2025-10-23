@@ -14,49 +14,46 @@
     ignoreShellProgramCheck = true;
   };
   user = {
-    core = {
-      packages.enable = true;
-      defaults = {
-        browser = lib.mkDefault "librewolf";
-        editor = lib.mkDefault "nvim";
-        terminal = lib.mkDefault "foot";
-        fileManager = lib.mkDefault "pcmanfm";
-        launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
-        archiveManager = lib.mkDefault "file-roller";
-        imageViewer = lib.mkDefault "imv";
-        mediaPlayer = lib.mkDefault "mpv";
-      };
-      appearance = {
-        enable = true;
-        dpi = 144;
-        baseFontSize = 12;
-        cursorSize = 36;
-        fonts = {
-          main = [
-            {
-              package = flakeInputs.fast-fonts.packages.${system}.default;
-              name = "Fast IosevkaSlab";
-            }
-          ];
-          fallback = [
-            {
-              package = pkgs.noto-fonts-emoji;
-              name = "Noto Color Emoji";
-            }
-            {
-              package = pkgs.noto-fonts-cjk-sans;
-              name = "Noto Sans CJK";
-            }
-            {
-              package = pkgs.font-awesome;
-              name = "Font Awesome";
-            }
-          ];
-        };
-      };
-      user.enable = true;
+    packages.enable = true;
+    defaults = {
+      browser = lib.mkDefault "librewolf";
+      editor = lib.mkDefault "nvim";
+      terminal = lib.mkDefault "foot";
+      fileManager = lib.mkDefault "pcmanfm";
+      launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
+      archiveManager = lib.mkDefault "file-roller";
+      imageViewer = lib.mkDefault "imv";
+      mediaPlayer = lib.mkDefault "mpv";
     };
-    directories = {
+    appearance = {
+      enable = true;
+      dpi = 144;
+      baseFontSize = 12;
+      cursorSize = 36;
+      fonts = {
+        main = [
+          {
+            package = flakeInputs.fast-fonts.packages.${system}.default;
+            name = "Fast IosevkaSlab";
+          }
+        ];
+        fallback = [
+          {
+            package = pkgs.noto-fonts-emoji;
+            name = "Noto Color Emoji";
+          }
+          {
+            package = pkgs.noto-fonts-cjk-sans;
+            name = "Noto Sans CJK";
+          }
+          {
+            package = pkgs.font-awesome;
+            name = "Font Awesome";
+          }
+        ];
+      };
+    };
+    paths = {
       music.path = "/home/guest/Music";
       dcim.path = "/home/guest/DCIM";
     };
