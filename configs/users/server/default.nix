@@ -37,7 +37,6 @@
   };
 
   user = {
-    packages.enable = true;
     defaults = {
       editor = lib.mkDefault "nvim";
       terminal = lib.mkDefault "foot";

@@ -27,7 +27,6 @@
     }
   ];
   user = {
-    packages.enable = true;
     defaults = {
       browser = "librewolf";
       editor = lib.mkDefault "nvim";
