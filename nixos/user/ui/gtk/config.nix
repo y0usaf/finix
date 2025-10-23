@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: let
-  mainFontName = (builtins.elemAt config.user.core.appearance.fonts.main 0).name;
-  inherit (config.user.core.appearance) baseFontSize;
-  inherit (config.user.core.user) bookmarks;
+  mainFontName = (builtins.elemAt config.user.appearance.fonts.main 0).name;
+  inherit (config.user.appearance) baseFontSize;
+  inherit (config.user.paths) bookmarks;
   scaleFactor = config.user.ui.gtk.scale;
 
   styles = import ./css.nix {inherit config lib;};
@@ -18,7 +18,7 @@
       gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
       gtk-font-name = "${mainFontName} ${toString baseFontSize}";
       gtk-xft-antialias = 1;
-      gtk-xft-dpi = toString config.user.core.appearance.dpi;
+      gtk-xft-dpi = toString config.user.appearance.dpi;
       gtk-xft-hinting = 1;
       gtk-xft-hintstyle = "hintslight";
       gtk-xft-rgba = "rgb";

@@ -32,7 +32,7 @@ in {
             text = lib.mkAfter ''
               [Settings]
               gtk-cursor-theme-name=${x11ThemeName}
-              gtk-cursor-theme-size=${toString config.user.core.appearance.cursorSize}
+              gtk-cursor-theme-size=${toString config.user.appearance.cursorSize}
             '';
             clobber = true;
           };
@@ -40,7 +40,7 @@ in {
             text = lib.mkAfter ''
               [Settings]
               gtk-cursor-theme-name=${x11ThemeName}
-              gtk-cursor-theme-size=${toString config.user.core.appearance.cursorSize}
+              gtk-cursor-theme-size=${toString config.user.appearance.cursorSize}
             '';
             clobber = true;
           };
@@ -49,11 +49,11 @@ in {
           ".config/zsh/.zprofile" = {
             text = lib.mkAfter (''
                 export XCURSOR_THEME="${x11ThemeName}"
-                export XCURSOR_SIZE="${toString config.user.core.appearance.cursorSize}"
+                export XCURSOR_SIZE="${toString config.user.appearance.cursorSize}"
               ''
               + lib.optionalString (hyprcursorPackage != null) ''
                 export HYPRCURSOR_THEME="DeepinDarkV20-hypr"
-                export HYPRCURSOR_SIZE="${toString config.user.core.appearance.cursorSize}"
+                export HYPRCURSOR_SIZE="${toString config.user.appearance.cursorSize}"
               '');
             clobber = true;
           };
@@ -62,7 +62,7 @@ in {
           ".config/nushell/env.nu" = {
             text = lib.mkAfter ''
               $env.XCURSOR_THEME = "${x11ThemeName}"
-              $env.XCURSOR_SIZE = "${toString config.user.core.appearance.cursorSize}"
+              $env.XCURSOR_SIZE = "${toString config.user.appearance.cursorSize}"
             '';
             clobber = true;
           };

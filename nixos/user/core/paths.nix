@@ -15,7 +15,7 @@
     };
   };
 in {
-  options.user.directories = {
+  options.user.paths = {
     flake = mkOpt dirModule "The directory where the flake lives.";
     music = mkOpt dirModule "Directory for music files.";
     dcim = mkOpt dirModule "Directory for pictures (DCIM).";
@@ -26,5 +26,10 @@ in {
         video = mkOpt dirModule "Wallpaper directory for videos.";
       };
     }) "Wallpaper directories configuration";
+    bookmarks = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "GTK bookmarks for file manager";
+    };
   };
 }
