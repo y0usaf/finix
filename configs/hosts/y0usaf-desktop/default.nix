@@ -10,7 +10,7 @@
   ...
 }: {
   imports = [
-    ../../../modules/system
+    ../../../nixos
     ./hardware-configuration.nix
     ../../users/y0usaf
   ];
