@@ -14,7 +14,6 @@
     ignoreShellProgramCheck = true;
   };
   user = {
-    packages.enable = true;
     defaults = {
       browser = lib.mkDefault "librewolf";
       editor = lib.mkDefault "nvim";

@@ -24,14 +24,13 @@
   ];
 in {
   options.user.packages = {
-    enable = lib.mkEnableOption "core packages and base system tools";
     extraPackages = lib.mkOption {
       type = lib.types.listOf lib.types.package;
       default = [];
       description = "Additional packages to install";
     };
   };
-  config = lib.mkIf config.user.packages.enable {
+  config = {
     environment.systemPackages = basePackages ++ config.user.packages.extraPackages;
   };
 }
