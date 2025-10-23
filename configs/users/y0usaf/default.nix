@@ -27,62 +27,49 @@
     }
   ];
   user = {
-    core = {
-      packages.enable = true;
-      user = {
-        enable = true;
-        bookmarks = [
-          "file:///home/y0usaf/Downloads Downloads"
-          "file:///home/y0usaf/Documents Documents"
-          "file:///home/y0usaf/Music Music"
-          "file:///home/y0usaf/DCIM Pictures"
-          "file:///home/y0usaf/nixos NixOS"
-          "file:///tmp tmp"
+    packages.enable = true;
+    defaults = {
+      browser = "librewolf";
+      editor = lib.mkDefault "nvim";
+      ide = lib.mkDefault "cursor";
+      terminal = lib.mkDefault "foot";
+      fileManager = lib.mkDefault "pcmanfm";
+      launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
+      discord = lib.mkDefault "discord-canary";
+      archiveManager = lib.mkDefault "file-roller";
+      imageViewer = lib.mkDefault "imv";
+      mediaPlayer = lib.mkDefault "mpv";
+    };
+    appearance = {
+      enable = true;
+      dpi = 144;
+      baseFontSize = 12;
+      cursorSize = 18;
+      opacity = 0.7;
+      fonts = {
+        main = [
+          {
+            package = flakeInputs.fast-fonts.packages.${system}.default;
+            name = "Fast IosevkaSlab";
+          }
+        ];
+        fallback = [
+          {
+            package = pkgs.noto-fonts-emoji;
+            name = "Noto Color Emoji";
+          }
+          {
+            package = pkgs.noto-fonts-cjk-sans;
+            name = "Noto Sans CJK";
+          }
+          {
+            package = pkgs.font-awesome;
+            name = "Font Awesome";
+          }
         ];
       };
-      defaults = {
-        browser = "librewolf";
-        editor = lib.mkDefault "nvim";
-        ide = lib.mkDefault "cursor";
-        terminal = lib.mkDefault "foot";
-        fileManager = lib.mkDefault "pcmanfm";
-        launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
-        discord = lib.mkDefault "discord-canary";
-        archiveManager = lib.mkDefault "file-roller";
-        imageViewer = lib.mkDefault "imv";
-        mediaPlayer = lib.mkDefault "mpv";
-      };
-      appearance = {
-        enable = true;
-        dpi = 144;
-        baseFontSize = 12;
-        cursorSize = 18;
-        opacity = 0.7;
-        fonts = {
-          main = [
-            {
-              package = flakeInputs.fast-fonts.packages.${system}.default;
-              name = "Fast IosevkaSlab";
-            }
-          ];
-          fallback = [
-            {
-              package = pkgs.noto-fonts-emoji;
-              name = "Noto Color Emoji";
-            }
-            {
-              package = pkgs.noto-fonts-cjk-sans;
-              name = "Noto Sans CJK";
-            }
-            {
-              package = pkgs.font-awesome;
-              name = "Font Awesome";
-            }
-          ];
-        };
-      };
     };
-    directories = {
+    paths = {
       flake.path = "/home/y0usaf/nixos";
       music.path = "/home/y0usaf/Music";
       dcim.path = "/home/y0usaf/DCIM";
@@ -94,6 +81,14 @@
         static.path = "/home/y0usaf/DCIM/Wallpapers/32_9";
         video.path = "/home/y0usaf/DCIM/Wallpapers_Video";
       };
+      bookmarks = [
+        "file:///home/y0usaf/Downloads Downloads"
+        "file:///home/y0usaf/Documents Documents"
+        "file:///home/y0usaf/Music Music"
+        "file:///home/y0usaf/DCIM Pictures"
+        "file:///home/y0usaf/nixos NixOS"
+        "file:///tmp tmp"
+      ];
     };
     ui = {
       ags.enable = true;
