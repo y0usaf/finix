@@ -61,7 +61,7 @@ in {
 
               export_vars_from_files "${tokensDirectory}"
 
-              let hostname = (sys | get host.name)
+              let hostname = (hostname)
               $env.HOST = $hostname
               $env.HOSTNAME = $hostname
 
