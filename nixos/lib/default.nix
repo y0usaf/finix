@@ -54,7 +54,6 @@ in {
           ];
           _module.args = {
             inherit hostConfig lib genLib system;
-            # Pass inputs for modules that might need them
             flakeInputs = inputs;
           };
         };
