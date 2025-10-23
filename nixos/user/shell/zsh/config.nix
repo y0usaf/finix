@@ -70,9 +70,9 @@ in {
                 export_vars_from_files "${tokensDirectory}"
 
 
-                export TERMINAL="${config.user.core.defaults.terminal}"
-                export BROWSER="${config.user.core.defaults.browser}"
-                export EDITOR="${config.user.core.defaults.editor}"
+                export TERMINAL="${config.user.defaults.terminal}"
+                export BROWSER="${config.user.defaults.browser}"
+                export EDITOR="${config.user.defaults.editor}"
               '';
             in
               tokenFunctionScript;

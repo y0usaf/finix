@@ -1,5 +1,5 @@
 {lib, ...}: {
-  options.user.core.defaults = {
+  options.user.defaults = {
     browser = lib.mkOption {
       type = lib.types.str;
       default = "firefox";

@@ -23,7 +23,7 @@
     pkgs.ripgrep
   ];
 in {
-  options.user.core.packages = {
+  options.user.packages = {
     enable = lib.mkEnableOption "core packages and base system tools";
     extraPackages = lib.mkOption {
       type = lib.types.listOf lib.types.package;
@@ -31,7 +31,7 @@ in {
       description = "Additional packages to install";
     };
   };
-  config = lib.mkIf config.user.core.packages.enable {
-    environment.systemPackages = basePackages ++ config.user.core.packages.extraPackages;
+  config = lib.mkIf config.user.packages.enable {
+    environment.systemPackages = basePackages ++ config.user.packages.extraPackages;
   };
 }

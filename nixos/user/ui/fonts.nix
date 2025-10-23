@@ -3,8 +3,8 @@
   lib,
   ...
 }: let
-  mainFontNames = map (x: x.name) config.user.core.appearance.fonts.main;
-  fallbackNames = map (x: x.name) config.user.core.appearance.fonts.fallback;
+  mainFontNames = map (x: x.name) config.user.appearance.fonts.main;
+  fallbackNames = map (x: x.name) config.user.appearance.fonts.fallback;
   fontXmlConfig = ''
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
@@ -62,7 +62,7 @@
         <edit name="rgba" mode="assign"><const>rgb</const></edit>
         <edit name="autohint" mode="assign"><bool>true</bool></edit>
         <edit name="lcdfilter" mode="assign"><const>lcdlight</const></edit>
-        <edit name="dpi" mode="assign"><double>${toString config.user.core.appearance.dpi}</double></edit>
+        <edit name="dpi" mode="assign"><double>${toString config.user.appearance.dpi}</double></edit>
       </match>
     </fontconfig>
   '';
@@ -75,7 +75,7 @@ in {
     };
   };
   config = lib.mkIf config.user.ui.fonts.enable {
-    environment.systemPackages = (map (x: x.package) config.user.core.appearance.fonts.main) ++ (map (x: x.package) config.user.core.appearance.fonts.fallback);
+    environment.systemPackages = (map (x: x.package) config.user.appearance.fonts.main) ++ (map (x: x.package) config.user.appearance.fonts.fallback);
 
     hjem.users.${config.user.name} = {
       files.".config/fontconfig/fonts.conf" = {
