@@ -123,7 +123,7 @@ in {
 
               # Nix utilities
               def buildtime [] {
-                time { nix build $"($env.NH_FLAKE)#nixosConfigurations.($env.HOST).config.system.build.toplevel" --option eval-cache false }
+                nix build $"($env.NH_FLAKE)#nixosConfigurations.($env.HOST).config.system.build.toplevel" --option eval-cache false
               }
 
               # Utility
