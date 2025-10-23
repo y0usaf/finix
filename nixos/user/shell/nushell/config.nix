@@ -87,7 +87,7 @@ in {
               $env.config.show_banner = false
               let user = $env.USER
               let host = (hostname)
-              print $"(ansi bold_cyan)User(ansi reset): (ansi green)($user)(ansi reset)@(ansi yellow)($host)(ansi reset)"
+              print $"(ansi cyan)User(ansi reset): (ansi green)($user)(ansi reset)@(ansi yellow)($host)(ansi reset)"
               print ""
               uname | reject kernel-version
             '';
