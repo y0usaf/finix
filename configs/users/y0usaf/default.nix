@@ -41,7 +41,6 @@
       mediaPlayer = lib.mkDefault "mpv";
     };
     appearance = {
-      enable = true;
       dpi = 144;
       baseFontSize = 12;
       cursorSize = 18;
@@ -190,7 +189,6 @@
       formatNix.enable = true;
       syncthing = {
         enable = true;
-
         # Define all devices
         devices = {
           desktop = {
