@@ -60,9 +60,9 @@ in {
 
             export_vars_from_files "${tokensDirectory}"
 
-            $env.TERMINAL = "${config.user.core.defaults.terminal}"
-            $env.BROWSER = "${config.user.core.defaults.browser}"
-            $env.EDITOR = "${config.user.core.defaults.editor}"
+            $env.TERMINAL = "${config.user.defaults.terminal}"
+            $env.BROWSER = "${config.user.defaults.browser}"
+            $env.EDITOR = "${config.user.defaults.editor}"
           '';
           clobber = true;
         };

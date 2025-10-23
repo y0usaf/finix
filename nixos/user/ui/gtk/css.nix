@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  mainFontName = (builtins.elemAt config.user.core.appearance.fonts.main 0).name;
+  mainFontName = (builtins.elemAt config.user.appearance.fonts.main 0).name;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
@@ -19,7 +19,7 @@
   ];
   strokeLayers = 4;
   repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (_: shadowOffsets) strokeLayers));
-  baseOpacity = toString (config.user.core.appearance.opacity / 3);
+  baseOpacity = toString (config.user.appearance.opacity / 3);
   textColor = "white";
   backgroundColor = "rgba(0, 0, 0, ${baseOpacity})";
 in {

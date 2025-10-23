@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: let
-  computedFontSize = toString (config.user.core.appearance.baseFontSize * 1.33);
-  mainFontName = (builtins.elemAt config.user.core.appearance.fonts.main 0).name;
-  fallbackFontNames = map (x: x.name) config.user.core.appearance.fonts.fallback;
+  computedFontSize = toString (config.user.appearance.baseFontSize * 1.33);
+  mainFontName = (builtins.elemAt config.user.appearance.fonts.main 0).name;
+  fallbackFontNames = map (x: x.name) config.user.appearance.fonts.fallback;
   mainFontConfig =
     "${mainFontName}:size=${computedFontSize}, "
     + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") fallbackFontNames);
@@ -25,7 +25,7 @@
       alternate-scroll-mode = "yes";
     };
     colors = {
-      alpha = config.user.core.appearance.opacity;
+      alpha = config.user.appearance.opacity;
       background = "000000";
       foreground = "ffffff";
       regular0 = "000000";

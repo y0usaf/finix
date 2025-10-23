@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  inherit (config.user.core) defaults;
+  inherit (config.user) defaults;
 in {
   config = lib.mkIf config.user.ui.niri.enable {
     usr.files.".config/niri/config.kdl".value.binds = {
@@ -104,7 +104,7 @@ in {
 
       # Utilities
       "Alt+grave" = {spawn = ["bash" "-c" "niri msg pick-color | grep Hex: | cut -d' ' -f2 | wl-copy"];};
-      "Mod+Shift+C" = {spawn = ["sh" "-c" "killall swaybg; swaybg -i $(find ${config.user.directories.wallpapers.static.path} -type f | shuf -n 1) -m fill &"];};
+      "Mod+Shift+C" = {spawn = ["sh" "-c" "killall swaybg; swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill &"];};
 
       # Monitor controls
       "Mod+6" = {spawn = ["sh" "-c" "niri msg output DP-4 on; niri msg output DP-2 on; niri msg output HDMI-A-2 on"];};

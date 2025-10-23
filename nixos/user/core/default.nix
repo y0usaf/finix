@@ -3,9 +3,8 @@ _: {
     ./user-config.nix
     ./appearance.nix
     ./defaults.nix
-    ./directories.nix
+    ./paths.nix
     ./packages.nix
-    ./user.nix
     ./session
   ];
 }

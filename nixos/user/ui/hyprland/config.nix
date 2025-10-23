@@ -20,8 +20,8 @@
         ".config/hypr/hyprpaper.conf" = {
           clobber = true;
           text = ''
-            preload = ${config.user.directories.wallpapers.static.path}
-            wallpaper = ,${config.user.directories.wallpapers.static.path}
+            preload = ${config.user.paths.wallpapers.static.path}
+            wallpaper = ,${config.user.paths.wallpapers.static.path}
             splash = false
             ipc = on
           '';

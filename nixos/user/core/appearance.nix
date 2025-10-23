@@ -3,7 +3,7 @@
   lib,
   ...
 }: {
-  options.user.core.appearance = {
+  options.user.appearance = {
     enable = lib.mkEnableOption "appearance settings";
     fonts = lib.mkOption {
       type = lib.types.submodule {
@@ -78,6 +78,6 @@
     };
   };
   config =
-    lib.mkIf config.user.core.appearance.enable {
+    lib.mkIf config.user.appearance.enable {
     };
 }

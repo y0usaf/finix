@@ -4,7 +4,7 @@
   genLib,
   ...
 }: let
-  inherit (config.user.core) defaults;
+  inherit (config.user) defaults;
 
   variablesConfig = {
     "$mod" = "ALT";
