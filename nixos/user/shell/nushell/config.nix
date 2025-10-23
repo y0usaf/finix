@@ -117,6 +117,11 @@ in {
               def pip [...args] { ^pip3 ...$args }
               def venv [...args] { ^python3 -m venv ...$args }
 
+              # Nix utilities
+              def buildtime [] {
+                time (nix build $"($env.NH_FLAKE)#nixosConfigurations.($env.HOST).config.system.build.toplevel" --option eval-cache false)
+              }
+
               # Utility
               def cat [...args] { bat ...$args }
               def ide [] { zellij --layout ${homeDirectory}/.config/zellij/layouts/ide.kdl }
