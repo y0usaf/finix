@@ -1,3 +1,6 @@
 {
-  imports = [./config.nix];
+  imports = [
+    ./config.nix
+    ./xdg-env.nix
+  ];
 }
