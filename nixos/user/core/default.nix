@@ -1,5 +1,6 @@
 _: {
   imports = [
+    ./user-config.nix
     ./appearance.nix
     ./defaults.nix
     ./directories.nix

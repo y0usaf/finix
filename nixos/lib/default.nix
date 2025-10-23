@@ -50,7 +50,6 @@ in {
             })
             # nvf module for neovim
             inputs.nvf.nixosModules.default
-            ../user/options.nix
             ../user
           ];
           _module.args = {
