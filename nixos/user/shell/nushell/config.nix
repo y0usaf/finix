@@ -85,11 +85,7 @@ in {
               $env.config.completions.algorithm = "prefix"
 
               $env.config.show_banner = false
-              let user = $env.USER
-              let host = (hostname)
-              print $"(ansi cyan)User(ansi reset): (ansi green)($user)(ansi reset)@(ansi yellow)($host)(ansi reset)"
-              print ""
-              uname | reject kernel-version
+              uname | reject kernel-version | insert user $env.USER | insert host (hostname)
             '';
             clobber = true;
           };
