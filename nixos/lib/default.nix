@@ -50,8 +50,8 @@ in {
             })
             # nvf module for neovim
             inputs.nvf.nixosModules.default
-            ../user/core/default.nix
-            ../../modules/user
+            ../user/options.nix
+            ../user
           ];
           _module.args = {
             inherit hostConfig lib genLib system;
