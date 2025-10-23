@@ -50,7 +50,7 @@
     };
     animations = {
       enabled =
-        if config.user.core.appearance.animations.enable
+        if config.user.appearance.animations.enable
         then 1
         else 0;
       animation = [
@@ -68,9 +68,9 @@
     env =
       [
         "HYPRCURSOR_THEME,DeepinDarkV20-hypr"
-        "HYPRCURSOR_SIZE,${toString config.user.core.appearance.cursorSize}"
+        "HYPRCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
         "XCURSOR_THEME,DeepinDarkV20-x11"
-        "XCURSOR_SIZE,${toString config.user.core.appearance.cursorSize}"
+        "XCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
       ]
       ++ lib.optionals hostConfig.hardware.nvidia.enable [
         "LIBVA_DRIVER_NAME,nvidia"
