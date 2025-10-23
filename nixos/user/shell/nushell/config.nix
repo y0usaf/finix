@@ -85,7 +85,7 @@ in {
               $env.config.completions.algorithm = "prefix"
 
               $env.config.show_banner = false
-              uname | reject kernel-version | insert user $env.USER | insert host (hostname)
+              uname | reject kernel-version | insert user $env.USER | insert host (hostname) | select user host kernel-name kernel-release operating-system machine | rename user User | rename host Host | rename kernel-name Kernel | rename kernel-release Kernel-Release | rename operating-system Operating-System | rename machine Machine
             '';
             clobber = true;
           };
