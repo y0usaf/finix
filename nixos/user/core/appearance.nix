@@ -4,7 +4,6 @@
   ...
 }: {
   options.user.appearance = {
-    enable = lib.mkEnableOption "appearance settings";
     fonts = lib.mkOption {
       type = lib.types.submodule {
         options = {
@@ -77,7 +76,4 @@
       description = "Global UI opacity setting (0.0 = fully transparent, 1.0 = fully opaque)";
     };
   };
-  config =
-    lib.mkIf config.user.appearance.enable {
-    };
 }
