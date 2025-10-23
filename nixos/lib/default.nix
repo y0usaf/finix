@@ -12,7 +12,7 @@
   inherit (pkgs) lib;
 
   # Custom generators library
-  genLib = import ./generators lib;
+  genLib = import ../../lib/generators lib;
 in {
   nixosConfigurations =
     lib.mapAttrs (_hostName: hostConfig:
@@ -50,8 +50,8 @@ in {
             })
             # nvf module for neovim
             inputs.nvf.nixosModules.default
-            ./user-config.nix
-            ../modules/user
+            ../user/core/default.nix
+            ../../modules/user
           ];
           _module.args = {
             inherit hostConfig lib genLib system;
@@ -61,15 +61,15 @@ in {
         };
       })
     {
-      y0usaf-desktop = import ../configs/hosts/y0usaf-desktop {
+      y0usaf-desktop = import ../../configs/hosts/y0usaf-desktop {
         inherit pkgs lib system inputs;
         flakeInputs = inputs;
       };
-      y0usaf-laptop = import ../configs/hosts/y0usaf-laptop {
+      y0usaf-laptop = import ../../configs/hosts/y0usaf-laptop {
         inherit pkgs lib system inputs;
         flakeInputs = inputs;
       };
-      y0usaf-server = import ../configs/hosts/y0usaf-server {
+      y0usaf-server = import ../../configs/hosts/y0usaf-server {
         inherit pkgs lib system inputs;
         flakeInputs = inputs;
       };
