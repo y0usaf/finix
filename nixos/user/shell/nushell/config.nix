@@ -85,7 +85,7 @@ in {
               $env.config.completions.algorithm = "prefix"
 
               $env.config.show_banner = false
-              uname -snrmo
+              uname | reject kernel-version
             '';
             clobber = true;
           };
