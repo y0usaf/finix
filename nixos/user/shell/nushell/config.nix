@@ -87,11 +87,10 @@ in {
               $env.config.show_banner = false
               uname | reject kernel-version | each { |row|
                 let k = ($row | get "kernel-name")
-                let n = ($row | get nodename)
                 let kr = ($row | get "kernel-release")
                 let os = ($row | get "operating-system")
                 let m = ($row | get machine)
-                {Kernel: $k, Nodename: $n, "Kernel-Release": $kr, "Operating-System": $os, Machine: $m, User: ($env.USER), Host: (hostname)}
+                {User: ($env.USER), Host: (hostname), Kernel: $k, Version: $kr, OS: $os, Machine: $m}
               }
             '';
             clobber = true;
