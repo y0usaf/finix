@@ -90,7 +90,8 @@ in {
                 let kr = ($row | get "kernel-release")
                 let os = ($row | get "operating-system")
                 let m = ($row | get machine)
-                {User: ($env.USER), Host: (hostname), Kernel: $"($k) ($kr)", OS: $os, Machine: $m}
+                let table = {User: ($env.USER), Host: (hostname), Kernel: $"($k) ($kr)", OS: $os, Machine: $m}
+                (ansi cyan) + ($table | table) + (ansi reset)
               }
             '';
             clobber = true;
