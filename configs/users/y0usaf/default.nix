@@ -73,6 +73,10 @@
         enable = true;
         mainFont = flakeInputs.fast-fonts.packages.${system}.default;
         mainFontName = "Fast IosevkaSlab";
+        backup = {
+          package = pkgs.noto-fonts-cjk-sans;
+          name = "Noto Sans CJK";
+        };
       };
       foot.enable = true;
       gtk = {

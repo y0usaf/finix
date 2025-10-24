@@ -5,7 +5,8 @@
   # Build font list from user config
   fontList = lib.concatStringsSep ", " [
     config.user.ui.fonts.mainFontName
-    config.user.ui.fonts.cjk.name
+    config.user.ui.fonts.backup.name
+    "Symbols Nerd Font"
     config.user.ui.fonts.emoji.name
   ];
 in {
