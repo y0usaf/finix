@@ -1,4 +1,4 @@
-{...}: {
+_: {
   config.usr.files.".claude/output-styles/explanatory.md" = {
     text = ''
       ---

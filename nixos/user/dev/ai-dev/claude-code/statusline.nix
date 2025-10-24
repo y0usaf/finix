@@ -1,4 +1,4 @@
-{...}: {
+_: {
   config.usr.files.".claude/statusline.sh" = {
     text = ''
       #!/bin/bash
