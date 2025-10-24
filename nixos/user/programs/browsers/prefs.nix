@@ -2,11 +2,12 @@
   config,
   lib,
 }: let
-  # Build font list from user appearance config
-  fontList = lib.concatStringsSep ", " (
-    [(builtins.elemAt config.user.appearance.fonts.main 0).name]
-    ++ map (f: f.name) config.user.appearance.fonts.fallback
-  );
+  # Build font list from user config
+  fontList = lib.concatStringsSep ", " [
+    config.user.ui.fonts.mainFontName
+    config.user.ui.fonts.cjk.name
+    config.user.ui.fonts.emoji.name
+  ];
 in {
   # Locked preferences (user cannot change)
   locked = {

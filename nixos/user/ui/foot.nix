@@ -5,8 +5,8 @@
   ...
 }: let
   computedFontSize = toString (config.user.appearance.baseFontSize * 1.33);
-  mainFontName = (builtins.elemAt config.user.appearance.fonts.main 0).name;
-  fallbackFontNames = map (x: x.name) config.user.appearance.fonts.fallback;
+  mainFontName = config.user.ui.fonts.mainFontName;
+  fallbackFontNames = [config.user.ui.fonts.cjk.name config.user.ui.fonts.emoji.name];
   mainFontConfig =
     "${mainFontName}:size=${computedFontSize}, "
     + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") fallbackFontNames);
