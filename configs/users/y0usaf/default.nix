@@ -44,28 +44,6 @@
       baseFontSize = 12;
       cursorSize = 18;
       opacity = 0.7;
-      fonts = {
-        main = [
-          {
-            package = flakeInputs.fast-fonts.packages.${system}.default;
-            name = "Fast IosevkaSlab";
-          }
-        ];
-        fallback = [
-          {
-            package = pkgs.noto-fonts-emoji;
-            name = "Noto Color Emoji";
-          }
-          {
-            package = pkgs.noto-fonts-cjk-sans;
-            name = "Noto Sans CJK";
-          }
-          {
-            package = pkgs.font-awesome;
-            name = "Font Awesome";
-          }
-        ];
-      };
     };
     paths = {
       flake.path = "/home/y0usaf/nixos";
@@ -91,7 +69,11 @@
     ui = {
       ags.enable = true;
       cursor.enable = true;
-      fonts.enable = true;
+      fonts = {
+        enable = true;
+        mainFont = flakeInputs.fast-fonts.packages.${system}.default;
+        mainFontName = "Fast IosevkaSlab";
+      };
       foot.enable = true;
       gtk = {
         enable = true;
