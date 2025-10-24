@@ -57,10 +57,20 @@
       url = "github:NotAShelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = {nixpkgs, ...} @ inputs: let
-    system = "x86_64-linux";
+  outputs = {
+    nixpkgs,
+    darwin,
+    ...
+  } @ inputs: let
+    linuxSystem = "x86_64-linux";
+    darwinSystem = "aarch64-darwin";
 
     # Centralized nixpkgs config
     nixpkgsConfig = {
@@ -73,12 +83,26 @@
 
     # Import lib with flake inputs
     nixosLib = import ./nixos/lib {
-      inherit inputs system nixpkgsConfig;
+      inherit inputs;
+      system = linuxSystem;
+      inherit nixpkgsConfig;
     };
   in {
     inherit (nixosLib) nixosConfigurations;
 
+    darwinConfigurations.y0usaf-macbook = darwin.lib.darwinSystem {
+      system = darwinSystem;
+      modules = [
+        {
+          networking.hostName = "y0usaf-macbook";
+          system.stateVersion = 4;
+          nix.settings.experimental-features = ["nix-command" "flakes"];
+        }
+      ];
+    };
+
     # Expose for easier access
-    formatter.${system} = nixpkgs.legacyPackages.${system}.alejandra;
+    formatter.${linuxSystem} = nixpkgs.legacyPackages.${linuxSystem}.alejandra;
+    formatter.${darwinSystem} = nixpkgs.legacyPackages.${darwinSystem}.alejandra;
   };
 }

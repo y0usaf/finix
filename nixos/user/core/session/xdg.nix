@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: {
+{config, ...}: {
   config = {
     usr.files = {
       ".config/user-dirs.dirs" = {

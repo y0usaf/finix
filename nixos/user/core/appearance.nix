@@ -1,7 +1,4 @@
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   options.user.appearance = {
     fonts = lib.mkOption {
       type = lib.types.submodule {
