@@ -1,4 +1,4 @@
-{lib, ...}: {
+{...}: {
   config.usr.files.".claude/settings.json" = {
     text = builtins.toJSON {
       includeCoAuthoredBy = false;
