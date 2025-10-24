@@ -5,7 +5,7 @@
   ...
 }: let
   computedFontSize = toString (config.user.appearance.baseFontSize * 1.33);
-  mainFontName = config.user.ui.fonts.mainFontName;
+  inherit (config.user.ui.fonts) mainFontName;
   fallbackFontNames = ["Symbols Nerd Font" config.user.ui.fonts.backup.name config.user.ui.fonts.emoji.name];
   mainFontConfig =
     "${mainFontName}:size=${computedFontSize}, "

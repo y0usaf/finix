@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  mainFontName = config.user.ui.fonts.mainFontName;
+  inherit (config.user.ui.fonts) mainFontName;
   inherit (config.user.appearance) baseFontSize;
   inherit (config.user.paths) bookmarks;
   scaleFactor = config.user.ui.gtk.scale;

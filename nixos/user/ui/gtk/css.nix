@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  mainFontName = config.user.ui.fonts.mainFontName;
+  inherit (config.user.ui.fonts) mainFontName;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
