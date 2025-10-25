@@ -4,5 +4,8 @@
     vim
     git
     nh
+    claude-code
+    raycast
+    kitty
   ];
 }
