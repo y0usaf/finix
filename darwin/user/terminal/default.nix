@@ -1,5 +1,5 @@
 {...}: {
   imports = [
-    ./claude-code
+    ./kitty.nix
   ];
 }
