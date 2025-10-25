@@ -62,11 +62,17 @@
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
     nixpkgs,
     darwin,
+    home-manager,
     ...
   } @ inputs: let
     linuxSystem = "x86_64-linux";
@@ -93,10 +99,32 @@
     darwinConfigurations.y0usaf-macbook = darwin.lib.darwinSystem {
       system = darwinSystem;
       modules = [
+        ./darwin
+        home-manager.darwinModules.home-manager
         {
           networking.hostName = "y0usaf-macbook";
-          system.stateVersion = 4;
-          nix.settings.experimental-features = ["nix-command" "flakes"];
+          networking.computerName = "y0usaf-macbook";
+          system.stateVersion = 5;
+
+          nix.settings = {
+            experimental-features = ["nix-command" "flakes"];
+            trusted-users = ["y0usaf" "@admin"];
+          };
+
+          # User configuration
+          users.users.y0usaf = {
+            name = "y0usaf";
+            home = "/Users/y0usaf";
+          };
+
+          # Install Fast Font system-wide
+          fonts.packages = [inputs.fast-fonts.packages.${darwinSystem}.default];
+
+          # Configure home-manager
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+
+          nixpkgs.config = nixpkgsConfig;
         }
       ];
     };
