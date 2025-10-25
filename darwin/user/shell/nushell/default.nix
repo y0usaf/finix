@@ -1,4 +1,7 @@
 {pkgs, ...}: {
+  # Set nushell as default shell
+  users.users.y0usaf.shell = pkgs.nushell;
+
   home-manager.users.y0usaf = {
     programs.nushell = {
       enable = true;
@@ -78,8 +81,8 @@
         pkgcount = "nix-store --query --requisites /run/current-system/sw | split row '/' | last | split column '-' | get column2 | sort | uniq | length";
 
         # Version control
-        hmpush = "git -C /Users/y0usaf/nixos-clean push origin main";
-        hmpull = "git -C /Users/y0usaf/nixos-clean fetch origin; git -C /Users/y0usaf/nixos-clean reset --hard origin/main";
+        hmpush = "git -C /Users/y0usaf/nixos push origin main";
+        hmpull = "git -C /Users/y0usaf/nixos fetch origin; git -C /Users/y0usaf/nixos reset --hard origin/main";
       };
     };
   };
