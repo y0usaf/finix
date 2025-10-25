@@ -1,9 +1,9 @@
-{pkgs, ...}: {
-  # Shell configuration
-  environment.systemPackages = with pkgs; [
-    nushell
-    zsh
+{...}: {
+  imports = [
+    ./zsh
+    ./nushell
   ];
 
+  # Enable zsh system-wide
   programs.zsh.enable = true;
 }

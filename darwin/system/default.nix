@@ -1,3 +1,5 @@
 {...}: {
-  # System-level darwin configuration
+  imports = [
+    ./tailscale.nix
+  ];
 }
