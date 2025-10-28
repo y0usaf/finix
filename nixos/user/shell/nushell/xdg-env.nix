@@ -22,11 +22,8 @@
           $env.ANDROID_HOME = ($env.XDG_DATA_HOME | path join "android")
           $env.ADB_VENDOR_KEY = ($env.XDG_CONFIG_HOME | path join "android")
           $env.PYENV_ROOT = ($env.XDG_DATA_HOME | path join "pyenv")
-          $env.NPM_CONFIG_USERCONFIG = ($env.XDG_CONFIG_HOME | path join "npm/npmrc")
-          $env.NPM_CONFIG_PREFIX = ($env.XDG_DATA_HOME | path join "npm")
-          $env.NPM_CONFIG_CACHE = ($env.XDG_CACHE_HOME | path join "npm")
-          $env.NPM_CONFIG_INIT_MODULE = ($env.XDG_CONFIG_HOME | path join "npm/config/npm-init.js")
-          $env.NPM_CONFIG_TMP = ($env.XDG_RUNTIME_DIR | path join "npm")
+          $env.BUN_INSTALL = ($env.XDG_DATA_HOME | path join "bun")
+          $env.BUNFIG = ($env.XDG_CONFIG_HOME | path join "bun/bunfig.toml")
           $env.NUGET_PACKAGES = ($env.XDG_CACHE_HOME | path join "NuGetPackages")
           $env.KERAS_HOME = ($env.XDG_STATE_HOME | path join "keras")
           $env.NIMBLE_DIR = ($env.XDG_DATA_HOME | path join "nimble")
@@ -67,6 +64,11 @@
 
           # nvidia-settings - Use XDG config directory (no env var support)
           alias nvidia-settings = ^nvidia-settings --config=($env.XDG_CONFIG_HOME | path join "nvidia/settings")
+
+          # Ensure XDG directories for bun exist
+          mkdir ($env.XDG_DATA_HOME | path join "bun")
+          mkdir ($env.XDG_CACHE_HOME | path join "bun")
+          mkdir ($env.XDG_CONFIG_HOME | path join "bun")
 
           # Function to create XDG directories if they don't exist
           def ensure_xdg_dirs [] {
