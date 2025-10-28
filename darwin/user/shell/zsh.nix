@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+_: {
   home-manager.users.y0usaf = {
     programs.zsh = {
       enable = true;
@@ -36,7 +36,7 @@
         hmpull = "git -C /Users/y0usaf/nixos-clean fetch origin && git -C /Users/y0usaf/nixos-clean reset --hard origin/main";
       };
 
-      initExtra = ''
+      initContent = ''
         # Token export function
         export_vars_from_files() {
             local dir_path=$1
@@ -108,14 +108,5 @@
         PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f %# '
       '';
     };
-
-    home.packages = with pkgs; [
-      bat
-      lsd
-      tree
-      ripgrep
-      statix
-      deadnix
-    ];
   };
 }

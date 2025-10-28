@@ -1,6 +1,7 @@
-{pkgs, ...}: {
-  # Allow passwordless sudo for nh
+_: {
+  # Allow passwordless sudo for admin group
   security.sudo.extraConfig = ''
-    %admin ALL=(ALL:ALL) NOPASSWD: ${pkgs.nh}/bin/nh
+    Defaults env_keep+="HOME"
+    %admin ALL=(ALL:ALL) NOPASSWD: ALL
   '';
 }

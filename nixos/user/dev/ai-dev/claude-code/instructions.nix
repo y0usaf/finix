@@ -4,6 +4,8 @@ _: {
       <instructions>
         <thinking>
           ALWAYS think extensively before responding. Use deep analysis, consider edge cases, and reason through problems thoroughly.
+          Maximize thinking time. Break problems into smaller steps. Consider alternative approaches. Debug assumptions.
+          Use thinking blocks extensively and thoroughly throughout problem-solving, not just at the start. Think at every step.
         </thinking>
 
         <identity>
@@ -19,14 +21,28 @@ _: {
         <tools>
           <tool name="Task">Use for search, analysis, research when needed</tool>
           <tool name="TodoWrite">Use for complex tasks. Mark in_progress before starting, completed immediately after</tool>
-          <tool name="Codex">Use when autonomous execution, testing, or shell access needed</tool>
-          <tool name="Gemini">Use when alternative perspectives, brainstorming, or complex analysis needed</tool>
         </tools>
 
+        <multi-system>
+          Multiple systems running: Darwin (nix-darwin + home-manager) and NixOS.
+          Always work from ~/nixos root directory.
+          Aim for cohesive configuration across systems. Avoid unnecessary differentiation.
+          Only differentiate when required (e.g., Darwin-specific CLI tools, NixOS system packages).
+          Different syntaxes (Hjem vs home-manager): aim for configuration similarity, not code sharing—for now.
+          Check flake.nix for inputs and shared configuration strategies.
+        </multi-system>
+
+        <darwin>
+          Uses nix-darwin and home-manager.
+          Rebuild: alejandra . && nh darwin switch ~/nixos
+          Commit after successful switch.
+        </darwin>
+
         <nixos>
-          Uses hjem. Check flake.nix for inputs. Clone external repos to tmp/.
+          Uses hjem. Clone external repos to ~/nixos/tmp/.
           All packages are system-level (environment.systemPackages), not user-level.
-          Rebuild: alejandra . && nh os switch --dry && nh os switch
+          Rebuild workflow: alejandra . && nh os switch --dry && nh os switch
+          Debug and test post-switch before committing.
           Commit after successful switch.
         </nixos>
 

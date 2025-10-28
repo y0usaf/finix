@@ -2,6 +2,7 @@
   imports = [
     ./tailscale.nix
     ./sudo.nix
-    ./debloat.nix
+    ./preferences
+    ./ui-effects.nix
   ];
 }

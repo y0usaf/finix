@@ -1,20 +1,5 @@
-{...}: {
+_: {
   # Disable macOS bloatware and unnecessary services
-
-  # Set primary user for user-specific defaults
-  system.primaryUser = "y0usaf";
-
-  # Disable various system services
-  system.defaults.LaunchServices.LSQuarantine = false; # Disable "Are you sure you want to open this application?" dialog
-
-  # Dock settings - hide unwanted apps
-  system.defaults.dock = {
-    show-recents = false;
-    static-only = true; # Only show open applications
-    # Remove all default apps from dock (user can add back what they want)
-  };
-
-  # Disable unwanted features
   system.defaults.CustomUserPreferences = {
     # Disable FaceTime auto-launch
     "com.apple.FaceTime" = {
@@ -37,12 +22,19 @@
     "com.apple.assistant.support" = {
       "Assistant Enabled" = false;
     };
-  };
 
-  # Disable Siri system-wide
-  system.defaults.CustomSystemPreferences = {
-    "com.apple.assistant.support" = {
-      "Assistant Enabled" = 0;
+    # Disable Spotlight keyboard shortcut (Cmd+Space)
+    "com.apple.symbolichotkeys" = {
+      "AppleSymbolicHotKeys" = {
+        "64" = {
+          "enabled" = false;
+        };
+      };
+    };
+
+    # Disable Spotlight indexing entirely (using Raycast instead)
+    "com.apple.spotlight" = {
+      "orderedItems" = [];
     };
   };
 
@@ -50,5 +42,5 @@
   # due to System Integrity Protection (SIP). However, you can:
   # 1. Hide them from Launchpad
   # 2. Use third-party tools to hide them (requires disabling SIP)
-  # 3. Remove them from Dock (configured above)
+  # 3. Remove them from Dock (configured in other modules)
 }
