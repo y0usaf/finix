@@ -5,7 +5,7 @@ _: {
     ./docker.nix
     ./gcloud.nix
     ./latex.nix
-    ./npm.nix
+    ./bun.nix
     ./nvim
     ./python.nix
     ./upscale.nix

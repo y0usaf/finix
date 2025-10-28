@@ -22,11 +22,8 @@
           export ANDROID_HOME="$XDG_DATA_HOME/android"
           export ADB_VENDOR_KEY="$XDG_CONFIG_HOME/android"
           export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
-          export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
-          export NPM_CONFIG_PREFIX="$XDG_DATA_HOME/npm"
-          export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
-          export NPM_CONFIG_INIT_MODULE="$XDG_CONFIG_HOME/npm/config/npm-init.js"
-          export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
+          export BUN_INSTALL="$XDG_DATA_HOME/bun"
+          export BUNFIG="$XDG_CONFIG_HOME/bun/bunfig.toml"
           export NUGET_PACKAGES="$XDG_CACHE_HOME/NuGetPackages"
           export KERAS_HOME="$XDG_STATE_HOME/keras"
           export NIMBLE_DIR="$XDG_DATA_HOME/nimble"
@@ -68,8 +65,8 @@
           # nvidia-settings - Use XDG config directory (no env var support)
           alias nvidia-settings='nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings"'
 
-          # Ensure XDG runtime directory for npm exists
-          [[ -d "$XDG_RUNTIME_DIR" ]] && mkdir -p "$XDG_RUNTIME_DIR/npm" 2>/dev/null
+          # Ensure XDG runtime directory for bun exists
+          [[ -d "$XDG_RUNTIME_DIR" ]] && mkdir -p "$XDG_RUNTIME_DIR/bun" 2>/dev/null
 
           # Function to create XDG directories if they don't exist
           ensure_xdg_dirs() {

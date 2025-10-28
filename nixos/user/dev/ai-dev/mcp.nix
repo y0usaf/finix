@@ -24,7 +24,7 @@ in {
   };
   config = lib.mkIf config.user.dev.mcp.enable {
     environment.systemPackages = [
-      pkgs.nodejs_20
+      pkgs.bun
       pkgs.uv
     ];
     usr = {
@@ -47,7 +47,7 @@ in {
     };
 
     systemd.tmpfiles.rules = [
-      "d ${config.user.homeDirectory}/.local/share/npm/lib/node_modules 0755 ${config.user.name} users - -"
+      "d ${config.user.homeDirectory}/.local/share/bun 0755 ${config.user.name} users - -"
     ];
   };
 }
