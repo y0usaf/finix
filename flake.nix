@@ -93,12 +93,31 @@
       system = linuxSystem;
       inherit nixpkgsConfig;
     };
+
+    # Darwin-specific: Iosevka Slab font from Fast-Fonts
+    darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};
+    iosevkaSlab = darwinPkgs.stdenvNoCC.mkDerivation {
+      pname = "fast-iosevka-slab";
+      version = "1.0.0";
+      src = inputs.fast-fonts;
+
+      installPhase = ''
+        mkdir -p $out/share/fonts/truetype
+        cp -f $src/fonts/Fast_IosevkaSlab.ttf $out/share/fonts/truetype/ || true
+      '';
+    };
   in {
     inherit (nixosLib) nixosConfigurations;
 
     darwinConfigurations.y0usaf-macbook = darwin.lib.darwinSystem {
       system = darwinSystem;
       modules = [
+        {
+          _module.args = {
+            inherit inputs iosevkaSlab;
+            inherit (inputs) nvf;
+          };
+        }
         ./darwin
         home-manager.darwinModules.home-manager
         {
@@ -121,9 +140,11 @@
           fonts.packages = [inputs.fast-fonts.packages.${darwinSystem}.default];
 
           # Configure home-manager
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.backupFileExtension = "backup";
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            backupFileExtension = "backup";
+          };
 
           nixpkgs.config = nixpkgsConfig;
         }

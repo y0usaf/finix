@@ -1,10 +1,10 @@
-{...}: {
+_: {
   home-manager.users.y0usaf = {
     home.file.".claude/settings.json" = {
       text = builtins.toJSON {
         includeCoAuthoredBy = false;
         outputStyle = "explanatory";
-        model = "claude-haiku-4-5-20251001";
+        model = "claude-haiku-4-5";
         env = {
           MAX_THINKING_TOKENS = "31999";
         };

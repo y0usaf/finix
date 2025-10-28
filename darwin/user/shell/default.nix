@@ -1,7 +1,8 @@
 {...}: {
   imports = [
-    ./zsh
-    ./nushell
+    ./zsh.nix
+    ./nushell.nix
+    ./zellij
   ];
 
   # Enable zsh system-wide
