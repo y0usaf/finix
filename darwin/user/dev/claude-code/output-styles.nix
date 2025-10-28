@@ -1,4 +1,4 @@
-{...}: {
+_: {
   home-manager.users.y0usaf = {
     home.file.".claude/output-styles/explanatory.md" = {
       text = ''
