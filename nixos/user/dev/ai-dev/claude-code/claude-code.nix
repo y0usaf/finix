@@ -9,8 +9,6 @@
   };
 
   config = lib.mkIf config.user.dev.claude-code.enable {
-    environment.systemPackages = [
-      pkgs.claude-code
-    ];
+    environment.systemPackages = [];
   };
 }
