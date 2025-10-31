@@ -6,7 +6,6 @@
 }: let
   zjstatusPackage = flakeInputs.zjstatus.packages.${config.nixpkgs.system}.default;
 
-  # Top status bar - main status info
   zjstatusTopBar = ''
     plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
       format_left   ""
@@ -49,7 +48,6 @@
     }
   '';
 
-  # Bottom status bar - centered hints
   zjstatusHintsBar = ''
     plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
       format_left   ""

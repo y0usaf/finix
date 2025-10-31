@@ -5,7 +5,6 @@
   ...
 }: {
   config = lib.mkIf (config.user.dev.nvim.enable && config.user.dev.nvim.neovide) {
-    # Package installed at system level via environment.systemPackages
     environment.systemPackages = [
       pkgs.neovide
     ];

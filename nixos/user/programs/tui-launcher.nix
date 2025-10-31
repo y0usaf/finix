@@ -1,9 +1,3 @@
-###############################################################################
-# TUI Launcher Module
-# A simple application launcher using fzf
-# - Creates the launcher script in ~/.config/scripts/
-# - Handles executable permissions properly
-###############################################################################
 {
   config,
   lib,
@@ -19,14 +13,9 @@
         executable = true;
         text = ''
           #!/usr/bin/env bash
-          # terminal application launcher for sway, using skim
-          # Based on: https://gitlab.com/FlyingWombat/my-scripts/blob/master/sway-launcher
-          # https://gist.github.com/Biont/40ef59652acf3673520c7a03c9f22d2a
           shopt -s nullglob globstar
           set -o pipefail
-          # Ensure file descriptor 3 is available for debug output
           exec 3>/dev/null
-          # shellcheck disable=SC2154
           trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND" >&2; exit $s' ERR
           IFS=$'\n\t'
           DEL=$'\34'
@@ -40,15 +29,12 @@
           CONFIG_DIR="''${XDG_CONFIG_HOME:-${config.user.homeDirectory}/.config}/tui-launcher"
           PROVIDERS_FILE="''${PROVIDERS_FILE:=providers.conf}"
           if [[ "''${PROVIDERS_FILE#/}" == "''${PROVIDERS_FILE}" ]]; then
-            # $PROVIDERS_FILE is a relative path, prepend $CONFIG_DIR
             PROVIDERS_FILE="''${CONFIG_DIR}/''${PROVIDERS_FILE}"
           fi
           if [[ ! -v PREVIEW_WINDOW ]]; then
               PREVIEW_WINDOW=up:3:border-rounded
           fi
 
-          # Provider config entries are separated by the field separator \034 and have the following structure:
-          # list_cmd,preview_cmd,launch_cmd
           declare -A PROVIDERS
           if [ -f "''${PROVIDERS_FILE}" ]; then
             while IFS=$'\t' read -r provider_name list_cmd preview_cmd launch_cmd; do
@@ -70,7 +56,7 @@
             PROVIDERS['desktop']="''${0} list-entries''${DEL}''${0} describe-desktop \"{1}\"''${DEL}''${0} run-desktop '{1}' {2}"
             PROVIDERS['command']="''${0} list-commands''${DEL}''${0} describe-command \"{1}\"''${DEL}''${TERMINAL_COMMAND} {1}"
           fi
-          PROVIDERS['user']="exit''${DEL}exit''${DEL}{1}" # Fallback provider that simply executes the exact command if there were no matches
+          PROVIDERS['user']="exit''${DEL}exit''${DEL}{1}"
 
           function describe() {
             [[ -z "''${1}" || -z "''${PROVIDERS[''${1}]+x}" ]] && return 0

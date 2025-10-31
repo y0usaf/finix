@@ -16,11 +16,10 @@
       };
       ".config/zsh/cat-fetch.zsh" = {
         text = ''
-          # Cat fetch display colors - pure fire
-          tomoe_colour='\033[1;38;2;255;0;255m'   # Pure magenta
-          moon_colour='\033[1;38;2;0;255;0m'      # Pure neon green
-          ekko_colour='\033[1;38;2;0;255;255m'    # Pure cyan
-          bozo_colour='\033[1;38;2;255;0;0m'      # Pure fire red
+          tomoe_colour='\033[1;38;2;255;0;255m'
+          moon_colour='\033[1;38;2;0;255;0m'
+          ekko_colour='\033[1;38;2;0;255;255m'
+          bozo_colour='\033[1;38;2;255;0;0m'
           reset='\033[0m'
 
           print_cats() {

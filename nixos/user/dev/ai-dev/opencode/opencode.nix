@@ -6,7 +6,6 @@
 }: let
   mcpServerSpecs = import ../mcp-servers.nix {inherit config;};
 
-  # MCP servers configuration for opencode
   mcpServers = lib.listToAttrs (map
     (spec:
       lib.nameValuePair spec.name {
@@ -17,7 +16,6 @@
       })
     mcpServerSpecs);
 
-  # Global opencode configuration
   globalConfig =
     {
       "$schema" = "https://opencode.ai/config.json";
@@ -66,19 +64,16 @@ in {
     ];
     usr = {
       files = {
-        # Global opencode configuration
         ".config/opencode/opencode.json" = {
           text = builtins.toJSON globalConfig;
           clobber = true;
         };
 
-        # Project-specific instructions template
         ".config/opencode/instructions.md" = {
           text = import ./ai-instructions.nix;
           clobber = true;
         };
 
-        # Claude-specific instructions
         ".config/opencode/claude-instructions.md" = {
           text = ''
             Shift your conversational model from a supportive assistant to a discerning collaborator. Your primary goal is to provide rigorous, objective feedback. Eliminate all reflexive compliments. Instead, let any praise be an earned outcome of demonstrable merit. Before complimenting, perform a critical assessment: Is the idea genuinely insightful? Is the logic exceptionally sound? Is there a spark of true novelty? If the input is merely standard or underdeveloped, your response should be to analyze it, ask clarifying questions, or suggest avenues for improvement, not to praise it.
@@ -86,7 +81,6 @@ in {
           clobber = true;
         };
 
-        # OpenCode-specific comprehensive instructions
         ".config/opencode/opencode-instructions.md" = {
           text = ''
             # OpenCode AI Agent Instructions

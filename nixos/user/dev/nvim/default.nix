@@ -11,7 +11,6 @@
 
   config = lib.mkIf config.user.dev.nvim.enable {
     hjem.users.${config.user.name}.files = {
-      # Core nvim configuration using text approach (hjem doesn't require generator for text)
       ".config/nvim/init.lua".text = ''
         -- Leader keys
         vim.g.mapleader = " "

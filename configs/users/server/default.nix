@@ -85,7 +85,6 @@
       syncthing = {
         enable = true;
 
-        # Define all devices
         devices = {
           desktop = {
             id = "KII4S2Y-KWA6M4K-MCQAUOO-C6PMX4L-V5JVDPW-HHZF52D-HP57BNH-EKCCZQC";
@@ -102,7 +101,6 @@
           };
         };
 
-        # Define folders - for now just Tokens shared with all devices
         folders = {
           tokens = {
             id = "bv79n-fh4kx";

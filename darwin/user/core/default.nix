@@ -5,7 +5,6 @@
   ...
 }: let
   basePackages = with pkgs; [
-    # Core tools
     vim
     git
     nh
@@ -14,7 +13,6 @@
     alejandra
     bun
 
-    # CLI utilities
     bat
     lsd
     tree
@@ -23,17 +21,17 @@
     deadnix
     zellij
 
-    # Input remapping
     karabiner-elements
 
-    # UI/System tools
     alt-tab-macos
     discord
 
-    # Neovim via nvf
     nvf.packages.${pkgs.system}.default
   ];
 in {
-  # Core system packages with support for extra packages via options
+  imports = [
+    ./user-config.nix
+  ];
+
   environment.systemPackages = basePackages ++ config.user.packages.extraPackages;
 }

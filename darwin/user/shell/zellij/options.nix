@@ -9,31 +9,26 @@
     autoStart = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Automatically start Zellij session on shell startup";
     };
 
     package = lib.mkOption {
       type = lib.types.package;
       default = pkgs.zellij;
-      description = "The Zellij package to use";
     };
 
     settings = lib.mkOption {
       type = lib.types.attrs;
       default = {};
-      description = "Additional settings for Zellij configuration";
     };
 
     performanceMode = lib.mkOption {
       type = lib.types.bool;
       default = true;
-      description = "Optimize configuration for faster startup times";
     };
 
     themeConfig = lib.mkOption {
       type = lib.types.str;
       default = "";
-      description = "Theme configuration to append to zellij config";
     };
   };
 }

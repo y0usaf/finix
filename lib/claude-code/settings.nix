@@ -1,7 +1,6 @@
 {
   includeCoAuthoredBy = false;
   outputStyle = "explanatory";
-  #model = "claude-haiku-4-5";
   env = {
     MAX_THINKING_TOKENS = "31999";
   };

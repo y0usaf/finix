@@ -2,7 +2,6 @@
   description = "y0usaf's NixOS configuration";
 
   inputs = {
-    # Pin to same revision as npins had
     nixpkgs.url = "github:NixOS/nixpkgs/7df7ff7d8e00218376575f0acdcc5d66741351ee";
 
     flake-utils.url = "github:numtide/flake-utils";
@@ -72,6 +71,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    mango = {
+      url = "github:DreamMaoMao/mango";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -83,7 +87,6 @@
     linuxSystem = "x86_64-linux";
     darwinSystem = "aarch64-darwin";
 
-    # Centralized nixpkgs config
     nixpkgsConfig = {
       allowUnfree = true;
       cudaSupport = true;
@@ -92,10 +95,8 @@
       ];
     };
 
-    # Import claude-code lib at flake level
     claudeCodeLib = import ./lib/claude-code;
 
-    # Import lib with flake inputs
     nixosLib = import ./nixos/lib {
       inherit inputs;
       system = linuxSystem;
@@ -103,7 +104,6 @@
       inherit claudeCodeLib;
     };
 
-    # Darwin-specific: Iosevka Slab font from Fast-Fonts
     darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};
     darwinLib = darwinPkgs.lib;
     genLib = import ./lib/generators darwinLib;

@@ -13,13 +13,11 @@ in {
     pipeName = lib.mkOption {
       type = lib.types.str;
       default = "zjstatus_hints";
-      description = "Named pipe for communication between zjstatus and zjstatus-hints";
     };
 
     maxLength = lib.mkOption {
       type = lib.types.int;
       default = 0;
-      description = "Maximum length of hints (0 = no limit)";
     };
   };
 

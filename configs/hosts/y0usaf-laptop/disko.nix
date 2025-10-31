@@ -1,4 +1,3 @@
-# Y0usaf-Laptop Disko Configuration - Fixed to match actual hardware
 {
   pkgs,
   disko,

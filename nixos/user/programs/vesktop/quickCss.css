@@ -1,8 +1,6 @@
 @import url("https://raw.codeberg.page/AllPurposeMat/Disblock-Origin/DisblockOrigin.theme.css");
-/* ===========================================ROOT VARIABLES & CONFIGURATION=========================================== */
 :root {
 	container-name: root;
-	/* Layout Variables */
 	--custom-guild-list-padding: 8px;
 	--gap: 3px;
 	--divider-thickness: 1px;
@@ -10,23 +8,19 @@
 	--top-bar-height: var(--gap);
 	--chatbar-height: 44px;
 	--window-control-size: 12px;
-	/* Calculated Variables */
 	--custom-guild-list-width: calc(var(--guildbar-avatar-size) + var(--custom-guild-list-padding) * 2 + var(--border-thickness) * 2);
 	--custom-app-top-bar-height: var(--top-bar-height);
 	--custom-channel-textarea-text-area-height: var(--chatbar-height);
 	--custom-channel-header-height: calc(var(--guildbar-avatar-size) + var(--space-xs) + var(--border-thickness) * 2);
 	--top-bar-right-margin: calc(32px + var(--space-xs));
-	/* Transitions */
 	--border-hover-transition: 0.2s ease;
 	--list-item-transition: 0.2s ease;
 	--dms-icon-svg-transition: 0.4s ease;
-	/* Effects */
 	--panel-backdrop-filter: none;
 	--border-hover: var(--accent-2);
 }
 body {
 	container-name: body;
-	/* Typography */
 	--font: monospace;
 	--code-font: monospace;
 	--font-primary: var(--font), 'gg sans';
@@ -34,37 +28,31 @@ body {
 	--font-code: var(--code-font), 'gg mono';
 	line-height: 1.3;
 }
-/* ===========================================COLOR SYSTEM=========================================== */
 :root {
-	/* Base Colors */
 	--base-gray: oklch(54% 0 0);
 	--base-red: oklch(70% 0.13 0);
 	--base-green: oklch(70% 0.12 170);
 	--base-blue: oklch(70% 0.11 215);
 	--base-yellow: oklch(75% 0.12 90);
 	--base-purple: oklch(70% 0.12 310);
-	
-	/* Text Colors - computed from base gray */
+
 	--text-0: oklch(from var(--base-gray) calc(l + 0.45) c h);
 	--text-1: oklch(from var(--base-gray) calc(l + 0.41) c h);
 	--text-2: oklch(from var(--base-gray) calc(l + 0.31) c h);
 	--text-3: oklch(from var(--base-gray) calc(l + 0.21) c h);
 	--text-4: oklch(from var(--base-gray) calc(l + 0.06) c h);
 	--text-5: oklch(from var(--base-gray) calc(l - 0.14) c h);
-	
-	/* Background Colors - computed from base gray */
+
 	--bg-1: oklch(from var(--base-gray) calc(l - 0.23) c h);
 	--bg-2: oklch(from var(--base-gray) calc(l - 0.27) c h);
 	--bg-3: oklch(from var(--base-gray) calc(l - 0.31) c h);
 	--bg-4: oklch(0% 0 0);
-	
-	/* Interactive States - computed with opacity */
+
 	--hover: oklch(from var(--base-gray) l c h / 0.1);
 	--active: oklch(from var(--base-gray) l c h / 0.2);
 	--active-2: oklch(from var(--base-gray) l c h / 0.3);
 	--message-hover: var(--hover);
-	
-	/* Color Variants - computed from base colors */
+
 	--red-1: oklch(from var(--base-red) calc(l + 0.05) c h);
 	--red-2: var(--base-red);
 	--red-3: oklch(from var(--base-red) calc(l - 0.05) c h);
@@ -94,62 +82,50 @@ body {
 	--purple-3: oklch(from var(--base-purple) calc(l - 0.05) c h);
 	--purple-4: oklch(from var(--base-purple) calc(l - 0.10) c h);
 	--purple-5: oklch(from var(--base-purple) calc(l - 0.15) c h);
-	
-	/* Accent Colors */
+
 	--accent-1: var(--purple-1);
 	--accent-2: var(--purple-2);
 	--accent-3: var(--purple-3);
 	--accent-4: var(--purple-4);
 	--accent-5: var(--purple-5);
 	--accent-new: var(--red-2);
-	
-	/* Status Colors */
+
 	--online: var(--green-2);
 	--dnd: var(--red-2);
 	--idle: var(--yellow-2);
 	--streaming: var(--purple-2);
 	--offline: var(--text-4);
-	
-	/* Border Colors */
+
 	--border-light: var(--text-5);
 	--border: var(--text-5);
 	--border-hover: var(--purple-2);
 	--button-border: oklch(from var(--text-1) l c h / 0.1);
-	
-	/* Special Backgrounds */
+
 	--mention: linear-gradient(to right, color-mix(in hsl, var(--accent-2), transparent 90%) 40%, transparent);
 	--mention-hover: linear-gradient(to right, color-mix(in hsl, var(--accent-2), transparent 95%) 40%, transparent);
 	--reply: linear-gradient(to right, color-mix(in hsl, var(--text-3), transparent 90%) 40%, transparent);
 	--reply-hover: linear-gradient(to right, color-mix(in hsl, var(--text-3), transparent 95%) 40%, transparent);
 }
-/* ===========================================GLOBAL STYLES=========================================== */
-/* Remove all rounded corners globally */
 *,*::before,*::after {
 	border-radius: 0 !important;
 }
-/* Remove unnecessary backgrounds */
 .app__160d8,#app-mount,body {
 	background: transparent !important;
 }
-/* Placeholder styling */
 ::placeholder {
 	color: var(--text-5);
 }
-/* Selection styling */
 ::selection,.highlight {
 	background: var(--accent-3);
 	color: var(--text-0);
 }
-/* Scrollbar optimization */
 [class*='scroll'] {
 	will-change: scroll-position;
 }
 ::-webkit-scrollbar-thumb {
 	border-radius: 0 !important;
 }
-/* ===========================================PANEL SYSTEM=========================================== */
 .visual-refresh {
-	/* Main panel containers with unified styling */
 	.guilds_c48ade,.sidebarList_c48ade,.panels_c48ade,.chat_f75fb0 > .subtitleContainer_f75fb0,.container_c8ffbb,.content_f75fb0 > .membersWrap_c8ffbb,.container__133bf > .container__9293f,.container_f391e3 > .container__9293f,.homeWrapper__0920e > .container__9293f,.container__01ae2 > .container__9293f,.container_fb64c9 > .container__9293f,.peopleColumn__133bf,.nowPlayingColumn__133bf,.scroller_c880e8,.container_f391e3 > .content_f75fb0,.shop__6db1d,.content_f75fb0 > .outer_c0bea0,.searchResultsWrap_a9e706,.container_f369db,.chat_fb64c9,.container_a592e1,.callContainer_cb9592,.wrapper_cb9592.sidebarOpen_cb9592 .callContainer_cb9592,.callContainer__722ff,.chat_f75fb0 > .header_c791b2,.chat_f75fb0 > .scrollerBase_d125d2,.chat_f75fb0 > .header__0b563,.chat_f75fb0 > .container__0b563 {
 		background-color: var(--background-base-lower);
 		border: var(--border-thickness) solid var(--border-hover);
@@ -157,20 +133,16 @@ body {
 		box-sizing: border-box;
 		transition: border-color var(--border-hover-transition);
 	}
-	/* Hover effects for panels */
 	.guilds_c48ade:hover,.sidebarList_c48ade:hover,.panels_c48ade:hover,.chat_f75fb0 > .subtitleContainer_f75fb0:hover,.container_c8ffbb:hover,.content_f75fb0 > .membersWrap_c8ffbb:hover,.container__133bf > .container__9293f:hover,.container_f391e3 > .container__9293f:hover,.homeWrapper__0920e > .container__9293f:hover,.container__01ae2 > .container__9293f:hover,.container_fb64c9 > .container__9293f:hover,.peopleColumn__133bf:hover,.nowPlayingColumn__133bf:hover,.scroller_c880e8:hover,.container_f391e3 > .content_f75fb0:hover,.shop__6db1d:hover,.content_f75fb0 > .outer_c0bea0:hover,.searchResultsWrap_a9e706:hover,.container_f369db:hover,.chat_fb64c9:hover,.container_a592e1:hover,.callContainer_cb9592:hover,.wrapper_cb9592.sidebarOpen_cb9592 .callContainer_cb9592:hover,.callContainer__722ff:hover,.chat_f75fb0 > .header_c791b2:hover,.chat_f75fb0 > .scrollerBase_d125d2:hover,.chat_f75fb0 > .header__0b563:hover,.chat_f75fb0 > .container__0b563:hover {
 		border-color: var(--border-hover);
 	}
 }
-/* ===========================================LAYOUT & POSITIONING=========================================== */
 .visual-refresh {
-	/* User panel positioning */
 	.panels_c48ade {
 		bottom: 0;
 		left: 0;
 		width: 100%;
 	}
-	/* Layout margins and spacing */
 	.sidebar_c48ade {
 		margin: 0 var(--gap) var(--gap) var(--gap);
 	}
@@ -184,21 +156,18 @@ body {
 	.sidebarList_c48ade {
 		margin-bottom: calc(var(--custom-app-panels-height, 0) + var(--gap));
 	}
-	/* Guild list styling */
 	.scroller_ef3116 {
 		padding: var(--custom-guild-list-padding) 0;
 	}
 	.folderGroup__48112,.listItem__650eb {
 		width: 100%;
 	}
-	/* Container positioning */
 	.container__2637a {
 		padding-bottom: 0;
 	}
 	.container__9293f {
 		margin-bottom: var(--gap);
 	}
-	/* Top bar elements */
 	.title_c38106,.trailing_c38106 > a[href="https://support.discord.com"] {
 		display: none;
 	}
@@ -213,7 +182,6 @@ body {
 	.systemBar_c38106 .trailing_c38106 {
 		top: var(--space-xs);
 	}
-	/* Window controls */
 	.winButtons_c38106 {
 		padding: 0;
 	}
@@ -226,7 +194,6 @@ body {
 		box-sizing: border-box;
 		margin: 0;
 	}
-	/* Toolbar adjustments */
 	.toolbar__9293f {
 		padding-right: var(--top-bar-right-margin);
 	}
@@ -246,9 +213,7 @@ body {
 		z-index: 999;
 	}
 }
-/* ===========================================CHAT & MESSAGING=========================================== */
 .visual-refresh {
-	/* Chat container styling */
 	.chat_f75fb0 {
 		border: none !important;
 		background: none;
@@ -280,7 +245,6 @@ body {
 	.page_c48ade > div > .chat_f75fb0 > .content_f75fb0 {
 		border-left: none;
 	}
-	/* Messages wrapper */
 	.messagesWrapper__36d07 {
 		background-color: var(--background-base-lower);
 		border: var(--border-thickness) solid var(--border-hover);
@@ -296,7 +260,6 @@ body {
 	.scroller__36d07::-webkit-scrollbar-track {
 		margin-bottom: 26px;
 	}
-	/* Chat input area */
 	.form_f75fb0 {
 		display: flex;
 		flex-direction: column;
@@ -324,7 +287,6 @@ body {
 	.slateTextArea_ec4baf {
 		margin-left: 2px;
 	}
-	/* Typing indicator */
 	.chatContent_f75fb0:has(.typing_b88801) .messagesWrapper__36d07::before {
 		content: '';
 		position: absolute;
@@ -343,14 +305,12 @@ body {
 		padding: 0 0 0 var(--space-sm);
 		height: 26px;
 	}
-	/* Message styling */
 	.newMessagesBar__0f481 {
 		top: 12px;
 		left: 12px;
 		right: 12px;
 		padding: 0 8px;
 	}
-	/* Message highlights */
 	.message__5126c.mentioned__5126c::before,.replying__5126c::before,.ephemeral__5126c::before {
 		width: var(--divider-thickness);
 		height: calc(100% - 2px);
@@ -360,7 +320,6 @@ body {
 	.message__5126c {
 		margin-left: 4px;
 	}
-	/* Divider improvements */
 	.divider__908e2 {
 		border-width: var(--divider-thickness);
 	}
@@ -371,7 +330,6 @@ body {
 		margin-top: calc(var(--divider-thickness) - var(--divider-thickness) * 2);
 	}
 }
-/* ===========================================MEMBER LIST & SIDEBAR=========================================== */
 .visual-refresh {
 	.container_c8ffbb {
 		margin-left: var(--gap);
@@ -391,14 +349,12 @@ body {
 	.resizeHandle__01ae2 {
 		background: transparent;
 	}
-	/* DM list styling */
 	.privateChannels__35e86,.scroller__99e7c {
 		background: none;
 	}
 	.scroller__99e7c {
 		margin-bottom: 0;
 	}
-	/* DM user panel */
 	.content_f75fb0 > .outer_c0bea0 {
 		margin-left: var(--gap);
 		overflow: hidden;
@@ -413,9 +369,7 @@ body {
 		background-size: 100% calc(100% + 2 * var(--border-thickness));
 	}
 }
-/* ===========================================ANIMATIONS & INTERACTIONS=========================================== */
 .visual-refresh {
-	/* Hover animations for list items */
 	.wrapper__2ea32 .link__2ea32,.container__91a9d,.channel__972a0,.side_b3f026 .item_b3f026 {
 		transition: margin-left var(--list-item-transition);
 		will-change: margin-left;
@@ -436,7 +390,6 @@ body {
 	.wrapper__2ea32:hover .unread__2ea32 {
 		margin-left: 4px;
 	}
-	/* Server selected marker */
 	.pill_e5445c.wrapper__58105 {
 		width: calc((var(--custom-guild-list-padding) - 4px) / 2 + 4px);
 	}
@@ -445,9 +398,7 @@ body {
 		margin-left: calc((var(--custom-guild-list-padding) - 4px) / 2);
 	}
 }
-/* ===========================================DISCORD VARIABLE OVERRIDES=========================================== */
 body,.theme-dark:not(.custom-user-profile-theme),.theme-light:not(.custom-user-profile-theme) {
-	/* Background Variables */
 	--activity-card-background: var(--bg-3);
 	--background-accent: var(--bg-2);
 	--background-floating: var(--bg-3);
@@ -461,14 +412,12 @@ body,.theme-dark:not(.custom-user-profile-theme),.theme-light:not(.custom-user-p
 	--background-secondary: var(--bg-3);
 	--background-secondary-alt: var(--bg-3);
 	--background-tertiary: var(--bg-4);
-	/* Base Backgrounds */
 	--bg-base-primary: var(--bg-4);
 	--bg-base-secondary: var(--bg-4);
 	--bg-base-tertiary: var(--bg-3);
 	--background-base-low: var(--bg-4);
 	--background-base-lower: var(--bg-4);
 	--background-base-lowest: var(--bg-4);
-	/* Modifier Backgrounds */
 	--background-mod-subtle: var(--hover);
 	--background-mod-normal: var(--active);
 	--background-mod-strong: var(--active-2);
@@ -476,13 +425,11 @@ body,.theme-dark:not(.custom-user-profile-theme),.theme-light:not(.custom-user-p
 	--background-modifier-active: var(--active);
 	--background-modifier-hover: var(--hover);
 	--background-modifier-selected: var(--active);
-	/* Surface Backgrounds */
 	--background-surface-high: var(--bg-3);
 	--background-surface-higher: var(--bg-3);
 	--background-surface-highest: var(--bg-3);
 	--bg-surface-overlay: var(--bg-4);
 	--bg-surface-raised: var(--bg-3);
-	/* Text Variables */
 	--text-brand: var(--accent-1);
 	--text-danger: var(--red-1);
 	--text-link: var(--accent-1);
@@ -496,13 +443,11 @@ body,.theme-dark:not(.custom-user-profile-theme),.theme-light:not(.custom-user-p
 	--text-tertiary: var(--text-4);
 	--text-warning: var(--yellow-1);
 	--text-default: var(--text-3);
-	/* Border Variables */
 	--border-faint: var(--border-light);
 	--border-subtle: var(--border);
 	--border-normal: var(--border);
 	--border-strong: var(--border);
 	--input-border: var(--border);
-	/* Status Variables */
 	--status-danger: var(--red-2);
 	--status-dnd: var(--dnd);
 	--status-idle: var(--idle);
@@ -511,33 +456,26 @@ body,.theme-dark:not(.custom-user-profile-theme),.theme-light:not(.custom-user-p
 	--status-positive: var(--green-2);
 	--status-speaking: var(--green-2);
 	--status-warning: var(--yellow-2);
-	/* Interactive Variables */
 	--interactive-normal: var(--text-4);
 	--interactive-hover: var(--text-3);
 	--interactive-active: var(--text-3);
 	--interactive-muted: var(--text-5);
-	/* Brand Colors */
 	--bg-brand: var(--accent-2);
 	--brand-360: var(--accent-2);
 	--brand-500: var(--accent-2);
 	--blurple-50: var(--accent-2);
-	/* Mention Variables */
 	--mention-foreground: var(--accent-1);
 	--mention-background: color-mix(in hsl, var(--accent-2), transparent 90%);
-	/* Input Variables */
 	--input-background: var(--bg-3);
 	--channel-text-area-placeholder: var(--text-5);
 	--deprecated-text-input-bg: var(--bg-3);
 	--deprecated-text-input-border: var(--border-light);
-	/* Modal Variables */
 	--modal-background: var(--bg-4);
 	--modal-footer-background: var(--bg-4);
-	/* Scrollbar Variables */
 	--scrollbar-auto-thumb: var(--bg-3);
 	--scrollbar-auto-track: transparent;
 	--scrollbar-thin-thumb: var(--bg-3);
 	--scrollbar-thin-track: transparent;
-	/* Other Variables */
 	--chat-background-default: var(--bg-3);
 	--chat-text-muted: var(--text-5);
 	--white: var(--text-0);
@@ -546,23 +484,18 @@ body,.theme-dark:not(.custom-user-profile-theme),.theme-light:not(.custom-user-p
 	--card-primary-bg: var(--bg-3);
 	--card-secondary-bg: var(--bg-2);
 }
-/* ===========================================SPECIFIC ELEMENT STYLING=========================================== */
-/* Remove visual effects */
 .burstGlow__23977 {
 	display: none;
 }
-/* Avatar status indicators - hide default Discord status elements to use custom ones */
 .svg_cc5dd2 > mask,.svg__44b0c > circle,.svg__44b0c > g,.svg__44b0c rect[mask*='url(#'],.avatar__20a53 .status_a423bd {
 	display: none;
 }
-/* Keep the rect elements visible for color detection but make them transparent */
 .svg__44b0c > rect {
 	opacity: 0;
 }
 .mask__68edb > foreignObject,.svg__44b0c > foreignObject,.svg__2338f > foreignObject {
 	mask: none;
 }
-/* Custom status indicators */
 .wrapper__44b0c,.container__1ce5d {
 	--online-2: var(--online);
 	--dnd-2: var(--dnd);
@@ -581,41 +514,35 @@ body,.theme-dark:not(.custom-user-profile-theme),.theme-light:not(.custom-user-p
 	border: 2px solid var(--background-base-lower);
 	z-index: 1;
 }
-/* Online status */
 .wrapper__44b0c:has(rect[fill='#43a25a'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(67, 162, 90)'])::after,
 .container__1ce5d:has(.status_a423bd[style*='background-color: rgb(67, 162, 90)'])::after {
 	background: var(--online-2) !important;
 }
-/* DND status */
 .wrapper__44b0c:has(rect[fill='#d83a42'])::after,
 .wrapper__44b0c:has(rect[fill='#f23f43'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(216, 58, 66)'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(242, 63, 67)'])::after {
 	background: var(--dnd-2) !important;
 }
-/* Idle status */
 .wrapper__44b0c:has(rect[fill='#ca9654'])::after,
 .wrapper__44b0c:has(rect[fill='#faa61a'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(202, 150, 84)'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(250, 166, 26)'])::after {
 	background: var(--idle-2) !important;
 }
-/* Offline status */
 .wrapper__44b0c:has(rect[fill='#82838b'])::after,
 .wrapper__44b0c:has(rect[fill='#80848e'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(130, 131, 139)'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(128, 132, 142)'])::after {
 	background: var(--offline-2) !important;
 }
-/* Streaming status */
 .wrapper__44b0c:has(rect[fill='#9147ff'])::after,
 .wrapper__44b0c:has(rect[fill='#593695'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(145, 71, 255)'])::after,
 .wrapper__44b0c:has(rect[fill='rgb(89, 54, 149)'])::after {
 	background: var(--streaming-2) !important;
 }
-/* Badge styling */
 .lowerBadge_cc5dd2 {
 	border: 2px solid var(--background-base-lower);
 	bottom: -4px;
@@ -626,7 +553,6 @@ body,.theme-dark:not(.custom-user-profile-theme),.theme-light:not(.custom-user-p
 	top: -4px;
 	right: -4px;
 }
-/* System24 loading animation */
 .content_a2f514 {
 	display: flex;
 	flex-direction: column;

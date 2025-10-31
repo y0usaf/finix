@@ -1,6 +1,5 @@
 {
   "nixos-build" = ''
-    # /nixos-build
     Build and switch NixOS configuration safely:
     1. Format code with `alejandra .`
     2. Test build with `nh os switch --dry`
@@ -9,7 +8,6 @@
   '';
 
   "fix-issue" = ''
-    # /fix-issue
     Analyze and fix GitHub issue: $ARGUMENTS
     1. Use `gh issue view` to get issue details
     2. Search codebase for relevant files
@@ -20,7 +18,6 @@
   '';
 
   "review-pr" = ''
-    # /review-pr
     Comprehensive PR review: $ARGUMENTS
     1. Fetch PR details with `gh pr view`
     2. Review changed files for security issues
@@ -30,7 +27,6 @@
   '';
 
   "debug-error" = ''
-    # /debug-error
     Systematic error debugging: $ARGUMENTS
     1. Analyze the error message and stack trace
     2. Identify the failing component
@@ -41,7 +37,6 @@
   '';
 
   "optimize-performance" = ''
-    # /optimize-performance
     Performance optimization workflow: $ARGUMENTS
     1. Profile the current performance
     2. Identify the biggest bottlenecks
@@ -52,7 +47,6 @@
   '';
 
   "security-audit" = ''
-    # /security-audit
     Security vulnerability assessment: $ARGUMENTS
     1. Run automated security scanners
     2. Review code for OWASP Top 10 issues
@@ -63,7 +57,6 @@
   '';
 
   "test-coverage" = ''
-    # /test-coverage
     Improve test coverage: $ARGUMENTS
     1. Run coverage analysis
     2. Identify untested code paths
@@ -74,7 +67,6 @@
   '';
 
   "refactor-code" = ''
-    # /refactor-code
     Safe code refactoring: $ARGUMENTS
     1. Understand current code behavior
     2. Identify refactoring opportunities

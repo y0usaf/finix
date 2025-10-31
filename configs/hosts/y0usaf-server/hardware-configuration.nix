@@ -1,4 +1,3 @@
-# Hardware configuration for y0usaf-server
 {
   config,
   lib,

@@ -2,7 +2,6 @@
   config,
   lib,
 }: let
-  # Import shared prefs with Darwin-specific hardware acceleration settings
   sharedPrefs = import ../../../lib/shared/browsers/prefs.nix {
     config =
       config

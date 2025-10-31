@@ -16,26 +16,22 @@ in {
 
   config = lib.mkIf config.user.dev.claude-code.enable {
     usr.files = {
-      # Instructions (CLAUDE.md)
       ".claude/CLAUDE.md" = {
         text = claudeCodeLib.instructions;
         clobber = true;
       };
 
-      # Settings (settings.json)
       ".claude/settings.json" = {
         text = builtins.toJSON claudeCodeLib.settings;
         clobber = true;
       };
 
-      # Statusline script
       ".claude/statusline.sh" = {
         text = claudeCodeLib.statusline;
         executable = true;
         clobber = true;
       };
 
-      # Slash commands
       ".claude/commands/nixos-build.md" = {
         text = claudeCodeLib.commands.nixos-build;
         clobber = true;
@@ -76,7 +72,6 @@ in {
         clobber = true;
       };
 
-      # Skills
       ".claude/skills/ensemble/SKILL.md" = {
         text = claudeCodeLib.skills.ensemble.content;
         clobber = true;
@@ -107,7 +102,6 @@ in {
         clobber = true;
       };
 
-      # Agents
       ".claude/agents/search-pattern.md" = {
         text = claudeCodeLib.agents.search-pattern.content;
         clobber = true;
@@ -138,7 +132,6 @@ in {
         clobber = true;
       };
 
-      # Hooks
       ".claude/hooks/notification.ts" = {
         text = claudeCodeLib.hooks.notification;
         executable = true;
@@ -157,7 +150,6 @@ in {
         clobber = true;
       };
 
-      # Sound files for Linux
       ".claude/on-agent-need-attention.wav" = {
         source = "${awesome-claude-code}/on-agent-need-attention.wav";
         clobber = true;

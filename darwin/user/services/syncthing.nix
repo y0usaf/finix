@@ -1,4 +1,4 @@
-_: {
+{config, ...}: {
   home-manager.users.y0usaf.services.syncthing = {
     enable = true;
 
@@ -20,11 +20,10 @@ _: {
       };
 
       folders = {
-        # Tokens folder - shared on all devices including macbook
         tokens = {
           id = "bv79n-fh4kx";
           label = "Tokens";
-          path = "/Users/y0usaf/Tokens";
+          path = "${config.user.homeDirectory}/Tokens";
           devices = ["desktop" "laptop" "server" "phone"];
         };
       };

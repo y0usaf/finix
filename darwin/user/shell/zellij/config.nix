@@ -8,7 +8,6 @@
 }: let
   cfg = config.user.shell.zellij;
 
-  # Base configuration as structured data
   baseConfig =
     {
       hide_session_name = false;
@@ -50,7 +49,7 @@ in {
         home.file.".config/zellij/config.kdl" = {
           text =
             genLib.toKDL baseConfig
-            + "\n\n// Using default keybindings for now\n"
+            + "\n\n"
             + zjstatusHintsConfig
             + cfg.themeConfig;
         };
@@ -58,7 +57,6 @@ in {
       // lib.optionalAttrs cfg.autoStart {
         home.file.".config/zsh/init-zellij.zsh" = {
           text = ''
-            # Auto-start zellij if not already in a session
             if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && -z "$TMUX" ]]; then
               exec zellij
             fi

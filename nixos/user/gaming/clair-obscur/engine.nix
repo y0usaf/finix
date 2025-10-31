@@ -16,7 +16,6 @@
       generator = lib.generators.toINI {};
       value = {
         "ConsoleVariables" = {
-          # Performance Mod Core Settings
           "r.DiffuseIndirect.Denoiser" = "2";
           "r.FastBlurThreshold" = "0";
           "r.ForceHighestMipOnUITextures" = "1";
@@ -47,7 +46,6 @@
           "r.VT.MaxUploadsPerFrame" = "64";
           "r.VT.MaxTilesProducedPerFrame" = "64";
 
-          # Performance Mod Variable Settings
           "r.Lumen.Reflections.MaxRayIntensity" = "4";
           "r.Lumen.Reflections.ScreenSpaceReconstruction.KernelRadius" = "24";
           "r.Lumen.ScreenProbeGather.DownsampleFactor" = "32";
@@ -75,19 +73,16 @@
           "r.VolumetricFog.HistoryWeight" = "0.95";
           "r.VolumetricFog.VoxelizationShowOnlyPassIndex" = "-1";
 
-          # Performance Mod Lighting
           "r.EyeAdaptation.BlackHistogramBucketInfluence" = "1";
           "r.EyeAdaptation.LensAttenuation" = "0.5";
           "r.SkylightIntensityMultiplier" = "2";
           "r.Lumen.Reflections.SpecularScale" = "1.5";
 
-          # Performance Mod Lossless
           "r.LumenScene.Radiosity.UpdateFactor" = "128";
           "r.LumenScene.DirectLighting.UpdateFactor" = "128";
           "r.Lumen.Reflections.DownsampleFactor" = "1";
           "r.Lumen.Reflections.Temporal.MaxFramesAccumulated" = "32";
 
-          # Performance Mod Post Process
           "r.DepthOfFieldQuality" = "0";
           "r.FilmGrain" = "0";
           "r.LensFlareQuality" = "0";
@@ -95,7 +90,6 @@
           "r.SceneColorFringeQuality" = "0";
           "r.Tonemapper.Quality" = "0";
 
-          # Anti-Aliasing Disabled
           "r.DefaultFeature.AntiAliasing" = "0";
           "r.PostProcessAAQuality" = "0";
           "r.TemporalAA.Algorithm" = "0";
@@ -104,20 +98,16 @@
           "r.NGX.DLSS.PreferNISSharpen" = "0";
           "r.NGX.LogLevel" = "0";
 
-          # Performance Mod Custom
           "r.ViewDistanceScale" = "1.5";
 
-          # Ray Tracing Disabled (shader compilation issues)
           "r.RayTracing" = "0";
           "r.RayTracing.GlobalIllumination" = "0";
           "r.RayTracing.Reflections" = "0";
           "r.RayTracing.Shadows" = "0";
 
-          # Disable Niagara Ray Tracing specifically
           "fx.Niagara.RayTracing.Enable" = "0";
           "r.Niagara.RayTracing.Enable" = "0";
 
-          # CPU/Threading Optimizations from original config
           "bAllowAsynchronousShaderCompiling" = "1";
           "bAllowCompilingThroughWorkerThreads" = "1";
           "bAllowMultiThreadedShaderCompile" = "1";
@@ -137,7 +127,6 @@
           "r.ForceAllCoresForShaderCompiling" = "1";
           "r.ThreadedShaderCompilation" = "1";
 
-          # Essential Threading from original config
           "r.AllowMultiThreadedShaderCreation" = "1";
           "r.EnableMultiThreadedRendering" = "1";
           "r.RHICmdUseParallelAlgorithms" = "1";
@@ -152,7 +141,6 @@
           "r.AsyncPipelineCompile" = "1";
           "r.UseAsyncShaderPrecompilation" = "1";
 
-          # Parallel Processing (key ones)
           "r.ParallelShaderCompile" = "1";
           "r.ParallelRendering" = "1";
           "r.ParallelBasePass" = "1";
@@ -161,12 +149,10 @@
           "r.ParallelCulling" = "1";
           "r.ParallelDestruction" = "1";
 
-          # Memory/GC Threading
           "gc.AllowParallelGC" = "1";
           "gc.CreateGCClusters" = "1";
           "gc.MultithreadedDestructionEnabled" = "1";
 
-          # Physics Threading
           "p.AsyncSceneEnabled" = "1";
           "p.Chaos.PerParticleCollision.ISPC" = "1";
           "p.Chaos.Spherical.ISPC" = "1";
@@ -174,13 +160,11 @@
           "p.Chaos.TriangleMesh.ISPC" = "1";
           "p.Chaos.VelocityField.ISPC" = "1";
 
-          # Input Optimization
           "bDisableMouseAcceleration" = "1";
           "bEnableMouseSmoothing" = "0";
           "bViewAccelerationEnabled" = "0";
           "RawMouseInputEnabled" = "1";
 
-          # Essential Performance
           "t.MaxFPS" = "0";
           "bSmoothFrameRate" = "0";
           "r.OneFrameThreadLag" = "1";

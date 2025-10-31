@@ -8,17 +8,14 @@
       ".config/zsh/.zshenv" = {
         clobber = true;
         text = ''
-          # XDG Base Directory Specification
           export XDG_CONFIG_HOME="$HOME/.config"
           export XDG_DATA_HOME="$HOME/.local/share"
           export XDG_STATE_HOME="$HOME/.local/state"
           export XDG_CACHE_HOME="$HOME/.cache"
 
-          # Custom XDG directories for desktop integration
           export XDG_SCREENSHOTS_DIR="$HOME/Pictures/Screenshots"
           export XDG_WALLPAPERS_DIR="$HOME/Pictures/Wallpapers"
 
-          # Application XDG compliance - Environment Variables
           export ANDROID_HOME="$XDG_DATA_HOME/android"
           export ADB_VENDOR_KEY="$XDG_CONFIG_HOME/android"
           export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
@@ -57,23 +54,16 @@
 
       ".config/zsh/aliases/xdg-compliance.zsh" = {
         text = ''
-          # XDG Base Directory compliance aliases for apps that don't respect env vars
-
-          # wget - Force XDG compliance (additional layer beyond WGET_HSTS_FILE env var)
           alias wget='wget --hsts-file="$XDG_DATA_HOME/wget-hsts"'
 
-          # nvidia-settings - Use XDG config directory (no env var support)
           alias nvidia-settings='nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings"'
 
-          # Ensure XDG runtime directory for bun exists
           [[ -d "$XDG_RUNTIME_DIR" ]] && mkdir -p "$XDG_RUNTIME_DIR/bun" 2>/dev/null
 
-          # Function to create XDG directories if they don't exist
           ensure_xdg_dirs() {
               mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME" "$XDG_CACHE_HOME"
           }
 
-          # Run on shell startup
           ensure_xdg_dirs
         '';
       };
