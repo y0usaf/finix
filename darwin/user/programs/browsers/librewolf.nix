@@ -6,10 +6,8 @@
 }: let
   inherit (builtins) toJSON isBool isInt isString toString;
 
-  # Import preferences
   prefs = import ./prefs.nix {inherit config lib;};
 
-  # Convert preference value to JSON
   prefValue = pref:
     toJSON (
       if isBool pref || isInt pref || isString pref
@@ -17,7 +15,6 @@
       else toString pref
     );
 
-  # Convert attrs to JS pref calls
   attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
 in {
   imports = [

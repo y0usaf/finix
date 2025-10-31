@@ -5,7 +5,6 @@
   system,
   ...
 }: {
-  # Direct NixOS user configuration
   users.users.guest = {
     isNormalUser = true;
     shell = pkgs.zsh;

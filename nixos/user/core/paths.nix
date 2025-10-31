@@ -1,5 +1,4 @@
 {lib, ...}: let
-  # Define custom lib functions locally
   mkOpt = type: description: lib.mkOption {inherit type description;};
   dirModule = lib.types.submodule {
     options = {

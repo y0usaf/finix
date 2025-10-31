@@ -8,7 +8,6 @@
     ./bar-overlay.nix
   ];
 
-  # Legacy compatibility - enable bar-overlay by default when old ags.enable is used
   config = lib.mkIf (config.user.ui.ags.enable or false) {
     user.ui.ags.bar-overlay.enable = lib.mkDefault true;
   };

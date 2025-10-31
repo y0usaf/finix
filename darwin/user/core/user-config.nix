@@ -3,60 +3,54 @@
   config,
   ...
 }: {
-  imports = [
-    (lib.modules.mkAliasOptionModule ["usr"] ["hjem" "users" config.user.name])
-  ];
   options = {
     user = {
       name = lib.mkOption {
         type = lib.types.str;
-        description = "Primary username for the system";
       };
 
       homeDirectory = lib.mkOption {
         type = lib.types.path;
-        description = "Home directory path for the user";
       };
 
       configDirectory = lib.mkOption {
         type = lib.types.path;
         default = "${config.user.homeDirectory}/.config";
-        description = "XDG config directory path";
       };
 
       dataDirectory = lib.mkOption {
         type = lib.types.path;
         default = "${config.user.homeDirectory}/.local/share";
-        description = "XDG data directory path";
       };
 
       stateDirectory = lib.mkOption {
         type = lib.types.path;
         default = "${config.user.homeDirectory}/.local/state";
-        description = "XDG state directory path";
       };
 
       cacheDirectory = lib.mkOption {
         type = lib.types.path;
         default = "${config.user.homeDirectory}/.cache";
-        description = "XDG cache directory path";
       };
 
       nixosConfigDirectory = lib.mkOption {
         type = lib.types.path;
         default = "${config.user.homeDirectory}/nixos";
-        description = "NixOS configuration directory";
       };
 
       tokensDirectory = lib.mkOption {
         type = lib.types.path;
         default = "${config.user.homeDirectory}/Tokens";
-        description = "Directory containing API tokens and secrets";
       };
     };
   };
 
   config = {
+    user = {
+      name = "y0usaf";
+      homeDirectory = "/Users/${config.user.name}";
+    };
+
     assertions = [
       {
         assertion = config.user.name != "";

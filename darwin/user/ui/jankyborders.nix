@@ -12,25 +12,21 @@ in {
     style = mkOption {
       type = types.enum ["round" "square"];
       default = "square";
-      description = "Border style";
     };
 
     width = mkOption {
       type = types.float;
       default = 2.0;
-      description = "Border width in points";
     };
 
     activeColor = mkOption {
       type = types.str;
       default = "0xffffffff";
-      description = "Active window border color (ARGB format)";
     };
 
     inactiveColor = mkOption {
       type = types.str;
       default = "0xff333333";
-      description = "Inactive window border color (ARGB format)";
     };
   };
 

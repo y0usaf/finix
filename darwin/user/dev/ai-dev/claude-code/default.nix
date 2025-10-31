@@ -1,23 +1,19 @@
 {claudeCodeLib, ...}: {
   config = {
     home.file = {
-      # Instructions (CLAUDE.md)
       ".claude/CLAUDE.md" = {
         text = claudeCodeLib.instructions;
       };
 
-      # Settings (settings.json)
       ".claude/settings.json" = {
         text = builtins.toJSON claudeCodeLib.settings;
       };
 
-      # Statusline script
       ".claude/statusline.sh" = {
         text = claudeCodeLib.statusline;
         executable = true;
       };
 
-      # Slash commands
       ".claude/commands/nixos-build.md" = {
         text = claudeCodeLib.commands.nixos-build;
       };
@@ -50,7 +46,6 @@
         text = claudeCodeLib.commands.refactor-code;
       };
 
-      # Skills
       ".claude/skills/ensemble/SKILL.md" = {
         text = claudeCodeLib.skills.ensemble.content;
       };
@@ -75,7 +70,6 @@
         text = claudeCodeLib.skills.nix-security-scanner.content;
       };
 
-      # Agents
       ".claude/agents/search-pattern.md" = {
         text = claudeCodeLib.agents.search-pattern.content;
       };
@@ -100,7 +94,6 @@
         text = claudeCodeLib.agents.graph-imports.content;
       };
 
-      # Hooks
       ".claude/hooks/notification.ts" = {
         text = claudeCodeLib.hooks.notification;
         executable = true;

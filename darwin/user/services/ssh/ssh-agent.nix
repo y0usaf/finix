@@ -1,6 +1,9 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
   home-manager.users.y0usaf = {
-    # SSH agent service via launchd
     launchd.agents.ssh-agent = {
       enable = true;
       config = {
@@ -8,19 +11,18 @@
           "${pkgs.openssh}/bin/ssh-agent"
           "-D"
           "-a"
-          "/Users/y0usaf/.ssh/agent.sock"
+          "${config.user.homeDirectory}/.ssh/agent.sock"
         ];
         Sockets = {
           Listeners = {
-            SockPathName = "/Users/y0usaf/.ssh/agent.sock";
+            SockPathName = "${config.user.homeDirectory}/.ssh/agent.sock";
           };
         };
       };
     };
 
-    # Set SSH_AUTH_SOCK environment variable
     home.sessionVariables = {
-      SSH_AUTH_SOCK = "/Users/y0usaf/.ssh/agent.sock";
+      SSH_AUTH_SOCK = "${config.user.homeDirectory}/.ssh/agent.sock";
     };
   };
 }
