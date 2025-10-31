@@ -24,17 +24,24 @@ in {
           imports = [
             # Host system configuration
             (_:
-              (removeAttrs hostConfig ["imports" "homeDirectory"])
+              (removeAttrs hostConfig ["imports" "homeDirectory" "trustedUsers"])
               // {
                 inherit (hostConfig) imports;
                 user = {
-                  name = "y0usaf";
+                  name = builtins.head hostConfig.trustedUsers;
                   inherit (hostConfig) homeDirectory;
                 };
                 nixpkgs = {
                   config = nixpkgsConfig;
                   overlays = [inputs.neovim-nightly-overlay.overlays.default];
                 };
+                # Assertions
+                assertions = [
+                  {
+                    assertion = hostConfig.trustedUsers != [] && builtins.isList hostConfig.trustedUsers;
+                    message = "Host configuration must define trustedUsers as a non-empty list. The first user will be used as the primary system user.";
+                  }
+                ];
               })
             # Disko
             (inputs.disko + "/module.nix")

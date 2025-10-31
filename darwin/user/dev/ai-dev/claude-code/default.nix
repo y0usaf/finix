@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  claudeCodeLib,
-  ...
-}: {
+{claudeCodeLib, ...}: {
   config = {
     home.file = {
       # Instructions (CLAUDE.md)

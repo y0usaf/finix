@@ -78,7 +78,6 @@
     nixpkgs,
     darwin,
     home-manager,
-    neovim-nightly-overlay,
     ...
   } @ inputs: let
     linuxSystem = "x86_64-linux";

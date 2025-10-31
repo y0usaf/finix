@@ -4,7 +4,7 @@
   ...
 }: let
   sharedUi = import ../../../lib/shared/browsers/ui-chrome.nix {};
-  userChromeCss = sharedUi.userChromeCss;
+  inherit (sharedUi) userChromeCss;
 in {
   config = lib.mkIf config.user.programs.librewolf.enable {
     home-manager.users.y0usaf = {
