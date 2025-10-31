@@ -91,23 +91,15 @@
       fsType = "btrfs";
       options = ["subvol=@music"];
     };
-    #  "/home/y0usaf/.cache" = {
-    #    device = "tmpfs";
-    #    fsType = "tmpfs";
-    #    options = ["size=2G" "uid=1001" "gid=100" "mode=0755"];
-    #  };
   };
-  # ZRAM configuration - hardware-level memory management
   zramSwap = {
     enable = true;
-    memoryPercent = 50; # 48GB ZRAM for 96GB system
-    algorithm = "zstd"; # Optimal compression
+    memoryPercent = 50;
+    algorithm = "zstd";
   };
 
-  # Aggressive swappiness for ZRAM systems
   boot.kernel.sysctl."vm.swappiness" = 180;
 
-  # No disk swap needed on 96GB desktop system
   swapDevices = [];
   networking.useDHCP = lib.mkDefault true;
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

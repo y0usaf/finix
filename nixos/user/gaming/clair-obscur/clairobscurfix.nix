@@ -22,19 +22,16 @@ in {
 
   config = lib.mkIf config.user.gaming.clair-obscur.clairobscurfix.enable {
     usr.files = {
-      # Install the ASI plugin
       ".local/share/Steam/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
         clobber = true;
         source = "${clairobscurfix}/ClairObscurFix.asi";
       };
 
-      # Install the ASI loader (required for .asi files to work)
       ".local/share/Steam/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/dsound.dll" = {
         clobber = true;
         source = "${clairobscurfix}/dsound.dll";
       };
 
-      # Install the configuration file
       ".local/share/Steam/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.ini" = {
         clobber = true;
         generator = lib.generators.toINI {};

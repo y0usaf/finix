@@ -4,7 +4,6 @@
       extraPackages = lib.mkOption {
         type = lib.types.listOf lib.types.package;
         default = [];
-        description = "Additional packages to install system-wide";
       };
     };
 
@@ -13,7 +12,6 @@
         enable = lib.mkOption {
           type = lib.types.bool;
           default = true;
-          description = "Alacritty terminal emulator";
         };
       };
     };
@@ -39,7 +37,6 @@
         mainFontName = lib.mkOption {
           type = lib.types.str;
           default = "Iosevka Term Slab";
-          description = "Main font family name";
         };
         backup = lib.mkOption {
           type = lib.types.submodule {
@@ -47,12 +44,10 @@
               name = lib.mkOption {
                 type = lib.types.str;
                 default = "DejaVu Sans Mono";
-                description = "Backup font family name";
               };
             };
           };
           default = {};
-          description = "Backup font configuration";
         };
         emoji = lib.mkOption {
           type = lib.types.submodule {
@@ -60,12 +55,10 @@
               name = lib.mkOption {
                 type = lib.types.str;
                 default = "Noto Color Emoji";
-                description = "Emoji font family name";
               };
             };
           };
           default = {};
-          description = "Emoji font configuration";
         };
       };
     };

@@ -14,7 +14,6 @@
     ignoreShellProgramCheck = true;
   };
 
-  # Personal sudo configuration
   security.sudo.extraRules = [
     {
       users = ["y0usaf"];
@@ -85,6 +84,9 @@
       };
       hyprland = {
         enable = false;
+      };
+      mangowc = {
+        enable = true;
       };
       niri = {
         enable = true;
@@ -174,7 +176,6 @@
       formatNix.enable = true;
       syncthing = {
         enable = true;
-        # Define all devices
         devices = {
           desktop = {
             id = "KII4S2Y-KWA6M4K-MCQAUOO-C6PMX4L-V5JVDPW-HHZF52D-HP57BNH-EKCCZQC";
@@ -191,10 +192,8 @@
           };
         };
 
-        # Define folders with per-host configuration
         folders =
           {
-            # Tokens folder - shared on all devices
             tokens = {
               id = "bv79n-fh4kx";
               label = "Tokens";
@@ -203,7 +202,6 @@
             };
           }
           // lib.optionalAttrs (config.networking.hostName == "y0usaf-desktop") {
-            # Desktop-specific folders
             music = {
               id = "oty33-aq3dt";
               label = "Music";

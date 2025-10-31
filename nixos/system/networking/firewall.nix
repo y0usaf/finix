@@ -3,14 +3,14 @@ _: {
     networking.firewall = {
       enable = true;
       allowedTCPPorts = [
-        22 # SSH
-        3000 # Forgejo
-        22000 # Syncthing
-        25565 # Minecraft
+        22
+        3000
+        22000
+        25565
       ];
       allowedUDPPorts = [
-        22000 # Syncthing
-        21027 # Syncthing discovery
+        22000
+        21027
       ];
     };
   };

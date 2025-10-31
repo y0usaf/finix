@@ -7,7 +7,6 @@
 }: let
   zjstatusPackage = inputs.zjstatus.packages.${pkgs.system}.default;
 
-  # Top status bar - main status info
   zjstatusTopBar = ''
     plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
       format_left   ""
@@ -50,7 +49,6 @@
     }
   '';
 
-  # Bottom status bar - centered hints
   zjstatusHintsBar = ''
     plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
       format_left   ""
@@ -84,7 +82,6 @@ in {
           }
         }
       '';
-      description = "Layout configuration for zjstatus. Customize via user.shell.zellij.zjstatus.layout option.";
     };
   };
 

@@ -2,7 +2,7 @@ _: {
   imports = [
     ./controllers.nix
     ./core.nix
-    ./shader-cache.nix
+    ./steam.nix
     ./balatro
     ./emulation
     ./marvel-rivals
