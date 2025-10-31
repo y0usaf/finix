@@ -1,6 +1,5 @@
 {
   includeCoAuthoredBy = false;
-  outputStyle = "explanatory";
   env = {
     MAX_THINKING_TOKENS = "31999";
   };
