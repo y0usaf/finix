@@ -57,15 +57,6 @@ in {
               '');
             clobber = true;
           };
-        }
-        // lib.optionalAttrs config.user.shell.nushell.enable {
-          ".config/nushell/env.nu" = {
-            text = lib.mkAfter ''
-              $env.XCURSOR_THEME = "${x11ThemeName}"
-              $env.XCURSOR_SIZE = "${toString config.user.appearance.cursorSize}"
-            '';
-            clobber = true;
-          };
         };
     };
   };

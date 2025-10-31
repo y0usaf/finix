@@ -10,7 +10,8 @@ _: {
         # Development
         lintcheck = "clear; statix check .; deadnix .";
         lintfix = "clear; statix fix .; deadnix .";
-        clauded = "claude --dangerously-skip-permissions";
+        claude = "bunx @anthropic-ai/claude-code";
+        clauded = "bunx @anthropic-ai/claude-code --dangerously-skip-permissions";
         buildtime = "time (nix build .#darwinConfigurations.y0usaf-macbook.system --option eval-cache false)";
 
         # Navigation

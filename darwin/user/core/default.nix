@@ -9,11 +9,10 @@
     vim
     git
     nh
-    claude-code
     raycast
     alacritty
-    nushell
     alejandra
+    bun
 
     # CLI utilities
     bat

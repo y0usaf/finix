@@ -20,6 +20,6 @@
   '';
 
   prompt = ''
-    PS1='%F{blue}%~%(?.%F{green}.%F{red})> %f'
+    PS1='%B%F{green}%~%b%f%(?.%B%F{cyan}.%B%F{red})>%f%b '
   '';
 }

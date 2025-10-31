@@ -3,6 +3,5 @@ _: {
     ./cat-fetch.nix
     ./zellij
     ./zsh
-    ./nushell
   ];
 }

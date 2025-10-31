@@ -67,6 +67,13 @@
                   "matches": "firefox"
                 },
                 "profile": "No VidMem Reuse"
+              },
+              {
+                "pattern": {
+                  "feature": "procname",
+                  "matches": "chromium"
+                },
+                "profile": "No VidMem Reuse"
               }
             ]
           }
