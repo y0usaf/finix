@@ -1,7 +1,6 @@
 {...}: {
   imports = [
     ./zsh.nix
-    ./nushell.nix
     ./zellij
   ];
 

@@ -1,0 +1,86 @@
+{
+  "nixos-build" = ''
+    # /nixos-build
+    Build and switch NixOS configuration safely:
+    1. Format code with `alejandra .`
+    2. Test build with `nh os switch --dry`
+    3. Apply changes with `nh os switch`
+    4. Verify system state
+  '';
+
+  "fix-issue" = ''
+    # /fix-issue
+    Analyze and fix GitHub issue: $ARGUMENTS
+    1. Use `gh issue view` to get issue details
+    2. Search codebase for relevant files
+    3. Understand the problem context
+    4. Implement necessary changes
+    5. Test the fix thoroughly
+    6. Create PR if requested
+  '';
+
+  "review-pr" = ''
+    # /review-pr
+    Comprehensive PR review: $ARGUMENTS
+    1. Fetch PR details with `gh pr view`
+    2. Review changed files for security issues
+    3. Check code quality and best practices
+    4. Test the changes locally
+    5. Provide detailed feedback with suggestions
+  '';
+
+  "debug-error" = ''
+    # /debug-error
+    Systematic error debugging: $ARGUMENTS
+    1. Analyze the error message and stack trace
+    2. Identify the failing component
+    3. Check logs and system state
+    4. Create minimal reproduction case
+    5. Apply fix with proper testing
+    6. Document the solution
+  '';
+
+  "optimize-performance" = ''
+    # /optimize-performance
+    Performance optimization workflow: $ARGUMENTS
+    1. Profile the current performance
+    2. Identify the biggest bottlenecks
+    3. Research optimization strategies
+    4. Implement improvements incrementally
+    5. Benchmark before/after metrics
+    6. Monitor for regressions
+  '';
+
+  "security-audit" = ''
+    # /security-audit
+    Security vulnerability assessment: $ARGUMENTS
+    1. Run automated security scanners
+    2. Review code for OWASP Top 10 issues
+    3. Check dependency vulnerabilities
+    4. Audit access controls and authentication
+    5. Review data handling and privacy
+    6. Create remediation plan with priorities
+  '';
+
+  "test-coverage" = ''
+    # /test-coverage
+    Improve test coverage: $ARGUMENTS
+    1. Run coverage analysis
+    2. Identify untested code paths
+    3. Write tests for critical functions
+    4. Add edge case testing
+    5. Verify test quality (not just quantity)
+    6. Update CI/CD to enforce coverage thresholds
+  '';
+
+  "refactor-code" = ''
+    # /refactor-code
+    Safe code refactoring: $ARGUMENTS
+    1. Understand current code behavior
+    2. Identify refactoring opportunities
+    3. Create comprehensive tests first
+    4. Apply refactoring in small steps
+    5. Run tests after each change
+    6. Update documentation if needed
+  '';
+}

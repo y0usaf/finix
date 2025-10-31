@@ -58,6 +58,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    neovim-nightly-overlay = {
+      url = "github:nix-community/neovim-nightly-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -73,6 +78,7 @@
     nixpkgs,
     darwin,
     home-manager,
+    neovim-nightly-overlay,
     ...
   } @ inputs: let
     linuxSystem = "x86_64-linux";
@@ -87,15 +93,21 @@
       ];
     };
 
+    # Import claude-code lib at flake level
+    claudeCodeLib = import ./lib/claude-code;
+
     # Import lib with flake inputs
     nixosLib = import ./nixos/lib {
       inherit inputs;
       system = linuxSystem;
       inherit nixpkgsConfig;
+      inherit claudeCodeLib;
     };
 
     # Darwin-specific: Iosevka Slab font from Fast-Fonts
     darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};
+    darwinLib = darwinPkgs.lib;
+    genLib = import ./lib/generators darwinLib;
     iosevkaSlab = darwinPkgs.stdenvNoCC.mkDerivation {
       pname = "fast-iosevka-slab";
       version = "1.0.0";
@@ -114,7 +126,7 @@
       modules = [
         {
           _module.args = {
-            inherit inputs iosevkaSlab;
+            inherit inputs iosevkaSlab genLib claudeCodeLib;
             inherit (inputs) nvf;
           };
         }

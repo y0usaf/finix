@@ -3,9 +3,26 @@
   lib,
   pkgs,
   inputs,
+  genLib,
   ...
 }: let
   cfg = config.user.shell.zellij;
+
+  # Base configuration as structured data
+  baseConfig =
+    {
+      hide_session_name = false;
+      copy_on_select = true;
+      show_startup_tips = false;
+      on_force_close = "quit";
+      session_serialization = false;
+      pane_frames = true;
+    }
+    // lib.optionalAttrs cfg.zjstatus.enable {
+      default_layout = "zjstatus";
+    }
+    // cfg.settings;
+
   zjstatusHintsConfig = let
     c = config.user.shell.zellij;
   in
@@ -32,18 +49,7 @@ in {
 
         home.file.".config/zellij/config.kdl" = {
           text =
-            # Base configuration
-            ''
-              hide_session_name = false
-              copy_on_select = true
-              show_startup_tips = false
-              on_force_close = "quit"
-              session_serialization = false
-              pane_frames = true
-            ''
-            + lib.optionalString cfg.zjstatus.enable ''
-              default_layout = "zjstatus"
-            ''
+            genLib.toKDL baseConfig
             + "\n\n// Using default keybindings for now\n"
             + zjstatusHintsConfig
             + cfg.themeConfig;

@@ -8,7 +8,7 @@
 }: {
   users.users.y0usaf = {
     isNormalUser = true;
-    shell = pkgs.nushell;
+    shell = pkgs.zsh;
     extraGroups = ["wheel" "networkmanager" "video" "audio" "input" "gamemode" "dialout" "bluetooth" "lp" "docker"];
     home = "/home/y0usaf";
     ignoreShellProgramCheck = true;
@@ -121,6 +121,7 @@
       qbittorrent.enable = true;
       stremio.enable = true;
       tui-launcher.enable = true;
+      slack.enable = true;
     };
     dev = {
       claude-code.enable = true;
@@ -143,8 +144,7 @@
       upscale.enable = true;
     };
     shell = {
-      zsh.enable = false;
-      nushell.enable = true;
+      zsh.enable = true;
       cat-fetch.enable = true;
       zellij = {
         enable = true;

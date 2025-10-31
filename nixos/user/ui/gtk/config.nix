@@ -4,19 +4,14 @@
   pkgs,
   ...
 }: let
-  inherit (config.user.ui.fonts) mainFontName;
-  inherit (config.user.appearance) baseFontSize;
-  inherit (config.user.paths) bookmarks;
   scaleFactor = config.user.ui.gtk.scale;
-
-  styles = import ./css.nix {inherit config lib;};
 
   gtk3Settings = {
     Settings = {
       gtk-application-prefer-dark-theme = 1;
       gtk-cursor-theme-name = "DeepinDarkV20-x11";
       gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
-      gtk-font-name = "${mainFontName} ${toString baseFontSize}";
+      gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.baseFontSize}";
       gtk-xft-antialias = 1;
       gtk-xft-dpi = toString config.user.appearance.dpi;
       gtk-xft-hinting = 1;
@@ -30,7 +25,7 @@
       gtk-application-prefer-dark-theme = 1;
       gtk-cursor-theme-name = "DeepinDarkV20-x11";
       gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
-      gtk-font-name = "${mainFontName} ${toString baseFontSize}";
+      gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.baseFontSize}";
     };
   };
 in {
@@ -49,11 +44,11 @@ in {
           };
           ".config/gtk-3.0/gtk.css" = {
             clobber = true;
-            text = styles.gtkCss;
+            text = (import ./css.nix {inherit config lib;}).gtkCss;
           };
           ".config/gtk-3.0/bookmarks" = {
             clobber = true;
-            text = lib.concatStringsSep "\n" bookmarks;
+            text = lib.concatStringsSep "\n" config.user.paths.bookmarks;
           };
           ".config/gtk-4.0/settings.ini" = {
             clobber = true;
@@ -67,14 +62,6 @@ in {
             text = lib.mkAfter ''
               export XCURSOR_SIZE="${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * scaleFactor)))}"
               export GDK_DPI_SCALE="${toString scaleFactor}"
-            '';
-          };
-        }
-        // lib.optionalAttrs config.user.shell.nushell.enable {
-          ".config/nushell/env.nu" = {
-            clobber = true;
-            text = lib.mkAfter ''
-              $env.GDK_DPI_SCALE = "${toString scaleFactor}"
             '';
           };
         };

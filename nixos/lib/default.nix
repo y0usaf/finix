@@ -2,11 +2,13 @@
   inputs,
   system,
   nixpkgsConfig,
+  claudeCodeLib,
 }: let
-  # Direct pkgs without overlays
+  # Direct pkgs with neovim-nightly overlay
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = nixpkgsConfig;
+    overlays = [inputs.neovim-nightly-overlay.overlays.default];
   };
 
   inherit (pkgs) lib;
@@ -31,6 +33,7 @@ in {
                 };
                 nixpkgs = {
                   config = nixpkgsConfig;
+                  overlays = [inputs.neovim-nightly-overlay.overlays.default];
                 };
               })
             # Disko
@@ -53,7 +56,7 @@ in {
             ../user
           ];
           _module.args = {
-            inherit hostConfig lib genLib system;
+            inherit hostConfig lib genLib system claudeCodeLib;
             flakeInputs = inputs;
           };
         };

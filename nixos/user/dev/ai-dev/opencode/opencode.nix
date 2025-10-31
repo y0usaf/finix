@@ -62,7 +62,6 @@ in {
   config = lib.mkIf config.user.dev.opencode.enable {
     environment.systemPackages = [
       pkgs.opencode
-      pkgs.nodejs_20
       pkgs.uv
     ];
     usr = {

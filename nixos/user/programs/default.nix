@@ -11,6 +11,7 @@ _: {
     ./obsidian.nix
     ./pcmanfm.nix
     ./qbittorrent.nix
+    ./slack.nix
     ./stremio.nix
     ./tui-launcher.nix
     ./vesktop
