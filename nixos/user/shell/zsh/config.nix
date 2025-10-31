@@ -39,7 +39,6 @@ in {
               export_vars_from_files() {
                   local dir_path=$1
 
-                  # Check if directory exists
                   if [[ ! -d "$dir_path" ]]; then
                       return 0
                   fi
@@ -50,7 +49,6 @@ in {
                       if [[ -f $file_path ]]; then
                           var_name=$(basename "$file_path" .txt)
 
-                          # Skip if variable name is invalid
                           if [[ ! $var_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
                               continue
                           fi
@@ -59,7 +57,6 @@ in {
                               continue
                           fi
 
-                          # Read file content and skip if it contains problematic characters
                           local content=$(cat "$file_path" 2>/dev/null || echo "")
                           if [[ -z "$content" ]] || [[ $content =~ [[:cntrl:]] ]] || [[ $content == *"-----"* ]]; then
                               continue
@@ -81,24 +78,18 @@ in {
           ".config/zsh/.zshrc" = {
             text = lib.concatStringsSep "\n" (
               [
-                # Load aliases
                 "source \"$ZDOTDIR/aliases.zsh\""
               ]
               ++ lib.optional config.user.shell.zellij.enable "source \"$ZDOTDIR/zellij.zsh\""
               ++ [
-                # Plugins
                 pluginsData
 
-                # History settings
                 settingsData.history
 
-                # Completion settings
                 settingsData.completion
 
-                # Prompt
                 settingsData.prompt
 
-                # Functions
                 functionsData.temppkg
                 functionsData.temprun
                 functionsData.fanspeed

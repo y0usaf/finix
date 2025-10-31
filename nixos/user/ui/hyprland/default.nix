@@ -2,7 +2,7 @@ _: {
   imports = [
     ./options.nix
     ./config.nix
-    ./variables.nix # Variables first
+    ./variables.nix
     ./keybindings.nix
     ./core.nix
     ./monitors.nix

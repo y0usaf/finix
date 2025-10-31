@@ -4,7 +4,6 @@
   nixpkgsConfig,
   claudeCodeLib,
 }: let
-  # Direct pkgs with neovim-nightly overlay
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = nixpkgsConfig;
@@ -13,7 +12,6 @@
 
   inherit (pkgs) lib;
 
-  # Custom generators library
   genLib = import ../../lib/generators lib;
 in {
   nixosConfigurations =
@@ -22,30 +20,20 @@ in {
         inherit system;
         configuration = {
           imports = [
-            # Host system configuration
             (_:
-              (removeAttrs hostConfig ["imports" "homeDirectory" "trustedUsers"])
+              (removeAttrs hostConfig ["imports" "homeDirectory"])
               // {
                 inherit (hostConfig) imports;
                 user = {
-                  name = builtins.head hostConfig.trustedUsers;
+                  name = "y0usaf";
                   inherit (hostConfig) homeDirectory;
                 };
                 nixpkgs = {
                   config = nixpkgsConfig;
                   overlays = [inputs.neovim-nightly-overlay.overlays.default];
                 };
-                # Assertions
-                assertions = [
-                  {
-                    assertion = hostConfig.trustedUsers != [] && builtins.isList hostConfig.trustedUsers;
-                    message = "Host configuration must define trustedUsers as a non-empty list. The first user will be used as the primary system user.";
-                  }
-                ];
               })
-            # Disko
             (inputs.disko + "/module.nix")
-            # Hjem
             ({...}: {
               imports = [
                 (_: {
@@ -58,8 +46,8 @@ in {
                 users = {};
               };
             })
-            # nvf module for neovim
             inputs.nvf.nixosModules.default
+            inputs.mango.nixosModules.mango
             ../user
           ];
           _module.args = {

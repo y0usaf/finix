@@ -1,4 +1,4 @@
-{...}: {
+{config, ...}: {
   imports = [
     ./ssh-agent.nix
   ];
@@ -9,7 +9,6 @@
 
     matchBlocks = {
       "*" = {
-        # Global defaults for all hosts
         forwardAgent = true;
         addKeysToAgent = "yes";
         serverAliveInterval = 60;
@@ -30,14 +29,14 @@
       "github.com" = {
         hostname = "github.com";
         user = "git";
-        identityFile = "/Users/y0usaf/Tokens/id_rsa_y0usaf";
+        identityFile = "${config.user.homeDirectory}/Tokens/id_rsa_y0usaf";
       };
 
       "forgejo" = {
         hostname = "y0usaf-server";
         port = 2222;
         user = "forgejo";
-        identityFile = "/Users/y0usaf/Tokens/id_rsa_y0usaf";
+        identityFile = "${config.user.homeDirectory}/Tokens/id_rsa_y0usaf";
         identitiesOnly = true;
       };
     };

@@ -16,7 +16,6 @@
         ".config/bun/bunfig.toml" = {
           clobber = true;
           text = ''
-            # Bun configuration
             [install]
             cache_dir = "${config.user.cacheDirectory}/bun"
             global_dir = "${config.user.dataDirectory}/bun"

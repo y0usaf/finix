@@ -1,4 +1,3 @@
-# basically 1:1 taken from https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix
 lib: let
   toHyprconf = {
     attrs,
@@ -61,7 +60,6 @@ lib: let
   in
     toHyprconf' initialIndent attrs;
 
-  # taken from https://github.com/hyprwm/Hyprland/blob/f4b148df1e2d8edc96bd878a4cfde32ca6515ac8/nix/module.nix#L185-L197
   pluginsToHyprconf = plugins: importantPrefixes:
     toHyprconf {
       attrs = {

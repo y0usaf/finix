@@ -6,7 +6,7 @@ _: {
     ./foot.nix
     ./gtk
     ./hyprland
-
+    ./mangowc
     ./niri
 
     ./quickshell.nix

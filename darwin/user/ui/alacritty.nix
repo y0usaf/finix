@@ -4,12 +4,10 @@
   ...
 }: {
   home-manager.users.y0usaf = {
-    # Install Fast Iosevka Slab font
     home.packages = [
       iosevkaSlab
     ];
 
-    # Copy font to ~/Library/Fonts so macOS can find them
     home.activation.copyFastFonts = pkgs.lib.mkAfter ''
       run mkdir -p $HOME/Library/Fonts
       run cp -f ${iosevkaSlab}/share/fonts/truetype/* $HOME/Library/Fonts/ || true

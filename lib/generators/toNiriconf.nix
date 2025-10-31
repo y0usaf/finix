@@ -3,11 +3,9 @@ lib: let
   inherit (lib.attrsets) mapAttrsToList;
   inherit (lib.strings) concatStringsSep concatMapStringsSep;
 
-  # Convert Nix attributes to KDL format specifically for niri
   toNiriconf = attrs: let
     kdlGenerator = import ./toKDL.nix {inherit lib;};
 
-    # Format output nodes: output "name" { ... }
     formatOutput = name: config: let
       position =
         if hasAttr "position" config
@@ -29,7 +27,6 @@ lib: let
       then concatStringsSep "\n" (mapAttrsToList formatOutput attrs.output)
       else "";
 
-    # Format spawn-at-startup: spawn-at-startup "arg1" "arg2" ...
     formatSpawnCmd = cmd:
       "spawn-at-startup "
       + concatMapStringsSep " " (arg: "\"${toString arg}\"") (
@@ -43,12 +40,10 @@ lib: let
       then concatStringsSep "\n" (map formatSpawnCmd attrs.spawn-at-startup)
       else "";
 
-    # Main config without special attrs
     specialAttrs = ["output" "spawn-at-startup" "_extraConfig"];
     mainAttrs = lib.filterAttrs (k: _: !lib.elem k specialAttrs) attrs;
     mainConfig = kdlGenerator.toKDL mainAttrs;
 
-    # Extra config appended as-is
     extraConfig =
       if hasAttr "_extraConfig" attrs
       then attrs._extraConfig

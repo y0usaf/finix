@@ -4,7 +4,6 @@
   ...
 }: {
   home-manager.users.y0usaf = lib.mkIf config.user.tools.raycast.enable {
-    # Raycast autostart via launchd
     launchd.agents.raycast = {
       enable = true;
       config = {

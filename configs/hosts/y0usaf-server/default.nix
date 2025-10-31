@@ -1,8 +1,3 @@
-# Hardware:
-# - CPU: Intel N100 (4C/4T)
-# - RAM: 16GB
-# - Storage: 477GB SSD
-# - GPU: None (headless)
 {lib, ...}: {
   imports = [
     ../../../nixos
@@ -45,7 +40,7 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [22 80 443 2222 3000 22000]; # SSH, HTTP, HTTPS, Forgejo SSH, Forgejo HTTP, Syncthing
-    allowedUDPPorts = [22000 21027]; # Syncthing sync and discovery
+    allowedTCPPorts = [22 80 443 2222 3000 22000];
+    allowedUDPPorts = [22000 21027];
   };
 }
