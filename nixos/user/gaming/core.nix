@@ -9,12 +9,10 @@
   };
   config = lib.mkIf config.user.gaming.core.enable {
     environment.systemPackages = [
-      pkgs.steam
+      pkgs.prismlauncher
       pkgs.gamescope
-      pkgs.protonup-rs
       pkgs.gamemode
       pkgs.protontricks
-      pkgs.prismlauncher
     ];
   };
 }
