@@ -101,16 +101,25 @@ in {
         // lib.optionalAttrs config.user.shell.zellij.enable {
           ".config/zsh/zellij.zsh" = {
             text = ''
-              if [[ -z "$ZELLIJ" ]] && [[ -t 0 ]]; then
-                if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
-                  zellij attach -c
-                else
-                  zellij
-                fi
+              # Skip if already in multiplexer or SSH session
+              [[ -n "$ZELLIJ" || -n "$SSH_CONNECTION" || -n "$TMUX" ]] && return
 
-                if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
-                  exit
-                fi
+              # Skip if in virtual console (TTY)
+              # Fast path: TERM check (no subprocess)
+              [[ "$TERM" == "linux" ]] && return
+
+              # Robust fallback: device path check (minimal subprocess overhead)
+              [[ $(readlink /proc/self/fd/0 2>/dev/null) =~ ^/dev/tty[0-9] ]] && return
+
+              # Start Zellij
+              if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
+                zellij attach -c
+              else
+                zellij
+              fi
+
+              if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
+                exit
               fi
             '';
             clobber = true;
