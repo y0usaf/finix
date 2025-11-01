@@ -57,7 +57,7 @@ in {
           };
         }
         // lib.optionalAttrs config.user.shell.zsh.enable {
-          ".zshenv" = {
+          ".config/zsh/.zshenv" = {
             clobber = true;
             text = lib.mkAfter ''
               export XCURSOR_SIZE="${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * scaleFactor)))}"
