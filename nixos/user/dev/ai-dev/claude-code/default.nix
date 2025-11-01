@@ -26,12 +26,6 @@ in {
         clobber = true;
       };
 
-      ".claude/statusline.sh" = {
-        text = claudeCodeLib.statusline;
-        executable = true;
-        clobber = true;
-      };
-
       ".claude/commands/nixos-build.md" = {
         text = claudeCodeLib.commands.nixos-build;
         clobber = true;

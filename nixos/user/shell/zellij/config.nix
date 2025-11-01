@@ -55,9 +55,17 @@ in {
           ".config/zsh/aliases/zellij.zsh" = {
             clobber = true;
             text = ''
-              if [[ -z "$ZELLIJ" && -z "$SSH_CONNECTION" && -z "$TMUX" && ! "$TERM" =~ ^(linux|console)$ ]]; then
-                exec zellij
-              fi
+              # Skip if already in a multiplexer or SSH session (fast: variable checks only)
+              [[ -n "$ZELLIJ" || -n "$SSH_CONNECTION" || -n "$TMUX" ]] && return
+
+              # Skip if in virtual console
+              # Fast path: TERM check (no subprocess)
+              [[ "$TERM" == "linux" ]] && return
+
+              # Robust fallback: device path check (minimal subprocess overhead)
+              [[ $(readlink /proc/self/fd/0 2>/dev/null) =~ ^/dev/tty[0-9] ]] && return
+
+              exec zellij
             '';
           };
         };
