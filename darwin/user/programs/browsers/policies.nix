@@ -1,2 +1,2 @@
 _:
-import ../../../lib/shared/browsers/policies.nix {}
+import ../../../../lib/shared/browsers/policies.nix {}
