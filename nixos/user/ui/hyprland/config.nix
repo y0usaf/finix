@@ -10,7 +10,7 @@
       pkgs.hyprland
       pkgs.grim
       pkgs.slurp
-      pkgs.wl-clipboard
+      pkgs.wl-clipboard-rs
       pkgs.jq
       pkgs.swaybg
       pkgs.xwayland
