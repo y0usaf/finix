@@ -1,50 +1,33 @@
 _: {
   userChromeCss = ''
     :root {
-        /* Single theme color - change this to customize entire theme */
         --theme-color: #000000;
-
-        /* Transparent white overlays for UI elements */
-        --overlay-1: rgba(255, 255, 255, 0.05);
-        --overlay-2: rgba(255, 255, 255, 0.1);
-        --overlay-3: rgba(255, 255, 255, 0.15);
-        --overlay-4: rgba(255, 255, 255, 0.2);
-
-        /* Text colors derived from theme */
-        --text-primary: rgba(255, 255, 255, 0.9);
-        --text-secondary: rgba(255, 255, 255, 0.5);
-
-        /* Font and base sizing */
+        --overlay-1: color-mix(in srgb, var(--theme-color) 95%, white 5%);
+        --overlay-2: color-mix(in srgb, var(--theme-color) 95%, white 5%);
+        --overlay-3: color-mix(in srgb, var(--theme-color) 85%, white 15%);
+        --overlay-4: color-mix(in srgb, var(--theme-color) 85%, white 15%);
         --font-family: 'DejaVu Sans Mono';
         --font-size: 0.6875rem;
-
-        /* Layout dimensions */
         --bar-width: 75vw;
+        --bar-height: 1.2em;
         --breakout-width: 50vw;
         --breakout-top: 20vh;
-
-        /* Derived UI colors */
-        --tab-active-bg: rgba(255, 255, 255, 0.2);
-        --tab-inactive-bg: rgba(255, 255, 255, 0.1);
-        --tab-active-fg: var(--text-primary);
-        --tab-inactive-fg: var(--text-secondary);
         --urlbar-focused-bg: var(--overlay-3);
         --urlbar-bg: transparent;
         --toolbar-bg: var(--overlay-1);
-
-        /* Browser variable overrides */
-        --toolbarbutton-border-radius: 0px!important;
-        --toolbarbutton-inner-padding: 0 0.5em!important;
         --toolbar-field-focus-background-color: var(--urlbar-focused-bg)!important;
         --toolbar-field-background-color: var(--urlbar-bg)!important;
         --toolbar-field-focus-border-color: transparent!important;
-        --toolbar-bgcolor: var(--toolbar-bg)!important
+        --toolbar-bgcolor: var(--toolbar-bg)!important;
+        background-color: var(--theme-color)!important
     }
 
-    * {
-        animation: none!important;
-        transition: none!important;
-        scroll-behavior: auto!important
+    @media (prefers-reduced-motion:reduce) {
+        * {
+            animation: none!important;
+            transition: none!important;
+            scroll-behavior: auto!important
+        }
     }
 
     #statuspanel,.titlebar-buttonbox-container,.titlebar-spacer,.toolbar-spring,.urlbarView-row[label="LibreWolf Suggest"],[anonid=spring],toolbarspring {
@@ -59,16 +42,14 @@ _: {
         border-radius: 0!important
     }
 
-    .titlebar-buttonbox-container {
-    }
-
     :root:not([customizing]) #TabsToolbar {
         margin: 0 auto!important;
         width: var(--bar-width)!important;
         border-radius: 0!important;
         padding: 0!important;
         min-height: 0!important;
-        max-height: 1.2em!important
+        max-height: var(--bar-height)!important;
+        background-color: var(--toolbar-bg)!important
     }
 
     .tabbrowser-tab * {
@@ -77,10 +58,15 @@ _: {
     }
 
     .tabbrowser-tab {
-        height: 1.2em;
+        height: var(--bar-height)!important;
         font-size: var(--font-size)!important;
         align-items: center!important;
-        margin-bottom: 0.2em!important
+        margin-bottom: .2em!important;
+        background-color: var(--overlay-2)!important
+    }
+
+    .tabbrowser-tab[selected="true"],.tabbrowser-tab[visuallyselected="true"],.tabbrowser-tab[selected="true"] .tab-background,.tabbrowser-tab[visuallyselected="true"] .tab-background {
+        background-color: var(--overlay-4)!important
     }
 
     #tabbrowser-tabs>.tabbrowser-arrowscrollbox,.tabbrowser-tab {
@@ -91,43 +77,44 @@ _: {
         -moz-appearance: none!important;
         padding-top: 0!important;
         padding-bottom: 0!important;
-        -moz-box-align: stretch;
+        -moz-box-align: stretch!important;
         margin: 0!important
     }
 
     #tabbrowser-tabs .tabs-newtab-button:hover,#tabs-newtab-button:hover {
-        background-color: var(--toolbarbutton-hover-background)
+        background-color: var(--toolbarbutton-hover-background)!important
     }
 
     #tabbrowser-tabs .tabs-newtab-button>.toolbarbutton-icon,#tabs-newtab-button>.toolbarbutton-icon {
         padding: 0!important;
-        transform: scale(1);
+        transform: scale(1)!important;
         background-color: transparent!important
     }
 
     #tabbrowser-arrowscrollbox:not([overflowing]) {
-        --uc-flex-justify: center
+        --uc-flex-justify: center!important
     }
 
     scrollbox[orient=horizontal]>slot {
-        justify-content: var(--uc-flex-justify, initial)
+        justify-content: var(--uc-flex-justify, initial)!important
     }
 
     #nav-bar {
         position: fixed!important;
         bottom: 0!important;
         width: var(--bar-width)!important;
-        height: 2.2em!important;
-        max-height: 2.2em!important;
-        margin: -0.25em auto 0!important;
+        height: var(--bar-height)!important;
+        max-height: var(--bar-height)!important;
+        margin: -.25em auto 0!important;
         border-top: none!important;
         left: 0!important;
         right: 0!important;
-        z-index: 1
+        z-index: 1!important;
+        background-color: var(--toolbar-bg)!important
     }
 
     #browser {
-        margin-bottom: 2.2em!important
+        margin-bottom: var(--bar-height)!important
     }
 
     :root[inFullscreen] #nav-bar {
@@ -139,14 +126,14 @@ _: {
     }
 
     #urlbar-container {
-        font-family: var(--font-family);
-        font-size: var(--font-size);
+        font-family: var(--font-family)!important;
+        font-size: var(--font-size)!important;
         margin: 0!important;
         padding: 0!important
     }
 
     #urlbar {
-        min-height: 2.4em!important;
+        min-height: var(--bar-height)!important;
         border-color: transparent!important
     }
 
@@ -168,14 +155,16 @@ _: {
         transform: translateX(-50%)!important;
         z-index: 999!important;
         margin: 0!important;
-        box-shadow: 0 15px 30px rgba(0,0,0,.2);
+        box-shadow: 0 15px 30px rgba(0,0,0,.2)!important;
         background-color: var(--theme-color)!important
     }
 
     .urlbarView {
         font-size: var(--font-size)!important;
         max-height: 60vh!important;
-        overflow-y: auto!important
+        overflow-y: auto!important;
+        bottom: 100%!important;
+        top: auto!important
     }
 
     .urlbarView-row * {
@@ -184,24 +173,25 @@ _: {
     }
 
     .tab-icon-image,.toolbarbutton-icon,.urlbar-icon {
-        width: 0.8em!important;
+        width: .8em!important;
         height: auto!important;
         padding: 0!important
     }
 
     .tab-icon-image {
-        margin-right: 0.3em!important
+        margin-right: .3em!important
     }
 
     #PersonalToolbar toolbarbutton,#TabsToolbar toolbarbutton,#nav-bar toolbarbutton,.toolbarbutton-1,toolbar .toolbarbutton-1 {
         -moz-appearance: none!important;
         margin: 0!important;
-        padding: 0 0.5em!important
+        padding: 0 .5em!important
     }
 
     #navigator-toolbox {
         border: 0!important;
-        appearance: toolbar!important
+        appearance: toolbar!important;
+        background-color: var(--theme-color)!important
     }
 
     #TabsToolbar,#titlebar,toolbar {
@@ -215,7 +205,7 @@ _: {
 
     @media (-moz-os-version:windows-win10) {
         :root[sizemode=maximized] #navigator-toolbox {
-            padding-top: 0.5em!important
+            padding-top: .5em!important
         }
     }
   '';
