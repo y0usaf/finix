@@ -1,0 +1,27 @@
+# Aliases that work on both NixOS and Darwin
+{}: {
+  # XDG compliance
+  wget = ''wget --hsts-file="$XDG_DATA_HOME/wget-hsts"'';
+
+  # Development tools
+  lintcheck = "clear; statix check .; deadnix .";
+  lintfix = "clear; statix fix .; deadnix .";
+  claude = "bunx @anthropic-ai/claude-code";
+  clauded = "bunx @anthropic-ai/claude-code --dangerously-skip-permissions";
+
+  # File listing with lsd
+  "l." = "lsd -A | grep -E \"^\\\\.\"";
+  la = "lsd -A --color=always --group-dirs=first --icon=always";
+  ll = "lsd -l --color=always --group-dirs=first --icon=always";
+  ls = "lsd -lA --color=always --group-dirs=first --icon=always";
+  lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
+
+  # Grep replacements with ripgrep
+  grep = "rg --color auto";
+  dir = "dir --color=auto";
+  egrep = "rg --color auto";
+  fgrep = "rg -F --color auto";
+
+  # Subversion XDG compliance
+  svn = ''svn --config-dir "$XDG_CONFIG_HOME/subversion"'';
+}

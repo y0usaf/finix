@@ -3,12 +3,7 @@
   pkgs,
   lib,
   ...
-}: let
-  inherit (config.user) name tokensDirectory nixosConfigDirectory;
-  functionsData = import ./functions.nix {inherit config;};
-  settingsData = import ./settings.nix {inherit config;};
-  pluginsData = import ./plugins.nix {inherit pkgs;};
-in {
+}: {
   options.user.shell.zsh = {
     enable = lib.mkEnableOption "zsh shell configuration";
   };
@@ -25,54 +20,24 @@ in {
       pkgs.zsh-autosuggestions
     ];
 
-    hjem.users.${name} = {
+    hjem.users.${config.user.name} = {
       files =
         {
           ".config/zsh/aliases.zsh" = {
             text = lib.concatStringsSep "\n" (
-              lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") (import ./aliases.nix {inherit config nixosConfigDirectory;})
+              lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") (import ./aliases.nix {inherit config; nixosConfigDirectory = config.user.nixosConfigDirectory;})
             );
             clobber = true;
           };
           ".config/zsh/.zshenv" = {
-            text = ''
-              export_vars_from_files() {
-                  local dir_path=$1
+            text =
+              (import ../../../../lib/shell/zsh/export-vars.nix {inherit config;})
+              + ''
 
-                  if [[ ! -d "$dir_path" ]]; then
-                      return 0
-                  fi
-
-                  local skip_for_opencode=("ANTHROPIC_API_KEY" "OPENAI_API_KEY")
-
-                  for file_path in "$dir_path"/*; do
-                      if [[ -f $file_path ]]; then
-                          var_name=$(basename "$file_path" .txt)
-
-                          if [[ ! $var_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-                              continue
-                          fi
-
-                          if [[ " ''${skip_for_opencode[@]} " =~ " $var_name " ]]; then
-                              continue
-                          fi
-
-                          local content=$(cat "$file_path" 2>/dev/null || echo "")
-                          if [[ -z "$content" ]] || [[ $content =~ [[:cntrl:]] ]] || [[ $content == *"-----"* ]]; then
-                              continue
-                          fi
-
-                          export $var_name="$content"
-                      fi
-                  done
-              }
-              export_vars_from_files "${tokensDirectory}"
-
-
-              export TERMINAL="${config.user.defaults.terminal}"
-              export BROWSER="${config.user.defaults.browser}"
-              export EDITOR="${config.user.defaults.editor}"
-            '';
+                export TERMINAL="${config.user.defaults.terminal}"
+                export BROWSER="${config.user.defaults.browser}"
+                export EDITOR="${config.user.defaults.editor}"
+              '';
             clobber = true;
           };
           ".config/zsh/.zshrc" = {
@@ -82,17 +47,17 @@ in {
               ]
               ++ lib.optional config.user.shell.zellij.enable "source \"$ZDOTDIR/zellij.zsh\""
               ++ [
-                pluginsData
+                (import ./plugins.nix {inherit pkgs;})
 
-                settingsData.history
+                (import ./settings.nix {inherit config;}).history
 
-                settingsData.completion
+                (import ./settings.nix {inherit config;}).completion
 
-                settingsData.prompt
+                (import ./settings.nix {inherit config;}).prompt
 
-                functionsData.temppkg
-                functionsData.temprun
-                functionsData.fanspeed
+                (import ../../../../lib/shell/zsh/functions.nix {}).temppkg
+                (import ../../../../lib/shell/zsh/functions.nix {}).temprun
+                (import ./functions.nix {inherit config;}).fanspeed
               ]
             );
             clobber = true;
