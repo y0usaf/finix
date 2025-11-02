@@ -5,37 +5,7 @@
   flakeInputs,
   genLib,
   ...
-}: let
-  baseConfig =
-    {
-      hide_session_name = false;
-      copy_on_select = true;
-      show_startup_tips = false;
-      on_force_close = "quit";
-      session_serialization = false;
-      pane_frames = true;
-    }
-    // lib.optionalAttrs config.user.shell.zellij.zjstatus.enable {
-      default_layout = "zjstatus";
-    }
-    // config.user.shell.zellij.settings;
-
-  zjstatusHintsConfig = let
-    cfg = config.user.shell.zellij;
-  in
-    lib.optionalString (cfg.zjstatusHints.enable or false) ''
-      plugins {
-        zjstatus-hints location="file:${flakeInputs.zjstatus-hints.packages.${config.nixpkgs.system}.default}/bin/zjstatus-hints.wasm" {
-          max_length ${toString (cfg.zjstatusHints.maxLength or 0)}
-          pipe_name "${cfg.zjstatusHints.pipeName or "zjstatus_hints"}"
-        }
-      }
-
-      load_plugins {
-        zjstatus-hints
-      }
-    '';
-in {
+}: {
   config = lib.mkIf config.user.shell.zellij.enable {
     environment.systemPackages = [
       pkgs.zellij
@@ -46,9 +16,34 @@ in {
           ".config/zellij/config.kdl" = {
             clobber = false;
             text =
-              genLib.toKDL baseConfig
+              genLib.toKDL (
+                {
+                  hide_session_name = false;
+                  copy_on_select = true;
+                  show_startup_tips = false;
+                  on_force_close = "quit";
+                  session_serialization = false;
+                  pane_frames = true;
+                }
+                // lib.optionalAttrs config.user.shell.zellij.zjstatus.enable {
+                  default_layout = "zjstatus";
+                }
+                // config.user.shell.zellij.settings
+              )
               + "\n\n// Using default keybindings for now\n"
-              + zjstatusHintsConfig;
+              + (lib.optionalString (config.user.shell.zellij.zjstatusHints.enable or false) ''
+                  plugins {
+                    zjstatus-hints location="file:${flakeInputs.zjstatus-hints.packages.${config.nixpkgs.system}.default}/bin/zjstatus-hints.wasm" {
+                      max_length ${toString (config.user.shell.zellij.zjstatusHints.maxLength or 0)}
+                      pipe_name "${config.user.shell.zellij.zjstatusHints.pipeName or "zjstatus_hints"}"
+                    }
+                  }
+
+                  load_plugins {
+                    zjstatus-hints
+                  }
+                '')
+              + config.user.shell.zellij.themeConfig;
           };
         }
         // lib.optionalAttrs (config.user.shell.zellij.autoStart && config.user.shell.zsh.enable) {

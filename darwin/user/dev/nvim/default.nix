@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  nvim = import ../../../lib/nvim {inherit lib;};
-in {
+}: {
   imports = [
     ../../../lib/nvim/options.nix
   ];
@@ -39,7 +37,7 @@ in {
 
     # Init.lua file
     home-manager.users.${config.user.name}.home.file.".config/nvim/init.lua" = {
-      text = nvim.initLua;
+      text = (import ../../../lib/nvim {inherit lib;}).initLua;
     };
 
     # Neovide config file
