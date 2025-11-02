@@ -3,8 +3,12 @@
   pkgs,
   nvf,
   ...
-}: let
-  basePackages = with pkgs; [
+}: {
+  imports = [
+    ./user-config.nix
+  ];
+
+  environment.systemPackages = (with pkgs; [
     vim
     git
     nh
@@ -27,11 +31,5 @@
     discord
 
     nvf.packages.${pkgs.system}.default
-  ];
-in {
-  imports = [
-    ./user-config.nix
-  ];
-
-  environment.systemPackages = basePackages ++ config.user.packages.extraPackages;
+  ]) ++ config.user.packages.extraPackages;
 }

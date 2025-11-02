@@ -4,9 +4,7 @@
   inputs,
   pkgs,
   ...
-}: let
-  zjstatusHintsPackage = inputs.zjstatus-hints.packages.${pkgs.system}.default;
-in {
+}: {
   options.user.shell.zellij.zjstatusHints = {
     enable = lib.mkEnableOption "zjstatus-hints keybinding hints plugin";
 
@@ -23,7 +21,7 @@ in {
 
   config = lib.mkIf (config.user.shell.zellij.enable && config.user.shell.zellij.zjstatus.enable && config.user.shell.zellij.zjstatusHints.enable) {
     home-manager.users.y0usaf.home.file.".config/zellij/plugins/zjstatus-hints.wasm" = {
-      source = "${zjstatusHintsPackage}/bin/zjstatus-hints.wasm";
+      source = "${inputs.zjstatus-hints.packages.${pkgs.system}.default}/bin/zjstatus-hints.wasm";
     };
   };
 }

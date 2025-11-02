@@ -1,9 +1,17 @@
 {
   config,
   nixosConfigDirectory,
-}:
-{
-  wget = ''wget --hsts-file="$XDG_DATA_HOME/wget-hsts"'';
+}: let
+  commonAliases = import ../../../../lib/shell/zsh/common-aliases.nix {};
+  nixosAliases = import ../../../../lib/shell/zsh/nixos-aliases.nix {};
+in
+commonAliases
+// nixosAliases
+// {
+  buildtime = "time (nix build \${NH_FLAKE}#nixosConfigurations.\${HOST}.config.system.build.toplevel --option eval-cache false)";
+
+  hmpush = "git -C ${nixosConfigDirectory} push origin main --force";
+  hmpull = "git -C ${nixosConfigDirectory} fetch origin && git -C ${nixosConfigDirectory} reset --hard origin/main";
 }
 // (
   if config.hardware.nvidia.enable
@@ -13,34 +21,3 @@
   }
   else {}
 )
-// {
-  adb = ''HOME="$XDG_DATA_HOME/android" adb'';
-
-  lintcheck = "clear; statix check .; deadnix .";
-  lintfix = "clear; statix fix .; deadnix .";
-  claude = "bunx @anthropic-ai/claude-code";
-  clauded = "bunx @anthropic-ai/claude-code --dangerously-skip-permissions";
-  buildtime = "time (nix build \${NH_FLAKE}#nixosConfigurations.\${HOST}.config.system.build.toplevel --option eval-cache false)";
-
-  mocp = ''mocp -M "$XDG_CONFIG_HOME/moc" -O MOCDir="$XDG_CONFIG_HOME/moc"'';
-
-  yarn = ''yarn --use-yarnrc "$XDG_CONFIG_HOME/yarn/config"'';
-
-  "l." = "lsd -A | grep -E \"^\\\\.\"";
-  la = "lsd -A --color=always --group-dirs=first --icon=always";
-  ll = "lsd -l --color=always --group-dirs=first --icon=always";
-  ls = "lsd -lA --color=always --group-dirs=first --icon=always";
-  lt = "lsd -A --tree --color=always --group-dirs=first --icon=always";
-
-  grep = "rg --color auto";
-  dir = "dir --color=auto";
-  egrep = "rg --color auto";
-  fgrep = "rg -F --color auto";
-
-  pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i";
-  pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
-
-  svn = ''svn --config-dir "$XDG_CONFIG_HOME/subversion"'';
-  hmpush = "git -C ${nixosConfigDirectory} push origin main --force";
-  hmpull = "git -C ${nixosConfigDirectory} fetch origin && git -C ${nixosConfigDirectory} reset --hard origin/main";
-}
