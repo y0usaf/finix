@@ -9,4 +9,7 @@
 
   # Keymaps - returns Lua string
   keymaps = import ./keymaps.nix;
+
+  # Theme configuration - minimalist biophilic with dopamine accents
+  theme = import ./theme.nix;
 }
