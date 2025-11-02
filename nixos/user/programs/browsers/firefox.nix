@@ -5,7 +5,7 @@
   ...
 }: {
   imports = [
-    ./config.nix
+    ../../../../lib/browsers/options.nix
     ./ui-chrome.nix
   ];
 
