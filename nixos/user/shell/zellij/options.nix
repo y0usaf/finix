@@ -20,6 +20,12 @@
       description = "Additional settings for Zellij configuration";
     };
 
+    themeConfig = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "Theme configuration for Zellij";
+    };
+
     performanceMode = lib.mkOption {
       type = lib.types.bool;
       default = true;

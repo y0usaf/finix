@@ -3,20 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit (builtins) toJSON isBool isInt isString toString;
-
-  prefs = import ./prefs.nix {inherit config lib;};
-
-  prefValue = pref:
-    toJSON (
-      if isBool pref || isInt pref || isString pref
-      then pref
-      else toString pref
-    );
-
-  attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
-in {
+}: {
   imports = [
     ./config.nix
     ./ui-chrome.nix
@@ -57,9 +44,17 @@ in {
               ''
                 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
               ''
-              + (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") prefs.locked)
+              + (lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON (
+                if builtins.isBool value || builtins.isInt value || builtins.isString value
+                then value
+                else builtins.toString value
+              )});") (import ./prefs.nix {inherit config lib;}).locked)
               + "\n"
-              + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") prefs.default);
+              + (lib.concatMapAttrsStringSep "\n" (name: value: "defaultPref(\"${name}\", ${builtins.toJSON (
+                if builtins.isBool value || builtins.isInt value || builtins.isString value
+                then value
+                else builtins.toString value
+              )});") (import ./prefs.nix {inherit config lib;}).default);
           };
         };
       };
