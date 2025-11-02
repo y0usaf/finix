@@ -95,13 +95,10 @@
       ];
     };
 
-    claudeCodeLib = import ./lib/claude-code;
-
     nixosLib = import ./nixos/lib {
       inherit inputs;
       system = linuxSystem;
       inherit nixpkgsConfig;
-      inherit claudeCodeLib;
     };
 
     darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};
@@ -125,7 +122,7 @@
       modules = [
         {
           _module.args = {
-            inherit inputs iosevkaSlab genLib claudeCodeLib;
+            inherit inputs iosevkaSlab genLib;
             inherit (inputs) nvf;
           };
         }

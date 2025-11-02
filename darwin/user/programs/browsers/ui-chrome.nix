@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  sharedUi = import ../../../../lib/shared/browsers/ui-chrome.nix {};
+  sharedUi = import ../../../../lib/browsers/ui-chrome.nix {};
   inherit (sharedUi) userChromeCss;
 in {
   config = lib.mkIf config.user.programs.librewolf.enable {
