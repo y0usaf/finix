@@ -87,33 +87,15 @@
 
     <darwin>
       Uses nix-darwin and home-manager.
-
-      Rebuild workflow:
-      1. git add <modified files>
-      2. alejandra .
-      3. nh darwin switch ~/nixos
-      4. Verify changes work correctly
-      5. ONLY THEN: git commit && git push
-
-      CRITICAL: NEVER commit/push before successful switch.
-      CRITICAL: NEVER commit/push without testing post-switch functionality.
+      Workflow: git add → alejandra . → nh darwin switch → TEST → git commit && push
+      CRITICAL: Only commit after successful switch and user testing.
     </darwin>
 
     <nixos>
       Uses hjem. Clone external repos to ~/nixos/tmp/.
       IMPORTANT: All packages are system-level (environment.systemPackages), NOT user-level.
-
-      Rebuild workflow:
-      1. git add <modified files>
-      2. alejandra .
-      3. nh os switch --dry (verify no errors)
-      4. nh os switch (apply configuration)
-      5. Test and verify post-switch (functionality, UI, performance)
-      6. ONLY THEN: git commit && git push
-
-      CRITICAL: NEVER commit/push before successful switch.
-      CRITICAL: NEVER commit/push without testing post-switch functionality.
-      CRITICAL: Dry-run success ≠ actual success. Always test the real switch.
+      Workflow: git add → alejandra . → nh os switch --dry → nh os switch → TEST → git commit && push
+      CRITICAL: Only commit after successful switch and user testing.
     </nixos>
 
     <hjem-syntax>
