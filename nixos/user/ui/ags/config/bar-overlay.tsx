@@ -1,5 +1,6 @@
-import { App, Astal, Gtk } from "astal/gtk3"
-import { Variable, exec } from "astal"
+import { App, Astal, Gtk, Gdk } from "astal/gtk3"
+import { Variable, exec, bind } from "astal"
+import Tray from "gi://AstalTray"
 
 const styles = `
 * {
@@ -9,6 +10,12 @@ const styles = `
 
 .bar-top, .bar-bottom {
     background: transparent;
+}
+
+.bar-top window,
+.bar-bottom window {
+    margin: 0;
+    padding: 0;
 }
 
 .bar {
@@ -36,10 +43,61 @@ const styles = `
         0 1px 1px black,
         0 -1px 1px black;
 }
+
+.tray-block {
+    background: #2a2a2a;
+    border-radius: 0;
+    padding: 2px;
+    margin: 0;
+}
+
+.tray-item {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 2px;
+    margin: 0;
+    min-width: unset;
+    min-height: unset;
+    outline: none;
+    box-shadow: none;
+}
+
+.tray-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.tray-item:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.tray-item image {
+    min-width: 16px;
+    min-height: 16px;
+}
 `
 
 const time = Variable("").poll(1000, () => exec(["date", "+%H:%M:%S"]))
 const date = Variable("").poll(30000, () => exec(["date", "+%d/%m/%y"]))
+
+const tray = Tray.get_default()
+
+function TrayItem({ item }: { item: any }) {
+    const handleClick = (self: any, event: Gdk.Event) => {
+        const button = event.get_button()[1]
+        if (button === Gdk.BUTTON_PRIMARY) {
+            item.activate(event.get_coords()[1], event.get_coords()[2])
+        }
+    }
+
+    return <button
+        className="tray-item"
+        tooltipMarkup={bind(item, "tooltipMarkup")}
+        onButtonPressEvent={handleClick}>
+        <icon gIcon={bind(item, "gicon")} />
+    </button>
+}
 
 function TopBar() {
     return <window
@@ -54,6 +112,11 @@ function TopBar() {
             </box>
             <box className="date-block">
                 <label label={date()} />
+            </box>
+            <box className="tray-block" spacing={2}>
+                {bind(tray, "items").as(items => items.map(item => (
+                    <TrayItem key={item.itemId} item={item} />
+                )))}
             </box>
         </box>
     </window>
@@ -72,6 +135,11 @@ function BottomBar() {
             </box>
             <box className="date-block">
                 <label label={date()} />
+            </box>
+            <box className="tray-block" spacing={2}>
+                {bind(tray, "items").as(items => items.map(item => (
+                    <TrayItem key={item.itemId} item={item} />
+                )))}
             </box>
         </box>
     </window>

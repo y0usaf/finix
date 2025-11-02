@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  mcpServerSpecs = import ./mcp-servers.nix {inherit config;};
+  mcpServerSpecs = import ./servers.nix {inherit config;};
 
   mkStdIOServer = spec: {
     type = "stdio";

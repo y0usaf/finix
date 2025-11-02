@@ -13,7 +13,11 @@
   };
   config = lib.mkIf config.user.ui.ags.bar-overlay.enable {
     environment.systemPackages = [
-      pkgs.ags
+      (pkgs.ags.override {
+        extraPackages = with pkgs.astal; [
+          tray
+        ];
+      })
     ];
     usr = {
       files = {

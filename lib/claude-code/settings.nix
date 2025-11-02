@@ -1,7 +1,8 @@
 {
   includeCoAuthoredBy = false;
+  model = "claude-haiku-4-5";
   env = {
-    MAX_THINKING_TOKENS = "31999";
+    MAX_THINKING_TOKENS = "32000";
   };
   statusLine = {
     type = "command";

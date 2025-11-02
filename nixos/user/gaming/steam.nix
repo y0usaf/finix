@@ -10,6 +10,9 @@
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
       extraCompatPackages = [pkgs.proton-ge-bin];
+      package =
+        pkgs.steam.override {
+        };
     };
 
     hardware.steam-hardware.enable = true;

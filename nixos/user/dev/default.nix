@@ -1,6 +1,11 @@
 _: {
   imports = [
-    ./ai-dev
+    ./claude-code
+    ./codex
+    ./opencode
+    ./crush.nix
+    ./gemini-cli.nix
+    ../../lib/shared/mcp
 
     ./docker.nix
     ./gcloud.nix
