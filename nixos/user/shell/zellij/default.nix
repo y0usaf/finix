@@ -1,6 +1,6 @@
 _: {
   imports = [
-    ./options.nix
+    ../../../../lib/shell/zellij/default.nix
     ./config.nix
     ./theme.nix
     ./zjstatus.nix
