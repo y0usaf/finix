@@ -1,4 +1,4 @@
-{lib, ...}: {
+{lib, pkgs ? null, ...}: {
   options.user.shell.zellij = {
     enable = lib.mkEnableOption "zellij terminal multiplexer";
 
@@ -10,7 +10,7 @@
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = lib.mkDefault "zellij";
+      default = if pkgs != null then pkgs.zellij else lib.mkDefault "zellij";
       description = "The Zellij package to use";
     };
 

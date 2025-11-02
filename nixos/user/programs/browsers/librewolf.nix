@@ -18,7 +18,7 @@
   attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
 in {
   imports = [
-    ./config.nix
+    ../../../../lib/browsers/options.nix
     ./ui-chrome.nix
   ];
 
