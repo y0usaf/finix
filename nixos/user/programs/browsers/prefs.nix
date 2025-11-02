@@ -2,7 +2,7 @@
   config,
   lib,
 }: let
-  sharedPrefs = import ../../../../lib/shared/browsers/prefs.nix {
+  sharedPrefs = import ../../../../lib/browsers/prefs.nix {
     config =
       config
       // rec {

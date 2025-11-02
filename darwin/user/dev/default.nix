@@ -1,6 +1,6 @@
 {...}: {
   imports = [
-    ./claude-code
     ./git.nix
+    ./nvim
   ];
 }

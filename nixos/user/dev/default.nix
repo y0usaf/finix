@@ -5,7 +5,7 @@ _: {
     ./opencode
     ./crush.nix
     ./gemini-cli.nix
-    ../../../lib/shared/mcp
+    ../../../lib/mcp
 
     ./docker.nix
     ./gcloud.nix

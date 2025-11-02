@@ -2,7 +2,6 @@
   inputs,
   system,
   nixpkgsConfig,
-  claudeCodeLib,
 }: let
   pkgs = import inputs.nixpkgs {
     inherit system;
@@ -51,7 +50,7 @@ in {
             ../user
           ];
           _module.args = {
-            inherit hostConfig lib genLib system claudeCodeLib;
+            inherit hostConfig lib genLib system;
             flakeInputs = inputs;
           };
         };
