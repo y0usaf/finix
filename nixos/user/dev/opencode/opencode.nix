@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  mcpServerSpecs = import ../../../../lib/shared/mcp/servers.nix {inherit config;};
+  mcpServerSpecs = import ../../../../lib/mcp/servers.nix {inherit config;};
 
   mcpServers = lib.listToAttrs (map
     (spec:
