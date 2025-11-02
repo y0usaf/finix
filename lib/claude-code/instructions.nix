@@ -26,7 +26,7 @@
 
         CRITICAL - Auto-Parallelization:
         YOU MUST consider parallel execution for independent work.
-        Launch multiple Task agents in ONE message when work can be done independently.
+        ALWAYS run multiple Task invocations in a SINGLE message when work can be done independently.
 
         Parallelize for:
         - Multi-directory analysis (darwin/, nixos/, lib/)
@@ -34,7 +34,7 @@
         - Multiple file refactoring
         - Independent searches/analyses
 
-        Example: Analyzing 3 directories = 3 parallel Task calls in single message.
+        Example: Analyzing 3 directories = 3 parallel Task calls in ONE message.
 
         IMPORTANT: Default to parallel. Only serialize when tasks have dependencies.
       </tool>
