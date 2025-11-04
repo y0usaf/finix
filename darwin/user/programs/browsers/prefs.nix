@@ -1,7 +1,8 @@
 {
   config,
   lib,
-}: import ../../../../lib/browsers/prefs.nix {
+}:
+import ../../../../lib/browsers/prefs.nix {
   config =
     config
     // {
