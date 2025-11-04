@@ -1,4 +1,4 @@
-{}: {
+_: {
   # Temporary package shell
   temppkg = ''
     temppkg() {
