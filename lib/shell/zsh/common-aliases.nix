@@ -1,5 +1,5 @@
 # Aliases that work on both NixOS and Darwin
-{}: {
+_: {
   # XDG compliance
   wget = ''wget --hsts-file="$XDG_DATA_HOME/wget-hsts"'';
 
@@ -8,6 +8,7 @@
   lintfix = "clear; statix fix .; deadnix .";
   claude = "bunx @anthropic-ai/claude-code";
   clauded = "bunx @anthropic-ai/claude-code --dangerously-skip-permissions";
+  codex = "bunx @openai/codex";
 
   # File listing with lsd
   "l." = "lsd -A | grep -E \"^\\\\.\"";
