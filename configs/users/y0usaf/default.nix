@@ -127,6 +127,7 @@
     };
     dev = {
       claude-code.enable = true;
+      codex.enable = true;
       crush.enable = true;
       gemini-cli.enable = true;
       mcp.enable = true;
@@ -141,7 +142,6 @@
         enable = true;
         enableMcpServers = true;
       };
-      codex.enable = true;
       latex.enable = true;
       upscale.enable = true;
     };

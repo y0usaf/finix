@@ -34,7 +34,13 @@
     "/" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
-      options = ["subvol=@"];
+      options = [
+        "subvol=@"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/boot" = {
       device = "/dev/disk/by-uuid/31F2-1AE7";
@@ -44,52 +50,113 @@
     "/btrfs" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
-      options = ["subvolid=5"];
+      options = [
+        "subvolid=5"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/btrfs/data" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
-      options = ["subvolid=5"];
+      options = [
+        "subvolid=5"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/home" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
-      options = ["subvol=@home"];
+      options = [
+        "subvol=@home"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/swap" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
-      options = ["subvol=@swap" "nodatacow"];
+      options = [
+        "subvol=@swap"
+        "nodatacow"
+        "compress=no"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/home/y0usaf/.config" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
-      options = ["subvol=@config"];
+      options = [
+        "subvol=@config"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/home/y0usaf/.local" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
-      options = ["subvol=@local"];
+      options = [
+        "subvol=@local"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/home/y0usaf/.local/share/Steam" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
-      options = ["subvol=@steam"];
+      options = [
+        "subvol=@steam"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/home/y0usaf/Pictures" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
-      options = ["subvol=@pictures"];
+      options = [
+        "subvol=@pictures"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/home/y0usaf/DCIM" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
-      options = ["subvol=@dcim"];
+      options = [
+        "subvol=@dcim"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
     "/home/y0usaf/Music" = {
       device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
-      options = ["subvol=@music"];
+      options = [
+        "subvol=@music"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
     };
   };
   zramSwap = {

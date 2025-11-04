@@ -15,6 +15,7 @@
     bluetooth = {
       enable = false;
     };
+    cpu.intel.enable = true;
     nvidia = {
       enable = false;
       cuda.enable = false;
