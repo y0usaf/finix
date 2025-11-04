@@ -7,15 +7,10 @@
   config = {
     boot = {
       kernelPackages = pkgs.linuxPackages_latest;
-      kernelModules =
-        [
-          "kvm-amd"
-          "k10temp"
-          "nct6775"
-          "ashmem_linux"
-          "binder_linux"
-        ]
-        ++ lib.optionals config.hardware.amdgpu.enable ["amdgpu"];
+      kernelModules = [
+        "ashmem_linux"
+        "binder_linux"
+      ];
       kernel.sysctl = {
         "kernel.unprivileged_userns_clone" = 1;
       };
