@@ -23,6 +23,7 @@
     bluetooth = {
       enable = true;
     };
+    cpu.amd.enable = true;
     nvidia.enable = false;
     amdgpu.enable = true;
   };
