@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -16,16 +17,13 @@
     fi
   '';
 in {
-  config = {
-    services.mediamtx = {
-      enable = true;
-      settings = {
-        webrtc = true;
-        webrtcAddress = ":${port}";
-        webrtcLocalUDPAddress = ":${port}";
-        paths = {
-          all_others = {};
-        };
+  config = lib.mkIf config.services.mediamtx.enable {
+    services.mediamtx.settings = {
+      webrtc = true;
+      webrtcAddress = ":${port}";
+      webrtcLocalUDPAddress = ":${port}";
+      paths = {
+        all_others = {};
       };
     };
 
