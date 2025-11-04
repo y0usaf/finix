@@ -1,5 +1,5 @@
 # Darwin/macOS-specific aliases
-{}: {
+_: {
   # nix-darwin switch
   nds = "nh darwin switch";
 

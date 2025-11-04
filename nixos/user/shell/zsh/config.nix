@@ -25,7 +25,10 @@
         {
           ".config/zsh/aliases.zsh" = {
             text = lib.concatStringsSep "\n" (
-              lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") (import ./aliases.nix {inherit config; nixosConfigDirectory = config.user.nixosConfigDirectory;})
+              lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") (import ./aliases.nix {
+                inherit config;
+                inherit (config.user) nixosConfigDirectory;
+              })
             );
             clobber = true;
           };
