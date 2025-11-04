@@ -45,16 +45,18 @@
                 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
               ''
               + (lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON (
-                if builtins.isBool value || builtins.isInt value || builtins.isString value
-                then value
-                else builtins.toString value
-              )});") (import ./prefs.nix {inherit config lib;}).locked)
+                  if builtins.isBool value || builtins.isInt value || builtins.isString value
+                  then value
+                  else builtins.toString value
+                )});")
+                (import ./prefs.nix {inherit config lib;}).locked)
               + "\n"
               + (lib.concatMapAttrsStringSep "\n" (name: value: "defaultPref(\"${name}\", ${builtins.toJSON (
-                if builtins.isBool value || builtins.isInt value || builtins.isString value
-                then value
-                else builtins.toString value
-              )});") (import ./prefs.nix {inherit config lib;}).default);
+                  if builtins.isBool value || builtins.isInt value || builtins.isString value
+                  then value
+                  else builtins.toString value
+                )});")
+                (import ./prefs.nix {inherit config lib;}).default);
           };
         };
       };
