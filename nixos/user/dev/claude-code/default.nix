@@ -72,31 +72,6 @@ in {
         clobber = true;
       };
 
-      ".claude/skills/build-status-checker/SKILL.md" = {
-        text = claudeCodeConfig.skills.build-status-checker.content;
-        clobber = true;
-      };
-
-      ".claude/skills/linter/SKILL.md" = {
-        text = claudeCodeConfig.skills.linter.content;
-        clobber = true;
-      };
-
-      ".claude/skills/test-runner/SKILL.md" = {
-        text = claudeCodeConfig.skills.test-runner.content;
-        clobber = true;
-      };
-
-      ".claude/skills/configuration-consistency-auditor/SKILL.md" = {
-        text = claudeCodeConfig.skills.configuration-consistency-auditor.content;
-        clobber = true;
-      };
-
-      ".claude/skills/nix-security-scanner/SKILL.md" = {
-        text = claudeCodeConfig.skills.nix-security-scanner.content;
-        clobber = true;
-      };
-
       ".claude/agents/search-pattern.md" = {
         text = claudeCodeConfig.agents.search-pattern.content;
         clobber = true;
