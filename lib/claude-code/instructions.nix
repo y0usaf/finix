@@ -1,13 +1,15 @@
 ''
   <instructions>
     <thinking>
-      CRITICAL: Think extensively before EVERY response.
-      - Use deep analysis, consider edge cases, reason through problems thoroughly
-      - Maximize thinking time - break problems into smaller steps
-      - Consider alternative approaches - debug assumptions
-      - Use thinking blocks throughout problem-solving, not just at start
+      Think before every response. Use thinking to:
+      - Understand user intent, not just literal request
+      - Identify parallelization opportunities
+      - Consider edge cases affecting approach
+      - Debug assumptions about requirements
+      - Decide between valid approaches
 
-      YOU MUST think at every step, especially before tool use.
+      Minimum: One thinking block before first tool call.
+      If task changes during execution, add new thinking block.
     </thinking>
 
     <identity>
@@ -24,19 +26,21 @@
       <tool name="Task">
         Use for search, analysis, research when needed.
 
-        CRITICAL - Auto-Parallelization:
-        YOU MUST consider parallel execution for independent work.
-        ALWAYS run multiple Task invocations in a SINGLE message when work can be done independently.
+        MANDATORY PARALLELIZATION:
+        Default action: Always parallelize independent work in a single message.
+        Exception: Only serialize if Task B directly depends on Task A's results.
 
-        Parallelize for:
-        - Multi-directory analysis (darwin/, nixos/, lib/)
-        - Independent reviews (security, performance, style)
-        - Multiple file refactoring
-        - Independent searches/analyses
+        Before making Task calls, ask:
+        - "Can any of these work happen simultaneously?"
+        - "If one has dependencies, can I nest them in one Task and parallelize the rest?"
+        - "Am I serializing just out of habit?"
 
-        Example: Analyzing 3 directories = 3 parallel Task calls in ONE message.
+        Common parallelization patterns:
+        - Multi-directory analysis: darwin/ + nixos/ + lib/ = 3 parallel Tasks
+        - Independent reviews: security review + performance review = parallel Tasks
+        - Dependent work: Wrap in one Task (search → analyze results), parallelize with independent work
 
-        IMPORTANT: Default to parallel. Only serialize when tasks have dependencies.
+        Failure mode: Completing work in 15 minutes sequentially when 5 minutes in parallel is possible.
       </tool>
 
       <tool name="TodoWrite">
@@ -103,6 +107,25 @@
       usr is aliased to hjem.users.${"$"}{config.user.name} (defined in nixos/user/core/user-config.nix:9)
       Use usr.files = { ... } as shorthand instead of hjem.users.${"$"}{name}.files = { ... }
     </hjem-syntax>
+
+    <failure_modes>
+      <failure>Committing code that doesn't build or switch successfully</failure>
+      <prevention>
+        NEVER attempt git commit until:
+        - alejandra . completes without errors
+        - nh os switch --dry succeeds (NixOS) OR nh darwin switch succeeds (Darwin)
+        - nh os switch succeeds (NixOS only, after dry run passes)
+        - Manual testing confirms expected behavior
+
+        If any step fails, fix the issue before committing.
+      </prevention>
+
+      <failure>Serializing work when parallelization is possible</failure>
+      <prevention>
+        Before making Task calls, ask: "Can any work happen simultaneously?"
+        Default to parallel. Only serialize if Task B directly depends on Task A's results.
+      </prevention>
+    </failure_modes>
 
     <standards>
       Clear naming. Fast failure. Modular design. Security first. Performance aware. Self-documenting code.
