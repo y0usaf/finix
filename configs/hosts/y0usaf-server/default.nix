@@ -25,6 +25,7 @@
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = false;
+    mediamtx.enable = true;
     n8n = {
       enable = true;
       openFirewall = true;
