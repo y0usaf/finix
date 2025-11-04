@@ -1,0 +1,3 @@
+{
+  instructions = import ./instructions.nix;
+}
