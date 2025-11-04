@@ -32,17 +32,17 @@
               )
               + "\n\n// Using default keybindings for now\n"
               + (lib.optionalString (config.user.shell.zellij.zjstatusHints.enable or false) ''
-                  plugins {
-                    zjstatus-hints location="file:${flakeInputs.zjstatus-hints.packages.${config.nixpkgs.system}.default}/bin/zjstatus-hints.wasm" {
-                      max_length ${toString (config.user.shell.zellij.zjstatusHints.maxLength or 0)}
-                      pipe_name "${config.user.shell.zellij.zjstatusHints.pipeName or "zjstatus_hints"}"
-                    }
+                plugins {
+                  zjstatus-hints location="file:${flakeInputs.zjstatus-hints.packages.${config.nixpkgs.system}.default}/bin/zjstatus-hints.wasm" {
+                    max_length ${toString (config.user.shell.zellij.zjstatusHints.maxLength or 0)}
+                    pipe_name "${config.user.shell.zellij.zjstatusHints.pipeName or "zjstatus_hints"}"
                   }
+                }
 
-                  load_plugins {
-                    zjstatus-hints
-                  }
-                '')
+                load_plugins {
+                  zjstatus-hints
+                }
+              '')
               + config.user.shell.zellij.themeConfig;
           };
         }
