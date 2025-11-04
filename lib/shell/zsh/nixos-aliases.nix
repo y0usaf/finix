@@ -1,5 +1,5 @@
 # NixOS-specific aliases
-{}: {
+_: {
   # Android development
   adb = ''HOME="$XDG_DATA_HOME/android" adb'';
 
