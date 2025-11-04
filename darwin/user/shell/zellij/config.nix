@@ -32,17 +32,17 @@
             )
             + "\n\n"
             + (lib.optionalString (config.user.shell.zellij.zjstatusHints.enable or false) ''
-                plugins {
-                  zjstatus-hints location="file:${inputs.zjstatus-hints.packages.${pkgs.system}.default}/bin/zjstatus-hints.wasm" {
-                    max_length ${toString (config.user.shell.zellij.zjstatusHints.maxLength or 0)}
-                    pipe_name "${config.user.shell.zellij.zjstatusHints.pipeName or "zjstatus_hints"}"
-                  }
+              plugins {
+                zjstatus-hints location="file:${inputs.zjstatus-hints.packages.${pkgs.system}.default}/bin/zjstatus-hints.wasm" {
+                  max_length ${toString (config.user.shell.zellij.zjstatusHints.maxLength or 0)}
+                  pipe_name "${config.user.shell.zellij.zjstatusHints.pipeName or "zjstatus_hints"}"
                 }
+              }
 
-                load_plugins {
-                  zjstatus-hints
-                }
-              '')
+              load_plugins {
+                zjstatus-hints
+              }
+            '')
             + config.user.shell.zellij.themeConfig;
         };
       }

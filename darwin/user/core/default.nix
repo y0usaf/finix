@@ -8,28 +8,30 @@
     ./user-config.nix
   ];
 
-  environment.systemPackages = (with pkgs; [
-    vim
-    git
-    nh
-    raycast
-    alacritty
-    alejandra
-    bun
+  environment.systemPackages =
+    (with pkgs; [
+      vim
+      git
+      nh
+      raycast
+      alacritty
+      alejandra
+      bun
 
-    bat
-    lsd
-    tree
-    ripgrep
-    statix
-    deadnix
-    zellij
+      bat
+      lsd
+      tree
+      ripgrep
+      statix
+      deadnix
+      zellij
 
-    karabiner-elements
+      karabiner-elements
 
-    alt-tab-macos
-    discord
+      alt-tab-macos
+      discord
 
-    nvf.packages.${pkgs.system}.default
-  ]) ++ config.user.packages.extraPackages;
+      nvf.packages.${pkgs.system}.default
+    ])
+    ++ config.user.packages.extraPackages;
 }
