@@ -87,26 +87,56 @@
       - Only differentiate when required (Darwin-specific CLI tools, NixOS system packages)
       - Different syntaxes (Hjem vs home-manager): aim for configuration similarity, not code sharing
       - Check flake.nix for inputs and shared configuration strategies
+
+      <module-organization>
+        Directory structure and what belongs where:
+
+        lib/: System-agnostic option definitions and reusable modules
+        - Shared across both Darwin and NixOS
+        - Examples: zsh, zellij (terminal multiplexer), shell functions
+        - Rule: Use if the tool/concept exists identically on both systems
+
+        nixos/user/: NixOS user-level implementations (hjem)
+        - Specific to NixOS with hjem syntax
+        - Examples: zsh config specific to NixOS, user environment setup
+
+        nixos/system/: NixOS system-level configuration
+        - System packages and kernel-level configuration
+        - Examples: niri (Wayland compositor, Linux-only), system services
+
+        darwin/users/: Darwin user-level implementations (home-manager)
+        - Specific to Darwin with home-manager syntax
+        - Examples: zsh config specific to Darwin, user environment setup
+
+        darwin/system/: Darwin system-level configuration (nix-darwin)
+        - System packages and macOS-specific setup
+        - Examples: raycast (macOS spotlight alternative, macOS-only)
+
+        COUNTEREXAMPLES (what NOT to put in lib):
+        - raycast: Darwin-only macOS app, goes in darwin/system
+        - niri: Linux-only Wayland compositor, goes in nixos/system
+        - Anything with system-specific syscalls or platform-only binaries
+      </module-organization>
+
+      <darwin>
+        Uses nix-darwin and home-manager.
+        Workflow: git add → alejandra . → nh darwin switch → TEST → git commit && push
+        CRITICAL: Only commit after successful switch and user testing.
+      </darwin>
+
+      <nixos>
+        Uses hjem. Clone external repos to ~/nixos/tmp/.
+        IMPORTANT: All packages are system-level (environment.systemPackages), NOT user-level.
+        Workflow: git add → alejandra . → nh os switch --dry → nh os switch → TEST → git commit && push
+        CRITICAL: Only commit after successful switch and user testing.
+      </nixos>
+
+      <hjem-syntax>
+        files."path" = { generator = lib.generators.toFormat {}; value = {}; };
+        usr is aliased to hjem.users.${"$"}{config.user.name} (defined in nixos/user/core/user-config.nix:9)
+        Use usr.files = { ... } as shorthand instead of hjem.users.${"$"}{name}.files = { ... }
+      </hjem-syntax>
     </multi-system>
-
-    <darwin>
-      Uses nix-darwin and home-manager.
-      Workflow: git add → alejandra . → nh darwin switch → TEST → git commit && push
-      CRITICAL: Only commit after successful switch and user testing.
-    </darwin>
-
-    <nixos>
-      Uses hjem. Clone external repos to ~/nixos/tmp/.
-      IMPORTANT: All packages are system-level (environment.systemPackages), NOT user-level.
-      Workflow: git add → alejandra . → nh os switch --dry → nh os switch → TEST → git commit && push
-      CRITICAL: Only commit after successful switch and user testing.
-    </nixos>
-
-    <hjem-syntax>
-      files."path" = { generator = lib.generators.toFormat {}; value = {}; };
-      usr is aliased to hjem.users.${"$"}{config.user.name} (defined in nixos/user/core/user-config.nix:9)
-      Use usr.files = { ... } as shorthand instead of hjem.users.${"$"}{name}.files = { ... }
-    </hjem-syntax>
 
     <failure_modes>
       <failure>Committing code that doesn't build or switch successfully</failure>
