@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{lib, ...}: {
   config.user.shell.zellij.zjstatus.layout = lib.mkDefault ''
     layout {
       default_tab_template {

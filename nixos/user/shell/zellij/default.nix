@@ -4,9 +4,7 @@
   pkgs,
   genLib,
   ...
-}: let
-  cfg = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
-in {
+}: {
   imports = [
     ../../../../lib/shell/zellij/default.nix
   ];
@@ -22,22 +20,22 @@ in {
           clobber = false;
           text =
             genLib.toKDL (
-              cfg.mkKdlAttrs {
+              (import ../../../../lib/shell/zellij/config.nix {inherit lib;}).mkKdlAttrs {
                 zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
                 userSettings = config.user.shell.zellij.settings;
               }
             )
             + "\n\n// Using default keybindings for now\n"
-            + cfg.mkPluginsString {
+            + (import ../../../../lib/shell/zellij/config.nix {inherit lib;}).mkPluginsString {
               zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
             }
-            + genLib.toKDL cfg.theme;
+            + genLib.toKDL (import ../../../../lib/shell/zellij/config.nix {inherit lib;}).theme;
         };
       }
       // lib.optionalAttrs (config.user.shell.zellij.autoStart && config.user.shell.zsh.enable) {
         ".config/zsh/zellij.zsh" = {
           clobber = true;
-          text = cfg.shellIntegration;
+          text = (import ../../../../lib/shell/zellij/config.nix {inherit lib;}).shellIntegration;
         };
       }
       // lib.optionalAttrs (config.user.shell.zellij.enable && config.user.shell.zellij.zjstatus.enable) {
