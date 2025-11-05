@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   shellIntegrationLib = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
