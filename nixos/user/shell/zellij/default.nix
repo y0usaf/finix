@@ -5,7 +5,7 @@
   genLib,
   ...
 }: let
-  cfg = import ../../../../lib/shell/zellij/config.nix { inherit lib; };
+  cfg = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
 in {
   imports = [
     ../../../../lib/shell/zellij/default.nix
@@ -19,20 +19,6 @@ in {
     user.shell.zellij.themeConfig =
       "\n// Neon theme configuration\n"
       + genLib.toKDL cfg.theme;
-
-    user.shell.zellij.zjstatus.layout = lib.mkDefault ''
-      layout {
-        default_tab_template {
-          pane size=1 borderless=true {
-            ${cfg.zjstatus.zjstatusTopBar}
-          }
-          children
-          pane size=1 borderless=true {
-            ${cfg.zjstatus.zjstatusHintsBar}
-          }
-        }
-      }
-    '';
 
     usr.files =
       {
