@@ -1,4 +1,7 @@
-{lib, ...}: {
+{lib, ...}: let
+  theme = import ./theme.nix {};
+  zjstatus = import ./zjstatus.nix {};
+in {
   baseConfig = {
     hide_session_name = false;
     copy_on_select = true;
@@ -24,4 +27,6 @@
 
     exec zellij
   '';
+
+  inherit theme zjstatus;
 }
