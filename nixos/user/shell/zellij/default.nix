@@ -6,6 +6,7 @@
   ...
 }: let
   zjstatusUrl = "https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm";
+  zjstatusHintsUrl = "https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm";
   baseConfig = {
     hide_session_name = false;
     copy_on_select = true;
@@ -72,7 +73,7 @@ in {
             + "\n\n// Using default keybindings for now\n"
             + (lib.optionalString (config.user.shell.zellij.zjstatusHints.enable or false) ''
               plugins {
-                zjstatus-hints location="${zjstatusUrl}" {
+                zjstatus-hints location="${zjstatusHintsUrl}" {
                   max_length ${toString config.user.shell.zellij.zjstatusHints.maxLength}
                   pipe_name "${config.user.shell.zellij.zjstatusHints.pipeName}"
                 }
