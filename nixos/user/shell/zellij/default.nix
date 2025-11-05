@@ -6,6 +6,7 @@
   ...
 }: let
   cfg = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
+  themeConfig = "\n// Neon theme configuration\n" + genLib.toKDL cfg.theme;
 in {
   imports = [
     ../../../../lib/shell/zellij/default.nix
@@ -15,10 +16,6 @@ in {
     environment.systemPackages = [
       pkgs.zellij
     ];
-
-    user.shell.zellij.themeConfig =
-      "\n// Neon theme configuration\n"
-      + genLib.toKDL cfg.theme;
 
     usr.files =
       {
@@ -33,11 +30,11 @@ in {
               // config.user.shell.zellij.settings
             )
             + "\n\n// Using default keybindings for now\n"
-            + (lib.optionalString (config.user.shell.zellij.zjstatusHints.enable or false) ''
+            + (lib.optionalString config.user.shell.zellij.zjstatus.enable ''
               plugins {
                 zjstatus-hints location="${cfg.zjstatusHintsUrl}" {
-                  max_length ${toString config.user.shell.zellij.zjstatusHints.maxLength}
-                  pipe_name "${config.user.shell.zellij.zjstatusHints.pipeName}"
+                  max_length 0
+                  pipe_name "zjstatus_hints"
                 }
               }
 
@@ -45,7 +42,7 @@ in {
                 zjstatus-hints
               }
             '')
-            + config.user.shell.zellij.themeConfig;
+            + themeConfig;
         };
       }
       // lib.optionalAttrs (config.user.shell.zellij.autoStart && config.user.shell.zsh.enable) {
