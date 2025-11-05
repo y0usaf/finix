@@ -6,7 +6,6 @@
   ...
 }: let
   cfg = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
-  themeConfig = "\n// Neon theme configuration\n" + genLib.toKDL cfg.theme;
 in {
   imports = [
     ../../../../lib/shell/zellij/default.nix
@@ -32,7 +31,7 @@ in {
             + cfg.mkPluginsString {
               zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
             }
-            + themeConfig;
+            + genLib.toKDL cfg.theme;
         };
       }
       // lib.optionalAttrs (config.user.shell.zellij.autoStart && config.user.shell.zsh.enable) {
