@@ -8,5 +8,6 @@
     ./keybindings.nix
     ./environment.nix
     ./portals.nix
+    ./zsh-autostart.nix
   ];
 }

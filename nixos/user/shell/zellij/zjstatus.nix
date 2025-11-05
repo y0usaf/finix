@@ -1,13 +1,12 @@
 {
   config,
   lib,
-  flakeInputs,
   ...
 }: let
-  zjstatusPackage = flakeInputs.zjstatus.packages.${config.nixpkgs.system}.default;
+  zjstatusUrl = "https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm";
 
   zjstatusTopBar = ''
-    plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
+    plugin location="${zjstatusUrl}" {
       format_left   ""
       format_center "#[bg=#3c3c3c,fg=#00ff64,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} #[bg=#3c3c3c,fg=#00ff64,bold] {datetime}"
       format_right  ""
@@ -49,7 +48,7 @@
   '';
 
   zjstatusHintsBar = ''
-    plugin location="file:${zjstatusPackage}/bin/zjstatus.wasm" {
+    plugin location="${zjstatusUrl}" {
       format_left   ""
       format_center "#[fg=#00ff64,bg=#0f0f0f]{pipe_zjstatus_hints}"
       format_right  ""
@@ -63,32 +62,17 @@
     }
   '';
 in {
-  options.user.shell.zellij.zjstatus = {
-    enable = lib.mkEnableOption "zjstatus plugin for zellij";
-
-    layout = lib.mkOption {
-      type = lib.types.lines;
-      default = ''
-        layout {
-          default_tab_template {
-            pane size=1 borderless=true {
-              ${zjstatusTopBar}
-            }
-            children
-            pane size=1 borderless=true {
-              ${zjstatusHintsBar}
-            }
-          }
+  config.user.shell.zellij.zjstatus.layout = lib.mkDefault ''
+    layout {
+      default_tab_template {
+        pane size=1 borderless=true {
+          ${zjstatusTopBar}
         }
-      '';
-      description = "Layout configuration for zjstatus. Customize via user.shell.zellij.zjstatus.layout option.";
-    };
-  };
-
-  config = lib.mkIf (config.user.shell.zellij.enable && config.user.shell.zellij.zjstatus.enable) {
-    usr.files.".config/zellij/layouts/zjstatus.kdl" = {
-      clobber = true;
-      text = config.user.shell.zellij.zjstatus.layout;
-    };
-  };
+        children
+        pane size=1 borderless=true {
+          ${zjstatusHintsBar}
+        }
+      }
+    }
+  '';
 }
