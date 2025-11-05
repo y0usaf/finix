@@ -150,7 +150,7 @@
       cat-fetch.enable = true;
       zellij = {
         enable = true;
-        autoStart = true;
+        autoStart = false;
         zjstatus.enable = true;
         zjstatusHints.enable = true;
       };
