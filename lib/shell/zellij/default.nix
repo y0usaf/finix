@@ -1,6 +1,8 @@
-{lib, ...}: let
+{lib, ...}:
+let
   cfg = import ./config.nix {inherit lib;};
-in {
+in
+{
   imports = [
     ./options.nix
   ];

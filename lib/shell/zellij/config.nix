@@ -1,7 +1,7 @@
 {lib, ...}: let
   theme = import ./theme.nix {};
   zjstatus = import ./zjstatus.nix {};
-in {
+
   baseConfig = {
     hide_session_name = false;
     copy_on_select = true;
@@ -27,6 +27,33 @@ in {
 
     exec zellij
   '';
+in {
+  inherit baseConfig shellIntegration theme zjstatus;
+  inherit zjstatusUrl zjstatusHintsUrl;
 
-  inherit theme zjstatus;
+  # Build complete KDL config attrs (caller will pass to genLib.toKDL)
+  mkKdlAttrs = {
+    zjstatusEnabled,
+    userSettings,
+  }:
+    baseConfig
+    // lib.optionalAttrs zjstatusEnabled {
+      default_layout = "zjstatus";
+    }
+    // userSettings;
+
+  # Build plugins and hints strings
+  mkPluginsString = {zjstatusEnabled}:
+    lib.optionalString zjstatusEnabled ''
+      plugins {
+        zjstatus-hints location="${zjstatusHintsUrl}" {
+          max_length 0
+          pipe_name "zjstatus_hints"
+        }
+      }
+
+      load_plugins {
+        zjstatus-hints
+      }
+    '';
 }
