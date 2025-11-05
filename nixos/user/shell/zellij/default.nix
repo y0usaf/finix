@@ -4,6 +4,5 @@ _: {
     ./config.nix
     ./theme.nix
     ./zjstatus.nix
-    ./zjstatus-hints.nix
   ];
 }

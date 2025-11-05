@@ -22,6 +22,10 @@ _: {
         background-color: var(--theme-color)!important
     }
 
+    * {
+        border-radius: 0!important
+    }
+
     @media (prefers-reduced-motion:reduce) {
         * {
             animation: none!important;
@@ -38,14 +42,9 @@ _: {
         --panel-border-radius: 0px!important
     }
 
-    menu,menucaption,menuitem {
-        border-radius: 0!important
-    }
-
     :root:not([customizing]) #TabsToolbar {
         margin: 0 auto!important;
         width: var(--bar-width)!important;
-        border-radius: 0!important;
         padding: 0!important;
         min-height: 0!important;
         max-height: var(--bar-height)!important;
@@ -53,8 +52,7 @@ _: {
     }
 
     .tabbrowser-tab * {
-        margin: 0!important;
-        border-radius: 0!important
+        margin: 0!important
     }
 
     .tabbrowser-tab {
