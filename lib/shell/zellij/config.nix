@@ -1,5 +1,4 @@
-{ lib, ... }:
-{
+{lib, ...}: {
   baseConfig = {
     hide_session_name = false;
     copy_on_select = true;

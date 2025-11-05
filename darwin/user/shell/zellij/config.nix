@@ -3,11 +3,9 @@
   lib,
   pkgs,
   ...
-}:
-let
-  shellIntegrationLib = import ../../../../lib/shell/zellij/config.nix { inherit lib; };
-in
-{
+}: let
+  shellIntegrationLib = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
+in {
   config = lib.mkIf config.user.shell.zellij.enable {
     home-manager.users.y0usaf = {
       programs.zellij = {
@@ -25,7 +23,12 @@ in
             session_serialization false
             pane_frames true
             ${lib.optionalString config.user.shell.zellij.zjstatus.enable "default_layout \"zjstatus\""}
-            ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k} ${if lib.isString v then "\"${v}\"" else builtins.toString v}") config.user.shell.zellij.settings)}
+            ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k} ${
+                if lib.isString v
+                then "\"${v}\""
+                else builtins.toString v
+              }")
+              config.user.shell.zellij.settings)}
             ${lib.optionalString (config.user.shell.zellij.zjstatusHints.enable or false) ''
               plugins {
                 zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm" {

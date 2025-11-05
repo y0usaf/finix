@@ -57,18 +57,4 @@ _: {
       pipe_zjstatus_hints_rendermode "raw"
     }
   '';
-
-  defaultLayout = ''
-    layout {
-      default_tab_template {
-        pane size=1 borderless=true {
-          ${zjstatusTopBar}
-        }
-        children
-        pane size=1 borderless=true {
-          ${zjstatusHintsBar}
-        }
-      }
-    }
-  '';
 }
