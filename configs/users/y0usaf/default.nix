@@ -152,7 +152,6 @@
         enable = true;
         autoStart = false;
         zjstatus.enable = true;
-        zjstatusHints.enable = true;
       };
     };
     tools = {
