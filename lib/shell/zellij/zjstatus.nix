@@ -1,9 +1,7 @@
-{config}: let
-  zjstatusUrl = "https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm";
-in {
+_: {
   # Top status bar - main status info
   zjstatusTopBar = ''
-    plugin location="${zjstatusUrl}" {
+    plugin location="https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm" {
       format_left   ""
       format_center "#[bg=#3c3c3c,fg=#00ff64,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} #[bg=#3c3c3c,fg=#00ff64,bold] {datetime}"
       format_right  ""
@@ -46,7 +44,7 @@ in {
 
   # Bottom status bar - centered hints
   zjstatusHintsBar = ''
-    plugin location="${zjstatusUrl}" {
+    plugin location="https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm" {
       format_left   ""
       format_center "#[fg=#00ff64,bg=#0f0f0f]{pipe_zjstatus_hints}"
       format_right  ""
