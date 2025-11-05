@@ -1,7 +1,9 @@
-_: {
+{config}: let
+  zjstatusUrl = "https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm";
+in {
   # Top status bar - main status info
   zjstatusTopBar = ''
-    plugin location="file:{{zjstatusPackage}}/bin/zjstatus.wasm" {
+    plugin location="${zjstatusUrl}" {
       format_left   ""
       format_center "#[bg=#3c3c3c,fg=#00ff64,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} #[bg=#3c3c3c,fg=#00ff64,bold] {datetime}"
       format_right  ""
@@ -44,7 +46,7 @@ _: {
 
   # Bottom status bar - centered hints
   zjstatusHintsBar = ''
-    plugin location="file:{{zjstatusPackage}}/bin/zjstatus.wasm" {
+    plugin location="${zjstatusUrl}" {
       format_left   ""
       format_center "#[fg=#00ff64,bg=#0f0f0f]{pipe_zjstatus_hints}"
       format_right  ""
@@ -62,11 +64,11 @@ _: {
     layout {
       default_tab_template {
         pane size=1 borderless=true {
-          {{zjstatusTopBar}}
+          ${zjstatusTopBar}
         }
         children
         pane size=1 borderless=true {
-          {{zjstatusHintsBar}}
+          ${zjstatusHintsBar}
         }
       }
     }
