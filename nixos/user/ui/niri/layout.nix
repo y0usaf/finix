@@ -41,6 +41,8 @@
         inactive-color = "aaaaaa";
         position = "bottom";
       };
+
+      blur.on = {};
     };
   };
 }
