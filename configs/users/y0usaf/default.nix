@@ -247,6 +247,9 @@
           installAll = true;
         };
       };
+      duet-night-abyss = {
+        enable = true;
+      };
     };
   };
 }
