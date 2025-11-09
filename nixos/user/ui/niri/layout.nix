@@ -42,7 +42,12 @@
         position = "bottom";
       };
 
-      blur.on = {};
+      blur = {
+        on = {};
+        passes = 3;
+        radius = 12.0;
+        # noise = 0.1; # Optional: adds grain texture to blur (0-1024)
+      };
     };
   };
 }
