@@ -76,6 +76,11 @@
       url = "github:DreamMaoMao/mango";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    niri = {
+      url = "github:visualglitch91/niri/2bc06170c36d613dad88ccf26cec8ca5e379d76e";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
