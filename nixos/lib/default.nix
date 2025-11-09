@@ -6,7 +6,12 @@
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = nixpkgsConfig;
-    overlays = [inputs.neovim-nightly-overlay.overlays.default];
+    overlays = [
+      inputs.neovim-nightly-overlay.overlays.default
+      (_final: _prev: {
+        niri = inputs.niri.packages.${system}.default;
+      })
+    ];
   };
 
   inherit (pkgs) lib;
@@ -29,7 +34,12 @@ in {
                 };
                 nixpkgs = {
                   config = nixpkgsConfig;
-                  overlays = [inputs.neovim-nightly-overlay.overlays.default];
+                  overlays = [
+                    inputs.neovim-nightly-overlay.overlays.default
+                    (_final: _prev: {
+                      niri = inputs.niri.packages.${system}.default;
+                    })
+                  ];
                 };
               })
             (inputs.disko + "/module.nix")
