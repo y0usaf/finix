@@ -1,4 +1,35 @@
-{lib, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  portalEnv = pkgs.writeText "xdg-desktop-portal-gnome-environment.conf" ''
+    [Service]
+    PassEnvironment=WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+  '';
+  portalGnomeOverride = pkgs.writeText "xdg-desktop-portal-gnome-override.conf" ''
+    [Service]
+    Restart=always
+
+    [Unit]
+    After=xdg-desktop-portal-gtk.service
+  '';
+  portalGtkOverride = pkgs.writeText "xdg-desktop-portal-gtk-override.conf" ''
+    [Service]
+    Restart=always
+
+    [Unit]
+    After=xdg-desktop-portal.service
+    Wants=xdg-desktop-portal-gnome.service
+  '';
+  portalOverride = pkgs.writeText "xdg-desktop-portal-override.conf" ''
+    [Service]
+    Restart=always
+
+    [Unit]
+    Wants=xdg-desktop-portal-gtk.service
+  '';
+in {
   config = {
     usr = {
       files = {
@@ -23,54 +54,18 @@
             };
           };
         };
-
-        ".config/systemd/user/xdg-desktop-portal-gnome.service.d/environment.conf" = {
-          generator = lib.generators.toINI {};
-          value = {
-            Service = {
-              PassEnvironment = "WAYLAND_DISPLAY XDG_CURRENT_DESKTOP";
-            };
-          };
-        };
-
-        ".config/systemd/user/xdg-desktop-portal-gnome.service.d/override.conf" = {
-          generator = lib.generators.toINI {};
-          value = {
-            Service = {
-              Restart = "always";
-            };
-            Unit = {
-              After = "xdg-desktop-portal-gtk.service";
-            };
-          };
-        };
-
-        ".config/systemd/user/xdg-desktop-portal-gtk.service.d/override.conf" = {
-          generator = lib.generators.toINI {};
-          value = {
-            Service = {
-              Restart = "always";
-            };
-            Unit = {
-              After = "xdg-desktop-portal.service";
-              Wants = "xdg-desktop-portal-gnome.service";
-            };
-          };
-        };
-
-        ".config/systemd/user/xdg-desktop-portal.service.d/override.conf" = {
-          generator = lib.generators.toINI {};
-          value = {
-            Service = {
-              Restart = "always";
-            };
-            Unit = {
-              Wants = "xdg-desktop-portal-gtk.service";
-            };
-          };
-        };
       };
     };
+
+    systemd.user.tmpfiles.rules = [
+      "d %t/systemd/user/xdg-desktop-portal-gnome.service.d 0755 - - - -"
+      "d %t/systemd/user/xdg-desktop-portal-gtk.service.d 0755 - - - -"
+      "d %t/systemd/user/xdg-desktop-portal.service.d 0755 - - - -"
+      "L+ %t/systemd/user/xdg-desktop-portal-gnome.service.d/environment.conf - - - - ${portalEnv}"
+      "L+ %t/systemd/user/xdg-desktop-portal-gnome.service.d/override.conf - - - - ${portalGnomeOverride}"
+      "L+ %t/systemd/user/xdg-desktop-portal-gtk.service.d/override.conf - - - - ${portalGtkOverride}"
+      "L+ %t/systemd/user/xdg-desktop-portal.service.d/override.conf - - - - ${portalOverride}"
+    ];
 
     systemd.user.targets.niri-session = {
       wants = [
