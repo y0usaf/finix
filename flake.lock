@@ -433,6 +433,28 @@
         "type": "github"
       }
     },
+    "niri": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_2"
+      },
+      "locked": {
+        "lastModified": 1760549596,
+        "narHash": "sha256-sNAJQBP2rVL5OM6Lnblmy7EWYRsrZnmuQnnip4mX8mQ=",
+        "owner": "visualglitch91",
+        "repo": "niri",
+        "rev": "1b8f467fa26014cf846c1960d93995b73f24e1e4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "visualglitch91",
+        "ref": "feat/blur",
+        "repo": "niri",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1759381078,
@@ -523,6 +545,7 @@
         "home-manager": "home-manager",
         "mango": "mango",
         "neovim-nightly-overlay": "neovim-nightly-overlay",
+        "niri": "niri",
         "nixpkgs": "nixpkgs",
         "nvf": "nvf",
         "obs-image-reaction": "obs-image-reaction",
@@ -556,6 +579,27 @@
     "rust-overlay_2": {
       "inputs": {
         "nixpkgs": [
+          "niri",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1757989933,
+        "narHash": "sha256-9cpKYWWPCFhgwQTww8S94rTXgg8Q8ydFv9fXM6I8xQM=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "8249aa3442fb9b45e615a35f39eca2fe5510d7c3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_3": {
+      "inputs": {
+        "nixpkgs": [
           "smfh",
           "nixpkgs"
         ]
@@ -574,7 +618,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_3": {
+    "rust-overlay_4": {
       "inputs": {
         "nixpkgs": [
           "zjstatus",
@@ -595,7 +639,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_4": {
+    "rust-overlay_5": {
       "inputs": {
         "nixpkgs": [
           "zjstatus-hints",
@@ -665,7 +709,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay_2",
+        "rust-overlay": "rust-overlay_3",
         "systems": "systems_5"
       },
       "locked": {
@@ -794,7 +838,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay_3"
+        "rust-overlay": "rust-overlay_4"
       },
       "locked": {
         "lastModified": 1761162625,
@@ -817,7 +861,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay_4"
+        "rust-overlay": "rust-overlay_5"
       },
       "locked": {
         "lastModified": 1760214872,

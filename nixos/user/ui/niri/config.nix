@@ -22,12 +22,6 @@
         {
           prefer-no-csd = {};
 
-          blur = {
-            passes = 3;
-            radius = 12.0;
-            noise = 0.0;
-          };
-
           cursor = {
             xcursor-theme = "DeepinDarkV20-x11";
             xcursor-size = config.user.appearance.cursorSize;
