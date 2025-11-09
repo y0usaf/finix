@@ -42,7 +42,7 @@
       dpi = 144;
       baseFontSize = 12;
       cursorSize = 18;
-      opacity = 0.7;
+      opacity = 0.0;
     };
     paths = {
       flake.path = "/home/y0usaf/nixos";

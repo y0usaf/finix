@@ -44,9 +44,9 @@
 
       blur = {
         on = {};
-        passes = 3;
-        radius = 12.0;
-        # noise = 0.1; # Optional: adds grain texture to blur (0-1024)
+        passes = 5;
+        radius = 5;
+        noise = 0;
       };
     };
   };
