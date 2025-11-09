@@ -15,13 +15,6 @@
       clobber = true;
       generator = lib.generators.toINI {};
       value = {
-        "Core.System" = {
-          Paths = [
-            "../../../Engine/Content"
-            "%GAMEDIR%Content"
-            "../../../EM/Plugins/DynamicAtlas/Content"
-          ];
-        };
         "WindowsApplication.Accessibility" = {
           StickyKeysHotkey = "False";
           ToggleKeysHotkey = "False";
@@ -39,12 +32,12 @@
           bAllowMultiThreadedShaderCompile = "1";
           bEnableMultiCoreRendering = "1";
           AttemptStuckThreadResuscitation = "True";
-          D3D12.MaxCommandsPerCommandList = "100000";
-          D3D12.AdjustTexturePoolSizeBasedOnBudget = "1";
-          D3D11.MaxCommandsPerCommandList = "100000";
-          D3D11.AdjustTexturePoolSizeBasedOnBudget = "1";
-          PakCache.CachePerPakFile = "1";
-          PakCache.UseNewTrim = "1";
+          "D3D12.MaxCommandsPerCommandList" = "100000";
+          "D3D12.AdjustTexturePoolSizeBasedOnBudget" = "1";
+          "D3D11.MaxCommandsPerCommandList" = "100000";
+          "D3D11.AdjustTexturePoolSizeBasedOnBudget" = "1";
+          "PakCache.CachePerPakFile" = "1";
+          "PakCache.UseNewTrim" = "1";
           "foliage.MaxOcclusionQueriesPerComponent" = "1000";
           "foliage.MinOcclusionQueriesPerComponent" = "900";
           "foliage.ditheredLOD" = "1";
