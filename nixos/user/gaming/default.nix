@@ -4,6 +4,7 @@ _: {
     ./core.nix
     ./steam.nix
     ./balatro
+    ./duet-night-abyss
     ./emulation
     ./marvel-rivals
     ./wukong
