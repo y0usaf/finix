@@ -52,5 +52,12 @@
 
     # RTKit - real-time audio priority
     security.rtkit.enable = true;
+
+    # Configure aggressive real-time priority for PipeWire audio service
+    systemd.services.pipewire.serviceConfig = {
+      Nice = -20; # Highest priority
+      CPUSchedulingPolicy = "rr"; # Round-robin real-time scheduling
+      CPUSchedulingPriority = 99; # Maximum real-time priority
+    };
   };
 }
