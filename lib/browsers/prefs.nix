@@ -54,6 +54,16 @@ in {
     "font.name-list.sans-serif.x-western" = fontList;
     "font.name-list.serif.x-unicode" = fontList;
     "font.name-list.serif.x-western" = fontList;
+
+    # Audio processing disables for better microphone quality
+    "media.getusermedia.audio.processing.aec" = 0;
+    "media.getusermedia.audio.processing.aec.enabled" = false;
+    "media.getusermedia.audio.processing.agc" = 0;
+    "media.getusermedia.audio.processing.agc.enabled" = false;
+    "media.getusermedia.audio.processing.agc2.forced" = false;
+    "media.getusermedia.audio.processing.noise" = 0;
+    "media.getusermedia.audio.processing.noise.enabled" = false;
+    "media.getusermedia.audio.processing.hpf.enabled" = false;
   };
 
   default = {
