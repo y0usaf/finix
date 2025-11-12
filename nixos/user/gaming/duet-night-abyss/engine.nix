@@ -11,7 +11,7 @@
     };
   };
   config = lib.mkIf config.user.gaming.duet-night-abyss.enable {
-    usr.files.".local/share/Steam/steamapps/compatdata/3286820662/pfx/drive_c/users/steamuser/AppData/Local/Duet/Saved/Config/Windows/Engine.ini" = {
+    usr.files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/3286820662/pfx/drive_c/users/steamuser/AppData/Local/Duet/Saved/Config/Windows/Engine.ini" = {
       clobber = true;
       generator = lib.generators.toINI {};
       value = {
@@ -57,14 +57,8 @@
           LogAnalytics = "off";
         };
         "/Script/Engine.RendererSettings" = {
-          "r.DefaultFeature.Antialiasing" = "1";
-          "r.TemporalAACurrentFrameWeight" = "0.05";
-          "r.TemporalAAFilterSize" = "1.0";
-          "r.TemporalAA.Algorithm" = "1";
-          "r.TemporalAA.Upsampling" = "1";
-          "r.TemporalAASharpness" = "0";
-          "r.TemporalAASamples" = "4";
-          "r.PostProcessAAQuality" = "6";
+          "r.DefaultFeature.Antialiasing" = "0";
+          "r.PostProcessAAQuality" = "0";
           "r.Reflections.Denoiser" = "2";
           "r.Reflections.Denoiser.TemporalAccumulation" = "1";
           "r.Cache.UpdateEveryFrame" = "1";
@@ -82,9 +76,9 @@
           "r.Streaming.Threaded" = "1";
           "r.Shadow.CSMCaching" = "1";
           "r.ShaderCompiler.AllowDistributedCompilation" = "0";
-          "FX.MaxGPUParticlesSpawnedPerFrame" = "5000";
+          "FX.MaxGPUParticlesSpawnedPerFrame" = "3000";
           "FX.SkipVectorVMBackendOptimizations" = "1";
-          "FX.MaxCPUParticlesPerEmitter" = "3000";
+          "FX.MaxCPUParticlesPerEmitter" = "2000";
           "FX.EnableCircularAnimTrailDump" = "0";
           "FX.ParticlePerfStats.Enabled" = "0";
           "FX.Niagara.DebugDraw.Enabled" = "0";
@@ -144,7 +138,7 @@
           "r.ParticleQuality" = "3";
           "r.MaxAnisotropy" = "16";
           "r.AmbientOcclusionRadiusScale" = "2";
-          "r.BloomCustom.ClampMaxlight" = "0.05";
+          "r.BloomCustom.ClampMaxlight" = "0.02";
         };
         "SystemSettings" = {
           "r.ParallelGraphics" = "1";
@@ -187,8 +181,10 @@
           "r.Streaming.LimitPoolSizeToVRAM" = "1";
           "r.Streaming.AmortizeCPUToGPUCopy" = "1";
           "r.Streaming.NumStaticComponentsProcessedPerFrame" = "1000";
-          "r.Streaming.MaxNumTexturesToStreamPerFrame" = "1000";
+          "r.Streaming.MaxNumTexturesToStreamPerFrame" = "2000";
           "r.Streaming.AllowFastForceResident" = "0";
+          "r.LOD.BaseLOD" = "-1";
+          "r.MaxQualityMode" = "1";
           "r.Shadow.UnbuiltPreviewInGame" = "0";
           "r.Shadow.CacheWholeSceneShadows" = "0";
           "r.Shadow.CacheNonWholeSceneShadows" = "1";
