@@ -6,6 +6,8 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
+    user.ui.niri.blur.enable = false;
+
     environment.systemPackages = [
       pkgs.niri
       pkgs.grim
