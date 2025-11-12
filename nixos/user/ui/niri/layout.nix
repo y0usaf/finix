@@ -42,12 +42,17 @@
         position = "bottom";
       };
 
-      blur = {
-        on = {};
-        passes = 5;
-        radius = 5;
-        noise = 0;
-      };
+      blur =
+        if config.user.ui.niri.blur.enable
+        then {
+          on = {};
+          passes = config.user.ui.niri.blur.passes;
+          radius = config.user.ui.niri.blur.radius;
+          noise = config.user.ui.niri.blur.noise;
+        }
+        else {
+          off = {};
+        };
     };
   };
 }
