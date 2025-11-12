@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.gaming.duet-night-abyss.enable {
-    usr.files.".local/share/Steam/steamapps/compatdata/3286820662/pfx/drive_c/users/steamuser/AppData/Local/Duet/Saved/Config/Windows/Scalability.ini" = {
+    usr.files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/3286820662/pfx/drive_c/users/steamuser/AppData/Local/Duet/Saved/Config/Windows/Scalability.ini" = {
       clobber = true;
       generator = lib.generators.toINI {};
       value = {
@@ -42,7 +42,7 @@
           "r.ViewDistanceScale" = "100.0";
           "r.foliageDistanceScale" = "100.0";
           "r.LightMaxDrawDistanceScale" = "100.0";
-          "r.StaticMeshLODDistanceScale" = "0.0001";
+          "r.StaticMeshLODDistanceScale" = "1.5";
           "r.AOMaxViewDistance" = "50000";
         };
       };
