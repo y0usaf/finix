@@ -1,4 +1,8 @@
-{lib, ...}: let
+{
+  lib,
+  config,
+  ...
+}: let
   mkOpt = type: description: lib.mkOption {inherit type description;};
   dirModule = lib.types.submodule {
     options = {
@@ -30,5 +34,9 @@ in {
       default = [];
       description = "GTK bookmarks for file manager";
     };
+  };
+
+  config.user.paths.steam = lib.mkDefault {
+    path = "${config.user.dataDirectory}/Steam";
   };
 }
