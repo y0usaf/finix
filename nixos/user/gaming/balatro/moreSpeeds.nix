@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf (config.user.gaming.balatro.enable && lib.elem "morespeeds" config.user.gaming.balatro.enabledMods) {
-    usr.files.".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua" = {
+    usr.files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua" = {
       clobber = true;
       text = ''
         --- STEAMODDED HEADER

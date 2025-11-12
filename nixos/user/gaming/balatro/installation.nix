@@ -96,7 +96,7 @@ in {
         (lib.mapAttrs' (
             _name: mod:
               lib.nameValuePair
-              ".local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
+              "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
               {
                 clobber = true;
                 source = mod.src;
@@ -104,7 +104,7 @@ in {
           )
           enabledMods)
         // (lib.optionalAttrs config.user.gaming.balatro.enableLovelyInjector {
-          ".local/share/Steam/steamapps/common/Balatro/version.dll" = {
+          "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Balatro/version.dll" = {
             clobber = true;
             source = "${lovelyInjectorPackage}/version.dll";
           };

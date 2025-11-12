@@ -11,7 +11,7 @@
     };
   };
   config = lib.mkIf config.user.gaming.marvel-rivals.engine.enable {
-    usr.files.".local/share/Steam/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini" = {
+    usr.files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Config/Windows/Engine.ini" = {
       clobber = true;
       generator = lib.generators.toINI {};
       value = {

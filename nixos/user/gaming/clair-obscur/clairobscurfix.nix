@@ -22,17 +22,17 @@ in {
 
   config = lib.mkIf config.user.gaming.clair-obscur.clairobscurfix.enable {
     usr.files = {
-      ".local/share/Steam/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
+      "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
         clobber = true;
         source = "${clairobscurfix}/ClairObscurFix.asi";
       };
 
-      ".local/share/Steam/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/dsound.dll" = {
+      "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/dsound.dll" = {
         clobber = true;
         source = "${clairobscurfix}/dsound.dll";
       };
 
-      ".local/share/Steam/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.ini" = {
+      "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.ini" = {
         clobber = true;
         generator = lib.generators.toINI {};
         value = {
