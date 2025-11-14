@@ -36,7 +36,7 @@
               ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"]
               ["sh" "-c" "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
             ]
-            ++ lib.optional (config.user.ui.ags.enable or false) ["sh" "-c" "${pkgs.ags}/bin/ags run /home/${config.user.name}/.config/ags/bar-overlay.tsx"];
+            ++ lib.optional (config.user.ui.ags.enable or false) ["sh" "-c" "${config.user.ui.ags.package}/bin/ags run /home/${config.user.name}/.config/ags/bar-overlay.tsx"];
 
           hotkey-overlay = {};
           window-rule = {

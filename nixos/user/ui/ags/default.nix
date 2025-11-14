@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   imports = [
@@ -17,6 +18,11 @@
       type = lib.types.bool;
       default = false;
       description = "Enable AGS v2 (defaults to bar-overlay)";
+    };
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.ags;
+      description = "AGS package to run (allows adding extra typelibs such as AstalTray).";
     };
   };
 }
