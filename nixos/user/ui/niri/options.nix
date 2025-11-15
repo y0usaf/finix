@@ -3,7 +3,11 @@
     enable = lib.mkEnableOption "Niri wayland compositor";
 
     blur = {
-      enable = lib.mkEnableOption "window blur effects" // {default = true;};
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Enable window blur effects";
+      };
       passes = lib.mkOption {
         type = lib.types.int;
         default = 5;
