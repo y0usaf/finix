@@ -45,10 +45,7 @@ in {
             (inputs.disko + "/module.nix")
             ({...}: {
               imports = [
-                (_: {
-                  _module.args.hjem-lib = import (inputs.hjem + "/lib.nix") {inherit lib pkgs;};
-                })
-                (inputs.hjem + "/modules/nixos")
+                ((import (inputs.hjem + "/modules/nixos")).hjem)
               ];
               config.hjem = {
                 linker = pkgs.callPackage (inputs.smfh + "/package.nix") {};
