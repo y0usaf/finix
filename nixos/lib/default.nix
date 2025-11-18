@@ -3,15 +3,17 @@
   system,
   nixpkgsConfig,
 }: let
+  commonOverlays = [
+    inputs.neovim-nightly-overlay.overlays.default
+    (_final: _prev: {
+      niri = inputs.niri.packages.${system}.default;
+    })
+  ];
+
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = nixpkgsConfig;
-    overlays = [
-      inputs.neovim-nightly-overlay.overlays.default
-      (_final: _prev: {
-        niri = inputs.niri.packages.${system}.default;
-      })
-    ];
+    overlays = commonOverlays;
   };
 
   inherit (pkgs) lib;
@@ -24,28 +26,11 @@ in {
         inherit system;
         configuration = {
           imports = [
-            (_:
-              (removeAttrs hostConfig ["imports" "homeDirectory"])
-              // {
-                inherit (hostConfig) imports;
-                user = {
-                  name = "y0usaf";
-                  inherit (hostConfig) homeDirectory;
-                };
-                nixpkgs = {
-                  config = nixpkgsConfig;
-                  overlays = [
-                    inputs.neovim-nightly-overlay.overlays.default
-                    (_final: _prev: {
-                      niri = inputs.niri.packages.${system}.default;
-                    })
-                  ];
-                };
-              })
+            (lib.removeAttrs hostConfig ["homeDirectory"])
             (inputs.disko + "/module.nix")
             ({...}: {
               imports = [
-                ((import (inputs.hjem + "/modules/nixos")).hjem)
+                (import (inputs.hjem + "/modules/nixos")).hjem
               ];
               config.hjem = {
                 linker = pkgs.callPackage (inputs.smfh + "/package.nix") {};
@@ -56,6 +41,14 @@ in {
             inputs.mango.nixosModules.mango
             ../user
           ];
+          nixpkgs = {
+            config = nixpkgsConfig;
+            overlays = commonOverlays;
+          };
+          user = {
+            name = "y0usaf";
+            inherit (hostConfig) homeDirectory;
+          };
           _module.args = {
             inherit hostConfig lib genLib system;
             flakeInputs = inputs;

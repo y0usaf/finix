@@ -85,9 +85,7 @@
       hyprland = {
         enable = false;
       };
-      mangowc = {
-        enable = true;
-      };
+      mangowc.enable = false;
       niri = {
         enable = true;
         extraConfig = ''
