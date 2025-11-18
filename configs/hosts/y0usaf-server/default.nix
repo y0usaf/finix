@@ -1,8 +1,12 @@
-{lib, ...}: {
+{
+  lib,
+  flakeInputs,
+  ...
+}: {
   imports = [
     ../../../nixos
     ./hardware-configuration.nix
-    ../../users/server
+    (flakeInputs.self + /configs/users/server.nix)
   ];
 
   hostname = "y0usaf-server";
