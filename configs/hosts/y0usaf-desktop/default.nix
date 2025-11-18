@@ -3,11 +3,11 @@
   flakeInputs,
   system,
   ...
-}: {
+} @ args: {
   imports = [
     ../../../nixos
     ./hardware-configuration.nix
-    ../../users/y0usaf
+    (flakeInputs.self + /configs/users/y0usaf.nix)
   ];
 
   fonts = {
