@@ -6,9 +6,10 @@ _: {
   # Development tools
   lintcheck = "clear; statix check .; deadnix .";
   lintfix = "clear; statix fix .; deadnix .";
-  claude = "bunx @anthropic-ai/claude-code";
-  clauded = "bunx @anthropic-ai/claude-code --dangerously-skip-permissions";
-  codex = "bunx @openai/codex";
+  claude = "bunx --bun @anthropic-ai/claude-code";
+  clauded = "bunx --bun @anthropic-ai/claude-code --dangerously-skip-permissions";
+  codex = "bunx --bun @openai/codex";
+  gemini = "bunx --bun @google/gemini-cli@preview";
 
   # File listing with lsd
   "l." = "lsd -A | grep -E \"^\\\\.\"";
