@@ -50,7 +50,7 @@
               ]
               ++ lib.optional config.user.shell.zellij.enable "source \"$ZDOTDIR/zellij.zsh\""
               ++ [
-                (import ./plugins.nix {inherit pkgs;})
+                (import ../../../../lib/shell/zsh/plugins.nix {inherit pkgs;})
 
                 (import ./settings.nix {inherit config;}).history
 
