@@ -1,4 +1,8 @@
-{config, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   home-manager.users.y0usaf = {
     programs.zsh = {
       enable = true;
@@ -11,6 +15,8 @@
         ${(import ../../../lib/shell/zsh/functions.nix {}).temppkg}
 
         ${(import ../../../lib/shell/zsh/functions.nix {}).temprun}
+
+        ${import ../../../lib/shell/zsh/plugins.nix {inherit pkgs;}}
 
         HISTFILE="$HOME/.zsh_history"
         HISTSIZE=50000
@@ -25,5 +31,10 @@
         PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f %# '
       '';
     };
+
+    home.packages = [
+      pkgs.zsh-syntax-highlighting
+      pkgs.zsh-autosuggestions
+    ];
   };
 }

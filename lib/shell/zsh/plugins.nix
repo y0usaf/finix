@@ -5,6 +5,7 @@
   ZSH_HIGHLIGHT_STYLES[builtin]='fg=6,bold'
   ZSH_HIGHLIGHT_STYLES[string]='fg=2'
   ZSH_HIGHLIGHT_STYLES[error]='fg=1,bold'
+  ZSH_HIGHLIGHT_STYLES[comment]='fg=5'
 
   source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
