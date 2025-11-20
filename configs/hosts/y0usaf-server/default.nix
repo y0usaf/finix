@@ -58,6 +58,6 @@
   services.resolved = {
     enable = true;
     fallbackDns = ["1.1.1.1" "8.8.8.8"];
-    dnssec = "no";
+    dnssec = "false";
   };
 }
