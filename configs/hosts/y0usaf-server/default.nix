@@ -47,10 +47,17 @@
 
   networking = {
     nameservers = ["1.1.1.1" "8.8.8.8"];
+    useDHCP = false;
     firewall = {
       enable = true;
       allowedTCPPorts = [22 80 443 2222 3000 22000];
       allowedUDPPorts = [22000 21027];
     };
+  };
+
+  services.resolved = {
+    enable = true;
+    fallbackDns = ["1.1.1.1" "8.8.8.8"];
+    dnssec = "no";
   };
 }
