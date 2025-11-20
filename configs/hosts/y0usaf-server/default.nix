@@ -30,6 +30,7 @@
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = false;
+    jellyfin.enable = true;
     mediamtx.enable = true;
     n8n = {
       enable = true;
@@ -45,7 +46,7 @@
   };
 
   networking = {
-    nameservers = [ "1.1.1.1" "8.8.8.8" ];
+    nameservers = ["1.1.1.1" "8.8.8.8"];
     firewall = {
       enable = true;
       allowedTCPPorts = [22 80 443 2222 3000 22000];
