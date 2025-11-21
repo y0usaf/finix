@@ -1,3 +1,1 @@
-{
-  ensemble = import ./ensemble.nix;
-}
+{}
