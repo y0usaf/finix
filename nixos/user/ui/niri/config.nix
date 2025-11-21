@@ -15,6 +15,7 @@
       pkgs.wl-clipboard-rs
       pkgs.jq
       pkgs.swaybg
+      pkgs.xwayland-satellite
     ];
 
     usr.files.".config/niri/config.kdl" = {
