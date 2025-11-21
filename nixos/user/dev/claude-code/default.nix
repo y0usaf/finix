@@ -67,41 +67,6 @@ in {
         clobber = true;
       };
 
-      ".claude/skills/ensemble/SKILL.md" = {
-        text = claudeCodeConfig.skills.ensemble.content;
-        clobber = true;
-      };
-
-      ".claude/agents/search-pattern.md" = {
-        text = claudeCodeConfig.agents.search-pattern.content;
-        clobber = true;
-      };
-
-      ".claude/agents/trace-dependency.md" = {
-        text = claudeCodeConfig.agents.trace-dependency.content;
-        clobber = true;
-      };
-
-      ".claude/agents/compare-configs.md" = {
-        text = claudeCodeConfig.agents.compare-configs.content;
-        clobber = true;
-      };
-
-      ".claude/agents/validate-syntax.md" = {
-        text = claudeCodeConfig.agents.validate-syntax.content;
-        clobber = true;
-      };
-
-      ".claude/agents/resolve-option.md" = {
-        text = claudeCodeConfig.agents.resolve-option.content;
-        clobber = true;
-      };
-
-      ".claude/agents/graph-imports.md" = {
-        text = claudeCodeConfig.agents.graph-imports.content;
-        clobber = true;
-      };
-
       ".claude/hooks/notification.ts" = {
         text = claudeCodeConfig.hooks.notification;
         executable = true;
