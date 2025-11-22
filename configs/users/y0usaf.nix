@@ -243,6 +243,9 @@
       duet-night-abyss = {
         enable = true;
       };
+      arc-raiders = {
+        enable = true;
+      };
     };
   };
 }
