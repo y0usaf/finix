@@ -11,7 +11,7 @@
     };
   };
   config = lib.mkIf config.user.gaming.arc-raiders.enable {
-    usr.files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/1808500/pfx/drive_c/users/steamuser/AppData/Local/ArcRaiders/Saved/Config/Windows/Engine.ini" = {
+    usr.files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/1808500/pfx/drive_c/users/steamuser/AppData/Local/PioneerGame/Saved/Config/WindowsClient/Engine.ini" = {
       "clobber" = true;
       "generator" = lib.generators.toINI {};
       value = {
