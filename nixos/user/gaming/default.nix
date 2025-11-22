@@ -3,6 +3,7 @@ _: {
     ./controllers.nix
     ./core.nix
     ./steam.nix
+    ./arc-raiders
     ./balatro
     ./duet-night-abyss
     ./emulation
