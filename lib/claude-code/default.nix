@@ -5,5 +5,5 @@
   mcp = import ./mcp.nix;
   skills = import ./skills;
   agents = import ./agents;
-  hooks = import ./hooks.nix;
+  hooks = import ./hooks;
 }
