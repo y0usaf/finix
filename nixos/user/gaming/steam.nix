@@ -4,12 +4,16 @@
   lib,
   ...
 }: {
-  config = lib.mkIf config.user.gaming.core.enable {
+  options.user.gaming.steam = {
+    enable = lib.mkEnableOption "Steam";
+  };
+
+  config = lib.mkIf config.user.gaming.steam.enable {
     programs.steam = {
       enable = true;
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
-      extraCompatPackages = [pkgs.proton-ge-bin];
+      extraCompatPackages = lib.optionals config.gaming.proton.enable [pkgs.proton-ge-bin];
       package =
         pkgs.steam.override {
         };

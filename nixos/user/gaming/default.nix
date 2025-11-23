@@ -3,6 +3,8 @@ _: {
     ./controllers.nix
     ./core.nix
     ./steam.nix
+    ./mangohud.nix
+    ./launchers.nix
     ./arc-raiders
     ./balatro
     ./duet-night-abyss
