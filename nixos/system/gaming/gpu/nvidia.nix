@@ -69,6 +69,40 @@
           print(f"Error applying NVIDIA settings: {e}", file=sys.stderr)
           sys.exit(1)
     '';
+
+  nvifaControlScript =
+    pkgs.writers.writePython3Bin "nvidia-set-fan" {
+      libraries = with pkgs.python313Packages; [nvidia-ml-py];
+    } ''
+      import sys
+      from pynvml import (
+          nvmlInit,
+          nvmlDeviceGetHandleByIndex,
+          nvmlDeviceSetFanSpeed_v2,
+      )
+
+      if len(sys.argv) != 2:
+          print("Usage: nvidia-set-fan <speed_0_to_100>")
+          sys.exit(1)
+
+      try:
+          speed = int(sys.argv[1])
+          if not 0 <= speed <= 100:
+              print("Error: Speed must be between 0 and 100")
+              sys.exit(1)
+
+          nvmlInit()
+          handle = nvmlDeviceGetHandleByIndex(0)
+          nvmlDeviceSetFanSpeed_v2(handle, 0, speed)
+          print(f"✓ Set GPU fan speed to {speed}%")
+
+      except ValueError:
+          print("Error: Speed must be an integer")
+          sys.exit(1)
+      except Exception as e:
+          print(f"Error setting fan speed: {e}", file=sys.stderr)
+          sys.exit(1)
+    '';
 in {
   options.gaming.gpu.nvidia = {
     enable = lib.mkEnableOption "NVIDIA GPU management (clocks, voltage, fans)";
@@ -102,6 +136,7 @@ in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
       nvidiaMgmtScript
+      nvifaControlScript
     ];
 
     systemd.services.nvidia-management = {
