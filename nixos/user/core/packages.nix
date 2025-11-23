@@ -21,6 +21,7 @@
     pkgs.networkmanager
     pkgs.fzf
     pkgs.ripgrep
+    pkgs.udiskie
   ];
 in {
   options.user.packages = {

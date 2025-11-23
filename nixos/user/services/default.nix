@@ -4,6 +4,7 @@ _: {
     ./polkit-agent.nix
     ./ssh.nix
     ./syncthing.nix
+    ./udiskie.nix
     ./xdg-portals.nix
   ];
 }
