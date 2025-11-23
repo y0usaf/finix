@@ -53,11 +53,11 @@
     };
     gpu.nvidia = {
       enable = true;
-      maxClock = 2500;
+      maxClock = 2450;
       minClock = 300;
-      coreVoltageOffset = null;
-      memoryVoltageOffset = null;
-      fanSpeed = null;
+      coreVoltageOffset = -25;
+      memoryVoltageOffset = -25;
+      fanSpeed = 50;
     };
   };
   services = {
