@@ -5,48 +5,118 @@
   ...
 }: let
   cfg = config.gaming.gpu.nvidia;
+
+  nvidiaConfig = builtins.toJSON {
+    maxClock = cfg.maxClock;
+    minClock = cfg.minClock;
+    coreVoltageOffset = cfg.coreVoltageOffset;
+    memoryVoltageOffset = cfg.memoryVoltageOffset;
+    fanSpeed = cfg.fanSpeed;
+  };
+
+  configFile = pkgs.writeText "nvidia-config.json" nvidiaConfig;
+
+  nvidiaMgmtScript =
+    pkgs.writers.writePython3Bin "nvidia-management" {
+      libraries = with pkgs.python313Packages; [nvidia-ml-py];
+    } ''
+      import json
+      import sys
+      from pynvml import (
+          nvmlInit,
+          nvmlDeviceGetHandleByIndex,
+          nvmlDeviceSetGpuLockedClocks,
+          nvmlDeviceSetGpcClkVfOffset,
+          nvmlDeviceSetMemClkVfOffset,
+          nvmlDeviceSetFanSpeed_v2,
+      )
+
+      try:
+          cfg_file = '${configFile}'
+          with open(cfg_file) as f:
+              config = json.load(f)
+
+          nvmlInit()
+          handle = nvmlDeviceGetHandleByIndex(0)
+
+          # Apply GPU locked clocks
+          if config.get('maxClock'):
+              nvmlDeviceSetGpuLockedClocks(
+                  handle,
+                  config.get('minClock', 300),
+                  config['maxClock']
+              )
+              print("✓ Set GPU clocks")
+
+          # Apply core voltage offset
+          if config.get('coreVoltageOffset') is not None:
+              nvmlDeviceSetGpcClkVfOffset(handle, config['coreVoltageOffset'])
+              print("✓ Set core voltage offset")
+
+          # Apply memory voltage offset
+          if config.get('memoryVoltageOffset') is not None:
+              nvmlDeviceSetMemClkVfOffset(handle, config['memoryVoltageOffset'])
+              print("✓ Set memory voltage offset")
+
+          # Set fan speed
+          if config.get('fanSpeed') is not None:
+              nvmlDeviceSetFanSpeed_v2(handle, 0, config['fanSpeed'])
+              print("✓ Set fan speed")
+
+          print("NVIDIA management applied successfully")
+
+      except Exception as e:
+          print(f"Error applying NVIDIA settings: {e}", file=sys.stderr)
+          sys.exit(1)
+    '';
 in {
   options.gaming.gpu.nvidia = {
-    enable = lib.mkEnableOption "NVIDIA GPU optimizations for gaming";
+    enable = lib.mkEnableOption "NVIDIA GPU management (clocks, voltage, fans)";
     maxClock = lib.mkOption {
-      type = lib.types.nullOr lib.types.int;
-      default = null;
-      description = "Maximum GPU clock in MHz (null to disable)";
+      type = lib.types.int;
+      default = 2500;
+      description = "Maximum GPU clock in MHz";
     };
-    coreOffset = lib.mkOption {
-      type = lib.types.nullOr lib.types.int;
-      default = null;
-      description = "GPU core clock offset in MHz (null to disable)";
+    minClock = lib.mkOption {
+      type = lib.types.int;
+      default = 300;
+      description = "Minimum GPU clock in MHz";
     };
-    memOffset = lib.mkOption {
+    coreVoltageOffset = lib.mkOption {
       type = lib.types.nullOr lib.types.int;
       default = null;
-      description = "GPU memory clock offset in MHz (null to disable)";
+      description = "Core voltage offset in mV (negative = undervolt)";
     };
-    powerLimit = lib.mkOption {
+    memoryVoltageOffset = lib.mkOption {
       type = lib.types.nullOr lib.types.int;
       default = null;
-      description = "Power limit in watts (null to disable)";
+      description = "Memory voltage offset in mV (negative = undervolt)";
+    };
+    fanSpeed = lib.mkOption {
+      type = lib.types.nullOr lib.types.int;
+      default = null;
+      description = "Fan speed percentage (0-100), null for auto";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [pkgs.nvidia_oc];
+    environment.systemPackages = [
+      nvidiaMgmtScript
+    ];
 
-    systemd.services.nvidia-overclock = {
-      description = "NVIDIA GPU overclocking/undervolting";
+    systemd.services.nvidia-management = {
+      description = "NVIDIA GPU Management (clocks, voltage, fans)";
       wantedBy = ["multi-user.target"];
-      after = ["nvidia-persistenced.service"];
+      after = ["multi-user.target"];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = ''
-          ${lib.getExe pkgs.nvidia_oc} set --index 0 --min-clock 0 \
-          ${lib.optionalString (cfg.maxClock != null) "--max-clock ${toString cfg.maxClock}"} \
-          ${lib.optionalString (cfg.coreOffset != null) "--freq-offset ${toString cfg.coreOffset}"} \
-          ${lib.optionalString (cfg.memOffset != null) "--mem-offset ${toString (cfg.memOffset * 2)}"} \
-          ${lib.optionalString (cfg.powerLimit != null) "--power-limit ${toString (cfg.powerLimit * 1000)}"}
-        '';
+        ExecStart = "${lib.getExe nvidiaMgmtScript}";
+        StandardOutput = "journal";
+        StandardError = "journal";
+      };
+      unitConfig = {
+        ConditionPathExists = "/dev/nvidiactl";
       };
     };
   };
