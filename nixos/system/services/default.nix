@@ -9,5 +9,6 @@ _: {
     ./scx.nix
     ./syncthing-proxy.nix
     ./tailscale
+    ./udisks2.nix
   ];
 }
