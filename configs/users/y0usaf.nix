@@ -219,6 +219,8 @@
     gaming = {
       core.enable = true;
       controllers.enable = true;
+      steam.enable = true;
+      mangohud.enable = true;
       emulation = {
         wii-u.enable = true;
         gcn-wii.enable = true;

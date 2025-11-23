@@ -40,6 +40,25 @@
         };
       };
   };
+  gaming = {
+    proton = {
+      enable = true;
+      ntsync = true;
+      nativeWayland = false;
+    };
+    mangohud = {
+      enable = true;
+      enableSessionWide = true;
+      refreshRate = 175;
+    };
+    gpu.nvidia = {
+      enable = true;
+      maxClock = null;
+      coreOffset = 50;
+      memOffset = 100;
+      powerLimit = null;
+    };
+  };
   services = {
     docker.enable = true;
     waydroid.enable = false;

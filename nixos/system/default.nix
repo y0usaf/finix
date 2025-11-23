@@ -2,6 +2,7 @@ _: {
   imports = [
     ./boot
     ./core
+    ./gaming
     ./hardware
     ./networking
     ./programs
