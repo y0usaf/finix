@@ -7,6 +7,12 @@
 in {
   options.user.gaming.mangohud = {
     enable = lib.mkEnableOption "MangoHud user configuration";
+    enableSessionWide = lib.mkEnableOption "MangoHud for all Vulkan apps";
+    refreshRate = lib.mkOption {
+      type = lib.types.int;
+      default = 170;
+      description = "Target refresh rate for FPS limiting";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -16,7 +22,7 @@ in {
         font_size=20
         text_outline_thickness=1
         cellpadding_y=-0.2
-        fps_limit=${toString config.gaming.mangohud.refreshRate},0
+        fps_limit=${toString cfg.refreshRate},0
         vsync=1
         gl_vsync=0
         preset=0,1,2

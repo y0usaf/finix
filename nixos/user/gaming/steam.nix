@@ -13,7 +13,7 @@
       enable = true;
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
-      extraCompatPackages = lib.optionals config.gaming.proton.enable [pkgs.proton-ge-bin];
+      extraCompatPackages = lib.optionals config.user.gaming.proton.enable [pkgs.proton-ge-bin];
       package =
         pkgs.steam.override {
         };
