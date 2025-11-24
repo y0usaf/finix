@@ -2,6 +2,7 @@ _: {
   imports = [
     ./controllers.nix
     ./core.nix
+    ./proton.nix
     ./steam.nix
     ./mangohud.nix
     ./launchers.nix
