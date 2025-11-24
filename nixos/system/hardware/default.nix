@@ -7,6 +7,7 @@ _: {
     ./i2c.nix
     ./input.nix
     ./nvidia.nix
+    ./nvidia-management.nix
     ./video.nix
   ];
 }

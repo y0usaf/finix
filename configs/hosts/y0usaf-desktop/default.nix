@@ -40,10 +40,9 @@
         };
       };
   };
-  gaming = {
+  user.gaming = {
     proton = {
       enable = true;
-      ntsync = true;
       nativeWayland = false;
     };
     mangohud = {
@@ -51,15 +50,16 @@
       enableSessionWide = true;
       refreshRate = 175;
     };
-    gpu.nvidia = {
-      enable = true;
-      maxClock = 2450;
-      minClock = 300;
-      coreVoltageOffset = -25;
-      memoryVoltageOffset = -25;
-      fanSpeed = 50;
-    };
   };
+  hardware.nvidia.management = {
+    enable = true;
+    maxClock = 2450;
+    minClock = 300;
+    coreVoltageOffset = -25;
+    memoryVoltageOffset = -25;
+    fanSpeed = 50;
+  };
+  user.gaming.proton.ntsync = true;
   services = {
     docker.enable = true;
     waydroid.enable = false;
