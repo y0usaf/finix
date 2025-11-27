@@ -6,4 +6,5 @@
   skills = import ./skills;
   agents = import ./agents;
   hooks = import ./hooks;
+  scripts = import ./scripts;
 }
