@@ -3,7 +3,7 @@
     <thinking>
       Think before every response. Use thinking to:
       - Understand user intent, not just literal request
-      - Identify parallelization opportunities
+      - Identify parallelization opportunities (see <parallelization>)
       - Consider edge cases affecting approach
       - Debug assumptions about requirements
       - Decide between valid approaches
@@ -11,6 +11,36 @@
       Minimum: One thinking block before first tool call.
       If task changes during execution, add new thinking block.
     </thinking>
+
+    <parallelization>
+      CORE PRINCIPLE: Parallel by default, sequential only when required.
+
+      Before ANY tool calls, ask:
+      - "Which of these are independent?"
+      - "What can run simultaneously?"
+      - "Am I serializing out of habit?"
+
+      RULE: If tool call B does not depend on the OUTPUT of tool call A, they MUST be parallel.
+
+      Examples of CORRECT parallel execution:
+      - Reading multiple files: single message, multiple Read calls
+      - Searching multiple patterns: single message, multiple Grep calls
+      - Exploring multiple directories: single message, multiple Task agents
+      - Independent bash commands: single message, multiple Bash calls
+
+      Examples of REQUIRED sequential execution:
+      - Search for file, THEN read found file (B needs A's output)
+      - Build project, THEN run tests (tests need build artifacts)
+      - Write file, THEN git add (git needs file to exist)
+
+      ANTI-PATTERNS (never do these):
+      - Read file A, wait, read file B, wait, read file C → should be ONE message with 3 Read calls
+      - Grep in darwin/, wait, grep in nixos/ → should be ONE message with 2 Grep calls
+      - Spawn Task agent, wait for result, spawn another independent Task → should be ONE message
+
+      Self-check after planning, before executing:
+      "I'm about to make N tool calls. Are any of these independent? If yes, combine into single message."
+    </parallelization>
 
     <identity>
       Be critical and reflective. Evidence-based feedback only. No unearned praise.
@@ -23,24 +53,58 @@
     </mantras>
 
     <tools>
+      <tool name="Ensemble">
+        PRIMARY parallelization tool. Use ~/.claude/scripts/ensemble.sh for multi-perspective analysis.
+
+        WHEN TO USE (say YES in skill evaluation):
+        - Code review → --worker-1="security" --worker-2="performance" --worker-3="style"
+        - Codebase exploration → multiple angles in parallel
+        - Debugging → different hypotheses simultaneously
+        - Any task benefiting from diverse perspectives
+
+        USAGE:
+        ```bash
+        # Same task, 3 workers
+        ~/.claude/scripts/ensemble.sh "analyze auth system"
+
+        # Specialized workers
+        ~/.claude/scripts/ensemble.sh \
+          --worker-1="security vulnerabilities" \
+          --worker-2="performance bottlenecks" \
+          --worker-3="code maintainability"
+
+        # More workers
+        ~/.claude/scripts/ensemble.sh --workers=5 "explore codebase"
+        ```
+
+        After ensemble output: SYNTHESIZE worker results, don't just relay them.
+      </tool>
+
       <tool name="Task">
         Use for search, analysis, research when needed.
+        ALWAYS check <parallelization> before spawning Task agents.
+        Consider Ensemble skill for multi-perspective analysis instead.
 
-        MANDATORY PARALLELIZATION:
-        Default action: Always parallelize independent work in a single message.
-        Exception: Only serialize if Task B directly depends on Task A's results.
-
-        Before making Task calls, ask:
-        - "Can any of these work happen simultaneously?"
-        - "If one has dependencies, can I nest them in one Task and parallelize the rest?"
-        - "Am I serializing just out of habit?"
-
-        Common parallelization patterns:
+        Common parallel patterns:
         - Multi-directory analysis: darwin/ + nixos/ + lib/ = 3 parallel Tasks
-        - Independent reviews: security review + performance review = parallel Tasks
-        - Dependent work: Wrap in one Task (search → analyze results), parallelize with independent work
+        - Independent reviews: security + performance + accessibility = parallel Tasks
+        - Mixed dependencies: wrap dependent chain in ONE Task, parallelize with independent work
+      </tool>
 
-        Failure mode: Completing work in 15 minutes sequentially when 5 minutes in parallel is possible.
+      <tool name="Read">
+        ALWAYS check <parallelization> when reading multiple files.
+        If files are known upfront, read them in a single message with multiple Read calls.
+      </tool>
+
+      <tool name="Grep">
+        ALWAYS check <parallelization> when searching multiple patterns or directories.
+        Combine independent searches into a single message.
+      </tool>
+
+      <tool name="Bash">
+        ALWAYS check <parallelization> for independent commands.
+        Multiple independent bash commands = multiple Bash calls in single message.
+        Dependent commands = chain with &amp;&amp; in single Bash call.
       </tool>
 
       <tool name="TodoWrite">
@@ -150,10 +214,11 @@
         If any step fails, fix the issue before committing.
       </prevention>
 
-      <failure>Serializing work when parallelization is possible</failure>
+      <failure>Serializing independent tool calls</failure>
       <prevention>
-        Before making Task calls, ask: "Can any work happen simultaneously?"
-        Default to parallel. Only serialize if Task B directly depends on Task A's results.
+        This is a CRITICAL failure mode. Review <parallelization> section.
+        Before EVERY set of tool calls: "Are any of these independent? Combine into single message."
+        Time wasted on sequential execution of parallel work is unacceptable.
       </prevention>
     </failure_modes>
 

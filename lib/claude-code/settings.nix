@@ -1,21 +1,24 @@
 {
   includeCoAuthoredBy = false;
-  model = "claude-haiku-4-5";
+  model = "claude-opus-4-5";
   env = {
-    MAX_THINKING_TOKENS = "32000";
+    MAX_THINKING_TOKENS = "31999";
+    BASH_DEFAULT_TIMEOUT_MS = "900000";
+    DISABLE_TELEMETRY = "1";
+    CLAUDE_CODE_SUBAGENT_MODEL = "claude-haiku-4-5";
   };
   statusLine = {
     type = "command";
     command = "bunx ccusage statusline";
   };
   hooks = {
-    Notification = [
+    UserPromptSubmit = [
       {
         matcher = "";
         hooks = [
           {
             type = "command";
-            command = "bun ~/.claude/hooks/notification.ts --notify";
+            command = "~/.claude/hooks/skill-eval.sh";
           }
         ];
       }
@@ -31,18 +34,16 @@
         ];
       }
     ];
-    SubagentStop = [
+    Notification = [
       {
-        matcher = "";
+        matcher = "permission_prompt";
         hooks = [
           {
             type = "command";
-            command = "bun ~/.claude/hooks/subagent_stop.ts";
+            command = "bun ~/.claude/hooks/notification.ts --notify";
           }
         ];
       }
     ];
-    PreToolUse = [];
-    PostToolUse = [];
   };
 }

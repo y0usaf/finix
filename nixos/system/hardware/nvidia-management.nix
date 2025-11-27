@@ -20,158 +20,167 @@
     pkgs.writers.writePython3Bin "nvidia-management" {
       libraries = with pkgs.python313Packages; [nvidia-ml-py];
     } ''
+      import argparse
       import json
       import sys
+      from pathlib import Path
       from pynvml import (
-          nvmlInit,
           nvmlDeviceGetHandleByIndex,
-          nvmlDeviceSetGpuLockedClocks,
-          nvmlDeviceSetGpcClkVfOffset,
-          nvmlDeviceSetMemClkVfOffset,
           nvmlDeviceSetFanSpeed_v2,
+          nvmlDeviceSetGpcClkVfOffset,
+          nvmlDeviceSetGpuLockedClocks,
+          nvmlDeviceSetMemClkVfOffset,
+          nvmlInit,
       )
 
-      try:
-          cfg_file = '${configFile}'
-          with open(cfg_file) as f:
-              config = json.load(f)
 
+      CONFIG_PATH = Path(
+          "${configFile}"
+      )
+
+
+      def init_handle():
           nvmlInit()
-          handle = nvmlDeviceGetHandleByIndex(0)
+          return nvmlDeviceGetHandleByIndex(0)
 
-          # Apply GPU locked clocks
-          if config.get('maxClock'):
-              nvmlDeviceSetGpuLockedClocks(
-                  handle,
-                  config.get('minClock', 300),
-                  config['maxClock']
-              )
-              print("✓ Set GPU clocks")
 
-          # Apply core voltage offset
-          if config.get('coreVoltageOffset') is not None:
-              nvmlDeviceSetGpcClkVfOffset(handle, config['coreVoltageOffset'])
-              print("✓ Set core voltage offset")
+      def load_config(path: Path) -> dict:
+          if not path.exists():
+              raise FileNotFoundError(f"Config file not found: {path}")
+          with path.open() as f:
+              return json.load(f)
 
-          # Apply memory voltage offset
-          if config.get('memoryVoltageOffset') is not None:
-              nvmlDeviceSetMemClkVfOffset(handle, config['memoryVoltageOffset'])
-              print("✓ Set memory voltage offset")
 
-          # Set fan speed
-          if config.get('fanSpeed') is not None:
-              nvmlDeviceSetFanSpeed_v2(handle, 0, config['fanSpeed'])
-              print("✓ Set fan speed")
+      def apply_settings(config: dict):
+          handle = init_handle()
+
+          max_clock = config.get("maxClock")
+          min_clock = config.get("minClock", 300)
+          if max_clock is not None:
+              nvmlDeviceSetGpuLockedClocks(handle, min_clock, max_clock)
+              print(f"✓ Set GPU clocks to min {min_clock} MHz / max {max_clock} MHz")
+
+          core_offset = config.get("coreVoltageOffset")
+          if core_offset is not None:
+              validate_voltage(core_offset)
+              nvmlDeviceSetGpcClkVfOffset(handle, core_offset)
+              print(f"✓ Set core voltage offset to {core_offset} mV")
+
+          mem_offset = config.get("memoryVoltageOffset")
+          if mem_offset is not None:
+              validate_voltage(mem_offset)
+              nvmlDeviceSetMemClkVfOffset(handle, mem_offset)
+              print(f"✓ Set memory voltage offset to {mem_offset} mV")
+
+          fan_speed = config.get("fanSpeed")
+          if fan_speed is not None:
+              validate_fan_speed(fan_speed)
+              nvmlDeviceSetFanSpeed_v2(handle, 0, fan_speed)
+              print(f"✓ Set fan speed to {fan_speed}%")
 
           print("NVIDIA management applied successfully")
 
-      except Exception as e:
-          print(f"Error applying NVIDIA settings: {e}", file=sys.stderr)
-          sys.exit(1)
-    '';
 
-  nvifaControlScript =
-    pkgs.writers.writePython3Bin "nvidia-set-fan" {
-      libraries = with pkgs.python313Packages; [nvidia-ml-py];
-    } ''
-      import sys
-      from pynvml import (
-          nvmlInit,
-          nvmlDeviceGetHandleByIndex,
-          nvmlDeviceSetFanSpeed_v2,
-      )
-
-      if len(sys.argv) != 2:
-          print("Usage: nvidia-set-fan <speed_0_to_100>")
-          sys.exit(1)
-
-      try:
-          speed = int(sys.argv[1])
+      def validate_fan_speed(speed: int):
           if not 0 <= speed <= 100:
-              print("Error: Speed must be between 0 and 100")
-              sys.exit(1)
+              raise ValueError("Fan speed must be between 0 and 100")
 
-          nvmlInit()
-          handle = nvmlDeviceGetHandleByIndex(0)
+
+      def validate_voltage(offset: int):
+          if not -200 <= offset <= 100:
+              raise ValueError("Voltage offset must be between -200 and 100 mV")
+
+
+      def cmd_apply(_args):
+          config = load_config(CONFIG_PATH)
+          apply_settings(config)
+
+
+      def cmd_fan(args):
+          speed = int(args.speed)
+          validate_fan_speed(speed)
+          handle = init_handle()
           nvmlDeviceSetFanSpeed_v2(handle, 0, speed)
           print(f"✓ Set GPU fan speed to {speed}%")
 
-      except ValueError:
-          print("Error: Speed must be an integer")
-          sys.exit(1)
-      except Exception as e:
-          print(f"Error setting fan speed: {e}", file=sys.stderr)
-          sys.exit(1)
-    '';
 
-  setCoreVoltageScript =
-    pkgs.writers.writePython3Bin "nvidia-core-voltage" {
-      libraries = with pkgs.python313Packages; [nvidia-ml-py];
-    } ''
-      import sys
-      from pynvml import (
-          nvmlInit,
-          nvmlDeviceGetHandleByIndex,
-          nvmlDeviceSetGpcClkVfOffset,
-      )
-
-      if len(sys.argv) != 2:
-          print("Usage: nvidia-core-voltage <offset_mV>")
-          print("  Example: nvidia-core-voltage -75  # Undervolt by 75mV")
-          sys.exit(1)
-
-      try:
-          offset = int(sys.argv[1])
-          if not -200 <= offset <= 100:
-              print("Error: Offset must be between -200 and 100 mV")
-              sys.exit(1)
-
-          nvmlInit()
-          handle = nvmlDeviceGetHandleByIndex(0)
+      def cmd_core_voltage(args):
+          offset = int(args.offset)
+          validate_voltage(offset)
+          handle = init_handle()
           nvmlDeviceSetGpcClkVfOffset(handle, offset)
-          print(f"✓ Set core voltage offset to {offset}mV")
+          print(f"✓ Set core voltage offset to {offset} mV")
 
-      except ValueError:
-          print("Error: Offset must be an integer")
-          sys.exit(1)
-      except Exception as e:
-          print(f"Error setting core voltage: {e}", file=sys.stderr)
-          sys.exit(1)
-    '';
 
-  setMemoryVoltageScript =
-    pkgs.writers.writePython3Bin "nvidia-mem-voltage" {
-      libraries = with pkgs.python313Packages; [nvidia-ml-py];
-    } ''
-      import sys
-      from pynvml import (
-          nvmlInit,
-          nvmlDeviceGetHandleByIndex,
-          nvmlDeviceSetMemClkVfOffset,
-      )
+      def cmd_mem_voltage(args):
+          offset = int(args.offset)
+          validate_voltage(offset)
+          handle = init_handle()
+          nvmlDeviceSetMemClkVfOffset(handle, offset)
+          print(f"✓ Set memory voltage offset to {offset} mV")
 
-      if len(sys.argv) != 2:
-          print("Usage: nvidia-mem-voltage <offset_mV>")
-          print("  Example: nvidia-mem-voltage -50  # Undervolt by 50mV")
-          sys.exit(1)
 
-      try:
-          offset = int(sys.argv[1])
-          if not -200 <= offset <= 100:
-              print("Error: Offset must be between -200 and 100 mV")
+      def build_parser():
+          parser = argparse.ArgumentParser(
+              prog="nvidia-management",
+              description="NVIDIA GPU management (clocks, voltage, fans)",
+          )
+          sub = parser.add_subparsers(dest="command", required=True)
+
+          apply_parser = sub.add_parser(
+              "apply",
+              help="Apply settings from config file"
+          )
+          apply_parser.set_defaults(func=cmd_apply)
+
+          fan_parser = sub.add_parser(
+              "fan",
+              help="Set fan speed (0-100)"
+          )
+          fan_parser.add_argument(
+              "speed",
+              type=int,
+              help="Fan speed percentage"
+          )
+          fan_parser.set_defaults(func=cmd_fan)
+
+          core_parser = sub.add_parser(
+              "core-voltage",
+              help="Set core voltage offset (mV)"
+          )
+          core_parser.add_argument(
+              "offset",
+              type=int,
+              help="Voltage offset in mV (-200 to 100)"
+          )
+          core_parser.set_defaults(func=cmd_core_voltage)
+
+          mem_parser = sub.add_parser(
+              "mem-voltage",
+              help="Set memory voltage offset (mV)"
+          )
+          mem_parser.add_argument(
+              "offset",
+              type=int,
+              help="Voltage offset in mV (-200 to 100)"
+          )
+          mem_parser.set_defaults(func=cmd_mem_voltage)
+
+          return parser
+
+
+      def main(argv=None):
+          parser = build_parser()
+          args = parser.parse_args(argv)
+          try:
+              args.func(args)
+          except Exception as e:
+              print(f"Error: {e}", file=sys.stderr)
               sys.exit(1)
 
-          nvmlInit()
-          handle = nvmlDeviceGetHandleByIndex(0)
-          nvmlDeviceSetMemClkVfOffset(handle, offset)
-          print(f"✓ Set memory voltage offset to {offset}mV")
 
-      except ValueError:
-          print("Error: Offset must be an integer")
-          sys.exit(1)
-      except Exception as e:
-          print(f"Error setting memory voltage: {e}", file=sys.stderr)
-          sys.exit(1)
+      if __name__ == "__main__":
+          main()
     '';
 in {
   options.hardware.nvidia.management = {
@@ -204,12 +213,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [
-      nvidiaMgmtScript
-      nvifaControlScript
-      setCoreVoltageScript
-      setMemoryVoltageScript
-    ];
+    environment.systemPackages = [nvidiaMgmtScript];
 
     systemd.services.nvidia-management = {
       description = "NVIDIA GPU Management (clocks, voltage, fans)";
@@ -218,7 +222,7 @@ in {
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = "${lib.getExe nvidiaMgmtScript}";
+        ExecStart = "${lib.getExe nvidiaMgmtScript} apply";
         StandardOutput = "journal";
         StandardError = "journal";
       };

@@ -67,6 +67,12 @@ in {
         clobber = true;
       };
 
+      ".claude/hooks/utils.ts" = {
+        text = claudeCodeConfig.hooks.utils;
+        executable = true;
+        clobber = true;
+      };
+
       ".claude/hooks/notification.ts" = {
         text = claudeCodeConfig.hooks.notification;
         executable = true;
@@ -85,13 +91,30 @@ in {
         clobber = true;
       };
 
+      ".claude/hooks/skill-eval.sh" = {
+        text = claudeCodeConfig.hooks.skill_eval;
+        executable = true;
+        clobber = true;
+      };
+
+      ".claude/skills/ensemble/SKILL.md" = {
+        text = claudeCodeConfig.skills.ensemble;
+        clobber = true;
+      };
+
+      ".claude/scripts/ensemble.sh" = {
+        text = claudeCodeConfig.scripts.ensemble;
+        executable = true;
+        clobber = true;
+      };
+
       ".claude/on-agent-need-attention.wav" = {
-        source = "${awesome-claude-code}/on-agent-need-attention.wav";
+        source = ../../../../lib/claude-code/tuturu.ogg;
         clobber = true;
       };
 
       ".claude/on-agent-complete.wav" = {
-        source = "${awesome-claude-code}/on-agent-complete.wav";
+        source = ../../../../lib/claude-code/tuturu.ogg;
         clobber = true;
       };
     };
