@@ -54,10 +54,10 @@
   hardware.nvidia.management = {
     enable = true;
     maxClock = 2450;
-    minClock = 300;
-    coreVoltageOffset = -25;
-    memoryVoltageOffset = -25;
-    fanSpeed = 50;
+    minClock = 1000;
+    coreVoltageOffset = -100;
+    memoryVoltageOffset = -100;
+    fanSpeed = 60;
   };
   user.gaming.proton.ntsync = true;
   services = {
