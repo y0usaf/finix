@@ -97,13 +97,33 @@ in {
         clobber = true;
       };
 
-      ".claude/skills/ensemble/SKILL.md" = {
-        text = claudeCodeConfig.skills.ensemble;
+      # Tool enforcement hooks
+      ".claude/hooks/todowrite-reminder.sh" = {
+        text = claudeCodeConfig.hooks.todowrite_reminder;
+        executable = true;
         clobber = true;
       };
 
-      ".claude/scripts/ensemble.sh" = {
-        text = claudeCodeConfig.scripts.ensemble;
+      ".claude/hooks/askuser-reminder.sh" = {
+        text = claudeCodeConfig.hooks.askuser_reminder;
+        executable = true;
+        clobber = true;
+      };
+
+      ".claude/hooks/parallel-reminder.sh" = {
+        text = claudeCodeConfig.hooks.parallel_reminder;
+        executable = true;
+        clobber = true;
+      };
+
+      ".claude/hooks/tool-tracker.ts" = {
+        text = claudeCodeConfig.hooks.tool_tracker;
+        executable = true;
+        clobber = true;
+      };
+
+      ".claude/hooks/tool-validator.ts" = {
+        text = claudeCodeConfig.hooks.tool_validator;
         executable = true;
         clobber = true;
       };

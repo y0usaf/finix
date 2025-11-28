@@ -12,21 +12,47 @@
     command = "bunx ccusage statusline";
   };
   hooks = {
+    # UserPromptSubmit: 3 always-on tool reminders
     UserPromptSubmit = [
       {
         matcher = "";
         hooks = [
           {
             type = "command";
-            command = "~/.claude/hooks/skill-eval.sh";
+            command = "~/.claude/hooks/todowrite-reminder.sh";
+          }
+          {
+            type = "command";
+            command = "~/.claude/hooks/askuser-reminder.sh";
+          }
+          {
+            type = "command";
+            command = "~/.claude/hooks/parallel-reminder.sh";
           }
         ];
       }
     ];
+    # PostToolUse: Track tool usage to cache
+    PostToolUse = [
+      {
+        matcher = "Read|Write|Edit|MultiEdit|Bash|Glob|Grep|Task|TodoWrite|AskUserQuestion";
+        hooks = [
+          {
+            type = "command";
+            command = "bun ~/.claude/hooks/tool-tracker.ts";
+          }
+        ];
+      }
+    ];
+    # Stop: Validate tool usage + existing sound/transcript hooks
     Stop = [
       {
         matcher = "";
         hooks = [
+          {
+            type = "command";
+            command = "bun ~/.claude/hooks/tool-validator.ts";
+          }
           {
             type = "command";
             command = "bun ~/.claude/hooks/stop.ts --chat";
