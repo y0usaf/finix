@@ -10,7 +10,6 @@ _: {
     ./niri
 
     ./quickshell.nix
-    ./wallust.nix
     ./wayland.nix
   ];
 }

@@ -1,25 +1,26 @@
-_: {
+{
   userChromeCss = ''
     :root {
-        --theme-color: #000000;
-        --overlay-1: color-mix(in srgb, var(--theme-color) 95%, white 5%);
-        --overlay-2: color-mix(in srgb, var(--theme-color) 95%, white 5%);
-        --overlay-3: color-mix(in srgb, var(--theme-color) 85%, white 15%);
-        --overlay-4: color-mix(in srgb, var(--theme-color) 85%, white 15%);
+        /* Firefox Theme API vars (set by pywalfox, fallback to defaults) */
+        --theme-frame: var(--lwt-accent-color, #000000);
+        --theme-toolbar: var(--toolbar-bgcolor, var(--theme-frame));
+        --theme-tab-selected: var(--lwt-selected-tab-background-color, var(--theme-toolbar));
+        --theme-toolbar-field: var(--toolbar-field-background-color, var(--theme-toolbar));
+        --theme-tab-text: var(--tab-text-color, var(--lwt-tab-text, #ffffff));
+        --theme-field-text: var(--toolbar-field-color, var(--theme-tab-text));
+        --theme-icon: var(--lwt-toolbarbutton-icon-fill, #ffffff);
+
         --font-family: 'DejaVu Sans Mono';
         --font-size: 0.6875rem;
         --bar-width: 75vw;
         --bar-height: 1.2em;
         --breakout-width: 50vw;
-        --breakout-top: 20vh;
-        --urlbar-focused-bg: var(--overlay-3);
-        --urlbar-bg: transparent;
-        --toolbar-bg: var(--overlay-1);
-        --toolbar-field-focus-background-color: var(--urlbar-focused-bg)!important;
-        --toolbar-field-background-color: var(--urlbar-bg)!important;
-        --toolbar-field-focus-border-color: transparent!important;
-        --toolbar-bgcolor: var(--toolbar-bg)!important;
-        background-color: var(--theme-color)!important
+        --breakout-top: 20vh
+    }
+
+    /* Force frame background on root and titlebar areas */
+    :root, #titlebar, #TabsToolbar-customization-target {
+        background-color: var(--theme-frame)!important
     }
 
     * {
@@ -48,7 +49,7 @@ _: {
         padding: 0!important;
         min-height: 0!important;
         max-height: var(--bar-height)!important;
-        background-color: var(--toolbar-bg)!important
+        background-color: var(--theme-toolbar)!important
     }
 
     .tabbrowser-tab * {
@@ -60,11 +61,11 @@ _: {
         font-size: var(--font-size)!important;
         align-items: center!important;
         margin-bottom: .2em!important;
-        background-color: var(--overlay-2)!important
+        background-color: var(--theme-frame)!important
     }
 
     .tabbrowser-tab[selected="true"],.tabbrowser-tab[visuallyselected="true"],.tabbrowser-tab[selected="true"] .tab-background,.tabbrowser-tab[visuallyselected="true"] .tab-background {
-        background-color: var(--overlay-4)!important
+        background-color: var(--theme-tab-selected)!important
     }
 
     #tabbrowser-tabs>.tabbrowser-arrowscrollbox,.tabbrowser-tab {
@@ -108,7 +109,7 @@ _: {
         left: 0!important;
         right: 0!important;
         z-index: 1!important;
-        background-color: var(--toolbar-bg)!important
+        background-color: var(--theme-toolbar)!important
     }
 
     #browser {
@@ -154,7 +155,7 @@ _: {
         z-index: 999!important;
         margin: 0!important;
         box-shadow: 0 15px 30px rgba(0,0,0,.2)!important;
-        background-color: var(--theme-color)!important
+        background-color: var(--theme-toolbar-field)!important
     }
 
     .urlbarView {
@@ -189,7 +190,7 @@ _: {
     #navigator-toolbox {
         border: 0!important;
         appearance: toolbar!important;
-        background-color: var(--theme-color)!important
+        background-color: var(--theme-frame)!important
     }
 
     #TabsToolbar,#titlebar,toolbar {

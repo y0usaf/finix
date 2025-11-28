@@ -8,6 +8,7 @@
     ./services
     ./ui
     ./programs
+    ./appearance/wallust
   ];
 
   config.user = {
@@ -15,6 +16,7 @@
     tools.raycast.enable = true;
     ui.jankyborders.enable = true;
     programs.librewolf.enable = true;
+    appearance.wallust.enable = true;
     shell.zellij = {
       enable = true;
       autoStart = true;
