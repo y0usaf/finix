@@ -96,7 +96,6 @@
         '';
       };
       quickshell.enable = true;
-      wallust.enable = true;
       wayland.enable = true;
     };
     programs = {
@@ -153,6 +152,7 @@
         name = "y0usaf";
         email = "OA99@Outlook.com";
       };
+      gh.enable = true;
       nh = {
         enable = true;
         flake = "/home/y0usaf/nixos";
