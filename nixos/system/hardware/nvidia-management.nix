@@ -7,11 +7,11 @@
   cfg = config.hardware.nvidia.management;
 
   nvidiaConfig = builtins.toJSON {
-    maxClock = cfg.maxClock;
-    minClock = cfg.minClock;
-    coreVoltageOffset = cfg.coreVoltageOffset;
-    memoryVoltageOffset = cfg.memoryVoltageOffset;
-    fanSpeed = cfg.fanSpeed;
+    inherit (cfg) maxClock;
+    inherit (cfg) minClock;
+    inherit (cfg) coreVoltageOffset;
+    inherit (cfg) memoryVoltageOffset;
+    inherit (cfg) fanSpeed;
   };
 
   configFile = pkgs.writeText "nvidia-config.json" nvidiaConfig;
