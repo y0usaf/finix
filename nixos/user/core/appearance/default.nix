@@ -1,4 +1,9 @@
 {lib, ...}: {
+  imports = [
+    ./wallust
+  ];
+
+  # Appearance options (fonts, DPI, animations, etc.)
   options.user.appearance = {
     fonts = lib.mkOption {
       type = lib.types.submodule {

@@ -6,6 +6,9 @@ _: {
   # Development tools
   lintcheck = "clear; statix check .; deadnix .";
   lintfix = "clear; statix fix .; deadnix .";
+
+  # Wallust wrapper (auto-updates pywalfox)
+  wallust = "wt";
   claude = "bunx --bun @anthropic-ai/claude-code";
   clauded = "bunx --bun @anthropic-ai/claude-code --dangerously-skip-permissions";
   codex = "bunx --bun @openai/codex";
