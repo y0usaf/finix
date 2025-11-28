@@ -12,7 +12,7 @@
     command = "bunx ccusage statusline";
   };
   hooks = {
-    # UserPromptSubmit: 3 always-on tool reminders
+    # UserPromptSubmit: always-on tool reminders
     UserPromptSubmit = [
       {
         matcher = "";
@@ -28,6 +28,10 @@
           {
             type = "command";
             command = "~/.claude/hooks/parallel-reminder.sh";
+          }
+          {
+            type = "command";
+            command = "~/.claude/hooks/codex-reminder.sh";
           }
         ];
       }
