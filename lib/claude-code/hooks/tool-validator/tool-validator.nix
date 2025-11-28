@@ -89,11 +89,11 @@
       );
     }
 
-    // Check Task usage - ALWAYS required for thinking/exploration
+    // Check Task usage - ALWAYS required for everything
     const hasTask = uniqueTools.has("Task");
     if (!hasTask) {
       feedback.push(
-        `TASK: You did NOT use Task tool. It is MANDATORY for all thinking/exploration.`
+        `TASK: You did NOT use Task tool. It is MANDATORY for ALL work.`
       );
     }
 

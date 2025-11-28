@@ -128,6 +128,12 @@ in {
         clobber = true;
       };
 
+      ".claude/hooks/codex-reminder.sh" = {
+        text = claudeCodeConfig.hooks.codex_reminder;
+        executable = true;
+        clobber = true;
+      };
+
       ".claude/on-agent-need-attention.wav" = {
         source = ../../../../lib/claude-code/tuturu.ogg;
         clobber = true;

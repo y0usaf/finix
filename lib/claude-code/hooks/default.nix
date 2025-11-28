@@ -10,4 +10,5 @@
   todowrite_reminder = import ./todowrite-reminder/default.nix;
   askuser_reminder = import ./askuser-reminder/default.nix;
   parallel_reminder = import ./parallel-reminder/default.nix;
+  codex_reminder = import ./codex-reminder/default.nix;
 }

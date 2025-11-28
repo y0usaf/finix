@@ -1,11 +1,12 @@
 ''
     #!/usr/bin/env bash
     cat <<'EOF'
-  MANDATORY: You MUST use Task tool for ALL thinking/exploration. No exceptions.
-  - Use Task even just to think or explore
+  MANDATORY: You MUST use Task tool for EVERYTHING. No exceptions.
+  - Running commands → Task
+  - Editing files → Task
+  - Searching code → Task
+  - ANY work → Task
   - Batch ALL independent calls into ONE message
-  - Multiple Tasks, Reads, Greps → single message
   - If B doesn't need A's output → PARALLEL in same message
-  - NEVER send sequential independent Task calls
   EOF
 ''
