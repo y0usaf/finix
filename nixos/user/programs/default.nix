@@ -2,7 +2,7 @@ _: {
   imports = [
     ./bluetooth.nix
     ./creative.nix
-    ./discord.nix
+    ./discord
     ./imv.nix
     ./media.nix
     ./mimeapps.nix
@@ -14,7 +14,6 @@ _: {
     ./slack.nix
     ./stremio.nix
     ./tui-launcher.nix
-    ./vesktop
     ./webapps.nix
     ./browsers
   ];

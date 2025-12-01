@@ -99,13 +99,12 @@
       wayland.enable = true;
     };
     programs = {
-      vesktop.enable = false;
+      discord = {
+        vesktop.enable = true;
+        stable.enable = true;
+      };
       webapps.enable = true;
       librewolf.enable = true;
-      discord = {
-        enable = true;
-        variant = "stable";
-      };
       obsidian.enable = true;
       creative.enable = true;
       media.enable = true;

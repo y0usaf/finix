@@ -4,12 +4,13 @@
   lib,
   ...
 }: {
-  options.user.programs.vesktop = {
-    enable = lib.mkEnableOption "Vesktop (Discord client) module";
+  options.user.programs.discord.vesktop = {
+    enable = lib.mkEnableOption "Vesktop (Discord client with Vencord)";
   };
 
-  config = lib.mkIf config.user.programs.vesktop.enable {
+  config = lib.mkIf config.user.programs.discord.vesktop.enable {
     environment.systemPackages = [pkgs.vesktop];
+
     usr.files = {
       ".config/vesktop/settings.json" = {
         generator = lib.generators.toJSON {};
@@ -31,7 +32,6 @@
           themeLinks = [];
           frameless = false;
           transparent = false;
-
           eagerPatches = false;
           enableReactDevtools = false;
           winCtrlQ = false;
