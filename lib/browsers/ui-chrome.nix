@@ -49,7 +49,7 @@
         padding: 0!important;
         min-height: 0!important;
         max-height: var(--bar-height)!important;
-        background-color: var(--theme-toolbar)!important
+        background-color: var(--theme-frame)!important
     }
 
     .tabbrowser-tab * {
@@ -109,7 +109,7 @@
         left: 0!important;
         right: 0!important;
         z-index: 1!important;
-        background-color: var(--theme-toolbar)!important
+        background-color: var(--theme-frame)!important
     }
 
     #browser {

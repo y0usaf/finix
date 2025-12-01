@@ -5,20 +5,18 @@
   ...
 }: let
   inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf;
-  cfg = config.user.programs.discord;
+  cfg = config.user.programs.discord.canary;
 
   disableFeatures = [
     "WebRtcAllowInputVolumeAdjustment"
     "ChromeWideEchoCancellation"
   ];
 
-  # VA-API features removed - cause GPU crashes on NVIDIA/Wayland
-  enableFeatures = optionals config.hardware.nvidia.enable [
-    "WaylandLinuxDrmSyncobj" # fix flickering on NVIDIA Wayland
-  ];
+  enableFeatures = [];
 
   gpuArgs =
-    optionals (enableFeatures != []) [
+    []
+    ++ optionals (enableFeatures != []) [
       "--enable-features=${concatStringsSep "," enableFeatures}"
     ]
     ++ optionals (disableFeatures != []) [
@@ -30,30 +28,17 @@
 
   commandLineArgs = concatStringsSep " " (gpuArgs ++ cfg.extraArgs);
 
-  # Font helpers for OpenASAR CSS
   font = config.user.ui.fonts;
   wrapFonts = fonts: concatStringsSep ", " (map (f: "\"${f}\"") fonts);
   primaryFont = wrapFonts [font.mainFontName font.backup.name font.emoji.name];
   monoFont = wrapFonts [font.mainFontName font.backup.name];
-
-  # Config path based on variant
-  configPath =
-    if cfg.variant == "canary"
-    then ".config/discordcanary/settings.json"
-    else ".config/discord/settings.json";
 in {
-  options.user.programs.discord = {
-    enable = mkEnableOption "Discord module";
-    variant = mkOption {
-      type = lib.types.enum ["canary" "stable"];
-      default = "canary";
-      description = "Which Discord variant to install (canary or stable)";
-    };
+  options.user.programs.discord.canary = {
+    enable = mkEnableOption "Discord Canary";
     extraArgs = mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
-      example = ["--disable-gpu" "--enable-features=UseOzonePlatform"];
-      description = "Extra command line arguments to pass to Discord";
+      description = "Extra command line arguments to pass to Discord Canary";
     };
     minimizeToTray =
       mkEnableOption "Minimize to tray on close"
@@ -65,36 +50,23 @@ in {
 
   config = mkIf cfg.enable {
     environment.systemPackages = [
-      (
-        if cfg.variant == "canary"
-        then
-          (pkgs.discord-canary.override {
-            inherit commandLineArgs;
-            withOpenASAR = true;
-            withVencord = true;
-            withTTS = false;
-            enableAutoscroll = true;
-          })
-        else
-          (pkgs.discord.override {
-            inherit commandLineArgs;
-            withOpenASAR = true;
-            withVencord = true;
-            withTTS = false;
-            enableAutoscroll = true;
-          })
-      )
+      (pkgs.discord-canary.override {
+        inherit commandLineArgs;
+        withOpenASAR = false;
+        withVencord = true;
+        withTTS = false;
+        enableAutoscroll = true;
+      })
     ];
 
-    # Manage Discord settings.json via hjem
-    hjem.users.${config.user.name}.files.${configPath} = {
+    hjem.users.${config.user.name}.files.".config/discordcanary/settings.json" = {
       generator = lib.generators.toJSON {};
       value = {
         SKIP_HOST_UPDATE = true;
         MINIMIZE_TO_TRAY = cfg.minimizeToTray;
         OPEN_ON_STARTUP = false;
         DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
-        enableHardwareAcceleration = true;
+        enableHardwareAcceleration = false;
         openasar = {
           setup = true;
           cmdPreset = "balanced";
