@@ -45,7 +45,7 @@
       # Quick Launch Apps
       bind=Alt,1,spawn,${config.user.defaults.ide}
       bind=Alt,2,spawn,${config.user.defaults.browser}
-      bind=Alt,3,spawn,vesktop
+      bind=Alt,3,spawn,discord
       bind=Alt,4,spawn,steam
       bind=Alt,5,spawn,obs
 

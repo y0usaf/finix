@@ -8,6 +8,21 @@
     (_final: _prev: {
       niri = inputs.niri.packages.${system}.default;
     })
+    # Fix obs-vertical-canvas Qt6GuiPrivate cmake detection
+    (final: prev: {
+      obs-studio-plugins =
+        prev.obs-studio-plugins
+        // {
+          obs-vertical-canvas = prev.obs-studio-plugins.obs-vertical-canvas.overrideAttrs (old: {
+            postPatch =
+              (old.postPatch or "")
+              + ''
+                # Add find_package for Qt6 GuiPrivate component
+                sed -i '/find_qt(COMPONENTS Widgets COMPONENTS_LINUX Gui)/a find_package(Qt6 REQUIRED COMPONENTS GuiPrivate)' CMakeLists.txt
+              '';
+          });
+        };
+    })
   ];
 
   pkgs = import inputs.nixpkgs {

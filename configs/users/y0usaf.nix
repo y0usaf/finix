@@ -33,7 +33,7 @@
       terminal = lib.mkDefault "foot";
       fileManager = lib.mkDefault "pcmanfm";
       launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
-      discord = lib.mkDefault "discord-canary";
+      discord = lib.mkDefault "discord";
       archiveManager = lib.mkDefault "file-roller";
       imageViewer = lib.mkDefault "imv";
       mediaPlayer = lib.mkDefault "mpv";
@@ -99,10 +99,13 @@
       wayland.enable = true;
     };
     programs = {
-      vesktop.enable = true;
+      vesktop.enable = false;
       webapps.enable = true;
       librewolf.enable = true;
-      discord.enable = true;
+      discord = {
+        enable = true;
+        variant = "stable";
+      };
       obsidian.enable = true;
       creative.enable = true;
       media.enable = true;
@@ -238,10 +241,6 @@
         clairobscurfix.enable = true;
         engine.enable = true;
         scalability.enable = true;
-        mods = {
-          enable = true;
-          installAll = true;
-        };
       };
       duet-night-abyss = {
         enable = true;
