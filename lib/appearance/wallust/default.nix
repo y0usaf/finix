@@ -1,7 +1,7 @@
 # Shared wallust configuration for NixOS and Darwin
 # Provides colorschemes, templates, file definitions, and wt script
 {lib}: let
-  colorschemes = import ./colorschemes.nix;
+  colorschemes = import ./colorschemes;
   templates = import ./templates.nix {inherit lib;};
 in {
   inherit colorschemes templates;
@@ -15,6 +15,7 @@ in {
     # Colorschemes
     ".config/wallust/colorschemes/dopamine.json" = builtins.toJSON colorschemes.dopamine;
     ".config/wallust/colorschemes/sunset-red.json" = builtins.toJSON colorschemes.sunset-red;
+    ".config/wallust/colorschemes/golden.json" = builtins.toJSON colorschemes.golden;
 
     # Shared CSS variables template
     ".config/wallust/templates/colors.css" = templates.colorsCss;
