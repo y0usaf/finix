@@ -85,7 +85,7 @@ in {
 
       "Mod+1" = {spawn = defaults.ide;};
       "Mod+2" = {spawn = defaults.browser;};
-      "Mod+3" = {spawn = "vesktop";};
+      "Mod+3" = {spawn = "discord";};
       "Mod+4" = {spawn = "steam";};
       "Mod+5" = {spawn = "obs";};
 

@@ -28,7 +28,7 @@
         "$mod, O, exec, $notepad"
         "$mod, 1, exec, $ide"
         "$mod, 2, exec, $browser"
-        "$mod, 3, exec, vesktop"
+        "$mod, 3, exec, discord"
         "$mod, 4, exec, steam"
         "$mod, 5, exec, $obs"
       ]

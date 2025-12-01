@@ -4,7 +4,7 @@
       enable = true;
       enable32Bit = true;
       extraPackages = [
-        pkgs.vaapiVdpau
+        pkgs.libva-vdpau-driver
         pkgs.libvdpau-va-gl
       ];
     };

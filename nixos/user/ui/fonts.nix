@@ -38,7 +38,7 @@
         options = {
           package = lib.mkOption {
             type = lib.types.package;
-            default = pkgs.noto-fonts-emoji;
+            default = pkgs.noto-fonts-color-emoji;
             description = "Emoji font package";
           };
           name = lib.mkOption {

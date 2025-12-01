@@ -4,6 +4,5 @@
     ./clairobscurfix.nix
     ./engine.nix
     ./scalability.nix
-    ./mods.nix
   ];
 }
