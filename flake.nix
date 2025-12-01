@@ -31,11 +31,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    expedition-33-mods = {
-      url = "github:y0usaf/Expedition-33-Mods";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     zjstatus = {
       url = "github:dj95/zjstatus";
       inputs.nixpkgs.follows = "nixpkgs";
