@@ -28,6 +28,9 @@ in {
     # Zellij templates
     ".config/wallust/templates/zellij-config.kdl" = templates.mkZellijConfigTemplate {inherit zjstatusEnabled;};
     ".config/wallust/templates/zellij-layout.kdl" = templates.zjstatusLayout;
+
+    # Discord quickCss template
+    ".config/wallust/templates/discord-quickcss.css" = templates.discordQuickCss;
   };
 
   # wt script text - wraps wallust with pywalfox update
@@ -58,6 +61,8 @@ in {
     mkdir -p ~/.config/zellij/layouts
     mkdir -p ~/.cache/wal
     mkdir -p ~/.cache/wallust
+    mkdir -p ~/.config/Vencord/settings
+    mkdir -p ~/.config/vesktop/settings
 
     ${wallustBin} ${
       if builtins.hasAttr defaultTheme colorschemes
