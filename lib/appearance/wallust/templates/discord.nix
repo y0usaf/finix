@@ -31,59 +31,58 @@
   	line-height: 1.3;
   }
   :root {
-  	--base-gray: oklch(54% 0 0);
-  	--base-red: oklch(70% 0.13 0);
-  	--base-green: oklch(70% 0.12 170);
-  	--base-blue: oklch(70% 0.11 215);
-  	--base-yellow: oklch(75% 0.12 90);
-  	--base-purple: oklch(70% 0.12 310);
+  	--base-red: {{color1}};
+  	--base-green: {{color2}};
+  	--base-blue: {{color4}};
+  	--base-yellow: {{color3}};
+  	--base-purple: {{color5}};
 
-  	--text-0: oklch(from var(--base-gray) calc(l + 0.45) c h);
-  	--text-1: oklch(from var(--base-gray) calc(l + 0.41) c h);
-  	--text-2: oklch(from var(--base-gray) calc(l + 0.31) c h);
-  	--text-3: oklch(from var(--base-gray) calc(l + 0.21) c h);
-  	--text-4: oklch(from var(--base-gray) calc(l + 0.06) c h);
-  	--text-5: oklch(from var(--base-gray) calc(l - 0.14) c h);
+  	--text-0: {{foreground}};
+  	--text-1: {{color15}};
+  	--text-2: {{color7}};
+  	--text-3: {{color7}};
+  	--text-4: {{color8}};
+  	--text-5: {{color8}};
 
-  	--bg-1: oklch(from var(--base-gray) calc(l - 0.23) c h);
-  	--bg-2: oklch(from var(--base-gray) calc(l - 0.27) c h);
-  	--bg-3: oklch(from var(--base-gray) calc(l - 0.31) c h);
-  	--bg-4: oklch(0% 0 0);
+  	--bg-1: {{color0}};
+  	--bg-2: {{color0}};
+  	--bg-3: {{color0}};
+  	--bg-4: {{background}};
 
-  	--hover: oklch(from var(--base-gray) l c h / 0.1);
-  	--active: oklch(from var(--base-gray) l c h / 0.2);
-  	--active-2: oklch(from var(--base-gray) l c h / 0.3);
+  	--hover: color-mix(in srgb, {{color8}} 10%, transparent);
+  	--active: color-mix(in srgb, {{color8}} 20%, transparent);
+  	--active-2: color-mix(in srgb, {{color8}} 30%, transparent);
   	--message-hover: var(--hover);
 
-  	--red-1: oklch(from var(--base-red) calc(l + 0.05) c h);
-  	--red-2: var(--base-red);
-  	--red-3: oklch(from var(--base-red) calc(l - 0.05) c h);
-  	--red-4: oklch(from var(--base-red) calc(l - 0.10) c h);
-  	--red-5: oklch(from var(--base-red) calc(l - 0.15) c h);
+  	--red-1: {{color9}};
+  	--red-2: {{color1}};
+  	--red-3: {{color1}};
+  	--red-4: {{color1}};
+  	--red-5: {{color1}};
 
-  	--green-1: oklch(from var(--base-green) calc(l + 0.05) c h);
-  	--green-2: var(--base-green);
-  	--green-3: oklch(from var(--base-green) calc(l - 0.05) c h);
-  	--green-4: oklch(from var(--base-green) calc(l - 0.10) c h);
-  	--green-5: oklch(from var(--base-green) calc(l - 0.15) c h);
+  	--green-1: {{color10}};
+  	--green-2: {{color2}};
+  	--green-3: {{color2}};
+  	--green-4: {{color2}};
+  	--green-5: {{color2}};
 
-  	--blue-1: oklch(from var(--base-blue) calc(l + 0.05) c h);
-  	--blue-2: var(--base-blue);
-  	--blue-3: oklch(from var(--base-blue) calc(l - 0.05) c h);
-  	--blue-4: oklch(from var(--base-blue) calc(l - 0.10) c h);
-  	--blue-5: oklch(from var(--base-blue) calc(l - 0.15) c h);
+  	--blue-1: {{color12}};
+  	--blue-2: {{color4}};
+  	--blue-3: {{color4}};
+  	--blue-4: {{color4}};
+  	--blue-5: {{color4}};
 
-  	--yellow-1: oklch(from var(--base-yellow) calc(l + 0.05) c h);
-  	--yellow-2: var(--base-yellow);
-  	--yellow-3: oklch(from var(--base-yellow) calc(l - 0.05) c h);
-  	--yellow-4: oklch(from var(--base-yellow) calc(l - 0.10) c h);
-  	--yellow-5: oklch(from var(--base-yellow) calc(l - 0.15) c h);
+  	--yellow-1: {{color11}};
+  	--yellow-2: {{color3}};
+  	--yellow-3: {{color3}};
+  	--yellow-4: {{color3}};
+  	--yellow-5: {{color3}};
 
-  	--purple-1: oklch(from var(--base-purple) calc(l + 0.05) c h);
-  	--purple-2: var(--base-purple);
-  	--purple-3: oklch(from var(--base-purple) calc(l - 0.05) c h);
-  	--purple-4: oklch(from var(--base-purple) calc(l - 0.10) c h);
-  	--purple-5: oklch(from var(--base-purple) calc(l - 0.15) c h);
+  	--purple-1: {{color13}};
+  	--purple-2: {{color5}};
+  	--purple-3: {{color5}};
+  	--purple-4: {{color5}};
+  	--purple-5: {{color5}};
 
   	--accent-1: var(--purple-1);
   	--accent-2: var(--purple-2);
@@ -101,12 +100,12 @@
   	--border-light: var(--text-5);
   	--border: var(--text-5);
   	--border-hover: var(--purple-2);
-  	--button-border: oklch(from var(--text-1) l c h / 0.1);
+  	--button-border: color-mix(in srgb, {{foreground}} 10%, transparent);
 
-  	--mention: linear-gradient(to right, color-mix(in hsl, var(--accent-2), transparent 90%) 40%, transparent);
-  	--mention-hover: linear-gradient(to right, color-mix(in hsl, var(--accent-2), transparent 95%) 40%, transparent);
-  	--reply: linear-gradient(to right, color-mix(in hsl, var(--text-3), transparent 90%) 40%, transparent);
-  	--reply-hover: linear-gradient(to right, color-mix(in hsl, var(--text-3), transparent 95%) 40%, transparent);
+  	--mention: linear-gradient(to right, color-mix(in srgb, var(--accent-2) 10%, transparent) 40%, transparent);
+  	--mention-hover: linear-gradient(to right, color-mix(in srgb, var(--accent-2) 5%, transparent) 40%, transparent);
+  	--reply: linear-gradient(to right, color-mix(in srgb, var(--text-3) 10%, transparent) 40%, transparent);
+  	--reply-hover: linear-gradient(to right, color-mix(in srgb, var(--text-3) 5%, transparent) 40%, transparent);
   }
   *,*::before,*::after {
   	border-radius: 0 !important;
