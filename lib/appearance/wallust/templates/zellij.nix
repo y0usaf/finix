@@ -81,7 +81,7 @@
           base {{ color11 | red }} {{ color11 | green }} {{ color11 | blue }}
           {% elif "dopamine" in wallpaper %}
           base {{ color9 | red }} {{ color9 | green }} {{ color9 | blue }}
-          {% elif "sunset-red" in wallpaper %}
+          {% elif "red" in wallpaper %}
           base {{ color9 | red }} {{ color9 | green }} {{ color9 | blue }}
           {% else %}
           base {{ color4 | red }} {{ color4 | green }} {{ color4 | blue }}
