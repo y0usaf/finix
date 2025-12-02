@@ -1,10 +1,10 @@
 import { App, Astal, Gtk, Gdk } from "astal/gtk3"
-import { Variable, exec, bind } from "astal"
+import { Variable, exec, bind, monitorFile } from "astal"
 import Tray from "gi://AstalTray"
 
-const styles = `
-@import url("@HOME@/.cache/wallust/ags-colors.css");
+const GTK_COLORS = "@HOME@/.cache/wallust/gtk-colors.css"
 
+const styles = `
 * {
     font-size: 14px;
     font-family: monospace;
@@ -27,37 +27,37 @@ const styles = `
 }
 
 .time-block, .date-block {
-    background: @wallust_bg;
-    border-radius: 0;
-    padding: 2px;
+    background: @bg;
+    border: 0.05em solid @fg;
+    padding: 0.15em 0.3em;
     margin: 0;
-    color: @wallust_fg;
+    color: @fg;
 }
 
 .time-block label, .date-block label {
     background: transparent;
-    color: @wallust_fg;
+    color: @fg;
+    font-weight: bold;
     margin: 0;
     padding: 0;
     text-shadow:
-        1px 0 1px @wallust_black,
-        -1px 0 1px @wallust_black,
-        0 1px 1px @wallust_black,
-        0 -1px 1px @wallust_black;
+        0.07em 0 0.07em @black,
+        -0.07em 0 0.07em @black,
+        0 0.07em 0.07em @black,
+        0 -0.07em 0.07em @black;
 }
 
 .tray-block {
-    background: @wallust_bg;
-    border-radius: 0;
-    padding: 2px;
+    background: @bg;
+    border: 0.05em solid @fg;
+    padding: 0.15em;
     margin: 0;
 }
 
 .tray-item {
     background: transparent;
     border: none;
-    border-radius: 0;
-    padding: 2px;
+    padding: 0.15em;
     margin: 0;
     min-width: unset;
     min-height: unset;
@@ -66,7 +66,7 @@ const styles = `
 }
 
 .tray-item:hover {
-    background: alpha(@wallust_fg, 0.1);
+    background: alpha(@fg, 0.1);
 }
 
 .tray-item:focus {
@@ -75,10 +75,21 @@ const styles = `
 }
 
 .tray-item image {
-    min-width: 16px;
-    min-height: 16px;
+    min-width: 1.15em;
+    min-height: 1.15em;
 }
 `
+
+function loadStyles() {
+    App.reset_css()
+    App.apply_css(GTK_COLORS)
+    App.apply_css(styles)
+}
+
+// Watch colors file for changes
+monitorFile(GTK_COLORS, () => {
+    loadStyles()
+})
 
 const time = Variable("").poll(1000, () => exec(["date", "+%H:%M:%S"]))
 const date = Variable("").poll(30000, () => exec(["date", "+%d/%m/%y"]))
@@ -148,8 +159,8 @@ function BottomBar() {
 }
 
 App.start({
-    css: styles,
     main() {
+        loadStyles()
         TopBar()
         BottomBar()
     },
