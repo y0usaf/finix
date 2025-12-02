@@ -2,5 +2,5 @@
 {
   dopamine = import ./dopamine.nix;
   red = import ./red.nix;
-  golden = import ./golden.nix;
+  p4g = import ./p4g.nix;
 }
