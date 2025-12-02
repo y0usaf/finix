@@ -22,7 +22,7 @@ in {
     # Colorschemes
     ".config/wallust/colorschemes/dopamine.json" = builtins.toJSON colorschemes.dopamine;
     ".config/wallust/colorschemes/red.json" = builtins.toJSON colorschemes.red;
-    ".config/wallust/colorschemes/golden.json" = builtins.toJSON colorschemes.golden;
+    ".config/wallust/colorschemes/p4g.json" = builtins.toJSON colorschemes.p4g;
 
     # Shared CSS variables template
     ".config/wallust/templates/colors.css" = templates.colorsCss;
