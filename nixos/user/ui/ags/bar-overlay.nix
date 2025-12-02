@@ -18,6 +18,11 @@
           tray
         ];
       };
+      homeDir = "/home/${config.user.name}";
+      barOverlay = pkgs.substitute {
+        src = ./config/bar-overlay.tsx;
+        substitutions = ["--subst-var-by" "HOME" homeDir];
+      };
     in {
       user.ui.ags.package = agsWithTray;
       environment.systemPackages = [
@@ -25,7 +30,7 @@
       ];
       usr = {
         files = {
-          ".config/ags/bar-overlay.tsx".source = ./config/bar-overlay.tsx;
+          ".config/ags/bar-overlay.tsx".source = barOverlay;
           ".config/ags/tsconfig.json".source = ./config/tsconfig.json;
         };
       };

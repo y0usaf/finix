@@ -11,6 +11,9 @@
     zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
     discordStable = discordCfg.stable.enable or false;
     discordVesktop = discordCfg.vesktop.enable or false;
+    discordMinimalImprovement = discordCfg.vesktop.enable or discordCfg.stable.enable or false;
+    niriEnabled = config.user.ui.niri.enable or false;
+    agsEnabled = config.user.ui.ags.enable or false;
   };
 in {
   options.user.appearance.wallust = {
