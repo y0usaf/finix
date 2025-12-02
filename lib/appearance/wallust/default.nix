@@ -12,18 +12,16 @@ in {
     zjstatusEnabled ? false,
     discordStable ? false,
     discordVesktop ? false,
-    discordMinimalImprovement ? false,
     niriEnabled ? false,
-    agsEnabled ? false,
   }: {
     # Main config
     ".config/wallust/wallust.toml" = templates.mkWallustConfig {
-      inherit discordStable discordVesktop discordMinimalImprovement niriEnabled agsEnabled;
+      inherit discordStable discordVesktop niriEnabled;
     };
 
     # Colorschemes
     ".config/wallust/colorschemes/dopamine.json" = builtins.toJSON colorschemes.dopamine;
-    ".config/wallust/colorschemes/sunset-red.json" = builtins.toJSON colorschemes.sunset-red;
+    ".config/wallust/colorschemes/red.json" = builtins.toJSON colorschemes.red;
     ".config/wallust/colorschemes/golden.json" = builtins.toJSON colorschemes.golden;
 
     # Shared CSS variables template
@@ -42,14 +40,11 @@ in {
     # Discord quickCss template
     ".config/wallust/templates/discord-quickcss.css" = templates.discordQuickCss;
 
-    # MinimalImprovement compact theme template
-    ".config/wallust/templates/minimal-improvement.css" = templates.minimalImprovement;
-
     # Niri border colors template
     ".config/wallust/templates/niri-borders.kdl" = templates.niriBorders;
 
-    # AGS color variables template
-    ".config/wallust/templates/ags-colors.css" = templates.agsColors;
+    # GTK CSS color definitions
+    ".config/wallust/templates/gtk-colors.css" = templates.gtkColors;
   };
 
   # wt script text - wraps wallust with pywalfox update
@@ -81,9 +76,7 @@ in {
     mkdir -p ~/.cache/wal
     mkdir -p ~/.cache/wallust
     mkdir -p ~/.config/Vencord/settings
-    mkdir -p ~/.config/Vencord/themes
     mkdir -p ~/.config/vesktop/settings
-    mkdir -p ~/.config/vesktop/themes
     mkdir -p ~/.config/ags
 
     ${wallustBin} ${

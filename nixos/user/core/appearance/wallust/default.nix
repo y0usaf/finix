@@ -11,16 +11,14 @@
     zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
     discordStable = discordCfg.stable.enable or false;
     discordVesktop = discordCfg.vesktop.enable or false;
-    discordMinimalImprovement = discordCfg.vesktop.enable or discordCfg.stable.enable or false;
     niriEnabled = config.user.ui.niri.enable or false;
-    agsEnabled = config.user.ui.ags.enable or false;
   };
 in {
   options.user.appearance.wallust = {
     defaultTheme = lib.mkOption {
       type = lib.types.str;
       default = "dopamine";
-      description = "Default theme to apply on login. Can be a custom colorscheme name (dopamine, sunset-red, golden) or a built-in wallust theme (Synthwave, Tokyo-Night, etc.)";
+      description = "Default theme to apply on login. Can be a custom colorscheme name (dopamine, red, golden) or a built-in wallust theme (Synthwave, Tokyo-Night, etc.)";
     };
   };
 
