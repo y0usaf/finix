@@ -2,15 +2,21 @@
 # Provides colorschemes, templates, file definitions, and wt script
 {lib}: let
   colorschemes = import ./colorschemes;
-  templates = import ./templates.nix {inherit lib;};
+  templates = import ./templates {inherit lib;};
 in {
   inherit colorschemes templates;
 
   # Generate wallust config files (path -> content)
   # Can be used by both hjem and home-manager
-  mkFiles = {zjstatusEnabled ? false}: {
+  mkFiles = {
+    zjstatusEnabled ? false,
+    discordStable ? false,
+    discordVesktop ? false,
+  }: {
     # Main config
-    ".config/wallust/wallust.toml" = templates.mkWallustConfig {};
+    ".config/wallust/wallust.toml" = templates.mkWallustConfig {
+      inherit discordStable discordVesktop;
+    };
 
     # Colorschemes
     ".config/wallust/colorschemes/dopamine.json" = builtins.toJSON colorschemes.dopamine;

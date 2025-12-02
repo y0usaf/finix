@@ -5,8 +5,13 @@
   ...
 }: let
   cfg = config.user.appearance.wallust;
+  discordCfg = config.user.programs.discord;
   wallustLib = import ../../../../../lib/appearance/wallust {inherit lib;};
-  files = wallustLib.mkFiles {zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;};
+  files = wallustLib.mkFiles {
+    zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
+    discordStable = discordCfg.stable.enable or false;
+    discordVesktop = discordCfg.vesktop.enable or false;
+  };
 in {
   options.user.appearance.wallust = {
     defaultTheme = lib.mkOption {
