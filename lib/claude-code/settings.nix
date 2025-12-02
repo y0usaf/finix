@@ -36,27 +36,11 @@
         ];
       }
     ];
-    # PostToolUse: Track tool usage to cache
-    PostToolUse = [
-      {
-        matcher = "Read|Write|Edit|MultiEdit|Bash|Glob|Grep|Task|TodoWrite|AskUserQuestion";
-        hooks = [
-          {
-            type = "command";
-            command = "bun ~/.claude/hooks/tool-tracker.ts";
-          }
-        ];
-      }
-    ];
-    # Stop: Validate tool usage + existing sound/transcript hooks
+    # Stop: sound/transcript hooks
     Stop = [
       {
         matcher = "";
         hooks = [
-          {
-            type = "command";
-            command = "bun ~/.claude/hooks/tool-validator.ts";
-          }
           {
             type = "command";
             command = "bun ~/.claude/hooks/stop.ts --chat";
