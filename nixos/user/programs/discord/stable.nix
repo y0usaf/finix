@@ -5,20 +5,17 @@
   ...
 }: let
   inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf;
-  cfg = config.user.programs.discord;
+  cfg = config.user.programs.discord.stable;
 
   disableFeatures = [
     "WebRtcAllowInputVolumeAdjustment"
     "ChromeWideEchoCancellation"
   ];
 
-  # GPU completely disabled - causes crashes on NVIDIA/Wayland
   enableFeatures = [];
 
   gpuArgs =
-    [
-      # Minimal flags for NVIDIA/Wayland
-    ]
+    []
     ++ optionals (enableFeatures != []) [
       "--enable-features=${concatStringsSep "," enableFeatures}"
     ]
@@ -31,29 +28,16 @@
 
   commandLineArgs = concatStringsSep " " (gpuArgs ++ cfg.extraArgs);
 
-  # Font helpers for OpenASAR CSS
   font = config.user.ui.fonts;
   wrapFonts = fonts: concatStringsSep ", " (map (f: "\"${f}\"") fonts);
   primaryFont = wrapFonts [font.mainFontName font.backup.name font.emoji.name];
   monoFont = wrapFonts [font.mainFontName font.backup.name];
-
-  # Config path based on variant
-  configPath =
-    if cfg.variant == "canary"
-    then ".config/discordcanary/settings.json"
-    else ".config/discord/settings.json";
 in {
-  options.user.programs.discord = {
-    enable = mkEnableOption "Discord module";
-    variant = mkOption {
-      type = lib.types.enum ["canary" "stable"];
-      default = "canary";
-      description = "Which Discord variant to install (canary or stable)";
-    };
+  options.user.programs.discord.stable = {
+    enable = mkEnableOption "Discord stable";
     extraArgs = mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
-      example = ["--disable-gpu" "--enable-features=UseOzonePlatform"];
       description = "Extra command line arguments to pass to Discord";
     };
     minimizeToTray =
@@ -66,29 +50,16 @@ in {
 
   config = mkIf cfg.enable {
     environment.systemPackages = [
-      (
-        if cfg.variant == "canary"
-        then
-          (pkgs.discord-canary.override {
-            inherit commandLineArgs;
-            withOpenASAR = false;
-            withVencord = true;
-            withTTS = false;
-            enableAutoscroll = true;
-          })
-        else
-          (pkgs.discord.override {
-            inherit commandLineArgs;
-            withOpenASAR = false;
-            withVencord = true;
-            withTTS = false;
-            enableAutoscroll = true;
-          })
-      )
+      (pkgs.discord.override {
+        inherit commandLineArgs;
+        withOpenASAR = false;
+        withVencord = true;
+        withTTS = false;
+        enableAutoscroll = true;
+      })
     ];
 
-    # Manage Discord settings.json via hjem
-    hjem.users.${config.user.name}.files.${configPath} = {
+    hjem.users.${config.user.name}.files.".config/discord/settings.json" = {
       generator = lib.generators.toJSON {};
       value = {
         SKIP_HOST_UPDATE = true;
