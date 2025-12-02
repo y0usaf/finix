@@ -5,9 +5,6 @@
 }: let
   commonOverlays = [
     inputs.neovim-nightly-overlay.overlays.default
-    (_final: _prev: {
-      niri = inputs.niri.packages.${system}.default;
-    })
     # Fix obs-vertical-canvas Qt6GuiPrivate cmake detection
     (final: prev: {
       obs-studio-plugins =

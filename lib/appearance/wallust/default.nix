@@ -12,10 +12,13 @@ in {
     zjstatusEnabled ? false,
     discordStable ? false,
     discordVesktop ? false,
+    discordMinimalImprovement ? false,
+    niriEnabled ? false,
+    agsEnabled ? false,
   }: {
     # Main config
     ".config/wallust/wallust.toml" = templates.mkWallustConfig {
-      inherit discordStable discordVesktop;
+      inherit discordStable discordVesktop discordMinimalImprovement niriEnabled agsEnabled;
     };
 
     # Colorschemes
@@ -38,6 +41,15 @@ in {
 
     # Discord quickCss template
     ".config/wallust/templates/discord-quickcss.css" = templates.discordQuickCss;
+
+    # MinimalImprovement compact theme template
+    ".config/wallust/templates/minimal-improvement.css" = templates.minimalImprovement;
+
+    # Niri border colors template
+    ".config/wallust/templates/niri-borders.kdl" = templates.niriBorders;
+
+    # AGS color variables template
+    ".config/wallust/templates/ags-colors.css" = templates.agsColors;
   };
 
   # wt script text - wraps wallust with pywalfox update
@@ -69,7 +81,10 @@ in {
     mkdir -p ~/.cache/wal
     mkdir -p ~/.cache/wallust
     mkdir -p ~/.config/Vencord/settings
+    mkdir -p ~/.config/Vencord/themes
     mkdir -p ~/.config/vesktop/settings
+    mkdir -p ~/.config/vesktop/themes
+    mkdir -p ~/.config/ags
 
     ${wallustBin} ${
       if builtins.hasAttr defaultTheme colorschemes

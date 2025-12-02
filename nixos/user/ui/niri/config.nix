@@ -6,8 +6,6 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    user.ui.niri.blur.enable = false;
-
     environment.systemPackages = [
       pkgs.niri
       pkgs.grim
@@ -23,6 +21,9 @@
       generator = genLib.toNiriconf;
       value =
         {
+          # Include wallust-generated border colors (live-reloads on wallpaper change)
+          include._args = ["/home/${config.user.name}/.cache/wallust/niri-borders.kdl"];
+
           prefer-no-csd = {};
 
           cursor = {
