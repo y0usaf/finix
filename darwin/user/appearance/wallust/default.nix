@@ -14,7 +14,7 @@ in {
     defaultTheme = lib.mkOption {
       type = lib.types.str;
       default = "dopamine";
-      description = "Default theme to apply. Can be a custom colorscheme name (dopamine, sunset-red, golden) or a built-in wallust theme (Synthwave, Tokyo-Night, etc.)";
+      description = "Default theme to apply. Can be a custom colorscheme name (dopamine, red, golden) or a built-in wallust theme (Synthwave, Tokyo-Night, etc.)";
     };
   };
 
