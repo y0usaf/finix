@@ -14,7 +14,7 @@
     color8 = "#1f1a10"; # Dark gold-tinged gray
     color9 = "#ff4422"; # Bright fiery red
     color10 = "#c4d70c"; # P4 yellow-green
-    color11 = "#ffe52c"; # P4 bright yellow (iconic)
+    color11 = "#ffff00"; # Pure yellow (zellij border)
     color12 = "#7fe6ef"; # P4 cyan/light blue
     color13 = "#faa622"; # Bright gold
     color14 = "#7fe6ef"; # P4 light cyan
