@@ -33,7 +33,7 @@
   }
 
   runHook("stop.json", async (data: { stop_hook_active?: boolean; transcript_path?: string }) => {
-    await playSound("on-agent-complete.wav");
+    await playSound("on-agent-complete.wav", 0.25);
 
     if (hasFlag("--chat") && data.transcript_path) {
       processTranscript(data.transcript_path);
