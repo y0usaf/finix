@@ -19,10 +19,10 @@
         ];
       };
 
+      # Border and tab-indicator colors are in wallust-generated include file
       border = {
         width = 1;
-        active-color = "ffffff";
-        inactive-color = "#000000";
+        # Colors set via wallust include below
       };
 
       focus-ring = {
@@ -37,16 +37,8 @@
             "total-proportion" = 0.01;
           };
         };
-        active-color = "#ffffff";
-        inactive-color = "aaaaaa";
+        # Colors set via wallust include below
         position = "bottom";
-      };
-
-      blur = lib.mkIf config.user.ui.niri.blur.enable {
-        on = {};
-        inherit (config.user.ui.niri.blur) passes;
-        inherit (config.user.ui.niri.blur) radius;
-        inherit (config.user.ui.niri.blur) noise;
       };
     };
   };

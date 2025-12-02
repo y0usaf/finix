@@ -23,4 +23,13 @@ in {
 
   # Discord/Vesktop
   discordQuickCss = import ./discord.nix;
+
+  # MinimalImprovement compact theme (separate from quickCss)
+  minimalImprovement = import ./minimal-improvement.nix;
+
+  # Niri border colors (included via niri's include directive)
+  niriBorders = import ./niri.nix;
+
+  # AGS (Astal) color variables
+  agsColors = import ./ags.nix;
 }

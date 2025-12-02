@@ -3,6 +3,8 @@ import { Variable, exec, bind } from "astal"
 import Tray from "gi://AstalTray"
 
 const styles = `
+@import url("@HOME@/.cache/wallust/ags-colors.css");
+
 * {
     font-size: 14px;
     font-family: monospace;
@@ -25,27 +27,27 @@ const styles = `
 }
 
 .time-block, .date-block {
-    background: #2a2a2a;
+    background: @wallust_bg;
     border-radius: 0;
     padding: 2px;
     margin: 0;
-    color: white;
+    color: @wallust_fg;
 }
 
 .time-block label, .date-block label {
     background: transparent;
-    color: white;
+    color: @wallust_fg;
     margin: 0;
     padding: 0;
     text-shadow:
-        1px 0 1px black,
-        -1px 0 1px black,
-        0 1px 1px black,
-        0 -1px 1px black;
+        1px 0 1px @wallust_black,
+        -1px 0 1px @wallust_black,
+        0 1px 1px @wallust_black,
+        0 -1px 1px @wallust_black;
 }
 
 .tray-block {
-    background: #2a2a2a;
+    background: @wallust_bg;
     border-radius: 0;
     padding: 2px;
     margin: 0;
@@ -64,7 +66,7 @@ const styles = `
 }
 
 .tray-item:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: alpha(@wallust_fg, 0.1);
 }
 
 .tray-item:focus {
