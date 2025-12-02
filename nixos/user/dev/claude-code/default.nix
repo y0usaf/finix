@@ -73,20 +73,8 @@ in {
         clobber = true;
       };
 
-      ".claude/hooks/notification.ts" = {
-        text = claudeCodeConfig.hooks.notification;
-        executable = true;
-        clobber = true;
-      };
-
       ".claude/hooks/stop.ts" = {
         text = claudeCodeConfig.hooks.stop;
-        executable = true;
-        clobber = true;
-      };
-
-      ".claude/hooks/subagent_stop.ts" = {
-        text = claudeCodeConfig.hooks.subagent_stop;
         executable = true;
         clobber = true;
       };
@@ -112,18 +100,6 @@ in {
 
       ".claude/hooks/parallel-reminder.sh" = {
         text = claudeCodeConfig.hooks.parallel_reminder;
-        executable = true;
-        clobber = true;
-      };
-
-      ".claude/hooks/tool-tracker.ts" = {
-        text = claudeCodeConfig.hooks.tool_tracker;
-        executable = true;
-        clobber = true;
-      };
-
-      ".claude/hooks/tool-validator.ts" = {
-        text = claudeCodeConfig.hooks.tool_validator;
         executable = true;
         clobber = true;
       };

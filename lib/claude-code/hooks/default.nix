@@ -1,14 +1,18 @@
 {
+  # Shared utilities
   utils = import ./utils/default.nix;
-  notification = import ./notification/default.nix;
-  stop = import ./stop/default.nix;
-  subagent_stop = import ./subagent-stop/default.nix;
-  skill_eval = import ./skill-eval/default.nix;
-  # Tool enforcement hooks
-  tool_tracker = import ./tool-tracker/default.nix;
-  tool_validator = import ./tool-validator/default.nix;
-  todowrite_reminder = import ./todowrite-reminder/default.nix;
-  askuser_reminder = import ./askuser-reminder/default.nix;
-  parallel_reminder = import ./parallel-reminder/default.nix;
-  codex_reminder = import ./codex-reminder/default.nix;
+
+  # UserPromptSubmit hooks
+  todowrite_reminder = import ./user-prompt-submit/todowrite-reminder.nix;
+  askuser_reminder = import ./user-prompt-submit/askuser-reminder.nix;
+  parallel_reminder = import ./user-prompt-submit/parallel-reminder.nix;
+  codex_reminder = import ./user-prompt-submit/codex-reminder.nix;
+  skill_eval = import ./user-prompt-submit/skill-eval.nix;
+
+  # Stop hooks
+  stop = import ./stop/completion-sound.nix;
+  tool_validator = import ./stop/tool-validator.nix;
+
+  # PreToolUse hooks
+  tool_tracker = import ./pre-tool-use/tool-tracker.nix;
 }
