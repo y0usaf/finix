@@ -26,6 +26,7 @@
   @define-color background {{ background }};
   @define-color foreground {{ foreground }};
   @define-color cursor {{ cursor }};
+  @define-color accent {{ cursor }};
 
   /* Semantic aliases */
   @define-color bg {{ background }};

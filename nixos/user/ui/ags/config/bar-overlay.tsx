@@ -28,7 +28,7 @@ const styles = `
 
 .time-block, .date-block {
     background: @bg;
-    border: 0.05em solid @fg;
+    border: 0.05em solid @accent;
     padding: 0.15em 0.3em;
     margin: 0;
     color: @fg;
@@ -49,7 +49,7 @@ const styles = `
 
 .tray-block {
     background: @bg;
-    border: 0.05em solid @fg;
+    border: 0.05em solid @accent;
     padding: 0.15em;
     margin: 0;
 }
