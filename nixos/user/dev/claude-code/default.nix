@@ -27,8 +27,10 @@
     enabledPlugins = {
       "audio-notify@y0usaf-marketplace" = true;
       "codex-mcp@y0usaf-marketplace" = true;
+      "collab-flow@y0usaf-marketplace" = true;
       "instructions@y0usaf-marketplace" = true;
-      "prompt-reminders@y0usaf-marketplace" = true;
+      "parallelization-instruct@y0usaf-marketplace" = true;
+      "todowrite-instruct@y0usaf-marketplace" = true;
       "tool-tracker@y0usaf-marketplace" = true;
     };
     extraKnownMarketplaces = {

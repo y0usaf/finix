@@ -7,6 +7,8 @@
     name = "y0usaf";
   };
 
+  hooks = import ./hooks.nix;
+
   mcpServers = {
     codex = {
       command = "bunx";

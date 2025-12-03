@@ -97,14 +97,14 @@
           const data = parseJson<HookData>(input);
 
           if (!data) {
-            process.exit(1);
+            process.exit(0);
           }
 
           appendToLog("stop.json", data);
           await playSound("on-agent-complete.wav", 0.25);
           process.exit(0);
         } catch {
-          process.exit(1);
+          process.exit(0);
         }
       }
 
