@@ -57,8 +57,8 @@ _: {
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
       };
-      "addon@darkreader.org" = {
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi";
+      "jid1-QoFqdK4qzUfGWQ@jetpack" = {
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/dark-background-light-text/latest.xpi";
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
       };

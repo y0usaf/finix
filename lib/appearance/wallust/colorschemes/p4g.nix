@@ -23,7 +23,6 @@
   special = {
     background = "#000000"; # Pure black
     foreground = "#e8e0c8"; # Warm light
-    cursor = "#ffe52c"; # Bright yellow (P4 signature)
+    cursor = "#ffe52c"; # Bright yellow - also used as accent color (P4 signature)
   };
-  accent = "#ffe52c"; # P4 bright yellow (signature)
 }

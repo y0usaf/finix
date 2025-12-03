@@ -22,7 +22,6 @@
   special = {
     background = "#000000"; # Pure black
     foreground = "#f0f0ff"; # Bright white
-    cursor = "#ff006e"; # Hot pink cursor (reward on every keystroke)
+    cursor = "#00ffff"; # Cyan - also used as accent color (dopamine signature)
   };
-  accent = "#ff006e"; # Hot pink (dopamine red)
 }

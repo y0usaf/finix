@@ -77,13 +77,7 @@
           emphasis_3 {{ color12 | red }} {{ color12 | green }} {{ color12 | blue }}
         }
         frame_selected {
-          {% if "p4g" in wallpaper %}
-          base {{ color11 | red }} {{ color11 | green }} {{ color11 | blue }}
-          {% elif "red" in wallpaper %}
-          base {{ color9 | red }} {{ color9 | green }} {{ color9 | blue }}
-          {% else %}
-          base {{ color4 | red }} {{ color4 | green }} {{ color4 | blue }}
-          {% endif %}
+          base {{ cursor | red }} {{ cursor | green }} {{ cursor | blue }}
           background {{ background | red }} {{ background | green }} {{ background | blue }}
           emphasis_0 {{ color1 | red }} {{ color1 | green }} {{ color1 | blue }}
           emphasis_1 {{ color3 | red }} {{ color3 | green }} {{ color3 | blue }}

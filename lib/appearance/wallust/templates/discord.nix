@@ -62,8 +62,8 @@
   	--text-1: {{color15}} !important;
   	--text-2: {{color7}} !important;
   	--text-3: {{color7}} !important;
-  	--text-4: {{color8}} !important;
-  	--text-5: {{color8}} !important;
+  	--text-4: {{color7}} !important;
+  	--text-5: {{cursor}} !important;
 
   	--bg-1: {{color0}} !important;
   	--bg-2: {{color0}} !important;
