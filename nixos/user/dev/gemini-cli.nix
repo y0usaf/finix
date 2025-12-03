@@ -90,7 +90,22 @@
         clobber = true;
       };
       ".gemini/settings.json" = {
-        text = builtins.toJSON {};
+        text = builtins.toJSON {
+          security = {
+            auth = {
+              selectedType = "oauth-personal";
+            };
+          };
+          general = {
+            previewFeatures = true;
+          };
+          ui = {
+            footer = {
+              hideModelInfo = false;
+            };
+            showModelInfoInChat = true;
+          };
+        };
         clobber = true;
       };
     };
