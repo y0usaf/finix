@@ -22,7 +22,8 @@
 
   # Settings without hooks (hooks come from plugin now)
   settingsWithoutHooks = {
-    inherit (claudeCodeConfig.settings) includeCoAuthoredBy model env statusLine;
+    inherit (claudeCodeConfig.settings) includeCoAuthoredBy env statusLine;
+    model = config.user.dev.claude-code.model;
     enabledPlugins = {
       "audio-notify@y0usaf-marketplace" = true;
       "codex-mcp@y0usaf-marketplace" = true;
