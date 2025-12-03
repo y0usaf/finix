@@ -70,7 +70,7 @@
               hooks =
                 map (h: {
                   type = h.type or "command";
-                  command = h.command;
+                  inherit (h) command;
                 })
                 hook.hooks;
             })
