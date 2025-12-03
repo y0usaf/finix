@@ -7,6 +7,7 @@
   imports = [
     ./webapps/keybard.nix
     ./webapps/google-meet.nix
+    ./webapps/gcp-console.nix
   ];
 
   options.user.programs.webapps = {
@@ -18,6 +19,7 @@
     user.programs = {
       keybard.enable = lib.mkDefault true;
       google-meet.enable = lib.mkDefault true;
+      gcp-console.enable = lib.mkDefault true;
     };
   };
 }
