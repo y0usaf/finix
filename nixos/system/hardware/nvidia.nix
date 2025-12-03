@@ -60,10 +60,6 @@
         # Lower frame buffering for latency
         __GL_MaxFramesAllowed = "1";
         __GL_YIELD = "usleep";
-        # Fix hw acceleration in native wayland apps
-        __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json";
-        # Fix hw acceleration in bwrap (osu!lazer, wrapped appimages)
-        __EGL_EXTERNAL_PLATFORM_CONFIG_DIRS = "/run/opengl-driver/share/egl/egl_external_platform.d";
         CUDA_CACHE_PATH = "$XDG_CACHE_HOME/nv";
         CUDA_DISABLE_PERF_BOOST = "1";
       };

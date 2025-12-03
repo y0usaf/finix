@@ -1,23 +1,15 @@
 # Niri border colors template (included via niri's include directive)
-# Uses theme-specific accent colors, color8 for inactive (dark grey)
+# Uses cursor color as accent (cursor == accent in our colorschemes), color7 for inactive
 ''
   layout {
     border {
       on
-      {% if "p4g" in wallpaper %}
-      active-color "{{ color11 }}"
-      {% else %}
-      active-color "{{ color4 }}"
-      {% endif %}
-      inactive-color "{{ color8 }}"
+      active-color "{{ cursor }}"
+      inactive-color "{{ color7 }}"
     }
     tab-indicator {
-      {% if "p4g" in wallpaper %}
-      active-color "{{ color11 }}"
-      {% else %}
-      active-color "{{ color4 }}"
-      {% endif %}
-      inactive-color "{{ color8 }}"
+      active-color "{{ cursor }}"
+      inactive-color "{{ color7 }}"
     }
   }
 ''
