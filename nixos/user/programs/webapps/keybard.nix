@@ -15,7 +15,7 @@
           text = ''
             [Desktop Entry]
             Name=Keybard
-            Exec=${lib.getExe pkgs.chromium} --app=https://captdeaf.github.io/keybard --force-dark-mode %U
+            Exec=${lib.getExe pkgs.chromium} --app=https://captdeaf.github.io/keybard --enable-features=WebContentsForceDark %U
             Terminal=false
             Type=Application
             Categories=Utility;System;

@@ -15,7 +15,7 @@
           text = ''
             [Desktop Entry]
             Name=Google Meet
-            Exec=${lib.getExe pkgs.chromium} --app=https://meet.google.com --force-dark-mode %U
+            Exec=${lib.getExe pkgs.chromium} --app=https://meet.google.com --enable-features=WebContentsForceDark %U
             Terminal=false
             Type=Application
             Categories=Network;VideoConference;Chat;
