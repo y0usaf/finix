@@ -22,7 +22,6 @@
   special = {
     background = "#1a0000";
     foreground = "#ff8800";
-    cursor = "#ff0000";
+    cursor = "#ff0000"; # True red - also used as accent color
   };
-  accent = "#ff0000";
 }
