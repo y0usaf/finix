@@ -15,8 +15,7 @@
   enableFeatures = [];
 
   gpuArgs =
-    []
-    ++ optionals (enableFeatures != []) [
+    optionals (enableFeatures != []) [
       "--enable-features=${concatStringsSep "," enableFeatures}"
     ]
     ++ optionals (disableFeatures != []) [
