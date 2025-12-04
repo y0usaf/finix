@@ -17,6 +17,9 @@
   # GTK CSS colors - for AGS and other GTK apps
   gtk-colors = { template = "gtk-colors.css", target = "~/.cache/wallust/gtk-colors.css" }
 
+  # Shell variables (hex colors for cat-fetch and other shell apps)
+  shell-colors = { template = "shell-colors.sh", target = "~/.cache/wallust/shell-colors.sh" }
+
   # Pywal-compatible colors.json for pywalfox
   pywal-colors = { template = "colors.json", target = "~/.cache/wal/colors.json" }
 
