@@ -3,7 +3,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  firefoxShared = import ../../../lib/browsers/firefox-shared.nix {inherit config lib;};
+in {
   imports = [
     ../../../lib/browsers/options.nix
     ./ui-chrome.nix
@@ -13,26 +15,11 @@
     home-manager.users.y0usaf = {
       home.packages = [
         (pkgs.wrapFirefox pkgs.firefox-unwrapped {
-          extraPolicies =
-            (import ./policies.nix {inherit config lib;}).browserPolicies
-            // {
-              DisableFirefoxStudies = true;
-            };
+          extraPolicies = firefoxShared.browserPolicies;
         })
       ];
       home.file.".mozilla/firefox/profiles.ini" = {
-        text = lib.generators.toINI {} {
-          Profile0 = {
-            Name = "default";
-            IsRelative = 1;
-            Path = "default";
-            Default = 1;
-          };
-          General = {
-            StartWithLastProfile = 1;
-            Version = 2;
-          };
-        };
+        text = lib.generators.toINI {} firefoxShared.profilesIni;
       };
     };
   };
