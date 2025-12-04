@@ -10,6 +10,9 @@ in {
   # Terminal colors
   footColors = import ./foot.nix;
 
+  # Shell variables (hex colors for runtime ANSI conversion)
+  shellColors = import ./shell-colors.nix;
+
   # Pywal JSON
   pywalColorsJson = import ./pywal.nix;
 

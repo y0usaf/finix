@@ -3,6 +3,7 @@
 {lib}: let
   colorschemes = import ./colorschemes;
   templates = import ./templates {inherit lib;};
+
 in {
   inherit colorschemes templates;
 
@@ -32,6 +33,9 @@ in {
 
     # Foot terminal colors
     ".config/wallust/templates/foot-colors.ini" = templates.footColors;
+
+    # Shell colors (hex variables for runtime ANSI conversion)
+    ".config/wallust/templates/shell-colors.sh" = templates.shellColors;
 
     # Zellij templates
     ".config/wallust/templates/zellij-config.kdl" = templates.mkZellijConfigTemplate {inherit zjstatusEnabled;};
