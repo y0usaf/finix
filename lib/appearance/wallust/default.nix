@@ -3,7 +3,6 @@
 {lib}: let
   colorschemes = import ./colorschemes;
   templates = import ./templates {inherit lib;};
-
 in {
   inherit colorschemes templates;
 
