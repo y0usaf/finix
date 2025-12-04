@@ -14,7 +14,7 @@
       name = "y0usaf";
       email = "";
     };
-    plugins = claudeCodeConfig.plugins;
+    inherit (claudeCodeConfig) plugins;
     basePath = ".config/claude"; # ~/.config/claude/
     description = "Personal Claude Code plugin marketplace";
     version = "1.0.0";
@@ -23,7 +23,7 @@
   # Settings without hooks (hooks come from plugin now)
   settingsWithoutHooks = {
     inherit (claudeCodeConfig.settings) includeCoAuthoredBy env statusLine;
-    model = config.user.dev.claude-code.model;
+    inherit (config.user.dev.claude-code) model;
     enabledPlugins = {
       "audio-notify@y0usaf-marketplace" = true;
       "codex-mcp@y0usaf-marketplace" = true;
