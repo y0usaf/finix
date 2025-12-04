@@ -3,7 +3,18 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  librewolfShared = import ../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
+
+  prefValue = pref:
+    builtins.toJSON (
+      if builtins.isBool pref || builtins.isInt pref || builtins.isString pref
+      then pref
+      else builtins.toString pref
+    );
+
+  prefsToJs = attrs: lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${prefValue value});") attrs;
+in {
   imports = [
     ../../../lib/browsers/options.nix
     ./ui-chrome.nix
@@ -17,26 +28,11 @@
         ];
         file = {
           ".librewolf/profiles.ini" = {
-            text = lib.generators.toINI {} {
-              Profile0 = {
-                Name = "y0usaf";
-                IsRelative = 1;
-                Path = "y0usaf";
-                Default = 1;
-              };
-              General = {
-                StartWithLastProfile = 1;
-                Version = 2;
-              };
-            };
+            text = lib.generators.toINI {} librewolfShared.profilesIni;
           };
           ".librewolf/distribution/policies.json" = {
             text = builtins.toJSON {
-              policies =
-                (import ./policies.nix {inherit config lib;}).browserPolicies
-                // {
-                  DisableFirefoxAccounts = false;
-                };
+              policies = librewolfShared.browserPolicies;
             };
           };
           ".librewolf/y0usaf/user.js" = {
@@ -44,19 +40,9 @@
               ''
                 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
               ''
-              + (lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON (
-                  if builtins.isBool value || builtins.isInt value || builtins.isString value
-                  then value
-                  else builtins.toString value
-                )});")
-                (import ./prefs.nix {inherit config lib;}).locked)
+              + prefsToJs librewolfShared.locked
               + "\n"
-              + (lib.concatMapAttrsStringSep "\n" (name: value: "defaultPref(\"${name}\", ${builtins.toJSON (
-                  if builtins.isBool value || builtins.isInt value || builtins.isString value
-                  then value
-                  else builtins.toString value
-                )});")
-                (import ./prefs.nix {inherit config lib;}).default);
+              + (lib.concatMapAttrsStringSep "\n" (name: value: "defaultPref(\"${name}\", ${prefValue value});") librewolfShared.default);
           };
         };
       };
