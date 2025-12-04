@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "type": "command",
+        "command": "if grep -qE '(git commit|nh os switch|nh darwin switch)' <<< '$command'; then ./.claude/pre-commit-validate.sh; fi"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "type": "command",
+        "command": "if grep -qE '\\.(nix|nixos)$' <<< '$file_path'; then alejandra --check '$file_path' 2>/dev/null || (alejandra '$file_path' 2>&1 | head -10 && echo '[✓ auto-formatted with alejandra]') || echo '[alejandra formatting skipped]'; fi"
+      },
+      {
+        "matcher": "Edit|Write",
+        "type": "command",
+        "command": "if grep -qE '\\.(nix|nixos)$' <<< '$file_path'; then statix check '$file_path' 2>&1 | grep -E '(warning|error):' || true; fi"
+      },
+      {
+        "matcher": "Edit|Write",
+        "type": "command",
+        "command": "if grep -qE '\\.(nix|nixos)$' <<< '$file_path'; then deadnix -f '$file_path' 2>&1 | grep -v '^$' | head -5 || true; fi"
+      }
+    ]
+  }
+}
