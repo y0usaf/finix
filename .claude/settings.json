@@ -4,7 +4,7 @@
       {
         "matcher": "Bash",
         "type": "command",
-        "command": "if grep -qE '(git commit|nh os switch|nh darwin switch)' <<< '$command'; then ./.claude/pre-commit-validate.sh; fi"
+        "command": "if grep -qE '(^|[;&(|\\s])(git\\s+commit|nh\\s+(os|darwin)\\s+switch)($|[;&(|\\s])' <<< '$command'; then ./.claude/pre-commit-validate.sh; fi"
       }
     ],
     "PostToolUse": [
