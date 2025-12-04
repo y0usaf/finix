@@ -3,7 +3,19 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  firefoxShared = import ../../../../lib/browsers/firefox-shared.nix {inherit config lib;};
+
+  profilesIni =
+    firefoxShared.profilesIni
+    // {
+      Profile0 =
+        firefoxShared.profilesIni.Profile0
+        // {
+          Path = config.user.name;
+        };
+    };
+in {
   imports = [
     ../../../../lib/browsers/options.nix
     ./ui-chrome.nix
@@ -12,11 +24,7 @@
   config = lib.mkIf config.user.programs.firefox.enable {
     environment.systemPackages = [
       (pkgs.wrapFirefox pkgs.firefox-unwrapped {
-        extraPolicies =
-          (import ./policies.nix {inherit config lib;}).browserPolicies
-          // {
-            DisableFirefoxStudies = true;
-          };
+        extraPolicies = firefoxShared.browserPolicies;
       })
     ];
     hjem.users.${config.user.name} = {
@@ -24,18 +32,7 @@
         {
           ".mozilla/firefox/profiles.ini" = {
             generator = lib.generators.toINI {};
-            value = {
-              Profile0 = {
-                Name = "default";
-                IsRelative = 1;
-                Path = config.user.name;
-                Default = 1;
-              };
-              General = {
-                StartWithLastProfile = 1;
-                Version = 2;
-              };
-            };
+            value = profilesIni;
             clobber = true;
           };
         }

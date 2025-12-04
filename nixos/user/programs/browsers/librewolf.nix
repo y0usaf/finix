@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: let
-  inherit (builtins) toJSON isBool isInt isString toString;
+  librewolfShared = import ../../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
 
-  prefs = import ./prefs.nix {inherit config lib;};
+  inherit (builtins) toJSON isBool isInt isString toString;
 
   prefValue = pref:
     toJSON (
@@ -16,6 +16,17 @@
     );
 
   attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
+
+  profilesIni =
+    librewolfShared.profilesIni
+    // {
+      Profile0 =
+        librewolfShared.profilesIni.Profile0
+        // {
+          Name = "default";
+          Path = config.user.name;
+        };
+    };
 in {
   imports = [
     ../../../../lib/browsers/options.nix
@@ -25,12 +36,8 @@ in {
   config = lib.mkIf config.user.programs.librewolf.enable {
     environment.systemPackages = [
       (pkgs.librewolf-bin.override {
-        extraPrefs = (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") prefs.locked) + "\n" + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") prefs.default);
-        extraPolicies =
-          (import ./policies.nix {inherit config lib;}).browserPolicies
-          // {
-            DisableFirefoxAccounts = false;
-          };
+        extraPrefs = (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") librewolfShared.locked) + "\n" + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") librewolfShared.default);
+        extraPolicies = librewolfShared.browserPolicies;
       })
       pkgs.pywalfox-native
     ];
@@ -39,18 +46,7 @@ in {
         {
           ".librewolf/profiles.ini" = {
             generator = lib.generators.toINI {};
-            value = {
-              Profile0 = {
-                Name = "default";
-                IsRelative = 1;
-                Path = config.user.name;
-                Default = 1;
-              };
-              General = {
-                StartWithLastProfile = 1;
-                Version = 2;
-              };
-            };
+            value = profilesIni;
             clobber = true;
           };
           # Pywalfox native messaging host for dynamic theme updates
