@@ -19,7 +19,7 @@
       powerManagement.enable = true;
       open = false;
       nvidiaSettings = false; # useless on wayland
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
     };
 
     hardware.graphics.extraPackages =
