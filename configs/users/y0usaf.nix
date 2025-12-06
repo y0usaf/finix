@@ -239,7 +239,6 @@
         gameusersettings.enable = true;
         clairobscurfix.enable = true;
         engine.enable = true;
-        scalability.enable = true;
       };
       duet-night-abyss = {
         enable = true;
