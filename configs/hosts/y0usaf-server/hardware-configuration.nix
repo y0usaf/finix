@@ -66,6 +66,11 @@
     algorithm = "zstd";
   };
 
+  boot.tmp = {
+    useTmpfs = true;
+    tmpfsSize = "25%";
+  };
+
   swapDevices = [];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
