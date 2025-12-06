@@ -4,17 +4,6 @@
 # JSON output to stdout with exit 0 for proper hook parsing
 {
   config = {
-    SessionStart = [
-      {
-        matcher = "";
-        hooks = [
-          {
-            type = "command";
-            command = "\${CLAUDE_PLUGIN_ROOT}/hooks/scripts/codex-reminder.sh";
-          }
-        ];
-      }
-    ];
     UserPromptSubmit = [
       {
         matcher = "";
@@ -31,13 +20,10 @@
   scripts = {
     "codex-reminder.sh" = ''
       #!/usr/bin/env bash
-      # Read stdin to get hook event name
       # Uses "advanced JSON API approach" per https://github.com/gabriel-dehan/claude_hooks/pull/15:
       # - Structured JSON output to stdout (not stderr)
       # - Exit code 0 (not non-zero) for proper hook STDOUT capture/parsing
-      read -r input
-      event=$(echo "$input" | jq -r '.hook_event_name // "UserPromptSubmit"')
-      echo "{\"decision\":\"approve\",\"reason\":\"\",\"hookSpecificOutput\":{\"hookEventName\":\"$event\",\"additionalContext\":\"<system-reminder>\nMANDATORY: Use Codex MCP on every response for discussion and review.\n</system-reminder>\"}}"
+      echo "{\"decision\":\"approve\",\"reason\":\"\",\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"<system-reminder>\nMANDATORY: Use Codex MCP on every response for discussion and review.\n</system-reminder>\"}}"
       exit 0
     '';
   };

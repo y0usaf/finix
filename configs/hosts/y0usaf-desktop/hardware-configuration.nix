@@ -165,6 +165,11 @@
     algorithm = "zstd";
   };
 
+  boot.tmp = {
+    useTmpfs = true;
+    tmpfsSize = "25%";
+  };
+
   boot.kernel.sysctl."vm.swappiness" = 180;
 
   swapDevices = [];
