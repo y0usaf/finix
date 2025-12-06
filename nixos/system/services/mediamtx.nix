@@ -3,25 +3,12 @@
   lib,
   pkgs,
   ...
-}: let
-  port = "4200";
-
-  publicIPScript = pkgs.writeShellScript "update-mediamtx-env" ''
-    PUBLIC_IP=$(${pkgs.curl}/bin/curl -s https://api.ipify.org || echo "127.0.0.1")
-    ENV_FILE="/etc/mediamtx.env"
-
-    if [ -n "$PUBLIC_IP" ] && [ "$PUBLIC_IP" != "127.0.0.1" ]; then
-      echo "MTX_WEBRTCADDITIONALHOSTS=$PUBLIC_IP" > "$ENV_FILE"
-    else
-      echo "# No public IP available" > "$ENV_FILE"
-    fi
-  '';
-in {
+}: {
   config = lib.mkIf config.services.mediamtx.enable {
     services.mediamtx.settings = {
       webrtc = true;
-      webrtcAddress = ":${port}";
-      webrtcLocalUDPAddress = ":${port}";
+      webrtcAddress = ":4200";
+      webrtcLocalUDPAddress = ":4200";
       paths = {
         all_others = {};
       };
@@ -33,25 +20,24 @@ in {
       description = "Update MediaMTX public IP";
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = publicIPScript;
+        ExecStart = pkgs.writeShellScript "update-mediamtx-env" ''
+          PUBLIC_IP=$(${pkgs.curl}/bin/curl -s https://api.ipify.org || echo "127.0.0.1")
+          ENV_FILE="/etc/mediamtx.env"
+
+          if [ -n "$PUBLIC_IP" ] && [ "$PUBLIC_IP" != "127.0.0.1" ]; then
+            echo "MTX_WEBRTCADDITIONALHOSTS=$PUBLIC_IP" > "$ENV_FILE"
+          else
+            echo "# No public IP available" > "$ENV_FILE"
+          fi
+        '';
       };
       before = ["mediamtx.service"];
       wantedBy = ["multi-user.target"];
     };
 
     networking.firewall = {
-      allowedTCPPorts = [
-        (lib.toInt port)
-        8554
-        1935
-        8080
-        9997
-      ];
-      allowedUDPPorts = [
-        (lib.toInt port)
-        8000
-        8001
-      ];
+      allowedTCPPorts = [4200];
+      allowedUDPPorts = [4200];
     };
 
     environment.systemPackages = [
