@@ -20,10 +20,14 @@
   scripts = {
     "askuser-reminder.sh" = ''
       #!/usr/bin/env bash
-      # Uses "advanced JSON API approach" per https://github.com/gabriel-dehan/claude_hooks/pull/15:
-      # - Structured JSON output to stdout (not stderr)
-      # - Exit code 0 (not non-zero) for proper hook STDOUT capture/parsing
-      echo "{\"decision\":\"approve\",\"reason\":\"\",\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"<system-reminder>\nMANDATORY: You MUST use AskUserQuestion EVERY response. No exceptions.\n- Ask at least ONE clarification or confirmation\n- Even if requirements seem clear, verify assumptions\n- NEVER proceed without asking first\n- Collaboration over autonomy\n</system-reminder>\"}}"
+      jq -n '{
+        decision: "approve",
+        reason: "",
+        hookSpecificOutput: {
+          hookEventName: "UserPromptSubmit",
+          additionalContext: "<system-reminder>\nMANDATORY: You MUST use AskUserQuestion EVERY response. No exceptions.\n\nExample:\n\n<invoke name=\"AskUserQuestion\">\n<parameter name=\"questions\">[{\"question\": \"What approach do you prefer?\", \"header\": \"Architecture\", \"options\": [{\"label\": \"Option A\", \"description\": \"Why choose A\"}, {\"label\": \"Option B\", \"description\": \"Why choose B\"}], \"multiSelect\": false}]</parameter>\n</invoke>\n\nRules:\n- Ask at least ONE clarification or confirmation\n- Even if requirements seem clear, verify assumptions\n- NEVER proceed without asking first\n- Collaboration over autonomy\n</system-reminder>"
+        }
+      }'
       exit 0
     '';
   };

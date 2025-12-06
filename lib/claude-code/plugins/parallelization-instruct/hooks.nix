@@ -20,10 +20,14 @@
   scripts = {
     "parallel-reminder.sh" = ''
       #!/usr/bin/env bash
-      # Uses "advanced JSON API approach" per https://github.com/gabriel-dehan/claude_hooks/pull/15:
-      # - Structured JSON output to stdout (not stderr)
-      # - Exit code 0 (not non-zero) for proper hook STDOUT capture/parsing
-      echo "{\"decision\":\"approve\",\"reason\":\"\",\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"<system-reminder>\nMANDATORY: Parallelize ALL independent tool calls. Single message, multiple calls.\n\n<bad-example>Read file → wait → read another file</bad-example>\n<good-example>Read multiple files in single message</good-example>\n\nParallelizable tools: Read, Glob, Grep, Task, Bash, WebFetch, WebSearch, Edit, Write\n\nRULE: If B does not need output from A → PARALLEL in same message\n</system-reminder>\"}}"
+      jq -n '{
+        decision: "approve",
+        reason: "",
+        hookSpecificOutput: {
+          hookEventName: "UserPromptSubmit",
+          additionalContext: "<system-reminder>\nMANDATORY: Parallelize ALL independent tool calls. Single message, multiple calls.\n\nExample (parallel):\n\n<invoke name=\"Read\">\n<parameter name=\"file_path\">/path/to/file1</parameter>\n</invoke>\n\n<invoke name=\"Read\">\n<parameter name=\"file_path\">/path/to/file2</parameter>\n</invoke>\n\n<invoke name=\"Bash\">\n<parameter name=\"command\">git status</parameter>\n<parameter name=\"description\">Check repo status</parameter>\n</invoke>\n\nIf B does not need output from A → PARALLEL in same message.\n</system-reminder>"
+        }
+      }'
       exit 0
     '';
   };
