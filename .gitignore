@@ -1,6 +1,7 @@
 tmp/
 .crush
 .claude
+.code
 !.claude/settings.json
 !.claude/pre-commit-validate.sh
 !.claude/nix-check.sh
