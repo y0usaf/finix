@@ -143,5 +143,39 @@
     <standards>
       Clear naming. Fast failure. Modular design. Security first. Performance aware. Self-documenting code.
     </standards>
+
+    <git>
+      ALWAYS use conventional commits format. More details at conventionalcommits.org
+
+      <examples>
+        * feat: new feature
+        * fix(scope): bug in scope
+        * feat!: breaking change / feat(scope)!: rework API
+        * chore(deps): update dependencies
+      </examples>
+
+      <types>
+        * build: Changes affecting build system or dependencies (scopes: flake, npm, etc.)
+        * ci: Changes to CI configuration files and scripts
+        * chore: Changes not affecting source code or tests (build process, auxiliary tools)
+        * docs: Documentation only changes
+        * feat: A new feature
+        * fix: A bug fix
+        * perf: Code change improving performance
+        * refactor: Code change that neither fixes a bug nor adds a feature
+        * revert: Revert something
+        * style: Changes not affecting code meaning (whitespace, formatting)
+        * test: Adding missing tests or correcting existing tests
+      </types>
+
+      <practices>
+        * One logical change per commit (not one file per commit)
+        * Put newline before extended commit body
+        * Test before committing (alejandra, build --dry-run, build, manual testing)
+        * Never force push to main/master
+        * Keep branches short-lived
+        * Write imperative mood in subjects ("add feature", not "added feature")
+      </practices>
+    </git>
   </instructions>
 ''
