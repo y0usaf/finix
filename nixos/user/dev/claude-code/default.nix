@@ -31,7 +31,7 @@
       "instructions@y0usaf-marketplace" = true;
       "parallelization-instruct@y0usaf-marketplace" = true;
       "todowrite-instruct@y0usaf-marketplace" = true;
-      "tool-tracker@y0usaf-marketplace" = true;
+      "tool-tracker@y0usaf-marketplace" = false;
     };
     extraKnownMarketplaces = {
       "y0usaf-marketplace" = {
