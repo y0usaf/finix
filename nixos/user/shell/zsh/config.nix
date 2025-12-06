@@ -92,16 +92,6 @@
             '';
             clobber = true;
           };
-        }
-        // lib.optionalAttrs (config.networking.hostName == "y0usaf-desktop") {
-          ".config/zsh/.zprofile" = {
-            text = ''
-              if [[ $- == *i* ]]; then
-                sudo nvidia-smi -pl 150
-              fi
-            '';
-            clobber = true;
-          };
         };
     };
   };
