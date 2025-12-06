@@ -6,7 +6,6 @@
   mcp = import ./mcp.nix;
   skills = import ./skills;
   agents = import ./agents;
-  hooks = import ./hooks;
   scripts = import ./scripts;
 
   # New plugin marketplace system
