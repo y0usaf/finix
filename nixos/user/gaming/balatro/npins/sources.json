@@ -9,9 +9,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "dbb6496d163d15e86b0afb6879d32b891164af05",
-      "url": "https://github.com/SpectralPack/Aura/archive/dbb6496d163d15e86b0afb6879d32b891164af05.tar.gz",
-      "hash": "1414yivy6rgwgl9mpkps6pnm5mzl2wj7j2fczia6n7020m2dnqg1"
+      "revision": "93c4642083a46368ecc951ef9d468fd4d1bac197",
+      "url": "https://github.com/SpectralPack/Aura/archive/93c4642083a46368ecc951ef9d468fd4d1bac197.tar.gz",
+      "hash": "048i0dvq458zbxsg6mji9dybq59bxg8ca77h049wp2w44cfci009"
     },
     "Balatro-Stickers-Always-Shown": {
       "type": "GitRelease",
@@ -53,9 +53,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "c2a22f091fe92d1bcbd547297a837791b6eae771",
+      "revision": "00f26d69305ae2908adf73f6e530c21c9e484ee1",
       "url": null,
-      "hash": "1nbrkhvzlk7y89rgbb6dp385hw85i417xnba4z3p4aqjdpgh9zd5"
+      "hash": "0129w8zc0glkzx7wbinwk831zscn9sb5bc43gwm4vpwnxgll1kyi"
     },
     "cryptid": {
       "type": "Git",
@@ -65,9 +65,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "bca501cbeea487b8ca80198c46e3a4a198856de0",
+      "revision": "952f6e44234a21a52f2d35497e3873734c44325d",
       "url": null,
-      "hash": "1psdh0hryhj942b1i6i5pnmxiw1phil6q27apycapyhi0mp3ahs6"
+      "hash": "12cfyp70vbkidvkhcsi7jnq6y9rqnfdrwvl6xrlvnynxl5km0x1v"
     },
     "jokerdisplay": {
       "type": "Git",
@@ -77,9 +77,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "7d7a61761b13894820270f9664d33685f54ec82a",
+      "revision": "32404069a39f6f9389bb97de006ad8e00de4f913",
       "url": null,
-      "hash": "0x2y4rljh75yc93ql3b3vpq4y7xwqnrw7zkmlgk17dff8nzbw9i2"
+      "hash": "0h4yqgxj1f31fkacail3kkpry0z2m1g9fpaqdf29girrxymzripj"
     },
     "multiplayer": {
       "type": "Git",
@@ -89,9 +89,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "c7b1c210f0d6699819222b1767ee9469878d1c52",
+      "revision": "f0110fd46e6ef5d70476c1e7a57b5f7b15d4c7da",
       "url": null,
-      "hash": "0b133p8m64kqdjc9lnznzn12gi84xrllwpzfxw2aissx6bnd0hdc"
+      "hash": "0iv58mi783iwagf3vy96hhi056lz9pixkfi7jiahmrbbgqc4c21z"
     },
     "pokermon": {
       "type": "Git",
@@ -101,9 +101,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "98a06f49be978052bc74a6cba80b08d38f607fd2",
+      "revision": "a9d3795e8b5783365edd16f6cfff5f4635d7086c",
       "url": null,
-      "hash": "1gqinb21dpqfvy42g2avz01q2r6jqjcn176kyk8b1c61pj3lliyf"
+      "hash": "1ryy25z2npb587qncnixk0izp69w93yadvlv9gfajvls3j44zpyq"
     },
     "steamodded": {
       "type": "Git",
@@ -113,9 +113,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "9bb34e88cbc7d3122944baa038a7b2e5bb3efd10",
+      "revision": "1fc5acb3cf1007bb525fca49f763fda2fe36408f",
       "url": null,
-      "hash": "1m1c6r021hr55w5rxp5sfad13g9n97lfx6bmynri2d08rj16gq37"
+      "hash": "198y28h7v92j32hm7kmxw8b34nvw64rmdpaxlpflfpzp12i266vy"
     },
     "steamodded-examples": {
       "type": "Git",
@@ -137,9 +137,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "372d66c64bf987987cffbe31f731b3d1732526f3",
+      "revision": "d5b61a94969b5a7a0e5a2156acf599aa5c936a85",
       "url": null,
-      "hash": "0gfni4dmqxmf7cbzh778sh9w47jqk312gi0vagxlihmwfi41xwf6"
+      "hash": "0xr826k1c56r79qd0q6g6iljrkvprpxvhpv1kl7k8yxsyifc84n9"
     }
   },
   "version": 5
