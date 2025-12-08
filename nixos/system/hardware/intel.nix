@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.hardware.cpu.intel;
-in {
+}: {
   options.hardware.cpu.intel = {
     enable = lib.mkEnableOption "Intel CPU specific kernel tweaks";
     extraKernelModules = lib.mkOption {
@@ -15,13 +13,13 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.hardware.cpu.intel.enable {
     boot.kernelModules =
       [
         "kvm-intel"
         "coretemp"
       ]
-      ++ cfg.extraKernelModules;
+      ++ config.hardware.cpu.intel.extraKernelModules;
 
     hardware.cpu.intel.updateMicrocode =
       lib.mkDefault config.hardware.enableRedistributableFirmware;
