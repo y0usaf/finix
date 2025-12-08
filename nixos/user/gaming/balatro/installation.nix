@@ -85,6 +85,7 @@ in {
         - stickersalwaysshown: SirMaiquis/Balatro-Stickers-Always-Shown (keeps stickers visible on jokers)
         - handybalatro: SleepyG11/HandyBalatro (Quality of Life controls and shortcuts)
         - aura: SpectralPack/Aura (visual enhancement mod)
+        - ultimatespeedup: sse2/balatro-ultimate-speedup-mod (additional speed options)
         - morespeeds: MoreSpeeds.lua (custom speed options)
       '';
     };

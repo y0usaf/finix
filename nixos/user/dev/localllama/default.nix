@@ -1,1 +1,1 @@
-import ./ollama.nix
+import ./ollama
