@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.hardware.cpu.amd;
-in {
+}: {
   options = {
     hardware.cpu.amd = {
       enable = lib.mkEnableOption "AMD CPU specific kernel tweaks";
@@ -20,13 +18,13 @@ in {
   };
 
   config = lib.mkMerge [
-    (lib.mkIf cfg.enable {
+    (lib.mkIf config.hardware.cpu.amd.enable {
       boot.kernelModules =
         [
           "kvm-amd"
           "k10temp"
         ]
-        ++ cfg.extraKernelModules;
+        ++ config.hardware.cpu.amd.extraKernelModules;
 
       hardware.cpu.amd.updateMicrocode =
         lib.mkDefault config.hardware.enableRedistributableFirmware;

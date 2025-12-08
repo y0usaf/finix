@@ -4,14 +4,12 @@
   lib,
   ...
 }: let
-  cfg = config.hardware.nvidia.management;
-
   nvidiaConfig = builtins.toJSON {
-    inherit (cfg) maxClock;
-    inherit (cfg) minClock;
-    inherit (cfg) coreVoltageOffset;
-    inherit (cfg) memoryVoltageOffset;
-    inherit (cfg) fanSpeed;
+    inherit (config.hardware.nvidia.management) maxClock;
+    inherit (config.hardware.nvidia.management) minClock;
+    inherit (config.hardware.nvidia.management) coreVoltageOffset;
+    inherit (config.hardware.nvidia.management) memoryVoltageOffset;
+    inherit (config.hardware.nvidia.management) fanSpeed;
   };
 
   configFile = pkgs.writeText "nvidia-config.json" nvidiaConfig;
@@ -212,7 +210,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.hardware.nvidia.management.enable {
     environment.systemPackages = [nvidiaMgmtScript];
 
     systemd.services.nvidia-management = {
