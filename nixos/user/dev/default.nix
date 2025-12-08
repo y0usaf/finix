@@ -11,6 +11,7 @@ _: {
     ./gcloud.nix
     ./latex.nix
     ./bun.nix
+    ./localllama
     ./nvim
     ./python.nix
     ./upscale.nix
