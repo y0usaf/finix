@@ -1,17 +1,27 @@
 # Hooks configuration for codex-mcp plugin
-# Uses Codex CLI directly for code review on every response
 # Mitigations: https://github.com/anthropics/claude-code/issues/10875
 #              https://github.com/gabriel-dehan/claude_hooks/pull/15
 # JSON output to stdout with exit 0 for proper hook parsing
 {
   config = {
+    SessionStart = [
+      {
+        matcher = "";
+        hooks = [
+          {
+            type = "command";
+            command = "\${CLAUDE_PLUGIN_ROOT}/hooks/scripts/codex-reminder.sh";
+          }
+        ];
+      }
+    ];
     UserPromptSubmit = [
       {
         matcher = "";
         hooks = [
           {
             type = "command";
-            command = "\${CLAUDE_PLUGIN_ROOT}/hooks/scripts/codex-review.sh";
+            command = "\${CLAUDE_PLUGIN_ROOT}/hooks/scripts/codex-reminder.sh";
           }
         ];
       }
@@ -19,19 +29,15 @@
   };
 
   scripts = {
-    "codex-review.sh" = ''
+    "codex-reminder.sh" = ''
       #!/usr/bin/env bash
-      CODEX_OUTPUT=$(bunx @openai/codex review --uncommitted 2>&1 | head -100)
-      jq -n \
-        --arg codex_output "$CODEX_OUTPUT" \
-        '{
-          decision: "approve",
-          reason: "",
-          hookSpecificOutput: {
-            hookEventName: "UserPromptSubmit",
-            additionalContext: ("<system-reminder>\nCODEX REVIEW:\n" + $codex_output + "\n</system-reminder>")
-          }
-        }'
+      # Read stdin to get hook event name
+      # Uses "advanced JSON API approach" per https://github.com/gabriel-dehan/claude_hooks/pull/15:
+      # - Structured JSON output to stdout (not stderr)
+      # - Exit code 0 (not non-zero) for proper hook STDOUT capture/parsing
+      read -r input
+      event=$(echo "$input" | jq -r '.hook_event_name // "UserPromptSubmit"')
+      echo "{\"decision\":\"approve\",\"reason\":\"\",\"hookSpecificOutput\":{\"hookEventName\":\"$event\",\"additionalContext\":\"<system-reminder>\nMANDATORY: Use Codex MCP on every response for discussion and review.\n</system-reminder>\"}}"
       exit 0
     '';
   };
