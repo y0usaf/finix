@@ -26,7 +26,7 @@
     inherit (config.user.dev.claude-code) model;
     enabledPlugins = {
       "audio-notify@y0usaf-marketplace" = true;
-      "codex-mcp@y0usaf-marketplace" = true;
+      #"codex-mcp@y0usaf-marketplace" = true;
       "collab-flow@y0usaf-marketplace" = true;
       "instructions@y0usaf-marketplace" = true;
       "parallelization-instruct@y0usaf-marketplace" = true;
