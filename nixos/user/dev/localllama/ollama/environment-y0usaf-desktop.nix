@@ -20,6 +20,11 @@
   # Adjust if you want stricter memory limits
   OLLAMA_MAX_VRAM = "24000000000"; # ~24GB in bytes
 
+  # For Mixture-of-Experts models (deepseek-coder-v2, qwq)
+  # Keep expert weights on CPU, offload only active experts to GPU
+  # Enables running larger MoE models like 16B, 32B on 4090
+  OLLAMA_CPU_MOE = "1";
+
   # Verbose logging to help debug performance
   # Remove if not needed
   # OLLAMA_DEBUG = "1";

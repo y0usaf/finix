@@ -5,6 +5,7 @@
   ...
 }: let
   mcpServerSpecs = import ../../../../lib/mcp/servers.nix {inherit config;};
+  ollamaProvider = import ../../../../lib/opencode/ollama.nix;
 
   mcpServers = lib.listToAttrs (map
     (spec:
@@ -31,6 +32,9 @@
         "{file:${config.user.configDirectory}/opencode/opencode-instructions.md}"
       ];
     }
+    // (lib.optionalAttrs config.user.dev.opencode.enableOllama {
+      provider = ollamaProvider.provider;
+    })
     // (lib.optionalAttrs config.user.dev.opencode.enableMcpServers {
       mcp = mcpServers;
     });
@@ -54,6 +58,12 @@ in {
       type = lib.types.bool;
       default = false;
       description = "Enable MCP servers for enhanced functionality";
+    };
+
+    enableOllama = lib.mkOption {
+      type = lib.types.bool;
+      default = config.user.dev.localllama.enable;
+      description = "Enable local Ollama provider for opencode (auto-enabled if localllama is enabled)";
     };
   };
 
