@@ -65,4 +65,43 @@ _: {
       pipe_zjstatus_hints_rendermode "static"
     }
   '';
+
+  # Custom keybind hints with global modifier extraction and label text overrides
+  # Uses local dev build to test customization features
+  # Common modifiers (e.g., Ctrl) are displayed once on far left, keys without duplication
+  zjstatusHintsCustom = ''
+    plugin location="/home/y0usaf/Dev/zjstatus-hints-fork/target/wasm32-wasip1/debug/zjstatus_hints.wasm" {
+      // Format: just show keys since Ctrl is extracted and shown on the left
+      key_format "{keys}"
+
+      // Global color configuration
+      key_fg "#000000"
+      key_bg "#00ffb3"
+      label_fg "#e0e0ff"
+      label_bg "#0a0a0f"
+
+      // Label text overrides - unicode fullwidth characters for modes
+      // Modes (use fullwidth characters)
+      pane_label_text "ｐ"
+      tab_label_text "ｔ"
+      resize_label_text "ｒ"
+      move_label_text "ｍ"
+      scroll_label_text "ｓｃ"
+      search_label_text "ｓｈ"
+      session_label_text "ｓｓ"
+
+      // Actions (unicode glyphs for better visual variety)
+      split_right_label_text "→"
+      split_down_label_text "↓"
+      new_label_text "ｎ"
+      close_label_text "✕"
+      fullscreen_label_text "◻"
+      float_label_text "◈"
+      embed_label_text "⊙"
+      rename_label_text "◐"
+      select_label_text "✓"
+      break_pane_label_text "⊥"
+      sync_label_text "⇄"
+    }
+  '';
 }

@@ -5,9 +5,7 @@
   ...
 }: {
   imports = [
-    ./webapps/keybard.nix
-    ./webapps/google-meet.nix
-    ./webapps/gcp-console.nix
+    ../../../lib/webapps
   ];
 
   options.user.programs.webapps = {
@@ -20,6 +18,7 @@
       keybard.enable = lib.mkDefault true;
       google-meet.enable = lib.mkDefault true;
       gcp-console.enable = lib.mkDefault true;
+      linear.enable = lib.mkDefault true;
     };
   };
 }
