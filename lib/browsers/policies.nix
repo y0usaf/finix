@@ -92,6 +92,12 @@ _: {
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
       };
+
+      "conventional-comments-addon@pullpo.io" = {
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/conventional-comments-pullpo/latest.xpi";
+        installation_mode = "force_installed";
+        allowed_in_private_browsing = true;
+      };
     };
   };
 }
