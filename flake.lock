@@ -300,26 +300,6 @@
         "type": "github"
       }
     },
-    "jay": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1765384284,
-        "narHash": "sha256-I+g4VjHRlHk9B/hMqgWTcqrlEg2baL004YT9nn4NA8w=",
-        "path": "/home/y0usaf/Dev/tmp/jay",
-        "type": "path"
-      },
-      "original": {
-        "path": "/home/y0usaf/Dev/tmp/jay",
-        "type": "path"
-      }
-    },
     "mango": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -482,7 +462,6 @@
         "flake-utils": "flake-utils_2",
         "hjem": "hjem",
         "home-manager": "home-manager",
-        "jay": "jay",
         "mango": "mango",
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nixpkgs": "nixpkgs",
