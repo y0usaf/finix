@@ -6,7 +6,6 @@ _: {
     ./foot.nix
     ./gtk
     ./hyprland
-    ./jay.nix
     ./mangowc
     ./niri
 
