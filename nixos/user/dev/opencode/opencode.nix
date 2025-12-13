@@ -33,7 +33,7 @@
       ];
     }
     // (lib.optionalAttrs config.user.dev.opencode.enableOllama {
-      provider = ollamaProvider.provider;
+      inherit (ollamaProvider) provider;
     })
     // (lib.optionalAttrs config.user.dev.opencode.enableMcpServers {
       mcp = mcpServers;

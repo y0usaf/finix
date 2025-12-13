@@ -32,6 +32,7 @@
 
     (lib.mkIf config.hardware.amdgpu.enable {
       services.xserver.videoDrivers = ["amdgpu"];
+      nixpkgs.config.hipSupport = true;
     })
   ];
 }

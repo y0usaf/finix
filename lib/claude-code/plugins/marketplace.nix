@@ -64,7 +64,7 @@
     builtins.toJSON {
       hooks =
         lib.mapAttrs (
-          event: eventHooks:
+          _event: eventHooks:
             map (hook: {
               inherit (hook) matcher;
               hooks =
