@@ -2,7 +2,7 @@
   flakeInputs,
   system,
   ...
-} @ args: {
+}: {
   imports = [
     ../../../nixos
     ./hardware-configuration.nix

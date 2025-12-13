@@ -83,7 +83,7 @@
         scale = 1.5;
       };
       hyprland = {
-        enable = false;
+        enable = true;
       };
       mangowc.enable = false;
       niri = {
