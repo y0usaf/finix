@@ -37,7 +37,7 @@
       # - Exit code 0 (not non-zero) for proper hook STDOUT capture/parsing
       read -r input
       event=$(echo "$input" | jq -r '.hook_event_name // "UserPromptSubmit"')
-      echo "{\"decision\":\"approve\",\"reason\":\"\",\"hookSpecificOutput\":{\"hookEventName\":\"$event\",\"additionalContext\":\"<system-reminder>\nMANDATORY: Use Codex MCP whenever a review or second opinion would be useful.\n</system-reminder>\"}}"
+      echo "{\"decision\":\"approve\",\"reason\":\"\",\"hookSpecificOutput\":{\"hookEventName\":\"$event\",\"additionalContext\":\"<system-reminder>\nUse Codex MCP when seeking reviews or second opinions.\n</system-reminder>\"}}"
       exit 0
     '';
   };
