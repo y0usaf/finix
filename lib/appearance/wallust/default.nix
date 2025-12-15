@@ -13,10 +13,11 @@ in {
     discordStable ? false,
     discordVesktop ? false,
     niriEnabled ? false,
+    vicinaeEnabled ? false,
   }: {
     # Main config
     ".config/wallust/wallust.toml" = templates.mkWallustConfig {
-      inherit discordStable discordVesktop niriEnabled;
+      inherit discordStable discordVesktop niriEnabled vicinaeEnabled;
     };
 
     # Colorschemes
@@ -45,6 +46,9 @@ in {
 
     # Niri border colors template
     ".config/wallust/templates/niri-borders.kdl" = templates.niriBorders;
+
+    # Vicinae theme template
+    ".config/wallust/templates/vicinae-colors.toml" = templates.vicinaeColors;
 
     # GTK CSS color definitions
     ".config/wallust/templates/gtk-colors.css" = templates.gtkColors;
@@ -81,6 +85,7 @@ in {
     mkdir -p ~/.config/Vencord/settings
     mkdir -p ~/.config/vesktop/settings
     mkdir -p ~/.config/ags
+    mkdir -p ~/.local/share/vicinae/themes
 
     ${wallustBin} ${
       if builtins.hasAttr defaultTheme colorschemes

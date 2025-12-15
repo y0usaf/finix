@@ -12,6 +12,6 @@ _: {
     ./emulation
     ./marvel-rivals
     ./wukong
-    ./clair-obscur
+    ./expedition33
   ];
 }

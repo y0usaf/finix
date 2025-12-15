@@ -8,6 +8,7 @@ _: {
     ./hyprland
     ./mangowc
     ./niri
+    ./vicinae
 
     ./quickshell.nix
     ./wayland.nix

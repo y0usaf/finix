@@ -22,6 +22,7 @@
     environment.systemPackages = [
       pkgs.nixos-icons
       pkgs.xdg-utils
+      pkgs.vicinae
     ];
 
     fonts.enableDefaultPackages = lib.mkDefault true;

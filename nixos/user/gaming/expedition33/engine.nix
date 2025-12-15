@@ -3,14 +3,14 @@
   lib,
   ...
 }: {
-  options.user.gaming.clair-obscur.engine = {
+  options.user.gaming.expedition33.engine = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
       description = "Enable Clair Obscur Engine.ini configuration";
     };
   };
-  config = lib.mkIf config.user.gaming.clair-obscur.engine.enable {
+  config = lib.mkIf config.user.gaming.expedition33.engine.enable {
     usr.files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/1903340/pfx/drive_c/users/steamuser/AppData/Local/Sandfall/Saved/Config/Windows/Engine.ini" = {
       clobber = true;
       generator = lib.generators.toINI {};
