@@ -12,6 +12,7 @@
     discordStable = discordCfg.stable.enable or false;
     discordVesktop = discordCfg.vesktop.enable or false;
     niriEnabled = config.user.ui.niri.enable or false;
+    vicinaeEnabled = config.user.ui.vicinae.enable or false;
   };
 in {
   options.user.appearance.wallust = {
@@ -29,7 +30,10 @@ in {
       (pkgs.writeShellApplication {
         name = "wt";
         runtimeInputs = [pkgs.wallust pkgs.pywalfox-native];
-        text = wallustLib.mkWtScriptText {browserBinary = "librewolf";};
+        text = wallustLib.mkWtScriptText {
+          browserBinary = "librewolf";
+          vicinaeEnabled = config.user.ui.vicinae.enable or false;
+        };
       })
     ];
 

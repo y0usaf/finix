@@ -54,9 +54,13 @@ in {
     ".config/wallust/templates/gtk-colors.css" = templates.gtkColors;
   };
 
-  # wt script text - wraps wallust with pywalfox update
+  # wt script text - wraps wallust with pywalfox update and optional vicinae reload
   # browserBinary: which browser to update (librewolf, firefox)
-  mkWtScriptText = {browserBinary ? "librewolf"}: ''
+  # vicinaeEnabled: whether to reload vicinae theme
+  mkWtScriptText = {
+    browserBinary ? "librewolf",
+    vicinaeEnabled ? false,
+  }: ''
     if [ -z "''${1:-}" ]; then
       echo "Usage: wt <command> [args...]"
       echo "Commands: cs <colorscheme>, theme <name>, run <image>"
@@ -71,7 +75,11 @@ in {
 
     # Update pywalfox
     pywalfox --browser ${browserBinary} update
-  '';
+    ${lib.optionalString vicinaeEnabled ''
+
+      # Hot-reload vicinae theme
+      vicinae theme set wallust-auto 2>/dev/null || true
+    ''}'';
 
   # Startup script to apply default theme
   mkStartupScript = {
