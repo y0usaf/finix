@@ -30,6 +30,9 @@ in {
   # Niri border colors (included via niri's include directive)
   niriBorders = import ./niri.nix;
 
+  # Vicinae theme colors
+  vicinaeColors = import ./vicinae-colors.nix;
+
   # GTK CSS color definitions (for AGS and other GTK apps)
   gtkColors = import ./gtk-colors.nix;
 }
