@@ -12,7 +12,7 @@
     stripRoot = false;
   };
 in {
-  options.user.gaming.clair-obscur.clairobscurfix = {
+  options.user.gaming.expedition33.clairobscurfix = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -20,7 +20,7 @@ in {
     };
   };
 
-  config = lib.mkIf config.user.gaming.clair-obscur.clairobscurfix.enable {
+  config = lib.mkIf config.user.gaming.expedition33.clairobscurfix.enable {
     usr.files = {
       "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
         clobber = true;

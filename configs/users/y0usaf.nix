@@ -95,6 +95,7 @@
           }
         '';
       };
+      vicinae.enable = true;
       quickshell.enable = true;
       wayland.enable = true;
     };
@@ -236,7 +237,7 @@
       wukong = {
         enable = true;
       };
-      clair-obscur = {
+      expedition33 = {
         gameusersettings.enable = true;
         clairobscurfix.enable = true;
         engine.enable = true;

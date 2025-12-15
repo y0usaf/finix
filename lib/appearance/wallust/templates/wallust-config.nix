@@ -4,6 +4,7 @@
   discordStable ? false,
   discordVesktop ? false,
   niriEnabled ? false,
+  vicinaeEnabled ? false,
 }: ''
   backend = "fastresize"
   color_space = "lch"
@@ -38,5 +39,8 @@
   ''}${lib.optionalString niriEnabled ''
     # Niri border colors (included via niri's include directive)
     niri-borders = { template = "niri-borders.kdl", target = "~/.cache/wallust/niri-borders.kdl" }
+  ''}${lib.optionalString vicinaeEnabled ''
+    # Vicinae theme (auto-generated from wallust colors)
+    vicinae-colors = { template = "vicinae-colors.toml", target = "~/.local/share/vicinae/themes/wallust-auto.toml" }
   ''}${extraTemplates}
 ''
