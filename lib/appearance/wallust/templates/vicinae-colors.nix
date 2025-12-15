@@ -7,19 +7,17 @@
   inherits = "vicinae-dark"
 
   [colors.core]
-  # Primary accent color - uses wallust's primary accent
-  accent = "{{ colors.primary }}"
-  # Background uses wallust's background
-  background = "{{ colors.background }}"
-  # Foreground text color
-  foreground = "{{ colors.foreground }}"
+  # Use wallust colors: cursor is accent, color0 is black/background
+  accent = "{{ cursor }}"
+  background = "{{ color0 }}"
+  foreground = "{{ color7 }}"
 
   [colors.accents.color]
-  # Use wallust's color palette
-  red = "{{ colors.red }}"
-  green = "{{ colors.green }}"
-  yellow = "{{ colors.yellow }}"
-  blue = "{{ colors.blue }}"
-  purple = "{{ colors.purple }}"
-  cyan = "{{ colors.cyan }}"
+  # Use wallust's ANSI color palette
+  red = "{{ color1 }}"
+  green = "{{ color2 }}"
+  yellow = "{{ color3 }}"
+  blue = "{{ color4 }}"
+  purple = "{{ color5 }}"
+  cyan = "{{ color6 }}"
 ''
