@@ -10,7 +10,7 @@
     "$transparent" = "ffffff00";
     "$inactive_colour" = "333333ff";
     bezier = [
-      "in_out,.65,-0.01,0,.95"
+      "in_out,0.65,0.01,0,0.95"
       "woa,0,0,0,1"
     ];
     general = {
@@ -84,7 +84,7 @@ in {
       clobber = true;
       text = lib.mkAfter (genLib.toHyprconf {
         attrs = coreConfig;
-        importantPrefixes = ["$" "exec" "source"];
+        importantPrefixes = ["$" "exec" "source" "bezier"];
       });
     };
   };
