@@ -12,7 +12,7 @@ in {
       "Mod+O" = {toggle-overview = {};};
 
       "Mod+T" = {spawn = defaults.terminal;};
-      "Super+R" = {spawn = "vicinae open";};
+      "Super+R" = {spawn = ["vicinae" "open"];};
       "Mod+E" = {spawn = defaults.fileManager;};
       "Super+Shift+O" = {spawn = "${defaults.terminal} -e ${defaults.editor}";};
 
