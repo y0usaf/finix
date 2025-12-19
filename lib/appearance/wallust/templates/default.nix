@@ -24,14 +24,17 @@ in {
   zjstatusLayout = zellij.layout;
   zellijTheme = zellij.theme;
 
-  # Discord/Vesktop
-  discordQuickCss = import ./discord.nix;
+  # Discord theme colors (hot-reloadable, imported by quickCSS)
+  discordColors = import ./discord-colors.nix;
 
   # Niri border colors (included via niri's include directive)
   niriBorders = import ./niri.nix;
 
   # Vicinae theme colors
   vicinaeColors = import ./vicinae-colors.nix;
+
+  # cmus colorscheme
+  cmusColors = import ./cmus-colors.nix;
 
   # GTK CSS color definitions (for AGS and other GTK apps)
   gtkColors = import ./gtk-colors.nix;
