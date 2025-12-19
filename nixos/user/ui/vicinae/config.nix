@@ -23,7 +23,7 @@
       searchFiles = true; # real default (was overridden to false)
     };
     theme = {
-      name = cfg.theme; # custom (default: "vicinae-dark")
+      name = "wallust-auto"; # Always use wallust-generated theme
       # iconTheme = "...";  # optional: custom icon theme
     };
     window = {

@@ -9,10 +9,9 @@
   wallustLib = import ../../../../../lib/appearance/wallust {inherit lib;};
   files = wallustLib.mkFiles {
     zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
-    discordStable = discordCfg.stable.enable or false;
-    discordVesktop = discordCfg.vesktop.enable or false;
     niriEnabled = config.user.ui.niri.enable or false;
     vicinaeEnabled = config.user.ui.vicinae.enable or false;
+    cmusEnabled = config.user.programs.cmus.enable or false;
   };
 in {
   options.user.appearance.wallust = {
