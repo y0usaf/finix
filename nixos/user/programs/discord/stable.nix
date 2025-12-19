@@ -58,21 +58,20 @@ in {
       })
     ];
 
-    hjem.users.${config.user.name}.files.".config/discord/settings.json" = {
-      generator = lib.generators.toJSON {};
-      value = {
-        SKIP_HOST_UPDATE = true;
-        MINIMIZE_TO_TRAY = cfg.minimizeToTray;
-        OPEN_ON_STARTUP = false;
-        DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
-        enableHardwareAcceleration = false;
-        openasar = {
-          setup = true;
-          cmdPreset = "balanced";
-          quickstart = false;
-          css =
-            # css
-            ''
+    hjem.users.${config.user.name}.files = {
+      ".config/discord/settings.json" = {
+        generator = lib.generators.toJSON {};
+        value = {
+          SKIP_HOST_UPDATE = true;
+          MINIMIZE_TO_TRAY = cfg.minimizeToTray;
+          OPEN_ON_STARTUP = false;
+          DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
+          enableHardwareAcceleration = false;
+          openasar = {
+            setup = true;
+            cmdPreset = "balanced";
+            quickstart = false;
+            css = ''
               /* Hide nitro begging */
               @import url("https://raw.codeberg.page/AllPurposeMat/Disblock-Origin/DisblockOrigin.theme.css");
 
@@ -85,20 +84,6 @@ in {
                 ul[data-list-id="guildsnav"] > div.itemsContainer_ef3116 {
                   margin-top: 8px;
                 }
-              }
-
-              :root {
-                /* Use system fonts for UI */
-                --font-primary: ${primaryFont} !important;
-                --font-display: ${primaryFont} !important;
-                --font-headline: ${primaryFont} !important;
-                --font-code: ${monoFont} !important;
-
-                /* Disblock settings */
-                --display-clan-tags: none;
-                --display-active-now: none;
-                --display-hover-reaction-emoji: none;
-                --bool-show-name-gradients: false;
               }
 
               /* Make "Read All" vencord button text smaller */
@@ -124,7 +109,22 @@ in {
                   }
                 }
               }
+
+              :root {
+                /* Use system fonts for UI */
+                --font-primary: ${primaryFont} !important;
+                --font-display: ${primaryFont} !important;
+                --font-headline: ${primaryFont} !important;
+                --font-code: ${monoFont} !important;
+
+                /* Disblock settings */
+                --display-clan-tags: none;
+                --display-active-now: none;
+                --display-hover-reaction-emoji: none;
+                --bool-show-name-gradients: false;
+              }
             '';
+          };
         };
       };
     };

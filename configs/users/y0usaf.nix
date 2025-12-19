@@ -109,6 +109,7 @@
       obsidian.enable = true;
       creative.enable = true;
       media.enable = true;
+      cmus.enable = true;
       bluetooth.enable = true;
       obs.enable = true;
       imv.enable = true;
