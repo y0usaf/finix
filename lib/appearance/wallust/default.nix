@@ -10,18 +10,18 @@ in {
   # Can be used by both hjem and home-manager
   mkFiles = {
     zjstatusEnabled ? false,
-    discordStable ? false,
-    discordVesktop ? false,
     niriEnabled ? false,
     vicinaeEnabled ? false,
+    cmusEnabled ? false,
   }: {
     # Main config
     ".config/wallust/wallust.toml" = templates.mkWallustConfig {
-      inherit discordStable discordVesktop niriEnabled vicinaeEnabled;
+      inherit niriEnabled vicinaeEnabled cmusEnabled;
     };
 
     # Colorschemes
     ".config/wallust/colorschemes/dopamine.json" = builtins.toJSON colorschemes.dopamine;
+    ".config/wallust/colorschemes/eva01.json" = builtins.toJSON colorschemes.eva01;
     ".config/wallust/colorschemes/red.json" = builtins.toJSON colorschemes.red;
     ".config/wallust/colorschemes/p4g.json" = builtins.toJSON colorschemes.p4g;
 
@@ -41,14 +41,17 @@ in {
     ".config/wallust/templates/zellij-config.kdl" = templates.mkZellijConfigTemplate {inherit zjstatusEnabled;};
     ".config/wallust/templates/zellij-layout.kdl" = templates.zjstatusLayout;
 
-    # Discord quickCss template
-    ".config/wallust/templates/discord-quickcss.css" = templates.discordQuickCss;
+    # Discord theme colors template (wallust will process and output to Vencord)
+    ".config/wallust/templates/discord-colors.css" = templates.discordColors;
 
     # Niri border colors template
     ".config/wallust/templates/niri-borders.kdl" = templates.niriBorders;
 
     # Vicinae theme template
     ".config/wallust/templates/vicinae-colors.toml" = templates.vicinaeColors;
+
+    # cmus colorscheme template
+    ".config/wallust/templates/cmus-colors.theme" = templates.cmusColors;
 
     # GTK CSS color definitions
     ".config/wallust/templates/gtk-colors.css" = templates.gtkColors;

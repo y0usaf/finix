@@ -1,10 +1,9 @@
 # Wallust config template generator
 {lib}: {
   extraTemplates ? "",
-  discordStable ? false,
-  discordVesktop ? false,
   niriEnabled ? false,
   vicinaeEnabled ? false,
+  cmusEnabled ? false,
 }: ''
   backend = "fastresize"
   color_space = "lch"
@@ -30,17 +29,17 @@
   # Zellij templates
   zellij-config = { template = "zellij-config.kdl", target = "~/.config/zellij/config.kdl" }
   zellij-layout = { template = "zellij-layout.kdl", target = "~/.config/zellij/layouts/zjstatus.kdl" }
-  ${lib.optionalString discordStable ''
-    # Discord stable (Vencord) quickCss
-    discord-quickcss-vencord = { template = "discord-quickcss.css", target = "~/.config/Vencord/settings/quickCss.css" }
-  ''}${lib.optionalString discordVesktop ''
-    # Vesktop quickCss
-    discord-quickcss-vesktop = { template = "discord-quickcss.css", target = "~/.config/vesktop/settings/quickCss.css" }
-  ''}${lib.optionalString niriEnabled ''
+
+  # Discord theme colors (hot-reloadable via Vencord)
+  discord-colors = { template = "discord-colors.css", target = "~/.config/Vencord/themes/wallust-colors.css" }
+  ${lib.optionalString niriEnabled ''
     # Niri border colors (included via niri's include directive)
     niri-borders = { template = "niri-borders.kdl", target = "~/.cache/wallust/niri-borders.kdl" }
   ''}${lib.optionalString vicinaeEnabled ''
     # Vicinae theme (auto-generated from wallust colors)
     vicinae-colors = { template = "vicinae-colors.toml", target = "~/.local/share/vicinae/themes/wallust-auto.toml" }
+  ''}${lib.optionalString cmusEnabled ''
+    # cmus colorscheme (uses fixed ANSI indices, palette varies per wallust theme)
+    cmus-colors = { template = "cmus-colors.theme", target = "~/.config/cmus/colorschemes/wallust-auto.theme" }
   ''}${extraTemplates}
 ''
