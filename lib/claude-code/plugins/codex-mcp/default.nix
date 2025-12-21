@@ -17,7 +17,7 @@
         "@openai/codex"
         "mcp-server"
         "-c"
-        "model=gpt-5.1-codex"
+        "model=gpt-5.2-codex"
         "-c"
         "model_reasoning_effort=high"
       ];
