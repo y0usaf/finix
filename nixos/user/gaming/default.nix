@@ -13,5 +13,6 @@ _: {
     ./marvel-rivals
     ./wukong
     ./expedition33
+    ./rv-there-yet
   ];
 }
