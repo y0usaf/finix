@@ -12,6 +12,7 @@
     niriEnabled = config.user.ui.niri.enable or false;
     vicinaeEnabled = config.user.ui.vicinae.enable or false;
     cmusEnabled = config.user.programs.cmus.enable or false;
+    vestopkEnabled = config.user.programs.discord.vesktop.enable or false;
   };
 in {
   options.user.appearance.wallust = {
