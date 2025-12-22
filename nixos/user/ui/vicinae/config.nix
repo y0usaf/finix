@@ -14,7 +14,7 @@
     faviconService = "twenty"; # custom (default: "google")
     font = {
       size = scaledFontSize; # custom scaling (default: 10.5)
-      # normal = "Monospace";  # optional: custom font family
+      normal = cfg.fontName; # use main font from user.ui.fonts
     };
     keybinding = "default";
     keybinds = {};
@@ -28,8 +28,8 @@
     };
     window = {
       csd = true;
-      opacity = 0.98;
-      rounding = 10;
+      opacity = 0.9;
+      rounding = 0;
     };
   };
 in {
