@@ -13,10 +13,11 @@ in {
     niriEnabled ? false,
     vicinaeEnabled ? false,
     cmusEnabled ? false,
+    vestopkEnabled ? false,
   }: {
     # Main config
     ".config/wallust/wallust.toml" = templates.mkWallustConfig {
-      inherit niriEnabled vicinaeEnabled cmusEnabled;
+      inherit niriEnabled vicinaeEnabled cmusEnabled vestopkEnabled;
     };
 
     # Colorschemes
@@ -41,7 +42,7 @@ in {
     ".config/wallust/templates/zellij-config.kdl" = templates.mkZellijConfigTemplate {inherit zjstatusEnabled;};
     ".config/wallust/templates/zellij-layout.kdl" = templates.zjstatusLayout;
 
-    # Discord theme colors template (wallust will process and output to Vencord)
+    # Discord theme colors template (wallust will process and output to Vencord and optionally Vesktop)
     ".config/wallust/templates/discord-colors.css" = templates.discordColors;
 
     # Niri border colors template

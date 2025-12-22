@@ -3,7 +3,7 @@ _: {
     boot.loader = {
       limine.enable = true;
       efi = {
-        canTouchEfiVariables = false;
+        canTouchEfiVariables = true;
         efiSysMountPoint = "/boot";
       };
     };
