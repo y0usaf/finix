@@ -4,6 +4,7 @@
   niriEnabled ? false,
   vicinaeEnabled ? false,
   cmusEnabled ? false,
+  vestopkEnabled ? false,
 }: ''
   backend = "fastresize"
   color_space = "lch"
@@ -32,7 +33,10 @@
 
   # Discord theme colors (hot-reloadable via Vencord)
   discord-colors = { template = "discord-colors.css", target = "~/.config/Vencord/themes/wallust-colors.css" }
-  ${lib.optionalString niriEnabled ''
+  ${lib.optionalString vestopkEnabled ''
+    # Vesktop theme colors (same as Discord, just different location)
+    vesktop-colors = { template = "discord-colors.css", target = "~/.config/vesktop/themes/wallust-colors.css" }
+  ''}${lib.optionalString niriEnabled ''
     # Niri border colors (included via niri's include directive)
     niri-borders = { template = "niri-borders.kdl", target = "~/.cache/wallust/niri-borders.kdl" }
   ''}${lib.optionalString vicinaeEnabled ''
