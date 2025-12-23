@@ -65,26 +65,12 @@
     waydroid.enable = false;
     controllers.enable = true;
     tailscale.enableVPN = true;
-    tftpd = {
-      enable = true;
-      path = "/srv/tftp";
-    };
     syncthing-proxy = {
       enable = true;
       virtualHostName = "syncthing-desktop";
     };
     nginx = {
       enable = true;
-      virtualHosts."pxe" = {
-        listen = [
-          {
-            addr = "192.168.2.28";
-            port = 8080;
-          }
-        ];
-        root = "/srv/tftp";
-        locations."/".extraConfig = "autoindex on;";
-      };
     };
   };
 }
