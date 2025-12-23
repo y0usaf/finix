@@ -113,7 +113,7 @@
               </edit>
             </match>
             <!-- Fallback font configuration -->
-            <alias>
+            <alias binding="strong">
               <family>monospace</family>
               <prefer>
                 <family>${config.user.ui.fonts.mainFontName}</family>
