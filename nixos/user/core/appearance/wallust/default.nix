@@ -19,7 +19,7 @@ in {
     defaultTheme = lib.mkOption {
       type = lib.types.str;
       default = "dopamine";
-      description = "Default theme to apply on login. Can be a custom colorscheme name (dopamine, red, p4g) or a built-in wallust theme (Synthwave, Tokyo-Night, etc.)";
+      description = "Default theme to apply on login. Can be a custom colorscheme name (dopamine, eva02, p4g) or a built-in wallust theme (Synthwave, Tokyo-Night, etc.)";
     };
   };
 
