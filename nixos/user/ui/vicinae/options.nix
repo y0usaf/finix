@@ -1,4 +1,8 @@
-{lib, config, ...}: {
+{
+  lib,
+  config,
+  ...
+}: {
   options.user.ui.vicinae = {
     enable = lib.mkEnableOption "Vicinae launcher";
 

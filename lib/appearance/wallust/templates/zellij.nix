@@ -145,124 +145,83 @@
           max_length 0
           pipe_name "zjstatus_hints"
 
-          // Global defaults
-          key_fg "#000000"
-          key_bg "#FFFFFF"
-          label_fg "#FFFFFF"
-          label_bg "#333333"
+          // Global defaults - ANSI colors for wallust hot-swap
+          // Unified black text with bright backgrounds for readability
+          key_fg "black"
+          key_bg "white"
+          label_fg "black"
+          label_bg "white"
 
           // ═══════════════════════════════════════════════════════════
-          // NORMAL MODE - Mode switchers (rainbow base colors)
+          // NORMAL MODE - Mode switchers (bright backgrounds)
           // ═══════════════════════════════════════════════════════════
-          pane_key_bg "#FF3355"
-          pane_label_bg "#991133"
-          tab_key_bg "#33FF88"
-          tab_label_bg "#119944"
-          resize_key_bg "#3388FF"
-          resize_label_bg "#1144AA"
-          move_key_bg "#FFDD33"
-          move_label_bg "#AA8800"
-          scroll_key_bg "#DD55FF"
-          scroll_label_bg "#8822AA"
-          search_key_bg "#33DDFF"
-          search_label_bg "#1188AA"
-          session_key_bg "#FF8833"
-          session_label_bg "#AA4400"
-          quit_key_bg "#FF3388"
-          quit_label_bg "#AA1155"
+          pane_label_bg "bright_green"
+          tab_label_bg "bright_yellow"
+          resize_label_bg "bright_yellow"
+          move_label_bg "bright_yellow"
+          scroll_label_bg "bright_magenta"
+          search_label_bg "bright_magenta"
+          session_label_bg "bright_magenta"
+          quit_label_bg "bright_red"
 
           // ═══════════════════════════════════════════════════════════
-          // PANE MODE - Red family (mode-specific with dots)
+          // PANE MODE - Green
           // ═══════════════════════════════════════════════════════════
-          "pane.new_key_bg" "#FF5566"
-          "pane.new_label_bg" "#AA2233"
-          "pane.close_key_bg" "#FF4455"
-          "pane.close_label_bg" "#992233"
-          fullscreen_key_bg "#FF6677"
-          fullscreen_label_bg "#AA3344"
-          float_key_bg "#FF7788"
-          float_label_bg "#AA4455"
-          embed_key_bg "#FF8899"
-          embed_label_bg "#AA5566"
-          split_right_key_bg "#FF99AA"
-          split_right_label_bg "#AA6677"
-          split_down_key_bg "#FFAABB"
-          split_down_label_bg "#AA7788"
-          "pane.rename_key_bg" "#FFBBCC"
-          "pane.rename_label_bg" "#AA8899"
-          "pane.move_key_bg" "#FF6688"
-          "pane.move_label_bg" "#AA3355"
-          "pane.select_key_bg" "#FF7799"
-          "pane.select_label_bg" "#AA4466"
+          "pane.new_label_bg" "bright_green"
+          "pane.close_label_bg" "bright_red"
+          fullscreen_label_bg "bright_cyan"
+          float_label_bg "bright_cyan"
+          embed_label_bg "bright_cyan"
+          split_right_label_bg "bright_green"
+          split_down_label_bg "bright_green"
+          "pane.rename_label_bg" "bright_yellow"
+          "pane.move_label_bg" "bright_yellow"
+          "pane.select_label_bg" "bright_blue"
 
           // ═══════════════════════════════════════════════════════════
-          // TAB MODE - Green family (mode-specific with dots)
+          // TAB MODE - Yellow
           // ═══════════════════════════════════════════════════════════
-          "tab.new_key_bg" "#55FF99"
-          "tab.new_label_bg" "#22AA55"
-          "tab.close_key_bg" "#44EE88"
-          "tab.close_label_bg" "#119944"
-          break_pane_key_bg "#66FFAA"
-          break_pane_label_bg "#33AA66"
-          sync_key_bg "#77FFBB"
-          sync_label_bg "#44AA77"
-          "tab.rename_key_bg" "#88FFCC"
-          "tab.rename_label_bg" "#55AA88"
-          "tab.move_key_bg" "#99FFDD"
-          "tab.move_label_bg" "#66AA99"
-          "tab.select_key_bg" "#AAFFEE"
-          "tab.select_label_bg" "#77AAAA"
+          "tab.new_label_bg" "bright_green"
+          "tab.close_label_bg" "bright_red"
+          break_pane_label_bg "bright_cyan"
+          sync_label_bg "bright_magenta"
+          "tab.rename_label_bg" "bright_yellow"
+          "tab.move_label_bg" "bright_yellow"
+          "tab.select_label_bg" "bright_blue"
 
           // ═══════════════════════════════════════════════════════════
-          // RESIZE MODE - Blue family
+          // RESIZE MODE - Yellow
           // ═══════════════════════════════════════════════════════════
-          // resize reuses mode switcher color
-          increase_key_bg "#55AAFF"
-          increase_label_bg "#2266BB"
-          decrease_key_bg "#4499EE"
-          decrease_label_bg "#1155AA"
+          increase_label_bg "bright_green"
+          decrease_label_bg "bright_red"
 
           // ═══════════════════════════════════════════════════════════
-          // SCROLL MODE - Magenta family
+          // SCROLL MODE - Magenta
           // ═══════════════════════════════════════════════════════════
-          // scroll, search reuse mode switcher colors
-          page_key_bg "#EE66FF"
-          page_label_bg "#9933AA"
-          half_page_key_bg "#DD77FF"
-          half_page_label_bg "#8844AA"
-          edit_key_bg "#CC88FF"
-          edit_label_bg "#7755AA"
+          page_label_bg "bright_magenta"
+          half_page_label_bg "bright_magenta"
+          edit_label_bg "bright_yellow"
 
           // ═══════════════════════════════════════════════════════════
-          // SEARCH MODE - Cyan family
+          // SEARCH MODE - Magenta
           // ═══════════════════════════════════════════════════════════
-          // search, scroll, page, half page reuse colors
-          down_key_bg "#44EEFF"
-          down_label_bg "#2299AA"
-          up_key_bg "#55FFFF"
-          up_label_bg "#33AAAA"
+          down_label_bg "bright_cyan"
+          up_label_bg "bright_cyan"
 
           // ═══════════════════════════════════════════════════════════
-          // SESSION MODE - Orange family
+          // SESSION MODE - Magenta
           // ═══════════════════════════════════════════════════════════
-          detach_key_bg "#FF9944"
-          detach_label_bg "#AA5500"
-          manager_key_bg "#FFAA55"
-          manager_label_bg "#AA6611"
-          config_key_bg "#FFBB66"
-          config_label_bg "#AA7722"
-          plugins_key_bg "#FFCC77"
-          plugins_label_bg "#AA8833"
-          about_key_bg "#FFDD88"
-          about_label_bg "#AA9944"
+          detach_label_bg "bright_red"
+          manager_label_bg "bright_cyan"
+          config_label_bg "bright_yellow"
+          plugins_label_bg "bright_green"
+          about_label_bg "bright_blue"
 
           // ═══════════════════════════════════════════════════════════
           // SHARED - Used across multiple modes
           // ═══════════════════════════════════════════════════════════
-          select_key_bg "#AAAAAA"
-          select_label_bg "#555555"
-          normal_key_bg "#888888"
-          normal_label_bg "#444444"
+          select_label_bg "bright_blue"
+          normal_label_bg "bright_blue"
         }
       }
 
@@ -281,7 +240,7 @@
         pane size=1 borderless=true {
           plugin location="https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm" {
             format_left   ""
-            format_center "#[bg=yellow,fg=black,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} #[bg=cyan,fg=black,bold] {datetime}"
+            format_center "#[bg=bright_yellow,fg=black,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} #[bg=bright_cyan,fg=black,bold] {datetime}"
             format_right  ""
             format_space  ""
 
@@ -292,32 +251,32 @@
             border_enabled  "false"
             hide_frame_for_single_pane "false"
 
-            // Mode badges
-            mode_normal        "#[bg=blue,fg=black,bold] NORMAL "
-            mode_locked        "#[bg=red,fg=white,bold] LOCKED "
-            mode_resize        "#[bg=yellow,fg=black,bold] RESIZE "
-            mode_pane          "#[bg=green,fg=black,bold] PANE "
-            mode_tab           "#[bg=yellow,fg=black,bold] TAB "
-            mode_scroll        "#[bg=magenta,fg=white,bold] SCROLL "
-            mode_enter_search  "#[bg=magenta,fg=white,bold] SEARCH "
-            mode_search        "#[bg=magenta,fg=white,bold] SEARCH "
-            mode_rename_tab    "#[bg=yellow,fg=black,bold] RENAME "
-            mode_rename_pane   "#[bg=green,fg=black,bold] RENAME "
-            mode_session       "#[bg=magenta,fg=white,bold] SESSION "
-            mode_move          "#[bg=yellow,fg=black,bold] MOVE "
-            mode_prompt        "#[bg=magenta,fg=white,bold] PROMPT "
-            mode_tmux          "#[bg=red,fg=white,bold] TMUX "
+            // Mode badges - unified black text on bright backgrounds
+            mode_normal        "#[bg=bright_blue,fg=black,bold] NORMAL "
+            mode_locked        "#[bg=bright_red,fg=black,bold] LOCKED "
+            mode_resize        "#[bg=bright_yellow,fg=black,bold] RESIZE "
+            mode_pane          "#[bg=bright_green,fg=black,bold] PANE "
+            mode_tab           "#[bg=bright_yellow,fg=black,bold] TAB "
+            mode_scroll        "#[bg=bright_magenta,fg=black,bold] SCROLL "
+            mode_enter_search  "#[bg=bright_magenta,fg=black,bold] SEARCH "
+            mode_search        "#[bg=bright_magenta,fg=black,bold] SEARCH "
+            mode_rename_tab    "#[bg=bright_yellow,fg=black,bold] RENAME "
+            mode_rename_pane   "#[bg=bright_green,fg=black,bold] RENAME "
+            mode_session       "#[bg=bright_magenta,fg=black,bold] SESSION "
+            mode_move          "#[bg=bright_yellow,fg=black,bold] MOVE "
+            mode_prompt        "#[bg=bright_magenta,fg=black,bold] PROMPT "
+            mode_tmux          "#[bg=bright_red,fg=black,bold] TMUX "
 
-            // Tabs
-            tab_normal              "#[bg=bright_black,fg=black] {name} {floating_indicator}"
-            tab_normal_fullscreen   "#[bg=bright_black,fg=black] {name} [] {floating_indicator}"
-            tab_normal_sync         "#[bg=bright_black,fg=black] {name} <> {floating_indicator}"
-            tab_active              "#[bg=cyan,fg=black,bold] {name} {floating_indicator}"
-            tab_active_fullscreen   "#[bg=cyan,fg=black,bold] {name} [] {floating_indicator}"
-            tab_active_sync         "#[bg=cyan,fg=black,bold] {name} <> {floating_indicator}"
+            // Tabs - unified black text on bright backgrounds
+            tab_normal              "#[bg=white,fg=black] {name} {floating_indicator}"
+            tab_normal_fullscreen   "#[bg=white,fg=black] {name} [] {floating_indicator}"
+            tab_normal_sync         "#[bg=white,fg=black] {name} <> {floating_indicator}"
+            tab_active              "#[bg=bright_cyan,fg=black,bold] {name} {floating_indicator}"
+            tab_active_fullscreen   "#[bg=bright_cyan,fg=black,bold] {name} [] {floating_indicator}"
+            tab_active_sync         "#[bg=bright_cyan,fg=black,bold] {name} <> {floating_indicator}"
             tab_floating_indicator  "⬚ "
 
-            datetime          "#[bg=cyan,fg=black,bold] {format} "
+            datetime          "#[bg=bright_cyan,fg=black,bold] {format} "
             datetime_format   "%d/%m/%y %H:%M:%S"
             datetime_timezone "Canada/Toronto"
           }
@@ -326,15 +285,15 @@
         pane size=1 borderless=true {
           plugin location="https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm" {
             format_left   ""
-            format_center "{pipe_zjstatus_hints}"
+            format_center "#[fg=bright_cyan,bg=black]{pipe_zjstatus_hints}"
             format_right  ""
             format_space  ""
 
             border_enabled  "false"
             hide_frame_for_single_pane "false"
 
-            pipe_zjstatus_hints_format "{output}"
-            pipe_zjstatus_hints_rendermode "raw"
+            pipe_zjstatus_hints_format "#[fg=bright_cyan,bg=black,bold]{output}"
+            pipe_zjstatus_hints_rendermode "static"
           }
         }
       }
