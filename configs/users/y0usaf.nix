@@ -71,7 +71,7 @@
       fonts = {
         enable = true;
         mainFont = flakeInputs.fast-fonts.packages.${system}.default;
-        mainFontName = "Fast IosevkaSlab";
+        mainFontName = "Iosevka Term Slab";
         backup = {
           package = pkgs.noto-fonts-cjk-sans;
           name = "Noto Sans CJK";

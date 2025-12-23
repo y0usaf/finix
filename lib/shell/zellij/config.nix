@@ -12,7 +12,7 @@
   };
 
   zjstatusUrl = "https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm";
-  zjstatusHintsUrl = "https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm";
+  zjstatusHintsUrl = "https://raw.githubusercontent.com/y0usaf/zjstatus-hints/feat/custom-labels/zjstatus_hints.wasm";
 
   shellIntegration = ''
     # Skip if already in a multiplexer or SSH session (fast: variable checks only)
