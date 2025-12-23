@@ -30,7 +30,7 @@ in {
               config.user.shell.zellij.settings)}
             ${lib.optionalString (config.user.shell.zellij.zjstatusHints.enable or false) ''
               plugins {
-                zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm" {
+                zjstatus-hints location="https://raw.githubusercontent.com/y0usaf/zjstatus-hints/feat/custom-labels/zjstatus_hints.wasm" {
                   max_length ${toString config.user.shell.zellij.zjstatusHints.maxLength}
                   pipe_name "${config.user.shell.zellij.zjstatusHints.pipeName}"
                 }
