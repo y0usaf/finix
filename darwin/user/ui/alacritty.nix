@@ -33,13 +33,13 @@
             family = "Iosevka Term Slab";
             style = "Regular";
           };
-          size = 13;
+          size = 20;
         };
 
         window = {
           padding = {
-            x = 8;
-            y = 8;
+            x = 12;
+            y = 12;
           };
           opacity = 0.5;
           decorations = "none";
