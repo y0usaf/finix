@@ -7,6 +7,10 @@
     programs.zsh = {
       enable = true;
 
+      envExtra = ''
+        export NH_DARWIN_FLAKE="${config.user.nixosConfigDirectory}"
+      '';
+
       initContent = ''
         HISTFILE="$HOME/.zsh_history"
         HISTSIZE=50000
@@ -21,7 +25,6 @@
         PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f %# '
 
         # nh configuration
-        export NH_DARWIN_FLAKE="${config.user.nixosConfigDirectory}"
         nhd() {
           clear
           local update=""

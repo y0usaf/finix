@@ -10,10 +10,6 @@ _: {
       "DidSeeSyncSetup2" = true;
     };
 
-    "com.apple.Music" = {
-      "userWantsPlaybackNotifications" = false;
-    };
-
     "com.apple.assistant.support" = {
       "Assistant Enabled" = false;
     };
