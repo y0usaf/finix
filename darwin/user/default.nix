@@ -9,6 +9,5 @@
     ./ui
     ./programs
     ./appearance/wallust
-    ../../../configs/users/y0usaf-darwin.nix
   ];
 }

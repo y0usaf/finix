@@ -7,17 +7,7 @@
     programs.zsh = {
       enable = true;
 
-      shellAliases = import ../../../lib/shell/zsh/common-aliases.nix {} // import ../../../lib/shell/zsh/darwin-aliases.nix {};
-
       initContent = ''
-        ${import ../../../lib/shell/zsh/export-vars.nix {inherit config;}}
-
-        ${(import ../../../lib/shell/zsh/functions.nix {}).temppkg}
-
-        ${(import ../../../lib/shell/zsh/functions.nix {}).temprun}
-
-        ${import ../../../lib/shell/zsh/plugins.nix {inherit pkgs;}}
-
         HISTFILE="$HOME/.zsh_history"
         HISTSIZE=50000
         SAVEHIST=50000
@@ -29,6 +19,27 @@
         compinit
 
         PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f %# '
+
+        # nh configuration
+        export NH_DARWIN_FLAKE="${config.user.nixosConfigDirectory}"
+        nhd() {
+          clear
+          local update=""
+          local dry=""
+          local OPTIND
+          while getopts "du" opt; do
+            case $opt in
+              d) dry="--dry" ;;
+              u) update="--update" ;;
+              *) echo "Invalid option: -$OPTARG" >&2 ;;
+            esac
+          done
+          shift $((OPTIND-1))
+          nh darwin switch $update $dry "$@"
+        }
+        alias nhdd="nhd -d"
+        alias nhdu="nhd -u"
+        alias nhdud="nhd -ud"
       '';
     };
 

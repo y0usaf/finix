@@ -5,7 +5,7 @@
   ...
 }: {
   imports = [
-    ../../../lib/nvim/options.nix
+    ../../../../lib/nvim/options.nix
   ];
 
   config = lib.mkIf config.user.dev.nvim.enable {
@@ -41,7 +41,7 @@
         file =
           {
             ".config/nvim/init.lua" = {
-              text = (import ../../../lib/nvim {inherit lib;}).initLua;
+              text = (import ../../../../lib/nvim {inherit lib;}).initLua;
             };
           }
           // lib.optionalAttrs config.user.dev.nvim.neovide {
