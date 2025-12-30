@@ -1,8 +1,13 @@
 {
   config,
+  lib,
   pkgs,
   ...
-}: {
+}: let
+  commonAliases = import ../../../lib/shell/zsh/common-aliases.nix null;
+  darwinAliases = import ../../../lib/shell/zsh/darwin-aliases.nix null;
+  allAliases = commonAliases // darwinAliases;
+in {
   home-manager.users.y0usaf = {
     programs.zsh = {
       enable = true;
@@ -10,6 +15,8 @@
       envExtra = ''
         export NH_DARWIN_FLAKE="${config.user.nixosConfigDirectory}"
       '';
+
+      shellAliases = allAliases;
 
       initContent = ''
         HISTFILE="$HOME/.zsh_history"
@@ -40,9 +47,6 @@
           shift $((OPTIND-1))
           nh darwin switch $update $dry "$@"
         }
-        alias nhdd="nhd -d"
-        alias nhdu="nhd -u"
-        alias nhdud="nhd -ud"
       '';
     };
 
