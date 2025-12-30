@@ -6,7 +6,6 @@
     ./finder.nix
     ./screenshot.nix
     ./performance.nix
-    ./display.nix
   ];
 
   system = {
@@ -32,6 +31,9 @@
   system.defaults.CustomSystemPreferences = {
     "com.apple.assistant.support" = {
       "Assistant Enabled" = 0;
+    };
+    "com.apple.windowserver" = {
+      "DisplayResolution" = "3456x2234";
     };
   };
 }
