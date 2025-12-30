@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  librewolfShared = import ../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
+  librewolfShared = import ../../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
 
   prefValue = pref:
     builtins.toJSON (
@@ -16,7 +16,7 @@
   prefsToJs = attrs: lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${prefValue value});") attrs;
 in {
   imports = [
-    ../../../lib/browsers/options.nix
+    ../../../../lib/browsers/options.nix
     ./ui-chrome.nix
   ];
 
