@@ -82,18 +82,23 @@
     linuxSystem = "x86_64-linux";
     darwinSystem = "aarch64-darwin";
 
-    nixpkgsConfig = {
+    commonNixpkgsConfig = {
       allowUnfree = true;
-      cudaSupport = true;
       permittedInsecurePackages = [
         "qtwebengine-5.15.19"
       ];
     };
 
+    linuxNixpkgsConfig =
+      commonNixpkgsConfig
+      // {
+        cudaSupport = true;
+      };
+
     nixosLib = import ./nixos/lib {
       inherit inputs;
       system = linuxSystem;
-      inherit nixpkgsConfig;
+      nixpkgsConfig = linuxNixpkgsConfig;
     };
 
     darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};
@@ -149,7 +154,7 @@
             backupFileExtension = "backup";
           };
 
-          nixpkgs.config = nixpkgsConfig;
+          nixpkgs.config = commonNixpkgsConfig;
         }
       ];
     };
