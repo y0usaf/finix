@@ -4,10 +4,10 @@
   pkgs,
   ...
 }: let
-  firefoxShared = import ../../../lib/browsers/firefox-shared.nix {inherit config lib;};
+  firefoxShared = import ../../../../lib/browsers/firefox-shared.nix {inherit config lib;};
 in {
   imports = [
-    ../../../lib/browsers/options.nix
+    ../../../../lib/browsers/options.nix
     ./ui-chrome.nix
   ];
 
