@@ -6,6 +6,7 @@
     ./finder.nix
     ./screenshot.nix
     ./performance.nix
+    ./display.nix
   ];
 
   system = {
