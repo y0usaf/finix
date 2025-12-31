@@ -13,11 +13,6 @@
           "-a"
           "${config.user.homeDirectory}/.ssh/agent.sock"
         ];
-        Sockets = {
-          Listeners = {
-            SockPathName = "${config.user.homeDirectory}/.ssh/agent.sock";
-          };
-        };
       };
     };
 
