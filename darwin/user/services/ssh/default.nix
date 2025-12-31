@@ -1,8 +1,4 @@
 {config, ...}: {
-  imports = [
-    ./ssh-agent.nix
-  ];
-
   home-manager.users.y0usaf.programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
