@@ -69,7 +69,7 @@
       [
         "HYPRCURSOR_THEME,DeepinDarkV20-hypr"
         "HYPRCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
-        "XCURSOR_THEME,DeepinDarkV20-x11"
+        "XCURSOR_THEME,SSB-x11"
         "XCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
       ]
       ++ lib.optionals hostConfig.hardware.nvidia.enable [
