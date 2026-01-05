@@ -30,6 +30,27 @@
         "type": "github"
       }
     },
+    "cursors": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1767627081,
+        "narHash": "sha256-CwCcmpf5Wyb6gLdset1PJ2EKeKyUNpIoxqjdHBXp0uE=",
+        "owner": "y0usaf",
+        "repo": "cursors",
+        "rev": "806b0ca70d10852cc8590cda8aa1fc441185456a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "cursors",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -47,27 +68,6 @@
       "original": {
         "owner": "LnL7",
         "repo": "nix-darwin",
-        "type": "github"
-      }
-    },
-    "deepin-dark-xcursor": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1747700606,
-        "narHash": "sha256-hUamIUMXPXpvW9JRjAITd7bDFWmDeZak9RCr+nyPpIg=",
-        "owner": "y0usaf",
-        "repo": "Deepin-Dark-xcursor",
-        "rev": "b3df394dd67ab93ead5ba08db3b3bb46132e0d8c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "repo": "Deepin-Dark-xcursor",
         "type": "github"
       }
     },
@@ -490,8 +490,8 @@
     },
     "root": {
       "inputs": {
+        "cursors": "cursors",
         "darwin": "darwin",
-        "deepin-dark-xcursor": "deepin-dark-xcursor",
         "disko": "disko",
         "fast-fonts": "fast-fonts",
         "flake-utils": "flake-utils_2",

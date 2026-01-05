@@ -6,7 +6,7 @@
   ...
 }: let
   x11ThemeName = "DeepinDarkV20-x11";
-  xcursorPackage = flakeInputs.deepin-dark-xcursor.packages.${system}.default;
+  xcursorPackage = flakeInputs.cursors.packages.${system}.default;
   hyprcursorPackage = null;
 in {
   options.user.ui.cursor = {
