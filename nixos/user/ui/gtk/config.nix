@@ -9,7 +9,7 @@
   gtk3Settings = {
     Settings = {
       gtk-application-prefer-dark-theme = 1;
-      gtk-cursor-theme-name = "DeepinDarkV20-x11";
+      gtk-cursor-theme-name = "SSB-x11";
       gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
       gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.baseFontSize}";
       gtk-xft-antialias = 1;
@@ -23,7 +23,7 @@
   gtk4Settings = {
     Settings = {
       gtk-application-prefer-dark-theme = 1;
-      gtk-cursor-theme-name = "DeepinDarkV20-x11";
+      gtk-cursor-theme-name = "SSB-x11";
       gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
       gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.baseFontSize}";
     };

@@ -27,7 +27,7 @@
           prefer-no-csd = {};
 
           cursor = {
-            xcursor-theme = "DeepinDarkV20-x11";
+            xcursor-theme = "SSB-x11";
             xcursor-size = config.user.appearance.cursorSize;
           };
 
