@@ -5,9 +5,9 @@
   system,
   ...
 }: let
-  x11ThemeName = "DeepinDarkV20-x11";
-  xcursorPackage = flakeInputs.cursors.packages.${system}.default;
-  hyprcursorPackage = null;
+  x11ThemeName = "SSB-x11";
+  xcursorPackage = flakeInputs.cursors.packages.${system}."ssb-xcursor";
+  hyprcursorPackage = flakeInputs.cursors.packages.${system}."deepin-dark-hyprcursor";
 in {
   options.user.ui.cursor = {
     enable = lib.mkOption {
