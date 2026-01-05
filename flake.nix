@@ -26,8 +26,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    deepin-dark-xcursor = {
-      url = "github:y0usaf/Deepin-Dark-xcursor";
+    cursors = {
+      url = "github:y0usaf/cursors";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
