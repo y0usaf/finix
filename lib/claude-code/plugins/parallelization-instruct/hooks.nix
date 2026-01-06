@@ -1,7 +1,5 @@
 # Hooks configuration for parallelization-instruct plugin
-# Mitigations: https://github.com/anthropics/claude-code/issues/10875
-#              https://github.com/gabriel-dehan/claude_hooks/pull/15
-# JSON output to stdout with exit 0 for proper hook parsing
+# Plain text stdout with exit 0 adds context to UserPromptSubmit/SessionStart
 {
   config = {
     UserPromptSubmit = [
@@ -19,16 +17,29 @@
 
   scripts = {
     "parallel-reminder.sh" = ''
-      #!/usr/bin/env bash
-      jq -n '{
-        decision: "approve",
-        reason: "",
-        hookSpecificOutput: {
-          hookEventName: "UserPromptSubmit",
-          additionalContext: "<system-reminder>\nMANDATORY: Parallelize ALL independent tool calls. Single message, multiple calls.\n\nExample (parallel):\n\n<invoke name=\"Read\">\n<parameter name=\"file_path\">/path/to/file1</parameter>\n</invoke>\n\n<invoke name=\"Read\">\n<parameter name=\"file_path\">/path/to/file2</parameter>\n</invoke>\n\n<invoke name=\"Bash\">\n<parameter name=\"command\">git status</parameter>\n<parameter name=\"description\">Check repo status</parameter>\n</invoke>\n\nIf B does not need output from A → PARALLEL in same message.\n</system-reminder>"
-        }
-      }'
-      exit 0
+            #!/usr/bin/env bash
+            cat <<'EOF'
+      <system-reminder>
+      MANDATORY: Parallelize ALL independent tool calls. Single message, multiple calls.
+
+      Example (parallel):
+
+      <invoke name="Read">
+      <parameter name="file_path">/path/to/file1</parameter>
+      </invoke>
+
+      <invoke name="Read">
+      <parameter name="file_path">/path/to/file2</parameter>
+      </invoke>
+
+      <invoke name="Bash">
+      <parameter name="command">git status</parameter>
+      <parameter name="description">Check repo status</parameter>
+      </invoke>
+
+      If B does not need output from A → PARALLEL in same message.
+      </system-reminder>
+      EOF
     '';
   };
 }
