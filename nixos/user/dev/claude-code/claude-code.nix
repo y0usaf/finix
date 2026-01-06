@@ -8,7 +8,7 @@
 
     model = lib.mkOption {
       type = lib.types.str;
-      default = "claude-haiku-4-5";
+      default = "claude-opus-4-5";
       description = "Claude model to use";
     };
   };
