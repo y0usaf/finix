@@ -1,6 +1,5 @@
 {
   includeCoAuthoredBy = false;
-  model = "claude-opus-4-5";
   env = {
     MAX_THINKING_TOKENS = "64000";
     BASH_DEFAULT_TIMEOUT_MS = "120000";
