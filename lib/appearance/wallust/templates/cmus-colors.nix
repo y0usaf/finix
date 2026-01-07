@@ -6,9 +6,10 @@
   set color_win_bg=default
   set color_win_dir=default
 
-  # Window styling - accent (color5/magenta) with bright text
+  # Window styling - accent (color5/magenta)
   set color_win_cur=5
-  set color_win_cur_fg=15
+  set color_win_cur_sel_fg=15
+  set color_win_cur_sel_bg=5
   set color_separator=darkgray
 
   # Command line

@@ -44,6 +44,6 @@
     vicinae-colors = { template = "vicinae-colors.toml", target = "~/.local/share/vicinae/themes/wallust-auto.toml" }
   ''}${lib.optionalString cmusEnabled ''
     # cmus colorscheme (uses fixed ANSI indices, palette varies per wallust theme)
-    cmus-colors = { template = "cmus-colors.theme", target = "~/.config/cmus/colorschemes/wallust-auto.theme" }
+    cmus-colors = { template = "cmus-colors.theme", target = "~/.config/cmus/wallust-auto.theme" }
   ''}${extraTemplates}
 ''
