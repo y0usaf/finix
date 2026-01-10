@@ -3,7 +3,7 @@
   lib,
   ...
 }: {
-  config = lib.mkIf config.user.gaming.core.enable {
+  config = lib.mkIf config.user.gaming.expedition33.enable {
     usr.files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/1903340/pfx/drive_c/users/steamuser/AppData/Local/Sandfall/Saved/Config/Windows/Scalability.ini" = {
       clobber = true;
       generator = lib.generators.toINI {};

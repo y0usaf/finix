@@ -106,6 +106,7 @@
         stable.enable = true;
         vesktop.enable = true;
       };
+      handy.enable = true;
       obsidian.enable = true;
       creative.enable = true;
       media.enable = true;
@@ -238,11 +239,7 @@
       wukong = {
         enable = true;
       };
-      expedition33 = {
-        gameusersettings.enable = true;
-        clairobscurfix.enable = true;
-        engine.enable = true;
-      };
+      expedition33.enable = true;
       duet-night-abyss = {
         enable = true;
       };
