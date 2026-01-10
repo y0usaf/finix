@@ -12,7 +12,6 @@
       pkgs.pulsemixer
       pkgs.ffmpeg
       pkgs.vlc
-      pkgs.stremio
       pkgs.cmus
     ];
   };

@@ -71,12 +71,18 @@
       url = "github:DreamMaoMao/mango";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    handy = {
+      url = "github:y0usaf/Handy/feat/nix-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
     nixpkgs,
     darwin,
     home-manager,
+    handy,
     ...
   } @ inputs: let
     linuxSystem = "x86_64-linux";
@@ -86,6 +92,8 @@
       allowUnfree = true;
       permittedInsecurePackages = [
         "qtwebengine-5.15.19"
+        "librewolf-bin-146.0.1-1"
+        "librewolf-bin-unwrapped-146.0.1-1"
       ];
     };
 

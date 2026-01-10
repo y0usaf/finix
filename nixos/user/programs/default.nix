@@ -4,6 +4,7 @@ _: {
     ./cmus.nix
     ./creative.nix
     ./discord
+    ./handy.nix
     ./imv.nix
     ./media.nix
     ./mimeapps.nix
