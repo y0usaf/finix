@@ -16,9 +16,7 @@
         enable = true;
         enableOnBoot = true;
       };
-      podman = {
-        enable = true;
-      };
+      podman.enable = true;
     };
   };
 }
