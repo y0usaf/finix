@@ -5,15 +5,9 @@
   ...
 }: let
   librewolfShared = import ../../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
+  helpers = import ../../../../lib/browsers/helpers.nix {inherit lib;};
 
-  prefValue = pref:
-    builtins.toJSON (
-      if builtins.isBool pref || builtins.isInt pref || builtins.isString pref
-      then pref
-      else builtins.toString pref
-    );
-
-  prefsToJs = attrs: lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${prefValue value});") attrs;
+  prefsToJs = attrs: helpers.attrsToLines (name: value: "lockPref(\"${name}\", ${helpers.prefValue value});") attrs;
 in {
   imports = [
     ../../../../lib/browsers/options.nix
@@ -21,7 +15,7 @@ in {
   ];
 
   config = lib.mkIf config.user.programs.librewolf.enable {
-    home-manager.users.y0usaf = {
+    home-manager.users.${config.user.name} = {
       home = {
         packages = [
           pkgs.librewolf
@@ -35,7 +29,7 @@ in {
               policies = librewolfShared.browserPolicies;
             };
           };
-          ".librewolf/y0usaf/user.js" = {
+          ".librewolf/${config.user.name}/user.js" = {
             text =
               ''
                 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
