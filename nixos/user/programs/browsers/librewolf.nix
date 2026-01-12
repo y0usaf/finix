@@ -5,17 +5,7 @@
   ...
 }: let
   librewolfShared = import ../../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
-
-  inherit (builtins) toJSON isBool isInt isString toString;
-
-  prefValue = pref:
-    toJSON (
-      if isBool pref || isInt pref || isString pref
-      then pref
-      else toString pref
-    );
-
-  attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
+  helpers = import ../../../../lib/browsers/helpers.nix {inherit lib;};
 
   profilesIni =
     librewolfShared.profilesIni
@@ -36,7 +26,7 @@ in {
   config = lib.mkIf config.user.programs.librewolf.enable {
     environment.systemPackages = [
       (pkgs.librewolf-bin.override {
-        extraPrefs = (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") librewolfShared.locked) + "\n" + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") librewolfShared.default);
+        extraPrefs = (helpers.attrsToLines (name: value: "lockPref(\"${name}\", ${helpers.prefValue value});") librewolfShared.locked) + "\n" + (helpers.attrsToLines (name: value: "defaultPref(\"${name}\", ${helpers.prefValue value});") librewolfShared.default);
         extraPolicies = librewolfShared.browserPolicies;
       })
       pkgs.pywalfox-native
