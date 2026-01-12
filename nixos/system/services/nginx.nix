@@ -3,7 +3,5 @@
   lib,
   ...
 }: {
-  config = lib.mkIf config.services.nginx.enable {
-    services.nginx.recommendedProxySettings = true;
-  };
+  config.services.nginx.recommendedProxySettings = lib.mkIf config.services.nginx.enable true;
 }

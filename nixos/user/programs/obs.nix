@@ -3,9 +3,10 @@
   pkgs,
   lib,
   flakeInputs,
-  system,
   ...
-}: {
+}: let
+  system = pkgs.stdenv.hostPlatform.system;
+in {
   options.user.programs.obs = {
     enable = lib.mkEnableOption "OBS Studio";
   };

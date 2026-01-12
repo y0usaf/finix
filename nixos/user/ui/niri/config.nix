@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   genLib,
   ...
 }: {
@@ -37,9 +37,10 @@
             [
               ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"]
               ["sh" "-c" "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
-              ["${pkgs.vicinae}/bin/vicinae" "server"]
             ]
-            ++ lib.optional (config.user.ui.ags.enable or false) ["sh" "-c" "${config.user.ui.ags.package}/bin/ags run /home/${config.user.name}/.config/ags/bar-overlay.tsx"];
+            ++ lib.optional config.user.ui.vicinae.enable ["${pkgs.vicinae}/bin/vicinae" "server"]
+            ++ lib.optional (config.user.ui.ags.enable or false) ["sh" "-c" "${config.user.ui.ags.package}/bin/ags run /home/${config.user.name}/.config/ags/bar-overlay.tsx"]
+            ++ lib.optional (config.user.programs.handy.enable or false) ["handy"];
 
           hotkey-overlay = {};
           window-rule = {

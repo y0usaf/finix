@@ -1,5 +1,3 @@
 _: {
-  config = {
-    security.rtkit.enable = true;
-  };
+  config.security.rtkit.enable = true;
 }
