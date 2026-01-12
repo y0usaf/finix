@@ -3,9 +3,10 @@
   lib,
   config,
   flakeInputs,
-  system,
   ...
-}: {
+}: let
+  system = pkgs.stdenv.hostPlatform.system;
+in {
   users.users.y0usaf = {
     isNormalUser = true;
     shell = pkgs.zsh;
@@ -82,9 +83,7 @@
         enable = true;
         scale = 1.5;
       };
-      hyprland = {
-        enable = true;
-      };
+      hyprland.enable = true;
       mangowc.enable = false;
       niri = {
         enable = true;
@@ -95,7 +94,7 @@
           }
         '';
       };
-      vicinae.enable = true;
+      vicinae.enable = false;
       quickshell.enable = true;
       wayland.enable = true;
     };
@@ -236,16 +235,10 @@
         enableLovelyInjector = true;
         enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "stickersalwaysshown"];
       };
-      wukong = {
-        enable = true;
-      };
+      wukong.enable = true;
       expedition33.enable = true;
-      duet-night-abyss = {
-        enable = true;
-      };
-      arc-raiders = {
-        enable = true;
-      };
+      duet-night-abyss.enable = true;
+      arc-raiders.enable = true;
     };
   };
 }

@@ -4,6 +4,7 @@ _: {
       limine = {
         enable = true;
         maxGenerations = 20;
+        validateChecksums = false;
       };
       efi = {
         canTouchEfiVariables = true;

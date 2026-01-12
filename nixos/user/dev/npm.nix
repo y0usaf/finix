@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: {
   options.user.dev.npm = {
@@ -11,18 +11,14 @@
     environment.systemPackages = [
       pkgs.nodejs_20
     ];
-    usr = {
-      files = {
-        ".config/npm/npmrc" = {
-          clobber = true;
-          text = ''
-            prefix=${config.user.dataDirectory}/npm
-            cache=${config.user.cacheDirectory}/npm
-            init-module=${config.user.configDirectory}/npm/config/npm-init.js
-            store-dir=${config.user.cacheDirectory}/pnpm/store
-          '';
-        };
-      };
+    usr.files.".config/npm/npmrc" = {
+      clobber = true;
+      text = ''
+        prefix=${config.user.dataDirectory}/npm
+        cache=${config.user.cacheDirectory}/npm
+        init-module=${config.user.configDirectory}/npm/config/npm-init.js
+        store-dir=${config.user.cacheDirectory}/pnpm/store
+      '';
     };
     systemd.tmpfiles.rules = [
       "d ${config.user.homeDirectory}/.local/share/npm 0755 ${config.user.name} ${config.user.name} - -"

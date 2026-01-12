@@ -31,6 +31,8 @@
       "parallelization-instruct@y0usaf-marketplace" = true;
       "todowrite-instruct@y0usaf-marketplace" = true;
       "tool-tracker@y0usaf-marketplace" = false;
+      "ralph-loop@claude-plugins-official" = true;
+      "code-simplifier@claude-plugins-official" = true;
     };
     extraKnownMarketplaces = {
       "y0usaf-marketplace" = {

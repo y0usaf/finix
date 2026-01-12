@@ -62,7 +62,7 @@ in {
             inherit (hostConfig) homeDirectory;
           };
           _module.args = {
-            inherit hostConfig lib genLib system;
+            inherit hostConfig lib genLib;
             flakeInputs = inputs;
           };
         };
