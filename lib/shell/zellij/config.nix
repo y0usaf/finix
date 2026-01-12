@@ -14,7 +14,7 @@
   zjstatusUrl = "https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm";
   zjstatusHintsUrl = "https://raw.githubusercontent.com/y0usaf/zjstatus-hints/feat/custom-labels/zjstatus_hints.wasm";
 
-  shellIntegration = ''
+  shellChecks = ''
     # Skip if already in a multiplexer or SSH session (fast: variable checks only)
     [[ -n "$ZELLIJ" || -n "$SSH_CONNECTION" || -n "$TMUX" ]] && return
 
@@ -24,11 +24,11 @@
 
     # Robust fallback: device path check (minimal subprocess overhead)
     [[ $(readlink /proc/self/fd/0 2>/dev/null) =~ ^/dev/tty[0-9] ]] && return
-
-    exec zellij
   '';
+
+  shellIntegration = shellChecks + "\n    exec zellij\n  ";
 in {
-  inherit baseConfig shellIntegration theme zjstatus;
+  inherit baseConfig shellIntegration shellChecks theme zjstatus;
   inherit zjstatusUrl zjstatusHintsUrl;
 
   # Build complete KDL config attrs (caller will pass to genLib.toKDL)

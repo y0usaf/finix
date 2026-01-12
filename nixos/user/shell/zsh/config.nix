@@ -44,52 +44,51 @@
             clobber = true;
           };
           ".config/zsh/.zshrc" = {
-            text = lib.concatStringsSep "\n" (
-              [
-                "source \"$ZDOTDIR/aliases.zsh\""
-              ]
-              ++ lib.optional config.user.shell.zellij.enable "source \"$ZDOTDIR/zellij.zsh\""
-              ++ [
-                (import ../../../../lib/shell/zsh/plugins.nix {inherit pkgs;})
+            text = let
+              settings = import ./settings.nix {inherit config;};
+              libFunctions = import ../../../../lib/shell/zsh/functions.nix {};
+              localFunctions = import ./functions.nix {inherit config;};
+            in
+              lib.concatStringsSep "\n" (
+                [
+                  "source \"$ZDOTDIR/aliases.zsh\""
+                ]
+                ++ lib.optional config.user.shell.zellij.enable "source \"$ZDOTDIR/zellij.zsh\""
+                ++ [
+                  (import ../../../../lib/shell/zsh/plugins.nix {inherit pkgs;})
 
-                (import ./settings.nix {inherit config;}).history
+                  settings.history
 
-                (import ./settings.nix {inherit config;}).completion
+                  settings.completion
 
-                (import ./settings.nix {inherit config;}).prompt
+                  settings.prompt
 
-                (import ../../../../lib/shell/zsh/functions.nix {}).temppkg
-                (import ../../../../lib/shell/zsh/functions.nix {}).temprun
-                (import ./functions.nix {inherit config;}).fanspeed
-              ]
-            );
+                  libFunctions.temppkg
+                  libFunctions.temprun
+                  localFunctions.fanspeed
+                ]
+              );
             clobber = true;
           };
         }
         // lib.optionalAttrs config.user.shell.zellij.enable {
           ".config/zsh/zellij.zsh" = {
-            text = ''
-              # Skip if already in multiplexer or SSH session
-              [[ -n "$ZELLIJ" || -n "$SSH_CONNECTION" || -n "$TMUX" ]] && return
+            text = let
+              zellijConfig = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
+            in
+              zellijConfig.shellChecks
+              + ''
+                # Start Zellij
+                if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
+                  zellij attach -c
+                else
+                  zellij
+                fi
 
-              # Skip if in virtual console (TTY)
-              # Fast path: TERM check (no subprocess)
-              [[ "$TERM" == "linux" ]] && return
-
-              # Robust fallback: device path check (minimal subprocess overhead)
-              [[ $(readlink /proc/self/fd/0 2>/dev/null) =~ ^/dev/tty[0-9] ]] && return
-
-              # Start Zellij
-              if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
-                zellij attach -c
-              else
-                zellij
-              fi
-
-              if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
-                exit
-              fi
-            '';
+                if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
+                  exit
+                fi
+              '';
             clobber = true;
           };
         };

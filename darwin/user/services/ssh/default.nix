@@ -1,39 +1,33 @@
-{config, ...}: {
-  home-manager.users.y0usaf.programs.ssh = {
+{config, ...}: let
+  sharedSsh = import ../../../../lib/ssh;
+  hosts = sharedSsh.hosts;
+  defaults = sharedSsh.defaults;
+  identityFile = "${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}";
+in {
+  home-manager.users.${config.user.name}.programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
 
     matchBlocks = {
-      "*" = {
-        forwardAgent = true;
-        addKeysToAgent = "yes";
-        serverAliveInterval = 60;
-        serverAliveCountMax = 5;
-        controlMaster = "auto";
-        controlPath = "%d/.ssh/master-%r@%h:%p";
-        controlPersist = "10m";
-        setEnv = {
-          TERM = "xterm-256color";
-        };
-      };
+      "*" = defaults;
 
       "server" = {
-        hostname = "192.168.2.66";
-        user = "y0usaf";
+        hostname = hosts.server.hostname;
+        user = hosts.server.user;
       };
 
       "github.com" = {
-        hostname = "github.com";
-        user = "git";
-        identityFile = "${config.user.homeDirectory}/Tokens/id_rsa_y0usaf";
+        hostname = hosts.github.hostname;
+        user = hosts.github.user;
+        inherit identityFile;
       };
 
       "forgejo" = {
-        hostname = "y0usaf-server";
-        port = 2222;
-        user = "forgejo";
-        identityFile = "${config.user.homeDirectory}/Tokens/id_rsa_y0usaf";
-        identitiesOnly = true;
+        hostname = hosts.forgejo.hostname;
+        port = hosts.forgejo.port;
+        user = hosts.forgejo.user;
+        identitiesOnly = hosts.forgejo.identitiesOnly;
+        inherit identityFile;
       };
     };
   };
