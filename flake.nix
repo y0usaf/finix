@@ -82,7 +82,6 @@
     nixpkgs,
     darwin,
     home-manager,
-    handy,
     ...
   } @ inputs: let
     linuxSystem = "x86_64-linux";

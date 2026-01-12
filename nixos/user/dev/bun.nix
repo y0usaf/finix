@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: {
   options.user.dev.bun = {
@@ -11,17 +11,13 @@
     environment.systemPackages = [
       pkgs.bun
     ];
-    usr = {
-      files = {
-        ".config/bun/bunfig.toml" = {
-          clobber = true;
-          text = ''
-            [install]
-            cache_dir = "${config.user.cacheDirectory}/bun"
-            global_dir = "${config.user.dataDirectory}/bun"
-          '';
-        };
-      };
+    usr.files.".config/bun/bunfig.toml" = {
+      clobber = true;
+      text = ''
+        [install]
+        cache_dir = "${config.user.cacheDirectory}/bun"
+        global_dir = "${config.user.dataDirectory}/bun"
+      '';
     };
     systemd.tmpfiles.rules = [
       "d ${config.user.homeDirectory}/.local/share/bun 0755 ${config.user.name} ${config.user.name} - -"

@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   flakeInputs,
   ...
 }: let
@@ -25,5 +25,10 @@ in {
       handy
       pkgs.wtype # Ensure wtype is available for Wayland text injection
     ];
+
+    # Send SIGUSR2 to toggle recording
+    usr.files.".config/niri/config.kdl".value.binds.${config.user.programs.handy.keybind} = {
+      spawn = ["pkill" "-SIGUSR2" "handy"];
+    };
   };
 }

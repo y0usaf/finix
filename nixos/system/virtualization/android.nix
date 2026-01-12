@@ -10,9 +10,5 @@
     default = {};
   };
 
-  config = {
-    virtualisation.waydroid = lib.mkIf config.services.waydroid.enable {
-      enable = true;
-    };
-  };
+  config.virtualisation.waydroid.enable = lib.mkIf config.services.waydroid.enable true;
 }

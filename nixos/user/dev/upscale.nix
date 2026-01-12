@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: {
   options.user.dev.upscale = {
@@ -12,14 +12,12 @@
     environment.systemPackages = [
       pkgs.realesrgan-ncnn-vulkan
     ];
-    usr = {
-      files = lib.optionalAttrs config.user.shell.zsh.enable {
-        ".config/zsh/aliases/esrgan.zsh" = {
-          text = ''
-            alias esrgan="realesrgan-ncnn-vulkan -i ${config.user.homeDirectory}/Pictures/Upscale/Input -o ${config.user.homeDirectory}/Pictures/Upscale/Output"
-          '';
-          clobber = true;
-        };
+    usr.files = lib.optionalAttrs config.user.shell.zsh.enable {
+      ".config/zsh/aliases/esrgan.zsh" = {
+        text = ''
+          alias esrgan="realesrgan-ncnn-vulkan -i ${config.user.homeDirectory}/Pictures/Upscale/Input -o ${config.user.homeDirectory}/Pictures/Upscale/Output"
+        '';
+        clobber = true;
       };
     };
   };

@@ -14,16 +14,12 @@
       pkgs.docker-buildx
       pkgs.docker-credential-helpers
     ];
-    usr = {
-      files = {
-        ".docker/config.json" = {
-          clobber = true;
-          text = builtins.toJSON {
-            credsStore = "pass";
-            currentContext = "default";
-            plugins = {};
-          };
-        };
+    usr.files.".docker/config.json" = {
+      clobber = true;
+      text = builtins.toJSON {
+        credsStore = "pass";
+        currentContext = "default";
+        plugins = {};
       };
     };
   };

@@ -1,32 +1,20 @@
 {
-  lib,
   config,
+  lib,
   ...
 }: {
-  options = {
-    virtualisation = {
-      qemu = {
-        enable = lib.mkEnableOption "QEMU/KVM virtualization";
-      };
-    };
-  };
+  options.virtualisation.qemu.enable = lib.mkEnableOption "QEMU/KVM virtualization";
 
   config = lib.mkIf config.virtualisation.qemu.enable {
-    virtualisation = {
-      libvirtd = {
-        enable = true;
-        qemu = {
-          swtpm.enable = true;
-          ovmf.enable = true;
-          runAsRoot = false;
-        };
+    virtualisation.libvirtd = {
+      enable = true;
+      qemu = {
+        swtpm.enable = true;
+        ovmf.enable = true;
+        runAsRoot = false;
       };
     };
 
-    programs = {
-      virt-manager = {
-        enable = true;
-      };
-    };
+    programs.virt-manager.enable = true;
   };
 }

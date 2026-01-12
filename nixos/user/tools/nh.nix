@@ -21,34 +21,30 @@
     environment.systemPackages = [
       pkgs.nh
     ];
-    usr = {
-      files = {
-        ".config/zsh/.zshrc" = {
-          text = lib.mkAfter ''
-            export NH_FLAKE="${config.user.nixosConfigDirectory}"
-            nhs() {
-              clear
-              local update=""
-              local dry=""
-              local OPTIND
-              while getopts "du" opt; do
-                case $opt in
-                  d) dry="--dry" ;;
-                  u) update="--update" ;;
-                  *) echo "Invalid option: -$OPTARG" >&2 ;;
-                esac
-              done
-              shift $((OPTIND-1))
-              nh os switch $update $dry "$@"
-            }
-            alias nhd="nhs -d"
-            alias nhu="nhs -u"
-            alias nhud="nhs -ud"
-            alias nhc="nh clean all"
-          '';
-          clobber = true;
-        };
-      };
+    usr.files.".config/zsh/.zshrc" = {
+      text = lib.mkAfter ''
+        export NH_FLAKE="${config.user.nixosConfigDirectory}"
+        nhs() {
+          clear
+          local update=""
+          local dry=""
+          local OPTIND
+          while getopts "du" opt; do
+            case $opt in
+              d) dry="--dry" ;;
+              u) update="--update" ;;
+              *) echo "Invalid option: -$OPTARG" >&2 ;;
+            esac
+          done
+          shift $((OPTIND-1))
+          nh os switch $update $dry "$@"
+        }
+        alias nhd="nhs -d"
+        alias nhu="nhs -u"
+        alias nhud="nhs -ud"
+        alias nhc="nh clean all"
+      '';
+      clobber = true;
     };
   };
 }

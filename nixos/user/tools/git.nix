@@ -25,31 +25,20 @@
       pkgs.git
       pkgs.openssh
     ];
-    usr = {
-      files = {
-        ".config/git/config" = {
-          clobber = true;
-          generator = lib.generators.toGitINI;
-          value = {
-            user = {
-              inherit (config.user.tools.git) name;
-              inherit (config.user.tools.git) email;
-            };
-            core = {
-              inherit (config.user.tools.git) editor;
-            };
-            init = {
-              defaultBranch = "main";
-            };
-            pull = {
-              rebase = true;
-            };
-            push = {
-              autoSetupRemote = true;
-            };
-            url."git@github.com:".pushInsteadOf = "https://github.com/";
-          };
+    usr.files.".config/git/config" = {
+      clobber = true;
+      generator = lib.generators.toGitINI;
+      value = {
+        user = {
+          inherit (config.user.tools.git) name email;
         };
+        core = {
+          inherit (config.user.tools.git) editor;
+        };
+        init.defaultBranch = "main";
+        pull.rebase = true;
+        push.autoSetupRemote = true;
+        url."git@github.com:".pushInsteadOf = "https://github.com/";
       };
     };
   };

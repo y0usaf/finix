@@ -5,7 +5,6 @@
   ...
 }: let
   cfg = config.user.appearance.wallust;
-  discordCfg = config.user.programs.discord;
   wallustLib = import ../../../../../lib/appearance/wallust {inherit lib;};
   files = wallustLib.mkFiles {
     zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;

@@ -1,5 +1,3 @@
 _: {
-  config = {
-    hardware.i2c.enable = true;
-  };
+  config.hardware.i2c.enable = true;
 }
