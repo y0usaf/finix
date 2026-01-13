@@ -1,11 +1,11 @@
 {
   pkgs,
-  lib,
+  config,
   ...
 }: {
   environment.systemPackages = [
     (pkgs.writeShellScriptBin "obsidian" ''
-      exec ${pkgs.obsidian}/bin/obsidian --force-device-scale-factor=1.5 "$@"
+      exec ${pkgs.obsidian}/bin/obsidian --force-device-scale-factor=${builtins.toString config.user.ui.gtk.scale} "$@"
     '')
   ];
 }
