@@ -209,5 +209,49 @@ in ''
   require("dressing").setup({})
   require("windows").setup({})
 
+  -- Obsidian setup
+  require("obsidian").setup({
+    workspaces = {
+      {
+        name = "personal",
+        path = os.getenv("HOME") .. "/Documents/obsidian",
+      },
+    },
+    notes_subdir = "notes",
+    new_notes_location = "notes_subdir",
+    daily_notes_folder = "daily",
+    completion = {
+      nvim_cmp = true,
+      min_chars = 1,
+    },
+    mappings = {
+      ["gf"] = {
+        action = function()
+          return require("obsidian").util.gf_passthrough()
+        end,
+        opts = { noremap = false, expr = true, buffer = true },
+      },
+      ["<cr>"] = {
+        action = function()
+          return require("obsidian").util.smart_action()
+        end,
+        opts = { buffer = true, expr = true },
+      },
+    },
+    new_notes_location = "notes_subdir",
+    wiki_link_func = function(opts)
+      return require("obsidian.util").wiki_link_id_prefix(opts)
+    end,
+    markdown_link_func = function(opts)
+      return require("obsidian.util").markdown_link(opts)
+    end,
+    image_name_func = function()
+      return tostring(os.time())
+    end,
+    follow_url_func = function(url)
+      vim.fn.jobstart({"open", url})
+    end,
+  })
+
   ${nvimExports.keymaps}
 ''
