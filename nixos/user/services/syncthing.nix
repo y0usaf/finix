@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  sharedSyncthing = import ../../../lib/syncthing;
-in {
+}: {
   options.user.services.syncthing = {
     enable = lib.mkEnableOption "Syncthing service";
 
@@ -41,16 +39,9 @@ in {
           "syncthing-desktop:8384"
           "syncthing-server:8384"
         ];
-        devices = sharedSyncthing.devices;
+        inherit (config.user.services.syncthing) devices;
         folders =
-          {
-            tokens =
-              sharedSyncthing.folders.tokens
-              // {
-                path = "${config.user.homeDirectory}/Tokens";
-              };
-          }
-          // lib.optionalAttrs (config.hostname == "y0usaf-server") {
+          lib.optionalAttrs (config.hostname == "y0usaf-server") {
             music = {
               id = "oty33-aq3dt";
               label = "Music";
