@@ -31,16 +31,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    zjstatus = {
-      url = "github:dj95/zjstatus";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    zjstatus-hints = {
-      url = "github:y0usaf/zjstatus-hints";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     obs-image-reaction = {
       url = "github:y0usaf/obs-image-reaction";
       inputs.nixpkgs.follows = "nixpkgs";
