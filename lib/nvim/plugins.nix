@@ -52,4 +52,7 @@
   # Specialized
   "https://github.com/kawre/leetcode.nvim"
   "https://github.com/gelguy/wilder.nvim"
+
+  # Note-taking
+  "https://github.com/epwalsh/obsidian.nvim"
 ]
