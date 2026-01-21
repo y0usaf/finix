@@ -7,6 +7,7 @@
   policies = import ./policies.nix {inherit config lib;};
   prefs = import ./prefs.nix {inherit config lib;};
   ui = import ./ui-chrome.nix;
+  content = import ./ui-content.nix;
 in {
   # Firefox policies to apply (used by both platforms)
   browserPolicies =
@@ -20,6 +21,9 @@ in {
 
   # Firefox UI CSS
   inherit (ui) userChromeCss;
+
+  # Firefox web content CSS
+  inherit (content) userContentCss;
 
   # Standard profiles.ini configuration
   profilesIni = {
