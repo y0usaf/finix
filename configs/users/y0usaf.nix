@@ -44,6 +44,7 @@ in {
       baseFontSize = 12;
       cursorSize = 18;
       opacity = 0.7;
+      wallust.defaultTheme = "eva01";
     };
     paths = {
       flake.path = "/home/y0usaf/nixos";
