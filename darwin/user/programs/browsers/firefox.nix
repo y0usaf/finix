@@ -21,6 +21,12 @@ in {
       home.file.".mozilla/firefox/profiles.ini" = {
         text = lib.generators.toINI {} firefoxShared.profilesIni;
       };
+      home.file.".mozilla/firefox/y0usaf/chrome/userChrome.css" = {
+        text = firefoxShared.userChromeCss;
+      };
+      home.file.".mozilla/firefox/y0usaf/chrome/userContent.css" = {
+        text = firefoxShared.userContentCss;
+      };
     };
   };
 }

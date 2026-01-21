@@ -35,6 +35,14 @@ in {
             value = profilesIni;
             clobber = true;
           };
+          ".mozilla/firefox/${config.user.name}/chrome/userChrome.css" = {
+            text = firefoxShared.userChromeCss;
+            clobber = true;
+          };
+          ".mozilla/firefox/${config.user.name}/chrome/userContent.css" = {
+            text = firefoxShared.userContentCss;
+            clobber = true;
+          };
         }
         // lib.optionalAttrs config.user.shell.zsh.enable {
           ".config/zsh/.zprofile" = {
