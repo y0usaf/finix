@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: let
-  handy-base = flakeInputs.handy.packages.${pkgs.system}.default;
+  handy-base = flakeInputs.handy.packages.${pkgs.stdenv.hostPlatform.system}.default;
   handy = pkgs.writeShellScriptBin "handy" ''
     export WEBKIT_DISABLE_DMABUF_RENDERER=1
     exec ${handy-base}/bin/handy "$@"
