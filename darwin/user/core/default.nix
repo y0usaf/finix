@@ -31,7 +31,7 @@
       alt-tab-macos
       discord
 
-      nvf.packages.${pkgs.system}.default
+      nvf.packages.${pkgs.stdenv.hostPlatform.system}.default
     ])
     ++ config.user.packages.extraPackages;
 }
