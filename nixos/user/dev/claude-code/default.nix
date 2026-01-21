@@ -30,20 +30,35 @@
       };
     enabledPlugins = {
       "audio-notify@y0usaf-marketplace" = true;
-      "codex-mcp@y0usaf-marketplace" = true;
+      "codex-mcp@y0usaf-marketplace" = false;
       "collab-flow@y0usaf-marketplace" = true;
       "instructions@y0usaf-marketplace" = true;
-      "parallelization-instruct@y0usaf-marketplace" = true;
+      "parallelization-instruct@y0usaf-marketplace" = false;
       "todowrite-instruct@y0usaf-marketplace" = true;
       "tool-tracker@y0usaf-marketplace" = false;
-      "ralph-loop@claude-plugins-official" = true;
+      "agent-review@y0usaf-marketplace" = true;
+      "ralph-loop@claude-plugins-official" = false;
       "code-simplifier@claude-plugins-official" = true;
+      # CU-Claude-Plugins
+      "codex-mcp@cu-claude-plugins" = false;
+      "collab-flow@cu-claude-plugins" = false;
+      "skills-framework@cu-claude-plugins" = true;
+      "the-chopper@cu-claude-plugins" = true;
+      "skill-eval-hook@cu-claude-plugins" = false;
+      "skillify@cu-claude-plugins" = true;
     };
     extraKnownMarketplaces = {
       "y0usaf-marketplace" = {
         source = {
           source = "directory";
           path = "/home/y0usaf/.config/claude";
+        };
+      };
+      "cu-claude-plugins" = {
+        source = {
+          source = "github";
+          owner = "Cook-Unity";
+          repo = "CU-Claude-Plugins";
         };
       };
     };
