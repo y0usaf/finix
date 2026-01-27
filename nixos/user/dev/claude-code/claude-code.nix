@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   options.user.dev.claude-code = {
@@ -20,6 +21,8 @@
   };
 
   config = lib.mkIf config.user.dev.claude-code.enable {
-    environment.systemPackages = [];
+    environment.systemPackages = [
+      pkgs.claude-code
+    ];
   };
 }
