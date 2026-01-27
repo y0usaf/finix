@@ -9,13 +9,13 @@
 
     model = lib.mkOption {
       type = lib.types.str;
-      default = "claude-haiku-4-5";
+      default = "opus";
       description = "Claude model to use";
     };
 
     subagentModel = lib.mkOption {
       type = lib.types.str;
-      default = "claude-haiku-4-5";
+      default = "opus";
       description = "Claude model to use for subagents";
     };
   };
