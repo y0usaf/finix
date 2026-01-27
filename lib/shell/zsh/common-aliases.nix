@@ -10,6 +10,11 @@ _: {
   # Wallust wrapper (auto-updates pywalfox)
   wallust = "wt";
 
+  # Claude Code - native and bunx variants
+  clauded = "claude --dangerously-skip-permissions";
+  bunclaude = "bunx --bun @anthropic-ai/claude-code";
+  bunclauded = "bunx --bun @anthropic-ai/claude-code --dangerously-skip-permissions";
+
   # File listing with lsd
   "l." = "lsd -A | grep -E \"^\\\\.\"";
   la = "lsd -A --color=always --group-dirs=first --icon=always";
