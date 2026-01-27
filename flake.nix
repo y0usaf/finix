@@ -66,12 +66,18 @@
       url = "github:y0usaf/Handy/feat/nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    claude-code-nix = {
+      url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
     nixpkgs,
     darwin,
     home-manager,
+    claude-code-nix,
     ...
   } @ inputs: let
     linuxSystem = "x86_64-linux";
