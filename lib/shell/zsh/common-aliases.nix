@@ -9,11 +9,6 @@ _: {
 
   # Wallust wrapper (auto-updates pywalfox)
   wallust = "wt";
-  claude = "bunx --bun @anthropic-ai/claude-code";
-  clauded = "bunx --bun @anthropic-ai/claude-code --dangerously-skip-permissions";
-  code = "bunx -bun @just-every/code";
-  codex = "bunx --bun @openai/codex";
-  gemini = "bunx --bun @google/gemini-cli@preview";
 
   # File listing with lsd
   "l." = "lsd -A | grep -E \"^\\\\.\"";
