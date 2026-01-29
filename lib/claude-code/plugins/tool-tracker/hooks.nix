@@ -8,6 +8,7 @@
           {
             type = "command";
             command = "bun \${CLAUDE_PLUGIN_ROOT}/hooks/scripts/tool-tracker.ts";
+            async = true;
           }
         ];
       }
