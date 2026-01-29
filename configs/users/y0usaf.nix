@@ -121,6 +121,7 @@ in {
       stremio.enable = true;
       tui-launcher.enable = true;
       slack.enable = true;
+      btop.enable = true;
     };
     dev = {
       claude-code.enable = true;

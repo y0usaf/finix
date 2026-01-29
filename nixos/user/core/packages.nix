@@ -14,7 +14,6 @@
     pkgs.lsd
     pkgs.alejandra
     pkgs.tree
-    pkgs.btop
     pkgs.psmisc
     pkgs.dconf
     pkgs.lm_sensors
