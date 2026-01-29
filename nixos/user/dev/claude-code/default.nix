@@ -21,7 +21,7 @@
 
   # Settings without hooks (hooks come from plugin now)
   settingsWithoutHooks = {
-    inherit (claudeCodeConfig.settings) includeCoAuthoredBy statusLine;
+    inherit (claudeCodeConfig.settings) includeCoAuthoredBy statusLine permissions;
     inherit (config.user.dev.claude-code) model;
     env =
       claudeCodeConfig.settings.env
