@@ -1,6 +1,7 @@
 _: {
   imports = [
     ./bluetooth.nix
+    ./btop.nix
     ./cmus.nix
     ./creative.nix
     ./discord
