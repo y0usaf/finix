@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: let
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
   x11ThemeName = "SSB-x11";
   xcursorPackage = flakeInputs.cursors.packages.${system}."ssb-xcursor";
   hyprcursorPackage = flakeInputs.cursors.packages.${system}."deepin-dark-hyprcursor";
