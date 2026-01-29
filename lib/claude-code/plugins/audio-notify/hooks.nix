@@ -8,6 +8,7 @@
           {
             type = "command";
             command = "bun \${CLAUDE_PLUGIN_ROOT}/hooks/scripts/completion-sound.ts";
+            async = true;
           }
         ];
       }
