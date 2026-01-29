@@ -41,12 +41,12 @@
       "ralph-loop@claude-plugins-official" = false;
       "code-simplifier@claude-plugins-official" = true;
       # CU-Claude-Plugins
-      "codex-mcp@cu-claude-plugins" = false;
-      "collab-flow@cu-claude-plugins" = false;
-      "skills-framework@cu-claude-plugins" = true;
-      "the-chopper@cu-claude-plugins" = true;
-      "skill-eval-hook@cu-claude-plugins" = false;
-      "skillify@cu-claude-plugins" = true;
+      "codex-mcp@CU-Claude-Plugins" = false;
+      "collab-flow@CU-Claude-Plugins" = false;
+      "skills-framework@CU-Claude-Plugins" = true;
+      "the-chopper@CU-Claude-Plugins" = true;
+      "skill-eval-hook@CU-Claude-Plugins" = false;
+      "skillify@CU-Claude-Plugins" = true;
     };
     extraKnownMarketplaces = {
       "y0usaf-marketplace" = {
@@ -55,7 +55,7 @@
           path = "/home/y0usaf/.config/claude";
         };
       };
-      "cu-claude-plugins" = {
+      "CU-Claude-Plugins" = {
         source = {
           source = "github";
           owner = "Cook-Unity";
