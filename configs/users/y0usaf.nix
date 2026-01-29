@@ -112,7 +112,10 @@ in {
       media.enable = true;
       cmus.enable = true;
       bluetooth.enable = true;
-      obs.enable = true;
+      obs = {
+        enable = true;
+        backgroundRemoval.enable = false;
+      };
       imv.enable = true;
       mimeapps.enable = true;
       mpv.enable = true;
