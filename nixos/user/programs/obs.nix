@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: let
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
 in {
   options.user.programs.obs = {
     enable = lib.mkEnableOption "OBS Studio";
