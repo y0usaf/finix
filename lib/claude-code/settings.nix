@@ -1,5 +1,9 @@
 {
   includeCoAuthoredBy = false;
+  outputStyle = "Explanatory";
+  permissions = {
+    defaultMode = "plan";
+  };
   env = {
     MAX_THINKING_TOKENS = "56000";
     BASH_DEFAULT_TIMEOUT_MS = "120000";
