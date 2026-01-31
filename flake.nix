@@ -87,9 +87,8 @@
       allowUnfree = true;
       permittedInsecurePackages = [
         "qtwebengine-5.15.19"
-        "librewolf-bin-146.0.1-1"
-        "librewolf-bin-unwrapped-146.0.1-1"
       ];
+      allowInsecurePredicate = pkg: nixpkgs.lib.hasPrefix "librewolf" (pkg.pname or "");
     };
 
     linuxNixpkgsConfig =
