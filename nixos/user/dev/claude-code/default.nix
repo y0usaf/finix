@@ -32,6 +32,7 @@
       "audio-notify@y0usaf-marketplace" = true;
       "codex-mcp@y0usaf-marketplace" = false;
       "collab-flow@y0usaf-marketplace" = true;
+      "ensemble@y0usaf-marketplace" = true;
       "instructions@y0usaf-marketplace" = true;
       "linear-mcp@y0usaf-marketplace" = true;
       "parallelization-instruct@y0usaf-marketplace" = false;
