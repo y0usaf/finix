@@ -3,7 +3,6 @@ _: {
     ./audio.nix
     ./dbus.nix
     ./forgejo.nix
-    ./gvfs.nix
     ./mediamtx.nix
     ./n8n.nix
     ./nginx.nix

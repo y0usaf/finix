@@ -58,6 +58,17 @@
         "space_cache=v2"
       ];
     };
+    "/btrfs/data" = {
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
+      fsType = "btrfs";
+      options = [
+        "subvolid=5"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
+    };
     "/home" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
@@ -104,7 +115,7 @@
       ];
     };
     "/home/y0usaf/.local/share/Steam" = {
-      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = [
         "subvol=@steam"
@@ -115,7 +126,7 @@
       ];
     };
     "/home/y0usaf/Pictures" = {
-      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = [
         "subvol=@pictures"
@@ -126,7 +137,7 @@
       ];
     };
     "/home/y0usaf/DCIM" = {
-      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = [
         "subvol=@dcim"
@@ -137,7 +148,7 @@
       ];
     };
     "/home/y0usaf/Music" = {
-      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      device = "/dev/disk/by-uuid/9df24ce7-8abe-4a4b-9c9d-1a5c1c894051";
       fsType = "btrfs";
       options = [
         "subvol=@music"
