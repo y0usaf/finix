@@ -8,6 +8,7 @@
   homeDir = config.system.homeDirectory or "/home/${username}";
   disks = {
     systemDisk = "/dev/nvme0n1";
+    dataDisk = "/dev/nvme1n1";
   };
 in {
   imports = [
@@ -54,32 +55,34 @@ in {
                     mountpoint = "/swap";
                     mountOptions = ["nodatacow" "noatime"];
                   };
-                  "@config" = {
-                    mountpoint = "${homeDir}/.config";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                  "@local" = {
-                    mountpoint = "${homeDir}/.local";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                  "@steam" = {
-                    mountpoint = "${homeDir}/.local/share/Steam";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                  "@pictures" = {
-                    mountpoint = "${homeDir}/Pictures";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                  "@dcim" = {
-                    mountpoint = "${homeDir}/DCIM";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                  "@music" = {
-                    mountpoint = "${homeDir}/Music";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
                 };
               };
+            };
+          };
+        };
+      };
+      data = {
+        device = disks.dataDisk;
+        type = "disk";
+        content = {
+          type = "btrfs";
+          extraArgs = ["-f"];
+          subvolumes = {
+            "@pictures" = {
+              mountpoint = "${homeDir}/Pictures";
+              mountOptions = ["compress=zstd" "noatime"];
+            };
+            "@dcim" = {
+              mountpoint = "${homeDir}/DCIM";
+              mountOptions = ["compress=zstd" "noatime"];
+            };
+            "@music" = {
+              mountpoint = "${homeDir}/Music";
+              mountOptions = ["compress=zstd" "noatime"];
+            };
+            "@steam" = {
+              mountpoint = "${homeDir}/.local/share/Steam";
+              mountOptions = ["compress=zstd" "noatime"];
             };
           };
         };
