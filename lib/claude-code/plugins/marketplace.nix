@@ -47,6 +47,9 @@
         inherit (plugin) description version;
         author = plugin.author or {};
       }
+      // lib.optionalAttrs (plugin ? commands) {
+        commands = "./commands";
+      }
       // lib.optionalAttrs (plugin ? hooks) {
         hooks = "./hooks/hooks.json";
       }
