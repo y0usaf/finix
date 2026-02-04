@@ -107,6 +107,7 @@
             label = "Tokens";
             path = "~/Tokens";
             devices = ["desktop" "laptop" "server" "phone"];
+            type = "receiveonly";
           };
         };
       };
