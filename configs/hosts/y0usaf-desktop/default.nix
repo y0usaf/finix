@@ -73,4 +73,9 @@
       enable = true;
     };
   };
+
+  boot.windowsDualBoot = {
+    enable = true;
+    windowsEfiPartuuid = "09d3f11d-33f2-442b-9971-c279ef51860f";
+  };
 }
