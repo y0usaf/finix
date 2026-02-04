@@ -1,12 +1,18 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   options.user.dev.gemini-cli = {
     enable = lib.mkEnableOption "Gemini CLI development tools";
   };
   config = lib.mkIf config.user.dev.gemini-cli.enable {
+    environment.systemPackages = [
+      (pkgs.writeShellScriptBin "gemini" ''
+        exec ${pkgs.bun}/bin/bunx --bun @google/gemini-cli@preview "$@"
+      '')
+    ];
     usr.files = {
       ".gemini/GEMINI.md" = {
         text = ''
