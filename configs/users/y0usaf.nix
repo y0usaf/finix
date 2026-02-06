@@ -127,7 +127,11 @@ in {
       btop.enable = true;
     };
     dev = {
-      claude-code.enable = true;
+      claude-code = {
+        enable = true;
+        model = "claude-opus-4-6";
+        subagentModel = "claude-opus-4-6";
+      };
       codex.enable = true;
       crush.enable = true;
       gemini-cli.enable = true;
