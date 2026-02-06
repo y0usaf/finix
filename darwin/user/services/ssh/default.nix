@@ -12,13 +12,11 @@ in {
       "*" = defaults;
 
       "server" = {
-        inherit (hosts.server) hostname;
-        inherit (hosts.server) user;
+        inherit (hosts.server) hostname user forwardAgent;
       };
 
       "github.com" = {
-        inherit (hosts.github) hostname;
-        inherit (hosts.github) user;
+        inherit (hosts.github) hostname user forwardAgent;
         inherit identityFile;
       };
 
