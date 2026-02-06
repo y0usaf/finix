@@ -36,7 +36,7 @@ in {
               ''
               + prefsToJs librewolfShared.locked
               + "\n"
-              + (lib.concatMapAttrsStringSep "\n" (name: value: "defaultPref(\"${name}\", ${prefValue value});") librewolfShared.default);
+              + (lib.concatMapAttrsStringSep "\n" (name: value: "defaultPref(\"${name}\", ${helpers.prefValue value});") librewolfShared.default);
           };
         };
       };
