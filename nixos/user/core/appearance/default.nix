@@ -3,46 +3,8 @@
     ./wallust
   ];
 
-  # Appearance options (fonts, DPI, animations, etc.)
+  # Appearance options (DPI, animations, etc.)
   options.user.appearance = {
-    fonts = lib.mkOption {
-      type = lib.types.submodule {
-        options = {
-          main = lib.mkOption {
-            type = lib.types.listOf (lib.types.submodule {
-              options = {
-                package = lib.mkOption {
-                  type = lib.types.package;
-                  description = "Font package";
-                };
-                name = lib.mkOption {
-                  type = lib.types.str;
-                  description = "Font name";
-                };
-              };
-            });
-            description = "List of font configurations for main fonts";
-          };
-          fallback = lib.mkOption {
-            type = lib.types.listOf (lib.types.submodule {
-              options = {
-                package = lib.mkOption {
-                  type = lib.types.package;
-                  description = "Font package";
-                };
-                name = lib.mkOption {
-                  type = lib.types.str;
-                  description = "Font name";
-                };
-              };
-            });
-            default = [];
-            description = "List of font configurations for fallback fonts";
-          };
-        };
-      };
-      description = "System font configuration";
-    };
     baseFontSize = lib.mkOption {
       type = lib.types.int;
       default = 12;
