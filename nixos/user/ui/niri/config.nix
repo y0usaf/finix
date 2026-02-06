@@ -22,7 +22,7 @@
       value =
         {
           # Include wallust-generated border colors (live-reloads on wallpaper change)
-          include._args = ["/home/${config.user.name}/.cache/wallust/niri-borders.kdl"];
+          include._args = ["${config.user.cacheDirectory}/wallust/niri-borders.kdl"];
 
           prefer-no-csd = {};
 
@@ -39,7 +39,7 @@
               ["sh" "-c" "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
             ]
             ++ lib.optional config.user.ui.vicinae.enable ["${pkgs.vicinae}/bin/vicinae" "server"]
-            ++ lib.optional (config.user.ui.ags.enable or false) ["sh" "-c" "${config.user.ui.ags.package}/bin/ags run /home/${config.user.name}/.config/ags/bar-overlay.tsx"]
+            ++ lib.optional (config.user.ui.ags.enable or false) ["sh" "-c" "${config.user.ui.ags.package}/bin/ags run ${config.user.configDirectory}/ags/bar-overlay.tsx"]
             ++ lib.optional (config.user.programs.handy.enable or false) ["handy"];
 
           hotkey-overlay = {};
