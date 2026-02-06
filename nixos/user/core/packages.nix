@@ -12,7 +12,6 @@
     pkgs.unzip
     pkgs.bash
     pkgs.lsd
-    pkgs.alejandra
     pkgs.tree
     pkgs.psmisc
     pkgs.dconf

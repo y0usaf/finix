@@ -15,6 +15,7 @@
   stateVersion = "24.11";
   timezone = "America/Toronto";
   var-cache = true;
+  core.graphicalDesktop.headless = true;
   hardware = {
     bluetooth = {
       enable = false;

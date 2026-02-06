@@ -51,8 +51,8 @@ in {
     environment.systemPackages = [
       (pkgs.discord-canary.override {
         inherit commandLineArgs;
-        withOpenASAR = false;
-        withVencord = true;
+        withOpenASAR = true;
+        disableUpdates = false;
         withTTS = false;
         enableAutoscroll = true;
       })
@@ -62,6 +62,8 @@ in {
       generator = lib.generators.toJSON {};
       value = {
         SKIP_HOST_UPDATE = true;
+        UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord";
+        NEW_UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord/";
         MINIMIZE_TO_TRAY = cfg.minimizeToTray;
         OPEN_ON_STARTUP = false;
         DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;

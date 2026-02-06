@@ -52,6 +52,6 @@ in {
     };
 
     # Config files via hjem
-    hjem.users.${config.user.name}.files = lib.mapAttrs (_: content: {text = content;}) files;
+    usr.files = lib.mapAttrs (_: content: {text = content;}) files;
   };
 }
