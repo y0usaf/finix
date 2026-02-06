@@ -16,7 +16,6 @@
         ".ssh/config" = {
           clobber = true;
           text = ''
-            ForwardAgent yes
             AddKeysToAgent yes
             ServerAliveInterval 60
             ServerAliveCountMax 5
@@ -33,6 +32,7 @@
                 HostName github.com
                 User git
                 IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
+                ForwardAgent yes
 
             Host forgejo
                 HostName y0usaf-server
