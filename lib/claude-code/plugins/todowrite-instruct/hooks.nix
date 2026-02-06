@@ -8,17 +8,10 @@
         hooks = [
           {
             type = "command";
-            command = "\${CLAUDE_PLUGIN_ROOT}/hooks/scripts/todowrite-reminder.sh";
+            command = "echo '<system-reminder>MANDATORY: Use TaskCreate before proceeding.</system-reminder>'";
           }
         ];
       }
     ];
-  };
-
-  scripts = {
-    "todowrite-reminder.sh" = ''
-      #!/usr/bin/env bash
-      echo '<system-reminder>MANDATORY: Use TaskCreate before proceeding.</system-reminder>'
-    '';
   };
 }

@@ -8,17 +8,10 @@
         hooks = [
           {
             type = "command";
-            command = "\${CLAUDE_PLUGIN_ROOT}/hooks/scripts/askuser-reminder.sh";
+            command = "echo '<system-reminder>MANDATORY: Use AskUserQuestion before proceeding.</system-reminder>'";
           }
         ];
       }
     ];
-  };
-
-  scripts = {
-    "askuser-reminder.sh" = ''
-      #!/usr/bin/env bash
-      echo '<system-reminder>MANDATORY: Use AskUserQuestion before proceeding.</system-reminder>'
-    '';
   };
 }
