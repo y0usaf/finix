@@ -1,8 +1,6 @@
 {
   pkgs,
   lib,
-  flakeInputs,
-  system,
   ...
 }: {
   users.users.guest = {
@@ -27,28 +25,6 @@
       dpi = 144;
       baseFontSize = 12;
       cursorSize = 36;
-      fonts = {
-        main = [
-          {
-            package = flakeInputs.fast-fonts.packages.${system}.default;
-            name = "Fast IosevkaSlab";
-          }
-        ];
-        fallback = [
-          {
-            package = pkgs.noto-fonts-color-emoji;
-            name = "Noto Color Emoji";
-          }
-          {
-            package = pkgs.noto-fonts-cjk-sans;
-            name = "Noto Sans CJK";
-          }
-          {
-            package = pkgs.font-awesome;
-            name = "Font Awesome";
-          }
-        ];
-      };
     };
     paths = {
       music.path = "/home/guest/Music";
