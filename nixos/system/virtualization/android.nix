@@ -10,5 +10,11 @@
     default = {};
   };
 
-  config.virtualisation.waydroid.enable = lib.mkIf config.services.waydroid.enable true;
+  config = lib.mkIf config.services.waydroid.enable {
+    virtualisation.waydroid.enable = true;
+    boot.kernelModules = [
+      "ashmem_linux"
+      "binder_linux"
+    ];
+  };
 }
