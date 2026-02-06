@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   codexConfig = import ../../../../lib/codex;
@@ -16,11 +15,5 @@ in {
     };
   };
 
-  config = lib.mkIf config.user.dev.codex.enable {
-    environment.systemPackages = [
-      (pkgs.writeShellScriptBin "codex" ''
-        exec ${pkgs.bun}/bin/bunx --bun @openai/codex "$@"
-      '')
-    ];
-  };
+  config = lib.mkIf config.user.dev.codex.enable {};
 }

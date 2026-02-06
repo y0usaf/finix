@@ -13,6 +13,10 @@ _: {
   # Claude Code - plan mode by default with bypass available
   claude = "claude --allow-dangerously-skip-permissions";
 
+  # AI CLI tools via bunx
+  codex = "bunx --bun @openai/codex";
+  gemini = "bunx --bun @google/gemini-cli@preview";
+
   # File listing with lsd
   "l." = "lsd -A | grep -E \"^\\\\.\"";
   la = "lsd -A --color=always --group-dirs=first --icon=always";
