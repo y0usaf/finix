@@ -6,6 +6,7 @@
   instructions = import ./instructions;
   linear-mcp = import ./linear-mcp;
   parallelization-instruct = import ./parallelization-instruct;
+  teams-instruct = import ./teams-instruct;
   todowrite-instruct = import ./todowrite-instruct;
   tool-tracker = import ./tool-tracker;
 }
