@@ -35,6 +35,7 @@
       "instructions@y0usaf-marketplace" = true;
       "linear-mcp@y0usaf-marketplace" = true;
       "parallelization-instruct@y0usaf-marketplace" = false;
+      "teams-instruct@y0usaf-marketplace" = true;
       "todowrite-instruct@y0usaf-marketplace" = true;
       "tool-tracker@y0usaf-marketplace" = false;
       "ralph-loop@claude-plugins-official" = false;
