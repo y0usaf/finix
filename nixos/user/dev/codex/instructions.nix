@@ -19,7 +19,11 @@ in {
       };
       ".codex/config.toml" = {
         generator = tomlGenerator;
-        value = config.user.dev.codex.settings;
+        value =
+          config.user.dev.codex.settings
+          // {
+            model = config.user.dev.codex.model;
+          };
         clobber = true;
       };
     };

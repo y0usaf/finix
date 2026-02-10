@@ -132,7 +132,10 @@ in {
         model = "claude-opus-4-6";
         subagentModel = "claude-opus-4-6";
       };
-      codex.enable = true;
+      codex = {
+        enable = true;
+        model = "gpt-5.3-codex";
+      };
       crush.enable = true;
       gemini-cli.enable = true;
       mcp.enable = true;
