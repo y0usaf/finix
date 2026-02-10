@@ -63,7 +63,7 @@
     };
 
     handy = {
-      url = "github:y0usaf/Handy/feat/nix-flake";
+      url = "github:y0usaf/Handy/fix/nix-native-build";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
