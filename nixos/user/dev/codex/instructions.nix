@@ -22,7 +22,7 @@ in {
         value =
           config.user.dev.codex.settings
           // {
-            model = config.user.dev.codex.model;
+            inherit (config.user.dev.codex) model;
           };
         clobber = true;
       };
