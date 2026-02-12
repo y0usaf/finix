@@ -61,6 +61,7 @@
   };
   user.gaming.proton.ntsync = true;
   services = {
+    btrbk-snapshots.enable = true;
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = true;

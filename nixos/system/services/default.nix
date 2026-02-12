@@ -1,6 +1,7 @@
 _: {
   imports = [
     ./audio.nix
+    ./btrbk.nix
     ./dbus.nix
     ./forgejo.nix
     ./gvfs.nix
