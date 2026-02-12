@@ -176,7 +176,7 @@ in {
       };
       "7z".enable = true;
       file-roller.enable = true;
-      spotdl.enable = true;
+      nicotine-plus.enable = true;
       yt-dlp.enable = true;
     };
     services = {
