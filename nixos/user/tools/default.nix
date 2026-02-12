@@ -5,7 +5,7 @@ _: {
     ./gh.nix
     ./git.nix
     ./nh.nix
-    ./spotdl.nix
+    ./nicotine-plus.nix
     ./yt-dlp.nix
   ];
 }
