@@ -137,6 +137,15 @@
           clobber = true;
         })
       plugin.skills
+    )
+    # Data files (arbitrary files at plugin root)
+    // lib.optionalAttrs (plugin ? dataFiles) (
+      lib.mapAttrs' (fileName: fileContent:
+        lib.nameValuePair "${pluginPath}/${fileName}" {
+          text = fileContent;
+          clobber = true;
+        })
+      plugin.dataFiles
     );
 in {
   # Main build function
