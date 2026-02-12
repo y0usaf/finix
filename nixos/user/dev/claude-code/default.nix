@@ -31,11 +31,12 @@
     enabledPlugins = {
       "audio-notify@y0usaf-marketplace" = true;
       "codex-mcp@y0usaf-marketplace" = false;
-      "collab-flow@y0usaf-marketplace" = true;
+      "collab-flow@y0usaf-marketplace" = false;
+      "instructify@y0usaf-marketplace" = true;
       "instructions@y0usaf-marketplace" = true;
       "linear-mcp@y0usaf-marketplace" = true;
-      "teams-instruct@y0usaf-marketplace" = true;
-      "todowrite-instruct@y0usaf-marketplace" = true;
+      "teams-instruct@y0usaf-marketplace" = false;
+      "todowrite-instruct@y0usaf-marketplace" = false;
       "tool-tracker@y0usaf-marketplace" = false;
       "ralph-loop@claude-plugins-official" = false;
       "code-simplifier@claude-plugins-official" = true;
