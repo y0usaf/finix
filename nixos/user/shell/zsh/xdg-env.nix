@@ -39,7 +39,7 @@
           export HISTFILE="$XDG_STATE_HOME/zsh/history"
           export GNUPGHOME="$XDG_DATA_HOME/gnupg"
           export PARALLEL_HOME="$XDG_CONFIG_HOME/parallel"
-          export SPOTDL_CONFIG="$XDG_CONFIG_HOME/spotdl.yml"
+
           export DVDCSS_CACHE="$XDG_DATA_HOME/dvdcss"
           export WINEPREFIX="$XDG_DATA_HOME/wine"
           export TEXMFVAR="$XDG_CACHE_HOME/texlive/texmf-var"
