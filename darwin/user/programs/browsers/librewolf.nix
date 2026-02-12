@@ -10,7 +10,6 @@
   prefsToJs = attrs: helpers.attrsToLines (name: value: "lockPref(\"${name}\", ${helpers.prefValue value});") attrs;
 in {
   imports = [
-    ../../../../lib/browsers/options.nix
     ./ui-chrome.nix
   ];
 

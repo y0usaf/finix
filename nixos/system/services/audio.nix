@@ -50,9 +50,6 @@
       };
     };
 
-    # RTKit - real-time audio priority
-    security.rtkit.enable = true;
-
     # Configure aggressive real-time priority for PipeWire audio service
     systemd.services.pipewire.serviceConfig = {
       Nice = -20; # Highest priority

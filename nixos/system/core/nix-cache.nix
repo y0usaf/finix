@@ -7,11 +7,6 @@
 
   config = lib.mkIf config.var-cache {
     nix = {
-      settings = {
-        max-jobs = "auto";
-        cores = 0;
-        auto-optimise-store = true;
-      };
       gc = {
         automatic = true;
         dates = "weekly";

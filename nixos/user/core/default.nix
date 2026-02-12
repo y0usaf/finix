@@ -5,6 +5,6 @@ _: {
     ./defaults.nix
     ./paths.nix
     ./packages.nix
-    ./session
+    ./session/xdg.nix
   ];
 }

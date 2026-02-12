@@ -6,5 +6,4 @@
       options v4l2loopback exclusive_caps=1
     '';
   };
-  security.polkit.enable = true;
 }

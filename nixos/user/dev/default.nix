@@ -2,16 +2,16 @@ _: {
   imports = [
     ./claude-code
     ./codex
-    ./opencode
+    ./opencode/opencode.nix
     ./crush.nix
     ./gemini-cli.nix
-    ../../../lib/mcp
+    ../../../lib/mcp/mcp.nix
 
     ./docker.nix
     ./gcloud.nix
     ./latex.nix
     ./bun.nix
-    ./localllama
+    ./localllama/ollama
     ./nvim
     ./python.nix
     ./upscale.nix
