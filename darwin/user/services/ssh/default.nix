@@ -21,10 +21,7 @@ in {
       };
 
       "forgejo" = {
-        inherit (hosts.forgejo) hostname;
-        inherit (hosts.forgejo) port;
-        inherit (hosts.forgejo) user;
-        inherit (hosts.forgejo) identitiesOnly;
+        inherit (hosts.forgejo) hostname port user identitiesOnly;
         inherit identityFile;
       };
     };

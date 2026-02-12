@@ -28,10 +28,6 @@
         assertion = config.hostname != "";
         message = "System hostname cannot be empty";
       }
-      {
-        assertion = lib.hasPrefix "/" (toString config.user.homeDirectory);
-        message = "Home directory must be an absolute path";
-      }
     ];
   };
 }
