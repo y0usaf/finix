@@ -14,7 +14,7 @@ _: {
   claude = "claude --allow-dangerously-skip-permissions";
 
   # AI CLI tools via bunx
-  codex = "bunx --bun @openai/codex";
+  buncodex = "bunx --bun @openai/codex";
   gemini = "bunx --bun @google/gemini-cli@preview";
 
   # File listing with lsd
