@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  home-manager.users.y0usaf = {
+  home-manager.users.${config.user.name} = {
     launchd.agents.aerospace = lib.mkIf config.user.wm.aerospace.enable {
       enable = true;
       config = {
