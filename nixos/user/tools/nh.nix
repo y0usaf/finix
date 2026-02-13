@@ -23,7 +23,11 @@
     ];
     usr.files.".config/zsh/.zshrc" = {
       text = lib.mkAfter ''
-        export NH_FLAKE="${config.user.nixosConfigDirectory}"
+        export NH_FLAKE="${toString (
+          if config.user.tools.nh.flake != null
+          then config.user.tools.nh.flake
+          else config.user.paths.flake.path
+        )}"
         nhs() {
           clear
           local update=""

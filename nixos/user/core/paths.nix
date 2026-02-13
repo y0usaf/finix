@@ -36,7 +36,11 @@ in {
     };
   };
 
+  config.user.paths.flake = lib.mkDefault {
+    path = "${config.user.homeDirectory}/nixos";
+  };
+
   config.user.paths.steam = lib.mkDefault {
-    path = "${config.user.dataDirectory}/Steam";
+    path = "${config.user.homeDirectory}/.local/share/Steam";
   };
 }
