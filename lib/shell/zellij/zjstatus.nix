@@ -67,10 +67,10 @@ _: {
   '';
 
   # Custom keybind hints with global modifier extraction and label text overrides
-  # Uses local dev build to test customization features
+  # Uses forked plugin artifact with customization features
   # Common modifiers (e.g., Ctrl) are displayed once on far left, keys without duplication
   zjstatusHintsCustom = ''
-    plugin location="/home/y0usaf/Dev/zjstatus-hints-fork/target/wasm32-wasip1/debug/zjstatus_hints.wasm" {
+    plugin location="https://raw.githubusercontent.com/y0usaf/zjstatus-hints/feat/custom-labels/zjstatus_hints.wasm" {
       // Format: just show keys since Ctrl is extracted and shown on the left
       key_format "{keys}"
 

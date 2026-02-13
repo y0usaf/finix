@@ -95,6 +95,27 @@
             devices = ["desktop" "laptop" "server" "phone"];
             type = "receiveonly";
           };
+          music = {
+            id = "oty33-aq3dt";
+            label = "Music";
+            path = "~/Music";
+            devices = ["desktop" "server" "phone"];
+            type = "receiveonly";
+          };
+          dcim = {
+            id = "ti9yk-zu3xs";
+            label = "DCIM";
+            path = "~/DCIM";
+            devices = ["desktop" "server" "phone"];
+            type = "receiveonly";
+          };
+          pictures = {
+            id = "zbxzv-35v4e";
+            label = "Pictures";
+            path = "~/Pictures";
+            devices = ["desktop" "server" "phone"];
+            type = "receiveonly";
+          };
         };
       };
     };

@@ -11,20 +11,24 @@ in {
   ];
 
   config = lib.mkIf config.user.programs.firefox.enable {
-    home-manager.users.y0usaf = {
-      home.packages = [
-        (pkgs.wrapFirefox pkgs.firefox-unwrapped {
-          extraPolicies = firefoxShared.browserPolicies;
-        })
-      ];
-      home.file.".mozilla/firefox/profiles.ini" = {
-        text = lib.generators.toINI {} firefoxShared.profilesIni;
-      };
-      home.file.".mozilla/firefox/y0usaf/chrome/userChrome.css" = {
-        text = firefoxShared.userChromeCss;
-      };
-      home.file.".mozilla/firefox/y0usaf/chrome/userContent.css" = {
-        text = firefoxShared.userContentCss;
+    home-manager.users.${config.user.name} = {
+      home = {
+        packages = [
+          (pkgs.wrapFirefox pkgs.firefox-unwrapped {
+            extraPolicies = firefoxShared.browserPolicies;
+          })
+        ];
+        file = {
+          ".mozilla/firefox/profiles.ini" = {
+            text = lib.generators.toINI {} firefoxShared.profilesIni;
+          };
+          ".mozilla/firefox/${config.user.name}/chrome/userChrome.css" = {
+            text = firefoxShared.userChromeCss;
+          };
+          ".mozilla/firefox/${config.user.name}/chrome/userContent.css" = {
+            text = firefoxShared.userContentCss;
+          };
+        };
       };
     };
   };
