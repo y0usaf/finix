@@ -20,9 +20,9 @@
       pkgs.zlib
       pkgs.libGL
       pkgs.glib
-      pkgs.xorg.libX11
-      pkgs.xorg.libXext
-      pkgs.xorg.libXrender
+      pkgs.libx11
+      pkgs.libxext
+      pkgs.libxrender
       pkgs.gcc
       pkgs.binutils
     ];
@@ -40,9 +40,9 @@
             pkgs.zlib
             pkgs.libGL
             pkgs.glib
-            pkgs.xorg.libX11
-            pkgs.xorg.libXext
-            pkgs.xorg.libXrender
+            pkgs.libx11
+            pkgs.libxext
+            pkgs.libxrender
           ]}"
           export NIX_LD="${pkgs.stdenv.cc.bintools.dynamicLinker}"
           export CC="${pkgs.gcc}/bin/gcc"
