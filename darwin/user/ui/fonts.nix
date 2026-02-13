@@ -10,7 +10,7 @@
   };
 
   config = lib.mkIf config.user.ui.fonts.enable {
-    home-manager.users.y0usaf = {
+    home-manager.users.${config.user.name} = {
       home.packages = [
         pkgs.fontconfig
         iosevkaSlab

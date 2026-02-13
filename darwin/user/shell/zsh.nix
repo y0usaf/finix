@@ -7,12 +7,12 @@
   darwinAliases = import ../../../lib/shell/zsh/darwin-aliases.nix null;
   allAliases = commonAliases // darwinAliases;
 in {
-  home-manager.users.y0usaf = {
+  home-manager.users.${config.user.name} = {
     programs.zsh = {
       enable = true;
 
       envExtra = ''
-        export NH_DARWIN_FLAKE="${config.user.nixosConfigDirectory}"
+        export NH_DARWIN_FLAKE="${config.user.homeDirectory}/nixos"
       '';
 
       shellAliases = allAliases;

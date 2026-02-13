@@ -4,5 +4,5 @@ _: {
   nds = "nh darwin switch";
 
   # Darwin build timing
-  buildtime = "time (nix build .#darwinConfigurations.y0usaf-macbook.system --option eval-cache false)";
+  buildtime = "time (nix build \"\${NH_DARWIN_FLAKE}#darwinConfigurations.\${HOST}.system\" --option eval-cache false)";
 }

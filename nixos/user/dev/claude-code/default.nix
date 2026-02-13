@@ -52,7 +52,7 @@
       "y0usaf-marketplace" = {
         source = {
           source = "directory";
-          path = "/home/y0usaf/.config/claude";
+          path = "${config.user.homeDirectory}/.config/claude";
         };
       };
       "CU-Claude-Plugins" = {

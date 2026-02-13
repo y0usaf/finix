@@ -1,9 +1,13 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     ./browsers
   ];
 
-  home-manager.users.y0usaf = {
+  home-manager.users.${config.user.name} = {
     home.packages = with pkgs; [
       tailscale
     ];
