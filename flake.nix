@@ -73,7 +73,7 @@
     };
 
     codex-desktop-linux = {
-      url = "path:/home/y0usaf/nixos/tmp/codex-desktop-linux";
+      url = "github:y0usaf/codex-desktop-linux";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
