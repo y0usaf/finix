@@ -102,6 +102,7 @@ in {
     programs = {
       webapps.enable = true;
       librewolf.enable = true;
+      codex-desktop.enable = true;
       discord = {
         stable.enable = true;
         vesktop.enable = true;
@@ -129,8 +130,8 @@ in {
     dev = {
       claude-code = {
         enable = true;
-        model = "claude-opus-4-6";
-        subagentModel = "claude-opus-4-6";
+        model = "haiku";
+        subagentModel = "haiku";
       };
       codex = {
         enable = true;
