@@ -6,7 +6,7 @@
   shellIntegrationLib = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
 in {
   config = lib.mkIf config.user.shell.zellij.enable {
-    home-manager.users.y0usaf = {
+    home-manager.users.${config.user.name} = {
       programs.zellij = {
         enable = true;
         inherit (config.user.shell.zellij) package;

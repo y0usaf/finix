@@ -31,7 +31,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.y0usaf = {
+    home-manager.users.${config.user.name} = {
       home.file.".config/borders/bordersrc" = {
         executable = true;
         text = ''

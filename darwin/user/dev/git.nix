@@ -1,5 +1,5 @@
-_: {
-  home-manager.users.y0usaf.programs.git = {
+{config, ...}: {
+  home-manager.users.${config.user.name}.programs.git = {
     enable = true;
     settings = {
       user = {
