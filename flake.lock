@@ -50,14 +50,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1771000581,
-        "narHash": "sha256-Jq6zidysxLGT2icN2eoEi1aHVMy8QGYhsh+wCZi/j9s=",
-        "path": "/home/y0usaf/nixos/tmp/codex-desktop-linux",
-        "type": "path"
+        "lastModified": 1771002580,
+        "narHash": "sha256-x+YTmIR9ZZIqqe360EN8vlwcL/IlfDXVw7g0OGodfTA=",
+        "owner": "y0usaf",
+        "repo": "codex-desktop-linux",
+        "rev": "43060132ee78e04730b280682dea425f99c34602",
+        "type": "github"
       },
       "original": {
-        "path": "/home/y0usaf/nixos/tmp/codex-desktop-linux",
-        "type": "path"
+        "owner": "y0usaf",
+        "repo": "codex-desktop-linux",
+        "type": "github"
       }
     },
     "cursors": {
