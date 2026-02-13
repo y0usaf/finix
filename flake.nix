@@ -71,13 +71,17 @@
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    codex-desktop-linux = {
+      url = "path:/home/y0usaf/nixos/tmp/codex-desktop-linux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
     nixpkgs,
     darwin,
     home-manager,
-    claude-code-nix,
     ...
   } @ inputs: let
     linuxSystem = "x86_64-linux";
