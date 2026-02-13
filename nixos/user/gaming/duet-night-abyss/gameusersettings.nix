@@ -48,7 +48,6 @@
   };
 
   mkGameUserSettings = {
-    subdir,
     resX,
     resY,
     lastOpened,
@@ -73,13 +72,11 @@
 in {
   config = lib.mkIf config.user.gaming.duet-night-abyss.enable {
     usr.files."${steamPrefix}/EMLauncher/Saved/Config/WindowsNoEditor/GameUserSettings.ini" = mkEntry {
-      subdir = "EMLauncher";
       resX = "1344";
       resY = "642";
       lastOpened = "EMLauncher";
     };
     usr.files."${steamPrefix}/DNA Game/EM/Saved/Config/WindowsNoEditor/GameUserSettings.ini" = mkEntry {
-      subdir = "DNA Game/EM";
       resX = "2543";
       resY = "1418";
       lastOpened = "EM";

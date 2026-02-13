@@ -86,7 +86,7 @@ if [[ "$count" -eq 0 || -z "$matched_json" ]]; then
       echo ""
       ;;
     Stop)
-      echo '{"decision":"allow","reason":""}'
+      exit 0
       ;;
     *)
       echo '{"decision":"approve","reason":""}'
@@ -116,7 +116,7 @@ case "$event" in
   Stop)
     # Stop events use decision + reason
     reason=$(echo "$wrapped" | jq -Rs .)
-    echo "{\"decision\":\"allow\",\"reason\":${reason}}"
+    echo "{\"decision\":\"approve\",\"reason\":${reason}}"
     ;;
   *)
     # All other events use hookSpecificOutput.additionalContext
