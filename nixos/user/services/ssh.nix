@@ -31,14 +31,14 @@
             Host github.com
                 HostName github.com
                 User git
-                IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
+                IdentityFile ${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}
                 ForwardAgent yes
 
             Host forgejo
                 HostName y0usaf-server
                 Port 2222
                 User forgejo
-                IdentityFile ${config.user.tokensDirectory}/id_rsa_${config.user.name}
+                IdentityFile ${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}
                 IdentitiesOnly yes
           '';
         };
