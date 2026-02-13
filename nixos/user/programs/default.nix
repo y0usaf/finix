@@ -3,6 +3,7 @@ _: {
     ./bluetooth.nix
     ./btop.nix
     ./cmus.nix
+    ./codex-desktop.nix
     ./creative.nix
     ./discord
     ./handy.nix
