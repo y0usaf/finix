@@ -29,5 +29,5 @@
           fi
       done
   }
-  export_vars_from_files "${config.user.tokensDirectory}"
+  export_vars_from_files "${config.user.homeDirectory}/Tokens"
 ''

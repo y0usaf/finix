@@ -8,7 +8,7 @@
     enable = lib.mkEnableOption "zsh shell configuration";
   };
   config = lib.mkIf config.user.shell.zsh.enable {
-    environment.variables.ZDOTDIR = "${config.user.configDirectory}/zsh";
+    environment.variables.ZDOTDIR = "${config.user.homeDirectory}/.config/zsh";
     programs.zsh.enable = true;
 
     environment.systemPackages = [
@@ -27,7 +27,7 @@
             text = lib.concatStringsSep "\n" (
               lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") (import ./aliases.nix {
                 inherit config;
-                inherit (config.user) nixosConfigDirectory;
+                flakeDirectory = config.user.paths.flake.path;
               })
             );
             clobber = true;

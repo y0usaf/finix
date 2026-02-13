@@ -28,8 +28,8 @@
       instructions = [
         "AGENTS.md"
         ".cursor/rules/*.md"
-        "{file:${config.user.configDirectory}/opencode/claude-instructions.md}"
-        "{file:${config.user.configDirectory}/opencode/opencode-instructions.md}"
+        "{file:${config.user.homeDirectory}/.config/opencode/claude-instructions.md}"
+        "{file:${config.user.homeDirectory}/.config/opencode/opencode-instructions.md}"
       ];
     }
     // (lib.optionalAttrs config.user.dev.opencode.enableOllama {

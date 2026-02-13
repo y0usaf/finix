@@ -14,10 +14,10 @@
     usr.files.".config/npm/npmrc" = {
       clobber = true;
       text = ''
-        prefix=${config.user.dataDirectory}/npm
-        cache=${config.user.cacheDirectory}/npm
-        init-module=${config.user.configDirectory}/npm/config/npm-init.js
-        store-dir=${config.user.cacheDirectory}/pnpm/store
+        prefix=${config.user.homeDirectory}/.local/share/npm
+        cache=${config.user.homeDirectory}/.cache/npm
+        init-module=${config.user.homeDirectory}/.config/npm/config/npm-init.js
+        store-dir=${config.user.homeDirectory}/.cache/pnpm/store
       '';
     };
     systemd.tmpfiles.rules = [

@@ -15,8 +15,8 @@
       clobber = true;
       text = ''
         [install]
-        cache_dir = "${config.user.cacheDirectory}/bun"
-        global_dir = "${config.user.dataDirectory}/bun"
+        cache_dir = "${config.user.homeDirectory}/.cache/bun"
+        global_dir = "${config.user.homeDirectory}/.local/share/bun"
       '';
     };
     systemd.tmpfiles.rules = [

@@ -12,36 +12,6 @@
       homeDirectory = lib.mkOption {
         type = lib.types.path;
       };
-
-      configDirectory = lib.mkOption {
-        type = lib.types.path;
-        default = "${config.user.homeDirectory}/.config";
-      };
-
-      dataDirectory = lib.mkOption {
-        type = lib.types.path;
-        default = "${config.user.homeDirectory}/.local/share";
-      };
-
-      stateDirectory = lib.mkOption {
-        type = lib.types.path;
-        default = "${config.user.homeDirectory}/.local/state";
-      };
-
-      cacheDirectory = lib.mkOption {
-        type = lib.types.path;
-        default = "${config.user.homeDirectory}/.cache";
-      };
-
-      nixosConfigDirectory = lib.mkOption {
-        type = lib.types.path;
-        default = "${config.user.homeDirectory}/nixos";
-      };
-
-      tokensDirectory = lib.mkOption {
-        type = lib.types.path;
-        default = "${config.user.homeDirectory}/Tokens";
-      };
     };
   };
 
