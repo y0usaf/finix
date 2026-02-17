@@ -102,7 +102,10 @@ in {
     programs = {
       webapps.enable = true;
       librewolf.enable = true;
-      codex-desktop.enable = true;
+      codex-desktop = {
+        enable = true;
+        yoloMode = true;
+      };
       discord = {
         stable.enable = true;
         vesktop.enable = true;
