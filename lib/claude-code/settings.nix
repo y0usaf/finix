@@ -12,6 +12,7 @@
   };
   statusLine = {
     type = "command";
-    command = "bunx ccusage statusline";
+    #command = "bunx ccusage statusline";
+    command = "bunx -y @owloops/claude-powerline@latest --style=powerline";
   };
 }
