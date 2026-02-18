@@ -63,7 +63,7 @@
     };
 
     handy = {
-      url = "github:y0usaf/Handy/fix/nix-native-build";
+      url = "github:cjpais/Handy";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -73,7 +73,7 @@
     };
 
     codex-desktop-linux = {
-      url = "github:y0usaf/codex-desktop-linux";
+      url = "github:y0usaf/Codex-Desktop-Nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
