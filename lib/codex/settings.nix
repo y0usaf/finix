@@ -13,4 +13,11 @@
   tui = {
     alternate_screen = "never";
   };
+  mcp_servers = {
+    linear = {
+      command = "bunx";
+      args = ["--bun" "@tacticlaunch/mcp-linear"];
+      env_vars = ["LINEAR_API_KEY"];
+    };
+  };
 }
