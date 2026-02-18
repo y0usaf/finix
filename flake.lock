@@ -50,16 +50,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1771007688,
-        "narHash": "sha256-x+YTmIR9ZZIqqe360EN8vlwcL/IlfDXVw7g0OGodfTA=",
+        "lastModified": 1771339682,
+        "narHash": "sha256-tFKrkKY2haJPB7/yU+hlXmK+VpNfmXpHffA3cRlFnts=",
         "owner": "y0usaf",
-        "repo": "codex-desktop-linux",
-        "rev": "38ebb03c441fd0e1f83c491c2d012bca270617c7",
+        "repo": "Codex-Desktop-Nix",
+        "rev": "f6cee2f5bb9c35abdf5d1301892cee66e18d2d80",
         "type": "github"
       },
       "original": {
         "owner": "y0usaf",
-        "repo": "codex-desktop-linux",
+        "repo": "Codex-Desktop-Nix",
         "type": "github"
       }
     },
@@ -317,16 +317,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1770770645,
-        "narHash": "sha256-HT2ZQqXzjUTLl+wXwGRnb31UWA1ZyKfIYA2oBwEfcLw=",
-        "owner": "y0usaf",
+        "lastModified": 1771337590,
+        "narHash": "sha256-pbW8l1DHH6wf2Li5b6pcmRFzgA/B39tz71ipKUnR2jg=",
+        "owner": "cjpais",
         "repo": "Handy",
-        "rev": "f736b72544309e272c95818110f17e6b03c78017",
+        "rev": "cbc80802cbf1e313136e585c44f61e91cee470f0",
         "type": "github"
       },
       "original": {
-        "owner": "y0usaf",
-        "ref": "fix/nix-native-build",
+        "owner": "cjpais",
         "repo": "Handy",
         "type": "github"
       }
