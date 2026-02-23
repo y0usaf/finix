@@ -73,7 +73,7 @@
     };
 
     codex-desktop-linux = {
-      url = "github:y0usaf/Codex-Desktop-Nix";
+      url = "github:y0usaf/codex-desktop-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
