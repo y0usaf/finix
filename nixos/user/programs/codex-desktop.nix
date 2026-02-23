@@ -6,7 +6,12 @@
   ...
 }: let
   cfg = config.user.programs.codex-desktop;
-  codex-desktop = flakeInputs.codex-desktop-linux.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  codex-desktop = flakeInputs.codex-desktop-linux.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (_: {
+    src = pkgs.fetchurl {
+      url = "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg";
+      hash = "sha256-0YLr6GnCilNGmpZ27CDH7bTzkYZ5wIh6ILFvGaNBfhs=";
+    };
+  });
 in {
   options.user.programs.codex-desktop = {
     enable = lib.mkEnableOption "Codex Desktop (OpenAI Codex app for Linux)";
