@@ -20,7 +20,8 @@ in {
       ".codex/config.toml" = {
         generator = tomlGenerator;
         value =
-          config.user.dev.codex.settings
+          codexConfig.settings
+          // config.user.dev.codex.settings
           // {
             inherit (config.user.dev.codex) model;
           };
