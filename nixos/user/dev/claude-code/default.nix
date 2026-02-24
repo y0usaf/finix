@@ -33,7 +33,6 @@
       "codex-mcp@y0usaf-marketplace" = false;
       "collab-flow@y0usaf-marketplace" = false;
       "instructify@y0usaf-marketplace" = true;
-      "instructions@y0usaf-marketplace" = true;
       "linear-mcp@y0usaf-marketplace" = true;
       "teams-instruct@y0usaf-marketplace" = false;
       "todowrite-instruct@y0usaf-marketplace" = false;
@@ -86,6 +85,11 @@ in {
 
         ".claude/on-agent-complete.wav" = {
           source = ../../../../lib/claude-code/tuturu.ogg;
+          clobber = true;
+        };
+
+        ".claude/CLAUDE.md" = {
+          text = claudeCodeConfig.instructions;
           clobber = true;
         };
       };

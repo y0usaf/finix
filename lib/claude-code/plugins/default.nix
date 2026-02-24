@@ -4,7 +4,6 @@
   codex-mcp = import ./codex-mcp;
   collab-flow = import ./collab-flow;
   instructify = import ./instructify;
-  instructions = import ./instructions;
   linear-mcp = import ./linear-mcp;
   teams-instruct = import ./teams-instruct;
   todowrite-instruct = import ./todowrite-instruct;
