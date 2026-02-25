@@ -1,6 +1,6 @@
 _: {
   imports = [
-    ./cachix.nix
+    ./substituters.nix
     ./environment.nix
     ./graphical-desktop.nix
     ./lix.nix
