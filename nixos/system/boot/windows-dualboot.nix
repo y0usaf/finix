@@ -22,15 +22,14 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    boot.loader.limine.extraEntries = let
-      locator =
-        if cfg.windowsEfiPartuuid != null
-        then "uuid(${cfg.windowsEfiPartuuid})"
-        else "boot()";
-    in ''
+    boot.loader.limine.extraEntries = ''
       /+Windows Boot Manager
         protocol: chainload
-        path: ${locator}:/EFI/Microsoft/Boot/bootmgfw.efi
+        path: ${
+        if cfg.windowsEfiPartuuid != null
+        then "uuid(${cfg.windowsEfiPartuuid})"
+        else "boot()"
+      }:/EFI/Microsoft/Boot/bootmgfw.efi
     '';
 
     environment.systemPackages = [
