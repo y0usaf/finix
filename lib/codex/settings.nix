@@ -2,6 +2,7 @@
   approval_policy = "never";
   sandbox_mode = "danger-full-access";
   features = {
+    multi_agent = true;
     steer = true;
     unified_exec = true;
   };
