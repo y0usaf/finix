@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  shellIntegrationLib = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
-in {
+}: {
   config = lib.mkIf config.user.shell.zellij.enable {
     home-manager.users.${config.user.name} = {
       programs.zellij = {
@@ -44,7 +42,7 @@ in {
           '';
         };
         ".config/zsh/zellij.zsh" = lib.mkIf (config.user.shell.zellij.autoStart && config.user.shell.zsh.enable) {
-          text = shellIntegrationLib.shellIntegration;
+          text = (import ../../../../lib/shell/zellij/config.nix {inherit lib;}).shellIntegration;
         };
         ".config/zellij/layouts/zjstatus.kdl" = lib.mkIf (config.user.shell.zellij.enable && config.user.shell.zellij.zjstatus.enable) {
           text = config.user.shell.zellij.zjstatus.layout;
