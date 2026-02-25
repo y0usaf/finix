@@ -133,8 +133,8 @@ in {
     dev = {
       claude-code = {
         enable = true;
-        model = "haiku";
-        subagentModel = "haiku";
+        model = "sonnet";
+        subagentModel = "sonnet";
       };
       codex = {
         enable = true;
