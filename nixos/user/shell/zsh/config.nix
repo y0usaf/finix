@@ -73,10 +73,8 @@
         }
         // lib.optionalAttrs config.user.shell.zellij.enable {
           ".config/zsh/zellij.zsh" = {
-            text = let
-              zellijConfig = import ../../../../lib/shell/zellij/config.nix {inherit lib;};
-            in
-              zellijConfig.shellChecks
+            text =
+              (import ../../../../lib/shell/zellij/config.nix {inherit lib;}).shellChecks
               + ''
                 # Start Zellij
                 if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then

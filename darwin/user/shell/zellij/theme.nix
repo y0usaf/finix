@@ -1,5 +1,3 @@
-{genLib, ...}: let
-  sharedTheme = import ../../../../lib/shell/zellij/theme.nix {};
-in {
-  config.user.shell.zellij.themeConfig = genLib.toKDL sharedTheme;
+{genLib, ...}: {
+  config.user.shell.zellij.themeConfig = genLib.toKDL (import ../../../../lib/shell/zellij/theme.nix {});
 }

@@ -2,11 +2,7 @@
   config,
   pkgs,
   ...
-}: let
-  commonAliases = import ../../../lib/shell/zsh/common-aliases.nix null;
-  darwinAliases = import ../../../lib/shell/zsh/darwin-aliases.nix null;
-  allAliases = commonAliases // darwinAliases;
-in {
+}: {
   home-manager.users.${config.user.name} = {
     programs.zsh = {
       enable = true;
@@ -15,7 +11,9 @@ in {
         export NH_DARWIN_FLAKE="${config.user.homeDirectory}/nixos"
       '';
 
-      shellAliases = allAliases;
+      shellAliases =
+        (import ../../../lib/shell/zsh/common-aliases.nix null)
+        // (import ../../../lib/shell/zsh/darwin-aliases.nix null);
 
       initContent = ''
         HISTFILE="$HOME/.zsh_history"

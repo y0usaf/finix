@@ -36,8 +36,8 @@
         "$mod SHIFT, S, swapactiveworkspaces, DP-4 HDMI-A-2"
         "$mod, S, movecurrentworkspacetomonitor, +1"
       ]
-      (lib.lists.forEach ["h" "j" "k" "l"] (key: let
-        direction =
+      (lib.lists.forEach ["h" "j" "k" "l"] (key: [
+        "$mod, ${key}, movefocus, ${
           {
             "k" = "u";
             "h" = "l";
@@ -46,16 +46,23 @@
           }
           .${
             key
-          };
-      in [
-        "$mod, ${key}, movefocus, ${direction}"
-        "$mod SHIFT, ${key}, movewindow, ${direction}"
+          }
+        }"
+        "$mod SHIFT, ${key}, movewindow, ${
+          {
+            "k" = "u";
+            "h" = "l";
+            "j" = "d";
+            "l" = "r";
+          }
+          .${
+            key
+          }
+        }"
       ]))
-      (lib.lists.forEach (lib.range 1 9) (i: let
-        num = toString i;
-      in [
-        "$mod2, ${num}, workspace, ${num}"
-        "$mod2 SHIFT, ${num}, movetoworkspacesilent, ${num}"
+      (lib.lists.forEach (lib.range 1 9) (i: [
+        "$mod2, ${toString i}, workspace, ${toString i}"
+        "$mod2 SHIFT, ${toString i}, movetoworkspacesilent, ${toString i}"
       ]))
 
       [

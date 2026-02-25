@@ -40,18 +40,15 @@ in {
             clobber = true;
           };
           # Pywalfox native messaging host for dynamic theme updates
-          ".librewolf/native-messaging-hosts/pywalfox.json".text = let
-            pywalfoxWrapper = pkgs.writeShellScript "pywalfox-wrapper" ''
+          ".librewolf/native-messaging-hosts/pywalfox.json".text = builtins.toJSON {
+            name = "pywalfox";
+            description = "Native messaging host for Pywalfox";
+            path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
               exec ${pkgs.pywalfox-native}/bin/pywalfox start
-            '';
-          in
-            builtins.toJSON {
-              name = "pywalfox";
-              description = "Native messaging host for Pywalfox";
-              path = "${pywalfoxWrapper}";
-              type = "stdio";
-              allowed_extensions = ["pywalfox@frewacom.org"];
-            };
+            ''}";
+            type = "stdio";
+            allowed_extensions = ["pywalfox@frewacom.org"];
+          };
         }
         // lib.optionalAttrs config.user.shell.zsh.enable {
           ".config/zsh/.zprofile" = {

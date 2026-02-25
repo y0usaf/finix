@@ -3,25 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  basePackages = [
-    pkgs.git
-    pkgs.curl
-    pkgs.wget
-    pkgs.cachix
-    pkgs.unzip
-    pkgs.bash
-    pkgs.lsd
-    pkgs.tree
-    pkgs.psmisc
-    pkgs.dconf
-    pkgs.lm_sensors
-    pkgs.networkmanager
-    pkgs.fzf
-    pkgs.ripgrep
-    pkgs.udiskie
-  ];
-in {
+}: {
   options.user.packages = {
     extraPackages = lib.mkOption {
       type = lib.types.listOf lib.types.package;
@@ -30,6 +12,24 @@ in {
     };
   };
   config = {
-    environment.systemPackages = basePackages ++ config.user.packages.extraPackages;
+    environment.systemPackages =
+      [
+        pkgs.git
+        pkgs.curl
+        pkgs.wget
+        pkgs.cachix
+        pkgs.unzip
+        pkgs.bash
+        pkgs.lsd
+        pkgs.tree
+        pkgs.psmisc
+        pkgs.dconf
+        pkgs.lm_sensors
+        pkgs.networkmanager
+        pkgs.fzf
+        pkgs.ripgrep
+        pkgs.udiskie
+      ]
+      ++ config.user.packages.extraPackages;
   };
 }
