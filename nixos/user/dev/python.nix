@@ -10,7 +10,6 @@
   config = lib.mkIf config.user.dev.python.enable {
     environment.systemPackages = [
       pkgs.python3
-      pkgs.python312
       pkgs.uv
       pkgs.ninja
       pkgs.meson
@@ -48,7 +47,6 @@
           export CC="${pkgs.gcc}/bin/gcc"
           export LD="${pkgs.binutils}/bin/ld"
           export PATH="$PYTHONUSERBASE/bin:$PATH"
-          export PYTHONPATH="$PYTHONUSERBASE/lib/python3.12/site-packages:$PYTHONPATH"
         '';
       };
       ".config/zsh/.zshrc" = {
