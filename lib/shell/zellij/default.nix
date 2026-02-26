@@ -1,6 +1,4 @@
-{lib, ...}: let
-  cfg = import ./config.nix {inherit lib;};
-in {
+{lib, ...}: {
   imports = [
     ./options.nix
   ];
@@ -10,11 +8,11 @@ in {
       layout {
         default_tab_template {
           pane size=1 borderless=true {
-            ${cfg.zjstatus.zjstatusTopBar}
+            ${(import ./config.nix {inherit lib;}).zjstatus.zjstatusTopBar}
           }
           children
           pane size=1 borderless=true {
-            ${cfg.zjstatus.zjstatusHintsBar}
+            ${(import ./config.nix {inherit lib;}).zjstatus.zjstatusHintsBar}
           }
         }
       }
