@@ -53,7 +53,7 @@
         create = false;
       };
       wallpapers = {
-        static.path = "/home/y0usaf/DCIM/Wallpapers/32_9";
+        static.path = "/home/y0usaf/DCIM/Wallpapers/32_9/dark";
         video.path = "/home/y0usaf/DCIM/Wallpapers_Video";
       };
       bookmarks = [
