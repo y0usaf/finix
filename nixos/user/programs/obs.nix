@@ -4,9 +4,7 @@
   lib,
   flakeInputs,
   ...
-}: let
-  inherit (pkgs.stdenv.hostPlatform) system;
-in {
+}: {
   options.user.programs.obs = {
     enable = lib.mkEnableOption "OBS Studio";
     backgroundRemoval.enable = lib.mkEnableOption "OBS background removal plugin";
@@ -26,7 +24,7 @@ in {
                 pkgs.obs-studio-plugins.obs-aitum-multistream
                 pkgs.obs-studio-plugins.obs-vertical-canvas
                 pkgs.obs-studio-plugins.obs-scale-to-sound
-                flakeInputs.obs-image-reaction.outputs.packages.${system}.default
+                flakeInputs.obs-image-reaction.outputs.packages.${pkgs.stdenv.hostPlatform.system}.default
               ];
           })
         ];
