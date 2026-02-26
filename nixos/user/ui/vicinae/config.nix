@@ -4,9 +4,8 @@
   pkgs,
   ...
 }: let
-  cfg = config.user.ui.vicinae;
   baseFontSize = 10.5;
-  scaledFontSize = baseFontSize * cfg.scale;
+  scaledFontSize = baseFontSize * config.user.ui.vicinae.scale;
   vicinaeConfig = {
     # Vicinae defaults from config-service.hpp (with custom overrides)
     closeOnFocusLoss = false;
@@ -14,7 +13,7 @@
     faviconService = "twenty"; # custom (default: "google")
     font = {
       size = scaledFontSize; # custom scaling (default: 10.5)
-      normal = cfg.fontName; # use main font from user.ui.fonts
+      normal = config.user.ui.vicinae.fontName; # use main font from user.ui.fonts
     };
     keybinding = "default";
     keybinds = {};
@@ -33,12 +32,12 @@
     };
   };
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.user.ui.vicinae.enable {
     environment.systemPackages = [pkgs.vicinae];
 
     # Vicinae configuration via hjem
     usr.files.".config/vicinae/vicinae.json" = {
-      text = builtins.toJSON (lib.recursiveUpdate vicinaeConfig cfg.extraConfig);
+      text = builtins.toJSON (lib.recursiveUpdate vicinaeConfig config.user.ui.vicinae.extraConfig);
     };
 
     # Note: Wallust will generate the wallust-auto.toml theme based on colorscheme

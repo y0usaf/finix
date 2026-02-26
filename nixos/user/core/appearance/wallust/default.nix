@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  cfg = config.user.appearance.wallust;
   wallustLib = import ../../../../../lib/appearance/wallust {inherit lib;};
   files = wallustLib.mkFiles {
     zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
@@ -45,7 +44,7 @@ in {
         Type = "oneshot";
         ExecStart = pkgs.writeShellScript "wallust-default" (wallustLib.mkStartupScript {
           wallustBin = "${pkgs.wallust}/bin/wallust";
-          inherit (cfg) defaultTheme;
+          inherit (config.user.appearance.wallust) defaultTheme;
         });
         RemainAfterExit = true;
       };

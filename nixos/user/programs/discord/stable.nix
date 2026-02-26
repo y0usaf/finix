@@ -5,7 +5,6 @@
   ...
 }: let
   inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf;
-  cfg = config.user.programs.discord.stable;
 
   disableFeatures = [
     "WebRtcAllowInputVolumeAdjustment"
@@ -21,11 +20,11 @@
     ++ optionals (disableFeatures != []) [
       "--disable-features=${concatStringsSep "," disableFeatures}"
     ]
-    ++ optionals (!cfg.smoothScroll) [
+    ++ optionals (!config.user.programs.discord.stable.smoothScroll) [
       "--disable-smooth-scrolling"
     ];
 
-  commandLineArgs = concatStringsSep " " (gpuArgs ++ cfg.extraArgs);
+  commandLineArgs = concatStringsSep " " (gpuArgs ++ config.user.programs.discord.stable.extraArgs);
 in {
   options.user.programs.discord.stable = {
     enable = mkEnableOption "Discord stable";
@@ -42,7 +41,7 @@ in {
       // {default = true;};
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf config.user.programs.discord.stable.enable {
     environment.systemPackages = [
       (pkgs.discord.override {
         inherit commandLineArgs;
@@ -60,7 +59,7 @@ in {
           SKIP_HOST_UPDATE = true;
           UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord";
           NEW_UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord/";
-          MINIMIZE_TO_TRAY = cfg.minimizeToTray;
+          MINIMIZE_TO_TRAY = config.user.programs.discord.stable.minimizeToTray;
           OPEN_ON_STARTUP = false;
           DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
           enableHardwareAcceleration = false;

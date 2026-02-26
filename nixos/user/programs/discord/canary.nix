@@ -5,7 +5,6 @@
   ...
 }: let
   inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf;
-  cfg = config.user.programs.discord.canary;
 
   disableFeatures = [
     "WebRtcAllowInputVolumeAdjustment"
@@ -21,11 +20,11 @@
     ++ optionals (disableFeatures != []) [
       "--disable-features=${concatStringsSep "," disableFeatures}"
     ]
-    ++ optionals (!cfg.smoothScroll) [
+    ++ optionals (!config.user.programs.discord.canary.smoothScroll) [
       "--disable-smooth-scrolling"
     ];
 
-  commandLineArgs = concatStringsSep " " (gpuArgs ++ cfg.extraArgs);
+  commandLineArgs = concatStringsSep " " (gpuArgs ++ config.user.programs.discord.canary.extraArgs);
 in {
   options.user.programs.discord.canary = {
     enable = mkEnableOption "Discord Canary";
@@ -42,7 +41,7 @@ in {
       // {default = true;};
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf config.user.programs.discord.canary.enable {
     environment.systemPackages = [
       (pkgs.discord-canary.override {
         inherit commandLineArgs;
@@ -59,7 +58,7 @@ in {
         SKIP_HOST_UPDATE = true;
         UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord";
         NEW_UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord/";
-        MINIMIZE_TO_TRAY = cfg.minimizeToTray;
+        MINIMIZE_TO_TRAY = config.user.programs.discord.canary.minimizeToTray;
         OPEN_ON_STARTUP = false;
         DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
         enableHardwareAcceleration = false;

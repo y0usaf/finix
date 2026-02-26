@@ -2,19 +2,17 @@
   config,
   lib,
   ...
-}: let
-  inherit (config.user) defaults;
-in {
+}: {
   config = lib.mkIf config.user.ui.niri.enable {
     usr.files.".config/niri/config.kdl".value.binds = {
       "Mod+Shift+Slash" = {show-hotkey-overlay = {};};
       "Mod+Shift+E" = {quit = {};};
       "Mod+O" = {toggle-overview = {};};
 
-      "Mod+T" = {spawn = defaults.terminal;};
-      "Super+R" = {spawn = ["sh" "-c" defaults.launcher];};
-      "Mod+E" = {spawn = defaults.fileManager;};
-      "Super+Shift+O" = {spawn = "${defaults.terminal} -e ${defaults.editor}";};
+      "Mod+T" = {spawn = config.user.defaults.terminal;};
+      "Super+R" = {spawn = ["sh" "-c" config.user.defaults.launcher];};
+      "Mod+E" = {spawn = config.user.defaults.fileManager;};
+      "Super+Shift+O" = {spawn = "${config.user.defaults.terminal} -e ${config.user.defaults.editor}";};
 
       "Mod+Q" = {close-window = {};};
       "Mod+F" = {maximize-column = {};};
@@ -76,8 +74,8 @@ in {
       "Mod+BracketLeft" = {consume-or-expel-window-left = {};};
       "Mod+BracketRight" = {consume-or-expel-window-right = {};};
 
-      "Mod+1" = {spawn = defaults.ide;};
-      "Mod+2" = {spawn = defaults.browser;};
+      "Mod+1" = {spawn = config.user.defaults.ide;};
+      "Mod+2" = {spawn = config.user.defaults.browser;};
       "Mod+3" = {spawn = "discord";};
       "Mod+4" = {spawn = "steam";};
       "Mod+5" = {spawn = "obs";};
