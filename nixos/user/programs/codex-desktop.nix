@@ -5,7 +5,6 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.programs.codex-desktop;
   codex-desktop = flakeInputs.codex-desktop-linux.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (_: {
     src = pkgs.fetchurl {
       url = "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg";
@@ -26,11 +25,11 @@ in {
     '';
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.user.programs.codex-desktop.enable {
     environment.systemPackages = [
       codex-desktop
       (pkgs.writeShellScriptBin "codex-desktop-launcher" ''
-        ${lib.optionalString cfg.useWayland ''
+        ${lib.optionalString config.user.programs.codex-desktop.useWayland ''
           export NIXOS_OZONE_WL=1
           export ELECTRON_OZONE_PLATFORM_HINT=wayland
         ''}
@@ -38,7 +37,7 @@ in {
       '')
     ];
 
-    user.dev.codex = lib.mkIf cfg.yoloMode {
+    user.dev.codex = lib.mkIf config.user.programs.codex-desktop.yoloMode {
       enable = lib.mkDefault true;
       settings.approval_policy = lib.mkForce "never";
       settings.sandbox_mode = lib.mkForce "danger-full-access";

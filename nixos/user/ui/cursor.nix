@@ -5,10 +5,9 @@
   flakeInputs,
   ...
 }: let
-  inherit (pkgs.stdenv.hostPlatform) system;
   x11ThemeName = "SSB-x11";
-  xcursorPackage = flakeInputs.cursors.packages.${system}."ssb-xcursor";
-  hyprcursorPackage = flakeInputs.cursors.packages.${system}."deepin-dark-hyprcursor";
+  xcursorPackage = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}."ssb-xcursor";
+  hyprcursorPackage = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}."deepin-dark-hyprcursor";
 in {
   options.user.ui.cursor = {
     enable = lib.mkOption {
