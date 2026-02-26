@@ -59,6 +59,8 @@
       bookmarks = [
         "file:///home/y0usaf/Downloads Downloads"
         "file:///home/y0usaf/Documents Documents"
+        "file:///home/y0usaf/Dev Dev"
+        "file:///home/y0usaf/Dev/Cookunity CookUnity"
         "file:///home/y0usaf/Music Music"
         "file:///home/y0usaf/DCIM Pictures"
         "file:///home/y0usaf/nixos NixOS"
