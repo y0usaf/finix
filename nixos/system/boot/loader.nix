@@ -3,7 +3,7 @@ _: {
     boot.loader = {
       limine = {
         enable = true;
-        maxGenerations = 20;
+        maxGenerations = 5;
         secureBoot.enable = true;
       };
       efi = {
