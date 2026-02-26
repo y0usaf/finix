@@ -4,8 +4,6 @@ lib: let
   inherit (lib.strings) concatStringsSep concatMapStringsSep;
 
   toNiriconf = attrs: let
-    kdlGenerator = import ./toKDL.nix {inherit lib;};
-
     formatOutput = name: config: let
       position =
         if hasAttr "position" config
@@ -40,9 +38,9 @@ lib: let
       then concatStringsSep "\n" (map formatSpawnCmd attrs.spawn-at-startup)
       else "";
 
-    specialAttrs = ["output" "spawn-at-startup" "_extraConfig"];
-    mainAttrs = lib.filterAttrs (k: _: !lib.elem k specialAttrs) attrs;
-    mainConfig = kdlGenerator.toKDL mainAttrs;
+    mainConfig = (import ./toKDL.nix {inherit lib;}).toKDL (
+      lib.filterAttrs (k: _: !lib.elem k ["output" "spawn-at-startup" "_extraConfig"]) attrs
+    );
 
     extraConfig =
       if hasAttr "_extraConfig" attrs

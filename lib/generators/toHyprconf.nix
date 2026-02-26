@@ -22,8 +22,6 @@ lib: let
       hasPrefix
       ;
 
-    initialIndent = concatStrings (replicate indentLevel "  ");
-
     toHyprconf' = indent: attrs: let
       sections = filterAttrs (_: v: isAttrs v || (isList v && all isAttrs v)) attrs;
 
@@ -58,18 +56,18 @@ lib: let
       + concatStringsSep "\n" (mapAttrsToList mkSection sections)
       + mkFields fields;
   in
-    toHyprconf' initialIndent attrs;
+    toHyprconf' (concatStrings (replicate indentLevel "  ")) attrs;
 
   pluginsToHyprconf = plugins: importantPrefixes:
     toHyprconf {
       attrs = {
-        plugin = let
-          mkEntry = entry:
+        plugin =
+          map
+          (entry:
             if lib.types.package.check entry
             then "${entry}/lib/lib${entry.pname}.so"
-            else entry;
-        in
-          map mkEntry plugins;
+            else entry)
+          plugins;
       };
       inherit importantPrefixes;
     };
