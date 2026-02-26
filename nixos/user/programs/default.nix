@@ -16,6 +16,7 @@ _: {
     ./pcmanfm.nix
     ./qbittorrent.nix
     ./slack.nix
+    ./stoat-desktop.nix
     ./stremio.nix
     ./tui-launcher.nix
     ./webapps.nix
