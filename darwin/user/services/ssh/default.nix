@@ -1,7 +1,5 @@
 {config, ...}: let
-  sharedSsh = import ../../../../lib/ssh;
-  inherit (sharedSsh) hosts;
-  inherit (sharedSsh) defaults;
+  inherit (import ../../../../lib/ssh) hosts defaults;
   identityFile = "${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}";
 in {
   home-manager.users.${config.user.name}.programs.ssh = {
