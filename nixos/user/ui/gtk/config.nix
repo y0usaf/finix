@@ -4,13 +4,11 @@
   pkgs,
   ...
 }: let
-  scaleFactor = config.user.ui.gtk.scale;
-
   gtk3Settings = {
     Settings = {
       gtk-application-prefer-dark-theme = 1;
       gtk-cursor-theme-name = "SSB-x11";
-      gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
+      gtk-cursor-theme-size = toString (builtins.floor (24 * config.user.ui.gtk.scale));
       gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.baseFontSize}";
       gtk-xft-antialias = 1;
       gtk-xft-dpi = toString config.user.appearance.dpi;
@@ -24,7 +22,7 @@
     Settings = {
       gtk-application-prefer-dark-theme = 1;
       gtk-cursor-theme-name = "SSB-x11";
-      gtk-cursor-theme-size = toString (builtins.floor (24 * scaleFactor));
+      gtk-cursor-theme-size = toString (builtins.floor (24 * config.user.ui.gtk.scale));
       gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.baseFontSize}";
     };
   };
@@ -60,8 +58,8 @@ in {
           ".config/zsh/.zshenv" = {
             clobber = true;
             text = lib.mkAfter ''
-              export XCURSOR_SIZE="${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * scaleFactor)))}"
-              export GDK_DPI_SCALE="${toString scaleFactor}"
+              export XCURSOR_SIZE="${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * config.user.ui.gtk.scale)))}"
+              export GDK_DPI_SCALE="${toString config.user.ui.gtk.scale}"
             '';
           };
         };

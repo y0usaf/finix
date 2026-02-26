@@ -5,7 +5,6 @@
   ...
 }: let
   wallustLib = import ../../../../lib/appearance/wallust {inherit lib;};
-  files = wallustLib.mkFiles {zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;};
 in {
   options.user.appearance.wallust = {
     enable = lib.mkEnableOption "wallust dynamic theming";
@@ -30,7 +29,9 @@ in {
 
     home-manager.users.${config.user.name} = {
       # Config files via home-manager
-      home.file = lib.mapAttrs (_: content: {text = content;}) files;
+      home.file = lib.mapAttrs (_: content: {text = content;}) (wallustLib.mkFiles {
+        zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
+      });
 
       # launchd agent to apply theme on login
       launchd.agents.wallust-default = {
