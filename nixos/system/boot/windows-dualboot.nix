@@ -2,9 +2,7 @@
   lib,
   config,
   ...
-}: let
-  cfg = config.boot.windowsDualBoot;
-in {
+}: {
   options.boot.windowsDualBoot = {
     enable = lib.mkEnableOption "Windows dual-boot via Limine chainload";
     windowsEfiPartuuid = lib.mkOption {
@@ -15,13 +13,13 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.boot.windowsDualBoot.enable {
     boot.loader.limine.extraEntries = ''
       /+Windows Boot Manager
         protocol: chainload
         path: ${
-        if cfg.windowsEfiPartuuid != null
-        then "uuid(${cfg.windowsEfiPartuuid})"
+        if config.boot.windowsDualBoot.windowsEfiPartuuid != null
+        then "uuid(${config.boot.windowsDualBoot.windowsEfiPartuuid})"
         else "boot()"
       }:/EFI/Microsoft/Boot/bootmgfw.efi
     '';

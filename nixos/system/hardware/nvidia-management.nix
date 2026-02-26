@@ -4,10 +4,8 @@
   lib,
   ...
 }: let
-  cfg = config.hardware.nvidia.management;
-
   nvidiaConfig = builtins.toJSON {
-    inherit (cfg) maxClock minClock coreVoltageOffset memoryVoltageOffset fanCurve fanCurveInterval;
+    inherit (config.hardware.nvidia.management) maxClock minClock coreVoltageOffset memoryVoltageOffset fanCurve fanCurveInterval;
   };
 
   configFile = pkgs.writeText "nvidia-config.json" nvidiaConfig;
@@ -293,7 +291,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.hardware.nvidia.management.enable {
     environment.systemPackages = [nvidiaMgmtScript];
 
     systemd.services.nvidia-management = {
@@ -312,7 +310,7 @@ in {
       };
     };
 
-    systemd.services.nvidia-fan-curve = lib.mkIf (cfg.fanCurve != []) {
+    systemd.services.nvidia-fan-curve = lib.mkIf (config.hardware.nvidia.management.fanCurve != []) {
       description = "NVIDIA GPU Fan Curve Daemon";
       wantedBy = ["multi-user.target"];
       after = ["multi-user.target"];
