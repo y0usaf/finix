@@ -126,6 +126,7 @@
       stremio.enable = true;
       tui-launcher.enable = true;
       slack.enable = true;
+      stoat-desktop.enable = true;
       btop.enable = true;
     };
     dev = {
