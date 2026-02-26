@@ -4,13 +4,11 @@
   genLib,
   ...
 }: let
-  quickshellEnabled = config.user.ui.quickshell.enable or false;
-
   quickshellConfig = {
-    "exec-once" = lib.optionals quickshellEnabled [
+    "exec-once" = lib.optionals (config.user.ui.quickshell.enable or false) [
       "exec quickshell"
     ];
-    bind = lib.optionals quickshellEnabled [
+    bind = lib.optionals (config.user.ui.quickshell.enable or false) [
       "$mod2, TAB, exec, quickshell ipc call workspaces toggle"
     ];
   };

@@ -4,8 +4,7 @@
   pkgs,
   ...
 }: let
-  baseFontSize = 10.5;
-  scaledFontSize = baseFontSize * config.user.ui.vicinae.scale;
+  scaledFontSize = 10.5 * config.user.ui.vicinae.scale;
   vicinaeConfig = {
     # Vicinae defaults from config-service.hpp (with custom overrides)
     closeOnFocusLoss = false;
