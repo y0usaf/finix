@@ -1,12 +1,10 @@
-{lib}: let
-  inherit (builtins) toJSON isBool isInt isString toString;
-in {
+{lib}: {
   # Convert preference value to JSON
   prefValue = pref:
-    toJSON (
-      if isBool pref || isInt pref || isString pref
+    builtins.toJSON (
+      if builtins.isBool pref || builtins.isInt pref || builtins.isString pref
       then pref
-      else toString pref
+      else builtins.toString pref
     );
 
   # Convert attributes to lines with custom formatter

@@ -3,32 +3,7 @@
   pkgs,
   lib,
   ...
-}: let
-  formatScript = pkgs.writeShellScript "format-nix-watcher" ''
-    set -euo pipefail
-
-    WATCH_DIR="${config.user.services.formatNix.watchDirectory}"
-    cd "$WATCH_DIR"
-
-    echo "Watching $WATCH_DIR for .nix updates"
-
-    ${pkgs.inotify-tools}/bin/inotifywait \
-      -m \
-      -r \
-      -e close_write \
-      --format '%w%f' \
-      "$WATCH_DIR" | while read -r file; do
-        case "$file" in
-          *.nix)
-            echo "Formatting $file"
-            if ! ${pkgs.alejandra}/bin/alejandra "$file"; then
-              echo "alejandra failed for $file" >&2
-            fi
-            ;;
-        esac
-      done
-  '';
-in {
+}: {
   options.user.services.formatNix = {
     enable = lib.mkEnableOption "automatic Nix file formatting with alejandra";
     watchDirectory = lib.mkOption {
@@ -48,7 +23,30 @@ in {
 
       serviceConfig = {
         Type = "simple";
-        ExecStart = formatScript;
+        ExecStart = pkgs.writeShellScript "format-nix-watcher" ''
+          set -euo pipefail
+
+          WATCH_DIR="${config.user.services.formatNix.watchDirectory}"
+          cd "$WATCH_DIR"
+
+          echo "Watching $WATCH_DIR for .nix updates"
+
+          ${pkgs.inotify-tools}/bin/inotifywait \
+            -m \
+            -r \
+            -e close_write \
+            --format '%w%f' \
+            "$WATCH_DIR" | while read -r file; do
+              case "$file" in
+                *.nix)
+                  echo "Formatting $file"
+                  if ! ${pkgs.alejandra}/bin/alejandra "$file"; then
+                    echo "alejandra failed for $file" >&2
+                  fi
+                  ;;
+              esac
+            done
+        '';
         Restart = "on-failure";
         RestartSec = "2";
       };
