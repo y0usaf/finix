@@ -57,7 +57,20 @@
     minClock = 1000;
     coreVoltageOffset = -100;
     memoryVoltageOffset = -100;
-    fanSpeed = 60;
+    fanCurve = [
+      {
+        temp = 50;
+        speed = 0;
+      }
+      {
+        temp = 75;
+        speed = 50;
+      }
+      {
+        temp = 90;
+        speed = 70;
+      }
+    ];
   };
   user.gaming.proton.ntsync = true;
   services = {
