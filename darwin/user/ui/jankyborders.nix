@@ -3,9 +3,7 @@
   lib,
   ...
 }:
-with lib; let
-  cfg = config.user.ui.jankyborders;
-in {
+with lib; {
   options.user.ui.jankyborders = {
     enable = mkEnableOption "jankyborders window borders";
 
@@ -30,7 +28,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf config.user.ui.jankyborders.enable {
     home-manager.users.${config.user.name} = {
       home.file.".config/borders/bordersrc" = {
         executable = true;
@@ -38,11 +36,11 @@ in {
           #!/bin/bash
 
           options=(
-              style=${cfg.style}
-              width=${toString cfg.width}
+              style=${config.user.ui.jankyborders.style}
+              width=${toString config.user.ui.jankyborders.width}
               hidpi=off
-              active_color=${cfg.activeColor}
-              inactive_color=${cfg.inactiveColor}
+              active_color=${config.user.ui.jankyborders.activeColor}
+              inactive_color=${config.user.ui.jankyborders.inactiveColor}
           )
 
           borders "''${options[@]}"

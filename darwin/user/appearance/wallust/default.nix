@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  cfg = config.user.appearance.wallust;
   wallustLib = import ../../../../lib/appearance/wallust {inherit lib;};
   files = wallustLib.mkFiles {zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;};
 in {
@@ -18,7 +17,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.user.appearance.wallust.enable {
     environment.systemPackages = [
       pkgs.wallust
       # Wrapper script: runs wallust and updates pywalfox
@@ -43,7 +42,7 @@ in {
             "-c"
             (wallustLib.mkStartupScript {
               wallustBin = "${pkgs.wallust}/bin/wallust";
-              inherit (cfg) defaultTheme;
+              inherit (config.user.appearance.wallust) defaultTheme;
             })
           ];
           RunAtLoad = true;
