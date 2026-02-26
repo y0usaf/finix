@@ -4,11 +4,9 @@
   lib,
   ...
 }: let
-  nvidiaConfig = builtins.toJSON {
+  configFile = pkgs.writeText "nvidia-config.json" (builtins.toJSON {
     inherit (config.hardware.nvidia.management) maxClock minClock coreVoltageOffset memoryVoltageOffset fanCurve fanCurveInterval;
-  };
-
-  configFile = pkgs.writeText "nvidia-config.json" nvidiaConfig;
+  });
 
   nvidiaMgmtScript =
     pkgs.writers.writePython3Bin "nvidia-management" {

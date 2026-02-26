@@ -5,13 +5,6 @@
   ...
 }: let
   wallustLib = import ../../../../../lib/appearance/wallust {inherit lib;};
-  files = wallustLib.mkFiles {
-    zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
-    niriEnabled = config.user.ui.niri.enable or false;
-    vicinaeEnabled = config.user.ui.vicinae.enable or false;
-    cmusEnabled = config.user.programs.cmus.enable or false;
-    vestopkEnabled = config.user.programs.discord.vesktop.enable or false;
-  };
 in {
   options.user.appearance.wallust = {
     defaultTheme = lib.mkOption {
@@ -51,6 +44,12 @@ in {
     };
 
     # Config files via hjem
-    usr.files = lib.mapAttrs (_: content: {text = content;}) files;
+    usr.files = lib.mapAttrs (_: content: {text = content;}) (wallustLib.mkFiles {
+      zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
+      niriEnabled = config.user.ui.niri.enable or false;
+      vicinaeEnabled = config.user.ui.vicinae.enable or false;
+      cmusEnabled = config.user.programs.cmus.enable or false;
+      vestopkEnabled = config.user.programs.discord.vesktop.enable or false;
+    });
   };
 }
