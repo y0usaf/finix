@@ -4,8 +4,10 @@
   lib,
   ...
 }: let
+  cfg = config.hardware.nvidia.management;
+
   nvidiaConfig = builtins.toJSON {
-    inherit (config.hardware.nvidia.management) maxClock minClock coreVoltageOffset memoryVoltageOffset fanSpeed;
+    inherit (cfg) maxClock minClock coreVoltageOffset memoryVoltageOffset fanCurve fanCurveInterval;
   };
 
   configFile = pkgs.writeText "nvidia-config.json" nvidiaConfig;
@@ -16,10 +18,16 @@
     } ''
       import argparse
       import json
+      import signal
       import sys
+      import time
       from pathlib import Path
       from pynvml import (
+          NVML_TEMPERATURE_GPU,
           nvmlDeviceGetHandleByIndex,
+          nvmlDeviceGetNumFans,
+          nvmlDeviceGetTemperature,
+          nvmlDeviceSetDefaultFanSpeed_v2,
           nvmlDeviceSetFanSpeed_v2,
           nvmlDeviceSetGpcClkVfOffset,
           nvmlDeviceSetGpuLockedClocks,
@@ -66,12 +74,6 @@
               nvmlDeviceSetMemClkVfOffset(handle, mem_offset)
               print(f"✓ Set memory voltage offset to {mem_offset} mV")
 
-          fan_speed = config.get("fanSpeed")
-          if fan_speed is not None:
-              validate_fan_speed(fan_speed)
-              nvmlDeviceSetFanSpeed_v2(handle, 0, fan_speed)
-              print(f"✓ Set fan speed to {fan_speed}%")
-
           print("NVIDIA management applied successfully")
 
 
@@ -83,6 +85,20 @@
       def validate_voltage(offset: int):
           if not -200 <= offset <= 100:
               raise ValueError("Voltage offset must be between -200 and 100 mV")
+
+
+      def interpolate_fan_speed(curve: list, temp: int) -> int:
+          if temp <= curve[0]["temp"]:
+              return curve[0]["speed"]
+          if temp >= curve[-1]["temp"]:
+              return curve[-1]["speed"]
+          for i in range(len(curve) - 1):
+              lo = curve[i]
+              hi = curve[i + 1]
+              if lo["temp"] <= temp <= hi["temp"]:
+                  ratio = (temp - lo["temp"]) / (hi["temp"] - lo["temp"])
+                  return int(lo["speed"] + ratio * (hi["speed"] - lo["speed"]))
+          return curve[-1]["speed"]
 
 
       def cmd_apply(_args):
@@ -112,6 +128,49 @@
           handle = init_handle()
           nvmlDeviceSetMemClkVfOffset(handle, offset)
           print(f"✓ Set memory voltage offset to {offset} mV")
+
+
+      def cmd_watch(_args):
+          config = load_config(CONFIG_PATH)
+          curve = sorted(config.get("fanCurve", []), key=lambda p: p["temp"])
+          interval = config.get("fanCurveInterval", 5)
+
+          if not curve:
+              print("No fan curve configured", file=sys.stderr)
+              sys.exit(1)
+
+          handle = init_handle()
+          num_fans = nvmlDeviceGetNumFans(handle)
+          running = True
+
+          def handle_signal(signum, frame):
+              nonlocal running
+              running = False
+
+          signal.signal(signal.SIGTERM, handle_signal)
+          signal.signal(signal.SIGINT, handle_signal)
+
+          print(f"Starting fan curve daemon (interval={interval}s, fans={num_fans})")
+
+          while running:
+              temp = nvmlDeviceGetTemperature(handle, NVML_TEMPERATURE_GPU)
+              target_speed = interpolate_fan_speed(curve, temp)
+              for i in range(num_fans):
+                  nvmlDeviceSetFanSpeed_v2(handle, i, target_speed)
+              print(f"Temp: {temp}C -> Fan: {target_speed}%")
+              time.sleep(interval)
+
+          for i in range(num_fans):
+              nvmlDeviceSetDefaultFanSpeed_v2(handle, i)
+          print("Fan control restored to automatic")
+
+
+      def cmd_fan_restore(_args):
+          handle = init_handle()
+          num_fans = nvmlDeviceGetNumFans(handle)
+          for i in range(num_fans):
+              nvmlDeviceSetDefaultFanSpeed_v2(handle, i)
+          print(f"Restored {num_fans} fan(s) to automatic control")
 
 
       def build_parser():
@@ -160,6 +219,18 @@
           )
           mem_parser.set_defaults(func=cmd_mem_voltage)
 
+          watch_parser = sub.add_parser(
+              "watch",
+              help="Run temperature-reactive fan curve daemon"
+          )
+          watch_parser.set_defaults(func=cmd_watch)
+
+          restore_parser = sub.add_parser(
+              "fan-restore",
+              help="Restore fans to automatic control"
+          )
+          restore_parser.set_defaults(func=cmd_fan_restore)
+
           return parser
 
 
@@ -199,14 +270,30 @@ in {
       default = null;
       description = "Memory voltage offset in mV (negative = undervolt)";
     };
-    fanSpeed = lib.mkOption {
-      type = lib.types.nullOr lib.types.int;
-      default = null;
-      description = "Fan speed percentage (0-100), null for auto";
+    fanCurve = lib.mkOption {
+      type = lib.types.listOf (lib.types.submodule {
+        options = {
+          temp = lib.mkOption {
+            type = lib.types.int;
+            description = "GPU temperature in °C";
+          };
+          speed = lib.mkOption {
+            type = lib.types.int;
+            description = "Fan speed percentage";
+          };
+        };
+      });
+      default = [];
+      description = "Fan curve as temp/speed points. A single point gives a fixed speed at all temperatures.";
+    };
+    fanCurveInterval = lib.mkOption {
+      type = lib.types.int;
+      default = 5;
+      description = "Polling interval in seconds for fan curve daemon.";
     };
   };
 
-  config = lib.mkIf config.hardware.nvidia.management.enable {
+  config = lib.mkIf cfg.enable {
     environment.systemPackages = [nvidiaMgmtScript];
 
     systemd.services.nvidia-management = {
@@ -217,6 +304,24 @@ in {
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = "${lib.getExe nvidiaMgmtScript} apply";
+        StandardOutput = "journal";
+        StandardError = "journal";
+      };
+      unitConfig = {
+        ConditionPathExists = "/dev/nvidiactl";
+      };
+    };
+
+    systemd.services.nvidia-fan-curve = lib.mkIf (cfg.fanCurve != []) {
+      description = "NVIDIA GPU Fan Curve Daemon";
+      wantedBy = ["multi-user.target"];
+      after = ["multi-user.target"];
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${lib.getExe nvidiaMgmtScript} watch";
+        ExecStop = "${lib.getExe nvidiaMgmtScript} fan-restore";
+        Restart = "on-failure";
+        RestartSec = "5s";
         StandardOutput = "journal";
         StandardError = "journal";
       };
