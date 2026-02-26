@@ -5,10 +5,9 @@
   ...
 }: let
   computedFontSize = toString (config.user.appearance.baseFontSize * 1.33);
-  inherit (config.user.ui.fonts) mainFontName;
   fallbackFontNames = ["Symbols Nerd Font" config.user.ui.fonts.backup.name config.user.ui.fonts.emoji.name];
   mainFontConfig =
-    "${mainFontName}:size=${computedFontSize}, "
+    "${config.user.ui.fonts.mainFontName}:size=${computedFontSize}, "
     + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") fallbackFontNames);
   # Foot config - colors loaded dynamically from wallust via include (cache-only theming)
   footConfigText = ''

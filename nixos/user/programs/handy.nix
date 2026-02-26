@@ -5,14 +5,13 @@
   flakeInputs,
   ...
 }: let
-  system = pkgs.stdenv.hostPlatform.system;
   handySrc = flakeInputs.handy;
-  handyBase = handySrc.packages.${system}.default;
+  handyBase = handySrc.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   # Temporary local fix until cjpais/Handy updates its stale bun deps hash.
   handyBunDeps = pkgs.stdenv.mkDerivation {
     pname = "handy-bun-deps";
-    version = handyBase.version;
+    inherit (handyBase) version;
     src = handySrc;
 
     nativeBuildInputs = [
