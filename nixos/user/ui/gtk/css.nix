@@ -3,7 +3,6 @@
   lib,
   ...
 }: let
-  inherit (config.user.ui.fonts) mainFontName;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
@@ -26,7 +25,7 @@ in {
   gtkCss = ''
     /* Global element styling */
     * {
-      font-family: "${mainFontName}";
+      font-family: "${config.user.ui.fonts.mainFontName}";
       color: ${textColor};
       background: ${backgroundColor};
       outline-width: 0;
