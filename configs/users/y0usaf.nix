@@ -111,7 +111,6 @@
         vesktop.enable = true;
       };
       handy.enable = true;
-      obsidian.enable = true;
       creative.enable = true;
       media.enable = true;
       cmus.enable = true;
