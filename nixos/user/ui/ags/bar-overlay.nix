@@ -16,6 +16,7 @@
       agsWithTray = pkgs.ags.override {
         extraPackages = with pkgs.astal; [
           tray
+          battery
         ];
       };
       homeDir = "/home/${config.user.name}";
