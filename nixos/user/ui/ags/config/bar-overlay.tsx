@@ -1,6 +1,7 @@
 import { App, Astal, Gtk, Gdk } from "astal/gtk3"
 import { Variable, exec, bind, monitorFile } from "astal"
 import Tray from "gi://AstalTray"
+import Battery from "gi://AstalBattery"
 
 const GTK_COLORS = "@HOME@/.cache/wallust/gtk-colors.css"
 
@@ -35,6 +36,27 @@ const styles = `
 }
 
 .time-block label, .date-block label {
+    background: transparent;
+    color: @fg;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    text-shadow:
+        0.07em 0 0.07em @black,
+        -0.07em 0 0.07em @black,
+        0 0.07em 0.07em @black,
+        0 -0.07em 0.07em @black;
+}
+
+.battery-block {
+    background: @bg;
+    border: 0.05em solid @accent;
+    padding: 0.15em 0.3em;
+    margin: 0;
+    color: @fg;
+}
+
+.battery-block label {
     background: transparent;
     color: @fg;
     font-weight: bold;
@@ -95,6 +117,7 @@ const time = Variable("").poll(1000, () => exec(["date", "+%H:%M:%S"]))
 const date = Variable("").poll(30000, () => exec(["date", "+%d/%m/%y"]))
 
 const tray = Tray.get_default()
+const battery = Battery.get_default()
 
 function TrayItem({ item }: { item: any }) {
     const handleClick = (self: any, event: Gdk.Event) => {
@@ -112,6 +135,19 @@ function TrayItem({ item }: { item: any }) {
     </button>
 }
 
+function BatteryBlock() {
+    return <box className="battery-block" spacing={4}>
+        <label
+            label={bind(battery, "percentage").as(
+                (p) => `${Math.round(p * 100)}%`
+            )}
+        />
+        <label
+            label={bind(battery, "charging").as((c) => (c ? "↑" : "↓"))}
+        />
+    </box>
+}
+
 function TopBar() {
     return <window
         className="bar-top"
@@ -120,6 +156,7 @@ function TopBar() {
         anchor={Astal.WindowAnchor.TOP}
         application={App}>
         <box className="bar" spacing={8}>
+            <BatteryBlock />
             <box className="time-block">
                 <label label={time()} />
             </box>
@@ -143,6 +180,7 @@ function BottomBar() {
         anchor={Astal.WindowAnchor.BOTTOM}
         application={App}>
         <box className="bar" spacing={8}>
+            <BatteryBlock />
             <box className="time-block">
                 <label label={time()} />
             </box>
