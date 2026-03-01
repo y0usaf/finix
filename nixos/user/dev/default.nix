@@ -15,5 +15,6 @@ _: {
     ./nvim
     ./python.nix
     ./upscale.nix
+    ./android-tools.nix
   ];
 }

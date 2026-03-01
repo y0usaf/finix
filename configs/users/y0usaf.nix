@@ -141,6 +141,7 @@
         enable = true;
         model = "gpt-5.3-codex";
       };
+      android-tools.enable = true;
       codex-cli.enable = true;
       crush.enable = true;
       gemini-cli.enable = true;
