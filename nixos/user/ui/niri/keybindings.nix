@@ -86,6 +86,17 @@
       "Alt+grave" = {spawn = ["bash" "-c" "niri msg pick-color | grep Hex: | cut -d' ' -f2 | wl-copy"];};
       "Mod+Shift+C" = {spawn = ["sh" "-c" "killall swaybg; swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill &"];};
 
+      "XF86MonBrightnessUp" = {spawn = ["brightnessctl" "set" "5%+"];};
+      "XF86MonBrightnessDown" = {spawn = ["brightnessctl" "set" "5%-"];};
+
+      "XF86AudioRaiseVolume" = {spawn = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"];};
+      "XF86AudioLowerVolume" = {spawn = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"];};
+      "XF86AudioMute" = {spawn = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];};
+
+      "XF86AudioPlay" = {spawn = ["playerctl" "play-pause"];};
+      "XF86AudioNext" = {spawn = ["playerctl" "next"];};
+      "XF86AudioPrev" = {spawn = ["playerctl" "previous"];};
+
       "Mod+6" = {spawn = ["sh" "-c" "niri msg output DP-4 on; niri msg output DP-2 on; niri msg output HDMI-A-2 on"];};
       "Mod+7" = {spawn = ["sh" "-c" "niri msg output DP-4 off; niri msg output DP-2 off; niri msg output HDMI-A-2 off"];};
     };
