@@ -7,7 +7,7 @@
   imports = [
     ../../../nixos
     ./hardware-configuration.nix
-    (flakeInputs.self + /configs/users/y0usaf.nix)
+    (flakeInputs.self + /configs/users/y0usaf-dev.nix)
   ];
 
   fonts = {
