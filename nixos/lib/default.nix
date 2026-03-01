@@ -77,6 +77,10 @@ in {
         inherit pkgs lib system inputs;
         flakeInputs = inputs;
       };
+      y0usaf-framework = import ../../configs/hosts/y0usaf-framework {
+        inherit pkgs lib system inputs;
+        flakeInputs = inputs;
+      };
       y0usaf-server = import ../../configs/hosts/y0usaf-server {
         inherit pkgs lib system inputs;
         flakeInputs = inputs;
