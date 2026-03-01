@@ -14,6 +14,7 @@ _: {
     ./obs.nix
     ./pcmanfm.nix
     ./qbittorrent.nix
+    ./siyuan.nix
     ./slack.nix
     ./stoat-desktop.nix
     ./stremio.nix
