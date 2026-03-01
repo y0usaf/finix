@@ -7,7 +7,7 @@
   users.users.y0usaf = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = ["wheel" "networkmanager" "video" "audio" "input" "dialout" "bluetooth" "lp" "docker"];
+    extraGroups = ["wheel" "networkmanager" "video" "audio" "input" "gamemode" "dialout" "bluetooth" "lp" "docker"];
     home = "/home/y0usaf";
     ignoreShellProgramCheck = true;
   };
@@ -95,6 +95,27 @@
       tui-launcher.enable = true;
       slack.enable = true;
       btop.enable = true;
+      stremio.enable = true;
+      qbittorrent.enable = true;
+    };
+    gaming = {
+      core.enable = true;
+      controllers.enable = true;
+      steam.enable = true;
+      mangohud.enable = true;
+      emulation = {
+        wii-u.enable = true;
+        gcn-wii.enable = true;
+      };
+      balatro = {
+        enable = true;
+        enableLovelyInjector = true;
+        enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "stickersalwaysshown"];
+      };
+      wukong.enable = true;
+      expedition33.enable = true;
+      duet-night-abyss.enable = true;
+      arc-raiders.enable = true;
     };
     dev = {
       claude-code = {
