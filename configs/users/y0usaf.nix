@@ -200,7 +200,7 @@
               id = "bv79n-fh4kx";
               label = "Tokens";
               path = "~/Tokens";
-              devices = ["desktop" "laptop" "server" "phone"];
+              devices = ["desktop" "laptop" "framework" "server" "phone"];
             };
           }
           // lib.optionalAttrs (config.networking.hostName == "y0usaf-desktop") {
