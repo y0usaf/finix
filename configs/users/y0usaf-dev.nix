@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   flakeInputs,
   ...
 }: {
@@ -32,6 +33,7 @@
       terminal = lib.mkDefault "foot";
       fileManager = lib.mkDefault "pcmanfm";
       launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
+      discord = lib.mkDefault "discord";
       archiveManager = lib.mkDefault "file-roller";
       imageViewer = lib.mkDefault "imv";
       mediaPlayer = lib.mkDefault "mpv";
@@ -45,7 +47,16 @@
     };
     paths = {
       flake.path = "/home/y0usaf/nixos";
-      wallpapers.static.path = "/home/y0usaf/DCIM/Wallpapers";
+      music.path = "/home/y0usaf/Music";
+      dcim.path = "/home/y0usaf/DCIM";
+      steam = {
+        path = "/home/y0usaf/.local/share/Steam";
+        create = false;
+      };
+      wallpapers = {
+        static.path = "/home/y0usaf/DCIM/Wallpapers";
+        video.path = "/home/y0usaf/DCIM/Wallpapers_Video";
+      };
       bookmarks = [
         "file:///home/y0usaf/Downloads Downloads"
         "file:///home/y0usaf/Documents Documents"
@@ -71,6 +82,8 @@
         enable = true;
         scale = 1.5;
       };
+      hyprland.enable = false;
+      mangowc.enable = false;
       niri = {
         enable = true;
         extraConfig = ''
@@ -80,23 +93,41 @@
           }
         '';
       };
+      vicinae.enable = false;
       quickshell.enable = true;
       wayland.enable = true;
     };
     programs = {
       webapps.enable = true;
       librewolf.enable = true;
+      codex-desktop = {
+        enable = false;
+        yoloMode = true;
+      };
+      discord = {
+        stable.enable = false;
+        vesktop.enable = false;
+      };
+      handy.enable = false;
       obsidian.enable = true;
+      creative.enable = false;
+      media.enable = false;
+      cmus.enable = false;
       bluetooth.enable = true;
+      obs = {
+        enable = false;
+        backgroundRemoval.enable = false;
+      };
       imv.enable = true;
       mimeapps.enable = true;
       mpv.enable = true;
       pcmanfm.enable = true;
+      qbittorrent.enable = false;
+      stremio.enable = true;
       tui-launcher.enable = true;
       slack.enable = true;
+      stoat-desktop.enable = false;
       btop.enable = true;
-      stremio.enable = true;
-      qbittorrent.enable = true;
     };
     gaming = {
       core.enable = true;
@@ -134,6 +165,7 @@
       mcp.enable = true;
       docker.enable = true;
       gcloud.enable = true;
+      localllama.enable = false;
       nvim = {
         enable = true;
         neovide = false;
@@ -143,6 +175,8 @@
         enable = true;
         enableMcpServers = true;
       };
+      latex.enable = false;
+      upscale.enable = false;
     };
     shell = {
       zsh.enable = true;
@@ -166,6 +200,7 @@
       };
       "7z".enable = true;
       file-roller.enable = true;
+      nicotine-plus.enable = false;
       yt-dlp.enable = true;
     };
     services = {
@@ -176,14 +211,36 @@
       syncthing = {
         enable = true;
         devices = import ../../lib/syncthing.nix;
-        folders = {
-          tokens = {
-            id = "bv79n-fh4kx";
-            label = "Tokens";
-            path = "~/Tokens";
-            devices = ["desktop" "laptop" "framework" "server" "phone"];
+
+        folders =
+          {
+            tokens = {
+              id = "bv79n-fh4kx";
+              label = "Tokens";
+              path = "~/Tokens";
+              devices = ["desktop" "laptop" "framework" "server" "phone"];
+            };
+          }
+          // lib.optionalAttrs (config.networking.hostName == "y0usaf-desktop") {
+            music = {
+              id = "oty33-aq3dt";
+              label = "Music";
+              path = "~/Music";
+              devices = ["desktop" "server" "phone"];
+            };
+            dcim = {
+              id = "ti9yk-zu3xs";
+              label = "DCIM";
+              path = "~/DCIM";
+              devices = ["desktop" "server" "phone"];
+            };
+            pictures = {
+              id = "zbxzv-35v4e";
+              label = "Pictures";
+              path = "~/Pictures";
+              devices = ["desktop" "server" "phone"];
+            };
           };
-        };
       };
     };
   };
