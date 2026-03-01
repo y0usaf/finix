@@ -1,5 +1,6 @@
 {
   includeCoAuthoredBy = false;
+  autoMemoryEnabled = false;
   outputStyle = "Explanatory";
   permissions = {
     defaultMode = "plan";
