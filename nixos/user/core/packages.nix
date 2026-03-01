@@ -29,6 +29,7 @@
         pkgs.fzf
         pkgs.ripgrep
         pkgs.udiskie
+        pkgs.playerctl
       ]
       ++ config.user.packages.extraPackages;
   };
