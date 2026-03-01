@@ -22,6 +22,8 @@
   stateVersion = "24.11";
   timezone = "America/Toronto";
   var-cache = true;
+  nixpkgs.config.cudaSupport = true;
+
   hardware = {
     bluetooth = {
       enable = true;
