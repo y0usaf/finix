@@ -56,6 +56,9 @@ in {
 
     # GTK CSS color definitions
     ".config/wallust/templates/gtk-colors.css" = templates.gtkColors;
+
+    # Obsidian Shimmering Focus theme colors
+    ".config/wallust/templates/obsidian-colors.css" = templates.obsidianColors;
   };
 
   # wt script text - wraps wallust with pywalfox update and optional vicinae reload

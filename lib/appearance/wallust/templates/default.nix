@@ -38,4 +38,7 @@ in {
 
   # GTK CSS color definitions (for AGS and other GTK apps)
   gtkColors = import ./gtk-colors.nix;
+
+  # Obsidian Shimmering Focus theme colors
+  obsidianColors = import ./obsidian-colors.nix;
 }

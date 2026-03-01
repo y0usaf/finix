@@ -31,6 +31,9 @@
   zellij-config = { template = "zellij-config.kdl", target = "~/.config/zellij/config.kdl" }
   zellij-layout = { template = "zellij-layout.kdl", target = "~/.config/zellij/layouts/zjstatus.kdl" }
 
+  # Obsidian Shimmering Focus theme colors
+  obsidian-colors = { template = "obsidian-colors.css", target = "~/Documents/obsidian/.obsidian/snippets/wallust-colours.css" }
+
   # Discord theme colors (hot-reloadable via Vencord)
   discord-colors = { template = "discord-colors.css", target = "~/.config/Vencord/themes/wallust-colors.css" }
   ${lib.optionalString vestopkEnabled ''
