@@ -1,6 +1,7 @@
 {
   flakeInputs,
   lib,
+  pkgs,
   system,
   ...
 }: {
@@ -19,6 +20,8 @@
   homeDirectory = "/home/y0usaf";
   stateVersion = "24.11";
   timezone = "America/Toronto";
+
+  environment.systemPackages = [pkgs.brightnessctl];
 
   # Secure Boot disabled until sbctl keys are enrolled post-install
   boot.loader.limine.secureBoot.enable = lib.mkForce false;
