@@ -12,6 +12,7 @@ _: {
     ./mimeapps.nix
     ./mpv.nix
     ./obs.nix
+    ./obsidian.nix
     ./pcmanfm.nix
     ./qbittorrent.nix
     ./siyuan.nix
