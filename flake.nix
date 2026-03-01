@@ -100,11 +100,7 @@
       allowInsecurePredicate = pkg: nixpkgs.lib.hasPrefix "librewolf" (pkg.pname or "");
     };
 
-    linuxNixpkgsConfig =
-      commonNixpkgsConfig
-      // {
-        cudaSupport = true;
-      };
+    linuxNixpkgsConfig = commonNixpkgsConfig;
 
     nixosLib = import ./nixos/lib {
       inherit inputs;
