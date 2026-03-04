@@ -33,7 +33,6 @@
       "codex-mcp@y0usaf-marketplace" = false;
       "collab-flow@y0usaf-marketplace" = false;
       "instructify@y0usaf-marketplace" = true;
-      "linear-mcp@y0usaf-marketplace" = true;
       "teams-instruct@y0usaf-marketplace" = false;
       "todowrite-instruct@y0usaf-marketplace" = false;
       "tool-tracker@y0usaf-marketplace" = false;
