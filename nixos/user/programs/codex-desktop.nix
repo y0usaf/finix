@@ -8,7 +8,7 @@
   codex-desktop = flakeInputs.codex-desktop-linux.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (_: {
     src = pkgs.fetchurl {
       url = "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg";
-      hash = "sha256-9YUd1WBIM4pJlCc6A41us1/Z3mXUPpSIicJ9DI5cShg=";
+      hash = "sha256-4ricm3TGObpAIJRFhY7GNX/mFB/f8Va9Yf+3rVAV2ao=";
     };
   });
 in {
