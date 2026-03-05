@@ -38,7 +38,7 @@
       mediaPlayer = lib.mkDefault "mpv";
     };
     appearance = {
-      dpi = 144;
+      dpi = 189; # physical DPI of 16" 2560x1600 display
       baseFontSize = 12;
       cursorSize = 18;
       opacity = 0.7;
@@ -100,10 +100,11 @@
       webapps.enable = true;
       librewolf.enable = true;
       codex-desktop = {
-        enable = false;
+        enable = true;
         yoloMode = true;
       };
       discord = {
+        canary.enable = true;
         stable.enable = false;
         vesktop.enable = false;
       };

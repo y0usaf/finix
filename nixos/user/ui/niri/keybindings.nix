@@ -76,7 +76,7 @@
 
       "Mod+1" = {spawn = config.user.defaults.ide;};
       "Mod+2" = {spawn = config.user.defaults.browser;};
-      "Mod+3" = {spawn = "discord";};
+      "Mod+3" = {spawn = config.user.defaults.discord;};
       "Mod+4" = {spawn = "steam";};
       "Mod+5" = {spawn = "obs";};
 
