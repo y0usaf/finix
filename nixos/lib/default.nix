@@ -32,7 +32,7 @@
 
   inherit (pkgs) lib;
 
-  genLib = import ../../lib/generators lib;
+  genLib = import ../../lib/generators {inherit lib pkgs;};
 in {
   nixosConfigurations =
     lib.mapAttrs (_hostName: hostConfig:

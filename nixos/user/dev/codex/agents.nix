@@ -8,18 +8,14 @@
 in {
   config = lib.mkIf config.user.dev.codex.enable {
     usr.files = {
-      ".codex/INSTRUCTIONS.md" = {
-        text = codexConfig.instructions;
+      ".codex/agents/explorer.toml" = {
+        generator = genLib.toTOML;
+        value = codexConfig.agents.explorer;
         clobber = true;
       };
-      ".codex/config.toml" = {
+      ".codex/agents/worker.toml" = {
         generator = genLib.toTOML;
-        value =
-          codexConfig.settings
-          // config.user.dev.codex.settings
-          // {
-            inherit (config.user.dev.codex) model;
-          };
+        value = codexConfig.agents.worker;
         clobber = true;
       };
     };

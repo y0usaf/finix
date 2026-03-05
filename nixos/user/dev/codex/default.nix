@@ -3,5 +3,6 @@ _: {
     ./codex.nix
     ./codex-cli.nix
     ./instructions.nix
+    ./agents.nix
   ];
 }
