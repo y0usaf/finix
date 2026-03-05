@@ -68,7 +68,7 @@
       ];
     };
     ui = {
-      ags.enable = true;
+      gpuishell.enable = true;
       cursor.enable = true;
       fonts = {
         enable = true;
