@@ -14,10 +14,11 @@ in {
     vicinaeEnabled ? false,
     cmusEnabled ? false,
     vestopkEnabled ? false,
+    gpuishellEnabled ? false,
   }: {
     # Main config
     ".config/wallust/wallust.toml" = templates.mkWallustConfig {
-      inherit niriEnabled vicinaeEnabled cmusEnabled vestopkEnabled;
+      inherit niriEnabled vicinaeEnabled cmusEnabled vestopkEnabled gpuishellEnabled;
     };
 
     # Colorschemes
@@ -59,6 +60,9 @@ in {
 
     # Obsidian Shimmering Focus theme colors
     ".config/wallust/templates/obsidian-colors.css" = templates.obsidianColors;
+
+    # gpui-shell theme template
+    ".config/wallust/templates/gpuishell-theme.toml" = templates.gpuishellTheme;
   };
 
   # wt script text - wraps wallust with pywalfox update and optional vicinae reload

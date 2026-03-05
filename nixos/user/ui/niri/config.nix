@@ -39,7 +39,7 @@
               ["sh" "-c" "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
             ]
             ++ lib.optional config.user.ui.vicinae.enable ["${pkgs.vicinae}/bin/vicinae" "server"]
-            ++ lib.optional (config.user.ui.ags.enable or false) ["sh" "-c" "${config.user.ui.ags.package}/bin/ags run ${config.user.homeDirectory}/.config/ags/bar-overlay.tsx"]
+            ++ lib.optional (config.user.ui.gpuishell.enable or false) ["${pkgs.gpuishell}/bin/gpuishell"]
             ++ lib.optional (config.user.programs.handy.enable or false) ["handy"];
 
           hotkey-overlay = {};
