@@ -115,7 +115,10 @@
 
     darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};
     darwinLib = darwinPkgs.lib;
-    genLib = import ./lib/generators darwinLib;
+    genLib = import ./lib/generators {
+      lib = darwinLib;
+      pkgs = darwinPkgs;
+    };
     iosevkaSlab = darwinPkgs.stdenvNoCC.mkDerivation {
       pname = "fast-iosevka-slab";
       version = "1.0.0";
