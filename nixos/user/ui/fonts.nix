@@ -122,6 +122,15 @@
                 <family>${config.user.ui.fonts.emoji.name}</family>
               </prefer>
             </alias>
+            <alias binding="strong">
+              <family>sans-serif</family>
+              <prefer>
+                <family>${config.user.ui.fonts.mainFontName}</family>
+                <family>${config.user.ui.fonts.backup.name}</family>
+                <family>Symbols Nerd Font</family>
+                <family>${config.user.ui.fonts.emoji.name}</family>
+              </prefer>
+            </alias>
             <!-- Font rendering options -->
             <match target="font">
               <edit name="antialias" mode="assign"><bool>true</bool></edit>

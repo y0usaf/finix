@@ -41,4 +41,7 @@ in {
 
   # Obsidian Shimmering Focus theme colors
   obsidianColors = import ./obsidian-colors.nix;
+
+  # gpui-shell theme colors
+  gpuishellTheme = import ./gpuishell-theme.nix;
 }

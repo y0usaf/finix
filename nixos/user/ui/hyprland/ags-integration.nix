@@ -6,19 +6,12 @@
 }: let
   agsConfig = {
     "exec-once" =
-      lib.optionals (config.user.ui.ags.enable or false) [
-        "exec ags run ~/.config/ags/bar-overlay.tsx"
+      lib.optionals (config.user.ui.gpuishell.enable or false) [
+        "gpuishell"
       ]
       ++ [
         "for monitor in $(hyprctl monitors -j | jq -r '.[].name'); do wall=$(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1); swaybg -o $monitor -i $wall -m fill & done"
       ];
-    bind = lib.optionals (config.user.ui.ags.enable or false) [
-      "$mod, W, exec, ags request showStats"
-      "$mod2, TAB, exec, ags request toggleWorkspaces"
-    ];
-    bindr = lib.optionals (config.user.ui.ags.enable or false) [
-      "$mod, W, exec, ags request hideStats"
-    ];
   };
 in {
   config = lib.mkIf config.user.ui.hyprland.enable {

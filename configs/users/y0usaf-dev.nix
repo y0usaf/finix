@@ -32,7 +32,7 @@
       terminal = lib.mkDefault "foot";
       fileManager = lib.mkDefault "pcmanfm";
       launcher = lib.mkDefault "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
-      discord = lib.mkDefault "discord";
+      discord = lib.mkDefault "discord-canary";
       archiveManager = lib.mkDefault "file-roller";
       imageViewer = lib.mkDefault "imv";
       mediaPlayer = lib.mkDefault "mpv";
@@ -65,7 +65,7 @@
       ];
     };
     ui = {
-      ags.enable = true;
+      gpuishell.enable = true;
       cursor.enable = true;
       fonts = {
         enable = true;

@@ -1,6 +1,6 @@
 _: {
   imports = [
-    ./ags
+    ./gpui-shell
     ./cursor.nix
     ./fonts.nix
     ./foot.nix
