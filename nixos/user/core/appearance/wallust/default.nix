@@ -50,6 +50,7 @@ in {
       vicinaeEnabled = config.user.ui.vicinae.enable or false;
       cmusEnabled = config.user.programs.cmus.enable or false;
       vestopkEnabled = config.user.programs.discord.vesktop.enable or false;
+      gpuishellEnabled = config.user.ui.gpuishell.enable or false;
     });
   };
 }

@@ -5,6 +5,7 @@
   vicinaeEnabled ? false,
   cmusEnabled ? false,
   vestopkEnabled ? false,
+  gpuishellEnabled ? false,
 }: ''
   backend = "fastresize"
   color_space = "lch"
@@ -48,5 +49,8 @@
   ''}${lib.optionalString cmusEnabled ''
     # cmus colorscheme (uses fixed ANSI indices, palette varies per wallust theme)
     cmus-colors = { template = "cmus-colors.theme", target = "~/.config/cmus/wallust-auto.theme" }
+  ''}${lib.optionalString gpuishellEnabled ''
+    # gpui-shell theme colors
+    gpuishell-theme = { template = "gpuishell-theme.toml", target = "~/.config/gpuishell/theme.toml" }
   ''}${extraTemplates}
 ''
