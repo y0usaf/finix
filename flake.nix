@@ -72,6 +72,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    tweakcc = {
+      url = "git+file:///home/y0usaf/nixos/tmp/tweakcc?ref=feat/nix-module";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     codex-desktop-linux = {
       url = "github:y0usaf/codex-desktop-flake";
       inputs.nixpkgs.follows = "nixpkgs";
