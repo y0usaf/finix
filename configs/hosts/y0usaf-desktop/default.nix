@@ -81,7 +81,6 @@
     waydroid.enable = false;
     controllers.enable = true;
     tailscale.enableVPN = true;
-    openssh.enable = true;
     syncthing-proxy = {
       enable = true;
       virtualHostName = "syncthing-desktop";
