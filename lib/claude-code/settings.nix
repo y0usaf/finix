@@ -2,9 +2,7 @@
   includeCoAuthoredBy = false;
   autoMemoryEnabled = false;
   outputStyle = "Explanatory";
-  permissions = {
-    defaultMode = "acceptEdits";
-  };
+  permissions = {};
   env = {
     #MAX_THINKING_TOKENS = "56000";
     #BASH_DEFAULT_TIMEOUT_MS = "120000";
