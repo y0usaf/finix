@@ -5,10 +5,15 @@
 
   # Appearance options (DPI, animations, etc.)
   options.user.appearance = {
-    scaledFontSize = lib.mkOption {
+    termFontSize = lib.mkOption {
       type = lib.types.int;
       default = 12;
-      description = "Font size used by foot, GTK, and other UI elements";
+      description = "Font size used by terminal emulators (e.g. foot)";
+    };
+    gtkFontSize = lib.mkOption {
+      type = lib.types.int;
+      default = 12;
+      description = "Font size used by GTK applications";
     };
     cursorSize = lib.mkOption {
       type = lib.types.int;
