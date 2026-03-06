@@ -24,7 +24,7 @@
             ControlPersist 10m
             SetEnv TERM=xterm-256color
             Host server
-                HostName 192.168.2.66
+                HostName y0usaf-server
                 User y0usaf
                 ForwardAgent yes
 
