@@ -52,6 +52,7 @@ in {
               };
             })
             inputs.nvf.nixosModules.default
+            inputs.tweakcc.nixosModules.default
             inputs.mango.nixosModules.mango
             ../user
           ];
