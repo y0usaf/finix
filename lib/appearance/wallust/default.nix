@@ -25,6 +25,7 @@ in {
     ".config/wallust/colorschemes/dopamine.json" = builtins.toJSON colorschemes.dopamine;
     ".config/wallust/colorschemes/eva01.json" = builtins.toJSON colorschemes.eva01;
     ".config/wallust/colorschemes/eva02.json" = builtins.toJSON colorschemes.eva02;
+    ".config/wallust/colorschemes/p3.json" = builtins.toJSON colorschemes.p3;
     ".config/wallust/colorschemes/p4g.json" = builtins.toJSON colorschemes.p4g;
 
     # Shared CSS variables template

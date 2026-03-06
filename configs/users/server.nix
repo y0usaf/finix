@@ -33,7 +33,6 @@
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
     };
-    openFirewall = true;
   };
 
   user = {

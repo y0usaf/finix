@@ -7,6 +7,7 @@
     services.tailscale = {
       enable = true;
       openFirewall = true;
+      extraUpFlags = ["--ssh"];
     };
 
     systemd.services.tailscale-resume = {
