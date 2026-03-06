@@ -5,6 +5,7 @@ _: {
     ./opencode/opencode.nix
     ./crush.nix
     ./gemini-cli.nix
+    ./agent-slack.nix
     ../../../lib/mcp/mcp.nix
 
     ./docker.nix
