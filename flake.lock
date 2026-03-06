@@ -355,16 +355,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1772675361,
-        "narHash": "sha256-yTrNkRhD4KiqATM9dK5PaFsedOHcZHTyM6BIF0BRN6w=",
+        "lastModified": 1772007686,
+        "narHash": "sha256-WWk/8Zu2vwuY/SLwAN4voF8yxgMfuAApI6P4wzD9rQg=",
         "owner": "cjpais",
         "repo": "Handy",
-        "rev": "5ff3c896b2163f3b9c6e80bbd252495d46d73ffd",
+        "rev": "f1516d92281c27ba5971c8da4a2356e5f084b0db",
         "type": "github"
       },
       "original": {
         "owner": "cjpais",
         "repo": "Handy",
+        "rev": "f1516d92281c27ba5971c8da4a2356e5f084b0db",
         "type": "github"
       }
     },

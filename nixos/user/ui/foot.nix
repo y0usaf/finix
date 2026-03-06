@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  computedFontSize = toString config.user.appearance.baseFontSize;
+  computedFontSize = toString config.user.appearance.scaledFontSize;
   fallbackFontNames = ["Symbols Nerd Font" config.user.ui.fonts.backup.name config.user.ui.fonts.emoji.name];
   mainFontConfig =
     "${config.user.ui.fonts.mainFontName}:size=${computedFontSize}, "
