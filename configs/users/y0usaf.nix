@@ -39,7 +39,7 @@
     };
     appearance = {
       dpi = 144;
-      termFontSize = 12;
+      termFontSize = 18;
       gtkFontSize = 12;
       cursorSize = 18;
       opacity = 0.7;
