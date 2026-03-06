@@ -1,18 +1,14 @@
-{
-  lib,
-  config,
-  ...
-}: {
+{lib, ...}: {
   imports = [
     ./wallust
   ];
 
   # Appearance options (DPI, animations, etc.)
   options.user.appearance = {
-    baseFontSize = lib.mkOption {
+    scaledFontSize = lib.mkOption {
       type = lib.types.int;
       default = 12;
-      description = "Base font size that other UI elements should scale from";
+      description = "Font size used by foot, GTK, and other UI elements";
     };
     cursorSize = lib.mkOption {
       type = lib.types.int;
@@ -42,11 +38,5 @@
       default = 0.1;
       description = "Global UI opacity setting (0.0 = fully transparent, 1.0 = fully opaque)";
     };
-    scaledFontSize = lib.mkOption {
-      type = lib.types.int;
-      description = "Font size scaled proportionally from baseFontSize at 96 DPI reference";
-    };
   };
-
-  config.user.appearance.scaledFontSize = builtins.floor (config.user.appearance.baseFontSize * config.user.appearance.dpi / 96);
 }

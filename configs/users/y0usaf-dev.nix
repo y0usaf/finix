@@ -39,7 +39,7 @@
     };
     appearance = {
       dpi = 189; # physical DPI of 16" 2560x1600 display
-      baseFontSize = 12;
+      scaledFontSize = 23;
       cursorSize = 18;
       opacity = 0.7;
       wallust.defaultTheme = "eva01";
