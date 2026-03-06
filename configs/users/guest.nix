@@ -23,7 +23,7 @@
     };
     appearance = {
       dpi = 144;
-      baseFontSize = 12;
+      baseFontSize = 8; # produces scaledFontSize=12 at 144 dpi (matches pre-scaling behaviour)
       cursorSize = 36;
     };
     paths = {
