@@ -63,7 +63,10 @@
     };
   };
 in {
-  imports = [./claude-code.nix];
+  imports = [
+    ./claude-code.nix
+    ./tweakcc.nix
+  ];
 
   config = lib.mkIf config.user.dev.claude-code.enable {
     usr.files =

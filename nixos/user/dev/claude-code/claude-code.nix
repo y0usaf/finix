@@ -21,11 +21,12 @@
   };
 
   config = lib.mkIf config.user.dev.claude-code.enable {
-    environment.systemPackages = [
-      pkgs.claude-code
-      (pkgs.writeShellScriptBin "bunclaude" ''
-        exec ${pkgs.bun}/bin/bunx --bun @anthropic-ai/claude-code --allow-dangerously-skip-permissions "$@"
-      '')
-    ];
+    environment.systemPackages =
+      lib.optionals (!config.programs.tweakcc.enable) [pkgs.claude-code]
+      ++ [
+        (pkgs.writeShellScriptBin "bunclaude" ''
+          exec ${pkgs.bun}/bin/bunx --bun @anthropic-ai/claude-code --allow-dangerously-skip-permissions "$@"
+        '')
+      ];
   };
 }
