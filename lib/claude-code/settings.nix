@@ -3,7 +3,7 @@
   autoMemoryEnabled = false;
   outputStyle = "Explanatory";
   permissions = {
-    defaultMode = "plan";
+    defaultMode = "acceptEdits";
   };
   env = {
     #MAX_THINKING_TOKENS = "56000";
