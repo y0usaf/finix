@@ -87,6 +87,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    agent-slack = {
+      url = "github:y0usaf/agent-slack?ref=feat/nix-flake-and-hash-updater";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
     gpui-shell = {
       url = "github:andre-brandao/gpui-shell";
       inputs.nixpkgs.follows = "nixpkgs";
