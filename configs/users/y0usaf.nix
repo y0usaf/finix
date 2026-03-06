@@ -38,8 +38,8 @@
       mediaPlayer = lib.mkDefault "mpv";
     };
     appearance = {
-      dpi = 144;
-      termFontSize = 18;
+      dpi = 109;
+      termFontSize = 12;
       gtkFontSize = 12;
       cursorSize = 18;
       opacity = 0.7;
