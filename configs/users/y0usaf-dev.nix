@@ -163,6 +163,7 @@
       codex-cli.enable = true;
       crush.enable = true;
       gemini-cli.enable = true;
+      agent-slack.enable = true;
       mcp.enable = true;
       docker.enable = true;
       gcloud.enable = true;

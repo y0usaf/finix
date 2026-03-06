@@ -1,5 +1,29 @@
 {
   "nodes": {
+    "agent-slack": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1772831628,
+        "narHash": "sha256-rHevYTutnclK+XmxU7r1c5oL/dulmbW1ZiA8iBsm+5o=",
+        "owner": "y0usaf",
+        "repo": "agent-slack",
+        "rev": "bf4803dae4337ddb7f64609092c6425435cf9e75",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "ref": "feat/nix-flake-and-hash-updater",
+        "repo": "agent-slack",
+        "type": "github"
+      }
+    },
     "claude-code-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -645,6 +669,7 @@
     },
     "root": {
       "inputs": {
+        "agent-slack": "agent-slack",
         "claude-code-nix": "claude-code-nix",
         "codex-cli-nix": "codex-cli-nix",
         "codex-desktop-linux": "codex-desktop-linux",
