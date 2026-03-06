@@ -9,7 +9,7 @@
       gtk-application-prefer-dark-theme = 1;
       gtk-cursor-theme-name = "SSB-x11";
       gtk-cursor-theme-size = toString (builtins.floor (24 * config.user.ui.gtk.scale));
-      gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.baseFontSize}";
+      gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.scaledFontSize}";
       gtk-xft-antialias = 1;
       gtk-xft-dpi = toString config.user.appearance.dpi;
       gtk-xft-hinting = 1;
@@ -23,7 +23,7 @@
       gtk-application-prefer-dark-theme = 1;
       gtk-cursor-theme-name = "SSB-x11";
       gtk-cursor-theme-size = toString (builtins.floor (24 * config.user.ui.gtk.scale));
-      gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.baseFontSize}";
+      gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.scaledFontSize}";
     };
   };
 in {
