@@ -938,11 +938,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772793681,
-        "narHash": "sha256-klUr5tiB3re8HM6jujZA9fg4Dm/EiL5QC+RD4fV/JpI=",
+        "lastModified": 1772815022,
+        "narHash": "sha256-NkJM7sVPkpRv84sioeWvNapxlgcEclgcPF4XD3pcosI=",
         "ref": "feat/nix-module",
-        "rev": "15249e580d436739e7219844529d17dc2118343e",
-        "revCount": 469,
+        "rev": "5b15c01e5450e6d6e278debaf99295ed0133d727",
+        "revCount": 466,
         "type": "git",
         "url": "file:///home/y0usaf/nixos/tmp/tweakcc"
       },
