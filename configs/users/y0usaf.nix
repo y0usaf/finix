@@ -39,7 +39,7 @@
     };
     appearance = {
       dpi = 144;
-      baseFontSize = 8; # produces scaledFontSize=12 at 144 dpi (matches pre-scaling behaviour)
+      scaledFontSize = 12;
       cursorSize = 18;
       opacity = 0.7;
       wallust.defaultTheme = "eva01";
