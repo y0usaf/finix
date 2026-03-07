@@ -40,6 +40,7 @@
             ]
             ++ lib.optional config.user.ui.vicinae.enable ["${pkgs.vicinae}/bin/vicinae" "server"]
             ++ lib.optional (config.user.ui.gpuishell.enable or false) ["${pkgs.gpuishell}/bin/gpuishell"]
+            ++ lib.optional (config.user.ui.ags.bar-overlay.enable or false) ["${config.user.ui.ags.package}/bin/ags" "run" "/home/${config.user.name}/.config/ags/bar-overlay.tsx"]
             ++ lib.optional (config.user.programs.handy.enable or false) ["handy"];
 
           hotkey-overlay = {};
