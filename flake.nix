@@ -73,7 +73,7 @@
     };
 
     tweakcc = {
-      url = "git+file:///home/y0usaf/nixos/tmp/tweakcc?ref=feat/nix-module";
+      url = "github:y0usaf/tweakcc?ref=feat/nix-module";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
