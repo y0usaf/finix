@@ -5,7 +5,6 @@
   ...
 }: {
   imports = [
-    ./fetch-widget.nix
     ./bar-overlay.nix
   ];
 
