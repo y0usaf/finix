@@ -69,7 +69,11 @@
       ];
     };
     ui = {
-      gpuishell.enable = true;
+      ags = {
+        enable = true;
+        bar-overlay.modules = ["time" "date" "tray"];
+      };
+      gpuishell.enable = false;
       cursor.enable = true;
       fonts = {
         enable = true;
