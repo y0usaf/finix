@@ -10,10 +10,25 @@
       default = false;
       description = "Enable AGS v2 Bar Overlay (Minimal time/date bars)";
     };
+    modules = lib.mkOption {
+      type = lib.types.listOf (lib.types.enum [
+        "time"
+        "date"
+        "tray"
+        "battery"
+      ]);
+      default = [
+        "time"
+        "date"
+        "tray"
+        "battery"
+      ];
+      description = "Bar overlay modules to enable";
+    };
   };
   config = lib.mkIf config.user.ui.ags.bar-overlay.enable (
     let
-      agsWithTray = pkgs.ags.override {
+      agsWithModules = pkgs.ags.override {
         extraPackages = with pkgs.astal; [
           tray
           battery
@@ -22,12 +37,19 @@
       homeDir = "/home/${config.user.name}";
       barOverlay = pkgs.substitute {
         src = ./config/bar-overlay.tsx;
-        substitutions = ["--subst-var-by" "HOME" homeDir];
+        substitutions = [
+          "--subst-var-by"
+          "HOME"
+          homeDir
+          "--subst-var-by"
+          "MODULES"
+          (builtins.toJSON config.user.ui.ags.bar-overlay.modules)
+        ];
       };
     in {
-      user.ui.ags.package = agsWithTray;
+      user.ui.ags.package = agsWithModules;
       environment.systemPackages = [
-        agsWithTray
+        agsWithModules
       ];
       usr = {
         files = {

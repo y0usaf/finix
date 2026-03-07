@@ -3,6 +3,8 @@ import { Variable, exec, bind, monitorFile } from "astal"
 import Tray from "gi://AstalTray"
 import Battery from "gi://AstalBattery"
 
+const MODULES: string[] = @MODULES@
+
 const GTK_COLORS = "@HOME@/.cache/wallust/gtk-colors.css"
 
 const styles = `
@@ -148,6 +150,23 @@ function BatteryBlock() {
     </box>
 }
 
+function BarContent() {
+    return <box className="bar" spacing={8}>
+        {MODULES.includes("battery") && <BatteryBlock />}
+        {MODULES.includes("time") && <box className="time-block">
+            <label label={time()} />
+        </box>}
+        {MODULES.includes("date") && <box className="date-block">
+            <label label={date()} />
+        </box>}
+        {MODULES.includes("tray") && <box className="tray-block" spacing={2}>
+            {bind(tray, "items").as(items => items.map(item => (
+                <TrayItem key={item.itemId} item={item} />
+            )))}
+        </box>}
+    </box>
+}
+
 function TopBar() {
     return <window
         className="bar-top"
@@ -155,20 +174,7 @@ function TopBar() {
         exclusivity={Astal.Exclusivity.IGNORE}
         anchor={Astal.WindowAnchor.TOP}
         application={App}>
-        <box className="bar" spacing={8}>
-            <BatteryBlock />
-            <box className="time-block">
-                <label label={time()} />
-            </box>
-            <box className="date-block">
-                <label label={date()} />
-            </box>
-            <box className="tray-block" spacing={2}>
-                {bind(tray, "items").as(items => items.map(item => (
-                    <TrayItem key={item.itemId} item={item} />
-                )))}
-            </box>
-        </box>
+        <BarContent />
     </window>
 }
 
@@ -179,20 +185,7 @@ function BottomBar() {
         exclusivity={Astal.Exclusivity.IGNORE}
         anchor={Astal.WindowAnchor.BOTTOM}
         application={App}>
-        <box className="bar" spacing={8}>
-            <BatteryBlock />
-            <box className="time-block">
-                <label label={time()} />
-            </box>
-            <box className="date-block">
-                <label label={date()} />
-            </box>
-            <box className="tray-block" spacing={2}>
-                {bind(tray, "items").as(items => items.map(item => (
-                    <TrayItem key={item.itemId} item={item} />
-                )))}
-            </box>
-        </box>
+        <BarContent />
     </window>
 }
 
