@@ -28,6 +28,13 @@
                 User y0usaf
                 ForwardAgent yes
 
+            Host desktop
+                HostName y0usaf-desktop
+                Port 2222
+                User y0usaf
+                IdentityFile ${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}
+                ForwardAgent yes
+
             Host github.com
                 HostName github.com
                 User git
