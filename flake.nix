@@ -93,6 +93,10 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
+    impermanence = {
+      url = "github:nix-community/impermanence";
+    };
+
     gpui-shell = {
       url = "github:andre-brandao/gpui-shell";
       inputs.nixpkgs.follows = "nixpkgs";
