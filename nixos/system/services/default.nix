@@ -8,6 +8,7 @@ _: {
     ./mediamtx.nix
     ./n8n.nix
     ./nginx.nix
+    ./openssh.nix
     ./scx.nix
     ./syncthing-proxy.nix
     ./tailscale
