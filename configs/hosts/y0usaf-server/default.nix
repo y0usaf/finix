@@ -32,7 +32,6 @@
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = false;
-    jellyfin.enable = true;
     mediamtx.enable = true;
     n8n = {
       enable = true;
@@ -61,7 +60,9 @@
 
   services.resolved = {
     enable = true;
-    fallbackDns = ["1.1.1.1" "8.8.8.8"];
-    dnssec = "false";
+    settings.Resolve = {
+      FallbackDNS = ["1.1.1.1" "8.8.8.8"];
+      DNSSEC = "false";
+    };
   };
 }
