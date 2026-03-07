@@ -3,7 +3,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  isOpen = config.hardware.nvidia.open;
+in {
   options = {
     hardware.nvidia = {
       enable = lib.mkEnableOption "NVIDIA GPU support";
@@ -16,10 +18,17 @@
 
     hardware.nvidia = {
       modesetting.enable = true;
-      powerManagement.enable = true;
-      open = false;
+      powerManagement.enable = !isOpen;
+      open = true;
+      gsp.enable = isOpen;
       nvidiaSettings = false; # useless on wayland
-      package = config.boot.kernelPackages.nvidiaPackages.stable;
+      package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+        version = "595.45.04";
+        sha256_64bit = "sha256-zUllSSRsuio7dSkcbBTuxF+dN12d6jEPE0WgGvVOj14=";
+        openSha256 = "sha256-uqNfImwTKhK8gncUdP1TPp0D6Gog4MSeIJMZQiJWDoE=";
+        usePersistenced = false;
+        useSettings = false;
+      };
     };
 
     hardware.graphics.extraPackages =
@@ -39,13 +48,19 @@
         "nvidia_drm"
       ];
       blacklistedKernelModules = ["nouveau"];
-      kernelParams = [
-        "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
-        "nvidia.NVreg_UsePageAttributeTable=1"
-        "nvidia.NVreg_EnableResizableBar=1"
-        "nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1"
-        "nvidia_modeset.disable_vrr_memclk_switch=1"
-      ];
+      kernelParams =
+        [
+          "nvidia.NVreg_UsePageAttributeTable=1"
+          "nvidia.NVreg_EnableResizableBar=1"
+          "nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1"
+          "nvidia_modeset.disable_vrr_memclk_switch=1"
+        ]
+        ++ lib.optionals isOpen [
+          "nvidia.NVreg_UseKernelSuspendNotifiers=1"
+        ]
+        ++ lib.optionals (!isOpen) [
+          "nvidia.NVreg_TemporaryFilePath=/var/tmp"
+        ];
     };
 
     environment = {
@@ -74,29 +89,22 @@
       };
       # Fix high VRAM usage on electron apps
       etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool.json".text = builtins.toJSON {
-        rules =
-          map (proc: {
+        rules = [
+          {
             pattern = {
-              feature = "procname";
-              matches = proc;
+              feature = "true";
+              matches = "";
             };
             profile = "No VidMem Reuse";
-          }) [
-            "Hyprland"
-            ".Hyprland-wrapped"
-            "niri"
-            "Discord"
-            ".Discord-wrapped"
-            "DiscordCanary"
-            ".DiscordCanary-wrapped"
-            "electron"
-            ".electron-wrapped"
-            "firefox"
-            ".firefox-wrapped"
-            "chromium"
-            "librewolf"
-            ".librewolf-wrapped"
-          ];
+          }
+          {
+            pattern = {
+              feature = "true";
+              matches = "";
+            };
+            profile = "CudaNoStablePerfLimit";
+          }
+        ];
       };
     };
 
