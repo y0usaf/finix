@@ -11,14 +11,13 @@
           hideStartupBanner = true;
           expandThinkingBlocks = false;
         };
+        claudeMdAltNames = ["AGENTS.md"];
         toolsets = [
           {
-            name = "default";
+            name = "undefined";
             allowedTools = ["Bash" "WebFetch"];
           }
         ];
-        defaultToolset = "default";
-        planModeToolset = "default";
       };
     };
   };
