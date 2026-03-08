@@ -53,6 +53,10 @@
                     mountpoint = "/persist";
                     mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@persist"];
                   };
+                  "@steam" = {
+                    mountpoint = "/home/y0usaf/.local/share/Steam";
+                    mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@steam"];
+                  };
                 };
               };
             };

@@ -53,6 +53,12 @@
       fsType = "vfat";
       options = ["fmask=0077" "dmask=0077"];
     };
+
+    "/home/y0usaf/.local/share/Steam" = {
+      device = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
+      fsType = "btrfs";
+      options = ["subvol=@steam" "relatime" "ssd" "discard=async" "space_cache=v2"];
+    };
   };
 
   swapDevices = [];
