@@ -6,6 +6,7 @@ _: {
       "/var/lib/systemd/coredump"
       "/var/log"
       "/etc/ssh"
+      "/etc/NetworkManager/system-connections"
       "/var/lib/docker"
       "/var/lib/tailscale"
       "/var/lib/hjem"
@@ -15,9 +16,11 @@ _: {
     files = [
       "/etc/machine-id"
     ];
-
     users.y0usaf = {
       directories = [
+        ".cache/librewolf"
+        ".cache/zellij"
+        ".cache/wallust"
         ".config"
         ".claude"
         ".librewolf"
