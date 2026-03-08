@@ -2,9 +2,6 @@
 # Output: ~/Documents/obsidian/.obsidian/snippets/wallust-colours.css
 ''
   .theme-dark.theme-dark {
-    --bg-hue: 0;
-    --bg-sat: 0%;
-
     --background-primary: {{ background }} !important;
     --background-primary-alt: {{ background }} !important;
     --background-secondary: {{ color8 }} !important;
@@ -14,8 +11,12 @@
     --titlebar-background: {{ color8 }};
     --titlebar-background-focused: {{ color8 }};
 
-    --color-accent: {{ cursor }};
-    --interactive-accent: {{ color6 }};
+    --color-accent: {{ cursor }} !important;
+    --interactive-accent: {{ cursor }} !important;
+    --interactive-accent-hover: {{ cursor }} !important;
+
+    --text-normal: {{ foreground }} !important;
+    --text-muted: {{ color7 }} !important;
 
     --alt-heading-color: {{ color5 }};
     --secondary-accent: {{ color3 }};
