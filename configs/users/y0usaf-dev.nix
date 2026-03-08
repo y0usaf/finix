@@ -10,7 +10,7 @@
     extraGroups = ["wheel" "networkmanager" "video" "audio" "input" "gamemode" "dialout" "bluetooth" "lp" "docker"];
     home = "/home/y0usaf";
     ignoreShellProgramCheck = true;
-    hashedPassword = "$6$n/t/wqwj5yE/fu5n$8CKtdI2KSdQwg/zKvW6hnjwIlXQERxHYfjWVnnx7thaa9u1tU3V9Bqxd2N0Pw7P/J7baTo0XXm4MdtfYY9Beg1";
+    hashedPasswordFile = "/persist/secrets/password-hashes/y0usaf";
   };
 
   security.sudo.extraRules = [
