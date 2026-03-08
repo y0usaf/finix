@@ -15,5 +15,28 @@ _: {
     files = [
       "/etc/machine-id"
     ];
+
+    users.y0usaf = {
+      directories = [
+        ".config"
+        ".claude"
+        ".librewolf"
+        ".codex"
+        ".local"
+        ".mozilla"
+        ".ssh"
+        ".steam"
+        "DCIM"
+        "Dev"
+        "Documents"
+        "Music"
+        "Pictures"
+        "Tokens"
+        "nixos"
+      ];
+      files = [
+        ".claude.json"
+      ];
+    };
   };
 }
