@@ -24,5 +24,10 @@ _: {
     files = [
       "/etc/machine-id"
     ];
+    users.y0usaf = {
+      directories = [
+        "nixos"
+      ];
+    };
   };
 }
