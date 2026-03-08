@@ -8,6 +8,7 @@
   imports = [
     ../../../nixos
     ./hardware-configuration.nix
+    ./impermanence.nix
     (flakeInputs.self + /configs/users/y0usaf-dev.nix)
   ];
 
