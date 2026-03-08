@@ -10,6 +10,7 @@
     extraGroups = ["wheel" "networkmanager" "video" "audio" "input" "gamemode" "dialout" "bluetooth" "lp" "docker"];
     home = "/home/y0usaf";
     ignoreShellProgramCheck = true;
+    hashedPassword = "$6$n/t/wqwj5yE/fu5n$8CKtdI2KSdQwg/zKvW6hnjwIlXQERxHYfjWVnnx7thaa9u1tU3V9Bqxd2N0Pw7P/J7baTo0XXm4MdtfYY9Beg1";
   };
 
   security.sudo.extraRules = [
@@ -39,7 +40,7 @@
     };
     appearance = {
       dpi = 189; # physical DPI of 16" 2560x1600 display
-      termFontSize = 23;
+      termFontSize = 12;
       gtkFontSize = 23;
       cursorSize = 18;
       opacity = 0.7;
@@ -109,7 +110,7 @@
         stable.enable = false;
         vesktop.enable = false;
       };
-      handy.enable = false;
+      handy.enable = true;
       obsidian.enable = true;
       creative.enable = false;
       media.enable = false;

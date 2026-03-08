@@ -9,7 +9,6 @@
   };
   config = lib.mkIf config.user.programs.media.enable {
     environment.systemPackages = [
-      pkgs.pulsemixer
       pkgs.ffmpeg
       pkgs.vlc
       pkgs.cmus

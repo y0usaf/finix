@@ -30,6 +30,7 @@
         pkgs.ripgrep
         pkgs.udiskie
         pkgs.playerctl
+        pkgs.pulsemixer
       ]
       ++ config.user.packages.extraPackages;
   };
