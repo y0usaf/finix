@@ -19,13 +19,15 @@ _: {
     users.y0usaf = {
       directories = [
         ".cache/librewolf"
+        ".cache/nix"
         ".cache/zellij"
         ".cache/wallust"
         ".config"
         ".claude"
         ".librewolf"
         ".codex"
-        ".local"
+        ".local/share"
+        ".local/state"
         ".mozilla"
         ".ssh"
         ".steam"
