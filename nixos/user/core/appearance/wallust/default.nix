@@ -31,8 +31,10 @@ in {
     # Systemd user service to apply default theme on login
     systemd.user.services.wallust-default = {
       description = "Apply default wallust theme";
-      wantedBy = ["graphical-session.target"];
-      after = ["graphical-session.target"];
+      wantedBy = ["graphical-session-pre.target"];
+      before = [
+        "graphical-session.target"
+      ];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = pkgs.writeShellScript "wallust-default" (wallustLib.mkStartupScript {

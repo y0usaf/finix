@@ -17,15 +17,16 @@
 
   fileSystems = {
     "/" = {
-      device = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
-      fsType = "btrfs";
-      options = ["subvol=@"];
+      device = "none";
+      fsType = "tmpfs";
+      options = ["mode=755" "size=1G"];
     };
 
     "/home" = {
       device = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
       fsType = "btrfs";
-      options = ["subvol=@home"];
+      options = ["subvol=@home" "relatime" "ssd" "discard=async" "space_cache=v2"];
+      neededForBoot = true;
     };
 
     "/nix" = {
@@ -62,26 +63,6 @@
     algorithm = "zstd";
     priority = 100;
   };
-
-  boot.initrd.postDeviceCommands = lib.mkBefore ''
-    mkdir /btrfs_tmp
-    mount -o subvol=/ /dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27 /btrfs_tmp
-
-    delete_subvolume_recursively() {
-      IFS=$'\n'
-      for i in $(btrfs subvolume list -o "$1" | cut -f 9- -d ' '); do
-        delete_subvolume_recursively "/btrfs_tmp/$i"
-      done
-      btrfs subvolume delete "$1"
-    }
-
-    if [[ -e /btrfs_tmp/@ ]]; then
-      delete_subvolume_recursively /btrfs_tmp/@
-    fi
-
-    btrfs subvolume create /btrfs_tmp/@
-    umount /btrfs_tmp
-  '';
 
   boot.tmp = {
     useTmpfs = true;
