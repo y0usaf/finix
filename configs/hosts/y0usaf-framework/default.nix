@@ -9,6 +9,7 @@
     ../../../nixos
     ./hardware-configuration.nix
     ./impermanence.nix
+    ./home-rollback.nix
     (flakeInputs.self + /configs/users/y0usaf-dev.nix)
   ];
 
