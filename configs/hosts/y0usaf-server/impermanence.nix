@@ -9,6 +9,7 @@ _: {
 
       # SSH host keys
       "/etc/ssh"
+      "/etc/NetworkManager/system-connections"
 
       # Services
       "/var/lib/postgresql"
