@@ -12,7 +12,6 @@
       };
       touchpad = {
         tap = {};
-        dwt = {};
         natural-scroll = {};
         accel-speed = 0.0;
       };
