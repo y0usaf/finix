@@ -18,9 +18,9 @@
 
   fileSystems = {
     "/" = {
-      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
-      fsType = "btrfs";
-      options = ["subvol=@" "compress=zstd" "noatime"];
+      device = "none";
+      fsType = "tmpfs";
+      options = ["mode=755" "size=1G"];
     };
 
     "/nix" = {
@@ -39,7 +39,8 @@
     "/home" = {
       device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
       fsType = "btrfs";
-      options = ["subvol=@home"];
+      options = ["subvol=@home" "compress=zstd" "noatime"];
+      neededForBoot = true;
     };
 
     "/btrfs" = {
