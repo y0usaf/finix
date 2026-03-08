@@ -88,7 +88,7 @@
     };
 
     agent-slack = {
-      url = "github:y0usaf/agent-slack?ref=feat/nix-flake-and-hash-updater";
+      url = "github:stablyai/agent-slack";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };

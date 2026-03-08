@@ -45,6 +45,14 @@
                     mountpoint = "/home";
                     mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@home"];
                   };
+                  "@nix" = {
+                    mountpoint = "/nix";
+                    mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@nix"];
+                  };
+                  "@persist" = {
+                    mountpoint = "/persist";
+                    mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@persist"];
+                  };
                 };
               };
             };
