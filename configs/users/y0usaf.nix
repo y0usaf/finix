@@ -149,9 +149,9 @@
       android-tools.enable = true;
       codex-cli.enable = true;
       crush.enable = true;
-      gemini-cli.enable = true;
+      gemini-cli.enable = false;
       agent-slack.enable = true;
-      mcp.enable = true;
+      mcp.enable = false;
       docker.enable = true;
       gcloud.enable = true;
       localllama.enable = true;
@@ -162,7 +162,7 @@
       python.enable = true;
       opencode = {
         enable = true;
-        enableMcpServers = true;
+        enableMcpServers = false;
       };
       latex.enable = true;
       upscale.enable = true;
