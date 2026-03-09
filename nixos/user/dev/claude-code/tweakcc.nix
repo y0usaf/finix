@@ -15,7 +15,7 @@
         toolsets = [
           {
             name = "undefined";
-            allowedTools = ["ToolSearch" "Bash" "WebFetch"];
+            allowedTools = ["ToolSearch" "Bash" "WebFetch" "WebSearch"];
           }
         ];
       };
