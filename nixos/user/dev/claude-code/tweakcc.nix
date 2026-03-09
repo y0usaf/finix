@@ -15,7 +15,7 @@
         toolsets = [
           {
             name = "undefined";
-            allowedTools = [];
+            allowedTools = ["Read" "Edit" "Write" "Glob" "Grep"];
           }
         ];
       };
