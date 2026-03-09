@@ -1,15 +1,5 @@
 # Instructify rules — migrated from collab-flow, todowrite-instruct, teams-instruct
 builtins.toJSON {
-  collab-flow = {
-    events = ["UserPromptSubmit"];
-    instruction = "MANDATORY: Use AskUserQuestion before proceeding.";
-  };
-
-  todowrite-instruct = {
-    events = ["UserPromptSubmit"];
-    instruction = "MANDATORY: Use TaskCreate before proceeding.";
-  };
-
   agentic-terminal-instruct = {
     events = ["UserPromptSubmit"];
     instruction = ''
@@ -18,7 +8,7 @@ builtins.toJSON {
   };
 
   teams-instruct = {
-    events = ["UserPromptSubmit"];
+    events = ["SessionStart"];
     instruction = ''
       MANDATORY: Use Agent Teams for ALL tasks. Never work alone when teammates can parallelize the effort.
 
