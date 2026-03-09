@@ -15,7 +15,7 @@
         toolsets = [
           {
             name = "undefined";
-            allowedTools = ["ToolSearch" "Read" "Edit" "Write" "Glob" "Grep" "Bash" "WebFetch" "WebSearch"];
+            allowedTools = ["ToolSearch" "Read" "Edit" "Write" "Glob" "Grep" "Bash" "WebFetch" "WebSearch" "AskUserQuestion" "TaskCreate" "TaskGet" "TaskOutput" "TaskStop" "TaskUpdate"];
           }
         ];
       };
