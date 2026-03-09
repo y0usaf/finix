@@ -159,6 +159,7 @@
         enable = true;
         neovide = false;
       };
+      bun.enable = true;
       python.enable = true;
       opencode = {
         enable = true;
