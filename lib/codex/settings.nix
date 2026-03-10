@@ -14,13 +14,6 @@
   tui = {
     alternate_screen = "never";
   };
-  mcp_servers = {
-    linear = {
-      command = "bunx";
-      args = ["--bun" "@tacticlaunch/mcp-linear"];
-      env_vars = ["LINEAR_API_KEY"];
-    };
-  };
   agents = {
     explorer = {
       description = "Use for codebase discovery and analysis. Prioritize reading, tracing, and precise explanations before making edits.";
