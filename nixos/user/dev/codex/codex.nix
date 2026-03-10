@@ -8,7 +8,7 @@
 
     model = lib.mkOption {
       type = lib.types.str;
-      default = "gpt-5.3-codex";
+      default = "gpt-5.4";
       description = "Codex model to use";
     };
 
