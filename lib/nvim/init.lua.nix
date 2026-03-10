@@ -211,6 +211,7 @@ in ''
 
   -- Obsidian setup
   require("obsidian").setup({
+    create_dirs = false,
     workspaces = {
       {
         name = "personal",
