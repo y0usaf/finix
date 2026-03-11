@@ -5,16 +5,14 @@
   ...
 }: let
   mcpServerSpecs = import ./servers.nix {inherit config;};
-
-  mkStdIOServer = spec: {
-    type = "stdio";
-    inherit (spec) command;
-    inherit (spec) args;
-    env = spec.environment;
-  };
-
   mcpServers = lib.listToAttrs (map
-    (spec: lib.nameValuePair spec.name (mkStdIOServer spec))
+    (spec:
+      lib.nameValuePair spec.name {
+        type = "stdio";
+        inherit (spec) command;
+        inherit (spec) args;
+        env = spec.environment;
+      })
     mcpServerSpecs);
 in {
   options.user.dev.mcp = {
