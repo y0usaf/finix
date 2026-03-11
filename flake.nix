@@ -101,6 +101,11 @@
       url = "github:andre-brandao/gpui-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    strictix = {
+      url = "path:/home/y0usaf/Dev/strictix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {

@@ -8,6 +8,7 @@ _: {
     ./nix-ld.nix
     ./nix-package-management.nix
     ./nix-tools.nix
+    ./strictix.nix
     ./system.nix
   ];
 }
