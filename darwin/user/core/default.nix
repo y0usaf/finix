@@ -6,6 +6,7 @@
 }: {
   imports = [
     ./user-config.nix
+    ./strictix.nix
   ];
 
   environment.systemPackages =
