@@ -11,13 +11,8 @@
     "ChromeWideEchoCancellation"
   ];
 
-  enableFeatures = [];
-
   gpuArgs =
-    optionals (enableFeatures != []) [
-      "--enable-features=${concatStringsSep "," enableFeatures}"
-    ]
-    ++ optionals (disableFeatures != []) [
+    optionals (disableFeatures != []) [
       "--disable-features=${concatStringsSep "," disableFeatures}"
     ]
     ++ optionals (!config.user.programs.discord.canary.smoothScroll) [

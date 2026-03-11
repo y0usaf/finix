@@ -3,10 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  claudeCodeConfig = import ../../../../lib/claude-code;
-  skillPlugins = lib.filterAttrs (_pluginName: plugin: plugin ? skills) claudeCodeConfig.plugins;
-in {
+}: {
   options.user.dev.claude-code = {
     enable = lib.mkEnableOption "Claude Code development tools";
 
@@ -30,7 +27,7 @@ in {
           description = "Whether to enable the `${pluginName}` Claude Code skill plugin.";
         };
       })
-      skillPlugins;
+      (lib.filterAttrs (_pluginName: plugin: plugin ? skills) (import ../../../../lib/claude-code).plugins);
   };
 
   config = lib.mkIf config.user.dev.claude-code.enable {
