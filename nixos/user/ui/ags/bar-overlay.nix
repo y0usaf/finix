@@ -34,18 +34,6 @@
           battery
         ];
       };
-      homeDir = "/home/${config.user.name}";
-      barOverlay = pkgs.substitute {
-        src = ./config/bar-overlay.tsx;
-        substitutions = [
-          "--subst-var-by"
-          "HOME"
-          homeDir
-          "--subst-var-by"
-          "MODULES"
-          (builtins.toJSON config.user.ui.ags.bar-overlay.modules)
-        ];
-      };
     in {
       user.ui.ags.package = agsWithModules;
       environment.systemPackages = [
@@ -53,7 +41,17 @@
       ];
       usr = {
         files = {
-          ".config/ags/bar-overlay.tsx".source = barOverlay;
+          ".config/ags/bar-overlay.tsx".source = pkgs.substitute {
+            src = ./config/bar-overlay.tsx;
+            substitutions = [
+              "--subst-var-by"
+              "HOME"
+              "/home/${config.user.name}"
+              "--subst-var-by"
+              "MODULES"
+              (builtins.toJSON config.user.ui.ags.bar-overlay.modules)
+            ];
+          };
           ".config/ags/tsconfig.json".source = ./config/tsconfig.json;
         };
       };
