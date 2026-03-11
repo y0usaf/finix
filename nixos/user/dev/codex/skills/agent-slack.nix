@@ -13,7 +13,7 @@ in {
       };
       ".codex/skills/agent-slack/agents/openai.yaml" = {
         generator = lib.generators.toYAML {};
-        value = {interface = skill.interface;};
+        value = {inherit (skill) interface;};
         clobber = true;
       };
     };
