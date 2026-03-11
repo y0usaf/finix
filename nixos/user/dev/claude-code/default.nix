@@ -6,8 +6,7 @@
   claudeCodeConfig = import ../../../../lib/claude-code;
 
   # Build the marketplace with all plugins
-  marketplaceFiles = claudeCodeConfig.marketplace {inherit lib;};
-  marketplace = marketplaceFiles.build {
+  marketplace = (claudeCodeConfig.marketplace {inherit lib;}).build {
     name = "y0usaf-marketplace";
     owner = {
       name = "y0usaf";
@@ -29,10 +28,13 @@
         CLAUDE_CODE_SUBAGENT_MODEL = config.user.dev.claude-code.subagentModel;
       };
     enabledPlugins = {
+      "agent-slack@y0usaf-marketplace" = config.user.dev.agent-slack.enable && config.user.dev.claude-code.skills.agent-slack.enable;
       "audio-notify@y0usaf-marketplace" = true;
       "codex-mcp@y0usaf-marketplace" = false;
       "collab-flow@y0usaf-marketplace" = false;
+      "gh@y0usaf-marketplace" = config.user.tools.gh.enable && config.user.dev.claude-code.skills.gh.enable;
       "instructify@y0usaf-marketplace" = true;
+      "linear-cli@y0usaf-marketplace" = config.user.dev.claude-code.skills.linear-cli.enable;
       "teams-instruct@y0usaf-marketplace" = false;
       "todowrite-instruct@y0usaf-marketplace" = false;
       "tool-tracker@y0usaf-marketplace" = false;

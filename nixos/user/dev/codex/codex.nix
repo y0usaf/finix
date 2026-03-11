@@ -17,6 +17,16 @@
       default = {};
       description = "Codex CLI config.toml setting overrides.";
     };
+
+    skills =
+      lib.mapAttrs (skillName: _skill: {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Whether to install the `${skillName}` Codex skill.";
+        };
+      })
+      (import ../../../../lib/codex).skills;
   };
 
   config = lib.mkIf config.user.dev.codex.enable {};
