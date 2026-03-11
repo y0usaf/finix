@@ -13,7 +13,7 @@ in {
       };
       ".codex/skills/linear-cli/agents/openai.yaml" = {
         generator = lib.generators.toYAML {};
-        value = {interface = skill.interface;};
+        value = {inherit (skill) interface;};
         clobber = true;
       };
     };

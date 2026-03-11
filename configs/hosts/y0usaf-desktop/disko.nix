@@ -6,9 +6,6 @@
 }: let
   username = config.system.username or "y0usaf";
   homeDir = config.system.homeDirectory or "/home/${username}";
-  disks = {
-    systemDisk = "/dev/nvme0n1";
-  };
 in {
   imports = [
     disko.nixosModules.disko
@@ -19,7 +16,10 @@ in {
   disko.devices = {
     disk = {
       system = {
-        device = disks.systemDisk;
+        device =
+          {
+            systemDisk = "/dev/nvme0n1";
+          }.systemDisk;
         type = "disk";
         content = {
           type = "gpt";

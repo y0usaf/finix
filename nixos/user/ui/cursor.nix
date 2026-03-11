@@ -6,7 +6,6 @@
   ...
 }: let
   x11ThemeName = "SSB-x11";
-  xcursorPackage = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}."ssb-xcursor";
   hyprcursorPackage = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}."deepin-dark-hyprcursor";
 in {
   options.user.ui.cursor = {
@@ -19,7 +18,7 @@ in {
   config = lib.mkIf config.user.ui.cursor.enable {
     environment.systemPackages =
       [
-        xcursorPackage
+        flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}."ssb-xcursor"
       ]
       ++ lib.optionals (hyprcursorPackage != null) [
         hyprcursorPackage

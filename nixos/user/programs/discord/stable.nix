@@ -10,16 +10,6 @@
     "WebRtcAllowInputVolumeAdjustment"
     "ChromeWideEchoCancellation"
   ];
-
-  gpuArgs =
-    optionals (disableFeatures != []) [
-      "--disable-features=${concatStringsSep "," disableFeatures}"
-    ]
-    ++ optionals (!config.user.programs.discord.stable.smoothScroll) [
-      "--disable-smooth-scrolling"
-    ];
-
-  commandLineArgs = concatStringsSep " " (gpuArgs ++ config.user.programs.discord.stable.extraArgs);
 in {
   options.user.programs.discord.stable = {
     enable = mkEnableOption "Discord stable";
@@ -39,7 +29,13 @@ in {
   config = mkIf config.user.programs.discord.stable.enable {
     environment.systemPackages = [
       (pkgs.discord.override {
-        inherit commandLineArgs;
+        commandLineArgs = concatStringsSep " " ((optionals (disableFeatures != []) [
+            "--disable-features=${concatStringsSep "," disableFeatures}"
+          ]
+          ++ optionals (!config.user.programs.discord.stable.smoothScroll) [
+            "--disable-smooth-scrolling"
+          ])
+        ++ config.user.programs.discord.stable.extraArgs);
         withOpenASAR = true;
         disableUpdates = false;
         withTTS = false;

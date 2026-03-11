@@ -9,11 +9,9 @@
     inherit (builtins) typeOf replaceStrings elem;
 
     indentStrings = let
-      unlines = lib.splitString "\n";
       lines = lib.concatStringsSep "\n";
-      indentAll = lines: concatStringsSep "\n" (map (x: "	" + x) lines);
     in
-      stringsWithNewlines: indentAll (unlines (lines stringsWithNewlines));
+      stringsWithNewlines: (lines: concatStringsSep "\n" (map (x: "	" + x) lines)) ((lib.splitString "\n") (lines stringsWithNewlines));
 
     sanitizeString = replaceStrings ["\n" ''"''] ["\\n" ''\"''];
 
