@@ -13,11 +13,9 @@
     env = spec.environment;
   };
 
-  mcpServersConfig = {
-    mcpServers = lib.listToAttrs (map
-      (spec: lib.nameValuePair spec.name (mkStdIOServer spec))
-      mcpServerSpecs);
-  };
+  mcpServers = lib.listToAttrs (map
+    (spec: lib.nameValuePair spec.name (mkStdIOServer spec))
+    mcpServerSpecs);
 in {
   options.user.dev.mcp = {
     enable = lib.mkEnableOption "Model Context Protocol configuration";
@@ -30,17 +28,15 @@ in {
     usr = {
       files = {
         ".cursor/mcp.json" = {
-          text = builtins.toJSON mcpServersConfig;
+          text = builtins.toJSON {inherit mcpServers;};
           clobber = true;
         };
         ".claude/mcp_config.json" = {
-          text = builtins.toJSON mcpServersConfig;
+          text = builtins.toJSON {inherit mcpServers;};
           clobber = true;
         };
         ".claude/mcp_servers.json" = {
-          text = builtins.toJSON (lib.listToAttrs (map
-            (spec: lib.nameValuePair spec.name (mkStdIOServer spec))
-            mcpServerSpecs));
+          text = builtins.toJSON mcpServers;
           clobber = true;
         };
       };

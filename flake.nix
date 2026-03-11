@@ -120,12 +120,10 @@
       allowInsecurePredicate = pkg: nixpkgs.lib.hasPrefix "librewolf" (pkg.pname or "");
     };
 
-    linuxNixpkgsConfig = commonNixpkgsConfig;
-
     nixosLib = import ./nixos/lib {
       inherit inputs;
       system = linuxSystem;
-      nixpkgsConfig = linuxNixpkgsConfig;
+      nixpkgsConfig = commonNixpkgsConfig;
     };
 
     darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};

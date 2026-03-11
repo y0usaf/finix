@@ -3,13 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  tomlFormat = pkgs.formats.toml {};
-  tomlGenerator =
-    if lib.generators ? toTOML
-    then lib.generators.toTOML {}
-    else (value: builtins.readFile (tomlFormat.generate "gpuishell-config" value));
-in {
+}: {
   options.user.ui.gpuishell = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -23,7 +17,10 @@ in {
 
     usr.files.".config/gpuishell/config.toml" = {
       clobber = true;
-      generator = tomlGenerator;
+      generator =
+        if lib.generators ? toTOML
+        then lib.generators.toTOML {}
+        else (value: builtins.readFile ((pkgs.formats.toml {}).generate "gpuishell-config" value));
       value = {
         bar = {
           size = 32.0;
