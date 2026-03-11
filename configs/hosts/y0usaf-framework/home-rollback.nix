@@ -1,11 +1,9 @@
-{lib, ...}: let
-  btrfsDevice = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
-in {
+{lib, ...}: {
   # Recreate @home from @home-blank on each boot (impermanence README pattern).
   # This avoids tmpfs /home space pressure while keeping ephemeral home semantics.
   boot.initrd.postDeviceCommands = lib.mkAfter ''
     mkdir -p /btrfs_tmp
-    mount -t btrfs -o subvolid=5 ${btrfsDevice} /btrfs_tmp
+    mount -t btrfs -o subvolid=5 /dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27 /btrfs_tmp
 
     delete_subvolume_recursively() {
       IFS=$'\n'

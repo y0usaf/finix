@@ -6,17 +6,6 @@
 }: let
   librewolfShared = import ../../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
   helpers = import ../../../../lib/browsers/helpers.nix {inherit lib;};
-
-  profilesIni =
-    librewolfShared.profilesIni
-    // {
-      Profile0 =
-        librewolfShared.profilesIni.Profile0
-        // {
-          Name = "default";
-          Path = config.user.name;
-        };
-    };
 in {
   imports = [
     ../../../../lib/browsers/options.nix
@@ -36,7 +25,16 @@ in {
         {
           ".librewolf/profiles.ini" = {
             generator = lib.generators.toINI {};
-            value = profilesIni;
+            value =
+              librewolfShared.profilesIni
+              // {
+                Profile0 =
+                  librewolfShared.profilesIni.Profile0
+                  // {
+                    Name = "default";
+                    Path = config.user.name;
+                  };
+              };
             clobber = true;
           };
           # Pywalfox native messaging host for dynamic theme updates

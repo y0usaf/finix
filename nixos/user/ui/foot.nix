@@ -5,34 +5,13 @@
   ...
 }: let
   computedFontSize = toString config.user.appearance.termFontSize;
-  fallbackFontNames = ["Symbols Nerd Font" config.user.ui.fonts.backup.name config.user.ui.fonts.emoji.name];
   mainFontConfig =
     "${config.user.ui.fonts.mainFontName}:size=${computedFontSize}, "
-    + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") fallbackFontNames);
-  # Foot config - colors loaded dynamically from wallust via include (cache-only theming)
-  footConfigText = ''
-    include=~/.cache/wallust/colors_foot.ini
-
-    [main]
-    term=xterm-256color
-    font=${mainFontConfig}
-    dpi-aware=yes
-
-    [cursor]
-    style=underline
-    blink=no
-
-    [mouse]
-    hide-when-typing=no
-    alternate-scroll-mode=yes
-
-    [colors]
-    alpha=${toString config.user.appearance.opacity}
-
-    [key-bindings]
-    clipboard-copy=Control+c XF86Copy
-    clipboard-paste=Control+v XF86Paste
-  '';
+    + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") [
+      "Symbols Nerd Font"
+      config.user.ui.fonts.backup.name
+      config.user.ui.fonts.emoji.name
+    ]);
 in {
   options.user.ui.foot = {
     enable = lib.mkEnableOption "foot terminal emulator";
@@ -43,7 +22,30 @@ in {
     ];
     usr.files.".config/foot/foot.ini" = {
       clobber = true;
-      text = footConfigText;
+      # Foot config - colors loaded dynamically from wallust via include (cache-only theming)
+      text = ''
+        include=~/.cache/wallust/colors_foot.ini
+
+        [main]
+        term=xterm-256color
+        font=${mainFontConfig}
+        dpi-aware=yes
+
+        [cursor]
+        style=underline
+        blink=no
+
+        [mouse]
+        hide-when-typing=no
+        alternate-scroll-mode=yes
+
+        [colors]
+        alpha=${toString config.user.appearance.opacity}
+
+        [key-bindings]
+        clipboard-copy=Control+c XF86Copy
+        clipboard-paste=Control+v XF86Paste
+      '';
     };
   };
 }

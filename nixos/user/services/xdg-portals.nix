@@ -2,34 +2,7 @@
   lib,
   pkgs,
   ...
-}: let
-  portalEnv = pkgs.writeText "xdg-desktop-portal-gnome-environment.conf" ''
-    [Service]
-    PassEnvironment=WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-  '';
-  portalGnomeOverride = pkgs.writeText "xdg-desktop-portal-gnome-override.conf" ''
-    [Service]
-    Restart=always
-
-    [Unit]
-    After=xdg-desktop-portal-gtk.service
-  '';
-  portalGtkOverride = pkgs.writeText "xdg-desktop-portal-gtk-override.conf" ''
-    [Service]
-    Restart=always
-
-    [Unit]
-    After=xdg-desktop-portal.service
-    Wants=xdg-desktop-portal-gnome.service
-  '';
-  portalOverride = pkgs.writeText "xdg-desktop-portal-override.conf" ''
-    [Service]
-    Restart=always
-
-    [Unit]
-    Wants=xdg-desktop-portal-gtk.service
-  '';
-in {
+}: {
   config = {
     usr = {
       files = {
@@ -61,10 +34,32 @@ in {
       "d %t/systemd/user/xdg-desktop-portal-gnome.service.d 0755 - - - -"
       "d %t/systemd/user/xdg-desktop-portal-gtk.service.d 0755 - - - -"
       "d %t/systemd/user/xdg-desktop-portal.service.d 0755 - - - -"
-      "L+ %t/systemd/user/xdg-desktop-portal-gnome.service.d/environment.conf - - - - ${portalEnv}"
-      "L+ %t/systemd/user/xdg-desktop-portal-gnome.service.d/override.conf - - - - ${portalGnomeOverride}"
-      "L+ %t/systemd/user/xdg-desktop-portal-gtk.service.d/override.conf - - - - ${portalGtkOverride}"
-      "L+ %t/systemd/user/xdg-desktop-portal.service.d/override.conf - - - - ${portalOverride}"
+      "L+ %t/systemd/user/xdg-desktop-portal-gnome.service.d/environment.conf - - - - ${pkgs.writeText "xdg-desktop-portal-gnome-environment.conf" ''
+        [Service]
+        PassEnvironment=WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+      ''}"
+      "L+ %t/systemd/user/xdg-desktop-portal-gnome.service.d/override.conf - - - - ${pkgs.writeText "xdg-desktop-portal-gnome-override.conf" ''
+        [Service]
+        Restart=always
+
+        [Unit]
+        After=xdg-desktop-portal-gtk.service
+      ''}"
+      "L+ %t/systemd/user/xdg-desktop-portal-gtk.service.d/override.conf - - - - ${pkgs.writeText "xdg-desktop-portal-gtk-override.conf" ''
+        [Service]
+        Restart=always
+
+        [Unit]
+        After=xdg-desktop-portal.service
+        Wants=xdg-desktop-portal-gnome.service
+      ''}"
+      "L+ %t/systemd/user/xdg-desktop-portal.service.d/override.conf - - - - ${pkgs.writeText "xdg-desktop-portal-override.conf" ''
+        [Service]
+        Restart=always
+
+        [Unit]
+        Wants=xdg-desktop-portal-gtk.service
+      ''}"
     ];
 
     systemd.user.targets.niri-session = {
