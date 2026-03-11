@@ -3,19 +3,17 @@
   lib,
   genLib,
   ...
-}: let
-  codexConfig = import ../../../../lib/codex;
-in {
+}: {
   config = lib.mkIf config.user.dev.codex.enable {
     usr.files = {
       ".codex/INSTRUCTIONS.md" = {
-        text = codexConfig.instructions;
+        text = (import ../../../../lib/codex).instructions;
         clobber = true;
       };
       ".codex/config.toml" = {
         generator = genLib.toTOML;
         value =
-          codexConfig.settings
+          (import ../../../../lib/codex).settings
           // config.user.dev.codex.settings
           // {
             inherit (config.user.dev.codex) model;

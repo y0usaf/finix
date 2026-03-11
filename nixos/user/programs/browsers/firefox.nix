@@ -5,16 +5,6 @@
   ...
 }: let
   firefoxShared = import ../../../../lib/browsers/firefox-shared.nix {inherit config lib;};
-
-  profilesIni =
-    firefoxShared.profilesIni
-    // {
-      Profile0 =
-        firefoxShared.profilesIni.Profile0
-        // {
-          Path = config.user.name;
-        };
-    };
 in {
   imports = [
     ../../../../lib/browsers/options.nix
@@ -32,7 +22,15 @@ in {
         {
           ".mozilla/firefox/profiles.ini" = {
             generator = lib.generators.toINI {};
-            value = profilesIni;
+            value =
+              firefoxShared.profilesIni
+              // {
+                Profile0 =
+                  firefoxShared.profilesIni.Profile0
+                  // {
+                    Path = config.user.name;
+                  };
+              };
             clobber = true;
           };
           ".mozilla/firefox/${config.user.name}/chrome/userChrome.css" = {

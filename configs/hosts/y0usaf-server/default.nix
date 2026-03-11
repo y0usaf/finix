@@ -7,14 +7,12 @@
     ../../../nixos
     ./hardware-configuration.nix
     ./impermanence.nix
-    ({lib, ...}: let
-      btrfsDevice = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
-    in {
+    ({lib, ...}: {
       # Recreate @home from @home-blank on each boot (impermanence README pattern).
       # This keeps /home ephemeral without moving it to tmpfs.
       boot.initrd.postDeviceCommands = lib.mkAfter ''
         mkdir -p /btrfs_tmp
-        mount -t btrfs -o subvolid=5 ${btrfsDevice} /btrfs_tmp
+        mount -t btrfs -o subvolid=5 /dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92 /btrfs_tmp
 
         delete_subvolume_recursively() {
           IFS=$'\n'
