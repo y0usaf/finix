@@ -4,13 +4,6 @@
   pkgs,
   ...
 }: let
-  models = import ./models.nix;
-  # Try to load host-specific environment, fall back to default
-  hostEnv = "environment-${config.networking.hostName}.nix";
-  environment =
-    if builtins.pathExists ./${hostEnv}
-    then import ./${hostEnv}
-    else import ./environment-default.nix;
   gpuAcceleration = import ./gpu.nix;
 
   # Map GPU acceleration type to ollama package variant
@@ -36,8 +29,11 @@ in {
       host = "127.0.0.1";
       port = 11434;
 
-      loadModels = models;
-      environmentVariables = environment;
+      loadModels = import ./models.nix;
+      environmentVariables =
+        if builtins.pathExists (./. + "/environment-${config.networking.hostName}.nix")
+        then import (./. + "/environment-${config.networking.hostName}.nix")
+        else import ./environment-default.nix;
     };
   };
 }
