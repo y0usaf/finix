@@ -131,12 +131,31 @@
     )
     # Skills
     // lib.optionalAttrs (plugin ? skills) (
-      lib.mapAttrs' (skillName: skillContent:
-        lib.nameValuePair "${pluginPath}/skills/${skillName}/SKILL.md" {
-          text = skillContent;
-          clobber = true;
-        })
-      plugin.skills
+      lib.foldl' (
+        acc: skillName: let
+          skill = plugin.skills.${skillName};
+          skillBody =
+            if builtins.isAttrs skill
+            then skill.skill
+            else skill;
+        in
+          acc
+          // {
+            "${pluginPath}/skills/${skillName}/SKILL.md" = {
+              text = skillBody;
+              clobber = true;
+            };
+          }
+          // lib.optionalAttrs (builtins.isAttrs skill && skill ? interface) {
+            "${pluginPath}/skills/${skillName}/agents/openai.yaml" = {
+              generator = lib.generators.toYAML {};
+              value = {
+                interface = skill.interface;
+              };
+              clobber = true;
+            };
+          }
+      ) {} (lib.attrNames plugin.skills)
     )
     # Data files (arbitrary files at plugin root)
     // lib.optionalAttrs (plugin ? dataFiles) (
