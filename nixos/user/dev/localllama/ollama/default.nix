@@ -5,18 +5,7 @@
   ...
 }: let
   gpuAcceleration = import ./gpu.nix;
-
   # Map GPU acceleration type to ollama package variant
-  ollamaPackage =
-    if gpuAcceleration == "cuda"
-    then pkgs.ollama-cuda
-    else if gpuAcceleration == "rocm"
-    then pkgs.ollama-rocm
-    else if gpuAcceleration == "vulkan"
-    then pkgs.ollama-vulkan
-    else if gpuAcceleration == null
-    then pkgs.ollama-cpu
-    else pkgs.ollama;
 in {
   options.user.dev.localllama = {
     enable = lib.mkEnableOption "Local LLM setup with Ollama";
@@ -25,7 +14,16 @@ in {
   config = lib.mkIf config.user.dev.localllama.enable {
     services.ollama = {
       enable = true;
-      package = ollamaPackage;
+      package =
+        if gpuAcceleration == "cuda"
+        then pkgs.ollama-cuda
+        else if gpuAcceleration == "rocm"
+        then pkgs.ollama-rocm
+        else if gpuAcceleration == "vulkan"
+        then pkgs.ollama-vulkan
+        else if gpuAcceleration == null
+        then pkgs.ollama-cpu
+        else pkgs.ollama;
       host = "127.0.0.1";
       port = 11434;
 

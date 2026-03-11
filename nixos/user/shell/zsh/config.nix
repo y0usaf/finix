@@ -47,7 +47,6 @@
             text = let
               settings = import ./settings.nix {inherit config;};
               libFunctions = import ../../../../lib/shell/zsh/functions.nix {};
-              localFunctions = import ./functions.nix {inherit config;};
             in
               lib.concatStringsSep "\n" (
                 [
@@ -65,7 +64,7 @@
 
                   libFunctions.temppkg
                   libFunctions.temprun
-                  localFunctions.fanspeed
+                  (import ./functions.nix {inherit config;}).fanspeed
                 ]
               );
             clobber = true;

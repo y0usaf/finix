@@ -23,8 +23,6 @@ lib: let
       ;
 
     toHyprconf' = indent: attrs: let
-      sections = filterAttrs (_: v: isAttrs v || (isList v && all isAttrs v)) attrs;
-
       mkSection = n: attrs:
         if lib.isList attrs
         then (concatMapStringsSep "\n" (a: mkSection n a) attrs)
@@ -49,12 +47,10 @@ lib: let
         importantPrefixes;
 
       importantFields = filterAttrs isImportantField allFields;
-
-      fields = removeAttrs allFields (mapAttrsToList (n: _: n) importantFields);
     in
       mkFields importantFields
-      + concatStringsSep "\n" (mapAttrsToList mkSection sections)
-      + mkFields fields;
+      + concatStringsSep "\n" (mapAttrsToList mkSection (filterAttrs (_: v: isAttrs v || (isList v && all isAttrs v)) attrs))
+      + mkFields (removeAttrs allFields (mapAttrsToList (n: _: n) importantFields));
   in
     toHyprconf' (concatStrings (replicate indentLevel "  ")) attrs;
 

@@ -3,23 +3,19 @@
 {
   config,
   lib,
-}: let
-  policies = import ./policies.nix {inherit config lib;};
-  prefs = import ./prefs.nix {inherit config lib;};
-  ui = import ./ui-chrome.nix;
-in {
+}: {
   # LibreWolf policies (slightly different from Firefox)
   browserPolicies =
-    policies.browserPolicies
+    (import ./policies.nix {inherit config lib;}).browserPolicies
     // {
       DisableFirefoxAccounts = false;
     };
 
   # Browser preferences (locked and default)
-  inherit (prefs) locked default;
+  inherit (import ./prefs.nix {inherit config lib;}) locked default;
 
   # Firefox UI CSS
-  inherit (ui) userChromeCss;
+  inherit (import ./ui-chrome.nix) userChromeCss;
 
   # LibreWolf profiles.ini configuration
   profilesIni = {

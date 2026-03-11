@@ -2,7 +2,6 @@
 # These use Jinja2 syntax: {{ color0 }}, {{ background | red }}, etc.
 {lib}: let
   zellij = import ./zellij.nix {inherit lib;};
-  mkWallustConfig = import ./wallust-config.nix {inherit lib;};
 in {
   # CSS variables
   colorsCss = import ./colors-css.nix;
@@ -17,7 +16,7 @@ in {
   pywalColorsJson = import ./pywal.nix;
 
   # Wallust config generator
-  inherit mkWallustConfig;
+  mkWallustConfig = import ./wallust-config.nix {inherit lib;};
 
   # Zellij templates
   mkZellijConfigTemplate = zellij.mkConfigTemplate;

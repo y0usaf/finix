@@ -3,27 +3,22 @@
 {
   config,
   lib,
-}: let
-  policies = import ./policies.nix {inherit config lib;};
-  prefs = import ./prefs.nix {inherit config lib;};
-  ui = import ./ui-chrome.nix;
-  content = import ./ui-content.nix;
-in {
+}: {
   # Firefox policies to apply (used by both platforms)
   browserPolicies =
-    policies.browserPolicies
+    (import ./policies.nix {inherit config lib;}).browserPolicies
     // {
       DisableFirefoxStudies = true;
     };
 
   # Browser preferences (locked and default)
-  inherit (prefs) locked default;
+  inherit (import ./prefs.nix {inherit config lib;}) locked default;
 
   # Firefox UI CSS
-  inherit (ui) userChromeCss;
+  inherit (import ./ui-chrome.nix) userChromeCss;
 
   # Firefox web content CSS
-  inherit (content) userContentCss;
+  inherit (import ./ui-content.nix) userContentCss;
 
   # Standard profiles.ini configuration
   profilesIni = {

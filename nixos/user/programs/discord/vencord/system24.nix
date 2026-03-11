@@ -18,7 +18,7 @@
 
 
           :root {
-              --custom-guild-list-padding: 12px;
+              --custom-guild-list-padding: 6px;
               --panel-backdrop-filter: none;
 
           }
@@ -32,7 +32,7 @@
               --custom-app-top-bar-height: var(--top-bar-height);
               --window-control-size: 14px;
               --custom-chatbar: separated !important;
-              --chatbar-height: 56px !important;
+              --chatbar-height: 40px !important;
               --label-color: var(--text-muted);
               --label-hover-color: var(--brand-360);
               --label-font-weight: 500;
@@ -396,6 +396,7 @@
           .message__5126c {
               border-radius: var(--radius-md);
               margin-left: 4px;
+              padding-block: 1px !important;
           }
 
           .pill_e5445c.wrapper__58105 {
@@ -1358,6 +1359,9 @@
               }
               .guilds__5e434 {
                   margin-bottom: 0;
+              }
+              .accountProfileCard__1fed1 {
+                  padding-block: 4px !important;
               }
 
           /* window-controls.css */

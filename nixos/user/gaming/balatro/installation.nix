@@ -4,7 +4,6 @@
   lib,
   ...
 }: let
-  moreSpeeds = import ./moreSpeeds.nix {inherit config lib;};
   sources = import ./npins;
   availableMods = {
     steamodded = {
@@ -48,7 +47,6 @@
       name = "Aura";
     };
   };
-  enabledMods = lib.filterAttrs (name: _mod: lib.elem name config.user.gaming.balatro.enabledMods) availableMods;
   lovelyInjectorPackage = pkgs.fetchzip {
     url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
     sha256 = "sha256-tFDiYDRW5arGz92Knug6XnyhxYatUQ7iR/Wxfz6Hjw4=";
@@ -91,7 +89,7 @@ in {
     };
   };
   config = lib.mkMerge [
-    moreSpeeds.config
+    (import ./moreSpeeds.nix {inherit config lib;}).config
     (lib.mkIf config.user.gaming.balatro.enable {
       usr.files =
         (lib.mapAttrs' (
@@ -103,7 +101,7 @@ in {
                 source = mod.src;
               }
           )
-          enabledMods)
+          (lib.filterAttrs (name: _mod: lib.elem name config.user.gaming.balatro.enabledMods) availableMods))
         // (lib.optionalAttrs config.user.gaming.balatro.enableLovelyInjector {
           "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Balatro/version.dll" = {
             clobber = true;

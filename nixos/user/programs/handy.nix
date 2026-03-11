@@ -34,17 +34,6 @@
     outputHashMode = "recursive";
     outputHash = "sha256-+hUANv0w3qnK5d2+4JW3XMazLRDhWCbOxUXQyTGta/0=";
   };
-
-  handy = handyBase.overrideAttrs (_old: {
-    preBuild = ''
-      cp -r ${handyBunDeps}/node_modules node_modules
-      chmod -R +w node_modules
-      substituteInPlace node_modules/.bin/{tsc,vite} \
-        --replace-fail "/usr/bin/env node" "${lib.getExe pkgs.bun}"
-      export HOME=$TMPDIR
-      bun run build
-    '';
-  });
 in {
   options.user.programs.handy = {
     enable = lib.mkEnableOption "Handy speech-to-text";
@@ -57,7 +46,16 @@ in {
 
   config = lib.mkIf config.user.programs.handy.enable {
     environment.systemPackages = [
-      handy
+      (handyBase.overrideAttrs (_old: {
+        preBuild = ''
+          cp -r ${handyBunDeps}/node_modules node_modules
+          chmod -R +w node_modules
+          substituteInPlace node_modules/.bin/{tsc,vite} \
+            --replace-fail "/usr/bin/env node" "${lib.getExe pkgs.bun}"
+          export HOME=$TMPDIR
+          bun run build
+        '';
+      }))
       pkgs.wtype # Ensure wtype is available for Wayland text injection
     ];
 

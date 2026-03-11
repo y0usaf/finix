@@ -3,42 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  mcpServerSpecs = import ../../../../lib/mcp/servers.nix {inherit config;};
-  ollamaProvider = import ../../../../lib/opencode/ollama.nix;
-
-  mcpServers = lib.listToAttrs (map
-    (spec:
-      lib.nameValuePair spec.name {
-        type = "local";
-        command = [spec.command] ++ spec.args;
-        enabled = true;
-        inherit (spec) environment;
-      })
-    mcpServerSpecs);
-
-  globalConfig =
-    {
-      "$schema" = "https://opencode.ai/config.json";
-      inherit (config.user.dev.opencode) theme;
-      inherit (config.user.dev.opencode) model;
-      autoupdate = true;
-      share = "manual";
-      disabled_providers = ["openai" "huggingface"];
-      instructions = [
-        "AGENTS.md"
-        ".cursor/rules/*.md"
-        "{file:${config.user.homeDirectory}/.config/opencode/claude-instructions.md}"
-        "{file:${config.user.homeDirectory}/.config/opencode/opencode-instructions.md}"
-      ];
-    }
-    // (lib.optionalAttrs config.user.dev.opencode.enableOllama {
-      inherit (ollamaProvider) provider;
-    })
-    // (lib.optionalAttrs config.user.dev.opencode.enableMcpServers {
-      mcp = mcpServers;
-    });
-in {
+}: {
   options.user.dev.opencode = {
     enable = lib.mkEnableOption "opencode AI coding agent";
 
@@ -75,7 +40,33 @@ in {
     usr = {
       files = {
         ".config/opencode/opencode.json" = {
-          text = builtins.toJSON globalConfig;
+          text = builtins.toJSON ({
+              "$schema" = "https://opencode.ai/config.json";
+              inherit (config.user.dev.opencode) theme model;
+              autoupdate = true;
+              share = "manual";
+              disabled_providers = ["openai" "huggingface"];
+              instructions = [
+                "AGENTS.md"
+                ".cursor/rules/*.md"
+                "{file:${config.user.homeDirectory}/.config/opencode/claude-instructions.md}"
+                "{file:${config.user.homeDirectory}/.config/opencode/opencode-instructions.md}"
+              ];
+            }
+            // (lib.optionalAttrs config.user.dev.opencode.enableOllama {
+              inherit (import ../../../../lib/opencode/ollama.nix) provider;
+            })
+            // (lib.optionalAttrs config.user.dev.opencode.enableMcpServers {
+              mcp = lib.listToAttrs (map
+                (spec:
+                  lib.nameValuePair spec.name {
+                    type = "local";
+                    command = [spec.command] ++ spec.args;
+                    enabled = true;
+                    inherit (spec) environment;
+                  })
+                (import ../../../../lib/mcp/servers.nix {inherit config;}));
+            }));
           clobber = true;
         };
 

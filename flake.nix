@@ -125,12 +125,6 @@
       allowInsecurePredicate = pkg: nixpkgs.lib.hasPrefix "librewolf" (pkg.pname or "");
     };
 
-    nixosLib = import ./nixos/lib {
-      inherit inputs;
-      system = linuxSystem;
-      nixpkgsConfig = commonNixpkgsConfig;
-    };
-
     darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};
     darwinLib = darwinPkgs.lib;
     genLib = import ./lib/generators {
@@ -148,7 +142,14 @@
       '';
     };
   in {
-    inherit (nixosLib) nixosConfigurations;
+    inherit
+      (import ./nixos/lib {
+        inherit inputs;
+        system = linuxSystem;
+        nixpkgsConfig = commonNixpkgsConfig;
+      })
+      nixosConfigurations
+      ;
 
     darwinConfigurations.y0usaf-macbook = darwin.lib.darwinSystem {
       system = darwinSystem;

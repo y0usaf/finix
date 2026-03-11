@@ -19,14 +19,13 @@
   strokeLayers = 4;
   repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (_: shadowOffsets) strokeLayers));
   baseOpacity = toString (config.user.appearance.opacity / 3);
-  textColor = "white";
   backgroundColor = "rgba(0, 0, 0, ${baseOpacity})";
 in {
   gtkCss = ''
     /* Global element styling */
     * {
       font-family: "${config.user.ui.fonts.mainFontName}";
-      color: ${textColor};
+      color: white;
       background: ${backgroundColor};
       outline-width: 0;
       outline-offset: 0;

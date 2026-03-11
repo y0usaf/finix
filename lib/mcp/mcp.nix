@@ -9,8 +9,7 @@
     (spec:
       lib.nameValuePair spec.name {
         type = "stdio";
-        inherit (spec) command;
-        inherit (spec) args;
+        inherit (spec) command args;
         env = spec.environment;
       })
     mcpServerSpecs);
