@@ -53,6 +53,7 @@ in {
             inputs.tweakcc.nixosModules.default
             inputs.mango.nixosModules.mango
             inputs.impermanence.nixosModules.impermanence
+            inputs.patchix.nixosModules.default
             ../user
           ];
           nixpkgs = {
