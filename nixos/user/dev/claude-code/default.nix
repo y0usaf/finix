@@ -26,57 +26,7 @@ in {
         description = "Personal Claude Code plugin marketplace";
         version = "1.0.0";
       })
-      # Base Claude settings (model, env, etc. - NO hooks)
       // {
-        ".claude/settings.json" = {
-          text = builtins.toJSON {
-            inherit (claudeCodeConfig.settings) includeCoAuthoredBy statusLine permissions;
-            inherit (config.user.dev.claude-code) model;
-            env =
-              claudeCodeConfig.settings.env
-              // {
-                CLAUDE_CODE_SUBAGENT_MODEL = config.user.dev.claude-code.subagentModel;
-              };
-            enabledPlugins = {
-              "agent-slack@y0usaf-marketplace" = config.user.dev.agent-slack.enable && config.user.dev.claude-code.skills.agent-slack.enable;
-              "audio-notify@y0usaf-marketplace" = true;
-              "codex-mcp@y0usaf-marketplace" = false;
-              "collab-flow@y0usaf-marketplace" = false;
-              "gh@y0usaf-marketplace" = config.user.tools.gh.enable && config.user.dev.claude-code.skills.gh.enable;
-              "instructify@y0usaf-marketplace" = true;
-              "linear-cli@y0usaf-marketplace" = config.user.dev.claude-code.skills.linear-cli.enable;
-              "teams-instruct@y0usaf-marketplace" = false;
-              "todowrite-instruct@y0usaf-marketplace" = false;
-              "tool-tracker@y0usaf-marketplace" = false;
-              "ralph-loop@claude-plugins-official" = false;
-              "code-simplifier@claude-plugins-official" = true;
-              # CU-Claude-Plugins
-              "codex-mcp@CU-Claude-Plugins" = false;
-              "collab-flow@CU-Claude-Plugins" = false;
-              "skills-framework@CU-Claude-Plugins" = true;
-              "the-chopper@CU-Claude-Plugins" = true;
-              "skill-eval-hook@CU-Claude-Plugins" = false;
-              "skillify@CU-Claude-Plugins" = true;
-            };
-            extraKnownMarketplaces = {
-              "y0usaf-marketplace" = {
-                source = {
-                  source = "directory";
-                  path = "${config.user.homeDirectory}/.config/claude";
-                };
-              };
-              "CU-Claude-Plugins" = {
-                source = {
-                  source = "github";
-                  owner = "Cook-Unity";
-                  repo = "CU-Claude-Plugins";
-                };
-              };
-            };
-          };
-          clobber = true;
-        };
-
         # Sound files for notifications
         ".claude/on-agent-need-attention.wav" = {
           source = ../../../../lib/claude-code/tuturu.ogg;
@@ -93,5 +43,56 @@ in {
           clobber = true;
         };
       };
+
+    # settings.json via patchix — mutable so Claude Code can toggle plugins
+    patchix.enable = true;
+    patchix.users."${config.user.name}".patches.".claude/settings.json" = {
+      format = "json";
+      clobber = false;
+      value = {
+        inherit (claudeCodeConfig.settings) includeCoAuthoredBy statusLine permissions;
+        inherit (config.user.dev.claude-code) model;
+        env =
+          claudeCodeConfig.settings.env
+          // {
+            CLAUDE_CODE_SUBAGENT_MODEL = config.user.dev.claude-code.subagentModel;
+          };
+        enabledPlugins = {
+          "agent-slack@y0usaf-marketplace" = config.user.dev.agent-slack.enable && config.user.dev.claude-code.skills.agent-slack.enable;
+          "audio-notify@y0usaf-marketplace" = true;
+          "codex-mcp@y0usaf-marketplace" = false;
+          "collab-flow@y0usaf-marketplace" = false;
+          "gh@y0usaf-marketplace" = config.user.tools.gh.enable && config.user.dev.claude-code.skills.gh.enable;
+          "instructify@y0usaf-marketplace" = true;
+          "linear-cli@y0usaf-marketplace" = config.user.dev.claude-code.skills.linear-cli.enable;
+          "teams-instruct@y0usaf-marketplace" = false;
+          "todowrite-instruct@y0usaf-marketplace" = false;
+          "tool-tracker@y0usaf-marketplace" = false;
+          "ralph-loop@claude-plugins-official" = false;
+          "code-simplifier@claude-plugins-official" = true;
+          "codex-mcp@ai-eng-plugins" = false;
+          "collab-flow@ai-eng-plugins" = false;
+          "skills-framework@ai-eng-plugins" = true;
+          "the-chopper@ai-eng-plugins" = true;
+          "skill-eval-hook@ai-eng-plugins" = false;
+          "skillify@ai-eng-plugins" = true;
+        };
+        extraKnownMarketplaces = {
+          "y0usaf-marketplace" = {
+            source = {
+              source = "directory";
+              path = "${config.user.homeDirectory}/.config/claude";
+            };
+          };
+          "ai-eng-plugins" = {
+            source = {
+              source = "github";
+              owner = "Cook-Unity";
+              repo = "ai-eng-plugins";
+            };
+          };
+        };
+      };
+    };
   };
 }
