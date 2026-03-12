@@ -106,6 +106,11 @@
       url = "path:/home/y0usaf/Dev/strictix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    patchix = {
+      url = "path:/home/y0usaf/Dev/patchix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
