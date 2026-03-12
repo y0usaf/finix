@@ -4,8 +4,7 @@
   disko,
   ...
 }: let
-  username = config.system.username or "y0usaf";
-  homeDir = config.system.homeDirectory or "/home/${username}";
+  homeDir = config.system.homeDirectory or "/home/${config.system.username or "y0usaf"}";
 in {
   imports = [
     disko.nixosModules.disko

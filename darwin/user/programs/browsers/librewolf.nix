@@ -12,7 +12,7 @@ in {
   ];
 
   config = lib.mkIf config.user.programs.librewolf.enable {
-    home-manager.users.${config.user.name} = {
+    home-manager.users."${config.user.name}" = {
       home = {
         packages = [
           pkgs.librewolf

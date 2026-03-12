@@ -38,22 +38,22 @@ lib: let
 
       allFields = filterAttrs (_: v: !(isAttrs v || (isList v && all isAttrs v))) attrs;
 
-      isImportantField = n: _:
+      importantFields = filterAttrs (n: _:
         foldl (acc: prev:
           if hasPrefix prev n
           then true
           else acc)
         false
-        importantPrefixes;
-
-      importantFields = filterAttrs isImportantField allFields;
+        importantPrefixes)
+      allFields;
     in
       mkFields importantFields
       + concatStringsSep "\n" (mapAttrsToList mkSection (filterAttrs (_: v: isAttrs v || (isList v && all isAttrs v)) attrs))
       + mkFields (removeAttrs allFields (mapAttrsToList (n: _: n) importantFields));
   in
     toHyprconf' (concatStrings (replicate indentLevel "  ")) attrs;
-
+in {
+  inherit toHyprconf;
   pluginsToHyprconf = plugins: importantPrefixes:
     toHyprconf {
       attrs = {
@@ -67,6 +67,4 @@ lib: let
       };
       inherit importantPrefixes;
     };
-in {
-  inherit toHyprconf pluginsToHyprconf;
 }

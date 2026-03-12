@@ -13,8 +13,6 @@
     in
       stringsWithNewlines: (lines: concatStringsSep "\n" (map (x: "	" + x) lines)) ((lib.splitString "\n") (lines stringsWithNewlines));
 
-    sanitizeString = replaceStrings ["\n" ''"''] ["\\n" ''\"''];
-
     literalValueToString = element:
       lib.throwIfNot
       (elem (typeOf element) [
@@ -34,57 +32,9 @@
           then "true"
           else "false"
         else if typeOf element == "string"
-        then ''"${sanitizeString element}"''
+        then ''"${replaceStrings ["\n" ''"''] ["\\n" ''\"''] element}"''
         else toString element
       );
-
-    convertAttrsToKDL = name: attrs: let
-      children =
-        (lib.pipe (attrs._children or []) [
-          (map (child: mapAttrsToList convertAttributeToKDL child))
-          lib.flatten
-        ])
-        ++ (lib.pipe attrs [
-          (lib.filterAttrs (
-            name: _:
-              !(elem name [
-                "_args"
-                "_props"
-                "_children"
-              ])
-          ))
-          (mapAttrsToList convertAttributeToKDL)
-        ]);
-    in
-      lib.concatStringsSep " " (
-        [name]
-        ++ map literalValueToString (attrs._args or [])
-        ++ lib.mapAttrsToList (name: value: "${name}=${literalValueToString value}") (attrs._props or {})
-        ++ lib.optional (children != []) ''
-          {
-          ${indentStrings children}
-          }''
-      );
-
-    convertListOfFlatAttrsToKDL = name: list: "${name} ${concatStringsSep " " (map literalValueToString list)}";
-
-    convertListOfNonFlatAttrsToKDL = name: list: ''
-      ${name} {
-      ${indentStrings (map (x: convertAttributeToKDL "-" x) list)}
-      }'';
-
-    convertListToKDL = name: list:
-      if
-        !any (
-          el:
-            elem (typeOf el) [
-              "list"
-              "set"
-            ]
-        )
-        list
-      then convertListOfFlatAttrsToKDL name list
-      else convertListOfNonFlatAttrsToKDL name list;
 
     convertAttributeToKDL = name: value: let
       vType = typeOf value;
@@ -99,9 +49,49 @@
         ]
       then "${name} ${literalValueToString value}"
       else if vType == "set"
-      then convertAttrsToKDL name value
+      then let
+        children =
+          (lib.pipe (value._children or []) [
+            (map (child: mapAttrsToList convertAttributeToKDL child))
+            lib.flatten
+          ])
+          ++ (lib.pipe value [
+            (lib.filterAttrs (
+              childName: _:
+                !(elem childName [
+                  "_args"
+                  "_props"
+                  "_children"
+                ])
+            ))
+            (mapAttrsToList convertAttributeToKDL)
+          ]);
+      in
+        lib.concatStringsSep " " (
+          [name]
+          ++ map literalValueToString (value._args or [])
+          ++ lib.mapAttrsToList (propName: propValue: "${propName}=${literalValueToString propValue}") (value._props or {})
+          ++ lib.optional (children != []) ''
+            {
+            ${indentStrings children}
+            }''
+        )
       else if vType == "list"
-      then convertListToKDL name value
+      then
+        if
+          !any (
+            el:
+              elem (typeOf el) [
+                "list"
+                "set"
+              ]
+          )
+          value
+        then "${name} ${concatStringsSep " " (map literalValueToString value)}"
+        else ''
+          ${name} {
+          ${indentStrings (map (x: convertAttributeToKDL "-" x) value)}
+          }''
       else
         throw ''
           Cannot convert type `(${typeOf value})` to KDL:

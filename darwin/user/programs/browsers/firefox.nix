@@ -11,7 +11,7 @@ in {
   ];
 
   config = lib.mkIf config.user.programs.firefox.enable {
-    home-manager.users.${config.user.name} = {
+    home-manager.users."${config.user.name}" = {
       home = {
         packages = [
           (pkgs.wrapFirefox pkgs.firefox-unwrapped {

@@ -2,34 +2,33 @@
   config,
   lib,
   ...
-}:
-with lib; {
+}: {
   options.user.ui.jankyborders = {
-    enable = mkEnableOption "jankyborders window borders";
+    enable = lib.mkEnableOption "jankyborders window borders";
 
-    style = mkOption {
-      type = types.enum ["round" "square"];
+    style = lib.mkOption {
+      type = lib.types.enum ["round" "square"];
       default = "square";
     };
 
-    width = mkOption {
-      type = types.float;
+    width = lib.mkOption {
+      type = lib.types.float;
       default = 2.0;
     };
 
-    activeColor = mkOption {
-      type = types.str;
+    activeColor = lib.mkOption {
+      type = lib.types.str;
       default = "0xffffffff";
     };
 
-    inactiveColor = mkOption {
-      type = types.str;
+    inactiveColor = lib.mkOption {
+      type = lib.types.str;
       default = "0xff333333";
     };
   };
 
-  config = mkIf config.user.ui.jankyborders.enable {
-    home-manager.users.${config.user.name} = {
+  config = lib.mkIf config.user.ui.jankyborders.enable {
+    home-manager.users."${config.user.name}" = {
       home.file.".config/borders/bordersrc" = {
         executable = true;
         text = ''

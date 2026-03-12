@@ -71,7 +71,7 @@
       cursor.enable = true;
       fonts = {
         enable = true;
-        mainFont = flakeInputs.fast-fonts.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        mainFont = flakeInputs.fast-fonts.packages."${pkgs.stdenv.hostPlatform.system}".default;
         mainFontName = "Iosevka Term Slab";
         backup = {
           package = pkgs.noto-fonts-cjk-sans;

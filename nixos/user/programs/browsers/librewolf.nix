@@ -20,7 +20,7 @@ in {
       })
       pkgs.pywalfox-native
     ];
-    hjem.users.${config.user.name} = {
+    hjem.users."${config.user.name}" = {
       files =
         {
           ".librewolf/profiles.ini" = {

@@ -11,7 +11,7 @@
 
   config = lib.mkIf config.user.dev.agent-slack.enable {
     environment.systemPackages = [
-      flakeInputs.agent-slack.packages.${pkgs.stdenv.hostPlatform.system}.default
+      flakeInputs.agent-slack.packages."${pkgs.stdenv.hostPlatform.system}".default
     ];
   };
 }

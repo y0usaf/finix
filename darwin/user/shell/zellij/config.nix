@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.shell.zellij.enable {
-    home-manager.users.${config.user.name} = {
+    home-manager.users."${config.user.name}" = {
       programs.zellij = {
         enable = true;
         inherit (config.user.shell.zellij) package;

@@ -1,7 +1,4 @@
 {lib, ...}: let
-  theme = import ./theme.nix {};
-  zjstatus = import ./zjstatus.nix {};
-
   baseConfig = {
     hide_session_name = false;
     copy_on_select = true;
@@ -11,7 +8,6 @@
     pane_frames = true;
   };
 
-  zjstatusUrl = "https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm";
   zjstatusHintsUrl = "https://raw.githubusercontent.com/y0usaf/zjstatus-hints/feat/custom-labels/zjstatus_hints.wasm";
 
   shellChecks = ''
@@ -25,11 +21,12 @@
     # Robust fallback: device path check (minimal subprocess overhead)
     [[ $(readlink /proc/self/fd/0 2>/dev/null) =~ ^/dev/tty[0-9] ]] && return
   '';
-
-  shellIntegration = shellChecks + "\n    exec zellij\n  ";
 in {
-  inherit baseConfig shellIntegration shellChecks theme zjstatus;
-  inherit zjstatusUrl zjstatusHintsUrl;
+  inherit baseConfig shellChecks zjstatusHintsUrl;
+  theme = import ./theme.nix {};
+  zjstatus = import ./zjstatus.nix {};
+  zjstatusUrl = "https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm";
+  shellIntegration = shellChecks + "\n    exec zellij\n  ";
 
   # Build complete KDL config attrs (caller will pass to genLib.toKDL)
   mkKdlAttrs = {

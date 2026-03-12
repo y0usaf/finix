@@ -88,7 +88,7 @@ in {
     (lib.mkIf config.user.gaming.balatro.enable {
       usr.files =
         (lib.mapAttrs' (
-            _name: mod:
+            _: mod:
               lib.nameValuePair
               "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
               {
@@ -96,7 +96,7 @@ in {
                 source = mod.src;
               }
           )
-          (lib.filterAttrs (name: _mod: lib.elem name config.user.gaming.balatro.enabledMods) availableMods))
+          (lib.filterAttrs (name: _: lib.elem name config.user.gaming.balatro.enabledMods) availableMods))
         // (lib.optionalAttrs config.user.gaming.balatro.enableLovelyInjector {
           "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Balatro/version.dll" = {
             clobber = true;

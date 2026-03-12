@@ -3,7 +3,7 @@
   lib,
   ...
 }: {
-  home-manager.users.${config.user.name} = lib.mkIf config.user.tools.raycast.enable {
+  home-manager.users."${config.user.name}" = lib.mkIf config.user.tools.raycast.enable {
     launchd.agents.raycast = {
       enable = true;
       config = {

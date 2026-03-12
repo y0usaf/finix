@@ -15,6 +15,7 @@
       pkgs.pkg-config
       pkgs.openssl
       pkgs.gcc
+      pkgs.cargo
     ];
 
     systemd.tmpfiles.rules = [

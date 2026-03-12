@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: {
-  home-manager.users.${config.user.name} = {
+  home-manager.users."${config.user.name}" = {
     programs.zsh = {
       enable = true;
 

@@ -1,5 +1,5 @@
 {config, ...}: {
-  home-manager.users.${config.user.name}.services.syncthing = {
+  home-manager.users."${config.user.name}".services.syncthing = {
     enable = true;
 
     settings = {
