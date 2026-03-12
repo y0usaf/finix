@@ -31,19 +31,16 @@ let
           rev = revision;
           name =
             (url: rev: let
-              matched = builtins.match "^.*/([^/]*)(\\.git)?$" url;
-
-              short = builtins.substring 0 7 rev;
-
-              appendShort =
+                matched = builtins.match "^.*/([^/]*)(\\.git)?$" url;
+              in "${
+                if matched == null
+                then "source"
+                else builtins.head matched
+              }${
                 if (builtins.match "[a-f0-9]*" rev) != null
-                then "-${short}"
-                else "";
-            in "${
-              if matched == null
-              then "source"
-              else builtins.head matched
-            }${appendShort}")
+                then "-${builtins.substring 0 7 rev}"
+                else ""
+              }")
             url
             revision;
           inherit url submodules;
@@ -57,8 +54,7 @@ in
         // {
           outPath =
             (name: path: let
-              envVarName = "NPINS_OVERRIDE_${saneName}";
-              saneName = (f: s:
+              envVarName = "NPINS_OVERRIDE_${(f: s:
                 (builtins.concatStringsSep "") (map f ((s:
                   map (p: builtins.substring p 1 s) ((first: last:
                     if first > last
@@ -69,7 +65,7 @@ in
                 if (builtins.match "[a-zA-Z0-9]" c) == null
                 then "_"
                 else c)
-              name;
+              name}";
               ersatz = builtins.getEnv envVarName;
             in
               if ersatz == ""
