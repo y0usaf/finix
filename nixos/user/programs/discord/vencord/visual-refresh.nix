@@ -8,7 +8,7 @@
       (config.user.programs.discord.stable.enable or false)
       || (config.user.programs.discord.canary.enable or false)
     ) {
-      hjem.users.${config.user.name}.files = {
+      hjem.users."${config.user.name}".files = {
         ".config/Vencord/themes/visual-refresh-hide-1.css".text = ''
           /* Hide the Visual Refresh title bar */
           .visual-refresh {

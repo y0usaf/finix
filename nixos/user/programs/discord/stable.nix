@@ -43,7 +43,7 @@ in {
       })
     ];
 
-    hjem.users.${config.user.name}.files = {
+    hjem.users."${config.user.name}".files = {
       ".config/discord/settings.json" = {
         generator = lib.generators.toJSON {};
         value = {
