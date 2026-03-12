@@ -3,6 +3,6 @@ _: {
     ./disblock.nix
     ./visual-refresh.nix
     ./system-font.nix
-    ./system24.nix
+    ./custom-theme.nix
   ];
 }
