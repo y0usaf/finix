@@ -29,9 +29,9 @@
   config = lib.mkIf config.user.ui.ags.bar-overlay.enable (
     let
       agsWithModules = pkgs.ags.override {
-        extraPackages = with pkgs.astal; [
-          tray
-          battery
+        extraPackages = [
+          pkgs.astal.tray
+          pkgs.astal.battery
         ];
       };
     in {

@@ -1,4 +1,5 @@
 {
+  lib,
   config,
   flakeDirectory,
 }:
@@ -10,11 +11,7 @@
   hmpush = "git -C ${flakeDirectory} push origin main --force";
   hmpull = "git -C ${flakeDirectory} fetch origin && git -C ${flakeDirectory} reset --hard origin/main";
 }
-// (
-  if config.hardware.nvidia.enable
-  then {
-    nvidia-settings = ''nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings"'';
-    gpupower = "sudo nvidia-smi -pl";
-  }
-  else {}
-)
+// lib.optionalAttrs config.hardware.nvidia.enable {
+  nvidia-settings = ''nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings"'';
+  gpupower = "sudo nvidia-smi -pl";
+}

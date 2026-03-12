@@ -31,8 +31,6 @@
   };
 
   inherit (pkgs) lib;
-
-  genLib = import ../../lib/generators {inherit lib pkgs;};
 in {
   nixosConfigurations =
     lib.mapAttrs (_hostName: hostConfig:
@@ -66,7 +64,8 @@ in {
             inherit (hostConfig) homeDirectory;
           };
           _module.args = {
-            inherit hostConfig lib genLib;
+            inherit hostConfig lib;
+            genLib = import ../../lib/generators {inherit lib pkgs;};
             flakeInputs = inputs;
           };
         };

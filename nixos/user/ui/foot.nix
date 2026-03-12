@@ -5,13 +5,6 @@
   ...
 }: let
   computedFontSize = toString config.user.appearance.termFontSize;
-  mainFontConfig =
-    "${config.user.ui.fonts.mainFontName}:size=${computedFontSize}, "
-    + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") [
-      "Symbols Nerd Font"
-      config.user.ui.fonts.backup.name
-      config.user.ui.fonts.emoji.name
-    ]);
 in {
   options.user.ui.foot = {
     enable = lib.mkEnableOption "foot terminal emulator";
@@ -28,7 +21,12 @@ in {
 
         [main]
         term=xterm-256color
-        font=${mainFontConfig}
+        font=${"${config.user.ui.fonts.mainFontName}:size=${computedFontSize}, "
+          + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") [
+            "Symbols Nerd Font"
+            config.user.ui.fonts.backup.name
+            config.user.ui.fonts.emoji.name
+          ])}
         dpi-aware=yes
 
         [cursor]

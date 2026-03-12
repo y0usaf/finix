@@ -26,7 +26,7 @@
           ".config/zsh/aliases.zsh" = {
             text = lib.concatStringsSep "\n" (
               lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") (import ./aliases.nix {
-                inherit config;
+                inherit lib config;
                 flakeDirectory = config.user.paths.flake.path;
               })
             );
