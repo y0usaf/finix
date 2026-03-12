@@ -47,11 +47,6 @@
       name = "Aura";
     };
   };
-  lovelyInjectorPackage = pkgs.fetchzip {
-    url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
-    sha256 = "sha256-tFDiYDRW5arGz92Knug6XnyhxYatUQ7iR/Wxfz6Hjw4=";
-    stripRoot = false;
-  };
 in {
   options.user.gaming.balatro = {
     enable = lib.mkOption {
@@ -105,7 +100,11 @@ in {
         // (lib.optionalAttrs config.user.gaming.balatro.enableLovelyInjector {
           "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Balatro/version.dll" = {
             clobber = true;
-            source = "${lovelyInjectorPackage}/version.dll";
+            source = "${pkgs.fetchzip {
+              url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
+              sha256 = "sha256-tFDiYDRW5arGz92Knug6XnyhxYatUQ7iR/Wxfz6Hjw4=";
+              stripRoot = false;
+            }}/version.dll";
           };
         });
     })
