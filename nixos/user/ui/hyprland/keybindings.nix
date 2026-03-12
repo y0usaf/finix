@@ -49,9 +49,7 @@
                         "j" = "d";
                         "l" = "r";
                       }
-          .${
-                        key
-                      }
+          ."${key}"
                     }"
                     "$mod SHIFT, ${key}, movewindow, ${
                       {
@@ -60,9 +58,7 @@
                         "j" = "d";
                         "l" = "r";
                       }
-          .${
-                        key
-                      }
+          ."${key}"
                     }"
                   ]))
               (lib.lists.forEach (lib.range 1 9) (i: [

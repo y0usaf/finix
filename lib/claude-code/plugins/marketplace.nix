@@ -9,13 +9,7 @@
 #   }
 #
 # Returns: attrset suitable for `usr.files = { ... }`
-{lib}: let
-  # Generate marketplace.json content
-  # Generate plugin.json content
-  # Generate hooks.json for a plugin's hooks
-  # Format: { "hooks": { "EventName": [{ "matcher": "", "hooks": [...] }], ... } }
-  # Build file entries for a single plugin
-in {
+{lib}: {
   # Main build function
   build = {
     name,
@@ -103,7 +97,7 @@ in {
               builtins.toJSON {
                 hooks =
                   lib.mapAttrs (
-                    _event: eventHooks:
+                    _: eventHooks:
                       map (hook: {
                         inherit (hook) matcher;
                         hooks =
@@ -151,7 +145,7 @@ in {
         // lib.optionalAttrs (plugin ? skills) (
           lib.foldl' (
             acc: skillName: let
-              skill = plugin.skills.${skillName};
+              skill = plugin.skills."${skillName}";
             in
               acc
               // {
@@ -185,6 +179,6 @@ in {
         ))
       basePath
       pluginName
-      plugins.${pluginName})
+      plugins."${pluginName}")
     {} (lib.attrNames plugins);
 }

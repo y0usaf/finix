@@ -8,7 +8,7 @@
     inputs.claude-code-nix.overlays.default
     inputs.gpui-shell.overlays.default
     # Fix obs-vertical-canvas Qt6GuiPrivate cmake detection
-    (_final: prev: {
+    (_: prev: {
       obs-studio-plugins =
         prev.obs-studio-plugins
         // {
@@ -33,7 +33,7 @@
   inherit (pkgs) lib;
 in {
   nixosConfigurations =
-    lib.mapAttrs (_hostName: hostConfig:
+    lib.mapAttrs (_: hostConfig:
       import (inputs.nixpkgs + "/nixos") {
         inherit system;
         configuration = {

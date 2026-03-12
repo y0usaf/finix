@@ -8,7 +8,7 @@
     environment.systemPackages = [
       pkgs.neovide
     ];
-    hjem.users.${config.user.name} = {
+    hjem.users."${config.user.name}" = {
       files.".config/neovide/config.toml" = {
         clobber = true;
         text = ''

@@ -19,7 +19,7 @@
     };
 
     skills =
-      lib.mapAttrs (skillName: _skill: {
+      lib.mapAttrs (skillName: _: {
         enable = lib.mkOption {
           type = lib.types.bool;
           default = true;

@@ -10,7 +10,7 @@
   ];
 
   fonts = {
-    packages = [flakeInputs.fast-fonts.packages.${system}.default];
+    packages = [flakeInputs.fast-fonts.packages."${system}".default];
     fontDir.enable = true;
   };
   hostname = "y0usaf-laptop";

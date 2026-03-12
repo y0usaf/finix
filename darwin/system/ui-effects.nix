@@ -1,6 +1,6 @@
 {pkgs, ...}: {
-  environment.systemPackages = with pkgs; [
-    jankyborders
+  environment.systemPackages = [
+    pkgs.jankyborders
   ];
 
   launchd.daemons.jankyborders = {

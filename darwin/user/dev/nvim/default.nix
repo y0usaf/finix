@@ -10,21 +10,20 @@
 
   config = lib.mkIf config.user.dev.nvim.enable {
     home-manager = {
-      users.${config.user.name}.home = {
+      users."${config.user.name}".home = {
         # Packages via home-manager
         packages =
           [
             pkgs.ripgrep
             pkgs.fd
             pkgs.tree-sitter
-            (pkgs.tree-sitter.withPlugins (p:
-              with p; [
-                tree-sitter-nix
-                tree-sitter-lua
-                tree-sitter-python
-                tree-sitter-markdown
-                tree-sitter-json
-              ]))
+            (pkgs.tree-sitter.withPlugins (p: [
+              p.tree-sitter-nix
+              p.tree-sitter-lua
+              p.tree-sitter-python
+              p.tree-sitter-markdown
+              p.tree-sitter-json
+            ]))
             pkgs.neovim
             pkgs.lua-language-server
             pkgs.nil

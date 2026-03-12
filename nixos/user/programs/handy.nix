@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: let
-  handyBase = flakeInputs.handy.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  handyBase = flakeInputs.handy.packages."${pkgs.stdenv.hostPlatform.system}".default;
   # Temporary local fix until cjpais/Handy updates its stale bun deps hash.
 in {
   options.user.programs.handy = {
@@ -19,7 +19,7 @@ in {
 
   config = lib.mkIf config.user.programs.handy.enable {
     environment.systemPackages = [
-      (handyBase.overrideAttrs (_old: {
+      (handyBase.overrideAttrs (_: {
         preBuild = ''
           cp -r ${pkgs.stdenv.mkDerivation {
             pname = "handy-bun-deps";
@@ -58,7 +58,7 @@ in {
     ];
 
     # Send SIGUSR2 to toggle recording
-    usr.files.".config/niri/config.kdl".value.binds.${config.user.programs.handy.keybind} = {
+    usr.files.".config/niri/config.kdl".value.binds."${config.user.programs.handy.keybind}" = {
       spawn = ["pkill" "-SIGUSR2" "handy"];
     };
   };

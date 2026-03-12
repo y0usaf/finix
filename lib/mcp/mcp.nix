@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  mcpServerSpecs = import ./servers.nix {inherit config;};
   mcpServers = lib.listToAttrs (map
     (spec:
       lib.nameValuePair spec.name {
@@ -12,7 +11,7 @@
         inherit (spec) command args;
         env = spec.environment;
       })
-    mcpServerSpecs);
+    (import ./servers.nix {inherit config;}));
 in {
   options.user.dev.mcp = {
     enable = lib.mkEnableOption "Model Context Protocol configuration";
