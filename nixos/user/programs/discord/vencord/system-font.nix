@@ -5,7 +5,6 @@
 }: let
   wrapFonts = fonts: lib.concatStringsSep ", " (map (f: "\"${f}\"") fonts);
   primaryFont = wrapFonts [config.user.ui.fonts.mainFontName config.user.ui.fonts.backup.name config.user.ui.fonts.emoji.name];
-  monoFont = wrapFonts [config.user.ui.fonts.mainFontName config.user.ui.fonts.backup.name];
 in {
   config =
     lib.mkIf (
@@ -18,7 +17,7 @@ in {
           --font-primary: ${primaryFont} !important;
           --font-display: ${primaryFont} !important;
           --font-headline: ${primaryFont} !important;
-          --font-code: ${monoFont} !important;
+          --font-code: ${wrapFonts [config.user.ui.fonts.mainFontName config.user.ui.fonts.backup.name]} !important;
         }
       '';
     };
