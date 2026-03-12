@@ -6,7 +6,7 @@
   ...
 }: let
   x11ThemeName = "SSB-x11";
-  hyprcursorPackage = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}."deepin-dark-hyprcursor";
+  hyprcursorPackage = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}"."deepin-dark-hyprcursor";
 in {
   options.user.ui.cursor = {
     enable = lib.mkOption {
@@ -18,13 +18,13 @@ in {
   config = lib.mkIf config.user.ui.cursor.enable {
     environment.systemPackages =
       [
-        flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}."ssb-xcursor"
+        flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}"."ssb-xcursor"
       ]
       ++ lib.optionals (hyprcursorPackage != null) [
         hyprcursorPackage
       ];
 
-    hjem.users.${config.user.name} = {
+    hjem.users."${config.user.name}" = {
       files =
         {
           ".config/gtk-3.0/settings.ini" = {

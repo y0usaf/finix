@@ -2,7 +2,7 @@
   inherit (import ../../../../lib/ssh) hosts defaults;
   identityFile = "${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}";
 in {
-  home-manager.users.${config.user.name}.programs.ssh = {
+  home-manager.users."${config.user.name}".programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
 

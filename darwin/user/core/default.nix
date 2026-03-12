@@ -10,29 +10,29 @@
   ];
 
   environment.systemPackages =
-    (with pkgs; [
-      vim
-      git
-      nh
-      raycast
-      alacritty
-      alejandra
-      bun
+    [
+      pkgs.vim
+      pkgs.git
+      pkgs.nh
+      pkgs.raycast
+      pkgs.alacritty
+      pkgs.alejandra
+      pkgs.bun
 
-      bat
-      lsd
-      tree
-      ripgrep
-      statix
-      deadnix
-      zellij
+      pkgs.bat
+      pkgs.lsd
+      pkgs.tree
+      pkgs.ripgrep
+      pkgs.statix
+      pkgs.deadnix
+      pkgs.zellij
 
-      karabiner-elements
+      pkgs.karabiner-elements
 
-      alt-tab-macos
-      discord
+      pkgs.alt-tab-macos
+      pkgs.discord
 
-      nvf.packages.${pkgs.stdenv.hostPlatform.system}.default
-    ])
+      nvf.packages."${pkgs.stdenv.hostPlatform.system}".default
+    ]
     ++ config.user.packages.extraPackages;
 }

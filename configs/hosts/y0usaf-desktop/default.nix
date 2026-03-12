@@ -12,7 +12,7 @@
 
   fonts = {
     packages = [
-      flakeInputs.fast-fonts.packages.${system}.default
+      flakeInputs.fast-fonts.packages."${system}".default
     ];
     fontDir.enable = true;
   };

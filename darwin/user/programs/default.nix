@@ -7,9 +7,9 @@
     ./browsers
   ];
 
-  home-manager.users.${config.user.name} = {
-    home.packages = with pkgs; [
-      tailscale
+  home-manager.users."${config.user.name}" = {
+    home.packages = [
+      pkgs.tailscale
     ];
   };
 }

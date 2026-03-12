@@ -125,22 +125,7 @@
       allowInsecurePredicate = pkg: nixpkgs.lib.hasPrefix "librewolf" (pkg.pname or "");
     };
 
-    darwinPkgs = nixpkgs.legacyPackages.${darwinSystem};
-    darwinLib = darwinPkgs.lib;
-    genLib = import ./lib/generators {
-      lib = darwinLib;
-      pkgs = darwinPkgs;
-    };
-    iosevkaSlab = darwinPkgs.stdenvNoCC.mkDerivation {
-      pname = "fast-iosevka-slab";
-      version = "1.0.0";
-      src = inputs.fast-fonts;
-
-      installPhase = ''
-        mkdir -p $out/share/fonts/truetype
-        cp -f $src/fonts/Fast_IosevkaSlab.ttf $out/share/fonts/truetype/ || true
-      '';
-    };
+    darwinPkgs = nixpkgs.legacyPackages."${darwinSystem}";
   in {
     inherit
       (import ./nixos/lib {
@@ -156,7 +141,21 @@
       modules = [
         {
           _module.args = {
-            inherit inputs iosevkaSlab genLib;
+            inherit inputs;
+            genLib = import ./lib/generators {
+              inherit (darwinPkgs) lib;
+              pkgs = darwinPkgs;
+            };
+            iosevkaSlab = darwinPkgs.stdenvNoCC.mkDerivation {
+              pname = "fast-iosevka-slab";
+              version = "1.0.0";
+              src = inputs.fast-fonts;
+
+              installPhase = ''
+                mkdir -p $out/share/fonts/truetype
+                cp -f $src/fonts/Fast_IosevkaSlab.ttf $out/share/fonts/truetype/ || true
+              '';
+            };
             inherit (inputs) nvf;
           };
         }
@@ -179,7 +178,7 @@
           };
 
           # Install Fast Font system-wide
-          fonts.packages = [inputs.fast-fonts.packages.${darwinSystem}.default];
+          fonts.packages = [inputs.fast-fonts.packages."${darwinSystem}".default];
 
           # Configure home-manager
           home-manager = {
@@ -194,7 +193,7 @@
     };
 
     # Expose for easier access
-    formatter.${linuxSystem} = nixpkgs.legacyPackages.${linuxSystem}.alejandra;
-    formatter.${darwinSystem} = nixpkgs.legacyPackages.${darwinSystem}.alejandra;
+    formatter."${linuxSystem}" = nixpkgs.legacyPackages."${linuxSystem}".alejandra;
+    formatter."${darwinSystem}" = nixpkgs.legacyPackages."${darwinSystem}".alejandra;
   };
 }

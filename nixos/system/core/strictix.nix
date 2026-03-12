@@ -4,6 +4,6 @@
   ...
 }: {
   environment.systemPackages = [
-    flakeInputs.strictix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    flakeInputs.strictix.packages."${pkgs.stdenv.hostPlatform.system}".default
   ];
 }

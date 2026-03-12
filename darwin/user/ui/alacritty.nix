@@ -4,7 +4,7 @@
   iosevkaSlab,
   ...
 }: {
-  home-manager.users.${config.user.name} = {
+  home-manager.users."${config.user.name}" = {
     home.packages = [
       iosevkaSlab
     ];

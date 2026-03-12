@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: let
-  codex-desktop = flakeInputs.codex-desktop-linux.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (_: {
+  codex-desktop = flakeInputs.codex-desktop-linux.packages."${pkgs.stdenv.hostPlatform.system}".default.overrideAttrs (_: {
     src = pkgs.fetchurl {
       url = "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg";
       hash = "sha256-4oKdhkRmwUbvnexeguuwfv+oRHhR3WYbUwewB9rpLDc=";
