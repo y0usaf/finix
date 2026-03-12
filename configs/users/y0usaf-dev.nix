@@ -175,6 +175,7 @@
         neovide = false;
       };
       python.enable = true;
+      rust.enable = true;
       opencode = {
         enable = true;
         enableMcpServers = false;

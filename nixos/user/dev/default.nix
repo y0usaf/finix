@@ -15,6 +15,7 @@ _: {
     ./localllama/ollama
     ./nvim
     ./python.nix
+    ./rust.nix
     ./upscale.nix
     ./android-tools.nix
   ];
