@@ -43,7 +43,7 @@ in {
       })
     ];
 
-    hjem.users.${config.user.name}.files.".config/discordcanary/settings.json" = {
+    hjem.users."${config.user.name}".files.".config/discordcanary/settings.json" = {
       generator = lib.generators.toJSON {};
       value = {
         SKIP_HOST_UPDATE = true;

@@ -8,7 +8,7 @@
       (config.user.programs.discord.stable.enable or false)
       || (config.user.programs.discord.canary.enable or false)
     ) {
-      hjem.users.${config.user.name}.files = {
+      hjem.users."${config.user.name}".files = {
         ".config/Vencord/themes/custom-theme.css".text = ''
           /**
            * @name custom-theme
@@ -543,10 +543,12 @@
                   height: 26px;
               }
               .channelBottomBarArea_f75fb0 {
-                  margin-top: var(--gap);
+                  margin-top: 0;
               }
               .channelTextArea_f75fb0 {
                   margin: 0;
+                  box-sizing: border-box;
+                  min-height: var(--chatbar-height);
                   background-color: var(--background-base-lower);
                   border-radius: var(--radius-lg);
                   border: var(--border-thickness) solid var(--border-subtle);
@@ -1357,6 +1359,7 @@
           /* user-panel.css */
 
               .panels__5e434 {
+                  bottom: 0;
                   right: 0;
                   left: unset;
                   width: calc(var(--custom-guild-sidebar-width) - var(--custom-guild-list-width));
@@ -1368,6 +1371,12 @@
                   display: flex;
                   align-items: center;
                   padding: 0;
+              }
+              .panels__5e434 .flex__7c0ba,
+              .panels__5e434 .avatarWrapper__37e49,
+              .panels__5e434 .wrapper__37e49 {
+                  height: 100%;
+                  align-items: center;
               }
               .guilds__5e434 {
                   margin-bottom: 0;
