@@ -4,13 +4,9 @@
   lib,
   ...
 }: let
-  configFile = pkgs.writeText "nvidia-config.json" (builtins.toJSON {
-    inherit (config.hardware.nvidia.management) maxClock minClock coreVoltageOffset memoryVoltageOffset fanCurve fanCurveInterval;
-  });
-
   nvidiaMgmtScript =
     pkgs.writers.writePython3Bin "nvidia-management" {
-      libraries = with pkgs.python313Packages; [nvidia-ml-py];
+      libraries = [pkgs.python313Packages.nvidia-ml-py];
     } ''
       import argparse
       import json
@@ -33,7 +29,9 @@
 
 
       CONFIG_PATH = Path(
-          "${configFile}"
+          "${pkgs.writeText "nvidia-config.json" (builtins.toJSON {
+        inherit (config.hardware.nvidia.management) maxClock minClock coreVoltageOffset memoryVoltageOffset fanCurve fanCurveInterval;
+      })}"
       )
 
 

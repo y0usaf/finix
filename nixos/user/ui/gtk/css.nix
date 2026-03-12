@@ -6,20 +6,7 @@
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
-  shadowOffsets = [
-    "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
-    "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
-    "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
-    "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
-    "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
-    "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
-    "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
-    "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
-  ];
-  strokeLayers = 4;
-  repeatedShadow = lib.concatStringsSep ",\n" (lib.concatLists (lib.genList (_: shadowOffsets) strokeLayers));
-  baseOpacity = toString (config.user.appearance.opacity / 3);
-  backgroundColor = "rgba(0, 0, 0, ${baseOpacity})";
+  backgroundColor = "rgba(0, 0, 0, ${toString (config.user.appearance.opacity / 3)})";
 in {
   gtkCss = ''
     /* Global element styling */
@@ -29,7 +16,18 @@ in {
       background: ${backgroundColor};
       outline-width: 0;
       outline-offset: 0;
-      text-shadow: ${repeatedShadow};
+      text-shadow: ${lib.concatStringsSep ",\n" (lib.concatLists (lib.genList
+      (_: [
+        "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+        "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+        "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
+        "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
+        "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+        "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+        "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+        "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+      ])
+      4))};
     }
     /* Hover state for all elements */
     *:hover {
