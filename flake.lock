@@ -743,6 +743,23 @@
         "type": "github"
       }
     },
+    "patchix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773354015,
+        "narHash": "sha256-T4rJogkeReAXThmXLamFhSjMXy43P0TXutNGXcOw4Y0=",
+        "path": "/home/y0usaf/Dev/patchix",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/y0usaf/Dev/patchix",
+        "type": "path"
+      }
+    },
     "root": {
       "inputs": {
         "agent-slack": "agent-slack",
@@ -764,6 +781,7 @@
         "nixpkgs": "nixpkgs_3",
         "nvf": "nvf",
         "obs-image-reaction": "obs-image-reaction",
+        "patchix": "patchix",
         "smfh": "smfh_2",
         "strictix": "strictix",
         "tweakcc": "tweakcc"
