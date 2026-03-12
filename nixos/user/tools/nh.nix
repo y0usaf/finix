@@ -7,7 +7,7 @@
   options.user.tools.nh = {
     enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
     flake = lib.mkOption {
-      type = with lib.types; nullOr (either singleLineStr path);
+      type = lib.types.nullOr (lib.types.either lib.types.singleLineStr lib.types.path);
       default = null;
       description = ''
         The path that will be used for the NH_FLAKE environment variable.

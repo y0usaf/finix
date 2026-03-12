@@ -96,7 +96,7 @@ in {
         meta = {
           description = "Modern media center (CEF-based, no qtwebengine)";
           homepage = "https://www.stremio.com/";
-          license = with lib.licenses; [gpl3Only unfree];
+          license = [lib.licenses.gpl3Only lib.licenses.unfree];
           platforms = lib.platforms.linux;
           mainProgram = "stremio";
         };
