@@ -27,7 +27,7 @@ in {
       })
     ];
 
-    home-manager.users.${config.user.name} = {
+    home-manager.users."${config.user.name}" = {
       # Config files via home-manager
       home.file = lib.mapAttrs (_: content: {text = content;}) (wallustLib.mkFiles {
         zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;

@@ -24,7 +24,7 @@
                 pkgs.obs-studio-plugins.obs-aitum-multistream
                 pkgs.obs-studio-plugins.obs-vertical-canvas
                 pkgs.obs-studio-plugins.obs-scale-to-sound
-                flakeInputs.obs-image-reaction.outputs.packages.${pkgs.stdenv.hostPlatform.system}.default
+                flakeInputs.obs-image-reaction.outputs.packages."${pkgs.stdenv.hostPlatform.system}".default
               ];
           })
         ];

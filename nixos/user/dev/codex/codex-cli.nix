@@ -11,7 +11,7 @@
 
   config = lib.mkIf config.user.dev.codex-cli.enable {
     environment.systemPackages = [
-      flakeInputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+      flakeInputs.codex-cli-nix.packages."${pkgs.stdenv.hostPlatform.system}".default
     ];
   };
 }

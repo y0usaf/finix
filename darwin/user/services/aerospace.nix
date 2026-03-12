@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  home-manager.users.${config.user.name} = {
+  home-manager.users."${config.user.name}" = {
     launchd.agents.aerospace = lib.mkIf config.user.wm.aerospace.enable {
       enable = true;
       config = {
@@ -18,9 +18,9 @@
       };
     };
 
-    home.packages = lib.optionals config.user.wm.aerospace.enable (with pkgs; [
-      aerospace
-    ]);
+    home.packages = lib.optionals config.user.wm.aerospace.enable [
+      pkgs.aerospace
+    ];
 
     xdg.configFile."aerospace/aerospace.toml" = lib.mkIf config.user.wm.aerospace.enable {
       text = ''

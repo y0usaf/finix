@@ -4,6 +4,6 @@
   ...
 }: {
   environment.systemPackages = [
-    inputs.strictix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.strictix.packages."${pkgs.stdenv.hostPlatform.system}".default
   ];
 }

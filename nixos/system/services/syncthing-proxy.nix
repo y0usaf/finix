@@ -14,7 +14,7 @@
   config = lib.mkIf config.services.syncthing-proxy.enable {
     services.nginx = {
       enable = true;
-      virtualHosts.${config.services.syncthing-proxy.virtualHostName} = {
+      virtualHosts."${config.services.syncthing-proxy.virtualHostName}" = {
         locations."/" = {
           proxyPass = "http://127.0.0.1:8384";
           proxyWebsockets = true;

@@ -20,14 +20,14 @@
     };
 
     skills =
-      lib.mapAttrs (pluginName: _plugin: {
+      lib.mapAttrs (pluginName: _: {
         enable = lib.mkOption {
           type = lib.types.bool;
           default = true;
           description = "Whether to enable the `${pluginName}` Claude Code skill plugin.";
         };
       })
-      (lib.filterAttrs (_pluginName: plugin: plugin ? skills) (import ../../../../lib/claude-code).plugins);
+      (lib.filterAttrs (_: plugin: plugin ? skills) (import ../../../../lib/claude-code).plugins);
   };
 
   config = lib.mkIf config.user.dev.claude-code.enable {
