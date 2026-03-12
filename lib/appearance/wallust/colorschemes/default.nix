@@ -1,5 +1,6 @@
 # Wallust colorschemes - import-only index
 {
+  black = import ./black.nix;
   dopamine = import ./dopamine.nix;
   eva01 = import ./eva01.nix;
   eva02 = import ./eva02.nix;
