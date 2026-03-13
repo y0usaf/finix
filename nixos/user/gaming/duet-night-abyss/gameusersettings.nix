@@ -51,7 +51,6 @@
         };
       } {
         "/Script/Engine.GameUserSettings" = {
-          inherit (args) resX resY;
           ResolutionSizeX = args.resX;
           ResolutionSizeY = args.resY;
           LastUserConfirmedResolutionSizeX = args.resX;
