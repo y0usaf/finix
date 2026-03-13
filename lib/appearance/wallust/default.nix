@@ -22,6 +22,7 @@ in {
     };
 
     # Colorschemes
+    ".config/wallust/colorschemes/black.json" = builtins.toJSON colorschemes.black;
     ".config/wallust/colorschemes/dopamine.json" = builtins.toJSON colorschemes.dopamine;
     ".config/wallust/colorschemes/eva01.json" = builtins.toJSON colorschemes.eva01;
     ".config/wallust/colorschemes/eva02.json" = builtins.toJSON colorschemes.eva02;

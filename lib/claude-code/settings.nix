@@ -9,9 +9,4 @@
     DISABLE_TELEMETRY = "1";
     CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
   };
-  statusLine = {
-    type = "command";
-    #command = "bunx ccusage statusline";
-    command = "bunx -y @owloops/claude-powerline@latest --style=powerline";
-  };
 }
