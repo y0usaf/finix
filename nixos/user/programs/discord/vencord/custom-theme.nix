@@ -543,7 +543,7 @@
                   height: 26px;
               }
               .channelBottomBarArea_f75fb0 {
-                  margin-top: 0;
+                  margin-top: var(--gap);
               }
               .channelTextArea_f75fb0 {
                   margin: 0;
@@ -1268,7 +1268,7 @@
                   --custom-channel-header-height: calc(var(--guildbar-avatar-size) + var(--space-xs) + var(--border-thickness) * 2);
                   /* --top-bar-right-margin: calc(32px + var(--space-xs)); */
                   --top-bar-right-margin: calc(32px + var(--space-xs));
-                  --custom-app-panels-height: var(--chatbar-height);
+                  --custom-app-panels-height: 80px;
               }
 
               .title_c38106,
@@ -1363,7 +1363,7 @@
                   right: 0;
                   left: unset;
                   width: calc(var(--custom-guild-sidebar-width) - var(--custom-guild-list-width));
-                  height: var(--chatbar-height);
+                  height: 80px;
                   overflow: hidden;
               }
               .panels__5e434 > .container__37e49 {
