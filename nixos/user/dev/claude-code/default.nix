@@ -1,11 +1,13 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   claudeCodeConfig = import ../../../../lib/claude-code;
   # Build the marketplace with all plugins
   # Settings without hooks (hooks come from plugin now)
+  statuslineScript = import ../../../../lib/claude-code/statusline.nix {inherit pkgs;};
 in {
   imports = [
     ./claude-code.nix
@@ -50,7 +52,11 @@ in {
       format = "json";
       clobber = false;
       value = {
-        inherit (claudeCodeConfig.settings) includeCoAuthoredBy statusLine permissions;
+        inherit (claudeCodeConfig.settings) includeCoAuthoredBy permissions;
+        statusLine = {
+          type = "command";
+          command = "${statuslineScript}/bin/statusline";
+        };
         inherit (config.user.dev.claude-code) model;
         env =
           claudeCodeConfig.settings.env
