@@ -4,17 +4,20 @@
   lib,
   ...
 }: let
-  inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf;
+  inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf types;
 
   disableFeatures = [
     "WebRtcAllowInputVolumeAdjustment"
     "ChromeWideEchoCancellation"
   ];
+  inherit (config) user;
+  userName = user.name;
+  stableCfg = user.programs.discord.stable;
 in {
   options.user.programs.discord.stable = {
     enable = mkEnableOption "Discord stable";
     extraArgs = mkOption {
-      type = lib.types.listOf lib.types.str;
+      type = types.listOf types.str;
       default = [];
       description = "Extra command line arguments to pass to Discord";
     };
@@ -26,16 +29,16 @@ in {
       // {default = true;};
   };
 
-  config = mkIf config.user.programs.discord.stable.enable {
+  config = mkIf stableCfg.enable {
     environment.systemPackages = [
       (pkgs.discord.override {
         commandLineArgs = concatStringsSep " " ((optionals (disableFeatures != []) [
             "--disable-features=${concatStringsSep "," disableFeatures}"
           ]
-          ++ optionals (!config.user.programs.discord.stable.smoothScroll) [
+          ++ optionals (!stableCfg.smoothScroll) [
             "--disable-smooth-scrolling"
           ])
-        ++ config.user.programs.discord.stable.extraArgs);
+        ++ stableCfg.extraArgs);
         withOpenASAR = true;
         disableUpdates = false;
         withTTS = false;
@@ -43,14 +46,14 @@ in {
       })
     ];
 
-    hjem.users."${config.user.name}".files = {
+    hjem.users."${userName}".files = {
       ".config/discord/settings.json" = {
         generator = lib.generators.toJSON {};
         value = {
           SKIP_HOST_UPDATE = true;
           UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord";
           NEW_UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord/";
-          MINIMIZE_TO_TRAY = config.user.programs.discord.stable.minimizeToTray;
+          MINIMIZE_TO_TRAY = stableCfg.minimizeToTray;
           OPEN_ON_STARTUP = false;
           DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
           enableHardwareAcceleration = false;
@@ -59,12 +62,12 @@ in {
             cmdPreset = "balanced";
             quickstart = false;
             css = ''
-              @import url("file:///home/${config.user.name}/.config/Vencord/themes/disblock.css");
-              @import url("file:///home/${config.user.name}/.config/Vencord/themes/visual-refresh-hide-2.css");
-              @import url("file:///home/${config.user.name}/.config/Vencord/themes/visual-refresh-hide-3.css");
-              @import url("file:///home/${config.user.name}/.config/Vencord/themes/visual-refresh-hide-4.css");
-              @import url("file:///home/${config.user.name}/.config/Vencord/themes/visual-refresh-hide-5.css");
-              @import url("file:///home/${config.user.name}/.config/Vencord/themes/system-font.css");
+              @import url("file:///home/${userName}/.config/Vencord/themes/disblock.css");
+              @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-2.css");
+              @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-3.css");
+              @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-4.css");
+              @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-5.css");
+              @import url("file:///home/${userName}/.config/Vencord/themes/system-font.css");
             '';
           };
         };

@@ -28,12 +28,15 @@
   };
   config = lib.mkIf config.user.ui.ags.bar-overlay.enable (
     let
+      inherit (pkgs) astal;
       agsWithModules = pkgs.ags.override {
         extraPackages = [
-          pkgs.astal.tray
-          pkgs.astal.battery
+          astal.tray
+          astal.battery
         ];
       };
+
+      inherit (config) user;
     in {
       user.ui.ags.package = agsWithModules;
       environment.systemPackages = [
@@ -46,10 +49,10 @@
             substitutions = [
               "--subst-var-by"
               "HOME"
-              "/home/${config.user.name}"
+              "/home/${user.name}"
               "--subst-var-by"
               "MODULES"
-              (builtins.toJSON config.user.ui.ags.bar-overlay.modules)
+              (builtins.toJSON user.ui.ags.bar-overlay.modules)
             ];
           };
           ".config/ags/tsconfig.json".source = ./config/tsconfig.json;

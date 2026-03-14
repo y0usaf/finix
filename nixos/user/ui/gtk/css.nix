@@ -3,15 +3,16 @@
   lib,
   ...
 }: let
+  inherit (config) user;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
-  backgroundColor = "rgba(0, 0, 0, ${toString (config.user.appearance.opacity / 3)})";
+  backgroundColor = "rgba(0, 0, 0, ${toString (user.appearance.opacity / 3)})";
 in {
   gtkCss = ''
     /* Global element styling */
     * {
-      font-family: "${config.user.ui.fonts.mainFontName}";
+      font-family: "${user.ui.fonts.mainFontName}";
       color: white;
       background: ${backgroundColor};
       outline-width: 0;

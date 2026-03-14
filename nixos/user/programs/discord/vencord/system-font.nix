@@ -4,20 +4,24 @@
   ...
 }: let
   wrapFonts = fonts: lib.concatStringsSep ", " (map (f: "\"${f}\"") fonts);
-  primaryFont = wrapFonts [config.user.ui.fonts.mainFontName config.user.ui.fonts.backup.name config.user.ui.fonts.emoji.name];
+  inherit (config) user;
+  inherit (user.ui) fonts;
+  inherit (user.programs) discord;
+  uiFontList = [fonts.mainFontName fonts.backup.name];
+  primaryFont = wrapFonts (uiFontList ++ [fonts.emoji.name]);
 in {
   config =
     lib.mkIf (
-      (config.user.programs.discord.stable.enable or false)
-      || (config.user.programs.discord.canary.enable or false)
+      (discord.stable.enable or false)
+      || (discord.canary.enable or false)
     ) {
-      hjem.users."${config.user.name}".files.".config/Vencord/themes/system-font.css".text = ''
+      hjem.users."${user.name}".files.".config/Vencord/themes/system-font.css".text = ''
         :root {
           /* Use system fonts for UI */
           --font-primary: ${primaryFont} !important;
           --font-display: ${primaryFont} !important;
           --font-headline: ${primaryFont} !important;
-          --font-code: ${wrapFonts [config.user.ui.fonts.mainFontName config.user.ui.fonts.backup.name]} !important;
+          --font-code: ${wrapFonts uiFontList} !important;
         }
       '';
     };

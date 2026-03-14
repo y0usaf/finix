@@ -3,9 +3,12 @@
   lib,
   ...
 }: let
-  steamPrefix = "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/3286820662/pfx/drive_c/Program Files (x86)/Duet Night Abyss";
+  inherit (config) user;
+  steamPrefix = "${lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path}/steamapps/compatdata/3286820662/pfx/drive_c/Program Files (x86)/Duet Night Abyss";
 
-  mkEntry = args: {
+  mkEntry = args: let
+    inherit (args) resX resY;
+  in {
     clobber = true;
     generator = lib.generators.toINI {};
     value =
@@ -51,10 +54,10 @@
         };
       } {
         "/Script/Engine.GameUserSettings" = {
-          ResolutionSizeX = args.resX;
-          ResolutionSizeY = args.resY;
-          LastUserConfirmedResolutionSizeX = args.resX;
-          LastUserConfirmedResolutionSizeY = args.resY;
+          ResolutionSizeX = resX;
+          ResolutionSizeY = resY;
+          LastUserConfirmedResolutionSizeX = resX;
+          LastUserConfirmedResolutionSizeY = resY;
         };
         "ShaderPipelineCache.CacheFile" = {
           LastOpened = args.lastOpened;
@@ -62,7 +65,7 @@
       };
   };
 in {
-  config = lib.mkIf config.user.gaming.duet-night-abyss.enable {
+  config = lib.mkIf user.gaming.duet-night-abyss.enable {
     usr.files."${steamPrefix}/EMLauncher/Saved/Config/WindowsNoEditor/GameUserSettings.ini" = mkEntry {
       resX = "1344";
       resY = "642";

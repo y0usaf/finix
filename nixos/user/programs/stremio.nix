@@ -23,6 +23,8 @@
       "${cefPinned}/Release"
     ];
   };
+  inherit (lib) licenses;
+  libayatanaAppindicator = pkgs.libayatana-appindicator;
 in {
   options.user.programs.stremio = {
     enable = lib.mkEnableOption "Stremio media center";
@@ -52,7 +54,7 @@ in {
 
         postPatch = ''
           substituteInPlace $cargoDepsCopy/libappindicator-sys-*/src/lib.rs \
-            --replace-fail "libayatana-appindicator3.so.1" "${pkgs.libayatana-appindicator}/lib/libayatana-appindicator3.so.1"
+            --replace-fail "libayatana-appindicator3.so.1" "${libayatanaAppindicator}/lib/libayatana-appindicator3.so.1"
         '';
 
         buildFeatures = ["offline-build"];
@@ -61,7 +63,7 @@ in {
           pkgs.atk
           cefPath
           pkgs.gtk3
-          pkgs.libayatana-appindicator
+          libayatanaAppindicator
           pkgs.mpv
           pkgs.openssl
         ];
@@ -96,7 +98,7 @@ in {
         meta = {
           description = "Modern media center (CEF-based, no qtwebengine)";
           homepage = "https://www.stremio.com/";
-          license = [lib.licenses.gpl3Only lib.licenses.unfree];
+          license = [licenses.gpl3Only licenses.unfree];
           platforms = lib.platforms.linux;
           mainProgram = "stremio";
         };

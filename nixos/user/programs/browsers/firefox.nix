@@ -5,44 +5,47 @@
   ...
 }: let
   firefoxShared = import ../../../../lib/browsers/firefox-shared.nix {inherit config lib;};
+  inherit (config) user;
+  userName = user.name;
+  inherit (firefoxShared) profilesIni;
 in {
   imports = [
     ../../../../lib/browsers/options.nix
     ./ui-chrome.nix
   ];
 
-  config = lib.mkIf config.user.programs.firefox.enable {
+  config = lib.mkIf user.programs.firefox.enable {
     environment.systemPackages = [
       (pkgs.wrapFirefox pkgs.firefox-unwrapped {
         extraPolicies = firefoxShared.browserPolicies;
       })
     ];
-    hjem.users."${config.user.name}" = {
+    hjem.users."${userName}" = {
       files =
         {
           ".mozilla/firefox/profiles.ini" = {
             generator = lib.generators.toINI {};
             value =
-              firefoxShared.profilesIni
+              profilesIni
               // {
                 Profile0 =
-                  firefoxShared.profilesIni.Profile0
+                  profilesIni.Profile0
                   // {
-                    Path = config.user.name;
+                    Path = userName;
                   };
               };
             clobber = true;
           };
-          ".mozilla/firefox/${config.user.name}/chrome/userChrome.css" = {
+          ".mozilla/firefox/${userName}/chrome/userChrome.css" = {
             text = firefoxShared.userChromeCss;
             clobber = true;
           };
-          ".mozilla/firefox/${config.user.name}/chrome/userContent.css" = {
+          ".mozilla/firefox/${userName}/chrome/userContent.css" = {
             text = firefoxShared.userContentCss;
             clobber = true;
           };
         }
-        // lib.optionalAttrs config.user.shell.zsh.enable {
+        // lib.optionalAttrs user.shell.zsh.enable {
           ".config/zsh/.zprofile" = {
             text = lib.mkAfter ''
               export MOZ_ENABLE_WAYLAND=1

@@ -5,6 +5,11 @@
   ...
 }: let
   wallustLib = import ../../../../../lib/appearance/wallust {inherit lib;};
+  wallustPkg = pkgs.wallust;
+  inherit (config) user;
+  userUi = user.ui;
+  userPrograms = user.programs;
+  vicinaeEnabled = userUi.vicinae.enable or false;
 in {
   options.user.appearance.wallust = {
     defaultTheme = lib.mkOption {
@@ -16,14 +21,14 @@ in {
 
   config = {
     environment.systemPackages = [
-      pkgs.wallust
+      wallustPkg
       # Wrapper script: runs wallust and updates pywalfox
       (pkgs.writeShellApplication {
         name = "wt";
-        runtimeInputs = [pkgs.wallust pkgs.pywalfox-native];
+        runtimeInputs = [wallustPkg pkgs.pywalfox-native];
         text = wallustLib.mkWtScriptText {
           browserBinary = "librewolf";
-          vicinaeEnabled = config.user.ui.vicinae.enable or false;
+          inherit vicinaeEnabled;
         };
       })
     ];
@@ -38,8 +43,8 @@ in {
       serviceConfig = {
         Type = "oneshot";
         ExecStart = pkgs.writeShellScript "wallust-default" (wallustLib.mkStartupScript {
-          wallustBin = "${pkgs.wallust}/bin/wallust";
-          inherit (config.user.appearance.wallust) defaultTheme;
+          wallustBin = "${wallustPkg}/bin/wallust";
+          inherit (user.appearance.wallust) defaultTheme;
         });
         RemainAfterExit = true;
       };
@@ -47,12 +52,12 @@ in {
 
     # Config files via hjem
     usr.files = lib.mapAttrs (_: content: {text = content;}) (wallustLib.mkFiles {
-      zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
-      niriEnabled = config.user.ui.niri.enable or false;
-      vicinaeEnabled = config.user.ui.vicinae.enable or false;
-      cmusEnabled = config.user.programs.cmus.enable or false;
-      vestopkEnabled = config.user.programs.discord.vesktop.enable or false;
-      gpuishellEnabled = config.user.ui.gpuishell.enable or false;
+      zjstatusEnabled = user.shell.zellij.zjstatus.enable;
+      niriEnabled = userUi.niri.enable or false;
+      inherit vicinaeEnabled;
+      cmusEnabled = userPrograms.cmus.enable or false;
+      vestopkEnabled = userPrograms.discord.vesktop.enable or false;
+      gpuishellEnabled = userUi.gpuishell.enable or false;
     });
   };
 }

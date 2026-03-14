@@ -5,7 +5,10 @@
   flakeInputs,
   ...
 }: let
-  handyBase = flakeInputs.handy.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  handyFlake = flakeInputs.handy;
+  inherit (pkgs) stdenv bun;
+  handyBase = handyFlake.packages."${stdenv.hostPlatform.system}".default;
+  handyCfg = config.user.programs.handy;
   # Temporary local fix until cjpais/Handy updates its stale bun deps hash.
 in {
   options.user.programs.handy = {
@@ -17,17 +20,17 @@ in {
     };
   };
 
-  config = lib.mkIf config.user.programs.handy.enable {
+  config = lib.mkIf handyCfg.enable {
     environment.systemPackages = [
       (handyBase.overrideAttrs (_: {
         preBuild = ''
-          cp -r ${pkgs.stdenv.mkDerivation {
+          cp -r ${stdenv.mkDerivation {
             pname = "handy-bun-deps";
             inherit (handyBase) version;
-            src = flakeInputs.handy;
+            src = handyFlake;
 
             nativeBuildInputs = [
-              pkgs.bun
+              bun
               pkgs.cacert
             ];
 
@@ -49,7 +52,7 @@ in {
           }}/node_modules node_modules
           chmod -R +w node_modules
           substituteInPlace node_modules/.bin/{tsc,vite} \
-            --replace-fail "/usr/bin/env node" "${lib.getExe pkgs.bun}"
+            --replace-fail "/usr/bin/env node" "${lib.getExe bun}"
           export HOME=$TMPDIR
           bun run build
         '';
@@ -58,7 +61,7 @@ in {
     ];
 
     # Send SIGUSR2 to toggle recording
-    usr.files.".config/niri/config.kdl".value.binds."${config.user.programs.handy.keybind}" = {
+    usr.files.".config/niri/config.kdl".value.binds."${handyCfg.keybind}" = {
       spawn = ["pkill" "-SIGUSR2" "handy"];
     };
   };

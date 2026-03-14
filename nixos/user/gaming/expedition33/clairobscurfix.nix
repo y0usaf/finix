@@ -4,27 +4,29 @@
   lib,
   ...
 }: let
-  sources = import ./npins;
+  inherit (config) user;
+  clairObscurVersion = (import ./npins).ClairObscurFix.version;
+  steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
 
   clairobscurfix = pkgs.fetchzip {
-    url = "https://codeberg.org/Lyall/ClairObscurFix/releases/download/${sources.ClairObscurFix.version}/ClairObscurFix_${sources.ClairObscurFix.version}.zip";
+    url = "https://codeberg.org/Lyall/ClairObscurFix/releases/download/${clairObscurVersion}/ClairObscurFix_${clairObscurVersion}.zip";
     sha256 = "160xv8gb95rn2kpcwv65j3q8fsi1wiayqchgn4gnkrh6g909qzrb";
     stripRoot = false;
   };
 in {
-  config = lib.mkIf config.user.gaming.expedition33.enable {
+  config = lib.mkIf user.gaming.expedition33.enable {
     usr.files = {
-      "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
+      "${steamPath}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
         clobber = true;
         source = "${clairobscurfix}/ClairObscurFix.asi";
       };
 
-      "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/dsound.dll" = {
+      "${steamPath}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/dsound.dll" = {
         clobber = true;
         source = "${clairobscurfix}/dsound.dll";
       };
 
-      "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.ini" = {
+      "${steamPath}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.ini" = {
         clobber = true;
         generator = lib.generators.toINI {};
         value = {

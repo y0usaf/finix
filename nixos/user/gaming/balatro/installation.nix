@@ -47,15 +47,18 @@
       name = "Aura";
     };
   };
+
+  inherit (lib) types mkOption;
+  typeBool = types.bool;
 in {
   options.user.gaming.balatro = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
+    enable = mkOption {
+      type = typeBool;
       default = false;
       description = "Enable Balatro mod management";
     };
-    enableLovelyInjector = lib.mkOption {
-      type = lib.types.bool;
+    enableLovelyInjector = mkOption {
+      type = typeBool;
       default = false;
       description = ''
         Enable Lovely Injector - a runtime lua injector for LÖVE 2D games.
@@ -63,8 +66,8 @@ in {
         Required for most Balatro mods to work.
       '';
     };
-    enabledMods = lib.mkOption {
-      type = lib.types.listOf (lib.types.enum ((lib.attrNames availableMods) ++ ["morespeeds"]));
+    enabledMods = mkOption {
+      type = types.listOf (types.enum ((lib.attrNames availableMods) ++ ["morespeeds"]));
       default = [];
       description = ''
         List of mod names to enable. Available mods:
@@ -85,20 +88,24 @@ in {
   };
   config = lib.mkMerge [
     (import ./moreSpeeds.nix {inherit config lib;}).config
-    (lib.mkIf config.user.gaming.balatro.enable {
+    (lib.mkIf config.user.gaming.balatro.enable (let
+      inherit (config) user;
+      steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
+      balatroCfg = user.gaming.balatro;
+    in {
       usr.files =
         (lib.mapAttrs' (
             _: mod:
               lib.nameValuePair
-              "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
+              "${steamPath}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
               {
                 clobber = true;
                 source = mod.src;
               }
           )
-          (lib.filterAttrs (name: _: lib.elem name config.user.gaming.balatro.enabledMods) availableMods))
-        // (lib.optionalAttrs config.user.gaming.balatro.enableLovelyInjector {
-          "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Balatro/version.dll" = {
+          (lib.filterAttrs (name: _: lib.elem name balatroCfg.enabledMods) availableMods))
+        // (lib.optionalAttrs balatroCfg.enableLovelyInjector {
+          "${steamPath}/steamapps/common/Balatro/version.dll" = {
             clobber = true;
             source = "${pkgs.fetchzip {
               url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
@@ -107,6 +114,6 @@ in {
             }}/version.dll";
           };
         });
-    })
+    }))
   ];
 }
