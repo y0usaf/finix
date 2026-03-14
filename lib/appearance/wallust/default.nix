@@ -3,6 +3,7 @@
 {lib}: let
   colorschemes = import ./colorschemes;
   templates = import ./templates {inherit lib;};
+  inherit (builtins) toJSON;
 in {
   inherit colorschemes templates;
 
@@ -22,13 +23,13 @@ in {
     };
 
     # Colorschemes
-    ".config/wallust/colorschemes/black.json" = builtins.toJSON colorschemes.black;
-    ".config/wallust/colorschemes/dopamine.json" = builtins.toJSON colorschemes.dopamine;
-    ".config/wallust/colorschemes/eva01.json" = builtins.toJSON colorschemes.eva01;
-    ".config/wallust/colorschemes/eva02.json" = builtins.toJSON colorschemes.eva02;
-    ".config/wallust/colorschemes/p3.json" = builtins.toJSON colorschemes.p3;
-    ".config/wallust/colorschemes/p4.json" = builtins.toJSON colorschemes.p4;
-    ".config/wallust/colorschemes/p5.json" = builtins.toJSON colorschemes.p5;
+    ".config/wallust/colorschemes/black.json" = toJSON colorschemes.black;
+    ".config/wallust/colorschemes/dopamine.json" = toJSON colorschemes.dopamine;
+    ".config/wallust/colorschemes/eva01.json" = toJSON colorschemes.eva01;
+    ".config/wallust/colorschemes/eva02.json" = toJSON colorschemes.eva02;
+    ".config/wallust/colorschemes/p3.json" = toJSON colorschemes.p3;
+    ".config/wallust/colorschemes/p4.json" = toJSON colorschemes.p4;
+    ".config/wallust/colorschemes/p5.json" = toJSON colorschemes.p5;
 
     # Shared CSS variables template
     ".config/wallust/templates/colors.css" = templates.colorsCss;
