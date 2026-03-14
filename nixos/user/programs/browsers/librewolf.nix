@@ -5,34 +5,38 @@
   ...
 }: let
   librewolfShared = import ../../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
-  helpers = import ../../../../lib/browsers/helpers.nix {inherit lib;};
+  inherit (import ../../../../lib/browsers/helpers.nix {inherit lib;}) attrsToLines prefValue;
+  inherit (config) user;
+  userName = user.name;
+  inherit (librewolfShared) profilesIni;
+  pywalfoxNative = pkgs.pywalfox-native;
 in {
   imports = [
     ../../../../lib/browsers/options.nix
     ./ui-chrome.nix
   ];
 
-  config = lib.mkIf config.user.programs.librewolf.enable {
+  config = lib.mkIf user.programs.librewolf.enable {
     environment.systemPackages = [
       (pkgs.librewolf-bin.override {
-        extraPrefs = (helpers.attrsToLines (name: value: "lockPref(\"${name}\", ${helpers.prefValue value});") librewolfShared.locked) + "\n" + (helpers.attrsToLines (name: value: "defaultPref(\"${name}\", ${helpers.prefValue value});") librewolfShared.default);
+        extraPrefs = (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") librewolfShared.locked) + "\n" + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") librewolfShared.default);
         extraPolicies = librewolfShared.browserPolicies;
       })
-      pkgs.pywalfox-native
+      pywalfoxNative
     ];
-    hjem.users."${config.user.name}" = {
+    hjem.users."${userName}" = {
       files =
         {
           ".librewolf/profiles.ini" = {
             generator = lib.generators.toINI {};
             value =
-              librewolfShared.profilesIni
+              profilesIni
               // {
                 Profile0 =
-                  librewolfShared.profilesIni.Profile0
+                  profilesIni.Profile0
                   // {
                     Name = "default";
-                    Path = config.user.name;
+                    Path = userName;
                   };
               };
             clobber = true;
@@ -42,13 +46,13 @@ in {
             name = "pywalfox";
             description = "Native messaging host for Pywalfox";
             path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
-              exec ${pkgs.pywalfox-native}/bin/pywalfox start
+              exec ${pywalfoxNative}/bin/pywalfox start
             ''}";
             type = "stdio";
             allowed_extensions = ["pywalfox@frewacom.org"];
           };
         }
-        // lib.optionalAttrs config.user.shell.zsh.enable {
+        // lib.optionalAttrs user.shell.zsh.enable {
           ".config/zsh/.zprofile" = {
             text = lib.mkAfter ''
               export MOZ_ENABLE_WAYLAND=1

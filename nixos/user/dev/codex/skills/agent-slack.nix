@@ -4,8 +4,10 @@
   ...
 }: let
   skill = import ../../../../../lib/codex/skills/agent-slack.nix;
+  userDev = config.user.dev;
+  codexCfg = userDev.codex;
 in {
-  config = lib.mkIf (config.user.dev.codex.enable && config.user.dev.codex.skills.agent-slack.enable && config.user.dev.agent-slack.enable) {
+  config = lib.mkIf (codexCfg.enable && codexCfg.skills.agent-slack.enable && userDev.agent-slack.enable) {
     usr.files = {
       ".codex/skills/agent-slack/SKILL.md" = {
         text = skill.skill;

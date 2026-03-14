@@ -28,9 +28,11 @@ in {
       port = 11434;
 
       loadModels = import ./models.nix;
-      environmentVariables =
-        if builtins.pathExists (./. + "/environment-${config.networking.hostName}.nix")
-        then import (./. + "/environment-${config.networking.hostName}.nix")
+      environmentVariables = let
+        envFile = ./. + "/environment-${config.networking.hostName}.nix";
+      in
+        if builtins.pathExists envFile
+        then import envFile
         else import ./environment-default.nix;
     };
   };

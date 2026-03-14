@@ -5,8 +5,12 @@
   flakeInputs,
   ...
 }: let
+  inherit (lib) mkAfter;
   x11ThemeName = "SSB-x11";
-  hyprcursorPackage = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}"."deepin-dark-hyprcursor";
+  cursorsPkgs = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}";
+  hyprcursorPackage = cursorsPkgs."deepin-dark-hyprcursor";
+  inherit (config) user;
+  inherit (user.appearance) cursorSize;
 in {
   options.user.ui.cursor = {
     enable = lib.mkOption {
@@ -15,44 +19,44 @@ in {
       description = "Enable cursor theme configuration";
     };
   };
-  config = lib.mkIf config.user.ui.cursor.enable {
+  config = lib.mkIf user.ui.cursor.enable {
     environment.systemPackages =
       [
-        flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}"."ssb-xcursor"
+        cursorsPkgs."ssb-xcursor"
       ]
       ++ lib.optionals (hyprcursorPackage != null) [
         hyprcursorPackage
       ];
 
-    hjem.users."${config.user.name}" = {
+    hjem.users."${user.name}" = {
       files =
         {
           ".config/gtk-3.0/settings.ini" = {
-            text = lib.mkAfter ''
+            text = mkAfter ''
               [Settings]
               gtk-cursor-theme-name=${x11ThemeName}
-              gtk-cursor-theme-size=${toString config.user.appearance.cursorSize}
+              gtk-cursor-theme-size=${toString cursorSize}
             '';
             clobber = true;
           };
           ".config/gtk-4.0/settings.ini" = {
-            text = lib.mkAfter ''
+            text = mkAfter ''
               [Settings]
               gtk-cursor-theme-name=${x11ThemeName}
-              gtk-cursor-theme-size=${toString config.user.appearance.cursorSize}
+              gtk-cursor-theme-size=${toString cursorSize}
             '';
             clobber = true;
           };
         }
-        // lib.optionalAttrs config.user.shell.zsh.enable {
+        // lib.optionalAttrs user.shell.zsh.enable {
           ".config/zsh/.zprofile" = {
-            text = lib.mkAfter (''
+            text = mkAfter (''
                 export XCURSOR_THEME="${x11ThemeName}"
-                export XCURSOR_SIZE="${toString config.user.appearance.cursorSize}"
+                export XCURSOR_SIZE="${toString cursorSize}"
               ''
               + lib.optionalString (hyprcursorPackage != null) ''
                 export HYPRCURSOR_THEME="DeepinDarkV20-hypr"
-                export HYPRCURSOR_SIZE="${toString config.user.appearance.cursorSize}"
+                export HYPRCURSOR_SIZE="${toString cursorSize}"
               '');
             clobber = true;
           };

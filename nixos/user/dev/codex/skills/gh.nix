@@ -4,8 +4,10 @@
   ...
 }: let
   skill = import ../../../../../lib/codex/skills/gh.nix;
+  inherit (config) user;
+  codexCfg = user.dev.codex;
 in {
-  config = lib.mkIf (config.user.dev.codex.enable && config.user.dev.codex.skills.gh.enable && config.user.tools.gh.enable) {
+  config = lib.mkIf (codexCfg.enable && codexCfg.skills.gh.enable && user.tools.gh.enable) {
     usr.files = {
       ".codex/skills/gh/SKILL.md" = {
         text = skill.skill;
