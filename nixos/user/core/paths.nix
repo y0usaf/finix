@@ -3,15 +3,18 @@
   config,
   ...
 }: let
-  mkOpt = type: description: lib.mkOption {inherit type description;};
-  dirModule = lib.types.submodule {
+  inherit (lib) mkDefault mkOption;
+  inherit (lib.types) str bool submodule listOf;
+  homeDir = config.user.homeDirectory;
+  mkOpt = type: description: mkOption {inherit type description;};
+  dirModule = submodule {
     options = {
-      path = lib.mkOption {
-        type = lib.types.str;
+      path = mkOption {
+        type = str;
         description = "Absolute path to the directory";
       };
-      create = lib.mkOption {
-        type = lib.types.bool;
+      create = mkOption {
+        type = bool;
         default = true;
         description = "Whether to create the directory if it doesn't exist";
       };
@@ -23,24 +26,24 @@ in {
     music = mkOpt dirModule "Directory for music files.";
     dcim = mkOpt dirModule "Directory for pictures (DCIM).";
     steam = mkOpt dirModule "Directory for Steam.";
-    wallpapers = mkOpt (lib.types.submodule {
+    wallpapers = mkOpt (submodule {
       options = {
         static = mkOpt dirModule "Wallpaper directory for static images.";
         video = mkOpt dirModule "Wallpaper directory for videos.";
       };
     }) "Wallpaper directories configuration";
-    bookmarks = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
+    bookmarks = mkOption {
+      type = listOf str;
       default = [];
       description = "GTK bookmarks for file manager";
     };
   };
 
-  config.user.paths.flake = lib.mkDefault {
-    path = "${config.user.homeDirectory}/nixos";
+  config.user.paths.flake = mkDefault {
+    path = "${homeDir}/nixos";
   };
 
-  config.user.paths.steam = lib.mkDefault {
-    path = "${config.user.homeDirectory}/.local/share/Steam";
+  config.user.paths.steam = mkDefault {
+    path = "${homeDir}/.local/share/Steam";
   };
 }

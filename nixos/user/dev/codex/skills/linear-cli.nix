@@ -4,8 +4,9 @@
   ...
 }: let
   skill = import ../../../../../lib/codex/skills/linear-cli.nix;
+  codexCfg = config.user.dev.codex;
 in {
-  config = lib.mkIf (config.user.dev.codex.enable && config.user.dev.codex.skills.linear-cli.enable) {
+  config = lib.mkIf (codexCfg.enable && codexCfg.skills.linear-cli.enable) {
     usr.files = {
       ".codex/skills/linear-cli/SKILL.md" = {
         text = skill.skill;

@@ -5,16 +5,17 @@
   ...
 }: let
   claudeCodeConfig = import ../../../../lib/claude-code;
-  # Build the marketplace with all plugins
-  # Settings without hooks (hooks come from plugin now)
-  statuslineScript = import ../../../../lib/claude-code/statusline.nix {inherit pkgs;};
+  inherit (config) user;
+  userDev = user.dev;
+  claudeCodeCfg = userDev.claude-code;
+  ccSettings = claudeCodeConfig.settings;
 in {
   imports = [
     ./claude-code.nix
     ./tweakcc.nix
   ];
 
-  config = lib.mkIf config.user.dev.claude-code.enable {
+  config = lib.mkIf claudeCodeCfg.enable {
     usr.files =
       # Marketplace files (plugins, commands, hooks, etc.)
       ((claudeCodeConfig.marketplace {inherit lib;}).build {
@@ -48,29 +49,31 @@ in {
 
     # settings.json via patchix — mutable so Claude Code can toggle plugins
     patchix.enable = true;
-    patchix.users."${config.user.name}".patches.".claude/settings.json" = {
+    patchix.users."${user.name}".patches.".claude/settings.json" = {
       format = "json";
       clobber = false;
       value = {
-        inherit (claudeCodeConfig.settings) includeCoAuthoredBy permissions;
+        inherit (ccSettings) includeCoAuthoredBy permissions;
         statusLine = {
           type = "command";
-          command = "${statuslineScript}/bin/statusline";
+          command = "${import ../../../../lib/claude-code/statusline.nix {inherit pkgs;}}/bin/statusline";
         };
-        inherit (config.user.dev.claude-code) model;
+        inherit (claudeCodeCfg) model;
         env =
-          claudeCodeConfig.settings.env
+          ccSettings.env
           // {
-            CLAUDE_CODE_SUBAGENT_MODEL = config.user.dev.claude-code.subagentModel;
+            CLAUDE_CODE_SUBAGENT_MODEL = claudeCodeCfg.subagentModel;
           };
-        enabledPlugins = {
-          "agent-slack@y0usaf-marketplace" = config.user.dev.agent-slack.enable && config.user.dev.claude-code.skills.agent-slack.enable;
+        enabledPlugins = let
+          inherit (claudeCodeCfg) skills;
+        in {
+          "agent-slack@y0usaf-marketplace" = userDev.agent-slack.enable && skills.agent-slack.enable;
           "audio-notify@y0usaf-marketplace" = true;
           "codex-mcp@y0usaf-marketplace" = false;
           "collab-flow@y0usaf-marketplace" = false;
-          "gh@y0usaf-marketplace" = config.user.tools.gh.enable && config.user.dev.claude-code.skills.gh.enable;
+          "gh@y0usaf-marketplace" = user.tools.gh.enable && skills.gh.enable;
           "instructify@y0usaf-marketplace" = true;
-          "linear-cli@y0usaf-marketplace" = config.user.dev.claude-code.skills.linear-cli.enable;
+          "linear-cli@y0usaf-marketplace" = skills.linear-cli.enable;
           "teams-instruct@y0usaf-marketplace" = false;
           "todowrite-instruct@y0usaf-marketplace" = false;
           "tool-tracker@y0usaf-marketplace" = false;
@@ -87,7 +90,7 @@ in {
           "y0usaf-marketplace" = {
             source = {
               source = "directory";
-              path = "${config.user.homeDirectory}/.config/claude";
+              path = "${user.homeDirectory}/.config/claude";
             };
           };
           "ai-eng-plugins" = {
