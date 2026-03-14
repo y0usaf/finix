@@ -2,11 +2,14 @@
   config,
   lib,
 }: let
+  inherit (config) user;
+  uiFonts = user.ui.fonts;
+  hwAccel = user.programs.browser.hardwareAccel or {};
   fontList = lib.concatStringsSep ", " [
-    config.user.ui.fonts.mainFontName
-    config.user.ui.fonts.backup.name
+    uiFonts.mainFontName
+    uiFonts.backup.name
     "Symbols Nerd Font"
-    config.user.ui.fonts.emoji.name
+    uiFonts.emoji.name
   ];
 in {
   locked = {
@@ -21,10 +24,10 @@ in {
     "browser.tabs.inTitlebar" = 0;
     "browser.toolbars.bookmarks.visibility" = "never";
 
-    "gfx.webrender.all" = config.user.programs.browser.hardwareAccel.webrender or true;
-    "media.hardware-video-decoding.enabled" = config.user.programs.browser.hardwareAccel.videoDecoding or true;
-    "media.ffmpeg.vaapi.enabled" = config.user.programs.browser.hardwareAccel.vaapi or false;
-    "layers.acceleration.disabled" = config.user.programs.browser.hardwareAccel.disabled or false;
+    "gfx.webrender.all" = hwAccel.webrender or true;
+    "media.hardware-video-decoding.enabled" = hwAccel.videoDecoding or true;
+    "media.ffmpeg.vaapi.enabled" = hwAccel.vaapi or false;
+    "layers.acceleration.disabled" = hwAccel.disabled or false;
 
     "browser.sessionstore.interval" = 15000;
     "network.http.max-persistent-connections-per-server" = 10;

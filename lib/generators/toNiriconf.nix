@@ -2,21 +2,25 @@ lib: let
   inherit (builtins) isList hasAttr;
   inherit (lib.attrsets) mapAttrsToList;
   inherit (lib.strings) concatStringsSep concatMapStringsSep;
+  filterNonEmpty = lib.filter (s: s != "");
+  inherit (lib) filterAttrs;
 in {
   toNiriconf = attrs:
     lib.concatStringsSep "\n\n" (
-      lib.filter (s: s != "") [
+      filterNonEmpty [
         ((import ./toKDL.nix {inherit lib;}).toKDL (
-          lib.filterAttrs (k: _: !lib.elem k ["output" "spawn-at-startup" "_extraConfig"]) attrs
+          filterAttrs (k: _: !lib.elem k ["output" "spawn-at-startup" "_extraConfig"]) attrs
         ))
         (
           if hasAttr "output" attrs
           then
-            concatStringsSep "\n" (mapAttrsToList (name: config: ''              output "${name}" {
-                      ${concatStringsSep "\n" (lib.filter (s: s != "") ([
+            concatStringsSep "\n" (mapAttrsToList (name: config: let
+              pos = config.position;
+            in ''              output "${name}" {
+                      ${concatStringsSep "\n" (filterNonEmpty ([
                   (
                     if hasAttr "position" config
-                    then "\tposition x=${toString config.position.x} y=${toString config.position.y}"
+                    then "\tposition x=${toString pos.x} y=${toString pos.y}"
                     else ""
                   )
                   (
@@ -25,7 +29,7 @@ in {
                     else ""
                   )
                 ]
-                ++ (mapAttrsToList (key: value: "\t${key} \"${toString value}\"") (lib.filterAttrs (k: _: k != "position" && k != "mode") config))))}
+                ++ (mapAttrsToList (key: value: "\t${key} \"${toString value}\"") (filterAttrs (k: _: k != "position" && k != "mode") config))))}
                       }'')
             attrs.output)
           else ""
