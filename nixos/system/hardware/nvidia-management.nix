@@ -4,6 +4,7 @@
   lib,
   ...
 }: let
+  nvidiaMgmt = config.hardware.nvidia.management;
   nvidiaMgmtScript =
     pkgs.writers.writePython3Bin "nvidia-management" {
       libraries = [pkgs.python313Packages.nvidia-ml-py];
@@ -30,7 +31,7 @@
 
       CONFIG_PATH = Path(
           "${pkgs.writeText "nvidia-config.json" (builtins.toJSON {
-        inherit (config.hardware.nvidia.management) maxClock minClock coreVoltageOffset memoryVoltageOffset fanCurve fanCurveInterval;
+        inherit (nvidiaMgmt) maxClock minClock coreVoltageOffset memoryVoltageOffset fanCurve fanCurveInterval;
       })}"
       )
 
@@ -241,38 +242,43 @@
       if __name__ == "__main__":
           main()
     '';
+
+  mkOpt = lib.mkOption;
+  inherit (lib) types mkIf getExe;
+  typeInt = types.int;
+  typeNullOrInt = types.nullOr typeInt;
 in {
   options.hardware.nvidia.management = {
     enable = lib.mkEnableOption "NVIDIA GPU management (clocks, voltage, fans)";
-    maxClock = lib.mkOption {
-      type = lib.types.int;
+    maxClock = mkOpt {
+      type = typeInt;
       default = 2500;
       description = "Maximum GPU clock in MHz";
     };
-    minClock = lib.mkOption {
-      type = lib.types.int;
+    minClock = mkOpt {
+      type = typeInt;
       default = 300;
       description = "Minimum GPU clock in MHz";
     };
-    coreVoltageOffset = lib.mkOption {
-      type = lib.types.nullOr lib.types.int;
+    coreVoltageOffset = mkOpt {
+      type = typeNullOrInt;
       default = null;
       description = "Core voltage offset in mV (negative = undervolt)";
     };
-    memoryVoltageOffset = lib.mkOption {
-      type = lib.types.nullOr lib.types.int;
+    memoryVoltageOffset = mkOpt {
+      type = typeNullOrInt;
       default = null;
       description = "Memory voltage offset in mV (negative = undervolt)";
     };
-    fanCurve = lib.mkOption {
-      type = lib.types.listOf (lib.types.submodule {
+    fanCurve = mkOpt {
+      type = types.listOf (types.submodule {
         options = {
-          temp = lib.mkOption {
-            type = lib.types.int;
+          temp = mkOpt {
+            type = typeInt;
             description = "GPU temperature in °C";
           };
-          speed = lib.mkOption {
-            type = lib.types.int;
+          speed = mkOpt {
+            type = typeInt;
             description = "Fan speed percentage";
           };
         };
@@ -280,14 +286,14 @@ in {
       default = [];
       description = "Fan curve as temp/speed points. A single point gives a fixed speed at all temperatures.";
     };
-    fanCurveInterval = lib.mkOption {
-      type = lib.types.int;
+    fanCurveInterval = mkOpt {
+      type = typeInt;
       default = 5;
       description = "Polling interval in seconds for fan curve daemon.";
     };
   };
 
-  config = lib.mkIf config.hardware.nvidia.management.enable {
+  config = mkIf nvidiaMgmt.enable {
     environment.systemPackages = [nvidiaMgmtScript];
 
     systemd.services.nvidia-management = {
@@ -297,7 +303,7 @@ in {
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = "${lib.getExe nvidiaMgmtScript} apply";
+        ExecStart = "${getExe nvidiaMgmtScript} apply";
         StandardOutput = "journal";
         StandardError = "journal";
       };
@@ -306,14 +312,14 @@ in {
       };
     };
 
-    systemd.services.nvidia-fan-curve = lib.mkIf (config.hardware.nvidia.management.fanCurve != []) {
+    systemd.services.nvidia-fan-curve = mkIf (nvidiaMgmt.fanCurve != []) {
       description = "NVIDIA GPU Fan Curve Daemon";
       wantedBy = ["multi-user.target"];
       after = ["multi-user.target"];
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${lib.getExe nvidiaMgmtScript} watch";
-        ExecStop = "${lib.getExe nvidiaMgmtScript} fan-restore";
+        ExecStart = "${getExe nvidiaMgmtScript} watch";
+        ExecStop = "${getExe nvidiaMgmtScript} fan-restore";
         Restart = "on-failure";
         RestartSec = "5s";
         StandardOutput = "journal";
