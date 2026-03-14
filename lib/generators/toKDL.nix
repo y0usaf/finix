@@ -9,7 +9,7 @@
     inherit (builtins) typeOf replaceStrings elem;
 
     indentStrings = let
-      lines = lib.concatStringsSep "\n";
+      lines = concatStringsSep "\n";
     in
       stringsWithNewlines: (lines: concatStringsSep "\n" (map (x: "	" + x) lines)) ((lib.splitString "\n") (lines stringsWithNewlines));
 
@@ -50,12 +50,13 @@
       then "${name} ${literalValueToString value}"
       else if vType == "set"
       then let
+        inherit (lib) pipe;
         children =
-          (lib.pipe (value._children or []) [
+          (pipe (value._children or []) [
             (map (child: mapAttrsToList convertAttributeToKDL child))
             lib.flatten
           ])
-          ++ (lib.pipe value [
+          ++ (pipe value [
             (lib.filterAttrs (
               childName: _:
                 !(elem childName [

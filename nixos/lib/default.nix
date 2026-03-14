@@ -3,16 +3,19 @@
   system,
   nixpkgsConfig,
 }: let
+  nixpkgsInput = inputs.nixpkgs;
   commonOverlays = [
     inputs.neovim-nightly-overlay.overlays.default
     inputs.claude-code-nix.overlays.default
     inputs.gpui-shell.overlays.default
     # Fix obs-vertical-canvas Qt6GuiPrivate cmake detection
-    (_: prev: {
+    (_: prev: let
+      prevObsPlugins = prev.obs-studio-plugins;
+    in {
       obs-studio-plugins =
-        prev.obs-studio-plugins
+        prevObsPlugins
         // {
-          obs-vertical-canvas = prev.obs-studio-plugins.obs-vertical-canvas.overrideAttrs (old: {
+          obs-vertical-canvas = prevObsPlugins.obs-vertical-canvas.overrideAttrs (old: {
             postPatch =
               (old.postPatch or "")
               + ''
@@ -24,7 +27,7 @@
     })
   ];
 
-  pkgs = import inputs.nixpkgs {
+  pkgs = import nixpkgsInput {
     inherit system;
     config = nixpkgsConfig;
     overlays = commonOverlays;
@@ -34,7 +37,7 @@
 in {
   nixosConfigurations =
     lib.mapAttrs (_: hostConfig:
-      import (inputs.nixpkgs + "/nixos") {
+      import (nixpkgsInput + "/nixos") {
         inherit system;
         configuration = {
           imports = [
