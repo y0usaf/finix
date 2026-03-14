@@ -4,12 +4,16 @@
   pkgs,
   ...
 }: let
-  computedFontSize = toString config.user.appearance.termFontSize;
+  inherit (config) user;
+  userUi = user.ui;
+  userAppearance = user.appearance;
+  uiFonts = userUi.fonts;
+  computedFontSize = toString userAppearance.termFontSize;
 in {
   options.user.ui.foot = {
     enable = lib.mkEnableOption "foot terminal emulator";
   };
-  config = lib.mkIf config.user.ui.foot.enable {
+  config = lib.mkIf userUi.foot.enable {
     environment.systemPackages = [
       pkgs.foot
     ];
@@ -21,11 +25,11 @@ in {
 
         [main]
         term=xterm-256color
-        font=${"${config.user.ui.fonts.mainFontName}:size=${computedFontSize}, "
+        font=${"${uiFonts.mainFontName}:size=${computedFontSize}, "
           + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") [
             "Symbols Nerd Font"
-            config.user.ui.fonts.backup.name
-            config.user.ui.fonts.emoji.name
+            uiFonts.backup.name
+            uiFonts.emoji.name
           ])}
         dpi-aware=yes
 
@@ -38,7 +42,7 @@ in {
         alternate-scroll-mode=yes
 
         [colors]
-        alpha=${toString config.user.appearance.opacity}
+        alpha=${toString userAppearance.opacity}
 
         [key-bindings]
         clipboard-copy=Control+c XF86Copy
