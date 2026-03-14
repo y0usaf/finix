@@ -1,8 +1,10 @@
 {config, ...}: let
   inherit (import ../../../../lib/ssh) hosts defaults;
-  identityFile = "${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}";
+  inherit (config) user;
+  userName = user.name;
+  identityFile = "${user.homeDirectory}/Tokens/id_rsa_${userName}";
 in {
-  home-manager.users."${config.user.name}".programs.ssh = {
+  home-manager.users."${userName}".programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
 

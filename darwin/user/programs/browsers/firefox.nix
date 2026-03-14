@@ -5,13 +5,15 @@
   ...
 }: let
   firefoxShared = import ../../../../lib/browsers/firefox-shared.nix {inherit config lib;};
+  inherit (config) user;
+  userName = user.name;
 in {
   imports = [
     ./ui-chrome.nix
   ];
 
-  config = lib.mkIf config.user.programs.firefox.enable {
-    home-manager.users."${config.user.name}" = {
+  config = lib.mkIf user.programs.firefox.enable {
+    home-manager.users."${userName}" = {
       home = {
         packages = [
           (pkgs.wrapFirefox pkgs.firefox-unwrapped {
@@ -22,10 +24,10 @@ in {
           ".mozilla/firefox/profiles.ini" = {
             text = lib.generators.toINI {} firefoxShared.profilesIni;
           };
-          ".mozilla/firefox/${config.user.name}/chrome/userChrome.css" = {
+          ".mozilla/firefox/${userName}/chrome/userChrome.css" = {
             text = firefoxShared.userChromeCss;
           };
-          ".mozilla/firefox/${config.user.name}/chrome/userContent.css" = {
+          ".mozilla/firefox/${userName}/chrome/userContent.css" = {
             text = firefoxShared.userContentCss;
           };
         };

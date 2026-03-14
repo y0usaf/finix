@@ -5,6 +5,9 @@
   ...
 }: let
   wallustLib = import ../../../../lib/appearance/wallust {inherit lib;};
+  wallustPkg = pkgs.wallust;
+  inherit (config) user;
+  wallustCfg = user.appearance.wallust;
 in {
   options.user.appearance.wallust = {
     enable = lib.mkEnableOption "wallust dynamic theming";
@@ -16,21 +19,21 @@ in {
     };
   };
 
-  config = lib.mkIf config.user.appearance.wallust.enable {
+  config = lib.mkIf wallustCfg.enable {
     environment.systemPackages = [
-      pkgs.wallust
+      wallustPkg
       # Wrapper script: runs wallust and updates pywalfox
       (pkgs.writeShellApplication {
         name = "wt";
-        runtimeInputs = [pkgs.wallust pkgs.pywalfox-native];
+        runtimeInputs = [wallustPkg pkgs.pywalfox-native];
         text = wallustLib.mkWtScriptText {browserBinary = "librewolf";};
       })
     ];
 
-    home-manager.users."${config.user.name}" = {
+    home-manager.users."${user.name}" = {
       # Config files via home-manager
       home.file = lib.mapAttrs (_: content: {text = content;}) (wallustLib.mkFiles {
-        zjstatusEnabled = config.user.shell.zellij.zjstatus.enable;
+        zjstatusEnabled = user.shell.zellij.zjstatus.enable;
       });
 
       # launchd agent to apply theme on login
@@ -42,8 +45,8 @@ in {
             "${pkgs.bash}/bin/bash"
             "-c"
             (wallustLib.mkStartupScript {
-              wallustBin = "${pkgs.wallust}/bin/wallust";
-              inherit (config.user.appearance.wallust) defaultTheme;
+              wallustBin = "${wallustPkg}/bin/wallust";
+              inherit (wallustCfg) defaultTheme;
             })
           ];
           RunAtLoad = true;
