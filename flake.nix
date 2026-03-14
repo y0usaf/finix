@@ -121,6 +121,7 @@
   } @ inputs: let
     linuxSystem = "x86_64-linux";
     darwinSystem = "aarch64-darwin";
+    legacyPkgs = nixpkgs.legacyPackages;
 
     commonNixpkgsConfig = {
       allowUnfree = true;
@@ -130,7 +131,8 @@
       allowInsecurePredicate = pkg: nixpkgs.lib.hasPrefix "librewolf" (pkg.pname or "");
     };
 
-    darwinPkgs = nixpkgs.legacyPackages."${darwinSystem}";
+    darwinPkgs = legacyPkgs."${darwinSystem}";
+    fastFonts = inputs.fast-fonts;
   in {
     inherit
       (import ./nixos/lib {
@@ -154,7 +156,7 @@
             iosevkaSlab = darwinPkgs.stdenvNoCC.mkDerivation {
               pname = "fast-iosevka-slab";
               version = "1.0.0";
-              src = inputs.fast-fonts;
+              src = fastFonts;
 
               installPhase = ''
                 mkdir -p $out/share/fonts/truetype
@@ -183,7 +185,7 @@
           };
 
           # Install Fast Font system-wide
-          fonts.packages = [inputs.fast-fonts.packages."${darwinSystem}".default];
+          fonts.packages = [fastFonts.packages."${darwinSystem}".default];
 
           # Configure home-manager
           home-manager = {
@@ -198,7 +200,7 @@
     };
 
     # Expose for easier access
-    formatter."${linuxSystem}" = nixpkgs.legacyPackages."${linuxSystem}".alejandra;
-    formatter."${darwinSystem}" = nixpkgs.legacyPackages."${darwinSystem}".alejandra;
+    formatter."${linuxSystem}" = legacyPkgs."${linuxSystem}".alejandra;
+    formatter."${darwinSystem}" = darwinPkgs.alejandra;
   };
 }
