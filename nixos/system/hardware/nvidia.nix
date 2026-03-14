@@ -4,16 +4,20 @@
   pkgs,
   ...
 }: let
-  isOpen = config.hardware.nvidia.open;
+  mkEnable = lib.mkEnableOption;
+  inherit (lib) optionals;
+  nvidiaHw = config.hardware.nvidia;
+  isOpen = nvidiaHw.open;
+  cudaEnabled = nvidiaHw.cuda.enable;
 in {
   options = {
     hardware.nvidia = {
-      enable = lib.mkEnableOption "NVIDIA GPU support";
-      cuda.enable = lib.mkEnableOption "CUDA support";
+      enable = mkEnable "NVIDIA GPU support";
+      cuda.enable = mkEnable "CUDA support";
     };
   };
 
-  config = lib.mkIf config.hardware.nvidia.enable {
+  config = lib.mkIf nvidiaHw.enable {
     services.xserver.videoDrivers = ["nvidia"];
 
     hardware.nvidia = {
@@ -35,7 +39,7 @@ in {
       [
         pkgs.nvidia-vaapi-driver
       ]
-      ++ lib.optionals config.hardware.nvidia.cuda.enable [
+      ++ optionals cudaEnabled [
         pkgs.cudatoolkit
       ];
 
@@ -55,16 +59,16 @@ in {
           "nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1"
           "nvidia_modeset.disable_vrr_memclk_switch=1"
         ]
-        ++ lib.optionals isOpen [
+        ++ optionals isOpen [
           "nvidia.NVreg_UseKernelSuspendNotifiers=1"
         ]
-        ++ lib.optionals (!isOpen) [
+        ++ optionals (!isOpen) [
           "nvidia.NVreg_TemporaryFilePath=/var/tmp"
         ];
     };
 
     environment = {
-      systemPackages = lib.optionals config.hardware.nvidia.cuda.enable [
+      systemPackages = optionals cudaEnabled [
         pkgs.cudaPackages.cudnn
       ];
       sessionVariables = {
