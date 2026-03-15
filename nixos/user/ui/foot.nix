@@ -41,7 +41,7 @@ in {
         hide-when-typing=no
         alternate-scroll-mode=yes
 
-        [colors]
+        [colors-dark]
         alpha=${toString userAppearance.opacity}
 
         [key-bindings]
