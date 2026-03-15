@@ -2,9 +2,9 @@
 # Nushell aliases cannot contain pipes or env var expansion at call time.
 # Complex aliases that need those features use `def` commands instead.
 _: ''
-  # Development tools
-  alias lintcheck = clear; statix check .; deadnix .
-  alias lintfix = clear; statix fix .; deadnix .
+  # Development tools (must be def - semicolons in aliases execute immediately)
+  def lintcheck [] { clear; ^statix check .; ^deadnix . }
+  def lintfix [] { clear; ^statix fix .; ^deadnix . }
 
   # Wallust wrapper
   alias wt = wallust
