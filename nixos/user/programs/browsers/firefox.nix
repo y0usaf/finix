@@ -53,6 +53,15 @@ in {
             '';
             clobber = true;
           };
+        }
+        // lib.optionalAttrs user.shell.nushell.enable {
+          ".config/nushell/login.nu" = {
+            text = lib.mkAfter ''
+              $env.MOZ_ENABLE_WAYLAND = "1"
+              $env.MOZ_USE_XINPUT2 = "1"
+            '';
+            clobber = true;
+          };
         };
     };
   };
