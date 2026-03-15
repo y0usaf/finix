@@ -1,5 +1,6 @@
 _: {
   imports = [
+    ./agent-harness.nix
     ./bluetooth.nix
     ./btop.nix
     ./cmus.nix
