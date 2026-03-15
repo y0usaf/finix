@@ -1,4 +1,8 @@
 _: {
+  banner = ''
+    $env.config.show_banner = false
+  '';
+
   history = ''
     $env.config.history = {
       max_size: 10000
@@ -37,7 +41,6 @@ _: {
   '';
 
   carapace = ''
-    $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
     source ~/.config/nushell/carapace.nu
   '';
 
