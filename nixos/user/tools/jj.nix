@@ -85,6 +85,26 @@
           '';
           clobber = true;
         };
+      }
+      // lib.optionalAttrs (config.user.tools.jj.enableAliases && config.user.shell.nushell.enable) {
+        ".config/nushell/config.nu" = {
+          text = lib.mkAfter ''
+            alias jl = jj log -r recent
+            alias jll = jj log -r ::@
+            alias js = jj status
+            alias jd = jj diff
+            alias jc = jj commit
+            alias jca = jj commit --amend
+            alias jco = jj checkout
+            alias jn = jj new
+            alias je = jj edit
+            alias jb = jj branch
+            alias jrb = jj rebase
+            alias jsp = jj split
+            alias jsq = jj squash
+          '';
+          clobber = true;
+        };
       };
   };
 }

@@ -21,34 +21,62 @@
     environment.systemPackages = [
       pkgs.nh
     ];
-    usr.files.".config/zsh/.zshrc" = {
-      text = lib.mkAfter ''
-        export NH_FLAKE="${toString (
-          if config.user.tools.nh.flake != null
-          then config.user.tools.nh.flake
-          else config.user.paths.flake.path
-        )}"
-        nhs() {
-          clear
-          local update=""
-          local dry=""
-          local OPTIND
-          while getopts "du" opt; do
-            case $opt in
-              d) dry="--dry" ;;
-              u) update="--update" ;;
-              *) echo "Invalid option: -$OPTARG" >&2 ;;
-            esac
-          done
-          shift $((OPTIND-1))
-          nh os switch $update $dry "$@"
-        }
-        alias nhd="nhs -d"
-        alias nhu="nhs -u"
-        alias nhud="nhs -ud"
-        alias nhc="nh clean all"
-      '';
-      clobber = true;
-    };
+    usr.files = let
+      nhFlake = toString (
+        if config.user.tools.nh.flake != null
+        then config.user.tools.nh.flake
+        else config.user.paths.flake.path
+      );
+    in
+      {
+        ".config/zsh/.zshrc" = {
+          text = lib.mkAfter ''
+            export NH_FLAKE="${nhFlake}"
+            nhs() {
+              clear
+              local update=""
+              local dry=""
+              local OPTIND
+              while getopts "du" opt; do
+                case $opt in
+                  d) dry="--dry" ;;
+                  u) update="--update" ;;
+                  *) echo "Invalid option: -$OPTARG" >&2 ;;
+                esac
+              done
+              shift $((OPTIND-1))
+              nh os switch $update $dry "$@"
+            }
+            alias nhd="nhs -d"
+            alias nhu="nhs -u"
+            alias nhud="nhs -ud"
+            alias nhc="nh clean all"
+          '';
+          clobber = true;
+        };
+      }
+      // lib.optionalAttrs config.user.shell.nushell.enable {
+        ".config/nushell/env.nu" = {
+          text = lib.mkAfter ''
+            $env.NH_FLAKE = "${nhFlake}"
+          '';
+          clobber = true;
+        };
+        ".config/nushell/config.nu" = {
+          text = lib.mkAfter ''
+            def nhs [--dry(-d), --update(-u), ...rest: string] {
+              clear
+              let update_flag = if $update { ["--update"] } else { [] }
+              let dry_flag = if $dry { ["--dry"] } else { [] }
+              ^nh os switch ...$update_flag ...$dry_flag ...$rest
+            }
+            alias nhd = nhs -d
+            alias nhu = nhs -u
+            alias nhud = nhs -u -d
+            alias nhc = nh clean all
+          '';
+          clobber = true;
+        };
+      };
   };
 }

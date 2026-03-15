@@ -58,6 +58,15 @@
               export GDK_DPI_SCALE="${toString config.user.ui.gtk.scale}"
             '';
           };
+        }
+        // lib.optionalAttrs config.user.shell.nushell.enable {
+          ".config/nushell/env.nu" = {
+            clobber = true;
+            text = lib.mkAfter ''
+              $env.XCURSOR_SIZE = "${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * config.user.ui.gtk.scale)))}"
+              $env.GDK_DPI_SCALE = "${toString config.user.ui.gtk.scale}"
+            '';
+          };
         };
     };
   };
