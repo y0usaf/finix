@@ -111,6 +111,11 @@
       url = "path:/home/y0usaf/Dev/patchix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    agent-harness = {
+      url = "path:/home/y0usaf/Dev/Agent-Harness";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
