@@ -7,7 +7,7 @@ _: ''
   def lintfix [] { clear; ^statix fix .; ^deadnix . }
 
   # Wallust wrapper
-  alias wt = wallust
+  alias wallust = wt
 
   # Claude Code
   alias claude = claude --allow-dangerously-skip-permissions
@@ -21,6 +21,9 @@ _: ''
   alias ll = lsd -l --color=always --group-dirs=first --icon=always
   alias ls = lsd -lA --color=always --group-dirs=first --icon=always
   alias lt = lsd -A --tree --color=always --group-dirs=first --icon=always
+
+  # Directory listing
+  def dir [...args: string] { ^dir --color=auto ...$args }
 
   # Grep replacements with ripgrep
   def grep [...args: string] { ^rg --color auto ...$args }

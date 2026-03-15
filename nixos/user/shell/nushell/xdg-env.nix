@@ -52,6 +52,13 @@
           $env.NPM_CONFIG_CACHE = $"($env.XDG_CACHE_HOME)/npm"
           $env.NPM_CONFIG_TMP = $"($env.XDG_RUNTIME_DIR? | default '/tmp')/npm"
           $env.NPM_CONFIG_INIT_MODULE = $"($env.XDG_CONFIG_HOME)/npm/config/npm-init.js"
+
+          # Ensure XDG directories exist
+          [$env.XDG_CONFIG_HOME $env.XDG_DATA_HOME $env.XDG_STATE_HOME $env.XDG_CACHE_HOME] | each { |d| mkdir $d }
+
+          # Ensure bun runtime dir exists
+          let runtime_dir = ($env.XDG_RUNTIME_DIR? | default null)
+          if $runtime_dir != null { mkdir $"($runtime_dir)/bun" }
         '';
       };
 

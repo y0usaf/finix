@@ -78,7 +78,6 @@ in {
           "todowrite-instruct@y0usaf-marketplace" = false;
           "tool-tracker@y0usaf-marketplace" = false;
           "ralph-loop@claude-plugins-official" = false;
-          "code-simplifier@claude-plugins-official" = true;
           "codex-mcp@ai-eng-plugins" = false;
           "collab-flow@ai-eng-plugins" = false;
           "skills-framework@ai-eng-plugins" = true;
