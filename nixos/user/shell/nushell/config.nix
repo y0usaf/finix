@@ -59,6 +59,13 @@
             text = "";
             clobber = true;
           };
+          ".config/nushell/carapace.nu" = {
+            source = pkgs.runCommand "carapace-init-nu" {} ''
+              export HOME=$(mktemp -d)
+              ${pkgs.carapace}/bin/carapace _carapace nushell > $out
+            '';
+            clobber = true;
+          };
         }
         // lib.optionalAttrs config.user.shell.zellij.enable {
           ".config/nushell/zellij.nu" = {
