@@ -8,6 +8,7 @@
     inputs.neovim-nightly-overlay.overlays.default
     inputs.claude-code-nix.overlays.default
     inputs.gpui-shell.overlays.default
+    inputs.agent-harness.overlays.default
     # Fix obs-vertical-canvas Qt6GuiPrivate cmake detection
     (_: prev: let
       prevObsPlugins = prev.obs-studio-plugins;

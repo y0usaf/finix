@@ -134,6 +134,7 @@
       tui-launcher.enable = true;
       slack.enable = true;
       stoat-desktop.enable = true;
+      agent-harness.enable = true;
       btop.enable = true;
     };
     dev = {

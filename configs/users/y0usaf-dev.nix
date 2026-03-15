@@ -129,6 +129,7 @@
       tui-launcher.enable = true;
       slack.enable = true;
       stoat-desktop.enable = false;
+      agent-harness.enable = true;
       btop.enable = true;
     };
     gaming = {
