@@ -1,6 +1,6 @@
 # Foot terminal colors (uses | strip to remove # from hex)
 ''
-  [colors]
+  [colors-dark]
   foreground={{foreground | strip}}
   background={{background | strip}}
   selection-foreground={{background | strip}}
