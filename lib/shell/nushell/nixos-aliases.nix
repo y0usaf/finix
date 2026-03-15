@@ -11,10 +11,10 @@ _: ''
 
   # Nix store queries (uses pipes - must be def)
   def pkgs [query: string] {
-    ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' '''' } | sort | uniq | where $it =~ $query
+    ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' "" } | sort | uniq | where $it =~ $query
   }
 
   def pkgcount [] {
-    ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' '''' } | sort | uniq | length
+    ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' "" } | sort | uniq | length
   }
 ''

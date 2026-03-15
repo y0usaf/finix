@@ -57,30 +57,21 @@
         ".config/nushell/cat-fetch.nu" = {
           text = ''
             def print_cats [] {
-              let colors_file = $"($env.HOME)/.cache/wallust/shell-colors.sh"
-              mut tomoe = (ansi magenta)
-              mut moon = (ansi green)
-              mut ekko = (ansi cyan)
-              mut bozo = (ansi red)
+              # Use terminal palette colors (indices 0-15 controlled by Wallust)
+              let e = $"\u{1b}"
+              let tomoe = $"($e)[38;5;13m"  # Magenta
+              let moon = $"($e)[38;5;2m"    # Green
+              let ekko = $"($e)[38;5;12m"   # Cyan
+              let bozo = $"($e)[38;5;9m"    # Bright red
+              let r = (ansi reset)
 
-              if ($colors_file | path exists) {
-                # Parse wallust shell colors
-                let colors = (open $colors_file | lines | where $it =~ '=' | each { |line|
-                  let parts = ($line | str replace "export " "" | split column "=" name value)
-                  {name: ($parts | get name.0), value: ($parts | get value.0 | str replace -a "'" "" | str replace -a '"' '''')}
-                } | reduce -f {} { |it, acc| $acc | merge {($it.name): $it.value} })
-                $tomoe = ($colors | get -i WALLUST_COLOR13 | default (ansi magenta))
-                $moon = ($colors | get -i WALLUST_COLOR2 | default (ansi green))
-                $ekko = ($colors | get -i WALLUST_COLOR12 | default (ansi cyan))
-                $bozo = ($colors | get -i WALLUST_COLOR9 | default (ansi red))
-              }
+              let line1 = $"($tomoe) ⟋|､      ($moon)  ⟋|､      ($ekko)  ⟋|､      ($bozo)  ⟋|､"
+              let line2 = [$tomoe "(°､ ｡ 7    " $moon "(°､ ｡ 7    " $ekko "(°､ ｡ 7    " $bozo "(°､ ｡ 7"] | str join
+              let line3 = $"($tomoe) |､  ~ヽ   ($moon) |､  ~ヽ   ($ekko) |､  ~ヽ   ($bozo) |､  ~ヽ"
+              let line4 = [$tomoe " じしf_,)〳" $moon " じしf_,)〳" $ekko " じしf_,)〳" $bozo " じしf_,)〳"] | str join
+              let line5 = $"($bozo)  [tomo]   ($tomoe)  [moon]   ($moon)  [ekko]   ($ekko)  [bozo]($r)"
 
-              let reset = (ansi reset)
-              print $"($tomoe) ⟋|､      ($moon)  ⟋|､      ($ekko)  ⟋|､      ($bozo)  ⟋|､
-            ($tomoe)\(°､ ｡ 7    ($moon)\(°､ ｡ 7    ($ekko)\(°､ ｡ 7    ($bozo)\(°､ ｡ 7
-            ($tomoe) |､  ~ヽ   ($moon) |､  ~ヽ   ($ekko) |､  ~ヽ   ($bozo) |､  ~ヽ
-            ($tomoe) じしf_,)〳($moon) じしf_,)〳($ekko) じしf_,)〳($bozo) じしf_,)〳
-            ($bozo)  [tomo]   ($tomoe)  [moon]   ($moon)  [ekko]   ($ekko)  [bozo]($reset)"
+              print ([$line1 $line2 $line3 $line4 $line5] | str join "\n")
             }
 
             print_cats
