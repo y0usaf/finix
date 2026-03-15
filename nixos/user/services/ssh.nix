@@ -57,6 +57,14 @@
             export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
           '';
         };
+      }
+      // lib.optionalAttrs config.user.shell.nushell.enable {
+        ".config/nushell/env.nu" = {
+          clobber = true;
+          text = lib.mkAfter ''
+            $env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR? | default '/run/user/1000')/ssh-agent"
+          '';
+        };
       };
     systemd.user.services.ssh-agent = {
       description = "SSH key agent";
