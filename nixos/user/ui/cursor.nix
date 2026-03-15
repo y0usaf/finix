@@ -60,6 +60,19 @@ in {
               '');
             clobber = true;
           };
+        }
+        // lib.optionalAttrs user.shell.nushell.enable {
+          ".config/nushell/login.nu" = {
+            text = mkAfter (''
+                $env.XCURSOR_THEME = "${x11ThemeName}"
+                $env.XCURSOR_SIZE = "${toString cursorSize}"
+              ''
+              + lib.optionalString (hyprcursorPackage != null) ''
+                $env.HYPRCURSOR_THEME = "DeepinDarkV20-hypr"
+                $env.HYPRCURSOR_SIZE = "${toString cursorSize}"
+              '');
+            clobber = true;
+          };
         };
     };
   };
