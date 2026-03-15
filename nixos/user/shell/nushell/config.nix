@@ -31,6 +31,7 @@
             in
               lib.concatStringsSep "\n" (
                 [
+                  settings.banner
                   settings.history
                   settings.completion
                   settings.keybindings
@@ -62,7 +63,7 @@
           ".config/nushell/carapace.nu" = {
             source = pkgs.runCommand "carapace-init-nu" {} ''
               export HOME=$(mktemp -d)
-              ${pkgs.carapace}/bin/carapace _carapace nushell > $out
+              ${pkgs.carapace}/bin/carapace _carapace nushell | ${pkgs.gnused}/bin/sed '/\/build\/.*carapace\/bin/d' > $out
             '';
             clobber = true;
           };
