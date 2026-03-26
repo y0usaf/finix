@@ -14,5 +14,6 @@ _: {
     ./wukong
     ./expedition33
     ./rv-there-yet
+    ./solo-leveling-arise
   ];
 }
