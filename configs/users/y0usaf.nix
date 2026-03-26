@@ -255,6 +255,7 @@
       expedition33.enable = true;
       duet-night-abyss.enable = true;
       arc-raiders.enable = true;
+      solo-leveling-arise.enable = true;
     };
   };
 }
