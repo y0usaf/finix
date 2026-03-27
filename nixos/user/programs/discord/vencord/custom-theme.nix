@@ -8,7 +8,7 @@
       (config.user.programs.discord.stable.enable or false)
       || (config.user.programs.discord.canary.enable or false)
     ) {
-      hjem.users."${config.user.name}".files = {
+      bayt.users."${config.user.name}".files = {
         ".config/Vencord/themes/custom-theme.css".text = ''
           /**
            * @name custom-theme

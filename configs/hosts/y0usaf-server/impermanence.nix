@@ -17,7 +17,7 @@ _: {
       "/var/lib/private" # n8n, blocky (systemd DynamicUser dirs)
       "/var/lib/docker"
       "/var/lib/tailscale"
-      "/var/lib/hjem"
+      "/var/lib/bayt"
       "/var/lib/btrbk"
       "/var/lib/NetworkManager"
     ];

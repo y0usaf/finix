@@ -7,6 +7,7 @@
   librewolfShared = import ../../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
   inherit (import ../../../../lib/browsers/helpers.nix {inherit lib;}) attrsToLines prefValue;
   inherit (config) user;
+  inherit (user) shell;
   userName = user.name;
   inherit (librewolfShared) profilesIni;
   pywalfoxNative = pkgs.pywalfox-native;
@@ -24,7 +25,7 @@ in {
       })
       pywalfoxNative
     ];
-    hjem.users."${userName}" = {
+    bayt.users."${userName}" = {
       files =
         {
           ".librewolf/profiles.ini" = {
@@ -52,7 +53,7 @@ in {
             allowed_extensions = ["pywalfox@frewacom.org"];
           };
         }
-        // lib.optionalAttrs user.shell.zsh.enable {
+        // lib.optionalAttrs shell.zsh.enable {
           ".config/zsh/.zprofile" = {
             text = lib.mkAfter ''
               export MOZ_ENABLE_WAYLAND=1
@@ -61,7 +62,7 @@ in {
             clobber = true;
           };
         }
-        // lib.optionalAttrs user.shell.nushell.enable {
+        // lib.optionalAttrs shell.nushell.enable {
           ".config/nushell/login.nu" = {
             text = lib.mkAfter ''
               $env.MOZ_ENABLE_WAYLAND = "1"

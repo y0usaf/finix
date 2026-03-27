@@ -8,7 +8,7 @@ in {
   inherit colorschemes templates;
 
   # Generate wallust config files (path -> content)
-  # Can be used by both hjem and home-manager
+  # Can be used by both bayt and home-manager
   mkFiles = {
     zjstatusEnabled ? false,
     niriEnabled ? false,
