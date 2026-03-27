@@ -3,7 +3,12 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  inherit (config.user) homeDirectory shell;
+  inherit (pkgs) cacert gcc binutils;
+  dynamicLinker = pkgs.stdenv.cc.bintools.dynamicLinker;
+  caCert = "${cacert}/etc/ssl/certs/ca-bundle.crt";
+in {
   options.user.dev.python = {
     enable = lib.mkEnableOption "Python development environment";
   };
@@ -14,7 +19,7 @@
       pkgs.ninja
       pkgs.meson
       pkgs.pkg-config
-      pkgs.cacert
+      cacert
       pkgs.stdenv.cc.cc.lib
       pkgs.zlib
       pkgs.libGL
@@ -22,8 +27,8 @@
       pkgs.libx11
       pkgs.libxext
       pkgs.libxrender
-      pkgs.gcc
-      pkgs.binutils
+      gcc
+      binutils
     ];
     usr.files = let
       ldLibPath = lib.makeLibraryPath [
@@ -36,19 +41,19 @@
         pkgs.libxrender
       ];
     in
-      lib.optionalAttrs config.user.shell.zsh.enable {
+      lib.optionalAttrs shell.zsh.enable {
         ".config/zsh/.zshenv" = {
           clobber = true;
           text = lib.mkAfter ''
-            export PYTHONUSERBASE="${config.user.homeDirectory}/.local/share/python"
-            export PIP_CACHE_DIR="${config.user.homeDirectory}/.cache/pip"
-            export VIRTUAL_ENV_HOME="${config.user.homeDirectory}/.local/share/venvs"
-            export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-            export REQUESTS_CA_BUNDLE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+            export PYTHONUSERBASE="${homeDirectory}/.local/share/python"
+            export PIP_CACHE_DIR="${homeDirectory}/.cache/pip"
+            export VIRTUAL_ENV_HOME="${homeDirectory}/.local/share/venvs"
+            export SSL_CERT_FILE="${caCert}"
+            export REQUESTS_CA_BUNDLE="${caCert}"
             export NIX_LD_LIBRARY_PATH="${ldLibPath}"
-            export NIX_LD="${pkgs.stdenv.cc.bintools.dynamicLinker}"
-            export CC="${pkgs.gcc}/bin/gcc"
-            export LD="${pkgs.binutils}/bin/ld"
+            export NIX_LD="${dynamicLinker}"
+            export CC="${gcc}/bin/gcc"
+            export LD="${binutils}/bin/ld"
             export PATH="$PYTHONUSERBASE/bin:$PATH"
           '';
         };
@@ -87,19 +92,19 @@
           '';
         };
       }
-      // lib.optionalAttrs config.user.shell.nushell.enable {
+      // lib.optionalAttrs shell.nushell.enable {
         ".config/nushell/env.nu" = {
           clobber = true;
           text = lib.mkAfter ''
-            $env.PYTHONUSERBASE = "${config.user.homeDirectory}/.local/share/python"
-            $env.PIP_CACHE_DIR = "${config.user.homeDirectory}/.cache/pip"
-            $env.VIRTUAL_ENV_HOME = "${config.user.homeDirectory}/.local/share/venvs"
-            $env.SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-            $env.REQUESTS_CA_BUNDLE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+            $env.PYTHONUSERBASE = "${homeDirectory}/.local/share/python"
+            $env.PIP_CACHE_DIR = "${homeDirectory}/.cache/pip"
+            $env.VIRTUAL_ENV_HOME = "${homeDirectory}/.local/share/venvs"
+            $env.SSL_CERT_FILE = "${caCert}"
+            $env.REQUESTS_CA_BUNDLE = "${caCert}"
             $env.NIX_LD_LIBRARY_PATH = "${ldLibPath}"
-            $env.NIX_LD = "${pkgs.stdenv.cc.bintools.dynamicLinker}"
-            $env.CC = "${pkgs.gcc}/bin/gcc"
-            $env.LD = "${pkgs.binutils}/bin/ld"
+            $env.NIX_LD = "${dynamicLinker}"
+            $env.CC = "${gcc}/bin/gcc"
+            $env.LD = "${binutils}/bin/ld"
             $env.PATH = ($env.PATH | prepend $"($env.PYTHONUSERBASE)/bin")
           '';
         };
@@ -143,10 +148,12 @@
           '';
         };
       };
-    systemd.tmpfiles.rules = [
-      "d ${config.user.homeDirectory}/.local/share/python 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${config.user.homeDirectory}/.cache/pip 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${config.user.homeDirectory}/.local/share/venvs 0755 ${config.user.name} ${config.user.name} - -"
+    systemd.tmpfiles.rules = let
+      userName = config.user.name;
+    in [
+      "d ${homeDirectory}/.local/share/python 0755 ${userName} ${userName} - -"
+      "d ${homeDirectory}/.cache/pip 0755 ${userName} ${userName} - -"
+      "d ${homeDirectory}/.local/share/venvs 0755 ${userName} ${userName} - -"
     ];
   };
 }

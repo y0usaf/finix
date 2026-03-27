@@ -3,7 +3,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  nhOpts = config.user.tools.nh;
+in {
   options.user.tools.nh = {
     enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
     flake = lib.mkOption {
@@ -17,14 +19,14 @@
       '';
     };
   };
-  config = lib.mkIf config.user.tools.nh.enable {
+  config = lib.mkIf nhOpts.enable {
     environment.systemPackages = [
       pkgs.nh
     ];
     usr.files = let
       nhFlake = toString (
-        if config.user.tools.nh.flake != null
-        then config.user.tools.nh.flake
+        if nhOpts.flake != null
+        then nhOpts.flake
         else config.user.paths.flake.path
       );
     in
