@@ -15,7 +15,7 @@ in {
       (discord.stable.enable or false)
       || (discord.canary.enable or false)
     ) {
-      hjem.users."${user.name}".files.".config/Vencord/themes/system-font.css".text = ''
+      bayt.users."${user.name}".files.".config/Vencord/themes/system-font.css".text = ''
         :root {
           /* Use system fonts for UI */
           --font-primary: ${primaryFont} !important;

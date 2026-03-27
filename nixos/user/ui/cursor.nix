@@ -10,6 +10,7 @@
   cursorsPkgs = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}";
   hyprcursorPackage = cursorsPkgs."deepin-dark-hyprcursor";
   inherit (config) user;
+  inherit (user) shell;
   inherit (user.appearance) cursorSize;
 in {
   options.user.ui.cursor = {
@@ -28,7 +29,7 @@ in {
         hyprcursorPackage
       ];
 
-    hjem.users."${user.name}" = {
+    bayt.users."${user.name}" = {
       files =
         {
           ".config/gtk-3.0/settings.ini" = {
@@ -48,7 +49,7 @@ in {
             clobber = true;
           };
         }
-        // lib.optionalAttrs user.shell.zsh.enable {
+        // lib.optionalAttrs shell.zsh.enable {
           ".config/zsh/.zprofile" = {
             text = mkAfter (''
                 export XCURSOR_THEME="${x11ThemeName}"
@@ -61,7 +62,7 @@ in {
             clobber = true;
           };
         }
-        // lib.optionalAttrs user.shell.nushell.enable {
+        // lib.optionalAttrs shell.nushell.enable {
           ".config/nushell/login.nu" = {
             text = mkAfter (''
                 $env.XCURSOR_THEME = "${x11ThemeName}"

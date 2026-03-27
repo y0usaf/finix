@@ -46,10 +46,9 @@ in {
             (inputs.disko + "/module.nix")
             ({...}: {
               imports = [
-                (import (inputs.hjem + "/modules/nixos")).hjem
+                (import (inputs.bayt + "/modules/nixos")).bayt
               ];
-              config.hjem = {
-                linker = pkgs.callPackage (inputs.smfh + "/package.nix") {};
+              config.bayt = {
                 users = {};
               };
             })

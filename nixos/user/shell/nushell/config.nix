@@ -16,7 +16,7 @@
       pkgs.tree
     ];
 
-    hjem.users."${config.user.name}" = {
+    bayt.users."${config.user.name}" = {
       files =
         {
           ".config/nushell/config.nu" = {

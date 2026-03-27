@@ -46,7 +46,7 @@ in {
       })
     ];
 
-    hjem.users."${userName}".files.".config/discordcanary/settings.json" = {
+    bayt.users."${userName}".files.".config/discordcanary/settings.json" = {
       generator = lib.generators.toJSON {};
       value = {
         SKIP_HOST_UPDATE = true;

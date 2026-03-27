@@ -7,7 +7,7 @@
   config = lib.mkIf config.user.ui.vicinae.enable {
     environment.systemPackages = [pkgs.vicinae];
 
-    # Vicinae configuration via hjem
+    # Vicinae configuration via bayt
     usr.files.".config/vicinae/vicinae.json" = {
       text = builtins.toJSON (lib.recursiveUpdate {
           # Vicinae defaults from config-service.hpp (with custom overrides)

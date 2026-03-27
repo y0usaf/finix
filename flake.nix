@@ -11,13 +11,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hjem = {
-      url = "github:feel-co/hjem";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    smfh = {
-      url = "github:feel-co/smfh";
+    bayt = {
+      url = "github:y0usaf/bayt";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

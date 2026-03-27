@@ -1,6 +1,6 @@
 {lib, ...}: {
   options.user.ui.gtk = {
-    enable = lib.mkEnableOption "GTK theming and configuration using hjem";
+    enable = lib.mkEnableOption "GTK theming and configuration using bayt";
     scale = lib.mkOption {
       type = lib.types.float;
       default = 1.0;

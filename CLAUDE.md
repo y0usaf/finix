@@ -20,7 +20,7 @@ System-agnostic option definitions and reusable modules shared across Darwin and
 - Rule: Use if the tool/concept exists identically on both systems
 
 ### nixos/user/
-NixOS user-level implementations using hjem syntax.
+NixOS user-level implementations using bayt syntax.
 - Examples: zsh config specific to NixOS, user environment setup
 
 ### nixos/system/
@@ -71,7 +71,7 @@ git add → alejandra . → nh darwin switch → TEST → git commit && push
 **CRITICAL:** Only commit after successful switch and user testing.
 
 ### NixOS
-Uses hjem. Clone external repos to `~/nixos/tmp/`.
+Uses bayt. Clone external repos to `~/nixos/tmp/`.
 **IMPORTANT:** All packages are system-level (`environment.systemPackages`), NOT user-level.
 ```
 git add → alejandra . → nh os switch --dry → nh os switch → TEST → git commit && push
@@ -84,8 +84,8 @@ git add → alejandra . → nh os switch --dry → nh os switch → TEST → git
 files."path" = { generator = lib.generators.toFormat {}; value = {}; };
 ```
 
-`usr` is aliased to `hjem.users.${config.user.name}` (defined in `nixos/user/core/user-config.nix:9`).
-Use `usr.files = { ... }` as shorthand instead of `hjem.users.${name}.files = { ... }`.
+`usr` is aliased to `bayt.users.${config.user.name}` (defined in `nixos/user/core/user-config.nix:9`).
+Use `usr.files = { ... }` as shorthand instead of `bayt.users.${name}.files = { ... }`.
 
 ## Failure Modes
 

@@ -50,7 +50,7 @@ in {
       };
     };
 
-    # Config files via hjem
+    # Config files via bayt
     usr.files = lib.mapAttrs (_: content: {text = content;}) (wallustLib.mkFiles {
       zjstatusEnabled = user.shell.zellij.zjstatus.enable;
       niriEnabled = userUi.niri.enable or false;

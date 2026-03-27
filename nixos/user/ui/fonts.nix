@@ -61,7 +61,7 @@
       config.user.ui.fonts.emoji.package
     ];
 
-    hjem.users."${config.user.name}" = {
+    bayt.users."${config.user.name}" = {
       files.".config/fontconfig/fonts.conf" = {
         clobber = true;
         text = ''
