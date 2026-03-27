@@ -4,7 +4,7 @@
   ...
 }: {
   imports = [
-    (lib.modules.mkAliasOptionModule ["usr"] ["hjem" "users" config.user.name])
+    (lib.modules.mkAliasOptionModule ["usr"] ["bayt" "users" config.user.name])
   ];
   options = {
     user = {

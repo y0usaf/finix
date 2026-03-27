@@ -6,6 +6,7 @@
 }: let
   firefoxShared = import ../../../../lib/browsers/firefox-shared.nix {inherit config lib;};
   inherit (config) user;
+  inherit (user) shell;
   userName = user.name;
   inherit (firefoxShared) profilesIni;
 in {
@@ -20,7 +21,7 @@ in {
         extraPolicies = firefoxShared.browserPolicies;
       })
     ];
-    hjem.users."${userName}" = {
+    bayt.users."${userName}" = {
       files =
         {
           ".mozilla/firefox/profiles.ini" = {
@@ -45,7 +46,7 @@ in {
             clobber = true;
           };
         }
-        // lib.optionalAttrs user.shell.zsh.enable {
+        // lib.optionalAttrs shell.zsh.enable {
           ".config/zsh/.zprofile" = {
             text = lib.mkAfter ''
               export MOZ_ENABLE_WAYLAND=1
@@ -54,7 +55,7 @@ in {
             clobber = true;
           };
         }
-        // lib.optionalAttrs user.shell.nushell.enable {
+        // lib.optionalAttrs shell.nushell.enable {
           ".config/nushell/login.nu" = {
             text = lib.mkAfter ''
               $env.MOZ_ENABLE_WAYLAND = "1"

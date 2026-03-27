@@ -20,7 +20,7 @@
       pkgs.zsh-autosuggestions
     ];
 
-    hjem.users."${config.user.name}" = {
+    bayt.users."${config.user.name}" = {
       files =
         {
           ".config/zsh/aliases.zsh" = {

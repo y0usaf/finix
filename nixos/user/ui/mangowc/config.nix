@@ -17,7 +17,7 @@
       pkgs.swaybg
     ];
 
-    # Minimal configuration via hjem
+    # Minimal configuration via bayt
     usr.files.".config/mango/config.conf".text = ''
       # MangoWC Configuration
 

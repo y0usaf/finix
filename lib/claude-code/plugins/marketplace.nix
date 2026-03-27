@@ -1,4 +1,4 @@
-# Marketplace builder - generates hjem file entries for Claude Code plugin marketplace
+# Marketplace builder - generates bayt file entries for Claude Code plugin marketplace
 #
 # Usage:
 #   marketplace.build {

@@ -155,7 +155,7 @@
 
             ## NixOS-Specific Protocols
 
-            - Uses hjem (NOT home-manager)
+            - Uses bayt (NOT home-manager)
             - Check flake.nix for available inputs
             - Clone external repos to `tmp/` folder (in gitignore)
             - Rebuild with `nh os switch` after configuration changes
