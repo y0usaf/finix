@@ -42,6 +42,7 @@
       termFontSize = 16;
       gtkFontSize = 12;
       cursorSize = 18;
+      cursorColor = "pink";
       opacity = 0.7;
       wallust.defaultTheme = "eva01";
     };

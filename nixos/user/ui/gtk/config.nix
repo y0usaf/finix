@@ -9,7 +9,7 @@
       pkgs.gtk3
       pkgs.gtk4
     ];
-    usr = {
+    bayt.users."${config.user.name}" = {
       files =
         {
           ".config/gtk-3.0/settings.ini" = {

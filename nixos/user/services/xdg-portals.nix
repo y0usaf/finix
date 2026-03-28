@@ -1,10 +1,11 @@
 {
+  config,
   lib,
   pkgs,
   ...
 }: {
   config = {
-    usr = {
+    bayt.users."${config.user.name}" = {
       files = {
         ".local/share/xdg-desktop-portal/portals/gnome.portal" = {
           generator = lib.generators.toINI {};

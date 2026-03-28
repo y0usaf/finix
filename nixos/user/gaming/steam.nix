@@ -21,7 +21,7 @@
 
     hardware.steam-hardware.enable = true;
 
-    # usr.files.".config/steam/steam_dev.cfg" = {
+    # bayt.users."${config.user.name}".files.".config/steam/steam_dev.cfg" = {
     #   text = ''
     #     unShaderBackgroundProcessingThreads ${toString cfg.shaderThreads}
     #   '';

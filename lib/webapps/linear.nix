@@ -8,7 +8,7 @@
     enable = lib.mkEnableOption "Linear webapp";
   };
   config = lib.mkIf config.user.programs.linear.enable {
-    usr = {
+    bayt.users."${config.user.name}" = {
       files = {
         ".local/share/applications/linear.desktop" = {
           clobber = true;

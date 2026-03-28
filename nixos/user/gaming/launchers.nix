@@ -10,7 +10,7 @@
   };
 
   config = {
-    usr = lib.mkMerge [
+    bayt.users."${config.user.name}" = lib.mkMerge [
       (lib.mkIf config.user.gaming.launchers.lutris.enable (
         lib.optionalAttrs config.gaming.proton.enable {
           xdg.data.files."lutris/runners/proton/GE-Proton".source = "${pkgs.proton-ge-bin}/steamcompattool";

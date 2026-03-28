@@ -8,6 +8,7 @@ _: {
     ./launchers.nix
     ./arc-raiders
     ./balatro
+    ./bg3
     ./duet-night-abyss
     ./emulation
     ./marvel-rivals
