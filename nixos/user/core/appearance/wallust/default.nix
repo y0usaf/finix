@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  wallustLib = import ../../../../../lib/appearance/wallust {inherit lib;};
+  wallustLib = import ./data {inherit lib;};
   wallustPkg = pkgs.wallust;
   inherit (config) user;
   userUi = user.ui;

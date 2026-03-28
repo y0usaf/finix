@@ -4,8 +4,8 @@
   pkgs,
   ...
 }: let
-  librewolfShared = import ../../../../lib/browsers/librewolf-shared.nix {inherit config lib;};
-  inherit (import ../../../../lib/browsers/helpers.nix {inherit lib;}) attrsToLines prefValue;
+  librewolfShared = import ./data/librewolf-shared.nix {inherit config lib;};
+  inherit (import ./data/helpers.nix {inherit lib;}) attrsToLines prefValue;
   inherit (config) user;
   inherit (user) shell;
   userName = user.name;
@@ -13,7 +13,7 @@
   pywalfoxNative = pkgs.pywalfox-native;
 in {
   imports = [
-    ../../../../lib/browsers/options.nix
+    ./browser-options.nix
     ./ui-chrome.nix
   ];
 

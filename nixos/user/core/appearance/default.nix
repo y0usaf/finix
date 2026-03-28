@@ -21,7 +21,7 @@
       description = "Size of the system cursor";
     };
     cursorColor = lib.mkOption {
-      type = lib.types.enum ["pink" "green" "blue" "yellow" "red" "orange" "cyan" "purple" "grey" "black"];
+      type = lib.types.enum ["pink" "green" "blue" "yellow" "red" "orange" "cyan" "purple" "grey" "black" "inverted"];
       default = "pink";
       description = "Color variant for the Popucom animated cursor theme";
     };

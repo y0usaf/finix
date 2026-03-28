@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  claudeCodeConfig = import ../../../../lib/claude-code;
+  claudeCodeConfig = import ./data;
   inherit (config) user;
   userDev = user.dev;
   claudeCodeCfg = userDev.claude-code;
@@ -32,12 +32,12 @@ in {
       // {
         # Sound files for notifications
         ".claude/on-agent-need-attention.wav" = {
-          source = ../../../../lib/claude-code/tuturu.ogg;
+          source = ./data/tuturu.ogg;
           clobber = true;
         };
 
         ".claude/on-agent-complete.wav" = {
-          source = ../../../../lib/claude-code/tuturu.ogg;
+          source = ./data/tuturu.ogg;
           clobber = true;
         };
 
@@ -56,7 +56,7 @@ in {
         inherit (ccSettings) includeCoAuthoredBy permissions;
         statusLine = {
           type = "command";
-          command = "${import ../../../../lib/claude-code/statusline.nix {inherit pkgs;}}/bin/statusline";
+          command = "${import ./data/statusline.nix {inherit pkgs;}}/bin/statusline";
         };
         inherit (claudeCodeCfg) model;
         env =

@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  skill = import ../../../../../lib/codex/skills/gh.nix;
+  skill = import ../data/skills/gh.nix;
   inherit (config) user;
   codexCfg = user.dev.codex;
 in {
