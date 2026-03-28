@@ -8,7 +8,7 @@
   };
 
   config = {
-    usr.files = {
+    bayt.users."${config.user.name}".files = {
       ".config/mimeapps.list" = {
         clobber = true;
         text = ''

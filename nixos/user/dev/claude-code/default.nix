@@ -16,7 +16,7 @@ in {
   ];
 
   config = lib.mkIf claudeCodeCfg.enable {
-    usr.files =
+    bayt.users."${config.user.name}".files =
       # Marketplace files (plugins, commands, hooks, etc.)
       ((claudeCodeConfig.marketplace {inherit lib;}).build {
         name = "y0usaf-marketplace";

@@ -3,9 +3,6 @@
   config,
   ...
 }: {
-  imports = [
-    (lib.modules.mkAliasOptionModule ["usr"] ["bayt" "users" config.user.name])
-  ];
   options = {
     user = {
       name = lib.mkOption {

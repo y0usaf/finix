@@ -8,7 +8,7 @@
 #     basePath = ".config/claude";  # where marketplace lives
 #   }
 #
-# Returns: attrset suitable for `usr.files = { ... }`
+# Returns: attrset suitable for `bayt.users."${config.user.name}".files = { ... }`
 {lib}: let
   inherit (builtins) toJSON;
   inherit (lib) foldl' optionalAttrs mapAttrs mapAttrs' mapAttrsToList nameValuePair attrNames;

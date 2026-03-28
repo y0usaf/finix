@@ -1,5 +1,5 @@
 {config, ...}: {
-  config.usr.files.".config/user-dirs.dirs" = {
+  config.bayt.users."${config.user.name}".files.".config/user-dirs.dirs" = {
     clobber = true;
     text = ''
       XDG_DESKTOP_DIR="${config.user.homeDirectory}/Desktop"

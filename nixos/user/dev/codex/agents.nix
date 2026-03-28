@@ -5,7 +5,7 @@
   ...
 }: {
   config = lib.mkIf config.user.dev.codex.enable {
-    usr.files = {
+    bayt.users."${config.user.name}".files = {
       ".codex/agents/explorer.toml" = {
         generator = genLib.toTOML;
         value = (import ../../../../lib/codex).agents.explorer;

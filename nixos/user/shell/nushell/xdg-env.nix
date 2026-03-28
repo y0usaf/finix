@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.shell.nushell.enable {
-    usr.files = {
+    bayt.users."${config.user.name}".files = {
       ".config/nushell/env.nu" = {
         clobber = true;
         text = ''

@@ -7,7 +7,7 @@
     enable = lib.mkEnableOption "tui launcher";
   };
   config = lib.mkIf config.user.programs.tui-launcher.enable {
-    usr.files.".config/scripts/tui-launcher.sh" = {
+    bayt.users."${config.user.name}".files.".config/scripts/tui-launcher.sh" = {
       clobber = true;
       executable = true;
       text = ''

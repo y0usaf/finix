@@ -61,7 +61,7 @@ in {
     ];
 
     # Send SIGUSR2 to toggle recording
-    usr.files.".config/niri/config.kdl".value.binds."${handyCfg.keybind}" = {
+    bayt.users."${config.user.name}".files.".config/niri/config.kdl".value.binds."${handyCfg.keybind}" = {
       spawn = ["pkill" "-SIGUSR2" "handy"];
     };
   };

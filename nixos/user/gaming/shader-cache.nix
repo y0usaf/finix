@@ -1,6 +1,6 @@
 {config, ...}: {
   config = {
-    usr.files.".config/steam/steam_dev.cfg" = {
+    bayt.users."${config.user.name}".files.".config/steam/steam_dev.cfg" = {
       text = ''
         unShaderBackgroundProcessingThreads ${toString config.nix.settings.max-jobs}
       '';

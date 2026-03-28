@@ -11,7 +11,7 @@
     environment.systemPackages = [
       pkgs.openssh
     ];
-    usr.files =
+    bayt.users."${config.user.name}".files =
       {
         ".ssh/config" = {
           clobber = true;

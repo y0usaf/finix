@@ -8,7 +8,7 @@
     enable = lib.mkEnableOption "Google Cloud Platform Console webapp";
   };
   config = lib.mkIf config.user.programs.gcp-console.enable {
-    usr = {
+    bayt.users."${config.user.name}" = {
       files = {
         ".local/share/applications/gcp-console.desktop" = {
           clobber = true;

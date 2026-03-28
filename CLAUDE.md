@@ -78,14 +78,11 @@ git add → alejandra . → nh os switch --dry → nh os switch → TEST → git
 ```
 **CRITICAL:** Only commit after successful switch and user testing.
 
-## Hjem Syntax
+## Bayt Syntax
 
 ```nix
-files."path" = { generator = lib.generators.toFormat {}; value = {}; };
+bayt.users."${config.user.name}".files."path" = { generator = lib.generators.toFormat {}; value = {}; };
 ```
-
-`usr` is aliased to `bayt.users.${config.user.name}` (defined in `nixos/user/core/user-config.nix:9`).
-Use `usr.files = { ... }` as shorthand instead of `bayt.users.${name}.files = { ... }`.
 
 ## Failure Modes
 

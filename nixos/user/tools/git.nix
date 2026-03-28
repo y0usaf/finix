@@ -25,7 +25,7 @@
       pkgs.git
       pkgs.openssh
     ];
-    usr.files.".config/git/config" = {
+    bayt.users."${config.user.name}".files.".config/git/config" = {
       clobber = true;
       generator = lib.generators.toGitINI;
       value = {

@@ -5,7 +5,7 @@
   ...
 }: {
   config = lib.mkIf config.user.dev.codex.enable {
-    usr.files = {
+    bayt.users."${config.user.name}".files = {
       ".codex/INSTRUCTIONS.md" = {
         text = (import ../../../../lib/codex).instructions;
         clobber = true;

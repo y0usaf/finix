@@ -11,7 +11,7 @@
     environment.systemPackages = [
       pkgs.nodejs_20
     ];
-    usr.files.".config/npm/npmrc" = {
+    bayt.users."${config.user.name}".files.".config/npm/npmrc" = {
       clobber = true;
       text = ''
         prefix=${config.user.homeDirectory}/.local/share/npm

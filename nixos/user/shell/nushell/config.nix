@@ -46,14 +46,16 @@
             clobber = true;
           };
           ".config/nushell/env.nu" = {
-            text =
-              (import ../../../../lib/shell/nushell/export-vars.nix {inherit config;})
-              + ''
+            text = lib.mkMerge [
+              ((import ../../../../lib/shell/nushell/export-vars.nix {inherit config;})
+                + ''
 
-                $env.TERMINAL = "${config.user.defaults.terminal}"
-                $env.BROWSER = "${config.user.defaults.browser}"
-                $env.EDITOR = "${config.user.defaults.editor}"
-              '';
+                  $env.TERMINAL = "${config.user.defaults.terminal}"
+                  $env.BROWSER = "${config.user.defaults.browser}"
+                  $env.EDITOR = "${config.user.defaults.editor}"
+                '')
+              (lib.mkAfter (import ./settings.nix {inherit config;}).prompt)
+            ];
             clobber = true;
           };
           ".config/nushell/login.nu" = {
@@ -87,12 +89,6 @@
             clobber = true;
           };
         };
-    };
-
-    # Set prompt in env.nu so it's available early
-    usr.files.".config/nushell/env.nu" = {
-      text = lib.mkAfter (import ./settings.nix {inherit config;}).prompt;
-      clobber = true;
     };
   };
 }

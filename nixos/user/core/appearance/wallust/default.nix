@@ -51,7 +51,7 @@ in {
     };
 
     # Config files via bayt
-    usr.files = lib.mapAttrs (_: content: {text = content;}) (wallustLib.mkFiles {
+    bayt.users."${config.user.name}".files = lib.mapAttrs (_: content: {text = content;}) (wallustLib.mkFiles {
       zjstatusEnabled = user.shell.zellij.zjstatus.enable;
       niriEnabled = userUi.niri.enable or false;
       inherit vicinaeEnabled;

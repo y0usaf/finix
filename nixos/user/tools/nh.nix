@@ -23,7 +23,7 @@ in {
     environment.systemPackages = [
       pkgs.nh
     ];
-    usr.files = let
+    bayt.users."${config.user.name}".files = let
       nhFlake = toString (
         if nhOpts.flake != null
         then nhOpts.flake

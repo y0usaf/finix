@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.shell.zsh.enable {
-    usr.files = {
+    bayt.users."${config.user.name}".files = {
       ".config/zsh/.zshenv" = {
         clobber = true;
         text = ''
