@@ -13,7 +13,8 @@
   colorCap = let
     first = builtins.substring 0 1 cursorColor;
     rest = builtins.substring 1 (-1) cursorColor;
-  in (lib.toUpper first) + rest;
+  in
+    (lib.toUpper first) + rest;
   x11ThemeName = "Popucom-${colorCap}-x11";
   hyprThemeName = "Popucom-${colorCap}-hypr";
   xcursorPackage = cursorsPkgs."popucom-${cursorColor}-xcursor";

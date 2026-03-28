@@ -1,44 +1,5 @@
 {
   "pins": {
-    "BG3WASD": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "Ch4nKyy",
-        "repo": "BG3WASD"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "022d5ffa4f314c4ba5b2fd13cdcf0f95a3a5ef91",
-      "url": "https://github.com/Ch4nKyy/BG3WASD/archive/022d5ffa4f314c4ba5b2fd13cdcf0f95a3a5ef91.tar.gz",
-      "hash": "sha256-gEacnwzN7lajf8jt1tPEcv10TxqQPTbZBiKy9R5mqzE="
-    },
-    "BG3_NativeCameraTweaks": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "ersh1",
-        "repo": "BG3_NativeCameraTweaks"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "862222b6e68d863841724cb86b2492a9071255a9",
-      "url": "https://github.com/ersh1/BG3_NativeCameraTweaks/archive/862222b6e68d863841724cb86b2492a9071255a9.tar.gz",
-      "hash": "sha256-YCrC4hLdZY6geBFGvBcxdefJ6uu4dFK9/CJA+DR9jZA="
-    },
-    "NativeModLoader": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "gottyduke",
-        "repo": "NativeModLoader"
-      },
-      "branch": "master",
-      "submodules": false,
-      "revision": "8b66575e23b1bf7fa5fba11a9b2382a9cc14c4c9",
-      "url": "https://github.com/gottyduke/NativeModLoader/archive/8b66575e23b1bf7fa5fba11a9b2382a9cc14c4c9.tar.gz",
-      "hash": "sha256-O+NsOm1xnjxR8c5xQQgYD4v3XamdSMSbk1+5iUIzcG8="
-    },
     "bg3se": {
       "type": "GitRelease",
       "repository": {
@@ -54,6 +15,19 @@
       "revision": "7f3b26f118a2859243a4dea292572923e77bdbc8",
       "url": "https://api.github.com/repos/Norbyte/bg3se/tarball/refs/tags/updater-20240430",
       "hash": "sha256-APLa6IwOQUrWmtpsO5WhA+jZozCdddndqcckZVm/xks="
+    },
+    "game-mods": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "y0usaf",
+        "repo": "game-mods"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "d54ec2dfad1e2116bf11c461e30d6fbf78e91df3",
+      "url": "https://github.com/y0usaf/game-mods/archive/d54ec2dfad1e2116bf11c461e30d6fbf78e91df3.tar.gz",
+      "hash": "sha256-Vw7t9JGzi3mcz4lSgGtuq9GHKN8eZZX46LcmkCJGxdk="
     }
   },
   "version": 7

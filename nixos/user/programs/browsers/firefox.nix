@@ -4,14 +4,14 @@
   pkgs,
   ...
 }: let
-  firefoxShared = import ../../../../lib/browsers/firefox-shared.nix {inherit config lib;};
+  firefoxShared = import ./data/firefox-shared.nix {inherit config lib;};
   inherit (config) user;
   inherit (user) shell;
   userName = user.name;
   inherit (firefoxShared) profilesIni;
 in {
   imports = [
-    ../../../../lib/browsers/options.nix
+    ./browser-options.nix
     ./ui-chrome.nix
   ];
 

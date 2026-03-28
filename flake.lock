@@ -165,36 +165,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1774733861,
-        "narHash": "sha256-Te3e5uS4PRqSqJNJf6abZ2tX6fjOOhUqBgNkAe01JaY=",
+        "lastModified": 1774739936,
+        "narHash": "sha256-wf4dEX44NjTyczlwARXanav43RknQJ8s3/UJlIfZgZk=",
         "owner": "y0usaf",
         "repo": "cursors",
-        "rev": "0ab25312e2ded83a49eb6e2fd967ee092b8fbb96",
+        "rev": "8ba013ea503a7fa8c921f67f8330ca12b5fc7ac0",
         "type": "github"
       },
       "original": {
         "owner": "y0usaf",
         "repo": "cursors",
-        "type": "github"
-      }
-    },
-    "darwin": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1773000227,
-        "narHash": "sha256-zm3ftUQw0MPumYi91HovoGhgyZBlM4o3Zy0LhPNwzXE=",
-        "owner": "LnL7",
-        "repo": "nix-darwin",
-        "rev": "da529ac9e46f25ed5616fd634079a5f3c579135f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "LnL7",
-        "repo": "nix-darwin",
         "type": "github"
       }
     },
@@ -472,26 +452,6 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1773422513,
-        "narHash": "sha256-MPjR48roW7CUMU6lu0+qQGqj92Kuh3paIulMWFZy+NQ=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "ef12a9a2b0f77c8fa3dda1e7e494fca668909056",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "home-manager_2": {
-      "inputs": {
-        "nixpkgs": [
           "impermanence",
           "nixpkgs"
         ]
@@ -512,7 +472,7 @@
     },
     "impermanence": {
       "inputs": {
-        "home-manager": "home-manager_2",
+        "home-manager": "home-manager",
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
@@ -803,13 +763,11 @@
         "codex-cli-nix": "codex-cli-nix",
         "codex-desktop-linux": "codex-desktop-linux",
         "cursors": "cursors",
-        "darwin": "darwin",
         "disko": "disko",
         "fast-fonts": "fast-fonts",
         "flake-utils": "flake-utils_5",
         "gpui-shell": "gpui-shell",
         "handy": "handy",
-        "home-manager": "home-manager",
         "impermanence": "impermanence",
         "mango": "mango",
         "neovim-nightly-overlay": "neovim-nightly-overlay",

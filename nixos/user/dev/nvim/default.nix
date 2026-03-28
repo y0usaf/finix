@@ -3,10 +3,10 @@
   lib,
   ...
 }: let
-  nvim = import ../../../../lib/nvim {inherit lib;};
+  nvim = import ./data {inherit lib;};
 in {
   imports = [
-    ../../../../lib/nvim/options.nix
+    ./nvim-options.nix
     nvim.packages
     nvim.neovide
   ];

@@ -26,7 +26,7 @@
           description = "Whether to install the `${skillName}` Codex skill.";
         };
       })
-      (import ../../../../lib/codex).skills;
+      (import ./data).skills;
   };
 
   config = lib.mkIf config.user.dev.codex.enable {};

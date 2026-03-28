@@ -6,7 +6,7 @@ _: {
     ./crush.nix
     ./gemini-cli.nix
     ./agent-slack.nix
-    ../../../lib/mcp/mcp.nix
+    ./mcp.nix
 
     ./docker.nix
     ./gcloud.nix

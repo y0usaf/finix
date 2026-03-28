@@ -8,10 +8,15 @@
 
   sources = import ./npins;
   cfg = config.user.gaming.bg3;
+
   steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path;
-  bg3Bin = "${steamPath}/steamapps/common/Baldurs Gate 3/bin";
+  gameDir = "${steamPath}/steamapps/common/Baldurs Gate 3";
+  compatDir = "${steamPath}/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser";
+
+  bg3Bin = "${gameDir}/bin";
   nativeModsDir = "${bg3Bin}/NativeMods";
 
+  modSrc = "${sources.game-mods}/bg3";
   tomlFormat = pkgs.formats.toml {};
 
   bg3seVersion = sources.bg3se.version;
@@ -24,28 +29,20 @@ in {
       description = "Enable Baldur's Gate 3 mod management";
     };
 
-    scriptExtender = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Install BG3 Script Extender (DWrite.dll auto-updater)";
-      };
+    scriptExtender.enable = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Install BG3 Script Extender (DWrite.dll auto-updater)";
     };
 
-    nativeModLoader = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = ''
-          Install NativeModLoader (bink2w64.dll proxy).
-          Required for WASD and NativeCameraTweaks.
-          Back up the original bin/bink2w64.dll to bin/bink2w64_original.dll before enabling.
-        '';
-      };
-      source = mkOption {
-        type = types.path;
-        description = "Path to NativeModLoader's bink2w64.dll (download from Nexus Mods)";
-      };
+    nativeModLoader.enable = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Install NativeModLoader (bink2w64.dll proxy).
+        Required for WASD and NativeCameraTweaks.
+        Back up the original bin/bink2w64.dll to bin/bink2w64_original.dll before enabling.
+      '';
     };
 
     wasd = {
@@ -53,10 +50,6 @@ in {
         type = types.bool;
         default = false;
         description = "Install WASD character movement mod";
-      };
-      source = mkOption {
-        type = types.path;
-        description = "Path to BG3WASD.dll (download from Nexus Mods)";
       };
       settings = mkOption {
         type = tomlFormat.type;
@@ -96,10 +89,6 @@ in {
         default = false;
         description = "Install Native Camera Tweaks mod";
       };
-      source = mkOption {
-        type = types.path;
-        description = "Path to BG3NativeCameraTweaks.dll (download from Nexus Mods)";
-      };
       settings = mkOption {
         type = tomlFormat.type;
         default = {};
@@ -115,7 +104,7 @@ in {
           clobber = true;
           source = "${pkgs.fetchzip {
             url = "https://github.com/Norbyte/bg3se/releases/download/${bg3seVersion}/BG3SE-Updater-${bg3seDate}.zip";
-            sha256 = "sha256-rLD8rgUz3ppj/SMzZUMoqzJFeBEHWMsjrXYi3vPvR2o=";
+            sha256 = "sha256-XhintUwpaQ9AhWjsPvWMFLKF2D7WdjmhPcvNLoVtGho=";
             stripRoot = false;
           }}/DWrite.dll";
         };
@@ -124,14 +113,14 @@ in {
       (mkIf cfg.nativeModLoader.enable {
         "${bg3Bin}/bink2w64.dll" = {
           clobber = true;
-          source = cfg.nativeModLoader.source;
+          source = "${modSrc}/bin/bink2w64.dll";
         };
       })
 
       (mkIf cfg.wasd.enable {
         "${nativeModsDir}/BG3WASD.dll" = {
           clobber = true;
-          source = cfg.wasd.source;
+          source = "${modSrc}/bin/NativeMods/BG3WASD.dll";
         };
         "${nativeModsDir}/BG3WASD.toml" = {
           clobber = true;
@@ -142,7 +131,7 @@ in {
       (mkIf cfg.nativeCameraTweaks.enable {
         "${nativeModsDir}/BG3NativeCameraTweaks.dll" = {
           clobber = true;
-          source = cfg.nativeCameraTweaks.source;
+          source = "${modSrc}/bin/NativeMods/BG3NativeCameraTweaks.dll";
         };
       })
 

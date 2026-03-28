@@ -30,7 +30,8 @@
             colorCap = let
               first = builtins.substring 0 1 config.user.appearance.cursorColor;
               rest = builtins.substring 1 (-1) config.user.appearance.cursorColor;
-            in (lib.toUpper first) + rest;
+            in
+              (lib.toUpper first) + rest;
           in {
             xcursor-theme = "Popucom-${colorCap}-x11";
             xcursor-size = config.user.appearance.cursorSize;

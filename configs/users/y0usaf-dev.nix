@@ -216,7 +216,7 @@
       udiskie.enable = true;
       syncthing = {
         enable = true;
-        devices = import ../../lib/syncthing.nix;
+        devices = import ../syncthing-devices.nix;
 
         folders = {
           tokens = {

@@ -34,7 +34,7 @@
           };
           ".config/zsh/.zshenv" = {
             text =
-              (import ../../../../lib/shell/zsh/export-vars.nix {inherit config;})
+              (import ./data/export-vars.nix {inherit config;})
               + ''
 
                 export TERMINAL="${config.user.defaults.terminal}"
@@ -46,7 +46,7 @@
           ".config/zsh/.zshrc" = {
             text = let
               settings = import ./settings.nix {inherit config;};
-              libFunctions = import ../../../../lib/shell/zsh/functions.nix {};
+              libFunctions = import ./data/functions.nix {};
             in
               lib.concatStringsSep "\n" (
                 [
@@ -54,7 +54,7 @@
                 ]
                 ++ lib.optional config.user.shell.zellij.enable "source \"$ZDOTDIR/zellij.zsh\""
                 ++ [
-                  (import ../../../../lib/shell/zsh/plugins.nix {inherit pkgs;})
+                  (import ./data/plugins.nix {inherit pkgs;})
 
                   settings.history
 
@@ -73,7 +73,7 @@
         // lib.optionalAttrs config.user.shell.zellij.enable {
           ".config/zsh/zellij.zsh" = {
             text =
-              (import ../../../../lib/shell/zellij/config.nix {inherit lib;}).shellChecks
+              (import ../zellij/data/zellij-lib.nix {inherit lib;}).shellChecks
               + ''
                 # Start Zellij
                 if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then

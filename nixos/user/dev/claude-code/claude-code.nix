@@ -27,7 +27,7 @@
           description = "Whether to enable the `${pluginName}` Claude Code skill plugin.";
         };
       })
-      (lib.filterAttrs (_: plugin: plugin ? skills) (import ../../../../lib/claude-code).plugins);
+      (lib.filterAttrs (_: plugin: plugin ? skills) (import ./data).plugins);
   };
 
   config = lib.mkIf config.user.dev.claude-code.enable {

@@ -52,6 +52,13 @@
       enableSessionWide = true;
       refreshRate = 175;
     };
+    bg3 = {
+      enable = true;
+      scriptExtender.enable = true;
+      nativeModLoader.enable = true;
+      wasd.enable = true;
+      nativeCameraTweaks.enable = true;
+    };
   };
   hardware.nvidia.management = {
     enable = true;

@@ -5,7 +5,7 @@
   ...
 }: {
   imports = [
-    ../../../lib/webapps
+    ./webapps
   ];
 
   options.user.programs.webapps = {
