@@ -3,8 +3,8 @@
   config,
   flakeDirectory,
 }:
-(import ../../../../lib/shell/zsh/common-aliases.nix {})
-// (import ../../../../lib/shell/zsh/nixos-aliases.nix {})
+(import ./data/common-aliases.nix {})
+// (import ./data/nixos-aliases.nix {})
 // {
   buildtime = "time (nix build \${NH_FLAKE}#nixosConfigurations.\${HOST}.config.system.build.toplevel --option eval-cache false)";
 

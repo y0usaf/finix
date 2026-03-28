@@ -3,8 +3,8 @@
   config,
   flakeDirectory,
 }:
-(import ../../../../lib/shell/nushell/common-aliases.nix {})
-+ (import ../../../../lib/shell/nushell/nixos-aliases.nix {})
+(import ./data/common-aliases.nix {})
++ (import ./data/nixos-aliases.nix {})
 + ''
 
   # NixOS build timing
