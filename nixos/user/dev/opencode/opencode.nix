@@ -54,7 +54,7 @@
               ];
             }
             // (lib.optionalAttrs config.user.dev.opencode.enableOllama {
-              inherit (import ../../../../lib/opencode/ollama.nix) provider;
+              inherit (import ./data/ollama.nix) provider;
             })
             // (lib.optionalAttrs config.user.dev.opencode.enableMcpServers {
               mcp = lib.listToAttrs (map
@@ -65,7 +65,7 @@
                     enabled = true;
                     inherit (spec) environment;
                   })
-                (import ../../../../lib/mcp/servers.nix {inherit config;}));
+                (import ./data/mcp-servers.nix {inherit config;}));
             }));
           clobber = true;
         };

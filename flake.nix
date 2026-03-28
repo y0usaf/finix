@@ -42,16 +42,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    darwin = {
-      url = "github:LnL7/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     mango = {
       url = "github:DreamMaoMao/mango";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -113,94 +103,25 @@
     };
   };
 
-  outputs = {
-    nixpkgs,
-    darwin,
-    home-manager,
-    ...
-  } @ inputs: let
-    linuxSystem = "x86_64-linux";
-    darwinSystem = "aarch64-darwin";
+  outputs = {nixpkgs, ...} @ inputs: let
+    system = "x86_64-linux";
     legacyPkgs = nixpkgs.legacyPackages;
 
-    commonNixpkgsConfig = {
+    nixpkgsConfig = {
       allowUnfree = true;
       permittedInsecurePackages = [
         "qtwebengine-5.15.19"
       ];
       allowInsecurePredicate = pkg: nixpkgs.lib.hasPrefix "librewolf" (pkg.pname or "");
     };
-
-    darwinPkgs = legacyPkgs."${darwinSystem}";
-    fastFonts = inputs.fast-fonts;
   in {
     inherit
       (import ./nixos/lib {
-        inherit inputs;
-        system = linuxSystem;
-        nixpkgsConfig = commonNixpkgsConfig;
+        inherit inputs system nixpkgsConfig;
       })
       nixosConfigurations
       ;
 
-    darwinConfigurations.y0usaf-macbook = darwin.lib.darwinSystem {
-      system = darwinSystem;
-      modules = [
-        {
-          _module.args = {
-            inherit inputs;
-            genLib = import ./lib/generators {
-              inherit (darwinPkgs) lib;
-              pkgs = darwinPkgs;
-            };
-            iosevkaSlab = darwinPkgs.stdenvNoCC.mkDerivation {
-              pname = "fast-iosevka-slab";
-              version = "1.0.0";
-              src = fastFonts;
-
-              installPhase = ''
-                mkdir -p $out/share/fonts/truetype
-                cp -f $src/fonts/Fast_IosevkaSlab.ttf $out/share/fonts/truetype/ || true
-              '';
-            };
-            inherit (inputs) nvf;
-          };
-        }
-        ./darwin
-        home-manager.darwinModules.home-manager
-        {
-          networking.hostName = "y0usaf-macbook";
-          networking.computerName = "y0usaf-macbook";
-          system.stateVersion = 5;
-
-          nix.settings = {
-            experimental-features = ["nix-command" "flakes"];
-            trusted-users = ["y0usaf" "@admin"];
-          };
-
-          # User configuration
-          users.users.y0usaf = {
-            name = "y0usaf";
-            home = "/Users/y0usaf";
-          };
-
-          # Install Fast Font system-wide
-          fonts.packages = [fastFonts.packages."${darwinSystem}".default];
-
-          # Configure home-manager
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            backupFileExtension = "backup";
-          };
-
-          nixpkgs.config = commonNixpkgsConfig;
-        }
-      ];
-    };
-
-    # Expose for easier access
-    formatter."${linuxSystem}" = legacyPkgs."${linuxSystem}".alejandra;
-    formatter."${darwinSystem}" = darwinPkgs.alejandra;
+    formatter."${system}" = legacyPkgs."${system}".alejandra;
   };
 }

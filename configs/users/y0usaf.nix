@@ -42,7 +42,7 @@
       termFontSize = 16;
       gtkFontSize = 12;
       cursorSize = 18;
-      cursorColor = "pink";
+      cursorColor = "cyan";
       opacity = 0.7;
       wallust.defaultTheme = "eva01";
     };
@@ -205,7 +205,7 @@
       udiskie.enable = true;
       syncthing = {
         enable = true;
-        devices = import ../../lib/syncthing.nix;
+        devices = import ../syncthing-devices.nix;
 
         folders =
           {

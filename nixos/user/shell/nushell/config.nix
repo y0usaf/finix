@@ -22,7 +22,7 @@
           ".config/nushell/config.nu" = {
             text = let
               settings = import ./settings.nix {inherit config;};
-              libFunctions = import ../../../../lib/shell/nushell/functions.nix {};
+              libFunctions = import ./data/functions.nix {};
               aliases = import ./aliases.nix {
                 inherit lib config;
                 flakeDirectory = config.user.paths.flake.path;
@@ -47,7 +47,7 @@
           };
           ".config/nushell/env.nu" = {
             text = lib.mkMerge [
-              ((import ../../../../lib/shell/nushell/export-vars.nix {inherit config;})
+              ((import ./data/export-vars.nix {inherit config;})
                 + ''
 
                   $env.TERMINAL = "${config.user.defaults.terminal}"

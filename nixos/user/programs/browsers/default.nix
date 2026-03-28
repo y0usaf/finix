@@ -1,6 +1,6 @@
 _: {
   imports = [
-    ../../../../lib/browsers/options.nix
+    ./browser-options.nix
     ./firefox.nix
     ./librewolf.nix
   ];
