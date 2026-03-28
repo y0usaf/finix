@@ -11,7 +11,7 @@
     environment.systemPackages = [
       pkgs.bun
     ];
-    usr.files.".config/bun/bunfig.toml" = {
+    bayt.users."${config.user.name}".files.".config/bun/bunfig.toml" = {
       clobber = true;
       text = ''
         [install]

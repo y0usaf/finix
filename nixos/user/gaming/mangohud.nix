@@ -14,7 +14,7 @@
   };
 
   config = lib.mkIf config.user.gaming.mangohud.enable {
-    usr = {
+    bayt.users."${config.user.name}" = {
       xdg.config.files."MangoHud/MangoHud.conf".text = ''
         blacklist=mpv
         font_size=20

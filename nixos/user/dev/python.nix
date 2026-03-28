@@ -30,7 +30,7 @@ in {
       gcc
       binutils
     ];
-    usr.files = let
+    bayt.users."${config.user.name}".files = let
       ldLibPath = lib.makeLibraryPath [
         pkgs.stdenv.cc.cc.lib
         pkgs.zlib

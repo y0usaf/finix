@@ -15,7 +15,7 @@
   };
 in {
   config = lib.mkIf user.gaming.expedition33.enable {
-    usr.files = {
+    bayt.users."${config.user.name}".files = {
       "${steamPath}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
         clobber = true;
         source = "${clairobscurfix}/ClairObscurFix.asi";

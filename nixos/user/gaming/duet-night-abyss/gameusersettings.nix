@@ -66,15 +66,17 @@
   };
 in {
   config = lib.mkIf user.gaming.duet-night-abyss.enable {
-    usr.files."${steamPrefix}/EMLauncher/Saved/Config/WindowsNoEditor/GameUserSettings.ini" = mkEntry {
-      resX = "1344";
-      resY = "642";
-      lastOpened = "EMLauncher";
-    };
-    usr.files."${steamPrefix}/DNA Game/EM/Saved/Config/WindowsNoEditor/GameUserSettings.ini" = mkEntry {
-      resX = "2543";
-      resY = "1418";
-      lastOpened = "EM";
+    bayt.users."${config.user.name}".files = {
+      "${steamPrefix}/EMLauncher/Saved/Config/WindowsNoEditor/GameUserSettings.ini" = mkEntry {
+        resX = "1344";
+        resY = "642";
+        lastOpened = "EMLauncher";
+      };
+      "${steamPrefix}/DNA Game/EM/Saved/Config/WindowsNoEditor/GameUserSettings.ini" = mkEntry {
+        resX = "2543";
+        resY = "1418";
+        lastOpened = "EM";
+      };
     };
   };
 }

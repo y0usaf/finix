@@ -11,7 +11,7 @@
     };
   };
   config = lib.mkIf config.user.gaming.marvel-rivals.marvelusersettings.enable {
-    usr.files =
+    bayt.users."${config.user.name}".files =
       lib.genAttrs [
         "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/default/MarvelUserSetting.ini"
         "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2767030/pfx/drive_c/users/steamuser/AppData/Local/Marvel/Saved/Saved/Config/current/MarvelUserSetting.ini"

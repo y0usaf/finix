@@ -15,7 +15,7 @@
   config = lib.mkIf config.user.ui.gpuishell.enable {
     environment.systemPackages = [pkgs.gpuishell];
 
-    usr.files.".config/gpuishell/config.toml" = {
+    bayt.users."${config.user.name}".files.".config/gpuishell/config.toml" = {
       clobber = true;
       generator =
         if lib.generators ? toTOML

@@ -20,6 +20,11 @@
       default = 24;
       description = "Size of the system cursor";
     };
+    cursorColor = lib.mkOption {
+      type = lib.types.enum ["pink" "green" "blue" "yellow" "red" "orange" "cyan" "purple" "grey" "black"];
+      default = "pink";
+      description = "Color variant for the Popucom animated cursor theme";
+    };
     dpi = lib.mkOption {
       type = lib.types.int;
       default = 96;

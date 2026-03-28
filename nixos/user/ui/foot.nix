@@ -17,7 +17,7 @@ in {
     environment.systemPackages = [
       pkgs.foot
     ];
-    usr.files.".config/foot/foot.ini" = {
+    bayt.users."${config.user.name}".files.".config/foot/foot.ini" = {
       clobber = true;
       # Foot config - colors loaded dynamically from wallust via include (cache-only theming)
       text = ''

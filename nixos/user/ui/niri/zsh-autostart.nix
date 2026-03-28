@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    usr.files =
+    bayt.users."${config.user.name}".files =
       {
         ".config/zsh/.zprofile" = {
           text = lib.mkAfter ''

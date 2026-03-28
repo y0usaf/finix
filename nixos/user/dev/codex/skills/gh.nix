@@ -8,7 +8,7 @@
   codexCfg = user.dev.codex;
 in {
   config = lib.mkIf (codexCfg.enable && codexCfg.skills.gh.enable && user.tools.gh.enable) {
-    usr.files = {
+    bayt.users."${config.user.name}".files = {
       ".codex/skills/gh/SKILL.md" = {
         text = skill.skill;
         clobber = true;

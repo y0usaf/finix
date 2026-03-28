@@ -6,12 +6,18 @@
   ...
 }: let
   inherit (lib) mkAfter;
-  x11ThemeName = "SSB-x11";
   cursorsPkgs = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}";
-  hyprcursorPackage = cursorsPkgs."deepin-dark-hyprcursor";
   inherit (config) user;
   inherit (user) shell;
-  inherit (user.appearance) cursorSize;
+  inherit (user.appearance) cursorSize cursorColor;
+  colorCap = let
+    first = builtins.substring 0 1 cursorColor;
+    rest = builtins.substring 1 (-1) cursorColor;
+  in (lib.toUpper first) + rest;
+  x11ThemeName = "Popucom-${colorCap}-x11";
+  hyprThemeName = "Popucom-${colorCap}-hypr";
+  xcursorPackage = cursorsPkgs."popucom-${cursorColor}-xcursor";
+  hyprcursorPackage = cursorsPkgs."popucom-${cursorColor}-hyprcursor";
 in {
   options.user.ui.cursor = {
     enable = lib.mkOption {
@@ -21,13 +27,10 @@ in {
     };
   };
   config = lib.mkIf user.ui.cursor.enable {
-    environment.systemPackages =
-      [
-        cursorsPkgs."ssb-xcursor"
-      ]
-      ++ lib.optionals (hyprcursorPackage != null) [
-        hyprcursorPackage
-      ];
+    environment.systemPackages = [
+      xcursorPackage
+      hyprcursorPackage
+    ];
 
     bayt.users."${user.name}" = {
       files =
@@ -51,27 +54,23 @@ in {
         }
         // lib.optionalAttrs shell.zsh.enable {
           ".config/zsh/.zprofile" = {
-            text = mkAfter (''
-                export XCURSOR_THEME="${x11ThemeName}"
-                export XCURSOR_SIZE="${toString cursorSize}"
-              ''
-              + lib.optionalString (hyprcursorPackage != null) ''
-                export HYPRCURSOR_THEME="DeepinDarkV20-hypr"
-                export HYPRCURSOR_SIZE="${toString cursorSize}"
-              '');
+            text = mkAfter ''
+              export XCURSOR_THEME="${x11ThemeName}"
+              export XCURSOR_SIZE="${toString cursorSize}"
+              export HYPRCURSOR_THEME="${hyprThemeName}"
+              export HYPRCURSOR_SIZE="${toString cursorSize}"
+            '';
             clobber = true;
           };
         }
         // lib.optionalAttrs shell.nushell.enable {
           ".config/nushell/login.nu" = {
-            text = mkAfter (''
-                $env.XCURSOR_THEME = "${x11ThemeName}"
-                $env.XCURSOR_SIZE = "${toString cursorSize}"
-              ''
-              + lib.optionalString (hyprcursorPackage != null) ''
-                $env.HYPRCURSOR_THEME = "DeepinDarkV20-hypr"
-                $env.HYPRCURSOR_SIZE = "${toString cursorSize}"
-              '');
+            text = mkAfter ''
+              $env.XCURSOR_THEME = "${x11ThemeName}"
+              $env.XCURSOR_SIZE = "${toString cursorSize}"
+              $env.HYPRCURSOR_THEME = "${hyprThemeName}"
+              $env.HYPRCURSOR_SIZE = "${toString cursorSize}"
+            '';
             clobber = true;
           };
         };
