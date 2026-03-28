@@ -42,7 +42,7 @@
       environment.systemPackages = [
         agsWithModules
       ];
-      usr = {
+      bayt.users."${config.user.name}" = {
         files = {
           ".config/ags/bar-overlay.tsx".source = pkgs.substitute {
             src = ./config/bar-overlay.tsx;

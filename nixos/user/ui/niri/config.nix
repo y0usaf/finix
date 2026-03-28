@@ -16,7 +16,7 @@
       pkgs.xwayland-satellite
     ];
 
-    usr.files.".config/niri/config.kdl" = {
+    bayt.users."${config.user.name}".files.".config/niri/config.kdl" = {
       clobber = true;
       generator = genLib.toNiriconf;
       value =
@@ -26,8 +26,13 @@
 
           prefer-no-csd = {};
 
-          cursor = {
-            xcursor-theme = "SSB-x11";
+          cursor = let
+            colorCap = let
+              first = builtins.substring 0 1 config.user.appearance.cursorColor;
+              rest = builtins.substring 1 (-1) config.user.appearance.cursorColor;
+            in (lib.toUpper first) + rest;
+          in {
+            xcursor-theme = "Popucom-${colorCap}-x11";
             xcursor-size = config.user.appearance.cursorSize;
           };
 

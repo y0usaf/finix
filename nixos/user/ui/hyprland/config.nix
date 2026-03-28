@@ -15,7 +15,7 @@
       pkgs.swaybg
       pkgs.xwayland
     ];
-    usr = {
+    bayt.users."${config.user.name}" = {
       files = {
         ".config/hypr/hyprpaper.conf" = {
           clobber = true;

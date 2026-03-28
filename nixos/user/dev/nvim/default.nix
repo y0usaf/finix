@@ -12,7 +12,7 @@ in {
   ];
 
   config = lib.mkIf config.user.dev.nvim.enable {
-    usr.files.".config/nvim/init.lua" = {
+    bayt.users."${config.user.name}".files.".config/nvim/init.lua" = {
       text = nvim.initLua;
     };
   };

@@ -29,7 +29,7 @@
     environment.systemPackages = [
       pkgs.jujutsu
     ];
-    usr.files =
+    bayt.users."${config.user.name}".files =
       {
         ".config/jj/config.toml" = {
           text = ''

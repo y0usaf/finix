@@ -37,7 +37,7 @@
       pkgs.opencode
       pkgs.uv
     ];
-    usr = {
+    bayt.users."${config.user.name}" = {
       files = {
         ".config/opencode/opencode.json" = {
           text = builtins.toJSON ({

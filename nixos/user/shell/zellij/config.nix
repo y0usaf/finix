@@ -11,7 +11,7 @@
 
     # Wallust (core) manages zellij config files for dynamic theming
     # Only shell integration is managed here
-    usr.files =
+    bayt.users."${config.user.name}".files =
       lib.optionalAttrs (config.user.shell.zellij.autoStart && config.user.shell.zsh.enable) {
         ".config/zsh/zellij.zsh" = {
           clobber = true;
