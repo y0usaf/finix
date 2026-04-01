@@ -1,0 +1,42 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  options.user.dev.claude-code = {
+    enable = lib.mkEnableOption "Claude Code development tools";
+
+    model = lib.mkOption {
+      type = lib.types.str;
+      default = "opus";
+      description = "Claude model to use";
+    };
+
+    subagentModel = lib.mkOption {
+      type = lib.types.str;
+      default = "opus";
+      description = "Claude model to use for subagents";
+    };
+
+    skills =
+      lib.mapAttrs (pluginName: _: {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Whether to enable the `${pluginName}` Claude Code skill plugin.";
+        };
+      })
+      (lib.filterAttrs (_: plugin: plugin ? skills) (import ./data/claude-code-lib.nix).plugins);
+  };
+
+  config = lib.mkIf config.user.dev.claude-code.enable {
+    environment.systemPackages =
+      lib.optionals (!config.programs.tweakcc.enable) [pkgs.claude-code]
+      ++ [
+        (pkgs.writeShellScriptBin "bunclaude" ''
+          exec ${pkgs.bun}/bin/bunx --bun @anthropic-ai/claude-code --allow-dangerously-skip-permissions "$@"
+        '')
+      ];
+  };
+}
