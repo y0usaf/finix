@@ -3,7 +3,10 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
+  nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
+in {
   options.user.tools.jj = {
     enable = lib.mkEnableOption "jujutsu version control system";
     name = lib.mkOption {
@@ -66,7 +69,7 @@
           clobber = true;
         };
       }
-      // lib.optionalAttrs (config.user.tools.jj.enableAliases && config.user.shell.zsh.enable) {
+      // lib.optionalAttrs (config.user.tools.jj.enableAliases && zshEnabled) {
         ".config/zsh/.zshrc" = {
           text = ''
             alias jl='jj log -r recent'
@@ -86,7 +89,7 @@
           clobber = true;
         };
       }
-      // lib.optionalAttrs (config.user.tools.jj.enableAliases && config.user.shell.nushell.enable) {
+      // lib.optionalAttrs (config.user.tools.jj.enableAliases && nushellEnabled) {
         ".config/nushell/config.nu" = {
           text = lib.mkAfter ''
             alias jl = jj log -r recent
