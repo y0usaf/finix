@@ -52,7 +52,7 @@ in {
         description = "Install WASD character movement mod";
       };
       settings = mkOption {
-        type = tomlFormat.type;
+        inherit (tomlFormat) type;
         default = {
           ModHotkeys = {
             ToggleMovementMode = "key:capslock";
@@ -90,7 +90,7 @@ in {
         description = "Install Native Camera Tweaks mod";
       };
       settings = mkOption {
-        type = tomlFormat.type;
+        inherit (tomlFormat) type;
         default = {};
         description = "BG3NativeCameraTweaks TOML configuration settings";
       };
