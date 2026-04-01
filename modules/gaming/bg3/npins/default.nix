@@ -226,7 +226,7 @@ in
         else if builtins.isAttrs input
         then input
         else throw "Unsupported input type ${builtins.typeOf input}, must be a path or an attrset";
-      version = data.version;
+      inherit (data) version;
     in
       if version == 7
       then builtins.mapAttrs (name: spec: mkFunctor (mkSource name spec)) data.pins
