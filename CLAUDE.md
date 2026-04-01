@@ -1,96 +1,88 @@
 # NixOS Configuration
 
-## Multi-System Setup
+## Setup
 
-This repo manages both Darwin (nix-darwin + home-manager) and NixOS systems.
+NixOS-only repo using bayt for user file management.
 Always work from `~/nixos` root directory.
-
-### Configuration Philosophy
-- Aim for cohesive configuration across systems
-- Avoid unnecessary differentiation
-- Only differentiate when required (Darwin-specific CLI tools, NixOS system packages)
-- Different syntaxes (Hjem vs home-manager): aim for configuration similarity, not code sharing
-- Check `flake.nix` for inputs and shared configuration strategies
 
 ## Directory Structure
 
-### lib/
-System-agnostic option definitions and reusable modules shared across Darwin and NixOS.
-- Examples: zsh, zellij, shell functions
-- Rule: Use if the tool/concept exists identically on both systems
+### `hosts.nix`
+Top-level host inventory. Each host is composed from semantic module domains plus a selected profile via `recursivelyImport`.
 
-### nixos/user/
-NixOS user-level implementations using bayt syntax.
-- Examples: zsh config specific to NixOS, user environment setup
+### `recursivelyImport.nix`
+Recursive module loader. Imports module `.nix` files from folders, ignores non-`.nix` helpers such as `.nixlib`, and skips `data/` and `npins/`.
 
-### nixos/system/
-NixOS system-level configuration.
-- System packages and kernel-level configuration
-- Examples: niri (Wayland compositor, Linux-only), system services
+### `modules/`
+All reusable NixOS module content lives here.
+- `modules/core/` — universal system and user foundations
+  - `boot/` — bootloader and kernel settings
+  - `system/` — global system defaults, nix settings, environment
+  - `hardware/` — reusable hardware modules
+  - `networking/` — base networking configuration
+  - `security/` — security modules
+  - `services/` — always-on system services not tied to a desktop session
+  - `user/` — shared user identity, core paths, shell-neutral defaults, appearance options, session config
+  - `virtualization/` — virtualization modules
+- `modules/desktop/` — desktop stack
+  - `session/` — session plumbing, desktop integration services, GUI defaults, UI, and theming
+  - `apps/` — GUI applications and app-specific system glue
+- `modules/shell/` — interactive shell environments and terminal tooling
+- `modules/tools/` — CLI tools and developer-facing utilities
+- `modules/user-services/` — user-scoped services such as SSH agent and Syncthing
+- `modules/dev/` — development environments and AI tooling
+- `modules/gaming/` — gaming platforms, launchers, and per-game tweaks
+- `modules/profiles/` — reusable profile layers selected per host
 
-### darwin/user/
-Darwin user-level implementations using home-manager syntax.
-- Examples: zsh config specific to Darwin, user environment setup
+### `hosts/`
+Per-machine leaf modules only.
+- hardware configuration
+- impermanence/home rollback
+- host-specific quirks
+- install-only helpers such as disko live under `data/`
 
-### darwin/system/
-Darwin system-level configuration using nix-darwin.
-- System packages and macOS-specific setup
-- Examples: raycast (macOS spotlight alternative, macOS-only)
-
-### What NOT to put in lib/
-- raycast: Darwin-only macOS app, goes in darwin/system
-- niri: Linux-only Wayland compositor, goes in nixos/system
-- Anything with system-specific syscalls or platform-only binaries
+### `lib/`
+Shared helpers that are not NixOS modules.
+- `lib/generators/` — custom format generators
 
 ## Conventions
 
-### default.nix Files
-`default.nix` files should be **import-only**. They should only contain imports of other modules, no inline configuration.
+### Composition
+Host composition happens in `hosts.nix`, not inside host leaf modules.
 
-```nix
-# CORRECT - import only
-{
-  foo = import ./foo.nix;
-  bar = import ./bar.nix;
-}
+### Module Files
+Every `.nix` file outside `data/` and `npins/` must be a valid NixOS module.
+Private helper expressions that are not modules should use `.nixlib` or another non-`.nix` extension.
 
-# WRONG - inline configuration
-{
-  foo = import ./foo.nix;
-  someOption = "value";  # Don't do this
-}
-```
+### Profile Files
+Profiles live under `modules/profiles/` and are split by concern: `identity.nix`, `defaults.nix`, `paths.nix`, `ui.nix`, `programs.nix`, `dev.nix`, `gaming.nix`, `shell.nix`, `tools.nix`, `services.nix`.
 
-## Workflows
+### Data Files
+Avoid `data/` for module-local implementation helpers.
+Prefer semantic directories such as `assets/`, `templates/`, `colorschemes/`, or `plugins/`, and use `.nixlib` for non-module Nix expressions that should not be auto-imported.
+Keep `data/` only for genuinely external or host-local payloads that need a subtree without participating in the module graph.
 
-### Darwin
-Uses nix-darwin and home-manager.
-```
-git add → alejandra . → nh darwin switch → TEST → git commit && push
-```
-**CRITICAL:** Only commit after successful switch and user testing.
+Examples:
+- `modules/dev/claude-code/assets/`
+- `modules/desktop/session/theme/wallust/templates/`
+- `modules/desktop/apps/browsers/userChrome.css`
 
-### NixOS
+## Workflow
+
 Uses bayt. Clone external repos to `~/nixos/tmp/`.
-**IMPORTANT:** All packages are system-level (`environment.systemPackages`), NOT user-level.
+All packages are system-level via NixOS modules.
+
 ```
-git add → alejandra . → nh os switch --dry → nh os switch → TEST → git commit && push
+git add -> alejandra . -> nh os switch --dry -> nh os switch -> TEST -> git commit && push
 ```
-**CRITICAL:** Only commit after successful switch and user testing.
+
+Only commit after formatting, successful evaluation/switch, and manual testing.
 
 ## Bayt Syntax
 
 ```nix
-bayt.users."${config.user.name}".files."path" = { generator = lib.generators.toFormat {}; value = {}; };
+bayt.users."${config.user.name}".files."path" = {
+  generator = lib.generators.toFormat {};
+  value = {};
+};
 ```
-
-## Failure Modes
-
-### Committing code that doesn't build
-**NEVER** attempt git commit until:
-- `alejandra .` completes without errors
-- `nh os switch --dry` succeeds (NixOS) OR `nh darwin switch` succeeds (Darwin)
-- `nh os switch` succeeds (NixOS only, after dry run passes)
-- Manual testing confirms expected behavior
-
-If any step fails, fix the issue before committing.
