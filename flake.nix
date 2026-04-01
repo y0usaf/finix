@@ -28,18 +28,10 @@
 
     obs-image-reaction = {
       url = "github:y0usaf/obs-image-reaction";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-
-    nvf = {
-      url = "github:NotAShelf/nvf";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    neovim-nightly-overlay = {
-      url = "github:nix-community/neovim-nightly-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     mango = {
@@ -72,10 +64,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     agent-slack = {
       url = "github:stablyai/agent-slack";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     impermanence = {
@@ -88,17 +87,17 @@
     };
 
     strictix = {
-      url = "path:/home/y0usaf/Dev/strictix";
+      url = "git+file:/home/y0usaf/Dev/strictix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     patchix = {
-      url = "path:/home/y0usaf/Dev/patchix";
+      url = "git+file:/home/y0usaf/Dev/patchix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     agent-harness = {
-      url = "path:/home/y0usaf/Dev/Agent-Harness";
+      url = "git+file:/home/y0usaf/Dev/Agent-Harness";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -106,21 +105,8 @@
   outputs = {nixpkgs, ...} @ inputs: let
     system = "x86_64-linux";
     legacyPkgs = nixpkgs.legacyPackages;
-
-    nixpkgsConfig = {
-      allowUnfree = true;
-      permittedInsecurePackages = [
-        "qtwebengine-5.15.19"
-      ];
-      allowInsecurePredicate = pkg: nixpkgs.lib.hasPrefix "librewolf" (pkg.pname or "");
-    };
   in {
-    inherit
-      (import ./nixos/lib {
-        inherit inputs system nixpkgsConfig;
-      })
-      nixosConfigurations
-      ;
+    nixosConfigurations = import ./hosts.nix {inherit inputs;};
 
     formatter."${system}" = legacyPkgs."${system}".alejandra;
   };
