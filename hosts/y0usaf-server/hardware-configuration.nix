@@ -1,0 +1,94 @@
+{
+  config,
+  lib,
+  modulesPath,
+  ...
+}: {
+  imports = [
+    (modulesPath + "/installer/scan/not-detected.nix")
+  ];
+
+  boot = {
+    initrd = {
+      availableKernelModules = ["xhci_pci" "ahci" "sd_mod"];
+      kernelModules = [];
+    };
+    kernelModules = ["kvm-intel"];
+    extraModulePackages = [];
+    kernel.sysctl."vm.swappiness" = 100;
+  };
+
+  fileSystems = {
+    "/" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = ["mode=755" "size=1G"];
+    };
+
+    "/nix" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@nix" "compress=zstd" "noatime"];
+    };
+
+    "/persist" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@persist" "compress=zstd" "noatime"];
+      neededForBoot = true;
+    };
+
+    "/home" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@home" "compress=zstd" "noatime"];
+      neededForBoot = true;
+    };
+
+    "/btrfs" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvolid=5"];
+    };
+
+    "/boot" = {
+      device = "/dev/disk/by-uuid/41B0-E342";
+      fsType = "vfat";
+      options = ["fmask=0022" "dmask=0022"];
+    };
+
+    "/home/y0usaf/Music" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@music"];
+    };
+
+    "/home/y0usaf/DCIM" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@dcim"];
+    };
+
+    "/home/y0usaf/Pictures" = {
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
+      fsType = "btrfs";
+      options = ["subvol=@pictures"];
+    };
+  };
+
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+    algorithm = "zstd";
+  };
+
+  boot.tmp = {
+    useTmpfs = true;
+    tmpfsSize = "25%";
+  };
+
+  swapDevices = [];
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+}
