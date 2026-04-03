@@ -21,6 +21,7 @@
       settings.personality = "pragmatic";
     };
     codex-cli.enable = true;
+    pi.enable = true;
     nvim = {
       enable = true;
       neovide = false;

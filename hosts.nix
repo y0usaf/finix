@@ -65,6 +65,7 @@
     inputs.mango.nixosModules.mango
     inputs.impermanence.nixosModules.impermanence
     inputs.patchix.nixosModules.default
+    inputs.nvtune.nixosModules.default
   ];
 
   moduleDomains = {
