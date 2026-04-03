@@ -64,6 +64,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    pi-mono = {
+      url = "github:y0usaf/pi-mono";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hermes-agent = {
       url = "github:NousResearch/hermes-agent";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -98,6 +103,11 @@
 
     agent-harness = {
       url = "git+file:/home/y0usaf/Dev/Agent-Harness";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nvtune = {
+      url = "github:y0usaf/nvtune";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
