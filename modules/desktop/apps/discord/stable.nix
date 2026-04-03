@@ -7,7 +7,8 @@
   inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf types;
 
   enableFeatures = [
-    "WaylandLinuxDrmSyncobj"
+    # WaylandLinuxDrmSyncobj removed - causes format negotiation failures with niri screenshare
+    # See: pw.link: negotiating -> error no more input formats (-22)
   ];
   disableFeatures = [
     "WebRtcAllowInputVolumeAdjustment"
