@@ -67,6 +67,12 @@ in {
 
     # gpui-shell theme template
     ".config/wallust/templates/gpuishell-theme.toml" = templates.gpuishellTheme;
+
+    # Termvide terminal theme template
+    ".config/wallust/templates/termvide-theme.toml" = templates.termvideTheme;
+
+    # Termvide live OSC palette update script
+    ".config/wallust/templates/termvide-osc.sh" = templates.termvideOsc;
   };
 
   # wt script text - wraps wallust with pywalfox update and optional vicinae reload
@@ -87,6 +93,11 @@ in {
 
     # Brief delay for file write (avoid race conditions)
     sleep 0.5
+
+    # Push live palette updates to the current terminal when supported
+    if [ -t 1 ] && [ -f "$HOME/.cache/wallust/termvide-osc.sh" ]; then
+      sh "$HOME/.cache/wallust/termvide-osc.sh"
+    fi
 
     # Update pywalfox
     pywalfox --browser ${browserBinary} update
