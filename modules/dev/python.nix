@@ -30,6 +30,10 @@ in {
       gcc
       binutils
     ];
+    environment.sessionVariables = {
+      PYTHONSTARTUP = "${homeDirectory}/.config/python/pythonrc";
+      PYTHON_HISTORY = "${homeDirectory}/.local/state/python_history";
+    };
     bayt.users."${config.user.name}".files = let
       ldLibPath = lib.makeLibraryPath [
         pkgs.stdenv.cc.cc.lib
@@ -41,7 +45,16 @@ in {
         pkgs.libxrender
       ];
     in
-      lib.optionalAttrs shell.zsh.enable {
+      {
+        ".config/python/pythonrc" = {
+          clobber = true;
+          text = ''
+            # Python 3.13+ handles history natively via PYTHON_HISTORY env var.
+            # This file is kept for any remaining startup customisation.
+          '';
+        };
+      }
+      // lib.optionalAttrs shell.zsh.enable {
         ".config/zsh/.zshenv" = {
           clobber = true;
           text = lib.mkAfter ''
@@ -154,6 +167,7 @@ in {
       "d ${homeDirectory}/.local/share/python 0755 ${userName} ${userName} - -"
       "d ${homeDirectory}/.cache/pip 0755 ${userName} ${userName} - -"
       "d ${homeDirectory}/.local/share/venvs 0755 ${userName} ${userName} - -"
+      "d ${homeDirectory}/.config/python 0755 ${userName} ${userName} - -"
     ];
   };
 }
