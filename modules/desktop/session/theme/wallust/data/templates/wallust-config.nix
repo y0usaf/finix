@@ -28,6 +28,12 @@
   # Foot terminal colors (cache-only theming)
   foot-colors = { template = "foot-colors.ini", target = "~/.cache/wallust/colors_foot.ini" }
 
+  # Termvide terminal theme (picked up on next launch)
+  termvide-theme = { template = "termvide-theme.toml", target = "~/.cache/wallust/termvide-theme.toml" }
+
+  # Termvide live OSC palette updater (used by wt for hot reload)
+  termvide-osc = { template = "termvide-osc.sh", target = "~/.cache/wallust/termvide-osc.sh" }
+
   # Zellij templates
   zellij-config = { template = "zellij-config.kdl", target = "~/.config/zellij/config.kdl" }
   zellij-layout = { template = "zellij-layout.kdl", target = "~/.config/zellij/layouts/zjstatus.kdl" }
