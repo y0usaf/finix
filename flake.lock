@@ -575,6 +575,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-discord-legacy": {
+      "locked": {
+        "lastModified": 1771848320,
+        "narHash": "sha256-0MAd+0mun3K/Ns8JATeHT1sX28faLII5hVLq0L3BdZU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "2fc6539b481e1d2569f25f8799236694180c0993",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "2fc6539b481e1d2569f25f8799236694180c0993",
+        "type": "github"
+      }
+    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1748740939,
@@ -683,6 +699,29 @@
       "original": {
         "type": "git",
         "url": "file:/home/y0usaf/Dev/patchix"
+      }
+    },
+    "pi-agents": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775246808,
+        "narHash": "sha256-EBDFzn1e4spWW3FJtbZE6wu5vo9Z+k53Jf3lL1wPQsA=",
+        "ref": "refs/heads/main",
+        "rev": "3269842604edb2112cd4e8aefb9a17673674472d",
+        "revCount": 1,
+        "type": "git",
+        "url": "file:/home/y0usaf/Dev/pi-mono/packages/pi-agents"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:/home/y0usaf/Dev/pi-mono/packages/pi-agents"
       }
     },
     "pi-mono": {
@@ -812,11 +851,14 @@
         "impermanence": "impermanence",
         "mango": "mango",
         "nixpkgs": "nixpkgs_3",
+        "nixpkgs-discord-legacy": "nixpkgs-discord-legacy",
         "nvtune": "nvtune",
         "obs-image-reaction": "obs-image-reaction",
         "patchix": "patchix",
+        "pi-agents": "pi-agents",
         "pi-mono": "pi-mono",
         "strictix": "strictix",
+        "termvide": "termvide",
         "tweakcc": "tweakcc"
       }
     },
@@ -1083,6 +1125,28 @@
         "owner": "nix-systems",
         "repo": "default",
         "type": "github"
+      }
+    },
+    "termvide": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dirtyRev": "e5c8adb807932da8b9f8711509f930bd5f5e1201-dirty",
+        "dirtyShortRev": "e5c8adb-dirty",
+        "lastModified": 1775245832,
+        "narHash": "sha256-eeWrR1rwN7IiCsnM5eqj9KMg/ao3pqbkxfciwe82RkI=",
+        "type": "git",
+        "url": "file:/home/y0usaf/Dev/termvide"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:/home/y0usaf/Dev/termvide"
       }
     },
     "tweakcc": {
