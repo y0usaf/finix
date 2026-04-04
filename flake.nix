@@ -64,9 +64,27 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixpkgs-discord-legacy.url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
+
     pi-mono = {
       url = "github:y0usaf/pi-mono";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    termvide = {
+      url = "git+file:/home/y0usaf/Dev/termvide";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+
+    pi-agents = {
+      url = "git+file:/home/y0usaf/Dev/pi-mono/packages/pi-agents";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     hermes-agent = {
