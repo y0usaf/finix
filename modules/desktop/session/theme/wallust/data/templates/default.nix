@@ -43,4 +43,10 @@ in {
 
   # gpui-shell theme colors
   gpuishellTheme = import ./gpuishell-theme.nix;
+
+  # Termvide terminal theme
+  termvideTheme = import ./termvide-theme.nix;
+
+  # Termvide live OSC palette updater
+  termvideOsc = import ./termvide-osc.nix;
 }

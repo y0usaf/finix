@@ -30,6 +30,7 @@ _: {
     tui-launcher.enable = true;
     slack.enable = true;
     stoat-desktop.enable = false;
+    termvide.enable = true;
     agent-harness.enable = true;
     btop.enable = true;
   };
