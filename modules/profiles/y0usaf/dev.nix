@@ -20,10 +20,7 @@ _: {
     docker.enable = true;
     gcloud.enable = true;
     localllama.enable = true;
-    nvim = {
-      enable = true;
-      neovide = false;
-    };
+    nvim.enable = true;
     bun.enable = true;
     python.enable = true;
     rust.enable = true;
