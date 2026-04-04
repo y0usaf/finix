@@ -9,18 +9,12 @@
   };
 
   config = lib.mkIf config.user.dev.rust.enable {
-    environment = {
-      systemPackages = [
-        pkgs.rustup
-        pkgs.pkg-config
-        pkgs.openssl
-        pkgs.gcc
-      ];
-      sessionVariables = {
-        CARGO_HOME = "${config.user.homeDirectory}/.local/share/cargo";
-        RUSTUP_HOME = "${config.user.homeDirectory}/.local/share/rustup";
-      };
-    };
+    environment.systemPackages = [
+      pkgs.rustup
+      pkgs.pkg-config
+      pkgs.openssl
+      pkgs.gcc
+    ];
 
     systemd.tmpfiles.rules = [
       "d ${config.user.homeDirectory}/.local/share/cargo 0755 ${config.user.name} ${config.user.name} - -"
