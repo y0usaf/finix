@@ -20,6 +20,11 @@
 in {
   options.user.programs.discord.stable = {
     enable = mkEnableOption "Discord stable";
+    package = mkOption {
+      type = types.package;
+      default = pkgs.discord;
+      description = "Discord package to customize and install";
+    };
     extraArgs = mkOption {
       type = types.listOf types.str;
       default = [];
@@ -35,7 +40,7 @@ in {
 
   config = mkIf stableCfg.enable {
     environment.systemPackages = [
-      (pkgs.discord.override {
+      (stableCfg.package.override {
         commandLineArgs = concatStringsSep " " ((optionals (enableFeatures != []) [
             "--enable-features=${concatStringsSep "," enableFeatures}"
           ]

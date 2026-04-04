@@ -3,7 +3,12 @@
   flakeInputs,
   pkgs,
   ...
-}: {
+}: let
+  legacyDiscordPkgs = import flakeInputs.nixpkgs-discord-legacy {
+    inherit (pkgs.stdenv.hostPlatform) system;
+    config.allowUnfree = true;
+  };
+in {
   fonts = {
     packages = [
       flakeInputs.fast-fonts.packages."${pkgs.stdenv.hostPlatform.system}".default
@@ -12,6 +17,7 @@
   };
   hostname = "y0usaf-desktop";
   trustedUsers = ["y0usaf"];
+  user.programs.discord.stable.package = legacyDiscordPkgs.discord;
   stateVersion = "24.11";
   timezone = "America/Toronto";
   var-cache = true;
