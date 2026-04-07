@@ -4,23 +4,45 @@
   pkgs,
   ...
 }: let
+  inherit (pkgs.stdenv.hostPlatform) system;
   legacyDiscordPkgs = import flakeInputs.nixpkgs-discord-legacy {
-    inherit (pkgs.stdenv.hostPlatform) system;
+    inherit system;
     config.allowUnfree = true;
   };
 in {
   fonts = {
     packages = [
-      flakeInputs.fast-fonts.packages."${pkgs.stdenv.hostPlatform.system}".default
+      flakeInputs.fast-fonts.packages."${system}".default
     ];
     fontDir.enable = true;
   };
   hostname = "y0usaf-desktop";
   trustedUsers = ["y0usaf"];
-  user.programs.discord.stable.package = legacyDiscordPkgs.discord;
   stateVersion = "24.11";
   timezone = "America/Toronto";
   var-cache = true;
+  user = {
+    programs.discord.stable.package = legacyDiscordPkgs.discord;
+    gaming = {
+      proton = {
+        enable = true;
+        nativeWayland = false;
+        ntsync = true;
+      };
+      mangohud = {
+        enable = true;
+        enableSessionWide = true;
+        refreshRate = 175;
+      };
+      bg3 = {
+        enable = true;
+        scriptExtender.enable = true;
+        nativeModLoader.enable = true;
+        wasd.enable = true;
+        nativeCameraTweaks.enable = true;
+      };
+    };
+  };
   hardware = {
     bluetooth = {
       enable = true;
@@ -29,6 +51,27 @@ in {
     nvidia = {
       enable = true;
       cuda.enable = true;
+      management = {
+        enable = true;
+        maxClock = 2450;
+        minClock = 1000;
+        coreVoltageOffset = -100;
+        memoryVoltageOffset = -100;
+        fanCurve = [
+          {
+            temp = 50;
+            speed = 0;
+          }
+          {
+            temp = 75;
+            speed = 50;
+          }
+          {
+            temp = 90;
+            speed = 70;
+          }
+        ];
+      };
     };
     amdgpu.enable = false;
     display.outputs =
@@ -39,46 +82,6 @@ in {
         };
       };
   };
-  user.gaming = {
-    proton = {
-      enable = true;
-      nativeWayland = false;
-    };
-    mangohud = {
-      enable = true;
-      enableSessionWide = true;
-      refreshRate = 175;
-    };
-    bg3 = {
-      enable = true;
-      scriptExtender.enable = true;
-      nativeModLoader.enable = true;
-      wasd.enable = true;
-      nativeCameraTweaks.enable = true;
-    };
-  };
-  hardware.nvidia.management = {
-    enable = true;
-    maxClock = 2450;
-    minClock = 1000;
-    coreVoltageOffset = -100;
-    memoryVoltageOffset = -100;
-    fanCurve = [
-      {
-        temp = 50;
-        speed = 0;
-      }
-      {
-        temp = 75;
-        speed = 50;
-      }
-      {
-        temp = 90;
-        speed = 70;
-      }
-    ];
-  };
-  user.gaming.proton.ntsync = true;
   services = {
     btrbk-snapshots.enable = true;
     docker.enable = true;

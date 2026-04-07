@@ -1,15 +1,11 @@
 {
   config,
   pkgs,
-  disko,
   ...
 }: let
   sysConfig = config.system;
   homeDir = sysConfig.homeDirectory or "/home/${sysConfig.username or "y0usaf"}";
 in {
-  imports = [
-    disko.nixosModules.disko
-  ];
   environment.systemPackages = [
     pkgs.disko
   ];
