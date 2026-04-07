@@ -6,10 +6,7 @@
     then [elem]
     else
       builtins.filter
-      (f: let
-        s = toString f;
-      in
-        !(lib.hasInfix "/data/" s) && !(lib.hasInfix "/npins/" s))
+      (f: !(lib.hasInfix "/npins/" (toString f)))
       (lib.filesystem.listFilesRecursive elem);
 in
   list:
