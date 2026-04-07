@@ -6,7 +6,6 @@
 }: {
   config = lib.mkIf config.user.ui.hyprland.enable {
     bayt.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
-      clobber = true;
       text = lib.mkBefore (genLib.toHyprconf {
         attrs = {
           "$mod" = "ALT";

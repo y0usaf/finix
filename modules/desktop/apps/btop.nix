@@ -10,7 +10,6 @@
   config = lib.mkIf config.user.programs.btop.enable {
     environment.systemPackages = [pkgs.btop];
     bayt.users."${config.user.name}".files.".config/btop/btop.conf" = {
-      clobber = true;
       text = ''
         color_theme = "TTY"
         theme_background = False
