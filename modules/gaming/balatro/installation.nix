@@ -99,14 +99,12 @@ in {
               lib.nameValuePair
               "${steamPath}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
               {
-                clobber = true;
                 source = mod.src;
               }
           )
           (lib.filterAttrs (name: _: lib.elem name balatroCfg.enabledMods) availableMods))
         // (lib.optionalAttrs balatroCfg.enableLovelyInjector {
           "${steamPath}/steamapps/common/Balatro/version.dll" = {
-            clobber = true;
             source = "${pkgs.fetchzip {
               url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
               sha256 = "sha256-tFDiYDRW5arGz92Knug6XnyhxYatUQ7iR/Wxfz6Hjw4=";

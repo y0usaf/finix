@@ -4,6 +4,8 @@
   lib,
   ...
 }: let
+  inherit (config.user) defaults shell;
+  inherit (shell) zellij;
   flakeDirectory = config.user.paths.flake.path;
 
   settings = {
@@ -180,7 +182,7 @@ in {
   options.user.shell.nushell = {
     enable = lib.mkEnableOption "nushell shell configuration";
   };
-  config = lib.mkIf config.user.shell.nushell.enable {
+  config = lib.mkIf shell.nushell.enable {
     environment.systemPackages = [
       pkgs.nushell
       pkgs.carapace
@@ -205,39 +207,34 @@ in {
                 tempRunFunction
                 localFunctions
               ]
-              ++ lib.optional (config.user.shell.zellij.enable && config.user.shell.zellij.autoStart) "source ~/.config/nushell/zellij.nu"
+              ++ lib.optional (zellij.enable && zellij.autoStart) "source ~/.config/nushell/zellij.nu"
             );
-            clobber = true;
           };
           ".config/nushell/env.nu" = {
             text = lib.mkMerge [
               (exportVars
                 + ''
 
-                  $env.TERMINAL = "${config.user.defaults.terminal}"
-                  $env.BROWSER = "${config.user.defaults.browser}"
-                  $env.EDITOR = "${config.user.defaults.editor}"
+                  $env.TERMINAL = "${defaults.terminal}"
+                  $env.BROWSER = "${defaults.browser}"
+                  $env.EDITOR = "${defaults.editor}"
                 '')
               (lib.mkAfter settings.prompt)
             ];
-            clobber = true;
           };
           ".config/nushell/login.nu" = {
             text = "";
-            clobber = true;
           };
           ".config/nushell/carapace.nu" = {
             source = pkgs.runCommand "carapace-init-nu" {} ''
               export HOME=$(mktemp -d)
               ${pkgs.carapace}/bin/carapace _carapace nushell | ${pkgs.gnused}/bin/sed '/\/build\/.*carapace\/bin/d' > $out
             '';
-            clobber = true;
           };
         }
-        // lib.optionalAttrs (config.user.shell.zellij.enable && config.user.shell.zellij.autoStart) {
+        // lib.optionalAttrs (zellij.enable && zellij.autoStart) {
           ".config/nushell/zellij.nu" = {
             text = zellijStartup;
-            clobber = true;
           };
         };
     };

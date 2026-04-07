@@ -9,7 +9,6 @@
   mkEntry = args: let
     inherit (args) resX resY;
   in {
-    clobber = true;
     generator = lib.generators.toINI {};
     value =
       lib.recursiveUpdate {

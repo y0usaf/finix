@@ -4,31 +4,33 @@
   pkgs,
   ...
 }: let
+  inherit (lib) types mkOption mkEnableOption mkIf mkAfter optionalString optionalAttrs;
   zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
   nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
+  cfg = config.user.tools.jj;
 in {
   options.user.tools.jj = {
-    enable = lib.mkEnableOption "jujutsu version control system";
-    name = lib.mkOption {
-      type = lib.types.str;
+    enable = mkEnableOption "jujutsu version control system";
+    name = mkOption {
+      type = types.str;
       description = "Jujutsu username.";
     };
-    email = lib.mkOption {
-      type = lib.types.str;
+    email = mkOption {
+      type = types.str;
       description = "Jujutsu email address.";
     };
-    editor = lib.mkOption {
-      type = lib.types.str;
+    editor = mkOption {
+      type = types.str;
       default = "nvim";
       description = "Default editor for jujutsu.";
     };
-    enableAliases = lib.mkOption {
-      type = lib.types.bool;
+    enableAliases = mkOption {
+      type = types.bool;
       default = true;
       description = "Enable common jujutsu aliases.";
     };
   };
-  config = lib.mkIf config.user.tools.jj.enable {
+  config = mkIf cfg.enable {
     environment.systemPackages = [
       pkgs.jujutsu
     ];
@@ -37,19 +39,19 @@ in {
         ".config/jj/config.toml" = {
           text = ''
             [user]
-            name = "${config.user.tools.jj.name}"
-            email = "${config.user.tools.jj.email}"
+            name = "${cfg.name}"
+            email = "${cfg.email}"
             [ui]
             default-command = "status"
-            editor = "${config.user.tools.jj.editor}"
-            diff-editor = "${config.user.tools.jj.editor}"
+            editor = "${cfg.editor}"
+            diff-editor = "${cfg.editor}"
             [git]
             auto-local-branch = true
             push-branch-prefix = ""
             [revset-aliases]
-            "mine" = "author(${config.user.tools.jj.email})"
+            "mine" = "author(${cfg.email})"
             "recent" = "heads(::@ & recent(5))"
-            ${lib.optionalString config.user.tools.jj.enableAliases ''
+            ${optionalString cfg.enableAliases ''
               [aliases]
               l = ["log", "-r", "recent"]
               ll = ["log", "-r", "::@"]
@@ -66,10 +68,9 @@ in {
               sq = ["squash"]
             ''}
           '';
-          clobber = true;
         };
       }
-      // lib.optionalAttrs (config.user.tools.jj.enableAliases && zshEnabled) {
+      // optionalAttrs (cfg.enableAliases && zshEnabled) {
         ".config/zsh/.zshrc" = {
           text = ''
             alias jl='jj log -r recent'
@@ -86,12 +87,11 @@ in {
             alias jsp='jj split'
             alias jsq='jj squash'
           '';
-          clobber = true;
         };
       }
-      // lib.optionalAttrs (config.user.tools.jj.enableAliases && nushellEnabled) {
+      // optionalAttrs (cfg.enableAliases && nushellEnabled) {
         ".config/nushell/config.nu" = {
-          text = lib.mkAfter ''
+          text = mkAfter ''
             alias jl = jj log -r recent
             alias jll = jj log -r ::@
             alias js = jj status
@@ -106,7 +106,6 @@ in {
             alias jsp = jj split
             alias jsq = jj squash
           '';
-          clobber = true;
         };
       };
   };

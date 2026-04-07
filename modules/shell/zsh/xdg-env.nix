@@ -6,7 +6,6 @@
   config = lib.mkIf config.user.shell.zsh.enable {
     bayt.users."${config.user.name}".files = {
       ".config/zsh/.zshenv" = {
-        clobber = true;
         text = ''
           export XDG_CONFIG_HOME="$HOME/.config"
           export XDG_DATA_HOME="$HOME/.local/share"
