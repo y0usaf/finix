@@ -10,12 +10,10 @@ in {
     bayt.users."${config.user.name}".files = {
       ".codex/skills/linear-cli/SKILL.md" = {
         text = skill.skill;
-        clobber = true;
       };
       ".codex/skills/linear-cli/agents/openai.yaml" = {
         generator = lib.generators.toYAML {};
         value = {inherit (skill) interface;};
-        clobber = true;
       };
     };
   };

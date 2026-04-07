@@ -15,7 +15,6 @@
       pkgs.docker-credential-helpers
     ];
     bayt.users."${config.user.name}".files.".config/docker/config.json" = {
-      clobber = true;
       text = builtins.toJSON {
         credsStore = "pass";
         currentContext = "default";

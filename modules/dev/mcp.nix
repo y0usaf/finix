@@ -29,15 +29,12 @@ in {
       in {
         ".cursor/mcp.json" = {
           text = mcpConfig;
-          clobber = true;
         };
         ".claude/mcp_config.json" = {
           text = mcpConfig;
-          clobber = true;
         };
         ".claude/mcp_servers.json" = {
           text = toJSON mcpServers;
-          clobber = true;
         };
       };
     };
