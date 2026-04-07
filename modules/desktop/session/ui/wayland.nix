@@ -4,13 +4,15 @@
   lib,
   ...
 }: let
+  inherit (config.user) ui;
   zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
   nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
+  gtkScale = ui.gtk.scale;
 in {
   options.user.ui.wayland = {
     enable = lib.mkEnableOption "Wayland configuration";
   };
-  config = lib.mkIf config.user.ui.wayland.enable {
+  config = lib.mkIf ui.wayland.enable {
     environment.systemPackages = [
       pkgs.grim
       pkgs.slurp
@@ -30,9 +32,8 @@ in {
               export GDK_BACKEND=wayland
               export SDL_VIDEODRIVER=wayland,x11
               export CLUTTER_BACKEND=wayland
-              export GDK_DPI_SCALE=${toString config.user.ui.gtk.scale}
+              export GDK_DPI_SCALE=${toString gtkScale}
             '';
-            clobber = true;
           };
         }
         // lib.optionalAttrs nushellEnabled {
@@ -46,9 +47,8 @@ in {
               $env.GDK_BACKEND = "wayland"
               $env.SDL_VIDEODRIVER = "wayland,x11"
               $env.CLUTTER_BACKEND = "wayland"
-              $env.GDK_DPI_SCALE = "${toString config.user.ui.gtk.scale}"
+              $env.GDK_DPI_SCALE = "${toString gtkScale}"
             '';
-            clobber = true;
           };
         };
     };

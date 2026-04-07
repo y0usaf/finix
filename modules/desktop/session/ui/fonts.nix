@@ -63,7 +63,6 @@
 
     bayt.users."${config.user.name}" = {
       files.".config/fontconfig/fonts.conf" = {
-        clobber = true;
         text = ''
           <?xml version="1.0"?>
           <!DOCTYPE fontconfig SYSTEM "fonts.dtd">

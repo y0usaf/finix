@@ -55,11 +55,9 @@ in {
                     Path = userName;
                   };
               };
-            clobber = true;
           };
           ".librewolf/${userName}/chrome/userChrome.css" = {
             text = browserShared.userChromeCss;
-            clobber = true;
           };
           # Pywalfox native messaging host for dynamic theme updates
           ".librewolf/native-messaging-hosts/pywalfox.json".text = builtins.toJSON {
@@ -78,7 +76,6 @@ in {
               export MOZ_ENABLE_WAYLAND=1
               export MOZ_USE_XINPUT2=1
             '';
-            clobber = true;
           };
         }
         // lib.optionalAttrs shell.nushell.enable {
@@ -87,7 +84,6 @@ in {
               $env.MOZ_ENABLE_WAYLAND = "1"
               $env.MOZ_USE_XINPUT2 = "1"
             '';
-            clobber = true;
           };
         };
     };
