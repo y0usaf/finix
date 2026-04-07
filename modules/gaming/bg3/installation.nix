@@ -19,6 +19,8 @@
   modSrc = "${sources.game-mods}/bg3";
   tomlFormat = pkgs.formats.toml {};
 
+  cameraTweaks = cfg.nativeCameraTweaks;
+
   bg3seVersion = sources.bg3se.version;
   bg3seDate = lib.removePrefix "updater-" bg3seVersion;
 in {
@@ -101,7 +103,6 @@ in {
     bayt.users."${config.user.name}".files = mkMerge [
       (mkIf cfg.scriptExtender.enable {
         "${bg3Bin}/DWrite.dll" = {
-          clobber = true;
           source = "${pkgs.fetchzip {
             url = "https://github.com/Norbyte/bg3se/releases/download/${bg3seVersion}/BG3SE-Updater-${bg3seDate}.zip";
             sha256 = "sha256-XhintUwpaQ9AhWjsPvWMFLKF2D7WdjmhPcvNLoVtGho=";
@@ -112,33 +113,28 @@ in {
 
       (mkIf cfg.nativeModLoader.enable {
         "${bg3Bin}/bink2w64.dll" = {
-          clobber = true;
           source = "${modSrc}/bin/bink2w64.dll";
         };
       })
 
       (mkIf cfg.wasd.enable {
         "${nativeModsDir}/BG3WASD.dll" = {
-          clobber = true;
           source = "${modSrc}/bin/NativeMods/BG3WASD.dll";
         };
         "${nativeModsDir}/BG3WASD.toml" = {
-          clobber = true;
           source = tomlFormat.generate "BG3WASD.toml" cfg.wasd.settings;
         };
       })
 
-      (mkIf cfg.nativeCameraTweaks.enable {
+      (mkIf cameraTweaks.enable {
         "${nativeModsDir}/BG3NativeCameraTweaks.dll" = {
-          clobber = true;
           source = "${modSrc}/bin/NativeMods/BG3NativeCameraTweaks.dll";
         };
       })
 
-      (mkIf (cfg.nativeCameraTweaks.enable && cfg.nativeCameraTweaks.settings != {}) {
+      (mkIf (cameraTweaks.enable && cameraTweaks.settings != {}) {
         "${nativeModsDir}/BG3NativeCameraTweaks.toml" = {
-          clobber = true;
-          source = tomlFormat.generate "BG3NativeCameraTweaks.toml" cfg.nativeCameraTweaks.settings;
+          source = tomlFormat.generate "BG3NativeCameraTweaks.toml" cameraTweaks.settings;
         };
       })
     ];

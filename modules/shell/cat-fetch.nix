@@ -13,7 +13,6 @@
           text = lib.mkAfter ''
             source "$ZDOTDIR/cat-fetch.zsh"
           '';
-          clobber = true;
         };
         ".config/zsh/cat-fetch.zsh" = {
           text = ''
@@ -44,7 +43,6 @@
 
             print_cats
           '';
-          clobber = true;
         };
       }
       // lib.optionalAttrs config.user.shell.nushell.enable {
@@ -52,7 +50,6 @@
           text = lib.mkAfter ''
             source ~/.config/nushell/cat-fetch.nu
           '';
-          clobber = true;
         };
         ".config/nushell/cat-fetch.nu" = {
           text = ''
@@ -76,7 +73,6 @@
 
             print_cats
           '';
-          clobber = true;
         };
       };
   };

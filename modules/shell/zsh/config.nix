@@ -4,6 +4,10 @@
   lib,
   ...
 }: let
+  homeDir = config.user.homeDirectory;
+  inherit (config.user) shell;
+  inherit (shell) zellij;
+  inherit (config.user) defaults;
   flakeDirectory = config.user.paths.flake.path;
   aliases =
     {
@@ -69,13 +73,13 @@
             fi
         done
     }
-    export_vars_from_files "${config.user.homeDirectory}/Tokens"
+    export_vars_from_files "${homeDir}/Tokens"
   '';
 
   historySettings = ''
     HISTSIZE=10000
     SAVEHIST=10000
-    HISTFILE="${config.user.homeDirectory}/.local/state/zsh/history"
+    HISTFILE="${homeDir}/.local/state/zsh/history"
     setopt HIST_IGNORE_DUPS
     setopt HIST_IGNORE_ALL_DUPS
     setopt HIST_IGNORE_SPACE
@@ -175,9 +179,9 @@ in {
   options.user.shell.zsh = {
     enable = lib.mkEnableOption "zsh shell configuration";
   };
-  config = lib.mkIf config.user.shell.zsh.enable {
+  config = lib.mkIf shell.zsh.enable {
     environment = {
-      variables.ZDOTDIR = "${config.user.homeDirectory}/.config/zsh";
+      variables.ZDOTDIR = "${homeDir}/.config/zsh";
       systemPackages = [
         pkgs.zsh
         pkgs.bat
@@ -196,25 +200,23 @@ in {
             text = lib.concatStringsSep "\n" (
               lib.mapAttrsToList (k: v: "alias -- ${lib.escapeShellArg k}=${lib.escapeShellArg v}") aliases
             );
-            clobber = true;
           };
           ".config/zsh/.zshenv" = {
             text =
               exportVars
               + ''
 
-                export TERMINAL="${config.user.defaults.terminal}"
-                export BROWSER="${config.user.defaults.browser}"
-                export EDITOR="${config.user.defaults.editor}"
+                export TERMINAL="${defaults.terminal}"
+                export BROWSER="${defaults.browser}"
+                export EDITOR="${defaults.editor}"
               '';
-            clobber = true;
           };
           ".config/zsh/.zshrc" = {
             text = lib.concatStringsSep "\n" (
               [
                 "source \"$ZDOTDIR/aliases.zsh\""
               ]
-              ++ lib.optional (config.user.shell.zellij.enable && config.user.shell.zellij.autoStart) "source \"$ZDOTDIR/zellij.zsh\""
+              ++ lib.optional (zellij.enable && zellij.autoStart) "source \"$ZDOTDIR/zellij.zsh\""
               ++ [
                 pluginSettings
                 historySettings
@@ -225,13 +227,11 @@ in {
                 fanSpeedFunction
               ]
             );
-            clobber = true;
           };
         }
-        // lib.optionalAttrs (config.user.shell.zellij.enable && config.user.shell.zellij.autoStart) {
+        // lib.optionalAttrs (zellij.enable && zellij.autoStart) {
           ".config/zsh/zellij.zsh" = {
             text = zellijStartup;
-            clobber = true;
           };
         };
     };
