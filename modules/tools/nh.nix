@@ -56,7 +56,6 @@ in {
             alias nhud="nhs -ud"
             alias nhc="nh clean all"
           '';
-          clobber = true;
         };
       }
       // lib.optionalAttrs nushellEnabled {
@@ -64,7 +63,6 @@ in {
           text = lib.mkAfter ''
             $env.NH_FLAKE = "${nhFlake}"
           '';
-          clobber = true;
         };
         ".config/nushell/config.nu" = {
           text = lib.mkAfter ''
@@ -79,7 +77,6 @@ in {
             alias nhud = nhs -u -d
             alias nhc = nh clean all
           '';
-          clobber = true;
         };
       };
   };

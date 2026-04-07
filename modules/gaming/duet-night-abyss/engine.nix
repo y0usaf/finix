@@ -12,7 +12,6 @@
   };
   config = lib.mkIf config.user.gaming.duet-night-abyss.enable {
     bayt.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/3286820662/pfx/drive_c/users/steamuser/AppData/Local/Duet/Saved/Config/Windows/Engine.ini" = {
-      clobber = true;
       generator = lib.generators.toINI {};
       value = {
         "WindowsApplication.Accessibility" = {

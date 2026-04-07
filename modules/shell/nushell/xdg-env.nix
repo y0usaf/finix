@@ -6,7 +6,6 @@
   config = lib.mkIf config.user.shell.nushell.enable {
     bayt.users."${config.user.name}".files = {
       ".config/nushell/env.nu" = {
-        clobber = true;
         text = ''
           $env.XDG_CONFIG_HOME = $"($env.HOME)/.config"
           $env.XDG_DATA_HOME = $"($env.HOME)/.local/share"

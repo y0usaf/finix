@@ -5,7 +5,6 @@
 }: {
   config = lib.mkIf config.user.gaming.core.enable {
     bayt.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/3286820662/pfx/drive_c/users/steamuser/AppData/Local/Duet/Saved/Config/Windows/Scalability.ini" = {
-      clobber = true;
       generator = lib.generators.toINI {};
       value = {
         # Tier 0: Low Performance
