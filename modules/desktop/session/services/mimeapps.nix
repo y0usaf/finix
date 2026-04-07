@@ -10,7 +10,6 @@
   config = lib.mkIf config.user.programs.mimeapps.enable {
     bayt.users."${config.user.name}".files = {
       ".config/mimeapps.list" = {
-        clobber = true;
         text = ''
           [Default Applications]
           text/html=${config.user.defaults.browser}.desktop

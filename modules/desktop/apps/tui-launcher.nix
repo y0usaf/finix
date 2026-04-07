@@ -8,7 +8,6 @@
   };
   config = lib.mkIf config.user.programs.tui-launcher.enable {
     bayt.users."${config.user.name}".files.".config/scripts/tui-launcher.sh" = {
-      clobber = true;
       executable = true;
       text = ''
         #!/usr/bin/env bash

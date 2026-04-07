@@ -16,7 +16,6 @@
     environment.systemPackages = [pkgs.gpuishell];
 
     bayt.users."${config.user.name}".files.".config/gpuishell/config.toml" = {
-      clobber = true;
       generator =
         if lib.generators ? toTOML
         then lib.generators.toTOML {}

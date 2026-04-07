@@ -20,7 +20,6 @@ in {
           text = lib.mkAfter ''
             #niri
           '';
-          clobber = true;
         };
       };
   };

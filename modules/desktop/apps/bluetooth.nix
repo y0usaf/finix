@@ -13,7 +13,6 @@
       pkgs.bluetuith
     ];
     bayt.users."${config.user.name}".files.".config/autostart/blueman.desktop" = {
-      clobber = true;
       source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
     };
   };

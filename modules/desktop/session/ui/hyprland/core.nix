@@ -6,7 +6,6 @@
 }: {
   config = lib.mkIf config.user.ui.hyprland.enable {
     bayt.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
-      clobber = true;
       text = lib.mkAfter (genLib.toHyprconf {
         attrs = {
           "$active_colour" = "ffffffff";
@@ -72,7 +71,7 @@
             [
               "HYPRCURSOR_THEME,DeepinDarkV20-hypr"
               "HYPRCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
-              "XCURSOR_THEME,SSB-x11"
+              "XCURSOR_THEME,DeepinDarkV20-x11"
               "XCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
             ]
             ++ lib.optionals config.hardware.nvidia.enable [

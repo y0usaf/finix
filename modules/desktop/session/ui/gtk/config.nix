@@ -6,15 +6,22 @@
 }: let
   zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
   nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
-  inherit (config) user;
+  inherit (config.user) ui appearance;
+  gtkCfg = ui.gtk;
+  gtkScale = gtkCfg.scale;
+  cursorSize = builtins.floor (24 * gtkScale);
+  cursorSizeStr = builtins.replaceStrings [".0"] [""] (toString cursorSize);
+  toINI = lib.generators.toINI {};
+  inherit (appearance) gtkFontSize;
+  inherit (ui.fonts) mainFontName;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
-  backgroundColor = "rgba(0, 0, 0, ${toString (user.appearance.opacity / 3)})";
+  backgroundColor = "rgba(0, 0, 0, ${toString (appearance.opacity / 3)})";
   gtkCss = ''
     /* Global element styling */
     * {
-      font-family: "${user.ui.fonts.mainFontName}";
+      font-family: "${mainFontName}";
       color: white;
       background: ${backgroundColor};
       outline-width: 0;
@@ -52,7 +59,16 @@
     }
   '';
 in {
-  config = lib.mkIf config.user.ui.gtk.enable {
+  options.user.ui.gtk = {
+    enable = lib.mkEnableOption "GTK theming and configuration using bayt";
+    scale = lib.mkOption {
+      type = lib.types.float;
+      default = 1.0;
+      description = "Scaling factor for GTK applications (e.g., 1.0, 1.25, 1.5, 2.0)";
+    };
+  };
+
+  config = lib.mkIf gtkCfg.enable {
     environment.systemPackages = [
       pkgs.gtk3
       pkgs.gtk4
@@ -61,16 +77,15 @@ in {
       files =
         {
           ".config/gtk-3.0/settings.ini" = {
-            clobber = true;
-            generator = lib.generators.toINI {};
+            generator = toINI;
             value = {
               Settings = {
                 gtk-application-prefer-dark-theme = 1;
                 gtk-cursor-theme-name = "SSB-x11";
-                gtk-cursor-theme-size = toString (builtins.floor (24 * config.user.ui.gtk.scale));
-                gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.gtkFontSize}";
+                gtk-cursor-theme-size = toString cursorSize;
+                gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
                 gtk-xft-antialias = 1;
-                gtk-xft-dpi = toString config.user.appearance.dpi;
+                gtk-xft-dpi = toString appearance.dpi;
                 gtk-xft-hinting = 1;
                 gtk-xft-hintstyle = "hintslight";
                 gtk-xft-rgba = "rgb";
@@ -78,41 +93,36 @@ in {
             };
           };
           ".config/gtk-3.0/gtk.css" = {
-            clobber = true;
             text = gtkCss;
           };
           ".config/gtk-3.0/bookmarks" = {
-            clobber = true;
             text = lib.concatStringsSep "\n" config.user.paths.bookmarks;
           };
           ".config/gtk-4.0/settings.ini" = {
-            clobber = true;
-            generator = lib.generators.toINI {};
+            generator = toINI;
             value = {
               Settings = {
                 gtk-application-prefer-dark-theme = 1;
                 gtk-cursor-theme-name = "SSB-x11";
-                gtk-cursor-theme-size = toString (builtins.floor (24 * config.user.ui.gtk.scale));
-                gtk-font-name = "${config.user.ui.fonts.mainFontName} ${toString config.user.appearance.gtkFontSize}";
+                gtk-cursor-theme-size = toString cursorSize;
+                gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
               };
             };
           };
         }
         // lib.optionalAttrs zshEnabled {
           ".config/zsh/.zshenv" = {
-            clobber = true;
             text = lib.mkAfter ''
-              export XCURSOR_SIZE="${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * config.user.ui.gtk.scale)))}"
-              export GDK_DPI_SCALE="${toString config.user.ui.gtk.scale}"
+              export XCURSOR_SIZE="${cursorSizeStr}"
+              export GDK_DPI_SCALE="${toString gtkScale}"
             '';
           };
         }
         // lib.optionalAttrs nushellEnabled {
           ".config/nushell/env.nu" = {
-            clobber = true;
             text = lib.mkAfter ''
-              $env.XCURSOR_SIZE = "${builtins.replaceStrings [".0"] [""] (toString (builtins.floor (24 * config.user.ui.gtk.scale)))}"
-              $env.GDK_DPI_SCALE = "${toString config.user.ui.gtk.scale}"
+              $env.XCURSOR_SIZE = "${cursorSizeStr}"
+              $env.GDK_DPI_SCALE = "${toString gtkScale}"
             '';
           };
         };

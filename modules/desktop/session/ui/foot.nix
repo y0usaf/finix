@@ -18,7 +18,6 @@ in {
       pkgs.foot
     ];
     bayt.users."${config.user.name}".files.".config/foot/foot.ini" = {
-      clobber = true;
       # Foot config - colors loaded dynamically from wallust via include (cache-only theming)
       text = ''
         include=~/.cache/wallust/colors_foot.ini
