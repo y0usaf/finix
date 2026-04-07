@@ -4,6 +4,8 @@
   pkgs,
   ...
 }: let
+  userName = config.user.name;
+  homeDir = config.user.homeDirectory;
   zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
   nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
 in {
@@ -14,10 +16,9 @@ in {
     environment.systemPackages = [
       pkgs.openssh
     ];
-    bayt.users."${config.user.name}".files =
+    bayt.users."${userName}".files =
       {
         ".ssh/config" = {
-          clobber = true;
           text = ''
             AddKeysToAgent yes
             ServerAliveInterval 60
@@ -29,7 +30,7 @@ in {
             Host server y0usaf-server
                 HostName y0usaf-server
                 User y0usaf
-                IdentityFile ${config.user.homeDirectory}/.ssh/id_ed25519
+                IdentityFile ${homeDir}/.ssh/id_ed25519
                 IdentitiesOnly yes
                 ForwardAgent yes
 
@@ -37,27 +38,26 @@ in {
                 HostName y0usaf-desktop
                 Port 2222
                 User y0usaf
-                IdentityFile ${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}
+                IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
                 ForwardAgent yes
 
             Host github.com
                 HostName github.com
                 User git
-                IdentityFile ${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}
+                IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
                 ForwardAgent yes
 
             Host forgejo
                 HostName y0usaf-server
                 Port 2222
                 User forgejo
-                IdentityFile ${config.user.homeDirectory}/Tokens/id_rsa_${config.user.name}
+                IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
                 IdentitiesOnly yes
           '';
         };
       }
       // lib.optionalAttrs zshEnabled {
         ".config/zsh/.zshenv" = {
-          clobber = true;
           text = lib.mkAfter ''
             export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
           '';
@@ -65,7 +65,6 @@ in {
       }
       // lib.optionalAttrs nushellEnabled {
         ".config/nushell/env.nu" = {
-          clobber = true;
           text = lib.mkAfter ''
             $env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR? | default '/run/user/1000')/ssh-agent"
           '';

@@ -1,4 +1,5 @@
 {config, ...}: let
+  userName = config.user.name;
   home = config.user.homeDirectory;
   xdgConfig = "${home}/.config";
   xdgData = "${home}/.local/share";
@@ -79,18 +80,17 @@ in {
 
     # Ensure critical XDG directories exist
     systemd.tmpfiles.rules = [
-      "d ${xdgConfig} 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${xdgData} 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${xdgState} 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${xdgCache} 0700 ${config.user.name} ${config.user.name} - -"
-      "d ${xdgState}/bash 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${xdgState}/less 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${xdgState}/zsh 0755 ${config.user.name} ${config.user.name} - -"
+      "d ${xdgConfig} 0755 ${userName} ${userName} - -"
+      "d ${xdgData} 0755 ${userName} ${userName} - -"
+      "d ${xdgState} 0755 ${userName} ${userName} - -"
+      "d ${xdgCache} 0700 ${userName} ${userName} - -"
+      "d ${xdgState}/bash 0755 ${userName} ${userName} - -"
+      "d ${xdgState}/less 0755 ${userName} ${userName} - -"
+      "d ${xdgState}/zsh 0755 ${userName} ${userName} - -"
     ];
 
-    bayt.users."${config.user.name}".files = {
+    bayt.users."${userName}".files = {
       ".config/user-dirs.dirs" = {
-        clobber = true;
         text = ''
           XDG_DESKTOP_DIR="${home}/Desktop"
           XDG_DOWNLOAD_DIR="${home}/Downloads"
