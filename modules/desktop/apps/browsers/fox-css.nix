@@ -1,4 +1,4 @@
-{...}: {
+_: {
   config.user.programs.browser.shared = {
     userChromeCss = ''
       :root {

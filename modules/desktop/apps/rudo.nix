@@ -20,7 +20,7 @@ in {
       ".config/rudo/config.toml" = {
         source = (pkgs.formats.toml {}).generate "rudo-config" {
           window = {
-            opacity = userAppearance.opacity;
+            inherit (userAppearance) opacity;
           };
         };
       };

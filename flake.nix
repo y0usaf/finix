@@ -4,8 +4,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    flake-utils.url = "github:numtide/flake-utils";
-
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -28,10 +26,7 @@
 
     obs-image-reaction = {
       url = "github:y0usaf/obs-image-reaction";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     mango = {
@@ -71,11 +66,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    termvide = {
-      url = "github:y0usaf/termvide";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     rudo = {
       url = "github:y0usaf/rudo";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -83,10 +73,7 @@
 
     pi-agents = {
       url = "git+file:/home/y0usaf/Dev/pi-mono/packages/pi-agents";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     hermes-agent = {
@@ -96,10 +83,7 @@
 
     agent-slack = {
       url = "github:stablyai/agent-slack";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     impermanence = {
