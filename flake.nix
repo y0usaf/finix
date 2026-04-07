@@ -12,7 +12,7 @@
     };
 
     bayt = {
-      url = "github:y0usaf/bayt";
+      url = "github:y0usaf/bayt?ref=feat/shared-core-standalone-phase4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -72,11 +72,13 @@
     };
 
     termvide = {
-      url = "git+file:/home/y0usaf/Dev/termvide";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+      url = "github:y0usaf/termvide";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    rudo = {
+      url = "github:y0usaf/rudo";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     pi-agents = {
@@ -110,17 +112,17 @@
     };
 
     strictix = {
-      url = "git+file:/home/y0usaf/Dev/strictix";
+      url = "github:y0usaf/strictix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     patchix = {
-      url = "git+file:/home/y0usaf/Dev/patchix";
+      url = "github:y0usaf/patchix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     agent-harness = {
-      url = "git+file:/home/y0usaf/Dev/Agent-Harness";
+      url = "git+ssh://git@github.com/y0usaf/Agent-Harness";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
