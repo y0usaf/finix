@@ -18,7 +18,6 @@
     bayt.users."${config.user.name}" = {
       files = {
         ".config/hypr/hyprpaper.conf" = {
-          clobber = true;
           text = ''
             preload = ${config.user.paths.wallpapers.static.path}
             wallpaper = ,${config.user.paths.wallpapers.static.path}

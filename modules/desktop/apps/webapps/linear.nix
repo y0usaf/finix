@@ -11,7 +11,6 @@
     bayt.users."${config.user.name}" = {
       files = {
         ".local/share/applications/linear.desktop" = {
-          clobber = true;
           text = ''
             [Desktop Entry]
             Name=Linear

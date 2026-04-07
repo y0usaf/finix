@@ -4,6 +4,10 @@
   lib,
   ...
 }: {
+  options.user.ui.mangowc = {
+    enable = lib.mkEnableOption "MangoWC wayland compositor";
+  };
+
   config = lib.mkIf config.user.ui.mangowc.enable {
     # Enable mangowc at the system level
     programs.mango.enable = true;

@@ -11,7 +11,6 @@
     bayt.users."${config.user.name}" = {
       files = {
         ".local/share/applications/keybard.desktop" = {
-          clobber = true;
           text = ''
             [Desktop Entry]
             Name=Keybard

@@ -4,6 +4,8 @@
   ...
 }: let
   inherit (lib) mkEnableOption mkOption types;
+  attrsOfAnything = types.attrsOf types.anything;
+  hwAccel = config.user.programs.browser.hardwareAccel;
   uiFonts = config.user.ui.fonts;
   fontList = lib.concatStringsSep ", " [
     uiFonts.mainFontName
@@ -45,21 +47,21 @@ in {
 
       shared = {
         policies = mkOption {
-          type = types.attrsOf types.anything;
+          type = attrsOfAnything;
           internal = true;
           default = {};
           description = "Shared Firefox-family browser policies.";
         };
 
         lockedPrefs = mkOption {
-          type = types.attrsOf types.anything;
+          type = attrsOfAnything;
           internal = true;
           default = {};
           description = "Shared locked Firefox-family browser preferences.";
         };
 
         defaultPrefs = mkOption {
-          type = types.attrsOf types.anything;
+          type = attrsOfAnything;
           internal = true;
           default = {};
           description = "Shared default Firefox-family browser preferences.";
@@ -191,10 +193,10 @@ in {
       "browser.tabs.inTitlebar" = 0;
       "browser.toolbars.bookmarks.visibility" = "never";
 
-      "gfx.webrender.all" = config.user.programs.browser.hardwareAccel.webrender;
-      "media.hardware-video-decoding.enabled" = config.user.programs.browser.hardwareAccel.videoDecoding;
-      "media.ffmpeg.vaapi.enabled" = config.user.programs.browser.hardwareAccel.vaapi;
-      "layers.acceleration.disabled" = config.user.programs.browser.hardwareAccel.disabled;
+      "gfx.webrender.all" = hwAccel.webrender;
+      "media.hardware-video-decoding.enabled" = hwAccel.videoDecoding;
+      "media.ffmpeg.vaapi.enabled" = hwAccel.vaapi;
+      "layers.acceleration.disabled" = hwAccel.disabled;
 
       "browser.sessionstore.interval" = 15000;
       "network.http.max-persistent-connections-per-server" = 10;
@@ -239,8 +241,5 @@ in {
     defaultPrefs = {
       "browser.display.use_document_fonts" = 0;
     };
-
-    userChromeCss = import ./data/userchrome.nix;
-    userContentCss = import ./data/usercontent.nix;
   };
 }
