@@ -3,11 +3,12 @@
   flakeInputs,
   ...
 }: {
-  environment.variables.HERMES_HOME = "/home/y0usaf/.hermes";
-
-  environment.systemPackages = [
-    flakeInputs.hermes-agent.packages."${pkgs.stdenv.hostPlatform.system}".default
-  ];
+  environment = {
+    variables.HERMES_HOME = "/home/y0usaf/.hermes";
+    systemPackages = [
+      flakeInputs.hermes-agent.packages."${pkgs.stdenv.hostPlatform.system}".default
+    ];
+  };
 
   user.dev = {
     claude-code = {
