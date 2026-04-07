@@ -693,7 +693,7 @@
     toggle_on_hover = "{{ color12 }}"
   '';
 
-  termvideTheme = ''
+  rudoTheme = ''
     background = "{{ background }}"
     foreground = "{{ foreground }}"
     cursor = "{{ cursor }}"
@@ -716,7 +716,7 @@
     color15 = "{{ color15 }}"
   '';
 
-  termvideOsc = ''
+  rudoOsc = ''
     printf '\033]10;{{ foreground }}\007'
     printf '\033]11;{{ background }}\007'
     printf '\033]12;{{ cursor }}\007'
@@ -771,11 +771,11 @@
     # Foot terminal colors (cache-only theming)
     foot-colors = { template = "foot-colors.ini", target = "~/.cache/wallust/colors_foot.ini" }
 
-    # Termvide terminal theme (picked up on next launch)
-    termvide-theme = { template = "termvide-theme.toml", target = "~/.cache/wallust/termvide-theme.toml" }
+    # Rudo terminal theme (picked up on next launch)
+    rudo-theme = { template = "rudo-theme.toml", target = "~/.cache/wallust/rudo-theme.toml" }
 
-    # Termvide live OSC palette updater (used by wt for hot reload)
-    termvide-osc = { template = "termvide-osc.sh", target = "~/.cache/wallust/termvide-osc.sh" }
+    # Rudo live OSC palette updater (used by wt for hot reload)
+    rudo-osc = { template = "rudo-osc.sh", target = "~/.cache/wallust/rudo-osc.sh" }
 
     # Zellij templates
     zellij-config = { template = "zellij-config.kdl", target = "~/.config/zellij/config.kdl" }
@@ -1168,11 +1168,11 @@
     # gpui-shell theme template
     ".config/wallust/templates/gpuishell-theme.toml" = gpuishellTheme;
 
-    # Termvide terminal theme template
-    ".config/wallust/templates/termvide-theme.toml" = termvideTheme;
+    # Rudo terminal theme template
+    ".config/wallust/templates/rudo-theme.toml" = rudoTheme;
 
-    # Termvide live OSC palette update script
-    ".config/wallust/templates/termvide-osc.sh" = termvideOsc;
+    # Rudo live OSC palette update script
+    ".config/wallust/templates/rudo-osc.sh" = rudoOsc;
   };
 
   mkWtScriptText = {
@@ -1192,8 +1192,8 @@
     sleep 0.5
 
     # Push live palette updates to the current terminal when supported
-    if [ -t 1 ] && [ -f "$HOME/.cache/wallust/termvide-osc.sh" ]; then
-      sh "$HOME/.cache/wallust/termvide-osc.sh"
+    if [ -t 1 ] && [ -f "$HOME/.cache/wallust/rudo-osc.sh" ]; then
+      sh "$HOME/.cache/wallust/rudo-osc.sh"
     fi
 
     # Update pywalfox
