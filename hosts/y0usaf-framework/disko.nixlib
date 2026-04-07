@@ -1,12 +1,4 @@
-{
-  pkgs,
-  disko,
-  ...
-}: {
-  imports = [
-    disko.nixosModules.disko
-  ];
-
+{pkgs, ...}: {
   environment.systemPackages = [
     pkgs.disko
   ];
@@ -21,7 +13,7 @@
           partitions = {
             boot = {
               name = "boot";
-              size = "512M";
+              size = "2G";
               type = "EF00";
               content = {
                 type = "filesystem";
@@ -32,7 +24,7 @@
             };
             root = {
               name = "root";
-              size = "442.6G";
+              size = "100%";
               content = {
                 type = "btrfs";
                 extraArgs = ["-f"];
@@ -45,14 +37,19 @@
                     mountpoint = "/home";
                     mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@home"];
                   };
+                  "@nix" = {
+                    mountpoint = "/nix";
+                    mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@nix"];
+                  };
+                  "@persist" = {
+                    mountpoint = "/persist";
+                    mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@persist"];
+                  };
+                  "@steam" = {
+                    mountpoint = "/home/y0usaf/.local/share/Steam";
+                    mountOptions = ["relatime" "ssd" "discard=async" "space_cache=v2" "subvol=@steam"];
+                  };
                 };
-              };
-            };
-            swap = {
-              name = "swap";
-              size = "33.8G";
-              content = {
-                type = "swap";
               };
             };
           };
@@ -60,8 +57,4 @@
       };
     };
   };
-
-  swapDevices = [
-    {device = "/dev/disk/by-uuid/be858002-6caa-4bca-8160-75cc21c1836e";}
-  ];
 }
