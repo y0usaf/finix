@@ -8,13 +8,17 @@
     bayt.users."${config.user.name}".files = {
       ".codex/agents/explorer.toml" = {
         generator = genLib.toTOML;
-        value = (import ./data/codex-lib.nix).agents.explorer;
-        clobber = true;
+        value = {
+          model = "gpt-5.4";
+          model_reasoning_effort = "high";
+        };
       };
       ".codex/agents/worker.toml" = {
         generator = genLib.toTOML;
-        value = (import ./data/codex-lib.nix).agents.worker;
-        clobber = true;
+        value = {
+          model = "gpt-5.4";
+          model_reasoning_effort = "high";
+        };
       };
     };
   };

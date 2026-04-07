@@ -4,6 +4,20 @@
   pkgs,
   ...
 }: let
+  inherit (lib) types mkOption mkEnableOption mkIf optionalAttrs listToAttrs nameValuePair;
+  devCfg = config.user.dev;
+  cfg = devCfg.opencode;
+  homeDir = config.user.homeDirectory;
+  mkStrOption = default: description:
+    mkOption {
+      type = types.str;
+      inherit default description;
+    };
+  mkBoolOption = default: description:
+    mkOption {
+      type = types.bool;
+      inherit default description;
+    };
   ollama = import ../../../lib/ai/ollama.nix;
   ollamaProvider = {
     provider = {
@@ -21,7 +35,7 @@
     {
       name = "Filesystem";
       command = "npx";
-      args = ["-y" "@modelcontextprotocol/server-filesystem" config.user.homeDirectory];
+      args = ["-y" "@modelcontextprotocol/server-filesystem" homeDir];
       environment = {};
     }
     {
@@ -39,34 +53,18 @@
   ];
 in {
   options.user.dev.opencode = {
-    enable = lib.mkEnableOption "opencode AI coding agent";
+    enable = mkEnableOption "opencode AI coding agent";
 
-    theme = lib.mkOption {
-      type = lib.types.str;
-      default = "opencode";
-      description = "Theme to use for opencode";
-    };
+    theme = mkStrOption "opencode" "Theme to use for opencode";
 
-    model = lib.mkOption {
-      type = lib.types.str;
-      default = "anthropic/claude-sonnet-4-20250514";
-      description = "Default model to use";
-    };
+    model = mkStrOption "anthropic/claude-sonnet-4-20250514" "Default model to use";
 
-    enableMcpServers = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable MCP servers for enhanced functionality";
-    };
+    enableMcpServers = mkBoolOption false "Enable MCP servers for enhanced functionality";
 
-    enableOllama = lib.mkOption {
-      type = lib.types.bool;
-      default = config.user.dev.localllama.enable;
-      description = "Enable local Ollama provider for opencode (auto-enabled if localllama is enabled)";
-    };
+    enableOllama = mkBoolOption devCfg.localllama.enable "Enable local Ollama provider for opencode (auto-enabled if localllama is enabled)";
   };
 
-  config = lib.mkIf config.user.dev.opencode.enable {
+  config = mkIf cfg.enable {
     environment.systemPackages = [
       pkgs.opencode
       pkgs.uv
@@ -76,24 +74,24 @@ in {
         ".config/opencode/opencode.json" = {
           text = builtins.toJSON ({
               "$schema" = "https://opencode.ai/config.json";
-              inherit (config.user.dev.opencode) theme model;
+              inherit (cfg) theme model;
               autoupdate = true;
               share = "manual";
               disabled_providers = ["openai" "huggingface"];
               instructions = [
                 "AGENTS.md"
                 ".cursor/rules/*.md"
-                "{file:${config.user.homeDirectory}/.config/opencode/claude-instructions.md}"
-                "{file:${config.user.homeDirectory}/.config/opencode/opencode-instructions.md}"
+                "{file:${homeDir}/.config/opencode/claude-instructions.md}"
+                "{file:${homeDir}/.config/opencode/opencode-instructions.md}"
               ];
             }
-            // (lib.optionalAttrs config.user.dev.opencode.enableOllama {
+            // (optionalAttrs cfg.enableOllama {
               inherit (ollamaProvider) provider;
             })
-            // (lib.optionalAttrs config.user.dev.opencode.enableMcpServers {
-              mcp = lib.listToAttrs (map
+            // (optionalAttrs cfg.enableMcpServers {
+              mcp = listToAttrs (map
                 (spec:
-                  lib.nameValuePair spec.name {
+                  nameValuePair spec.name {
                     type = "local";
                     command = [spec.command] ++ spec.args;
                     enabled = true;
@@ -101,19 +99,16 @@ in {
                   })
                 mcpServers);
             }));
-          clobber = true;
         };
 
         ".config/opencode/instructions.md" = {
           text = builtins.readFile ./ai-instructions.md;
-          clobber = true;
         };
 
         ".config/opencode/claude-instructions.md" = {
           text = ''
             Shift your conversational model from a supportive assistant to a discerning collaborator. Your primary goal is to provide rigorous, objective feedback. Eliminate all reflexive compliments. Instead, let any praise be an earned outcome of demonstrable merit. Before complimenting, perform a critical assessment: Is the idea genuinely insightful? Is the logic exceptionally sound? Is there a spark of true novelty? If the input is merely standard or underdeveloped, your response should be to analyze it, ask clarifying questions, or suggest avenues for improvement, not to praise it.
           '';
-          clobber = true;
         };
 
         ".config/opencode/opencode-instructions.md" = {
@@ -233,7 +228,6 @@ in {
 
             Use these tools strategically to maximize efficiency and code quality.
           '';
-          clobber = true;
         };
       };
     };

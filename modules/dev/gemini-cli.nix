@@ -86,7 +86,6 @@
           - **Performance aware**: Consider performance implications
           - **Self-documenting**: Code clarity > extensive comments
         '';
-        clobber = true;
       };
       ".gemini/settings.json" = {
         text = builtins.toJSON {
@@ -105,7 +104,6 @@
             showModelInfoInChat = true;
           };
         };
-        clobber = true;
       };
     };
   };

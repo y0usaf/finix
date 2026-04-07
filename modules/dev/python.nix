@@ -6,37 +6,42 @@
 }: let
   inherit (config.user) homeDirectory shell;
   inherit (pkgs) cacert gcc binutils;
-  inherit (pkgs.stdenv.cc.bintools) dynamicLinker;
+  inherit (pkgs.stdenv) cc;
+  inherit (cc.bintools) dynamicLinker;
   caCert = "${cacert}/etc/ssl/certs/ca-bundle.crt";
+  ccLib = cc.cc.lib;
+  userName = config.user.name;
 in {
   options.user.dev.python = {
     enable = lib.mkEnableOption "Python development environment";
   };
   config = lib.mkIf config.user.dev.python.enable {
-    environment.systemPackages = [
-      pkgs.python3
-      pkgs.uv
-      pkgs.ninja
-      pkgs.meson
-      pkgs.pkg-config
-      cacert
-      pkgs.stdenv.cc.cc.lib
-      pkgs.zlib
-      pkgs.libGL
-      pkgs.glib
-      pkgs.libx11
-      pkgs.libxext
-      pkgs.libxrender
-      gcc
-      binutils
-    ];
-    environment.sessionVariables = {
-      PYTHONSTARTUP = "${homeDirectory}/.config/python/pythonrc";
-      PYTHON_HISTORY = "${homeDirectory}/.local/state/python_history";
+    environment = {
+      systemPackages = [
+        pkgs.python3
+        pkgs.uv
+        pkgs.ninja
+        pkgs.meson
+        pkgs.pkg-config
+        cacert
+        ccLib
+        pkgs.zlib
+        pkgs.libGL
+        pkgs.glib
+        pkgs.libx11
+        pkgs.libxext
+        pkgs.libxrender
+        gcc
+        binutils
+      ];
+      sessionVariables = {
+        PYTHONSTARTUP = "${homeDirectory}/.config/python/pythonrc";
+        PYTHON_HISTORY = "${homeDirectory}/.local/state/python_history";
+      };
     };
-    bayt.users."${config.user.name}".files = let
+    bayt.users."${userName}".files = let
       ldLibPath = lib.makeLibraryPath [
-        pkgs.stdenv.cc.cc.lib
+        ccLib
         pkgs.zlib
         pkgs.libGL
         pkgs.glib
@@ -47,7 +52,6 @@ in {
     in
       {
         ".config/python/pythonrc" = {
-          clobber = true;
           text = ''
             # Python 3.13+ handles history natively via PYTHON_HISTORY env var.
             # This file is kept for any remaining startup customisation.
@@ -56,7 +60,6 @@ in {
       }
       // lib.optionalAttrs shell.zsh.enable {
         ".config/zsh/.zshenv" = {
-          clobber = true;
           text = lib.mkAfter ''
             export PYTHONUSERBASE="${homeDirectory}/.local/share/python"
             export PIP_CACHE_DIR="${homeDirectory}/.cache/pip"
@@ -71,7 +74,6 @@ in {
           '';
         };
         ".config/zsh/.zshrc" = {
-          clobber = true;
           text = lib.mkAfter ''
             alias py="python3"
             alias pip="pip3"
@@ -107,7 +109,6 @@ in {
       }
       // lib.optionalAttrs shell.nushell.enable {
         ".config/nushell/env.nu" = {
-          clobber = true;
           text = lib.mkAfter ''
             $env.PYTHONUSERBASE = "${homeDirectory}/.local/share/python"
             $env.PIP_CACHE_DIR = "${homeDirectory}/.cache/pip"
@@ -122,7 +123,6 @@ in {
           '';
         };
         ".config/nushell/config.nu" = {
-          clobber = true;
           text = lib.mkAfter ''
             alias py = python3
             alias pip = pip3
@@ -161,9 +161,7 @@ in {
           '';
         };
       };
-    systemd.tmpfiles.rules = let
-      userName = config.user.name;
-    in [
+    systemd.tmpfiles.rules = [
       "d ${homeDirectory}/.local/share/python 0755 ${userName} ${userName} - -"
       "d ${homeDirectory}/.cache/pip 0755 ${userName} ${userName} - -"
       "d ${homeDirectory}/.local/share/venvs 0755 ${userName} ${userName} - -"
