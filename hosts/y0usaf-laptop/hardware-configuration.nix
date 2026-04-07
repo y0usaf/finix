@@ -44,12 +44,13 @@
     priority = 100;
   };
 
-  boot.tmp = {
-    useTmpfs = true;
-    tmpfsSize = "25%";
+  boot = {
+    tmp = {
+      useTmpfs = true;
+      tmpfsSize = "25%";
+    };
+    kernel.sysctl."vm.swappiness" = 180;
   };
-
-  boot.kernel.sysctl."vm.swappiness" = 180;
 
   swapDevices = [
     {

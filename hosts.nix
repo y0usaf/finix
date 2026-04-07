@@ -57,9 +57,12 @@
     (inputs.disko + "/module.nix")
     ({...}: {
       imports = [
-        (import (inputs.bayt + "/modules/nixos")).bayt
+        inputs.bayt.nixosModules.default
       ];
-      config.bayt.users = {};
+      config.bayt = {
+        clobberByDefault = true;
+        users = {};
+      };
     })
     inputs.tweakcc.nixosModules.default
     inputs.mango.nixosModules.mango
