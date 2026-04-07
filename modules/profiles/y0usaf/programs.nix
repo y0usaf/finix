@@ -30,7 +30,6 @@ _: {
     slack.enable = true;
     stoat-desktop.enable = true;
     rudo.enable = true;
-    termvide.enable = true;
     agent-harness.enable = true;
     btop.enable = true;
   };
