@@ -32,7 +32,7 @@ in {
           description = "Whether to install the `${skillName}` Codex skill.";
         };
       })
-      (import ../../../lib/ai/skills);
+      config.lib.ai.skills;
   };
 
   config = mkMerge [

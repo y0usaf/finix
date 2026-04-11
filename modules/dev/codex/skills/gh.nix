@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  skill = import ../../../../lib/ai/skills/gh.nix;
+  skill = config.lib.ai.skills.gh;
   inherit (config) user;
   codexCfg = user.dev.codex;
   ghEnabled = lib.attrByPath ["tools" "gh" "enable"] false user;

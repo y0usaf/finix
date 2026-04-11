@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  skill = import ../../../../lib/ai/skills/linear-cli.nix;
+  skill = config.lib.ai.skills.linear-cli;
   codexCfg = config.user.dev.codex;
 in {
   config = lib.mkIf (codexCfg.enable && codexCfg.skills.linear-cli.enable) {

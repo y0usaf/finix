@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  genLib,
   ...
 }: {
   config = lib.mkIf config.user.dev.codex.enable {
@@ -21,7 +20,7 @@
         '';
       };
       ".codex/config.toml" = {
-        generator = genLib.toTOML;
+        generator = config.lib.generators.toTOML;
         value =
           {
             approval_policy = "never";

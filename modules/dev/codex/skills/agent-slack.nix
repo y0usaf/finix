@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  skill = import ../../../../lib/ai/skills/agent-slack.nix;
+  skill = config.lib.ai.skills.agent-slack;
   userDev = config.user.dev;
   codexCfg = userDev.codex;
 in {
