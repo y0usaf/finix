@@ -1,12 +1,11 @@
 {
   config,
   lib,
-  genLib,
   ...
 }: {
   config = lib.mkIf config.user.ui.hyprland.enable {
     bayt.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
-      text = lib.mkAfter (genLib.toHyprconf {
+      text = lib.mkAfter (config.lib.generators.toHyprconf {
         attrs = {
           "$active_colour" = "ffffffff";
           "$transparent" = "ffffff00";
