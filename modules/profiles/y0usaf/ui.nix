@@ -6,7 +6,10 @@
   user.ui = {
     ags = {
       enable = true;
-      bar-overlay.modules = ["time" "date" "tray"];
+      bar-overlay = {
+        modules = ["time" "date" "tray"];
+        exclusivity = "normal";
+      };
     };
     gpuishell.enable = false;
     cursor.enable = true;

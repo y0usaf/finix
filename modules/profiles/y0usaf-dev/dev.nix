@@ -15,7 +15,10 @@ _: {
     crush.enable = true;
     gemini-cli.enable = false;
     agent-slack.enable = true;
-    pi.enable = true;
+    pi = {
+      enable = true;
+      rtk.enable = true;
+    };
     mcp.enable = false;
     docker.enable = true;
     gcloud.enable = true;

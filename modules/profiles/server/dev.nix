@@ -22,7 +22,10 @@
       settings.personality = "pragmatic";
     };
     codex-cli.enable = true;
-    pi.enable = true;
+    pi = {
+      enable = true;
+      rtk.enable = true;
+    };
     nvim.enable = true;
     docker.enable = true;
   };
