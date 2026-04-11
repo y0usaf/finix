@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  genLib,
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
@@ -17,7 +16,7 @@
     ];
 
     bayt.users."${config.user.name}".files.".config/niri/config.kdl" = {
-      generator = genLib.toNiriconf;
+      generator = config.lib.generators.toNiriconf;
       value =
         {
           # Include wallust-generated border colors (live-reloads on wallpaper change)
@@ -57,8 +56,20 @@
             default-window-height.fixed = 600;
           };
         }
-        // lib.optionalAttrs (config.user.ui.niri.extraConfig != "") {
-          _extraConfig = config.user.ui.niri.extraConfig;
+        // {
+          _extraConfig = lib.concatStringsSep "\n\n" (lib.filter (s: s != "") [
+            (lib.optionalString (config.user.ui.niri.extraConfig != "") config.user.ui.niri.extraConfig)
+            ''
+              window-rule {
+                match app-id="cs2"
+                open-floating false
+                min-width 2543
+                max-width 2543
+                min-height 1418
+                max-height 1418
+              }
+            ''
+          ]);
         };
     };
   };
