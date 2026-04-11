@@ -8,7 +8,7 @@ in {
   toNiriconf = attrs:
     lib.concatStringsSep "\n\n" (
       filterNonEmpty [
-        ((import ./toKDL.nix {inherit lib;}).toKDL (
+        ((import ./toKDL.nixlib {inherit lib;}).toKDL (
           filterAttrs (k: _: !lib.elem k ["output" "spawn-at-startup" "_extraConfig"]) attrs
         ))
         (
