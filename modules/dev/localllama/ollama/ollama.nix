@@ -4,8 +4,6 @@
   pkgs,
   ...
 }: let
-  ollama = import ../../../../lib/ai/ollama.nix;
-
   # GPU acceleration settings for Ollama
   # Options: null (CPU only), "cuda" (NVIDIA), "rocm" (AMD), etc.
   # "cuda" for NVIDIA GPUs like RTX 4090
@@ -70,7 +68,12 @@ in {
       host = "127.0.0.1";
       port = 11434;
 
-      loadModels = ollama.preloadModels;
+      loadModels = [
+        "deepseek-coder-v2:16b"
+        "qwen2.5-coder:32b"
+        "qwq:32b"
+        "qwen2.5:32b"
+      ];
       inherit environmentVariables;
     };
   };
