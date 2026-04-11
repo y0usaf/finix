@@ -66,13 +66,23 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    pi-rtk-flake = {
+      url = "github:y0usaf/pi-rtk-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pi-codex-fast-flake = {
+      url = "path:/home/y0usaf/Dev/pi-mono-flake/packages/pi-codex-fast-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     rudo = {
       url = "github:y0usaf/rudo";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     pi-agents = {
-      url = "git+file:/home/y0usaf/Dev/pi-mono/packages/pi-agents";
+      url = "github:y0usaf/pi-multi-agent";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -118,9 +128,65 @@
 
   outputs = {nixpkgs, ...} @ inputs: let
     system = "x86_64-linux";
+    inherit (nixpkgs) lib;
     legacyPkgs = nixpkgs.legacyPackages;
+    recursivelyImport = import ./recursivelyImport.nix {inherit lib;};
+
+    moduleDomains = {
+      core = [./modules/core];
+      desktop = [./modules/desktop];
+      shell = [./modules/shell];
+      tools = [./modules/tools];
+      user-services = [./modules/user-services];
+      dev = [./modules/dev];
+      gaming = [./modules/gaming];
+    };
+
+    mkHost = {
+      hostDir,
+      profileDir,
+      domains,
+    }:
+      lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          flakeInputs = inputs;
+          inherit (inputs) disko;
+        };
+        modules = recursivelyImport (
+          lib.concatMap (domain: moduleDomains."${domain}") domains
+          ++ [
+            profileDir
+            hostDir
+          ]
+        );
+      };
   in {
-    nixosConfigurations = import ./hosts.nix {inherit inputs;};
+    nixosConfigurations = {
+      y0usaf-desktop = mkHost {
+        hostDir = ./hosts/y0usaf-desktop;
+        profileDir = ./modules/profiles/y0usaf;
+        domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
+      };
+
+      y0usaf-laptop = mkHost {
+        hostDir = ./hosts/y0usaf-laptop;
+        profileDir = ./modules/profiles/y0usaf;
+        domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
+      };
+
+      y0usaf-framework = mkHost {
+        hostDir = ./hosts/y0usaf-framework;
+        profileDir = ./modules/profiles/y0usaf-dev;
+        domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
+      };
+
+      y0usaf-server = mkHost {
+        hostDir = ./hosts/y0usaf-server;
+        profileDir = ./modules/profiles/server;
+        domains = ["core" "shell" "tools" "user-services" "dev"];
+      };
+    };
 
     formatter."${system}" = legacyPkgs."${system}".alejandra;
   };
