@@ -126,7 +126,7 @@
     '';
 
   exportVars = ''
-    def export_vars_from_files [dir_path: string] {
+    def --env export_vars_from_files [dir_path: string] {
       if not ($dir_path | path exists) { return }
       let skip_keys = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY"]
       for file in (ls $dir_path | where type == file | get name) {
