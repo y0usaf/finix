@@ -440,7 +440,7 @@
         name = "y0usaf";
       };
       skills = {
-        agent-slack = import ../../../lib/ai/skills/agent-slack.nix;
+        inherit (config.lib.ai.skills) agent-slack;
       };
     };
 
@@ -647,7 +647,7 @@
         name = "y0usaf";
       };
       skills = {
-        gh = import ../../../lib/ai/skills/gh.nix;
+        inherit (config.lib.ai.skills) gh;
       };
     };
 
@@ -748,7 +748,7 @@
         name = "y0usaf";
       };
       skills = {
-        linear-cli = import ../../../lib/ai/skills/linear-cli.nix;
+        inherit (config.lib.ai.skills) linear-cli;
       };
     };
 
