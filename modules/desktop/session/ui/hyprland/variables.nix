@@ -1,12 +1,11 @@
 {
   lib,
   config,
-  genLib,
   ...
 }: {
   config = lib.mkIf config.user.ui.hyprland.enable {
     bayt.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
-      text = lib.mkBefore (genLib.toHyprconf {
+      text = lib.mkBefore (config.lib.generators.toHyprconf {
         attrs = {
           "$mod" = "ALT";
           "$mod2" = "SUPER";
