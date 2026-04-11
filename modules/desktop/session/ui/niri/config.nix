@@ -56,20 +56,8 @@
             default-window-height.fixed = 600;
           };
         }
-        // {
-          _extraConfig = lib.concatStringsSep "\n\n" (lib.filter (s: s != "") [
-            (lib.optionalString (config.user.ui.niri.extraConfig != "") config.user.ui.niri.extraConfig)
-            ''
-              window-rule {
-                match app-id="cs2"
-                open-floating false
-                min-width 2543
-                max-width 2543
-                min-height 1418
-                max-height 1418
-              }
-            ''
-          ]);
+        // lib.optionalAttrs (config.user.ui.niri.extraConfig != "") {
+          _extraConfig = config.user.ui.niri.extraConfig;
         };
     };
   };
