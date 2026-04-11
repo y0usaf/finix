@@ -30,7 +30,6 @@ _: {
     tui-launcher.enable = true;
     slack.enable = true;
     stoat-desktop.enable = false;
-    rudo.enable = true;
     agent-harness.enable = true;
     btop.enable = true;
   };
