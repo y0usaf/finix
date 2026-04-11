@@ -10,9 +10,9 @@ in {
   in {
     bayt.users."${config.user.name}".files = {
       "${steamPath}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/autoexec.cfg".text = ''
-        alias +switchw "slot3"
-        alias -switchw "lastinv"
-        bind "Q" +switchw
+        alias +switchw "slot3; +lookatweapon"
+        alias -switchw "-lookatweapon; lastinv"
+        bind "X" +switchw
       '';
 
       "${steamPath}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/video.txt".text = ''
