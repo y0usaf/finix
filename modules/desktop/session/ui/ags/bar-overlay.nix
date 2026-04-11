@@ -25,6 +25,21 @@
       ];
       description = "Bar overlay modules to enable";
     };
+    exclusivity = lib.mkOption {
+      type = lib.types.enum [
+        "normal"
+        "exclusive"
+        "ignore"
+      ];
+      default = "ignore";
+      description = ''
+        Layer-shell exclusivity mode for the overlay windows.
+
+        - `ignore`: float above windows without reserving screen space
+        - `exclusive`: reserve screen space with the compositor
+        - `normal`: compositor default behavior without forced reservation
+      '';
+    };
   };
   config = lib.mkIf config.user.ui.ags.bar-overlay.enable (
     let
@@ -38,9 +53,15 @@
 
       inherit (config) user;
 
+      astalExclusivity = builtins.getAttr user.ui.ags.bar-overlay.exclusivity {
+        normal = "Astal.Exclusivity.NORMAL";
+        exclusive = "Astal.Exclusivity.EXCLUSIVE";
+        ignore = "Astal.Exclusivity.IGNORE";
+      };
+
       barOverlayTsx =
         # AGS bar-overlay TSX template
-        # Uses @MODULES@ and @HOME@ as substitution placeholders
+        # Uses @EXCLUSIVITY@, @HOME@, and @MODULES@ as substitution placeholders
         ''
           import { App, Astal, Gtk, Gdk } from "astal/gtk3"
           import { Variable, exec, bind, monitorFile } from "astal"
@@ -48,6 +69,7 @@
           import Battery from "gi://AstalBattery"
 
           const MODULES: string[] = @MODULES@
+          const EXCLUSIVITY = @EXCLUSIVITY@
 
           const GTK_COLORS = "@HOME@/.cache/wallust/gtk-colors.css"
 
@@ -215,7 +237,7 @@
               return <window
                   className="bar-top"
                   layer={Astal.Layer.OVERLAY}
-                  exclusivity={Astal.Exclusivity.IGNORE}
+                  exclusivity={EXCLUSIVITY}
                   anchor={Astal.WindowAnchor.TOP}
                   application={App}>
                   <BarContent />
@@ -226,7 +248,7 @@
               return <window
                   className="bar-bottom"
                   layer={Astal.Layer.OVERLAY}
-                  exclusivity={Astal.Exclusivity.IGNORE}
+                  exclusivity={EXCLUSIVITY}
                   anchor={Astal.WindowAnchor.BOTTOM}
                   application={App}>
                   <BarContent />
@@ -268,8 +290,8 @@
         files = {
           ".config/ags/bar-overlay.tsx".text =
             builtins.replaceStrings
-            ["@HOME@" "@MODULES@"]
-            ["/home/${user.name}" (builtins.toJSON user.ui.ags.bar-overlay.modules)]
+            ["@EXCLUSIVITY@" "@HOME@" "@MODULES@"]
+            [astalExclusivity "/home/${user.name}" (builtins.toJSON user.ui.ags.bar-overlay.modules)]
             barOverlayTsx;
           ".config/ags/tsconfig.json" = {
             generator = lib.generators.toJSON {};
