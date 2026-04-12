@@ -45,9 +45,6 @@ in {
           ".mozilla/firefox/${userName}/chrome/userChrome.css" = {
             text = browserShared.userChromeCss;
           };
-          ".mozilla/firefox/${userName}/chrome/userContent.css" = {
-            text = browserShared.userContentCss;
-          };
         }
         // lib.optionalAttrs shell.zsh.enable {
           ".config/zsh/.zprofile" = {
