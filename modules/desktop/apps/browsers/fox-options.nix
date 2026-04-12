@@ -73,13 +73,6 @@ in {
           default = "";
           description = "Shared Firefox-family userChrome.css content.";
         };
-
-        userContentCss = mkOption {
-          type = types.lines;
-          internal = true;
-          default = "";
-          description = "Shared Firefox-family userContent.css content.";
-        };
       };
     };
   };
