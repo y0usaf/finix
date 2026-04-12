@@ -1,6 +1,6 @@
 {
-  flakeInputs,
   pkgs,
+  flakeInputs,
   ...
 }: {
   fonts = {

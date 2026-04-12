@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: {
   config = lib.mkIf config.user.ui.hyprland.enable {

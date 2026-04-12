@@ -1,7 +1,7 @@
 {
   lib,
-  flakeInputs,
   pkgs,
+  flakeInputs,
   ...
 }: let
   inherit (pkgs.stdenv.hostPlatform) system;

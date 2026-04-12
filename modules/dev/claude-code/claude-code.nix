@@ -7,6 +7,7 @@
   inherit (lib) attrByPath filterAttrs generators mapAttrs mkEnableOption mkIf mkOption optionals optionalAttrs types;
   inherit (types) anything attrsOf bool str;
   inherit (config) user;
+  aiSkills = config.lib.ai.skills;
 
   ghEnabled = attrByPath ["user" "tools" "gh" "enable"] false config;
   agentSlackEnabled = attrByPath ["user" "dev" "agent-slack" "enable"] false config;
@@ -124,21 +125,21 @@
   in {
     # Main build function
     build = {
+      basePath ? ".config/claude",
+      description ? "Personal Claude Code plugin marketplace",
       name,
       owner,
       plugins,
-      basePath ? ".config/claude",
-      description ? "Personal Claude Code plugin marketplace",
       version ? "1.0.0",
     }:
     # Marketplace manifest
       {
         "${basePath}/.claude-plugin/marketplace.json" = {
           text = ({
+            description ? "Personal Claude Code plugin marketplace",
             name,
             owner,
             plugins,
-            description ? "Personal Claude Code plugin marketplace",
             version ? "1.0.0",
           }:
             toJSON {
@@ -440,7 +441,7 @@
         name = "y0usaf";
       };
       skills = {
-        inherit (config.lib.ai.skills) agent-slack;
+        inherit (aiSkills) agent-slack;
       };
     };
 
@@ -647,7 +648,7 @@
         name = "y0usaf";
       };
       skills = {
-        inherit (config.lib.ai.skills) gh;
+        inherit (aiSkills) gh;
       };
     };
 
@@ -748,7 +749,7 @@
         name = "y0usaf";
       };
       skills = {
-        inherit (config.lib.ai.skills) linear-cli;
+        inherit (aiSkills) linear-cli;
       };
     };
 
