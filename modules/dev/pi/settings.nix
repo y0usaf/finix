@@ -87,6 +87,14 @@
     - Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
   '';
 
+  mkInternalStr = description:
+    lib.mkOption {
+      type = lib.types.str;
+      internal = true;
+      default = "";
+      inherit description;
+    };
+
   piSettings = {
     defaultProvider = "anthropic";
     defaultModel = "claude-opus-4-6";
@@ -127,26 +135,9 @@ in {
       description = "Pi extension settings written to extension-settings.json.";
     };
 
-    readmePath = lib.mkOption {
-      type = lib.types.str;
-      internal = true;
-      default = "";
-      description = "Path to the pi README.";
-    };
-
-    docsPath = lib.mkOption {
-      type = lib.types.str;
-      internal = true;
-      default = "";
-      description = "Path to the pi docs directory.";
-    };
-
-    examplesPath = lib.mkOption {
-      type = lib.types.str;
-      internal = true;
-      default = "";
-      description = "Path to the pi examples directory.";
-    };
+    readmePath = mkInternalStr "Path to the pi README.";
+    docsPath = mkInternalStr "Path to the pi docs directory.";
+    examplesPath = mkInternalStr "Path to the pi examples directory.";
   };
 
   config = lib.mkIf cfg.enable {

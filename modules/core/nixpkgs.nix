@@ -1,6 +1,6 @@
 {
-  flakeInputs,
   lib,
+  flakeInputs,
   ...
 }: {
   nixpkgs = {
