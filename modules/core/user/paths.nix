@@ -1,6 +1,6 @@
 {
-  lib,
   config,
+  lib,
   ...
 }: let
   inherit (lib) mkDefault mkOption;

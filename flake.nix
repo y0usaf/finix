@@ -143,9 +143,9 @@
     };
 
     mkHost = {
+      domains,
       hostDir,
       profileDir,
-      domains,
     }:
       lib.nixosSystem {
         inherit system;

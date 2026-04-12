@@ -1,7 +1,7 @@
 {
-  flakeInputs,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: {
   fonts = {
