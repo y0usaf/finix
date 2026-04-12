@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: let
   wallustPkg = pkgs.wallust;
@@ -743,12 +743,12 @@
   # ═══════════════════════════════════════════════════════════════════
 
   mkWallustConfig = {
-    extraTemplates ? "",
-    niriEnabled ? false,
-    vicinaeEnabled ? false,
     cmusEnabled ? false,
-    vestopkEnabled ? false,
+    extraTemplates ? "",
     gpuishellEnabled ? false,
+    niriEnabled ? false,
+    vestopkEnabled ? false,
+    vicinaeEnabled ? false,
   }: ''
     backend = "fastresize"
     color_space = "lch"
@@ -1110,12 +1110,12 @@
   # ═══════════════════════════════════════════════════════════════════
 
   mkFiles = {
-    zjstatusEnabled ? false,
-    niriEnabled ? false,
-    vicinaeEnabled ? false,
     cmusEnabled ? false,
-    vestopkEnabled ? false,
     gpuishellEnabled ? false,
+    niriEnabled ? false,
+    vestopkEnabled ? false,
+    vicinaeEnabled ? false,
+    zjstatusEnabled ? false,
   }: {
     # Main config
     ".config/wallust/wallust.toml" = mkWallustConfig {
@@ -1205,8 +1205,8 @@
     ''}'';
 
   mkStartupScript = {
-    wallustBin,
     defaultTheme,
+    wallustBin,
   }: ''
     # Ensure output directories exist (wallust templates write here)
     mkdir -p ~/.config/zellij/layouts

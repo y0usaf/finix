@@ -1,6 +1,6 @@
 {
-  lib,
   config,
+  lib,
   ...
 }: {
   config = lib.mkIf config.user.shell.zsh.enable {

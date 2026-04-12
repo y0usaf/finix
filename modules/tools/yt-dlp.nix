@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: let
   zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;

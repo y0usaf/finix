@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }: let
   inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf types;

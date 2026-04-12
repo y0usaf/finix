@@ -52,8 +52,9 @@
       };
 
       inherit (config) user;
+      barOverlay = user.ui.ags.bar-overlay;
 
-      astalExclusivity = builtins.getAttr user.ui.ags.bar-overlay.exclusivity {
+      astalExclusivity = builtins.getAttr barOverlay.exclusivity {
         normal = "Astal.Exclusivity.NORMAL";
         exclusive = "Astal.Exclusivity.EXCLUSIVE";
         ignore = "Astal.Exclusivity.IGNORE";
@@ -291,7 +292,7 @@
           ".config/ags/bar-overlay.tsx".text =
             builtins.replaceStrings
             ["@EXCLUSIVITY@" "@HOME@" "@MODULES@"]
-            [astalExclusivity "/home/${user.name}" (builtins.toJSON user.ui.ags.bar-overlay.modules)]
+            [astalExclusivity "/home/${user.name}" (builtins.toJSON barOverlay.modules)]
             barOverlayTsx;
           ".config/ags/tsconfig.json" = {
             generator = lib.generators.toJSON {};
