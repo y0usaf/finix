@@ -6,7 +6,7 @@
 }: let
   inherit (lib) types mkOption mkIf mkMerge;
 
-  sources = import ./npins;
+  mods = import ./mods.nix;
   cfg = config.user.gaming.bg3;
 
   steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path;
@@ -16,12 +16,12 @@
   bg3Bin = "${gameDir}/bin";
   nativeModsDir = "${bg3Bin}/NativeMods";
 
-  modSrc = "${sources.game-mods}/bg3";
+  modSrc = "${mods.game-mods}/bg3";
   tomlFormat = pkgs.formats.toml {};
 
   cameraTweaks = cfg.nativeCameraTweaks;
 
-  bg3seVersion = sources.bg3se.version;
+  bg3seVersion = mods.bg3se.version;
   bg3seDate = lib.removePrefix "updater-" bg3seVersion;
 in {
   options.user.gaming.bg3 = {
