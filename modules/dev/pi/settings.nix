@@ -96,8 +96,8 @@
     };
 
   piSettings = {
-    defaultProvider = "anthropic";
-    defaultModel = "claude-opus-4-6";
+    defaultProvider = "openai-codex";
+    defaultModel = "gpt-5.4";
     defaultThinkingLevel = "xhigh";
     enabledModels = [
       "openai-codex/gpt-5.4"
