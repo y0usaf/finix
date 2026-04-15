@@ -20,14 +20,9 @@
             border_size = 1;
             "col.active_border" = "rgba($active_colour)";
             "col.inactive_border" = "rgba($inactive_colour)";
-            layout =
-              if config.user.ui.hyprland.group.enable
-              then "group"
-              else "dwindle";
-          };
-          dwindle = {
-            single_window_aspect_ratio = "1.77 1.0";
-            single_window_aspect_ratio_tolerance = 0.1;
+            "col.nogroup_border" = "rgba($inactive_colour)";
+            "col.nogroup_border_active" = "rgba($active_colour)";
+            layout = "scrolling";
           };
           input = {
             kb_layout = "us";
@@ -78,6 +73,36 @@
               "GBM_BACKEND,nvidia-drm"
               "__GLX_VENDOR_LIBRARY_NAME,nvidia"
             ];
+          binds.movefocus_cycles_groupfirst = true;
+          scrolling = {
+            column_width = 0.5;
+            explicit_column_widths = "0.33333,0.5,0.66667";
+            wrap_focus = false;
+            wrap_swapcol = false;
+          };
+          group = {
+            auto_group = true;
+            group_on_movetoworkspace = true;
+            "col.border_active" = "rgba($active_colour)";
+            "col.border_inactive" = "rgba($inactive_colour)";
+            "col.border_locked_active" = "rgba($active_colour)";
+            "col.border_locked_inactive" = "rgba($inactive_colour)";
+            groupbar = {
+              enabled = true;
+              gradients = false;
+              render_titles = false;
+              height = 8;
+              indicator_height = 2;
+              rounding = 0;
+              gradient_rounding = 0;
+              gaps_out = 0;
+              keep_upper_gap = false;
+              "col.active" = "rgba($active_colour)";
+              "col.inactive" = "rgba($inactive_colour)";
+              "col.locked_active" = "rgba($active_colour)";
+              "col.locked_inactive" = "rgba($inactive_colour)";
+            };
+          };
         };
         importantPrefixes = ["$" "exec" "source" "bezier"];
       });

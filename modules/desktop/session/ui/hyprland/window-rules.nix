@@ -7,19 +7,18 @@
     bayt.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
       text = lib.mkAfter (config.lib.generators.toHyprconf {
         attrs = {
-          "$firefox-pip" = "class:^(firefox)$, title:^(Picture-in-Picture)";
-          "$kitty" = "class:^(kitty)$";
-          windowrulev2 = [
-            "float, center, size 300 600, class:^(launcher)"
-            "float, center, class:^(hyprland-share-picker)"
-            "float, $firefox-pip"
-            "opacity 0.75 override, $firefox-pip"
-            "noborder, $firefox-pip"
-            "size 30% 30%, $firefox-pip"
-            "workspace special:lovely, title:^(Lovely.*)"
+          windowrule = [
+            "match:class ^(launcher), float on, center on, size 300 600"
+            "match:class ^(hyprland-share-picker), float on, center on"
+            "match:class ^(firefox)$, match:title ^(Picture-in-Picture), float on"
+            "match:class ^(firefox)$, match:title ^(Picture-in-Picture), opacity 0.75 override"
+            "match:class ^(firefox)$, match:title ^(Picture-in-Picture), border_size 0"
+            "match:class ^(firefox)$, match:title ^(Picture-in-Picture), size 30% 30%"
+            "match:title ^(Lovely.*), workspace special:lovely"
+            "match:float false, group set"
           ];
           layerrule = [
-            "blur, notifications"
+            "match:namespace ^(notifications)$, blur 1"
           ];
         };
         importantPrefixes = ["$" "exec" "source"];
