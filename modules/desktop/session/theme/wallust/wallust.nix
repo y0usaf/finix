@@ -7,6 +7,10 @@
   wallustPkg = pkgs.wallust;
   wallustCfg = config.user.appearance.wallust;
   zjstatusEnabled = lib.attrByPath ["user" "shell" "zellij" "zjstatus" "enable"] false config;
+  zjstatusHintsWasm = pkgs.fetchurl {
+    url = "https://github.com/y0usaf/zjstatus-hints/releases/download/v0.1.5-y0usaf.2/zjstatus-hints.wasm";
+    hash = "sha256-NM40ZLNrziFZ7SKuD1bvzhHoDg/y4nU5Wt+hzbZPzAA=";
+  };
   niriEnabled = lib.attrByPath ["user" "ui" "niri" "enable"] false config;
   vicinaeEnabled = lib.attrByPath ["user" "ui" "vicinae" "enable"] false config;
   cmusEnabled = lib.attrByPath ["user" "programs" "cmus" "enable"] false config;
@@ -1220,6 +1224,10 @@ in {
         });
         RemainAfterExit = true;
       };
+    };
+
+    bayt.users."${config.user.name}" = lib.mkIf zjstatusEnabled {
+      xdg.config.files."zellij/plugins/zjstatus-hints.wasm".source = zjstatusHintsWasm;
     };
 
     bayt.users."${config.user.name}".files = lib.mapAttrs (_: content: {text = content;}) (mkFiles {
