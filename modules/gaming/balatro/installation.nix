@@ -4,46 +4,47 @@
   pkgs,
   ...
 }: let
-  sources = import ./npins;
+  mods = import ./mods.nix;
+
   availableMods = {
     steamodded = {
-      src = sources.steamodded;
+      src = mods.steamodded;
       name = "smods";
     };
     talisman = {
-      src = sources.talisman;
+      src = mods.talisman;
       name = "Talisman";
     };
     cryptid = {
-      src = sources.cryptid;
+      src = mods.cryptid;
       name = "Cryptid";
     };
     multiplayer = {
-      src = sources.multiplayer;
+      src = mods.multiplayer;
       name = "BalatroMultiplayer";
     };
     cardsleeves = {
-      src = sources.cardsleeves;
+      src = mods.cardsleeves;
       name = "CardSleeves";
     };
     jokerdisplay = {
-      src = sources.jokerdisplay;
+      src = mods.jokerdisplay;
       name = "JokerDisplay-1.8.4.1";
     };
     pokermon = {
-      src = sources.pokermon;
+      src = mods.pokermon;
       name = "Pokermon";
     };
     stickersalwaysshown = {
-      src = sources."Balatro-Stickers-Always-Shown";
+      src = mods."Balatro-Stickers-Always-Shown";
       name = "StickersAlwaysShown";
     };
     handybalatro = {
-      src = sources."HandyBalatro";
+      src = mods."HandyBalatro";
       name = "HandyBalatro";
     };
     aura = {
-      src = sources."Aura";
+      src = mods."Aura";
       name = "Aura";
     };
   };
