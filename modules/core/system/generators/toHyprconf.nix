@@ -1,8 +1,8 @@
-lib: let
+{lib, ...}: let
   toHyprconf = {
     attrs,
-    indentLevel ? 0,
     importantPrefixes ? ["$"],
+    indentLevel ? 0,
   }: let
     inherit
       (builtins)
@@ -53,18 +53,5 @@ lib: let
   in
     toHyprconf' (concatStrings (replicate indentLevel "  ")) attrs;
 in {
-  inherit toHyprconf;
-  pluginsToHyprconf = plugins: importantPrefixes:
-    toHyprconf {
-      attrs = {
-        plugin =
-          map
-          (entry:
-            if lib.types.package.check entry
-            then "${entry}/lib/lib${entry.pname}.so"
-            else entry)
-          plugins;
-      };
-      inherit importantPrefixes;
-    };
+  config.lib.generators.toHyprconf = toHyprconf;
 }
