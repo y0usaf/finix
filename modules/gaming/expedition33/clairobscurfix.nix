@@ -5,23 +5,17 @@
   ...
 }: let
   inherit (config) user;
-  clairObscurVersion = (import ./npins).ClairObscurFix.version;
+  mods = import ./mods.nix {inherit pkgs;};
   steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
-
-  clairobscurfix = pkgs.fetchzip {
-    url = "https://codeberg.org/Lyall/ClairObscurFix/releases/download/${clairObscurVersion}/ClairObscurFix_${clairObscurVersion}.zip";
-    sha256 = "160xv8gb95rn2kpcwv65j3q8fsi1wiayqchgn4gnkrh6g909qzrb";
-    stripRoot = false;
-  };
 in {
   config = lib.mkIf user.gaming.expedition33.enable {
     bayt.users."${config.user.name}".files = {
       "${steamPath}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
-        source = "${clairobscurfix}/ClairObscurFix.asi";
+        source = "${mods.ClairObscurFix.src}/ClairObscurFix.asi";
       };
 
       "${steamPath}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/dsound.dll" = {
-        source = "${clairobscurfix}/dsound.dll";
+        source = "${mods.ClairObscurFix.src}/dsound.dll";
       };
 
       "${steamPath}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.ini" = {
