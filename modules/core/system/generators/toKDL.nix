@@ -1,5 +1,5 @@
-{lib}: {
-  toKDL = let
+{lib, ...}: {
+  config.lib.generators.toKDL = let
     inherit
       (lib)
       concatStringsSep

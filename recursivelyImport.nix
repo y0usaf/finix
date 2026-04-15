@@ -1,6 +1,6 @@
 {lib}: let
   # Only `.nix` files participate in the recursive module graph.
-  # Helper expressions should use a non-`.nix` extension such as `.nixlib`.
+  # Non-module helpers should be imported explicitly.
   expandIfFolder = elem:
     if !builtins.isPath elem || builtins.readFileType elem != "directory"
     then [elem]
