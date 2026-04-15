@@ -9,7 +9,7 @@
     fonts = {
       enable = true;
       mainFont = flakeInputs.fast-fonts.packages."${pkgs.stdenv.hostPlatform.system}".default;
-      mainFontName = "Iosevka Term Slab";
+      mainFontName = "Fast Iosevka Term Slab Compact";
       backup = {
         package = pkgs.noto-fonts-cjk-sans;
         name = "Noto Sans CJK";
@@ -31,6 +31,7 @@
         }
       '';
     };
+    sway.enable = true;
     vicinae.enable = false;
     quickshell.enable = true;
     wayland.enable = true;
