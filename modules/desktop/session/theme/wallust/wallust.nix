@@ -947,88 +947,53 @@
 
     ${lib.optionalString zjstatusEnabled ''
       plugins {
-        zjstatus-hints location="https://github.com/y0usaf/zjstatus-hints/releases/download/v0.1.5-y0usaf.1/zjstatus-hints.wasm" {
+        zjstatus-hints location="file:~/.config/zellij/plugins/zjstatus-hints.wasm" {
           max_length 0
           pipe_name "zjstatus_hints"
           transparent_bg true
-          key_fg "#{{foreground | strip}}"
-          label_fg "#{{color8 | strip}}"
+          shared_mode_modifier true
+          label_fg "#{{foreground | strip}}"
           separator " · "
 
-          // Legacy background defaults kept for non-transparent overrides
-          key_bg "white"
-          label_bg "white"
+          pane_key_fg    "#{{color10 | strip}}"
+          tab_key_fg     "#{{color11 | strip}}"
+          resize_key_fg  "#{{color11 | strip}}"
+          move_key_fg    "#{{color11 | strip}}"
+          scroll_key_fg  "#{{color13 | strip}}"
+          search_key_fg  "#{{color13 | strip}}"
+          session_key_fg "#{{color13 | strip}}"
+          quit_key_fg    "#{{color1 | strip}}"
 
-          // ═══════════════════════════════════════════════════════════
-          // NORMAL MODE - Mode switchers (bright backgrounds)
-          // ═══════════════════════════════════════════════════════════
-          pane_label_bg "bright_green"
-          tab_label_bg "bright_yellow"
-          resize_label_bg "bright_yellow"
-          move_label_bg "bright_yellow"
-          scroll_label_bg "bright_magenta"
-          search_label_bg "bright_magenta"
-          session_label_bg "bright_magenta"
-          quit_label_bg "bright_red"
+          new_key_fg         "#{{color10 | strip}}"
+          close_key_fg       "#{{color1 | strip}}"
+          fullscreen_key_fg  "#{{color14 | strip}}"
+          float_key_fg       "#{{color14 | strip}}"
+          embed_key_fg       "#{{color14 | strip}}"
+          split_right_key_fg "#{{color10 | strip}}"
+          split_down_key_fg  "#{{color10 | strip}}"
+          rename_key_fg      "#{{color11 | strip}}"
+          select_key_fg      "#{{color4 | strip}}"
+          increase_key_fg    "#{{color10 | strip}}"
+          decrease_key_fg    "#{{color1 | strip}}"
+          page_key_fg        "#{{color13 | strip}}"
+          half_page_key_fg   "#{{color13 | strip}}"
+          edit_key_fg        "#{{color11 | strip}}"
+          down_key_fg        "#{{color14 | strip}}"
+          up_key_fg          "#{{color14 | strip}}"
+          detach_key_fg      "#{{color1 | strip}}"
+          manager_key_fg     "#{{color14 | strip}}"
+          config_key_fg      "#{{color11 | strip}}"
+          plugins_key_fg     "#{{color10 | strip}}"
+          about_key_fg       "#{{color4 | strip}}"
 
-          // ═══════════════════════════════════════════════════════════
-          // PANE MODE - Green
-          // ═══════════════════════════════════════════════════════════
-          "pane.new_label_bg" "bright_green"
-          "pane.close_label_bg" "bright_red"
-          fullscreen_label_bg "bright_cyan"
-          float_label_bg "bright_cyan"
-          embed_label_bg "bright_cyan"
-          split_right_label_bg "bright_green"
-          split_down_label_bg "bright_green"
-          "pane.rename_label_bg" "bright_yellow"
-          "pane.move_label_bg" "bright_yellow"
-          "pane.select_label_bg" "bright_blue"
-
-          // ═══════════════════════════════════════════════════════════
-          // TAB MODE - Yellow
-          // ═══════════════════════════════════════════════════════════
-          "tab.new_label_bg" "bright_green"
-          "tab.close_label_bg" "bright_red"
-          break_pane_label_bg "bright_cyan"
-          sync_label_bg "bright_magenta"
-          "tab.rename_label_bg" "bright_yellow"
-          "tab.move_label_bg" "bright_yellow"
-          "tab.select_label_bg" "bright_blue"
-
-          // ═══════════════════════════════════════════════════════════
-          // RESIZE MODE - Yellow
-          // ═══════════════════════════════════════════════════════════
-          increase_label_bg "bright_green"
-          decrease_label_bg "bright_red"
-
-          // ═══════════════════════════════════════════════════════════
-          // SCROLL MODE - Magenta
-          // ═══════════════════════════════════════════════════════════
-          page_label_bg "bright_magenta"
-          half_page_label_bg "bright_magenta"
-          edit_label_bg "bright_yellow"
-
-          // ═══════════════════════════════════════════════════════════
-          // SEARCH MODE - Magenta
-          // ═══════════════════════════════════════════════════════════
-          down_label_bg "bright_cyan"
-          up_label_bg "bright_cyan"
-
-          // ═══════════════════════════════════════════════════════════
-          // SESSION MODE - Magenta
-          // ═══════════════════════════════════════════════════════════
-          detach_label_bg "bright_red"
-          manager_label_bg "bright_cyan"
-          config_label_bg "bright_yellow"
-          plugins_label_bg "bright_green"
-          about_label_bg "bright_blue"
-
-          // ═══════════════════════════════════════════════════════════
-          // SHARED - Used across multiple modes
-          // ═══════════════════════════════════════════════════════════
-          select_label_bg "bright_blue"
-          normal_label_bg "bright_blue"
+          alias_fullscreen  "full"
+          alias_split_right "S→"
+          alias_split_down  "S↓"
+          alias_rename      "ren"
+          alias_half_page   "½pg"
+          alias_select      "sel"
+          alias_break_pane  "break"
+          alias_manager     "mgr"
         }
       }
 
@@ -1050,7 +1015,7 @@
             format_right  ""
             format_space  " "
 
-            session "#[fg=bright_black]{name}"
+            session "#[fg=#{{foreground | strip}}]{name}"
             format_hide_on_overlength "true"
             format_precedence "lrc"
 
@@ -1072,16 +1037,16 @@
             mode_prompt        "#[fg=magenta,bold]PROMPT"
             mode_tmux          "#[fg=red,bold]TMUX"
 
-            tab_normal              "#[fg=bright_black]{name}{floating_indicator} "
-            tab_normal_fullscreen   "#[fg=bright_black]{name} [] {floating_indicator} "
-            tab_normal_sync         "#[fg=bright_black]{name} <> {floating_indicator} "
-            tab_active              "#[fg=white,bold,underline]{name}{floating_indicator} "
-            tab_active_fullscreen   "#[fg=white,bold,underline]{name} [] {floating_indicator} "
-            tab_active_sync         "#[fg=white,bold,underline]{name} <> {floating_indicator} "
-            tab_floating_indicator  "⬚"
+            tab_normal              "#[fg=#{{color8 | strip}}]{name} "
+            tab_normal_fullscreen   "#[fg=#{{color8 | strip}}]{name} [] "
+            tab_normal_sync         "#[fg=#{{color8 | strip}}]{name} <> "
+            tab_active              "#[fg=#{{foreground | strip}},bold,underline]{name} "
+            tab_active_fullscreen   "#[fg=#{{foreground | strip}},bold,underline]{name} [] "
+            tab_active_sync         "#[fg=#{{foreground | strip}},bold,underline]{name} <> "
+            tab_floating_indicator  ""
 
-            datetime          "#[fg=bright_black]{format}"
-            datetime_format   "%H:%M"
+            datetime          "#[fg=#{{foreground | strip}}]{format}"
+            datetime_format   "%H:%M:%S"
           }
         }
         children
