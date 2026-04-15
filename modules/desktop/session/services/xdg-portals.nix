@@ -24,7 +24,7 @@
             portal = {
               DBusName = "org.freedesktop.impl.portal.desktop.gtk";
               Interfaces = "org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;";
-              UseIn = "niri;gtk;";
+              UseIn = "niri;sway;gtk;";
             };
           };
         };
