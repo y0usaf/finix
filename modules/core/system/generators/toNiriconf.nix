@@ -1,16 +1,18 @@
-lib: let
+{
+  config,
+  lib,
+  ...
+}: let
   inherit (builtins) isList hasAttr;
   inherit (lib.attrsets) mapAttrsToList;
   inherit (lib.strings) concatStringsSep concatMapStringsSep;
   filterNonEmpty = lib.filter (s: s != "");
   inherit (lib) filterAttrs;
 in {
-  toNiriconf = attrs:
+  config.lib.generators.toNiriconf = attrs:
     lib.concatStringsSep "\n\n" (
       filterNonEmpty [
-        ((import ./toKDL.nixlib {inherit lib;}).toKDL (
-          filterAttrs (k: _: !lib.elem k ["output" "spawn-at-startup" "_extraConfig"]) attrs
-        ))
+        (config.lib.generators.toKDL (filterAttrs (k: _: !lib.elem k ["output" "spawn-at-startup" "_extraConfig"]) attrs))
         (
           if hasAttr "output" attrs
           then
@@ -44,7 +46,7 @@ in {
                 then cmd
                 else [cmd]
               ))
-            attrs.spawn-at-startup)
+            attrs."spawn-at-startup")
           else ""
         )
         (
