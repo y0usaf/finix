@@ -3,10 +3,11 @@
   lib,
   ...
 }: let
-  skill = config.lib.ai.skills.linear-cli;
+  skill = import ../../skills/linear-cli.nix {moduleMode = false;};
   codexCfg = config.user.dev.codex;
+  linearCliEnabled = lib.attrByPath ["skills" "linear-cli" "enable"] true codexCfg;
 in {
-  config = lib.mkIf (codexCfg.enable && codexCfg.skills.linear-cli.enable) {
+  config = lib.mkIf (codexCfg.enable && linearCliEnabled) {
     bayt.users."${config.user.name}".files = {
       ".codex/skills/linear-cli/SKILL.md" = {
         text = skill.skill;
