@@ -41,7 +41,8 @@ in {
         alternate-scroll-mode=yes
 
         [colors-dark]
-        alpha=${toString userAppearance.opacity}
+        alpha=0.82
+        alpha-mode=matching
 
         [key-bindings]
         clipboard-copy=Control+c XF86Copy
