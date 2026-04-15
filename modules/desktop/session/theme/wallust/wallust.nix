@@ -947,15 +947,16 @@
 
     ${lib.optionalString zjstatusEnabled ''
       plugins {
-        zjstatus-hints location="file:~/.config/zellij/plugins/zjstatus-hints.wasm" {
+        zjstatus-hints location="https://github.com/y0usaf/zjstatus-hints/releases/download/v0.1.5-y0usaf.1/zjstatus-hints.wasm" {
           max_length 0
           pipe_name "zjstatus_hints"
+          transparent_bg true
+          key_fg "#{{foreground | strip}}"
+          label_fg "#{{color8 | strip}}"
+          separator " · "
 
-          // Global defaults - ANSI colors for wallust hot-swap
-          // Unified black text with bright backgrounds for readability
-          key_fg "black"
+          // Legacy background defaults kept for non-transparent overrides
           key_bg "white"
-          label_fg "black"
           label_bg "white"
 
           // ═══════════════════════════════════════════════════════════
@@ -1045,59 +1046,56 @@
         pane size=1 borderless=true {
           plugin location="https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm" {
             format_left   ""
-            format_center "#[bg=bright_yellow,fg=black,bold] {session} #[bg=reset,fg=reset] {mode} {tabs} #[bg=bright_cyan,fg=black,bold] {datetime}"
+            format_center "{session}  {mode}  {tabs}  {datetime}"
             format_right  ""
-            format_space  ""
+            format_space  " "
 
-            session "{name}"
+            session "#[fg=bright_black]{name}"
             format_hide_on_overlength "true"
             format_precedence "lrc"
 
             border_enabled  "false"
             hide_frame_for_single_pane "false"
 
-            // Mode badges - unified black text on bright backgrounds
-            mode_normal        "#[bg=bright_blue,fg=black,bold] NORMAL "
-            mode_locked        "#[bg=bright_red,fg=black,bold] LOCKED "
-            mode_resize        "#[bg=bright_yellow,fg=black,bold] RESIZE "
-            mode_pane          "#[bg=bright_green,fg=black,bold] PANE "
-            mode_tab           "#[bg=bright_yellow,fg=black,bold] TAB "
-            mode_scroll        "#[bg=bright_magenta,fg=black,bold] SCROLL "
-            mode_enter_search  "#[bg=bright_magenta,fg=black,bold] SEARCH "
-            mode_search        "#[bg=bright_magenta,fg=black,bold] SEARCH "
-            mode_rename_tab    "#[bg=bright_yellow,fg=black,bold] RENAME "
-            mode_rename_pane   "#[bg=bright_green,fg=black,bold] RENAME "
-            mode_session       "#[bg=bright_magenta,fg=black,bold] SESSION "
-            mode_move          "#[bg=bright_yellow,fg=black,bold] MOVE "
-            mode_prompt        "#[bg=bright_magenta,fg=black,bold] PROMPT "
-            mode_tmux          "#[bg=bright_red,fg=black,bold] TMUX "
+            mode_normal        "#[fg=bright_cyan,bold]NORMAL"
+            mode_locked        "#[fg=red,bold]LOCKED"
+            mode_resize        "#[fg=yellow,bold]RESIZE"
+            mode_pane          "#[fg=green,bold]PANE"
+            mode_tab           "#[fg=yellow,bold]TAB"
+            mode_scroll        "#[fg=magenta,bold]SCROLL"
+            mode_enter_search  "#[fg=magenta,bold]SEARCH"
+            mode_search        "#[fg=magenta,bold]SEARCH"
+            mode_rename_tab    "#[fg=yellow,bold]RENAME"
+            mode_rename_pane   "#[fg=green,bold]RENAME"
+            mode_session       "#[fg=magenta,bold]SESSION"
+            mode_move          "#[fg=yellow,bold]MOVE"
+            mode_prompt        "#[fg=magenta,bold]PROMPT"
+            mode_tmux          "#[fg=red,bold]TMUX"
 
-            // Tabs - unified black text on bright backgrounds
-            tab_normal              "#[bg=white,fg=black] {name} {floating_indicator}"
-            tab_normal_fullscreen   "#[bg=white,fg=black] {name} [] {floating_indicator}"
-            tab_normal_sync         "#[bg=white,fg=black] {name} <> {floating_indicator}"
-            tab_active              "#[bg=bright_cyan,fg=black,bold] {name} {floating_indicator}"
-            tab_active_fullscreen   "#[bg=bright_cyan,fg=black,bold] {name} [] {floating_indicator}"
-            tab_active_sync         "#[bg=bright_cyan,fg=black,bold] {name} <> {floating_indicator}"
-            tab_floating_indicator  "⬚ "
+            tab_normal              "#[fg=bright_black]{name}{floating_indicator} "
+            tab_normal_fullscreen   "#[fg=bright_black]{name} [] {floating_indicator} "
+            tab_normal_sync         "#[fg=bright_black]{name} <> {floating_indicator} "
+            tab_active              "#[fg=white,bold,underline]{name}{floating_indicator} "
+            tab_active_fullscreen   "#[fg=white,bold,underline]{name} [] {floating_indicator} "
+            tab_active_sync         "#[fg=white,bold,underline]{name} <> {floating_indicator} "
+            tab_floating_indicator  "⬚"
 
-            datetime          "#[bg=bright_cyan,fg=black,bold] {format} "
-            datetime_format   "%d/%m/%y %H:%M:%S"
-            datetime_timezone "Canada/Toronto"
+            datetime          "#[fg=bright_black]{format}"
+            datetime_format   "%H:%M"
           }
         }
         children
         pane size=1 borderless=true {
           plugin location="https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm" {
             format_left   ""
-            format_center "#[fg=bright_cyan,bg=black]{pipe_zjstatus_hints}"
+            format_center "{pipe_zjstatus_hints}"
             format_right  ""
-            format_space  ""
+            format_space  " "
 
             border_enabled  "false"
             hide_frame_for_single_pane "false"
 
-            pipe_zjstatus_hints_format "#[fg=bright_cyan,bg=black,bold]{output}"
+            pipe_zjstatus_hints_format "{output}"
             pipe_zjstatus_hints_rendermode "static"
           }
         }
