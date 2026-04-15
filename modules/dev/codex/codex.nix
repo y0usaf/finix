@@ -4,6 +4,11 @@
   ...
 }: let
   inherit (lib) attrByPath mapAttrs mkDefault mkEnableOption mkForce mkIf mkMerge mkOption types;
+  aiSkills = {
+    agent-slack = import ../skills/agent-slack.nix {moduleMode = false;};
+    gh = import ../skills/gh.nix {moduleMode = false;};
+    linear-cli = import ../skills/linear-cli.nix {moduleMode = false;};
+  };
 
   codexDesktopYoloMode =
     attrByPath ["user" "programs" "codex-desktop" "enable"] false config
@@ -32,7 +37,7 @@ in {
           description = "Whether to install the `${skillName}` Codex skill.";
         };
       })
-      config.lib.ai.skills;
+      aiSkills;
   };
 
   config = mkMerge [

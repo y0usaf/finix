@@ -3,12 +3,13 @@
   lib,
   ...
 }: let
-  skill = config.lib.ai.skills.gh;
+  skill = import ../../skills/gh.nix {moduleMode = false;};
   inherit (config) user;
   codexCfg = user.dev.codex;
   ghEnabled = lib.attrByPath ["tools" "gh" "enable"] false user;
+  ghSkillEnabled = lib.attrByPath ["skills" "gh" "enable"] true codexCfg;
 in {
-  config = lib.mkIf (codexCfg.enable && codexCfg.skills.gh.enable && ghEnabled) {
+  config = lib.mkIf (codexCfg.enable && ghSkillEnabled && ghEnabled) {
     bayt.users."${config.user.name}".files = {
       ".codex/skills/gh/SKILL.md" = {
         text = skill.skill;

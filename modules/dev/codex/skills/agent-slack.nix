@@ -3,11 +3,12 @@
   lib,
   ...
 }: let
-  skill = config.lib.ai.skills.agent-slack;
+  skill = import ../../skills/agent-slack.nix {moduleMode = false;};
   userDev = config.user.dev;
   codexCfg = userDev.codex;
+  agentSlackSkillEnabled = lib.attrByPath ["skills" "agent-slack" "enable"] true codexCfg;
 in {
-  config = lib.mkIf (codexCfg.enable && codexCfg.skills.agent-slack.enable && userDev.agent-slack.enable) {
+  config = lib.mkIf (codexCfg.enable && agentSlackSkillEnabled && userDev.agent-slack.enable) {
     bayt.users."${config.user.name}".files = {
       ".codex/skills/agent-slack/SKILL.md" = {
         text = skill.skill;
