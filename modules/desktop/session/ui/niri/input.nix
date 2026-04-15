@@ -18,9 +18,8 @@
       mouse = {
         accel-speed = 0.0;
       };
-      focus-follows-mouse = {
-        _props = {"max-scroll-amount" = "0%";};
-      };
+      warp-mouse-to-focus = {};
+      focus-follows-mouse._props.max-scroll-amount = "0%";
       mod-key = "Alt";
     };
   };
