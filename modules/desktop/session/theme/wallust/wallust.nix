@@ -953,7 +953,7 @@
           transparent_bg true
           shared_mode_modifier true
           label_fg "#{{foreground | strip}}"
-          separator " · "
+          separator ""
 
           pane_key_fg    "#{{color10 | strip}}"
           tab_key_fg     "#{{color11 | strip}}"
@@ -1037,12 +1037,12 @@
             mode_prompt        "#[fg=magenta,bold]PROMPT"
             mode_tmux          "#[fg=red,bold]TMUX"
 
-            tab_normal              "#[fg=#{{color8 | strip}}]{name} "
-            tab_normal_fullscreen   "#[fg=#{{color8 | strip}}]{name} [] "
-            tab_normal_sync         "#[fg=#{{color8 | strip}}]{name} <> "
-            tab_active              "#[fg=#{{foreground | strip}},bold,underline]{name} "
-            tab_active_fullscreen   "#[fg=#{{foreground | strip}},bold,underline]{name} [] "
-            tab_active_sync         "#[fg=#{{foreground | strip}},bold,underline]{name} <> "
+            tab_normal              "#[fg=#{{foreground | strip}}]{name} "
+            tab_normal_fullscreen   "#[fg=#{{foreground | strip}}]{name} [] "
+            tab_normal_sync         "#[fg=#{{foreground | strip}}]{name} <> "
+            tab_active              "#[fg=bright_cyan,bold,underline]{name} "
+            tab_active_fullscreen   "#[fg=bright_cyan,bold,underline]{name} [] "
+            tab_active_sync         "#[fg=bright_cyan,bold,underline]{name} <> "
             tab_floating_indicator  ""
 
             datetime          "#[fg=#{{foreground | strip}}]{format}"
