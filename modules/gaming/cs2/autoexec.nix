@@ -12,7 +12,7 @@ in {
       "${steamPath}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/autoexec.cfg".text = ''
         alias +switchw "slot3; +lookatweapon"
         alias -switchw "-lookatweapon; lastinv"
-        bind "X" +switchw
+        bind "[" +switchw
       '';
 
       "${steamPath}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/video.txt".text = ''
