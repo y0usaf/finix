@@ -2,11 +2,12 @@
   config,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
     environment.systemPackages = [
-      pkgs.niri
+      flakeInputs.niri.packages."${pkgs.stdenv.hostPlatform.system}".default
       pkgs.grim
       pkgs.slurp
       pkgs.wl-clipboard-rs
@@ -50,14 +51,51 @@
             ++ lib.optional (config.user.programs.handy.enable or false) ["handy"];
 
           hotkey-overlay = {};
+
+          blur = {
+            passes = 3;
+            offset = 3;
+            noise = 0.04;
+          };
+
           window-rule = {
             match._props.app-id = "^launcher$";
             default-column-width.fixed = 800;
             default-window-height.fixed = 600;
           };
         }
-        // lib.optionalAttrs (config.user.ui.niri.extraConfig != "") {
-          _extraConfig = config.user.ui.niri.extraConfig;
+        // {
+          _extraConfig =
+            ''
+              window-rule {
+                  background-effect {
+                      blur true
+                      xray false
+                  }
+
+                  popups {
+                      background-effect {
+                          blur true
+                          xray false
+                      }
+                  }
+              }
+
+              layer-rule {
+                  background-effect {
+                      blur true
+                      xray false
+                  }
+
+                  popups {
+                      background-effect {
+                          blur true
+                          xray false
+                      }
+                  }
+              }
+            ''
+            + lib.optionalString (config.user.ui.niri.extraConfig != "") "\n${config.user.ui.niri.extraConfig}";
         };
     };
   };

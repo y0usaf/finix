@@ -100,6 +100,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    niri = {
+      url = "github:niri-wm/niri";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     strictix = {
       url = "github:y0usaf/strictix";
       inputs.nixpkgs.follows = "nixpkgs";
