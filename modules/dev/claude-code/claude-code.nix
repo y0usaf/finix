@@ -7,7 +7,11 @@
   inherit (lib) attrByPath filterAttrs generators mapAttrs mkEnableOption mkIf mkOption optionals optionalAttrs types;
   inherit (types) anything attrsOf bool str;
   inherit (config) user;
-  aiSkills = config.lib.ai.skills;
+  aiSkills = {
+    agent-slack = import ../skills/agent-slack.nix {moduleMode = false;};
+    gh = import ../skills/gh.nix {moduleMode = false;};
+    linear-cli = import ../skills/linear-cli.nix {moduleMode = false;};
+  };
 
   ghEnabled = attrByPath ["user" "tools" "gh" "enable"] false config;
   agentSlackEnabled = attrByPath ["user" "dev" "agent-slack" "enable"] false config;
