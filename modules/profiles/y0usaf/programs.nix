@@ -25,6 +25,7 @@ _: {
     mpv.enable = true;
     pcmanfm.enable = true;
     qbittorrent.enable = true;
+    rudo.enable = true;
     stremio.enable = true;
     tui-launcher.enable = true;
     slack.enable = true;
