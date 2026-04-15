@@ -4,11 +4,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    disko = {
-      url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     bayt = {
       url = "github:y0usaf/bayt?ref=feat/shared-core-standalone-phase4";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -151,7 +146,6 @@
         inherit system;
         specialArgs = {
           flakeInputs = inputs;
-          inherit (inputs) disko;
         };
         modules = recursivelyImport (
           lib.concatMap (domain: moduleDomains."${domain}") domains

@@ -1,6 +1,5 @@
 {flakeInputs, ...}: {
   imports = [
-    (flakeInputs.disko + "/module.nix")
     flakeInputs.bayt.nixosModules.default
     flakeInputs.tweakcc.nixosModules.default
     flakeInputs.mango.nixosModules.mango
