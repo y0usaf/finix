@@ -1226,13 +1226,15 @@ in {
       };
     };
 
-    bayt.users."${config.user.name}" = lib.mkIf zjstatusEnabled {
-      xdg.config.files."zellij/plugins/zjstatus-hints.wasm".source = zjstatusHintsWasm;
-    };
-
-    bayt.users."${config.user.name}".files = lib.mapAttrs (_: content: {text = content;}) (mkFiles {
-      inherit zjstatusEnabled niriEnabled vicinaeEnabled cmusEnabled gpuishellEnabled;
-      vestopkEnabled = vesktopEnabled;
-    });
+    bayt.users."${config.user.name}" =
+      {
+        files = lib.mapAttrs (_: content: {text = content;}) (mkFiles {
+          inherit zjstatusEnabled niriEnabled vicinaeEnabled cmusEnabled gpuishellEnabled;
+          vestopkEnabled = vesktopEnabled;
+        });
+      }
+      // lib.optionalAttrs zjstatusEnabled {
+        xdg.config.files."zellij/plugins/zjstatus-hints.wasm".source = zjstatusHintsWasm;
+      };
   };
 }
