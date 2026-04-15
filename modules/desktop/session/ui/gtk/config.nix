@@ -17,7 +17,7 @@
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
-  backgroundColor = "rgba(0, 0, 0, ${toString (appearance.opacity / 3)})";
+  backgroundColor = "transparent";
   gtkCss = ''
     /* Global element styling */
     * {
