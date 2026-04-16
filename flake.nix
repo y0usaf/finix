@@ -4,6 +4,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    finix.url = "github:finix-community/finix";
+
     bayt = {
       url = "github:y0usaf/bayt?ref=feat/shared-core-standalone-phase4";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -71,6 +73,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    zjstatus-hints = {
+      url = "github:y0usaf/zjstatus-hints?ref=feat/custom-labels";
+    };
+
     rudo = {
       url = "github:y0usaf/rudo";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -130,7 +136,10 @@
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
     legacyPkgs = nixpkgs.legacyPackages;
-    recursivelyImport = import ./recursivelyImport.nix {inherit lib;};
+    recursivelyImport = import ./recursivelyImport.nix {
+      inherit (lib) hasInfix hasSuffix;
+      inherit (lib.filesystem) listFilesRecursive;
+    };
 
     moduleDomains = {
       core = [./modules/core];
@@ -160,6 +169,10 @@
           ]
         );
       };
+
+    finixServerVm = import ./experiments/finix/server-vm {
+      inherit inputs system;
+    };
   in {
     nixosConfigurations = {
       y0usaf-desktop = mkHost {
@@ -185,6 +198,16 @@
         profileDir = ./modules/profiles/server;
         domains = ["core" "shell" "tools" "user-services" "dev"];
       };
+    };
+
+    packages."${system}" = {
+      finix-server-vm = finixServerVm.vmPackage;
+      finix-server-impermanent-vm = finixServerVm.impermanentVmPackage;
+    };
+
+    checks."${system}" = {
+      finix-server-vm-smoke = finixServerVm.smokeTest;
+      finix-server-vm-impermanence = finixServerVm.impermanenceTest;
     };
 
     formatter."${system}" = legacyPkgs."${system}".alejandra;
