@@ -11,21 +11,20 @@ let
     if builtins.isAttrs fetched
     then fetched.outPath
     else fetched;
+  fetchGitHubTarball = owner: repo: rev: sha256:
+    builtins.fetchTarball {
+      url = "https://api.github.com/repos/${owner}/${repo}/tarball/${rev}";
+      inherit sha256;
+    };
 in {
   Aura = builtins.fetchTarball {
     url = "https://github.com/SpectralPack/Aura/archive/dbb6496d163d15e86b0afb6879d32b891164af05.tar.gz";
     sha256 = "1414yivy6rgwgl9mpkps6pnm5mzl2wj7j2fczia6n7020m2dnqg1";
   };
 
-  "Balatro-Stickers-Always-Shown" = builtins.fetchTarball {
-    url = "https://api.github.com/repos/SirMaiquis/Balatro-Stickers-Always-Shown/tarball/v1.4.0";
-    sha256 = "0gsdbn02yg87msvxalz5znpznws6x5n81gyfl5ir29ivn41sr85d";
-  };
+  "Balatro-Stickers-Always-Shown" = fetchGitHubTarball "SirMaiquis" "Balatro-Stickers-Always-Shown" "v1.4.0" "0gsdbn02yg87msvxalz5znpznws6x5n81gyfl5ir29ivn41sr85d";
 
-  HandyBalatro = builtins.fetchTarball {
-    url = "https://api.github.com/repos/SleepyG11/HandyBalatro/tarball/v1.5.1";
-    sha256 = "1bv663n6qns9mi7cgvimkynymig2b06qykryzmskcjlbvl587h37";
-  };
+  HandyBalatro = fetchGitHubTarball "SleepyG11" "HandyBalatro" "v1.5.1" "1bv663n6qns9mi7cgvimkynymig2b06qykryzmskcjlbvl587h37";
 
   cardsleeves = fetchGit {
     url = "https://github.com/larswijn/CardSleeves.git";

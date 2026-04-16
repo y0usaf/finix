@@ -71,6 +71,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    zjstatus-hints = {
+      url = "github:y0usaf/zjstatus-hints?ref=feat/custom-labels";
+    };
+
     rudo = {
       url = "github:y0usaf/rudo";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -130,7 +134,10 @@
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
     legacyPkgs = nixpkgs.legacyPackages;
-    recursivelyImport = import ./recursivelyImport.nix {inherit lib;};
+    recursivelyImport = import ./recursivelyImport.nix {
+      inherit (lib) hasInfix hasSuffix;
+      inherit (lib.filesystem) listFilesRecursive;
+    };
 
     moduleDomains = {
       core = [./modules/core];

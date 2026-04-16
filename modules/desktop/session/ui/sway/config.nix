@@ -4,8 +4,9 @@
   pkgs,
   ...
 }: let
-  inherit (config.user) appearance;
+  inherit (config.user) appearance ui;
   inherit (appearance) cursorColor cursorSize;
+  inherit (ui) sway;
   colorCap = let
     first = builtins.substring 0 1 cursorColor;
     rest = builtins.substring 1 (-1) cursorColor;
@@ -15,13 +16,13 @@
     [
       "exec --no-startup-id sh -c 'swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill'"
     ]
-    ++ lib.optional config.user.ui.vicinae.enable "exec --no-startup-id ${pkgs.vicinae}/bin/vicinae server"
-    ++ lib.optional (config.user.ui.gpuishell.enable or false) "exec --no-startup-id ${pkgs.gpuishell}/bin/gpuishell"
-    ++ lib.optional (config.user.ui.quickshell.enable or false) "exec --no-startup-id quickshell"
-    ++ lib.optional (config.user.ui.ags.bar-overlay.enable or false) "exec --no-startup-id ${config.user.ui.ags.package}/bin/ags run /home/${config.user.name}/.config/ags/bar-overlay.tsx"
+    ++ lib.optional ui.vicinae.enable "exec --no-startup-id ${pkgs.vicinae}/bin/vicinae server"
+    ++ lib.optional (ui.gpuishell.enable or false) "exec --no-startup-id ${pkgs.gpuishell}/bin/gpuishell"
+    ++ lib.optional (ui.quickshell.enable or false) "exec --no-startup-id quickshell"
+    ++ lib.optional (ui.ags.bar-overlay.enable or false) "exec --no-startup-id ${ui.ags.package}/bin/ags run /home/${config.user.name}/.config/ags/bar-overlay.tsx"
     ++ lib.optional (config.user.programs.handy.enable or false) "exec --no-startup-id handy";
 in {
-  config = lib.mkIf config.user.ui.sway.enable (lib.mkMerge [
+  config = lib.mkIf sway.enable (lib.mkMerge [
     {
       programs.sway = {
         enable = true;
@@ -65,8 +66,8 @@ in {
       '';
     }
 
-    (lib.mkIf (config.user.ui.sway.extraConfig != "") {
-      bayt.users."${config.user.name}".files.".config/sway/config".text = lib.mkAfter config.user.ui.sway.extraConfig;
+    (lib.mkIf (sway.extraConfig != "") {
+      bayt.users."${config.user.name}".files.".config/sway/config".text = lib.mkAfter sway.extraConfig;
     })
   ]);
 }

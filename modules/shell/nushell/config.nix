@@ -14,69 +14,16 @@
     '';
 
     history = ''
-      $env.config.history = {
-        max_size: 10000
-        file_format: "sqlite"
-        sync_on_enter: true
-        isolation: false
-      }
+      $env.config.history.max_size = 10000
+      $env.config.history.file_format = "sqlite"
     '';
 
     completion = ''
-      $env.config.completions = {
-        case_sensitive: false
-        quick: true
-        partial: true
-        algorithm: "fuzzy"
-        use_ls_colors: true
-      }
-    '';
-
-    prompt = ''
-      $env.PROMPT_COMMAND = {||
-        let path = ($env.PWD | str replace $env.HOME '~')
-        $"(ansi green_bold)($path)(ansi reset)"
-      }
-      $env.PROMPT_COMMAND_RIGHT = ""
-      $env.PROMPT_INDICATOR = {||
-        if ($env.LAST_EXIT_CODE == 0) {
-          $"(ansi cyan_bold)>(ansi reset) "
-        } else {
-          $"(ansi red_bold)>(ansi reset) "
-        }
-      }
-      $env.PROMPT_INDICATOR_VI_INSERT = "> "
-      $env.PROMPT_INDICATOR_VI_NORMAL = "〉"
-      $env.PROMPT_MULTILINE_INDICATOR = "::: "
+      $env.config.completions.algorithm = "fuzzy"
     '';
 
     carapace = ''
       source ~/.config/nushell/carapace.nu
-    '';
-
-    keybindings = ''
-      $env.config.keybindings = [
-        {
-          name: completion_menu
-          modifier: none
-          keycode: tab
-          mode: [emacs vi_normal vi_insert]
-          event: {
-            until: [
-              { send: menu name: completion_menu }
-              { send: menunext }
-              { edit: complete }
-            ]
-          }
-        }
-        {
-          name: history_menu
-          modifier: control
-          keycode: char_r
-          mode: [emacs vi_normal vi_insert]
-          event: { send: menu name: history_menu }
-        }
-      ]
     '';
   };
 
@@ -92,7 +39,6 @@
 
       alias la = lsd -A --color=always --group-dirs=first --icon=always
       alias ll = lsd -l --color=always --group-dirs=first --icon=always
-      alias ls = lsd -lA --color=always --group-dirs=first --icon=always
       alias lt = lsd -A --tree --color=always --group-dirs=first --icon=always
 
       def dir [...args: string] { ^dir --color=auto ...$args }
@@ -200,7 +146,6 @@ in {
                 settings.banner
                 settings.history
                 settings.completion
-                settings.keybindings
                 settings.carapace
                 aliases
                 tempPkgFunction
@@ -211,19 +156,14 @@ in {
             );
           };
           ".config/nushell/env.nu" = {
-            text = lib.mkMerge [
-              (exportVars
-                + ''
+            text =
+              exportVars
+              + ''
 
-                  $env.TERMINAL = "${defaults.terminal}"
-                  $env.BROWSER = "${defaults.browser}"
-                  $env.EDITOR = "${defaults.editor}"
-                '')
-              (lib.mkAfter settings.prompt)
-            ];
-          };
-          ".config/nushell/login.nu" = {
-            text = "";
+                $env.TERMINAL = "${defaults.terminal}"
+                $env.BROWSER = "${defaults.browser}"
+                $env.EDITOR = "${defaults.editor}"
+              '';
           };
           ".config/nushell/carapace.nu" = {
             source = pkgs.runCommand "carapace-init-nu" {} ''
