@@ -800,16 +800,16 @@
         ]
       },
       "locked": {
-        "dir": "packages/pi-agents",
-        "lastModified": 1776377957,
-        "narHash": "sha256-XbaBA7U+z0lEqPyRkOHb4NXe1U8m7V0iO+FB5W7/IIo=",
+        "dir": "extensions/pi-agents",
+        "lastModified": 1776562566,
+        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "bfa07c5401016fae3dc0986a937044ed0d323527",
+        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
         "type": "github"
       },
       "original": {
-        "dir": "packages/pi-agents",
+        "dir": "extensions/pi-agents",
         "owner": "y0usaf",
         "repo": "pi-flake",
         "type": "github"
@@ -822,16 +822,38 @@
         ]
       },
       "locked": {
-        "dir": "packages/pi-codex-fast-flake",
-        "lastModified": 1776377957,
-        "narHash": "sha256-XbaBA7U+z0lEqPyRkOHb4NXe1U8m7V0iO+FB5W7/IIo=",
+        "dir": "extensions/pi-codex-fast",
+        "lastModified": 1776562566,
+        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "bfa07c5401016fae3dc0986a937044ed0d323527",
+        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
         "type": "github"
       },
       "original": {
-        "dir": "packages/pi-codex-fast-flake",
+        "dir": "extensions/pi-codex-fast",
+        "owner": "y0usaf",
+        "repo": "pi-flake",
+        "type": "github"
+      }
+    },
+    "pi-compact-tools": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "extensions/pi-compact-tools",
+        "lastModified": 1776562566,
+        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
+        "owner": "y0usaf",
+        "repo": "pi-flake",
+        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
+        "type": "github"
+      },
+      "original": {
+        "dir": "extensions/pi-compact-tools",
         "owner": "y0usaf",
         "repo": "pi-flake",
         "type": "github"
@@ -842,20 +864,20 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "piAdversaryFlake": "piAdversaryFlake",
         "piAgents": "piAgents",
-        "piCodexFastFlake": "piCodexFastFlake",
+        "piCodexFast": "piCodexFast",
+        "piCompactTools": "piCompactTools",
         "piGeckoWebsearch": "piGeckoWebsearch",
-        "piRtkFlake": "piRtkFlake",
+        "piRtk": "piRtk",
         "piSrc": "piSrc",
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1776377957,
-        "narHash": "sha256-XbaBA7U+z0lEqPyRkOHb4NXe1U8m7V0iO+FB5W7/IIo=",
+        "lastModified": 1776562566,
+        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "bfa07c5401016fae3dc0986a937044ed0d323527",
+        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
         "type": "github"
       },
       "original": {
@@ -871,39 +893,20 @@
         ]
       },
       "locked": {
-        "dir": "packages/pi-rtk-flake",
-        "lastModified": 1776377957,
-        "narHash": "sha256-XbaBA7U+z0lEqPyRkOHb4NXe1U8m7V0iO+FB5W7/IIo=",
+        "dir": "extensions/pi-rtk",
+        "lastModified": 1776562566,
+        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "bfa07c5401016fae3dc0986a937044ed0d323527",
+        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
         "type": "github"
       },
       "original": {
-        "dir": "packages/pi-rtk-flake",
+        "dir": "extensions/pi-rtk",
         "owner": "y0usaf",
         "repo": "pi-flake",
         "type": "github"
       }
-    },
-    "piAdversaryFlake": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-mono",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./packages/pi-adversary-flake",
-        "type": "path"
-      },
-      "original": {
-        "path": "./packages/pi-adversary-flake",
-        "type": "path"
-      },
-      "parent": [
-        "pi-mono"
-      ]
     },
     "piAgents": {
       "inputs": {
@@ -913,18 +916,18 @@
         ]
       },
       "locked": {
-        "path": "./packages/pi-agents",
+        "path": "./extensions/pi-agents",
         "type": "path"
       },
       "original": {
-        "path": "./packages/pi-agents",
+        "path": "./extensions/pi-agents",
         "type": "path"
       },
       "parent": [
         "pi-mono"
       ]
     },
-    "piCodexFastFlake": {
+    "piCodexFast": {
       "inputs": {
         "nixpkgs": [
           "pi-mono",
@@ -932,11 +935,30 @@
         ]
       },
       "locked": {
-        "path": "./packages/pi-codex-fast-flake",
+        "path": "./extensions/pi-codex-fast",
         "type": "path"
       },
       "original": {
-        "path": "./packages/pi-codex-fast-flake",
+        "path": "./extensions/pi-codex-fast",
+        "type": "path"
+      },
+      "parent": [
+        "pi-mono"
+      ]
+    },
+    "piCompactTools": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-mono",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-compact-tools",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-compact-tools",
         "type": "path"
       },
       "parent": [
@@ -951,18 +973,18 @@
         ]
       },
       "locked": {
-        "path": "./packages/pi-gecko-websearch",
+        "path": "./extensions/pi-gecko-websearch",
         "type": "path"
       },
       "original": {
-        "path": "./packages/pi-gecko-websearch",
+        "path": "./extensions/pi-gecko-websearch",
         "type": "path"
       },
       "parent": [
         "pi-mono"
       ]
     },
-    "piRtkFlake": {
+    "piRtk": {
       "inputs": {
         "nixpkgs": [
           "pi-mono",
@@ -970,11 +992,11 @@
         ]
       },
       "locked": {
-        "path": "./packages/pi-rtk-flake",
+        "path": "./extensions/pi-rtk",
         "type": "path"
       },
       "original": {
-        "path": "./packages/pi-rtk-flake",
+        "path": "./extensions/pi-rtk",
         "type": "path"
       },
       "parent": [
@@ -1006,11 +1028,11 @@
         ]
       },
       "locked": {
-        "path": "./packages/pi-webfetch",
+        "path": "./extensions/pi-webfetch",
         "type": "path"
       },
       "original": {
-        "path": "./packages/pi-webfetch",
+        "path": "./extensions/pi-webfetch",
         "type": "path"
       },
       "parent": [
@@ -1128,6 +1150,7 @@
         "patchix": "patchix",
         "pi-agents": "pi-agents",
         "pi-codex-fast-flake": "pi-codex-fast-flake",
+        "pi-compact-tools": "pi-compact-tools",
         "pi-mono": "pi-mono",
         "pi-rtk-flake": "pi-rtk-flake",
         "rudo": "rudo",

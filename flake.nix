@@ -30,7 +30,7 @@
     };
 
     handy = {
-      url = "github:cjpais/Handy/f1516d92281c27ba5971c8da4a2356e5f084b0db";
+      url = "github:cjpais/Handy/c1e11faa71f010436d4ff63b3467f8d6973ecba8";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -57,17 +57,22 @@
     nixpkgs-discord-legacy.url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
 
     pi-mono = {
-      url = "github:y0usaf/pi-mono";
+      url = "github:y0usaf/pi-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     pi-rtk-flake = {
-      url = "github:y0usaf/pi-rtk-flake";
+      url = "github:y0usaf/pi-flake?dir=extensions/pi-rtk";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     pi-codex-fast-flake = {
-      url = "path:/home/y0usaf/Dev/pi-mono-flake/packages/pi-codex-fast-flake";
+      url = "github:y0usaf/pi-flake?dir=extensions/pi-codex-fast";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pi-compact-tools = {
+      url = "github:y0usaf/pi-flake?dir=extensions/pi-compact-tools";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -81,7 +86,7 @@
     };
 
     pi-agents = {
-      url = "github:y0usaf/pi-multi-agent";
+      url = "github:y0usaf/pi-flake?dir=extensions/pi-agents";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
