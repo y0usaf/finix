@@ -70,13 +70,11 @@
               window-rule {
                   background-effect {
                       blur true
-                      xray false
                   }
 
                   popups {
                       background-effect {
                           blur true
-                          xray false
                       }
                   }
               }
@@ -84,14 +82,22 @@
               layer-rule {
                   background-effect {
                       blur true
-                      xray false
                   }
 
                   popups {
                       background-effect {
                           blur true
-                          xray false
                       }
+                  }
+              }
+
+              recent-windows {
+                  off
+              }
+
+              gestures {
+                  hot-corners {
+                      off
                   }
               }
             ''
