@@ -61,7 +61,6 @@ in {
       management = {
         enable = true;
         maxClock = 2450;
-        minClock = 1000;
         coreVoltageOffset = -100;
         memoryVoltageOffset = -100;
         fanCurve = [
