@@ -181,6 +181,29 @@
     finixServerHeadless = import ./experiments/finix/server-headless {
       inherit inputs system;
     };
+
+    # Bare-metal finix system for y0usaf-server. Not yet installed; just
+    # evaluate/build it so we can iterate on the config without touching
+    # the running NixOS host.
+    finixServerBareMetal = let
+      pkgs = import inputs.nixpkgs {
+        inherit system;
+        config.allowUnfreePredicate = pkg:
+          builtins.elem (pkg.pname or (builtins.parseDrvName (pkg.name or "")).name) ["n8n"];
+      };
+      inherit (pkgs) lib;
+      finixModules = import "${inputs.finix.outPath}/modules";
+      allFinixModules = builtins.attrValues (builtins.removeAttrs finixModules ["default"]);
+    in
+      inputs.finix.lib.finixSystem {
+        inherit lib;
+        modules =
+          allFinixModules
+          ++ [
+            {nixpkgs.pkgs = pkgs;}
+            (import ./experiments/finix/server/host.nix inputs)
+          ];
+      };
   in {
     nixosConfigurations = {
       y0usaf-desktop = mkHost {
@@ -213,6 +236,7 @@
       finix-server-impermanent-vm = finixServerVm.impermanentVmPackage;
       finix-server-headless-trial = finixServerHeadless.package;
       finix-server-headless-remote-trial = finixServerHeadless.remoteTrialPackage;
+      finix-server-bare-metal = finixServerBareMetal.config.system.topLevel;
     };
 
     checks."${system}" = {

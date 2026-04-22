@@ -43,14 +43,13 @@
       allFinixModules
       ++ [
         "${inputs.finix.outPath}/modules/virtualisation/qemu.nix"
-        (manualBaseModule
-          // {
-            virtualisation.qemu.sharedDirectories.nixos = {
-              source = "/home/y0usaf/nixos";
-              target = "/home/y0usaf/nixos";
-              securityModel = "none";
-            };
-          })
+        (lib.recursiveUpdate manualBaseModule {
+          virtualisation.qemu.sharedDirectories.nixos = {
+            source = "/home/y0usaf/nixos";
+            target = "/home/y0usaf/nixos";
+            securityModel = "none";
+          };
+        })
         commonModule
       ];
   };
@@ -61,14 +60,13 @@
       allFinixModules
       ++ [
         "${inputs.finix.outPath}/modules/virtualisation/qemu.nix"
-        (manualBaseModule
-          // {
-            virtualisation.qemu.sharedDirectories.nixos = {
-              source = "/home/y0usaf/nixos";
-              target = "/mnt/nixos";
-              securityModel = "none";
-            };
-          })
+        (lib.recursiveUpdate manualBaseModule {
+          virtualisation.qemu.sharedDirectories.nixos = {
+            source = "/home/y0usaf/nixos";
+            target = "/mnt/nixos";
+            securityModel = "none";
+          };
+        })
         commonModule
         impermanenceModule
       ];

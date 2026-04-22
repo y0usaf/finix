@@ -5,6 +5,17 @@ inputs: {
   ...
 }: let
   isTestVm = config ? testing && config.testing ? enable && config.testing.enable;
+  # The manual `run-finix-server-vm` and `run-finix-server-impermanent-vm` scripts
+  # both set `virtualisation.qemu.sharedDirectories.nixos`, which is the cheapest
+  # way for this module to detect "I am running inside a finix VM, not on bare metal".
+  # Anything gated on `isVm` is a VM-only convenience (loose ssh auth, stub password,
+  # bind-to-0.0.0.0 so qemu hostfwd works, etc.) and MUST stay off for real servers.
+  isVm =
+    isTestVm
+    || (config ? virtualisation
+      && config.virtualisation ? qemu
+      && config.virtualisation.qemu ? sharedDirectories
+      && (config.virtualisation.qemu.sharedDirectories ? nixos));
 
   dockerConfig = (pkgs.formats.json {}).generate "docker-daemon.json" {
     "data-root" = "/var/lib/docker";
@@ -100,10 +111,17 @@ inputs: {
       --port=41641
   '';
 
+  # VM-only: bind services to 0.0.0.0 so qemu hostfwd can reach them.
+  # Bare metal keeps them on localhost; nginx (with TLS/vhost) exposes them.
+  listenAddr =
+    if isVm
+    then "0.0.0.0"
+    else "127.0.0.1";
+
   syncthingStart = pkgs.writeShellScript "syncthing-start" ''
     exec ${pkgs.syncthing}/bin/syncthing \
       --no-browser \
-      --gui-address=127.0.0.1:8384 \
+      --gui-address=${listenAddr}:8384 \
       --config=/home/y0usaf/.config/syncthing \
       --data=/home/y0usaf/.local/state/syncthing
   '';
@@ -285,7 +303,7 @@ inputs: {
     [server]
     DOMAIN = localhost
     ROOT_URL = http://localhost:3000/
-    HTTP_ADDR = 127.0.0.1
+    HTTP_ADDR = ${listenAddr}
     HTTP_PORT = 3000
     SSH_DOMAIN = y0usaf-server
     START_SSH_SERVER = true
@@ -445,6 +463,12 @@ in {
       PermitRootLogin = "no";
       KbdInteractiveAuthentication = false;
       AuthorizedKeysFile = ".ssh/authorized_keys Tokens/authorized_keys /etc/ssh/authorized_keys.d/%u";
+      # VM-only: the host's /nix/store is 9p-mounted world-writable, which makes
+      # sshd refuse symlinked authorized_keys via StrictModes. PAM's pam_unix
+      # account check also rejects users without a shadow entry. Bare metal
+      # must keep both defaults (strict modes + PAM on).
+      UsePAM = lib.mkIf isVm false;
+      StrictModes = lib.mkIf isVm false;
     };
   };
 
@@ -456,8 +480,17 @@ in {
   users.users = {
     y0usaf = {
       isNormalUser = true;
+      # VM-only: ships a known throwaway password ("y0usaf") so serial console
+      # login works without having to paste a hash or mount /persist.
+      # Bare metal reads from /persist/secrets/... via the host module instead.
+      password = lib.mkIf isVm "***REMOVED***";
       home = "/home/y0usaf";
-      shell = "${pkgs.nushell}/bin/nu";
+      # VM-only: bash behaves cleanly on the QEMU -nographic serial console;
+      # nushell's reedline UI corrupts input. Real server keeps nushell.
+      shell =
+        if isVm
+        then "${pkgs.bashInteractive}/bin/bash"
+        else "${pkgs.nushell}/bin/nu";
       extraGroups = ["wheel" "docker"];
       packages = with pkgs;
         [
@@ -678,7 +711,7 @@ in {
     environment = {
       HOME = "/var/lib/n8n";
       N8N_PORT = "5678";
-      N8N_HOST = "127.0.0.1";
+      N8N_HOST = listenAddr;
       N8N_USER_FOLDER = "/var/lib/n8n";
       N8N_SECURE_COOKIE = "false";
       TZ = config.time.timeZone;
