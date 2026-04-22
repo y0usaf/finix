@@ -11,7 +11,10 @@ _: {
       stable.enable = false;
       vesktop.enable = false;
     };
-    handy.enable = true;
+    handy = {
+      enable = true;
+      transcribeBinding = "alt_left+m";
+    };
     obsidian.enable = true;
     creative.enable = false;
     media.enable = false;
