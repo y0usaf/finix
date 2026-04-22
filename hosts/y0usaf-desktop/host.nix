@@ -44,6 +44,10 @@ in {
         wasd.enable = true;
         nativeCameraTweaks.enable = true;
       };
+      runelite = {
+        enable = true;
+        scale = 2.0;
+      };
     };
   };
   hardware = {
