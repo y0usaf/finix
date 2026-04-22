@@ -1,4 +1,8 @@
-{lib}: let
+{
+  hasInfix,
+  hasSuffix,
+  listFilesRecursive,
+}: let
   # Only `.nix` files participate in the recursive module graph.
   # Non-module helpers should be imported explicitly.
   expandIfFolder = elem:
@@ -6,10 +10,15 @@
     then [elem]
     else
       builtins.filter
-      (f: !(lib.hasInfix "/npins/" (toString f)))
-      (lib.filesystem.listFilesRecursive elem);
+      (f: !(hasInfix "/npins/" (toString f)))
+      (listFilesRecursive elem);
 in
   list:
     builtins.filter
-    (elem: !builtins.isPath elem || lib.hasSuffix ".nix" (toString elem))
+    (elem:
+      !builtins.isPath elem
+      || (
+        hasSuffix ".nix" (toString elem)
+        && !hasSuffix "/mods.nix" (toString elem)
+      ))
     (builtins.concatMap expandIfFolder list)
