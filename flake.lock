@@ -221,6 +221,23 @@
         "type": "github"
       }
     },
+    "deno2nix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771449470,
+        "narHash": "sha256-ZGKHKRB7K5aUIyJenXwOcX21F2yTXLa19q3YXQM3E48=",
+        "owner": "aMOPel",
+        "repo": "deno2nix",
+        "rev": "adb4dcea663cd61c19e01c8c36dd73db4af358a5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "aMOPel",
+        "ref": "custom-made-fetcher",
+        "repo": "deno2nix",
+        "type": "github"
+      }
+    },
     "fast-fonts": {
       "inputs": {
         "nixpkgs": [
@@ -551,6 +568,28 @@
       "original": {
         "owner": "vic",
         "repo": "import-tree",
+        "type": "github"
+      }
+    },
+    "linear-cli": {
+      "inputs": {
+        "deno2nix": "deno2nix",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775751921,
+        "narHash": "sha256-6aYa4wrG8Ri/gzpEhli8c27y0e4NntQ5JS4pgCjxWwA=",
+        "owner": "y0usaf",
+        "repo": "linear-cli",
+        "rev": "d820a267e3927e35faaf209cb03cc68f031225a0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "ref": "nix-flake",
+        "repo": "linear-cli",
         "type": "github"
       }
     },
@@ -908,6 +947,28 @@
         "type": "github"
       }
     },
+    "pi-tool-management": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "extensions/pi-tool-management",
+        "lastModified": 1776670713,
+        "narHash": "sha256-kWUG3tEHQ7ETBX57HXjjRABBvefchS1qk2gI6JiU9Tk=",
+        "owner": "y0usaf",
+        "repo": "pi-flake",
+        "rev": "5c8b8ea40c027743411d4a6d01c0a0bb9085607a",
+        "type": "github"
+      },
+      "original": {
+        "dir": "extensions/pi-tool-management",
+        "owner": "y0usaf",
+        "repo": "pi-flake",
+        "type": "github"
+      }
+    },
     "piAgents": {
       "inputs": {
         "nixpkgs": [
@@ -1141,6 +1202,7 @@
         "handy": "handy",
         "hermes-agent": "hermes-agent",
         "impermanence": "impermanence",
+        "linear-cli": "linear-cli",
         "mango": "mango",
         "niri": "niri",
         "nixpkgs": "nixpkgs_3",
@@ -1153,6 +1215,7 @@
         "pi-compact-tools": "pi-compact-tools",
         "pi-mono": "pi-mono",
         "pi-rtk-flake": "pi-rtk-flake",
+        "pi-tool-management": "pi-tool-management",
         "rudo": "rudo",
         "strictix": "strictix",
         "tweakcc": "tweakcc",
