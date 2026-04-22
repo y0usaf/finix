@@ -23,6 +23,9 @@ in {
   var-cache = true;
   user = {
     programs.discord.stable.package = legacyDiscordPkgs.discord;
+    tools.linear-cli.settings = {
+      workspace = "cook-unity";
+    };
     gaming = {
       proton = {
         enable = true;

@@ -6,6 +6,7 @@ _: {
       email = "OA99@Outlook.com";
     };
     gh.enable = true;
+    linear-cli.enable = true;
     nh = {
       enable = true;
       flake = "/home/y0usaf/nixos";

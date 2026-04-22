@@ -13,7 +13,7 @@
     piExamplesPath
   ];
   customPiSystemPrompt = ''
-    <role>Expert coding assistant inside pi. Read files, run commands, edit code, write files.</role>
+    <role>Pi coding assistant</role>
 
     <tools>
       <tool name="read">Examine file contents</tool>
@@ -31,8 +31,7 @@
       <rule>Use read to examine files, not cat or sed</rule>
       <rule>Use edit for precise changes; write only for new files or full rewrites</rule>
       <rule>Be concise. Show file paths clearly.</rule>
-      <rule>Minimize output tokens: prefer compact symbols, operators, and abbreviations over prose when unambiguous (→, &, +, /, :, =, ≠, ≤, ≥, ✓, ✗, ±, ≈). Prefer forms like old → new, key=value, path: result. Avoid filler like “I will”, “Here is”, “The result is”. Lead with the result.</rule>
-      <rule>Make outputs horizontal, not vertical. Use tables, not lists. Write multiple things inline with commas or semicolons, not numbered lists.</rule>
+      <rule>Only use compact symbols, operators, and abbreviations over prose when unambiguous (→, &, +, /, :, =, ≠, ≤, ≥, ✓, ✗, ±, ≈). Prefer forms like old → new, key=value, path: result. Avoid filler always.</rule>
       <rule>Prefer fragments over full sentences when clarity is preserved. Avoid restating the prompt or adding summaries unless asked.</rule>
     </rules>
 
@@ -101,7 +100,7 @@
     defaultThinkingLevel = "xhigh";
     enabledModels = [
       "openai-codex/gpt-5.4"
-      "anthropic/claude-opus-4-6"
+      "anthropic/claude-opus-4-7"
     ];
     compaction.enabled = false;
     showHardwareCursor = true;
@@ -147,6 +146,8 @@ in {
         message = "user.dev.pi requires modules/dev/pi/pi-mono.nix to provide pi documentation paths.";
       }
     ];
+
+    environment.variables.PI_SKIP_VERSION_CHECK = "1";
 
     bayt.users."${config.user.name}".files =
       {

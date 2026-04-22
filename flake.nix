@@ -54,6 +54,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    linear-cli = {
+      url = "github:y0usaf/linear-cli?ref=nix-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixpkgs-discord-legacy.url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
 
     pi-mono = {
@@ -73,6 +78,11 @@
 
     pi-compact-tools = {
       url = "github:y0usaf/pi-flake?dir=extensions/pi-compact-tools";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pi-tool-management = {
+      url = "github:y0usaf/pi-flake?dir=extensions/pi-tool-management";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
