@@ -1,5 +1,6 @@
 {
   config,
+  flakeInputs,
   lib,
   pkgs,
   ...
@@ -7,10 +8,7 @@
   wallustPkg = pkgs.wallust;
   wallustCfg = config.user.appearance.wallust;
   zjstatusEnabled = lib.attrByPath ["user" "shell" "zellij" "zjstatus" "enable"] false config;
-  zjstatusHintsWasm = pkgs.fetchurl {
-    url = "https://github.com/y0usaf/zjstatus-hints/releases/download/v0.1.5-y0usaf.2/zjstatus-hints.wasm";
-    hash = "sha256-NM40ZLNrziFZ7SKuD1bvzhHoDg/y4nU5Wt+hzbZPzAA=";
-  };
+  zjstatusHintsWasm = "${flakeInputs.zjstatus-hints.packages."${pkgs.stdenv.hostPlatform.system}".default}/bin/zjstatus-hints.wasm";
   niriEnabled = lib.attrByPath ["user" "ui" "niri" "enable"] false config;
   vicinaeEnabled = lib.attrByPath ["user" "ui" "vicinae" "enable"] false config;
   cmusEnabled = lib.attrByPath ["user" "programs" "cmus" "enable"] false config;
@@ -954,9 +952,15 @@
         zjstatus-hints location="file:~/.config/zellij/plugins/zjstatus-hints.wasm" {
           max_length 0
           pipe_name "zjstatus_hints"
+          modifier_style "long"
           transparent_bg true
           shared_mode_modifier true
           label_fg "#{{foreground | strip}}"
+          hint_prefix " "
+          key_prefix "["
+          key_suffix "]"
+          label_prefix " "
+          label_suffix ""
           separator ""
 
           pane_key_fg    "#{{color10 | strip}}"
@@ -1041,12 +1045,12 @@
             mode_prompt        "#[fg=magenta,bold]PROMPT"
             mode_tmux          "#[fg=red,bold]TMUX"
 
-            tab_normal              "#[fg=#{{foreground | strip}}]{name} "
-            tab_normal_fullscreen   "#[fg=#{{foreground | strip}}]{name} [] "
-            tab_normal_sync         "#[fg=#{{foreground | strip}}]{name} <> "
-            tab_active              "#[fg=bright_cyan,bold,underline]{name} "
-            tab_active_fullscreen   "#[fg=bright_cyan,bold,underline]{name} [] "
-            tab_active_sync         "#[fg=bright_cyan,bold,underline]{name} <> "
+            tab_normal              "#[fg=#{{foreground | strip}}][{name}] "
+            tab_normal_fullscreen   "#[fg=#{{foreground | strip}}][{name} []] "
+            tab_normal_sync         "#[fg=#{{foreground | strip}}][{name} <>] "
+            tab_active              "#[fg=bright_cyan,bold,underline][{name}] "
+            tab_active_fullscreen   "#[fg=bright_cyan,bold,underline][{name} []] "
+            tab_active_sync         "#[fg=bright_cyan,bold,underline][{name} <>] "
             tab_floating_indicator  ""
 
             datetime          "#[fg=#{{foreground | strip}}]{format}"
