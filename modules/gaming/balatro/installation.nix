@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  mods = import ./mods.nix;
+  mods = config.user.gaming.mods.balatro;
 
   availableMods = {
     steamodded = {
