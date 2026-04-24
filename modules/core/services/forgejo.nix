@@ -4,6 +4,13 @@
   ...
 }: {
   config = lib.mkIf config.services.forgejo.enable {
+    users = {
+      # Pin forgejo uid/gid so persisted /var/lib/forgejo ownership survives
+      # service-user reordering across rebuilds.
+      users.forgejo.uid = lib.mkDefault 993;
+      groups.forgejo.gid = lib.mkDefault 989;
+    };
+
     services = {
       forgejo = {
         database.type = lib.mkDefault "postgres";
