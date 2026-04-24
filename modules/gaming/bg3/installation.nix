@@ -6,7 +6,7 @@
 }: let
   inherit (lib) types mkOption mkIf mkMerge;
 
-  mods = import ./mods.nix;
+  mods = config.user.gaming.mods.bg3;
   cfg = config.user.gaming.bg3;
 
   steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path;

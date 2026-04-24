@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (config) user;
-  mods = import ./mods.nix {inherit pkgs;};
+  mods = config.user.gaming.mods.expedition33;
   steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
 in {
   config = lib.mkIf user.gaming.expedition33.enable {

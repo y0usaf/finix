@@ -7,7 +7,7 @@ _: {
     };
     codex = {
       enable = true;
-      model = "gpt-5.4";
+      model = "gpt-5.5";
       settings.personality = "pragmatic";
     };
     android-tools.enable = true;

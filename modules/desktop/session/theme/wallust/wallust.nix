@@ -1,8 +1,8 @@
 {
   config,
-  flakeInputs,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: let
   wallustPkg = pkgs.wallust;

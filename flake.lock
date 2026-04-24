@@ -840,11 +840,11 @@
       },
       "locked": {
         "dir": "extensions/pi-agents",
-        "lastModified": 1776562566,
-        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
+        "lastModified": 1777053773,
+        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
+        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
         "type": "github"
       },
       "original": {
@@ -862,11 +862,11 @@
       },
       "locked": {
         "dir": "extensions/pi-codex-fast",
-        "lastModified": 1776562566,
-        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
+        "lastModified": 1777053773,
+        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
+        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
         "type": "github"
       },
       "original": {
@@ -883,16 +883,16 @@
         ]
       },
       "locked": {
-        "dir": "extensions/pi-compact-tools",
-        "lastModified": 1776562566,
-        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
+        "dir": "extensions/pi-compact",
+        "lastModified": 1777053773,
+        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
+        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
         "type": "github"
       },
       "original": {
-        "dir": "extensions/pi-compact-tools",
+        "dir": "extensions/pi-compact",
         "owner": "y0usaf",
         "repo": "pi-flake",
         "type": "github"
@@ -905,18 +905,19 @@
         ],
         "piAgents": "piAgents",
         "piCodexFast": "piCodexFast",
-        "piCompactTools": "piCompactTools",
+        "piCompact": "piCompact",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piRtk": "piRtk",
         "piSrc": "piSrc",
+        "piToolManagement": "piToolManagement",
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1776562566,
-        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
+        "lastModified": 1777053773,
+        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
+        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
         "type": "github"
       },
       "original": {
@@ -933,11 +934,11 @@
       },
       "locked": {
         "dir": "extensions/pi-rtk",
-        "lastModified": 1776562566,
-        "narHash": "sha256-Qc2WcOVCm0WC5JdaqzTfaE0pYlRQKMdcrTmE+lHOscE=",
+        "lastModified": 1777053773,
+        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "f6a1f5f612e6d211807208a0a114a6da3a853b2f",
+        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
         "type": "github"
       },
       "original": {
@@ -955,11 +956,11 @@
       },
       "locked": {
         "dir": "extensions/pi-tool-management",
-        "lastModified": 1776670713,
-        "narHash": "sha256-kWUG3tEHQ7ETBX57HXjjRABBvefchS1qk2gI6JiU9Tk=",
+        "lastModified": 1777053773,
+        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "5c8b8ea40c027743411d4a6d01c0a0bb9085607a",
+        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
         "type": "github"
       },
       "original": {
@@ -1007,7 +1008,7 @@
         "pi-mono"
       ]
     },
-    "piCompactTools": {
+    "piCompact": {
       "inputs": {
         "nixpkgs": [
           "pi-mono",
@@ -1015,11 +1016,11 @@
         ]
       },
       "locked": {
-        "path": "./extensions/pi-compact-tools",
+        "path": "./extensions/pi-compact",
         "type": "path"
       },
       "original": {
-        "path": "./extensions/pi-compact-tools",
+        "path": "./extensions/pi-compact",
         "type": "path"
       },
       "parent": [
@@ -1067,11 +1068,11 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1776355015,
-        "narHash": "sha256-hl1+zBBJMc3l8wJwzobkkaORtB39AfSOOWYkRtbf1Js=",
+        "lastModified": 1777033471,
+        "narHash": "sha256-KNpodvUvYr2sR9BI4Dgt8xyxHR4PsZ8d6g8IqwIq4Is=",
         "owner": "badlogic",
         "repo": "pi-mono",
-        "rev": "72619e92466fd2f181d660eb4e3f5eff630ad8f5",
+        "rev": "3e0ee69b5ead441e4669b123b2f98635fee7da30",
         "type": "github"
       },
       "original": {
@@ -1080,6 +1081,25 @@
         "repo": "pi-mono",
         "type": "github"
       }
+    },
+    "piToolManagement": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-mono",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-tool-management",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-tool-management",
+        "type": "path"
+      },
+      "parent": [
+        "pi-mono"
+      ]
     },
     "piWebfetch": {
       "inputs": {

@@ -77,7 +77,7 @@
     };
 
     pi-compact-tools = {
-      url = "github:y0usaf/pi-flake?dir=extensions/pi-compact-tools";
+      url = "github:y0usaf/pi-flake?dir=extensions/pi-compact";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -150,7 +150,7 @@
     inherit (nixpkgs) lib;
     legacyPkgs = nixpkgs.legacyPackages;
     recursivelyImport = import ./recursivelyImport.nix {
-      inherit (lib) hasInfix hasSuffix;
+      inherit (lib) hasSuffix;
       inherit (lib.filesystem) listFilesRecursive;
     };
 
