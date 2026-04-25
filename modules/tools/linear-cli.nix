@@ -7,14 +7,13 @@
 }: let
   cfg = config.user.tools.linear-cli;
   tomlFormat = pkgs.formats.toml {};
-  linearCliPkg = flakeInputs.linear-cli.packages."${pkgs.stdenv.hostPlatform.system}".default;
 in {
   options.user.tools.linear-cli = {
     enable = lib.mkEnableOption "Linear CLI";
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = linearCliPkg;
+      default = flakeInputs.linear-cli.packages."${pkgs.stdenv.hostPlatform.system}".default;
       description = "Linear CLI package to install.";
     };
 
