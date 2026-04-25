@@ -8,17 +8,15 @@
   inherit (lib) optionals;
   nvidiaHw = config.hardware.nvidia;
   isOpen = nvidiaHw.open;
-  cudaEnabled = nvidiaHw.cuda.enable;
 in {
   options = {
-    hardware.nvidia = {
-      enable = mkEnable "NVIDIA GPU support";
-      cuda.enable = mkEnable "CUDA support";
-    };
+    hardware.nvidia.enable = mkEnable "NVIDIA GPU support";
   };
 
   config = lib.mkIf nvidiaHw.enable {
     services.xserver.videoDrivers = ["nvidia"];
+
+    nixpkgs.config.cudaSupport = true;
 
     hardware = {
       nvidia = {
@@ -35,13 +33,10 @@ in {
           useSettings = false;
         };
       };
-      graphics.extraPackages =
-        [
-          pkgs.nvidia-vaapi-driver
-        ]
-        ++ optionals cudaEnabled [
-          pkgs.cudatoolkit
-        ];
+      graphics.extraPackages = [
+        pkgs.nvidia-vaapi-driver
+        pkgs.cudatoolkit
+      ];
     };
 
     boot = {
@@ -69,7 +64,7 @@ in {
     };
 
     environment = {
-      systemPackages = optionals cudaEnabled [
+      systemPackages = [
         pkgs.cudaPackages.cudnn
       ];
       sessionVariables = {
