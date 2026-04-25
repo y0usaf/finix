@@ -1421,11 +1421,11 @@
         "systems": "systems_10"
       },
       "locked": {
-        "lastModified": 1777084947,
-        "narHash": "sha256-mPGTEsp7ttl9jDer15TJgZLvAfBWlay12FSOxjuciRo=",
+        "lastModified": 1777123443,
+        "narHash": "sha256-MITMVfc441IBuE1P5hWBmLLaN13krfMRA4bO7igCcHM=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "0de95204b73a3880a242c464d176615987b02bf8",
+        "rev": "da962dbd5aeb2fd3d19cc27764e978d7eb7a10f1",
         "type": "github"
       },
       "original": {
