@@ -57,7 +57,6 @@ in {
     cpu.amd.enable = true;
     nvidia = {
       enable = true;
-      cuda.enable = true;
       management = {
         enable = true;
         maxClock = 2450;
