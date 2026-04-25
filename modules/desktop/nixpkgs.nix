@@ -1,6 +1,5 @@
 {flakeInputs, ...}: {
   nixpkgs = {
-    config.cudaSupport = true;
     overlays = [
       flakeInputs.gpui-shell.overlays.default
       flakeInputs.agent-harness.overlays.default
