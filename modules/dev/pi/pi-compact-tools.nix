@@ -10,6 +10,19 @@
   piCompactToolsPkg = flakeInputs."pi-compact-tools".packages."${system}".default;
 in {
   config = lib.mkIf cfg.enable {
-    user.dev.pi.packageSources = lib.mkOrder 1200 ["${piCompactToolsPkg}"];
+    user.dev.pi = {
+      packageSources = lib.mkOrder 1200 ["${piCompactToolsPkg}"];
+      extensionSettings."pi-compact" = {
+        tools = {
+          mode = "compact";
+          gap = false;
+        };
+        user = {
+          mode = "borderless";
+          gap = true;
+        };
+        thinking.mode = "compact";
+      };
+    };
   };
 }
