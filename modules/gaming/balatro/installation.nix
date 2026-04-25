@@ -4,7 +4,8 @@
   pkgs,
   ...
 }: let
-  mods = config.user.gaming.mods.balatro;
+  inherit (config.user) gaming;
+  mods = gaming.mods.balatro;
 
   availableMods = {
     steamodded = {
@@ -89,7 +90,7 @@ in {
   };
   config = lib.mkMerge [
     (import ./moreSpeeds.nix {inherit config lib;}).config
-    (lib.mkIf config.user.gaming.balatro.enable (let
+    (lib.mkIf gaming.balatro.enable (let
       inherit (config) user;
       steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
       balatroCfg = user.gaming.balatro;

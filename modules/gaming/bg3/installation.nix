@@ -5,9 +5,10 @@
   ...
 }: let
   inherit (lib) types mkOption mkIf mkMerge;
+  inherit (config.user) gaming;
 
-  mods = config.user.gaming.mods.bg3;
-  cfg = config.user.gaming.bg3;
+  mods = gaming.mods.bg3;
+  cfg = gaming.bg3;
 
   steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path;
   gameDir = "${steamPath}/steamapps/common/Baldurs Gate 3";
