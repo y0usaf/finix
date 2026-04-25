@@ -94,27 +94,31 @@
       inherit description;
     };
 
-  piSettings = {
-    defaultProvider = "openai-codex";
-    defaultModel = "gpt-5.5";
-    defaultThinkingLevel = "xhigh";
-    enabledModels = [
-      "openai-codex/gpt-5.5"
-      "anthropic/claude-opus-4-7"
-    ];
-    compaction.enabled = false;
-    showHardwareCursor = true;
-    editorPaddingX = 0;
-    steeringMode = "one-at-a-time";
-    transport = "sse";
-    hideThinkingBlock = true;
-    collapseChangelog = true;
-    quietStartup = false;
-    doubleEscapeAction = "tree";
-    treeFilterMode = "default";
-    theme = "dark";
-    packages = cfg.packageSources;
-  };
+  piSettings =
+    {
+      defaultProvider = "openai-codex";
+      defaultModel = "gpt-5.5";
+      defaultThinkingLevel = "xhigh";
+      enabledModels = [
+        "openai-codex/gpt-5.5"
+        "anthropic/claude-opus-4-7"
+      ];
+      compaction.enabled = false;
+      showHardwareCursor = true;
+      editorPaddingX = 0;
+      steeringMode = "one-at-a-time";
+      transport = "sse";
+      hideThinkingBlock = true;
+      collapseChangelog = true;
+      quietStartup = false;
+      doubleEscapeAction = "tree";
+      treeFilterMode = "default";
+      theme = "dark";
+      packages = cfg.packageSources;
+    }
+    // lib.optionalAttrs (cfg.extensionSettings != {}) {
+      inherit (cfg) extensionSettings;
+    };
 in {
   options.user.dev.pi = {
     enable = lib.mkEnableOption "pi coding agent CLI";
@@ -131,7 +135,7 @@ in {
       type = with lib.types; attrsOf anything;
       internal = true;
       default = {};
-      description = "Pi extension settings written to extension-settings.json.";
+      description = "Pi extension settings written to settings.json extensionSettings.";
     };
 
     readmePath = mkInternalStr "Path to the pi README.";
@@ -149,22 +153,16 @@ in {
 
     environment.variables.PI_SKIP_VERSION_CHECK = "1";
 
-    bayt.users."${config.user.name}".files =
-      {
-        ".pi/agent/settings.json" = {
-          text = builtins.toJSON piSettings;
-        };
-        ".pi/agent/DEFAULT_SYSTEM.md" = {
-          text = defaultPiSystemPrompt;
-        };
-        ".pi/agent/SYSTEM.md" = {
-          text = customPiSystemPrompt;
-        };
-      }
-      // lib.optionalAttrs (cfg.extensionSettings != {}) {
-        ".pi/agent/extension-settings.json" = {
-          text = builtins.toJSON cfg.extensionSettings;
-        };
+    bayt.users."${config.user.name}".files = {
+      ".pi/agent/settings.json" = {
+        text = builtins.toJSON piSettings;
       };
+      ".pi/agent/DEFAULT_SYSTEM.md" = {
+        text = defaultPiSystemPrompt;
+      };
+      ".pi/agent/SYSTEM.md" = {
+        text = customPiSystemPrompt;
+      };
+    };
   };
 }

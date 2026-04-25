@@ -884,11 +884,11 @@
       },
       "locked": {
         "dir": "extensions/pi-compact",
-        "lastModified": 1777053773,
-        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
+        "lastModified": 1777146556,
+        "narHash": "sha256-1lxLZLWr8X7VjA5/rcUKnDvkuaH2+LIZ0L46ny022oI=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
+        "rev": "b72680064a7309dc84c0131e86f30b01e4436ae7",
         "type": "github"
       },
       "original": {
