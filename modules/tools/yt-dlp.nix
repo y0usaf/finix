@@ -3,10 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
-  nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
-in {
+}: {
   options.user.tools.yt-dlp = {
     enable = lib.mkEnableOption "YouTube-DLP media conversion tools";
   };
@@ -17,7 +14,7 @@ in {
     ];
     bayt.users."${config.user.name}" = {
       files =
-        lib.optionalAttrs zshEnabled {
+        lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
           ".config/zsh/.zshrc" = {
             text = lib.mkAfter ''
               alias ytm4a="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s'"
@@ -29,7 +26,7 @@ in {
             '';
           };
         }
-        // lib.optionalAttrs nushellEnabled {
+        // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
           ".config/nushell/config.nu" = {
             text = lib.mkAfter ''
               def ytm4a [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata -o '%(title)s.%(ext)s' ...$urls }

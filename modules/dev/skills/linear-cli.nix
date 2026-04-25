@@ -1,5 +1,4 @@
 args: let
-  moduleMode = args.moduleMode or true;
   skill = {
     skill = ''
       ---
@@ -73,7 +72,7 @@ args: let
     };
   };
 in
-  if moduleMode
+  if (args.moduleMode or true)
   then {
     config.lib.ai.skills.linear-cli = skill;
   }
