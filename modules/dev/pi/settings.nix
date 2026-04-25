@@ -4,9 +4,15 @@
   ...
 }: let
   cfg = config.user.dev.pi;
-
-  # Custom system prompt with placeholder substitution
-  customPrompt = ''
+  piReadmePath = cfg.readmePath;
+  piDocsPath = cfg.docsPath;
+  piExamplesPath = cfg.examplesPath;
+  hasPiDocs = builtins.all (path: path != "") [
+    piReadmePath
+    piDocsPath
+    piExamplesPath
+  ];
+  customPiSystemPrompt = ''
     <role>Pi coding assistant</role>
 
     <tools>
@@ -30,9 +36,9 @@
     </rules>
 
     <pi-docs condition="only read when user asks about pi, SDK, extensions, themes, skills, or TUI">
-      <path name="main">${cfg.readmePath}</path>
-      <path name="docs">${cfg.docsPath}</path>
-      <path name="examples">${cfg.examplesPath}</path>
+      <path name="main">${piReadmePath}</path>
+      <path name="docs">${piDocsPath}</path>
+      <path name="examples">${piExamplesPath}</path>
       <topics>
         <topic key="extensions">docs/extensions.md, examples/extensions/</topic>
         <topic key="themes">docs/themes.md</topic>
@@ -49,12 +55,12 @@
     </pi-docs>
   '';
 
-  defaultPrompt = ''
+  defaultPiSystemPrompt = ''
     You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
 
     Available tools:
     - read: Read file contents
-    - bash: Execute bash commands (ls, grep, find, rg)
+    - bash: Execute bash commands (ls, grep, find, etc.)
     - edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call
     - write: Create or overwrite files
 
@@ -72,22 +78,93 @@
     - Show file paths clearly when working with files
 
     Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):
-    - Main documentation: ${cfg.readmePath}
-    - Additional docs: ${cfg.docsPath}
-    - Examples: ${cfg.examplesPath} (extensions, custom tools, SDK)
+    - Main documentation: ${piReadmePath}
+    - Additional docs: ${piDocsPath}
+    - Examples: ${piExamplesPath} (extensions, custom tools, SDK)
     - When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)
     - When working on pi topics, read the docs and examples, and follow .md cross-references before implementing
     - Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
   '';
-in {
-  config = lib.mkIf cfg.enable {
-    bayt.users."${config.user.name}".files = {
-      ".pi/agent/SYSTEM.md" = {
-        text = customPrompt;
-      };
-      ".pi/agent/DEFAULT_SYSTEM.md" = {
-        text = defaultPrompt;
-      };
+
+  mkInternalStr = description:
+    lib.mkOption {
+      type = lib.types.str;
+      internal = true;
+      default = "";
+      inherit description;
     };
+
+  piSettings = {
+    defaultProvider = "openai-codex";
+    defaultModel = "gpt-5.4";
+    defaultThinkingLevel = "xhigh";
+    enabledModels = [
+      "openai-codex/gpt-5.4"
+      "anthropic/claude-opus-4-7"
+    ];
+    compaction.enabled = false;
+    showHardwareCursor = true;
+    editorPaddingX = 0;
+    steeringMode = "one-at-a-time";
+    transport = "sse";
+    hideThinkingBlock = true;
+    collapseChangelog = true;
+    quietStartup = false;
+    doubleEscapeAction = "tree";
+    treeFilterMode = "default";
+    theme = "dark";
+    packages = cfg.packageSources;
+  };
+in {
+  options.user.dev.pi = {
+    enable = lib.mkEnableOption "pi coding agent CLI";
+    rtk.enable = lib.mkEnableOption "pi-rtk extension and rtk binary";
+
+    packageSources = lib.mkOption {
+      type = with lib.types; listOf str;
+      internal = true;
+      default = [];
+      description = "Pi package sources written to settings.json.";
+    };
+
+    extensionSettings = lib.mkOption {
+      type = with lib.types; attrsOf anything;
+      internal = true;
+      default = {};
+      description = "Pi extension settings written to extension-settings.json.";
+    };
+
+    readmePath = mkInternalStr "Path to the pi README.";
+    docsPath = mkInternalStr "Path to the pi docs directory.";
+    examplesPath = mkInternalStr "Path to the pi examples directory.";
+  };
+
+  config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = hasPiDocs;
+        message = "user.dev.pi requires modules/dev/pi/pi-mono.nix to provide pi documentation paths.";
+      }
+    ];
+
+    environment.variables.PI_SKIP_VERSION_CHECK = "1";
+
+    bayt.users."${config.user.name}".files =
+      {
+        ".pi/agent/settings.json" = {
+          text = builtins.toJSON piSettings;
+        };
+        ".pi/agent/DEFAULT_SYSTEM.md" = {
+          text = defaultPiSystemPrompt;
+        };
+        ".pi/agent/SYSTEM.md" = {
+          text = customPiSystemPrompt;
+        };
+      }
+      // lib.optionalAttrs (cfg.extensionSettings != {}) {
+        ".pi/agent/extension-settings.json" = {
+          text = builtins.toJSON cfg.extensionSettings;
+        };
+      };
   };
 }
