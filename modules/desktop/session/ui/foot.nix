@@ -6,9 +6,8 @@
 }: let
   inherit (config) user;
   userUi = user.ui;
-  userAppearance = user.appearance;
   uiFonts = userUi.fonts;
-  computedFontSize = toString userAppearance.termFontSize;
+  computedFontSize = toString user.appearance.termFontSize;
 in {
   options.user.ui.foot = {
     enable = lib.mkEnableOption "foot terminal emulator";

@@ -1,5 +1,5 @@
-{lib, ...}: let
-  toHyprconf = {
+{lib, ...}: {
+  config.lib.generators.toHyprconf = {
     attrs,
     importantPrefixes ? ["$"],
     indentLevel ? 0,
@@ -52,6 +52,4 @@
       + mkFields (removeAttrs allFields (mapAttrsToList (n: _: n) importantFields));
   in
     toHyprconf' (concatStrings (replicate indentLevel "  ")) attrs;
-in {
-  config.lib.generators.toHyprconf = toHyprconf;
 }

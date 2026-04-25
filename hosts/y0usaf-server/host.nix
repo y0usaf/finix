@@ -42,9 +42,7 @@
       enable = false;
     };
     cpu.intel.enable = true;
-    nvidia = {
-      enable = false;
-    };
+    nvidia.enable = false;
     amdgpu.enable = false;
   };
   services = {

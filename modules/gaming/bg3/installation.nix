@@ -10,11 +10,7 @@
   mods = gaming.mods.bg3;
   cfg = gaming.bg3;
 
-  steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path;
-  gameDir = "${steamPath}/steamapps/common/Baldurs Gate 3";
-  compatDir = "${steamPath}/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser";
-
-  bg3Bin = "${gameDir}/bin";
+  bg3Bin = "${"${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/common/Baldurs Gate 3"}/bin";
   nativeModsDir = "${bg3Bin}/NativeMods";
 
   modSrc = "${mods.game-mods}/bg3";
@@ -23,7 +19,6 @@
   cameraTweaks = cfg.nativeCameraTweaks;
 
   bg3seVersion = mods.bg3se.version;
-  bg3seDate = lib.removePrefix "updater-" bg3seVersion;
 in {
   options.user.gaming.bg3 = {
     enable = mkOption {
@@ -105,7 +100,7 @@ in {
       (mkIf cfg.scriptExtender.enable {
         "${bg3Bin}/DWrite.dll" = {
           source = "${pkgs.fetchzip {
-            url = "https://github.com/Norbyte/bg3se/releases/download/${bg3seVersion}/BG3SE-Updater-${bg3seDate}.zip";
+            url = "https://github.com/Norbyte/bg3se/releases/download/${bg3seVersion}/BG3SE-Updater-${lib.removePrefix "updater-" bg3seVersion}.zip";
             sha256 = "sha256-XhintUwpaQ9AhWjsPvWMFLKF2D7WdjmhPcvNLoVtGho=";
             stripRoot = false;
           }}/DWrite.dll";

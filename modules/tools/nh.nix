@@ -5,8 +5,6 @@
   ...
 }: let
   nhOpts = config.user.tools.nh;
-  zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
-  nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
 in {
   options.user.tools.nh = {
     enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
@@ -32,7 +30,7 @@ in {
         else config.user.paths.flake.path
       );
     in
-      lib.optionalAttrs zshEnabled {
+      lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
         ".config/zsh/.zshrc" = {
           text = lib.mkAfter ''
             export NH_FLAKE="${nhFlake}"
@@ -58,7 +56,7 @@ in {
           '';
         };
       }
-      // lib.optionalAttrs nushellEnabled {
+      // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
         ".config/nushell/env.nu" = {
           text = lib.mkAfter ''
             $env.NH_FLAKE = "${nhFlake}"

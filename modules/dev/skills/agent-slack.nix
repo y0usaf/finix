@@ -1,5 +1,4 @@
 args: let
-  moduleMode = args.moduleMode or true;
   skill = {
     requiresAgentSlack = true;
 
@@ -65,7 +64,7 @@ args: let
     };
   };
 in
-  if moduleMode
+  if (args.moduleMode or true)
   then {
     config.lib.ai.skills.agent-slack = skill;
   }

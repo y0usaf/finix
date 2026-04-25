@@ -5,8 +5,6 @@
   ...
 }: let
   inherit (lib) types mkOption mkEnableOption mkIf mkAfter optionalString optionalAttrs;
-  zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
-  nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
   cfg = config.user.tools.jj;
 in {
   options.user.tools.jj = {
@@ -70,7 +68,7 @@ in {
           '';
         };
       }
-      // optionalAttrs (cfg.enableAliases && zshEnabled) {
+      // optionalAttrs (cfg.enableAliases && (lib.attrByPath ["user" "shell" "zsh" "enable"] false config)) {
         ".config/zsh/.zshrc" = {
           text = ''
             alias jl='jj log -r recent'
@@ -89,7 +87,7 @@ in {
           '';
         };
       }
-      // optionalAttrs (cfg.enableAliases && nushellEnabled) {
+      // optionalAttrs (cfg.enableAliases && (lib.attrByPath ["user" "shell" "nushell" "enable"] false config)) {
         ".config/nushell/config.nu" = {
           text = mkAfter ''
             alias jl = jj log -r recent

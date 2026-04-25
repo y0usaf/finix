@@ -4,13 +4,12 @@
   pkgs,
   ...
 }: let
-  mkEnable = lib.mkEnableOption;
   inherit (lib) optionals;
   nvidiaHw = config.hardware.nvidia;
   isOpen = nvidiaHw.open;
 in {
   options = {
-    hardware.nvidia.enable = mkEnable "NVIDIA GPU support";
+    hardware.nvidia.enable = lib.mkEnableOption "NVIDIA GPU support";
   };
 
   config = lib.mkIf nvidiaHw.enable {

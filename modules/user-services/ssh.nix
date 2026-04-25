@@ -6,8 +6,6 @@
 }: let
   userName = config.user.name;
   homeDir = config.user.homeDirectory;
-  zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
-  nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
 in {
   options.user.services.ssh = {
     enable = lib.mkEnableOption "SSH configuration module";
@@ -56,14 +54,14 @@ in {
           '';
         };
       }
-      // lib.optionalAttrs zshEnabled {
+      // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
         ".config/zsh/.zshenv" = {
           text = lib.mkAfter ''
             export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
           '';
         };
       }
-      // lib.optionalAttrs nushellEnabled {
+      // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
         ".config/nushell/env.nu" = {
           text = lib.mkAfter ''
             $env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR? | default '/run/user/1000')/ssh-agent"

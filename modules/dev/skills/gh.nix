@@ -1,5 +1,4 @@
 args: let
-  moduleMode = args.moduleMode or true;
   skill = {
     requiresGh = true;
 
@@ -75,7 +74,7 @@ args: let
     };
   };
 in
-  if moduleMode
+  if (args.moduleMode or true)
   then {
     config.lib.ai.skills.gh = skill;
   }

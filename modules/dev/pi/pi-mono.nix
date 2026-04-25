@@ -6,10 +6,9 @@
   ...
 }: let
   inherit (pkgs.stdenv.hostPlatform) system;
-  cfg = config.user.dev.pi;
   piPkg = flakeInputs."pi-mono".packages."${system}".default;
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.user.dev.pi.enable {
     environment.systemPackages = [
       piPkg
     ];

@@ -5,10 +5,6 @@
   ...
 }: let
   inherit (pkgs.stdenv.hostPlatform) system;
-  legacyDiscordPkgs = import flakeInputs.nixpkgs-discord-legacy {
-    inherit system;
-    config.allowUnfree = true;
-  };
 in {
   fonts = {
     packages = [
@@ -22,7 +18,11 @@ in {
   timezone = "America/Toronto";
   var-cache = true;
   user = {
-    programs.discord.stable.package = legacyDiscordPkgs.discord;
+    programs.discord.stable.package =
+      (import flakeInputs.nixpkgs-discord-legacy {
+        inherit system;
+        config.allowUnfree = true;
+      }).discord;
     tools.linear-cli.settings = {
       workspace = "cook-unity";
     };

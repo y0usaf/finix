@@ -148,21 +148,6 @@
   outputs = {nixpkgs, ...} @ inputs: let
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
-    legacyPkgs = nixpkgs.legacyPackages;
-    recursivelyImport = import ./recursivelyImport.nix {
-      inherit (lib) hasSuffix;
-      inherit (lib.filesystem) listFilesRecursive;
-    };
-
-    moduleDomains = {
-      core = [./modules/core];
-      desktop = [./modules/desktop];
-      shell = [./modules/shell];
-      tools = [./modules/tools];
-      user-services = [./modules/user-services];
-      dev = [./modules/dev];
-      gaming = [./modules/gaming];
-    };
 
     mkHost = {
       domains,
@@ -174,13 +159,27 @@
         specialArgs = {
           flakeInputs = inputs;
         };
-        modules = recursivelyImport (
-          lib.concatMap (domain: moduleDomains."${domain}") domains
-          ++ [
-            profileDir
-            hostDir
-          ]
-        );
+        modules =
+          (import ./recursivelyImport.nix {
+            inherit (lib) hasSuffix;
+            inherit (lib.filesystem) listFilesRecursive;
+          }) (
+            lib.concatMap (domain:
+              {
+                core = [./modules/core];
+                desktop = [./modules/desktop];
+                shell = [./modules/shell];
+                tools = [./modules/tools];
+                user-services = [./modules/user-services];
+                dev = [./modules/dev];
+                gaming = [./modules/gaming];
+              }."${domain}")
+            domains
+            ++ [
+              profileDir
+              hostDir
+            ]
+          );
       };
   in {
     nixosConfigurations = {
@@ -209,6 +208,6 @@
       };
     };
 
-    formatter."${system}" = legacyPkgs."${system}".alejandra;
+    formatter."${system}" = nixpkgs.legacyPackages."${system}".alejandra;
   };
 }

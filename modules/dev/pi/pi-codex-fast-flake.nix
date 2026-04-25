@@ -6,14 +6,12 @@
   ...
 }: let
   inherit (pkgs.stdenv.hostPlatform) system;
-  cfg = config.user.dev.pi;
-  piCodexFastPkg = flakeInputs."pi-codex-fast-flake".packages."${system}".default;
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.user.dev.pi.enable {
     user = {
       dev = {
         pi = {
-          packageSources = lib.mkOrder 1000 ["${piCodexFastPkg}"];
+          packageSources = lib.mkOrder 1000 ["${flakeInputs."pi-codex-fast-flake".packages."${system}".default}"];
           extensionSettings = {
             "codex-fast" = true;
           };

@@ -1,8 +1,6 @@
 {
   config,
   lib,
-  pkgs,
-  ...
 }: let
   inherit (config) user;
   mods = config.user.gaming.mods.expedition33;

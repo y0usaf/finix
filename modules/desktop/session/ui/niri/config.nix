@@ -28,13 +28,8 @@
           cursor = let
             inherit (config.user) appearance;
             inherit (appearance) cursorColor cursorSize;
-            colorCap = let
-              first = builtins.substring 0 1 cursorColor;
-              rest = builtins.substring 1 (-1) cursorColor;
-            in
-              (lib.toUpper first) + rest;
           in {
-            xcursor-theme = "Popucom-${colorCap}-x11";
+            xcursor-theme = "Popucom-${(lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor)}-x11";
             xcursor-size = cursorSize;
           };
 
