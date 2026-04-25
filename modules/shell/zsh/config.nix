@@ -215,9 +215,6 @@ in {
             text = lib.concatStringsSep "\n" (
               [
                 "source \"$ZDOTDIR/aliases.zsh\""
-              ]
-              ++ lib.optional (zellij.enable && zellij.autoStart) "source \"$ZDOTDIR/zellij.zsh\""
-              ++ [
                 pluginSettings
                 historySettings
                 completionSettings
@@ -226,6 +223,7 @@ in {
                 tempRunFunction
                 fanSpeedFunction
               ]
+              ++ lib.optional (zellij.enable && zellij.autoStart) "source \"$ZDOTDIR/zellij.zsh\""
             );
           };
         }
