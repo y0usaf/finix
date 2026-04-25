@@ -4,8 +4,6 @@
   pkgs,
   ...
 }: let
-  zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
-  nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
   homeDir = config.user.homeDirectory;
 in {
   options.user.dev.upscale = {
@@ -17,14 +15,14 @@ in {
       pkgs.realesrgan-ncnn-vulkan
     ];
     bayt.users."${config.user.name}".files =
-      lib.optionalAttrs zshEnabled {
+      lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
         ".config/zsh/aliases/esrgan.zsh" = {
           text = ''
             alias esrgan="realesrgan-ncnn-vulkan -i ${homeDir}/Pictures/Upscale/Input -o ${homeDir}/Pictures/Upscale/Output"
           '';
         };
       }
-      // lib.optionalAttrs nushellEnabled {
+      // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
         ".config/nushell/config.nu" = {
           text = lib.mkAfter ''
             alias esrgan = realesrgan-ncnn-vulkan -i ${homeDir}/Pictures/Upscale/Input -o ${homeDir}/Pictures/Upscale/Output

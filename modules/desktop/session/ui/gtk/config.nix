@@ -4,8 +4,6 @@
   pkgs,
   ...
 }: let
-  zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
-  nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
   inherit (config.user) ui appearance;
   gtkCfg = ui.gtk;
   gtkScale = gtkCfg.scale;
@@ -18,46 +16,6 @@
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
   backgroundColor = "transparent";
-  gtkCss = ''
-    /* Global element styling */
-    * {
-      font-family: "${mainFontName}";
-      color: white;
-      background: ${backgroundColor};
-      outline-width: 0;
-      outline-offset: 0;
-      text-shadow: ${lib.concatStringsSep ",\n" (lib.concatLists (lib.genList
-      (_: [
-        "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
-        "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
-        "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
-        "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
-        "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
-        "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
-        "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
-        "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
-      ])
-      4))};
-    }
-    /* Hover state for all elements */
-    *:hover {
-      background: rgba(100, 149, 237, 0.1);
-    }
-    /* Selected state for all elements */
-    *:selected {
-      background: rgba(100, 149, 237, 0.5);
-    }
-    /* Button styling */
-    button {
-      border-radius: 0.15rem;
-      min-height: 1rem;
-      padding: 0.05rem 0.25rem;
-    }
-    /* Menu background styling */
-    menu {
-      background: ${backgroundColor};
-    }
-  '';
 in {
   options.user.ui.gtk = {
     enable = lib.mkEnableOption "GTK theming and configuration using bayt";
@@ -93,7 +51,46 @@ in {
             };
           };
           ".config/gtk-3.0/gtk.css" = {
-            text = gtkCss;
+            text = ''
+              /* Global element styling */
+              * {
+                font-family: "${mainFontName}";
+                color: white;
+                background: ${backgroundColor};
+                outline-width: 0;
+                outline-offset: 0;
+                text-shadow: ${lib.concatStringsSep ",\n" (lib.concatLists (lib.genList
+                (_: [
+                  "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+                  "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+                  "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
+                  "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
+                  "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+                  "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+                  "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+                  "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+                ])
+                4))};
+              }
+              /* Hover state for all elements */
+              *:hover {
+                background: rgba(100, 149, 237, 0.1);
+              }
+              /* Selected state for all elements */
+              *:selected {
+                background: rgba(100, 149, 237, 0.5);
+              }
+              /* Button styling */
+              button {
+                border-radius: 0.15rem;
+                min-height: 1rem;
+                padding: 0.05rem 0.25rem;
+              }
+              /* Menu background styling */
+              menu {
+                background: ${backgroundColor};
+              }
+            '';
           };
           ".config/gtk-3.0/bookmarks" = {
             text = lib.concatStringsSep "\n" config.user.paths.bookmarks;
@@ -110,7 +107,7 @@ in {
             };
           };
         }
-        // lib.optionalAttrs zshEnabled {
+        // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
           ".config/zsh/.zshenv" = {
             text = lib.mkAfter ''
               export XCURSOR_SIZE="${cursorSizeStr}"
@@ -118,7 +115,7 @@ in {
             '';
           };
         }
-        // lib.optionalAttrs nushellEnabled {
+        // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
           ".config/nushell/env.nu" = {
             text = lib.mkAfter ''
               $env.XCURSOR_SIZE = "${cursorSizeStr}"

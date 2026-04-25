@@ -10,32 +10,22 @@
   inherit (config) user;
   inherit (user) shell;
   inherit (user.appearance) cursorSize cursorColor cursorTheme;
-  colorCap = let
-    first = builtins.substring 0 1 cursorColor;
-    rest = builtins.substring 1 (-1) cursorColor;
-  in
-    (lib.toUpper first) + rest;
-
-  isPopucom = cursorTheme == "popucom";
-
-  popucom = {
-    x11ThemeName = "Popucom-${colorCap}-x11";
-    hyprThemeName = "Popucom-${colorCap}-hypr";
-    xcursorPackage = cursorsPkgs."popucom-${cursorColor}-xcursor";
-    hyprcursorPackage = cursorsPkgs."popucom-${cursorColor}-hyprcursor";
-  };
-
-  deepin = {
-    x11ThemeName = "DeepinDarkV20-x11";
-    hyprThemeName = "DeepinDarkV20-hypr";
-    xcursorPackage = cursorsPkgs.deepin-dark-xcursor;
-    hyprcursorPackage = cursorsPkgs.deepin-dark-hyprcursor;
-  };
+  colorCap = (lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor);
 
   theme =
-    if isPopucom
-    then popucom
-    else deepin;
+    if (cursorTheme == "popucom")
+    then {
+      x11ThemeName = "Popucom-${colorCap}-x11";
+      hyprThemeName = "Popucom-${colorCap}-hypr";
+      xcursorPackage = cursorsPkgs."popucom-${cursorColor}-xcursor";
+      hyprcursorPackage = cursorsPkgs."popucom-${cursorColor}-hyprcursor";
+    }
+    else {
+      x11ThemeName = "DeepinDarkV20-x11";
+      hyprThemeName = "DeepinDarkV20-hypr";
+      xcursorPackage = cursorsPkgs.deepin-dark-xcursor;
+      hyprcursorPackage = cursorsPkgs.deepin-dark-hyprcursor;
+    };
 in {
   options.user.ui.cursor = {
     enable = lib.mkOption {

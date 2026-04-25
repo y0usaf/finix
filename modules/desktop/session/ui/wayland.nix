@@ -5,8 +5,6 @@
   ...
 }: let
   inherit (config.user) ui;
-  zshEnabled = lib.attrByPath ["user" "shell" "zsh" "enable"] false config;
-  nushellEnabled = lib.attrByPath ["user" "shell" "nushell" "enable"] false config;
   gtkScale = ui.gtk.scale;
 in {
   options.user.ui.wayland = {
@@ -21,7 +19,7 @@ in {
     ];
     bayt.users."${config.user.name}" = {
       files =
-        lib.optionalAttrs zshEnabled {
+        lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
           ".config/zsh/.zprofile" = {
             text = lib.mkAfter ''
               export WLR_NO_HARDWARE_CURSORS=1
@@ -36,7 +34,7 @@ in {
             '';
           };
         }
-        // lib.optionalAttrs nushellEnabled {
+        // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
           ".config/nushell/login.nu" = {
             text = lib.mkAfter ''
               $env.WLR_NO_HARDWARE_CURSORS = "1"
