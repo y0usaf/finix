@@ -898,7 +898,7 @@
         "type": "github"
       }
     },
-    "pi-mono": {
+    "pi-flake": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -907,17 +907,18 @@
         "piCodexFast": "piCodexFast",
         "piCompact": "piCompact",
         "piGeckoWebsearch": "piGeckoWebsearch",
+        "piHashline": "piHashline",
         "piRtk": "piRtk",
         "piSrc": "piSrc",
         "piToolManagement": "piToolManagement",
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1777053773,
-        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
+        "lastModified": 1777497704,
+        "narHash": "sha256-+I4cHXhEoxZfadN3sPIvAOK5FRJE9JASl5DLawKE6Go=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
+        "rev": "574f0a383c8a85b666e21dff2d74ca9954749cef",
         "type": "github"
       },
       "original": {
@@ -973,7 +974,7 @@
     "piAgents": {
       "inputs": {
         "nixpkgs": [
-          "pi-mono",
+          "pi-flake",
           "nixpkgs"
         ]
       },
@@ -986,13 +987,13 @@
         "type": "path"
       },
       "parent": [
-        "pi-mono"
+        "pi-flake"
       ]
     },
     "piCodexFast": {
       "inputs": {
         "nixpkgs": [
-          "pi-mono",
+          "pi-flake",
           "nixpkgs"
         ]
       },
@@ -1005,13 +1006,13 @@
         "type": "path"
       },
       "parent": [
-        "pi-mono"
+        "pi-flake"
       ]
     },
     "piCompact": {
       "inputs": {
         "nixpkgs": [
-          "pi-mono",
+          "pi-flake",
           "nixpkgs"
         ]
       },
@@ -1024,13 +1025,13 @@
         "type": "path"
       },
       "parent": [
-        "pi-mono"
+        "pi-flake"
       ]
     },
     "piGeckoWebsearch": {
       "inputs": {
         "nixpkgs": [
-          "pi-mono",
+          "pi-flake",
           "nixpkgs"
         ]
       },
@@ -1043,13 +1044,32 @@
         "type": "path"
       },
       "parent": [
-        "pi-mono"
+        "pi-flake"
+      ]
+    },
+    "piHashline": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-hashline",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-hashline",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
       ]
     },
     "piRtk": {
       "inputs": {
         "nixpkgs": [
-          "pi-mono",
+          "pi-flake",
           "nixpkgs"
         ]
       },
@@ -1062,7 +1082,7 @@
         "type": "path"
       },
       "parent": [
-        "pi-mono"
+        "pi-flake"
       ]
     },
     "piSrc": {
@@ -1085,7 +1105,7 @@
     "piToolManagement": {
       "inputs": {
         "nixpkgs": [
-          "pi-mono",
+          "pi-flake",
           "nixpkgs"
         ]
       },
@@ -1098,13 +1118,13 @@
         "type": "path"
       },
       "parent": [
-        "pi-mono"
+        "pi-flake"
       ]
     },
     "piWebfetch": {
       "inputs": {
         "nixpkgs": [
-          "pi-mono",
+          "pi-flake",
           "nixpkgs"
         ]
       },
@@ -1117,7 +1137,7 @@
         "type": "path"
       },
       "parent": [
-        "pi-mono"
+        "pi-flake"
       ]
     },
     "pyproject-build-systems": {
@@ -1233,7 +1253,7 @@
         "pi-agents": "pi-agents",
         "pi-codex-fast-flake": "pi-codex-fast-flake",
         "pi-compact-tools": "pi-compact-tools",
-        "pi-mono": "pi-mono",
+        "pi-flake": "pi-flake",
         "pi-rtk-flake": "pi-rtk-flake",
         "pi-tool-management": "pi-tool-management",
         "rudo": "rudo",
