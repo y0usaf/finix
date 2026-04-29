@@ -1,17 +1,15 @@
 {
   config,
   lib,
-  pkgs,
-  flakeInputs,
   ...
 }: let
-  inherit (pkgs.stdenv.hostPlatform) system;
-  piPkg = flakeInputs."pi-mono".packages."${system}".default;
+  piPkg = config.programs.pi.finalPackage;
 in {
   config = lib.mkIf config.user.dev.pi.enable {
-    environment.systemPackages = [
-      piPkg
-    ];
+    programs.pi = {
+      enable = true;
+      full = true;
+    };
 
     user.dev.pi = {
       readmePath = "${piPkg}/share/pi/README.md";

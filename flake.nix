@@ -61,7 +61,7 @@
 
     nixpkgs-discord-legacy.url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
 
-    pi-mono = {
+    pi-flake = {
       url = "github:y0usaf/pi-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
