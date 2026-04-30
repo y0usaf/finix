@@ -908,19 +908,18 @@
         "piCompact": "piCompact",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piHashline": "piHashline",
-        "piInputBox": "piInputBox",
+        "piMinimalUi": "piMinimalUi",
         "piRtk": "piRtk",
         "piSrc": "piSrc",
-        "piStatusline": "piStatusline",
         "piToolManagement": "piToolManagement",
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1777517011,
-        "narHash": "sha256-QkNMh4xnw4mY2jLsPDqfCiB1HWzDFWtkm2Y7q/7/O8o=",
+        "lastModified": 1777518530,
+        "narHash": "sha256-jdlj0BgV1SP6BhCF7aKsyZQvS4oPUiXdWqYP763XNKE=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "5c0ed9a416e976e90927ef9c52b7f3278f14fa99",
+        "rev": "12bc640db86eaaef78cd01bf1581867a9339f71a",
         "type": "github"
       },
       "original": {
@@ -1068,7 +1067,7 @@
         "pi-flake"
       ]
     },
-    "piInputBox": {
+    "piMinimalUi": {
       "inputs": {
         "nixpkgs": [
           "pi-flake",
@@ -1076,11 +1075,11 @@
         ]
       },
       "locked": {
-        "path": "./extensions/pi-input-box",
+        "path": "./extensions/pi-minimal-ui",
         "type": "path"
       },
       "original": {
-        "path": "./extensions/pi-input-box",
+        "path": "./extensions/pi-minimal-ui",
         "type": "path"
       },
       "parent": [
@@ -1122,25 +1121,6 @@
         "repo": "pi-mono",
         "type": "github"
       }
-    },
-    "piStatusline": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-statusline",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-statusline",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
     },
     "piToolManagement": {
       "inputs": {
