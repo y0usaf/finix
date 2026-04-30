@@ -1,0 +1,2 @@
+# Extra gitignore-style ignore patterns for strictix traversal.
+ignore = ["tmp"]
