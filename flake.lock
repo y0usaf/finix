@@ -840,11 +840,11 @@
       },
       "locked": {
         "dir": "extensions/pi-agents",
-        "lastModified": 1777053773,
-        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
+        "lastModified": 1777517011,
+        "narHash": "sha256-QkNMh4xnw4mY2jLsPDqfCiB1HWzDFWtkm2Y7q/7/O8o=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
+        "rev": "5c0ed9a416e976e90927ef9c52b7f3278f14fa99",
         "type": "github"
       },
       "original": {
@@ -862,11 +862,11 @@
       },
       "locked": {
         "dir": "extensions/pi-codex-fast",
-        "lastModified": 1777053773,
-        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
+        "lastModified": 1777517011,
+        "narHash": "sha256-QkNMh4xnw4mY2jLsPDqfCiB1HWzDFWtkm2Y7q/7/O8o=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
+        "rev": "5c0ed9a416e976e90927ef9c52b7f3278f14fa99",
         "type": "github"
       },
       "original": {
@@ -884,11 +884,11 @@
       },
       "locked": {
         "dir": "extensions/pi-compact",
-        "lastModified": 1777146556,
-        "narHash": "sha256-1lxLZLWr8X7VjA5/rcUKnDvkuaH2+LIZ0L46ny022oI=",
+        "lastModified": 1777517011,
+        "narHash": "sha256-QkNMh4xnw4mY2jLsPDqfCiB1HWzDFWtkm2Y7q/7/O8o=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "b72680064a7309dc84c0131e86f30b01e4436ae7",
+        "rev": "5c0ed9a416e976e90927ef9c52b7f3278f14fa99",
         "type": "github"
       },
       "original": {
@@ -908,17 +908,19 @@
         "piCompact": "piCompact",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piHashline": "piHashline",
+        "piInputBox": "piInputBox",
         "piRtk": "piRtk",
         "piSrc": "piSrc",
+        "piStatusline": "piStatusline",
         "piToolManagement": "piToolManagement",
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1777497704,
-        "narHash": "sha256-+I4cHXhEoxZfadN3sPIvAOK5FRJE9JASl5DLawKE6Go=",
+        "lastModified": 1777517011,
+        "narHash": "sha256-QkNMh4xnw4mY2jLsPDqfCiB1HWzDFWtkm2Y7q/7/O8o=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "574f0a383c8a85b666e21dff2d74ca9954749cef",
+        "rev": "5c0ed9a416e976e90927ef9c52b7f3278f14fa99",
         "type": "github"
       },
       "original": {
@@ -935,11 +937,11 @@
       },
       "locked": {
         "dir": "extensions/pi-rtk",
-        "lastModified": 1777053773,
-        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
+        "lastModified": 1777517011,
+        "narHash": "sha256-QkNMh4xnw4mY2jLsPDqfCiB1HWzDFWtkm2Y7q/7/O8o=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
+        "rev": "5c0ed9a416e976e90927ef9c52b7f3278f14fa99",
         "type": "github"
       },
       "original": {
@@ -957,11 +959,11 @@
       },
       "locked": {
         "dir": "extensions/pi-tool-management",
-        "lastModified": 1777053773,
-        "narHash": "sha256-y0CXY0TKFmyGcp14rVnRk3G9QHf7aLrfhr52acBqsJY=",
+        "lastModified": 1777517011,
+        "narHash": "sha256-QkNMh4xnw4mY2jLsPDqfCiB1HWzDFWtkm2Y7q/7/O8o=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "17947a8c6f79e8309b5a249d89618383b5de33ee",
+        "rev": "5c0ed9a416e976e90927ef9c52b7f3278f14fa99",
         "type": "github"
       },
       "original": {
@@ -1066,6 +1068,25 @@
         "pi-flake"
       ]
     },
+    "piInputBox": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-input-box",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-input-box",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
+    },
     "piRtk": {
       "inputs": {
         "nixpkgs": [
@@ -1101,6 +1122,25 @@
         "repo": "pi-mono",
         "type": "github"
       }
+    },
+    "piStatusline": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-statusline",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-statusline",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
     },
     "piToolManagement": {
       "inputs": {
