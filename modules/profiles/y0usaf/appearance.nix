@@ -7,6 +7,6 @@ _: {
     cursorSize = 18;
     cursorColor = "cyan";
     opacity = 0.7;
-    wallust.defaultTheme = "eva01";
+    wallust.defaultTheme = "bumblebee";
   };
 }

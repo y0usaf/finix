@@ -1,4 +1,4 @@
-{...}: {
+_: {
   config.user.appearance.wallust = {
     targets = {
       "rudo-theme" = {

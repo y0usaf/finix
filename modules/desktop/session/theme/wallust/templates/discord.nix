@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  vesktopEnabled = lib.attrByPath ["user" "programs" "discord" "vesktop" "enable"] false config;
-in {
+}: {
   config.user.appearance.wallust = {
     targets =
       {
@@ -13,7 +11,7 @@ in {
           target = "~/.config/Vencord/themes/wallust-colors.css";
         };
       }
-      // lib.optionalAttrs vesktopEnabled {
+      // lib.optionalAttrs (lib.attrByPath ["user" "programs" "discord" "vesktop" "enable"] false config) {
         "vesktop-colors" = {
           template = "discord-colors.css";
           target = "~/.config/vesktop/themes/wallust-colors.css";

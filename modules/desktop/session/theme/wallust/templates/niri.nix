@@ -2,11 +2,9 @@
   config,
   lib,
   ...
-}: let
-  enabled = lib.attrByPath ["user" "ui" "niri" "enable"] false config;
-in {
+}: {
   config.user.appearance.wallust = {
-    targets = lib.optionalAttrs enabled {
+    targets = lib.optionalAttrs (lib.attrByPath ["user" "ui" "niri" "enable"] false config) {
       "niri-borders" = {
         template = "niri-borders.kdl";
         target = "~/.cache/wallust/niri-borders.kdl";

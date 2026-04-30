@@ -7,57 +7,39 @@
 }: let
   wallustPkg = pkgs.wallust;
   wallustCfg = config.user.appearance.wallust;
-  zjstatusEnabled = lib.attrByPath ["user" "shell" "zellij" "zjstatus" "enable"] false config;
 
   inherit (builtins) toJSON;
-
-  colorschemeFiles = lib.mapAttrs' (name: scheme:
-    lib.nameValuePair ".config/wallust/colorschemes/${name}.json" {
-      text = toJSON scheme;
-    })
-  wallustCfg.colorschemes;
-
-  templateFiles = lib.mapAttrs' (name: template:
-    lib.nameValuePair ".config/wallust/templates/${name}" {
-      text = template;
-    })
-  wallustCfg.templates;
-
-  targetLines =
-    lib.mapAttrsToList (
-      name: target: ''${name} = { template = "${target.template}", target = "${target.target}" }''
-    )
-    wallustCfg.targets;
+  inherit (lib.types) anything attrsOf lines listOf str submodule;
 in {
   options.user.appearance.wallust = {
     defaultTheme = lib.mkOption {
-      type = lib.types.str;
+      type = str;
       default = "dopamine";
       description = "Default theme to apply on login.";
     };
 
     colorschemes = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
+      type = attrsOf anything;
       default = {};
       description = "Named Wallust colorschemes rendered to ~/.config/wallust/colorschemes.";
     };
 
     templates = lib.mkOption {
-      type = lib.types.attrsOf lib.types.lines;
+      type = attrsOf lines;
       default = {};
       description = "Wallust templates rendered to ~/.config/wallust/templates.";
     };
 
     targets = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule {
+      type = attrsOf (submodule {
         options = {
           template = lib.mkOption {
-            type = lib.types.str;
+            type = str;
             description = "Template filename from ~/.config/wallust/templates.";
           };
 
           target = lib.mkOption {
-            type = lib.types.str;
+            type = str;
             description = "Output path written by Wallust.";
           };
         };
@@ -67,7 +49,7 @@ in {
     };
 
     startupDirs = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
+      type = listOf str;
       default = [
         "~/.config/zellij/layouts"
         "~/.cache/wal"
@@ -81,7 +63,7 @@ in {
     };
 
     reloadHooks = lib.mkOption {
-      type = lib.types.listOf lib.types.lines;
+      type = listOf lines;
       default = [];
       description = "Shell snippets run by wt after Wallust and pywalfox updates.";
     };
@@ -148,8 +130,16 @@ in {
     bayt.users."${config.user.name}" =
       {
         files =
-          colorschemeFiles
-          // templateFiles
+          (lib.mapAttrs' (name: scheme:
+            lib.nameValuePair ".config/wallust/colorschemes/${name}.json" {
+              text = toJSON scheme;
+            })
+          wallustCfg.colorschemes)
+          // (lib.mapAttrs' (name: template:
+            lib.nameValuePair ".config/wallust/templates/${name}" {
+              text = template;
+            })
+          wallustCfg.templates)
           // {
             ".config/wallust/wallust.toml" = {
               text = ''
@@ -159,12 +149,15 @@ in {
                 check_contrast = true
 
                 [templates]
-                ${lib.concatStringsSep "\n" targetLines}
+                ${lib.concatStringsSep "\n" (lib.mapAttrsToList (
+                    name: target: ''${name} = { template = "${target.template}", target = "${target.target}" }''
+                  )
+                  wallustCfg.targets)}
               '';
             };
           };
       }
-      // lib.optionalAttrs zjstatusEnabled {
+      // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zellij" "zjstatus" "enable"] false config) {
         xdg.config.files."zellij/plugins/zjstatus-hints.wasm".source = "${flakeInputs.zjstatus-hints.packages."${pkgs.stdenv.hostPlatform.system}".default}/bin/zjstatus-hints.wasm";
       };
   };
