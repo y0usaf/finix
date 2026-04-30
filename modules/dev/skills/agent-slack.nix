@@ -13,7 +13,7 @@ args: let
       ## Overview
 
       Use the `agent-slack` CLI for Slack work instead of a Slack MCP server or manual API calls.
-      Prefer the installed `agent-slack` binary when `user.dev.agent-slack.enable` is on.
+      Prefer the installed `agent-slack` binary when `user.dev.work.agent-slack.enable` is on.
 
       ## Entry Point
 
