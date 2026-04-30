@@ -224,31 +224,32 @@ in {
           pane size=1 borderless=true {
             plugin location="https://github.com/dj95/zjstatus/releases/download/v0.21.1/zjstatus.wasm" {
               format_left   ""
-              format_center "{session}  {mode}  {tabs}  {datetime}"
+              format_center "#[fg=#{{foreground | strip}}][{session}] {mode} {tabs}{datetime}"
               format_right  ""
               format_space  " "
 
-              session "#[fg=#{{foreground | strip}}]{name}"
+              // {session} cannot be formatted via a separate `session` key in zjstatus;
+              // formatting must be applied inline before the handle in format_*.
               format_hide_on_overlength "true"
               format_precedence "lrc"
 
               border_enabled  "false"
               hide_frame_for_single_pane "false"
 
-              mode_normal        "#[fg=#{{color14 | strip}},bold]NORMAL"
-              mode_locked        "#[fg=#{{color1 | strip}},bold]LOCKED"
-              mode_resize        "#[fg=#{{color11 | strip}},bold]RESIZE"
-              mode_pane          "#[fg=#{{color10 | strip}},bold]PANE"
-              mode_tab           "#[fg=#{{color11 | strip}},bold]TAB"
-              mode_scroll        "#[fg=#{{color13 | strip}},bold]SCROLL"
-              mode_enter_search  "#[fg=#{{color13 | strip}},bold]SEARCH"
-              mode_search        "#[fg=#{{color13 | strip}},bold]SEARCH"
-              mode_rename_tab    "#[fg=#{{color11 | strip}},bold]RENAME"
-              mode_rename_pane   "#[fg=#{{color10 | strip}},bold]RENAME"
-              mode_session       "#[fg=#{{color13 | strip}},bold]SESSION"
-              mode_move          "#[fg=#{{color11 | strip}},bold]MOVE"
-              mode_prompt        "#[fg=#{{color13 | strip}},bold]PROMPT"
-              mode_tmux          "#[fg=#{{color1 | strip}},bold]TMUX"
+              mode_normal        "#[fg=#{{color14 | strip}},bold][NORMAL]"
+              mode_locked        "#[fg=#{{color1 | strip}},bold][LOCKED]"
+              mode_resize        "#[fg=#{{color11 | strip}},bold][RESIZE]"
+              mode_pane          "#[fg=#{{color10 | strip}},bold][PANE]"
+              mode_tab           "#[fg=#{{color11 | strip}},bold][TAB]"
+              mode_scroll        "#[fg=#{{color13 | strip}},bold][SCROLL]"
+              mode_enter_search  "#[fg=#{{color13 | strip}},bold][SEARCH]"
+              mode_search        "#[fg=#{{color13 | strip}},bold][SEARCH]"
+              mode_rename_tab    "#[fg=#{{color11 | strip}},bold][RENAME]"
+              mode_rename_pane   "#[fg=#{{color10 | strip}},bold][RENAME]"
+              mode_session       "#[fg=#{{color13 | strip}},bold][SESSION]"
+              mode_move          "#[fg=#{{color11 | strip}},bold][MOVE]"
+              mode_prompt        "#[fg=#{{color13 | strip}},bold][PROMPT]"
+              mode_tmux          "#[fg=#{{color1 | strip}},bold][TMUX]"
 
               tab_normal              "#[fg=#{{foreground | strip}}][{name}] "
               tab_normal_fullscreen   "#[fg=#{{foreground | strip}}][{name} []] "
@@ -258,7 +259,7 @@ in {
               tab_active_sync         "#[fg=#{{color14 | strip}},bold,underline][{name} <>] "
               tab_floating_indicator  ""
 
-              datetime          "#[fg=#{{foreground | strip}}]{format}"
+              datetime          "#[fg=#{{foreground | strip}}][{format}]"
               datetime_format   "%H:%M:%S"
             }
           }
