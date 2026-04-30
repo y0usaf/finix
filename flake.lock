@@ -832,50 +832,6 @@
         "type": "github"
       }
     },
-    "pi-codex-fast-flake": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "extensions/pi-codex-fast",
-        "lastModified": 1777548958,
-        "narHash": "sha256-yD0TfJitsRpF5YbfmieiLbTjtT21pbp52wCMe1BSzSE=",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "rev": "7905c3545c8175a0b0e5977bbb4e42138ac8f16d",
-        "type": "github"
-      },
-      "original": {
-        "dir": "extensions/pi-codex-fast",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "type": "github"
-      }
-    },
-    "pi-compact-tools": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "extensions/pi-compact",
-        "lastModified": 1777548958,
-        "narHash": "sha256-yD0TfJitsRpF5YbfmieiLbTjtT21pbp52wCMe1BSzSE=",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "rev": "7905c3545c8175a0b0e5977bbb4e42138ac8f16d",
-        "type": "github"
-      },
-      "original": {
-        "dir": "extensions/pi-compact",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "type": "github"
-      }
-    },
     "pi-flake": {
       "inputs": {
         "nixpkgs": [
@@ -893,80 +849,14 @@
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1777551802,
-        "narHash": "sha256-3GY6mMAkIcoH/TPKuwZW8hN4cr8zE0enZeVu6XLIiFM=",
+        "lastModified": 1777586141,
+        "narHash": "sha256-oPChyYdyGFb6WozRYcR29Ipis77gFQmY1+nlTLC1kKg=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "159925f58806e1bb4f86aaba472b0d653b446a3d",
+        "rev": "705f670e64812a22c9c92366fa8c9a0714b91c79",
         "type": "github"
       },
       "original": {
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "type": "github"
-      }
-    },
-    "pi-hive": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "extensions/pi-hive",
-        "lastModified": 1777551802,
-        "narHash": "sha256-3GY6mMAkIcoH/TPKuwZW8hN4cr8zE0enZeVu6XLIiFM=",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "rev": "159925f58806e1bb4f86aaba472b0d653b446a3d",
-        "type": "github"
-      },
-      "original": {
-        "dir": "extensions/pi-hive",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "type": "github"
-      }
-    },
-    "pi-rtk-flake": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "extensions/pi-rtk",
-        "lastModified": 1777548958,
-        "narHash": "sha256-yD0TfJitsRpF5YbfmieiLbTjtT21pbp52wCMe1BSzSE=",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "rev": "7905c3545c8175a0b0e5977bbb4e42138ac8f16d",
-        "type": "github"
-      },
-      "original": {
-        "dir": "extensions/pi-rtk",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "type": "github"
-      }
-    },
-    "pi-tool-management": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "extensions/pi-tool-management",
-        "lastModified": 1777548958,
-        "narHash": "sha256-yD0TfJitsRpF5YbfmieiLbTjtT21pbp52wCMe1BSzSE=",
-        "owner": "y0usaf",
-        "repo": "pi-flake",
-        "rev": "7905c3545c8175a0b0e5977bbb4e42138ac8f16d",
-        "type": "github"
-      },
-      "original": {
-        "dir": "extensions/pi-tool-management",
         "owner": "y0usaf",
         "repo": "pi-flake",
         "type": "github"
@@ -1270,12 +1160,7 @@
         "nvtune": "nvtune",
         "obs-image-reaction": "obs-image-reaction",
         "patchix": "patchix",
-        "pi-codex-fast-flake": "pi-codex-fast-flake",
-        "pi-compact-tools": "pi-compact-tools",
         "pi-flake": "pi-flake",
-        "pi-hive": "pi-hive",
-        "pi-rtk-flake": "pi-rtk-flake",
-        "pi-tool-management": "pi-tool-management",
         "rudo": "rudo",
         "strictix": "strictix",
         "tweakcc": "tweakcc",

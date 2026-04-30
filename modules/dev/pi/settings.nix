@@ -21,13 +21,6 @@ in {
     enable = lib.mkEnableOption "pi coding agent CLI";
     rtk.enable = lib.mkEnableOption "pi-rtk extension and rtk binary";
 
-    packageSources = lib.mkOption {
-      type = with lib.types; listOf str;
-      internal = true;
-      default = [];
-      description = "Pi package sources written to settings.json.";
-    };
-
     extensionSettings = lib.mkOption {
       type = with lib.types; attrsOf anything;
       internal = true;
@@ -54,6 +47,21 @@ in {
 
     environment.variables.PI_SKIP_VERSION_CHECK = "1";
 
+    user.dev.pi.extensionSettings = {
+      "codex-fast" = false;
+      "pi-compact" = {
+        tools = {
+          mode = "compact";
+          gap = false;
+        };
+        user = {
+          mode = "borderless";
+          gap = true;
+        };
+        thinking.mode = "compact";
+      };
+    };
+
     bayt.users."${config.user.name}".files = {
       ".pi/agent/settings.json" = {
         text = builtins.toJSON ({
@@ -62,6 +70,7 @@ in {
             defaultThinkingLevel = "medium";
             enabledModels = [
               "openai-codex/gpt-5.5"
+              "openai-codex/gpt-5.4-mini"
               "anthropic/claude-opus-4-7"
             ];
             compaction.enabled = false;
@@ -78,9 +87,6 @@ in {
           }
           // lib.optionalAttrs (bundledExtensionPaths != []) {
             extensions = bundledExtensionPaths;
-          }
-          // lib.optionalAttrs (bundledExtensionPaths == [] && cfg.packageSources != []) {
-            packages = cfg.packageSources;
           }
           // lib.optionalAttrs (cfg.extensionSettings != {}) {
             inherit (cfg) extensionSettings;

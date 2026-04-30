@@ -8,8 +8,6 @@
   inherit (types) anything attrsOf bool str;
   inherit (config) user;
 
-  claudeCodeCfg = user.dev.claude-code;
-
   claudeCodeSkillEnabled = skillName:
     attrByPath ["user" "dev" "claude-code" "skills" skillName "enable"] true config;
 in {
@@ -106,7 +104,7 @@ in {
     };
   };
 
-  config = mkIf claudeCodeCfg.enable {
+  config = mkIf user.dev.claude-code.enable {
     environment.systemPackages =
       optionals (!config.programs.tweakcc.enable) [pkgs.claude-code]
       ++ [

@@ -1,10 +1,4 @@
-{...}: let
-  aiSkills = {
-    agent-slack = import ../../skills/agent-slack.nix {moduleMode = false;};
-    gh = import ../../skills/gh.nix {moduleMode = false;};
-    linear-cli = import ../../skills/linear-cli.nix {moduleMode = false;};
-  };
-
+_: let
   codexReminderCommand = ''    printf '%s\n' '<system-reminder>
     Use Codex MCP when seeking reviews or second opinions.
     </system-reminder>''''';
