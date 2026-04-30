@@ -23,7 +23,7 @@ in {
         inherit system;
         config.allowUnfree = true;
       }).discord;
-    tools.linear-cli.settings = {
+    dev.work.linear-cli.settings = {
       workspace = "cook-unity";
     };
     gaming = {

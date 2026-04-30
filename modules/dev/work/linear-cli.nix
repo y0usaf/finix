@@ -5,10 +5,10 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.tools.linear-cli;
+  cfg = config.user.dev.work.linear-cli;
   tomlFormat = pkgs.formats.toml {};
 in {
-  options.user.tools.linear-cli = {
+  options.user.dev.work.linear-cli = {
     enable = lib.mkEnableOption "Linear CLI";
 
     package = lib.mkOption {
