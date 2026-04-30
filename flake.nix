@@ -95,8 +95,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    pi-agents = {
-      url = "github:y0usaf/pi-flake?dir=extensions/pi-agents";
+    pi-hive = {
+      url = "github:y0usaf/pi-flake?dir=extensions/pi-hive";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
