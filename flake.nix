@@ -66,37 +66,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    pi-rtk-flake = {
-      url = "github:y0usaf/pi-flake?dir=extensions/pi-rtk";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    pi-codex-fast-flake = {
-      url = "github:y0usaf/pi-flake?dir=extensions/pi-codex-fast";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    pi-compact-tools = {
-      url = "github:y0usaf/pi-flake?dir=extensions/pi-compact";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    pi-tool-management = {
-      url = "github:y0usaf/pi-flake?dir=extensions/pi-tool-management";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     zjstatus-hints = {
       url = "github:y0usaf/zjstatus-hints?ref=feat/custom-labels";
     };
 
     rudo = {
       url = "github:y0usaf/rudo";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    pi-hive = {
-      url = "github:y0usaf/pi-flake?dir=extensions/pi-hive";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

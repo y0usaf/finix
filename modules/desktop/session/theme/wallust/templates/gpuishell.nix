@@ -2,11 +2,9 @@
   config,
   lib,
   ...
-}: let
-  enabled = lib.attrByPath ["user" "ui" "gpuishell" "enable"] false config;
-in {
+}: {
   config.user.appearance.wallust = {
-    targets = lib.optionalAttrs enabled {
+    targets = lib.optionalAttrs (lib.attrByPath ["user" "ui" "gpuishell" "enable"] false config) {
       "gpuishell-theme" = {
         template = "gpuishell-theme.toml";
         target = "~/.config/gpuishell/theme.toml";

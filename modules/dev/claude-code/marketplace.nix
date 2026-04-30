@@ -5,7 +5,6 @@
 }: let
   inherit (config) user;
   claudeCodeCfg = user.dev.claude-code;
-  claudeCodePlugins = claudeCodeCfg.plugins;
 in {
   config = lib.mkIf claudeCodeCfg.enable {
     bayt.users."${user.name}".files =
@@ -185,7 +184,7 @@ in {
           name = "y0usaf";
           email = "";
         };
-        plugins = claudeCodePlugins;
+        inherit (claudeCodeCfg) plugins;
         basePath = ".config/claude";
         description = "Personal Claude Code plugin marketplace";
         version = "1.0.0";
