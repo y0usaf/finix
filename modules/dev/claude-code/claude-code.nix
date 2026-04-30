@@ -57,7 +57,7 @@ in {
         // optionalAttrs (claudeCodeSkillEnabled "linear-cli") {
           "linear-cli@y0usaf-marketplace" = true;
         }
-        // optionalAttrs ((attrByPath ["user" "dev" "agent-slack" "enable"] false config) && claudeCodeSkillEnabled "agent-slack") {
+        // optionalAttrs ((attrByPath ["user" "dev" "work" "agent-slack" "enable"] false config) && claudeCodeSkillEnabled "agent-slack") {
           "agent-slack@y0usaf-marketplace" = true;
         };
       description = ''

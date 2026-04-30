@@ -14,7 +14,11 @@ _: {
     codex-cli.enable = true;
     crush.enable = true;
     gemini-cli.enable = false;
-    agent-slack.enable = true;
+    work = {
+      agent-slack.enable = true;
+      gws.enable = true;
+      linear-cli.enable = true;
+    };
     pi = {
       enable = true;
       rtk.enable = true;
