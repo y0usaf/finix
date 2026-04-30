@@ -884,11 +884,11 @@
       },
       "locked": {
         "dir": "extensions/pi-compact",
-        "lastModified": 1777517011,
-        "narHash": "sha256-QkNMh4xnw4mY2jLsPDqfCiB1HWzDFWtkm2Y7q/7/O8o=",
+        "lastModified": 1777521629,
+        "narHash": "sha256-2FH9TffRDMYLYrtcMNJF+rc1f4e7V75q79Mo1JXc94k=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "5c0ed9a416e976e90927ef9c52b7f3278f14fa99",
+        "rev": "7b501bd619b4d8fbf1ba4a7de7718d1ed670d26f",
         "type": "github"
       },
       "original": {
@@ -915,11 +915,11 @@
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1777518530,
-        "narHash": "sha256-jdlj0BgV1SP6BhCF7aKsyZQvS4oPUiXdWqYP763XNKE=",
+        "lastModified": 1777521629,
+        "narHash": "sha256-2FH9TffRDMYLYrtcMNJF+rc1f4e7V75q79Mo1JXc94k=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "12bc640db86eaaef78cd01bf1581867a9339f71a",
+        "rev": "7b501bd619b4d8fbf1ba4a7de7718d1ed670d26f",
         "type": "github"
       },
       "original": {
