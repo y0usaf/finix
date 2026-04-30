@@ -1,4 +1,4 @@
-{lib}: let
+{lib, ...}: let
   fetchGit = {
     rev,
     submodules ? false,
