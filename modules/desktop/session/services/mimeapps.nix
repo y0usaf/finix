@@ -8,7 +8,7 @@
   };
 
   config = lib.mkIf config.user.programs.mimeapps.enable {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".config/mimeapps.list" = {
         text = ''
           [Default Applications]

@@ -23,7 +23,7 @@ in {
       pkgs.bun
       pkgs.uv
     ];
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files = let
         mcpConfig = toJSON {inherit mcpServers;};
       in {

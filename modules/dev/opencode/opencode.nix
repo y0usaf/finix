@@ -36,7 +36,7 @@ in {
       pkgs.opencode
       pkgs.uv
     ];
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files = {
         ".config/opencode/opencode.json" = {
           text = builtins.toJSON ({
@@ -205,7 +205,7 @@ in {
 
             ## NixOS-Specific Protocols
 
-            - Uses bayt (NOT home-manager)
+            - Uses manzil (NOT home-manager)
             - Check flake.nix for available inputs
             - Clone external repos to `tmp/` folder (in gitignore)
             - Rebuild with `nh os switch` after configuration changes

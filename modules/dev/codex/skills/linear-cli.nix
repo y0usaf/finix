@@ -7,7 +7,7 @@
   codexCfg = config.user.dev.codex;
 in {
   config = lib.mkIf (codexCfg.enable && (lib.attrByPath ["skills" "linear-cli" "enable"] true codexCfg)) {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".codex/skills/linear-cli/SKILL.md" = {
         text = skill.skill;
       };

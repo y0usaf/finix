@@ -8,7 +8,7 @@
   codexCfg = user.dev.codex;
 in {
   config = lib.mkIf (codexCfg.enable && (lib.attrByPath ["skills" "gh" "enable"] true codexCfg) && (lib.attrByPath ["tools" "gh" "enable"] false user)) {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".codex/skills/gh/SKILL.md" = {
         text = skill.skill;
       };

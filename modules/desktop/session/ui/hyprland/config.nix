@@ -15,7 +15,7 @@
       pkgs.swaybg
       pkgs.xwayland
     ];
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files = {
         ".config/hypr/hyprpaper.conf" = {
           text = ''

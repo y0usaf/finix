@@ -8,7 +8,7 @@
     enable = lib.mkEnableOption "Keybard webapp";
   };
   config = lib.mkIf config.user.programs.keybard.enable {
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files = {
         ".local/share/applications/keybard.desktop" = {
           text = ''

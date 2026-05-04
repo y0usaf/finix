@@ -11,7 +11,7 @@
     environment.systemPackages = [
       pkgs.bun
     ];
-    bayt.users."${config.user.name}".files.".config/bun/bunfig.toml" = {
+    manzil.users."${config.user.name}".files.".config/bun/bunfig.toml" = {
       text = ''
         [install]
         cache_dir = "${config.user.homeDirectory}/.cache/bun"

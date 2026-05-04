@@ -26,7 +26,7 @@ in {
         pkgs.playerctl
       ];
 
-      bayt.users."${config.user.name}".files.".config/sway/config".text = lib.mkBefore ''
+      manzil.users."${config.user.name}".files.".config/sway/config".text = lib.mkBefore ''
         include /etc/sway/config.d/*
 
         set $mod Mod1
@@ -60,7 +60,7 @@ in {
     }
 
     (lib.mkIf (sway.extraConfig != "") {
-      bayt.users."${config.user.name}".files.".config/sway/config".text = lib.mkAfter sway.extraConfig;
+      manzil.users."${config.user.name}".files.".config/sway/config".text = lib.mkAfter sway.extraConfig;
     })
   ]);
 }

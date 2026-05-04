@@ -96,7 +96,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    bayt.users."${config.user.name}".files = mkMerge [
+    manzil.users."${config.user.name}".files = mkMerge [
       (mkIf cfg.scriptExtender.enable {
         "${bg3Bin}/DWrite.dll" = {
           source = "${pkgs.fetchzip {

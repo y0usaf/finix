@@ -127,7 +127,7 @@ in {
       };
     };
 
-    bayt.users."${config.user.name}" =
+    manzil.users."${config.user.name}" =
       {
         files =
           (lib.mapAttrs' (name: scheme:
