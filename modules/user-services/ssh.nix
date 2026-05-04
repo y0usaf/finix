@@ -14,7 +14,7 @@ in {
     environment.systemPackages = [
       pkgs.openssh
     ];
-    bayt.users."${userName}".files =
+    manzil.users."${userName}".files =
       {
         ".ssh/config" = {
           text = ''

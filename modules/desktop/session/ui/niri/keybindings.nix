@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    bayt.users."${config.user.name}".files.".config/niri/config.kdl".value.binds = {
+    manzil.users."${config.user.name}".files.".config/niri/config.kdl".value.binds = {
       "Mod+Shift+Slash" = {show-hotkey-overlay = {};};
       "Mod+Shift+E" = {quit = {};};
       "Mod+O" = {toggle-overview = {};};

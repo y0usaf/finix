@@ -7,7 +7,7 @@
     enable = lib.mkEnableOption "tui launcher";
   };
   config = lib.mkIf config.user.programs.tui-launcher.enable {
-    bayt.users."${config.user.name}".files.".config/scripts/tui-launcher.sh" = {
+    manzil.users."${config.user.name}".files.".config/scripts/tui-launcher.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash

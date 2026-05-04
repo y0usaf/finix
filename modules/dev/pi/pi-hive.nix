@@ -30,7 +30,7 @@ in {
   };
 
   config = lib.mkIf (cfg.enable && hiveCfg.enable) {
-    bayt.users."${config.user.name}".files =
+    manzil.users."${config.user.name}".files =
       {
         ".pi/agent/pi-hive.json".text = builtins.toJSON {
           inherit (hiveCfg) maxDepth maxLiveAgents;

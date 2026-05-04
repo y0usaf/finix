@@ -8,7 +8,7 @@
     enable = lib.mkEnableOption "Google Meet webapp";
   };
   config = lib.mkIf config.user.programs.google-meet.enable {
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files = {
         ".local/share/applications/google-meet.desktop" = {
           text = ''

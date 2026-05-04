@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.dev.codex.enable {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".codex/INSTRUCTIONS.md" = {
         text = ''
           <system>

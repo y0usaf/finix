@@ -8,7 +8,7 @@
   '';
 in {
   config = lib.mkIf config.user.ui.niri.enable {
-    bayt.users."${config.user.name}".files =
+    manzil.users."${config.user.name}".files =
       lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
         ".config/zsh/.zprofile" = {
           text = niriMarker;

@@ -9,7 +9,7 @@ _: {
       "/etc/NetworkManager/system-connections"
       "/var/lib/docker"
       "/var/lib/tailscale"
-      "/var/lib/bayt"
+      "/var/lib/manzil"
       "/var/lib/NetworkManager"
       "/var/lib/bluetooth"
     ];

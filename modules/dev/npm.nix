@@ -11,7 +11,7 @@
     environment.systemPackages = [
       pkgs.nodejs_20
     ];
-    bayt.users."${config.user.name}".files.".config/npm/npmrc" = {
+    manzil.users."${config.user.name}".files.".config/npm/npmrc" = {
       text = ''
         prefix=${config.user.homeDirectory}/.local/share/npm
         cache=${config.user.homeDirectory}/.cache/npm

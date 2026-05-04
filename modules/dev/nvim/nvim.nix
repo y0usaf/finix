@@ -38,7 +38,7 @@ in {
       pkgs.jq
     ];
 
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".config/nvim/init.lua" = {
         text = ''
           -- Leader keys

@@ -16,7 +16,7 @@ in {
     environment.systemPackages = [
       pkgs.foot
     ];
-    bayt.users."${config.user.name}".files.".config/foot/foot.ini" = {
+    manzil.users."${config.user.name}".files.".config/foot/foot.ini" = {
       # Foot config - colors loaded dynamically from wallust via include (cache-only theming)
       text = ''
         include=~/.cache/wallust/colors_foot.ini

@@ -25,7 +25,7 @@
       pkgs.git
       pkgs.openssh
     ];
-    bayt.users."${config.user.name}".files.".config/git/config" = {
+    manzil.users."${config.user.name}".files.".config/git/config" = {
       generator = lib.generators.toGitINI;
       value = {
         user = {

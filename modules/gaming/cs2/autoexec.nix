@@ -8,7 +8,7 @@ in {
   config = mkIf config.user.gaming.core.enable (let
     steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path;
   in {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       "${steamPath}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/autoexec.cfg".text = ''
         alias +switchw "slot3; +lookatweapon"
         alias -switchw "-lookatweapon; lastinv"

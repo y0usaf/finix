@@ -15,7 +15,7 @@
   config = lib.mkIf config.user.ui.gpuishell.enable {
     environment.systemPackages = [pkgs.gpuishell];
 
-    bayt.users."${config.user.name}".files.".config/gpuishell/config.toml" = {
+    manzil.users."${config.user.name}".files.".config/gpuishell/config.toml" = {
       generator =
         if lib.generators ? toTOML
         then lib.generators.toTOML {}

@@ -11,7 +11,7 @@
   config = lib.mkIf config.user.programs.discord.vesktop.enable {
     environment.systemPackages = [pkgs.vesktop];
 
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".config/vesktop/settings.json" = {
         generator = lib.generators.toJSON {};
         value = {
