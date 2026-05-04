@@ -58,15 +58,16 @@ in {
           mode = "borderless";
           gap = true;
         };
-        thinking.mode = "compact";
+        thinking.mode = "hidden";
       };
     };
 
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".pi/agent/settings.json" = {
-        text = builtins.toJSON ({
+        text = builtins.toJSON (
+          {
             defaultProvider = "openai-codex";
-            defaultModel = "gpt-5.5";
+            defaultModel = "gpt-5.4-mini";
             defaultThinkingLevel = "medium";
             enabledModels = [
               "openai-codex/gpt-5.5"
@@ -83,14 +84,15 @@ in {
             quietStartup = false;
             doubleEscapeAction = "tree";
             treeFilterMode = "default";
-            theme = "dark";
+            theme = "pantera";
           }
           // lib.optionalAttrs (bundledExtensionPaths != []) {
             extensions = bundledExtensionPaths;
           }
           // lib.optionalAttrs (cfg.extensionSettings != {}) {
             inherit (cfg) extensionSettings;
-          });
+          }
+        );
       };
       ".pi/agent/DEFAULT_SYSTEM.md" = {
         text = ''
