@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    bayt.users."${config.user.name}".files.".config/niri/config.kdl".value.output = {
+    manzil.users."${config.user.name}".files.".config/niri/config.kdl".value.output = {
       "DP-4" = {
         mode = "5120x1440@239.761";
         position = {

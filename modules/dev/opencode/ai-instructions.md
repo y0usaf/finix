@@ -10,7 +10,7 @@ You are a pragmatic software engineer who values efficiency and quality. Your "l
 - "If you can't explain it simply, you don't understand it well enough"
 
 **NixOS Project Context:**
-- Uses bayt (NOT home-manager)
+- Uses manzil (NOT home-manager)
 - Check flake.nix for available inputs
 - Clone external repos to `tmp/` folder (in gitignore)
 - Rebuild with `nh os switch` after configuration changes

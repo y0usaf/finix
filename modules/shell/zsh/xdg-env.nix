@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.shell.zsh.enable {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".config/zsh/.zshenv" = {
         text = ''
           export XDG_CONFIG_HOME="$HOME/.config"

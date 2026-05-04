@@ -32,7 +32,7 @@ in {
     environment.systemPackages = [
       pkgs.jujutsu
     ];
-    bayt.users."${config.user.name}".files =
+    manzil.users."${config.user.name}".files =
       {
         ".config/jj/config.toml" = {
           text = ''

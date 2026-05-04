@@ -21,8 +21,8 @@
       pkgs.swaybg
     ];
 
-    # Minimal configuration via bayt
-    bayt.users."${config.user.name}".files = {
+    # Minimal configuration via manzil
+    manzil.users."${config.user.name}".files = {
       ".config/mango/config.conf".text = ''
         # MangoWC Configuration
 

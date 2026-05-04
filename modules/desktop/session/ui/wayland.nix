@@ -17,7 +17,7 @@ in {
       pkgs.wl-clipboard-rs
       pkgs.hyprpicker
     ];
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files =
         lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
           ".config/zsh/.zprofile" = {

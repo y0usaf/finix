@@ -39,7 +39,7 @@ in {
       pkgs.tree
     ];
 
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files =
         {
           ".config/nushell/config.nu" = {

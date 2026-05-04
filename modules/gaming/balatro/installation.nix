@@ -95,7 +95,7 @@ in {
       steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
       balatroCfg = user.gaming.balatro;
     in {
-      bayt.users."${config.user.name}".files =
+      manzil.users."${config.user.name}".files =
         (lib.mapAttrs' (
             _: mod:
               lib.nameValuePair

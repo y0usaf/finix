@@ -7,7 +7,7 @@
   claudeCodeCfg = user.dev.claude-code;
 in {
   config = lib.mkIf claudeCodeCfg.enable {
-    bayt.users."${user.name}".files =
+    manzil.users."${user.name}".files =
       (let
         inherit (builtins) toJSON;
         inherit (lib) foldl' optionalAttrs mapAttrs mapAttrs' mapAttrsToList nameValuePair attrNames;

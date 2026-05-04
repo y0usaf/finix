@@ -14,7 +14,7 @@ in {
     environment.systemPackages = [
       pkgs.realesrgan-ncnn-vulkan
     ];
-    bayt.users."${config.user.name}".files =
+    manzil.users."${config.user.name}".files =
       lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
         ".config/zsh/aliases/esrgan.zsh" = {
           text = ''

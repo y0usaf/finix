@@ -40,7 +40,7 @@ in {
       })
       pywalfoxNative
     ];
-    bayt.users."${userName}" = {
+    manzil.users."${userName}" = {
       files =
         {
           ".librewolf/profiles.ini" = {

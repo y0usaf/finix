@@ -89,7 +89,7 @@ in {
       "d ${xdgState}/zsh 0755 ${userName} ${userName} - -"
     ];
 
-    bayt.users."${userName}".files = {
+    manzil.users."${userName}".files = {
       ".config/user-dirs.dirs" = {
         text = ''
           XDG_DESKTOP_DIR="${home}/Desktop"

@@ -4,8 +4,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    bayt = {
-      url = "github:y0usaf/bayt?ref=feat/shared-core-standalone-phase4";
+    manzil = {
+      url = "github:y0usaf/Manzil";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf (config.user.gaming.balatro.enable && lib.elem "morespeeds" config.user.gaming.balatro.enabledMods) {
-    bayt.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua" = {
+    manzil.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/MoreSpeeds.lua" = {
       text = ''
         --- STEAMODDED HEADER
         --- MOD_NAME: More Speed

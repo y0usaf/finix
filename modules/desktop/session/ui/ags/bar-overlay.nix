@@ -58,7 +58,7 @@
       environment.systemPackages = [
         agsWithModules
       ];
-      bayt.users."${config.user.name}" = {
+      manzil.users."${config.user.name}" = {
         files = {
           ".config/ags/bar-overlay.tsx".text =
             builtins.replaceStrings

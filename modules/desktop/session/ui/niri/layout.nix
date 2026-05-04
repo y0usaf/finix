@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    bayt.users."${config.user.name}".files.".config/niri/config.kdl".value.layout = {
+    manzil.users."${config.user.name}".files.".config/niri/config.kdl".value.layout = {
       gaps = 10;
       center-focused-column = "never";
       default-column-display = "tabbed";

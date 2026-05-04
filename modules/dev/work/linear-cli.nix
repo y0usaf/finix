@@ -30,7 +30,7 @@ in {
       pkgs.libsecret
     ];
 
-    bayt.users."${config.user.name}".files = lib.optionalAttrs (builtins.length (builtins.attrNames cfg.settings) > 0) {
+    manzil.users."${config.user.name}".files = lib.optionalAttrs (builtins.length (builtins.attrNames cfg.settings) > 0) {
       ".config/linear/linear.toml" = {
         source = tomlFormat.generate "linear-cli-config" cfg.settings;
       };

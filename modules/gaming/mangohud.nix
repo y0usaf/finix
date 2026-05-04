@@ -14,7 +14,7 @@
   };
 
   config = lib.mkIf config.user.gaming.mangohud.enable {
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       xdg = {
         config = {
           files = {

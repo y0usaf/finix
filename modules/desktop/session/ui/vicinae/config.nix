@@ -26,8 +26,8 @@
   config = lib.mkIf config.user.ui.vicinae.enable {
     environment.systemPackages = [pkgs.vicinae];
 
-    # Vicinae configuration via bayt
-    bayt.users."${config.user.name}".files.".config/vicinae/vicinae.json" = {
+    # Vicinae configuration via manzil
+    manzil.users."${config.user.name}".files.".config/vicinae/vicinae.json" = {
       text = builtins.toJSON (lib.recursiveUpdate {
           # Vicinae defaults from config-service.hpp (with custom overrides)
           closeOnFocusLoss = false;

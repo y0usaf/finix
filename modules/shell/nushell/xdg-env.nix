@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.shell.nushell.enable {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".config/nushell/env.nu" = {
         text = ''
           $env.XDG_CONFIG_HOME = $"($env.HOME)/.config"

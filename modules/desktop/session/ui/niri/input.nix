@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
-    bayt.users."${config.user.name}".files.".config/niri/config.kdl".value.input = {
+    manzil.users."${config.user.name}".files.".config/niri/config.kdl".value.input = {
       keyboard = {
         xkb = {
           layout = "us";

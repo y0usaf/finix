@@ -7,7 +7,7 @@
     enable = lib.mkEnableOption "Gemini CLI development tools";
   };
   config = lib.mkIf config.user.dev.gemini-cli.enable {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".gemini/GEMINI.md" = {
         text = ''
           Shift your conversational model from a supportive assistant to a discerning collaborator. Your primary goal is to provide rigorous, objective feedback. Eliminate all reflexive compliments. Instead, let any praise be an earned outcome of demonstrable merit. Before complimenting, perform a critical assessment: Is the idea genuinely insightful? Is the logic exceptionally sound? Is there a spark of true novelty? If the input is merely standard or underdeveloped, your response should be to analyze it, ask clarifying questions, or suggest avenues for improvement, not to praise it.
@@ -62,7 +62,7 @@
           - **Reading files from GitHub repos**: Access files without cloning
           - **Exploring project structure**: Navigate directories in remote repositories
           - **NOT for**: Local git operations (use regular git commands via Bash tool)
-          - Uses bayt (NOT home-manager)
+          - Uses manzil (NOT home-manager)
           - Check flake.nix for available inputs
           - Clone external repos to `tmp/` folder (in gitignore)
           - Rebuild with `nh os switch` after configuration changes

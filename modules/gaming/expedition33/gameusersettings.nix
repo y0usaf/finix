@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.gaming.expedition33.enable {
-    bayt.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/1903340/pfx/drive_c/users/steamuser/AppData/Local/Sandfall/Saved/Config/Windows/GameUserSettings.ini" = {
+    manzil.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/1903340/pfx/drive_c/users/steamuser/AppData/Local/Sandfall/Saved/Config/Windows/GameUserSettings.ini" = {
       generator = lib.generators.toINI {};
       value = {
         "ScalabilityGroups" = {

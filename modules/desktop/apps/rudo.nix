@@ -16,7 +16,7 @@ in {
   config = lib.mkIf config.user.programs.rudo.enable {
     environment.systemPackages = [flakeInputs.rudo.packages."${system}".default];
 
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".config/rudo/config.toml" = {
         source = (pkgs.formats.toml {}).generate "rudo-config" (lib.recursiveUpdate {
             window = {

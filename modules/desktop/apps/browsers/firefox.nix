@@ -27,7 +27,7 @@ in {
         extraPolicies = browserShared.policies // {DisableFirefoxStudies = true;};
       })
     ];
-    bayt.users."${userName}" = {
+    manzil.users."${userName}" = {
       files =
         {
           ".mozilla/firefox/profiles.ini" = {

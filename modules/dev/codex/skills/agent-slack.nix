@@ -8,7 +8,7 @@
   codexCfg = userDev.codex;
 in {
   config = lib.mkIf (codexCfg.enable && (lib.attrByPath ["skills" "agent-slack" "enable"] true codexCfg) && userDev.work.agent-slack.enable) {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       ".codex/skills/agent-slack/SKILL.md" = {
         text = skill.skill;
       };

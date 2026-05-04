@@ -8,7 +8,7 @@
     flakeInputs.strictix.packages."${pkgs.stdenv.hostPlatform.system}".default
   ];
 
-  bayt.users."${config.user.name}".files.".config/strictix/config.toml" = {
+  manzil.users."${config.user.name}".files.".config/strictix/config.toml" = {
     source = (pkgs.formats.toml {}).generate "strictix-config" {
       enabled = [
         "single_use_let"

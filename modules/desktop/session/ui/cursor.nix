@@ -39,7 +39,7 @@ in {
       [theme.xcursorPackage]
       ++ lib.optional (theme ? hyprcursorPackage) theme.hyprcursorPackage;
 
-    bayt.users."${user.name}" = {
+    manzil.users."${user.name}" = {
       files =
         {
           ".config/gtk-3.0/settings.ini" = {

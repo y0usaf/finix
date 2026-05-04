@@ -39,7 +39,7 @@ in {
         PYTHON_HISTORY = "${homeDirectory}/.local/state/python_history";
       };
     };
-    bayt.users."${userName}".files = let
+    manzil.users."${userName}".files = let
       ldLibPath = lib.makeLibraryPath [
         ccLib
         pkgs.zlib

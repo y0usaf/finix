@@ -61,7 +61,7 @@
       config.user.ui.fonts.emoji.package
     ];
 
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files.".config/fontconfig/fonts.conf" = {
         text = ''
           <?xml version="1.0"?>

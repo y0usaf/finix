@@ -18,7 +18,7 @@
   backgroundColor = "transparent";
 in {
   options.user.ui.gtk = {
-    enable = lib.mkEnableOption "GTK theming and configuration using bayt";
+    enable = lib.mkEnableOption "GTK theming and configuration using manzil";
     scale = lib.mkOption {
       type = lib.types.float;
       default = 1.0;
@@ -31,7 +31,7 @@ in {
       pkgs.gtk3
       pkgs.gtk4
     ];
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files =
         {
           ".config/gtk-3.0/settings.ini" = {

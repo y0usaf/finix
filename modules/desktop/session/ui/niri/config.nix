@@ -16,7 +16,7 @@
       pkgs.xwayland-satellite
     ];
 
-    bayt.users."${config.user.name}".files.".config/niri/config.kdl" = {
+    manzil.users."${config.user.name}".files.".config/niri/config.kdl" = {
       generator = config.lib.generators.toNiriconf;
       value =
         {

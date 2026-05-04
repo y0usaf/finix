@@ -8,7 +8,7 @@
       (config.user.programs.discord.stable.enable or false)
       || (config.user.programs.discord.canary.enable or false)
     ) {
-      bayt.users."${config.user.name}".files = {
+      manzil.users."${config.user.name}".files = {
         ".config/Vencord/themes/visual-refresh.css".text = ''
           /* Hide the Visual Refresh title bar */
           .visual-refresh {

@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.hyprland.enable {
-    bayt.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
+    manzil.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
       text = lib.mkBefore (config.lib.generators.toHyprconf {
         attrs = {
           "$mod" = "ALT";

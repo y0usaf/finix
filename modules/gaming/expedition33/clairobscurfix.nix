@@ -8,7 +8,7 @@
   steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
 in {
   config = lib.mkIf user.gaming.expedition33.enable {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       "${steamPath}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
         source = "${mods.ClairObscurFix.src}/ClairObscurFix.asi";
       };

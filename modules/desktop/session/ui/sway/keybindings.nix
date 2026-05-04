@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.sway.enable {
-    bayt.users."${config.user.name}".files.".config/sway/config".text = lib.mkAfter ''
+    manzil.users."${config.user.name}".files.".config/sway/config".text = lib.mkAfter ''
       bindsym $mod+Shift+slash exec swaynag -t warning -m 'Hotkey overlay unavailable in sway; see ~/.config/sway/config'
       bindsym $mod+Shift+e exit
       ${lib.optionalString (config.user.ui.quickshell.enable or false) "bindsym $mod+o exec quickshell ipc call workspaces toggle"}

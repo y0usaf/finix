@@ -1,6 +1,6 @@
 {flakeInputs, ...}: {
   imports = [
-    flakeInputs.bayt.nixosModules.default
+    flakeInputs.manzil.nixosModules.default
     flakeInputs.tweakcc.nixosModules.default
     flakeInputs.mango.nixosModules.mango
     flakeInputs.impermanence.nixosModules.impermanence
@@ -8,7 +8,7 @@
     flakeInputs.nvtune.nixosModules.default
     flakeInputs.pi-flake.nixosModules.default
   ];
-  bayt = {
+  manzil = {
     clobberByDefault = true;
     users = {};
   };

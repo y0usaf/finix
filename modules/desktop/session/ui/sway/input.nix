@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.ui.sway.enable {
-    bayt.users."${config.user.name}".files.".config/sway/config".text = lib.mkAfter ''
+    manzil.users."${config.user.name}".files.".config/sway/config".text = lib.mkAfter ''
       input type:keyboard {
           xkb_layout us
       }

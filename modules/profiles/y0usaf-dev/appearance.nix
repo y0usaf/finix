@@ -5,6 +5,6 @@ _: {
     gtkFontSize = 23;
     cursorSize = 18;
     opacity = 0.7;
-    wallust.defaultTheme = "bumblebee";
+    wallust.defaultTheme = "pantera";
   };
 }
