@@ -65,7 +65,7 @@
   };
 in {
   config = lib.mkIf user.gaming.duet-night-abyss.enable {
-    bayt.users."${config.user.name}".files = {
+    manzil.users."${config.user.name}".files = {
       "${steamPrefix}/EMLauncher/Saved/Config/WindowsNoEditor/GameUserSettings.ini" = mkEntry {
         resX = "1344";
         resY = "642";

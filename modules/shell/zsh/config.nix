@@ -27,7 +27,7 @@ in {
     };
     programs.zsh.enable = true;
 
-    bayt.users."${config.user.name}" = {
+    manzil.users."${config.user.name}" = {
       files =
         {
           ".config/zsh/aliases.zsh" = {

@@ -52,7 +52,7 @@ in {
       })
     ];
 
-    bayt.users."${userName}".files.".config/discordcanary/settings.json" = {
+    manzil.users."${userName}".files.".config/discordcanary/settings.json" = {
       generator = lib.generators.toJSON {};
       value = {
         SKIP_HOST_UPDATE = true;

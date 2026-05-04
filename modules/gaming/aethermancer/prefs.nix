@@ -11,7 +11,7 @@
     };
   };
   config = lib.mkIf config.user.gaming.aethermancer.enable {
-    bayt.users."${config.user.name}".files.".config/unity3d/moi rai games/Aethermancer/prefs".text = ''
+    manzil.users."${config.user.name}".files.".config/unity3d/moi rai games/Aethermancer/prefs".text = ''
       <unity_prefs version_major="1" version_minor="1">
       	<pref name="Screen_VSync_Enabled" type="int">0</pref>
       	<pref name="stg_user_setting_ui" type="int">1</pref>

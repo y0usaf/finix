@@ -21,7 +21,7 @@
   };
 in {
   config = lib.mkIf claudeCodeCfg.enable {
-    bayt.users."${user.name}".files = {
+    manzil.users."${user.name}".files = {
       ".claude/on-agent-need-attention.wav" = {
         source = ./assets/tuturu.ogg;
       };
