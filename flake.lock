@@ -815,9 +815,9 @@
         ],
         "piCodexFast": "piCodexFast",
         "piCompact": "piCompact",
+        "piContextJanitor": "piContextJanitor",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piHashline": "piHashline",
-        "piHive": "piHive",
         "piMinimalUi": "piMinimalUi",
         "piMorph": "piMorph",
         "piRtk": "piRtk",
@@ -826,11 +826,11 @@
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1777860249,
-        "narHash": "sha256-luL6LgPH8d6HU2S8naU5AgXboc4bG0WKYf/xP6nkIg4=",
+        "lastModified": 1777998884,
+        "narHash": "sha256-nQhkBlfaNwdSRsknOmNk20QTngoMpHPr6Sc3E90/tow=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "d9d73db5028a6dac817d10d0b9a236e51ce932c0",
+        "rev": "d9a23e8c2b4de72d99653e366eb098fa45fe23b8",
         "type": "github"
       },
       "original": {
@@ -877,6 +877,25 @@
         "pi-flake"
       ]
     },
+    "piContextJanitor": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-context-janitor",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-context-janitor",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
+    },
     "piGeckoWebsearch": {
       "inputs": {
         "nixpkgs": [
@@ -909,25 +928,6 @@
       },
       "original": {
         "path": "./extensions/pi-hashline",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piHive": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-hive",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-hive",
         "type": "path"
       },
       "parent": [
