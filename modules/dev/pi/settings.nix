@@ -58,7 +58,6 @@ in {
           mode = "borderless";
           gap = true;
         };
-        thinking.mode = "hidden";
       };
     };
 
@@ -71,8 +70,7 @@ in {
             defaultThinkingLevel = "medium";
             enabledModels = [
               "openai-codex/gpt-5.5"
-              "openai-codex/gpt-5.4-mini"
-              "anthropic/claude-opus-4-7"
+              "anthropic/claude-opus-4-6"
             ];
             compaction.enabled = false;
             showHardwareCursor = true;
@@ -81,7 +79,7 @@ in {
             transport = "sse";
             hideThinkingBlock = true;
             collapseChangelog = true;
-            quietStartup = false;
+            quietStartup = true;
             doubleEscapeAction = "tree";
             treeFilterMode = "default";
             theme = "pantera";
