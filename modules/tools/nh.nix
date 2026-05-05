@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: let
   nhOpts = config.user.tools.nh;
@@ -21,7 +22,7 @@ in {
   };
   config = lib.mkIf nhOpts.enable {
     environment.systemPackages = [
-      pkgs.nh
+      flakeInputs.nh.packages.${pkgs.system}.default
     ];
     manzil.users."${config.user.name}".files = let
       nhFlake = toString (

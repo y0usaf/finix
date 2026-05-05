@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    nh = {
+      url = "github:nix-community/nh";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     manzil = {
       url = "github:y0usaf/Manzil";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -118,6 +123,11 @@
       url = "github:y0usaf/nvtune";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-on-droid = {
+      url = "github:nix-community/nix-on-droid";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {nixpkgs, ...} @ inputs: let
@@ -180,6 +190,17 @@
         hostDir = ./hosts/y0usaf-server;
         profileDir = ./modules/profiles/server;
         domains = ["core" "shell" "tools" "user-services" "dev"];
+      };
+    };
+
+    nixOnDroidConfigurations = {
+      default = inputs."nix-on-droid".lib.nixOnDroidConfiguration {
+        pkgs = import nixpkgs {
+          system = "aarch64-linux";
+        };
+        modules = [
+          ./hosts/android-phone/nix-on-droid.nix
+        ];
       };
     };
 
