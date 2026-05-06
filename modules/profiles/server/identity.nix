@@ -1,4 +1,12 @@
-{pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  readKey = path: lib.removeSuffix "\n" (builtins.readFile path);
+  desktopSshKey = readKey ../../../hosts/y0usaf-desktop/user-ssh.pub;
+  phoneSshKey = readKey ../../../hosts/android-phone/user-ssh.pub;
+in {
   user = {
     name = "y0usaf";
     homeDirectory = "/home/y0usaf";
@@ -12,7 +20,8 @@
     ignoreShellProgramCheck = true;
     hashedPasswordFile = "/persist/secrets/password-hashes/y0usaf";
     openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6ZHkn1pACV406TM5yUCRt/874vybgpUW3sUKka9nAC y0usaf@y0usaf-desktop"
+      desktopSshKey
+      phoneSshKey
     ];
   };
 
