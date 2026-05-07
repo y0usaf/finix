@@ -198,6 +198,9 @@
         pkgs = import nixpkgs {
           system = "aarch64-linux";
         };
+        extraSpecialArgs = {
+          flakeInputs = inputs;
+        };
         modules = [
           ./hosts/android-phone/nix-on-droid.nix
         ];

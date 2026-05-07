@@ -475,16 +475,17 @@
         "nixpkgs": [
           "nixpkgs"
         ],
+        "npm-lockfile-fix": "npm-lockfile-fix",
         "pyproject-build-systems": "pyproject-build-systems",
         "pyproject-nix": "pyproject-nix_2",
         "uv2nix": "uv2nix_2"
       },
       "locked": {
-        "lastModified": 1775048973,
-        "narHash": "sha256-tJs0cR/UKyHxpPCyX2lv4Hx14o8YZ8ZAbgNDaLWzf+g=",
+        "lastModified": 1778118030,
+        "narHash": "sha256-aYOqj6C8mCrCIDU4XBvtQh53L69Yc/A6M5tjhcTzNuA=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "e905768ffd7fcc6f5e2336167b0e5b876a9df573",
+        "rev": "49c3c2e0d37c96dc593a807a5e81fdf4f0aa3d85",
         "type": "github"
       },
       "original": {
@@ -909,6 +910,27 @@
         "type": "gitlab"
       }
     },
+    "npm-lockfile-fix": {
+      "inputs": {
+        "nixpkgs": [
+          "hermes-agent",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775903712,
+        "narHash": "sha256-2GV79U6iVH4gKAPWYrxUReB0S41ty/Y3dBLquU8AlaA=",
+        "owner": "jeslie0",
+        "repo": "npm-lockfile-fix",
+        "rev": "c6093acb0c0548e0f9b8b3d82918823721930fe8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jeslie0",
+        "repo": "npm-lockfile-fix",
+        "type": "github"
+      }
+    },
     "nvtune": {
       "inputs": {
         "nixpkgs": [
@@ -980,19 +1002,21 @@
         "piContextJanitor": "piContextJanitor",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piHashline": "piHashline",
-        "piMinimalUi": "piMinimalUi",
+        "piMinimalEditor": "piMinimalEditor",
         "piMorph": "piMorph",
+        "piPomodoro": "piPomodoro",
         "piRtk": "piRtk",
         "piSrc": "piSrc",
         "piToolManagement": "piToolManagement",
-        "piWebfetch": "piWebfetch"
+        "piWebfetch": "piWebfetch",
+        "piWorkingIndicator": "piWorkingIndicator"
       },
       "locked": {
-        "lastModified": 1777998884,
-        "narHash": "sha256-nQhkBlfaNwdSRsknOmNk20QTngoMpHPr6Sc3E90/tow=",
+        "lastModified": 1778103408,
+        "narHash": "sha256-X7bPDCNX7kvSxOOx9UmZGFcEnG0U2L5oVBz3K7hw34U=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "d9a23e8c2b4de72d99653e366eb098fa45fe23b8",
+        "rev": "766d3cee31e7170b192368a24a54c02aab56347d",
         "type": "github"
       },
       "original": {
@@ -1096,7 +1120,7 @@
         "pi-flake"
       ]
     },
-    "piMinimalUi": {
+    "piMinimalEditor": {
       "inputs": {
         "nixpkgs": [
           "pi-flake",
@@ -1104,11 +1128,11 @@
         ]
       },
       "locked": {
-        "path": "./extensions/pi-minimal-ui",
+        "path": "./extensions/pi-minimal-editor",
         "type": "path"
       },
       "original": {
-        "path": "./extensions/pi-minimal-ui",
+        "path": "./extensions/pi-minimal-editor",
         "type": "path"
       },
       "parent": [
@@ -1128,6 +1152,25 @@
       },
       "original": {
         "path": "./extensions/pi-morph",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
+    },
+    "piPomodoro": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-pomodoro",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-pomodoro",
         "type": "path"
       },
       "parent": [
@@ -1202,6 +1245,25 @@
       },
       "original": {
         "path": "./extensions/pi-webfetch",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
+    },
+    "piWorkingIndicator": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-working-indicator",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-working-indicator",
         "type": "path"
       },
       "parent": [

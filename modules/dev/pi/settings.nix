@@ -59,6 +59,13 @@ in {
           gap = true;
         };
       };
+      "pi-pomodoro" = {
+        workMinutes = 25;
+        breakMinutes = 5;
+        longBreakMinutes = 15;
+        longBreakEvery = 4;
+        notifyTransitions = true;
+      };
     };
 
     manzil.users."${config.user.name}".files = {

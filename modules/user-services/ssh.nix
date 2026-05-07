@@ -7,18 +7,6 @@
   userName = config.user.name;
   homeDir = config.user.homeDirectory;
   readKey = path: lib.removeSuffix "\n" (builtins.readFile path);
-  knownHosts = {
-    "y0usaf-desktop" = readKey ../../hosts/y0usaf-desktop/host-ssh-ed25519.pub;
-    "desktop" = readKey ../../hosts/y0usaf-desktop/host-ssh-ed25519.pub;
-    "y0usaf-server" = readKey ../../hosts/y0usaf-server/host-ssh-ed25519.pub;
-    "server" = readKey ../../hosts/y0usaf-server/host-ssh-ed25519.pub;
-    "android-phone" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
-    "100.93.111.41" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
-    "192.168.2.34" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
-  };
-  knownHostsText = lib.concatStringsSep "\n" (
-    lib.mapAttrsToList (host: key: "${host} ${key}") knownHosts
-  );
 in {
   options.user.services.ssh = {
     enable = lib.mkEnableOption "SSH configuration module";
@@ -75,7 +63,19 @@ in {
           '';
         };
         ".ssh/known_hosts" = {
-          text = knownHostsText + "\n";
+          text =
+            (lib.concatStringsSep "\n" (
+              lib.mapAttrsToList (host: key: "${host} ${key}") {
+                "y0usaf-desktop" = readKey ../../hosts/y0usaf-desktop/host-ssh-ed25519.pub;
+                "desktop" = readKey ../../hosts/y0usaf-desktop/host-ssh-ed25519.pub;
+                "y0usaf-server" = readKey ../../hosts/y0usaf-server/host-ssh-ed25519.pub;
+                "server" = readKey ../../hosts/y0usaf-server/host-ssh-ed25519.pub;
+                "android-phone" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
+                "100.93.111.41" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
+                "192.168.2.34" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
+              }
+            ))
+            + "\n";
         };
       }
       // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
