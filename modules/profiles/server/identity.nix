@@ -4,8 +4,6 @@
   ...
 }: let
   readKey = path: lib.removeSuffix "\n" (builtins.readFile path);
-  desktopSshKey = readKey ../../../hosts/y0usaf-desktop/user-ssh.pub;
-  phoneSshKey = readKey ../../../hosts/android-phone/user-ssh.pub;
 in {
   user = {
     name = "y0usaf";
@@ -20,8 +18,8 @@ in {
     ignoreShellProgramCheck = true;
     hashedPasswordFile = "/persist/secrets/password-hashes/y0usaf";
     openssh.authorizedKeys.keys = [
-      desktopSshKey
-      phoneSshKey
+      (readKey ../../../hosts/y0usaf-desktop/user-ssh.pub)
+      (readKey ../../../hosts/android-phone/user-ssh.pub)
     ];
   };
 
