@@ -8,6 +8,8 @@
       };
       pulse.enable = true;
 
+      extraLadspaPackages = [pkgs.rnnoise-plugin.ladspa];
+
       # RNNoise neural network-based noise suppression for microphone
       extraConfig.pipewire."99-input-denoising" = {
         "context.modules" = [
@@ -21,7 +23,7 @@
                   {
                     "type" = "ladspa";
                     "name" = "rnnoise";
-                    "plugin" = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
+                    "plugin" = "librnnoise_ladspa";
                     "label" = "noise_suppressor_mono";
                     "control" = {
                       "VAD Threshold (%)" = 50; # Voice Activity Detection threshold
