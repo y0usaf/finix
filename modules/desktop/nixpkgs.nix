@@ -2,7 +2,6 @@
   nixpkgs = {
     overlays = [
       flakeInputs.gpui-shell.overlays.default
-      flakeInputs.agent-harness.overlays.default
       # Fix obs-vertical-canvas Qt6GuiPrivate cmake detection
       (_: prev: let
         prevObsPlugins = prev.obs-studio-plugins;

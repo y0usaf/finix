@@ -1,27 +1,5 @@
 {
   "nodes": {
-    "agent-harness": {
-      "inputs": {
-        "crane": "crane",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "rust-overlay": "rust-overlay"
-      },
-      "locked": {
-        "lastModified": 1775151677,
-        "narHash": "sha256-Ieqa1PNJ0z8E1Ial3FP3AsOV1UElej1UJeX5rQFNzuQ=",
-        "ref": "refs/heads/main",
-        "rev": "9e278d92d4eec23f422f5e8e780ccdd96b5996c6",
-        "revCount": 94,
-        "type": "git",
-        "url": "ssh://git@github.com/y0usaf/Agent-Harness"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/y0usaf/Agent-Harness"
-      }
-    },
     "agent-slack": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -134,21 +112,6 @@
     },
     "crane": {
       "locked": {
-        "lastModified": 1773189535,
-        "narHash": "sha256-E1G/Or6MWeP+L6mpQ0iTFLpzSzlpGrITfU2220Gq47g=",
-        "owner": "ipetkov",
-        "repo": "crane",
-        "rev": "6fa2fb4cf4a89ba49fc9dd5a3eb6cde99d388269",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ipetkov",
-        "repo": "crane",
-        "type": "github"
-      }
-    },
-    "crane_2": {
-      "locked": {
         "lastModified": 1769737823,
         "narHash": "sha256-DrBaNpZ+sJ4stXm+0nBX7zqZT9t9P22zbk6m5YhQxS4=",
         "owner": "ipetkov",
@@ -162,7 +125,7 @@
         "type": "github"
       }
     },
-    "crane_3": {
+    "crane_2": {
       "locked": {
         "lastModified": 1759893430,
         "narHash": "sha256-yAy4otLYm9iZ+NtQwTMEbqHwswSFUbhn7x826RR6djw=",
@@ -426,12 +389,12 @@
     },
     "gpui-shell": {
       "inputs": {
-        "crane": "crane_2",
+        "crane": "crane",
         "matugen": "matugen",
         "nixpkgs": [
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay_2"
+        "rust-overlay": "rust-overlay"
       },
       "locked": {
         "lastModified": 1775046320,
@@ -678,7 +641,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay_3"
+        "rust-overlay": "rust-overlay_2"
       },
       "locked": {
         "lastModified": 1776252914,
@@ -1360,7 +1323,6 @@
     },
     "root": {
       "inputs": {
-        "agent-harness": "agent-harness",
         "agent-slack": "agent-slack",
         "claude-code-nix": "claude-code-nix",
         "codex-cli-nix": "codex-cli-nix",
@@ -1412,27 +1374,6 @@
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
-          "agent-harness",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1773544328,
-        "narHash": "sha256-Iv+qez54LAz+isij4APBk31VWA//Go81hwFOXr5iWTw=",
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "rev": "4f977d776793c8bfbfdd7eca7835847ccc48874e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "type": "github"
-      }
-    },
-    "rust-overlay_2": {
-      "inputs": {
-        "nixpkgs": [
           "gpui-shell",
           "nixpkgs"
         ]
@@ -1451,7 +1392,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_3": {
+    "rust-overlay_2": {
       "inputs": {
         "nixpkgs": [
           "niri",
@@ -1472,7 +1413,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_4": {
+    "rust-overlay_3": {
       "inputs": {
         "nixpkgs": [
           "zjstatus-hints",
@@ -1782,9 +1723,9 @@
     },
     "zjstatus-hints": {
       "inputs": {
-        "crane": "crane_3",
+        "crane": "crane_2",
         "nixpkgs": "nixpkgs_4",
-        "rust-overlay": "rust-overlay_4"
+        "rust-overlay": "rust-overlay_3"
       },
       "locked": {
         "lastModified": 1776350044,
