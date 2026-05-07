@@ -4,6 +4,7 @@ _: {
       enable = true;
       model = "sonnet";
       subagentModel = "sonnet";
+      enabledPlugins."audio-notify@y0usaf-marketplace" = false;
     };
     codex = {
       enable = true;
