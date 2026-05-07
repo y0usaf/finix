@@ -114,11 +114,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    agent-harness = {
-      url = "git+ssh://git@github.com/y0usaf/Agent-Harness";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nvtune = {
       url = "github:y0usaf/nvtune";
       inputs.nixpkgs.follows = "nixpkgs";
