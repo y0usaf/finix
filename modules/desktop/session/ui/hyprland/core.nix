@@ -5,18 +5,6 @@
 }: let
   inherit (config.user.appearance) cursorColor cursorTheme;
   colorCap = (lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor);
-  xcursorTheme =
-    if cursorTheme == "popucom"
-    then "Popucom-${colorCap}-x11"
-    else if cursorTheme == "deepin"
-    then "DeepinDarkV20-x11"
-    else "Earendil-Dark-x11";
-  hyprcursorTheme =
-    if cursorTheme == "popucom"
-    then "Popucom-${colorCap}-hypr"
-    else if cursorTheme == "deepin"
-    then "DeepinDarkV20-hypr"
-    else "Earendil-Dark-hypr";
 in {
   config = lib.mkIf config.user.ui.hyprland.enable {
     manzil.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
@@ -78,9 +66,21 @@ in {
           debug.disable_logs = false;
           env =
             [
-              "HYPRCURSOR_THEME,${hyprcursorTheme}"
+              "HYPRCURSOR_THEME,${
+                if cursorTheme == "popucom"
+                then "Popucom-${colorCap}-hypr"
+                else if cursorTheme == "deepin"
+                then "DeepinDarkV20-hypr"
+                else "Earendil-Dark-hypr"
+              }"
               "HYPRCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
-              "XCURSOR_THEME,${xcursorTheme}"
+              "XCURSOR_THEME,${
+                if cursorTheme == "popucom"
+                then "Popucom-${colorCap}-x11"
+                else if cursorTheme == "deepin"
+                then "DeepinDarkV20-x11"
+                else "Earendil-Dark-x11"
+              }"
               "XCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
             ]
             ++ lib.optionals config.hardware.nvidia.enable [
