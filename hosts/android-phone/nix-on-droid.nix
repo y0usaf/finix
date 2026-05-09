@@ -1,8 +1,8 @@
 {
   config,
-  flakeInputs,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: let
   phoneUser = config.user.userName;
@@ -12,94 +12,14 @@
   sshdDirectory = "${homeDir}/sshd";
 
   gitName = "y0usaf";
-  gitEmail = "OA99@Outlook.com";
   tokensKey = "${homeDir}/Tokens/id_rsa_${gitName}";
-  manzil = flakeInputs.manzil.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  manzil = flakeInputs.manzil.packages."${pkgs.stdenv.hostPlatform.system}".default;
 
   readKey = path: lib.removeSuffix "\n" (builtins.readFile path);
-  authorizedKeys = pkgs.writeText "android-phone-authorized_keys" ''
-    ${builtins.readFile ../y0usaf-desktop/user-ssh.pub}
-    ${builtins.readFile ../y0usaf-server/user-ssh.pub}
-  '';
-  knownHostsText =
-    (lib.concatStringsSep "\n" (
-      lib.mapAttrsToList (host: key: "${host} ${key}") {
-        "100.93.111.41" = readKey ./host-ssh-ed25519.pub;
-        "192.168.2.34" = readKey ./host-ssh-ed25519.pub;
-        "android-phone" = readKey ./host-ssh-ed25519.pub;
-        "desktop" = readKey ../y0usaf-desktop/host-ssh-ed25519.pub;
-        "server" = readKey ../y0usaf-server/host-ssh-ed25519.pub;
-        "y0usaf-desktop" = readKey ../y0usaf-desktop/host-ssh-ed25519.pub;
-        "y0usaf-server" = readKey ../y0usaf-server/host-ssh-ed25519.pub;
-      }
-    ))
-    + "\n";
 
   mkTextFile = name: text: {
     source = pkgs.writeText "android-phone-${name}" text;
     clobber = true;
-  };
-  manzilFiles = {
-    ".config/git/config" = mkTextFile "git-config" (lib.generators.toGitINI {
-      user = {
-        name = gitName;
-        email = gitEmail;
-      };
-      core.editor = "vim";
-      init.defaultBranch = "main";
-      pull.rebase = true;
-      push.autoSetupRemote = true;
-      url."git@github.com:".pushInsteadOf = "https://github.com/";
-    });
-
-    ".config/nushell/config.nu" = mkTextFile "nushell-config" ''
-      $env.config.show_banner = false
-      $env.config.history.max_size = 10000
-      $env.config.history.file_format = "sqlite"
-
-      alias la = ls -a
-      alias ll = ls -l
-      alias lla = ls -la
-    '';
-
-    ".config/nushell/env.nu" = mkTextFile "nushell-env" ''
-      $env.EDITOR = "vim"
-      $env.VISUAL = "vim"
-      $env.SHELL = "${pkgs.nushell}/bin/nu"
-      $env.XDG_CACHE_HOME = "${homeDir}/.cache"
-      $env.XDG_CONFIG_HOME = "${homeDir}/.config"
-      $env.XDG_DATA_HOME = "${homeDir}/.local/share"
-      $env.XDG_STATE_HOME = "${homeDir}/.local/state"
-    '';
-
-    ".ssh/config" = mkTextFile "ssh-config" ''
-      AddKeysToAgent yes
-      ServerAliveInterval 60
-      ServerAliveCountMax 5
-      SetEnv TERM=xterm-256color
-
-      Host server y0usaf-server
-          HostName y0usaf-server
-          User y0usaf
-          IdentityFile ${homeDir}/.ssh/id_ed25519
-          IdentitiesOnly yes
-          ForwardAgent yes
-
-      Host desktop y0usaf-desktop
-          HostName y0usaf-desktop
-          Port 2222
-          User y0usaf
-          IdentityFile ${tokensKey}
-          ForwardAgent yes
-
-      Host github.com
-          HostName github.com
-          User git
-          IdentityFile ${tokensKey}
-          ForwardAgent yes
-    '';
-
-    ".ssh/known_hosts" = mkTextFile "known-hosts" knownHostsText;
   };
   manzilManifest = pkgs.writeText "android-phone-manzil-manifest.json" (builtins.toJSON {
     files =
@@ -108,7 +28,79 @@
         source = "${file.source}";
         inherit (file) clobber;
       })
-      manzilFiles;
+      {
+        ".config/git/config" = mkTextFile "git-config" (lib.generators.toGitINI {
+          user = {
+            name = gitName;
+            email = "OA99@Outlook.com";
+          };
+          core.editor = "vim";
+          init.defaultBranch = "main";
+          pull.rebase = true;
+          push.autoSetupRemote = true;
+          url."git@github.com:".pushInsteadOf = "https://github.com/";
+        });
+
+        ".config/nushell/config.nu" = mkTextFile "nushell-config" ''
+          $env.config.show_banner = false
+          $env.config.history.max_size = 10000
+          $env.config.history.file_format = "sqlite"
+
+          alias la = ls -a
+          alias ll = ls -l
+          alias lla = ls -la
+        '';
+
+        ".config/nushell/env.nu" = mkTextFile "nushell-env" ''
+          $env.EDITOR = "vim"
+          $env.VISUAL = "vim"
+          $env.SHELL = "${pkgs.nushell}/bin/nu"
+          $env.XDG_CACHE_HOME = "${homeDir}/.cache"
+          $env.XDG_CONFIG_HOME = "${homeDir}/.config"
+          $env.XDG_DATA_HOME = "${homeDir}/.local/share"
+          $env.XDG_STATE_HOME = "${homeDir}/.local/state"
+        '';
+
+        ".ssh/config" = mkTextFile "ssh-config" ''
+          AddKeysToAgent yes
+          ServerAliveInterval 60
+          ServerAliveCountMax 5
+          SetEnv TERM=xterm-256color
+
+          Host server y0usaf-server
+              HostName y0usaf-server
+              User y0usaf
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              IdentitiesOnly yes
+              ForwardAgent yes
+
+          Host desktop y0usaf-desktop
+              HostName y0usaf-desktop
+              Port 2222
+              User y0usaf
+              IdentityFile ${tokensKey}
+              ForwardAgent yes
+
+          Host github.com
+              HostName github.com
+              User git
+              IdentityFile ${tokensKey}
+              ForwardAgent yes
+        '';
+
+        ".ssh/known_hosts" = mkTextFile "known-hosts" ((lib.concatStringsSep "\n" (
+            lib.mapAttrsToList (host: key: "${host} ${key}") {
+              "100.93.111.41" = readKey ./host-ssh-ed25519.pub;
+              "192.168.2.34" = readKey ./host-ssh-ed25519.pub;
+              "android-phone" = readKey ./host-ssh-ed25519.pub;
+              "desktop" = readKey ../y0usaf-desktop/host-ssh-ed25519.pub;
+              "server" = readKey ../y0usaf-server/host-ssh-ed25519.pub;
+              "y0usaf-desktop" = readKey ../y0usaf-desktop/host-ssh-ed25519.pub;
+              "y0usaf-server" = readKey ../y0usaf-server/host-ssh-ed25519.pub;
+            }
+          ))
+          + "\n");
+      };
   });
 in {
   system.stateVersion = "24.05";
@@ -171,7 +163,10 @@ in {
 
     sshd = ''
             $DRY_RUN_CMD mkdir $VERBOSE_ARG --parents "${homeDir}/.ssh"
-            $DRY_RUN_CMD cp ${authorizedKeys} "${homeDir}/.ssh/authorized_keys"
+            $DRY_RUN_CMD cp ${pkgs.writeText "android-phone-authorized_keys" ''
+        ${builtins.readFile ../y0usaf-desktop/user-ssh.pub}
+        ${builtins.readFile ../y0usaf-server/user-ssh.pub}
+      ''} "${homeDir}/.ssh/authorized_keys"
             $DRY_RUN_CMD chmod 700 "${homeDir}/.ssh"
             $DRY_RUN_CMD chmod 600 "${homeDir}/.ssh/authorized_keys"
 
