@@ -3,7 +3,7 @@ _: {
     dpi = 189;
     termFontSize = 12;
     gtkFontSize = 23;
-    cursorTheme = "earendil-dark";
+    cursorTheme = "deepin";
     cursorSize = 18;
     opacity = 0.7;
     wallust.defaultTheme = "pantera";
