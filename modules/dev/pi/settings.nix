@@ -19,7 +19,6 @@
 in {
   options.user.dev.pi = {
     enable = lib.mkEnableOption "pi coding agent CLI";
-    rtk.enable = lib.mkEnableOption "pi-rtk extension and rtk binary";
 
     extensionSettings = lib.mkOption {
       type = with lib.types; attrsOf anything;
