@@ -15,8 +15,7 @@ _:
           --bar-height: 1.2em;
           --breakout-width: 50vw;
           --breakout-top: 20vh;
-          --panel-popup-offset: calc(-2 * var(--panel-padding-block) - 40px - 32px - 8.5em);
-          --permission-popup-offset: calc(-2 * var(--panel-padding-block) - 2.5em);
+          --popup-offset-top: calc(var(--breakout-top) - 100vh);
       }
 
       #navigator-toolbox {
@@ -52,12 +51,9 @@ _:
 
       @media (-moz-platform: linux) {
           #notification-popup[side="top"],
+          #permission-popup[side="top"],
           #customizationui-widget-panel[side="top"] {
-              margin-top: var(--panel-popup-offset) !important;
-          }
-
-          #permission-popup[side="top"] {
-              margin-top: var(--permission-popup-offset) !important;
+              margin-top: var(--popup-offset-top) !important;
           }
       }
 

@@ -30,6 +30,11 @@ in {
             uiFonts.emoji.name
           ])}
         dpi-aware=yes
+        # Center the terminal grid when the compositor gives foot a window size
+        # that is not an exact multiple of the cell height/width. Without this,
+        # foot anchors the grid top-left and puts the leftover pixels on the
+        # bottom/right, which shows up as a tiny gap below Zellij's bottom bar.
+        pad=0x0 center
 
         [cursor]
         style=underline
