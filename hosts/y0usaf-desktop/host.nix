@@ -7,9 +7,7 @@
   inherit (pkgs.stdenv.hostPlatform) system;
 in {
   fonts = {
-    packages = [
-      flakeInputs.fast-fonts.packages."${system}".default
-    ];
+    packages = [flakeInputs.fonts.packages."${system}".default];
     fontDir.enable = true;
   };
   hostname = "y0usaf-desktop";
