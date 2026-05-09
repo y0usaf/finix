@@ -20,11 +20,18 @@
       xcursorPackage = cursorsPkgs."popucom-${cursorColor}-xcursor";
       hyprcursorPackage = cursorsPkgs."popucom-${cursorColor}-hyprcursor";
     }
-    else {
+    else if (cursorTheme == "deepin")
+    then {
       x11ThemeName = "DeepinDarkV20-x11";
       hyprThemeName = "DeepinDarkV20-hypr";
       xcursorPackage = cursorsPkgs.deepin-dark-xcursor;
       hyprcursorPackage = cursorsPkgs.deepin-dark-hyprcursor;
+    }
+    else {
+      x11ThemeName = "Earendil-Dark-x11";
+      hyprThemeName = "Earendil-Dark-hypr";
+      xcursorPackage = cursorsPkgs.earendil-dark-xcursor;
+      hyprcursorPackage = cursorsPkgs.earendil-dark-hyprcursor;
     };
 in {
   options.user.ui.cursor = {
