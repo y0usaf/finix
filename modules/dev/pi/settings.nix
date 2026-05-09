@@ -83,6 +83,12 @@ in {
             editorPaddingX = 0;
             steeringMode = "one-at-a-time";
             transport = "sse";
+            options = {
+              skills_paths = [
+                "./.codex/skills"
+                "./.claude/skills"
+              ];
+            };
             hideThinkingBlock = true;
             collapseChangelog = true;
             quietStartup = true;
