@@ -15,8 +15,8 @@
     cursor.enable = true;
     fonts = {
       enable = true;
-      mainFont = flakeInputs.fast-fonts.packages."${pkgs.stdenv.hostPlatform.system}".default;
-      mainFontName = "Fast Iosevka Term Slab Compact";
+      mainFont = flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default;
+      mainFontName = "Departure Mono Condensed";
       backup = {
         package = pkgs.noto-fonts-cjk-sans;
         name = "Noto Sans CJK";
