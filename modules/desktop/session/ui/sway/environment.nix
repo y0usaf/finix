@@ -4,7 +4,14 @@
   ...
 }: let
   inherit (config.user) appearance;
-  inherit (appearance) cursorColor cursorSize;
+  inherit (appearance) cursorColor cursorSize cursorTheme;
+  colorCap = (lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor);
+  xcursorTheme =
+    if cursorTheme == "popucom"
+    then "Popucom-${colorCap}-x11"
+    else if cursorTheme == "deepin"
+    then "DeepinDarkV20-x11"
+    else "Earendil-Dark-x11";
 in {
   config = lib.mkIf config.user.ui.sway.enable {
     programs.sway.extraSessionCommands = lib.mkAfter ''
@@ -18,7 +25,7 @@ in {
       export SDL_VIDEODRIVER=wayland,x11
       export CLUTTER_BACKEND=wayland
       export GDK_DPI_SCALE=${toString config.user.ui.gtk.scale}
-      export XCURSOR_THEME=Popucom-${(lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor)}-x11
+      export XCURSOR_THEME=${xcursorTheme}
       export XCURSOR_SIZE=${toString cursorSize}
     '';
   };

@@ -27,9 +27,16 @@
 
           cursor = let
             inherit (config.user) appearance;
-            inherit (appearance) cursorColor cursorSize;
+            inherit (appearance) cursorColor cursorSize cursorTheme;
+            colorCap = (lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor);
+            xcursorTheme =
+              if cursorTheme == "popucom"
+              then "Popucom-${colorCap}-x11"
+              else if cursorTheme == "deepin"
+              then "DeepinDarkV20-x11"
+              else "Earendil-Dark-x11";
           in {
-            xcursor-theme = "Popucom-${(lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor)}-x11";
+            xcursor-theme = xcursorTheme;
             xcursor-size = cursorSize;
           };
 
