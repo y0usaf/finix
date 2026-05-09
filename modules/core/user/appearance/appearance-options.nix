@@ -17,9 +17,9 @@
       description = "Size of the system cursor";
     };
     cursorTheme = lib.mkOption {
-      type = lib.types.enum ["popucom" "deepin"];
+      type = lib.types.enum ["popucom" "deepin" "earendil-dark"];
       default = "popucom";
-      description = "Cursor theme to use (popucom = animated Popucom theme, deepin = Deepin cursor theme)";
+      description = "Cursor theme to use (popucom = animated Popucom theme, deepin = Deepin cursor theme, earendil-dark = Earendil Dark cursor theme)";
     };
     cursorColor = lib.mkOption {
       type = lib.types.enum ["pink" "green" "blue" "yellow" "red" "orange" "cyan" "purple" "grey" "black" "inverted"];
