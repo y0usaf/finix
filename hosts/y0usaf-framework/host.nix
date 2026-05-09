@@ -5,7 +5,7 @@
   ...
 }: {
   fonts = {
-    packages = [flakeInputs.fast-fonts.packages."${pkgs.stdenv.hostPlatform.system}".default];
+    packages = [flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default];
     fontDir.enable = true;
   };
   hostname = "y0usaf-framework";

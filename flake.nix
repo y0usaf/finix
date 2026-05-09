@@ -14,8 +14,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    fast-fonts = {
-      url = "github:y0usaf/Fast-Fonts";
+    fonts = {
+      url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
