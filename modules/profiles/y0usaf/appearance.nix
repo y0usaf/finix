@@ -3,7 +3,7 @@ _: {
     dpi = 109;
     termFontSize = 16;
     gtkFontSize = 12;
-    cursorTheme = "earendil-dark";
+    cursorTheme = "deepin";
     cursorSize = 18;
     cursorColor = "cyan";
     opacity = 0.7;

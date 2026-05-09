@@ -7,13 +7,6 @@
   inherit (config.user) appearance ui;
   inherit (appearance) cursorColor cursorSize cursorTheme;
   inherit (ui) sway;
-  colorCap = (lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor);
-  xcursorTheme =
-    if cursorTheme == "popucom"
-    then "Popucom-${colorCap}-x11"
-    else if cursorTheme == "deepin"
-    then "DeepinDarkV20-x11"
-    else "Earendil-Dark-x11";
 in {
   config = lib.mkIf sway.enable (lib.mkMerge [
     {
@@ -49,7 +42,13 @@ in {
 
         floating_modifier $mod normal
 
-        seat seat0 xcursor_theme ${xcursorTheme} ${toString cursorSize}
+        seat seat0 xcursor_theme ${
+          if cursorTheme == "popucom"
+          then "Popucom-${(lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor)}-x11"
+          else if cursorTheme == "deepin"
+          then "DeepinDarkV20-x11"
+          else "Earendil-Dark-x11"
+        } ${toString cursorSize}
 
         for_window [app_id="launcher"] floating enable
         for_window [app_id="launcher"] resize set width 800 px height 600 px
