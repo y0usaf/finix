@@ -3,7 +3,9 @@
   lib,
   ...
 }: let
-  inherit (config.user.appearance) cursorColor cursorTheme;
+  inherit (config.user) appearance;
+  inherit (appearance) cursorColor cursorTheme;
+  cursorSize = toString appearance.cursorSize;
   colorCap = (lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor);
 in {
   config = lib.mkIf config.user.ui.hyprland.enable {
@@ -49,7 +51,7 @@ in {
           };
           animations = {
             enabled =
-              if config.user.appearance.animations.enable
+              if appearance.animations.enable
               then 1
               else 0;
             animation = [
@@ -73,7 +75,7 @@ in {
                 then "DeepinDarkV20-hypr"
                 else "Earendil-Dark-hypr"
               }"
-              "HYPRCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
+              "HYPRCURSOR_SIZE,${cursorSize}"
               "XCURSOR_THEME,${
                 if cursorTheme == "popucom"
                 then "Popucom-${colorCap}-x11"
@@ -81,7 +83,7 @@ in {
                 then "DeepinDarkV20-x11"
                 else "Earendil-Dark-x11"
               }"
-              "XCURSOR_SIZE,${toString config.user.appearance.cursorSize}"
+              "XCURSOR_SIZE,${cursorSize}"
             ]
             ++ lib.optionals config.hardware.nvidia.enable [
               "LIBVA_DRIVER_NAME,nvidia"

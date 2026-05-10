@@ -65,6 +65,9 @@ in {
         longBreakEvery = 4;
         notifyTransitions = true;
       };
+      "pi-rlm" = {
+        models = ["openai-codex/gpt-5.4-mini"];
+      };
     };
 
     manzil.users."${config.user.name}".files = {
@@ -73,8 +76,9 @@ in {
           {
             defaultProvider = "openai-codex";
             defaultModel = "gpt-5.4-mini";
-            defaultThinkingLevel = "medium";
+            defaultThinkingLevel = "xhigh";
             enabledModels = [
+              "openai-codex/gpt-5.4-mini"
               "openai-codex/gpt-5.5"
               "anthropic/claude-opus-4-6"
             ];
