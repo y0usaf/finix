@@ -10,15 +10,17 @@
   config = lib.mkIf config.user.tools.yt-dlp.enable {
     environment.systemPackages = [
       pkgs.yt-dlp-light
+      pkgs.uv
       pkgs.ffmpeg
+      pkgs.rsgain
     ];
     manzil.users."${config.user.name}" = {
       files =
         lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
           ".config/zsh/.zshrc" = {
             text = lib.mkAfter ''
-              alias ytm4a="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata --embed-thumbnail --convert-thumbnails jpg -o '%(title)s.%(ext)s'"
               alias ytopus="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bestaudio[ext=webm][acodec^=opus]/bestaudio[acodec^=opus]' --remux-video opus --embed-metadata --add-metadata --embed-thumbnail --convert-thumbnails jpg -o '%(title)s.%(ext)s'"
+              alias someopus="uvx somedl -f opus -l"
               alias ytmp3="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s'"
               alias ytmp4="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -vf scale=-2:720' -o '%(title)s.%(ext)s'"
               alias ytmp4s="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=480]+ba/b[height<=480]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 26 -preset faster -c:a aac -b:a 96k -vf scale=-2:480' -o '%(title)s.%(ext)s'"
@@ -30,8 +32,8 @@
         // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
           ".config/nushell/config.nu" = {
             text = lib.mkAfter ''
-              def ytm4a [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata --embed-thumbnail --convert-thumbnails jpg -o '%(title)s.%(ext)s' ...$urls }
               def ytopus [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bestaudio[ext=webm][acodec^=opus]/bestaudio[acodec^=opus]' --remux-video opus --embed-metadata --add-metadata --embed-thumbnail --convert-thumbnails jpg -o '%(title)s.%(ext)s' ...$urls }
+              def someopus [...urls: string] { ^uvx somedl -f opus -l ...$urls }
               def ytmp3 [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s' ...$urls }
               def ytmp4 [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=720]+ba/b[height<=720]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -vf scale=-2:720' -o '%(title)s.%(ext)s' ...$urls }
               def ytmp4s [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bv*[height<=480]+ba/b[height<=480]' --recode-video mp4 --embed-metadata --add-metadata --postprocessor-args 'ffmpeg:-c:v libx264 -crf 26 -preset faster -c:a aac -b:a 96k -vf scale=-2:480' -o '%(title)s.%(ext)s' ...$urls }

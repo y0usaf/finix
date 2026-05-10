@@ -404,11 +404,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1778304609,
-        "narHash": "sha256-zqnLbATiSK4I7DFRnOt5ISjva7QVanHfko7U2QK+a+0=",
+        "lastModified": 1778418470,
+        "narHash": "sha256-0afuiGPIhN4CQYNO/b+iqflEhEw0k+p4cBwRy8E212c=",
         "owner": "y0usaf",
         "repo": "fonts",
-        "rev": "a4012a46d5a6cbff83e5979b1a067211a7f1102a",
+        "rev": "3058b390cc8e4df6ba37e513548dcbb4cf3df70e",
         "type": "github"
       },
       "original": {
@@ -948,8 +948,8 @@
         "rust-overlay": "rust-overlay_4"
       },
       "locked": {
-        "lastModified": 1778373824,
-        "narHash": "sha256-D9RvB+2VqAJF7QRShOWLWvVuuMK0hboznTtNypofyzQ=",
+        "lastModified": 1778378575,
+        "narHash": "sha256-3T56VdkIWAnV+L7U+6cJV/TufyuUidqMZMHUIsI6h+8=",
         "path": "/home/y0usaf/Dev/nur",
         "type": "path"
       },
@@ -1040,11 +1040,11 @@
         "piWorkingIndicator": "piWorkingIndicator"
       },
       "locked": {
-        "lastModified": 1778288933,
-        "narHash": "sha256-WHOkk8KdcJZcM7seSjkOvjaYD3ulEbtP2zN6IN6/y0c=",
+        "lastModified": 1778425498,
+        "narHash": "sha256-cCw2+X7lm5P5ETABn15rXdmI65YvX1AEpT6pnXJv+VE=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "1d2e1d0bcf80215902bad74ce6e3d0a7afa875c0",
+        "rev": "617679f65ae3679ecc4c3e3ef255b2b93917399c",
         "type": "github"
       },
       "original": {

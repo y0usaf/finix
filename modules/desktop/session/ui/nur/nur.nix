@@ -7,16 +7,11 @@
 }: let
   cfg = config.user.ui.nur;
   bar = cfg.bar-overlay;
-  luaString = builtins.toJSON;
-  luaBool = value:
-    if value
-    then "true"
-    else "false";
-  luaList = values: "{ " + lib.concatMapStringsSep ", " luaString values + " }";
+  inherit (lib.types) bool;
 in {
   options.user.ui.nur = {
     enable = lib.mkOption {
-      type = lib.types.bool;
+      type = bool;
       default = false;
       description = "Enable Nur GPU-accelerated Lua-scriptable Wayland shell";
     };
@@ -31,7 +26,10 @@ in {
     config = lib.mkOption {
       type = lib.types.lines;
       default = ''
-        local BarOverlay = dofile(os.getenv("HOME") .. "/.config/nur/bar_overlay.lua")
+        local ok, BarOverlay = pcall(require, "nur.widgets.bar_overlay")
+        if not ok then
+            BarOverlay = dofile(os.getenv("HOME") .. "/.config/nur/bar_overlay.lua")
+        end
 
         BarOverlay.open({
             modules = @MODULES@,
@@ -43,9 +41,9 @@ in {
 
     bar-overlay = {
       enable = lib.mkOption {
-        type = lib.types.bool;
+        type = bool;
         default = true;
-        description = "Generate the local Nur bar overlay module.";
+        description = "Generate a local fallback Nur bar overlay module.";
       };
 
       modules = lib.mkOption {
@@ -55,8 +53,8 @@ in {
       };
 
       exclusive = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
+        type = bool;
+        default = true;
         description = "Whether the bar overlay reserves layer-shell exclusive space.";
       };
     };
@@ -70,7 +68,14 @@ in {
         ".config/nur/init.lua".text =
           builtins.replaceStrings
           ["@MODULES@" "@EXCLUSIVE@"]
-          [(luaList bar.modules) (luaBool bar.exclusive)]
+          [
+            ((values: "{ " + lib.concatMapStringsSep ", " builtins.toJSON values + " }") bar.modules)
+            ((value:
+              if value
+              then "true"
+              else "false")
+            bar.exclusive)
+          ]
           cfg.config;
       }
       // lib.optionalAttrs bar.enable {
@@ -86,8 +91,9 @@ in {
           local SystemTray = require("nur.widgets.system_tray")
           local theme = require("nur.theme")
 
-          local M = {}
-          M._layout_generation = 0
+          local M = _G.__nur_widgets_bar_overlay or {}
+          _G.__nur_widgets_bar_overlay = M
+          M._layout_generation = M._layout_generation or 0
 
           local DEFAULT_MODULES = { "time", "date", "tray" }
 
