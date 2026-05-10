@@ -59,6 +59,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    concord = {
+      url = "github:chojs23/concord";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     linear-cli = {
       url = "github:y0usaf/linear-cli?ref=nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -96,6 +101,11 @@
 
     gpui-shell = {
       url = "github:andre-brandao/gpui-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nur = {
+      url = "path:/home/y0usaf/Dev/nur";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
