@@ -9,7 +9,7 @@
     fonts = {
       enable = true;
       mainFont = flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default;
-      mainFontName = "Departure Mono Condensed";
+      mainFontName = "Departure Mono Condensed Compact";
       backup = {
         package = pkgs.noto-fonts-cjk-sans;
         name = "Noto Sans CJK";
