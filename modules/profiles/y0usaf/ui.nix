@@ -5,12 +5,13 @@
 }: {
   user.ui = {
     ags = {
-      enable = true;
+      enable = false;
       bar-overlay = {
         modules = ["time" "date" "tray"];
         exclusivity = "normal";
       };
     };
+    nur.enable = true;
     gpuishell.enable = false;
     cursor.enable = true;
     fonts = {
@@ -40,7 +41,7 @@
     };
     sway.enable = true;
     vicinae.enable = false;
-    quickshell.enable = true;
+    quickshell.enable = false;
     wayland.enable = true;
   };
 }
