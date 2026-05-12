@@ -63,8 +63,8 @@ in {
 
       exclusive = lib.mkOption {
         type = bool;
-        default = true;
-        description = "Whether the bar overlay reserves layer-shell exclusive space.";
+        default = false;
+        description = "Whether the bar overlay reserves layer-shell exclusive space. Keep false for a pure overlay.";
       };
 
       font-family = lib.mkOption {
@@ -103,9 +103,9 @@ in {
           -- ~/.config/nur/bar_overlay.lua
           -- Local bar overlay config.
           --
-          -- Uses one layer-shell surface per module block. This avoids the grey
-          -- transparent-surface artifact seen with the WGPU/Wayland backend while still
-          -- preserving transparent gaps between the blocks.
+          -- Uses one compositor-centered layer-shell surface per edge. Module blocks
+          -- render inside that fixed-width centered surface, so positioning is delegated
+          -- to the compositor instead of computed from an assumed display width.
 
           local Wallust = require("nur.wallust")
           local SystemTray = require("nur.widgets.system_tray")
@@ -169,12 +169,6 @@ in {
           end
 
 
-
-          local function display_width()
-              local displays = shell.displays and shell.displays() or {}
-              local d = displays[1]
-              return (d and d.width) or 1920
-          end
 
           local function tray_item_count()
               local tray = shell.services.systemtray:get()
@@ -260,47 +254,63 @@ in {
               }
           end
 
-          local function open_edge(edge, content, items, start_x, opts)
-              local height = opts.height or 24
-              local bg = Wallust.hex(Wallust.color("bg", theme.base))
-              local fg = Wallust.hex(Wallust.color("fg", theme.text))
-              local x = start_x
+          local function render_edge(content, items, total_width, height, spacing)
+              local children = {}
               for _, item in ipairs(items) do
-                  local name = (opts.name_prefix or "bar-overlay") .. "-" .. edge .. "-" .. item.name
-                  close_existing(name)
-
-                  local win = shell.window({
-                      name = name,
-                      anchor = edge == "top" and "top-left" or "bottom-left",
-                      popup_width = item.width,
-                      height = height,
-                      margin_left = x,
-                      margin_top = edge == "top" and (opts.margin_top or 0) or 0,
-                      margin_bottom = edge == "bottom" and (opts.margin_bottom or 0) or 0,
-                      layer = "overlay",
-                      exclusive = opts.exclusive ~= false,
-                      bg = bg,
-                      fg = fg,
-                      font_size = 14,
-                      font_family = M._font_family,
-                  })
-
-                  local render_fn = function()
-                      return content:render_module(item.name, item.width, height)
-                  end
-                  win:render(render_fn)
-
-                  -- Until the runtime has fine-grained Lua dependency tracking, refresh
-                  -- these tiny module windows directly so clock/date/tray
-                  -- repaint exactly when their backing state changes.
-                  shell.interval(opts.refresh_interval or 1000, function()
-                      if opts.layout_generation and opts.layout_generation ~= M._layout_generation then return end
-                      win:render(render_fn)
-                  end)
-
-                  item.window = win
-                  x = x + item.width + (opts.spacing or 8)
+                  children[#children + 1] = content:render_module(item.name, item.width, height)
               end
+
+              return ui.hbox({
+                  width = total_width,
+                  height = height,
+                  gap = spacing or 0,
+                  children = children,
+              })
+          end
+
+          local function open_edge(edge, content, items, total_width, opts)
+              local height = opts.height or 24
+              local fg = Wallust.hex(Wallust.color("fg", theme.text))
+              local name = opts.name or ((opts.name_prefix or "bar-overlay") .. "-" .. edge)
+
+              -- Close windows created by older per-module versions of this widget.
+              for _, item in ipairs(items) do
+                  close_existing((opts.name_prefix or "bar-overlay") .. "-" .. edge .. "-" .. item.name)
+              end
+              close_existing(name)
+
+              local win = shell.window({
+                  name = name,
+                  anchor = edge == "top" and "top-center" or "bottom-center",
+                  popup_width = total_width,
+                  height = height,
+                  margin_top = edge == "top" and (opts.margin_top or 0) or 0,
+                  margin_bottom = edge == "bottom" and (opts.margin_bottom or 0) or 0,
+                  layer = "overlay",
+                  exclusive = opts.exclusive == true,
+                  bg = "transparent",
+                  fg = fg,
+                  font_size = 14,
+                  font_family = M._font_family,
+              })
+
+              local render_fn = function()
+                  return render_edge(content, items, total_width, height, opts.spacing or 8)
+              end
+              win:render(render_fn)
+
+              -- Until the runtime has fine-grained Lua dependency tracking, refresh
+              -- these tiny module windows directly so clock/date/tray repaint exactly
+              -- when their backing state changes.
+              shell.interval(opts.refresh_interval or 1000, function()
+                  if opts.layout_generation and opts.layout_generation ~= M._layout_generation then return end
+                  win:render(render_fn)
+              end)
+
+              for _, item in ipairs(items) do
+                  item.window = win
+              end
+              return win
           end
 
           function M.open(opts)
@@ -333,8 +343,6 @@ in {
                   if i > 1 then total = total + spacing end
               end
 
-              local start_x = math.floor((display_width() - total) / 2 + 0.5)
-
               local time = clock_state(opts.time_format or "%H:%M:%S", opts.time_interval or 1000)
               local date = clock_state(opts.date_format or "%d/%m/%y", opts.date_interval or 30000)
               local tray = SystemTray.new({
@@ -358,7 +366,8 @@ in {
                   tray = tray,
               })
 
-              open_edge("top", top_content, items, start_x, {
+              local top_window = open_edge("top", top_content, items, total, {
+                  name = opts.top_name or "bar-overlay-top",
                   height = height,
                   spacing = spacing,
                   name_prefix = opts.name_prefix,
@@ -367,7 +376,8 @@ in {
                   refresh_interval = opts.refresh_interval,
                   layout_generation = layout_generation,
               })
-              open_edge("bottom", bottom_content, items, start_x, {
+              local bottom_window = open_edge("bottom", bottom_content, items, total, {
+                  name = opts.bottom_name or "bar-overlay-bottom",
                   height = height,
                   spacing = spacing,
                   name_prefix = opts.name_prefix,
@@ -397,6 +407,8 @@ in {
               return {
                   top_content = top_content,
                   bottom_content = bottom_content,
+                  top_window = top_window,
+                  bottom_window = bottom_window,
                   items = items,
               }
           end
