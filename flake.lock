@@ -948,8 +948,8 @@
         "rust-overlay": "rust-overlay_4"
       },
       "locked": {
-        "lastModified": 1778614481,
-        "narHash": "sha256-ySzexoYhTsOBJ63uT7uyok51lMSnWTJb/nxru66S/gI=",
+        "lastModified": 1778618044,
+        "narHash": "sha256-ghd8qOLGhHFYQ8pIhFIuqbXzwoZQJCBf1PJSC/Cej9Q=",
         "path": "/home/y0usaf/Dev/nur",
         "type": "path"
       },
