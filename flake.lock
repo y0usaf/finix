@@ -1040,11 +1040,11 @@
         "piWorkingIndicator": "piWorkingIndicator"
       },
       "locked": {
-        "lastModified": 1778614610,
-        "narHash": "sha256-t9cTVtn4lipzzoVDaAeaIlXBbQmlNj162URlc/1Dvao=",
+        "lastModified": 1778623031,
+        "narHash": "sha256-QBznacS9qr0e+UI2FGvOGfrFpwDsLCNY+nwz1ZyJMi0=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "904a2e9b96ffd6e48b5449f63ff723bfaf7a56b9",
+        "rev": "fba77a66785fa6179056db780a3d0ed9490ae51a",
         "type": "github"
       },
       "original": {
