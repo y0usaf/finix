@@ -26,6 +26,10 @@ in {
     config = lib.mkOption {
       type = lib.types.lines;
       default = ''
+        -- Resolve the system monospace font so GPUI gets the real family name.
+        local _nur_font = @FONT_FAMILY@
+        if _nur_font == "" then _nur_font = "monospace" end
+
         local ok, BarOverlay = pcall(require, "nur.widgets.bar_overlay")
         if not ok then
             BarOverlay = dofile(os.getenv("HOME") .. "/.config/nur/bar_overlay.lua")
@@ -34,6 +38,11 @@ in {
         BarOverlay.open({
             modules = @MODULES@,
             exclusive = @EXCLUSIVE@,
+            font_family = _nur_font,
+            -- Keep tray width stable. Reopening all layer-shell popup surfaces when
+            -- tray icons settle can trip Blade/Vulkan on Wayland.
+            tray_width = 160,
+            relayout_interval = false,
         })
       '';
       description = "Lua config written to ~/.config/nur/init.lua.";
@@ -57,6 +66,12 @@ in {
         default = true;
         description = "Whether the bar overlay reserves layer-shell exclusive space.";
       };
+
+      font-family = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Font family for bar overlay labels. null = resolve system monospace via fc-match.";
+      };
     };
   };
 
@@ -67,7 +82,7 @@ in {
       {
         ".config/nur/init.lua".text =
           builtins.replaceStrings
-          ["@MODULES@" "@EXCLUSIVE@"]
+          ["@MODULES@" "@EXCLUSIVE@" "@FONT_FAMILY@"]
           [
             ((values: "{ " + lib.concatMapStringsSep ", " builtins.toJSON values + " }") bar.modules)
             ((value:
@@ -75,6 +90,11 @@ in {
               then "true"
               else "false")
             bar.exclusive)
+            (
+              if bar.font-family != null
+              then builtins.toJSON bar.font-family
+              else ''shell.exec("fc-match monospace --format='%{family}'")''
+            )
           ]
           cfg.config;
       }
@@ -94,6 +114,7 @@ in {
           local M = _G.__nur_widgets_bar_overlay or {}
           _G.__nur_widgets_bar_overlay = M
           M._layout_generation = M._layout_generation or 0
+          M._font_family = M._font_family or "monospace"
 
           local DEFAULT_MODULES = { "time", "date", "tray" }
 
@@ -111,7 +132,7 @@ in {
                   color = Wallust.color("fg", theme.text),
                   weight = "bold",
                   size = 14,
-                  font_family = "monospace",
+                  font_family = M._font_family,
               })
           end
 
@@ -230,11 +251,12 @@ in {
           local function module_widths(opts)
               opts = opts or {}
               local count = tray_item_count()
+              local dynamic_tray_width = count * 22 + math.max(0, count - 1) * 2 + 6
               return {
                   battery = opts.battery_width or 58,
                   time = opts.time_width or 74,
                   date = opts.date_width or 74,
-                  tray = opts.tray_width or math.max(6, count * 22 + math.max(0, count - 1) * 2 + 6),
+                  tray = opts.tray_width or math.max(opts.min_tray_width or 160, dynamic_tray_width),
               }
           end
 
@@ -260,7 +282,7 @@ in {
                       bg = bg,
                       fg = fg,
                       font_size = 14,
-                      font_family = "monospace",
+                      font_family = M._font_family,
                   })
 
                   local render_fn = function()
@@ -283,6 +305,7 @@ in {
 
           function M.open(opts)
               opts = opts or {}
+              if opts.font_family then M._font_family = opts.font_family end
               M._layout_generation = M._layout_generation + 1
               local layout_generation = M._layout_generation
               Wallust.watch(opts.wallust_path)
@@ -354,15 +377,16 @@ in {
                   layout_generation = layout_generation,
               })
 
-              -- Tray apps can appear/disappear at any time. Re-open on count changes so
-              -- the fixed-size layer-shell module windows get fresh widths/positions.
-              if contains(modules, "tray") then
-                  local last_count = tray_item_count()
+              -- Reopening all popup surfaces while tray icons are still settling can
+              -- trip Blade/Vulkan on Wayland. Keep this opt-in; a stable tray_width is
+              -- safer for the normal bar.
+              if contains(modules, "tray") and opts.relayout_interval ~= false then
+                  local last_width = module_widths(opts).tray
                   shell.interval(opts.relayout_interval or 1000, function()
                       if layout_generation ~= M._layout_generation then return end
 
-                      local count = tray_item_count()
-                      if count ~= last_count then
+                      local width = module_widths(opts).tray
+                      if width ~= last_width then
                           local again = {}
                           for k, v in pairs(opts) do again[k] = v end
                           M.open(again)
