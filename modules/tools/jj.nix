@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) types mkOption mkEnableOption mkIf mkAfter optionalString optionalAttrs;
+  inherit (lib) types mkOption mkEnableOption mkIf mkAfter optionalAttrs;
   cfg = config.user.tools.jj;
 in {
   options.user.tools.jj = {
@@ -35,37 +35,43 @@ in {
     manzil.users."${config.user.name}".files =
       {
         ".config/jj/config.toml" = {
-          text = ''
-            [user]
-            name = "${cfg.name}"
-            email = "${cfg.email}"
-            [ui]
-            default-command = "status"
-            editor = "${cfg.editor}"
-            diff-editor = "${cfg.editor}"
-            [git]
-            auto-local-branch = true
-            push-branch-prefix = ""
-            [revset-aliases]
-            "mine" = "author(${cfg.email})"
-            "recent" = "heads(::@ & recent(5))"
-            ${optionalString cfg.enableAliases ''
-              [aliases]
-              l = ["log", "-r", "recent"]
-              ll = ["log", "-r", "::@"]
-              s = ["status"]
-              d = ["diff"]
-              c = ["commit"]
-              ca = ["commit", "--amend"]
-              co = ["checkout"]
-              n = ["new"]
-              e = ["edit"]
-              b = ["branch"]
-              rb = ["rebase"]
-              sp = ["split"]
-              sq = ["squash"]
-            ''}
-          '';
+          generator = config.lib.generators.toTOML;
+          value =
+            {
+              user = {
+                inherit (cfg) name email;
+              };
+              ui = {
+                default-command = "status";
+                inherit (cfg) editor;
+                diff-editor = cfg.editor;
+              };
+              git = {
+                auto-local-branch = true;
+                push-branch-prefix = "";
+              };
+              revset-aliases = {
+                mine = "author(${cfg.email})";
+                recent = "heads(::@ & recent(5))";
+              };
+            }
+            // optionalAttrs cfg.enableAliases {
+              aliases = {
+                l = ["log" "-r" "recent"];
+                ll = ["log" "-r" "::@"];
+                s = ["status"];
+                d = ["diff"];
+                c = ["commit"];
+                ca = ["commit" "--amend"];
+                co = ["checkout"];
+                n = ["new"];
+                e = ["edit"];
+                b = ["branch"];
+                rb = ["rebase"];
+                sp = ["split"];
+                sq = ["squash"];
+              };
+            };
         };
       }
       // optionalAttrs (cfg.enableAliases && (lib.attrByPath ["user" "shell" "zsh" "enable"] false config)) {
