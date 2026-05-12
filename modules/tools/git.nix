@@ -37,7 +37,10 @@
         init.defaultBranch = "main";
         pull.rebase = true;
         push.autoSetupRemote = true;
-        url."git@github.com:".pushInsteadOf = "https://github.com/";
+        url."git@github.com:" = {
+          insteadOf = "https://github.com/";
+          pushInsteadOf = "https://github.com/";
+        };
       };
     };
   };
