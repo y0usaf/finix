@@ -39,7 +39,9 @@ in {
     manzil.users."${config.user.name}" = {
       files = {
         ".config/opencode/opencode.json" = {
-          text = builtins.toJSON ({
+          generator = lib.generators.toJSON {};
+          value =
+            {
               "$schema" = "https://opencode.ai/config.json";
               inherit (cfg) theme model;
               autoupdate = true;
@@ -119,7 +121,7 @@ in {
                     environment = {};
                   }
                 ]);
-            }));
+            });
         };
 
         ".config/opencode/instructions.md" = {

@@ -15,7 +15,8 @@
       pkgs.docker-credential-helpers
     ];
     manzil.users."${config.user.name}".files.".config/docker/config.json" = {
-      text = builtins.toJSON {
+      generator = lib.generators.toJSON {};
+      value = {
         credsStore = "pass";
         currentContext = "default";
         plugins = {};

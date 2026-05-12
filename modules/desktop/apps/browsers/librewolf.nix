@@ -60,14 +60,17 @@ in {
             text = browserShared.userChromeCss;
           };
           # Pywalfox native messaging host for dynamic theme updates
-          ".librewolf/native-messaging-hosts/pywalfox.json".text = builtins.toJSON {
-            name = "pywalfox";
-            description = "Native messaging host for Pywalfox";
-            path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
-              exec ${pywalfoxNative}/bin/pywalfox start
-            ''}";
-            type = "stdio";
-            allowed_extensions = ["pywalfox@frewacom.org"];
+          ".librewolf/native-messaging-hosts/pywalfox.json" = {
+            generator = lib.generators.toJSON {};
+            value = {
+              name = "pywalfox";
+              description = "Native messaging host for Pywalfox";
+              path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
+                exec ${pywalfoxNative}/bin/pywalfox start
+              ''}";
+              type = "stdio";
+              allowed_extensions = ["pywalfox@frewacom.org"];
+            };
           };
         }
         // lib.optionalAttrs shell.zsh.enable {

@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  inherit (builtins) toJSON;
+  toJSON = lib.generators.toJSON {};
   mcpServers = lib.listToAttrs (map
     (spec:
       lib.nameValuePair spec.name {
@@ -23,19 +23,18 @@ in {
       pkgs.bun
       pkgs.uv
     ];
-    manzil.users."${config.user.name}" = {
-      files = let
-        mcpConfig = toJSON {inherit mcpServers;};
-      in {
-        ".cursor/mcp.json" = {
-          text = mcpConfig;
-        };
-        ".claude/mcp_config.json" = {
-          text = mcpConfig;
-        };
-        ".claude/mcp_servers.json" = {
-          text = toJSON mcpServers;
-        };
+    manzil.users."${config.user.name}".files = {
+      ".cursor/mcp.json" = {
+        generator = toJSON;
+        value = {inherit mcpServers;};
+      };
+      ".claude/mcp_config.json" = {
+        generator = toJSON;
+        value = {inherit mcpServers;};
+      };
+      ".claude/mcp_servers.json" = {
+        generator = toJSON;
+        value = mcpServers;
       };
     };
 

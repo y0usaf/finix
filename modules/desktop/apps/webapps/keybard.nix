@@ -11,15 +11,15 @@
     manzil.users."${config.user.name}" = {
       files = {
         ".local/share/applications/keybard.desktop" = {
-          text = ''
-            [Desktop Entry]
-            Name=Keybard
-            Exec=${lib.getExe pkgs.chromium} --app=https://captdeaf.github.io/keybard --enable-features=WebContentsForceDark %U
-            Terminal=false
-            Type=Application
-            Categories=Utility;System;
-            Comment=Keyboard testing utility
-          '';
+          generator = lib.generators.toINI {};
+          value."Desktop Entry" = {
+            Name = "Keybard";
+            Exec = "${lib.getExe pkgs.chromium} --app=https://captdeaf.github.io/keybard --enable-features=WebContentsForceDark %U";
+            Terminal = false;
+            Type = "Application";
+            Categories = "Utility;System;";
+            Comment = "Keyboard testing utility";
+          };
         };
       };
     };
