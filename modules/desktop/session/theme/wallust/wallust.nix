@@ -8,7 +8,6 @@
   wallustPkg = pkgs.wallust;
   wallustCfg = config.user.appearance.wallust;
 
-  inherit (builtins) toJSON;
   inherit (lib.types) anything attrsOf lines listOf str submodule;
 in {
   options.user.appearance.wallust = {
@@ -132,7 +131,8 @@ in {
         files =
           (lib.mapAttrs' (name: scheme:
             lib.nameValuePair ".config/wallust/colorschemes/${name}.json" {
-              text = toJSON scheme;
+              generator = lib.generators.toJSON {};
+              value = scheme;
             })
           wallustCfg.colorschemes)
           // (lib.mapAttrs' (name: template:
@@ -142,18 +142,14 @@ in {
           wallustCfg.templates)
           // {
             ".config/wallust/wallust.toml" = {
-              text = ''
-                backend = "fastresize"
-                color_space = "lch"
-                palette = "dark"
-                check_contrast = true
-
-                [templates]
-                ${lib.concatStringsSep "\n" (lib.mapAttrsToList (
-                    name: target: ''${name} = { template = "${target.template}", target = "${target.target}" }''
-                  )
-                  wallustCfg.targets)}
-              '';
+              generator = config.lib.generators.toTOML;
+              value = {
+                backend = "fastresize";
+                color_space = "lch";
+                palette = "dark";
+                check_contrast = true;
+                templates = wallustCfg.targets;
+              };
             };
           };
       }
