@@ -674,11 +674,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1778009434,
-        "narHash": "sha256-kbT+bAdT8U1KRPVwwXpTCLQuRzER2yIkiv2E9/F/jhw=",
+        "lastModified": 1778389445,
+        "narHash": "sha256-9NyDMVf8ydUZGTzcPcLMQf0o1B3bte/00UGbuXHNWh8=",
         "owner": "niri-wm",
         "repo": "niri",
-        "rev": "56654034e9a9b74f6fcf268ebfe114a8c74a8c0b",
+        "rev": "38191826cb1e5fb9051a7e141fefe4941a2b4bed",
         "type": "github"
       },
       "original": {
@@ -948,8 +948,8 @@
         "rust-overlay": "rust-overlay_4"
       },
       "locked": {
-        "lastModified": 1778378575,
-        "narHash": "sha256-3T56VdkIWAnV+L7U+6cJV/TufyuUidqMZMHUIsI6h+8=",
+        "lastModified": 1778614481,
+        "narHash": "sha256-ySzexoYhTsOBJ63uT7uyok51lMSnWTJb/nxru66S/gI=",
         "path": "/home/y0usaf/Dev/nur",
         "type": "path"
       },
@@ -1040,11 +1040,11 @@
         "piWorkingIndicator": "piWorkingIndicator"
       },
       "locked": {
-        "lastModified": 1778425498,
-        "narHash": "sha256-cCw2+X7lm5P5ETABn15rXdmI65YvX1AEpT6pnXJv+VE=",
+        "lastModified": 1778614610,
+        "narHash": "sha256-t9cTVtn4lipzzoVDaAeaIlXBbQmlNj162URlc/1Dvao=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "617679f65ae3679ecc4c3e3ef255b2b93917399c",
+        "rev": "904a2e9b96ffd6e48b5449f63ff723bfaf7a56b9",
         "type": "github"
       },
       "original": {
@@ -1246,11 +1246,11 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1777033471,
-        "narHash": "sha256-KNpodvUvYr2sR9BI4Dgt8xyxHR4PsZ8d6g8IqwIq4Is=",
+        "lastModified": 1778433054,
+        "narHash": "sha256-U3Qnqu0igVceojYSexS5XHTQ0K1WXrZnOhdmcvVb3+E=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "3e0ee69b5ead441e4669b123b2f98635fee7da30",
+        "rev": "f348a06294f12792858c083dac2bcc462988a3d3",
         "type": "github"
       },
       "original": {
