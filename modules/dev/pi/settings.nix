@@ -46,36 +46,13 @@ in {
 
     environment.variables.PI_SKIP_VERSION_CHECK = "1";
 
-    user.dev.pi.extensionSettings = {
-      "codex-fast" = false;
-      "pi-compact" = {
-        tools = {
-          mode = "compact";
-          gap = false;
-        };
-        user = {
-          mode = "borderless";
-          gap = true;
-        };
-      };
-      "pi-pomodoro" = {
-        workMinutes = 25;
-        breakMinutes = 5;
-        longBreakMinutes = 15;
-        longBreakEvery = 4;
-        notifyTransitions = true;
-      };
-      "pi-rlm" = {
-        models = ["openai-codex/gpt-5.4-mini"];
-      };
-    };
-
     manzil.users."${config.user.name}".files = {
       ".pi/agent/settings.json" = {
-        text = builtins.toJSON (
+        generator = lib.generators.toJSON {};
+        value =
           {
             defaultProvider = "openai-codex";
-            defaultModel = "gpt-5.4-mini";
+            defaultModel = "gpt-5.5";
             defaultThinkingLevel = "xhigh";
             enabledModels = [
               "openai-codex/gpt-5.4-mini"
@@ -105,8 +82,7 @@ in {
           }
           // lib.optionalAttrs (cfg.extensionSettings != {}) {
             inherit (cfg) extensionSettings;
-          }
-        );
+          };
       };
       ".pi/agent/DEFAULT_SYSTEM.md" = {
         text = ''
