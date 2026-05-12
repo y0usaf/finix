@@ -88,7 +88,8 @@
         '';
       };
       ".gemini/settings.json" = {
-        text = builtins.toJSON {
+        generator = lib.generators.toJSON {};
+        value = {
           security = {
             auth = {
               selectedType = "oauth-personal";

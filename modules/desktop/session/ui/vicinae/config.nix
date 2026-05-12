@@ -28,7 +28,9 @@
 
     # Vicinae configuration via manzil
     manzil.users."${config.user.name}".files.".config/vicinae/vicinae.json" = {
-      text = builtins.toJSON (lib.recursiveUpdate {
+      generator = lib.generators.toJSON {};
+      value =
+        lib.recursiveUpdate {
           # Vicinae defaults from config-service.hpp (with custom overrides)
           closeOnFocusLoss = false;
           considerPreedit = false;
@@ -53,7 +55,7 @@
             rounding = 0;
           };
         }
-        config.user.ui.vicinae.extraConfig);
+        config.user.ui.vicinae.extraConfig;
     };
 
     # Note: Wallust will generate the wallust-auto.toml theme based on colorscheme
