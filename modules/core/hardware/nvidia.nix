@@ -87,7 +87,7 @@ in {
         LIBGL_DRIVER_NAME = "nvidia";
       };
       # Fix high VRAM usage on electron apps
-      etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool.json".text = builtins.toJSON {
+      etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool.json".text = lib.generators.toJSON {} {
         rules = [
           {
             pattern = {

@@ -12,11 +12,11 @@
       pkgs.bun
     ];
     manzil.users."${config.user.name}".files.".config/bun/bunfig.toml" = {
-      text = ''
-        [install]
-        cache_dir = "${config.user.homeDirectory}/.cache/bun"
-        global_dir = "${config.user.homeDirectory}/.local/share/bun"
-      '';
+      generator = config.lib.generators.toTOML;
+      value.install = {
+        cache_dir = "${config.user.homeDirectory}/.cache/bun";
+        global_dir = "${config.user.homeDirectory}/.local/share/bun";
+      };
     };
     systemd.tmpfiles.rules = [
       "d ${config.user.homeDirectory}/.local/share/bun 0755 ${config.user.name} ${config.user.name} - -"
