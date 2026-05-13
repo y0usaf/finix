@@ -51,12 +51,13 @@ in {
         generator = lib.generators.toJSON {};
         value =
           {
-            defaultProvider = "openai-codex";
-            defaultModel = "gpt-5.5";
-            defaultThinkingLevel = "xhigh";
+            defaultProvider = "vercel-ai-gateway";
+            defaultModel = "deepseek/deepseek-v4-pro";
+            defaultThinkingLevel = "high";
             enabledModels = [
+              "vercel-ai-gateway/deepseek/deepseek-v4-pro"
               "openai-codex/gpt-5.4-mini"
-              "openai-codex/gpt-5.5"
+              "openai-codex/gpt-5.4"
               "anthropic/claude-opus-4-6"
             ];
             compaction.enabled = false;
@@ -83,6 +84,25 @@ in {
           // lib.optionalAttrs (cfg.extensionSettings != {}) {
             inherit (cfg) extensionSettings;
           };
+      };
+      ".pi/agent/models.json" = {
+        generator = lib.generators.toJSON {};
+        value = {
+          providers = {
+            "vercel-ai-gateway" = {
+              modelOverrides = {
+                "deepseek/deepseek-v4-pro" = {
+                  compat = {
+                    vercelGatewayRouting = {
+                      only = ["deepseek"];
+                      order = ["deepseek"];
+                    };
+                  };
+                };
+              };
+            };
+          };
+        };
       };
       ".pi/agent/DEFAULT_SYSTEM.md" = {
         text = ''
