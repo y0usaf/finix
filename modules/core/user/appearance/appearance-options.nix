@@ -11,20 +11,15 @@
       default = 12;
       description = "Font size used by GTK applications";
     };
-    cursorSize = lib.mkOption {
+    xcursorSize = lib.mkOption {
       type = lib.types.int;
       default = 24;
-      description = "Size of the system cursor";
+      description = "Cursor size for XCursor-based applications and compositors.";
     };
-    cursorTheme = lib.mkOption {
-      type = lib.types.enum ["popucom" "deepin" "earendil-dark"];
-      default = "popucom";
-      description = "Cursor theme to use (popucom = animated Popucom theme, deepin = Deepin cursor theme, earendil-dark = Earendil Dark cursor theme)";
-    };
-    cursorColor = lib.mkOption {
-      type = lib.types.enum ["pink" "green" "blue" "yellow" "red" "orange" "cyan" "purple" "grey" "black" "inverted"];
-      default = "pink";
-      description = "Color variant for the Popucom animated cursor theme";
+    hyprcursorSize = lib.mkOption {
+      type = lib.types.int;
+      default = 24;
+      description = "Base Hyprcursor size used by Hyprland at user.appearance.dpi.";
     };
     dpi = lib.mkOption {
       type = lib.types.int;
