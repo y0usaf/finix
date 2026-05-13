@@ -84,6 +84,17 @@
                   }
               }
 
+              window-rule {
+                  match app-id="^foot$"
+                  default-column-display "tabbed"
+                  open-consume-into-column "active"
+              }
+
+              window-rule {
+                  match app-id="^(firefox|librewolf)$"
+                  default-column-display "tabbed"
+                  open-consume-into-column "active"
+              }
               recent-windows {
                   off
               }

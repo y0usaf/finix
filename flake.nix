@@ -110,7 +110,8 @@
     };
 
     niri = {
-      url = "github:niri-wm/niri";
+      # PR 3508: open-consume-into-column window rule.
+      url = "github:niri-wm/niri?ref=pull/3508/head";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
