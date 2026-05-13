@@ -7,8 +7,8 @@
   inherit (config.user) ui appearance;
   gtkCfg = ui.gtk;
   gtkScale = gtkCfg.scale;
-  cursorSize = builtins.floor (24 * gtkScale);
-  cursorSizeStr = builtins.replaceStrings [".0"] [""] (toString cursorSize);
+  xcursorSize = appearance.xcursorSize;
+  xcursorSizeStr = toString xcursorSize;
   toINI = lib.generators.toINI {};
   inherit (appearance) gtkFontSize;
   inherit (ui.fonts) mainFontName;
@@ -39,8 +39,8 @@ in {
             value = {
               Settings = {
                 gtk-application-prefer-dark-theme = 1;
-                gtk-cursor-theme-name = "SSB-x11";
-                gtk-cursor-theme-size = toString cursorSize;
+                gtk-cursor-theme-name = config.user.ui.cursor.package.xcursorThemeName;
+                gtk-cursor-theme-size = toString xcursorSize;
                 gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
                 gtk-xft-antialias = 1;
                 gtk-xft-dpi = toString appearance.dpi;
@@ -100,8 +100,8 @@ in {
             value = {
               Settings = {
                 gtk-application-prefer-dark-theme = 1;
-                gtk-cursor-theme-name = "SSB-x11";
-                gtk-cursor-theme-size = toString cursorSize;
+                gtk-cursor-theme-name = config.user.ui.cursor.package.xcursorThemeName;
+                gtk-cursor-theme-size = toString xcursorSize;
                 gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
               };
             };
@@ -110,7 +110,7 @@ in {
         // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
           ".config/zsh/.zshenv" = {
             text = lib.mkAfter ''
-              export XCURSOR_SIZE="${cursorSizeStr}"
+              export XCURSOR_SIZE="${xcursorSizeStr}"
               export GDK_DPI_SCALE="${toString gtkScale}"
             '';
           };
@@ -118,7 +118,7 @@ in {
         // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
           ".config/nushell/env.nu" = {
             text = lib.mkAfter ''
-              $env.XCURSOR_SIZE = "${cursorSizeStr}"
+              $env.XCURSOR_SIZE = "${xcursorSizeStr}"
               $env.GDK_DPI_SCALE = "${toString gtkScale}"
             '';
           };

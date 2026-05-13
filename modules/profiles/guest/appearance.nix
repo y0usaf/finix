@@ -3,6 +3,6 @@ _: {
     dpi = 144;
     termFontSize = 12;
     gtkFontSize = 12;
-    cursorSize = 36;
+    xcursorSize = 36;
   };
 }

@@ -25,17 +25,9 @@
 
           prefer-no-csd = {};
 
-          cursor = let
-            inherit (config.user) appearance;
-            inherit (appearance) cursorColor cursorSize cursorTheme;
-          in {
-            xcursor-theme =
-              if cursorTheme == "popucom"
-              then "Popucom-${(lib.toUpper (builtins.substring 0 1 cursorColor)) + (builtins.substring 1 (-1) cursorColor)}-x11"
-              else if cursorTheme == "deepin"
-              then "DeepinDarkV20-x11"
-              else "Earendil-Dark-x11";
-            xcursor-size = cursorSize;
+          cursor = {
+            xcursor-theme = config.user.ui.cursor.package.xcursorThemeName;
+            xcursor-size = config.user.appearance.xcursorSize;
           };
 
           screenshot-path = null;
