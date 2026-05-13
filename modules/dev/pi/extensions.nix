@@ -2,10 +2,8 @@
   config,
   lib,
   ...
-}: let
-  cfg = config.user.dev.pi;
-in {
-  config = lib.mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.user.dev.pi.enable {
     user.dev.pi.extensionSettings = {
       "codex-fast" = false;
       "pi-compact" = {
