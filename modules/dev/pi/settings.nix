@@ -92,7 +92,10 @@ in {
             "vercel-ai-gateway" = {
               modelOverrides = {
                 "deepseek/deepseek-v4-pro" = {
+                  reasoning = true;
                   compat = {
+                    thinkingFormat = "openai";
+                    supportsReasoningEffort = true;
                     vercelGatewayRouting = {
                       only = ["deepseek"];
                       order = ["deepseek"];
