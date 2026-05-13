@@ -3,9 +3,11 @@
   lib,
   ...
 }: let
-  quickshellEnabled = config.user.ui.quickshell.enable or false;
+  inherit (config.user) ui;
+
+  quickshellEnabled = ui.quickshell.enable or false;
 in {
-  config = lib.mkIf config.user.ui.hyprland.enable {
+  config = lib.mkIf ui.hyprland.enable {
     manzil.users."${config.user.name}".files.".config/hypr/hyprland.conf" = {
       text = lib.mkAfter (lib.optionalString quickshellEnabled ''
         exec-once = exec quickshell
