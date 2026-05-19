@@ -4,6 +4,7 @@
   ...
 }: let
   cfg = config.user.dev.pi;
+  toJSON = lib.generators.toJSON {};
   piReadmePath = cfg.readmePath;
   piDocsPath = cfg.docsPath;
   piExamplesPath = cfg.examplesPath;
@@ -48,16 +49,15 @@ in {
 
     manzil.users."${config.user.name}".files = {
       ".pi/agent/settings.json" = {
-        generator = lib.generators.toJSON {};
+        generator = toJSON;
         value =
           {
             defaultProvider = "vercel-ai-gateway";
             defaultModel = "deepseek/deepseek-v4-pro";
             defaultThinkingLevel = "high";
             enabledModels = [
-              "vercel-ai-gateway/deepseek/deepseek-v4-pro"
-              "openai-codex/gpt-5.4-mini"
               "openai-codex/gpt-5.4"
+              "openai-codex/gpt-5.4-mini"
               "anthropic/claude-opus-4-6"
             ];
             compaction.enabled = false;
@@ -71,7 +71,7 @@ in {
                 "./.claude/skills"
               ];
             };
-            hideThinkingBlock = true;
+            hideThinkingBlock = false;
             collapseChangelog = true;
             quietStartup = true;
             doubleEscapeAction = "tree";
@@ -86,7 +86,7 @@ in {
           };
       };
       ".pi/agent/models.json" = {
-        generator = lib.generators.toJSON {};
+        generator = toJSON;
         value = {
           providers = {
             "vercel-ai-gateway" = {

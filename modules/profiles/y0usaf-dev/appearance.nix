@@ -2,9 +2,7 @@
   pkgs,
   flakeInputs,
   ...
-}: let
-  cursorsPkgs = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}";
-in {
+}: {
   user.appearance = {
     dpi = 189;
     termFontSize = 12;
@@ -14,5 +12,5 @@ in {
     wallust.defaultTheme = "pantera";
   };
 
-  user.ui.cursor.package = cursorsPkgs.deepin-dark;
+  user.ui.cursor.package = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark;
 }
