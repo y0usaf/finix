@@ -6,17 +6,14 @@
   ...
 }: let
   inherit (lib) mkAfter;
-  cursorsPkgs = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}";
   inherit (config) user;
   inherit (user) shell;
   inherit (user.appearance) hyprcursorSize xcursorSize;
-  cursor = user.ui.cursor;
+  inherit (user.ui) cursor;
   cursorPackage = cursor.package;
   cursorSessionVariables = cursorPackage.mkCursorSessionVariables {
     inherit xcursorSize hyprcursorSize;
   };
-  zshSessionVariables = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') cursorSessionVariables);
-  nushellSessionVariables = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: ''$env.${name} = "${value}"'') cursorSessionVariables);
 in {
   options.user.ui.cursor = {
     enable = lib.mkOption {
@@ -27,7 +24,7 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = cursorsPkgs.popucom-pink;
+      default = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".popucom-pink;
       description = ''
         Combined cursor theme package. The package is expected to expose cursor
         metadata through passthru, including xcursorThemeName and
@@ -60,14 +57,14 @@ in {
         // lib.optionalAttrs shell.zsh.enable {
           ".config/zsh/.zprofile" = {
             text = mkAfter ''
-              ${zshSessionVariables}
+              ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') cursorSessionVariables)}
             '';
           };
         }
         // lib.optionalAttrs shell.nushell.enable {
           ".config/nushell/login.nu" = {
             text = mkAfter ''
-              ${nushellSessionVariables}
+              ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: ''$env.${name} = "${value}"'') cursorSessionVariables)}
             '';
           };
         };

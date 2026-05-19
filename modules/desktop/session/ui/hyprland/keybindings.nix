@@ -52,28 +52,26 @@
     }
   ];
 
-  whichKeyConfig = {
-    icon = 1;
-    timeoutMs = 6500;
-    colour = "rgba(111111dd)";
-    commands = {
-      hyprctl = "${pkgs.hyprland}/bin/hyprctl";
-      lua = "${pkgs.lua5_4}/bin/lua";
-      sleep = "${pkgs.coreutils}/bin/sleep";
-    };
-    groups.open = {
-      title = "open";
-      entries =
-        map (entry: {
-          key = lib.toLower entry.key;
-          inherit (entry) label;
-        })
-        whichKeyOpenEntries;
-    };
-  };
-
-  whichKeyLua = pkgs.writeText "hyprland-which-key.lua" ''
-    local config = ${lib.generators.toLua {} whichKeyConfig}
+  whichKey = "${pkgs.lua5_4}/bin/lua ${pkgs.writeText "hyprland-which-key.lua" ''
+    local config = ${lib.generators.toLua {} {
+      icon = 1;
+      timeoutMs = 6500;
+      colour = "rgba(111111dd)";
+      commands = {
+        hyprctl = "${pkgs.hyprland}/bin/hyprctl";
+        lua = "${pkgs.lua5_4}/bin/lua";
+        sleep = "${pkgs.coreutils}/bin/sleep";
+      };
+      groups.open = {
+        title = "open";
+        entries =
+          map (entry: {
+            key = lib.toLower entry.key;
+            inherit (entry) label;
+          })
+          whichKeyOpenEntries;
+      };
+    }}
     local commands = config.commands or {}
 
     local function sh_quote(value)
@@ -178,9 +176,7 @@
         "timeout",
         sh_quote(token),
     }, " "))
-  '';
-
-  whichKey = "${pkgs.lua5_4}/bin/lua ${whichKeyLua}";
+  ''}";
   withSubmapReset = command: "${whichKey} reset; ${command}";
 
   whichKeyOpenBinds =
@@ -275,11 +271,6 @@
       "$mod SHIFT, C, exec, killall swaybg; for monitor in $(hyprctl monitors -j | jq -r '.[].name'); do wall=$(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1); swaybg -o $monitor -i $wall -m fill & done"
     ]
   ];
-
-  mouseBinds = [
-    "$mod, mouse:272, movewindow"
-    "$mod, mouse:273, resizewindow"
-  ];
 in {
   config =
     lib.mkIf config.user.ui.hyprland.enable {
@@ -293,7 +284,10 @@ in {
 " (bind: "bind = ${bind}") whichKeyOpenBinds}
             submap = reset
             ${lib.concatMapStringsSep "
-" (bind: "bindm = ${bind}") mouseBinds}
+" (bind: "bindm = ${bind}") [
+                "$mod, mouse:272, movewindow"
+                "$mod, mouse:273, resizewindow"
+              ]}
           '';
       };
     };
