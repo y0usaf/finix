@@ -7,7 +7,8 @@
   inherit (config.user) ui appearance;
   gtkCfg = ui.gtk;
   gtkScale = gtkCfg.scale;
-  xcursorSize = appearance.xcursorSize;
+  cursorThemeName = ui.cursor.package.xcursorThemeName;
+  inherit (appearance) xcursorSize;
   xcursorSizeStr = toString xcursorSize;
   toINI = lib.generators.toINI {};
   inherit (appearance) gtkFontSize;
@@ -39,7 +40,7 @@ in {
             value = {
               Settings = {
                 gtk-application-prefer-dark-theme = 1;
-                gtk-cursor-theme-name = config.user.ui.cursor.package.xcursorThemeName;
+                gtk-cursor-theme-name = cursorThemeName;
                 gtk-cursor-theme-size = toString xcursorSize;
                 gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
                 gtk-xft-antialias = 1;
@@ -100,7 +101,7 @@ in {
             value = {
               Settings = {
                 gtk-application-prefer-dark-theme = 1;
-                gtk-cursor-theme-name = config.user.ui.cursor.package.xcursorThemeName;
+                gtk-cursor-theme-name = cursorThemeName;
                 gtk-cursor-theme-size = toString xcursorSize;
                 gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
               };

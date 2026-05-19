@@ -8,15 +8,15 @@
       ".codex/agents/explorer.toml" = {
         generator = config.lib.generators.toTOML;
         value = {
-          model = "gpt-5.5";
-          model_reasoning_effort = "high";
+          model = "gpt-5.4";
+          model_reasoning_effort = "xhigh";
         };
       };
       ".codex/agents/worker.toml" = {
         generator = config.lib.generators.toTOML;
         value = {
-          model = "gpt-5.5";
-          model_reasoning_effort = "high";
+          model = "gpt-5.4";
+          model_reasoning_effort = "xhigh";
         };
       };
     };
