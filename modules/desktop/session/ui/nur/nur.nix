@@ -11,7 +11,7 @@
   toLua = lib.generators.toLua {};
   luaInline = lib.generators.mkLuaInline;
   barOverlayDefaults = {
-    modules = bar.modules;
+    inherit (bar) modules;
     font_family = "monospace";
     name_prefix = "bar-overlay";
     top_name = "bar-overlay-top";
@@ -66,18 +66,6 @@
     battery = {
       gap = 4;
     };
-  };
-  fontFamilyLua =
-    if bar.font-family != null
-    then toLua bar.font-family
-    else toLua (luaInline ''shell.exec("fc-match monospace --format='%{family}'")'');
-  fontFamilyFallbackLua = toLua barOverlayDefaults.font_family;
-  barOpenOptionsLua = toLua {
-    modules = bar.modules;
-    exclusive = bar.exclusive;
-    font_family = luaInline "_nur_font";
-    tray_width = barOverlayDefaults.module_widths.tray;
-    relayout_interval = false;
   };
   barOverlayDefaultsLua = toLua barOverlayDefaults;
 in {
@@ -150,9 +138,18 @@ in {
           [
             (toLua bar.modules)
             (toLua bar.exclusive)
-            fontFamilyLua
-            fontFamilyFallbackLua
-            barOpenOptionsLua
+            (
+              if bar.font-family != null
+              then toLua bar.font-family
+              else toLua (luaInline ''shell.exec("fc-match monospace --format='%{family}'")'')
+            )
+            (toLua barOverlayDefaults.font_family)
+            (toLua {
+              inherit (bar) modules exclusive;
+              font_family = luaInline "_nur_font";
+              tray_width = barOverlayDefaults.module_widths.tray;
+              relayout_interval = false;
+            })
             barOverlayDefaultsLua
           ]
           cfg.config;

@@ -10,7 +10,7 @@ in {
 
     model = mkOption {
       type = types.str;
-      default = "gpt-5.5";
+      default = "gpt-5.4";
       description = "Codex model to use";
     };
 

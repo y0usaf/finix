@@ -23,11 +23,6 @@
         longBreakEvery = 4;
         notifyTransitions = true;
       };
-      "pi-rlm" = {
-        models = ["openai-codex/gpt-5.4-mini"];
-        maxConcurrent = 4;
-        maxDepth = 4;
-      };
     };
   };
 }
