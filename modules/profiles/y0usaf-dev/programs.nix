@@ -7,9 +7,9 @@ _: {
       yoloMode = true;
     };
     discord = {
-      canary.enable = true;
-      stable.enable = false;
-      vesktop.enable = false;
+      canary.enable = false;
+      stable.enable = true;
+      vesktop.enable = true;
     };
     handy = {
       enable = true;
