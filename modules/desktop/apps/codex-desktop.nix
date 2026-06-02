@@ -7,7 +7,13 @@
 }: let
   inherit (lib) mkEnableOption mkIf;
   codexDesktopCfg = config.user.programs.codex-desktop;
-  codex-desktop = flakeInputs.codex-desktop-linux.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  codex-desktop = flakeInputs.codex-desktop-linux.packages."${pkgs.stdenv.hostPlatform.system}".default.overrideAttrs (_: {
+    version = "0-unstable-2026-06-02";
+    src = pkgs.fetchurl {
+      url = "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg";
+      hash = "sha256-xGhTgxNq/IhSbFhBu4Sie2BxkOzqEeaPSeSTQce/34o=";
+    };
+  });
 in {
   options.user.programs.codex-desktop = {
     enable = mkEnableOption "Codex Desktop (OpenAI Codex app for Linux)";
