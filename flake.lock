@@ -96,11 +96,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1778053597,
-        "narHash": "sha256-FnZNt6nMfA6rl0xN0+iR3/qI+nfWmxJ5yB58QpMaXH8=",
+        "lastModified": 1779229997,
+        "narHash": "sha256-QRUWb0+91GuLkXB2DK5ixo1WoULHuwY+Knl6/h9Rotg=",
         "owner": "y0usaf",
         "repo": "codex-desktop-flake",
-        "rev": "52c9dbd6dde6f99073ebcefd0c67491ebfab56aa",
+        "rev": "389ac3d9698a7c58a8f76674ac31268bd5acf439",
         "type": "github"
       },
       "original": {
