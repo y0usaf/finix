@@ -5,15 +5,17 @@
 }: {
   # Recreate @home from @home-blank on each boot (impermanence README pattern).
   # This avoids tmpfs /home space pressure while keeping ephemeral home semantics.
-  boot.initrd.systemd.services.reset-home = {
-    description = "Reset @home Btrfs subvolume";
+  # Converted to systemd initrd service (postDeviceCommands no longer supported).
+  boot.initrd.systemd.services.home-rollback = {
+    description = "Rollback @home btrfs subvolume to @home-blank snapshot";
     wantedBy = ["initrd.target"];
-    wants = ["initrd-root-device.target"];
-    after = ["initrd-root-device.target"];
-    before = ["sysroot.mount"];
+    after = ["dev-disk-by\\x2duuid-6ae685dc\\x2d540e\\x2d42f2\\x2db30a\\x2d104a8aac0e27.device"];
+    before = ["sysroot-home.mount"];
     unitConfig.DefaultDependencies = false;
-    serviceConfig.Type = "oneshot";
-    path = with pkgs; [btrfs-progs coreutils util-linux];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
     script = ''
       mkdir -p /btrfs_tmp
       mount -t btrfs -o subvolid=5 /dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27 /btrfs_tmp

@@ -8,8 +8,10 @@ _: {
     };
     codex = {
       enable = true;
-      model = "gpt-5.5";
-      settings.personality = "pragmatic";
+      model = "gpt-5.4";
+      settings = {
+        personality = "pragmatic";
+      };
     };
     android-tools.enable = true;
     codex-cli.enable = true;

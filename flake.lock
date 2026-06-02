@@ -1027,17 +1027,18 @@
         ]
       },
       "locked": {
-        "lastModified": 1779072852,
-        "narHash": "sha256-zD0BjdCoArTzFwxPXLKZiqMtJ2vyCKXVp3ZR1/pAHcI=",
-        "ref": "refs/heads/main",
-        "rev": "c58704acda75da91d5c7228474a9a1607400dcb4",
-        "revCount": 4161,
-        "type": "git",
-        "url": "https://github.com/y0usaf/pi-rlm"
+        "lastModified": 1779191970,
+        "narHash": "sha256-oQ2BqXF6mCzv8Xn2mvx9hwE2/R1WH8I42YORpslASfY=",
+        "owner": "y0usaf",
+        "repo": "pi-rlm",
+        "rev": "6906ab58f59b21162c292bf3d1e9f731e33d8eb0",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "https://github.com/y0usaf/pi-rlm"
+        "owner": "y0usaf",
+        "ref": "rlm-rewrite-1779064714",
+        "repo": "pi-rlm",
+        "type": "github"
       }
     },
     "pyproject-build-systems": {
