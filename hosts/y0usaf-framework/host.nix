@@ -3,9 +3,11 @@
   pkgs,
   flakeInputs,
   ...
-}: {
+}: let
+  inherit (pkgs.stdenv.hostPlatform) system;
+in {
   fonts = {
-    packages = [flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default];
+    packages = [flakeInputs.fonts.packages."${system}".default];
     fontDir.enable = true;
   };
   hostname = "y0usaf-framework";
@@ -14,6 +16,12 @@
   timezone = "America/Toronto";
 
   environment.systemPackages = [pkgs.brightnessctl];
+
+  user.programs.discord.stable.package =
+    (import flakeInputs.nixpkgs-discord-legacy {
+      inherit system;
+      config.allowUnfree = true;
+    }).discord;
 
   # Secure Boot disabled until sbctl keys are enrolled post-install
   boot.loader.limine.secureBoot.enable = lib.mkForce false;
