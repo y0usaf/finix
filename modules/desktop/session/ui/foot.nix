@@ -12,6 +12,11 @@
 in {
   options.user.ui.foot = {
     enable = lib.mkEnableOption "foot terminal emulator";
+    lineHeight = lib.mkOption {
+      type = lib.types.str;
+      default = "24px";
+      description = "Foot line height";
+    };
   };
   config = lib.mkIf userUi.foot.enable {
     environment.systemPackages = [
@@ -35,7 +40,7 @@ in {
                 uiFonts.emoji.name
               ]);
             "dpi-aware" = "yes";
-            "line-height" = "24px";
+            "line-height" = userUi.foot.lineHeight;
           };
 
         cursor = {

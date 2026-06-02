@@ -15,12 +15,15 @@
         name = "Noto Sans CJK";
       };
     };
-    foot.enable = true;
+    foot = {
+      enable = true;
+      lineHeight = "32px";
+    };
     gtk = {
       enable = true;
       scale = 1.0;
     };
-    hyprland.enable = false;
+    hyprland.enable = true;
     mangowc.enable = false;
     niri = {
       enable = true;
@@ -31,7 +34,7 @@
         }
       '';
     };
-    sway.enable = true;
+    sway.enable = false;
     vicinae.enable = false;
     quickshell.enable = true;
     wayland.enable = true;
