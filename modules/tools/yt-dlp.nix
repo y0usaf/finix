@@ -19,7 +19,6 @@
         lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
           ".config/zsh/.zshrc" = {
             text = lib.mkAfter ''
-              alias ytm4a="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata --embed-thumbnail --convert-thumbnails jpg -o '%(title)s.%(ext)s'"
               alias ytopus="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bestaudio[ext=webm][acodec^=opus]/bestaudio[acodec^=opus]' --remux-video opus --embed-metadata --add-metadata --embed-thumbnail --convert-thumbnails jpg -o '%(title)s.%(ext)s'"
               alias someopus="uvx somedl -f opus -l"
               alias ytmp3="yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s'"
@@ -33,7 +32,6 @@
         // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
           ".config/nushell/config.nu" = {
             text = lib.mkAfter ''
-              def ytm4a [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format m4a --embed-metadata --add-metadata --embed-thumbnail --convert-thumbnails jpg -o '%(title)s.%(ext)s' ...$urls }
               def ytopus [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -f 'bestaudio[ext=webm][acodec^=opus]/bestaudio[acodec^=opus]' --remux-video opus --embed-metadata --add-metadata --embed-thumbnail --convert-thumbnails jpg -o '%(title)s.%(ext)s' ...$urls }
               def someopus [...urls: string] { ^uvx somedl -f opus -l ...$urls }
               def ytmp3 [...urls: string] { ^yt-dlp --extractor-args 'youtube:player_client=android' --no-check-certificate -x --audio-format mp3 --embed-metadata --add-metadata -o '%(title)s.%(ext)s' ...$urls }
