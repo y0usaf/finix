@@ -72,7 +72,7 @@
     nixpkgs-discord-legacy.url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
 
     pi-flake = {
-      url = "github:y0usaf/pi-rlm/rlm-rewrite-1779064714";
+      url = "git+https://github.com/y0usaf/pi-rlm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
