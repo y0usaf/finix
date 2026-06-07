@@ -10,9 +10,8 @@ _:
           --theme-toolbar-field: var(--toolbar-field-background-color, var(--theme-toolbar));
           --theme-tab-text: var(--tab-text-color, var(--lwt-tab-text, #ffffff));
           --font-family: monospace !important;
-          --font-size: 0.6875rem;
           --bar-width: 75vw;
-          --bar-height: 1.2em;
+          --bar-height: calc(var(--tab-min-height, 32px) * 0.94);
           --breakout-width: 50vw;
           --breakout-top: 20vh;
           --popup-offset-top: calc(var(--breakout-top) - 100vh);
@@ -26,6 +25,11 @@ _:
       #titlebar {
           order: -1 !important;
           background-color: var(--theme-frame) !important;
+      }
+
+      #titlebar {
+          min-height: var(--bar-height) !important;
+          max-height: var(--bar-height) !important;
       }
 
       #main-window > body > #browser {
@@ -126,9 +130,8 @@ _:
 
       .tabbrowser-tab {
           height: var(--bar-height) !important;
-          font-size: var(--font-size) !important;
           align-items: center !important;
-          margin-bottom: 0.2em !important;
+          margin-bottom: 0 !important;
           background-color: var(--theme-frame) !important;
       }
 
@@ -173,7 +176,7 @@ _:
       toolbar .toolbarbutton-1 {
           -moz-appearance: none !important;
           margin: 0 !important;
-          padding: 0 0.5em !important;
+          padding: 0 0.25em !important;
       }
 
       .tab-icon-image,
@@ -188,11 +191,6 @@ _:
           margin-right: 0.3em !important;
       }
 
-      #urlbar-container,
-      .urlbarView {
-          font-size: var(--font-size) !important;
-      }
-
       #urlbar-container {
           font-family: var(--font-family) !important;
           margin: 0 !important;
@@ -205,7 +203,7 @@ _:
       }
 
       #urlbar-input {
-          margin: 0 1em !important;
+          margin: 0 0.5em !important;
           text-align: center !important;
       }
 
