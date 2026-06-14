@@ -28,7 +28,7 @@ in {
             SetEnv TERM=xterm-256color
             Host server y0usaf-server
                 HostName y0usaf-server
-                User y0usaf
+                User ${userName}
                 IdentityFile ${homeDir}/.ssh/id_ed25519
                 IdentitiesOnly yes
                 ForwardAgent yes
@@ -36,7 +36,7 @@ in {
             Host desktop
                 HostName y0usaf-desktop
                 Port 2222
-                User y0usaf
+                User ${userName}
                 IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
                 ForwardAgent yes
 

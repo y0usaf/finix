@@ -12,12 +12,12 @@
     };
     launcher = lib.mkOption {
       type = lib.types.str;
-      default = "foot -a 'launcher' ~/.config/scripts/tui-launcher.sh";
+      default = "foot --app-id=launcher ~/.config/scripts/tui-launcher.sh";
       description = "Default application launcher";
     };
     discord = lib.mkOption {
       type = lib.types.str;
-      default = "discord-canary";
+      default = "discord";
       description = "Default Discord client";
     };
     archiveManager = lib.mkOption {

@@ -12,6 +12,10 @@
       extraUpFlags = ["--ssh"];
     };
 
+    # Tailnet peers are already authenticated; trust the interface so services
+    # are reachable over the tailnet without opening their ports on LAN.
+    networking.firewall.trustedInterfaces = ["tailscale0"];
+
     systemd.services.tailscale-resume = {
       description = "Restart Tailscale after resume";
       wantedBy = ["suspend.target"];

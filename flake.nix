@@ -143,7 +143,6 @@
     mkHost = {
       domains,
       hostDir,
-      profileDir,
     }:
       lib.nixosSystem {
         inherit system;
@@ -167,7 +166,6 @@
               }."${domain}")
             domains
             ++ [
-              profileDir
               hostDir
             ]
           );
@@ -176,25 +174,21 @@
     nixosConfigurations = {
       y0usaf-desktop = mkHost {
         hostDir = ./hosts/y0usaf-desktop;
-        profileDir = ./modules/profiles/y0usaf;
         domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
       };
 
       y0usaf-laptop = mkHost {
         hostDir = ./hosts/y0usaf-laptop;
-        profileDir = ./modules/profiles/y0usaf;
         domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
       };
 
       y0usaf-framework = mkHost {
         hostDir = ./hosts/y0usaf-framework;
-        profileDir = ./modules/profiles/y0usaf-dev;
         domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
       };
 
       y0usaf-server = mkHost {
         hostDir = ./hosts/y0usaf-server;
-        profileDir = ./modules/profiles/server;
         domains = ["core" "shell" "tools" "user-services" "dev"];
       };
     };

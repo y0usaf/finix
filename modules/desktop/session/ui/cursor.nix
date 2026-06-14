@@ -24,7 +24,7 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".popucom-pink;
+      default = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark;
       description = ''
         Combined cursor theme package. The package is expected to expose cursor
         metadata through passthru, including xcursorThemeName and

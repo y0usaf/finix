@@ -9,7 +9,7 @@
   };
   config = lib.mkIf config.user.dev.npm.enable {
     environment.systemPackages = [
-      pkgs.nodejs_20
+      pkgs.nodejs
     ];
     manzil.users."${config.user.name}".files.".config/npm/npmrc" = {
       text = ''

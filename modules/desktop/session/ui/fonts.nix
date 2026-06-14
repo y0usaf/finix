@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: {
   options.user.ui.fonts = {
@@ -12,10 +13,12 @@
     };
     mainFont = lib.mkOption {
       type = lib.types.package;
+      default = flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default;
       description = "Main monospace font package";
     };
     mainFontName = lib.mkOption {
       type = lib.types.str;
+      default = "Departure Mono Condensed Compact";
       description = "Main font family name";
     };
     backup = lib.mkOption {
@@ -23,14 +26,17 @@
         options = {
           package = lib.mkOption {
             type = lib.types.package;
+            default = pkgs.noto-fonts-cjk-sans;
             description = "Backup font package";
           };
           name = lib.mkOption {
             type = lib.types.str;
+            default = "Noto Sans CJK";
             description = "Backup font family name";
           };
         };
       };
+      default = {};
       description = "Backup font configuration";
     };
     emoji = lib.mkOption {

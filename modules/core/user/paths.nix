@@ -34,8 +34,15 @@ in {
         flake = mkDefault {
           path = "${homeDir}/nixos";
         };
+        music = mkDefault {
+          path = "${homeDir}/Music";
+        };
+        dcim = mkDefault {
+          path = "${homeDir}/DCIM";
+        };
         steam = mkDefault {
           path = "${homeDir}/.local/share/Steam";
+          create = false;
         };
       };
     };

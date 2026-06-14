@@ -1,6 +1,11 @@
-{lib, ...}: let
-  inherit (lib) mkOption;
+{
+  config,
+  lib,
+  ...
+}: let
+  inherit (lib) mkDefault mkOption;
   inherit (lib.types) str bool submodule listOf;
+  homeDir = config.user.homeDirectory;
   mkOpt = type: description: mkOption {inherit type description;};
   dirModule = submodule {
     options = {
@@ -25,8 +30,23 @@ in {
     }) "Wallpaper directories configuration";
     bookmarks = mkOption {
       type = listOf str;
-      default = [];
+      default = [
+        "file://${homeDir}/Downloads Downloads"
+        "file://${homeDir}/Documents Documents"
+        "file://${homeDir}/Dev Dev"
+        "file://${homeDir}/nixos NixOS"
+        "file:///tmp tmp"
+      ];
       description = "GTK bookmarks for file manager";
+    };
+  };
+
+  config.user.paths.wallpapers = {
+    static = mkDefault {
+      path = "${homeDir}/DCIM/Wallpapers";
+    };
+    video = mkDefault {
+      path = "${homeDir}/DCIM/Wallpapers_Video";
     };
   };
 }
