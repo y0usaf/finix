@@ -18,6 +18,9 @@
       DISABLE_TELEMETRY = "1";
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
     };
+    memory = {
+      enabled = false;
+    };
   };
 in {
   config = lib.mkIf claudeCodeCfg.enable {
@@ -54,6 +57,7 @@ in {
             permissions
             promptSuggestionEnabled
             skipDangerousModePermissionPrompt
+            memory
             ;
           env =
             ccSettings.env

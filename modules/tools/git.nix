@@ -8,10 +8,12 @@
     enable = lib.mkEnableOption "git configuration";
     name = lib.mkOption {
       type = lib.types.str;
+      default = "y0usaf";
       description = "Git username.";
     };
     email = lib.mkOption {
       type = lib.types.str;
+      default = "OA99@Outlook.com";
       description = "Git email address.";
     };
     editor = lib.mkOption {

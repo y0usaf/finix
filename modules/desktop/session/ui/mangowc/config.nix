@@ -30,12 +30,6 @@
         scroller_default_proportion=0.5
         scroller_proportion_preset=0.33333,0.5,0.66667
 
-        # Monitor Configuration
-        # Format: name,mfact,nmaster,layout,transform,scale,x,y,width,height,refreshrate
-        monitorrule=DP-4,0.55,1,scroller,0,1,0,0,5120,1440,240
-        monitorrule=DP-2,0.55,1,scroller,0,1,0,0,5120,1440,240
-        monitorrule=HDMI-A-2,0.55,1,scroller,0,1,5120,0,1920,1080,60
-
         # System
         bind=Alt+Shift,e,quit,
         bind=SUPER+Shift,r,reload_config,
