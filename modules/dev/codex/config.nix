@@ -11,6 +11,7 @@
           {
             approval_policy = "never";
             sandbox_mode = "danger-full-access";
+            fastMode = false;
             features = {
               multi_agent = true;
               steer = true;

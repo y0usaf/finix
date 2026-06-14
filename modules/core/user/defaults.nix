@@ -2,7 +2,7 @@
   options.user.defaults = {
     browser = lib.mkOption {
       type = lib.types.str;
-      default = "firefox";
+      default = "librewolf";
       description = "Default web browser";
     };
     editor = lib.mkOption {

@@ -1,4 +1,4 @@
-_: let
+{config, ...}: let
   codexReminderCommand = ''    printf '%s\n' '<system-reminder>
     Use Codex MCP when seeking reviews or second opinions.
     </system-reminder>''''';
@@ -45,7 +45,7 @@ in {
             "@openai/codex"
             "mcp-server"
             "-c"
-            "model=gpt-5.2-codex"
+            "model=${config.user.dev.codex.model}"
             "-c"
             "model_reasoning_effort=high"
           ];

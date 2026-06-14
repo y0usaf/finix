@@ -1,0 +1,11 @@
+_: {
+  user.appearance = {
+    dpi = 109;
+    termFontSize = 16;
+    gtkFontSize = 12;
+    xcursorSize = 18;
+    hyprcursorSize = 36;
+    opacity = 0.7;
+    wallust.defaultTheme = "pantera";
+  };
+}

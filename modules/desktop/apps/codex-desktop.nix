@@ -7,7 +7,7 @@
 }: let
   inherit (lib) mkEnableOption mkIf;
   codexDesktopCfg = config.user.programs.codex-desktop;
-  codex-desktop = flakeInputs.codex-desktop-linux.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  codex-desktop = pkgs.callPackage "${flakeInputs.codex-desktop-linux}/package.nix" {};
 in {
   options.user.programs.codex-desktop = {
     enable = mkEnableOption "Codex Desktop (OpenAI Codex app for Linux)";
