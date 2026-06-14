@@ -56,7 +56,6 @@ in {
                   pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i";
                   pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
                   buildtime = "time (nix build \${NH_FLAKE}#nixosConfigurations.\${HOST}.config.system.build.toplevel --option eval-cache false)";
-                  hmpush = "git -C ${flakeDirectory} push origin main --force";
                   hmpull = "git -C ${flakeDirectory} fetch origin && git -C ${flakeDirectory} reset --hard origin/main";
                 }
                 // lib.optionalAttrs config.hardware.nvidia.enable {
@@ -94,7 +93,7 @@ in {
                                 continue
                             fi
 
-                            export $var_name="$content"
+                            export "''${var_name}=''${content}"
                         fi
                     done
                 }
