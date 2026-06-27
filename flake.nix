@@ -115,6 +115,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    shojiwm = {
+      url = "github:y0usaf/ShojiWM";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     strictix = {
       url = "github:y0usaf/strictix";
       inputs.nixpkgs.follows = "nixpkgs";
