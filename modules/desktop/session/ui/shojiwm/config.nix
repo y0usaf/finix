@@ -69,6 +69,7 @@
       "@@DISCORD@@"
       "@@WALLPAPER_PATH@@"
       "@@XWAYLAND_SATELLITE@@"
+      "@@FONT_FAMILY@@"
     ]
     [
       config.user.defaults.terminal
@@ -80,6 +81,7 @@
       config.user.defaults.discord
       config.user.paths.wallpapers.static.path
       "${pkgs.xwayland-satellite}/bin/xwayland-satellite"
+      config.user.ui.fonts.mainFontName
     ]
     (builtins.readFile ./config.tsx);
 
@@ -131,7 +133,7 @@
       cp ${./window-manager.ts} $out/src/window-manager.ts
       cp ${runtimeConfigSrc}/src/window-animation.ts $out/src/window-animation.ts
 
-      # Copy SVG assets for window buttons (close, maximize, minimize)
+      # Copy SVG assets for window buttons (close, maximize)
       cp ${runtimeConfigSrc}/assets/*.svg $out/assets/
 
       cat > $out/package.json <<EOF
@@ -230,7 +232,6 @@ in {
       ".config/shojiwm/src/window-manager.ts".source = "${cfg}/src/window-manager.ts";
       ".config/shojiwm/src/window-animation.ts".source = "${cfg}/src/window-animation.ts";
       ".config/shojiwm/assets/x.svg".source = "${cfg}/assets/x.svg";
-      ".config/shojiwm/assets/minus.svg".source = "${cfg}/assets/minus.svg";
       ".config/shojiwm/assets/maximize-2.svg".source = "${cfg}/assets/maximize-2.svg";
       ".config/shojiwm/assets/minimize-2.svg".source = "${cfg}/assets/minimize-2.svg";
 
