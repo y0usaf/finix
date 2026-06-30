@@ -4,6 +4,7 @@
   ...
 }: let
   inherit (lib) attrByPath mapAttrs mkDefault mkEnableOption mkIf mkMerge mkOption types;
+  inherit (config.user.dev) codex;
 in {
   options.user.dev.codex = {
     enable = mkEnableOption "Codex CLI configuration and instructions";
@@ -73,8 +74,8 @@ in {
   };
 
   config = mkMerge [
-    (mkIf config.user.dev.codex.enable {})
-    (mkIf config.user.dev.codex.providers."vercel-ai-gateway".enable {
+    (mkIf codex.enable {})
+    (mkIf codex.providers."vercel-ai-gateway".enable {
       user.dev.codex.model = mkDefault "openai/gpt-5.4";
     })
     (mkIf (attrByPath ["user" "programs" "codex-desktop" "enable"] false config

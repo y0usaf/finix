@@ -8,6 +8,7 @@
   devCfg = config.user.dev;
   cfg = devCfg.opencode;
   homeDir = config.user.homeDirectory;
+  toJson = lib.generators.toJSON {};
   mkStrOption = default: description:
     mkOption {
       type = types.str;
@@ -42,7 +43,7 @@ in {
     manzil.users."${config.user.name}" = {
       files = {
         ".config/opencode/opencode.json" = {
-          generator = lib.generators.toJSON {};
+          generator = toJson;
           value =
             {
               "$schema" = "https://opencode.ai/config.json";
@@ -130,7 +131,7 @@ in {
 
         ".config/opencode/tui.json" = {
           clobber = true;
-          generator = lib.generators.toJSON {};
+          generator = toJson;
           value = {
             "$schema" = "https://opencode.ai/tui.json";
             inherit (cfg) theme;

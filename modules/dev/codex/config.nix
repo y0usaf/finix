@@ -6,7 +6,7 @@
   codexCfg = config.user.dev.codex;
   vercelAiGatewayCfg = codexCfg.providers."vercel-ai-gateway";
 in {
-  config = lib.mkIf config.user.dev.codex.enable {
+  config = lib.mkIf codexCfg.enable {
     patchix = {
       enable = true;
       users."${config.user.name}".patches.".codex/config.toml" = {
