@@ -7,6 +7,47 @@
 }: let
   shojiwmPkg = flakeInputs.shojiwm.packages."${pkgs.stdenv.hostPlatform.system}".default;
 
+  # Re-wrap the upstream binaries with NVIDIA-specific environment variables
+  # scoped to the ShojiWM process only (not leaked globally via
+  # environment.sessionVariables, which would affect tty2, SDDM, and every
+  # other compositor session on the machine).
+  #
+  # The upstream package.nix wrapper sets GBM_BACKENDS_PATH via --suffix to
+  # only the Mesa store path, which does NOT contain nvidia-drm_gbm.so.
+  # That library lives in /run/opengl-driver/lib/gbm (libgbm's compiled-in
+  # default search path). When GBM_BACKENDS_PATH is set (by the upstream
+  # wrapper), libgbm no longer falls back to the compiled default, so
+  # GBM_BACKEND=nvidia-drm fails with "failed to open nvidia-drm" unless
+  # we prepend the opengl-driver path here.
+  #
+  # Other compositors (niri, hyprland, sway) set GBM_BACKEND inside their
+  # own config files and their binaries do NOT override GBM_BACKENDS_PATH,
+  # so libgbm uses /run/opengl-driver/lib/gbm by default. ShojiWM needs
+  # this extra wrapper layer because its upstream NixOS package sets
+  # GBM_BACKENDS_PATH in its makeWrapper invocation.
+  shojiwmWrapped = pkgs.symlinkJoin {
+    name = "shojiwm-nvidia-wrapped";
+    paths = [shojiwmPkg];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    passthru = {inherit (shojiwmPkg) providedSessions;};
+    postBuild = lib.optionalString config.hardware.nvidia.enable ''
+      # shoji_wm — the compositor: needs GBM_BACKEND=nvidia-drm to drive the
+      # display through the NVIDIA DRM node, plus the GBM search path fix.
+      wrapProgram $out/bin/shoji_wm \
+        --prefix GBM_BACKENDS_PATH : /run/opengl-driver/lib/gbm \
+        --set-default GBM_BACKEND nvidia-drm \
+        --set-default __GLX_VENDOR_LIBRARY_NAME nvidia \
+        --set-default __EGL_VENDOR_LIBRARY_FILENAMES /run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json \
+        --set-default LIBVA_DRIVER_NAME nvidia
+      # xdg-desktop-portal-shojiwm — a Wayland client (winit/iced) that also
+      # needs to find the NVIDIA GBM backend for EGL on this machine.
+      wrapProgram $out/bin/xdg-desktop-portal-shojiwm \
+        --prefix GBM_BACKENDS_PATH : /run/opengl-driver/lib/gbm \
+        --set-default __GLX_VENDOR_LIBRARY_NAME nvidia \
+        --set-default __EGL_VENDOR_LIBRARY_FILENAMES /run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json
+    '';
+  };
+
   # Upstream's package embeds the TypeScript runtime at $out/lib/shojiwm/.
   # (The fork exposed it via passthru.shojiwm-runtime; upstream does not.)
   runtimeDir = "${shojiwmPkg}/lib/shojiwm";
@@ -132,19 +173,13 @@ in {
     # official NixOS module (shojiwm.nixosModules.default).
     programs.shojiwm.enable = true;
 
-    # NVIDIA env vars must be set before the compositor process starts, not in
-    # config.tsx via COMPOSITOR.env (which runs after EGL/GLES init — too late
-    # for GBM_BACKEND to be picked up, causing flickering on NVIDIA).
-    # Other compositors set these via their own config-file env mechanisms
-    # (niri "environment" block, sway extraSessionCommands, hyprland "env =").
-    # ShojiWM's upstream NixOS module has no such hook, so we use session
-    # variables scoped to this WM.
-    environment.sessionVariables = lib.optionalAttrs config.hardware.nvidia.enable {
-      GBM_BACKEND = "nvidia-drm";
-      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-      __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json";
-      LIBVA_DRIVER_NAME = "nvidia";
-    };
+    # Override the upstream package with the NVIDIA-wrapped version defined
+    # above. The upstream NixOS module checks `cfg.package ? override` and
+    # calls `.override { xwayland; xwaylandSatellite }` if available;
+    # symlinkJoin does not expose .override, so the module installs the
+    # (already NVIDIA-wrapped) package as-is. The upstream defaults already
+    # bake in xwayland-satellite, so no functionality is lost.
+    programs.shojiwm.package = shojiwmWrapped;
 
     # Extra packages not already installed by programs.shojiwm.
     environment.systemPackages = [
