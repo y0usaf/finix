@@ -116,7 +116,7 @@
     };
 
     shojiwm = {
-      url = "github:y0usaf/ShojiWM";
+      url = "github:bea4dev/ShojiWM";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -172,6 +172,7 @@
             domains
             ++ [
               hostDir
+              inputs.shojiwm.nixosModules.default
             ]
           );
       };

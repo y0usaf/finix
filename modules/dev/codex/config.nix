@@ -2,16 +2,21 @@
   config,
   lib,
   ...
-}: {
+}: let
+  codexCfg = config.user.dev.codex;
+  vercelAiGatewayCfg = codexCfg.providers."vercel-ai-gateway";
+in {
   config = lib.mkIf config.user.dev.codex.enable {
-    manzil.users."${config.user.name}".files = {
-      ".codex/config.toml" = {
-        generator = config.lib.generators.toTOML;
+    patchix = {
+      enable = true;
+      users."${config.user.name}".patches.".codex/config.toml" = {
+        format = "toml";
+        clobber = true;
         value =
           {
             approval_policy = "never";
             sandbox_mode = "danger-full-access";
-            fastMode = false;
+            service_tier = "default";
             features = {
               multi_agent = true;
               steer = true;
@@ -36,10 +41,27 @@
               };
             };
           }
-          // config.user.dev.codex.settings
+          // lib.optionalAttrs vercelAiGatewayCfg.enable {
+            model_provider = "vercel-ai-gateway";
+            model_providers."vercel-ai-gateway" = {
+              name = "Vercel AI Gateway";
+              base_url = vercelAiGatewayCfg.baseUrl;
+              env_key = "AI_GATEWAY_API_KEY";
+              wire_api = vercelAiGatewayCfg.wireApi;
+            };
+          }
+          // codexCfg.settings
           // {
-            inherit (config.user.dev.codex) model;
+            inherit (codexCfg) model;
           };
+      };
+    };
+
+    manzil.users."${config.user.name}".files = lib.optionalAttrs (vercelAiGatewayCfg.enable && vercelAiGatewayCfg.apiKeyFile != null) {
+      ".config/nushell/env.nu" = {
+        text = lib.mkAfter ''
+          $env.AI_GATEWAY_API_KEY = (open "${vercelAiGatewayCfg.apiKeyFile}" | str trim)
+        '';
       };
     };
   };

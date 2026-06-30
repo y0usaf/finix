@@ -11,7 +11,6 @@
     environment.systemPackages = [
       pkgs.ffmpeg
       pkgs.vlc
-      pkgs.cmus
     ];
   };
 }
