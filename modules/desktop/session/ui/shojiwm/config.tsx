@@ -597,6 +597,7 @@ COMPOSITOR.window.composition = (window: WaylandWindow) => {
     gap: 8,
     alignItems: "center",
     background: titlebarBackground,
+    position: "relative",
   };
 
   const appIcon = (
@@ -609,13 +610,15 @@ COMPOSITOR.window.composition = (window: WaylandWindow) => {
         color: titleColor,
         fontSize: 13,
         fontWeight: 600,
-        flexGrow: 1,
-        flexShrink: 1,
-        minWidth: 0,
+        position: "absolute",
+        left: 0,
+        right: 0,
+        textAlign: "center",
+        pointerEvents: "none",
+        fontFamily: "@@FONT_FAMILY@@",
       }}
     />
   );
-  const minimizeButton = <MinimizeButton window={window} />;
   const maximizeButton = <MaximizeButton window={window} />;
   const closeButton = <CloseButton window={window} />;
 
@@ -625,7 +628,6 @@ COMPOSITOR.window.composition = (window: WaylandWindow) => {
       <Box direction="row" style={titlebarStyle}>
         {appIcon}
         {label}
-        {minimizeButton}
         {maximizeButton}
         {closeButton}
       </Box>
@@ -670,7 +672,7 @@ COMPOSITOR.window.composition = (window: WaylandWindow) => {
       <WindowBorder
         style={{
           border: { px: WINDOW_BORDER_PX, color: borderColor },
-          borderRadius: 10,
+          borderRadius: 0,
           background: "#10131900",
           padding: 0,
           paddingX: 0,
@@ -719,7 +721,7 @@ const CloseButton = ({ window }: { window: WaylandWindow }) => {
         style={{
           width: 16,
           height: 16,
-          borderRadius: 8,
+          borderRadius: 0,
           background: "#FFFFFF20",
           border: { px: 1, color: borderColor },
         }}
@@ -765,7 +767,7 @@ const MaximizeButton = ({ window }: { window: WaylandWindow }) => {
         style={{
           width: 16,
           height: 16,
-          borderRadius: 8,
+          borderRadius: 0,
           background: "#FFFFFF20",
           border: { px: 1, color: borderColor },
         }}
@@ -783,40 +785,3 @@ const MaximizeButton = ({ window }: { window: WaylandWindow }) => {
   );
 };
 
-const MinimizeButton = ({ window }: { window: WaylandWindow }) => {
-  const [hover, setHover] = useState(false);
-  const borderColor = hover((h) => (h ? "#00000000" : "#F8FF7530"));
-
-  let icon: CompositionRenderable | null = null;
-  if (hover()) {
-    icon = (
-      <Image
-        src="./assets/minus.svg"
-        style={{
-          width: 16,
-          height: 16,
-          position: "absolute",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
-    );
-  }
-
-  return (
-    <Box style={{ position: "relative", flexShrink: 0 }}>
-      <Button
-        onHoverChange={setHover}
-        style={{
-          width: 16,
-          height: 16,
-          borderRadius: 8,
-          background: "#FFFFFF20",
-          border: { px: 1, color: borderColor },
-        }}
-        onClick={() => window.minimize()}
-      />
-      {icon}
-    </Box>
-  );
-};

@@ -7,6 +7,8 @@
   inherit (lib) attrByPath mkEnableOption mkIf mkOption optionals optionalAttrs types;
   inherit (types) anything attrsOf bool str;
   inherit (config) user;
+  nullOrStr = types.nullOr str;
+  claudeCode = user.dev.claude-code;
 
   claudeCodeSkillEnabled = skillName:
     attrByPath ["user" "dev" "claude-code" "skills" skillName "enable"] true config;
@@ -56,7 +58,7 @@ in {
       };
 
       autoMemoryDirectory = mkOption {
-        type = types.nullOr str;
+        type = nullOrStr;
         default = null;
         example = "~/.claude/memory";
         description = ''
@@ -97,7 +99,7 @@ in {
       };
 
       apiKeyFile = mkOption {
-        type = types.nullOr str;
+        type = nullOrStr;
         default = null;
         example = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
         description = ''
@@ -151,7 +153,7 @@ in {
       };
 
       apiKeyFile = mkOption {
-        type = types.nullOr str;
+        type = nullOrStr;
         default = null;
         example = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
         description = ''
@@ -255,19 +257,18 @@ in {
     };
   };
 
-  config = mkIf user.dev.claude-code.enable {
+  config = mkIf claudeCode.enable {
     assertions = let
-      gatewayCfg = user.dev.claude-code.providers."vercel-ai-gateway";
-      legacyCfg = user.dev.claude-code.apiGateway;
-      legacyConfigured =
-        legacyCfg.baseUrl
-        != ""
-        || legacyCfg.apiKeyFile != null
-        || legacyCfg.models != {}
-        || legacyCfg.extraEnv != {};
+      legacyCfg = claudeCode.apiGateway;
     in [
       {
-        assertion = !(gatewayCfg.enable && legacyConfigured);
+        assertion =
+          !(claudeCode.providers."vercel-ai-gateway".enable
+            && (legacyCfg.baseUrl
+              != ""
+              || legacyCfg.apiKeyFile != null
+              || legacyCfg.models != {}
+              || legacyCfg.extraEnv != {}));
         message = ''
           user.dev.claude-code.apiGateway and
           user.dev.claude-code.providers."vercel-ai-gateway" are both configured.
