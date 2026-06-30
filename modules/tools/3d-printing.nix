@@ -15,11 +15,11 @@
       # causes the default opencv cmake config to require nvcc at configure time.
       (pkgs.orca-slicer.override {
         withNvidiaGLWorkaround = true;
-        opencv = pkgs.opencv.override { enableCuda = false; };
+        opencv = pkgs.opencv.override {enableCuda = false;};
       })
       (pkgs.bambu-studio.override {
         withNvidiaGLWorkaround = true;
-        opencv = pkgs.opencv.override { enableCuda = false; };
+        opencv = pkgs.opencv.override {enableCuda = false;};
       })
     ];
   };

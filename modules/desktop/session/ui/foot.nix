@@ -39,6 +39,7 @@ in {
                 uiFonts.backup.name
                 uiFonts.emoji.name
               ]);
+            "bold-text-in-bright" = "yes";
             "dpi-aware" = "yes";
             "line-height" = userUi.foot.lineHeight;
           };
