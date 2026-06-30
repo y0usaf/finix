@@ -25,9 +25,9 @@ in {
         gsp.enable = isOpen;
         nvidiaSettings = false; # useless on wayland
         package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-          version = "595.45.04";
-          sha256_64bit = "sha256-zUllSSRsuio7dSkcbBTuxF+dN12d6jEPE0WgGvVOj14=";
-          openSha256 = "sha256-uqNfImwTKhK8gncUdP1TPp0D6Gog4MSeIJMZQiJWDoE=";
+          version = "595.80";
+          sha256_64bit = "sha256-PVTIP+B/01c/8M66hXTAYTLg9T2Hy9u1gq43K7TF1Hg=";
+          openSha256 = "sha256-nonwYYPItHeMC/5Ox/TlWhjiddMPu4PLqNhgIg+bfW8=";
           usePersistenced = false;
           useSettings = false;
         };
@@ -71,20 +71,18 @@ in {
         __GL_VRR_ALLOWED = "1";
         __GL_MaxFramesAllowed = "1";
         __GL_YIELD = "usleep";
-        #__EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json";
-        #__EGL_EXTERNAL_PLATFORM_CONFIG_DIRS = "/run/opengl-driver/share/egl/egl_external_platform.d";
         CUDA_CACHE_PATH = "${config.user.homeDirectory}/.cache/nv";
         CUDA_DISABLE_PERF_BOOST = "1";
       };
+      # NOTE: Compositor-specific NVIDIA vars (GBM_BACKEND, LIBVA_DRIVER_NAME,
+      # __GLX_VENDOR_LIBRARY_NAME, __EGL_VENDOR_LIBRARY_FILENAMES,
+      # WLR_NO_HARDWARE_CURSORS) are set per-WM (niri, shojiwm, hyprland, sway)
+      # gated on config.hardware.nvidia.enable, so they don't leak across sessions.
+      # GALLIUM_DRIVER and LIBGL_DRIVER_NAME are omitted — they can break
+      # Mesa/non-NVIDIA rendering paths and are not needed with nvidia-drm.
       variables = {
-        GBM_BACKEND = "nvidia-drm";
-        LIBVA_DRIVER_NAME = "nvidia";
-        WLR_NO_HARDWARE_CURSORS = "1";
-        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
         NVIDIA_DRIVER_CAPABILITIES = "all";
         WAYDROID_EXTRA_ARGS = "--gpu-mode host";
-        GALLIUM_DRIVER = "nvidia";
-        LIBGL_DRIVER_NAME = "nvidia";
       };
       # Fix high VRAM usage on electron apps
       etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool.json".text = lib.generators.toJSON {} {

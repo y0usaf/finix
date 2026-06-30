@@ -22,19 +22,22 @@ in {
   options.user.dev.opencode = {
     enable = mkEnableOption "opencode AI coding agent";
 
-    theme = mkStrOption "opencode" "Theme to use for opencode";
+    theme = mkStrOption "system" "Theme to use for opencode";
 
-    model = mkStrOption "anthropic/claude-sonnet-4-20250514" "Default model to use";
+    model = mkStrOption "neuralwatt/glm-5.2" "Default model to use";
 
     enableMcpServers = mkBoolOption false "Enable MCP servers for enhanced functionality";
 
-    enableOllama = mkBoolOption devCfg.localllama.enable "Enable local Ollama provider for opencode (auto-enabled if localllama is enabled)";
+    enableLsps = mkBoolOption true "Enable LSP servers for diagnostics";
+
+    enableOllama = mkBoolOption false "Enable local Ollama provider for opencode";
   };
 
   config = mkIf cfg.enable {
     environment.systemPackages = [
       pkgs.opencode
       pkgs.uv
+      pkgs.nixd
     ];
     manzil.users."${config.user.name}" = {
       files = {
@@ -43,7 +46,7 @@ in {
           value =
             {
               "$schema" = "https://opencode.ai/config.json";
-              inherit (cfg) theme model;
+              inherit (cfg) model;
               autoupdate = true;
               share = "manual";
               disabled_providers = ["openai" "huggingface"];
@@ -54,6 +57,7 @@ in {
                 "{file:${homeDir}/.config/opencode/opencode-instructions.md}"
               ];
             }
+            // (optionalAttrs cfg.enableLsps {lsp = {};})
             // (optionalAttrs cfg.enableOllama {
               inherit
                 ({
@@ -122,6 +126,15 @@ in {
                   }
                 ]);
             });
+        };
+
+        ".config/opencode/tui.json" = {
+          clobber = true;
+          generator = lib.generators.toJSON {};
+          value = {
+            "$schema" = "https://opencode.ai/tui.json";
+            inherit (cfg) theme;
+          };
         };
 
         ".config/opencode/instructions.md" = {

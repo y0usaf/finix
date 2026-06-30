@@ -9,9 +9,16 @@
         dbus-interfaces-in-non-session-instances = {};
       };
 
-      environment = {
-        DISPLAY = ":0";
-      };
+      environment =
+        {
+          DISPLAY = ":0";
+        }
+        // (lib.optionalAttrs config.hardware.nvidia.enable {
+          GBM_BACKEND = "nvidia-drm";
+          __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+          __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json";
+          LIBVA_DRIVER_NAME = "nvidia";
+        });
     };
   };
 }

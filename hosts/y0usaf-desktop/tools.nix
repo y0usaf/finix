@@ -7,5 +7,6 @@ _: {
     file-roller.enable = true;
     nicotine-plus.enable = true;
     yt-dlp.enable = true;
+    "3d-printing".enable = true;
   };
 }
