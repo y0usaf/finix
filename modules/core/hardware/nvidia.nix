@@ -21,7 +21,7 @@ in {
       nvidia = {
         modesetting.enable = true;
         powerManagement.enable = !isOpen;
-        open = true;
+        open = false;
         gsp.enable = isOpen;
         nvidiaSettings = false; # useless on wayland
         package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
