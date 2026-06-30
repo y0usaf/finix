@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  inherit (lib) attrByPath mapAttrs mkDefault mkEnableOption mkForce mkIf mkMerge mkOption types;
+  inherit (lib) attrByPath mapAttrs mkDefault mkEnableOption mkIf mkMerge mkOption types;
 in {
   options.user.dev.codex = {
     enable = mkEnableOption "Codex CLI configuration and instructions";
@@ -18,6 +18,43 @@ in {
       type = types.attrs;
       default = {};
       description = "Codex CLI config.toml setting overrides.";
+    };
+
+    providers."vercel-ai-gateway" = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable the Vercel AI Gateway provider for Codex.";
+      };
+
+      baseUrl = mkOption {
+        type = types.str;
+        default = "https://ai-gateway.vercel.sh/v1";
+        description = ''
+          Vercel AI Gateway base URL for OpenAI-compatible Codex requests.
+          This becomes `model_providers."vercel-ai-gateway".base_url`.
+        '';
+      };
+
+      apiKeyFile = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        example = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
+        description = ''
+          Path (as a string, not a path literal) to a file containing the
+          Vercel AI Gateway API key/token. Appends a nushell env.nu snippet
+          that reads AI_GATEWAY_API_KEY from this file at shell startup.
+        '';
+      };
+
+      wireApi = mkOption {
+        type = types.str;
+        default = "responses";
+        description = ''
+          Codex wire API for the Vercel AI Gateway provider. `responses`
+          matches the documented OpenAI Responses API integration.
+        '';
+      };
     };
 
     skills =
@@ -37,13 +74,16 @@ in {
 
   config = mkMerge [
     (mkIf config.user.dev.codex.enable {})
+    (mkIf config.user.dev.codex.providers."vercel-ai-gateway".enable {
+      user.dev.codex.model = mkDefault "openai/gpt-5.4";
+    })
     (mkIf (attrByPath ["user" "programs" "codex-desktop" "enable"] false config
       && attrByPath ["user" "programs" "codex-desktop" "yoloMode"] false config) {
       user.dev.codex = {
         enable = mkDefault true;
         settings = {
-          approval_policy = mkForce "never";
-          sandbox_mode = mkForce "danger-full-access";
+          approval_policy = "never";
+          sandbox_mode = "danger-full-access";
         };
       };
     })
