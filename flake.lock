@@ -1309,17 +1309,14 @@
         ]
       },
       "locked": {
-        "lastModified": 1782585318,
-        "narHash": "sha256-6sriEquGnMHnx5QBCcSCOvoYt6QHwfS4VvTJAQeVKDw=",
-        "owner": "bea4dev",
-        "repo": "ShojiWM",
-        "rev": "a6daa8b4dcc05812569ed4979274d427301b2a8c",
-        "type": "github"
+        "lastModified": 1782797084,
+        "narHash": "sha256-QF8VnB6BH1ZYV/c8gs6AGUlQTZI7Aw4jotrNREWF2jg=",
+        "path": "/home/y0usaf/Dev/ShojiWM",
+        "type": "path"
       },
       "original": {
-        "owner": "bea4dev",
-        "repo": "ShojiWM",
-        "type": "github"
+        "path": "/home/y0usaf/Dev/ShojiWM",
+        "type": "path"
       }
     },
     "strictix": {

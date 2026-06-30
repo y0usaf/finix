@@ -116,7 +116,7 @@
     };
 
     shojiwm = {
-      url = "github:bea4dev/ShojiWM";
+      url = "path:/home/y0usaf/Dev/ShojiWM";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
