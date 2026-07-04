@@ -87,102 +87,59 @@ in {
       };
     };
 
-    apiGateway = {
-      baseUrl = mkOption {
-        type = str;
-        default = "";
-        description = ''
-          Custom API base URL, e.g. a Vercel AI Gateway endpoint.
-          Sets ANTHROPIC_BASE_URL in settings.json.
-          Leave empty to use Anthropic's API directly.
-        '';
-      };
+    providers = mkOption {
+      type = attrsOf (types.submodule {
+        options = {
+          baseUrl = mkOption {
+            type = str;
+            example = "https://ai-gateway.vercel.sh";
+            description = ''
+              Anthropic-compatible base URL for this provider. The wrapper
+              exports it as ANTHROPIC_BASE_URL for its own process tree only.
+            '';
+          };
 
-      apiKeyFile = mkOption {
-        type = nullOrStr;
-        default = null;
-        example = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
-        description = ''
-          Path (as a string, not a path literal) to a file containing the
-          gateway API key/token. Appends a nushell env.nu snippet that reads
-          ANTHROPIC_API_KEY from this file at shell startup.
+          apiKeyFile = mkOption {
+            type = nullOrStr;
+            default = null;
+            example = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
+            description = ''
+              Path (as a string, not a path literal) to a file containing the
+              provider API key. Read at wrapper runtime and exported as
+              ANTHROPIC_AUTH_TOKEN for that invocation only — never into the
+              session environment, where it would shadow OAuth /login.
 
-          Must be a string so the path is read at runtime by nushell — a path
-          literal would copy the file into the world-readable Nix store at
-          eval time, leaking the secret.
-        '';
-      };
+              Must be a string so the file is read at runtime — a path
+              literal would copy the secret into the world-readable Nix
+              store at eval time.
+            '';
+          };
 
-      models = mkOption {
-        type = attrsOf str;
-        default = {};
-        example = {
-          ANTHROPIC_DEFAULT_OPUS_MODEL = "glm-5.2-fast[1m]";
-          ANTHROPIC_DEFAULT_SONNET_MODEL = "glm-5.2-fast[1m]";
-          ANTHROPIC_DEFAULT_HAIKU_MODEL = "glm-5.2-fast[1m]";
+          models = mkOption {
+            type = attrsOf str;
+            default = {};
+            example = {
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "zai/glm-5.2-fast";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "zai/glm-5.2-fast";
+              ANTHROPIC_DEFAULT_HAIKU_MODEL = "zai/glm-5.2-fast";
+            };
+            description = "Model-tier routing env vars exported by the wrapper.";
+          };
+
+          extraEnv = mkOption {
+            type = attrsOf str;
+            default = {};
+            example = {CLAUDE_CODE_AUTO_COMPACT_WINDOW = "1000000";};
+            description = "Extra env vars exported by the wrapper.";
+          };
         };
-        description = ''
-          Maps Claude Code's model tiers to gateway model IDs via env vars.
-          When using a gateway, set these instead of `model`/`subagentModel`,
-          which only select the logical tier (opus/sonnet/haiku).
-        '';
-      };
-
-      extraEnv = mkOption {
-        type = attrsOf str;
-        default = {};
-        example = {CLAUDE_CODE_AUTO_COMPACT_WINDOW = "1000000";};
-        description = "Extra env vars merged into settings.json (e.g. auto-compact window).";
-      };
-    };
-
-    providers."vercel-ai-gateway" = {
-      enable = mkOption {
-        type = bool;
-        default = false;
-        description = "Enable the Vercel AI Gateway provider for Claude Code.";
-      };
-
-      baseUrl = mkOption {
-        type = str;
-        default = "https://ai-gateway.vercel.sh";
-        description = ''
-          Vercel AI Gateway base URL for Claude-compatible requests.
-          Sets ANTHROPIC_BASE_URL in settings.json when enabled.
-        '';
-      };
-
-      apiKeyFile = mkOption {
-        type = nullOrStr;
-        default = null;
-        example = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
-        description = ''
-          Path (as a string, not a path literal) to a file containing the
-          Vercel AI Gateway API key/token. Appends a nushell env.nu snippet
-          that reads ANTHROPIC_AUTH_TOKEN from this file at shell startup.
-        '';
-      };
-
-      models = mkOption {
-        type = attrsOf str;
-        default = {};
-        example = {
-          ANTHROPIC_DEFAULT_OPUS_MODEL = "zai/glm-5.2";
-          ANTHROPIC_DEFAULT_SONNET_MODEL = "zai/glm-5.2";
-          ANTHROPIC_DEFAULT_HAIKU_MODEL = "zai/glm-4.7-flash";
-        };
-        description = ''
-          Model routing env vars merged into Claude Code settings.json when
-          the Vercel AI Gateway provider is enabled.
-        '';
-      };
-
-      extraEnv = mkOption {
-        type = attrsOf str;
-        default = {};
-        example = {CLAUDE_CODE_AUTO_COMPACT_WINDOW = "1000000";};
-        description = "Extra env vars merged into settings.json for the Vercel AI Gateway provider.";
-      };
+      });
+      default = {};
+      description = ''
+        Named API gateway providers. Each entry generates a `claude-<name>`
+        wrapper command that routes through the provider for that invocation
+        only. Plain `claude` always uses subscription OAuth.
+      '';
     };
 
     plugins = mkOption {
@@ -258,32 +215,33 @@ in {
   };
 
   config = mkIf claudeCode.enable {
-    assertions = let
-      legacyCfg = claudeCode.apiGateway;
-    in [
-      {
-        assertion =
-          !(claudeCode.providers."vercel-ai-gateway".enable
-            && (legacyCfg.baseUrl
-              != ""
-              || legacyCfg.apiKeyFile != null
-              || legacyCfg.models != {}
-              || legacyCfg.extraEnv != {}));
-        message = ''
-          user.dev.claude-code.apiGateway and
-          user.dev.claude-code.providers."vercel-ai-gateway" are both configured.
-          Use only one provider configuration path.
-        '';
-      }
-    ];
-
     environment.systemPackages =
       optionals (!config.programs.tweakcc.enable) [pkgs.claude-code]
       ++ [
         (pkgs.writeShellScriptBin "bunclaude" ''
           exec ${pkgs.bun}/bin/bunx --bun @anthropic-ai/claude-code --allow-dangerously-skip-permissions "$@"
         '')
-      ];
+      ]
+      ++ lib.mapAttrsToList (
+        name: provider:
+          pkgs.writeShellScriptBin "claude-${name}" (
+            ''
+              export ANTHROPIC_BASE_URL=${lib.escapeShellArg provider.baseUrl}
+              # A non-empty ANTHROPIC_API_KEY would take precedence over the token.
+              unset ANTHROPIC_API_KEY
+            ''
+            + lib.optionalString (provider.apiKeyFile != null) ''
+              export ANTHROPIC_AUTH_TOKEN="$(tr -d '[:space:]' < ${lib.escapeShellArg provider.apiKeyFile})"
+            ''
+            + lib.concatStrings (lib.mapAttrsToList
+              (key: value: "export ${key}=${lib.escapeShellArg value}\n")
+              (provider.models // provider.extraEnv))
+            + ''
+              exec claude "$@"
+            ''
+          )
+      )
+      claudeCode.providers;
 
     programs.tweakcc = {
       enable = false;
