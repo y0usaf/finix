@@ -2,25 +2,27 @@ _: {
   user.dev = {
     claude-code = {
       enable = true;
-      model = "sonnet";
-      subagentModel = "sonnet";
+      model = "fable";
+      subagentModel = "claude-sonnet-5";
       enabledPlugins."audio-notify@y0usaf-marketplace" = false;
-      providers."vercel-ai-gateway" = {
-        enable = true;
+      providers.vercel = {
+        baseUrl = "https://ai-gateway.vercel.sh";
         apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
         models = {
           ANTHROPIC_DEFAULT_OPUS_MODEL = "zai/glm-5.2-fast";
           ANTHROPIC_DEFAULT_SONNET_MODEL = "zai/glm-5.2-fast";
           ANTHROPIC_DEFAULT_HAIKU_MODEL = "zai/glm-5.2-fast";
         };
-        extraEnv.CLAUDE_CODE_AUTO_COMPACT_WINDOW = "1000000";
       };
     };
     codex = {
       enable = true;
       model = "zai/glm-5.2-fast";
-      providers."vercel-ai-gateway" = {
-        enable = true;
+      defaultProvider = "vercel";
+      providers.vercel = {
+        name = "Vercel AI Gateway";
+        baseUrl = "https://ai-gateway.vercel.sh/v1";
+        envKey = "AI_GATEWAY_API_KEY";
         apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
       };
       settings.personality = "pragmatic";
