@@ -17,6 +17,7 @@ _: {
         }
       '';
     };
+    hyprland.enable = true;
     shojiwm.enable = true;
     wayland.enable = true;
   };
