@@ -9,7 +9,7 @@ _:
           --theme-tab-selected: var(--lwt-selected-tab-background-color, var(--theme-toolbar));
           --theme-toolbar-field: var(--toolbar-field-background-color, var(--theme-toolbar));
           --theme-tab-text: var(--tab-text-color, var(--lwt-tab-text, #ffffff));
-          --font-family: monospace !important;
+          --font-family: monospace;
           --bar-width: 75vw;
           --bar-height: calc(var(--tab-min-height, 32px) * 0.94);
           --breakout-width: 50vw;
@@ -17,17 +17,21 @@ _:
           --popup-offset-top: calc(var(--breakout-top) - 100vh);
       }
 
+      /* Load-bearing layout hack: dissolve #navigator-toolbox so its children
+         become direct flex siblings of #browser inside #main-window > body,
+         then reorder them: menubar on top, titlebar/tabs above content,
+         nav-bar below content. Everything below depends on this. */
       #navigator-toolbox {
           display: contents !important;
       }
 
-      #nav-bar,
-      #titlebar {
-          order: -1 !important;
-          background-color: var(--theme-frame) !important;
+      #toolbar-menubar {
+          order: -2 !important;
       }
 
       #titlebar {
+          order: -1 !important;
+          background-color: var(--theme-frame) !important;
           min-height: var(--bar-height) !important;
           max-height: var(--bar-height) !important;
       }
@@ -42,17 +46,16 @@ _:
           height: var(--bar-height) !important;
           margin: 0 auto !important;
           border: 0 !important;
+          background-color: var(--theme-frame) !important;
       }
 
       #PersonalToolbar {
-          order: 2 !important;
           display: none !important;
       }
 
-      #toolbar-menubar {
-          order: -2 !important;
-      }
-
+      /* With #nav-bar moved below the content area, top-anchored panels still
+         anchor near the bottom of the window; drag them up to the breakout
+         urlbar's position (top: var(--breakout-top), see #urlbar[breakout]). */
       @media (-moz-platform: linux) {
           #notification-popup[side="top"],
           #permission-popup[side="top"],
@@ -70,13 +73,27 @@ _:
           background-color: var(--theme-frame) !important;
       }
 
-      * {
-          border-radius: 0 !important;
+      /* Square corners everywhere, via theme variables rather than a
+         universal selector. */
+      :root,
+      menupopup,
+      panel,
+      toolbar {
+          --panel-border-radius: 0px !important;
+          --arrowpanel-border-radius: 0px !important;
+          --toolbarbutton-border-radius: 0px !important;
+          --tab-border-radius: 0px !important;
+          --urlbar-border-radius: 0px !important;
+          --border-radius-medium: 0px !important;
+          --border-radius-small: 0px !important;
       }
 
-      menupopup,
-      panel {
-          --panel-border-radius: 0px !important;
+      #urlbar,
+      #urlbar-background,
+      .tab-background,
+      .toolbarbutton-1,
+      .urlbarView-row {
+          border-radius: 0 !important;
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -92,7 +109,6 @@ _:
       .titlebar-spacer,
       .toolbar-spring,
       .urlbarView-row[label="LibreWolf Suggest"],
-      [anonid="spring"],
       toolbarspring {
           display: none !important;
       }
@@ -135,7 +151,9 @@ _:
           background-color: var(--theme-frame) !important;
       }
 
-      .tabbrowser-tab * {
+      .tabbrowser-tab .tab-content,
+      .tabbrowser-tab .tab-background,
+      .tabbrowser-tab .tab-stack {
           margin: 0 !important;
       }
 
@@ -146,34 +164,14 @@ _:
           background-color: var(--theme-tab-selected) !important;
       }
 
-      :root:not([customizing]) #TabsToolbar .titlebar-button,
-      :root:not([customizing]) #TabsToolbar-customization-target > .toolbarbutton-1,
-      :root:not([customizing]) #tabbrowser-tabs .tabs-newtab-button,
-      :root:not([customizing]) #tabs-newtab-button {
-          -moz-appearance: none !important;
-          padding-top: 0 !important;
-          padding-bottom: 0 !important;
-          -moz-box-align: stretch !important;
-          margin: 0 !important;
-      }
-
-      #tabbrowser-tabs .tabs-newtab-button:hover,
-      #tabs-newtab-button:hover {
-          background-color: var(--toolbarbutton-hover-background) !important;
-      }
-
-      #tabbrowser-tabs .tabs-newtab-button > .toolbarbutton-icon,
-      #tabs-newtab-button > .toolbarbutton-icon {
-          padding: 0 !important;
-          transform: scale(1) !important;
-          background-color: transparent !important;
-      }
-
       #PersonalToolbar toolbarbutton,
       #TabsToolbar toolbarbutton,
       #nav-bar toolbarbutton,
       .toolbarbutton-1,
-      toolbar .toolbarbutton-1 {
+      toolbar .toolbarbutton-1,
+      :root:not([customizing]) #TabsToolbar .titlebar-button,
+      :root:not([customizing]) #tabbrowser-tabs .tabs-newtab-button,
+      :root:not([customizing]) #tabs-newtab-button {
           -moz-appearance: none !important;
           margin: 0 !important;
           padding: 0 0.25em !important;
