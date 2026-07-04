@@ -7,6 +7,9 @@
     manzil.users."${config.user.name}".files.".config/niri/config.kdl".value = {
       debug = {
         dbus-interfaces-in-non-session-instances = {};
+        # NVIDIA freeze test: wait for render completion before queueing
+        # frames to KMS (see niri discussion #3777).
+        wait-for-frame-completion-before-queueing = {};
       };
 
       environment =
