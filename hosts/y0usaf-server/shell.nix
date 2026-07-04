@@ -3,6 +3,6 @@ _: {
     zsh.enable = true;
     nushell.enable = true;
     cat-fetch.enable = true;
-    zellij.enable = true;
+    ekko.enable = true;
   };
 }
