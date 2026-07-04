@@ -20,7 +20,7 @@ _: {
       directories = [
         ".cache/librewolf"
         ".cache/nix"
-        ".cache/zellij"
+        ".cache/ekko"
         ".cache/wallust"
         ".config"
         ".claude"

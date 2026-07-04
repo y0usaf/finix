@@ -3,10 +3,9 @@ _: {
     zsh.enable = true;
     nushell.enable = true;
     cat-fetch.enable = true;
-    zellij = {
+    ekko = {
       enable = true;
       autoStart = true;
-      zjstatus.enable = true;
     };
   };
 }
