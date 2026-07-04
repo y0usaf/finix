@@ -4,7 +4,6 @@
   ...
 }: let
   codexCfg = config.user.dev.codex;
-  vercelAiGatewayCfg = codexCfg.providers."vercel-ai-gateway";
 in {
   config = lib.mkIf codexCfg.enable {
     patchix = {
@@ -41,27 +40,25 @@ in {
               };
             };
           }
-          // lib.optionalAttrs vercelAiGatewayCfg.enable {
-            model_provider = "vercel-ai-gateway";
-            model_providers."vercel-ai-gateway" = {
-              name = "Vercel AI Gateway";
-              base_url = vercelAiGatewayCfg.baseUrl;
-              env_key = "AI_GATEWAY_API_KEY";
-              wire_api = vercelAiGatewayCfg.wireApi;
-            };
+          // lib.optionalAttrs (codexCfg.providers != {}) {
+            model_providers =
+              lib.mapAttrs (_: provider: {
+                inherit (provider) name;
+                base_url = provider.baseUrl;
+                env_key = provider.envKey;
+                # Codex removed chat-completions support; only the
+                # Responses API remains (openai/codex#7782).
+                wire_api = "responses";
+              })
+              codexCfg.providers;
+          }
+          // lib.optionalAttrs (codexCfg.defaultProvider != null) {
+            model_provider = codexCfg.defaultProvider;
           }
           // codexCfg.settings
           // {
             inherit (codexCfg) model;
           };
-      };
-    };
-
-    manzil.users."${config.user.name}".files = lib.optionalAttrs (vercelAiGatewayCfg.enable && vercelAiGatewayCfg.apiKeyFile != null) {
-      ".config/nushell/env.nu" = {
-        text = lib.mkAfter ''
-          $env.AI_GATEWAY_API_KEY = (open "${vercelAiGatewayCfg.apiKeyFile}" | str trim)
-        '';
       };
     };
   };
