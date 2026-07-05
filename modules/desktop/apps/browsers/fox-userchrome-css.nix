@@ -10,11 +10,35 @@ _:
           --theme-toolbar-field: var(--toolbar-field-background-color, var(--theme-toolbar));
           --theme-tab-text: var(--tab-text-color, var(--lwt-tab-text, #ffffff));
           --font-family: monospace;
+          /* Thin-chrome sizing: everything derives from --chrome-font-size.
+             Bar height = one line of text plus --bar-pad above and below;
+             shrink or grow the chrome by touching these two values only. */
+          --chrome-font-size: 11px;
+          --bar-pad: 2px;
           --bar-width: 75vw;
-          --bar-height: calc(var(--tab-min-height, 32px) * 0.94);
+          --bar-height: calc(var(--chrome-font-size) + 2 * var(--bar-pad) + 2px);
           --breakout-width: 50vw;
           --breakout-top: 20vh;
           --popup-offset-top: calc(var(--breakout-top) - 100vh);
+          /* Collapse Firefox's own density floors so internal layout math
+             follows the thin bars instead of fighting them. */
+          --tab-min-height: var(--bar-height) !important;
+          --urlbar-min-height: var(--bar-height) !important;
+          --urlbar-height: var(--bar-height) !important;
+          --urlbar-container-height: var(--bar-height) !important;
+          --toolbarbutton-inner-padding: var(--bar-pad) !important;
+          --toolbarbutton-outer-padding: 0px !important;
+          --toolbar-start-end-padding: 0px !important;
+          --tab-block-margin: 0px !important;
+          --tab-inline-padding: 0.25em !important;
+      }
+
+      /* Chrome-wide font size: keeps text legible while the bars shrink
+         around it. Content area is unaffected. */
+      #TabsToolbar,
+      #nav-bar,
+      #titlebar {
+          font-size: var(--chrome-font-size) !important;
       }
 
       /* Load-bearing layout hack: dissolve #navigator-toolbox so its children
@@ -177,10 +201,12 @@ _:
           padding: 0 0.25em !important;
       }
 
+      /* Icons track the chrome font size (1em = --chrome-font-size inside the
+         bars) so they stay legible as the bars thin out. */
       .tab-icon-image,
       .toolbarbutton-icon,
       .urlbar-icon {
-          width: 0.8em !important;
+          width: 1em !important;
           height: auto !important;
           padding: 0 !important;
       }
@@ -198,6 +224,17 @@ _:
       #urlbar {
           min-height: var(--bar-height) !important;
           border-color: transparent !important;
+      }
+
+      /* Docked urlbar hugs the thin bar; the breakout overlay below opts back
+         into a comfortable size for actual typing. */
+      #urlbar:not([breakout-extend]) {
+          height: var(--bar-height) !important;
+      }
+
+      #urlbar:not([breakout-extend]) > .urlbar-input-container {
+          height: var(--bar-height) !important;
+          min-height: var(--bar-height) !important;
       }
 
       #urlbar-input {
@@ -220,6 +257,7 @@ _:
           margin: 0 !important;
           box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
           background-color: var(--theme-toolbar-field) !important;
+          font-size: calc(var(--chrome-font-size) * 1.3) !important;
       }
 
       .urlbarView {
