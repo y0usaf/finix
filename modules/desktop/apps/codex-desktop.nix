@@ -7,7 +7,14 @@
 }: let
   inherit (lib) mkEnableOption mkIf;
   codexDesktopCfg = config.user.programs.codex-desktop;
-  codex-desktop = pkgs.callPackage "${flakeInputs.codex-desktop-linux}/package.nix" {};
+  codex-desktop = (pkgs.callPackage "${flakeInputs.codex-desktop-linux}/package.nix" {}).overrideAttrs {
+    # Upstream Codex.dmg is a mutable URL; the flake's pinned hash goes stale
+    # whenever OpenAI ships a new build. Override until the flake repo is bumped.
+    src = pkgs.fetchurl {
+      url = "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg";
+      hash = "sha256-2VYe7twPXuqLAi1s1BYxbwxbVir/fR4dvUiqXYR/N/4=";
+    };
+  };
 in {
   options.user.programs.codex-desktop = {
     enable = mkEnableOption "Codex Desktop (OpenAI Codex app for Linux)";

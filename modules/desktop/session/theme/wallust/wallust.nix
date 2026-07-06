@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  flakeInputs,
   ...
 }: let
   wallustPkg = pkgs.wallust;
@@ -154,7 +153,10 @@ in {
           };
       }
       // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zellij" "zjstatus" "enable"] false config) {
-        xdg.config.files."zellij/plugins/zjstatus-hints.wasm".source = "${flakeInputs.zjstatus-hints.packages."${pkgs.stdenv.hostPlatform.system}".default}/bin/zjstatus-hints.wasm";
+        xdg.config.files."zellij/plugins/zjstatus-hints.wasm".source = pkgs.fetchurl {
+          url = "https://github.com/b0o/zjstatus-hints/releases/download/v0.1.4/zjstatus-hints.wasm";
+          hash = "sha256-k2xV6QJcDtvUNCE4PvwVG9/ceOkk+Wa/6efGgr7IcZ0=";
+        };
       };
   };
 }
