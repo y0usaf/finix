@@ -8,7 +8,6 @@
   piReadmePath = cfg.readmePath;
   piDocsPath = cfg.docsPath;
   piExamplesPath = cfg.examplesPath;
-  inherit (config.programs.pi) bundledExtensionPaths;
 
   mkInternalStr = description:
     lib.mkOption {
@@ -77,9 +76,6 @@ in {
             doubleEscapeAction = "tree";
             treeFilterMode = "default";
             theme = "pantera";
-          }
-          // lib.optionalAttrs (bundledExtensionPaths != []) {
-            extensions = bundledExtensionPaths;
           }
           // lib.optionalAttrs (cfg.extensionSettings != {}) {
             inherit (cfg) extensionSettings;
