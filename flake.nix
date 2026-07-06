@@ -69,16 +69,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # deno2nix is linear-cli's build tooling (linear-cli flake imports it as
+    # flake=false). We vendor it here too so we can rebuild the `linear`
+    # package locally with a corrected deno-deps hash, instead of forking
+    # the dead linear-cli wrapper repo to fix its stale FOD hash. Pinned to
+    # the same ref linear-cli uses.
+    deno2nix = {
+      url = "github:aMOPel/deno2nix?ref=custom-made-fetcher";
+      flake = false;
+    };
+
     nixpkgs-discord-legacy.url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
-
-    pi-flake = {
-      url = "github:y0usaf/pi-rlm/rlm-rewrite-1779064714";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    zjstatus-hints = {
-      url = "github:y0usaf/zjstatus-hints?ref=feat/custom-labels";
-    };
 
     rudo = {
       url = "github:y0usaf/rudo";
@@ -122,6 +123,11 @@
 
     shojiwm = {
       url = "path:/home/y0usaf/Dev/ShojiWM";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    tomoe = {
+      url = "path:/home/y0usaf/Dev/tomoe";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
