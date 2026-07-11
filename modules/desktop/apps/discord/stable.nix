@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: let
   inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf types;
@@ -17,12 +18,37 @@
   inherit (config) user;
   userName = user.name;
   stableCfg = user.programs.discord.stable;
+
+  # Discord pinned to the last release before the distro-format repackaging,
+  # built from the legacy nixpkgs snapshot's package files against *current*
+  # pkgs. This avoids instantiating a full second nixpkgs (~1s eval + ~300MB
+  # RAM per host) just for one package.
+  legacyDir = "${flakeInputs.nixpkgs-discord-legacy}/pkgs/applications/networking/instant-messengers/discord";
+  legacySource = (lib.importJSON "${legacyDir}/sources.json")."linux-stable";
+  legacyDiscord = pkgs.callPackage "${legacyDir}/linux.nix" {
+    pname = "discord";
+    inherit (legacySource) version;
+    src = pkgs.fetchurl {inherit (legacySource) url hash;};
+    branch = "stable";
+    binaryName = "Discord";
+    desktopName = "Discord";
+    self = legacyDiscord;
+    meta = {
+      description = "All-in-one cross-platform voice and text chat for gamers";
+      mainProgram = "Discord";
+    };
+  };
 in {
   options.user.programs.discord.stable = {
     enable = mkEnableOption "Discord stable";
+    pinLegacy = mkEnableOption "pin Discord to the legacy 0.0.125 release";
     package = mkOption {
       type = types.package;
-      default = pkgs.discord;
+      default =
+        if stableCfg.pinLegacy
+        then legacyDiscord
+        else pkgs.discord;
+      defaultText = lib.literalExpression "pkgs.discord";
       description = "Discord package to customize and install";
     };
     extraArgs = mkOption {
