@@ -49,5 +49,6 @@ _: {
     };
     latex.enable = true;
     upscale.enable = true;
+    phi.enable = true;
   };
 }

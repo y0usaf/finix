@@ -114,7 +114,7 @@ in {
     (mkIf codex.enable {
       assertions = [
         {
-          assertion = codex.defaultProvider == null || codex.providers ? ${codex.defaultProvider};
+          assertion = codex.defaultProvider == null || codex.providers ? "${codex.defaultProvider}";
           message = ''
             user.dev.codex.defaultProvider = "${toString codex.defaultProvider}"
             does not match any entry in user.dev.codex.providers.
@@ -124,17 +124,14 @@ in {
 
       environment.systemPackages =
         lib.mapAttrsToList (
-          name: provider: let
-            args =
-              ["-c" "model_provider=\"${name}\""]
-              ++ optionals (provider.model != null) ["-c" "model=\"${provider.model}\""];
-          in
+          name: provider:
             pkgs.writeShellScriptBin "codex-${name}" (
               lib.optionalString (provider.apiKeyFile != null) ''
                 export ${provider.envKey}="$(tr -d '[:space:]' < ${lib.escapeShellArg provider.apiKeyFile})"
               ''
               + ''
-                exec codex ${lib.escapeShellArgs args} "$@"
+                exec codex ${lib.escapeShellArgs (["-c" "model_provider=\"${name}\""]
+                    ++ optionals (provider.model != null) ["-c" "model=\"${provider.model}\""])} "$@"
               ''
             )
         )

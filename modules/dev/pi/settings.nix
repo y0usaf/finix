@@ -5,6 +5,7 @@
 }: let
   cfg = config.user.dev.pi;
   toJSON = lib.generators.toJSON {};
+  homeDir = config.user.homeDirectory;
   piReadmePath = cfg.readmePath;
   piDocsPath = cfg.docsPath;
   piExamplesPath = cfg.examplesPath;
@@ -40,24 +41,23 @@ in {
           piDocsPath
           piExamplesPath
         ];
-        message = "user.dev.pi requires modules/dev/pi/pi-mono.nix to provide pi documentation paths.";
+        message = "user.dev.pi requires modules/dev/pi/pi-flake.nix to provide pi documentation paths.";
       }
     ];
-
-    environment.variables.PI_SKIP_VERSION_CHECK = "1";
 
     manzil.users."${config.user.name}".files = {
       ".pi/agent/settings.json" = {
         generator = toJSON;
         value =
           {
-            defaultProvider = "vercel-ai-gateway";
-            defaultModel = "deepseek/deepseek-v4-pro";
+            defaultProvider = "openai-codex";
+            defaultModel = "gpt-5.6-sol";
             defaultThinkingLevel = "high";
             enabledModels = [
-              "openai-codex/gpt-5.4"
-              "openai-codex/gpt-5.4-mini"
-              "anthropic/claude-opus-4-6"
+              "openai-codex/gpt-5.6-sol"
+              "openai-codex/gpt-5.6-luna"
+              "anthropic/claude-fable-5"
+              "neuralwatt/glm-5.2"
             ];
             compaction.enabled = false;
             showHardwareCursor = true;
@@ -75,7 +75,6 @@ in {
             quietStartup = true;
             doubleEscapeAction = "tree";
             treeFilterMode = "default";
-            theme = "pantera";
           }
           // lib.optionalAttrs (cfg.extensionSettings != {}) {
             inherit (cfg) extensionSettings;
@@ -99,6 +98,85 @@ in {
                   };
                 };
               };
+            };
+            "neuralwatt" = {
+              baseUrl = "https://api.neuralwatt.com/v1";
+              api = "openai-completions";
+              apiKey = "!cat ${homeDir}/Tokens/NEURALWATT_API_KEY.txt";
+              authHeader = true;
+              compat.supportsDeveloperRole = false;
+              models = [
+                {
+                  id = "glm-5.2";
+                  name = "GLM 5.2";
+                  reasoning = true;
+                  input = ["text" "image"];
+                  contextWindow = 1048576;
+                  maxTokens = 16384;
+                  cost = {
+                    input = 0;
+                    output = 0;
+                    cacheRead = 0;
+                    cacheWrite = 0;
+                  };
+                }
+                {
+                  id = "glm-5.2-fast";
+                  name = "GLM 5.2 Fast";
+                  reasoning = true;
+                  input = ["text" "image"];
+                  contextWindow = 1048576;
+                  maxTokens = 16384;
+                  cost = {
+                    input = 0;
+                    output = 0;
+                    cacheRead = 0;
+                    cacheWrite = 0;
+                  };
+                }
+                {
+                  id = "kimi-k2.7-code";
+                  name = "Kimi K2.7 Code";
+                  reasoning = true;
+                  input = ["text" "image"];
+                  contextWindow = 262128;
+                  maxTokens = 16384;
+                  cost = {
+                    input = 0;
+                    output = 0;
+                    cacheRead = 0;
+                    cacheWrite = 0;
+                  };
+                }
+                {
+                  id = "kimi-k2.6";
+                  name = "Kimi K2.6";
+                  reasoning = true;
+                  input = ["text" "image"];
+                  contextWindow = 262128;
+                  maxTokens = 16384;
+                  cost = {
+                    input = 0;
+                    output = 0;
+                    cacheRead = 0;
+                    cacheWrite = 0;
+                  };
+                }
+                {
+                  id = "qwen3.5-397b";
+                  name = "Qwen 3.5 397B";
+                  reasoning = true;
+                  input = ["text" "image"];
+                  contextWindow = 262128;
+                  maxTokens = 16384;
+                  cost = {
+                    input = 0;
+                    output = 0;
+                    cacheRead = 0;
+                    cacheWrite = 0;
+                  };
+                }
+              ];
             };
           };
         };

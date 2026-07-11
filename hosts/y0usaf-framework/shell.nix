@@ -5,6 +5,7 @@ _: {
     ekko = {
       enable = true;
       autoStart = true;
+      open = true;
     };
   };
 }

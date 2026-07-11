@@ -32,19 +32,8 @@
       ;
     inherit (builtins) match typeOf;
 
-    isIdent = s: match "[A-Za-z_][A-Za-z0-9_]*" s != null;
-
-    escapeStr = replaceStrings ["\\" "\"" "\n" "\r"] ["\\\\" "\\\"" "\\n" "\\r"];
-
     # Quote a string for Lua, mirroring toKDL's literalValueToString.
-    quoteStr = s: ''"${escapeStr s}"'';
-
-    keyStr = k:
-      if isString k && isIdent k
-      then k
-      else if isString k
-      then "[${quoteStr k}]"
-      else "[${toString k}]";
+    quoteStr = s: ''"${(replaceStrings ["\\" "\"" "\n" "\r"] ["\\\\" "\\\"" "\\n" "\\r"]) s}"'';
 
     valStr = v:
       if isAttrs v
@@ -67,7 +56,13 @@
     entry = k: v:
       if v == null
       then ""
-      else "${keyStr k} = ${valStr v}";
+      else "${(k:
+        if isString k && (s: match "[A-Za-z_][A-Za-z0-9_]*" s != null) k
+        then k
+        else if isString k
+        then "[${quoteStr k}]"
+        else "[${toString k}]")
+      k} = ${valStr v}";
   in
     value:
       if isAttrs value

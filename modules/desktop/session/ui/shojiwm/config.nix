@@ -25,28 +25,6 @@
   # so libgbm uses /run/opengl-driver/lib/gbm by default. ShojiWM needs
   # this extra wrapper layer because its upstream NixOS package sets
   # GBM_BACKENDS_PATH in its makeWrapper invocation.
-  shojiwmWrapped = pkgs.symlinkJoin {
-    name = "shojiwm-nvidia-wrapped";
-    paths = [shojiwmPkg];
-    nativeBuildInputs = [pkgs.makeWrapper];
-    passthru = {inherit (shojiwmPkg) providedSessions;};
-    postBuild = lib.optionalString config.hardware.nvidia.enable ''
-      # shoji_wm — the compositor: needs GBM_BACKEND=nvidia-drm to drive the
-      # display through the NVIDIA DRM node, plus the GBM search path fix.
-      wrapProgram $out/bin/shoji_wm \
-        --prefix GBM_BACKENDS_PATH : /run/opengl-driver/lib/gbm \
-        --set-default GBM_BACKEND nvidia-drm \
-        --set-default __GLX_VENDOR_LIBRARY_NAME nvidia \
-        --set-default __EGL_VENDOR_LIBRARY_FILENAMES /run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json \
-        --set-default LIBVA_DRIVER_NAME nvidia
-      # xdg-desktop-portal-shojiwm — a Wayland client (winit/iced) that also
-      # needs to find the NVIDIA GBM backend for EGL on this machine.
-      wrapProgram $out/bin/xdg-desktop-portal-shojiwm \
-        --prefix GBM_BACKENDS_PATH : /run/opengl-driver/lib/gbm \
-        --set-default __GLX_VENDOR_LIBRARY_NAME nvidia \
-        --set-default __EGL_VENDOR_LIBRARY_FILENAMES /run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json
-    '';
-  };
 
   # Upstream's package embeds the TypeScript runtime at $out/lib/shojiwm/.
   # (The fork exposed it via passthru.shojiwm-runtime; upstream does not.)
@@ -57,8 +35,9 @@
   # The TSX file uses @@TOKEN@@ placeholders which are substituted with
   # Nix config.user.defaults.* values. This avoids all dollar-brace escaping
   # issues between Nix string interpolation and JS template literals.
-  tsxContent =
-    lib.replaceStrings
+
+  # Write the templated TSX to a Nix store path (no shell escaping needed).
+  indexTsx = pkgs.writeText "index.tsx" (lib.replaceStrings
     [
       "@@TERMINAL@@"
       "@@LAUNCHER@@"
@@ -83,11 +62,7 @@
       "${pkgs.xwayland-satellite}/bin/xwayland-satellite"
       config.user.ui.fonts.mainFontName
     ]
-    (builtins.readFile ./config.tsx);
-
-  # Write the templated TSX to a Nix store path (no shell escaping needed).
-  indexTsx = pkgs.writeText "index.tsx" tsxContent;
-
+    (builtins.readFile ./config.tsx));
   # A full-featured ShojiWM configuration using HybridWindowManager for
   # Sway/i3-like tiling (floating is disabled — everything tiles). Key bindings mirror niri:
   #   Alt+T .................. terminal
@@ -117,57 +92,6 @@
   # Spawn-at-startup (onEnable, non-reload):
   #   xwayland-satellite ...... XWayland support (DISPLAY :0)
   #   swaybg .................. random wallpaper from configured path
-  shojiwmConfig =
-    pkgs.runCommand "shojiwm-config"
-    {
-      inherit indexTsx;
-    }
-    ''
-      mkdir -p $out/src $out/assets
-
-      # Custom configuration (templated from config.tsx with Nix values)
-      cp ${indexTsx} $out/src/index.tsx
-
-      # Copy the window manager module from this repo (customized with
-      # tabbed/stacking layout support) and the upstream window animation module.
-      cp ${./window-manager.ts} $out/src/window-manager.ts
-      cp ${runtimeConfigSrc}/src/window-animation.ts $out/src/window-animation.ts
-
-      # Copy SVG assets for window buttons (close, maximize)
-      cp ${runtimeConfigSrc}/assets/*.svg $out/assets/
-
-      cat > $out/package.json <<EOF
-      { "name": "shojiwm-config", "private": true, "type": "module" }
-      EOF
-
-      # Mirror the tsconfig upstream's dist/install.sh writes for a user
-      # config. tsx (esbuild) reads this to pick the JSX runtime; with the
-      # full options below it compiles <X/> to the automatic runtime
-      # (`import { jsx } from "shoji_wm/jsx-runtime"`) rather than the
-      # classic `React.createElement` (which throws "React is not defined"
-      # at runtime and wedges the decoration evaluator).
-      cat > $out/tsconfig.json <<EOF
-      {
-        "compilerOptions": {
-          "target": "ES2022",
-          "module": "ESNext",
-          "moduleResolution": "Bundler",
-          "jsx": "react-jsx",
-          "jsxImportSource": "shoji_wm",
-          "strict": true,
-          "verbatimModuleSyntax": true,
-          "noEmit": true
-        }
-      }
-      EOF
-
-      # node_modules in the store derivation lets the symlinked siblings
-      # (window-manager.ts, window-animation.ts) resolve `import "shoji_wm"`
-      # from their (symlink-resolved) location here. The real index.tsx
-      # deployed in ~/.config/shojiwm resolves it from the separate
-      # node_modules/shoji_wm symlink deployed there.
-      ln -s ${runtimeDir}/node_modules $out/node_modules
-    '';
 in {
   config = lib.mkIf config.user.ui.shojiwm.enable {
     # Delegate package installation, Wayland session registration, xdg-desktop-portal
@@ -181,7 +105,28 @@ in {
     # symlinkJoin does not expose .override, so the module installs the
     # (already NVIDIA-wrapped) package as-is. The upstream defaults already
     # bake in xwayland-satellite, so no functionality is lost.
-    programs.shojiwm.package = shojiwmWrapped;
+    programs.shojiwm.package = pkgs.symlinkJoin {
+      name = "shojiwm-nvidia-wrapped";
+      paths = [shojiwmPkg];
+      nativeBuildInputs = [pkgs.makeWrapper];
+      passthru = {inherit (shojiwmPkg) providedSessions;};
+      postBuild = lib.optionalString config.hardware.nvidia.enable ''
+        # shoji_wm — the compositor: needs GBM_BACKEND=nvidia-drm to drive the
+        # display through the NVIDIA DRM node, plus the GBM search path fix.
+        wrapProgram $out/bin/shoji_wm \
+          --prefix GBM_BACKENDS_PATH : /run/opengl-driver/lib/gbm \
+          --set-default GBM_BACKEND nvidia-drm \
+          --set-default __GLX_VENDOR_LIBRARY_NAME nvidia \
+          --set-default __EGL_VENDOR_LIBRARY_FILENAMES /run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json \
+          --set-default LIBVA_DRIVER_NAME nvidia
+        # xdg-desktop-portal-shojiwm — a Wayland client (winit/iced) that also
+        # needs to find the NVIDIA GBM backend for EGL on this machine.
+        wrapProgram $out/bin/xdg-desktop-portal-shojiwm \
+          --prefix GBM_BACKENDS_PATH : /run/opengl-driver/lib/gbm \
+          --set-default __GLX_VENDOR_LIBRARY_NAME nvidia \
+          --set-default __EGL_VENDOR_LIBRARY_FILENAMES /run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json
+      '';
+    };
 
     # Extra packages not already installed by programs.shojiwm.
     environment.systemPackages = [
@@ -211,7 +156,56 @@ in {
     # dist/install.sh's user-config layout (real tsconfig.json/package.json +
     # a node_modules/shoji_wm symlink).
     manzil.users."${config.user.name}".files = let
-      cfg = "${shojiwmConfig}";
+      cfg = "${pkgs.runCommand "shojiwm-config"
+        {
+          inherit indexTsx;
+        }
+        ''
+          mkdir -p $out/src $out/assets
+
+          # Custom configuration (templated from config.tsx with Nix values)
+          cp ${indexTsx} $out/src/index.tsx
+
+          # Copy the window manager module from this repo (customized with
+          # tabbed/stacking layout support) and the upstream window animation module.
+          cp ${./window-manager.ts} $out/src/window-manager.ts
+          cp ${runtimeConfigSrc}/src/window-animation.ts $out/src/window-animation.ts
+
+          # Copy SVG assets for window buttons (close, maximize)
+          cp ${runtimeConfigSrc}/assets/*.svg $out/assets/
+
+          cat > $out/package.json <<EOF
+          { "name": "shojiwm-config", "private": true, "type": "module" }
+          EOF
+
+          # Mirror the tsconfig upstream's dist/install.sh writes for a user
+          # config. tsx (esbuild) reads this to pick the JSX runtime; with the
+          # full options below it compiles <X/> to the automatic runtime
+          # (`import { jsx } from "shoji_wm/jsx-runtime"`) rather than the
+          # classic `React.createElement` (which throws "React is not defined"
+          # at runtime and wedges the decoration evaluator).
+          cat > $out/tsconfig.json <<EOF
+          {
+            "compilerOptions": {
+              "target": "ES2022",
+              "module": "ESNext",
+              "moduleResolution": "Bundler",
+              "jsx": "react-jsx",
+              "jsxImportSource": "shoji_wm",
+              "strict": true,
+              "verbatimModuleSyntax": true,
+              "noEmit": true
+            }
+          }
+          EOF
+
+          # node_modules in the store derivation lets the symlinked siblings
+          # (window-manager.ts, window-animation.ts) resolve `import "shoji_wm"`
+          # from their (symlink-resolved) location here. The real index.tsx
+          # deployed in ~/.config/shojiwm resolves it from the separate
+          # node_modules/shoji_wm symlink deployed there.
+          ln -s ${runtimeDir}/node_modules $out/node_modules
+        ''}";
     in {
       # Real copies — the project root markers config_project_dir walks up to,
       # and the file whose directory tree tsx's tsconfig discovery anchors on.

@@ -17,11 +17,7 @@ in {
 
   environment.systemPackages = [pkgs.brightnessctl];
 
-  user.programs.discord.stable.package =
-    (import flakeInputs.nixpkgs-discord-legacy {
-      inherit system;
-      config.allowUnfree = true;
-    }).discord;
+  user.programs.discord.stable.pinLegacy = true;
 
   # Secure Boot disabled until sbctl keys are enrolled post-install
   boot.loader.limine.secureBoot.enable = lib.mkForce false;

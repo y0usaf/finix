@@ -59,6 +59,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    phi = {
+      url = "git+ssh://git@github.com/y0usaf/phi.git?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Pinned to a known-good commit (pi 0.80.6). Bump this rev to pull newer
+    # pi releases / model definitions.
+    pi-flake = {
+      url = "github:y0usaf/pi-flake/94694da7321ce74aa7b82c13db7e60e28c0caba6";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     concord = {
       url = "github:chojs23/concord";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -79,7 +91,12 @@
       flake = false;
     };
 
-    nixpkgs-discord-legacy.url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
+    # Source-only (flake = false): we callPackage discord's package files from
+    # this snapshot against current pkgs instead of importing a second nixpkgs.
+    nixpkgs-discord-legacy = {
+      url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
+      flake = false;
+    };
 
     rudo = {
       url = "github:y0usaf/rudo";
@@ -96,11 +113,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    agent-slack = {
-      url = "github:stablyai/agent-slack";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     impermanence = {
       url = "github:nix-community/impermanence";
     };
@@ -111,7 +123,12 @@
     };
 
     nur = {
-      url = "path:/home/y0usaf/Dev/nur";
+      url = "git+file:///home/y0usaf/Dev/nur";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    moonshell = {
+      url = "git+file:///home/y0usaf/Dev/moonshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -122,12 +139,12 @@
     };
 
     shojiwm = {
-      url = "path:/home/y0usaf/Dev/ShojiWM";
+      url = "git+file:///home/y0usaf/Dev/ShojiWM";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     tomoe = {
-      url = "path:/home/y0usaf/Dev/tomoe";
+      url = "git+file:///home/y0usaf/Dev/tomoe";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -143,6 +160,11 @@
 
     nvtune = {
       url = "github:y0usaf/nvtune";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nvflashk-linux = {
+      url = "git+file:///home/y0usaf/Dev/sandbox/nvflashk-linux";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
