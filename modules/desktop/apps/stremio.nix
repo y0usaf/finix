@@ -89,6 +89,9 @@ in {
 
         preFixup = ''
           gappsWrapperArgs+=(
+            # stremio passes RUST_LOG verbatim into mpv's msg-level; non-mpv
+            # values like "crate=debug" make mpv creation fail with -11
+            --unset RUST_LOG \
             --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib" \
             --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [pkgs.libGL]}" \
             --prefix PATH : "${lib.makeBinPath [pkgs.nodejs]}"

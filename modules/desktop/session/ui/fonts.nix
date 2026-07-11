@@ -18,7 +18,7 @@
     };
     mainFontName = lib.mkOption {
       type = lib.types.str;
-      default = "Departure Mono Condensed Compact";
+      default = "Departure Mono Ultra Condensed";
       description = "Main font family name";
     };
     backup = lib.mkOption {
