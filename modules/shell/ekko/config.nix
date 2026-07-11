@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: let
-  ekko = config.user.shell.ekko;
+  inherit (config.user.shell) ekko;
 in {
   options.user.shell.ekko = {
     enable = lib.mkEnableOption "ekko terminal multiplexer";
@@ -14,11 +14,26 @@ in {
       default = false;
       description = "Automatically attach an ekko session on shell startup";
     };
+    open = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Route the WM terminal-spawn bind through `ekko open`: with an ekko
+        client attached, the bind opens a fresh session inside it instead of
+        spawning a new terminal window; cold (no client), ekko spawns the
+        terminal itself (via $TERMINAL, exported by the WM session). Read by
+        the WM modules (tomoe, hyprland).
+      '';
+    };
   };
 
   config = lib.mkIf ekko.enable {
     environment.systemPackages = [
-      flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".default
+      # Two products from one workspace (WS-M12 split): the stock muxer and
+      # the Pi superset (`pi-harness`) — separate binaries, separate
+      # config/socket universes.
+      flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".ekko
+      flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".pi-harness
     ];
 
     manzil.users."${config.user.name}".files =

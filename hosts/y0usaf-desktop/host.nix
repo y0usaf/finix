@@ -16,11 +16,7 @@ in {
   timezone = "America/Toronto";
   var-cache = true;
   user = {
-    programs.discord.stable.package =
-      (import flakeInputs.nixpkgs-discord-legacy {
-        inherit system;
-        config.allowUnfree = true;
-      }).discord;
+    programs.discord.stable.pinLegacy = true;
     dev.work.linear-cli.settings = {
       workspace = "cook-unity";
     };
