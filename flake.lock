@@ -233,16 +233,31 @@
         ]
       },
       "locked": {
-        "lastModified": 1783558237,
-        "narHash": "sha256-nS+KR0uPe+ce41FhtGppojP9JPYefDYjmHOOfsw1Gfg=",
+        "lastModified": 1783972255,
+        "narHash": "sha256-5Pu9N6wT+r0kiWWFdOhFEeHvkiLbWie3boUkhpE6+44=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "6f84f5e26d667547721917ae855d1cc2edb84802",
+        "rev": "5ab1e784a46da56905b82596d0ad2da51e83ecd5",
         "type": "github"
       },
       "original": {
         "owner": "y0usaf",
         "repo": "ekko",
+        "type": "github"
+      }
+    },
+    "finix": {
+      "locked": {
+        "lastModified": 1783977583,
+        "narHash": "sha256-gnwRvQIEpaIJBr3tniNQjI8PYQl5EJAK0dwqUW538jg=",
+        "owner": "finix-community",
+        "repo": "finix",
+        "rev": "8598b051fcce90333c47b177fa2732c2e3ad6004",
+        "type": "github"
+      },
+      "original": {
+        "owner": "finix-community",
+        "repo": "finix",
         "type": "github"
       }
     },
@@ -703,27 +718,6 @@
         "type": "github"
       }
     },
-    "niri": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1782073839,
-        "narHash": "sha256-ksqYK5Y/58wBzeq/iT7B5rIhU7w/EAGVnU/L63CmlbQ=",
-        "owner": "niri-wm",
-        "repo": "niri",
-        "rev": "adaa96ac304009dc5e44522aefa8f669362752e0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "niri-wm",
-        "ref": "pull/3508/head",
-        "repo": "niri",
-        "type": "github"
-      }
-    },
     "nix-formatter-pack": {
       "inputs": {
         "nixpkgs": [
@@ -1092,12 +1086,9 @@
         ],
         "piCodexFast": "piCodexFast",
         "piCompact": "piCompact",
-        "piContextJanitor": "piContextJanitor",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piHashline": "piHashline",
         "piMinimalEditor": "piMinimalEditor",
-        "piMorph": "piMorph",
-        "piPomodoro": "piPomodoro",
         "piRlm": "piRlm",
         "piRtk": "piRtk",
         "piSrc": "piSrc",
@@ -1106,17 +1097,17 @@
         "piWorkingIndicator": "piWorkingIndicator"
       },
       "locked": {
-        "lastModified": 1783777340,
-        "narHash": "sha256-PD3E5KPP50AuAddI0mFgdZqjKN6BTR+YAv3l7Y+Nv9A=",
+        "lastModified": 1784004110,
+        "narHash": "sha256-BfAyFk7SozpJuDR5euyWxhl0dBw529E1XBEH7jTx3hA=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "94694da7321ce74aa7b82c13db7e60e28c0caba6",
+        "rev": "989496ae3e67029e221ea148fc078c13d9766f9c",
         "type": "github"
       },
       "original": {
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "94694da7321ce74aa7b82c13db7e60e28c0caba6",
+        "rev": "989496ae3e67029e221ea148fc078c13d9766f9c",
         "type": "github"
       }
     },
@@ -1152,25 +1143,6 @@
       },
       "original": {
         "path": "./extensions/pi-compact",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piContextJanitor": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-context-janitor",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-context-janitor",
         "type": "path"
       },
       "parent": [
@@ -1228,44 +1200,6 @@
       },
       "original": {
         "path": "./extensions/pi-minimal-editor",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piMorph": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-morph",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-morph",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piPomodoro": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-pomodoro",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-pomodoro",
         "type": "path"
       },
       "parent": [
@@ -1443,6 +1377,7 @@
         "cursors": "cursors",
         "deno2nix": "deno2nix",
         "ekko": "ekko",
+        "finix": "finix",
         "fonts": "fonts",
         "gpui-shell": "gpui-shell",
         "handy": "handy",
@@ -1453,7 +1388,6 @@
         "manzil": "manzil",
         "moonshell": "moonshell",
         "nh": "nh",
-        "niri": "niri",
         "nix-on-droid": "nix-on-droid",
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-discord-legacy": "nixpkgs-discord-legacy",
@@ -1761,11 +1695,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783531256,
-        "narHash": "sha256-0rkeJcdv/TU9XtpR0npjRSb2fQjlkf5kHO3vkW7C/II=",
+        "lastModified": 1783963726,
+        "narHash": "sha256-c2HvFtJ1HPZaVOX5CgBz6QVaBrpQBaaRTIfFMWaocV8=",
         "ref": "refs/heads/main",
-        "rev": "a3a721ea629e6aee7310d88c1cbc18b852da28c2",
-        "revCount": 44,
+        "rev": "5d80ad808d9067877988df6f070b2f8f58e48c2a",
+        "revCount": 54,
         "type": "git",
         "url": "file:///home/y0usaf/Dev/tomoe"
       },
