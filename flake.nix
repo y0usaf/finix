@@ -67,7 +67,7 @@
     # Pinned to a known-good commit (pi 0.80.6). Bump this rev to pull newer
     # pi releases / model definitions.
     pi-flake = {
-      url = "github:y0usaf/pi-flake/94694da7321ce74aa7b82c13db7e60e28c0caba6";
+      url = "github:y0usaf/pi-flake/989496ae3e67029e221ea148fc078c13d9766f9c";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -132,12 +132,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    niri = {
-      # PR 3508: open-consume-into-column window rule.
-      url = "github:niri-wm/niri?ref=pull/3508/head";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     shojiwm = {
       url = "git+file:///home/y0usaf/Dev/ShojiWM";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -172,11 +166,16 @@
       url = "github:nix-community/nix-on-droid";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Experimental finit-based OS for the server migration (see ./finix).
+    finix.url = "github:finix-community/finix";
   };
 
   outputs = {nixpkgs, ...} @ inputs: let
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
+
+    finixStaging = import ./finix {inherit inputs system;};
 
     mkHost = {
       domains,
@@ -244,6 +243,11 @@
           ./hosts/android-phone/nix-on-droid.nix
         ];
       };
+    };
+
+    packages."${system}" = {
+      finix-server-vm = finixStaging.vmPackage;
+      finix-server-trial = finixStaging.trialPackage;
     };
 
     formatter."${system}" = nixpkgs.legacyPackages."${system}".alejandra;
