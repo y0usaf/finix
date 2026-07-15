@@ -109,6 +109,8 @@ _: {
         ".cache/mesa_shader_cache_db"
         ".cache/wallust"
         ".cache/ekko"
+        ".cache/librewolf"
+        ".cache/mozilla"
         ".nv"
       ];
       files = [
