@@ -33,6 +33,25 @@ in {
                 IdentitiesOnly yes
                 ForwardAgent yes
 
+            # Rescue path: Tailscale SSH - tailscaled itself answers :22 on
+            # the tailnet IP; auth = tailnet identity, independent of the
+            # server's sshd config/PAM/authorized_keys AND of LAN/DHCP.
+            # Host key is Tailscale's (not sshd's), hence the separate
+            # known_hosts file; the WireGuard tunnel already authenticates
+            # the peer, accept-new is fine here.
+            Host rescue server-ts
+                HostName 100.105.204.116
+                User ${userName}
+                IdentityFile ${homeDir}/.ssh/id_ed25519
+                StrictHostKeyChecking accept-new
+                UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
+
+            Host rescue-root
+                HostName 100.105.204.116
+                User root
+                StrictHostKeyChecking accept-new
+                UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
+
             Host desktop
                 HostName y0usaf-desktop
                 Port 2222
@@ -99,7 +118,7 @@ in {
         Type = "forking";
         Environment = "SSH_AUTH_SOCK=%t/ssh-agent";
         ExecStart = "${pkgs.openssh}/bin/ssh-agent -a $SSH_AUTH_SOCK";
-        ExecStartPost = "${pkgs.coreutils}/bin/systemctl --user set-environment SSH_AUTH_SOCK=$SSH_AUTH_SOCK";
+        ExecStartPost = "${config.systemd.package}/bin/systemctl --user set-environment SSH_AUTH_SOCK=$SSH_AUTH_SOCK";
       };
     };
   };
