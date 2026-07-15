@@ -82,7 +82,10 @@ in {
       };
   };
   services = {
-    btrbk-snapshots.enable = true;
+    btrbk-snapshots = {
+      enable = true;
+      subvolumes = ["@dcim" "@music" "@persist"];
+    };
     docker.enable = true;
     waydroid.enable = false;
     controllers.enable = true;
