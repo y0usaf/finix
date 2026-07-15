@@ -51,8 +51,8 @@ in {
         value =
           {
             defaultProvider = "openai-codex";
-            defaultModel = "gpt-5.6-sol";
-            defaultThinkingLevel = "high";
+            defaultModel = "gpt-5.6-luna";
+            defaultThinkingLevel = "max";
             enabledModels = [
               "openai-codex/gpt-5.6-sol"
               "openai-codex/gpt-5.6-luna"
@@ -85,6 +85,7 @@ in {
         value = {
           providers = {
             "vercel-ai-gateway" = {
+              apiKey = "$AI_GATEWAY_API_KEY";
               modelOverrides = {
                 "deepseek/deepseek-v4-pro" = {
                   reasoning = true;

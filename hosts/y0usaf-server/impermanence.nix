@@ -15,7 +15,6 @@ _: {
       "/var/lib/postgresql"
       "/var/lib/forgejo"
       "/var/lib/private" # n8n, blocky (systemd DynamicUser dirs)
-      "/var/lib/docker"
       "/var/lib/tailscale"
       "/var/lib/manzil"
       "/var/lib/btrbk"

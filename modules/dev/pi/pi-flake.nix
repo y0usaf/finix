@@ -14,18 +14,18 @@ in {
   config = lib.mkIf config.user.dev.pi.enable {
     programs.pi = {
       enable = true;
-      # Default bundle minus rlm and pomodoro (morph stays opt-in upstream).
+      # Default bundle minus rlm.
       extensions = {
         "codex-fast" = true;
         "gecko-websearch" = true;
         rtk = true;
         compact = true;
-        "context-janitor" = true;
         "tool-management" = true;
         webfetch = true;
         hashline = true;
         "minimal-editor" = true;
         "working-indicator" = true;
+        advisor = true;
         review = true;
         vcc = true;
       };
