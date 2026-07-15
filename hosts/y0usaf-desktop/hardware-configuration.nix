@@ -34,15 +34,9 @@
   };
   fileSystems = {
     "/" = {
-      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
-      fsType = "btrfs";
-      options = [
-        "subvol=@"
-        "compress=zstd:3"
-        "noatime"
-        "ssd"
-        "space_cache=v2"
-      ];
+      device = "none";
+      fsType = "tmpfs";
+      options = ["mode=755" "size=4G"];
     };
     "/boot" = {
       device = "/dev/disk/by-uuid/31F2-1AE7";
