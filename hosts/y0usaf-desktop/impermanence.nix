@@ -100,7 +100,7 @@ _: {
         ".minecraft"
         ".stremio-server"
         ".slskd"
-        ".SNOW"
+
 
         # Caches worth keeping (shader/compile caches; .cache itself not a subvol)
         ".cache/nix"
@@ -115,6 +115,7 @@ _: {
       ];
       files = [
         ".claude.json"
+        ".SNOW"
       ];
     };
   };
