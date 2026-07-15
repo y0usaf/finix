@@ -7,6 +7,12 @@ _: {
       "/var/lib/systemd/coredump"
       "/var/log"
 
+      # Root user state (agents, ssh)
+      {
+        directory = "/root";
+        mode = "0700";
+      }
+
       # SSH host keys & secure boot signing keys
       "/etc/ssh"
       "/var/lib/sbctl"
