@@ -2,12 +2,11 @@
   config,
   lib,
   pkgs,
-  flakeInputs,
   ...
 }: {
   config = lib.mkIf config.user.ui.niri.enable {
     environment.systemPackages = [
-      flakeInputs.niri.packages."${pkgs.stdenv.hostPlatform.system}".default
+      pkgs.niri
       pkgs.grim
       pkgs.slurp
       pkgs.wl-clipboard-rs

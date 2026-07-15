@@ -9,12 +9,12 @@
 
   tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
   # With `user.shell.ekko.open`, the terminal-spawn bind routes through the
-  # running mux (`ekko open`): an attached client opens a fresh session
-  # in-place; cold, ekko spawns $TERMINAL (exported by tomoe-session below).
+  # running mux helper: an attached client requests focus for its existing
+  # terminal; cold, the helper falls back to the regular terminal spawn.
   ekkoOpen = config.user.shell.ekko.enable && config.user.shell.ekko.open;
   termSpawn =
     if ekkoOpen
-    then "ekko open"
+    then "ekko-activate-or-terminal"
     else config.user.defaults.terminal;
   # tomoe has no upstream niri-session-style wrapper binary and no NixOS
   # module, so this flake provides a `tomoe-session` shim that mirrors
@@ -42,11 +42,7 @@ in {
         export XCURSOR_THEME=${config.user.ui.cursor.package.xcursorThemeName}
         export XCURSOR_SIZE=${toString config.user.appearance.xcursorSize}
         export TOMOE_PORTAL_CHOOSER="''${TOMOE_PORTAL_CHOOSER:-$HOME/.config/scripts/portal-chooser.sh}"
-        ${lib.optionalString ekkoOpen ''
-          # `ekko open`'s cold-boot terminal (scoped to the session, per the
-          # philosophy above).
-          export TERMINAL=${config.user.defaults.terminal}
-        ''}
+
         ${lib.optionalString config.hardware.nvidia.enable ''
           export WLR_NO_HARDWARE_CURSORS=1
           export LIBVA_DRIVER_NAME=nvidia
@@ -184,6 +180,13 @@ in {
             local wins, full, floats = {}, {}, {}
             for _, win in ipairs(wm.workspaces[wm.active]) do
               local id = win:id()
+              local rules = tomoe.rules_for(win)
+              -- Classify rule-floated windows before split_columns sees them:
+              -- briefly tiling then removing a transient corrupts the deck's
+              -- visible id and makes that column jump back to its first window.
+              if rules.floating then
+                floating[id] = true
+              end
               if wm.fullscreen[id] then
                 table.insert(full, win)
               elseif floating[id] then

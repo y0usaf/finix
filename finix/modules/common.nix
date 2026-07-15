@@ -7,6 +7,21 @@
 }: {
   time.timeZone = "America/Toronto";
 
+  # finix's networking module seeds networking.hosts with reversed
+  # name->IP entries ("localhost = [127.0.0.1]") while the renderer and the
+  # option docs are IP-keyed - the defaults produce invalid /etc/hosts
+  # lines, breaking localhost resolution (which e.g. postgres' default
+  # listen_addresses depends on). Blank the bad keys (empty lists are
+  # filtered out of the generated file) and supply correct IP-keyed
+  # entries. TODO: report upstream.
+  networking.hosts = {
+    localhost = lib.mkForce [];
+    ${config.networking.hostName} = lib.mkForce [];
+    "127.0.0.1" = ["localhost"];
+    "::1" = ["localhost"];
+    "127.0.0.2" = [config.networking.hostName];
+  };
+
   services = {
     mdevd.enable = true;
     sysklogd.enable = true;
@@ -51,8 +66,11 @@
     sudo.enable = true;
   };
 
+  # Keep both the desktop key and the server's existing rescue key available
+  # while the persistent system's SSH ownership checks are being tightened.
   environment.etc."ssh/authorized_keys.d/y0usaf".text = ''
     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6ZHkn1pACV406TM5yUCRt/874vybgpUW3sUKka9nAC y0usaf@y0usaf-desktop
+    ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-server/user-ssh.pub)}
   '';
 
   environment.etc.sudoers.text = lib.mkAfter ''
