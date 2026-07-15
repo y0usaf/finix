@@ -29,11 +29,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    mango = {
-      url = "github:DreamMaoMao/mango";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     handy = {
       url = "github:cjpais/Handy/c1e11faa71f010436d4ff63b3467f8d6973ecba8";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -64,15 +59,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Pinned to a known-good commit (pi 0.80.6). Bump this rev to pull newer
-    # pi releases / model definitions.
+    # Follow pi-flake main; flake.lock records resolved revision.
     pi-flake = {
-      url = "github:y0usaf/pi-flake/989496ae3e67029e221ea148fc078c13d9766f9c";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    concord = {
-      url = "github:chojs23/concord";
+      url = "github:y0usaf/pi-flake?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -122,18 +111,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nur = {
-      url = "git+file:///home/y0usaf/Dev/nur";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     moonshell = {
       url = "git+file:///home/y0usaf/Dev/moonshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    shojiwm = {
-      url = "git+file:///home/y0usaf/Dev/ShojiWM";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -167,7 +146,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Experimental finit-based OS for the server migration (see ./finix).
+    # Finit-based OS: the server's installed OS since 2026-07-15 (NixOS is
+    # its on-disk rescue entry). See ./finix + finix/NOTES.md.
     finix.url = "github:finix-community/finix";
   };
 
@@ -180,11 +160,13 @@
     mkHost = {
       domains,
       hostDir,
+      extraModules ? [],
     }:
       lib.nixosSystem {
         inherit system;
         specialArgs = {
           flakeInputs = inputs;
+          inherit finixStaging;
         };
         modules =
           (import ./recursivelyImport.nix {
@@ -204,8 +186,8 @@
             domains
             ++ [
               hostDir
-              inputs.shojiwm.nixosModules.default
             ]
+            ++ extraModules
           );
       };
   in {
@@ -213,6 +195,16 @@
       y0usaf-desktop = mkHost {
         hostDir = ./hosts/y0usaf-desktop;
         domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
+      };
+
+      # Desktop + VBIOS maintenance specialisation. Evaluating the
+      # specialisation re-runs the whole module system (~20-30% eval time),
+      # so it lives in a variant instead of the default host:
+      #   nh os switch -H y0usaf-desktop-vbios
+      y0usaf-desktop-vbios = mkHost {
+        hostDir = ./hosts/y0usaf-desktop;
+        domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
+        extraModules = [./hosts/y0usaf-desktop-vbios/vbios-maintenance.nix];
       };
 
       y0usaf-laptop = mkHost {
@@ -245,9 +237,20 @@
       };
     };
 
+    # Finix systems, first-class beside nixosConfigurations. Same module
+    # universe split as always: finix systems can never import ./modules/*.
+    finixConfigurations = {
+      y0usaf-server = finixStaging.serverPersistent;
+    };
+
     packages."${system}" = {
+      finix-server-persistent = finixStaging.persistentPackage;
+      finix-server-persistent-deploy = finixStaging.persistentDeployPackage;
+      finix-server-boot = finixStaging.bootPackage;
+      # Attic (retired kexec era; see finix/attic/):
       finix-server-vm = finixStaging.vmPackage;
       finix-server-trial = finixStaging.trialPackage;
+      finix-server-persistent-kexec = finixStaging.persistentKexecPackage;
     };
 
     formatter."${system}" = nixpkgs.legacyPackages."${system}".alejandra;

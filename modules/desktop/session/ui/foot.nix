@@ -44,6 +44,10 @@ in {
             "line-height" = userUi.foot.lineHeight;
           };
 
+        bell = {
+          urgent = "yes";
+        };
+
         cursor = {
           style = "underline";
           blink = "no";

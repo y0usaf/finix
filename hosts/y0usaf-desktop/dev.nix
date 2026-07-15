@@ -41,6 +41,7 @@ _: {
     localllama.enable = false;
     nvim.enable = true;
     bun.enable = true;
+    npm.enable = true;
     python.enable = true;
     rust.enable = true;
     opencode = {

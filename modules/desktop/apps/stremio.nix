@@ -55,6 +55,12 @@ in {
         postPatch = ''
           substituteInPlace $cargoDepsCopy/libappindicator-sys-*/src/lib.rs \
             --replace-fail "libayatana-appindicator3.so.1" "${libayatanaAppindicator}/lib/libayatana-appindicator3.so.1"
+
+          # Vesktop/venmic cannot reliably select native PipeWire mpv streams.
+          # Route mpv through pipewire-pulse so Stremio appears as shareable audio.
+          substituteInPlace src/player/mod.rs \
+            --replace-fail 'init.set_property("vo", "libmpv")?;' \
+              'init.set_property("vo", "libmpv")?; init.set_property("ao", "pulse")?;'
         '';
 
         buildFeatures = ["offline-build"];

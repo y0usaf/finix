@@ -1695,11 +1695,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783963726,
-        "narHash": "sha256-c2HvFtJ1HPZaVOX5CgBz6QVaBrpQBaaRTIfFMWaocV8=",
+        "lastModified": 1784034555,
+        "narHash": "sha256-iSZIK0aXRpbaSOq7oKAnl/JHJdZLCdyJd6OeIMH4Ozc=",
         "ref": "refs/heads/main",
-        "rev": "5d80ad808d9067877988df6f070b2f8f58e48c2a",
-        "revCount": 54,
+        "rev": "83f5d088a434d3029f97a8950a4a53447f423e50",
+        "revCount": 57,
         "type": "git",
         "url": "file:///home/y0usaf/Dev/tomoe"
       },

@@ -150,6 +150,5 @@
     codex-cli.enable = true;
     pi.enable = true;
     nvim.enable = true;
-    docker.enable = true;
   };
 }

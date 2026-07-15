@@ -1,169 +1,97 @@
-# Finix server migration staging area.
+# Finix - the server's installed OS since 2026-07-15 (NixOS stays on disk
+# as the rescue entry). See NOTES.md for the full migration record.
 #
-# Phase 1 (VM):
-#   nix build .#finix-server-vm && ./result/bin/run-finix-server-vm
-#   ssh -p 22222 y0usaf@localhost   (serial console login: y0usaf/y0usaf)
+# Layout:
+#   lib/      mk-system.nix (builder), esp-island.nix (boot driver),
+#             deploy.nix (SSH config deploys)
+#   modules/  common.nix baseline + upstream-bug workarounds
+#   hosts/    per-machine finix systems (y0usaf-server; desktop someday)
+#   attic/    retired kexec-era tooling (vm, trial, beacon, kexec drivers)
 #
-# Phase 2 (guarded bare-metal trial via kexec):
-#   1. deploy the NixOS guard config to the server once:
-#        nixos-rebuild switch --flake .#y0usaf-server --target-host server --use-remote-sudo
-#   2. nix run .#finix-server-trial
-#   3. ssh y0usaf@<server-ip>   (trial auto-returns to NixOS after 10 min
-#      unless you `touch /persist/finix-trial/keep`; return manually with
-#      `sudo initctl reboot`)
+# Day-2 operations:
+#   config-only change:  nix run .#finix-server-persistent-deploy -- 192.168.2.66 test|switch
+#   kernel/initrd/cmdline change:  nix run .#finix-server-boot -- 192.168.2.66 install
+#                                  ... oneshot, health checks, ... promote
+#   status/rescue:  nix run .#finix-server-boot -- 192.168.2.66 status|demote|rollback
 {
   inputs,
   system,
 }: let
-  pkgs = import inputs.nixpkgs {inherit system;};
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    # n8n ships under the (unfree) Sustainable Use License.
+    config.allowUnfreePredicate = pkg: builtins.elem (pkg.pname or pkg.name) ["n8n"];
+  };
   inherit (pkgs) lib;
 
-  mkFinixSystem = modules:
-    inputs.finix.lib.finixSystem {
-      inherit lib;
-      specialArgs = {
-        modulesPath = toString inputs.nixpkgs + "/nixos/modules";
-      };
-      modules = with inputs.finix.nixosModules;
-        [
-          {nixpkgs.pkgs = lib.mkDefault pkgs;}
-          bash
-          dhcpcd
-          getty
-          openssh
-          sudo
-          sysklogd
-          ./common.nix
-        ]
-        ++ modules;
-    };
+  mkFinixSystem = import ./lib/mk-system.nix {inherit inputs pkgs lib;};
 
+  # ── systems ──────────────────────────────────────────────────────────────
+  serverPersistent = mkFinixSystem (with inputs.finix.nixosModules; [
+    cron
+    nftables
+    postgresql
+    nix-daemon
+    ./hosts/y0usaf-server/services.nix
+    ./hosts/y0usaf-server/persistent.nix
+  ]);
+
+  # Retired-era systems (attic); kept buildable, not part of any boot path.
   serverVm = mkFinixSystem [
     # Not exported by name from finix's module set; import by path.
     "${inputs.finix.outPath}/modules/virtualisation/qemu.nix"
-    ./server-vm.nix
+    ./attic/server-vm.nix
   ];
 
-  serverTrial = mkFinixSystem [./server-trial.nix];
+  serverTrial = mkFinixSystem (with inputs.finix.nixosModules; [
+    cron
+    nftables
+    postgresql
+    ./hosts/y0usaf-server/services.nix
+    ./attic/server-trial.nix
+  ]);
 
-  runVmScript = pkgs.writeShellScriptBin "run-finix-server-vm" ''
-    exec ${lib.escapeShellArgs serverVm.config.virtualisation.qemu.argv} "$@"
-  '';
+  # ── drivers ──────────────────────────────────────────────────────────────
+  island = import ./lib/esp-island.nix {inherit pkgs lib serverPersistent;};
+  deploy = import ./lib/deploy.nix {inherit pkgs serverPersistent;};
+  attic = import ./attic/drivers.nix {
+    inherit pkgs lib serverVm serverTrial serverPersistent;
+  };
+in {
+  inherit serverVm serverTrial serverPersistent;
 
-  # Pre-finit beacon: the only netconsole that has proven reliable on the
-  # real server (finit's own initrd tasks race NIC bring-up). Wraps /init in
-  # a tiny shell script that loads the NIC driver + netconsole and emits
-  # progress markers to /dev/kmsg before handing off to finit untouched.
-  # NOTE: the initrd's standalone `sh` has no default PATH - set it.
-  beaconInit = pkgs.writeScript "beacon-init" ''
-    #!/bin/sh
-    PATH=/bin
-    export PATH
-    mkdir -p /proc /sys /dev
-    mount -t proc proc /proc 2>/dev/null
-    mount -t sysfs sysfs /sys 2>/dev/null
-    mount -t devtmpfs devtmpfs /dev 2>/dev/null
-    for m in r8169 igc e1000e; do modprobe "$m" 2>/dev/null; done
-    sleep 2
-    for _ in 1 2 3 4 5; do
-      for d in /sys/class/net/*; do
-        n=$(basename "$d")
-        [ "$n" = lo ] && continue
-        if modprobe netconsole "netconsole=+6665@192.168.2.66/$n,6666@192.168.2.28/58:11:22:b7:f0:29" 2>/dev/null; then
-          echo "beacon: netconsole up on $n" > /dev/kmsg
-          break 2
-        fi
-      done
-      sleep 1
-    done
-    echo "beacon: exec finit" > /dev/kmsg
-    exec /init-orig "$@"
-  '';
-
-  beaconInitrd =
-    pkgs.runCommand "finix-trial-initrd-beacon" {
-      nativeBuildInputs = [pkgs.cpio pkgs.zstd];
+  persistentPackage =
+    pkgs.runCommand "finix-server-persistent" {
+      meta.mainProgram = "finix-server-persistent";
     } ''
-      mkdir root $out
-      cd root
-      cat ${serverTrial.config.system.topLevel}/initrd | zstd -dc | cpio -idm --no-absolute-filenames --quiet
-      mv init init-orig
-      cp ${beaconInit} init
-      chmod +x init
-      find . -mindepth 1 | cpio -o -H newc --owner=+0:+0 --quiet | zstd -3 > $out/initrd
+      mkdir -p $out/bin
+      ln -s ${serverPersistent.config.system.topLevel} $out/system
     '';
 
-  # Desktop-side driver for the guarded bare-metal trial. Refuses to kexec
-  # unless the hardware watchdog exists and systemd is configured to arm it
-  # across the kexec (see hosts/y0usaf-server/finix-guard.nix).
-  trialScript = pkgs.writeShellScriptBin "finix-server-trial" ''
-    set -euo pipefail
+  bootPackage =
+    pkgs.runCommand "finix-server-boot" {
+      meta.mainProgram = "finix-server-boot";
+    } ''
+      mkdir -p $out/bin
+      ln -s ${island.bootDriverScript}/bin/finix-server-boot $out/bin/finix-server-boot
+    '';
 
-    host="''${1:-server}"
-    system_path='${serverTrial.config.system.topLevel}'
-    bootjson="$system_path/boot.json"
+  persistentDeployPackage =
+    pkgs.runCommand "finix-server-persistent-deploy" {
+      meta.mainProgram = "finix-server-persistent-deploy";
+    } ''
+      mkdir -p $out/bin
+      ln -s ${deploy.persistentDeployScript}/bin/finix-server-persistent-deploy $out/bin/finix-server-persistent-deploy
+    '';
 
-    kernel="$(${pkgs.jq}/bin/jq -r '.["org.nixos.bootspec.v1"].kernel' "$bootjson")"
-    initrd='${beaconInitrd}/initrd'
-    init="$(${pkgs.jq}/bin/jq -r '.["org.nixos.bootspec.v1"].init' "$bootjson")"
-    kernel_params="$(${pkgs.jq}/bin/jq -r '.["org.nixos.bootspec.v1"].kernelParams | join(" ")' "$bootjson")"
-    cmdline="init=$init $kernel_params"
-
-    echo "==> copying finix closure to $host"
-    nix copy --to "ssh://$host" "$system_path" '${beaconInitrd}'
-
-    echo "==> verifying guards and starting guarded kexec"
-    ssh "$host" "sudo bash -s -- '$kernel' '$initrd' '$cmdline' '$system_path'" <<'EOF'
-    set -euo pipefail
-    kernel=$1 initrd=$2 cmdline=$3 system=$4
-
-    modprobe intel_oc_wdt 2>/dev/null || true
-    if ! [ -c /dev/watchdog0 ]; then
-      echo "ABORT: /dev/watchdog0 missing - refusing unguarded kexec" >&2
-      exit 1
-    fi
-
-    wd_usec="$(systemctl show -p KExecWatchdogUSec --value)"
-    case "$wd_usec" in
-      ""|0|infinity)
-        echo "ABORT: KExecWatchdogSec not configured (systemd.watchdog.kexecTime) - refusing unguarded kexec" >&2
-        exit 1
-        ;;
-    esac
-    echo "watchdog: /dev/watchdog0 present, kexec arming = $wd_usec"
-
-    # Protect the trial closure from nix-collect-garbage on the server.
-    nix-store --realise "$system" --add-root /nix/var/nix/gcroots/finix-trial >/dev/null
-
-    kexec -l "$kernel" --initrd="$initrd" --command-line="$cmdline"
-    sync
-    echo "jumping to finix..."
-    systemctl kexec
-    EOF
-
-    cat <<'MSG'
-
-    kexec initiated. Guards active:
-      - HW watchdog armed across the jump (hang -> reset -> NixOS)
-      - panic=30 / oops=panic / lockup panics (crash -> reboot -> NixOS)
-      - auto-return to NixOS after 10 min unless you run:
-          ssh y0usaf@<ip> 'touch /persist/finix-trial/keep'
-      - return manually: ssh y0usaf@<ip> 'sudo initctl reboot'
-      - post-mortem after a failed trial: /persist/finix-trial/boot-*.log
-
-    The trial system uses DHCP with static fallback 192.168.2.66.
-    MSG
-  '';
-in {
-  inherit serverVm serverTrial;
-
+  # ── attic packages (retired kexec era; see attic/drivers.nix) ────────────
   vmPackage =
     pkgs.runCommand "finix-server-vm" {
       meta.mainProgram = "run-finix-server-vm";
     } ''
       mkdir -p $out/bin
       ln -s ${serverVm.config.system.topLevel} $out/system
-      ln -s ${runVmScript}/bin/run-finix-server-vm $out/bin/run-finix-server-vm
+      ln -s ${attic.runVmScript}/bin/run-finix-server-vm $out/bin/run-finix-server-vm
     '';
 
   trialPackage =
@@ -172,6 +100,14 @@ in {
     } ''
       mkdir -p $out/bin
       ln -s ${serverTrial.config.system.topLevel} $out/system
-      ln -s ${trialScript}/bin/finix-server-trial $out/bin/finix-server-trial
+      ln -s ${attic.trialScript}/bin/finix-server-trial $out/bin/finix-server-trial
+    '';
+
+  persistentKexecPackage =
+    pkgs.runCommand "finix-server-persistent-kexec" {
+      meta.mainProgram = "finix-server-persistent-kexec";
+    } ''
+      mkdir -p $out/bin
+      ln -s ${attic.persistentKexecScript}/bin/finix-server-persistent-kexec $out/bin/finix-server-persistent-kexec
     '';
 }

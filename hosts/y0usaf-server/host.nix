@@ -16,7 +16,6 @@
   };
   services = {
     btrbk-snapshots.enable = true;
-    docker.enable = true;
     waydroid.enable = false;
     controllers.enable = false;
     mediamtx.enable = true;

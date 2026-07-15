@@ -18,24 +18,28 @@ in {
       type = lib.types.bool;
       default = false;
       description = ''
-        Route the WM terminal-spawn bind through `ekko open`: with an ekko
-        client attached, the bind opens a fresh session inside it instead of
-        spawning a new terminal window; cold (no client), ekko spawns the
-        terminal itself (via $TERMINAL, exported by the WM session). Read by
-        the WM modules (tomoe, hyprland).
+        Route the WM terminal-spawn bind through ekko: with an attached
+        client, request focus for that existing terminal; cold (no client),
+        fall back to spawning the regular terminal. Read by the WM modules
+        (tomoe, hyprland).
       '';
     };
   };
 
   config = lib.mkIf ekko.enable {
     environment.systemPackages = [
-      # Two products from one workspace (WS-M12 split): the stock muxer and
-      # the Pi superset (`pi-harness`) — separate binaries, separate
-      # config/socket universes.
-      flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".ekko
-      flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".pi-harness
-    ];
+      # The stock muxer + a small helper that first tries `ekko activate`,
+      # then falls back to the regular terminal spawn when no client is
+      # attached.
+      flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".default
+      (pkgs.writeShellScriptBin "ekko-activate-or-terminal" ''
+        if ekko activate >/dev/null 2>&1; then
+          exit 0
+        fi
+        exec ${config.user.defaults.terminal} "$@"
+      '')
 
+    ];
     manzil.users."${config.user.name}".files =
       lib.optionalAttrs (ekko.autoStart && lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
         ".config/nushell/config.nu" = {
