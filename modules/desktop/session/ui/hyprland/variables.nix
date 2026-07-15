@@ -5,11 +5,11 @@
 }: let
   # `$term` is only ever used to *spawn* a terminal (Mod+T, which-key T);
   # `$notepad` embeds `defaults.terminal -e` directly, so routing the spawn
-  # through `ekko open` (user.shell.ekko.open) is safe here.
+  # through ekko (user.shell.ekko.open) is safe here.
   ekkoOpen = config.user.shell.ekko.enable && config.user.shell.ekko.open;
   termSpawn =
     if ekkoOpen
-    then "ekko open"
+    then "ekko-activate-or-terminal"
     else config.user.defaults.terminal;
 in {
   config = lib.mkIf config.user.ui.hyprland.enable {
@@ -25,7 +25,6 @@ in {
         $ide = ${config.user.defaults.ide}
         $notepad = ${config.user.defaults.terminal} -e ${config.user.defaults.editor}
         $obs = obs
-        ${lib.optionalString ekkoOpen "env = TERMINAL,${config.user.defaults.terminal}"}
       '';
     };
   };

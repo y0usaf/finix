@@ -60,6 +60,29 @@
         "space_cache=v2"
       ];
     };
+    "/nix" = {
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      fsType = "btrfs";
+      options = [
+        "subvol=@nix"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
+    };
+    "/persist" = {
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      fsType = "btrfs";
+      options = [
+        "subvol=@persist"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
+      neededForBoot = true;
+    };
     "/home" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
@@ -70,6 +93,7 @@
         "ssd"
         "space_cache=v2"
       ];
+      neededForBoot = true;
     };
     "/swap" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";

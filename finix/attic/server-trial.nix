@@ -39,8 +39,10 @@
   netconsoleTarget = "192.168.2.28";
   netconsoleTargetMac = "58:11:22:b7:f0:29";
   netconsolePort = "6666";
-  # Trial window before auto-return to NixOS.
-  trialSeconds = 600;
+  # Trial window before auto-return to NixOS. 30 min: enough to exercise
+  # the ported services (forgejo/syncthing/tailscale/...); the 10-min
+  # window was validated 3x before being raised.
+  trialSeconds = 1800;
 
   netconsoleLoad = ''
     # The NIC driver is not loaded implicitly in the initrd (only the disk
