@@ -16,7 +16,6 @@ in {
       enable = true;
       # Default bundle minus rlm.
       extensions = {
-        "codex-fast" = true;
         "gecko-websearch" = true;
         rtk = true;
         compact = true;
@@ -24,10 +23,10 @@ in {
         webfetch = true;
         hashline = true;
         "minimal-editor" = true;
-        "working-indicator" = true;
         advisor = true;
         review = true;
         vcc = true;
+        caveman = true;
       };
     };
 
