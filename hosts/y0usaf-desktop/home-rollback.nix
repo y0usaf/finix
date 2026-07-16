@@ -1,8 +1,9 @@
 _: {
   # Recreate @home from @home-blank on each boot (impermanence README pattern).
-  # Persistent user state lives in /persist (impermanence.nix) and dedicated
-  # subvols (@config, @local, @steam, @dcim, @music, @pictures).
-  # Pre-P4 home preserved read-only at ~/old-home (@home-old snapshot).
+  # Persistent user state lives in /persist (impermanence.nix, granular
+  # allowlist); durable bulk data on dedicated subvols (@steam, @dcim,
+  # @music, @pictures). Pre-P4 home read-only at ~/old-home (@home-old).
+  # Pre-granular @config/@local snapshots: /btrfs/_premigration/.
   boot.initrd.systemd.services.home-rollback = {
     description = "Rollback @home btrfs subvolume to @home-blank snapshot";
     wantedBy = ["initrd.target"];
@@ -32,6 +33,12 @@ _: {
       fi
 
       if [ -d /btrfs_tmp/@home ]; then
+        # Keep previous boot's home for forgot-to-persist recovery
+        # (inspect at /btrfs/@home-lastboot; rotated every boot).
+        if [ -d /btrfs_tmp/@home-lastboot ]; then
+          delete_subvolume_recursively /btrfs_tmp/@home-lastboot
+        fi
+        btrfs subvolume snapshot -r /btrfs_tmp/@home /btrfs_tmp/@home-lastboot
         delete_subvolume_recursively /btrfs_tmp/@home
       fi
 

@@ -33,6 +33,12 @@ _: {
       fi
 
       if [ -d /btrfs_tmp/@home ]; then
+        # Keep previous boot's home for forgot-to-persist recovery
+        # (inspect at /btrfs/@home-lastboot; rotated every boot).
+        if [ -d /btrfs_tmp/@home-lastboot ]; then
+          delete_subvolume_recursively /btrfs_tmp/@home-lastboot
+        fi
+        btrfs subvolume snapshot -r /btrfs_tmp/@home /btrfs_tmp/@home-lastboot
         delete_subvolume_recursively /btrfs_tmp/@home
       fi
 
