@@ -10,11 +10,7 @@
   uiFontList = [fonts.mainFontName fonts.backup.name];
   primaryFont = wrapFonts (uiFontList ++ [fonts.emoji.name]);
 in {
-  config =
-    lib.mkIf (
-      (discord.stable.enable or false)
-      || (discord.canary.enable or false)
-    ) {
+  config = lib.mkIf (discord.stable.enable or false) {
       manzil.users."${user.name}".files.".config/Vencord/themes/system-font.css".text = ''
         :root {
           /* Use system fonts for UI */
