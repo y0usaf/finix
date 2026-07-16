@@ -14,7 +14,9 @@
     virtualisation = {
       docker = {
         enable = true;
-        enableOnBoot = true;
+        # Socket activation: daemon (and any unless-stopped containers,
+        # e.g. supabase local stacks) only come up on first docker command.
+        enableOnBoot = false;
       };
       podman.enable = true;
     };
