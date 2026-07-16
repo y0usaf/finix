@@ -19,7 +19,7 @@
       generator =
         if lib.generators ? toTOML
         then lib.generators.toTOML {}
-        else (value: builtins.readFile ((pkgs.formats.toml {}).generate "gpuishell-config" value));
+        else (value: (pkgs.formats.toml {}).generate "gpuishell-config" value);
       value = {
         bar = {
           size = 32.0;
