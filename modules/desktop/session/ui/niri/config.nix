@@ -36,10 +36,7 @@
               ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"]
               ["sh" "-c" "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
             ]
-            ++ lib.optional config.user.ui.vicinae.enable ["${pkgs.vicinae}/bin/vicinae" "server"]
             ++ lib.optional (config.user.ui.gpuishell.enable or false) ["${pkgs.gpuishell}/bin/gpuishell"]
-            ++ lib.optional (config.user.ui.ags.bar-overlay.enable or false) ["${config.user.ui.ags.package}/bin/ags" "run" "/home/${config.user.name}/.config/ags/bar-overlay.tsx"]
-            ++ lib.optional (config.user.ui.nur.enable or false) ["${config.user.ui.nur.package}/bin/nur"]
             ++ lib.optional (config.user.ui.moonshell.enable or false) ["${config.user.ui.moonshell.package}/bin/moonshell"]
             ++ lib.optional (config.user.programs.handy.enable or false) ["handy"];
 

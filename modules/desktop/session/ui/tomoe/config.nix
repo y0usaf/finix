@@ -20,8 +20,8 @@
   # module, so this flake provides a `tomoe-session` shim that mirrors
   # ~/Dev/tomoe/run-tty.sh but execs the installed package binary. It scopes
   # session env to the compositor process (not leaked via
-  # environment.sessionVariables, which would affect every TTY) — the same
-  # philosophy as shojiwm's NVIDIA wrapper in ../shojiwm/config.nix.
+  # environment.sessionVariables, which would affect every TTY) — a process-scoped
+  # compositor wrapper pattern.
   # The Lua config body. tomoe's config is a real program (require("wm"),
   # function binds, loops), so it lives here as a Nix string; toLua only
   # serializes the inline value tables (border, displays) — see
@@ -111,18 +111,7 @@ in {
             "sh", "-c",
             "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill",
           } })
-          -- nur is a layer-shell client, so it runs the same under tomoe as under
-          -- niri. As a service, tomoe restarts it when it exits or crashes (1 Hz
-          -- supervision). The watchdog covers the case tomoe can't see — a frozen
-          -- nur that's still alive — by probing its IPC and killing it on hang,
-          -- which turns a freeze into an exit the service policy handles.
-          ${lib.optionalString config.user.ui.nur.enable ''
-              tomoe.process.service("nur", { command = { "${lib.getExe config.user.ui.nur.package}" }, restart = "on_exit" })''}
-          -- TODO: nur-watchdog has no flake input; add one to re-enable.
-          -- tomoe.process.service("nur-watchdog", { command = { "nur-watchdog" }, restart = "on_exit" })
-          -- moonshell (nur's successor) is also a plain layer-shell client; same
-          -- supervision story, no watchdog needed yet — it has no GPU stack to
-          -- freeze and tomoe's on_exit restart covers crashes.
+
           ${lib.optionalString (config.user.ui.moonshell.enable or false) ''
               tomoe.process.service("moonshell", { command = { "${lib.getExe config.user.ui.moonshell.package}" }, restart = "on_exit" })''}
 

@@ -19,7 +19,7 @@
     hyprcursorSize = lib.mkOption {
       type = lib.types.int;
       default = 24;
-      description = "Base Hyprcursor size used by Hyprland at user.appearance.dpi.";
+      description = "Base Hyprcursor size at user.appearance.dpi.";
     };
     dpi = lib.mkOption {
       type = lib.types.int;

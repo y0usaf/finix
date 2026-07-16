@@ -76,7 +76,7 @@ in {
       };
       # NOTE: Compositor-specific NVIDIA vars (GBM_BACKEND, LIBVA_DRIVER_NAME,
       # __GLX_VENDOR_LIBRARY_NAME, __EGL_VENDOR_LIBRARY_FILENAMES,
-      # WLR_NO_HARDWARE_CURSORS) are set per-WM (niri, shojiwm, hyprland, sway)
+      # WLR_NO_HARDWARE_CURSORS) are set per-WM (niri)
       # gated on config.hardware.nvidia.enable, so they don't leak across sessions.
       # GALLIUM_DRIVER and LIBGL_DRIVER_NAME are omitted — they can break
       # Mesa/non-NVIDIA rendering paths and are not needed with nvidia-drm.

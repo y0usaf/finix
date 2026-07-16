@@ -3,11 +3,7 @@
   lib,
   ...
 }: {
-  config =
-    lib.mkIf (
-      (config.user.programs.discord.stable.enable or false)
-      || (config.user.programs.discord.canary.enable or false)
-    ) {
+  config = lib.mkIf (config.user.programs.discord.stable.enable or false) {
       manzil.users."${config.user.name}".files = {
         ".config/Vencord/themes/visual-refresh.css".text = ''
           /* Hide the Visual Refresh title bar */
