@@ -10,6 +10,11 @@
       enable = true;
       openFirewall = true;
       extraUpFlags = ["--ssh"];
+      # extraUpFlags only apply when someone manually runs `tailscale up`;
+      # set-flags are re-asserted by the module on every activation, so the
+      # sshd/PAM-independent rescue path can't silently rot (found RunSSH
+      # false on the server 2026-07-14 despite the up-flag above).
+      extraSetFlags = ["--ssh"];
     };
 
     # Tailnet peers are already authenticated; trust the interface so services
