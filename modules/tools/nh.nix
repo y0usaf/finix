@@ -48,7 +48,9 @@ in {
                 esac
               done
               shift $((OPTIND-1))
-              nh os switch $update $dry "$@"
+              # GC_DONT_GC: skip Boehm GC during eval (~35% less eval CPU,
+              # peak RSS ~4-5GB). Remove if eval OOMs on low-memory hosts.
+              GC_DONT_GC=1 nh os switch $update $dry "$@"
             }
             alias nhd="nhs -d"
             alias nhu="nhs -u"
@@ -69,7 +71,8 @@ in {
               clear
               let update_flag = if $update { ["--update"] } else { [] }
               let dry_flag = if $dry { ["--dry"] } else { [] }
-              ^nh os switch ...$update_flag ...$dry_flag ...$rest
+              # GC_DONT_GC: skip Boehm GC during eval (~35% less eval CPU).
+              GC_DONT_GC=1 ^nh os switch ...$update_flag ...$dry_flag ...$rest
             }
             alias nhd = nhs -d
             alias nhu = nhs -u
