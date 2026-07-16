@@ -18,7 +18,6 @@
       pkgs.playerctl
       pkgs.pulsemixer
       pkgs.xdg-utils
-      pkgs.vicinae
     ];
 
     fonts.enableDefaultPackages = lib.mkDefault true;

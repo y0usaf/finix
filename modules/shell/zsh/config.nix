@@ -6,7 +6,7 @@
 }: let
   homeDir = config.user.homeDirectory;
   inherit (config.user) shell;
-  inherit (shell) zellij;
+
   inherit (config.user) defaults;
   flakeDirectory = config.user.paths.flake.path;
 in {
@@ -49,10 +49,9 @@ in {
                   dir = "dir --color=auto";
                   egrep = "rg --color auto";
                   fgrep = "rg -F --color auto";
-                  svn = ''svn --config-dir "$XDG_CONFIG_HOME/subversion"'';
+
                   adb = ''HOME="$XDG_DATA_HOME/android" adb'';
-                  mocp = ''mocp -M "$XDG_CONFIG_HOME/moc" -O MOCDir="$XDG_CONFIG_HOME/moc"'';
-                  yarn = ''yarn --use-yarnrc "$XDG_CONFIG_HOME/yarn/config"'';
+
                   pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i";
                   pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
                   buildtime = "time (nix build \${NH_FLAKE}#nixosConfigurations.\${HOST}.config.system.build.toplevel --option eval-cache false)";
@@ -179,35 +178,7 @@ in {
                   else ""
                 )
               ]
-              ++ lib.optional (zellij.enable && zellij.autoStart) "source \"$ZDOTDIR/zellij.zsh\""
             );
-          };
-        }
-        // lib.optionalAttrs (zellij.enable && zellij.autoStart) {
-          ".config/zsh/zellij.zsh" = {
-            text =
-              ''
-                # Skip if already in a multiplexer or SSH session (fast: variable checks only)
-                [[ -n "$ZELLIJ" || -n "$SSH_CONNECTION" || -n "$TMUX" ]] && return
-
-                # Skip if in virtual console
-                [[ "$TERM" == "linux" ]] && return
-
-                # Robust fallback: device path check (minimal subprocess overhead)
-                [[ $(readlink /proc/self/fd/0 2>/dev/null) =~ ^/dev/tty[0-9] ]] && return
-              ''
-              + ''
-                # Start Zellij
-                if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
-                  zellij attach -c
-                else
-                  zellij
-                fi
-
-                if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
-                  exit
-                fi
-              '';
           };
         };
     };
