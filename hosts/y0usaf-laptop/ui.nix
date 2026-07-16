@@ -1,6 +1,5 @@
 _: {
   user.ui = {
-    nur.enable = false; # replaced by moonshell (nur's successor)
     moonshell = {
       enable = true;
       # Laptop: battery shows the placeholder facade (static 100%) until

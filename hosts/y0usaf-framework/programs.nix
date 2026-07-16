@@ -8,7 +8,7 @@ _: {
     };
     discord = {
       stable.enable = true;
-      canary.enable = false;
+
       vesktop.enable = true;
     };
     handy = {

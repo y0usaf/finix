@@ -21,7 +21,7 @@ in {
         Route the WM terminal-spawn bind through ekko: with an attached
         client, request focus for that existing terminal; cold (no client),
         fall back to spawning the regular terminal. Read by the WM modules
-        (tomoe, hyprland).
+        (tomoe).
       '';
     };
   };
@@ -38,7 +38,6 @@ in {
         fi
         exec ${config.user.defaults.terminal} "$@"
       '')
-
     ];
     manzil.users."${config.user.name}".files =
       lib.optionalAttrs (ekko.autoStart && lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
@@ -50,7 +49,7 @@ in {
         ".config/nushell/ekko.nu" = {
           text = ''
             # Skip if already in a multiplexer or SSH session
-            if ("EKKO_SESSION_NAME" in $env) or ("ZELLIJ" in $env) or ("SSH_CONNECTION" in $env) or ("TMUX" in $env) { return }
+            if ("EKKO_SESSION_NAME" in $env) or ("SSH_CONNECTION" in $env) or ("TMUX" in $env) { return }
 
             # Skip if in virtual console
             if ($env.TERM? | default "") == "linux" { return }
@@ -68,7 +67,7 @@ in {
         ".config/zsh/ekko.zsh" = {
           text = ''
             # Skip if already in a multiplexer or SSH session (fast: variable checks only)
-            [[ -n "$EKKO_SESSION_NAME" || -n "$ZELLIJ" || -n "$SSH_CONNECTION" || -n "$TMUX" ]] && return
+            [[ -n "$EKKO_SESSION_NAME" || -n "$SSH_CONNECTION" || -n "$TMUX" ]] && return
 
             # Skip if in virtual console
             [[ "$TERM" == "linux" ]] && return

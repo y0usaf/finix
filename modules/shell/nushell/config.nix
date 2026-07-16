@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (config.user) defaults shell;
-  inherit (shell) zellij;
+
   flakeDirectory = config.user.paths.flake.path;
 
   settings = {
@@ -69,11 +69,8 @@ in {
                     def "l." [] { ^lsd -A | lines | where $it =~ '^\.' }
 
                     def wget [...args: string] { ^wget $"--hsts-file=($env.XDG_DATA_HOME)/wget-hsts" ...$args }
-                    def svn [...args: string] { ^svn --config-dir $"($env.XDG_CONFIG_HOME)/subversion" ...$args }
 
                     def adb [...args: string] { with-env { HOME: $"($env.XDG_DATA_HOME)/android" } { ^adb ...$args } }
-                    def mocp [...args: string] { ^mocp -M $"($env.XDG_CONFIG_HOME)/moc" -O $"MOCDir=($env.XDG_CONFIG_HOME)/moc" ...$args }
-                    def yarn [...args: string] { ^yarn --use-yarnrc $"($env.XDG_CONFIG_HOME)/yarn/config" ...$args }
 
                     def pkgs [query: string] {
                       ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' "" } | sort | uniq | where $it =~ $query
@@ -111,7 +108,7 @@ in {
                   else ""
                 )
               ]
-              ++ lib.optional (zellij.enable && zellij.autoStart) "source ~/.config/nushell/zellij.nu"
+
             );
           };
           ".config/nushell/env.nu" = {
@@ -143,24 +140,6 @@ in {
             source = pkgs.runCommand "carapace-init-nu" {} ''
               export HOME=$(mktemp -d)
               ${pkgs.carapace}/bin/carapace _carapace nushell | ${pkgs.gnused}/bin/sed '/\/build\/.*carapace\/bin/d' > $out
-            '';
-          };
-        }
-        // lib.optionalAttrs (zellij.enable && zellij.autoStart) {
-          ".config/nushell/zellij.nu" = {
-            text = ''
-              # Skip if already in a multiplexer or SSH session
-              if ("ZELLIJ" in $env) or ("SSH_CONNECTION" in $env) or ("TMUX" in $env) { return }
-
-              # Skip if in virtual console
-              if ($env.TERM? | default "") == "linux" { return }
-
-              # Start Zellij
-              if ($env.ZELLIJ_AUTO_ATTACH? | default "false") == "true" {
-                exec zellij attach -c
-              } else {
-                exec zellij
-              }
             '';
           };
         };
