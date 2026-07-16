@@ -1,17 +1,22 @@
 # Stage-3 bridge: keep NixOS's Limine generations and add the persistent
-# Finix system beside them. The NixOS Limine entry has now been menu-booted
-# cleanly; Finix becomes the default while NixOS remains the rescue entry.
-{finixStaging, ...}: let
+# Finix system beside them. With the ESP island (finix/default.nix,
+# `nix run .#finix-server-boot`) this menu entry is now the *tertiary* way
+# into Finix - the canonical boot path is the \EFI\finix island + "Finix"
+# EFI entry; this entry remains for a human at the console and only tracks
+# the generation baked at the last NixOS deploy.
+{
+  finixStaging,
+  pkgs,
+  ...
+}: let
   finixSystem = finixStaging.serverPersistent.config.system.topLevel;
 in {
   boot.loader.limine = {
-    # extraConfig is prepended before NixOS's generated default_entry: 2;
-    # Limine keeps the first global assignment, so this selects Finix after
-    # the clean NixOS menu boot has been verified.
-    extraConfig = "default_entry: Finix persistent";
-
     additionalFiles = {
       "finix/kernel" = "${finixSystem}/kernel";
+      # Early microcode - direct boots must not run raw BIOS ucode (0x1a);
+      # see 2026-07-15 freeze in finix/NOTES.md. Listed as first module.
+      "finix/ucode.img" = "${pkgs.microcode-intel}/intel-ucode.img";
       "finix/initrd" = "${finixSystem}/initrd";
     };
 
@@ -21,6 +26,7 @@ in {
         comment: Finix persistent server system
         kernel_path: boot():/limine/finix/kernel
         cmdline: init=${finixSystem}/init console=tty0 panic=30 oops=panic softlockup_panic=1 hung_task_panic=1
+        module_path: boot():/limine/finix/ucode.img
         module_path: boot():/limine/finix/initrd
     '';
   };
