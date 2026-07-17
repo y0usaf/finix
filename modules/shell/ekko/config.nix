@@ -40,7 +40,32 @@ in {
       '')
     ];
     manzil.users."${config.user.name}".files =
-      lib.optionalAttrs (ekko.autoStart && lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
+      {
+        # The which-key.lua user extension (~/.config/ekko/extensions/)
+        # rebuilds the leader mode and the status/hint bar in Lua; the
+        # builtin leader and statusbar MUST stay disabled or the runtime
+        # aborts with duplicate leader-mode keybindings on attach. The
+        # builtin sidebar (visible: None = always shown) is replaced by the
+        # lua leader-attached session panel. The builtin panes extension
+        # registers leader h/j/k/l/x/|/- for split/focus/close — its j/k/x
+        # collide with which-key.lua's own leader keys, so it is disabled
+        # too; pane keys live in the lua map instead.
+        #
+        # Unbind project navigation: "none" is intentionally unparseable —
+        # resolve_chords skips the action entirely (empty string would fall
+        # back to the defaults instead).
+        ".config/ekko/config.toml" = {
+          text = ''
+            [extensions]
+            disabled = ["ekko-builtins.leader", "ekko-builtins.statusbar", "ekko-builtins.sidebar", "ekko-builtins.panes"]
+
+            [keybinds]
+            project_prev = "none"
+            project_next = "none"
+          '';
+        };
+      }
+      // lib.optionalAttrs (ekko.autoStart && lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
         ".config/nushell/config.nu" = {
           text = lib.mkAfter ''
             source ~/.config/nushell/ekko.nu
