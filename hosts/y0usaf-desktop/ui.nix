@@ -1,6 +1,9 @@
 _: {
   user.ui = {
-    moonshell.enable = true;
+    moonshell = {
+      enable = true;
+      bar-overlay.bongo-cat.enable = true;
+    };
     cursor.enable = true;
     fonts.enable = true;
     foot.enable = true;

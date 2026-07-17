@@ -241,12 +241,17 @@
     # universe split as always: finix systems can never import ./modules/*.
     finixConfigurations = {
       y0usaf-server = finixStaging.serverPersistent;
+      y0usaf-desktop = finixStaging.desktopPersistent;
     };
 
     packages."${system}" = {
       finix-server-persistent = finixStaging.persistentPackage;
       finix-server-persistent-deploy = finixStaging.persistentDeployPackage;
       finix-server-boot = finixStaging.bootPackage;
+      # Desktop (phase 1: console skeleton; drives its own ESP via `local`):
+      finix-desktop-persistent = finixStaging.desktopPersistentPackage;
+      finix-desktop-boot = finixStaging.desktopBootPackage;
+      finix-desktop-deploy = finixStaging.desktopDeployPackage;
       # Attic (retired kexec era; see finix/attic/):
       finix-server-vm = finixStaging.vmPackage;
       finix-server-trial = finixStaging.trialPackage;

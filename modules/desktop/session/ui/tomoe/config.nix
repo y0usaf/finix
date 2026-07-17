@@ -16,6 +16,23 @@
     if ekkoOpen
     then "ekko-activate-or-terminal"
     else config.user.defaults.terminal;
+  # Screencast source picker for xdg-desktop-portal-tomoe (dmenu contract:
+  # candidates on stdin, choice on stdout, non-zero exit = cancel). The
+  # portal hands us pipes, not a tty, so shuttle through a tmpdir and run
+  # fzf in a floating foot window (same app-id the launcher float rule
+  # matches). Store path referenced from TOMOE_PORTAL_CHOOSER below, so the
+  # script and the env var deploy atomically — a dangling path made the
+  # portal read exit 127 as "user cancelled".
+  portalChooser = pkgs.writeShellScript "portal-chooser" ''
+    set -eu
+    dir=$(${pkgs.coreutils}/bin/mktemp -d)
+    trap '${pkgs.coreutils}/bin/rm -rf "$dir"' EXIT
+    ${pkgs.coreutils}/bin/cat > "$dir/in"
+    ${lib.getExe pkgs.foot} --app-id=launcher -e ${pkgs.runtimeShell} -c \
+      "${lib.getExe pkgs.fzf} --prompt 'cast: ' < '$dir/in' > '$dir/out'" || true
+    [ -s "$dir/out" ] || exit 1
+    ${pkgs.coreutils}/bin/cat "$dir/out"
+  '';
   # tomoe has no upstream niri-session-style wrapper binary and no NixOS
   # module, so this flake provides a `tomoe-session` shim that mirrors
   # ~/Dev/tomoe/run-tty.sh but execs the installed package binary. It scopes
@@ -41,7 +58,7 @@ in {
         export CLUTTER_BACKEND=wayland
         export XCURSOR_THEME=${config.user.ui.cursor.package.xcursorThemeName}
         export XCURSOR_SIZE=${toString config.user.appearance.xcursorSize}
-        export TOMOE_PORTAL_CHOOSER="''${TOMOE_PORTAL_CHOOSER:-$HOME/.config/scripts/portal-chooser.sh}"
+        export TOMOE_PORTAL_CHOOSER="''${TOMOE_PORTAL_CHOOSER:-${portalChooser}}"
 
         ${lib.optionalString config.hardware.nvidia.enable ''
           export WLR_NO_HARDWARE_CURSORS=1

@@ -180,11 +180,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784324512,
-        "narHash": "sha256-sIXHrCGYfHF4tyxl8P+VGD17C8OjKOExn/8bl61YzUc=",
+        "lastModified": 1784328881,
+        "narHash": "sha256-sUJPICrmJyr+W5sNtK2wIqcgKjqwPUo/GwumjKIhMDU=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "3285b3b304156c38d9aed5d80699e79c858fb734",
+        "rev": "45728adbbbf1d10f34edeabf319b54170cd694dc",
         "type": "github"
       },
       "original": {

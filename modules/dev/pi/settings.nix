@@ -50,14 +50,16 @@ in {
         generator = toJSON;
         value =
           {
-            defaultProvider = "openai-codex";
-            defaultModel = "gpt-5.6-luna";
+            defaultProvider = "vercel-ai-gateway";
+            defaultModel = "moonshotai/kimi-k3";
             defaultThinkingLevel = "max";
             enabledModels = [
               "openai-codex/gpt-5.6-sol"
               "openai-codex/gpt-5.6-luna"
               "anthropic/claude-fable-5"
               "neuralwatt/glm-5.2"
+              "vercel-ai-gateway/moonshotai/kimi-k3"
+              "neuralwatt/kimi-k3"
             ];
             compaction.enabled = false;
             showHardwareCursor = true;
@@ -84,22 +86,6 @@ in {
         generator = toJSON;
         value = {
           providers = {
-            "vercel-ai-gateway" = {
-              apiKey = "$AI_GATEWAY_API_KEY";
-              modelOverrides = {
-                "deepseek/deepseek-v4-pro" = {
-                  reasoning = true;
-                  compat = {
-                    thinkingFormat = "openai";
-                    supportsReasoningEffort = true;
-                    vercelGatewayRouting = {
-                      only = ["deepseek"];
-                      order = ["deepseek"];
-                    };
-                  };
-                };
-              };
-            };
             "neuralwatt" = {
               baseUrl = "https://api.neuralwatt.com/v1";
               api = "openai-completions";
@@ -162,6 +148,30 @@ in {
                     cacheRead = 0;
                     cacheWrite = 0;
                   };
+                }
+                {
+                  id = "kimi-k3";
+                  name = "Kimi K3";
+                  reasoning = true;
+                  thinkingLevelMap = {
+                    off = null;
+                    minimal = null;
+                    low = null;
+                    medium = null;
+                    high = null;
+                    xhigh = null;
+                    max = "max";
+                  };
+                  input = ["text" "image"];
+                  contextWindow = 1000000;
+                  maxTokens = 131072;
+                  cost = {
+                    input = 0;
+                    output = 0;
+                    cacheRead = 0;
+                    cacheWrite = 0;
+                  };
+                  compat.supportsReasoningEffort = true;
                 }
                 {
                   id = "qwen3.5-397b";

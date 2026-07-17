@@ -57,6 +57,15 @@
     battery = {
       gap = 4;
     };
+    bongo_cat = {
+      enable = bar.bongo-cat.enable;
+      asset_dir = "${./assets/bongo-cat}";
+      name = "bongo-cat";
+      height = bar.bongo-cat.height;
+      margin_bottom = bar.bongo-cat.margin-bottom;
+      keypress_duration = bar.bongo-cat.keypress-duration;
+      layer = "overlay";
+    };
   };
 in {
   options.user.ui.moonshell = {
@@ -112,6 +121,28 @@ in {
         default = null;
         description = "Font family for bar overlay labels. null = resolve system monospace via fc-match.";
       };
+      bongo-cat = {
+        enable = lib.mkOption {
+          type = bool;
+          default = false;
+          description = "Render bongo cat in bottom-center overlay and react to keyboard activity.";
+        };
+        height = lib.mkOption {
+          type = lib.types.ints.between 10 200;
+          default = 80;
+          description = "Bongo cat image height in physical pixels.";
+        };
+        margin-bottom = lib.mkOption {
+          type = lib.types.int;
+          default = 24;
+          description = "Bottom margin, typically leaving room for bottom bar.";
+        };
+        keypress-duration = lib.mkOption {
+          type = lib.types.ints.between 10 5000;
+          default = 100;
+          description = "Milliseconds each paw stays down after a key press.";
+        };
+      };
     };
   };
 
@@ -132,6 +163,7 @@ in {
             (toLua barOverlayDefaults.font_family)
             (toLua {
               inherit (bar) modules exclusive;
+              inherit (barOverlayDefaults) bongo_cat;
               font_family = luaInline "_ms_font";
             })
           ]
@@ -383,6 +415,87 @@ in {
               if old then pcall(function() old:close() end) end
           end
 
+          local function open_bongo(opts)
+              local cfg = opts.bongo_cat or DEFAULTS.bongo_cat
+              if not cfg or not cfg.enable then return nil end
+
+              local keyboard = shell.services.keyboard
+              if not keyboard then
+                  io.stderr:write("moonshell: bongo cat needs updated Moonshell binary; skipping\n")
+                  return nil
+              end
+              local height = cfg.height or 80
+              local width = math.floor(height * 864 / 360 + 0.5)
+              local dir = cfg.asset_dir
+              local paths = {
+                  both_up = dir .. "/bongo-cat-both-up.png",
+                  left_down = dir .. "/bongo-cat-left-down.png",
+                  right_down = dir .. "/bongo-cat-right-down.png",
+                  both_down = dir .. "/bongo-cat-both-down.png",
+              }
+              local frame = shell.state(paths.both_up)
+              local left_token, right_token = 0, 0
+              local left_live, right_live = false, false
+
+              local function update_frame()
+                  local next_frame = paths.both_up
+                  if left_live and right_live then
+                      next_frame = paths.both_down
+                  elseif left_live then
+                      next_frame = paths.left_down
+                  elseif right_live then
+                      next_frame = paths.right_down
+                  end
+                  if frame:get() ~= next_frame then frame:set(next_frame) end
+              end
+
+              local last_sequence = keyboard:get().sequence
+              keyboard:subscribe(function()
+                  local event = keyboard:get()
+                  if event.sequence == last_sequence then return end
+                  last_sequence = event.sequence
+                  if event.hand == "left" then
+                      left_token = left_token + 1
+                      local token = left_token
+                      left_live = true
+                      shell.once(cfg.keypress_duration or 100, function()
+                          if left_token == token then
+                              left_live = false
+                              update_frame()
+                          end
+                      end)
+                  else
+                      right_token = right_token + 1
+                      local token = right_token
+                      right_live = true
+                      shell.once(cfg.keypress_duration or 100, function()
+                          if right_token == token then
+                              right_live = false
+                              update_frame()
+                          end
+                      end)
+                  end
+                  update_frame()
+              end)
+
+              local name = cfg.name or "bongo-cat"
+              close_existing(name)
+              local win = shell.window({
+                  name = name,
+                  anchor = DEFAULTS.anchors.bottom,
+                  popup_width = width,
+                  height = height,
+                  margin_bottom = cfg.margin_bottom or 0,
+                  layer = cfg.layer or "overlay",
+                  exclusive = false,
+                  bg = "#00000000",
+              })
+              win:render(function()
+                  return ui.image({ src = frame:get(), width = width, height = height })
+              end)
+              return win
+          end
+
           function M.new(opts)
               opts = opts or {}
 
@@ -547,12 +660,14 @@ in {
                   refresh_interval = opts.refresh_interval,
                   layout_generation = layout_generation,
               })
+              local bongo_window = open_bongo(opts)
 
               return {
                   top_content = top_content,
                   bottom_content = bottom_content,
                   top_window = top_window,
                   bottom_window = bottom_window,
+                  bongo_window = bongo_window,
                   items = items,
               }
           end
