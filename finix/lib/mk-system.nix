@@ -12,6 +12,8 @@ inputs.finix.lib.finixSystem {
   inherit lib;
   specialArgs = {
     modulesPath = toString inputs.nixpkgs + "/nixos/modules";
+    # Flake inputs for hosts that pull packages from them (e.g. pi).
+    flakeInputs = inputs;
   };
   modules = with inputs.finix.nixosModules;
     [
