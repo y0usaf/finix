@@ -180,11 +180,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784096493,
-        "narHash": "sha256-klCZfGPQ1TI8KDZOXvEnbYxPwai5LiZqUGG/3yI9QjU=",
+        "lastModified": 1784324512,
+        "narHash": "sha256-sIXHrCGYfHF4tyxl8P+VGD17C8OjKOExn/8bl61YzUc=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "ca7cb356ba499ce700b891e7c41041d48349109b",
+        "rev": "3285b3b304156c38d9aed5d80699e79c858fb734",
         "type": "github"
       },
       "original": {
@@ -946,11 +946,11 @@
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1784094946,
-        "narHash": "sha256-m0VxmXvksHMJKSJQqsKsJvJZyXZKnqMUBPiPRSzSqPY=",
+        "lastModified": 1784298806,
+        "narHash": "sha256-qTmbJtJRIvEdYnAEkTJCuvnGjFDsPlzjkCCBQxQ4MjQ=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "cc77b0cc6527904758c9a56d08a1a017f465a023",
+        "rev": "f9ee1e662cb08ca0b3fff58b147bbf70efd3a4e4",
         "type": "github"
       },
       "original": {
@@ -1058,11 +1058,11 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1783776008,
-        "narHash": "sha256-sOtXw6DJIhvt8cpfFZhfEfnKsGUrf4LSE1sC/KBljNs=",
+        "lastModified": 1784289152,
+        "narHash": "sha256-o2WuFTloi4KRyt9bAum1PD2DlHqN5YsK7AHDoHb/BQc=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "8479bd84743e8889f728acb21a62794102db0529",
+        "rev": "64f83c85d9f36c831e96b29477750f92cd5a2230",
         "type": "github"
       },
       "original": {
@@ -1385,13 +1385,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1784034555,
-        "narHash": "sha256-iSZIK0aXRpbaSOq7oKAnl/JHJdZLCdyJd6OeIMH4Ozc=",
-        "ref": "refs/heads/main",
-        "rev": "83f5d088a434d3029f97a8950a4a53447f423e50",
-        "revCount": 57,
-        "type": "git",
-        "url": "file:///home/y0usaf/Dev/tomoe"
+        "lastModified": 1784248932,
+        "narHash": "sha256-Bp4z+mobZw5VkrHTgR3Y0uzdsnEEVM68DJSYuSg9luw=",
+        "path": "/home/y0usaf/Dev/tomoe",
+        "type": "path"
       },
       "original": {
         "type": "git",
