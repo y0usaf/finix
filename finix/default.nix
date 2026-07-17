@@ -1,14 +1,15 @@
 # Finix - the server's installed OS since 2026-07-15 (NixOS stays on disk
-# as the rescue entry). See NOTES.md for the full migration record.
+# as the rescue entry); the desktop is migrating the same way (phase 1:
+# console skeleton). See NOTES.md for the full record.
 #
 # Layout:
 #   lib/      mk-system.nix (builder), esp-island.nix (boot driver),
-#             deploy.nix (SSH config deploys)
-#   modules/  common.nix baseline + upstream-bug workarounds
-#   hosts/    per-machine finix systems (y0usaf-server; desktop someday)
+#             deploy.nix (SSH/local config deploys)
+#   modules/  common.nix baseline + workarounds, diagnostics.nix
+#   hosts/    per-machine finix systems (y0usaf-server, y0usaf-desktop)
 #   attic/    retired kexec-era tooling (vm, trial, beacon, kexec drivers)
 #
-# Day-2 operations:
+# Day-2 operations (server; desktop mirrors with finix-desktop-* + `local`):
 #   config-only change:  nix run .#finix-server-persistent-deploy -- 192.168.2.66 test|switch
 #   kernel/initrd/cmdline change:  nix run .#finix-server-boot -- 192.168.2.66 install
 #                                  ... oneshot, health checks, ... promote
@@ -36,6 +37,12 @@
     ./hosts/y0usaf-server/persistent.nix
   ]);
 
+  desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules; [
+    nix-daemon
+    ./modules/diagnostics.nix
+    ./hosts/y0usaf-desktop/persistent.nix
+  ]);
+
   # Retired-era systems (attic); kept buildable, not part of any boot path.
   serverVm = mkFinixSystem [
     # Not exported by name from finix's module set; import by path.
@@ -52,13 +59,49 @@
   ]);
 
   # ── drivers ──────────────────────────────────────────────────────────────
-  island = import ./lib/esp-island.nix {inherit pkgs lib serverPersistent;};
-  deploy = import ./lib/deploy.nix {inherit pkgs serverPersistent;};
+  islandLib = import ./lib/esp-island.nix {inherit pkgs lib;};
+  deployLib = import ./lib/deploy.nix {inherit pkgs;};
+
+  serverIsland = islandLib.mkIsland {
+    name = "finix-server-boot";
+    system = serverPersistent.config.system.topLevel;
+    # ADL-N BIOS ships ancient 0x1a microcode; both raw direct boots
+    # misbehaved until 0x21 was prepended (incident #2).
+    ucodeImg = "${pkgs.microcode-intel}/intel-ucode.img";
+    defaultHost = "server";
+  };
+
+  desktopIsland = islandLib.mkIsland {
+    name = "finix-desktop-boot";
+    system = desktopPersistent.config.system.topLevel;
+    ucodeImg = "${pkgs.microcode-amd}/amd-ucode.img";
+    # The desktop drives its own ESP: island script runs locally under sudo.
+    defaultHost = "local";
+  };
+
+  serverDeploy = deployLib.mkDeploy {
+    name = "finix-server-persistent-deploy";
+    system = serverPersistent.config.system.topLevel;
+    defaultHost = "server";
+  };
+
+  desktopDeploy = deployLib.mkDeploy {
+    name = "finix-desktop-deploy";
+    system = desktopPersistent.config.system.topLevel;
+    defaultHost = "local";
+  };
+
   attic = import ./attic/drivers.nix {
     inherit pkgs lib serverVm serverTrial serverPersistent;
   };
+
+  binPackage = name: script:
+    pkgs.runCommand name {meta.mainProgram = name;} ''
+      mkdir -p $out/bin
+      ln -s ${script}/bin/${name} $out/bin/${name}
+    '';
 in {
-  inherit serverVm serverTrial serverPersistent;
+  inherit serverVm serverTrial serverPersistent desktopPersistent;
 
   persistentPackage =
     pkgs.runCommand "finix-server-persistent" {
@@ -68,21 +111,19 @@ in {
       ln -s ${serverPersistent.config.system.topLevel} $out/system
     '';
 
-  bootPackage =
-    pkgs.runCommand "finix-server-boot" {
-      meta.mainProgram = "finix-server-boot";
+  desktopPersistentPackage =
+    pkgs.runCommand "finix-desktop-persistent" {
+      meta.mainProgram = "finix-desktop-persistent";
     } ''
       mkdir -p $out/bin
-      ln -s ${island.bootDriverScript}/bin/finix-server-boot $out/bin/finix-server-boot
+      ln -s ${desktopPersistent.config.system.topLevel} $out/system
     '';
 
-  persistentDeployPackage =
-    pkgs.runCommand "finix-server-persistent-deploy" {
-      meta.mainProgram = "finix-server-persistent-deploy";
-    } ''
-      mkdir -p $out/bin
-      ln -s ${deploy.persistentDeployScript}/bin/finix-server-persistent-deploy $out/bin/finix-server-persistent-deploy
-    '';
+  bootPackage = binPackage "finix-server-boot" serverIsland.bootDriverScript;
+  desktopBootPackage = binPackage "finix-desktop-boot" desktopIsland.bootDriverScript;
+
+  persistentDeployPackage = binPackage "finix-server-persistent-deploy" serverDeploy.deployScript;
+  desktopDeployPackage = binPackage "finix-desktop-deploy" desktopDeploy.deployScript;
 
   # ── attic packages (retired kexec era; see attic/drivers.nix) ────────────
   vmPackage =
