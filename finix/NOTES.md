@@ -1,6 +1,61 @@
-# Finix migration — session notes (updated 2026-07-15: PROMOTED — finix is the default boot)
+# Finix migration — session notes (updated 2026-07-16: desktop phase 1 staged; server PROMOTED 2026-07-15)
 
-## STATUS
+## DESKTOP (y0usaf-desktop) — phase 1 staged 2026-07-16, NOT yet booted
+
+Same dual-boot architecture as the server: NixOS keeps /boot/limine and the
+BootOrder head; finix lives in the self-contained \EFI\finix island and
+boots one-shot at a time until it earns promote. Windows entry untouched.
+Secure Boot is DISABLED in firmware (sbctl keys exist but aren't enforced) —
+unsigned island Limine boots; if SB is ever enabled, sign the island first.
+
+Phase 1 scope (console skeleton, `finix/hosts/y0usaf-desktop/persistent.nix`):
+
+- tmpfs root (4G) + @nix/@persist/@home/@btrfs/ESP + data subvols
+  (@steam/@pictures/@dcim/@music/@home-old ro) — fstab parity with NixOS
+- impermanence REPLAYED, single source of truth:
+  hosts/y0usaf-desktop/impermanence.nix is a pure-literal function; the
+  finix host imports it and replays the same allowlist (system /var dirs as
+  neededForBoot fstab binds; the 250-entry user allowlist + files as ONE
+  `persist-user-binds` finit task; /etc/* entries excluded — /etc is
+  finix-managed: machine-id copied by activation, ssh host keys consumed in
+  place from /persist/etc/ssh, exactly the server pattern). KEEP
+  impermanence.nix pure literals or the finix eval breaks.
+- sshd: NixOS ed25519 host key, authorized-keys copy activation,
+  UsePAM+StrictModes on; passwordFile from /persist/secrets (y0usaf + root)
+- dhcpcd (eno1/igc) + static fallback 192.168.2.28; nix-daemon; getty
+  tty1/tty2; kmsg recorder + breadcrumbs via new shared
+  finix/modules/diagnostics.nix (server still runs its inline copy —
+  migrate it there on its next planned deploy)
+- kernel: linuxPackages_latest, amd_pstate=active mitigations=off,
+  zenpower via extraModulePackages, panic=30/oops=panic fall-home params
+- boot driver: `nix run .#finix-desktop-boot -- local install|oneshot|...`
+  (mkIsland generalization; desktop drives its OWN ESP under sudo, AMD
+  amd-ucode.img prepended instead of intel); config deploys:
+  `nix run .#finix-desktop-deploy -- local test|switch` — REFUSES to run
+  under systemd/NixOS (activation would clobber the live /etc); first
+  activation happens via the island boot, not a NixOS-side switch
+
+Deliberately deferred (phase 2+): NVIDIA + graphical session
+(seatd/dbus/niri/pipewire), user services, zram (no upstream module), /swap
+subvol (unused under NixOS too), NetworkManager/bluetooth/docker/tailscale,
+@home-blank rollback in the finix initrd (NixOS still rolls @home back on
+ITS boots; allowlisted writes land in /persist either way — same durability,
+deferred @home-noise cleanup). Steam validation gates promote.
+
+New upstream gotcha found: modules/lib/utils.nix escapePath maps BOTH "/"
+and "/root" to stanza name "root" → neededForBoot collision assert. /root
+is therefore bound by the persist-user-binds task, not fstab.
+
+Verification status: system + drivers build; server closure verified
+byte-identical after the mkIsland/mkDeploy refactor (topLevel still
+7jhzs63m…); NixOS desktop drv unchanged. NOT yet booted on metal.
+
+Desktop next steps: `finix-desktop-boot local install` (opens test window,
+BootOrder stays NixOS-first) → console oneshot → verify binds/sshd/nix-
+daemon/logs → iterate phase 2 (session stack) → steam → promote only after
+the graphical stack is boring.
+
+## SERVER STATUS
 
 Phases 1–3 are complete: VM → guarded bare-metal trial → full service
 parity, all verified on metal. The 24h soak was accepted. Stage 2 is now
