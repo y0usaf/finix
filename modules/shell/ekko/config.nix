@@ -62,6 +62,14 @@ in {
             [keybinds]
             project_prev = "none"
             project_next = "none"
+
+            # Zellij-style pane borders: a full box frame around every pane,
+            # the focused pane's frame tinted with the theme accent. Swap to
+            # "compact" for zellij's compact mode (single shared boundary
+            # lines with junction glyphs). The daemon owns the canvas, so
+            # this takes effect for newly started sessions (ekko kill).
+            [ui]
+            pane_borders = "frame"
           '';
         };
       }
