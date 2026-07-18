@@ -21,7 +21,7 @@
   pkgs = import inputs.nixpkgs {
     inherit system;
     # n8n ships under the (unfree) Sustainable Use License.
-    config.allowUnfreePredicate = pkg: builtins.elem (pkg.pname or pkg.name) ["n8n"];
+    config.allowUnfreePredicate = pkg: builtins.elem (pkg.pname or pkg.name) ["n8n" "nvidia-x11" "nvidia-kernel-modules"];
   };
   inherit (pkgs) lib;
 
