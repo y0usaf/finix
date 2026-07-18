@@ -215,6 +215,26 @@ TOMOE_PORTAL_CHOOSER. Then Steam run = the promote gate; power-cut
 drill; promote via `nix run .#finix-desktop-boot -- local promote`
 (refuses unless BootCurrent IS the island — do it from a finix boot).
 
+2026-07-18 INCIDENT + FIX: tomoe-session "couldn't write to XDG_RUNTIME_DIR".
+Root cause chain, all three shipped fixes in session/parity/packages-bridge:
+1. upstream injects pam_rundir into login+sshd PAM whenever seatd is
+   enabled (no opt-out) — refcounts /run/user/.1001, DELETES /run/user/1001
+   on last close_session: tty logout / last ssh drop nuked the dir under
+   the finit-owned pipewire/wireplumber daemons and the boot-created dir.
+   FIX: security.pam.services.{login,sshd}.text mkForce'd — upstream text
+   minus pam_rundir; the finit xdg-runtime-dir task is the SINGLE owner.
+2. packages-bridge also shipped the NixOS tomoe-session shim — it shadowed
+   the finix wrapper in sw/bin (buildEnv collision): no dbus-run-session,
+   no runtime-dir guard, no polkit agent — 2c/2d session fixes silently
+   inert. FIX: "tomoe-session" → bridge denyList.
+3. /tmp was 0755 (upstream activation mkdir under umask 0022; NixOS 1777)
+   — non-root tmp writes failed. FIX: x11-socket-dir task chmods 1777.
+NOTES CORRECTION: "finix pam has NO elogind hooks" (2b) is STALE — pinned
+rev 8598b05 ships pam_elogind behind services.elogind.enable. elogind +
+logind libseat backend stays the clean long-term session model; if adopted,
+drop these PAM forces + the finit runtime-dir task together.
+UPSTREAM GAPS to report: seatd⇒pam_rundir unconditional; /tmp not 1777.
+
 ## SERVER STATUS
 
 Phases 1–3 are complete: VM → guarded bare-metal trial → full service
