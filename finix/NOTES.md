@@ -178,6 +178,43 @@ promote), nushell as login shell decision, bluetooth (blueman/bluez
 services not ported), OBS virtual cam (v4l2loopback module), power-cut
 drill, then PROMOTE.
 
+2026-07-18 PHASE 2d PARITY SWEEP deployed live + staged (marker 2.4,
+slot 4a8afirz, verified current= on ESP): new parity.nix +
+bridge/session extensions, user is promote-ready comfort-wise, this
+closes the functional gap list.
+- upstream modules ENABLED (NOT in mkFinixSystem baseline — imported
+  via flakeInputs.finix.nixosModules in parity.nix): bluetooth (bluez,
+  ControllerMode dual + FastConnectable + AutoEnable ≈ powerOnBoot),
+  polkit (adminIdentities y0usaf), rtkit.
+- tailscaled + tailscale-ssh assert ported verbatim from the server;
+  state was ALREADY persisted via the impermanence replay → desktop
+  kept its tailnet identity (100.90.54.18, `ssh rescue` path intact).
+- zram-swap finit task (50% RAM zstd, prio 100) — hand-rolled, no
+  upstream module; VERIFIED /dev/zram0 46.8G active.
+- v4l2loopback (exclusive_caps=1) for OBS virtual cam; tun for
+  tailscale; both in boot.kernelModules + extraModulePackages.
+- udev-rules BRIDGE: NixOS services.udev.packages reused, each package
+  SANITIZED (sed /systemd/d per .rules file; find -type f — some rule
+  "packages" are single files, some dirs) — eudev's validator hard-fails
+  on /run/current-system/systemd/bin/systemd-run references (lvm2 +
+  extra-udev-rules were the culprits). Keeps steam-devices, ntsync,
+  DualSense/vial hidraw perms, i2c.
+- gamemode group + membership (gamemoded dbus-activates per session).
+- session shim: __GL_*/CUDA_*/NVIDIA_DRIVER_CAPABILITIES sessionVar
+  parity; polkit agent (pkgs.polkit_gnome — the NixOS module's "lnAgent"
+  name is cosmetic) spawns INSIDE dbus-run-session via a
+  tomoe-session-inner wrapper so it shares the session bus.
+- xwayland-satellite: NO port needed — tomoe's init.lua process.once
+  starts it from a store path; confirmed running.
+VERIFIED live: bluetoothd/polkitd/rtkit-daemon/tailscaled running,
+tailscale-ssh + zram done, steam/i2c rules in /etc/udev/rules.d.
+OPEN (minor): pipewire threads still SCHED_OTHER after rtkit restart —
+module-rt↔rtkit handshake needs a look (audio works regardless); RELOG
+required for: session bus → portals + polkit agent + gamemoded +
+TOMOE_PORTAL_CHOOSER. Then Steam run = the promote gate; power-cut
+drill; promote via `nix run .#finix-desktop-boot -- local promote`
+(refuses unless BootCurrent IS the island — do it from a finix boot).
+
 ## SERVER STATUS
 
 Phases 1–3 are complete: VM → guarded bare-metal trial → full service

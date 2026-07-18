@@ -65,6 +65,14 @@
     ${lib.optionalString config.hardware.nvidia.enable ''
       export WLR_NO_HARDWARE_CURSORS=1
       export LIBVA_DRIVER_NAME=nvidia
+      # environment.sessionVariables parity (NixOS nvidia.nix).
+      export __GL_SYNC_TO_VBLANK=0
+      export __GL_VRR_ALLOWED=1
+      export __GL_MaxFramesAllowed=1
+      export __GL_YIELD=usleep
+      export CUDA_CACHE_PATH="$HOME/.cache/nv"
+      export CUDA_DISABLE_PERF_BOOST=1
+      export NVIDIA_DRIVER_CAPABILITIES=all
     ''}
     # No GBM_BACKEND / __EGL_VENDOR_LIBRARY_FILENAMES / __GLX_VENDOR_LIBRARY_NAME
     # — see the NixOS shim: forcing the NVIDIA EGL vendor hides Mesa's
@@ -72,8 +80,13 @@
     cd "$HOME"
     # No logind → no per-login session bus; dbus-run-session gives the
     # compositor AND everything it spawns one session bus, on which the
-    # portals dbus-activate.
-    exec ${pkgs.dbus}/bin/dbus-run-session -- ${lib.getExe tomoePkg} --backend tty "$@"
+    # portals dbus-activate. The polkit agent must live on that same bus,
+    # so it starts inside the wrapper (NixOS ran it as a systemd user
+    # service on graphical-session.target).
+    exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
+      ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
+      exec ${lib.getExe tomoePkg} --backend tty "$@"
+    ''} "$@"
   '';
 in {
   # seatd: upstream defaults the service to runlevels [34], but finix
