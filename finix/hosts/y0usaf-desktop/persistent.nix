@@ -158,7 +158,7 @@
     neededForBoot = true;
   };
 in {
-  imports = [./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix];
+  imports = [./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix ./parity.nix];
 
   networking.hostName = "y0usaf-desktop";
 
@@ -348,7 +348,7 @@ in {
   };
 
   # Console-visible generation marker + deploy-path prover.
-  environment.etc."finix-stage2".text = "desktop-phase2.3\n";
+  environment.etc."finix-stage2".text = "desktop-phase2.4\n";
 
   environment.systemPackages = [
     pkgs.nix
