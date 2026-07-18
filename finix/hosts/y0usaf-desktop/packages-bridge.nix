@@ -19,6 +19,7 @@
 # they light up the moment the service ports land.
 {
   lib,
+  pkgs,
   flakeInputs,
   ...
 }: let
@@ -38,4 +39,24 @@
     nixosCfg.environment.systemPackages;
 in {
   environment.systemPackages = bridged;
+
+  # Same trick for udev rules (steam-devices, i2c, ntsync/DualSense/vial
+  # perms, …) — but SANITIZED: any rule line shelling out to systemd
+  # (systemd-run triggers etc.) is stripped; eudev's rule validator hard-
+  # fails on the dangling /run/current-system/systemd paths and those
+  # actions are meaningless under finit anyway. systemd-owned packages
+  # are dropped wholesale (eudev ships its own base rules).
+  services.udev.packages = let
+    sanitize = p:
+      pkgs.runCommand "${pname p}-definit" {} ''
+        mkdir -p $out/lib/udev/rules.d
+        find ${p}/ -type f -name "*.rules" | while read -r f; do
+          ${pkgs.gnused}/bin/sed '/systemd/d' "$f" \
+            > "$out/lib/udev/rules.d/$(basename "$f")"
+        done
+      '';
+  in
+    map sanitize
+    (builtins.filter (p: !(lib.hasInfix "systemd" (pname p)))
+      nixosCfg.services.udev.packages);
 }
