@@ -116,6 +116,21 @@ in {
     fi
   '';
 
+  # Automatic DISPLAY everywhere a login shell starts (TTY/ssh), not just
+  # under the compositor: in-session processes inherit the shim's export;
+  # this covers the rest by probing for a live X socket. Dynamic — no
+  # hardcoded :0 assumption if satellite ever lands elsewhere.
+  environment.etc."profile.d/display.sh".text = ''
+    if [ -z "''${DISPLAY:-}" ]; then
+      for _x in /tmp/.X11-unix/X*; do
+        [ -S "$_x" ] || continue
+        export DISPLAY=":''${_x##*/X}"
+        break
+      done
+      unset _x
+    fi
+  '';
+
   # Fonts: same trio as the NixOS ui/fonts.nix defaults. foot picks the
   # family from the persisted ~/.config/foot config; fontconfig just has
   # to be able to resolve it.
