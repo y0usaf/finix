@@ -116,6 +116,56 @@ in {
     fi
   '';
 
+  # pam_rundir — injected into every login path by upstream whenever
+  # services.seatd.enable is set (shadow + openssh modules, no opt-out
+  # knob) — refcounts sessions in /run/user/.<uid> and DELETES
+  # /run/user/<uid> on the last close_session. Incompatible with this
+  # host's model: pipewire/wireplumber/pipewire-pulse are finit SYSTEM
+  # services that outlive logins, and the dir is boot-created above.
+  # Observed 2026-07-18: tty logout (or last ssh drop) removed the dir
+  # under the daemons; tomoe-session then failed its runtime-dir check.
+  # One owner only: the finit task. Force the upstream PAM texts minus
+  # the pam_rundir line (verbatim copies otherwise — keep in lockstep
+  # with upstream shadow/openssh modules by hand).
+  # UPSTREAM GAP: seatd should not imply pam_rundir unconditionally.
+  security.pam.services.login.text = lib.mkForce ''
+    # Account management.
+    account required pam_unix.so # unix (order 10900)
+
+    # Authentication management.
+    auth optional pam_unix.so likeauth nullok # unix-early (order 11500)
+    auth sufficient pam_unix.so likeauth nullok try_first_pass # unix (order 12800)
+    auth required pam_deny.so # deny (order 13600)
+
+    # Password management.
+    password sufficient pam_unix.so nullok yescrypt # unix (order 10200)
+
+    # Session management.
+    session required pam_env.so conffile=/etc/security/pam_env.conf readenv=0 # env (order 10100)
+    session required pam_unix.so # unix (order 10200)
+    session required pam_loginuid.so # loginuid (order 10300)
+    session required pam_limits.so conf=/etc/security/limits.conf
+    session required ${config.security.pam.package}/lib/security/pam_lastlog.so silent # lastlog (order 10700)
+  '';
+
+  security.pam.services.sshd.text = lib.mkForce ''
+    # Account management.
+    account required pam_unix.so debug # unix (order 10900)
+
+    # Authentication management.
+    auth sufficient pam_unix.so likeauth try_first_pass debug # unix (order 11500)
+    auth required pam_deny.so debug # deny (order 12300)
+
+    # Password management.
+    password sufficient pam_unix.so nullok yescrypt debug # unix (order 10200)
+
+    # Session management.
+    session required pam_env.so debug conffile=/etc/security/pam_env.conf readenv=0 # env (order 10100)
+    session required pam_unix.so debug # unix (order 10200)
+    session required pam_loginuid.so debug # loginuid (order 10300)
+    session required pam_limits.so
+  '';
+
   # Automatic DISPLAY everywhere a login shell starts (TTY/ssh), not just
   # under the compositor: in-session processes inherit the shim's export;
   # this covers the rest by probing for a live X socket. Dynamic — no
