@@ -158,6 +158,8 @@
     neededForBoot = true;
   };
 in {
+  imports = [./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix];
+
   networking.hostName = "y0usaf-desktop";
 
   finix.diagnostics = {
@@ -338,11 +340,15 @@ in {
 
   services.nix-daemon = {
     enable = true;
-    settings.trusted-users = ["root" "y0usaf"];
+    settings = {
+      trusted-users = ["root" "y0usaf"];
+      # Phase-2a lesson: every nix invocation needed --extra-experimental-features.
+      experimental-features = ["nix-command" "flakes"];
+    };
   };
 
   # Console-visible generation marker + deploy-path prover.
-  environment.etc."finix-stage2".text = "desktop-phase1.2\n";
+  environment.etc."finix-stage2".text = "desktop-phase2.3\n";
 
   environment.systemPackages = [
     pkgs.nix

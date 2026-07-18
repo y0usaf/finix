@@ -55,6 +55,129 @@ BootOrder stays NixOS-first) → console oneshot → verify binds/sshd/nix-
 daemon/logs → iterate phase 2 (session stack) → steam → promote only after
 the graphical stack is boring.
 
+2026-07-18 first boots + FLICKER ROOT CAUSE: boot 1 (07-17 00:50Z) had no
+firmware in image → amdgpu psp/dcn/gc failed AND nouveau GSP ctor failed
+-2 → stable efifb console. Fix added linux-firmware for amdgpu — side
+effect: nouveau got its GSP blobs, took the dGPU (monitor is on DP-4 of
+the NVIDIA card; iGPU has NO cable), kicked simpledrm, and cannot hold
+the G9-class 3840x1080 super-ultrawide link (`gsp ctrl cmd:0x00731341
+failed` + `DP-4: invalid native reply 0x03` bursts; DRM state reads
+stable while the panel strobes — silent GSP link cycling, likely
+DSC/high-refresh). No live mitigation exists: single monitor on dGPU,
+rmmod = dark screen, fb0 exposes one mode. FIX: modprobe.d `blacklist
+nouveau` (server iTCO pattern) → dGPU-connected console stays on
+simpledrm (boot-1 proven); marker desktop-phase1.2, slot 2h5yv11z staged
+as island default 2026-07-18 from INSIDE the flickering boot.
+
+Phase-1 verification PASSED (run live in the phase1.1 boot, flicker and
+all): tmpfs root 4G, 268 persist binds mounted, /nix /persist /home
+/boot + data subvols ok, sshd up (host key from /persist), nix-daemon
+up, uid y0usaf=1001 correct, diagnostics logs landing in
+/persist/finix-boot/. Gotchas found: nix.conf lacks
+`experimental-features nix-command flakes` (flag-workaround; bake into
+services.nix-daemon settings in phase 2); getty shows 0 agetty procs
+post-login (login shell replaces it — fine).
+
+2026-07-18 PHASE 2a staged (slot pambvcx8, marker desktop-phase2.0, NOT
+yet booted): new hosts/y0usaf-desktop/graphical.nix — NVIDIA proprietary
+via upstream `hardware.nvidia` (closed, mkDriver 595.80 pinned = same drv
+as NixOS, modesetting on, gsp OFF mirroring NixOS, PM off — upstream PM
+path wants programs.zzz sleep backend, desktop never suspends), NixOS
+kernelParams parity (PAT/ResizableBar/AggressiveVblank/vrr_memclk/
+TemporaryFilePath), hardware.graphics + enable32Bit (Steam gate), eudev
+INSTEAD of mdevd on this host (mkForce off; nvidia udev rules + phase-2b
+libinput need libudev; server keeps mdevd), seatd + dbus groundwork,
+y0usaf += video/render/seat. allowUnfree += nvidia-x11 +
+nvidia-kernel-modules.
+
+UPSTREAM GAP found: finix nvidia module sets extraModulePackages =
+package.bin — stale vs nixpkgs' kernel-module split; .bin has no
+lib/modules so nvidia.ko silently never lands in the aggregate. Fixed
+host-side: boot.extraModulePackages = [package.mod]. Add to the upstream
+issue list.
+
+Phase-2a BOOTED GREEN (2026-07-18, slot pambvcx8): all four nvidia
+modules loaded, /dev/nvidia* + /dev/dri/card1,2 + renderD128,129 present,
+console readable on the nvidia fbdev, eudev coldplug clean (eno1 name
+kept, by-uuid links, all mounts), dbus up. Benign: driver probes
+gsp_ga10x.bin and logs -2 (gsp.enable=false ships no GSP fw — same as
+NixOS). seatd was NOT running → see 2b.
+
+Phase-2b DEPLOYED LIVE same boot (slot s1qhrpb1 staged, marker
+desktop-phase2.1) — first use of finix-desktop-deploy on this host
+(config-only path, no reboot): new hosts/y0usaf-desktop/session.nix.
+- seatd root cause: upstream module defaults runlevels [34]; finix boots
+  runlevel 2 → service never eligible, initctl shows misleading "halted
+  exit 0". Fix: runlevels mkForce "234" (mkForce needed — upstream sets
+  a bare default). Its `-n %n` notify:s6 command is FINE (udevd uses the
+  same pattern). UPSTREAM GAP.
+- XDG_RUNTIME_DIR without logind: finit task creates /run/user/1001
+  (0700 y0usaf) + profile.d export + shim fallback. Replace with
+  elogind + pam_elogind when portals land (2c) — finix pam has NO
+  elogind hooks today (checked).
+- tomoe-session shim replicated from the NixOS module (env scoped to
+  compositor; cursor/font from flakeInputs.cursors/fonts directly —
+  packages cross the universe split, only modules don't). No
+  TOMOE_PORTAL_CHOOSER yet (portals are 2c). No GBM_BACKEND/EGL vendor
+  forcing (smithay renderer probe breaks, same as NixOS shim).
+- fonts via upstream fonts.fontconfig + fonts.packages (Departure Mono
+  UC + Noto CJK + emoji); foot family comes from persisted ~/.config.
+- packages: tomoe, foot, grim/slurp/wl-clipboard-rs/jq/swaybg/
+  xwayland-satellite, nushell (config.nu on persisted /home; login shell
+  stays bash for rescue), fzf/rg/fd.
+- nix-daemon settings.experimental-features = nix-command flakes baked
+  (phase-2a papercut).
+Verified live: seatd running + /run/seatd.sock (root:seat), y0usaf in
+video/render/seat, /run/user/1001 ok, tomoe-session/nu/foot on PATH,
+fc-list resolves Departure. tomoe FIRST LIGHT not yet attempted — needs
+a fresh login on tty2 (groups + profile) and the compositor grabs the VT.
+
+Phase-2c backlog: pipewire (NO upstream module — hand-roll finit
+service; no audio until then), elogind+pam for portals + session dbus,
+xdg-desktop-portal-gtk + TOMOE_PORTAL_CHOOSER, Steam (32-bit GL already
+staged), decide login shell nushell, decide seatd vs logind libseat
+backend long-term.
+
+2026-07-18 PHASE 2b+ tomoe FIRST LIGHT confirmed by user (session runs,
+apps launch). Then:
+
+2026-07-18 packages-bridge (marker 2.2, slot k544ilnw): new
+packages-bridge.nix EVALS the NixOS system for this host and reuses its
+environment.systemPackages list wholesale — modules can't cross the
+universe split, evaluated DERIVATIONS can. One source of truth, ~1830
+binaries, zero double bookkeeping. denyList: networkmanager, docker,
+docker-compose. Costs accepted: finix eval also evals NixOS (~s + RAM);
+bridged drvs come from the NixOS pkgs instance (cudaSupport=true,
+NixOS unfree allowlist — finix's predicate never re-evals them).
+Corrected en route: "ln" is NOT the browser (librewolf is; Mod+2 bind
+now spawns librewolf); coreutils ln wins the sw/bin collision, harmless.
+
+2026-07-18 PHASE 2c audio + portals + user services DEPLOYED LIVE
+(marker 2.3, slot abqp03vx staged — first install attempt was aborted
+mid-run and re-run; VERIFY `current=` on the ESP after every install):
+- audio.nix: pipewire/wireplumber/pipewire-pulse as finit services
+  (user y0usaf + environment attrs — server syncthing pattern), wait
+  wrappers for /run/user/1001 + pipewire-0 socket ordering, RNNoise
+  filter-chain ported verbatim (toJSON is valid SPA-JSON), LADSPA_PATH
+  env, y0usaf += audio group (no logind ACLs → /dev/snd via group).
+  VERIFIED: Scarlett 2i2 default sink/source, rnnoise_source node up,
+  cmus plays. NOT ported: RT priority (NixOS Nice -20/SCHED_RR 99) —
+  needs rtkit (dbus+polkit) or finit rlimit work; benign pw_rtkit
+  session-bus error in wpctl output is this gap.
+- session.nix: shim now exec's dbus-run-session (session bus for
+  compositor + children; portals dbus-activate there), XDG_DATA_DIRS →
+  sw/share for dbus-1 services + .desktop discovery, TOMOE_PORTAL_CHOOSER
+  restored (verbatim foot+fzf chooser port), packages +=
+  xdg-desktop-portal{,-gtk} (tomoe's own portal ships in its package).
+  Portals need a session STARTED under the new shim — relog tomoe once.
+- syncthing: desktop instance, server pattern, GUI 127.0.0.1:8384.
+- ssh user-service: nothing to port — pure dotfiles, already persisted.
+Still open after 2c: RT audio, elogind-vs-manual XDG_RUNTIME_DIR
+(portals fine on dbus-run-session for now), Steam validation (gates
+promote), nushell as login shell decision, bluetooth (blueman/bluez
+services not ported), OBS virtual cam (v4l2loopback module), power-cut
+drill, then PROMOTE.
+
 ## SERVER STATUS
 
 Phases 1–3 are complete: VM → guarded bare-metal trial → full service
