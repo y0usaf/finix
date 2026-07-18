@@ -31,6 +31,10 @@
     "networkmanager" # finix runs dhcpcd + static fallback
     "docker" # deferred wholesale (NOTES phase-1 scope)
     "docker-compose"
+    # The NixOS tomoe-session shim: it shadowed this host's own wrapper in
+    # sw/bin (buildEnv collision) — no dbus-run-session, no runtime-dir
+    # guard, no polkit agent. session.nix ships the finix wrapper.
+    "tomoe-session"
   ];
 
   pname = p: p.pname or (lib.getName p);

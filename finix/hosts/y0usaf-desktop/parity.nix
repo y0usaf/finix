@@ -103,13 +103,17 @@
   users.groups.gamemode = {};
   users.users.y0usaf.extraGroups = ["gamemode"];
 
-  # ── X11 socket dir: systemd-tmpfiles owned this on NixOS. Xwayland
-  # (hence xwayland-satellite, hence Steam) refuses to create it as
-  # non-root — sticky root-owned world-writable, the X11 convention.
+  # ── X11 socket dir + /tmp mode: systemd-tmpfiles owned both on NixOS.
+  # Xwayland (hence xwayland-satellite, hence Steam) refuses to create
+  # /tmp/.X11-unix as non-root — sticky root-owned world-writable, the
+  # X11 convention. UPSTREAM GAP: finix activation mkdirs /tmp under
+  # umask 0022 → 0755 (NixOS: 1777), so anything non-root writing tmp
+  # files (browsers, sandboxes, our own tooling) fails until fixed.
   finit.tasks.x11-socket-dir = {
-    description = "create /tmp/.X11-unix for Xwayland";
+    description = "fix /tmp mode + create X11 socket dirs";
     command = pkgs.writeShellScript "x11-socket-dir" ''
       export PATH=${lib.makeBinPath [pkgs.coreutils]}
+      chmod 1777 /tmp
       install -d -m 1777 /tmp/.X11-unix /tmp/.ICE-unix
     '';
     log = true;
