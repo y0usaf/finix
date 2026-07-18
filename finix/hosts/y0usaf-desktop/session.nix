@@ -83,6 +83,9 @@
     # portals dbus-activate. The polkit agent must live on that same bus,
     # so it starts inside the wrapper (NixOS ran it as a systemd user
     # service on graphical-session.target).
+    # xwayland-satellite (started by tomoe's process.once) claims :0 —
+    # export it so terminals + steam inherit X availability.
+    export DISPLAY=:0
     exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
       ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
       exec ${lib.getExe tomoePkg} --backend tty "$@"

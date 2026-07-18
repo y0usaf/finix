@@ -102,4 +102,22 @@
   # binaries + steam-hardware udev rules come via the bridge.
   users.groups.gamemode = {};
   users.users.y0usaf.extraGroups = ["gamemode"];
+
+  # ── X11 socket dir: systemd-tmpfiles owned this on NixOS. Xwayland
+  # (hence xwayland-satellite, hence Steam) refuses to create it as
+  # non-root — sticky root-owned world-writable, the X11 convention.
+  finit.tasks.x11-socket-dir = {
+    description = "create /tmp/.X11-unix for Xwayland";
+    command = pkgs.writeShellScript "x11-socket-dir" ''
+      export PATH=${lib.makeBinPath [pkgs.coreutils]}
+      install -d -m 1777 /tmp/.X11-unix /tmp/.ICE-unix
+    '';
+    log = true;
+  };
+
+  # ── CA bundle under the Debian name: finix renders ca-bundle.crt only;
+  # Steam's ubuntu-runtime tooling (and other FHS-expectation software)
+  # hardcodes ca-certificates.crt — its absence surfaced as the updater's
+  # opaque "http error 0" TLS failure.
+  environment.etc."ssl/certs/ca-certificates.crt".source = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 }
