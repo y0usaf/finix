@@ -255,6 +255,28 @@ switch from inside the finix boot (config-only path, ~30 finit jobs clean):
 OPEN after 2.5: power-cut drill → promote; RT-audio rtkit handshake
 (cosmetic); elogind long-term; @home-blank initrd rollback deferred.
 
+2026-07-19 desktop 2.6 — DEADMAN PORT deployed live + staged (slot
+7swmlhcv, marker desktop-phase2.6, current= verified on ESP; previous
+slot 6ahjb5b7 kept as rollback): the server's bootnext-deadman copied
+into persistent.nix verbatim (arm BootNext=Limine at boot start; clear
+once sshd listens continuously for 2 min, 10-min budget). Closes the
+last guard gap before promote: post-promote, a slot that hangs
+pre-userspace parks the box in NixOS instead of looping forever (the
+server 00:19 incident class). Verified LIVE via config-only switch
+from inside the finix boot: armed BootNext=Boot0000 13:00:08Z, cleared
+13:01:58Z (sshd healthy), exit 0. Note: 2.5 never bumped the
+/etc/finix-stage2 marker (stale 2.4); 2.6 corrects it. Desktop deadman
+health = sshd :22 = also the box's only headless rescue path — keep
+sshd unconditional on this host.
+REMAINING before promote: oneshot into slot 7swmlhcv (reboots — do it
+when the session can go) → confirm deadman armed→cleared in syslog →
+power-cut drill (hard reset from the island boot; verify dirty-boot
+health: btrfs, 268 binds, nvidia, session, deadman re-arms) →
+`finix-desktop-boot local promote` from the island boot. NOTE: the
+2026-07-19 16:45Z session entered finix via the NixOS Limine menu pick
+(BootCurrent=0000) — promote would have REFUSED there; the oneshot is
+what makes BootCurrent=0005 (island) and unlocks promote.
+
 ## SERVER STATUS
 
 Phases 1–3 are complete: VM → guarded bare-metal trial → full service

@@ -149,6 +149,46 @@
     exec /run/current-system/sw/bin/initctl reboot
   '';
 
+  # Arm-first dead-man switch, ported from the server: point BootNext at the
+  # NixOS loader as early as possible, clear it only once this boot proves
+  # healthy. Any crash/hang before that lands the next firmware boot in
+  # NixOS. Pre-promote this just mirrors BootOrder (harmless); post-promote
+  # it is THE guard against a bad slot parking the box on a broken boot.
+  bootnextDeadman = pkgs.writeShellScript "desktop-bootnext-deadman" ''
+    set -u
+    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnugrep pkgs.gnused pkgs.iproute2]}
+
+    mountpoint -q /sys/firmware/efi/efivars \
+      || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
+      || { echo "bootnext-deadman: no efivars; not armed" >&2; exit 1; }
+
+    lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
+    if [ -z "$lim" ]; then
+      echo "bootnext-deadman: no Limine EFI entry; not armed" >&2
+      exit 1
+    fi
+    efibootmgr -q -n "$lim" || { echo "bootnext-deadman: arming failed" >&2; exit 1; }
+    echo "bootnext-deadman: armed BootNext=Boot$lim (NixOS)"
+
+    # Healthy = sshd continuously listening for 2 minutes (10-minute budget).
+    ok=0
+    for _ in $(seq 1 60); do
+      if ss -ltn 2>/dev/null | grep -q ':22 '; then
+        ok=$((ok + 1))
+      else
+        ok=0
+      fi
+      if [ "$ok" -ge 12 ]; then
+        efibootmgr -q -N || true
+        echo "bootnext-deadman: healthy, BootNext cleared"
+        exit 0
+      fi
+      sleep 10
+    done
+    echo "bootnext-deadman: health timeout; BootNext stays armed (next boot = NixOS)" >&2
+    exit 1
+  '';
+
   bindMount = dir: {
     device = "/persist${dir}";
     # finix's initrd generator requires a real fsType for neededForBoot binds;
@@ -329,6 +369,12 @@ in {
     log = true;
   };
 
+  finit.tasks.bootnext-deadman = {
+    description = "EFI BootNext dead-man switch (fall home to NixOS)";
+    command = "${bootnextDeadman}";
+    log = true;
+  };
+
   finit.tasks.persist-user-binds = {
     description = "replay the impermanence user allowlist as bind mounts";
     command = "${persistUserBinds}";
@@ -348,7 +394,7 @@ in {
   };
 
   # Console-visible generation marker + deploy-path prover.
-  environment.etc."finix-stage2".text = "desktop-phase2.4\n";
+  environment.etc."finix-stage2".text = "desktop-phase2.6\n";
 
   environment.systemPackages = [
     pkgs.nix
