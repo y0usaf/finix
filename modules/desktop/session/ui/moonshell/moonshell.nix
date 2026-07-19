@@ -63,6 +63,7 @@
       name = "bongo-cat";
       height = bar.bongo-cat.height;
       margin_bottom = bar.bongo-cat.margin-bottom;
+      x_offset = bar.bongo-cat.x-offset;
       keypress_duration = bar.bongo-cat.keypress-duration;
       layer = "overlay";
     };
@@ -134,8 +135,13 @@ in {
         };
         margin-bottom = lib.mkOption {
           type = lib.types.int;
-          default = 24;
-          description = "Bottom margin, typically leaving room for bottom bar.";
+          default = 6;
+          description = "Bottom margin. Smaller than the bar height so the paws overlap the widget row — the cat taps the widgets.";
+        };
+        x-offset = lib.mkOption {
+          type = lib.types.int;
+          default = -24;
+          description = "Horizontal offset from center, so each paw lands over one of the two bottom widget blocks.";
         };
         keypress-duration = lib.mkOption {
           type = lib.types.ints.between 10 5000;
@@ -480,10 +486,15 @@ in {
 
               local name = cfg.name or "bongo-cat"
               close_existing(name)
+              -- Layer-shell centers a bottom-anchored surface; margins on the
+              -- unanchored edges are ignored, so x_offset is applied inside
+              -- the surface: widen it by |x_offset| and justify the cat to
+              -- the opposite edge. Negative offset = cat left of center.
+              local x_offset = cfg.x_offset or 0
               local win = shell.window({
                   name = name,
                   anchor = DEFAULTS.anchors.bottom,
-                  popup_width = width,
+                  popup_width = width + math.abs(x_offset),
                   height = height,
                   margin_bottom = cfg.margin_bottom or 0,
                   layer = cfg.layer or "overlay",
@@ -491,7 +502,12 @@ in {
                   bg = "#00000000",
               })
               win:render(function()
-                  return ui.image({ src = frame:get(), width = width, height = height })
+                  return ui.hbox({
+                      width = width + math.abs(x_offset),
+                      height = height,
+                      justify = x_offset < 0 and "end" or "start",
+                      children = { ui.image({ src = frame:get(), width = width, height = height }) },
+                  })
               end)
               return win
           end
