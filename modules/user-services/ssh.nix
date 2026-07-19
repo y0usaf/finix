@@ -92,6 +92,8 @@ in {
                 "android-phone" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
                 "100.93.111.41" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
                 "192.168.2.34" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
+                # GitHub's official ed25519 host key (github.com/en/keys).
+                "github.com" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
               }
             ))
             + "\n";
