@@ -124,4 +124,17 @@
   # hardcodes ca-certificates.crt — its absence surfaced as the updater's
   # opaque "http error 0" TLS failure.
   environment.etc."ssl/certs/ca-certificates.crt".source = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+
+  # ── XDG dirs parity: NixOS links all of /share into the system profile;
+  # finix's upstream baseline cherry-picks subdirs and omits the XDG ones.
+  # Without /share/applications the tui-launcher desktop provider only saw
+  # ~/.local/share (Steam entries); icons/pixmaps/mime restore GTK icon
+  # lookup, portal/xdg-open MIME dispatch, and .desktop icon resolution.
+  environment.pathsToLink = [
+    "/share/applications"
+    "/share/icons"
+    "/share/pixmaps"
+    "/share/mime"
+  ];
+
 }

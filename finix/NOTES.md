@@ -235,6 +235,26 @@ logind libseat backend stays the clean long-term session model; if adopted,
 drop these PAM forces + the finit runtime-dir task together.
 UPSTREAM GAPS to report: seatd⇒pam_rundir unconditional; /tmp not 1777.
 
+2026-07-18 desktop 2.5 — DEPLOYED LIVE via finix-desktop-deploy local
+switch from inside the finix boot (config-only path, ~30 finit jobs clean):
+- STEAM VALIDATED by user (launches + runs) — the promote gate is now just
+  the power-cut drill.
+- Login shell FLIPPED to nushell (session.nix mkForce vs common.nix bash;
+  userborn rewrote /etc/passwd live, zero downtime). config.nu/env.nu/
+  carapace.nu come from the persisted .config/nushell bind — zero porting
+  needed, env.nu is pure XDG vars. Root stays bash; profile.d fallbacks
+  stay for rescue. Closes the 2b/2c "decide login shell" item.
+- XDG dirs parity (parity.nix): pathsToLink += /share/{applications,icons,
+  pixmaps,mime} — tui-launcher desktop provider, GTK icon lookup, portal/
+  xdg-open MIME dispatch all fixed. (Superseded by xdg.{icons,mime,portal}
+  .enable when the pin bumps — upstream #160.)
+- session shim: TERMINAL=foot export (NixOS inherits TERMINAL from the
+  interactive login shell rc; finix's bash exported nothing → tui-launcher
+  Terminal=true entries died silently) + XDG_DATA_DIRS deduped (re-exec
+  safe).
+OPEN after 2.5: power-cut drill → promote; RT-audio rtkit handshake
+(cosmetic); elogind long-term; @home-blank initrd rollback deferred.
+
 ## SERVER STATUS
 
 Phases 1–3 are complete: VM → guarded bare-metal trial → full service
@@ -645,8 +665,33 @@ way, host key stable — no known_hosts churn, tailnet IP kept):
    dir once (shared state); snapshots verified under finix, NixOS timer
    will succeed from tonight.
 
-## Upstream finix bugs/gaps to report
-
+## Upstream finix bugs/gaps — FILED 2026-07-18, maintainer (aanderse) responses + outcomes:
+- #150 seatd: WORKS AS INTENDED — `finit.runlevel = 3` is the graphical
+  runlevel (set it, drop our seatd mkForce); PAM minimal by design, turnstile
+  coming for XDG rundir. ACTION: graphical.nix sets finit.runlevel=3.
+- #151 fstab mounts: OUR ERROR — finit runs mount -a at stage 2; mounts were
+  never broken, services RACED them. neededForBoot on deps is the correct fix.
+  Follow-up comment posted correcting the record.
+- #152 initrd bind fsType: confirmed real, reproducer flake posted.
+- #153 hosts reversal: PR #163 OPEN (IP-keyed seed + doc fix, validated).
+- #154 HostKey join: answered — finix-only bug (nixpkgs throws on unknown
+  list keys; finix added HostKey to spaceSeparated, sshd rejects multi-arg
+  HostKey — sshd -t evidence posted). Fix = drop HostKey from spaceSeparated;
+  offered PR.
+- #155 dhcpcd: RESOLVED upstream by PR #149 (merged 07-17). ACTION: bump pin,
+  drop -B workaround.
+- #158 nvidia .bin/.mod: RESOLVED upstream 2f40ead. ACTION: bump pin, drop
+  package.mod workaround.
+- #160 pathsToLink: works as intended — minimal by design; xdg.icons.enable,
+  xdg.mime.enable, xdg.portal.enable add the dirs. ACTION: replace our manual
+  pathsToLink with those module enables.
+- #161 escapePath: PR #164 OPEN (systemd-escape convention, injective; root
+  fs stanza mount-root → mount--, all else unchanged; validated).
+- #162 microcode: RESOLVED by PR #103 (already in pin!) — native
+  hardware.cpu.{intel,amd}.updateMicrocode options exist. ACTION: adopt +
+  eventually drop ESP cat-hack.
+- #156 PATH, #157 limine, #159 /tmp: no maintainer comment; workarounds stand.
+Original report details (for the still-open items):
 - `modules/finit/mount.nix` only generates mount tasks for `neededForBoot`
   filesystems — everything else is written to /etc/fstab and **never
   mounted**. Workaround: neededForBoot=true on every mount we need.
@@ -767,10 +812,8 @@ Stage-3 order of operations (updated after incident #2):
 8. DONE 2026-07-15 ~01:20 EDT: btrbk-via-cron + DHCP renewal both proven
    on the island boot (induced; see checklist). Tonight's midnight cron
    fire is a free double-check.
-9. File upstream issues (mount.nix, initrd bind fsType, hosts reversal,
-   HostKey join, dhcpcd, PATH, programs.limine ESP collision, and
-   consider: initrd should support early-microcode prepend natively) —
-   all have in-tree workarounds.
+9. DONE 2026-07-18: upstream issues filed (#150–#162, see the upstream
+   bugs section). Track + drop workarounds as fixes land.
 9. Housekeeping when confident: delete `/persist/var/lib/docker`,
    `@jellyfin`, stale `/persist/var/lib/{acme,bayt,blocky}`,
    `.n8n/broken-searchapi-*`; relax the pinned kernel match if desired;
