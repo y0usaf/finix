@@ -574,17 +574,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1783543955,
-        "narHash": "sha256-vNQBD7RDournEFdLoLphs5QHKPTuuYpV9yU2M0Xup6g=",
+        "lastModified": 1784482162,
+        "narHash": "sha256-WOzYv+cDXA8Rq2j86LhVX7kc3oCyDq99KJzDN+XnHvQ=",
         "ref": "refs/heads/main",
-        "rev": "0287810041b7523632fa86260a69fe0d2b2fc260",
-        "revCount": 17,
+        "rev": "2371a49982aaa243ffc6832dc459c3a9339e913e",
+        "revCount": 19,
         "type": "git",
-        "url": "file:///home/y0usaf/Dev/moonshell"
+        "url": "ssh://git@github.com/y0usaf/moonshell.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/Dev/moonshell"
+        "url": "ssh://git@github.com/y0usaf/moonshell.git"
       }
     },
     "nh": {
@@ -835,17 +835,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1783783304,
-        "narHash": "sha256-t3RX9bX0n+/WnfFHSSmwDhA4oBQGw50/8U1E2hex+Ow=",
+        "lastModified": 1784491157,
+        "narHash": "sha256-F+MbYRAYwWwAyuwNkRd2lfRzLWeorp9KQuHkaFjwNC8=",
         "ref": "refs/heads/main",
-        "rev": "7bf9694c482dfeadbabaffc262fc63af699b3781",
-        "revCount": 1,
+        "rev": "e366e794cd58444ed31ff7b40fa69932e8bd4038",
+        "revCount": 6,
         "type": "git",
-        "url": "file:///home/y0usaf/Dev/sandbox/nvflashk-linux"
+        "url": "ssh://git@github.com/y0usaf/nvflashk-linux.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/Dev/sandbox/nvflashk-linux"
+        "url": "ssh://git@github.com/y0usaf/nvflashk-linux.git"
       }
     },
     "nvtune": {
@@ -1385,14 +1385,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1784248932,
-        "narHash": "sha256-Bp4z+mobZw5VkrHTgR3Y0uzdsnEEVM68DJSYuSg9luw=",
-        "path": "/home/y0usaf/Dev/tomoe",
-        "type": "path"
+        "lastModified": 1784491034,
+        "narHash": "sha256-jGWNsCMW5jaXeJvsH7wiS2m4dZUTQO4LP4qjaI53G8s=",
+        "owner": "y0usaf",
+        "repo": "tomoe",
+        "rev": "389327c5a70c60edb34b7351bbd11ab22d2b87d0",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/y0usaf/Dev/tomoe"
+        "owner": "y0usaf",
+        "repo": "tomoe",
+        "type": "github"
       }
     },
     "treefmt-nix": {

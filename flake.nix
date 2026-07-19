@@ -112,12 +112,12 @@
     };
 
     moonshell = {
-      url = "git+file:///home/y0usaf/Dev/moonshell";
+      url = "git+ssh://git@github.com/y0usaf/moonshell.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     tomoe = {
-      url = "git+file:///home/y0usaf/Dev/tomoe";
+      url = "github:y0usaf/tomoe";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -137,7 +137,7 @@
     };
 
     nvflashk-linux = {
-      url = "git+file:///home/y0usaf/Dev/sandbox/nvflashk-linux";
+      url = "git+ssh://git@github.com/y0usaf/nvflashk-linux.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

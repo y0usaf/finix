@@ -149,134 +149,6 @@
     exec /run/current-system/sw/bin/initctl reboot
   '';
 
-  # Arm-first dead-man switch, ported from the server: point BootNext at the
-  # NixOS loader as early as possible, clear it only once this boot proves
-  # healthy. Any crash/hang before that lands the next firmware boot in
-  # NixOS. Pre-promote this just mirrors BootOrder (harmless); post-promote
-  # it is THE guard against a bad slot parking the box on a broken boot.
-  bootnextDeadman = pkgs.writeShellScript "desktop-bootnext-deadman" ''
-    set -u
-    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnugrep pkgs.gnused pkgs.iproute2]}
-
-    mountpoint -q /sys/firmware/efi/efivars \
-      || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
-      || { echo "bootnext-deadman: no efivars; not armed" >&2; exit 1; }
-
-    lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
-    if [ -z "$lim" ]; then
-      echo "bootnext-deadman: no Limine EFI entry; not armed" >&2
-      exit 1
-    fi
-    efibootmgr -q -n "$lim" || { echo "bootnext-deadman: arming failed" >&2; exit 1; }
-    echo "bootnext-deadman: armed BootNext=Boot$lim (NixOS)"
-
-    # Healthy = sshd continuously listening for 2 minutes (10-minute budget).
-    ok=0
-    for _ in $(seq 1 60); do
-      if ss -ltn 2>/dev/null | grep -q ':22 '; then
-        ok=$((ok + 1))
-      else
-        ok=0
-      fi
-      if [ "$ok" -ge 12 ]; then
-        efibootmgr -q -N || true
-        echo "bootnext-deadman: healthy, BootNext cleared"
-        exit 0
-      fi
-      sleep 10
-    done
-    echo "bootnext-deadman: health timeout; BootNext stays armed (next boot = NixOS)" >&2
-    exit 1
-  '';
-
-  # One-shot autonomous promote drill, gated on /persist/finix-promote-drill/state
-  # (no state file = inert no-op on every boot). Operator sets state=armed,
-  # then boots the island (oneshot). Boot 1 (armed): waits for the deadman to
-  # clear, re-verifies health, points BootNext at the island, and hard-resets
-  # via sysrq-b = the power-cut drill (no sync, no unmount). Boot 2 (dirty):
-  # same health gate on the dirty-recovered boot, then writes BootOrder
-  # Finix-first = promote, and removes the state file. Any failure aborts
-  # with the box still up; the deadman guards every boot throughout.
-  promoteDrill = pkgs.writeShellScript "desktop-promote-drill" ''
-    set -u
-    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnugrep pkgs.gnused pkgs.iproute2 pkgs.iputils pkgs.kmod]}
-
-    statedir=/persist/finix-promote-drill
-    state=$statedir/state
-    [ -f "$state" ] || exit 0
-    step=$(cat "$state")
-
-    mountpoint -q /sys/firmware/efi/efivars \
-      || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
-      || { echo "promote-drill: no efivars" >&2; exit 1; }
-
-    finix_num="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Finix\t.*/\1/p' | head -n1)"
-    [ -n "$finix_num" ] || { echo "promote-drill: no Finix EFI entry" >&2; exit 1; }
-
-    # The deadman owns BootNext until it clears (healthy) or stays armed
-    # (unhealthy). Never race it: still set after 12 min = unhealthy boot.
-    i=0
-    while [ "$i" -lt 72 ]; do
-      efibootmgr | grep -q '^BootNext:' || break
-      i=$((i + 1))
-      sleep 10
-    done
-    if efibootmgr | grep -q '^BootNext:'; then
-      echo "promote-drill: deadman never cleared (unhealthy boot); aborting step=$step" >&2
-      exit 1
-    fi
-
-    healthy() {
-      ss -ltn 2>/dev/null | grep -q ':22 ' || return 1
-      ip -4 addr show scope global | grep -q 'inet ' || return 1
-      mountpoint -q /persist || return 1
-      mountpoint -q /home || return 1
-      mountpoint -q /nix || return 1
-      mountpoint -q /boot || return 1
-      [ "$(findmnt -n -o TARGET | grep -c '^/home/y0usaf/')" -ge 200 ] || return 1
-      lsmod | grep -q '^nvidia ' || return 1
-      [ -e /dev/nvidia0 ] || return 1
-      ping -c1 -W2 192.168.2.1 >/dev/null 2>&1 || return 1
-      return 0
-    }
-    ok=0
-    for _ in $(seq 1 36); do
-      if healthy; then ok=$((ok + 1)); else ok=0; fi
-      [ "$ok" -ge 3 ] && break
-      sleep 10
-    done
-    [ "$ok" -ge 3 ] || { echo "promote-drill: health checks failed; aborting step=$step" >&2; exit 1; }
-    echo "promote-drill: health green at step=$step"
-
-    case "$step" in
-      armed)
-        echo dirty > "$state.tmp"
-        mv "$state.tmp" "$state"
-        sync
-        efibootmgr -q -n "$finix_num" || { echo "promote-drill: BootNext arm failed" >&2; exit 1; }
-        echo "promote-drill: BootNext=Boot$finix_num; HARD RESET (sysrq-b) in 5s — the power-cut drill"
-        sleep 5
-        echo b > /proc/sysrq-trigger
-        ;;
-      dirty)
-        cur=$(efibootmgr | sed -n 's/^BootCurrent: //p')
-        [ "$cur" = "$finix_num" ] || { echo "promote-drill: BootCurrent=$cur is not the island (Boot$finix_num); refusing" >&2; exit 1; }
-        order=$(efibootmgr | sed -n 's/^BootOrder: //p')
-        rest=$(printf '%s' "$order" | tr ',' '\n' | grep -v "^$finix_num\$" | paste -sd, -)
-        [ -n "$rest" ] && rest=",$rest"
-        efibootmgr -q -o "$finix_num$rest" || { echo "promote-drill: BootOrder write failed" >&2; exit 1; }
-        rm -f "$state"
-        date -u +'promoted %Y-%m-%dT%H:%M:%SZ' > "$statedir/done"
-        sync
-        echo "promote-drill: PROMOTED — BootOrder Finix-first ($finix_num$rest)"
-        ;;
-      *)
-        echo "promote-drill: unknown state '$step'" >&2
-        exit 1
-        ;;
-    esac
-  '';
-
   bindMount = dir: {
     device = "/persist${dir}";
     # finix's initrd generator requires a real fsType for neededForBoot binds;
@@ -457,18 +329,6 @@ in {
     log = true;
   };
 
-  finit.tasks.bootnext-deadman = {
-    description = "EFI BootNext dead-man switch (fall home to NixOS)";
-    command = "${bootnextDeadman}";
-    log = true;
-  };
-
-  finit.tasks.promote-drill = {
-    description = "one-shot hard-reset drill + promote (gated on /persist state)";
-    command = "${promoteDrill}";
-    log = true;
-  };
-
   finit.tasks.persist-user-binds = {
     description = "replay the impermanence user allowlist as bind mounts";
     command = "${persistUserBinds}";
@@ -488,7 +348,7 @@ in {
   };
 
   # Console-visible generation marker + deploy-path prover.
-  environment.etc."finix-stage2".text = "desktop-phase2.7\n";
+  environment.etc."finix-stage2".text = "desktop-phase2.4\n";
 
   environment.systemPackages = [
     pkgs.nix
