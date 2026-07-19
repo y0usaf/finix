@@ -277,6 +277,38 @@ health: btrfs, 268 binds, nvidia, session, deadman re-arms) →
 (BootCurrent=0000) — promote would have REFUSED there; the oneshot is
 what makes BootCurrent=0005 (island) and unlocks promote.
 
+2026-07-19 desktop 2.7 — AUTONOMOUS PROMOTE DRILL armed (slot 8m7yach1,
+marker desktop-phase2.7, current= verified on ESP; rollback = 7swmlhcv).
+User directive: fully autonomous, no handoff. Reboots kill the agent
+session, so the drill is a state machine baked into the config as
+finit task promote-drill, gated on /persist/finix-promote-drill/state
+(absent = inert no-op on every future boot). Operator (agent) arms
+state=armed, then oneshot; from there the box runs itself:
+  boot 1 (clean island): wait for deadman to clear BootNext (<=12 min,
+    else abort) -> health gate x3 consecutive (sshd :22, IPv4 global,
+    /persist /home /nix /boot mountpoints, >=200 binds under
+    /home/y0usaf, nvidia module + /dev/nvidia0, ping 192.168.2.1) ->
+    state=dirty (synced) -> BootNext=Finix -> sysrq-b HARD RESET = the
+    power-cut drill (no sync/unmount; FS-side equivalent of the reset
+    button — PSU-rail differences noted but OS-side drill identical).
+  boot 2 (dirty island, via BootNext): deadman clears -> same health
+    gate -> BootCurrent==Finix check -> efibootmgr -o Finix-first =
+    PROMOTE -> rm state, stamp done file, box stays up. Getty logins
+    from then on = finix as the installed OS.
+Safety net throughout: deadman guards both boots; any health failure
+aborts with the box up and unpromoted (BootOrder still NixOS-first);
+hang pre-userspace -> deadman BootNext -> next cycle parks in NixOS.
+Post-hoc verification: /persist/finix-promote-drill/done timestamp,
+state file gone, efibootmgr BootOrder 0005-first, syslog lines
+'promote-drill: ...'. If the box parks in NixOS: read
+/persist/finix-promote-drill/state + newest /persist/finix-boot/ logs
+from NixOS (same /persist), fix, re-arm state, re-oneshot.
+Post-promote deploy discipline (now active): any topLevel-changing
+deploy stages a NEW slot and install forces BootOrder NixOS-first
+(test window) -> oneshot -> health -> promote again, same as the
+server era. Config-only switches stay live-only. NixOS config =
+frozen rescue; never nix-collect-garbage -d from finix.
+
 ## SERVER STATUS
 
 Phases 1–3 are complete: VM → guarded bare-metal trial → full service
