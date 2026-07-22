@@ -12,7 +12,7 @@ in {
 
     model = mkOption {
       type = types.str;
-      default = "gpt-5.4";
+      default = "gpt-5.6-sol";
       description = "Codex model to use";
     };
 

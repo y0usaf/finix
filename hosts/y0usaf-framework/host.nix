@@ -17,6 +17,9 @@ in {
 
   environment.systemPackages = [pkgs.brightnessctl];
 
+  # udev rules from brightnessctl: chgrp video + g+w on backlight, user already in video group
+  services.udev.packages = [pkgs.brightnessctl];
+
   user.programs.discord.stable.pinLegacy = true;
 
   # Secure Boot disabled until sbctl keys are enrolled post-install

@@ -53,114 +53,12 @@
     options = ["bind"];
     neededForBoot = true;
   };
-
-  forgejoStart = pkgs.writeShellScript "forgejo-start" ''
-    # Wait for postgres to accept connections; finit has no condition for
-    # "socket ready" and forgejo aborts on a refused connection.
-    for _ in $(seq 1 60); do
-      ${pkgs.postgresql_16}/bin/pg_isready -q -h /run/postgresql && break
-      sleep 1
-    done
-    ${pkgs.postgresql_16}/bin/pg_isready -q -h /run/postgresql || exit 1
-    exec ${pkgs.forgejo-lts}/bin/forgejo web
-  '';
-
-  mediamtxConf = (pkgs.formats.yaml {}).generate "mediamtx.yaml" {
-    webrtc = true;
-    webrtcAddress = ":4200";
-    webrtcLocalUDPAddress = ":4200";
-    paths.all_others = {};
-  };
-
   # finit's `environment` option owns the service env file, so the runtime
   # public-IP env (written by the mediamtx-env task) is sourced here rather
   # than via the finit `env:` stanza.
-  mediamtxStart = pkgs.writeShellScript "mediamtx-start" ''
-    if [ -r /run/mediamtx.env ]; then
-      set -a
-      . /run/mediamtx.env
-      set +a
-    fi
-    exec ${pkgs.mediamtx}/bin/mediamtx ${mediamtxConf}
-  '';
-
-  nginxConf = pkgs.writeText "nginx.conf" ''
-    daemon off;
-    worker_processes 1;
-    pid /run/nginx/nginx.pid;
-
-    events {}
-
-    http {
-      access_log off;
-      proxy_temp_path /run/nginx/proxy_temp;
-      client_body_temp_path /run/nginx/client_body_temp;
-      fastcgi_temp_path /run/nginx/fastcgi_temp;
-      uwsgi_temp_path /run/nginx/uwsgi_temp;
-      scgi_temp_path /run/nginx/scgi_temp;
-
-      map $http_upgrade $connection_upgrade {
-        default upgrade;
-        ""      close;
-      }
-
-      server {
-        listen 80;
-        server_name syncthing-server;
-
-        location / {
-          proxy_pass http://127.0.0.1:8384;
-          proxy_http_version 1.1;
-          # No Host override: syncthing's GUI host-check only accepts its
-          # own gui-address, so the default $proxy_host (127.0.0.1:8384)
-          # is exactly right. Forwarding the client Host got 403s.
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection $connection_upgrade;
-          proxy_read_timeout 600s;
-          proxy_send_timeout 600s;
-        }
-      }
-    }
-  '';
-
-  btrbkConf = pkgs.writeText "btrbk.conf" ''
-    timestamp_format long
-    snapshot_preserve_min 2d
-    snapshot_preserve 7d 4w
-
-    volume /btrfs
-      snapshot_dir _snapshots
-      subvolume @dcim
-      subvolume @music
-  '';
-
   # NixOS firewall parity: host.nix allowed TCP 80/443/2222/3000/22000 +
   # forgejo 3000/2222, n8n openFirewall (5678), mediamtx 4200, syncthing
   # 22000/21027, tailscale 41641; tailscale0 is trusted.
-  nftablesRuleset = pkgs.writeText "finix-server.nft" ''
-    flush ruleset
-
-    table inet filter {
-      chain input {
-        type filter hook input priority filter; policy drop;
-
-        iifname "lo" accept
-        iifname "tailscale0" accept comment "tailnet peers are authenticated"
-        ct state established,related accept
-        ct state invalid drop
-        meta l4proto { icmp, ipv6-icmp } accept
-
-        udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
-
-        tcp dport { 22, 80, 443, 2222, 3000, 5678, 22000, 4200 } accept
-        udp dport { 21027, 22000, 4200, 41641 } accept
-      }
-      chain forward {
-        type filter hook forward priority filter; policy drop;
-      }
-    }
-  '';
 in {
   ## Storage: server subvolumes + service state bound out of /persist.
   fileSystems = {
@@ -192,9 +90,50 @@ in {
   ## in the initrd, so it exists before sshd starts). ed25519 only: finix
   ## renders list settings space-joined on ONE HostKey line, which sshd
   ## rejects - one key per list is the safe shape. TODO: report upstream.
-  services.openssh.settings.HostKey = lib.mkForce [
-    "/persist/etc/ssh/ssh_host_ed25519_key"
-  ];
+  services = {
+    openssh.settings = {
+      # Parity with the NixOS universe: real sshd on 2200 (2222 = forgejo,
+      # tailnet :22 = Tailscale SSH rescue path).
+      Port = [2200];
+      HostKey = lib.mkForce [
+        "/persist/etc/ssh/ssh_host_ed25519_key"
+      ];
+    };
+    nftables = {
+      enable = true;
+      configFile = pkgs.writeText "finix-server.nft" ''
+        flush ruleset
+
+        table inet filter {
+          chain input {
+            type filter hook input priority filter; policy drop;
+
+            iifname "lo" accept
+            iifname "tailscale0" accept comment "tailnet peers are authenticated"
+            ct state established,related accept
+            ct state invalid drop
+            meta l4proto { icmp, ipv6-icmp } accept
+
+            udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
+
+            tcp dport { 80, 443, 2222, 3000, 5678, 22000, 4200 } accept comment "sshd(2200) is tailnet-only"
+            udp dport { 21027, 22000, 4200, 41641 } accept
+          }
+          chain forward {
+            type filter hook forward priority filter; policy drop;
+          }
+        }
+      '';
+    };
+    postgresql = {
+      enable = true;
+      package = pkgs.postgresql_16;
+      authentication = ''
+        local all all peer
+      '';
+    };
+    cron.enable = true;
+  };
   # Upstream task generates a throwaway key in /var/lib/sshd; sshd's start
   # condition depends on it. Repurpose it as a sanity check on the persisted
   # key instead.
@@ -204,10 +143,6 @@ in {
   '');
 
   ## Firewall (parity with the NixOS server's networking.firewall).
-  services.nftables = {
-    enable = true;
-    configFile = nftablesRuleset;
-  };
 
   ## Tailnet names (parity with modules/core/services/tailscale/hosts.nix).
   networking.hosts = {
@@ -250,21 +185,22 @@ in {
 
   ## postgresql (finix upstream module). Pinned to the on-disk cluster's
   ## major version; initdb is skipped because PG_VERSION already exists.
-  services.postgresql = {
-    enable = true;
-    package = pkgs.postgresql_16;
-    authentication = ''
-      local all all peer
-    '';
-  };
 
   ## cron backend for scheduled tasks (btrbk).
-  services.cron.enable = true;
   providers.scheduler = {
     backend = "cron";
     tasks.btrbk-snapshots = {
       interval = "daily";
-      command = "${lib.getExe pkgs.btrbk} -q -c ${btrbkConf} run";
+      command = "${lib.getExe pkgs.btrbk} -q -c ${pkgs.writeText "btrbk.conf" ''
+        timestamp_format long
+        snapshot_preserve_min 2d
+        snapshot_preserve 7d 4w
+
+        volume /btrfs
+          snapshot_dir _snapshots
+          subvolume @dcim
+          subvolume @music
+      ''} run";
     };
   };
 
@@ -339,7 +275,16 @@ in {
       description = "forgejo git hosting";
       user = "forgejo";
       group = "forgejo";
-      command = "${forgejoStart}";
+      command = "${pkgs.writeShellScript "forgejo-start" ''
+        # Wait for postgres to accept connections; finit has no condition for
+        # "socket ready" and forgejo aborts on a refused connection.
+        for _ in $(seq 1 60); do
+          ${pkgs.postgresql_16}/bin/pg_isready -q -h /run/postgresql && break
+          sleep 1
+        done
+        ${pkgs.postgresql_16}/bin/pg_isready -q -h /run/postgresql || exit 1
+        exec ${pkgs.forgejo-lts}/bin/forgejo web
+      ''}";
       path = [
         pkgs.forgejo-lts
         pkgs.git
@@ -396,7 +341,19 @@ in {
       description = "mediamtx media server";
       user = "mediamtx";
       group = "mediamtx";
-      command = "${mediamtxStart}";
+      command = "${pkgs.writeShellScript "mediamtx-start" ''
+        if [ -r /run/mediamtx.env ]; then
+          set -a
+          . /run/mediamtx.env
+          set +a
+        fi
+        exec ${pkgs.mediamtx}/bin/mediamtx ${(pkgs.formats.yaml {}).generate "mediamtx.yaml" {
+          webrtc = true;
+          webrtcAddress = ":4200";
+          webrtcLocalUDPAddress = ":4200";
+          paths.all_others = {};
+        }}
+      ''}";
       conditions = [
         "net/lo/up"
         "task/mediamtx-env/success"
@@ -429,7 +386,45 @@ in {
     # (parity with modules/core/services/syncthing-proxy.nix).
     nginx = {
       description = "nginx reverse proxy (syncthing GUI)";
-      command = "${pkgs.nginx}/bin/nginx -c ${nginxConf} -e stderr";
+      command = "${pkgs.nginx}/bin/nginx -c ${pkgs.writeText "nginx.conf" ''
+        daemon off;
+        worker_processes 1;
+        pid /run/nginx/nginx.pid;
+
+        events {}
+
+        http {
+          access_log off;
+          proxy_temp_path /run/nginx/proxy_temp;
+          client_body_temp_path /run/nginx/client_body_temp;
+          fastcgi_temp_path /run/nginx/fastcgi_temp;
+          uwsgi_temp_path /run/nginx/uwsgi_temp;
+          scgi_temp_path /run/nginx/scgi_temp;
+
+          map $http_upgrade $connection_upgrade {
+            default upgrade;
+            ""      close;
+          }
+
+          server {
+            listen 80;
+            server_name syncthing-server;
+
+            location / {
+              proxy_pass http://127.0.0.1:8384;
+              proxy_http_version 1.1;
+              # No Host override: syncthing's GUI host-check only accepts its
+              # own gui-address, so the default $proxy_host (127.0.0.1:8384)
+              # is exactly right. Forwarding the client Host got 403s.
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection $connection_upgrade;
+              proxy_read_timeout 600s;
+              proxy_send_timeout 600s;
+            }
+          }
+        }
+      ''} -e stderr";
       conditions = ["net/lo/up"];
       log = true;
     };
