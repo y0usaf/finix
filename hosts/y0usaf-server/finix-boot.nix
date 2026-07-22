@@ -5,8 +5,8 @@
 # EFI entry; this entry remains for a human at the console and only tracks
 # the generation baked at the last NixOS deploy.
 {
-  finixStaging,
   pkgs,
+  finixStaging,
   ...
 }: let
   finixSystem = finixStaging.serverPersistent.config.system.topLevel;

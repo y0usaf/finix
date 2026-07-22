@@ -6,7 +6,6 @@
 # (Nice -20 / SCHED_RR 99 on NixOS) is NOT ported yet — needs rtkit or
 # finit rlimit surgery; plain scheduling is fine for first sound.
 {
-  config,
   lib,
   pkgs,
   ...
@@ -22,7 +21,23 @@
 
   # Same graph as the NixOS module's extraConfig."99-input-denoising";
   # real JSON is valid SPA-JSON.
-  denoiseConf = builtins.toJSON {
+
+  # Startup ordering without sockets-activation: wait, then become the
+  # daemon. finit restarts us if the wait budget runs out.
+  waitSock = pkgs.writeShellScript "wait-pipewire-sock" ''
+    export PATH=${lib.makeBinPath [pkgs.coreutils]}
+    for _ in $(seq 1 60); do
+      [ -S ${runtimeDir}/pipewire-0 ] && exec "$@"
+      sleep 1
+    done
+    echo "wait-pipewire-sock: pipewire-0 never appeared" >&2
+    exit 1
+  '';
+in {
+  # /dev/snd is root:audio without logind ACLs.
+  users.users.y0usaf.extraGroups = ["audio"];
+
+  environment.etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = builtins.toJSON {
     "context.modules" = [
       {
         name = "libpipewire-module-filter-chain";
@@ -62,32 +77,6 @@
     ];
   };
 
-  # Startup ordering without sockets-activation: wait, then become the
-  # daemon. finit restarts us if the wait budget runs out.
-  waitDir = pkgs.writeShellScript "wait-runtime-dir" ''
-    export PATH=${lib.makeBinPath [pkgs.coreutils]}
-    for _ in $(seq 1 60); do
-      [ -d ${runtimeDir} ] && exec "$@"
-      sleep 1
-    done
-    echo "wait-runtime-dir: ${runtimeDir} never appeared" >&2
-    exit 1
-  '';
-  waitSock = pkgs.writeShellScript "wait-pipewire-sock" ''
-    export PATH=${lib.makeBinPath [pkgs.coreutils]}
-    for _ in $(seq 1 60); do
-      [ -S ${runtimeDir}/pipewire-0 ] && exec "$@"
-      sleep 1
-    done
-    echo "wait-pipewire-sock: pipewire-0 never appeared" >&2
-    exit 1
-  '';
-in {
-  # /dev/snd is root:audio without logind ACLs.
-  users.users.y0usaf.extraGroups = ["audio"];
-
-  environment.etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = denoiseConf;
-
   environment.systemPackages = [
     pkgs.pipewire
     pkgs.wireplumber
@@ -99,7 +88,15 @@ in {
       description = "pipewire (y0usaf)";
       user = "y0usaf";
       environment = svcEnv;
-      command = "${waitDir} ${pkgs.pipewire}/bin/pipewire";
+      command = "${pkgs.writeShellScript "wait-runtime-dir" ''
+        export PATH=${lib.makeBinPath [pkgs.coreutils]}
+        for _ in $(seq 1 60); do
+          [ -d ${runtimeDir} ] && exec "$@"
+          sleep 1
+        done
+        echo "wait-runtime-dir: ${runtimeDir} never appeared" >&2
+        exit 1
+      ''} ${pkgs.pipewire}/bin/pipewire";
       log = true;
     };
     wireplumber = {

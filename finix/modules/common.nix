@@ -16,7 +16,7 @@
   # entries. TODO: report upstream.
   networking.hosts = {
     localhost = lib.mkForce [];
-    ${config.networking.hostName} = lib.mkForce [];
+    "${config.networking.hostName}" = lib.mkForce [];
     "127.0.0.1" = ["localhost"];
     "::1" = ["localhost"];
     "127.0.0.2" = [config.networking.hostName];
@@ -68,14 +68,25 @@
 
   # Keep both the desktop key and the server's existing rescue key available
   # while the persistent system's SSH ownership checks are being tightened.
-  environment.etc."ssh/authorized_keys.d/y0usaf".text = ''
-    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6ZHkn1pACV406TM5yUCRt/874vybgpUW3sUKka9nAC y0usaf@y0usaf-desktop
-    ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-server/user-ssh.pub)}
-  '';
-
-  environment.etc.sudoers.text = lib.mkAfter ''
-    y0usaf ALL = (ALL:ALL) NOPASSWD: ALL
-  '';
+  environment = {
+    etc."ssh/authorized_keys.d/y0usaf".text = ''
+      ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-desktop/user-ssh.pub)}
+      ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-framework/user-ssh.pub)}
+      ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-server/user-ssh.pub)}
+      ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/android-phone/user-ssh.pub)}
+    '';
+    etc.sudoers.text = lib.mkAfter ''
+      y0usaf ALL = (ALL:ALL) NOPASSWD: ALL
+    '';
+    systemPackages = with pkgs; [
+      curl
+      iproute2
+      iputils
+      procps
+      util-linux
+      vim
+    ];
+  };
 
   users.users.y0usaf = {
     isNormalUser = true;
@@ -87,13 +98,4 @@
     # once the bare-metal system graduates from trial status.
     password = "***REMOVED***";
   };
-
-  environment.systemPackages = with pkgs; [
-    curl
-    iproute2
-    iputils
-    procps
-    util-linux
-    vim
-  ];
 }

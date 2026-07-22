@@ -1,11 +1,7 @@
 # Phase 1 of the finix server migration: a minimal QEMU VM that must boot,
 # bring up networking, and accept SSH. Service parity (docker, forgejo,
 # syncthing, ...) is layered on in later phases once this base is trusted.
-{
-  lib,
-  pkgs,
-  ...
-}: {
+_: {
   networking.hostName = "finix-server-vm";
 
   # Root is tmpfs; the host nix store is 9p-mounted by the qemu module.

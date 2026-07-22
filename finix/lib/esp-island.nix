@@ -3,8 +3,8 @@
 # (remote island script + driver) per host. Server keeps intel ucode + ssh
 # operation; the desktop drives its own ESP locally (host = "local").
 {
-  pkgs,
   lib,
+  pkgs,
 }: {
   # mkIsland {name, system, ucodeImg, defaultHost}
   #   name        driver binary name (e.g. finix-server-boot)
@@ -15,10 +15,10 @@
   #   defaultHost ssh target when none given, or "local" to run the island
   #               script on this machine under sudo (desktop drives itself)
   mkIsland = {
+    defaultHost,
     name,
     system,
     ucodeImg,
-    defaultHost,
   }: rec {
     # ── Stage 3: ESP island + BootNext (bootloader takeover without hands) ──
     #

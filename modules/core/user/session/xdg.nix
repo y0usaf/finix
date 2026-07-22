@@ -48,6 +48,13 @@ in {
       NPM_CONFIG_CACHE = "${xdgCache}/npm";
       NPM_CONFIG_INIT_MODULE = "${xdgConfig}/npm/config/npm-init.js";
 
+      # --- AI coding agents (no native XDG support) ---
+      CLAUDE_CONFIG_DIR = "${xdgData}/claude"; # also absorbs ~/.claude.json
+      CODEX_HOME = "${xdgData}/codex";
+      PI_CODING_AGENT_DIR = "${xdgData}/pi/agent";
+      PI_VCC_CONFIG_PATH = "${xdgData}/pi/agent/pi-vcc-config.json"; # vcc ext ignores PI_CODING_AGENT_DIR
+      KIMI_CODE_HOME = "${xdgData}/kimi-code";
+
       # --- Databases / REPLs ---
       SQLITE_HISTORY = "${xdgState}/sqlite_history";
 

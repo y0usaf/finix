@@ -28,6 +28,7 @@ in {
             SetEnv TERM=xterm-256color
             Host server y0usaf-server
                 HostName y0usaf-server
+                Port 2200
                 User ${userName}
                 IdentityFile ${homeDir}/.ssh/id_ed25519
                 IdentitiesOnly yes
@@ -52,11 +53,20 @@ in {
                 StrictHostKeyChecking accept-new
                 UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
 
-            Host desktop
+            Host desktop y0usaf-desktop
                 HostName y0usaf-desktop
                 Port 2222
                 User ${userName}
-                IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
+                IdentityFile ${homeDir}/.ssh/id_ed25519
+                IdentitiesOnly yes
+                ForwardAgent yes
+
+            Host framework y0usaf-framework
+                HostName y0usaf-framework
+                Port 2222
+                User ${userName}
+                IdentityFile ${homeDir}/.ssh/id_ed25519
+                IdentitiesOnly yes
                 ForwardAgent yes
 
             Host android-phone phone
@@ -81,23 +91,8 @@ in {
                 IdentitiesOnly yes
           '';
         };
-        ".ssh/known_hosts" = {
-          text =
-            (lib.concatStringsSep "\n" (
-              lib.mapAttrsToList (host: key: "${host} ${key}") {
-                "y0usaf-desktop" = readKey ../../hosts/y0usaf-desktop/host-ssh-ed25519.pub;
-                "desktop" = readKey ../../hosts/y0usaf-desktop/host-ssh-ed25519.pub;
-                "y0usaf-server" = readKey ../../hosts/y0usaf-server/host-ssh-ed25519.pub;
-                "server" = readKey ../../hosts/y0usaf-server/host-ssh-ed25519.pub;
-                "android-phone" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
-                "100.93.111.41" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
-                "192.168.2.34" = readKey ../../hosts/android-phone/host-ssh-ed25519.pub;
-                # GitHub's official ed25519 host key (github.com/en/keys).
-                "github.com" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
-              }
-            ))
-            + "\n";
-        };
+        # Host key pins live system-wide in /etc/ssh/ssh_known_hosts
+        # (modules/core/services/openssh.nix), port-qualified.
       }
       // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
         ".config/zsh/.zshenv" = {

@@ -27,22 +27,20 @@
 
   # Daemon binaries whose SERVICES are deliberately not (or differently)
   # provided here; shipping the CLIs would only invite confusion.
-  denyList = [
-    "networkmanager" # finix runs dhcpcd + static fallback
-    "docker" # deferred wholesale (NOTES phase-1 scope)
-    "docker-compose"
-    # The NixOS tomoe-session shim: it shadowed this host's own wrapper in
-    # sw/bin (buildEnv collision) — no dbus-run-session, no runtime-dir
-    # guard, no polkit agent. session.nix ships the finix wrapper.
-    "tomoe-session"
-  ];
 
   pname = p: p.pname or (lib.getName p);
-  bridged =
-    builtins.filter (p: !(builtins.elem (pname p) denyList))
-    nixosCfg.environment.systemPackages;
 in {
-  environment.systemPackages = bridged;
+  environment.systemPackages = builtins.filter (p:
+    !(builtins.elem (pname p) [
+      "networkmanager" # finix runs dhcpcd + static fallback
+      "docker" # deferred wholesale (NOTES phase-1 scope)
+      "docker-compose"
+      # The NixOS tomoe-session shim: it shadowed this host's own wrapper in
+      # sw/bin (buildEnv collision) — no dbus-run-session, no runtime-dir
+      # guard, no polkit agent. session.nix ships the finix wrapper.
+      "tomoe-session"
+    ]))
+  nixosCfg.environment.systemPackages;
 
   # Same trick for udev rules (steam-devices, i2c, ntsync/DualSense/vial
   # perms, …) — but SANITIZED: any rule line shelling out to systemd
@@ -50,17 +48,15 @@ in {
   # fails on the dangling /run/current-system/systemd paths and those
   # actions are meaningless under finit anyway. systemd-owned packages
   # are dropped wholesale (eudev ships its own base rules).
-  services.udev.packages = let
-    sanitize = p:
+  services.udev.packages =
+    map (p:
       pkgs.runCommand "${pname p}-definit" {} ''
         mkdir -p $out/lib/udev/rules.d
         find ${p}/ -type f -name "*.rules" | while read -r f; do
           ${pkgs.gnused}/bin/sed '/systemd/d' "$f" \
             > "$out/lib/udev/rules.d/$(basename "$f")"
         done
-      '';
-  in
-    map sanitize
+      '')
     (builtins.filter (p: !(lib.hasInfix "systemd" (pname p)))
       nixosCfg.services.udev.packages);
 }

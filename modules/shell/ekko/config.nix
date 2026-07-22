@@ -41,16 +41,19 @@ in {
     ];
     manzil.users."${config.user.name}".files =
       {
-        # The which-key.lua user extension (~/.config/ekko/extensions/)
-        # rebuilds the leader mode and the status/hint bar in Lua; the
-        # builtin leader and statusbar MUST stay disabled or the runtime
-        # aborts with duplicate leader-mode keybindings on attach. The
-        # builtin sidebar (visible: None = always shown) is replaced by the
-        # lua leader-attached session panel. The builtin panes extension
-        # registers leader h/j/k/l/x/|/- for split/focus/close — its j/k/x
-        # collide with which-key.lua's own leader keys, so it is disabled
-        # too; pane keys live in the lua map instead.
-        #
+        # The which-key.lua user extension rebuilds the leader mode and the
+        # status/hint bar in Lua; the builtin leader and statusbar MUST stay
+        # disabled or the runtime aborts with duplicate leader-mode
+        # keybindings on attach. The builtin sidebar (visible: None = always
+        # shown) is replaced by the lua leader-attached session panel. The
+        # builtin panes extension registers leader h/j/k/l/x/|/- for
+        # split/focus/close — its j/k/x collide with which-key.lua's own
+        # leader keys, so it is disabled too; pane keys live in the lua map
+        # instead. Vendored alongside this module (which-key.lua) so every
+        # host gets it — it used to live hand-managed on one machine, and
+        # hosts without it lost the entire leader/status UI.
+        ".config/ekko/extensions/which-key.lua".source = ./which-key.lua;
+
         # Unbind project navigation: "none" is intentionally unparseable —
         # resolve_chords skips the action entirely (empty string would fall
         # back to the defaults instead).

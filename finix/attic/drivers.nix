@@ -3,11 +3,11 @@
 # kept buildable for reference and because the beacon pattern is hard-won
 # (see NOTES.md "Hard-won debugging infrastructure").
 {
-  pkgs,
   lib,
-  serverVm,
-  serverTrial,
+  pkgs,
   serverPersistent,
+  serverTrial,
+  serverVm,
 }: rec {
   runVmScript = pkgs.writeShellScriptBin "run-finix-server-vm" ''
     exec ${lib.escapeShellArgs serverVm.config.virtualisation.qemu.argv} "$@"

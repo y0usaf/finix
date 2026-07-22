@@ -8,7 +8,7 @@ in {
   config = lib.mkIf codexCfg.enable {
     patchix = {
       enable = true;
-      users."${config.user.name}".patches.".codex/config.toml" = {
+      users."${config.user.name}".patches.".local/share/codex/config.toml" = {
         format = "toml";
         clobber = true;
         value =

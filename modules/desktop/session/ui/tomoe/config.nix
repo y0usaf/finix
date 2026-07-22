@@ -12,10 +12,6 @@
   # running mux helper: an attached client requests focus for its existing
   # terminal; cold, the helper falls back to the regular terminal spawn.
   ekkoOpen = config.user.shell.ekko.enable && config.user.shell.ekko.open;
-  termSpawn =
-    if ekkoOpen
-    then "ekko-activate-or-terminal"
-    else config.user.defaults.terminal;
   # Screencast source picker for xdg-desktop-portal-tomoe (dmenu contract:
   # candidates on stdin, choice on stdout, non-zero exit = cancel). The
   # portal hands us pipes, not a tty, so shuttle through a tmpdir and run
@@ -23,16 +19,6 @@
   # matches). Store path referenced from TOMOE_PORTAL_CHOOSER below, so the
   # script and the env var deploy atomically — a dangling path made the
   # portal read exit 127 as "user cancelled".
-  portalChooser = pkgs.writeShellScript "portal-chooser" ''
-    set -eu
-    dir=$(${pkgs.coreutils}/bin/mktemp -d)
-    trap '${pkgs.coreutils}/bin/rm -rf "$dir"' EXIT
-    ${pkgs.coreutils}/bin/cat > "$dir/in"
-    ${lib.getExe pkgs.foot} --app-id=launcher -e ${pkgs.runtimeShell} -c \
-      "${lib.getExe pkgs.fzf} --prompt 'cast: ' < '$dir/in' > '$dir/out'" || true
-    [ -s "$dir/out" ] || exit 1
-    ${pkgs.coreutils}/bin/cat "$dir/out"
-  '';
   # tomoe has no upstream niri-session-style wrapper binary and no NixOS
   # module, so this flake provides a `tomoe-session` shim that mirrors
   # ~/Dev/tomoe/run-tty.sh but execs the installed package binary. It scopes
@@ -58,7 +44,16 @@ in {
         export CLUTTER_BACKEND=wayland
         export XCURSOR_THEME=${config.user.ui.cursor.package.xcursorThemeName}
         export XCURSOR_SIZE=${toString config.user.appearance.xcursorSize}
-        export TOMOE_PORTAL_CHOOSER="''${TOMOE_PORTAL_CHOOSER:-${portalChooser}}"
+        export TOMOE_PORTAL_CHOOSER="''${TOMOE_PORTAL_CHOOSER:-${pkgs.writeShellScript "portal-chooser" ''
+          set -eu
+          dir=$(${pkgs.coreutils}/bin/mktemp -d)
+          trap '${pkgs.coreutils}/bin/rm -rf "$dir"' EXIT
+          ${pkgs.coreutils}/bin/cat > "$dir/in"
+          ${lib.getExe pkgs.foot} --app-id=launcher -e ${pkgs.runtimeShell} -c \
+            "${lib.getExe pkgs.fzf} --prompt 'cast: ' < '$dir/in' > '$dir/out'" || true
+          [ -s "$dir/out" ] || exit 1
+          ${pkgs.coreutils}/bin/cat "$dir/out"
+        ''}}"
 
         ${lib.optionalString config.hardware.nvidia.enable ''
           export WLR_NO_HARDWARE_CURSORS=1
@@ -101,10 +96,8 @@ in {
 
           local wm = require("wm")
           wm.gaps = 8
-          -- wm.lua ships workspace_count = 9, but no binds below ever call
-          -- wm.switch / wm.move_focused, so the session never leaves workspace 1:
-          -- the deck layout is the whole session. Per-workspace state in `visible`
-          -- and the global `column` table just stay single-entry in practice.
+          -- The layout chunk below is selected by user.ui.tomoe.layout: "deck"
+          -- (two 16:9 columns, default) or "sway" (manual splits over workspaces).
 
           tomoe.settings {
             -- Alt, matching the niri setup this replaced (niri/input.nix mod-key).
@@ -114,10 +107,12 @@ in {
             focused = "#7aa2f7";
             unfocused = "#3b4261";
           }},
-                -- NVIDIA: a fenced frame queued to KMS before its render completes
-                -- hangs the driver (whole-session freeze, niri discussion #3777);
-                -- wait for the render CPU-side instead.
-                wait_for_frame_completion = true,
+          ${lib.optionalString config.hardware.nvidia.enable ''
+              -- NVIDIA: a fenced frame queued to KMS before its render completes
+              -- hangs the driver (whole-session freeze, niri discussion #3777);
+              -- wait for the render CPU-side instead. NVIDIA-only: on any other
+              -- GPU this just serializes every frame for nothing.
+              wait_for_frame_completion = true,''}
           ${lib.optionalString (config.user.ui.tomoe.displays != {}) ''
               displays = ${toLua config.user.ui.tomoe.displays},''}
           }
@@ -132,267 +127,10 @@ in {
           ${lib.optionalString (config.user.ui.moonshell.enable or false) ''
               tomoe.process.service("moonshell", { command = { "${lib.getExe config.user.ui.moonshell.package}" }, restart = "on_exit" })''}
 
-          -- ─── Layout: two 16:9 deck columns ───────────────────────────────────────────
-          -- The screen splits into a left and a right half-column; on 32:9 each
-          -- half is exactly 16:9. Each column is a deck: its front window fills
-          -- the half and the rest stay mapped one slot above/below it, so J/K can
-          -- animate the whole stack vertically instead of hide/show swapping.
-          -- wm's event hooks call arrange through the module table, so
-          -- reassigning wm.arrange swaps the layout everywhere.
-          local column = {} -- window id -> "left" | "right", persists across workspaces
-          local visible = {} -- workspace -> { left = id, right = id }: each deck's front
+          -- ─── Floating (shared by both layouts) ──────────────────────────────────────
+          -- Super+space toggles; the active layout's wm.arrange reads this set and
+          -- keeps floated windows raised above the tiling.
           local floating = {} -- window id -> true: stays in its workspace, outside tiling
-
-          -- Mod+r cycles the column split: 16:9+16:9 → 21:9+11:9 → 11:9+21:9.
-          -- On the 32:9 screen, these are fractions of the total usable width:
-          -- 21/32 = 0.65625, 11/32 = 0.34375.
-          local ratios = { 0.5, 21/32, 11/32 }
-          local ratio_idx = 1
-          local ratio = ratios[1]
-
-          local function vis()
-            visible[wm.active] = visible[wm.active] or {}
-            return visible[wm.active]
-          end
-
-          -- Partition a workspace's tiled windows into ordered column lists,
-          -- assigning any new window to the focused window's column so a newly
-          -- spawned window stacks in the deck you're working in, not the opposite
-          -- one. With no tiled focused window, fall back to the emptier column
-          -- (tie: left). A new window jumps to the front of its deck (wm focuses
-          -- it on open).
-          local function split_columns(wins)
-            local left, right = {}, {}
-            local f = tomoe.focused_window()
-            local fside = f and column[f:id()]
-            for _, win in ipairs(wins) do
-              local id = win:id()
-              if not column[id] then
-                if fside == "left" or fside == "right" then
-                  column[id] = fside
-                elseif #left ~= #right then
-                  column[id] = #left < #right and "left" or "right"
-                else
-                  column[id] = "left"
-                end
-                vis()[column[id]] = id
-              end
-              table.insert(column[id] == "left" and left or right, win)
-            end
-            return left, right
-          end
-
-          local function tiled_windows()
-            local wins, full, floats = {}, {}, {}
-            for _, win in ipairs(wm.workspaces[wm.active]) do
-              local id = win:id()
-              local rules = tomoe.rules_for(win)
-              -- Classify rule-floated windows before split_columns sees them:
-              -- briefly tiling then removing a transient corrupts the deck's
-              -- visible id and makes that column jump back to its first window.
-              if rules.floating then
-                floating[id] = true
-              end
-              if wm.fullscreen[id] then
-                table.insert(full, win)
-              elseif floating[id] then
-                table.insert(floats, win)
-              else
-                table.insert(wins, win)
-              end
-            end
-            return wins, full, floats
-          end
-
-          -- Floating windows stay above the tiled deck; fullscreen stays above both.
-          local function raise_untiled(floats, full)
-            for _, win in ipairs(floats) do
-              win:show()
-              win:raise()
-            end
-            for _, win in ipairs(full) do
-              win:show()
-              win:raise()
-            end
-          end
-
-          -- Alt+O toggles a flat grid: every tiled window on the workspace shown
-          -- at once, equal-sized, gaps preserved (no 16:9 letterboxing, no deck
-          -- hiding). Off again on the next press. wm.arrange reads this flag, so
-          -- the layout follows focus/workspace switches until it's toggled back.
-          wm.grid = false
-
-          function wm.arrange()
-            local area = tomoe.usable_area()
-            local wins, full, floats = tiled_windows()
-            local g = wm.gaps
-            local x, y = area.x + g, area.y + g
-            local w, h = area.w - 2 * g, area.h - 2 * g
-            if wm.grid then
-              local n = #wins
-              if n == 0 then
-                raise_untiled(floats, full)
-                return
-              end
-              -- Fit n windows into the nearest-square grid (cols >= rows), each
-              -- cell equal-sized. ceil(n/cols) rows so the last row never spills.
-              local cols = math.ceil(math.sqrt(n))
-              local rows = math.ceil(n / cols)
-              local cw = math.floor((w - (cols - 1) * g) / cols)
-              local ch = math.floor((h - (rows - 1) * g) / rows)
-              for i, win in ipairs(wins) do
-                local idx = i - 1
-                local r = math.floor(idx / cols)
-                local c = idx % cols
-                win:set_geometry(
-                  x + c * (cw + g),
-                  y + r * (ch + g),
-                  cw, ch
-                )
-                win:show()
-              end
-              raise_untiled(floats, full)
-              return
-            end
-            local left_cw = math.floor((w - g) * ratio)
-            local right_cw = w - g - left_cw
-            local left, right = split_columns(wins)
-            local v = vis()
-            local function place(col, side, cx, cw)
-              if #col == 0 then
-                v[side] = nil
-                return
-              end
-              local front_idx = 1
-              for i, win in ipairs(col) do
-                if win:id() == v[side] then
-                  front_idx = i
-                  break
-                end
-              end
-              local front = col[front_idx]
-              local stride = h + g
-              v[side] = front:id()
-              for i, win in ipairs(col) do
-                win:set_geometry(
-                  cx,
-                  y + (i - front_idx) * stride,
-                  cw, h
-                )
-                win:show()
-              end
-              front:raise()
-            end
-            place(left, "left", x, left_cw)
-            place(right, "right", x + left_cw + g, right_cw)
-            raise_untiled(floats, full)
-          end
-
-          -- H/L: focus the left/right deck's front window.
-          local function focus_column(side)
-            local left, right = split_columns(tiled_windows())
-            local col = side == "left" and left or right
-            local id = vis()[side]
-            for _, win in ipairs(col) do
-              if win:id() == id then
-                win:focus()
-                return
-              end
-            end
-            if col[1] then
-              col[1]:focus()
-            end
-          end
-
-          -- J/K: scroll the focused deck down/up (wraps), revealing and focusing
-          -- the next window in the column.
-          local function focus_vert(dir)
-            local f = tomoe.focused_window()
-            local side = f and column[f:id()]
-            if not side then
-              return
-            end
-            local left, right = split_columns(tiled_windows())
-            local col = side == "right" and right or left
-            for i, win in ipairs(col) do
-              if win:id() == vis()[side] then
-                local target = col[((i - 1 + dir) % #col) + 1]
-                vis()[side] = target:id()
-                wm.arrange()
-                target:focus()
-                return
-              end
-            end
-          end
-
-          -- Shift+J/K: move the focused window down/up within its deck's scroll
-          -- order, by swapping with its column neighbor in the workspace order.
-          local function move_vert(dir)
-            local f = tomoe.focused_window()
-            local side = f and column[f:id()]
-            if not side then
-              return
-            end
-            local wins = wm.workspaces[wm.active]
-            local idxs, mine = {}, nil
-            for i, win in ipairs(wins) do
-              if column[win:id()] == side and not wm.fullscreen[win:id()] then
-                table.insert(idxs, i)
-                if win:id() == f:id() then
-                  mine = #idxs
-                end
-              end
-            end
-            local other = mine and mine + dir
-            if not other or other < 1 or other > #idxs then
-              return
-            end
-            local a, b = idxs[mine], idxs[other]
-            wins[a], wins[b] = wins[b], wins[a]
-            wm.arrange()
-          end
-
-          -- Shift+H/L: swap the two columns wholesale (deck fronts included).
-          local function swap_columns()
-            for _, win in ipairs(wm.workspaces[wm.active]) do
-              local id = win:id()
-              if column[id] then
-                column[id] = column[id] == "left" and "right" or "left"
-              end
-            end
-            local v = vis()
-            v.left, v.right = v.right, v.left
-            wm.arrange()
-          end
-
-          -- [ / ]: send the focused window to the left/right column, where it
-          -- becomes the deck front. If it was the old deck's front, reveal the
-          -- next window in that deck rather than resetting to its first entry.
-          local function move_to_column(side)
-            local f = tomoe.focused_window()
-            if not f or wm.fullscreen[f:id()] or floating[f:id()] then
-              return
-            end
-            local id = f:id()
-            local v = vis()
-            local prev = column[id]
-            if prev and prev ~= side and v[prev] == id then
-              local left, right = split_columns(tiled_windows())
-              local old = prev == "left" and left or right
-              v[prev] = nil
-              for i, win in ipairs(old) do
-                if win:id() == id and #old > 1 then
-                  -- Deck navigation wraps, so popping the bottom window reveals
-                  -- the top one just as focus_vert(1) would.
-                  v[prev] = old[(i % #old) + 1]:id()
-                  break
-                end
-              end
-            end
-            column[id] = side
-            v[side] = id
-            wm.arrange()
-          end
 
           local function toggle_floating()
             local win = tomoe.focused_window()
@@ -441,57 +179,719 @@ in {
             end
             wm.arrange()
           end)
+        ''
+        + (
+          if config.user.ui.tomoe.layout == "sway"
+          then ''
 
-          -- Click-to-focus or wm's close-refocus can land on a deck-offscreen
-          -- window; bring it to the front of its deck. Untiled windows (the
-          -- floating launcher) are skipped. Also keep a one-step focus history:
-          -- the close hook below needs to know who was focused before wm's
-          -- close-refocus already moved focus.
-          local last_focus = {}
-          local function find_tiled(id)
-            if floating[id] then
-              return
+            -- ─── Layout: sway-style manual splits over numbered workspaces ─────────────
+            -- One split tree per workspace: inner nodes { dir = "h"|"v", kids },
+            -- leaves { win = id }. Mod+b / Mod+v choose the direction the NEXT
+            -- window splits the focused leaf with (side-by-side / stacked); the
+            -- default follows the focused region's longer axis, i3-style. The
+            -- tree self-heals in arrange: leaves that left the workspace are
+            -- pruned, unknown windows insert next to the previously focused
+            -- leaf. Alt+J/K scroll workspaces, so vertical focus within
+            -- stacked splits rides Mod+Ctrl+J/K.
+            --
+            -- Animations off: this layout retiles the whole tree on every
+            -- open/close and workspace-switch hide/show, so the default move
+            -- springs and open fades turn every operation into a spring storm.
+            -- Sway feels snappy because it never animates; match that.
+            tomoe.settings { animations = false }
+
+            local trees = {}      -- workspace -> split tree root
+            local split_pref = {} -- window id -> "h"|"v": direction of its next split
+            local focus_hist = {} -- cur/prev focused ids: prev is the split target
+
+            local function is_leaf(node)
+              return node ~= nil and node.win ~= nil
             end
-            for _, win in ipairs(wm.workspaces[wm.active]) do
-              if win:id() == id then
-                return win
+
+            local function find_leaf(node, id)
+              if not node then
+                return nil
+              end
+              if is_leaf(node) then
+                return node.win == id and node or nil
+              end
+              for _, kid in ipairs(node.kids) do
+                local hit = find_leaf(kid, id)
+                if hit then
+                  return hit
+                end
+              end
+              return nil
+            end
+
+            local function last_leaf(node)
+              if is_leaf(node) then
+                return node.win
+              end
+              return node and last_leaf(node.kids[#node.kids]) or nil
+            end
+
+            -- Insert new_id beside target_id, sway-style: a parent container
+            -- with the same direction gains a sibling right after the target,
+            -- otherwise the target leaf is wrapped in a new container.
+            local function insert_leaf(node, target_id, new_id, dir)
+              if is_leaf(node) then
+                if node.win == target_id then
+                  return { dir = dir, kids = { { win = target_id }, { win = new_id } } }
+                end
+                return node
+              end
+              if node.dir == dir then
+                for i, kid in ipairs(node.kids) do
+                  if is_leaf(kid) and kid.win == target_id then
+                    table.insert(node.kids, i + 1, { win = new_id })
+                    return node
+                  end
+                end
+              end
+              for i, kid in ipairs(node.kids) do
+                if find_leaf(kid, target_id) then
+                  node.kids[i] = insert_leaf(kid, target_id, new_id, dir)
+                  return node
+                end
+              end
+              return node
+            end
+
+            local function prune(node, keep)
+              if not node then
+                return nil
+              end
+              if is_leaf(node) then
+                return keep[node.win] and node or nil
+              end
+              local kids = {}
+              for _, kid in ipairs(node.kids) do
+                local k = prune(kid, keep)
+                if k then
+                  kids[#kids + 1] = k
+                end
+              end
+              if #kids == 0 then
+                return nil
+              end
+              if #kids == 1 then
+                return kids[1]
+              end
+              node.kids = kids
+              return node
+            end
+
+            -- Equal splits; the last kid absorbs rounding so no stray gap
+            -- column opens at the far edge.
+            local function render(node, x, y, w, h, g)
+              if is_leaf(node) then
+                local win = tomoe.window(node.win)
+                if win then
+                  win:set_geometry(x, y, w, h)
+                  win:show()
+                end
+                return
+              end
+              local n = #node.kids
+              if node.dir == "h" then
+                local pos = x
+                local step = math.floor((w - (n - 1) * g) / n)
+                for i, kid in ipairs(node.kids) do
+                  local kw = i == n and (x + w - pos) or step
+                  render(kid, pos, y, kw, h, g)
+                  pos = pos + kw + g
+                end
+              else
+                local pos = y
+                local step = math.floor((h - (n - 1) * g) / n)
+                for i, kid in ipairs(node.kids) do
+                  local kh = i == n and (y + h - pos) or step
+                  render(kid, x, pos, w, kh, g)
+                  pos = pos + kh + g
+                end
               end
             end
-          end
-          tomoe.on_focus_change(function(win)
-            if not win then
-              return
+
+            function wm.arrange()
+              local area = tomoe.usable_area()
+              local g = wm.gaps
+              local wins, full, floats = {}, {}, {}
+              local keep = {}
+              for _, win in ipairs(wm.workspaces[wm.active]) do
+                local id = win:id()
+                -- Classify rule-floated windows before the tree sees them.
+                if tomoe.rules_for(win).floating then
+                  floating[id] = true
+                end
+                if wm.fullscreen[id] then
+                  full[#full + 1] = win
+                elseif floating[id] then
+                  floats[#floats + 1] = win
+                else
+                  wins[#wins + 1] = win
+                  keep[id] = true
+                end
+              end
+              local root = prune(trees[wm.active], keep)
+              for _, win in ipairs(wins) do
+                local id = win:id()
+                if not find_leaf(root, id) then
+                  if not root then
+                    root = { win = id }
+                  else
+                    -- wm focuses new windows on open, so the split target is
+                    -- the previously focused window, not the new one.
+                    local target = (focus_hist.prev and keep[focus_hist.prev])
+                      and focus_hist.prev or last_leaf(root)
+                    local dir = split_pref[target]
+                    split_pref[target] = nil
+                    if not dir then
+                      local twin = tomoe.window(target)
+                      local geo = twin and twin:geometry()
+                      dir = (geo and geo.h > geo.w) and "v" or "h"
+                    end
+                    root = insert_leaf(root, target, id, dir)
+                  end
+                end
+              end
+              trees[wm.active] = root
+              if root then
+                render(root, area.x + g, area.y + g, area.w - 2 * g, area.h - 2 * g, g)
+              end
+              for _, win in ipairs(floats) do
+                win:show()
+                win:raise()
+              end
+              for _, win in ipairs(full) do
+                win:show()
+                win:raise()
+              end
             end
-            local id = win:id()
-            if id ~= last_focus.cur then
-              last_focus.prev, last_focus.cur = last_focus.cur, id
+
+            -- Geometric focus: H/L ride the X axis, Ctrl+J/K the Y axis.
+            local function focus_dir(dx, dy)
+              local f = tomoe.focused_window()
+              local fg = f and f:geometry()
+              if not fg then
+                return
+              end
+              local fx, fy = fg.x + fg.w / 2, fg.y + fg.h / 2
+              local best, best_d
+              for _, win in ipairs(wm.workspaces[wm.active]) do
+                local id = win:id()
+                if id ~= f:id() and not floating[id] and not wm.fullscreen[id] then
+                  local geo = win:geometry()
+                  if geo then
+                    local cx, cy = geo.x + geo.w / 2, geo.y + geo.h / 2
+                    local ddx, ddy = cx - fx, cy - fy
+                    local dom = dx ~= 0 and ddx or ddy
+                    local cross = dx ~= 0 and ddy or ddx
+                    if (dom > 0) == (dx + dy > 0) and math.abs(dom) > math.abs(cross) then
+                      local d = math.abs(ddx) + math.abs(ddy)
+                      if not best_d or d < best_d then
+                        best, best_d = win, d
+                      end
+                    end
+                  end
+                end
+              end
+              if best then
+                best:focus()
+              end
             end
-            local side = column[id]
-            if side and not wm.fullscreen[id] and find_tiled(id) and vis()[side] ~= id then
-              vis()[side] = id
+
+            -- J/K scroll the workspace ring; Shift+J/K send the focused window
+            -- along it and follow (it lands at the end of the target list,
+            -- which wm.switch then focuses).
+            local function ws_step(dir)
+              wm.switch(((wm.active - 1 + dir) % wm.workspace_count) + 1)
+            end
+
+            local function ws_move_step(dir)
+              if not tomoe.focused_window() then
+                return
+              end
+              local n = ((wm.active - 1 + dir) % wm.workspace_count) + 1
+              wm.move_focused(n)
+              wm.switch(n)
+            end
+
+            -- In-order leaf ids of a tree: the linear order Shift+H/L swaps in.
+            local function leaf_ids(node, out)
+              if not node then
+                return out
+              end
+              if is_leaf(node) then
+                out[#out + 1] = node.win
+                return out
+              end
+              for _, kid in ipairs(node.kids) do
+                leaf_ids(kid, out)
+              end
+              return out
+            end
+
+            local function swap_leaf(node, a, b)
+              if not node then
+                return
+              end
+              if is_leaf(node) then
+                if node.win == a then
+                  node.win = b
+                elseif node.win == b then
+                  node.win = a
+                end
+                return
+              end
+              for _, kid in ipairs(node.kids) do
+                swap_leaf(kid, a, b)
+              end
+            end
+
+            -- Shift+H/L: swap the focused window with the previous/next leaf in
+            -- tree order. The tree keeps its shape; the windows trade regions.
+            local function move_swap(dir)
+              local f = tomoe.focused_window()
+              local root = trees[wm.active]
+              if not f or not root then
+                return
+              end
+              local ids = leaf_ids(root, {})
+              for i, id in ipairs(ids) do
+                if id == f:id() then
+                  local j = i + dir
+                  if j < 1 or j > #ids then
+                    return
+                  end
+                  swap_leaf(root, id, ids[j])
+                  wm.arrange()
+                  return
+                end
+              end
+            end
+
+            tomoe.on_focus_change(function(win)
+              if not win then
+                return
+              end
+              local id = win:id()
+              if id ~= focus_hist.cur then
+                focus_hist.prev, focus_hist.cur = focus_hist.cur, id
+              end
+            end)
+
+            tomoe.on_window_close(function(win)
+              local id = win:id()
+              split_pref[id] = nil
+              floating[id] = nil
+              if focus_hist.prev == id then
+                focus_hist.prev = nil
+              end
+            end)
+
+            -- Trees are plain data (ids only), so they ride on_reload directly;
+            -- restore just drops leaves whose window died while away.
+            tomoe.on_reload("sway", function()
+              return trees
+            end, function(saved)
+              local function valid(node)
+                if is_leaf(node) then
+                  return tomoe.window(node.win) ~= nil
+                end
+                local kids = {}
+                for _, kid in ipairs(node.kids or {}) do
+                  if valid(kid) then
+                    kids[#kids + 1] = kid
+                  end
+                end
+                node.kids = kids
+                return #kids > 0
+              end
+              trees = {}
+              for ws, root in pairs(saved or {}) do
+                if type(root) == "table" and valid(root) then
+                  trees[tonumber(ws) or ws] = root
+                end
+              end
+              wm.arrange()
+            end)
+
+            -- ─── Binds (sway layout; Mod = Alt) ─────────────────────────────────────
+            tomoe.bind("Mod+h", function() focus_dir(-1, 0) end, "Focus Left")
+            tomoe.bind("Mod+l", function() focus_dir(1, 0) end, "Focus Right")
+            tomoe.bind("Mod+Ctrl+j", function() focus_dir(0, 1) end, "Focus Down")
+            tomoe.bind("Mod+Ctrl+k", function() focus_dir(0, -1) end, "Focus Up")
+            tomoe.bind("Mod+j", function() ws_step(1) end, "Next Workspace")
+            tomoe.bind("Mod+k", function() ws_step(-1) end, "Previous Workspace")
+            tomoe.bind("Mod+Shift+j", function() ws_move_step(1) end, "Move Window to Next Workspace")
+            tomoe.bind("Mod+Shift+k", function() ws_move_step(-1) end, "Move Window to Previous Workspace")
+            tomoe.bind("Mod+Shift+h", function() move_swap(-1) end, "Swap with Previous Window")
+            tomoe.bind("Mod+Shift+l", function() move_swap(1) end, "Swap with Next Window")
+            tomoe.bind("Mod+b", function()
+              local f = tomoe.focused_window()
+              if f then
+                split_pref[f:id()] = "h"
+              end
+            end, "Split Next Horizontally")
+            tomoe.bind("Mod+v", function()
+              local f = tomoe.focused_window()
+              if f then
+                split_pref[f:id()] = "v"
+              end
+            end, "Split Next Vertically")
+            -- ─── Apps (Alt digits stay app spawns; workspaces ride J/K) ──────────────
+            tomoe.bind("Mod+1", function() tomoe.spawn("cursor") end)
+            tomoe.bind("Mod+2", function() tomoe.spawn("librewolf") end)
+            tomoe.bind("Mod+3", function() tomoe.spawn("discord") end)
+            tomoe.bind("Mod+4", function() tomoe.spawn("steam") end)
+            tomoe.bind("Mod+5", function() tomoe.spawn("obs") end)
+          ''
+          else ''
+
+            -- ─── Layout: two 16:9 deck columns ───────────────────────────────────────────
+            -- The screen splits into a left and a right half-column; on 32:9 each
+            -- half is exactly 16:9. Each column is a deck: its front window fills
+            -- the half and the rest stay mapped one slot above/below it, so J/K can
+            -- animate the whole stack vertically instead of hide/show swapping.
+            -- wm's event hooks call arrange through the module table, so
+            -- reassigning wm.arrange swaps the layout everywhere.
+            local column = {} -- window id -> "left" | "right", persists across workspaces
+            local visible = {} -- workspace -> { left = id, right = id }: each deck's front
+
+            -- Mod+r cycles the column split: 16:9+16:9 → 21:9+11:9 → 11:9+21:9.
+            -- On the 32:9 screen, these are fractions of the total usable width:
+            -- 21/32 = 0.65625, 11/32 = 0.34375.
+            local ratios = { 0.5, 21/32, 11/32 }
+            local ratio_idx = 1
+            local ratio = ratios[1]
+
+            local function vis()
+              visible[wm.active] = visible[wm.active] or {}
+              return visible[wm.active]
+            end
+
+            -- Partition a workspace's tiled windows into ordered column lists,
+            -- assigning any new window to the focused window's column so a newly
+            -- spawned window stacks in the deck you're working in, not the opposite
+            -- one. With no tiled focused window, fall back to the emptier column
+            -- (tie: left). A new window jumps to the front of its deck (wm focuses
+            -- it on open).
+            local function split_columns(wins)
+              local left, right = {}, {}
+              local f = tomoe.focused_window()
+              local fside = f and column[f:id()]
+              for _, win in ipairs(wins) do
+                local id = win:id()
+                if not column[id] then
+                  if fside == "left" or fside == "right" then
+                    column[id] = fside
+                  elseif #left ~= #right then
+                    column[id] = #left < #right and "left" or "right"
+                  else
+                    column[id] = "left"
+                  end
+                  vis()[column[id]] = id
+                end
+                table.insert(column[id] == "left" and left or right, win)
+              end
+              return left, right
+            end
+
+            local function tiled_windows()
+              local wins, full, floats = {}, {}, {}
+              for _, win in ipairs(wm.workspaces[wm.active]) do
+                local id = win:id()
+                local rules = tomoe.rules_for(win)
+                -- Classify rule-floated windows before split_columns sees them:
+                -- briefly tiling then removing a transient corrupts the deck's
+                -- visible id and makes that column jump back to its first window.
+                if rules.floating then
+                  floating[id] = true
+                end
+                if wm.fullscreen[id] then
+                  table.insert(full, win)
+                elseif floating[id] then
+                  table.insert(floats, win)
+                else
+                  table.insert(wins, win)
+                end
+              end
+              return wins, full, floats
+            end
+
+            -- Floating windows stay above the tiled deck; fullscreen stays above both.
+            local function raise_untiled(floats, full)
+              for _, win in ipairs(floats) do
+                win:show()
+                win:raise()
+              end
+              for _, win in ipairs(full) do
+                win:show()
+                win:raise()
+              end
+            end
+
+            -- Alt+O toggles a flat grid: every tiled window on the workspace shown
+            -- at once, equal-sized, gaps preserved (no 16:9 letterboxing, no deck
+            -- hiding). Off again on the next press. wm.arrange reads this flag, so
+            -- the layout follows focus/workspace switches until it's toggled back.
+            wm.grid = false
+
+            function wm.arrange()
+              local area = tomoe.usable_area()
+              local wins, full, floats = tiled_windows()
+              local g = wm.gaps
+              local x, y = area.x + g, area.y + g
+              local w, h = area.w - 2 * g, area.h - 2 * g
+              if wm.grid then
+                local n = #wins
+                if n == 0 then
+                  raise_untiled(floats, full)
+                  return
+                end
+                -- Fit n windows into the nearest-square grid (cols >= rows), each
+                -- cell equal-sized. ceil(n/cols) rows so the last row never spills.
+                local cols = math.ceil(math.sqrt(n))
+                local rows = math.ceil(n / cols)
+                local cw = math.floor((w - (cols - 1) * g) / cols)
+                local ch = math.floor((h - (rows - 1) * g) / rows)
+                for i, win in ipairs(wins) do
+                  local idx = i - 1
+                  local r = math.floor(idx / cols)
+                  local c = idx % cols
+                  win:set_geometry(
+                    x + c * (cw + g),
+                    y + r * (ch + g),
+                    cw, ch
+                  )
+                  win:show()
+                end
+                raise_untiled(floats, full)
+                return
+              end
+              local left_cw = math.floor((w - g) * ratio)
+              local right_cw = w - g - left_cw
+              local left, right = split_columns(wins)
+              local v = vis()
+              local function place(col, side, cx, cw)
+                if #col == 0 then
+                  v[side] = nil
+                  return
+                end
+                local front_idx = 1
+                for i, win in ipairs(col) do
+                  if win:id() == v[side] then
+                    front_idx = i
+                    break
+                  end
+                end
+                local front = col[front_idx]
+                local stride = h + g
+                v[side] = front:id()
+                for i, win in ipairs(col) do
+                  win:set_geometry(
+                    cx,
+                    y + (i - front_idx) * stride,
+                    cw, h
+                  )
+                  win:show()
+                end
+                front:raise()
+              end
+              place(left, "left", x, left_cw)
+              place(right, "right", x + left_cw + g, right_cw)
+              raise_untiled(floats, full)
+            end
+
+            -- H/L: focus the left/right deck's front window.
+            local function focus_column(side)
+              local left, right = split_columns(tiled_windows())
+              local col = side == "left" and left or right
+              local id = vis()[side]
+              for _, win in ipairs(col) do
+                if win:id() == id then
+                  win:focus()
+                  return
+                end
+              end
+              if col[1] then
+                col[1]:focus()
+              end
+            end
+
+            -- J/K: scroll the focused deck down/up (wraps), revealing and focusing
+            -- the next window in the column.
+            local function focus_vert(dir)
+              local f = tomoe.focused_window()
+              local side = f and column[f:id()]
+              if not side then
+                return
+              end
+              local left, right = split_columns(tiled_windows())
+              local col = side == "right" and right or left
+              for i, win in ipairs(col) do
+                if win:id() == vis()[side] then
+                  local target = col[((i - 1 + dir) % #col) + 1]
+                  vis()[side] = target:id()
+                  wm.arrange()
+                  target:focus()
+                  return
+                end
+              end
+            end
+
+            -- Shift+J/K: move the focused window down/up within its deck's scroll
+            -- order, by swapping with its column neighbor in the workspace order.
+            local function move_vert(dir)
+              local f = tomoe.focused_window()
+              local side = f and column[f:id()]
+              if not side then
+                return
+              end
+              local wins = wm.workspaces[wm.active]
+              local idxs, mine = {}, nil
+              for i, win in ipairs(wins) do
+                if column[win:id()] == side and not wm.fullscreen[win:id()] then
+                  table.insert(idxs, i)
+                  if win:id() == f:id() then
+                    mine = #idxs
+                  end
+                end
+              end
+              local other = mine and mine + dir
+              if not other or other < 1 or other > #idxs then
+                return
+              end
+              local a, b = idxs[mine], idxs[other]
+              wins[a], wins[b] = wins[b], wins[a]
               wm.arrange()
             end
-          end)
 
-          -- wm's close hook (runs first) refocuses the flat-list-last window,
-          -- which may sit in the other deck. If the closed window was the focused
-          -- deck front, pull focus back to whatever that deck revealed instead.
-          -- Also drop the column assignment so reused ids start fresh.
-          tomoe.on_window_close(function(win)
-            local id = win:id()
-            local side = column[id]
-            column[id] = nil
-            floating[id] = nil
-            if side and id == last_focus.prev then
-              local front = vis()[side] and find_tiled(vis()[side])
-              if front then
-                front:focus()
+            -- Shift+H/L: swap the two columns wholesale (deck fronts included).
+            local function swap_columns()
+              for _, win in ipairs(wm.workspaces[wm.active]) do
+                local id = win:id()
+                if column[id] then
+                  column[id] = column[id] == "left" and "right" or "left"
+                end
+              end
+              local v = vis()
+              v.left, v.right = v.right, v.left
+              wm.arrange()
+            end
+
+            -- [ / ]: send the focused window to the left/right column, where it
+            -- becomes the deck front. If it was the old deck's front, reveal the
+            -- next window in that deck rather than resetting to its first entry.
+            local function move_to_column(side)
+              local f = tomoe.focused_window()
+              if not f or wm.fullscreen[f:id()] or floating[f:id()] then
+                return
+              end
+              local id = f:id()
+              local v = vis()
+              local prev = column[id]
+              if prev and prev ~= side and v[prev] == id then
+                local left, right = split_columns(tiled_windows())
+                local old = prev == "left" and left or right
+                v[prev] = nil
+                for i, win in ipairs(old) do
+                  if win:id() == id and #old > 1 then
+                    -- Deck navigation wraps, so popping the bottom window reveals
+                    -- the top one just as focus_vert(1) would.
+                    v[prev] = old[(i % #old) + 1]:id()
+                    break
+                  end
+                end
+              end
+              column[id] = side
+              v[side] = id
+              wm.arrange()
+            end
+
+            -- Click-to-focus or wm's close-refocus can land on a deck-offscreen
+            -- window; bring it to the front of its deck. Untiled windows (the
+            -- floating launcher) are skipped. Also keep a one-step focus history:
+            -- the close hook below needs to know who was focused before wm's
+            -- close-refocus already moved focus.
+            local last_focus = {}
+            local function find_tiled(id)
+              if floating[id] then
+                return
+              end
+              for _, win in ipairs(wm.workspaces[wm.active]) do
+                if win:id() == id then
+                  return win
+                end
               end
             end
-          end)
+            tomoe.on_focus_change(function(win)
+              if not win then
+                return
+              end
+              local id = win:id()
+              if id ~= last_focus.cur then
+                last_focus.prev, last_focus.cur = last_focus.cur, id
+              end
+              local side = column[id]
+              if side and not wm.fullscreen[id] and find_tiled(id) and vis()[side] ~= id then
+                vis()[side] = id
+                wm.arrange()
+              end
+            end)
+
+            -- wm's close hook (runs first) refocuses the flat-list-last window,
+            -- which may sit in the other deck. If the closed window was the focused
+            -- deck front, pull focus back to whatever that deck revealed instead.
+            -- Also drop the column assignment so reused ids start fresh.
+            tomoe.on_window_close(function(win)
+              local id = win:id()
+              local side = column[id]
+              column[id] = nil
+              floating[id] = nil
+              if side and id == last_focus.prev then
+                local front = vis()[side] and find_tiled(vis()[side])
+                if front then
+                  front:focus()
+                end
+              end
+            end)
+
+            -- ─── Deck binds (HJKL over the two columns) ────────────────────────────────
+            tomoe.bind("Mod+h", function() focus_column("left") end, "Focus Left Column")
+            tomoe.bind("Mod+l", function() focus_column("right") end, "Focus Right Column")
+            tomoe.bind("Mod+j", function() focus_vert(1) end, "Scroll Deck Down")
+            tomoe.bind("Mod+k", function() focus_vert(-1) end, "Scroll Deck Up")
+            tomoe.bind("Mod+Shift+h", swap_columns, "Swap Columns")
+            tomoe.bind("Mod+Shift+l", swap_columns)
+            tomoe.bind("Mod+Shift+j", function() move_vert(1) end, "Move Window Down")
+            tomoe.bind("Mod+Shift+k", function() move_vert(-1) end, "Move Window Up")
+            tomoe.bind("Mod+bracketleft", function() move_to_column("left") end, "Move Window to Left Column")
+            tomoe.bind("Mod+bracketright", function() move_to_column("right") end, "Move Window to Right Column")
+            tomoe.bind("Mod+o", function() wm.grid = not wm.grid; wm.arrange() end, "Toggle Even Grid")
+            tomoe.bind("Mod+r", function()
+              ratio_idx = ratio_idx % #ratios + 1
+              ratio = ratios[ratio_idx]
+              wm.arrange()
+            end, "Cycle Column Split (16:9+16:9 / 21:9+11:9 / 11:9+21:9)")
+
+            -- ─── Apps ───────────────────────────────────────────────────────────────────
+            tomoe.bind("Mod+1", function() tomoe.spawn("cursor") end)
+            tomoe.bind("Mod+2", function() tomoe.spawn("librewolf") end)
+            tomoe.bind("Mod+3", function() tomoe.spawn("discord") end)
+            tomoe.bind("Mod+4", function() tomoe.spawn("steam") end)
+            tomoe.bind("Mod+5", function() tomoe.spawn("obs") end)
+          ''
+        )
+        + ''
 
           -- ─── Binds (mirroring niri/keybindings.nix; Mod = Alt) ───────────────────────
-          tomoe.bind("Mod+t", function() tomoe.spawn("${termSpawn}") end, "Spawn Terminal")
+          tomoe.bind("Mod+t", function() tomoe.spawn("${
+            if ekkoOpen
+            then "ekko-activate-or-terminal"
+            else config.user.defaults.terminal
+          }") end, "Spawn Terminal")
           tomoe.bind("Super+r", function() tomoe.spawn("foot --app-id=launcher ~/.config/scripts/tui-launcher.sh") end, "Run an Application")
           tomoe.bind("Mod+e", function() tomoe.spawn("pcmanfm") end, "File Manager")
           tomoe.bind("Super+Shift+o", function() tomoe.spawn("foot -e nvim") end, "Editor")
@@ -500,31 +900,6 @@ in {
           tomoe.bind("Super+space", toggle_floating, "Toggle Floating")
           tomoe.bind("Mod+Shift+e", "quit")
           tomoe.bind("Mod+Shift+slash", "show-hotkey-overlay")
-
-          -- ─── Focus / movement (HJKL over the two columns) ────────────────────────────
-          tomoe.bind("Mod+h", function() focus_column("left") end, "Focus Left Column")
-          tomoe.bind("Mod+l", function() focus_column("right") end, "Focus Right Column")
-          tomoe.bind("Mod+j", function() focus_vert(1) end, "Scroll Deck Down")
-          tomoe.bind("Mod+k", function() focus_vert(-1) end, "Scroll Deck Up")
-          tomoe.bind("Mod+Shift+h", swap_columns, "Swap Columns")
-          tomoe.bind("Mod+Shift+l", swap_columns)
-          tomoe.bind("Mod+Shift+j", function() move_vert(1) end, "Move Window Down")
-          tomoe.bind("Mod+Shift+k", function() move_vert(-1) end, "Move Window Up")
-          tomoe.bind("Mod+bracketleft", function() move_to_column("left") end, "Move Window to Left Column")
-          tomoe.bind("Mod+bracketright", function() move_to_column("right") end, "Move Window to Right Column")
-          tomoe.bind("Mod+o", function() wm.grid = not wm.grid; wm.arrange() end, "Toggle Even Grid")
-          tomoe.bind("Mod+r", function()
-            ratio_idx = ratio_idx % #ratios + 1
-            ratio = ratios[ratio_idx]
-            wm.arrange()
-          end, "Cycle Column Split (16:9+16:9 / 21:9+11:9 / 11:9+21:9)")
-
-          -- ─── Apps ────────────────────────────────────────────────────────────────────
-          tomoe.bind("Mod+1", function() tomoe.spawn("cursor") end)
-          tomoe.bind("Mod+2", function() tomoe.spawn("librewolf") end)
-          tomoe.bind("Mod+3", function() tomoe.spawn("discord") end)
-          tomoe.bind("Mod+4", function() tomoe.spawn("steam") end)
-          tomoe.bind("Mod+5", function() tomoe.spawn("obs") end)
 
           -- ─── Screenshots / wallpaper ─────────────────────────────────────────────────
           tomoe.bind("Mod+g", "screenshot", "Screenshot")
@@ -538,6 +913,9 @@ in {
           tomoe.bind("XF86AudioPlay", function() tomoe.spawn("playerctl play-pause") end)
           tomoe.bind("XF86AudioNext", function() tomoe.spawn("playerctl next") end)
           tomoe.bind("XF86AudioPrev", function() tomoe.spawn("playerctl previous") end)
+          tomoe.bind("XF86AudioMicMute", function() tomoe.spawn("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle") end)
+          tomoe.bind("XF86MonBrightnessUp", function() tomoe.spawn("brightnessctl set 5%+") end)
+          tomoe.bind("XF86MonBrightnessDown", function() tomoe.spawn("brightnessctl set 5%-") end)
         ''
         + lib.optionalString (config.user.ui.tomoe.extraConfig != "") "\n-- ─── host extraConfig ────────────────────────────────────────────────────────\n${config.user.ui.tomoe.extraConfig}\n";
     };

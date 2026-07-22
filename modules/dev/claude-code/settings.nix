@@ -23,15 +23,15 @@
 in {
   config = lib.mkIf claudeCodeCfg.enable {
     manzil.users."${user.name}".files = {
-      ".claude/on-agent-need-attention.wav" = {
+      ".local/share/claude/on-agent-need-attention.wav" = {
         source = ./assets/tuturu.ogg;
       };
 
-      ".claude/on-agent-complete.wav" = {
+      ".local/share/claude/on-agent-complete.wav" = {
         source = ./assets/tuturu.ogg;
       };
 
-      ".claude/CLAUDE.md" = {
+      ".local/share/claude/CLAUDE.md" = {
         text = ''
           <system>
             <environment>NixOS</environment>
@@ -45,7 +45,7 @@ in {
         '';
       };
 
-      ".claude/settings.json" = {
+      ".local/share/claude/settings.json" = {
         generator = lib.generators.toJSON {};
         value =
           {

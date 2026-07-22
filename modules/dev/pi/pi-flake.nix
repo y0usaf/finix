@@ -7,7 +7,7 @@
 }: let
   piFlake = flakeInputs.pi-flake;
   # The base pi package is built from the upstream monorepo source; docs live there.
-  piSrc = "${piFlake.packages.${pkgs.stdenv.hostPlatform.system}.pi.src}/packages/coding-agent";
+  piSrc = "${piFlake.packages."${pkgs.stdenv.hostPlatform.system}".pi.src}/packages/coding-agent";
 in {
   imports = [piFlake.nixosModules.default];
 

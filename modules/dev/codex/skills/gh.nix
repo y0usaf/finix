@@ -9,10 +9,10 @@
 in {
   config = lib.mkIf (codexCfg.enable && (lib.attrByPath ["skills" "gh" "enable"] true codexCfg) && (lib.attrByPath ["tools" "gh" "enable"] false user)) {
     manzil.users."${config.user.name}".files = {
-      ".codex/skills/gh/SKILL.md" = {
+      ".local/share/codex/skills/gh/SKILL.md" = {
         text = skill.skill;
       };
-      ".codex/skills/gh/agents/openai.yaml" = {
+      ".local/share/codex/skills/gh/agents/openai.yaml" = {
         generator = lib.generators.toYAML {};
         value = {inherit (skill) interface;};
       };

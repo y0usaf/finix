@@ -46,7 +46,7 @@ in {
     ];
 
     manzil.users."${config.user.name}".files = {
-      ".pi/agent/settings.json" = {
+      ".local/share/pi/agent/settings.json" = {
         generator = toJSON;
         value =
           {
@@ -82,7 +82,7 @@ in {
             inherit (cfg) extensionSettings;
           };
       };
-      ".pi/agent/models.json" = {
+      ".local/share/pi/agent/models.json" = {
         generator = toJSON;
         value = {
           providers = {
@@ -189,10 +189,97 @@ in {
                 }
               ];
             };
+            "vercel-ai-gateway" = {
+              baseUrl = "https://ai-gateway.vercel.sh/v1";
+              api = "openai-completions";
+              apiKey = "!cat ${homeDir}/Tokens/AI_GATEWAY_API_KEY.txt";
+              models = [
+                {
+                  id = "moonshotai/kimi-k3";
+                  name = "Kimi K3";
+                  reasoning = true;
+                  input = ["text" "image"];
+                  contextWindow = 1000000;
+                  maxTokens = 131072;
+                  cost = {
+                    input = 3;
+                    output = 15;
+                    cacheRead = 0.3;
+                    cacheWrite = 0;
+                  };
+                }
+                {
+                  id = "openai/gpt-oss-120b";
+                  name = "GPT-OSS 120B (fast)";
+                  reasoning = true;
+                  input = ["text"];
+                  contextWindow = 131072;
+                  maxTokens = 131072;
+                  cost = {
+                    input = 0.1;
+                    output = 0.5;
+                    cacheRead = 0;
+                    cacheWrite = 0;
+                  };
+                  compat.vercelGatewayRouting = {
+                    only = ["cerebras" "groq" "baseten"];
+                    order = ["cerebras" "groq" "baseten"];
+                  };
+                }
+                {
+                  id = "zai/glm-4.7";
+                  name = "GLM 4.7 (Cerebras)";
+                  reasoning = true;
+                  input = ["text"];
+                  contextWindow = 200000;
+                  maxTokens = 120000;
+                  cost = {
+                    input = 0.6;
+                    output = 2.2;
+                    cacheRead = 0.12;
+                    cacheWrite = 0;
+                  };
+                  compat.vercelGatewayRouting = {
+                    only = ["cerebras" "baseten"];
+                    order = ["cerebras" "baseten"];
+                  };
+                }
+                {
+                  id = "moonshotai/kimi-k2.5";
+                  name = "Kimi K2.5 (Baseten)";
+                  reasoning = true;
+                  input = ["text" "image"];
+                  contextWindow = 262144;
+                  maxTokens = 262144;
+                  cost = {
+                    input = 0.6;
+                    output = 3;
+                    cacheRead = 0.1;
+                    cacheWrite = 0;
+                  };
+                  compat.vercelGatewayRouting.only = ["baseten"];
+                }
+                {
+                  id = "meta/llama-3.3-70b";
+                  name = "Llama 3.3 70B (Groq)";
+                  reasoning = false;
+                  input = ["text"];
+                  contextWindow = 128000;
+                  maxTokens = 8192;
+                  cost = {
+                    input = 0.72;
+                    output = 0.72;
+                    cacheRead = 0;
+                    cacheWrite = 0;
+                  };
+                  compat.vercelGatewayRouting.only = ["groq"];
+                }
+              ];
+            };
           };
         };
       };
-      ".pi/agent/DEFAULT_SYSTEM.md" = {
+      ".local/share/pi/agent/DEFAULT_SYSTEM.md" = {
         text = ''
           You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
 
@@ -226,7 +313,7 @@ in {
           - Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
         '';
       };
-      ".pi/agent/SYSTEM.md" = {
+      ".local/share/pi/agent/SYSTEM.md" = {
         text = ''
           <role>Pi coding assistant</role>
 

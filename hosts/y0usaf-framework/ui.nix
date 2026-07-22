@@ -1,6 +1,13 @@
 _: {
   user.ui = {
-    gpuishell.enable = true;
+    moonshell = {
+      enable = true;
+      bar-overlay.modules = ["time" "date" "battery"];
+      bar-overlay.edges = ["bottom"];
+      bar-overlay.exclusive = true;
+      bar-overlay.indent = 8;
+      bar-overlay.bongo-cat.enable = true;
+    };
     cursor.enable = true;
     fonts.enable = true;
     foot = {
@@ -9,18 +16,22 @@ _: {
     };
     gtk = {
       enable = true;
-      scale = 1.0;
+      scale = 1.5;
     };
-    niri = {
+    tomoe = {
+      layout = "sway";
       enable = true;
+      displays = {
+        "eDP-1" = {
+          scale = 1;
+        };
+      };
+
       extraConfig = ''
-        window-rule {
-          match app-id="launcher"
-          open-floating true
-        }
+        -- Keep the dmenu-style launcher/portal chooser out of the split tree.
+        tomoe.rule { app_id = "^launcher$", floating = true }
       '';
     };
-    quickshell.enable = true;
     wayland.enable = true;
   };
 }
