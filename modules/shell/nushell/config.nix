@@ -40,109 +40,105 @@ in {
     ];
 
     manzil.users."${config.user.name}" = {
-      files =
-        {
-          ".config/nushell/config.nu" = {
-            text = lib.concatStringsSep "\n" (
-              [
-                settings.banner
-                settings.history
-                settings.completion
-                settings.carapace
-                (''
-                    def lintcheck [] { clear; ^statix check .; ^deadnix . }
-                    def lintfix [] { clear; ^statix fix .; ^deadnix . }
+      files = {
+        ".config/nushell/config.nu" = {
+          text = lib.concatStringsSep "\n" [
+            settings.banner
+            settings.history
+            settings.completion
+            settings.carapace
+            (''
+                def lintcheck [] { clear; ^statix check .; ^deadnix . }
+                def lintfix [] { clear; ^statix fix .; ^deadnix . }
 
-                    alias wallust = wt
-                    alias claude = claude --allow-dangerously-skip-permissions
-                    alias buncodex = bunx --bun @openai/codex
-                    alias gemini = bunx --bun @google/gemini-cli@preview
+                alias wallust = wt
+                alias claude = claude --allow-dangerously-skip-permissions
+                alias buncodex = bunx --bun @openai/codex
+                alias gemini = bunx --bun @google/gemini-cli@preview
 
-                    alias la = lsd -A --color=always --group-dirs=first --icon=always
-                    alias ll = lsd -l --color=always --group-dirs=first --icon=always
-                    alias lt = lsd -A --tree --color=always --group-dirs=first --icon=always
+                alias la = lsd -A --color=always --group-dirs=first --icon=always
+                alias ll = lsd -l --color=always --group-dirs=first --icon=always
+                alias lt = lsd -A --tree --color=always --group-dirs=first --icon=always
 
-                    def dir [...args: string] { ^dir --color=auto ...$args }
-                    def grep [...args: string] { ^rg --color auto ...$args }
-                    def egrep [...args: string] { ^rg --color auto ...$args }
-                    def fgrep [...args: string] { ^rg -F --color auto ...$args }
-                    def "l." [] { ^lsd -A | lines | where $it =~ '^\.' }
+                def dir [...args: string] { ^dir --color=auto ...$args }
+                def grep [...args: string] { ^rg --color auto ...$args }
+                def egrep [...args: string] { ^rg --color auto ...$args }
+                def fgrep [...args: string] { ^rg -F --color auto ...$args }
+                def "l." [] { ^lsd -A | lines | where $it =~ '^\.' }
 
-                    def wget [...args: string] { ^wget $"--hsts-file=($env.XDG_DATA_HOME)/wget-hsts" ...$args }
+                def wget [...args: string] { ^wget $"--hsts-file=($env.XDG_DATA_HOME)/wget-hsts" ...$args }
 
-                    def adb [...args: string] { with-env { HOME: $"($env.XDG_DATA_HOME)/android" } { ^adb ...$args } }
+                def adb [...args: string] { with-env { HOME: $"($env.XDG_DATA_HOME)/android" } { ^adb ...$args } }
 
-                    def pkgs [query: string] {
-                      ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' "" } | sort | uniq | where $it =~ $query
-                    }
-
-                    def pkgcount [] {
-                      ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' "" } | sort | uniq | length
-                    }
-
-                    def buildtime [] { timeit { ^nix build $"($env.NH_FLAKE)#nixosConfigurations.($env.HOST).config.system.build.toplevel" --option eval-cache false } }
-                    def hmpull [] { ^git -C ${flakeDirectory} fetch origin; ^git -C ${flakeDirectory} reset --hard origin/main }
-                  ''
-                  + lib.optionalString config.hardware.nvidia.enable ''
-                    def nvidia-settings [...args: string] { ^nvidia-settings $"--config=($env.XDG_CONFIG_HOME)/nvidia/settings" ...$args }
-                    def gpupower [watts: string] { sudo nvidia-smi -pl $watts }
-                  '')
-                ''
-                  def temppkg [package: string] {
-                    ^nix-shell -p $package --run $"exec ($env.SHELL)"
-                  }
-                ''
-                ''
-                  def temprun [package: string, ...args: string] {
-                    ^nix run $"nixpkgs#($package)" -- ...$args
-                  }
-                ''
-                (
-                  if config.networking.hostName == "y0usaf-laptop"
-                  then ''
-                    def fanspeed [percentage: string] {
-                      ^asusctl fan-curve -m quiet -D $"30c:($percentage),40c:($percentage),50c:($percentage),60c:($percentage),70c:($percentage),80c:($percentage),90c:($percentage),100c:($percentage)" -e true -f gpu
-                      ^asusctl fan-curve -m quiet -D $"30c:($percentage),40c:($percentage),50c:($percentage),60c:($percentage),70c:($percentage),80c:($percentage),90c:($percentage),100c:($percentage)" -e true -f cpu
-                    }
-                  ''
-                  else ""
-                )
-              ]
-
-            );
-          };
-          ".config/nushell/env.nu" = {
-            text =
-              ''
-                def --env export_vars_from_files [dir_path: string] {
-                  if not ($dir_path | path exists) { return }
-                  let skip_keys = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY"]
-                  for file in (ls $dir_path | where type == file | get name) {
-                    let var_name = ($file | path basename | str replace '.txt' "")
-                    if not ($var_name =~ '^[a-zA-Z_][a-zA-Z0-9_]*$') { continue }
-                    if ($var_name in $skip_keys) { continue }
-                    let content = (open $file | str trim)
-                    if ($content | is-empty) { continue }
-                    if ($content =~ '-----') { continue }
-                    load-env {($var_name): $content}
-                  }
+                def pkgs [query: string] {
+                  ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' "" } | sort | uniq | where $it =~ $query
                 }
-                export_vars_from_files "${config.user.homeDirectory}/Tokens"
-              ''
-              + ''
 
-                $env.TERMINAL = "${defaults.terminal}"
-                $env.BROWSER = "${defaults.browser}"
-                $env.EDITOR = "${defaults.editor}"
-              '';
-          };
-          ".config/nushell/carapace.nu" = {
-            source = pkgs.runCommand "carapace-init-nu" {} ''
-              export HOME=$(mktemp -d)
-              ${pkgs.carapace}/bin/carapace _carapace nushell | ${pkgs.gnused}/bin/sed '/\/build\/.*carapace\/bin/d' > $out
-            '';
-          };
+                def pkgcount [] {
+                  ^nix-store --query --requisites /run/current-system | lines | each { |l| $l | str replace -r '^[^-]*-' "" } | sort | uniq | length
+                }
+
+                def buildtime [] { timeit { ^nix build $"($env.NH_FLAKE)#nixosConfigurations.($env.HOST).config.system.build.toplevel" --option eval-cache false } }
+                def hmpull [] { ^git -C ${flakeDirectory} fetch origin; ^git -C ${flakeDirectory} reset --hard origin/main }
+              ''
+              + lib.optionalString config.hardware.nvidia.enable ''
+                def nvidia-settings [...args: string] { ^nvidia-settings $"--config=($env.XDG_CONFIG_HOME)/nvidia/settings" ...$args }
+                def gpupower [watts: string] { sudo nvidia-smi -pl $watts }
+              '')
+            ''
+              def temppkg [package: string] {
+                ^nix-shell -p $package --run $"exec ($env.SHELL)"
+              }
+            ''
+            ''
+              def temprun [package: string, ...args: string] {
+                ^nix run $"nixpkgs#($package)" -- ...$args
+              }
+            ''
+            (
+              if config.networking.hostName == "y0usaf-laptop"
+              then ''
+                def fanspeed [percentage: string] {
+                  ^asusctl fan-curve -m quiet -D $"30c:($percentage),40c:($percentage),50c:($percentage),60c:($percentage),70c:($percentage),80c:($percentage),90c:($percentage),100c:($percentage)" -e true -f gpu
+                  ^asusctl fan-curve -m quiet -D $"30c:($percentage),40c:($percentage),50c:($percentage),60c:($percentage),70c:($percentage),80c:($percentage),90c:($percentage),100c:($percentage)" -e true -f cpu
+                }
+              ''
+              else ""
+            )
+          ];
         };
+        ".config/nushell/env.nu" = {
+          text =
+            ''
+              def --env export_vars_from_files [dir_path: string] {
+                if not ($dir_path | path exists) { return }
+                let skip_keys = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY"]
+                for file in (ls $dir_path | where type == file | get name) {
+                  let var_name = ($file | path basename | str replace '.txt' "")
+                  if not ($var_name =~ '^[a-zA-Z_][a-zA-Z0-9_]*$') { continue }
+                  if ($var_name in $skip_keys) { continue }
+                  let content = (open $file | str trim)
+                  if ($content | is-empty) { continue }
+                  if ($content =~ '-----') { continue }
+                  load-env {($var_name): $content}
+                }
+              }
+              export_vars_from_files "${config.user.homeDirectory}/Tokens"
+            ''
+            + ''
+
+              $env.TERMINAL = "${defaults.terminal}"
+              $env.BROWSER = "${defaults.browser}"
+              $env.EDITOR = "${defaults.editor}"
+            '';
+        };
+        ".config/nushell/carapace.nu" = {
+          source = pkgs.runCommand "carapace-init-nu" {} ''
+            export HOME=$(mktemp -d)
+            ${pkgs.carapace}/bin/carapace _carapace nushell | ${pkgs.gnused}/bin/sed '/\/build\/.*carapace\/bin/d' > $out
+          '';
+        };
+      };
     };
   };
 }

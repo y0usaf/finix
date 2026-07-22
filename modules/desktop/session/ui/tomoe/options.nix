@@ -2,6 +2,17 @@
   options.user.ui.tomoe = {
     enable = lib.mkEnableOption "tomoe Wayland compositor";
 
+    layout = lib.mkOption {
+      type = lib.types.enum ["deck" "sway"];
+      default = "deck";
+      description = ''
+        Window-management layout chunk generated into ~/.config/tomoe/init.lua:
+        "deck" = two 16:9 deck columns (the original ultrawide layout);
+        "sway" = manual h/v split trees over numbered workspaces
+        (Alt+J/K scroll workspaces, Alt+H/L focus left/right).
+      '';
+    };
+
     displays = lib.mkOption {
       type = lib.types.attrs;
       default = {};

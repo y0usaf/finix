@@ -49,12 +49,10 @@ in {
     startupDirs = lib.mkOption {
       type = listOf str;
       default = [
-
         "~/.cache/wal"
         "~/.cache/wallust"
         "~/.config/Vencord/settings"
         "~/.config/vesktop/settings"
-
       ];
       description = "Directories created before applying the default Wallust theme.";
     };
@@ -124,32 +122,31 @@ in {
       };
     };
 
-    manzil.users."${config.user.name}" =
-      {
-        files =
-          (lib.mapAttrs' (name: scheme:
-            lib.nameValuePair ".config/wallust/colorschemes/${name}.json" {
-              generator = lib.generators.toJSON {};
-              value = scheme;
-            })
-          wallustCfg.colorschemes)
-          // (lib.mapAttrs' (name: template:
-            lib.nameValuePair ".config/wallust/templates/${name}" {
-              text = template;
-            })
-          wallustCfg.templates)
-          // {
-            ".config/wallust/wallust.toml" = {
-              generator = config.lib.generators.toTOML;
-              value = {
-                backend = "fastresize";
-                color_space = "lch";
-                palette = "dark";
-                check_contrast = true;
-                templates = wallustCfg.targets;
-              };
+    manzil.users."${config.user.name}" = {
+      files =
+        (lib.mapAttrs' (name: scheme:
+          lib.nameValuePair ".config/wallust/colorschemes/${name}.json" {
+            generator = lib.generators.toJSON {};
+            value = scheme;
+          })
+        wallustCfg.colorschemes)
+        // (lib.mapAttrs' (name: template:
+          lib.nameValuePair ".config/wallust/templates/${name}" {
+            text = template;
+          })
+        wallustCfg.templates)
+        // {
+          ".config/wallust/wallust.toml" = {
+            generator = config.lib.generators.toTOML;
+            value = {
+              backend = "fastresize";
+              color_space = "lch";
+              palette = "dark";
+              check_contrast = true;
+              templates = wallustCfg.targets;
             };
           };
-      };
+        };
+    };
   };
 }

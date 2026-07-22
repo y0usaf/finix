@@ -62,35 +62,6 @@
   islandLib = import ./lib/esp-island.nix {inherit pkgs lib;};
   deployLib = import ./lib/deploy.nix {inherit pkgs;};
 
-  serverIsland = islandLib.mkIsland {
-    name = "finix-server-boot";
-    system = serverPersistent.config.system.topLevel;
-    # ADL-N BIOS ships ancient 0x1a microcode; both raw direct boots
-    # misbehaved until 0x21 was prepended (incident #2).
-    ucodeImg = "${pkgs.microcode-intel}/intel-ucode.img";
-    defaultHost = "server";
-  };
-
-  desktopIsland = islandLib.mkIsland {
-    name = "finix-desktop-boot";
-    system = desktopPersistent.config.system.topLevel;
-    ucodeImg = "${pkgs.microcode-amd}/amd-ucode.img";
-    # The desktop drives its own ESP: island script runs locally under sudo.
-    defaultHost = "local";
-  };
-
-  serverDeploy = deployLib.mkDeploy {
-    name = "finix-server-persistent-deploy";
-    system = serverPersistent.config.system.topLevel;
-    defaultHost = "server";
-  };
-
-  desktopDeploy = deployLib.mkDeploy {
-    name = "finix-desktop-deploy";
-    system = desktopPersistent.config.system.topLevel;
-    defaultHost = "local";
-  };
-
   attic = import ./attic/drivers.nix {
     inherit pkgs lib serverVm serverTrial serverPersistent;
   };
@@ -119,11 +90,40 @@ in {
       ln -s ${desktopPersistent.config.system.topLevel} $out/system
     '';
 
-  bootPackage = binPackage "finix-server-boot" serverIsland.bootDriverScript;
-  desktopBootPackage = binPackage "finix-desktop-boot" desktopIsland.bootDriverScript;
+  bootPackage =
+    binPackage "finix-server-boot"
+    (islandLib.mkIsland {
+      name = "finix-server-boot";
+      system = serverPersistent.config.system.topLevel;
+      # ADL-N BIOS ships ancient 0x1a microcode; both raw direct boots
+      # misbehaved until 0x21 was prepended (incident #2).
+      ucodeImg = "${pkgs.microcode-intel}/intel-ucode.img";
+      defaultHost = "server";
+    }).bootDriverScript;
+  desktopBootPackage =
+    binPackage "finix-desktop-boot"
+    (islandLib.mkIsland {
+      name = "finix-desktop-boot";
+      system = desktopPersistent.config.system.topLevel;
+      ucodeImg = "${pkgs.microcode-amd}/amd-ucode.img";
+      # The desktop drives its own ESP: island script runs locally under sudo.
+      defaultHost = "local";
+    }).bootDriverScript;
 
-  persistentDeployPackage = binPackage "finix-server-persistent-deploy" serverDeploy.deployScript;
-  desktopDeployPackage = binPackage "finix-desktop-deploy" desktopDeploy.deployScript;
+  persistentDeployPackage =
+    binPackage "finix-server-persistent-deploy"
+    (deployLib.mkDeploy {
+      name = "finix-server-persistent-deploy";
+      system = serverPersistent.config.system.topLevel;
+      defaultHost = "server";
+    }).deployScript;
+  desktopDeployPackage =
+    binPackage "finix-desktop-deploy"
+    (deployLib.mkDeploy {
+      name = "finix-desktop-deploy";
+      system = desktopPersistent.config.system.topLevel;
+      defaultHost = "local";
+    }).deployScript;
 
   # ── attic packages (retired kexec era; see attic/drivers.nix) ────────────
   vmPackage =

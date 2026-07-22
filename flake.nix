@@ -159,8 +159,8 @@
 
     mkHost = {
       domains,
-      hostDir,
       extraModules ? [],
+      hostDir,
     }:
       lib.nixosSystem {
         inherit system;

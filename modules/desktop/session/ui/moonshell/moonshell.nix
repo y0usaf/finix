@@ -15,6 +15,8 @@
   # shell.services.systemtray lands.
   barOverlayDefaults = {
     inherit (bar) modules;
+    edges = ["top" "bottom"];
+    indent = 0;
     font_family = "monospace";
     name_prefix = "bar-overlay";
     top_name = "bar-overlay-top";
@@ -58,10 +60,10 @@
       gap = 4;
     };
     bongo_cat = {
-      enable = bar.bongo-cat.enable;
+      inherit (bar.bongo-cat) enable;
       asset_dir = "${./assets/bongo-cat}";
       name = "bongo-cat";
-      height = bar.bongo-cat.height;
+      inherit (bar.bongo-cat) height;
       margin_bottom = bar.bongo-cat.margin-bottom;
       x_offset = bar.bongo-cat.x-offset;
       keypress_duration = bar.bongo-cat.keypress-duration;
@@ -109,6 +111,18 @@ in {
         type = lib.types.listOf (lib.types.enum ["time" "date" "battery"]);
         default = ["time" "date"];
         description = "Bar overlay modules to render.";
+      };
+
+      edges = lib.mkOption {
+        type = lib.types.listOf (lib.types.enum ["top" "bottom"]);
+        default = ["top" "bottom"];
+        description = "Screen edges that get a module bar. Single edge = no duplicated widgets.";
+      };
+
+      indent = lib.mkOption {
+        type = lib.types.ints.unsigned;
+        default = 0;
+        description = "Exclusive bars: lift the widget row this many px off the screen edge. Baked into the bar thickness so the exclusive zone covers it — windows never overlap the gap.";
       };
 
       exclusive = lib.mkOption {
@@ -168,7 +182,7 @@ in {
             )
             (toLua barOverlayDefaults.font_family)
             (toLua {
-              inherit (bar) modules exclusive;
+              inherit (bar) modules exclusive edges indent;
               inherit (barOverlayDefaults) bongo_cat;
               font_family = luaInline "_ms_font";
             })
@@ -491,12 +505,26 @@ in {
               -- the surface: widen it by |x_offset| and justify the cat to
               -- the opposite edge. Negative offset = cat left of center.
               local x_offset = cfg.x_offset or 0
+              -- Smithay arranges every layer surface — overlay included —
+              -- inside the zone left by exclusive bars, so a bottom-exclusive
+              -- widget bar pushes the cat up by the bar's whole thickness.
+              -- Subtract it back: the cat is a free overlay and keeps its
+              -- screen-edge margin.
+              local exclusive_zone = 0
+              if opts.exclusive == true then
+                  for _, e in ipairs(opts.edges or DEFAULTS.edges or {}) do
+                      if e == "bottom" then
+                          exclusive_zone = (opts.height or DEFAULTS.height)
+                              + (opts.indent or DEFAULTS.indent or 0)
+                      end
+                  end
+              end
               local win = shell.window({
                   name = name,
                   anchor = DEFAULTS.anchors.bottom,
                   popup_width = width + math.abs(x_offset),
                   height = height,
-                  margin_bottom = cfg.margin_bottom or 0,
+                  margin_bottom = (cfg.margin_bottom or 0) - exclusive_zone,
                   layer = cfg.layer or "overlay",
                   exclusive = false,
                   bg = "#00000000",
@@ -577,26 +605,67 @@ in {
               local height = opts.height or DEFAULTS.height
               local fg = Wallust.hex(Wallust.color("fg", theme.text))
               local name = opts.name or ((opts.name_prefix or DEFAULTS.name_prefix) .. "-" .. edge)
+              local spacing = opts.spacing or DEFAULTS.spacing
+              local exclusive = opts.exclusive == true
+              local indent = opts.indent or DEFAULTS.indent or 0
 
               close_existing(name)
 
-              local win = shell.window({
-                  name = name,
-                  anchor = DEFAULTS.anchors[edge],
-                  popup_width = total_width,
-                  height = height,
-                  margin_top = edge == "top" and (opts.margin_top or DEFAULTS.margin_top) or DEFAULTS.margin_top,
-                  margin_bottom = edge == "bottom" and (opts.margin_bottom or DEFAULTS.margin_bottom) or DEFAULTS.margin_bottom,
-                  layer = opts.layer or DEFAULTS.layer,
-                  exclusive = opts.exclusive == true,
-                  bg = opts.bg or DEFAULTS.bg,
-                  fg = fg,
-                  font_size = opts.font_size or DEFAULTS.font_size,
-                  font_family = M._font_family,
-              })
-
-              local render_fn = function()
-                  return render_edge(content, items, total_width, height, opts.spacing or DEFAULTS.spacing)
+              local win, render_fn
+              if exclusive then
+                  -- Popup-anchored surfaces can't hold an exclusive zone (and
+                  -- overlay-layer zones are ignored), so the no-overlap bar is
+                  -- a full-width edge bar on the top layer. The widget row
+                  -- stays centered via justify; windows stop at its edge.
+                  render_fn = function()
+                      local children = {}
+                      for _, item in ipairs(items) do
+                          children[#children + 1] = content:render_module(item.name, item.width, height)
+                      end
+                      local row = ui.hbox({
+                          height = height,
+                          justify = "center",
+                          gap = spacing,
+                          children = children,
+                      })
+                      if indent <= 0 then return row end
+                      -- Indent: row pinned to the top of the taller surface;
+                      -- the empty strip below sits inside the exclusive zone,
+                      -- so windows respect the gap.
+                      return ui.vbox({
+                          align = "center",
+                          children = { row },
+                      })
+                  end
+                  win = shell.window({
+                      name = name,
+                      position = edge,
+                      height = height + indent,
+                      layer = "top",
+                      exclusive = true,
+                      bg = opts.bg or DEFAULTS.bg,
+                      fg = fg,
+                      font_size = opts.font_size or DEFAULTS.font_size,
+                      font_family = M._font_family,
+                  })
+              else
+                  render_fn = function()
+                      return render_edge(content, items, total_width, height, spacing)
+                  end
+                  win = shell.window({
+                      name = name,
+                      anchor = DEFAULTS.anchors[edge],
+                      popup_width = total_width,
+                      height = height,
+                      margin_top = edge == "top" and (opts.margin_top or DEFAULTS.margin_top) or DEFAULTS.margin_top,
+                      margin_bottom = edge == "bottom" and (opts.margin_bottom or DEFAULTS.margin_bottom) or DEFAULTS.margin_bottom,
+                      layer = opts.layer or DEFAULTS.layer,
+                      exclusive = false,
+                      bg = opts.bg or DEFAULTS.bg,
+                      fg = fg,
+                      font_size = opts.font_size or DEFAULTS.font_size,
+                      font_family = M._font_family,
+                  })
               end
               win:render(render_fn)
 
@@ -628,6 +697,14 @@ in {
               local widths = module_widths(opts)
               local height = opts.height or DEFAULTS.height
               local spacing = opts.spacing or DEFAULTS.spacing
+              local edges = opts.edges or DEFAULTS.edges
+
+              local function has_edge(edge)
+                  for _, e in ipairs(edges) do
+                      if e == edge then return true end
+                  end
+                  return false
+              end
 
               local items = {}
               for _, name in ipairs(modules) do
@@ -645,47 +722,47 @@ in {
               local time = clock_state(opts.time_format or DEFAULTS.time.format, opts.time_interval or DEFAULTS.time.interval)
               local date = clock_state(opts.date_format or DEFAULTS.date.format, opts.date_interval or DEFAULTS.date.interval)
 
-              local top_content = M.new({
-                  modules = modules,
-                  time_state = time,
-                  date_state = date,
-              })
-              local bottom_content = M.new({
-                  modules = modules,
-                  time_state = time,
-                  date_state = date,
-              })
+              local result = { items = items }
 
-              local top_window = open_edge("top", top_content, items, total, {
-                  name = opts.top_name or DEFAULTS.top_name,
-                  height = height,
-                  spacing = spacing,
-                  name_prefix = opts.name_prefix,
-                  margin_top = opts.margin_top,
-                  exclusive = opts.exclusive,
-                  refresh_interval = opts.refresh_interval,
-                  layout_generation = layout_generation,
-              })
-              local bottom_window = open_edge("bottom", bottom_content, items, total, {
-                  name = opts.bottom_name or DEFAULTS.bottom_name,
-                  height = height,
-                  spacing = spacing,
-                  name_prefix = opts.name_prefix,
-                  margin_bottom = opts.margin_bottom,
-                  exclusive = opts.exclusive,
-                  refresh_interval = opts.refresh_interval,
-                  layout_generation = layout_generation,
-              })
-              local bongo_window = open_bongo(opts)
+              if has_edge("top") then
+                  result.top_content = M.new({
+                      modules = modules,
+                      time_state = time,
+                      date_state = date,
+                  })
+                  result.top_window = open_edge("top", result.top_content, items, total, {
+                      name = opts.top_name or DEFAULTS.top_name,
+                      height = height,
+                      spacing = spacing,
+                      name_prefix = opts.name_prefix,
+                      margin_top = opts.margin_top,
+                      exclusive = opts.exclusive,
+                      refresh_interval = opts.refresh_interval,
+                      layout_generation = layout_generation,
+                  })
+              end
 
-              return {
-                  top_content = top_content,
-                  bottom_content = bottom_content,
-                  top_window = top_window,
-                  bottom_window = bottom_window,
-                  bongo_window = bongo_window,
-                  items = items,
-              }
+              if has_edge("bottom") then
+                  result.bottom_content = M.new({
+                      modules = modules,
+                      time_state = time,
+                      date_state = date,
+                  })
+                  result.bottom_window = open_edge("bottom", result.bottom_content, items, total, {
+                      name = opts.bottom_name or DEFAULTS.bottom_name,
+                      height = height,
+                      spacing = spacing,
+                      name_prefix = opts.name_prefix,
+                      margin_bottom = opts.margin_bottom,
+                      exclusive = opts.exclusive,
+                      refresh_interval = opts.refresh_interval,
+                      layout_generation = layout_generation,
+                  })
+              end
+
+              result.bongo_window = open_bongo(opts)
+
+              return result
           end
 
           return M

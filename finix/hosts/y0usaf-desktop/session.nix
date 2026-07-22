@@ -16,91 +16,11 @@
   ...
 }: let
   sys = pkgs.stdenv.hostPlatform.system;
-  tomoePkg = flakeInputs.tomoe.packages.${sys}.default;
-  cursorPkg = flakeInputs.cursors.packages.${sys}.deepin-dark;
-  mainFont = flakeInputs.fonts.packages.${sys}.default;
-
+  tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
   # Screencast source picker for xdg-desktop-portal-tomoe — verbatim port
   # of the NixOS shim's chooser (dmenu contract: candidates on stdin,
   # choice on stdout, non-zero exit = cancel; portal hands us pipes, so
   # shuttle via tmpdir and run fzf in a floating foot window).
-  portalChooser = pkgs.writeShellScript "portal-chooser" ''
-    set -eu
-    dir=$(${pkgs.coreutils}/bin/mktemp -d)
-    trap '${pkgs.coreutils}/bin/rm -rf "$dir"' EXIT
-    ${pkgs.coreutils}/bin/cat > "$dir/in"
-    ${lib.getExe pkgs.foot} --app-id=launcher -e ${pkgs.runtimeShell} -c \
-      "${lib.getExe pkgs.fzf} --prompt 'cast: ' < '$dir/in' > '$dir/out'" || true
-    [ -s "$dir/out" ] || exit 1
-    ${pkgs.coreutils}/bin/cat "$dir/out"
-  '';
-
-  tomoeSession = pkgs.writeShellScriptBin "tomoe-session" ''
-    # Mirror of the NixOS tomoe-session shim; session env stays scoped to
-    # the compositor process, never global.
-    export XDG_CURRENT_DESKTOP=tomoe
-    export XDG_SESSION_TYPE=wayland
-    export NIXOS_OZONE_WL=1
-    export QT_QPA_PLATFORM=wayland
-    export ELECTRON_OZONE_PLATFORM_HINT=wayland
-    export GDK_BACKEND=wayland
-    export SDL_VIDEODRIVER=wayland,x11
-    export CLUTTER_BACKEND=wayland
-    export XCURSOR_THEME=${cursorPkg.xcursorThemeName}
-    export XCURSOR_SIZE=24
-    # Portals + .desktop discovery: dbus activation and app launchers scan
-    # XDG_DATA_DIRS; the system profile carries dbus-1 service files for
-    # xdg-desktop-portal{,-gtk} and tomoe's own portal. Deduped — a re-exec
-    # (or a profile that already prepends) must not stack duplicates.
-    case ":''${XDG_DATA_DIRS:-}:" in
-      *":/run/current-system/sw/share:"*) ;;
-      *) export XDG_DATA_DIRS="/run/current-system/sw/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}" ;;
-    esac
-    # Launcher parity: on NixOS the compositor inherits TERMINAL from the
-    # interactive login shell (zsh/nushell rc exports it); finix logs in on
-    # bash, which exports nothing — tui-launcher's alacritty fallback is not
-    # installed → Terminal=true entries + the command provider died silently.
-    # Session-scoped, mirrors the rc export.
-    export TERMINAL=foot
-    export TOMOE_PORTAL_CHOOSER="''${TOMOE_PORTAL_CHOOSER:-${portalChooser}}"
-
-    # No logind: guarantee the runtime dir even if the profile.d hook was
-    # skipped (e.g. exec'd from a bare shell).
-    export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
-    [ -d "$XDG_RUNTIME_DIR" ] || {
-      echo "tomoe-session: $XDG_RUNTIME_DIR missing (xdg-runtime-dir task failed?)" >&2
-      exit 1
-    }
-
-    ${lib.optionalString config.hardware.nvidia.enable ''
-      export WLR_NO_HARDWARE_CURSORS=1
-      export LIBVA_DRIVER_NAME=nvidia
-      # environment.sessionVariables parity (NixOS nvidia.nix).
-      export __GL_SYNC_TO_VBLANK=0
-      export __GL_VRR_ALLOWED=1
-      export __GL_MaxFramesAllowed=1
-      export __GL_YIELD=usleep
-      export CUDA_CACHE_PATH="$HOME/.cache/nv"
-      export CUDA_DISABLE_PERF_BOOST=1
-      export NVIDIA_DRIVER_CAPABILITIES=all
-    ''}
-    # No GBM_BACKEND / __EGL_VENDOR_LIBRARY_FILENAMES / __GLX_VENDOR_LIBRARY_NAME
-    # — see the NixOS shim: forcing the NVIDIA EGL vendor hides Mesa's
-    # EGL_EXT_device_query and smithay then finds no renderer at all.
-    cd "$HOME"
-    # No logind → no per-login session bus; dbus-run-session gives the
-    # compositor AND everything it spawns one session bus, on which the
-    # portals dbus-activate. The polkit agent must live on that same bus,
-    # so it starts inside the wrapper (NixOS ran it as a systemd user
-    # service on graphical-session.target).
-    # xwayland-satellite (started by tomoe's process.once) claims :0 —
-    # export it so terminals + steam inherit X availability.
-    export DISPLAY=:0
-    exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
-      ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
-      exec ${lib.getExe tomoePkg} --backend tty "$@"
-    ''} "$@"
-  '';
 in {
   # seatd: upstream defaults the service to runlevels [34], but finix
   # boots into runlevel 2 — the service is never eligible and initctl
@@ -120,11 +40,121 @@ in {
     '';
     log = true;
   };
-  environment.etc."profile.d/xdg-runtime-dir.sh".text = ''
-    if [ -z "''${XDG_RUNTIME_DIR:-}" ]; then
-      export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-    fi
-  '';
+  environment = {
+    etc."profile.d/xdg-runtime-dir.sh".text = ''
+      if [ -z "''${XDG_RUNTIME_DIR:-}" ]; then
+        export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+      fi
+    '';
+    etc."profile.d/display.sh".text = ''
+      if [ -z "''${DISPLAY:-}" ]; then
+        for _x in /tmp/.X11-unix/X*; do
+          [ -S "$_x" ] || continue
+          export DISPLAY=":''${_x##*/X}"
+          break
+        done
+        unset _x
+      fi
+    '';
+    systemPackages = [
+      tomoePkg
+      (pkgs.writeShellScriptBin "tomoe-session" ''
+        # Mirror of the NixOS tomoe-session shim; session env stays scoped to
+        # the compositor process, never global.
+        export XDG_CURRENT_DESKTOP=tomoe
+        export XDG_SESSION_TYPE=wayland
+        export NIXOS_OZONE_WL=1
+        export QT_QPA_PLATFORM=wayland
+        export ELECTRON_OZONE_PLATFORM_HINT=wayland
+        export GDK_BACKEND=wayland
+        export SDL_VIDEODRIVER=wayland,x11
+        export CLUTTER_BACKEND=wayland
+        export XCURSOR_THEME=${flakeInputs.cursors.packages."${sys}".deepin-dark.xcursorThemeName}
+        export XCURSOR_SIZE=24
+        # Portals + .desktop discovery: dbus activation and app launchers scan
+        # XDG_DATA_DIRS; the system profile carries dbus-1 service files for
+        # xdg-desktop-portal{,-gtk} and tomoe's own portal. Deduped — a re-exec
+        # (or a profile that already prepends) must not stack duplicates.
+        case ":''${XDG_DATA_DIRS:-}:" in
+          *":/run/current-system/sw/share:"*) ;;
+          *) export XDG_DATA_DIRS="/run/current-system/sw/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}" ;;
+        esac
+        # Launcher parity: on NixOS the compositor inherits TERMINAL from the
+        # interactive login shell (zsh/nushell rc exports it); finix logs in on
+        # bash, which exports nothing — tui-launcher's alacritty fallback is not
+        # installed → Terminal=true entries + the command provider died silently.
+        # Session-scoped, mirrors the rc export.
+        export TERMINAL=foot
+        export TOMOE_PORTAL_CHOOSER="''${TOMOE_PORTAL_CHOOSER:-${pkgs.writeShellScript "portal-chooser" ''
+          set -eu
+          dir=$(${pkgs.coreutils}/bin/mktemp -d)
+          trap '${pkgs.coreutils}/bin/rm -rf "$dir"' EXIT
+          ${pkgs.coreutils}/bin/cat > "$dir/in"
+          ${lib.getExe pkgs.foot} --app-id=launcher -e ${pkgs.runtimeShell} -c \
+            "${lib.getExe pkgs.fzf} --prompt 'cast: ' < '$dir/in' > '$dir/out'" || true
+          [ -s "$dir/out" ] || exit 1
+          ${pkgs.coreutils}/bin/cat "$dir/out"
+        ''}}"
+
+        # No logind: guarantee the runtime dir even if the profile.d hook was
+        # skipped (e.g. exec'd from a bare shell).
+        export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
+        [ -d "$XDG_RUNTIME_DIR" ] || {
+          echo "tomoe-session: $XDG_RUNTIME_DIR missing (xdg-runtime-dir task failed?)" >&2
+          exit 1
+        }
+
+        ${lib.optionalString config.hardware.nvidia.enable ''
+          export WLR_NO_HARDWARE_CURSORS=1
+          export LIBVA_DRIVER_NAME=nvidia
+          # environment.sessionVariables parity (NixOS nvidia.nix).
+          export __GL_SYNC_TO_VBLANK=0
+          export __GL_VRR_ALLOWED=1
+          export __GL_MaxFramesAllowed=1
+          export __GL_YIELD=usleep
+          export CUDA_CACHE_PATH="$HOME/.cache/nv"
+          export CUDA_DISABLE_PERF_BOOST=1
+          export NVIDIA_DRIVER_CAPABILITIES=all
+        ''}
+        # No GBM_BACKEND / __EGL_VENDOR_LIBRARY_FILENAMES / __GLX_VENDOR_LIBRARY_NAME
+        # — see the NixOS shim: forcing the NVIDIA EGL vendor hides Mesa's
+        # EGL_EXT_device_query and smithay then finds no renderer at all.
+        cd "$HOME"
+        # No logind → no per-login session bus; dbus-run-session gives the
+        # compositor AND everything it spawns one session bus, on which the
+        # portals dbus-activate. The polkit agent must live on that same bus,
+        # so it starts inside the wrapper (NixOS ran it as a systemd user
+        # service on graphical-session.target).
+        # xwayland-satellite (started by tomoe's process.once) claims :0 —
+        # export it so terminals + steam inherit X availability.
+        export DISPLAY=:0
+        exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
+          ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
+          exec ${lib.getExe tomoePkg} --backend tty "$@"
+        ''} "$@"
+      '')
+      # Session companions (NixOS shim parity).
+      pkgs.foot
+      pkgs.grim
+      pkgs.slurp
+      pkgs.wl-clipboard-rs
+      pkgs.jq
+      pkgs.swaybg
+      pkgs.xwayland-satellite
+      # Portals (2c): tomoe ships its own portal backend + config in its
+      # package; gtk covers file pickers.
+      pkgs.xdg-desktop-portal
+      pkgs.xdg-desktop-portal-gtk
+      # Daily-driver shell: config.nu/env.nu/carapace.nu live on persisted
+      # /home (generated by the NixOS side; env.nu is pure XDG vars —
+      # OS-agnostic). nushell now the LOGIN shell (proven under finix);
+      # root stays bash + profile.d fallbacks stay for rescue.
+      pkgs.nushell
+      pkgs.fzf
+      pkgs.ripgrep
+      pkgs.fd
+    ];
+  };
 
   # pam_rundir — injected into every login path by upstream whenever
   # services.seatd.enable is set (shadow + openssh modules, no opt-out
@@ -180,16 +210,6 @@ in {
   # under the compositor: in-session processes inherit the shim's export;
   # this covers the rest by probing for a live X socket. Dynamic — no
   # hardcoded :0 assumption if satellite ever lands elsewhere.
-  environment.etc."profile.d/display.sh".text = ''
-    if [ -z "''${DISPLAY:-}" ]; then
-      for _x in /tmp/.X11-unix/X*; do
-        [ -S "$_x" ] || continue
-        export DISPLAY=":''${_x##*/X}"
-        break
-      done
-      unset _x
-    fi
-  '';
 
   # Fonts: same trio as the NixOS ui/fonts.nix defaults. foot picks the
   # family from the persisted ~/.config/foot config; fontconfig just has
@@ -197,36 +217,11 @@ in {
   fonts = {
     fontconfig.enable = true;
     packages = [
-      mainFont
+      flakeInputs.fonts.packages."${sys}".default
       pkgs.noto-fonts-cjk-sans
       pkgs.noto-fonts-color-emoji
     ];
   };
-
-  environment.systemPackages = [
-    tomoePkg
-    tomoeSession
-    # Session companions (NixOS shim parity).
-    pkgs.foot
-    pkgs.grim
-    pkgs.slurp
-    pkgs.wl-clipboard-rs
-    pkgs.jq
-    pkgs.swaybg
-    pkgs.xwayland-satellite
-    # Portals (2c): tomoe ships its own portal backend + config in its
-    # package; gtk covers file pickers.
-    pkgs.xdg-desktop-portal
-    pkgs.xdg-desktop-portal-gtk
-    # Daily-driver shell: config.nu/env.nu/carapace.nu live on persisted
-    # /home (generated by the NixOS side; env.nu is pure XDG vars —
-    # OS-agnostic). nushell now the LOGIN shell (proven under finix);
-    # root stays bash + profile.d fallbacks stay for rescue.
-    pkgs.nushell
-    pkgs.fzf
-    pkgs.ripgrep
-    pkgs.fd
-  ];
 
   # Login shell = nushell (mkForce vs common.nix's bash). Root untouched.
   users.users.y0usaf.shell = lib.mkForce "${pkgs.nushell}/bin/nu";

@@ -5,7 +5,7 @@
 }: {
   config = lib.mkIf config.user.dev.codex.enable {
     manzil.users."${config.user.name}".files = {
-      ".codex/INSTRUCTIONS.md" = {
+      ".local/share/codex/INSTRUCTIONS.md" = {
         text = ''
           <system>
             <environment>NixOS</environment>
