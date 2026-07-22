@@ -3,7 +3,10 @@ _: {
     webapps.enable = true;
     librewolf.enable = true;
     codex-desktop = {
-      enable = true;
+      # 2026-07-22: upstream Codex.dmg (mutable URL) now ships ChatGPT.app;
+      # codex-desktop-flake can't extract it and the June dmg fell out of
+      # every local store. Re-enable once the flake handles the new layout.
+      enable = false;
       yoloMode = true;
     };
     discord = {
