@@ -255,6 +255,81 @@ switch from inside the finix boot (config-only path, ~30 finit jobs clean):
 OPEN after 2.5: power-cut drill → promote; RT-audio rtkit handshake
 (cosmetic); elogind long-term; @home-blank initrd rollback deferred.
 
+2026-07-19 desktop 2.6 — DEADMAN PORT deployed live + staged (slot
+7swmlhcv, marker desktop-phase2.6, current= verified on ESP; previous
+slot 6ahjb5b7 kept as rollback): the server's bootnext-deadman copied
+into persistent.nix verbatim (arm BootNext=Limine at boot start; clear
+once sshd listens continuously for 2 min, 10-min budget). Closes the
+last guard gap before promote: post-promote, a slot that hangs
+pre-userspace parks the box in NixOS instead of looping forever (the
+server 00:19 incident class). Verified LIVE via config-only switch
+from inside the finix boot: armed BootNext=Boot0000 13:00:08Z, cleared
+13:01:58Z (sshd healthy), exit 0. Note: 2.5 never bumped the
+/etc/finix-stage2 marker (stale 2.4); 2.6 corrects it. Desktop deadman
+health = sshd :22 = also the box's only headless rescue path — keep
+sshd unconditional on this host.
+REMAINING before promote: oneshot into slot 7swmlhcv (reboots — do it
+when the session can go) → confirm deadman armed→cleared in syslog →
+power-cut drill (hard reset from the island boot; verify dirty-boot
+health: btrfs, 268 binds, nvidia, session, deadman re-arms) →
+`finix-desktop-boot local promote` from the island boot. NOTE: the
+2026-07-19 16:45Z session entered finix via the NixOS Limine menu pick
+(BootCurrent=0000) — promote would have REFUSED there; the oneshot is
+what makes BootCurrent=0005 (island) and unlocks promote.
+
+2026-07-19 desktop 2.7 — AUTONOMOUS PROMOTE DRILL armed (slot 8m7yach1,
+marker desktop-phase2.7, current= verified on ESP; rollback = 7swmlhcv).
+User directive: fully autonomous, no handoff. Reboots kill the agent
+session, so the drill is a state machine baked into the config as
+finit task promote-drill, gated on /persist/finix-promote-drill/state
+(absent = inert no-op on every future boot). Operator (agent) arms
+state=armed, then oneshot; from there the box runs itself:
+  boot 1 (clean island): wait for deadman to clear BootNext (<=12 min,
+    else abort) -> health gate x3 consecutive (sshd :22, IPv4 global,
+    /persist /home /nix /boot mountpoints, >=200 binds under
+    /home/y0usaf, nvidia module + /dev/nvidia0, ping 192.168.2.1) ->
+    state=dirty (synced) -> BootNext=Finix -> sysrq-b HARD RESET = the
+    power-cut drill (no sync/unmount; FS-side equivalent of the reset
+    button — PSU-rail differences noted but OS-side drill identical).
+  boot 2 (dirty island, via BootNext): deadman clears -> same health
+    gate -> BootCurrent==Finix check -> efibootmgr -o Finix-first =
+    PROMOTE -> rm state, stamp done file, box stays up. Getty logins
+    from then on = finix as the installed OS.
+Safety net throughout: deadman guards both boots; any health failure
+aborts with the box up and unpromoted (BootOrder still NixOS-first);
+hang pre-userspace -> deadman BootNext -> next cycle parks in NixOS.
+Post-hoc verification: /persist/finix-promote-drill/done timestamp,
+state file gone, efibootmgr BootOrder 0005-first, syslog lines
+'promote-drill: ...'. If the box parks in NixOS: read
+/persist/finix-promote-drill/state + newest /persist/finix-boot/ logs
+from NixOS (same /persist), fix, re-arm state, re-oneshot.
+Post-promote deploy discipline (now active): any topLevel-changing
+deploy stages a NEW slot and install forces BootOrder NixOS-first
+(test window) -> oneshot -> health -> promote again, same as the
+server era. Config-only switches stay live-only. NixOS config =
+frozen rescue; never nix-collect-garbage -d from finix.
+
+
+2026-07-19 2.7 OUTCOME + RACE FIX — DESKTOP PROMOTED. Drill aborted in
+boot 1: "deadman never cleared" logged in the SAME second as task
+start. Root cause: boot-start race — the drill's first BootNext poll
+ran BEFORE the deadman armed (both are runlevel-2 tasks; the firmware
+had consumed the oneshot BootNext, so the var was briefly absent): the
+wait loop broke instantly on "absent", the immediate re-check saw the
+deadman's arm and misreported it as "never cleared". Abort was safe by
+design (box stayed up, unpromoted). Recovery, run manually from that
+healthy island boot (BootCurrent=0005): state file removed FIRST (an
+armed state surviving to a later boot could have sysrq-b'd
+spontaneously once the race went the other way), then
+`finix-desktop-boot local promote` directly — BootOrder 0005-first.
+Script fix committed (arm-wait phase before clear-wait; refuse to
+drill if the deadman never arms) but NOT restaged: a new slot would
+demote to the test window, so it rides the next natural deploy. The
+dirty-boot drill runs POST-promote instead: manual sysrq-b with
+BootOrder Finix-first, so the dirty boot IS finix and the deadman is
+armed throughout (failure → parks in NixOS). Same coverage as the
+pre-promote drill, one extra boot cycle of risk on failure.
+
 ## SERVER STATUS
 
 Phases 1–3 are complete: VM → guarded bare-metal trial → full service
