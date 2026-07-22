@@ -1,5 +1,9 @@
 _: {
   user.dev = {
+    kimi-code = {
+      enable = true;
+      apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
+    };
     claude-code = {
       enable = true;
       model = "fable";

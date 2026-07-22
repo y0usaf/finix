@@ -19,6 +19,8 @@ _: {
       linear-cli.enable = true;
     };
     pi.enable = true;
+    bun.enable = true;
+    npm.enable = true;
     docker.enable = true;
     gcloud.enable = true;
     nvim.enable = true;

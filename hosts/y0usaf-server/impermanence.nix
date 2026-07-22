@@ -1,39 +1,29 @@
-_: {
+# Pure literals (import/++ only, no lib/pkgs/config) — same contract as the
+# desktop module, which finix replays as bind mounts. Shared entries live in
+# ../common/persist.nix.
+_: let
+  common = import ../common/persist.nix;
+in {
   environment.persistence."/persist" = {
     hideMounts = true;
-    directories = [
-      # System identity & NixOS state
-      "/var/lib/nixos"
-      "/var/lib/systemd/coredump"
-      "/var/log"
-
-      # SSH host keys
-      "/etc/ssh"
-      "/etc/NetworkManager/system-connections"
-
-      # Services
-      "/var/lib/postgresql"
-      "/var/lib/forgejo"
-      "/var/lib/private" # n8n, blocky (systemd DynamicUser dirs)
-      "/var/lib/tailscale"
-      "/var/lib/manzil"
-      "/var/lib/btrbk"
-      "/var/lib/NetworkManager"
-    ];
-    files = [
-      "/etc/machine-id"
-    ];
+    directories =
+      common.systemDirectories
+      ++ [
+        # Services
+        "/var/lib/postgresql"
+        "/var/lib/forgejo"
+        "/var/lib/private" # n8n, blocky (systemd DynamicUser dirs)
+        "/var/lib/btrbk"
+      ];
+    files = common.systemFiles;
     users.y0usaf = {
-      directories = [
-        "nixos"
-        ".hermes"
-        ".codex"
-        ".claude"
-        ".config/claude"
-      ];
-      files = [
-        ".claude.json"
-      ];
+      directories =
+        common.userDirectories
+        ++ [
+          ".hermes"
+          ".config/claude"
+        ];
+      files = common.userFiles;
     };
   };
 }

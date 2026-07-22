@@ -4,9 +4,9 @@
 {pkgs}: {
   # mkDeploy {name, system, defaultHost}
   mkDeploy = {
+    defaultHost,
     name,
     system,
-    defaultHost,
   }: {
     deployScript = pkgs.writeShellScriptBin name ''
       set -euo pipefail

@@ -99,6 +99,5 @@ in {
     };
   };
 
-  services.openssh.ports = [2222];
-  networking.firewall.allowedTCPPorts = [25565 2222];
+  networking.firewall.allowedTCPPorts = [25565];
 }

@@ -4,9 +4,9 @@
 # Shared baseline: bash, dhcpcd, getty, openssh, sudo, sysklogd + our
 # common.nix workarounds (see NOTES.md "Upstream finix bugs/gaps").
 {
-  inputs,
-  pkgs,
   lib,
+  pkgs,
+  inputs,
 }: modules:
 inputs.finix.lib.finixSystem {
   inherit lib;

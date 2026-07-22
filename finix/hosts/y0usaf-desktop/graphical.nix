@@ -12,7 +12,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: {
   hardware.nvidia = {
@@ -62,14 +61,16 @@
   # ships udev rules mdevd can't consume, and phase-2b's libinput/niri
   # enumerate input devices via libudev. Server keeps mdevd. net-fallback
   # already tolerates any eudev NIC rename (matches en*/eth*).
-  services.mdevd.enable = lib.mkForce false;
-  services.udev.enable = true;
+  services = {
+    mdevd.enable = lib.mkForce false;
+    udev.enable = true;
+    seatd.enable = true;
+    dbus.enable = true;
+  };
 
   # Seat + bus groundwork for niri (phase 2b). seatd creates its own
   # "seat" group; dbus its messagebus user. machine-id is already copied
   # from /persist by the activation script in persistent.nix.
-  services.seatd.enable = true;
-  services.dbus.enable = true;
 
   users.users.y0usaf.extraGroups = ["video" "render" "seat"];
 }

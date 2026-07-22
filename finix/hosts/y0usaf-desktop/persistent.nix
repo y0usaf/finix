@@ -22,8 +22,6 @@
   ...
 }: let
   diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
-  desktopIp = "192.168.2.28";
-  fallbackGateway = "192.168.2.1";
 
   # Single source of truth: the NixOS impermanence module for this host is a
   # pure-literal function — call it and replay the same allowlist here.
@@ -43,10 +41,6 @@
   # upstream escapePath maps both "/" and "/root" to the finit stanza name
   # "root", so it cannot be a neededForBoot fstab entry (collision assert).
   # Everything else (/var/*) binds 1:1 via fstab.
-  systemBindDirs =
-    builtins.filter (d: !lib.hasPrefix "/etc/" d && d != "/root")
-    (map dirPath persistCfg.directories);
-  userDirs = map dirPath persistCfg.users.y0usaf.directories;
   userFiles = persistCfg.users.y0usaf.files;
 
   btrfsOpts = ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
@@ -55,108 +49,10 @@
     fsType = "btrfs";
     options = ["subvol=${name}"] ++ btrfsOpts ++ extraOpts;
   };
-
   # The 250-entry user allowlist as one supervised task instead of 250 fstab
   # mount tasks: same bind-mount semantics as the impermanence module,
   # ownership applied only to directories this script itself creates.
-  userBindList = pkgs.writeText "persist-user-binds" (lib.concatMapStrings (d: "${d}\n") userDirs);
-  userFileList = pkgs.writeText "persist-user-files" (lib.concatMapStrings (f: "${f}\n") userFiles);
-  persistUserBinds = pkgs.writeShellScript "persist-user-binds" ''
-    set -u
-    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux]}
-
-    for _ in $(seq 1 120); do
-      mountpoint -q /persist && mountpoint -q /home && break
-      sleep 1
-    done
-    mountpoint -q /persist || { echo "persist-user-binds: /persist never mounted" >&2; exit 1; }
-    mountpoint -q /home || { echo "persist-user-binds: /home never mounted" >&2; exit 1; }
-
-    fail=0
-
-    # /root first: kept out of fstab (escapePath collision with "/", see
-    # systemBindDirs above). Root-owned, mode from the allowlist (0700).
-    install -d -m 0700 /persist/root
-    install -d -m 0700 /root
-    mountpoint -q /root || mount --bind /persist/root /root || fail=1
-
-    src_root=/persist/home/y0usaf
-    dst_root=/home/y0usaf
-
-    while IFS= read -r rel; do
-      [ -n "$rel" ] || continue
-      src="$src_root/$rel"
-      dst="$dst_root/$rel"
-      [ -d "$src" ] || install -d -o y0usaf -g users "$src" || { fail=1; continue; }
-      [ -d "$dst" ] || install -d -o y0usaf -g users "$dst" || { fail=1; continue; }
-      mountpoint -q "$dst" || mount --bind "$src" "$dst" || fail=1
-    done < ${userBindList}
-
-    while IFS= read -r rel; do
-      [ -n "$rel" ] || continue
-      src="$src_root/$rel"
-      dst="$dst_root/$rel"
-      [ -f "$src" ] || { install -o y0usaf -g users -m 0600 /dev/null "$src" || { fail=1; continue; }; }
-      [ -f "$dst" ] || { install -o y0usaf -g users -m 0600 /dev/null "$dst" || { fail=1; continue; }; }
-      mountpoint -q "$dst" || mount --bind "$src" "$dst" || fail=1
-    done < ${userFileList}
-
-    [ "$fail" = 0 ] || { echo "persist-user-binds: some binds failed" >&2; exit 1; }
-    echo "persist-user-binds: allowlist mounted"
-  '';
-
-  netFallback = pkgs.writeShellScript "desktop-net-fallback" ''
-    set -eu
-    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.iproute2 pkgs.gnugrep]}
-
-    find_iface() {
-      for dev in /sys/class/net/en* /sys/class/net/eth*; do
-        [ -e "$dev" ] || continue
-        basename "$dev"
-        return 0
-      done
-      return 1
-    }
-
-    # DHCP is authoritative; only install the known-good static fallback after
-    # a fair wait so a delayed lease is never needlessly replaced.
-    for _ in $(seq 1 45); do
-      if ${pkgs.iproute2}/bin/ip -4 addr show scope global 2>/dev/null \
-        | ${pkgs.gnugrep}/bin/grep -q 'inet '; then
-        exit 0
-      fi
-      sleep 1
-    done
-
-    iface="$(find_iface)" || exit 1
-    ${pkgs.iproute2}/bin/ip link set "$iface" up || true
-    ${pkgs.iproute2}/bin/ip addr replace ${desktopIp}/24 dev "$iface" || true
-    ${pkgs.iproute2}/bin/ip route replace default via ${fallbackGateway} dev "$iface" || true
-    printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > /etc/resolv.conf || true
-  '';
-
   # Deliberate, reversible exit to the rescue OS (one-shot; BootOrder kept).
-  bootNixos = pkgs.writeShellScriptBin "boot-nixos" ''
-    set -eu
-    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused]}
-    [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
-    mountpoint -q /sys/firmware/efi/efivars \
-      || mount -t efivarfs efivarfs /sys/firmware/efi/efivars
-    lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
-    [ -n "$lim" ] || { echo "boot-nixos: no Limine EFI entry" >&2; exit 1; }
-    efibootmgr -q -n "$lim"
-    echo "boot-nixos: BootNext=Boot$lim; rebooting into NixOS rescue"
-    exec /run/current-system/sw/bin/initctl reboot
-  '';
-
-  bindMount = dir: {
-    device = "/persist${dir}";
-    # finix's initrd generator requires a real fsType for neededForBoot binds;
-    # mount.nix ignores it when the bind option is present.
-    fsType = "btrfs";
-    options = ["bind"];
-    neededForBoot = true;
-  };
 in {
   imports = [./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix ./parity.nix];
 
@@ -164,7 +60,7 @@ in {
 
   finix.diagnostics = {
     enable = true;
-    diskUuid = diskUuid;
+    inherit diskUuid;
     fallbackDevices = ["/dev/nvme0n1p5"];
   };
 
@@ -178,9 +74,37 @@ in {
   # NixOS blacklists nouveau too (proprietary driver); phase 2 brings the
   # real NVIDIA stack. Without nouveau the dGPU-connected console stays on
   # simpledrm (boot-1 behavior, stable).
-  environment.etc."modprobe.d/finix-desktop-blacklist.conf".text = ''
-    blacklist nouveau
-  '';
+  environment = {
+    etc."modprobe.d/finix-desktop-blacklist.conf".text = ''
+      blacklist nouveau
+    '';
+    etc."finix-stage2".text = "desktop-phase2.4\n";
+    systemPackages = [
+      pkgs.nix
+      pkgs.efibootmgr
+      (pkgs.writeShellScriptBin "boot-nixos" ''
+        set -eu
+        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused]}
+        [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
+        mountpoint -q /sys/firmware/efi/efivars \
+          || mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+        lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
+        [ -n "$lim" ] || { echo "boot-nixos: no Limine EFI entry" >&2; exit 1; }
+        efibootmgr -q -n "$lim"
+        echo "boot-nixos: BootNext=Boot$lim; rebooting into NixOS rescue"
+        exec /run/current-system/sw/bin/initctl reboot
+      '')
+      pkgs.git
+      pkgs.curl
+      pkgs.iproute2
+      pkgs.iputils
+      pkgs.procps
+      pkgs.util-linux
+      pkgs.vim
+      # Daily driver essentials until the real package set lands (phase 2):
+      flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi
+    ];
+  };
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
@@ -264,13 +188,45 @@ in {
     # early, before activation and services.
     // builtins.listToAttrs (map (d: {
         name = d;
-        value = bindMount d;
+        value =
+          (dir: {
+            device = "/persist${dir}";
+            # finix's initrd generator requires a real fsType for neededForBoot binds;
+            # mount.nix ignores it when the bind option is present.
+            fsType = "btrfs";
+            options = ["bind"];
+            neededForBoot = true;
+          })
+          d;
       })
-      systemBindDirs);
+      (builtins.filter (d: !lib.hasPrefix "/etc/" d && d != "/root")
+        (map dirPath persistCfg.directories)));
 
-  services.getty = {
-    enable = true;
-    ttys = ["tty1" "tty2"];
+  services = {
+    getty = {
+      enable = true;
+      ttys = ["tty1" "tty2"];
+    };
+    openssh.settings = {
+      # Parity with the NixOS universe: real sshd on 2222; :22 stays free
+      # for Tailscale SSH once tailscaled lands (phase 2).
+      Port = [2222];
+      # Reuse the NixOS host key from /persist/etc/ssh: same host identity
+      # under either OS, no known_hosts churn. ed25519 only — finix renders
+      # list settings space-joined on ONE line (upstream gotcha).
+      HostKey = lib.mkForce ["/persist/etc/ssh/ssh_host_ed25519_key"];
+      AuthorizedKeysFile = lib.mkForce ["/persist/etc/ssh/authorized_keys.d/%u"];
+      UsePAM = lib.mkForce true;
+      StrictModes = lib.mkForce true;
+    };
+    nix-daemon = {
+      enable = true;
+      settings = {
+        trusted-users = ["root" "y0usaf"];
+        # Phase-2a lesson: every nix invocation needed --extra-experimental-features.
+        experimental-features = ["nix-command" "flakes"];
+      };
+    };
   };
 
   # Same credentials as the NixOS install (impermanence keeps these paths).
@@ -306,62 +262,99 @@ in {
     fi
   '';
 
-  services.openssh.settings = {
-    # Reuse the NixOS host key from /persist/etc/ssh: same host identity
-    # under either OS, no known_hosts churn. ed25519 only — finix renders
-    # list settings space-joined on ONE line (upstream gotcha).
-    HostKey = lib.mkForce ["/persist/etc/ssh/ssh_host_ed25519_key"];
-    AuthorizedKeysFile = lib.mkForce ["/persist/etc/ssh/authorized_keys.d/%u"];
-    UsePAM = lib.mkForce true;
-    StrictModes = lib.mkForce true;
-  };
-
   # Upstream task generates a throwaway key in /var/lib/sshd; sshd's start
   # would race it. The persisted key must already exist — assert, not create.
-  finit.tasks.ssh-keygen.command = lib.mkForce (pkgs.writeShellScript "check-host-keys" ''
-    [ -s /persist/etc/ssh/ssh_host_ed25519_key ]
-  '');
+  finit = {
+    tasks = {
+      ssh-keygen.command = lib.mkForce (pkgs.writeShellScript "check-host-keys" ''
+        [ -s /persist/etc/ssh/ssh_host_ed25519_key ]
+      '');
+      net-fallback = {
+        description = "static IP fallback if DHCP fails";
+        command = "${pkgs.writeShellScript "desktop-net-fallback" ''
+          set -eu
+          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.iproute2 pkgs.gnugrep]}
 
-  finit.tasks.net-fallback = {
-    description = "static IP fallback if DHCP fails";
-    command = "${netFallback}";
-    conditions = ["net/lo/up"];
-    log = true;
-  };
+          find_iface() {
+            for dev in /sys/class/net/en* /sys/class/net/eth*; do
+              [ -e "$dev" ] || continue
+              basename "$dev"
+              return 0
+            done
+            return 1
+          }
 
-  finit.tasks.persist-user-binds = {
-    description = "replay the impermanence user allowlist as bind mounts";
-    command = "${persistUserBinds}";
-    log = true;
-  };
+          # DHCP is authoritative; only install the known-good static fallback after
+          # a fair wait so a delayed lease is never needlessly replaced.
+          for _ in $(seq 1 45); do
+            if ${pkgs.iproute2}/bin/ip -4 addr show scope global 2>/dev/null \
+              | ${pkgs.gnugrep}/bin/grep -q 'inet '; then
+              exit 0
+            fi
+            sleep 1
+          done
 
-  # The desktop must accept pushed closures + local rebuilds.
-  finit.tasks.remount-nix-store.enable = false;
+          iface="$(find_iface)" || exit 1
+          ${pkgs.iproute2}/bin/ip link set "$iface" up || true
+          ${pkgs.iproute2}/bin/ip addr replace 192.168.2.28/24 dev "$iface" || true
+          ${pkgs.iproute2}/bin/ip route replace default via 192.168.2.1 dev "$iface" || true
+          printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > /etc/resolv.conf || true
+        ''}";
+        conditions = ["net/lo/up"];
+        log = true;
+      };
+      persist-user-binds = {
+        description = "replay the impermanence user allowlist as bind mounts";
+        command = "${pkgs.writeShellScript "persist-user-binds" ''
+          set -u
+          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux]}
 
-  services.nix-daemon = {
-    enable = true;
-    settings = {
-      trusted-users = ["root" "y0usaf"];
-      # Phase-2a lesson: every nix invocation needed --extra-experimental-features.
-      experimental-features = ["nix-command" "flakes"];
+          for _ in $(seq 1 120); do
+            mountpoint -q /persist && mountpoint -q /home && break
+            sleep 1
+          done
+          mountpoint -q /persist || { echo "persist-user-binds: /persist never mounted" >&2; exit 1; }
+          mountpoint -q /home || { echo "persist-user-binds: /home never mounted" >&2; exit 1; }
+
+          fail=0
+
+          # /root first: kept out of fstab (escapePath collision with "/", see
+          # systemBindDirs above). Root-owned, mode from the allowlist (0700).
+          install -d -m 0700 /persist/root
+          install -d -m 0700 /root
+          mountpoint -q /root || mount --bind /persist/root /root || fail=1
+
+          src_root=/persist/home/y0usaf
+          dst_root=/home/y0usaf
+
+          while IFS= read -r rel; do
+            [ -n "$rel" ] || continue
+            src="$src_root/$rel"
+            dst="$dst_root/$rel"
+            [ -d "$src" ] || install -d -o y0usaf -g users "$src" || { fail=1; continue; }
+            [ -d "$dst" ] || install -d -o y0usaf -g users "$dst" || { fail=1; continue; }
+            mountpoint -q "$dst" || mount --bind "$src" "$dst" || fail=1
+          done < ${pkgs.writeText "persist-user-binds" (lib.concatMapStrings (d: "${d}\n") (map dirPath persistCfg.users.y0usaf.directories))}
+
+          while IFS= read -r rel; do
+            [ -n "$rel" ] || continue
+            src="$src_root/$rel"
+            dst="$dst_root/$rel"
+            [ -f "$src" ] || { install -o y0usaf -g users -m 0600 /dev/null "$src" || { fail=1; continue; }; }
+            [ -f "$dst" ] || { install -o y0usaf -g users -m 0600 /dev/null "$dst" || { fail=1; continue; }; }
+            mountpoint -q "$dst" || mount --bind "$src" "$dst" || fail=1
+          done < ${pkgs.writeText "persist-user-files" (lib.concatMapStrings (f: "${f}\n") userFiles)}
+
+          [ "$fail" = 0 ] || { echo "persist-user-binds: some binds failed" >&2; exit 1; }
+          echo "persist-user-binds: allowlist mounted"
+        ''}";
+        log = true;
+      };
+      remount-nix-store.enable = false;
     };
   };
 
-  # Console-visible generation marker + deploy-path prover.
-  environment.etc."finix-stage2".text = "desktop-phase2.4\n";
+  # The desktop must accept pushed closures + local rebuilds.
 
-  environment.systemPackages = [
-    pkgs.nix
-    pkgs.efibootmgr
-    bootNixos
-    pkgs.git
-    pkgs.curl
-    pkgs.iproute2
-    pkgs.iputils
-    pkgs.procps
-    pkgs.util-linux
-    pkgs.vim
-    # Daily driver essentials until the real package set lands (phase 2):
-    flakeInputs.pi-flake.packages.${pkgs.stdenv.hostPlatform.system}.pi
-  ];
+  # Console-visible generation marker + deploy-path prover.
 }
