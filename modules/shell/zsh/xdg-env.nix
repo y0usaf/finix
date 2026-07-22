@@ -37,6 +37,15 @@
           export PYTHON_HISTORY="$XDG_STATE_HOME/python_history"
           export HISTFILE="$XDG_STATE_HOME/zsh/history"
           export GNUPGHOME="$XDG_DATA_HOME/gnupg"
+
+          # AI coding agents (no native XDG support); mirrored from
+          # modules/core/user/session/xdg.nix so finix sessions (shared
+          # $HOME, no NixOS sessionVariables) get them too.
+          export CLAUDE_CONFIG_DIR="$XDG_DATA_HOME/claude"
+          export CODEX_HOME="$XDG_DATA_HOME/codex"
+          export PI_CODING_AGENT_DIR="$XDG_DATA_HOME/pi/agent"
+          export PI_VCC_CONFIG_PATH="$XDG_DATA_HOME/pi/agent/pi-vcc-config.json"
+          export KIMI_CODE_HOME="$XDG_DATA_HOME/kimi-code"
           export PARALLEL_HOME="$XDG_CONFIG_HOME/parallel"
 
           export DVDCSS_CACHE="$XDG_DATA_HOME/dvdcss"

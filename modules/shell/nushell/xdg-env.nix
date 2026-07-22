@@ -28,6 +28,14 @@
           $env.CARGO_HOME = $"($env.XDG_DATA_HOME)/cargo"
           $env.RUSTUP_HOME = $"($env.XDG_DATA_HOME)/rustup"
           $env.GOPATH = $"($env.XDG_DATA_HOME)/go"
+
+          # AI coding agents (no native XDG support); mirrored from
+          # modules/core/user/session/xdg.nix for finix sessions.
+          $env.CLAUDE_CONFIG_DIR = $"($env.XDG_DATA_HOME)/claude"
+          $env.CODEX_HOME = $"($env.XDG_DATA_HOME)/codex"
+          $env.PI_CODING_AGENT_DIR = $"($env.XDG_DATA_HOME)/pi/agent"
+          $env.PI_VCC_CONFIG_PATH = $"($env.XDG_DATA_HOME)/pi/agent/pi-vcc-config.json"
+          $env.KIMI_CODE_HOME = $"($env.XDG_DATA_HOME)/kimi-code"
           $env._JAVA_OPTIONS = $"-Djava.util.prefs.userRoot=\"($env.XDG_CONFIG_HOME)/java\""
           $env.LESSHISTFILE = $"($env.XDG_STATE_HOME)/less/history"
           $env.NODE_REPL_HISTORY = $"($env.XDG_STATE_HOME)/node_repl_history"
