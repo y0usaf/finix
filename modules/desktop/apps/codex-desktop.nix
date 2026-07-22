@@ -13,7 +13,7 @@
     # Pin to the last known-good June 2026 DMG (still in local /nix/store).
     src = pkgs.fetchurl {
       url = "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg";
-      hash = "sha256-BadoUKWgNbs+fjwLYbfLDzWcJQno7B7UgQUmprx1Gr4=";
+      hash = "sha256-xGhTgxNq/IhSbFhBu4Sie2BxkOzqEeaPSeSTQce/34o=";
     };
   };
 in {
