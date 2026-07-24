@@ -18,12 +18,7 @@ in {
         common.userDirectories
         ++ [
           # NOTE: .local/share/Steam is a dedicated btrfs subvol (@steam)
-          # mounted on top of /home — NOT listed here. DCIM/Music/Pictures
-          # are plain persisted dirs on this host (no subvols). Downloads
-          # stays ephemeral.
-          "DCIM"
-          "Music"
-          "Pictures"
+          # mounted on top of /home — NOT listed here.
 
           # Gaming
           ".steam"
