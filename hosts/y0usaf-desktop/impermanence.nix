@@ -277,7 +277,7 @@ in {
           ".local/share/parllama"
           ".local/share/charm"
           ".local/share/crush"
-          ".local/share/claude"
+          # .local/share/claude comes from hosts/common/persist.nix
           ".local/share/piebald"
           ".local/share/ai.piebald.desktop"
           ".local/share/ai.opencode.desktop"
