@@ -41,25 +41,31 @@
           id = "oty33-aq3dt";
           label = "Music";
           path = "~/Music";
-          devices = ["desktop" "laptop" "framework" "server" "phone"];
+          devices = ["desktop" "laptop" "server" "phone"];
           versioning.type = "trashcan";
         };
         dcim = {
           id = "ti9yk-zu3xs";
           label = "DCIM";
           path = "~/DCIM";
-          devices = ["desktop" "laptop" "framework" "server" "phone"];
+          devices = ["desktop" "laptop" "server" "phone"];
           versioning.type = "trashcan";
         };
         pictures = {
           id = "zbxzv-35v4e";
           label = "Pictures";
           path = "~/Pictures";
-          devices = ["desktop" "laptop" "framework" "server" "phone"];
+          devices = ["desktop" "laptop" "server" "phone"];
           versioning.type = "trashcan";
         };
       };
       description = "Syncthing folders configuration";
+    };
+
+    enabledFolders = lib.mkOption {
+      type = lib.types.nullOr (lib.types.listOf lib.types.str);
+      default = null;
+      description = "Folder attribute names enabled on this host; null enables all folders";
     };
   };
 
@@ -77,7 +83,11 @@
           "syncthing-desktop:8384"
           "syncthing-server:8384"
         ];
-        inherit (config.user.services.syncthing) devices folders;
+        devices = config.user.services.syncthing.devices;
+        folders =
+          if config.user.services.syncthing.enabledFolders == null
+          then config.user.services.syncthing.folders
+          else lib.getAttrs config.user.services.syncthing.enabledFolders config.user.services.syncthing.folders;
       };
     };
   };

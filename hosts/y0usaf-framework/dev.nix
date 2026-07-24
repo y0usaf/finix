@@ -22,6 +22,7 @@ _: {
     bun.enable = true;
     npm.enable = true;
     docker.enable = true;
+    emacs-tour.enable = true;
     gcloud.enable = true;
     nvim.enable = true;
     python.enable = true;

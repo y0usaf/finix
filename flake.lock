@@ -118,6 +118,21 @@
         "type": "github"
       }
     },
+    "crane_3": {
+      "locked": {
+        "lastModified": 1776635034,
+        "narHash": "sha256-OEOJrT3ZfwbChzODfIH4GzlNTtOFuZFWPtW7jIeR8xU=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "dc7496d8ea6e526b1254b55d09b966e94673750f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "cursors": {
       "inputs": {
         "nixpkgs": [
@@ -936,21 +951,22 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "piCompact": "piCompact",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piHashline": "piHashline",
-        "piMinimalEditor": "piMinimalEditor",
+        "piInterview": "piInterview",
+        "piKimi": "piKimi",
+        "piMinimal": "piMinimal",
         "piRtk": "piRtk",
         "piSrc": "piSrc",
         "piToolManagement": "piToolManagement",
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1784298806,
-        "narHash": "sha256-qTmbJtJRIvEdYnAEkTJCuvnGjFDsPlzjkCCBQxQ4MjQ=",
+        "lastModified": 1784850037,
+        "narHash": "sha256-aTUIVYaIpv9muElmqsHDgPTETKqP4yQ/7rSQgK5weFc=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "f9ee1e662cb08ca0b3fff58b147bbf70efd3a4e4",
+        "rev": "0eed9a5eda14884ab13021c465854f16bfb0058d",
         "type": "github"
       },
       "original": {
@@ -960,24 +976,28 @@
         "type": "github"
       }
     },
-    "piCompact": {
+    "pi-harness": {
       "inputs": {
+        "crane": "crane_3",
         "nixpkgs": [
-          "pi-flake",
           "nixpkgs"
-        ]
+        ],
+        "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "path": "./extensions/pi-compact",
-        "type": "path"
+        "lastModified": 1784735791,
+        "narHash": "sha256-RYHFe5i2F5MIBXne702wsrZFGidLTBQMAEzfVTYrkBs=",
+        "ref": "main",
+        "rev": "08b6b186932a8def73617f8eac161a18c786219d",
+        "revCount": 55,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/pi-harness.git"
       },
       "original": {
-        "path": "./extensions/pi-compact",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
+        "ref": "main",
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/pi-harness.git"
+      }
     },
     "piGeckoWebsearch": {
       "inputs": {
@@ -1017,7 +1037,7 @@
         "pi-flake"
       ]
     },
-    "piMinimalEditor": {
+    "piInterview": {
       "inputs": {
         "nixpkgs": [
           "pi-flake",
@@ -1025,11 +1045,49 @@
         ]
       },
       "locked": {
-        "path": "./extensions/pi-minimal-editor",
+        "path": "./extensions/pi-interview",
         "type": "path"
       },
       "original": {
-        "path": "./extensions/pi-minimal-editor",
+        "path": "./extensions/pi-interview",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
+    },
+    "piKimi": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-kimi",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-kimi",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
+    },
+    "piMinimal": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-minimal",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-minimal",
         "type": "path"
       },
       "parent": [
@@ -1187,6 +1245,7 @@
         "patchix": "patchix",
         "phi": "phi",
         "pi-flake": "pi-flake",
+        "pi-harness": "pi-harness",
         "rudo": "rudo",
         "strictix": "strictix",
         "tomoe": "tomoe",
@@ -1226,6 +1285,27 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "5018343419ea808f8a413241381976b7e60951f2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_2": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-harness",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1776654897,
+        "narHash": "sha256-Vqi4AiJVCcBGn/RmBtRCgyH5rCxqm/w0xV9diJWF1Ic=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "25d75be8139815a53560745fa060909777495105",
         "type": "github"
       },
       "original": {

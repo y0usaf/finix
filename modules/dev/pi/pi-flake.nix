@@ -12,17 +12,21 @@ in {
   imports = [piFlake.nixosModules.default];
 
   config = lib.mkIf config.user.dev.pi.enable {
+    environment.systemPackages = [
+      flakeInputs.pi-harness.packages."${pkgs.stdenv.hostPlatform.system}".default
+    ];
+
     programs.pi = {
       enable = true;
-      # Default bundle minus rlm.
+      # Default bundle minus opt-in workflow variants.
       extensions = {
         "gecko-websearch" = true;
         rtk = true;
-        compact = true;
+        minimal = true;
+        interview = true;
         "tool-management" = true;
         webfetch = true;
         hashline = true;
-        "minimal-editor" = true;
         advisor = true;
         review = true;
         vcc = true;

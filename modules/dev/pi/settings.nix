@@ -51,7 +51,7 @@ in {
         value =
           {
             defaultProvider = "vercel-ai-gateway";
-            defaultModel = "moonshotai/kimi-k3";
+            defaultModel = "anthropic/claude-fable-5";
             defaultThinkingLevel = "max";
             enabledModels = [
               "openai-codex/gpt-5.6-sol"
@@ -81,6 +81,14 @@ in {
           // lib.optionalAttrs (cfg.extensionSettings != {}) {
             inherit (cfg) extensionSettings;
           };
+      };
+      ".local/share/pi/agent/interview.json" = {
+        generator = toJSON;
+        value = {
+          mode = "strict";
+          provider = "openai-codex";
+          model = "gpt-5.6-luna";
+        };
       };
       ".local/share/pi/agent/models.json" = {
         generator = toJSON;

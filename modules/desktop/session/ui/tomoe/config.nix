@@ -401,20 +401,33 @@ in {
               end
             end
 
-            -- J/K scroll the workspace ring; Shift+J/K send the focused window
-            -- along it and follow (it lands at the end of the target list,
-            -- which wm.switch then focuses).
+            -- J/K scroll the workspace ring; Shift+J/K moves the focused window
+            -- and follows it. Reassign before switching instead of composing
+            -- wm.move_focused() + wm.switch(): that pair queues hide then immediate
+            -- resize/show for the moved surface in one Lua entry, which can leave a
+            -- client's content at its old buffer size. Keeping it mapped gives the
+            -- client one normal resize configure for its target split.
             local function ws_step(dir)
               wm.switch(((wm.active - 1 + dir) % wm.workspace_count) + 1)
             end
 
             local function ws_move_step(dir)
-              if not tomoe.focused_window() then
+              local win = tomoe.focused_window()
+              if not win then
                 return
               end
               local n = ((wm.active - 1 + dir) % wm.workspace_count) + 1
-              wm.move_focused(n)
-              wm.switch(n)
+              local source = wm.workspaces[wm.active]
+              for i, candidate in ipairs(source) do
+                if candidate:id() == win:id() then
+                  table.remove(source, i)
+                  table.insert(wm.workspaces[n], win)
+                  -- wm.switch hides only the remaining source windows, arranges
+                  -- the target once, announces state, then focuses its last entry.
+                  wm.switch(n)
+                  return
+                end
+              end
             end
 
             -- In-order leaf ids of a tree: the linear order Shift+H/L swaps in.

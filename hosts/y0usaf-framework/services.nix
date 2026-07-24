@@ -4,6 +4,9 @@ _: {
     polkitAgent.enable = true;
     formatNix.enable = true;
     udiskie.enable = true;
-    syncthing.enable = true;
+    syncthing = {
+      enable = true;
+      enabledFolders = ["tokens"];
+    };
   };
 }
