@@ -65,6 +65,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    pi-harness = {
+      url = "git+ssh://git@github.com/y0usaf/pi-harness.git?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     linear-cli = {
       url = "github:y0usaf/linear-cli?ref=nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";

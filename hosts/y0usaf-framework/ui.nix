@@ -28,6 +28,8 @@ _: {
       };
 
       extraConfig = ''
+        -- Browser/video/game controls may request real output fullscreen.
+        wm.honor_client_fullscreen = true
         -- Keep the dmenu-style launcher/portal chooser out of the split tree.
         tomoe.rule { app_id = "^launcher$", floating = true }
       '';
