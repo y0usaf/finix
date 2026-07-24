@@ -108,11 +108,11 @@ in {
             unfocused = "#3b4261";
           }},
           ${lib.optionalString config.hardware.nvidia.enable ''
-              -- NVIDIA: a fenced frame queued to KMS before its render completes
-              -- hangs the driver (whole-session freeze, niri discussion #3777);
-              -- wait for the render CPU-side instead. NVIDIA-only: on any other
-              -- GPU this just serializes every frame for nothing.
-              wait_for_frame_completion = true,''}
+            -- NVIDIA: a fenced frame queued to KMS before its render completes
+            -- hangs the driver (whole-session freeze, niri discussion #3777);
+            -- wait for the render CPU-side instead. NVIDIA-only: on any other
+            -- GPU this just serializes every frame for nothing.
+            wait_for_frame_completion = true,''}
           ${lib.optionalString (config.user.ui.tomoe.displays != {}) ''
               displays = ${toLua config.user.ui.tomoe.displays},''}
           }
@@ -124,8 +124,15 @@ in {
             "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill",
           } })
 
+          -- ─── Shell (moonshell, in-process since the fusion) ─────────────────────────
+          -- Notification popups: the compositor hosts the notification
+          -- daemon; this builtin renders notify-send popups with ui.*.
+          require("moonshell.notifications").setup()
           ${lib.optionalString (config.user.ui.moonshell.enable or false) ''
-              tomoe.process.service("moonshell", { command = { "${lib.getExe config.user.ui.moonshell.package}" }, restart = "on_exit" })''}
+            -- The bar overlay runs in this VM — same ~/.config/moonshell
+            -- files the standalone client reads under niri, but here with
+            -- zero extra processes and zero IPC (tomoe FUSION.md F2/F3).
+            dofile(os.getenv("HOME") .. "/.config/moonshell/init.lua")''}
 
           -- ─── Floating (shared by both layouts) ──────────────────────────────────────
           -- Super+space toggles; the active layout's wm.arrange reads this set and

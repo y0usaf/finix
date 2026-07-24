@@ -111,16 +111,9 @@
       url = "github:nix-community/impermanence";
     };
 
-    gpui-shell = {
-      url = "github:andre-brandao/gpui-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    moonshell = {
-      url = "git+ssh://git@github.com/y0usaf/moonshell.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
+    # moonshell is no longer a separate input: it merged into tomoe as
+    # its in-process shell subsystem (tomoe FUSION.md; the standalone
+    # repo is archived).
     tomoe = {
       url = "github:y0usaf/tomoe";
       inputs.nixpkgs.follows = "nixpkgs";

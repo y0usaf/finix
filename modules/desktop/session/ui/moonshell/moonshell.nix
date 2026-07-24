@@ -10,9 +10,9 @@
   inherit (lib.types) bool;
   toLua = lib.generators.toLua {};
   luaInline = lib.generators.mkLuaInline;
-  # nur's bar-overlay defaults, minus the tray: moonshell has no SNI
-  # service yet (moonshell PLAN.md M3). Tray comes back once
-  # shell.services.systemtray lands.
+  # nur's bar-overlay defaults. The SNI tray service exists since the
+  # fusion (shell.services.tray, tomoe FUSION.md F3); this overlay
+  # doesn't render a tray widget yet.
   barOverlayDefaults = {
     inherit (bar) modules;
     edges = ["top" "bottom"];
@@ -75,14 +75,19 @@ in {
     enable = lib.mkOption {
       type = bool;
       default = false;
-      description = "Enable moonshell, the GPU-free Lua-scriptable Wayland shell (nur's successor).";
+      description = "Enable moonshell, tomoe's in-process Lua shell (nur's successor; standalone client under niri).";
     };
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = flakeInputs.moonshell.packages."${pkgs.stdenv.hostPlatform.system}".moonshell;
-      defaultText = lib.literalExpression ''flakeInputs.moonshell.packages."''${pkgs.stdenv.hostPlatform.system}".moonshell'';
-      description = "moonshell package to install and run.";
+      default = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
+      defaultText = lib.literalExpression ''flakeInputs.tomoe.packages."''${pkgs.stdenv.hostPlatform.system}".default'';
+      description = ''
+        Package providing bin/moonshell — the *transitional* standalone
+        client, shipped by the tomoe flake since the fusion (FUSION.md;
+        deleted at F6). Only the niri session path launches it; under
+        tomoe the same ~/.config/moonshell/init.lua runs in-process.
+      '';
     };
 
     config = lib.mkOption {
@@ -107,7 +112,8 @@ in {
       };
 
       modules = lib.mkOption {
-        # No "tray": moonshell has no SNI service yet (PLAN.md M3).
+        # shell.services.tray exists since the fusion (F3); a tray
+        # widget for this overlay is still to be written.
         type = lib.types.listOf (lib.types.enum ["time" "date" "battery"]);
         default = ["time" "date"];
         description = "Bar overlay modules to render.";
@@ -167,8 +173,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [cfg.package];
-
     manzil.users."${config.user.name}".files =
       {
         ".config/moonshell/init.lua".text =
@@ -368,8 +372,8 @@ in {
 
         ".config/moonshell/bar_overlay.lua".text = ''
           -- ~/.config/moonshell/bar_overlay.lua
-          -- Local bar overlay config (nur's bar_overlay, tray stripped:
-          -- moonshell has no SNI service yet — tray returns with M3).
+          -- Local bar overlay config (nur's bar_overlay; runs in tomoe's
+          -- VM in-process, or under the standalone client on niri).
           --
           -- Uses one compositor-centered layer-shell surface per edge. Module blocks
           -- render inside that fixed-width centered surface, so positioning is delegated
@@ -441,7 +445,7 @@ in {
 
               local keyboard = shell.services.keyboard
               if not keyboard then
-                  io.stderr:write("moonshell: bongo cat needs updated Moonshell binary; skipping\n")
+                  io.stderr:write("moonshell: no shell.services.keyboard facade; skipping bongo cat\n")
                   return nil
               end
               local height = cfg.height or 80
@@ -510,8 +514,12 @@ in {
               -- widget bar pushes the cat up by the bar's whole thickness.
               -- Subtract it back: the cat is a free overlay and keeps its
               -- screen-edge margin.
+              -- In-process (the tomoe global exists) native surfaces
+              -- anchor to raw output edges, so no compensation needed;
+              -- standalone layer-shell arranges overlays inside the
+              -- exclusive zone and needs the margin pulled back.
               local exclusive_zone = 0
-              if opts.exclusive == true then
+              if _G.tomoe == nil and opts.exclusive == true then
                   for _, e in ipairs(opts.edges or DEFAULTS.edges or {}) do
                       if e == "bottom" then
                           exclusive_zone = (opts.height or DEFAULTS.height)

@@ -2,8 +2,8 @@ _: {
   user.ui = {
     moonshell = {
       enable = true;
-      # Laptop: battery shows the placeholder facade (static 100%) until
-      # moonshell M3 §3 lands the native UPower backend.
+      # Battery is native (UPower over rustbus, sysfs fallback) since
+      # moonshell M3 §3 / the fusion.
       bar-overlay.modules = ["time" "date" "battery"];
     };
     cursor.enable = true;
