@@ -1,9 +1,5 @@
 _: {
   user.ui = {
-    moonshell = {
-      enable = true;
-      bar-overlay.bongo-cat.enable = true;
-    };
     cursor.enable = true;
     fonts.enable = true;
     foot.enable = true;
@@ -14,6 +10,7 @@ _: {
 
     tomoe = {
       enable = true;
+      bar.bongo-cat.enable = true;
       displays = {
         "DP-2" = {
           position = [0 0];

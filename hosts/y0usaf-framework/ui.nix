@@ -1,13 +1,5 @@
 _: {
   user.ui = {
-    moonshell = {
-      enable = true;
-      bar-overlay.modules = ["time" "date" "battery"];
-      bar-overlay.edges = ["bottom"];
-      bar-overlay.exclusive = true;
-      bar-overlay.indent = 8;
-      bar-overlay.bongo-cat.enable = true;
-    };
     cursor.enable = true;
     fonts.enable = true;
     foot = {
@@ -21,6 +13,13 @@ _: {
     tomoe = {
       layout = "sway";
       enable = true;
+      bar = {
+        modules = ["time" "date" "battery" "network"];
+        edges = ["bottom"];
+        exclusive = true;
+        indent = 8;
+        bongo-cat.enable = true;
+      };
       displays = {
         "eDP-1" = {
           scale = 1;
@@ -30,7 +29,7 @@ _: {
       extraConfig = ''
         -- Browser/video/game controls may request real output fullscreen.
         wm.honor_client_fullscreen = true
-        -- Keep the dmenu-style launcher/portal chooser out of the split tree.
+        -- Keep the dmenu-style launcher out of the split tree.
         tomoe.rule { app_id = "^launcher$", floating = true }
       '';
     };
