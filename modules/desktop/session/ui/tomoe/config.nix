@@ -8,17 +8,29 @@
   inherit (config.lib.generators) toLua;
 
   tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  bar = config.user.ui.tomoe.bar;
+  # BarOverlay.open() options for the in-VM bar (deployed next to init.lua
+  # by shell.nix). font_family is assigned in Lua after fc-match resolution.
+  barOpenOpts = toLua {
+    inherit (bar) modules edges indent exclusive;
+    bongo_cat = {
+      inherit (bar.bongo-cat) enable height;
+      asset_dir = "${./assets/bongo-cat}";
+      name = "bongo-cat";
+      margin_bottom = bar.bongo-cat.margin-bottom;
+      x_offset = bar.bongo-cat.x-offset;
+      keypress_duration = bar.bongo-cat.keypress-duration;
+      layer = "overlay";
+    };
+  };
   # With `user.shell.ekko.open`, the terminal-spawn bind routes through the
   # running mux helper: an attached client requests focus for its existing
   # terminal; cold, the helper falls back to the regular terminal spawn.
   ekkoOpen = config.user.shell.ekko.enable && config.user.shell.ekko.open;
-  # Screencast source picker for xdg-desktop-portal-tomoe (dmenu contract:
-  # candidates on stdin, choice on stdout, non-zero exit = cancel). The
-  # portal hands us pipes, not a tty, so shuttle through a tmpdir and run
-  # fzf in a floating foot window (same app-id the launcher float rule
-  # matches). Store path referenced from TOMOE_PORTAL_CHOOSER below, so the
-  # script and the env var deploy atomically — a dangling path made the
-  # portal read exit 127 as "user cancelled".
+  # The portal's screencast source picker is compositor-drawn now:
+  # require("screencast") in the Lua config answers portal requests with a
+  # tomoe.ui.menu over IPC — no foot+fzf chooser script, no
+  # TOMOE_PORTAL_CHOOSER.
   # tomoe has no upstream niri-session-style wrapper binary and no NixOS
   # module, so this flake provides a `tomoe-session` shim that mirrors
   # ~/Dev/tomoe/run-tty.sh but execs the installed package binary. It scopes
@@ -44,16 +56,6 @@ in {
         export CLUTTER_BACKEND=wayland
         export XCURSOR_THEME=${config.user.ui.cursor.package.xcursorThemeName}
         export XCURSOR_SIZE=${toString config.user.appearance.xcursorSize}
-        export TOMOE_PORTAL_CHOOSER="''${TOMOE_PORTAL_CHOOSER:-${pkgs.writeShellScript "portal-chooser" ''
-          set -eu
-          dir=$(${pkgs.coreutils}/bin/mktemp -d)
-          trap '${pkgs.coreutils}/bin/rm -rf "$dir"' EXIT
-          ${pkgs.coreutils}/bin/cat > "$dir/in"
-          ${lib.getExe pkgs.foot} --app-id=launcher -e ${pkgs.runtimeShell} -c \
-            "${lib.getExe pkgs.fzf} --prompt 'cast: ' < '$dir/in' > '$dir/out'" || true
-          [ -s "$dir/out" ] || exit 1
-          ${pkgs.coreutils}/bin/cat "$dir/out"
-        ''}}"
 
         ${lib.optionalString config.hardware.nvidia.enable ''
           export WLR_NO_HARDWARE_CURSORS=1
@@ -107,6 +109,17 @@ in {
             focused = "#7aa2f7";
             unfocused = "#3b4261";
           }},
+            -- Dual-kawase blur behind shell layer surfaces, matched by
+            -- namespace (= shell.window name): widget bars + notification
+            -- popups. Bongo cat excluded — a blurred rect around a
+            -- transparent overlay reads as a smudge.
+            blur = ${toLua {
+            enabled = true;
+            passes = 3;
+            offset = 1.0;
+            anti_artifact_margin = 96;
+            layer_namespaces = ["bar-overlay-top" "bar-overlay-bottom" "moonshell.notifications"];
+          }},
           ${lib.optionalString config.hardware.nvidia.enable ''
             -- NVIDIA: a fenced frame queued to KMS before its render completes
             -- hangs the driver (whole-session freeze, niri discussion #3777);
@@ -124,15 +137,39 @@ in {
             "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill",
           } })
 
-          -- ─── Shell (moonshell, in-process since the fusion) ─────────────────────────
-          -- Notification popups: the compositor hosts the notification
-          -- daemon; this builtin renders notify-send popups with ui.*.
-          require("moonshell.notifications").setup()
-          ${lib.optionalString (config.user.ui.moonshell.enable or false) ''
-            -- The bar overlay runs in this VM — same ~/.config/moonshell
-            -- files the standalone client reads under niri, but here with
-            -- zero extra processes and zero IPC (tomoe FUSION.md F2/F3).
-            dofile(os.getenv("HOME") .. "/.config/moonshell/init.lua")''}
+          -- ─── Shell (in-process since the fusion) ─────────────────────────────────
+          -- Compositor-drawn screencast picker: the portal asks this VM over
+          -- IPC and gets a tomoe.ui.menu — no foot+fzf chooser script. Rule
+          -- escape hatches: tomoe.rule { app_id = "^obs$", screencast = "DP-2" }
+          -- casts that output without asking; screencast = false denies.
+          require("screencast")
+
+          ${lib.optionalString bar.enable ''
+            -- Bar overlay + wallust bridge, deployed next to this file by the
+            -- same module (folded in from ~/.config/moonshell; runs in this VM
+            -- with zero extra processes and zero IPC — tomoe FUSION.md F2/F3).
+            local _ms_font = shell.exec("fc-match monospace --format='%{family}'")
+            if _ms_font == "" then _ms_font = "monospace" end
+            local BarOverlay = dofile(os.getenv("HOME") .. "/.config/tomoe/shell/bar_overlay.lua")
+            local _bar_opts = ${barOpenOpts}
+            _bar_opts.font_family = _ms_font
+            BarOverlay.open(_bar_opts)''}
+
+          -- Notification popups: the compositor hosts the notification daemon
+          -- (FUSION.md F3); this builtin renders notify-send popups with ui.*,
+          -- colored from the wallust palette the bar just applied (a snapshot
+          -- at load — live wallust regenerates recolor on config reload).
+          local _Wallust = _G.__moonshell_wallust
+          local function _wc(name)
+            local v = _Wallust and _Wallust.color(name)
+            if type(v) == "number" then return _Wallust.hex(v) end
+            return v
+          end
+          require("moonshell.notifications").setup({
+            bg = _wc("bg"),
+            fg = _wc("fg"),
+            body_fg = _wc("fg"),
+          })
 
           -- ─── Floating (shared by both layouts) ──────────────────────────────────────
           -- Super+space toggles; the active layout's wm.arrange reads this set and
