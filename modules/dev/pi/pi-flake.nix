@@ -31,6 +31,7 @@ in {
         review = true;
         vcc = true;
         caveman = true;
+        atelier = true;
       };
     };
 
