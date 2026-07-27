@@ -254,11 +254,8 @@
     };
 
     packages."${system}" = {
-      finix-server-persistent = finixStaging.persistentPackage;
       finix-server-persistent-deploy = finixStaging.persistentDeployPackage;
       finix-server-boot = finixStaging.bootPackage;
-      # Desktop (phase 1: console skeleton; drives its own ESP via `local`):
-      finix-desktop-persistent = finixStaging.desktopPersistentPackage;
       finix-desktop-boot = finixStaging.desktopBootPackage;
       finix-desktop-deploy = finixStaging.desktopDeployPackage;
     };
