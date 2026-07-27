@@ -1,5 +1,5 @@
 # Stage-3 bridge: keep NixOS's Limine generations and add the persistent
-# Finix system beside them. With the ESP island (lib/finix.nix,
+# Finix system beside them. With the ESP island (modules/finix/default.nix,
 # `nix run .#finix-server-boot`) this menu entry is now the *tertiary* way
 # into Finix - the canonical boot path is the \EFI\finix island + "Finix"
 # EFI entry; this entry remains for a human at the console and only tracks

@@ -145,7 +145,7 @@
     };
 
     # Finit-based OS: the server's installed OS since 2026-07-15 (NixOS is
-    # its on-disk rescue entry). See lib/finix.nix + modules/finix/NOTES.md.
+    # its on-disk rescue entry). See modules/finix/ (default.nix + NOTES.md).
     finix.url = "github:finix-community/finix";
   };
 
@@ -153,7 +153,7 @@
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
 
-    finixStaging = import ./lib/finix.nix {inherit inputs system;};
+    finixStaging = import ./modules/finix {inherit inputs system;};
 
     mkHost = {
       domains,
@@ -261,10 +261,6 @@
       finix-desktop-persistent = finixStaging.desktopPersistentPackage;
       finix-desktop-boot = finixStaging.desktopBootPackage;
       finix-desktop-deploy = finixStaging.desktopDeployPackage;
-      # Attic (retired kexec era; see attic/):
-      finix-server-vm = finixStaging.vmPackage;
-      finix-server-trial = finixStaging.trialPackage;
-      finix-server-persistent-kexec = finixStaging.persistentKexecPackage;
     };
 
     formatter."${system}" = nixpkgs.legacyPackages."${system}".alejandra;
