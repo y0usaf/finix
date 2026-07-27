@@ -61,14 +61,6 @@ in {
                 IdentitiesOnly yes
                 ForwardAgent yes
 
-            Host framework y0usaf-framework
-                HostName y0usaf-framework
-                Port 2222
-                User ${userName}
-                IdentityFile ${homeDir}/.ssh/id_ed25519
-                IdentitiesOnly yes
-                ForwardAgent yes
-
             Host android-phone phone
                 HostName 100.93.111.41
                 Port 8022
