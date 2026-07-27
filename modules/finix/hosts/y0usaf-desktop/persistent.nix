@@ -86,7 +86,7 @@ in {
         set -eu
         export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused]}
         [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
-        # Single-Limine era (2026-07-27, lib/limine-entries.nix): BootNext to
+        # Single-Limine era (2026-07-27, modules/finix/limine-entries.nix): BootNext to
         # the Limine EFI entry just re-boots Limine's default = FINIX. Point
         # default_entry at the newest NixOS generation by entry path instead;
         # the next finix-desktop-boot install restores default_entry: 1.

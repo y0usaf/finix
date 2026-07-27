@@ -1,5 +1,5 @@
 # Single-Limine boot driver for the finix DESKTOP (replaces the ESP island
-# on this host; the server keeps lib/esp-island.nix — headless, its BootNext
+# on this host; the server keeps modules/finix/esp-island.nix — headless, its BootNext
 # deadman ceremony still earns its keep there).
 #
 # Rationale: Limine's job is multi-OS menus. The island ran a SECOND Limine
