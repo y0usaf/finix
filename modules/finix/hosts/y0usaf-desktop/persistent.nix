@@ -56,7 +56,7 @@
   # ownership applied only to directories this script itself creates.
   # Deliberate, reversible exit to the rescue OS (one-shot; BootOrder kept).
 in {
-  imports = [./boot.nix ./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix ./parity.nix];
+  imports = [./boot.nix ./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix ./parity.nix ./dotfiles.nix];
 
   networking.hostName = "y0usaf-desktop";
   # No MagicDNS parity yet (tailscaled runs, resolv.conf is static): pin the
