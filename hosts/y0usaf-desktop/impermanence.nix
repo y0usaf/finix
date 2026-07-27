@@ -249,8 +249,6 @@ in {
           ".local/share/weechat"
           ".local/share/zoxide"
           ".local/share/waydroid"
-          ".local/share/handy"
-          ".local/share/com.pais.handy" # whisper models
           ".local/share/whisper-models"
           ".local/share/FreeCAD"
           ".local/share/Meltytech"

@@ -13,7 +13,12 @@
   pkgs,
   flakeInputs,
   ...
-}: {
+}: let
+  # Bridged NixOS-side asryx config (same trick as packages-bridge.nix):
+  # model store paths + the warm toggle are declared once, NixOS-side, in
+  # modules/desktop/apps/asryx.nix.
+  asryxCfg = flakeInputs.self.nixosConfigurations.y0usaf-desktop-nixos.config.user.programs.asryx;
+in {
   # These upstream modules are NOT in mkFinixSystem's baseline (udev/dbus/
   # seatd et al are wired into finixSystem itself; these three are opt-in).
   imports = with flakeInputs.finix.nixosModules; [bluetooth polkit rtkit];
@@ -99,6 +104,17 @@
           export PATH=${lib.makeBinPath [pkgs.coreutils]}
           chmod 1777 /tmp
           install -d -m 1777 /tmp/.X11-unix /tmp/.ICE-unix
+        '';
+        log = true;
+      };
+      # Page-cache warm for the asryx model: on NixOS a systemd oneshot
+      # (asryx.nix) does this; under finit it needs its own task. cat is
+      # enough — evictable page cache, no mlock, no daemon.
+      asryx-warm = lib.mkIf (asryxCfg.enable && asryxCfg.warm) {
+        description = "warm asryx whisper model into page cache";
+        command = pkgs.writeShellScript "asryx-warm" ''
+          export PATH=${lib.makeBinPath [pkgs.coreutils]}
+          cat ${asryxCfg.modelPath} ${asryxCfg.vadPath} > /dev/null
         '';
         log = true;
       };

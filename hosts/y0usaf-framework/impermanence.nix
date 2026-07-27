@@ -60,8 +60,6 @@ in {
           ".local/share/stremio"
           ".local/share/nvim" # plugins/mason
           ".local/share/pki"
-          ".local/share/handy"
-          ".local/share/com.pais.handy" # whisper models
           ".local/share/rtk"
           ".local/share/bun" # globals only; install/cache regenerates
           ".local/share/cargo"

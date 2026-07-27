@@ -14,10 +14,7 @@ _: {
 
       vesktop.enable = true;
     };
-    handy = {
-      enable = true;
-      transcribeBinding = "alt_left+m";
-    };
+    asryx.enable = true;
     obsidian.enable = true;
     creative.enable = false;
     media.enable = false;
