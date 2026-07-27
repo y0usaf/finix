@@ -1,6 +1,6 @@
 # Boot ownership for y0usaf-desktop: finix owns /boot via the UPSTREAM
 # programs.limine module (2026-07-27; replaces the custom single-Limine
-# section writer — modules/finix/limine-entries.nix is deleted).
+# section writer — finix/limine-entries.nix is deleted).
 #
 # Why the NOTES.md landmine no longer applies HERE: the warning was
 # "upstream limine uses the same ESP paths as NixOS's module and prunes

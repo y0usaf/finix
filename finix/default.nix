@@ -29,7 +29,7 @@
 
   # Shared builder for every finix system in this repo. finix uses its own
   # module system (finit/providers option tree) — NixOS modules under
-  # ../../modules are NOT importable here and never will be. Baseline:
+  # ../modules are NOT importable here and never will be. Baseline:
   # bash, dhcpcd, getty, openssh, sudo, sysklogd + common.nix workarounds
   # (see NOTES.md "Upstream finix bugs/gaps").
   mkFinixSystem = modules:
@@ -61,15 +61,15 @@
     nftables
     postgresql
     nix-daemon
-    ./hosts/y0usaf-server/services.nix
-    ./hosts/y0usaf-server/persistent.nix
+    ../hosts/y0usaf-server/finix/services.nix
+    ../hosts/y0usaf-server/finix/persistent.nix
   ]);
 
   desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules; [
     nix-daemon
-    limine # upstream bootloader: hosts/y0usaf-desktop/boot.nix (OFF on server)
+    limine # upstream bootloader: ../hosts/y0usaf-desktop/finix/boot.nix (OFF on server)
     ./diagnostics.nix
-    ./hosts/y0usaf-desktop/persistent.nix
+    ../hosts/y0usaf-desktop/finix/persistent.nix
   ]);
 
   # ── drivers ──────────────────────────────────────────────────────────────

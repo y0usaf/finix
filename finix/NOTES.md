@@ -38,7 +38,7 @@ boots one-shot at a time until it earns promote. Windows entry untouched.
 Secure Boot is DISABLED in firmware (sbctl keys exist but aren't enforced) —
 unsigned island Limine boots; if SB is ever enabled, sign the island first.
 
-Phase 1 scope (console skeleton, `modules/finix/hosts/y0usaf-desktop/persistent.nix`):
+Phase 1 scope (console skeleton, `hosts/y0usaf-desktop/finix/persistent.nix`):
 
 - tmpfs root (4G) + @nix/@persist/@home/@btrfs/ESP + data subvols
   (@steam/@pictures/@dcim/@music/@home-old ro) — fstab parity with NixOS
@@ -54,7 +54,7 @@ Phase 1 scope (console skeleton, `modules/finix/hosts/y0usaf-desktop/persistent.
   UsePAM+StrictModes on; passwordFile from /persist/secrets (y0usaf + root)
 - dhcpcd (eno1/igc) + static fallback 192.168.2.28; nix-daemon; getty
   tty1/tty2; kmsg recorder + breadcrumbs via new shared
-  modules/finix/diagnostics.nix (server still runs its inline copy —
+  finix/diagnostics.nix (server still runs its inline copy —
   migrate it there on its next planned deploy)
 - kernel: linuxPackages_latest, amd_pstate=active mitigations=off,
   zenpower via extraModulePackages, panic=30/oops=panic fall-home params
@@ -828,7 +828,7 @@ Original report details (for the still-open items):
 
 ## Hard-won debugging infrastructure (keep!)
 
-- **Beacon initrd** (`beaconInit`/`beaconInitrd` in modules/finix/default.nix):
+- **Beacon initrd** (`beaconInit`/`beaconInitrd` in finix/default.nix):
   wraps /init with pre-finit netconsole + kmsg markers. The ONLY reliable
   netconsole on this box (finit-task netconsole races NIC bring-up; NIC
   reset at coldplug kills the stream anyway).
@@ -847,15 +847,15 @@ finix stays its own module universe (finit option tree — ./modules/* at
 the repo root can never be imported here); sharing happens via the
 nixpkgs pin, key files, and (future) a facts.nix.
 
-- `modules/finix/default.nix` — thin composer: pkgs (allowUnfree n8n), systems,
+- `finix/default.nix` — thin composer: pkgs (allowUnfree n8n), systems,
   drivers, package exports; interface to flake.nix unchanged
-- `modules/finix/default.nix (mkFinixSystem)` — mkFinixSystem builder (baseline modules +
+- `finix/default.nix (mkFinixSystem)` — mkFinixSystem builder (baseline modules +
   modules/common.nix)
-- `modules/finix/esp-island.nix` — espIslandScript + finix-server-boot driver
+- `finix/esp-island.nix` — espIslandScript + finix-server-boot driver
   (the boot path; prepends intel-ucode.img per slot)
-- `modules/finix/deploy.nix` — SSH config-only deploy driver
-- `modules/finix/common.nix` — shared baseline + upstream-bug workarounds
-- `modules/finix/hosts/y0usaf-server/{persistent,services}.nix` — the server
+- `finix/deploy.nix` — SSH config-only deploy driver
+- `finix/common.nix` — shared baseline + upstream-bug workarounds
+- `hosts/y0usaf-server/finix/{persistent,services}.nix` — the server
 - `attic/` — retired kexec era, still buildable: server-vm.nix,
   server-trial.nix, drivers.nix (beacon initrd, trial + persistent kexec,
   VM runner)
@@ -926,7 +926,7 @@ Stage-3 order of operations (updated after incident #2):
    `.n8n/broken-searchapi-*`; relax the pinned kernel match if desired;
    retire the kexec drivers to an attic note once the island is default.
 
-2026-07-27 DESKTOP: island RETIRED, single-Limine boot (modules/finix/limine-entries.nix).
+2026-07-27 DESKTOP: island RETIRED, single-Limine boot (finix/limine-entries.nix).
 Root cause of "config-only deploys revert on reboot": deploy activates
 runtime only; the ISLAND's pinned slot (current=8m7yach1, staged 07-19) is
 what the bootloader chainloaded — the 07-26 deploy (zv6yal8i, tomoe with
@@ -953,7 +953,7 @@ Pre-change limine.conf backup: /boot/limine/limine.conf.bak-pre-finix-entries.
 
 ## 2026-07-28 — single-owner Limine + NixOS purge runbook
 
-Driver (modules/finix/limine-entries.nix) grew full-ownership actions; every
+Driver (finix/limine-entries.nix) grew full-ownership actions; every
 render_conf now re-enrolls the config blake2b into BOOTX64.EFI and re-signs
 with sbctl (enroll BEFORE sign — enrollment rewrites the binary). sbctl keys
 already persist via the shared impermanence allowlist (/var/lib/sbctl),
