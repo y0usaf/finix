@@ -31,7 +31,8 @@
   # Rebuilt here because the local installHook override below needs the
   # same configPath substitution.
   limineInstallConfig = pkgs.writeText "limine-install.json" (builtins.toJSON {
-    inherit (cfg)
+    inherit
+      (cfg)
       additionalFiles
       biosDevice
       biosSupport
@@ -52,7 +53,10 @@
     fileSystems = config.fileSystems;
     canTouchEfiVariables = config.boot.loader.efi.canTouchEfiVariables;
     efiRemovable = cfg.efiInstallAsRemovable;
-    maxGenerations = if cfg.maxGenerations == null then 0 else cfg.maxGenerations;
+    maxGenerations =
+      if cfg.maxGenerations == null
+      then 0
+      else cfg.maxGenerations;
     hostArchitecture = pkgs.stdenv.hostPlatform.parsed.cpu;
     fwupdEfiPath = config.services.fwupd.package or null;
   });
