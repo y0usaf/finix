@@ -57,6 +57,9 @@ in {
   imports = [./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix ./parity.nix];
 
   networking.hostName = "y0usaf-desktop";
+  # No MagicDNS parity yet (tailscaled runs, resolv.conf is static): pin the
+  # tailnet names ssh config + git remotes rely on (forgejo = y0usaf-server).
+  networking.hosts."100.105.204.116" = ["y0usaf-server"];
 
   finix.diagnostics = {
     enable = true;

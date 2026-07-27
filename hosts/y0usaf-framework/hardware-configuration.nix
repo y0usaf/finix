@@ -25,27 +25,27 @@
     };
 
     "/home" = {
-      device = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
       options = ["subvol=@home" "relatime" "ssd" "discard=async" "space_cache=v2"];
       neededForBoot = true;
     };
 
     "/nix" = {
-      device = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
       options = ["subvol=@nix" "relatime" "ssd" "discard=async" "space_cache=v2"];
     };
 
     "/persist" = {
-      device = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
       options = ["subvol=@persist" "relatime" "ssd" "discard=async" "space_cache=v2"];
       neededForBoot = true;
     };
 
     "/btrfs" = {
-      device = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
       options = ["subvolid=5"];
     };
@@ -57,9 +57,15 @@
     };
 
     "/home/y0usaf/.local/share/Steam" = {
-      device = "/dev/disk/by-uuid/6ae685dc-540e-42f2-b30a-104a8aac0e27";
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
       options = ["subvol=@steam" "relatime" "ssd" "discard=async" "space_cache=v2"];
+    };
+
+    "/home/y0usaf/dev" = {
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      fsType = "btrfs";
+      options = ["subvol=@dev" "noatime" "compress=zstd:3" "ssd" "discard=async" "space_cache=v2"];
     };
   };
 
