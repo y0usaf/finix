@@ -17,6 +17,7 @@ _: {
       enable = true;
       backend = "cuda";
       autofill = true;
+      model = "large-v3-turbo";
     };
     obsidian.enable = true;
     creative.enable = true;

@@ -56,7 +56,12 @@
   # ownership applied only to directories this script itself creates.
   # Deliberate, reversible exit to the rescue OS (one-shot; BootOrder kept).
 in {
-  imports = [./boot.nix ./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix ./parity.nix ./dotfiles.nix];
+  imports = [./boot.nix ./graphical.nix ./session.nix ./audio.nix ./parity.nix ./materialized-packages.nix];
+
+  # manzil dotfiles: native finix module (imported in finix/default.nix),
+  # linker runs as a finit task gated on the user persist binds — the files
+  # it writes (~/.config/nushell, ~/.config/ekko, …) live under those binds.
+  manzil.finit.conditions = ["task/persist-user-binds/success"];
 
   networking.hostName = "y0usaf-desktop";
   # No MagicDNS parity yet (tailscaled runs, resolv.conf is static): pin the

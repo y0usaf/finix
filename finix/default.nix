@@ -15,21 +15,36 @@
 {
   inputs,
   system,
-  # Unexported NixOS bridge eval (desktop): package list + manzil dotfile
-  # manifest consumed by hosts/y0usaf-desktop bridge modules. Passed in from
-  # the flake (self-reference would be circular through nixosConfigurations).
-  nixosBridge,
 }: let
+  # pkgs parity with the (now deleted) NixOS bridge: same unfree/insecure
+  # policy, cudaSupport, and overlays as modules/core/nixpkgs.nix, so the
+  # compat-imported package declarations build against an equivalent pkgs.
+  permittedInsecurePackages = [
+    "qtwebengine-5.15.19"
+    "electron-38.8.4"
+    "openssl-1.1.1w"
+    "nodejs-20.20.2"
+    "nodejs-slim-20.20.2"
+  ];
   pkgs = import inputs.nixpkgs {
     inherit system;
-    # n8n ships under the (unfree) Sustainable Use License.
-    config.allowUnfreePredicate = pkg: builtins.elem (pkg.pname or pkg.name) ["n8n" "nvidia-x11" "nvidia-kernel-modules"];
+    config = {
+      allowUnfree = true;
+      cudaSupport = true;
+      inherit permittedInsecurePackages;
+      allowInsecurePredicate = pkg:
+        builtins.elem (pkg.name or "${pkg.pname or "name-missing"}-${pkg.version or "version-missing"}") permittedInsecurePackages
+        || lib.hasPrefix "librewolf" (pkg.pname or "")
+        || lib.hasPrefix "electron" (pkg.pname or "");
+    };
+    overlays = [inputs.claude-code-nix.overlays.default];
   };
   inherit (pkgs) lib;
 
   # Shared builder for every finix system in this repo. finix uses its own
   # module system (finit/providers option tree) — NixOS modules under
-  # ../modules are NOT importable here and never will be. Baseline:
+  # ../modules are consumed ONLY through finix/compat-import.nix (whitelist
+  # shim: user/manzil/environment/fonts + services.udev.packages). Baseline:
   # bash, dhcpcd, getty, openssh, sudo, sysklogd + common.nix workarounds
   # (see NOTES.md "Upstream finix bugs/gaps").
   mkFinixSystem = modules:
@@ -39,11 +54,54 @@
         modulesPath = toString inputs.nixpkgs + "/nixos/modules";
         # Flake inputs for hosts that pull packages from them (e.g. pi).
         flakeInputs = inputs;
-        inherit nixosBridge;
       };
       modules = with inputs.finix.nixosModules;
         [
           {nixpkgs.pkgs = lib.mkDefault pkgs;}
+          # NixOS declares config.lib (nixpkgs lib as an option); our
+          # modules extend it with custom generators (toTOML/toLua/toKDL/
+          # toNiriconf) and reference config.lib.generators in manzil file
+          # generators. finix has no such option — stub it. DEEP freeform:
+          # plain types.attrs merges shallow (later `generators` def would
+          # silently overwrite earlier ones).
+          {
+            options.lib = lib.mkOption {
+              type = lib.types.submodule {freeformType = lib.types.attrsOf (lib.types.attrsOf lib.types.unspecified);};
+              default = {};
+            };
+          }
+          # NixOS-only option stubs referenced by guards in kept config.
+          # Values mirror the desktop's bridge-era reality (bluetooth + amdgpu
+          # on; server services + lix off).
+          {
+            options.boot.loader.limine.secureBoot.enable = lib.mkEnableOption "";
+            options.services = {
+              mediamtx.enable = lib.mkEnableOption "";
+              forgejo.enable = lib.mkEnableOption "";
+              n8n.enable = lib.mkEnableOption "";
+              nginx.enable = lib.mkEnableOption "";
+            };
+            options.programs = {
+              lix.enable = lib.mkEnableOption "";
+              tweakcc.enable = lib.mkEnableOption "";
+            };
+            options.hardware = {
+              bluetooth.enable = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+              };
+              amdgpu.enable = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+              };
+            };
+            # Referenced by gaming/shader-cache.nix's steam_dev.cfg manzil
+            # entry; mirrors modules/core/system/nix-package-management.nix.
+            options.nix.settings.max-jobs = lib.mkOption {
+              type = lib.types.str;
+              default = "auto";
+            };
+          }
           bash
           dhcpcd
           getty
@@ -55,6 +113,36 @@
         ++ modules;
     };
 
+  compatImport = import ./compat-import.nix {inherit lib;};
+
+  # The desktop's shared config library: every .nix under the NixOS domain
+  # tree + the desktop host dir, shimmed through compat-import. Exclusions:
+  #   - flake-modules.nix wires NixOS-only input modules (manzil.nixosModules
+  #     would collide with the finix variant imported below)
+  #   - hosts/y0usaf-desktop/finix/ is already finix-native
+  compatRoots = [
+    ../modules/core
+    ../modules/desktop
+    ../modules/shell
+    ../modules/tools
+    ../modules/user-services
+    ../modules/dev
+    ../modules/gaming
+    ../hosts/y0usaf-desktop
+  ];
+  compatExclusions = [
+    ../modules/core/flake-modules.nix
+  ];
+  compatFiles = builtins.filter (p:
+    !(builtins.elem p compatExclusions)
+    && !(lib.hasInfix "/finix/" (toString p)))
+  (import ../recursivelyImport.nix {
+    inherit (lib) hasSuffix;
+    inherit (lib.filesystem) listFilesRecursive;
+  }
+    compatRoots);
+  compatModules = map compatImport compatFiles;
+
   # ── systems ──────────────────────────────────────────────────────────────
   serverPersistent = mkFinixSystem (with inputs.finix.nixosModules; [
     cron
@@ -65,12 +153,15 @@
     ../hosts/y0usaf-server/finix/persistent.nix
   ]);
 
-  desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules; [
-    nix-daemon
-    limine # upstream bootloader: ../hosts/y0usaf-desktop/finix/boot.nix (OFF on server)
-    ./diagnostics.nix
-    ../hosts/y0usaf-desktop/finix/persistent.nix
-  ]);
+  desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules;
+    [
+      nix-daemon
+      limine # upstream bootloader: ../hosts/y0usaf-desktop/finix/boot.nix (OFF on server)
+      ./diagnostics.nix
+      ../hosts/y0usaf-desktop/finix/persistent.nix
+      inputs.manzil.finixModules.default
+    ]
+    ++ compatModules);
 
   # ── drivers ──────────────────────────────────────────────────────────────
   islandLib = import ./esp-island.nix {inherit pkgs lib;};

@@ -12,17 +12,15 @@
   lib,
   pkgs,
   flakeInputs,
-  nixosBridge,
   ...
 }: let
-  # Bridged NixOS-side asryx config (same trick as packages-bridge.nix):
-  # model store paths + the warm toggle are declared once, NixOS-side, in
-  # modules/desktop/apps/asryx.nix.
-  asryxCfg = nixosBridge.config.user.programs.asryx;
+  # Native now: user.programs.asryx arrives via compat-import of
+  # modules/desktop/apps/asryx.nix (same options, this module universe).
+  asryxCfg = config.user.programs.asryx;
 in {
   # These upstream modules are NOT in mkFinixSystem's baseline (udev/dbus/
-  # seatd et al are wired into finixSystem itself; these three are opt-in).
-  imports = with flakeInputs.finix.nixosModules; [bluetooth polkit rtkit];
+  # seatd et al are wired into finixSystem itself; the rest are opt-in).
+  imports = with flakeInputs.finix.nixosModules; [bluetooth polkit rtkit udisks2 upower];
 
   # ── bluetooth: upstream module; settings parity with the NixOS side.
   # powerOnBoot=true translates to Policy.AutoEnable. blueman/bluetuith
