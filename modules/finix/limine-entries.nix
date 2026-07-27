@@ -202,7 +202,7 @@
         prune_slots "$cur" "$prev"
         sync
         echo "==> slot $cur is limine.conf entry 1 (default); previous: ''${prev:-none}"
-        echo "==> reboot boots it directly — NixOS generations remain in the menu as rescue"
+        echo "==> reboot boots it directly — previous + golden slots remain in the menu as rescue"
       }
 
       do_rollback() {
