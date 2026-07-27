@@ -48,7 +48,9 @@
   # /var/lib/tailscale is already a /persist bind via the impermanence
   # replay, so the desktop keeps its tailnet identity (and the `ssh
   # rescue` path stays valid from the other side).
-  boot.kernelModules = ["tun" "v4l2loopback" "zram"];
+  # uinput: asryx autofill (dotool types the transcript; udev rule granting
+  # the input group access rides the packages-bridge as extra-udev-rules).
+  boot.kernelModules = ["tun" "v4l2loopback" "zram" "uinput"];
   finit = {
     services.tailscaled = {
       description = "tailscale mesh VPN daemon";
@@ -125,7 +127,9 @@
   # group to exist for the renice policy. gamescope/gamemode/steam
   # binaries + steam-hardware udev rules come via the bridge.
   users.groups.gamemode = {};
-  users.users.y0usaf.extraGroups = ["gamemode"];
+  # input: dotool opens /dev/uinput (asryx autofill); rule 99-local.rules
+  # (bridged) grants the input group rw on the uinput node.
+  users.users.y0usaf.extraGroups = ["gamemode" "input"];
 
   # ── X11 socket dir + /tmp mode: systemd-tmpfiles owned both on NixOS.
   # Xwayland (hence xwayland-satellite, hence Steam) refuses to create
