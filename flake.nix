@@ -140,7 +140,7 @@
     };
 
     # Finit-based OS: the server's installed OS since 2026-07-15 (NixOS is
-    # its on-disk rescue entry). See modules/finix/ (default.nix + NOTES.md).
+    # its on-disk rescue entry). See finix/ (default.nix + NOTES.md).
     finix.url = "github:finix-community/finix";
   };
 
@@ -158,7 +158,7 @@
       domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
     };
 
-    finixStaging = import ./modules/finix {inherit inputs system nixosBridge;};
+    finixStaging = import ./finix {inherit inputs system nixosBridge;};
 
     mkHost = {
       domains,
@@ -172,7 +172,10 @@
           inherit finixStaging;
         };
         modules =
-          (import ./recursivelyImport.nix {
+          # hostDir/finix/ subtrees are finix modules (different module
+          # universe) — NixOS must never import them.
+          builtins.filter (m: !(builtins.isPath m && lib.hasInfix "/finix/" (toString m)))
+          ((import ./recursivelyImport.nix {
             inherit (lib) hasSuffix;
             inherit (lib.filesystem) listFilesRecursive;
           }) (
@@ -191,7 +194,7 @@
               hostDir
             ]
             ++ extraModules
-          );
+          ));
       };
   in {
     nixosConfigurations = {
@@ -226,7 +229,7 @@
 
     # Finix systems, first-class beside nixosConfigurations. Same module
     # universe split as always: finix systems can never import the NixOS
-    # modules in ./modules/* (their own tree lives in ./modules/finix and is
+    # modules in ./modules/* (their own tree lives in ./finix and is
     # never in mkHost's domain map, so NixOS never imports it back either).
     finixConfigurations = {
       y0usaf-server = finixStaging.serverPersistent;

@@ -234,7 +234,7 @@ in {
       }, "Push-to-talk speech-to-text")
     '';
     # Boot-time page-cache warm (NixOS hosts). The finix desktop wires its
-    # own finit task in modules/finix/.../parity.nix off modelPath/vadPath.
+    # own finit task in hosts/y0usaf-desktop/finix/parity.nix off modelPath/vadPath.
     systemd.services.asryx-warm = lib.mkIf cfg.warm {
       description = "Warm asryx whisper model into page cache";
       wantedBy = ["multi-user.target"];
