@@ -19,6 +19,64 @@
 # generation → stc boot (installHook). Rollback = pick an older
 # generation at the Limine menu, exactly the NixOS model.
 {
+  config,
+  lib,
+  pkgs,
+  flakeInputs,
+  ...
+}: let
+  cfg = config.programs.limine;
+
+  # Mirror of upstream providers.bootloader.nix's limine-install.json.
+  # Rebuilt here because the local installHook override below needs the
+  # same configPath substitution.
+  limineInstallConfig = pkgs.writeText "limine-install.json" (builtins.toJSON {
+    inherit (cfg)
+      additionalFiles
+      biosDevice
+      biosSupport
+      efiSupport
+      enrollConfig
+      extraEntries
+      force
+      partitionIndex
+      settings
+      validateChecksums
+      secureBoot
+      ;
+
+    nixPath = config.services.nix-daemon.package;
+    efiBootMgrPath = pkgs.efibootmgr;
+    liminePath = cfg.package;
+    efiMountPoint = config.boot.loader.efi.efiSysMountPoint;
+    fileSystems = config.fileSystems;
+    canTouchEfiVariables = config.boot.loader.efi.canTouchEfiVariables;
+    efiRemovable = cfg.efiInstallAsRemovable;
+    maxGenerations = if cfg.maxGenerations == null then 0 else cfg.maxGenerations;
+    hostArchitecture = pkgs.stdenv.hostPlatform.parsed.cpu;
+    fwupdEfiPath = config.services.fwupd.package or null;
+  });
+
+  # Upstream limine-install.py hardcodes the generation group header as
+  # "/+NixOS default profile" (and the start/end comments). The per-gen
+  # labels already say "finix" (bootspec.nix); patch the header to match.
+  # Local override only — retire when upstream makes the name configurable.
+  limineInstallPatched = pkgs.runCommand "limine-install.py" {} ''
+    sed -e 's/+NixOS {group_name}/+finix {group_name}/' \
+        -e 's/NixOS boot entries/finix boot entries/g' \
+        ${flakeInputs.finix}/modules/programs/limine/limine-install.py > $out
+  '';
+in {
+  # installHook override: same replaceVarsWith as upstream, patched script.
+  providers.bootloader.installHook = lib.mkForce (pkgs.replaceVarsWith {
+    src = limineInstallPatched;
+    isExecutable = true;
+    replacements = {
+      python3 = pkgs.python3.withPackages (python-packages: [python-packages.psutil]);
+      configPath = limineInstallConfig;
+    };
+  });
+
   # limine-install.py reads boot.json (RFC-0125 org.nixos.bootspec.v1)
   # from every generation link; finix emits it when this is on.
   boot.bootspec.enable = true;
