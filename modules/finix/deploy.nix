@@ -52,10 +52,9 @@
         exit 0
       fi
 
-      # Keep this independent of the active Finix system: the NixOS system
-      # profile on the shared @nix subvolume supplies nix-store even during
-      # the first deployment from a trial boot.
-      remote_store="ssh://$host?remote-program=/nix/var/nix/profiles/system/sw/bin/nix-store"
+      # post-NixOS-purge: the running finix system supplies nix-store (the
+      # trial-era NixOS system profile is deleted; see NOTES.md runbook).
+      remote_store="ssh://$host?remote-program=/run/current-system/sw/bin/nix-store"
 
       echo "==> copying persistent finix closure to $host"
       nix copy --to "$remote_store" "$system_path"

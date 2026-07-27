@@ -30,8 +30,7 @@
   ];
 
   userDirectories = [
-    # Data
-    "dev"
+    # Data (dev excluded — real @dev subvol, fileSystems entry)
     "Documents"
     "Tokens"
     "nixos"
