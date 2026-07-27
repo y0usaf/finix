@@ -88,7 +88,6 @@ in rec {
       defaultHost = "server";
     }).bootDriverScript;
 
-
   persistentDeployPackage =
     (deployLib.mkDeploy {
       name = "finix-server-persistent-deploy";

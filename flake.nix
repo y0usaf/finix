@@ -176,25 +176,25 @@
           # universe) — NixOS must never import them.
           builtins.filter (m: !(builtins.isPath m && lib.hasInfix "/finix/" (toString m)))
           ((import ./recursivelyImport.nix {
-            inherit (lib) hasSuffix;
-            inherit (lib.filesystem) listFilesRecursive;
-          }) (
-            lib.concatMap (domain:
-              {
-                core = [./modules/core];
-                desktop = [./modules/desktop];
-                shell = [./modules/shell];
-                tools = [./modules/tools];
-                user-services = [./modules/user-services];
-                dev = [./modules/dev];
-                gaming = [./modules/gaming];
-              }."${domain}")
-            domains
-            ++ [
-              hostDir
-            ]
-            ++ extraModules
-          ));
+              inherit (lib) hasSuffix;
+              inherit (lib.filesystem) listFilesRecursive;
+            }) (
+              lib.concatMap (domain:
+                {
+                  core = [./modules/core];
+                  desktop = [./modules/desktop];
+                  shell = [./modules/shell];
+                  tools = [./modules/tools];
+                  user-services = [./modules/user-services];
+                  dev = [./modules/dev];
+                  gaming = [./modules/gaming];
+                }."${domain}")
+              domains
+              ++ [
+                hostDir
+              ]
+              ++ extraModules
+            ));
       };
   in {
     nixosConfigurations = {
