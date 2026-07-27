@@ -207,6 +207,7 @@ in {
       # Durable bulk data on dedicated subvols, exactly as under NixOS.
       "/home/y0usaf/old-home" = subvolMount "@home-old" ["ro"] // {neededForBoot = true;};
       "/home/y0usaf/.local/share/Steam" = subvolMount "@steam" [] // {neededForBoot = true;};
+      "/home/y0usaf/dev" = subvolMount "@dev" [] // {neededForBoot = true;};
       "/home/y0usaf/Pictures" = subvolMount "@pictures" [] // {neededForBoot = true;};
       "/home/y0usaf/DCIM" = subvolMount "@dcim" [] // {neededForBoot = true;};
       "/home/y0usaf/Music" = subvolMount "@music" [] // {neededForBoot = true;};

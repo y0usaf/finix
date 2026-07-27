@@ -125,6 +125,18 @@
         "space_cache=v2"
       ];
     };
+    "/home/y0usaf/dev" = {
+      device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
+      fsType = "btrfs";
+      options = [
+        "subvol=@dev"
+        "compress=zstd:3"
+        "noatime"
+        "ssd"
+        "space_cache=v2"
+      ];
+    };
+
     "/home/y0usaf/Pictures" = {
       device = "/dev/disk/by-uuid/32ad19b5-88df-4e63-92d2-d5a150ad65c5";
       fsType = "btrfs";
