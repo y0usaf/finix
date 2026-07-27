@@ -36,9 +36,7 @@
               ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"]
               ["sh" "-c" "swaybg -i $(find ${config.user.paths.wallpapers.static.path} -type f | shuf -n 1) -m fill"]
             ]
-            ++ lib.optional (config.user.ui.gpuishell.enable or false) ["${pkgs.gpuishell}/bin/gpuishell"]
-
-            ++ lib.optional (config.user.programs.handy.enable or false) ["handy"];
+            ++ lib.optional (config.user.ui.gpuishell.enable or false) ["${pkgs.gpuishell}/bin/gpuishell"];
 
           hotkey-overlay = {};
 

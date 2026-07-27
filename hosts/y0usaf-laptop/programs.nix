@@ -10,10 +10,7 @@ _: {
       stable.enable = true;
       vesktop.enable = true;
     };
-    handy = {
-      enable = true;
-      transcribeBinding = "alt_left+m";
-    };
+    asryx.enable = true;
     obsidian.enable = true;
     creative.enable = true;
     media.enable = true;
