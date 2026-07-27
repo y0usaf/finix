@@ -32,11 +32,10 @@ in {
         refreshRate = 175;
       };
       bg3 = {
-        enable = true;
-        scriptExtender.enable = true;
-        nativeModLoader.enable = true;
-        wasd.enable = true;
-        nativeCameraTweaks.enable = true;
+        # Disabled: y0usaf/game-mods repo deleted from GitHub (404).
+        # fetchFromGitHub pin d54ec2df unfetchable. Re-enable after
+        # repo restored or mods vendored elsewhere.
+        enable = false;
       };
       runelite = {
         enable = true;
