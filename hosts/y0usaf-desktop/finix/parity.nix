@@ -41,7 +41,16 @@ in {
       adminIdentities = ["unix-user:y0usaf"];
     };
     rtkit.enable = true;
+
+    # Bridge era got these via NixOS's own service modules; finix's ship
+    # their udev rules + dbus activation themselves.
+    upower.enable = true;
+    udisks2.enable = true;
   };
+
+  # ddcutil monitor control: finix's i2c module ships the rules; NixOS-side
+  # this rode hardware.i2c.enable (modules/core/hardware/i2c.nix).
+  hardware.i2c.enable = true;
 
   # ── polkit + rtkit: polkit unlocks privileged desktop actions (and is
   # rtkit's authorization backend); rtkit restores the RT scheduling the
