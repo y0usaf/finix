@@ -45,7 +45,7 @@ in {
           "Desktop"
           "Videos"
           "Games"
-          "cookunity"
+          "cu-workbench"
           "inscend"
           "shoji_wm"
 
