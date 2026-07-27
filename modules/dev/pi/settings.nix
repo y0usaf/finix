@@ -5,7 +5,7 @@
 }: let
   cfg = config.user.dev.pi;
   toJSON = lib.generators.toJSON {};
-  homeDir = config.user.homeDirectory;
+
   piReadmePath = cfg.readmePath;
   piDocsPath = cfg.docsPath;
   piExamplesPath = cfg.examplesPath;
@@ -51,15 +51,13 @@ in {
         value =
           {
             defaultProvider = "vercel-ai-gateway";
-            defaultModel = "anthropic/claude-fable-5";
+            defaultModel = "moonshotai/kimi-k3-fast";
             defaultThinkingLevel = "max";
             enabledModels = [
               "openai-codex/gpt-5.6-sol"
               "openai-codex/gpt-5.6-luna"
               "anthropic/claude-fable-5"
-              "neuralwatt/glm-5.2"
-              "vercel-ai-gateway/moonshotai/kimi-k3"
-              "neuralwatt/kimi-k3"
+              "moonshotai/kimi-k3-fast"
             ];
             compaction.enabled = false;
             showHardwareCursor = true;
@@ -93,200 +91,34 @@ in {
       ".local/share/pi/agent/models.json" = {
         generator = toJSON;
         value = {
-          providers = {
-            "neuralwatt" = {
-              baseUrl = "https://api.neuralwatt.com/v1";
-              api = "openai-completions";
-              apiKey = "!cat ${homeDir}/Tokens/NEURALWATT_API_KEY.txt";
-              authHeader = true;
-              compat.supportsDeveloperRole = false;
-              models = [
-                {
-                  id = "glm-5.2";
-                  name = "GLM 5.2";
-                  reasoning = true;
-                  input = ["text" "image"];
-                  contextWindow = 1048576;
-                  maxTokens = 16384;
-                  cost = {
-                    input = 0;
-                    output = 0;
-                    cacheRead = 0;
-                    cacheWrite = 0;
-                  };
-                }
-                {
-                  id = "glm-5.2-fast";
-                  name = "GLM 5.2 Fast";
-                  reasoning = true;
-                  input = ["text" "image"];
-                  contextWindow = 1048576;
-                  maxTokens = 16384;
-                  cost = {
-                    input = 0;
-                    output = 0;
-                    cacheRead = 0;
-                    cacheWrite = 0;
-                  };
-                }
-                {
-                  id = "kimi-k2.7-code";
-                  name = "Kimi K2.7 Code";
-                  reasoning = true;
-                  input = ["text" "image"];
-                  contextWindow = 262128;
-                  maxTokens = 16384;
-                  cost = {
-                    input = 0;
-                    output = 0;
-                    cacheRead = 0;
-                    cacheWrite = 0;
-                  };
-                }
-                {
-                  id = "kimi-k2.6";
-                  name = "Kimi K2.6";
-                  reasoning = true;
-                  input = ["text" "image"];
-                  contextWindow = 262128;
-                  maxTokens = 16384;
-                  cost = {
-                    input = 0;
-                    output = 0;
-                    cacheRead = 0;
-                    cacheWrite = 0;
-                  };
-                }
-                {
-                  id = "kimi-k3";
-                  name = "Kimi K3";
-                  reasoning = true;
-                  thinkingLevelMap = {
-                    off = null;
-                    minimal = null;
-                    low = null;
-                    medium = null;
-                    high = null;
-                    xhigh = null;
-                    max = "max";
-                  };
-                  input = ["text" "image"];
-                  contextWindow = 1000000;
-                  maxTokens = 131072;
-                  cost = {
-                    input = 0;
-                    output = 0;
-                    cacheRead = 0;
-                    cacheWrite = 0;
-                  };
-                  compat.supportsReasoningEffort = true;
-                }
-                {
-                  id = "qwen3.5-397b";
-                  name = "Qwen 3.5 397B";
-                  reasoning = true;
-                  input = ["text" "image"];
-                  contextWindow = 262128;
-                  maxTokens = 16384;
-                  cost = {
-                    input = 0;
-                    output = 0;
-                    cacheRead = 0;
-                    cacheWrite = 0;
-                  };
-                }
-              ];
+          providers."vercel-ai-gateway" = {
+            # Vercel gateway has no exclude list; whitelist every upstream
+            # provider except moonshotai via vercelGatewayRouting.only.
+            modelOverrides."anthropic/claude-fable-5" = {
+              compat.vercelGatewayRouting.only = ["anthropic" "bedrock" "vertex"];
             };
-            "vercel-ai-gateway" = {
-              baseUrl = "https://ai-gateway.vercel.sh/v1";
-              api = "openai-completions";
-              apiKey = "!cat ${homeDir}/Tokens/AI_GATEWAY_API_KEY.txt";
-              models = [
-                {
-                  id = "moonshotai/kimi-k3";
-                  name = "Kimi K3";
-                  reasoning = true;
-                  input = ["text" "image"];
-                  contextWindow = 1000000;
-                  maxTokens = 131072;
-                  cost = {
-                    input = 3;
-                    output = 15;
-                    cacheRead = 0.3;
-                    cacheWrite = 0;
-                  };
-                }
-                {
-                  id = "openai/gpt-oss-120b";
-                  name = "GPT-OSS 120B (fast)";
-                  reasoning = true;
-                  input = ["text"];
-                  contextWindow = 131072;
-                  maxTokens = 131072;
-                  cost = {
-                    input = 0.1;
-                    output = 0.5;
-                    cacheRead = 0;
-                    cacheWrite = 0;
-                  };
-                  compat.vercelGatewayRouting = {
-                    only = ["cerebras" "groq" "baseten"];
-                    order = ["cerebras" "groq" "baseten"];
-                  };
-                }
-                {
-                  id = "zai/glm-4.7";
-                  name = "GLM 4.7 (Cerebras)";
-                  reasoning = true;
-                  input = ["text"];
-                  contextWindow = 200000;
-                  maxTokens = 120000;
-                  cost = {
-                    input = 0.6;
-                    output = 2.2;
-                    cacheRead = 0.12;
-                    cacheWrite = 0;
-                  };
-                  compat.vercelGatewayRouting = {
-                    only = ["cerebras" "baseten"];
-                    order = ["cerebras" "baseten"];
-                  };
-                }
-                {
-                  id = "moonshotai/kimi-k2.5";
-                  name = "Kimi K2.5 (Baseten)";
-                  reasoning = true;
-                  input = ["text" "image"];
-                  contextWindow = 262144;
-                  maxTokens = 262144;
-                  cost = {
-                    input = 0.6;
-                    output = 3;
-                    cacheRead = 0.1;
-                    cacheWrite = 0;
-                  };
-                  compat.vercelGatewayRouting.only = ["baseten"];
-                }
-                {
-                  id = "meta/llama-3.3-70b";
-                  name = "Llama 3.3 70B (Groq)";
-                  reasoning = false;
-                  input = ["text"];
-                  contextWindow = 128000;
-                  maxTokens = 8192;
-                  cost = {
-                    input = 0.72;
-                    output = 0.72;
-                    cacheRead = 0;
-                    cacheWrite = 0;
-                  };
-                  compat.vercelGatewayRouting.only = ["groq"];
-                }
-              ];
-            };
+            models = [
+              {
+                id = "moonshotai/kimi-k3-fast";
+                name = "Kimi K3 Fast";
+                api = "anthropic-messages";
+                reasoning = true;
+                input = ["text" "image"];
+                cost = {
+                  input = 4.5;
+                  output = 22.5;
+                  cacheRead = 0.45;
+                  cacheWrite = 0;
+                };
+                contextWindow = 1000000;
+                maxTokens = 131072;
+                compat.vercelGatewayRouting.only = ["fireworks"];
+              }
+            ];
           };
         };
       };
+
       ".local/share/pi/agent/DEFAULT_SYSTEM.md" = {
         text = ''
           You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
