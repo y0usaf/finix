@@ -6,8 +6,8 @@ in {
     bookmarks = [
       "file://${homeDir}/Downloads Downloads"
       "file://${homeDir}/Documents Documents"
-      "file://${homeDir}/Dev Dev"
-      "file://${homeDir}/Dev/Cookunity CookUnity"
+      "file://${homeDir}/dev dev"
+      "file://${homeDir}/dev/Cookunity CookUnity"
       "file://${homeDir}/Music Music"
       "file://${homeDir}/DCIM Pictures"
       "file://${homeDir}/nixos NixOS"

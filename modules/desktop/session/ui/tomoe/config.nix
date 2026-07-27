@@ -33,7 +33,7 @@
   # TOMOE_PORTAL_CHOOSER.
   # tomoe has no upstream niri-session-style wrapper binary and no NixOS
   # module, so this flake provides a `tomoe-session` shim that mirrors
-  # ~/Dev/tomoe/run-tty.sh but execs the installed package binary. It scopes
+  # ~/dev/tomoe/run-tty.sh but execs the installed package binary. It scopes
   # session env to the compositor process (not leaked via
   # environment.sessionVariables, which would affect every TTY) — a process-scoped
   # compositor wrapper pattern.
