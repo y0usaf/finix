@@ -29,11 +29,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    handy = {
-      url = "github:cjpais/Handy/c1e11faa71f010436d4ff63b3467f8d6973ecba8";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
