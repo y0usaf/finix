@@ -84,7 +84,7 @@ in {
       pkgs.efibootmgr
       (pkgs.writeShellScriptBin "boot-nixos" ''
         set -eu
-        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused]}
+        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused pkgs.limine pkgs.sbctl]}
         [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
         # Single-Limine era (2026-07-27, modules/finix/limine-entries.nix): BootNext to
         # the Limine EFI entry just re-boots Limine's default = FINIX. Point
@@ -94,10 +94,43 @@ in {
         gen="$(sed -n 's|^//\(Generation [0-9][0-9]*\).*|\1|p' "$conf" | head -n1)"
         [ -n "$gen" ] || { echo "boot-nixos: no NixOS generation in $conf" >&2; exit 1; }
         sed -i "s|^default_entry:.*|default_entry: NixOS default profile/$gen|" "$conf"
+        # Re-enroll + re-sign: the conf hash is enrolled in BOOTX64.EFI — an
+        # edited conf without re-enrollment = boot-time hash-mismatch panic
+        # (the original 2026-07 incident). Pristine copy, enroll, sign, mv.
+        efi=/boot/EFI/limine/BOOTX64.EFI
+        cp ${pkgs.limine}/share/limine/BOOTX64.EFI "$efi.tmp"
+        limine enroll-config "$efi.tmp" "$(b2sum "$conf" | cut -d' ' -f1)"
+        [ -d /var/lib/sbctl/keys ] && sbctl sign "$efi.tmp" >/dev/null
+        mv "$efi.tmp" "$efi"
         echo "boot-nixos: default_entry -> NixOS ($gen); rebooting."
-        echo "boot-nixos: back to finix = pick it in the menu, or 'finix-desktop-boot local install'"
+        echo "boot-nixos: back to finix = pick it in the menu, or 'fx switch'"
         sync
         exec /run/current-system/sw/bin/initctl reboot
+      '')
+      # THE cockpit — one verb, everything chains. Daily life = 'fx switch'.
+      # Dispatch-only: evaluates the repo fresh via nix run, so it never
+      # goes stale inside the system closure.
+      (pkgs.writeShellScriptBin "fx" ''
+        set -euo pipefail
+        flake="''${FX_FLAKE:-/home/y0usaf/nixos}"
+        v="''${1:-}"
+        case "$v" in
+          switch|test|boot)
+            exec nix run "$flake#finix-desktop-deploy" -- local "$v" ;;
+          rollback|status|adopt|retire-nixos|cleanup-island)
+            # last three: one-time migration verbs (NOTES.md), gone post-purge
+            exec nix run "$flake#finix-desktop-boot" -- local "$v" ;;
+          server)
+            shift; sv="''${1:?usage: fx server <verb>}"
+            case "$sv" in
+              switch|test|boot) exec nix run "$flake#finix-server-persistent-deploy" -- server "$sv" ;;
+              *) exec nix run "$flake#finix-server-boot" -- server "$sv" ;;
+            esac ;;
+          *)
+            echo "usage: fx switch|test|rollback|status              (this machine)" >&2
+            echo "       fx server switch|test|install|oneshot|promote|demote|rollback|status" >&2
+            exit 2 ;;
+        esac
       '')
       pkgs.git
       pkgs.curl

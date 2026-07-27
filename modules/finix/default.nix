@@ -70,22 +70,6 @@
 in rec {
   inherit serverPersistent desktopPersistent;
 
-  persistentPackage =
-    pkgs.runCommand "finix-server-persistent" {
-      meta.mainProgram = "finix-server-persistent";
-    } ''
-      mkdir -p $out/bin
-      ln -s ${serverPersistent.config.system.topLevel} $out/system
-    '';
-
-  desktopPersistentPackage =
-    pkgs.runCommand "finix-desktop-persistent" {
-      meta.mainProgram = "finix-desktop-persistent";
-    } ''
-      mkdir -p $out/bin
-      ln -s ${desktopPersistent.config.system.topLevel} $out/system
-    '';
-
   bootPackage =
     (islandLib.mkIsland {
       name = "finix-server-boot";
