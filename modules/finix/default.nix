@@ -3,13 +3,15 @@
 # lives in THIS folder: default.nix (systems + packages), the boot/deploy
 # drivers, common.nix baseline, diagnostics.nix, hosts/, NOTES.md.
 #
-# Day-2 operations (server; desktop mirrors with finix-desktop-* + `local`):
-#   config-only change:  nix run .#finix-server-persistent-deploy -- 192.168.2.66 test|switch
-#                        (desktop: nix run .#finix-desktop-deploy -- local switch
-#                        alone — it chains the boot-slot staging; nh os switch parity)
-#   kernel/initrd/cmdline change:  nix run .#finix-server-boot -- 192.168.2.66 install
-#                                  ... oneshot, health checks, ... promote
-#   status/rescue:  nix run .#finix-server-boot -- 192.168.2.66 status|demote|rollback
+# Day-2 operations:
+#   desktop:  nh os switch            full flow — build → activate → profile
+#                                     generation → Limine menu render (upstream
+#                                     programs.limine owns /boot, hosts/y0usaf-desktop/boot.nix)
+#             fx test                 runtime-only trial, never touches boot
+#   server:   nix run .#finix-server-persistent-deploy -- 192.168.2.66 test|switch
+#             kernel/initrd/cmdline:  nix run .#finix-server-boot -- 192.168.2.66 install
+#                                     ... oneshot, health checks, ... promote
+#             status/rescue:          nix run .#finix-server-boot -- 192.168.2.66 status|demote|rollback
 {
   inputs,
   system,
@@ -60,6 +62,7 @@
 
   desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules; [
     nix-daemon
+    limine # upstream bootloader: hosts/y0usaf-desktop/boot.nix (OFF on server)
     ./diagnostics.nix
     ./hosts/y0usaf-desktop/persistent.nix
   ]);
@@ -80,12 +83,6 @@ in rec {
       defaultHost = "server";
     }).bootDriverScript;
 
-  desktopBootPackage =
-    ((import ./limine-entries.nix {inherit pkgs lib;}).mkLimineEntries {
-      name = "finix-desktop-boot";
-      system = desktopPersistent.config.system.topLevel;
-      ucodeImg = "${pkgs.microcode-amd}/amd-ucode.img";
-    }).bootDriverScript;
 
   persistentDeployPackage =
     (deployLib.mkDeploy {
@@ -99,9 +96,8 @@ in rec {
       name = "finix-desktop-deploy";
       system = desktopPersistent.config.system.topLevel;
       defaultHost = "local";
-      # nh os switch parity: a successful switch also stages the boot slot
-      # (kernel/initrd/limine.conf + enroll/sign), so the reboot default
-      # follows the deploy. The boot driver self-sudos.
-      postSwitch = "${desktopBootPackage}/bin/finix-desktop-boot local install";
+      # No postSwitch: stc switch|boot runs the limine installHook itself
+      # (boot.nix). Only `fx test` (runtime-only, no installHook) and
+      # manual stc invocations go through this package anymore.
     }).deployScript;
 }
