@@ -20,8 +20,10 @@
         Per-output display settings, keyed by output name. Serialized to
         the `tomoe.settings { displays = ... }` table via toLua. Each value
         may set `resolution` ("<preferred|max|WxH>[@<Hz|max]>"), `position`
-        `{ x, y }` (physical pixels), `mirror`, `disabled`, `vrr`. An empty
-        attrset means tomoe uses EDID-preferred modes for every output.
+        `{ x, y }` (physical pixels), `scale` (fractional client scale,
+        snapped to N/120; inherits settings.scale when omitted), `mirror`,
+        `disabled`, `vrr`. An empty attrset means tomoe uses EDID-preferred
+        modes for every output.
       '';
       example = lib.literalExpression ''
         {

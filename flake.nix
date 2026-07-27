@@ -145,7 +145,7 @@
     };
 
     # Finit-based OS: the server's installed OS since 2026-07-15 (NixOS is
-    # its on-disk rescue entry). See ./finix + finix/NOTES.md.
+    # its on-disk rescue entry). See lib/finix.nix + modules/finix/NOTES.md.
     finix.url = "github:finix-community/finix";
   };
 
@@ -153,7 +153,7 @@
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
 
-    finixStaging = import ./finix {inherit inputs system;};
+    finixStaging = import ./lib/finix.nix {inherit inputs system;};
 
     mkHost = {
       domains,
@@ -190,7 +190,12 @@
       };
   in {
     nixosConfigurations = {
-      y0usaf-desktop = mkHost {
+      # Desktop default = finix: bare `nh os switch` on the desktop targets
+      # finix (via finix's nixos-compat: config.system.build.toplevel).
+      # NixOS stays as the on-disk rescue entry under -nixos (only run
+      # `nh os switch -H y0usaf-desktop-nixos` while booted into NixOS).
+      y0usaf-desktop = finixStaging.desktopPersistent;
+      y0usaf-desktop-nixos = mkHost {
         hostDir = ./hosts/y0usaf-desktop;
         domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
       };
@@ -219,6 +224,10 @@
         hostDir = ./hosts/y0usaf-server;
         domains = ["core" "shell" "tools" "user-services" "dev"];
       };
+
+      # Finix alias so `nh os switch -H <name>` resolves it: nh only reads
+      # nixosConfigurations (hostname-keyed), never finixConfigurations.
+      y0usaf-server-finix = finixStaging.serverPersistent;
     };
 
     nixOnDroidConfigurations = {
@@ -236,7 +245,9 @@
     };
 
     # Finix systems, first-class beside nixosConfigurations. Same module
-    # universe split as always: finix systems can never import ./modules/*.
+    # universe split as always: finix systems can never import the NixOS
+    # modules in ./modules/* (their own tree lives in ./modules/finix and is
+    # never in mkHost's domain map, so NixOS never imports it back either).
     finixConfigurations = {
       y0usaf-server = finixStaging.serverPersistent;
       y0usaf-desktop = finixStaging.desktopPersistent;
@@ -250,7 +261,7 @@
       finix-desktop-persistent = finixStaging.desktopPersistentPackage;
       finix-desktop-boot = finixStaging.desktopBootPackage;
       finix-desktop-deploy = finixStaging.desktopDeployPackage;
-      # Attic (retired kexec era; see finix/attic/):
+      # Attic (retired kexec era; see attic/):
       finix-server-vm = finixStaging.vmPackage;
       finix-server-trial = finixStaging.trialPackage;
       finix-server-persistent-kexec = finixStaging.persistentKexecPackage;

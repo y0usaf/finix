@@ -6,7 +6,7 @@
 # Dual-boot model (same as the server): NixOS keeps /boot/limine and stays
 # the BootOrder head; this system boots via the self-contained ESP island
 # (\EFI\finix\) one-shot at a time until it earns promote. Windows entry
-# untouched. See finix/NOTES.md.
+# untouched. See modules/finix/NOTES.md.
 #
 # Deliberately NOT here yet (phase 2+): NVIDIA, seat/session stack, zram
 # (no upstream module), /swap subvol (unused; swapDevices=[] on NixOS too),
@@ -26,7 +26,7 @@
   # Single source of truth: the NixOS impermanence module for this host is a
   # pure-literal function — call it and replay the same allowlist here.
   persistCfg =
-    ((import ../../../hosts/y0usaf-desktop/impermanence.nix) {})
+    ((import ../../../../hosts/y0usaf-desktop/impermanence.nix) {})
     .environment
     .persistence
     ."/persist";
@@ -86,12 +86,17 @@ in {
         set -eu
         export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused]}
         [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
-        mountpoint -q /sys/firmware/efi/efivars \
-          || mount -t efivarfs efivarfs /sys/firmware/efi/efivars
-        lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
-        [ -n "$lim" ] || { echo "boot-nixos: no Limine EFI entry" >&2; exit 1; }
-        efibootmgr -q -n "$lim"
-        echo "boot-nixos: BootNext=Boot$lim; rebooting into NixOS rescue"
+        # Single-Limine era (2026-07-27, lib/limine-entries.nix): BootNext to
+        # the Limine EFI entry just re-boots Limine's default = FINIX. Point
+        # default_entry at the newest NixOS generation by entry path instead;
+        # the next finix-desktop-boot install restores default_entry: 1.
+        conf=/boot/limine/limine.conf
+        gen="$(sed -n 's|^//\(Generation [0-9][0-9]*\).*|\1|p' "$conf" | head -n1)"
+        [ -n "$gen" ] || { echo "boot-nixos: no NixOS generation in $conf" >&2; exit 1; }
+        sed -i "s|^default_entry:.*|default_entry: NixOS default profile/$gen|" "$conf"
+        echo "boot-nixos: default_entry -> NixOS ($gen); rebooting."
+        echo "boot-nixos: back to finix = pick it in the menu, or 'finix-desktop-boot local install'"
+        sync
         exec /run/current-system/sw/bin/initctl reboot
       '')
       pkgs.git
@@ -139,8 +144,9 @@ in {
       "amd_pstate=active"
       "mitigations=off"
       "console=tty0"
-      # Unattended fall-home for oneshot trials: any panic reboots into the
-      # BootOrder head (NixOS) after 30s.
+      # Unattended self-heal: any panic reboots after 30s into Limine's
+      # default — finix itself since 2026-07-27 (single-Limine era; was the
+      # NixOS BootOrder head in the island trial era).
       "panic=30"
       "oops=panic"
       "softlockup_panic=1"

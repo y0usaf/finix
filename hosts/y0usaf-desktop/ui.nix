@@ -1,16 +1,8 @@
 _: {
-  user.ui = {
-    cursor.enable = true;
-    fonts.enable = true;
-    foot.enable = true;
-    gtk = {
-      enable = true;
-      scale = 1.5;
-    };
+  imports = [../common/ui-tomoe.nix];
 
+  user.ui = {
     tomoe = {
-      enable = true;
-      bar.bongo-cat.enable = true;
       displays = {
         "DP-2" = {
           position = [0 0];
@@ -29,10 +21,10 @@ _: {
         -- Discord/Telegram replace valid activation tokens with stale serials;
         -- opt in to Tomoe's compatibility path for this session.
         tomoe.settings { honor_xdg_activation_with_invalid_serial = true }
-        -- Exclude the launcher from the deck on its first arrangement. Removing
-        -- it in a later on_window_open hook is too late: the deck has already
-        -- made it the visible window and falls back to its first window.
-        tomoe.rule { app_id = "^launcher$", floating = true }
+        -- The launcher floats via the shared rule in hosts/common/ui-tomoe.nix.
+        -- These hooks only handle focus: remember who had focus before the
+        -- launcher opened, center/raise the launcher, and give focus back on
+        -- close (the default close hook would focus the deck's last window).
         local launcher_return_focus = {}
         tomoe.on_window_open(function(win)
           if win:app_id() ~= "launcher" then
@@ -97,6 +89,5 @@ _: {
         end
       '';
     };
-    wayland.enable = true;
   };
 }

@@ -1,4 +1,4 @@
-# Guard rails that make headless finix kexec trials safe (see ./finix at the
+# Guard rails that make headless finix kexec trials safe (see modules/finix/NOTES.md at the
 # repo root). Also gives NixOS itself hang self-recovery via the hardware
 # watchdog. Must be switched in on the server before running
 # `nix run .#finix-server-trial`.

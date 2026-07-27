@@ -23,7 +23,7 @@
   flakeInputs,
   ...
 }: let
-  nixosCfg = flakeInputs.self.nixosConfigurations.y0usaf-desktop.config;
+  nixosCfg = flakeInputs.self.nixosConfigurations.y0usaf-desktop-nixos.config;
 
   # Daemon binaries whose SERVICES are deliberately not (or differently)
   # provided here; shipping the CLIs would only invite confusion.

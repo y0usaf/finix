@@ -33,7 +33,7 @@ in {
       default = [
         "file://${homeDir}/Downloads Downloads"
         "file://${homeDir}/Documents Documents"
-        "file://${homeDir}/Dev Dev"
+        "file://${homeDir}/dev dev"
         "file://${homeDir}/nixos NixOS"
         "file:///tmp tmp"
       ];
