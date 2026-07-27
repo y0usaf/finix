@@ -1,4 +1,34 @@
-# Finix migration — session notes (updated 2026-07-16: desktop phase 1 staged; server PROMOTED 2026-07-15)
+# Finix migration — session notes (updated 2026-07-27: desktop UPSTREAM-LIMINE TAKEOVER; nh is the day-2 driver)
+
+## 2026-07-27 DESKTOP — upstream programs.limine takeover, nh replaces fx/island
+
+The desktop's custom boot scaffolding is RETIRED: limine-entries.nix
+(single-Limine section writer) deleted, the finix-desktop-boot package and
+fx local switch|boot|rollback|status|adopt|retire-nixos|cleanup-island
+verbs are gone (fx keeps `test` + `server`). hosts/y0usaf-desktop/boot.nix
+enables upstream programs.limine + boot.bootspec + canTouchEfiVariables
+(+ enrollConfig/hash_mismatch_panic; Secure Boot still off in firmware).
+
+Why possible: the landmine below was about a SHARED ESP with a live NixOS
+rescue path; the single-Limine era had already stripped NixOS generations
+from limine.conf, and Windows boots via its own EFI entry — nothing left
+to prune that matters. Stale ESP leftovers (/boot/EFI/nixos, /boot/loader,
+/boot/EFI/systemd, /boot/EFI/finix island slots, BOOTX64.EFI.bak-hashfix,
+/boot/limine*.bak-pre-takeover) are inert — delete by hand once the
+takeover boot is proven.
+
+Day-2 on the desktop is now the NixOS model: nh os switch = build → stc
+test (activate) → nix build --profile (new generation) → stc boot
+(installHook renders /boot/limine/limine.conf from /nix/var/nix/profiles/
+system generations + installs/enrolls \efi\limine\BOOTX64.EFI). Rollback =
+pick an older generation at the Limine menu. nh + NH_FLAKE ship in the
+desktop closure; nix.conf already had experimental-features (phase-2a).
+fx test = runtime-only trial (stc test never runs the installHook).
+
+Transition done live from the finix session: /boot/limine + /boot/EFI/
+limine backed up to *.bak-pre-takeover, then stc switch let the
+installHook take over /boot. SERVER UNCHANGED: ESP island + fx server
+verbs; programs.limine stays OFF there (headless).
 
 ## DESKTOP (y0usaf-desktop) — phase 1 staged 2026-07-16, NOT yet booted
 
@@ -787,12 +817,14 @@ Original report details (for the still-open items):
 - No default PATH for finit-spawned processes and for the initrd's
   standalone `sh` (bit us repeatedly; also affects interactive ssh login
   shells — worth checking finix's profile/env setup for a proper fix).
-- **LANDMINE — `programs.limine`**: finix upstream ships a Limine module
-  that is a fork of the NixOS installer using the SAME ESP paths
-  (/boot/limine/limine.conf, \efi\limine\BOOTX64.EFI) and it prunes files
-  it didn't write. Enabling it on the shared ESP would overwrite the NixOS
-  menu and delete NixOS kernels — i.e. destroy the rescue path. Never
-  enable it here; the ESP island (finix-server-boot) fills its role.
+- **`programs.limine` (was LANDMINE, now desktop-enabled)**: finix upstream
+  ships a Limine module that is a fork of the NixOS installer using the
+  SAME ESP paths (/boot/limine/limine.conf, \efi\limine\BOOTX64.EFI) and it
+  prunes files it didn't write. ENABLED on the desktop 2026-07-27
+  (hosts/y0usaf-desktop/boot.nix) once the NixOS rescue entries were gone
+  from the menu — the pruning became the desired cleanup. Still BANNED on
+  the server: its NixOS rescue entry + headless BootNext ceremony matter;
+  the ESP island (finix-server-boot) fills the role there.
 
 ## Hard-won debugging infrastructure (keep!)
 

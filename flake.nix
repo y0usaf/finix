@@ -256,7 +256,7 @@
     packages."${system}" = {
       finix-server-persistent-deploy = finixStaging.persistentDeployPackage;
       finix-server-boot = finixStaging.bootPackage;
-      finix-desktop-boot = finixStaging.desktopBootPackage;
+
       finix-desktop-deploy = finixStaging.desktopDeployPackage;
     };
 

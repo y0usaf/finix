@@ -3,10 +3,12 @@
 # subvols, /persist allowlist replayed as bind mounts). No graphical
 # session yet — that is phase 2 (seatd/dbus/niri/pipewire).
 #
-# Dual-boot model (same as the server): NixOS keeps /boot/limine and stays
-# the BootOrder head; this system boots via the self-contained ESP island
-# (\EFI\finix\) one-shot at a time until it earns promote. Windows entry
-# untouched. See modules/finix/NOTES.md.
+# Boot model (2026-07-27+): finix IS the installed OS on this box and owns
+# /boot via the upstream programs.limine module (./boot.nix) — the Limine
+# menu lists finix generations, the NixOS rescue entries are gone, Windows
+# boots via its own EFI entry. Day-2 driver: nh os switch (build → activate
+# → profile generation → boot-menu render). The server is unchanged (ESP
+# island, headless deadman). See modules/finix/NOTES.md.
 #
 # Deliberately NOT here yet (phase 2+): NVIDIA, seat/session stack, zram
 # (no upstream module), /swap subvol (unused; swapDevices=[] on NixOS too),
@@ -54,7 +56,7 @@
   # ownership applied only to directories this script itself creates.
   # Deliberate, reversible exit to the rescue OS (one-shot; BootOrder kept).
 in {
-  imports = [./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix ./parity.nix];
+  imports = [./boot.nix ./graphical.nix ./session.nix ./packages-bridge.nix ./audio.nix ./parity.nix];
 
   networking.hostName = "y0usaf-desktop";
   # No MagicDNS parity yet (tailscaled runs, resolv.conf is static): pin the
@@ -82,47 +84,26 @@ in {
       blacklist nouveau
     '';
     etc."finix-stage2".text = "desktop-phase2.4\n";
+    # Bare `nh os switch` targets this repo (nh resolves the hostname-keyed
+    # nixosConfigurations.y0usaf-desktop = this finix system).
+    etc."profile.d/nh.sh".text = ''
+      export NH_FLAKE=/home/y0usaf/nixos
+    '';
     systemPackages = [
       pkgs.nix
       pkgs.efibootmgr
-      (pkgs.writeShellScriptBin "boot-nixos" ''
-        set -eu
-        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused pkgs.limine pkgs.sbctl]}
-        [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
-        # Single-Limine era (2026-07-27, modules/finix/limine-entries.nix): BootNext to
-        # the Limine EFI entry just re-boots Limine's default = FINIX. Point
-        # default_entry at the newest NixOS generation by entry path instead;
-        # the next finix-desktop-boot install restores default_entry: 1.
-        conf=/boot/limine/limine.conf
-        gen="$(sed -n 's|^//\(Generation [0-9][0-9]*\).*|\1|p' "$conf" | head -n1)"
-        [ -n "$gen" ] || { echo "boot-nixos: no NixOS generation in $conf" >&2; exit 1; }
-        sed -i "s|^default_entry:.*|default_entry: NixOS default profile/$gen|" "$conf"
-        # Re-enroll + re-sign: the conf hash is enrolled in BOOTX64.EFI — an
-        # edited conf without re-enrollment = boot-time hash-mismatch panic
-        # (the original 2026-07 incident). Pristine copy, enroll, sign, mv.
-        efi=/boot/EFI/limine/BOOTX64.EFI
-        cp ${pkgs.limine}/share/limine/BOOTX64.EFI "$efi.tmp"
-        limine enroll-config "$efi.tmp" "$(b2sum "$conf" | cut -d' ' -f1)"
-        [ -d /var/lib/sbctl/keys ] && sbctl sign "$efi.tmp" >/dev/null
-        mv "$efi.tmp" "$efi"
-        echo "boot-nixos: default_entry -> NixOS ($gen); rebooting."
-        echo "boot-nixos: back to finix = pick it in the menu, or 'fx switch'"
-        sync
-        exec /run/current-system/sw/bin/initctl reboot
-      '')
-      # THE cockpit — one verb, everything chains. Daily life = 'fx switch'.
-      # Dispatch-only: evaluates the repo fresh via nix run, so it never
-      # goes stale inside the system closure.
+      # Server cockpit + local runtime-only trial. Local switch/boot are
+      # GONE: `nh os switch` is the local driver — upstream programs.limine
+      # (./boot.nix) made switch-to-configuration self-contained: activate +
+      # profile generation + Limine menu render. Dispatch-only via nix run,
+      # so this never goes stale inside the system closure.
       (pkgs.writeShellScriptBin "fx" ''
         set -euo pipefail
         flake="''${FX_FLAKE:-/home/y0usaf/nixos}"
-        v="''${1:-}"
-        case "$v" in
-          switch|test|boot)
-            exec nix run "$flake#finix-desktop-deploy" -- local "$v" ;;
-          rollback|status|adopt|retire-nixos|cleanup-island)
-            # last three: one-time migration verbs (NOTES.md), gone post-purge
-            exec nix run "$flake#finix-desktop-boot" -- local "$v" ;;
+        case "''${1:-}" in
+          test)
+            # runtime-only activation; never touches the boot menu
+            exec nix run "$flake#finix-desktop-deploy" -- local test ;;
           server)
             shift; sv="''${1:?usage: fx server <verb>}"
             case "$sv" in
@@ -130,8 +111,9 @@ in {
               *) exec nix run "$flake#finix-server-boot" -- server "$sv" ;;
             esac ;;
           *)
-            echo "usage: fx switch|test|rollback|status              (this machine)" >&2
-            echo "       fx server switch|test|install|oneshot|promote|demote|rollback|status" >&2
+            echo "this machine: nh os switch — fx only keeps:" >&2
+            echo "  fx test                     runtime-only activation trial" >&2
+            echo "  fx server switch|test|install|oneshot|promote|demote|rollback|status" >&2
             exit 2 ;;
         esac
       '')
@@ -144,6 +126,9 @@ in {
       pkgs.vim
       # Daily driver essentials until the real package set lands (phase 2):
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi
+      # nh is the day-2 driver now (./boot.nix made switch-to-configuration
+      # self-contained); NH_FLAKE above points bare `nh os switch` here.
+      flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
     ];
   };
 
