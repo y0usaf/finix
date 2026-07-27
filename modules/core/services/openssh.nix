@@ -26,7 +26,6 @@ in {
   # Every machine's user key may log in everywhere (pubkeys live in-repo).
   users.users."${config.user.name}".openssh.authorizedKeys.keys = [
     (readKey ../../../hosts/y0usaf-desktop/user-ssh.pub)
-    (readKey ../../../hosts/y0usaf-framework/user-ssh.pub)
     (readKey ../../../hosts/y0usaf-server/user-ssh.pub)
     (readKey ../../../hosts/android-phone/user-ssh.pub)
   ];
@@ -41,10 +40,6 @@ in {
     "y0usaf-desktop" = {
       hostNames = ["[y0usaf-desktop]:2222" "[100.90.54.18]:2222"];
       publicKeyFile = ../../../hosts/y0usaf-desktop/host-ssh-ed25519.pub;
-    };
-    "y0usaf-framework" = {
-      hostNames = ["[y0usaf-framework]:2222" "[100.82.221.125]:2222"];
-      publicKeyFile = ../../../hosts/y0usaf-framework/host-ssh-ed25519.pub;
     };
     "y0usaf-server" = {
       hostNames = ["[y0usaf-server]:2200" "[100.105.204.116]:2200"];

@@ -23,10 +23,10 @@
 {
   lib,
   pkgs,
-  flakeInputs,
+  nixosBridge,
   ...
 }: let
-  nixosCfg = flakeInputs.self.nixosConfigurations.y0usaf-desktop-nixos.config;
+  nixosCfg = nixosBridge.config;
 
   # The upstream snippet renders util-linux runuser(8); swap the uid-switch
   # mechanism only, keep everything else (flock, state install on success)

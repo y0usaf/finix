@@ -148,7 +148,17 @@
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
 
-    finixStaging = import ./modules/finix {inherit inputs system;};
+    # Phoenix: main is finix-first. NixOS survives as (a) the server's
+    # on-disk rescue system, and (b) an unexported desktop bridge eval whose
+    # package list + manzil dotfile manifest the finix desktop consumes
+    # (dotfiles.nix / packages-bridge.nix / parity.nix). NixOS desktop,
+    # laptop and framework configs live on the nixos-legacy branch.
+    nixosBridge = mkHost {
+      hostDir = ./hosts/y0usaf-desktop;
+      domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
+    };
+
+    finixStaging = import ./modules/finix {inherit inputs system nixosBridge;};
 
     mkHost = {
       domains,
@@ -187,34 +197,9 @@
     nixosConfigurations = {
       # Desktop default = finix: bare `nh os switch` on the desktop targets
       # finix (via finix's nixos-compat: config.system.build.toplevel).
-      # NixOS stays as the on-disk rescue entry under -nixos (only run
-      # `nh os switch -H y0usaf-desktop-nixos` while booted into NixOS).
       y0usaf-desktop = finixStaging.desktopPersistent;
-      y0usaf-desktop-nixos = mkHost {
-        hostDir = ./hosts/y0usaf-desktop;
-        domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
-      };
 
-      # Desktop + VBIOS maintenance specialisation. Evaluating the
-      # specialisation re-runs the whole module system (~20-30% eval time),
-      # so it lives in a variant instead of the default host:
-      #   nh os switch -H y0usaf-desktop-vbios
-      y0usaf-desktop-vbios = mkHost {
-        hostDir = ./hosts/y0usaf-desktop;
-        domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
-        extraModules = [./hosts/y0usaf-desktop-vbios/vbios-maintenance.nix];
-      };
-
-      y0usaf-laptop = mkHost {
-        hostDir = ./hosts/y0usaf-laptop;
-        domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
-      };
-
-      y0usaf-framework = mkHost {
-        hostDir = ./hosts/y0usaf-framework;
-        domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
-      };
-
+      # Server NixOS = on-disk rescue for the finix server.
       y0usaf-server = mkHost {
         hostDir = ./hosts/y0usaf-server;
         domains = ["core" "shell" "tools" "user-services" "dev"];

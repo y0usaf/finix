@@ -66,12 +66,11 @@
     sudo.enable = true;
   };
 
-  # Keep both the desktop key and the server's existing rescue key available
-  # while the persistent system's SSH ownership checks are being tightened.
+  # Desktop key + server's existing rescue key available while the
+  # persistent system's SSH ownership checks are being tightened.
   environment = {
     etc."ssh/authorized_keys.d/y0usaf".text = ''
       ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-desktop/user-ssh.pub)}
-      ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-framework/user-ssh.pub)}
       ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-server/user-ssh.pub)}
       ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/android-phone/user-ssh.pub)}
     '';

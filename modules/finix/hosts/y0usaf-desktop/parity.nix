@@ -12,12 +12,13 @@
   lib,
   pkgs,
   flakeInputs,
+  nixosBridge,
   ...
 }: let
   # Bridged NixOS-side asryx config (same trick as packages-bridge.nix):
   # model store paths + the warm toggle are declared once, NixOS-side, in
   # modules/desktop/apps/asryx.nix.
-  asryxCfg = flakeInputs.self.nixosConfigurations.y0usaf-desktop-nixos.config.user.programs.asryx;
+  asryxCfg = nixosBridge.config.user.programs.asryx;
 in {
   # These upstream modules are NOT in mkFinixSystem's baseline (udev/dbus/
   # seatd et al are wired into finixSystem itself; these three are opt-in).

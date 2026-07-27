@@ -20,10 +20,10 @@
 {
   lib,
   pkgs,
-  flakeInputs,
+  nixosBridge,
   ...
 }: let
-  nixosCfg = flakeInputs.self.nixosConfigurations.y0usaf-desktop-nixos.config;
+  nixosCfg = nixosBridge.config;
 
   # Daemon binaries whose SERVICES are deliberately not (or differently)
   # provided here; shipping the CLIs would only invite confusion.
