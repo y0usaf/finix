@@ -8,7 +8,7 @@
 # menu lists finix generations, the NixOS rescue entries are gone, Windows
 # boots via its own EFI entry. Day-2 driver: nh os switch (build → activate
 # → profile generation → boot-menu render). The server is unchanged (ESP
-# island, headless deadman). See modules/finix/NOTES.md.
+# island, headless deadman). See finix/NOTES.md.
 #
 # Deliberately NOT here yet (phase 2+): NVIDIA, seat/session stack, zram
 # (no upstream module), /swap subvol (unused; swapDevices=[] on NixOS too),
@@ -28,7 +28,7 @@
   # Single source of truth: the NixOS impermanence module for this host is a
   # pure-literal function — call it and replay the same allowlist here.
   persistCfg =
-    ((import ../../../../hosts/y0usaf-desktop/impermanence.nix) {})
+    ((import ../impermanence.nix) {})
     .environment
     .persistence
     ."/persist";
