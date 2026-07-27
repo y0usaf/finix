@@ -774,11 +774,11 @@
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1784850037,
-        "narHash": "sha256-aTUIVYaIpv9muElmqsHDgPTETKqP4yQ/7rSQgK5weFc=",
+        "lastModified": 1785193317,
+        "narHash": "sha256-1t6G3Cg9PP/FjsTtUoBsO/qqWE47RrMK2/eL17yh6ug=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "0eed9a5eda14884ab13021c465854f16bfb0058d",
+        "rev": "8cefc93851a4690451f5f96e8bbfc31f1c836ef4",
         "type": "github"
       },
       "original": {
@@ -928,11 +928,11 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1784289152,
-        "narHash": "sha256-o2WuFTloi4KRyt9bAum1PD2DlHqN5YsK7AHDoHb/BQc=",
+        "lastModified": 1784983035,
+        "narHash": "sha256-dJyCuf8OI7QibS7Rn2dNitgYHeyYdbgOoJhErzdK4+E=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "64f83c85d9f36c831e96b29477750f92cd5a2230",
+        "rev": "5bc1c2c0a6f07e00e8c240304182f213ab8d311f",
         "type": "github"
       },
       "original": {
