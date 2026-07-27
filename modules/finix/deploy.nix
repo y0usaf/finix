@@ -1,8 +1,9 @@
 # SSH deploy driver: config-only changes to a running persistent finix
-# system. With postSwitch set (desktop), a successful local boot|switch also
-# stages the ESP boot slot — deploy alone is runtime-only and the next
-# reboot would silently revert (island-era bug class). Server kernel/initrd/
-# cmdline changes still go through the ESP island driver.
+# system. Desktop no longer uses postSwitch — since hosts/y0usaf-desktop/boot.nix
+# (upstream programs.limine), switch-to-configuration switch|boot runs the
+# bootloader installHook itself; the desktop deploy survives only for `fx test`
+# (runtime-only, never touches the boot menu). Server kernel/initrd/cmdline
+# changes still go through the ESP island driver.
 {pkgs}: {
   # mkDeploy {name, system, defaultHost}
   mkDeploy = {
