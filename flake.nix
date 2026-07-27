@@ -1,5 +1,5 @@
 {
-  description = "y0usaf's NixOS configuration";
+  description = "Phoenix — y0usaf's finix systems (NixOS on nixos-legacy branch)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
