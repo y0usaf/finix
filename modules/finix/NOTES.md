@@ -796,7 +796,7 @@ Original report details (for the still-open items):
 
 ## Hard-won debugging infrastructure (keep!)
 
-- **Beacon initrd** (`beaconInit`/`beaconInitrd` in lib/finix.nix):
+- **Beacon initrd** (`beaconInit`/`beaconInitrd` in modules/finix/default.nix):
   wraps /init with pre-finit netconsole + kmsg markers. The ONLY reliable
   netconsole on this box (finit-task netconsole races NIC bring-up; NIC
   reset at coldplug kills the stream anyway).
@@ -815,13 +815,13 @@ finix stays its own module universe (finit option tree — ./modules/* at
 the repo root can never be imported here); sharing happens via the
 nixpkgs pin, key files, and (future) a facts.nix.
 
-- `lib/finix.nix` — thin composer: pkgs (allowUnfree n8n), systems,
+- `modules/finix/default.nix` — thin composer: pkgs (allowUnfree n8n), systems,
   drivers, package exports; interface to flake.nix unchanged
-- `lib/mk-system.nix` — mkFinixSystem builder (baseline modules +
+- `modules/finix/default.nix (mkFinixSystem)` — mkFinixSystem builder (baseline modules +
   modules/common.nix)
-- `lib/esp-island.nix` — espIslandScript + finix-server-boot driver
+- `modules/finix/esp-island.nix` — espIslandScript + finix-server-boot driver
   (the boot path; prepends intel-ucode.img per slot)
-- `lib/deploy.nix` — SSH config-only deploy driver
+- `modules/finix/deploy.nix` — SSH config-only deploy driver
 - `modules/finix/common.nix` — shared baseline + upstream-bug workarounds
 - `modules/finix/hosts/y0usaf-server/{persistent,services}.nix` — the server
 - `attic/` — retired kexec era, still buildable: server-vm.nix,
@@ -894,7 +894,7 @@ Stage-3 order of operations (updated after incident #2):
    `.n8n/broken-searchapi-*`; relax the pinned kernel match if desired;
    retire the kexec drivers to an attic note once the island is default.
 
-2026-07-27 DESKTOP: island RETIRED, single-Limine boot (lib/limine-entries.nix).
+2026-07-27 DESKTOP: island RETIRED, single-Limine boot (modules/finix/limine-entries.nix).
 Root cause of "config-only deploys revert on reboot": deploy activates
 runtime only; the ISLAND's pinned slot (current=8m7yach1, staged 07-19) is
 what the bootloader chainloaded — the 07-26 deploy (zv6yal8i, tomoe with
@@ -921,7 +921,7 @@ Pre-change limine.conf backup: /boot/limine/limine.conf.bak-pre-finix-entries.
 
 ## 2026-07-28 — single-owner Limine + NixOS purge runbook
 
-Driver (lib/limine-entries.nix) grew full-ownership actions; every
+Driver (modules/finix/limine-entries.nix) grew full-ownership actions; every
 render_conf now re-enrolls the config blake2b into BOOTX64.EFI and re-signs
 with sbctl (enroll BEFORE sign — enrollment rewrites the binary). sbctl keys
 already persist via the shared impermanence allowlist (/var/lib/sbctl),

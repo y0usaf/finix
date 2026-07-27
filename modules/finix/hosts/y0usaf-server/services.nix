@@ -20,7 +20,7 @@
 #   - syncthing runs as y0usaf against ~/.config/syncthing on @home: same
 #     device ID, same folders.
 #
-# Requires (wired up in lib/finix.nix): finix modules cron, nftables,
+# Requires (wired up in modules/finix/default.nix): finix modules cron, nftables,
 # postgresql.
 {
   config,
