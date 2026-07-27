@@ -133,14 +133,15 @@
   compatExclusions = [
     ../modules/core/flake-modules.nix
   ];
-  compatFiles = builtins.filter (p:
-    !(builtins.elem p compatExclusions)
-    && !(lib.hasInfix "/finix/" (toString p)))
-  (import ../recursivelyImport.nix {
-    inherit (lib) hasSuffix;
-    inherit (lib.filesystem) listFilesRecursive;
-  }
-    compatRoots);
+  compatFiles =
+    builtins.filter (p:
+      !(builtins.elem p compatExclusions)
+      && !(lib.hasInfix "/finix/" (toString p)))
+    (import ../recursivelyImport.nix {
+        inherit (lib) hasSuffix;
+        inherit (lib.filesystem) listFilesRecursive;
+      }
+      compatRoots);
   compatModules = map compatImport compatFiles;
 
   # ── systems ──────────────────────────────────────────────────────────────
