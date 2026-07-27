@@ -13,9 +13,10 @@ _: {
       stable.enable = true;
       vesktop.enable = true;
     };
-    handy = {
+    asryx = {
       enable = true;
-      transcribeBinding = "alt_left+m";
+      backend = "cuda";
+      autofill = true;
     };
     obsidian.enable = true;
     creative.enable = true;
