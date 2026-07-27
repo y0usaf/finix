@@ -158,21 +158,6 @@ in {
                 nix run nixpkgs#$pkg -- "$@"
               }
             ''
-            (
-              if config.networking.hostName == "y0usaf-laptop"
-              then ''
-                fanspeed() {
-                  if [ -z "$1" ]; then
-                    echo "Usage: fanspeed <percentage>"
-                    return 1
-                  fi
-                  local speed="$1"
-                  asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f gpu
-                  asusctl fan-curve -m quiet -D "30c:$speed,40c:$speed,50c:$speed,60c:$speed,70c:$speed,80c:$speed,90c:$speed,100c:$speed" -e true -f cpu
-                }
-              ''
-              else ""
-            )
           ];
         };
       };

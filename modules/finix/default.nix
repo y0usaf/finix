@@ -15,6 +15,10 @@
 {
   inputs,
   system,
+  # Unexported NixOS bridge eval (desktop): package list + manzil dotfile
+  # manifest consumed by hosts/y0usaf-desktop bridge modules. Passed in from
+  # the flake (self-reference would be circular through nixosConfigurations).
+  nixosBridge,
 }: let
   pkgs = import inputs.nixpkgs {
     inherit system;
@@ -35,6 +39,7 @@
         modulesPath = toString inputs.nixpkgs + "/nixos/modules";
         # Flake inputs for hosts that pull packages from them (e.g. pi).
         flakeInputs = inputs;
+        inherit nixosBridge;
       };
       modules = with inputs.finix.nixosModules;
         [
