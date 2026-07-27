@@ -19,8 +19,7 @@
 #
 # `imports` are shimmed recursively; non-path imports (flake input modules)
 # are dropped — finix wires its own (manzil.finixModules, etc.).
-{
-lib}: let
+{lib}: let
   inherit (builtins) isAttrs isFunction isPath head tail;
 
   # Config-node combinators the module system produces, recursed through so
@@ -93,8 +92,9 @@ lib}: let
   # fonts: finix supports fonts.packages + fonts.fontconfig only; NixOS's
   # fontDir/enableDefaultPackages/conf/dtd are dropped. (User font config
   # rides the user.* namespace, untouched here.)
-  fontsPick = filterNode (c:
-    lib.filterAttrs (n: _: builtins.elem n ["packages" "fontconfig"]) c);
+  fontsPick =
+    filterNode (c:
+      lib.filterAttrs (n: _: builtins.elem n ["packages" "fontconfig"]) c);
 
   topPick = filterNode (c:
     (lib.filterAttrs (n: _: builtins.elem n ["user" "manzil" "lib"]) c)
@@ -129,36 +129,37 @@ lib}: let
     # NB: finix matches module args by function signature, so the shim must
     # NAME every arg the wrapped modules use (lib/config/pkgs/flakeInputs/
     # modulesPath) — a bare `args:` form receives none of them.
-    then {
-      config,
-      lib,
-      pkgs,
-      flakeInputs,
-      modulesPath,
-      ...
-    } @ args: let
-      raw = module args;
-    in
-      if !isAttrs raw
-      then {}
-      else let
-        # NixOS module shorthand: top-level keys other than imports/options/
-        # config ARE config ({ imports = […]; user.ui.gtk.scale = 1.5; }).
-        shorthand = builtins.removeAttrs raw ["imports" "options" "config"];
-        configPart =
-          if raw ? config && shorthand != {}
-          then throw "compat-import: module mixes bare config keys with an explicit config attrset"
-          else if raw ? config
-          then raw.config
-          else shorthand;
+    then
+      {
+        config,
+        lib,
+        pkgs,
+        flakeInputs,
+        modulesPath,
+        ...
+      } @ args: let
+        raw = module args;
       in
-        {
-          imports = map shimPath (builtins.filter isPath (raw.imports or []));
-        }
-        # options pass through whole (real declarations + defaults) minus
-        # paths finix itself declares (dropOptionPaths above).
-        // (lib.optionalAttrs (raw ? options) {options = optionsPick raw.options;})
-        // (lib.optionalAttrs (configPart != {}) {config = topPick configPart;})
+        if !isAttrs raw
+        then {}
+        else let
+          # NixOS module shorthand: top-level keys other than imports/options/
+          # config ARE config ({ imports = […]; user.ui.gtk.scale = 1.5; }).
+          shorthand = builtins.removeAttrs raw ["imports" "options" "config"];
+          configPart =
+            if raw ? config && shorthand != {}
+            then throw "compat-import: module mixes bare config keys with an explicit config attrset"
+            else if raw ? config
+            then raw.config
+            else shorthand;
+        in
+          {
+            imports = map shimPath (builtins.filter isPath (raw.imports or []));
+          }
+          # options pass through whole (real declarations + defaults) minus
+          # paths finix itself declares (dropOptionPaths above).
+          // (lib.optionalAttrs (raw ? options) {options = optionsPick raw.options;})
+          // (lib.optionalAttrs (configPart != {}) {config = topPick configPart;})
     else {}; # non-function (flake input modules): dropped by design
 
   shimPath = path: shim (import path);
