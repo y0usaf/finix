@@ -2,7 +2,7 @@
 # merge their extras on top with `++`.
 #
 # Pure data — NO function args, lib, pkgs, or config. finix
-# (finix/hosts/*/persistent.nix) imports the host impermanence.nix, calls it
+# (modules/finix/hosts/*/persistent.nix) imports the host impermanence.nix, calls it
 # with {}, and replays the resulting lists as plain bind mounts; everything
 # reachable from there must stay literal (import/++ only). This file lives
 # outside hosts/<host>/ so recursivelyImport never picks it up as a module.
@@ -31,7 +31,7 @@
 
   userDirectories = [
     # Data
-    "Dev"
+    "dev"
     "Documents"
     "Tokens"
     "nixos"

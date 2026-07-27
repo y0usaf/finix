@@ -1,4 +1,4 @@
-# ALSO the finix system's persist allowlist: finix/hosts/y0usaf-desktop/*
+# ALSO the finix system's persist allowlist: modules/finix/hosts/y0usaf-desktop/*
 # calls this function and replays these lists as plain bind mounts. Keep it
 # pure literals (import/++ only, no lib/pkgs/config) so both module universes
 # can read it. Entries shared with other hosts live in ../common/persist.nix.

@@ -8,7 +8,7 @@ boots one-shot at a time until it earns promote. Windows entry untouched.
 Secure Boot is DISABLED in firmware (sbctl keys exist but aren't enforced) —
 unsigned island Limine boots; if SB is ever enabled, sign the island first.
 
-Phase 1 scope (console skeleton, `finix/hosts/y0usaf-desktop/persistent.nix`):
+Phase 1 scope (console skeleton, `modules/finix/hosts/y0usaf-desktop/persistent.nix`):
 
 - tmpfs root (4G) + @nix/@persist/@home/@btrfs/ESP + data subvols
   (@steam/@pictures/@dcim/@music/@home-old ro) — fstab parity with NixOS
@@ -24,7 +24,7 @@ Phase 1 scope (console skeleton, `finix/hosts/y0usaf-desktop/persistent.nix`):
   UsePAM+StrictModes on; passwordFile from /persist/secrets (y0usaf + root)
 - dhcpcd (eno1/igc) + static fallback 192.168.2.28; nix-daemon; getty
   tty1/tty2; kmsg recorder + breadcrumbs via new shared
-  finix/modules/diagnostics.nix (server still runs its inline copy —
+  modules/finix/diagnostics.nix (server still runs its inline copy —
   migrate it there on its next planned deploy)
 - kernel: linuxPackages_latest, amd_pstate=active mitigations=off,
   zenpower via extraModulePackages, panic=30/oops=panic fall-home params
@@ -796,7 +796,7 @@ Original report details (for the still-open items):
 
 ## Hard-won debugging infrastructure (keep!)
 
-- **Beacon initrd** (`beaconInit`/`beaconInitrd` in finix/default.nix):
+- **Beacon initrd** (`beaconInit`/`beaconInitrd` in lib/finix.nix):
   wraps /init with pre-finit netconsole + kmsg markers. The ONLY reliable
   netconsole on this box (finit-task netconsole races NIC bring-up; NIC
   reset at coldplug kills the stream anyway).
@@ -815,16 +815,16 @@ finix stays its own module universe (finit option tree — ./modules/* at
 the repo root can never be imported here); sharing happens via the
 nixpkgs pin, key files, and (future) a facts.nix.
 
-- `finix/default.nix` — thin composer: pkgs (allowUnfree n8n), systems,
+- `lib/finix.nix` — thin composer: pkgs (allowUnfree n8n), systems,
   drivers, package exports; interface to flake.nix unchanged
-- `finix/lib/mk-system.nix` — mkFinixSystem builder (baseline modules +
+- `lib/mk-system.nix` — mkFinixSystem builder (baseline modules +
   modules/common.nix)
-- `finix/lib/esp-island.nix` — espIslandScript + finix-server-boot driver
+- `lib/esp-island.nix` — espIslandScript + finix-server-boot driver
   (the boot path; prepends intel-ucode.img per slot)
-- `finix/lib/deploy.nix` — SSH config-only deploy driver
-- `finix/modules/common.nix` — shared baseline + upstream-bug workarounds
-- `finix/hosts/y0usaf-server/{persistent,services}.nix` — the server
-- `finix/attic/` — retired kexec era, still buildable: server-vm.nix,
+- `lib/deploy.nix` — SSH config-only deploy driver
+- `modules/finix/common.nix` — shared baseline + upstream-bug workarounds
+- `modules/finix/hosts/y0usaf-server/{persistent,services}.nix` — the server
+- `attic/` — retired kexec era, still buildable: server-vm.nix,
   server-trial.nix, drivers.nix (beacon initrd, trial + persistent kexec,
   VM runner)
 - flake outputs: `finixConfigurations.y0usaf-server` (first-class),
@@ -893,3 +893,70 @@ Stage-3 order of operations (updated after incident #2):
    `@jellyfin`, stale `/persist/var/lib/{acme,bayt,blocky}`,
    `.n8n/broken-searchapi-*`; relax the pinned kernel match if desired;
    retire the kexec drivers to an attic note once the island is default.
+
+2026-07-27 DESKTOP: island RETIRED, single-Limine boot (lib/limine-entries.nix).
+Root cause of "config-only deploys revert on reboot": deploy activates
+runtime only; the ISLAND's pinned slot (current=8m7yach1, staged 07-19) is
+what the bootloader chainloaded — the 07-26 deploy (zv6yal8i, tomoe with
+shell.services.*) never became the boot default, so the new init.lua ran
+against the stale compositor. The island was a second Limine existing only
+to own a config file; Limine already does multi-OS menus. New model:
+finix-desktop-boot (mkLimineEntries, local-only) manages a marked
+FINIX-MANAGED section inside NixOS's OWN /boot/limine/limine.conf —
+current slot = entry 1 (default_entry: 1), previous slot entry 2, NixOS
+generations stay as rescue below. Kernels/slots state still at
+/boot/EFI/finix/ (storage; NixOS's limine module prunes only /boot/limine).
+Boot0005 "Finix" EFI entry + island BOOTX64.EFI/limine.conf deleted
+(cleanup-island); BootOrder = Limine-first only. Server KEEPS esp-island.nix
+(headless; BootNext deadman ceremony still earns its keep). Tradeoffs:
+- oneshot/promote/demote gone on the desktop — physical access + the
+  Limine menu is the fallback; rollback flips current/previous in place.
+- a NixOS-side rebuild regenerates limine.conf and WIPES the managed
+  section → re-run `finix-desktop-boot local install` (NixOS is frozen
+  rescue; rare). hosts/y0usaf-desktop/finix-boot.nix chainload retired to
+  a no-op note so a NixOS rebuild can't resurrect the dead chainload.
+- Day-2 desktop flow now: finix-desktop-deploy local switch (runtime) +
+  finix-desktop-boot local install (boot default follows).
+Pre-change limine.conf backup: /boot/limine/limine.conf.bak-pre-finix-entries.
+
+## 2026-07-28 — single-owner Limine + NixOS purge runbook
+
+Driver (lib/limine-entries.nix) grew full-ownership actions; every
+render_conf now re-enrolls the config blake2b into BOOTX64.EFI and re-signs
+with sbctl (enroll BEFORE sign — enrollment rewrites the binary). sbctl keys
+already persist via the shared impermanence allowlist (/var/lib/sbctl),
+replayed by finix. Secure Boot still OFF in firmware — signing is
+future-proofing; enrollment is what Limine actually verifies (the 2026-07
+hash-mismatch incident class).
+
+  adopt           one-time: BOOTX64.EFI from pkgs.limine, 'Limine' EFI entry
+                  created if missing, conf re-rendered + enrolled + signed
+  retire-nixos    final: strip the NixOS generations block from limine.conf
+  golden slot     prune_slots never touches kernels/golden or the
+                  finix-esp-golden gcroot — operator-pinned parachute
+
+DESKTOP purge order:
+1. nix run .#finix-desktop-boot -- local adopt
+2. burn-in: a few reboots + a deploy cycle; NixOS gens stay in the menu
+3. pin golden (once, from finix):
+     cur=$(sed -n 's/^current=//p' /boot/EFI/finix/slots)
+     cp -a /boot/EFI/finix/kernels/$cur /boot/EFI/finix/kernels/golden
+     nix-store --realise "$(cat /boot/EFI/finix/kernels/golden/system)" \
+       --add-root /nix/var/nix/gcroots/finix-esp-golden
+     # then copy the managed "/Finix <slot>" entry below the
+     # FINIX-MANAGED-END line, rename to "/Finix golden", paths s/$cur/golden/
+     # — outside the managed section, renders preserve it
+4. nix run .#finix-desktop-boot -- local retire-nixos
+   (boot-nixos becomes a clean error from here on — no generations left)
+5. store purge, from finix:
+     nix-env -p /nix/var/nix/profiles/system --delete-generations old
+     # keep /boot/limine/limine.conf + /boot/EFI/limine/BOOTX64.EFI; delete
+     # the rest of /boot/limine/ (generation kernels/wallpapers)
+     nix store gc
+6. keep the installer ISO on USB regardless
+
+SERVER purge order (island already BootOrder head since the 07-15 promote):
+1. delete the NixOS-side EFI entry: efibootmgr -b XXXX -B  ('Limine', NOT 'Finix')
+2. rm -rf /boot/limine /boot/EFI/limine   (island = /boot/EFI/finix, untouched)
+3. nix-env -p /nix/var/nix/profiles/system --delete-generations old && nix store gc
+4. deadman ceremony (finix-guard) stays as-is — BootNext still beats BootOrder

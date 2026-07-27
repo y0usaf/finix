@@ -1,8 +1,8 @@
 # mkFinixSystem: the shared builder for every finix system in this repo.
 # finix uses its own module system (finit/providers option tree) - NixOS
-# modules under ../../modules are NOT importable here and never will be.
+# modules under ../modules are NOT importable here and never will be.
 # Shared baseline: bash, dhcpcd, getty, openssh, sudo, sysklogd + our
-# common.nix workarounds (see NOTES.md "Upstream finix bugs/gaps").
+# common.nix workarounds (see modules/finix/NOTES.md "Upstream finix bugs/gaps").
 {
   lib,
   pkgs,
@@ -24,7 +24,7 @@ inputs.finix.lib.finixSystem {
       openssh
       sudo
       sysklogd
-      ../modules/common.nix
+      ../modules/finix/common.nix
     ]
     ++ modules;
 }
