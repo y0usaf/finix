@@ -32,6 +32,11 @@
       url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin";
       sha256 = "00nhqqvgwyl9zgyy7vk9i3n017q2wlncp5p7ymsk0cpkdp47jdx0";
     };
+    # Near-large accuracy at ~8x large's speed; English dictation default.
+    "large-v3-turbo" = pkgs.fetchurl {
+      url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin";
+      hash = "sha256-H8cPd0046xaZk6w5Huo1fvR8iHV+9y7llDh5t+jivGk=";
+    };
   };
 
   # Silero VAD; url + sha from asryx package/lib/_constants.sh.
@@ -143,6 +148,15 @@ in {
       description = "Optional command the transcript is piped to after copy.";
     };
     autofill = lib.mkEnableOption "typing the transcript into the focused window (dotool/uinput)";
+    warm = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Boot-time task that reads the selected model (+VAD) into the page
+        cache, so the first asryx press of a session doesn't pay cold disk
+        reads. Evictable under memory pressure; no daemon, no lock.
+      '';
+    };
     keybind = lib.mkOption {
       type = lib.types.str;
       default = "Alt+M";
@@ -157,9 +171,23 @@ in {
         keycode-latched release fires even if the modifier is released first.
       '';
     };
+    # Store paths bridged into the finix universe (parity.nix page-cache
+    # warm task). Not user-facing.
+    modelPath = lib.mkOption {
+      type = lib.types.package;
+      readOnly = true;
+      internal = true;
+      default = whisperModels.${cfg.model};
+    };
+    vadPath = lib.mkOption {
+      type = lib.types.package;
+      readOnly = true;
+      internal = true;
+      default = vadModel;
+    };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf cfg.enable ({
     environment.systemPackages = [asryx];
 
     # uinput node + input-group access for dotool; user is already in input
@@ -205,5 +233,15 @@ in {
         release = function() tomoe.spawn("asryx") end,
       }, "Push-to-talk speech-to-text")
     '';
-  };
+    # Boot-time page-cache warm (NixOS hosts). The finix desktop wires its
+    # own finit task in modules/finix/.../parity.nix off modelPath/vadPath.
+    systemd.services.asryx-warm = lib.mkIf cfg.warm {
+      description = "Warm asryx whisper model into page cache";
+      wantedBy = ["multi-user.target"];
+      serviceConfig.Type = "oneshot";
+      script = ''
+        ${pkgs.coreutils}/bin/cat ${cfg.modelPath} ${cfg.vadPath} > /dev/null
+      '';
+    };
+  });
 }
