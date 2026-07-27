@@ -148,17 +148,11 @@
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
 
-    # Phoenix: main is finix-first. NixOS survives as (a) the server's
-    # on-disk rescue system, and (b) an unexported desktop bridge eval whose
-    # package list + manzil dotfile manifest the finix desktop consumes
-    # (dotfiles.nix / packages-bridge.nix / parity.nix). NixOS desktop,
-    # laptop and framework configs live on the nixos-legacy branch.
-    nixosBridge = mkHost {
-      hostDir = ./hosts/y0usaf-desktop;
-      domains = ["core" "desktop" "shell" "tools" "user-services" "dev" "gaming"];
-    };
-
-    finixStaging = import ./finix {inherit inputs system nixosBridge;};
+    # Phoenix: main is finix-only. The desktop's packages/dotfiles reach
+    # finix directly through finix/compat-import.nix — there is no NixOS
+    # desktop eval anymore. NixOS survives only as the server's on-disk
+    # rescue system (+ nixos-legacy branch for everything else).
+    finixStaging = import ./finix {inherit inputs system;};
 
     mkHost = {
       domains,
