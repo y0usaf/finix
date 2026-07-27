@@ -64,17 +64,20 @@
       # Limine verifies the loaded conf against the blake2b hash enrolled in
       # BOOTX64.EFI (NixOS enrolls because secureBoot.enable → enrollConfig;
       # verification happens with SB OFF in firmware too — the 2026-07
-      # hash-mismatch incident). Every rewrite must re-enroll, and enroll
-      # BEFORE sign: enrollment rewrites the binary. Keys persist at
-      # /var/lib/sbctl (shared impermanence allowlist, replayed by finix).
+      # hash-mismatch incident). Always start from the PRISTINE binary:
+      # enrollment modifies it in place and sbctl refuses to re-sign a
+      # mangled prior signature ("incorrect digest"). Enroll before sign,
+      # atomic mv last — the exact flow of NixOS's limine module. Keys
+      # persist at /var/lib/sbctl (impermanence allowlist, finix replays).
       enroll_sign() {
-        [ -f "$limine_efi" ] || { echo "warn: no $limine_efi — skipping enroll/sign" >&2; return 0; }
-        limine enroll-config "$limine_efi" "$(b2sum "$conf" | cut -d' ' -f1)"
+        cp ${pkgs.limine}/share/limine/BOOTX64.EFI "$limine_efi.tmp"
+        limine enroll-config "$limine_efi.tmp" "$(b2sum "$conf" | cut -d' ' -f1)"
         if [ -d /var/lib/sbctl/keys ]; then
-          sbctl sign -s "$limine_efi" >/dev/null
+          sbctl sign "$limine_efi.tmp" >/dev/null || die "sbctl sign failed"
         else
           echo "warn: /var/lib/sbctl/keys absent — left unsigned (SB off in firmware)" >&2
         fi
+        mv "$limine_efi.tmp" "$limine_efi"
       }
 
       die() { echo "ERROR: $*" >&2; exit 1; }
@@ -82,6 +85,14 @@
       [ "$(id -u)" = 0 ] || die "must run as root"
       mountpoint -q "$esp" || die "$esp is not a mountpoint"
       [ -f "$conf" ] || die "no limine.conf at $conf (NixOS limine module manages it)"
+
+      # finix mounts no efivarfs by default (kernel support only); the island
+      # tooling mounts it on demand — same here. Quietly absent on non-EFI.
+      if [ -d /sys/firmware/efi ] && ! mountpoint -q /sys/firmware/efi/efivars 2>/dev/null; then
+        mount -t efivarfs efivarfs /sys/firmware/efi/efivars 2>/dev/null || true
+      fi
+      efi_vars_ok=0
+      mountpoint -q /sys/firmware/efi/efivars 2>/dev/null && efi_vars_ok=1
 
       copy_changed() { # src dst - vfat-friendly, skip if identical
         if ! cmp -s "$1" "$2" 2>/dev/null; then
@@ -115,6 +126,11 @@
         block=$BEGIN$'\n'$(emit_slot "$1" "")
         if [ -n "$2" ] && [ -f "$state_dir/kernels/$2/cmdline" ]; then
           block=$block$'\n\n'$(emit_slot "$2" " (previous)")
+        fi
+        # Pinned parachute slot (see NOTES.md): always LAST in the managed
+        # block, so default_entry 1 stays the current slot.
+        if [ -f "$state_dir/kernels/golden/cmdline" ]; then
+          block=$block$'\n\n'$(emit_slot golden "")
         fi
         block=$block$'\n'$END
         awk -v block="$block" -v begin="$BEGIN" -v end="$END" '
@@ -227,14 +243,19 @@
         # render from then on keeps the conf hash enrolled + binary signed.
         read_state
         [ -n "$cur" ] || die "no finix slot staged — run install first"
-        copy_changed ${pkgs.limine}/share/limine/BOOTX64.EFI "$limine_efi"
-        if ! efibootmgr | grep -qi 'limine'; then
-          local src disk part
-          src=$(findmnt -n -o SOURCE "$esp") || die "cannot resolve $esp source device"
-          disk=/dev/$(lsblk -n -o PKNAME "$src")
-          part=$(cat "/sys/class/block/$(basename "$src")/partition")
-          efibootmgr -q -c -d "$disk" -p "$part" -L Limine -l '\EFI\limine\BOOTX64.EFI'
-          echo "==> created EFI entry 'Limine' ($disk part $part)"
+
+        if [ "$efi_vars_ok" = 1 ]; then
+          if ! efibootmgr | grep -qi 'limine'; then
+            local src disk part
+            src=$(findmnt -n -o SOURCE "$esp") || die "cannot resolve $esp source device"
+            disk=/dev/$(lsblk -n -o PKNAME "$src")
+            part=$(cat "/sys/class/block/$(basename "$src")/partition")
+            efibootmgr -q -c -d "$disk" -p "$part" -L Limine -l '\EFI\limine\BOOTX64.EFI'
+            echo "==> created EFI entry 'Limine' ($disk part $part)"
+          fi
+        else
+          echo "==> no efivars visible (agent namespace?) — skipping EFI entry check;"
+          echo "    the existing 'Limine' entry on the host keeps pointing at this binary"
         fi
         render_conf "$cur" "$prev"
         sync

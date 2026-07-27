@@ -336,6 +336,18 @@ in {
             <tool name="write">New files or complete rewrites only</tool>
           </tools>
 
+          <communication-style>
+            User has ADHD. Explain like they're smart but new to the topic (ELI5).
+            <rule>Lead with a simple analogy or one-line plain-English summary before technical detail.</rule>
+            <rule>One idea per line. Short lines beat dense paragraphs.</rule>
+            <rule>Bold the key terms and decisions so they're easy to scan.</rule>
+            <rule>Break multi-step work into a numbered checklist; show progress as you go.</rule>
+            <rule>Keep code blocks and tool calls unchanged — ELI5 applies to explanations around them.</rule>
+            <rule>Skip jargon when a plain word works; define jargon in-line when it's required.</rule>
+            <rule>End with a one-line recap: what changed and what happens next.</rule>
+            Existing concision rules still apply — be brief, not dense.
+          </communication-style>
+
           <rules>
             <rule>Use bash for file discovery (ls, find, rg)</rule>
             <rule>Use read to examine files, not cat or sed</rule>
