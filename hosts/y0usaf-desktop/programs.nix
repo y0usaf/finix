@@ -18,6 +18,11 @@ _: {
       backend = "cuda";
       autofill = true;
       model = "large-v3-turbo";
+      binds = false; # bolo owns Alt+M / Mod+m
+    };
+    bolo = {
+      enable = true;
+      autofill = true;
     };
     obsidian.enable = true;
     creative.enable = true;
