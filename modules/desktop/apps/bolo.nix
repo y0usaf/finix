@@ -37,36 +37,6 @@
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
-  manifest = pkgs.writeText "bolo-manifest" (builtins.toJSON {
-    version = 1;
-    active = cfg.model;
-    language = cfg.language;
-    provider = cfg.provider;
-    threads = cfg.threads;
-    pipe_to = cfg.pipeTo;
-    models = lib.mapAttrsToList (name: m: {
-      inherit name;
-      inherit (m) engine;
-      encoder = "${modelDir name}/encoder.int8.onnx";
-      decoder = "${modelDir name}/decoder.int8.onnx";
-      joiner = "${modelDir name}/joiner.int8.onnx";
-      tokens = "${modelDir name}/tokens.txt";
-    })
-    models;
-  });
-
-  runtimeDeps =
-    [
-      pkgs.pipewire # pw-record
-      pkgs.wl-clipboard # wl-copy
-      pkgs.libnotify # notify-send
-      pkgs.coreutils # tr (autofill flatten) + sh plumbing
-    ]
-    # Autofill types via dotool/uinput; without it in the wrapper the
-    # pipe_to command fails silently (pipe failures are swallowed by
-    # design — clipboard is the backup).
-    ++ lib.optionals cfg.autofill [pkgs.dotool];
-
   # bolod build: provider picks the sherpa-onnx variant bolod links.
   # CUDA via k2-fsa's official prebuilt GPU release (cuda-12.x/cudnn-9.x,
   # same upstream version as nixpkgs sherpa-onnx). DOCTRINE-07 EXCEPTION:
@@ -100,20 +70,17 @@
     '';
   };
 
-  sherpaOnnx =
-    if cfg.provider == "cuda"
-    then sherpaOnnxGpu
-    else pkgs.sherpa-onnx;
-
   boloPkgs =
     if cfg.provider == "cuda"
     then {
-      bolod = (flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system}.bolod.override {
-        sherpa-onnx = sherpaOnnx;
-      });
-      inherit (flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system}) bolo;
+      bolod = flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}".bolod.override {
+        sherpa-onnx = if cfg.provider == "cuda"
+    then sherpaOnnxGpu
+    else pkgs.sherpa-onnx;
+      };
+      inherit (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}") bolo;
     }
-    else flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system};
+    else flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}";
 
   # bolod is spawned by the compositor, whose PATH doesn't carry these.
   bolod = pkgs.symlinkJoin {
@@ -121,7 +88,16 @@
     paths = [boloPkgs.bolod];
     nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = ''
-      wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath runtimeDeps}
+      wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath ([
+      pkgs.pipewire # pw-record
+      pkgs.wl-clipboard # wl-copy
+      pkgs.libnotify # notify-send
+      pkgs.coreutils # tr (autofill flatten) + sh plumbing
+    ]
+    # Autofill types via dotool/uinput; without it in the wrapper the
+    # pipe_to command fails silently (pipe failures are swallowed by
+    # design — clipboard is the backup).
+    ++ lib.optionals cfg.autofill [pkgs.dotool])}
     '';
   };
 in {
@@ -184,21 +160,33 @@ in {
 
     # Same autofill pipeline as asryx: flatten to one line, release all
     # modifiers on dotool's virtual keyboard first (tomoe merges xkb state).
-    user.programs.bolo.pipeTo = lib.mkIf cfg.autofill (lib.mkDefault (
-      "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool"
-    ));
+    user.programs.bolo.pipeTo = lib.mkIf cfg.autofill (lib.mkDefault "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool");
 
     manzil.users."${config.user.name}" = {
       files =
         {
-          ".config/bolo/manifest.json".source = manifest;
+          ".config/bolo/manifest.json".source = pkgs.writeText "bolo-manifest" (builtins.toJSON {
+    version = 1;
+    active = cfg.model;
+    inherit (cfg) language provider threads;
+    pipe_to = cfg.pipeTo;
+    models = lib.mapAttrsToList (name: m: {
+      inherit name;
+      inherit (m) engine;
+      encoder = "${modelDir name}/encoder.int8.onnx";
+      decoder = "${modelDir name}/decoder.int8.onnx";
+      joiner = "${modelDir name}/joiner.int8.onnx";
+      tokens = "${modelDir name}/tokens.txt";
+    })
+    models;
+  });
         }
         # Model files land where the manifest points.
         // lib.foldl' (acc: name:
           acc
           // lib.mapAttrs' (f: src:
             lib.nameValuePair ".local/share/bolo/models/${name}/${f}" {source = src;})
-          models.${name}.files) {}
+          models."${name}".files) {}
         (lib.attrNames models)
         // lib.optionalAttrs config.user.ui.niri.enable {
           ".config/niri/config.kdl".value = {
