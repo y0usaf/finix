@@ -176,10 +176,12 @@ in {
       enable = true;
       settings = {
         trusted-users = ["root" "y0usaf"];
-        substituters = ["http://y0usaf-server:8787/cache"];
+        # Its own attic cache via loopback: instant-refuse if atticd is down,
+        # no LAN hairpin, no tailnet detour (same box either way).
+        substituters = ["http://127.0.0.1:8787/cache"];
         trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
+        connect-timeout = 5;
       };
-      # Its own attic cache: lets the server substitute what it just pushed.
     };
   };
 
