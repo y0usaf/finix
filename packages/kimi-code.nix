@@ -1,15 +1,4 @@
-{
-  lib,
-  stdenv,
-  fetchFromGitHub,
-  fetchPnpmDeps,
-  pnpmConfigHook,
-  pnpm_10,
-  nodejs_24,
-  makeWrapper,
-  ripgrep,
-  fd,
-}:
+{ lib, fd, fetchFromGitHub, fetchPnpmDeps, makeWrapper, nodejs_24, pnpmConfigHook, pnpm_10, ripgrep, stdenv }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "kimi-code";
   version = "0.28.1";

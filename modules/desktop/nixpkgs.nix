@@ -1,4 +1,4 @@
-{...}: {
+_: {
   nixpkgs = {
     overlays = [
       # Fix obs-vertical-canvas Qt6GuiPrivate cmake detection

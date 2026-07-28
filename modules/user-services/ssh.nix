@@ -6,7 +6,6 @@
 }: let
   userName = config.user.name;
   homeDir = config.user.homeDirectory;
-  readKey = path: lib.removeSuffix "\n" (builtins.readFile path);
 in {
   options.user.services.ssh = {
     enable = lib.mkEnableOption "SSH configuration module";
