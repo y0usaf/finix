@@ -132,6 +132,30 @@ in {
       default = "";
       description = "Optional command the transcript is piped to after copy.";
     };
+    vocabulary = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.listOf lib.types.str);
+      default = {};
+      example = lib.literalExpression ''
+        {
+          Hyprland = ["hyper land"];
+          niri = [];
+        }
+      '';
+      description = ''
+        Transcript corrections: canonical word -> known mishearings.
+        bolod applies aliases exactly, then falls back to fuzzy matching
+        (vocabFuzzy) for undeclared mishearings. Policy lives in the host,
+        this module only compiles it into the manifest.
+      '';
+    };
+    vocabFuzzy = lib.mkOption {
+      type = lib.types.numbers.between 0.0 1.0;
+      default = 0.85;
+      description = ''
+        Similarity threshold for bolod's fuzzy vocabulary pass; 0 disables
+        it, leaving only exact alias/word matching.
+      '';
+    };
     autofill = lib.mkEnableOption "typing the transcript into the focused window (dotool/uinput)";
     keybind = lib.mkOption {
       type = lib.types.str;
@@ -187,6 +211,9 @@ in {
       tokens = "${modelDir name}/tokens.txt";
     })
     models;
+    # One declaration mechanism: same attrset -> list shape as models.
+    vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) cfg.vocabulary;
+    vocab_fuzzy = cfg.vocabFuzzy;
   });
         }
         # Model files land where the manifest points.
@@ -206,9 +233,17 @@ in {
         };
     };
 
-    # Tomoe: autostart at config load + push-to-talk hold bind.
+    # Tomoe: supervised daemon + push-to-talk hold bind. process.service (not
+    # spawn) so a bolod crash is respawned by tomoe's 1 Hz supervision tick
+    # instead of leaving the keybind dead until the next login. restart
+    # "on_exit" is the superset of "on_failure" (clean exits restart too) —
+    # bolod is never supposed to exit on its own. reload keep_if_unchanged
+    # (default) avoids paying model-load time on every config reload.
     user.ui.tomoe.extraConfig = lib.mkIf config.user.ui.tomoe.enable ''
-      tomoe.spawn("${bolod}/bin/bolod")
+      tomoe.process.service("bolod", {
+        command = {"${bolod}/bin/bolod"},
+        restart = "on_exit",
+      })
       tomoe.bind("${cfg.tomoeKeybind}", {
         press = function() tomoe.spawn("${boloPkgs.bolo}/bin/bolo") end,
         release = function() tomoe.spawn("${boloPkgs.bolo}/bin/bolo") end,
