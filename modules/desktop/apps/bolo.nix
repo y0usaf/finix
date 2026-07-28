@@ -56,11 +56,17 @@
     models;
   });
 
-  runtimeDeps = [
-    pkgs.pipewire # pw-record
-    pkgs.wl-clipboard # wl-copy
-    pkgs.libnotify # notify-send
-  ];
+  runtimeDeps =
+    [
+      pkgs.pipewire # pw-record
+      pkgs.wl-clipboard # wl-copy
+      pkgs.libnotify # notify-send
+      pkgs.coreutils # tr (autofill flatten) + sh plumbing
+    ]
+    # Autofill types via dotool/uinput; without it in the wrapper the
+    # pipe_to command fails silently (pipe failures are swallowed by
+    # design — clipboard is the backup).
+    ++ lib.optionals cfg.autofill [pkgs.dotool];
 
   # bolod is spawned by the compositor, whose PATH doesn't carry these.
   bolod = pkgs.symlinkJoin {
