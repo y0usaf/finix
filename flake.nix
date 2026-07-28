@@ -159,8 +159,14 @@
     # desktop eval anymore. NixOS survives only as the server's on-disk
     # rescue system (+ nixos-legacy branch for everything else).
     finixStaging = import ./finix {inherit inputs system;};
+  in {
+    nixosConfigurations = {
+      # Desktop default = finix: bare `nh os switch` on the desktop targets
+      # finix (via finix's nixos-compat: config.system.build.toplevel).
+      y0usaf-desktop = finixStaging.desktopPersistent;
 
-    mkHost = {
+      # Server NixOS = on-disk rescue for the finix server.
+      y0usaf-server = ({
       domains,
       extraModules ? [],
       hostDir,
@@ -195,15 +201,7 @@
               ]
               ++ extraModules
             ));
-      };
-  in {
-    nixosConfigurations = {
-      # Desktop default = finix: bare `nh os switch` on the desktop targets
-      # finix (via finix's nixos-compat: config.system.build.toplevel).
-      y0usaf-desktop = finixStaging.desktopPersistent;
-
-      # Server NixOS = on-disk rescue for the finix server.
-      y0usaf-server = mkHost {
+      }) {
         hostDir = ./hosts/y0usaf-server;
         domains = ["core" "shell" "tools" "user-services" "dev"];
       };
