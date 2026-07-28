@@ -174,10 +174,12 @@ in {
     };
     nix-daemon = {
       enable = true;
-      settings.trusted-users = ["root" "y0usaf"];
+      settings = {
+        trusted-users = ["root" "y0usaf"];
+        substituters = ["http://y0usaf-server:8787/cache"];
+        trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
+      };
       # Its own attic cache: lets the server substitute what it just pushed.
-      settings.substituters = ["http://y0usaf-server:8787/cache"];
-      settings.trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
     };
   };
 
