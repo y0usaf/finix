@@ -42,6 +42,7 @@
     active = cfg.model;
     language = cfg.language;
     provider = cfg.provider;
+    threads = cfg.threads;
     pipe_to = cfg.pipeTo;
     models = lib.mapAttrsToList (name: m: {
       inherit name;
@@ -144,6 +145,11 @@ in {
       type = lib.types.str;
       default = "en";
       description = "Dictation language hint recorded in the manifest.";
+    };
+    threads = lib.mkOption {
+      type = lib.types.nullOr lib.types.ints.positive;
+      default = null;
+      description = "Decoder threads; null = 50% of available cores (daemon default).";
     };
     pipeTo = lib.mkOption {
       type = lib.types.str;
