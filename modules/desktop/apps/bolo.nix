@@ -152,11 +152,19 @@ in {
     environment.systemPackages = [boloPkgs.bolo];
 
     # uinput node + input-group access for dotool autofill. Same rule asryx
-    # installs; duplicate lines are harmless while both are enabled.
+    # installs; duplicate lines are harmless while both are enabled. Rules go
+    # through services.udev.packages (portable: NixOS + finix), never
+    # extraRules (NixOS-only — the finix compat shim drops it).
     boot.kernelModules = lib.mkIf cfg.autofill ["uinput"];
-    services.udev.extraRules = lib.mkIf cfg.autofill ''
-      KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
-    '';
+    services.udev.packages = lib.optionals cfg.autofill [
+      (pkgs.writeTextFile {
+        name = "bolo-uinput-rules";
+        destination = "/lib/udev/rules.d/99-bolo-uinput.rules";
+        text = ''
+          KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+        '';
+      })
+    ];
 
     # Same autofill pipeline as asryx: flatten to one line, release all
     # modifiers on dotool's virtual keyboard first (tomoe merges xkb state).

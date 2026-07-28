@@ -2,9 +2,12 @@
   config = {
     nix.settings = {
       use-xdg-base-directories = true;
+      # dead-cache stall tax when the finix server is off (default 15s x 5).
+      connect-timeout = 5;
       substituters = [
-        # attic on the finix server: tailnet-only, push cache for heavy
-        # local builds (CUDA-class). First so local builds win.
+        # attic on the finix server: push cache for heavy local builds
+        # (CUDA-class). LAN first, tailnet fallback when roaming.
+        "http://192.168.2.66:8787/cache"
         "http://y0usaf-server:8787/cache"
         "https://chaotic-nyx.cachix.org"
         "https://nyx.cachix.org"
