@@ -5,9 +5,11 @@
 # push-based cache on :8787 (tailscale-only via the firewall); the desktop
 # pushes after heavy builds and all hosts pull as a substituter.
 #
-# Auth model (attic's): one RS256 keypair signs JWTs. The PEM lives
-# root-only at /var/lib/atticd/signing.pem (impermanence-persisted). Admin
-# tokens are minted on the server with atticd-atticadm.
+# Auth model (attic's): one RS256 keypair signs JWTs. The PKCS1 PEM lives
+# root-only at /var/lib/atticd/signing.pem (impermanence-persisted) and is
+# handed to atticd as base64 via ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64,
+# sourced from a root-only runtime env file (never the world-readable
+# /nix/store config). Admin tokens are minted on the server with atticadm.
 {
   config,
   lib,
@@ -21,16 +23,13 @@
     require-proof-of-possession = false
 
     [database]
-    # embedded sqlite in the state dir; single-box scale
-    url = "sqlite:///var/lib/atticd/atticd.db"
+    # embedded sqlite in the state dir; single-box scale. sqlx needs
+    # ?mode=rwc to create the file (NixOS module does the same).
+    url = "sqlite:///var/lib/atticd/atticd.db?mode=rwc"
 
     [storage]
     type = "local"
     path = "/var/lib/atticd/storage"
-
-    [signing]
-    # root-only; written by the activation task below
-    keypair = "/var/lib/atticd/signing.pem"
 
     [chunking]
     nar-size-threshold = 65536
@@ -38,6 +37,9 @@
     avg-size = 16384
     max-size = 65536
   '';
+  # JWT signing secret comes from the env file below, not the TOML: attic
+  # reads [jwt.signing] token-rs256-secret-base64, falling back to
+  # ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64 when the TOML omits it.
 in {
   # State out of /persist (impermanence), same pattern as forgejo.
   fileSystems."/var/lib/atticd" = {
@@ -52,14 +54,23 @@ in {
   finit.tasks.atticd-keygen = {
     description = "generate atticd RS256 signing keypair if absent";
     command = pkgs.writeShellScript "atticd-keygen" ''
-      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.attic-server]}
+      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.openssl]}
       install -d -m 0700 /var/lib/atticd
       if [ ! -s /var/lib/atticd/signing.pem ]; then
-        atticd generate-signing-key > /var/lib/atticd/signing.pem.tmp
+        # attic ships no keygen subcommand; RS256 keys are plain PKCS1 PEM.
+        openssl genrsa -out /var/lib/atticd/signing.pem.tmp 4096
         chmod 0400 /var/lib/atticd/signing.pem.tmp
         mv /var/lib/atticd/signing.pem.tmp /var/lib/atticd/signing.pem
         echo "atticd-keygen: new signing keypair"
       fi
+      # Runtime env file the service sources: base64 PEM, root-only.
+      {
+        printf 'ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64='
+        base64 -w0 /var/lib/atticd/signing.pem
+        printf '\n'
+      } > /var/lib/atticd/token.env.tmp
+      chmod 0400 /var/lib/atticd/token.env.tmp
+      mv /var/lib/atticd/token.env.tmp /var/lib/atticd/token.env
       install -d -m 0755 /var/lib/atticd/storage
     '';
     log = true;
@@ -67,7 +78,14 @@ in {
 
   finit.services.atticd = {
     description = "attic binary cache server";
-    command = "${attic}/bin/atticd -f ${configFile}";
+    # Source the root-only runtime env (JWT secret) before exec; finit's env:
+    # stanza only points at world-readable /nix/store files.
+    command = pkgs.writeShellScript "atticd-run" ''
+      set -a
+      . /var/lib/atticd/token.env
+      set +a
+      exec ${attic}/bin/atticd -f ${configFile}
+    '';
     path = [pkgs.coreutils];
     environment = {
       RUST_LOG = "attic=info";

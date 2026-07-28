@@ -169,6 +169,7 @@
     ../hosts/y0usaf-server/finix/services.nix
     ../hosts/y0usaf-server/finix/persistent.nix
     ../hosts/y0usaf-server/finix/attic.nix
+    ../hosts/y0usaf-server/finix/boot-health.nix
   ]);
 
   desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules;
@@ -202,6 +203,8 @@ in rec {
       name = "finix-server-persistent-deploy";
       system = serverPersistent.config.system.topLevel;
       defaultHost = "server";
+      # Boot slots on the server belong to the ESP island driver, not stc.
+      bootDriverName = "finix-server-boot";
     }).deployScript;
 
   desktopDeployPackage =

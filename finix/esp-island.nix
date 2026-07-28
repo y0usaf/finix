@@ -60,7 +60,30 @@
         || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
         || die "no EFI variable support"
       mountpoint -q "$esp" || die "$esp is not a mountpoint"
-      [ -f "$esp/limine/limine.conf" ] || die "NixOS limine island missing at $esp/limine - wrong box?"
+      # Fall-home verification: the island's safety model needs a working
+      # non-island boot path. Missing rescue used to die here; post-purge the
+      # NixOS limine is gone from the ESP, so warn loudly instead. Operators
+      # who require the fall-home gate pass --require-fallhome to install.
+      require_fallhome=0
+      verify_fallhome() {
+        local ok=1 rescue_path
+        # Every non-Finix EFI entry must point at a binary that exists on the ESP.
+        rescue_path=$(sed -n 's|^  path: boot():/\(.*\)$|\1|p' "$conf" 2>/dev/null | head -n1)
+        if [ -n "$rescue_path" ] && [ ! -f "$esp/$rescue_path" ]; then
+          echo "WARN: limine rescue entry target missing: $esp/$rescue_path" >&2
+          ok=0
+        fi
+        # The UEFI fallback loader must not be the island itself (identical
+        # bytes = both boot paths land on the same config = no fall-home).
+        if [ -f "$esp/EFI/BOOT/BOOTX64.EFI" ] && cmp -s "$esp/EFI/BOOT/BOOTX64.EFI" "$island/BOOTX64.EFI" 2>/dev/null; then
+          echo "WARN: fallback EFI/BOOT/BOOTX64.EFI is the island limine - no independent fall-home" >&2
+          ok=0
+        fi
+        if [ "$ok" != 1 ] && [ "$require_fallhome" = 1 ]; then
+          die "fall-home verification failed"
+        fi
+        [ "$ok" = 1 ]
+      }
 
       entry_num() { # exact label -> XXXX (first match) or empty
         efibootmgr | sed -n "s/^Boot\([0-9A-F]\{4\}\)[^ ]* $1\t.*/\1/p" | head -n1
@@ -110,8 +133,21 @@
             printf '\n'
             emit_slot "$2" " (previous)"
           fi
-          printf '\n/NixOS rescue (Limine)\n  protocol: efi\n  path: boot():/efi/limine/BOOTX64.EFI\n'
-        } > "$conf.tmp" && mv "$conf.tmp" "$conf"
+          # Only advertise the rescue entry when its target actually exists;
+          # a dead menu entry is worse than none (incident #3).
+          if [ -f "$esp/efi/limine/BOOTX64.EFI" ]; then
+            printf '\n/NixOS rescue (Limine)\n  protocol: efi\n  path: boot():/efi/limine/BOOTX64.EFI\n'
+          fi
+        } > "$conf.tmp" || die "failed to render $conf.tmp"
+        # Sanity before swap: every kernel/module path in the conf must exist
+        # on the ESP, and the conf must contain at least one Finix entry.
+        local p
+        for p in $(sed -n 's|^  \(kernel\|module\)_path: boot():/\(.*\)$|\2|p' "$conf.tmp"); do
+          [ -f "$esp/$p" ] || die "rendered conf references missing ESP file: $p"
+        done
+        grep -q '^/Finix ' "$conf.tmp" || die "rendered conf has no Finix entry"
+        [ -f "$conf" ] && cp "$conf" "$conf.bak"
+        mv "$conf.tmp" "$conf"
       }
 
       prune_slots() { # cur prev
@@ -168,6 +204,24 @@
         fi
       }
 
+      verify_staged() { # system cmdline - prove the staged slot is bootable
+        local system=$1 cmdline=$2 init_path magic
+        # bzImage carries "HdrS" magic at offset 0x202.
+        magic=$(dd if="$system/kernel" bs=1 skip=514 count=4 2>/dev/null) || true
+        [ "$magic" = "HdrS" ] || die "$system/kernel is not a bzImage (HdrS magic missing)"
+        # initrd starts with the early-ucode cpio ("070701") or gzip (1f8b).
+        magic=$(dd if="$system/initrd" bs=1 count=2 2>/dev/null | od -An -tx1 | tr -d ' \n')
+        case "$magic" in
+          1f8b|3037) ;;
+          *) die "$system/initrd has unexpected magic bytes: $magic" ;;
+        esac
+        # init= must resolve inside the rooted closure.
+        init_path=$(printf '%s\n' "$cmdline" | tr ' ' '\n' | sed -n 's/^init=//p' | head -n1)
+        [ -n "$init_path" ] || die "cmdline has no init= parameter"
+        [ -e "$init_path" ] || die "init path missing from store: $init_path"
+        echo "==> staged slot verified: bzImage+initrd magic ok, init= present"
+      }
+
       do_install() {
         local system cmdline slot changed
         system=$1 cmdline=$2
@@ -190,6 +244,8 @@
         write_file "$island/kernels/$slot/cmdline" "$cmdline"
         write_file "$island/kernels/$slot/system" "$system"
         copy_changed ${pkgs.limine}/share/limine/BOOTX64.EFI "$island/BOOTX64.EFI"
+        # Prove the staged files (not just the store inputs) are boot-shaped.
+        verify_staged "$island/kernels/$slot" "$cmdline"
 
         # The booted slot execs init out of /nix/store: root its closure.
         "$system/sw/bin/nix-store" --realise "$system" \
@@ -208,6 +264,7 @@
         prune_slots "$cur" "$prev"
         clean_stale
         ensure_entry
+        verify_fallhome
         if [ "$changed" = 1 ]; then
           demote
           echo "==> slot $cur staged as island default; BootOrder forced NixOS-first (test window open)"
@@ -280,12 +337,18 @@
         else
           echo "not installed"
         fi
+        echo
+        echo "== fall-home =="
+        verify_fallhome && echo "fall-home OK"
       }
 
       action=''${1:-status}
       shift || true
       case "$action" in
-        install) do_install "''${1:?system path required}" "''${2:?cmdline required}" ;;
+        install)
+          if [ "''${3:-}" = --require-fallhome ]; then require_fallhome=1; fi
+          do_install "''${1:?system path required}" "''${2:?cmdline required}"
+          ;;
         oneshot) do_oneshot ;;
         promote) do_promote "''${1:-}" ;;
         demote) demote; echo "==> BootOrder NixOS-first: $(boot_order)" ;;
@@ -313,9 +376,9 @@
           ;;
       esac
       case "$action" in
-        status|bootnext-test|install|oneshot|promote|promote-force|demote|rollback) ;;
+        status|bootnext-test|install|install-require-fallhome|oneshot|promote|promote-force|demote|rollback) ;;
         *)
-          echo "usage: ${name} [host|local] [status|bootnext-test|install|oneshot|promote|promote-force|demote|rollback]" >&2
+          echo "usage: ${name} [host|local] [status|bootnext-test|install|install-require-fallhome|oneshot|promote|promote-force|demote|rollback]" >&2
           exit 2
           ;;
       esac
@@ -335,6 +398,9 @@
           install)
             exec sudo "$island" install "$system_path" "$(cmdline_from_bootspec)"
             ;;
+          install-require-fallhome)
+            exec sudo "$island" install "$system_path" "$(cmdline_from_bootspec)" --require-fallhome
+            ;;
           promote-force)
             exec sudo "$island" promote --force
             ;;
@@ -344,17 +410,20 @@
         esac
       fi
 
-      remote_store="ssh://$host?remote-program=/nix/var/nix/profiles/system/sw/bin/nix-store"
+      # post-NixOS-purge: running finix supplies nix-store (same as deploy.nix)
+      remote_store="ssh://$host?remote-program=/run/current-system/sw/bin/nix-store"
       sshopts="-o BatchMode=yes -o ConnectTimeout=10 -o ControlMaster=no -o ControlPath=none"
       export NIX_SSHOPTS="$sshopts"
 
       remote_args=""
       case "$action" in
-        install)
+        install|install-require-fallhome)
           cmdline="$(cmdline_from_bootspec)"
           echo "==> copying island tooling + persistent closure to $host"
           nix copy --to "$remote_store" "$island" "$system_path"
           remote_args=" '$system_path' '$cmdline'"
+          if [ "$action" = install-require-fallhome ]; then remote_args="$remote_args '--require-fallhome'"; fi
+          action=install
           ;;
         promote-force)
           action=promote
