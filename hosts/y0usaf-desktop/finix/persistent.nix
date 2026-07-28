@@ -193,6 +193,19 @@ in {
         options = ["mode=755" "size=4G"];
       };
 
+      # /tmp gets its OWN tmpfs so a runaway build (cargo target dirs, nix-shell
+      # scratch) fills 16G of throwaway space instead of the 4G root tmpfs —
+      # a full root tmpfs wedges /etc, /var and activation itself.
+      # NOTE: boot.tmp.useTmpfs/tmpfsSize is a systemd-only option (tmp.mount);
+      # under finix it is a no-op, so the mount is declared here explicitly.
+      # neededForBoot: mount.nix only emits mount tasks for those (gotcha #1).
+      "/tmp" = {
+        device = "none";
+        fsType = "tmpfs";
+        options = ["mode=1777" "size=16G" "nosuid" "nodev" "strictatime"];
+        neededForBoot = true;
+      };
+
       "/nix" = subvolMount "@nix" [] // {neededForBoot = true;};
       "/persist" = subvolMount "@persist" [] // {neededForBoot = true;};
       "/home" = subvolMount "@home" [] // {neededForBoot = true;};
