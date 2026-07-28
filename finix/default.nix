@@ -37,7 +37,23 @@
         || lib.hasPrefix "librewolf" (pkg.pname or "")
         || lib.hasPrefix "electron" (pkg.pname or "");
     };
-    overlays = [inputs.claude-code-nix.overlays.default];
+    overlays = [
+      inputs.claude-code-nix.overlays.default
+      # n8n 2.31.4's GitHub archive FOD hash drifted (GitHub repacks tag
+      # tarballs; gzip bytes aren't stable). Re-pin with the current bytes.
+      # Pre-existing breakage unrelated to our changes — drop when nixpkgs
+      # bumps past it.
+      (final: prev: {
+        n8n = prev.n8n.overrideAttrs (old: {
+          src = final.fetchFromGitHub {
+            owner = "n8n-io";
+            repo = "n8n";
+            rev = "n8n@${old.version}";
+            hash = "sha256-lmkCT1o5LSC1ORd+Jozr9hkJu2znMpFO97jTWYOnga0=";
+          };
+        });
+      })
+    ];
   };
   inherit (pkgs) lib;
 
@@ -152,6 +168,7 @@
     nix-daemon
     ../hosts/y0usaf-server/finix/services.nix
     ../hosts/y0usaf-server/finix/persistent.nix
+    ../hosts/y0usaf-server/finix/attic.nix
   ]);
 
   desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules;
