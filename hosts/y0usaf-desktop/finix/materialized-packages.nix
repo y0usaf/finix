@@ -32,7 +32,18 @@
       pkgs.strace
     ]
     ++ lib.optionals config.user.gaming.steam.enable [
-      pkgs.steam
+      # compat-import drops programs.*, so programs.steam.extraCompatPackages
+      # (proton-ge-bin) never reaches Steam under finix — GE-Proton is in the
+      # store but STEAM_EXTRA_COMPAT_TOOLS_PATHS stays unset, so the compat
+      # tool dropdown never lists it. Bake the path into the wrapper instead.
+      (
+        if config.user.gaming.proton.enable
+        then
+          pkgs.steam.override {
+            extraEnv.STEAM_EXTRA_COMPAT_TOOLS_PATHS = "${pkgs.proton-ge-bin.steamcompattool}";
+          }
+        else pkgs.steam
+      )
       pkgs.steam-run
     ]
     ++ lib.optional config.user.dev.pi.enable
