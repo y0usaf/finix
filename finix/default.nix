@@ -90,33 +90,35 @@
           # Values mirror the desktop's bridge-era reality (bluetooth + amdgpu
           # on; server services + lix off).
           {
-            options.boot.loader.limine.secureBoot.enable = lib.mkEnableOption "";
-            options.services = {
-              mediamtx.enable = lib.mkEnableOption "";
-              forgejo.enable = lib.mkEnableOption "";
-              n8n.enable = lib.mkEnableOption "";
-              nginx.enable = lib.mkEnableOption "";
-            };
-            options.programs = {
-              lix.enable = lib.mkEnableOption "";
-              tweakcc.enable = lib.mkEnableOption "";
-            };
-            options.hardware = {
-              bluetooth.enable = lib.mkOption {
-                type = lib.types.bool;
-                default = true;
-              };
-              amdgpu.enable = lib.mkOption {
-                type = lib.types.bool;
-                default = true;
-              };
+            options = {
+              boot.loader.limine.secureBoot.enable = lib.mkEnableOption "";
+              services = {
+                            mediamtx.enable = lib.mkEnableOption "";
+                            forgejo.enable = lib.mkEnableOption "";
+                            n8n.enable = lib.mkEnableOption "";
+                            nginx.enable = lib.mkEnableOption "";
+                          };
+              programs = {
+                            lix.enable = lib.mkEnableOption "";
+                            tweakcc.enable = lib.mkEnableOption "";
+                          };
+              hardware = {
+                            bluetooth.enable = lib.mkOption {
+                              type = lib.types.bool;
+                              default = true;
+                            };
+                            amdgpu.enable = lib.mkOption {
+                              type = lib.types.bool;
+                              default = true;
+                            };
+                          };
+              nix.settings.max-jobs = lib.mkOption {
+                            type = lib.types.str;
+                            default = "auto";
+                          };
             };
             # Referenced by gaming/shader-cache.nix's steam_dev.cfg manzil
             # entry; mirrors modules/core/system/nix-package-management.nix.
-            options.nix.settings.max-jobs = lib.mkOption {
-              type = lib.types.str;
-              default = "auto";
-            };
           }
           bash
           dhcpcd
@@ -129,36 +131,11 @@
         ++ modules;
     };
 
-  compatImport = import ./compat-import.nix {inherit lib;};
-
   # The desktop's shared config library: every .nix under the NixOS domain
   # tree + the desktop host dir, shimmed through compat-import. Exclusions:
   #   - flake-modules.nix wires NixOS-only input modules (manzil.nixosModules
   #     would collide with the finix variant imported below)
   #   - hosts/y0usaf-desktop/finix/ is already finix-native
-  compatRoots = [
-    ../modules/core
-    ../modules/desktop
-    ../modules/shell
-    ../modules/tools
-    ../modules/user-services
-    ../modules/dev
-    ../modules/gaming
-    ../hosts/y0usaf-desktop
-  ];
-  compatExclusions = [
-    ../modules/core/flake-modules.nix
-  ];
-  compatFiles =
-    builtins.filter (p:
-      !(builtins.elem p compatExclusions)
-      && !(lib.hasInfix "/finix/" (toString p)))
-    (import ../recursivelyImport.nix {
-        inherit (lib) hasSuffix;
-        inherit (lib.filesystem) listFilesRecursive;
-      }
-      compatRoots);
-  compatModules = map compatImport compatFiles;
 
   # ── systems ──────────────────────────────────────────────────────────────
   serverPersistent = mkFinixSystem (with inputs.finix.nixosModules; [
@@ -180,16 +157,33 @@
       ../hosts/y0usaf-desktop/finix/persistent.nix
       inputs.manzil.finixModules.default
     ]
-    ++ compatModules);
+    ++ (map (import ./compat-import.nix {inherit lib;}) (builtins.filter (p:
+      !(builtins.elem p [
+    ../modules/core/flake-modules.nix
+  ])
+      && !(lib.hasInfix "/finix/" (toString p)))
+    (import ../recursivelyImport.nix {
+        inherit (lib) hasSuffix;
+        inherit (lib.filesystem) listFilesRecursive;
+      }
+      [
+    ../modules/core
+    ../modules/desktop
+    ../modules/shell
+    ../modules/tools
+    ../modules/user-services
+    ../modules/dev
+    ../modules/gaming
+    ../hosts/y0usaf-desktop
+  ]))));
 
   # ── drivers ──────────────────────────────────────────────────────────────
-  islandLib = import ./esp-island.nix {inherit pkgs lib;};
   deployLib = import ./deploy.nix {inherit pkgs;};
 in rec {
   inherit serverPersistent desktopPersistent;
 
   bootPackage =
-    (islandLib.mkIsland {
+    ((import ./esp-island.nix {inherit pkgs lib;}).mkIsland {
       name = "finix-server-boot";
       system = serverPersistent.config.system.topLevel;
       # ADL-N BIOS ships ancient 0x1a microcode; both raw direct boots
