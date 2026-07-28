@@ -9,11 +9,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1785239303,
-        "narHash": "sha256-6q5+8IAs5G9jZw2SZecAjPCw6sQIJcU8cW1z1j4zK5Y=",
+        "lastModified": 1785280765,
+        "narHash": "sha256-kPrIP26xNcL5hq7vaxTFWK5AP/PSFAuY5uL4+jUiyQw=",
         "ref": "refs/heads/main",
-        "rev": "152311b77bbee7b637f111e6f5e0f6df4242b474",
-        "revCount": 8,
+        "rev": "394d8394be74b7790977028432068ec727b3972a",
+        "revCount": 16,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/bolo.git"
       },
@@ -812,11 +812,11 @@
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1785238264,
-        "narHash": "sha256-GSjT28ETSj8i6Ypy1I+pCsipobCieP1656/tMl2xBNk=",
+        "lastModified": 1785271909,
+        "narHash": "sha256-QZ734y09jmhpA69a/puKdEt2/zZJz80U5EOmawSqOWU=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "27137fbabc8c13cdb44ec2c9d379ec1d04f5593d",
+        "rev": "515657c71984d4a7428883e4e9af74b3fa32f459",
         "type": "github"
       },
       "original": {
@@ -985,11 +985,11 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1784983035,
-        "narHash": "sha256-dJyCuf8OI7QibS7Rn2dNitgYHeyYdbgOoJhErzdK4+E=",
+        "lastModified": 1785257504,
+        "narHash": "sha256-ZLitC8UB1bfgj7R1gW59x5Q5veQZHjs/ctrZRk3Lqko=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "5bc1c2c0a6f07e00e8c240304182f213ab8d311f",
+        "rev": "027a5847901b5dde30270abaa1041046cd2b4b55",
         "type": "github"
       },
       "original": {
