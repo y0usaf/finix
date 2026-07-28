@@ -8,21 +8,9 @@
   inherit (config.lib.generators) toLua;
 
   tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
-  bar = config.user.ui.tomoe.bar;
+  inherit (config.user.ui.tomoe) bar;
   # BarOverlay.open() options for the in-VM bar (deployed next to init.lua
   # by shell.nix). font_family is assigned in Lua after fc-match resolution.
-  barOpenOpts = toLua {
-    inherit (bar) modules edges indent exclusive;
-    bongo_cat = {
-      inherit (bar.bongo-cat) enable height;
-      asset_dir = "${./assets/bongo-cat}";
-      name = "bongo-cat";
-      margin_bottom = bar.bongo-cat.margin-bottom;
-      x_offset = bar.bongo-cat.x-offset;
-      keypress_duration = bar.bongo-cat.keypress-duration;
-      layer = "overlay";
-    };
-  };
   # With `user.shell.ekko.open`, the terminal-spawn bind routes through the
   # running mux helper: an attached client requests focus for its existing
   # terminal; cold, the helper falls back to the regular terminal spawn.
@@ -151,7 +139,18 @@ in {
             local _ms_font = shell.exec("fc-match monospace --format='%{family}'")
             if _ms_font == "" then _ms_font = "monospace" end
             local BarOverlay = dofile(os.getenv("HOME") .. "/.config/tomoe/shell/bar_overlay.lua")
-            local _bar_opts = ${barOpenOpts}
+            local _bar_opts = ${toLua {
+    inherit (bar) modules edges indent exclusive;
+    bongo_cat = {
+      inherit (bar.bongo-cat) enable height;
+      asset_dir = "${./assets/bongo-cat}";
+      name = "bongo-cat";
+      margin_bottom = bar.bongo-cat.margin-bottom;
+      x_offset = bar.bongo-cat.x-offset;
+      keypress_duration = bar.bongo-cat.keypress-duration;
+      layer = "overlay";
+    };
+  }}
             _bar_opts.font_family = _ms_font
             BarOverlay.open(_bar_opts)''}
 
