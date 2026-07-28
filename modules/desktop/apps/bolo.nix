@@ -41,6 +41,7 @@
     version = 1;
     active = cfg.model;
     language = cfg.language;
+    provider = cfg.provider;
     pipe_to = cfg.pipeTo;
     models = lib.mapAttrsToList (name: m: {
       inherit name;
