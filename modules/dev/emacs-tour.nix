@@ -3,8 +3,13 @@
   lib,
   pkgs,
   ...
-}: let
-  emacsWithPkgs = pkgs.emacs-pgtk.pkgs.withPackages (epkgs:
+}: {
+  options.user.dev.emacs-tour = {
+    enable = lib.mkEnableOption "Emacs with a guided why-Emacs-is-great tour";
+  };
+  config = lib.mkIf config.user.dev.emacs-tour.enable {
+    environment.systemPackages = [
+      (pkgs.emacs-pgtk.pkgs.withPackages (epkgs:
     with epkgs; [
       vertico
       marginalia
@@ -16,14 +21,7 @@
       olivetti
       nix-mode
       rainbow-delimiters
-    ]);
-in {
-  options.user.dev.emacs-tour = {
-    enable = lib.mkEnableOption "Emacs with a guided why-Emacs-is-great tour";
-  };
-  config = lib.mkIf config.user.dev.emacs-tour.enable {
-    environment.systemPackages = [
-      emacsWithPkgs
+    ]))
     ];
     manzil.users."${config.user.name}".files = {
       ".config/emacs/init.el".text = ''

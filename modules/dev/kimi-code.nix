@@ -6,14 +6,13 @@
 }: let
   cfg = config.user.dev.kimi-code;
   homeDir = config.user.homeDirectory;
-  kimiPkg = pkgs.callPackage ../../packages/kimi-code.nix {};
 in {
   options.user.dev.kimi-code = {
     enable = lib.mkEnableOption "Kimi Code CLI with Vercel AI Gateway provider";
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = kimiPkg;
+      default = pkgs.callPackage ../../packages/kimi-code.nix {};
       description = "Kimi Code package.";
     };
 
@@ -70,7 +69,7 @@ in {
           };
           models."vercel/${cfg.model}" = {
             provider = "vercel";
-            model = cfg.model;
+            inherit (cfg) model;
             max_context_size = cfg.maxContextSize;
             capabilities = ["thinking" "image_in" "tool_use"];
             display_name = cfg.displayName;
