@@ -6,9 +6,6 @@
   ...
 }: let
   cfg = config.user.programs.bolo;
-
-  boloPkgs = flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system};
-
   # Parakeet TDT 0.6B v3 (int8), k2-fsa/csukuangfj sherpa-onnx export.
   # Declared once here; daemon manifest + manzil links derive from it
   # (doctrine 04/05). Add further models to this attrset — runtime model
@@ -68,6 +65,45 @@
     # design — clipboard is the backup).
     ++ lib.optionals cfg.autofill [pkgs.dotool];
 
+  # bolod build: cuda flips sherpa-onnx (hence onnxruntime) to its
+  # cudaSupport variant; both carry the flag first-class in nixpkgs.
+  # cuda chain: cudnn-frontend's build can't find nvcc on the cuda 12.9
+  # pin (setup-cuda hook builds CUDAToolkit_ROOT without it). Seed the
+  # hook's path set so nvcc lands in the generated -DCUDAToolkit_ROOT.
+  cudaPkgsFixed = pkgs.cudaPackages.overrideScope (_: prev: {
+    cudnn-frontend = prev.cudnn-frontend.overrideAttrs (old: {
+      nativeBuildInputs = (old.nativeBuildInputs or []) ++ [prev.cuda_nvcc];
+      preConfigure = (old.preConfigure or "") + "\n"
+        + "declare -gA cudaHostPathsSeen 2>/dev/null || true\n"
+        + "cudaHostPathsSeen[\"${prev.cuda_nvcc}\"]=1\n";
+    });
+  });
+
+  # cudaSupport variant; both carry the flag first-class in nixpkgs.
+  # onnxruntime must be the cuda build too — sherpa-onnx only forwards the
+  # ENABLE_GPU flag, it does not re-override its onnxruntime input.
+  sherpaOnnx =
+    if cfg.provider == "cuda"
+    then
+      pkgs.sherpa-onnx.override {
+        cudaSupport = true;
+        onnxruntime = pkgs.onnxruntime.override {
+          cudaSupport = true;
+          cudaPackages = cudaPkgsFixed;
+        };
+      }
+    else pkgs.sherpa-onnx;
+
+  boloPkgs =
+    if cfg.provider == "cuda"
+    then {
+      bolod = (flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system}.bolod.override {
+        sherpa-onnx = sherpaOnnx;
+      });
+      inherit (flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system}) bolo;
+    }
+    else flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system};
+
   # bolod is spawned by the compositor, whose PATH doesn't carry these.
   bolod = pkgs.symlinkJoin {
     name = "bolod-wrapped";
@@ -84,6 +120,15 @@ in {
       type = lib.types.enum (lib.attrNames models);
       default = "parakeet-v3-int8";
       description = "Active model; written to the bolod manifest.";
+    };
+    provider = lib.mkOption {
+      type = lib.types.enum ["cpu" "cuda"];
+      default = "cpu";
+      description = ''
+        onnxruntime execution provider. "cuda" rebuilds sherpa-onnx +
+        onnxruntime with cudaSupport (long first build). DESIGN.md records
+        cpu as the measured-sufficient default (12x real-time).
+      '';
     };
     language = lib.mkOption {
       type = lib.types.str;
