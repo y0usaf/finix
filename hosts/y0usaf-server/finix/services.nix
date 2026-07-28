@@ -235,23 +235,12 @@ in {
       log = true;
     };
 
-    # n8n's NixOS state was owned by a systemd DynamicUser (now uid 65534
-    # leftovers); give it to the trial's static n8n user. /var/lib/private
-    # is 0700 root under systemd - open to 0711 so n8n can traverse. The
-    # /var/lib/n8n symlink mirrors systemd's StateDirectory layout:
-    # community-package installs under .n8n/nodes reference paths through
-    # it, and n8n crashes on any dangling package dir.
-    n8n-state = {
-      description = "adopt n8n state for static n8n user";
-      command = pkgs.writeShellScript "n8n-state" ''
-        export PATH=${lib.makeBinPath [pkgs.coreutils]}
-        chmod 711 /var/lib/private
-        mkdir -p /var/lib/private/n8n
-        chown -R n8n:n8n /var/lib/private/n8n
-        ln -sfn /var/lib/private/n8n /var/lib/n8n
-      '';
-      log = true;
-    };
+    # n8n DROPPED 2026-07-28: nixpkgs n8n 2.31.4 is unbuildable — src
+    # tarball hash drift + pnpm-deps hash drift (GitHub repacks tag
+    # archives). It blocked every server deploy. The NixOS-side state and
+    # the overlay pin attempt remain (finix/default.nix); restore when a
+    # nixpkgs bump ships a stable n8n. The live generation still serves
+    # n8n until this deploy lands.
 
     # Parity with mediamtx-update-ip: advertise the public IP for WebRTC.
     mediamtx-env = {
@@ -311,31 +300,6 @@ in {
       log = true;
     };
 
-    n8n = {
-      description = "n8n workflow automation";
-      user = "n8n";
-      group = "n8n";
-      command = "${pkgs.n8n}/bin/n8n";
-      path = [pkgs.nodejs];
-      environment = {
-        # Through the /var/lib/n8n symlink (n8n-state task) for exact
-        # systemd parity: package installs then record portable paths.
-        HOME = "/var/lib/n8n";
-        N8N_USER_FOLDER = "/var/lib/n8n";
-        N8N_PORT = "5678";
-        N8N_SECURE_COOKIE = "false";
-        N8N_DIAGNOSTICS_ENABLED = "false";
-        N8N_RUNNERS_MODE = "internal";
-        N8N_RUNNERS_BROKER_LISTEN_ADDRESS = "127.0.0.1";
-        N8N_RUNNERS_BROKER_PORT = "5679";
-        GENERIC_TIMEZONE = config.time.timeZone;
-      };
-      conditions = [
-        "net/lo/up"
-        "task/n8n-state/success"
-      ];
-      log = true;
-    };
 
     mediamtx = {
       description = "mediamtx media server";
