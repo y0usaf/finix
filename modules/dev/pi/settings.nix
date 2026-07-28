@@ -50,13 +50,14 @@ in {
         generator = toJSON;
         value =
           {
-            defaultProvider = "vercel-ai-gateway";
-            defaultModel = "moonshotai/kimi-k3-fast";
+            defaultProvider = "anthropic";
+            defaultModel = "claude-opus-5";
             defaultThinkingLevel = "max";
             enabledModels = [
               "openai-codex/gpt-5.6-sol"
               "openai-codex/gpt-5.6-luna"
               "anthropic/claude-fable-5"
+              "anthropic/claude-opus-5"
               "moonshotai/kimi-k3-fast"
             ];
             compaction.enabled = false;
