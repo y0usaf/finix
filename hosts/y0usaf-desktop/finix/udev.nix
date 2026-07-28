@@ -8,22 +8,19 @@
 #   - vial + DualSense hidraw: raw extraRules from modules/core/hardware/
 #     input.nix — finix udev has no extraRules option, so they are written
 #     out as a rules package here.
-{
-  pkgs,
-  lib,
-  ...
-}: let
+{ pkgs, ... }:
   # Same sanitize as the bridge: drop any rule line shelling out to systemd.
-  sanitize = p:
+{
+  services.udev.packages = [
+    ((p:
     pkgs.runCommand "${p.pname or (builtins.parseDrvName p.name).name}-definit" {} ''
       mkdir -p $out/lib/udev/rules.d
       find ${p}/ -type f -name "*.rules" | while read -r f; do
         ${pkgs.gnused}/bin/sed '/systemd/d' "$f" \
           > "$out/lib/udev/rules.d/$(basename "$f")"
       done
-    '';
-
-  extraRules = pkgs.writeTextFile {
+    '') pkgs.steam-devices-udev-rules)
+    (pkgs.writeTextFile {
     name = "phoenix-udev-rules";
     destination = "/lib/udev/rules.d/99-phoenix.rules";
     text = ''
@@ -35,10 +32,6 @@
       KERNEL=="hidraw*", KERNELS=="*054C:0CE6*", MODE="0660", TAG+="uaccess"
       KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0df2", MODE="0660", TAG+="uaccess"
     '';
-  };
-in {
-  services.udev.packages = [
-    (sanitize pkgs.steam-devices-udev-rules)
-    extraRules
+  })
   ];
 }
