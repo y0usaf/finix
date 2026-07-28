@@ -22,12 +22,7 @@
 #
 # Requires (wired up in finix/default.nix): finix modules cron, nftables,
 # postgresql.
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
+{ lib, pkgs, ... }: let
   # Same disk as server-trial.nix.
   diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
 
@@ -116,7 +111,7 @@ in {
 
             udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
 
-            tcp dport { 80, 443, 2222, 3000, 5678, 22000, 4200 } accept comment "sshd(2200) is tailnet-only"
+            tcp dport { 80, 443, 2222, 3000, 5678, 22000, 4200, 8787 } accept comment "sshd(2200) is tailnet-only; 8787 attic cache (LAN builds substitute over eth0, tailnet too slow)"
             udp dport { 21027, 22000, 4200, 41641 } accept
           }
           chain forward {

@@ -10,37 +10,11 @@
 # handed to atticd as base64 via ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64,
 # sourced from a root-only runtime env file (never the world-readable
 # /nix/store config). Admin tokens are minted on the server with atticadm.
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  attic = pkgs.attic-server;
-
-  configFile = pkgs.writeText "atticd.toml" ''
-    listen = "[::]:8787"
-    require-proof-of-possession = false
-
-    [database]
-    # embedded sqlite in the state dir; single-box scale. sqlx needs
-    # ?mode=rwc to create the file (NixOS module does the same).
-    url = "sqlite:///var/lib/atticd/atticd.db?mode=rwc"
-
-    [storage]
-    type = "local"
-    path = "/var/lib/atticd/storage"
-
-    [chunking]
-    nar-size-threshold = 65536
-    min-size = 4096
-    avg-size = 16384
-    max-size = 65536
-  '';
+{ lib, pkgs, ... }:
   # JWT signing secret comes from the env file below, not the TOML: attic
   # reads [jwt.signing] token-rs256-secret-base64, falling back to
   # ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64 when the TOML omits it.
-in {
+{
   # State out of /persist (impermanence), same pattern as forgejo.
   fileSystems."/var/lib/atticd" = {
     device = "/persist/var/lib/atticd";
@@ -84,7 +58,25 @@ in {
       set -a
       . /var/lib/atticd/token.env
       set +a
-      exec ${attic}/bin/atticd -f ${configFile}
+      exec ${pkgs.attic-server}/bin/atticd -f ${pkgs.writeText "atticd.toml" ''
+    listen = "[::]:8787"
+    require-proof-of-possession = false
+
+    [database]
+    # embedded sqlite in the state dir; single-box scale. sqlx needs
+    # ?mode=rwc to create the file (NixOS module does the same).
+    url = "sqlite:///var/lib/atticd/atticd.db?mode=rwc"
+
+    [storage]
+    type = "local"
+    path = "/var/lib/atticd/storage"
+
+    [chunking]
+    nar-size-threshold = 65536
+    min-size = 4096
+    avg-size = 16384
+    max-size = 65536
+  ''}
     '';
     path = [pkgs.coreutils];
     environment = {
