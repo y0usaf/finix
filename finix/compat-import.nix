@@ -30,7 +30,6 @@
   # wrap only dropped config; forcing their conditions would demand stubs
   # for every nixpkgs option they reference. Keys are read shallowly (WHNF
   # only — no config values forced).
-  keepKeys = ["user" "manzil" "fonts" "lib"];
 
   survives = c:
     if !isAttrs c
@@ -38,7 +37,7 @@
     else if c._type or "" != ""
     then true # nested node: conservative — keep, recurse decides
     else
-      (builtins.any (k: c ? ${k}) keepKeys)
+      (builtins.any (k: c ? "${k}") ["user" "manzil" "fonts" "lib"])
       || (c ? environment)
       || (c ? services && (isAttrs c.services && (c.services._type or "" != "" || c.services ? udev)));
 
@@ -67,8 +66,8 @@
       else let
         k = head path;
       in
-        lib.optionalAttrs (c ? ${k}) {
-          ${k} = pickPath (tail path) c.${k};
+        lib.optionalAttrs (c ? "${k}") {
+          "${k}" = pickPath (tail path) c."${k}";
         });
 
   # environment: finix supports a subset only (no extraInit; NixOS's
@@ -77,38 +76,15 @@
   # Packages the bridge era deliberately filtered out of the desktop:
   # finix runs dhcpcd (not NetworkManager) and docker is deferred wholesale
   # (podman ships via hosts/…/finix/materialized-packages.nix instead).
-  dropPackages = ["networkmanager" "docker" "docker-compose"];
-  pkgName = p: p.pname or (builtins.parseDrvName (p.name or "?")).name;
-
-  envPick = filterNode (c: let
-    kept = lib.filterAttrs (n: _: builtins.elem n ["systemPackages" "etc" "variables" "shells" "binsh"]) c;
-    renamed = lib.optionalAttrs (c ? sessionVariables) {variables = c.sessionVariables;};
-    merged = lib.recursiveUpdate kept renamed;
-  in
-    if merged ? systemPackages
-    then merged // {systemPackages = builtins.filter (p: !(builtins.elem (pkgName p) dropPackages)) merged.systemPackages;}
-    else merged);
 
   # fonts: finix supports fonts.packages + fonts.fontconfig only; NixOS's
   # fontDir/enableDefaultPackages/conf/dtd are dropped. (User font config
   # rides the user.* namespace, untouched here.)
-  fontsPick =
-    filterNode (c:
-      lib.filterAttrs (n: _: builtins.elem n ["packages" "fontconfig"]) c);
-
-  topPick = filterNode (c:
-    (lib.filterAttrs (n: _: builtins.elem n ["user" "manzil" "lib"]) c)
-    // (lib.optionalAttrs (c ? environment) {environment = envPick c.environment;})
-    // (lib.optionalAttrs (c ? fonts) {fonts = fontsPick c.fonts;})
-    // (lib.optionalAttrs (c ? services) {services = pickPath ["udev" "packages"] c.services;}));
 
   # Option subtrees our modules declare but finix ALSO declares — passing
   # them through would error "already declared". Everything else passes
   # whole (real declarations + defaults, so guards in kept config evaluate
   # exactly as NixOS-side).
-  dropOptionPaths = [
-    ["hardware" "nvidia"]
-  ];
 
   dropPath = path: c:
     if path == [] || !isAttrs c
@@ -116,15 +92,13 @@
     else let
       k = head path;
     in
-      if !(c ? ${k})
+      if !(c ? "${k}")
       then c
       else if tail path == []
       then builtins.removeAttrs c [k]
-      else c // {${k} = dropPath (tail path) c.${k};};
+      else c // {"${k}" = dropPath (tail path) c."${k}";}; # non-function (flake input modules): dropped by design
 
-  optionsPick = c: builtins.foldl' (acc: p: dropPath p acc) c dropOptionPaths;
-
-  shim = module:
+  shimPath = path: (module:
     if isFunction module
     # NB: finix matches module args by function signature, so the shim must
     # NAME every arg the wrapped modules use (lib/config/pkgs/flakeInputs/
@@ -149,19 +123,27 @@
           configPart =
             if raw ? config && shorthand != {}
             then throw "compat-import: module mixes bare config keys with an explicit config attrset"
-            else if raw ? config
-            then raw.config
-            else shorthand;
+            else raw.config or shorthand;
         in
           {
             imports = map shimPath (builtins.filter isPath (raw.imports or []));
           }
           # options pass through whole (real declarations + defaults) minus
           # paths finix itself declares (dropOptionPaths above).
-          // (lib.optionalAttrs (raw ? options) {options = optionsPick raw.options;})
-          // (lib.optionalAttrs (configPart != {}) {config = topPick configPart;})
-    else {}; # non-function (flake input modules): dropped by design
-
-  shimPath = path: shim (import path);
+          // (lib.optionalAttrs (raw ? options) {options = (c: builtins.foldl' (acc: p: dropPath p acc) c [
+    ["hardware" "nvidia"]
+  ]) raw.options;})
+          // (lib.optionalAttrs (configPart != {}) {config = (filterNode (c:
+    (lib.filterAttrs (n: _: builtins.elem n ["user" "manzil" "lib"]) c)
+    // (lib.optionalAttrs (c ? environment) {environment = (filterNode (c: let
+    merged = lib.recursiveUpdate (lib.filterAttrs (n: _: builtins.elem n ["systemPackages" "etc" "variables" "shells" "binsh"]) c) (lib.optionalAttrs (c ? sessionVariables) {variables = c.sessionVariables;});
+  in
+    if merged ? systemPackages
+    then merged // {systemPackages = builtins.filter (p: !(builtins.elem ((p: p.pname or (builtins.parseDrvName (p.name or "?")).name) p) ["networkmanager" "docker" "docker-compose"])) merged.systemPackages;}
+    else merged)) c.environment;})
+    // (lib.optionalAttrs (c ? fonts) {fonts = (filterNode (c:
+      lib.filterAttrs (n: _: builtins.elem n ["packages" "fontconfig"]) c)) c.fonts;})
+    // (lib.optionalAttrs (c ? services) {services = pickPath ["udev" "packages"] c.services;}))) configPart;})
+    else {}) (import path);
 in
   shimPath

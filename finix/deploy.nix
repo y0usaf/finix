@@ -6,15 +6,7 @@
 # changes still go through the ESP island driver.
 {pkgs}: {
   # mkDeploy {name, system, defaultHost}
-  mkDeploy = {
-    defaultHost,
-    name,
-    system,
-    postSwitch ? null,
-    # Set when another driver owns the boot menu: `boot` then only half-works
-    # (stc warns, nothing is staged - incident #3), so refuse it up front.
-    bootDriverName ? null,
- }: {
+  mkDeploy = { bootDriverName ? null, defaultHost, name, postSwitch ? null, system }: {
     deployScript = pkgs.writeShellScriptBin name ''
       set -euo pipefail
 
