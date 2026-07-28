@@ -261,6 +261,10 @@ in {
         trusted-users = ["root" "y0usaf"];
         # Phase-2a lesson: every nix invocation needed --extra-experimental-features.
         experimental-features = ["nix-command" "flakes"];
+        # attic on the finix server: tailnet-only push cache for heavy local
+        # builds (CUDA-class). NixOS-domain substituters.nix is NixOS-only.
+        substituters = ["http://y0usaf-server:8787/cache"];
+        trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
       };
     };
   };
