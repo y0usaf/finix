@@ -14,6 +14,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    bolo = {
+      # Private repo: ssh fetcher (same as phi / nvflashk-linux).
+      url = "git+ssh://git@github.com/y0usaf/bolo.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     fonts = {
       url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";
