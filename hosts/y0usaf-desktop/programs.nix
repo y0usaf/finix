@@ -23,6 +23,7 @@ _: {
     bolo = {
       enable = true;
       autofill = true;
+      provider = "cuda";
     };
     obsidian.enable = true;
     creative.enable = true;
