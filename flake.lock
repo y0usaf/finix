@@ -800,6 +800,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
+        "piAphrodite": "piAphrodite",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piHashline": "piHashline",
         "piInterview": "piInterview",
@@ -811,11 +812,11 @@
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1785193317,
-        "narHash": "sha256-1t6G3Cg9PP/FjsTtUoBsO/qqWE47RrMK2/eL17yh6ug=",
+        "lastModified": 1785236774,
+        "narHash": "sha256-S3wqR//Mld28rdcYG5rwb09EYhHIg6+1r7s0W8ST4ak=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "8cefc93851a4690451f5f96e8bbfc31f1c836ef4",
+        "rev": "8c5b5b6b2f63bc8164152e01f44cefd1b6dae617",
         "type": "github"
       },
       "original": {
@@ -847,6 +848,25 @@
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/pi-harness.git"
       }
+    },
+    "piAphrodite": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-aphrodite",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-aphrodite",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
     },
     "piGeckoWebsearch": {
       "inputs": {

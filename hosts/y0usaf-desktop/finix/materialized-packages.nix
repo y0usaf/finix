@@ -13,9 +13,7 @@
   pkgs,
   flakeInputs,
   ...
-}: let
-  sys = pkgs.stdenv.hostPlatform.system;
-in {
+}: {
   environment.systemPackages =
     [
       # tailscaled runs natively under finix (parity.nix) — CLI required.
@@ -53,6 +51,7 @@ in {
         vcc = true;
         caveman = true;
         atelier = true;
+        aphrodite = true;
       };
     });
 }
