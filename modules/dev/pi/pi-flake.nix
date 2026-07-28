@@ -32,6 +32,7 @@ in {
         vcc = true;
         caveman = true;
         atelier = true;
+        aphrodite = true;
       };
     };
 
