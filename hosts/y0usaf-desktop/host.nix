@@ -16,6 +16,7 @@ in {
   timezone = "America/Toronto";
   var-cache = true;
   user = {
+    hardware.controllers.enable = true; # hidraw udev rules (finix-safe namespace)
     programs.discord.stable.pinLegacy = true;
     dev.work.linear-cli.settings = {
       workspace = "cook-unity";
@@ -87,7 +88,7 @@ in {
     };
     docker.enable = true;
     waydroid.enable = false;
-    controllers.enable = true;
+
     tailscale.enableVPN = true;
     syncthing-proxy = {
       enable = true;

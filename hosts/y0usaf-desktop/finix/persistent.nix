@@ -263,10 +263,17 @@ in {
         trusted-users = ["root" "y0usaf"];
         # Phase-2a lesson: every nix invocation needed --extra-experimental-features.
         experimental-features = ["nix-command" "flakes"];
-        # attic on the finix server: tailnet-only push cache for heavy local
-        # builds (CUDA-class). NixOS-domain substituters.nix is NixOS-only.
-        substituters = ["http://y0usaf-server:8787/cache"];
+        # attic on the finix server: push cache for heavy local builds
+        # (CUDA-class). LAN first (~40MiB/s push, ~180MB/s pull), tailnet
+        # fallback for roaming (~100x slower but works).
+        substituters = [
+          "http://192.168.2.66:8787/cache"
+          "http://y0usaf-server:8787/cache"
+        ];
         trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
+        # dead-cache stall tax: default 15s x 5 retries when the server is
+        # off. 5s keeps the fallback fast; connect-only, transfers unaffected.
+        connect-timeout = 5;
       };
     };
   };

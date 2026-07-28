@@ -187,11 +187,19 @@ in {
   })];
 
     # uinput node + input-group access for dotool; user is already in input
-    # (modules/desktop/user-groups.nix).
+    # (modules/desktop/user-groups.nix). Rules go through
+    # services.udev.packages (portable: NixOS + finix), never extraRules
+    # (NixOS-only — the finix compat shim drops it).
     boot.kernelModules = lib.mkIf cfg.autofill ["uinput"];
-    services.udev.extraRules = lib.mkIf cfg.autofill ''
-      KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
-    '';
+    services.udev.packages = lib.optionals cfg.autofill [
+      (pkgs.writeTextFile {
+        name = "asryx-uinput-rules";
+        destination = "/lib/udev/rules.d/99-asryx-uinput.rules";
+        text = ''
+          KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+        '';
+      })
+    ];
 
     # Flatten transcript to one line and type it into the focused window.
     # asryx always copies to the clipboard first, then pipes here.

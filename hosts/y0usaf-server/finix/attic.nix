@@ -72,10 +72,12 @@
     path = "/var/lib/atticd/storage"
 
     [chunking]
-    nar-size-threshold = 65536
-    min-size = 4096
-    avg-size = 16384
-    max-size = 65536
+    # big chunks: 16KiB-default dedup crawls on CUDA-class NARs (75k chunks
+    # for 1.2GB = sqlite-bound, ~400KiB/s). 1MiB avg uploaded at 26-40MiB/s.
+    nar-size-threshold = 1048576
+    min-size = 262144
+    avg-size = 1048576
+    max-size = 4194304
   ''}
     '';
     path = [pkgs.coreutils];
