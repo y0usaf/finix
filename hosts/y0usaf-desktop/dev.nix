@@ -13,21 +13,20 @@ _: {
         baseUrl = "https://ai-gateway.vercel.sh";
         apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
         models = {
-          ANTHROPIC_DEFAULT_OPUS_MODEL = "zai/glm-5.2-fast";
-          ANTHROPIC_DEFAULT_SONNET_MODEL = "zai/glm-5.2-fast";
-          ANTHROPIC_DEFAULT_HAIKU_MODEL = "zai/glm-5.2-fast";
+          ANTHROPIC_DEFAULT_OPUS_MODEL = "moonshotai/kimi-k3-fast";
+          ANTHROPIC_DEFAULT_SONNET_MODEL = "moonshotai/kimi-k3-fast";
+          ANTHROPIC_DEFAULT_HAIKU_MODEL = "moonshotai/kimi-k3-fast";
         };
       };
     };
     codex = {
       enable = true;
-      model = "zai/glm-5.2-fast";
-      defaultProvider = "vercel";
       providers.vercel = {
         name = "Vercel AI Gateway";
         baseUrl = "https://ai-gateway.vercel.sh/v1";
         envKey = "AI_GATEWAY_API_KEY";
         apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
+        model = "moonshotai/kimi-k3-fast";
       };
       settings.personality = "pragmatic";
     };
