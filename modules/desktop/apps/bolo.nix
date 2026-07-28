@@ -65,33 +65,42 @@
     # design — clipboard is the backup).
     ++ lib.optionals cfg.autofill [pkgs.dotool];
 
-  # bolod build: cuda flips sherpa-onnx (hence onnxruntime) to its
-  # cudaSupport variant; both carry the flag first-class in nixpkgs.
-  # cuda chain: cudnn-frontend's build can't find nvcc on the cuda 12.9
-  # pin (setup-cuda hook builds CUDAToolkit_ROOT without it). Seed the
-  # hook's path set so nvcc lands in the generated -DCUDAToolkit_ROOT.
-  cudaPkgsFixed = pkgs.cudaPackages.overrideScope (_: prev: {
-    cudnn-frontend = prev.cudnn-frontend.overrideAttrs (old: {
-      nativeBuildInputs = (old.nativeBuildInputs or []) ++ [prev.cuda_nvcc];
-      preConfigure = (old.preConfigure or "") + "\n"
-        + "declare -gA cudaHostPathsSeen 2>/dev/null || true\n"
-        + "cudaHostPathsSeen[\"${prev.cuda_nvcc}\"]=1\n";
-    });
-  });
+  # bolod build: provider picks the sherpa-onnx variant bolod links.
+  # CUDA via k2-fsa's official prebuilt GPU release (cuda-12.x/cudnn-9.x,
+  # same upstream version as nixpkgs sherpa-onnx). DOCTRINE-07 EXCEPTION:
+  # binary blob — chosen because compiling onnxruntime[cudaSupport] is
+  # hours of full-load build (and cudnn-frontend is broken on this cuda
+  # pin). The compiled chain exists in git history (d2b3db8d) if a source
+  # build is ever preferred. Runtime libs come from nixpkgs cudaPackages —
+  # only sherpa-onnx/onnxruntime themselves are blobs.
+  sherpaOnnxGpu = pkgs.stdenv.mkDerivation {
+    pname = "sherpa-onnx-gpu-prebuilt";
+    version = "1.13.3";
+    src = pkgs.fetchurl {
+      url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.3/sherpa-onnx-v1.13.3-cuda-12.x-cudnn-9.x-linux-x64-gpu.tar.bz2";
+      hash = "sha256-6/Jllz8kHhwgOuMmLS5kK0zxHZd2OWjyvLM0FkBVIeg=";
+    };
+    nativeBuildInputs = [pkgs.autoPatchelfHook];
+    buildInputs = with pkgs.cudaPackages; [
+      cuda_cudart
+      libcublas
+      libcurand
+      libcufft
+      cudnn
+      pkgs.stdenv.cc.cc.lib
+    ];
+    installPhase = ''
+      mkdir -p $out/include $out/lib
+      cp -r include/sherpa-onnx $out/include/
+      # Skip the tensorrt provider: unused (EP is "cuda") and would drag in
+      # TensorRT for nothing.
+      cp $(ls lib/*.so | grep -v tensorrt) $out/lib/
+    '';
+  };
 
-  # cudaSupport variant; both carry the flag first-class in nixpkgs.
-  # onnxruntime must be the cuda build too — sherpa-onnx only forwards the
-  # ENABLE_GPU flag, it does not re-override its onnxruntime input.
   sherpaOnnx =
     if cfg.provider == "cuda"
-    then
-      pkgs.sherpa-onnx.override {
-        cudaSupport = true;
-        onnxruntime = pkgs.onnxruntime.override {
-          cudaSupport = true;
-          cudaPackages = cudaPkgsFixed;
-        };
-      }
+    then sherpaOnnxGpu
     else pkgs.sherpa-onnx;
 
   boloPkgs =
