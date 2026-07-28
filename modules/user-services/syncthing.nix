@@ -83,7 +83,7 @@
           "syncthing-desktop:8384"
           "syncthing-server:8384"
         ];
-        devices = config.user.services.syncthing.devices;
+        inherit (config.user.services.syncthing) devices;
         folders =
           if config.user.services.syncthing.enabledFolders == null
           then config.user.services.syncthing.folders
