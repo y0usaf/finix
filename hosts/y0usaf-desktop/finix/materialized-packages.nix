@@ -52,6 +52,7 @@
         caveman = true;
         atelier = true;
         aphrodite = true;
+        "extensible-workflows" = true;
       };
     });
 }
