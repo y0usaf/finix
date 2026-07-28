@@ -157,6 +157,11 @@ in {
         reads. Evictable under memory pressure; no daemon, no lock.
       '';
     };
+    binds = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Compositor keybinds. Disabled on the desktop: bolo owns Alt+M/Mod+m there.";
+    };
     keybind = lib.mkOption {
       type = lib.types.str;
       default = "Alt+M";
@@ -222,12 +227,12 @@ in {
         // lib.mapAttrs' (name: src:
           lib.nameValuePair ".local/share/asryx/models/ggml-${name}.bin" {source = src;})
         whisperModels
-        // lib.optionalAttrs config.user.ui.niri.enable {
+        // lib.optionalAttrs (config.user.ui.niri.enable && cfg.binds) {
           ".config/niri/config.kdl".value.binds."${cfg.keybind}" = {spawn = "asryx";};
         };
     };
 
-    user.ui.tomoe.extraConfig = lib.mkIf config.user.ui.tomoe.enable ''
+    user.ui.tomoe.extraConfig = lib.mkIf (config.user.ui.tomoe.enable && cfg.binds) ''
       tomoe.bind("${cfg.tomoeKeybind}", {
         press = function() tomoe.spawn("asryx") end,
         release = function() tomoe.spawn("asryx") end,
