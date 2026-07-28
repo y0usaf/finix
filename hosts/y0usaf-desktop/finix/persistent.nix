@@ -88,15 +88,17 @@ in {
   # real NVIDIA stack. Without nouveau the dGPU-connected console stays on
   # simpledrm (boot-1 behavior, stable).
   environment = {
-    etc."modprobe.d/finix-desktop-blacklist.conf".text = ''
-      blacklist nouveau
-    '';
-    etc."finix-stage2".text = "desktop-phase2.4\n";
+    etc = {
+      "modprobe.d/finix-desktop-blacklist.conf".text = ''
+            blacklist nouveau
+          '';
+      "finix-stage2".text = "desktop-phase2.4\n";
+      "profile.d/nh.sh".text = ''
+            export NH_FLAKE=/home/y0usaf/nixos
+          '';
+    };
     # Bare `nh os switch` targets this repo (nh resolves the hostname-keyed
     # nixosConfigurations.y0usaf-desktop = this finix system).
-    etc."profile.d/nh.sh".text = ''
-      export NH_FLAKE=/home/y0usaf/nixos
-    '';
     systemPackages = [
       pkgs.nix
       pkgs.efibootmgr
