@@ -16,11 +16,15 @@
   # ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64 when the TOML omits it.
 {
   # State out of /persist (impermanence), same pattern as forgejo.
+  # Same shape as services.nix's persistBind: finix ignores fsType "none" +
+  # depends (NixOS idioms); binds must declare btrfs + neededForBoot to be
+  # mounted from initrd. fsType is ignored for binds but must be listed in
+  # supportedFilesystems, hence btrfs.
   fileSystems."/var/lib/atticd" = {
     device = "/persist/var/lib/atticd";
-    fsType = "none";
+    fsType = "btrfs";
     options = ["bind"];
-    depends = ["/persist"];
+    neededForBoot = true;
   };
 
   # signing.pem: generate once, root-only. finit task runs before the
