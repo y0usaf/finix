@@ -85,7 +85,7 @@ in {
           # Gaming / apps
           ".steam"
           ".SteamCloud"
-          ".minecraft"
+
           ".stremio-server"
           ".slskd"
 
@@ -105,7 +105,7 @@ in {
 
           # Chat / comms (bulk = cache; sessions live inside)
           ".config/discord"
-          ".config/discordcanary"
+
           ".config/vesktop"
           ".config/Vencord" # mutable settings/quickCss; themes regen
           ".config/Slack"
@@ -137,8 +137,7 @@ in {
           ".config/qBittorrent"
           ".config/nicotine"
           ".config/slskd"
-          ".config/Logseq"
-          ".config/Ladybird"
+
           ".config/epy"
           ".config/cmus" # library/playlists
 
@@ -150,7 +149,7 @@ in {
           ".config/Frame"
           ".config/intent"
           ".config/herdr"
-          ".config/kopuz"
+
           ".config/snowflake"
           ".config/camset"
 
@@ -158,7 +157,6 @@ in {
           ".config/Cemu"
           ".config/unity3d" # game prefs
           ".config/bolt-launcher"
-          ".config/Olympus"
 
           # Misc state
           ".config/dconf"
@@ -188,20 +186,15 @@ in {
 
           # Emulation / gaming (saves!)
           ".local/share/dolphin-emu"
-          ".local/share/yuzu"
-          ".local/share/sudachi"
+
           ".local/share/Cemu"
           ".local/share/shipofharkinian"
           ".local/share/bolt-launcher"
-          ".local/share/lutris"
-          ".local/share/gale"
-          ".local/share/com.kesomannen.gale"
-          ".local/share/NexusMods.App"
+
           ".local/share/osu"
           ".local/share/wine"
           ".local/share/skua-wine"
-          ".local/share/godot"
-          ".local/share/PixelOver"
+
           ".local/share/balatroai"
           ".local/share/Celeste"
           ".local/share/CassetteBeasts"
@@ -214,8 +207,7 @@ in {
           ".local/share/SteamWorld Heist"
           ".local/share/shapez.io"
           ".local/share/lootplot"
-          ".local/share/love"
-          ".local/share/pokete"
+
           ".local/share/hackerpg"
           ".local/share/com.overboy.noobsarecoming"
           ".local/share/Noobs Are Coming (Save)"
@@ -223,61 +215,44 @@ in {
           ".local/share/.Wurst encryption"
           ".local/share/aspyr-media"
           ".local/share/Smart Code ltd"
-          ".local/share/CO-E33_Save_Editor"
-          ".local/share/com.co-e33-save-editor.app"
 
           # Apps
-          ".local/share/TelegramDesktop"
-          ".local/share/whatsapp-for-linux"
-          ".local/share/wasistlos"
-          ".local/share/zoom"
+
           ".local/share/stremio"
           ".local/share/qBittorrent" # BT_backup resume data
           ".local/share/nicotine"
           ".local/share/slskd"
-          ".local/share/qutebrowser"
-          ".local/share/Ladybird"
 
           ".local/share/nvim" # plugins/mason
           ".local/share/mpd"
-          ".local/share/Anki2"
-          ".local/share/komikku"
-          ".local/share/manga-tui"
-          ".local/share/zathura"
-          ".local/share/qalculate"
-          ".local/share/jrnl"
-          ".local/share/weechat"
-          ".local/share/zoxide"
+
           ".local/share/waydroid"
           ".local/share/whisper-models"
-          ".local/share/FreeCAD"
-          ".local/share/Meltytech"
+
           ".local/share/bambu-studio"
           ".local/share/bambustudio"
           ".local/share/orca-slicer"
           ".local/share/Vial"
-          ".local/share/wootomation"
+
           ".local/share/fonts"
           ".local/share/icons"
           ".local/share/sounds"
           ".local/share/applications"
           ".local/share/android"
-          ".local/share/jupyter"
+
           ".local/share/mcp-trader"
           ".local/share/music-get"
           ".local/share/polybot"
           ".local/share/rtk"
           ".local/share/tirith"
           ".local/share/vibe-kanban"
-          ".local/share/supermaven"
-          ".local/share/smassh"
+
           ".local/share/superfile"
-          ".local/share/parllama"
+
           ".local/share/charm"
           ".local/share/crush"
           # .local/share/claude comes from hosts/common/persist.nix
-          ".local/share/piebald"
-          ".local/share/ai.piebald.desktop"
+
           ".local/share/ai.opencode.desktop"
           ".local/share/app.codeg"
           ".local/share/jean"
@@ -287,14 +262,13 @@ in {
 
           ".local/share/com.vercel.cli"
           ".local/share/com.vercel.token"
-          ".local/share/kopuz"
 
           ".local/share/syncthing"
 
           ### ~/.local/state — histories & app state
           ".local/state/zsh" # shell history
           ".local/state/bash"
-          ".local/state/elvish"
+
           ".local/state/nvim" # shada/undo
           ".local/state/codex"
           ".local/state/opencode"
@@ -313,11 +287,10 @@ in {
           ".local/state/sayl"
 
           ".local/state/music-get"
-          ".local/state/NexusMods.App"
-          ".local/state/spicetify"
+
           ".local/state/superfile"
           ".local/state/vicinae"
-          ".local/state/weechat"
+
           ".local/state/zap"
 
           # Caches worth keeping (shader/compile caches; .cache itself ephemeral)
