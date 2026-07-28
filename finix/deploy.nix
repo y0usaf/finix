@@ -11,7 +11,10 @@
     name,
     system,
     postSwitch ? null,
-  }: {
+    # Set when another driver owns the boot menu: `boot` then only half-works
+    # (stc warns, nothing is staged - incident #3), so refuse it up front.
+    bootDriverName ? null,
+ }: {
     deployScript = pkgs.writeShellScriptBin name ''
       set -euo pipefail
 
@@ -30,6 +33,11 @@
           exit 2
           ;;
       esac
+      if [ "$action" = boot ] && [ -n '${if bootDriverName != null then bootDriverName else ""}' ]; then
+        echo "${name}: 'boot' cannot stage a boot slot on this host (stc has no bootloader here)." >&2
+        echo "  use: ${if bootDriverName != null then bootDriverName else ""} install, then oneshot, then promote" >&2
+        exit 1
+      fi
 
       system_path='${system}'
       post_switch='${if postSwitch == null then "" else postSwitch}'
