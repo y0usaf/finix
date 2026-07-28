@@ -185,7 +185,7 @@ in {
     # Same autofill pipeline as asryx: flatten to one line, release all
     # modifiers on dotool's virtual keyboard first (tomoe merges xkb state).
     user.programs.bolo.pipeTo = lib.mkIf cfg.autofill (lib.mkDefault (
-      "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntype '; tr '\\n' ' '; } | dotool"
+      "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool"
     ));
 
     manzil.users."${config.user.name}" = {
