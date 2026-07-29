@@ -50,6 +50,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Official Anthropic .deb (downloads.claude.ai apt pool) repackaged with
+    # autoPatchelfHook. We consume nix/claude-desktop.nix via callPackage
+    # against our own pkgs (same pattern as codex-desktop-linux), so the
+    # flake's own nixpkgs instance is never evaluated.
+    claude-desktop-linux = {
+      url = "github:aaddrick/claude-desktop-debian";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
