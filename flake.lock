@@ -812,11 +812,11 @@
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1785271909,
-        "narHash": "sha256-QZ734y09jmhpA69a/puKdEt2/zZJz80U5EOmawSqOWU=",
+        "lastModified": 1785294640,
+        "narHash": "sha256-Unrp3ICAYQm6aeqa+OR/u6wR+PkkrTWxj183Mu0Yd2g=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "515657c71984d4a7428883e4e9af74b3fa32f459",
+        "rev": "9b022f4d11299bba008037102b9f37ae0b82e6cd",
         "type": "github"
       },
       "original": {
