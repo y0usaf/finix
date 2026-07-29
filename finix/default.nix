@@ -143,10 +143,16 @@
     nftables
     postgresql
     nix-daemon
+    # Staged, disarmed: boot.nix pins programs.limine.enable = false, so this
+    # module is inert (upstream guards its config block on cfg.enable) and the
+    # server closure is unchanged. Imported so the takeover config evaluates
+    # on every deploy instead of rotting. The ESP island still owns boot.
+    limine
     ../hosts/y0usaf-server/finix/services.nix
     ../hosts/y0usaf-server/finix/persistent.nix
     ../hosts/y0usaf-server/finix/attic.nix
     ../hosts/y0usaf-server/finix/boot-health.nix
+    ../hosts/y0usaf-server/finix/boot.nix
   ]);
 
   desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules;
