@@ -1,4 +1,78 @@
-# Finix migration — session notes (updated 2026-07-27: desktop UPSTREAM-LIMINE TAKEOVER; nh is the day-2 driver)
+# Finix migration — session notes (updated 2026-07-29: server takeover STAGED but disarmed; desktop done)
+
+## 2026-07-29 SERVER — upstream-limine takeover staged, NOT armed
+
+`hosts/y0usaf-server/finix/boot.nix` now carries the server's port of the
+desktop takeover (2026-07-27), gated behind one `takeover = false` binding.
+It is imported into serverPersistent (finix/default.nix) so it evaluates on
+every deploy instead of rotting, and the upstream `limine` module is in the
+module list beside it.
+
+PROVEN INERT: `finixConfigurations.y0usaf-server.config.system.topLevel`
+is byte-identical before and after the change
+(/nix/store/qcq7wryk9lph842vad3xdlp8w8f2mff6-finix-system, checked against a
+HEAD worktree). Upstream guards its whole config block on `cfg.enable`
+(modules/programs/limine/default.nix:272), so nothing reaches the closure.
+Deploying this is a no-op; the island still owns the boot path.
+
+Why staged and not flipped: this box is REMOTE-ONLY (no console, no IPMI).
+The flip is the point of no return for the NixOS rescue path.
+
+WHAT THE FLIP DESTROYS: limine-install.py walks the whole install dir,
+marks every pre-existing file for deletion, and rewrites limine.conf from
+/nix/var/nix/profiles/system — which here are FINIX generations. The NixOS
+generation kernels and menu entries in /boot/limine are gone after the
+first `stc boot`.
+
+WHAT SURVIVES: the ESP island (/boot/EFI/finix + its own "Finix" EFI entry)
+is a different directory and is never touched. Post-flip the island IS the
+rescue path that NixOS used to be — that is what makes this recoverable
+without hands on the box.
+
+### Blocking work before the flip (do in this order)
+
+1. Retarget the deadman. persistent.nix's `bootnext-deadman` arms BootNext
+   at the EFI entry named "Limine" and calls it "fall home to NixOS".
+   After the flip that entry boots the finix-owned limine.conf — it would
+   fall home into the system that just failed. Point it at the "Finix"
+   island entry (ideally the golden slot) instead.
+2. Fix or retire `boot-nixos` (persistent.nix ~line 110): same stale
+   assumption, becomes a lie the moment the NixOS entries are pruned.
+3. Pin a golden island slot, desktop runbook step 3 below (cp the current
+   slot to kernels/golden + a gcroot). This is the parachute the flip
+   spends the NixOS rescue for.
+4. Confirm `boot-health` last-good is fresh and the island's current slot
+   matches /run/booted-system (finix/boot-health.nix writes
+   /var/lib/boot-health/last-good).
+
+### The flip itself
+
+1. `takeover = true` in hosts/y0usaf-server/finix/boot.nix
+2. deploy runtime-only first — `nix run .#finix-server-persistent-deploy --
+   192.168.2.66 test` — proves the closure builds and activates; `stc test`
+   never runs the installHook, so /boot is still untouched here
+3. `... 192.168.2.66 switch` — THIS is the destructive step (installHook
+   renders /boot/limine/limine.conf, prunes the NixOS kernels, enrols the
+   hash into BOOTX64.EFI)
+4. verify BEFORE rebooting: /boot/limine/limine.conf lists finix
+   generations, the "/Finix ESP island (fallback)" entry is present, and
+   /boot/EFI/finix is intact
+5. reboot; if the box does not come back, BootNext/BootOrder still has the
+   island entry — that is the whole safety story
+
+### Only after a proven takeover boot
+
+Delete, in one commit: finix/esp-island.nix (471), hosts/y0usaf-server/
+{finix-boot.nix (33), finix-guard.nix (30), home-rollback.nix (49)}, the
+`bootPackage` / `finix-server-boot` outputs in finix/default.nix +
+flake.nix, and shrink finix/deploy.nix to the `fx test` path (~50 lines).
+Then run the SERVER purge order at the bottom of this file.
+
+NOT deletable, ever, without porting ./modules to native finix:
+compat-import.nix (149) + materialized-packages.nix (69). diagnostics.nix
+(180) is permanent debug infra, not scaffolding — but the server still
+runs an INLINE DUPLICATE of it (persistent.nix ~323-410); collapse that to
+an import of finix/diagnostics.nix on the next planned server deploy.
 
 ## 2026-07-27 DESKTOP — upstream programs.limine takeover, nh replaces fx/island
 
