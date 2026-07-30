@@ -93,29 +93,29 @@
             options = {
               boot.loader.limine.secureBoot.enable = lib.mkEnableOption "";
               services = {
-                            mediamtx.enable = lib.mkEnableOption "";
-                            forgejo.enable = lib.mkEnableOption "";
-                            n8n.enable = lib.mkEnableOption "";
-                            nginx.enable = lib.mkEnableOption "";
-                          };
+                mediamtx.enable = lib.mkEnableOption "";
+                forgejo.enable = lib.mkEnableOption "";
+                n8n.enable = lib.mkEnableOption "";
+                nginx.enable = lib.mkEnableOption "";
+              };
               programs = {
-                            lix.enable = lib.mkEnableOption "";
-                            tweakcc.enable = lib.mkEnableOption "";
-                          };
+                lix.enable = lib.mkEnableOption "";
+                tweakcc.enable = lib.mkEnableOption "";
+              };
               hardware = {
-                            bluetooth.enable = lib.mkOption {
-                              type = lib.types.bool;
-                              default = true;
-                            };
-                            amdgpu.enable = lib.mkOption {
-                              type = lib.types.bool;
-                              default = true;
-                            };
-                          };
+                bluetooth.enable = lib.mkOption {
+                  type = lib.types.bool;
+                  default = true;
+                };
+                amdgpu.enable = lib.mkOption {
+                  type = lib.types.bool;
+                  default = true;
+                };
+              };
               nix.settings.max-jobs = lib.mkOption {
-                            type = lib.types.str;
-                            default = "auto";
-                          };
+                type = lib.types.str;
+                default = "auto";
+              };
             };
             # Referenced by gaming/shader-cache.nix's steam_dev.cfg manzil
             # entry; mirrors modules/core/system/nix-package-management.nix.
@@ -158,30 +158,34 @@
   desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules;
     [
       nix-daemon
+      # Packet filter. Was serverPersistent-only until 2026-07-30, which is why
+      # the desktop ran unfiltered since the finix switch (DRIFT-AUDIT #1).
+      # Ruleset: ../hosts/y0usaf-desktop/finix/firewall.nix.
+      nftables
       limine # upstream bootloader: ../hosts/y0usaf-desktop/finix/boot.nix (OFF on server)
       ./diagnostics.nix
       ../hosts/y0usaf-desktop/finix/persistent.nix
       inputs.manzil.finixModules.default
     ]
     ++ (map (import ./compat-import.nix {inherit lib;}) (builtins.filter (p:
-      !(builtins.elem p [
-    ../modules/core/flake-modules.nix
-  ])
-      && !(lib.hasInfix "/finix/" (toString p)))
-    (import ../recursivelyImport.nix {
-        inherit (lib) hasSuffix;
-        inherit (lib.filesystem) listFilesRecursive;
-      }
-      [
-    ../modules/core
-    ../modules/desktop
-    ../modules/shell
-    ../modules/tools
-    ../modules/user-services
-    ../modules/dev
-    ../modules/gaming
-    ../hosts/y0usaf-desktop
-  ]))));
+        !(builtins.elem p [
+          ../modules/core/flake-modules.nix
+        ])
+        && !(lib.hasInfix "/finix/" (toString p)))
+      (import ../recursivelyImport.nix {
+          inherit (lib) hasSuffix;
+          inherit (lib.filesystem) listFilesRecursive;
+        }
+        [
+          ../modules/core
+          ../modules/desktop
+          ../modules/shell
+          ../modules/tools
+          ../modules/user-services
+          ../modules/dev
+          ../modules/gaming
+          ../hosts/y0usaf-desktop
+        ]))));
 
   # ── drivers ──────────────────────────────────────────────────────────────
   deployLib = import ./deploy.nix {inherit pkgs;};

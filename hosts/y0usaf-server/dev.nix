@@ -143,10 +143,7 @@
       subagentModel = "sonnet";
       enabledPlugins."audio-notify@y0usaf-marketplace" = false;
     };
-    codex = {
-      enable = true;
-      settings.personality = "pragmatic";
-    };
+    codex.enable = true;
     codex-cli.enable = true;
     pi.enable = true;
     nvim.enable = true;

@@ -22,7 +22,11 @@
 #
 # Requires (wired up in finix/default.nix): finix modules cron, nftables,
 # postgresql.
-{ lib, pkgs, ... }: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   # Same disk as server-trial.nix.
   diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
 
@@ -54,6 +58,17 @@
   # NixOS firewall parity: host.nix allowed TCP 80/443/2222/3000/22000 +
   # forgejo 3000/2222, n8n openFirewall (5678), mediamtx 4200, syncthing
   # 22000/21027, tailscale 41641; tailscale0 is trusted.
+  #
+  # 2026-07-30 DIVERGENCE FROM NIXOS PARITY: sshd:2200 now also accepted on
+  # eth0. This box is remote-only - no console, no IPMI - and until now the
+  # tailnet was its SOLE shell path, verified by `ssh -p 2200 192.168.2.66`
+  # timing out from the desktop. That made tailscale a single point of
+  # failure for getting in at all: control-plane outage, node-key expiry, a
+  # tailscaled crash after an update, and the only remaining recourse was the
+  # BootNext deadman ceremony. The LAN fallback is independent of all of it.
+  # Scoped by iifname (not a subnet literal) so a DHCP change cannot silently
+  # kill the fallback. Auth is key-only (services.nix: PermitRootLogin = no,
+  # KbdInteractiveAuthentication = false); the box is behind NAT.
 in {
   ## Storage: server subvolumes + service state bound out of /persist.
   fileSystems = {
@@ -111,7 +126,10 @@ in {
 
             udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
 
-            tcp dport { 80, 443, 2222, 3000, 5678, 22000, 4200, 8787 } accept comment "sshd(2200) is tailnet-only; 8787 attic cache (LAN builds substitute over eth0, tailnet too slow)"
+            iifname "eth0" tcp dport 2200 accept comment "sshd LAN fallback: this box has no console and no IPMI, so the tailnet must not be its only way in"
+
+            # nft caps comments at 128 chars - keep these short.
+            tcp dport { 80, 443, 2222, 3000, 5678, 22000, 4200, 8787 } accept comment "2222 = forgejo ssh, NOT sshd (that is the eth0 rule); 8787 attic cache (LAN builds, tailnet too slow)"
             udp dport { 21027, 22000, 4200, 41641 } accept
           }
           chain forward {
@@ -294,7 +312,6 @@ in {
       ];
       log = true;
     };
-
 
     mediamtx = {
       description = "mediamtx media server";

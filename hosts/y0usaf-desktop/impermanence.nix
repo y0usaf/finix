@@ -2,7 +2,7 @@
 # calls this function and replays these lists as plain bind mounts. Keep it
 # pure literals (import/++ only, no lib/pkgs/config) so both module universes
 # can read it. Entries shared with other hosts live in ../common/persist.nix.
-_: let
+{config, ...}: let
   common = import ../common/persist.nix;
 in {
   environment.persistence."/persist" = {
@@ -33,6 +33,26 @@ in {
     users.y0usaf = {
       directories =
         common.userDirectories
+        ++ (
+          if config.user.programs.firefox.enable
+          then [".mozilla"]
+          else []
+        )
+        ++ (
+          if config.user.programs.librewolf.enable
+          then [".librewolf" ".config/librewolf"]
+          else []
+        )
+        ++ (
+          if config.user.programs.discord.stable.enable
+          then [".config/discord"]
+          else []
+        )
+        ++ (
+          if config.user.programs.discord.vesktop.enable
+          then [".config/vesktop" ".config/Vencord"]
+          else []
+        )
         ++ [
           # NOTE: DCIM, Music, Pictures, .local/share/Steam are dedicated
           # btrfs subvols mounted on top of /home — NOT listed here.
@@ -90,7 +110,7 @@ in {
           ".slskd"
 
           ### ~/.config — mutable app state only. Nix/manzil-generated configs
-          ### (zsh, nushell rc, niri, foot, wallust, gtk, mpv, git, gh config,
+          ### (bash rc, niri, foot, wallust, gtk, mpv, git, gh config,
           ### npm/bun/docker/python rc, pi, mangohud, ...) regenerate on switch.
 
           # Credentials / identity
@@ -161,7 +181,6 @@ in {
           # Misc state
           ".config/dconf"
           ".config/nix" # possible access-tokens
-          ".config/nushell" # generated rc clobbers; history.sqlite persists
           ".config/ekko" # config.toml + extensions (app-owned)
 
           ### ~/.local/share — real data/saves. Caches (go, gradle, pnpm, uv,
@@ -175,7 +194,7 @@ in {
           # Big data (flagged: prune candidates, but keep)
           ".local/share/PrismLauncher" # 55G — minecraft worlds, irreplaceable
           ".local/share/bun" # globals only (supabase/vercel/...); install/cache purged, regenerates
-          ".local/share/vicinae" # 7.5G — clipboard/extension db; PRUNE candidate
+
           ".local/share/cargo"
           ".local/share/rustup"
           ".local/share/npm" # global prefix
@@ -225,9 +244,7 @@ in {
 
           ".local/share/nvim" # plugins/mason
           ".local/share/mpd"
-
           ".local/share/waydroid"
-          ".local/share/whisper-models"
 
           ".local/share/bambu-studio"
           ".local/share/bambustudio"
@@ -266,8 +283,7 @@ in {
           ".local/share/syncthing"
 
           ### ~/.local/state — histories & app state
-          ".local/state/zsh" # shell history
-          ".local/state/bash"
+          ".local/state/bash" # shell history
 
           ".local/state/nvim" # shada/undo
           ".local/state/codex"
@@ -287,21 +303,16 @@ in {
           ".local/state/sayl"
 
           ".local/state/music-get"
-
           ".local/state/superfile"
-          ".local/state/vicinae"
 
           ".local/state/zap"
 
           # Caches worth keeping (shader/compile caches; .cache itself ephemeral)
-          ".cache/nvidia"
-          ".cache/mesa_shader_cache"
-          ".cache/mesa_shader_cache_db"
+
           ".cache/wallust"
           ".cache/ekko"
           ".cache/librewolf"
           ".cache/mozilla"
-          ".nv"
         ];
       files =
         common.userFiles

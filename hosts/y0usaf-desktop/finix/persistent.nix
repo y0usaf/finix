@@ -25,10 +25,10 @@
 }: let
   diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
 
-  # Single source of truth: the NixOS impermanence module for this host is a
-  # pure-literal function — call it and replay the same allowlist here.
+  # Single source of truth: pass finix's evaluated config into the NixOS
+  # impermanence data function so enable-gated app paths match this system.
   persistCfg =
-    ((import ../impermanence.nix) {})
+    ((import ../impermanence.nix) {inherit config;})
     .environment
     .persistence
     ."/persist";
@@ -56,11 +56,11 @@
   # ownership applied only to directories this script itself creates.
   # Deliberate, reversible exit to the rescue OS (one-shot; BootOrder kept).
 in {
-  imports = [./boot.nix ./graphical.nix ./session.nix ./audio.nix ./parity.nix ./materialized-packages.nix ./udev.nix];
+  imports = [./boot.nix ./graphical.nix ./session.nix ./audio.nix ./parity.nix ./materialized-packages.nix ./udev.nix ./firewall.nix];
 
   # manzil dotfiles: native finix module (imported in finix/default.nix),
   # linker runs as a finit task gated on the user persist binds — the files
-  # it writes (~/.config/nushell, ~/.config/ekko, …) live under those binds.
+  # it writes (~/.zshrc, ~/.config/ekko, …) live under those binds.
   # clobberByDefault: parity with the NixOS-side setting (flake-modules.nix)
   # — validated against the live manifest, where ~500 entries are clobber.
   manzil.finit.conditions = ["task/persist-user-binds/success"];
@@ -90,12 +90,12 @@ in {
   environment = {
     etc = {
       "modprobe.d/finix-desktop-blacklist.conf".text = ''
-            blacklist nouveau
-          '';
+        blacklist nouveau
+      '';
       "finix-stage2".text = "desktop-phase2.4\n";
       "profile.d/nh.sh".text = ''
-            export NH_FLAKE=/home/y0usaf/nixos
-          '';
+        export NH_FLAKE=/home/y0usaf/nixos
+      '';
     };
     # Bare `nh os switch` targets this repo (nh resolves the hostname-keyed
     # nixosConfigurations.y0usaf-desktop = this finix system).

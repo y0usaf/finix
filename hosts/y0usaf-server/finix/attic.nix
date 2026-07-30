@@ -10,10 +10,14 @@
 # handed to atticd as base64 via ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64,
 # sourced from a root-only runtime env file (never the world-readable
 # /nix/store config). Admin tokens are minted on the server with atticadm.
-{ lib, pkgs, ... }:
-  # JWT signing secret comes from the env file below, not the TOML: attic
-  # reads [jwt.signing] token-rs256-secret-base64, falling back to
-  # ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64 when the TOML omits it.
+{
+  lib,
+  pkgs,
+  ...
+}:
+# JWT signing secret comes from the env file below, not the TOML: attic
+# reads [jwt.signing] token-rs256-secret-base64, falling back to
+# ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64 when the TOML omits it.
 {
   # State out of /persist (impermanence), same pattern as forgejo.
   # Same shape as services.nix's persistBind: finix ignores fsType "none" +
@@ -63,26 +67,26 @@
       . /var/lib/atticd/token.env
       set +a
       exec ${pkgs.attic-server}/bin/atticd -f ${pkgs.writeText "atticd.toml" ''
-    listen = "[::]:8787"
-    require-proof-of-possession = false
+        listen = "[::]:8787"
+        require-proof-of-possession = false
 
-    [database]
-    # embedded sqlite in the state dir; single-box scale. sqlx needs
-    # ?mode=rwc to create the file (NixOS module does the same).
-    url = "sqlite:///var/lib/atticd/atticd.db?mode=rwc"
+        [database]
+        # embedded sqlite in the state dir; single-box scale. sqlx needs
+        # ?mode=rwc to create the file (NixOS module does the same).
+        url = "sqlite:///var/lib/atticd/atticd.db?mode=rwc"
 
-    [storage]
-    type = "local"
-    path = "/var/lib/atticd/storage"
+        [storage]
+        type = "local"
+        path = "/var/lib/atticd/storage"
 
-    [chunking]
-    # big chunks: 16KiB-default dedup crawls on CUDA-class NARs (75k chunks
-    # for 1.2GB = sqlite-bound, ~400KiB/s). 1MiB avg uploaded at 26-40MiB/s.
-    nar-size-threshold = 1048576
-    min-size = 262144
-    avg-size = 1048576
-    max-size = 4194304
-  ''}
+        [chunking]
+        # big chunks: 16KiB-default dedup crawls on CUDA-class NARs (75k chunks
+        # for 1.2GB = sqlite-bound, ~400KiB/s). 1MiB avg uploaded at 26-40MiB/s.
+        nar-size-threshold = 1048576
+        min-size = 262144
+        avg-size = 1048576
+        max-size = 4194304
+      ''}
     '';
     path = [pkgs.coreutils];
     environment = {

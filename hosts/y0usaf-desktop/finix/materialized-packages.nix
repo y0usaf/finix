@@ -46,24 +46,8 @@
       )
       pkgs.steam-run
     ]
+    # pi-full = every extension at registry stage "active" in pi-flake.
+    # Promotion there is deployment here; there is no host-side allowlist.
     ++ lib.optional config.user.dev.pi.enable
-    (flakeInputs.pi-flake.lib.piWithExtensionFlags {
-      inherit pkgs;
-      extensionFlags = {
-        "gecko-websearch" = true;
-        rtk = true;
-        minimal = true;
-        interview = true;
-        "tool-management" = true;
-        webfetch = true;
-        hashline = true;
-        advisor = true;
-        review = true;
-        vcc = true;
-        caveman = true;
-        atelier = true;
-        aphrodite = true;
-        loom = true;
-      };
-    });
+    flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi-full;
 }

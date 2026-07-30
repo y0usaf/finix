@@ -44,24 +44,33 @@
           };
         });
 
-        ".config/nushell/config.nu" = mkTextFile "nushell-config" ''
-          $env.config.show_banner = false
-          $env.config.history.max_size = 10000
-          $env.config.history.file_format = "sqlite"
+        # nix-on-droid has no /etc/profile.d session-vars drop-in, so the XDG
+        # exports live here rather than in environment.sessionVariables.
+        ".bashrc" = mkTextFile "bashrc" ''
+          case $- in
+            *i*) ;;
+            *) return ;;
+          esac
 
-          alias la = ls -a
-          alias ll = ls -l
-          alias lla = ls -la
+          export EDITOR=vim
+          export VISUAL=vim
+          export XDG_CACHE_HOME="${homeDir}/.cache"
+          export XDG_CONFIG_HOME="${homeDir}/.config"
+          export XDG_DATA_HOME="${homeDir}/.local/share"
+          export XDG_STATE_HOME="${homeDir}/.local/state"
+
+          HISTSIZE=10000
+          HISTFILESIZE=10000
+          HISTCONTROL=ignoreboth:erasedups
+          shopt -s histappend checkwinsize
+
+          alias la="ls -a"
+          alias ll="ls -l"
+          alias lla="ls -la"
         '';
 
-        ".config/nushell/env.nu" = mkTextFile "nushell-env" ''
-          $env.EDITOR = "vim"
-          $env.VISUAL = "vim"
-          $env.SHELL = "${pkgs.nushell}/bin/nu"
-          $env.XDG_CACHE_HOME = "${homeDir}/.cache"
-          $env.XDG_CONFIG_HOME = "${homeDir}/.config"
-          $env.XDG_DATA_HOME = "${homeDir}/.local/share"
-          $env.XDG_STATE_HOME = "${homeDir}/.local/state"
+        ".bash_profile" = mkTextFile "bash-profile" ''
+          [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
         '';
 
         ".ssh/config" = mkTextFile "ssh-config" ''
@@ -109,7 +118,7 @@ in {
   system.stateVersion = "24.05";
   time.timeZone = "America/Toronto";
 
-  user.shell = "${pkgs.nushell}/bin/nu";
+  user.shell = "${pkgs.bashInteractive}/bin/bash";
 
   environment = {
     packages =
@@ -122,20 +131,20 @@ in {
       ++ (with pkgs; [
         curl
         gitMinimal
-        nushell
+        bashInteractive
         openssh
         vim
       ]);
     etcBackupExtension = ".bak";
     motd = ''
       minimal nix-on-droid profile
-      shell: nu
+      shell: bash
       ssh: ssh -p ${toString sshdPort} ${phoneUser}@100.93.111.41
     '';
     sessionVariables = {
       EDITOR = "vim";
       VISUAL = "vim";
-      SHELL = "${pkgs.nushell}/bin/nu";
+      SHELL = "${pkgs.bashInteractive}/bin/bash";
     };
   };
 

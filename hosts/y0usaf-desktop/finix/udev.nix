@@ -11,17 +11,18 @@
 # which NixOS and finix both honor and the compat shim forwards — one
 # declaration mechanism, no catch-all. finix has no extraRules option;
 # anything still using NixOS's extraRules is dropped by the shim on purpose.
-{ pkgs, ... }:
-  # Same sanitize as the bridge: drop any rule line shelling out to systemd.
+{pkgs, ...}:
+# Same sanitize as the bridge: drop any rule line shelling out to systemd.
 {
   services.udev.packages = [
     ((p:
-    pkgs.runCommand "${p.pname or (builtins.parseDrvName p.name).name}-definit" {} ''
-      mkdir -p $out/lib/udev/rules.d
-      find ${p}/ -type f -name "*.rules" | while read -r f; do
-        ${pkgs.gnused}/bin/sed '/systemd/d' "$f" \
-          > "$out/lib/udev/rules.d/$(basename "$f")"
-      done
-    '') pkgs.steam-devices-udev-rules)
+      pkgs.runCommand "${p.pname or (builtins.parseDrvName p.name).name}-definit" {} ''
+        mkdir -p $out/lib/udev/rules.d
+        find ${p}/ -type f -name "*.rules" | while read -r f; do
+          ${pkgs.gnused}/bin/sed '/systemd/d' "$f" \
+            > "$out/lib/udev/rules.d/$(basename "$f")"
+        done
+      '')
+    pkgs.steam-devices-udev-rules)
   ];
 }

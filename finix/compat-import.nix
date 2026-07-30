@@ -98,52 +98,66 @@
       then builtins.removeAttrs c [k]
       else c // {"${k}" = dropPath (tail path) c."${k}";}; # non-function (flake input modules): dropped by design
 
-  shimPath = path: (module:
-    if isFunction module
-    # NB: finix matches module args by function signature, so the shim must
-    # NAME every arg the wrapped modules use (lib/config/pkgs/flakeInputs/
-    # modulesPath) — a bare `args:` form receives none of them.
-    then
-      {
-        config,
-        lib,
-        pkgs,
-        flakeInputs,
-        modulesPath,
-        ...
-      } @ args: let
-        raw = module args;
-      in
-        if !isAttrs raw
-        then {}
-        else let
-          # NixOS module shorthand: top-level keys other than imports/options/
-          # config ARE config ({ imports = […]; user.ui.gtk.scale = 1.5; }).
-          shorthand = builtins.removeAttrs raw ["imports" "options" "config"];
-          configPart =
-            if raw ? config && shorthand != {}
-            then throw "compat-import: module mixes bare config keys with an explicit config attrset"
-            else raw.config or shorthand;
+  shimPath = path:
+    (module:
+      if isFunction module
+      # NB: finix matches module args by function signature, so the shim must
+      # NAME every arg the wrapped modules use (lib/config/pkgs/flakeInputs/
+      # modulesPath) — a bare `args:` form receives none of them.
+      then
+        {
+          config,
+          lib,
+          pkgs,
+          flakeInputs,
+          modulesPath,
+          ...
+        } @ args: let
+          raw = module args;
         in
-          {
-            imports = map shimPath (builtins.filter isPath (raw.imports or []));
-          }
-          # options pass through whole (real declarations + defaults) minus
-          # paths finix itself declares (dropOptionPaths above).
-          // (lib.optionalAttrs (raw ? options) {options = (c: builtins.foldl' (acc: p: dropPath p acc) c [
-    ["hardware" "nvidia"]
-  ]) raw.options;})
-          // (lib.optionalAttrs (configPart != {}) {config = (filterNode (c:
-    (lib.filterAttrs (n: _: builtins.elem n ["user" "manzil" "lib"]) c)
-    // (lib.optionalAttrs (c ? environment) {environment = (filterNode (c: let
-    merged = lib.recursiveUpdate (lib.filterAttrs (n: _: builtins.elem n ["systemPackages" "etc" "variables" "shells" "binsh"]) c) (lib.optionalAttrs (c ? sessionVariables) {variables = c.sessionVariables;});
-  in
-    if merged ? systemPackages
-    then merged // {systemPackages = builtins.filter (p: !(builtins.elem ((p: p.pname or (builtins.parseDrvName (p.name or "?")).name) p) ["networkmanager" "docker" "docker-compose"])) merged.systemPackages;}
-    else merged)) c.environment;})
-    // (lib.optionalAttrs (c ? fonts) {fonts = (filterNode (c:
-      lib.filterAttrs (n: _: builtins.elem n ["packages" "fontconfig"]) c)) c.fonts;})
-    // (lib.optionalAttrs (c ? services) {services = pickPath ["udev" "packages"] c.services;}))) configPart;})
-    else {}) (import path);
+          if !isAttrs raw
+          then {}
+          else let
+            # NixOS module shorthand: top-level keys other than imports/options/
+            # config ARE config ({ imports = […]; user.ui.gtk.scale = 1.5; }).
+            shorthand = builtins.removeAttrs raw ["imports" "options" "config"];
+            configPart =
+              if raw ? config && shorthand != {}
+              then throw "compat-import: module mixes bare config keys with an explicit config attrset"
+              else raw.config or shorthand;
+          in
+            {
+              imports = map shimPath (builtins.filter isPath (raw.imports or []));
+            }
+            # options pass through whole (real declarations + defaults) minus
+            # paths finix itself declares (dropOptionPaths above).
+            // (lib.optionalAttrs (raw ? options) {
+              options = (c:
+                builtins.foldl' (acc: p: dropPath p acc) c [
+                  ["hardware" "nvidia"]
+                ])
+              raw.options;
+            })
+            // (lib.optionalAttrs (configPart != {}) {
+              config = (filterNode (c:
+                (lib.filterAttrs (n: _: builtins.elem n ["user" "manzil" "lib"]) c)
+                // (lib.optionalAttrs (c ? environment) {
+                  environment = (filterNode (c: let
+                    merged = lib.recursiveUpdate (lib.filterAttrs (n: _: builtins.elem n ["systemPackages" "etc" "variables" "shells" "binsh"]) c) (lib.optionalAttrs (c ? sessionVariables) {variables = c.sessionVariables;});
+                  in
+                    if merged ? systemPackages
+                    then merged // {systemPackages = builtins.filter (p: !(builtins.elem ((p: p.pname or (builtins.parseDrvName (p.name or "?")).name) p) ["networkmanager" "docker" "docker-compose"])) merged.systemPackages;}
+                    else merged))
+                  c.environment;
+                })
+                // (lib.optionalAttrs (c ? fonts) {
+                  fonts = (filterNode (c:
+                      lib.filterAttrs (n: _: builtins.elem n ["packages" "fontconfig"]) c))
+                  c.fonts;
+                })
+                // (lib.optionalAttrs (c ? services) {services = pickPath ["udev" "packages"] c.services;})))
+              configPart;
+            })
+      else {}) (import path);
 in
   shimPath
