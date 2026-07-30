@@ -19,7 +19,17 @@ in {
     };
   };
 
-  # sshd reachable over the tailnet only; never LAN/WAN.
+  # sshd on the tailnet. SCOPE: this reaches the y0usaf-server NixOS rescue
+  # eval only — `networking` is off compat-import's whitelist, so it has not
+  # touched a running system since 2026-07-17.
+  #
+  # The old comment here read "never LAN/WAN". Both finix rulesets now
+  # deliberately disagree and add a wired-NIC LAN fallback on top of the
+  # tailnet path (hosts/y0usaf-desktop/finix/firewall.nix,
+  # hosts/y0usaf-server/finix/services.nix), because tailscale being the sole
+  # shell path makes it a single point of failure — acute on the server,
+  # which has no console and no IPMI. Left tailnet-only here on purpose: the
+  # rescue eval is a frozen last resort, not a box you administer daily.
   networking.firewall.interfaces."tailscale0".allowedTCPPorts =
     config.services.openssh.ports;
 

@@ -21,65 +21,38 @@ in {
     };
   };
   config = lib.mkIf nhOpts.enable {
-    environment.systemPackages = [
-      flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
-    ];
-    manzil.users."${config.user.name}".files = let
-      nhFlake = toString (
+    environment = {
+      systemPackages = [
+        flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
+      ];
+      sessionVariables.NH_FLAKE = toString (
         if nhOpts.flake != null
         then nhOpts.flake
         else config.user.paths.flake.path
       );
-    in
-      lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
-        ".config/zsh/.zshrc" = {
-          text = lib.mkAfter ''
-            export NH_FLAKE="${nhFlake}"
-            nhs() {
-              clear
-              local update=""
-              local dry=""
-              local OPTIND
-              while getopts "du" opt; do
-                case $opt in
-                  d) dry="--dry" ;;
-                  u) update="--update" ;;
-                  *) echo "Invalid option: -$OPTARG" >&2 ;;
-                esac
-              done
-              shift $((OPTIND-1))
-              # GC_DONT_GC: skip Boehm GC during eval (~35% less eval CPU,
-              # peak RSS ~4-5GB). Remove if eval OOMs on low-memory hosts.
-              GC_DONT_GC=1 nh os switch $update $dry "$@"
-            }
-            alias nhd="nhs -d"
-            alias nhu="nhs -u"
-            alias nhud="nhs -ud"
-            alias nhc="nh clean all"
-          '';
-        };
+    };
+    user.shell.rcExtra = lib.mkAfter ''
+      nhs() {
+        clear
+        local update=""
+        local dry=""
+        local OPTIND
+        while getopts "du" opt; do
+          case $opt in
+            d) dry="--dry" ;;
+            u) update="--update" ;;
+            *) echo "Invalid option: -$OPTARG" >&2 ;;
+          esac
+        done
+        shift $((OPTIND - 1))
+        # GC_DONT_GC: skip Boehm GC during eval (~35% less eval CPU,
+        # peak RSS ~4-5GB). Remove if eval OOMs on low-memory hosts.
+        GC_DONT_GC=1 nh os switch $update $dry "$@"
       }
-      // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
-        ".config/nushell/env.nu" = {
-          text = lib.mkAfter ''
-            $env.NH_FLAKE = "${nhFlake}"
-          '';
-        };
-        ".config/nushell/config.nu" = {
-          text = lib.mkAfter ''
-            def nhs [--dry(-d), --update(-u), ...rest: string] {
-              clear
-              let update_flag = if $update { ["--update"] } else { [] }
-              let dry_flag = if $dry { ["--dry"] } else { [] }
-              # GC_DONT_GC: skip Boehm GC during eval (~35% less eval CPU).
-              GC_DONT_GC=1 ^nh os switch ...$update_flag ...$dry_flag ...$rest
-            }
-            alias nhd = nhs -d
-            alias nhu = nhs -u
-            alias nhud = nhs -u -d
-            alias nhc = nh clean all
-          '';
-        };
-      };
+      alias nhd="nhs -d"
+      alias nhu="nhs -u"
+      alias nhud="nhs -ud"
+      alias nhc="nh clean all"
+    '';
   };
 }
