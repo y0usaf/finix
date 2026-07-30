@@ -7,7 +7,6 @@
 }: let
   inherit (lib) mkAfter;
   inherit (config) user;
-  inherit (user) shell;
   inherit (user.appearance) hyprcursorSize xcursorSize;
   inherit (user.ui) cursor;
   cursorPackage = cursor.package;
@@ -34,40 +33,29 @@ in {
   };
 
   config = lib.mkIf cursor.enable {
-    environment.systemPackages = cursorPackage.cursorPackages or [cursorPackage];
+    environment = {
+      systemPackages = cursorPackage.cursorPackages or [cursorPackage];
+      # Single owner for XCURSOR_*/HYPRCURSOR_* (gtk/config.nix owns GDK_DPI_SCALE).
+      sessionVariables = cursorSessionVariables;
+    };
 
     manzil.users."${user.name}" = {
-      files =
-        {
-          ".config/gtk-3.0/settings.ini" = {
-            text = mkAfter ''
-              [Settings]
-              gtk-cursor-theme-name=${cursorPackage.xcursorThemeName}
-              gtk-cursor-theme-size=${toString xcursorSize}
-            '';
-          };
-          ".config/gtk-4.0/settings.ini" = {
-            text = mkAfter ''
-              [Settings]
-              gtk-cursor-theme-name=${cursorPackage.xcursorThemeName}
-              gtk-cursor-theme-size=${toString xcursorSize}
-            '';
-          };
-        }
-        // lib.optionalAttrs shell.zsh.enable {
-          ".config/zsh/.zprofile" = {
-            text = mkAfter ''
-              ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') cursorSessionVariables)}
-            '';
-          };
-        }
-        // lib.optionalAttrs shell.nushell.enable {
-          ".config/nushell/login.nu" = {
-            text = mkAfter ''
-              ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: ''$env.${name} = "${value}"'') cursorSessionVariables)}
-            '';
-          };
+      files = {
+        ".config/gtk-3.0/settings.ini" = {
+          text = mkAfter ''
+            [Settings]
+            gtk-cursor-theme-name=${cursorPackage.xcursorThemeName}
+            gtk-cursor-theme-size=${toString xcursorSize}
+          '';
         };
+        ".config/gtk-4.0/settings.ini" = {
+          text = mkAfter ''
+            [Settings]
+            gtk-cursor-theme-name=${cursorPackage.xcursorThemeName}
+            gtk-cursor-theme-size=${toString xcursorSize}
+          '';
+        };
+      };
     };
   };
 }
