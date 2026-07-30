@@ -10,6 +10,12 @@ local Wallust = _G.__moonshell_wallust
     or dofile(os.getenv("HOME") .. "/.config/tomoe/shell/wallust.lua")
 _G.__moonshell_wallust = Wallust
 local theme = require("moonshell.theme")
+-- CPU/memory/GPU sampler. Upstream tomoe ships shell.services.sysinfo as a
+-- placeholder facade (declared, never pushed), so this file supplies the
+-- push side in-VM and the blocks below read it back through the facade.
+local Sysinfo = _G.__moonshell_sysinfo
+    or dofile(os.getenv("HOME") .. "/.config/tomoe/shell/sysinfo.lua")
+_G.__moonshell_sysinfo = Sysinfo
 
 local DEFAULTS = @DEFAULTS@
 
@@ -19,6 +25,7 @@ M._layout_generation = M._layout_generation or 0
 M._font_family = M._font_family or DEFAULTS.font_family
 
 local DEFAULT_MODULES = DEFAULTS.modules
+local SYSINFO = DEFAULTS.sysinfo or {}
 
 local function label(text)
     Wallust.version:get()
@@ -203,9 +210,53 @@ function M.new(opts)
         return block({ label(self.date:get()) }, { width = width, height = height })
     end
 
+    -- CPU / memory / GPU blocks read shell.services.sysinfo through
+    -- Sysinfo.get(). The sampling lives in sysinfo.lua (pure /proc and
+    -- /sys reads; nvidia-smi only on NVIDIA, only via exec_async). When a
+    -- native Rust backend eventually fills the facade, these blocks are
+    -- already correct and sysinfo.lua just goes away.
+    -- Number fields are zero-padded to a fixed character count. In a
+    -- monospace face that pins the block's rendered width, so a stat going
+    -- from 9% to 100% cannot shove its neighbours (or the clock) sideways.
+    function self:cpu_block(width, height)
+        local si = Sysinfo.get()
+        local text = string.format("CPU %3d%%", si.cpu_percent or 0)
+        if SYSINFO.show_cpu_temp and si.cpu_temp_c then
+            text = string.format("CPU %3d%% %2d°", si.cpu_percent or 0, si.cpu_temp_c)
+        end
+        return block({ label(text) }, { width = width, height = height })
+    end
+
+    function self:memory_block(width, height)
+        local si = Sysinfo.get()
+        local text
+        if SYSINFO.memory_style == "absolute" and si.memory_used_mb then
+            text = string.format("RAM %4.1fG", si.memory_used_mb / 1024)
+        else
+            text = string.format("RAM %3d%%", si.memory_percent or 0)
+        end
+        return block({ label(text) }, { width = width, height = height })
+    end
+
+    function self:gpu_block(width, height)
+        local si = Sysinfo.get()
+        if not si.gpu_available then
+            -- No usable counter (no nvidia module, no amdgpu
+            -- gpu_busy_percent): render an empty slot instead of a fake 0%,
+            -- the same contract the battery service uses on desktops.
+            return ui.hbox({ width = width, height = height, children = {} })
+        end
+        local text = string.format("GPU %3d%%", si.gpu_percent or 0)
+        if SYSINFO.show_gpu_temp and si.gpu_temp_c then
+            text = text .. string.format(" %2d°", si.gpu_temp_c)
+        end
+        if SYSINFO.show_gpu_vram and (si.gpu_mem_total_mb or 0) > 0 then
+            text = text .. string.format(" %4.1fG", (si.gpu_mem_used_mb or 0) / 1024)
+        end
+        return block({ label(text) }, { width = width, height = height })
+    end
+
     -- Native in-VM service (tomoe FUSION.md F3): no subprocess polling.
-    -- (sysinfo has only a placeholder facade upstream — nothing pushes
-    -- it — so no sysinfo block here.)
     function self:network_block(width, height)
         local net = shell.services.network:get()
         local text = (net.connected and net.ssid and net.ssid ~= "") and net.ssid or "offline"
@@ -217,6 +268,9 @@ function M.new(opts)
         if name == "time" then return self:time_block(width, height) end
         if name == "date" then return self:date_block(width, height) end
         if name == "network" then return self:network_block(width, height) end
+        if name == "cpu" then return self:cpu_block(width, height) end
+        if name == "memory" then return self:memory_block(width, height) end
+        if name == "gpu" then return self:gpu_block(width, height) end
         return ui.hbox({ width = width, height = height, children = {} })
     end
 
@@ -230,21 +284,91 @@ local function module_widths(opts)
         time = opts.time_width or DEFAULTS.module_widths.time,
         date = opts.date_width or DEFAULTS.module_widths.date,
         network = opts.network_width or DEFAULTS.module_widths.network,
+        cpu = opts.cpu_width or DEFAULTS.module_widths.cpu,
+        memory = opts.memory_width or DEFAULTS.module_widths.memory,
+        gpu = opts.gpu_width or DEFAULTS.module_widths.gpu,
     }
 end
 
-local function render_edge(content, items, total_width, height, spacing)
+-- `intrinsic` drops the per-module fixed widths so each block measures its
+-- own text. Fixed widths silently overflow when a label is wider than the
+-- number in DEFAULTS.module_widths ("GPU 100% 62° 12.3G" needs ~160px, not
+-- 150), and an overflowing flex row eats all its slack, which kills any
+-- justify-based alignment. Seam-centered bars therefore measure, never guess.
+local function render_items(content, list, height, intrinsic)
     local children = {}
-    for _, item in ipairs(items) do
-        children[#children + 1] = content:render_module(item.name, item.width, height)
+    for _, item in ipairs(list) do
+        children[#children + 1] =
+            content:render_module(item.name, (not intrinsic) and item.width or nil, height)
+    end
+    return children
+end
+
+-- One side of a seam-centered bar. width=0 with grow=1 is the important
+-- part: flex here adds a share of the leftover space to each child's
+-- *measured* base size (crates/moonshell-render/src/layout.rs:198-217), so
+-- two grow children only end up equal when both bases are zero. Then each
+-- half is exactly half the surface and their shared border is the midpoint.
+local function render_half(content, list, height, spacing, justify, inset)
+    return ui.hbox({
+        width = 0,
+        grow = 1,
+        height = height,
+        gap = spacing,
+        justify = justify,
+        padding_right = justify == "end" and inset or nil,
+        padding_left = justify == "start" and inset or nil,
+        children = render_items(content, list, height, true),
+    })
+end
+
+-- split = { left, right, inset } from split_at_seam(); nil = the old
+-- behaviour where the whole row is centered as one block.
+local function render_edge(content, items, total_width, height, spacing, split)
+    if split then
+        -- Fills the surface, which spans the whole output, so the halves'
+        -- border sits on the output's center line by construction.
+        return ui.hbox({
+            height = height,
+            gap = 0,
+            children = {
+                render_half(content, split.left, height, spacing, "end", split.inset),
+                render_half(content, split.right, height, spacing, "start", split.inset),
+            },
+        })
     end
 
     return ui.hbox({
         width = total_width,
         height = height,
         gap = spacing or DEFAULTS.block.gap,
-        children = children,
+        children = render_items(content, items, height),
     })
+end
+
+-- Find the seam: the boundary between the two module names in `pair`
+-- (default time|date). Returns a split descriptor, or nil when the pair is
+-- not adjacent on this bar — then the caller keeps whole-row centering.
+local function split_at_seam(items, pair, spacing)
+    if type(pair) ~= "table" or #pair < 2 then return nil end
+
+    local seam
+    for i = 1, #items - 1 do
+        if items[i].name == pair[1] and items[i + 1].name == pair[2] then
+            seam = i
+            break
+        end
+    end
+    if not seam then return nil end
+
+    local left, right = {}, {}
+    for i, item in ipairs(items) do
+        if i <= seam then left[#left + 1] = item else right[#right + 1] = item end
+    end
+
+    -- Half the inter-module gap belongs to each side, so the seam lands in
+    -- the middle of the gap rather than against one block's edge.
+    return { left = left, right = right, inset = math.floor(spacing / 2) }
 end
 
 local function open_edge(edge, content, items, total_width, opts)
@@ -264,16 +388,18 @@ local function open_edge(edge, content, items, total_width, opts)
         -- a full-width edge bar on the top layer. The widget row
         -- stays centered via justify; windows stop at its edge.
         render_fn = function()
-            local children = {}
-            for _, item in ipairs(items) do
-                children[#children + 1] = content:render_module(item.name, item.width, height)
+            local row
+            if opts.split then
+                -- Already full-width with the seam at its own midpoint.
+                row = render_edge(content, items, nil, height, spacing, opts.split)
+            else
+                row = ui.hbox({
+                    height = height,
+                    justify = "center",
+                    gap = spacing,
+                    children = render_items(content, items, height),
+                })
             end
-            local row = ui.hbox({
-                height = height,
-                justify = "center",
-                gap = spacing,
-                children = children,
-            })
             if indent <= 0 then return row end
             -- Indent: row pinned to the top of the taller surface;
             -- the empty strip below sits inside the exclusive zone,
@@ -296,22 +422,45 @@ local function open_edge(edge, content, items, total_width, opts)
         })
     else
         render_fn = function()
-            return render_edge(content, items, total_width, height, spacing)
+            return render_edge(content, items, total_width, height, spacing, opts.split)
         end
-        win = shell.window({
-            name = name,
-            anchor = DEFAULTS.anchors[edge],
-            popup_width = total_width,
-            height = height,
-            margin_top = edge == "top" and (opts.margin_top or DEFAULTS.margin_top) or DEFAULTS.margin_top,
-            margin_bottom = edge == "bottom" and (opts.margin_bottom or DEFAULTS.margin_bottom) or DEFAULTS.margin_bottom,
-            layer = opts.layer or DEFAULTS.layer,
-            exclusive = false,
-            bg = opts.bg or DEFAULTS.bg,
-            fg = fg,
-            font_size = opts.font_size or DEFAULTS.font_size,
-            font_family = M._font_family,
-        })
+        if opts.split then
+            -- Seam-centered bars need a surface whose midpoint is the
+            -- output's midpoint. A centered popup can't guarantee that: its
+            -- width comes from summed module widths, and any label wider
+            -- than its declared width shifts everything. A full-width bar
+            -- (position = edge anchors left+right, so resolve_rect stretches
+            -- it across the output) makes the midpoint exact and free.
+            -- exclusive = false keeps it a pure overlay: no reserved space.
+            win = shell.window({
+                name = name,
+                position = edge,
+                height = height,
+                margin_top = edge == "top" and (opts.margin_top or DEFAULTS.margin_top) or DEFAULTS.margin_top,
+                margin_bottom = edge == "bottom" and (opts.margin_bottom or DEFAULTS.margin_bottom) or DEFAULTS.margin_bottom,
+                layer = opts.layer or DEFAULTS.layer,
+                exclusive = false,
+                bg = opts.bg or DEFAULTS.bg,
+                fg = fg,
+                font_size = opts.font_size or DEFAULTS.font_size,
+                font_family = M._font_family,
+            })
+        else
+            win = shell.window({
+                name = name,
+                anchor = DEFAULTS.anchors[edge],
+                popup_width = total_width,
+                height = height,
+                margin_top = edge == "top" and (opts.margin_top or DEFAULTS.margin_top) or DEFAULTS.margin_top,
+                margin_bottom = edge == "bottom" and (opts.margin_bottom or DEFAULTS.margin_bottom) or DEFAULTS.margin_bottom,
+                layer = opts.layer or DEFAULTS.layer,
+                exclusive = false,
+                bg = opts.bg or DEFAULTS.bg,
+                fg = fg,
+                font_size = opts.font_size or DEFAULTS.font_size,
+                font_family = M._font_family,
+            })
+        end
     end
     win:render(render_fn)
 
@@ -340,6 +489,15 @@ function M.open(opts)
     close_existing(opts.bottom_name or DEFAULTS.bottom_name)
 
     local modules = opts.modules or DEFAULT_MODULES
+
+    -- Start sampling only when a stats module is actually on the bar: no
+    -- widget means no /proc polling and no nvidia-smi spawns.
+    for _, name in ipairs(modules) do
+        if name == "cpu" or name == "memory" or name == "gpu" then
+            Sysinfo.start(SYSINFO)
+            break
+        end
+    end
     local widths = module_widths(opts)
     local height = opts.height or DEFAULTS.height
     local spacing = opts.spacing or DEFAULTS.spacing
@@ -359,10 +517,19 @@ function M.open(opts)
         end
     end
 
+    -- Seam-centered layout: everything keeps its declared order, but the
+    -- boundary between the `center_between` pair is what gets pinned to
+    -- screen center, so the clock stays put while stats grow outward.
+    local split = split_at_seam(items, opts.center_between or DEFAULTS.center_between, spacing)
+
+    -- Only the non-split popup surface needs a summed width; a seam-centered
+    -- bar spans the output and measures its modules.
     local total = 0
-    for i, item in ipairs(items) do
-        total = total + item.width
-        if i > 1 then total = total + spacing end
+    if not split then
+        for i, item in ipairs(items) do
+            total = total + item.width
+            if i > 1 then total = total + spacing end
+        end
     end
 
     local time = clock_state(opts.time_format or DEFAULTS.time.format, opts.time_interval or DEFAULTS.time.interval)
@@ -385,6 +552,7 @@ function M.open(opts)
             exclusive = opts.exclusive,
             refresh_interval = opts.refresh_interval,
             layout_generation = layout_generation,
+            split = split,
         })
     end
 
@@ -403,6 +571,7 @@ function M.open(opts)
             exclusive = opts.exclusive,
             refresh_interval = opts.refresh_interval,
             layout_generation = layout_generation,
+            split = split,
         })
     end
 
