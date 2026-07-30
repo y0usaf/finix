@@ -74,9 +74,10 @@
     if cfg.provider == "cuda"
     then {
       bolod = flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}".bolod.override {
-        sherpa-onnx = if cfg.provider == "cuda"
-    then sherpaOnnxGpu
-    else pkgs.sherpa-onnx;
+        sherpa-onnx =
+          if cfg.provider == "cuda"
+          then sherpaOnnxGpu
+          else pkgs.sherpa-onnx;
       };
       inherit (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}") bolo;
     }
@@ -89,15 +90,15 @@
     nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = ''
       wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath ([
-      pkgs.pipewire # pw-record
-      pkgs.wl-clipboard # wl-copy
-      pkgs.libnotify # notify-send
-      pkgs.coreutils # tr (autofill flatten) + sh plumbing
-    ]
-    # Autofill types via dotool/uinput; without it in the wrapper the
-    # pipe_to command fails silently (pipe failures are swallowed by
-    # design — clipboard is the backup).
-    ++ lib.optionals cfg.autofill [pkgs.dotool])}
+          pkgs.pipewire # pw-record
+          pkgs.wl-clipboard # wl-copy
+          pkgs.libnotify # notify-send
+          pkgs.coreutils # tr (autofill flatten) + sh plumbing
+        ]
+        # Autofill types via dotool/uinput; without it in the wrapper the
+        # pipe_to command fails silently (pipe failures are swallowed by
+        # design — clipboard is the backup).
+        ++ lib.optionals cfg.autofill [pkgs.dotool])}
     '';
   };
 in {
@@ -198,23 +199,24 @@ in {
       files =
         {
           ".config/bolo/manifest.json".source = pkgs.writeText "bolo-manifest" (builtins.toJSON {
-    version = 1;
-    active = cfg.model;
-    inherit (cfg) language provider threads;
-    pipe_to = cfg.pipeTo;
-    models = lib.mapAttrsToList (name: m: {
-      inherit name;
-      inherit (m) engine;
-      encoder = "${modelDir name}/encoder.int8.onnx";
-      decoder = "${modelDir name}/decoder.int8.onnx";
-      joiner = "${modelDir name}/joiner.int8.onnx";
-      tokens = "${modelDir name}/tokens.txt";
-    })
-    models;
-    # One declaration mechanism: same attrset -> list shape as models.
-    vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) cfg.vocabulary;
-    vocab_fuzzy = cfg.vocabFuzzy;
-  });
+            version = 1;
+            active = cfg.model;
+            inherit (cfg) language provider threads;
+            pipe_to = cfg.pipeTo;
+            models =
+              lib.mapAttrsToList (name: m: {
+                inherit name;
+                inherit (m) engine;
+                encoder = "${modelDir name}/encoder.int8.onnx";
+                decoder = "${modelDir name}/decoder.int8.onnx";
+                joiner = "${modelDir name}/joiner.int8.onnx";
+                tokens = "${modelDir name}/tokens.txt";
+              })
+              models;
+            # One declaration mechanism: same attrset -> list shape as models.
+            vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) cfg.vocabulary;
+            vocab_fuzzy = cfg.vocabFuzzy;
+          });
         }
         # Model files land where the manifest points.
         // lib.foldl' (acc: name:

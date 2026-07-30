@@ -4,11 +4,11 @@ _:
   config.user.programs.browser.shared = {
     userChromeCss = ''
       :root {
-          --theme-frame: var(--lwt-accent-color, #000000);
+          --theme-frame: var(--lwt-accent-color, light-dark(#ffffff, #000000));
           --theme-toolbar: var(--toolbar-bgcolor, var(--theme-frame));
           --theme-tab-selected: var(--lwt-selected-tab-background-color, var(--theme-toolbar));
           --theme-toolbar-field: var(--toolbar-field-background-color, var(--theme-toolbar));
-          --theme-tab-text: var(--tab-text-color, var(--lwt-tab-text, #ffffff));
+          --theme-tab-text: var(--tab-text-color, var(--lwt-tab-text, light-dark(#000000, #ffffff)));
           --font-family: monospace;
           /* Thin-chrome sizing: everything derives from --chrome-font-size.
              Bar height = one line of text plus --bar-pad above and below;
@@ -31,6 +31,17 @@ _:
           --toolbar-start-end-padding: 0px !important;
           --tab-block-margin: 0px !important;
           --tab-inline-padding: 0.25em !important;
+          /* Suggestion-list sizing. The breakout urlbar sets font-size to
+             1.3x --chrome-font-size and .urlbarView inherits it, so row
+             heights must be expressed in em to track that. Firefox gives
+             .urlbarView-title and .urlbarView-url line-height: 1.4
+             (view-nova.css:581, :785), hence the 1.4em term. */
+          --urlbarview-row-pad: 0.35em;
+          --urlbarview-row-min: calc(1.4em + 2 * var(--urlbarview-row-pad));
+          /* Zeroed here rather than on .urlbarView-row because Firefox derives
+             --urlbarView-row-border from it on :root, and a custom property's
+             var() references resolve on the element that declares it. */
+          --urlbarView-row-gutter: 0px !important;
       }
 
       /* Chrome-wide font size: keeps text legible while the bars shrink
@@ -73,6 +84,13 @@ _:
           background-color: var(--theme-frame) !important;
       }
 
+      /* Borrowed from Zen: with #nav-bar pinned to var(--bar-width), a wide
+         child (searchbar, extension button row) would otherwise force the bar
+         to overflow instead of flexing. min-width:0 lets flex shrink win. */
+      #nav-bar-customization-target {
+          min-width: 0 !important;
+      }
+
       #PersonalToolbar {
           display: none !important;
       }
@@ -98,7 +116,18 @@ _:
       }
 
       /* Square corners everywhere, via theme variables rather than a
-         universal selector. */
+         universal selector.
+
+         Nova (browser.nova.enabled, Fx 152+) redefines the design tokens in
+         @layer tokens-foundation-nova, so the classic --border-radius-medium
+         path is no longer what the urlbar uses. Ground truth from omni.ja:
+           tokens-shared.css:693-728  --border-radius-large: 12px
+                                      --border-radius-xlarge: 16px
+                                      --border-radius-xxlarge: 24px
+                                      --button-border-radius: xxlarge (was medium)
+           urlbar/tokens.css:15,29    --urlbar-border-radius: button-border-radius
+                                      --urlbarview-border-radius: 1.8462em
+         Zeroing only medium/small left the 24px pill intact. */
       :root,
       menupopup,
       panel,
@@ -108,12 +137,31 @@ _:
           --toolbarbutton-border-radius: 0px !important;
           --tab-border-radius: 0px !important;
           --urlbar-border-radius: 0px !important;
-          --border-radius-medium: 0px !important;
           --border-radius-small: 0px !important;
+          --border-radius-medium: 0px !important;
+          --border-radius-large: 0px !important;
+          --border-radius-xlarge: 0px !important;
+          --border-radius-xxlarge: 0px !important;
+          --button-border-radius: 0px !important;
+          --urlbarview-border-radius: 0px !important;
+          --urlbar-inner-border-radius: 0px !important;
+          --urlbarView-row-border-radius: 0px !important;
+          --urlbarView-icon-border-radius: 0px !important;
+          /* Nova computes this as calc(--urlbar-height / 2 - 24px). With a
+             ~17px bar that is -15.5px, i.e. the expanded urlbar background
+             bleeds 15px past the input on every side. Pin it flush. */
+          --urlbar-background-inset: 0px !important;
       }
 
+      /* Fx 152 renamed the fill element: UrlbarInput.mjs:113 emits
+         <html:div class="urlbar-background"> with no id, because the urlbar is
+         now instantiable more than once (Smart Window). #urlbar-background is
+         a dead selector on this build. #urlbar itself is still an id
+         (browser.xhtml:6049, <html:moz-urlbar id="urlbar">), light DOM, so
+         userChrome.css still reaches inside. */
       #urlbar,
-      #urlbar-background,
+      .urlbar-background,
+      .urlbar-input-container,
       .tab-background,
       .toolbarbutton-1,
       .urlbarView-row {
@@ -219,6 +267,7 @@ _:
           font-family: var(--font-family) !important;
           margin: 0 !important;
           padding: 0 !important;
+          z-index: 1 !important;
       }
 
       #urlbar {
@@ -249,6 +298,9 @@ _:
 
       #urlbar[breakout][breakout-extend] {
           width: var(--breakout-width) !important;
+          /* Floor from Zen: --breakout-width is a vw fraction, so a narrow
+             window would shrink the overlay to uselessness. */
+          min-width: min(600px, 90vw) !important;
           top: var(--breakout-top) !important;
           left: 50% !important;
           position: fixed !important;
@@ -256,8 +308,23 @@ _:
           z-index: 999 !important;
           margin: 0 !important;
           box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
-          background-color: var(--theme-toolbar-field) !important;
           font-size: calc(var(--chrome-font-size) * 1.3) !important;
+      }
+
+      /* Nova splits the urlbar fill across two elements depending on state
+         (urlbar-searchbar.css:291-330):
+           docked   -> .urlbar-background is display:none, the pill is painted
+                       on .urlbar-input-container
+           extended -> .urlbar-background returns as display:block
+         Style both, or the frosted look only appears half the time. Neither
+         responds to a background-color set on #urlbar, since .urlbar-background
+         is position:absolute inset:0 and covers it. */
+      #urlbar[breakout][breakout-extend] > .urlbar-background,
+      #urlbar[breakout][breakout-extend] > .urlbar-input-container {
+          background-color: color-mix(in srgb, var(--theme-toolbar-field) 75%, transparent) !important;
+          backdrop-filter: blur(30px) !important;
+          outline: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.2)) !important;
+          outline-offset: -1px !important;
       }
 
       .urlbarView {
@@ -267,9 +334,37 @@ _:
           top: auto !important;
       }
 
-      .urlbarView-row * {
+      /* browser.uidensity = 1 is compact (fox-options.nix:182), and Firefox
+         gates both of its row height floors on the negation of that:
+           view-nova.css:149  .urlbarView-row      min-height: --urlbarView-row-min-height
+           view-nova.css:181  .urlbarView-row-inner min-height: --urlbarView-row-inner-min-height
+         both inside :root:not([uidensity="compact"]).
+         So under compact nothing sets row height but the content, and the
+         blanket padding: 0 below removed the last of it. The row's highlight
+         is background-clip: padding-box (view-nova.css:132), so it collapsed
+         onto the bare line box and the 1.4 line-height glyphs rendered
+         outside it. Restore an explicit floor. */
+      .urlbarView-row {
+          min-height: var(--urlbarview-row-min) !important;
+      }
+
+      .urlbarView-row > .urlbarView-row-inner {
+          min-height: var(--urlbarview-row-min) !important;
+          padding-block: var(--urlbarview-row-pad) !important;
+          padding-inline: 0.5em !important;
+      }
+
+      /* Reset scoped one level deeper than before, so it no longer eats the
+         row padding restored above. */
+      .urlbarView-row-inner * {
           padding: 0 !important;
           margin: 0 !important;
+      }
+
+      /* Must follow the reset: equal specificity (0,1,0), so source order
+         decides. Without this the favicon butts against the title. */
+      .urlbarView-favicon {
+          margin-inline-end: 0.4em !important;
       }
 
       :root[inFullscreen] #nav-bar {

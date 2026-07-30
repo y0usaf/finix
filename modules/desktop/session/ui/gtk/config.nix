@@ -9,7 +9,6 @@
   gtkScale = gtkCfg.scale;
   cursorThemeName = ui.cursor.package.xcursorThemeName;
   inherit (appearance) xcursorSize;
-  xcursorSizeStr = toString xcursorSize;
   toINI = lib.generators.toINI {};
   inherit (appearance) gtkFontSize;
   inherit (ui.fonts) mainFontName;
@@ -28,102 +27,90 @@ in {
   };
 
   config = lib.mkIf gtkCfg.enable {
-    environment.systemPackages = [
-      pkgs.gtk3
-      pkgs.gtk4
-    ];
+    environment = {
+      systemPackages = [
+        pkgs.gtk3
+        pkgs.gtk4
+      ];
+      # GTK owns GDK_DPI_SCALE; cursor.nix owns XCURSOR_SIZE (one owner per key,
+      # or the sessionVariables merge conflicts).
+      sessionVariables.GDK_DPI_SCALE = toString gtkScale;
+    };
     manzil.users."${config.user.name}" = {
-      files =
-        {
-          ".config/gtk-3.0/settings.ini" = {
-            generator = toINI;
-            value = {
-              Settings = {
-                gtk-application-prefer-dark-theme = 1;
-                gtk-cursor-theme-name = cursorThemeName;
-                gtk-cursor-theme-size = toString xcursorSize;
-                gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
-                gtk-xft-antialias = 1;
-                gtk-xft-dpi = toString appearance.dpi;
-                gtk-xft-hinting = 1;
-                gtk-xft-hintstyle = "hintslight";
-                gtk-xft-rgba = "rgb";
-              };
+      files = {
+        ".config/gtk-3.0/settings.ini" = {
+          generator = toINI;
+          value = {
+            Settings = {
+              gtk-application-prefer-dark-theme = 1;
+              gtk-cursor-theme-name = cursorThemeName;
+              gtk-cursor-theme-size = toString xcursorSize;
+              gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
+              gtk-xft-antialias = 1;
+              gtk-xft-dpi = toString appearance.dpi;
+              gtk-xft-hinting = 1;
+              gtk-xft-hintstyle = "hintslight";
+              gtk-xft-rgba = "rgb";
             };
-          };
-          ".config/gtk-3.0/gtk.css" = {
-            text = ''
-              /* Global element styling */
-              * {
-                font-family: "${mainFontName}";
-                color: white;
-                background: ${backgroundColor};
-                outline-width: 0;
-                outline-offset: 0;
-                text-shadow: ${lib.concatStringsSep ",\n" (lib.concatLists (lib.genList
-                (_: [
-                  "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
-                  "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
-                  "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
-                  "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
-                  "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
-                  "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
-                  "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
-                  "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
-                ])
-                4))};
-              }
-              /* Hover state for all elements */
-              *:hover {
-                background: rgba(100, 149, 237, 0.1);
-              }
-              /* Selected state for all elements */
-              *:selected {
-                background: rgba(100, 149, 237, 0.5);
-              }
-              /* Button styling */
-              button {
-                border-radius: 0.15rem;
-                min-height: 1rem;
-                padding: 0.05rem 0.25rem;
-              }
-              /* Menu background styling */
-              menu {
-                background: ${backgroundColor};
-              }
-            '';
-          };
-          ".config/gtk-3.0/bookmarks" = {
-            text = lib.concatStringsSep "\n" config.user.paths.bookmarks;
-          };
-          ".config/gtk-4.0/settings.ini" = {
-            generator = toINI;
-            value = {
-              Settings = {
-                gtk-application-prefer-dark-theme = 1;
-                gtk-cursor-theme-name = cursorThemeName;
-                gtk-cursor-theme-size = toString xcursorSize;
-                gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
-              };
-            };
-          };
-        }
-        // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
-          ".config/zsh/.zshenv" = {
-            text = lib.mkAfter ''
-              export XCURSOR_SIZE="${xcursorSizeStr}"
-              export GDK_DPI_SCALE="${toString gtkScale}"
-            '';
-          };
-        }
-        // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
-          ".config/nushell/env.nu" = {
-            text = lib.mkAfter ''
-              $env.XCURSOR_SIZE = "${xcursorSizeStr}"
-              $env.GDK_DPI_SCALE = "${toString gtkScale}"
-            '';
           };
         };
+        ".config/gtk-3.0/gtk.css" = {
+          text = ''
+            /* Global element styling */
+            * {
+              font-family: "${mainFontName}";
+              color: white;
+              background: ${backgroundColor};
+              outline-width: 0;
+              outline-offset: 0;
+              text-shadow: ${lib.concatStringsSep ",\n" (lib.concatLists (lib.genList
+              (_: [
+                "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+                "-${shadowSize} 0 ${shadowRadius} ${shadowColor}"
+                "0 ${shadowSize} ${shadowRadius} ${shadowColor}"
+                "0 -${shadowSize} ${shadowRadius} ${shadowColor}"
+                "${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+                "-${shadowSize} ${shadowSize} ${shadowRadius} ${shadowColor}"
+                "${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+                "-${shadowSize} -${shadowSize} ${shadowRadius} ${shadowColor}"
+              ])
+              4))};
+            }
+            /* Hover state for all elements */
+            *:hover {
+              background: rgba(100, 149, 237, 0.1);
+            }
+            /* Selected state for all elements */
+            *:selected {
+              background: rgba(100, 149, 237, 0.5);
+            }
+            /* Button styling */
+            button {
+              border-radius: 0.15rem;
+              min-height: 1rem;
+              padding: 0.05rem 0.25rem;
+            }
+            /* Menu background styling */
+            menu {
+              background: ${backgroundColor};
+            }
+          '';
+        };
+        ".config/gtk-3.0/bookmarks" = {
+          text = lib.concatStringsSep "\n" config.user.paths.bookmarks;
+        };
+        ".config/gtk-4.0/settings.ini" = {
+          generator = toINI;
+          value = {
+            Settings = {
+              gtk-application-prefer-dark-theme = 1;
+              gtk-cursor-theme-name = cursorThemeName;
+              gtk-cursor-theme-size = toString xcursorSize;
+              gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
+            };
+          };
+        };
+      };
     };
   };
 }
