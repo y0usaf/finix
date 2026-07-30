@@ -99,5 +99,7 @@ in {
     };
   };
 
-  networking.firewall.allowedTCPPorts = [25565];
+  # TCP 25565 (minecraft host) moved 2026-07-30 to finix/firewall.nix, the
+  # desktop's only firewall. `networking` is not on compat-import's whitelist,
+  # so this line was inert from the finix switch onward (DRIFT-AUDIT #1).
 }

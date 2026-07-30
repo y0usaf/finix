@@ -26,11 +26,9 @@
   ...
 }: let
   cfg = config.programs.limine;
-
   # Mirror of upstream providers.bootloader.nix's limine-install.json.
   # Rebuilt here because the local installHook override below needs the
   # same configPath substitution.
-
   # Upstream limine-install.py hardcodes the generation group header as
   # "/+NixOS default profile" (and the start/end comments). The per-gen
   # labels already say "finix" (bootspec.nix); patch the header to match.
@@ -39,43 +37,43 @@ in {
   # installHook override: same replaceVarsWith as upstream, patched script.
   providers.bootloader.installHook = lib.mkForce (pkgs.replaceVarsWith {
     src = pkgs.runCommand "limine-install.py" {} ''
-    sed -e 's/+NixOS {group_name}/+finix {group_name}/' \
-        -e 's/NixOS boot entries/finix boot entries/g' \
-        ${flakeInputs.finix}/modules/programs/limine/limine-install.py > $out
-  '';
+      sed -e 's/+NixOS {group_name}/+finix {group_name}/' \
+          -e 's/NixOS boot entries/finix boot entries/g' \
+          ${flakeInputs.finix}/modules/programs/limine/limine-install.py > $out
+    '';
     isExecutable = true;
     replacements = {
       python3 = pkgs.python3.withPackages (python-packages: [python-packages.psutil]);
       configPath = pkgs.writeText "limine-install.json" (builtins.toJSON {
-    inherit
-      (cfg)
-      additionalFiles
-      biosDevice
-      biosSupport
-      efiSupport
-      enrollConfig
-      extraEntries
-      force
-      partitionIndex
-      settings
-      validateChecksums
-      secureBoot
-      ;
+        inherit
+          (cfg)
+          additionalFiles
+          biosDevice
+          biosSupport
+          efiSupport
+          enrollConfig
+          extraEntries
+          force
+          partitionIndex
+          settings
+          validateChecksums
+          secureBoot
+          ;
 
-    nixPath = config.services.nix-daemon.package;
-    efiBootMgrPath = pkgs.efibootmgr;
-    liminePath = cfg.package;
-    efiMountPoint = config.boot.loader.efi.efiSysMountPoint;
-    inherit (config) fileSystems;
-    inherit (config.boot.loader.efi) canTouchEfiVariables;
-    efiRemovable = cfg.efiInstallAsRemovable;
-    maxGenerations =
-      if cfg.maxGenerations == null
-      then 0
-      else cfg.maxGenerations;
-    hostArchitecture = pkgs.stdenv.hostPlatform.parsed.cpu;
-    fwupdEfiPath = config.services.fwupd.package or null;
-  });
+        nixPath = config.services.nix-daemon.package;
+        efiBootMgrPath = pkgs.efibootmgr;
+        liminePath = cfg.package;
+        efiMountPoint = config.boot.loader.efi.efiSysMountPoint;
+        inherit (config) fileSystems;
+        inherit (config.boot.loader.efi) canTouchEfiVariables;
+        efiRemovable = cfg.efiInstallAsRemovable;
+        maxGenerations =
+          if cfg.maxGenerations == null
+          then 0
+          else cfg.maxGenerations;
+        hostArchitecture = pkgs.stdenv.hostPlatform.parsed.cpu;
+        fwupdEfiPath = config.services.fwupd.package or null;
+      });
     };
   });
 

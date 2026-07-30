@@ -6,7 +6,13 @@
 # changes still go through the ESP island driver.
 {pkgs}: {
   # mkDeploy {name, system, defaultHost}
-  mkDeploy = { bootDriverName ? null, defaultHost, name, postSwitch ? null, system }: {
+  mkDeploy = {
+    bootDriverName ? null,
+    defaultHost,
+    name,
+    postSwitch ? null,
+    system,
+  }: {
     deployScript = pkgs.writeShellScriptBin name ''
       set -euo pipefail
 
@@ -25,14 +31,26 @@
           exit 2
           ;;
       esac
-      if [ "$action" = boot ] && [ -n '${if bootDriverName != null then bootDriverName else ""}' ]; then
+      if [ "$action" = boot ] && [ -n '${
+        if bootDriverName != null
+        then bootDriverName
+        else ""
+      }' ]; then
         echo "${name}: 'boot' cannot stage a boot slot on this host (stc has no bootloader here)." >&2
-        echo "  use: ${if bootDriverName != null then bootDriverName else ""} install, then oneshot, then promote" >&2
+        echo "  use: ${
+        if bootDriverName != null
+        then bootDriverName
+        else ""
+      } install, then oneshot, then promote" >&2
         exit 1
       fi
 
       system_path='${system}'
-      post_switch='${if postSwitch == null then "" else postSwitch}'
+      post_switch='${
+        if postSwitch == null
+        then ""
+        else postSwitch
+      }'
 
       if [ "$host" = local ]; then
         # Self-deploy: only meaningful on a running finix system. Under

@@ -1,5 +1,15 @@
 # Finix migration — session notes (updated 2026-07-29: server takeover STAGED but disarmed; desktop done)
 
+## 2026-07-30 DESKTOP — finix portal discovery fix
+
+Root cause: finix dropped the `xdg.*` subtree, so xdg-desktop-portal could not
+scan `/run/current-system/sw/share/xdg-desktop-portal` for `tomoe.portal`.
+Enabled upstream `xdg.portal`, `xdg.icons`, and `xdg.mime`, and installed a
+local tomoe portal config selecting gtk by default and tomoe for ScreenCast.
+This closes the #160 pathsToLink action item. Relog tomoe so the new
+`XDG_DATA_DIRS` takes effect. An upstream PR for `xdg.portal.config` is pending;
+drop the local config when it lands.
+
 ## 2026-07-29 SERVER — upstream-limine takeover staged, NOT armed
 
 `hosts/y0usaf-server/finix/boot.nix` now carries the server's port of the
@@ -227,20 +237,18 @@ desktop-phase2.1) — first use of finix-desktop-deploy on this host
 - fonts via upstream fonts.fontconfig + fonts.packages (Departure Mono
   UC + Noto CJK + emoji); foot family comes from persisted ~/.config.
 - packages: tomoe, foot, grim/slurp/wl-clipboard-rs/jq/swaybg/
-  xwayland-satellite, nushell (config.nu on persisted /home; login shell
-  stays bash for rescue), fzf/rg/fd.
+  xwayland-satellite, bash + carapace (login shell), fzf/rg/fd.
 - nix-daemon settings.experimental-features = nix-command flakes baked
   (phase-2a papercut).
 Verified live: seatd running + /run/seatd.sock (root:seat), y0usaf in
-video/render/seat, /run/user/1001 ok, tomoe-session/nu/foot on PATH,
+video/render/seat, /run/user/1001 ok, tomoe-session/foot on PATH,
 fc-list resolves Departure. tomoe FIRST LIGHT not yet attempted — needs
 a fresh login on tty2 (groups + profile) and the compositor grabs the VT.
 
 Phase-2c backlog: pipewire (NO upstream module — hand-roll finit
 service; no audio until then), elogind+pam for portals + session dbus,
 xdg-desktop-portal-gtk + TOMOE_PORTAL_CHOOSER, Steam (32-bit GL already
-staged), decide login shell nushell, decide seatd vs logind libseat
-backend long-term.
+staged), decide seatd vs logind libseat backend long-term.
 
 2026-07-18 PHASE 2b+ tomoe FIRST LIGHT confirmed by user (session runs,
 apps launch). Then:
@@ -278,9 +286,8 @@ mid-run and re-run; VERIFY `current=` on the ESP after every install):
 - ssh user-service: nothing to port — pure dotfiles, already persisted.
 Still open after 2c: RT audio, elogind-vs-manual XDG_RUNTIME_DIR
 (portals fine on dbus-run-session for now), Steam validation (gates
-promote), nushell as login shell decision, bluetooth (blueman/bluez
-services not ported), OBS virtual cam (v4l2loopback module), power-cut
-drill, then PROMOTE.
+promote), bluetooth (blueman/bluez services not ported), OBS virtual
+cam (v4l2loopback module), power-cut drill, then PROMOTE.
 
 2026-07-18 PHASE 2d PARITY SWEEP deployed live + staged (marker 2.4,
 slot 4a8afirz, verified current= on ESP): new parity.nix +
@@ -343,10 +350,9 @@ UPSTREAM GAPS to report: seatd⇒pam_rundir unconditional; /tmp not 1777.
 switch from inside the finix boot (config-only path, ~30 finit jobs clean):
 - STEAM VALIDATED by user (launches + runs) — the promote gate is now just
   the power-cut drill.
-- Login shell FLIPPED to nushell (session.nix mkForce vs common.nix bash;
-  userborn rewrote /etc/passwd live, zero downtime). config.nu/env.nu/
-  carapace.nu come from the persisted .config/nushell bind — zero porting
-  needed, env.nu is pure XDG vars. Root stays bash; profile.d fallbacks
+- Login shell settled on bash (finix/common.nix; userborn owns /etc/passwd,
+  rewrites live with zero downtime). ~/.bashrc is generated NixOS-side onto
+  persisted /home — nothing to port. Root stays bash; profile.d fallbacks
   stay for rescue. Closes the 2b/2c "decide login shell" item.
 - XDG dirs parity (parity.nix): pathsToLink += /share/{applications,icons,
   pixmaps,mime} — tui-launcher desktop provider, GTK icon lookup, portal/
