@@ -4,6 +4,8 @@
   ...
 }: let
   cfg = config.user.dev.pi;
+  inherit (lib) types;
+  nullOrStr = types.nullOr types.str;
   toJSON = lib.generators.toJSON {};
 
   piReadmePath = cfg.readmePath;
@@ -31,6 +33,59 @@ in {
     readmePath = mkInternalStr "Path to the pi README.";
     docsPath = mkInternalStr "Path to the pi docs directory.";
     examplesPath = mkInternalStr "Path to the pi examples directory.";
+
+    agents = {
+      model = lib.mkOption {
+        type = nullOrStr;
+        default = "vercel-ai-gateway/openai/gpt-5.6-luna";
+        description = ''
+          Model for pi-agents spawned children, written to
+          `~/.local/share/pi/agent/pi-agents.json`. Use a qualified
+          `provider/modelId` pair (for example `cursor/composer-2.5`).
+        '';
+      };
+
+      maxDepth = lib.mkOption {
+        type = types.int;
+        default = 1;
+        description = ''
+          Maximum descendant depth for pi-agents. Depth 0 disables spawning.
+        '';
+      };
+
+      maxLiveAgents = lib.mkOption {
+        type = types.int;
+        default = 6;
+        description = ''
+          Maximum number of live pi-agents children kept in memory.
+        '';
+      };
+
+      orchestrator = lib.mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          Strip write/edit from the main pi session at session start so
+          file mutations route through spawned executor agents. Toggle
+          per-session with /orchestrate.
+        '';
+      };
+
+      panelModels = lib.mkOption {
+        type = types.listOf types.str;
+        default = [
+          "vercel-ai-gateway/moonshotai/kimi-k3"
+          "vercel-ai-gateway/anthropic/claude-fable-5"
+          "vercel-ai-gateway/openai/gpt-5.6-sol"
+        ];
+        description = ''
+          Panel member models for pi-agents spawn_agent panels, in seat
+          order. The extension requires between 2 and 5 entries and
+          rejects other lengths at load. An empty list omits the key so
+          panels fall back to `model`.
+        '';
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -59,6 +114,7 @@ in {
               "anthropic/claude-fable-5"
               "anthropic/claude-opus-5"
               "moonshotai/kimi-k3-fast"
+              "cursor/composer-2"
             ];
             compaction.enabled = false;
             showHardwareCursor = true;
@@ -71,7 +127,7 @@ in {
                 "./.claude/skills"
               ];
             };
-            hideThinkingBlock = false;
+            hideThinkingBlock = true;
             collapseChangelog = true;
             quietStartup = true;
             doubleEscapeAction = "tree";
@@ -120,6 +176,19 @@ in {
         };
       };
 
+      ".local/share/pi/agent/pi-agents.json" = {
+        generator = toJSON;
+        value =
+          {
+            inherit (cfg.agents) maxDepth maxLiveAgents orchestrator;
+          }
+          // lib.optionalAttrs (cfg.agents.model != null) {
+            inherit (cfg.agents) model;
+          }
+          // lib.optionalAttrs (cfg.agents.panelModels != []) {
+            inherit (cfg.agents) panelModels;
+          };
+      };
     };
   };
 }
