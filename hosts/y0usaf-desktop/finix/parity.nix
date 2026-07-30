@@ -136,13 +136,13 @@ in {
       options v4l2loopback exclusive_caps=1
     '';
     etc."ssl/certs/ca-certificates.crt".source = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
-    pathsToLink = [
-      "/share/applications"
-      "/share/icons"
-      "/share/pixmaps"
-      "/share/mime"
-    ];
   };
+
+  # finix's upstream xdg modules own these links: portal adds applications
+  # + portal definitions, icons adds icons + pixmaps, and mime adds shared
+  # MIME data (replacing the former hand-rolled list).
+  xdg.icons.enable = true;
+  xdg.mime.enable = true;
 
   # ── zram swap: zramSwap.enable { 50%, zstd } has no upstream module —
   # literal port of what the NixOS option does at runtime.
@@ -167,9 +167,8 @@ in {
   # hardcodes ca-certificates.crt — its absence surfaced as the updater's
   # opaque "http error 0" TLS failure.
 
-  # ── XDG dirs parity: NixOS links all of /share into the system profile;
-  # finix's upstream baseline cherry-picks subdirs and omits the XDG ones.
-  # Without /share/applications the tui-launcher desktop provider only saw
-  # ~/.local/share (Steam entries); icons/pixmaps/mime restore GTK icon
-  # lookup, portal/xdg-open MIME dispatch, and .desktop icon resolution.
+  # ── XDG dirs parity: finix's upstream xdg.portal/icons/mime modules now
+  # own the links (including portal definitions and .desktop discovery),
+  # preserving the old applications/icons/pixmaps/mime set while fixing the
+  # missing portal scan path; this closes the #160 pathsToLink workaround.
 }
