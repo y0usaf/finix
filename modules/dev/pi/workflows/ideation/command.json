@@ -1,0 +1,7 @@
+{
+  "name": "ideate",
+  "description": "Multi-model debate ideation workflow. Usage: bare /ideate debates what this session is circling; /ideate <topic> fixes the question; /ideate '{ \"topic\": \"...\", \"context\"?, \"maxRounds\"?, \"models\"?, \"judgeModel\"? }'",
+  "script": "ideate.js",
+  "argKey": "topic",
+  "sessionContext": { "key": "sessionContext", "maxChars": 12000 }
+}
