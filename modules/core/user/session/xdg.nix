@@ -27,7 +27,7 @@ in {
       AWS_SHARED_CREDENTIALS_FILE = "${xdgConfig}/aws/credentials";
 
       # --- Shell history ---
-      HISTFILE = "${xdgState}/bash/history";
+      HISTFILE = "${xdgState}/zsh/history";
       LESSHISTFILE = "${xdgState}/less/history";
 
       # --- Language runtimes ---
@@ -91,9 +91,9 @@ in {
       "d ${xdgData} 0755 ${userName} ${userName} - -"
       "d ${xdgState} 0755 ${userName} ${userName} - -"
       "d ${xdgCache} 0700 ${userName} ${userName} - -"
-      "d ${xdgState}/bash 0755 ${userName} ${userName} - -"
-      "d ${xdgState}/less 0755 ${userName} ${userName} - -"
       "d ${xdgState}/zsh 0755 ${userName} ${userName} - -"
+      "d ${xdgCache}/zsh 0755 ${userName} ${userName} - -" # zcompdump
+      "d ${xdgState}/less 0755 ${userName} ${userName} - -"
     ];
 
     manzil.users."${userName}".files = {

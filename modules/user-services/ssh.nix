@@ -14,91 +14,81 @@ in {
     environment.systemPackages = [
       pkgs.openssh
     ];
-    manzil.users."${userName}".files =
-      {
-        ".ssh/config" = {
-          text = ''
-            AddKeysToAgent yes
-            ServerAliveInterval 60
-            ServerAliveCountMax 5
-            ControlMaster auto
-            ControlPath %d/.ssh/master-%r@%h:%p
-            ControlPersist 10m
-            SetEnv TERM=xterm-256color
-            Host server y0usaf-server
-                HostName y0usaf-server
-                Port 2200
-                User ${userName}
-                IdentityFile ${homeDir}/.ssh/id_ed25519
-                IdentitiesOnly yes
-                ForwardAgent yes
+    manzil.users."${userName}".files = {
+      ".ssh/config" = {
+        text = ''
+          AddKeysToAgent yes
+          ServerAliveInterval 60
+          ServerAliveCountMax 5
+          ControlMaster auto
+          ControlPath %d/.ssh/master-%r@%h:%p
+          ControlPersist 10m
+          SetEnv TERM=xterm-256color
+          Host server y0usaf-server
+              HostName y0usaf-server
+              Port 2200
+              User ${userName}
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              IdentitiesOnly yes
+              ForwardAgent yes
 
-            # Rescue path: Tailscale SSH - tailscaled itself answers :22 on
-            # the tailnet IP; auth = tailnet identity, independent of the
-            # server's sshd config/PAM/authorized_keys AND of LAN/DHCP.
-            # Host key is Tailscale's (not sshd's), hence the separate
-            # known_hosts file; the WireGuard tunnel already authenticates
-            # the peer, accept-new is fine here.
-            Host rescue server-ts
-                HostName 100.105.204.116
-                User ${userName}
-                IdentityFile ${homeDir}/.ssh/id_ed25519
-                StrictHostKeyChecking accept-new
-                UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
+          # Rescue path: Tailscale SSH - tailscaled itself answers :22 on
+          # the tailnet IP; auth = tailnet identity, independent of the
+          # server's sshd config/PAM/authorized_keys AND of LAN/DHCP.
+          # Host key is Tailscale's (not sshd's), hence the separate
+          # known_hosts file; the WireGuard tunnel already authenticates
+          # the peer, accept-new is fine here.
+          Host rescue server-ts
+              HostName 100.105.204.116
+              User ${userName}
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              StrictHostKeyChecking accept-new
+              UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
 
-            Host rescue-root
-                HostName 100.105.204.116
-                User root
-                StrictHostKeyChecking accept-new
-                UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
+          Host rescue-root
+              HostName 100.105.204.116
+              User root
+              StrictHostKeyChecking accept-new
+              UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
 
-            Host desktop y0usaf-desktop
-                HostName y0usaf-desktop
-                Port 2222
-                User ${userName}
-                IdentityFile ${homeDir}/.ssh/id_ed25519
-                IdentitiesOnly yes
-                ForwardAgent yes
+          Host desktop y0usaf-desktop
+              HostName y0usaf-desktop
+              Port 2222
+              User ${userName}
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              IdentitiesOnly yes
+              ForwardAgent yes
 
-            Host android-phone phone
-                HostName 100.93.111.41
-                Port 8022
-                User nix-on-droid
-                IdentityFile ${homeDir}/.ssh/id_ed25519
-                IdentitiesOnly yes
-                ForwardAgent yes
+          Host android-phone phone
+              HostName 100.93.111.41
+              Port 8022
+              User nix-on-droid
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              IdentitiesOnly yes
+              ForwardAgent yes
 
-            Host github.com
-                HostName github.com
-                User git
-                IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
-                ForwardAgent yes
+          Host github.com
+              HostName github.com
+              User git
+              IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
+              ForwardAgent yes
 
-            Host forgejo
-                HostName y0usaf-server
-                Port 2222
-                User forgejo
-                IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
-                IdentitiesOnly yes
-          '';
-        };
-        # Host key pins live system-wide in /etc/ssh/ssh_known_hosts
-        # (modules/core/services/openssh.nix), port-qualified.
-      }
-      // lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
-        ".config/zsh/.zshenv" = {
-          text = lib.mkAfter ''
-            export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
-          '';
-        };
-      }
-      // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
-        ".config/nushell/env.nu" = {
-          text = lib.mkAfter ''
-            $env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR? | default '/run/user/1000')/ssh-agent"
-          '';
-        };
+          Host forgejo
+              HostName y0usaf-server
+              Port 2222
+              User forgejo
+              IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
+              IdentitiesOnly yes
+        '';
       };
+      # Host key pins live system-wide in /etc/ssh/ssh_known_hosts
+      # (modules/core/services/openssh.nix), port-qualified.
+    };
+    # Not environment.sessionVariables: finix renders those with
+    # escapeShellArg, so "$XDG_RUNTIME_DIR" would land literal.
+    user.shell.rcExtra = lib.mkAfter ''
+      export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
+    '';
     systemd.user.services.ssh-agent = {
       description = "SSH key agent";
       wantedBy = ["default.target"];
