@@ -9,32 +9,15 @@
   # The base pi package is built from the upstream monorepo source; docs live there.
   piSrc = "${piFlake.packages."${pkgs.stdenv.hostPlatform.system}".pi.src}/packages/coding-agent";
 in {
-  imports = [piFlake.nixosModules.default];
+  # No NixOS module import: finix's compat-import drops flake-input modules and
+  # the whole programs.* namespace, so programs.pi never reached the desktop.
+  # The pi package is declared once, in
+  # hosts/y0usaf-desktop/finix/materialized-packages.nix.
 
   config = lib.mkIf config.user.dev.pi.enable {
     environment.systemPackages = [
       flakeInputs.pi-harness.packages."${pkgs.stdenv.hostPlatform.system}".default
     ];
-
-    programs.pi = {
-      enable = true;
-      # Default bundle minus opt-in workflow variants.
-      extensions = {
-        "gecko-websearch" = true;
-        rtk = true;
-        minimal = true;
-        interview = true;
-        "tool-management" = true;
-        webfetch = true;
-        hashline = true;
-        advisor = true;
-        review = true;
-        vcc = true;
-        caveman = true;
-        atelier = true;
-        aphrodite = true;
-      };
-    };
 
     user.dev.pi = {
       readmePath = "${piSrc}/README.md";
