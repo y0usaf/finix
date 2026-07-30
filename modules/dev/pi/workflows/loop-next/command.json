@@ -1,0 +1,7 @@
+{
+  "name": "loop-next",
+  "description": "Loop the project's /next skill in fresh sub-agent contexts until PLAN.md has no unchecked boxes. Usage: /loop-next, /loop-next 10, or /loop-next '{ \"maxSteps\": 10 }'",
+  "script": "loop-next.js",
+  "argKey": "maxSteps",
+  "args": {}
+}
