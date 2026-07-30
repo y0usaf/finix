@@ -3,7 +3,6 @@
     flakeInputs.manzil.nixosModules.default
     flakeInputs.tweakcc.nixosModules.default
     flakeInputs.impermanence.nixosModules.impermanence
-    flakeInputs.patchix.nixosModules.default
     flakeInputs.nvtune.nixosModules.default
   ];
   manzil = {

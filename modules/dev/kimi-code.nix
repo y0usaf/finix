@@ -53,27 +53,27 @@ in {
     ];
 
     # Provider + model declarations, merged into the mutable config.toml at
-    # activation/boot by patchix (login rewrites survive; patches re-merge).
-    # api_key stays an empty placeholder — the kimi wrapper below fills it in.
-    patchix = {
-      enable = true;
-      # KIMI_CODE_HOME is pinned to ~/.local/share/kimi-code in xdg.nix.
-      users."${config.user.name}".patches.".local/share/kimi-code/config.toml" = {
-        format = "toml";
-        value = {
-          default_model = "vercel/${cfg.model}";
-          providers.vercel = {
-            type = "openai";
-            base_url = "https://ai-gateway.vercel.sh/v1";
-            api_key = "";
-          };
-          models."vercel/${cfg.model}" = {
-            provider = "vercel";
-            inherit (cfg) model;
-            max_context_size = cfg.maxContextSize;
-            capabilities = ["thinking" "image_in" "tool_use"];
-            display_name = cfg.displayName;
-          };
+    # activation by manzil's merge entry (login rewrites survive; patches
+    # re-merge). api_key stays an empty placeholder — the kimi wrapper below
+    # fills it in.
+    # KIMI_CODE_HOME is pinned to ~/.local/share/kimi-code in xdg.nix.
+    manzil.users."${config.user.name}".files.".local/share/kimi-code/config.toml" = {
+      type = "merge";
+      format = "toml";
+      clobber = true;
+      value = {
+        default_model = "vercel/${cfg.model}";
+        providers.vercel = {
+          type = "openai";
+          base_url = "https://ai-gateway.vercel.sh/v1";
+          api_key = "";
+        };
+        models."vercel/${cfg.model}" = {
+          provider = "vercel";
+          inherit (cfg) model;
+          max_context_size = cfg.maxContextSize;
+          capabilities = ["thinking" "image_in" "tool_use"];
+          display_name = cfg.displayName;
         };
       };
     };

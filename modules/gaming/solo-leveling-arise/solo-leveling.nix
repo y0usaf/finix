@@ -14,11 +14,11 @@ in {
   };
 
   config = lib.mkIf user.gaming.solo-leveling-arise.enable {
-    patchix = {
-      enable = true;
-      users."${user.name}".patches."${lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path}/steamapps/compatdata/2373990/pfx/user.reg" = {
-        format = "reg";
-        value = {
+    manzil.users."${user.name}".files."${lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path}/steamapps/compatdata/2373990/pfx/user.reg" = {
+      type = "merge";
+      format = "reg";
+      clobber = true;
+      value = {
           "HKEY_CURRENT_USER\\Software\\Netmarble Corp\\sololvcsA\\options" = {
             "KEY_GRAPHIC_OPTION_ScreenResolutionX" = {
               type = "sz";
@@ -165,7 +165,6 @@ in {
               value = "3";
             };
           };
-        };
       };
     };
   };

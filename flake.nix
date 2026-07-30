@@ -134,11 +134,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    patchix = {
-      url = "github:y0usaf/patchix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nvtune = {
       url = "github:y0usaf/nvtune";
       inputs.nixpkgs.follows = "nixpkgs";
