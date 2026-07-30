@@ -10,18 +10,18 @@
   config = lib.mkIf config.user.dev.emacs-tour.enable {
     environment.systemPackages = [
       (pkgs.emacs-pgtk.pkgs.withPackages (epkgs:
-    with epkgs; [
-      vertico
-      marginalia
-      orderless
-      consult
-      magit
-      org-modern
-      org-auto-tangle
-      olivetti
-      nix-mode
-      rainbow-delimiters
-    ]))
+        with epkgs; [
+          vertico
+          marginalia
+          orderless
+          consult
+          magit
+          org-modern
+          org-auto-tangle
+          olivetti
+          nix-mode
+          rainbow-delimiters
+        ]))
     ];
     manzil.users."${config.user.name}".files = {
       ".config/emacs/init.el".text = ''
