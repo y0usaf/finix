@@ -507,16 +507,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1785172787,
-        "narHash": "sha256-NOtjVSJ0/TroEh16Hn7Y+gJ4z3TyrJx9GY8Cp6wnjig=",
+        "lastModified": 1785429407,
+        "narHash": "sha256-jQ9JLxQ9SBmKIDOafDyZugPXbDRROECawvMPVJzdnks=",
         "owner": "y0usaf",
-        "repo": "Manzil",
-        "rev": "430a4f61c3498617dd2c83644e792762ace97130",
+        "repo": "manzil",
+        "rev": "d28425a7a8092e738f909c094c0738be13f2ce28",
         "type": "github"
       },
       "original": {
         "owner": "y0usaf",
-        "repo": "Manzil",
+        "repo": "manzil",
         "type": "github"
       }
     },
@@ -807,26 +807,6 @@
         "type": "github"
       }
     },
-    "patchix": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1778268095,
-        "narHash": "sha256-3NY202BPXodWMmIYntLBR0ryaNsq+8+odDHGWLoNci4=",
-        "owner": "y0usaf",
-        "repo": "patchix",
-        "rev": "7b4be55d2b39f646b42c0a4cd0198f59d100c3cc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "repo": "patchix",
-        "type": "github"
-      }
-    },
     "phi": {
       "inputs": {
         "crane": "crane_2",
@@ -854,23 +834,22 @@
         "nixpkgs": [
           "nixpkgs"
         ],
+        "piAgents": "piAgents",
         "piAphrodite": "piAphrodite",
         "piGeckoWebsearch": "piGeckoWebsearch",
         "piHashline": "piHashline",
         "piInterview": "piInterview",
-        "piKimi": "piKimi",
-        "piMinimal": "piMinimal",
+        "piManagement": "piManagement",
         "piRtk": "piRtk",
         "piSrc": "piSrc",
-        "piToolManagement": "piToolManagement",
         "piWebfetch": "piWebfetch"
       },
       "locked": {
-        "lastModified": 1785294640,
-        "narHash": "sha256-Unrp3ICAYQm6aeqa+OR/u6wR+PkkrTWxj183Mu0Yd2g=",
+        "lastModified": 1785446432,
+        "narHash": "sha256-VcOWeMFJxBcT6xprdcMUI+cUBLWrXoeTOHOeee1xKTI=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "9b022f4d11299bba008037102b9f37ae0b82e6cd",
+        "rev": "3e760e20bb43c0947329c9aa74ec153bb4cff60d",
         "type": "github"
       },
       "original": {
@@ -889,11 +868,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1784735791,
-        "narHash": "sha256-RYHFe5i2F5MIBXne702wsrZFGidLTBQMAEzfVTYrkBs=",
+        "lastModified": 1785434149,
+        "narHash": "sha256-v20Ld5w1kGUC0q/IqCcmJq6Ob/Hj2b4lul/yRJLDTzQ=",
         "ref": "main",
-        "rev": "08b6b186932a8def73617f8eac161a18c786219d",
-        "revCount": 55,
+        "rev": "dbde8bf6966bc28c19ec33dd97625034df764565",
+        "revCount": 63,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/pi-harness.git"
       },
@@ -902,6 +881,25 @@
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/pi-harness.git"
       }
+    },
+    "piAgents": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-flake",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./extensions/pi-agents",
+        "type": "path"
+      },
+      "original": {
+        "path": "./extensions/pi-agents",
+        "type": "path"
+      },
+      "parent": [
+        "pi-flake"
+      ]
     },
     "piAphrodite": {
       "inputs": {
@@ -979,7 +977,7 @@
         "pi-flake"
       ]
     },
-    "piKimi": {
+    "piManagement": {
       "inputs": {
         "nixpkgs": [
           "pi-flake",
@@ -987,30 +985,11 @@
         ]
       },
       "locked": {
-        "path": "./extensions/pi-kimi",
+        "path": "./extensions/pi-management",
         "type": "path"
       },
       "original": {
-        "path": "./extensions/pi-kimi",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piMinimal": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-minimal",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-minimal",
+        "path": "./extensions/pi-management",
         "type": "path"
       },
       "parent": [
@@ -1052,25 +1031,6 @@
         "repo": "pi",
         "type": "github"
       }
-    },
-    "piToolManagement": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-tool-management",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-tool-management",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
     },
     "piWebfetch": {
       "inputs": {
@@ -1164,7 +1124,6 @@
         "nvflashk-linux": "nvflashk-linux",
         "nvtune": "nvtune",
         "obs-image-reaction": "obs-image-reaction",
-        "patchix": "patchix",
         "phi": "phi",
         "pi-flake": "pi-flake",
         "pi-harness": "pi-harness",
