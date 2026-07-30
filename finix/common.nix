@@ -62,21 +62,48 @@
   };
 
   programs = {
+    # Still enabled with zsh as the login shell: this ships /etc/bashrc and
+    # /etc/profile.d/bash.sh, and bash remains /bin/sh plus the fallback shell.
     bash.enable = true;
     sudo.enable = true;
   };
 
+  # finix has no programs.zsh module (only bash and fish), and compat-import
+  # drops `programs.*` from the NixOS tree anyway — so zsh's system-level
+  # wiring is hand-rolled here. modules/shell/zsh/config.nix owns the user rc.
+  #
+  # /etc/zshenv is REQUIRED, not cosmetic. nixpkgs' zsh is built with a global
+  # zshenv that does:  if /etc/NIXOS exists and /etc/zshenv is unreadable,
+  # source /etc/set-environment. finix creates /etc/NIXOS but has no
+  # /etc/set-environment (it uses /etc/profile.d instead), so without this file
+  # every single zsh start prints:
+  #   .../zsh-5.9.2/etc/zshenv:.:8: no such file or directory: /etc/set-environment
+  # Providing the file takes the readable branch and silences the fallback.
+  # System env still arrives the same way bash gets it: ~/.zprofile sources
+  # /etc/profile under `emulate sh`.
+
   # Desktop key + server's existing rescue key available while the
   # persistent system's SSH ownership checks are being tightened.
   environment = {
-    etc."ssh/authorized_keys.d/y0usaf".text = ''
-      ${lib.removeSuffix "\n" (builtins.readFile ../hosts/y0usaf-desktop/user-ssh.pub)}
-      ${lib.removeSuffix "\n" (builtins.readFile ../hosts/y0usaf-server/user-ssh.pub)}
-      ${lib.removeSuffix "\n" (builtins.readFile ../hosts/android-phone/user-ssh.pub)}
-    '';
-    etc.sudoers.text = lib.mkAfter ''
-      y0usaf ALL = (ALL:ALL) NOPASSWD: ALL
-    '';
+    etc = {
+      "ssh/authorized_keys.d/y0usaf".text = ''
+        ${lib.removeSuffix "\n" (builtins.readFile ../hosts/y0usaf-desktop/user-ssh.pub)}
+        ${lib.removeSuffix "\n" (builtins.readFile ../hosts/y0usaf-server/user-ssh.pub)}
+        ${lib.removeSuffix "\n" (builtins.readFile ../hosts/android-phone/user-ssh.pub)}
+      '';
+      sudoers.text = lib.mkAfter ''
+        y0usaf ALL = (ALL:ALL) NOPASSWD: ALL
+      '';
+      zshenv.text = ''
+        # Intentionally minimal: exists so nixpkgs' compiled-in global zshenv
+        # takes the `/etc/zshenv is readable` branch instead of trying to source
+        # the NixOS-only /etc/set-environment, which finix does not generate.
+      '';
+    };
+    shells = [
+      "/run/current-system/sw/bin/zsh"
+      "${pkgs.zsh}/bin/zsh"
+    ];
     systemPackages = with pkgs; [
       curl
       iproute2
@@ -84,13 +111,14 @@
       procps
       util-linux
       vim
+      zsh
     ];
   };
 
   users.users.y0usaf = {
     isNormalUser = true;
     home = "/home/y0usaf";
-    shell = "${pkgs.bashInteractive}/bin/bash";
+    shell = "${pkgs.zsh}/bin/zsh";
     extraGroups = ["wheel"];
     # ***REMOVED*** for local console login only; sshd has
     # PasswordAuthentication disabled. TODO: read hash from /persist/secrets

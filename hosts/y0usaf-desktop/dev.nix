@@ -19,17 +19,7 @@ _: {
         };
       };
     };
-    codex = {
-      enable = true;
-      providers.vercel = {
-        name = "Vercel AI Gateway";
-        baseUrl = "https://ai-gateway.vercel.sh/v1";
-        envKey = "AI_GATEWAY_API_KEY";
-        apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
-        model = "moonshotai/kimi-k3-fast";
-      };
-      settings.personality = "pragmatic";
-    };
+    codex.enable = true;
     android-tools.enable = true;
     codex-cli.enable = true;
     crush.enable = true;

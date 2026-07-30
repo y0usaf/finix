@@ -38,10 +38,6 @@
     # Identity / credentials
     ".ssh"
 
-    # Browsers
-    ".mozilla"
-    ".librewolf"
-
     # AI / dev tooling state — relocated out of ~ via env vars in
     # modules/core/user/session/xdg.nix (CLAUDE_CONFIG_DIR, CODEX_HOME,
     # PI_CODING_AGENT_DIR, KIMI_CODE_HOME). ~/.claude.json lives inside
@@ -54,7 +50,6 @@
     # ~/.config
     ".config/gh" # hosts.yml oauth
     ".config/gws" # google oauth creds (client_secret, .encryption_key)
-    ".config/librewolf"
 
     # ~/.local/state
     ".local/state/nix"
