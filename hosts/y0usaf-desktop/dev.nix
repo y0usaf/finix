@@ -39,6 +39,7 @@ _: {
       linear-cli.enable = true;
     };
     pi.enable = true;
+    canon.enable = true;
     docker.enable = true;
     gcloud.enable = true;
     localllama.enable = false;
