@@ -110,81 +110,85 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [((if cudaBuild
-    then cudaPackages.backendStdenv
-    else pkgs.stdenv).mkDerivation {
-    pname = "asryx";
-    version = "1.3.0-unstable-2026-07-27";
-    src = pkgs.fetchFromGitHub {
-    owner = "rccyx";
-    repo = "asryx";
-    rev = "d52de7f77809e4323944343b98e74508add96244";
-    hash = "sha256-kklQqvoLS7gW3WE8Tu8iQvtVYa2Z16mJshffukqfgV0=";
-  };
+    environment.systemPackages = [
+      ((
+          if cudaBuild
+          then cudaPackages.backendStdenv
+          else pkgs.stdenv
+        ).mkDerivation {
+          pname = "asryx";
+          version = "1.3.0-unstable-2026-07-27";
+          src = pkgs.fetchFromGitHub {
+            owner = "rccyx";
+            repo = "asryx";
+            rev = "d52de7f77809e4323944343b98e74508add96244";
+            hash = "sha256-kklQqvoLS7gW3WE8Tu8iQvtVYa2Z16mJshffukqfgV0=";
+          };
 
-    nativeBuildInputs =
-      [pkgs.cmake pkgs.ninja pkgs.makeWrapper]
-      ++ lib.optionals cudaBuild [
-        cudaPackages.cuda_nvcc
-        pkgs.autoAddDriverRunpath
-      ]
-      ++ lib.optionals vulkanBuild [pkgs.shaderc];
+          nativeBuildInputs =
+            [pkgs.cmake pkgs.ninja pkgs.makeWrapper]
+            ++ lib.optionals cudaBuild [
+              cudaPackages.cuda_nvcc
+              pkgs.autoAddDriverRunpath
+            ]
+            ++ lib.optionals vulkanBuild [pkgs.shaderc];
 
-    buildInputs =
-      lib.optionals cudaBuild [
-        cudaPackages.cuda_cudart
-        cudaPackages.libcublas
-        cudaPackages.cuda_cccl
-      ]
-      ++ lib.optionals vulkanBuild [
-        pkgs.vulkan-headers
-        pkgs.vulkan-loader
-        pkgs.spirv-headers
-      ];
+          buildInputs =
+            lib.optionals cudaBuild [
+              cudaPackages.cuda_cudart
+              cudaPackages.libcublas
+              cudaPackages.cuda_cccl
+            ]
+            ++ lib.optionals vulkanBuild [
+              pkgs.vulkan-headers
+              pkgs.vulkan-loader
+              pkgs.spirv-headers
+            ];
 
-    cmakeFlags =
-      ["-DBACKEND=${cfg.backend}"]
-      ++ lib.optionals cudaBuild [
-        "-DCMAKE_CUDA_ARCHITECTURES=${cfg.cudaArchitectures}"
-      ];
+          cmakeFlags =
+            ["-DBACKEND=${cfg.backend}"]
+            ++ lib.optionals cudaBuild [
+              "-DCMAKE_CUDA_ARCHITECTURES=${cfg.cudaArchitectures}"
+            ];
 
-    # CMakeLists resolves whisper.cpp via $HOME; stage the pinned checkout in
-    # a fake build home instead of patching upstream.
-    preConfigure = ''
-      export HOME="$NIX_BUILD_TOP/fake-home"
-      mkdir -p "$HOME/.local/share/asryx/deps"
-      cp -r ${pkgs.fetchFromGitHub {
-    owner = "ggml-org";
-    repo = "whisper.cpp";
-    rev = "fc674574ca27cac59a15e5b22a09b9d9ad62aafe";
-    hash = "sha256-UFp62iUGrB57WZc3/N+L/8+NSeagan9ftAoTz6Yzqlk=";
-  }} "$HOME/.local/share/asryx/deps/whisper.cpp"
-      chmod -R u+w "$HOME/.local/share/asryx/deps/whisper.cpp"
-    '';
+          # CMakeLists resolves whisper.cpp via $HOME; stage the pinned checkout in
+          # a fake build home instead of patching upstream.
+          preConfigure = ''
+            export HOME="$NIX_BUILD_TOP/fake-home"
+            mkdir -p "$HOME/.local/share/asryx/deps"
+            cp -r ${pkgs.fetchFromGitHub {
+              owner = "ggml-org";
+              repo = "whisper.cpp";
+              rev = "fc674574ca27cac59a15e5b22a09b9d9ad62aafe";
+              hash = "sha256-UFp62iUGrB57WZc3/N+L/8+NSeagan9ftAoTz6Yzqlk=";
+            }} "$HOME/.local/share/asryx/deps/whisper.cpp"
+            chmod -R u+w "$HOME/.local/share/asryx/deps/whisper.cpp"
+          '';
 
-    installPhase = ''
-      runHook preInstall
-      install -Dm755 asryx $out/bin/asryx
-      wrapProgram $out/bin/asryx \
-        --prefix PATH : ${lib.makeBinPath ([
-      pkgs.pipewire # pw-record
-      pkgs.wl-clipboard # wl-copy
-      pkgs.libnotify # notify-send
-    ]
-    # Autofill types via uinput: daemonless dotool (no ydotoold service to
-    # wire under finit) and compositor-agnostic (tomoe lacks the
-    # zwp_virtual_keyboard_manager_v1 protocol that wtype needs).
-    ++ lib.optionals cfg.autofill [pkgs.dotool])}
-      runHook postInstall
-    '';
+          installPhase = ''
+            runHook preInstall
+            install -Dm755 asryx $out/bin/asryx
+            wrapProgram $out/bin/asryx \
+              --prefix PATH : ${lib.makeBinPath ([
+                pkgs.pipewire # pw-record
+                pkgs.wl-clipboard # wl-copy
+                pkgs.libnotify # notify-send
+              ]
+              # Autofill types via uinput: daemonless dotool (no ydotoold service to
+              # wire under finit) and compositor-agnostic (tomoe lacks the
+              # zwp_virtual_keyboard_manager_v1 protocol that wtype needs).
+              ++ lib.optionals cfg.autofill [pkgs.dotool])}
+            runHook postInstall
+          '';
 
-    meta = {
-      description = "Native C++ ASR toggle for Linux (whisper.cpp in-process)";
-      homepage = "https://github.com/rccyx/asryx";
-      license = lib.licenses.mit;
-      mainProgram = "asryx";
-    };
-  })];
+          meta = {
+            description = "Native C++ ASR toggle for Linux (whisper.cpp in-process)";
+            homepage = "https://github.com/rccyx/asryx";
+            license = lib.licenses.mit;
+            mainProgram = "asryx";
+          };
+        })
+    ];
 
     # uinput node + input-group access for dotool; user is already in input
     # (modules/desktop/user-groups.nix). Rules go through

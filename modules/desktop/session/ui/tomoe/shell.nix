@@ -21,11 +21,80 @@ in {
 
     modules = lib.mkOption {
       # shell.services.tray exists since the fusion (F3); a tray
-      # widget for this overlay is still to be written. sysinfo is a
-      # placeholder facade upstream (nothing pushes it), so no module.
-      type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network"]);
+      # widget for this overlay is still to be written. cpu/memory/gpu
+      # ride the sysinfo facade, which upstream declares but never
+      # pushes — lua/sysinfo.lua supplies the push side in-VM.
+      type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu"]);
       default = ["time" "date"];
       description = "Bar overlay modules to render.";
+    };
+
+    center-between = lib.mkOption {
+      type = lib.types.nullOr (lib.types.listOf lib.types.str);
+      default = ["time" "date"];
+      example = ["cpu" "memory"];
+      description = ''
+        Two adjacent module names whose shared boundary is pinned to screen center. The bar surface is padded to twice its wider half, so the seam sits at the surface midpoint and layer-shell's centering puts that midpoint on the output's center — the clock stays put while stats grow outward. null, or a pair that is not adjacent in `modules`, falls back to centering the whole row as one block.
+      '';
+    };
+
+    sysinfo = {
+      cpu-interval = lib.mkOption {
+        type = lib.types.ints.between 100 60000;
+        default = 1000;
+        description = "Milliseconds between /proc/stat samples. CPU percent is a delta between two samples, so the first tick after start always reads 0.";
+      };
+
+      memory-interval = lib.mkOption {
+        type = lib.types.ints.between 100 60000;
+        default = 2000;
+        description = "Milliseconds between /proc/meminfo samples.";
+      };
+
+      gpu-interval = lib.mkOption {
+        type = lib.types.ints.between 250 60000;
+        default = 2000;
+        description = "Milliseconds between GPU samples. On NVIDIA each sample is one async nvidia-smi run (~30ms off-thread), so keep this above ~1000.";
+      };
+
+      gpu-backend = lib.mkOption {
+        type = lib.types.enum ["auto" "nvidia" "amd" "none"];
+        default = "auto";
+        description = ''
+          Which GPU counter source to probe. auto prefers NVIDIA (detected by /proc/driver/nvidia/version) and falls back to the amdgpu sysfs busy counter, because on a hybrid box the AMD iGPU reads ~0% while the discrete card does the work. No source found = the gpu module renders an empty slot.
+        '';
+      };
+
+      gpu-card = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "card1";
+        description = "DRM card hint for the amdgpu sysfs backend (/sys/class/drm/<card>/device/gpu_busy_percent). null = first card exposing the counter.";
+      };
+
+      memory-style = lib.mkOption {
+        type = lib.types.enum ["percent" "absolute"];
+        default = "percent";
+        description = "RAM readout: percent of MemTotal, or absolute gigabytes used.";
+      };
+
+      show-cpu-temp = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Append CPU die temperature (k10temp Tctl / coretemp Package id 0) to the cpu module.";
+      };
+
+      show-gpu-temp = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Append GPU temperature to the gpu module.";
+      };
+
+      show-gpu-vram = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Append VRAM used (gigabytes) to the gpu module.";
+      };
     };
 
     edges = lib.mkOption {
@@ -89,65 +158,87 @@ in {
         builtins.replaceStrings ["@USER@"] [config.user.name]
         (builtins.readFile ./lua/wallust.lua);
 
+      # CPU/memory/GPU sampler: pushes snapshots into the sysinfo service
+      # facade the bar overlay reads. Deployed unconditionally; it only
+      # registers timers when a cpu/memory/gpu module is on the bar.
+      ".config/tomoe/shell/sysinfo.lua".text = builtins.readFile ./lua/sysinfo.lua;
+
       ".config/tomoe/shell/bar_overlay.lua".text =
-        builtins.replaceStrings ["@DEFAULTS@"] [(toLua {
-    inherit (bar) modules;
-    edges = ["top" "bottom"];
-    indent = 0;
-    font_family = "monospace";
-    name_prefix = "bar-overlay";
-    top_name = "bar-overlay-top";
-    bottom_name = "bar-overlay-bottom";
-    height = 24;
-    spacing = 8;
-    margin_top = 0;
-    margin_bottom = 0;
-    refresh_interval = 1000;
-    layer = "overlay";
-    bg = "transparent";
-    font_size = 14;
-    anchors = {
-      top = "top-center";
-      bottom = "bottom-center";
-    };
-    label = {
-      weight = "bold";
-      size = 14;
-    };
-    block = {
-      gap = 0;
-      border = 0.7;
-      padding_y = 2.1;
-      padding_x = 4.2;
-    };
-    time = {
-      format = "%H:%M:%S";
-      interval = 1000;
-    };
-    date = {
-      format = "%d/%m/%y";
-      interval = 30000;
-    };
-    module_widths = {
-      battery = 58;
-      time = 74;
-      date = 74;
-      network = 96;
-    };
-    battery = {
-      gap = 4;
-    };
-    bongo_cat = {
-      inherit (bar.bongo-cat) enable;
-      asset_dir = "${./assets/bongo-cat}";
-      name = "bongo-cat";
-      inherit (bar.bongo-cat) height;
-      margin_bottom = bar.bongo-cat.margin-bottom;
-      x_offset = bar.bongo-cat.x-offset;
-      keypress_duration = bar.bongo-cat.keypress-duration;
-      layer = "overlay";
-    };
-  })]
+        builtins.replaceStrings ["@DEFAULTS@"] [
+          (toLua {
+            inherit (bar) modules;
+            center_between = bar.center-between;
+            edges = ["top" "bottom"];
+            indent = 0;
+            font_family = "monospace";
+            name_prefix = "bar-overlay";
+            top_name = "bar-overlay-top";
+            bottom_name = "bar-overlay-bottom";
+            height = 24;
+            spacing = 8;
+            margin_top = 0;
+            margin_bottom = 0;
+            refresh_interval = 1000;
+            layer = "overlay";
+            bg = "transparent";
+            font_size = 14;
+            anchors = {
+              top = "top-center";
+              bottom = "bottom-center";
+            };
+            label = {
+              weight = "bold";
+              size = 14;
+            };
+            block = {
+              gap = 0;
+              border = 0.7;
+              padding_y = 2.1;
+              padding_x = 4.2;
+            };
+            time = {
+              format = "%H:%M:%S";
+              interval = 1000;
+            };
+            date = {
+              format = "%d/%m/%y";
+              interval = 30000;
+            };
+            module_widths = {
+              battery = 58;
+              time = 74;
+              date = 74;
+              network = 96;
+              cpu = 104;
+              memory = 84;
+              gpu = 150;
+            };
+            battery = {
+              gap = 4;
+            };
+            sysinfo = {
+              cpu_interval = bar.sysinfo.cpu-interval;
+              memory_interval = bar.sysinfo.memory-interval;
+              gpu_interval = bar.sysinfo.gpu-interval;
+              gpu_prefer = bar.sysinfo.gpu-backend;
+              gpu_card = bar.sysinfo.gpu-card;
+              memory_style = bar.sysinfo.memory-style;
+              show_cpu_temp = bar.sysinfo.show-cpu-temp;
+              show_gpu_temp = bar.sysinfo.show-gpu-temp;
+              show_gpu_vram = bar.sysinfo.show-gpu-vram;
+            };
+            bongo_cat = {
+              inherit (bar.bongo-cat) enable;
+              asset_dir = "${./assets/bongo-cat}";
+              name = "bongo-cat";
+              inherit (bar.bongo-cat) height;
+              margin_bottom = bar.bongo-cat.margin-bottom;
+              x_offset = bar.bongo-cat.x-offset;
+              keypress_duration = bar.bongo-cat.keypress-duration;
+              layer = "overlay";
+            };
+          })
+        ]
         (builtins.readFile ./lua/bar_overlay.lua);
     };
   };

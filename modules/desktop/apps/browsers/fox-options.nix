@@ -180,6 +180,10 @@ in {
       "browser.theme.content-theme" = 0;
       "browser.theme.toolbar-theme" = 0;
       "browser.uidensity" = 1;
+      # Nova: Mozilla's in-progress chrome redesign (Fx 152+).
+      # Swaps UrlbarInput for SmartbarInput and disables the legacy
+      # megabar breakout CSS via @media not -moz-pref("browser.nova.enabled").
+      "browser.nova.enabled" = true;
 
       "extensions.webextensions.remote" = true;
 

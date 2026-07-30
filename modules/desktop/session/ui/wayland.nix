@@ -5,50 +5,35 @@
   ...
 }: let
   inherit (config.user) ui;
-  gtkScale = ui.gtk.scale;
 in {
   options.user.ui.wayland = {
     enable = lib.mkEnableOption "Wayland configuration";
   };
   config = lib.mkIf ui.wayland.enable {
-    environment.systemPackages = [
-      pkgs.grim
-      pkgs.slurp
-      pkgs.wl-clipboard-rs
-      pkgs.hyprpicker
-    ];
-    manzil.users."${config.user.name}" = {
-      files =
-        lib.optionalAttrs (lib.attrByPath ["user" "shell" "zsh" "enable"] false config) {
-          ".config/zsh/.zprofile" = {
-            text = lib.mkAfter ''
-              export WLR_NO_HARDWARE_CURSORS=1
-              export NIXOS_OZONE_WL=1
-              export QT_QPA_PLATFORM=wayland
-              export ELECTRON_OZONE_PLATFORM_HINT=wayland
-              export XDG_SESSION_TYPE=wayland
-              export GDK_BACKEND=wayland
-              export SDL_VIDEODRIVER=wayland,x11
-              export CLUTTER_BACKEND=wayland
-              export GDK_DPI_SCALE=${toString gtkScale}
-            '';
-          };
-        }
-        // lib.optionalAttrs (lib.attrByPath ["user" "shell" "nushell" "enable"] false config) {
-          ".config/nushell/login.nu" = {
-            text = lib.mkAfter ''
-              $env.WLR_NO_HARDWARE_CURSORS = "1"
-              $env.NIXOS_OZONE_WL = "1"
-              $env.QT_QPA_PLATFORM = "wayland"
-              $env.ELECTRON_OZONE_PLATFORM_HINT = "wayland"
-              $env.XDG_SESSION_TYPE = "wayland"
-              $env.GDK_BACKEND = "wayland"
-              $env.SDL_VIDEODRIVER = "wayland,x11"
-              $env.CLUTTER_BACKEND = "wayland"
-              $env.GDK_DPI_SCALE = "${toString gtkScale}"
-            '';
-          };
-        };
+    environment = {
+      systemPackages = [
+        pkgs.grim
+        pkgs.slurp
+        pkgs.wl-clipboard-rs
+        pkgs.hyprpicker
+      ];
+      # Single owner for the Wayland env surface. /etc/profile.d exports these
+      # for login shells, so the compositor and everything it spawns inherit
+      # them — no per-shell rc duplication. MOZ_* live here rather than in the
+      # browser modules: firefox.nix and librewolf.nix both set the same two
+      # keys, which collides on merge, and "enable Wayland" is a Wayland fact.
+      sessionVariables = {
+        WLR_NO_HARDWARE_CURSORS = "1";
+        NIXOS_OZONE_WL = "1";
+        QT_QPA_PLATFORM = "wayland";
+        ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+        XDG_SESSION_TYPE = "wayland";
+        GDK_BACKEND = "wayland";
+        SDL_VIDEODRIVER = "wayland,x11";
+        CLUTTER_BACKEND = "wayland";
+        MOZ_ENABLE_WAYLAND = "1";
+        MOZ_USE_XINPUT2 = "1";
+      };
     };
   };
 }
