@@ -10,7 +10,7 @@
     };
 
     manzil = {
-      url = "github:y0usaf/Manzil";
+      url = "github:y0usaf/manzil";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
