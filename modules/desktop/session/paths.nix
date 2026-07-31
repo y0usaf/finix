@@ -34,7 +34,7 @@ in {
         "file://${homeDir}/Downloads Downloads"
         "file://${homeDir}/Documents Documents"
         "file://${homeDir}/dev dev"
-        "file://${homeDir}/nixos NixOS"
+        "file://${homeDir}/finix Finix"
         "file:///tmp tmp"
       ];
       description = "GTK bookmarks for file manager";

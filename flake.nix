@@ -1,5 +1,5 @@
 {
-  description = "Phoenix — y0usaf's finix systems (NixOS on nixos-legacy branch)";
+  description = "Finix — y0usaf's systems (NixOS on nixos-legacy branch)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -158,7 +158,7 @@
     system = "x86_64-linux";
     inherit (nixpkgs) lib;
 
-    # Phoenix: main is finix-only. The desktop's packages/dotfiles reach
+    # Finix: main is finix-only. The desktop's packages/dotfiles reach
     # finix directly through finix/compat-import.nix.
     finixStaging = import ./finix {inherit inputs system;};
   in {
