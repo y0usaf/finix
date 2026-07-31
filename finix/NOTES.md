@@ -1,5 +1,157 @@
 # Finix migration — session notes (updated 2026-07-29: server takeover STAGED but disarmed; desktop done)
 
+## 2026-07-31 — post-power-cycle verification
+
+Power-cycle recovery is green: the machine is booted on generation 5
+(`/nix/store/mbglrcf525gfq5zrkl5si7jzb2zchkda-finix-system`) through the manually
+selected `Limine` door 0002. `BootCurrent=0002`, `BootNext` is absent, and the
+asserted order is `0002,0000,0003,0001`.
+
+The checksum panic at door 0003 (`\\EFI\\BOOT`) was caused by a torn/divergent
+fallback enrollment after the hard power cut: this boot's assert repaired the
+order and its sync leg copied the fallback (`bootorder-assert: synced EFI
+fallback from enrolled Limine`, 2026-07-31 09:46:10). The enrolled and fallback
+binaries now compare `IDENTICAL`. The earlier activation also logged the sync
+copy (09:09:58), though its `cmp` was unavailable; this confirms the dirty-power-
+cut theory rather than an intentional config mismatch. The console/menu pick of
+0002 was consistent and recovered the system. The deadman armed BootNext=0000
+and logged `healthy, BootNext cleared` at 09:48:01.
+
+Freeze forensics remain a silent-freeze signature: the frozen-era kmsg/boot
+recorder has no panic, oops, MCE, or watchdog diagnostic; the last persisted
+kernel heartbeat is the final `NET: Registered PF_PACKET protocol family` line
+(about 09:09:58 boot-era, with syslog activity through 09:12:13), followed by the
+gap until the post-boot at about 09:46. Current dmesg shows microcode 0x21
+(updated early from 0x1a), EDAC initialization but no MCE. The ESP was flagged
+by FAT as not properly unmounted and potentially corrupt; schedule fsck, do not
+run it during this verification. Health is good (Forgejo :3000=200, nginx :80=200,
+sshd listening on :2200; no failed finit services). Generations 1–5 are present,
+with 5 current. Island slots still report `current=qcq7wryk` and the golden
+directory is present.
+
+Open follow-ups: add an explicit fallback sync after installHook/assert writes;
+run ESP fsck at the next planned maintenance; if the freeze recurs, treat it as
+a hardware watch (it occurred on 0x21 microcode, so the July theory is
+incomplete); island restage to the current generation remains pending.
+
+## 2026-07-30 SERVER — LIMINE TAKEOVER EXECUTED, boot proven green
+
+Pre-flip recon found the box AHEAD of these notes: `/nix/var/nix/profiles/system`
+was already deleted, the `Limine` EFI entry was deleted, and `/boot/limine` plus
+`/boot/EFI/limine` were absent. The NixOS rescue was therefore already
+unreachable; the `takeover = false` deadman (`Limine` target) had been failing
+to arm and was only an island fallback. This flip formalized reality rather
+than destroying a live rescue path.
+
+sshd moved to :2200 on 07-30, breaking the deploy driver's port-22 assumption
+and ad-hoc automation. `~/.ssh/config` is store-managed and immutable. Session
+workaround: a PATH ssh shim (`exec` real ssh with `-p 2200`) fronting
+`nix run .#finix-server-persistent-deploy`. DRIVER GAP: deploy.nix needs port
+handling.
+
+Golden slot pinned: kernels/golden copied from qcq7wryk, gcroot
+`finix-esp-golden`, and `"/Finix golden"` appended to the island
+`limine.conf`; the config was backed up to `limine.conf.bak-pre-golden`.
+The island config is not hash-enrolled, so this append is safe.
+
+takeover.nix -> true. Deploy test was runtime-green. The system profile had to
+be CREATED with `nix-env -p /nix/var/nix/profiles/system --set`, because
+installHook renders the menu from profile generations and the driver registers
+none: generation 1 is
+`/nix/store/cslrplgq41a65qbvigqkw9z9gn7h712w-finix-system`. Deploy switch then
+rendered `/boot/limine/limine.conf` (generation 1 plus
+`/Finix ESP island (fallback)`), installed `\\EFI\\limine\\BOOTX64.EFI` and
+enrolled its config hash, created the `Limine` EFI entry as Boot0002, and set
+BootOrder 0002-first.
+
+First boot at 22:07 EDT via BootNext=0002: ssh returned in 55s, booted
+`cslrplgq…`, BootCurrent=0002, and microcode updated early from 0x1a. The
+deadman armed BootNext=0000 (island rescue); BootNext was absent by 22:10,
+so clearing happened. The script's echo lines were not found in syslog — the
+finit task output logging path is worth inspecting — but absent BootNext is
+evidence of the clear. Zero failed services; forgejo/nginx/postgres green.
+
+Firmware reshuffled BootOrder to 0003-first after the BootNext boot (same board
+quirk as 2026-07-15). Manually promoted it back to
+0002,0000,0003,0001 (Limine, Finix island, UEFI OS fallback, EFI shell).
+
+`boot-health` now writes last-bad because booted != island slot — EXPECTED
+post-takeover. That task guarded the retired island-promote flow; retire or
+retarget it with the island tooling cleanup.
+
+n8n is absent from the new generation, NOT a takeover regression:
+`services.nix:251` dropped it 2026-07-28 because nixpkgs 2.31.4 is unbuildable;
+this deploy landed the drop. It returns on a nixpkgs bump.
+
+NEXT, in order: (1) fix deploy.nix's day-2 gap — register a new system profile
+generation on switch/boot and handle ssh port 2200, or the menu rots at gen 1
+while runtime drifts (the desktop 07-27 “deploys revert on reboot” class);
+(2) soak, then make the “Only after a proven takeover boot” deletion commit
+(esp-island.nix, finix-boot.nix, finix-guard.nix, home-rollback.nix,
+finix-server-boot outputs, deploy.nix shrink). The old SERVER purge order at
+the bottom is now STALE/PARTIALLY EXECUTED: the Limine entry and
+`/boot/limine` were already gone pre-flip; do NOT run steps 1/2 against the
+new finix-owned Limine 0002 and `/boot/limine`; (3) collapse the inline
+diagnostics duplicate into finix/diagnostics.nix on the next planned deploy.
+
+### 2026-07-31 — BootOrder shuffle root-caused + durable fix
+
+The plain-reboot drill parked the box on the island: firmware shuffled BootOrder
+verbatim to `0003,0000,0002,0001`. Recovery used tailscale-ssh after flipping
+the tailnet SSH ACL check → accept; check mode had blocked its own rescue, so
+that NOTES open item is now CLOSED. tailscale-ssh shells have no PATH (known
+finix gotcha, hit again): export PATH first in remote commands.
+
+Root cause and fix: the `bootorder-assert` finit task now repairs named EFI
+order and synchronizes `\\EFI\\BOOT\\BOOTX64.EFI` with enrolled Limine; deploy.nix
+registers profile generations before switch/boot and handles ssh port 2200.
+Island restage to the current generation remains pending (cleanup phase).
+
+Addendum (2026-07-31 close-out): The sed failure was Nix over-escaping the
+portable whitespace pattern, not firmware state. In the drill, door 0003 won;
+the box booted the newest generation in 15s, and `bootorder-assert` repaired
+order to 0002,0000,0003,0001. The diffutils/cmp fix was deployed in generation
+5. Its activation run completed the order leg and the EFI fallback leg (already
+identical; no command-not-found), with the enrolled and fallback binaries
+confirmed byte-identical. The golden audit found the slot present, with its
+`finix-esp-golden` gcroot and `/Finix golden` entry; the earlier missing report
+was a path/sudo artifact. BootNext was absent before and after close-out, and
+the deadman logged healthy/cleared.
+
+## 2026-07-31 BOTH — fallback hardening pass (post-freeze)
+
+**DESKTOP.** `\\EFI\\BOOT\\BOOTX64.EFI` was the stale Jun-26 pre-takeover
+loader (the server's checksum-panic landmine class). It was synced from enrolled
+`\\EFI\\limine` with `BOOTX64.EFI.bak-pre-sync` retained, then re-synced after
+the same-session deploy re-render; final `cmp` was identical. `/boot/EFI/finix`
+was absent (cleanup-island era), so the golden slot was freshly staged from the
+RUNNING system `ralz7prz…` (kernel/initrd/cmdline/system); `finix-esp-golden`
+was repointed from ancient `i8br…` and verified. A durable `"/Finix golden"`
+menu entry is now declarative via `programs.limine.extraEntries` in
+`hosts/y0usaf-desktop/finix/boot.nix`, rendered by the finix-desktop-deploy
+local switch. tomoe survived. **RESIDUAL:** desktop has no assert-style task;
+every future desktop deploy re-renders `\\EFI\\limine` and leaves `\\EFI\\BOOT`
+stale again until manually re-synced. Console access makes this acceptable;
+revisit if it ever bites.
+
+**SERVER.** Generation 6 `hm90i485…` deployed with sync-after-ESP-write
+hardening: bootorder-assert's `cp` leg plus deploy.nix post-switch remote sync;
+the island driver also gained `ssh -p 2200`. Island RESTAGED: `current=hm90i485`
+(modern closure, sshd:2200; the LAN-deaf island-park failure mode is dead),
+`previous=qcq7wryk`, and the golden slot was deliberately left as the old
+parachute. Gcroots were verified. The island config now chainloads `"NixOS
+rescue"` → the finix-owned `\\efi\\limine` (bonus loop door, target verified).
+ESP fsck cleared the dirty bit; the boot-sector/backup mismatch at offset 65
+was left unfixed as benign, for interactive repair at the next maintenance.
+Island install reordered the BootOrder tail to `0002,0003,0001,0000` — Limine
+remains first; the on-box assert restores `0002,0000,0003,0001` at next boot.
+
+**Open ledger.** Worktree remains uncommitted (takeover, driver, assert, and
+hardening; commit split pending). Watch for silent-freeze recurrence (hardware
+class, 2 occurrences; microcode exonerated). BIOS AC-power-on plus a smart plug
+remain recommended. Delete island tooling in a post-soak commit. Desktop
+`\\EFI\\BOOT` re-sync caveat is recorded above.
+
 ## 2026-07-30 DESKTOP — finix portal discovery fix
 
 Root cause: finix dropped the `xdg.*` subtree, so xdg-desktop-portal could not
@@ -41,19 +193,24 @@ without hands on the box.
 
 ### Blocking work before the flip (do in this order)
 
-1. Retarget the deadman. persistent.nix's `bootnext-deadman` arms BootNext
-   at the EFI entry named "Limine" and calls it "fall home to NixOS".
-   After the flip that entry boots the finix-owned limine.conf — it would
-   fall home into the system that just failed. Point it at the "Finix"
-   island entry (ideally the golden slot) instead.
-2. Fix or retire `boot-nixos` (persistent.nix ~line 110): same stale
-   assumption, becomes a lie the moment the NixOS entries are pruned.
-3. Pin a golden island slot, desktop runbook step 3 below (cp the current
-   slot to kernels/golden + a gcroot). This is the parachute the flip
-   spends the NixOS rescue for.
-4. Confirm `boot-health` last-good is fresh and the island's current slot
-   matches /run/booted-system (finix/boot-health.nix writes
-   /var/lib/boot-health/last-good).
+1. **DONE (staged via shared gate; 2026-07-30).** Retargeted the deadman.
+   `hosts/y0usaf-server/finix/takeover.nix` keeps `bootnext-deadman` on the
+   EFI entry named "Limine" while false (fall home to NixOS), and selects the
+   "Finix" island entry when true. The flip set the gate true and followed the
+   unchanged deploy runbook. EFI BootNext cannot select the island's golden
+   menu slot; the island entry is the fallback.
+2. **DONE (staged via shared gate; 2026-07-30).** Gated `boot-nixos` on
+   `hosts/y0usaf-server/finix/takeover.nix`: it remains unchanged while false,
+   and while true reports that NixOS rescue was pruned and exits 1, directing
+   recovery to the island golden slot via the Finix EFI entry / console menu.
+   The flip set the gate true.
+3. **DONE (executed; 2026-07-30).** Pinned the golden island slot: kernels/golden
+   copied from qcq7wryk with gcroot `finix-esp-golden`; `"/Finix golden"` was
+   appended to the island config after `limine.conf.bak-pre-golden` backup.
+4. **DONE (verified/executed; 2026-07-30).** Confirmed the boot-health state and
+   completed the takeover boot. Boot 0002 returned green; the island remains
+   the rescue path and boot-health's last-bad write is the expected retired
+   island-promote behavior.
 
 ### The flip itself
 
@@ -1072,3 +1229,7 @@ SERVER purge order (island already BootOrder head since the 07-15 promote):
 2. rm -rf /boot/limine /boot/EFI/limine   (island = /boot/EFI/finix, untouched)
 3. nix-env -p /nix/var/nix/profiles/system --delete-generations old && nix store gc
 4. deadman ceremony (finix-guard) stays as-is — BootNext still beats BootOrder
+
+2026-07-31 PURGE — server rescue retirement
+
+The server rescue NixOS configuration was retired from the flake after the Finix takeover. Deleted 5 files / 130 lines: the NixOS bridge, watchdog, home rollback, and unreferenced tools/user modules. Kept host.nix, services.nix, dev.nix, shell.nix, and hardware-configuration.nix because basename grep found references in the Finix universe or shared audit/comments; kept impermanence.nix and both SSH public keys as load-bearing. The island driver and finix-server-boot outputs remain deliberately kept. modules/ untouched — load-bearing via compat-import.
