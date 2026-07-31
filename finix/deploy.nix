@@ -12,6 +12,7 @@
     name,
     postSwitch ? null,
     system,
+    sshPort ? null,
   }: {
     deployScript = pkgs.writeShellScriptBin name ''
       set -euo pipefail
@@ -51,6 +52,12 @@
         then ""
         else postSwitch
       }'
+      if [ "$host" != local ] && [ -n '${if sshPort == null then "" else toString sshPort}' ]; then
+        export NIX_SSHOPTS='-p ${if sshPort == null then "" else toString sshPort}'
+        ssh_cmd=(ssh -p '${if sshPort == null then "" else toString sshPort}')
+      else
+        ssh_cmd=(ssh)
+      fi
 
       if [ "$host" = local ]; then
         # Self-deploy: only meaningful on a running finix system. Under
@@ -61,6 +68,12 @@
         fi
         sudo "$system_path/sw/bin/nix-store" --realise "$system_path" \
           --add-root /nix/var/nix/gcroots/finix-persistent >/dev/null
+        if [ "$action" != test ]; then
+          # WHY: the limine installHook renders the boot menu from profile
+          # generations; without registration the menu rots at gen 1 while
+          # runtime drifts (2026-07-30 server drill; 07-27 desktop class).
+          sudo "$system_path/sw/bin/nix-env" -p /nix/var/nix/profiles/system --set "$system_path"
+        fi
         sudo "$system_path/bin/switch-to-configuration" "$action"
         # nh os switch parity: finix switch-to-configuration is runtime-only,
         # so chain the boot-slot staging (skip for test = config-only trial).
@@ -79,12 +92,26 @@
       nix copy --to "$remote_store" "$system_path"
 
       echo "==> rooting persistent closure"
-      ssh "$host" \
+      "''${ssh_cmd[@]}" "$host" \
         "/run/wrappers/bin/sudo '$system_path/sw/bin/nix-store' --realise '$system_path' --add-root /nix/var/nix/gcroots/finix-persistent"
 
+      if [ "$action" != test ]; then
+        # WHY: the limine installHook renders the boot menu from profile
+        # generations; without registration the menu rots at gen 1 while
+        # runtime drifts (2026-07-30 server drill; 07-27 desktop class).
+        echo "==> registering system profile generation"
+        "''${ssh_cmd[@]}" "$host" \
+          "/run/wrappers/bin/sudo /run/current-system/sw/bin/nix-env -p /nix/var/nix/profiles/system --set '$system_path'"
+      fi
+
       echo "==> finix switch-to-configuration $action"
-      ssh "$host" \
+      "''${ssh_cmd[@]}" "$host" \
         "/run/wrappers/bin/sudo '$system_path/bin/switch-to-configuration' '$action'"
+      # Dirty-cut torn-write incident 2026-07-31: flush installHook ESP writes.
+      if [ "$action" != test ]; then
+        "''${ssh_cmd[@]}" "$host" \
+          "/run/wrappers/bin/sudo /run/current-system/sw/bin/sync"
+      fi
     '';
   };
 }

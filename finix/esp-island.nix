@@ -412,7 +412,8 @@
 
       # post-NixOS-purge: running finix supplies nix-store (same as deploy.nix)
       remote_store="ssh://$host?remote-program=/run/current-system/sw/bin/nix-store"
-      sshopts="-o BatchMode=yes -o ConnectTimeout=10 -o ControlMaster=no -o ControlPath=none"
+      # Server sshd listens on the dedicated deployment port.
+      sshopts="-p 2200 -o BatchMode=yes -o ConnectTimeout=10 -o ControlMaster=no -o ControlPath=none"
       export NIX_SSHOPTS="$sshopts"
 
       remote_args=""
