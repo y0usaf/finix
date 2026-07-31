@@ -187,3 +187,35 @@ same author, same month.
 
 The variable is not care. It is whether a human is responsible for keeping two
 files in agreement.
+
+## Facts rescued from NixOS-only modules deleted 2026-08
+
+These modules were inert under the compat-import whitelist (they evaluated and did nothing) and were removed with the desktop/server closure hashes proven unchanged.
+
+- `modules/core/boot/loader.nix` — Limine enabled, max generations 5, secure boot enabled; EFI variables writable with `/boot` EFI mount — `ported: hosts/y0usaf-desktop/finix/boot.nix:84-102` (Limine and writable EFI are ported; the current desktop intentionally uses maxGenerations 20 and firmware Secure Boot remains off, as documented in `finix/NOTES.md:1197`).
+- `modules/core/boot/kernel.nix` — latest Linux packages, `kernel.unprivileged_userns_clone=1`, AMD GPU kernel parameters under `hardware.amdgpu.enable` — `ported: hosts/y0usaf-desktop/finix/persistent.nix:145-146,174-185; hosts/y0usaf-desktop/finix/graphical.nix:45-53` (the desktop's active GPU is NVIDIA; its AMD-related boot choice is explicit in persistent.nix).
+- `modules/core/networking/networkmanager.nix` — NetworkManager enabled — `UNPORTED` (intentional: wired `dhcpcd` covers this desktop, documented in `hosts/y0usaf-desktop/finix/persistent.nix:13-16` and `finix/NOTES.md:309-314`).
+- `modules/core/networking/firewall.nix` — firewall enabled, TCP 22/22000, UDP 22000/21027 — `ported: hosts/y0usaf-desktop/finix/firewall.nix:62-84; hosts/y0usaf-server/finix/services.nix:112-140` (ports are deliberately replaced/scoped; see desktop firewall rationale at lines 21-38).
+- `modules/core/security/polkit.nix` — polkit enabled — `ported: hosts/y0usaf-desktop/finix/parity.nix:23,39-42`.
+- `modules/core/security/rtkit.nix` — rtkit enabled — `ported: hosts/y0usaf-desktop/finix/parity.nix:23,43`.
+- `modules/core/system/nix-ld.nix` — nix-ld enabled with `stdenv.cc.cc.lib` and zlib — `UNPORTED` (real gap; no nix-ld declaration was found in either native host tree).
+- `modules/core/system/substituters.nix` — XDG nix dirs, connect-timeout 5, fallback, one download attempt, LAN/tailnet/Cachix substituters and keys — `ported: hosts/y0usaf-desktop/finix/persistent.nix:273-294` (the native block carries the active LAN/tailnet cache and timeout/fallback policy).
+- `modules/core/system/nix-cache.nix` and `nix-package-management.nix` — Nix settings including `auto-optimise-store = true`, trusted-users, max-jobs — `ported: hosts/y0usaf-desktop/finix/persistent.nix:273-294` for trusted users/settings; `UNPORTED` for `auto-optimise-store` and `max-jobs` (real gap, also recorded by the existing audit at `finix/DRIFT-AUDIT.md:95-99` for auto-optimise-store).
+- `modules/core/virtualization/vm.nix` — optional libvirtd/QEMU, swtpm, OVMF, non-root, virt-manager — `UNPORTED` (intentional optional feature; no VM enablement exists in either native host tree).
+- `modules/core/virtualization/android.nix` — optional Waydroid plus ashmem_linux/binder_linux kernel modules — `UNPORTED` (intentional optional feature; no Waydroid enablement exists in either native host tree).
+- `modules/core/hardware/i2c.nix` — `hardware.i2c.enable = true` — `ported: hosts/y0usaf-desktop/finix/parity.nix:51-53`.
+- `modules/core/services/forgejo.nix` — Forgejo PostgreSQL/LFS, ports/domain/SSH settings, pinned uid/gid, PostgreSQL enablement — `ported: hosts/y0usaf-server/finix/services.nix:103-147,166-200,275-314` (native service/state and pinned uid/gid are present; native firewall ports are at `services.nix:132-133`).
+- `modules/core/services/mediamtx.nix` — WebRTC port 4200, public-IP environment updater, firewall TCP/UDP 4200 — `ported: hosts/y0usaf-server/finix/services.nix:132-133,258-270,316-338`.
+- `modules/core/services/n8n.nix` — n8n Node.js path, `N8N_SECURE_COOKIE=false` — `UNPORTED` (intentional temporary decision: the native service comments that n8n was dropped because nixpkgs 2.31.4 is unbuildable, `hosts/y0usaf-server/finix/services.nix:251-256`; the decision is also recorded in `finix/NOTES.md:977-978`).
+- `modules/core/services/nginx.nix` — recommended proxy settings — `ported: hosts/y0usaf-server/finix/services.nix:361-406` (native nginx reverse proxy includes the required proxy/websocket/timeout settings).
+- `modules/core/services/openssh.nix` — key-only sshd on port 2222, tailnet firewall allowance, authorized keys, known-host pins — `ported: hosts/y0usaf-server/finix/services.nix:103-110,129-133,158-164; hosts/y0usaf-desktop/finix/firewall.nix:72-80` (native ports are intentionally host-specific: server sshd 2200, desktop 2222).
+- `modules/core/services/syncthing-proxy.nix` — nginx reverse proxy to Syncthing GUI 8384 — `ported: hosts/y0usaf-server/finix/services.nix:361-403`.
+- `modules/core/services/tailscale/config.nix` — Tailscale SSH/open-firewall flags, resume restart unit — `ported: hosts/y0usaf-desktop/finix/parity.nix:60-93; hosts/y0usaf-server/finix/services.nix:225-249` (the desktop native path asserts SSH; the server has the persistent rescue task).
+- `modules/core/services/tailscale/hosts.nix` — tailnet host aliases for Syncthing and Forgejo — `ported: hosts/y0usaf-server/finix/services.nix:160-164`.
+- `modules/core/services/scx.nix` — scx_lavd scheduler with rustscheds package — `UNPORTED` (real gap; no scx declaration was found in either native host tree).
+- `modules/core/services/dbus.nix` — dbus enabled with dconf and gcr packages — `ported: hosts/y0usaf-desktop/finix/graphical.nix:64-69` (dbus is enabled natively; dconf/gcr are not separately declared in the host trees).
+- `modules/core/services/btrbk.nix` — daily snapshots, `timestamp_format = long`, preserve minimum 2d and 7d/4w, `/btrfs` snapshot directory `_snapshots`, subvolumes `@dcim` and `@music` — `ported: hosts/y0usaf-server/finix/services.nix:202-218`.
+- `modules/desktop/session/system/gvfs.nix` — gvfs enabled — `ported: hosts/y0usaf-desktop/finix/materialized-packages.nix:24-25` (native package bridge supplies gvfs; no separate service toggle).
+- `modules/desktop/session/system/upower.nix` — upower enabled — `ported: hosts/y0usaf-desktop/finix/parity.nix:45-49`.
+- `modules/desktop/session/system/udisks2.nix` — udisks2 enabled — `ported: hosts/y0usaf-desktop/finix/parity.nix:23,45-49`.
+- `hosts/y0usaf-desktop/user.nix` — persisted password hash files for desktop user and root — `ported: hosts/y0usaf-desktop/finix/persistent.nix:298-308`.
