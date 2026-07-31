@@ -301,13 +301,13 @@ in {
             || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
             || { echo "bootnext-deadman: no efivars; not armed" >&2; exit 1; }
 
-          lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
+          lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* ${deadmanEntry}\t.*/\1/p' | head -n1)"
           if [ -z "$lim" ]; then
-            echo "bootnext-deadman: no Limine EFI entry; not armed" >&2
+            echo "bootnext-deadman: no ${deadmanEntry} EFI entry; not armed" >&2
             exit 1
           fi
           efibootmgr -q -n "$lim" || { echo "bootnext-deadman: arming failed" >&2; exit 1; }
-          echo "bootnext-deadman: armed BootNext=Boot$lim (NixOS)"
+          echo "bootnext-deadman: armed BootNext=Boot$lim (${deadmanDestination})"
 
           # Healthy = sshd continuously listening for 2 minutes (10-minute budget).
           ok=0
@@ -324,9 +324,63 @@ in {
             fi
             sleep 10
           done
-          echo "bootnext-deadman: health timeout; BootNext stays armed (next boot = NixOS)" >&2
+          echo "bootnext-deadman: health timeout; BootNext stays armed (next boot = ${deadmanDestination})" >&2
           exit 1
         ''}";
+        log = true;
+      };
+      bootorder-assert = lib.mkIf takeover {
+        # WHY: firmware shuffles the promoted order and may let 0003's stale
+        # EFI fallback win; assert the enrolled Limine door first and make the
+        # fallback byte-identical (2026-07-30/31 drill incident).
+        description = "assert stable Limine EFI BootOrder and fallback";
+        command = "${pkgs.writeShellScript "persistent-bootorder-assert" ''
+          set -eu
+          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused pkgs.gnugrep pkgs.diffutils]}
+
+          mountpoint -q /sys/firmware/efi/efivars \
+            || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
+            || { echo "bootorder-assert: no efivars" >&2; exit 1; }
+
+          # efibootmgr separates the label from its device path with a tab on
+          # this firmware, but accept any horizontal whitespace: the output
+          # format is not an EFI-variable contract.
+          lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-Fa-f]\{4\}\)[^ ]*[[:space:]]\+Limine[[:space:]].*/\1/p' | head -n1)"
+          fin="$(efibootmgr | sed -n 's/^Boot\([0-9A-Fa-f]\{4\}\)[^ ]*[[:space:]]\+Finix[[:space:]].*/\1/p' | head -n1)"
+          if [ -z "$lim" ] || [ -z "$fin" ]; then
+            echo "bootorder-assert: missing Limine or Finix EFI entry" >&2
+            exit 1
+          fi
+
+          current="$(efibootmgr | sed -n 's/^BootOrder: //p')"
+          desired="$lim,$fin"
+          oldIFS="$IFS"
+          IFS=,
+          for id in $current; do
+            [ "$id" = "$lim" ] || [ "$id" = "$fin" ] || desired="$desired,$id"
+          done
+          IFS="$oldIFS"
+          echo "bootorder-assert: current=$current desired=$desired"
+          if [ "$current" != "$desired" ]; then
+            efibootmgr -q -o "$desired"
+            after="$(efibootmgr | sed -n 's/^BootOrder: //p')"
+            echo "bootorder-assert: after=$after"
+          fi
+
+          if [ -e /boot/EFI/limine/BOOTX64.EFI ] && [ ! -e /boot/EFI/BOOT/BOOTX64.EFI ] || \
+             [ -e /boot/EFI/limine/BOOTX64.EFI ] && ! cmp -s /boot/EFI/limine/BOOTX64.EFI /boot/EFI/BOOT/BOOTX64.EFI; then
+            # WHY: firmware shuffle makes 0003 (\\EFI\\BOOT fallback) win some
+            # boots; identical bytes turn that door into the enrolled Limine
+            # menu instead of hash-mismatch fallthrough to the island
+            # (2026-07-30/31 drill incident).
+            mkdir -p /boot/EFI/BOOT
+            cp /boot/EFI/limine/BOOTX64.EFI /boot/EFI/BOOT/BOOTX64.EFI
+            # Dirty-cut torn-write incident 2026-07-31: flush the fallback copy.
+            sync
+            echo "bootorder-assert: synced EFI fallback from enrolled Limine"
+          fi
+        ''}";
+        conditions = ["net/lo/up"];
         log = true;
       };
       stage2-diag = {
