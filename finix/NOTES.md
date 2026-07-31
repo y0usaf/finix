@@ -1233,3 +1233,9 @@ SERVER purge order (island already BootOrder head since the 07-15 promote):
 2026-07-31 PURGE — server rescue retirement
 
 The server rescue NixOS configuration was retired from the flake after the Finix takeover. Deleted 5 files / 130 lines: the NixOS bridge, watchdog, home rollback, and unreferenced tools/user modules. Kept host.nix, services.nix, dev.nix, shell.nix, and hardware-configuration.nix because basename grep found references in the Finix universe or shared audit/comments; kept impermanence.nix and both SSH public keys as load-bearing. The island driver and finix-server-boot outputs remain deliberately kept. modules/ untouched — load-bearing via compat-import.
+
+2026-07-31: repository renamed nixos → finix; path references rewritten to
+/home/y0usaf/finix and remote paths to y0usaf/finix. Dead server NixOS files
+(host/services/dev/shell/tools/user/hardware-configuration) removed after
+strict code-reference sweep; impermanence.nix and *.pub keys kept as load-bearing
+keepers. Forks convention: finix-fork.

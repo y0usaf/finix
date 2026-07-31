@@ -94,7 +94,7 @@ in {
       '';
       "finix-stage2".text = "desktop-phase2.4\n";
       "profile.d/nh.sh".text = ''
-        export NH_FLAKE=/home/y0usaf/nixos
+        export NH_FLAKE=/home/y0usaf/finix
       '';
     };
     # Bare `nh os switch` targets this repo (nh resolves the hostname-keyed
@@ -109,7 +109,7 @@ in {
       # so this never goes stale inside the system closure.
       (pkgs.writeShellScriptBin "fx" ''
         set -euo pipefail
-        flake="''${FX_FLAKE:-/home/y0usaf/nixos}"
+        flake="''${FX_FLAKE:-/home/y0usaf/finix}"
         case "''${1:-}" in
           test)
             # runtime-only activation; never touches the boot menu
