@@ -50,7 +50,7 @@
   # ── THE SWITCH ─────────────────────────────────────────────────────────
   # false = island era (current, safe, remote-recoverable)
   # true  = finix owns /boot/limine (one-way for the NixOS rescue path)
-  takeover = false;
+  takeover = import ./takeover.nix;
 
   cfg = config.programs.limine;
 in {
