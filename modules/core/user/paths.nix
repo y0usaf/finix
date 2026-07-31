@@ -32,7 +32,7 @@ in {
     user = {
       paths = {
         flake = mkDefault {
-          path = "${homeDir}/nixos";
+          path = "${homeDir}/finix";
         };
         music = mkDefault {
           path = "${homeDir}/Music";

@@ -156,7 +156,7 @@ def reference_url(reference: dict[str, Any]) -> str | None:
 
 
 def flake_path(raw: str | None) -> Path:
-    value = raw or os.environ.get("NH_FLAKE") or "~/nixos"
+    value = raw or os.environ.get("NH_FLAKE") or "~/finix"
     if "#" in value:
         value = value.split("#", 1)[0]
     if "://" in value:

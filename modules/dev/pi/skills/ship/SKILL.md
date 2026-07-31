@@ -2,7 +2,7 @@
 name: ship
 description: >-
   Finish explicitly requested repository work end to end: inspect and split the current Git diff into logical commits, validate, commit and push, update the matching direct input in the user's downstream system flake, and activate it with nh os switch. Use when the user says "split the diff logically, commit and push, update flake, nh os switch", asks to ship completed work into their NixOS configuration, or invokes /skill:ship. Do not use for ordinary commit or push requests that omit the flake update and system switch.
-compatibility: Requires git, Nix with flakes, nh, network access, and a downstream flake selected by --flake, NH_FLAKE, or ~/nixos.
+compatibility: Requires git, Nix with flakes, nh, network access, and a downstream flake selected by --flake, NH_FLAKE, or ~/finix.
 metadata:
   author: y0usaf
   version: "1"
@@ -24,7 +24,7 @@ Ship current repository into downstream system configuration.
 
 Arguments may override defaults:
 
-- `flake=<path>`: downstream flake; default `$NH_FLAKE`, then `~/nixos`
+- `flake=<path>`: downstream flake; default `$NH_FLAKE`, then `~/finix`
 - `input=<name>`: direct flake input; default auto-detection from current repository remotes
 - Any other text: extra task, validation, or commit guidance
 
