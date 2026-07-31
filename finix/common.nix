@@ -120,9 +120,9 @@
     home = "/home/y0usaf";
     shell = "${pkgs.zsh}/bin/zsh";
     extraGroups = ["wheel"];
-    # ***REMOVED*** for local console login only; sshd has
-    # PasswordAuthentication disabled. TODO: read hash from /persist/secrets
-    # once the bare-metal system graduates from trial status.
-    password = "***REMOVED***";
+    # Password hash is supplied from the persistent secret store for local
+    # console login only; sshd has PasswordAuthentication disabled. The file
+    # must exist before rebuilding finix on bare metal.
+    passwordFile = "/persist/secrets/password-hashes/y0usaf";
   };
 }
