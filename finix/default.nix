@@ -209,6 +209,7 @@ in rec {
       defaultHost = "server";
       # Boot slots on the server belong to the ESP island driver, not stc.
       bootDriverName = "finix-server-boot";
+      sshPort = 2200;
     }).deployScript;
 
   desktopDeployPackage =
