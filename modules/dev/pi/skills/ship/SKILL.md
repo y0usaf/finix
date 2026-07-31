@@ -30,12 +30,14 @@ Arguments may override defaults:
 
 ## Helper
 
-Resolve helper once and reuse absolute path:
+The helper lives beside this file at `scripts/system-flake`. Resolve it from this skill's own directory — the `location` path shown for `ship` in the skills listing — and reuse that absolute path:
 
 ```bash
-helper="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/skills/ship/scripts/system-flake"
+helper="$(dirname <path to this SKILL.md>)/scripts/system-flake"
 test -x "$helper"
 ```
+
+Do not `readlink -f` the SKILL.md path first: it is a symlink into the Nix store, and that store path contains only the file itself, not the `scripts/` sibling. Do not fall back to a guessed path if `test -x` fails — report the failure instead.
 
 Helper commands:
 

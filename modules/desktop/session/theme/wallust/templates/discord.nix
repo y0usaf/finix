@@ -5,13 +5,13 @@
 }: {
   config.user.appearance.wallust = {
     targets =
-      {
+      lib.optionalAttrs config.user.programs.discord.stable.enable {
         "discord-colors" = {
           template = "discord-colors.css";
           target = "~/.config/Vencord/themes/wallust-colors.css";
         };
       }
-      // lib.optionalAttrs (lib.attrByPath ["user" "programs" "discord" "vesktop" "enable"] false config) {
+      // lib.optionalAttrs config.user.programs.discord.vesktop.enable {
         "vesktop-colors" = {
           template = "discord-colors.css";
           target = "~/.config/vesktop/themes/wallust-colors.css";
@@ -30,13 +30,13 @@
         --text-0: {{ foreground }} !important;
         --text-1: {{ color15 }} !important;
         --text-2: {{ color7 }} !important;
-        --text-3: {{ color7 }} !important;
-        --text-4: {{ color7 }} !important;
-        --text-5: {{ cursor }} !important;
+        --text-3: color-mix(in srgb, {{ color7 }} 85%, {{ background }}) !important;
+        --text-4: color-mix(in srgb, {{ color7 }} 60%, {{ background }}) !important;
+        --text-5: color-mix(in srgb, {{ color7 }} 40%, {{ background }}) !important;
 
-        --bg-1: {{ color0 }} !important;
-        --bg-2: {{ color0 }} !important;
-        --bg-3: {{ color0 }} !important;
+        --bg-1: color-mix(in srgb, {{ color8 }} 20%, {{ background }}) !important;
+        --bg-2: color-mix(in srgb, {{ color8 }} 14%, {{ background }}) !important;
+        --bg-3: color-mix(in srgb, {{ color8 }} 8%, {{ background }}) !important;
         --bg-4: {{ background }} !important;
 
         --hover: color-mix(in srgb, {{ color8 }} 10%, transparent) !important;
@@ -168,7 +168,7 @@
         --brand-500: var(--accent-2) !important;
         --blurple-50: var(--accent-2) !important;
         --mention-foreground: var(--accent-1) !important;
-        --mention-background: color-mix(in hsl, var(--accent-2), transparent 90%) !important;
+        --mention-background: color-mix(in srgb, var(--accent-2) 10%, transparent) !important;
         --input-background: var(--bg-3) !important;
         --channel-text-area-placeholder: var(--text-5) !important;
         --deprecated-text-input-bg: var(--bg-3) !important;

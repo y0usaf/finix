@@ -4,6 +4,10 @@
       use-xdg-base-directories = true;
       # dead-cache stall tax when the finix server is off (default 15s x 5).
       connect-timeout = 5;
+      # Dead/unreachable substituters degrade to a local build, not abort the run.
+      fallback = true;
+      # One attempt avoids ~40s stalls from default 5 retries x 5s timeout.
+      download-attempts = 1;
       substituters = [
         # attic on the finix server: push cache for heavy local builds
         # (CUDA-class). LAN first, tailnet fallback when roaming.

@@ -107,6 +107,7 @@ in {
               @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-4.css");
               @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-5.css");
               @import url("file:///home/${userName}/.config/Vencord/themes/system-font.css");
+              @import url("file:///home/${userName}/.config/Vencord/themes/wallust-colors.css");
             '';
           };
         };

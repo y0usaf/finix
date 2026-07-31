@@ -106,7 +106,7 @@ in {
             defaultTheme,
             wallustBin,
           }: ''
-            # Ensure output directories exist (wallust templates write here)
+            # Client config dirs that must exist before first launch (wallust creates its own target parents)
             ${lib.concatMapStringsSep "\n" (dir: "mkdir -p ${dir}") wallustCfg.startupDirs}
 
             ${wallustBin} ${

@@ -212,11 +212,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785205242,
-        "narHash": "sha256-3XlThsyThorMHjXHaJdeCcfV7kt8O1sCZ1HSY5GOG6M=",
+        "lastModified": 1785453957,
+        "narHash": "sha256-T4wAzyyBcRWffBjKF75NcBt++oideKzwsd86buYxrFg=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "bbd1bb461e2daa3d4be0d1d920d97ff3e1777adf",
+        "rev": "8ba5cdc1c98245ff29d9efb026b6076ab55f160a",
         "type": "github"
       },
       "original": {
@@ -834,22 +834,14 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "piAgents": "piAgents",
-        "piAphrodite": "piAphrodite",
-        "piGeckoWebsearch": "piGeckoWebsearch",
-        "piHashline": "piHashline",
-        "piInterview": "piInterview",
-        "piManagement": "piManagement",
-        "piRtk": "piRtk",
-        "piSrc": "piSrc",
-        "piWebfetch": "piWebfetch"
+        "piSrc": "piSrc"
       },
       "locked": {
-        "lastModified": 1785446432,
-        "narHash": "sha256-VcOWeMFJxBcT6xprdcMUI+cUBLWrXoeTOHOeee1xKTI=",
+        "lastModified": 1785504979,
+        "narHash": "sha256-Pv9L/eljldxrCUcQJHE1u5AVSMuhiQYhyq3Obtzj02s=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "3e760e20bb43c0947329c9aa74ec153bb4cff60d",
+        "rev": "a766cee8133ee26de649e1d6347b3af65069100f",
         "type": "github"
       },
       "original": {
@@ -882,139 +874,6 @@
         "url": "ssh://git@github.com/y0usaf/pi-harness.git"
       }
     },
-    "piAgents": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-agents",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-agents",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piAphrodite": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-aphrodite",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-aphrodite",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piGeckoWebsearch": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-gecko-websearch",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-gecko-websearch",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piHashline": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-hashline",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-hashline",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piInterview": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-interview",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-interview",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piManagement": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-management",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-management",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
-    "piRtk": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-rtk",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-rtk",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
-    },
     "piSrc": {
       "flake": false,
       "locked": {
@@ -1031,25 +890,6 @@
         "repo": "pi",
         "type": "github"
       }
-    },
-    "piWebfetch": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-flake",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./extensions/pi-webfetch",
-        "type": "path"
-      },
-      "original": {
-        "path": "./extensions/pi-webfetch",
-        "type": "path"
-      },
-      "parent": [
-        "pi-flake"
-      ]
     },
     "pyproject-build-systems": {
       "inputs": {
