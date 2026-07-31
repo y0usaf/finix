@@ -4,6 +4,34 @@
 # can read it. Entries shared with other hosts live in ../common/persist.nix.
 {config, ...}: let
   common = import ../common/persist.nix;
+  gameSaves = [
+    "dolphin-emu"
+    "Cemu"
+    "shipofharkinian"
+    "bolt-launcher"
+    "osu"
+    "wine"
+    "skua-wine"
+    "balatroai"
+    "Celeste"
+    "CassetteBeasts"
+    "Brotato"
+    "Baba_Is_You"
+    "binding of isaac rebirth"
+    "HallsOfTorment"
+    "YourOnlyMoveIsHUSTLE"
+    "Rocket League"
+    "SteamWorld Heist"
+    "shapez.io"
+    "lootplot"
+    "hackerpg"
+    "com.overboy.noobsarecoming"
+    "Noobs Are Coming (Save)"
+    ".renpy"
+    ".Wurst encryption"
+    "aspyr-media"
+    "Smart Code ltd"
+  ];
 in {
   environment.persistence."/persist" = {
     hideMounts = true;
@@ -53,7 +81,7 @@ in {
           then [".config/vesktop" ".config/Vencord"]
           else []
         )
-        ++ [
+        ++ ([
           # NOTE: DCIM, Music, Pictures, .local/share/Steam are dedicated
           # btrfs subvols mounted on top of /home — NOT listed here.
           # @config/@local were dissolved into the granular allowlists below;
@@ -73,7 +101,6 @@ in {
           ".pki"
           ".aws"
           ".mcp-auth"
-          ".git"
 
           # AI / dev tooling state
           ".claude-code-router"
@@ -88,19 +115,6 @@ in {
           ".supabase"
           ".n8n-mcp"
           ".obsidian"
-
-          # Toolchains
-          ".cargo"
-          ".rustup"
-          ".bun"
-          ".npm"
-          ".java"
-          ".android"
-          ".vcpkg"
-          ".nimble"
-          ".biome"
-          ".jdeploy"
-          ".triton"
 
           # Gaming / apps
           ".steam"
@@ -124,10 +138,6 @@ in {
           ".config/net.imput.helium"
 
           # Chat / comms (bulk = cache; sessions live inside)
-          ".config/discord"
-
-          ".config/vesktop"
-          ".config/Vencord" # mutable settings/quickCss; themes regen
           ".config/Slack"
 
           # Sync (device keys + index — critical)
@@ -204,36 +214,7 @@ in {
           ".local/share/phi"
 
           # Emulation / gaming (saves!)
-          ".local/share/dolphin-emu"
-
-          ".local/share/Cemu"
-          ".local/share/shipofharkinian"
-          ".local/share/bolt-launcher"
-
-          ".local/share/osu"
-          ".local/share/wine"
-          ".local/share/skua-wine"
-
-          ".local/share/balatroai"
-          ".local/share/Celeste"
-          ".local/share/CassetteBeasts"
-          ".local/share/Brotato"
-          ".local/share/Baba_Is_You"
-          ".local/share/binding of isaac rebirth"
-          ".local/share/HallsOfTorment"
-          ".local/share/YourOnlyMoveIsHUSTLE"
-          ".local/share/Rocket League"
-          ".local/share/SteamWorld Heist"
-          ".local/share/shapez.io"
-          ".local/share/lootplot"
-
-          ".local/share/hackerpg"
-          ".local/share/com.overboy.noobsarecoming"
-          ".local/share/Noobs Are Coming (Save)"
-          ".local/share/.renpy"
-          ".local/share/.Wurst encryption"
-          ".local/share/aspyr-media"
-          ".local/share/Smart Code ltd"
+        ] ++ builtins.map (n: ".local/share/${n}") gameSaves ++ [
 
           # Apps
 
@@ -242,7 +223,6 @@ in {
           ".local/share/nicotine"
           ".local/share/slskd"
 
-          ".local/share/nvim" # plugins/mason
           ".local/share/mpd"
           ".local/share/waydroid"
 
@@ -309,11 +289,8 @@ in {
 
           # Caches worth keeping (shader/compile caches; .cache itself ephemeral)
 
-          ".cache/wallust"
           ".cache/ekko"
-          ".cache/librewolf"
-          ".cache/mozilla"
-        ];
+        ]);
       files =
         common.userFiles
         ++ [

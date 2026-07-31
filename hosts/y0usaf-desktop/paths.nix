@@ -10,7 +10,7 @@ in {
       "file://${homeDir}/cu-workbench/repos CookUnity"
       "file://${homeDir}/Music Music"
       "file://${homeDir}/DCIM Pictures"
-      "file://${homeDir}/nixos NixOS"
+      "file://${homeDir}/finix Finix"
       "file:///tmp tmp"
     ];
   };

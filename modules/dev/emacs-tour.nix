@@ -73,11 +73,8 @@
         (global-set-key (kbd "C-c c") #'org-capture)
         (global-set-key (kbd "C-c a") #'org-agenda)
 
-        ;; The whole system config as one literate document: nixos.org is
-        ;; the editing surface; saving it tangles the .nix files back out.
+        ;; Keep Org buffers convenient for editing Finix configuration.
         (add-hook 'org-mode-hook #'org-auto-tangle-mode)
-        (global-set-key (kbd "C-c n")
-                        (lambda () (interactive) (find-file "~/finix/nixos.org")))
 
         (add-hook 'org-mode-hook #'org-modern-mode)
         (add-hook 'org-mode-hook #'olivetti-mode)
@@ -153,7 +150,7 @@
         write PhD theses, and track their entire lives in files like this.
 
         * Magit: git as it should have been
-        Run this block (=C-c C-c=) to open Magit on your NixOS config:
+        Run this block (=C-c C-c=) to open Magit on your Finix config:
 
         #+begin_src emacs-lisp
         (magit-status "~/finix")
@@ -164,15 +161,11 @@
         =q= quits. Most people who try Magit never touch the git CLI again.
 
         * The shell is in here too
-        #+begin_src shell :results output
-        nixos-version
-        #+end_src
+        Run shell blocks with =C-c C-c= to capture their output into your
+        document. This is how people write executable, reproducible notes —
+        the code and the prose live in one file.
 
-        =C-c C-c=. Shell output, captured into your document. This is how
-        people write executable, reproducible notes — the code and the
-        prose live in one file.
-
-        * Your NixOS repo is org'd
+        * Your Finix repo is org'd
         =~/finix/TODO.org= is wired into this Emacs as a project inbox:
 
         - =C-c c= from *anywhere* — capture a task (=t=), idea (=i=), or
@@ -185,11 +178,10 @@
         The habit that makes people live here: mid-task thought appears,
         =C-c c t=, type it, =C-c C-c=, thought is filed, flow unbroken.
 
-        And the deep end: =C-c n= opens =~/finix/nixos.org= — your *entire
-        system configuration as one literate document*. Every .nix file is
-        a source block; =C-c '= edits one with full nix-mode; saving the
-        org file tangles them all back to disk. Fold it with =S-TAB= and
-        your OS reads like a book's table of contents.
+        And the deep end: your *entire system configuration* is organized
+        under =~/finix=. Every .nix file is a source block; =C-c '= edits one
+        with full nix-mode. Fold it with =S-TAB= and your OS reads like a
+        book's table of contents.
 
         * Recess
         - =M-x tetris= — yes, really
