@@ -33,7 +33,7 @@
     # Data (dev excluded — real @dev subvol, fileSystems entry)
     "Documents"
     "Tokens"
-    "nixos"
+    "finix"
 
     # Identity / credentials
     ".ssh"
