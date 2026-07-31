@@ -28,7 +28,7 @@
           autoUpdate = true;
           autoUpdateNotification = true;
           useQuickCss = true;
-          enabledThemes = [];
+          enabledThemes = ["wallust-colors.css"];
           themeLinks = [];
           frameless = false;
           transparent = false;
