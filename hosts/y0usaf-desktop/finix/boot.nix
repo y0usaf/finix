@@ -100,6 +100,18 @@ in {
 
     enrollConfig = true;
     maxGenerations = 20;
+
+    # 2026-07-31: NVRAM-loss/checksum-panic parachute; mirror the server's
+    # proven fallback pattern with a golden copy of the running system.
+    extraEntries = ''
+      /Finix golden
+        protocol: linux
+        comment: pinned fallback from the running system
+        kernel_path: boot():/EFI/finix/kernels/golden/kernel
+        cmdline: init=/nix/store/ralz7prz3545kixkfwag61ky42z1j8b9-finix-system/init nvidia-drm.modeset=1 nvidia-drm.fbdev=1 nvidia.NVreg_UsePageAttributeTable=1 nvidia.NVreg_EnableResizableBar=1 nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1 nvidia_modeset.disable_vrr_memclk_switch=1 nvidia.NVreg_TemporaryFilePath=/var/tmp amd_pstate=active mitigations=off console=tty0 panic=30 oops=panic softlockup_panic=1 hung_task_panic=1
+        module_path: boot():/EFI/finix/kernels/golden/initrd
+    '';
+
     settings = {
       timeout = 5;
       hash_mismatch_panic = true;

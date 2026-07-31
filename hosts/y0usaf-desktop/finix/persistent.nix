@@ -287,6 +287,10 @@ in {
         # dead-cache stall tax: default 15s x 5 retries when the server is
         # off. 5s keeps the fallback fast; connect-only, transfers unaffected.
         connect-timeout = 5;
+        # Dead/unreachable substituters degrade to a local build, not abort the run.
+        fallback = true;
+        # One attempt avoids ~40s stalls from default 5 retries x 5s timeout.
+        download-attempts = 1;
       };
     };
   };
