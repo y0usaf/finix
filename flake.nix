@@ -159,9 +159,7 @@
     inherit (nixpkgs) lib;
 
     # Phoenix: main is finix-only. The desktop's packages/dotfiles reach
-    # finix directly through finix/compat-import.nix — there is no NixOS
-    # desktop eval anymore. NixOS survives only as the server's on-disk
-    # rescue system (+ nixos-legacy branch for everything else).
+    # finix directly through finix/compat-import.nix.
     finixStaging = import ./finix {inherit inputs system;};
   in {
     nixosConfigurations = {
@@ -169,49 +167,9 @@
       # finix (via finix's nixos-compat: config.system.build.toplevel).
       y0usaf-desktop = finixStaging.desktopPersistent;
 
-      # Server NixOS = on-disk rescue for the finix server.
-      y0usaf-server = ({
-      domains,
-      extraModules ? [],
-      hostDir,
-    }:
-      lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          flakeInputs = inputs;
-          inherit finixStaging;
-        };
-        modules =
-          # hostDir/finix/ subtrees are finix modules (different module
-          # universe) — NixOS must never import them.
-          builtins.filter (m: !(builtins.isPath m && lib.hasInfix "/finix/" (toString m)))
-          ((import ./recursivelyImport.nix {
-              inherit (lib) hasSuffix;
-              inherit (lib.filesystem) listFilesRecursive;
-            }) (
-              lib.concatMap (domain:
-                {
-                  core = [./modules/core];
-                  desktop = [./modules/desktop];
-                  shell = [./modules/shell];
-                  tools = [./modules/tools];
-                  user-services = [./modules/user-services];
-                  dev = [./modules/dev];
-                  gaming = [./modules/gaming];
-                }."${domain}")
-              domains
-              ++ [
-                hostDir
-              ]
-              ++ extraModules
-            ));
-      }) {
-        hostDir = ./hosts/y0usaf-server;
-        domains = ["core" "shell" "tools" "user-services" "dev"];
-      };
-
-      # Finix alias so `nh os switch -H <name>` resolves it: nh only reads
-      # nixosConfigurations (hostname-keyed), never finixConfigurations.
+      # Finix is the installed server system; retain the hostname alias for
+      # tools that only inspect nixosConfigurations.
+      y0usaf-server = finixStaging.serverPersistent;
       y0usaf-server-finix = finixStaging.serverPersistent;
     };
 
