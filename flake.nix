@@ -1,5 +1,5 @@
 {
-  description = "Finix — y0usaf's systems (NixOS on nixos-legacy branch)";
+  description = "Finix — y0usaf's finix-only systems; the historical NixOS tree lives on the nixos-legacy branch";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
