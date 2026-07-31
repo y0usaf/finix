@@ -11,6 +11,9 @@
   ...
 }: let
   diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
+  takeover = import ./takeover.nix;
+  deadmanEntry = if takeover then "Finix" else "Limine";
+  deadmanDestination = if takeover then "island rescue" else "NixOS";
 
   # Boot diagnostics, ported from the trial config after the 2026-07-15
   # warm-reboot hang left zero logs (died before syslog/binds). Markers
@@ -105,18 +108,23 @@ in {
     systemPackages = [
       pkgs.nix
       pkgs.efibootmgr
-      (pkgs.writeShellScriptBin "boot-nixos" ''
-        set -eu
-        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused]}
-        [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
-        mountpoint -q /sys/firmware/efi/efivars \
-          || mount -t efivarfs efivarfs /sys/firmware/efi/efivars
-        lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
-        [ -n "$lim" ] || { echo "boot-nixos: no Limine EFI entry" >&2; exit 1; }
-        efibootmgr -q -n "$lim"
-        echo "boot-nixos: BootNext=Boot$lim; rebooting into NixOS rescue"
-        exec /run/current-system/sw/bin/initctl reboot
-      '')
+      (pkgs.writeShellScriptBin "boot-nixos" (
+        if takeover then ''
+          echo "boot-nixos: NixOS rescue was pruned by the limine takeover; rescue = island golden slot via the Finix EFI entry / console menu" >&2
+          exit 1
+        '' else ''
+          set -eu
+          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused]}
+          [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
+          mountpoint -q /sys/firmware/efi/efivars \
+            || mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+          lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
+          [ -n "$lim" ] || { echo "boot-nixos: no Limine EFI entry" >&2; exit 1; }
+          efibootmgr -q -n "$lim"
+          echo "boot-nixos: BootNext=Boot$lim; rebooting into NixOS rescue"
+          exec /run/current-system/sw/bin/initctl reboot
+        '' )
+      )
     ];
   };
 
@@ -282,7 +290,9 @@ in {
         log = true;
       };
       bootnext-deadman = {
-        description = "EFI BootNext dead-man switch (fall home to NixOS)";
+        # Post-flip the island IS the rescue path. BootNext addresses EFI
+        # entries, not Limine menu slots, so it cannot target the golden slot.
+        description = "EFI BootNext dead-man switch (fall home to ${deadmanDestination})";
         command = "${pkgs.writeShellScript "persistent-bootnext-deadman" ''
           set -u
           export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnugrep pkgs.gnused pkgs.iproute2]}
