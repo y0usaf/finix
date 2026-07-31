@@ -57,18 +57,18 @@
           (org-babel-do-load-languages
            'org-babel-load-languages
            '((emacs-lisp . t) (shell . t))))
-        ;; ~/nixos as an org project: capture from anywhere, agenda as dashboard
-        (setq org-directory "~/nixos"
-              org-default-notes-file "~/nixos/TODO.org"
-              org-agenda-files '("~/nixos/TODO.org")
+        ;; ~/finix as an org project: capture from anywhere, agenda as dashboard
+        (setq org-directory "~/finix"
+              org-default-notes-file "~/finix/TODO.org"
+              org-agenda-files '("~/finix/TODO.org")
               org-log-done 'time
               org-capture-templates
-              '(("t" "Nix task" entry (file+headline "~/nixos/TODO.org" "Tasks")
+              '(("t" "Nix task" entry (file+headline "~/finix/TODO.org" "Tasks")
                  "* TODO %?\n%U")
-                ("i" "Idea" entry (file+headline "~/nixos/TODO.org" "Ideas")
+                ("i" "Idea" entry (file+headline "~/finix/TODO.org" "Ideas")
                  "* %?\n%U")
                 ("p" "Package to try" checkitem
-                 (file+headline "~/nixos/TODO.org" "Packages to try")
+                 (file+headline "~/finix/TODO.org" "Packages to try")
                  "- [ ] %?")))
         (global-set-key (kbd "C-c c") #'org-capture)
         (global-set-key (kbd "C-c a") #'org-agenda)
@@ -77,7 +77,7 @@
         ;; the editing surface; saving it tangles the .nix files back out.
         (add-hook 'org-mode-hook #'org-auto-tangle-mode)
         (global-set-key (kbd "C-c n")
-                        (lambda () (interactive) (find-file "~/nixos/nixos.org")))
+                        (lambda () (interactive) (find-file "~/finix/nixos.org")))
 
         (add-hook 'org-mode-hook #'org-modern-mode)
         (add-hook 'org-mode-hook #'olivetti-mode)
@@ -156,7 +156,7 @@
         Run this block (=C-c C-c=) to open Magit on your NixOS config:
 
         #+begin_src emacs-lisp
-        (magit-status "~/nixos")
+        (magit-status "~/finix")
         #+end_src
 
         In the Magit buffer: =TAB= expands any file to show its diff, =s=
@@ -173,7 +173,7 @@
         prose live in one file.
 
         * Your NixOS repo is org'd
-        =~/nixos/TODO.org= is wired into this Emacs as a project inbox:
+        =~/finix/TODO.org= is wired into this Emacs as a project inbox:
 
         - =C-c c= from *anywhere* — capture a task (=t=), idea (=i=), or
           package to try (=p=); it files itself into TODO.org and drops you
@@ -185,7 +185,7 @@
         The habit that makes people live here: mid-task thought appears,
         =C-c c t=, type it, =C-c C-c=, thought is filed, flow unbroken.
 
-        And the deep end: =C-c n= opens =~/nixos/nixos.org= — your *entire
+        And the deep end: =C-c n= opens =~/finix/nixos.org= — your *entire
         system configuration as one literate document*. Every .nix file is
         a source block; =C-c '= edits one with full nix-mode; saving the
         org file tangles them all back to disk. Fold it with =S-TAB= and
