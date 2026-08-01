@@ -51,8 +51,6 @@ in {
       # --- AI coding agents (no native XDG support) ---
       CLAUDE_CONFIG_DIR = "${xdgData}/claude"; # also absorbs ~/.claude.json
       CODEX_HOME = "${xdgData}/codex";
-      PI_CODING_AGENT_DIR = "${xdgData}/pi/agent";
-      PI_VCC_CONFIG_PATH = "${xdgData}/pi/agent/pi-vcc-config.json"; # vcc ext ignores PI_CODING_AGENT_DIR
       KIMI_CODE_HOME = "${xdgData}/kimi-code";
 
       # --- Databases / REPLs ---

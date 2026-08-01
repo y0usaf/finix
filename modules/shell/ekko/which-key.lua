@@ -321,7 +321,7 @@ local function pane_on_key(_state, bytes)
 end
 
 -- The leader chord (ctrl+b by default) and the stock leader map. The
--- builtin leader is disabled in config.toml, so these live here. Keys are
+-- builtin leader is disabled in init.lua, so these live here. Keys are
 -- pinned to match the user's config; rebind by editing this table.
 local LEADER_CHORD = "ctrl+b"
 local STOCK_MAP = {

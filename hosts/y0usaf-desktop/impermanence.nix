@@ -68,7 +68,10 @@ in {
         )
         ++ (
           if config.user.programs.librewolf.enable
-          then [".librewolf" ".config/librewolf"]
+          # LibreWolf's non-Flatpak XDG layout is
+          # ~/.config/librewolf/librewolf. Persist its profile/config, but
+          # deliberately leave ~/.cache/librewolf ephemeral.
+          then [".config/librewolf/librewolf"]
           else []
         )
         ++ (
@@ -82,215 +85,216 @@ in {
           else []
         )
         ++ ([
-          # NOTE: DCIM, Music, Pictures, .local/share/Steam are dedicated
-          # btrfs subvols mounted on top of /home — NOT listed here.
-          # @config/@local were dissolved into the granular allowlists below;
-          # anything not listed is ephemeral (recoverable from
-          # /btrfs/_premigration/* snapshots until those are deleted).
+            # NOTE: DCIM, Music, Pictures, .local/share/Steam are dedicated
+            # btrfs subvols mounted on top of /home — NOT listed here.
+            # @config/@local were dissolved into the granular allowlists below;
+            # anything not listed is ephemeral (recoverable from
+            # /btrfs/_premigration/* snapshots until those are deleted).
 
-          # Data
-          "Downloads"
-          "Desktop"
-          "Videos"
-          "Games"
-          "cu-workbench"
-          "inscend"
-          "shoji_wm"
+            # Data
+            "Downloads"
+            "Desktop"
+            "Videos"
+            "Games"
+            "cu-workbench"
+            "inscend"
+            "shoji_wm"
 
-          # Identity / credentials
-          ".pki"
-          ".aws"
-          ".mcp-auth"
+            # Identity / credentials
+            ".pki"
+            ".aws"
+            ".mcp-auth"
 
-          # AI / dev tooling state
-          ".claude-code-router"
-          ".gemini"
-          ".crush"
-          ".cookunity"
-          ".forge"
-          ".nexau"
-          ".phi"
+            # AI / dev tooling state
+            ".claude-code-router"
+            ".gemini"
+            ".crush"
+            ".cookunity"
+            ".forge"
+            ".nexau"
+            ".phi"
 
-          ".slack"
-          ".supabase"
-          ".n8n-mcp"
-          ".obsidian"
+            ".slack"
+            ".supabase"
+            ".n8n-mcp"
+            ".obsidian"
 
-          # Gaming / apps
-          ".steam"
-          ".SteamCloud"
+            # Gaming / apps
+            ".steam"
+            ".SteamCloud"
 
-          ".stremio-server"
-          ".slskd"
+            ".stremio-server"
+            ".slskd"
 
-          ### ~/.config — mutable app state only. Nix/manzil-generated configs
-          ### (bash rc, niri, foot, wallust, gtk, mpv, git, gh config,
-          ### npm/bun/docker/python rc, pi, mangohud, ...) regenerate on switch.
+            ### ~/.config — mutable app state only. Nix/manzil-generated configs
+            ### (bash rc, niri, foot, wallust, gtk, mpv, git, gh config,
+            ### npm/bun/docker/python rc, pi, mangohud, ...) regenerate on switch.
 
-          # Credentials / identity
-          ".config/age"
-          ".config/aws"
-          ".config/gcloud"
-          ".config/ngrok"
+            # Credentials / identity
+            ".config/age"
+            ".config/aws"
+            ".config/gcloud"
+            ".config/ngrok"
 
-          # Browsers
-          ".config/chromium"
-          ".config/net.imput.helium"
+            # Browsers
+            ".config/chromium"
+            ".config/net.imput.helium"
 
-          # Chat / comms (bulk = cache; sessions live inside)
-          ".config/Slack"
+            # Chat / comms (bulk = cache; sessions live inside)
+            ".config/Slack"
 
-          # Sync (device keys + index — critical)
-          ".config/syncthing"
+            # Sync (device keys + index — critical)
+            ".config/syncthing"
 
-          # AI / editors / IDEs
-          ".config/AionUi"
+            # AI / editors / IDEs
+            ".config/AionUi"
 
-          ".config/Claude"
-          ".config/Codex"
-          ".config/opencode"
-          ".config/manicode"
-          ".config/agent-harness"
-          ".config/pi-harness"
-          ".config/crush"
-          ".config/phi"
+            ".config/Claude"
+            ".config/Codex"
+            ".config/opencode"
+            ".config/manicode"
+            ".config/agent-harness"
+            ".config/pi-harness"
+            ".config/crush"
+            ".config/phi"
 
-          # Desktop apps
-          ".config/obsidian"
-          ".config/obs-studio"
-          ".config/BambuStudio"
-          ".config/OrcaSlicer"
-          ".config/GIMP"
-          ".config/Pinta"
+            # Desktop apps
+            ".config/obsidian"
+            ".config/obs-studio"
+            ".config/BambuStudio"
+            ".config/OrcaSlicer"
+            ".config/GIMP"
+            ".config/Pinta"
 
-          ".config/stoat-desktop"
-          ".config/qBittorrent"
-          ".config/nicotine"
-          ".config/slskd"
+            ".config/stoat-desktop"
+            ".config/qBittorrent"
+            ".config/nicotine"
+            ".config/slskd"
 
-          ".config/epy"
-          ".config/cmus" # library/playlists
+            ".config/epy"
+            ".config/cmus" # library/playlists
 
-          ".config/GitHub Desktop"
+            ".config/GitHub Desktop"
 
-          # Work
-          ".config/gws-inscend"
+            # Work
+            ".config/gws-inscend"
 
-          ".config/Frame"
-          ".config/intent"
-          ".config/herdr"
+            ".config/Frame"
+            ".config/intent"
+            ".config/herdr"
 
-          ".config/snowflake"
-          ".config/camset"
+            ".config/snowflake"
+            ".config/camset"
 
-          # Gaming
-          ".config/Cemu"
-          ".config/unity3d" # game prefs
-          ".config/bolt-launcher"
+            # Gaming
+            ".config/Cemu"
+            ".config/unity3d" # game prefs
+            ".config/bolt-launcher"
 
-          # Misc state
-          ".config/dconf"
-          ".config/nix" # possible access-tokens
-          ".config/ekko" # config.toml + extensions (app-owned)
+            # Misc state
+            ".config/dconf"
+            ".config/nix" # possible access-tokens
+            ".config/ekko" # config.toml + extensions (app-owned)
 
-          ### ~/.local/share — real data/saves. Caches (go, gradle, pnpm, uv,
-          ### NuGet, yarn, pyenv, virtualenv, Trash, ...) are ephemeral.
+            ### ~/.local/share — real data/saves. Caches (go, gradle, pnpm, uv,
+            ### NuGet, yarn, pyenv, virtualenv, Trash, ...) are ephemeral.
 
-          # Keys / identity
-          ".local/share/gnupg"
-          ".local/share/keyrings"
-          ".local/share/pki"
+            # Keys / identity
+            ".local/share/gnupg"
+            ".local/share/keyrings"
+            ".local/share/pki"
 
-          # Big data (flagged: prune candidates, but keep)
-          ".local/share/PrismLauncher" # 55G — minecraft worlds, irreplaceable
-          ".local/share/bun" # globals only (supabase/vercel/...); install/cache purged, regenerates
+            # Big data (flagged: prune candidates, but keep)
+            ".local/share/PrismLauncher" # 55G — minecraft worlds, irreplaceable
+            ".local/share/bun" # globals only (supabase/vercel/...); install/cache purged, regenerates
 
-          ".local/share/cargo"
-          ".local/share/rustup"
-          ".local/share/npm" # global prefix
-          ".local/share/containers" # podman
-          ".local/share/opencode"
+            ".local/share/cargo"
+            ".local/share/rustup"
+            ".local/share/npm" # global prefix
+            ".local/share/containers" # podman
+            ".local/share/opencode"
 
-          ".local/share/phi"
+            ".local/share/phi"
 
-          # Emulation / gaming (saves!)
-        ] ++ builtins.map (n: ".local/share/${n}") gameSaves ++ [
+            # Emulation / gaming (saves!)
+          ]
+          ++ builtins.map (n: ".local/share/${n}") gameSaves
+          ++ [
+            # Apps
 
-          # Apps
+            ".local/share/stremio"
+            ".local/share/qBittorrent" # BT_backup resume data
+            ".local/share/nicotine"
+            ".local/share/slskd"
 
-          ".local/share/stremio"
-          ".local/share/qBittorrent" # BT_backup resume data
-          ".local/share/nicotine"
-          ".local/share/slskd"
+            ".local/share/mpd"
+            ".local/share/waydroid"
 
-          ".local/share/mpd"
-          ".local/share/waydroid"
+            ".local/share/bambu-studio"
+            ".local/share/bambustudio"
+            ".local/share/orca-slicer"
+            ".local/share/Vial"
 
-          ".local/share/bambu-studio"
-          ".local/share/bambustudio"
-          ".local/share/orca-slicer"
-          ".local/share/Vial"
+            ".local/share/fonts"
+            ".local/share/icons"
+            ".local/share/sounds"
+            ".local/share/applications"
+            ".local/share/android"
 
-          ".local/share/fonts"
-          ".local/share/icons"
-          ".local/share/sounds"
-          ".local/share/applications"
-          ".local/share/android"
+            ".local/share/mcp-trader"
+            ".local/share/music-get"
+            ".local/share/polybot"
+            ".local/share/rtk"
+            ".local/share/tirith"
+            ".local/share/vibe-kanban"
 
-          ".local/share/mcp-trader"
-          ".local/share/music-get"
-          ".local/share/polybot"
-          ".local/share/rtk"
-          ".local/share/tirith"
-          ".local/share/vibe-kanban"
+            ".local/share/superfile"
 
-          ".local/share/superfile"
+            ".local/share/charm"
+            ".local/share/crush"
+            # .local/share/claude comes from hosts/common/persist.nix
 
-          ".local/share/charm"
-          ".local/share/crush"
-          # .local/share/claude comes from hosts/common/persist.nix
+            ".local/share/ai.opencode.desktop"
+            ".local/share/app.codeg"
+            ".local/share/jean"
+            ".local/share/com.jean.desktop"
 
-          ".local/share/ai.opencode.desktop"
-          ".local/share/app.codeg"
-          ".local/share/jean"
-          ".local/share/com.jean.desktop"
+            ".local/share/com.panes.app"
 
-          ".local/share/com.panes.app"
+            ".local/share/com.vercel.cli"
+            ".local/share/com.vercel.token"
 
-          ".local/share/com.vercel.cli"
-          ".local/share/com.vercel.token"
+            ".local/share/syncthing"
 
-          ".local/share/syncthing"
+            ### ~/.local/state — histories & app state
+            ".local/state/bash" # shell history
 
-          ### ~/.local/state — histories & app state
-          ".local/state/bash" # shell history
+            ".local/state/nvim" # shada/undo
+            ".local/state/codex"
+            ".local/state/opencode"
+            ".local/state/agent-harness"
+            ".local/state/pi-harness"
+            ".local/state/pi-rs-parallel"
+            ".local/state/ekko-pi"
+            ".local/state/ekko-parallel"
+            ".local/state/syncthing" # index
+            ".local/state/wireplumber" # audio device volumes
 
-          ".local/state/nvim" # shada/undo
-          ".local/state/codex"
-          ".local/state/opencode"
-          ".local/state/agent-harness"
-          ".local/state/pi-harness"
-          ".local/state/pi-rs-parallel"
-          ".local/state/ekko-pi"
-          ".local/state/ekko-parallel"
-          ".local/state/syncthing" # index
-          ".local/state/wireplumber" # audio device volumes
+            ".local/state/lazygit"
+            ".local/state/manzil"
+            ".local/state/bayt"
+            ".local/state/herdr"
+            ".local/state/sayl"
 
-          ".local/state/lazygit"
-          ".local/state/manzil"
-          ".local/state/bayt"
-          ".local/state/herdr"
-          ".local/state/sayl"
+            ".local/state/music-get"
+            ".local/state/superfile"
 
-          ".local/state/music-get"
-          ".local/state/superfile"
+            ".local/state/zap"
 
-          ".local/state/zap"
+            # Caches worth keeping (shader/compile caches; .cache itself ephemeral)
 
-          # Caches worth keeping (shader/compile caches; .cache itself ephemeral)
-
-          ".cache/ekko"
-        ]);
+            ".cache/ekko"
+          ]);
       files =
         common.userFiles
         ++ [

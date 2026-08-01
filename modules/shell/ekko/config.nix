@@ -55,30 +55,38 @@ in {
       # Unbind project navigation: "none" is intentionally unparseable —
       # resolve_chords skips the action entirely (empty string would fall
       # back to the defaults instead).
-      ".config/ekko/config.toml" = {
+      ".config/ekko/init.lua" = {
         text = ''
-          [extensions]
-          disabled = ["ekko-builtins.leader", "ekko-builtins.statusbar", "ekko-builtins.sidebar", "ekko-builtins.panes", "ekko-builtins.keybindings"]
-
-          # The entire stock chord set is disabled above; [keybinds] has
-          # nothing left to suppress.
-
-          # Zellij-style pane borders: a full box frame around every pane,
-          # the focused pane's frame tinted with the theme accent. Swap to
-          # "compact" for zellij's compact mode (single shared boundary
-          # lines with junction glyphs). The daemon owns the canvas, so
-          # this takes effect for newly started sessions (ekko kill).
-          [ui]
-          pane_borders = "frame"
-          # Panes are auto-tiled to exactly equal areas by recursively halving
-          # along the longer axis, pixel-aware because a terminal cell is about
-          # twice as tall as it is wide: 3 panes are full-height columns and 4
-          # panes are a 2x2 grid. The requested split axis is ignored and the
-          # whole layout recomputes on every add or close. The daemon owns the
-          # canvas, so this takes effect for newly started sessions (ekko kill).
-          pane_layout = "equal"
-          # Drives the client's animation tick (default 80ms = 12.5fps; 33ms = 30fps).
-          animation_interval_ms = 33
+          return {
+            extensions = {
+              -- The entire stock chord set is disabled above; [keybinds] has
+              -- nothing left to suppress.
+              disabled = {
+                "ekko-builtins.leader",
+                "ekko-builtins.statusbar",
+                "ekko-builtins.sidebar",
+                "ekko-builtins.panes",
+                "ekko-builtins.keybindings",
+              },
+            },
+            ui = {
+              -- Zellij-style pane borders: a full box frame around every pane,
+              -- the focused pane's frame tinted with the theme accent. Swap to
+              -- "compact" for zellij's compact mode (single shared boundary
+              -- lines with junction glyphs). The daemon owns the canvas, so
+              -- this takes effect for newly started sessions (ekko kill).
+              pane_borders = "frame",
+              -- Panes are auto-tiled to exactly equal areas by recursively halving
+              -- along the longer axis, pixel-aware because a terminal cell is about
+              -- twice as tall as it is wide: 3 panes are full-height columns and 4
+              -- panes are a 2x2 grid. The requested split axis is ignored and the
+              -- whole layout recomputes on every add or close. The daemon owns the
+              -- canvas, so this takes effect for newly started sessions (ekko kill).
+              pane_layout = "equal",
+              -- Drives the client's animation tick (default 80ms = 12.5fps; 33ms = 30fps).
+              animation_interval_ms = 33,
+            },
+          }
         '';
       };
     };
