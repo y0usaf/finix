@@ -4,76 +4,13 @@
   ...
 }: let
   inherit (config) user;
-  claudeCodeCfg = user.dev.claude-code;
-  ccSettings = {
-    includeCoAuthoredBy = false;
-    promptSuggestionEnabled = false;
-    skipDangerousModePermissionPrompt = true;
-    # Standing opt-in: xhigh effort + dynamic-workflow orchestration,
-    # so the "ultracode" prompt keyword isn't needed each turn.
-    ultracode = true;
-    permissions = {
-      defaultMode = "bypassPermissions";
-    };
-    env = {
-      DISABLE_TELEMETRY = "1";
-      CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
-    };
-  };
 in {
-  config = lib.mkIf claudeCodeCfg.enable {
-    manzil.users."${user.name}".files = {
-      ".local/share/claude/on-agent-need-attention.wav" = {
-        source = ./assets/tuturu.ogg;
-      };
-
-      ".local/share/claude/on-agent-complete.wav" = {
-        source = ./assets/tuturu.ogg;
-      };
-
-      ".local/share/claude/CLAUDE.md" = {
-        text = ''
-          <system>
-            <environment>NixOS</environment>
-            <rules>
-              <rule>Use <code>nix shell -p <package></code> to run tools not on the system.</rule>
-              <rule>Use <code>bun</code> and <code>bunx</code> instead of npm, npx, or yarn.</rule>
-              <rule>Use CLIs for external services (e.g. linear, vercel, gh) over API calls or web interfaces.</rule>
-              <rule>For Linear tasks, use the <code>linear</code> CLI and do not use a Linear MCP server.</rule>
-            </rules>
-          </system>
-        '';
-      };
-
-      ".local/share/claude/settings.json" = {
-        generator = lib.generators.toJSON {};
-        value =
-          {
-            inherit (claudeCodeCfg) model effortLevel extraKnownMarketplaces;
-            inherit
-              (ccSettings)
-              includeCoAuthoredBy
-              permissions
-              promptSuggestionEnabled
-              skipDangerousModePermissionPrompt
-              ;
-            # Real auto-memory toggle. The schema key is the top-level boolean
-            # `autoMemoryEnabled` (defaults to true in Claude Code); the old
-            # `memory = { enabled = false; }` key was a silent no-op.
-            inherit (claudeCodeCfg.memory) autoMemoryEnabled;
-            env =
-              ccSettings.env
-              // {
-                CLAUDE_CODE_SUBAGENT_MODEL = claudeCodeCfg.subagentModel;
-              }
-              // lib.optionalAttrs claudeCodeCfg.memory.disableClaudeMdFiles {
-                CLAUDE_CODE_DISABLE_CLAUDE_MDS = "1";
-              };
-            enabledPlugins = lib.filterAttrs (_: enabled: enabled) claudeCodeCfg.enabledPlugins;
-          }
-          // lib.optionalAttrs (claudeCodeCfg.memory.autoMemoryDirectory != null) {
-            inherit (claudeCodeCfg.memory) autoMemoryDirectory;
-          };
+  config = lib.mkIf config.user.dev.claude-code.enable {
+    manzil.users."${user.name}".files.".local/share/claude/settings.json" = {
+      generator = lib.generators.toJSON {};
+      value = {
+        permissions.defaultMode = "bypassPermissions";
+        skipDangerousModePermissionPrompt = true;
       };
     };
   };
