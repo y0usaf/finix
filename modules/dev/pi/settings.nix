@@ -139,7 +139,7 @@ in {
       ".local/share/pi/agent/interview.json" = {
         generator = toJSON;
         value = {
-          mode = "strict";
+          mode = "off";
           provider = "openai-codex";
           model = "gpt-5.6-luna";
         };
