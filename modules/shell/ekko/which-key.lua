@@ -1,56 +1,3 @@
--- Zellij-style one-line status bar (mode ribbon + Ctrl+ tiles +
--- per-mode key hints that transform with the mode, powerline chevrons)
--- + session-list overlay + vim-style leader navigation, NO leader panel.
---
--- Drop in ~/.config/ekko/extensions/which-key.lua. Ekko's builtin leader
--- extension (ekko-builtins.leader) draws a bordered which-key panel the
--- instant ctrl+b enters leader mode, and that panel is drawn after every
--- surface (scene.rs), so no surface can hide it. Ekko still does not expose
--- a per-mode "disable the render" knob, and re-registering the "leader" mode
--- from Lua fails loudly (builtins register first; a name clash is an error),
--- so the only way to make ctrl+b show the hint bar instead of the panel is
--- to disable the builtin leader entirely (config.toml) and rebuild the
--- leader here in Lua with NO render — just the chord, the mode, the stock
--- map, and the hjkl/x navigation entries. The bottom-docked hint bar (the
--- surface below) and the leader-attached session-list overlay are the only
--- chrome in leader mode.
---
--- Status bar layout (zellij's one-line UI, single bottom row):
---   left: mode ribbon — ` NORMAL ` on the mode colour, powerline
---     chevron, then the shared-modifier tile strip
---     ` Ctrl + <b> LEADER  <p> PANE  <q> DETACH `; the active mode's
---     tile becomes a full coloured powerline segment.
---   right of the tiles the bar transforms with the mode (zellij's
---     one_line_ui): normal shows the leader map, any other mode shows a
---     chevron group separator then that mode's own keybinds — ctrl+p
---     flips the strip to the pane binds live. Session name right-aligned.
---   Chevrons are the nerd-font private-use glyph  (SEP below; swap for
---     ">" without arrow fonts, same fallback zellij makes).
---
--- Session-list overlay: a leader-attached overlay (`attach_mode = "leader"`)
--- opens the instant leader mode is entered and closes the instant it exits —
--- no wiring needed. It pops out as a centred floating panel: a bordered box
--- (`surface_raised` fill, `border` frame) sized to the widest session name
--- and centred on the frame (`col = floor((cols - width)/2)`, `row =
--- floor((rows - height)/2)`), mirroring the builtin help overlay's centring
--- math. A bold "sessions" title sits on the top border row; below it, one
--- row per session in sidebar order as "● name" — the current session in
--- `accent` with a filled bullet, the rest in `muted` with a hollow bullet.
--- Names are truncated on a codepoint boundary (with "…") so nothing
--- overflows the panel. It is render-only — input keeps flowing to the leader
--- mode, so the j/k session steps and the h/l project hops update the filled
--- bullet live while you hold the leader.
---
--- The navigation entries (h/j/k/l) are *sticky* (no "exit_mode"): hold the
--- leader, page through sessions/projects, then Esc out. The stock entries
--- (c/s/n/d/?) and the kill entry (x) are non-sticky: they run their action
--- and exit leader mode. Esc exits quietly; any other unbound printable
--- exits with a "leader: '<key>' is unbound" note.
---
--- NOTE: because the builtin leader is disabled, the `[keybinds] leader` and
--- `leader.*` config entries are no longer read by anything — the chord and
--- the stock-map keys live here. Rebind them by editing this file.
-
 local ext = {
   id = "user.which-key",
   name = "which-key nav",
@@ -59,8 +6,7 @@ local ext = {
 }
 
 -- 1-based wrap-around index: move `i` by `delta` within `n` elements,
--- wrapping in either direction. Shared by step_session, kill_session, and
--- adjacent_project so the modulo arithmetic lives in one place.
+-- wrapping in either direction. Shared by step_session and kill_session.
 local function wrap(i, delta, n)
   return ((i - 1 + delta) % n + n) % n + 1
 end
@@ -105,41 +51,6 @@ local function step_session(snapshot, delta)
   return { { switch_session = names[wrap(i, delta, n)] } }
 end
 
--- First session of the adjacent project (wrapping), or a status note.
-local function adjacent_project(snapshot, forward)
-  local projects = snapshot.projects
-  if #projects < 2 then
-    return { note("no other project") }
-  end
-  -- Find the current session's project index (first match, matching the
-  -- builtin's project_index_of which uses .position()).
-  local cur = nil
-  for pi, project in ipairs(projects) do
-    for _, session in ipairs(project.sessions) do
-      if session.name == snapshot.session_name then
-        cur = pi
-        break
-      end
-    end
-    if cur then break end
-  end
-  cur = cur or 1
-  local n = #projects
-  local delta = forward and 1 or -1
-  local idx = cur
-  for _ = 1, n do
-    idx = wrap(idx, delta, n)
-    local first = projects[idx].sessions[1]
-    if first then
-      return { { switch_session = first.name } }
-    end
-    if idx == cur then
-      break
-    end
-  end
-  return { note("no other project") }
-end
-
 -- Kill the current session, then land on the next session in sidebar order
 -- (wrapping). Mirrors the stock kill handler: kill first, switch to a
 -- neighbor so you don't exit with the corpse. Non-sticky — exits leader mode.
@@ -155,266 +66,220 @@ local function kill_session(snapshot)
   return actions
 end
 
--- ── session-list overlay ─────────────────────────────────────────────────
-
--- Truncate `text` to `max` display cells, appending an ellipsis when it
--- does not fit. The Lua bridge exposes no display_cell_width, so cells are
--- approximated as one per *codepoint* (good for ASCII; avoids slicing a
--- multi-byte UTF-8 sequence in half on non-ASCII session names). `max` is
--- a cell budget; the cut always lands on a codepoint boundary.
-local function truncate(text, max)
-  if max <= 0 then return "" end
-  local ncells = 0
-  for _ in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
-    ncells = ncells + 1
-  end
-  if ncells <= max then return text end
-  if max <= 1 then return "\u{2026}" end
-  local out, count = {}, 0
-  for ch in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
-    count = count + 1
-    if count >= max then break end
-    out[#out + 1] = ch
-  end
-  return table.concat(out) .. "\u{2026}"
+local function styled(ctx, col, row, width, fg, bg, text, reverse, bold)
+  ctx.put_text_styled(col, row, width, fg, bg, text, reverse, bold)
 end
 
--- Count codepoints in `text` — the Lua bridge exposes no display-cell
--- width, so cells are approximated as one per codepoint (good for ASCII;
--- avoids counting bytes for multi-byte UTF-8). Used to size the panel to
--- its widest session name.
-local function cp_width(text)
+-- ── compact bottom bar ───────────────────────────────────────────────────
+-- Rust's display_cell_width is not bridged to Lua, so this approximation is deliberate.
+local function codepoint_width(cp)
+  if (cp >= 0x0300 and cp <= 0x036F) or (cp >= 0x1AB0 and cp <= 0x1AFF)
+      or (cp >= 0x1DC0 and cp <= 0x1DFF) or (cp >= 0x20D0 and cp <= 0x20FF)
+      or (cp >= 0xFE00 and cp <= 0xFE0F) then
+    return 0
+  end
+  if (cp >= 0x1100 and cp <= 0x115F) or (cp >= 0x2329 and cp <= 0x232A)
+      or (cp >= 0x2E80 and cp <= 0xA4CF) or (cp >= 0xAC00 and cp <= 0xD7A3)
+      or (cp >= 0xF900 and cp <= 0xFAFF) or (cp >= 0xFE10 and cp <= 0xFE6F)
+      or (cp >= 0xFF00 and cp <= 0xFF60) or (cp >= 0x1F000 and cp <= 0x1FAFF) then
+    return 2
+  end
+  return 1
+end
+
+local function utf8_codepoint(ch)
+  local b1, b2, b3, b4 = string.byte(ch, 1, 4)
+  if b1 < 0x80 then return b1 end
+  if b1 < 0xE0 then return (b1 - 0xC0) * 0x40 + b2 - 0x80 end
+  if b1 < 0xF0 then return (b1 - 0xE0) * 0x1000 + (b2 - 0x80) * 0x40 + b3 - 0x80 end
+  return (b1 - 0xF0) * 0x40000 + (b2 - 0x80) * 0x1000 + (b3 - 0x80) * 0x40 + b4 - 0x80
+end
+
+local function display_width(text)
   local n = 0
-  for _ in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
-    n = n + 1
+  for ch in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    n = n + codepoint_width(utf8_codepoint(ch))
   end
   return n
 end
 
--- Render the session-list overlay as a centred floating panel that pops out
--- of the normal chrome on leader entry. The panel is a bordered box
--- (`draw_box` → box-drawing chars + `surface_raised` fill) sized to the
--- widest session name and centred on the frame: `col = floor((cols -
--- width)/2)`, `row = floor((rows - height)/2)`, mirroring the builtin help
--- overlay's centring math. A bold "sessions" title sits on the top border
--- row (overwriting the middle ─ chars, corners stay). Below it, one row per
--- session in sidebar order: "● name" — the current session gets a filled
--- bullet (U+25CF) in `accent`, every other session a hollow bullet (U+25CB)
--- in `muted`; names are truncated on a codepoint boundary (with "…") so
--- nothing overflows the panel. The overlay is `attach_mode = "leader"` so
--- the host opens it the instant leader mode is entered and closes it on
--- exit; it is render-only, so input keeps flowing to the leader mode — the
--- j/k session steps and the h/l project hops move the filled bullet live
--- while you hold the leader.
-local function render_session_overlay(ctx, _state, snapshot)
-  local cols, rows = ctx.size()
-  if cols < 12 or rows < 5 then
-    return
+local function truncate(text, max)
+  if max <= 0 then return "" end
+  if display_width(text) <= max then return text end
+  if max == 1 then return "…" end
+  local out, width = {}, 0
+  local ellipsis_width = display_width("…")
+  for ch in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    local cw = codepoint_width(utf8_codepoint(ch))
+    if width + cw + ellipsis_width > max then break end
+    out[#out + 1], width = ch, width + cw
   end
-
-  local names = session_names(snapshot)
-  local cur = snapshot.session_name
-
-  -- Inner content width: the widest "● name" row, or the title, whichever
-  -- is larger. "● name" is bullet(1) + space(1) + name.
-  local inner = cp_width("sessions")
-  for _, name in ipairs(names) do
-    local w = 2 + cp_width(name)
-    if w > inner then inner = w end
-  end
-  if #names == 0 and cp_width("no sessions") > inner then
-    inner = cp_width("no sessions")
-  end
-
-  -- Panel geometry: inner + 4 (2-col padding inside the border each side),
-  -- clamped to the frame and a sensible floor.
-  local width = math.max(12, math.min(inner + 4, cols))
-  local n = #names
-  if n == 0 then n = 1 end
-  -- height: title row + one row per session + 1 bottom padding, clamped.
-  local height = math.max(4, math.min(n + 2, rows))
-
-  -- Centre on the frame.
-  local col = math.floor((cols - width) / 2)
-  local row = math.floor((rows - height) / 2)
-
-  local bg = "surface_raised"
-  local border = "border"
-
-  -- Bordered box: fills with the raised surface and draws box-drawing chars.
-  ctx.draw_box(col, row, width, height, "text", bg, border)
-
-  -- Title on the top border row (overwrites the middle ─ chars; corners
-  -- and the first/last 2 cols of the border remain).
-  ctx.put_text_bold(col + 2, row, width - 4, "heading", bg, "sessions")
-
-  if #names == 0 then
-    ctx.put_text(col + 2, row + 1, width - 4, "muted", bg, "no sessions")
-    return
-  end
-
-  -- One row per session, left-padded 2 inside the border. Stop before the
-  -- bottom border row.
-  local avail = width - 4
-  local max_name = avail - 2
-  for i, name in ipairs(names) do
-    local r = row + i
-    if r >= row + height - 1 then
-      break
-    end
-    local is_current = name == cur
-    local bullet = is_current and "\u{25CF}" or "\u{25CB}"   -- ● / ○
-    local bullet_fg = is_current and "accent" or "muted"
-    local name_fg = is_current and "accent" or "muted"
-    ctx.put_text(col + 2, r, 1, bullet_fg, bg, bullet)
-    local display = truncate(name, max_name)
-    ctx.put_text(col + 4, r, max_name, name_fg, bg, display)
-  end
+  return table.concat(out) .. "…"
 end
 
--- ── zellij-style status bar ────────────────────────────────────────────
+local MODE_BG = { normal = "success", leader = "accent", pane = "warning", scroll = "accent_2", command = "accent_2" }
+local SEP_LEFT, SEP_RIGHT = "", ""
+local NOTE_SETTLE, MODE_SETTLE = 2000, 240
+local last_note_text, last_note_ms, last_mode, mode_flip_ms
+local FRAMES = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
 
--- Powerline separator, zellij's ARROW_SEPARATOR (nerd-font private-use
--- glyph ). Set to ">" (or "") when the terminal font has no nerd-font
--- glyphs — the same fallback zellij makes without arrow fonts.
-local SEP = "\u{e0b0}"
-
--- Left mode ribbon colours, one per mode (zellij: green NORMAL, orange
--- PANE, ...). Unknown modes fall back to status_bg.
-local MODE_BG = {
-  normal = "success",
-  leader = "accent",
-  pane = "warning",
-  scroll = "accent_2",
-  command = "accent_2",
-}
-
--- Mode tiles, zellij's `<p> PANE  <t> TAB ...` strip. Every entry
--- is a real global ctrl chord: b and p are registered by this extension,
--- ctrl+q (detach) is stock. `mode` marks the tile that lights up while
--- its mode is active; DETACH is an action, never current, so it never
--- highlights.
-local TILES = {
-  { key = "b", name = "LEADER", mode = "leader" },
-  { key = "p", name = "PANE", mode = "pane" },
-  { key = "q", name = "DETACH", mode = nil },
-}
-
--- The hints for the trailing segment: every binding scoped to the
--- active mode, straight from the snapshot's keybinding list, so a new
--- extension appears here automatically (stock scroll/command modes
--- included). Idle (normal mode) shows the leader map, mirroring zellij
--- showing its global shortcuts on the NORMAL line. The chord-repeat
--- "close panel" binding is filtered out — same thing as the leader hint.
--- Duplicate descriptions (hjkl + arrows for the same focus move) show
--- once, with their first chord.
-local function hint_entries(snapshot)
-  local mode = snapshot.mode
-  if mode == "normal" then
-    mode = "leader"
-  end
-  local entries = {}
-  local seen = {}
-  for _, b in ipairs(snapshot.keybindings) do
-    if b.mode == mode and b.description ~= "close panel" and not seen[b.description] then
-      seen[b.description] = true
-      -- Multi-chord bindings show only their primary chord.
-      local chord = (b.chord_text or ""):gsub("%s*/.*", "")
-      entries[#entries + 1] = { key = chord, desc = b.description }
-    end
-  end
-  return entries
+local function emphasis(snapshot)
+  if last_mode ~= snapshot.mode then last_mode, mode_flip_ms = snapshot.mode, snapshot.now_ms end
+  local age = mode_flip_ms and snapshot.now_ms - mode_flip_ms or MODE_SETTLE
+  if age < 80 then return true, false elseif age < MODE_SETTLE then return false, true end
+  return false, false
 end
 
--- Bar, left segment: the active mode's ribbon — ` NORMAL ` on the mode
--- colour, closed by a powerline chevron. Returns the next free column.
-local function draw_ribbon(ctx, cols, mode)
+local function note_content(snapshot)
+  local n = snapshot.status_note
+  if not n then return nil end
+  if last_note_text ~= n.text then last_note_text, last_note_ms = n.text, snapshot.now_ms end
+  local fg = n.kind == "error" and "error" or n.kind == "ok" and "success" or "accent"
+  return " " .. n.text .. " ", fg, last_note_ms and snapshot.now_ms - last_note_ms < NOTE_SETTLE
+end
+
+local function draw_mode(ctx, start, mode, reverse, bold)
   local label = " " .. mode:upper() .. " "
+  local w = display_width(label)
+  if mode == "normal" then
+    styled(ctx, start, 0, w, "success", "transparent", label, reverse, bold)
+    return w
+  end
   local bg = MODE_BG[mode] or "status_bg"
-  ctx.put_text_bold(0, 0, #label, "status_fg", bg, label)
-  ctx.put_text(#label, 0, 1, bg, "surface", SEP)
-  return #label + 1
+  styled(ctx, start, 0, w, "status_fg", bg, label, reverse, bold)
+  if start + w < ctx.size() then ctx.put_text(start + w, 0, 1, bg, "transparent", SEP_RIGHT) end
+  return w + 1
 end
 
--- Bar, after the ribbon: ` Ctrl + <b> LEADER  <p> PANE  <q> DETACH `,
--- zellij's shared-modifier tile strip. Unselected tiles: muted `<>` and
--- name, `text`-bold key, `border`-coloured chevron separators. The tile
--- of the active mode becomes a full powerline segment in the mode colour
--- — the bar visibly flips when ctrl+p / ctrl+b land. Returns the next
--- free column.
-local function draw_tiles(ctx, cols, col, mode)
-  local mod = " Ctrl +"
-  ctx.put_text(col, 0, cols - col, "muted", "surface", mod)
-  col = col + #mod
-  for _, tile in ipairs(TILES) do
-    local left = " <" .. tile.key .. ">"
-    local right = " " .. tile.name .. " "
-    if tile.mode == mode then
-      local bg = MODE_BG[mode] or "status_bg"
-      ctx.put_text(col, 0, 1, bg, "surface", SEP)
-      ctx.put_text_bold(col + 1, 0, #left + #right, "status_fg", bg, left .. right)
-      ctx.put_text(col + 1 + #left + #right, 0, 1, bg, "surface", SEP)
-      col = col + #left + #right + 2
+local function binding_mode(binding)
+  return binding.mode
+end
+
+local function chord_tokens(chord)
+  local primary = (chord or ""):gsub("%s*/.*", "")
+  local modifier, key = primary:match("^([%a]+)%+(.+)$")
+  if modifier then return modifier, key end
+  return nil, primary
+end
+
+local function hint_entries(snapshot)
+  local out, seen = {}, {}
+  for _, binding in ipairs(snapshot.keybindings or {}) do
+    local eligible = snapshot.mode == "normal" and binding_mode(binding) == nil
+      or snapshot.mode ~= "normal" and binding_mode(binding) == snapshot.mode
+    if eligible and binding.description ~= "close panel" and not seen[binding.description] then
+      seen[binding.description] = true
+      out[#out + 1] = { chord = binding.chord_text or "", desc = binding.description or "" }
+    end
+  end
+  return out
+end
+
+local function token_width(entry, with_desc)
+  local modifier, key = chord_tokens(entry.chord)
+  local tokens = modifier and ("[" .. modifier:gsub("^%l", string.upper) .. "] [" .. key .. "]") or ("[" .. key .. "]")
+  return display_width(tokens .. (with_desc and (" " .. entry.desc) or "")), modifier, key, tokens
+end
+
+local function draw_hints(ctx, snapshot)
+  local cols = ctx.size()
+  local entries = hint_entries(snapshot)
+  local function measure(with_desc)
+    local total, count = 0, 0
+    for _, entry in ipairs(entries) do
+      local w = token_width(entry, with_desc)
+      local add = w + (count > 0 and 2 or 0)
+      if total + add > cols then break end
+      total, count = total + add, count + 1
+    end
+    return total, count
+  end
+  local row_w, count
+  local with_desc
+  row_w, count = measure(true)
+  if count < #entries then row_w, count = measure(false); with_desc = false else with_desc = true end
+  if count == 0 then return end
+  local x = math.max(0, math.floor((cols - row_w) / 2))
+  for i = 1, count do
+    local entry = entries[i]
+    local _, modifier, key, tokens = token_width(entry, with_desc)
+    local modifier_token = modifier and ("[" .. modifier:gsub("^%l", string.upper) .. "]") or nil
+    local key_token = "[" .. key .. "]"
+    if modifier_token then
+      styled(ctx, x, 0, 1, "border", "transparent", "[", false, false); x = x + 1
+      styled(ctx, x, 0, display_width(modifier_token) - 2, "muted", "transparent", modifier_token:sub(2, -2), false, false); x = x + display_width(modifier_token) - 2
+      styled(ctx, x, 0, 1, "border", "transparent", "]", false, false); x = x + 1
+      styled(ctx, x, 0, 1, "border", "transparent", " ", false, false); x = x + 1
     else
-      ctx.put_text(col, 0, 2, "muted", "surface", " <")
-      ctx.put_text_bold(col + 2, 0, #tile.key, "text", "surface", tile.key)
-      ctx.put_text(col + 2 + #tile.key, 0, 1, "muted", "surface", ">")
-      ctx.put_text(col + 3 + #tile.key, 0, #right, "muted", "surface", right)
-      col = col + #left + #right
-      ctx.put_text(col, 0, 1, "border", "surface", SEP)
-      col = col + 1
+      styled(ctx, x, 0, 1, "border", "transparent", "[", false, false); x = x + 1
     end
-  end
-  return col
-end
-
--- Trailing segment: the key hints, zellij one_line_ui's transforming
--- part. Normal mode shows the leader map straight after the tiles
--- (zellij shows its secondary info there); any other mode gets a chevron
--- group separator first, then that mode's own keybinds — ctrl+p flips
--- the strip to the pane binds live. ` <key> action` pairs, the key in
--- `accent` bold, the action in `text`. The session name sits at the
--- right edge in `muted` when it fits clear of the hints.
-local function draw_hints(ctx, row, col, cols, snapshot)
-  if snapshot.mode ~= "normal" then
-    ctx.put_text(col, row, 1, "border", "surface", SEP)
-    col = col + 1
-  end
-  for _, e in ipairs(hint_entries(snapshot)) do
-    local key = " <" .. e.key .. ">"
-    if col + #key + #e.desc + 1 >= cols then
-      break
-    end
-    ctx.put_text_bold(col, row, #key, "accent", "surface", key)
-    ctx.put_text(col + #key, row, #e.desc + 1, "text", "surface", " " .. e.desc)
-    col = col + #key + #e.desc + 2
-  end
-  local name = snapshot.session_name
-  local w = cp_width(name)
-  if col + w + 2 < cols then
-    ctx.put_text(cols - w - 1, row, w, "muted", "surface", name)
+    styled(ctx, x, 0, display_width(key), "accent", "transparent", key, false, true); x = x + display_width(key)
+    styled(ctx, x, 0, 1, "border", "transparent", "]", false, false); x = x + 1
+    if with_desc then local d = " " .. entry.desc; styled(ctx, x, 0, display_width(d), "text", "transparent", d, false, false); x = x + display_width(d) end
+    if i < count then x = x + 2 end
   end
 end
 
--- Surface draw: the single-row zellij bar. Left is the mode ribbon +
--- Ctrl+ tiles; the rest of the line transforms with `snapshot.mode`
--- (every frame carries it): leader-map hints in normal, the mode's own
--- binds in any other mode. The builtin leader panel is gone (disabled in
--- config.toml) and this extension registers the leader mode with no
--- render, so on ctrl+b the ribbon flips to LEADER AND the
--- leader-attached session-list overlay pops out over the frame — no
--- builtin leader box.
-local function draw_surface_bar(ctx, snapshot)
+local function draw_top(ctx, snapshot)
+  local cols, rows = ctx.size(); if cols < 1 or rows < 1 then return end
+  ctx.fill_rect(0, 0, cols, rows, "transparent", "transparent")
+  local reverse, bold = emphasis(snapshot)
+  local chip_w = display_width(" " .. snapshot.mode:upper() .. " ") + (snapshot.mode == "normal" and 0 or 1)
+  local start = math.max(0, math.floor((cols - chip_w) / 2))
+  if chip_w <= cols then draw_mode(ctx, start, snapshot.mode, reverse, bold) end
+  if (snapshot.scrollback > 0 or snapshot.mode == "scroll") and start >= 2 then
+    ctx.put_text(0, 0, 1, "accent", "transparent", FRAMES[(math.floor(snapshot.now_ms / 80) % #FRAMES) + 1])
+  end
+  local text, fg, fresh = note_content(snapshot)
+  local value = text or snapshot.session_name or ""
+  local available = math.max(0, cols - (start + chip_w))
+  local shown = truncate(value, available)
+  local w = display_width(shown)
+  if w > 0 then styled(ctx, cols - w, 0, w, text and fg or "muted", "transparent", shown, false, text and fresh or false) end
+end
+
+local function draw_bottom(ctx, snapshot)
+  local cols, rows = ctx.size(); if cols < 1 or rows < 1 then return end
+  ctx.fill_rect(0, 0, cols, rows, "transparent", "transparent")
+  draw_hints(ctx, snapshot)
+end
+
+local function draw_sessions(ctx, _state, snapshot)
   local cols, rows = ctx.size()
-  if cols < 4 or rows < 1 then
+  if cols < 12 or rows < 5 then return end
+  local names = session_names(snapshot)
+  local count = #names
+  local longest = 0
+  for i = 1, count do longest = math.max(longest, display_width(names[i] or "")) end
+  local name_w = math.max(1, longest)
+  local width = math.min(cols, name_w + 5)
+  name_w = math.max(1, width - 5)
+  local capacity = math.max(1, rows - 2)
+  local vis = math.min(capacity, math.max(1, count))
+  local height = vis + 2
+  local col, row = math.floor((cols - width) / 2), math.floor((rows - height) / 3)
+  ctx.draw_box(col, row, width, height, "surface_raised", "surface_raised", "border")
+  styled(ctx, col + 2, row, math.min(9, width - 2), "heading", "surface_raised", " sessions ", false, true)
+  if count == 0 then
+    styled(ctx, col + 3, row + 1, name_w, "muted", "surface_raised", truncate("no sessions", name_w), false, false)
     return
   end
-  -- The surface's context is clipped to its 1-row bottom rect.
-  ctx.fill_rect(0, 0, cols, rows, "surface", "surface")
-  local col = draw_ribbon(ctx, cols, snapshot.mode)
-  col = draw_tiles(ctx, cols, col, snapshot.mode)
-  draw_hints(ctx, 0, col, cols, snapshot)
+  local cur = current_index(names, snapshot.session_name) or 1
+  local from_top = math.max(0, math.min(cur - math.floor(vis / 2) - 1, count - vis))
+  for offset = 0, vis - 1 do
+    local index = from_top + offset + 1
+    local name = names[index]
+    if name ~= nil then
+      local marker = index == cur and "▌" or " "
+      ctx.put_text(col + 1, row + 1 + offset, 1, index == cur and "accent" or "muted", "surface_raised", marker)
+      styled(ctx, col + 3, row + 1 + offset, name_w, index == cur and "text" or "muted", "surface_raised", truncate(name, name_w), false, false)
+    end
+  end
+  if count > vis then
+    ctx.render_scrollbar{col = col + width - 1, row = row + 1, rows = vis, visible = vis, total = count, from_top = from_top, fg = "border", bg = "surface_raised", thumb_fg = "accent", track = "│", thumb = "┃"}
+  end
 end
+
 -- ── leader mode (no render) ──────────────────────────────────────────────
 
 -- Leader mode fallback for keys no registered leader binding matched (the
@@ -460,11 +325,11 @@ end
 -- pinned to match the user's config; rebind by editing this table.
 local LEADER_CHORD = "ctrl+b"
 local STOCK_MAP = {
-  { chord = "c", desc = "command mode", actions = { { enter_mode = "command" } } },
-  { chord = "s", desc = "scroll",        actions = { { enter_mode = "scroll" } } },
   { chord = "n", desc = "new session",   actions = { "exit_mode", "new_session" } },
   { chord = "d", desc = "detach",        actions = { "exit_mode", "detach" } },
   { chord = "?", desc = "help",          actions = { "exit_mode", { open_overlay = "ekko:help" } } },
+  { chord = "s", desc = "scroll",         actions = { { enter_mode = "scroll" } } },
+  { chord = "c", desc = "command mode",   actions = { { enter_mode = "command" } } },
 }
 
 function ext.register(ekko)
@@ -480,7 +345,7 @@ function ext.register(ekko)
 
   -- Pressing the chord again inside leader mode exits it (the builtin's
   -- "close panel" behaviour, minus the panel). The description is "close
-  -- panel" so hint_entries filters it out — it is the same thing as the
+  -- panel" so the duplicate close-panel hint is avoided — it is the same thing as the
   -- leader hint, so showing both is redundant. Non-sticky.
   ekko.register_keybinding({
     chord = LEADER_CHORD,
@@ -547,23 +412,14 @@ function ext.register(ekko)
   })
 
   -- Pane management (stock ekko-builtins.panes is disabled: its leader
-  -- j/k/x collide with this map). Commands keep their stock names so
-  -- `:split`/`:pane-focus`/`:pane-close` still work; leader keys use the
-  -- chords this map leaves free: | and - to split, h/l to focus
-  -- left/right, X to close (j/k stay session steps, x stays kill-session).
-  -- Mouse click focuses a pane; :pane-focus up|down covers the rest.
+  -- j/k/x collide with this map). Equal-area layout ignores the split axis;
+  -- pane creation is exposed as a no-argument command. Mouse click focuses a
+  -- pane; :pane-focus up|down covers the rest.
   ekko.register_command({
-    name = "split",
-    args_hint = "right|down",
-    description = "split the focused pane",
-    handler = function(args)
-      if args == "right" then
-        return "split_right"
-      elseif args == "down" then
-        return "split_down"
-      else
-        return { { set_status_note = { text = "usage: split right|down", kind = "error" } } }
-      end
+    name = "pane-new",
+    description = "open a new pane",
+    handler = function(_raw_args)
+      return "split_down"
     end,
   })
   ekko.register_command({
@@ -581,25 +437,6 @@ function ext.register(ekko)
       return "close_focused_pane"
     end,
   })
-  local PANE_MAP = {
-    { chord = "|", desc = "split right", actions = { "exit_mode", "split_right" } },
-    { chord = "-", desc = "split down",  actions = { "exit_mode", "split_down" } },
-    { chord = "h", desc = "focus left",  actions = { "exit_mode", { focus_direction = "left" } } },
-    { chord = "l", desc = "focus right", actions = { "exit_mode", { focus_direction = "right" } } },
-    { chord = "X", desc = "close pane",  actions = { "exit_mode", "close_focused_pane" } },
-  }
-  for _, entry in ipairs(PANE_MAP) do
-    local actions = entry.actions
-    ekko.register_keybinding({
-      mode = "leader",
-      chord = entry.chord,
-      description = entry.desc,
-      handler = function(_snapshot)
-        return actions
-      end,
-    })
-  end
-
   -- Zellij-style pane mode: `ctrl+p` enters a modal pane layer (keys stay
   -- active until q/Esc), matching zellij's `Ctrl p`. The hint bar switches
   -- to the pane map while it's active.
@@ -617,8 +454,6 @@ function ext.register(ekko)
   })
   local PANE_MODE_MAP = {
     { chord = "n", desc = "new pane",     actions = { "split_down" } },
-    { chord = "r", desc = "split right",  actions = { "split_right" } },
-    { chord = "d", desc = "split down",   actions = { "split_down" } },
     { chord = "x", desc = "close pane",   actions = { "close_focused_pane" } },
     { chord = "q", desc = "exit pane",    actions = { "exit_mode" } },
   }
@@ -655,32 +490,33 @@ function ext.register(ekko)
     })
   end
 
-  -- Status bar: a one-line bottom-docked surface, always visible,
-  -- redraws on every frame. Replaces the stock statusbar (disabled in
-  -- config.toml). Render-only — input stays with the host (it dispatches
-  -- the leader entries above).
+  -- Two docked surfaces deliberately cost the PTY two rows of grid.
   ekko.register_surface({
-    name = "user.which-key:hints",
-    dock = "bottom",
-    priority = 0,
-    size = 1,
-    draw = draw_surface_bar,
+    name = "user.which-key:top",
+    dock = "top", priority = 0, size = 1,
+    wants_tick = function(snapshot)
+      local note_fresh = snapshot.status_note and (last_note_text ~= snapshot.status_note.text or not last_note_ms or snapshot.now_ms - last_note_ms < NOTE_SETTLE)
+      local mode_fresh = mode_flip_ms and snapshot.now_ms - mode_flip_ms < MODE_SETTLE
+      local active = snapshot.scrollback > 0 or snapshot.mode == "scroll"
+      return not not (note_fresh or mode_fresh or active)
+    end,
+    draw = draw_top,
+  })
+  ekko.register_surface({
+    name = "user.which-key:bottom",
+    dock = "bottom", priority = 0, size = 1,
+    draw = draw_bottom,
   })
 
-  -- Session-list overlay: leader-attached (`attach_mode = "leader"`), so the
-  -- host opens it the instant leader mode is entered and closes it the
-  -- instant it exits — no open/close wiring needed. Render-only (attached
-  -- overlays never receive keys), so input keeps flowing to the leader mode;
-  -- the j/k session steps and the h/l project hops move the filled bullet
-  -- live while you hold the leader. Draws a centred bordered panel
-  -- (`surface_raised` + `border`) over the frame, sized to the widest
-  -- session name.
   ekko.register_overlay({
     name = "user.which-key:sessions",
-    description = "session list, tied to leader mode",
     attach_mode = "leader",
-    render = render_session_overlay,
+    render = draw_sessions,
   })
+
+-- The extension registers a bottom status surface and a leader-attached
+-- session-list overlay, plus navigation callbacks above.
+
 end
 
 return ext

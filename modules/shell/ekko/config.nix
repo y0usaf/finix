@@ -45,10 +45,9 @@ in {
       # disabled or the runtime aborts with duplicate leader-mode
       # keybindings on attach. The builtin sidebar (visible: None = always
       # shown) is replaced by the lua leader-attached session panel. The
-      # builtin panes extension registers leader h/j/k/l/x/|/- for
-      # split/focus/close — its j/k/x collide with which-key.lua's own
-      # leader keys, so it is disabled too; pane keys live in the lua map
-      # instead. Vendored alongside this module (which-key.lua) so every
+      # builtin panes extension registers pane operations and leader keys
+      # that collide with which-key.lua's own leader keys, so it is disabled
+      # too; pane keys live in the lua map instead. Vendored alongside this module (which-key.lua) so every
       # host gets it — it used to live hand-managed on one machine, and
       # hosts without it lost the entire leader/status UI.
       ".config/ekko/extensions/which-key.lua".source = ./which-key.lua;
@@ -59,11 +58,10 @@ in {
       ".config/ekko/config.toml" = {
         text = ''
           [extensions]
-          disabled = ["ekko-builtins.leader", "ekko-builtins.statusbar", "ekko-builtins.sidebar", "ekko-builtins.panes"]
+          disabled = ["ekko-builtins.leader", "ekko-builtins.statusbar", "ekko-builtins.sidebar", "ekko-builtins.panes", "ekko-builtins.keybindings"]
 
-          [keybinds]
-          project_prev = "none"
-          project_next = "none"
+          # The entire stock chord set is disabled above; [keybinds] has
+          # nothing left to suppress.
 
           # Zellij-style pane borders: a full box frame around every pane,
           # the focused pane's frame tinted with the theme accent. Swap to
@@ -72,6 +70,15 @@ in {
           # this takes effect for newly started sessions (ekko kill).
           [ui]
           pane_borders = "frame"
+          # Panes are auto-tiled to exactly equal areas by recursively halving
+          # along the longer axis, pixel-aware because a terminal cell is about
+          # twice as tall as it is wide: 3 panes are full-height columns and 4
+          # panes are a 2x2 grid. The requested split axis is ignored and the
+          # whole layout recomputes on every add or close. The daemon owns the
+          # canvas, so this takes effect for newly started sessions (ekko kill).
+          pane_layout = "equal"
+          # Drives the client's animation tick (default 80ms = 12.5fps; 33ms = 30fps).
+          animation_interval_ms = 33
         '';
       };
     };
