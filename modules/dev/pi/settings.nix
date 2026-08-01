@@ -114,7 +114,6 @@ in {
               "anthropic/claude-fable-5"
               "anthropic/claude-opus-5"
               "moonshotai/kimi-k3-fast"
-              "cursor/composer-2"
             ];
             compaction.enabled = false;
             showHardwareCursor = true;
