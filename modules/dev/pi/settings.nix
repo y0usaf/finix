@@ -170,6 +170,25 @@ in {
                 maxTokens = 131072;
                 compat.vercelGatewayRouting.only = ["fireworks"];
               }
+              # DeepSeek upstream excluded (Chinese); Fireworks dropped for throughput (70tps vs 105tps).
+              # Baseten first for lowest TTFT (0.9s); DeepInfra cheaper failover (2.3s TTFT, $0.09/$0.18).
+              {
+                id = "deepseek/deepseek-v4-flash-0731";
+                name = "DeepSeek V4 Flash 0731";
+                api = "openai-completions";
+                reasoning = true;
+                input = ["text"];
+                cost = {
+                  input = 0.13;
+                  output = 0.26;
+                  cacheRead = 0.03;
+                  cacheWrite = 0;
+                };
+                contextWindow = 1000000;
+                maxTokens = 384000;
+                compat.vercelGatewayRouting.only = ["baseten" "deepinfra"];
+                compat.vercelGatewayRouting.order = ["baseten" "deepinfra"];
+              }
             ];
           };
         };
