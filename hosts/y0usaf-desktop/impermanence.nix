@@ -68,10 +68,9 @@ in {
         )
         ++ (
           if config.user.programs.librewolf.enable
-          # LibreWolf's non-Flatpak XDG layout is
-          # ~/.config/librewolf/librewolf. Persist its profile/config, but
-          # deliberately leave ~/.cache/librewolf ephemeral.
-          then [".config/librewolf/librewolf"]
+          # LibreWolf 152 reads the legacy ~/.librewolf only (no XDG support),
+          # so persist that. ~/.cache/librewolf stays ephemeral.
+          then [".librewolf"]
           else []
         )
         ++ (

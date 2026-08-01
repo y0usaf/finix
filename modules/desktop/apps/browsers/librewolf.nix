@@ -7,10 +7,10 @@
   inherit (config) user;
   browserShared = user.programs.browser.shared;
   userName = user.name;
-  # LibreWolf's native (non-Flatpak) XDG layout keeps both its profile
-  # registry and native messaging hosts below this directory.  Keep this
-  # separate from Firefox, which still uses ~/.mozilla.
-  librewolfConfig = ".config/librewolf/librewolf";
+  # LibreWolf 152 (librewolf-bin) reads the legacy home ~/.librewolf only: the
+  # package has no XDG_CONFIG_HOME / MOZ_LEGACY_HOME support (verified against
+  # the store path). Keep separate from Firefox, which uses ~/.mozilla.
+  librewolfConfig = ".librewolf";
   pywalfoxNative = pkgs.pywalfox-native;
   prefValue = pref:
     builtins.toJSON (
