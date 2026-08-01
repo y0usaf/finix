@@ -4,21 +4,7 @@ _: {
       enable = true;
       apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
     };
-    claude-code = {
-      enable = true;
-      model = "fable";
-      subagentModel = "claude-sonnet-5";
-      enabledPlugins."audio-notify@y0usaf-marketplace" = false;
-      providers.vercel = {
-        baseUrl = "https://ai-gateway.vercel.sh";
-        apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
-        models = {
-          ANTHROPIC_DEFAULT_OPUS_MODEL = "moonshotai/kimi-k3-fast";
-          ANTHROPIC_DEFAULT_SONNET_MODEL = "moonshotai/kimi-k3-fast";
-          ANTHROPIC_DEFAULT_HAIKU_MODEL = "moonshotai/kimi-k3-fast";
-        };
-      };
-    };
+    claude-code.enable = true;
     codex.enable = true;
     android-tools.enable = true;
     codex-cli.enable = true;

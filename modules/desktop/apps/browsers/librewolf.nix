@@ -7,6 +7,10 @@
   inherit (config) user;
   browserShared = user.programs.browser.shared;
   userName = user.name;
+  # LibreWolf's native (non-Flatpak) XDG layout keeps both its profile
+  # registry and native messaging hosts below this directory.  Keep this
+  # separate from Firefox, which still uses ~/.mozilla.
+  librewolfConfig = ".config/librewolf/librewolf";
   pywalfoxNative = pkgs.pywalfox-native;
   prefValue = pref:
     builtins.toJSON (
@@ -41,7 +45,7 @@ in {
     ];
     manzil.users."${userName}" = {
       files = {
-        ".librewolf/profiles.ini" = {
+        "${librewolfConfig}/profiles.ini" = {
           generator = lib.generators.toINI {};
           value =
             profilesIni
@@ -54,11 +58,11 @@ in {
                 };
             };
         };
-        ".librewolf/${userName}/chrome/userChrome.css" = {
+        "${librewolfConfig}/${userName}/chrome/userChrome.css" = {
           text = browserShared.userChromeCss;
         };
         # Pywalfox native messaging host for dynamic theme updates
-        ".librewolf/native-messaging-hosts/pywalfox.json" = {
+        "${librewolfConfig}/native-messaging-hosts/pywalfox.json" = {
           generator = lib.generators.toJSON {};
           value = {
             name = "pywalfox";
