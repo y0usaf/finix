@@ -121,10 +121,10 @@ in {
   config = lib.mkIf cfg.enable {
     manzil.users."${config.user.name}".files = {
       # SYSTEM.md is the only one pi loads; it replaces the built-in prompt entirely.
-      ".local/share/pi/agent/SYSTEM.md".text = systemPrompt;
+      ".pi/agent/SYSTEM.md".text = systemPrompt;
       # Inert reference copy of the prompt SYSTEM.md overrides. Pi reads only
       # SYSTEM.md and APPEND_SYSTEM.md, so this filename is never opened.
-      ".local/share/pi/agent/DEFAULT_SYSTEM.md".text = piDefaultPrompt;
+      ".pi/agent/DEFAULT_SYSTEM.md".text = piDefaultPrompt;
     };
   };
 }
