@@ -111,11 +111,6 @@ in {
           -- entries omitted from the table, so the toggle must re-send this
           -- complete mutable table rather than a partial disabled-only table.
           local displays = ${toLua config.user.ui.tomoe.displays}
-          -- tomoe.outputs() becomes empty when every connector is disabled;
-          -- retain names here so restore does not need to enumerate dark outputs.
-          local blanked_outputs = nil
-          local blanked_ad_hoc = {}
-
           tomoe.settings {
             -- Alt, matching the niri setup this replaced (niri/input.nix mod-key).
             mod = "alt",
@@ -984,39 +979,7 @@ in {
           tomoe.bind("Mod+Shift+slash", "show-hotkey-overlay")
 
           -- ─── Displays ────────────────────────────────────────────────────────────────
-          tomoe.bind("Mod+9", function()
-            if blanked_outputs then
-              for _, name in ipairs(blanked_outputs) do
-                if blanked_ad_hoc[name] then
-                  displays[name] = nil
-                elseif displays[name] then
-                  -- Missing disabled parses as false in lua.rs, so clear it
-                  -- explicitly on restore while retaining all other settings.
-                  displays[name].disabled = false
-                end
-              end
-              blanked_outputs = nil
-              blanked_ad_hoc = {}
-              tomoe.settings { displays = displays }
-              return
-            end
-
-            local outputs = tomoe.outputs()
-            if #outputs == 0 then
-              return
-            end
-            blanked_outputs = {}
-            for _, output in ipairs(outputs) do
-              local name = output.name
-              if displays[name] == nil then
-                displays[name] = {}
-                blanked_ad_hoc[name] = true
-              end
-              displays[name].disabled = true
-              blanked_outputs[#blanked_outputs + 1] = name
-            end
-            tomoe.settings { displays = displays }
-          end, "Blank/Restore All Outputs")
+          tomoe.bind("Mod+9", function() tomoe.power_off_outputs() end, "Screens Off")
 
           -- ─── Screenshots / wallpaper ─────────────────────────────────────────────────
           tomoe.bind("Mod+g", "screenshot", "Screenshot")
