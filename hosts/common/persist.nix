@@ -40,11 +40,11 @@
 
     # AI / dev tooling state — relocated out of ~ via env vars in
     # modules/core/user/session/xdg.nix (CLAUDE_CONFIG_DIR, CODEX_HOME,
-    # PI_CODING_AGENT_DIR, KIMI_CODE_HOME). ~/.claude.json lives inside
-    # the claude dir once CLAUDE_CONFIG_DIR is set.
+    # KIMI_CODE_HOME). ~/.claude.json lives inside the claude dir once
+    # CLAUDE_CONFIG_DIR is set. pi uses its own default ~/.pi/agent.
     ".local/share/claude"
     ".local/share/codex"
-    ".local/share/pi"
+    ".pi" # pi agent dir (pi's native default; no env var indirection)
     ".local/share/kimi-code" # config.toml (API key), sessions, logs
 
     # ~/.config
