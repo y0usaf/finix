@@ -121,6 +121,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    aphrodite-hermes = {
+      # Aphrodite CCR compression plugin for the Hermes gateway
+      # (github:PlayForm/Aphrodite-Hermes). Source-only: the repo has no
+      # flake.nix, so we consume it as a plain tree (like deno2nix).
+      # The prebuilt binary + dylib it normally auto-downloads are pinned
+      # separately (hash-verified vs. the release SHA256SUMS) in
+      # hosts/y0usaf-server/finix/hermes.nix — no runtime downloads on NixOS.
+      url = "github:PlayForm/Aphrodite-Hermes";
+      flake = false;
+    };
+
     impermanence = {
       url = "github:nix-community/impermanence";
     };
