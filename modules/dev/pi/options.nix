@@ -32,13 +32,13 @@ in {
 
     defaultProvider = lib.mkOption {
       type = types.str;
-      default = "anthropic";
+      default = "vercel-ai-gateway";
       description = "Default provider written to settings.json defaultProvider.";
     };
 
     defaultModel = lib.mkOption {
       type = types.str;
-      default = "claude-opus-5";
+      default = "anthropic/claude-fable-5";
       description = "Default model written to settings.json defaultModel.";
     };
 
