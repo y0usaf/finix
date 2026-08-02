@@ -837,11 +837,11 @@
         "piSrc": "piSrc"
       },
       "locked": {
-        "lastModified": 1785504979,
-        "narHash": "sha256-Pv9L/eljldxrCUcQJHE1u5AVSMuhiQYhyq3Obtzj02s=",
+        "lastModified": 1785641077,
+        "narHash": "sha256-UUFkNl7jtq1mWRVrsQiJ3H5NX4Fkt5b5gGd1SpTE31g=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "a766cee8133ee26de649e1d6347b3af65069100f",
+        "rev": "91714c938918b2a97e38e8e00d29d5beecc42c2f",
         "type": "github"
       },
       "original": {
