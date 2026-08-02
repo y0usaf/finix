@@ -6,6 +6,12 @@
 # from /persist, HERMES_HOME=$stateDir/.hermes, declarative config.yaml, and
 # secret injection via $HERMES_HOME/.env (hermes reads it on startup).
 #
+# Interactive surface (upstream services.hermes-agent.addToSystemPackages
+# parity): CLI on PATH via environment.systemPackages, HERMES_HOME exported so
+# shells share the gateway's state, y0usaf joins the hermes group, and state
+# dirs/files are group-writable/readable (2770/0660/0640) so `hermes config
+# set` and one-shot runs don't hit EACCES.
+#
 # Provider: "ai-gateway" = Vercel AI Gateway (key AI_GATEWAY_API_KEY).
 #
 # NOTE (verified 2026-08-01 against hermes-agent 0.19.0, rev 2b0fb72): the
@@ -61,6 +67,11 @@ let
     register_provider(ai_gateway)
   '';
 in {
+  environment = {
+    systemPackages = [ hermes ];
+    variables.HERMES_HOME = homeDir;
+  };
+
   fileSystems."${stateDir}" = {
     device = "/persist${stateDir}";
     fsType = "btrfs";
@@ -74,6 +85,7 @@ in {
       group = "hermes";
       home = stateDir;
     };
+    users.y0usaf.extraGroups = [ "hermes" ];
     groups.hermes = { };
   };
 
@@ -87,9 +99,16 @@ in {
       export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.gnugrep ]}
       mkdir -p ${homeDir}/cron ${homeDir}/sessions ${homeDir}/logs ${homeDir}/memories ${homeDir}/plugins/
       mkdir -p ${homeDir}/plugins/model-providers/ai-gateway
+      # 2770 = setgid + group-writable: y0usaf (hermes group) shares state
+      # with the gateway service (parity with upstream tmpfiles rules).
+      chmod 2770 ${stateDir} ${homeDir}
+      chmod 2770 ${homeDir}/cron ${homeDir}/sessions ${homeDir}/logs ${homeDir}/memories
+      chmod 2770 ${homeDir}/plugins ${homeDir}/plugins/model-providers/ai-gateway
       chown -R hermes:hermes ${stateDir} 2>/dev/null || true
       if [ ! -f ${homeDir}/config.yaml ]; then
-        install -o hermes -g hermes -m 0640 ${configYaml} ${homeDir}/config.yaml
+        install -o hermes -g hermes -m 0660 ${configYaml} ${homeDir}/config.yaml
+      else
+        chmod 0660 ${homeDir}/config.yaml 2>/dev/null || true
       fi
       # Declarative ai-gateway provider profile (hermes user plugin).
       install -o hermes -g hermes -m 0644 ${aiGatewayProviderPy} \
@@ -101,7 +120,9 @@ in {
         { echo "AI_GATEWAY_API_KEY=$key"; grep -v '^AI_GATEWAY_API_KEY=' ${homeDir}/.env 2>/dev/null || true; } > "$tmp"
         mv "$tmp" ${homeDir}/.env
         chown hermes:hermes ${homeDir}/.env
-        chmod 0600 ${homeDir}/.env
+        # 0640: hermes-group members (y0usaf) read it; the gateway itself
+        # runs as hermes (owner). Parity with upstream's 0640 .env.
+        chmod 0640 ${homeDir}/.env
       fi
     '';
     log = true;
@@ -119,6 +140,7 @@ in {
     environment = {
       HOME = stateDir;
       HERMES_HOME = homeDir;
+      HERMES_MANAGED = "true";
     };
     conditions = [ "net/lo/up" "task/hermes-dirs/success" ];
     log = true;
