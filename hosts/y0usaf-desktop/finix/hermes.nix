@@ -25,6 +25,11 @@ in {
     (pkgs.writeShellScriptBin "hermes-desktop-launcher" ''
       export NIXOS_OZONE_WL=1
       export ELECTRON_OZONE_PLATFORM_HINT=wayland
+      # Thin client: pre-fill the remote gateway URL (server dashboard at
+      # y0usaf-server:9119, tailnet-only). The app still asks for the
+      # basic-auth credentials once on first sign-in; the session then
+      # persists (server holds a stable BASIC_AUTH_SECRET).
+      export HERMES_DESKTOP_REMOTE_URL=http://y0usaf-server:9119
       exec hermes-desktop "$@"
     '')
   ];

@@ -106,6 +106,7 @@ in {
 
             # AI / dev tooling state
             ".claude-code-router"
+            ".hermes" # desktop app HERMES_HOME (config, sessions, skills dirs)
             ".gemini"
             ".crush"
             ".cookunity"
@@ -149,6 +150,7 @@ in {
             ".config/AionUi"
 
             ".config/Claude"
+            ".config/Hermes" # Electron userData — remote-gateway session (hermes desktop)
             ".config/Codex"
             ".config/opencode"
             ".config/manicode"
