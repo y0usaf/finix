@@ -3,29 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  # CEF pinned to match upstream stremio-linux-shell requirements
-  # https://github.com/Stremio/stremio-linux-shell/blob/v1.0.0-beta.12/flatpak/com.stremio.Stremio.Devel.json#L150
-  cefPinned = pkgs.cef-binary.override {
-    version = "138.0.21";
-    gitRevision = "54811fe";
-    chromiumVersion = "138.0.7204.101";
-    srcHashes = {
-      aarch64-linux = "";
-      x86_64-linux = "sha256-Kob/5lPdZc9JIPxzqiJXNSMaxLuAvNQKdd/AZDiXvNI=";
-    };
-  };
-
-  cefPath = pkgs.symlinkJoin {
-    name = "stremio-cef-target";
-    paths = [
-      "${cefPinned}/Resources"
-      "${cefPinned}/Release"
-    ];
-  };
-  inherit (lib) licenses;
-  libayatanaAppindicator = pkgs.libayatana-appindicator;
-in {
+}: {
   options.user.programs.stremio = {
     enable = lib.mkEnableOption "Stremio media center";
   };
@@ -33,64 +11,70 @@ in {
     environment.systemPackages = [
       (pkgs.rustPlatform.buildRustPackage (finalAttrs: {
         pname = "stremio-linux-shell";
-        version = "0-unstable-2eb0252f";
+        version = "1.1.4-unstable-3826d3c";
 
         src = pkgs.fetchFromGitHub {
           owner = "Stremio";
           repo = "stremio-linux-shell";
-          rev = "2eb0252fb568eaba829c9289e5ce49db6378f734";
-          hash = "sha256-NVChTlW146AAHtpeLrCEJBhWmOM7FvrSv9H/KMLJiNY=";
+          rev = "3826d3c9a97e83d218b6bf87321f2817065cef46";
+          hash = "sha256-Y5BkMviHM1+DcwUrrv4eqCLjawKfA4ZaohjgpFQjjFk=";
         };
 
+        # Current main: WebKitGTK-based, GTK4/libadwaita. No CEF, all deps on crates.io.
         cargoLock = {
           lockFile = "${finalAttrs.src}/Cargo.lock";
-          outputHashes = {
-            "cef-138.2.2+138.0.21" = "sha256-HfhiNwhCtKcuI27fGTCjk1HA1Icau6SUjXjHqAOllAk=";
-            "dpi-0.1.1" = "sha256-5nc8cGFl4jUsJXfEtfOxFBQFRoBrM6/5xfA2c1qhmoQ=";
-            "glutin-0.32.3" = "sha256-5IX+03mQmWxlCdVC0g1q2J+ulW+nPTAhYAd25wyaHx8=";
-            "libmpv2-4.1.0" = "sha256-zXMFuajnkY8RnVGlvXlZfoMpfifzqzJnt28a+yPZmcQ=";
-          };
         };
 
         postPatch = ''
-          substituteInPlace $cargoDepsCopy/libappindicator-sys-*/src/lib.rs \
-            --replace-fail "libayatana-appindicator3.so.1" "${libayatanaAppindicator}/lib/libayatana-appindicator3.so.1"
-
-          # Vesktop/venmic cannot reliably select native PipeWire mpv streams.
-          # Route mpv through pipewire-pulse so Stremio appears as shareable audio.
-          substituteInPlace src/player/mod.rs \
+          # Route mpv through pipewire-pulse so Stremio appears as shareable audio
+          # (Vesktop/venmic cannot select native PipeWire mpv streams).
+          substituteInPlace src/app/video/imp.rs \
             --replace-fail 'init.set_property("vo", "libmpv")?;' \
               'init.set_property("vo", "libmpv")?; init.set_property("ao", "pulse")?;'
+
+          # build.rs writes GLib schemas into dirs::data_dir() (=HOME/.local/share);
+          # the nix builder HOME is unwritable; export persists into the build phase
+          export HOME=/build
         '';
-
-        buildFeatures = ["offline-build"];
-
-        buildInputs = [
-          pkgs.atk
-          cefPath
-          pkgs.gtk3
-          libayatanaAppindicator
-          pkgs.mpv
-          pkgs.openssl
-        ];
 
         nativeBuildInputs = [
           pkgs.wrapGAppsHook4
           pkgs.makeBinaryWrapper
           pkgs.pkg-config
+          pkgs.gettext # msgfmt for build.rs po -> mo
+          pkgs.glib.bin # glib-compile-schemas
         ];
 
-        env.CEF_PATH = "${cefPath}";
+        buildInputs = [
+          pkgs.gtk4
+          pkgs.libadwaita
+          pkgs.webkitgtk_6_0 # WebKitGTK 6.0 (2.52), matches crate webkit6 v2_52
+          pkgs.glib-networking # TLS/proxy for the webview
+          pkgs.libepoxy # dlopen'd at runtime
+          pkgs.mpv # libmpv
+        ];
 
         postInstall = ''
-          mkdir -p $out/share/applications
-          cp data/com.stremio.Stremio.desktop $out/share/applications/com.stremio.Stremio.desktop
+          mkdir -p $out/share/applications $out/share/icons/hicolor/scalable/apps \
+                   $out/share/glib-2.0/schemas $out/share/stremio
+          cp data/com.stremio.Stremio.desktop $out/share/applications/
+          cp data/icons/com.stremio.Stremio.svg $out/share/icons/hicolor/scalable/apps/
+          cp data/com.stremio.Stremio.gschema.xml $out/share/glib-2.0/schemas/
+          cp data/server.js $out/share/stremio/server.js
 
-          mkdir -p $out/share/icons/hicolor/scalable/apps
-          cp data/icons/com.stremio.Stremio.svg $out/share/icons/hicolor/scalable/apps/com.stremio.Stremio.svg
+          # v1.1.4 hard-requires the compiled GSettings schema (app aborts otherwise);
+          # wrapGAppsHook relocates it to share/gsettings-schemas but doesn't compile it here.
+          glib-compile-schemas "$out/share/glib-2.0/schemas"
 
-          cp data/server.js $out/bin/server.js
-          mv $out/bin/stremio-linux-shell $out/bin/stremio
+          # upstream data/stremio.sh: force GSK OpenGL renderer on NVIDIA.
+          # Shim resolves its sibling binary relative to its own location
+          # (wrapGAppsHook wraps both binaries after us).
+          cat > $out/bin/stremio <<'SH'
+          #!/bin/sh
+          [ -e /dev/nvidia0 ] && export GSK_RENDERER=opengl
+          exec "$(dirname "$0")/stremio-linux-shell" "$@"
+          SH
+          chmod +x $out/bin/stremio
         '';
 
         preFixup = ''
@@ -98,16 +82,22 @@ in {
             # stremio passes RUST_LOG verbatim into mpv's msg-level; non-mpv
             # values like "crate=debug" make mpv creation fail with -11
             --unset RUST_LOG \
+            # libmpv refuses to initialize unless LC_NUMERIC is C ("Non-C locale detected",
+            # "Failed to create mpv: Null" panic); beta.12 called setlocale() in code, v1.1.4 doesn't
+            --unset LC_ALL \
+            --set LC_NUMERIC "C" \
+            --set SERVER_PATH "$out/share/stremio/server.js" \
+            --prefix PATH : "${lib.makeBinPath [pkgs.nodejs]}" \
             --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib" \
             --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [pkgs.libGL]}" \
-            --prefix PATH : "${lib.makeBinPath [pkgs.nodejs]}"
+            --prefix PATH : "${lib.makeBinPath [pkgs.bubblewrap]}"
           )
         '';
 
         meta = {
-          description = "Modern media center (CEF-based, no qtwebengine)";
+          description = "Modern media center (WebKitGTK-based)";
           homepage = "https://www.stremio.com/";
-          license = [licenses.gpl3Only licenses.unfree];
+          license = [lib.licenses.gpl3Only lib.licenses.unfree];
           platforms = lib.platforms.linux;
           mainProgram = "stremio";
         };
