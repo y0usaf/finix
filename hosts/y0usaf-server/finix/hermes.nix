@@ -23,8 +23,8 @@
 # built-in profile"). The profile points base_url at
 # https://ai-gateway.vercel.sh/v1 and reads the key from AI_GATEWAY_API_KEY.
 # Also verified: model.default must be the BARE gateway slug
-# ("anthropic/claude-sonnet-4") with provider set separately — a
-# "ai-gateway/anthropic/claude-sonnet-4" model.default makes the gateway
+# ("deepseek/deepseek-v4-flash-0731") with provider set separately — a
+# "ai-gateway/deepseek/deepseek-v4-flash-0731" model.default makes the gateway
 # receive the whole string as model id and answer HTTP 404.
 { lib, pkgs, flakeInputs, ... }:
 let
@@ -44,7 +44,7 @@ let
 
   configYaml = (pkgs.formats.yaml { }).generate "hermes-config.yaml" {
     model = {
-      default = "anthropic/claude-sonnet-4";
+      default = "deepseek/deepseek-v4-flash-0731";
       provider = "ai-gateway";
     };
     # The CLI session/model-switch resolver (resolve_provider_full) only
