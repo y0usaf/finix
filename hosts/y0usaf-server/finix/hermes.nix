@@ -70,6 +70,7 @@ in {
   environment = {
     systemPackages = [ hermes ];
     variables.HERMES_HOME = homeDir;
+    etc."zprofile".text = "export HERMES_HOME=${homeDir}\n";
   };
 
   fileSystems."${stateDir}" = {
@@ -124,6 +125,10 @@ in {
         # runs as hermes (owner). Parity with upstream's 0640 .env.
         chmod 0640 ${homeDir}/.env
       fi
+      # Idempotent belt-and-suspenders: fix a pre-existing 0600 .env on next
+      # boot (only reachable via the re-write branch above otherwise).
+      chmod 0640 ${homeDir}/.env 2>/dev/null || true
+      chmod 0660 ${homeDir}/config.yaml 2>/dev/null || true
     '';
     log = true;
   };
