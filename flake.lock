@@ -404,17 +404,16 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1785168757,
-        "narHash": "sha256-1KVG3QH8dyI0y4AhJHCCjt4bTD42PCOLyZ+9rOtq0bM=",
-        "owner": "NousResearch",
-        "repo": "hermes-agent",
-        "rev": "2b0fb72acae67f51652de5c51db556bc15a68f0e",
-        "type": "github"
+        "lastModified": 1785682279,
+        "narHash": "sha256-FtcAHfRPBNbbS4OvXZYNV1zuqTxLKEcMcIBXRlRmdcE=",
+        "rev": "57799c494c1eda012151ed50e76afbf2f7e5a311",
+        "revCount": 18271,
+        "type": "git",
+        "url": "file:///home/y0usaf/finix-vendor/hermes-agent"
       },
       "original": {
-        "owner": "NousResearch",
-        "repo": "hermes-agent",
-        "type": "github"
+        "type": "git",
+        "url": "file:///home/y0usaf/finix-vendor/hermes-agent"
       }
     },
     "home-manager": {

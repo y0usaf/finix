@@ -113,7 +113,11 @@
     };
 
     hermes-agent = {
-      url = "github:NousResearch/hermes-agent";
+      # Vendored patch of github:NousResearch/hermes-agent@2b0fb72 — upstream's
+      # electron-headers FOD sha went stale when artifacts.electronjs.org
+      # recompressed the v41.9.1 tarball (see finix-vendor/hermes-agent commit).
+      # Refresh: repeat the same one-line sha256 bump when the mirror rebuilds.
+      url = "git+file:///home/y0usaf/finix-vendor/hermes-agent";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
