@@ -141,6 +141,14 @@ in {
         # runs as hermes (owner). Parity with upstream's 0640 .env.
         chmod 0640 ${homeDir}/.env
       fi
+      # Dashboard basic-auth (hermes desktop remote backend): same idempotent
+      # pattern as the API key; secrets from /persist/secrets/hermes/.
+      for var in HERMES_DASHBOARD_BASIC_AUTH_USERNAME HERMES_DASHBOARD_BASIC_AUTH_PASSWORD HERMES_DASHBOARD_BASIC_AUTH_SECRET; do
+        secret=/persist/secrets/hermes/dashboard-auth-$var
+        if [ -r "$secret" ] && { [ ! -f ${homeDir}/.env ] || ! grep -q "^$var=" ${homeDir}/.env 2>/dev/null; }; then
+          printf '%s=%s\n' "$var" "$(tr -d '\r\n' < "$secret")" >> ${homeDir}/.env
+        fi
+      done
       # Per-user interactive state for y0usaf: same provider config + key,
       # own ~/.hermes. hermes itself clamps it to 0700 at startup; running
       # as y0usaf keeps workspace file access intact while the gateway's
@@ -176,6 +184,24 @@ in {
       set -eu
       export PATH=${lib.makeBinPath [ pkgs.coreutils ]}
       exec ${hermes}/bin/hermes gateway run
+    ''}";
+    environment = {
+      HOME = stateDir;
+      HERMES_HOME = homeDir;
+      HERMES_MANAGED = "true";
+    };
+    conditions = [ "net/lo/up" "task/hermes-dirs/success" ];
+    log = true;
+  };
+
+  finit.services."hermes-dashboard" = {
+    description = "hermes web dashboard (desktop remote backend)";
+    user = "hermes";
+    group = "hermes";
+    command = "${pkgs.writeShellScript "hermes-dashboard-start" ''
+      set -eu
+      export PATH=${lib.makeBinPath [ pkgs.coreutils ]}
+      exec ${hermes}/bin/hermes dashboard --host 0.0.0.0 --port 9119 --no-open
     ''}";
     environment = {
       HOME = stateDir;
