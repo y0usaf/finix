@@ -153,6 +153,7 @@
     ../hosts/y0usaf-server/finix/attic.nix
     ../hosts/y0usaf-server/finix/boot-health.nix
     ../hosts/y0usaf-server/finix/boot.nix
+    ../hosts/y0usaf-server/finix/hermes.nix
   ]);
 
   desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules;
