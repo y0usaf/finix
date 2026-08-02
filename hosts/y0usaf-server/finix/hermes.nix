@@ -6,11 +6,10 @@
 # from /persist, HERMES_HOME=$stateDir/.hermes, declarative config.yaml, and
 # secret injection via $HERMES_HOME/.env (hermes reads it on startup).
 #
-# Interactive surface: a sudo wrapper (hermes -> sudo -u hermes) shares the
-# gateway's state. Group-perms sharing (2770/0640 + hermes group) cannot
-# work: hermes chmods $HERMES_HOME to 0700 at startup
-# (hermes_constants.secure_parent_dir). /etc/zprofile is not sourced by
-# nixpkgs zsh (global rcs are compiled into the package), so no env export.
+# Interactive surface: `hermes` runs as the invoking user against per-user
+# ~/.hermes (seeded with the same provider config + key by hermes-dirs), so
+# workspace/git access works. `hermes-gw` (sudo -u hermes) administers the
+# gateway's own state, which hermes clamps to 0700 at startup.
 #
 # Provider: "ai-gateway" = Vercel AI Gateway (key AI_GATEWAY_API_KEY).
 #
@@ -33,12 +32,12 @@ let
   hermes = flakeInputs.hermes-agent.packages.${system}.minimal;
   stateDir = "/var/lib/hermes";
 
-  # Interactive CLI. hermes clamps $HERMES_HOME to 0700 at startup
-  # (hermes_constants.secure_parent_dir, upstream issue #25821), so
-  # group-sharing the state dir via 2770 can never survive a gateway
-  # start. Share the gateway's state by running AS hermes instead;
-  # y0usaf is NOPASSWD sudoer (finix/common.nix).
-  hermesInteractive = pkgs.writeShellScriptBin "hermes" ''
+  # Interactive CLI runs as the invoking user with per-user ~/.hermes
+  # (seeded by hermes-dirs below): a coding agent must run as the user
+  # whose files it edits. The previous sudo-wrapper ran as `hermes` and
+  # died stat'ing $PWD/.git under the 0700 /home/y0usaf. Gateway-state
+  # admin (config set etc.) goes through hermes-gw instead.
+  hermesGw = pkgs.writeShellScriptBin "hermes-gw" ''
     exec sudo -u hermes HOME=${stateDir} HERMES_HOME=${homeDir} ${hermes}/bin/hermes "$@"
   '';
   homeDir = "${stateDir}/.hermes";
@@ -88,7 +87,7 @@ in {
   # No HERMES_HOME env plumbing: /etc/zprofile is dead on finix (nixpkgs
   # zsh compiles global rcs into the package etc dir), and the wrapper
   # carries the env itself.
-  environment.systemPackages = [ hermesInteractive ];
+  environment.systemPackages = [ hermes hermesGw ];
 
   fileSystems."${stateDir}" = {
     device = "/persist${stateDir}";
@@ -142,6 +141,25 @@ in {
         # runs as hermes (owner). Parity with upstream's 0640 .env.
         chmod 0640 ${homeDir}/.env
       fi
+      # Per-user interactive state for y0usaf: same provider config + key,
+      # own ~/.hermes. hermes itself clamps it to 0700 at startup; running
+      # as y0usaf keeps workspace file access intact while the gateway's
+      # state stays private to the hermes user.
+      uhome=/home/y0usaf/.hermes
+      mkdir -p $uhome/plugins/model-providers/ai-gateway
+      if [ ! -f $uhome/config.yaml ]; then
+        install -m 0600 ${configYaml} $uhome/config.yaml
+      fi
+      install -m 0644 ${aiGatewayProviderPy} \
+        $uhome/plugins/model-providers/ai-gateway/__init__.py
+      if [ -r "$secret" ] && { [ ! -f $uhome/.env ] || ! grep -q '^AI_GATEWAY_API_KEY=' $uhome/.env 2>/dev/null; }; then
+        key="$(tr -d '\r\n' < "$secret")"
+        tmp=$uhome/.env.tmp
+        { echo "AI_GATEWAY_API_KEY=$key"; grep -v '^AI_GATEWAY_API_KEY=' $uhome/.env 2>/dev/null || true; } > "$tmp"
+        mv "$tmp" $uhome/.env
+        chmod 0600 $uhome/.env
+      fi
+      chown -R y0usaf:users $uhome 2>/dev/null || true
       # Idempotent belt-and-suspenders: fix a pre-existing 0600 .env on next
       # boot (only reachable via the re-write branch above otherwise).
       chmod 0640 ${homeDir}/.env 2>/dev/null || true
