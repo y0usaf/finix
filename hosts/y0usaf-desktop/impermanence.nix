@@ -63,7 +63,9 @@ in {
         common.userDirectories
         ++ (
           if config.user.programs.firefox.enable
-          then [".mozilla"]
+          # Firefox 147+: XDG dirs (~/.config/firefox) unless ~/.mozilla/firefox
+          # exists or MOZ_LEGACY_HOME=1. Empty ~/.mozilla alone is not legacy.
+          then [".config/firefox"]
           else []
         )
         ++ (

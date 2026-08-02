@@ -9,7 +9,7 @@
   userName = user.name;
   # LibreWolf 152 (librewolf-bin) reads the legacy home ~/.librewolf only: the
   # package has no XDG_CONFIG_HOME / MOZ_LEGACY_HOME support (verified against
-  # the store path). Keep separate from Firefox, which uses ~/.mozilla.
+  # the store path). Keep separate from Firefox, which uses ~/.config/firefox (XDG).
   librewolfConfig = ".librewolf";
   pywalfoxNative = pkgs.pywalfox-native;
   prefValue = pref:

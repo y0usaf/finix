@@ -28,7 +28,9 @@ in {
     ];
     manzil.users."${userName}" = {
       files = {
-        ".mozilla/firefox/profiles.ini" = {
+        # Firefox 147+ XDG layout: profiles under $XDG_CONFIG_HOME/firefox
+        # (~/.config/firefox). Legacy ~/.mozilla only if it contains firefox/.
+        ".config/firefox/profiles.ini" = {
           generator = lib.generators.toINI {};
           value =
             profilesIni
@@ -40,7 +42,7 @@ in {
                 };
             };
         };
-        ".mozilla/firefox/${userName}/chrome/userChrome.css" = {
+        ".config/firefox/${userName}/chrome/userChrome.css" = {
           text = browserShared.userChromeCss;
         };
       };

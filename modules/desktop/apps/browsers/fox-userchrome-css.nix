@@ -95,19 +95,41 @@ _:
           display: none !important;
       }
 
-      /* With #nav-bar moved below the content area, top-anchored panels still
-         anchor near the bottom of the window; drag them up to the breakout
-         urlbar's position (top: var(--breakout-top), see #urlbar[breakout]). */
+      /* With #nav-bar moved below the content area, panels anchored to its
+         buttons still open downward: doorhangers are <panel type="arrow"
+         flip="slide">, and slide mode never vertically flips a popup, it only
+         clamps it at the screen edge (menupopups flip; arrow panels do not).
+         So Gecko stamps side="top" and pins them to the bottom edge. Drag them
+         up to the breakout urlbar's position (top: var(--breakout-top)).
+         Margins work under Wayland because Gecko bakes them into the popup
+         rect before creating the xdg_popup.
+         #customizationui-widget-panel is a shared host: it also serves the
+         All-Tabs list anchored to the TOP tab strip, so guard it or the list
+         gets dragged 80vh off its anchor. */
       @media (-moz-platform: linux) {
           #notification-popup[side="top"],
           #permission-popup[side="top"],
-          #customizationui-widget-panel[side="top"] {
+          #identity-popup[side="top"],
+          #protections-popup[side="top"],
+          #editBookmarkPanel[side="top"],
+          #appMenu-popup[side="top"],
+          #unified-extensions-panel[side="top"],
+          #downloadsPanel[side="top"],
+          #widget-overflow[side="top"],
+          #confirmation-hint[side="top"],
+          #customizationui-widget-panel[side="top"]:not(:has(#allTabsMenu-allTabsView)) {
               margin-top: var(--popup-offset-top) !important;
           }
       }
 
+      /* PanelMultiView JS measures free space below the anchor (near zero with
+         the bar at the bottom) and writes that as an inline max-height, which
+         squished every menu. unset fixed the squish but left tall menus free
+         to overrun the bottom edge from their parked 20vh position, where
+         Wayland re-clamps them. Cap to the space between --breakout-top and
+         the nav-bar instead so long menus scroll. */
       .panel-viewstack {
-          max-height: unset !important;
+          max-height: calc(100vh - var(--breakout-top) - var(--bar-height) - 8px) !important;
       }
 
       #TabsToolbar-customization-target,
