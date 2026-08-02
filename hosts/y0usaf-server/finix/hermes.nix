@@ -6,11 +6,11 @@
 # from /persist, HERMES_HOME=$stateDir/.hermes, declarative config.yaml, and
 # secret injection via $HERMES_HOME/.env (hermes reads it on startup).
 #
-# Interactive surface (upstream services.hermes-agent.addToSystemPackages
-# parity): CLI on PATH via environment.systemPackages, HERMES_HOME exported so
-# shells share the gateway's state, y0usaf joins the hermes group, and state
-# dirs/files are group-writable/readable (2770/0660/0640) so `hermes config
-# set` and one-shot runs don't hit EACCES.
+# Interactive surface: a sudo wrapper (hermes -> sudo -u hermes) shares the
+# gateway's state. Group-perms sharing (2770/0640 + hermes group) cannot
+# work: hermes chmods $HERMES_HOME to 0700 at startup
+# (hermes_constants.secure_parent_dir). /etc/zprofile is not sourced by
+# nixpkgs zsh (global rcs are compiled into the package), so no env export.
 #
 # Provider: "ai-gateway" = Vercel AI Gateway (key AI_GATEWAY_API_KEY).
 #
@@ -32,6 +32,15 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   hermes = flakeInputs.hermes-agent.packages.${system}.minimal;
   stateDir = "/var/lib/hermes";
+
+  # Interactive CLI. hermes clamps $HERMES_HOME to 0700 at startup
+  # (hermes_constants.secure_parent_dir, upstream issue #25821), so
+  # group-sharing the state dir via 2770 can never survive a gateway
+  # start. Share the gateway's state by running AS hermes instead;
+  # y0usaf is NOPASSWD sudoer (finix/common.nix).
+  hermesInteractive = pkgs.writeShellScriptBin "hermes" ''
+    exec sudo -u hermes HOME=${stateDir} HERMES_HOME=${homeDir} ${hermes}/bin/hermes "$@"
+  '';
   homeDir = "${stateDir}/.hermes";
 
   configYaml = (pkgs.formats.yaml { }).generate "hermes-config.yaml" {
@@ -76,11 +85,10 @@ let
     register_provider(ai_gateway)
   '';
 in {
-  environment = {
-    systemPackages = [ hermes ];
-    variables.HERMES_HOME = homeDir;
-    etc."zprofile".text = "export HERMES_HOME=${homeDir}\n";
-  };
+  # No HERMES_HOME env plumbing: /etc/zprofile is dead on finix (nixpkgs
+  # zsh compiles global rcs into the package etc dir), and the wrapper
+  # carries the env itself.
+  environment.systemPackages = [ hermesInteractive ];
 
   fileSystems."${stateDir}" = {
     device = "/persist${stateDir}";
