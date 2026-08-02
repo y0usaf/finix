@@ -42,7 +42,8 @@ let
   '';
   homeDir = "${stateDir}/.hermes";
 
-  configYaml = (pkgs.formats.yaml { }).generate "hermes-config.yaml" {
+  # Shared provider config (gateway + per-user CLI both seed this).
+  baseConfig = {
     model = {
       default = "deepseek/deepseek-v4-flash-0731";
       provider = "ai-gateway";
@@ -57,6 +58,235 @@ let
       key_env = "AI_GATEWAY_API_KEY";
     };
   };
+
+  # Gateway config: base + Aphrodite CCR context engine. `plugins.enabled`
+  # activates the plugin (the imperative `hermes plugins enable aphrodite`
+  # writes exactly this key); `context.engine` hands the compression engine
+  # to the plugin; engine_threshold_pct = compress at 55% context fill
+  # (plugin default 45, README recommends 55). model.context_length is
+  # deliberately NOT set: claiming 1M tokens to the deepseek backend behind
+  # the Vercel gateway needs testing before we trust it.
+  configYaml = (pkgs.formats.yaml { }).generate "hermes-config.yaml" (baseConfig // {
+    plugins.enabled = [ "aphrodite" "serverstats" ];
+    context = {
+      engine = "aphrodite";
+      engine_threshold_pct = 55;
+    };
+  });
+
+  # Per-user interactive CLI config stays bare: no plugins.enabled without a
+  # seeded plugin dir, and the interactive surface doesn't run the proxies.
+  configYamlUser = (pkgs.formats.yaml { }).generate "hermes-config-user.yaml" baseConfig;
+
+  # Aphrodite CCR compression plugin (github:PlayForm/Aphrodite-Hermes).
+  # The stock install auto-fetches binary + dylib from GitHub Releases via
+  # download.sh (needs curl/wget and writes into the plugin dir — both wrong
+  # on NixOS). Instead we pin the exact release the plugin's BINARY_VERSION
+  # expects (1.3.7) and verify against the published SHA256SUMS file.
+  aphroditeSrc = flakeInputs.aphrodite-hermes;
+  aphroditeBin = pkgs.fetchurl {
+    url = "https://github.com/PlayForm/Aphrodite/releases/download/Aphrodite%2Fv1.3.7/aphrodite-x86_64-unknown-linux-gnu";
+    hash = "sha256-MfvWjkWGAwxRc9tbTNXNVzDfQ3E/KAOscG7SW9Xy1MQ=";
+  };
+  aphroditeLib = pkgs.fetchurl {
+    url = "https://github.com/PlayForm/Aphrodite/releases/download/Aphrodite%2Fv1.3.7/libaphrodite_hermes-x86_64-unknown-linux-gnu.so";
+    hash = "sha256-cDN0iz5P/pF8ZK3xWMFptfiEHUnUPuHAfmsLwaBptFo=";
+  };
+  # Python with PyYAML for the idempotent config merge below (the seed task
+  # installs config.yaml only on first boot; the merge adds the aphrodite
+  # keys to a live config.yaml without clobbering anything else).
+  pyYaml = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
+  aphroditeConfigMerge = pkgs.writeText "aphrodite-config-merge.py" ''
+    import sys
+    import yaml
+
+    p = sys.argv[1]
+    with open(p) as f:
+        cfg = yaml.safe_load(f) or {}
+    # Append, don't replace: preserve plugins enabled imperatively (e.g.
+    # serverstats) so the declarative merge never drops them on a reboot.
+    enabled = cfg.setdefault("plugins", {}).setdefault("enabled", [])
+    if "aphrodite" not in enabled:
+        enabled.append("aphrodite")
+    ctx = cfg.setdefault("context", {})
+    ctx["engine"] = "aphrodite"
+    ctx["engine_threshold_pct"] = 55
+    with open(p, "w") as f:
+        yaml.safe_dump(cfg, f, sort_keys=False)
+  '';
+
+  # serverstats dashboard plugin (desktop "Server Stats" pane): served by
+  # hermes-dashboard at /api/plugins/serverstats/* — pure /proc stats, no deps.
+  serverstatsManifest = pkgs.writeText "serverstats-manifest.json" ''
+    {
+      "name": "serverstats",
+      "version": "0.1.0",
+      "description": "Live finix server stats (CPU / RAM / disk / top procs) for the Hermes desktop UI",
+      "api": "plugin_api.py"
+    }
+  '';
+  serverstatsApi = pkgs.writeText "serverstats-plugin_api.py" ''
+    """serverstats — live stats for the finix server, served to the Hermes desktop UI.
+
+    Pure /proc reads (no psutil). Mounted by the hermes dashboard web server at
+    /api/plugins/serverstats/* (see `_mount_plugin_api_routes` in web_server.py).
+
+    Endpoints:
+        GET /health -> {"ok": true}
+        GET /stats  -> full snapshot: cpu%, load, mem, swap, disk, uptime, top procs
+    """
+    from __future__ import annotations
+
+    import os
+    import time
+    from typing import Any, Dict, Optional
+
+    from fastapi import APIRouter
+
+    router = APIRouter()
+
+    _HOST = os.uname().nodename
+    _CORES = os.cpu_count() or 1
+    _PAGE = os.sysconf("SC_PAGE_SIZE")
+
+    # CPU samples are cached ~1.5s so concurrent pollers (chip + pane) share
+    # one /proc/stat delta instead of each sleeping for the sample window.
+    _cpu_cache: Dict[str, Any] = {"ts": 0.0, "val": 0.0}
+
+
+    def _read(path: str) -> str:
+        try:
+            with open(path, "r") as f:
+                return f.read()
+        except OSError:
+            return ""
+
+
+    def _cpu_sample() -> tuple[int, int]:
+        """Return (total_ticks, idle_ticks) from the first /proc/stat line."""
+        lines = _read("/proc/stat").splitlines()
+        if not lines:
+            return (0, 0)
+        parts = lines[0].split()
+        nums = [int(x) for x in parts[1:] if x.isdigit()][:8]
+        if len(nums) < 4:
+            return (0, 0)
+        idle = nums[3] + (nums[4] if len(nums) > 4 else 0)  # idle + iowait
+        return (sum(nums), idle)
+
+
+    def _compute_cpu(interval: float = 0.4) -> float:
+        t0, i0 = _cpu_sample()
+        if t0 == 0:
+            return 0.0
+        time.sleep(interval)
+        t1, i1 = _cpu_sample()
+        dt = t1 - t0
+        if dt <= 0:
+            return 0.0
+        busy = (t1 - i1) - (t0 - i0)
+        return round(min(100.0, max(0.0, 100.0 * busy / dt)), 1)
+
+
+    def _cpu_percent() -> float:
+        now = time.monotonic()
+        if now - _cpu_cache["ts"] < 1.5:
+            return _cpu_cache["val"]
+        val = _compute_cpu(0.4)
+        _cpu_cache["ts"] = now
+        _cpu_cache["val"] = val
+        return val
+
+
+    def _meminfo() -> Dict[str, int]:
+        info: Dict[str, int] = {}
+        for line in _read("/proc/meminfo").splitlines():
+            key, _, rest = line.partition(":")
+            num = rest.split()[0]
+            if num.isdigit():
+                info[key] = int(num) * 1024
+        return info
+
+
+    def _disk(path: str) -> Optional[Dict[str, Any]]:
+        try:
+            st = os.statvfs(path)
+            total = st.f_blocks * st.f_frsize
+            avail = st.f_bavail * st.f_frsize
+            pct = (100.0 * (st.f_blocks - st.f_bavail) / st.f_blocks
+                   if st.f_blocks else 0.0)
+            return {
+                "path": path,
+                "total": total,
+                "used": total - avail,
+                "available": avail,
+                "percent": round(pct, 1),
+            }
+        except OSError:
+            return None
+
+
+    def _top_procs(limit: int = 6) -> list[Dict[str, Any]]:
+        procs: list[Dict[str, Any]] = []
+        for entry in os.listdir("/proc"):
+            if not entry.isdigit():
+                continue
+            try:
+                statm = _read(f"/proc/{entry}/statm").split()
+                comm = _read(f"/proc/{entry}/comm").strip()
+                if not statm:
+                    continue
+                rss = int(statm[1]) * _PAGE
+                procs.append({"pid": int(entry), "name": comm or entry, "rss": rss})
+            except (ValueError, OSError):
+                continue
+        procs.sort(key=lambda p: p["rss"], reverse=True)
+        return procs[:limit]
+
+
+    def _loadavg() -> Dict[str, float]:
+        parts = _read("/proc/loadavg").split()
+        if len(parts) < 3:
+            return {"1": 0.0, "5": 0.0, "15": 0.0}
+        return {"1": float(parts[0]), "5": float(parts[1]), "15": float(parts[2])}
+
+
+    def _uptime() -> float:
+        parts = _read("/proc/uptime").split()
+        return float(parts[0]) if parts else 0.0
+
+
+    @router.get("/health")
+    def health() -> dict:
+        return {"ok": True, "host": _HOST, "ts": int(time.time())}
+
+
+    @router.get("/stats")
+    def stats() -> dict:
+        mem = _meminfo()
+        total = mem.get("MemTotal", 0)
+        avail = mem.get("MemAvailable", mem.get("MemFree", 0))
+        swap_total = mem.get("SwapTotal", 0)
+        swap_free = mem.get("SwapFree", 0)
+        return {
+            "host": _HOST,
+            "cores": _CORES,
+            "cpu_percent": _cpu_percent(),
+            "load": _loadavg(),
+            "mem": {
+                "total": total,
+                "available": avail,
+                "used": max(0, total - avail),
+                "percent": round(100.0 * (total - avail) / total, 1) if total else 0.0,
+                "swap_total": swap_total,
+                "swap_used": max(0, swap_total - swap_free),
+            },
+            "disk_persist": _disk("/persist"),
+            "uptime_s": _uptime(),
+            "top_procs": _top_procs(6),
+            "ts": int(time.time()),
+        }
+  '';
 
   aiGatewayProviderPy = pkgs.writeText "ai-gateway-provider.py" ''
     """Vercel AI Gateway provider profile (user plugin).
@@ -130,6 +360,35 @@ in {
       # Declarative ai-gateway provider profile (hermes user plugin).
       install -o hermes -g hermes -m 0644 ${aiGatewayProviderPy} \
         ${homeDir}/plugins/model-providers/ai-gateway/__init__.py
+
+      # Declarative serverstats dashboard plugin (desktop "Server Stats" pane):
+      # served by hermes-dashboard at /api/plugins/serverstats/*, allow-listed
+      # via plugins.enabled (configYaml + the merge above).
+      mkdir -p ${homeDir}/plugins/serverstats/dashboard
+      install -o hermes -g hermes -m 0644 ${serverstatsManifest} \
+        ${homeDir}/plugins/serverstats/dashboard/manifest.json
+      install -o hermes -g hermes -m 0644 ${serverstatsApi} \
+        ${homeDir}/plugins/serverstats/dashboard/plugin_api.py
+
+      # Aphrodite CCR compression plugin: writable copy of the plugin tree +
+      # pinned, hash-verified binaries. Pre-placing them means download.sh
+      # (curl/wget, writes into the plugin dir) is never needed at runtime.
+      # Idempotent: cp/install overwrite each boot, so a bumped pin reseeds
+      # on the next switch.
+      mkdir -p ${homeDir}/plugins/aphrodite/binaries
+      cp -rT ${aphroditeSrc} ${homeDir}/plugins/aphrodite
+      install -m 0755 ${aphroditeBin} \
+        ${homeDir}/plugins/aphrodite/binaries/aphrodite
+      install -m 0644 ${aphroditeLib} \
+        ${homeDir}/plugins/aphrodite/binaries/libaphrodite_hermes-x86_64-unknown-linux-gnu.so
+      chown -R hermes:hermes ${homeDir}/plugins/aphrodite
+      chmod 2770 ${homeDir}/plugins/aphrodite
+      # Idempotent merge of the aphrodite keys into an existing config.yaml
+      # (the generated file only installs on first boot; this keeps live
+      # tweaks while adding the declarative keys).
+      ${pyYaml}/bin/python3 ${aphroditeConfigMerge} ${homeDir}/config.yaml
+      chmod 0660 ${homeDir}/config.yaml 2>/dev/null || true
+      chown hermes:hermes ${homeDir}/config.yaml 2>/dev/null || true
       secret=/persist/secrets/hermes/ai-gateway-api-key
       if [ -r "$secret" ] && { [ ! -f ${homeDir}/.env ] || ! grep -q '^AI_GATEWAY_API_KEY=' ${homeDir}/.env 2>/dev/null; }; then
         key="$(tr -d '\r\n' < "$secret")"
@@ -156,7 +415,7 @@ in {
       uhome=/home/y0usaf/.hermes
       mkdir -p $uhome/plugins/model-providers/ai-gateway
       if [ ! -f $uhome/config.yaml ]; then
-        install -m 0600 ${configYaml} $uhome/config.yaml
+        install -m 0600 ${configYamlUser} $uhome/config.yaml
       fi
       install -m 0644 ${aiGatewayProviderPy} \
         $uhome/plugins/model-providers/ai-gateway/__init__.py
@@ -189,6 +448,11 @@ in {
       HOME = stateDir;
       HERMES_HOME = homeDir;
       HERMES_MANAGED = "true";
+      # Aphrodite: explicit binary/dylib paths (same as the plugin's
+      # defaults; explicit = self-documenting and guarantees the finit unit
+      # restarts on deploy so the hooks load).
+      APHRODITE_BINARY_PATH = "${homeDir}/plugins/aphrodite/binaries/aphrodite";
+      APHRODITE_HERMES_DYLIB_PATH = "${homeDir}/plugins/aphrodite/binaries/libaphrodite_hermes-x86_64-unknown-linux-gnu.so";
     };
     conditions = [ "net/lo/up" "task/hermes-dirs/success" ];
     log = true;

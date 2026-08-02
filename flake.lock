@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "aphrodite-hermes": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785510709,
+        "narHash": "sha256-L97eOV8SD32ZpnyRXOVkLcsI01hbgObcKZuFPhovkmM=",
+        "owner": "PlayForm",
+        "repo": "Aphrodite-Hermes",
+        "rev": "57fff07a6ce2b042b914f15a5208112ec6f29ac4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "PlayForm",
+        "repo": "Aphrodite-Hermes",
+        "type": "github"
+      }
+    },
     "bolo": {
       "inputs": {
         "crane": "crane",
@@ -404,10 +420,10 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1785682279,
-        "narHash": "sha256-FtcAHfRPBNbbS4OvXZYNV1zuqTxLKEcMcIBXRlRmdcE=",
-        "rev": "57799c494c1eda012151ed50e76afbf2f7e5a311",
-        "revCount": 18271,
+        "lastModified": 1785705745,
+        "narHash": "sha256-pVFI4gBHdoqoNm/NYlASnqGXHdaWBp/ZCZUifOOBR/k=",
+        "rev": "67c1c4ddb1ea8f2a573c2ade458884b18eb99a89",
+        "revCount": 18272,
         "type": "git",
         "url": "file:///home/y0usaf/finix-vendor/hermes-agent"
       },
@@ -942,6 +958,7 @@
     },
     "root": {
       "inputs": {
+        "aphrodite-hermes": "aphrodite-hermes",
         "bolo": "bolo",
         "claude-code-nix": "claude-code-nix",
         "claude-desktop-linux": "claude-desktop-linux",
