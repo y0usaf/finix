@@ -53,7 +53,6 @@ in {
         # Services
         "/var/lib/docker"
         "/var/lib/btrbk"
-        "/var/lib/fwupd"
         "/var/lib/hjem"
         "/var/lib/bayt"
       ];
@@ -99,7 +98,6 @@ in {
             "Games"
             "cu-workbench"
             "inscend"
-            "shoji_wm"
 
             # Identity / credentials
             ".pki"
