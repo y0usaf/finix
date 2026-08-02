@@ -39,6 +39,15 @@ let
       default = "anthropic/claude-sonnet-4";
       provider = "ai-gateway";
     };
+    # The CLI session/model-switch resolver (resolve_provider_full) only
+    # knows config `providers:` — it never sees $HERMES_HOME user plugins.
+    # The plugin below still feeds runtime quirks (auth-kind, headers,
+    # model listing); this entry is what makes provider resolution work.
+    providers.ai-gateway = {
+      name = "Vercel AI Gateway";
+      base_url = "https://ai-gateway.vercel.sh/v1";
+      key_env = "AI_GATEWAY_API_KEY";
+    };
   };
 
   aiGatewayProviderPy = pkgs.writeText "ai-gateway-provider.py" ''
