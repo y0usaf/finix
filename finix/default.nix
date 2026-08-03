@@ -167,6 +167,8 @@
       ./diagnostics.nix
       ../hosts/y0usaf-desktop/finix/persistent.nix
       inputs.manzil.finixModules.default
+      # rewrite every entry every switch (watcher invalidation)
+      {manzil.forceByDefault = true;}
     ]
     ++ (map (import ./compat-import.nix {inherit lib;}) (builtins.filter (p:
         !(builtins.elem p [
