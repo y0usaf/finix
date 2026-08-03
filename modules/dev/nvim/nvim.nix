@@ -273,7 +273,6 @@ in {
           pcall(require("telescope").load_extension, "fzf")
 
           -- LSP setup
-          local lspconfig = require("lspconfig")
           local capabilities = require("cmp_nvim_lsp").default_capabilities()
           require("lsp_lines").setup()
           vim.diagnostic.config({ virtual_text = false })
@@ -292,13 +291,14 @@ in {
 
           local servers = { "lua_ls", "nil_ls", "pyright" }
           for _, server in ipairs(servers) do
-            lspconfig[server].setup({
+            vim.lsp.config(server, {
               capabilities = capabilities,
               on_attach = on_attach,
               settings = server == "lua_ls" and {
                 Lua = { diagnostics = { globals = { "vim" } } }
               } or {},
             })
+            vim.lsp.enable(server)
           end
 
           -- Completion setup
@@ -342,10 +342,6 @@ in {
           })
 
           -- Other plugin setups
-          require("nvim-treesitter.configs").setup({
-            highlight = { enable = true },
-            indent = { enable = true },
-          })
 
           -- Theme configuration (minimalist biophilic with dopamine accents)
           ${''

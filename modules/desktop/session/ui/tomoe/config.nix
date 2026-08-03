@@ -7,7 +7,13 @@
 }: let
   inherit (config.lib.generators) toLua;
 
-  tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  # force_server_side_decorations (titlebar-less clients) is a local patch to
+  # tomoe; drop this override + the patch file once it lands upstream.
+  tomoePkg =
+    (flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default)
+    .overrideAttrs (old: {
+      patches = (old.patches or []) ++ [ ./force-server-side-decorations.patch ];
+    });
   inherit (config.user.ui.tomoe) bar;
   # tomoe only fingerprints init.lua for config reloads (crates/tomoe/src/main.rs
   # polls its canonical path + mtime every 500ms; state.rs:69-80). The
@@ -136,6 +142,7 @@ in {
             -- wait for the render CPU-side instead. NVIDIA-only: on any other
             -- GPU this just serializes every frame for nothing.
             wait_for_frame_completion = true,''}
+            force_server_side_decorations = true,
             displays = displays,
           }
 
