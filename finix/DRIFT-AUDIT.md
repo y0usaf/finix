@@ -212,7 +212,7 @@ These modules were inert under the compat-import whitelist (they evaluated and d
 - `modules/core/services/syncthing-proxy.nix` — nginx reverse proxy to Syncthing GUI 8384 — `ported: hosts/y0usaf-server/finix/services.nix:361-403`.
 - `modules/core/services/tailscale/config.nix` — Tailscale SSH/open-firewall flags, resume restart unit — `ported: hosts/y0usaf-desktop/finix/parity.nix:60-93; hosts/y0usaf-server/finix/services.nix:225-249` (the desktop native path asserts SSH; the server has the persistent rescue task).
 - `modules/core/services/tailscale/hosts.nix` — tailnet host aliases for Syncthing and Forgejo — `ported: hosts/y0usaf-server/finix/services.nix:160-164`.
-- `modules/core/services/scx.nix` — scx_lavd scheduler with rustscheds package — `UNPORTED` (real gap; no scx declaration was found in either native host tree).
+- `modules/core/services/scx.nix` — scx_lavd scheduler with rustscheds package — `ported: hosts/y0usaf-desktop/finix/scheduler.nix`.
 - `modules/core/services/dbus.nix` — dbus enabled with dconf and gcr packages — `ported: hosts/y0usaf-desktop/finix/graphical.nix:64-69` (dbus is enabled natively; dconf/gcr are not separately declared in the host trees).
 - `modules/core/services/btrbk.nix` — daily snapshots, `timestamp_format = long`, preserve minimum 2d and 7d/4w, `/btrfs` snapshot directory `_snapshots`, subvolumes `@dcim` and `@music` — `ported: hosts/y0usaf-server/finix/services.nix:202-218`.
 - `modules/desktop/session/system/gvfs.nix` — gvfs enabled — `ported: hosts/y0usaf-desktop/finix/materialized-packages.nix:24-25` (native package bridge supplies gvfs; no separate service toggle).
