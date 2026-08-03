@@ -32,6 +32,30 @@
             --replace-fail 'init.set_property("vo", "libmpv")?;' \
               'init.set_property("vo", "libmpv")?; init.set_property("ao", "pulse")?;'
 
+          # The window.decorations flag only hides the in-app header; the actual
+          # GTK CSD title bar stays. Drop it up-front (before the window maps)
+          # and re-assert it at realize.
+          substituteInPlace src/app/imp.rs \
+            --replace-fail "window.set_property(\"decorations\", self.decorations.get());" \
+              "window.set_property(\"decorations\", self.decorations.get());
+        if !self.decorations.get() {
+            window.set_decorated(false);
+        }"
+          # Also re-assert undecorated at realize and 250ms later: GTK4/libadwaita
+          # renegotiates the xdg-decoration mode during map; the pre-map call alone
+          # can be overridden (tomoe grants whatever mode the client asks for).
+          substituteInPlace src/app/window/imp.rs \
+            --replace-fail "    prelude::WidgetExt," \
+              "    prelude::{GtkWindowExt, WidgetExt},"
+          substituteInPlace src/app/window/imp.rs \
+            --replace-fail "self.show_header(false);" \
+              "self.obj().set_decorated(false);
+        self.show_header(false);
+        let win = self.obj().clone();
+        glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
+            win.set_decorated(false);
+        });"
+
           # build.rs writes GLib schemas into dirs::data_dir() (=HOME/.local/share);
           # the nix builder HOME is unwritable; export persists into the build phase
           export HOME=/build
@@ -79,6 +103,8 @@
 
         preFixup = ''
           gappsWrapperArgs+=(
+            # borderless app window (no title bar / headerbar)
+            --add-flags "--no-window-decorations" \
             # stremio passes RUST_LOG verbatim into mpv's msg-level; non-mpv
             # values like "crate=debug" make mpv creation fail with -11
             --unset RUST_LOG \

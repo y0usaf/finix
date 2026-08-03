@@ -522,11 +522,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785429407,
-        "narHash": "sha256-jQ9JLxQ9SBmKIDOafDyZugPXbDRROECawvMPVJzdnks=",
+        "lastModified": 1785724419,
+        "narHash": "sha256-Sp5BQfLEdRaqs8Jmrvn25f5eE7YWv7pojMy7UugoCNM=",
         "owner": "y0usaf",
         "repo": "manzil",
-        "rev": "d28425a7a8092e738f909c094c0738be13f2ce28",
+        "rev": "db719deeda77a0c50adfdcca5447a4a98ec9d2d7",
         "type": "github"
       },
       "original": {
@@ -852,11 +852,11 @@
         "piSrc": "piSrc"
       },
       "locked": {
-        "lastModified": 1785641077,
-        "narHash": "sha256-UUFkNl7jtq1mWRVrsQiJ3H5NX4Fkt5b5gGd1SpTE31g=",
+        "lastModified": 1785782181,
+        "narHash": "sha256-X5iExgStfZEFOorOrZ0wJEWuqiFjPlbkw9FWJNosjpc=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "91714c938918b2a97e38e8e00d29d5beecc42c2f",
+        "rev": "9a858000ed49db6cbd79331900b244ea4dd582db",
         "type": "github"
       },
       "original": {
