@@ -17,11 +17,6 @@
 }: let
   system = pkgs.stdenv.hostPlatform.system;
   hermesDesktop = flakeInputs.hermes-agent.packages."${system}".desktop;
-  # Declarative copy of the desktop UI plugin (Server Stats pane/chip), seeded
-  # into ~/.hermes/desktop-plugins by manzil below so the widget survives
-  # impermanence / wiped homes. Tracked file (not inline string) so it can be
-  # syntax-checked and edited standalone.
-  serverstatsPluginJs = builtins.readFile ./serverstats-plugin.js;
 in {
   environment.systemPackages = [
     hermesDesktop
@@ -30,11 +25,6 @@ in {
     (pkgs.writeShellScriptBin "hermes-desktop-launcher" ''
       export NIXOS_OZONE_WL=1
       export ELECTRON_OZONE_PLATFORM_HINT=wayland
-      # Thin client: pre-fill the remote gateway URL (server dashboard at
-      # y0usaf-server:9119, tailnet-only). The app still asks for the
-      # basic-auth credentials once on first sign-in; the session then
-      # persists (server holds a stable BASIC_AUTH_SECRET).
-      export HERMES_DESKTOP_REMOTE_URL=http://y0usaf-server:9119
       exec hermes-desktop "$@"
     '')
   ];
@@ -45,28 +35,20 @@ in {
   # what any niri app menu picks up); Exec goes through the launcher so the
   # Wayland env vars above are always applied. Icon is git-tracked inside
   # the hermes-agent flake input, so it survives store materialization.
-  manzil.users."${config.user.name}".files = {
-    ".local/share/applications/hermes.desktop" = {
-      generator = lib.generators.toINI {};
-      value."Desktop Entry" = {
-        Name = "Hermes Agent";
-        GenericName = "AI Agent";
-        Comment = "Hermes Agent desktop shell (Nous Research)";
-        Exec = "hermes-desktop-launcher %U";
-        Icon = "${flakeInputs.hermes-agent}/apps/desktop/assets/icon.png";
-        Terminal = "false";
-        Type = "Application";
-        StartupWMClass = "hermes-desktop";
-        StartupNotify = "true";
-        Categories = "Development;Utility;";
-        Keywords = "ai;agent;assistant;nous;hermes";
-      };
+  manzil.users."${config.user.name}".files.".local/share/applications/hermes.desktop" = {
+    generator = lib.generators.toINI {};
+    value."Desktop Entry" = {
+      Name = "Hermes Agent";
+      GenericName = "AI Agent";
+      Comment = "Hermes Agent desktop shell (Nous Research)";
+      Exec = "hermes-desktop-launcher %U";
+      Icon = "${flakeInputs.hermes-agent}/apps/desktop/assets/icon.png";
+      Terminal = "false";
+      Type = "Application";
+      StartupWMClass = "hermes-desktop";
+      StartupNotify = "true";
+      Categories = "Development;Utility;";
+      Keywords = "ai;agent;assistant;nous;hermes";
     };
-
-    # Server Stats desktop widget: the app scans ${hermes_home}/desktop-plugins
-    # (the LOCAL home in remote mode after the finix-vendor hermes:api patch), so
-    # the plugin must exist under the desktop user home. manzil re-materializes
-    # it on every boot, making the widget durable across impermanence.
-    ".hermes/desktop-plugins/serverstats/plugin.js".text = serverstatsPluginJs;
   };
 }

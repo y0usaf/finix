@@ -38,7 +38,7 @@ in {
 
     defaultModel = lib.mkOption {
       type = types.str;
-      default = "anthropic/claude-fable-5";
+      default = "deepseek/deepseek-v4-flash-0731";
       description = "Default model written to settings.json defaultModel.";
     };
 
@@ -51,12 +51,15 @@ in {
     enabledModels = lib.mkOption {
       type = types.listOf types.str;
       default = [
-        "deepseek/deepseek-v4-flash-0731"
-        "openai-codex/gpt-5.6-sol"
-        "openai-codex/gpt-5.6-luna"
+        "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
+        "vercel-ai-gateway/moonshotai/kimi-k3-fast"
+        "vercel-ai-gateway/anthropic/claude-fable-5"
+        "vercel-ai-gateway/openai/gpt-5.6-sol"
+        "vercel-ai-gateway/openai/gpt-5.6-luna"
         "anthropic/claude-fable-5"
         "anthropic/claude-opus-5"
-        "moonshotai/kimi-k3-fast"
+        "openai-codex/gpt-5.6-sol"
+        "openai-codex/gpt-5.6-luna"
       ];
       description = "Models written to settings.json enabledModels.";
     };

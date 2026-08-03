@@ -136,12 +136,13 @@ in {
             ".config/gcloud"
             ".config/ngrok"
 
-            # Browsers
-            ".config/chromium"
-            ".config/net.imput.helium"
-
-            # Chat / comms (bulk = cache; sessions live inside)
-            ".config/Slack"
+            # Slack is persisted selectively — auth/session storage only, caches
+            # (Cache, Code Cache, GPUCache, Service Worker, Crashpad, logs, sentry)
+            # stay ephemeral.
+            ".config/Slack/Local Storage"
+            ".config/Slack/Session Storage"
+            ".config/Slack/IndexedDB"
+            ".config/Slack/storage"
 
             # Sync (device keys + index — critical)
             ".config/syncthing"
@@ -162,14 +163,9 @@ in {
             # Desktop apps
             ".config/obsidian"
             ".config/obs-studio"
-            ".config/BambuStudio"
-            ".config/OrcaSlicer"
-            ".config/GIMP"
-            ".config/Pinta"
 
-            ".config/stoat-desktop"
             ".config/qBittorrent"
-            ".config/nicotine"
+            ".config/stoat-desktop"
             ".config/slskd"
 
             ".config/epy"
@@ -197,6 +193,10 @@ in {
             ".config/nix" # possible access-tokens
             ".config/ekko" # config.toml + extensions (app-owned)
 
+            # ekko cache: resurrection manifests MUST survive reboots for `ekko attach`;
+            # daemon logs ride along. Persist the whole dir (small).
+            ".cache/ekko"
+
             ### ~/.local/share — real data/saves. Caches (go, gradle, pnpm, uv,
             ### NuGet, yarn, pyenv, virtualenv, Trash, ...) are ephemeral.
 
@@ -211,8 +211,6 @@ in {
 
             ".local/share/cargo"
             ".local/share/rustup"
-            ".local/share/npm" # global prefix
-            ".local/share/containers" # podman
             ".local/share/opencode"
 
             ".local/share/phi"
@@ -224,23 +222,13 @@ in {
             # Apps
 
             ".local/share/stremio"
-            ".local/share/qBittorrent" # BT_backup resume data
-            ".local/share/nicotine"
+            ".local/share/stremio-linux-shell" # stremio v1.1.4+ WebKitGTK profile (login session/site data)
             ".local/share/slskd"
 
-            ".local/share/mpd"
-            ".local/share/waydroid"
-
-            ".local/share/bambu-studio"
-            ".local/share/bambustudio"
-            ".local/share/orca-slicer"
             ".local/share/Vial"
 
-            ".local/share/fonts"
-            ".local/share/icons"
-            ".local/share/sounds"
-            ".local/share/applications"
-            ".local/share/android"
+            # adb keypair kept; sdk cache + debug.keystore stay ephemeral
+            ".local/share/android/.android"
 
             ".local/share/mcp-trader"
             ".local/share/music-get"
@@ -251,7 +239,6 @@ in {
 
             ".local/share/superfile"
 
-            ".local/share/charm"
             ".local/share/crush"
             # .local/share/claude comes from hosts/common/persist.nix
 
@@ -269,36 +256,29 @@ in {
 
             ### ~/.local/state — histories & app state
             ".local/state/bash" # shell history
-
+            ".local/state/zsh" # zsh HISTFILE (modules/core/user/session/xdg.nix)
             ".local/state/nvim" # shada/undo
-            ".local/state/codex"
-            ".local/state/opencode"
-            ".local/state/agent-harness"
             ".local/state/pi-harness"
-            ".local/state/pi-rs-parallel"
-            ".local/state/ekko-pi"
-            ".local/state/ekko-parallel"
             ".local/state/syncthing" # index
             ".local/state/wireplumber" # audio device volumes
 
-            ".local/state/lazygit"
-            ".local/state/manzil"
-            ".local/state/bayt"
-            ".local/state/herdr"
-            ".local/state/sayl"
-
             ".local/state/music-get"
             ".local/state/superfile"
-
-            ".local/state/zap"
-
-            # Caches worth keeping (shader/compile caches; .cache itself ephemeral)
-
-            ".cache/ekko"
           ]);
       files =
         common.userFiles
         ++ [
+          # adb keypair kept; sdk cache + debug.keystore stay ephemeral
+          ".local/share/android/adbkey"
+          ".local/share/android/adbkey.pub"
+
+          ".config/Slack/Local State"
+          ".config/Slack/Preferences"
+          ".config/Slack/Cookies"
+          ".config/Slack/Cookies-journal"
+          ".config/Slack/Network Persistent State"
+          ".config/Slack/TransportSecurity"
+
           ".SNOW"
         ];
     };
