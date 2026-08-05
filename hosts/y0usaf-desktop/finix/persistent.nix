@@ -45,6 +45,35 @@
   # Everything else (/var/*) binds 1:1 via fstab.
   userFiles = persistCfg.users.y0usaf.files;
 
+  # btrfs snapshot-reset ("wipe on boot") helpers. homeTemplateDirs is the
+  # set of intermediate ancestor dirs that must exist (y0usaf-owned) inside
+  # the @home-blank skeleton so the allowlist binds land on cleanly-owned
+  # parents: for each allowlist DIRECTORY entry, every proper ancestor
+  # ("a/b/c" -> "a", "a/b"); for each allowlist FILE entry, its dirname plus
+  # every proper ancestor of that dirname. Computed here at eval time so the
+  # template can never drift from the allowlist; the leaf dirs/files
+  # themselves are created by persist-user-binds, not baked into the template.
+  splitPath = p: builtins.filter (s: s != "") (lib.splitString "/" p);
+  properAncestors = p: let
+    parts = splitPath p;
+  in lib.init (lib.genList (i: lib.concatStringsSep "/" (lib.take (i + 1) parts)) (lib.length parts));
+  dirnameOf = p: let
+    parts = splitPath p;
+  in lib.optional (lib.length parts > 1) (lib.concatStringsSep "/" (lib.init parts));
+  fileTemplateDirs =
+    builtins.concatMap (f: let
+        d = dirnameOf (dirPath f);
+      in d ++ lib.concatMap properAncestors d)
+    userFiles;
+  dirTemplateDirs = builtins.concatMap (d: properAncestors (dirPath d)) persistCfg.users.y0usaf.directories;
+  homeTemplateDirs = lib.unique (dirTemplateDirs ++ fileTemplateDirs);
+
+  # The dedicated data-subvol mounts under the home dir (old-home, Steam,
+  # dev, Pictures, DCIM, Music): derived from the fstab set so the skeleton
+  # follows the mounts, then each mountpoint's path relative to /home/y0usaf.
+  dataSubvolMounts = lib.unique (map (mp: lib.removePrefix "/home/y0usaf/" mp)
+    (builtins.filter (mp: lib.hasPrefix "/home/y0usaf/" mp) (builtins.attrNames config.fileSystems)));
+
   btrfsOpts = ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
   subvolMount = name: extraOpts: {
     device = "/dev/disk/by-uuid/${diskUuid}";
@@ -134,6 +163,44 @@ in {
       pkgs.procps
       pkgs.util-linux
       pkgs.vim
+      # Manual one-time tool (run as root on the live system) to build the
+      # @home-blank template that reset-home wipes @home back to on every boot.
+      (pkgs.writeShellScriptBin "prep-home-blank" ''
+        set -euo pipefail
+
+        export PATH=${lib.makeBinPath [pkgs.btrfs-progs pkgs.coreutils pkgs.util-linux]}
+
+        mountpoint -q /btrfs || {
+          echo "prep-home-blank: /btrfs is not a mountpoint" >&2
+          exit 1
+        }
+
+        if btrfs subvolume show /btrfs/@home-blank >/dev/null 2>&1; then
+          if [ "''${1:-}" != "--force" ]; then
+            echo "prep-home-blank: /btrfs/@home-blank already exists; rerun with --force to delete and recreate" >&2
+            exit 1
+          fi
+          echo "prep-home-blank: --force: deleting existing /btrfs/@home-blank"
+          btrfs subvolume delete /btrfs/@home-blank
+        fi
+
+        btrfs subvolume create /btrfs/@home-blank
+
+        # y0usaf home root (0700, uid pinned to the NixOS value 1001) + the
+        # data-subvol mountpoints + every allowlist ancestor dir, all
+        # y0usaf:users. The leaf allowlist entries themselves are left to
+        # persist-user-binds to create on first access.
+        install -d -m 0700 -o 1001 -g users /btrfs/@home-blank/y0usaf
+        while IFS= read -r dir; do
+          [ -n "$dir" ] || continue
+          install -d -m 0755 -o 1001 -g users "/btrfs/@home-blank/y0usaf/$dir"
+        done <<'DIRS'
+        ${lib.concatStringsSep "\n" (dataSubvolMounts ++ homeTemplateDirs)}
+        DIRS
+
+        chown -R 1001:users /btrfs/@home-blank/y0usaf
+        echo "prep-home-blank: @home-blank ready ($((1 + ${toString (builtins.length (dataSubvolMounts ++ homeTemplateDirs))})) dirs)"
+      '')
       # Daily driver essentials until the real package set lands (phase 2):
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi
       # nh is the day-2 driver now (./boot.nix made switch-to-configuration
@@ -157,6 +224,84 @@ in {
       ];
       kernelModules = ["btrfs"];
       supportedFilesystems.btrfs.enable = true;
+      # btrfs snapshot-reset ("wipe on boot"): reset-home runs once the
+      # subvolid=5 /btrfs mount is up, and mount-home is gated on its success
+      # so an unwiped boot still brings up /home (fail-open — the only nonzero
+      # exit is when no @home candidate exists at all, see step 1).
+      finit.tasks = {
+        reset-home = {
+          description = "btrfs snapshot-reset: rotate @home back to the @home-blank template";
+          conditions = ["task/mount-btrfs/success"];
+          script = ''
+            B=/sysroot/btrfs
+
+            # 1. RECOVERY FIRST: a crash mid-rotation can leave @home missing.
+            #    Promote @home-new if it exists, else restore @home-lastboot,
+            #    else FATAL (the ONLY nonzero exit). A recovered home skips the
+            #    wipe this boot.
+            if ! btrfs subvolume show "$B/@home" >/dev/null 2>&1; then
+              if btrfs subvolume show "$B/@home-new" >/dev/null 2>&1; then
+                mv "$B/@home-new" "$B/@home" || { echo "reset-home: FATAL: promote @home-new failed" >&2; exit 1; }
+                echo "reset-home: recovered @home from @home-new"
+              elif btrfs subvolume show "$B/@home-lastboot" >/dev/null 2>&1; then
+                mv "$B/@home-lastboot" "$B/@home" || { echo "reset-home: FATAL: restore @home-lastboot failed" >&2; exit 1; }
+                echo "reset-home: recovered @home from @home-lastboot"
+              else
+                echo "reset-home: FATAL: no @home candidate (@home/@home-new/@home-lastboot all missing)" >&2
+                exit 1
+              fi
+              exit 0
+            fi
+
+            # 2. @home exists: drop a stale @home-new from an interrupted rotation.
+            if btrfs subvolume show "$B/@home-new" >/dev/null 2>&1; then
+              btrfs subvolume delete "$B/@home-new" || { echo "reset-home: skip: could not delete stale @home-new"; exit 0; }
+            fi
+
+            # 3. No template -> nothing to wipe this boot.
+            if ! btrfs subvolume show "$B/@home-blank" >/dev/null 2>&1; then
+              echo "reset-home: skip: no template"
+              exit 0
+            fi
+
+            # 4. Fresh snapshot from the blank template (never touch @home-blank
+            #    itself).
+            btrfs subvolume snapshot "$B/@home-blank" "$B/@home-new" || { echo "reset-home: skip"; exit 0; }
+
+            # 5. Drop the previous rotation's @home-lastboot; if that fails, drop
+            #    @home-new too so we keep exactly one dangling @home and leave the
+            #    live @home untouched.
+            if btrfs subvolume show "$B/@home-lastboot" >/dev/null 2>&1; then
+              btrfs subvolume delete "$B/@home-lastboot" || {
+                btrfs subvolume delete "$B/@home-new" || true
+                echo "reset-home: skip"
+                exit 0
+              }
+            fi
+
+            # 6. Rotate the live @home to @home-lastboot.
+            mv "$B/@home" "$B/@home-lastboot" || {
+              btrfs subvolume delete "$B/@home-new" || true
+              echo "reset-home: skip"
+              exit 0
+            }
+
+            # 7. Promote the fresh snapshot to be the new @home; roll back on
+            #    failure so the previous @home stays live.
+            mv "$B/@home-new" "$B/@home" || {
+              mv "$B/@home-lastboot" "$B/@home" || true
+              echo "reset-home: skip: rolled back"
+              exit 0
+            }
+
+            echo "reset-home: success"
+            exit 0
+          '';
+        };
+        # PLAIN list definition on purpose: the module system appends this to the
+        # generated conditions (wait-dev-home, ...). mkForce would clobber them.
+        "mount-home".conditions = ["task/reset-home/success"];
+      };
     };
     kernelModules = [
       "kvm-amd"
@@ -382,6 +527,53 @@ in {
           mountpoint -q /persist || { echo "persist-user-binds: /persist never mounted" >&2; exit 1; }
           mountpoint -q /home || { echo "persist-user-binds: /home never mounted" >&2; exit 1; }
 
+          # Home dir itself first: the initrd X-mount.mkdir may have pre-created
+          # /home/y0usaf root-owned on a freshly wiped (snapshot) home, and GNU
+          # install -d chowns only the FINAL component of a path — deep entries
+          # below it would otherwise land under a root-owned ancestor. Heal the
+          # pre-created ownership unconditionally (|| true).
+          install -d -m 0700 -o y0usaf -g users /home/y0usaf
+          install -d -m 0755 /persist/home/y0usaf
+          chown y0usaf:users /home/y0usaf || true
+
+          # ensure_parents: make every intermediate ancestor of an entry
+          # y0usaf-owned too (install -d only chowns the last component, so deep
+          # allowlist entries like .config/Slack/Local Storage would leave
+          # root-owned intermediates). Existing dirs are best-effort chowns
+          # (|| true): /home/y0usaf/old-home is a ro mount, a failing chown there
+          # must not hard-fail the task.
+          ensure_parents() {
+            base="$1"
+            rel="$2"
+            parent="''${rel%/*}"
+            [ "$parent" = "$rel" ] && return 0
+            rest="$parent"
+            build=""
+            while [ -n "$rest" ]; do
+              case "$rest" in
+                */*)
+                  comp="''${rest%%/*}"
+                  rest="''${rest#*/}"
+                  ;;
+                *)
+                  comp="$rest"
+                  rest=""
+                  ;;
+              esac
+              if [ -n "$build" ]; then
+                build="$build/$comp"
+              else
+                build="$comp"
+              fi
+              dir="$base/$build"
+              if [ -d "$dir" ]; then
+                chown y0usaf:users "$dir" || true
+              else
+                install -d -m 0755 -o y0usaf -g users "$dir" || true
+              fi
+            done
+          }
+
           fail=0
 
           # /root first: kept out of fstab (escapePath collision with "/", see
@@ -397,6 +589,8 @@ in {
             [ -n "$rel" ] || continue
             src="$src_root/$rel"
             dst="$dst_root/$rel"
+            ensure_parents "$src_root" "$rel"
+            ensure_parents "$dst_root" "$rel"
             [ -d "$src" ] || install -d -o y0usaf -g users "$src" || { fail=1; continue; }
             [ -d "$dst" ] || install -d -o y0usaf -g users "$dst" || { fail=1; continue; }
             mountpoint -q "$dst" || mount --bind "$src" "$dst" || fail=1
@@ -406,6 +600,8 @@ in {
             [ -n "$rel" ] || continue
             src="$src_root/$rel"
             dst="$dst_root/$rel"
+            ensure_parents "$src_root" "$rel"
+            ensure_parents "$dst_root" "$rel"
             [ -f "$src" ] || { install -o y0usaf -g users -m 0600 /dev/null "$src" || { fail=1; continue; }; }
             [ -f "$dst" ] || { install -o y0usaf -g users -m 0600 /dev/null "$dst" || { fail=1; continue; }; }
             mountpoint -q "$dst" || mount --bind "$src" "$dst" || fail=1
