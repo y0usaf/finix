@@ -1,5 +1,5 @@
 {
-  description = "Finix — y0usaf's finix-only systems; the historical NixOS tree lives on the nixos-legacy branch";
+  description = "Finix — y0usaf's finix-only systems (host wiring in modules/finix/default.nix, shared builder in modules/finix/finixSystem.nix); the historical NixOS tree lives on the nixos-legacy branch";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -165,32 +165,26 @@
     };
 
     # Finit-based OS: the server's installed OS since 2026-07-15 (NixOS is
-    # its on-disk rescue entry). See finix/ (default.nix + NOTES.md).
+    # its on-disk rescue entry). See modules/finix/default.nix (host wiring),
+    # modules/finix/finixSystem.nix (shared builder) + modules/finix/NOTES.md.
     finix.url = "github:finix-community/finix";
   };
 
-  outputs = {nixpkgs, ...} @ inputs: let
+  outputs = inputs: let
     system = "x86_64-linux";
-    inherit (nixpkgs) lib;
-
-    # Finix: main is finix-only. The desktop's packages/dotfiles reach
-    # finix directly through finix/compat-import.nix.
-    finixStaging = import ./finix {inherit inputs system;};
+    cfg = import ./modules/finix {inherit inputs system;};
   in {
-    nixosConfigurations = {
-      # Desktop default = finix: bare `nh os switch` on the desktop targets
-      # finix (via finix's nixos-compat: config.system.build.toplevel).
-      y0usaf-desktop = finixStaging.desktopPersistent;
-
-      # Finix is the installed server system; retain the hostname alias for
-      # tools that only inspect nixosConfigurations.
-      y0usaf-server = finixStaging.serverPersistent;
-      y0usaf-server-finix = finixStaging.serverPersistent;
-    };
+    nixosConfigurations =
+      cfg.hosts
+      // {
+        # Finix is the installed server system; retain the hostname alias for
+        # tools that only inspect nixosConfigurations.
+        y0usaf-server-finix = cfg.hosts.y0usaf-server;
+      };
 
     nixOnDroidConfigurations = {
       default = inputs."nix-on-droid".lib.nixOnDroidConfiguration {
-        pkgs = import nixpkgs {
+        pkgs = import inputs.nixpkgs {
           system = "aarch64-linux";
         };
         extraSpecialArgs = {
@@ -202,22 +196,10 @@
       };
     };
 
-    # Finix systems, first-class beside nixosConfigurations. Same module
-    # universe split as always: finix systems can never import the NixOS
-    # modules in ./modules/* (their own tree lives in ./finix and is
-    # never in mkHost's domain map, so NixOS never imports it back either).
-    finixConfigurations = {
-      y0usaf-server = finixStaging.serverPersistent;
-      y0usaf-desktop = finixStaging.desktopPersistent;
-    };
+    finixConfigurations = cfg.hosts;
 
-    packages."${system}" = {
-      finix-server-persistent-deploy = finixStaging.persistentDeployPackage;
-      finix-server-boot = finixStaging.bootPackage;
+    packages."${system}" = cfg.packages;
 
-      finix-desktop-deploy = finixStaging.desktopDeployPackage;
-    };
-
-    formatter."${system}" = nixpkgs.legacyPackages."${system}".alejandra;
+    formatter."${system}" = inputs.nixpkgs.legacyPackages."${system}".alejandra;
   };
 }
