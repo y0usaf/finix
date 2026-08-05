@@ -7,13 +7,9 @@
 }: let
   inherit (config.lib.generators) toLua;
 
-  # force_server_side_decorations (titlebar-less clients) is a local patch to
-  # tomoe; drop this override + the patch file once it lands upstream.
-  tomoePkg =
-    (flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default)
-    .overrideAttrs (old: {
-      patches = (old.patches or []) ++ [ ./force-server-side-decorations.patch ];
-    });
+  # force_server_side_decorations landed upstream in tomoe (8e0bd50); the local
+  # patch that used to carry it is gone — the packaged default has it now.
+  tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
   inherit (config.user.ui.tomoe) bar;
   # tomoe only fingerprints init.lua for config reloads (crates/tomoe/src/main.rs
   # polls its canonical path + mtime every 500ms; state.rs:69-80). The
