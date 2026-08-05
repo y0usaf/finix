@@ -17,13 +17,9 @@
   ...
 }: let
   sys = pkgs.stdenv.hostPlatform.system;
-  # force_server_side_decorations (titlebar-less clients) is a local patch;
-  # drop this override + the patch once it lands upstream tomoe.
-  tomoePkg =
-    (flakeInputs.tomoe.packages."${sys}".default)
-    .overrideAttrs (old: {
-      patches = (old.patches or []) ++ [ ./force-server-side-decorations.patch ];
-    });
+  # force_server_side_decorations landed upstream in tomoe (8e0bd50); the local
+  # patch that used to carry it is gone — the packaged default has it now.
+  tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
 in {
   # seatd: upstream defaults the service to runlevels [34], but finix
   # boots into runlevel 2 — the service is never eligible and initctl
