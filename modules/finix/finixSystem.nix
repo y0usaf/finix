@@ -1,7 +1,10 @@
 # Finix — the installed OS on server (2026-07-15) and desktop; NixOS remains
-# on disk as rescue until the purge (NOTES.md runbook). Everything finix
-# lives in THIS folder: default.nix (systems + packages), the boot/deploy
-# drivers, common.nix baseline, diagnostics.nix, hosts/, NOTES.md.
+# on disk as rescue until the purge (NOTES.md runbook). Host wiring — the
+# finix systems and deploy/boot packages — lives in default.nix; this file
+# (modules/finix/finixSystem.nix) is the shared builder only: pkgs parity +
+# mkFinixSystem. The boot/deploy drivers (deploy.nix, esp-island.nix),
+# diagnostics.nix, the common.nix baseline and NOTES.md sit beside it in
+# modules/finix/; hosts/ at the repo root.
 #
 # Day-2 operations:
 #   desktop:  nh os switch            full flow — build → activate → profile
@@ -17,7 +20,7 @@
   system,
 }: let
   # pkgs parity with the (now deleted) NixOS bridge: same unfree/insecure
-  # policy, cudaSupport, and overlays as modules/core/nixpkgs.nix, so the
+  # policy, cudaSupport, and overlays as ../core/nixpkgs.nix, so the
   # compat-imported package declarations build against an equivalent pkgs.
   permittedInsecurePackages = [
     "qtwebengine-5.15.19"
@@ -58,11 +61,12 @@
   inherit (pkgs) lib;
 
   # Shared builder for every finix system in this repo. finix uses its own
-  # module system (finit/providers option tree) — NixOS modules under
-  # ../modules are consumed ONLY through finix/compat-import.nix (whitelist
-  # shim: user/manzil/environment/fonts + services.udev.packages). Baseline:
-  # bash, dhcpcd, getty, openssh, sudo, sysklogd + common.nix workarounds
-  # (see NOTES.md "Upstream finix bugs/gaps").
+  # module system (finit/providers option tree) — NixOS modules in sibling
+  # dirs (../core ../desktop ../dev ../gaming ../shell ../tools ../user-services)
+  # are consumed ONLY through ./compat-import.nix (whitelist shim:
+  # user/manzil/environment/fonts + services.udev.packages). Baseline: bash,
+  # dhcpcd, getty, openssh, sudo, sysklogd + ./common.nix
+  # workarounds (see NOTES.md "Upstream finix bugs/gaps").
   mkFinixSystem = modules:
     inputs.finix.lib.finixSystem {
       inherit lib;
@@ -118,7 +122,7 @@
               };
             };
             # Referenced by gaming/shader-cache.nix's steam_dev.cfg manzil
-            # entry; mirrors modules/core/system/nix-package-management.nix.
+            # entry; mirrors ../core/system/nix-package-management.nix.
           }
           bash
           dhcpcd
@@ -130,98 +134,6 @@
         ]
         ++ modules;
     };
-
-  # The desktop's shared config library: every .nix under the NixOS domain
-  # tree + the desktop host dir, shimmed through compat-import. Exclusions:
-  #   - flake-modules.nix wires NixOS-only input modules (manzil.nixosModules
-  #     would collide with the finix variant imported below)
-  #   - hosts/y0usaf-desktop/finix/ is already finix-native
-
-  # ── systems ──────────────────────────────────────────────────────────────
-  serverPersistent = mkFinixSystem (with inputs.finix.nixosModules; [
-    cron
-    nftables
-    postgresql
-    nix-daemon
-    # Staged, disarmed: boot.nix pins programs.limine.enable = false, so this
-    # module is inert (upstream guards its config block on cfg.enable) and the
-    # server closure is unchanged. Imported so the takeover config evaluates
-    # on every deploy instead of rotting. The ESP island still owns boot.
-    limine
-    ../hosts/y0usaf-server/finix/services.nix
-    ../hosts/y0usaf-server/finix/persistent.nix
-    ../hosts/y0usaf-server/finix/attic.nix
-    ../hosts/y0usaf-server/finix/boot-health.nix
-    ../hosts/y0usaf-server/finix/boot.nix
-    ../hosts/y0usaf-server/finix/hermes.nix
-  ]);
-
-  desktopPersistent = mkFinixSystem (with inputs.finix.nixosModules;
-    [
-      nix-daemon
-      # Packet filter. Was serverPersistent-only until 2026-07-30, which is why
-      # the desktop ran unfiltered since the finix switch (DRIFT-AUDIT #1).
-      # Ruleset: ../hosts/y0usaf-desktop/finix/firewall.nix.
-      nftables
-      limine # upstream bootloader: ../hosts/y0usaf-desktop/finix/boot.nix (OFF on server)
-      ./diagnostics.nix
-      ../hosts/y0usaf-desktop/finix/persistent.nix
-      inputs.manzil.finixModules.default
-      # rewrite every entry every switch (watcher invalidation)
-      {manzil.forceByDefault = true;}
-    ]
-    ++ (map (import ./compat-import.nix {inherit lib;}) (builtins.filter (p:
-        !(builtins.elem p [
-          ../modules/core/flake-modules.nix
-        ])
-        && !(lib.hasInfix "/finix/" (toString p)))
-      (import ../recursivelyImport.nix {
-          inherit (lib) hasSuffix;
-          inherit (lib.filesystem) listFilesRecursive;
-        }
-        [
-          ../modules/core
-          ../modules/desktop
-          ../modules/shell
-          ../modules/tools
-          ../modules/user-services
-          ../modules/dev
-          ../modules/gaming
-          ../hosts/y0usaf-desktop
-        ]))));
-
-  # ── drivers ──────────────────────────────────────────────────────────────
-  deployLib = import ./deploy.nix {inherit pkgs;};
-in rec {
-  inherit serverPersistent desktopPersistent;
-
-  bootPackage =
-    ((import ./esp-island.nix {inherit pkgs lib;}).mkIsland {
-      name = "finix-server-boot";
-      system = serverPersistent.config.system.topLevel;
-      # ADL-N BIOS ships ancient 0x1a microcode; both raw direct boots
-      # misbehaved until 0x21 was prepended (incident #2).
-      ucodeImg = "${pkgs.microcode-intel}/intel-ucode.img";
-      defaultHost = "server";
-    }).bootDriverScript;
-
-  persistentDeployPackage =
-    (deployLib.mkDeploy {
-      name = "finix-server-persistent-deploy";
-      system = serverPersistent.config.system.topLevel;
-      defaultHost = "server";
-      # Boot slots on the server belong to the ESP island driver, not stc.
-      bootDriverName = "finix-server-boot";
-      sshPort = 2200;
-    }).deployScript;
-
-  desktopDeployPackage =
-    (deployLib.mkDeploy {
-      name = "finix-desktop-deploy";
-      system = desktopPersistent.config.system.topLevel;
-      defaultHost = "local";
-      # No postSwitch: stc switch|boot runs the limine installHook itself
-      # (boot.nix). Only `fx test` (runtime-only, no installHook) and
-      # manual stc invocations go through this package anymore.
-    }).deployScript;
+in {
+  inherit lib pkgs mkFinixSystem;
 }

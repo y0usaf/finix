@@ -1,18 +1,20 @@
 {
-  hasSuffix,
-  listFilesRecursive,
-}: let
-  isPath = elem: builtins.isPath elem;
-  # Only `.nix` files participate in the recursive module graph.
-  # Non-module helpers should be imported explicitly.
+  lib,
+}:
+
+let
+  inherit (lib) hasSuffix;
+  inherit (builtins) concatMap isPath filter readFileType;
+
+  expandIfFolder = elem:
+    if !isPath elem || readFileType elem != "directory"
+      then [ elem ]
+    else lib.filesystem.listFilesRecursive elem;
+
 in
-  list:
-    builtins.filter
-    (elem:
-      !isPath elem
-      || hasSuffix ".nix" (toString elem))
-    (builtins.concatMap (elem:
-      if !isPath elem || builtins.readFileType elem != "directory"
-      then [elem]
-      else listFilesRecursive elem)
-    list)
+  list: filter
+    # Filter out any path that doesn't look like `*.nix`. Don't forget to use
+    # toString to prevent copying paths to the store unnecessarily
+    (elem: !isPath elem || hasSuffix ".nix" (toString elem))
+    # Expand any folder to all the files within it.
+    (concatMap expandIfFolder list)
