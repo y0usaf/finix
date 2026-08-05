@@ -12,7 +12,7 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.callPackage ../../packages/kimi-code.nix {};
+      default = pkgs.callPackage ./package.nix {};
       description = "Kimi Code package.";
     };
 
