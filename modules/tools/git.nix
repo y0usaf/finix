@@ -1,49 +1,58 @@
 {
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
-  options.user.tools.git = {
-    enable = lib.mkEnableOption "git configuration";
-    name = lib.mkOption {
-      type = lib.types.str;
-      default = "y0usaf";
-      description = "Git username.";
+  hosts = ["desktop" "server"];
+  compat = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: {
+    options.user.tools.git = {
+      enable = lib.mkEnableOption "git configuration";
+      name = lib.mkOption {
+        type = lib.types.str;
+        default = "y0usaf";
+        description = "Git username.";
+      };
+      email = lib.mkOption {
+        type = lib.types.str;
+        default = "OA99@Outlook.com";
+        description = "Git email address.";
+      };
+      editor = lib.mkOption {
+        type = lib.types.str;
+        default = "nvim";
+        description = "Default editor for git.";
+      };
     };
-    email = lib.mkOption {
-      type = lib.types.str;
-      default = "OA99@Outlook.com";
-      description = "Git email address.";
-    };
-    editor = lib.mkOption {
-      type = lib.types.str;
-      default = "nvim";
-      description = "Default editor for git.";
-    };
-  };
-  config = lib.mkIf config.user.tools.git.enable {
-    environment.systemPackages = [
-      pkgs.git
-      pkgs.openssh
-    ];
-    manzil.users."${config.user.name}".files.".config/git/config" = {
-      generator = lib.generators.toGitINI;
-      value = {
-        user = {
-          inherit (config.user.tools.git) name email;
-        };
-        core = {
-          inherit (config.user.tools.git) editor;
-        };
-        init.defaultBranch = "main";
-        pull.rebase = true;
-        push.autoSetupRemote = true;
-        url."git@github.com:" = {
-          insteadOf = "https://github.com/";
-          pushInsteadOf = "https://github.com/";
+    config = lib.mkIf config.user.tools.git.enable {
+      environment.systemPackages = [
+        pkgs.git
+        pkgs.openssh
+      ];
+      manzil.users."${config.user.name}".files.".config/git/config" = {
+        generator = lib.generators.toGitINI;
+        value = {
+          user = {
+            inherit (config.user.tools.git) name email;
+          };
+          core = {
+            inherit (config.user.tools.git) editor;
+          };
+          init.defaultBranch = "main";
+          pull.rebase = true;
+          push.autoSetupRemote = true;
+          url."git@github.com:" = {
+            insteadOf = "https://github.com/";
+            pushInsteadOf = "https://github.com/";
+          };
         };
       };
     };
+  };
+  # finix-native: enable the shared git module on finix systems. The server
+  # has no desktop tools.nix to set user.tools.git.enable, so the aspect
+  # carries it here (desktop already enables it; idempotent).
+  finix = {
+    user.tools.git.enable = true;
   };
 }
