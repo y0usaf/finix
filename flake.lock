@@ -25,11 +25,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1785280765,
-        "narHash": "sha256-kPrIP26xNcL5hq7vaxTFWK5AP/PSFAuY5uL4+jUiyQw=",
+        "lastModified": 1785801472,
+        "narHash": "sha256-aImUTiqaA0HJPAxPZnRk2ctIQ4b4JGulohrRL2lf7js=",
         "ref": "refs/heads/main",
-        "rev": "394d8394be74b7790977028432068ec727b3972a",
-        "revCount": 16,
+        "rev": "f96acf3bfc4e33619cf5b733f456006c4374b883",
+        "revCount": 22,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/bolo.git"
       },
@@ -238,6 +238,22 @@
       "original": {
         "owner": "y0usaf",
         "repo": "ekko",
+        "type": "github"
+      }
+    },
+    "engramSrc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785814370,
+        "narHash": "sha256-BK0ZBVkvRXzBjFQEI7pnLhjZ/B+1rH84z4ciOyxX/AE=",
+        "owner": "nagisanzenin",
+        "repo": "engram",
+        "rev": "d0a61cd671301ce7fe05d46616d1fbc7e2af6382",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nagisanzenin",
+        "repo": "engram",
         "type": "github"
       }
     },
@@ -846,17 +862,18 @@
     },
     "pi-flake": {
       "inputs": {
+        "engramSrc": "engramSrc",
         "nixpkgs": [
           "nixpkgs"
         ],
         "piSrc": "piSrc"
       },
       "locked": {
-        "lastModified": 1785782181,
-        "narHash": "sha256-X5iExgStfZEFOorOrZ0wJEWuqiFjPlbkw9FWJNosjpc=",
+        "lastModified": 1785948592,
+        "narHash": "sha256-7ps6Jq6slL0+g1dUBNIXCuo/QAlho71IxIlBGSU2O6I=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "9a858000ed49db6cbd79331900b244ea4dd582db",
+        "rev": "16c47ae5e76c5509b922263f5c9156b902ae226c",
         "type": "github"
       },
       "original": {
@@ -1172,11 +1189,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785239060,
-        "narHash": "sha256-iFdCEl3JAgecql38U3NurVoMQz5OwWHq49iaEqHFvDQ=",
+        "lastModified": 1785889284,
+        "narHash": "sha256-UxX7qga0hRWh0AiINQy9ZsFMd2BpKdncOZ7hRw0puTA=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "ae0cd20d92dd00f1694745e1b2af3da05ca0e103",
+        "rev": "120379aaefcb27a1cca7a700a115550367b0fb07",
         "type": "github"
       },
       "original": {
