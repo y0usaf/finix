@@ -56,7 +56,7 @@
   # ownership applied only to directories this script itself creates.
   # Deliberate, reversible exit to the rescue OS (one-shot; BootOrder kept).
 in {
-  imports = [./boot.nix ./graphical.nix ./session.nix ./audio.nix ./parity.nix ./scheduler.nix ./materialized-packages.nix ./udev.nix ./firewall.nix ./hermes.nix];
+  imports = [./boot.nix ./graphical.nix ./session.nix ./audio.nix ./parity.nix ./scheduler.nix ./materialized-packages.nix ./udev.nix ./hermes.nix];
 
   # manzil dotfiles: native finix module (imported in finix/default.nix),
   # linker runs as a finit task gated on the user persist binds — the files
