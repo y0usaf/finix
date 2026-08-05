@@ -37,6 +37,7 @@
 
     # Identity / credentials
     ".ssh"
+    ".azure" # azure-cli msal token cache (~/.azure/msal_token_cache.json)
 
     # AI / dev tooling state — relocated out of ~ via env vars in
     # modules/core/user/session/xdg.nix (CLAUDE_CONFIG_DIR, CODEX_HOME,
