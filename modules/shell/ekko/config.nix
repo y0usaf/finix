@@ -76,12 +76,17 @@ in {
               -- lines with junction glyphs). The daemon owns the canvas, so
               -- this takes effect for newly started sessions (ekko kill).
               pane_borders = "frame",
-              -- Panes are auto-tiled to exactly equal areas by recursively halving
-              -- along the longer axis, pixel-aware because a terminal cell is about
-              -- twice as tall as it is wide: 3 panes are full-height columns and 4
-              -- panes are a 2x2 grid. The requested split axis is ignored and the
-              -- whole layout recomputes on every add or close. The daemon owns the
-              -- canvas, so this takes effect for newly started sessions (ekko kill).
+              -- Client-local ASCII separators: the daemon still reserves the
+              -- separator cells, but the client renders them with these glyphs
+              -- instead of the box-drawing table.
+              border_glyphs = { horizontal = "-", vertical = "|", junction = "+" },
+              -- Panes tile to the divisor-pair grid whose cells are closest to
+              -- square in pixels (cell height counted twice); prime counts of
+              -- five or more use one near-half proportional cut whose halves
+              -- are themselves grids. The requested split axis is ignored and
+              -- the whole layout recomputes on every add or close. The daemon
+              -- owns the canvas, so this takes effect for newly started
+              -- sessions (ekko kill).
               pane_layout = "equal",
               -- Drives the client's animation tick (default 80ms = 12.5fps; 33ms = 30fps).
               animation_interval_ms = 33,
