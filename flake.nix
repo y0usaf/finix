@@ -75,6 +75,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # PrimeIntellect prime-agent fork; upstream tree plus flake.nix/flake.lock.
+    prime-agent-flake = {
+      url = "github:y0usaf/prime-agent-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     pi-harness = {
       url = "git+ssh://git@github.com/y0usaf/pi-harness.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
