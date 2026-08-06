@@ -931,11 +931,11 @@
         "primeAgentSrc": "primeAgentSrc"
       },
       "locked": {
-        "lastModified": 1786025619,
-        "narHash": "sha256-9jmjfFET1vB3sfRvHfNXYhYHDk+9mfPN/5aCzc4vghQ=",
+        "lastModified": 1786026802,
+        "narHash": "sha256-5LEhr9ZHqM5iu1ndC8sNHrJYQ/YE0bziSuHJ4navaRk=",
         "owner": "y0usaf",
         "repo": "prime-agent-flake",
-        "rev": "dcab52d95cecf5e39b4e8938f4280eeb305a3c47",
+        "rev": "041891bd5953ba97b225453f2a05835da95d8f44",
         "type": "github"
       },
       "original": {
