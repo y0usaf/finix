@@ -930,11 +930,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785987142,
-        "narHash": "sha256-E1wLwcVQEK3S00UdKDqDHqAJBymH73K/XRIaV+nwDvI=",
+        "lastModified": 1785987579,
+        "narHash": "sha256-+7UGpcz6omW4A+Hk+OfnLUdRhMYn11oSp/JIrdzM3Xc=",
         "owner": "y0usaf",
         "repo": "prime-agent-flake",
-        "rev": "37160df8d7ee726faef8b42f325115d6997b3c8e",
+        "rev": "deb8d38e310d761eec6b2231f36d9ffc6ffcdf55",
         "type": "github"
       },
       "original": {
