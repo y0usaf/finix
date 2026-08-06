@@ -75,9 +75,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # PrimeIntellect prime-agent fork; upstream tree plus flake.nix/flake.lock.
+    # PrimeIntellect prime-agent fork; thin flake, fetches upstream as an input.
     prime-agent-flake = {
-      url = "github:y0usaf/prime-agent-flake";
+      url = "github:y0usaf/prime-agent-flake?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
