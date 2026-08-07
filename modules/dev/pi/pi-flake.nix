@@ -23,6 +23,14 @@ in {
       readmePath = "${piSrc}/README.md";
       docsPath = "${piSrc}/docs";
       examplesPath = "${piSrc}/examples";
+      # pi-flake renders its frames with ASCII glyphs by default (unicode is the
+      # preset default; hosts can override via user.dev.pi.settings.symbols).
+      settings = {
+        symbols = {
+          preset = "ascii";
+          overrides = {};
+        };
+      };
     };
   };
 }
