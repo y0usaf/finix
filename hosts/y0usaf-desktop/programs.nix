@@ -45,7 +45,7 @@ _: {
     bluetooth.enable = true;
     obs = {
       enable = true;
-      backgroundRemoval.enable = false;
+      backgroundRemoval.enable = true;
     };
     imv.enable = true;
     mimeapps.enable = true;
