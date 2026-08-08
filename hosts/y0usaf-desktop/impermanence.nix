@@ -107,11 +107,8 @@ in {
             # AI / dev tooling state
             ".claude-code-router"
             ".hermes" # desktop app HERMES_HOME (config, sessions, skills dirs)
-            ".gemini"
             ".crush"
             ".cookunity"
-            ".forge"
-            ".nexau"
             ".phi"
             ".paseo" # paseo daemon state (config.json, phone pairing, sessions)
 
@@ -135,7 +132,6 @@ in {
             ".config/age"
             ".config/aws"
             ".config/gcloud"
-            ".config/ngrok"
 
             # Slack is persisted selectively — auth/session storage only, caches
             # (Cache, Code Cache, GPUCache, Service Worker, Crashpad, logs, sentry)
