@@ -438,8 +438,8 @@ function ext.register(ekko)
     end,
   })
   -- Zellij-style pane mode: `ctrl+p` enters a modal pane layer (keys stay
-  -- active until q/Esc), matching zellij's `Ctrl p`. The hint bar switches
-  -- to the pane map while it's active.
+  -- active until q/Esc), matching zellij's `Ctrl p` — except n (new pane),
+  -- which splits and auto-exits pane mode, mirroring new session in leader mode.
   ekko.register_keybinding({
     chord = "ctrl+p",
     mode = nil,
@@ -453,7 +453,7 @@ function ext.register(ekko)
     on_key = pane_on_key,
   })
   local PANE_MODE_MAP = {
-    { chord = "n", desc = "new pane",     actions = { "split_down" } },
+    { chord = "n", desc = "new pane",     actions = { "exit_mode", "split_down" } },
     { chord = "x", desc = "close pane",   actions = { "close_focused_pane" } },
     { chord = "q", desc = "exit pane",    actions = { "exit_mode" } },
   }
