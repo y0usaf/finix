@@ -838,6 +838,26 @@
         "type": "github"
       }
     },
+    "paseo": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786127307,
+        "narHash": "sha256-nrkuSGmfm3PP1Kk2n+B6d/M0Xx3F+MrV+uhlNVWgKAU=",
+        "owner": "getpaseo",
+        "repo": "paseo",
+        "rev": "5e197ad0cf314df519b63ba841aa93346fb88a00",
+        "type": "github"
+      },
+      "original": {
+        "owner": "getpaseo",
+        "repo": "paseo",
+        "type": "github"
+      }
+    },
     "phi": {
       "inputs": {
         "crane": "crane_2",
@@ -1036,6 +1056,7 @@
         "nvflashk-linux": "nvflashk-linux",
         "nvtune": "nvtune",
         "obs-image-reaction": "obs-image-reaction",
+        "paseo": "paseo",
         "phi": "phi",
         "pi-flake": "pi-flake",
         "pi-harness": "pi-harness",

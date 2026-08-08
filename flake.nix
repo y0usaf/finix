@@ -118,6 +118,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    paseo = {
+      url = "github:getpaseo/paseo";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hermes-agent = {
       # Vendored patch of github:NousResearch/hermes-agent@2b0fb72 — upstream's
       # electron-headers FOD sha went stale when artifacts.electronjs.org
