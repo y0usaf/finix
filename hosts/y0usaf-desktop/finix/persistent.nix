@@ -403,6 +403,12 @@ in {
       enable = true;
       ttys = ["tty1" "tty2"];
     };
+    # Crash-hunt capture: duplicate EVERY facility/severity to the server
+    # (y0usaf-server 192.168.2.66:514, UDP) so an instant power-cut reboot
+    # during `adb pair` still lands its kernel oops/MCE/AER before the box
+    # dies. Desktop-only (common.nix is shared with the server). Local
+    # /var/log stays durable via the /persist/var/log bind (common/persist.nix).
+    sysklogd.extraConfig = "*.* @192.168.2.66:514";
     openssh.settings = {
       # Parity with the NixOS universe: real sshd on 2222; :22 stays free
       # for Tailscale SSH once tailscaled lands (phase 2).
