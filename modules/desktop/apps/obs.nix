@@ -25,7 +25,7 @@
           (pkgs.wrapOBS {
             plugins =
               lib.optional config.user.programs.obs.backgroundRemoval.enable
-              pkgs.obs-studio-plugins.obs-backgroundremoval
+              (pkgs.obs-studio-plugins.obs-backgroundremoval.override { onnxruntime = pkgs.onnxruntime.override { cudaSupport = false; }; })
               ++ [
                 pkgs.obs-studio-plugins.obs-vkcapture
                 pkgs.obs-studio-plugins.obs-pipewire-audio-capture
