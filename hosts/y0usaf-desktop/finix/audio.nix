@@ -6,6 +6,7 @@
 # (Nice -20 / SCHED_RR 99 on NixOS) is NOT ported yet — needs rtkit or
 # finit rlimit surgery; plain scheduling is fine for first sound.
 {
+  config,
   lib,
   pkgs,
   ...
@@ -120,7 +121,24 @@ in {
       description = "syncthing file sync (y0usaf)";
       user = "y0usaf";
       environment.HOME = "/home/y0usaf";
-      command = "${pkgs.syncthing}/bin/syncthing --config=/home/y0usaf/.config/syncthing --data=/home/y0usaf/.config/syncthing --gui-address=127.0.0.1:8384 --no-browser";
+      # Seed the declarative folders/devices on first (re)start so a wiped or
+      # empty config.xml self-heals instead of silently coming up with no sync.
+      # config.user.services.syncthing.seedConfigFile is built by the finix
+      # module (modules/user-services/syncthing.nix) from user.services.syncthing.
+      command = let
+        cfgDir = "/home/y0usaf/.config/syncthing";
+        seed = "${config.user.services.syncthing.seedConfigFile}";
+      in "${pkgs.writeShellScript "syncthing-seed" ''
+        set -e
+        CFG=${cfgDir}/config.xml
+        # Re-seed only when the live config is missing the declared folders
+        # (e.g. after a rebuild reset it). Leaves runtime state (API key, GUI
+        # tweaks, paused folders) untouched on healthy configs.
+        if [ ! -f "$CFG" ] || ! grep -q '<folder id=' "$CFG"; then
+          install -m 600 -o y0usaf -g users ${seed} "$CFG"
+        fi
+        exec ${pkgs.syncthing}/bin/syncthing --config=${cfgDir} --data=${cfgDir} --gui-address=127.0.0.1:8384 --no-browser
+      ''}";
       conditions = ["net/lo/up"];
       log = true;
     };
