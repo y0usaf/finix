@@ -113,6 +113,7 @@ in {
             ".forge"
             ".nexau"
             ".phi"
+            ".paseo" # paseo daemon state (config.json, phone pairing, sessions)
 
             ".slack"
             ".supabase"
