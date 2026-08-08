@@ -43,11 +43,19 @@
     # modules/core/user/session/xdg.nix (CLAUDE_CONFIG_DIR, CODEX_HOME,
     # KIMI_CODE_HOME). ~/.claude.json lives inside the claude dir once
     # CLAUDE_CONFIG_DIR is set. pi uses its own default ~/.pi/agent.
-    ".local/share/claude"
+    # claude: subdirs only — versions/ (218M binary cache) regenerates on next app
+    # start; settings.json is a manzil symlink (regenerates).
+    ".local/share/claude/backups"
+    ".local/share/claude/cache"
+    ".local/share/claude/plugins"
+    ".local/share/claude/projects"
+    ".local/share/claude/sessions"
+    ".local/share/claude/tasks"
+    ".local/share/claude/teams"
+    ".local/share/claude/.claude"
     ".local/share/codex"
     ".pi" # pi agent dir (pi's native default; no env var indirection)
     ".prime" # prime agent dir (agents, sessions, daemon state, logs)
-    ".local/share/kimi-code" # config.toml (API key), sessions, logs
 
     # ~/.config
     ".config/gh" # hosts.yml oauth
@@ -61,5 +69,7 @@
   ];
 
   userFiles = [
+    ".local/share/claude/.claude.json"
+    ".local/share/claude/history.jsonl"
   ];
 }
