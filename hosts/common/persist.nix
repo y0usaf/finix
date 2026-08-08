@@ -46,6 +46,7 @@
     ".local/share/claude"
     ".local/share/codex"
     ".pi" # pi agent dir (pi's native default; no env var indirection)
+    ".prime" # prime agent dir (agents, sessions, daemon state, logs)
     ".local/share/kimi-code" # config.toml (API key), sessions, logs
 
     # ~/.config
