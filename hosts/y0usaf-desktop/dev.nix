@@ -15,6 +15,7 @@ _: {
       linear-cli.enable = true;
     };
     pi.enable = true;
+    paseo.enable = true;
     canon.enable = true;
     docker.enable = true;
     gcloud.enable = true;
