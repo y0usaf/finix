@@ -5,12 +5,39 @@
   inherit (inputs) nixpkgs;
   lib = nixpkgs.lib;
 
-  # Synaptic Standard wiring: recursive import + aspect transposition.
+  # Synaptic Standard wiring: recursive import + explicit module-table dispatch.
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
-  # transpose: {lib} -> host -> paths. Aspect files ({compat}? {finix}? hosts?)
-  # carry both universes; everything else stays legacy (compat,
-  # desktop-only).
-  transpose = import ../../transpose.nix {inherit lib;};
+  # Module-tree wiring (transpose.nix removed 2026-08 — the generic aspect
+  # dispatch was overengineered for three files). Policy, explicit:
+  #   - every walked file is a desktop-only compat shim (legacy semantics);
+  #   - the three aspect files below carry their sides and host membership in
+  #     this table: compat sides are whitelist-shimmed (NixOS dialect), finix
+  #     sides pass untouched (finix-native). hosts/compat/finix wrappers stay
+  #     in the files, but membership is no longer read from them — a new
+  #     aspect file must be added HERE.
+  shim = import ./compat-import.nix {inherit lib;};
+  userCfg = import ../../modules/core/user/user-config.nix;
+  gitCfg = import ../../modules/tools/git.nix;
+  fwCfg = import ../../modules/core/firewall.nix;
+  aspects = {
+    "${toString ../../modules/core/user/user-config.nix}" = {
+      desktop = [(shim userCfg.compat)];
+      server = [(shim userCfg.compat)];
+    };
+    "${toString ../../modules/tools/git.nix}" = {
+      desktop = [(shim gitCfg.compat) gitCfg.finix];
+      server = [(shim gitCfg.compat) gitCfg.finix];
+    };
+    "${toString ../../modules/core/firewall.nix}" = {
+      desktop = [fwCfg.finix];
+      server = [];
+    };
+  };
+  treeModules = host: paths:
+    builtins.concatMap (
+      p: aspects."${toString p}"."${host}" or (lib.optional (host == "desktop") (shim (import p)))
+    )
+    paths;
   # Nix has no destructuring let-binding; bind the module and inherit the
   # names (lib is already bound above; nixpkgs.lib === the builder's lib).
   finixSystem = import ./finixSystem.nix {inherit inputs system;};
@@ -61,7 +88,7 @@
       {manzil.forceByDefault = true;}
     ]
     # Legacy files stay desktop-only; only aspect files with server membership land here.
-    ++ transpose "server" serverPaths
+    ++ treeModules "server" serverPaths
   );
 
   desktopPersistent = mkFinixSystem (
@@ -80,7 +107,7 @@
       # rewrite every entry every switch (watcher invalidation)
       {manzil.forceByDefault = true;}
     ]
-    ++ transpose "desktop" desktopPaths
+    ++ treeModules "desktop" desktopPaths
   );
 
   bootPackage =
