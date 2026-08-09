@@ -7,10 +7,7 @@
 # hosts/y0usaf-server/finix/hermes.nix). The daemon must run as the real
 # user so the agents it spawns inherit the user's PATH, git, ssh, and API
 # credentials.
-{
-  lib,
-  ...
-}: let
+{lib, ...}: let
   inherit (lib) types;
 in {
   options.user.dev.paseo = {
@@ -54,6 +51,27 @@ in {
       type = types.attrsOf types.str;
       default = {};
       description = "Extra environment variables for the Paseo daemon.";
+    };
+
+    environmentFiles = lib.mkOption {
+      type = types.listOf types.str;
+      default = [];
+      description = ''
+        Files whose contents become environment variables of the daemon (and
+        therefore of every agent it spawns). Each file's basename, extension
+        stripped and uppercased with non-alphanumerics mapped to _, names the
+        variable; the trimmed file content is the value. Keeps API keys out of
+        the store (pattern: ~/Tokens/*.txt, one bare key per file).
+      '';
+    };
+
+    group = lib.mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Group the daemon runs as. Default: the user's own group (user.name).
+        Set explicitly when the user's primary group differs (e.g. 'users').
+      '';
     };
   };
 }
