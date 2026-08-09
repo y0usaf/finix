@@ -13,9 +13,10 @@ in {
         value = {
           providers."vercel-ai-gateway" = {
             # openai-completions is the only api that emits vercelGatewayRouting;
-            # anthropic-messages (the built-in default) drops it. baseUrl needs
-            # /v1 because the openai client uses baseUrl verbatim.
-            baseUrl = "https://ai-gateway.vercel.sh/v1";
+            # anthropic-messages (the built-in default) drops it. baseUrl is
+            # per-model: openai models need /v1 (client uses baseUrl verbatim),
+            # while anthropic-messages models must NOT get /v1 (SDK appends
+            # /v1/messages -> double path -> 404).
             api = "openai-completions";
             # Vercel gateway has no exclude list; whitelist every upstream
             # provider except moonshotai via vercelGatewayRouting.only.
@@ -26,6 +27,7 @@ in {
               {
                 id = "moonshotai/kimi-k3-fast";
                 name = "Kimi K3 Fast";
+                baseUrl = "https://ai-gateway.vercel.sh/v1";
                 reasoning = true;
                 input = ["text" "image"];
                 cost = {
@@ -42,6 +44,7 @@ in {
               {
                 id = "deepseek/deepseek-v4-flash-0731";
                 name = "DeepSeek V4 Flash 0731";
+                baseUrl = "https://ai-gateway.vercel.sh/v1";
                 reasoning = true;
                 input = ["text"];
                 cost = {
