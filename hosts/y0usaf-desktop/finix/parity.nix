@@ -46,6 +46,12 @@ in {
     # their udev rules + dbus activation themselves.
     upower.enable = true;
     udisks2.enable = true;
+
+    # Waydroid (testing, sandbox ~/dev/sandbox/tft-waydroid): ship the
+    # id.waydro.Container dbus policy + service file so the system bus lets
+    # root own the container-manager name. Container itself is started
+    # manually (sudo waydroid container start), not as a finit service.
+    dbus.packages = [pkgs.waydroid-nftables];
   };
 
   # ddcutil monitor control: finix's i2c module ships the rules; NixOS-side
