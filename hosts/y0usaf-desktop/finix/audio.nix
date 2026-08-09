@@ -121,6 +121,10 @@ in {
       description = "syncthing file sync (y0usaf)";
       user = "y0usaf";
       environment.HOME = "/home/y0usaf";
+      # finit.service "path" feeds the generated environment.PATH (old
+      # flake rev defaulted to sysklogd only; seed wrapper needs grep/
+      # install or it exits 127 before syncthing ever starts).
+      path = [pkgs.coreutils pkgs.gnugrep];
       # Seed the declarative folders/devices on first (re)start so a wiped or
       # empty config.xml self-heals instead of silently coming up with no sync.
       # config.user.services.syncthing.seedConfigFile is built by the finix
