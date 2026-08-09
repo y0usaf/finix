@@ -21,8 +21,11 @@
         };
 
         # Current main: WebKitGTK-based, GTK4/libadwaita. No CEF, all deps on crates.io.
+        # Lock file vendored into this repo (copied from src). Pointing lockFile at
+        # "${src}/Cargo.lock" is IFD: nix must download the GitHub tarball DURING
+        # evaluation, stalling every eval on network. Refresh the copy when rev bumps.
         cargoLock = {
-          lockFile = "${finalAttrs.src}/Cargo.lock";
+          lockFile = ./stremio-Cargo.lock;
         };
 
         postPatch = ''
@@ -32,32 +35,10 @@
             --replace-fail 'init.set_property("vo", "libmpv")?;' \
               'init.set_property("vo", "libmpv")?; init.set_property("ao", "pulse")?;'
 
-          # The window.decorations flag only hides the in-app header; the actual
-          # GTK CSD title bar stays. Drop it up-front (before the window maps)
-          # and re-assert it at realize.
-          substituteInPlace src/app/imp.rs \
-            --replace-fail "window.set_property(\"decorations\", self.decorations.get());" \
-              "window.set_property(\"decorations\", self.decorations.get());
-        if !self.decorations.get() {
-            window.set_decorated(false);
-            window.set_titlebar(None::<&gtk::Widget>);
-        }"
-          # Also re-assert undecorated at realize and 250ms later: GTK4/libadwaita
-          # renegotiates the xdg-decoration mode during map; the pre-map call alone
-          # can be overridden (tomoe grants whatever mode the client asks for).
-          substituteInPlace src/app/window/imp.rs \
-            --replace-fail "    prelude::WidgetExt," \
-              "    prelude::{GtkWindowExt, WidgetExt},"
-          substituteInPlace src/app/window/imp.rs \
-            --replace-fail "self.show_header(false);" \
-              "self.obj().set_decorated(false);
-        self.obj().set_titlebar(None::<&gtk::Widget>);
-        self.show_header(false);
-        let win = self.obj().clone();
-        glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
-            win.set_decorated(false);
-            win.set_titlebar(None::<&gtk::Widget>);
-        });"
+          # No decoration patches needed: with --no-window-decorations parsed
+          # correctly (single flag, see shim below), upstream realize() hides the
+          # AdwHeaderBar and drops the csd class itself. set_titlebar() must NOT
+          # be patched in — it g_error-aborts on AdwApplicationWindow.
 
           # build.rs writes GLib schemas into dirs::data_dir() (=HOME/.local/share);
           # the nix builder HOME is unwritable; export persists into the build phase
@@ -99,15 +80,17 @@
           cat > $out/bin/stremio <<'SH'
           #!/bin/sh
           [ -e /dev/nvidia0 ] && export GSK_RENDERER=opengl
-          exec "$(dirname "$0")/stremio-linux-shell" "$@"
+          # --no-window-decorations lives HERE, not in gappsWrapperArgs: the hook
+          # wraps BOTH this shim and stremio-linux-shell, so add-flags delivered
+          # the flag twice; clap SetTrue + ignore_errors(true) silently resolves
+          # a duplicated flag to FALSE (verified against clap 4.6.1).
+          exec "$(dirname "$0")/stremio-linux-shell" --no-window-decorations "$@"
           SH
           chmod +x $out/bin/stremio
         '';
 
         preFixup = ''
           gappsWrapperArgs+=(
-            # borderless app window (no title bar / headerbar)
-            --add-flags "--no-window-decorations" \
             # stremio passes RUST_LOG verbatim into mpv's msg-level; non-mpv
             # values like "crate=debug" make mpv creation fail with -11
             --unset RUST_LOG \
