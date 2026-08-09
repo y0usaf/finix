@@ -228,11 +228,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786056432,
-        "narHash": "sha256-KgqcjbSsq4yGHgplJWtUkhDIpNFgKMFYTamE+eL1nDQ=",
+        "lastModified": 1786164397,
+        "narHash": "sha256-+tf0Kq3EEz5hAYJlhGECySLi1O+7g1di2XXu8EbUgyc=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "081c3515e466367f3625f11ff299597a281c5330",
+        "rev": "b36b928e4503dd05caf26c134829570fd67f21bc",
         "type": "github"
       },
       "original": {
@@ -889,11 +889,11 @@
         "piSrc": "piSrc"
       },
       "locked": {
-        "lastModified": 1786160566,
-        "narHash": "sha256-el7j4t1RsUKcTgKKeLOFju0xs/p3Cnil62Vfm19yYZo=",
+        "lastModified": 1786292889,
+        "narHash": "sha256-RfPF1AjL6ZktJohtsAockSpTQzUJxirU6LWqChsDAj8=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "845ab026fdb2e24cdf741d87fccded3d0947e00f",
+        "rev": "d0d99769df9d1e21b5368a5948b7af57154f2231",
         "type": "github"
       },
       "original": {
@@ -951,11 +951,11 @@
         "primeAgentSrc": "primeAgentSrc"
       },
       "locked": {
-        "lastModified": 1786157733,
-        "narHash": "sha256-oNiLgtvhbfx/8QH+466ZnwxGLJQNnhuE+lMn32tOo4g=",
+        "lastModified": 1786163717,
+        "narHash": "sha256-GiftgOxRY1Eq2Fur2wu9VQdsPCIuFQ1tgW1W+p60+jU=",
         "owner": "y0usaf",
         "repo": "prime-agent-flake",
-        "rev": "b9ec4ff871d7553cbff93e846bd36b8fd33ad931",
+        "rev": "a4b19d61fa720d23850d15ecf0e09b07f937089b",
         "type": "github"
       },
       "original": {
