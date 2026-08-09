@@ -5,61 +5,51 @@
   inherit (inputs) nixpkgs;
   lib = nixpkgs.lib;
 
-  # Synaptic Standard wiring: recursive import + explicit module-table dispatch.
-  recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
-  # Module-tree wiring (transpose.nix removed 2026-08 — the generic aspect
-  # dispatch was overengineered for three files). Policy, explicit:
-  #   - every walked file is a desktop-only compat shim (legacy semantics);
-  #   - the three aspect files below carry their sides and host membership in
-  #     this table: compat sides are whitelist-shimmed (NixOS dialect), finix
-  #     sides pass untouched (finix-native). hosts/compat/finix wrappers stay
-  #     in the files, but membership is no longer read from them — a new
-  #     aspect file must be added HERE.
+  # Shared compat shim: NixOS modules from ../modules are consumed by finix
+  # ONLY through this whitelist filter (user/manzil/environment/fonts +
+  # services.udev.packages). Aspect/transpose dispatch was removed 2026-08 —
+  # hosts import what they need explicitly, like a normal NixOS config.
   shim = import ./compat-import.nix {inherit lib;};
-  userCfg = import ../../modules/core/user/user-config.nix;
-  gitCfg = import ../../modules/tools/git.nix;
-  fwCfg = import ../../modules/core/firewall.nix;
-  aspects = {
-    "${toString ../../modules/core/user/user-config.nix}" = {
-      desktop = [(shim userCfg.compat)];
-      server = [(shim userCfg.compat)];
-    };
-    "${toString ../../modules/tools/git.nix}" = {
-      desktop = [(shim gitCfg.compat) gitCfg.finix];
-      server = [(shim gitCfg.compat) gitCfg.finix];
-    };
-    "${toString ../../modules/core/firewall.nix}" = {
-      desktop = [fwCfg.finix];
-      server = [];
-    };
-  };
-  treeModules = host: paths:
-    builtins.concatMap (
-      p: aspects."${toString p}"."${host}" or (lib.optional (host == "desktop") (shim (import p)))
-    )
-    paths;
+
+  # finix-native modules (no shim) cannot be walked; the desktop packet
+  # filter is one and is imported directly below.
+  firewall = import ../core/firewall.nix;
+
+  # Desktop: bulk-import every NixOS module in the shared tree (shimmed) +
+  # the desktop host dir's legacy files. Exclusions:
+  #   - ../core/firewall.nix  (finix-native nftables, imported directly)
+  #   - ../core/flake-modules.nix  (NixOS-only input modules)
+  #   - ../dev/kimi-code/package.nix (package function, not a module)
+  #   - ../dev/paseo/options.nix + service.nix (finix-native finit service, no shim)
+  #     — the shim whitelist (user/manzil/environment/fonts) would DROP finit
+  #   - any path containing /finix/  (already finix-native)
+  recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
+  walkedKnownExclusions = [
+    ../core/firewall.nix
+    ../core/flake-modules.nix
+    ../dev/kimi-code/package.nix
+    ../dev/paseo/options.nix
+    ../dev/paseo/service.nix
+  ];
+  desktopNixosModules = map (p: shim (import p)) (builtins.filter (p:
+      !(builtins.elem p walkedKnownExclusions)
+      && !(lib.hasInfix "/finix/" (toString p)))
+    (recursivelyImport [
+      ../core
+      ../desktop
+      ../dev
+      ../gaming
+      ../shell
+      ../tools
+      ../user-services
+      ../../hosts/y0usaf-desktop
+    ]));
+
   # Nix has no destructuring let-binding; bind the module and inherit the
   # names (lib is already bound above; nixpkgs.lib === the builder's lib).
   finixSystem = import ./finixSystem.nix {inherit inputs system;};
   inherit (finixSystem) pkgs mkFinixSystem;
   deployLib = import ./deploy.nix {inherit pkgs;};
-
-  # Aspect filter shared by both hosts. Exclusions:
-  #   - ../core/flake-modules.nix  (NixOS-only input modules)
-  #   - ../dev/kimi-code/package.nix (package function, not a module)
-  #   - any path containing /finix/  (already finix-native)
-  aspectFilter =
-    builtins.filter
-    (p:
-      !(builtins.elem p [
-        ../core/flake-modules.nix
-        ../dev/kimi-code/package.nix
-      ])
-      && !(lib.hasInfix "/finix/" (toString p)));
-  # Walk the module family dirs by name (NOT ../../modules: that recurse would
-  # walk modules/finix itself), then the desktop host dir for its legacy files.
-  desktopPaths = aspectFilter (recursivelyImport [../core ../desktop ../dev ../gaming ../shell ../tools ../user-services ../../hosts/y0usaf-desktop]);
-  serverPaths = aspectFilter (recursivelyImport [../core ../desktop ../dev ../gaming ../shell ../tools ../user-services]);
 
   # NOTE: mkFinixSystem imports ./common.nix in its baseline (shared by
   # every system, kept in the old position for exact module-order parity).
@@ -83,12 +73,29 @@
       ../../hosts/y0usaf-server/finix/boot-health.nix
       ../../hosts/y0usaf-server/finix/boot.nix
       ../../hosts/y0usaf-server/finix/hermes.nix
+      ../../hosts/y0usaf-server/finix/paseo.nix
       inputs.manzil.finixModules.default
       # rewrite every entry every switch (watcher invalidation)
       {manzil.forceByDefault = true;}
+      # Shared NixOS modules the server needs, imported explicitly, in the
+      # same order the old recursive walk produced them (core/user-config,
+      # then dev/claude-code, dev/paseo, then tools/git) so the server
+      # closure is unchanged. user-config + git are shimmed; git is enabled
+      # here because the server has no tools.nix (desktop sets it in
+      # hosts/y0usaf-desktop/tools.nix; idempotent).
+      (shim (import ../core/user/user-config.nix))
+      # claude-code module + settings (NOT aspect-shaped; shimmed NixOS modules)
+      (shim (import ../dev/claude-code/claude-code.nix))
+      (shim (import ../dev/claude-code/settings.nix))
+      # paseo daemon options + finit service (finix-native, no shim). The
+      # server's paseo.nix above enables it; the desktop imports the same two
+      # files explicitly in desktopPersistent (the recursive walk would shim
+      # them and the compat shim drops finit — see walkedKnownExclusions).
+      (import ../dev/paseo/options.nix)
+      (import ../dev/paseo/service.nix)
+      (shim (import ../tools/git.nix))
+      {user.tools.git.enable = true;}
     ]
-    # Legacy files stay desktop-only; only aspect files with server membership land here.
-    ++ treeModules "server" serverPaths
   );
 
   desktopPersistent = mkFinixSystem (
@@ -96,7 +103,7 @@
       nix-daemon
       # Packet filter. Was serverPersistent-only until 2026-07-30, which is why
       # the desktop ran unfiltered since the finix switch (DRIFT-AUDIT #1).
-      # Ruleset: ../core/firewall.nix.
+      # Ruleset: ../core/firewall.nix (finix-native, imported directly below).
       nftables
       limine # upstream bootloader: ../../hosts/y0usaf-desktop/finix/boot.nix (OFF on server)
     ])
@@ -106,8 +113,14 @@
       inputs.manzil.finixModules.default
       # rewrite every entry every switch (watcher invalidation)
       {manzil.forceByDefault = true;}
+      firewall
+      # paseo daemon options + finit service (finix-native, no shim; same
+      # pattern as serverPersistent). Declares user.dev.paseo, gated on
+      # enable, which hosts/y0usaf-desktop/dev.nix sets.
+      (import ../dev/paseo/options.nix)
+      (import ../dev/paseo/service.nix)
     ]
-    ++ treeModules "desktop" desktopPaths
+    ++ desktopNixosModules
   );
 
   bootPackage =
