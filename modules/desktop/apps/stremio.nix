@@ -40,6 +40,7 @@
               "window.set_property(\"decorations\", self.decorations.get());
         if !self.decorations.get() {
             window.set_decorated(false);
+            window.set_titlebar(None::<&gtk::Widget>);
         }"
           # Also re-assert undecorated at realize and 250ms later: GTK4/libadwaita
           # renegotiates the xdg-decoration mode during map; the pre-map call alone
@@ -50,10 +51,12 @@
           substituteInPlace src/app/window/imp.rs \
             --replace-fail "self.show_header(false);" \
               "self.obj().set_decorated(false);
+        self.obj().set_titlebar(None::<&gtk::Widget>);
         self.show_header(false);
         let win = self.obj().clone();
         glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
             win.set_decorated(false);
+            win.set_titlebar(None::<&gtk::Widget>);
         });"
 
           # build.rs writes GLib schemas into dirs::data_dir() (=HOME/.local/share);
