@@ -55,8 +55,8 @@ in {
                 };
                 contextWindow = 1000000;
                 maxTokens = 384000;
-                compat.vercelGatewayRouting.only = ["baseten" "novita"];
-                compat.vercelGatewayRouting.order = ["baseten" "novita"];
+                compat.vercelGatewayRouting.only = ["wafer" "baseten"];
+                compat.vercelGatewayRouting.order = ["wafer" "baseten"];
               }
             ];
           };
