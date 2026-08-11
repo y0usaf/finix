@@ -17,6 +17,7 @@
   ...
 }: let
   sys = pkgs.stdenv.hostPlatform.system;
+
   # force_server_side_decorations landed upstream in tomoe (8e0bd50); the local
   # patch that used to carry it is gone — the packaged default has it now.
   tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
