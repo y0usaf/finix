@@ -78,7 +78,7 @@ in {
               maxTokens = 131072;
               compat.vercelGatewayRouting.only = ["fireworks"];
             }
-            # Baseten first for lowest TTFT; Novita failover. DeepSeek upstream excluded (Chinese).
+            # Baseten only; avoids frequent 503s from wafer upstream.
             {
               id = "deepseek/deepseek-v4-flash-0731";
               name = "DeepSeek V4 Flash 0731";
@@ -93,8 +93,7 @@ in {
               };
               contextWindow = 1000000;
               maxTokens = 384000;
-              compat.vercelGatewayRouting.only = ["wafer" "baseten"];
-              compat.vercelGatewayRouting.order = ["wafer" "baseten"];
+              compat.vercelGatewayRouting.only = ["baseten"];
             }
           ];
         };
