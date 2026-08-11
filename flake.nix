@@ -75,12 +75,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # PrimeIntellect prime-agent fork; thin flake, fetches upstream as an input.
-    prime-agent-flake = {
-      url = "github:y0usaf/prime-agent-flake?ref=main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     pi-harness = {
       url = "git+ssh://git@github.com/y0usaf/pi-harness.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";

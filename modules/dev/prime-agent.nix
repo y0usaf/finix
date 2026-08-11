@@ -104,7 +104,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
-      flakeInputs.prime-agent-flake.packages."${pkgs.stdenv.hostPlatform.system}".default
+      flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".prime-agent
     ];
 
     manzil.users."${config.user.name}".files = {

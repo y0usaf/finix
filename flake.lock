@@ -241,22 +241,6 @@
         "type": "github"
       }
     },
-    "engramSrc": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1785814370,
-        "narHash": "sha256-BK0ZBVkvRXzBjFQEI7pnLhjZ/B+1rH84z4ciOyxX/AE=",
-        "owner": "nagisanzenin",
-        "repo": "engram",
-        "rev": "d0a61cd671301ce7fe05d46616d1fbc7e2af6382",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nagisanzenin",
-        "repo": "engram",
-        "type": "github"
-      }
-    },
     "finix": {
       "locked": {
         "lastModified": 1785015387,
@@ -861,18 +845,18 @@
     },
     "pi-flake": {
       "inputs": {
-        "engramSrc": "engramSrc",
         "nixpkgs": [
           "nixpkgs"
         ],
-        "piSrc": "piSrc"
+        "piSrc": "piSrc",
+        "primeAgentSrc": "primeAgentSrc"
       },
       "locked": {
-        "lastModified": 1786422311,
-        "narHash": "sha256-lcedGNx/iCLuJSj655LSCSLv7e14q4r9Wuq9hJzkdrk=",
+        "lastModified": 1786449576,
+        "narHash": "sha256-Ola1Xl1bXFVTB3EXWvGZEIij5Sg54crwn23+GJBlB28=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "85a4be852a864fe0e67febf797bc86e751682822",
+        "rev": "5000b82693b47f3a8df1c39e588f79f8aab39693",
         "type": "github"
       },
       "original": {
@@ -917,46 +901,24 @@
       },
       "original": {
         "owner": "earendil-works",
-        "ref": "main",
         "repo": "pi",
-        "type": "github"
-      }
-    },
-    "prime-agent-flake": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "primeAgentSrc": "primeAgentSrc"
-      },
-      "locked": {
-        "lastModified": 1786362291,
-        "narHash": "sha256-OHbzPxdAf/GTjGHX9wu6s7n2LphXt2/ikTazjg7gwwk=",
-        "owner": "y0usaf",
-        "repo": "prime-agent-flake",
-        "rev": "2cf8ff1e9a665331880a208e65ed7c65df6cd088",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "ref": "main",
-        "repo": "prime-agent-flake",
+        "rev": "bde81c84405514c8b0f57c34405c152fb129c0ce",
         "type": "github"
       }
     },
     "primeAgentSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1785998635,
-        "narHash": "sha256-d8gleXPBsT3XGQXUgNZQCTSY0v/Vb2MkowMjrz3ak0E=",
-        "owner": "PrimeIntellect-ai",
+        "lastModified": 1786446668,
+        "narHash": "sha256-cAqUMfsQr1KU8jAoXeO0hyLMHH9he25v9U2PBVkfTaU=",
+        "owner": "y0usaf",
         "repo": "prime-agent",
-        "rev": "0e0d23391bcd879f1aea70dbda4d07dda7970b34",
+        "rev": "ae9678029b37cc7a9d7ac9a6d32d05b61a567ac3",
         "type": "github"
       },
       "original": {
-        "owner": "PrimeIntellect-ai",
-        "ref": "main",
+        "owner": "y0usaf",
+        "ref": "pa-prime-nix",
         "repo": "prime-agent",
         "type": "github"
       }
@@ -1039,7 +1001,6 @@
         "phi": "phi",
         "pi-flake": "pi-flake",
         "pi-harness": "pi-harness",
-        "prime-agent-flake": "prime-agent-flake",
         "rudo": "rudo",
         "strictix": "strictix",
         "tomoe": "tomoe",

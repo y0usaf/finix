@@ -99,8 +99,12 @@ in {
     };
   };
 
+  # prime-agent build requires npm install with network (lockfile has
+  # unresolvable packages not in npm registry like undici-types@7.16.0).
+  nix.settings.sandbox = "relaxed";
+
   # TCP 25565 (minecraft host) moved 2026-07-30 to modules/core/firewall.nix,
-  # the desktop's only firewall. `networking` is not on compat-import's
+  # the desktop's default firewall. `networking` is not on compat-import's
   # whitelist, so this line was inert from the finix switch onward
   # (DRIFT-AUDIT #1).
 }
