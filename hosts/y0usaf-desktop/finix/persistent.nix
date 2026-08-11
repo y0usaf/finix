@@ -25,6 +25,16 @@
 }: let
   diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
 
+  # Common btrfs mount options, matching the NixOS hardware-configuration.nix.
+  btrfsOpts = ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
+  # Helper: build a btrfs subvol mount attrset from subvol name + extra opts.
+  # Extra opts are appended after the standard btrfs options (e.g. ["ro"]).
+  subvolMount = subvol: extraOpts: {
+    device = "/dev/disk/by-uuid/${diskUuid}";
+    fsType = "btrfs";
+    options = ["subvol=${subvol}"] ++ btrfsOpts ++ extraOpts;
+  };
+
   # Single source of truth: pass finix's evaluated config into the NixOS
   # impermanence data function so enable-gated app paths match this system.
   persistCfg =
@@ -73,13 +83,6 @@
   # follows the mounts, then each mountpoint's path relative to /home/y0usaf.
   dataSubvolMounts = lib.unique (map (mp: lib.removePrefix "/home/y0usaf/" mp)
     (builtins.filter (mp: lib.hasPrefix "/home/y0usaf/" mp) (builtins.attrNames config.fileSystems)));
-
-  btrfsOpts = ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
-  subvolMount = name: extraOpts: {
-    device = "/dev/disk/by-uuid/${diskUuid}";
-    fsType = "btrfs";
-    options = ["subvol=${name}"] ++ btrfsOpts ++ extraOpts;
-  };
   # The 250-entry user allowlist as one supervised task instead of 250 fstab
   # mount tasks: same bind-mount semantics as the impermanence module,
   # ownership applied only to directories this script itself creates.
