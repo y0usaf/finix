@@ -15,7 +15,8 @@ _: {
     };
     wukong.enable = true;
     expedition33.enable = true;
-    duet-night-abyss.enable = true;
+    # duet-night-abyss: no module yet — uncomment when the module is added
+    # duet-night-abyss.enable = true;
     arc-raiders.enable = true;
     solo-leveling-arise.enable = true;
     aethermancer.enable = true;
