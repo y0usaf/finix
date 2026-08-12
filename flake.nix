@@ -60,7 +60,7 @@
     };
 
     codex-cli-nix = {
-      url = "github:sadjow/codex-cli-nix";
+      url = "path:/home/y0usaf/dev/codex-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -77,6 +77,11 @@
 
     pi-harness = {
       url = "git+ssh://git@github.com/y0usaf/pi-harness.git?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    reasonix-flake = {
+      url = "github:y0usaf/reasonix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

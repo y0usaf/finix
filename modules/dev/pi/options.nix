@@ -38,7 +38,7 @@ in {
 
     defaultModel = lib.mkOption {
       type = types.str;
-      default = "deepseek/deepseek-v4-flash-0731";
+      default = "anthropic/claude-fable-5";
       description = "Default model written to settings.json defaultModel.";
     };
 
@@ -51,7 +51,6 @@ in {
     enabledModels = lib.mkOption {
       type = types.listOf types.str;
       default = [
-        "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
         "vercel-ai-gateway/moonshotai/kimi-k3-fast"
         "vercel-ai-gateway/anthropic/claude-fable-5"
         "vercel-ai-gateway/openai/gpt-5.6-sol"
@@ -77,7 +76,7 @@ in {
     agents = {
       model = lib.mkOption {
         type = nullOrStr;
-        default = "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731";
+        default = "vercel-ai-gateway/anthropic/claude-fable-5";
         description = ''
           Model for pi-agents spawned children, written to
           `~/.pi/agent/pi-agents.json`. Use a qualified
