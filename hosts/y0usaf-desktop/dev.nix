@@ -33,5 +33,7 @@ _: {
     upscale.enable = true;
     phi.enable = true;
     prime-agent.enable = true;
+    reasonix.enable = true;
+    paseo.reasonix.enable = true;
   };
 }

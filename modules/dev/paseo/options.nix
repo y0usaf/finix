@@ -73,5 +73,15 @@ in {
         Set explicitly when the user's primary group differs (e.g. 'users').
       '';
     };
+
+    reasonix = {
+      enable = lib.mkEnableOption ''
+        reasonix as a Paseo ACP provider. Registers a custom ACP provider in
+        Paseo's daemon-owned config.json (agents.providers.reasonix with
+        extends="acp", command=[reasonix, acp]) via a non-destructive manzil
+        merge, so it shows up under the Paseo app as "Reasonix". reasonix must
+        also be installed (user.dev.reasonix.enable) so the CLI is on PATH.
+      '';
+    };
   };
 }
