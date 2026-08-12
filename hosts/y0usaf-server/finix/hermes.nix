@@ -22,10 +22,6 @@
 # plugins on name collision... third parties can monkey-patch or replace any
 # built-in profile"). The profile points base_url at
 # https://ai-gateway.vercel.sh/v1 and reads the key from AI_GATEWAY_API_KEY.
-# Also verified: model.default must be the BARE gateway slug
-# ("deepseek/deepseek-v4-flash-0731") with provider set separately — a
-# "ai-gateway/deepseek/deepseek-v4-flash-0731" model.default makes the gateway
-# receive the whole string as model id and answer HTTP 404.
 { lib, pkgs, flakeInputs, ... }:
 let
   system = pkgs.stdenv.hostPlatform.system;
@@ -45,7 +41,7 @@ let
   # Shared provider config (gateway + per-user CLI both seed this).
   baseConfig = {
     model = {
-      default = "deepseek/deepseek-v4-flash-0731";
+      default = "anthropic/claude-fable-5";
       provider = "ai-gateway";
     };
     # The CLI session/model-switch resolver (resolve_provider_full) only
@@ -64,7 +60,7 @@ let
   # writes exactly this key); `context.engine` hands the compression engine
   # to the plugin; engine_threshold_pct = compress at 55% context fill
   # (plugin default 45, README recommends 55). model.context_length is
-  # deliberately NOT set: claiming 1M tokens to the deepseek backend behind
+  # deliberately NOT set: claiming 1M tokens to a backend behind
   # the Vercel gateway needs testing before we trust it.
   configYaml = (pkgs.formats.yaml { }).generate "hermes-config.yaml" (baseConfig // {
     plugins.enabled = [ "aphrodite" "serverstats" ];

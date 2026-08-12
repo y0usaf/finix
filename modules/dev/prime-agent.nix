@@ -19,7 +19,7 @@ in {
 
     defaultModel = lib.mkOption {
       type = lib.types.str;
-      default = "deepseek/deepseek-v4-flash-0731";
+      default = "anthropic/claude-fable-5";
       description = "Default model written to ~/.prime/agent/settings.json defaultModel.";
     };
 
@@ -32,7 +32,6 @@ in {
     enabledModels = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [
-        "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
         "vercel-ai-gateway/anthropic/claude-fable-5"
         "vercel-ai-gateway/openai/gpt-5.6-sol"
         "openai-codex/gpt-5.6-sol"
@@ -77,23 +76,6 @@ in {
               contextWindow = 1000000;
               maxTokens = 131072;
               compat.vercelGatewayRouting.only = ["fireworks"];
-            }
-            # Baseten only; avoids frequent 503s from wafer upstream.
-            {
-              id = "deepseek/deepseek-v4-flash-0731";
-              name = "DeepSeek V4 Flash 0731";
-              baseUrl = "https://ai-gateway.vercel.sh/v1";
-              reasoning = true;
-              input = ["text"];
-              cost = {
-                input = 0.13;
-                output = 0.26;
-                cacheRead = 0.03;
-                cacheWrite = 0;
-              };
-              contextWindow = 1000000;
-              maxTokens = 384000;
-              compat.vercelGatewayRouting.only = ["baseten"];
             }
           ];
         };

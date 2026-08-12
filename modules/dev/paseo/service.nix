@@ -61,5 +61,26 @@ in {
       conditions = ["net/lo/up" "net/tailscale0/up"];
       log = true;
     };
+
+    # Register reasonix as a custom ACP provider so it appears in the Paseo
+    # app like claude/codex/opencode. Paseo's config.json is daemon-owned
+    # runtime state (device pairings, relay state, provider toggles), so we
+    # inject via a non-destructive manzil merge (clobberByDefault=false):
+    # only agents.providers.reasonix is added; everything the daemon manages
+    # is left untouched. reasonix must be on PATH (user.dev.reasonix.enable):
+    # the daemon resolves `reasonix` from its PATH, which includes
+    # /run/current-system/sw/bin.
+    manzil.users."${config.user.name}".files.".paseo/config.json" = {
+      type = "merge";
+      format = "json";
+      value = {
+        agents.providers.reasonix = {
+          extends = "acp";
+          label = "Reasonix";
+          description = "Reasonix cache-first coding agent";
+          command = ["reasonix" "acp"];
+        };
+      };
+    };
   };
 }
