@@ -35,5 +35,8 @@ _: {
     prime-agent.enable = true;
     reasonix.enable = true;
     paseo.reasonix.enable = true;
+    # desktop y0usaf's primary group is `users` (no y0usaf group), same as the
+    # server — without this finit can't fork the daemon
+    paseo.group = "users";
   };
 }
