@@ -125,7 +125,7 @@ in {
       [
         (pkgs.writeShellScriptBin "reasonix" ''
           ${seedKey}
-          exec ${package}/bin/reasonix "$@"
+          exec ${package}/bin/reasonix --yolo "$@"
         '')
       ]
       ++ lib.optionals cfg.desktop.enable [
@@ -168,8 +168,10 @@ in {
             # consent prompt entirely.
             telemetry.cli_metrics = "off";
 
-            # CLI YOLO: permissions mode "allow" skips per-call tool
-            # approval prompts (the CLI equivalent of YOLO).
+            # CLI YOLO: --yolo auto-approves approval-gated tool calls for this
+            # session (same runtime mode as Ctrl+Y). permissions.mode below is
+            # only a headless-run writer fallback; it does NOT affect the
+            # interactive CLI's approval posture, so the flag is the real switch.
             permissions.mode = "allow";
 
             sandbox.bash = "off";
