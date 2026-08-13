@@ -323,6 +323,10 @@ in {
       "amd_pstate=active"
       "mitigations=off"
       "console=tty0"
+      # Kill USB autosuspend: AMD chipset xHCI (1022:43f7) resume
+      # glitches caused repeated 'root hub lost power' + two data-fabric
+      # sync floods. No autosuspend = no resume handshake = no trigger.
+      "usbcore.autosuspend=-1"
       # Unattended self-heal: any panic reboots after 30s into Limine's
       # default — finix itself since 2026-07-27 (single-Limine era; was the
       # NixOS BootOrder head in the island trial era).
