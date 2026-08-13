@@ -11,7 +11,7 @@
     indentStrings = let
       lines = concatStringsSep "\n";
     in
-      stringsWithNewlines: (lines: concatStringsSep "\n" (map (x: "	" + x) lines)) ((lib.splitString "\n") (lines stringsWithNewlines));
+      stringsWithNewlines: (ls: concatStringsSep "\n" (map (x: "	" + x) ls)) ((lib.splitString "\n") (lines stringsWithNewlines));
 
     literalValueToString = element:
       lib.throwIfNot

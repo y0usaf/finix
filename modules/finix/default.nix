@@ -9,7 +9,7 @@
   # ONLY through this whitelist filter (user/manzil/environment/fonts +
   # services.udev.packages). Aspect/transpose dispatch was removed 2026-08 —
   # hosts import what they need explicitly, like a normal NixOS config.
-  shim = import ./compat-import.nix {inherit lib;};
+  shim = import ./compat-import.nix {lib' = lib;};
 
   # finix-native modules (no shim) cannot be walked; the desktop packet
   # filter is one and is imported directly below.

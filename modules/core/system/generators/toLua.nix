@@ -56,12 +56,12 @@
     entry = k: v:
       if v == null
       then ""
-      else "${(k:
-        if isString k && (s: match "[A-Za-z_][A-Za-z0-9_]*" s != null) k
-        then k
-        else if isString k
-        then "[${quoteStr k}]"
-        else "[${toString k}]")
+      else "${(key:
+        if isString key && (s: match "[A-Za-z_][A-Za-z0-9_]*" s != null) key
+        then key
+        else if isString key
+        then "[${quoteStr key}]"
+        else "[${toString key}]")
       k} = ${valStr v}";
   in
     value:
