@@ -849,11 +849,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1786506896,
-        "narHash": "sha256-mtVSXDe1HB7/Oxzzo1Th4NQO0MRwZ8sR7FHuvfnh8m4=",
+        "lastModified": 1786643953,
+        "narHash": "sha256-Lhg8Nri+R1xR/6GfoLKm8dth+NVMleLFkZ8R8E2K/aw=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "05c3f235dd1bf488756c0296cb9339c35e1b281a",
+        "rev": "809580702d1d3721142dd92c34ed11fcf4b79e74",
         "type": "github"
       },
       "original": {
@@ -889,17 +889,17 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1786460225,
-        "narHash": "sha256-fjiWr8VfskY4Vqqrqo3vS7XAKZF77ebOqD7UIVKptC8=",
+        "lastModified": 1786544738,
+        "narHash": "sha256-cY/F7/D6M5euTBdE91zqjaP8xN5oMnm6XSmn0whRiLI=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "2a9b4ebc680053c64e31f635b0b22d5e22564001",
+        "rev": "9795d602306ef68a97585909e8e79f92a389057b",
         "type": "github"
       },
       "original": {
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "2a9b4ebc680053c64e31f635b0b22d5e22564001",
+        "rev": "9795d602306ef68a97585909e8e79f92a389057b",
         "type": "github"
       }
     },
@@ -922,18 +922,18 @@
     "primeAgentSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1786446668,
-        "narHash": "sha256-cAqUMfsQr1KU8jAoXeO0hyLMHH9he25v9U2PBVkfTaU=",
-        "owner": "y0usaf",
-        "repo": "prime-agent",
-        "rev": "ae9678029b37cc7a9d7ac9a6d32d05b61a567ac3",
-        "type": "github"
+        "lastModified": 1786564684,
+        "narHash": "sha256-uO3X2BuP5RuAzjNfzJKssIleDoe9zgHVZCvVfbVU0GU=",
+        "ref": "main",
+        "rev": "0987c1ba7637cbcb99afe9efe1180b838a0aa958",
+        "revCount": 4497,
+        "type": "git",
+        "url": "https://github.com/PrimeIntellect-ai/prime-agent"
       },
       "original": {
-        "owner": "y0usaf",
-        "ref": "pa-prime-nix",
-        "repo": "prime-agent",
-        "type": "github"
+        "ref": "main",
+        "type": "git",
+        "url": "https://github.com/PrimeIntellect-ai/prime-agent"
       }
     },
     "primeBunSrc": {
