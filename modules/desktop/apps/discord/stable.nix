@@ -89,8 +89,7 @@ in {
         generator = lib.generators.toJSON {};
         value = {
           SKIP_HOST_UPDATE = true;
-          UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord";
-          NEW_UPDATE_ENDPOINT = "https://inject.shelter.uwu.network/vencord/";
+          SKIP_MODULE_UPDATE = true;
           MINIMIZE_TO_TRAY = stableCfg.minimizeToTray;
           OPEN_ON_STARTUP = false;
           DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
