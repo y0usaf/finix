@@ -33,8 +33,11 @@ _: {
     upscale.enable = true;
     phi.enable = true;
     prime-agent.enable = true;
-    reasonix.enable = true;
-    paseo.reasonix.enable = true;
+    reasonix = {
+      enable = true;
+      apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
+    };
+    paseo.reasonix.enable = false;
     # desktop y0usaf's primary group is `users` (no y0usaf group), same as the
     # server — without this finit can't fork the daemon
     paseo.group = "users";
