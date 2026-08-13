@@ -16,22 +16,22 @@ in {
         (
           if hasAttr "output" attrs
           then
-            concatStringsSep "\n" (mapAttrsToList (name: config: let
-              pos = config.position;
+            concatStringsSep "\n" (mapAttrsToList (name: out: let
+              pos = out.position;
             in ''              output "${name}" {
                       ${concatStringsSep "\n" (filterNonEmpty ([
                   (
-                    if hasAttr "position" config
+                    if hasAttr "position" out
                     then "\tposition x=${toString pos.x} y=${toString pos.y}"
                     else ""
                   )
                   (
-                    if hasAttr "mode" config
-                    then "\tmode \"${toString config.mode}\""
+                    if hasAttr "mode" out
+                    then "\tmode \"${toString out.mode}\""
                     else ""
                   )
                 ]
-                ++ (mapAttrsToList (key: value: "\t${key} \"${toString value}\"") (filterAttrs (k: _: k != "position" && k != "mode") config))))}
+                ++ (mapAttrsToList (key: value: "\t${key} \"${toString value}\"") (filterAttrs (k: _: k != "position" && k != "mode") out))))}
                       }'')
             attrs.output)
           else ""

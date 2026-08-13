@@ -21,7 +21,7 @@
 #
 # `imports` are shimmed recursively; non-path imports (flake input modules)
 # are dropped — finix wires its own (manzil.finixModules, etc.).
-{lib}: let
+{lib'}: let
   inherit (builtins) isAttrs isFunction isPath head tail;
 
   # Config-node combinators the module system produces, recursed through so
@@ -68,7 +68,7 @@
       else let
         k = head path;
       in
-        lib.optionalAttrs (c ? "${k}") {
+        lib'.optionalAttrs (c ? "${k}") {
           "${k}" = pickPath (tail path) c."${k}";
         });
 
@@ -143,17 +143,17 @@
             config = (filterNode (c:
               (lib.filterAttrs (n: _: builtins.elem n ["user" "manzil" "lib"]) c)
               // (lib.optionalAttrs (c ? environment) {
-                environment = (filterNode (c: let
-                  merged = lib.recursiveUpdate (lib.filterAttrs (n: _: builtins.elem n ["systemPackages" "etc" "variables" "shells" "binsh"]) c) (lib.optionalAttrs (c ? sessionVariables) {variables = c.sessionVariables;});
+                environment = (filterNode (env: let
+                  merged = lib.recursiveUpdate (lib.filterAttrs (n: _: builtins.elem n ["systemPackages" "etc" "variables" "shells" "binsh"]) env) (lib.optionalAttrs (env ? sessionVariables) {variables = env.sessionVariables;});
                 in
                   if merged ? systemPackages
-                  then merged // {systemPackages = builtins.filter (p: !(builtins.elem ((p: p.pname or (builtins.parseDrvName (p.name or "?")).name) p) ["networkmanager" "docker" "docker-compose"])) merged.systemPackages;}
+                  then merged // {systemPackages = builtins.filter (p: !(builtins.elem ((drv: drv.pname or (builtins.parseDrvName (drv.name or "?")).name) p) ["networkmanager" "docker" "docker-compose"])) merged.systemPackages;}
                   else merged))
                 c.environment;
               })
               // (lib.optionalAttrs (c ? fonts) {
-                fonts = (filterNode (c:
-                    lib.filterAttrs (n: _: builtins.elem n ["packages" "fontconfig"]) c))
+                fonts = (filterNode (fc:
+                    lib.filterAttrs (n: _: builtins.elem n ["packages" "fontconfig"]) fc))
                 c.fonts;
               })
               // (lib.optionalAttrs (c ? services) {services = pickPath ["udev" "packages"] c.services;})))

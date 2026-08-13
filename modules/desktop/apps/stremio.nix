@@ -9,7 +9,7 @@
   };
   config = lib.mkIf config.user.programs.stremio.enable {
     environment.systemPackages = [
-      (pkgs.rustPlatform.buildRustPackage (finalAttrs: {
+      (pkgs.rustPlatform.buildRustPackage (_finalAttrs: {
         pname = "stremio-linux-shell";
         version = "1.1.4-unstable-3826d3c";
 
