@@ -13,6 +13,7 @@
       (pkgs.stdenvNoCC.mkDerivation {
         pname = "agent-slack";
         version = "0.9.3";
+        nativeBuildInputs = [ pkgs.autoPatchelfHook ];
 
         src =
           pkgs.fetchurl {
