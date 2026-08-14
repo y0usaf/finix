@@ -30,6 +30,7 @@
     ../dev/kimi-code/package.nix
     ../dev/paseo/options.nix
     ../dev/paseo/service.nix
+    ../dev/skills/mapping.nix
   ];
   desktopNixosModules = map (p: shim (import p)) (builtins.filter (p:
       !(builtins.elem p walkedKnownExclusions)

@@ -1,3 +1,4 @@
+''
 ---
 name: ship
 description: >-
@@ -164,3 +165,4 @@ Report only useful facts:
 - Validation results
 - `nh os switch` result
 - Any intentionally uncommitted downstream or excluded source files
+''
