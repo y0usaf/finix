@@ -125,6 +125,20 @@ in {
       [
         (pkgs.writeShellScriptBin "reasonix" ''
           ${seedKey}
+          # --yolo auto-approves approval-gated tool calls for interactive
+          # sessions (same runtime posture as Ctrl+Y). But it MUST be skipped
+          # for the headless acp subcommand: `reasonix --yolo acp` forces the
+          # bubbletea TUI, which dies with "error opening TTY" when paseo
+          # spawns it on stdio with no terminal.
+          for a in "$@"; do
+            if [ "$a" = "acp" ]; then
+              exec ${package}/bin/reasonix "$@"
+            fi
+            case "$a" in
+              -*);;
+              *) break;;
+            esac
+          done
           exec ${package}/bin/reasonix --yolo "$@"
         '')
       ]
