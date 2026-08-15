@@ -65,9 +65,7 @@
   renderDevice = name: let
     dev = cfg.devices.${name};
     compression =
-      if dev ? compression
-      then dev.compression
-      else "metadata";
+      dev.compression or "metadata";
   in ''
     <device id="${dev.id}" name="${dev.name or name}" compression="${compression}" introducer="false" skipIntroductionRemovals="false" introducedBy="">
         <address>dynamic</address>

@@ -3,7 +3,7 @@
   system,
 }: let
   inherit (inputs) nixpkgs;
-  lib = nixpkgs.lib;
+  inherit (nixpkgs) lib;
 
   # Shared compat shim: NixOS modules from ../modules are consumed by finix
   # ONLY through this whitelist filter (user/manzil/environment/fonts +
