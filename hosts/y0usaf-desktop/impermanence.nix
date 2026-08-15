@@ -1,9 +1,13 @@
-# ALSO the finix system's persist allowlist: hosts/y0usaf-desktop/finix/*
+# Single persistence allowlist for y0usaf-desktop — one place to edit.
+#
+# Also the finix system's persist allowlist: hosts/y0usaf-desktop/finix/*
 # calls this function and replays these lists as plain bind mounts. Keep it
 # pure literals (import/++ only, no lib/pkgs/config) so both module universes
-# can read it. Entries shared with other hosts live in ../common/persist.nix.
-{config, ...}: let
-  common = import ../common/persist.nix;
+# can read it.
+#
+# Browser paths (firefox/librewolf/discord/vesktop) are persisted
+# unconditionally: a disabled app just leaves an empty dir on /persist.
+_: let
   gameSaves = [
     "dolphin-emu"
     "Cemu"
@@ -35,249 +39,251 @@
 in {
   environment.persistence."/persist" = {
     hideMounts = true;
-    directories =
-      common.systemDirectories
-      ++ [
-        # Root user state (agents, ssh)
-        {
-          directory = "/root";
-          mode = "0700";
-        }
+    directories = [
+      # System identity & NixOS state
+      "/var/lib/nixos"
+      "/var/lib/systemd/coredump"
+      "/var/log"
 
-        # Secure boot signing keys
-        "/var/lib/sbctl"
+      # SSH host keys
+      "/etc/ssh"
 
-        # Network
-        "/var/lib/bluetooth"
+      # Network
+      "/etc/NetworkManager/system-connections"
+      "/var/lib/NetworkManager"
+      "/var/lib/tailscale"
 
-        # Services
-        "/var/lib/docker"
-        "/var/lib/btrbk"
-        "/var/lib/hjem"
-        "/var/lib/bayt"
-      ];
-    files = common.systemFiles;
+      # Services
+      "/var/lib/manzil"
+
+      # Root user state (agents, ssh)
+      {
+        directory = "/root";
+        mode = "0700";
+      }
+
+      # Secure boot signing keys
+      "/var/lib/sbctl"
+
+      # Bluetooth pairing
+      "/var/lib/bluetooth"
+
+      # Docker engine state
+      "/var/lib/docker"
+
+      # Backup / automation
+      "/var/lib/btrbk"
+      "/var/lib/hjem"
+      "/var/lib/bayt"
+    ];
+    files = [
+      "/etc/machine-id"
+    ];
     users.y0usaf = {
-      directories =
-        common.userDirectories
-        ++ (
-          if config.user.programs.firefox.enable
-          # Firefox 147+: XDG dirs (~/.config/firefox) unless ~/.mozilla/firefox
-          # exists or MOZ_LEGACY_HOME=1. Empty ~/.mozilla alone is not legacy.
-          then [".config/firefox"]
-          else []
-        )
-        ++ (
-          if config.user.programs.librewolf.enable
-          # LibreWolf 152 reads the legacy ~/.librewolf only (no XDG support),
-          # so persist that. ~/.cache/librewolf stays ephemeral.
-          then [".librewolf"]
-          else []
-        )
-        ++ (
-          if config.user.programs.discord.stable.enable
-          then [".config/discord"]
-          else []
-        )
-        ++ (
-          if config.user.programs.discord.vesktop.enable
-          then [".config/vesktop" ".config/Vencord"]
-          else []
-        )
-        ++ ([
-            # NOTE: DCIM, Music, Pictures, .local/share/Steam are dedicated
-            # btrfs subvols mounted on top of /home — NOT listed here.
-            # @config/@local were dissolved into the granular allowlists below;
-            # anything not listed is ephemeral (recoverable from
-            # /btrfs/_premigration/* snapshots until those are deleted).
+      directories = [
+        # Data (dev excluded — real @dev subvol, fileSystems entry)
+        "Documents"
+        "Tokens"
+        "finix"
+        "Downloads"
+        "Desktop"
+        "Videos"
+        "Games"
+        "cu-workbench"
+        "inscend"
 
-            # Data
-            "Downloads"
-            "Desktop"
-            "Videos"
-            "Games"
-            "cu-workbench"
-            "inscend"
+        # Identity / credentials
+        ".ssh"
+        ".azure" # azure-cli msal token cache (~/.azure/msal_token_cache.json)
+        ".pki"
+        ".aws"
+        ".mcp-auth"
 
-            # Identity / credentials
-            ".pki"
-            ".aws"
-            ".mcp-auth"
+        # AI / dev tooling state — relocated out of ~ via env vars in
+        # modules/core/user/session/xdg.nix (CLAUDE_CONFIG_DIR, CODEX_HOME,
+        # KIMI_CODE_HOME). ~/.claude.json lives inside the claude dir once
+        # CLAUDE_CONFIG_DIR is set. pi uses its own default ~/.pi/agent.
+        # claude: subdirs only — versions/ (218M binary cache) regenerates on next app
+        # start; settings.json is a manzil symlink (regenerates).
+        ".local/share/claude/backups"
+        ".local/share/claude/cache"
+        ".local/share/claude/plugins"
+        ".local/share/claude/projects"
+        ".local/share/claude/sessions"
+        ".local/share/claude/tasks"
+        ".local/share/claude/teams"
+        ".local/share/claude/.claude"
+        ".local/share/codex"
+        ".pi" # pi agent dir (pi's native default; no env var indirection)
+        ".prime" # prime agent dir (agents, sessions, daemon state, logs)
+        ".hermes" # desktop app HERMES_HOME (config, sessions, skills dirs)
+        ".crush"
+        ".cookunity"
+        ".phi"
+        ".paseo" # paseo daemon state (config.json, phone pairing, sessions)
+        ".slack"
+        ".supabase"
+        ".n8n-mcp"
+        ".obsidian"
 
-            # AI / dev tooling state
-            ".claude-code-router"
-            ".hermes" # desktop app HERMES_HOME (config, sessions, skills dirs)
-            ".crush"
-            ".cookunity"
-            ".phi"
-            ".paseo" # paseo daemon state (config.json, phone pairing, sessions)
+        # Browsers — persisted unconditionally (empty dir when disabled)
+        # Firefox 147+: XDG dirs (~/.config/firefox) unless ~/.mozilla/firefox
+        # exists or MOZ_LEGACY_HOME=1. Empty ~/.mozilla alone is not legacy.
+        ".config/firefox"
+        # LibreWolf 152 reads the legacy ~/.librewolf only (no XDG support).
+        ".librewolf"
+        ".config/discord"
+        ".config/vesktop"
+        ".config/Vencord"
 
-            ".slack"
-            ".supabase"
-            ".n8n-mcp"
-            ".obsidian"
+        # Gaming / apps
+        ".steam"
+        ".SteamCloud"
+        ".stremio-server"
+        ".slskd"
 
-            # Gaming / apps
-            ".steam"
-            ".SteamCloud"
+        ### ~/.config — mutable app state only. Nix/manzil-generated configs
+        ### (bash rc, niri, foot, wallust, gtk, mpv, git, gh config,
+        ### npm/bun/docker/python rc, pi, mangohud, ...) regenerate on switch.
 
-            ".stremio-server"
-            ".slskd"
+        # Credentials / identity
+        ".config/gh" # hosts.yml oauth
+        ".config/gws" # google oauth creds (client_secret, .encryption_key)
+        ".config/age"
+        ".config/aws"
+        ".config/gcloud"
 
-            ### ~/.config — mutable app state only. Nix/manzil-generated configs
-            ### (bash rc, niri, foot, wallust, gtk, mpv, git, gh config,
-            ### npm/bun/docker/python rc, pi, mangohud, ...) regenerate on switch.
+        # Slack is persisted selectively — auth/session storage only, caches
+        # (Cache, Code Cache, GPUCache, Service Worker, Crashpad, logs, sentry)
+        # stay ephemeral.
+        ".config/Slack/Local Storage"
+        ".config/Slack/Session Storage"
+        ".config/Slack/IndexedDB"
+        ".config/Slack/storage"
 
-            # Credentials / identity
-            ".config/age"
-            ".config/aws"
-            ".config/gcloud"
+        # Sync (device keys + index — critical)
+        ".config/syncthing"
 
-            # Slack is persisted selectively — auth/session storage only, caches
-            # (Cache, Code Cache, GPUCache, Service Worker, Crashpad, logs, sentry)
-            # stay ephemeral.
-            ".config/Slack/Local Storage"
-            ".config/Slack/Session Storage"
-            ".config/Slack/IndexedDB"
-            ".config/Slack/storage"
+        # AI / editors / IDEs
+        ".config/AionUi"
+        ".config/Claude"
+        ".config/Hermes" # Electron userData — remote-gateway session (hermes desktop)
+        ".config/Codex"
+        ".config/opencode"
+        ".config/manicode"
+        ".config/agent-harness"
+        ".config/pi-harness"
+        ".config/crush"
+        ".config/phi"
 
-            # Sync (device keys + index — critical)
-            ".config/syncthing"
+        # Desktop apps
+        ".config/obsidian"
+        ".config/obs-studio"
+        ".config/qBittorrent"
+        ".config/stoat-desktop"
+        ".config/slskd"
+        ".config/epy"
+        ".config/cmus" # library/playlists
+        ".config/GitHub Desktop"
 
-            # AI / editors / IDEs
-            ".config/AionUi"
+        # Work
+        ".config/gws-inscend"
+        ".config/Frame"
+        ".config/intent"
+        ".config/herdr"
 
-            ".config/Claude"
-            ".config/Hermes" # Electron userData — remote-gateway session (hermes desktop)
-            ".config/Codex"
-            ".config/opencode"
-            ".config/manicode"
-            ".config/agent-harness"
-            ".config/pi-harness"
-            ".config/crush"
-            ".config/phi"
+        # Misc
+        ".config/snowflake"
+        ".config/camset"
 
-            # Desktop apps
-            ".config/obsidian"
-            ".config/obs-studio"
+        # Gaming
+        ".config/Cemu"
+        ".config/unity3d" # game prefs
+        ".config/bolt-launcher"
 
-            ".config/qBittorrent"
-            ".config/stoat-desktop"
-            ".config/slskd"
+        # Misc state
+        ".config/dconf"
+        ".config/nix" # possible access-tokens
+        ".config/ekko" # config.toml + extensions (app-owned)
 
-            ".config/epy"
-            ".config/cmus" # library/playlists
+        # ekko cache: resurrection manifests MUST survive reboots for `ekko attach`;
+        # daemon logs ride along. Persist the whole dir (small).
+        ".cache/ekko"
 
-            ".config/GitHub Desktop"
+        ### ~/.local/share — real data/saves. Caches (go, gradle, pnpm, uv,
+        ### NuGet, yarn, pyenv, virtualenv, Trash, ...) are ephemeral.
 
-            # Work
-            ".config/gws-inscend"
+        # Keys / identity
+        ".local/share/gnupg"
+        ".local/share/keyrings"
+        ".local/share/pki"
 
-            ".config/Frame"
-            ".config/intent"
-            ".config/herdr"
+        # Big data (flagged: prune candidates, but keep)
+        ".local/share/PrismLauncher" # 55G — minecraft worlds, irreplaceable
+        ".local/share/bun" # globals only (supabase/vercel/...); install/cache purged, regenerates
+        ".local/share/cargo"
+        ".local/share/rustup"
+        ".local/share/opencode"
+        ".local/share/phi"
+      ]
+      ++ builtins.map (n: ".local/share/${n}") gameSaves
+      ++ [
+        # Emulation / gaming saves appended above via gameSaves
 
-            ".config/snowflake"
-            ".config/camset"
+        # Apps
+        ".local/share/stremio"
+        ".local/share/stremio-linux-shell" # stremio v1.1.4+ WebKitGTK profile (login session/site data)
+        ".local/share/slskd"
+        ".local/share/Vial"
 
-            # Gaming
-            ".config/Cemu"
-            ".config/unity3d" # game prefs
-            ".config/bolt-launcher"
+        # adb keypair kept; sdk cache + debug.keystore stay ephemeral
+        ".local/share/android/.android"
+        ".local/share/mcp-trader"
+        ".local/share/music-get"
+        ".local/share/polybot"
+        ".local/share/rtk"
+        ".local/share/vibe-kanban"
+        ".local/share/superfile"
+        ".local/share/crush"
+        ".local/share/ai.opencode.desktop"
+        ".local/share/app.codeg"
+        ".local/share/com.jean.desktop"
+        ".local/share/com.panes.app"
+        ".local/share/com.vercel.cli"
+        ".local/share/com.vercel.token"
+        ".local/share/syncthing"
 
-            # Misc state
-            ".config/dconf"
-            ".config/nix" # possible access-tokens
-            ".config/ekko" # config.toml + extensions (app-owned)
+        ### ~/.local/state — histories & app state
+        ".local/state/nix"
+        ".local/state/bash" # shell history
+        ".local/state/rush" # rush history.sqlite (modules/core/user/session/xdg.nix)
+        ".local/state/nvim" # shada/undo
+        ".local/state/pi-harness"
+        ".local/state/syncthing" # index
+        ".local/state/wireplumber" # audio device volumes
+        ".local/state/music-get"
+        ".local/state/superfile"
 
-            # ekko cache: resurrection manifests MUST survive reboots for `ekko attach`;
-            # daemon logs ride along. Persist the whole dir (small).
-            ".cache/ekko"
+        # Caches worth keeping
+        ".cache/nix"
+      ];
+      files = [
+        ".local/share/claude/.claude.json"
+        ".local/share/claude/history.jsonl"
 
-            ### ~/.local/share — real data/saves. Caches (go, gradle, pnpm, uv,
-            ### NuGet, yarn, pyenv, virtualenv, Trash, ...) are ephemeral.
+        # adb keypair kept; sdk cache + debug.keystore stay ephemeral
+        ".local/share/android/adbkey"
+        ".local/share/android/adbkey.pub"
 
-            # Keys / identity
-            ".local/share/gnupg"
-            ".local/share/keyrings"
-            ".local/share/pki"
+        ".config/Slack/Local State"
+        ".config/Slack/Preferences"
+        ".config/Slack/Cookies"
+        ".config/Slack/Cookies-journal"
+        ".config/Slack/Network Persistent State"
+        ".config/Slack/TransportSecurity"
 
-            # Big data (flagged: prune candidates, but keep)
-            ".local/share/PrismLauncher" # 55G — minecraft worlds, irreplaceable
-            ".local/share/bun" # globals only (supabase/vercel/...); install/cache purged, regenerates
-
-            ".local/share/cargo"
-            ".local/share/rustup"
-            ".local/share/opencode"
-
-            ".local/share/phi"
-
-            # Emulation / gaming (saves!)
-          ]
-          ++ builtins.map (n: ".local/share/${n}") gameSaves
-          ++ [
-            # Apps
-
-            ".local/share/stremio"
-            ".local/share/stremio-linux-shell" # stremio v1.1.4+ WebKitGTK profile (login session/site data)
-            ".local/share/slskd"
-
-            ".local/share/Vial"
-
-            # adb keypair kept; sdk cache + debug.keystore stay ephemeral
-            ".local/share/android/.android"
-
-            ".local/share/mcp-trader"
-            ".local/share/music-get"
-            ".local/share/polybot"
-            ".local/share/rtk"
-            ".local/share/tirith"
-            ".local/share/vibe-kanban"
-
-            ".local/share/superfile"
-
-            ".local/share/crush"
-            # .local/share/claude comes from hosts/common/persist.nix
-
-            ".local/share/ai.opencode.desktop"
-            ".local/share/app.codeg"
-            ".local/share/jean"
-            ".local/share/com.jean.desktop"
-
-            ".local/share/com.panes.app"
-
-            ".local/share/com.vercel.cli"
-            ".local/share/com.vercel.token"
-
-            ".local/share/syncthing"
-
-            ### ~/.local/state — histories & app state
-            ".local/state/bash" # shell history
-            ".local/state/zsh" # zsh HISTFILE (modules/core/user/session/xdg.nix)
-            ".local/state/nvim" # shada/undo
-            ".local/state/pi-harness"
-            ".local/state/syncthing" # index
-            ".local/state/wireplumber" # audio device volumes
-
-            ".local/state/music-get"
-            ".local/state/superfile"
-          ]);
-      files =
-        common.userFiles
-        ++ [
-          # adb keypair kept; sdk cache + debug.keystore stay ephemeral
-          ".local/share/android/adbkey"
-          ".local/share/android/adbkey.pub"
-
-          ".config/Slack/Local State"
-          ".config/Slack/Preferences"
-          ".config/Slack/Cookies"
-          ".config/Slack/Cookies-journal"
-          ".config/Slack/Network Persistent State"
-          ".config/Slack/TransportSecurity"
-
-          ".SNOW"
-        ];
+        ".SNOW"
+      ];
     };
   };
 }
