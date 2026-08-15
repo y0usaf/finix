@@ -19,21 +19,5 @@
       pkgs.pulsemixer
       pkgs.xdg-utils
     ];
-
-    fonts.enableDefaultPackages = lib.mkDefault true;
-
-    services = {
-      speechd.enable = lib.mkDefault true;
-      xserver.desktopManager.runXdgAutostartIfNone = lib.mkDefault true;
-    };
-
-    hardware.graphics.enable = lib.mkDefault true;
-
-    xdg = {
-      autostart.enable = true;
-      menus.enable = true;
-      mime.enable = true;
-      icons.enable = true;
-    };
   };
 }

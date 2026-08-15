@@ -8,9 +8,10 @@
     enable = lib.mkEnableOption "docker development environment";
   };
   config = lib.mkIf config.user.dev.docker.enable {
+    # docker + docker-compose are filtered out by finix's compat shim (docker
+    # is deployed via podman in hosts); docker-buildx and the credential
+    # helpers survive the filter.
     environment.systemPackages = [
-      pkgs.docker
-      pkgs.docker-compose
       pkgs.docker-buildx
       pkgs.docker-credential-helpers
     ];

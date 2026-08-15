@@ -96,32 +96,6 @@ in {
       })
     ];
 
-    systemd.user.services.wallust-default = {
-      description = "Apply default wallust theme";
-      wantedBy = ["graphical-session-pre.target"];
-      before = ["graphical-session.target"];
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = pkgs.writeShellScript "wallust-default" (({
-            defaultTheme,
-            wallustBin,
-          }: ''
-            # Client config dirs that must exist before first launch (wallust creates its own target parents)
-            ${lib.concatMapStringsSep "\n" (dir: "mkdir -p ${dir}") wallustCfg.startupDirs}
-
-            ${wallustBin} ${
-              if builtins.hasAttr defaultTheme wallustCfg.colorschemes
-              then "cs ~/.config/wallust/colorschemes/${defaultTheme}.json"
-              else "theme ${defaultTheme}"
-            }
-          '') {
-            wallustBin = "${wallustPkg}/bin/wallust";
-            inherit (wallustCfg) defaultTheme;
-          });
-        RemainAfterExit = true;
-      };
-    };
-
     manzil.users."${config.user.name}" = {
       files =
         (lib.mapAttrs' (name: scheme:

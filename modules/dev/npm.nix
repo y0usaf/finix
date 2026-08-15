@@ -19,12 +19,5 @@
         store-dir=${config.user.homeDirectory}/.cache/pnpm/store
       '';
     };
-    systemd.tmpfiles.rules = [
-      "d ${config.user.homeDirectory}/.local/share/npm 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${config.user.homeDirectory}/.cache/npm 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${config.user.homeDirectory}/.config/npm/config 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${config.user.homeDirectory}/.cache/pnpm/store 0755 ${config.user.name} ${config.user.name} - -"
-      "d /run/user/%i/npm 0755 ${config.user.name} ${config.user.name} - -"
-    ];
   };
 }
