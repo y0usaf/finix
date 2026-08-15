@@ -36,7 +36,7 @@ in {
     environment = {
       systemPackages = cursorPackage.cursorPackages or [cursorPackage];
       # Single owner for XCURSOR_*/HYPRCURSOR_* (gtk/config.nix owns GDK_DPI_SCALE).
-      sessionVariables = cursorSessionVariables;
+      variables = cursorSessionVariables;
     };
 
     manzil.users."${user.name}" = {

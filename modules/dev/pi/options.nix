@@ -1,16 +1,9 @@
 {
-  config,
   lib,
   ...
 }: let
-  cfg = config.user.dev.pi;
-
   inherit (lib) types;
   nullOrStr = types.nullOr types.str;
-
-  piReadmePath = cfg.readmePath;
-  piDocsPath = cfg.docsPath;
-  piExamplesPath = cfg.examplesPath;
 
   mkInternalStr = description:
     lib.mkOption {
@@ -129,16 +122,4 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = builtins.all (path: path != "") [
-          piReadmePath
-          piDocsPath
-          piExamplesPath
-        ];
-        message = "user.dev.pi requires modules/dev/pi/pi-flake.nix to provide pi documentation paths.";
-      }
-    ];
-  };
 }

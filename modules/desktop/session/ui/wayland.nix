@@ -22,7 +22,7 @@ in {
       # them — no per-shell rc duplication. MOZ_* live here rather than in the
       # browser modules: firefox.nix and librewolf.nix both set the same two
       # keys, which collides on merge, and "enable Wayland" is a Wayland fact.
-      sessionVariables = {
+      variables = {
         WLR_NO_HARDWARE_CURSORS = "1";
         NIXOS_OZONE_WL = "1";
         QT_QPA_PLATFORM = "wayland";

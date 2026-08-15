@@ -15,10 +15,5 @@
       pkgs.openssl
       pkgs.gcc
     ];
-
-    systemd.tmpfiles.rules = [
-      "d ${config.user.homeDirectory}/.local/share/cargo 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${config.user.homeDirectory}/.local/share/rustup 0755 ${config.user.name} ${config.user.name} - -"
-    ];
   };
 }

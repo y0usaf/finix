@@ -10,14 +10,6 @@
     backgroundRemoval.enable = lib.mkEnableOption "OBS background removal plugin";
   };
   config = lib.mkIf config.user.programs.obs.enable {
-    boot = {
-      kernelModules = ["v4l2loopback"];
-      extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
-      extraModprobeConfig = ''
-        options v4l2loopback exclusive_caps=1
-      '';
-    };
-
     environment.systemPackages = [
       (pkgs.symlinkJoin {
         name = "obs-studio-with-cuda";
