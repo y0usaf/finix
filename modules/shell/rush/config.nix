@@ -5,6 +5,13 @@
   ...
 }: let
   inherit (config.user) shell;
+
+  # Wallust login apply: the desktop always imports the wallust module
+  # (modules/desktop/session/theme/wallust/wallust.nix), so its options and
+  # package are available here. The server uses rush but <em>not</em> this
+  # module (modules/shell is desktop-walk only), so no cross-host risk.
+  wallustCfg = config.user.appearance.wallust;
+  wallustBin = "${pkgs.wallust}/bin/wallust";
 in {
   options.user.shell.rush = {
     enable = lib.mkEnableOption "rush shell configuration";
@@ -36,6 +43,15 @@ in {
       # control chars.
       ".config/rush/profile.rush".text = ''
         . /etc/profile
+
+        # Wallust: apply the default colorscheme once at login (profile.rush
+        # runs only for login shells, so this never fires per interactive
+        # shell). Guarded on the binary existing so the server (which also
+        # uses rush but has no wallust) is untouched.
+        if command -v wallust >/dev/null 2>&1; then
+          ${lib.concatMapStringsSep "\n" (dir: "mkdir -p \"$HOME${lib.removePrefix "~" dir}\"") wallustCfg.startupDirs}
+          ${wallustBin} cs "$HOME/.config/wallust/colorschemes/${wallustCfg.defaultTheme}.json"
+        fi
 
         for file_path in "$HOME/Tokens"/*; do
           [ -f "$file_path" ] || continue

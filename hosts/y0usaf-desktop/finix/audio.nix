@@ -3,8 +3,9 @@
 # server's syncthing service set the user+environment pattern).
 # Port of modules/desktop/session/system/audio.nix (NixOS universe):
 # same RNNoise mono source, same pulse/alsa compat surface. RT priority
-# (Nice -20 / SCHED_RR 99 on NixOS) is NOT ported yet — needs rtkit or
-# finit rlimit surgery; plain scheduling is fine for first sound.
+# (Nice -20 / SCHED_RR 99 on NixOS): nice -20 via the pipewireRt wrapper
+# below; SCHED_RR 99 is negotiated at runtime by pipewire's module-rt with
+# the rtkit-daemon that parity.nix enables (services.rtkit.enable).
 {
   config,
   lib,
@@ -33,6 +34,17 @@
     done
     echo "wait-pipewire-sock: pipewire-0 never appeared" >&2
     exit 1
+  '';
+
+  # RT priority port: the NixOS systemd unit ran pipewire at Nice=-20 and let
+  # module-rt negotiate SCHED_RR 99 with rtkit-daemon. rtkit is enabled in
+  # parity.nix, so module-rt does the realtime scheduling; this wrapper applies
+  # the nice -20 (systemd's other half) before exec'ing pipewire.
+  pipewireRt = pkgs.writeShellScript "pipewire-rt" ''
+    export PATH=${lib.makeBinPath [pkgs.coreutils]}
+    # Matching NixOS's Nice=-20. untouched on failure is fine — module-rt's
+    # rtkit path is the authoritative realtime grant.
+    nice -n -20 "$@"
   '';
 in {
   # /dev/snd is root:audio without logind ACLs.
@@ -97,7 +109,7 @@ in {
         done
         echo "wait-runtime-dir: ${runtimeDir} never appeared" >&2
         exit 1
-      ''} ${pkgs.pipewire}/bin/pipewire";
+      ''} ${pipewireRt} ${pkgs.pipewire}/bin/pipewire";
       log = true;
     };
     wireplumber = {

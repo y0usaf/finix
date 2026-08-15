@@ -52,6 +52,18 @@ in {
     # root own the container-manager name. Container itself is started
     # manually (sudo waydroid container start), not as a finit service.
     dbus.packages = [pkgs.waydroid-nftables];
+
+    # ntsync: Wine's sync-on-NT-semaphores driver (reduces esync/fsync
+    # overhead for games under the bundled Wine/Proton). Rule shipped as a
+    # package (portable NixOS + finix) via services.udev.packages, never
+    # extraRules — parity with upstream finix uinput rules.
+    udev.packages = [
+      (pkgs.writeTextFile {
+        name = "ntsync-udev";
+        destination = "/etc/udev/rules.d/70-ntsync.rules";
+        text = ''KERNEL=="ntsync", MODE="0644"'';
+      })
+    ];
   };
 
   # ddcutil monitor control: finix's i2c module ships the rules; NixOS-side
@@ -69,7 +81,7 @@ in {
   # rescue` path stays valid from the other side).
   # uinput: asryx autofill (dotool types the transcript; udev rule granting
   # the input group access rides the packages-bridge as extra-udev-rules).
-  boot.kernelModules = ["tun" "v4l2loopback" "zram" "uinput"];
+  boot.kernelModules = ["tun" "v4l2loopback" "zram" "uinput" "ntsync"];
   finit = {
     services.tailscaled = {
       description = "tailscale mesh VPN daemon";
@@ -159,7 +171,14 @@ in {
   users.groups.gamemode = {};
   # input: dotool opens /dev/uinput (asryx autofill); rule 99-local.rules
   # (bridged) grants the input group rw on the uinput node.
-  users.users.y0usaf.extraGroups = ["gamemode" "input"];
+  # bluetooth (bluetoothd), lp (CUPS/printing), dialout (serial/tty devices)
+  # — restored from the deleted modules/desktop/user-groups.nix.
+  users.groups = {
+    bluetooth = {};
+    lp = {};
+    dialout = {};
+  };
+  users.users.y0usaf.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
 
   # ── X11 socket dir + /tmp mode: systemd-tmpfiles owned both on NixOS.
   # Xwayland (hence xwayland-satellite, hence Steam) refuses to create
