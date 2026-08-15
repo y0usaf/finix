@@ -44,7 +44,7 @@ in {
         gcc
         binutils
       ];
-      sessionVariables = {
+      variables = {
         PYTHONSTARTUP = "${homeDirectory}/.config/python/pythonrc";
         PYTHON_HISTORY = "${homeDirectory}/.local/state/python_history";
         PYTHONUSERBASE = pythonUserBase;
@@ -102,11 +102,5 @@ in {
         fi
       }
     '';
-    systemd.tmpfiles.rules = [
-      "d ${homeDirectory}/.local/share/python 0755 ${userName} ${userName} - -"
-      "d ${homeDirectory}/.cache/pip 0755 ${userName} ${userName} - -"
-      "d ${homeDirectory}/.local/share/venvs 0755 ${userName} ${userName} - -"
-      "d ${homeDirectory}/.config/python 0755 ${userName} ${userName} - -"
-    ];
   };
 }

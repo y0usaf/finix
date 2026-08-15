@@ -34,7 +34,7 @@ in {
       ];
       # GTK owns GDK_DPI_SCALE; cursor.nix owns XCURSOR_SIZE (one owner per key,
       # or the sessionVariables merge conflicts).
-      sessionVariables.GDK_DPI_SCALE = toString gtkScale;
+      variables.GDK_DPI_SCALE = toString gtkScale;
     };
     manzil.users."${config.user.name}" = {
       files = {

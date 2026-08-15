@@ -114,13 +114,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = cfg.apiKeyFile != "";
-        message = "user.dev.reasonix.apiKeyFile must point at a Vercel AI Gateway key file.";
-      }
-    ];
-
     environment.systemPackages =
       [
         (pkgs.writeShellScriptBin "reasonix" ''

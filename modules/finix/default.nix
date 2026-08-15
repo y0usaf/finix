@@ -5,23 +5,19 @@
   inherit (inputs) nixpkgs;
   inherit (nixpkgs) lib;
 
-  # Shared compat shim: NixOS modules from ../modules are consumed by finix
-  # ONLY through this whitelist filter (user/manzil/environment/fonts +
-  # services.udev.packages). Aspect/transpose dispatch was removed 2026-08 —
-  # hosts import what they need explicitly, like a normal NixOS config.
-  shim = import ./compat-import.nix {lib' = lib;};
-
   # finix-native modules (no shim) cannot be walked; the desktop packet
   # filter is one and is imported directly below.
   firewall = import ../core/firewall.nix;
 
-  # Desktop: bulk-import every NixOS module in the shared tree (shimmed) +
-  # the desktop host dir's legacy files. Exclusions:
+  # Desktop: bulk-import every module in the shared tree (already finix-
+  # consumed; the fleet stripped NixOS-only config) + the desktop host dir's
+  # legacy files. Exclusions:
   #   - ../core/firewall.nix  (finix-native nftables, imported directly)
   #   - ../core/flake-modules.nix  (NixOS-only input modules)
   #   - ../dev/kimi-code/package.nix (package function, not a module)
-  #   - ../dev/paseo/options.nix + service.nix (finix-native finit service, no shim)
-  #     — the shim whitelist (user/manzil/environment/fonts) would DROP finit
+  #   - ../dev/paseo/options.nix + service.nix (finix-native finit service)
+  #   - **/SKILL.nix data files and mapping.nix (non-module data)
+  #   - hosts/…/impermanence.nix + hardware-configuration.nix (NixOS-only)
   #   - any path containing /finix/  (already finix-native)
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
   walkedKnownExclusions = [
@@ -31,8 +27,19 @@
     ../dev/paseo/options.nix
     ../dev/paseo/service.nix
     ../dev/skills/mapping.nix
+    # SKILL.nix files are bare-string data (the shim dropped them as
+    # non-function modules); their content is consumed via direct import in
+    # ship.nix / codebase-atlas.nix, so exclude them from the walk.
+    ../dev/skills/codebase-atlas/SKILL.nix
+    ../dev/skills/ship/SKILL.nix
+    # environment.persistence is NixOS-only; this file's persist list is
+    # replayed as plain bind mounts by hosts/y0usaf-desktop/finix/*.
+    ../../hosts/y0usaf-desktop/impermanence.nix
+    # NixOS-only boot/fileSystems/zram/network config; finix re-implements it
+    # in boot.nix / parity.nix / persistent.nix.
+    ../../hosts/y0usaf-desktop/hardware-configuration.nix
   ];
-  desktopNixosModules = map (p: shim (import p)) (builtins.filter (p:
+  desktopNixosModules = map import (builtins.filter (p:
       !(builtins.elem p walkedKnownExclusions)
       && !(lib.hasInfix "/finix/" (toString p)))
     (recursivelyImport [
@@ -78,23 +85,22 @@
       inputs.manzil.finixModules.default
       # rewrite every entry every switch (watcher invalidation)
       {manzil.forceByDefault = true;}
-      # Shared NixOS modules the server needs, imported explicitly, in the
-      # same order the old recursive walk produced them (core/user-config,
-      # then dev/claude-code, dev/paseo, then tools/git) so the server
-      # closure is unchanged. user-config + git are shimmed; git is enabled
-      # here because the server has no tools.nix (desktop sets it in
-      # hosts/y0usaf-desktop/tools.nix; idempotent).
-      (shim (import ../core/user/user-config.nix))
-      # claude-code module + settings (NOT aspect-shaped; shimmed NixOS modules)
-      (shim (import ../dev/claude-code/claude-code.nix))
-      (shim (import ../dev/claude-code/settings.nix))
-      # paseo daemon options + finit service (finix-native, no shim). The
-      # server's paseo.nix above enables it; the desktop imports the same two
-      # files explicitly in desktopPersistent (the recursive walk would shim
-      # them and the compat shim drops finit — see walkedKnownExclusions).
+      # Shared modules the server needs, imported explicitly, in the same
+      # order the old recursive walk produced them (core/user-config, then
+      # dev/claude-code, dev/paseo, then tools/git) so the server closure is
+      # unchanged. user-config / claude-code / git are finix-consumed only;
+      # git is enabled here because the server has no tools.nix (desktop
+      # sets it in hosts/y0usaf-desktop/tools.nix; idempotent).
+      (import ../core/user/user-config.nix)
+      # claude-code module + settings (finix-consumed)
+      (import ../dev/claude-code/claude-code.nix)
+      (import ../dev/claude-code/settings.nix)
+      # paseo daemon options + finit service (finix-native). The server's
+      # paseo.nix above enables it; the desktop imports the same two files
+      # explicitly in desktopPersistent (the recursive walk excludes them).
       (import ../dev/paseo/options.nix)
       (import ../dev/paseo/service.nix)
-      (shim (import ../tools/git.nix))
+      (import ../tools/git.nix)
       {user.tools.git.enable = true;}
     ]
   );
@@ -115,8 +121,8 @@
       # rewrite every entry every switch (watcher invalidation)
       {manzil.forceByDefault = true;}
       firewall
-      # paseo daemon options + finit service (finix-native, no shim; same
-      # pattern as serverPersistent). Declares user.dev.paseo, gated on
+      # paseo daemon options + finit service (finix-native; same pattern as
+      # serverPersistent). Declares user.dev.paseo, gated on
       # enable, which hosts/y0usaf-desktop/dev.nix sets.
       (import ../dev/paseo/options.nix)
       (import ../dev/paseo/service.nix)

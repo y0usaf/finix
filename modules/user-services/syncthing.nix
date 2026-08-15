@@ -261,28 +261,5 @@ in {
 
   config = lib.mkIf config.user.services.syncthing.enable {
     user.services.syncthing.seedConfigFile = seedConfigXml;
-
-    # NixOS-universe declaration (dropped by finix compat-import whitelist,
-    # which only keeps user.*/environment/fonts/services.udev.packages). Kept
-    # for documentation/parity with the historical NixOS bridge.
-    services.syncthing = {
-      enable = true;
-      inherit (config.user.services.syncthing) user;
-      dataDir = config.user.homeDirectory;
-      configDir = "${config.user.homeDirectory}/.config/syncthing";
-      settings = {
-        gui.address = [
-          "127.0.0.1:8384"
-          "localhost:8384"
-          "syncthing-desktop:8384"
-          "syncthing-server:8384"
-        ];
-        inherit (config.user.services.syncthing) devices;
-        folders =
-          if config.user.services.syncthing.enabledFolders == null
-          then config.user.services.syncthing.folders
-          else lib.getAttrs config.user.services.syncthing.enabledFolders config.user.services.syncthing.folders;
-      };
-    };
   };
 }

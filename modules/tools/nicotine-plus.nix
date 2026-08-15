@@ -11,9 +11,5 @@
     environment.systemPackages = [
       pkgs.nicotine-plus
     ];
-    networking.firewall = {
-      allowedTCPPorts = [2234];
-      allowedUDPPorts = [2234];
-    };
   };
 }

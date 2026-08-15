@@ -194,7 +194,6 @@ in {
     # (modules/desktop/user-groups.nix). Rules go through
     # services.udev.packages (portable: NixOS + finix), never extraRules
     # (NixOS-only — the finix compat shim drops it).
-    boot.kernelModules = lib.mkIf cfg.autofill ["uinput"];
     services.udev.packages = lib.optionals cfg.autofill [
       (pkgs.writeTextFile {
         name = "asryx-uinput-rules";
@@ -239,15 +238,5 @@ in {
         release = function() tomoe.spawn("asryx") end,
       }, "Push-to-talk speech-to-text")
     '';
-    # Boot-time page-cache warm (NixOS hosts). The finix desktop wires its
-    # own finit task in hosts/y0usaf-desktop/finix/parity.nix off modelPath/vadPath.
-    systemd.services.asryx-warm = lib.mkIf cfg.warm {
-      description = "Warm asryx whisper model into page cache";
-      wantedBy = ["multi-user.target"];
-      serviceConfig.Type = "oneshot";
-      script = ''
-        ${pkgs.coreutils}/bin/cat ${cfg.modelPath} ${cfg.vadPath} > /dev/null
-      '';
-    };
   };
 }

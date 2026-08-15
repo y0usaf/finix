@@ -1,11 +1,9 @@
-# Shared user options + NixOS-side user/sudo config. Imported by both hosts:
-# desktop via the recursive walk (shimmed), server explicitly (shimmed). The
-# finix-native side of user setup lives in hosts/*/finix/ (compat-import drops
-# users.*/security.*, so only the `user.*` options survive here on finix).
+# Shared user options. The NixOS-side assertions/users.users/security.sudo
+# config was dropped by the compat shim (only the `user.*` options survive);
+# finix sets its own copy of the shell/user setup in modules/finix/common.nix.
 {
   config,
   lib,
-  pkgs,
   ...
 }: {
   options = {
@@ -22,42 +20,5 @@
         description = "Home directory path for the user";
       };
     };
-  };
-
-  config = {
-    assertions = [
-      {
-        assertion = config.user.name != "";
-        message = "user.name must be set to a non-empty string";
-      }
-      {
-        assertion = lib.hasPrefix "/" (toString config.user.homeDirectory);
-        message = "user.homeDirectory must be an absolute path";
-      }
-    ];
-
-    users.users."${config.user.name}" = {
-      isNormalUser = true;
-      # rush is the only interactive shell module (modules/shell/rush). finix is
-      # the live system on both hosts and sets its own copy of this in
-      # modules/finix/common.nix (compat-import drops users.*), so keep the two
-      # in sync.
-      shell = pkgs.rush;
-      home = toString config.user.homeDirectory;
-      ignoreShellProgramCheck = true;
-      extraGroups = ["wheel" "networkmanager" "docker"];
-    };
-
-    security.sudo.extraRules = [
-      {
-        users = [config.user.name];
-        commands = [
-          {
-            command = "ALL";
-            options = ["NOPASSWD"];
-          }
-        ];
-      }
-    ];
   };
 }

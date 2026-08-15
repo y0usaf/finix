@@ -45,13 +45,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = cfg.apiKeyFile != "";
-        message = "user.dev.kimi-code.apiKeyFile must point at a Vercel AI Gateway key file.";
-      }
-    ];
-
     # Provider + model declarations, merged into the mutable config.toml at
     # activation by manzil's merge entry (login rewrites survive; patches
     # re-merge). api_key stays an empty placeholder — the kimi wrapper below

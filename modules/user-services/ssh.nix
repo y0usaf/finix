@@ -89,15 +89,5 @@ in {
     user.shell.rcExtra = lib.mkAfter ''
       export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
     '';
-    systemd.user.services.ssh-agent = {
-      description = "SSH key agent";
-      wantedBy = ["default.target"];
-      serviceConfig = {
-        Type = "forking";
-        Environment = "SSH_AUTH_SOCK=%t/ssh-agent";
-        ExecStart = "${pkgs.openssh}/bin/ssh-agent -a $SSH_AUTH_SOCK";
-        ExecStartPost = "${config.systemd.package}/bin/systemctl --user set-environment SSH_AUTH_SOCK=$SSH_AUTH_SOCK";
-      };
-    };
   };
 }

@@ -180,7 +180,6 @@ in {
     # installs; duplicate lines are harmless while both are enabled. Rules go
     # through services.udev.packages (portable: NixOS + finix), never
     # extraRules (NixOS-only — the finix compat shim drops it).
-    boot.kernelModules = lib.mkIf cfg.autofill ["uinput"];
     services.udev.packages = lib.optionals cfg.autofill [
       (pkgs.writeTextFile {
         name = "bolo-uinput-rules";

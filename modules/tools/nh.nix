@@ -25,7 +25,7 @@ in {
       systemPackages = [
         flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
       ];
-      sessionVariables.NH_FLAKE = toString (
+      variables.NH_FLAKE = toString (
         if nhOpts.flake != null
         then nhOpts.flake
         else config.user.paths.flake.path

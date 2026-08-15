@@ -18,11 +18,5 @@
         global_dir = "${config.user.homeDirectory}/.local/share/bun";
       };
     };
-    systemd.tmpfiles.rules = [
-      "d ${config.user.homeDirectory}/.local/share/bun 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${config.user.homeDirectory}/.cache/bun 0755 ${config.user.name} ${config.user.name} - -"
-      "d ${config.user.homeDirectory}/.config/bun 0755 ${config.user.name} ${config.user.name} - -"
-      "d /run/user/%i/bun 0755 ${config.user.name} ${config.user.name} - -"
-    ];
   };
 }

@@ -1,8 +1,11 @@
 {
-  config,
   lib,
   ...
 }: {
+  # hostname/timezone/stateVersion options. The config wiring them to
+  # system.stateVersion / time.timeZone / networking.hostName and the
+  # hostname assertion was NixOS-only (dropped by the compat shim); finix sets
+  # hostname/timezone natively in hosts/.../finix.
   options = {
     hostname = lib.mkOption {
       type = lib.types.str;
@@ -17,17 +20,5 @@
       type = lib.types.str;
       description = "NixOS state version";
     };
-  };
-
-  config = {
-    system.stateVersion = config.stateVersion;
-    time.timeZone = config.timezone;
-    networking.hostName = config.hostname;
-    assertions = [
-      {
-        assertion = config.hostname != "";
-        message = "System hostname cannot be empty";
-      }
-    ];
   };
 }

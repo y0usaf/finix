@@ -24,7 +24,6 @@
         pkgs.tree
         pkgs.psmisc
         pkgs.lm_sensors
-        pkgs.networkmanager
         pkgs.fzf
         pkgs.ripgrep
       ]

@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: {
   config = {
@@ -27,49 +26,6 @@
               UseIn = "niri;gtk;";
             };
           };
-        };
-      };
-    };
-
-    systemd = {
-      user = {
-        tmpfiles.rules = [
-          "d %t/systemd/user/xdg-desktop-portal-gnome.service.d 0755 - - - -"
-          "d %t/systemd/user/xdg-desktop-portal-gtk.service.d 0755 - - - -"
-          "d %t/systemd/user/xdg-desktop-portal.service.d 0755 - - - -"
-          "L+ %t/systemd/user/xdg-desktop-portal-gnome.service.d/environment.conf - - - - ${pkgs.writeText "xdg-desktop-portal-gnome-environment.conf" ''
-            [Service]
-            PassEnvironment=WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-          ''}"
-          "L+ %t/systemd/user/xdg-desktop-portal-gnome.service.d/override.conf - - - - ${pkgs.writeText "xdg-desktop-portal-gnome-override.conf" ''
-            [Service]
-            Restart=always
-
-            [Unit]
-            After=xdg-desktop-portal-gtk.service
-          ''}"
-          "L+ %t/systemd/user/xdg-desktop-portal-gtk.service.d/override.conf - - - - ${pkgs.writeText "xdg-desktop-portal-gtk-override.conf" ''
-            [Service]
-            Restart=always
-
-            [Unit]
-            After=xdg-desktop-portal.service
-            Wants=xdg-desktop-portal-gnome.service
-          ''}"
-          "L+ %t/systemd/user/xdg-desktop-portal.service.d/override.conf - - - - ${pkgs.writeText "xdg-desktop-portal-override.conf" ''
-            [Service]
-            Restart=always
-
-            [Unit]
-            Wants=xdg-desktop-portal-gtk.service
-          ''}"
-        ];
-        targets.niri-session = {
-          wants = [
-            "xdg-desktop-portal.service"
-            "xdg-desktop-portal-gtk.service"
-            "xdg-desktop-portal-gnome.service"
-          ];
         };
       };
     };
