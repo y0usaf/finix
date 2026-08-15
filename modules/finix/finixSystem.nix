@@ -45,6 +45,26 @@
       (final: prev: {
         rush = inputs.rush.packages.${system}.default;
       })
+      # Fix obs-vertical-canvas Qt6GuiPrivate cmake detection (desktop obs.nix
+      # ships the plugin via obs-studio-plugins). Recovered from the deleted
+      # modules/desktop/nixpkgs.nix overlay; only touches obs-vertical-canvas,
+      # harmless for every other package. onnxruntime override and wrapOBS in
+      # obs.nix are unaffected.
+      (_: prev: let
+        prevObsPlugins = prev.obs-studio-plugins;
+      in {
+        obs-studio-plugins =
+          prevObsPlugins
+          // {
+            obs-vertical-canvas = prevObsPlugins.obs-vertical-canvas.overrideAttrs (old: {
+              postPatch =
+                (old.postPatch or "")
+                + ''
+                  sed -i '/find_qt(COMPONENTS Widgets COMPONENTS_LINUX Gui)/a find_package(Qt6 REQUIRED COMPONENTS GuiPrivate)' CMakeLists.txt
+                '';
+            });
+          };
+      })
       # n8n 2.31.4's GitHub archive FOD hash drifted (GitHub repacks tag
       # tarballs; gzip bytes aren't stable). Re-pin with the current bytes.
       # Pre-existing breakage unrelated to our changes — drop when nixpkgs

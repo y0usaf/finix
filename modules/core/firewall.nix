@@ -85,6 +85,8 @@
           tcp dport { 25565, 27015, 27036 } accept comment "minecraft host; steam dedicatedServer; steam remotePlay"
           udp dport { 21027, 27015, 41641 } accept comment "syncthing LAN discovery; steam dedicatedServer; tailscale direct path (parity.nix --port=41641)"
           udp dport 27031-27036 accept comment "steam remotePlay"
+          tcp dport 2234 accept comment "nicotine-plus Soulseek"
+          udp dport 2234 accept comment "nicotine-plus Soulseek"
         }
         chain forward {
           type filter hook forward priority filter; policy drop;
