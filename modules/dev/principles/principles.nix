@@ -3,29 +3,29 @@
   lib,
   ...
 }: {
-  options.user.dev.canon = {
-    enable = lib.mkEnableOption "~/dev design canon as AGENTS.md";
+  options.user.dev.principles = {
+    enable = lib.mkEnableOption "~/dev design principles as AGENTS.md";
   };
 
-  config = lib.mkIf config.user.dev.canon.enable {
+  config = lib.mkIf config.user.dev.principles.enable {
     manzil.users."${config.user.name}".files = {
-      # The canon lives inline as a Nix string: this repo should stay
+      # The principles live inline as a Nix string: this repo should stay
       # nix-only. Deployed as AGENTS.md so that agents walking up from cwd
       # pick it up at ~/dev, where the target is the only AGENTS.md and the
-      # scope boundary the canon's own scope rule draws.
+      # scope boundary the principles' own scope rule draws.
       "dev/AGENTS.md".text = ''
-        # ~/Dev — design canon
+        # ~/Dev — design principles
 
         Personal projects only; work repos, forks, upstream, `ref/` follow their own.
 
-        Slugs (`[[canon:least-code]]`) are citation names. Every rule has a **Check**:
+        Slugs (`[[principle:least-code]]`) are citation names. Every rule has a **Check**:
         **run** (command, pass/fail) or **judge** (human question). Claim run only
         after running it; never claim judge done. Only the prime directive has
         precedence; doctrine order is explanatory.
 
         ## Prime directive
 
-        ### `[[canon:least-code]]` — write less code
+        ### `[[principle:least-code]]` — write less code
 
         Best code is no code; second best is easy to delete. Prefer deletion to
         addition; abstract only on the third need. It outranks all because less code
@@ -36,7 +36,7 @@
 
         ## Doctrines
 
-        ### `[[canon:least-power]]` — say what, not how
+        ### `[[principle:least-power]]` — say what, not how
 
         Prefer the lowest rung that works: constant < data table < config file < pure
         function (no I/O) < code with I/O or state. The rung is what you know without
@@ -44,16 +44,27 @@
 
         **Check (judge):** name the rung and why the next lower rung cannot work.
 
-        ### `[[canon:spatiotemporal]]` — spatiotemporal composability: unmount clean, react to dependencies
+        ### `[[principle:spatiotemporal]]` — spatiotemporal composability: unmount clean, react to dependencies
         Ref: https://github.com/cordiverse/paper — "A Programming Paradigm for Spatiotemporal Composability"
 
-        Runtime-mounted in-process components compose on two axes. **Temporal:**
-        unmount leaves no component-owned residue — each committed context mutation
-        records an inverse; unmount applies inverses in reverse order. **Spatial:**
-        each component declares the context keys it reads; after each committed change
-        the runtime resolves changed keys against declarations and updates the
-        affected consumers. The **context** is host-owned state: effects write it,
-        declarations name its keys; the functional-core snapshot is a read of it.
+        Spatiotemporal composability is two orthogonal axes a runtime-mounted
+        in-process component composes on; the paper names the machinery directly.
+
+        - **Temporal composability** — the ability to completely revert a component's
+          side effects upon removal. Formalized as **revertible effects**: every
+          context transformation carries an inverse; the runtime tracks it and applies
+          inverses in reverse order on unmount, so no component-owned residue survives.
+        - **Spatial composability** — the ability to declare and reactively manage
+          inter-component dependencies. Formalized as **reactive coeffects**: a
+          component declares a coeffect specification (the context keys it reads);
+          after each committed context change the runtime notifies exactly the
+          components whose specification matches.
+
+        **Effect vs coeffect:** an effect is what the component writes to the context;
+        a coeffect is what it reads from it. The paper unifies both into a single
+        **context type** — one host-owned state: effects mutate it, coeffect
+        specifications name its keys. The functional-core snapshot is a read of that
+        context.
         Reconstruction may replace inverses by rebuilding from a named
         preserved-state set; it must reproduce inverse replay's observable state.
         `functional-core` supplies the one action path inverses attach to;
@@ -73,9 +84,9 @@
         **Not when:** nothing mounts during process life. Record the exception and
         its reversal in DESIGN.md.
 
-        ### `[[canon:unix]]` — the rules that still bind
+        ### `[[principle:unix]]` — the rules that still bind
 
-        Binds all code. Cleanup ownership lives in `[[canon:spatiotemporal]]`; this
+        Binds all code. Cleanup ownership lives in `[[principle:spatiotemporal]]`; this
         rule carries the rows. Fails when:
 
         1. Keep decisions out of machinery — one file picks and performs
@@ -90,7 +101,7 @@
         **Check (judge):** apply all eight rows; fix true failures or record a
         reasoned DESIGN.md divergence.
 
-        ### `[[canon:functional-core]]` — functional core, imperative shell
+        ### `[[principle:functional-core]]` — functional core, imperative shell
 
         Extension code never mutates host state: it reads an immutable pre-dispatch
         snapshot and returns actions the host applies afterward — one write path, one
@@ -104,7 +115,7 @@
         **Not when:** no extension surface is intended; DESIGN.md states why and the
         condition that would require one.
 
-        ### `[[canon:no-privileged-path]]` — nothing we ship gets a shortcut
+        ### `[[principle:no-privileged-path]]` — nothing we ship gets a shortcut
 
         Make a feature an extension when it can be; built-ins use the public API a
         stranger uses, in a `*-builtins` layer. Without a public API, declare every
@@ -117,7 +128,7 @@
         **Not when:** no plugin story; the API would exceed the feature set; fewer
         than three units of the kind. Record exception + reversal in DESIGN.md.
 
-        ### `[[canon:daemon-thin-client]]` — state outlives the viewer
+        ### `[[principle:daemon-thin-client]]` — state outlives the viewer
 
         State that must survive its viewer lives in a daemon; clients attach, render,
         detach. One integer wire version, bumped on every change; additive changes
@@ -126,14 +137,14 @@
 
         **Check (run):** DESIGN.md names daemon-owned state; kill and restart the
         client, confirm the state survives. Components mounted inside the daemon are
-        governed by `[[canon:spatiotemporal]]`; this rule owns only surviving state.
+        governed by `[[principle:spatiotemporal]]`; this rule owns only surviving state.
 
         **Not when:** the tool applies and exits, or one viewer shares the app's
         lifetime.
 
         ## Working rules
 
-        ### `[[canon:nix-verify]]` — verification goes through Nix
+        ### `[[principle:nix-verify]]` — verification goes through Nix
 
         `nix build`, `nix flake check`, `nix run`. `cargo build` fills `target/`, not
         the store, so the next `nix run` rebuilds. `cargo fmt`/`clippy` run natively;
@@ -142,18 +153,18 @@
 
         **Check (run):** "tests pass" only after a Nix command exits zero. Quote it.
 
-        ### `[[canon:design-doc]]` — every project states its own shape
+        ### `[[principle:design-doc]]` — every project states its own shape
 
         DESIGN.md before code for a new project or subsystem (not small fixes, scratch
-        trees, or worktrees). Local DESIGN.md outweighs canon; report conflicts.
+        trees, or worktrees). Local DESIGN.md outweighs principles; report conflicts.
         Record decisions and reasons, not status or conformance tables; do not restate
-        canon.
+        principles.
 
         **Check (run):** `rg '^## (Locked decisions|Architecture|Deferred|Roadmap)'
         DESIGN.md` returns exactly four hits. Facts other rules need belong to those
         rules' checks.
 
-        ### `[[canon:amend]]` — this file changes by proposal only
+        ### `[[principle:amend]]` — this file changes by proposal only
 
         An edit — panel rewrite included — is a proposal until its owner accepts it.
         When a rule loses the same argument twice for the same reason, the rule is

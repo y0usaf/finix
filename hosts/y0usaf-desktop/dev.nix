@@ -16,7 +16,7 @@ _: {
     };
     pi.enable = true;
     paseo.enable = true;
-    canon.enable = true;
+    principles.enable = true;
     docker.enable = true;
     gcloud.enable = true;
     localllama.enable = false;
