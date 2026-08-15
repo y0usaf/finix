@@ -79,16 +79,6 @@ in {
       pkgs.xwayland-satellite
     ];
 
-    # The tomoe package's postInstall already installs the tomoe-session.target
-    # (BindsTo graphical-session.target — how the compositor activates the
-    # graphical session), the tomoe.portal / tomoe-portals.conf, and the
-    # D-Bus service file for the portal backend into system dirs.
-    xdg.portal = {
-      enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-gtk];
-      config.tomoe.default = ["gtk"];
-    };
-
     manzil.users."${config.user.name}".files.".config/tomoe/init.lua" = {
       text =
         ''

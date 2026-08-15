@@ -7,7 +7,8 @@
   xdgCache = "${home}/.cache";
 in {
   config = {
-    environment.sessionVariables = {
+    # (sessionVariables re-homed to variables for the compat remap.)
+    environment.variables = {
       # --- XDG base directories ---
       XDG_CONFIG_HOME = xdgConfig;
       XDG_DATA_HOME = xdgData;
@@ -83,16 +84,6 @@ in {
       KERAS_HOME = "${xdgState}/keras";
       # WGET_HSTS_FILE: wget does not read env vars; XDG compliance via alias in shell configs
     };
-
-    # Ensure critical XDG directories exist
-    systemd.tmpfiles.rules = [
-      "d ${xdgConfig} 0755 ${userName} ${userName} - -"
-      "d ${xdgData} 0755 ${userName} ${userName} - -"
-      "d ${xdgState} 0755 ${userName} ${userName} - -"
-      "d ${xdgCache} 0700 ${userName} ${userName} - -"
-      "d ${xdgState}/rush 0755 ${userName} ${userName} - -" # rush history.sqlite
-      "d ${xdgState}/less 0755 ${userName} ${userName} - -"
-    ];
 
     manzil.users."${userName}".files = {
       ".config/user-dirs.dirs" = {
