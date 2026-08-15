@@ -310,9 +310,8 @@ let
     register_provider(ai_gateway)
   '';
 in {
-  # No HERMES_HOME env plumbing: /etc/zprofile is dead on finix (nixpkgs
-  # zsh compiles global rcs into the package etc dir), and the wrapper
-  # carries the env itself.
+  # No HERMES_HOME env plumbing: rush reads /etc/profile via
+  # ~/.config/rush/profile.rush, and the wrapper carries the env itself.
   environment.systemPackages = [ hermes hermesGw ];
 
   fileSystems."${stateDir}" = {
