@@ -48,7 +48,7 @@ local function block(children, opts)
         gap = opts.gap or DEFAULTS.block.gap,
         bg = Wallust.color("bg", theme.base),
         border = opts.border or DEFAULTS.block.border,
-        border_color = Wallust.color("accent", theme.accent),
+        border_color = Wallust.color("fg", theme.text),
         padding_top = opts.padding_top or opts.padding_y or DEFAULTS.block.padding_y, -- 0.15em
         padding_bottom = opts.padding_bottom or opts.padding_y or DEFAULTS.block.padding_y,
         padding_left = opts.padding_left or opts.padding_x or DEFAULTS.block.padding_x, -- 0.3em
@@ -210,6 +210,13 @@ function M.new(opts)
         return block({ label(self.date:get()) }, { width = width, height = height })
     end
 
+    -- Bongo counter: live key-press count from the in-VM keyboard service
+    -- (sequence is monotonic, pushed on every key press).
+    function self:bongo_block(width, height)
+        local kb = shell.services.keyboard:get()
+        return block({ label("🥁 " .. tostring(kb.sequence)) }, { width = width, height = height })
+    end
+
     -- CPU / memory / GPU blocks read shell.services.sysinfo through
     -- Sysinfo.get(). The sampling lives in sysinfo.lua (pure /proc and
     -- /sys reads; nvidia-smi only on NVIDIA, only via exec_async). When a
@@ -267,6 +274,7 @@ function M.new(opts)
         if name == "battery" then return self:battery_block(width, height) end
         if name == "time" then return self:time_block(width, height) end
         if name == "date" then return self:date_block(width, height) end
+        if name == "bongo" then return self:bongo_block(width, height) end
         if name == "network" then return self:network_block(width, height) end
         if name == "cpu" then return self:cpu_block(width, height) end
         if name == "memory" then return self:memory_block(width, height) end

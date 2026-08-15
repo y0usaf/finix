@@ -24,7 +24,7 @@ in {
       # widget for this overlay is still to be written. cpu/memory/gpu
       # ride the sysinfo facade, which upstream declares but never
       # pushes — lua/sysinfo.lua supplies the push side in-VM.
-      type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu"]);
+      type = lib.types.listOf (lib.types.enum ["time" "date" "bongo" "battery" "network" "cpu" "memory" "gpu"]);
       default = ["time" "date"];
       description = "Bar overlay modules to render.";
     };
@@ -208,6 +208,7 @@ in {
               battery = 58;
               time = 74;
               date = 74;
+              bongo = 74;
               network = 96;
               cpu = 104;
               memory = 84;
