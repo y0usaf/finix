@@ -12,10 +12,10 @@ in {
         generator = toJSON;
         value =
           {
-            defaultProvider = cfg.defaultProvider;
-            defaultModel = cfg.defaultModel;
-            defaultThinkingLevel = cfg.defaultThinkingLevel;
-            enabledModels = cfg.enabledModels;
+            inherit (cfg) defaultProvider;
+            inherit (cfg) defaultModel;
+            inherit (cfg) defaultThinkingLevel;
+            inherit (cfg) enabledModels;
             compaction.enabled = false;
             showHardwareCursor = true;
             editorPaddingX = 0;

@@ -30,6 +30,9 @@ in {
           preset = "ascii";
           overrides = {};
         };
+        recap = {
+          placement = "above";
+        };
       };
     };
   };
