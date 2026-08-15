@@ -38,11 +38,11 @@
 
     users.users."${config.user.name}" = {
       isNormalUser = true;
-      # zsh is the only interactive shell module (modules/shell/zsh). finix is
+      # rush is the only interactive shell module (modules/shell/rush). finix is
       # the live system on both hosts and sets its own copy of this in
       # modules/finix/common.nix (compat-import drops users.*), so keep the two
       # in sync.
-      shell = pkgs.zsh;
+      shell = pkgs.rush;
       home = toString config.user.homeDirectory;
       ignoreShellProgramCheck = true;
       extraGroups = ["wheel" "networkmanager" "docker"];

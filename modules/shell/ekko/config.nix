@@ -105,8 +105,13 @@ in {
       # Skip in a virtual console
       [[ "$TERM" == "linux" ]] && return
 
-      # Robust fallback: device path check (minimal subprocess overhead)
-      [[ $(readlink /proc/self/fd/0 2>/dev/null) =~ ^/dev/tty[0-9] ]] && return
+      # Robust fallback: device path check (minimal subprocess overhead).
+      # `case` glob, not `[[ =~ ]]`: rush has no regex match in `[[ ]]`,
+      # so the `=~` form is a syntax error that aborts sourcing before
+      # `exec ekko` ever runs.
+      case "$(readlink /proc/self/fd/0 2>/dev/null)" in
+        /dev/tty[0-9]*) return ;;
+      esac
 
       exec ekko
     '');
