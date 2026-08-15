@@ -9,6 +9,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    rush = {
+      url = "github:rockorager/rush";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     manzil = {
       url = "github:y0usaf/manzil";
       inputs.nixpkgs.follows = "nixpkgs";

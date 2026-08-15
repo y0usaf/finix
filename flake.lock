@@ -849,11 +849,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1786643953,
-        "narHash": "sha256-Lhg8Nri+R1xR/6GfoLKm8dth+NVMleLFkZ8R8E2K/aw=",
+        "lastModified": 1786766096,
+        "narHash": "sha256-NJ+KNdsTyTEDfBp4tl0w/cjQwN5tPr+zdRjVnfiKLU8=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "809580702d1d3721142dd92c34ed11fcf4b79e74",
+        "rev": "7711ce6b8775c5de7977cbfb973386a7389e9e92",
         "type": "github"
       },
       "original": {
@@ -889,17 +889,17 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1786544738,
-        "narHash": "sha256-cY/F7/D6M5euTBdE91zqjaP8xN5oMnm6XSmn0whRiLI=",
+        "lastModified": 1786629274,
+        "narHash": "sha256-VvfI+uqoBpDk2TWgpibTuHFVTW1Zt572/1rj4c5jMF0=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "9795d602306ef68a97585909e8e79f92a389057b",
+        "rev": "6f707eb36064e82af9c1320a7634f4dfad21049b",
         "type": "github"
       },
       "original": {
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "9795d602306ef68a97585909e8e79f92a389057b",
+        "rev": "6f707eb36064e82af9c1320a7634f4dfad21049b",
         "type": "github"
       }
     },
@@ -922,11 +922,11 @@
     "primeAgentSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1786564684,
-        "narHash": "sha256-uO3X2BuP5RuAzjNfzJKssIleDoe9zgHVZCvVfbVU0GU=",
+        "lastModified": 1786593687,
+        "narHash": "sha256-s+sAxKLhr+LiDcpeDCKmIG1KybcuD+PztoC1OoErj0A=",
         "ref": "main",
-        "rev": "0987c1ba7637cbcb99afe9efe1180b838a0aa958",
-        "revCount": 4497,
+        "rev": "7787f07415d843b9a800f6a4720e0c739bd608e5",
+        "revCount": 4499,
         "type": "git",
         "url": "https://github.com/PrimeIntellect-ai/prime-agent"
       },
@@ -1052,6 +1052,7 @@
         "pi-harness": "pi-harness",
         "reasonix-flake": "reasonix-flake",
         "rudo": "rudo",
+        "rush": "rush",
         "strictix": "strictix",
         "tomoe": "tomoe",
         "tweakcc": "tweakcc"
@@ -1074,6 +1075,26 @@
       "original": {
         "owner": "y0usaf",
         "repo": "rudo",
+        "type": "github"
+      }
+    },
+    "rush": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786678013,
+        "narHash": "sha256-QGFt4nI4Lb2+3gxCgOHvwWbUfgpNuT7WzPSl/3I40s0=",
+        "owner": "rockorager",
+        "repo": "rush",
+        "rev": "1f17312c0529088bf556d184c95d5df601c2376f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rockorager",
+        "repo": "rush",
         "type": "github"
       }
     },
