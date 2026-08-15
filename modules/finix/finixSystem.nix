@@ -42,6 +42,9 @@
     };
     overlays = [
       inputs.claude-code-nix.overlays.default
+      (final: prev: {
+        rush = inputs.rush.packages.${system}.default;
+      })
       # n8n 2.31.4's GitHub archive FOD hash drifted (GitHub repacks tag
       # tarballs; gzip bytes aren't stable). Re-pin with the current bytes.
       # Pre-existing breakage unrelated to our changes — drop when nixpkgs

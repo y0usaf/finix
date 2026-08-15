@@ -149,12 +149,12 @@ in {
       pkgs.jq
       pkgs.swaybg
       pkgs.xwayland-satellite
-      # Daily-driver shell: zsh. finix/common.nix sets it as the login shell and
-      # ships /etc/zshenv; modules/shell/zsh/config.nix generates ~/.zshrc and
-      # ~/.zprofile NixOS-side onto persisted /home. zsh itself comes from that
-      # module's systemPackages, bash from finix's programs.bash (still /bin/sh).
-      pkgs.carapace
-      pkgs.fzf
+      # Daily-driver shell: rush. finix/common.nix sets it as the login shell;
+      # modules/shell/rush/config.nix generates ~/.config/rush/{profile,config}.rush
+      # onto persisted /home. rush itself comes from that module's systemPackages
+      # (or common.nix on the server), bash from finix's programs.bash (still
+      # /bin/sh). Autosuggestions/history-search/completions are rush builtins,
+      # so carapace and fzf key-bindings are gone.
       pkgs.ripgrep
       pkgs.fd
     ];
@@ -227,5 +227,5 @@ in {
     ];
   };
 
-  # Login shell comes from finix/common.nix (zsh) — no override.
+  # Login shell comes from finix/common.nix (rush) — no override.
 }

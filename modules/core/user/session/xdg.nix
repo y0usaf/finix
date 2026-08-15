@@ -27,7 +27,8 @@ in {
       AWS_SHARED_CREDENTIALS_FILE = "${xdgConfig}/aws/credentials";
 
       # --- Shell history ---
-      HISTFILE = "${xdgState}/zsh/history";
+      # rush stores history in SQLite at $XDG_STATE_HOME/rush/history.sqlite
+      # (no HISTFILE). LESSHISTFILE is for less(1).
       LESSHISTFILE = "${xdgState}/less/history";
 
       # --- Language runtimes ---
@@ -89,8 +90,7 @@ in {
       "d ${xdgData} 0755 ${userName} ${userName} - -"
       "d ${xdgState} 0755 ${userName} ${userName} - -"
       "d ${xdgCache} 0700 ${userName} ${userName} - -"
-      "d ${xdgState}/zsh 0755 ${userName} ${userName} - -"
-      "d ${xdgCache}/zsh 0755 ${userName} ${userName} - -" # zcompdump
+      "d ${xdgState}/rush 0755 ${userName} ${userName} - -" # rush history.sqlite
       "d ${xdgState}/less 0755 ${userName} ${userName} - -"
     ];
 

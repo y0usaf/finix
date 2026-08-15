@@ -1,6 +1,6 @@
 _: {
   user.shell = {
-    zsh.enable = true;
+    rush.enable = true;
     cat-fetch.enable = true;
     ekko = {
       enable = true;

@@ -14,10 +14,10 @@ in {
   # mkBefore/mkAfter/mkOrder still resolve against each other exactly as they
   # did on .bashrc (ekko's mkOrder 1600 `exec` still lands last).
   #
-  # CONSTRAINT: keep everything here POSIX-compatible. zsh is the only shell
+  # CONSTRAINT: keep everything here POSIX-compatible. rush is the only shell
   # module today, but nix-shell and nix develop hardcode `source ~/.bashrc` for
   # their sub-shells, so a bash module can come back. No `shopt`, no
-  # PROMPT_COMMAND. Shell-specific behaviour belongs in modules/shell/zsh.
+  # PROMPT_COMMAND. Shell-specific behaviour belongs in modules/shell/rush.
   options.user.shell = {
     aliases = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
