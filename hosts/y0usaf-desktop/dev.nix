@@ -21,6 +21,7 @@ _: {
     gcloud.enable = true;
     nvim.enable = true;
     bun.enable = true;
+    biome.enable = true;
     npm.enable = true;
     python.enable = true;
     rust.enable = true;
