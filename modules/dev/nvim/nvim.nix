@@ -5,11 +5,6 @@
   ...
 }: let
   userAppearance = config.user.appearance;
-  # Plugin list - array of plugin URLs
-  # Core vim settings - Lua string
-  # Keymaps - Lua string
-  # Theme configuration - minimalist biophilic with dopamine accents
-  # Generated init.lua content
 in {
   options.user.dev.nvim = {
     enable = lib.mkEnableOption "Enhanced Neovim with MNW wrapper";
@@ -27,7 +22,37 @@ in {
         p.tree-sitter-markdown
         p.tree-sitter-json
       ]))
-      pkgs.neovim
+      (pkgs.neovim.override (old: {
+        configure = {
+          packages.finixPlugins = {
+            start = [
+              pkgs.vimPlugins.plenary-nvim
+              pkgs.vimPlugins.nvim-web-devicons
+              pkgs.vimPlugins.nui-nvim
+              pkgs.vimPlugins.neo-tree-nvim
+              pkgs.vimPlugins.nvim-lspconfig
+              pkgs.vimPlugins.nvim-cmp
+              pkgs.vimPlugins.cmp-nvim-lsp
+              pkgs.vimPlugins.cmp-buffer
+              pkgs.vimPlugins.cmp-path
+              pkgs.vimPlugins.luasnip
+              pkgs.vimPlugins.cmp_luasnip
+              pkgs.vimPlugins.lspkind-nvim
+              pkgs.vimPlugins.lsp_lines-nvim
+              pkgs.vimPlugins.telescope-nvim
+              pkgs.vimPlugins.telescope-fzf-native-nvim
+              (pkgs.vimPlugins.nvim-treesitter.withAllGrammars)
+              pkgs.vimPlugins.comment-nvim
+              pkgs.vimPlugins.nvim-autopairs
+              pkgs.vimPlugins.gitsigns-nvim
+              pkgs.vimPlugins.lualine-nvim
+              pkgs.vimPlugins.cyberdream-nvim
+              pkgs.vimPlugins.toggleterm-nvim
+            ];
+            opt = [];
+          };
+        };
+      }))
       pkgs.lua-language-server
       pkgs.nil
       pkgs.pyright
@@ -44,73 +69,6 @@ in {
           -- Leader keys
           vim.g.mapleader = " "
           vim.g.maplocalleader = "\\"
-
-          -- Bootstrap lazy.nvim
-          local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-          if not (vim.uv or vim.loop).fs_stat(lazypath) then
-            vim.fn.system({
-              "git", "clone", "--filter=blob:none",
-              "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath,
-            })
-          end
-          vim.opt.rtp:prepend(lazypath)
-
-          -- Load plugins
-          require("lazy").setup({
-            ${lib.concatMapStringsSep ",\n    " (p: "{ url = \"${p}\" }") [
-            # Core dependencies
-            "https://github.com/nvim-lua/plenary.nvim"
-            "https://github.com/nvim-tree/nvim-web-devicons"
-            "https://github.com/MunifTanjim/nui.nvim"
-
-            # File navigation
-            "https://github.com/nvim-neo-tree/neo-tree.nvim"
-
-            # Telescope
-            "https://github.com/nvim-telescope/telescope.nvim"
-            "https://github.com/nvim-telescope/telescope-fzf-native.nvim"
-
-            # LSP and Completion
-            "https://github.com/neovim/nvim-lspconfig"
-            "https://github.com/hrsh7th/nvim-cmp"
-            "https://github.com/hrsh7th/cmp-nvim-lsp"
-            "https://github.com/hrsh7th/cmp-buffer"
-            "https://github.com/hrsh7th/cmp-path"
-            "https://github.com/L3MON4D3/LuaSnip"
-            "https://github.com/saadparwaiz1/cmp_luasnip"
-            "https://github.com/onsails/lspkind.nvim"
-            "https://git.sr.ht/~whynothugo/lsp_lines.nvim"
-
-            # Treesitter
-            "https://github.com/nvim-treesitter/nvim-treesitter"
-
-            # Utilities
-            "https://github.com/numToStr/Comment.nvim"
-            "https://github.com/windwp/nvim-autopairs"
-            "https://github.com/kevinhwang91/nvim-ufo"
-            "https://github.com/kevinhwang91/promise-async"
-            "https://github.com/j-hui/fidget.nvim"
-            "https://github.com/RRethy/vim-illuminate"
-            "https://github.com/folke/twilight.nvim"
-            "https://github.com/akinsho/toggleterm.nvim"
-
-            # Theme & UI
-            "https://github.com/scottmckendry/cyberdream.nvim"
-            "https://github.com/Bekaboo/dropbar.nvim"
-            "https://github.com/stevearc/dressing.nvim"
-            "https://github.com/anuvyklack/windows.nvim"
-            "https://github.com/anuvyklack/middleclass"
-            "https://github.com/nvim-lualine/lualine.nvim"
-            "https://github.com/lewis6991/gitsigns.nvim"
-            "https://github.com/lukas-reineke/indent-blankline.nvim"
-            "https://github.com/folke/flash.nvim"
-            "https://github.com/echasnovski/mini.hipatterns"
-
-            # Specialized
-            "https://github.com/kawre/leetcode.nvim"
-            "https://github.com/gelguy/wilder.nvim"
-          ]}
-          })
 
           ${''
             -- Line numbers and UI
@@ -162,7 +120,8 @@ in {
             vim.g.loaded_netrw = 1
             vim.g.loaded_netrwPlugin = 1
 
-            -- UFO folding settings
+            -- Native folding
+            vim.opt.foldmethod = "indent"
             vim.opt.foldcolumn = "1"
             vim.opt.foldlevel = 99
             vim.opt.foldlevelstart = 99
@@ -173,16 +132,6 @@ in {
               vim.g.neovide_transparency = ${toString userAppearance.opacity}
             end
           ''}
-
-          -- Disable netrw for neo-tree
-          vim.g.loaded_netrw = 1
-          vim.g.loaded_netrwPlugin = 1
-
-          -- UFO folding settings
-          vim.opt.foldcolumn = "1"
-          vim.opt.foldlevel = 99
-          vim.opt.foldlevelstart = 99
-          vim.opt.foldenable = true
 
           -- Neo-tree setup
           require("neo-tree").setup({
@@ -456,19 +405,9 @@ in {
             })
           ''}
           require("gitsigns").setup({ current_line_blame = true })
-          require("ibl").setup({})
           require("Comment").setup({})
           require("nvim-autopairs").setup({})
-          require("ufo").setup({})
-          require("fidget").setup({})
-          require("illuminate").configure({})
-          require("twilight").setup({})
           require("toggleterm").setup({ direction = "float" })
-          require("flash").setup({})
-          require("mini.hipatterns").setup({})
-          require("dropbar").setup({})
-          require("dressing").setup({})
-          require("windows").setup({})
 
           ${''
             -- Keymaps setup
@@ -500,27 +439,12 @@ in {
             keymap("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 
             -- Utility keymaps
-            keymap("n", "<leader>ut", "<cmd>Twilight<cr>", { desc = "Toggle twilight" })
             keymap("n", "<C-\\", "<cmd>ToggleTerm<cr>", { desc = "Toggle terminal" })
             keymap("t", "<C-\\", "<cmd>ToggleTerm<cr>", { desc = "Toggle terminal" })
-
-            -- UFO fold keymaps
-            keymap("n", "zR", function() require("ufo").openAllFolds() end, { desc = "Open all folds" })
-            keymap("n", "zM", function() require("ufo").closeAllFolds() end, { desc = "Close all folds" })
-            keymap("n", "zr", function() require("ufo").openFoldsExceptKinds() end, { desc = "Open folds except kinds" })
-            keymap("n", "zm", function() require("ufo").closeFoldsWith() end, { desc = "Close folds with" })
-            keymap("n", "zp", function() require("ufo").peekFoldedLinesUnderCursor() end, { desc = "Peek folded lines" })
 
             -- Diagnostics
             keymap("n", "<leader>xx", builtin.diagnostics, { desc = "Diagnostics" })
             keymap("n", "<leader>xd", function() builtin.diagnostics({ bufnr = 0 }) end, { desc = "Buffer diagnostics" })
-
-            -- Leetcode
-            keymap("n", "<leader>lq", "<cmd>Leet<cr>", { desc = "Leetcode menu" })
-            keymap("n", "<leader>ll", "<cmd>Leet list<cr>", { desc = "Leetcode list" })
-            keymap("n", "<leader>lt", "<cmd>Leet test<cr>", { desc = "Leetcode test" })
-            keymap("n", "<leader>ls", "<cmd>Leet submit<cr>", { desc = "Leetcode submit" })
-            keymap("n", "<leader>ln", "<cmd>messages<cr>", { desc = "View messages" })
 
             -- Basic keymaps
             keymap("n", "<leader>w", "<cmd>w<cr>", { desc = "Save file" })
