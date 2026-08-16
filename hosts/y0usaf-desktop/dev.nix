@@ -15,6 +15,10 @@ _: {
       linear-cli.enable = true;
     };
     pi.enable = true;
+    pi.agents = {
+      maxDepth = 999;
+      maxLiveAgents = 999;
+    };
     paseo.enable = true;
     principles.enable = true;
     docker.enable = true;
