@@ -1146,11 +1146,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785889284,
-        "narHash": "sha256-UxX7qga0hRWh0AiINQy9ZsFMd2BpKdncOZ7hRw0puTA=",
+        "lastModified": 1786855799,
+        "narHash": "sha256-+Qb7tjX4pJIFESSo9RHiC+AOhYYb8CFk97laNfvm4nE=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "120379aaefcb27a1cca7a700a115550367b0fb07",
+        "rev": "6040758d2b0a7aab2d9e10b4418c76040987d051",
         "type": "github"
       },
       "original": {
