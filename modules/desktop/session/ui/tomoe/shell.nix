@@ -192,7 +192,7 @@ in {
             };
             block = {
               gap = 0;
-              border = 0.7;
+              border = 1;
               padding_y = 2.1;
               padding_x = 4.2;
             };
