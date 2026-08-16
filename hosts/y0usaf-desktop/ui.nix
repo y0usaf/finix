@@ -21,7 +21,7 @@ _: {
       # Bar shape is per-host. Stats first, clock last. The gpu module's
       # auto backend prefers the RTX 4090 over the Raphael iGPU, whose
       # gpu_busy_percent reads ~0 while the discrete card does the work.
-      bar.modules = ["cpu" "memory" "gpu" "time" "date"];
+      bar.modules = ["cpu" "memory" "gpu" "bongo" "time" "date"];
       extraConfig = ''
         -- Discord/Telegram replace valid activation tokens with stale serials;
         -- opt in to Tomoe's compatibility path for this session.
