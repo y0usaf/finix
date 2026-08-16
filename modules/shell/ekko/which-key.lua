@@ -151,10 +151,6 @@ local function draw_mode(ctx, start, mode, reverse, bold)
   return w + 1
 end
 
-local function binding_mode(binding)
-  return binding.mode
-end
-
 local function chord_tokens(chord)
   local primary = (chord or ""):gsub("%s*/.*", "")
   local modifier, key = primary:match("^([%a]+)%+(.+)$")
@@ -165,8 +161,8 @@ end
 local function hint_entries(snapshot)
   local out, seen = {}, {}
   for _, binding in ipairs(snapshot.keybindings or {}) do
-    local eligible = snapshot.mode == "normal" and binding_mode(binding) == nil
-      or snapshot.mode ~= "normal" and binding_mode(binding) == snapshot.mode
+    local eligible = snapshot.mode == "normal" and binding.mode == nil
+      or snapshot.mode ~= "normal" and binding.mode == snapshot.mode
     if eligible and binding.description ~= "close panel" and not seen[binding.description] then
       seen[binding.description] = true
       out[#out + 1] = { chord = binding.chord_text or "", desc = binding.description or "" }

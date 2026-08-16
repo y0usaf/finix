@@ -74,10 +74,7 @@
     if cfg.provider == "cuda"
     then {
       bolod = flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}".bolod.override {
-        sherpa-onnx =
-          if cfg.provider == "cuda"
-          then sherpaOnnxGpu
-          else pkgs.sherpa-onnx;
+        sherpa-onnx = sherpaOnnxGpu;
       };
       inherit (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}") bolo;
     }
