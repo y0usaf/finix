@@ -86,7 +86,6 @@ in {
           rush_prompt() {
             rush_prompt_status=$?
             prompt segment --bold --fg green "$(prompt_pwd)"
-            prompt async git-branch --ttl 5000 --prefix ' ' --fg bright-magenta -- git branch --show-current
             if test "$rush_prompt_status" = 0; then
               prompt segment --fg cyan '>'
             else
@@ -96,18 +95,7 @@ in {
           }
 
           rush_prompt_right() {
-            if prompt async-pending; then
-              case "$(( ''${rush_prompt_activity_frame:-0} % 4 ))" in
-                0) prompt text '(^_^) ' ;;
-                1) prompt text '(^o^) ' ;;
-                2) prompt text '(^-^) ' ;;
-                *) prompt text '(^_~) ' ;;
-              esac
-            elif test "''${rush_prompt_status:-0}" = 0; then
-              prompt text '(^_^) '
-            else
-              prompt segment --fg red '(>_<) '
-            fi
+            prompt segment --fg bright-blue "$(date +'%Y-%m-%d %H:%M')"
           }
 
           ${lib.concatStringsSep "\n" (lib.mapAttrsToList
