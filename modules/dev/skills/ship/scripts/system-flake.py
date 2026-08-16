@@ -9,7 +9,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 from urllib.parse import unquote, urlsplit
 
 
@@ -175,6 +175,27 @@ def source_root(raw: str) -> Path:
     return Path(process.stdout.strip()).resolve()
 
 
+class MatchingRemote(TypedDict):
+    name: str
+    fetch_urls: list[str]
+    push_urls: list[str]
+
+
+class InputInfo(TypedDict):
+    source: str
+    branch: str
+    head: str
+    upstream: str | None
+    flake: str
+    input: str
+    input_node: str
+    input_url: str | None
+    declared_ref: str | None
+    pinned_rev: str | None
+    locked_rev: str | None
+    matching_remotes: list[MatchingRemote]
+
+
 @dataclass
 class Remote:
     name: str
@@ -182,7 +203,7 @@ class Remote:
     push_urls: list[str]
     keys: set[str]
 
-    def as_json(self) -> dict[str, Any]:
+    def as_json(self) -> MatchingRemote:
         return {
             "name": self.name,
             "fetch_urls": self.fetch_urls,
@@ -339,7 +360,7 @@ def choose_input(
 
 def resolve(
     raw_source: str, raw_flake: str | None, requested: str | None
-) -> dict[str, Any]:
+) -> InputInfo:
     source = source_root(raw_source)
     flake = flake_path(raw_flake)
     selected, matching, branch, head, upstream = choose_input(source, flake, requested)
@@ -368,7 +389,7 @@ def require_no_tracked_changes(source: Path) -> None:
         )
 
 
-def probe_urls(info: dict[str, Any], selected: DirectInput) -> list[str]:
+def probe_urls(info: InputInfo, selected: DirectInput) -> list[str]:
     urls: list[str] = []
     for remote in info["matching_remotes"]:
         for url in [*remote["fetch_urls"], *remote["push_urls"]]:
@@ -397,7 +418,7 @@ def ls_remote(urls: list[str], patterns: list[str]) -> tuple[str, str]:
     raise ShipError("cannot query input remote:\n" + "\n".join(errors))
 
 
-def verify_published(info: dict[str, Any], selected: DirectInput) -> dict[str, str]:
+def verify_published(info: InputInfo, selected: DirectInput) -> dict[str, str]:
     head = info["head"]
     pinned = info.get("pinned_rev")
     if pinned:
