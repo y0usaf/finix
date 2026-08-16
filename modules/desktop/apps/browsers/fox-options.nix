@@ -15,7 +15,6 @@
   ];
 in {
   options.user.programs = {
-    firefox.enable = mkEnableOption "Firefox browser";
     librewolf.enable = mkEnableOption "LibreWolf browser";
 
     browser = {
