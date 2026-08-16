@@ -26,12 +26,6 @@ in {
         enableSessionWide = true;
         refreshRate = 175;
       };
-      bg3 = {
-        # Disabled: y0usaf/game-mods repo deleted from GitHub (404).
-        # fetchFromGitHub pin d54ec2df unfetchable. Re-enable after
-        # repo restored or mods vendored elsewhere.
-        enable = false;
-      };
       runelite = {
         enable = true;
         scale = 2.0;
