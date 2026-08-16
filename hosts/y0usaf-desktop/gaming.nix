@@ -11,7 +11,7 @@ _: {
     balatro = {
       enable = true;
       enableLovelyInjector = true;
-      enabledMods = ["steamodded" "talisman" "morespeeds" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "stickersalwaysshown"];
+      enabledMods = ["steamodded" "talisman" "cardsleeves" "multiplayer" "jokerdisplay" "pokermon" "aura" "stickersalwaysshown"];
     };
     wukong.enable = true;
     expedition33.enable = true;
