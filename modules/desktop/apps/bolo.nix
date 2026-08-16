@@ -158,11 +158,6 @@ in {
       '';
     };
     autofill = lib.mkEnableOption "typing the transcript into the focused window (dotool/uinput)";
-    keybind = lib.mkOption {
-      type = lib.types.str;
-      default = "Alt+M";
-      description = "Niri bind that toggles record/transcribe.";
-    };
     tomoeKeybind = lib.mkOption {
       type = lib.types.str;
       default = "Mod+m"; # tomoe Mod = Alt
@@ -223,15 +218,7 @@ in {
           // lib.mapAttrs' (f: src:
             lib.nameValuePair ".local/share/bolo/models/${name}/${f}" {source = src;})
           models."${name}".files) {}
-        (lib.attrNames models)
-        // lib.optionalAttrs config.user.ui.niri.enable {
-          ".config/niri/config.kdl".value = {
-            binds."${cfg.keybind}" = {spawn = "${boloPkgs.bolo}/bin/bolo";};
-            # Session-scoped daemon start (DESIGN.md locked decision):
-            # compositor child inherits XDG_RUNTIME_DIR + pipewire socket.
-            spawn-at-startup = [["${bolod}/bin/bolod"]];
-          };
-        };
+        (lib.attrNames models);
     };
 
     # Tomoe: supervised daemon + push-to-talk hold bind. process.service (not
