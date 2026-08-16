@@ -69,7 +69,7 @@ in {
       '';
     };
     enabledMods = mkOption {
-      type = types.listOf (types.enum ((lib.attrNames availableMods) ++ ["morespeeds"]));
+      type = types.listOf (types.enum (lib.attrNames availableMods));
       default = [];
       description = ''
         List of mod names to enable. Available mods:
@@ -84,12 +84,10 @@ in {
         - handybalatro: SleepyG11/HandyBalatro (Quality of Life controls and shortcuts)
         - aura: SpectralPack/Aura (visual enhancement mod)
         - ultimatespeedup: sse2/balatro-ultimate-speedup-mod (additional speed options)
-        - morespeeds: MoreSpeeds.lua (custom speed options)
       '';
     };
   };
   config = lib.mkMerge [
-    (import ./moreSpeeds.nix {inherit config lib;}).config
     (lib.mkIf gaming.balatro.enable (let
       inherit (config) user;
       steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
