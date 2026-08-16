@@ -225,6 +225,7 @@ in {
         ".local/share/rustup"
         ".local/share/opencode"
         ".local/share/phi"
+        ".local/share/nvim"
       ]
       ++ builtins.map (n: ".local/share/${n}") gameSaves
       ++ [
