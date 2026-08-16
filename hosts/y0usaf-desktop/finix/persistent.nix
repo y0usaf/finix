@@ -134,31 +134,6 @@ in {
     systemPackages = [
       pkgs.nix
       pkgs.efibootmgr
-      # Server cockpit + local runtime-only trial. Local switch/boot are
-      # GONE: `nh os switch` is the local driver — upstream programs.limine
-      # (./boot.nix) made switch-to-configuration self-contained: activate +
-      # profile generation + Limine menu render. Dispatch-only via nix run,
-      # so this never goes stale inside the system closure.
-      (pkgs.writeShellScriptBin "fx" ''
-        set -euo pipefail
-        flake="''${FX_FLAKE:-/home/y0usaf/finix}"
-        case "''${1:-}" in
-          test)
-            # runtime-only activation; never touches the boot menu
-            exec nix run "$flake#finix-desktop-deploy" -- local test ;;
-          server)
-            shift; sv="''${1:?usage: fx server <verb>}"
-            case "$sv" in
-              switch|test|boot) exec nix run "$flake#finix-server-persistent-deploy" -- server "$sv" ;;
-              *) exec nix run "$flake#finix-server-boot" -- server "$sv" ;;
-            esac ;;
-          *)
-            echo "this machine: nh os switch — fx only keeps:" >&2
-            echo "  fx test                     runtime-only activation trial" >&2
-            echo "  fx server switch|test|install|oneshot|promote|demote|rollback|status" >&2
-            exit 2 ;;
-        esac
-      '')
       pkgs.git
       pkgs.curl
       pkgs.iproute2
@@ -452,6 +427,10 @@ in {
       };
     };
   };
+
+  # Cap nix-daemon (and every build it spawns) at 24 of 32 cores (75%).
+  # cgroup v2 cpu.max = quota µs per 100ms period; 2400000 = 24 cores.
+  finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
 
   # Same credentials as the NixOS install (impermanence keeps these paths).
   # uid PINNED to the NixOS value: this box's y0usaf is 1001 (not the 1000
