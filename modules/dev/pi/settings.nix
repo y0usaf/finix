@@ -38,6 +38,10 @@ in {
           }
           // cfg.settings;
       };
+      ".pi/agent/models.json" = {
+        generator = toJSON;
+        value = cfg.models;
+      };
     };
   };
 }
