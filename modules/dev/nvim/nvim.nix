@@ -51,6 +51,18 @@ in {
             ];
             opt = [];
           };
+
+          # The wrapper sets VIMINIT to its own generated init.lua, which overrides
+          # nvim's default config loading and would otherwise skip the manzil-written
+          # ~/.config/nvim/init.lua. Load the bundled pack plugins first, then source
+          # the user config so its keymaps/setups actually take effect.
+          customLuaRC = ''
+            vim.cmd.packloadall()
+            local user_init = vim.fn.stdpath("config") .. "/init.lua"
+            if vim.fn.filereadable(user_init) == 1 then
+              dofile(user_init)
+            end
+          '';
         };
       }))
       pkgs.lua-language-server
