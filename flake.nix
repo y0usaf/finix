@@ -20,7 +20,7 @@
     };
 
     bolo = {
-      # Private repo: ssh fetcher (same as phi / nvflashk-linux).
+      # Private repo: ssh fetcher (same as phi).
       url = "git+ssh://git@github.com/y0usaf/bolo.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -42,11 +42,6 @@
 
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    tweakcc = {
-      url = "github:y0usaf/tweakcc?ref=feat/nix-module";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -147,10 +142,6 @@
       flake = false;
     };
 
-    impermanence = {
-      url = "github:nix-community/impermanence";
-    };
-
     # moonshell is no longer a separate input: it merged into tomoe as
     # its in-process shell subsystem (tomoe FUSION.md; the standalone
     # repo is archived).
@@ -161,16 +152,6 @@
 
     strictix = {
       url = "github:y0usaf/strictix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nvtune = {
-      url = "github:y0usaf/nvtune";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nvflashk-linux = {
-      url = "git+ssh://git@github.com/y0usaf/nvflashk-linux.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
