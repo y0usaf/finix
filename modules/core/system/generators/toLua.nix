@@ -64,11 +64,5 @@
         else "[${toString key}]")
       k} = ${valStr v}";
   in
-    value:
-      if isAttrs value
-      then
-        "{ "
-        + concatStringsSep ", " (lib.filter (s: s != "") (lib.mapAttrsToList entry (lib.filterAttrs (_: x: x != null) value)))
-        + " }"
-      else valStr value;
+    valStr;
 }
