@@ -19,7 +19,6 @@ _: {
     principles.enable = true;
     docker.enable = true;
     gcloud.enable = true;
-    localllama.enable = false;
     nvim.enable = true;
     bun.enable = true;
     npm.enable = true;
