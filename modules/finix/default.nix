@@ -13,16 +13,14 @@
   # consumed; the fleet stripped NixOS-only config) + the desktop host dir's
   # legacy files. Exclusions:
   #   - ../core/firewall.nix  (finix-native nftables, imported directly)
-  #   - ../core/flake-modules.nix  (NixOS-only input modules)
   #   - ../dev/kimi-code/package.nix (package function, not a module)
   #   - ../dev/paseo/options.nix + service.nix (finix-native finit service)
   #   - **/SKILL.nix data files and mapping.nix (non-module data)
-  #   - hosts/…/impermanence.nix + hardware-configuration.nix (NixOS-only)
+  #   - hosts/…/impermanence.nix (NixOS-only)
   #   - any path containing /finix/  (already finix-native)
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
   walkedKnownExclusions = [
     ../core/firewall.nix
-    ../core/flake-modules.nix
     ../dev/kimi-code/package.nix
     ../dev/paseo/options.nix
     ../dev/paseo/service.nix
@@ -32,12 +30,10 @@
     # ship.nix / codebase-atlas.nix, so exclude them from the walk.
     ../dev/skills/codebase-atlas/SKILL.nix
     ../dev/skills/ship/SKILL.nix
+    ../dev/skills/anti-slop/SKILL.nix
     # environment.persistence is NixOS-only; this file's persist list is
     # replayed as plain bind mounts by hosts/y0usaf-desktop/finix/*.
     ../../hosts/y0usaf-desktop/impermanence.nix
-    # NixOS-only boot/fileSystems/zram/network config; finix re-implements it
-    # in boot.nix / parity.nix / persistent.nix.
-    ../../hosts/y0usaf-desktop/hardware-configuration.nix
   ];
   desktopNixosModules = map import (builtins.filter (p:
       !(builtins.elem p walkedKnownExclusions)
