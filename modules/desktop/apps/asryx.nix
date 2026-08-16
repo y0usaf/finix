@@ -221,8 +221,7 @@ in {
         }
         // lib.mapAttrs' (name: src:
           lib.nameValuePair ".local/share/asryx/models/ggml-${name}.bin" {source = src;})
-        whisperModels
-        ;
+        whisperModels;
     };
 
     user.ui.tomoe.extraConfig = lib.mkIf (config.user.ui.tomoe.enable && cfg.binds) ''
