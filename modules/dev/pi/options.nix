@@ -31,7 +31,7 @@ in {
 
     defaultModel = lib.mkOption {
       type = types.str;
-      default = "deepseek/deepseek-v4-pro-0813";
+      default = "deepseek/deepseek-v4-flash-0731";
       description = "Default model written to settings.json defaultModel.";
     };
 
@@ -62,6 +62,46 @@ in {
       type = types.attrsOf types.anything;
       default = {};
       description = "Freeform settings.json override, merged last so hosts can override any key.";
+    };
+
+    models = lib.mkOption {
+      type = types.attrsOf types.anything;
+      default = {
+        providers."vercel-ai-gateway" = {
+          # Upsert deepseek models onto the builtin vercel-ai-gateway catalog so
+          # they use openai-completions (the only api that emits
+          # vercelGatewayRouting/providerOptions.gateway) and pin the gateway to
+          # the wafer provider. Unlisted models keep their builtin api+params.
+          # Params mirror the gateway catalog (ai-gateway.vercel.sh/v1/models).
+          models = [
+            {
+              id = "deepseek/deepseek-v4-flash-0731";
+              name = "DeepSeek V4 Flash 0731";
+              reasoning = true;
+              input = ["text"];
+              cost = { input = 0.2; output = 0.4; cacheRead = 0.04; cacheWrite = 0; };
+              contextWindow = 1000000;
+              maxTokens = 384000;
+              api = "openai-completions";
+              baseUrl = "https://ai-gateway.vercel.sh/v1";
+              compat.vercelGatewayRouting.only = ["wafer"];
+            }
+            {
+              id = "deepseek/deepseek-v4-flash";
+              name = "DeepSeek V4 Flash";
+              reasoning = true;
+              input = ["text"];
+              cost = { input = 0.2; output = 0.4; cacheRead = 0.04; cacheWrite = 0; };
+              contextWindow = 1000000;
+              maxTokens = 384000;
+              api = "openai-completions";
+              baseUrl = "https://ai-gateway.vercel.sh/v1";
+              compat.vercelGatewayRouting.only = ["wafer"];
+            }
+          ];
+        };
+      };
+      description = "Model definitions written to ~/.pi/agent/models.json.";
     };
 
     readmePath = mkInternalStr "Path to the pi README.";
