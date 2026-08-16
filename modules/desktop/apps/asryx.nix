@@ -77,12 +77,7 @@ in {
     binds = lib.mkOption {
       type = lib.types.bool;
       default = true;
-      description = "Compositor keybinds. Disabled on the desktop: bolo owns Alt+M/Mod+m there.";
-    };
-    keybind = lib.mkOption {
-      type = lib.types.str;
-      default = "Alt+M";
-      description = "Niri bind that toggles record/transcribe.";
+      description = "Tomoe push-to-talk bind enabling.";
     };
     tomoeKeybind = lib.mkOption {
       type = lib.types.str;
@@ -227,9 +222,7 @@ in {
         // lib.mapAttrs' (name: src:
           lib.nameValuePair ".local/share/asryx/models/ggml-${name}.bin" {source = src;})
         whisperModels
-        // lib.optionalAttrs (config.user.ui.niri.enable && cfg.binds) {
-          ".config/niri/config.kdl".value.binds."${cfg.keybind}" = {spawn = "asryx";};
-        };
+        ;
     };
 
     user.ui.tomoe.extraConfig = lib.mkIf (config.user.ui.tomoe.enable && cfg.binds) ''
