@@ -93,6 +93,11 @@ function M.get()
     local svc = shell.services and shell.services.sysinfo
     if svc then
         local s = svc:get()
+        -- Guard: accept the facade only once it reports a real snapshot.
+        -- Note cpu_percent is also the live probe here: a native backend's
+        -- first push legitimately has cpu_percent = 0 (delta counters), and
+        -- this truthiness check treats that as "not ready", falling back to
+        -- the local table instead of honoring the facade.
         if s and s.cpu_percent then return s end
     end
     return M.state
