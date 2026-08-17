@@ -240,11 +240,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786418112,
-        "narHash": "sha256-UhaZJb1P5PHmrL19WupI0jf4OqBlCLyq9ibAhrMjq7k=",
+        "lastModified": 1786863092,
+        "narHash": "sha256-7e8qljkxgaAEU6Q+mOVTs3S4E/J00oVRiQarI/S3470=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "21634d92d25b6cbe6af34be2f4d169402193f40b",
+        "rev": "56b1246c424bbd889fc8da0428e4fbca17314018",
         "type": "github"
       },
       "original": {
@@ -744,11 +744,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783299919,
-        "narHash": "sha256-kkZcO7bsZtgbIZ7sqWf5jjQ5cx2aNiq4FWFiumhfSRc=",
+        "lastModified": 1786898025,
+        "narHash": "sha256-e2bAgaX7sBvF6ciCisiRbZ9FNT2lVVey2ty3IkQ/nGA=",
         "ref": "main",
-        "rev": "02d5fa07d3f55acd3b8099b4b134eb72cb8a4382",
-        "revCount": 285,
+        "rev": "691d525ea8e0ea2e1b00932e1ec8a78f1ecde487",
+        "revCount": 290,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/phi.git"
       },
@@ -771,11 +771,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1786847248,
-        "narHash": "sha256-AvzwtyIrGydkdoFoSVbgWppMfVQExmK3aN9ZHa+4a94=",
+        "lastModified": 1786895455,
+        "narHash": "sha256-fN2hVuouqrIuHy3Y/VU87OwnOkGQk636f6ZYkju+VQY=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "d3fa268f1787a48922dfa8fc30dd12fc2687c0ae",
+        "rev": "5f23a34a97761738c851f1d75649aa9a9beeb500",
         "type": "github"
       },
       "original": {
@@ -794,11 +794,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1786065053,
-        "narHash": "sha256-kaSMcbUtGnitjlWEKLg7cdSsZoVvy77XQjn9xOeggUg=",
+        "lastModified": 1786883032,
+        "narHash": "sha256-nsdrNVgaeA6E1+PEQiVNL2FFZan7RMlvei42WyMPtQ4=",
         "ref": "main",
-        "rev": "d1b00d2c49d93dbdf72b451f2d3eae5956587fa3",
-        "revCount": 73,
+        "rev": "ad4363dc333c374803acc2d680c48c655c3fa87c",
+        "revCount": 79,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/pi-harness.git"
       },
@@ -1081,11 +1081,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786816363,
-        "narHash": "sha256-jyMITM92X9ifgfFtRGVniFDo2OfJ1rFZsFZj7vil9Qk=",
+        "lastModified": 1786889867,
+        "narHash": "sha256-7EzgLDjNsOUv6BQ8siOVN4V3CLIBq7Pwu3iWh/i7lR0=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "5f231dedf3747df74367be120a8fe8419fdf0f71",
+        "rev": "3ee19e3480216c640b1de8f6b9a74a46d3eb1f59",
         "type": "github"
       },
       "original": {
