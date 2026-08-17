@@ -168,12 +168,12 @@ in {
   # ── gaming: gamemoded is dbus-activated per session; it only needs its
   # group to exist for the renice policy. gamescope/gamemode/steam
   # binaries + steam-hardware udev rules come via the bridge.
-  users.groups.gamemode = {};
   # input: dotool opens /dev/uinput (asryx autofill); rule 99-local.rules
   # (bridged) grants the input group rw on the uinput node.
   # bluetooth (bluetoothd), lp (CUPS/printing), dialout (serial/tty devices)
   # — restored from the deleted modules/desktop/user-groups.nix.
   users.groups = {
+    gamemode = {};
     bluetooth = {};
     lp = {};
     dialout = {};

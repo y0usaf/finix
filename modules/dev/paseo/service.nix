@@ -15,7 +15,7 @@
   ...
 }: let
   cfg = config.user.dev.paseo;
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
   paseo = flakeInputs.paseo.packages."${system}".default;
   home = config.user.homeDirectory;
   homePaseo = "${home}/${cfg.dataDir}";

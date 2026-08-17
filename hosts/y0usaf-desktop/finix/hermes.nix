@@ -15,7 +15,7 @@
   flakeInputs,
   ...
 }: let
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
   hermesDesktop = flakeInputs.hermes-agent.packages."${system}".desktop;
 in {
   environment.systemPackages = [

@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  wrapFonts = fonts: lib.concatStringsSep ", " (map (f: "\"${f}\"") fonts);
+  wrapFonts = names: lib.concatStringsSep ", " (map (f: "\"${f}\"") names);
   inherit (config) user;
   inherit (user.ui) fonts;
   inherit (user.programs) discord;

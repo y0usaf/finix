@@ -6,7 +6,7 @@
   ...
 }: let
   cfg = config.user.dev.reasonix;
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
   package = flakeInputs.reasonix-flake.packages."${system}".default;
 
   # Idempotent: sync the gateway key from apiKeyFile into
