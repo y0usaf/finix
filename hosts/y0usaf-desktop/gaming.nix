@@ -20,5 +20,6 @@ _: {
     arc-raiders.enable = true;
     solo-leveling-arise.enable = true;
     aethermancer.enable = true;
+    tft.enable = true;
   };
 }

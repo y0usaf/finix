@@ -71,6 +71,9 @@ in {
       # Docker engine state
       "/var/lib/docker"
 
+      # Waydroid Android container (TFT) — image, userdata, installed apps
+      "/var/lib/waydroid"
+
       # Backup / automation
       "/var/lib/btrbk"
       "/var/lib/hjem"
