@@ -15,6 +15,7 @@ _: {
       linear-cli.enable = true;
     };
     pi.enable = true;
+    pi.prime-agent.enable = true;
     pi.agents = {
       maxDepth = 999;
       maxLiveAgents = 999;
@@ -49,7 +50,6 @@ _: {
     latex.enable = true;
     upscale.enable = true;
     phi.enable = true;
-    prime-agent.enable = true;
     reasonix = {
       enable = true;
       apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";

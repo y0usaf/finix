@@ -1,9 +1,9 @@
-{
-  lib,
-  ...
-}: let
+{lib, ...}: let
   inherit (lib) types;
   nullOrStr = types.nullOr types.str;
+
+  # Shared pi/prime-agent model catalog (plain data, see model-catalog.nix).
+  catalog = import ./model-catalog.nix;
 
   mkInternalStr = description:
     lib.mkOption {
@@ -25,36 +25,25 @@ in {
 
     defaultProvider = lib.mkOption {
       type = types.str;
-      default = "vercel-ai-gateway";
+      default = catalog.defaultProvider;
       description = "Default provider written to settings.json defaultProvider.";
     };
 
     defaultModel = lib.mkOption {
       type = types.str;
-      default = "deepseek/deepseek-v4-flash-0731";
+      default = catalog.defaultModel;
       description = "Default model written to settings.json defaultModel.";
     };
 
     defaultThinkingLevel = lib.mkOption {
       type = types.str;
-      default = "max";
+      default = catalog.defaultThinkingLevel;
       description = "Default thinking level written to settings.json defaultThinkingLevel.";
     };
 
     enabledModels = lib.mkOption {
       type = types.listOf types.str;
-      default = [
-        "vercel-ai-gateway/deepseek/deepseek-v4-pro-0813"
-        "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
-        "vercel-ai-gateway/moonshotai/kimi-k3-fast"
-        "vercel-ai-gateway/anthropic/claude-fable-5"
-        "vercel-ai-gateway/openai/gpt-5.6-sol"
-        "vercel-ai-gateway/openai/gpt-5.6-luna"
-        "anthropic/claude-fable-5"
-        "anthropic/claude-opus-5"
-        "openai-codex/gpt-5.6-sol"
-        "openai-codex/gpt-5.6-luna"
-      ];
+      default = catalog.enabledModels;
       description = "Models written to settings.json enabledModels.";
     };
 
@@ -66,41 +55,7 @@ in {
 
     models = lib.mkOption {
       type = types.attrsOf types.anything;
-      default = {
-        providers."vercel-ai-gateway" = {
-          # Upsert deepseek models onto the builtin vercel-ai-gateway catalog so
-          # they use openai-completions (the only api that emits
-          # vercelGatewayRouting/providerOptions.gateway) and pin the gateway to
-          # the wafer provider. Unlisted models keep their builtin api+params.
-          # Params mirror the gateway catalog (ai-gateway.vercel.sh/v1/models).
-          models = [
-            {
-              id = "deepseek/deepseek-v4-flash-0731";
-              name = "DeepSeek V4 Flash 0731";
-              reasoning = true;
-              input = ["text"];
-              cost = { input = 0.2; output = 0.4; cacheRead = 0.04; cacheWrite = 0; };
-              contextWindow = 1000000;
-              maxTokens = 384000;
-              api = "openai-completions";
-              baseUrl = "https://ai-gateway.vercel.sh/v1";
-              compat.vercelGatewayRouting.only = ["wafer"];
-            }
-            {
-              id = "deepseek/deepseek-v4-flash";
-              name = "DeepSeek V4 Flash";
-              reasoning = true;
-              input = ["text"];
-              cost = { input = 0.2; output = 0.4; cacheRead = 0.04; cacheWrite = 0; };
-              contextWindow = 1000000;
-              maxTokens = 384000;
-              api = "openai-completions";
-              baseUrl = "https://ai-gateway.vercel.sh/v1";
-              compat.vercelGatewayRouting.only = ["wafer"];
-            }
-          ];
-        };
-      };
+      default = catalog.models;
       description = "Model definitions written to ~/.pi/agent/models.json.";
     };
 
@@ -111,7 +66,7 @@ in {
     agents = {
       model = lib.mkOption {
         type = nullOrStr;
-        default = "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731";
+        default = "${catalog.defaultProvider}/${catalog.defaultModel}";
         description = ''
           Model for pi-agents spawned children, written to
           `~/.pi/agent/pi-agents.json`. Use a qualified
@@ -137,7 +92,7 @@ in {
 
       orchestrator = lib.mkOption {
         type = types.bool;
-        default = true;
+        default = false;
         description = ''
           Strip write/edit from the main pi session at session start so
           file mutations route through spawned executor agents. Toggle
@@ -161,5 +116,4 @@ in {
       };
     };
   };
-
 }
