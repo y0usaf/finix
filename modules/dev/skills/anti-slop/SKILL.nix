@@ -1,7 +1,15 @@
 ''
   ---
   name: anti-slop
-  description: Language-agnostic anti-slop hygiene for code in any language (TypeScript, JavaScript, Rust, Go, Lua, Python). Rejects low-evidence patterns: stacked casts, silenced type contracts, reflective dispatch where a direct call works, ad-hoc type-checking mid-function, mocking over real seams, and casting without a stated invariant. Use whenever writing, reviewing, or refactoring code, and when "anti-slop", "slop", "low-evidence", "avoid unknown", "no unsafe casts", or "type hygiene" come up. A principles skill, not a linter; per-language enforcement lives in the actual linter (clippy, oxlint).
+  description: >-
+    Language-agnostic anti-slop hygiene for code in any language (TypeScript,
+    JavaScript, Rust, Go, Lua, Python). Rejects low-evidence patterns: stacked
+    casts, silenced type contracts, reflective dispatch where a direct call works,
+    ad-hoc type-checking mid-function, mocking over real seams, and casting without
+    a stated invariant. Use whenever writing, reviewing, or refactoring code, and
+    when "anti-slop", "slop", "low-evidence", "avoid unknown", "no unsafe casts",
+    or "type hygiene" come up. A principles skill, not a linter; per-language
+    enforcement lives in the actual linter (clippy, oxlint).
   ---
 
   # Anti-slop

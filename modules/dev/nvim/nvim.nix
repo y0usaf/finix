@@ -22,7 +22,7 @@ in {
         p.tree-sitter-markdown
         p.tree-sitter-json
       ]))
-      (pkgs.neovim.override (old: {
+      (pkgs.neovim.override (_old: {
         configure = {
           packages.finixPlugins = {
             start = [
@@ -41,7 +41,7 @@ in {
               pkgs.vimPlugins.lsp_lines-nvim
               pkgs.vimPlugins.telescope-nvim
               pkgs.vimPlugins.telescope-fzf-native-nvim
-              (pkgs.vimPlugins.nvim-treesitter.withAllGrammars)
+              pkgs.vimPlugins.nvim-treesitter.withAllGrammars
               pkgs.vimPlugins.comment-nvim
               pkgs.vimPlugins.nvim-autopairs
               pkgs.vimPlugins.gitsigns-nvim
