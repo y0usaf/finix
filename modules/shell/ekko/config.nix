@@ -40,60 +40,26 @@ in {
       '')
     ];
     manzil.users."${config.user.name}".files = {
-      # The which-key.lua user extension rebuilds the leader mode and the
-      # status/hint bar in Lua; the builtin leader and statusbar MUST stay
+      # The which-key WASM extension rebuilds the leader mode and the
+      # status/hint bar as a compiled `.wasm` module on the cordis kernel (the
+      # Rust guest in the ekko repo, package `which-key`, built to
+      # wasm32-unknown-unknown). The builtin leader and statusbar MUST stay
       # disabled or the runtime aborts with duplicate leader-mode
       # keybindings on attach. The builtin sidebar (visible: None = always
-      # shown) is replaced by the lua leader-attached session panel. The
-      # builtin panes extension registers pane operations and leader keys
-      # that collide with which-key.lua's own leader keys, so it is disabled
-      # too; pane keys live in the lua map instead. Vendored alongside this module (which-key.lua) so every
-      # host gets it — it used to live hand-managed on one machine, and
-      # hosts without it lost the entire leader/status UI.
-      ".config/ekko/extensions/which-key.lua".source = ./which-key.lua;
+      # shown) is replaced by the leader-attached session panel. The builtin
+      # panes extension registers pane operations and leader keys that collide
+      # with which-key's own leader keys, so it is disabled too; pane keys
+      # live in the wasm map instead. Vendored via the ekko flake input so
+      # every host gets it deterministically.
+      ".config/ekko/extensions/which-key.wasm".source =
+        flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".which-key;
 
-      # Unbind project navigation: "none" is intentionally unparseable —
-      # resolve_chords skips the action entirely (empty string would fall
-      # back to the defaults instead).
-      ".config/ekko/init.lua" = {
-        text = ''
-          return {
-            extensions = {
-              -- The entire stock chord set is disabled above; [keybinds] has
-              -- nothing left to suppress.
-              disabled = {
-                "ekko-builtins.leader",
-                "ekko-builtins.statusbar",
-                "ekko-builtins.sidebar",
-                "ekko-builtins.panes",
-                "ekko-builtins.keybindings",
-              },
-            },
-            ui = {
-              -- Zellij-style pane borders: a full box frame around every pane,
-              -- the focused pane's frame tinted with the theme accent. Swap to
-              -- "compact" for zellij's compact mode (single shared boundary
-              -- lines with junction glyphs). The daemon owns the canvas, so
-              -- this takes effect for newly started sessions (ekko kill).
-              pane_borders = "frame",
-              -- Client-local ASCII separators: the daemon still reserves the
-              -- separator cells, but the client renders them with these glyphs
-              -- instead of the box-drawing table.
-              border_glyphs = { horizontal = "-", vertical = "|", junction = "+" },
-              -- Panes tile to the divisor-pair grid whose cells are closest to
-              -- square in pixels (cell height counted twice); prime counts of
-              -- five or more use one near-half proportional cut whose halves
-              -- are themselves grids. The requested split axis is ignored and
-              -- the whole layout recomputes on every add or close. The daemon
-              -- owns the canvas, so this takes effect for newly started
-              -- sessions (ekko kill).
-              pane_layout = "equal",
-              -- Drives the client's animation tick (default 80ms = 12.5fps; 33ms = 30fps).
-              animation_interval_ms = 33,
-            },
-          }
-        '';
-      };
+      # The WASM config module (cordis set 1): on mount it ctx_set's the
+      # `config` key with the settings JSON, reproducing the former init.lua.
+      # Builtin leader/statusbar/sidebar/panes/keybindings are disabled
+      # (which-key owns those surfaces); pane borders framed with ASCII
+      # glyphs, equal layout, 33ms animation tick.
+      ".config/ekko/config.wasm".source = ./config.wasm;
     };
 
     # mkOrder 1600 > mkAfter's 1500: `exec ekko` replaces the shell, so
