@@ -9,7 +9,7 @@
 }: let
   roots =
     (lib.optional config.user.dev.pi.enable ".pi/agent/skills")
-    ++ (lib.optional config.user.dev."prime-agent".enable ".prime/agent/skills")
+    ++ (lib.optional config.user.dev.pi.prime-agent.enable ".prime/agent/skills")
     ++ (lib.optional config.user.dev.reasonix.enable ".reasonix/skills");
 
   # mkSkill name files -> list of per-root attrsets, ready for lib.mkMerge.

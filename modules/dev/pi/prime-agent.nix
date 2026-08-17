@@ -5,38 +5,50 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.dev.prime-agent;
+  cfg = config.user.dev.pi.prime-agent;
+  # Shared pi/prime-agent model catalog (plain data, see model-catalog.nix).
+  catalog = import ./model-catalog.nix;
   toJSON = lib.generators.toJSON {};
 in {
-  options.user.dev.prime-agent = {
+  # Prime Agent is the pi core plus the Prime RLM/harness layer; it reads the
+  # same settings.json/models.json schema from ~/.prime/agent/ instead of
+  # ~/.pi/agent/, so its model catalog is shared with pi via model-catalog.nix.
+  options.user.dev.pi.prime-agent = {
     enable = lib.mkEnableOption "Prime Agent coding agent";
 
     defaultProvider = lib.mkOption {
       type = lib.types.str;
-      default = "vercel-ai-gateway";
+      default = catalog.defaultProvider;
       description = "Default provider written to ~/.prime/agent/settings.json defaultProvider.";
     };
 
     defaultModel = lib.mkOption {
       type = lib.types.str;
-      default = "anthropic/claude-fable-5";
+      default = catalog.defaultModel;
       description = "Default model written to ~/.prime/agent/settings.json defaultModel.";
     };
 
     defaultThinkingLevel = lib.mkOption {
       type = lib.types.str;
-      default = "high";
+      default = catalog.defaultThinkingLevel;
       description = "Default thinking level written to ~/.prime/agent/settings.json defaultThinkingLevel.";
     };
 
     enabledModels = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [
-        "vercel-ai-gateway/anthropic/claude-fable-5"
-        "vercel-ai-gateway/openai/gpt-5.6-sol"
-        "openai-codex/gpt-5.6-sol"
-      ];
+      default = catalog.enabledModels;
       description = "Model patterns written to ~/.prime/agent/settings.json enabledModels for cycling.";
+    };
+
+    rlmMaxDepth = lib.mkOption {
+      type = lib.types.int;
+      default = 999;
+      description = ''
+        RLM subagent recursion cap written to settings.json rlmMaxDepth.
+        Resolution order in agent-session.js: per-chat /rlm override >
+        depth inherited from the parent > this global setting >
+        RLM_MAX_DEPTH env > default 1. 999 is effectively unlimited.
+      '';
     };
 
     settings = lib.mkOption {
@@ -47,39 +59,7 @@ in {
 
     models = lib.mkOption {
       type = lib.types.attrsOf lib.types.anything;
-      default = {
-        providers."vercel-ai-gateway" = {
-          # openai-completions is the only api that emits vercelGatewayRouting;
-          # anthropic-messages (the built-in default) drops it. baseUrl is
-          # per-model: openai models need /v1 (client uses baseUrl verbatim),
-          # while anthropic-messages models must NOT get /v1 (SDK appends
-          # /v1/messages -> double path -> 404).
-          api = "openai-completions";
-          # Vercel gateway has no exclude list; whitelist every upstream
-          # provider except moonshotai via vercelGatewayRouting.only.
-          modelOverrides."anthropic/claude-fable-5" = {
-            compat.vercelGatewayRouting.only = ["anthropic" "bedrock" "vertex"];
-          };
-          models = [
-            {
-              id = "moonshotai/kimi-k3-fast";
-              name = "Kimi K3 Fast";
-              baseUrl = "https://ai-gateway.vercel.sh/v1";
-              reasoning = true;
-              input = ["text" "image"];
-              cost = {
-                input = 4.5;
-                output = 22.5;
-                cacheRead = 0.45;
-                cacheWrite = 0;
-              };
-              contextWindow = 1000000;
-              maxTokens = 131072;
-              compat.vercelGatewayRouting.only = ["fireworks"];
-            }
-          ];
-        };
-      };
+      default = catalog.models;
       description = "Model definitions written to ~/.prime/agent/models.json.";
     };
   };
@@ -98,6 +78,7 @@ in {
             inherit (cfg) defaultModel;
             inherit (cfg) defaultThinkingLevel;
             inherit (cfg) enabledModels;
+            inherit (cfg) rlmMaxDepth;
             hideThinkingBlock = true;
           }
           // cfg.settings;
