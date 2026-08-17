@@ -111,8 +111,8 @@ in {
       default = "cpu";
       description = ''
         onnxruntime execution provider. "cuda" rebuilds sherpa-onnx +
-        onnxruntime with cudaSupport (long first build). DESIGN.md records
-        cpu as the measured-sufficient default (12x real-time).
+        onnxruntime with cudaSupport (long first build). cpu is the
+        measured-sufficient default (12x real-time); cuda is opt-in.
       '';
     };
     language = lib.mkOption {

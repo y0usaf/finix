@@ -74,15 +74,15 @@
         tracks cleanup itself. State that survives a viewer belongs to
         `daemon-thin-client`.
 
-        **Check (run):** DESIGN.md names the composition unit, the context, and the
-        revert mechanism (inverses, or reconstruction + preserved-state set). Snapshot
-        the context, mount a unit, exercise every effect it can commit, unmount, diff:
+        **Check (run):** the composition unit, the context it reverts, and its
+        revert mechanism (inverses, or reconstruction + preserved-state set) live in
+        code, not a doc. Snapshot the context, mount a unit, exercise every effect it can commit, unmount, diff:
         residue fails. Change each declared dependency and confirm exactly its
         resolved consumers update; a missed consumer or an undeclared dependency
         fails.
 
-        **Not when:** nothing mounts during process life. Record the exception and
-        its reversal in DESIGN.md.
+        **Not when:** nothing mounts during process life. State the exception and
+        its reversal at the mount call site.
 
         ### `[[principle:unix]]` — the rules that still bind
 
@@ -98,8 +98,7 @@
         7. Generate what you'd hand-maintain — a hand-edited file could be generated
         8. Work, then measure, then optimize — optimization with no prior benchmark
 
-        **Check (judge):** apply all eight rows; fix true failures or record a
-        reasoned DESIGN.md divergence.
+        **Check (judge):** apply all eight rows; fix true failures.
 
         ### `[[principle:functional-core]]` — functional core, imperative shell
 
@@ -107,13 +106,14 @@
         snapshot and returns actions the host applies afterward — one write path, one
         home for invariants. A timeout or instruction budget kills runaway dispatches.
 
-        **Check (run):** DESIGN.md names the extension boundary and the dispatch test
-        covering snapshot isolation, action-only output, and termination. Search the
-        boundary for mutable host-state handles (`&mut` on a host type in Rust). A
-        hit, an unnamed boundary, or an unnamed test fails.
+        **Check (run):** the extension boundary is the code split between core and
+        shell, covered by a dispatch test of snapshot isolation, action-only output,
+        and termination. Search the boundary for mutable host-state handles (`&mut`
+        on a host type in Rust). A hit, an unnamed boundary, or an unnamed test
+        fails.
 
-        **Not when:** no extension surface is intended; DESIGN.md states why and the
-        condition that would require one.
+        **Not when:** no extension surface is intended; state why and the condition
+        that would require one.
 
         ### `[[principle:no-privileged-path]]` — nothing we ship gets a shortcut
 
@@ -121,12 +121,11 @@
         stranger uses, in a `*-builtins` layer. Without a public API, declare every
         unit of a kind through one mechanism.
 
-        **Check (run):** skip only if DESIGN.md marks this `n/a`; otherwise build
-        without built-ins and confirm the bare build starts and performs DESIGN.md's
-        named behavior. CI, not a manual ritual.
+        **Check (run):** build without built-ins and confirm the bare build starts
+        and performs the named behavior. CI, not a manual ritual.
 
         **Not when:** no plugin story; the API would exceed the feature set; fewer
-        than three units of the kind. Record exception + reversal in DESIGN.md.
+        than three units of the kind.
 
         ### `[[principle:daemon-thin-client]]` — state outlives the viewer
 
@@ -135,7 +134,7 @@
         keep old clients working, breaking changes reject them explicitly, never
         silent misparse.
 
-        **Check (run):** DESIGN.md names daemon-owned state; kill and restart the
+        **Check (run):** the surviving state lives on a daemon; kill and restart the
         client, confirm the state survives. Components mounted inside the daemon are
         governed by `[[principle:spatiotemporal]]`; this rule owns only surviving state.
 
@@ -153,17 +152,6 @@
 
         **Check (run):** "tests pass" only after a Nix command exits zero. Quote it.
 
-        ### `[[principle:design-doc]]` — every project states its own shape
-
-        DESIGN.md before code for a new project or subsystem (not small fixes, scratch
-        trees, or worktrees). Local DESIGN.md outweighs principles; report conflicts.
-        Record decisions and reasons, not status or conformance tables; do not restate
-        principles.
-
-        **Check (run):** `rg '^## (Locked decisions|Architecture|Deferred|Roadmap)'
-        DESIGN.md` returns exactly four hits. Facts other rules need belong to those
-        rules' checks.
-
         ### `[[principle:amend]]` — this file changes by proposal only
 
         An edit — panel rewrite included — is a proposal until its owner accepts it.
@@ -172,14 +160,6 @@
 
         **Check (judge):** changed because it was asked for, or because a rule was
         inconvenient right now?
-
-        ## DESIGN.md shape
-
-        Four sections required: **Locked decisions** (dated choices + reasons),
-        **Architecture** (module map: decision-making vs machinery), **Deferred**
-        (omissions + reasons), **Roadmap** (phases with checkable criteria). Others
-        optional. Put required facts — extension boundary, daemon-owned state,
-        composition unit + revert mechanism, `n/a` + reversal — where they fit.
       '';
     };
   };
