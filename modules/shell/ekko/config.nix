@@ -50,9 +50,12 @@ in {
       # panes extension registers pane operations and leader keys that collide
       # with which-key's own leader keys, so it is disabled too; pane keys
       # live in the wasm map instead. Vendored via the ekko flake input so
-      # every host gets it deterministically.
+      # every host gets it deterministically. Note: `packages.which-key` is
+      # the derivation's *output* (a dir containing which-key.wasm); point at
+      # the file inside it so manzil symlinks a file, not a directory.
       ".config/ekko/extensions/which-key.wasm".source =
-        flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".which-key;
+        flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".which-key
+        + "/which-key.wasm";
 
       # The WASM config module (cordis set 1): on mount it ctx_set's the
       # `config` key with the settings JSON, reproducing the former init.lua.
