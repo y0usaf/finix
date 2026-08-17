@@ -151,7 +151,14 @@
           dhcpcd
           getty
           openssh
-          sudo
+          # Local override of the upstream finix sudo module: the stock module
+          # adds the raw (mode 0555, non-setuid) sudo binary to
+          # environment.systemPackages, which shadows the setuid wrapper in
+          # /run/wrappers/bin/sudo on PATH and breaks every sudo invocation
+          # ("must be owned by uid 0 and have the setuid bit set"). See
+          # ./sudo/default.nix. Use our stripped copy instead of
+          # (inputs.finix.nixosModules.sudo).
+          ./sudo
           sysklogd
           ./common.nix
         ]
