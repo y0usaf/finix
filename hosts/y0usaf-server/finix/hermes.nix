@@ -24,7 +24,7 @@
 # https://ai-gateway.vercel.sh/v1 and reads the key from AI_GATEWAY_API_KEY.
 { lib, pkgs, flakeInputs, ... }:
 let
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
   hermes = flakeInputs.hermes-agent.packages.${system}.minimal;
   stateDir = "/var/lib/hermes";
 
