@@ -28,6 +28,9 @@
     # phi prompt modules; it defines no config, so skip it in the walk.
     ../dev/phi/prompt-body.nix
     ../dev/skills/mapping.nix
+    # Shared pi/prime-agent model catalog is plain data imported directly by
+    # modules/dev/pi/{options,prime-agent}.nix; it defines no config.
+    ../dev/pi/model-catalog.nix
     # SKILL.nix files are bare-string data (the shim dropped them as
     # non-function modules); their content is consumed via direct import in
     # ship.nix / codebase-atlas.nix, so exclude them from the walk.
