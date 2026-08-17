@@ -24,6 +24,9 @@
     ../dev/kimi-code/package.nix
     ../dev/paseo/options.nix
     ../dev/paseo/service.nix
+    # Phi prompt body is a plain data file imported explicitly by the pi and
+    # phi prompt modules; it defines no config, so skip it in the walk.
+    ../dev/phi/prompt-body.nix
     ../dev/skills/mapping.nix
     # SKILL.nix files are bare-string data (the shim dropped them as
     # non-function modules); their content is consumed via direct import in
