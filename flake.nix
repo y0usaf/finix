@@ -60,7 +60,7 @@
     };
 
     codex-cli-nix = {
-      url = "path:/home/y0usaf/dev/codex-flake";
+      url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -74,6 +74,11 @@
 
     phi = {
       url = "git+ssh://git@github.com/y0usaf/phi.git?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    fx = {
+      url = "github:y0usaf/fx/add-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -136,11 +141,10 @@
     };
 
     hermes-agent = {
-      # Vendored patch of github:NousResearch/hermes-agent@2b0fb72 — upstream's
-      # electron-headers FOD sha went stale when artifacts.electronjs.org
-      # recompressed the v41.9.1 tarball (see finix-vendor/hermes-agent commit).
-      # Refresh: repeat the same one-line sha256 bump when the mirror rebuilds.
-      url = "git+file:///home/y0usaf/finix-vendor/hermes-agent";
+      # Pin upstream source directly; desktop's mutable Electron headers hash is
+      # corrected where that package is materialized. Never depend on a sibling
+      # checkout: clean clones and rescue hosts must evaluate this flake alone.
+      url = "github:NousResearch/hermes-agent/2b0fb72acae67f51652de5c51db556bc15a68f0e";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
