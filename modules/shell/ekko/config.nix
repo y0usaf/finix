@@ -6,6 +6,24 @@
   ...
 }: let
   inherit (config.user.shell) ekko;
+  system = pkgs.stdenv.hostPlatform.system;
+
+  # The guest's 8 KiB draw-string pool is transient frame data, but upstream
+  # currently leaves it append-only. Repeated surface/overlay renders therefore
+  # fill it and trap the WASM guest, after which the next composed frame clears
+  # the missing chrome. Reset it at each draw dispatch; host imports copy every
+  # string synchronously, so no draw op retains a pointer across dispatches.
+  whichKey = flakeInputs.ekko.packages."${system}".which-key.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace src/lib.rs \
+        --replace-fail \
+          'pub fn on_surface_draw(p: i32, l: i32) {' \
+          $'pub fn on_surface_draw(p: i32, l: i32) {\n    unsafe { POOL_END = 0; }' \
+        --replace-fail \
+          'pub fn on_overlay_render(p: i32, l: i32) {' \
+          $'pub fn on_overlay_render(p: i32, l: i32) {\n    unsafe { POOL_END = 0; }'
+    '';
+  });
 in {
   options.user.shell.ekko = {
     enable = lib.mkEnableOption "ekko terminal multiplexer";
@@ -53,9 +71,7 @@ in {
       # every host gets it deterministically. Note: `packages.which-key` is
       # the derivation's *output* (a dir containing which-key.wasm); point at
       # the file inside it so manzil symlinks a file, not a directory.
-      ".config/ekko/extensions/which-key.wasm".source =
-        flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".which-key
-        + "/which-key.wasm";
+      ".config/ekko/extensions/which-key.wasm".source = whichKey + "/which-key.wasm";
 
       # The WASM config module (cordis set 1): on mount it ctx_set's the
       # `config` key with the settings JSON, reproducing the former init.lua.
