@@ -13,7 +13,7 @@
 # prime-agent.nix.
 {
   defaultProvider = "vercel-ai-gateway";
-  defaultModel = "deepseek/deepseek-v4-pro-0813";
+  defaultModel = "openai/gpt-5.6-sol";
   defaultThinkingLevel = "max";
 
   enabledModels = [

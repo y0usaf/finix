@@ -66,29 +66,38 @@
   splitPath = p: builtins.filter (s: s != "") (lib.splitString "/" p);
   properAncestors = p: let
     parts = splitPath p;
-  in lib.init (lib.genList (i: lib.concatStringsSep "/" (lib.take (i + 1) parts)) (lib.length parts));
+  in
+    lib.init (lib.genList (i: lib.concatStringsSep "/" (lib.take (i + 1) parts)) (lib.length parts));
   dirnameOf = p: let
     parts = splitPath p;
-  in lib.optional (lib.length parts > 1) (lib.concatStringsSep "/" (lib.init parts));
-  fileTemplateDirs =
-    builtins.concatMap (f: let
-        d = dirnameOf (dirPath f);
-      in d ++ lib.concatMap properAncestors d)
-    userFiles;
+  in
+    lib.optional (lib.length parts > 1) (lib.concatStringsSep "/" (lib.init parts));
+  fileTemplateDirs = builtins.concatMap (f: let
+    d = dirnameOf (dirPath f);
+  in
+    d ++ lib.concatMap properAncestors d)
+  userFiles;
   dirTemplateDirs = builtins.concatMap (d: properAncestors (dirPath d)) persistCfg.users.y0usaf.directories;
   homeTemplateDirs = lib.unique (dirTemplateDirs ++ fileTemplateDirs);
 
   # The dedicated data-subvol mounts under the home dir (old-home, Steam,
   # dev, Pictures, DCIM, Music): derived from the fstab set so the skeleton
   # follows the mounts, then each mountpoint's path relative to /home/y0usaf.
-  dataSubvolMounts = lib.unique (map (mp: lib.removePrefix "/home/y0usaf/" mp)
-    (builtins.filter (mp: lib.hasPrefix "/home/y0usaf/" mp) (builtins.attrNames config.fileSystems)));
+  dataSubvolMounts =
+    lib.unique (map (mp: lib.removePrefix "/home/y0usaf/" mp)
+      (builtins.filter (mp: lib.hasPrefix "/home/y0usaf/" mp) (builtins.attrNames config.fileSystems)));
   # The 250-entry user allowlist as one supervised task instead of 250 fstab
   # mount tasks: same bind-mount semantics as the impermanence module,
   # ownership applied only to directories this script itself creates.
   # Deliberate, reversible exit to the rescue OS (one-shot; BootOrder kept).
 in {
-  imports = [./boot.nix ./graphical.nix ./session.nix ./audio.nix ./parity.nix ./materialized-packages.nix ./udev.nix ./hermes.nix ./user-daemons.nix ./dsh-web.nix];
+  imports = [
+    ../../../modules/finix/desktop
+    ./boot.nix
+    ./graphical.nix
+    ./hermes.nix
+    ./dsh-web.nix
+  ];
 
   # manzil dotfiles: native finix module (imported in finix/default.nix),
   # linker runs as a finit task gated on the user persist binds — the files
@@ -428,9 +437,9 @@ in {
     };
   };
 
-  # Cap nix-daemon (and every build it spawns) at 24 of 32 cores (75%).
-  # cgroup v2 cpu.max = quota µs per 100ms period; 2400000 = 24 cores.
-  finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
+  # Cap nix-daemon (and every build it spawns) at 60% of 32 cores.
+  # cgroup v2 cpu.max = quota µs per 100ms period; 1920000 = 19.2 cores.
+  finit.services.nix-daemon.cgroup.settings."cpu.max" = 1920000;
 
   # Same credentials as the NixOS install (impermanence keeps these paths).
   # uid PINNED to the NixOS value: this box's y0usaf is 1001 (not the 1000
