@@ -17,9 +17,11 @@
   ...
 }: let
   sys = pkgs.stdenv.hostPlatform.system;
+  userName = config.user.name;
+  user = config.users.users.${userName};
+  runtimeDir = "/run/user/${toString user.uid}";
 
-  # force_server_side_decorations landed upstream in tomoe (8e0bd50); the local
-  # patch that used to carry it is gone — the packaged default has it now.
+  # force_server_side_decorations landed upstream in tomoe.
   tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
 in {
   # seatd: upstream defaults the service to runlevels [34], but finix
@@ -46,14 +48,13 @@ in {
     org.freedesktop.impl.portal.ScreenCast=tomoe
   '';
 
-  # XDG_RUNTIME_DIR without logind: tmpfs-backed /run survives nothing,
-  # so create the dir every boot; profile.d exports it for login shells.
-  # Replace with elogind + pam_elogind when portals force the issue (2c).
-  finit.tasks.xdg-runtime-dir = {
-    description = "runtime dir for y0usaf";
+  # seatd-only hosts need one stable runtime-dir owner. Elogind hosts create it
+  # through pam_elogind instead, avoiding two owners racing login teardown.
+  finit.tasks.xdg-runtime-dir = lib.mkIf (!config.services.elogind.enable) {
+    description = "runtime dir for ${userName}";
     command = pkgs.writeShellScript "xdg-runtime-dir" ''
       export PATH=${lib.makeBinPath [pkgs.coreutils]}
-      install -d -m 0700 -o y0usaf -g users /run/user/1001
+      install -d -m 0700 -o ${userName} -g users ${runtimeDir}
     '';
     log = true;
   };
@@ -185,11 +186,12 @@ in {
     password sufficient pam_unix.so nullok yescrypt # unix (order 10200)
 
     # Session management.
-    session required pam_env.so conffile=/etc/security/pam_env.conf readenv=0 # env (order 10100)
-    session required pam_unix.so # unix (order 10200)
-    session required pam_loginuid.so # loginuid (order 10300)
+    session required pam_env.so conffile=/etc/security/pam_env.conf readenv=0 # env
+    session required pam_unix.so # unix
+    session required pam_loginuid.so # loginuid
     session required pam_limits.so conf=/etc/security/limits.conf
-    session required ${config.security.pam.package}/lib/security/pam_lastlog.so silent # lastlog (order 10700)
+    ${lib.optionalString config.services.elogind.enable "session optional ${config.services.elogind.package}/lib/security/pam_elogind.so"}
+    session required ${config.security.pam.package}/lib/security/pam_lastlog.so silent # lastlog
   '';
 
   security.pam.services.sshd.text = lib.mkForce ''
@@ -204,10 +206,11 @@ in {
     password sufficient pam_unix.so nullok yescrypt debug # unix (order 10200)
 
     # Session management.
-    session required pam_env.so debug conffile=/etc/security/pam_env.conf readenv=0 # env (order 10100)
-    session required pam_unix.so debug # unix (order 10200)
-    session required pam_loginuid.so debug # loginuid (order 10300)
+    session required pam_env.so debug conffile=/etc/security/pam_env.conf readenv=0 # env
+    session required pam_unix.so debug # unix
+    session required pam_loginuid.so debug # loginuid
     session required pam_limits.so
+    ${lib.optionalString config.services.elogind.enable "session optional ${config.services.elogind.package}/lib/security/pam_elogind.so"}
   '';
 
   # Automatic DISPLAY everywhere a login shell starts (TTY/ssh), not just
