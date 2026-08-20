@@ -12,12 +12,14 @@
   pkgs,
   ...
 }: let
-  runtimeDir = "/run/user/1001";
+  userName = config.user.name;
+  user = config.users.users.${userName};
+  home = user.home;
+  runtimeDir = "/run/user/${toString user.uid}";
   svcEnv = {
-    HOME = "/home/y0usaf";
+    HOME = home;
     XDG_RUNTIME_DIR = runtimeDir;
-    # filter-chain resolves librnnoise_ladspa via LADSPA_PATH (NixOS module
-    # does the same through extraLadspaPackages).
+    # filter-chain resolves librnnoise_ladspa via LADSPA_PATH.
     LADSPA_PATH = "${pkgs.rnnoise-plugin.ladspa}/lib/ladspa";
   };
 
@@ -47,8 +49,8 @@
     nice -n -20 "$@"
   '';
 in {
-  # /dev/snd is root:audio without logind ACLs.
-  users.users.y0usaf.extraGroups = ["audio"];
+  # /dev/snd fallback when no logind ACL is present.
+  users.users.${userName}.extraGroups = ["audio"];
 
   environment.etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = builtins.toJSON {
     "context.modules" = [
@@ -98,8 +100,8 @@ in {
 
   finit.services = {
     pipewire = {
-      description = "pipewire (y0usaf)";
-      user = "y0usaf";
+      description = "pipewire (${userName})";
+      user = userName;
       environment = svcEnv;
       command = "${pkgs.writeShellScript "wait-runtime-dir" ''
         export PATH=${lib.makeBinPath [pkgs.coreutils]}
@@ -113,45 +115,33 @@ in {
       log = true;
     };
     wireplumber = {
-      description = "wireplumber session manager (y0usaf)";
-      user = "y0usaf";
+      description = "wireplumber session manager (${userName})";
+      user = userName;
       environment = svcEnv;
       command = "${waitSock} ${pkgs.wireplumber}/bin/wireplumber";
       log = true;
     };
     pipewire-pulse = {
-      description = "pulseaudio compat (y0usaf)";
-      user = "y0usaf";
+      description = "pulseaudio compat (${userName})";
+      user = userName;
       environment = svcEnv;
       command = "${waitSock} ${pkgs.pipewire}/bin/pipewire-pulse";
       log = true;
     };
 
-    # Desktop syncthing, exact server pattern (same device identity dir on
-    # persisted /home; GUI stays on localhost:8384, no proxy here).
     syncthing = {
-      description = "syncthing file sync (y0usaf)";
-      user = "y0usaf";
-      environment.HOME = "/home/y0usaf";
-      # finit.service "path" feeds the generated environment.PATH (old
-      # flake rev defaulted to sysklogd only; seed wrapper needs grep/
-      # install or it exits 127 before syncthing ever starts).
+      description = "syncthing file sync (${userName})";
+      user = userName;
+      environment.HOME = home;
       path = [pkgs.coreutils pkgs.gnugrep];
-      # Seed the declarative folders/devices on first (re)start so a wiped or
-      # empty config.xml self-heals instead of silently coming up with no sync.
-      # config.user.services.syncthing.seedConfigFile is built by the finix
-      # module (modules/user-services/syncthing.nix) from user.services.syncthing.
       command = let
-        cfgDir = "/home/y0usaf/.config/syncthing";
+        cfgDir = "${home}/.config/syncthing";
         seed = "${config.user.services.syncthing.seedConfigFile}";
       in "${pkgs.writeShellScript "syncthing-seed" ''
         set -e
         CFG=${cfgDir}/config.xml
-        # Re-seed only when the live config is missing the declared folders
-        # (e.g. after a rebuild reset it). Leaves runtime state (API key, GUI
-        # tweaks, paused folders) untouched on healthy configs.
         if [ ! -f "$CFG" ] || ! grep -q '<folder id=' "$CFG"; then
-          install -m 600 -o y0usaf -g users ${seed} "$CFG"
+          install -m 600 -o ${userName} -g users ${seed} "$CFG"
         fi
         exec ${pkgs.syncthing}/bin/syncthing --config=${cfgDir} --data=${cfgDir} --gui-address=127.0.0.1:8384 --no-browser
       ''}";

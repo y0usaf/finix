@@ -79,6 +79,7 @@
     etc = {
       "ssh/authorized_keys.d/y0usaf".text = ''
         ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-desktop/user-ssh.pub)}
+        ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-framework/user-ssh.pub)}
         ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-server/user-ssh.pub)}
         ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/android-phone/user-ssh.pub)}
       '';

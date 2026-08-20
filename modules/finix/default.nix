@@ -9,15 +9,8 @@
   # filter is one and is imported directly below.
   firewall = import ../core/firewall.nix;
 
-  # Desktop: bulk-import every module in the shared tree (already finix-
-  # consumed; the fleet stripped NixOS-only config) + the desktop host dir's
-  # legacy files. Exclusions:
-  #   - ../core/firewall.nix  (finix-native nftables, imported directly)
-  #   - ../dev/kimi-code/package.nix (package function, not a module)
-  #   - ../dev/paseo/options.nix + service.nix + desktop.nix (finix-native)
-  #   - **/SKILL.nix data files and mapping.nix (non-module data)
-  #   - hosts/…/impermanence.nix (NixOS-only)
-  #   - any path containing /finix/  (already finix-native)
+  # Shared graphical module walk. Native host files live below each host's
+  # finix/ directory and are imported explicitly; persistence files are data.
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
   walkedKnownExclusions = [
     ../core/firewall.nix
@@ -25,36 +18,31 @@
     ../dev/paseo/options.nix
     ../dev/paseo/service.nix
     ../dev/paseo/desktop.nix
-    # Phi prompt body is a plain data file imported explicitly by the pi and
-    # phi prompt modules; it defines no config, so skip it in the walk.
+    # Phi prompt body is data imported by pi and phi prompt modules.
     ../dev/phi/prompt-body.nix
     ../dev/skills/mapping.nix
-    # Shared pi/prime-agent model catalog is plain data imported directly by
-    # modules/dev/pi/{options,prime-agent}.nix; it defines no config.
     ../dev/pi/model-catalog.nix
-    # SKILL.nix files are bare-string data (the shim dropped them as
-    # non-function modules); their content is consumed via direct import in
-    # ship.nix / codebase-atlas.nix, so exclude them from the walk.
     ../dev/skills/codebase-atlas/SKILL.nix
     ../dev/skills/ship/SKILL.nix
     ../dev/skills/anti-slop/SKILL.nix
-    # environment.persistence is NixOS-only; this file's persist list is
-    # replayed as plain bind mounts by hosts/y0usaf-desktop/finix/*.
-    ../../hosts/y0usaf-desktop/impermanence.nix
   ];
-  desktopNixosModules = map import (builtins.filter (p:
-      !(builtins.elem p walkedKnownExclusions)
-      && !(lib.hasInfix "/finix/" (toString p)))
-    (recursivelyImport [
-      ../core
-      ../desktop
-      ../dev
-      ../gaming
-      ../shell
-      ../tools
-      ../user-services
-      ../../hosts/y0usaf-desktop
-    ]));
+  mkGraphicalModules = hostDir:
+    map import (builtins.filter (path:
+        !(builtins.elem path walkedKnownExclusions)
+        && !(lib.hasInfix "/finix/" (toString path))
+        && !(lib.hasSuffix "/impermanence.nix" (toString path)))
+      (recursivelyImport [
+        ../core
+        ../desktop
+        ../dev
+        ../gaming
+        ../shell
+        ../tools
+        ../user-services
+        hostDir
+      ]));
+  desktopNixosModules = mkGraphicalModules ../../hosts/y0usaf-desktop;
+  frameworkNixosModules = mkGraphicalModules ../../hosts/y0usaf-framework;
 
   # Nix has no destructuring let-binding; bind the module and inherit the
   # names (lib is already bound above; nixpkgs.lib === the builder's lib).
@@ -137,6 +125,26 @@
     ++ desktopNixosModules
   );
 
+  frameworkPersistent = mkFinixSystem (
+    (with inputs.finix.nixosModules; [
+      brightnessctl
+      docker
+      fwupd
+      networkmanager
+      nftables
+      nix-daemon
+      power-profiles-daemon
+      zzz
+    ])
+    ++ [
+      ./diagnostics.nix
+      ../../hosts/y0usaf-framework/finix/persistent.nix
+      inputs.manzil.finixModules.default
+      {manzil.forceByDefault = true;}
+    ]
+    ++ frameworkNixosModules
+  );
+
   bootPackage =
     ((import ./esp-island.nix {inherit pkgs lib;}).mkIsland {
       name = "finix-server-boot";
@@ -145,6 +153,14 @@
       # misbehaved until 0x21 was prepended (incident #2).
       ucodeImg = "${pkgs.microcode-intel}/intel-ucode.img";
       defaultHost = "server";
+    }).bootDriverScript;
+
+  frameworkBootPackage =
+    ((import ./esp-island.nix {inherit pkgs lib;}).mkIsland {
+      name = "finix-framework-boot";
+      system = frameworkPersistent.config.system.topLevel;
+      ucodeImg = "${pkgs.microcode-amd}/amd-ucode.img";
+      defaultHost = "local";
     }).bootDriverScript;
 
   persistentDeployPackage =
@@ -169,6 +185,7 @@
 in rec {
   hosts = {
     y0usaf-desktop = desktopPersistent;
+    y0usaf-framework = frameworkPersistent;
     y0usaf-server = serverPersistent;
   };
 
@@ -176,5 +193,6 @@ in rec {
     finix-server-persistent-deploy = persistentDeployPackage;
     finix-server-boot = bootPackage;
     finix-desktop-deploy = desktopDeployPackage;
+    finix-framework-boot = frameworkBootPackage;
   };
 }

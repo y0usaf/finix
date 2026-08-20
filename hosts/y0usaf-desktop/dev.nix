@@ -9,6 +9,7 @@ _: {
     android-tools.enable = true;
     codex-cli.enable = true;
     crush.enable = true;
+    fx.enable = true;
     work = {
       agent-slack.enable = true;
       gws.enable = true;

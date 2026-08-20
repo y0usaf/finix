@@ -8,7 +8,8 @@
   lib,
 }: let
   roots =
-    (lib.optional config.user.dev.pi.enable ".pi/agent/skills")
+    (lib.optional config.user.dev.fx.enable ".fx/skills")
+    ++ (lib.optional config.user.dev.pi.enable ".pi/agent/skills")
     ++ (lib.optional config.user.dev.pi.prime-agent.enable ".prime/agent/skills")
     ++ (lib.optional config.user.dev.reasonix.enable ".reasonix/skills");
 

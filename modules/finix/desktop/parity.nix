@@ -14,8 +14,8 @@
   flakeInputs,
   ...
 }: let
-  # Native now: user.programs.asryx arrives via compat-import of
-  # modules/desktop/apps/asryx.nix (same options, this module universe).
+  userName = config.user.name;
+  # Native shared option from modules/desktop/apps/asryx.nix.
   asryxCfg = config.user.programs.asryx;
 in {
   # These upstream modules are NOT in mkFinixSystem's baseline (udev/dbus/
@@ -38,7 +38,7 @@ in {
     };
     polkit = {
       enable = true;
-      adminIdentities = ["unix-user:y0usaf"];
+      adminIdentities = ["unix-user:${userName}"];
     };
     rtkit.enable = true;
 
@@ -178,7 +178,7 @@ in {
     lp = {};
     dialout = {};
   };
-  users.users.y0usaf.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
+  users.users.${userName}.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
 
   # ── X11 socket dir + /tmp mode: systemd-tmpfiles owned both on NixOS.
   # Xwayland (hence xwayland-satellite, hence Steam) refuses to create
