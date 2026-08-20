@@ -14,7 +14,7 @@
       # pick it up at ~/dev, where the target is the only AGENTS.md and the
       # scope boundary the principles' own scope rule draws.
       "dev/AGENTS.md".text = ''
-        # ~/Dev — design principles
+        # ~/dev — design principles
 
         Personal projects only; work repos, forks, upstream, `ref/` follow their own.
 

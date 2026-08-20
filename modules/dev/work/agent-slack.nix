@@ -13,12 +13,8 @@
       (pkgs.stdenvNoCC.mkDerivation {
         pname = "agent-slack";
         version = "0.9.3";
-        # NOTE: not autoPatchelfHook. The release asset is a bun `--compile`
-        # binary whose embedded `.bun` section is corrupted by autoPatchelf's
-        # rpath/ELF rewriting — the patched binary then runs as plain `bun`
-        # (prints bun's version) instead of agent-slack. A single
-        # `patchelf --set-interpreter` is all that's needed to point the
-        # hardcoded `/lib64/ld-linux-x86-64.so.2` at the NixOS glibc loader.
+        # Bun --compile embeds JS in the ELF. RPATH rewriting corrupts that
+        # payload, so patch only the hardcoded glibc interpreter.
         nativeBuildInputs = [ pkgs.patchelf ];
 
         src =
