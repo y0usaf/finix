@@ -217,6 +217,23 @@
         "type": "github"
       }
     },
+    "deepseek-harness": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787065964,
+        "narHash": "sha256-ThlrYs2ingONB9drqFHU37P2VHIsEHlOVWC8UdKhfms=",
+        "path": "/home/y0usaf/dev/sandbox/deepseek-harness-flake",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/y0usaf/dev/sandbox/deepseek-harness-flake",
+        "type": "path"
+      }
+    },
     "deno2nix": {
       "flake": false,
       "locked": {
@@ -260,11 +277,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786986398,
-        "narHash": "sha256-cgLp1cICiaOuGS6k+HzvQTYg9X6N+4npdU7MnmWXxnc=",
+        "lastModified": 1786990537,
+        "narHash": "sha256-p65eryEicmt/UZmGCeM5DRPy6fYp6FPBKeZP1LhmGX8=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "055af6443d89985a9721c3ade6650bcdd390bcae",
+        "rev": "469f5cc708b789ba61079e14887f3eb46b750e7d",
         "type": "github"
       },
       "original": {
@@ -433,6 +450,27 @@
       "original": {
         "owner": "y0usaf",
         "repo": "fonts",
+        "type": "github"
+      }
+    },
+    "fx-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787196387,
+        "narHash": "sha256-ETJTC4GguP108LmL5KZFeEkz14OVU6XFm3sd0c/Xsnk=",
+        "owner": "y0usaf",
+        "repo": "fx-flake",
+        "rev": "5edb03a3ae3bb99c3f4c0f5b73d967f41dceacc7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "ref": "add-nix-flake",
+        "repo": "fx-flake",
         "type": "github"
       }
     },
@@ -1007,10 +1045,12 @@
         "codex-cli-nix": "codex-cli-nix",
         "codex-desktop-linux": "codex-desktop-linux",
         "cursors": "cursors",
+        "deepseek-harness": "deepseek-harness",
         "deno2nix": "deno2nix",
         "ekko": "ekko",
         "finix": "finix",
         "fonts": "fonts",
+        "fx-flake": "fx-flake",
         "hermes-agent": "hermes-agent",
         "linear-cli": "linear-cli",
         "manzil": "manzil",

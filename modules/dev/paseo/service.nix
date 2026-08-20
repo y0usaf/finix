@@ -17,11 +17,12 @@
   cfg = config.user.dev.paseo;
   inherit (pkgs.stdenv.hostPlatform) system;
   paseo = flakeInputs.paseo.packages."${system}".default;
+  fx = flakeInputs.fx-flake.packages."${system}".default;
   home = config.user.homeDirectory;
   homePaseo = "${home}/${cfg.dataDir}";
 in {
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [paseo];
+    environment.systemPackages = [paseo fx];
 
     finit.services.paseo = {
       description = "Paseo - self-hosted daemon for AI coding agents";
@@ -62,19 +63,18 @@ in {
       log = true;
     };
 
-    # Register reasonix as a custom ACP provider so it appears in the Paseo
-    # app like claude/codex/opencode. Paseo's config.json is daemon-owned
-    # runtime state (device pairings, relay state, provider toggles), so we
-    # inject via a non-destructive manzil merge (clobberByDefault=false):
-    # only agents.providers.reasonix is added; everything the daemon manages
-    # is left untouched. reasonix must be on PATH (user.dev.reasonix.enable):
-    # the daemon resolves `reasonix` from its PATH, which includes
-    # /run/current-system/sw/bin.
+    # Register custom ACP providers without replacing Paseo-owned runtime state.
+    # Commands resolve from the daemon PATH, including /run/current-system/sw/bin.
     manzil.users."${config.user.name}".files.".paseo/config.json" = {
       type = "merge";
       format = "json";
-      value = {
-        agents.providers.reasonix = {
+      value.agents.providers = {
+        fx = {
+          extends = "acp";
+          label = "fx";
+          command = ["fx" "acp"];
+        };
+        reasonix = {
           extends = "acp";
           label = "Reasonix";
           description = "Reasonix cache-first coding agent";
