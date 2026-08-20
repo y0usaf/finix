@@ -13,7 +13,13 @@
       (pkgs.stdenvNoCC.mkDerivation {
         pname = "agent-slack";
         version = "0.9.3";
-        nativeBuildInputs = [ pkgs.autoPatchelfHook ];
+        # NOTE: not autoPatchelfHook. The release asset is a bun `--compile`
+        # binary whose embedded `.bun` section is corrupted by autoPatchelf's
+        # rpath/ELF rewriting — the patched binary then runs as plain `bun`
+        # (prints bun's version) instead of agent-slack. A single
+        # `patchelf --set-interpreter` is all that's needed to point the
+        # hardcoded `/lib64/ld-linux-x86-64.so.2` at the NixOS glibc loader.
+        nativeBuildInputs = [ pkgs.patchelf ];
 
         src =
           pkgs.fetchurl {
@@ -43,6 +49,7 @@
         installPhase = ''
           runHook preInstall
           install -Dm755 "$src" "$out/bin/agent-slack"
+          patchelf --set-interpreter "${pkgs.stdenv.cc.bintools.dynamicLinker}" "$out/bin/agent-slack"
           runHook postInstall
         '';
 
