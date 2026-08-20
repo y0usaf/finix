@@ -22,6 +22,8 @@ _: {
     };
     paseo = {
       enable = true;
+      # GUI companion to the daemon (Electron wrapper around the Paseo web UI).
+      desktop.enable = true;
       reasonix.enable = false;
       # Seed the Vercel AI Gateway key into the paseo daemon env so the agent
       # children it spawns (pi) can resolve the vercel-ai-gateway provider.

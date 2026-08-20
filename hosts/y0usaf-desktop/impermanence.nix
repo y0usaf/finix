@@ -124,6 +124,7 @@ in {
         ".cookunity"
         ".phi"
         ".paseo" # paseo daemon state (config.json, phone pairing, sessions)
+        ".dsh" # deepseek-harness web profile (node_modules, plugins, sessions, settings)
         ".slack"
         ".supabase"
         ".n8n-mcp"

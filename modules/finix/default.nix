@@ -14,7 +14,7 @@
   # legacy files. Exclusions:
   #   - ../core/firewall.nix  (finix-native nftables, imported directly)
   #   - ../dev/kimi-code/package.nix (package function, not a module)
-  #   - ../dev/paseo/options.nix + service.nix (finix-native finit service)
+  #   - ../dev/paseo/options.nix + service.nix + desktop.nix (finix-native)
   #   - **/SKILL.nix data files and mapping.nix (non-module data)
   #   - hosts/…/impermanence.nix (NixOS-only)
   #   - any path containing /finix/  (already finix-native)
@@ -24,6 +24,7 @@
     ../dev/kimi-code/package.nix
     ../dev/paseo/options.nix
     ../dev/paseo/service.nix
+    ../dev/paseo/desktop.nix
     # Phi prompt body is a plain data file imported explicitly by the pi and
     # phi prompt modules; it defines no config, so skip it in the walk.
     ../dev/phi/prompt-body.nix
@@ -128,6 +129,10 @@
       # enable, which hosts/y0usaf-desktop/dev.nix sets.
       (import ../dev/paseo/options.nix)
       (import ../dev/paseo/service.nix)
+      # paseo desktop app (GUI-only; the server has no desktop). Declares
+      # user.dev.paseo.desktop, gated on enable, which
+      # hosts/y0usaf-desktop/dev.nix sets.
+      (import ../dev/paseo/desktop.nix)
     ]
     ++ desktopNixosModules
   );
