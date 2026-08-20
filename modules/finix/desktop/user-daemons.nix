@@ -14,9 +14,10 @@
   pkgs,
   ...
 }: let
-  # /run/user/1001 — must match session.nix's task and the pipewire svcEnv.
-  runtimeDir = "/run/user/1001";
-  home = "/home/y0usaf";
+  userName = config.user.name;
+  user = config.users.users.${userName};
+  runtimeDir = "/run/user/${toString user.uid}";
+  home = user.home;
   svcEnv = {
     HOME = home;
     XDG_RUNTIME_DIR = runtimeDir;
@@ -44,19 +45,17 @@ in {
     # points SSH_AUTH_SOCK. No conditions other than the runtime dir: the
     # agent is useful even without network.
     ssh-agent = {
-      description = "ssh-agent (y0usaf)";
-      user = "y0usaf";
+      description = "ssh-agent (${userName})";
+      user = userName;
       environment = svcEnv;
       command = "${waitRuntimeDir} ${pkgs.openssh}/bin/ssh-agent -D -a ${runtimeDir}/ssh-agent";
       log = true;
     };
 
-    # udiskie: --automount mounts removable media as the persistent user.
-    # Talks to udisks2 over the system bus (parity.nix enables it). No
-    # dbus session bus needed for --automount (it uses the system udisks2).
+    # Talks to udisks2 over the system bus; no session bus required.
     udiskie = {
-      description = "udiskie automount (y0usaf)";
-      user = "y0usaf";
+      description = "udiskie automount (${userName})";
+      user = userName;
       environment = svcEnv;
       command = "${waitRuntimeDir} ${pkgs.udiskie}/bin/udiskie --automount";
       conditions = ["net/lo/up"];

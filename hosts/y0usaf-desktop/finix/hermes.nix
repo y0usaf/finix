@@ -16,7 +16,18 @@
   ...
 }: let
   inherit (pkgs.stdenv.hostPlatform) system;
-  hermesDesktop = flakeInputs.hermes-agent.packages."${system}".desktop;
+  hermesFull = flakeInputs.hermes-agent.packages.${system}.default;
+  upstreamDesktopNix = builtins.readFile "${flakeInputs.hermes-agent}/nix/desktop.nix";
+  patchedDesktopNix =
+    builtins.replaceStrings
+    ["sha256-zi/QMwRZ0+FwE9XTE+DiSIeJXAwxmLKEaBWD5W3pMOI="]
+    ["sha256-zOl8rx6woWh7aeRUOlkTMviKc/EAQQX6nr/MxAx1ZPI="]
+    upstreamDesktopNix;
+  hermesDesktop = assert lib.assertMsg (patchedDesktopNix != upstreamDesktopNix) "Hermes Electron headers hash patch no longer applies";
+    pkgs.callPackage (pkgs.writeText "hermes-desktop.nix" patchedDesktopNix) {
+      hermesNpmLib = hermesFull.hermesNpmLib;
+      hermesAgent = hermesFull;
+    };
 in {
   environment.systemPackages = [
     hermesDesktop
