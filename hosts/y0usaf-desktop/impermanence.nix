@@ -106,6 +106,7 @@ in {
         # modules/core/user/session/xdg.nix (CLAUDE_CONFIG_DIR, CODEX_HOME,
         # KIMI_CODE_HOME). ~/.claude.json lives inside the claude dir once
         # CLAUDE_CONFIG_DIR is set. pi uses its own default ~/.pi/agent.
+        ".fx" # fx settings, sessions, skills, and durable agent state
         # claude: subdirs only — versions/ (218M binary cache) regenerates on next app
         # start; settings.json is a manzil symlink (regenerates).
         ".local/share/claude/backups"

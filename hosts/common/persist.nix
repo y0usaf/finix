@@ -22,6 +22,7 @@
     "Tokens"
     "nixos"
     ".ssh"
+    ".fx"
     ".mozilla"
     ".librewolf"
     ".local/share/claude"
