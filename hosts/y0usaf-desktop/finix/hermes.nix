@@ -20,11 +20,22 @@
   upstreamDesktopNix = builtins.readFile "${flakeInputs.hermes-agent}/nix/desktop.nix";
   patchedDesktopNix =
     builtins.replaceStrings
-    ["sha256-zi/QMwRZ0+FwE9XTE+DiSIeJXAwxmLKEaBWD5W3pMOI="]
-    ["sha256-zOl8rx6woWh7aeRUOlkTMviKc/EAQQX6nr/MxAx1ZPI="]
+    [
+      "{\n  pkgs,"
+      "sha256-f8bSbLRmtbP93CJAvEBs+sHWDZ1xP2bcpLhC1EnOmZU="
+      "\${../apps/desktop/assets/icon.png}"
+      "\${../hermes_cli/linux_desktop_entry.py}"
+    ]
+    [
+      "{\n  hermesSrc,\n  pkgs,"
+      "sha256-zOl8rx6woWh7aeRUOlkTMviKc/EAQQX6nr/MxAx1ZPI="
+      "\${hermesSrc}/apps/desktop/assets/icon.png"
+      "\${hermesSrc}/hermes_cli/linux_desktop_entry.py"
+    ]
     upstreamDesktopNix;
   hermesDesktop = assert lib.assertMsg (patchedDesktopNix != upstreamDesktopNix) "Hermes Electron headers hash patch no longer applies";
     pkgs.callPackage (pkgs.writeText "hermes-desktop.nix" patchedDesktopNix) {
+      hermesSrc = flakeInputs.hermes-agent;
       hermesNpmLib = hermesFull.hermesNpmLib;
       hermesAgent = hermesFull;
     };

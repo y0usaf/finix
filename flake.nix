@@ -144,7 +144,7 @@
       # Pin upstream source directly; desktop's mutable Electron headers hash is
       # corrected where that package is materialized. Never depend on a sibling
       # checkout: clean clones and rescue hosts must evaluate this flake alone.
-      url = "github:NousResearch/hermes-agent/2b0fb72acae67f51652de5c51db556bc15a68f0e";
+      url = "github:NousResearch/hermes-agent/fcbd1076a93841fa88855acce810e342a5b78101";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
