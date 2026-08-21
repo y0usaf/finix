@@ -15,11 +15,26 @@ export WAYDROID_EXTRA_ARGS="${WAYDROID_EXTRA_ARGS:---gpu-mode host}"
 
 TFT_PACKAGE="${TFT_PACKAGE:-com.riotgames.league.teamfighttactics}"
 
-# --- one-time init (idempotent: skips if image already present) ---
-if [ ! -f /var/lib/waydroid/waydroid.cfg ]; then
-  echo "[tft] initializing Android image (first run, ~1.5GB)..."
+# Prevent a second launcher from restarting or corrupting an active image download.
+exec 9>/tmp/tft-launch.lock
+if ! flock -n 9; then
+  echo "[tft] another launch or initialization is already running." >&2
+  exit 1
+fi
+
+# --- one-time init (the config is written before image downloads finish) ---
+if [ ! -f /var/lib/waydroid/images/system.img ] \
+    || [ ! -f /var/lib/waydroid/images/vendor.img ]; then
+  echo "[tft] initializing Android images (first run, ~1.5GB)..."
+  echo "[tft] keep this terminal open until both downloads finish."
   sudo env "PATH=$PATH" "WAYDROID_EXTRA_ARGS=$WAYDROID_EXTRA_ARGS" \
     waydroid init -f -s GAPPS
+fi
+
+if [ ! -f /var/lib/waydroid/images/system.img ] \
+    || [ ! -f /var/lib/waydroid/images/vendor.img ]; then
+  echo "[tft] Waydroid initialization did not produce complete images." >&2
+  exit 1
 fi
 
 # --- Google Play device-spoof (Pixel 5 / redfin, Android 11) ---

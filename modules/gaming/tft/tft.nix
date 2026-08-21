@@ -16,6 +16,7 @@
     waydroid-helper
     lxc
     android-tools
+    util-linux
   ];
   scripts = ./scripts;
 
