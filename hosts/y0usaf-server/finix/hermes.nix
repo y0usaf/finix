@@ -22,8 +22,12 @@
 # plugins on name collision... third parties can monkey-patch or replace any
 # built-in profile"). The profile points base_url at
 # https://ai-gateway.vercel.sh/v1 and reads the key from AI_GATEWAY_API_KEY.
-{ lib, pkgs, flakeInputs, ... }:
-let
+{
+  lib,
+  pkgs,
+  flakeInputs,
+  ...
+}: let
   inherit (pkgs.stdenv.hostPlatform) system;
   hermes = flakeInputs.hermes-agent.packages.${system}.minimal;
   stateDir = "/var/lib/hermes";
@@ -62,7 +66,8 @@ let
   # (plugin default 45, README recommends 55). model.context_length is
   # deliberately NOT set: claiming 1M tokens to a backend behind
   # the Vercel gateway needs testing before we trust it.
-  configYaml = (pkgs.formats.yaml { }).generate "hermes-config.yaml" (baseConfig // {
+  configYaml = (pkgs.formats.yaml {}).generate "hermes-config.yaml" (baseConfig
+    // {
     plugins.enabled = [ "aphrodite" "serverstats" ];
     context = {
       engine = "aphrodite";
@@ -109,6 +114,122 @@ let
     ctx["engine_threshold_pct"] = 55
     with open(p, "w") as f:
         yaml.safe_dump(cfg, f, sort_keys=False)
+  '';
+
+  # Persistent Bot Mode specialists. Their exact model route and membership
+  # are declarative; mutable sessions, memories, and other profile metadata
+  # remain runtime state under $HERMES_HOME/profiles/<name>.
+  botProfiles = [
+    {
+      name = "deepseek-v4-pro-0813";
+      title = "DeepSeek V4 Pro 0813";
+      model = "deepseek/deepseek-v4-pro-0813";
+      description = "DeepSeek V4 Pro 0813 specialist for deep technical reasoning, implementation, and independent review.";
+    }
+    {
+      name = "opus-5";
+      title = "Opus 5";
+      model = "anthropic/claude-opus-5";
+      description = "Claude Opus 5 specialist for architecture, rigorous review, and complex software-engineering decisions.";
+    }
+  ];
+  botGroup = "Technical Council";
+  botProfilesJson = pkgs.writeText "hermes-bot-profiles.json" (builtins.toJSON {
+    inherit botGroup botProfiles;
+    botGroupMembers = ["sol"] ++ map (bot: bot.name) botProfiles;
+  });
+  botProfilesMerge = pkgs.writeText "hermes-bot-profiles-merge.py" ''
+    import os
+    import shutil
+    import sys
+    import yaml
+
+    home, definitions_path = sys.argv[1:3]
+    with open(definitions_path, encoding="utf-8") as f:
+        definitions = yaml.safe_load(f)
+
+    group = definitions["botGroup"]
+    profiles = definitions["botProfiles"]
+    group_members = definitions["botGroupMembers"]
+    source_env = os.path.join(home, ".env")
+    source_skills = os.path.join(home, "skills")
+    source_provider = os.path.join(home, "plugins", "model-providers", "ai-gateway")
+
+    for bot in profiles:
+        profile = os.path.join(home, "profiles", bot["name"])
+        os.makedirs(profile, exist_ok=True)
+
+        config_path = os.path.join(profile, "config.yaml")
+        try:
+            with open(config_path, encoding="utf-8") as f:
+                config = yaml.safe_load(f) or {}
+        except FileNotFoundError:
+            # A first-boot profile inherits the managed gateway's complete
+            # non-secret config (tools/plugins/context); subsequent boots
+            # preserve its profile-local mutable settings.
+            with open(os.path.join(home, "config.yaml"), encoding="utf-8") as f:
+                config = yaml.safe_load(f) or {}
+        config["model"] = {
+            "default": bot["model"],
+            "provider": "ai-gateway",
+        }
+        config.setdefault("providers", {})["ai-gateway"] = {
+            "name": "Vercel AI Gateway",
+            "base_url": "https://ai-gateway.vercel.sh/v1",
+            "key_env": "AI_GATEWAY_API_KEY",
+        }
+        with open(config_path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(config, f, sort_keys=False)
+        os.chmod(config_path, 0o660)
+
+        meta_path = os.path.join(profile, "profile.yaml")
+        try:
+            with open(meta_path, encoding="utf-8") as f:
+                meta = yaml.safe_load(f) or {}
+        except FileNotFoundError:
+            meta = {}
+        meta["description"] = bot["description"]
+        meta["description_auto"] = False
+        ui = meta.setdefault("ui_meta", {}).setdefault("hermes-bots", {})
+        ui["title"] = bot["title"]
+        groups = [g for g in ui.get("groups", []) if isinstance(g, str) and g]
+        if group not in groups:
+            groups.append(group)
+        ui["groups"] = groups
+        ui["group"] = groups[0]
+        with open(meta_path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(meta, f, sort_keys=False)
+
+        if os.path.isfile(source_env):
+            shutil.copy2(source_env, os.path.join(profile, ".env"))
+            os.chmod(os.path.join(profile, ".env"), 0o600)
+        if os.path.isdir(source_skills) and not os.path.exists(os.path.join(profile, "skills")):
+            shutil.copytree(source_skills, os.path.join(profile, "skills"))
+        if os.path.isdir(source_provider):
+            target_provider = os.path.join(profile, "plugins", "model-providers", "ai-gateway")
+            os.makedirs(os.path.dirname(target_provider), exist_ok=True)
+            shutil.copytree(source_provider, target_provider, dirs_exist_ok=True)
+
+    # Existing named profiles can participate without having their own model
+    # routing changed. This seats Sol alongside the two specialists.
+    for name in group_members:
+        profile = os.path.join(home, "profiles", name)
+        if not os.path.isdir(profile):
+            continue
+        meta_path = os.path.join(profile, "profile.yaml")
+        try:
+            with open(meta_path, encoding="utf-8") as f:
+                meta = yaml.safe_load(f) or {}
+        except FileNotFoundError:
+            meta = {}
+        ui = meta.setdefault("ui_meta", {}).setdefault("hermes-bots", {})
+        groups = [g for g in ui.get("groups", []) if isinstance(g, str) and g]
+        if group not in groups:
+            groups.append(group)
+        ui["groups"] = groups
+        ui["group"] = groups[0]
+        with open(meta_path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(meta, f, sort_keys=False)
   '';
 
   # serverstats dashboard plugin (desktop "Server Stats" pane): served by
@@ -382,8 +503,9 @@ in {
       # (the generated file only installs on first boot; this keeps live
       # tweaks while adding the declarative keys).
       ${pyYaml}/bin/python3 ${aphroditeConfigMerge} ${homeDir}/config.yaml
+
       chmod 0660 ${homeDir}/config.yaml 2>/dev/null || true
-      chown hermes:hermes ${homeDir}/config.yaml 2>/dev/null || true
+      chown -R hermes:hermes ${homeDir} 2>/dev/null || true
       secret=/persist/secrets/hermes/ai-gateway-api-key
       if [ -r "$secret" ] && { [ ! -f ${homeDir}/.env ] || ! grep -q '^AI_GATEWAY_API_KEY=' ${homeDir}/.env 2>/dev/null; }; then
         key="$(tr -d '\r\n' < "$secret")"
@@ -422,10 +544,18 @@ in {
         chmod 0600 $uhome/.env
       fi
       chown -R y0usaf:users $uhome 2>/dev/null || true
+      # Create/update the declarative specialist profiles only after the
+      # shared credential and plugin sources have been seeded. The merge owns
+      # model routing, role/title, and Technical Council membership; sessions
+      # and memories remain mutable runtime state.
+      mkdir -p ${homeDir}/profiles
+      ${pyYaml}/bin/python3 ${botProfilesMerge} ${homeDir} ${botProfilesJson}
+
       # Idempotent belt-and-suspenders: fix a pre-existing 0600 .env on next
       # boot (only reachable via the re-write branch above otherwise).
       chmod 0640 ${homeDir}/.env 2>/dev/null || true
       chmod 0660 ${homeDir}/config.yaml 2>/dev/null || true
+      chown -R hermes:hermes ${homeDir} 2>/dev/null || true
     '';
     log = true;
   };
