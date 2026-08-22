@@ -12,11 +12,12 @@
 # modules/finix/default.nix, imported directly by options.nix and
 # prime-agent.nix.
 {
-  defaultProvider = "vercel-ai-gateway";
-  defaultModel = "openai/gpt-5.6-sol";
+  defaultProvider = "openrouter";
+  defaultModel = "stealth/ox-alpha";
   defaultThinkingLevel = "max";
 
   enabledModels = [
+    "openrouter/stealth/ox-alpha"
     "vercel-ai-gateway/deepseek/deepseek-v4-pro-0813"
     "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
     "vercel-ai-gateway/moonshotai/kimi-k3-fast"
@@ -116,6 +117,24 @@
         maxTokens = 131072;
         api = "openai-completions";
         compat.vercelGatewayRouting.only = ["fireworks"];
+      }
+    ];
+  };
+
+  # Ox Alpha via OpenRouter builtin provider (OPENROUTER_API_KEY or
+  # /login openrouter). Explicit api/baseUrl so the upsert resolves even
+  # though the builtin catalog lacks this id.
+  models.providers."openrouter" = {
+    models = [
+      {
+        id = "stealth/ox-alpha";
+        name = "Ox Alpha";
+        api = "openai-completions";
+        baseUrl = "https://openrouter.ai/api/v1";
+        reasoning = true;
+        input = ["text" "image"];
+        contextWindow = 1048576;
+        maxTokens = 131072;
       }
     ];
   };
