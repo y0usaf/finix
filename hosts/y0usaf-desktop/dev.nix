@@ -21,6 +21,12 @@ _: {
       maxDepth = 999;
       maxLiveAgents = 999;
     };
+    omp = {
+      enable = true;
+      # Harness surface (~/.omp/config.json): settings.keybinds.*,
+      # panel_width_percent, sidebar_width, right_rail_width, ascii,
+      # symbols.overrides — see modules/dev/omp/default.nix.
+    };
     paseo = {
       enable = true;
       # GUI companion to the daemon (Electron wrapper around the Paseo web UI).

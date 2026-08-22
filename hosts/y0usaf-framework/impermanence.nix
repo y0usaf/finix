@@ -23,6 +23,7 @@ in {
           ".config/Codex"
           ".config/opencode"
           ".config/pi-harness"
+          ".omp" # oh-my-pi agent dir (sessions, harness config.json)
           ".config/discord"
           ".config/discordcanary"
           ".config/vesktop"
