@@ -93,6 +93,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    oh-my-pi = {
+      # omp coding agent upstream flake (exposes packages.<system>.omp).
+      url = "github:can1357/oh-my-pi";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     reasonix-flake = {
       url = "github:y0usaf/reasonix-flake";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -12,6 +12,7 @@ _: {
       linear-cli.enable = true;
     };
     pi.enable = true;
+    omp.enable = true;
     bun.enable = true;
     npm.enable = true;
     docker.enable = true;
