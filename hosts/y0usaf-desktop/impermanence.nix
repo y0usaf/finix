@@ -119,6 +119,7 @@ in {
         ".local/share/claude/.claude"
         ".local/share/codex"
         ".pi" # pi agent dir (pi's native default; no env var indirection)
+        ".omp" # oh-my-pi agent dir (sessions, harness config.json)
         ".prime" # prime agent dir (agents, sessions, daemon state, logs)
         ".hermes" # desktop app HERMES_HOME (config, sessions, skills dirs)
         ".crush"
