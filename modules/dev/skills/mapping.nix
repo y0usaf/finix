@@ -11,7 +11,10 @@
     (lib.optional config.user.dev.fx.enable ".fx/skills")
     ++ (lib.optional config.user.dev.pi.enable ".pi/agent/skills")
     ++ (lib.optional config.user.dev.pi.prime-agent.enable ".prime/agent/skills")
-    ++ (lib.optional config.user.dev.reasonix.enable ".reasonix/skills");
+    ++ (lib.optional config.user.dev.reasonix.enable ".reasonix/skills")
+    # oh-my-pi discovers user skills at ~/.omp/agent/skills (same layout as
+    # pi's ~/.pi/agent/skills; managed-skills is a separate omp-owned dir).
+    ++ (lib.optional config.user.dev.omp.enable ".omp/agent/skills");
 
   # mkSkill name files -> list of per-root attrsets, ready for lib.mkMerge.
   # files: relative path -> manzil file spec ({text}|{source}|{text,executable}).
