@@ -1,0 +1,3 @@
+_: {
+  manzil.forceByDefault = true;
+}
