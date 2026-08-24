@@ -14,7 +14,7 @@
 }: let
   userName = config.user.name;
   user = config.users.users.${userName};
-  home = user.home;
+  inherit (user) home;
   runtimeDir = "/run/user/${toString user.uid}";
   svcEnv = {
     HOME = home;
