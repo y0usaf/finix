@@ -35,10 +35,7 @@ in {
   # per-desktop xdg.portal.config generator; install the tomoe policy here
   # until the upstream option lands (the compositor's own shipped file uses
   # default=* while retaining this same ScreenCast mapping).
-  xdg.portal = {
-    enable = true;
-    portals = [pkgs.xdg-desktop-portal-gtk tomoePkg];
-  };
+  xdg.portal.portals = [pkgs.xdg-desktop-portal-gtk tomoePkg];
 
   # The picker moved into the compositor (require("screencast") in init.lua),
   # so no TOMOE_PORTAL_CHOOSER wrapper is exported here.
@@ -221,14 +218,11 @@ in {
   # Fonts: same trio as the NixOS ui/fonts.nix defaults. foot picks the
   # family from the persisted ~/.config/foot config; fontconfig just has
   # to be able to resolve it.
-  fonts = {
-    fontconfig.enable = true;
-    packages = [
-      flakeInputs.fonts.packages."${sys}".default
-      pkgs.noto-fonts-cjk-sans
-      pkgs.noto-fonts-color-emoji
-    ];
-  };
+  fonts.packages = [
+    flakeInputs.fonts.packages."${sys}".default
+    pkgs.noto-fonts-cjk-sans
+    pkgs.noto-fonts-color-emoji
+  ];
 
   # Login shell comes from finix/common.nix (rush) — no override.
 }
