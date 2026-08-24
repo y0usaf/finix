@@ -17,7 +17,7 @@
   userName = config.user.name;
   user = config.users.users.${userName};
   runtimeDir = "/run/user/${toString user.uid}";
-  home = user.home;
+  inherit (user) home;
   svcEnv = {
     HOME = home;
     XDG_RUNTIME_DIR = runtimeDir;

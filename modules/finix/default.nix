@@ -9,8 +9,9 @@
   # filter is one and is imported directly below.
   firewall = import ../core/firewall.nix;
 
-  # Shared graphical module walk. Native host files live below each host's
-  # finix/ directory and are imported explicitly; persistence files are data.
+  # Shared definitions and selected host policy are both discovered
+  # recursively. Native finix host modules are imported explicitly; persistence
+  # allowlists remain data until they become ordinary modules.
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
   walkedKnownExclusions = [
     ../core/firewall.nix
@@ -25,6 +26,8 @@
     ../dev/skills/codebase-atlas/SKILL.nix
     ../dev/skills/ship/SKILL.nix
     ../dev/skills/anti-slop/SKILL.nix
+    # Shared persistence is still imported as data by host policy modules.
+    ../hosts/common/persist.nix
   ];
   mkGraphicalModules = hostDir:
     map import (builtins.filter (path:
@@ -39,10 +42,11 @@
         ../shell
         ../tools
         ../user-services
+        ../hosts/common
         hostDir
       ]));
-  desktopNixosModules = mkGraphicalModules ../../hosts/y0usaf-desktop;
-  frameworkNixosModules = mkGraphicalModules ../../hosts/y0usaf-framework;
+  desktopNixosModules = mkGraphicalModules ../hosts/y0usaf-desktop;
+  frameworkNixosModules = mkGraphicalModules ../hosts/y0usaf-framework;
 
   # Nix has no destructuring let-binding; bind the module and inherit the
   # names (lib is already bound above; nixpkgs.lib === the builder's lib).
@@ -66,16 +70,20 @@
       limine
     ])
     ++ [
-      ../../hosts/y0usaf-server/finix/services.nix
-      ../../hosts/y0usaf-server/finix/persistent.nix
-      ../../hosts/y0usaf-server/finix/attic.nix
-      ../../hosts/y0usaf-server/finix/boot-health.nix
-      ../../hosts/y0usaf-server/finix/boot.nix
-      ../../hosts/y0usaf-server/finix/hermes.nix
-      ../../hosts/y0usaf-server/finix/paseo.nix
+      ../hosts/y0usaf-server/finix/services.nix
+      ../hosts/y0usaf-server/finix/persistent.nix
+      ../hosts/y0usaf-server/finix/attic.nix
+      ../hosts/y0usaf-server/finix/boot-health.nix
+      ../hosts/y0usaf-server/finix/boot.nix
+      ../hosts/y0usaf-server/finix/hermes.nix
+      ../hosts/y0usaf-server/finix/paseo.nix
       inputs.manzil.finixModules.default
-      # rewrite every entry every switch (watcher invalidation)
-      {manzil.forceByDefault = true;}
+      (import ../hosts/common/finix-base.nix)
+      (import ../hosts/common/finix-btrfs.nix)
+      (import ../hosts/common/finix-identity.nix)
+      (import ../hosts/common/finix-nix-daemon.nix)
+      (import ../hosts/common/manzil.nix)
+      (import ../hosts/common/ssh-keys.nix)
       # Shared modules the server needs, imported explicitly, in the same
       # order the old recursive walk produced them (core/user-config, then
       # dev/claude-code, dev/paseo, then tools/git) so the server closure is
@@ -92,7 +100,7 @@
       (import ../dev/paseo/options.nix)
       (import ../dev/paseo/service.nix)
       (import ../tools/git.nix)
-      {user.tools.git.enable = true;}
+      (import ../hosts/y0usaf-server/tools.nix)
     ]
   );
 
@@ -107,10 +115,8 @@
     ])
     ++ [
       ./diagnostics.nix
-      ../../hosts/y0usaf-desktop/finix/persistent.nix
+      ../hosts/y0usaf-desktop/finix/persistent.nix
       inputs.manzil.finixModules.default
-      # rewrite every entry every switch (watcher invalidation)
-      {manzil.forceByDefault = true;}
       firewall
       # paseo daemon options + finit service (finix-native; same pattern as
       # serverPersistent). Declares user.dev.paseo, gated on
@@ -138,9 +144,8 @@
     ])
     ++ [
       ./diagnostics.nix
-      ../../hosts/y0usaf-framework/finix/persistent.nix
+      ../hosts/y0usaf-framework/finix/persistent.nix
       inputs.manzil.finixModules.default
-      {manzil.forceByDefault = true;}
     ]
     ++ frameworkNixosModules
   );

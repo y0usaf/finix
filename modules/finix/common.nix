@@ -22,29 +22,20 @@
     "127.0.0.2" = [config.networking.hostName];
   };
 
-  services = {
-    mdevd.enable = true;
-    sysklogd.enable = true;
-    dhcpcd.enable = true;
-
-    openssh = {
-      enable = true;
-      settings = {
-        PasswordAuthentication = false;
-        PermitRootLogin = "no";
-        KbdInteractiveAuthentication = false;
-        AuthorizedKeysFile = [
-          ".ssh/authorized_keys"
-          "/etc/ssh/authorized_keys.d/%u"
-        ];
-        # Both the VM and the bare-metal trial run tmpfs roots: PAM rejects
-        # accounts without a persistent shadow entry there (observed as
-        # pubkey "Permission denied" on metal), and StrictModes trips over
-        # store-backed paths. TODO: revisit for the persistent-root system.
-        UsePAM = false;
-        StrictModes = false;
-      };
-    };
+  services.openssh.settings = {
+    PasswordAuthentication = false;
+    PermitRootLogin = "no";
+    KbdInteractiveAuthentication = false;
+    AuthorizedKeysFile = [
+      ".ssh/authorized_keys"
+      "/etc/ssh/authorized_keys.d/%u"
+    ];
+    # Both the VM and the bare-metal trial run tmpfs roots: PAM rejects
+    # accounts without a persistent shadow entry there (observed as
+    # pubkey "Permission denied" on metal), and StrictModes trips over
+    # store-backed paths. TODO: revisit for the persistent-root system.
+    UsePAM = false;
+    StrictModes = false;
   };
 
   # Upstream runs dhcpcd as a forking service with pidfile tracking, but
@@ -61,32 +52,15 @@
     pid = lib.mkForce null;
   };
 
-  programs = {
-    # Still enabled with rush as the login shell: this ships /etc/bashrc and
-    # /etc/profile.d/bash.sh, and bash remains /bin/sh plus the fallback shell.
-    bash.enable = true;
-    sudo.enable = true;
-  };
-
   # rush is a POSIX shell with no programs.rush module in finix, so its
   # system-level wiring (login shell + /etc/shells) is hand-rolled here.
   # modules/shell/rush/config.nix owns the user rc (desktop only). rush reads
   # /etc/profile for system env via ~/.config/rush/profile.rush (login).
 
-  # Desktop key + server's existing rescue key available while the
-  # persistent system's SSH ownership checks are being tightened.
   environment = {
-    etc = {
-      "ssh/authorized_keys.d/y0usaf".text = ''
-        ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-desktop/user-ssh.pub)}
-        ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-framework/user-ssh.pub)}
-        ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/y0usaf-server/user-ssh.pub)}
-        ${lib.removeSuffix "\n" (builtins.readFile ../../hosts/android-phone/user-ssh.pub)}
-      '';
-      sudoers.text = lib.mkAfter ''
-        y0usaf ALL = (ALL:ALL) NOPASSWD: ALL
-      '';
-    };
+    etc.sudoers.text = lib.mkAfter ''
+      y0usaf ALL = (ALL:ALL) NOPASSWD: ALL
+    '';
     shells = [
       "/run/current-system/sw/bin/rush"
       "${pkgs.rush}/bin/rush"
