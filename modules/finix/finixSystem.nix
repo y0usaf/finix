@@ -65,30 +65,14 @@
             });
           };
       })
-      # n8n 2.31.4's GitHub archive FOD hash drifted (GitHub repacks tag
-      # tarballs; gzip bytes aren't stable). Re-pin with the current bytes.
-      # Pre-existing breakage unrelated to our changes — drop when nixpkgs
-      # bumps past it.
-      (final: prev: {
-        n8n = prev.n8n.overrideAttrs (old: {
-          src = final.fetchFromGitHub {
-            owner = "n8n-io";
-            repo = "n8n";
-            rev = "n8n@${old.version}";
-            hash = "sha256-lmkCT1o5LSC1ORd+Jozr9hkJu2znMpFO97jTWYOnga0=";
-          };
-        });
-      })
     ];
   };
   inherit (pkgs) lib;
 
   # Shared builder for every finix system in this repo. finix uses its own
-  # module system (finit/providers option tree) — NixOS modules in sibling
-  # dirs (../core ../desktop ../dev ../gaming ../shell ../tools ../user-services)
-  # are consumed ONLY through ./compat-import.nix (whitelist shim:
-  # user/manzil/environment/fonts + services.udev.packages). Baseline: bash,
-  # dhcpcd, getty, openssh, sudo, sysklogd + ./common.nix
+  # module system and compatibility option tree; shared modules from sibling
+  # directories are selected by default.nix. Baseline: bash, dhcpcd, getty,
+  # openssh, sudo, sysklogd + ./common.nix
   # workarounds (see NOTES.md "Upstream finix bugs/gaps").
   mkFinixSystem = modules:
     inputs.finix.lib.finixSystem {
@@ -119,25 +103,9 @@
           {
             options = {
               boot.loader.limine.secureBoot.enable = lib.mkEnableOption "";
-              services = {
-                mediamtx.enable = lib.mkEnableOption "";
-                forgejo.enable = lib.mkEnableOption "";
-                n8n.enable = lib.mkEnableOption "";
-                nginx.enable = lib.mkEnableOption "";
-              };
-              programs = {
-                lix.enable = lib.mkEnableOption "";
-                tweakcc.enable = lib.mkEnableOption "";
-              };
-              hardware = {
-                bluetooth.enable = lib.mkOption {
-                  type = lib.types.bool;
-                  default = true;
-                };
-                amdgpu.enable = lib.mkOption {
-                  type = lib.types.bool;
-                  default = true;
-                };
+              hardware.bluetooth.enable = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
               };
               nix.settings.max-jobs = lib.mkOption {
                 type = lib.types.str;
@@ -161,6 +129,9 @@
           ./sudo
           sysklogd
           ./common.nix
+          ./persistence/bind-replay.nix
+          ./persistence/home-reset.nix
+          ./persistence/identity.nix
         ]
         ++ modules;
     };
