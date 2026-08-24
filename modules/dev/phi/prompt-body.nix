@@ -1,4 +1,4 @@
-{...}: {
+_: {
   # Shared behavioral prompt sections for the Pi and Phi coding agents.
   #
   # Source of truth for the tool-agnostic behavioral rules (<reader>,

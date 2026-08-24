@@ -10,15 +10,9 @@ in {
     enable = lib.mkEnableOption "rtk binary";
   };
 
-  config = lib.mkMerge [
-    (lib.mkIf dev.pi.enable {
-      user.dev.rtk.enable = lib.mkDefault true;
-    })
-
-    (lib.mkIf dev.rtk.enable {
-      environment.systemPackages = [
-        pkgs.rtk
-      ];
-    })
-  ];
+  config = lib.mkIf dev.rtk.enable {
+    environment.systemPackages = [
+      pkgs.rtk
+    ];
+  };
 }

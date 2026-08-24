@@ -44,10 +44,10 @@ in {
       ".omp/agent/settings.json" = {
         generator = toJSON;
         value = {
-          defaultProvider = catalog.defaultProvider;
-          defaultModel = catalog.defaultModel;
-          defaultThinkingLevel = catalog.defaultThinkingLevel;
-          enabledModels = catalog.enabledModels;
+          inherit (catalog) defaultProvider;
+          inherit (catalog) defaultModel;
+          inherit (catalog) defaultThinkingLevel;
+          inherit (catalog) enabledModels;
         };
       };
       ".omp/agent/models.json" = {

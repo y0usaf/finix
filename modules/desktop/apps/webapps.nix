@@ -10,11 +10,5 @@
 
   config = lib.mkIf config.user.programs.webapps.enable {
     environment.systemPackages = [pkgs.ungoogled-chromium];
-    user.programs = {
-      keybard.enable = lib.mkDefault true;
-      google-meet.enable = lib.mkDefault true;
-      gcp-console.enable = lib.mkDefault true;
-      linear.enable = lib.mkDefault true;
-    };
   };
 }

@@ -6,7 +6,7 @@
   ...
 }: let
   inherit (config.user.shell) ekko;
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
 
   # The guest's 8 KiB draw-string pool is transient frame data, but upstream
   # currently leaves it append-only. Repeated surface/overlay renders therefore

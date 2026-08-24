@@ -26,26 +26,14 @@ in {
   # powerOnBoot=true translates to Policy.AutoEnable. blueman/bluetuith
   # arrive via the packages bridge; bluetoothd is the part that must run.
   services = {
-    bluetooth = {
-      enable = true;
-      settings = {
-        General = {
-          ControllerMode = "dual";
-          FastConnectable = true;
-        };
-        Policy.AutoEnable = true;
+    bluetooth.settings = {
+      General = {
+        ControllerMode = "dual";
+        FastConnectable = true;
       };
+      Policy.AutoEnable = true;
     };
-    polkit = {
-      enable = true;
-      adminIdentities = ["unix-user:${userName}"];
-    };
-    rtkit.enable = true;
-
-    # Bridge era got these via NixOS's own service modules; finix's ship
-    # their udev rules + dbus activation themselves.
-    upower.enable = true;
-    udisks2.enable = true;
+    polkit.adminIdentities = ["unix-user:${userName}"];
 
     # Waydroid (testing, sandbox ~/dev/sandbox/tft-waydroid): ship the
     # id.waydro.Container dbus policy + service file so the system bus lets
@@ -68,8 +56,6 @@ in {
 
   # ddcutil monitor control: finix's i2c module ships the rules; NixOS-side
   # this rode hardware.i2c.enable (modules/core/hardware/i2c.nix).
-  hardware.i2c.enable = true;
-
   # ── polkit + rtkit: polkit unlocks privileged desktop actions (and is
   # rtkit's authorization backend); rtkit restores the RT scheduling the
   # NixOS pipewire unit got via systemd (Nice -20 / SCHED_RR) — pipewire's
@@ -159,9 +145,6 @@ in {
   # finix's upstream xdg modules own these links: portal adds applications
   # + portal definitions, icons adds icons + pixmaps, and mime adds shared
   # MIME data (replacing the former hand-rolled list).
-  xdg.icons.enable = true;
-  xdg.mime.enable = true;
-
   # ── zram swap: zramSwap.enable { 50%, zstd } has no upstream module —
   # literal port of what the NixOS option does at runtime.
 
