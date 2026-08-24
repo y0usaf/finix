@@ -3,8 +3,7 @@
 #
 # Persistence: /var/lib/waydroid is bind-mounted from /persist at boot
 # (impermanence allowlist), so the image + userdata + apps survive reboot.
-# libndk/houdini (ARM translation) are one-time setup already baked into the
-# persisted image — not re-run here.
+# ARM translation is installed idempotently before the container starts.
 set -euo pipefail
 
 WAYDROID="${WAYDROID:?set by module}"
@@ -63,6 +62,10 @@ ro.vendor.build.type=user
 ro.odm.build.tags=release-keys
 EOF
 fi
+
+# --- one-time ARM translation (TFT has no x86_64 build) ---
+TFT_HOUDINI_SCRIPT="${TFT_HOUDINI_SCRIPT:?set by module}"
+bash "$TFT_HOUDINI_SCRIPT"
 
 # --- clean any stale session/container so launch is idempotent ---
 sudo -n waydroid session stop 2>/dev/null || true
