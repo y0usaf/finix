@@ -99,6 +99,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    omp-harness = {
+      # pi-harness TUI retargeted to drive oh-my-pi (public mirror of
+      # ~/dev/omp-harness). Exposes packages.<system>.omp-harness (+ omp
+      # passthrough) and apps.<system>.default.
+      url = "github:y0usaf/omp-harness";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     reasonix-flake = {
       url = "github:y0usaf/reasonix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -183,6 +191,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Installs the ARM native bridge required by ARM-only Android apps such as
+    # TFT in the x86_64 Waydroid container.
+    waydroidscript = {
+      url = "github:casualsnek/waydroid_script";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Finit-based OS: the server's installed OS since 2026-07-15 (NixOS is
     # its on-disk rescue entry). See modules/finix/default.nix (host wiring),
     # modules/finix/finixSystem.nix (shared builder) + modules/finix/NOTES.md.
@@ -210,7 +225,7 @@
           flakeInputs = inputs;
         };
         modules = [
-          ./hosts/android-phone/nix-on-droid.nix
+          ./modules/hosts/android-phone/nix-on-droid.nix
         ];
       };
     };
