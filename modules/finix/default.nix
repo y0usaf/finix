@@ -158,6 +158,7 @@
       defaultHost = "server";
       # Boot slots on the server belong to the ESP island driver, not stc.
       bootDriverName = "finix-server-boot";
+      sshHost = "192.168.2.66";
       sshPort = 2200;
     }).deployScript;
 
