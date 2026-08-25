@@ -1,27 +1,11 @@
-# Finix — the installed OS on server (2026-07-15) and desktop; NixOS remains
-# on disk as rescue until the purge (NOTES.md runbook). Host wiring — the
-# finix systems and deploy/boot packages — lives in default.nix; this file
-# (modules/finix/finixSystem.nix) is the shared builder only: pkgs parity +
-# mkFinixSystem. The boot/deploy drivers (deploy.nix, esp-island.nix),
-# diagnostics.nix, the common.nix baseline and NOTES.md sit beside it in
-# modules/finix/; hosts/ at the repo root.
-#
-# Day-2 operations:
-#   desktop:  nh os switch            full flow — build → activate → profile
-#                                     generation → Limine menu render (upstream
-#                                     programs.limine owns /boot, hosts/y0usaf-desktop/boot.nix)
-#             fx test                 runtime-only trial, never touches boot
-#   server:   nix run .#finix-server-persistent-deploy -- 192.168.2.66 test|switch
-#             kernel/initrd/cmdline:  nix run .#finix-server-boot -- 192.168.2.66 install
-#                                     ... oneshot, health checks, ... promote
-#             status/rescue:          nix run .#finix-server-boot -- 192.168.2.66 status|demote|rollback
+# Shared Finix package policy and system builder.
+# Host composition lives in default.nix; boot and deployment drivers are kept
+# in this directory and host-specific policy lives under hosts/.
 {
   inputs,
   system,
 }: let
-  # pkgs parity with the (now deleted) NixOS bridge: same unfree/insecure
-  # policy, cudaSupport, and overlays as ../core/nixpkgs.nix, so the
-  # compat-imported package declarations build against an equivalent pkgs.
+  # Shared package policy for every Finix system.
   permittedInsecurePackages = [
     "qtwebengine-5.15.19"
     "electron-38.8.4"
@@ -69,11 +53,8 @@
   };
   inherit (pkgs) lib;
 
-  # Shared builder for every finix system in this repo. finix uses its own
-  # module system and compatibility option tree; shared modules from sibling
-  # directories are selected by default.nix. Baseline: bash, dhcpcd, getty,
-  # openssh, sudo, sysklogd + ./common.nix
-  # workarounds (see NOTES.md "Upstream finix bugs/gaps").
+  # Shared builder for every Finix system. Host-specific modules are supplied
+  # by default.nix; this baseline provides the core runtime and persistence.
   mkFinixSystem = modules:
     inputs.finix.lib.finixSystem {
       inherit lib;

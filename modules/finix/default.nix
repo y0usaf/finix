@@ -45,8 +45,8 @@
         ../hosts/common
         hostDir
       ]));
-  desktopNixosModules = mkGraphicalModules ../hosts/y0usaf-desktop;
-  frameworkNixosModules = mkGraphicalModules ../hosts/y0usaf-framework;
+  desktopModules = mkGraphicalModules ../hosts/y0usaf-desktop;
+  frameworkModules = mkGraphicalModules ../hosts/y0usaf-framework;
 
   # Nix has no destructuring let-binding; bind the module and inherit the
   # names (lib is already bound above; nixpkgs.lib === the builder's lib).
@@ -77,17 +77,10 @@
       (import ../hosts/common/finix-nix-daemon.nix)
       (import ../hosts/common/manzil.nix)
       (import ../hosts/common/ssh-keys.nix)
-      # Shared modules the server needs, imported explicitly, in the same
-      # order the old recursive walk produced them (core/user-config, then
-      # dev/claude-code, dev/paseo, then tools/git) so the server closure is
-      # unchanged. user-config / claude-code / git are finix-consumed only;
-      # git is enabled here because the server has no tools.nix (desktop
-      # sets it in hosts/y0usaf-desktop/tools.nix; idempotent).
+      # Server-only modules that are not part of the graphical module walk.
       (import ../core/user/user-config.nix)
       (import ../dev/claude-code/claude-code.nix)
-      # paseo daemon options + finit service (finix-native). The server's
-      # paseo.nix above enables it; the desktop imports the same two files
-      # explicitly in desktopPersistent (the recursive walk excludes them).
+      # paseo daemon options and finit service.
       (import ../dev/paseo/options.nix)
       (import ../dev/paseo/service.nix)
       (import ../tools/git.nix)
@@ -98,9 +91,7 @@
   desktopPersistent = mkFinixSystem (
     (with inputs.finix.nixosModules; [
       nix-daemon
-      # Packet filter. Was serverPersistent-only until 2026-07-30, which is why
-      # the desktop ran unfiltered since the finix switch (DRIFT-AUDIT #1).
-      # Ruleset: ../core/firewall.nix (finix-native, imported directly below).
+      # The desktop packet filter is a Finix-native module imported below.
       nftables
       limine # upstream bootloader: ../../hosts/y0usaf-desktop/finix/boot.nix (OFF on server)
     ])
@@ -109,17 +100,13 @@
       ../hosts/y0usaf-desktop/finix/persistent.nix
       inputs.manzil.finixModules.default
       firewall
-      # paseo daemon options + finit service (finix-native; same pattern as
-      # serverPersistent). Declares user.dev.paseo, gated on
-      # enable, which hosts/y0usaf-desktop/dev.nix sets.
+      # paseo daemon options and finit service.
       (import ../dev/paseo/options.nix)
       (import ../dev/paseo/service.nix)
-      # paseo desktop app (GUI-only; the server has no desktop). Declares
-      # user.dev.paseo.desktop, gated on enable, which
-      # hosts/y0usaf-desktop/dev.nix sets.
+      # paseo desktop app.
       (import ../dev/paseo/desktop.nix)
     ]
-    ++ desktopNixosModules
+    ++ desktopModules
   );
 
   frameworkPersistent = mkFinixSystem (
@@ -138,7 +125,7 @@
       ../hosts/y0usaf-framework/finix/persistent.nix
       inputs.manzil.finixModules.default
     ]
-    ++ frameworkNixosModules
+    ++ frameworkModules
   );
 
   bootPackage =
@@ -156,7 +143,7 @@
       name = "finix-server-persistent-deploy";
       system = serverPersistent.config.system.topLevel;
       defaultHost = "server";
-      # Boot slots on the server belong to the ESP island driver, not stc.
+      # Server boot slots are managed by the Finix ESP island driver.
       bootDriverName = "finix-server-boot";
       sshHost = "192.168.2.66";
       sshPort = 2200;
