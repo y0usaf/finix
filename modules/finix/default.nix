@@ -91,9 +91,7 @@
       # git is enabled here because the server has no tools.nix (desktop
       # sets it in hosts/y0usaf-desktop/tools.nix; idempotent).
       (import ../core/user/user-config.nix)
-      # claude-code module + settings (finix-consumed)
       (import ../dev/claude-code/claude-code.nix)
-      (import ../dev/claude-code/settings.nix)
       # paseo daemon options + finit service (finix-native). The server's
       # paseo.nix above enables it; the desktop imports the same two files
       # explicitly in desktopPersistent (the recursive walk excludes them).

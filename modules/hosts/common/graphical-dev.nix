@@ -3,7 +3,6 @@
     claude-code.enable = lib.mkDefault true;
     codex.enable = lib.mkDefault true;
     android-tools.enable = lib.mkDefault true;
-    codex-cli.enable = lib.mkDefault true;
     crush.enable = lib.mkDefault true;
     fx.enable = lib.mkDefault true;
     work = {
