@@ -26,8 +26,6 @@
     ".omfx" # oh my fx settings
     ".mozilla"
     ".librewolf"
-    ".local/share/claude"
-    ".local/share/codex"
     ".local/share/pi"
     ".local/share/kimi-code"
     ".config/gh"
