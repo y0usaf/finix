@@ -16,11 +16,13 @@ _: {
       ramp.enable = true;
       vercel.enable = true;
     };
-    pi.enable = true;
-    pi.prime-agent.enable = true;
-    pi.agents = {
-      maxDepth = 999;
-      maxLiveAgents = 999;
+    pi = {
+      enable = true;
+      prime-agent.enable = true;
+      agents = {
+        maxDepth = 999;
+        maxLiveAgents = 999;
+      };
     };
     omp = {
       enable = true;
