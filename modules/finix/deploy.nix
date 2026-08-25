@@ -1,17 +1,14 @@
-# SSH deploy driver: config-only changes to a running persistent finix
-# system. Desktop no longer uses postSwitch — since hosts/y0usaf-desktop/boot.nix
-# (upstream programs.limine), switch-to-configuration switch|boot runs the
-# bootloader installHook itself; the desktop deploy survives only for `fx test`
-# (runtime-only, never touches the boot menu). Server kernel/initrd/cmdline
-# changes still go through the ESP island driver.
+# SSH deploy driver for a running persistent Finix system. The server's
+# kernel/initrd/cmdline changes use the separate ESP island driver; desktop
+# bootloader updates are handled by its Limine module.
 {pkgs}: {
-  # mkDeploy {name, system, defaultHost}
+  # mkDeploy {name, system, defaultHost, ...}
   mkDeploy = {
     bootDriverName ? null,
     defaultHost,
     name,
-    postSwitch ? null,
     system,
+    sshHost ? null,
     sshPort ? null,
   }: {
     deployScript = pkgs.writeShellScriptBin name ''
@@ -47,69 +44,72 @@
       fi
 
       system_path='${system}'
-      post_switch='${
-        if postSwitch == null
+      remote_host="${
+        if sshHost == null
+        then "$host"
+        else sshHost
+      }"
+      if [ "$host" != local ] && [ -n '${
+        if sshPort == null
         then ""
-        else postSwitch
-      }'
-      if [ "$host" != local ] && [ -n '${if sshPort == null then "" else toString sshPort}' ]; then
-        export NIX_SSHOPTS='-p ${if sshPort == null then "" else toString sshPort}'
-        ssh_cmd=(ssh -p '${if sshPort == null then "" else toString sshPort}')
+        else toString sshPort
+      }' ]; then
+        export NIX_SSHOPTS='-p ${
+        if sshPort == null
+        then ""
+        else toString sshPort
+      } -o ControlPath=none'
+        ssh_cmd=(ssh -p '${
+        if sshPort == null
+        then ""
+        else toString sshPort
+      }' -o ControlPath=none)
       else
         ssh_cmd=(ssh)
       fi
 
       if [ "$host" = local ]; then
-        # Self-deploy: only meaningful on a running finix system. Under
-        # systemd/NixOS the activation would clobber the live /etc.
+        # Self-deploy only runs on a live Finix system. Refuse systemd hosts
+        # because their activation model is different.
         if [ -d /run/systemd/system ]; then
-          echo "${name}: refusing local $action under systemd/NixOS; boot finix first (or target a host over ssh)" >&2
+          echo "${name}: refusing local $action under systemd; target a live Finix host over ssh" >&2
           exit 1
         fi
         sudo "$system_path/sw/bin/nix-store" --realise "$system_path" \
           --add-root /nix/var/nix/gcroots/finix-persistent >/dev/null
         if [ "$action" != test ]; then
-          # WHY: the limine installHook renders the boot menu from profile
-          # generations; without registration the menu rots at gen 1 while
-          # runtime drifts (2026-07-30 server drill; 07-27 desktop class).
           sudo "$system_path/sw/bin/nix-env" -p /nix/var/nix/profiles/system --set "$system_path"
         fi
         sudo "$system_path/bin/switch-to-configuration" "$action"
-        # nh os switch parity: finix switch-to-configuration is runtime-only,
-        # so chain the boot-slot staging (skip for test = config-only trial).
-        if [ "$action" != test ] && [ -n "$post_switch" ]; then
-          echo "==> staging boot slot so the reboot default follows"
-          $post_switch
-        fi
         exit 0
       fi
 
-      # post-NixOS-purge: the running finix system supplies nix-store (the
-      # trial-era NixOS system profile is deleted; see NOTES.md runbook).
-      remote_store="ssh://$host?remote-program=/run/current-system/sw/bin/nix-store"
+      # The running Finix system supplies the remote nix-store endpoint.
+      remote_store="ssh://$remote_host${
+        if sshPort == null
+        then ""
+        else ":${toString sshPort}"
+      }?remote-program=/run/current-system/sw/bin/nix-store"
 
-      echo "==> copying persistent finix closure to $host"
+      echo "==> copying persistent finix closure to $remote_host"
       nix copy --to "$remote_store" "$system_path"
 
       echo "==> rooting persistent closure"
-      "''${ssh_cmd[@]}" "$host" \
+      "''${ssh_cmd[@]}" "$remote_host" \
         "/run/wrappers/bin/sudo '$system_path/sw/bin/nix-store' --realise '$system_path' --add-root /nix/var/nix/gcroots/finix-persistent"
 
       if [ "$action" != test ]; then
-        # WHY: the limine installHook renders the boot menu from profile
-        # generations; without registration the menu rots at gen 1 while
-        # runtime drifts (2026-07-30 server drill; 07-27 desktop class).
         echo "==> registering system profile generation"
-        "''${ssh_cmd[@]}" "$host" \
+        "''${ssh_cmd[@]}" "$remote_host" \
           "/run/wrappers/bin/sudo /run/current-system/sw/bin/nix-env -p /nix/var/nix/profiles/system --set '$system_path'"
       fi
 
       echo "==> finix switch-to-configuration $action"
-      "''${ssh_cmd[@]}" "$host" \
+      "''${ssh_cmd[@]}" "$remote_host" \
         "/run/wrappers/bin/sudo '$system_path/bin/switch-to-configuration' '$action'"
-      # Dirty-cut torn-write incident 2026-07-31: flush installHook ESP writes.
+      # Flush filesystem and bootloader writes before returning control.
       if [ "$action" != test ]; then
-        "''${ssh_cmd[@]}" "$host" \
+        "''${ssh_cmd[@]}" "$remote_host" \
           "/run/wrappers/bin/sudo /run/current-system/sw/bin/sync"
       fi
     '';
