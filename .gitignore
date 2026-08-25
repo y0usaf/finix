@@ -7,3 +7,6 @@ result
 .pi
 .pi-rlm
 .reasonix
+
+# python bytecode
+__pycache__/
