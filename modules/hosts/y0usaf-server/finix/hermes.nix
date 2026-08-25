@@ -59,20 +59,11 @@
     };
   };
 
-  # Gateway config: base + Aphrodite CCR context engine. `plugins.enabled`
-  # activates the plugin (the imperative `hermes plugins enable aphrodite`
-  # writes exactly this key); `context.engine` hands the compression engine
-  # to the plugin; engine_threshold_pct = compress at 55% context fill
-  # (plugin default 45, README recommends 55). model.context_length is
-  # deliberately NOT set: claiming 1M tokens to a backend behind
-  # the Vercel gateway needs testing before we trust it.
+  # Gateway config: Aphrodite is intentionally disabled; keep only the
+  # serverstats plugin enabled.
   configYaml = (pkgs.formats.yaml {}).generate "hermes-config.yaml" (baseConfig
     // {
-      plugins.enabled = ["aphrodite" "serverstats"];
-      context = {
-        engine = "aphrodite";
-        engine_threshold_pct = 55;
-      };
+      plugins.enabled = ["serverstats"];
     });
 
   # Per-user interactive CLI config stays bare: no plugins.enabled without a
@@ -106,12 +97,15 @@
         cfg = yaml.safe_load(f) or {}
     # Append, don't replace: preserve plugins enabled imperatively (e.g.
     # serverstats) so the declarative merge never drops them on a reboot.
-    enabled = cfg.setdefault("plugins", {}).setdefault("enabled", [])
-    if "aphrodite" not in enabled:
-        enabled.append("aphrodite")
-    ctx = cfg.setdefault("context", {})
-    ctx["engine"] = "aphrodite"
-    ctx["engine_threshold_pct"] = 55
+    plugins = cfg.setdefault("plugins", {})
+    enabled = plugins.setdefault("enabled", [])
+    plugins["enabled"] = [name for name in enabled if name != "aphrodite"]
+    ctx = cfg.get("context")
+    if isinstance(ctx, dict):
+        ctx.pop("engine", None)
+        ctx.pop("engine_threshold_pct", None)
+        if not ctx:
+            cfg.pop("context", None)
     with open(p, "w") as f:
         yaml.safe_dump(cfg, f, sort_keys=False)
   '';
