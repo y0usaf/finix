@@ -63,18 +63,11 @@
       nftables
       postgresql
       nix-daemon
-      # Staged, disarmed: boot.nix pins programs.limine.enable = false, so this
-      # module is inert (upstream guards its config block on cfg.enable) and the
-      # server closure is unchanged. Imported so the takeover config evaluates
-      # on every deploy instead of rotting. The ESP island still owns boot.
-      limine
     ])
     ++ [
       ../hosts/y0usaf-server/finix/services.nix
       ../hosts/y0usaf-server/finix/persistent.nix
       ../hosts/y0usaf-server/finix/attic.nix
-      ../hosts/y0usaf-server/finix/boot-health.nix
-      ../hosts/y0usaf-server/finix/boot.nix
       ../hosts/y0usaf-server/finix/hermes.nix
       ../hosts/y0usaf-server/finix/paseo.nix
       inputs.manzil.finixModules.default
@@ -158,14 +151,6 @@
       defaultHost = "server";
     }).bootDriverScript;
 
-  frameworkBootPackage =
-    ((import ./esp-island.nix {inherit pkgs lib;}).mkIsland {
-      name = "finix-framework-boot";
-      system = frameworkPersistent.config.system.topLevel;
-      ucodeImg = "${pkgs.microcode-amd}/amd-ucode.img";
-      defaultHost = "local";
-    }).bootDriverScript;
-
   persistentDeployPackage =
     (deployLib.mkDeploy {
       name = "finix-server-persistent-deploy";
@@ -196,6 +181,5 @@ in rec {
     finix-server-persistent-deploy = persistentDeployPackage;
     finix-server-boot = bootPackage;
     finix-desktop-deploy = desktopDeployPackage;
-    finix-framework-boot = frameworkBootPackage;
   };
 }

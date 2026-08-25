@@ -1,9 +1,7 @@
-# Stage-2 persistent Finix system for y0usaf-server.
+# Persistent Finix system for y0usaf-server.
 #
-# This is the trial system without the bounded trial machinery: the root stays
-# ephemeral, durable state remains on the existing @persist/@home subvolumes,
-# and the machine no longer returns to NixOS on a timer. NixOS remains the
-# bootloader/rescue system until the Limine takeover in stage 3.
+# The root is ephemeral; durable state remains on the existing @persist/@home
+# subvolumes. Boot and recovery are owned by the Finix ESP island.
 {
   config,
   lib,
@@ -11,16 +9,6 @@
   ...
 }: let
   diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
-  takeover = import ./takeover.nix;
-  deadmanEntry =
-    if takeover
-    then "Finix"
-    else "Limine";
-  deadmanDestination =
-    if takeover
-    then "island rescue"
-    else "NixOS";
-
   # Boot diagnostics, ported from the trial config after the 2026-07-15
   # warm-reboot hang left zero logs (died before syslog/binds). Markers
   # echoed into /dev/kmsg are replayed by the flight recorder once it
@@ -34,13 +22,8 @@
       echo "${tag}: $line" > /dev/kmsg || true
     done
   '';
-  # Arm-first dead-man switch for the stage-3 era: point BootNext at the
-  # NixOS loader as early as possible, clear it only once this boot proves
-  # healthy. Any crash/hang/watchdog reset before that lands the next
-  # firmware boot in NixOS, where the box parks (NixOS never auto-reboots).
-  # Harmless during the kexec era: NixOS is the bootloader default anyway.
-  # Deliberate, reversible exit to the rescue OS: survives promotion of the
-  # Finix island to BootOrder head (one-shot, does not touch BootOrder).
+  # Arm the Finix island as the one-shot recovery target and clear BootNext
+  # after the running system has passed its health check.
 in {
   networking.hostName = "y0usaf-server";
 
@@ -108,27 +91,6 @@ in {
     systemPackages = [
       pkgs.nix
       pkgs.efibootmgr
-      (
-        pkgs.writeShellScriptBin "boot-nixos" (
-          if takeover
-          then ''
-            echo "boot-nixos: NixOS rescue was pruned by the limine takeover; rescue = island golden slot via the Finix EFI entry / console menu" >&2
-            exit 1
-          ''
-          else ''
-            set -eu
-            export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnused]}
-            [ "$(id -u)" = 0 ] || { echo "boot-nixos: run with sudo" >&2; exit 1; }
-            mountpoint -q /sys/firmware/efi/efivars \
-              || mount -t efivarfs efivarfs /sys/firmware/efi/efivars
-            lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Limine\t.*/\1/p' | head -n1)"
-            [ -n "$lim" ] || { echo "boot-nixos: no Limine EFI entry" >&2; exit 1; }
-            efibootmgr -q -n "$lim"
-            echo "boot-nixos: BootNext=Boot$lim; rebooting into NixOS rescue"
-            exec /run/current-system/sw/bin/initctl reboot
-          ''
-        )
-      )
     ];
   };
 
@@ -153,9 +115,8 @@ in {
       neededForBoot = true;
     };
 
-    # ESP, shared with NixOS. The island tooling (finix-esp-island) and any
-    # kernel/initrd slot updates run from finix after the takeover, so the
-    # ESP must be reachable here too. neededForBoot: mount.nix only creates
+    # ESP used by the Finix boot island and its kernel/initrd slots.
+    # neededForBoot: mount.nix only creates
     # mount tasks for neededForBoot filesystems (upstream gotcha #1).
     "/boot" = {
       device = "/dev/disk/by-uuid/41B0-E342";
@@ -267,9 +228,7 @@ in {
         log = true;
       };
       bootnext-deadman = {
-        # Post-flip the island IS the rescue path. BootNext addresses EFI
-        # entries, not Limine menu slots, so it cannot target the golden slot.
-        description = "EFI BootNext dead-man switch (fall home to ${deadmanDestination})";
+        description = "EFI BootNext dead-man switch for the Finix island";
         command = "${pkgs.writeShellScript "persistent-bootnext-deadman" ''
           set -u
           export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.efibootmgr pkgs.gnugrep pkgs.gnused pkgs.iproute2]}
@@ -278,13 +237,13 @@ in {
             || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
             || { echo "bootnext-deadman: no efivars; not armed" >&2; exit 1; }
 
-          lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* ${deadmanEntry}\t.*/\1/p' | head -n1)"
-          if [ -z "$lim" ]; then
-            echo "bootnext-deadman: no ${deadmanEntry} EFI entry; not armed" >&2
+          island="$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* Finix\t.*/\1/p' | head -n1)"
+          if [ -z "$island" ]; then
+            echo "bootnext-deadman: no Finix EFI entry; not armed" >&2
             exit 1
           fi
-          efibootmgr -q -n "$lim" || { echo "bootnext-deadman: arming failed" >&2; exit 1; }
-          echo "bootnext-deadman: armed BootNext=Boot$lim (${deadmanDestination})"
+          efibootmgr -q -n "$island" || { echo "bootnext-deadman: arming failed" >&2; exit 1; }
+          echo "bootnext-deadman: armed BootNext=Boot$island (Finix island)"
 
           # Healthy = sshd continuously listening for 2 minutes (10-minute budget).
           ok=0
@@ -301,12 +260,12 @@ in {
             fi
             sleep 10
           done
-          echo "bootnext-deadman: health timeout; BootNext stays armed (next boot = ${deadmanDestination})" >&2
+          echo "bootnext-deadman: health timeout; BootNext stays armed (next boot = Finix island)" >&2
           exit 1
         ''}";
         log = true;
       };
-      bootorder-assert = lib.mkIf takeover {
+      bootorder-assert = {
         # WHY: firmware shuffles the promoted order and may let 0003's stale
         # EFI fallback win; assert the enrolled Limine door first and make the
         # fallback byte-identical (2026-07-30/31 drill incident).
@@ -452,7 +411,7 @@ in {
     };
   };
 
-  # Stage-2 status dump into the kmsg stream (and thus the recorder log).
+  # Status dump into the kmsg stream and recorder log.
 
   # Flight recorder: stream /dev/kmsg (full replay from boot + follow) to
   # /persist. Supervised service, not a backgrounded run task: finit reaps
@@ -469,6 +428,5 @@ in {
   # reboot; it also makes the active generation obvious from the console.
   # Keep the Nix client in the closure for SSH-based deployments. The daemon
   # is used as the remote store endpoint; local builds remain optional.
-  # efibootmgr backs the ESP-island tooling, the dead-man switch, and manual
-  # BootNext surgery; boot-nixos is the always-available exit to the rescue OS.
+  # efibootmgr backs the ESP island and its recovery tasks.
 }
