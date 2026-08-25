@@ -1,5 +1,5 @@
 {
-  description = "Finix — y0usaf's finix-only systems (host wiring in modules/finix/default.nix, shared builder in modules/finix/finixSystem.nix); the historical NixOS tree lives on the nixos-legacy branch";
+  description = "Finix systems for y0usaf";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -198,9 +198,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Finit-based OS: the server's installed OS since 2026-07-15 (NixOS is
-    # its on-disk rescue entry). See modules/finix/default.nix (host wiring),
-    # modules/finix/finixSystem.nix (shared builder) + modules/finix/NOTES.md.
+    # Finit-based OS and module system.
     finix.url = "github:finix-community/finix";
   };
 
