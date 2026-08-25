@@ -199,6 +199,7 @@ in {
           ".config/Frame"
           ".config/intent"
           ".config/herdr"
+          ".config/ramp" # ramp-cli config.toml + auth state
 
           # Misc
           ".config/snowflake"
@@ -228,7 +229,7 @@ in {
 
           # Big data (flagged: prune candidates, but keep)
           ".local/share/PrismLauncher" # 55G — minecraft worlds, irreplaceable
-          ".local/share/bun" # globals only (supabase/vercel/...); install/cache purged, regenerates
+          ".local/share/bun" # globals only (supabase/...); install/cache purged, regenerates
           ".local/share/cargo"
           ".local/share/rustup"
           ".local/share/opencode"
