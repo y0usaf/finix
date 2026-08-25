@@ -14,6 +14,8 @@ _: {
       agent-slack.enable = true;
       gws.enable = true;
       linear-cli.enable = true;
+      ramp.enable = true;
+      vercel.enable = true;
     };
     pi.enable = true;
     pi.prime-agent.enable = true;
