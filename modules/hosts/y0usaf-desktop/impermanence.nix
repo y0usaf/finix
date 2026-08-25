@@ -103,23 +103,9 @@ in {
           ".aws"
           ".mcp-auth"
 
-          # AI / dev tooling state — relocated out of ~ via env vars in
-          # modules/core/user/session/xdg.nix (CLAUDE_CONFIG_DIR, CODEX_HOME,
-          # KIMI_CODE_HOME). ~/.claude.json lives inside the claude dir once
-          # CLAUDE_CONFIG_DIR is set. pi uses its own default ~/.pi/agent.
+          # AI / dev tooling state
           ".fx" # fx settings, sessions, skills, and durable agent state
           ".omfx" # oh my fx profile settings (startup_mode and fork-only keys)
-          # claude: subdirs only — versions/ (218M binary cache) regenerates on next app
-          # start; settings.json is a manzil symlink (regenerates).
-          ".local/share/claude/backups"
-          ".local/share/claude/cache"
-          ".local/share/claude/plugins"
-          ".local/share/claude/projects"
-          ".local/share/claude/sessions"
-          ".local/share/claude/tasks"
-          ".local/share/claude/teams"
-          ".local/share/claude/.claude"
-          ".local/share/codex"
           ".pi" # pi agent dir (pi's native default; no env var indirection)
           ".omp" # oh-my-pi agent dir (sessions, harness config.json)
           ".prime" # prime agent dir (agents, sessions, daemon state, logs)
@@ -279,9 +265,6 @@ in {
           ".cache/nix"
         ];
       files = [
-        ".local/share/claude/.claude.json"
-        ".local/share/claude/history.jsonl"
-
         # adb keypair kept; sdk cache + debug.keystore stay ephemeral
         ".local/share/android/adbkey"
         ".local/share/android/adbkey.pub"

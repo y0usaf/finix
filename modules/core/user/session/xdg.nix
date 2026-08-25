@@ -51,8 +51,6 @@ in {
       NPM_CONFIG_INIT_MODULE = "${xdgConfig}/npm/config/npm-init.js";
 
       # --- AI coding agents (no native XDG support) ---
-      CLAUDE_CONFIG_DIR = "${xdgData}/claude"; # also absorbs ~/.claude.json
-      CODEX_HOME = "${xdgData}/codex";
       KIMI_CODE_HOME = "${xdgData}/kimi-code";
 
       # --- Databases / REPLs ---
