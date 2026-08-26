@@ -482,7 +482,8 @@ in {
   # Root-side seed: dirs, first-boot config.yaml, the ai-gateway provider
   # plugin, and AI_GATEWAY_API_KEY into .env from
   # /persist/secrets/hermes/ai-gateway-api-key. Idempotent.
-  finit.tasks."hermes-dirs" = {
+  finit = {
+    tasks."hermes-dirs" = {
     description = "prepare hermes state dirs and seed config/env";
     command = pkgs.writeShellScript "hermes-dirs" ''
       set -eu
@@ -619,7 +620,7 @@ SSHCFG
     log = true;
   };
 
-  finit.services."hermes-gateway" = {
+    services."hermes-gateway" = {
     description = "hermes agent gateway (Vercel AI Gateway provider)";
     user = "hermes";
     group = "hermes";
@@ -654,7 +655,7 @@ SSHCFG
     log = true;
   };
 
-  finit.services."hermes-dashboard" = {
+    services."hermes-dashboard" = {
     description = "hermes web dashboard (desktop remote backend)";
     user = "hermes";
     group = "hermes";
@@ -682,5 +683,6 @@ SSHCFG
     };
     conditions = ["net/lo/up" "task/hermes-dirs/success"];
     log = true;
+  };
   };
 }

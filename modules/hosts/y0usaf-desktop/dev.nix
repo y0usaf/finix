@@ -11,8 +11,10 @@ _: {
     fx.enable = true;
     work = {
       agent-slack.enable = true;
+      aws-cli.enable = true;
       gws.enable = true;
       linear-cli.enable = true;
+      notion-cli.enable = true;
       ramp.enable = true;
       vercel.enable = true;
     };

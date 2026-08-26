@@ -23,7 +23,7 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = (import flakeInputs.deno2nix {inherit pkgs;}).lib.buildDenoPackage {
+      default = (import (toString flakeInputs.deno2nix) {inherit pkgs;}).lib.buildDenoPackage {
         pname = "linear";
         inherit ((builtins.fromJSON (builtins.readFile "${linear-cli-src}/deno.json"))) version;
         src = lib.cleanSource linear-cli-src;

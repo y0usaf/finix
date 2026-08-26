@@ -60,12 +60,12 @@
 
   serverPersistent = mkFinixSystem {
     modules =
-      (with inputs.finix.nixosModules; [
-        cron
-        nftables
-        postgresql
-        nix-daemon
-      ])
+      [
+        inputs.finix.nixosModules.cron
+        inputs.finix.nixosModules.nftables
+        inputs.finix.nixosModules.postgresql
+        inputs.finix.nixosModules.nix-daemon
+      ]
       ++ [
         ../hosts/y0usaf-server/finix/services.nix
         ../hosts/y0usaf-server/finix/persistent.nix
@@ -91,11 +91,11 @@
   desktopPersistent = mkFinixSystem {
     cudaSupport = true;
     modules =
-      (with inputs.finix.nixosModules; [
-        nix-daemon
-        nftables
-        limine
-      ])
+      [
+        inputs.finix.nixosModules.nix-daemon
+        inputs.finix.nixosModules.nftables
+        inputs.finix.nixosModules.limine
+      ]
       ++ [
         ./diagnostics.nix
         ../hosts/y0usaf-desktop/finix/persistent.nix
@@ -109,16 +109,16 @@
   };
   frameworkPersistent = mkFinixSystem {
     modules =
-      (with inputs.finix.nixosModules; [
-        brightnessctl
-        docker
-        fwupd
-        networkmanager
-        nftables
-        nix-daemon
-        power-profiles-daemon
-        zzz
-      ])
+      [
+        inputs.finix.nixosModules.brightnessctl
+        inputs.finix.nixosModules.docker
+        inputs.finix.nixosModules.fwupd
+        inputs.finix.nixosModules.networkmanager
+        inputs.finix.nixosModules.nftables
+        inputs.finix.nixosModules.nix-daemon
+        inputs.finix.nixosModules.power-profiles-daemon
+        inputs.finix.nixosModules.zzz
+      ]
       ++ [
         ./diagnostics.nix
         ../hosts/y0usaf-framework/finix/persistent.nix

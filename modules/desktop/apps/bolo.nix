@@ -53,12 +53,12 @@
       hash = "sha256-6/Jllz8kHhwgOuMmLS5kK0zxHZd2OWjyvLM0FkBVIeg=";
     };
     nativeBuildInputs = [pkgs.autoPatchelfHook];
-    buildInputs = with pkgs.cudaPackages; [
-      cuda_cudart
-      libcublas
-      libcurand
-      libcufft
-      cudnn
+    buildInputs = [
+      pkgs.cudaPackages.cuda_cudart
+      pkgs.cudaPackages.libcublas
+      pkgs.cudaPackages.libcurand
+      pkgs.cudaPackages.libcufft
+      pkgs.cudaPackages.cudnn
       pkgs.stdenv.cc.cc.lib
     ];
     installPhase = ''

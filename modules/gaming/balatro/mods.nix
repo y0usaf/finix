@@ -10,7 +10,7 @@
 in {
   options = {
     user.gaming.mods.balatro = lib.mkOption {
-      type = with lib.types; attrsOf raw;
+      type = lib.types.attrsOf lib.types.raw;
       default = {
         Aura = fetchGitHub "SpectralPack" "Aura" "dbb6496d163d15e86b0afb6879d32b891164af05" "sha256-4WHbRAUCHGtU/MwJeSQX9NdS7TX6zlsTffxl43f0JJA=";
 

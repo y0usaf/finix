@@ -7,7 +7,7 @@
 in {
   options = {
     user.gaming.mods.expedition33 = lib.mkOption {
-      type = with lib.types; attrsOf raw;
+      type = lib.types.attrsOf lib.types.raw;
       default = {
         ClairObscurFix = {
           inherit version;

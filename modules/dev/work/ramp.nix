@@ -75,7 +75,7 @@ in {
             "aarch64-linux"
             "x86_64-linux"
           ];
-          sourceProvenance = with lib.sourceTypes; [binaryNativeCode];
+          sourceProvenance = [lib.sourceTypes.binaryNativeCode];
         };
       };
       description = "Ramp CLI package to install.";

@@ -6,7 +6,7 @@
   system,
 }: let
   mkPkgs = cudaSupport:
-    import inputs.nixpkgs {
+    import (toString inputs.nixpkgs) {
       inherit system;
       config = {
         allowUnfree = true;
@@ -43,7 +43,7 @@
         modulesPath = toString inputs.nixpkgs + "/nixos/modules";
         flakeInputs = inputs;
       };
-      modules = with inputs.finix.nixosModules; [
+      modules = [
         {nixpkgs.pkgs = lib.mkDefault pkgs;}
         {
           options.lib = lib.mkOption {
@@ -64,12 +64,12 @@
             };
           };
         }
-        bash
-        dhcpcd
-        getty
-        openssh
+        inputs.finix.nixosModules.bash
+        inputs.finix.nixosModules.dhcpcd
+        inputs.finix.nixosModules.getty
+        inputs.finix.nixosModules.openssh
         ./sudo
-        sysklogd
+        inputs.finix.nixosModules.sysklogd
         ./common.nix
         ./persistence/bind-replay.nix
         ./persistence/home-reset.nix
