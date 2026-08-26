@@ -2,13 +2,14 @@ _: {
   user.ui = {
     tomoe = {
       displays = {
-        "DP-2" = {
-          position = [0 0];
-          resolution = "5120x1440@239.761";
-        };
+        # 32:9 panel on DP-4, native 5120x1440@239.761. Its EDID preferred
+        # mode is a conservative 3840x1080@60 compatibility mode, so
+        # "preferred"/bare fallbacks run the panel under-scanned; ask for
+        # the size explicitly (no @Hz = highest refresh at that size).
+        # DP-2 is disconnected and dropped.
         "DP-4" = {
           position = [0 0];
-          resolution = "5120x1440@239.761";
+          resolution = "5120x1440";
         };
         "HDMI-A-2" = {
           position = [5120 0];
