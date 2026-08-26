@@ -5,15 +5,16 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.dev.pi.prime-agent;
-  # Shared pi/prime-agent model catalog (plain data, see model-catalog.nix).
-  catalog = import ./model-catalog.nix;
+  cfg = config.user.dev.prime-agent;
+  # Shared pi/prime-agent model catalog (plain data, see
+  # modules/dev/pi/model-catalog.nix).
+  catalog = import ./pi/model-catalog.nix;
   toJSON = lib.generators.toJSON {};
 in {
   # Prime Agent is the pi core plus the Prime RLM/harness layer; it reads the
   # same settings.json/models.json schema from ~/.prime/agent/ instead of
   # ~/.pi/agent/, so its model catalog is shared with pi via model-catalog.nix.
-  options.user.dev.pi.prime-agent = {
+  options.user.dev.prime-agent = {
     enable = lib.mkEnableOption "Prime Agent coding agent";
 
     defaultProvider = lib.mkOption {

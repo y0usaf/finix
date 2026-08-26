@@ -94,15 +94,13 @@ in {
   ## Stable host identity: reuse the NixOS host key (mounted with /persist
   ## in the initrd, so it exists before sshd starts). ed25519 only: finix
   ## renders list settings space-joined on ONE HostKey line, which sshd
-  ## rejects - one key per list is the safe shape. TODO: report upstream.
+  ## rejects - one key per list is the safe shape. The shared persistence
+  ## identity module owns this setting.
   services = {
     openssh.settings = {
       # Parity with the NixOS universe: real sshd on 2200 (2222 = forgejo,
       # tailnet :22 = Tailscale SSH rescue path).
       Port = [2200];
-      HostKey = lib.mkForce [
-        "/persist/etc/ssh/ssh_host_ed25519_key"
-      ];
     };
     nftables = {
       enable = true;
