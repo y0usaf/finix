@@ -65,14 +65,14 @@
       "/run/current-system/sw/bin/rush"
       "${pkgs.rush}/bin/rush"
     ];
-    systemPackages = with pkgs; [
-      curl
-      iproute2
-      iputils
-      procps
-      util-linux
-      vim
-      rush
+    systemPackages = [
+      pkgs.curl
+      pkgs.iproute2
+      pkgs.iputils
+      pkgs.procps
+      pkgs.util-linux
+      pkgs.vim
+      pkgs.rush
     ];
   };
 
