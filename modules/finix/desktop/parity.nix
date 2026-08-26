@@ -18,7 +18,13 @@
 in {
   # These upstream modules are NOT in mkFinixSystem's baseline (udev/dbus/
   # seatd et al are wired into finixSystem itself; the rest are opt-in).
-  imports = with flakeInputs.finix.nixosModules; [bluetooth polkit rtkit udisks2 upower];
+  imports = [
+    flakeInputs.finix.nixosModules.bluetooth
+    flakeInputs.finix.nixosModules.polkit
+    flakeInputs.finix.nixosModules.rtkit
+    flakeInputs.finix.nixosModules.udisks2
+    flakeInputs.finix.nixosModules.upower
+  ];
 
   # ── bluetooth: upstream module; settings parity with the NixOS side.
   # powerOnBoot=true translates to Policy.AutoEnable. blueman/bluetuith
