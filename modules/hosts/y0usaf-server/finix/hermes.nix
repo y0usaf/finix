@@ -13,6 +13,15 @@
 #
 # Provider: "ai-gateway" = Vercel AI Gateway (key AI_GATEWAY_API_KEY).
 #
+# Remote workspace (2026-08-25): the gateway + dashboard set
+# terminal.backend=ssh, so THEIR tool calls execute on y0usaf-desktop
+# (Tailscale 100.90.54.18, sshd :2222) instead of locally. Auth reuses the
+# service account's /var/lib/hermes/.ssh/id_ed25519, which IS the desktop
+# device key (hosts/y0usaf-desktop/user-ssh.pub) that
+# hosts/common/ssh-keys.nix authorizes on every host — no extra keypair.
+# The per-user interactive `hermes` CLI deliberately stays local-backend:
+# a coding agent runs as the user whose files it edits (see below).
+#
 # NOTE (verified 2026-08-01 against hermes-agent 0.19.0, rev 2b0fb72): the
 # "minimal" package ships NO baked-in "ai-gateway" provider profile (the
 # orchestrator's assumption that the base URL is pre-registered does not hold
@@ -108,6 +117,23 @@
             cfg.pop("context", None)
     with open(p, "w") as f:
         yaml.safe_dump(cfg, f, sort_keys=False)
+  '';
+
+  # Remote-workspace merge: declarative terminal.backend=ssh for the managed
+  # gateway + dashboard (their tool calls execute on y0usaf-desktop over
+  # SSH; see TERMINAL_SSH_* in the service environments below). Idempotent.
+  sshWorkspaceConfigMerge = pkgs.writeText "ssh-workspace-config-merge.py" ''
+    import sys
+    import yaml
+
+    p = sys.argv[1]
+    with open(p) as f:
+        cfg = yaml.safe_load(f) or {}
+    term = cfg.setdefault("terminal", {})
+    if term.get("backend") != "ssh":
+        term["backend"] = "ssh"
+        with open(p, "w") as f:
+            yaml.safe_dump(cfg, f, sort_keys=False)
   '';
 
   # Persistent Bot Mode specialists. Their exact model route and membership
@@ -446,6 +472,13 @@ in {
     groups.hermes = {};
   };
 
+  # rush 0.1.0 SIGILLs on this host's CPU (store-path crash reproduced
+  # directly, exit 132, 2026-08-25) — with rush as login shell, every SSH
+  # session died at exec and the gateway's ssh workspace was unreachable.
+  # bashInteractive until rush is rebuilt for this host or swapped out.
+  # common.nix keeps rush as an mkDefault so other hosts are unaffected.
+  users.users.y0usaf.shell = lib.mkForce "${pkgs.bashInteractive}/bin/bash";
+
   # Root-side seed: dirs, first-boot config.yaml, the ai-gateway provider
   # plugin, and AI_GATEWAY_API_KEY into .env from
   # /persist/secrets/hermes/ai-gateway-api-key. Idempotent.
@@ -497,6 +530,38 @@ in {
       # (the generated file only installs on first boot; this keeps live
       # tweaks while adding the declarative keys).
       ${pyYaml}/bin/python3 ${aphroditeConfigMerge} ${homeDir}/config.yaml
+
+      # Remote workspace: point the managed gateway/dashboard at the desktop
+      # over SSH (tools execute there). Idempotent YAML merge, same pattern
+      # as aphrodite above.
+      ${pyYaml}/bin/python3 ${sshWorkspaceConfigMerge} ${homeDir}/config.yaml
+
+      # The service account's id_ed25519 IS the desktop device key
+      # (hosts/y0usaf-desktop/user-ssh.pub), already authorized on every
+      # host via hosts/common/ssh-keys.nix. Only the routing stanza is new;
+      # appended after the github block, idempotent on re-runs.
+      mkdir -p ${stateDir}/.ssh
+      chmod 0700 ${stateDir}/.ssh
+      if ! grep -q "hermes-workspace" ${stateDir}/.ssh/config 2>/dev/null; then
+        cat >> ${stateDir}/.ssh/config <<'SSHCFG'
+
+Host hermes-workspace y0usaf-desktop desktop-ws
+  HostName 100.90.54.18
+  Port 2222
+  User y0usaf
+  IdentityFile /var/lib/hermes/.ssh/id_ed25519
+  IdentitiesOnly yes
+  StrictHostKeyChecking accept-new
+SSHCFG
+        chown hermes:hermes ${stateDir}/.ssh/config
+      fi
+
+      # Hermes' SSH backend keeps ControlMaster sockets under
+      # /var/tmp/hermes-ssh/; it creates that dir as whoever runs first, so
+      # make it sticky world-writable for multi-account sharing (gateway =
+      # hermes user, interactive CLI = y0usaf).
+      mkdir -p /var/tmp/hermes-ssh
+      chmod 1777 /var/tmp/hermes-ssh
 
       chmod 0660 ${homeDir}/config.yaml 2>/dev/null || true
       chown -R hermes:hermes ${homeDir} 2>/dev/null || true
@@ -577,6 +642,13 @@ in {
       # restarts on deploy so the hooks load).
       APHRODITE_BINARY_PATH = "${homeDir}/plugins/aphrodite/binaries/aphrodite";
       APHRODITE_HERMES_DYLIB_PATH = "${homeDir}/plugins/aphrodite/binaries/libaphrodite_hermes-x86_64-unknown-linux-gnu.so";
+      # Remote workspace: tools execute on y0usaf-desktop over SSH (keyed by
+      # the desktop device key the service account already owns; stanza is
+      # appended to its ~/.ssh/config by the hermes-dirs task below).
+      TERMINAL_SSH_HOST = "100.90.54.18";
+      TERMINAL_SSH_PORT = "2222";
+      TERMINAL_SSH_USER = "y0usaf";
+      TERMINAL_SSH_KEY = "${stateDir}/.ssh/id_ed25519";
     };
     conditions = ["net/lo/up" "task/hermes-dirs/success"];
     log = true;
@@ -602,6 +674,11 @@ in {
       LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib";
       APHRODITE_BINARY_PATH = "${homeDir}/plugins/aphrodite/binaries/aphrodite";
       APHRODITE_HERMES_DYLIB_PATH = "${homeDir}/plugins/aphrodite/binaries/libaphrodite_hermes-x86_64-unknown-linux-gnu.so";
+      # Same remote workspace as the gateway (see comment there).
+      TERMINAL_SSH_HOST = "100.90.54.18";
+      TERMINAL_SSH_PORT = "2222";
+      TERMINAL_SSH_USER = "y0usaf";
+      TERMINAL_SSH_KEY = "${stateDir}/.ssh/id_ed25519";
     };
     conditions = ["net/lo/up" "task/hermes-dirs/success"];
     log = true;

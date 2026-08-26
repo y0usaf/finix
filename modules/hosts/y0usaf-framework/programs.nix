@@ -1,6 +1,5 @@
 _: {
   user.programs = {
-    asryx.enable = false;
     bolo.enable = false;
     creative.enable = false;
     media.enable = false;

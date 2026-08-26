@@ -168,9 +168,8 @@ in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [boloPkgs.bolo];
 
-    # uinput node + input-group access for dotool autofill. Same rule asryx
-    # installs; duplicate lines are harmless while both are enabled. Rules go
-    # through services.udev.packages (portable: NixOS + finix), never
+    # uinput node + input-group access for dotool autofill.
+    # Rules go through services.udev.packages (portable: NixOS + finix), never
     # extraRules (NixOS-only — the finix compat shim drops it).
     services.udev.packages = lib.optionals cfg.autofill [
       (pkgs.writeTextFile {
@@ -182,8 +181,7 @@ in {
       })
     ];
 
-    # Same autofill pipeline as asryx: flatten to one line, release all
-    # modifiers on dotool's virtual keyboard first (tomoe merges xkb state).
+    # Flatten the transcript and release modifiers before dotool types it.
     user.programs.bolo.pipeTo = lib.mkIf cfg.autofill (lib.mkDefault "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool");
 
     manzil.users."${config.user.name}" = {

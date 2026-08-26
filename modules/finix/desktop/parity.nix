@@ -15,8 +15,6 @@
   ...
 }: let
   userName = config.user.name;
-  # Native shared option from modules/desktop/apps/asryx.nix.
-  asryxCfg = config.user.programs.asryx;
 in {
   # These upstream modules are NOT in mkFinixSystem's baseline (udev/dbus/
   # seatd et al are wired into finixSystem itself; the rest are opt-in).
@@ -65,8 +63,8 @@ in {
   # /var/lib/tailscale is already a /persist bind via the impermanence
   # replay, so the desktop keeps its tailnet identity (and the `ssh
   # rescue` path stays valid from the other side).
-  # uinput: asryx autofill (dotool types the transcript; udev rule granting
-  # the input group access rides the packages-bridge as extra-udev-rules).
+  # uinput: bolo autofill (dotool types the transcript; udev rule granting the
+  # input group access rides the packages-bridge as extra-udev-rules).
   boot.kernelModules = ["tun" "v4l2loopback" "zram" "uinput" "ntsync"];
   finit = {
     services.tailscaled = {
@@ -119,17 +117,6 @@ in {
         '';
         log = true;
       };
-      # Page-cache warm for the asryx model: on NixOS a systemd oneshot
-      # (asryx.nix) does this; under finit it needs its own task. cat is
-      # enough — evictable page cache, no mlock, no daemon.
-      asryx-warm = lib.mkIf (asryxCfg.enable && asryxCfg.warm) {
-        description = "warm asryx whisper model into page cache";
-        command = pkgs.writeShellScript "asryx-warm" ''
-          export PATH=${lib.makeBinPath [pkgs.coreutils]}
-          cat ${asryxCfg.modelPath} ${asryxCfg.vadPath} > /dev/null
-        '';
-        log = true;
-      };
     };
   };
 
@@ -150,8 +137,7 @@ in {
 
   # ── gaming: gamemoded is dbus-activated per session; it only needs its
   # group to exist for the renice policy. gamescope/gamemode/steam
-  # binaries + steam-hardware udev rules come via the bridge.
-  # input: dotool opens /dev/uinput (asryx autofill); rule 99-local.rules
+  # input: dotool opens /dev/uinput (bolo autofill); rule 99-local.rules
   # (bridged) grants the input group rw on the uinput node.
   # bluetooth (bluetoothd), lp (CUPS/printing), dialout (serial/tty devices)
   # — restored from the deleted modules/desktop/user-groups.nix.
