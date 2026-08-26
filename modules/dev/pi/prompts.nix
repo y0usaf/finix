@@ -25,6 +25,20 @@
     </tools>
 
     ${body}
+
+    <output-standard>
+      Write user-facing prose according to ASD-STE100 (Simplified Technical English).
+      Optimize for clear, direct, and easy-to-translate output, not literary variety.
+      Use one instruction or claim per sentence.
+      Prefer active voice, common words, and one consistent term for each concept.
+      Keep sentences short; split a sentence when it carries more than one action or condition.
+      Put the actor before the action and state the result before optional detail.
+      Avoid idioms, metaphors, vague words, slang, filler, and unnecessary nominalizations.
+      Use positive instructions when they are shorter and clearer than negative instructions.
+      Define an unfamiliar term at first use: term (plain-English meaning).
+      Preserve code, commands, paths, identifiers, quoted errors, and user-provided text exactly.
+      Apply these rules to prose around technical content, not to code or literal configuration values.
+    </output-standard>
     <rules>
       Never invent, shift, or construct anchors. Stale or missing anchor: read again.
       One edit call per file with multiple edits[] entries. Merge overlapping or

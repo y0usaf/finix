@@ -18,12 +18,12 @@ _: {
     };
     pi = {
       enable = true;
-      prime-agent.enable = true;
       agents = {
         maxDepth = 999;
         maxLiveAgents = 999;
       };
     };
+    prime-agent.enable = true;
     omp = {
       enable = true;
       # Harness surface (~/.omp/config.json), mirroring the live
@@ -41,6 +41,12 @@ _: {
           session_next = "ctrl+j";
           session_prev = "ctrl+k";
         };
+      };
+      ttsrRules.tldr = {
+        minOutputLength = 2000;
+        scope = "text";
+        interruptMode = "never";
+        content = "TL;DR: summarize the preceding response in 3-5 concise bullets.";
       };
     };
     paseo = {

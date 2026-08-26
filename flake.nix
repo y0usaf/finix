@@ -64,14 +64,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # DeepSeek Harness: the dsh package + web app, built from the local
-    # sandbox flake. Consumed by the dsh-web finit service (hosts/
-    # y0usaf-desktop/finix/dsh-web.nix) as an always-on tailnet web server.
-    deepseek-harness = {
-      url = "path:/home/y0usaf/dev/sandbox/deepseek-harness-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     phi = {
       url = "git+ssh://git@github.com/y0usaf/phi.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";

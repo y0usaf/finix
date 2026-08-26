@@ -1,8 +1,6 @@
 # omp (oh-my-pi) coding agent: upstream flake package + declarative harness
 # config. The agent's own config lives in ~/.omp/agent/config.yml; the
-# top-level ~/.omp/config.json belongs to the harness TUI surface (same split
-# as ~/.pi/config.json for pi-harness), so managing it here can never fight
-# the agent over a file.
+# top-level ~/.omp/config.json belongs to the harness TUI surface.
 {
   config,
   lib,
@@ -11,9 +9,25 @@
   ...
 }: let
   cfg = config.user.dev.omp;
-  # Same shared catalog pi uses (plain data, see modules/dev/pi/model-catalog.nix).
   catalog = import ../pi/model-catalog.nix;
   toJSON = lib.generators.toJSON {};
+
+  ruleFile = name: rule: {
+    name = ".omp/agent/rules/${name}.md";
+    value.text = let
+      frontmatter =
+        {}
+        // lib.optionalAttrs (rule.condition != null) { inherit (rule) condition; }
+        // lib.optionalAttrs (rule.minOutputLength != null && rule.condition == null) {
+          condition = ["(?s).{${toString rule.minOutputLength},}"];
+        }
+        // lib.optionalAttrs (rule.astCondition != null) { inherit (rule) astCondition; }
+        // lib.optionalAttrs (rule.scope != null) { inherit (rule) scope; }
+        // lib.optionalAttrs (rule.globs != []) { inherit (rule) globs; }
+        // lib.optionalAttrs (rule.interruptMode != null) { inherit (rule) interruptMode; };
+      yaml = lib.generators.toYAML {} frontmatter;
+    in "${lib.optionalString (frontmatter != {}) "---\n${yaml}---\n\n"}${rule.content}\n";
+  };
 in {
   options.user.dev.omp = {
     enable = lib.mkEnableOption "omp (oh-my-pi) coding agent CLI";
@@ -21,12 +35,50 @@ in {
     settings = lib.mkOption {
       type = with lib.types; attrsOf anything;
       default = {};
-      description = ''
-        Keys merged into ~/.omp/config.json — the omp-harness surface:
-        keybinds (e.g. keybinds.project_prev = "ctrl+h"),
-        panel_width_percent, sidebar_width, right_rail_width, ascii,
-        symbols.overrides. Missing keys fall back to built-in defaults.
-      '';
+      description = "Keys merged into ~/.omp/config.json.";
+    };
+
+    ttsrRules = lib.mkOption {
+      type = with lib.types; attrsOf (submodule ({...}: {
+        options = {
+          content = lib.mkOption {
+            type = lines;
+            description = "Reminder injected when this TTSR matches.";
+          };
+          condition = lib.mkOption {
+            type = nullOr (either str (listOf str));
+            default = null;
+            description = "Regex condition(s) matched against OMP streams.";
+          };
+          minOutputLength = lib.mkOption {
+            type = nullOr ints.positive;
+            default = null;
+            description = "Minimum streamed output characters before this TTSR matches.";
+          };
+          astCondition = lib.mkOption {
+            type = nullOr (either str (listOf str));
+            default = null;
+            description = "ast-grep pattern(s) matched against edit/write streams.";
+          };
+          scope = lib.mkOption {
+            type = nullOr (either str (listOf str));
+            default = null;
+            description = "TTSR stream scope, for example text.";
+          };
+          globs = lib.mkOption {
+            type = listOf str;
+            default = [];
+            description = "File globs limiting this rule.";
+          };
+          interruptMode = lib.mkOption {
+            type = nullOr (enum ["never" "prose-only" "tool-only" "always"]);
+            default = null;
+            description = "Per-rule interrupt behavior.";
+          };
+        };
+      }));
+      default = {};
+      description = "TTSR rules written to ~/.omp/agent/rules/<name>.md.";
     };
   };
 
@@ -40,7 +92,6 @@ in {
         generator = toJSON;
         value = cfg.settings;
       };
-      # Agent-side model config, same settings.json/models.json schema as pi.
       ".omp/agent/settings.json" = {
         generator = toJSON;
         value = {
@@ -54,6 +105,6 @@ in {
         generator = toJSON;
         value = catalog.models;
       };
-    };
+    } // lib.listToAttrs (lib.mapAttrsToList ruleFile cfg.ttsrRules);
   };
 }
