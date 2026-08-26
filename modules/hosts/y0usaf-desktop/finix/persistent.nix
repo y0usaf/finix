@@ -96,7 +96,6 @@ in {
     ./boot.nix
     ./graphical.nix
     ./hermes.nix
-    ./dsh-web.nix
   ];
 
   # manzil dotfiles: native finix module (imported in finix/default.nix),
@@ -343,9 +342,6 @@ in {
     };
   };
 
-  # Cap nix-daemon (and every build it spawns) at 60% of 32 cores.
-  # cgroup v2 cpu.max = quota µs per 100ms period; 1920000 = 19.2 cores.
-  finit.services.nix-daemon.cgroup.settings."cpu.max" = 1920000;
 
   # Same credentials as the NixOS install (impermanence keeps these paths).
   # uid PINNED to the NixOS value: this box's y0usaf is 1001 (not the 1000

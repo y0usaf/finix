@@ -13,7 +13,7 @@
 # prime-agent.nix.
 {
   defaultProvider = "vercel-ai-gateway";
-  defaultModel = "deepseek/deepseek-v4-flash-0731";
+  defaultModel = "openai/gpt-5.6-luna";
   defaultThinkingLevel = "max";
 
   enabledModels = [
@@ -22,6 +22,7 @@
     "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
     "vercel-ai-gateway/moonshotai/kimi-k3-fast"
     "vercel-ai-gateway/openai/gpt-5.6-sol"
+    "vercel-ai-gateway/openai/gpt-5.6-luna"
     "anthropic/claude-fable-5"
     "anthropic/claude-opus-5"
     "openai-codex/gpt-5.6-sol"

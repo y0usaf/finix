@@ -51,82 +51,83 @@
   # Nix has no destructuring let-binding; bind the module and inherit the
   # names (lib is already bound above; nixpkgs.lib === the builder's lib).
   finixSystem = import ./finixSystem.nix {inherit inputs system;};
-  inherit (finixSystem) pkgs mkFinixSystem;
+  inherit (finixSystem) basePkgs mkFinixSystem;
+  pkgs = basePkgs;
   deployLib = import ./deploy.nix {inherit pkgs;};
 
   # NOTE: mkFinixSystem imports ./common.nix in its baseline (shared by
   # every system, kept in the old position for exact module-order parity).
 
-  serverPersistent = mkFinixSystem (
-    (with inputs.finix.nixosModules; [
-      cron
-      nftables
-      postgresql
-      nix-daemon
-    ])
-    ++ [
-      ../hosts/y0usaf-server/finix/services.nix
-      ../hosts/y0usaf-server/finix/persistent.nix
-      ../hosts/y0usaf-server/finix/attic.nix
-      ../hosts/y0usaf-server/finix/hermes.nix
-      ../hosts/y0usaf-server/finix/paseo.nix
-      inputs.manzil.finixModules.default
-      (import ../hosts/common/finix-base.nix)
-      (import ../hosts/common/finix-btrfs.nix)
-      (import ../hosts/common/finix-identity.nix)
-      (import ../hosts/common/finix-nix-daemon.nix)
-      (import ../hosts/common/manzil.nix)
-      (import ../hosts/common/ssh-keys.nix)
-      # Server-only modules that are not part of the graphical module walk.
-      (import ../core/user/user-config.nix)
-      (import ../dev/claude-code/claude-code.nix)
-      # paseo daemon options and finit service.
-      (import ../dev/paseo/options.nix)
-      (import ../dev/paseo/service.nix)
-      (import ../tools/git.nix)
-      (import ../hosts/y0usaf-server/tools.nix)
-    ]
-  );
+  serverPersistent = mkFinixSystem {
+    modules =
+      (with inputs.finix.nixosModules; [
+        cron
+        nftables
+        postgresql
+        nix-daemon
+      ])
+      ++ [
+        ../hosts/y0usaf-server/finix/services.nix
+        ../hosts/y0usaf-server/finix/persistent.nix
+        ../hosts/y0usaf-server/finix/attic.nix
+        ../hosts/y0usaf-server/finix/hermes.nix
+        ../hosts/y0usaf-server/finix/paseo.nix
+        inputs.manzil.finixModules.default
+        (import ../hosts/common/finix-base.nix)
+        (import ../hosts/common/finix-btrfs.nix)
+        (import ../hosts/common/finix-identity.nix)
+        (import ../hosts/common/finix-nix-daemon.nix)
+        (import ../hosts/common/manzil.nix)
+        (import ../hosts/common/ssh-keys.nix)
+        (import ../core/user/user-config.nix)
+        (import ../dev/claude-code/claude-code.nix)
+        (import ../dev/paseo/options.nix)
+        (import ../dev/paseo/service.nix)
+        (import ../tools/git.nix)
+        (import ../hosts/y0usaf-server/tools.nix)
+      ];
+  };
 
-  desktopPersistent = mkFinixSystem (
-    (with inputs.finix.nixosModules; [
-      nix-daemon
-      # The desktop packet filter is a Finix-native module imported below.
-      nftables
-      limine # upstream bootloader: ../../hosts/y0usaf-desktop/finix/boot.nix (OFF on server)
-    ])
-    ++ [
-      ./diagnostics.nix
-      ../hosts/y0usaf-desktop/finix/persistent.nix
-      inputs.manzil.finixModules.default
-      firewall
-      # paseo daemon options and finit service.
-      (import ../dev/paseo/options.nix)
-      (import ../dev/paseo/service.nix)
-      # paseo desktop app.
-      (import ../dev/paseo/desktop.nix)
-    ]
-    ++ desktopModules
-  );
+  desktopPersistent = mkFinixSystem {
+    cudaSupport = true;
+    modules =
+      (with inputs.finix.nixosModules; [
+        nix-daemon
+        nftables
+        limine
+      ])
+      ++ [
+        ./diagnostics.nix
+        ../hosts/y0usaf-desktop/finix/persistent.nix
+        inputs.manzil.finixModules.default
+        firewall
+        (import ../dev/paseo/options.nix)
+        (import ../dev/paseo/service.nix)
+        (import ../dev/paseo/desktop.nix)
+      ]
+      ++ desktopModules;
+  };
+  frameworkPersistent = mkFinixSystem {
+    modules =
+      (with inputs.finix.nixosModules; [
+        brightnessctl
+        docker
+        fwupd
+        networkmanager
+        nftables
+        nix-daemon
+        power-profiles-daemon
+        zzz
+      ])
+      ++ [
+        ./diagnostics.nix
+        ../hosts/y0usaf-framework/finix/persistent.nix
+        inputs.manzil.finixModules.default
+      ]
+      ++ frameworkModules;
+  };
 
-  frameworkPersistent = mkFinixSystem (
-    (with inputs.finix.nixosModules; [
-      brightnessctl
-      docker
-      fwupd
-      networkmanager
-      nftables
-      nix-daemon
-      power-profiles-daemon
-      zzz
-    ])
-    ++ [
-      ./diagnostics.nix
-      ../hosts/y0usaf-framework/finix/persistent.nix
-      inputs.manzil.finixModules.default
-    ]
-    ++ frameworkModules
-  );
+  # Deployment and boot outputs below remain tied to their target systems.
 
   bootPackage =
     ((import ./esp-island.nix {inherit pkgs lib;}).mkIsland {
@@ -158,7 +159,7 @@
       # (boot.nix). Only `fx test` (runtime-only, no installHook) and
       # manual stc invocations go through this package anymore.
     }).deployScript;
-in rec {
+in {
   hosts = {
     y0usaf-desktop = desktopPersistent;
     y0usaf-framework = frameworkPersistent;
