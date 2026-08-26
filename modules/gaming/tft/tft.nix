@@ -25,12 +25,12 @@
       find "$out/lib/waydroid" -name __pycache__ -type d -exec rm -rf {} +
     '';
   });
-  runtimePkgs = with pkgs; [
+  runtimePkgs = [
     waydroidFixed
-    waydroid-helper
-    lxc
-    android-tools
-    util-linux
+    pkgs.waydroid-helper
+    pkgs.lxc
+    pkgs.android-tools
+    pkgs.util-linux
   ];
   translatorPkgs = [
     (pkgs.python3.withPackages (p: [p.inquirerpy p.tqdm p.requests]))

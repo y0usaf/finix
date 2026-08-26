@@ -17,7 +17,7 @@ in {
     enable = lib.mkEnableOption "pi coding agent CLI";
 
     extensionSettings = lib.mkOption {
-      type = with lib.types; attrsOf anything;
+      type = lib.types.attrsOf lib.types.anything;
       internal = true;
       default = {};
       description = "Pi extension settings written to settings.json extensionSettings.";

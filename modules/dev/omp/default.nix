@@ -33,45 +33,45 @@ in {
     enable = lib.mkEnableOption "omp (oh-my-pi) coding agent CLI";
 
     settings = lib.mkOption {
-      type = with lib.types; attrsOf anything;
+      type = lib.types.attrsOf lib.types.anything;
       default = {};
       description = "Keys merged into ~/.omp/config.json.";
     };
 
     ttsrRules = lib.mkOption {
-      type = with lib.types; attrsOf (submodule ({...}: {
+      type = lib.types.attrsOf (lib.types.submodule (_: {
         options = {
           content = lib.mkOption {
-            type = lines;
+            type = lib.types.lines;
             description = "Reminder injected when this TTSR matches.";
           };
           condition = lib.mkOption {
-            type = nullOr (either str (listOf str));
+            type = lib.types.nullOr (lib.types.either lib.types.str (lib.types.listOf lib.types.str));
             default = null;
             description = "Regex condition(s) matched against OMP streams.";
           };
           minOutputLength = lib.mkOption {
-            type = nullOr ints.positive;
+            type = lib.types.nullOr lib.types.ints.positive;
             default = null;
             description = "Minimum streamed output characters before this TTSR matches.";
           };
           astCondition = lib.mkOption {
-            type = nullOr (either str (listOf str));
+            type = lib.types.nullOr (lib.types.either lib.types.str (lib.types.listOf lib.types.str));
             default = null;
             description = "ast-grep pattern(s) matched against edit/write streams.";
           };
           scope = lib.mkOption {
-            type = nullOr (either str (listOf str));
+            type = lib.types.nullOr (lib.types.either lib.types.str (lib.types.listOf lib.types.str));
             default = null;
             description = "TTSR stream scope, for example text.";
           };
           globs = lib.mkOption {
-            type = listOf str;
+            type = lib.types.listOf lib.types.str;
             default = [];
             description = "File globs limiting this rule.";
           };
           interruptMode = lib.mkOption {
-            type = nullOr (enum ["never" "prose-only" "tool-only" "always"]);
+            type = lib.types.nullOr (lib.types.enum ["never" "prose-only" "tool-only" "always"]);
             default = null;
             description = "Per-rule interrupt behavior.";
           };

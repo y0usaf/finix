@@ -128,13 +128,13 @@ in {
           exec ${pkgs.openssh}/bin/sshd -f "${sshdDirectory}/sshd_config" -D -e
         '')
       ]
-      ++ (with pkgs; [
-        curl
-        gitMinimal
-        bashInteractive
-        openssh
-        vim
-      ]);
+      ++ [
+        pkgs.curl
+        pkgs.gitMinimal
+        pkgs.bashInteractive
+        pkgs.openssh
+        pkgs.vim
+      ];
     etcBackupExtension = ".bak";
     motd = ''
       minimal nix-on-droid profile

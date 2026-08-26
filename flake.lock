@@ -1641,11 +1641,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787757697,
-        "narHash": "sha256-jVRvY5EZs55JbU/anByHB9eQEHIxEjiUBYl3G9fdz/I=",
+        "lastModified": 1787758329,
+        "narHash": "sha256-CRSl65m8izz18A507pLo2hgeFNIleAbooHxiFFVhGX4=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "08ef4a0e0a3d6270bc8eaa3efbd71159fd752659",
+        "rev": "ed70db6a1e42deab1c6157ede33f78a19bcbad14",
         "type": "github"
       },
       "original": {
