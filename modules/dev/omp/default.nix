@@ -16,8 +16,7 @@
     name = ".omp/agent/rules/${name}.md";
     value.text = let
       frontmatter =
-        {}
-        // lib.optionalAttrs (rule.condition != null) { inherit (rule) condition; }
+        lib.optionalAttrs (rule.condition != null) { inherit (rule) condition; }
         // lib.optionalAttrs (rule.minOutputLength != null && rule.condition == null) {
           condition = ["(?s).{${toString rule.minOutputLength},}"];
         }
