@@ -13,9 +13,62 @@
   pkgs,
   flakeInputs,
   ...
-}: {
+}: let
+  glideRuntimeLibs = [
+    pkgs.alsa-lib
+    pkgs.gtk3
+    pkgs.libdbusmenu
+    pkgs.libevent
+    pkgs.libnotify
+    pkgs.libpulseaudio
+    pkgs.libva
+    pkgs.mesa
+    pkgs.pango
+    pkgs.pipewire
+    pkgs.stdenv.cc.cc.lib
+    pkgs.xorg.libX11
+    pkgs.xorg.libXcomposite
+    pkgs.xorg.libXdamage
+    pkgs.xorg.libXext
+    pkgs.xorg.libXfixes
+    pkgs.xorg.libXrandr
+    pkgs.xorg.libXtst
+  ];
+  glide = pkgs.stdenv.mkDerivation {
+    pname = "glide";
+    version = "0.1.63a";
+
+    src = pkgs.fetchurl {
+      url = "https://github.com/glide-browser/glide/releases/download/0.1.63a/glide.linux-x86_64.tar.xz";
+      hash = "sha256-idHArAa57FADdmhCI/5vK47SEd0dlz0diH4DRDmKDmE=";
+    };
+
+    sourceRoot = "glide";
+    nativeBuildInputs = [pkgs.patchelf];
+    buildInputs = glideRuntimeLibs;
+
+    installPhase = ''
+      mkdir -p $out/lib/glide $out/bin
+      cp -r . $out/lib/glide/
+      ln -s $out/lib/glide/glide $out/bin/glide
+    '';
+
+    postFixup = ''
+      runtimeRpath="$out/lib/glide:${lib.makeLibraryPath glideRuntimeLibs}"
+      for file in "$out"/lib/glide/*; do
+        if patchelf --print-rpath "$file" >/dev/null 2>&1; then
+          patchelf --set-rpath "$runtimeRpath" "$file"
+        fi
+      done
+      for file in glide glide-bin crashreporter crashhelper glxtest pingsender vaapitest vulkantest; do
+        patchelf --set-interpreter "${pkgs.stdenv.cc.libc}/lib/ld-linux-x86-64.so.2" "$out/lib/glide/$file"
+      done
+    '';
+  };
+in {
   environment.systemPackages =
     [
+      glide
       # tailscaled runs natively under finix (parity.nix) — CLI required.
       pkgs.tailscale
       pkgs.syncthing
