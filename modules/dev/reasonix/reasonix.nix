@@ -169,7 +169,7 @@ in {
           clobber = true;
 
           value = {
-            default_model = "deepseek-flash-0731";
+            default_model = "glm-5.3-flash";
 
             # No anonymous usage stats: cli_metrics=off suppresses the CLI
             # consent prompt entirely.
@@ -187,27 +187,13 @@ in {
 
             providers = [
               {
-                name = "deepseek-flash-0731";
+                name = "glm-5.3-flash";
 
                 kind = "openai";
 
                 base_url = "https://ai-gateway.vercel.sh/v1";
 
-                model = "deepseek-v4-flash-0731";
-
-                api_key_env = "AI_GATEWAY_API_KEY";
-
-                context_window = 1000000;
-              }
-
-              {
-                name = "deepseek-pro";
-
-                kind = "openai";
-
-                base_url = "https://ai-gateway.vercel.sh/v1";
-
-                model = "deepseek/deepseek-v4-pro-0813";
+                model = "glm-5.3-flash";
 
                 api_key_env = "AI_GATEWAY_API_KEY";
 
