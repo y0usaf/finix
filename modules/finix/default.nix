@@ -15,17 +15,17 @@
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
   walkedKnownExclusions = [
     ../core/firewall.nix
-    ../dev/kimi-code/package.nix
-    ../dev/paseo/options.nix
-    ../dev/paseo/service.nix
-    ../dev/paseo/desktop.nix
+    ../dev/ai/kimi-code/package.nix
+    ../dev/ai/paseo/options.nix
+    ../dev/ai/paseo/service.nix
+    ../dev/ai/paseo/desktop.nix
     # Phi prompt body is data imported by pi and phi prompt modules.
-    ../dev/phi/prompt-body.nix
-    ../dev/skills/mapping.nix
-    ../dev/pi/model-catalog.nix
-    ../dev/skills/codebase-atlas/SKILL.nix
-    ../dev/skills/ship/SKILL.nix
-    ../dev/skills/anti-slop/SKILL.nix
+    ../dev/ai/phi/prompt-body.nix
+    ../dev/ai/skills/mapping.nix
+    ../dev/ai/pi/model-catalog.nix
+    ../dev/ai/skills/codebase-atlas/SKILL.nix
+    ../dev/ai/skills/ship/SKILL.nix
+    ../dev/ai/skills/anti-slop/SKILL.nix
     # Shared persistence is still imported as data by host policy modules.
     ../hosts/common/persist.nix
   ];
@@ -80,9 +80,9 @@
         (import ../hosts/common/manzil.nix)
         (import ../hosts/common/ssh-keys.nix)
         (import ../core/user/user-config.nix)
-        (import ../dev/claude-code/claude-code.nix)
-        (import ../dev/paseo/options.nix)
-        (import ../dev/paseo/service.nix)
+        (import ../dev/ai/claude-code/claude-code.nix)
+        (import ../dev/ai/paseo/options.nix)
+        (import ../dev/ai/paseo/service.nix)
         (import ../tools/git.nix)
         (import ../hosts/y0usaf-server/tools.nix)
       ];
@@ -101,9 +101,9 @@
         ../hosts/y0usaf-desktop/finix/persistent.nix
         inputs.manzil.finixModules.default
         firewall
-        (import ../dev/paseo/options.nix)
-        (import ../dev/paseo/service.nix)
-        (import ../dev/paseo/desktop.nix)
+        (import ../dev/ai/paseo/options.nix)
+        (import ../dev/ai/paseo/service.nix)
+        (import ../dev/ai/paseo/desktop.nix)
       ]
       ++ desktopModules;
   };
