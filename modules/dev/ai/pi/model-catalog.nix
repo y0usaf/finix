@@ -13,7 +13,7 @@
 # prime-agent.nix.
 {
   defaultProvider = "vercel-ai-gateway";
-  defaultModel = "zai/glm-5.3-flash";
+  defaultModel = "openai/gpt-5.6-luna";
   defaultThinkingLevel = "max";
 
   enabledModels = [
@@ -21,6 +21,7 @@
     "openrouter/stealth/ox-alpha"
     "vercel-ai-gateway/deepseek/deepseek-v4-pro-0813"
     "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
+    "inference/deepseek-v4-flash-0731"
     "vercel-ai-gateway/moonshotai/kimi-k3-fast"
     "vercel-ai-gateway/openai/gpt-5.6-sol"
     "vercel-ai-gateway/openai/gpt-5.6-luna"
@@ -46,5 +47,30 @@
         maxTokens = 131072;
       }
     ];
+  };
+
+  # Inference.net exposes an OpenAI-compatible Chat Completions endpoint.
+  models.providers."inference" = {
+    api = "openai-completions";
+    baseUrl = "https://api.inference.net/v1";
+    apiKey = "$INFERENCE_API_KEY";
+    models = [
+      {
+        id = "deepseek-v4-flash-0731";
+        name = "DeepSeek V4 Flash 0731 (Inference.net)";
+        reasoning = true;
+        input = ["text"];
+        contextWindow = 128000;
+        maxTokens = 16384;
+      }
+    ];
+  };
+
+  # Restrict GLM-5.3-Flash to the requested Vercel AI Gateway providers.
+  models.providers."vercel-ai-gateway".modelOverrides."zai/glm-5.3-flash" = {
+    compat.vercelGatewayRouting = {
+      only = ["baseten" "wafer"];
+      order = ["baseten" "wafer"];
+    };
   };
 }
