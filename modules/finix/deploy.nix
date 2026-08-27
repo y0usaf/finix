@@ -1,7 +1,7 @@
 # SSH deploy driver for a running persistent Finix system. The server's
 # kernel/initrd/cmdline changes use the separate ESP island driver; desktop
 # bootloader updates are handled by its Limine module.
-{pkgs}: {
+{lib, pkgs}: {
   # mkDeploy {name, system, defaultHost, ...}
   mkDeploy = {
     bootDriverName ? null,
@@ -10,7 +10,12 @@
     system,
     sshHost ? null,
     sshPort ? null,
-  }: {
+  }: let
+    # Precomputed interpolations for the shell script below; empty when unset.
+    bootDriver = lib.optionalString (bootDriverName != null) bootDriverName;
+    portStr = lib.optionalString (sshPort != null) (toString sshPort);
+    portOpt = lib.optionalString (sshPort != null) ":${toString sshPort}";
+  in {
     deployScript = pkgs.writeShellScriptBin name ''
       set -euo pipefail
 
@@ -29,41 +34,22 @@
           exit 2
           ;;
       esac
-      if [ "$action" = boot ] && [ -n '${
-        if bootDriverName != null
-        then bootDriverName
-        else ""
-      }' ]; then
+      if [ "$action" = boot ] && [ -n '${bootDriver}' ]; then
         echo "${name}: 'boot' cannot stage a boot slot on this host (stc has no bootloader here)." >&2
-        echo "  use: ${
-        if bootDriverName != null
-        then bootDriverName
-        else ""
-      } install, then oneshot, then promote" >&2
+        echo "  use: ${bootDriver} install, then oneshot, then promote" >&2
         exit 1
       fi
 
       system_path='${system}'
-      remote_host="${
+      remote_host="$${
         if sshHost == null
         then "$host"
         else sshHost
       }"
-      if [ "$host" != local ] && [ -n '${
-        if sshPort == null
-        then ""
-        else toString sshPort
-      }' ]; then
-        export NIX_SSHOPTS='-p ${
-        if sshPort == null
-        then ""
-        else toString sshPort
-      } -o ControlPath=none'
-        ssh_cmd=(ssh -p '${
-        if sshPort == null
-        then ""
-        else toString sshPort
-      }' -o ControlPath=none)
+
+      if [ "$host" != local ] && [ -n '${portStr}' ]; then
+        export NIX_SSHOPTS='-p ${portStr} -o ControlPath=none'
+        ssh_cmd=(ssh -p '${portStr}' -o ControlPath=none)
       else
         ssh_cmd=(ssh)
       fi
@@ -85,11 +71,7 @@
       fi
 
       # The running Finix system supplies the remote nix-store endpoint.
-      remote_store="ssh://$remote_host${
-        if sshPort == null
-        then ""
-        else ":${toString sshPort}"
-      }?remote-program=/run/current-system/sw/bin/nix-store"
+      remote_store="ssh://$remote_host${portOpt}?remote-program=/run/current-system/sw/bin/nix-store"
 
       echo "==> copying persistent finix closure to $remote_host"
       nix copy --to "$remote_store" "$system_path"

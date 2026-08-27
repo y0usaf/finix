@@ -22,9 +22,6 @@
       isAttrs
       isList
       isString
-      isBool
-      isInt
-      isFloat
       replaceStrings
       filterAttrs
       filter
@@ -35,34 +32,49 @@
     # Quote a string for Lua, mirroring toKDL's literalValueToString.
     quoteStr = s: ''"${(replaceStrings ["\\" "\"" "\n" "\r"] ["\\\\" "\\\"" "\\n" "\\r"]) s}"'';
 
+    # Scalar values dispatch on builtins.typeOf; anything unhandled throws.
+    atomRenderers = {
+      bool = boolToString;
+      float = toString;
+      int = toString;
+      string = quoteStr;
+      "null" = _v: "nil";
+    };
+
+    atomStr = v: let
+      renderer = atomRenderers.${typeOf v} or null;
+    in
+      if renderer == null
+      then throw "toLua: cannot serialize ${typeOf v}"
+      else renderer v;
+
+    listStr = vs: "{ " + concatStringsSep ", " (map valStr (filter (x: x != null) vs)) + " }";
+
+    attrsetStr = v:
+      "{ "
+      + concatStringsSep ", " (filter (s: s != "") (mapAttrsToList entry (filterAttrs (_: x: x != null) v)))
+      + " }";
+
     valStr = v:
       if isAttrs v
-      then
-        "{ "
-        + concatStringsSep ", " (filter (s: s != "") (mapAttrsToList entry (filterAttrs (_: x: x != null) v)))
-        + " }"
+      then attrsetStr v
       else if isList v
-      then "{ " + concatStringsSep ", " (map valStr (filter (x: x != null) v)) + " }"
-      else if isString v
-      then quoteStr v
-      else if isBool v
-      then boolToString v
-      else if isInt v || isFloat v
-      then toString v
-      else if v == null
-      then "nil"
-      else throw "toLua: cannot serialize ${typeOf v}";
+      then listStr v
+      else atomStr v;
+
+    # Keys matching ^[A-Za-z_][A-Za-z0-9_]*$ emit bare; anything else emits
+    # quoted (["DP-1"] = ...), so connector names like DP-4 / HDMI-A-2 work.
+    keyStr = k:
+      if isString k && match "[A-Za-z_][A-Za-z0-9_]*" k != null
+      then k
+      else if isString k
+      then "[${quoteStr k}]"
+      else "[${toString k}]";
 
     entry = k: v:
       if v == null
       then ""
-      else "${(key:
-        if isString key && (s: match "[A-Za-z_][A-Za-z0-9_]*" s != null) key
-        then key
-        else if isString key
-        then "[${quoteStr key}]"
-        else "[${toString key}]")
-      k} = ${valStr v}";
+      else "${keyStr k} = ${valStr v}";
   in
     valStr;
 }
