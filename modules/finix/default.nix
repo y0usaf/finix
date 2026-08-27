@@ -53,7 +53,7 @@
   finixSystem = import ./finixSystem.nix {inherit inputs system;};
   inherit (finixSystem) basePkgs mkFinixSystem;
   pkgs = basePkgs;
-  deployLib = import ./deploy.nix {inherit pkgs;};
+  deployLib = import ./deploy.nix {inherit lib pkgs;};
 
   # NOTE: mkFinixSystem imports ./common.nix in its baseline (shared by
   # every system, kept in the old position for exact module-order parity).

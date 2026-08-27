@@ -41,7 +41,7 @@
       fi
 
       system_path='${system}'
-      remote_host="$${
+      remote_host="${
         if sshHost == null
         then "$host"
         else sshHost
