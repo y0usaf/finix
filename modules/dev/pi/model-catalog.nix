@@ -13,10 +13,11 @@
 # prime-agent.nix.
 {
   defaultProvider = "vercel-ai-gateway";
-  defaultModel = "openai/gpt-5.6-luna";
+  defaultModel = "zai/glm-5.3-flash";
   defaultThinkingLevel = "max";
 
   enabledModels = [
+    "vercel-ai-gateway/zai/glm-5.3-flash"
     "openrouter/stealth/ox-alpha"
     "vercel-ai-gateway/deepseek/deepseek-v4-pro-0813"
     "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
