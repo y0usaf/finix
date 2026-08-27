@@ -76,8 +76,6 @@ in {
 
       # Backup / automation
       "/var/lib/btrbk"
-      "/var/lib/hjem"
-      "/var/lib/bayt"
     ];
     files = [
       "/etc/machine-id"
