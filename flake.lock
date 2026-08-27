@@ -378,11 +378,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786990537,
-        "narHash": "sha256-p65eryEicmt/UZmGCeM5DRPy6fYp6FPBKeZP1LhmGX8=",
+        "lastModified": 1787785627,
+        "narHash": "sha256-xlcEJT4rj4vZ237LKf2c0vjfLlpBNr7pw7vL2ifvHtI=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "469f5cc708b789ba61079e14887f3eb46b750e7d",
+        "rev": "05b40f24e4a175711f4fa7f1faee43aa716894c7",
         "type": "github"
       },
       "original": {
@@ -1278,11 +1278,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1787756734,
-        "narHash": "sha256-X7qnkVTQXFJCd8p1OaZGFtMgjMyGhZgV4FBSCkhEevU=",
+        "lastModified": 1787777812,
+        "narHash": "sha256-JfDPpOCJpVYQcs1IMgZQHSS6zvIBoUiCmpruJ834XGo=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "3773a0a2502e302a3a922839839e46b6ef831279",
+        "rev": "7ab6ec20d2b625b7f4d585e8d8b9bdca75b509aa",
         "type": "github"
       },
       "original": {
@@ -1641,11 +1641,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787758329,
-        "narHash": "sha256-CRSl65m8izz18A507pLo2hgeFNIleAbooHxiFFVhGX4=",
+        "lastModified": 1787795988,
+        "narHash": "sha256-shoMW0QtZUxw+vTUxDb6yiNPI6IeHt24vSV+6NIzF80=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "ed70db6a1e42deab1c6157ede33f78a19bcbad14",
+        "rev": "0434ee703f3afe96fdcdcbc8e040e550619767fe",
         "type": "github"
       },
       "original": {
