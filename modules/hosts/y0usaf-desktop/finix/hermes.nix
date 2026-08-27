@@ -22,13 +22,13 @@
     builtins.replaceStrings
     [
       "{\n  pkgs,"
-      "sha256-zOl8rx6woWh7aeRUOlkTMviKc/EAQQX6nr/MxAx1ZPI="
+      "sha256-f8bSbLRmtbP93CJAvEBs+sHWDZ1xP2bcpLhC1EnOmZU="
       "\${../apps/desktop/assets/icon.png}"
       "\${../hermes_cli/linux_desktop_entry.py}"
     ]
     [
       "{\n  hermesSrc,\n  pkgs,"
-      "sha256-f8bSbLRmtbP93CJAvEBs+sHWDZ1xP2bcpLhC1EnOmZU="
+      "sha256-CyzcARd1+GhWr8ED7HBYW2MYD+tgetqZFMkaivaGvw0="
       "\${hermesSrc}/apps/desktop/assets/icon.png"
       "\${hermesSrc}/hermes_cli/linux_desktop_entry.py"
     ]
