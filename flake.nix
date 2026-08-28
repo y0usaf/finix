@@ -137,7 +137,9 @@
     };
 
     ekko = {
-      url = "github:y0usaf/ekko";
+      # Pinned to the last Lua-config (mlua) commit; ddabc9a removed Lua config
+      # support entirely, breaking config.toml/init.lua/which-key.lua.
+      url = "github:y0usaf/ekko/56b1246c424bbd889fc8da0428e4fbca17314018";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

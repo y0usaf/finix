@@ -629,7 +629,7 @@ in {
     description = "prepare hermes state dirs and seed config/env";
     command = pkgs.writeShellScript "hermes-dirs" ''
       set -eu
-      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep]}
+      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.findutils]}
       mkdir -p ${homeDir}/cron ${homeDir}/sessions ${homeDir}/logs ${homeDir}/memories ${homeDir}/plugins/
       mkdir -p ${homeDir}/plugins/model-providers/ai-gateway
       # 2770 = setgid + group-writable: y0usaf (hermes group) shares state
@@ -659,10 +659,17 @@ in {
       # Aphrodite CCR compression plugin: writable copy of the plugin tree +
       # pinned, hash-verified binaries. Pre-placing them means download.sh
       # (curl/wget, writes into the plugin dir) is never needed at runtime.
-      # Idempotent: cp/install overwrite each boot, so a bumped pin reseeds
-      # on the next switch.
+      # Wipe + reseed each boot: the upstream tree carries dangling symlinks
+      # (directives -> /Users/nikola/..., a macOS dev path) whose entry type
+      # flips between source generations, and an in-place `cp -rT` fails
+      # whenever the live entry's type no longer matches (both failure
+      # directions seen in production: 08-25 symlink-vs-dir, 08-28 the
+      # reverse). Reseeding from scratch is type-agnostic; pruning dangling
+      # links afterwards keeps the tree importable.
+      rm -rf ${homeDir}/plugins/aphrodite
       mkdir -p ${homeDir}/plugins/aphrodite/binaries
       cp -rT ${aphroditeSrc} ${homeDir}/plugins/aphrodite
+      find ${homeDir}/plugins/aphrodite -xtype l -delete
       install -m 0755 ${aphroditeBin} \
         ${homeDir}/plugins/aphrodite/binaries/aphrodite
       install -m 0644 ${aphroditeLib} \
