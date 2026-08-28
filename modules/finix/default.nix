@@ -21,32 +21,32 @@
     ../dev/ai/paseo/desktop.nix
     # Phi prompt body is data imported by pi and phi prompt modules.
     ../dev/ai/phi/prompt-body.nix
-    ../dev/ai/skills/mapping.nix
+    ../dev/ai/prompts/mapping.nix
     ../dev/ai/pi/model-catalog.nix
-    ../dev/ai/skills/codebase-atlas/SKILL.nix
-    ../dev/ai/skills/ship/SKILL.nix
-    ../dev/ai/skills/anti-slop/SKILL.nix
+    ../dev/ai/prompts/codebase-atlas/SKILL.nix
+    ../dev/ai/prompts/ship/SKILL.nix
+    ../dev/ai/prompts/anti-slop/SKILL.nix
     # Shared persistence is still imported as data by host policy modules.
     ../hosts/common/persist.nix
   ];
-  mkGraphicalModules = hostDir:
-    map import (builtins.filter (path:
-        !(builtins.elem path walkedKnownExclusions)
-        && !(lib.hasInfix "/finix/" (toString path))
-        && !(lib.hasSuffix "/impermanence.nix" (toString path)))
-      (recursivelyImport [
-        ../core
-        ../desktop
-        ../dev
-        ../gaming
-        ../shell
-        ../tools
-        ../user-services
-        ../hosts/common
-        hostDir
-      ]));
-  desktopModules = mkGraphicalModules ../hosts/y0usaf-desktop;
-  frameworkModules = mkGraphicalModules ../hosts/y0usaf-framework;
+  graphicalRoots = [
+    ../core
+    ../desktop
+    ../dev
+    ../gaming
+    ../shell
+    ../tools
+    ../user-services
+    ../hosts/common
+  ];
+  filterGraphicalModule = path:
+    !(builtins.elem path walkedKnownExclusions)
+    && !(lib.hasInfix "/finix/" (toString path))
+    && !(lib.hasSuffix "/impermanence.nix" (toString path));
+  commonGraphicalModules = map import (builtins.filter filterGraphicalModule (recursivelyImport graphicalRoots));
+  hostGraphicalModules = hostDir: map import (builtins.filter filterGraphicalModule (recursivelyImport [hostDir]));
+  desktopModules = commonGraphicalModules ++ hostGraphicalModules ../hosts/y0usaf-desktop;
+  frameworkModules = commonGraphicalModules ++ hostGraphicalModules ../hosts/y0usaf-framework;
 
   # Nix has no destructuring let-binding; bind the module and inherit the
   # names (lib is already bound above; nixpkgs.lib === the builder's lib).
