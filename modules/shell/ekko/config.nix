@@ -14,6 +14,18 @@ in {
       default = false;
       description = "Automatically attach an ekko session on shell startup";
     };
+    # Opt-in finix behavior (not an ekko default): closing the session's
+    # last pane while other alive sessions exist switches the client to the
+    # nearest session instead of exiting the terminal. Implemented in the
+    # vendored which-key.lua via the FINIX_CLOSE_TO_SESSION prologue below.
+    closeToNearestSession = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Closing the focused last pane (ctrl+p then x) switches to the nearest
+        alive session instead of exiting the terminal.
+      '';
+    };
     open = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -24,18 +36,42 @@ in {
         (tomoe).
       '';
     };
+
+    # Opt-in finix behavior (not an ekko default): the WM terminal-spawn
+    # path attaches to an existing alive session instead of spawning a
+    # terminal whose shell starts a fresh one. Implemented in the
+    # ekko-activate-or-terminal wrapper below.
+    openAttachesExisting = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        The WM terminal-spawn bind attaches to an existing alive ekko
+        session when no attached client exists to activate. Requires
+        ekko.open.
+      '';
+    };
   };
 
   config = lib.mkIf ekko.enable {
     environment.systemPackages = [
       # The stock muxer + a small helper that first tries `ekko activate`,
-      # then falls back to the regular terminal spawn when no client is
-      # attached.
+      # then (optionally) attaches to an existing alive session, and only
+      # then falls back to the regular terminal spawn.
       flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".default
       (pkgs.writeShellScriptBin "ekko-activate-or-terminal" ''
         if ekko activate >/dev/null 2>&1; then
           exit 0
         fi
+        ${lib.optionalString ekko.openAttachesExisting ''
+        # No attached client: attach to the first alive session instead of
+        # spawning a terminal whose shell would start a fresh one. `ekko ls`
+        # states: attached | detached | resurrectable; activate already
+        # covered attached, so detached is the interesting case here.
+        name="$(ekko ls | awk -F '\t' '$2 == "detached" {print $1; exit}')"
+        if [ -n "$name" ]; then
+          exec ${config.user.defaults.terminal} sh -c 'exec ekko attach "$1"' ekko-open "$name"
+        fi
+        ''}
         exec ${config.user.defaults.terminal} "$@"
       '')
     ];
@@ -50,7 +86,14 @@ in {
       # too; pane keys live in the lua map instead. Vendored alongside this module (which-key.lua) so every
       # host gets it — it used to live hand-managed on one machine, and
       # hosts without it lost the entire leader/status UI.
-      ".config/ekko/extensions/which-key.lua".source = ./which-key.lua;
+      # Vendored as text so finix options can inject a prologue: the
+      # FINIX_CLOSE_TO_SESSION flag is read by the pane-close handler in the
+      # file body (see closeToNearestSession above).
+      ".config/ekko/extensions/which-key.lua".text =
+        "local FINIX_CLOSE_TO_SESSION = "
+        + (lib.boolToString ekko.closeToNearestSession)
+        + "\n"
+        + builtins.readFile ./which-key.lua;
 
       # Unbind project navigation: "none" is intentionally unparseable —
       # resolve_chords skips the action entirely (empty string would fall
