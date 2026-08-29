@@ -150,12 +150,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    grok-bot-opengrok = {
-      # Grok Bot + opengrok wire maps, packaged declaratively.
-      url = "path:/home/y0usaf/dev/sandbox/grok-bot-opengrok";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     hermes-agent = {
       # Pin upstream source directly; desktop's mutable Electron headers hash is
       # corrected where that package is materialized. Never depend on a sibling
