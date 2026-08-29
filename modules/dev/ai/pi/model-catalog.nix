@@ -13,64 +13,100 @@
 # prime-agent.nix.
 {
   defaultProvider = "vercel-ai-gateway";
-  defaultModel = "openai/gpt-5.6-luna";
+  defaultModel = "zai/glm-5.3-flash@wafer";
   defaultThinkingLevel = "max";
 
   enabledModels = [
+    "vercel-ai-gateway/zai/glm-5.3-flash@wafer"
     "vercel-ai-gateway/zai/glm-5.3-flash"
-    "openrouter/stealth/ox-alpha"
-    "vercel-ai-gateway/deepseek/deepseek-v4-pro-0813"
     "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
-    "inference/deepseek-v4-flash-0731"
-    "vercel-ai-gateway/moonshotai/kimi-k3-fast"
-    "vercel-ai-gateway/openai/gpt-5.6-sol"
     "vercel-ai-gateway/openai/gpt-5.6-luna"
-    "anthropic/claude-fable-5"
-    "anthropic/claude-opus-5"
-    "openai-codex/gpt-5.6-sol"
     "openai-codex/gpt-5.6-luna"
   ];
 
-  # Ox Alpha via OpenRouter builtin provider (OPENROUTER_API_KEY or
-  # /login openrouter). Explicit api/baseUrl so the upsert resolves even
-  # though the builtin catalog lacks this id.
-  models.providers."openrouter" = {
+  models.providers."vercel-ai-gateway" = {
     models = [
       {
-        id = "stealth/ox-alpha";
-        name = "Ox Alpha";
+        id = "moonshotai/kimi-k3-fast";
+        name = "Kimi K3 Fast";
         api = "openai-completions";
-        baseUrl = "https://openrouter.ai/api/v1";
+        baseUrl = "https://ai-gateway.vercel.sh/v1";
         reasoning = true;
         input = ["text" "image"];
-        contextWindow = 1048576;
+        contextWindow = 1000000;
         maxTokens = 131072;
+        cost = {
+          input = 4.5;
+          output = 22.5;
+          cacheRead = 0.45;
+          cacheWrite = 0;
+        };
+        compat.vercelGatewayRouting.only = ["fireworks"];
       }
     ];
   };
 
-  # Inference.net exposes an OpenAI-compatible Chat Completions endpoint.
-  models.providers."inference" = {
+  models.providers."groq" = {
+    baseUrl = "https://api.groq.com/openai/v1";
     api = "openai-completions";
-    baseUrl = "https://api.inference.net/v1";
-    apiKey = "$INFERENCE_API_KEY";
+    apiKey = "!cat /home/y0usaf/Tokens/GROQ_API_KEY.txt";
     models = [
       {
-        id = "deepseek-v4-flash-0731";
-        name = "DeepSeek V4 Flash 0731 (Inference.net)";
+        id = "llama-3.3-70b-versatile";
+        name = "Llama 3.3 70B";
+        reasoning = false;
+        input = ["text"];
+        contextWindow = 131072;
+        maxTokens = 32768;
+        cost = {
+          input = 0.59;
+          output = 0.79;
+          cacheRead = 0;
+          cacheWrite = 0;
+        };
+      }
+      {
+        id = "llama-3.1-8b-instant";
+        name = "Llama 3.1 8B Instant";
+        reasoning = false;
+        input = ["text"];
+        contextWindow = 131072;
+        maxTokens = 8192;
+        cost = {
+          input = 0.05;
+          output = 0.08;
+          cacheRead = 0;
+          cacheWrite = 0;
+        };
+      }
+      {
+        id = "moonshotai/kimi-k2-instruct-0905";
+        name = "Kimi K2 Instruct";
+        reasoning = false;
+        input = ["text"];
+        contextWindow = 262144;
+        maxTokens = 16384;
+        cost = {
+          input = 1.0;
+          output = 3.0;
+          cacheRead = 0;
+          cacheWrite = 0;
+        };
+      }
+      {
+        id = "openai/gpt-oss-120b";
+        name = "GPT-OSS 120B";
         reasoning = true;
         input = ["text"];
-        contextWindow = 128000;
-        maxTokens = 16384;
+        contextWindow = 131072;
+        maxTokens = 65536;
+        cost = {
+          input = 0.15;
+          output = 0.75;
+          cacheRead = 0;
+          cacheWrite = 0;
+        };
       }
     ];
-  };
-
-  # Restrict GLM-5.3-Flash to the requested Vercel AI Gateway providers.
-  models.providers."vercel-ai-gateway".modelOverrides."zai/glm-5.3-flash" = {
-    compat.vercelGatewayRouting = {
-      only = ["baseten" "wafer"];
-      order = ["baseten" "wafer"];
-    };
   };
 }
