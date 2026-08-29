@@ -239,7 +239,7 @@
     "cordis-rs_2": {
       "inputs": {
         "flake-utils": "flake-utils_4",
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
         "lastModified": 1786931368,
@@ -666,43 +666,6 @@
         "type": "github"
       }
     },
-    "grok-bot-flake": {
-      "inputs": {
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "lastModified": 1787717219,
-        "narHash": "sha256-k0FEktJC51+Ww9OluN9GF6Vw6pYDUK1U8zdU5L3beis=",
-        "owner": "jordangarrison",
-        "repo": "grok-bot-flake",
-        "rev": "8ae224d6466f4fcc403604e9e4a5c4b1938dabbc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jordangarrison",
-        "repo": "grok-bot-flake",
-        "type": "github"
-      }
-    },
-    "grok-bot-opengrok": {
-      "inputs": {
-        "grok-bot-flake": "grok-bot-flake",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "opengrok": "opengrok"
-      },
-      "locked": {
-        "lastModified": 1787979835,
-        "narHash": "sha256-MAkcdpnv1gGvw62qH+Ugt8zjNXeU363zZUatq++IZf0=",
-        "path": "/home/y0usaf/dev/sandbox/grok-bot-opengrok",
-        "type": "path"
-      },
-      "original": {
-        "path": "/home/y0usaf/dev/sandbox/grok-bot-opengrok",
-        "type": "path"
-      }
-    },
     "hermes-agent": {
       "inputs": {
         "flake-parts": "flake-parts_2",
@@ -1042,22 +1005,6 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1787498568,
-        "narHash": "sha256-9i/VTdusq/+NM/tz+J1Re+ojkMB8MBf0QshnYfzHz30=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "56c02bc00adcf003215cc4bd996d6efaf4cff188",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_3": {
-      "locked": {
         "lastModified": 1786384358,
         "narHash": "sha256-RzPPiWeUtuvymnpuEWsdtzli5w4kjZs49FqEs3/1u+I=",
         "owner": "NixOS",
@@ -1072,7 +1019,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
+    "nixpkgs_3": {
       "locked": {
         "lastModified": 1786862985,
         "narHash": "sha256-FBJRXmbGXiSUDvYEbfLYRkckayyZ6SK1UEqhCrIZ2Cs=",
@@ -1198,7 +1145,7 @@
         "bun2nix": "bun2nix_2",
         "bun2nix-darwin-x64": "bun2nix-darwin-x64_2",
         "nix-bun": "nix-bun_2",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_2",
         "nixpkgs-darwin-x64": "nixpkgs-darwin-x64_2",
         "rust-overlay": "rust-overlay_3"
       },
@@ -1237,22 +1184,6 @@
       "original": {
         "owner": "y0usaf",
         "repo": "omp-harness",
-        "type": "github"
-      }
-    },
-    "opengrok": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1787949654,
-        "narHash": "sha256-61QGk6hew9AFQ/dWZQXCjyi5zo0QCluqaXzcysUQbbY=",
-        "owner": "OnlyTerp",
-        "repo": "opengrok",
-        "rev": "1e7aa59ea7cedfd85c4d70fb217898aacf67f4ce",
-        "type": "github"
-      },
-      "original": {
-        "owner": "OnlyTerp",
-        "repo": "opengrok",
         "type": "github"
       }
     },
@@ -1480,13 +1411,12 @@
         "fonts": "fonts",
         "fx": "fx",
         "fx-flake": "fx-flake",
-        "grok-bot-opengrok": "grok-bot-opengrok",
         "hermes-agent": "hermes-agent",
         "linear-cli": "linear-cli",
         "manzil": "manzil",
         "nh": "nh",
         "nix-on-droid": "nix-on-droid",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs",
         "nixpkgs-discord-legacy": "nixpkgs-discord-legacy",
         "obs-image-reaction": "obs-image-reaction",
         "oh-my-pi": "oh-my-pi",

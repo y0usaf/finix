@@ -9,6 +9,7 @@
   userName = config.user.name;
   user = config.users.users.${userName};
   runtimeDir = "/run/user/${toString user.uid}";
+  keyEnv = /var/lib/opengrok/gateway.env;
 in {
   environment.systemPackages = [ pkg ];
 
@@ -23,7 +24,7 @@ in {
     };
     command = pkgs.writeShellScript "opengrok-gateway-hop-run" ''
       set -a
-      . /var/lib/opengrok/gateway.env
+      . ${keyEnv}
       set +a
       exec ${pkgs.python3}/bin/python3 ${pkg}/share/opengrok/tools/hop-server.py
     '';
