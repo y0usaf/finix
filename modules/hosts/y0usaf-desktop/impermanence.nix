@@ -55,7 +55,6 @@ in {
 
       # Services
       "/var/lib/manzil"
-      "/var/lib/opengrok"
 
       # Root user state (agents, ssh)
       {
