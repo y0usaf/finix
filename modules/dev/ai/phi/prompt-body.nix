@@ -2,7 +2,7 @@ _: {
   # Shared behavioral prompt sections for the Pi and Phi coding agents.
   #
   # Source of truth for the tool-agnostic behavioral rules (<reader>,
-  # <style>, <explain>, <work>) that both pi (modules/dev/ai/pi/prompts.nix) and
+  # <style>, <explain>, <work>) that both pi (modules/dev/ai/prompts/system_prompts.nix) and
   # phi compose into their system prompts. Keep these in sync with any edits
   # to the pi prompt.
   #
