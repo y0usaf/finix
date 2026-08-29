@@ -10,13 +10,9 @@
   body = (import ../phi/prompt-body.nix {}).promptBody;
 
   # Harness-agnostic core. Everything a coding assistant needs regardless of
-  # which harness loads it. Harness-specific sections are appended below.
+  # which harness loads it. Harness-specific sections are appended below; the
+  # <role> (names pi) lives in the pi-specific section, not here.
   corePrompt = ''
-    <role>
-      Pi coding assistant. Get the work done, and leave the user understanding why it
-      worked. A correct answer the user cannot reason about later is a failed answer.
-    </role>
-
     ${body}
 
     <output-standard>
@@ -39,10 +35,16 @@
     </rules>
   '';
 
-  # Pi-only section: doc locations inside the nix store. Appended to corePrompt
-  # to form the final ~/.pi/agent/SYSTEM.md. A future harness (omp forks pi and
-  # could reuse corePrompt) appends its own equivalent instead.
-  piDocsSection = ''
+  # Pi-only section: identity and doc locations inside the nix store. Appended
+  # to corePrompt to form the final ~/.pi/agent/SYSTEM.md. A future harness
+  # (omp forks pi and could reuse corePrompt) appends its own equivalent
+  # instead, including its own <role>.
+  piSection = ''
+    <role>
+      Pi coding assistant. Get the work done, and leave the user understanding why it
+      worked. A correct answer the user cannot reason about later is a failed answer.
+    </role>
+
     <pi-docs condition="only when asked about pi itself, its SDK, extensions, themes, skills, or TUI">
       main: ${cfg.readmePath}
       docs: ${cfg.docsPath}
@@ -58,15 +60,16 @@
     </pi-docs>
   '';
 
-  systemPrompt = corePrompt + "\n\n" + piDocsSection;
+  systemPrompt = corePrompt + "\n\n" + piSection;
 
-  # Verbatim reference: pi 0.82.1's own default system prompt, as assembled by
+  # Verbatim reference: pi 0.84.3's own default system prompt, as assembled by
   # buildSystemPrompt() in <pi src>/packages/coding-agent/src/core/system-prompt.ts
-  # (lines 121-138) with the four built-in tools read, bash, edit, write. Guidelines
-  # appear in assembly order: bash file-ops, then each tool's promptGuidelines, then
-  # the two always-on lines. Pi additionally appends AGENTS.md project context, the
-  # skills section, and "Current working directory: <cwd>" at runtime.
-  # Nothing loads this file; it exists so SYSTEM.md can be diffed against what it replaces.
+  # with the four built-in tools read, bash, edit, write. Guidelines appear in
+  # assembly order: bash file-ops, then each tool's promptGuidelines (read, bash,
+  # edit, write), then the two always-on lines. Pi additionally appends AGENTS.md
+  # project context, the skills section, and "Current working directory: <cwd>" at
+  # runtime. Nothing loads this file; it exists so SYSTEM.md can be diffed against
+  # what it replaces. Re-verify against the source when bumping pi versions.
 
   piDefaultSystem = ''
     You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
@@ -82,6 +85,7 @@
     Guidelines:
     - Use bash for file operations like ls, rg, find
     - Use read to examine files instead of cat or sed.
+    - You can inspect PI_* environment variables for current model and session details.
     - Use edit for precise changes (edits[].oldText must match exactly)
     - When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls
     - Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.
