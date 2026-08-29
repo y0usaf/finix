@@ -47,6 +47,13 @@ in {
     (pkgs.writeShellScriptBin "hermes-desktop-launcher" ''
       export NIXOS_OZONE_WL=1
       export ELECTRON_OZONE_PLATFORM_HINT=wayland
+      # Thin-client discipline: the app connects to the server's gateway, but
+      # upstream still spawns local `hermes serve` helper backends for
+      # profile-scoped UI requests (defaults: pool of 3, reaped after 10min
+      # idle). Keep at most one, reaped after 60s idle, so stray agent
+      # processes on the desktop stay occasional and short-lived.
+      export HERMES_DESKTOP_POOL_MAX=1
+      export HERMES_DESKTOP_POOL_IDLE_MS=60000
       exec hermes-desktop "$@"
     '')
   ];

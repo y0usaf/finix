@@ -135,6 +135,24 @@ in {
             displays = displays,
           }
 
+          -- Regular windows blur only when their per-window blur property is
+          -- true: the renderer gates on props.blur == Some(true)
+          -- (render/mod.rs), layer_namespaces never matches a window, and no
+          -- client here speaks ext-background-effect-v1 (the protocol that
+          -- lets a client request blur itself). This rule opts every window
+          -- in globally; the blur is only visible through transparent pixels
+          -- (foot already runs at alpha 0.82). Fullscreen and camera zoom
+          -- gate it off. set_properties replaces the override table
+          -- wholesale, which is safe here: nothing else sets per-window
+          -- overrides (wm.lua doesn't), and the core clears per-window props
+          -- then re-runs rule apply fns on reload (state.rs
+          -- reapply_window_rules).
+          tomoe.rule {
+            apply = function(win)
+              win:set_properties({ blur = true })
+            end,
+          }
+
           -- ─── Processes ───────────────────────────────────────────────────────────────
           tomoe.process.once("xwayland-satellite", { command = { "${lib.getExe pkgs.xwayland-satellite}" } })
           tomoe.process.once("swaybg", { command = {
