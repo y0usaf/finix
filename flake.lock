@@ -388,40 +388,6 @@
         "type": "github"
       }
     },
-    "fabricSrc": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1787650141,
-        "narHash": "sha256-N0g8ms01/pEu6qw0WcyhPn0QZfnUe0P3rG4omWhymgQ=",
-        "owner": "monotykamary",
-        "repo": "pi-fabric",
-        "rev": "9e9db6cf528639fc6378a9abd273df6e46892a80",
-        "type": "github"
-      },
-      "original": {
-        "owner": "monotykamary",
-        "repo": "pi-fabric",
-        "rev": "9e9db6cf528639fc6378a9abd273df6e46892a80",
-        "type": "github"
-      }
-    },
-    "fffSrc": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786073211,
-        "narHash": "sha256-pE4DsaCvlvgTKJtyV8uGhAQvbJpxpgXlIkoVh8I15qw=",
-        "owner": "dmtrKovalenko",
-        "repo": "fff",
-        "rev": "e2cad2f09ea617d4c024f396f21d80e557f23a17",
-        "type": "github"
-      },
-      "original": {
-        "owner": "dmtrKovalenko",
-        "repo": "fff",
-        "rev": "e2cad2f09ea617d4c024f396f21d80e557f23a17",
-        "type": "github"
-      }
-    },
     "finix": {
       "locked": {
         "lastModified": 1787524290,
@@ -1265,8 +1231,6 @@
     },
     "pi-flake": {
       "inputs": {
-        "fabricSrc": "fabricSrc",
-        "fffSrc": "fffSrc",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -1275,11 +1239,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1787777812,
-        "narHash": "sha256-JfDPpOCJpVYQcs1IMgZQHSS6zvIBoUiCmpruJ834XGo=",
+        "lastModified": 1787898346,
+        "narHash": "sha256-ND+7PEsMYC0HBgxLDL+eway1H/6oWPTmgHxssgIQLlc=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "7ab6ec20d2b625b7f4d585e8d8b9bdca75b509aa",
+        "rev": "55b9be12f48ebd12ed597bf2a74a96cbdf9cc671",
         "type": "github"
       },
       "original": {

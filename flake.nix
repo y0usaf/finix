@@ -137,8 +137,10 @@
     };
 
     ekko = {
-      # Pinned to the last Lua-config (mlua) commit; ddabc9a removed Lua config
-      # support entirely, breaking config.toml/init.lua/which-key.lua.
+      # main = last Lua-config (mlua) commit 56b1246 + ctrl+tab /
+      # ctrl+shift+tab CSI chord parsing (6e8ecbe). The wasm bridge
+      # (ddabc9a..ef3afed) was force-pushed off main; it survives only in
+      # those commits' reflog / stale clones.
       url = "github:y0usaf/ekko/56b1246c424bbd889fc8da0428e4fbca17314018";
       inputs.nixpkgs.follows = "nixpkgs";
     };
