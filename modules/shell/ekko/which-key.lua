@@ -498,10 +498,13 @@ function ext.register(ekko)
     })
   end
 
-  -- Ctrl+Tab / Ctrl+Shift+Tab cycle sessions without leaving normal mode.
-  -- The chords arrive as CSI 27;5;9~ / 27;6;9~ (parser support: ekko 6e8ecbe).
-  for _, step in ipairs({ { chord = "ctrl+tab", delta = 1, desc = "next session" },
-                          { chord = "ctrl+shift+tab", delta = -1, desc = "prev session" } }) do
+  -- Alt+Right / Alt+Left cycle sessions without leaving normal mode.
+  -- (Previously Ctrl+Tab / Ctrl+Shift+Tab, which ekko 0.1.0's chord parser
+  -- rejects at registration time — "unparseable chord" — and because this
+  -- config disables every builtin extension, that single bad chord killed
+  -- the whole extension runtime: no keybinds, no bars, at launch.)
+  for _, step in ipairs({ { chord = "alt+right", delta = 1, desc = "next session" },
+                          { chord = "alt+left", delta = -1, desc = "prev session" } }) do
     local delta = step.delta
     ekko.register_keybinding({
       mode = nil,
