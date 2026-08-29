@@ -13,7 +13,7 @@ in {
           inherit version;
           src = pkgs.fetchzip {
             url = "https://github.com/yuiamoroll/EldenRingSeamlessCoopRelease/releases/download/${version}/Seamless.Co-op.v1.9.8-510-1-9-8-1776128433.zip";
-            sha256 = "sha256-GpVqMEoJR4462hCjEjhOCGexkEEN2ewheTsaLEdOX5g=";
+            sha256 = "sha256-Bz2EFv+kUXaZY2vb66RsqOb6n4kZkGp/49xh5/SgTHc=";
             stripRoot = false;
           };
         };
