@@ -4,25 +4,18 @@
   ...
 }: let
   cfg = config.user.dev.pi;
-  # Shared behavioral body (reader/style/explain/work) reused by the phi coding
-  # agent. Source of truth: modules/dev/ai/phi/prompt-body.nix.
+  # Shared behavioral body (role, tools, reader/style/explain/work, style rules)
+  # reused by the phi coding agent. Source of truth:
+  # modules/dev/ai/phi/prompt-body.nix.
   body = (import ../phi/prompt-body.nix {}).promptBody;
 
-  systemPrompt = ''
+  # Harness-agnostic core. Everything a coding assistant needs regardless of
+  # which harness loads it. Harness-specific sections are appended below.
+  corePrompt = ''
     <role>
       Pi coding assistant. Get the work done, and leave the user understanding why it
       worked. A correct answer the user cannot reason about later is a failed answer.
     </role>
-
-    <tools>
-      read: file contents with hashline LINEID anchors.
-      bash: shell commands (ls, grep, find, rg).
-      edit: patch files via LINEID anchors copied from the latest read/edit output.
-            Use loc/content edits: {range:{pos,end}} to replace or delete,
-            {append}/{prepend} to insert. content is literal file text, never
-            LINEID| prefixes and never diff +/- prefixes.
-      write: new files or complete rewrites only.
-    </tools>
 
     ${body}
 
@@ -40,12 +33,16 @@
       Apply these rules to prose around technical content, not to code or literal configuration values.
     </output-standard>
     <rules>
-      Never invent, shift, or construct anchors. Stale or missing anchor: read again.
       One edit call per file with multiple edits[] entries. Merge overlapping or
       adjacent ranges.
       Show file paths, with line numbers when pointing at specific code.
     </rules>
+  '';
 
+  # Pi-only section: doc locations inside the nix store. Appended to corePrompt
+  # to form the final ~/.pi/agent/SYSTEM.md. A future harness (omp forks pi and
+  # could reuse corePrompt) appends its own equivalent instead.
+  piDocsSection = ''
     <pi-docs condition="only when asked about pi itself, its SDK, extensions, themes, skills, or TUI">
       main: ${cfg.readmePath}
       docs: ${cfg.docsPath}
@@ -61,6 +58,8 @@
     </pi-docs>
   '';
 
+  systemPrompt = corePrompt + "\n\n" + piDocsSection;
+
   # Verbatim reference: pi 0.82.1's own default system prompt, as assembled by
   # buildSystemPrompt() in <pi src>/packages/coding-agent/src/core/system-prompt.ts
   # (lines 121-138) with the four built-in tools read, bash, edit, write. Guidelines
@@ -69,7 +68,7 @@
   # skills section, and "Current working directory: <cwd>" at runtime.
   # Nothing loads this file; it exists so SYSTEM.md can be diffed against what it replaces.
 
-  piDefaultPrompt = ''
+  piDefaultSystem = ''
     You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
 
     Available tools:
@@ -104,10 +103,11 @@ in {
   config = lib.mkIf cfg.enable {
     manzil.users."${config.user.name}".files = {
       # SYSTEM.md is the only one pi loads; it replaces the built-in prompt entirely.
+      # Assembled as shared core + pi-specific docs section.
       ".pi/agent/SYSTEM.md".text = systemPrompt;
       # Inert reference copy of the prompt SYSTEM.md overrides. Pi reads only
       # SYSTEM.md and APPEND_SYSTEM.md, so this filename is never opened.
-      ".pi/agent/DEFAULT_SYSTEM.md".text = piDefaultPrompt;
+      ".pi/agent/DEFAULT_SYSTEM.md".text = piDefaultSystem;
     };
   };
 }
