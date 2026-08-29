@@ -96,7 +96,6 @@ in {
     ./boot.nix
     ./graphical.nix
     ./hermes.nix
-    ./opengrok-hop.nix
   ];
 
   # manzil dotfiles: native finix module (imported in finix/default.nix),
