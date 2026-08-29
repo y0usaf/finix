@@ -1,8 +1,8 @@
 local ext = {
   id = "user.which-key",
   name = "which-key nav",
-  version = "0.12.0",
-  description = "vim-style hjkl nav + x kill-session + stock leader map + zellij-style one-line status bar (mode ribbon, Ctrl+ tile strip, per-mode key hints that transform with the mode, powerline chevrons), plus a leader-attached centred session-list panel that pops out on ctrl+b (no leader panel)",
+  version = "0.13.0",
+  description = "vim-style hjkl nav + x kill-session + stock leader map + zellij-style session tab strip on top, tmux-style solid green hint bar on the bottom, plus a leader-attached centred session-list panel that pops out on ctrl+b (no leader panel)",
 }
 
 -- 1-based wrap-around index: move `i` by `delta` within `n` elements,
@@ -49,6 +49,39 @@ local function step_session(snapshot, delta)
   local i = current_index(names, snapshot.session_name) or 1
   local n = #names
   return { { switch_session = names[wrap(i, delta, n)] } }
+end
+
+-- Alive sessions only (state == "Alive"): resurrectable manifests have no
+-- daemon to switch to.
+local function alive_session_names(snapshot)
+  local names = {}
+  for _, project in ipairs(snapshot.projects) do
+    for _, session in ipairs(project.sessions) do
+      -- The Lua bridge serializes SessionState lowercase ("alive"/"gone").
+      if session.state == "alive" then
+        names[#names + 1] = session.name
+      end
+    end
+  end
+  return names
+end
+
+-- Close-focused-pane, gated by the finix close-to-nearest-session option
+-- (prologue local FINIX_CLOSE_TO_SESSION): when the focused pane is the
+-- session's last and other alive sessions exist, close it but land on the
+-- next session in sidebar order instead of exiting the terminal. The close
+-- message is queued before the switch action, so the daemon tears the
+-- emptied session down while the client reconnects; the stale Exit frame
+-- from the old connection is dropped by generation filtering.
+local function close_pane_actions(snapshot)
+  if FINIX_CLOSE_TO_SESSION and #snapshot.panes <= 1 then
+    local names = alive_session_names(snapshot)
+    if #names >= 2 then
+      local i = current_index(names, snapshot.session_name) or 1
+      return { "close_focused_pane", { switch_session = names[wrap(i, 1, #names)] } }
+    end
+  end
+  return { "close_focused_pane" }
 end
 
 -- Kill the current session, then land on the next session in sidebar order
@@ -138,9 +171,13 @@ local function note_content(snapshot)
   return " " .. n.text .. " ", fg, last_note_ms and snapshot.now_ms - last_note_ms < NOTE_SETTLE
 end
 
-local function draw_mode(ctx, start, mode, reverse, bold)
+local function draw_mode(ctx, start, mode, reverse, bold, solid_bg)
   local label = " " .. mode:upper() .. " "
   local w = display_width(label)
+  if solid_bg then
+    styled(ctx, start, 0, w, "status_fg", solid_bg, label, reverse, bold)
+    return w
+  end
   if mode == "normal" then
     styled(ctx, start, 0, w, "success", "transparent", label, reverse, bold)
     return w
@@ -177,8 +214,78 @@ local function token_width(entry, with_desc)
   return display_width(tokens .. (with_desc and (" " .. entry.desc) or "")), modifier, key, tokens
 end
 
-local function draw_hints(ctx, snapshot)
-  local cols = ctx.size()
+-- ── zellij-style tab strip (top) ─────────────────────────────────────────
+-- One tab per session; the current session's tab is highlighted with the
+-- accent background, exactly zellij's tab-name strip.
+
+local TAB_MAX = 24
+
+local function tab_label(index, max)
+  return " " .. truncate(tostring(index), max) .. " "
+end
+
+local function draw_top(ctx, snapshot)
+  local cols, rows = ctx.size(); if cols < 1 or rows < 1 then return end
+  ctx.fill_rect(0, 0, cols, rows, "transparent", "transparent")
+  local reverse, bold = emphasis(snapshot)
+  -- Left edge: the mode indicator, like zellij's mode ribbon.
+  local chip_w = display_width(" " .. snapshot.mode:upper() .. " ") + (snapshot.mode == "normal" and 0 or 1)
+  local x = 0
+  if chip_w <= cols then x = draw_mode(ctx, 0, snapshot.mode, reverse, bold) end
+  -- Spinner sits right after the chip when scrollback is open.
+  if (snapshot.scrollback > 0 or snapshot.mode == "scroll") and x + 1 < cols then
+    ctx.put_text(x + 1, 0, 1, "accent", "transparent", FRAMES[(math.floor(snapshot.now_ms / 80) % #FRAMES) + 1])
+  end
+  -- Right edge: a transient note wins; otherwise the session name (dim).
+  local text, fg, fresh = note_content(snapshot)
+  local value = text or snapshot.session_name or ""
+  local shown = truncate(value, math.floor(cols / 3))
+  local right_w = display_width(shown)
+  if right_w > 0 then styled(ctx, cols - right_w, 0, right_w, text and fg or "muted", "transparent", shown, false, text and fresh or false) end
+  -- Center: the tab strip, clipped to the space between chip and name.
+  local names = session_names(snapshot)
+  local left_limit = x + 2
+  local right_limit = cols - right_w - 2
+  if #names == 0 or right_limit - left_limit < 6 then return end
+  -- Halve the per-tab label budget until the whole strip fits.
+  local labels, strip_w, max_w = {}, 0, TAB_MAX
+  for _ = 1, 8 do
+    labels, strip_w = {}, 0
+    for i in ipairs(names) do
+      local label = tab_label(i, max_w)
+      strip_w = strip_w + display_width(label) + 1
+      labels[#labels + 1] = label
+    end
+    strip_w = strip_w - 1
+    if strip_w <= right_limit - left_limit or max_w <= 3 then break end
+    max_w = math.max(3, math.floor(max_w / 2))
+  end
+  local cur = current_index(names, snapshot.session_name) or 1
+  local tx = left_limit + math.floor((right_limit - left_limit - strip_w) / 2)
+  for i, label in ipairs(labels) do
+    local lw = display_width(label)
+    if tx + lw > right_limit then break end
+    if i == cur then
+      styled(ctx, tx, 0, lw, "status_fg", "accent", label, false, true)
+    else
+      styled(ctx, tx, 0, lw, "muted", "transparent", label, false, false)
+    end
+    tx = tx + lw + 1
+  end
+end
+
+-- ── tmux-style colored strip (bottom) ────────────────────────────────────
+-- The whole row is one solid colored bar (tmux's default green), with the
+-- mode chip on the left, centered key hints, and the session name on the
+-- right — all drawn in the strip's own colors.
+
+local function draw_bottom(ctx, snapshot)
+  local cols, rows = ctx.size(); if cols < 1 or rows < 1 then return end
+  ctx.fill_rect(0, 0, cols, rows, "status_fg", "success")
+  draw_mode(ctx, 0, snapshot.mode, false, false, "accent")
+  local name = " " .. (snapshot.session_name or "") .. " "
+  local nw = display_width(name)
+  if nw < cols then styled(ctx, cols - nw, 0, nw, "status_fg", "success", name, false, true) end
   local entries = hint_entries(snapshot)
   local function measure(with_desc)
     local total, count = 0, 0
@@ -190,54 +297,29 @@ local function draw_hints(ctx, snapshot)
     end
     return total, count
   end
-  local row_w, count
-  local with_desc
+  local row_w, count, with_desc
   row_w, count = measure(true)
   if count < #entries then row_w, count = measure(false); with_desc = false else with_desc = true end
   if count == 0 then return end
   local x = math.max(0, math.floor((cols - row_w) / 2))
   for i = 1, count do
     local entry = entries[i]
-    local _, modifier, key, tokens = token_width(entry, with_desc)
-    local modifier_token = modifier and ("[" .. modifier:gsub("^%l", string.upper) .. "]") or nil
-    local key_token = "[" .. key .. "]"
-    if modifier_token then
-      styled(ctx, x, 0, 1, "border", "transparent", "[", false, false); x = x + 1
-      styled(ctx, x, 0, display_width(modifier_token) - 2, "muted", "transparent", modifier_token:sub(2, -2), false, false); x = x + display_width(modifier_token) - 2
-      styled(ctx, x, 0, 1, "border", "transparent", "]", false, false); x = x + 1
-      styled(ctx, x, 0, 1, "border", "transparent", " ", false, false); x = x + 1
-    else
-      styled(ctx, x, 0, 1, "border", "transparent", "[", false, false); x = x + 1
+    local _, modifier, key = token_width(entry, with_desc)
+    if modifier then
+      local mt = "[" .. modifier:gsub("^%l", string.upper) .. "] "
+      local mw = display_width(mt)
+      styled(ctx, x, 0, mw, "status_fg", "success", mt, false, false); x = x + mw
     end
-    styled(ctx, x, 0, display_width(key), "accent", "transparent", key, false, true); x = x + display_width(key)
-    styled(ctx, x, 0, 1, "border", "transparent", "]", false, false); x = x + 1
-    if with_desc then local d = " " .. entry.desc; styled(ctx, x, 0, display_width(d), "text", "transparent", d, false, false); x = x + display_width(d) end
+    local kt = "[" .. key .. "]"
+    local kw = display_width(kt)
+    styled(ctx, x, 0, kw, "status_fg", "success", kt, false, true); x = x + kw
+    if with_desc then
+      local d = " " .. entry.desc
+      local dw = display_width(d)
+      styled(ctx, x, 0, dw, "status_fg", "success", d, false, false); x = x + dw
+    end
     if i < count then x = x + 2 end
   end
-end
-
-local function draw_top(ctx, snapshot)
-  local cols, rows = ctx.size(); if cols < 1 or rows < 1 then return end
-  ctx.fill_rect(0, 0, cols, rows, "transparent", "transparent")
-  local reverse, bold = emphasis(snapshot)
-  local chip_w = display_width(" " .. snapshot.mode:upper() .. " ") + (snapshot.mode == "normal" and 0 or 1)
-  local start = math.max(0, math.floor((cols - chip_w) / 2))
-  if chip_w <= cols then draw_mode(ctx, start, snapshot.mode, reverse, bold) end
-  if (snapshot.scrollback > 0 or snapshot.mode == "scroll") and start >= 2 then
-    ctx.put_text(0, 0, 1, "accent", "transparent", FRAMES[(math.floor(snapshot.now_ms / 80) % #FRAMES) + 1])
-  end
-  local text, fg, fresh = note_content(snapshot)
-  local value = text or snapshot.session_name or ""
-  local available = math.max(0, cols - (start + chip_w))
-  local shown = truncate(value, available)
-  local w = display_width(shown)
-  if w > 0 then styled(ctx, cols - w, 0, w, text and fg or "muted", "transparent", shown, false, text and fresh or false) end
-end
-
-local function draw_bottom(ctx, snapshot)
-  local cols, rows = ctx.size(); if cols < 1 or rows < 1 then return end
-  ctx.fill_rect(0, 0, cols, rows, "transparent", "transparent")
-  draw_hints(ctx, snapshot)
 end
 
 local function draw_sessions(ctx, _state, snapshot)
@@ -266,7 +348,8 @@ local function draw_sessions(ctx, _state, snapshot)
     local index = from_top + offset + 1
     local name = names[index]
     if name ~= nil then
-      local marker = index == cur and "▌" or " "
+      -- Numbered like the top strip's tabs; the accent color marks the current one.
+      local marker = index < 10 and tostring(index) or "·"
       ctx.put_text(col + 1, row + 1 + offset, 1, index == cur and "accent" or "muted", "surface_raised", marker)
       styled(ctx, col + 3, row + 1 + offset, name_w, index == cur and "text" or "muted", "surface_raised", truncate(name, name_w), false, false)
     end
@@ -397,6 +480,39 @@ function ext.register(ekko)
   })
 
 
+  -- 1..9: jump to the Nth session in tab-strip order (same flattened
+  -- project -> session order the top bar numbers its tabs with).
+  for i = 1, 9 do
+    local target = i
+    ekko.register_keybinding({
+      mode = "leader",
+      chord = tostring(target),
+      description = "session " .. target,
+      handler = function(snapshot)
+        local names = session_names(snapshot)
+        if target > #names then
+          return { note(("no session %d"):format(target)) }
+        end
+        return { "exit_mode", { switch_session = names[target] } }
+      end,
+    })
+  end
+
+  -- Ctrl+Tab / Ctrl+Shift+Tab cycle sessions without leaving normal mode.
+  -- The chords arrive as CSI 27;5;9~ / 27;6;9~ (parser support: ekko 6e8ecbe).
+  for _, step in ipairs({ { chord = "ctrl+tab", delta = 1, desc = "next session" },
+                          { chord = "ctrl+shift+tab", delta = -1, desc = "prev session" } }) do
+    local delta = step.delta
+    ekko.register_keybinding({
+      mode = nil,
+      chord = step.chord,
+      description = step.desc,
+      handler = function(snapshot)
+        return step_session(snapshot, delta)
+      end,
+    })
+  end
+
   -- x: kill the current session (non-sticky — exits leader mode after kill).
   ekko.register_keybinding({
     mode = "leader",
@@ -450,7 +566,9 @@ function ext.register(ekko)
   })
   local PANE_MODE_MAP = {
     { chord = "n", desc = "new pane",     actions = { "exit_mode", "split_down" } },
-    { chord = "x", desc = "close pane",   actions = { "close_focused_pane" } },
+    -- x goes through close_pane_actions (close-to-nearest-session option);
+    -- the :pane-close command cannot: command handlers see no snapshot.
+    { chord = "x", desc = "close pane",   gated = true },
     { chord = "q", desc = "exit pane",    actions = { "exit_mode" } },
   }
   local FOCUS_MAP = {
@@ -469,9 +587,15 @@ function ext.register(ekko)
       mode = "pane",
       chord = entry.chord,
       description = entry.desc,
-      handler = function(_snapshot)
-        return actions
-      end,
+      handler = entry.gated
+        and function(snapshot)
+          local gated = close_pane_actions(snapshot)
+          table.insert(gated, 1, "exit_mode")
+          return gated
+        end
+        or function(_snapshot)
+          return actions
+        end,
     })
   end
   for _, entry in ipairs(FOCUS_MAP) do
