@@ -14,7 +14,7 @@ _: {
       aws-cli.enable = true;
       gws.enable = true;
       linear-cli.enable = true;
-      notion-cli.enable = true;
+      ntn.enable = true;
       ramp.enable = true;
       vercel.enable = true;
     };

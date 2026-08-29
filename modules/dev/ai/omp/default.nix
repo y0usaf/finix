@@ -98,6 +98,9 @@ in {
           inherit (catalog) defaultModel;
           inherit (catalog) defaultThinkingLevel;
           inherit (catalog) enabledModels;
+          packages = [
+            "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
+          ];
         };
       };
       ".omp/agent/models.json" = {
