@@ -6,6 +6,8 @@
       enable = lib.mkDefault true;
       autoStart = lib.mkDefault true;
       open = lib.mkDefault true;
+      closeToNearestSession = lib.mkDefault true;
+      openAttachesExisting = lib.mkDefault true;
     };
   };
 }
