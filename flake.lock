@@ -374,17 +374,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1786863092,
-        "narHash": "sha256-7e8qljkxgaAEU6Q+mOVTs3S4E/J00oVRiQarI/S3470=",
+        "lastModified": 1788132409,
+        "narHash": "sha256-rm4n4KH8XAdJ3WjJVpviGSds46RRcrZ5VzW7iz5FVWI=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "56b1246c424bbd889fc8da0428e4fbca17314018",
+        "rev": "64e85d1f327c2bb58efc773c268e9dac96ebbdf2",
         "type": "github"
       },
       "original": {
         "owner": "y0usaf",
+        "ref": "64e85d1",
         "repo": "ekko",
-        "rev": "56b1246c424bbd889fc8da0428e4fbca17314018",
         "type": "github"
       }
     },
@@ -624,27 +624,6 @@
         "type": "github"
       }
     },
-    "fx": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1787396057,
-        "narHash": "sha256-CfpUQ+15M5rylCT1q2R1aoqK6TyKfj9Y5MXfW1B8QFo=",
-        "owner": "y0usaf",
-        "repo": "fx",
-        "rev": "b3c35434d670cdc3cc80bb46568a3cfbc020d5da",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "ref": "add-nix-flake",
-        "repo": "fx",
-        "type": "github"
-      }
-    },
     "fx-flake": {
       "inputs": {
         "nixpkgs": [
@@ -679,17 +658,17 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1787314587,
-        "narHash": "sha256-oeFJlEoFybqKkbuWT4mW8PRauusjt3y44ZJXAcA7TPY=",
+        "lastModified": 1788105837,
+        "narHash": "sha256-gYVp0xbRXbD8GlSOwGtAKTVBT26jDFlaUOet4W2uxCk=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "fcbd1076a93841fa88855acce810e342a5b78101",
+        "rev": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
         "type": "github"
       },
       "original": {
         "owner": "NousResearch",
+        "ref": "main",
         "repo": "hermes-agent",
-        "rev": "fcbd1076a93841fa88855acce810e342a5b78101",
         "type": "github"
       }
     },
@@ -1115,6 +1094,26 @@
         "type": "github"
       }
     },
+    "oh-my-fx": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788143214,
+        "narHash": "sha256-gFNuop6qSB/iklm6/cJI0oe9mBfTGge4u1b1hTnPvG4=",
+        "owner": "y0usaf",
+        "repo": "oh-my-fx",
+        "rev": "e4fa282cc3f533bb91f02fcd4defab6ac8ec6755",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "oh-my-fx",
+        "type": "github"
+      }
+    },
     "oh-my-pi": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -1215,11 +1214,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786898025,
-        "narHash": "sha256-e2bAgaX7sBvF6ciCisiRbZ9FNT2lVVey2ty3IkQ/nGA=",
+        "lastModified": 1788144166,
+        "narHash": "sha256-XIDXOeAIrzd5W0Non3/9zN9ob3ZoX9kciwkcuqOxFPY=",
         "ref": "main",
-        "rev": "691d525ea8e0ea2e1b00932e1ec8a78f1ecde487",
-        "revCount": 290,
+        "rev": "ddd1da4178ff582ae6e9316819978ce9a45accca",
+        "revCount": 291,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/phi.git"
       },
@@ -1239,11 +1238,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1787898346,
-        "narHash": "sha256-ND+7PEsMYC0HBgxLDL+eway1H/6oWPTmgHxssgIQLlc=",
+        "lastModified": 1788142984,
+        "narHash": "sha256-AFQtE3Tt41EcPl1nHXy68/csu1VVmVMfBN5Uc/q8s/s=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "55b9be12f48ebd12ed597bf2a74a96cbdf9cc671",
+        "rev": "405c39c0b7a2c1efcb6d02dfbbdbaa0b6af96a06",
         "type": "github"
       },
       "original": {
@@ -1409,7 +1408,6 @@
         "ekko": "ekko",
         "finix": "finix",
         "fonts": "fonts",
-        "fx": "fx",
         "fx-flake": "fx-flake",
         "hermes-agent": "hermes-agent",
         "linear-cli": "linear-cli",
@@ -1419,6 +1417,7 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-discord-legacy": "nixpkgs-discord-legacy",
         "obs-image-reaction": "obs-image-reaction",
+        "oh-my-fx": "oh-my-fx",
         "oh-my-pi": "oh-my-pi",
         "omp-harness": "omp-harness",
         "paseo": "paseo",
