@@ -25,6 +25,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    grok-bot = {
+      # Private repo: ssh fetcher (same as bolo). Unfree redistributed
+      # Anysphere/XAI artifacts, kept private.
+      url = "git+ssh://git@github.com/y0usaf/grok-bot-0.18-linux.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     fonts = {
       url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";
