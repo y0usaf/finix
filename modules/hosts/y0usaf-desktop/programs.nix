@@ -1,5 +1,6 @@
 _: {
   user.programs = {
+    grok-bot.enable = true;
     bolo = {
       enable = true;
       autofill = true;

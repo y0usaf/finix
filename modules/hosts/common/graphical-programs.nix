@@ -10,6 +10,7 @@
       enable = lib.mkDefault false;
       yoloMode = lib.mkDefault true;
     };
+    grok-bot.enable = lib.mkDefault false;
     discord = {
       stable.enable = lib.mkDefault true;
       vesktop.enable = lib.mkDefault true;
