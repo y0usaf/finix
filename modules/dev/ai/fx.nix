@@ -9,7 +9,7 @@
 
   config = lib.mkIf config.user.dev.fx.enable {
     environment.systemPackages = [
-      flakeInputs.fx.packages.${pkgs.stdenv.hostPlatform.system}.default
+      flakeInputs.oh-my-fx.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
     manzil.users."${config.user.name}".files = {
@@ -52,23 +52,10 @@
             project_instructions_total_bytes = 131072;
           };
           sandbox = "none";
-          input_appearance = "tint";
           slash_menu_categories = true;
           startup_scrollback = true;
           startup_mode = "mux";
           prompt_history.enabled = true;
-          statusLine = {
-            sandbox = true;
-            context = true;
-            session = true;
-          };
-          notifications = {
-            turn_end = true;
-            attention_required = true;
-            max = false;
-          };
-          auto_upgrade = true;
-          update_channel = "stable";
         };
       };
     };
