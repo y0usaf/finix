@@ -79,12 +79,29 @@ in {
       default = {};
       description = "TTSR rules written to ~/.omp/agent/rules/<name>.md.";
     };
+    advisor = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Enable the omp advisor subsystem via the PI_CONFIG_FILES overlay.";
+      };
+      model = lib.mkOption {
+        type = lib.types.str;
+        default = "vercel-ai-gateway/openai/gpt-5.6-luna";
+        description = "Model id assigned to the advisor role.";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
       flakeInputs.oh-my-pi.packages."${pkgs.stdenv.hostPlatform.system}".omp
     ];
+    environment.etc."omp/advisor.yml".text = lib.generators.toYAML {} {
+      advisor.enabled = cfg.advisor.enable;
+      modelRoles.advisor = cfg.advisor.model;
+    };
+    environment.variables.PI_CONFIG_FILES = "/etc/omp/advisor.yml";
 
     manzil.users."${config.user.name}".files = {
       ".omp/config.json" = {
