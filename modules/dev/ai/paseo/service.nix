@@ -17,12 +17,11 @@
   cfg = config.user.dev.paseo;
   inherit (pkgs.stdenv.hostPlatform) system;
   paseo = flakeInputs.paseo.packages."${system}".default;
-  fx = flakeInputs.fx-flake.packages."${system}".default;
   home = config.user.homeDirectory;
   homePaseo = "${home}/${cfg.dataDir}";
 in {
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [paseo fx];
+    environment.systemPackages = [paseo];
 
     finit.services.paseo = {
       description = "Paseo - self-hosted daemon for AI coding agents";
@@ -72,7 +71,7 @@ in {
         fx = {
           extends = "acp";
           label = "fx";
-          command = ["fx" "acp"];
+          command = ["omfx" "acp"];
         };
         reasonix = {
           extends = "acp";
