@@ -84,6 +84,7 @@
         (import ../dev/ai/paseo/options.nix)
         (import ../dev/ai/paseo/service.nix)
         (import ../tools/git.nix)
+        (import ../tools/tmux.nix)
         (import ../hosts/y0usaf-server/tools.nix)
       ];
   };
@@ -146,8 +147,10 @@
       defaultHost = "server";
       # Server boot slots are managed by the Finix ESP island driver.
       bootDriverName = "finix-server-boot";
-      sshHost = "192.168.2.66";
-      sshPort = 2200;
+      # Root's ssh key is authorized ONLY via the tailnet IP (LAN root@:2200
+      # denies it; y0usaf@ works everywhere). Deploy as root@tailnet:22.
+      sshHost = "100.105.204.116";
+      sshPort = 22;
     }).deployScript;
 
   desktopDeployPackage =
