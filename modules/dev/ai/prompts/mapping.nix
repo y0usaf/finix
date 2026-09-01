@@ -10,6 +10,8 @@
   roots =
     (lib.optional config.user.dev.fx.enable ".fx/skills")
     ++ (lib.optional config.user.dev.pi.enable ".pi/agent/skills")
+    # phi has no per-user skills dir of its own; it scans ~/.config/phi/skills.
+    ++ (lib.optional config.user.dev.phi.enable ".config/phi/skills")
     ++ (lib.optional config.user.dev.prime-agent.enable ".prime/agent/skills")
     ++ (lib.optional config.user.dev.reasonix.enable ".reasonix/skills")
     # oh-my-pi discovers user skills at ~/.omp/agent/skills (same layout as
