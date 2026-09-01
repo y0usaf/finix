@@ -309,6 +309,10 @@ in {
       (builtins.filter (d: !lib.hasPrefix "/etc/" d && d != "/root")
         (map dirPath persistCfg.directories)));
 
+  # Cap nix-daemon (and every build it spawns) at 24 of 32 cores (75%).
+  # cgroup v2 cpu.max = quota µs per 100ms period; 2400000 = 24 cores.
+  finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
+
   services = {
     # Crash-hunt capture: duplicate EVERY facility/severity to the server
     # (y0usaf-server 192.168.2.66:514, UDP) so an instant power-cut reboot
