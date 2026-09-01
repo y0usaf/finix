@@ -16,6 +16,7 @@
         inputs.claude-code-nix.overlays.default
         (final: prev: {
           rush = inputs.rush.packages.${system}.default;
+          monstar = inputs.monstar.packages.${system}.default;
         })
         (_: prev: let
           prevObsPlugins = prev.obs-studio-plugins;
