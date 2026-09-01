@@ -755,6 +755,27 @@
         "type": "github"
       }
     },
+    "monstar": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788294290,
+        "narHash": "sha256-AesDxPRf2ccxvXlbA5jjN2Oo+3q/lfoJzQ21vUHK5C4=",
+        "owner": "y0usaf",
+        "repo": "monstar",
+        "rev": "8cdc73f2f69b665279f78680f5f890821503ded0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "ref": "flake-packaging",
+        "repo": "monstar",
+        "type": "github"
+      }
+    },
     "nh": {
       "inputs": {
         "nixpkgs": [
@@ -1411,6 +1432,7 @@
         "hermes-agent": "hermes-agent",
         "linear-cli": "linear-cli",
         "manzil": "manzil",
+        "monstar": "monstar",
         "nh": "nh",
         "nix-on-droid": "nix-on-droid",
         "nixpkgs": "nixpkgs",

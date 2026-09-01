@@ -12,7 +12,7 @@
     };
     launcher = lib.mkOption {
       type = lib.types.str;
-      default = "foot --app-id=launcher ~/.config/scripts/tui-launcher.sh";
+      default = "monstar --app-id=launcher -e ~/.config/scripts/tui-launcher.sh";
       description = "Default application launcher";
     };
     discord = lib.mkOption {

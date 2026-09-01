@@ -14,6 +14,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    monstar = {
+      # Wayland terminal emulator built on libghostty (CPU rendered, like
+      # foot). Now the main terminal.
+      url = "github:y0usaf/monstar/flake-packaging";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     manzil = {
       url = "github:y0usaf/manzil";
       inputs.nixpkgs.follows = "nixpkgs";
