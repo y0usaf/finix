@@ -374,16 +374,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1788132409,
-        "narHash": "sha256-rm4n4KH8XAdJ3WjJVpviGSds46RRcrZ5VzW7iz5FVWI=",
+        "lastModified": 1788260405,
+        "narHash": "sha256-RwWJrVjK4njKFW+9YirQzWfvpZ8Pf4H5068Cpv0syjk=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "64e85d1f327c2bb58efc773c268e9dac96ebbdf2",
+        "rev": "20c427928ac40106ef995ef58492da3e88f36c7a",
         "type": "github"
       },
       "original": {
         "owner": "y0usaf",
-        "ref": "64e85d1",
+        "ref": "20c4279",
         "repo": "ekko",
         "type": "github"
       }
@@ -624,25 +624,24 @@
         "type": "github"
       }
     },
-    "fx-flake": {
+    "grok-bot": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1787396057,
-        "narHash": "sha256-CfpUQ+15M5rylCT1q2R1aoqK6TyKfj9Y5MXfW1B8QFo=",
-        "owner": "y0usaf",
-        "repo": "fx-flake",
-        "rev": "b3c35434d670cdc3cc80bb46568a3cfbc020d5da",
-        "type": "github"
+        "lastModified": 1788190630,
+        "narHash": "sha256-otWXS4R7dTWCe4w4lkKU+Wcv5VU3ktbWXTlQg9QRWgo=",
+        "ref": "refs/heads/main",
+        "rev": "fbd28b06f607ac47d6225ca32fbee9ed69a964f1",
+        "revCount": 3,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/grok-bot-0.18-linux.git"
       },
       "original": {
-        "owner": "y0usaf",
-        "ref": "add-nix-flake",
-        "repo": "fx-flake",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/grok-bot-0.18-linux.git"
       }
     },
     "hermes-agent": {
@@ -658,11 +657,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1788105837,
-        "narHash": "sha256-gYVp0xbRXbD8GlSOwGtAKTVBT26jDFlaUOet4W2uxCk=",
+        "lastModified": 1788207114,
+        "narHash": "sha256-f/hrrt9ZUUjOcE4O1NWgO75YeDwkIKRxnn5G/2/MmE4=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+        "rev": "3783fd9ffeada5bee050326f6f96360b6e213d6a",
         "type": "github"
       },
       "original": {
@@ -1214,11 +1213,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788144166,
-        "narHash": "sha256-XIDXOeAIrzd5W0Non3/9zN9ob3ZoX9kciwkcuqOxFPY=",
+        "lastModified": 1788158682,
+        "narHash": "sha256-2T/HtKNqsvVeQf4s3tYPTWf0l1z1Xs+zFoTZrFolc6c=",
         "ref": "main",
-        "rev": "ddd1da4178ff582ae6e9316819978ce9a45accca",
-        "revCount": 291,
+        "rev": "a1dfe9afe109d1f14ad84840a90ffb6f865c7066",
+        "revCount": 305,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/phi.git"
       },
@@ -1238,11 +1237,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1788142984,
-        "narHash": "sha256-AFQtE3Tt41EcPl1nHXy68/csu1VVmVMfBN5Uc/q8s/s=",
+        "lastModified": 1788258996,
+        "narHash": "sha256-6TqE/qkhYgkp+LNvLwjw+nlM7gAj1pNsYAWdd6Zfs4Q=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "405c39c0b7a2c1efcb6d02dfbbdbaa0b6af96a06",
+        "rev": "2c9644abb59d8185f925d94261bc1e7d51b16f4e",
         "type": "github"
       },
       "original": {
@@ -1408,7 +1407,7 @@
         "ekko": "ekko",
         "finix": "finix",
         "fonts": "fonts",
-        "fx-flake": "fx-flake",
+        "grok-bot": "grok-bot",
         "hermes-agent": "hermes-agent",
         "linear-cli": "linear-cli",
         "manzil": "manzil",

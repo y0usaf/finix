@@ -76,8 +76,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    fx = {
-      url = "github:y0usaf/fx/add-nix-flake";
+    oh-my-fx = {
+      url = "github:y0usaf/oh-my-fx";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -111,11 +111,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    fx-flake = {
-      url = "github:y0usaf/fx-flake?ref=add-nix-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     linear-cli = {
       url = "github:y0usaf/linear-cli?ref=nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -144,13 +139,12 @@
     };
 
     ekko = {
-      # main = last Lua-config (mlua) commit 56b1246 + ctrl+tab /
-      # ctrl+shift+tab CSI chord parsing (6e8ecbe). The wasm bridge
-      # (ddabc9a..ef3afed) was force-pushed off main; it survives only in
-      # those commits' reflog / stale clones.
-      url = "github:y0usaf/ekko/56b1246c424bbd889fc8da0428e4fbca17314018";
+      # main = 20c4279: ctrl+tab / ctrl+shift+tab chords, fmt-gate fix,
+      # kernel notify no longer panics when on_change unmounts its own scope.
+      url = "github:y0usaf/ekko/20c4279";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
 
     paseo = {
       url = "github:getpaseo/paseo";
@@ -158,10 +152,10 @@
     };
 
     hermes-agent = {
-      # Pin upstream source directly; desktop's mutable Electron headers hash is
-      # corrected where that package is materialized. Never depend on a sibling
-      # checkout: clean clones and rescue hosts must evaluate this flake alone.
-      url = "github:NousResearch/hermes-agent/fcbd1076a93841fa88855acce810e342a5b78101";
+      # Track upstream main; the flake.lock rev is the actual pin. Earlier inline
+      # rev pin (v2026.8.19) left the install ~1800 commits behind, missing the
+      # deleted-profile-resurrection fixes (#94842/#95188/#94426).
+      url = "github:NousResearch/hermes-agent/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
