@@ -100,7 +100,7 @@ in {
         # TERMINAL in environment.sessionVariables (/etc/profile.d), which covers
         # login shells; this stays as the belt-and-braces path for a session
         # exec'd from something that never read /etc/profile.
-        export TERMINAL=foot
+        export TERMINAL=${config.user.defaults.terminal}
 
         # No logind: guarantee the runtime dir even if the profile.d hook was
         # skipped (e.g. exec'd from a bare shell).
@@ -140,7 +140,7 @@ in {
         ''} "$@"
       '')
       # Session companions (NixOS shim parity).
-      pkgs.foot
+      pkgs.monstar
       pkgs.grim
       pkgs.slurp
       pkgs.wl-clipboard-rs
@@ -215,9 +215,10 @@ in {
   # this covers the rest by probing for a live X socket. Dynamic — no
   # hardcoded :0 assumption if satellite ever lands elsewhere.
 
-  # Fonts: same trio as the NixOS ui/fonts.nix defaults. foot picks the
-  # family from the persisted ~/.config/foot config; fontconfig just has
-  # to be able to resolve it.
+  # Fonts: same trio as the NixOS ui/fonts.nix defaults. monstar (the main
+  # terminal) resolves the "monospace" family from the generated
+  # ~/.config/fontconfig/fonts.conf; fontconfig just has to be able to
+  # resolve it.
   fonts.packages = [
     flakeInputs.fonts.packages."${sys}".default
     pkgs.noto-fonts-cjk-sans
