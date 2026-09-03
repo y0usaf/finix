@@ -1,6 +1,8 @@
-# omp (oh-my-pi) coding agent: upstream flake package + declarative harness
-# config. The agent's own config lives in ~/.omp/agent/config.yml; the
-# top-level ~/.omp/config.json belongs to the harness TUI surface.
+# omp (oh-my-pi) coding agent: pi-flake's bundled build (omp-full: upstream
+# omp wrapped with the shared pi extension bundle via PI_CONFIG_FILES) plus
+# declarative harness config. The agent's own config lives in
+# ~/.omp/agent/config.yml; the top-level ~/.omp/config.json belongs to the
+# harness TUI surface.
 {
   config,
   lib,
@@ -83,7 +85,7 @@ in {
       enable = lib.mkOption {
         type = lib.types.bool;
         default = true;
-        description = "Enable the omp advisor subsystem via the PI_CONFIG_FILES overlay.";
+        description = "Advisor on/off. Merged into ~/.omp/agent/config.yml at activation (manzil merge; TUI rewrites survive, keys re-merge).";
       };
       model = lib.mkOption {
         type = lib.types.str;
@@ -94,16 +96,29 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # pi-flake's omp-full: upstream omp (can1357/oh-my-pi flake build)
+    # wrapped with the shared pi extension bundle (chronobreak,
+    # vercel-ai-gateway, recap, donsetch) injected via PI_CONFIG_FILES.
+    # Note: the bundle overlay's extensions array is authoritative for this
+    # build; it replaces any extensions list in user config layers.
     environment.systemPackages = [
-      flakeInputs.oh-my-pi.packages."${pkgs.stdenv.hostPlatform.system}".omp
+      flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".omp-full
     ];
-    environment.etc."omp/advisor.yml".text = lib.generators.toYAML {} {
-      advisor.enabled = cfg.advisor.enable;
-      modelRoles.advisor = cfg.advisor.model;
-    };
-    environment.variables.PI_CONFIG_FILES = "/etc/omp/advisor.yml";
 
     manzil.users."${config.user.name}".files = {
+      # Advisor settings merge into the mutable TUI-owned config.yml: omp
+      # persists /config edits here, so a symlink would break its atomic
+      # save (temp-file + rename next to the target). merge keeps the file
+      # writable, preserves TUI keys, and re-applies ours on every switch.
+      ".omp/agent/config.yml" = {
+        type = "merge";
+        format = "yaml";
+        clobber = true;
+        value = {
+          advisor.enabled = cfg.advisor.enable;
+          modelRoles.advisor = cfg.advisor.model;
+        };
+      };
       ".omp/config.json" = {
         generator = toJSON;
         value = cfg.settings;
