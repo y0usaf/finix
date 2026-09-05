@@ -83,7 +83,12 @@ in {
     users.y0usaf = {
       directories =
         [
-          # Data (dev excluded — real @dev subvol, fileSystems entry)
+          # AI agents re-homed to XDG (xdg-ninja report 2026-09-02)
+          ".config/pi/agent"  # RETIRED 2026-09-02: PI_CODING_AGENT_DIR reverted (pi/omp both read it; shared-dir hazard); pi back on native ~/.pi (allowlisted separately). Contents migrated back to ~/.pi; safe to drop.
+          ".config/claude"    # CLAUDE_CONFIG_DIR cutover
+          ".cache/nv"              # CUDA_CACHE_PATH cutover
+          ".local/share/android"   # ANDROID_USER_HOME cutover (corrected)
+          ".config/codex"     # CODEX_HOME cutover
           "Documents"
           "Tokens"
           "finix"
@@ -93,6 +98,15 @@ in {
           "Games"
           "cu-workbench"
           "inscend"
+
+          # AI / dev tooling state
+          ".config/AionUi"
+          ".config/manicode"
+          ".config/agent-harness"
+          ".config/herdr"
+
+          # Misc app state
+          ".config/camset"
 
           # Identity / credentials
           ".ssh"
@@ -104,7 +118,7 @@ in {
           # AI / dev tooling state
           ".fx" # fx settings, sessions, skills, and durable agent state
           ".omfx" # oh my fx profile settings (startup_mode and fork-only keys)
-          ".pi" # pi agent dir (pi's native default; no env var indirection)
+          ".pi" # pi agent dir (pi's native default; no env var indirection) — RETIRED merge-back target; safe to drop after 2026-09-02 merge-back confirmed
           ".omp" # oh-my-pi agent dir (sessions, harness config.json)
           ".prime" # prime agent dir (agents, sessions, daemon state, logs)
           ".hermes" # desktop app HERMES_HOME (config, sessions, skills dirs)
@@ -156,13 +170,10 @@ in {
           ".config/syncthing"
 
           # AI / editors / IDEs
-          ".config/AionUi"
           ".config/Claude"
-          ".config/Hermes" # Electron userData — remote-gateway session (hermes desktop)
+          ".config/Hermes" # Electron userData — local Hermes desktop settings
           ".config/Codex"
           ".config/opencode"
-          ".config/manicode"
-          ".config/agent-harness"
           ".config/pi-harness"
           ".config/crush"
           ".config/phi"
@@ -181,12 +192,9 @@ in {
           ".config/gws-inscend"
           ".config/Frame"
           ".config/intent"
-          ".config/herdr"
           ".config/ramp" # ramp-cli config.toml + auth state
-
           # Misc
           ".config/snowflake"
-          ".config/camset"
 
           # Gaming
           ".config/Cemu"

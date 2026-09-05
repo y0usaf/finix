@@ -19,7 +19,13 @@ in {
           "finix"
           "cu-workbench"
           ".steam"
-          ".config/claude"
+          ".local/share/android"   # ANDROID_USER_HOME data side
+          ".cache/nv"              # CUDA_CACHE_PATH cutover
+          ".config/pi/agent"       # RETIRED 2026-09-02: PI_CODING_AGENT_DIR reverted (pi/omp both read it; shared-dir hazard); pi back on native ~/.pi (allowlisted separately). Contents migrated back to ~/.pi; safe to drop.
+          ".config/codex"          # CODEX_HOME cutover
+          ".config/claude"         # CLAUDE_CONFIG_DIR cutover
+          ".local/share/azure"     # AZURE_CONFIG_DIR cutover
+          ".local/state/bash"      # HISTFILE cutover
           ".config/Codex"
           ".config/opencode"
           ".config/pi-harness"

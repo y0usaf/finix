@@ -89,6 +89,10 @@ in {
         shift
         nix run "nixpkgs#$pkg" -- "$@"
       }
+      # NPM_CONFIG_TMP must expand per-session (XDG_RUNTIME_DIR differs per
+      # login); environment.variables cannot defer expansion, so export it
+      # unquoted here — the shell resolves $XDG_RUNTIME_DIR at source time.
+      export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR"/npm
     '';
   };
 }
