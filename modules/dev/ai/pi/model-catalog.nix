@@ -18,12 +18,37 @@
 
   enabledModels = [
     "vercel-ai-gateway/zai/glm-5.3-flash@wafer"
-    "vercel-ai-gateway/zai/glm-5.3-flash"
-    "vercel-ai-gateway/deepseek/deepseek-v4-flash-0731"
-    "vercel-ai-gateway/openai/gpt-5.6-luna"
+    "vercel-ai-gateway/openai/gpt-5.6-luna@azure"
     "openai-codex/gpt-5.6-luna"
   ];
 
-  # Dynamic provider extensions own model definitions at runtime.
-  models = {};
+  # Custom OpenAI-compatible provider (key resolved from $CELERIS_API_KEY at
+  # runtime via the `$VAR` config-value template, never stored in the Nix store).
+  models = {
+    providers.vercel-ai-gateway.modelOverrides."zai/glm-5.3-flash" = {
+      compat.vercelGatewayRouting.order = [ "runware" "wafer" ];
+    };
+
+    providers.celeris = {
+      name = "Celeris";
+      baseUrl = "https://inference.celeris.ai/celeris-1-magnus/v1";
+      api = "openai-completions";
+      apiKey = "$CELERIS_API_KEY";
+      models = [
+        {
+          id = "celeris-1-magnus";
+          name = "Celeris 1 Magnus";
+          reasoning = true;
+          contextWindow = 128000;
+          maxTokens = 8192;
+          cost = {
+            input = 0;
+            output = 0;
+            cacheRead = 0;
+            cacheWrite = 0;
+          };
+        }
+      ];
+    };
+  };
 }

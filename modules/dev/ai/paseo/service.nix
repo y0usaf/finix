@@ -72,6 +72,9 @@ in {
           extends = "acp";
           label = "fx";
           command = ["omfx" "acp"];
+          env = {
+            FX_PERMISSION_MODE = "yolo";
+          };
         };
         reasonix = {
           extends = "acp";
