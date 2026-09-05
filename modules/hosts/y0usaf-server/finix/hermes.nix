@@ -1,11 +1,9 @@
-# Host module: imports the shared Hermes Agent module (modules/dev/hermes/).
-# Only genuinely host-specific policy stays here (y0usaf shell pin below).
+# Retain the server CPU-compatible login shell after retiring Hermes.
 {
   lib,
   pkgs,
   ...
 }: {
-  imports = [../../../../modules/dev/hermes/default.nix];
   # rush 0.1.0 SIGILLs on this host's CPU (store-path crash reproduced
   # directly, exit 132, 2026-08-25) — with rush as login shell, every SSH
   # session died at exec and the gateway's ssh workspace was unreachable.
