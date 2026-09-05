@@ -5,6 +5,7 @@
     cursor.enable = true;
     fonts.enable = true;
     foot.enable = true;
+    monstar.enable = true;
     gtk = {
       enable = true;
       scale = 1.5;
