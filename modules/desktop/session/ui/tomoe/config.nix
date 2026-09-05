@@ -983,9 +983,9 @@ in {
             then "ekko-activate-or-terminal"
             else config.user.defaults.terminal
           }") end, "Spawn Terminal")
-          tomoe.bind("Super+r", function() tomoe.spawn("foot --app-id=launcher ~/.config/scripts/tui-launcher.sh") end, "Run an Application")
+          tomoe.bind("Super+r", function() tomoe.spawn("${config.user.defaults.launcher}") end, "Run an Application")
           tomoe.bind("Mod+e", function() tomoe.spawn("pcmanfm") end, "File Manager")
-          tomoe.bind("Super+Shift+o", function() tomoe.spawn("foot -e nvim") end, "Editor")
+          tomoe.bind("Super+Shift+o", function() tomoe.spawn("${config.user.defaults.terminal} -e nvim") end, "Editor")
           tomoe.bind("Mod+q", wm.close_focused, "Close Window")
           tomoe.bind("Mod+f", wm.toggle_fullscreen, "Toggle Fullscreen")
           tomoe.bind("Super+space", toggle_floating, "Toggle Floating")
