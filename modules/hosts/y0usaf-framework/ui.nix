@@ -4,6 +4,7 @@ _: {
       enable = true;
       lineHeight = "32px";
     };
+    monstar.enable = true;
     gtk.scale = 1.5;
     tomoe = {
       layout = "sway";

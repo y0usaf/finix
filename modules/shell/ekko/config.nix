@@ -59,20 +59,29 @@ in {
       # then falls back to the regular terminal spawn.
       flakeInputs.ekko.packages."${pkgs.stdenv.hostPlatform.system}".default
       (pkgs.writeShellScriptBin "ekko-activate-or-terminal" ''
+        # Monstar (the main terminal) rejects bare positional commands —
+        # command forms need `-e` (foot-style positional args are not valid).
+        # No-arg fallback stays plain so the terminal opens with $SHELL.
+        run_in_terminal() {
+          if [ "$#" -eq 0 ]; then
+            exec ${config.user.defaults.terminal}
+          fi
+          exec ${config.user.defaults.terminal} -e "$@"
+        }
         if ekko activate >/dev/null 2>&1; then
           exit 0
         fi
         ${lib.optionalString ekko.openAttachesExisting ''
-        # No attached client: attach to the first alive session instead of
-        # spawning a terminal whose shell would start a fresh one. `ekko ls`
-        # states: attached | detached | resurrectable; activate already
-        # covered attached, so detached is the interesting case here.
-        name="$(ekko ls | awk -F '\t' '$2 == "detached" {print $1; exit}')"
-        if [ -n "$name" ]; then
-          exec ${config.user.defaults.terminal} sh -c 'exec ekko attach "$1"' ekko-open "$name"
-        fi
+          # No attached client: attach to the first alive session instead of
+          # spawning a terminal whose shell would start a fresh one. `ekko ls`
+          # states: attached | detached | resurrectable; activate already
+          # covered attached, so detached is the interesting case here.
+          name="$(ekko ls | awk -F '\t' '$2 == "detached" {print $1; exit}')"
+          if [ -n "$name" ]; then
+            run_in_terminal sh -c 'exec ekko attach "$1"' ekko-open "$name"
+          fi
         ''}
-        exec ${config.user.defaults.terminal} "$@"
+        run_in_terminal "$@"
       '')
     ];
     manzil.users."${config.user.name}".files = {
