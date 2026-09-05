@@ -148,12 +148,10 @@
     };
 
     ekko = {
-      # main = 20c4279: ctrl+tab / ctrl+shift+tab chords, fmt-gate fix,
-      # kernel notify no longer panics when on_change unmounts its own scope.
-      url = "github:y0usaf/ekko/20c4279";
+      # V2: Lisp configuration, persistent PTYs, and nested-shell detection.
+      url = "github:y0usaf/ekko/53634fb9602c6fa988506e51bcaead0a8d59498e";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
 
     paseo = {
       url = "github:getpaseo/paseo";
@@ -237,6 +235,18 @@
     finixConfigurations = cfg.hosts;
 
     packages."${system}" = cfg.packages;
+
+    checks."${system}".ekko-startup = let
+      desktop = cfg.hosts.y0usaf-desktop.config;
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      ekko = inputs.ekko.packages.${system}.default;
+    in
+      pkgs.runCommand "finix-ekko-startup" {nativeBuildInputs = [pkgs.python3];} ''
+        python ${./tests/ekko-startup.py} \
+          ${pkgs.writeText "finix-interactive-rc" desktop.user.shell.rcExtra} \
+          ${./modules/shell/ekko/init.lisp} ${ekko}/bin/ekko \
+          ${pkgs.bash}/bin/bash ${inputs.rush.packages.${system}.default}/bin/rush > $out
+      '';
 
     formatter."${system}" = inputs.nixpkgs.legacyPackages."${system}".alejandra;
   };

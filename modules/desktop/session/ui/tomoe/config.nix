@@ -25,10 +25,6 @@
   ]);
   # BarOverlay.open() options for the in-VM bar (deployed next to init.lua
   # by shell.nix). font_family is assigned in Lua after fc-match resolution.
-  # With `user.shell.ekko.open`, the terminal-spawn bind routes through the
-  # running mux helper: an attached client requests focus for its existing
-  # terminal; cold, the helper falls back to the regular terminal spawn.
-  ekkoOpen = config.user.shell.ekko.enable && config.user.shell.ekko.open;
   # The portal's screencast source picker is compositor-drawn now:
   # require("screencast") in the Lua config answers portal requests with a
   # tomoe.ui.menu over IPC — no foot+fzf chooser script, no
@@ -978,11 +974,7 @@ in {
         + ''
 
           -- ─── Binds (mirroring niri/keybindings.nix; Mod = Alt) ───────────────────────
-          tomoe.bind("Mod+t", function() tomoe.spawn("${
-            if ekkoOpen
-            then "ekko-activate-or-terminal"
-            else config.user.defaults.terminal
-          }") end, "Spawn Terminal")
+          tomoe.bind("Mod+t", function() tomoe.spawn("${config.user.defaults.terminal}") end, "Spawn Terminal")
           tomoe.bind("Super+r", function() tomoe.spawn("${config.user.defaults.launcher}") end, "Run an Application")
           tomoe.bind("Mod+e", function() tomoe.spawn("pcmanfm") end, "File Manager")
           tomoe.bind("Super+Shift+o", function() tomoe.spawn("${config.user.defaults.terminal} -e nvim") end, "Editor")
