@@ -16,22 +16,27 @@
   pkgs,
   ...
 }: {
-  environment.systemPackages = [
-    (pkgs.writeShellScriptBin "docker" ''
-      exec ${pkgs.podman}/bin/podman "$@"
-    '')
-    pkgs.passt
-    pkgs.netavark
-    pkgs.aardvark-dns
-    pkgs.fuse-overlayfs
-  ];
-
-  environment.etc."containers/policy.json".text = builtins.toJSON {
-    default = [
-      {
-        type = "insecureAcceptAnything";
-      }
+  environment = {
+    systemPackages = [
+      (pkgs.writeShellScriptBin "docker" ''
+        exec ${pkgs.podman}/bin/podman "$@"
+      '')
+      pkgs.passt
+      pkgs.netavark
+      pkgs.aardvark-dns
+      pkgs.fuse-overlayfs
     ];
+
+    etc."containers/policy.json".text = builtins.toJSON {
+      default = [
+        {
+          type = "insecureAcceptAnything";
+        }
+      ];
+    };
+
+    etc."subuid".text = "${config.user.name}:100000:65536\n";
+    etc."subgid".text = "${config.user.name}:100000:65536\n";
   };
 
   security.wrappers = {
@@ -48,7 +53,4 @@
       source = "${pkgs.shadow}/bin/newgidmap";
     };
   };
-
-  environment.etc."subuid".text = "${config.user.name}:100000:65536\n";
-  environment.etc."subgid".text = "${config.user.name}:100000:65536\n";
 }
