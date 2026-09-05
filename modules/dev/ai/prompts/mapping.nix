@@ -1,8 +1,7 @@
-# Library, not a module (excluded from the recursive walk like
-# kimi-code/package.nix). Owns the one question "where do skill files
-# belong": every enabled agent harness's skills dir. Skills declare only
-# their name + file map; adding a harness (claude/codex) is a one-line
-# change here instead of per-skill.
+# Library, not a module (excluded from the recursive walk). Owns the one
+# question "where do skill files belong": every enabled agent harness's
+# skills dir. Skills declare only their name + file map; adding a harness
+# (claude/codex) is a one-line change here instead of per-skill.
 {
   config,
   lib,
