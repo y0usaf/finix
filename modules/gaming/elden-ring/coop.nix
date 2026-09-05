@@ -30,7 +30,7 @@ in {
       };
 
       settings = lib.mkOption {
-        type = (lib.types.attrsOf lib.types.anything);
+        type = lib.types.attrsOf lib.types.anything;
         default = {};
         description = "Extra overrides merged into ersc_settings.ini (lowercase INI keys)";
       };
