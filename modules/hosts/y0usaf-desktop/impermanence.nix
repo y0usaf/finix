@@ -84,11 +84,11 @@ in {
       directories =
         [
           # AI agents re-homed to XDG (xdg-ninja report 2026-09-02)
-          ".config/pi/agent"  # RETIRED 2026-09-02: PI_CODING_AGENT_DIR reverted (pi/omp both read it; shared-dir hazard); pi back on native ~/.pi (allowlisted separately). Contents migrated back to ~/.pi; safe to drop.
-          ".config/claude"    # CLAUDE_CONFIG_DIR cutover
-          ".cache/nv"              # CUDA_CACHE_PATH cutover
-          ".local/share/android"   # ANDROID_USER_HOME cutover (corrected)
-          ".config/codex"     # CODEX_HOME cutover
+          ".config/pi/agent" # RETIRED 2026-09-02: PI_CODING_AGENT_DIR reverted (pi/omp both read it; shared-dir hazard); pi back on native ~/.pi (allowlisted separately). Contents migrated back to ~/.pi; safe to drop.
+          ".config/claude" # CLAUDE_CONFIG_DIR cutover
+          ".cache/nv" # CUDA_CACHE_PATH cutover
+          ".local/share/android" # ANDROID_USER_HOME cutover (corrected)
+          ".config/codex" # CODEX_HOME cutover
           "Documents"
           "Tokens"
           "finix"
@@ -204,9 +204,10 @@ in {
           # Misc state
           ".config/dconf"
           ".config/nix" # possible access-tokens
-          ".config/ekko" # config.toml + extensions (app-owned)
+          ".config/ekko" # Lisp init and local extensions
 
-          # ekko cache: resurrection manifests MUST survive reboots for `ekko attach`;
+          # Retain legacy Ekko cache for rollback; V2 sessions do not survive reboot.
+          # Legacy resurrection manifests belong to V1;
           # daemon logs ride along. Persist the whole dir (small).
           ".cache/ekko"
 
