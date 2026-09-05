@@ -15,7 +15,6 @@
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
   walkedKnownExclusions = [
     ../core/firewall.nix
-    ../dev/ai/kimi-code/package.nix
     ../dev/ai/paseo/options.nix
     ../dev/ai/paseo/service.nix
     ../dev/ai/paseo/desktop.nix
