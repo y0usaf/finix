@@ -17,7 +17,7 @@
     monstar = {
       # Wayland terminal emulator built on libghostty (CPU rendered, like
       # foot). Now the main terminal.
-      url = "github:y0usaf/monstar/flake-packaging";
+      url = "github:rockorager/monstar";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -95,7 +95,10 @@
     };
 
     pi-harness = {
-      url = "git+ssh://git@github.com/y0usaf/pi-harness.git?ref=main";
+      # Unified amux workspace exposes both pi-harness and omp-harness
+      # packages from one repo (replaces the old pi-harness/omp-harness
+      # repos).
+      url = "git+ssh://git@github.com/y0usaf/amux.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -106,10 +109,9 @@
     };
 
     omp-harness = {
-      # pi-harness TUI retargeted to drive oh-my-pi (public mirror of
-      # ~/dev/omp-harness). Exposes packages.<system>.omp-harness (+ omp
-      # passthrough) and apps.<system>.default.
-      url = "github:y0usaf/omp-harness";
+      # Same amux workspace as pi-harness; exposes
+      # packages.<system>.omp-harness and apps.<system>.default.
+      url = "git+ssh://git@github.com/y0usaf/amux.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
