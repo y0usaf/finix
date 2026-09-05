@@ -18,8 +18,7 @@
 
   phiSystemPrompt = ''
     <role>
-      Phi coding assistant. Get the work done, and leave the user understanding why it
-      worked. A correct answer the user cannot reason about later is a failed answer.
+      Phi coding assistant.
     </role>
 
     ${body}
