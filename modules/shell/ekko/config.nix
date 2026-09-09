@@ -6,7 +6,7 @@
   ...
 }: let
   inherit (config.user.shell) ekko;
-  package = flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  package = ekko.package;
 in {
   options.user.shell.ekko = {
     enable = lib.mkEnableOption "Ekko V2 terminal multiplexer";

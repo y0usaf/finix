@@ -1,0 +1,267 @@
+diff --git a/src/client.lisp b/src/client.lisp
+index 1f93670..33e4c93 100644
+--- a/src/client.lisp
++++ b/src/client.lisp
+@@ -171,12 +171,29 @@
+                       esc (1+ row) (+ x column 1) esc attributes text))))))
+     ;; Chrome policy is supplied by Lisp hooks as bounded spans. The server
+     ;; clips these before publication, and the client merely places them.
+-    (dolist (decoration (getf metadata :decorations))
++    (dolist (decoration (append (getf metadata :decorations) (getf metadata :overlays)))
+       (let ((y (second decoration)))
+         (when (and (integerp y) (<= 0 y) (< y rows))
+           (render-decoration (aref output y) cols rows decoration))))
+     (map 'vector #'get-output-stream-string output)))
+ 
++(defun overlay-image-crops (crop overlays cw ch)
++  "Subtract opaque cell spans from a pixel crop, preserving source offsets."
++  (when crop
++    (destructuring-bind (x y sx sy w h) crop
++      (let ((pieces (list (ekko/scene:make-rect x y w h))))
++        (dolist (span overlays)
++          (destructuring-bind (ox oy text sgr) span
++            (declare (ignore sgr))
++            (let ((width (ekko/text:display-width text)))
++              (when (plusp width)
++                (let ((cut (ekko/scene:make-rect (* ox cw) (* oy ch) (* width cw) ch)))
++                  (setf pieces (mapcan (lambda (piece) (ekko/scene:rect-subtract piece cut)) pieces)))))))
++        (loop for piece in pieces collect
++          (let ((px (ekko/scene:rect-x piece)) (py (ekko/scene:rect-y piece)))
++            (list px py (+ sx (- px x)) (+ sy (- py y))
++                  (ekko/scene:rect-width piece) (ekko/scene:rect-height piece))))))))
++
+ (defun render-scene (viewer)
+   (let ((scene (viewer-scene viewer)) (esc (code-char 27))
+         (wanted (make-hash-table :test 'equal)))
+@@ -190,7 +207,9 @@
+           (let* ((key (list (first pane) (first placement)))
+                  (asset (gethash key (viewer-assets viewer)))
+                  (crop (when asset (clipped-image pane placement asset cw ch))))
+-            (when crop (setf (gethash key wanted) (list asset crop))))))
++            (loop for fragment in (overlay-image-crops crop (getf metadata :overlays) cw ch)
++                  for index from 0 do
++                    (setf (gethash (append key (list index)) wanted) (list asset fragment))))))
+       (maphash (lambda (key old)
+                  (let ((new (gethash key wanted)))
+                    (unless (and new (= (second old) (first (first new))))
+@@ -217,12 +236,12 @@
+                (unless (and (equal (third old) crop) (= (fourth old) cw) (= (fifth old) ch))
+                  (place-outer viewer (first old) crop cw ch)
+                  (setf (third old) crop (fourth old) cw (fifth old) ch))
+-               (let ((id (ekko/client:allocate-outer-id (viewer-ids viewer) (first key) 1 (second key) 0)))
++               (let ((id (ekko/client:allocate-outer-id (viewer-ids viewer) (first key) 1 (second key) 0 (third key))))
+                  (upload-outer viewer id asset crop cw ch)
+                  (setf (gethash key (viewer-drawn viewer)) (list id (first asset) crop cw ch))))))
+        wanted)
+       (let ((active (find focus panes :key #'first)))
+-        (when (and active (nth 9 active))
++        (when (and active (nth 9 active) (null (getf metadata :overlays)))
+           (terminal-write viewer (format nil "~C[~D;~DH~C[?25h" esc
+                                          (+ (third active) (nth 8 active) 1)
+                                          (+ (second active) (nth 7 active) 1) esc))))
+diff --git a/src/commands.lisp b/src/commands.lisp
+index 8347af1..59d181d 100644
+--- a/src/commands.lisp
++++ b/src/commands.lisp
+@@ -337,12 +337,13 @@
+       (unless (and (listp span) (evenp (length span))) (error "Malformed decoration span: ~S" span))
+       (let ((keys nil))
+         (loop for (key value) on span by #'cddr do
+-          (unless (member key '(:x :y :text :sgr :rows)) (error "Unknown decoration field: ~S" key))
++          (unless (member key '(:x :y :text :sgr :rows :overlay)) (error "Unknown decoration field: ~S" key))
+           (when (member key keys) (error "Duplicate decoration field: ~S" key))
+           (push key keys))
+         (let ((x (getf span :x)) (y (getf span :y)) (text (getf span :text))
+               (sgr (getf span :sgr)) (rows (getf span :rows 1)))
+           (unless (and (integerp x) (<= 0 x 499) (integerp y) (<= 0 y 299)
++                       (member (getf span :overlay) '(nil t))
+                        (integerp rows) (<= 1 rows 300)
+                        (valid-decoration-text-p text)
+                        (listp sgr) (<= (length sgr) 16)
+@@ -358,10 +359,10 @@
+   (unless (or (null value) (and (listp value) (evenp (length value))
+                                 (<= (length value) 8)))
+     (error "Geometry value must be a proper property list"))
+-  (loop for (key item) on value by #'cddr do
++  (loop for (key item) on value by #'cddr for offset from 0 by 2 do
+     (unless (member key '(:pane-insets :boundary-insets :viewport-insets :split-gaps))
+       (error "Unknown geometry field: ~S" key))
+-    (when (member key (loop for (k v) on (subseq value 0 (- (length value) 2)) by #'cddr collect k))
++    (when (member key (loop for (k v) on (subseq value 0 offset) by #'cddr collect k))
+       (error "Duplicate geometry field: ~S" key))
+     (unless (or (and (member key '(:pane-insets :boundary-insets :viewport-insets))
+                      (bounded-geometry-p item 4))
+@@ -376,7 +377,7 @@
+       (let* ((op (first a)) (args (rest a)) (pane (getf args :pane))
+              (keys (case op
+                      (:pane-note '(:pane :text :sgr :duration))
+-                     (:set-keymap '(:name)) (:set-layout '(:tree)) (:set-state '(:value)) (:set-geometry '(:value)) (:decorate '(:spans)) (:split '(:pane :axis :argv)) (:focus '(:pane)) (:rename '(:pane :text)) (:resize '(:delta))
++                     (:send-input '(:bytes)) (:set-keymap '(:name)) (:set-layout '(:tree)) (:set-state '(:value)) (:set-geometry '(:value)) (:decorate '(:spans)) (:split '(:pane :axis :argv)) (:focus '(:pane)) (:rename '(:pane :text)) (:resize '(:delta))
+                      (:close '(:focus)) (:copy-move '(:delta)) (:copy-edge '(:edge)) (:status '(:text))
+                      ((:focus-next :zoom :swap :detach :stop :copy-mode :copy-mark :copy-selection
+                        :copy-exit :copy-search :copy-search-next :paste-buffer :reload :help) nil)
+@@ -412,6 +413,10 @@
+            (validate-geometry-value (getf args :value)))
+           (otherwise (incf primary-count) (setf primary-seen t)))
+         (case op
++          (:send-input
++           (unless (and (listp (getf args :bytes)) (<= (length (getf args :bytes)) 4096)
++                        (every (lambda (b) (typep b '(unsigned-byte 8))) (getf args :bytes)))
++             (error "Invalid input bytes")))
+           (:focus (unless pane (error "Focus needs a pane ID")))
+           (:close
+            (when (member :focus args)
+@@ -605,6 +610,7 @@
+                        (loop for b in (reverse (getf (session-registry session) :bindings))
+                              when (eq (getf b :map) :prefix) collect
+                                (format nil "~A -> ~A (~A)" (getf b :key) (getf b :command) (getf b :owner)))) 'vector)))
++      (:send-input (pane-input pane (octets-from-list (getf args :bytes))))
+       (:copy-mode (enter-copy pane (history-text (pane-vt pane))))
+       (:copy-exit (setf (pane-copy-lines pane) nil (pane-search-input pane) nil))
+       (:copy-move (when (pane-copy-lines pane) (move-copy pane (+ (pane-copy-cursor pane) (getf args :delta)))))
+@@ -769,7 +775,8 @@
+                                                                 :y (getf span :y)
+                                                                 :text (getf span :text)
+                                                                 :sgr (getf span :sgr)
+-                                                                :rows (getf span :rows 1)))))
++                                                                :rows (getf span :rows 1)
++                                                                :overlay (if (getf span :overlay) t :false)))))
+                 :contributions (loop for (owner . text) in (session-contributions session)
+                                      collect (list :object :owner owner :text text))
+                 :component-state (loop for (owner . value) in (session-component-state session)
+diff --git a/src/extensions.lisp b/src/extensions.lisp
+index 701fce2..4f240d8 100644
+--- a/src/extensions.lisp
++++ b/src/extensions.lisp
+@@ -54,7 +54,7 @@
+   (registration-phase)
+   (when (stringp unbound) (setf unbound (name-string unbound)))
+   (unless (and (keywordp name) name (not (member name '(:prefix :copy)))
+-               (or (member unbound '(:forward :ignore)) (stringp unbound)))
++               (or (member unbound '(:forward :ignore :copy)) (stringp unbound)))
+     (error "Invalid keymap name or unbound policy"))
+   (name-string name)
+   (let ((owner (owner component)))
+diff --git a/src/server.lisp b/src/server.lisp
+index e0bc57d..6dfb788 100644
+--- a/src/server.lisp
++++ b/src/server.lisp
+@@ -276,6 +276,19 @@
+          (modifiers (if kitty (1- (max 1 (or (second params) 1))) 0))
+          (key (if (and code (logbitp 2 modifiers) (<= 64 code 127)) (logand code 31) code))
+          (pane (nth (session-focus session) (session-panes session))))
++    ;; A copy fallback opts into the builtin search editor and copy bindings.
++    ;; Other maps (notably locked maps) retain literal application forwarding.
++    (when (and (eq (getf (find (session-mode session)
++                                    (getf (session-registry session) :keymaps)
++                                    :key (lambda (m) (getf m :name))) :unbound) :copy)
++               (pane-copy-lines pane)
++               (not (key-binding session (session-mode session) (semantic-key bytes key))))
++      (if (pane-search-input pane)
++          (copy-search-input session
++                             (if (and kitty key (<= 0 key #x10ffff))
++                                 (text-bytes (string (code-char key))) bytes))
++          (dispatch-binding session :copy (semantic-key bytes key)))
++      (return-from input-key))
+     (when (session-mode session)
+       (let* ((map (session-mode session)) (binding (key-binding session map (semantic-key bytes key)))
+              (policy (find map (reverse (getf (session-registry session) :keymaps))
+@@ -378,7 +391,7 @@
+               (incf cursor width))
+       (flush))
+     (nreverse out)))
+-(defun scene-decorations (session)
++(defun scene-decorations (session &optional overlay)
+   (let ((panes (visible-panes session)))
+     ;; Registry component order is the layer order. Contributions are stored
+     ;; by owner for replacement, so their completion order must not change
+@@ -392,10 +405,10 @@
+       (loop for owner in owners
+             for entry = (assoc owner (session-decorations session) :test #'equal)
+             when entry append (loop for span in (cdr entry)
+-                                    append (loop for row from (getf span :y)
++                                    when (eq (getf span :overlay) overlay) append (loop for row from (getf span :y)
+                                                   below (+ (getf span :y) (getf span :rows 1))
+                                                   append (clip-decoration
+-                                                           session panes
++                                                           session (unless overlay panes)
+                                                            (list :x (getf span :x) :y row
+                                                                  :text (getf span :text)
+                                                                  :sgr (getf span :sgr)))))))))
+@@ -417,7 +430,7 @@
+         (multiple-value-bind (viewport pane gaps width height) (session-geometry session)
+           (declare (ignore pane width height))
+           (list :status (status-text session) :style (option session :status-style '(0 30 47))
+-                :viewport-insets viewport :split-gaps gaps :decorations (scene-decorations session)))))
++                :viewport-insets viewport :split-gaps gaps :decorations (scene-decorations session) :overlays (scene-decorations session t)))))
+ (defun checked-startup-viewport (viewport)
+   (when viewport
+     (unless (and (listp viewport) (= (length viewport) 4)
+diff --git a/src/wire.lisp b/src/wire.lisp
+index 34a15e3..c9b4120 100644
+--- a/src/wire.lisp
++++ b/src/wire.lisp
+@@ -3,7 +3,7 @@
+   (:export #:run-session #:serve #:attach-session #:control-session #:restore-terminal))
+ (in-package #:ekko/runtime)
+ 
+-(defconstant +wire-version+ 7)
++(defconstant +wire-version+ 8)
+ (defconstant +queue-limit+ (* 8 1024 1024))
+ (defstruct wire fd (version +wire-version+) (packet-limit +queue-limit+) (queue nil) (queue-tail nil) (queued 0) (offset 0) (prefix (octets 4))
+   (prefix-used 0) body (body-used 0) (known (make-hash-table :test 'equal))
+diff --git a/tests/customization.lisp b/tests/customization.lisp
+index 2747199..ed8ea49 100644
+--- a/tests/customization.lisp
++++ b/tests/customization.lisp
+@@ -328,6 +328,15 @@
+                                       (string= (third span) "chrome"))) spans)
+             (not (some (lambda (span) (string= (third span) "content")) spans)))
+        "scene decorations are clipped away from app content"))
++    (ekko/runtime::apply-actions session :test
++      '((:decorate :spans ((:x 0 :y 1 :text "overlay" :sgr (0 30 46) :overlay t)))) nil nil)
++    (customization-check
++     (equal (getf (nth 7 (ekko/runtime::scene-data session)) :overlays)
++            '((0 1 "overlay" (0 30 46))))
++     "explicit overlay is published over application content")
++    (ekko/runtime::apply-actions session :test '((:decorate :spans nil)) nil nil)
++    (customization-check (null (getf (nth 7 (ekko/runtime::scene-data session)) :overlays))
++                         "replacement removes owned overlay")
+     (setf (getf (ekko/runtime::session-registry session) :components)
+           (list (list :id "early") (list :id "late"))
+           (ekko/runtime::session-decorations session)
+@@ -804,7 +813,7 @@
+     (customization-check
+      (equal (mapcar (lambda (rect) (subseq rect 0 5))
+                     (ekko/runtime::session-rectangles session nil))
+-            '((1 0 0 39 24) (2 40 0 40 11) (3 40 12 40 12)))
++            '((1 0 0 40 24) (2 40 0 40 12) (3 40 12 40 12)))
+      "edge content geometry preserves split rectangles")
+     ;; A later registered owner shadows only fields it supplies.  Removing it
+     ;; restores the earlier owner, and removing that owner restores defaults.
+diff --git a/tests/render.lisp b/tests/render.lisp
+index aeea79e..8afaab2 100644
+--- a/tests/render.lisp
++++ b/tests/render.lisp
+@@ -35,6 +35,21 @@
+     (let ((text (render-output viewer scene)))
+       (render-check (not (search "LONG TEXT" text)) "unchanged text suppressed")
+       (render-check (not (search "_G" text)) "unchanged image suppressed"))
++    ;; Opaque overlay splits an existing placement and covers live text.
++    (setf (getf (nth 7 scene) :overlays) '((2 1 "MENU" (0 30 46))))
++    (let ((text (render-output viewer scene)))
++      (render-check (search "MENU" text) "overlay composed after live text")
++      (render-check (= 3 (hash-table-count (ekko/runtime::viewer-drawn viewer)))
++                    "image fragments exclude overlay cells"))
++    (let ((text (render-output viewer scene)))
++      (render-check (not (search "_G" text)) "stable overlay does not retransmit images"))
++    (setf (getf (nth 7 scene) :overlays) nil)
++    (let ((text (render-output viewer scene)))
++      (render-check (search "LONG TEXT" text) "dismiss restores covered terminal row")
++      (render-check (= 1 (hash-table-count (ekko/runtime::viewer-drawn viewer)))
++                    "dismiss removes obsolete fragments")
++      (render-check (equal (third (gethash '(1 7 0) (ekko/runtime::viewer-drawn viewer)))
++                           '(0 16 0 0 64 32)) "dismiss restores whole image"))
+     ;; A new image generation must not redraw unchanged text.
+     (setf (gethash '(1 7) (ekko/runtime::viewer-assets viewer))
+           (list 2 64 32 32 (ekko/platform:octets 1))
