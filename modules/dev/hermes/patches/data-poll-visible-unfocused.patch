@@ -1,0 +1,78 @@
+--- a/apps/desktop/src/app/contrib/hooks/use-background-sync.ts
++++ b/apps/desktop/src/app/contrib/hooks/use-background-sync.ts
+@@ -511,22 +511,23 @@
+  *  when the machine is spending its charge. Returns nothing — meant to live
+  *  inside an effect. */
+ export function windowIsActivelyViewed({
+-  focused,
+   visibilityState
+ }: {
+   focused: boolean
+   visibilityState: DocumentVisibilityState
+ }): boolean {
+-  return visibilityState === 'visible' && focused
++  // Visibility alone: background turns (cron, messaging, other sessions) can
++  // land while the window is visible but unfocused, so the data backstops must
++  // keep running. Hidden/minimized still pauses — Chromium reports 'hidden'.
++  return visibilityState === 'visible'
+ }
+ 
+ function visiblePoll(intervalMs: number, tick: () => void): () => void {
+   const run = () => {
+-    // On macOS an unfocused or app-hidden BrowserWindow commonly remains
+-    // `visibilityState === "visible"`. Visibility alone therefore kept every
+-    // safety-net gateway poll alive while the user was in another app. These
+-    // are stale-data backstops, not the live event path, so pause them until
+-    // the window is actually being viewed and catch up immediately on focus.
++    // These are stale-data backstops, not the live event path: they keep
++    // their cadence while the window is visible but unfocused so background
++    // turns still surface, and pause only when the window is hidden/minimized
++    // (Chromium reports 'hidden'). Catch-up on return stays immediate.
+     if (windowIsActivelyViewed({ focused: document.hasFocus(), visibilityState: document.visibilityState })) {
+       tick()
+     }
+--- a/apps/desktop/src/app/shell/hooks/use-status-snapshot.ts
++++ b/apps/desktop/src/app/shell/hooks/use-status-snapshot.ts
+@@ -5,8 +5,8 @@
+ import type { StatusResponse } from '@/types/hermes'
+ 
+ // Statusbar health is ambient chrome, not live data — nothing the user acts on
+-// within seconds. 60s + an actively-viewed check keeps traffic low; focus and
+-// visibility listeners refresh immediately on return.
++// within seconds. 60s + a visible-window check keeps traffic low; focus and
++// visibility listeners still refresh immediately on return.
+ const REFRESH_MS = 60_000
+ 
+ type GatewayRequester = <T = unknown>(method: string, params?: Record<string, unknown>) => Promise<T>
+@@ -37,16 +37,25 @@
+     }
+ 
+     const scheduleRefresh = () => {
+-      if (!cancelled) {
+-        timer = window.setTimeout(() => void refresh(), REFRESH_MS)
++      if (cancelled) {
++        return
++      }
++
++      // A refocus catch-up can overlap an in-flight poll; both ends reach this
++      // in `finally`. Replace any pending timer instead of stacking a second
++      // one, so overlapping refreshes can never leave two chains running.
++      if (timer !== undefined) {
++        window.clearTimeout(timer)
+       }
++
++      timer = window.setTimeout(() => void refresh(), REFRESH_MS)
+     }
+ 
+     const refresh = async () => {
+-      // macOS commonly leaves an occluded BrowserWindow `visible`; focus is
+-      // the missing signal that prevents status + readiness RPCs while the
+-      // user is working in another app.
+-      if (document.visibilityState !== 'visible' || !document.hasFocus()) {
++      // Visible-but-unfocused still refreshes: background turns land without
++      // focus, and the statusbar must not freeze while the user is in another
++      // app. Hidden/minimized still pauses (Chromium reports 'hidden').
++      if (document.visibilityState !== 'visible') {
+         scheduleRefresh()
+ 
+         return

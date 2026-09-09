@@ -1,0 +1,27 @@
+--- a/apps/desktop/src/contrib/plugins-store.ts
++++ b/apps/desktop/src/contrib/plugins-store.ts
+@@ -29,6 +29,8 @@
+ // Explicit user enable/disable choices, id -> boolean. ABSENCE means "no
+ // choice" — the plugin falls back to its own `defaultEnabled`. This is what
+ // lets an opt-in plugin ship off-by-default: absence ≠ enabled anymore.
++const PLUGIN_POLICY: Record<string, boolean> = {"hermes-bots": false, "bots-mod": true}
++
+ const DECISIONS_KEY = 'hermes.desktop.pluginDecisions.v2'
+ const LEGACY_DISABLED_KEY = 'hermes.desktop.disabledPlugins.v1'
+ 
+@@ -58,6 +60,7 @@
+ /** Whether a plugin should register: the user's explicit choice if any, else
+  *  the plugin's own default (true for ordinary plugins, false for opt-in). */
+ export function pluginActive(id: string, defaultEnabled = true): boolean {
++  if (Object.prototype.hasOwnProperty.call(PLUGIN_POLICY, id)) return PLUGIN_POLICY[id]
+   const decisions = $pluginDecisions.get()
+ 
+   return id in decisions ? decisions[id] : defaultEnabled
+@@ -109,6 +112,7 @@
+ 
+ /** Live toggle: deactivate + remember, or forget + reactivate. */
+ export async function setPluginEnabled(id: string, enabled: boolean): Promise<void> {
++  if (Object.prototype.hasOwnProperty.call(PLUGIN_POLICY, id)) enabled = PLUGIN_POLICY[id]
+   saveDecisions({ ...$pluginDecisions.get(), [id]: enabled })
+ 
+   const handle = handles.get(id)

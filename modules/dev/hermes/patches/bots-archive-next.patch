@@ -1,0 +1,50 @@
+--- a/plugin.js
++++ b/plugin.js
+@@ -86,6 +86,26 @@
+       .bots-mod-session-row:hover { background: var(--ui-control-hover-background); }
+     `;// Local Sessions-style roster. The surrounding plugin owns routing/settings.
+ // SDK aliases below come from the installed bundle; build.py checks its hash.
++import {useEffect as botsModArchiveEffect} from 'react';
++function botsModArchiveSuccessor(rows,id) {
++  const index=rows.findIndex(row=>row.id===id||row.resolved_id===id);
++  if(index<0)return null;
++  return rows[index+1]||rows[index-1]||null;
++}
++function botsModBindArchive(bot,rows,open,host,eventTarget,invalidate) {
++  const listener=event=>{
++    const detail=event.detail;
++    if(!detail||detail.afterArchive)return;
++    const selected=host.state.focusedStoredSessionId.get();
++    const owner=host.state.focusedSessionOwner.get();
++    const row=rows.find(row=>row.id===detail.storedSessionId||row.resolved_id===detail.storedSessionId);
++    if(!row||!botsModIsSelected(row,bot,selected,owner))return;
++    const next=botsModArchiveSuccessor(rows,detail.storedSessionId);
++    if(next)detail.afterArchive=async()=>{invalidate();await open(next.id,true)};
++  };
++  eventTarget.addEventListener('hermes:bots-before-archive',listener);
++  return ()=>eventTarget.removeEventListener('hermes:bots-before-archive',listener);
++}
+ function hc({bot:e,onDelete:t,onEdit:n,onGroup:o,showHandle:r}) {
+   const {t:s}=fc(), i=te();
+ 
+@@ -96,7 +116,7 @@
+   const {shape,color,image}=Rt(e.name,p);
+   const name=U(e,p), detail=[`@${ee(e.name,e)}`,e.connectionLabel,x.label].filter(Boolean).join(' · ');
+   const openCanonical=()=>xi(e,{canonical:true});
+-  const ae=async id=>{
++  const ae=async (id,rethrow=false)=>{
+     try {
+       const route=we(e);
+       // Match canonical navigation: retire older opens and select the owner
+@@ -107,8 +127,10 @@
+         workspaceMode:'bots',workspaceOwnerKey:et(e),retryHydrationTimeoutOnce:true,
+         forceResume:true,tabTitle:botsModSessionLabel(u.find(row=>row.id===id),e.name)
+       });
+-    } catch(error) { Pe.notifyError?.(error,'Could not open session'); }
++    } catch(error) { if(rethrow)throw error; Pe.notifyError?.(error,'Could not open session'); }
+   };
++  botsModArchiveEffect(()=>botsModBindArchive(e,u,ae,Pe,window,
++    ()=>Np.invalidateQueries({queryKey:Rp(e)})),[e,u]);
+ 
+   const menu=ot(mu,{children:[
+     q(fu,{asChild:true,children:q(nr,{variant:'ghost',size:'icon-sm',
