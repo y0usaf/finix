@@ -10,7 +10,5 @@
       pkgs.statix
       pkgs.deadnix
     ]
-    ++ lib.optionals config.boot.loader.limine.secureBoot.enable [
-      pkgs.sbctl
-    ];
+    ++ lib.optional config.boot.loader.limine.secureBoot.enable pkgs.sbctl;
 }
