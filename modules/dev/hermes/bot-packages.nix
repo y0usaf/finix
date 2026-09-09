@@ -8,12 +8,12 @@
   inherit (pkgs.stdenv.hostPlatform) system;
   botsMod = pkgs.runCommand "hermes-bots-mod" {} ''
     mkdir -p $out
-    # The pinned fork includes the former bundle patches; preserve the newer
-    # no-unsolicited-greeting change as a standard patch, without Python.
+    # The pinned fork includes internal-chat visibility, the compact bot shelf,
+    # no unsolicited greetings, and archive-next navigation.
     cp ${flakeInputs.hermes-bots-mod}/plugin.js $out/plugin.js
-    chmod u+w $out/plugin.js
-    ${pkgs.patch}/bin/patch --batch --forward --fuzz=0 -p1 -d "$out" < ${./patches/bots-no-kickoff.patch}
-    ${pkgs.patch}/bin/patch --batch --forward --fuzz=0 -p1 -d "$out" < ${./patches/bots-archive-next.patch}
+    ${pkgs.nodejs}/bin/node --check "$out/plugin.js"
+    ${pkgs.nodejs}/bin/node ${flakeInputs.hermes-bots-mod}/roster.test.mjs "$out/plugin.js"
+    ${pkgs.nodejs}/bin/node ${flakeInputs.hermes-bots-mod}/shelf.test.mjs "$out/plugin.js"
     check_root="$TMPDIR/archive-check"
     action_path="apps/desktop/src/app/session/hooks/use-session-actions/index.ts"
     mkdir -p "$check_root/$(dirname "$action_path")"
