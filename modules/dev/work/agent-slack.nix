@@ -15,7 +15,7 @@
         version = "0.9.3";
         # Bun --compile embeds JS in the ELF. RPATH rewriting corrupts that
         # payload, so patch only the hardcoded glibc interpreter.
-        nativeBuildInputs = [ pkgs.patchelf ];
+        nativeBuildInputs = [pkgs.patchelf];
 
         src =
           pkgs.fetchurl {

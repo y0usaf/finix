@@ -7,12 +7,15 @@
   version = "0.22.10";
   # dist/ directory inside the npm tarball for the host platform; each holds a
   # statically linked binary, so no launcher or runtime deps are needed.
-  distDir = {
-    x86_64-linux = "ntn-linux-x64";
-    aarch64-linux = "ntn-linux-arm64";
-    x86_64-darwin = "ntn-darwin-x64";
-    aarch64-darwin = "ntn-darwin-arm64";
-  }.${pkgs.stdenv.hostPlatform.system};
+  distDir =
+    {
+      x86_64-linux = "ntn-linux-x64";
+      aarch64-linux = "ntn-linux-arm64";
+      x86_64-darwin = "ntn-darwin-x64";
+      aarch64-darwin = "ntn-darwin-arm64";
+    }.${
+      pkgs.stdenv.hostPlatform.system
+    };
 in {
   options.user.dev.work.ntn = {
     enable = lib.mkEnableOption "Notion CLI (ntn)";

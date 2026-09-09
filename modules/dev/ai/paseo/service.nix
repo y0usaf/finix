@@ -19,6 +19,12 @@
   paseo = flakeInputs.paseo.packages."${system}".default;
   home = config.user.homeDirectory;
   homePaseo = "${home}/${cfg.dataDir}";
+  serviceGroup = group: user:
+    if group != null
+    then group
+    else user;
+  relayArgument = relay:
+    lib.optionalString (!relay.enable) "--no-relay";
 in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [paseo];
@@ -26,10 +32,7 @@ in {
     finit.services.paseo = {
       description = "Paseo - self-hosted daemon for AI coding agents";
       user = config.user.name;
-      group =
-        if cfg.group != null
-        then cfg.group
-        else config.user.name;
+      group = serviceGroup cfg.group config.user.name;
       command = "${pkgs.writeShellScript "paseo-server-start" ''
         set -eu
         export PATH=${lib.concatStringsSep ":" [
@@ -49,7 +52,7 @@ in {
             export "$name"="$value"
           done
         fi
-        exec ${paseo}/bin/paseo-server ${lib.optionalString (!cfg.relay.enable) "--no-relay"}
+        exec ${paseo}/bin/paseo-server ${relayArgument cfg.relay}
       ''}";
       environment =
         {
