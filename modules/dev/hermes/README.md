@@ -6,8 +6,9 @@ backend; CLI and desktop share `~/.hermes`.
 
 The remaining standard patches provide session metadata, select Bots Mod,
 suppress unsolicited bot greetings, and refresh visible unfocused panes.
-There are no injected Python modules, prompt rewrites, profile reconcilers, crew
-commands, archive automation, or Mnemosyne runtime in this module.
+There are no injected Python modules, crew commands, archive automation, or
+Mnemosyne runtime in this module. `behavior.nix` owns the default-profile SOUL
+and selected behavioral settings; `skills.nix` owns the skill policy.
 
 The optional [`hermes-project` runner](PROJECT-RUNNER.md) adds durable project
 planning, isolated worker sessions/worktrees, verification, and independent
@@ -18,8 +19,9 @@ Hermes setup changes belong declaratively in this module, not solely in live
 `~/.hermes` files. `skills.nix` installs the compact skill entries and their
 on-demand guides through Manzil. `skills/disabled.json` owns the default
 profile's disabled-skill list, applied with the Hermes CLI at system activation.
-Only that config key is reconciled; unrelated settings and named profiles are
-preserved. Edit these source files first for future skill-policy changes.
+The disabled-skill key and the behavioral keys below are reconciled; unrelated
+settings and named profiles are preserved. Edit these source files first for
+future policy changes.
 Sessions, credentials, memories, and other runtime data remain mutable and must
 not be copied into the Nix store. Existing conversations are not deleted.
 
@@ -34,11 +36,12 @@ nix build path:.#nixosConfigurations.y0usaf-desktop.config.system.build.toplevel
 Activate through the normal Finix deployment workflow, then quit and reopen
 Hermes. A source edit or build alone does not update the running app.
 
-The default live profile uses a short SOUL, built-in memory, disabled curator and
-background review, and a small enabled skill catalog. Model, compaction and
-specialist bot configurations are preserved. Those pre-existing settings remain
-mutable; only the skill documents and disabled list above are reconciled so far.
-Future setup changes should be encoded here rather than made live-only.
+`behavior.nix` installs `SOUL.md` and reconciles built-in memory (provider,
+memory enabled, user-profile enabled), disabled curator, disabled automatic
+titles, and disabled background review through the supported Hermes CLI during
+activation. The source SOUL has one messaging section with the actual `notify`
+parameter. Model, compaction, and specialist bot configurations are preserved.
+Future setup changes must be encoded here rather than made live-only.
 Existing conversations can retain older instructions; use new conversations
 after restarting the updated app.
 
