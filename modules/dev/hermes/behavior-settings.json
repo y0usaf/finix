@@ -1,0 +1,8 @@
+{
+  "auxiliary.title_generation.enabled": false,
+  "auxiliary.background_review.enabled": false,
+  "curator.enabled": false,
+  "memory.provider": "",
+  "memory.memory_enabled": true,
+  "memory.user_profile_enabled": true
+}
