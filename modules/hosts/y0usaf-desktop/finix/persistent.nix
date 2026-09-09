@@ -35,13 +35,8 @@
     options = ["subvol=${subvol}"] ++ btrfsOpts ++ extraOpts;
   };
 
-  # Single source of truth: pass finix's evaluated config into the NixOS
-  # impermanence data function so enable-gated app paths match this system.
-  persistCfg =
-    ((import ../impermanence.nix) {inherit config;})
-    .environment
-    .persistence
-    ."/persist";
+  # Host policy is evaluated and merged by the module system.
+  persistCfg = config.finix.persistence.allowlist;
   dirPath = e:
     if builtins.isAttrs e
     then e.directory
@@ -95,6 +90,7 @@ in {
     ../../../finix/desktop
     ./boot.nix
     ./graphical.nix
+    ./vbios-maintenance.nix
     ./hermes.nix
   ];
 
@@ -333,8 +329,12 @@ in {
         substituters = [
           "http://192.168.2.66:8787/cache"
           "http://y0usaf-server:8787/cache"
+          "https://cuda-maintainers.cachix.org"
         ];
-        trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
+        trusted-public-keys = [
+          "cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="
+          "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+        ];
         # dead-cache stall tax: default 15s x 5 retries when the server is
         # off. 5s keeps the fallback fast; connect-only, transfers unaffected.
         connect-timeout = 5;
@@ -345,7 +345,6 @@ in {
       };
     };
   };
-
 
   # Same credentials as the NixOS install (impermanence keeps these paths).
   # uid PINNED to the NixOS value: this box's y0usaf is 1001 (not the 1000

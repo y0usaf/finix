@@ -11,23 +11,33 @@
   ...
 }: let
   cfg = config.user.dev.omp;
-  catalog = import ../pi/model-catalog.nix;
+  catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
+
+  conditionValue = rule:
+    if rule.condition != null
+    then rule.condition
+    else if rule.minOutputLength != null
+    then ["(?s).{${toString rule.minOutputLength},}"]
+    else null;
+  frontmatter = rule:
+    lib.filterAttrs (name: value:
+      value
+      != (
+        if name == "globs"
+        then []
+        else null
+      )) {
+      condition = conditionValue rule;
+      inherit (rule) astCondition scope globs interruptMode;
+    };
 
   ruleFile = name: rule: {
     name = ".omp/agent/rules/${name}.md";
     value.text = let
-      frontmatter =
-        lib.optionalAttrs (rule.condition != null) { inherit (rule) condition; }
-        // lib.optionalAttrs (rule.minOutputLength != null && rule.condition == null) {
-          condition = ["(?s).{${toString rule.minOutputLength},}"];
-        }
-        // lib.optionalAttrs (rule.astCondition != null) { inherit (rule) astCondition; }
-        // lib.optionalAttrs (rule.scope != null) { inherit (rule) scope; }
-        // lib.optionalAttrs (rule.globs != []) { inherit (rule) globs; }
-        // lib.optionalAttrs (rule.interruptMode != null) { inherit (rule) interruptMode; };
-      yaml = lib.generators.toYAML {} frontmatter;
-    in "${lib.optionalString (frontmatter != {}) "---\n${yaml}---\n\n"}${rule.content}\n";
+      frontmatterValue = frontmatter rule;
+      yaml = lib.generators.toYAML {} frontmatterValue;
+    in "${lib.optionalString (frontmatterValue != {}) "---\n${yaml}---\n\n"}${rule.content}\n";
   };
 in {
   options.user.dev.omp = {
@@ -105,40 +115,42 @@ in {
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".omp-full
     ];
 
-    manzil.users."${config.user.name}".files = {
-      # Advisor settings merge into the mutable TUI-owned config.yml: omp
-      # persists /config edits here, so a symlink would break its atomic
-      # save (temp-file + rename next to the target). merge keeps the file
-      # writable, preserves TUI keys, and re-applies ours on every switch.
-      ".omp/agent/config.yml" = {
-        type = "merge";
-        format = "yaml";
-        clobber = true;
-        value = {
-          advisor.enabled = cfg.advisor.enable;
-          modelRoles.advisor = cfg.advisor.model;
+    manzil.users."${config.user.name}".files =
+      {
+        # Advisor settings merge into the mutable TUI-owned config.yml: omp
+        # persists /config edits here, so a symlink would break its atomic
+        # save (temp-file + rename next to the target). merge keeps the file
+        # writable, preserves TUI keys, and re-applies ours on every switch.
+        ".omp/agent/config.yml" = {
+          type = "merge";
+          format = "yaml";
+          clobber = true;
+          value = {
+            advisor.enabled = cfg.advisor.enable;
+            modelRoles.advisor = cfg.advisor.model;
+          };
         };
-      };
-      ".omp/config.json" = {
-        generator = toJSON;
-        value = cfg.settings;
-      };
-      ".omp/agent/settings.json" = {
-        generator = toJSON;
-        value = {
-          inherit (catalog) defaultProvider;
-          inherit (catalog) defaultModel;
-          inherit (catalog) defaultThinkingLevel;
-          inherit (catalog) enabledModels;
-          packages = [
-            "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
-          ];
+        ".omp/config.json" = {
+          generator = toJSON;
+          value = cfg.settings;
         };
-      };
-      ".omp/agent/models.json" = {
-        generator = toJSON;
-        value = catalog.models;
-      };
-    } // lib.listToAttrs (lib.mapAttrsToList ruleFile cfg.ttsrRules);
+        ".omp/agent/settings.json" = {
+          generator = toJSON;
+          value = {
+            inherit (catalog) defaultProvider;
+            inherit (catalog) defaultModel;
+            inherit (catalog) defaultThinkingLevel;
+            inherit (catalog) enabledModels;
+            packages = [
+              "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
+            ];
+          };
+        };
+        ".omp/agent/models.json" = {
+          generator = toJSON;
+          value = catalog.models;
+        };
+      }
+      // lib.listToAttrs (lib.mapAttrsToList ruleFile cfg.ttsrRules);
   };
 }

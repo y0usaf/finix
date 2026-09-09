@@ -14,7 +14,7 @@
   lib,
   ...
 }: let
-  body = (import ./prompt-body.nix {}).promptBody;
+  body = config.user.dev.prompts.body;
 
   phiSystemPrompt = ''
     <role>
