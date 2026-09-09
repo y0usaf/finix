@@ -1,5 +1,6 @@
 _: {
   user.dev = {
+    autolith.enable = true;
     claude-code.enable = true;
     codex.enable = true;
     android-tools.enable = true;
