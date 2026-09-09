@@ -28,7 +28,11 @@ in {
   system.activation.scripts.hermesSkillPolicy = {
     deps = [ "users" ];
     text = ''
-      ${pkgs.util-linux}/bin/runuser -u ${lib.escapeShellArg user} -- ${applyPolicy}
+      # Match Manzil's Finix uid/gid drop: Finix has no runuser PAM service.
+      ${pkgs.util-linux}/bin/setpriv \
+        --reuid "$(${pkgs.coreutils}/bin/id -u ${lib.escapeShellArg user})" \
+        --regid "$(${pkgs.coreutils}/bin/id -g ${lib.escapeShellArg user})" \
+        --clear-groups ${applyPolicy}
     '';
   };
 }
