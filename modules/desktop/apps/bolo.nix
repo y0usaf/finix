@@ -70,8 +70,8 @@
     '';
   };
 
-  boloPkgs =
-    if cfg.provider == "cuda"
+  buildBoloPackages = provider:
+    if provider == "cuda"
     then {
       bolod = flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}".bolod.override {
         sherpa-onnx = sherpaOnnxGpu;
@@ -79,6 +79,17 @@
       inherit (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}") bolo;
     }
     else flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}";
+
+  boloPkgs = buildBoloPackages cfg.provider;
+  autofillUdevRules = enabled:
+    lib.optional enabled (pkgs.writeTextFile {
+      name = "bolo-uinput-rules";
+      destination = "/lib/udev/rules.d/99-bolo-uinput.rules";
+      text = ''
+        KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+      '';
+    });
+  autofillPipe = enabled: lib.mkIf enabled (lib.mkDefault "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool");
 
   # bolod is spawned by the compositor, whose PATH doesn't carry these.
   bolod = pkgs.symlinkJoin {
@@ -95,7 +106,7 @@
         # Autofill types via dotool/uinput; without it in the wrapper the
         # pipe_to command fails silently (pipe failures are swallowed by
         # design — clipboard is the backup).
-        ++ lib.optionals cfg.autofill [pkgs.dotool])}
+        ++ lib.optional cfg.autofill pkgs.dotool)}
     '';
   };
 in {
@@ -171,18 +182,10 @@ in {
     # uinput node + input-group access for dotool autofill.
     # Rules go through services.udev.packages (portable: NixOS + finix), never
     # extraRules (NixOS-only — the finix compat shim drops it).
-    services.udev.packages = lib.optionals cfg.autofill [
-      (pkgs.writeTextFile {
-        name = "bolo-uinput-rules";
-        destination = "/lib/udev/rules.d/99-bolo-uinput.rules";
-        text = ''
-          KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
-        '';
-      })
-    ];
+    services.udev.packages = autofillUdevRules cfg.autofill;
 
     # Flatten the transcript and release modifiers before dotool types it.
-    user.programs.bolo.pipeTo = lib.mkIf cfg.autofill (lib.mkDefault "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool");
+    user.programs.bolo.pipeTo = autofillPipe cfg.autofill;
 
     manzil.users."${config.user.name}" = {
       files =
