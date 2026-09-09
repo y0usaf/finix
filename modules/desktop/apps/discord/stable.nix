@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: let
-  inherit (lib) concatStringsSep optionals mkEnableOption mkOption mkIf types;
+  inherit (lib) concatStringsSep optional mkEnableOption mkOption mkIf types;
 
   enableFeatures = [
     # WaylandLinuxDrmSyncobj removed - causes format negotiation failures with niri screenshare
@@ -18,6 +18,13 @@
   inherit (config) user;
   userName = user.name;
   stableCfg = user.programs.discord.stable;
+  mkCommandLineArgs = cfg:
+    concatStringsSep " " (
+      optional (enableFeatures != []) "--enable-features=${concatStringsSep "," enableFeatures}"
+      ++ optional (disableFeatures != []) "--disable-features=${concatStringsSep "," disableFeatures}"
+      ++ optional (!cfg.smoothScroll) "--disable-smooth-scrolling"
+      ++ cfg.extraArgs
+    );
 
   # Discord pinned to the last release before the distro-format repackaging,
   # built from the legacy nixpkgs snapshot's package files against *current*
@@ -67,16 +74,7 @@ in {
   config = mkIf stableCfg.enable {
     environment.systemPackages = [
       (stableCfg.package.override {
-        commandLineArgs = concatStringsSep " " ((optionals (enableFeatures != []) [
-            "--enable-features=${concatStringsSep "," enableFeatures}"
-          ]
-          ++ optionals (disableFeatures != []) [
-            "--disable-features=${concatStringsSep "," disableFeatures}"
-          ]
-          ++ optionals (!stableCfg.smoothScroll) [
-            "--disable-smooth-scrolling"
-          ])
-        ++ stableCfg.extraArgs);
+        commandLineArgs = mkCommandLineArgs stableCfg;
         withOpenASAR = true;
         disableUpdates = false;
         withTTS = false;
