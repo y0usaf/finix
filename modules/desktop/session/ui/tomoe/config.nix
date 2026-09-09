@@ -6,6 +6,19 @@
   ...
 }: let
   inherit (config.lib.generators) toLua;
+  nvidiaSessionEnvironment = enabled:
+    lib.optionalString enabled ''
+      export WLR_NO_HARDWARE_CURSORS=1
+      export LIBVA_DRIVER_NAME=nvidia
+    '';
+  nvidiaFrameSetting = enabled:
+    lib.optionalString enabled ''
+      -- NVIDIA: a fenced frame queued to KMS before its render completes
+      -- hangs the driver (whole-session freeze, niri discussion #3777);
+      -- wait for the render CPU-side instead. NVIDIA-only: on any other
+      -- GPU this just serializes every frame for nothing.
+      wait_for_frame_completion = true,'';
+  hostExtraConfig = extra: lib.optionalString (extra != "") "\n-- ─── host extraConfig ────────────────────────────────────────────────────────\n${extra}\n";
 
   # force_server_side_decorations landed upstream in tomoe (8e0bd50); the local
   # patch that used to carry it is gone — the packaged default has it now.
@@ -55,10 +68,7 @@ in {
         export XCURSOR_THEME=${config.user.ui.cursor.package.xcursorThemeName}
         export XCURSOR_SIZE=${toString config.user.appearance.xcursorSize}
 
-        ${lib.optionalString config.hardware.nvidia.enable ''
-          export WLR_NO_HARDWARE_CURSORS=1
-          export LIBVA_DRIVER_NAME=nvidia
-        ''}
+        ${nvidiaSessionEnvironment config.hardware.nvidia.enable}
         # No GBM_BACKEND / __EGL_VENDOR_LIBRARY_FILENAMES / __GLX_VENDOR_LIBRARY_NAME
         # here: forcing the NVIDIA-only EGL vendor hides Mesa's EGL_EXT_device_query
         # from the glvnd client-extension union, which smithay requires to probe the
@@ -122,30 +132,16 @@ in {
             anti_artifact_margin = 96;
             layer_namespaces = ["bar-overlay-top" "bar-overlay-bottom" "moonshell.notifications"];
           }},
-          ${lib.optionalString config.hardware.nvidia.enable ''
-            -- NVIDIA: a fenced frame queued to KMS before its render completes
-            -- hangs the driver (whole-session freeze, niri discussion #3777);
-            -- wait for the render CPU-side instead. NVIDIA-only: on any other
-            -- GPU this just serializes every frame for nothing.
-            wait_for_frame_completion = true,''}
+          ${nvidiaFrameSetting config.hardware.nvidia.enable}
             displays = displays,
           }
 
-          -- Regular windows blur only when their per-window blur property is
-          -- true: the renderer gates on props.blur == Some(true)
-          -- (render/mod.rs), layer_namespaces never matches a window, and no
-          -- client here speaks ext-background-effect-v1 (the protocol that
-          -- lets a client request blur itself). This rule opts every window
-          -- in globally; the blur is only visible through transparent pixels
-          -- (foot already runs at alpha 0.82). Fullscreen and camera zoom
-          -- gate it off. set_properties replaces the override table
-          -- wholesale, which is safe here: nothing else sets per-window
-          -- overrides (wm.lua doesn't), and the core clears per-window props
-          -- then re-runs rule apply fns on reload (state.rs
-          -- reapply_window_rules).
+          -- Disable regular-window blur: off/on testing implicated it in
+          -- right-half flicker at 240 Hz on the desktop's NVIDIA/Samsung setup.
+          -- Layer-surface blur (panels and notifications) remains enabled.
           tomoe.rule {
             apply = function(win)
-              win:set_properties({ blur = true })
+              win:set_properties({ blur = false })
             end,
           }
 
@@ -254,9 +250,8 @@ in {
             wm.arrange()
           end)
         ''
-        + (
-          if config.user.ui.tomoe.layout == "sway"
-          then ''
+        + {
+          sway = ''
 
             -- ─── Layout: sway-style manual splits over numbered workspaces ─────────────
             -- One split tree per workspace: inner nodes { dir = "h"|"v", kids },
@@ -633,8 +628,8 @@ in {
             tomoe.bind("Mod+3", function() tomoe.spawn("discord") end)
             tomoe.bind("Mod+4", function() tomoe.spawn("steam") end)
             tomoe.bind("Mod+5", function() tomoe.spawn("obs") end)
-          ''
-          else ''
+          '';
+          deck = ''
 
             -- ─── Layout: two 16:9 deck columns ───────────────────────────────────────────
             -- The screen splits into a left and a right half-column; on 32:9 each
@@ -969,8 +964,10 @@ in {
             tomoe.bind("Mod+3", function() tomoe.spawn("discord") end)
             tomoe.bind("Mod+4", function() tomoe.spawn("steam") end)
             tomoe.bind("Mod+5", function() tomoe.spawn("obs") end)
-          ''
-        )
+          '';
+        }.${
+          config.user.ui.tomoe.layout
+        }
         + ''
 
           -- ─── Binds (mirroring niri/keybindings.nix; Mod = Alt) ───────────────────────
@@ -1035,7 +1032,7 @@ in {
           tomoe.bind("XF86MonBrightnessUp", function() tomoe.spawn("brightnessctl set 5%+") end)
           tomoe.bind("XF86MonBrightnessDown", function() tomoe.spawn("brightnessctl set 5%-") end)
         ''
-        + lib.optionalString (config.user.ui.tomoe.extraConfig != "") "\n-- ─── host extraConfig ────────────────────────────────────────────────────────\n${config.user.ui.tomoe.extraConfig}\n";
+        + hostExtraConfig config.user.ui.tomoe.extraConfig;
     };
   };
 }

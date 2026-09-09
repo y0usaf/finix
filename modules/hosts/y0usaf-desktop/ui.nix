@@ -1,5 +1,7 @@
-_: {
+{lib, ...}: {
   user.ui = {
+    cudaterm.enable = true;
+    monstar.enable = lib.mkForce false;
     tomoe = {
       displays = {
         # 32:9 panel on DP-4, native 5120x1440@239.761. Its EDID preferred
