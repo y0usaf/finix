@@ -911,11 +911,11 @@
     "hermes-bots-mod": {
       "flake": false,
       "locked": {
-        "lastModified": 1788989385,
-        "narHash": "sha256-UMz+DZ3BqwHvAGfisSJeox4PKL0tf8zCuSxcZ8aBmLk=",
+        "lastModified": 1788995284,
+        "narHash": "sha256-YpzjAs72jaexSWcCdD04xVZ1199nkV7FRnq15XOkHVI=",
         "owner": "y0usaf",
         "repo": "hermes-bots-mod",
-        "rev": "40c204c082db9fddd7151bd3f53339fa061c93a1",
+        "rev": "2ed6aba6dbe3153550b08918d4cf80882169acdb",
         "type": "github"
       },
       "original": {
