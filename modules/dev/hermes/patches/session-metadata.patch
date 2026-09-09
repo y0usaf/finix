@@ -1,0 +1,44 @@
+--- a/tui_gateway/methods_session.py
++++ b/tui_gateway/methods_session.py
+@@ -124,10 +124,12 @@
+ def _session_row_summary(row: dict, *, tip_row: dict | None = None, resolved_id=None) -> dict:
+     """Compact session.list row; ``tip_row``/``resolved_id`` come from the compression tip."""
+     tip_row = tip_row or row
++    # Activity is deliberately sourced from the rich DB row; started_at is not a last-active value.
+     return {"id": row["id"], **({} if resolved_id is None else {"resolved_id": resolved_id}),
+             "title": row.get("title") or "", "preview": tip_row.get("preview") or "",
+             "started_at": row.get("started_at") or 0, "message_count": tip_row.get("message_count") or 0,
+-            "source": row.get("source") or ""}
++            "source": row.get("source") or "", "last_active": row.get("last_activity_at"),
++            "running": row.get("running")}
+ 
+ 
+ # Hidden from human listings (sub-agent runs, kanban workers); a deny-list so new platforms surface automatically.
+@@ -397,7 +399,26 @@
+         # Over-fetch: per-source filtering + tip merging must not leave us short. ``include_hidden`` is for
+         # surfaces that OWN hidden sessions (Bots pane, pickers).
+         rows = _listing_rows(db, max(limit * 2, 200), include_hidden=_flag(params, "include_hidden"))[:limit]
+-        return _ok(rid, {"sessions": [_session_row_summary(s) for s in rows]})
++        # Registry is process-local: missing runtimes may be CLI/other-process sessions,
++        # so absence is unknown, never guessed idle. Snapshot state while holding the lock.
++        active_by_key = {}
++        with _sessions_lock:
++            for live in _sessions.values():
++                if live.get("_finalized"):
++                    continue
++                key = live.get("session_key")
++                if key:
++                    running = live.get("running")
++                    status = True if running is True or live.get("inflight_turn") else False if running is False else None
++                    active_by_key.setdefault(key, []).append(status)
++        enriched = []
++        for row in rows:
++            keys = set(row.get("_lineage_ids") or ()) | {row.get("id"), row.get("resolved_id")}
++            states = [value for key in keys for value in active_by_key.get(key, [])]
++            item = dict(row)
++            item["running"] = True if True in states else False if states and all(value is False for value in states) else None
++            enriched.append(item)
++        return _ok(rid, {"sessions": [_session_row_summary(s) for s in enriched]})
+     except Exception as e:
+         return _err(rid, 5006, str(e))
+ 
