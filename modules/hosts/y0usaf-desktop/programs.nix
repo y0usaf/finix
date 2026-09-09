@@ -24,7 +24,7 @@ _: {
     cmus.enable = true;
     obs = {
       enable = true;
-      backgroundRemoval.enable = true;
+      backgroundRemoval.enable = false;
     };
     qbittorrent.enable = true;
     stoat-desktop.enable = true;
