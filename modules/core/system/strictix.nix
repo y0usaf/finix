@@ -7,4 +7,3 @@
     flakeInputs.strictix.packages."${pkgs.stdenv.hostPlatform.system}".default
   ];
 }
-
