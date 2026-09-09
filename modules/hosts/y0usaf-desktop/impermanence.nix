@@ -1,13 +1,8 @@
-# Single persistence allowlist for y0usaf-desktop — one place to edit.
-#
-# Also the finix system's persist allowlist: hosts/y0usaf-desktop/finix/*
-# calls this function and replays these lists as plain bind mounts. Keep it
-# pure literals (import/++ only, no lib/pkgs/config) so both module universes
-# can read it.
+# Desktop persistence policy consumed by the native Finix mount modules.
 #
 # Browser paths (firefox/librewolf/discord/vesktop) are persisted
 # unconditionally: a disabled app just leaves an empty dir on /persist.
-_: let
+{...}: let
   gameSaves = [
     "dolphin-emu"
     "Cemu"
@@ -37,7 +32,7 @@ _: let
     "Smart Code ltd"
   ];
 in {
-  environment.persistence."/persist" = {
+  finix.persistence.allowlist = {
     hideMounts = true;
     directories = [
       # System identity & NixOS state

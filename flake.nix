@@ -225,48 +225,13 @@
     finix.url = "github:finix-community/finix";
   };
 
-  outputs = inputs: let
-    system = "x86_64-linux";
-    cfg = import ./modules/finix {inherit inputs system;};
-  in {
-    nixosConfigurations =
-      cfg.hosts
-      // {
-        # Finix is the installed server system; retain the hostname alias for
-        # tools that only inspect nixosConfigurations.
-        y0usaf-server-finix = cfg.hosts.y0usaf-server;
+  # All output construction lives under modules/.
+  outputs = inputs:
+    (inputs.nixpkgs.lib.evalModules {
+      specialArgs = {
+        inherit inputs;
+        system = "x86_64-linux";
       };
-
-    nixOnDroidConfigurations = {
-      default = inputs."nix-on-droid".lib.nixOnDroidConfiguration {
-        pkgs = import (toString inputs.nixpkgs) {
-          system = "aarch64-linux";
-        };
-        extraSpecialArgs = {
-          flakeInputs = inputs;
-        };
-        modules = [
-          ./modules/hosts/android-phone/nix-on-droid.nix
-        ];
-      };
-    };
-
-    finixConfigurations = cfg.hosts;
-
-    packages."${system}" = cfg.packages;
-
-    checks."${system}".ekko-startup = let
-      desktop = cfg.hosts.y0usaf-desktop.config;
-      pkgs = inputs.nixpkgs.legacyPackages.${system};
-      ekko = inputs.ekko.packages.${system}.default;
-    in
-      pkgs.runCommand "finix-ekko-startup" {nativeBuildInputs = [pkgs.python3];} ''
-        python ${./tests/ekko-startup.py} \
-          ${pkgs.writeText "finix-interactive-rc" desktop.user.shell.rcExtra} \
-          ${./modules/shell/ekko/init.lisp} ${ekko}/bin/ekko \
-          ${pkgs.bash}/bin/bash ${inputs.rush.packages.${system}.default}/bin/rush > $out
-      '';
-
-    formatter."${system}" = inputs.nixpkgs.legacyPackages."${system}".alejandra;
-  };
+      modules = [./modules/outputs.nix];
+    }).config.flake;
 }

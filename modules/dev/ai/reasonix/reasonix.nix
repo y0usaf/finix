@@ -135,9 +135,7 @@ in {
           exec ${package}/bin/reasonix --yolo "$@"
         '')
       ]
-      ++ lib.optionals cfg.desktop.enable [
-        desktopWrapper
-      ];
+      ++ lib.optional cfg.desktop.enable desktopWrapper;
 
     # App-menu entry — same manzil user-file pattern as hermes.nix.
 

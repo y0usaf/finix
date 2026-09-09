@@ -8,7 +8,7 @@
   cfg = config.user.dev.prime-agent;
   # Shared pi/prime-agent model catalog (plain data, see
   # modules/dev/ai/pi/model-catalog.nix).
-  catalog = import ./pi/model-catalog.nix;
+  catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
 in {
   # Prime Agent is the pi core plus the Prime RLM/harness layer; it reads the

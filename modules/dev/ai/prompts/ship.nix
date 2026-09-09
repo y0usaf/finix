@@ -4,11 +4,11 @@
   pkgs,
   ...
 }: let
-  inherit (import ./mapping.nix {inherit config lib;}) roots mkSkill;
+  inherit (config.lib.prompts) roots mkSkill;
 in {
   config = lib.mkIf (roots != []) {
     manzil.users."${config.user.name}".files = lib.mkMerge (mkSkill "ship" {
-      "SKILL.md".text = import ./ship/SKILL.nix;
+      "SKILL.md".text = config.user.dev.prompts.skillText.ship;
       "scripts/system-flake" = {
         executable = true;
         text = ''

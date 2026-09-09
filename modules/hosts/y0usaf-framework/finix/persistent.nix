@@ -21,7 +21,7 @@
     neededForBoot = true;
   };
 
-  persistCfg = ((import ../impermanence.nix) {}).environment.persistence."/persist";
+  persistCfg = config.finix.persistence.allowlist;
   dirPath = entry:
     if builtins.isAttrs entry
     then entry.directory

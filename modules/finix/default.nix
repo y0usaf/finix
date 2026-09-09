@@ -1,33 +1,14 @@
 {
   inputs,
   system,
+  config,
+  ...
 }: let
   inherit (inputs) nixpkgs;
   inherit (nixpkgs) lib;
 
-  # finix-native modules (no shim) cannot be walked; the desktop packet
-  # filter is one and is imported directly below.
-  firewall = import ../core/firewall.nix;
-
-  # Shared definitions and selected host policy are both discovered
-  # recursively. Native finix host modules are imported explicitly; persistence
-  # allowlists remain data until they become ordinary modules.
+  # Discovery returns module paths; lib.evalModules owns evaluation and deduplication.
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
-  walkedKnownExclusions = [
-    ../core/firewall.nix
-    ../dev/ai/paseo/options.nix
-    ../dev/ai/paseo/service.nix
-    ../dev/ai/paseo/desktop.nix
-    # Phi prompt body is data imported by pi and phi prompt modules.
-    ../dev/ai/phi/prompt-body.nix
-    ../dev/ai/prompts/mapping.nix
-    ../dev/ai/pi/model-catalog.nix
-    ../dev/ai/prompts/codebase-atlas/SKILL.nix
-    ../dev/ai/prompts/ship/SKILL.nix
-    ../dev/ai/prompts/anti-slop/SKILL.nix
-    # Shared persistence is still imported as data by host policy modules.
-    ../hosts/common/persist.nix
-  ];
   graphicalRoots = [
     ../core
     ../desktop
@@ -38,21 +19,13 @@
     ../user-services
     ../hosts/common
   ];
-  filterGraphicalModule = path:
-    !(builtins.elem path walkedKnownExclusions)
-    && !(lib.hasInfix "/finix/" (toString path))
-    && !(lib.hasSuffix "/impermanence.nix" (toString path));
-  commonGraphicalModules = map import (builtins.filter filterGraphicalModule (recursivelyImport graphicalRoots));
-  hostGraphicalModules = hostDir: map import (builtins.filter filterGraphicalModule (recursivelyImport [hostDir]));
+  commonGraphicalModules = recursivelyImport graphicalRoots;
+  hostGraphicalModules = hostDir: recursivelyImport [hostDir];
   desktopModules = commonGraphicalModules ++ hostGraphicalModules ../hosts/y0usaf-desktop;
   frameworkModules = commonGraphicalModules ++ hostGraphicalModules ../hosts/y0usaf-framework;
 
-  # Nix has no destructuring let-binding; bind the module and inherit the
-  # names (lib is already bound above; nixpkgs.lib === the builder's lib).
-  finixSystem = import ./finixSystem.nix {inherit inputs system;};
-  inherit (finixSystem) basePkgs mkFinixSystem;
-  pkgs = basePkgs;
-  deployLib = import ./deploy.nix {inherit lib pkgs;};
+  pkgs = config.finix.basePkgs;
+  mkFinixSystem = config.finix.mkSystem;
 
   # NOTE: mkFinixSystem imports ./common.nix in its baseline (shared by
   # every system, kept in the old position for exact module-order parity).
@@ -72,19 +45,19 @@
         ../hosts/y0usaf-server/finix/hermes.nix
         ../hosts/y0usaf-server/finix/paseo.nix
         inputs.manzil.finixModules.default
-        (import ../hosts/common/finix-base.nix)
-        (import ../hosts/common/finix-btrfs.nix)
-        (import ../hosts/common/finix-identity.nix)
-        (import ../hosts/common/finix-nix-daemon.nix)
-        (import ../hosts/common/manzil.nix)
-        (import ../hosts/common/ssh-keys.nix)
-        (import ../core/user/user-config.nix)
-        (import ../dev/ai/claude-code/claude-code.nix)
-        (import ../dev/ai/paseo/options.nix)
-        (import ../dev/ai/paseo/service.nix)
-        (import ../tools/git.nix)
-        (import ../tools/tmux.nix)
-        (import ../hosts/y0usaf-server/tools.nix)
+        ../hosts/common/finix-base.nix
+        ../hosts/common/finix-btrfs.nix
+        ../hosts/common/finix-identity.nix
+        ../hosts/common/finix-nix-daemon.nix
+        ../hosts/common/manzil.nix
+        ../hosts/common/ssh-keys.nix
+        ../core/user/user-config.nix
+        ../dev/ai/claude-code/claude-code.nix
+        ../dev/ai/paseo/options.nix
+        ../dev/ai/paseo/service.nix
+        ../tools/git.nix
+        ../tools/tmux.nix
+        ../hosts/y0usaf-server/tools.nix
       ];
   };
 
@@ -98,12 +71,7 @@
       ]
       ++ [
         ./diagnostics.nix
-        ../hosts/y0usaf-desktop/finix/persistent.nix
         inputs.manzil.finixModules.default
-        firewall
-        (import ../dev/ai/paseo/options.nix)
-        (import ../dev/ai/paseo/service.nix)
-        (import ../dev/ai/paseo/desktop.nix)
       ]
       ++ desktopModules;
   };
@@ -121,7 +89,6 @@
       ]
       ++ [
         ./diagnostics.nix
-        ../hosts/y0usaf-framework/finix/persistent.nix
         inputs.manzil.finixModules.default
       ]
       ++ frameworkModules;
@@ -130,7 +97,7 @@
   # Deployment and boot outputs below remain tied to their target systems.
 
   bootPackage =
-    ((import ./esp-island.nix {inherit pkgs lib;}).mkIsland {
+    (config.finix.mkIsland {
       name = "finix-server-boot";
       system = serverPersistent.config.system.topLevel;
       # ADL-N BIOS ships ancient 0x1a microcode; both raw direct boots
@@ -140,7 +107,7 @@
     }).bootDriverScript;
 
   persistentDeployPackage =
-    (deployLib.mkDeploy {
+    (config.finix.mkDeploy {
       name = "finix-server-persistent-deploy";
       system = serverPersistent.config.system.topLevel;
       defaultHost = "server";
@@ -153,7 +120,7 @@
     }).deployScript;
 
   desktopDeployPackage =
-    (deployLib.mkDeploy {
+    (config.finix.mkDeploy {
       name = "finix-desktop-deploy";
       system = desktopPersistent.config.system.topLevel;
       defaultHost = "local";
@@ -162,13 +129,24 @@
       # manual stc invocations go through this package anymore.
     }).deployScript;
 in {
-  hosts = {
+  imports = [./finixSystem.nix ./deploy.nix ./esp-island.nix];
+  options.finix = {
+    hosts = lib.mkOption {
+      type = lib.types.lazyAttrsOf lib.types.raw;
+      description = "Evaluated Finix host configurations.";
+    };
+    packages = lib.mkOption {
+      type = lib.types.attrsOf lib.types.package;
+      description = "Host deployment and boot tools.";
+    };
+  };
+  config.finix.hosts = {
     y0usaf-desktop = desktopPersistent;
     y0usaf-framework = frameworkPersistent;
     y0usaf-server = serverPersistent;
   };
 
-  packages = {
+  config.finix.packages = {
     finix-server-persistent-deploy = persistentDeployPackage;
     finix-server-boot = bootPackage;
     finix-desktop-deploy = desktopDeployPackage;
