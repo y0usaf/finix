@@ -36,7 +36,8 @@ nix build path:.#nixosConfigurations.y0usaf-desktop.config.system.build.toplevel
 Activate through the normal Finix deployment workflow, then quit and reopen
 Hermes. A source edit or build alone does not update the running app.
 
-`behavior.nix` installs `SOUL.md` and reconciles built-in memory (provider,
+`behavior.nix` installs `SOUL.md` and reconciles default agent reasoning effort
+(`low`), built-in memory (provider,
 memory enabled, user-profile enabled), disabled curator, disabled automatic
 titles, and disabled background review through the supported Hermes CLI during
 activation. The source SOUL has one messaging section with the actual `notify`

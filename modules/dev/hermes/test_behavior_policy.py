@@ -14,7 +14,9 @@ ROOT = Path(__file__).resolve().parent
 class BehaviorPolicyTests(unittest.TestCase):
     def test_cli_policy_is_idempotent_and_preserves_unmanaged_keys(self):
         desired = json.loads((ROOT / 'behavior-settings.json').read_text())
-        original = {'model': {'default': 'preserve-model'},
+        self.assertEqual(desired['agent.reasoning_effort'], 'low')
+        original = {'agent': {'reasoning_effort': 'medium', 'max_turns': 90},
+                    'model': {'default': 'preserve-model'},
                     'memory': {'provider': 'old', 'custom': 'preserve'},
                     'auxiliary': {'compression': {'provider': 'preserve'}},
                     'custom': {'value': 'preserve'}}

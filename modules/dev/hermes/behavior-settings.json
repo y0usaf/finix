@@ -1,4 +1,5 @@
 {
+  "agent.reasoning_effort": "low",
   "auxiliary.title_generation.enabled": false,
   "auxiliary.background_review.enabled": false,
   "curator.enabled": false,
