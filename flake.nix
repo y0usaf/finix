@@ -14,7 +14,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    cudaterm.url = "github:y0usaf/cudaterm/dbc572cf3160b3ca1014d8066206b275a0669939";
+    cudaterm.url = "github:y0usaf/cudaterm/7a065b33a395ac8278009caa97d941b03f7863af";
 
     monstar = {
       # Wayland terminal emulator built on libghostty (CPU rendered, like
