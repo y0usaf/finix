@@ -14,9 +14,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    cudaterm.url = "github:y0usaf/cudaterm/2fa4cda8a2cf5c86d08f57553191e979dd62a77a";
+
     monstar = {
       # Wayland terminal emulator built on libghostty (CPU rendered, like
-      # foot). Now the main terminal.
+      # foot). Used on the AMD Framework.
       url = "github:rockorager/monstar";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -120,6 +122,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Keep upstream's nixpkgs pin: its SBCL and generated Lisp package set
+    # must be updated together.
+    autolith.url = "github:lambda-symbolics/autolith";
+
     linear-cli = {
       url = "github:y0usaf/linear-cli?ref=nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -148,13 +154,23 @@
     };
 
     ekko = {
-      # V2: Lisp configuration, persistent PTYs, and nested-shell detection.
-      url = "github:y0usaf/ekko/53634fb9602c6fa988506e51bcaead0a8d59498e";
+      # Desktop defaults: taskbar, window controls, menus, floating and snapping.
+      url = "github:y0usaf/ekko/7edc36049cc16de3881029d86912199aedbaf18c";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     paseo = {
       url = "github:getpaseo/paseo";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    hermes-bots-mod = {
+      url = "github:y0usaf/hermes-bots-mod";
+      flake = false;
+    };
+
+    hermes-desktop-terminal = {
+      url = "path:/home/y0usaf/dev/sandbox/hermes-desktop-terminal";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -201,6 +217,9 @@
       url = "github:casualsnek/waydroid_script";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Disposable Zellij-profile preview; implementation lives in its Ekko module.
+    ekko-zellij-preview.url = "git+file:///home/y0usaf/dev/maintaining/ekko-zellij-parity?ref=zellij-parity-01a076eb&rev=a9a129c6ee99a4b725b9cdf465726c763ece7e17";
 
     # Finit-based OS and module system.
     finix.url = "github:finix-community/finix";
