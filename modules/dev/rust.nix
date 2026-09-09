@@ -16,6 +16,5 @@
       pkgs.openssl
       pkgs.gcc
     ];
-
   };
 }
