@@ -18,12 +18,14 @@
   # argument: 'data'") and aborts session start. initializer.py already skips
   # introspection for polkit for the same reason - do the same here.
   waydroidFixed = pkgs.waydroid-nftables.overrideAttrs (old: {
-    postFixup = (old.postFixup or "") + ''
-      substituteInPlace "$out/lib/waydroid/tools/services/notification_manager.py" \
-        --replace-fail 'get_object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")' \
-          'get_object("org.freedesktop.Notifications", "/org/freedesktop/Notifications", introspect=False)'
-      find "$out/lib/waydroid" -name __pycache__ -type d -exec rm -rf {} +
-    '';
+    postFixup =
+      (old.postFixup or "")
+      + ''
+        substituteInPlace "$out/lib/waydroid/tools/services/notification_manager.py" \
+          --replace-fail 'get_object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")' \
+            'get_object("org.freedesktop.Notifications", "/org/freedesktop/Notifications", introspect=False)'
+        find "$out/lib/waydroid" -name __pycache__ -type d -exec rm -rf {} +
+      '';
   });
   runtimePkgs = [
     waydroidFixed
