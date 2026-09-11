@@ -97,9 +97,7 @@
     };
 
     pi-harness = {
-      # Unified amux workspace exposes both pi-harness and omp-harness
-      # packages from one repo (replaces the old pi-harness/omp-harness
-      # repos).
+      # amux workspace; Finix consumes only its pi-harness package.
       url = "git+ssh://git@github.com/y0usaf/amux.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -110,21 +108,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    omp-harness = {
-      # Same amux workspace as pi-harness; exposes
-      # packages.<system>.omp-harness and apps.<system>.default.
-      url = "git+ssh://git@github.com/y0usaf/amux.git?ref=main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     reasonix-flake = {
       url = "github:y0usaf/reasonix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Keep upstream's nixpkgs pin: its SBCL and generated Lisp package set
-    # must be updated together.
-    autolith.url = "github:lambda-symbolics/autolith";
+    # must be updated together. Use the CLINEDI pin fix until upstream includes it.
+    autolith.url = "github:y0usaf/autolith?ref=fix-clinedi-pin";
+
+    # Emeraldian TUI (Obsidian vault terminal UI). Pinned to the PR head
+    # until upstream merges iamrohithrnair/emeraldian#25; keep the upstream
+    # flake's tested nixpkgs pin (same autolith reasoning).
+    emeraldian.url = "github:y0usaf/emeraldian/4557d20ce664a12dec7d5acf3d76a467cf4972a4";
 
     linear-cli = {
       url = "github:y0usaf/linear-cli?ref=nix-flake";
@@ -154,8 +150,8 @@
     };
 
     ekko = {
-      # Desktop defaults: taskbar, window controls, menus, floating and snapping.
-      url = "github:y0usaf/ekko/7edc36049cc16de3881029d86912199aedbaf18c";
+      # Desktop defaults; overflow panes hide and components keep durable state.
+      url = "github:y0usaf/ekko/bcb350bc33318289ea22ba742f7cb165ac67a43e";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -164,8 +160,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Standalone tooling owns implementation; Finix only integrates it.
+    hermes-tools = {
+      url = "git+file:///home/y0usaf/dev/developing/hermes-tools?ref=main";
+      flake = false;
+    };
+
     hermes-bots-mod = {
-      url = "github:y0usaf/hermes-bots-mod";
+      url = "github:y0usaf/hermes-bots-mod/41b505132dc77f256faea85e2d36519f93238427";
       flake = false;
     };
 
@@ -182,24 +184,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    aphrodite-hermes = {
-      # Aphrodite CCR compression plugin for the Hermes gateway
-      # (github:PlayForm/Aphrodite-Hermes). Source-only: the repo has no
-      # flake.nix, so we consume it as a plain tree (like deno2nix).
-      # The prebuilt binary + dylib it normally auto-downloads are pinned
-      # separately (hash-verified vs. the release SHA256SUMS) in
-      # hosts/y0usaf-server/finix/hermes.nix — no runtime downloads on NixOS.
-      url = "github:PlayForm/Aphrodite-Hermes";
-      flake = false;
-    };
-
-    # moonshell is no longer a separate input: it merged into tomoe as
-    # its in-process shell subsystem (tomoe FUSION.md; the standalone
-    # repo is archived).
-    tomoe = {
-      url = "github:y0usaf/tomoe";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # The compositor, from this checkout. git+file keeps the copy to the
+    # committed tree (no 4 GB target/, no .git), and its own nixpkgs pin
+    # supplies the wlroots 0.20.1 the native ABI was built against, so it must
+    # not follow this flake's nixpkgs.
+    tomoe.url = "git+file:///home/y0usaf/dev/maintaining/tomoe";
 
     strictix = {
       url = "github:y0usaf/strictix";
