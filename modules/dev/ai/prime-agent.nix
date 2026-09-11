@@ -81,6 +81,13 @@ in {
             inherit (cfg) enabledModels;
             inherit (cfg) rlmMaxDepth;
             hideThinkingBlock = true;
+            # The shared catalog's default is a
+            # vercel-ai-gateway `model@endpoint` id, which only exists once
+            # this extension registers the provider; prime-agent's built-in
+            # catalog has no DeepSeek V4.1 and no explicit-endpoint variants.
+            packages = [
+              "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
+            ];
           }
           // cfg.settings;
       };

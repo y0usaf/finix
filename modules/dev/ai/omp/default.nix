@@ -94,7 +94,7 @@ in {
     advisor = {
       enable = lib.mkOption {
         type = lib.types.bool;
-        default = true;
+        default = false;
         description = "Advisor on/off. Merged into ~/.omp/agent/config.yml at activation (manzil merge; TUI rewrites survive, keys re-merge).";
       };
       model = lib.mkOption {
@@ -117,8 +117,9 @@ in {
 
     manzil.users."${config.user.name}".files =
       {
-        # Advisor settings merge into the mutable TUI-owned config.yml: omp
-        # persists /config edits here, so a symlink would break its atomic
+        # Native model defaults and advisor settings belong in config.yml;
+        # OMP ignores legacy settings.json when this file exists.
+        # omp persists /config edits here, so a symlink would break its atomic
         # save (temp-file + rename next to the target). merge keeps the file
         # writable, preserves TUI keys, and re-applies ours on every switch.
         ".omp/agent/config.yml" = {
@@ -126,7 +127,9 @@ in {
           format = "yaml";
           clobber = true;
           value = {
+            inherit (catalog) defaultThinkingLevel;
             advisor.enabled = cfg.advisor.enable;
+            modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
             modelRoles.advisor = cfg.advisor.model;
           };
         };
