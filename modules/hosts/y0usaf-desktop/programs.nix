@@ -28,5 +28,6 @@ _: {
     };
     qbittorrent.enable = true;
     stoat-desktop.enable = true;
+    emeraldian.enable = true;
   };
 }
