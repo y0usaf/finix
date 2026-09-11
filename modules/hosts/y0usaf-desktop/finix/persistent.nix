@@ -90,7 +90,6 @@ in {
     ../../../finix/desktop
     ./boot.nix
     ./graphical.nix
-    ./vbios-maintenance.nix
     ./hermes.nix
   ];
 

@@ -33,12 +33,15 @@
   # "/+NixOS default profile" (and the start/end comments). The per-gen
   # labels already say "finix" (bootspec.nix); patch the header to match.
   # Local override only — retire when upstream makes the name configurable.
+  # Hide the retired VBIOS specialisation in retained generations too;
+  # removing its module only stops new generations from including it.
 in {
   # installHook override: same replaceVarsWith as upstream, patched script.
   providers.bootloader.installHook = lib.mkForce (pkgs.replaceVarsWith {
     src = pkgs.runCommand "limine-install.py" {} ''
       sed -e 's/+NixOS {group_name}/+finix {group_name}/' \
           -e 's/NixOS boot entries/finix boot entries/g' \
+          -e '/specialisations = bootjson\[/a\    specialisations = {k: v for k, v in specialisations.items() if k != "vbios-maintenance"}' \
           ${flakeInputs.finix}/modules/programs/limine/limine-install.py > $out
     '';
     isExecutable = true;
