@@ -1,5 +1,5 @@
 # Declarative default-profile skill policy; never reconcile other profiles.
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, flakeInputs, ... }:
 let
   user = config.user.name;
   home = config.users.users.${user}.home;
@@ -12,7 +12,7 @@ let
   files = lib.concatMap (skill: map (file: {
     name = ".hermes/skills/${skill}/${file}";
     value = {
-      source = ./skills + "/${skill}/${file}";
+      source = "${flakeInputs.hermes-tools}/skills/${skill}/${file}";
       clobber = true; # Take over only these backed-up skill documents.
     };
   }) [ "SKILL.md" "references/detailed-guide.md" ]) skillPaths;

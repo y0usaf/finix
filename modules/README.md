@@ -1,6 +1,17 @@
 # Repository layout
 
-All implementation and build definitions belong under `modules/`, alongside the feature that owns them. This includes package definitions, scripts, checks, patches, and previews. Do not create root-level `nix/`, `tests/`, or `previews/` directories.
+This repository owns system integration and user configuration, not standalone
+application implementations. Headlong operations live in
+`~/dev/developing/headlong-ops`; Hermes tooling lives in
+`~/dev/developing/hermes-tools`. Consume project source through flake inputs.
+Keep runners, application patches, reusable skills, and their tests with the
+project that owns them. Runtime state and credentials stay outside both source
+repositories and the Nix store.
+
+Finix-owned integration and build definitions belong under `modules/`, alongside
+the feature that owns them. Small activation helpers and system-specific checks
+can live beside that wiring. Do not use this rule to move an application's code
+into Finix. Do not create root-level `nix/`, `tests/`, or `previews/` directories.
 
 The repository root retains flake inputs and lock metadata, licensing, and tool configuration. Its `flake.nix` delegates output construction to `modules/outputs.nix`; do not add derivation builders to the root flake.
 
