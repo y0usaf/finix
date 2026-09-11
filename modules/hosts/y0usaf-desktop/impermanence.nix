@@ -15,6 +15,7 @@
     "Celeste"
     "CassetteBeasts"
     "Brotato"
+    "Ultrapool"
     "Baba_Is_You"
     "binding of isaac rebirth"
     "HallsOfTorment"
