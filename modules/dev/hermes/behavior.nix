@@ -1,5 +1,5 @@
 # Reproduce the default-profile behavioral baseline without replacing runtime data.
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, flakeInputs, ... }:
 let
   user = config.user.name;
   home = config.users.users.${user}.home;
