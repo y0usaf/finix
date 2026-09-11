@@ -35,8 +35,16 @@
       ];
     };
 
-    etc."subuid".text = "${config.user.name}:100000:65536\n";
-    etc."subgid".text = "${config.user.name}:100000:65536\n";
+    # shadow's privileged newuidmap/newgidmap reject symlinked ID maps.
+    # Request ordinary root-owned files rather than /etc -> store symlinks.
+    etc."subuid" = {
+      text = "${config.user.name}:100000:65536\n";
+      mode = "0644";
+    };
+    etc."subgid" = {
+      text = "${config.user.name}:100000:65536\n";
+      mode = "0644";
+    };
   };
 
   security.wrappers = {
