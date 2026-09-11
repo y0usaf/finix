@@ -60,6 +60,7 @@ in {
         ekko-zellij-preview = preview.package;
         ekko-zellij-runtime = preview.runtime;
         hermes-project = tools.dev.hermes.projectRunner;
+        tomoe = inputs.tomoe.packages.${system}.default;
       };
 
     apps.${system}.ekko-zellij-preview = {

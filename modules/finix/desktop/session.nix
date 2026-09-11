@@ -21,8 +21,26 @@
   user = config.users.users.${userName};
   runtimeDir = "/run/user/${toString user.uid}";
 
-  # force_server_side_decorations landed upstream in tomoe.
   tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
+
+  # Seeded into ~/.config/tomoe/init.lisp on the first session launch and never
+  # rewritten: the compositor watches that file and reloads it as you edit,
+  # which a store path could not do. DP-4's EDID preferred mode is a
+  # conservative 3840x1080 compatibility mode, so the panel is asked for its
+  # native size.
+  starterPolicy = pkgs.writeText "tomoe-init.lisp" ''
+    ;; Seeded by ~/finix (modules/finix/desktop/session.nix). Yours now: the
+    ;; session will not rewrite it. Edits reload live; --no-watch disables that.
+    ;; Super+Return terminal, Super+Tab focus, Super+q close, Super+Shift+r
+    ;; reload, Super+Shift+Escape quit come from the shipped policy.
+    (define-extension "displays" () (snapshot state event)
+      (declare (ignore snapshot state event))
+      (values nil
+              (list (configure-output "DP-4" :mode '(5120 1440))
+                    (configure-output "HDMI-A-2" :mode '(1920 1080 60)
+                                         :position '(5120 0)))
+              nil))
+  '';
 in {
   # seatd: upstream defaults the service to runlevels [34], but finix
   # boots into runlevel 2 — the service is never eligible and initctl
@@ -32,17 +50,14 @@ in {
   finit.services.seatd.runlevels = lib.mkForce "234";
 
   # finix has the portal package/portal-linking module but not NixOS's
-  # per-desktop xdg.portal.config generator; install the tomoe policy here
-  # until the upstream option lands (the compositor's own shipped file uses
-  # default=* while retaining this same ScreenCast mapping).
-  xdg.portal.portals = [pkgs.xdg-desktop-portal-gtk tomoePkg];
+  # per-desktop xdg.portal.config generator. The gtk backend is the only
+  # implementation installed: tomoe implements no portal of its own, so screen
+  # sharing is still a gap until the compositor grows screencopy.
+  xdg.portal.portals = [pkgs.xdg-desktop-portal-gtk];
 
-  # The picker moved into the compositor (require("screencast") in init.lua),
-  # so no TOMOE_PORTAL_CHOOSER wrapper is exported here.
   environment.etc."xdg/xdg-desktop-portal/tomoe-portals.conf".text = ''
     [preferred]
     default=gtk
-    org.freedesktop.impl.portal.ScreenCast=tomoe
   '';
 
   # seatd-only hosts need one stable runtime-dir owner. Elogind hosts create it
@@ -74,8 +89,8 @@ in {
     systemPackages = [
       tomoePkg
       (pkgs.writeShellScriptBin "tomoe-session" ''
-        # Mirror of the NixOS tomoe-session shim; session env stays scoped to
-        # the compositor process, never global.
+        # The session for this compositor; env stays scoped to the process
+        # tree, never global.
         export XDG_CURRENT_DESKTOP=tomoe
         export XDG_SESSION_TYPE=wayland
         export NIXOS_OZONE_WL=1
@@ -131,12 +146,19 @@ in {
         # portals dbus-activate. The polkit agent must live on that same bus,
         # so it starts inside the wrapper (NixOS ran it as a systemd user
         # service on graphical-session.target).
-        # xwayland-satellite (started by tomoe's process.once) claims :0 —
-        # export it so terminals + steam inherit X availability.
-        export DISPLAY=:0
+        # No DISPLAY here: the compositor exports its own Xwayland display to
+        # this process tree, and an inherited one would name another session.
+        # Seed the policy file once. install(1) keeps it writable; copying the
+        # store file would leave it read-only and break editing and reload.
+        policy="$HOME/.config/tomoe/init.lisp"
+        if [ ! -e "$policy" ]; then
+          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$policy")"
+          ${pkgs.coreutils}/bin/install -m 0644 ${starterPolicy} "$policy"
+          echo "tomoe-session: seeded $policy" >&2
+        fi
         exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
           ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
-          exec ${lib.getExe tomoePkg} --backend tty "$@"
+          exec ${lib.getExe tomoePkg} --backend drm "$@"
         ''} "$@"
       '')
       # Session companions (NixOS shim parity).
