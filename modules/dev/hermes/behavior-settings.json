@@ -1,5 +1,10 @@
 {
-  "agent.reasoning_effort": "low",
+  "model.default": "deepseek/deepseek-v4.1-flash",
+  "model.provider": "ai-gateway",
+  "agent.reasoning_effort": "ultra",
+  "agent.disabled_toolsets": ["image_gen", "video", "video_gen", "tts", "stt", "x_search"],
+  "approvals.mode": "off",
+  "browser.use_real_profile": true,
   "auxiliary.title_generation.enabled": false,
   "auxiliary.background_review.enabled": false,
   "curator.enabled": false,
