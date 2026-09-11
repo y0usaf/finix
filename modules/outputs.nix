@@ -60,6 +60,7 @@ in {
         ekko-zellij-preview = preview.package;
         ekko-zellij-runtime = preview.runtime;
         hermes-project = tools.dev.hermes.projectRunner;
+        p4g-setup = cfg.hosts.y0usaf-desktop.config.user.gaming.p4g.package;
         tomoe = inputs.tomoe.packages.${system}.default;
       };
 
