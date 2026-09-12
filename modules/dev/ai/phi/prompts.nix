@@ -14,7 +14,7 @@
   lib,
   ...
 }: let
-  body = config.user.dev.prompts.body;
+  inherit (config.user.dev.prompts) body;
 
   phiSystemPrompt = ''
     <role>

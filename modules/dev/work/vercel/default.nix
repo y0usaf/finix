@@ -5,7 +5,6 @@
   ...
 }: let
   cfg = config.user.dev.work.vercel;
-  version = "59.5.0";
 in {
   config = lib.mkIf cfg.enable {
     assertions = [

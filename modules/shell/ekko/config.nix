@@ -6,7 +6,7 @@
   ...
 }: let
   inherit (config.user.shell) ekko;
-  package = ekko.package;
+  inherit (ekko) package;
 in {
   options.user.shell.ekko = {
     enable = lib.mkEnableOption "Ekko V2 terminal multiplexer";

@@ -7,7 +7,7 @@
   # Shared behavioral body (role, tools, reader/style/explain/work, style rules)
   # reused by the phi coding agent. Source of truth:
   # modules/dev/ai/phi/prompt-body.nix.
-  body = config.user.dev.prompts.body;
+  inherit (config.user.dev.prompts) body;
 
   # Harness-agnostic core. Everything a coding assistant needs regardless of
   # which harness loads it. Harness-specific sections are appended below; the

@@ -2,7 +2,7 @@
 #
 # Browser paths (firefox/librewolf/discord/vesktop) are persisted
 # unconditionally: a disabled app just leaves an empty dir on /persist.
-{...}: let
+_: let
   gameSaves = [
     "dolphin-emu"
     "Cemu"
