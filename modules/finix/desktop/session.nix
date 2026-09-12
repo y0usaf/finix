@@ -23,25 +23,18 @@
 
   tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
 
-  # Seeded into ~/.config/tomoe/init.lisp on the first session launch and never
-  # rewritten: the compositor watches that file and reloads it as you edit,
-  # which a store path could not do. DP-4's EDID preferred mode is a
-  # conservative 3840x1080 compatibility mode, so the panel is asked for its
-  # native size.
-  starterPolicy = pkgs.writeText "tomoe-init.lisp" ''
-    ;; Seeded by ~/finix (modules/finix/desktop/session.nix). Yours now: the
-    ;; session will not rewrite it. Edits reload live; --no-watch disables that.
-    ;; Super+Return terminal, Super+Tab focus, Super+q close, Super+Shift+r
-    ;; reload, Super+Shift+Escape quit come from the shipped policy.
-    (define-extension "displays" () (snapshot state event)
-      (declare (ignore snapshot state event))
-      (values nil
-              (list (configure-output "DP-4" :mode '(5120 1440))
-                    (configure-output "HDMI-A-2" :mode '(1920 1080 60)
-                                         :position '(5120 0)))
-              nil))
-  '';
+  # The session installs both policy files from the flake on every launch, so
+  # the flake is the source of truth for their content. install(1) keeps them
+  # writable; a store symlink would be read-only and break the compositor's
+  # edit-and-reload watch (it stats the file the runtime loaded).
+  #
+  # lisp-config.nix serializes the values, keeps the policy code in Lisp, and
+  # fingerprints the complete generated deck so its changes trigger reloads.
+  deckPolicy = pkgs.writeText "tomoe-deck.lisp" config.user.ui.tomoe.lisp.deckText;
+  starterPolicy = pkgs.writeText "tomoe-init.lisp" config.user.ui.tomoe.lisp.initText;
 in {
+  imports = [./lisp-config.nix];
+
   # seatd: upstream defaults the service to runlevels [34], but finix
   # boots into runlevel 2 — the service is never eligible and initctl
   # shows a misleading "halted (exit 0)". Its command (`-n %n` + notify:s6)
@@ -148,14 +141,15 @@ in {
         # service on graphical-session.target).
         # No DISPLAY here: the compositor exports its own Xwayland display to
         # this process tree, and an inherited one would name another session.
-        # Seed the policy file once. install(1) keeps it writable; copying the
-        # store file would leave it read-only and break editing and reload.
+        # Install the policy files on every session start: the flake is the
+        # source of truth for their content. install(1) keeps them writable;
+        # copying the store files would leave them read-only and break editing
+        # and the live reload that editing drives.
         policy="$HOME/.config/tomoe/init.lisp"
-        if [ ! -e "$policy" ]; then
-          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$policy")"
-          ${pkgs.coreutils}/bin/install -m 0644 ${starterPolicy} "$policy"
-          echo "tomoe-session: seeded $policy" >&2
-        fi
+        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/tomoe"
+        ${pkgs.coreutils}/bin/install -m 0644 ${starterPolicy} "$policy"
+        deck="$HOME/.config/tomoe/deck.lisp"
+        ${pkgs.coreutils}/bin/install -m 0644 ${deckPolicy} "$deck"
         exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
           ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
           exec ${lib.getExe tomoePkg} --backend drm "$@"
