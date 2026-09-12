@@ -20,7 +20,7 @@ let
     set -eu
     export HOME=${lib.escapeShellArg home}
     export HERMES_HOME=${lib.escapeShellArg "${home}/.hermes"}
-    exec ${config.user.dev.hermes.packages.hermesFull}/bin/hermes config set --force \
+    exec ${config.user.dev.ai.hermes.packages.hermesFull}/bin/hermes config set --force \
       skills.disabled ${lib.escapeShellArg (builtins.toJSON disabled)}
   '';
 in {

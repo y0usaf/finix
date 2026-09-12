@@ -8,10 +8,10 @@
     crush.enable = lib.mkDefault true;
     fx.enable = lib.mkDefault true;
     work = {
-      agent-slack.enable = lib.mkDefault true;
       gws.enable = lib.mkDefault true;
       linear-cli.enable = lib.mkDefault true;
     };
+    ai.agent-slack.enable = lib.mkDefault true;
     pi.enable = lib.mkDefault true;
     rtk.enable = lib.mkDefault true;
     omp.enable = lib.mkDefault true;

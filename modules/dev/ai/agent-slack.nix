@@ -4,11 +4,11 @@
   pkgs,
   ...
 }: {
-  options.user.dev.work.agent-slack = {
+  options.user.dev.ai.agent-slack = {
     enable = lib.mkEnableOption "agent-slack CLI";
   };
 
-  config = lib.mkIf config.user.dev.work.agent-slack.enable {
+  config = lib.mkIf config.user.dev.ai.agent-slack.enable {
     environment.systemPackages = [
       (pkgs.stdenvNoCC.mkDerivation {
         pname = "agent-slack";
