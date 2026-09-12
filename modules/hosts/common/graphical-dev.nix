@@ -3,6 +3,7 @@
     autolith.enable = lib.mkDefault true;
     claude-code.enable = lib.mkDefault true;
     codex.enable = lib.mkDefault true;
+    devin.enable = lib.mkDefault true;
     android-tools.enable = lib.mkDefault true;
     crush.enable = lib.mkDefault true;
     fx.enable = lib.mkDefault true;
