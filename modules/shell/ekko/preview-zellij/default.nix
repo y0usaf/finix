@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
   ekko = flakeInputs.ekko-zellij-preview;
   previewPkgs = ekko.inputs.nixpkgs.legacyPackages.${system};
   runtime = ekko.packages.${system}.default;
