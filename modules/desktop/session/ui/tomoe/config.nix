@@ -23,6 +23,9 @@
   # force_server_side_decorations landed upstream in tomoe (8e0bd50); the local
   # patch that used to carry it is gone — the packaged default has it now.
   tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  # The old Rust+Lua compositor, from the separate tomoe-lua input pin. Kept
+  # out of the let's single tomoePkg so the two can never be conflated.
+  tomoeLuaPkg = flakeInputs.tomoe-lua.packages."${pkgs.stdenv.hostPlatform.system}".default;
   inherit (config.user.ui.tomoe) bar;
   # tomoe only fingerprints init.lua for config reloads (crates/tomoe/src/main.rs
   # polls its canonical path + mtime every 500ms; state.rs:69-80). The
@@ -54,9 +57,27 @@
   # generators/toLua.nix.
 in {
   config = lib.mkIf config.user.ui.tomoe.enable {
-    environment.systemPackages = [
-      tomoePkg
-      (pkgs.writeShellScriptBin "tomoe-session" ''
+    environment.systemPackages =
+      [
+        tomoePkg
+        pkgs.grim
+        pkgs.slurp
+        pkgs.wl-clipboard-rs
+        pkgs.jq
+        pkgs.swaybg
+        pkgs.xwayland-satellite
+      ]
+      ++ lib.optional config.user.ui.tomoeLua.enable
+      # Manual fallback session: the OLD Rust+Lua tomoe (flake input
+      # `tomoe-lua`), for when the primary Lisp compositor misbehaves. The
+      # name is deliberately distinct — the bare `tomoe-session` is the Lisp
+      # shim, and finix's env builder sets ignoreCollisions = true, so a
+      # same-named shim here would be silently dropped.
+      # The compositor package itself is NOT added to systemPackages: that
+      # would put a second derivation named `tomoe` (also shipping bin/tomoe)
+      # on PATH, which the same collision setting would resolve silently and
+      # could change which compositor the PRIMARY session runs.
+      (pkgs.writeShellScriptBin "tomoe-lua-session" ''
         export XDG_CURRENT_DESKTOP=tomoe
         export XDG_SESSION_TYPE=wayland
         export NIXOS_OZONE_WL=1
@@ -74,16 +95,26 @@ in {
         # from the glvnd client-extension union, which smithay requires to probe the
         # render device — tomoe then finds no renderer on ANY GPU and comes up with
         # zero outputs (black screen). run-tty.sh never set these and works.
+
+        # No logind on finix (seatd-based): guarantee the runtime dir even if
+        # the profile.d hook was skipped (e.g. exec'd from a bare shell).
+        export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
+        [ -d "$XDG_RUNTIME_DIR" ] || {
+          echo "tomoe-lua-session: $XDG_RUNTIME_DIR missing (xdg-runtime-dir task failed?)" >&2
+          exit 1
+        }
+
         cd "$HOME"
-        exec ${lib.getExe tomoePkg} --backend tty "$@"
-      '')
-      pkgs.grim
-      pkgs.slurp
-      pkgs.wl-clipboard-rs
-      pkgs.jq
-      pkgs.swaybg
-      pkgs.xwayland-satellite
-    ];
+        # No logind → no per-login session bus; dbus-run-session gives the
+        # compositor AND everything it spawns one session bus, on which the
+        # portals dbus-activate. The polkit agent must live on that same bus,
+        # so it starts inside the wrapper. Mirrors the Lisp shim in
+        # modules/finix/desktop/session.nix.
+        exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-lua-session-inner" ''
+          ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
+          exec ${lib.getExe tomoeLuaPkg} --backend tty "$@"
+        ''} "$@"
+      '');
 
     manzil.users."${config.user.name}".files.".config/tomoe/init.lua" = {
       text =

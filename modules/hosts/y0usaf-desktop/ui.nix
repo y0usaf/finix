@@ -2,6 +2,9 @@
   user.ui = {
     cudaterm.enable = true;
     monstar.enable = lib.mkForce false;
+    # Manual fallback to the old Rust+Lua compositor: adds the
+    # `tomoe-lua-session` shim on PATH; the primary Lisp session is unchanged.
+    tomoeLua.enable = true;
     tomoe = {
       displays = {
         # 32:9 panel on DP-4, native 5120x1440@239.761. Its EDID preferred
