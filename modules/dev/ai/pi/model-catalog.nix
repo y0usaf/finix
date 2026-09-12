@@ -24,13 +24,13 @@
         # is the cheapest routable endpoint ($0.22 in / $0.66 out per M, $0.007
         # cache read, 1.048M ctx); `@deepinfra` ($0.30/$1.20) is the working
         # alternative.
-        defaultProvider = "vercel-ai-gateway";
-        defaultModel = "deepseek/deepseek-v4.1-flash@fireworks";
+        defaultProvider = "opencode-go";
+        defaultModel = "deepseek-v4.1-flash";
         defaultThinkingLevel = "max";
 
         enabledModels = [
           "vercel-ai-gateway/deepseek/deepseek-v4.1-flash@fireworks"
-          "opencode-go/deepseek-flash"
+          "opencode-go/deepseek-v4.1-flash"
           "openai-codex/gpt-6-astra"
           "vercel-ai-gateway/zai/glm-5.3-flash@wafer"
           "vercel-ai-gateway/openai/gpt-5.6-luna@azure"
@@ -43,45 +43,6 @@
           providers.vercel-ai-gateway.modelOverrides."zai/glm-5.3-flash" = {
             compat.vercelGatewayRouting.order = ["runware" "wafer"];
           };
-
-          # opencode-go serves `deepseek-flash` (DeepSeek V4.1 Flash, released
-          # 2026-09-10), which the models.dev snapshot bundled with pi 0.85.1
-          # predates. Upsert it onto the builtin provider; auth and the rest of
-          # the builtin catalog stay untouched. Metadata mirrors the live
-          # catalog and the sibling `deepseek-v4-flash` compat block in
-          # packages/ai/src/providers/data/opencode-go.json.
-          providers.opencode-go.models = [
-            {
-              id = "deepseek-flash";
-              name = "DeepSeek V4.1 Flash";
-              api = "openai-completions";
-              baseUrl = "https://opencode.ai/zen/go/v1";
-              reasoning = true;
-              input = ["text" "image"];
-              contextWindow = 1000000;
-              maxTokens = 384000;
-              thinkingLevelMap = {
-                minimal = null;
-                low = "low";
-                medium = null;
-                high = "high";
-                max = "max";
-              };
-              compat = {
-                supportsStore = false;
-                supportsDeveloperRole = false;
-                maxTokensField = "max_tokens";
-                requiresReasoningContentOnAssistantMessages = true;
-                thinkingFormat = "deepseek";
-              };
-              cost = {
-                input = 0.15;
-                output = 0.6;
-                cacheRead = 0.003;
-                cacheWrite = 0;
-              };
-            }
-          ];
 
           providers.celeris = {
             name = "Celeris";
