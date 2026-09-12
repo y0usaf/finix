@@ -18,6 +18,7 @@
         (final: prev: {
           rush = inputs.rush.packages.${system}.default;
           monstar = inputs.monstar.packages.${system}.default;
+          lisp-sh = inputs.lisp-sh.packages.${system}.default;
         })
         (_: prev: let
           prevObsPlugins = prev.obs-studio-plugins;
