@@ -14,7 +14,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    cudaterm.url = "github:y0usaf/cudaterm/7a065b33a395ac8278009caa97d941b03f7863af";
+    lisp-sh = {
+      # Local checkout (no remote yet). The tree is clean and committed, which
+      # a git input requires; switch to the repo URL once it is published.
+      url = "git+file:///home/y0usaf/dev/sandbox/lisp-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    cudaterm.url = "github:y0usaf/cudaterm";
 
     monstar = {
       # Wayland terminal emulator built on libghostty (CPU rendered, like
@@ -31,6 +38,16 @@
     bolo = {
       # Private repo: ssh fetcher (same as phi).
       url = "git+ssh://git@github.com/y0usaf/bolo.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    baat = {
+      # Sibling of bolo (duplex voice bot). No remote yet, so this is the
+      # local checkout — its tree is clean and committed, which a git input
+      # requires. Switching to the private-repo ssh fetcher used by bolo is a
+      # one-line change once published:
+      #   url = "git+ssh://git@github.com/y0usaf/baat.git";
+      url = "git+file:///home/y0usaf/dev/developing/baat";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -151,7 +168,7 @@
 
     ekko = {
       # Desktop defaults; overflow panes hide and components keep durable state.
-      url = "github:y0usaf/ekko/bcb350bc33318289ea22ba742f7cb165ac67a43e";
+      url = "github:y0usaf/ekko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -189,6 +206,15 @@
     # supplies the wlroots 0.20.1 the native ABI was built against, so it must
     # not follow this flake's nixpkgs.
     tomoe.url = "git+file:///home/y0usaf/dev/maintaining/tomoe";
+
+    # Fallback compositor: the last Rust+Lua-era revision of the same
+    # checkout, before the Lisp rewrite. `shallow=1` is required — the local
+    # clone is shallow, and a bare ?rev= URL is rejected ("shallow
+    # repositories are only allowed when 'shallow = true;' is specified").
+    # No nixpkgs.follows: this rev's build was verified against its own
+    # nixpkgs pin (e52c192be9d7b2c4bd4aed326c8731b35f8bb75c); following ours
+    # would move it onto an unverified build path.
+    tomoe-lua.url = "git+file:///home/y0usaf/dev/maintaining/tomoe?rev=ae0cd20d92dd00f1694745e1b2af3da05ca0e103&shallow=1";
 
     strictix = {
       url = "github:y0usaf/strictix";
