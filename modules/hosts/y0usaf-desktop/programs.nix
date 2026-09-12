@@ -19,6 +19,11 @@ _: {
         finix = ["fee nix" "finnix" "fi nix"];
       };
     };
+    baat = {
+      enable = true;
+      # Same provider choice as bolo on this host.
+      provider = "cuda";
+    };
     creative.enable = true;
     media.enable = true;
     cmus.enable = true;
