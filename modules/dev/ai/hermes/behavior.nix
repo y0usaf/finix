@@ -9,7 +9,7 @@ let
     export HOME=${lib.escapeShellArg home}
     export HERMES_HOME=${lib.escapeShellArg "${home}/.hermes"}
     ${lib.concatStringsSep "\n" (lib.mapAttrsToList (key: value:
-      "${config.user.dev.hermes.packages.hermesFull}/bin/hermes config set --force ${lib.escapeShellArg key} ${lib.escapeShellArg (if builtins.isString value then value else builtins.toJSON value)}"
+      "${config.user.dev.ai.hermes.packages.hermesFull}/bin/hermes config set --force ${lib.escapeShellArg key} ${lib.escapeShellArg (if builtins.isString value then value else builtins.toJSON value)}"
     ) settings)}
   '';
 in {
