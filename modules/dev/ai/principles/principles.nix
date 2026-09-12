@@ -3,11 +3,11 @@
   lib,
   ...
 }: {
-  options.user.dev.principles = {
+  options.user.dev.ai.principles = {
     enable = lib.mkEnableOption "~/dev design principles as AGENTS.md";
   };
 
-  config = lib.mkIf config.user.dev.principles.enable {
+  config = lib.mkIf config.user.dev.ai.principles.enable {
     manzil.users."${config.user.name}".files = {
       # The principles live inline as a Nix string: this repo should stay
       # nix-only. Deployed as AGENTS.md so that agents walking up from cwd

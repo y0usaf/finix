@@ -7,13 +7,16 @@ _: {
     crush.enable = true;
     fx.enable = true;
     work = {
-      agent-slack.enable = true;
       aws-cli.enable = true;
       gws.enable = true;
       linear-cli.enable = true;
       ntn.enable = true;
       ramp.enable = true;
       vercel.enable = true;
+    };
+    ai = {
+      agent-slack.enable = true;
+      principles.enable = true;
     };
     pi = {
       enable = true;
@@ -64,7 +67,6 @@ _: {
       # server — without this finit can't fork the daemon
       group = "users";
     };
-    principles.enable = true;
     docker.enable = true;
     gcloud.enable = true;
     nvim.enable = true;

@@ -7,12 +7,12 @@
   flakeInputs,
   ...
 }: let
-  inherit (config.user.dev.hermes.packages) hermesFull hermesDesktop botsMod;
+  inherit (config.user.dev.ai.hermes.packages) hermesFull hermesDesktop botsMod;
 in {
   environment.systemPackages = [
     hermesFull
     hermesDesktop
-    config.user.dev.hermes.projectRunner
+    config.user.dev.ai.hermes.projectRunner
     (pkgs.callPackage "${flakeInputs.hermes-desktop-terminal}/package.nix" {
       inherit hermesDesktop;
       hermesAgent = hermesFull;

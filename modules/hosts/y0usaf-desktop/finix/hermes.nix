@@ -1,3 +1,3 @@
 {...}: {
-  imports = [../../../dev/hermes];
+  imports = [../../../dev/ai/hermes];
 }
