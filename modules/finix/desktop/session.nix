@@ -23,6 +23,25 @@
 
   tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
 
+  # tomoe's ScreenCast portal backend ships in the *Lua* compositor's package
+  # (the separate tomoe-lua input), not in the Lisp one. Only its portal
+  # metadata is installed: adding the whole package would put a second
+  # derivation shipping bin/tomoe (and bin/moonshell) into the system profile,
+  # where ignoreCollisions silently keeps one — possibly changing which
+  # compositor the bare `tomoe` command names.
+  tomoeLuaPkg = flakeInputs.tomoe-lua.packages."${sys}".default;
+  tomoePortalPkg =
+    pkgs.runCommand "tomoe-portal" {
+      meta.description = "xdg-desktop-portal ScreenCast backend metadata for tomoe";
+    } ''
+      install -Dm644 ${tomoeLuaPkg}/share/xdg-desktop-portal/portals/tomoe.portal \
+        $out/share/xdg-desktop-portal/portals/tomoe.portal
+      install -Dm644 ${tomoeLuaPkg}/share/xdg-desktop-portal/tomoe-portals.conf \
+        $out/share/xdg-desktop-portal/tomoe-portals.conf
+      install -Dm644 ${tomoeLuaPkg}/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service \
+        $out/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service
+    '';
+
   # The session installs both policy files from the flake on every launch, so
   # the flake is the source of truth for their content. install(1) keeps them
   # writable; a store symlink would be read-only and break the compositor's
@@ -43,14 +62,28 @@ in {
   finit.services.seatd.runlevels = lib.mkForce "234";
 
   # finix has the portal package/portal-linking module but not NixOS's
-  # per-desktop xdg.portal.config generator. The gtk backend is the only
-  # implementation installed: tomoe implements no portal of its own, so screen
-  # sharing is still a gap until the compositor grows screencopy.
-  xdg.portal.portals = [pkgs.xdg-desktop-portal-gtk];
+  # per-desktop xdg.portal.config generator. Two implementations are linked:
+  # gtk (file choosers, notifications, print) and tomoe's own ScreenCast
+  # backend, which exists only in the Lua compositor's package — the Lisp
+  # tomoe has no portal yet, so screensharing works in `tomoe-lua-session`
+  # and not in the Lisp session.
+  #
+  # Gated on the fallback session being enabled: the frontend advertises
+  # ScreenCast from the portal definitions it finds, and a backend whose
+  # compositor never runs can only fail every request.
+  xdg.portal.portals =
+    [pkgs.xdg-desktop-portal-gtk]
+    ++ lib.optional config.user.ui.tomoeLua.enable tomoePortalPkg;
 
+  # Per-desktop routing for XDG_CURRENT_DESKTOP=tomoe: ScreenCast to tomoe,
+  # everything else (file dialogs, notifications) to whichever other backend
+  # is installed. Same content the tomoe package ships at
+  # share/xdg-desktop-portal/tomoe-portals.conf; both copies exist so the route
+  # holds no matter which config/data dir xdg-desktop-portal consults first.
   environment.etc."xdg/xdg-desktop-portal/tomoe-portals.conf".text = ''
     [preferred]
-    default=gtk
+    default=*
+    org.freedesktop.impl.portal.ScreenCast=tomoe
   '';
 
   # seatd-only hosts need one stable runtime-dir owner. Elogind hosts create it

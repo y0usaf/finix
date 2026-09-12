@@ -39,4 +39,11 @@
       description = "Extra Lua appended to the generated ~/.config/tomoe/init.lua.";
     };
   };
+
+  # Manual fallback: deploy the `tomoe-lua-session` shim that runs the old
+  # Rust+Lua compositor (flake input `tomoe-lua`). Off by default — enabling
+  # it only adds that shim to systemPackages; the primary Lisp session is
+  # untouched.
+  options.user.ui.tomoeLua.enable =
+    lib.mkEnableOption "the Rust+Lua tomoe fallback session (tomoe-lua-session)";
 }
