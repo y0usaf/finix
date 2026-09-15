@@ -42,16 +42,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    baat = {
-      # Sibling of bolo (duplex voice bot). No remote yet, so this is the
-      # local checkout — its tree is clean and committed, which a git input
-      # requires. Switching to the private-repo ssh fetcher used by bolo is a
-      # one-line change once published:
-      #   url = "git+ssh://git@github.com/y0usaf/baat.git";
-      url = "git+file:///home/y0usaf/dev/developing/baat";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     grok-bot = {
       # Private repo: ssh fetcher (same as bolo). Unfree redistributed
       # Anysphere/XAI artifacts, kept private.
