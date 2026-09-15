@@ -2139,11 +2139,13 @@
         "narHash": "sha256-LvVAyk+0K9RezZspzrwQurvMnfIWn6PMAdiN9nwGHVk=",
         "ref": "refs/heads/main",
         "rev": "2ab42d0ebc1cea3166bb4de2b48923c20a8867d6",
-        "revCount": 80,
+        "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
       },
       "original": {
+        "rev": "2ab42d0ebc1cea3166bb4de2b48923c20a8867d6",
+        "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
       }

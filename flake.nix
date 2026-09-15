@@ -205,7 +205,13 @@
     # committed tree (no 4 GB target/, no .git), and its own nixpkgs pin
     # supplies the wlroots 0.20.1 the native ABI was built against, so it must
     # not follow this flake's nixpkgs.
-    tomoe.url = "git+file:///home/y0usaf/dev/maintaining/tomoe";
+    #
+    # Pinned by rev like tomoe-lua: a ref-tracking git+file input cannot be
+    # locked while this checkout is dirty, and `nix flake update` then refuses
+    # to write the lock for the whole flake ("has an unlocked input"). Bump
+    # after committing: `git -C ~/dev/maintaining/tomoe rev-parse HEAD` and
+    # replace the rev below.
+    tomoe.url = "git+file:///home/y0usaf/dev/maintaining/tomoe?rev=2ab42d0ebc1cea3166bb4de2b48923c20a8867d6&shallow=1";
 
     # Fallback compositor: the last Rust+Lua-era revision of the same
     # checkout, before the Lisp rewrite. `shallow=1` is required — the local
