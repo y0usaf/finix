@@ -64,10 +64,10 @@
     shells = [
       "/run/current-system/sw/bin/rush"
       "${pkgs.rush}/bin/rush"
-      # lisp-sh installs as an alternative shell. The login shell stays rush
-      # until lisp-sh grows line editing, history and completion.
-      "/run/current-system/sw/bin/lisp-sh"
-      "${pkgs.lisp-sh}/bin/lisp-sh"
+      # ash installs as an alternative shell. The login shell stays rush
+      # until ash grows line editing, history and completion.
+      "/run/current-system/sw/bin/ash"
+      "${pkgs.ash}/bin/ash"
     ];
     systemPackages = [
       pkgs.curl
@@ -77,7 +77,7 @@
       pkgs.util-linux
       pkgs.vim
       pkgs.rush
-      pkgs.lisp-sh
+      pkgs.ash
     ];
   };
 
