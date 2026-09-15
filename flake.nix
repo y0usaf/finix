@@ -178,10 +178,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Standalone tooling owns implementation; Finix only integrates it.
-    hermes-tools = {
-      url = "git+file:///home/y0usaf/dev/developing/hermes-tools?ref=main";
-      flake = false;
+    # `line`: the SBCL agent harness that Hermes' slope-line plugin dispatches to.
+    # `path:` like hermes-desktop-terminal, because the checkout is under active
+    # development and a git input cannot be locked while its tree is dirty
+    # ("has an unlocked input"). Re-run `nix flake lock --update-input slope`
+    # after editing slope; switch to git+file:// once its work is committed.
+    slope = {
+      url = "path:/home/y0usaf/dev/developing/slope";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     hermes-bots-mod = {
