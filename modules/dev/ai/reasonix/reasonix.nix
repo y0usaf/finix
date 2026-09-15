@@ -147,6 +147,19 @@ in {
 
     manzil.users."${config.user.name}".files =
       {
+        # Reasonix reads user-scoped standing instructions from
+        # $REASONIX_STATE_HOME (~/.reasonix by default) using the recognized
+        # document names REASONIX.md / AGENTS.md / CLAUDE.md
+        # (internal/instruction/resolver.go ScopeUser; internal/memory/doc.go),
+        # and folds them into the durable system-prompt prefix. readConfinedDocument
+        # opens through os.OpenRoot(scopeDir) and rejects a symlink whose target
+        # resolves outside that dir (document_symlink_escape), so a manzil store
+        # symlink would be dropped; deploy a real file with type = "copy".
+        ".reasonix/REASONIX.md" = {
+          type = "copy";
+          text = config.user.dev.prompts.noTests;
+        };
+
         # Provider + default model, merged into the mutable ~/.reasonix/config.toml
 
         # at activation (manzil merge; login rewrites survive, patches re-merge).

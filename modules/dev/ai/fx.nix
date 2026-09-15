@@ -13,6 +13,18 @@
     ];
 
     manzil.users."${config.user.name}".files = {
+      # Oh My Fx (the deployed `omfx` binary) both reads and rejects a global
+      # rules file at $HOME/.fx/AGENTS.md: src/builtins/context.zig loads it as
+      # <global-rules> on the initial context, but loadRule() omits a symlink
+      # whose target resolves outside the file's own directory. A manzil
+      # symlink into the Nix store is outside ~/.fx, so it would be silently
+      # dropped; deploy a real file (type = "copy") instead.
+      ".fx/AGENTS.md" = {
+        type = "copy";
+        clobber = true;
+        text = config.user.dev.prompts.noTests;
+      };
+
       # fx rejects settings symlinked into the Nix store as
       # durable_path_unsafe, so deploy these as real JSON files rather than
       # generated-file symlinks.

@@ -213,6 +213,9 @@ in {
               requested. Cite relevant paths and distinguish facts from assumptions.
             - Skip greetings, filler, repeated plans, recaps, and unsolicited
               next steps. Add detail when the task requires it.
+
+            Tests:
+            ${config.user.dev.prompts.noTests}
           '';
         };
       };

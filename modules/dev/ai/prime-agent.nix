@@ -96,6 +96,11 @@ in {
         generator = toJSON;
         value = cfg.models;
       };
+
+      # Prime Agent is pi-based: it appends APPEND_SYSTEM.md after its native
+      # default system prompt (getAgentDir()/APPEND_SYSTEM.md), so the shared
+      # no-test policy rides along without replacing its built-in guidance.
+      ".prime/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.noTests}\n";
     };
   };
 }

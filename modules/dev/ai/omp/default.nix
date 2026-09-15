@@ -153,6 +153,10 @@ in {
           generator = toJSON;
           value = catalog.models;
         };
+        # omp is a pi fork: APPEND_SYSTEM.md is appended after its native default
+        # system prompt (getAgentDir()/APPEND_SYSTEM.md), so the shared no-test
+        # policy rides along without replacing omp's built-in guidance.
+        ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.noTests}\n";
       }
       // lib.listToAttrs (lib.mapAttrsToList ruleFile cfg.ttsrRules);
   };
