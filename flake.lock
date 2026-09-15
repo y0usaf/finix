@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "ash": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789333596,
+        "narHash": "sha256-HdV6Rt1hA6pkJuep6xxIli0KogxFkWnT7ops+DQQl/Q=",
+        "ref": "refs/heads/main",
+        "rev": "df08ccca75767436105525c7c5174c30a8b36ef7",
+        "revCount": 12,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/ash.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/ash.git"
+      }
+    },
     "autolith": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -900,26 +920,6 @@
         "type": "github"
       }
     },
-    "lisp-sh": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789191318,
-        "narHash": "sha256-cBO5/SwHcH7bHaNOCHXnzUW0R1zl4j3lHPd4Vf0F/rc=",
-        "ref": "refs/heads/main",
-        "rev": "0d09cb8e176053fec9d6a046bde043c8902db0cc",
-        "revCount": 3,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/sandbox/lisp-shell"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/sandbox/lisp-shell"
-      }
-    },
     "manzil": {
       "inputs": {
         "nixpkgs": [
@@ -1736,6 +1736,7 @@
     },
     "root": {
       "inputs": {
+        "ash": "ash",
         "autolith": "autolith",
         "baat": "baat",
         "bolo": "bolo",
@@ -1757,7 +1758,6 @@
         "hermes-desktop-terminal": "hermes-desktop-terminal",
         "hermes-tools": "hermes-tools",
         "linear-cli": "linear-cli",
-        "lisp-sh": "lisp-sh",
         "manzil": "manzil",
         "monstar": "monstar",
         "nh": "nh",

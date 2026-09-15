@@ -14,10 +14,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    lisp-sh = {
-      # Local checkout (no remote yet). The tree is clean and committed, which
-      # a git input requires; switch to the repo URL once it is published.
-      url = "git+file:///home/y0usaf/dev/sandbox/lisp-shell";
+    ash = {
+      # Private repo: ssh fetcher (same as bolo). The SBCL "Agent Shell".
+      # `github:` cannot resolve it: the anonymous API returns 404, which
+      # fails `nix flake update` even though the locked rev stays fetchable.
+      url = "git+ssh://git@github.com/y0usaf/ash.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
