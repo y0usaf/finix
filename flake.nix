@@ -221,13 +221,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Installs the ARM native bridge required by ARM-only Android apps such as
-    # TFT in the x86_64 Waydroid container.
-    waydroidscript = {
-      url = "github:casualsnek/waydroid_script";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Disposable Zellij-profile preview; implementation lives in its Ekko module.
     ekko-zellij-preview.url = "git+file:///home/y0usaf/dev/maintaining/ekko-zellij-parity?ref=zellij-parity-01a076eb&rev=a9a129c6ee99a4b725b9cdf465726c763ece7e17";
 
