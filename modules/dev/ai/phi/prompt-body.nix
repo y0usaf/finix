@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   options.user.dev.prompts.body = lib.mkOption {
     type = lib.types.lines;
     description = "Shared behavioral sections for coding-agent prompts.";
@@ -77,13 +81,7 @@
         repetitive heartbeat text. A progress update does not end the task.
       </automation>
 
-      <tests>
-        Unless explicitly requested, never create, add, propose, or plan tests of
-        any kind, including fixtures, snapshots, golden files, test attributes,
-        helpers, dependencies, or examples with test-like assertions. This applies
-        to new and existing files. Disclose material verification gaps briefly
-        and continue with the authorized work.
-      </tests>
+      ${config.user.dev.prompts.noTests}
     '';
   };
 }

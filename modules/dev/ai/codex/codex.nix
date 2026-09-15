@@ -4,7 +4,12 @@
   pkgs,
   flakeInputs,
   ...
-}: {
+}: let
+  # Codex's task-specific guidance plus the shared no-test-authoring policy.
+  # developer_instructions is codex's supported extra system guidance channel.
+  developerInstructions =
+    builtins.readFile ./system-prompt.md + "\n\n" + config.user.dev.prompts.noTests;
+in {
   options.user.dev.codex.enable = lib.mkEnableOption "Codex CLI";
 
   config = lib.mkIf config.user.dev.codex.enable {
@@ -26,7 +31,7 @@
       (pkgs.writeShellScriptBin "codex" ''
         exec ${lib.getExe flakeInputs.codex-cli-nix.packages."${pkgs.stdenv.hostPlatform.system}".default} \
           --dangerously-bypass-approvals-and-sandbox \
-          --config ${lib.escapeShellArg "developer_instructions=${builtins.toJSON (builtins.readFile ./system-prompt.md)}"} \
+          --config ${lib.escapeShellArg "developer_instructions=${builtins.toJSON developerInstructions}"} \
           "$@"
       '')
     ];
