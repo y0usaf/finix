@@ -1,8 +1,8 @@
 {
-  "model.default": "deepseek/deepseek-v4.1-flash",
-  "model.provider": "ai-gateway",
-  "agent.reasoning_effort": "ultra",
-  "agent.disabled_toolsets": ["image_gen", "video", "video_gen", "tts", "stt", "x_search"],
+  "model.default": "deepseek-v4.1-flash",
+  "model.provider": "opencode-go",
+  "agent.reasoning_effort": "max",
+  "agent.disabled_toolsets": ["image_gen", "video", "video_gen", "tts", "stt", "x_search", "delegation"],
   "approvals.mode": "off",
   "browser.use_real_profile": true,
   "auxiliary.title_generation.enabled": false,
@@ -10,5 +10,9 @@
   "curator.enabled": false,
   "memory.provider": "",
   "memory.memory_enabled": true,
-  "memory.user_profile_enabled": true
+  "memory.user_profile_enabled": true,
+  "memory.memory_char_limit": 4400,
+  "memory.user_char_limit": 2750,
+  "plugins.enabled": ["slope-line"],
+  "tools.tool_search.enabled": false
 }

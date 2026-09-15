@@ -20,6 +20,24 @@
         "url": "ssh://git@github.com/y0usaf/ash.git"
       }
     },
+    "ash_2": {
+      "inputs": {
+        "nixpkgs": [
+          "slope",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789333596,
+        "narHash": "sha256-jZayjudyS7sglgNNxFMG4IUj/5jmJSUa3t0XVzE+Ibw=",
+        "path": "/home/y0usaf/dev/developing/ash",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/y0usaf/dev/developing/ash",
+        "type": "path"
+      }
+    },
     "autolith": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -791,11 +809,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1789053977,
-        "narHash": "sha256-b/Fs1DsP66X7m33xypXBOCymqcQvRQuqh2bxLEGxvNo=",
+        "lastModified": 1789400634,
+        "narHash": "sha256-UBIfLyITJAUgw+kpbNaEeyaEWLRugq8oy2lDRhKgbcU=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "110736c0bc9fd249f1ce7f7ca5d353040f640be6",
+        "rev": "efca6efdc850ef9e0c4ac8877e76efdf92a026ae",
         "type": "github"
       },
       "original": {
@@ -837,23 +855,6 @@
       "original": {
         "path": "/home/y0usaf/dev/sandbox/hermes-desktop-terminal",
         "type": "path"
-      }
-    },
-    "hermes-tools": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1789007490,
-        "narHash": "sha256-9FKpVeDaHv6GGRPxufdnjxe+8zCUnHe8n8Ik88V2Qns=",
-        "ref": "main",
-        "rev": "6a0bb5a571574eba7c75837aed4d945352dbd338",
-        "revCount": 1,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/hermes-tools"
-      },
-      "original": {
-        "ref": "main",
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/hermes-tools"
       }
     },
     "home-manager": {
@@ -1756,7 +1757,6 @@
         "hermes-agent": "hermes-agent",
         "hermes-bots-mod": "hermes-bots-mod",
         "hermes-desktop-terminal": "hermes-desktop-terminal",
-        "hermes-tools": "hermes-tools",
         "linear-cli": "linear-cli",
         "manzil": "manzil",
         "monstar": "monstar",
@@ -1774,6 +1774,7 @@
         "reasonix-flake": "reasonix-flake",
         "rudo": "rudo",
         "rush": "rush",
+        "slope": "slope",
         "strictix": "strictix",
         "tomoe": "tomoe",
         "tomoe-lua": "tomoe-lua",
@@ -1941,6 +1942,24 @@
         "owner": "andreymatin",
         "repo": "scss-reset",
         "type": "github"
+      }
+    },
+    "slope": {
+      "inputs": {
+        "ash": "ash_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789450437,
+        "narHash": "sha256-0TJXyyAdKSghuY0pb3+rmPgnqiqsheL2LiPiSfMZoJo=",
+        "path": "/home/y0usaf/dev/developing/slope",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/y0usaf/dev/developing/slope",
+        "type": "path"
       }
     },
     "strictix": {

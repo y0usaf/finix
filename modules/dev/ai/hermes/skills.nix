@@ -12,10 +12,30 @@ let
   files = lib.concatMap (skill: map (file: {
     name = ".hermes/skills/${skill}/${file}";
     value = {
-      source = "${flakeInputs.hermes-tools}/skills/${skill}/${file}";
+      source = "${./skills/${skill}/${file}}";
       clobber = true; # Take over only these backed-up skill documents.
     };
   }) [ "SKILL.md" "references/detailed-guide.md" ]) skillPaths;
+  # Hermes seeds bundled skills with `shutil.copytree`, preserving the store's
+  # read-only 0555 directories — both the skill directory and, where the bundled
+  # skill has one, its `references/` subdirectory. manzil places a file by
+  # creating a sibling temp inside the target's own directory, so it needs u+w
+  # there; without this the linker fails with "Permission denied (os error 13)"
+  # and the whole manifest is left un-updated. Declare both directories
+  # writable — attr values sort before their child paths, so each chmod runs
+  # before the entries beneath it.
+  #
+  # force = false is REQUIRED: manzil rejects a `directory` entry carrying the
+  # per-entry default force=true ("fatal: force is only valid for
+  # symlink/copy/merge entries") and then places NOTHING from the manifest.
+  dirs = map (path: {
+    name = ".hermes/skills/${path}";
+    value = {
+      type = "directory";
+      permissions = "0755";
+      force = false;
+    };
+  }) (lib.concatMap (skill: [ skill "${skill}/references" ]) skillPaths);
   applyPolicy = pkgs.writeShellScript "hermes-apply-skill-policy" ''
     set -eu
     export HOME=${lib.escapeShellArg home}
@@ -24,7 +44,7 @@ let
       skills.disabled ${lib.escapeShellArg (builtins.toJSON disabled)}
   '';
 in {
-  manzil.users.${user}.files = builtins.listToAttrs files;
+  manzil.users.${user}.files = builtins.listToAttrs (files ++ dirs);
   system.activation.scripts.hermesSkillPolicy = {
     deps = [ "users" ];
     text = ''

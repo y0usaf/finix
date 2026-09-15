@@ -2,11 +2,11 @@
 
 This repository owns system integration and user configuration, not standalone
 application implementations. Headlong operations live in
-`~/dev/developing/headlong-ops`; Hermes tooling lives in
-`~/dev/developing/hermes-tools`. Consume project source through flake inputs.
-Keep runners, application patches, reusable skills, and their tests with the
-project that owns them. Runtime state and credentials stay outside both source
-repositories and the Nix store.
+`~/dev/developing/headlong-ops`; Hermes tooling lives in-module at
+`modules/dev/ai/hermes/`. Where a project remains external, consume its source
+through flake inputs. Keep runners, application patches, reusable skills, and
+their tests with the module or project that owns them. Runtime state and
+credentials stay outside the source tree and the Nix store.
 
 Finix-owned integration and build definitions belong under `modules/`, alongside
 the feature that owns them. Small activation helpers and system-specific checks
