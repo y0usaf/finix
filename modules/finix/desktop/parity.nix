@@ -39,12 +39,6 @@ in {
     };
     polkit.adminIdentities = ["unix-user:${userName}"];
 
-    # Waydroid (testing, sandbox ~/dev/sandbox/tft-waydroid): ship the
-    # id.waydro.Container dbus policy + service file so the system bus lets
-    # root own the container-manager name. Container itself is started
-    # manually (sudo waydroid container start), not as a finit service.
-    dbus.packages = [pkgs.waydroid-nftables];
-
     # ntsync: Wine's sync-on-NT-semaphores driver (reduces esync/fsync
     # overhead for games under the bundled Wine/Proton). Rule shipped as a
     # package (portable NixOS + finix) via services.udev.packages, never

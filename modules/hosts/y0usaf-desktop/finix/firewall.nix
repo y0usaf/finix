@@ -59,11 +59,8 @@
 # key-only (openssh.nix: PasswordAuthentication = false, PermitRootLogin =
 # no) and the box is behind NAT, so this is not internet exposure.
 #
-# forward policy drop is safe today EXCEPT waydroid0 (the Waydroid container
-# bridge): that interface must be accepted in the forward hook (see the chain
-# below). Waydroid's own `inet lxc` forward base chain runs separately; this
-# chain's drop would still fire on waydroid traffic, so the explicit
-# iifname/oifname accepts are required for the container's DHCP/DNS/Internet.
+# forward policy drop: this host is an endpoint, never a router, so nothing is
+# forwarded and the forward hook carves out no exceptions.
 {pkgs, ...}: {
   services.nftables.configFile = pkgs.writeText "finix-desktop.nft" ''
     flush ruleset
@@ -80,8 +77,6 @@
 
         udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
 
-        iifname "waydroid0" udp dport { 53, 67 } accept comment "waydroid DHCP/DNS from gateway"
-
         iifname "eno1" tcp dport 2222 accept comment "sshd LAN fallback: independent of tailscale being up. Wired NIC only - never wlp96s0"
 
         tcp dport { 25565, 27015, 27036 } accept comment "minecraft host; steam dedicatedServer; steam remotePlay"
@@ -92,8 +87,6 @@
       }
       chain forward {
         type filter hook forward priority filter; policy drop;
-        iifname "waydroid0" accept comment "waydroid container->host forwarding"
-        oifname "waydroid0" accept comment "waydroid return path + inbound"
       }
     }
   '';

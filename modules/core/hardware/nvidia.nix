@@ -23,7 +23,6 @@
         CUDA_CACHE_PATH = "${config.user.homeDirectory}/.cache/nv";
         CUDA_DISABLE_PERF_BOOST = "1";
         NVIDIA_DRIVER_CAPABILITIES = "all";
-        WAYDROID_EXTRA_ARGS = "--gpu-mode host";
       };
       # Fix high VRAM usage on electron apps
       etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool.json".text = lib.generators.toJSON {} {

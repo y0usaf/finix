@@ -67,9 +67,6 @@ in {
       # Docker engine state
       "/var/lib/docker"
 
-      # Waydroid Android container (TFT) — image, userdata, installed apps
-      "/var/lib/waydroid"
-
       # Backup / automation
       "/var/lib/btrbk"
     ];
@@ -236,7 +233,6 @@ in {
 
           # adb keypair kept; sdk cache + debug.keystore stay ephemeral
           ".local/share/android/.android"
-          ".local/share/waydroid" # Android /data — Play/GMS login, TFT, installed apps (session binds it in)
           ".local/share/mcp-trader"
           ".local/share/music-get"
           ".local/share/polybot"
