@@ -2,7 +2,11 @@
 #
 # Browser paths (firefox/librewolf/discord/vesktop) are persisted
 # unconditionally: a disabled app just leaves an empty dir on /persist.
-_: let
+{
+  config,
+  lib,
+  ...
+}: let
   gameSaves = [
     "dolphin-emu"
     "Cemu"
@@ -15,7 +19,6 @@ _: let
     "Celeste"
     "CassetteBeasts"
     "Brotato"
-    "Ultrapool"
     "Baba_Is_You"
     "binding of isaac rebirth"
     "HallsOfTorment"
@@ -222,6 +225,14 @@ in {
           ".local/share/nvim"
         ]
         ++ builtins.map (n: ".local/share/${n}") gameSaves
+        # Barony's native-Linux build keeps its data dir directly in
+        # ~/.barony (config/, savegames/, scores/, mods/, books/, plus a
+        # large models.cache) — no Proton prefix. Gated on core gaming so
+        # a gaming-disabled build leaves nothing behind.
+        ++ lib.optionals config.user.gaming.core.enable [
+          ".barony"
+          ".local/share/Ultrapool"
+        ]
         ++ [
           # Emulation / gaming saves appended above via gameSaves
 
