@@ -94,7 +94,12 @@
     };
 
     oh-my-fx = {
-      url = "github:y0usaf/oh-my-fx";
+      # Pinned: the 2026-09-03 upstream merge (fd3e3019) dropped flake.nix,
+      # so a branch-tracking input cannot resolve ("flake.nix does not
+      # exist") and `nix flake update` aborts before writing the lock. This
+      # is the last flake-bearing revision; unpin once the fork ships a
+      # flake again, or replace the input with a local Zig build.
+      url = "github:y0usaf/oh-my-fx/e4fa282cc3f533bb91f02fcd4defab6ac8ec6755";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
