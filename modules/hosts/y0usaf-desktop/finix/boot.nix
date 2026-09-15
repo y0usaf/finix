@@ -113,6 +113,14 @@ in {
         kernel_path: boot():/EFI/finix/kernels/golden/kernel
         cmdline: init=/nix/store/ralz7prz3545kixkfwag61ky42z1j8b9-finix-system/init nvidia-drm.modeset=1 nvidia-drm.fbdev=1 nvidia.NVreg_UsePageAttributeTable=1 nvidia.NVreg_EnableResizableBar=1 nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1 nvidia_modeset.disable_vrr_memclk_switch=1 nvidia.NVreg_TemporaryFilePath=/var/tmp amd_pstate=active mitigations=off console=tty0 panic=30 oops=panic softlockup_panic=1 hung_task_panic=1
         module_path: boot():/EFI/finix/kernels/golden/initrd
+
+      /Vinix
+        protocol: limine
+        comment: vinix nightly-2026-09-07 (vanilla ISO kernel+initramfs)
+        kernel_path: boot():/EFI/vinix/vinix
+        module_path: boot():/EFI/vinix/initramfs.tar
+        resolution: 1024x768x32
+        kaslr: no
     '';
 
     settings = {
