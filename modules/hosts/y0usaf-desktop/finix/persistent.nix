@@ -75,7 +75,7 @@
   dirTemplateDirs = builtins.concatMap (d: properAncestors (dirPath d)) persistCfg.users.y0usaf.directories;
   homeTemplateDirs = lib.unique (dirTemplateDirs ++ fileTemplateDirs);
 
-  # The dedicated data-subvol mounts under the home dir (old-home, Steam,
+  # The dedicated data-subvol mounts under the home dir (Steam,
   # dev, Pictures, DCIM, Music): derived from the fstab set so the skeleton
   # follows the mounts, then each mountpoint's path relative to /home/y0usaf.
   dataSubvolMounts =
@@ -279,7 +279,6 @@ in {
       };
 
       # Durable bulk data on dedicated subvols, exactly as under NixOS.
-      "/home/y0usaf/old-home" = subvolMount "@home-old" ["ro"] // {neededForBoot = true;};
       "/home/y0usaf/.local/share/Steam" = subvolMount "@steam" [] // {neededForBoot = true;};
       "/home/y0usaf/dev" = subvolMount "@dev" [] // {neededForBoot = true;};
       "/home/y0usaf/Pictures" = subvolMount "@pictures" [] // {neededForBoot = true;};
