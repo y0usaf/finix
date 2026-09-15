@@ -58,26 +58,6 @@
         "type": "github"
       }
     },
-    "baat": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789168179,
-        "narHash": "sha256-wxqP5qKVj7Qc1GstKH1hbWgLtAgB/UZeegrXJ/4zR3A=",
-        "ref": "refs/heads/main",
-        "rev": "c42f851bcf7cb099bea62e6372c7534ee0a209d4",
-        "revCount": 4,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/baat"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/baat"
-      }
-    },
     "bolo": {
       "inputs": {
         "crane": "crane",
@@ -1739,7 +1719,6 @@
       "inputs": {
         "ash": "ash",
         "autolith": "autolith",
-        "baat": "baat",
         "bolo": "bolo",
         "claude-code-nix": "claude-code-nix",
         "claude-desktop-linux": "claude-desktop-linux",

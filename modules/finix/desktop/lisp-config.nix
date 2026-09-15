@@ -44,8 +44,6 @@
     (binding [":alt"] "3" ":discord")
     (binding [":alt"] "4" ":steam")
     (binding [":alt"] "5" ":obs")
-    # The daemon owns push-to-talk state; the key only runs `baat toggle`.
-    (binding [":alt"] "space" ":ptt")
     (binding [":alt"] "t" ":terminal")
     (binding [":super"] "r" ":launcher")
     (binding [":alt"] "e" ":files")
@@ -74,7 +72,6 @@
     discord = [defaults.discord];
     steam = ["steam"];
     obs = ["obs"];
-    ptt = ["baat" "toggle"];
     terminal = [defaults.terminal];
     # user.defaults.launcher is a shell command, including tilde expansion.
     launcher = ["sh" "-c" defaults.launcher];
