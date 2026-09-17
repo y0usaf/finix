@@ -214,6 +214,8 @@ in {
             - Skip greetings, filler, repeated plans, recaps, and unsolicited
               next steps. Add detail when the task requires it.
 
+            ${config.user.dev.prompts.ethics}
+
             Tests:
             ${config.user.dev.prompts.noTests}
           '';

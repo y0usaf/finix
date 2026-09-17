@@ -48,7 +48,13 @@ in {
 
       # --- Node / npm ---
       NODE_REPL_HISTORY = "${xdgState}/node_repl_history";
-      NPM_CONFIG_USERCONFIG = "${xdgConfig}/npm/npmrc";
+      # npm's userconfig must stay writable: `npm login` appends the registry
+      # auth token to it, and a manzil-managed file is a read-only store
+      # symlink, so login died with EACCES. This is npm's own default path.
+      NPM_CONFIG_USERCONFIG = "${home}/.npmrc";
+      # prefix moved out of the (now unmanaged) npmrc so `npm i -g` keeps
+      # targeting ~/.local/share/npm instead of the read-only nix store.
+      NPM_CONFIG_PREFIX = "${xdgData}/npm";
       NPM_CONFIG_CACHE = "${xdgCache}/npm";
       NPM_CONFIG_INIT_MODULE = "${xdgConfig}/npm/config/npm-init.js";
 

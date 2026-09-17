@@ -274,6 +274,11 @@ in {
           ".cache/nix"
         ];
       files = [
+        # npm registry auth token, written by `npm login` into npm's userconfig.
+        # Persisted because the userconfig moved off the read-only
+        # manzil-managed npmrc (see core/user/session/xdg.nix).
+        ".npmrc"
+
         # adb keypair kept; sdk cache + debug.keystore stay ephemeral
         ".local/share/android/adbkey"
         ".local/share/android/adbkey.pub"

@@ -232,9 +232,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Disposable Zellij-profile preview; implementation lives in its Ekko module.
-    ekko-zellij-preview.url = "git+file:///home/y0usaf/dev/maintaining/ekko-zellij-parity?ref=zellij-parity-01a076eb&rev=a9a129c6ee99a4b725b9cdf465726c763ece7e17";
-
     # Finit-based OS and module system.
     finix.url = "github:finix-community/finix";
   };

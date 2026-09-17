@@ -13,14 +13,9 @@
         flakeInputs = inputs;
       };
       modules = [
-        ./shell/ekko/package.nix
-
-        ./shell/ekko/preview-zellij
         ./dev/work/vercel/wrapper.nix
       ];
     }).config.user;
-  ekko = tools.shell.ekko.package;
-  preview = tools.shell.ekko.zellijPreview;
 in {
   imports = [./finix];
   options.flake = lib.mkOption {
@@ -55,18 +50,9 @@ in {
     packages."${system}" =
       cfg.packages
       // {
-        ekko-preview = ekko;
-        ekko-zellij-preview = preview.package;
-        ekko-zellij-runtime = preview.runtime;
         p4g-setup = cfg.hosts.y0usaf-desktop.config.user.gaming.p4g.package;
         tomoe = inputs.tomoe.packages.${system}.default;
       };
-
-    apps.${system}.ekko-zellij-preview = {
-      type = "app";
-      meta.description = "Disposable selectable Lisp Zellij profile preview";
-      program = "${preview.package}/bin/finix-ekko-zellij-preview";
-    };
 
     # Verification remains an actual full-system build, not script fixtures.
     checks."${system}".y0usaf-desktop = cfg.hosts.y0usaf-desktop.config.system.build.toplevel;

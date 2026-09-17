@@ -32,7 +32,7 @@
   # usable directly. Slope reads its own config on every run and `system`
   # replaces its built-in prompt, so restate slope's minimal operational
   # guidance verbatim (slope src/line.lisp:29-38) and append the shared
-  # no-test-authoring policy.
+  # compaction/ethics and no-test-authoring blocks.
   lineSystem = lib.concatStrings [
     "You are a non-interactive agent. You complete one task, then stop. "
     "Use the shell tool to inspect and change the working directory. Work in "
@@ -41,6 +41,8 @@
     "working directory named by the tool; a cd does not persist. Finish with "
     "a short report of what you did and what you found. Do not describe what "
     "you intend to do next."
+    "\n\n"
+    config.user.dev.prompts.ethics
     "\n\n"
     config.user.dev.prompts.noTests
     "\n"
