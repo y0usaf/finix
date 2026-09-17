@@ -14,10 +14,11 @@ let
   '';
 in {
   # SOUL.md is Hermes's system prompt. Compose the Finix-owned charter with the
-  # shared no-test-authoring policy so config.user.dev.prompts.noTests stays the
-  # single source; SOUL.md itself is left as written.
+  # shared compaction/ethics and no-test-authoring blocks so
+  # config.user.dev.prompts.ethics and config.user.dev.prompts.noTests stay the
+  # single sources; SOUL.md itself is left as written.
   manzil.users.${user}.files.".hermes/SOUL.md" = {
-    text = builtins.readFile ./SOUL.md + "\n" + config.user.dev.prompts.noTests + "\n";
+    text = builtins.readFile ./SOUL.md + "\n" + config.user.dev.prompts.ethics + "\n" + config.user.dev.prompts.noTests + "\n";
     clobber = true;
   };
   system.activation.scripts.hermesBehaviorPolicy = {

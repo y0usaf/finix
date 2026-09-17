@@ -81,6 +81,8 @@
         repetitive heartbeat text. A progress update does not end the task.
       </automation>
 
+      ${config.user.dev.prompts.ethics}
+
       ${config.user.dev.prompts.noTests}
     '';
   };

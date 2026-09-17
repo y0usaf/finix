@@ -69,7 +69,11 @@ in {
           ".cache/ekko"
           ".cache/mesa_shader_cache"
         ];
-      files = common.userFiles;
+      files = common.userFiles ++ [
+        # npm registry auth token written by `npm login` (userconfig moved to
+        # npm's own default in core/user/session/xdg.nix).
+        ".npmrc"
+      ];
     };
   };
 }

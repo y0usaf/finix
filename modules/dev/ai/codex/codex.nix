@@ -5,10 +5,11 @@
   flakeInputs,
   ...
 }: let
-  # Codex's task-specific guidance plus the shared no-test-authoring policy.
+  # Codex's task-specific guidance plus the shared compaction/ethics and
+  # no-test-authoring policies.
   # developer_instructions is codex's supported extra system guidance channel.
   developerInstructions =
-    builtins.readFile ./system-prompt.md + "\n\n" + config.user.dev.prompts.noTests;
+    builtins.readFile ./system-prompt.md + "\n\n" + config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests;
 in {
   options.user.dev.codex.enable = lib.mkEnableOption "Codex CLI";
 

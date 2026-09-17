@@ -23,7 +23,28 @@
     # Path ~/.config/devin/AGENTS.md, Activation always-on. Deploying
     # AGENTS.md there supplies the shared no-test policy; the package-only
     # module had no config file before.
-    manzil.users."${config.user.name}".files.".config/devin/AGENTS.md".text =
-      config.user.dev.prompts.noTests;
+    #
+    # config.json is merge-deployed, not symlinked: the CLI mutates it at
+    # runtime (permissions.allow grants, org_id), so merge keeps it writable
+    # and re-applies our keys on every switch. `attribution = false` drops the
+    # "Generated with [Devin]" line and the Co-Authored-By: Devin trailer from
+    # commits and PRs (docs.devin.ai/cli/reference/configuration/config-file).
+    # The permission mode has no config key — it is per-session state — so
+    # DEVIN_PERMISSION_MODE pins every launch to "dangerous" (the flag's
+    # canonical name for yolo/bypass; see `devin --help`).
+    manzil.users."${config.user.name}".files = {
+      ".config/devin/AGENTS.md".text =
+        config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests;
+      ".config/devin/config.json" = {
+        type = "merge";
+        format = "json";
+        clobber = true;
+        value = {
+          attribution = false;
+        };
+      };
+    };
+
+    environment.variables.DEVIN_PERMISSION_MODE = "dangerous";
   };
 }

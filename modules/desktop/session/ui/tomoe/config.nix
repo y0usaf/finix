@@ -1002,7 +1002,51 @@ in {
         + ''
 
           -- ─── Binds (mirroring niri/keybindings.nix; Mod = Alt) ───────────────────────
-          tomoe.bind("Mod+t", function() tomoe.spawn("${config.user.defaults.terminal}") end, "Spawn Terminal")
+          -- Mod+t is the ekko terminal. Ekko retitles its host window to
+          -- "ekko …" while a client is attached, and the spawned terminal
+          -- also carries the "ekko-term" app-id, so a later press focuses
+          -- the live window — hopping to its workspace first — instead of
+          -- spawning another client onto the shared session.
+          local function ekko_window()
+            for _, win in ipairs(tomoe.windows()) do
+              local title = win:title() or ""
+              if win:app_id() == "ekko-term" or title:match("^ekko") then
+                return win
+              end
+            end
+          end
+          tomoe.bind("Mod+t", function()
+            local win = ekko_window()
+            if not win then
+              tomoe.spawn("${config.user.defaults.terminal} --app-id ekko-term")
+              return
+            end
+            -- Hop to the window's workspace first: wm.switch shows it via
+            -- arrange; focus on a hidden window is a no-op.
+            for n, wins in pairs(wm.workspaces or {}) do
+              if n ~= wm.active then
+                for _, w in ipairs(wins) do
+                  if w:id() == win:id() then
+                    wm.switch(n)
+                  end
+                end
+              end
+            end
+            -- Deck layout only: focus() on a buried window leaves it behind
+            -- the column's front. Promote it to the deck front, then arrange
+            -- — `vis`/`column` are the deck chunk's locals, absent under sway.
+            if type(vis) == "function" and type(column) == "table" then
+              local side = column[win:id()]
+              if side then
+                vis()[side] = win:id()
+                wm.arrange()
+              end
+            end
+            win:show()
+            win:raise()
+            win:focus()
+          end, "Terminal")
+          tomoe.bind("Mod+Shift+r", "reload-config", "Reload Config")
           tomoe.bind("Super+r", function() tomoe.spawn("${config.user.defaults.launcher}") end, "Run an Application")
           tomoe.bind("Mod+e", function() tomoe.spawn("pcmanfm") end, "File Manager")
           tomoe.bind("Super+Shift+o", function() tomoe.spawn("${config.user.defaults.terminal} -e nvim") end, "Editor")
