@@ -1,6 +1,6 @@
 {
-  "model.default": "deepseek-v4.1-flash",
-  "model.provider": "opencode-go",
+  "model.default": "deepseek/deepseek-v4.1-flash",
+  "model.provider": "ai-gateway",
   "agent.reasoning_effort": "max",
   "agent.disabled_toolsets": ["image_gen", "video", "video_gen", "tts", "stt", "x_search", "delegation"],
   "approvals.mode": "off",
