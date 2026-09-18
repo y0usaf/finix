@@ -19,6 +19,16 @@
       clobber = true;
     };
   }) ["__init__.py" "plugin.yaml" "schemas.py" "tools.py"];
+  # The jev-skill-router plugin's two files: a gated, fail-open per-turn skill
+  # hint. It registers only the pre_llm_call hook (no tools); its `plugins.enabled`
+  # entry lives in behavior-settings.json.
+  routerFiles = map (file: {
+    name = ".hermes/plugins/jev-skill-router/${file}";
+    value = {
+      source = "${./plugins/jev-skill-router/${file}}";
+      clobber = true;
+    };
+  }) ["__init__.py" "plugin.yaml"];
   # Custom skins — one YAML per theme, theming CLI + TUI + desktop together.
   # `clobber` keeps the module authoritative over the live copy in ~/.hermes/skins/.
   skinFiles = map (file: {
@@ -68,7 +78,7 @@ in {
   ];
 
   manzil.users."${config.user.name}".files =
-    builtins.listToAttrs (pluginFiles ++ skinFiles)
+    builtins.listToAttrs (pluginFiles ++ routerFiles ++ skinFiles)
     // {
       ".hermes/desktop-plugins/bots-mod/plugin.js".source = "${botsMod}/plugin.js";
       # Native slope config for `line`. merge keeps the provider/model/key/header
