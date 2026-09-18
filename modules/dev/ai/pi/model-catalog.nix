@@ -29,12 +29,14 @@
         defaultThinkingLevel = "max";
 
         enabledModels = [
-          "vercel-ai-gateway/deepseek/deepseek-v4.1-flash@fireworks"
+          "vercel-ai-gateway/deepseek/deepseek-v4.1-flash@wafer"
           "opencode-go/deepseek-v4.1-flash"
           "openai-codex/gpt-6-astra"
           "vercel-ai-gateway/zai/glm-5.3-flash@wafer"
           "vercel-ai-gateway/openai/gpt-5.6-luna@azure"
           "openai-codex/gpt-5.6-luna"
+          "bonsai/bonsai"
+          "bonsai8b/bonsai8b"
         ];
 
         # Custom OpenAI-compatible provider (key resolved from $CELERIS_API_KEY at
@@ -55,6 +57,63 @@
                 name = "Celeris 1 Magnus";
                 reasoning = true;
                 contextWindow = 128000;
+                maxTokens = 8192;
+                cost = {
+                  input = 0;
+                  output = 0;
+                  cacheRead = 0;
+                  cacheWrite = 0;
+                };
+              }
+            ];
+          };
+
+          # Local OpenAI-compatible provider for a ternarily-quantized Bonsai 2 27B
+          # served by a local llama-server on 127.0.0.1:8891; only answers while that
+          # server is running (apiKey `none` sends no Authorization header).
+          providers.bonsai = {
+            name = "Bonsai (local)";
+            baseUrl = "http://127.0.0.1:8891/v1";
+            api = "openai-completions";
+            apiKey = "none";
+            models = [
+              {
+                id = "bonsai";
+                name = "Ternary Bonsai 2 27B (local)";
+                reasoning = true;
+                # llama-server's embedded Jinja template accepts only xhigh/medium/low.
+                # Pin pi's extended levels onto the template's own default ("xhigh");
+                # pi's global defaultThinkingLevel "max" then clamps to this entry.
+                thinkingLevelMap = {xhigh = "xhigh";};
+                contextWindow = 32768;
+                maxTokens = 8192;
+                cost = {
+                  input = 0;
+                  output = 0;
+                  cacheRead = 0;
+                  cacheWrite = 0;
+                };
+              }
+            ];
+          };
+
+          # Second local OpenAI-compatible provider: the smaller ternary Bonsai 8B
+          # (previous generation, qwen2 tokenizer) served by its own llama-server on
+          # 127.0.0.1:8893; only answers while that server is running (apiKey `none`
+          # sends no Authorization header). Its embedded template has no
+          # reasoning_effort variable at all (chat_template_caps.supports_reasoning_effort
+          # = false) and ignores any value sent, so no thinkingLevelMap is needed.
+          providers.bonsai8b = {
+            name = "Bonsai 8B (local)";
+            baseUrl = "http://127.0.0.1:8893/v1";
+            api = "openai-completions";
+            apiKey = "none";
+            models = [
+              {
+                id = "bonsai8b";
+                name = "Ternary Bonsai 8B (local)";
+                reasoning = true;
+                contextWindow = 32768;
                 maxTokens = 8192;
                 cost = {
                   input = 0;
