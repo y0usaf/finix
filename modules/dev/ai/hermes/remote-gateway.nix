@@ -27,6 +27,18 @@ in {
   options.user.dev.ai.hermes.remoteGateway = {
     enable = lib.mkEnableOption "Hermes remote gateway (headless `hermes serve` backend + web dashboard)";
 
+    apiKeyFile = lib.mkOption {
+      type = lib.types.path;
+      default = "${home}/Tokens/AI_GATEWAY_API_KEY.txt";
+      description = ''
+        Runtime credential file holding the AI Gateway API key. The packaged
+        `hermes` wrapper sources `load-credentials.sh`, which exports
+        AI_GATEWAY_API_KEY from `HERMES_API_KEY_FILE`; the daemons below only
+        get that because they exec that wrapper. The path lives outside the
+        store so the secret is never baked into a generation.
+      '';
+    };
+
     listenAddress = lib.mkOption {
       type = lib.types.str;
       default = "127.0.0.1";
@@ -58,6 +70,77 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # Background Hermes gateway (`hermes gateway run`). Separate process from
+    # `hermes serve` above and NOT optional: the gateway is the only thing that
+    # hosts the embedded kanban dispatcher (`kanban.dispatch_in_gateway`) plus
+    # auto-decompose and the kanban notifier. With no messaging platform
+    # configured it still runs, for exactly that reason (upstream logs "Gateway
+    # will continue running for cron job execution"). Without it, `ready`
+    # cards sit still forever and `triage` cards are never decomposed.
+    #
+    # `hermes gateway install` writes a systemd/launchd unit, which finix does
+    # not have, so the service is declared here in finit like every other
+    # daemon. A machine-global singleton lock
+    # (~/.hermes/kanban/.dispatcher.lock) keeps exactly one dispatcher across
+    # all profiles/gateways, so this cannot race the desktop or `hermes serve`.
+    finit.services.hermes-gateway = {
+      description = "Hermes gateway (embedded kanban dispatcher + cron)";
+      inherit user;
+      environment = {
+        HOME = home;
+        HERMES_HOME = "${home}/.hermes";
+        XDG_RUNTIME_DIR = runtimeDir;
+      };
+      command = pkgs.writeShellScript "hermes-gateway-start" ''
+        set -eu
+        export PATH=${lib.concatStringsSep ":" [
+          "${pkgs.coreutils}/bin"
+          "/run/current-system/sw/bin"
+          "/run/wrappers/bin"
+          "${home}/.nix-profile/bin"
+          "${home}/.local/state/nix/profile/bin"
+          "/nix/var/nix/profiles/default/bin"
+        ]}:$PATH
+
+        # Workers and steady-state locks live under the boot-created runtime
+        # dir (xdg-runtime-dir in session.nix owns it).
+        for _ in $(seq 1 60); do
+          [ -d ${lib.escapeShellArg runtimeDir} ] && break
+          sleep 1
+        done
+
+        # The packaged wrapper sources load-credentials.sh and exports
+        # AI_GATEWAY_API_KEY from HERMES_API_KEY_FILE at exec time. Set it
+        # explicitly so the service does not silently depend on the
+        # build-time default, and fail loudly if the key is missing.
+        key_file=${lib.escapeShellArg cfg.apiKeyFile}
+        if [ ! -r "$key_file" ]; then
+          echo "hermes-gateway: $key_file missing; worker dispatch would have no inference credential" >&2
+          exit 1
+        fi
+        export HERMES_API_KEY_FILE="$key_file"
+
+        # Same runtime-only credential file as `hermes serve`: dispatch spawns
+        # worker agents, which need the inference key. Never baked into the
+        # store, never echoed (mode 0600).
+        auth_env=${lib.escapeShellArg cfg.authEnvFile}
+        if [ -r "$auth_env" ]; then
+          set -a
+          . "$auth_env"
+          set +a
+        else
+          echo "hermes-gateway: $auth_env missing; refusing to start without an inference credential" >&2
+          exit 1
+        fi
+
+        # Foreground (supervised by finit). `hermes gateway restart` is the
+        # manual equivalent; do not also run `hermes gateway start`.
+        exec ${config.user.dev.ai.hermes.packages.hermesFull}/bin/hermes gateway run
+      '';
+      conditions = ["net/lo/up"];
+      log = true;
+    };
+
     finit.services.hermes-remote-gateway = {
       description = "Hermes remote gateway (hermes serve)";
       inherit user;

@@ -14,5 +14,6 @@
   "memory.memory_char_limit": 4400,
   "memory.user_char_limit": 2750,
   "plugins.enabled": ["jev-skill-router", "cwd-command"],
+  "kanban.max_in_progress": 1024,
   "tools.tool_search.enabled": false
 }
