@@ -54,6 +54,34 @@ candidate** (`len == 1`); `min_candidates` still governs the ambiguous multi-can
 - jev round trip: **~0.38-0.40 s** warm; ~0.56 s on the first (cold node spawn) call.
 - Gate hit rate on the four spec cases: 2/4 fire (the two skill-shaped messages), 2/4 stay closed.
 
+## Decision (2026-09-19): plugin, not upstream-native
+
+**Verdict: this stays a plugin in `~/finix`. No upstream issue/PR is warranted.**
+
+1. *No missing core surface.* The mechanism is already expressible through documented core
+   contracts, so an "upstream" change would add no capability — only move where the same
+   behaviour is configured. Verified against the live 0.21.2 source: `pre_llm_call` is in
+   `hermes_cli/plugins.py::VALID_HOOKS`; `agent/turn_context.py::_collect_pre_llm_call_context`
+   joins every string / `{"context": ...}` return into the user message; the hooks docs list
+   `pre_llm_call` kwargs (`user_message`, `conversation_history`, `session_id`, `turn_id`, ...).
+   The same event is also carried by core shell hooks (`hooks:` config), and `pre_llm_call` is
+   *not* in `SHELL_UNSUPPORTED_HOOKS`.
+2. *Core already owns skill selection.* The system prompt carries the skill index and instructs
+   the model to load matching skills from it. A second per-turn model call that picks a skill
+   duplicates a responsibility core already assigns to the main model.
+3. *The non-generic parts are personal.* `jev` plus its own key file, a hardcoded local binary
+   path, and one private skill catalogue. Upstreaming would force either a hard dependency on an
+   external CLI or a second billed inference call on every install's every turn. Neither belongs
+   in core.
+4. *The one more-native-looking alternative was assessed and rejected.* Rewriting it as a
+   `hooks:` shell hook drops the plugin manifest but pays an out-of-process spawn **every turn**,
+   routing or not, because the gate itself would run in the script. Measured on this box: bare
+   `python3` spawn + JSON parse = **~16.2 ms median / 15.1 ms min**, vs the in-process gate's
+   measured **~0.2 ms** — ~80x. A gate whose purpose is to avoid per-turn cost belongs in-process.
+
+Consequence: the upstreamable unit, if anything, is the already-shipped hook contract
+(`pre_llm_call`), not this router. No public posting was made (public actions are draft-then-approve).
+
 ## Restart caveat (unproven)
 The plugins docs say to *restart Hermes* after dropping plugin files; no live plugin-reload path is
 documented (`hermes plugins` has install/enable/disable/list/validate, no reload). A turn run in a
