@@ -6,7 +6,6 @@
   options.user.gaming.proton = {
     enable = lib.mkEnableOption "Proton-GE for gaming";
     nativeWayland = lib.mkEnableOption "Wayland native Proton support";
-    ntsync = lib.mkEnableOption "ntsync kernel module support";
   };
 
   config = lib.mkIf config.user.gaming.proton.enable {

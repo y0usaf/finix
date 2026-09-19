@@ -3,7 +3,6 @@
     core.enable = lib.mkDefault true;
     controllers.enable = lib.mkDefault true;
     steam.enable = lib.mkDefault true;
-    mangohud.enable = lib.mkDefault true;
     emulation = {
       wii-u.enable = lib.mkDefault true;
       gcn-wii.enable = lib.mkDefault true;
