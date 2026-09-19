@@ -29,6 +29,17 @@
       clobber = true;
     };
   }) ["__init__.py" "plugin.yaml"];
+  # The cwd-command plugin's two files: an in-session `/cwd` that prints the
+  # working directory the shell/file tools actually use, or retargets the session
+  # (process cwd, TERMINAL_CWD, session record, and the live terminal backend).
+  # Its `plugins.enabled` entry lives in behavior-settings.json.
+  cwdFiles = map (file: {
+    name = ".hermes/plugins/cwd-command/${file}";
+    value = {
+      source = "${./plugins/cwd-command/${file}}";
+      clobber = true;
+    };
+  }) ["__init__.py" "plugin.yaml"];
   # Custom skins — one YAML per theme, theming CLI + TUI + desktop together.
   # `clobber` keeps the module authoritative over the live copy in ~/.hermes/skins/.
   skinFiles = map (file: {
@@ -78,7 +89,7 @@ in {
   ];
 
   manzil.users."${config.user.name}".files =
-    builtins.listToAttrs (pluginFiles ++ routerFiles ++ skinFiles)
+    builtins.listToAttrs (pluginFiles ++ routerFiles ++ cwdFiles ++ skinFiles)
     // {
       ".hermes/desktop-plugins/bots-mod/plugin.js".source = "${botsMod}/plugin.js";
       # Native slope config for `line`. merge keeps the provider/model/key/header

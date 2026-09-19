@@ -1,0 +1,54 @@
+Upstream Confucius4-R2T2 hardcodes gpu_memory_utilization=0.95 in
+ws_server.py and exposes no knob. This box shares one 24 GiB RTX 4090 with
+other GPU residents (two llama-servers, bolod, cudaterm); at that fraction
+vLLM aborts on startup ("Free memory ... is less than desired GPU memory
+utilization"). The patch below adds ASR_GPU_MEMORY_UTILIZATION plus a
+--gpu_memory_utilization flag, and the vLLM batching/memory knobs
+(ASR_MAX_MODEL_LEN, ASR_MAX_NUM_BATCHED_TOKENS, ASR_ENFORCE_EAGER,
+ASR_SKIP_MM_PROFILING) needed to fit the model into ~4.75 GiB. Without it the
+server OOMs on startup here. Carried verbatim from the feasibility sandbox
+(/home/y0usaf/dev/sandbox/r2t2-20260918); that README holds the measured
+working point.
+
+--- a/ws_server.py
++++ b/ws_server.py
+@@ -281,10 +281,23 @@
+     logger.info(f"step2: Start loading ASR model from {args.asr_model_path}")
+ 
+     # Streaming is vLLM-only and no forced aligner supported.
++    # The extra kwargs below are not part of the upstream repo: this box has
++    # little free VRAM (other GPU jobs), so expose the vLLM memory knobs.
++    _llm_kwargs = {}
++    if os.environ.get("ASR_MAX_MODEL_LEN"):
++        _llm_kwargs["max_model_len"] = int(os.environ["ASR_MAX_MODEL_LEN"])
++    if os.environ.get("ASR_MAX_NUM_BATCHED_TOKENS"):
++        _llm_kwargs["max_num_batched_tokens"] = int(os.environ["ASR_MAX_NUM_BATCHED_TOKENS"])
++        _llm_kwargs["max_num_seqs"] = 1
++    if os.environ.get("ASR_ENFORCE_EAGER") == "1":
++        _llm_kwargs["enforce_eager"] = True
++    if os.environ.get("ASR_SKIP_MM_PROFILING") == "1":
++        _llm_kwargs["skip_mm_profiling"] = True
+     asr_model =  R2T2ASRModel.LLM(
+         model=args.asr_model_path,
+-        gpu_memory_utilization=0.95, #0.8
++        gpu_memory_utilization=args.gpu_memory_utilization,
+         max_new_tokens=1,
++        **_llm_kwargs,
+     )
+ 
+     logger.info("✅ ASR model initialized successfully")
+@@ -1266,6 +1279,14 @@
+         help="Path to the FireRedVAD Stream-VAD model. Defaults to checkpoints/vad/Stream-VAD "
+              "(see the README for how to download it).",
+     )
++    parser.add_argument(
++        '--gpu_memory_utilization',
++        type=float,
++        default=float(os.environ.get("ASR_GPU_MEMORY_UTILIZATION", "0.95")),
++        dest="gpu_memory_utilization",
++        help="vLLM gpu_memory_utilization (fraction of total VRAM). "
++             "Defaults to ASR_GPU_MEMORY_UTILIZATION or 0.95.",
++    )
+     args = parser.parse_args()
+     if not args.asr_model_path:
+         parser.error(

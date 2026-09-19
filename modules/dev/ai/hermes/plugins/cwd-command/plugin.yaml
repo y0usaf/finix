@@ -1,0 +1,11 @@
+name: cwd-command
+version: 0.1.0
+description: "In-session /cwd: print the working directory the terminal and file tools actually use, or retarget the running session (process cwd, TERMINAL_CWD, session record, live terminal backend). No upstream changes."
+author: y0usaf
+license: AGPL-3.0-only
+manifest_version: 2
+provides_tools: []
+provides_hooks: []
+tags:
+  - cli
+  - cwd

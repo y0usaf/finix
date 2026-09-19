@@ -81,6 +81,11 @@ _: {
     };
     latex.enable = true;
     upscale.enable = true;
+    # Confucius4-R2T2 streaming ASR server (resident vLLM WebSocket service on
+    # 127.0.0.1:8272), replacing the hand-started sandbox process at
+    # /home/y0usaf/dev/sandbox/r2t2-20260918. Defaults are the measured
+    # working point; see modules/dev/ai/r2t2/RUNBOOK.md.
+    r2t2.enable = true;
     phi.enable = true;
     reasonix = {
       enable = true;
