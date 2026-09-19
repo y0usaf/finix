@@ -29,6 +29,18 @@
       clobber = true;
     };
   }) ["__init__.py" "plugin.yaml"];
+  # The jev-tool-gate plugin's files: an append-only refusal gate for mutating tool calls (one jev
+  # `choice` verdict, returned as a directive-shaped tool result -- no transcript rewrite, so the
+  # prefix cache stays warm). Shipped installed but NOT in `plugins.enabled`: its task text is only
+  # the turn's last user message, which misreads a terse confirmation as off-task. See its
+  # BUILD-NOTES.md for the measured trade-off and the one-line enable command.
+  gateFiles = map (file: {
+    name = ".hermes/plugins/jev-tool-gate/${file}";
+    value = {
+      source = "${./plugins/jev-tool-gate/${file}}";
+      clobber = true;
+    };
+  }) ["__init__.py" "plugin.yaml"];
   # Custom skins — one YAML per theme, theming CLI + TUI + desktop together.
   # `clobber` keeps the module authoritative over the live copy in ~/.hermes/skins/.
   skinFiles = map (file: {
@@ -59,7 +71,7 @@ in {
   ];
 
   manzil.users."${config.user.name}".files =
-    builtins.listToAttrs (routerFiles ++ cwdFiles ++ skinFiles)
+    builtins.listToAttrs (routerFiles ++ cwdFiles ++ gateFiles ++ skinFiles)
     // {
       ".hermes/desktop-plugins/bots-mod/plugin.js".source = "${botsMod}/plugin.js";
       ".local/share/applications/hermes.desktop" = {
