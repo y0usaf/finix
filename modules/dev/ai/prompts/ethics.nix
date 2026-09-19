@@ -4,8 +4,7 @@
 # config.user.dev.prompts.ethics through its own supported mechanism: the
 # Hermes SOUL.md, codex developer_instructions, the opencode instruction files,
 # and the omp/prime-agent APPEND_SYSTEM.md; the pi and phi agents receive it
-# through the shared prompt body (modules/dev/ai/phi/prompt-body.nix), and the
-# line process through ~/.config/slope/config.json's `system` key. Edit the
+# through the shared prompt body (modules/dev/ai/phi/prompt-body.nix). Edit the
 # block here; consumers interpolate the option.
 {lib, ...}: {
   options.user.dev.prompts.ethics = lib.mkOption {

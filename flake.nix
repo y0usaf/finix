@@ -173,16 +173,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # `line`: the SBCL agent harness that Hermes' slope-line plugin dispatches to.
-    # `path:` like hermes-desktop-terminal, because the checkout is under active
-    # development and a git input cannot be locked while its tree is dirty
-    # ("has an unlocked input"). Re-run `nix flake lock --update-input slope`
-    # after editing slope; switch to git+file:// once its work is committed.
-    slope = {
-      url = "path:/home/y0usaf/dev/developing/slope";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     hermes-bots-mod = {
       url = "github:y0usaf/hermes-bots-mod/41b505132dc77f256faea85e2d36519f93238427";
       flake = false;

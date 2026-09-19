@@ -1,7 +1,7 @@
 # Hermes
 
-Finix's stock build of upstream Hermes, plus the slope-line delegation plugin,
-bundled skills, and the default-profile behavior policy. This directory is the
+Finix's stock build of upstream Hermes, plus bundled skills and the
+default-profile behavior policy. This directory is the
 whole module: there is no separate `hermes-tools` repository or flake input.
 Finix pins upstream `hermes-agent` (and `hermes-desktop-terminal`) and builds it
 unmodified; the desktop owns its backend, and the CLI and desktop share
@@ -12,12 +12,10 @@ unmodified; the desktop owns its backend, and the CLI and desktop share
 - `packages.nix` / `bot-packages.nix` -- `callPackage` builders for the Hermes
   CLI, the desktop, and the Bots Mod plugin. The caller supplies the upstream
   pin, the plugin source, and `apiKeyFile`.
-- `default.nix` -- installs the apps, `slope`, the slope-line plugin, skins, and
-  the desktop entry.
+- `default.nix` -- installs the apps, skins, and the desktop entry.
 - `remote-gateway.nix` -- tailnet-exposed `hermes serve`.
 - `behavior.nix`, `behavior-settings.json`, `SOUL.md` -- default-profile policy.
 - `skills.nix`, `skills/`, `skills/disabled.json` -- bundled skills and policy.
-- `plugins/slope-line/` -- the `line_task` delegation plugin (dispatches to `line`).
 - `plugins/cwd-command/` -- the in-session `/cwd` command (print the tool cwd, or
   retarget the session: process cwd, `TERMINAL_CWD`, session record, live backend).
 - `load-credentials.sh` -- runtime AI Gateway key loader for the CLI/desktop.

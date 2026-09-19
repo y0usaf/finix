@@ -43,7 +43,7 @@ candidate** (`len == 1`); `min_candidates` still governs the ambiguous multi-can
 (iii)/(iv) stay closed because they have zero lexical overlap.
 
 ## Disable
-- Runtime: `hermes config set --force plugins.enabled '["slope-line"]'` (drop it from the list), or
+- Runtime: `hermes config set --force plugins.enabled '["cwd-command"]'` (drop it from the list), or
   set `plugins.entries.jev-skill-router.settings.enabled` false.
 - Declarative: remove `"jev-skill-router"` from `plugins.enabled` in `../behavior-settings.json`.
   The hook then injects nothing without any other change.
