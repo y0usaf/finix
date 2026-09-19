@@ -80,6 +80,11 @@ crash each NixOS workaround prevents; the module reproduces them:
   fail with "cannot execute binary file" here.
 - `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.
 - `VLLM_WORKER_MULTIPROC_METHOD=spawn` (fork-in-CUDA is unsafe).
+- `CC` = the store gcc wrapper (`pkgs.stdenv.cc`), which is also on the service
+  `PATH`. Triton JIT-builds a small kernel while the vLLM engine initialises
+  and looks the C compiler up by name; with no `cc` reachable the engine dies
+  with `RuntimeError: Failed to find C compiler` and finit respawn-loops the
+  service (observed on every boot until the compiler was declared).
 - `PYTHONPATH` = the patched store tree (provides the `r2t2` package).
 - `ASR_MODEL_PATH`, `VAD_MODEL_PATH`, and the memory knobs below.
 
