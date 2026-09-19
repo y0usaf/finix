@@ -168,6 +168,11 @@
     PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True";
     # vLLM spawns its engine worker; fork-in-CUDA is unsafe.
     VLLM_WORKER_MULTIPROC_METHOD = "spawn";
+    # Triton JIT-builds a small kernel during vLLM engine init and looks up a C
+    # compiler by name: with no cc/gcc on the service PATH it dies with
+    # "RuntimeError: Failed to find C compiler" and finit respawn-loops the
+    # server. Point it at the store gcc wrapper explicitly.
+    CC = "${pkgs.stdenv.cc}/bin/cc";
   };
 
   # --- paths ----------------------------------------------------------------
@@ -342,7 +347,7 @@ in {
         // runtimeEnv
         // cfg.environment;
 
-      path = [pkgs.coreutils pkgs.gnugrep];
+      path = [pkgs.coreutils pkgs.gnugrep pkgs.stdenv.cc];
 
       # Supervise the server directly; restart whenever it leaves (crash or
       # clean exit - it is never supposed to exit on its own). respawn keeps
@@ -357,7 +362,7 @@ in {
 
       command = pkgs.writeShellScript "r2t2-server" ''
         set -eu
-        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep python]}
+        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep python pkgs.stdenv.cc]}
 
         run=${lib.escapeShellArg runDir}
         mkdir -p "$run" ${lib.escapeShellArg logDir}
