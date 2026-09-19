@@ -302,7 +302,7 @@
         "narHash": "sha256-GAmPIzbtjJW3NIW4l1NNjMMgGhweQ5EKE3Qt4hRq+Qk=",
         "owner": "y0usaf",
         "repo": "codex-desktop-flake",
-        "rev": "f647b9138b62d7581097c80a75fd9068630ca958",
+        "rev": "04438379d11c15ff23d88f85d700fe781cf53fba",
         "type": "github"
       },
       "original": {
@@ -385,7 +385,7 @@
         "narHash": "sha256-ogdKpEcl/0WIw5SMAn8E5Z0ag0VijLFpgWrQpFnciqc=",
         "owner": "y0usaf",
         "repo": "cursors",
-        "rev": "ffbfe43fc4bc832dd610f78add67867dd75399e3",
+        "rev": "8e5949a0efbb6c5adcaed0425d04e5afb9fea617",
         "type": "github"
       },
       "original": {
@@ -440,7 +440,7 @@
         "narHash": "sha256-yuT1tfm8Mgio7bxwuyWCqJz5VX3bc6W5htSJR7syoLQ=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "0d7903bcba6fedf3155e0e2fe27c8beaa4d07550",
+        "rev": "47eddac10c380dd050e991e5634f7d2c3a323991",
         "type": "github"
       },
       "original": {
@@ -726,7 +726,7 @@
         "narHash": "sha256-Fc+abMD8rpXuptW7dfT1yaYvvX9Gzlp5lzEQRQ3pNig=",
         "owner": "y0usaf",
         "repo": "fonts",
-        "rev": "3c8bc51d60a8a4347537f471a3c00ea3004088e8",
+        "rev": "b3815cf06d14946cda130a31fc337c41ac4558cb",
         "type": "github"
       },
       "original": {
@@ -789,7 +789,7 @@
         "narHash": "sha256-VF4H7xqHMzqC0KM0kMrnrTJYYSeHfYugmWjo9BTATVY=",
         "owner": "y0usaf",
         "repo": "hermes-bots-mod",
-        "rev": "41b505132dc77f256faea85e2d36519f93238427",
+        "rev": "3748f2e71a66fa73ddf603f5ab8e5342f8c495dc",
         "type": "github"
       },
       "original": {
@@ -891,7 +891,7 @@
         "narHash": "sha256-158Qc8gSCfq7cN/pey/xc5EI1ZY/fOSW4OLD2SDNQng=",
         "owner": "y0usaf",
         "repo": "manzil",
-        "rev": "108a9d643f3fa8c2edcf9ebb55407f0ace9f073b",
+        "rev": "d6a36e0ffade085359d3f25a61072891b92b021b",
         "type": "github"
       },
       "original": {
@@ -1367,7 +1367,7 @@
         "narHash": "sha256-FNXtNwwRsHZ+h21xCIN//0CF5xjCPAlDJBKEgUmomjc=",
         "owner": "y0usaf",
         "repo": "obs-image-reaction",
-        "rev": "a1158a302e4cfab960eea365cba1cd839f733fbe",
+        "rev": "579e63065703f8eaeaf3fbf40260772354fa4a1c",
         "type": "github"
       },
       "original": {
@@ -1525,7 +1525,7 @@
         "narHash": "sha256-cvrfA1REngAIHMfbSGL546lHcjFsKvS1bOfsMlJCnZg=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "52c3660a06d56bce327dcde3c3282564253e3e80",
+        "rev": "ba755ba39fefb68ff92906149d74d8e961ba96a8",
         "type": "github"
       },
       "original": {
@@ -1548,7 +1548,7 @@
         "lastModified": 1788360574,
         "narHash": "sha256-SGwjGSyK/CTQ4ENoxPQUBgTMWpN1+X+iFo2rta6k1H8=",
         "ref": "main",
-        "rev": "9b95d0c082c3abfc7f83124ca55e0fb6aaf54b29",
+        "rev": "5329d4f600236126098b35ee325f7db32c3a4179",
         "revCount": 99,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/amux.git"
@@ -2083,7 +2083,7 @@
         "lastModified": 1789090993,
         "narHash": "sha256-LvVAyk+0K9RezZspzrwQurvMnfIWn6PMAdiN9nwGHVk=",
         "ref": "refs/heads/main",
-        "rev": "2ab42d0ebc1cea3166bb4de2b48923c20a8867d6",
+        "rev": "af561e23ed324a0955b08fbaec7b852157c44ffc",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
@@ -2103,7 +2103,7 @@
         "lastModified": 1785239060,
         "narHash": "sha256-iFdCEl3JAgecql38U3NurVoMQz5OwWHq49iaEqHFvDQ=",
         "ref": "refs/heads/main",
-        "rev": "ae0cd20d92dd00f1694745e1b2af3da05ca0e103",
+        "rev": "4320c3f528d9d341ad3dbe52a90ed7fcdf190898",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
