@@ -33,6 +33,20 @@
         };
       };
     };
+    # Confucius4-R2T2 streaming ASR: bolod is a thin WebSocket client and holds
+    # no GPU; the resident server owns the VRAM (user.dev.r2t2, whose
+    # listenAddress/port the uri is derived from — one declaration). No local
+    # files. An ADDITIONAL engine, not a replacement: Parakeet stays `model`/
+    # default, r2t2 is opt-in per host (bolo DESIGN.md, commit decef23).
+    # A FORCED `language` is required: the server's default `zhen` auto-detects
+    # and withholds text until the utterance ends, so live typing shows nothing.
+    # Values are qwen_asr's SUPPORTED_LANGUAGES (English, Chinese, Cantonese,
+    # ...); a bare "en" is rejected by the server, so spell the name out.
+    "r2t2-streaming" = {
+      engine = "r2t2-streaming";
+      uri = "ws://${config.user.dev.r2t2.listenAddress}:${toString config.user.dev.r2t2.port}/asr_stream_api_v1";
+      language = "English";
+    };
   };
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
@@ -196,27 +210,35 @@ in {
             inherit (cfg) language provider threads;
             pipe_to = cfg.pipeTo;
             models =
-              lib.mapAttrsToList (name: m: {
-                inherit name;
-                inherit (m) engine;
-                encoder = "${modelDir name}/encoder.int8.onnx";
-                decoder = "${modelDir name}/decoder.int8.onnx";
-                joiner = "${modelDir name}/joiner.int8.onnx";
-                tokens = "${modelDir name}/tokens.txt";
-              })
+              lib.mapAttrsToList (name: m:
+                {
+                  inherit name;
+                  inherit (m) engine;
+                }
+                # Streaming shape: uri (+ a forced language); no local files.
+                // lib.optionalAttrs (m ? uri) {inherit (m) uri;}
+                // lib.optionalAttrs (m ? language) {inherit (m) language;}
+                # Offline transducer shape: the four file paths under modelDir.
+                // lib.optionalAttrs (m ? files) {
+                  encoder = "${modelDir name}/encoder.int8.onnx";
+                  decoder = "${modelDir name}/decoder.int8.onnx";
+                  joiner = "${modelDir name}/joiner.int8.onnx";
+                  tokens = "${modelDir name}/tokens.txt";
+                })
               models;
             # One declaration mechanism: same attrset -> list shape as models.
             vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) cfg.vocabulary;
             vocab_fuzzy = cfg.vocabFuzzy;
           });
         }
-        # Model files land where the manifest points.
+        # Model files land where the manifest points (streaming entries carry
+        # no `files`, so they contribute nothing here).
         // lib.foldl' (acc: name:
           acc
           // lib.mapAttrs' (f: src:
             lib.nameValuePair ".local/share/bolo/models/${name}/${f}" {source = src;})
           models."${name}".files) {}
-        (lib.attrNames models);
+        (lib.attrNames (lib.filterAttrs (_: m: m ? files) models));
     };
 
     # Tomoe: supervised daemon + push-to-talk hold bind. process.service (not
