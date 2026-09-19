@@ -20,24 +20,6 @@
         "url": "ssh://git@github.com/y0usaf/ash.git"
       }
     },
-    "ash_2": {
-      "inputs": {
-        "nixpkgs": [
-          "slope",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789333596,
-        "narHash": "sha256-jZayjudyS7sglgNNxFMG4IUj/5jmJSUa3t0XVzE+Ibw=",
-        "path": "/home/y0usaf/dev/developing/ash",
-        "type": "path"
-      },
-      "original": {
-        "path": "/home/y0usaf/dev/developing/ash",
-        "type": "path"
-      }
-    },
     "autolith": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -1716,7 +1698,6 @@
         "reasonix-flake": "reasonix-flake",
         "rudo": "rudo",
         "rush": "rush",
-        "slope": "slope",
         "strictix": "strictix",
         "tomoe": "tomoe",
         "tomoe-lua": "tomoe-lua"
@@ -1883,24 +1864,6 @@
         "owner": "andreymatin",
         "repo": "scss-reset",
         "type": "github"
-      }
-    },
-    "slope": {
-      "inputs": {
-        "ash": "ash_2",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789450437,
-        "narHash": "sha256-0TJXyyAdKSghuY0pb3+rmPgnqiqsheL2LiPiSfMZoJo=",
-        "path": "/home/y0usaf/dev/developing/slope",
-        "type": "path"
-      },
-      "original": {
-        "path": "/home/y0usaf/dev/developing/slope",
-        "type": "path"
       }
     },
     "strictix": {

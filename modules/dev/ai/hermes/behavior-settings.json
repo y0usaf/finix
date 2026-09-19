@@ -13,6 +13,6 @@
   "memory.user_profile_enabled": true,
   "memory.memory_char_limit": 4400,
   "memory.user_char_limit": 2750,
-  "plugins.enabled": ["slope-line", "jev-skill-router", "cwd-command"],
+  "plugins.enabled": ["jev-skill-router", "cwd-command"],
   "tools.tool_search.enabled": false
 }
