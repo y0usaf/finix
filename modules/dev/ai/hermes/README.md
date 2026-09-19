@@ -18,6 +18,10 @@ unmodified; the desktop owns its backend, and the CLI and desktop share
 - `skills.nix`, `skills/`, `skills/disabled.json` -- bundled skills and policy.
 - `plugins/cwd-command/` -- the in-session `/cwd` command (print the tool cwd, or
   retarget the session: process cwd, `TERMINAL_CWD`, session record, live backend).
+- `plugins/jev-tool-gate/` -- an append-only refusal gate for mutating tool calls:
+  one jev `choice` verdict returned as the call's tool result (no transcript
+  rewrite, so the prefix cache stays warm and `rewind_count` stays 0). Installed,
+  not enabled by default -- see its `BUILD-NOTES.md`.
 - `load-credentials.sh` -- runtime AI Gateway key loader for the CLI/desktop.
 - `skins/abyss.yaml` -- themes CLI, TUI, and desktop together.
 
