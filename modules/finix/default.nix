@@ -52,6 +52,12 @@
         ../hosts/common/manzil.nix
         ../hosts/common/ssh-keys.nix
         ../core/user/user-config.nix
+        # The headless server reaches modules/dev only through this explicit
+        # list, so claude-code's consumers of user.dev.prompts.* must be named
+        # here too — the graphical roots that normally import them are absent
+        # and the whole server config fails to evaluate without them.
+        ../dev/ai/prompts/ethics.nix
+        ../dev/ai/prompts/no-tests.nix
         ../dev/ai/claude-code/claude-code.nix
         ../dev/ai/paseo/options.nix
         ../dev/ai/paseo/service.nix
