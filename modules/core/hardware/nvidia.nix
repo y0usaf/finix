@@ -20,7 +20,6 @@
         __GL_VRR_ALLOWED = "1";
         __GL_MaxFramesAllowed = "1";
         __GL_YIELD = "usleep";
-        CUDA_CACHE_PATH = "${config.user.homeDirectory}/.cache/nv";
         CUDA_DISABLE_PERF_BOOST = "1";
         NVIDIA_DRIVER_CAPABILITIES = "all";
       };
