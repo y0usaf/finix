@@ -18,6 +18,8 @@ unmodified; the desktop owns its backend, and the CLI and desktop share
 - `behavior.nix`, `behavior-settings.json`, `SOUL.md` -- default-profile policy.
 - `skills.nix`, `skills/`, `skills/disabled.json` -- bundled skills and policy.
 - `plugins/slope-line/` -- the `line_task` delegation plugin (dispatches to `line`).
+- `plugins/cwd-command/` -- the in-session `/cwd` command (print the tool cwd, or
+  retarget the session: process cwd, `TERMINAL_CWD`, session record, live backend).
 - `load-credentials.sh` -- runtime AI Gateway key loader for the CLI/desktop.
 - `skins/abyss.yaml` -- themes CLI, TUI, and desktop together.
 
