@@ -32,7 +32,7 @@
         ".config/git/config" = mkTextFile "git-config" (lib.generators.toGitINI {
           user = {
             name = gitName;
-            email = "OA99@Outlook.com";
+            email = "74448287+y0usaf@users.noreply.github.com";
           };
           core.editor = "vim";
           init.defaultBranch = "main";
