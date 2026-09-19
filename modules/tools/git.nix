@@ -17,7 +17,10 @@
     };
     email = lib.mkOption {
       type = lib.types.str;
-      default = "OA99@Outlook.com";
+      # Account-linked GitHub noreply identity. Keeps commits credited to the
+      # account (contribution graph intact) without publishing a real mailbox
+      # in every commit object of every repo.
+      default = "74448287+y0usaf@users.noreply.github.com";
       description = "Git email address.";
     };
     editor = lib.mkOption {
