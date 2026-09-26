@@ -17,7 +17,14 @@ in {
 
   config = mkIf grokBotCfg.enable {
     environment.systemPackages = [
-      grok-bot
+      # Electron ignores GDK_DPI_SCALE, so the host's GTK scale reaches it as a
+      # Chromium switch — the same mechanism obsidian.nix uses. The package's
+      # own wrapper carries the flag, keeping the desktop entry's Exec plain.
+      (grok-bot.override {
+        commandLineArgs = [
+          "--force-device-scale-factor=${builtins.toString config.user.ui.gtk.scale}"
+        ];
+      })
     ];
   };
 }
