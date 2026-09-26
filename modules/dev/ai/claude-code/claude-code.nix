@@ -7,6 +7,16 @@
   options.user.dev.claude-code.enable = lib.mkEnableOption "Claude Code";
 
   config = lib.mkIf config.user.dev.claude-code.enable {
+    # Managed settings apply to every Claude Code entry point (IDE extension,
+    # npx, ...), not just the wrapper below, and live outside CLAUDE_CONFIG_DIR
+    # so Claude Code can keep rewriting its own user settings.json.
+    environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
+      model = "claude-opus-5-5";
+      effortLevel = "max";
+      permissions.defaultMode = "bypassPermissions";
+      skipDangerousModePermissionPrompt = true;
+    };
+
     environment.systemPackages = [
       (pkgs.writeShellScriptBin "claude" ''
         # --append-system-prompt adds the shared compaction/ethics and
@@ -18,7 +28,6 @@
         # clauses themselves live in config.user.dev.prompts.ethics and
         # config.user.dev.prompts.noTests.
         exec ${lib.getExe pkgs.claude-code} \
-          --dangerously-skip-permissions \
           --append-system-prompt ${lib.escapeShellArg (config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests)} \
           "$@"
       '')
