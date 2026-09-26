@@ -54,6 +54,7 @@ in {
           ".config/gh"
           ".config/gws"
           ".config/librewolf"
+          ".config/glide" # Glide profile root (glide/) + glide.ts
           ".local/state/nix"
           ".config/pi/agent" # RETIRED 2026-09-02: PI_CODING_AGENT_DIR reverted (pi/omp both read it; shared-dir hazard); pi back on native ~/.pi (allowlisted separately). Contents migrated back to ~/.pi; safe to drop.
           ".config/codex" # CODEX_HOME cutover

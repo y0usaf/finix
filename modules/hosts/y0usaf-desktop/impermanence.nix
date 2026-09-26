@@ -148,6 +148,8 @@ in {
           ".config/firefox"
           # LibreWolf 152 reads the legacy ~/.librewolf only (no XDG support).
           ".librewolf"
+          # Glide: XDG profile root ~/.config/glide/glide.
+          ".config/glide"
           ".config/discord"
           ".config/vesktop"
           ".config/Vencord"

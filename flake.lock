@@ -696,6 +696,27 @@
         "type": "github"
       }
     },
+    "glide-browser": {
+      "inputs": {
+        "home-manager": "home-manager",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788886164,
+        "narHash": "sha256-F1wxjMtHxA8YL3TiaVb5wujuCiog/tGYguxTGOf7oLQ=",
+        "owner": "glide-browser",
+        "repo": "glide.nix",
+        "rev": "90b69855767dfa25c81dcd437eac7206a8d13284",
+        "type": "github"
+      },
+      "original": {
+        "owner": "glide-browser",
+        "repo": "glide.nix",
+        "type": "github"
+      }
+    },
     "grok-bot": {
       "inputs": {
         "nixpkgs": [
@@ -717,6 +738,27 @@
       }
     },
     "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "glide-browser",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788651960,
+        "narHash": "sha256-v9wJd32eZ2bvhBzVOd7TIjLQd011P7nwOhjKtWlci5I=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "2c0350c759688177331b8f5242311fae8877bdb3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "home-manager_2": {
       "inputs": {
         "nixpkgs": [
           "nix-on-droid",
@@ -912,7 +954,7 @@
     },
     "nix-on-droid": {
       "inputs": {
-        "home-manager": "home-manager",
+        "home-manager": "home-manager_2",
         "nix-formatter-pack": "nix-formatter-pack",
         "nixpkgs": [
           "nixpkgs"
@@ -1503,6 +1545,7 @@
         "emeraldian": "emeraldian",
         "finix": "finix",
         "fonts": "fonts",
+        "glide-browser": "glide-browser",
         "grok-bot": "grok-bot",
         "linear-cli": "linear-cli",
         "manzil": "manzil",
