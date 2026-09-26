@@ -1,4 +1,5 @@
-# Retain the server CPU-compatible login shell after retiring Hermes.
+# Retain the server CPU-compatible login shell (moved here when the Hermes
+# module was deleted from finix; this override is unrelated to Hermes).
 {
   lib,
   pkgs,
