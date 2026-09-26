@@ -8,6 +8,8 @@
   inherit (lib) concatStringsSep optional mkEnableOption mkOption mkIf types;
 
   enableFeatures = [
+    "WaylandWindowDecorations"
+    "WaylandLinuxDrmSyncobj"
   ];
   disableFeatures = [
     "WebRtcAllowInputVolumeAdjustment"
