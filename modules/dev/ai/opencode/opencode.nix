@@ -218,6 +218,8 @@ in {
 
             Tests:
             ${config.user.dev.prompts.noTests}
+
+            ${config.user.dev.prompts.noComments}
           '';
         };
       };

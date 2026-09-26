@@ -22,7 +22,7 @@
       ".fx/AGENTS.md" = {
         type = "copy";
         clobber = true;
-        text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests;
+        text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
       };
 
       # fx rejects settings symlinked into the Nix store as

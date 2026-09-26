@@ -9,14 +9,14 @@
   # no-test-authoring policies.
   # developer_instructions is codex's supported extra system guidance channel.
   developerInstructions =
-    builtins.readFile ./system-prompt.md + "\n\n" + config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests;
+    builtins.readFile ./system-prompt.md + "\n\n" + config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
 in {
   options.user.dev.codex.enable = lib.mkEnableOption "Codex CLI";
 
   config = lib.mkIf config.user.dev.codex.enable {
     # Reconcile the shared CLI/desktop config without replacing runtime settings.
     system.activation.scripts.codexReasoningPolicy = {
-      deps = [ "users" ];
+      deps = ["users"];
       text = let
         user = lib.escapeShellArg config.user.name;
         home = config.users.users.${config.user.name}.home;

@@ -58,6 +58,7 @@
         # and the whole server config fails to evaluate without them.
         ../dev/ai/prompts/ethics.nix
         ../dev/ai/prompts/no-tests.nix
+        ../dev/ai/prompts/no-comments.nix
         ../dev/ai/claude-code/claude-code.nix
         ../dev/ai/paseo/options.nix
         ../dev/ai/paseo/service.nix
