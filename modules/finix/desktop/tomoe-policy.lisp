@@ -162,6 +162,7 @@
               ((null command) nil)
               ((equal command "close") (when focused (list (close-window focused))))
               ((equal command "quit") (list (quit)))
+              ((equal command "power") (list (output-power :toggle)))
               (t
                (let ((argv (second (assoc command +policy-launches+ :test #'equal))))
                  (when argv (list (apply #'launch argv)))))))))
