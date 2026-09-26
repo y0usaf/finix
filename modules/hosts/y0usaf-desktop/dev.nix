@@ -17,6 +17,7 @@ _: {
     ai = {
       agent-slack.enable = true;
       principles.enable = true;
+      firstmate.enable = true;
     };
     pi = {
       enable = true;
