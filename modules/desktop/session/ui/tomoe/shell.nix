@@ -1,21 +1,13 @@
-{
-  config,
-  lib,
-  ...
-}: let
-  cfg = config.user.ui.tomoe;
-  inherit (cfg) bar;
-  inherit (config.lib.generators) toLua;
-in {
+{lib, ...}: {
   options.user.ui.tomoe.bar = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = true;
-      description = "Run the widget-bar overlay in tomoe's Lua VM (folded in from the retired standalone moonshell client).";
+      description = "Draw the widget bar as tomoe shell surfaces.";
     };
 
     modules = lib.mkOption {
-      type = lib.types.listOf (lib.types.enum ["time" "date" "bongo" "battery" "network" "cpu" "memory" "gpu"]);
+      type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu"]);
       default = ["time" "date"];
       description = "Bar overlay modules to render.";
     };
@@ -25,7 +17,7 @@ in {
       default = ["time" "date"];
       example = ["cpu" "memory"];
       description = ''
-        Two adjacent module names whose shared boundary is pinned to screen center. The bar surface is padded to twice its wider half, so the seam sits at the surface midpoint and layer-shell's centering puts that midpoint on the output's center — the clock stays put while stats grow outward. null, or a pair that is not adjacent in `modules`, falls back to centering the whole row as one block.
+        Two adjacent module names whose shared boundary is pinned to screen center. The bar spans the output as two equal halves that meet at that seam, so the clock stays put while stats grow outward. null, or a pair that is not adjacent in `modules`, falls back to centering the whole row as one block.
       '';
     };
 
@@ -103,25 +95,25 @@ in {
     exclusive = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Whether the bar overlay reserves layer-shell exclusive space. Keep false for a pure overlay.";
+      description = "Whether the bar reserves exclusive space that windows tile around. Keep false for a pure overlay.";
     };
 
     font-family = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      description = "Font family for bar overlay labels. null = resolve system monospace via fc-match.";
+      description = "Font family for bar labels. null = the fontconfig monospace alias.";
     };
 
     bongo-cat = {
       enable = lib.mkOption {
         type = lib.types.bool;
         default = false;
-        description = "Render bongo cat in bottom-center overlay and react to keyboard activity (in-VM shell.services.keyboard feed since the fusion).";
+        description = "Render bongo cat in a bottom-center overlay that taps along with keyboard activity.";
       };
       height = lib.mkOption {
         type = lib.types.ints.between 10 200;
         default = 80;
-        description = "Bongo cat image height in physical pixels.";
+        description = "Bongo cat image height in logical pixels.";
       };
       margin-bottom = lib.mkOption {
         type = lib.types.int;
@@ -138,95 +130,6 @@ in {
         default = 100;
         description = "Milliseconds each paw stays down after a key press.";
       };
-    };
-  };
-
-  config = lib.mkIf (cfg.enable && bar.enable) {
-    manzil.users."${config.user.name}".files = {
-      ".config/tomoe/shell/wallust.lua".text = ''
-        local nix_home = ${toLua config.user.homeDirectory}
-        ${builtins.readFile ./lua/wallust.lua}'';
-
-      ".config/tomoe/shell/sysinfo.lua".text = builtins.readFile ./lua/sysinfo.lua;
-
-      ".config/tomoe/shell/bar_overlay.lua".text =
-        "local DEFAULTS = "
-        + toLua {
-          inherit (bar) modules;
-          center_between = bar.center-between;
-          edges = ["top" "bottom"];
-          indent = 0;
-          font_family = "monospace";
-          name_prefix = "bar-overlay";
-          top_name = "bar-overlay-top";
-          bottom_name = "bar-overlay-bottom";
-          height = 24;
-          spacing = 8;
-          margin_top = 0;
-          margin_bottom = 0;
-          refresh_interval = 1000;
-          layer = "overlay";
-          bg = "transparent";
-          font_size = 14;
-          anchors = {
-            top = "top-center";
-            bottom = "bottom-center";
-          };
-          label = {
-            weight = "bold";
-            size = 14;
-          };
-          block = {
-            gap = 0;
-            border = 1;
-            padding_y = 2.1;
-            padding_x = 4.2;
-          };
-          time = {
-            format = "%H:%M:%S";
-            interval = 1000;
-          };
-          date = {
-            format = "%d/%m/%y";
-            interval = 30000;
-          };
-          module_widths = {
-            battery = 58;
-            time = 74;
-            date = 74;
-            bongo = 74;
-            network = 96;
-            cpu = 104;
-            memory = 84;
-            gpu = 150;
-          };
-          battery = {
-            gap = 4;
-          };
-          sysinfo = {
-            cpu_interval = bar.sysinfo.cpu-interval;
-            memory_interval = bar.sysinfo.memory-interval;
-            gpu_interval = bar.sysinfo.gpu-interval;
-            gpu_prefer = bar.sysinfo.gpu-backend;
-            gpu_card = bar.sysinfo.gpu-card;
-            memory_style = bar.sysinfo.memory-style;
-            show_cpu_temp = bar.sysinfo.show-cpu-temp;
-            show_gpu_temp = bar.sysinfo.show-gpu-temp;
-            show_gpu_vram = bar.sysinfo.show-gpu-vram;
-          };
-          bongo_cat = {
-            inherit (bar.bongo-cat) enable;
-            asset_dir = "${./assets/bongo-cat}";
-            name = "bongo-cat";
-            inherit (bar.bongo-cat) height;
-            margin_bottom = bar.bongo-cat.margin-bottom;
-            x_offset = bar.bongo-cat.x-offset;
-            keypress_duration = bar.bongo-cat.keypress-duration;
-            layer = "overlay";
-          };
-        }
-        + "\n"
-        + builtins.readFile ./lua/bar_overlay.lua;
     };
   };
 }

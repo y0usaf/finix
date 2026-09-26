@@ -1201,22 +1201,6 @@
         "type": "github"
       }
     },
-    "nixpkgs_8": {
-      "locked": {
-        "lastModified": 1782821651,
-        "narHash": "sha256-D5jO0ME1lA9bDHnd5kVawBwItG/N4oZr3FlXmMzLec8=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "e52c192be9d7b2c4bd4aed326c8731b35f8bb75c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nmd": {
       "inputs": {
         "nixpkgs": [
@@ -1565,8 +1549,7 @@
         "rudo": "rudo",
         "rush": "rush",
         "strictix": "strictix",
-        "tomoe": "tomoe",
-        "tomoe-lua": "tomoe-lua"
+        "tomoe": "tomoe"
       }
     },
     "rudo": {
@@ -1909,36 +1892,16 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1790434514,
-        "narHash": "sha256-9zSSjC9GDdhwY0eIO/d9u+WtwBcICJwQkYIPIko7hdY=",
+        "lastModified": 1790438602,
+        "narHash": "sha256-RalJ9MZEuRifOO4KKq+3NFG0gmySjqOvGCQfFeW0j80=",
         "ref": "refs/heads/main",
-        "rev": "e7ae300b487ac5c534085b312899e9543f4b5739",
+        "rev": "a469568aa3719207868047afc4aac23c477c6cf2",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
       },
       "original": {
-        "rev": "e7ae300b487ac5c534085b312899e9543f4b5739",
-        "shallow": true,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/maintaining/tomoe"
-      }
-    },
-    "tomoe-lua": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_8"
-      },
-      "locked": {
-        "lastModified": 1785239060,
-        "narHash": "sha256-iFdCEl3JAgecql38U3NurVoMQz5OwWHq49iaEqHFvDQ=",
-        "ref": "refs/heads/main",
-        "rev": "4320c3f528d9d341ad3dbe52a90ed7fcdf190898",
-        "shallow": true,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/maintaining/tomoe"
-      },
-      "original": {
-        "rev": "ae0cd20d92dd00f1694745e1b2af3da05ca0e103",
+        "rev": "a469568aa3719207868047afc4aac23c477c6cf2",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"

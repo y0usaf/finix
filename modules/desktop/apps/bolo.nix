@@ -155,10 +155,12 @@ in {
     autofill = lib.mkEnableOption "typing the transcript into the focused window (dotool/uinput)";
     tomoeKeybind = lib.mkOption {
       type = lib.types.str;
-      default = "Mod+m";
+      default = "Alt+m";
       description = ''
-        Tomoe push-to-talk bind (hold form): key-down spawns bolo to start
-        recording, key-up spawns it again to stop and transcribe.
+        Tomoe push-to-talk bind (hold form), as modifiers from Super, Alt,
+        Ctrl, Shift and Mod joined to a keysym with "+": key-down spawns
+        bolo to start recording, key-up spawns it again to stop and
+        transcribe.
       '';
     };
   };
@@ -204,15 +206,25 @@ in {
         (lib.attrNames (lib.filterAttrs (_: m: m ? files) models));
     };
 
-    user.ui.tomoe.extraConfig = lib.mkIf config.user.ui.tomoe.enable ''
-      tomoe.process.service("bolod", {
-        command = {"${bolod}/bin/bolod"},
-        restart = "on_exit",
-      })
-      tomoe.bind("${cfg.tomoeKeybind}", {
-        press = function() tomoe.spawn("${boloPkgs.bolo}/bin/bolo") end,
-        release = function() tomoe.spawn("${boloPkgs.bolo}/bin/bolo") end,
-      }, "Push-to-talk speech-to-text (bolo)")
-    '';
+    user.ui.tomoe.extraConfig = lib.mkIf config.user.ui.tomoe.enable (let
+      inherit (config.lib.generators) mkLispInline toLisp;
+      keys = lib.splitString "+" cfg.tomoeKeybind;
+      modifiers = {
+        Super = ":super";
+        Alt = ":alt";
+        Ctrl = ":control";
+        Shift = ":shift";
+        Mod = ":mod";
+      };
+    in ''
+      (define-extension "bolo" (:reads (:key)) (snapshot state event)
+        (declare (ignore snapshot))
+        (values state
+                (list (service :bolod ${toLisp ["${bolod}/bin/bolod"]})
+                      (bind-key ${toLisp (map (key: mkLispInline modifiers.${key}) (lib.init keys))} ${toLisp (lib.last keys)}
+                                :press :release :release :description "Push-to-talk speech-to-text (bolo)"))
+                (when (and (eq (getf event :type) :key) (equal (getf event :owner) "bolo"))
+                  (list (launch ${toLisp "${boloPkgs.bolo}/bin/bolo"})))))
+    '');
   };
 }
