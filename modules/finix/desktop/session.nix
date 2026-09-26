@@ -23,8 +23,6 @@
       install -Dm644 ${tomoePkg}/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service \
         $out/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service
     '';
-
-  starterPolicy = pkgs.writeText "tomoe-init.lisp" config.user.ui.tomoe.lisp.initText;
 in {
   finit.services.seatd.runlevels = lib.mkForce "234";
 
@@ -97,9 +95,6 @@ in {
           export NVIDIA_DRIVER_CAPABILITIES=all
         ''}
         cd "$HOME"
-        policy="$HOME/.config/tomoe/init.lisp"
-        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/tomoe"
-        ${pkgs.coreutils}/bin/install -m 0644 ${starterPolicy} "$policy"
         exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
           ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
           exec ${lib.getExe tomoePkg} --backend drm "$@"
