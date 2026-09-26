@@ -90,6 +90,7 @@ in {
     ../../../finix/desktop
     ./boot.nix
     ./graphical.nix
+    ./network.nix
   ];
 
   # manzil dotfiles: native finix module (imported in finix/default.nix),
@@ -384,6 +385,29 @@ in {
         printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > /etc/resolv.conf || true
       ''}";
       conditions = ["net/lo/up"];
+  # Root is tmpfs, so /etc is rebuilt every boot and NetworkManager profiles
+  # written by nmtui land in RAM. finix does not bind-mount /etc/* allowlist
+  # entries (the fstab filter above drops them so a bind cannot shadow
+  # generated config), so replay /persist by hand — same shape as
+  # ../y0usaf-framework/finix/persistent.nix. Existing profiles come from the
+  # NixOS era via modules/hosts/common/persist.nix.
+  #
+  # A profile created with nmtui is NOT captured back automatically; save it
+  # with: sudo cp /etc/NetworkManager/system-connections/*.nmconnection \
+  #   /persist/etc/NetworkManager/system-connections/
+  system.activation.scripts.networkManagerConnections = {
+    deps = ["etc"];
+    text = ''
+      src=/persist/etc/NetworkManager/system-connections
+      dst=/etc/NetworkManager/system-connections
+      ${pkgs.coreutils}/bin/install -d -m 0700 "$dst"
+      if [ -d "$src" ]; then
+        ${pkgs.findutils}/bin/find "$src" -maxdepth 1 -type f -exec \
+          ${pkgs.coreutils}/bin/install -m 0600 -o root -g root {} "$dst/" \;
+      fi
+    '';
+  };
+
       log = true;
     };
   };

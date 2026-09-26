@@ -71,6 +71,7 @@
     cudaSupport = true;
     modules =
       [
+        inputs.finix.nixosModules.networkmanager
         inputs.finix.nixosModules.nix-daemon
         inputs.finix.nixosModules.nftables
         inputs.finix.nixosModules.limine
