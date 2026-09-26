@@ -154,9 +154,9 @@ in {
     manzil.users."${config.user.name}".files = {
       # Live Wallust -> theme bridge, read by the bar overlay and the
       # notification popup styling in init.lua.
-      ".config/tomoe/shell/wallust.lua".text =
-        builtins.replaceStrings ["@USER@"] [config.user.name]
-        (builtins.readFile ./lua/wallust.lua);
+      ".config/tomoe/shell/wallust.lua".text = ''
+        local nix_home = ${toLua config.user.homeDirectory}
+        ${builtins.readFile ./lua/wallust.lua}'';
 
       # CPU/memory/GPU sampler: pushes snapshots into the sysinfo service
       # facade the bar overlay reads. Deployed unconditionally; it only
@@ -164,83 +164,83 @@ in {
       ".config/tomoe/shell/sysinfo.lua".text = builtins.readFile ./lua/sysinfo.lua;
 
       ".config/tomoe/shell/bar_overlay.lua".text =
-        builtins.replaceStrings ["@DEFAULTS@"] [
-          (toLua {
-            inherit (bar) modules;
-            center_between = bar.center-between;
-            edges = ["top" "bottom"];
-            indent = 0;
-            font_family = "monospace";
-            name_prefix = "bar-overlay";
-            top_name = "bar-overlay-top";
-            bottom_name = "bar-overlay-bottom";
-            height = 24;
-            spacing = 8;
-            margin_top = 0;
-            margin_bottom = 0;
-            refresh_interval = 1000;
+        "local DEFAULTS = "
+        + toLua {
+          inherit (bar) modules;
+          center_between = bar.center-between;
+          edges = ["top" "bottom"];
+          indent = 0;
+          font_family = "monospace";
+          name_prefix = "bar-overlay";
+          top_name = "bar-overlay-top";
+          bottom_name = "bar-overlay-bottom";
+          height = 24;
+          spacing = 8;
+          margin_top = 0;
+          margin_bottom = 0;
+          refresh_interval = 1000;
+          layer = "overlay";
+          bg = "transparent";
+          font_size = 14;
+          anchors = {
+            top = "top-center";
+            bottom = "bottom-center";
+          };
+          label = {
+            weight = "bold";
+            size = 14;
+          };
+          block = {
+            gap = 0;
+            border = 1;
+            padding_y = 2.1;
+            padding_x = 4.2;
+          };
+          time = {
+            format = "%H:%M:%S";
+            interval = 1000;
+          };
+          date = {
+            format = "%d/%m/%y";
+            interval = 30000;
+          };
+          module_widths = {
+            battery = 58;
+            time = 74;
+            date = 74;
+            bongo = 74;
+            network = 96;
+            cpu = 104;
+            memory = 84;
+            gpu = 150;
+          };
+          battery = {
+            gap = 4;
+          };
+          sysinfo = {
+            cpu_interval = bar.sysinfo.cpu-interval;
+            memory_interval = bar.sysinfo.memory-interval;
+            gpu_interval = bar.sysinfo.gpu-interval;
+            gpu_prefer = bar.sysinfo.gpu-backend;
+            gpu_card = bar.sysinfo.gpu-card;
+            memory_style = bar.sysinfo.memory-style;
+            show_cpu_temp = bar.sysinfo.show-cpu-temp;
+            show_gpu_temp = bar.sysinfo.show-gpu-temp;
+            show_gpu_vram = bar.sysinfo.show-gpu-vram;
+          };
+          bongo_cat = {
+            inherit (bar.bongo-cat) enable;
+            asset_dir = "${./assets/bongo-cat}";
+            name = "bongo-cat";
+            inherit (bar.bongo-cat) height;
+            margin_bottom = bar.bongo-cat.margin-bottom;
+            x_offset = bar.bongo-cat.x-offset;
+            keypress_duration = bar.bongo-cat.keypress-duration;
             layer = "overlay";
-            bg = "transparent";
-            font_size = 14;
-            anchors = {
-              top = "top-center";
-              bottom = "bottom-center";
-            };
-            label = {
-              weight = "bold";
-              size = 14;
-            };
-            block = {
-              gap = 0;
-              border = 1;
-              padding_y = 2.1;
-              padding_x = 4.2;
-            };
-            time = {
-              format = "%H:%M:%S";
-              interval = 1000;
-            };
-            date = {
-              format = "%d/%m/%y";
-              interval = 30000;
-            };
-            module_widths = {
-              battery = 58;
-              time = 74;
-              date = 74;
-              bongo = 74;
-              network = 96;
-              cpu = 104;
-              memory = 84;
-              gpu = 150;
-            };
-            battery = {
-              gap = 4;
-            };
-            sysinfo = {
-              cpu_interval = bar.sysinfo.cpu-interval;
-              memory_interval = bar.sysinfo.memory-interval;
-              gpu_interval = bar.sysinfo.gpu-interval;
-              gpu_prefer = bar.sysinfo.gpu-backend;
-              gpu_card = bar.sysinfo.gpu-card;
-              memory_style = bar.sysinfo.memory-style;
-              show_cpu_temp = bar.sysinfo.show-cpu-temp;
-              show_gpu_temp = bar.sysinfo.show-gpu-temp;
-              show_gpu_vram = bar.sysinfo.show-gpu-vram;
-            };
-            bongo_cat = {
-              inherit (bar.bongo-cat) enable;
-              asset_dir = "${./assets/bongo-cat}";
-              name = "bongo-cat";
-              inherit (bar.bongo-cat) height;
-              margin_bottom = bar.bongo-cat.margin-bottom;
-              x_offset = bar.bongo-cat.x-offset;
-              keypress_duration = bar.bongo-cat.keypress-duration;
-              layer = "overlay";
-            };
-          })
-        ]
-        (builtins.readFile ./lua/bar_overlay.lua);
+          };
+        }
+        + "\n"
+        + builtins.readFile ./lua/bar_overlay.lua;
     };
   };
 }
