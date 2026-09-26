@@ -4,14 +4,8 @@
   ...
 }: let
   cfg = config.user.dev.pi;
-  # Shared behavioral body (role, tools, reader/style/explain/work, style rules)
-  # reused by the phi coding agent. Source of truth:
-  # modules/dev/ai/phi/prompt-body.nix.
   inherit (config.user.dev.prompts) body;
 
-  # Harness-agnostic core. Everything a coding assistant needs regardless of
-  # which harness loads it. Harness-specific sections are appended below; the
-  # <role> (names pi) lives in the pi-specific section, not here.
   corePrompt = ''
     ${body}
 
@@ -22,10 +16,6 @@
     </rules>
   '';
 
-  # Pi-only section: identity and doc locations inside the nix store. Appended
-  # to corePrompt to form the final ~/.pi/agent/SYSTEM.md. A future harness
-  # (omp forks pi and could reuse corePrompt) appends its own equivalent
-  # instead, including its own <role>.
   piSection = ''
     <role>
       Pi coding assistant.
@@ -48,15 +38,6 @@
   '';
 
   systemPrompt = corePrompt + "\n\n" + piSection;
-
-  # Verbatim reference: pi 0.84.3's own default system prompt, as assembled by
-  # buildSystemPrompt() in <pi src>/packages/coding-agent/src/core/system-prompt.ts
-  # with the four built-in tools read, bash, edit, write. Guidelines appear in
-  # assembly order: bash file-ops, then each tool's promptGuidelines (read, bash,
-  # edit, write), then the two always-on lines. Pi additionally appends AGENTS.md
-  # project context, the skills section, and "Current working directory: <cwd>" at
-  # runtime. Nothing loads this file; it exists so SYSTEM.md can be diffed against
-  # what it replaces. Re-verify against the source when bumping pi versions.
 
   piDefaultSystem = ''
     You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
@@ -93,11 +74,7 @@
 in {
   config = lib.mkIf cfg.enable {
     manzil.users."${config.user.name}".files = {
-      # SYSTEM.md is the only one pi loads; it replaces the built-in prompt entirely.
-      # Assembled as shared core + pi-specific docs section.
       ".pi/agent/SYSTEM.md".text = systemPrompt;
-      # Inert reference copy of the prompt SYSTEM.md overrides. Pi reads only
-      # SYSTEM.md and APPEND_SYSTEM.md, so this filename is never opened.
       ".pi/agent/DEFAULT_SYSTEM.md".text = piDefaultSystem;
     };
   };

@@ -1,6 +1,3 @@
-# Shared finit desktop stack. Hardware, storage, networking, firewall, and boot
-# stay host-owned; session/audio/parity/user daemons live here once for every
-# graphical Finix host.
 {
   imports = [
     ./audio.nix

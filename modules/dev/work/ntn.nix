@@ -5,8 +5,6 @@
   ...
 }: let
   version = "0.22.10";
-  # dist/ directory inside the npm tarball for the host platform; each holds a
-  # statically linked binary, so no launcher or runtime deps are needed.
   distDir =
     {
       x86_64-linux = "ntn-linux-x64";
@@ -32,7 +30,6 @@ in {
         };
 
         dontUnpack = true;
-        # Prebuilt static binary: skip ELF patching and stripping.
         dontPatchELF = true;
         dontStrip = true;
         installPhase = ''

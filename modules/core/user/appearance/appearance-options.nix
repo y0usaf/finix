@@ -1,5 +1,4 @@
 {lib, ...}: {
-  # Appearance options (DPI, animations, etc.)
   options.user.appearance = {
     termFontSize = lib.mkOption {
       type = lib.types.int;

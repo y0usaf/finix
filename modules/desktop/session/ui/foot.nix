@@ -23,7 +23,6 @@ in {
       pkgs.foot
     ];
     manzil.users."${config.user.name}".files.".config/foot/foot.ini" = {
-      # Foot colors are loaded dynamically from Wallust when the foot target exists.
       generator = lib.generators.toINI {};
       value = {
         main =

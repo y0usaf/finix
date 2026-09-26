@@ -1,12 +1,3 @@
-# Paseo daemon as a finit service (desktop + always-on server host, real user).
-#
-# Runs paseo-server (the foreground supervisor entrypoint) as the real
-# user. The daemon spawns coding-agent CLIs (claude, codex, opencode,
-# pi, ...), which sit in environment.systemPackages -> /run/current-system/
-# sw/bin, so the service PATH includes that dir plus the user's profile
-# bins (mirroring the NixOS module's inheritUserEnvironment). Relay on by
-# default: phone reaches the daemon through app.paseo.sh regardless of LAN.
-# Relay off (--no-relay) + tailnet listen = fully self-hosted direct path.
 {
   config,
   lib,
@@ -70,8 +61,6 @@ in {
       log = true;
     };
 
-    # Register custom ACP providers without replacing Paseo-owned runtime state.
-    # Commands resolve from the daemon PATH, including /run/current-system/sw/bin.
     manzil.users."${config.user.name}".files.".paseo/config.json" = {
       type = "merge";
       format = "json";

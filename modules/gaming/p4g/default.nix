@@ -6,7 +6,6 @@
 }: let
   cfg = config.user.gaming.p4g;
   fetch = url: hash: pkgs.fetchurl {inherit url hash;};
-  # Full offline pack supplies the curated app config, load order and mod settings.
   cep =
     fetch
     "https://gamebanana.com/dl/1512520"
@@ -91,12 +90,8 @@ in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [cfg.package];
     finit.rlimits.nofile.hard = 524288;
-    # Persona Essentials opens thousands of files while merging assets. Finix's
-    # login PAM stack reads this file; it has no security.pam.loginLimits option.
     environment.etc."security/limits.conf".text = lib.mkAfter ''
       ${config.user.name} - nofile 524288
     '';
-    # Setup is explicit: rebuilding while playing must never mutate a live prefix.
-    # The desktop already persists Games, which contains the default stateDirectory.
   };
 }

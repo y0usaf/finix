@@ -1,7 +1,3 @@
-# ESP island + BootNext boot driver (stage 3 tooling; see NOTES.md).
-# Generalized from the server-only original: mkIsland instantiates the pair
-# (remote island script + driver) per host. Server keeps intel ucode + ssh
-# operation; the desktop drives its own ESP locally (host = "local").
 {
   config,
   lib,
@@ -12,43 +8,12 @@ in {
   options.finix.mkIsland = lib.mkOption {
     type = lib.types.functionTo lib.types.raw;
     description = "ESP island boot driver builder";
-    # mkIsland {name, system, ucodeImg, defaultHost}
-    #   name        driver binary name (e.g. finix-server-boot)
-    #   system      the persistent config's system.topLevel
-    #   ucodeImg    early-microcode cpio prepended to every staged initrd
-    #               (intel-ucode.img / amd-ucode.img — incident #2: direct
-    #               firmware boots MUST NOT run the raw BIOS microcode)
-    #   defaultHost ssh target when none given, or "local" to run the island
-    #               script on this machine under sudo (desktop drives itself)
     default = {
       defaultHost,
       name,
       system,
       ucodeImg,
     }: rec {
-      # ── Stage 3: ESP island + BootNext (bootloader takeover without hands) ──
-      #
-      # Root half; runs on the target box under either OS. Manages a fully
-      # self-contained Finix boot island on the ESP:
-      #
-      #   /boot/EFI/finix/BOOTX64.EFI       own copy of Limine (app-adjacent conf)
-      #   /boot/EFI/finix/limine.conf       island config, default_entry: 1
-      #   /boot/EFI/finix/kernels/<slot>/   kernel+initrd+cmdline per generation
-      #   /boot/EFI/finix/slots             current=/previous= slot state
-      #
-      # plus a "Finix" EFI boot entry pointing at the island. It never touches
-      # NixOS's /boot/limine + \efi\limine (and the NixOS installer never prunes
-      # \EFI\finix), so the frozen NixOS config and this tool cannot fight.
-      #
-      # Safety model (see NOTES.md "Stage 3 mechanism"):
-      #   install  stage new slot as island default; force BootOrder NixOS-first
-      #            (opens a test window - an untested slot is never the cold-boot
-      #            default)
-      #   oneshot  BootNext=Finix + reboot: boots the island exactly once; any
-      #            crash/hang/panic falls home to NixOS via BootOrder
-      #   promote  BootOrder Finix-first; refused unless this boot IS the island
-      #   demote   manual safety lever back to NixOS-first
-      #   rollback island default -> previous slot
       espIslandScript = pkgs.writeShellScript "finix-esp-island" ''
         set -euo pipefail
         export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.gnugrep pkgs.gnused pkgs.efibootmgr pkgs.diffutils]}
@@ -66,21 +31,14 @@ in {
           || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
           || die "no EFI variable support"
         mountpoint -q "$esp" || die "$esp is not a mountpoint"
-        # Fall-home verification: the island's safety model needs a working
-        # non-island boot path. Missing rescue used to die here; post-purge the
-        # NixOS limine is gone from the ESP, so warn loudly instead. Operators
-        # who require the fall-home gate pass --require-fallhome to install.
         require_fallhome=0
         verify_fallhome() {
           local ok=1 rescue_path
-          # Every non-Finix EFI entry must point at a binary that exists on the ESP.
           rescue_path=$(sed -n 's|^  path: boot():/\(.*\)$|\1|p' "$conf" 2>/dev/null | head -n1)
           if [ -n "$rescue_path" ] && [ ! -f "$esp/$rescue_path" ]; then
             echo "WARN: limine rescue entry target missing: $esp/$rescue_path" >&2
             ok=0
           fi
-          # The UEFI fallback loader must not be the island itself (identical
-          # bytes = both boot paths land on the same config = no fall-home).
           if [ -f "$esp/EFI/BOOT/BOOTX64.EFI" ] && cmp -s "$esp/EFI/BOOT/BOOTX64.EFI" "$island/BOOTX64.EFI" 2>/dev/null; then
             echo "WARN: fallback EFI/BOOT/BOOTX64.EFI is the island limine - no independent fall-home" >&2
             ok=0
@@ -139,14 +97,10 @@ in {
               printf '\n'
               emit_slot "$2" " (previous)"
             fi
-            # Only advertise the rescue entry when its target actually exists;
-            # a dead menu entry is worse than none (incident #3).
             if [ -f "$esp/efi/limine/BOOTX64.EFI" ]; then
               printf '\n/NixOS rescue (Limine)\n  protocol: efi\n  path: boot():/efi/limine/BOOTX64.EFI\n'
             fi
           } > "$conf.tmp" || die "failed to render $conf.tmp"
-          # Sanity before swap: every kernel/module path in the conf must exist
-          # on the ESP, and the conf must contain at least one Finix entry.
           local p
           for p in $(sed -n 's|^  \(kernel\|module\)_path: boot():/\(.*\)$|\2|p' "$conf.tmp"); do
             [ -f "$esp/$p" ] || die "rendered conf references missing ESP file: $p"
@@ -171,8 +125,6 @@ in {
         }
 
         clean_stale() {
-          # April-era unmanaged leftovers: lowercase-'finix' EFI entries pointing
-          # at an orphaned hand-built UKI, plus the UKI file itself.
           local n
           for n in $(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)[^ ]* finix\t.*/\1/p'); do
             echo "==> deleting stale EFI entry Boot$n (finix)"
@@ -196,7 +148,6 @@ in {
           efibootmgr -q -c -d "$esp_disk" -p "$esp_part" -L "$label" -l '\EFI\finix\BOOTX64.EFI'
           num=$(entry_num "$label")
           [ -n "$num" ] || die "failed to create $label EFI entry"
-          # -c prepends to BootOrder; keep NixOS loaders first until promote.
           efibootmgr -q -o "''${order:+$order,}$num"
           echo "==> created EFI entry Boot$num ($label), appended last in BootOrder"
         }
@@ -212,16 +163,13 @@ in {
 
         verify_staged() { # system cmdline - prove the staged slot is bootable
           local system=$1 cmdline=$2 init_path magic
-          # bzImage carries "HdrS" magic at offset 0x202.
           magic=$(dd if="$system/kernel" bs=1 skip=514 count=4 2>/dev/null) || true
           [ "$magic" = "HdrS" ] || die "$system/kernel is not a bzImage (HdrS magic missing)"
-          # initrd starts with the early-ucode cpio ("070701") or gzip (1f8b).
           magic=$(dd if="$system/initrd" bs=1 count=2 2>/dev/null | od -An -tx1 | tr -d ' \n')
           case "$magic" in
             1f8b|3037) ;;
             *) die "$system/initrd has unexpected magic bytes: $magic" ;;
           esac
-          # init= must resolve inside the rooted closure.
           init_path=$(printf '%s\n' "$cmdline" | tr ' ' '\n' | sed -n 's/^init=//p' | head -n1)
           [ -n "$init_path" ] || die "cmdline has no init= parameter"
           [ -e "$init_path" ] || die "init path missing from store: $init_path"
@@ -236,13 +184,6 @@ in {
           mkdir -p "$island/kernels/$slot"
 
           copy_changed "$system/kernel" "$island/kernels/$slot/kernel"
-          # Early microcode: the BIOS may ship ancient ucode and every kexec-era
-          # finix boot silently inherited the ucode NixOS loaded earlier in the
-          # power cycle - but direct firmware boots run the raw BIOS ucode, and
-          # 2/2 of them misbehaved on the server (00:19 early hang; 10:28Z hard
-          # freeze after 5.5h, mid-heartbeat, zero kernel output, watchdog
-          # no-show). Prepend the early-ucode cpio exactly like NixOS does so
-          # direct boots match.
           tmp_initrd=$(mktemp /tmp/finix-island-initrd.XXXXXX)
           cat ${ucodeImg} "$system/initrd" > "$tmp_initrd"
           copy_changed "$tmp_initrd" "$island/kernels/$slot/initrd"
@@ -250,10 +191,8 @@ in {
           write_file "$island/kernels/$slot/cmdline" "$cmdline"
           write_file "$island/kernels/$slot/system" "$system"
           copy_changed ${pkgs.limine}/share/limine/BOOTX64.EFI "$island/BOOTX64.EFI"
-          # Prove the staged files (not just the store inputs) are boot-shaped.
           verify_staged "$island/kernels/$slot" "$cmdline"
 
-          # The booted slot execs init out of /nix/store: root its closure.
           "$system/sw/bin/nix-store" --realise "$system" \
             --add-root "/nix/var/nix/gcroots/finix-esp-$slot" >/dev/null
 
@@ -319,9 +258,6 @@ in {
         }
 
         do_bootnext_test() {
-          # Zero-risk firmware validation: one-shot into the Limine entry. Both
-          # outcomes land in NixOS; success = BootCurrent equals the Limine entry
-          # afterwards and BootNext is gone, proving this firmware honors BootNext.
           local lim
           lim=$(entry_num Limine)
           [ -n "$lim" ] || die "no Limine EFI entry"
@@ -365,11 +301,6 @@ in {
         esac
       '';
 
-      # Operator-side driver. host = "local": the island script runs directly
-      # on this machine under sudo (the desktop drives its own ESP; nix copy
-      # and ssh do not apply). Any other host: ssh via the LAN IP - Tailscale
-      # SSH in check mode intercepts tailnet-resolved names and waits forever
-      # on a browser auth, so automation targets the classic sshd path.
       bootDriverScript = pkgs.writeShellScriptBin name ''
         set -euo pipefail
 
@@ -416,9 +347,7 @@ in {
           esac
         fi
 
-        # post-NixOS-purge: running finix supplies nix-store (same as deploy.nix)
         remote_store="ssh://$host?remote-program=/run/current-system/sw/bin/nix-store"
-        # Server sshd listens on the dedicated deployment port.
         sshopts="-p 2200 -o BatchMode=yes -o ConnectTimeout=10 -o ControlMaster=no -o ControlPath=none"
         export NIX_SSHOPTS="$sshopts"
 
@@ -445,7 +374,6 @@ in {
         remote_cmd="/run/wrappers/bin/sudo '$island' '$action'$remote_args"
         case "$action" in
           oneshot|bootnext-test)
-            # The remote end reboots; the dropped connection is expected.
             ssh $sshopts "$host" "$remote_cmd" || true
             ;;
           *)

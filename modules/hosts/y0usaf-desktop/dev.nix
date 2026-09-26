@@ -29,11 +29,6 @@ _: {
     prompts.principles.enable = true;
     omp = {
       enable = true;
-      # Harness surface (~/.omp/config.json), mirroring the live
-      # ~/.pi/config.json values. pi-only keys dropped — no omp equivalent:
-      # pi_binary (discovery uses $OMP_BINARY / which("omp")), tui_mode (flag
-      # removed upstream), ui_scale, panel_padding_cells, font_family,
-      # body_height_percent (all ignored by omp's AppConfig).
       settings = {
         terminal_width_percent = 50;
         panel_width_percent = 13;
@@ -54,18 +49,11 @@ _: {
     };
     paseo = {
       enable = true;
-      # GUI companion to the daemon (Electron wrapper around the Paseo web UI).
       desktop.enable = true;
       reasonix.enable = false;
-      # Seed the Vercel AI Gateway key into the paseo daemon env so the agent
-      # children it spawns (pi) can resolve the vercel-ai-gateway provider.
-      # Basename AI_GATEWAY_API_KEY.txt -> AI_GATEWAY_API_KEY (mirrors the
-      # server's ANTHROPIC_API_KEY wiring in hosts/y0usaf-server/finix/paseo.nix).
       environmentFiles = [
         "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt"
       ];
-      # desktop y0usaf's primary group is `users` (no y0usaf group), same as the
-      # server — without this finit can't fork the daemon
       group = "users";
     };
     docker.enable = true;
@@ -82,10 +70,6 @@ _: {
     };
     latex.enable = true;
     upscale.enable = true;
-    # Confucius4-R2T2 streaming ASR server (resident vLLM WebSocket service on
-    # 127.0.0.1:8272), replacing the hand-started sandbox process at
-    # /home/y0usaf/dev/sandbox/r2t2-20260918. Defaults are the measured
-    # working point; see modules/dev/ai/r2t2/RUNBOOK.md.
     r2t2.enable = true;
     phi.enable = true;
     reasonix = {

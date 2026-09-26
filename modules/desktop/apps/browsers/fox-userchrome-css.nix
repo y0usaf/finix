@@ -1,6 +1,4 @@
-_:
-# Shared Firefox-family chrome CSS.
-{
+_: {
   config.user.programs.browser.shared = {
     userChromeCss = ''
       :root {

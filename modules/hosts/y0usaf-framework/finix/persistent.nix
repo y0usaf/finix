@@ -1,6 +1,3 @@
-# Framework 16 Finix trial. NixOS keeps ownership of \EFI\limine and remains
-# firmware default; modules/finix/esp-island.nix stages this closure under the
-# independent \EFI\finix island for BootNext-only trials.
 {
   config,
   lib,
@@ -119,8 +116,6 @@ in {
       "profile.d/nh.sh".text = ''
         export NH_FLAKE=/home/y0usaf/finix
       '';
-      # Keep the passwordless sudo rule from common.nix so unattended system
-      # builds can activate with `nh os switch`.
     };
     systemPackages = [
       pkgs.nix
@@ -204,17 +199,16 @@ in {
         neededForBoot = true;
       };
       "${homeDir}/.local/share/Steam" = subvolMount "@steam";
-      # Match desktop: development trees live on dedicated durable subvolume.
       "${homeDir}/dev" = subvolMount "@dev";
     }
     // (lib.genAttrs (builtins.filter
-        (directory: !lib.hasPrefix "/etc/" directory && directory != "/root")
-        (map dirPath persistCfg.directories)) (directory: {
-          device = "/persist${directory}";
-          fsType = "btrfs";
-          options = ["bind"];
-          neededForBoot = true;
-        }));
+      (directory: !lib.hasPrefix "/etc/" directory && directory != "/root")
+      (map dirPath persistCfg.directories)) (directory: {
+      device = "/persist${directory}";
+      fsType = "btrfs";
+      options = ["bind"];
+      neededForBoot = true;
+    }));
 
   services = {
     docker.enable = true;

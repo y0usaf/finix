@@ -47,21 +47,21 @@ in {
           "nixos"
           ".ssh"
           ".fx"
-          ".omfx" # oh my fx settings
+          ".omfx"
           ".mozilla"
           ".librewolf"
           ".local/share/pi"
           ".config/gh"
           ".config/gws"
           ".config/librewolf"
-          ".config/glide" # Glide profile root (glide/) + glide.ts
+          ".config/glide"
           ".local/state/nix"
-          ".config/pi/agent" # RETIRED 2026-09-02: PI_CODING_AGENT_DIR reverted (pi/omp both read it; shared-dir hazard); pi back on native ~/.pi (allowlisted separately). Contents migrated back to ~/.pi; safe to drop.
-          ".config/codex" # CODEX_HOME cutover
-          ".local/share/android" # ANDROID_USER_HOME data side
-          ".config/claude" # CLAUDE_CONFIG_DIR cutover
-          ".local/share/azure" # AZURE_CONFIG_DIR cutover
-          ".local/state/bash" # HISTFILE cutover
+          ".config/pi/agent"
+          ".config/codex"
+          ".local/share/android"
+          ".config/claude"
+          ".local/share/azure"
+          ".local/state/bash"
         ];
 
         userFiles = [];

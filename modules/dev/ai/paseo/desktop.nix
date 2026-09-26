@@ -1,11 +1,3 @@
-# Paseo desktop app (user.dev.paseo.desktop).
-#
-# The paseo flake ships two packages: `default` (the daemon, wired as a finit
-# service in service.nix) and `desktop` (paseo-desktop, an Electron wrapper
-# around the same web UI). This module installs the desktop app so it can pair
-# with the daemon on the same host. It is GUI-only, so it belongs on the
-# desktop host (not the server), and it needs the daemon running
-# (user.dev.paseo.enable) to have anything to connect to.
 {
   config,
   lib,
@@ -27,8 +19,6 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # The desktop app is a GUI companion to the daemon; installing it without
-    # the daemon would leave it with nothing to connect to.
     assertions = [
       {
         assertion = enable;

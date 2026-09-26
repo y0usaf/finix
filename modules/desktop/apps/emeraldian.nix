@@ -13,8 +13,6 @@ in {
   };
 
   config = mkIf config.user.programs.emeraldian.enable {
-    # Consume the source flake's own package; keep the upstream flake's
-    # tested nixpkgs pin rather than following Finix's nixpkgs input.
     environment.systemPackages = [
       flakeInputs.emeraldian.packages."${system}".default
     ];

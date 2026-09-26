@@ -9,8 +9,6 @@
   config = lib.mkIf config.user.shell.cat-fetch.enable {
     user.shell.rcExtra = lib.mkAfter ''
       print_cats() {
-        # Wallust rewrites shell-colors.sh on every theme change, so read it at
-        # call time rather than baking colours into this file.
         if [ -f "$HOME/.cache/wallust/shell-colors.sh" ]; then
           . "$HOME/.cache/wallust/shell-colors.sh"
           local tomoe_colour="$WALLUST_COLOR13" # Magenta

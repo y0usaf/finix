@@ -6,7 +6,6 @@
   inherit (lib) types;
   nullOrStr = types.nullOr types.str;
 
-  # Shared pi/prime-agent model catalog (plain data, see model-catalog.nix).
   catalog = config.user.dev.modelCatalog;
 
   mkInternalStr = description:

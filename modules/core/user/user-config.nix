@@ -1,6 +1,3 @@
-# Shared user options. The NixOS-side assertions/users.users/security.sudo
-# config was dropped by the compat shim (only the `user.*` options survive);
-# finix sets its own copy of the shell/user setup in modules/finix/common.nix.
 {
   config,
   lib,

@@ -13,8 +13,6 @@
       (pkgs.stdenvNoCC.mkDerivation {
         pname = "agent-slack";
         version = "0.9.3";
-        # Bun --compile embeds JS in the ELF. RPATH rewriting corrupts that
-        # payload, so patch only the hardcoded glibc interpreter.
         nativeBuildInputs = [pkgs.patchelf];
 
         src =

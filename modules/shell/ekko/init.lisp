@@ -1,55 +1,3 @@
-;; Ekko deck profile: two column-decks, mirroring the tomoe "deck" layout
-;; (modules/desktop/session/ui/tomoe/config.nix). The view splits into a
-;; left and a right column; each column is a deck whose front pane fills it
-;; while the rest stay mapped one slot above or below, so scrolling slides
-;; the stack vertically instead of hide/show swapping. A spawned pane joins
-;; the deck you last worked in (the :pending column commands record) and
-;; takes its front. Minimized and floated panes leave the decks
-;; (floats paint on top); closing a pane reveals the next member.
-;;
-;; Bindings. The top-level chords are Ctrl (fast, byte level) and Ctrl+Shift;
-;; a few Ctrl chords need the Kitty protocol, noted below. Alt is out either
-;; way: the tomoe compositor runs with Mod=Alt and grabs Mod+h/l, Mod+j/k,
-;; Mod+o and Mod+r globally (modules/desktop/session/ui/tomoe/config.nix), so
-;; an Alt chord is consumed by the compositor and can never reach ekko.
-;;
-;; How a control chord arrives. A Ctrl chord folds into its legacy control
-;; code only for an ASCII letter base, so "C-h" is code 8 and matches both a
-;; raw 0x08 byte and the Kitty CSI 104;5u event — those chords work on any
-;; host. Every other control base keeps a distinct Ctrl bit (ekko rev
-;; 0d7903b), because a legacy terminal has no distinct byte for it: Ctrl+[ IS
-;; the raw 0x1B byte and Ctrl+Tab IS the bare 0x09 byte. Those chords
-;; therefore need the Kitty keyboard path (the client's DISAMBIGUATE request,
-;; encoded as CSI 1;<mods>u). Escape is unaffected: Kitty sends it as CSI 27u,
-;; a legacy terminal as raw 0x1B, and neither matches Ctrl+[. The capitals
-;; family carries the Shift bit: an uppercase ASCII letter base means Shift on
-;; the lowercase key, so "C-J"/"C-K" are Ctrl+Shift+J/K, again on the Kitty
-;; path (a legacy control byte cannot carry Shift).
-;;   Ctrl+h / Ctrl+l  focus the left / right column's front pane
-;;   Ctrl+j / Ctrl+k  scroll the focused deck down / up (wraps)
-;;   Ctrl+o           flat equal-grid toggle        Ctrl+r  column ratio cycle
-;;   Ctrl+d           deck mode — the full tomoe bind set, bare letters
-;;                    standing in for the shifted chords:
-;;                    h l focus column · j k scroll · J K move within deck ·
-;;                    H L swap columns · [ ] send pane across · o grid ·
-;;                    r ratio · n new pane · q close · Escape/Enter exits
-;; Kitty-only, since the control byte collides (see above):
-;;   Ctrl+[ / Ctrl+]  move the focused pane to the left / right column
-;;   Ctrl+Tab         swap the two columns wholesale
-;;   Ctrl+Shift+J / Ctrl+Shift+K  move the focused pane down / up in its deck
-;; The cost is real: these Ctrl chords are intercepted before pane input, so
-;; C-h (backspace alias), C-j, C-k (kill-line), C-l (clear-screen), C-o, C-r
-;; (reverse-search) and C-d (EOF) no longer reach applications while the
-;; normal map is active.
-;;
-;; Alt+Shift stays out: it belongs to the compositor — tomoe binds
-;; Mod+Shift+h/l (swap columns) and Mod+Shift+j/k (move window) globally
-;; (config.nix lines 979-982), and with Mod=Alt the compositor grabs those
-;; chords, so they never reach ekko.
-;;
-;; The desktop defaults stay installed: this only replaces the layout
-;; provider and contributes bindings.
-
 (defpackage #:ekko-deck
   (:use #:cl #:ekko/extensions))
 (in-package #:ekko-deck)
@@ -99,9 +47,6 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
       (let ((vl (subset left)) (vr (subset right))
             (focus (value snapshot :focus)))
         (flet ((front (col vcol stored)
-                 ;; Newest joiner takes the front, then a focused member (a
-                 ;; click or focus-next on a buried pane promotes it), then
-                 ;; the remembered front, then the deck top.
                  (or (joined col)
                      (and (member focus vcol) focus)
                      (and (member stored vcol) stored)
@@ -119,8 +64,6 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
         :fl (getf model :fl) :fr (getf model :fr)
         :ratio (getf model :ratio) :grid (getf model :grid)
         :pending (getf model :pending)))
-
-;; ─── Geometry (same inset arithmetic as the public tiled/floating providers) ──
 
 (defun fit-insets (width height insets)
   (let* ((top (min (first insets) (max 0 (1- height))))
@@ -162,15 +105,11 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
       (list (max left (min x (+ left width (- w))))
             (max top (min y (+ top height (- h)))) w h))))
 
-;; ─── Layout provider ──────────────────────────────────────────────────────────
-
 (defun deck-columns (snapshot model x y w h gap)
   (let* ((ratio (nth (mod (getf model :ratio) (length +ratios+)) +ratios+))
          (lw (max 1 (min (- w gap 1) (floor (* (- w gap) ratio)))))
          (rw (max 1 (- w gap lw))))
     (flet ((place (vcol front cx cw)
-             ;; The front fills the column; the rest stay full-size one slot
-             ;; above or below it, so a scroll is a real slide.
              (let ((fi (or (position front vcol) 0)))
                (loop for id in vcol for i from 0
                      collect (deck-frame snapshot id cx (+ y (* (- i fi) h)) cw h)))))
@@ -200,12 +139,10 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
               (append (if (getf model :grid)
                           (deck-grid snapshot model x y w h gap)
                           (deck-columns snapshot model x y w h gap))
-                      ;; Floating panes paint above the decks.
                       (loop for pane in (sorted-panes snapshot) for i from 0
                             when (getf pane :floating)
                             collect (apply #'deck-frame snapshot (pane-id pane)
                                            (floating-rect pane i x y w h))))))
-        ;; Zoom is provider policy: hide the rest, show the focused pane full.
         (when (and (value snapshot :zoom)
                    (find focus placements :key (lambda (pl) (getf pl :pane))))
           (setf placements
@@ -217,8 +154,6 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
                         (list (deck-frame snapshot focus x y w h)))))
         (list (action :place-panes ':version 1 ':placements placements
                       ':camera '(0 0)))))))
-
-;; ─── Commands ─────────────────────────────────────────────────────────────────
 
 (defun column-of (model focus)
   (cond ((member focus (getf model :vl)) :left)
@@ -272,7 +207,6 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
     (rotatef (getf model :left) (getf model :right))
     (rotatef (getf model :vl) (getf model :vr))
     (rotatef (getf model :fl) (getf model :fr))
-    ;; Pending follows the focused pane across the swap.
     (let ((focus (value snapshot :focus)))
       (setf (getf model :pending)
             (cond ((member focus (getf model :left)) :left)
@@ -292,8 +226,6 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
                (skey (if (eq side :left) :fl :fr))
                (tkey (if (eq target :left) :left :right))
                (tfkey (if (eq target :left) :fl :fr)))
-          ;; If the moved pane was the deck front, reveal the member after
-          ;; it (wrapping, like a scroll) rather than resetting to the top.
           (when (eql focus (getf model skey))
             (setf (getf model skey) (nth (mod (1+ i) (length col)) col)))
           (setf (getf model side) (remove focus col)
@@ -310,8 +242,6 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
     (if side
         (let* ((vcol (getf model (if (eq side :left) :vl :vr)))
                (fkey (if (eq side :left) :fl :fr))
-               ;; Focus the member the deck reveals next, like tomoe's
-               ;; close-refocus pulling the window the deck uncovered.
                (target (and (> (length vcol) 1)
                             (nth (mod (1+ (or (position focus vcol) 0))
                                       (length vcol))
@@ -324,15 +254,12 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
               (list (action :close))))
         (list (action :close)))))
 
-;; ─── Registration ─────────────────────────────────────────────────────────────
-
 (register-component :id ':deck :reads '(:panes :focus :component-state))
 (register-layout-provider :component ':deck :name "deck" :api-version 1
                           :reads '(:panes :focus :viewport :geometry
                                    :component-state :zoom)
                           :handler #'deck-place)
 (set-option :component ':deck :name ':layout-provider :value "deck")
-;; One-cell column boundary; the desktop defaults set no split gap.
 (set-option :component ':deck :name ':split-gaps :value '(1 0))
 
 (register-command :component ':deck :name "deck-focus-left" :handler (focus-column :left))
@@ -347,9 +274,6 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
 (register-command :component ':deck :name "deck-close" :handler #'close-pane)
 (register-command :component ':deck :name "deck-new"
                   :handler (lambda (snapshot event) (declare (ignore event))
-                             ;; Pin the new pane's column before it exists:
-                             ;; the provider can't write state, so commands
-                             ;; record the working deck in :pending.
                              (let* ((model (deck-model snapshot))
                                     (side (column-of model (value snapshot :focus))))
                                (when side (setf (getf model :pending) side))
@@ -370,16 +294,9 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
                   :handler (lambda (snapshot event) (declare (ignore snapshot event))
                              (list (action :set-keymap ':name ':deck))))
 
-;; The deck map and its entry need the desktop :normal map to exist; on a
-;; bare runtime skip the bindings and keep the provider and commands.
 (when (find ':normal (getf (registry) ':keymaps)
             :key (lambda (m) (getf m ':name)))
   (register-keymap :component ':deck :name ':deck :unbound ':ignore)
-  ;; Top level: the core tomoe keys plus the rearrange chords — Ctrl+[ and
-  ;; Ctrl+] move the focused pane across, Ctrl+Tab swaps the two columns
-  ;; wholesale, and Ctrl+Shift+J/K reorder within a deck. Ctrl+[ / Ctrl+] /
-  ;; Ctrl+Tab need the Kitty path (see the header); the rest fold to legacy
-  ;; bytes or carry the Shift bit.
   (dolist (spec '(("C-h" . "deck-focus-left") ("C-l" . "deck-focus-right")
                   ("C-j" . "deck-scroll-down") ("C-k" . "deck-scroll-up")
                   ("C-o" . "deck-grid-toggle") ("C-r" . "deck-ratio-cycle")
@@ -388,8 +305,6 @@ tomoe — or balance into the shorter one (ties go left), and take its front."
                   ("C-Tab" . "deck-swap-columns")
                   ("C-J" . "deck-move-down") ("C-K" . "deck-move-up")))
     (bind-key :component ':deck :map ':normal :key (car spec) :command (cdr spec)))
-  ;; Deck mode (Ctrl+d): tomoe's full set — capitals are the shifted letters;
-  ;; the modal map carries Shift as the letter itself, with no modifier.
   (dolist (spec '(("h" . "deck-focus-left") ("l" . "deck-focus-right")
                   ("j" . "deck-scroll-down") ("k" . "deck-scroll-up")
                   ("J" . "deck-move-down") ("K" . "deck-move-up")

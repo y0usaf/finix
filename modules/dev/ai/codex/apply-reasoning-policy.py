@@ -7,12 +7,10 @@ import sys
 import tempfile
 import tomllib
 
-
 def apply(path):
     path = Path(path).expanduser().resolve()
     text = path.read_text() if path.exists() else ''
     before = tomllib.loads(text)
-    # Only replace a root-level key, never a setting in a TOML table.
     header = re.search(r'^\s*\[', text, flags=re.MULTILINE)
     end = header.start() if header else len(text)
     root, rest = text[:end], text[end:]
@@ -38,7 +36,6 @@ def apply(path):
         if os.path.exists(tmp):
             os.unlink(tmp)
     assert tomllib.loads(path.read_text()) == expected
-
 
 if __name__ == '__main__':
     apply(sys.argv[1])

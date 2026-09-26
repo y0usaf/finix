@@ -1593,7 +1593,6 @@ export function openStore(
         try {
           await lockRequest;
         } catch {
-          // A failed acquisition has no lock to release.
         }
       }
       const release = releaseLock;

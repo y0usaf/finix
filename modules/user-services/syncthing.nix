@@ -6,15 +6,12 @@
 }: let
   cfg = config.user.services.syncthing;
 
-  # Map an enabled folder attr-name to the set of peer device IDs it shares with,
-  # each resolved to the full syncthing device ID from cfg.devices.
   folderDeviceIds = folderName: let
     folder = cfg.folders.${folderName};
     devId = name: cfg.devices.${name}.id;
   in
     map devId folder.devices;
 
-  # Render one <folder> block (sendreceive with trashcan versioning).
   renderFolder = name: ''
     <folder id="${cfg.folders.${name}.id}" label="${cfg.folders.${name}.label}" path="${cfg.folders.${name}.path}" type="sendreceive" rescanIntervalS="3600" fsWatcherEnabled="true" fsWatcherDelayS="10" fsWatcherTimeoutS="0" ignorePerms="false" autoNormalize="true">
         <filesystemType>basic</filesystemType>
@@ -61,7 +58,6 @@
     </folder>
   '';
 
-  # Render one <device> block for a peer device.
   renderDevice = name: let
     dev = cfg.devices.${name};
     compression =
@@ -80,7 +76,6 @@
     </device>
   '';
 
-  # The set of folders to actually enable on this host.
   enabledFolderNames =
     if cfg.enabledFolders == null
     then builtins.attrNames cfg.folders
@@ -89,9 +84,6 @@
   folderXml = lib.concatMapStringsSep "\n" renderFolder enabledFolderNames;
   deviceXml = lib.concatMapStringsSep "\n" renderDevice (builtins.attrNames cfg.devices);
 
-  # Declarative seed config.xml. syncthing upgrades/expands this on first load,
-  # so we only need the folders/devices/gui/options that matter; missing fields
-  # get standard defaults.
   seedConfigXml = pkgs.writeText "syncthing-config.xml" ''
     <configuration version="52">
     ${folderXml}
@@ -248,9 +240,6 @@ in {
       description = "Folder attribute names enabled on this host; null enables all folders";
     };
 
-    # Derived (read-only) path to the generated seed config.xml the finit
-    # service seeds into ~/.config/syncthing/config.xml when it's missing the
-    # declared folders. Exposed here so host finit services can consume it.
     seedConfigFile = lib.mkOption {
       type = lib.types.path;
       readOnly = true;

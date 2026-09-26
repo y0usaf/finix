@@ -1,7 +1,3 @@
-# Persistent Finix system for y0usaf-server.
-#
-# The root is ephemeral; durable state remains on the existing @persist/@home
-# subvolumes. Boot and recovery are owned by the Finix ESP island.
 {
   config,
   lib,
@@ -9,12 +5,6 @@
   ...
 }: let
   diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
-  # Boot diagnostics, ported from the trial config after the 2026-07-15
-  # warm-reboot hang left zero logs (died before syslog/binds). Markers
-  # echoed into /dev/kmsg are replayed by the flight recorder once it
-  # starts, so initrd/stage-2 progress survives in /persist even when
-  # syslog never came up. Log home: /persist/finix-boot/ (finix-trial/
-  # stays trial-only).
   kmsgDump = tag: cmds: ''
     {
       ${cmds}
@@ -22,13 +12,10 @@
       echo "${tag}: $line" > /dev/kmsg || true
     done
   '';
-  # Arm the Finix island as the one-shot recovery target and clear BootNext
-  # after the running system has passed its health check.
 in {
   networking.hostName = "y0usaf-server";
 
   boot = {
-    # Same proven kernel as the NixOS host and the metal trial.
     kernelPackages = pkgs.linuxPackages_latest;
     initrd = {
       availableKernelModules = [
@@ -41,9 +28,6 @@ in {
         "e1000e"
       ];
 
-      # Progress markers into /dev/kmsg: visible on the console during a
-      # pre-userspace hang and replayed into the flight recorder log on a
-      # healthy boot. (No netconsole/beacon here by design — trial-only.)
       finit.tasks.initrd-diag = {
         description = "initrd diagnostics to kmsg";
         script = ''
@@ -53,7 +37,6 @@ in {
             cat /proc/partitions
             ls /dev/disk/by-uuid 2>&1 || echo "no by-uuid dir"
           ''}
-          # Report whether the root disk symlink ever appears.
           for _ in $(seq 1 60); do
             if [ -e /dev/disk/by-uuid/${diskUuid} ]; then
               echo "finix-initrd: by-uuid symlink present" > /dev/kmsg || true
@@ -71,7 +54,6 @@ in {
       "igc"
       "e1000e"
     ];
-    # BootNext dead-man switch and boot-nixos require EFI variables.
     supportedFilesystems.efivarfs.enable = true;
     kernelParams = [
       "console=tty0"
@@ -115,9 +97,6 @@ in {
       neededForBoot = true;
     };
 
-    # ESP used by the Finix boot island and its kernel/initrd slots.
-    # neededForBoot: mount.nix only creates
-    # mount tasks for neededForBoot filesystems (upstream gotcha #1).
     "/boot" = {
       device = "/dev/disk/by-uuid/41B0-E342";
       fsType = "vfat";
@@ -127,8 +106,6 @@ in {
 
     "/var/log" = (dir: {
       device = "/persist${dir}";
-      # finix's initrd generator requires a real fsType for neededForBoot binds;
-      # mount.nix ignores it when the bind option is present.
       fsType = "btrfs";
       options = ["bind"];
       neededForBoot = true;
@@ -142,8 +119,6 @@ in {
     };
     nix-daemon = {
       settings = {
-        # Its own attic cache via loopback: instant-refuse if atticd is down,
-        # no LAN hairpin, no tailnet detour (same box either way).
         substituters = ["http://127.0.0.1:8787/cache"];
         trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
         connect-timeout = 5;
@@ -158,7 +133,6 @@ in {
         set -u
         export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.kmod]}
 
-        # Keep the same single watchdog driver used by both NixOS and the trial.
         ${pkgs.kmod}/bin/modprobe intel_oc_wdt 2>/dev/null || true
 
         for _ in $(seq 1 30); do
@@ -180,8 +154,6 @@ in {
           exit 1
         fi
 
-        # Magic-close on a clean shutdown; otherwise an armed watchdog covers
-        # hangs during a kexec/reboot and keeps the NixOS rescue path viable.
         trap 'for fd in "''${devs[@]}"; do printf V >&"$fd"; done; exit 0' TERM INT
         while true; do
           for fd in "''${devs[@]}"; do
@@ -208,8 +180,6 @@ in {
             return 1
           }
 
-          # DHCP is authoritative; only install the known-good static fallback after
-          # a fair wait so a delayed lease is never needlessly replaced.
           for _ in $(seq 1 45); do
             if ${pkgs.iproute2}/bin/ip -4 addr show scope global 2>/dev/null \
               | ${pkgs.gnugrep}/bin/grep -q 'inet '; then
@@ -245,7 +215,6 @@ in {
           efibootmgr -q -n "$island" || { echo "bootnext-deadman: arming failed" >&2; exit 1; }
           echo "bootnext-deadman: armed BootNext=Boot$island (Finix island)"
 
-          # Healthy = sshd continuously listening for 2 minutes (10-minute budget).
           ok=0
           for _ in $(seq 1 60); do
             if ss -ltn 2>/dev/null | grep -q ':2200 '; then
@@ -266,9 +235,6 @@ in {
         log = true;
       };
       bootorder-assert = {
-        # WHY: firmware shuffles the promoted order and may let 0003's stale
-        # EFI fallback win; assert the enrolled Limine door first and make the
-        # fallback byte-identical (2026-07-30/31 drill incident).
         description = "assert stable Limine EFI BootOrder and fallback";
         command = "${pkgs.writeShellScript "persistent-bootorder-assert" ''
           set -eu
@@ -278,9 +244,6 @@ in {
             || mount -t efivarfs efivarfs /sys/firmware/efi/efivars \
             || { echo "bootorder-assert: no efivars" >&2; exit 1; }
 
-          # efibootmgr separates the label from its device path with a tab on
-          # this firmware, but accept any horizontal whitespace: the output
-          # format is not an EFI-variable contract.
           lim="$(efibootmgr | sed -n 's/^Boot\([0-9A-Fa-f]\{4\}\)[^ ]*[[:space:]]\+Limine[[:space:]].*/\1/p' | head -n1)"
           fin="$(efibootmgr | sed -n 's/^Boot\([0-9A-Fa-f]\{4\}\)[^ ]*[[:space:]]\+Finix[[:space:]].*/\1/p' | head -n1)"
           if [ -z "$lim" ] || [ -z "$fin" ]; then
@@ -305,13 +268,8 @@ in {
 
           if [ -e /boot/EFI/limine/BOOTX64.EFI ] && [ ! -e /boot/EFI/BOOT/BOOTX64.EFI ] || \
              [ -e /boot/EFI/limine/BOOTX64.EFI ] && ! cmp -s /boot/EFI/limine/BOOTX64.EFI /boot/EFI/BOOT/BOOTX64.EFI; then
-            # WHY: firmware shuffle makes 0003 (\\EFI\\BOOT fallback) win some
-            # boots; identical bytes turn that door into the enrolled Limine
-            # menu instead of hash-mismatch fallthrough to the island
-            # (2026-07-30/31 drill incident).
             mkdir -p /boot/EFI/BOOT
             cp /boot/EFI/limine/BOOTX64.EFI /boot/EFI/BOOT/BOOTX64.EFI
-            # Dirty-cut torn-write incident 2026-07-31: flush the fallback copy.
             sync
             echo "bootorder-assert: synced EFI fallback from enrolled Limine"
           fi
@@ -352,7 +310,6 @@ in {
             ${pkgs.util-linux}/bin/dmesg 2>&1 || true
           }
 
-          # Wait for /persist; the fstab mount task runs early in stage 2.
           for _ in $(seq 1 120); do
             ${pkgs.util-linux}/bin/mountpoint -q /persist && break
             sleep 1
@@ -370,7 +327,6 @@ in {
           snapshot early > "$outdir/boot-$ts.log" 2>&1 || true
           ${pkgs.coreutils}/bin/sync || true
 
-          # Second snapshot once services settled.
           sleep 60
           snapshot late >> "$outdir/boot-$ts.log" 2>&1 || true
           ${pkgs.coreutils}/bin/sync || true
@@ -388,8 +344,6 @@ in {
       log = true;
       command = pkgs.writeShellScript "kmsg-recorder" ''
         export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.findutils]}
-        # Self-sufficient: mount the persist subvolume ourselves instead of
-        # depending on fstab handling that may not have happened yet.
         mnt=/run/kmsg-persist
         mkdir -p "$mnt"
         until mountpoint -q "$mnt"; do
@@ -401,32 +355,11 @@ in {
         done
         d="$mnt/finix-boot"
         mkdir -p "$d"
-        # This runs on every boot forever: keep the newest 20 logs.
         ls -1t "$d"/kmsg-*.log 2>/dev/null | tail -n +21 | xargs -r rm -f
         ts=$(date -u +%Y-%m-%dT%H-%M-%SZ)
         echo "kmsg-recorder: writing to $d/kmsg-$ts.log" > /dev/kmsg
-        # /dev/kmsg replays the entire buffer from boot, then follows.
         exec cat /dev/kmsg > "$d/kmsg-$ts.log"
       '';
     };
   };
-
-  # Status dump into the kmsg stream and recorder log.
-
-  # Flight recorder: stream /dev/kmsg (full replay from boot + follow) to
-  # /persist. Supervised service, not a backgrounded run task: finit reaps
-  # a run task's cgroup on exit, which silently killed earlier attempts.
-  # commit=1 keeps the log durable without an explicit sync loop.
-
-  # Persist post-mortem snapshots where NixOS can read them. Unconditional:
-  # even a partial boot should leave traces.
-
-  # The persistent machine must accept pushed closures; unlike the guarded
-  # trial, leave /nix/store writable for the Nix daemon.
-
-  # Small activation marker used to prove the SSH deployment path without a
-  # reboot; it also makes the active generation obvious from the console.
-  # Keep the Nix client in the closure for SSH-based deployments. The daemon
-  # is used as the remote store endpoint; local builds remain optional.
-  # efibootmgr backs the ESP island and its recovery tasks.
 }

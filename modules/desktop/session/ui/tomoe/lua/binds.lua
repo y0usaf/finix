@@ -1,9 +1,3 @@
--- ─── Binds (mirroring niri/keybindings.nix; Mod = Alt) ───────────────────────
--- Mod+t is the ekko terminal. Ekko retitles its host window to
--- "ekko …" while a client is attached, and the spawned terminal
--- also carries the "ekko-term" app-id, so a later press focuses
--- the live window — hopping to its workspace first — instead of
--- spawning another client onto the shared session.
 local function ekko_window()
   for _, win in ipairs(tomoe.windows()) do
     local title = win:title() or ""
@@ -18,8 +12,6 @@ tomoe.bind("Mod+t", function()
     tomoe.spawn(nix.terminal .. " --app-id ekko-term")
     return
   end
-  -- Hop to the window's workspace first: wm.switch shows it via
-  -- arrange; focus on a hidden window is a no-op.
   for n, wins in pairs(wm.workspaces or {}) do
     if n ~= wm.active then
       for _, w in ipairs(wins) do
@@ -29,9 +21,6 @@ tomoe.bind("Mod+t", function()
       end
     end
   end
-  -- Deck layout only: focus() on a buried window leaves it behind
-  -- the column's front. Promote it to the deck front, then arrange
-  -- — `vis`/`column` are the deck chunk's locals, absent under sway.
   if type(vis) == "function" and type(column) == "table" then
     local side = column[win:id()]
     if side then
@@ -53,15 +42,12 @@ tomoe.bind("Super+space", toggle_floating, "Toggle Floating")
 tomoe.bind("Mod+Shift+e", "quit")
 tomoe.bind("Mod+Shift+slash", "show-hotkey-overlay")
 
--- ─── Displays ────────────────────────────────────────────────────────────────
 tomoe.bind("Mod+9", function()
   if blanked_outputs then
     for _, name in ipairs(blanked_outputs) do
       if blanked_ad_hoc[name] then
         displays[name] = nil
       elseif displays[name] then
-        -- Missing disabled parses as false in lua.rs, so clear it
-        -- explicitly on restore while retaining all other settings.
         displays[name].disabled = false
       end
     end
@@ -88,12 +74,10 @@ tomoe.bind("Mod+9", function()
   tomoe.settings { displays = displays }
 end, "Blank/Restore All Outputs")
 
--- ─── Screenshots / wallpaper ─────────────────────────────────────────────────
 tomoe.bind("Mod+g", "screenshot", "Screenshot")
 tomoe.bind("Mod+Shift+g", "screenshot-screen", "Screenshot Screen")
 tomoe.bind("Mod+Shift+c", function() tomoe.spawn("killall swaybg; swaybg -i " .. random_wallpaper .. " -m fill &") end, "Random Wallpaper")
 
--- ─── Media ───────────────────────────────────────────────────────────────────
 tomoe.bind("XF86AudioRaiseVolume", function() tomoe.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+") end)
 tomoe.bind("XF86AudioLowerVolume", function() tomoe.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-") end)
 tomoe.bind("XF86AudioMute", function() tomoe.spawn("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle") end)

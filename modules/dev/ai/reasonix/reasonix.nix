@@ -9,10 +9,6 @@
   inherit (pkgs.stdenv.hostPlatform) system;
   package = flakeInputs.reasonix-flake.packages."${system}".default;
 
-  # Idempotent: sync the gateway key from apiKeyFile into
-  # ~/.reasonix/.env (rewrite only when changed), then continue. Shared by
-  # the CLI and desktop wrappers — reasonix reads api_key_env exclusively
-  # from its global .env, never process env.
   seedKey = ''
     state_home="''${REASONIX_STATE_HOME:-$HOME/.reasonix}"
     env_file="$state_home/.env"
@@ -31,12 +27,6 @@
     fi
   '';
 
-  # Prebuilt desktop (Wails shell). Source build is disproportionate: Wails
-  # can't cross-compile the CGO/WebKit binary and needs the wails CLI +
-  # pnpm 10 + generated bindings; upstream ships native-runner artifacts
-  # instead. Only reasonix-desktop is dynamic (WebKitGTK 4.1/GTK3); the
-  # sibling launcher/guard binaries are static updater machinery we skip —
-  # Nix owns updates.
   desktopPackage = pkgs.stdenv.mkDerivation {
     pname = "reasonix-desktop";
     version = "1.25.1";
@@ -72,21 +62,7 @@
 
     ${seedKey}
 
-    # WebKitGTK ignores gtk-xft-dpi (what scales other GTK apps here) and
-
-    # drops GDK_DPI_SCALE on the Wayland backend, so the webview renders at
-
-    # 1x — tiny on a 1.5x system. Force XWayland where GDK_DPI_SCALE applies
-
-    # and match user.ui.gtk.scale (the same value the GTK module exports).
-
     export GDK_BACKEND=x11
-
-    # XWayland + NVIDIA: WebKitGTK's default DMA-BUF renderer blanks the
-
-    # webview (compositing-mode off does not help). Force the legacy GL
-
-    # renderer — the README's NVIDIA fallback.
 
     export WEBKIT_DISABLE_DMABUF_RENDERER=1
 
@@ -118,11 +94,6 @@ in {
       [
         (pkgs.writeShellScriptBin "reasonix" ''
           ${seedKey}
-          # --yolo auto-approves approval-gated tool calls for interactive
-          # sessions (same runtime posture as Ctrl+Y). But it MUST be skipped
-          # for the headless acp subcommand: `reasonix --yolo acp` forces the
-          # bubbletea TUI, which dies with "error opening TTY" when paseo
-          # spawns it on stdio with no terminal.
           for a in "$@"; do
             if [ "$a" = "acp" ]; then
               exec ${package}/bin/reasonix "$@"
@@ -137,40 +108,12 @@ in {
       ]
       ++ lib.optional cfg.desktop.enable desktopWrapper;
 
-    # App-menu entry — same manzil user-file pattern as hermes.nix.
-
-    # ~/.local/share/applications is globbed by the tui-launcher and any
-
-    # niri app menu. Exec goes through the wrapper so the API key is seeded
-
-    # before first launch (desktop reads the same global .env).
-
     manzil.users."${config.user.name}".files =
       {
-        # Reasonix reads user-scoped standing instructions from
-        # $REASONIX_STATE_HOME (~/.reasonix by default) using the recognized
-        # document names REASONIX.md / AGENTS.md / CLAUDE.md
-        # (internal/instruction/resolver.go ScopeUser; internal/memory/doc.go),
-        # and folds them into the durable system-prompt prefix. readConfinedDocument
-        # opens through os.OpenRoot(scopeDir) and rejects a symlink whose target
-        # resolves outside that dir (document_symlink_escape), so a manzil store
-        # symlink would be dropped; deploy a real file with type = "copy".
         ".reasonix/REASONIX.md" = {
           type = "copy";
           text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
         };
-
-        # Provider + default model, merged into the mutable ~/.reasonix/config.toml
-
-        # at activation (manzil merge; login rewrites survive, patches re-merge).
-
-        # Replaces the providers array: the stock deepseek-flash/deepseek-pro
-
-        # entries needed DEEPSEEK_API_KEY, which doesn't exist in ~/Tokens.
-
-        # check_updates=false: the Nix store is read-only, so the desktop
-
-        # self-updater can never replace the binary — Nix owns updates.
 
         ".reasonix/config.toml" = {
           type = "merge";
@@ -182,14 +125,8 @@ in {
           value = {
             default_model = "glm-5.3-flash";
 
-            # No anonymous usage stats: cli_metrics=off suppresses the CLI
-            # consent prompt entirely.
             telemetry.cli_metrics = "off";
 
-            # CLI YOLO: --yolo auto-approves approval-gated tool calls for this
-            # session (same runtime mode as Ctrl+Y). permissions.mode below is
-            # only a headless-run writer fallback; it does NOT affect the
-            # interactive CLI's approval posture, so the flag is the real switch.
             permissions.mode = "allow";
 
             sandbox.bash = "off";

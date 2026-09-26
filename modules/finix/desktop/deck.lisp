@@ -1,23 +1,5 @@
 (in-package #:tomoe-user)
 
-;; The "deck" layout: a 32:9 screen split into two half-columns that are each
-;; 16:9. Each column is a deck — its front window fills the half and its other
-;; windows stay mapped one slot above or below it, so Mod+j/k slides the stack
-;; instead of swapping two windows. Port of the deck chunk in the user's Tomoe
-;; Lua config, written against the public extension API: columns, deck order,
-;; the deck front and floating windows are all extension state, and every
-;; geometry change is a `place` effect.
-;;
-;; One implicit window set. The workspace machinery is gone (user decision:
-;; single workspace), so Alt+digits are free for the app spawns in the policy.
-;;
-;; Mod is Alt, matching the original. Mod+r cycles the split, Mod+o toggles an
-;; even grid, Mod+h/l/j/k drive the columns, Mod+Shift+* move windows,
-;; Super+space floats the focused window.
-
-;; lisp-config.nix prepends the layout constants and binding data through toLisp.
-;; This file contains the layout implementation, not a standalone config.
-
 (defun deck--state ()
   (list :grid nil :ratio 1 :focus nil
         :columns nil :windows nil
@@ -62,8 +44,6 @@ gone window left behind, or the keys go dead."
         (deck--front state :left)
         (deck--front state :right)
         (first windows))))
-
-;; --- usable area -------------------------------------------------------------
 
 (defun deck--exclusive-edge (anchors)
   "The edge an exclusive zone applies to, by the layer-shell rule."
@@ -116,12 +96,9 @@ against the output the layout is drawing on."
                 :width (max 1 (- (getf output :width) left right))
                 :height (max 1 (- (getf output :height) top bottom))))))))
 
-;; --- geometry ----------------------------------------------------------------
-
 (defun deck--box (state area id)
   "Where ID goes, or NIL when it is not in the window set."
   (let* ((gaps +deck-gaps+)
-         ;; Gaps are an outer margin too: the layout draws inside them.
          (x (+ (getf area :x) gaps)) (y (+ (getf area :y) gaps))
          (width (- (getf area :width) (* 2 gaps))) (height (- (getf area :height) (* 2 gaps))))
     (cond
@@ -167,17 +144,9 @@ against the output the layout is drawing on."
                            (apply #'place id (append box (list t)))
                            (place id 0 0 (max 1 (getf window :width))
                                   (max 1 (getf window :height)) nil)))
-          ;; The deck owns fullscreen, so it asserts it for every window: T for
-          ;; its own fullscreen set, NIL otherwise. Emitting nothing for the
-          ;; rest would let the shipped window-state unit's accepted client
-          ;; request stand (it mounts before this one). Denying it here is the
-          ;; Rust WM's honor_client_fullscreen = false: a client cannot choose
-          ;; layout policy, but Mod+f still fullscreens.
           append (list (fullscreen id (and box (member id windows)
                                            (member id (getf state :fullscreen))
                                            t))))))
-
-;; --- commands ----------------------------------------------------------------
 
 (defun deck--focus-window (state id)
   (setf (getf state :focus) id)
@@ -239,7 +208,6 @@ against the output the layout is drawing on."
          (previous (deck--side-of state id)))
     (when (and id (deck--manageable-p state id))
       (when (and previous (not (eql previous side)) (eql id (deck--front state previous)))
-        ;; Popping the front reveals the window after it, as a scroll would.
         (let* ((column (deck--column state previous))
                (index (position id column))
                (next (and index (nth (mod (1+ index) (length column)) column))))
@@ -253,7 +221,6 @@ against the output the layout is drawing on."
     (when id
       (cond
         ((member id (getf state :fullscreen))
-         ;; A fullscreen client becomes tiled on the first press, as in Tomoe.
          (setf (getf state :fullscreen) (remove id (getf state :fullscreen))))
         ((member id (getf state :floating))
          (setf (getf state :floating) (remove id (getf state :floating))
@@ -295,12 +262,8 @@ against the output the layout is drawing on."
                     (push id (getf state :fullscreen)))))))
     (t state)))
 
-;; --- bindings ----------------------------------------------------------------
-
 (defun deck--bindings ()
   (mapcar (lambda (binding) (apply #'bind-key binding)) +deck-bindings+))
-
-;; --- extension ---------------------------------------------------------------
 
 (define-extension "deck"
     (:reads (:windows :outputs :layers :layout :focus :key :button)
@@ -311,11 +274,6 @@ against the output the layout is drawing on."
          (focused (context snapshot :focus))
          (area (deck--area snapshot))
          (type (getf event :type)))
-    ;; A front that closes hands its deck on, before the prune drops the id: the
-    ;; window after it in that column takes the front, as a scroll would, and the
-    ;; column that held the focused window keeps the keyboard. Without the handoff
-    ;; the column keeps a front that is gone, so nothing in it is placed or shown
-    ;; and no key can bring it back.
     (when (eq type :unmap)
       (let ((gone (getf event :id)))
         (dolist (side '(:left :right))
@@ -324,13 +282,10 @@ against the output the layout is drawing on."
               (setf (cdr (assoc side (getf state :fronts))) next)
               (when (and next (eql gone (getf state :focus)))
                 (setf (getf state :focus) next)))))))
-    ;; Forget windows that are gone; ids are reused by the compositor.
     (setf (getf state :windows) (remove-if-not (lambda (id) (member id ids)) (getf state :windows))
           (getf state :columns) (remove-if-not (lambda (entry) (member (car entry) ids))
                                                (getf state :columns))
           (getf state :fronts)
-          ;; A deck front that closed is cleared, never removed: the two keys
-          ;; have to survive every prune, or adopting a front has nothing to set.
           (loop for entry in (getf state :fronts)
                 collect (if (and (cdr entry) (not (member (cdr entry) ids)))
                             (cons (car entry) nil)
@@ -341,8 +296,6 @@ against the output the layout is drawing on."
           (getf state :fullscreen) (remove-if-not (lambda (id) (member id ids))
                                                   (getf state :fullscreen)))
     (unless (member (getf state :focus) ids) (setf (getf state :focus) nil))
-    ;; A click or a focus command from another unit moves focus; adopt it first
-    ;; so a window that maps in the same dispatch still takes focus afterwards.
     (when (and focused (not (eql focused (getf state :focus)))
                (member focused (deck--windows state))
                (deck--manageable-p state focused))
@@ -350,15 +303,12 @@ against the output the layout is drawing on."
         (when side
           (deck--adopt-front state side focused)
           (deck--focus-window state focused))))
-    ;; A new window joins the focused window's column, or the emptier one, and
-    ;; arrives at the front of that deck.
     (dolist (window windows)
       (let ((id (getf window :id)))
         (unless (or (deck--side-of state id) (member id (getf state :floating)))
           (let* ((focus-side (and focused (deck--side-of state focused)))
                  (left (length (deck--column state :left)))
                  (right (length (deck--column state :right)))
-                 ;; An even split puts the newcomer on the left, as in Tomoe.
                  (side (or focus-side (if (<= left right) :left :right))))
             (push (cons id side) (getf state :columns))
             (setf (getf state :windows) (append (getf state :windows) (list id)))
@@ -366,27 +316,17 @@ against the output the layout is drawing on."
             (setf (getf state :focus) id)))))
     (when (and (eq type :key) (equal (getf event :owner) "deck"))
       (deck--command state area (getf event :command)))
-    ;; A client fullscreen request is denied: it never joins the fullscreen
-    ;; set, and deck--places asserts NIL so window-state's acceptance is
-    ;; overridden. Mod+f is the only way in.
-    ;; A click focuses the window under the pointer and brings it to the front
-    ;; of its deck, the way Tomoe's on_focus_change does. This unit owns focus
-    ;; while it is mounted, so click-to-focus has to be answered here too.
     (when (and (eq type :button) (eql (getf event :state) :pressed))
       (let ((id (getf event :id)))
         (when (and (integerp id) (member id (deck--windows state))
                    (deck--manageable-p state id) (deck--side-of state id))
           (deck--adopt-front state (deck--side-of state id) id)
           (deck--focus-window state id))))
-    ;; Close and quit are one-shot commands; only key and button dispatch may
-    ;; return them, so the binding names them directly.
     (let* ((command (when (and (eq type :key) (equal (getf event :owner) "deck"))
                       (getf event :command)))
            (current (deck--current state)))
       (values state
               (append (deck--bindings) (deck--places snapshot state area)
-                      ;; Focus always names a window the window set shows,
-                      ;; so no command can leave the keyboard without a target.
                       (list (focus current)))
               (cond ((and (equal command "close") current)
                      (list (close-window current)))

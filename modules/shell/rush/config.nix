@@ -6,10 +6,6 @@
 }: let
   inherit (config.user) shell;
 
-  # Wallust login apply: the desktop always imports the wallust module
-  # (modules/desktop/session/theme/wallust/wallust.nix), so its options and
-  # package are available here. The server uses rush but <em>not</em> this
-  # module (modules/shell is desktop-walk only), so no cross-host risk.
   wallustCfg = config.user.appearance.wallust;
   wallustBin = "${pkgs.wallust}/bin/wallust";
 in {
@@ -18,36 +14,15 @@ in {
   };
 
   config = lib.mkIf shell.rush.enable {
-    # rush is a POSIX shell with built-in autosuggestions, syntax
-    # highlighting, Ctrl-R history search, and structured (JSON) completions
-    # — so carapace, fzf key-bindings, zsh-autosuggestions and
-    # zsh-syntax-highlighting all drop away. Only the shell itself plus `bat`
-    # (cat replacement) ship here; lsd/tree/fzf/ripgrep come from
-    # modules/core/user/packages.nix. The system-level wiring — /etc/shells,
-    # login shell — lives in modules/finix/common.nix.
     environment.systemPackages = [
       pkgs.rush
       pkgs.bat
     ];
 
     manzil.users."${config.user.name}".files = {
-      # rush reads profile.rush for login shells and config.rush for
-      # interactive ones. Both are plain POSIX shell scripts (rush IS a POSIX
-      # shell), so there is no `emulate sh` dance and no null_glob guard: a
-      # glob with no matches stays literal, and `[ -f … ]` skips it.
-      #
-      # ~/Tokens/<NAME>.txt becomes $NAME. Login-only (not config.rush) so the
-      # file reads happen once per session; children inherit through the
-      # environment. Skips ANTHROPIC_API_KEY/OPENAI_API_KEY (agents must read
-      # their own credential files) and anything holding a PEM block or
-      # control chars.
       ".config/rush/profile.rush".text = ''
         . /etc/profile
 
-        # Wallust: apply the default colorscheme once at login (profile.rush
-        # runs only for login shells, so this never fires per interactive
-        # shell). Guarded on the binary existing so the server (which also
-        # uses rush but has no wallust) is untouched.
         if command -v wallust >/dev/null 2>&1; then
           ${lib.concatMapStringsSep "\n" (dir: "mkdir -p \"$HOME${lib.removePrefix "~" dir}\"") wallustCfg.startupDirs}
           ${wallustBin} cs "$HOME/.config/wallust/colorschemes/${wallustCfg.defaultTheme}.json"
@@ -72,17 +47,9 @@ in {
         unset file_path var_name content
       '';
 
-      # mkBefore pins this base block ahead of user.shell.rcExtra, which carries
-      # the feature modules' fragments at default (1000) priority.
       ".config/rush/config.rush".text = lib.mkMerge [
         (lib.mkBefore ''
-          # rush only reads config.rush for interactive shells, so no
-          # `[[ -o interactive ]]` guard is needed (unlike the bash/zsh
-          # versions).
 
-          # Prompt: bold green cwd, then a prompt char that is cyan on success,
-          # red on failure. `prompt segment` + `prompt_pwd` are rush builtins;
-          # `$?` is the previous command's status on entry to rush_prompt.
           rush_prompt() {
             rush_prompt_status=$?
             prompt segment --bold --fg green "$(prompt_pwd)"

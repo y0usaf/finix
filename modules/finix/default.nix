@@ -7,7 +7,6 @@
   inherit (inputs) nixpkgs;
   inherit (nixpkgs) lib;
 
-  # Discovery returns module paths; lib.evalModules owns evaluation and deduplication.
   recursivelyImport = import ../../recursivelyImport.nix {inherit lib;};
   graphicalRoots = [
     ../core
@@ -26,9 +25,6 @@
 
   pkgs = config.finix.basePkgs;
   mkFinixSystem = config.finix.mkSystem;
-
-  # NOTE: mkFinixSystem imports ./common.nix in its baseline (shared by
-  # every system, kept in the old position for exact module-order parity).
 
   serverPersistent = mkFinixSystem {
     modules =
@@ -52,10 +48,6 @@
         ../hosts/common/manzil.nix
         ../hosts/common/ssh-keys.nix
         ../core/user/user-config.nix
-        # The headless server reaches modules/dev only through this explicit
-        # list, so claude-code's consumers of user.dev.prompts.* must be named
-        # here too — the graphical roots that normally import them are absent
-        # and the whole server config fails to evaluate without them.
         ../dev/ai/prompts/ethics.nix
         ../dev/ai/prompts/no-tests.nix
         ../dev/ai/prompts/no-comments.nix
@@ -102,14 +94,10 @@
       ++ frameworkModules;
   };
 
-  # Deployment and boot outputs below remain tied to their target systems.
-
   bootPackage =
     (config.finix.mkIsland {
       name = "finix-server-boot";
       system = serverPersistent.config.system.topLevel;
-      # ADL-N BIOS ships ancient 0x1a microcode; both raw direct boots
-      # misbehaved until 0x21 was prepended (incident #2).
       ucodeImg = "${pkgs.microcode-intel}/intel-ucode.img";
       defaultHost = "server";
     }).bootDriverScript;
@@ -119,10 +107,7 @@
       name = "finix-server-persistent-deploy";
       system = serverPersistent.config.system.topLevel;
       defaultHost = "server";
-      # Server boot slots are managed by the Finix ESP island driver.
       bootDriverName = "finix-server-boot";
-      # Root's ssh key is authorized ONLY via the tailnet IP (LAN root@:2200
-      # denies it; y0usaf@ works everywhere). Deploy as root@tailnet:22.
       sshHost = "100.105.204.116";
       sshPort = 22;
     }).deployScript;
@@ -132,9 +117,6 @@
       name = "finix-desktop-deploy";
       system = desktopPersistent.config.system.topLevel;
       defaultHost = "local";
-      # No postSwitch: stc switch|boot runs the limine installHook itself
-      # (boot.nix). Only `fx test` (runtime-only, no installHook) and
-      # manual stc invocations go through this package anymore.
     }).deployScript;
 in {
   imports = [./finixSystem.nix ./deploy.nix ./esp-island.nix];

@@ -1,4 +1,3 @@
-# Framework persistence policy consumed through evaluated module configuration.
 {config, ...}: let
   common = config.finix.persistence.shared;
 in {
@@ -12,24 +11,23 @@ in {
       ];
     files = common.systemFiles;
     users.y0usaf = {
-      # Match desktop: ~/dev is dedicated @dev; ~/finix is persisted bind.
       directories =
         builtins.filter (directory: directory != "Dev" && directory != "nixos") common.userDirectories
         ++ [
           "finix"
           "cu-workbench"
           ".steam"
-          ".local/share/android" # ANDROID_USER_HOME data side
-          ".cache/nv" # CUDA_CACHE_PATH cutover
-          ".config/pi/agent" # RETIRED 2026-09-02: PI_CODING_AGENT_DIR reverted (pi/omp both read it; shared-dir hazard); pi back on native ~/.pi (allowlisted separately). Contents migrated back to ~/.pi; safe to drop.
-          ".config/codex" # CODEX_HOME cutover
-          ".config/claude" # CLAUDE_CONFIG_DIR cutover
-          ".local/share/azure" # AZURE_CONFIG_DIR cutover
-          ".local/state/bash" # HISTFILE cutover
+          ".local/share/android"
+          ".cache/nv"
+          ".config/pi/agent"
+          ".config/codex"
+          ".config/claude"
+          ".local/share/azure"
+          ".local/state/bash"
           ".config/Codex"
           ".config/opencode"
           ".config/pi-harness"
-          ".omp" # oh-my-pi agent dir (sessions, harness config.json)
+          ".omp"
           ".config/discord"
           ".config/discordcanary"
           ".config/vesktop"
@@ -69,11 +67,11 @@ in {
           ".cache/ekko"
           ".cache/mesa_shader_cache"
         ];
-      files = common.userFiles ++ [
-        # npm registry auth token written by `npm login` (userconfig moved to
-        # npm's own default in core/user/session/xdg.nix).
-        ".npmrc"
-      ];
+      files =
+        common.userFiles
+        ++ [
+          ".npmrc"
+        ];
     };
   };
 }

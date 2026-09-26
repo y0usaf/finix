@@ -6,8 +6,6 @@
   inherit (config.lib.generators) mkLispInline toLisp;
   inherit (config.user) defaults;
 
-  # Each row is the argument list for bind-key. Keywords are trusted Lisp
-  # expressions; key names and launch arguments remain ordinary Nix strings.
   binding = modifiers: key: command: [(map mkLispInline modifiers) key (mkLispInline command)];
 
   displays = lib.mapAttrsToList (name: settings: [name settings]) {
@@ -33,7 +31,6 @@
     (binding [":alt"] "r" ":ratio")
     (binding [":alt"] "f" ":fullscreen")
     (binding [":super"] "space" ":floating")
-    # The deck owns focus, including the shipped focus unit's Super+Tab.
     (binding [":super"] "Tab" ":next")
     (binding [":super" ":shift"] "Tab" ":previous")
   ];
@@ -64,8 +61,6 @@
     (binding [] "XF86MonBrightnessDown" ":brightness-down")
   ];
 
-  # String-keyed rows preserve command names; an attrset would turn them into
-  # keyword symbols. Lisp calls the fixed launch API with each argv list.
   launches = lib.mapAttrsToList (command: argv: [command argv]) {
     cursor = [defaults.ide];
     browser = [defaults.browser];
@@ -73,7 +68,6 @@
     steam = ["steam"];
     obs = ["obs"];
     terminal = [defaults.terminal];
-    # user.defaults.launcher is a shell command, including tilde expansion.
     launcher = ["sh" "-c" defaults.launcher];
     files = [defaults.fileManager];
     editor = [defaults.terminal "-e" defaults.editor];
@@ -96,10 +90,8 @@
   };
 
   deckText = ''
-    ;; Generated values from modules/finix/desktop/lisp-config.nix.
     (in-package #:tomoe-user)
     (defparameter +deck-gaps+ ${toLisp 8})
-    ;; Keep exact ratios: two 16:9 columns, then 21:9 / 11:9 and its mirror.
     (defparameter +deck-ratios+ ${toLisp (map mkLispInline ["1/2" "21/32" "11/32"])})
     (defparameter +deck-float-numerator+ ${toLisp (mkLispInline "3/5")})
     (defparameter +deck-bindings+ ${toLisp deckBindings})
@@ -107,10 +99,7 @@
     ${builtins.readFile ./deck.lisp}
   '';
 
-  # The compositor watches init.lisp, not the deck it loads. Include the
-  # generated values in this hash so Nix-only deck changes trigger reloads.
   initText = ''
-    ;; Generated values from modules/finix/desktop/lisp-config.nix.
     ;; Deck fingerprint: ${builtins.hashString "sha256" deckText}
     (in-package #:tomoe-user)
     (defparameter +policy-displays+ ${toLisp displays})

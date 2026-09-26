@@ -1,5 +1,3 @@
-# Laptop power/session stack. Elogind owns login runtime directories and lid
-# policy; zzz remains available for explicit suspend and provider hooks.
 {
   config,
   lib,

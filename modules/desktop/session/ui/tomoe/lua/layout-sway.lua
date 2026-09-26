@@ -1,22 +1,8 @@
--- ─── Layout: sway-style manual splits over numbered workspaces ─────────────
--- One split tree per workspace: inner nodes { dir = "h"|"v", kids },
--- leaves { win = id }. Mod+b / Mod+v choose the direction the NEXT
--- window splits the focused leaf with (side-by-side / stacked); the
--- default follows the focused region's longer axis, i3-style. The
--- tree self-heals in arrange: leaves that left the workspace are
--- pruned, unknown windows insert next to the previously focused
--- leaf. Alt+J/K scroll workspaces, so vertical focus within
--- stacked splits rides Mod+Ctrl+J/K.
---
--- Animations off: this layout retiles the whole tree on every
--- open/close and workspace-switch hide/show, so the default move
--- springs and open fades turn every operation into a spring storm.
--- Sway feels snappy because it never animates; match that.
 tomoe.settings { animations = false }
 
-local trees = {}      -- workspace -> split tree root
-local split_pref = {} -- window id -> "h"|"v": direction of its next split
-local focus_hist = {} -- cur/prev focused ids: prev is the split target
+local trees = {}
+local split_pref = {}
+local focus_hist = {}
 
 local function is_leaf(node)
   return node ~= nil and node.win ~= nil
@@ -45,9 +31,6 @@ local function last_leaf(node)
   return node and last_leaf(node.kids[#node.kids]) or nil
 end
 
--- Insert new_id beside target_id, sway-style: a parent container
--- with the same direction gains a sibling right after the target,
--- otherwise the target leaf is wrapped in a new container.
 local function insert_leaf(node, target_id, new_id, dir)
   if is_leaf(node) then
     if node.win == target_id then
@@ -96,8 +79,6 @@ local function prune(node, keep)
   return node
 end
 
--- Equal splits; the last kid absorbs rounding so no stray gap
--- column opens at the far edge.
 local function render(node, x, y, w, h, g)
   if is_leaf(node) then
     local win = tomoe.window(node.win)
@@ -134,7 +115,6 @@ function wm.arrange()
   local keep = {}
   for _, win in ipairs(wm.workspaces[wm.active]) do
     local id = win:id()
-    -- Classify rule-floated windows before the tree sees them.
     if tomoe.rules_for(win).floating then
       floating[id] = true
     end
@@ -154,8 +134,6 @@ function wm.arrange()
       if not root then
         root = { win = id }
       else
-        -- wm focuses new windows on open, so the split target is
-        -- the previously focused window, not the new one.
         local target = (focus_hist.prev and keep[focus_hist.prev])
           and focus_hist.prev or last_leaf(root)
         local dir = split_pref[target]
@@ -183,7 +161,6 @@ function wm.arrange()
   end
 end
 
--- Geometric focus: H/L ride the X axis, Ctrl+J/K the Y axis.
 local function focus_dir(dx, dy)
   local f = tomoe.focused_window()
   local fg = f and f:geometry()
@@ -215,12 +192,6 @@ local function focus_dir(dx, dy)
   end
 end
 
--- J/K scroll the workspace ring; Shift+J/K moves the focused window
--- and follows it. Reassign before switching instead of composing
--- wm.move_focused() + wm.switch(): that pair queues hide then immediate
--- resize/show for the moved surface in one Lua entry, which can leave a
--- client's content at its old buffer size. Keeping it mapped gives the
--- client one normal resize configure for its target split.
 local function ws_step(dir)
   wm.switch(((wm.active - 1 + dir) % wm.workspace_count) + 1)
 end
@@ -236,15 +207,12 @@ local function ws_move_step(dir)
     if candidate:id() == win:id() then
       table.remove(source, i)
       table.insert(wm.workspaces[n], win)
-      -- wm.switch hides only the remaining source windows, arranges
-      -- the target once, announces state, then focuses its last entry.
       wm.switch(n)
       return
     end
   end
 end
 
--- In-order leaf ids of a tree: the linear order Shift+H/L swaps in.
 local function leaf_ids(node, out)
   if not node then
     return out
@@ -276,8 +244,6 @@ local function swap_leaf(node, a, b)
   end
 end
 
--- Shift+H/L: swap the focused window with the previous/next leaf in
--- tree order. The tree keeps its shape; the windows trade regions.
 local function move_swap(dir)
   local f = tomoe.focused_window()
   local root = trees[wm.active]
@@ -317,8 +283,6 @@ tomoe.on_window_close(function(win)
   end
 end)
 
--- Trees are plain data (ids only), so they ride on_reload directly;
--- restore just drops leaves whose window died while away.
 tomoe.on_reload("sway", function()
   return trees
 end, function(saved)
@@ -344,7 +308,6 @@ end, function(saved)
   wm.arrange()
 end)
 
--- ─── Binds (sway layout; Mod = Alt) ─────────────────────────────────────
 tomoe.bind("Mod+h", function() focus_dir(-1, 0) end, "Focus Left")
 tomoe.bind("Mod+l", function() focus_dir(1, 0) end, "Focus Right")
 tomoe.bind("Mod+Ctrl+j", function() focus_dir(0, 1) end, "Focus Down")
@@ -367,7 +330,6 @@ tomoe.bind("Mod+v", function()
     split_pref[f:id()] = "v"
   end
 end, "Split Next Vertically")
--- ─── Apps (Alt digits stay app spawns; workspaces ride J/K) ──────────────
 tomoe.bind("Mod+1", function() tomoe.spawn("cursor") end)
 tomoe.bind("Mod+2", function() tomoe.spawn("librewolf") end)
 tomoe.bind("Mod+3", function() tomoe.spawn("discord") end)

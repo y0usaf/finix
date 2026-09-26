@@ -8,10 +8,6 @@
   inherit (config) user;
   browserShared = user.programs.browser.shared;
   userName = user.name;
-  # Profile root is XDG ~/.config/glide/glide (MOZ_APP_BASENAME=glide, per the
-  # upstream hm-module); native messaging hosts stay at the legacy
-  # ~/.glide-browser (nsXREDirProvider patch). Independent of LibreWolf's
-  # ~/.librewolf, so both browsers run side by side.
   glideConfig = ".config/glide/glide";
   glideNativeHosts = ".glide-browser/native-messaging-hosts";
   pywalfoxNative = pkgs.pywalfox-native;
@@ -22,10 +18,7 @@
       else builtins.toString pref
     );
   attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
-  # Glide ships its own chrome look: skip the shared userChrome.css and the
-  # Nova lock it depends on, leaving browser.nova.enabled at Glide's default.
   lockedPrefs = builtins.removeAttrs browserShared.lockedPrefs ["browser.nova.enabled"];
-  # Glide's own modal keys and hints replace Vimium-C.
   policies =
     browserShared.policies
     // {

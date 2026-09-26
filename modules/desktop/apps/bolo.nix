@@ -6,10 +6,6 @@
   ...
 }: let
   cfg = config.user.programs.bolo;
-  # Parakeet TDT 0.6B v3 (int8), k2-fsa/csukuangfj sherpa-onnx export.
-  # Declared once here; daemon manifest + manzil links derive from it
-  # (doctrine 04/05). Add further models to this attrset — runtime model
-  # installation does not exist in bolo by design.
   hfBase = "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/resolve/main";
   models = {
     "parakeet-v3-int8" = {
@@ -33,15 +29,6 @@
         };
       };
     };
-    # Confucius4-R2T2 streaming ASR: bolod is a thin WebSocket client and holds
-    # no GPU; the resident server owns the VRAM (user.dev.r2t2, whose
-    # listenAddress/port the uri is derived from — one declaration). No local
-    # files. An ADDITIONAL engine, not a replacement: Parakeet stays `model`/
-    # default, r2t2 is opt-in per host (bolo DESIGN.md, commit decef23).
-    # A FORCED `language` is required: the server's default `zhen` auto-detects
-    # and withholds text until the utterance ends, so live typing shows nothing.
-    # Values are qwen_asr's SUPPORTED_LANGUAGES (English, Chinese, Cantonese,
-    # ...); a bare "en" is rejected by the server, so spell the name out.
     "r2t2-streaming" = {
       engine = "r2t2-streaming";
       uri = "ws://${config.user.dev.r2t2.listenAddress}:${toString config.user.dev.r2t2.port}/asr_stream_api_v1";
@@ -51,14 +38,6 @@
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
-  # bolod build: provider picks the sherpa-onnx variant bolod links.
-  # CUDA via k2-fsa's official prebuilt GPU release (cuda-12.x/cudnn-9.x,
-  # same upstream version as nixpkgs sherpa-onnx). DOCTRINE-07 EXCEPTION:
-  # binary blob — chosen because compiling onnxruntime[cudaSupport] is
-  # hours of full-load build (and cudnn-frontend is broken on this cuda
-  # pin). The compiled chain exists in git history (d2b3db8d) if a source
-  # build is ever preferred. Runtime libs come from nixpkgs cudaPackages —
-  # only sherpa-onnx/onnxruntime themselves are blobs.
   sherpaOnnxGpu = pkgs.stdenv.mkDerivation {
     pname = "sherpa-onnx-gpu-prebuilt";
     version = "1.13.3";
@@ -78,8 +57,6 @@
     installPhase = ''
       mkdir -p $out/include $out/lib
       cp -r include/sherpa-onnx $out/include/
-      # Skip the tensorrt provider: unused (EP is "cuda") and would drag in
-      # TensorRT for nothing.
       cp $(ls lib/*.so | grep -v tensorrt) $out/lib/
     '';
   };
@@ -105,21 +82,17 @@
     });
   autofillPipe = enabled: lib.mkIf enabled (lib.mkDefault "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool");
 
-  # bolod is spawned by the compositor, whose PATH doesn't carry these.
   bolod = pkgs.symlinkJoin {
     name = "bolod-wrapped";
     paths = [boloPkgs.bolod];
     nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = ''
       wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath ([
-          pkgs.pipewire # pw-record
-          pkgs.wl-clipboard # wl-copy
-          pkgs.libnotify # notify-send
-          pkgs.coreutils # tr (autofill flatten) + sh plumbing
+          pkgs.pipewire
+          pkgs.wl-clipboard
+          pkgs.libnotify
+          pkgs.coreutils
         ]
-        # Autofill types via dotool/uinput; without it in the wrapper the
-        # pipe_to command fails silently (pipe failures are swallowed by
-        # design — clipboard is the backup).
         ++ lib.optional cfg.autofill pkgs.dotool)}
     '';
   };
@@ -182,7 +155,7 @@ in {
     autofill = lib.mkEnableOption "typing the transcript into the focused window (dotool/uinput)";
     tomoeKeybind = lib.mkOption {
       type = lib.types.str;
-      default = "Mod+m"; # tomoe Mod = Alt
+      default = "Mod+m";
       description = ''
         Tomoe push-to-talk bind (hold form): key-down spawns bolo to start
         recording, key-up spawns it again to stop and transcribe.
@@ -193,12 +166,8 @@ in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [boloPkgs.bolo];
 
-    # uinput node + input-group access for dotool autofill.
-    # Rules go through services.udev.packages (portable: NixOS + finix), never
-    # extraRules (NixOS-only — the finix compat shim drops it).
     services.udev.packages = autofillUdevRules cfg.autofill;
 
-    # Flatten the transcript and release modifiers before dotool types it.
     user.programs.bolo.pipeTo = autofillPipe cfg.autofill;
 
     manzil.users."${config.user.name}" = {
@@ -209,30 +178,24 @@ in {
             active = cfg.model;
             inherit (cfg) language provider threads;
             pipe_to = cfg.pipeTo;
-            models =
-              lib.mapAttrsToList (name: m:
-                {
-                  inherit name;
-                  inherit (m) engine;
-                }
-                # Streaming shape: uri (+ a forced language); no local files.
-                // lib.optionalAttrs (m ? uri) {inherit (m) uri;}
-                // lib.optionalAttrs (m ? language) {inherit (m) language;}
-                # Offline transducer shape: the four file paths under modelDir.
-                // lib.optionalAttrs (m ? files) {
-                  encoder = "${modelDir name}/encoder.int8.onnx";
-                  decoder = "${modelDir name}/decoder.int8.onnx";
-                  joiner = "${modelDir name}/joiner.int8.onnx";
-                  tokens = "${modelDir name}/tokens.txt";
-                })
-              models;
-            # One declaration mechanism: same attrset -> list shape as models.
+            models = lib.mapAttrsToList (name: m:
+              {
+                inherit name;
+                inherit (m) engine;
+              }
+              // lib.optionalAttrs (m ? uri) {inherit (m) uri;}
+              // lib.optionalAttrs (m ? language) {inherit (m) language;}
+              // lib.optionalAttrs (m ? files) {
+                encoder = "${modelDir name}/encoder.int8.onnx";
+                decoder = "${modelDir name}/decoder.int8.onnx";
+                joiner = "${modelDir name}/joiner.int8.onnx";
+                tokens = "${modelDir name}/tokens.txt";
+              })
+            models;
             vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) cfg.vocabulary;
             vocab_fuzzy = cfg.vocabFuzzy;
           });
         }
-        # Model files land where the manifest points (streaming entries carry
-        # no `files`, so they contribute nothing here).
         // lib.foldl' (acc: name:
           acc
           // lib.mapAttrs' (f: src:
@@ -241,12 +204,6 @@ in {
         (lib.attrNames (lib.filterAttrs (_: m: m ? files) models));
     };
 
-    # Tomoe: supervised daemon + push-to-talk hold bind. process.service (not
-    # spawn) so a bolod crash is respawned by tomoe's 1 Hz supervision tick
-    # instead of leaving the keybind dead until the next login. restart
-    # "on_exit" is the superset of "on_failure" (clean exits restart too) —
-    # bolod is never supposed to exit on its own. reload keep_if_unchanged
-    # (default) avoids paying model-load time on every config reload.
     user.ui.tomoe.extraConfig = lib.mkIf config.user.ui.tomoe.enable ''
       tomoe.process.service("bolod", {
         command = {"${bolod}/bin/bolod"},

@@ -7,9 +7,6 @@ _: {
       };
     };
 
-    # Monstar theme file (same syntax as the main config, color keys only).
-    # Referenced by the absolute theme path in ~/.config/monstar/config —
-    # monstar has no include directive.
     templates."monstar-theme" = ''
       foreground={{foreground | strip}}
       background={{background | strip}}

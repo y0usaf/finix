@@ -36,12 +36,6 @@ in {
         clear
         local update=""
         local dry=""
-        # Parse -d/-u (and their bundles) by hand: getopts consumes a long
-        # option character by character, so `nhs --update` set BOTH --update
-        # and --dry (the d in "update"), and every other long nh flag
-        # containing a d or u was eaten the same way. Stop at the first
-        # argument that is not one of our flags so nh's own flags, a flake
-        # path or a hostname pass through untouched.
         while [ $# -gt 0 ]; do
           case $1 in
             -d|--dry) dry="--dry" ;;
@@ -51,8 +45,6 @@ in {
           esac
           shift
         done
-        # GC_DONT_GC: skip Boehm GC during eval (~35% less eval CPU,
-        # peak RSS ~4-5GB). Remove if eval OOMs on low-memory hosts.
         GC_DONT_GC=1 nh os switch $update $dry "$@"
       }
       alias nhd="nhs -d"

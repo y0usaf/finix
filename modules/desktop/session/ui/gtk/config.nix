@@ -32,8 +32,6 @@ in {
         pkgs.gtk3
         pkgs.gtk4
       ];
-      # GTK owns GDK_DPI_SCALE; cursor.nix owns XCURSOR_SIZE (one owner per key,
-      # or the sessionVariables merge conflicts).
       variables.GDK_DPI_SCALE = toString gtkScale;
     };
     manzil.users."${config.user.name}" = {

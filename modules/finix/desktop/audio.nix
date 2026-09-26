@@ -1,11 +1,3 @@
-# Phase-2c: audio — pipewire + wireplumber + pulse compat as supervised
-# finit services running as y0usaf (no systemd user sessions here; the
-# server's syncthing service set the user+environment pattern).
-# Port of modules/desktop/session/system/audio.nix (NixOS universe):
-# same RNNoise mono source, same pulse/alsa compat surface. RT priority
-# (Nice -20 / SCHED_RR 99 on NixOS): nice -20 via the pipewireRt wrapper
-# below; SCHED_RR 99 is negotiated at runtime by pipewire's module-rt with
-# the rtkit-daemon that parity.nix enables (services.rtkit.enable).
 {
   config,
   lib,
@@ -19,15 +11,9 @@
   svcEnv = {
     HOME = home;
     XDG_RUNTIME_DIR = runtimeDir;
-    # filter-chain resolves librnnoise_ladspa via LADSPA_PATH.
     LADSPA_PATH = "${pkgs.rnnoise-plugin.ladspa}/lib/ladspa";
   };
 
-  # Same graph as the NixOS module's extraConfig."99-input-denoising";
-  # real JSON is valid SPA-JSON.
-
-  # Startup ordering without sockets-activation: wait, then become the
-  # daemon. finit restarts us if the wait budget runs out.
   waitSock = pkgs.writeShellScript "wait-pipewire-sock" ''
     export PATH=${lib.makeBinPath [pkgs.coreutils]}
     for _ in $(seq 1 60); do
@@ -38,18 +24,11 @@
     exit 1
   '';
 
-  # RT priority port: the NixOS systemd unit ran pipewire at Nice=-20 and let
-  # module-rt negotiate SCHED_RR 99 with rtkit-daemon. rtkit is enabled in
-  # parity.nix, so module-rt does the realtime scheduling; this wrapper applies
-  # the nice -20 (systemd's other half) before exec'ing pipewire.
   pipewireRt = pkgs.writeShellScript "pipewire-rt" ''
     export PATH=${lib.makeBinPath [pkgs.coreutils]}
-    # Matching NixOS's Nice=-20. untouched on failure is fine — module-rt's
-    # rtkit path is the authoritative realtime grant.
     nice -n -20 "$@"
   '';
 in {
-  # /dev/snd fallback when no logind ACL is present.
   users.users.${userName}.extraGroups = ["audio"];
 
   environment.etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = builtins.toJSON {
@@ -95,7 +74,7 @@ in {
   environment.systemPackages = [
     pkgs.pipewire
     pkgs.wireplumber
-    pkgs.pulseaudio # pactl against the pipewire-pulse socket
+    pkgs.pulseaudio
   ];
 
   finit.services = {

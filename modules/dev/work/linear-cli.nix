@@ -8,14 +8,6 @@
   cfg = config.user.dev.work.linear-cli;
   tomlFormat = pkgs.formats.toml {};
 
-  # Rebuild the `linear` package locally instead of using
-  # flakeInputs.linear-cli.packages.${system}.default. The linear-cli flake
-  # is a dead wrapper (a clone of schpet/linear-cli plus a flake) and its
-  # pinned `denoDepsHash` is stale — `linear-2.0.0-deno-deps` fails with a
-  # fixed-output hash mismatch. We vendor deno2nix (the same build tooling
-  # linear-cli's flake uses, pinned to the same ref) and rebuild `linear`
-  # from the linear-cli source tree with the corrected deps hash. Mirrors
-  # the build/install phases of linear-cli's flake.nix.
   linear-cli-src = flakeInputs.linear-cli;
 in {
   options.user.dev.work.linear-cli = {
@@ -27,8 +19,6 @@ in {
         pname = "linear";
         inherit ((builtins.fromJSON (builtins.readFile "${linear-cli-src}/deno.json"))) version;
         src = lib.cleanSource linear-cli-src;
-        # Corrected FOD hash; upstream linear-cli pins the stale
-        # sha256-jGqice4hH4RW2o7Q4VhwUm8G/EUb98AdJ/Z1jrXMeGE=.
         denoDepsHash = "sha256-C8xXrLd7h5SX7r8zjW7g5VRaN7mw+1LhE+nWoFfNjiA=";
 
         buildPhase = ''

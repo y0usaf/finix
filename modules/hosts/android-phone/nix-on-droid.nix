@@ -44,8 +44,6 @@
           };
         });
 
-        # nix-on-droid has no /etc/profile.d session-vars drop-in, so the XDG
-        # exports live here rather than in environment.sessionVariables.
         ".bashrc" = mkTextFile "bashrc" ''
           case $- in
             *i*) ;;

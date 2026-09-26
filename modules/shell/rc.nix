@@ -5,19 +5,6 @@
 }: let
   flakeDirectory = config.user.paths.flake.path;
 in {
-  # Shell-agnostic interactive config.
-  #
-  # WHY THIS EXISTS: eight modules used to append straight into
-  # manzil…files.".bashrc", which welded every one of them to bash. They now
-  # append to `user.shell.rcExtra` and the active shell module renders it into
-  # its own rc file. Ordering survives the move: rcExtra is `types.lines`, so
-  # mkBefore/mkAfter/mkOrder still resolve against each other exactly as they
-  # did on .bashrc (ekko's mkOrder 1600 `exec` still lands last).
-  #
-  # CONSTRAINT: keep everything here POSIX-compatible. rush is the only shell
-  # module today, but nix-shell and nix develop hardcode `source ~/.bashrc` for
-  # their sub-shells, so a bash module can come back. No `shopt`, no
-  # PROMPT_COMMAND. Shell-specific behaviour belongs in modules/shell/rush.
   options.user.shell = {
     aliases = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
@@ -69,8 +56,6 @@ in {
         gpupower = "sudo nvidia-smi -pl";
       };
 
-    # mkBefore: these are the base helpers, so they land ahead of the feature
-    # modules that append with mkAfter.
     user.shell.rcExtra = lib.mkBefore ''
       temppkg() {
         if [ -z "$1" ]; then
@@ -89,9 +74,6 @@ in {
         shift
         nix run "nixpkgs#$pkg" -- "$@"
       }
-      # NPM_CONFIG_TMP must expand per-session (XDG_RUNTIME_DIR differs per
-      # login); environment.variables cannot defer expansion, so export it
-      # unquoted here — the shell resolves $XDG_RUNTIME_DIR at source time.
       export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR"/npm
     '';
   };

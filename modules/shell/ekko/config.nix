@@ -19,21 +19,9 @@ in {
 
   config = lib.mkIf ekko.enable {
     environment.systemPackages = [package];
-    # The deck layout, then ekko's Windows XP theme from the pinned source.
     manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text =
       builtins.readFile ./init.lisp + "\n" + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp";
 
-    # Last in the interactive rc: the outer shell becomes the client. Bare
-    # `ekko` only prints usage; `attach` opens a view on the default
-    # instance's workspace — a cold daemon creates it first (single
-    # $SHELL -i pane), so no run/attach branch is needed. Clients attach
-    # concurrently: each terminal gets its own view onto the same panes.
-    # No exec, so a detach or a crash falls back to the shell instead of
-    # closing the terminal.
-    # The daemon sets EKKO_INSTANCE on every pane it spawns; EKKO_SESSION_NAME
-    # was the v1 variable and is stripped from pane environments, but guard
-    # on it anyway so a stale v1 daemon still blocks recursion.
-    # Keep this POSIX-compatible for both rush and Bash development shells.
     user.shell.rcExtra = lib.mkIf ekko.autoStart (lib.mkOrder 1600 ''
       if [ -z "''${EKKO_INSTANCE:-}" ] && [ -z "''${EKKO_SESSION_NAME:-}" ] &&
          [ -z "''${SSH_CONNECTION:-}" ] && [ -z "''${TMUX:-}" ] &&

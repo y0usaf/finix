@@ -1,29 +1,3 @@
-# Confucius4-R2T2 streaming ASR server: a resident GPU service (vLLM 0.14.0
-# backend) on a WebSocket, replacing today's hand-started sandbox process
-# (/home/y0usaf/dev/sandbox/r2t2-20260918). That README is the specification
-# of what works; this module is the declaration that reproduces it.
-#
-# Pieces and where they land:
-#   * ws_server.py - fetched from upstream at the pinned git rev and patched
-#     with ws_server-memory-knobs.patch (upstream hardcodes
-#     gpu_memory_utilization=0.95; on this shared 4090 that aborts at startup).
-#     The patch stays a visible file next to this module, not a rewrite.
-#   * Weights + VAD - pkgs.fetchurl, hash-pinned, assembled into one store
-#     directory (house idiom: bolo.nix's models attrset). 3.9 GiB in the store
-#     is a real cost, but it is the only form that survives a reboot with no
-#     manual download.
-#   * Python env - a uv venv in stateDir, materialised once by the declared
-#     `r2t2-install` script. vLLM + torch cu128 as a pure nix package is a
-#     large lift and PyPI wheels still need the LD_LIBRARY_PATH/TRITON hacks
-#     below, so nix-packaging loses on cost; a service start step that rebuilds
-#     the venv every boot loses on boot time and network dependence. A named
-#     install step is the least-code genuinely reproducible option.
-#   * Supervisor - finit.service (the house pattern for resident daemons:
-#     paseo, ssh-agent, pipewire), NOT tomoe.process.service (compositor-scoped,
-#     dies with the session; this server must outlive it).
-#
-# Inert until user.dev.r2t2.enable is set. Nothing here touches another
-# module's behaviour.
 {
   config,
   lib,
@@ -33,17 +7,11 @@
   cfg = config.user.dev.r2t2;
   home = config.user.homeDirectory;
   user = config.user.name;
-  # Desktop y0usaf's primary group is `users` (there is no y0usaf group), the
-  # same fact paseo's service records; finit cannot fork the daemon otherwise.
   group =
     if cfg.group != null
     then cfg.group
     else "users";
 
-  # --- source ---------------------------------------------------------------
-  # Upstream repo at the clone's commit. NB: the Hugging Face revision
-  # (185ce639...) is a weights revision, not the git commit; the server code
-  # lives at 80c22e61... (both are pinned below).
   src = pkgs.fetchgit {
     url = "https://github.com/netease-youdao/Confucius4-R2T2";
     rev = "80c22e6140bcb9166fb9906798894fc8b18c8309";
@@ -52,15 +20,12 @@
     fetchSubmodules = false;
   };
 
-  # The carried local patch (feasibility-gate memory knobs). Applied to the
-  # upstream tree so the change is reviewable as a diff in this directory.
   patched = pkgs.applyPatches {
     name = "Confucius4-R2T2-patched";
     inherit src;
     patches = [./ws_server-memory-knobs.patch];
   };
 
-  # --- model files ----------------------------------------------------------
   hfRev = "185ce639118ad1362d049ca0d8ed04b6ec5cd6c9";
   hfBase = "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/${hfRev}";
   hfFile = name: hash:
@@ -69,8 +34,6 @@
       inherit hash;
     };
 
-  # The full snapshot the server/vLLM reads from: config + tokenizer + the
-  # 3.9 GiB bf16 weights (model.safetensors, 4076191640 bytes).
   weights = pkgs.linkFarm "Confucius4-R2T2-weights-${hfRev}" [
     {
       name = "config.json";
@@ -118,8 +81,6 @@
     }
   ];
 
-  # The VAD is unconditional in ws_server.py: a service without it is broken.
-  # FireRedTeam/FireRedVAD Stream-VAD, at the revision the sandbox copied.
   vadRev = "7990aaccc6b7aec1e527743bd30201f2c4a03b8c";
   vadBase = "https://huggingface.co/FireRedTeam/FireRedVAD/resolve/${vadRev}/Stream-VAD";
   vad = pkgs.linkFarm "FireRedVAD-Stream-VAD-${vadRev}" [
@@ -142,18 +103,7 @@
   python = pkgs.python312;
   inherit (pkgs) uv;
 
-  # --- NixOS runtime environment -------------------------------------------
-  # PyPI wheels (numpy, torch, vllm) need sonames NixOS does not put on the
-  # default search path. Without libz numpy fails to import; without libstdc++
-  # torch/vllm fail. TRITON_LIBCUDA_PATH replaces the /sbin/ldconfig lookup
-  # triton does (NixOS has none). The ptxas/cuobjdump/nvdisasm bundled in the
-  # triton wheel are non-executable here, so point triton at the store CUDA
-  # 12.9 toolchain (matches the sandbox env.sh). See the sandbox README for the
-  # crash each of these prevents.
   cuda = pkgs.cudaPackages;
-  # /run/opengl-driver/lib is a directory of .so files, not a package prefix:
-  # lib.makeLibraryPath would append "/lib" to it (the sandbox env.sh puts the
-  # bare directory on LD_LIBRARY_PATH). cc.cc.lib + zlib ARE package prefixes.
   ldLibraryPath = lib.concatStringsSep ":" [
     "/run/opengl-driver/lib"
     "${pkgs.stdenv.cc.cc.lib}/lib"
@@ -166,22 +116,14 @@
     TRITON_CUOBJDUMP_PATH = "${cuda.cuda_cuobjdump}/bin/cuobjdump";
     TRITON_NVDISASM_PATH = "${cuda.cuda_nvdisasm}/bin/nvdisasm";
     PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True";
-    # vLLM spawns its engine worker; fork-in-CUDA is unsafe.
     VLLM_WORKER_MULTIPROC_METHOD = "spawn";
-    # Triton JIT-builds a small kernel during vLLM engine init and looks up a C
-    # compiler by name: with no cc/gcc on the service PATH it dies with
-    # "RuntimeError: Failed to find C compiler" and finit respawn-loops the
-    # server. Point it at the store gcc wrapper explicitly.
     CC = "${pkgs.stdenv.cc}/bin/cc";
   };
 
-  # --- paths ----------------------------------------------------------------
   envDir = "${cfg.stateDir}/.venv";
   runDir = "${cfg.stateDir}/run";
   logDir = "${cfg.stateDir}/logs";
 
-  # Finit notify:systemd readiness signalling helper. Standalone so the service
-  # wrapper need not embed a heredoc.
   notifyScript = pkgs.writeText "r2t2-notify-ready.py" ''
     import os, socket
     addr = os.environ.get("NOTIFY_SOCKET")
@@ -199,9 +141,6 @@
         sock.close()
   '';
 
-  # The pin set from the sandbox install.sh. vllm is pinned by qwen-asr[vllm];
-  # the other two vllm venvs on this box (0.28.0 / 0.29.0) carry transformers
-  # 5.x and are incompatible - do not reuse them.
   installScript = pkgs.writeShellScriptBin cfg.installEnvPackageName ''
     set -euo pipefail
     mkdir -p ${lib.escapeShellArg cfg.stateDir}
@@ -317,13 +256,8 @@ in {
       }
     ];
 
-    # The installer script is the declared, one-time environment step.
     environment.systemPackages = [installScript];
 
-    # Durability: the state dir must survive the homeReset rotation. Merging
-    # into the existing allowlist leaves every other entry alone. Only
-    # reachable when this host also imports finix's persistence module; the
-    # module is inert otherwise, so no other host is perturbed.
     finix.persistence.allowlist.users."${user}".directories = [
       (lib.removePrefix "${home}/" cfg.stateDir)
     ];
@@ -349,15 +283,8 @@ in {
 
       path = [pkgs.coreutils pkgs.gnugrep pkgs.stdenv.cc];
 
-      # Supervise the server directly; restart whenever it leaves (crash or
-      # clean exit - it is never supposed to exit on its own). respawn keeps
-      # restarting without counting toward the retry limit, matching bolod's
-      # restart="on_exit" reading in bolo.nix.
       respawn = true;
 
-      # finit-native readiness: the wrapper starts the server, waits for the
-      # socket to accept a connection, then signals READY=1 to $NOTIFY_SOCKET.
-      # Dependents can gate on `service/r2t2/ready`. See the runbook.
       notify = "systemd";
 
       command = pkgs.writeShellScript "r2t2-server" ''
@@ -366,16 +293,9 @@ in {
 
         run=${lib.escapeShellArg runDir}
         mkdir -p "$run" ${lib.escapeShellArg logDir}
-        # ws_server.py makes its logs/ and wav_tmp_store/ dirs relative to
-        # dirname(__file__) at import time (and per request). A store path is
-        # read-only, so run from a writable copy: __file__ must resolve here.
         install -m 0644 ${patched}/ws_server.py "$run/ws_server.py"
         mkdir -p "$run/logs/requests" "$run/wav_tmp_store"
 
-        # The venv is a declared, one-time install step (r2t2-install); it is
-        # NOT built here. Wait for it rather than crash-looping (house idiom:
-        # the runtime-dir / pipewire-socket waits in desktop/user-daemons.nix
-        # and desktop/audio.nix). finit re-runs us if the budget runs out.
         mypy=${envDir}/bin/python
         for _ in $(seq 1 600); do
           [ -x "$mypy" ] && break
@@ -394,10 +314,8 @@ in {
           --vad_model_path ${lib.escapeShellArg (toString vad)} &
         server_pid=$!
 
-        # Forward stop/term so finit's SIGTERM tears the server down.
         trap 'kill -TERM "$server_pid" 2>/dev/null || true' TERM INT
 
-        # Wait for the socket, then declare readiness to finit (notify:systemd).
         ready=0
         for _ in $(seq 1 300); do
           if ! kill -0 "$server_pid" 2>/dev/null; then

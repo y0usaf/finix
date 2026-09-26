@@ -9,14 +9,9 @@
 
   inherit (config.user.dev.prompts) ethics noTests noComments;
 
-  # Render VALUE as a Common Lisp string literal. Newlines are legal inside CL
-  # string literals, so only backslash and double-quote need escaping.
   lispString = value:
     "\"" + lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] value + "\"";
 
-  # Ethics is registered first and given the lower priority so it precedes the
-  # no-test policy inside the same request-local context (context--render sorts
-  # ascending by priority, src/agent/context.lisp).
   ethicsLisp = ''
     (define-context-contributor ethics-policy (request)
       "Deliver the shared compaction/ethics instructions with every provider request."
@@ -39,8 +34,6 @@
        :class :mandatory))
   '';
 
-  # The policy contributors are always present; user-supplied initLisp content
-  # is appended verbatim after them and loads in the same image.
   initLisp =
     ethicsLisp
     + "\n"
@@ -76,8 +69,6 @@ in {
 
     manzil.users.${config.user.name}.files.".config/autolith/init.lisp".text = initLisp;
 
-    # Preserve auth/preferences, conversations/private images, and recovery
-    # state across home resets. The XDG cache is disposable.
     finix.persistence.allowlist.users.${config.user.name}.directories =
       map
       (directory: {

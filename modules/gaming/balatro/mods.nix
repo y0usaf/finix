@@ -3,8 +3,6 @@
   pkgs,
   ...
 }: let
-  # Build-time fetchers (pkgs.fetch*) instead of builtins.fetch*: they don't
-  # block evaluation on network, fetch in parallel, and are substitutable.
   fetchGitHub = owner: repo: rev: hash:
     pkgs.fetchFromGitHub {inherit owner repo rev hash;};
 in {

@@ -40,11 +40,6 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      # The npm tarball ships prebuilt dist/ — no JS build step. Its
-      # devDependencies (@vercel-internals/*) are unpublished on the public
-      # registry, so the vendored package.json here is the upstream one with
-      # that section pruned; the matching lockfile sits beside it and npm ci's
-      # sync check stays satisfied.
       default = pkgs.buildNpmPackage {
         pname = "vercel";
         inherit version;
