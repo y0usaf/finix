@@ -16,6 +16,7 @@
 in {
   options.user.programs = {
     librewolf.enable = mkEnableOption "LibreWolf browser";
+    glide.enable = mkEnableOption "Glide browser";
 
     browser = {
       hardwareAccel = {

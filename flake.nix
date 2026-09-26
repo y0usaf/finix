@@ -90,6 +90,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Glide (keyboard-driven Firefox fork): official binary-release flake.
+    # Only package.nix is consumed (callPackage against our pkgs, same as
+    # codex-desktop-linux); its home-manager input is never evaluated.
+    glide-browser = {
+      url = "github:glide-browser/glide.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     phi = {
       url = "git+ssh://git@github.com/y0usaf/phi.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
