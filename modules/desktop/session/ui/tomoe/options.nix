@@ -42,12 +42,5 @@
       default = "";
       description = "Extra Common Lisp appended to the generated ~/.config/tomoe/init.lisp.";
     };
-
-    lisp.initText = lib.mkOption {
-      type = lib.types.lines;
-      internal = true;
-      readOnly = true;
-      description = "Rendered Common Lisp session policy, including serialized Nix values.";
-    };
   };
 }
