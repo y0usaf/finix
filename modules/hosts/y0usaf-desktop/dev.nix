@@ -16,7 +16,6 @@ _: {
     };
     ai = {
       agent-slack.enable = true;
-      principles.enable = true;
       firstmate.enable = true;
     };
     pi = {
@@ -27,6 +26,7 @@ _: {
       };
     };
     prime-agent.enable = true;
+    prompts.principles.enable = true;
     omp = {
       enable = true;
       # Harness surface (~/.omp/config.json), mirroring the live
