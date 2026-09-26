@@ -1,15 +1,3 @@
-# Rootless podman with a docker shim. Finix's compat shim drops the NixOS
-# virtualisation.* namespace, so the wiring that module used to do is
-# declared directly:
-#   - docker shim: Grok Bot's local Docker VM shells out to the docker
-#     binary; podman's CLI is docker-compatible (this reverses the earlier
-#     "docker CLIs stay excluded" stance from materialized-packages.nix on
-#     purpose).
-#   - newuidmap/newgidmap setuid wrappers: rootless UID mapping needs them.
-#   - /etc/subuid + /etc/subgid: the subordinate ranges rootless containers
-#     map into (what autoSubUidGidRange would have allocated).
-#   - pasta, netavark, aardvark-dns: rootless networking helpers podman looks
-#     up on PATH; fuse-overlayfs as the rootless overlay fallback.
 {
   config,
   lib,
@@ -35,8 +23,6 @@
       ];
     };
 
-    # shadow's privileged newuidmap/newgidmap reject symlinked ID maps.
-    # Request ordinary root-owned files rather than /etc -> store symlinks.
     etc."subuid" = {
       text = "${config.user.name}:100000:65536\n";
       mode = "0644";

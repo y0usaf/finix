@@ -1,17 +1,3 @@
-# Boot diagnostics for finix hosts: kmsg flight recorder + boot breadcrumbs
-# + initrd/stage-2 kmsg markers. Parameterized port of the machinery proven
-# on y0usaf-server (see NOTES.md "Hard-won debugging infrastructure"); the
-# server still carries its original inline copy — migrate it here on its
-# next planned deploy, not before.
-#
-# Design constraints carried over:
-#   - recorder is a supervised finit SERVICE (finit reaps a run task's
-#     cgroup on exit, killing backgrounded writers)
-#   - recorder self-mounts the persist subvolume (no fstab dependency) with
-#     commit=1 so logs survive hard freezes without a sync loop
-#   - breadcrumb waits for the fstab /persist mount instead
-#   - kmsg markers survive in the recorder log even when syslog never
-#     started (the 2026-07-15 warm-reboot hang left zero logs otherwise)
 {
   config,
   lib,
@@ -56,9 +42,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # Progress markers into /dev/kmsg: visible on the console during a
-    # pre-userspace hang and replayed into the flight recorder log on a
-    # healthy boot.
     boot.initrd.finit.tasks.initrd-diag = {
       description = "initrd diagnostics to kmsg";
       script = ''
@@ -68,7 +51,6 @@ in {
           cat /proc/partitions
           ls /dev/disk/by-uuid 2>&1 || echo "no by-uuid dir"
         ''}
-        # Report whether the root disk symlink ever appears.
         for _ in $(seq 1 60); do
           if [ -e /dev/disk/by-uuid/${cfg.diskUuid} ]; then
             echo "finix-initrd: by-uuid symlink present" > /dev/kmsg || true
@@ -80,7 +62,6 @@ in {
       '';
     };
 
-    # Stage-2 status dump into the kmsg stream (and thus the recorder log).
     finit = {
       tasks.stage2-diag = {
         description = "stage-2 diagnostics to kmsg";
@@ -109,11 +90,9 @@ in {
           done
           d="$mnt/${cfg.logDir}"
           mkdir -p "$d"
-          # This runs on every boot forever: keep the newest 20 logs.
           ls -1t "$d"/kmsg-*.log 2>/dev/null | tail -n +21 | xargs -r rm -f
           ts=$(date -u +%Y-%m-%dT%H-%M-%SZ)
           echo "kmsg-recorder: writing to $d/kmsg-$ts.log" > /dev/kmsg
-          # /dev/kmsg replays the entire buffer from boot, then follows.
           exec cat /dev/kmsg > "$d/kmsg-$ts.log"
         '';
       };
@@ -139,7 +118,6 @@ in {
             ${pkgs.util-linux}/bin/dmesg 2>&1 || true
           }
 
-          # Wait for /persist; the fstab mount task runs early in stage 2.
           for _ in $(seq 1 120); do
             ${pkgs.util-linux}/bin/mountpoint -q /persist && break
             sleep 1
@@ -157,7 +135,6 @@ in {
           snapshot early > "$outdir/boot-$ts.log" 2>&1 || true
           ${pkgs.coreutils}/bin/sync || true
 
-          # Second snapshot once services settled.
           sleep 60
           snapshot late >> "$outdir/boot-$ts.log" 2>&1 || true
           ${pkgs.coreutils}/bin/sync || true
@@ -170,11 +147,5 @@ in {
         log = true;
       };
     };
-
-    # Flight recorder: stream /dev/kmsg (full replay from boot + follow) to
-    # /persist. Self-sufficient by design; see header.
-
-    # Persist post-mortem snapshots where NixOS can read them. Unconditional:
-    # even a partial boot should leave traces.
   };
 }

@@ -9,8 +9,6 @@
 
   config = lib.mkIf config.user.dev.prompts.principles.enable {
     manzil.users."${config.user.name}".files = {
-      # Deployed at ~ so every agent walking up from a cwd under $HOME finds
-      # it, including sessions in ~/finix or $HOME itself.
       "AGENTS.md".text = ''
         # Principles
 

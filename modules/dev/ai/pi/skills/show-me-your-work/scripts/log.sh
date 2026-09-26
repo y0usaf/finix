@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Append a well-formed row to a show-me-your-work decision log (TSV).
-# Usage: log.sh <logfile> <phase> <decision> <why> <evidence> <result>
 set -euo pipefail
 
 if [ "$#" -ne 6 ]; then
@@ -21,12 +19,6 @@ if [ ! -f "$logfile" ]; then
 fi
 
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-# Strip tabs/newlines/CR so cells stay on one line, and prefix any cell
-# whose first char a spreadsheet would parse as a formula (=, +, -, @)
-# with a single quote. The skill expects this log to be read in
-# spreadsheets, so attacker-controlled evidence (PR titles, filenames,
-# generated text) must not become formula execution when a reviewer
-# opens the file.
 clean() {
 	local v
 	v=$(printf '%s' "$1" | tr '\t\n\r' '   ')

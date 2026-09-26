@@ -1,7 +1,3 @@
-# Shared git options + config. Imported by both hosts: desktop via the
-# recursive walk (shimmed), server explicitly (shimmed). The server has no
-# tools.nix to set user.tools.git.enable, so default.nix enables it inline
-# (desktop already sets it in hosts/y0usaf-desktop/tools.nix; idempotent).
 {
   config,
   lib,
@@ -17,9 +13,6 @@
     };
     email = lib.mkOption {
       type = lib.types.str;
-      # Account-linked GitHub noreply identity. Keeps commits credited to the
-      # account (contribution graph intact) without publishing a real mailbox
-      # in every commit object of every repo.
       default = "74448287+y0usaf@users.noreply.github.com";
       description = "Git email address.";
     };

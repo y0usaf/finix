@@ -16,8 +16,6 @@ in {
     nixosConfigurations =
       cfg.hosts
       // {
-        # Finix is the installed server system; retain the hostname alias for
-        # tools that only inspect nixosConfigurations.
         y0usaf-server-finix = cfg.hosts.y0usaf-server;
       };
 
@@ -44,7 +42,6 @@ in {
         tomoe = inputs.tomoe.packages.${system}.default;
       };
 
-    # Verification remains an actual full-system build, not script fixtures.
     checks."${system}".y0usaf-desktop = cfg.hosts.y0usaf-desktop.config.system.build.toplevel;
 
     formatter."${system}" = inputs.nixpkgs.legacyPackages."${system}".alejandra;

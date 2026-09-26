@@ -35,7 +35,6 @@ in {
   config = lib.mkIf cursor.enable {
     environment = {
       systemPackages = cursorPackage.cursorPackages or [cursorPackage];
-      # Single owner for XCURSOR_*/HYPRCURSOR_* (gtk/config.nix owns GDK_DPI_SCALE).
       variables = cursorSessionVariables;
     };
 

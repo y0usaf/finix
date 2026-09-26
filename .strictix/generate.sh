@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# Regenerate the options.json schemas strictix.toml maps onto each module
-# system: the three finix hosts (merged), the flake-level evalModules, and
-# nix-on-droid. Run from the repo root after changing any option.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

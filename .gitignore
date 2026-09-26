@@ -8,5 +8,4 @@ result
 .pi-rlm
 .reasonix
 
-# python bytecode
 __pycache__/

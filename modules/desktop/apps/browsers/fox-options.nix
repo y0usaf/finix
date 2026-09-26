@@ -180,9 +180,6 @@ in {
       "browser.theme.content-theme" = 0;
       "browser.theme.toolbar-theme" = 0;
       "browser.uidensity" = 1;
-      # Nova: Mozilla's in-progress chrome redesign (Fx 152+).
-      # Swaps UrlbarInput for SmartbarInput and disables the legacy
-      # megabar breakout CSS via @media not -moz-pref("browser.nova.enabled").
       "browser.nova.enabled" = true;
 
       "extensions.webextensions.remote" = true;
@@ -224,7 +221,6 @@ in {
       "font.name-list.serif.x-unicode" = fontList;
       "font.name-list.serif.x-western" = fontList;
 
-      # Audio processing disables for better microphone quality
       "media.getusermedia.audio.processing.aec" = 0;
       "media.getusermedia.audio.processing.aec.enabled" = false;
       "media.getusermedia.audio.processing.agc" = 0;

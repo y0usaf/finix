@@ -15,7 +15,6 @@ def run_cli(extra=()):
     os.execv(cli, [cli, *extra, *args])
 
 
-# Explicit upstream authentication/configuration remains available.
 if any(arg in ('--token', '-t', '--global-config', '-Q') or
        arg.startswith(('--token=', '--global-config=')) for arg in args):
     run_cli()
@@ -28,7 +27,6 @@ if '--help' in args or '-h' in args or not args:
     if args:
         run_cli()
 
-# Route using the directory the CLI will operate in, including --cwd.
 cwd = os.getcwd()
 for index, arg in enumerate(args):
     if arg == '--cwd':

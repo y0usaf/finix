@@ -1,7 +1,3 @@
-# Desktop persistence policy consumed by the native Finix mount modules.
-#
-# Browser paths (firefox/librewolf/discord/vesktop) are persisted
-# unconditionally: a disabled app just leaves an empty dir on /persist.
 {
   config,
   lib,
@@ -39,38 +35,29 @@ in {
   finix.persistence.allowlist = {
     hideMounts = true;
     directories = [
-      # System identity & NixOS state
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
       "/var/log"
 
-      # SSH host keys
       "/etc/ssh"
 
-      # Network
       "/etc/NetworkManager/system-connections"
       "/var/lib/NetworkManager"
       "/var/lib/tailscale"
 
-      # Services
       "/var/lib/manzil"
 
-      # Root user state (agents, ssh)
       {
         directory = "/root";
         mode = "0700";
       }
 
-      # Secure boot signing keys
       "/var/lib/sbctl"
 
-      # Bluetooth pairing
       "/var/lib/bluetooth"
 
-      # Docker engine state
       "/var/lib/docker"
 
-      # Backup / automation
       "/var/lib/btrbk"
     ];
     files = [
@@ -79,12 +66,11 @@ in {
     users.y0usaf = {
       directories =
         [
-          # AI agents re-homed to XDG (xdg-ninja report 2026-09-02)
-          ".config/pi/agent" # RETIRED 2026-09-02: PI_CODING_AGENT_DIR reverted (pi/omp both read it; shared-dir hazard); pi back on native ~/.pi (allowlisted separately). Contents migrated back to ~/.pi; safe to drop.
-          ".config/claude" # CLAUDE_CONFIG_DIR cutover
-          ".cache/nv" # CUDA_CACHE_PATH cutover
-          ".local/share/android" # ANDROID_USER_HOME cutover (corrected)
-          ".config/codex" # CODEX_HOME cutover
+          ".config/pi/agent"
+          ".config/claude"
+          ".cache/nv"
+          ".local/share/android"
+          ".config/codex"
           "Documents"
           "Tokens"
           "finix"
@@ -95,146 +81,106 @@ in {
           "cu-workbench"
           "inscend"
 
-          # AI / dev tooling state
           ".config/AionUi"
           ".config/manicode"
           ".config/agent-harness"
           ".config/herdr"
 
-          # Misc app state
           ".config/camset"
 
-          # Identity / credentials
           ".ssh"
-          ".azure" # azure-cli msal token cache (~/.azure/msal_token_cache.json)
+          ".azure"
           ".pki"
           ".aws"
           ".mcp-auth"
 
-          # Silva Bot (Grok Bot 0.18 Linux port). The port moved to XDG
-          # roots named "silvabot"; these mirror the ~/.fx / ~/.hermes /
-          # ~/.prime entries and must survive the switch or a reboot would
-          # wipe settings, plugins and the local Docker runtime.
-          ".config/silvabot"      # settings.json, plugins/, source-map.json
-          ".local/share/silvabot" # agents, transcripts, host secrets, docker runtime
-          ".local/state/silvabot" # host.lock, tokens, crash/upgrade markers
+          ".config/silvabot"
+          ".local/share/silvabot"
+          ".local/state/silvabot"
 
-          # Legacy roots, retained until the migration has been confirmed:
-          # the pre-XDG layout must stay persisted or a second boot would
-          # lose whatever the first-run migration has not yet carried over.
           ".cursor/sand-dev"
           ".cursor/sand"
           ".grokbot"
 
-          # AI / dev tooling state
-          ".fx" # fx settings, sessions, skills, and durable agent state
-          ".omfx" # oh my fx profile settings (startup_mode and fork-only keys)
-          ".pi" # pi agent dir (pi's native default; no env var indirection) — RETIRED merge-back target; safe to drop after 2026-09-02 merge-back confirmed
-          ".omp" # oh-my-pi agent dir (sessions, harness config.json)
-          ".prime" # prime agent dir (agents, sessions, daemon state, logs)
-          ".hermes" # desktop app HERMES_HOME (config, sessions, skills dirs)
+          ".fx"
+          ".omfx"
+          ".pi"
+          ".omp"
+          ".prime"
+          ".hermes"
           ".crush"
           ".cookunity"
           ".phi"
-          ".paseo" # paseo daemon state (config.json, phone pairing, sessions)
+          ".paseo"
           ".slack"
           ".supabase"
           ".n8n-mcp"
           ".obsidian"
 
-          # Browsers — persisted unconditionally (empty dir when disabled)
-          # Firefox 147+: XDG dirs (~/.config/firefox) unless ~/.mozilla/firefox
-          # exists or MOZ_LEGACY_HOME=1. Empty ~/.mozilla alone is not legacy.
           ".config/firefox"
-          # LibreWolf 152 reads the legacy ~/.librewolf only (no XDG support).
           ".librewolf"
-          # Glide: XDG profile root ~/.config/glide/glide.
           ".config/glide"
           ".config/discord"
           ".config/vesktop"
           ".config/Vencord"
 
-          # Gaming / apps
           ".steam"
           ".SteamCloud"
           ".stremio-server"
           ".slskd"
 
-          ### ~/.config — mutable app state only. Nix/manzil-generated configs
-          ### (bash rc, niri, foot, wallust, gtk, mpv, git, gh config,
-          ### npm/bun/docker/python rc, pi, mangohud, ...) regenerate on switch.
-
-          # Credentials / identity
-          ".config/gh" # hosts.yml oauth
-          ".config/gws" # google oauth creds (client_secret, .encryption_key)
+          ".config/gh"
+          ".config/gws"
           ".config/age"
           ".config/aws"
           ".config/gcloud"
 
-          # Slack is persisted selectively — auth/session storage only, caches
-          # (Cache, Code Cache, GPUCache, Service Worker, Crashpad, logs, sentry)
-          # stay ephemeral.
           ".config/Slack/Local Storage"
           ".config/Slack/Session Storage"
           ".config/Slack/IndexedDB"
           ".config/Slack/storage"
 
-          # Sync (device keys + index — critical)
           ".config/syncthing"
 
-          # AI / editors / IDEs
           ".config/Claude"
-          ".config/Hermes" # Electron userData — local Hermes desktop settings
+          ".config/Hermes"
           ".config/Codex"
           ".config/opencode"
           ".config/pi-harness"
           ".config/crush"
           ".config/phi"
 
-          # Desktop apps
           ".config/obsidian"
           ".config/obs-studio"
           ".config/qBittorrent"
           ".config/stoat-desktop"
           ".config/slskd"
           ".config/epy"
-          ".config/cmus" # library/playlists
+          ".config/cmus"
           ".config/GitHub Desktop"
 
-          # Work
           ".config/gws-inscend"
           ".config/Frame"
           ".config/intent"
-          ".config/ramp" # ramp-cli config.toml + auth state
-          # Misc
+          ".config/ramp"
           ".config/snowflake"
 
-          # Gaming
           ".config/Cemu"
-          ".config/unity3d" # game prefs
+          ".config/unity3d"
           ".config/bolt-launcher"
 
-          # Misc state
           ".config/dconf"
-          ".config/nix" # possible access-tokens
-          ".config/ekko" # Lisp init and local extensions
+          ".config/nix"
+          ".config/ekko"
 
-          # Retain legacy Ekko cache for rollback; V2 sessions do not survive reboot.
-          # Legacy resurrection manifests belong to V1;
-          # daemon logs ride along. Persist the whole dir (small).
           ".cache/ekko"
 
-          ### ~/.local/share — real data/saves. Caches (go, gradle, pnpm, uv,
-          ### NuGet, yarn, pyenv, virtualenv, Trash, ...) are ephemeral.
-
-          # Keys / identity
           ".local/share/gnupg"
           ".local/share/keyrings"
           ".local/share/pki"
 
-          # Big data (flagged: prune candidates, but keep)
-          ".local/share/PrismLauncher" # 55G — minecraft worlds, irreplaceable
-          ".local/share/bun" # globals only (supabase/...); install/cache purged, regenerates
+          ".local/share/PrismLauncher"
+          ".local/share/bun"
           ".local/share/cargo"
           ".local/share/rustup"
           ".local/share/opencode"
@@ -242,27 +188,17 @@ in {
           ".local/share/nvim"
         ]
         ++ builtins.map (n: ".local/share/${n}") gameSaves
-        # Barony's native-Linux build keeps its data dir directly in
-        # ~/.barony (config/, savegames/, scores/, mods/, books/, plus a
-        # large models.cache) — no Proton prefix. Gated on core gaming so
-        # a gaming-disabled build leaves nothing behind.
         ++ lib.optionals config.user.gaming.core.enable [
           ".barony"
           ".local/share/Ultrapool"
-          # Godot games (Ultrapool, Luck be a Landlord) keep their saves in
-          # the engine's per-game user dirs, not under their own names.
           ".local/share/godot/app_userdata"
         ]
         ++ [
-          # Emulation / gaming saves appended above via gameSaves
-
-          # Apps
           ".local/share/stremio"
-          ".local/share/stremio-linux-shell" # stremio v1.1.4+ WebKitGTK profile (login session/site data)
+          ".local/share/stremio-linux-shell"
           ".local/share/slskd"
           ".local/share/Vial"
 
-          # adb keypair kept; sdk cache + debug.keystore stay ephemeral
           ".local/share/android/.android"
           ".local/share/mcp-trader"
           ".local/share/music-get"
@@ -279,27 +215,21 @@ in {
           ".local/share/com.vercel.token"
           ".local/share/syncthing"
 
-          ### ~/.local/state — histories & app state
           ".local/state/nix"
-          ".local/state/bash" # shell history
-          ".local/state/rush" # rush history.sqlite (modules/core/user/session/xdg.nix)
-          ".local/state/nvim" # shada/undo
+          ".local/state/bash"
+          ".local/state/rush"
+          ".local/state/nvim"
           ".local/state/pi-harness"
-          ".local/state/syncthing" # index
-          ".local/state/wireplumber" # audio device volumes
+          ".local/state/syncthing"
+          ".local/state/wireplumber"
           ".local/state/music-get"
           ".local/state/superfile"
 
-          # Caches worth keeping
           ".cache/nix"
         ];
       files = [
-        # npm registry auth token, written by `npm login` into npm's userconfig.
-        # Persisted because the userconfig moved off the read-only
-        # manzil-managed npmrc (see core/user/session/xdg.nix).
         ".npmrc"
 
-        # adb keypair kept; sdk cache + debug.keystore stay ephemeral
         ".local/share/android/adbkey"
         ".local/share/android/adbkey.pub"
 

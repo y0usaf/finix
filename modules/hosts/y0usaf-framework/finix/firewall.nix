@@ -1,6 +1,3 @@
-# Framework packet filter: Wi-Fi is untrusted. SSH is reachable through the
-# authenticated tailscale0 path only; Syncthing keeps its authenticated LAN
-# transport/discovery ports.
 {pkgs, ...}: {
   services.nftables = {
     enable = true;

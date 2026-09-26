@@ -1,24 +1,11 @@
--- ~/.config/tomoe/shell/bar_overlay.lua
--- Local bar overlay config (nur's bar_overlay; runs in tomoe's VM
--- in-process — folded into the tomoe module with the fusion).
---
--- Uses one compositor-centered layer-shell surface per edge. Module blocks
--- render inside that fixed-width centered surface, so positioning is delegated
--- to the compositor instead of computed from an assumed display width.
 
 local Wallust = _G.__moonshell_wallust
     or dofile(os.getenv("HOME") .. "/.config/tomoe/shell/wallust.lua")
 _G.__moonshell_wallust = Wallust
 local theme = require("moonshell.theme")
--- CPU/memory/GPU sampler. Upstream tomoe ships shell.services.sysinfo as a
--- placeholder facade (declared, never pushed), so this file supplies the
--- push side in-VM and the blocks below read it back through the facade.
 local Sysinfo = _G.__moonshell_sysinfo
     or dofile(os.getenv("HOME") .. "/.config/tomoe/shell/sysinfo.lua")
 _G.__moonshell_sysinfo = Sysinfo
-
--- DEFAULTS is prepended by shell.nix: the overlay fallbacks, serialized
--- from Nix with toLua.
 
 local M = _G.__moonshell_widgets_bar_overlay or {}
 _G.__moonshell_widgets_bar_overlay = M
@@ -50,9 +37,9 @@ local function block(children, opts)
         bg = Wallust.color("bg", theme.base),
         border = opts.border or DEFAULTS.block.border,
         border_color = Wallust.color("fg", theme.text),
-        padding_top = opts.padding_top or opts.padding_y or DEFAULTS.block.padding_y, -- 0.15em
+        padding_top = opts.padding_top or opts.padding_y or DEFAULTS.block.padding_y,
         padding_bottom = opts.padding_bottom or opts.padding_y or DEFAULTS.block.padding_y,
-        padding_left = opts.padding_left or opts.padding_x or DEFAULTS.block.padding_x, -- 0.3em
+        padding_left = opts.padding_left or opts.padding_x or DEFAULTS.block.padding_x,
         padding_right = opts.padding_right or opts.padding_x or DEFAULTS.block.padding_x,
         children = children or {},
     })
@@ -67,9 +54,6 @@ local function clock_state(format, interval_ms)
 end
 
 local function close_existing(name)
-    -- moonshell window handles don't expose :close yet (PLAN M4);
-    -- hot reload swaps the whole VM (windows included), so this
-    -- only matters for same-VM re-open — pcall keeps it safe.
     local old = shell.get_window(name)
     if old then pcall(function() old:close() end) end
 end
@@ -139,20 +123,7 @@ local function open_bongo(opts)
 
     local name = cfg.name or "bongo-cat"
     close_existing(name)
-    -- Layer-shell centers a bottom-anchored surface; margins on the
-    -- unanchored edges are ignored, so x_offset is applied inside
-    -- the surface: widen it by |x_offset| and justify the cat to
-    -- the opposite edge. Negative offset = cat left of center.
     local x_offset = cfg.x_offset or 0
-    -- Smithay arranges every layer surface — overlay included —
-    -- inside the zone left by exclusive bars, so a bottom-exclusive
-    -- widget bar pushes the cat up by the bar's whole thickness.
-    -- Subtract it back: the cat is a free overlay and keeps its
-    -- screen-edge margin.
-    -- In-process (the tomoe global exists) native surfaces
-    -- anchor to raw output edges, so no compensation needed;
-    -- standalone layer-shell arranges overlays inside the
-    -- exclusive zone and needs the margin pulled back.
     local exclusive_zone = 0
     if _G.tomoe == nil and opts.exclusive == true then
         for _, e in ipairs(opts.edges or DEFAULTS.edges or {}) do
@@ -211,21 +182,11 @@ function M.new(opts)
         return block({ label(self.date:get()) }, { width = width, height = height })
     end
 
-    -- Bongo counter: live key-press count from the in-VM keyboard service
-    -- (sequence is monotonic, pushed on every key press).
     function self:bongo_block(width, height)
         local kb = shell.services.keyboard:get()
         return block({ label("🥁 " .. tostring(kb.sequence)) }, { width = width, height = height })
     end
 
-    -- CPU / memory / GPU blocks read shell.services.sysinfo through
-    -- Sysinfo.get(). The sampling lives in sysinfo.lua (pure /proc and
-    -- /sys reads; nvidia-smi only on NVIDIA, only via exec_async). When a
-    -- native Rust backend eventually fills the facade, these blocks are
-    -- already correct and sysinfo.lua just goes away.
-    -- Number fields are zero-padded to a fixed character count. In a
-    -- monospace face that pins the block's rendered width, so a stat going
-    -- from 9% to 100% cannot shove its neighbours (or the clock) sideways.
     function self:cpu_block(width, height)
         local si = Sysinfo.get()
         local text = string.format("CPU %3d%%", si.cpu_percent or 0)
@@ -249,9 +210,6 @@ function M.new(opts)
     function self:gpu_block(width, height)
         local si = Sysinfo.get()
         if not si.gpu_available then
-            -- No usable counter (no nvidia module, no amdgpu
-            -- gpu_busy_percent): render an empty slot instead of a fake 0%,
-            -- the same contract the battery service uses on desktops.
             return ui.hbox({ width = width, height = height, children = {} })
         end
         local text = string.format("GPU %3d%%", si.gpu_percent or 0)
@@ -264,7 +222,6 @@ function M.new(opts)
         return block({ label(text) }, { width = width, height = height })
     end
 
-    -- Native in-VM service (tomoe FUSION.md F3): no subprocess polling.
     function self:network_block(width, height)
         local net = shell.services.network:get()
         local text = (net.connected and net.ssid and net.ssid ~= "") and net.ssid or "offline"
@@ -299,11 +256,6 @@ local function module_widths(opts)
     }
 end
 
--- `intrinsic` drops the per-module fixed widths so each block measures its
--- own text. Fixed widths silently overflow when a label is wider than the
--- number in DEFAULTS.module_widths ("GPU 100% 62° 12.3G" needs ~160px, not
--- 150), and an overflowing flex row eats all its slack, which kills any
--- justify-based alignment. Seam-centered bars therefore measure, never guess.
 local function render_items(content, list, height, intrinsic)
     local children = {}
     for _, item in ipairs(list) do
@@ -313,11 +265,6 @@ local function render_items(content, list, height, intrinsic)
     return children
 end
 
--- One side of a seam-centered bar. width=0 with grow=1 is the important
--- part: flex here adds a share of the leftover space to each child's
--- *measured* base size (crates/moonshell-render/src/layout.rs:198-217), so
--- two grow children only end up equal when both bases are zero. Then each
--- half is exactly half the surface and their shared border is the midpoint.
 local function render_half(content, list, height, spacing, justify, inset)
     return ui.hbox({
         width = 0,
@@ -331,12 +278,8 @@ local function render_half(content, list, height, spacing, justify, inset)
     })
 end
 
--- split = { left, right, inset } from split_at_seam(); nil = the old
--- behaviour where the whole row is centered as one block.
 local function render_edge(content, items, total_width, height, spacing, split)
     if split then
-        -- Fills the surface, which spans the whole output, so the halves'
-        -- border sits on the output's center line by construction.
         return ui.hbox({
             height = height,
             gap = 0,
@@ -355,9 +298,6 @@ local function render_edge(content, items, total_width, height, spacing, split)
     })
 end
 
--- Find the seam: the boundary between the two module names in `pair`
--- (default time|date). Returns a split descriptor, or nil when the pair is
--- not adjacent on this bar — then the caller keeps whole-row centering.
 local function split_at_seam(items, pair, spacing)
     if type(pair) ~= "table" or #pair < 2 then return nil end
 
@@ -375,8 +315,6 @@ local function split_at_seam(items, pair, spacing)
         if i <= seam then left[#left + 1] = item else right[#right + 1] = item end
     end
 
-    -- Half the inter-module gap belongs to each side, so the seam lands in
-    -- the middle of the gap rather than against one block's edge.
     return { left = left, right = right, inset = math.floor(spacing / 2) }
 end
 
@@ -392,14 +330,9 @@ local function open_edge(edge, content, items, total_width, opts)
 
     local win, render_fn
     if exclusive then
-        -- Popup-anchored surfaces can't hold an exclusive zone (and
-        -- overlay-layer zones are ignored), so the no-overlap bar is
-        -- a full-width edge bar on the top layer. The widget row
-        -- stays centered via justify; windows stop at its edge.
         render_fn = function()
             local row
             if opts.split then
-                -- Already full-width with the seam at its own midpoint.
                 row = render_edge(content, items, nil, height, spacing, opts.split)
             else
                 row = ui.hbox({
@@ -410,9 +343,6 @@ local function open_edge(edge, content, items, total_width, opts)
                 })
             end
             if indent <= 0 then return row end
-            -- Indent: row pinned to the top of the taller surface;
-            -- the empty strip below sits inside the exclusive zone,
-            -- so windows respect the gap.
             return ui.vbox({
                 align = "center",
                 children = { row },
@@ -434,13 +364,6 @@ local function open_edge(edge, content, items, total_width, opts)
             return render_edge(content, items, total_width, height, spacing, opts.split)
         end
         if opts.split then
-            -- Seam-centered bars need a surface whose midpoint is the
-            -- output's midpoint. A centered popup can't guarantee that: its
-            -- width comes from summed module widths, and any label wider
-            -- than its declared width shifts everything. A full-width bar
-            -- (position = edge anchors left+right, so resolve_rect stretches
-            -- it across the output) makes the midpoint exact and free.
-            -- exclusive = false keeps it a pure overlay: no reserved space.
             win = shell.window({
                 name = name,
                 position = edge,
@@ -473,9 +396,6 @@ local function open_edge(edge, content, items, total_width, opts)
     end
     win:render(render_fn)
 
-    -- Until the runtime has fine-grained Lua dependency tracking, refresh
-    -- these tiny module windows directly so clock/date repaint exactly
-    -- when their backing state changes.
     shell.interval(opts.refresh_interval or DEFAULTS.refresh_interval, function()
         if opts.layout_generation and opts.layout_generation ~= M._layout_generation then return end
         win:render(render_fn)
@@ -499,8 +419,6 @@ function M.open(opts)
 
     local modules = opts.modules or DEFAULT_MODULES
 
-    -- Start sampling only when a stats module is actually on the bar: no
-    -- widget means no /proc polling and no nvidia-smi spawns.
     for _, name in ipairs(modules) do
         if name == "cpu" or name == "memory" or name == "gpu" then
             Sysinfo.start(SYSINFO)
@@ -526,13 +444,8 @@ function M.open(opts)
         end
     end
 
-    -- Seam-centered layout: everything keeps its declared order, but the
-    -- boundary between the `center_between` pair is what gets pinned to
-    -- screen center, so the clock stays put while stats grow outward.
     local split = split_at_seam(items, opts.center_between or DEFAULTS.center_between, spacing)
 
-    -- Only the non-split popup surface needs a summed width; a seam-centered
-    -- bar spans the output and measures its modules.
     local total = 0
     if not split then
         for i, item in ipairs(items) do

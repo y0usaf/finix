@@ -1,14 +1,3 @@
-# Phase-2b: the graphical session — tomoe (smithay compositor from
-# flakeInputs.tomoe) + session shim + fonts + daily-driver shell bits.
-# Packages cross the module-universe split freely (same pattern as `pi`);
-# only NixOS MODULES are unimportable. The shim mirrors
-# modules/desktop/session/ui/tomoe/config.nix (NixOS universe) — keep in
-# lockstep by hand.
-#
-# Deferred to 2c: pipewire (no upstream module — audio is absent until we
-# hand-roll a finit service), Steam. Portals now use finix's upstream xdg
-# module; the per-desktop config remains a local stand-in for its missing
-# xdg.portal.config option.
 {
   config,
   lib,
@@ -23,12 +12,6 @@
 
   tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
 
-  # tomoe's ScreenCast portal backend ships in the *Lua* compositor's package
-  # (the separate tomoe-lua input), not in the Lisp one. Only its portal
-  # metadata is installed: adding the whole package would put a second
-  # derivation shipping bin/tomoe (and bin/moonshell) into the system profile,
-  # where ignoreCollisions silently keeps one — possibly changing which
-  # compositor the bare `tomoe` command names.
   tomoeLuaPkg = flakeInputs.tomoe-lua.packages."${sys}".default;
   tomoePortalPkg =
     pkgs.runCommand "tomoe-portal" {
@@ -42,52 +25,23 @@
         $out/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service
     '';
 
-  # The session installs both policy files from the flake on every launch, so
-  # the flake is the source of truth for their content. install(1) keeps them
-  # writable; a store symlink would be read-only and break the compositor's
-  # edit-and-reload watch (it stats the file the runtime loaded).
-  #
-  # lisp-config.nix serializes the values, keeps the policy code in Lisp, and
-  # fingerprints the complete generated deck so its changes trigger reloads.
   deckPolicy = pkgs.writeText "tomoe-deck.lisp" config.user.ui.tomoe.lisp.deckText;
   starterPolicy = pkgs.writeText "tomoe-init.lisp" config.user.ui.tomoe.lisp.initText;
 in {
   imports = [./lisp-config.nix];
 
-  # seatd: upstream defaults the service to runlevels [34], but finix
-  # boots into runlevel 2 — the service is never eligible and initctl
-  # shows a misleading "halted (exit 0)". Its command (`-n %n` + notify:s6)
-  # is fine — udevd uses the same pattern. UPSTREAM GAP: seatd runlevels
-  # vs default runlevel.
   finit.services.seatd.runlevels = lib.mkForce "234";
 
-  # finix has the portal package/portal-linking module but not NixOS's
-  # per-desktop xdg.portal.config generator. Two implementations are linked:
-  # gtk (file choosers, notifications, print) and tomoe's own ScreenCast
-  # backend, which exists only in the Lua compositor's package — the Lisp
-  # tomoe has no portal yet, so screensharing works in `tomoe-lua-session`
-  # and not in the Lisp session.
-  #
-  # Gated on the fallback session being enabled: the frontend advertises
-  # ScreenCast from the portal definitions it finds, and a backend whose
-  # compositor never runs can only fail every request.
   xdg.portal.portals =
     [pkgs.xdg-desktop-portal-gtk]
     ++ lib.optional config.user.ui.tomoeLua.enable tomoePortalPkg;
 
-  # Per-desktop routing for XDG_CURRENT_DESKTOP=tomoe: ScreenCast to tomoe,
-  # everything else (file dialogs, notifications) to whichever other backend
-  # is installed. Same content the tomoe package ships at
-  # share/xdg-desktop-portal/tomoe-portals.conf; both copies exist so the route
-  # holds no matter which config/data dir xdg-desktop-portal consults first.
   environment.etc."xdg/xdg-desktop-portal/tomoe-portals.conf".text = ''
     [preferred]
     default=*
     org.freedesktop.impl.portal.ScreenCast=tomoe
   '';
 
-  # seatd-only hosts need one stable runtime-dir owner. Elogind hosts create it
-  # through pam_elogind instead, avoiding two owners racing login teardown.
   finit.tasks.xdg-runtime-dir = lib.mkIf (!config.services.elogind.enable) {
     description = "runtime dir for ${userName}";
     command = pkgs.writeShellScript "xdg-runtime-dir" ''
@@ -115,8 +69,6 @@ in {
     systemPackages = [
       tomoePkg
       (pkgs.writeShellScriptBin "tomoe-session" ''
-        # The session for this compositor; env stays scoped to the process
-        # tree, never global.
         export XDG_CURRENT_DESKTOP=tomoe
         export XDG_SESSION_TYPE=wayland
         export NIXOS_OZONE_WL=1
@@ -127,24 +79,12 @@ in {
         export CLUTTER_BACKEND=wayland
         export XCURSOR_THEME=${flakeInputs.cursors.packages."${sys}".deepin-dark.xcursorThemeName}
         export XCURSOR_SIZE=24
-        # Portals + .desktop discovery: dbus activation and app launchers scan
-        # XDG_DATA_DIRS; the system profile carries dbus-1 service files for
-        # xdg-desktop-portal{,-gtk} and tomoe's own portal. Deduped — a re-exec
-        # (or a profile that already prepends) must not stack duplicates.
         case ":''${XDG_DATA_DIRS:-}:" in
           *":/run/current-system/sw/share:"*) ;;
           *) export XDG_DATA_DIRS="/run/current-system/sw/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}" ;;
         esac
-        # Launcher parity: tui-launcher falls back to alacritty (not installed)
-        # when TERMINAL is unset, so Terminal=true .desktop entries and the
-        # command provider die silently. modules/core/user/defaults.nix now puts
-        # TERMINAL in environment.sessionVariables (/etc/profile.d), which covers
-        # login shells; this stays as the belt-and-braces path for a session
-        # exec'd from something that never read /etc/profile.
         export TERMINAL=${config.user.defaults.terminal}
 
-        # No logind: guarantee the runtime dir even if the profile.d hook was
-        # skipped (e.g. exec'd from a bare shell).
         export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
         [ -d "$XDG_RUNTIME_DIR" ] || {
           echo "tomoe-session: $XDG_RUNTIME_DIR missing (xdg-runtime-dir task failed?)" >&2
@@ -154,7 +94,6 @@ in {
         ${lib.optionalString config.hardware.nvidia.enable ''
           export WLR_NO_HARDWARE_CURSORS=1
           export LIBVA_DRIVER_NAME=nvidia
-          # environment.sessionVariables parity (NixOS nvidia.nix).
           export __GL_SYNC_TO_VBLANK=0
           export __GL_VRR_ALLOWED=1
           export __GL_MaxFramesAllowed=1
@@ -163,21 +102,7 @@ in {
           export CUDA_DISABLE_PERF_BOOST=1
           export NVIDIA_DRIVER_CAPABILITIES=all
         ''}
-        # No GBM_BACKEND / __EGL_VENDOR_LIBRARY_FILENAMES / __GLX_VENDOR_LIBRARY_NAME
-        # — see the NixOS shim: forcing the NVIDIA EGL vendor hides Mesa's
-        # EGL_EXT_device_query and smithay then finds no renderer at all.
         cd "$HOME"
-        # No logind → no per-login session bus; dbus-run-session gives the
-        # compositor AND everything it spawns one session bus, on which the
-        # portals dbus-activate. The polkit agent must live on that same bus,
-        # so it starts inside the wrapper (NixOS ran it as a systemd user
-        # service on graphical-session.target).
-        # No DISPLAY here: the compositor exports its own Xwayland display to
-        # this process tree, and an inherited one would name another session.
-        # Install the policy files on every session start: the flake is the
-        # source of truth for their content. install(1) keeps them writable;
-        # copying the store files would leave them read-only and break editing
-        # and the live reload that editing drives.
         policy="$HOME/.config/tomoe/init.lisp"
         ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/tomoe"
         ${pkgs.coreutils}/bin/install -m 0644 ${starterPolicy} "$policy"
@@ -188,7 +113,6 @@ in {
           exec ${lib.getExe tomoePkg} --backend drm "$@"
         ''} "$@"
       '')
-      # Session companions (NixOS shim parity).
       pkgs.monstar
       pkgs.grim
       pkgs.slurp
@@ -196,42 +120,20 @@ in {
       pkgs.jq
       pkgs.swaybg
       pkgs.xwayland-satellite
-      # Daily-driver shell: rush. finix/common.nix sets it as the login shell;
-      # modules/shell/rush/config.nix generates ~/.config/rush/{profile,config}.rush
-      # onto persisted /home. rush itself comes from that module's systemPackages
-      # (or common.nix on the server), bash from finix's programs.bash (still
-      # /bin/sh). Autosuggestions/history-search/completions are rush builtins,
-      # so carapace and fzf key-bindings are gone.
       pkgs.ripgrep
       pkgs.fd
     ];
   };
 
-  # pam_rundir — injected into every login path by upstream whenever
-  # services.seatd.enable is set (shadow + openssh modules, no opt-out
-  # knob) — refcounts sessions in /run/user/.<uid> and DELETES
-  # /run/user/<uid> on the last close_session. Incompatible with this
-  # host's model: pipewire/wireplumber/pipewire-pulse are finit SYSTEM
-  # services that outlive logins, and the dir is boot-created above.
-  # Observed 2026-07-18: tty logout (or last ssh drop) removed the dir
-  # under the daemons; tomoe-session then failed its runtime-dir check.
-  # One owner only: the finit task. Force the upstream PAM texts minus
-  # the pam_rundir line (verbatim copies otherwise — keep in lockstep
-  # with upstream shadow/openssh modules by hand).
-  # UPSTREAM GAP: seatd should not imply pam_rundir unconditionally.
   security.pam.services.login.text = lib.mkForce ''
-    # Account management.
     account required pam_unix.so # unix (order 10900)
 
-    # Authentication management.
     auth optional pam_unix.so likeauth nullok # unix-early (order 11500)
     auth sufficient pam_unix.so likeauth nullok try_first_pass # unix (order 12800)
     auth required pam_deny.so # deny (order 13600)
 
-    # Password management.
     password sufficient pam_unix.so nullok yescrypt # unix (order 10200)
 
-    # Session management.
     session required pam_env.so conffile=/etc/security/pam_env.conf readenv=0 # env
     session required pam_unix.so # unix
     session required pam_loginuid.so # loginuid
@@ -241,17 +143,13 @@ in {
   '';
 
   security.pam.services.sshd.text = lib.mkForce ''
-    # Account management.
     account required pam_unix.so debug # unix (order 10900)
 
-    # Authentication management.
     auth sufficient pam_unix.so likeauth try_first_pass debug # unix (order 11500)
     auth required pam_deny.so debug # deny (order 12300)
 
-    # Password management.
     password sufficient pam_unix.so nullok yescrypt debug # unix (order 10200)
 
-    # Session management.
     session required pam_env.so debug conffile=/etc/security/pam_env.conf readenv=0 # env
     session required pam_unix.so debug # unix
     session required pam_loginuid.so debug # loginuid
@@ -259,20 +157,9 @@ in {
     ${lib.optionalString config.services.elogind.enable "session optional ${config.services.elogind.package}/lib/security/pam_elogind.so"}
   '';
 
-  # Automatic DISPLAY everywhere a login shell starts (TTY/ssh), not just
-  # under the compositor: in-session processes inherit the shim's export;
-  # this covers the rest by probing for a live X socket. Dynamic — no
-  # hardcoded :0 assumption if satellite ever lands elsewhere.
-
-  # Fonts: same trio as the NixOS ui/fonts.nix defaults. monstar (the main
-  # terminal) resolves the "monospace" family from the generated
-  # ~/.config/fontconfig/fonts.conf; fontconfig just has to be able to
-  # resolve it.
   fonts.packages = [
     flakeInputs.fonts.packages."${sys}".default
     pkgs.noto-fonts-cjk-sans
     pkgs.noto-fonts-color-emoji
   ];
-
-  # Login shell comes from finix/common.nix (rush) — no override.
 }

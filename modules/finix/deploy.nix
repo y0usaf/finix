@@ -1,6 +1,3 @@
-# SSH deploy driver for a running persistent Finix system. The server's
-# kernel/initrd/cmdline changes use the separate ESP island driver; desktop
-# bootloader updates are handled by its Limine module.
 {
   config,
   lib,
@@ -11,7 +8,6 @@ in {
   options.finix.mkDeploy = lib.mkOption {
     type = lib.types.functionTo lib.types.raw;
     description = "SSH deployment driver builder";
-    # mkDeploy {name, system, defaultHost, ...}
     default = {
       bootDriverName ? null,
       defaultHost,
@@ -20,7 +16,6 @@ in {
       sshHost ? null,
       sshPort ? null,
     }: let
-      # Precomputed interpolations for the shell script below; empty when unset.
       bootDriver = lib.optionalString (bootDriverName != null) bootDriverName;
       portStr = lib.optionalString (sshPort != null) (toString sshPort);
       portOpt = lib.optionalString (sshPort != null) ":${toString sshPort}";
@@ -64,8 +59,6 @@ in {
         fi
 
         if [ "$host" = local ]; then
-          # Self-deploy only runs on a live Finix system. Refuse systemd hosts
-          # because their activation model is different.
           if [ -d /run/systemd/system ]; then
             echo "${name}: refusing local $action under systemd; target a live Finix host over ssh" >&2
             exit 1
@@ -79,7 +72,6 @@ in {
           exit 0
         fi
 
-        # The running Finix system supplies the remote nix-store endpoint.
         remote_store="ssh://$remote_host${portOpt}?remote-program=/run/current-system/sw/bin/nix-store"
 
         echo "==> copying persistent finix closure to $remote_host"
@@ -98,7 +90,6 @@ in {
         echo "==> finix switch-to-configuration $action"
         "''${ssh_cmd[@]}" "$remote_host" \
           "/run/wrappers/bin/sudo '$system_path/bin/switch-to-configuration' '$action'"
-        # Flush filesystem and bootloader writes before returning control.
         if [ "$action" != test ]; then
           "''${ssh_cmd[@]}" "$remote_host" \
             "/run/wrappers/bin/sudo /run/current-system/sw/bin/sync"

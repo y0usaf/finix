@@ -6,15 +6,6 @@
   options.user.dev.prompts.body = lib.mkOption {
     type = lib.types.lines;
     description = "Shared behavioral sections for coding-agent prompts.";
-    # Shared behavioral prompt sections for the Pi and Phi coding agents.
-    #
-    # Source of truth for the tool-agnostic behavioral rules (<reader>,
-    # <style>, <explain>, <work>) that both pi (modules/dev/ai/prompts/system_prompts.nix) and
-    # phi compose into their system prompts. Keep these in sync with any edits
-    # to the pi prompt.
-    #
-    # Each section includes a 4-space base indent so it interpolates cleanly
-    # into both agents' `''` indented strings.
     default = ''
       <reader>
         Technical engineer with ADHD. Assume strong fundamentals and unfamiliar

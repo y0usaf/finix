@@ -2,16 +2,9 @@
   user.ui = {
     cudaterm.enable = true;
     monstar.enable = lib.mkForce false;
-    # Manual fallback to the old Rust+Lua compositor: adds the
-    # `tomoe-lua-session` shim on PATH; the primary Lisp session is unchanged.
     tomoeLua.enable = true;
     tomoe = {
       displays = {
-        # 32:9 panel on DP-4, native 5120x1440@239.761. Its EDID preferred
-        # mode is a conservative 3840x1080@60 compatibility mode, so
-        # "preferred"/bare fallbacks run the panel under-scanned; ask for
-        # the size explicitly (no @Hz = highest refresh at that size).
-        # DP-2 is disconnected and dropped.
         "DP-4" = {
           position = [0 0];
           resolution = "5120x1440";
@@ -22,18 +15,9 @@
         };
       };
 
-      # Bar shape is per-host. Stats first, clock last. The gpu module's
-      # auto backend prefers the RTX 4090 over the Raphael iGPU, whose
-      # gpu_busy_percent reads ~0 while the discrete card does the work.
       bar.modules = ["cpu" "memory" "gpu" "bongo" "time" "date"];
       extraConfig = ''
-        -- Discord/Telegram replace valid activation tokens with stale serials;
-        -- opt in to Tomoe's compatibility path for this session.
         tomoe.settings { honor_xdg_activation_with_invalid_serial = true }
-        -- The launcher floats via the shared Tomoe defaults.
-        -- These hooks only handle focus: remember who had focus before the
-        -- launcher opened, center/raise the launcher, and give focus back on
-        -- close (the default close hook would focus the deck's last window).
         local launcher_return_focus = {}
         tomoe.on_window_open(function(win)
           if win:app_id() ~= "launcher" then
@@ -56,9 +40,6 @@
           win:focus()
         end)
 
-        -- The default WM's close hook focuses the flat workspace's last window.
-        -- Override that with the window that owned focus before this launcher,
-        -- unless another window has already taken focus while it was closing.
         tomoe.on_window_close(function(win)
           local previous_id = launcher_return_focus[win:id()]
           if not previous_id then
@@ -73,11 +54,6 @@
           end
         end)
 
-        -- Hide the lovely-injector console (app-id "steam_proton", title
-        -- "Lovely x.y.z") — a blank proton terminal. Keep it alive but out
-        -- of the tiling flow: the rule stops it stealing focus on open, and
-        -- an arrange sweep hides it and drops it from the workspace lists
-        -- (also catching windows a config reload restores back in).
         local function is_lovely(win)
           return win:app_id() == "steam_proton"
             and (win:title() or ""):find("^Lovely")

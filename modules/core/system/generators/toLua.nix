@@ -12,41 +12,8 @@
     ;
   inherit (builtins) attrNames elem match typeOf;
 
-  # Serialize a Nix value to a Lua expression. Like toLisp this is a *value
-  # serializer*, not a whole-config generator: Nix renders the data a Lua
-  # program needs (`local nix = ${toLua {...}}`), and the program itself lives
-  # in a real .lua file read in after it.
-  #
-  # - null       → nil
-  # - bool       → true / false
-  # - int        → bare integer
-  # - float      → shortest round-trip literal (0.1, 1e-07); toString would
-  #                round to six decimals. Non-finite values throw.
-  # - str        → double-quoted, escaping \ " and CR/LF (Lua rejects raw
-  #                newlines inside a quoted string)
-  # - path       → double-quoted store path; interpolation copies it into the
-  #                store, where builtins.toString leaves a checkout-local ref
-  # - derivation → double-quoted output path, not its attribute set
-  # - list       → { a, b, c }; empty → {}; null elements become nil,
-  #                preserving the positions of the elements after them
-  # - attrs      → { k = v, ["k-2"] = v } table; null-valued attributes are
-  #                omitted. Keys are always strings: identifier-shaped keys
-  #                that are not Lua reserved words emit bare, the rest emit
-  #                ["quoted"]. Entries render in attribute-name order.
-  #
-  # Attribute null means absent; false emits an explicit false.
-  #
-  # Nix values cannot express Lua code, so function references and calls enter
-  # through mkLuaInline. It takes a trusted, nonblank string holding exactly
-  # one Lua expression, whose syntax is not parsed or sandboxed; the form is
-  # wrapped in parentheses, which also truncates a multi-value call to its
-  # first value. The wrapper shares nixpkgs' shape ({ _type = "lua-inline";
-  # expr; }), so lib.generators.mkLuaInline values render here too; wrappers
-  # with any other attributes throw.
   quoteStr = s: ''"${replaceStrings ["\\" "\"" "\n" "\r"] ["\\\\" "\\\"" "\\n" "\\r"] s}"'';
 
-  # builtins.toJSON preserves round-trip precision and its number syntax is
-  # valid Lua. JSON encodes non-finite floats as null; Lua has no literal.
   floatStr = f: let
     json = builtins.toJSON f;
   in
@@ -54,7 +21,6 @@
     then throw "toLua: cannot serialize a non-finite float"
     else json;
 
-  # Lua 5.4 reserved words; a bare `end = 1` inside a table is a syntax error.
   reservedWords = [
     "and"
     "break"
@@ -115,9 +81,6 @@
     then "{}"
     else "{ ${concatStringsSep ", " entries} }";
 
-  # Leaf values render as expressions. Keyed by builtins.typeOf: every scalar
-  # the serializer accepts is listed here, and atomStr throws for the rest
-  # (lambdas, functions).
   atoms = {
     "null" = _: "nil";
     bool = v:

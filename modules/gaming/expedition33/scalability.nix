@@ -7,7 +7,6 @@
     manzil.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/1903340/pfx/drive_c/users/steamuser/AppData/Local/Sandfall/Saved/Config/Windows/Scalability.ini" = {
       generator = lib.generators.toINI {};
       value = {
-        # Tier 0: Low Performance
         "EffectsQuality@0" = {
           "r.SSS.Quality" = "0";
           "r.SSR.Quality" = "0";
@@ -42,7 +41,6 @@
           "r.AOMaxViewDistance" = "5000";
         };
 
-        # Tier 1: Medium
         "EffectsQuality@1" = {
           "r.SSS.Quality" = "1";
           "r.SSR.Quality" = "1";
@@ -77,7 +75,6 @@
           "r.AOMaxViewDistance" = "10000";
         };
 
-        # Tier 2: High
         "EffectsQuality@2" = {
           "r.SSS.Quality" = "2";
           "r.SSR.Quality" = "2";
@@ -112,7 +109,6 @@
           "r.AOMaxViewDistance" = "20000";
         };
 
-        # Tier 3: Epic (UE5 Standard)
         "EffectsQuality@3" = {
           "r.SSS.Quality" = "3";
           "r.SSR.Quality" = "3";
@@ -151,7 +147,6 @@
           "r.AOMaxViewDistance" = "30000";
         };
 
-        # Tier Cine: Maximum (Duet Night Abyss style)
         "EffectsQuality@Cine" = {
           "r.SSS.Quality" = "3";
           "r.SSR.Quality" = "3";

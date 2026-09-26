@@ -1,11 +1,3 @@
-# Shared compaction/ethics instructions for every coding-agent harness.
-#
-# Single source of truth for the "## Compaction" block. Each harness injects
-# config.user.dev.prompts.ethics through its own supported mechanism: the
-# Hermes SOUL.md, codex developer_instructions, the opencode instruction files,
-# and the omp/prime-agent APPEND_SYSTEM.md; the pi and phi agents receive it
-# through the shared prompt body (modules/dev/ai/phi/prompt-body.nix). Edit the
-# block here; consumers interpolate the option.
 {lib, ...}: {
   options.user.dev.prompts.ethics = lib.mkOption {
     type = lib.types.lines;

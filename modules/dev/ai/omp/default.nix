@@ -1,8 +1,3 @@
-# omp (oh-my-pi) coding agent: pi-flake's bundled build (omp-full: upstream
-# omp wrapped with the shared pi extension bundle via PI_CONFIG_FILES) plus
-# declarative harness config. The agent's own config lives in
-# ~/.omp/agent/config.yml; the top-level ~/.omp/config.json belongs to the
-# harness TUI surface.
 {
   config,
   lib,
@@ -106,22 +101,12 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # pi-flake's omp-full: upstream omp (can1357/oh-my-pi flake build)
-    # wrapped with the shared pi extension bundle (chronobreak,
-    # vercel-ai-gateway, recap, donsetch) injected via PI_CONFIG_FILES.
-    # Note: the bundle overlay's extensions array is authoritative for this
-    # build; it replaces any extensions list in user config layers.
     environment.systemPackages = [
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".omp-full
     ];
 
     manzil.users."${config.user.name}".files =
       {
-        # Native model defaults and advisor settings belong in config.yml;
-        # OMP ignores legacy settings.json when this file exists.
-        # omp persists /config edits here, so a symlink would break its atomic
-        # save (temp-file + rename next to the target). merge keeps the file
-        # writable, preserves TUI keys, and re-applies ours on every switch.
         ".omp/agent/config.yml" = {
           type = "merge";
           format = "yaml";

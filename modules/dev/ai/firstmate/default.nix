@@ -6,25 +6,8 @@
 }: let
   inherit (pkgs.stdenv.hostPlatform) system;
 
-  # firstmate's own bootstrap (bin/fm-bootstrap.sh) refuses to dispatch work
-  # until every tool below is on PATH at or above its version floor, and it
-  # reports each one it cannot find. Declaring them here keeps that list
-  # satisfied from the system generation instead of from a hand-run
-  # `npm install -g`, which on an impermanent root has nowhere to survive.
-  #
-  # Bumping a version: change `version`, refresh the two hashes (nix build
-  # reports the expected one on mismatch), and for an npm tool regenerate the
-  # matching *.package-lock.json beside this module with
-  #   npm install --package-lock-only --omit=dev
-  # run over that release's package.json with its scripts and devDependencies
-  # removed (see mkNodeTool's preprocessing, which does the same at build time).
   githubHomepage = name: "https://github.com/kunchenguid/${name}";
 
-  # The axi family publishes compiled JavaScript to npm and nothing else, so
-  # the published tarball is the source: no toolchain, no dev dependencies, and
-  # no build step. Preprocessing drops the dev-only fields npm would otherwise
-  # refuse to reconcile with the committed production lockfile and the build
-  # scripts whose sources the tarball does not ship.
   mkNodeTool = {
     name,
     version,
@@ -53,8 +36,6 @@
 
       inherit npmDepsHash;
 
-      # `dist/` is already compiled, and `npm ci` installed exactly the
-      # production dependencies the lockfile pins.
       dontNpmBuild = true;
       dontNpmPrune = true;
 
@@ -66,9 +47,6 @@
       };
     };
 
-  # A single-file release binary, wired for the platform whose asset this
-  # flake is carrying; the `throw` keeps a second host from silently
-  # evaluating to the wrong architecture's download.
   mkReleaseBinary = {
     name,
     version,
@@ -76,8 +54,6 @@
     tag ? "v${version}",
     asset,
     hash,
-    # Upstream links this one against the FHS loader path and libc; see the
-    # installPhase for why it is not simply patchelf'd into place.
     dynamic ? false,
   }:
     pkgs.stdenvNoCC.mkDerivation {
@@ -99,11 +75,6 @@
 
       sourceRoot = ".";
 
-      # patchelf cannot be used here for the dynamically linked one: growing
-      # this Go binary's program headers to hold a store-length interpreter
-      # path relocates its segments and the result segfaults on startup. The
-      # untouched binary runs correctly under the NixOS loader, so hand it the
-      # loader and a library search path instead of rewriting it.
       installPhase =
         if dynamic
         then ''
@@ -138,12 +109,6 @@ in {
   };
 
   config = lib.mkIf config.user.dev.ai.firstmate.enable {
-    # tmux is the same dependency set's other half; it lives in
-    # modules/tools/tmux.nix because it is usable without firstmate.
-    #
-    # perl is not in that list but is load-bearing all the same: the backlog
-    # transition and session-start libraries decode and re-encode byte values
-    # with it, so dispatch and cleanup fail loudly without it.
     environment.systemPackages = [
       pkgs.perl
 
@@ -187,8 +152,6 @@ in {
         npmDepsHash = "sha256-gu1TVpMXGPTrpkWeooon7zOfuRp0NtBWRyA7wbk+5fE=";
       })
 
-      # Upstream builds this one against the FHS loader path and links libc,
-      # neither of which exists here.
       (mkReleaseBinary {
         name = "treehouse";
         version = "2.3.0";
@@ -198,8 +161,6 @@ in {
         dynamic = true;
       })
 
-      # Statically linked, and its version gate is a structured-attestation
-      # check, so firstmate needs 1.46.0 or newer.
       (mkReleaseBinary {
         name = "no-mistakes";
         version = "1.79.0";

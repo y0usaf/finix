@@ -17,11 +17,6 @@ in {
         pkgs.wl-clipboard-rs
         pkgs.hyprpicker
       ];
-      # Single owner for the Wayland env surface. /etc/profile.d exports these
-      # for login shells, so the compositor and everything it spawns inherit
-      # them — no per-shell rc duplication. MOZ_* live here rather than in the
-      # browser modules: firefox.nix and librewolf.nix both set the same two
-      # keys, which collides on merge, and "enable Wayland" is a Wayland fact.
       variables = {
         WLR_NO_HARDWARE_CURSORS = "1";
         NIXOS_OZONE_WL = "1";

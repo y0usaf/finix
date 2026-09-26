@@ -1,12 +1,3 @@
-# Phase-2d: NixOS parity sweep gating promote. Upstream finix modules
-# where they exist (bluetooth/polkit/rtkit), server-proven ports where
-# they don't (tailscaled), hand-rolls where nothing exists (zram).
-# Sources mirrored from the NixOS universe:
-#   modules/core/hardware/bluetooth.nix   (bluez settings)
-#   modules/core/services/tailscale/*     (rescue-path semantics!)
-#   modules/desktop/apps/obs.nix          (v4l2loopback virtual cam)
-#   modules/gaming/core.nix               (gamemode group)
-#   hosts/y0usaf-desktop/hardware-configuration.nix (zramSwap 50% zstd)
 {
   config,
   lib,
@@ -16,8 +7,6 @@
 }: let
   userName = config.user.name;
 in {
-  # These upstream modules are NOT in mkFinixSystem's baseline (udev/dbus/
-  # seatd et al are wired into finixSystem itself; the rest are opt-in).
   imports = [
     flakeInputs.finix.nixosModules.bluetooth
     flakeInputs.finix.nixosModules.polkit
@@ -26,9 +15,6 @@ in {
     flakeInputs.finix.nixosModules.upower
   ];
 
-  # ── bluetooth: upstream module; settings parity with the NixOS side.
-  # powerOnBoot=true translates to Policy.AutoEnable. blueman/bluetuith
-  # arrive via the packages bridge; bluetoothd is the part that must run.
   services = {
     bluetooth.settings = {
       General = {
@@ -39,10 +25,6 @@ in {
     };
     polkit.adminIdentities = ["unix-user:${userName}"];
 
-    # ntsync: Wine's sync-on-NT-semaphores driver (reduces esync/fsync
-    # overhead for games under the bundled Wine/Proton). Rule shipped as a
-    # package (portable NixOS + finix) via services.udev.packages, never
-    # extraRules — parity with upstream finix uinput rules.
     udev.packages = [
       (pkgs.writeTextFile {
         name = "ntsync-udev";
@@ -52,19 +34,6 @@ in {
     ];
   };
 
-  # ddcutil monitor control: finix's i2c module ships the rules; NixOS-side
-  # this rode hardware.i2c.enable (modules/core/hardware/i2c.nix).
-  # ── polkit + rtkit: polkit unlocks privileged desktop actions (and is
-  # rtkit's authorization backend); rtkit restores the RT scheduling the
-  # NixOS pipewire unit got via systemd (Nice -20 / SCHED_RR) — pipewire's
-  # module-rt negotiates with rtkit-daemon at runtime.
-
-  # ── tailscale: no upstream module; server-proven stanza. State dir
-  # /var/lib/tailscale is already a /persist bind via the impermanence
-  # replay, so the desktop keeps its tailnet identity (and the `ssh
-  # rescue` path stays valid from the other side).
-  # uinput: bolo autofill (dotool types the transcript; udev rule granting the
-  # input group access rides the packages-bridge as extra-udev-rules).
   boot.kernelModules = ["tun" "v4l2loopback" "zram" "uinput" "ntsync"];
   finit = {
     services.tailscaled = {
@@ -120,7 +89,6 @@ in {
     };
   };
 
-  # ── OBS virtual camera (NixOS obs.nix parity).
   boot.extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
   environment = {
     etc."modprobe.d/v4l2loopback.conf".text = ''
@@ -129,18 +97,6 @@ in {
     etc."ssl/certs/ca-certificates.crt".source = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
   };
 
-  # finix's upstream xdg modules own these links: portal adds applications
-  # + portal definitions, icons adds icons + pixmaps, and mime adds shared
-  # MIME data (replacing the former hand-rolled list).
-  # ── zram swap: zramSwap.enable { 50%, zstd } has no upstream module —
-  # literal port of what the NixOS option does at runtime.
-
-  # ── gaming: gamemoded is dbus-activated per session; it only needs its
-  # group to exist for the renice policy. gamescope/gamemode/steam
-  # input: dotool opens /dev/uinput (bolo autofill); rule 99-local.rules
-  # (bridged) grants the input group rw on the uinput node.
-  # bluetooth (bluetoothd), lp (CUPS/printing), dialout (serial/tty devices)
-  # — restored from the deleted modules/desktop/user-groups.nix.
   users.groups = {
     gamemode = {};
     bluetooth = {};
@@ -148,21 +104,4 @@ in {
     dialout = {};
   };
   users.users.${userName}.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
-
-  # ── X11 socket dir + /tmp mode: systemd-tmpfiles owned both on NixOS.
-  # Xwayland (hence xwayland-satellite, hence Steam) refuses to create
-  # /tmp/.X11-unix as non-root — sticky root-owned world-writable, the
-  # X11 convention. UPSTREAM GAP: finix activation mkdirs /tmp under
-  # umask 0022 → 0755 (NixOS: 1777), so anything non-root writing tmp
-  # files (browsers, sandboxes, our own tooling) fails until fixed.
-
-  # ── CA bundle under the Debian name: finix renders ca-bundle.crt only;
-  # Steam's ubuntu-runtime tooling (and other FHS-expectation software)
-  # hardcodes ca-certificates.crt — its absence surfaced as the updater's
-  # opaque "http error 0" TLS failure.
-
-  # ── XDG dirs parity: finix's upstream xdg.portal/icons/mime modules now
-  # own the links (including portal definitions and .desktop discovery),
-  # preserving the old applications/icons/pixmaps/mime set while fixing the
-  # missing portal scan path; this closes the #160 pathsToLink workaround.
 }

@@ -52,10 +52,6 @@ in {
             opt = [];
           };
 
-          # The wrapper sets VIMINIT to its own generated init.lua, which overrides
-          # nvim's default config loading and would otherwise skip the manzil-written
-          # ~/.config/nvim/init.lua. Load the bundled pack plugins first, then source
-          # the user config so its keymaps/setups actually take effect.
           customLuaRC = ''
             vim.cmd.packloadall()
             local user_init = vim.fn.stdpath("config") .. "/init.lua"
@@ -78,12 +74,10 @@ in {
     manzil.users."${config.user.name}".files = {
       ".config/nvim/init.lua" = {
         text = ''
-          -- Leader keys
           vim.g.mapleader = " "
           vim.g.maplocalleader = "\\"
 
           ${''
-            -- Line numbers and UI
             vim.opt.number = true
             vim.opt.relativenumber = true
             vim.opt.signcolumn = "yes"
@@ -100,52 +94,42 @@ in {
             vim.opt.laststatus = 2
             vim.opt.cmdheight = 1
 
-            -- Indentation
             vim.opt.expandtab = true
             vim.opt.tabstop = 2
             vim.opt.shiftwidth = 2
 
-            -- System integration
             vim.opt.clipboard = "unnamedplus"
             vim.opt.mouse = "a"
 
-            -- Search
             vim.opt.ignorecase = true
             vim.opt.smartcase = true
 
-            -- Timing
             vim.opt.updatetime = 250
             vim.opt.timeoutlen = 300
 
-            -- Splits
             vim.opt.splitbelow = true
             vim.opt.splitright = true
             vim.opt.splitkeep = "screen"
             vim.opt.virtualedit = "onemore"
 
-            -- Additional UI options
             vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
             vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
             vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
-            -- Disable netrw for neo-tree
             vim.g.loaded_netrw = 1
             vim.g.loaded_netrwPlugin = 1
 
-            -- Native folding
             vim.opt.foldmethod = "indent"
             vim.opt.foldcolumn = "1"
             vim.opt.foldlevel = 99
             vim.opt.foldlevelstart = 99
             vim.opt.foldenable = true
 
-            -- Neovide / Termvide transparency
             if vim.g.neovide then
               vim.g.neovide_transparency = ${toString userAppearance.opacity}
             end
           ''}
 
-          -- Neo-tree setup
           require("neo-tree").setup({
             close_if_last_window = true,
             popup_border_style = "rounded",
@@ -228,12 +212,9 @@ in {
             }
           })
 
-          -- Plugin configurations
-          -- Telescope setup
           require("telescope").setup({})
           pcall(require("telescope").load_extension, "fzf")
 
-          -- LSP setup
           local capabilities = require("cmp_nvim_lsp").default_capabilities()
           require("lsp_lines").setup()
           vim.diagnostic.config({ virtual_text = false })
@@ -262,7 +243,6 @@ in {
             vim.lsp.enable(server)
           end
 
-          -- Completion setup
           local cmp = require("cmp")
           local luasnip = require("luasnip")
           local lspkind = require("lspkind")
@@ -302,9 +282,6 @@ in {
             },
           })
 
-          -- Other plugin setups
-
-          -- Theme configuration (minimalist biophilic with dopamine accents)
           ${''
             require("cyberdream").setup({
               transparent = true,
@@ -314,32 +291,26 @@ in {
               theme = {
                 variant = "default",
                 highlights = {
-                  -- Core UI - soft, minimal
                   Normal = { bg = "NONE", fg = "#e8e6e1" },
                   NormalNC = { bg = "NONE", fg = "#d1ccc8" },
 
-                  -- Cursor and selection - subtle
                   CursorLine = { bg = "#1a1f1a" },
                   CursorColumn = { bg = "#1a1f1a" },
                   Visual = { bg = "#2a3d2a" },
 
-                  -- Search - warm dopamine (gold)
                   Search = { bg = "#3d3a2a", fg = "#d4a574" },
                   IncSearch = { bg = "#4a4630", fg = "#e8c49d" },
 
-                  -- Diagnostics - nature-inspired with warmth
                   DiagnosticError = { fg = "#e8997d" },
                   DiagnosticWarn = { fg = "#d4a574" },
                   DiagnosticInfo = { fg = "#7b9fb5" },
                   DiagnosticHint = { fg = "#a8b5a8" },
                   DiagnosticOk = { fg = "#a8c9a0" },
 
-                  -- Messages
                   Error = { fg = "#e8997d" },
                   ErrorMsg = { fg = "#e8997d" },
                   WarningMsg = { fg = "#d4a574" },
 
-                  -- Syntax highlighting - nature palette
                   String = { fg = "#a8c9a0" },        -- sage green
                   Function = { fg = "#7b9fb5" },      -- soft blue (dopamine cool)
                   Keyword = { fg = "#5a7d6b" },       -- forest green
@@ -348,51 +319,41 @@ in {
                   Special = { fg = "#e8997d" },       -- coral (dopamine warm)
                   Comment = { fg = "#7a8178", italic = true },
 
-                  -- UI Elements
                   FloatBorder = { fg = "#a8b5a8" },
                   WinSeparator = { fg = "#3a3f3a" },
                   VertSplit = { fg = "#3a3f3a" },
 
-                  -- Lines and indicators
                   LineNr = { fg = "#5a5f5a" },
                   CursorLineNr = { fg = "#a8b5a8" },
                   SignColumn = { bg = "NONE" },
                   FoldColumn = { fg = "#5a7d6b", bg = "NONE" },
 
-                  -- Tabs and status
                   TabLine = { bg = "NONE", fg = "#7a7f7a" },
                   TabLineSel = { bg = "#2a3d2a", fg = "#a8b5a8" },
                   TabLineFill = { bg = "NONE" },
 
-                  -- Status line (keep subtle)
                   StatusLine = { bg = "#1a1f1a", fg = "#e8e6e1" },
                   StatusLineNC = { bg = "NONE", fg = "#7a7f7a" },
 
-                  -- Popup menus - subtle with warmth highlights
                   Pmenu = { bg = "#1a1f1a", fg = "#e8e6e1" },
                   PmenuSel = { bg = "#2a3d2a", fg = "#e8c49d" },
                   PmenuBorder = { fg = "#5a7d6b" },
                   PmenuThumb = { bg = "#5a7d6b" },
 
-                  -- Diff and git
                   DiffAdd = { fg = "#a8c9a0" },
                   DiffDelete = { fg = "#e8997d" },
                   DiffChange = { fg = "#d4a574" },
                   DiffText = { fg = "#e8c49d", bold = true },
 
-                  -- Folding
                   Folded = { bg = "#2a3d2a", fg = "#a8b5a8" },
 
-                  -- Spelling
                   SpellBad = { sp = "#e8997d", undercurl = true },
                   SpellCap = { sp = "#d4a574", undercurl = true },
                   SpellLocal = { sp = "#7b9fb5", undercurl = true },
                   SpellRare = { sp = "#a8b5a8", undercurl = true },
 
-                  -- Matchparen
                   MatchParen = { fg = "#e8c49d", bold = true },
 
-                  -- Visual mode
                   VisualNOS = { bg = "#2a3d2a" },
                 },
               },
@@ -422,11 +383,9 @@ in {
           require("toggleterm").setup({ direction = "float" })
 
           ${''
-            -- Keymaps setup
             local keymap = vim.keymap.set
             local builtin = require("telescope.builtin")
 
-            -- Telescope keymaps
             keymap("n", "<leader>ff", builtin.find_files, { desc = "Find files" })
             keymap("n", "<leader>fg", builtin.live_grep, { desc = "Live grep" })
             keymap("n", "<leader>fb", builtin.buffers, { desc = "Find buffers" })
@@ -434,41 +393,33 @@ in {
             keymap("n", "<leader>fh", builtin.help_tags, { desc = "Help tags" })
             keymap("n", "<leader>fo", builtin.git_status, { desc = "Git status" })
 
-            -- File navigation with neo-tree
             keymap("n", "-", "<cmd>Neotree toggle<cr>", { desc = "Toggle neo-tree" })
             keymap("n", "<leader>-", "<cmd>Neotree focus<cr>", { desc = "Focus neo-tree" })
             keymap("n", "<leader>e", "<cmd>Neotree reveal<cr>", { desc = "Reveal file in neo-tree" })
 
-            -- Buffer navigation
             keymap("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
             keymap("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
             keymap("n", "<leader>bd", "<cmd>bdelete<cr>", { desc = "Delete buffer" })
 
-            -- Window navigation
             keymap("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
             keymap("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
             keymap("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
             keymap("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 
-            -- Utility keymaps
             keymap("n", "<C-\\", "<cmd>ToggleTerm<cr>", { desc = "Toggle terminal" })
             keymap("t", "<C-\\", "<cmd>ToggleTerm<cr>", { desc = "Toggle terminal" })
 
-            -- Diagnostics
             keymap("n", "<leader>xx", builtin.diagnostics, { desc = "Diagnostics" })
             keymap("n", "<leader>xd", function() builtin.diagnostics({ bufnr = 0 }) end, { desc = "Buffer diagnostics" })
 
-            -- Basic keymaps
             keymap("n", "<leader>w", "<cmd>w<cr>", { desc = "Save file" })
             keymap("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })
             keymap("n", "<leader>/", function() require("Comment.api").toggle.linewise.current() end, { desc = "Toggle comment" })
             keymap("v", "<leader>/", "<esc><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<cr>", { desc = "Toggle comment" })
 
-            -- Better movement
             keymap({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
             keymap({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 
-            -- Move lines
             keymap("n", "<A-j>", "<cmd>m .+1<cr>==", { desc = "Move down" })
             keymap("n", "<A-k>", "<cmd>m .-2<cr>==", { desc = "Move up" })
             keymap("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move down" })
@@ -476,7 +427,6 @@ in {
             keymap("v", "<A-j>", ":m '>+1<cr>gv=gv", { desc = "Move down" })
             keymap("v", "<A-k>", ":m '<-2<cr>gv=gv", { desc = "Move up" })
 
-            -- Indenting
             keymap("v", "<", "<gv")
             keymap("v", ">", ">gv")
             keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")

@@ -13,10 +13,8 @@ import sys
 import tempfile
 from datetime import datetime, timezone
 
-
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
-
 
 def write_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -24,15 +22,12 @@ def write_json(path, data):
     temporary.write_text(json.dumps(data, indent=2) + "\n")
     temporary.replace(path)
 
-
 def windows_path(path):
     return "Z:" + str(path).replace("/", "\\")
-
 
 def digest(path):
     with path.open("rb") as source:
         return hashlib.file_digest(source, "sha256").hexdigest()
-
 
 def game_running():
     for process in Path("/proc").glob("[0-9]*/comm"):
@@ -43,11 +38,9 @@ def game_running():
             pass
     return False
 
-
 def require_stopped():
     if game_running():
         raise RuntimeError("P4G is running. Save and close it before installing or disabling mods.")
-
 
 def configure_loader(root, game, enabled, final_root=None):
     app_file = root / "Apps/p4g.exe/AppConfig.json"
@@ -87,10 +80,7 @@ def configure_loader(root, game, enabled, final_root=None):
         "SkipWineLaunchWarning": True,
     }
 
-
 def prepare(settings, state, payload, game):
-    # Each declared payload/config gets its own writable generation. Old ones
-    # remain available for rollback; builds and preparation never touch Steam.
     generation_settings = {k: v for k, v in settings.items() if k != "prefixDirectory"}
     key = hashlib.sha256(json.dumps(generation_settings, sort_keys=True).encode()).hexdigest()[:16]
     root = state / "generations" / key
@@ -100,7 +90,6 @@ def prepare(settings, state, payload, game):
         try:
             subprocess.run(["cp", "-r", "--reflink=auto", str(payload / "Reloaded") + "/.", str(temporary)], check=True)
             subprocess.run(["chmod", "-R", "u+w", str(temporary)], check=True)
-            # Validate the dependency closure before publishing the generation.
             loader_config = configure_loader(temporary, game, settings["enabledMods"], final_root=root)
             write_json(temporary / "ReloadedII.json", loader_config)
             (temporary / "portable.txt").touch()
@@ -112,7 +101,6 @@ def prepare(settings, state, payload, game):
     print(f"Prepared CEP 13.99.4 + Reloaded II 1.30.3: {root}", flush=True)
     return root, loader_config
 
-
 def wine(settings, arguments, log):
     env = os.environ | {"STEAM_DIR": settings["steamDirectory"], "WINEDEBUG": "-all"}
     command = ('test "$WINEPREFIX" -ef ' + shlex.quote(settings["prefixDirectory"])
@@ -120,10 +108,8 @@ def wine(settings, arguments, log):
                + '"$WINE" ' + shlex.join(str(arg) for arg in arguments))
     result = subprocess.run(["protontricks", "-c", command, "1113000"],
                             env=env, stdout=log, stderr=subprocess.STDOUT)
-    # Windows ERROR_SUCCESS_REBOOT_REQUIRED (3010) is truncated to eight bits.
     if result.returncode not in (0, 194):
         raise RuntimeError(f"Proton setup exited {result.returncode}; see {log.name}")
-
 
 def install(settings, state, payload, game, prefix, root, loader_config):
     require_stopped()
@@ -167,18 +153,13 @@ def install(settings, state, payload, game, prefix, root, loader_config):
         config_path = prefix / "drive_c/users/steamuser/AppData/Roaming/Reloaded-Mod-Loader-II/ReloadedII.json"
         existing = read_json(config_path) if config_path.exists() else {}
         write_json(config_path, existing | loader_config)
-        # Per-application overrides leave other programs in the prefix alone.
         key = r"HKCU\Software\Wine\AppDefaults\P4G.exe\DllOverrides"
         for dll in ("version", "msvcp140", "msvcp140_1", "msvcp140_2", "vcruntime140", "vcruntime140_1"):
             wine(settings, ["reg", "add", key, "/v", dll, "/t", "REG_SZ", "/d", "native,builtin", "/f"], log)
     require_stopped()
-    # Reserve/write manifest data before publishing any injection files. A full
-    # disk at this stage must not leave untracked, active injection behind.
     pending_manifest = game / ".finix-p4g.pending.json"
     write_json(pending_manifest, {"files": {n: digest(p) for n, p in files.items()},
                                   "generation": str(root), "backup": str(backup)})
-    # The proxy DLL is installed last: a partially completed runtime setup must
-    # never make Steam load an incomplete mod installation.
     for name in reversed(files):
         target = game / name
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -187,7 +168,6 @@ def install(settings, state, payload, game, prefix, root, loader_config):
         temporary.replace(target)
     pending_manifest.replace(manifest_path)
     print("Installed. Launch Persona 4 Golden through its normal Steam entry.")
-
 
 def disable(game):
     require_stopped()
@@ -203,7 +183,6 @@ def disable(game):
         (game / name).unlink(missing_ok=True)
     path.unlink()
     print("Mod injection disabled. Steam will launch vanilla P4G; backups and mod settings are retained.")
-
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -232,7 +211,6 @@ def main():
         root, loader_config = prepare(settings, state, payload, game)
         if args.action == "install":
             install(settings, state, payload, game, prefix, root, loader_config)
-
 
 if __name__ == "__main__":
     try:

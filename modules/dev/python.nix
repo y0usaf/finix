@@ -61,14 +61,9 @@ in {
     manzil.users."${userName}".files = {
       ".config/python/pythonrc" = {
         text = ''
-          # Python 3.13+ handles history natively via PYTHON_HISTORY env var.
-          # This file is kept for any remaining startup customisation.
         '';
       };
     };
-    # PATH must be prepended at shell start: finix renders
-    # environment.variables with escapeShellArg, so "$PATH" would land
-    # literal (modules/environment/shells/default.nix in the finix input).
     user.shell.rcExtra = lib.mkAfter ''
       PATH="${pythonUserBase}/bin:$PATH"
 

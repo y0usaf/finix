@@ -16,8 +16,6 @@ in {
             inherit (cfg) defaultModel;
             inherit (cfg) defaultThinkingLevel;
             inherit (cfg) enabledModels;
-            # Local-path packages load in place (no copy); deps resolve from
-            # the package dir's node_modules.
             packages = [
               "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
             ];

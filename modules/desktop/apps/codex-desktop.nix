@@ -7,8 +7,6 @@
 }: let
   inherit (lib) mkEnableOption mkIf;
   codexDesktopCfg = config.user.programs.codex-desktop;
-  # package.nix (2026-07) tracks the rebranded ChatGPT.app bundle from
-  # Codex-latest-x64.dmg with a pinned hash; no local src override needed.
   codex-desktop = pkgs.callPackage "${flakeInputs.codex-desktop-linux}/package.nix" {};
 in {
   options.user.programs.codex-desktop = {

@@ -6,11 +6,6 @@
   cfg = config.user.ui.tomoe;
   inherit (cfg) bar;
   inherit (config.lib.generators) toLua;
-  # nur's bar-overlay defaults. User-facing overrides ride the open() call
-  # serialized into init.lua (config.nix); these are the fallbacks the
-  # overlay module itself reads. The SNI tray service exists since the
-  # fusion (shell.services.tray, tomoe FUSION.md F3); this overlay doesn't
-  # render a tray widget yet.
 in {
   options.user.ui.tomoe.bar = {
     enable = lib.mkOption {
@@ -20,10 +15,6 @@ in {
     };
 
     modules = lib.mkOption {
-      # shell.services.tray exists since the fusion (F3); a tray
-      # widget for this overlay is still to be written. cpu/memory/gpu
-      # ride the sysinfo facade, which upstream declares but never
-      # pushes — lua/sysinfo.lua supplies the push side in-VM.
       type = lib.types.listOf (lib.types.enum ["time" "date" "bongo" "battery" "network" "cpu" "memory" "gpu"]);
       default = ["time" "date"];
       description = "Bar overlay modules to render.";
@@ -152,15 +143,10 @@ in {
 
   config = lib.mkIf (cfg.enable && bar.enable) {
     manzil.users."${config.user.name}".files = {
-      # Live Wallust -> theme bridge, read by the bar overlay and the
-      # notification popup styling in init.lua.
       ".config/tomoe/shell/wallust.lua".text = ''
         local nix_home = ${toLua config.user.homeDirectory}
         ${builtins.readFile ./lua/wallust.lua}'';
 
-      # CPU/memory/GPU sampler: pushes snapshots into the sysinfo service
-      # facade the bar overlay reads. Deployed unconditionally; it only
-      # registers timers when a cpu/memory/gpu module is on the bar.
       ".config/tomoe/shell/sysinfo.lua".text = builtins.readFile ./lua/sysinfo.lua;
 
       ".config/tomoe/shell/bar_overlay.lua".text =

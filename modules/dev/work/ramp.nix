@@ -7,11 +7,6 @@
   cfg = config.user.dev.work.ramp;
   version = "0.2.27";
 
-  # Release assets are PyInstaller onedir tarballs: main.dist/ carries a
-  # bundled CPython 3.12 plus every non-glibc shared object except libz
-  # (needed by CPython's zlib.so). The launcher keeps rpath $ORIGIN, so on
-  # NixOS only the ELF interpreter and libz are missing — autoPatchelfHook
-  # fixes both without touching the payload.
   assets = {
     aarch64-darwin = {
       tarball = "ramp-darwin-arm64.tar.gz";
@@ -33,7 +28,6 @@
   asset =
     assets."${pkgs.stdenv.hostPlatform.system}"
     or (throw "ramp: unsupported system '${pkgs.stdenv.hostPlatform.system}'");
-  # Inner launcher is named after the tarball minus .tar.gz.
   binName = builtins.replaceStrings [".tar.gz"] [""] asset.tarball;
 in {
   options.user.dev.work.ramp = {
@@ -53,11 +47,9 @@ in {
         nativeBuildInputs = [pkgs.autoPatchelfHook];
         buildInputs = [pkgs.zlib];
 
-        # Stripping the PyInstaller bootloader/bundled objects buys nothing.
         dontStrip = true;
         installPhase = ''
           runHook preInstall
-          # unpackPhase chdirs into the tarball's single root dir main.dist.
           mkdir -p $out/share/ramp $out/bin
           cp -r . $out/share/ramp/main.dist
           ln -s $out/share/ramp/main.dist/${binName} $out/bin/ramp
@@ -85,7 +77,7 @@ in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
       cfg.package
-      pkgs.libsecret # keyring-backed auth token storage
+      pkgs.libsecret
     ];
   };
 }

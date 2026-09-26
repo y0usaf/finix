@@ -1,9 +1,3 @@
--- ~/.config/tomoe/shell/wallust.lua
--- Live Wallust -> moonshell.theme bridge (port of nur.wallust).
---
--- Reads ~/.cache/wallust/gtk-colors.css, applies the GTK color tokens,
--- and exposes a reactive version state so widgets repaint when Wallust
--- regenerates colors.
 
 local theme = require("moonshell.theme")
 
@@ -23,9 +17,6 @@ M.colors = {
 
 local function shquote(s)
     s = tostring(s or "")
-    -- Built from string.char(39) = single-quote to dodge nix
-    -- indented-string escapes; esc is the POSIX quote-escape
-    -- sequence: quote, backslash-quote, quote.
     local q = string.char(39)
     local esc = q .. "\\" .. q .. q
     return q .. s:gsub(q, esc) .. q
@@ -61,12 +52,10 @@ local function parse_css(css)
     css = css or ""
     local raw = {}
 
-    -- Wallust GTK syntax: @define-color bg #rrggbb;
     for name, value in css:gmatch("@define%-color%s+([%w_%-]+)%s+([^;%s]+)") do
         raw[name] = value
     end
 
-    -- Also accept CSS custom property syntax: --bg: #rrggbb;
     for name, value in css:gmatch("%-%-([%w_%-]+)%s*:%s*([^;%s]+)") do
         raw[name] = value
     end

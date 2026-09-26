@@ -4,9 +4,6 @@
   pkgs,
   ...
 }: let
-  # Rules as packages, not extraRules: services.udev.packages exists on both
-  # NixOS and finix (the compat shim forwards it), extraRules is NixOS-only
-  # and silently dropped on finix. One declaration mechanism, both distros.
   rulesPkg = name: text:
     pkgs.writeTextFile {
       inherit name text;
@@ -22,9 +19,6 @@
     KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0df2", MODE="0660", TAG+="uaccess"
   '';
 in {
-  # user.* namespace, not services.*: the finix compat shim drops services.*
-  # config, so a guard declared there reads false on finix and the rules
-  # silently vanish. user.* survives the shim whole.
   options.user.hardware.controllers = lib.mkOption {
     type = lib.types.submodule {
       options.enable = lib.mkEnableOption "game controller hidraw udev rules";

@@ -1,6 +1,5 @@
 ignore = ["tmp"]
 
-# One options.json per module system; regenerate with .strictix/generate.sh.
 [lint]
 schema = ".strictix/hosts.json"
 enabled = ["unused-option"]

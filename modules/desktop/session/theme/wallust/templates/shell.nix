@@ -8,9 +8,6 @@ _: {
     };
 
     templates."shell-colors.sh" = ''
-      # ANSI color palette references (256-color mode)
-      # These reference the terminal's colors 0-15 which Wallust controls
-      # When you run `wallust cs <colorscheme>`, the terminal colors change and these automatically reflect
 
       WALLUST_COLOR0=$'\033[38;5;0m'
       WALLUST_COLOR1=$'\033[38;5;1m'

@@ -1,6 +1,3 @@
-# Shared Finix package policy and system builder.
-# Host composition lives in default.nix; boot and deployment drivers are kept
-# in this directory and host-specific policy lives under hosts/.
 {
   inputs,
   system,

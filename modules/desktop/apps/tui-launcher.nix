@@ -84,8 +84,6 @@
           compgen -c | sort -u | awk -v pre="$GLYPH_COMMAND" '{print $0 "\034command\034\033[31m" pre "\033[0m" $0}'
         }
         function list-entries() {
-          # Get locations of desktop application folders according to spec
-          # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
           IFS=':' read -ra DIRS <<<"''${XDG_DATA_HOME-${config.user.homeDirectory}/.local/share}:''${XDG_DATA_DIRS-/usr/local/share:/usr/share}"
           for i in "''${!DIRS[@]}"; do
             if [[ ! -d "''${DIRS[i]}" ]]; then
@@ -148,7 +146,6 @@
               }
             }' \
             $@ </dev/null
-          # the empty stdin is needed in case no *.desktop files
         }
         function run-desktop() {
           CMD="$("''${0}" generate-command "$@" 2>&3)"
@@ -156,17 +153,11 @@
           bash -c "''${CMD}"
         }
         function generate-command() {
-          # Define the search pattern that specifies the block to search for within the .desktop file
           PATTERN="^\\\\[Desktop Entry\\\\]"
           if [[ -n $2 ]]; then
             PATTERN="^\\\\[Desktop Action ''${2}\\\\]"
           fi
           echo "Searching for pattern: ''${PATTERN}" >&3
-          # 1. We see a line starting [Desktop, but we're already searching: deactivate search again
-          # 2. We see the specified pattern: start search
-          # 3. We see an Exec= line during search: remove field codes and set variable
-          # 3. We see a Path= line during search: set variable
-          # 4. Finally, build command line
           awk -v pattern="''${PATTERN}" -v terminal_cmd="''${TERMINAL_COMMAND}" -F= '
             BEGIN{a=0;exec=0;path=0}
                /^\[Desktop/{
@@ -208,7 +199,6 @@
         mkfifo "$FZFPIPE"
         trap 'rm -rf "$TMPDIR"' EXIT INT
 
-        # Iterate over providers and run their list-command
         for PROVIDER_NAME in "''${!PROVIDERS[@]}"; do
           ("''${0}" provide "''${PROVIDER_NAME}" >>"$FZFPIPE") &
         done
@@ -224,11 +214,7 @@
             --header="" --no-info \
             <"$FZFPIPE"
         ) || exit 1
-        # Get the last line of the fzf output. If there were no matches, it contains the query which we'll treat as a custom command
-        # If there were matches, it contains the selected item
         COMMAND_STR=$(printf '%s\n' "''${COMMAND_STR[@]: -1}")
-        # We still need to format the query to conform to our fallback provider.
-        # We check for the presence of field separator character to determine if we're dealing with a custom command
         if [[ $COMMAND_STR != *$'\034'* ]]; then
             COMMAND_STR="''${COMMAND_STR}"$'\034user\034'"''${COMMAND_STR}"$'\034'
         fi
@@ -239,7 +225,6 @@
         readarray -d $'\034' -t PARAMS <<<''${COMMAND_STR}
         # shellcheck disable=SC2086
         readarray -d ''${DEL} -t PROVIDER_ARGS <<<''${PROVIDERS[''${PARAMS[1]}]}
-        # Substitute {1}, {2} etc with the correct values
         COMMAND=''${PROVIDER_ARGS[2]//\{1\}/''${PARAMS[0]}}
         COMMAND=''${COMMAND//\{2\}/''${PARAMS[3]}}
         COMMAND=''${COMMAND%%[[:space:]]}

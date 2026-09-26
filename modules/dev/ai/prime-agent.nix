@@ -6,14 +6,9 @@
   ...
 }: let
   cfg = config.user.dev.prime-agent;
-  # Shared pi/prime-agent model catalog (plain data, see
-  # modules/dev/ai/pi/model-catalog.nix).
   catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
 in {
-  # Prime Agent is the pi core plus the Prime RLM/harness layer; it reads the
-  # same settings.json/models.json schema from ~/.prime/agent/ instead of
-  # ~/.pi/agent/, so its model catalog is shared with pi via model-catalog.nix.
   options.user.dev.prime-agent = {
     enable = lib.mkEnableOption "Prime Agent coding agent";
 
@@ -81,10 +76,6 @@ in {
             inherit (cfg) enabledModels;
             inherit (cfg) rlmMaxDepth;
             hideThinkingBlock = true;
-            # The shared catalog's default is a
-            # vercel-ai-gateway `model@endpoint` id, which only exists once
-            # this extension registers the provider; prime-agent's built-in
-            # catalog has no DeepSeek V4.1 and no explicit-endpoint variants.
             packages = [
               "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
             ];

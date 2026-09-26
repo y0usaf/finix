@@ -152,9 +152,6 @@ const REVIEW_DECISIONS = [
   "CHANGES_REQUESTED",
   "REVIEW_REQUIRED",
 ] as const;
-// `gh pr view` reports no review decision as "", not null. Only this field does
-// it, so the normalization stays here rather than in nullableEnum, where it
-// would stop a genuinely unexpected rollup state from failing closed.
 const reviewDecision = (value: unknown): T.ReviewDecision =>
   nullableEnum(
     value === "" ? null : value,
@@ -249,9 +246,6 @@ export function parseFastCheck(value: unknown): T.Check {
     return { ...details, kind: "skipped", reportedState: state };
   return { ...details, kind: "failed", reportedState: state };
 }
-// The owner-approval gate is excluded from pending everywhere, so the rule has
-// one home. Classifying it as pending on either read path makes the watcher
-// wait on a human, which is the behaviour #172004 removed from the Python.
 function pendingOrGate(
   details: {
     readonly name: string;

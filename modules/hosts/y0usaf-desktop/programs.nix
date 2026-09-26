@@ -5,9 +5,6 @@ _: {
       enable = true;
       autofill = true;
       provider = "cuda";
-      # Words Parakeet cannot know: my projects and handles. Aliases are
-      # only non-words (a real-word alias like "echo" would hijack normal
-      # speech); undeclared mishearings fall through to fuzzy matching.
       vocabulary = {
         Hyprland = ["hyper land" "hipper land"];
         niri = ["neary" "nyree"];

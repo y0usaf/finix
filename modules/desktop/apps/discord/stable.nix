@@ -8,8 +8,6 @@
   inherit (lib) concatStringsSep optional mkEnableOption mkOption mkIf types;
 
   enableFeatures = [
-    # WaylandLinuxDrmSyncobj removed - causes format negotiation failures with niri screenshare
-    # See: pw.link: negotiating -> error no more input formats (-22)
   ];
   disableFeatures = [
     "WebRtcAllowInputVolumeAdjustment"
@@ -26,10 +24,6 @@
       ++ cfg.extraArgs
     );
 
-  # Discord pinned to the last release before the distro-format repackaging,
-  # built from the legacy nixpkgs snapshot's package files against *current*
-  # pkgs. This avoids instantiating a full second nixpkgs (~1s eval + ~300MB
-  # RAM per host) just for one package.
   legacyDir = "${flakeInputs.nixpkgs-discord-legacy}/pkgs/applications/networking/instant-messengers/discord";
   legacySource = (lib.importJSON "${legacyDir}/sources.json")."linux-stable";
   legacyDiscord = pkgs.callPackage "${legacyDir}/linux.nix" {

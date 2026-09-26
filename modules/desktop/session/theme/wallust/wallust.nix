@@ -77,18 +77,14 @@ in {
             exit 1
           fi
 
-          # Pass all args to wallust
           wallust "$@"
 
-          # Brief delay for file write (avoid race conditions)
           sleep 0.5
 
-          # Push live palette updates to the current terminal when supported
           if [ -t 1 ] && [ -f "$HOME/.cache/wallust/rudo-osc.sh" ]; then
             sh "$HOME/.cache/wallust/rudo-osc.sh"
           fi
 
-          # Update pywalfox
           pywalfox --browser librewolf update
 
           ${lib.concatStringsSep "\n" wallustCfg.reloadHooks}
