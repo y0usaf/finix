@@ -418,11 +418,11 @@
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1789673413,
-        "narHash": "sha256-yuT1tfm8Mgio7bxwuyWCqJz5VX3bc6W5htSJR7syoLQ=",
+        "lastModified": 1790384155,
+        "narHash": "sha256-99fi4+UCdXGgeiZbMwCqesnh6wJR6xH7R2xc9NgwN3g=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "47eddac10c380dd050e991e5634f7d2c3a323991",
+        "rev": "e9dec7d927067bf3b2e6d83fa3ba34b2f6a53535",
         "type": "github"
       },
       "original": {

@@ -19,7 +19,9 @@ in {
 
   config = lib.mkIf ekko.enable {
     environment.systemPackages = [package];
-    manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text = builtins.readFile ./init.lisp;
+    # The deck layout, then ekko's Windows XP theme from the pinned source.
+    manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text =
+      builtins.readFile ./init.lisp + "\n" + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp";
 
     # Last in the interactive rc: the outer shell becomes the client. Bare
     # `ekko` only prints usage; `attach` opens a view on the default
