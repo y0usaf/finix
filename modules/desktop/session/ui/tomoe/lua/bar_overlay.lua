@@ -17,7 +17,8 @@ local Sysinfo = _G.__moonshell_sysinfo
     or dofile(os.getenv("HOME") .. "/.config/tomoe/shell/sysinfo.lua")
 _G.__moonshell_sysinfo = Sysinfo
 
-local DEFAULTS = @DEFAULTS@
+-- DEFAULTS is prepended by shell.nix: the overlay fallbacks, serialized
+-- from Nix with toLua.
 
 local M = _G.__moonshell_widgets_bar_overlay or {}
 _G.__moonshell_widgets_bar_overlay = M

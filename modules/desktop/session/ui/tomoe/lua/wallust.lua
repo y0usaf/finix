@@ -10,7 +10,7 @@ local theme = require("moonshell.theme")
 local M = {}
 
 M.path = os.getenv("WALLUST_GTK_COLORS")
-    or ((os.getenv("HOME") or "/home/@USER@") .. "/.cache/wallust/gtk-colors.css")
+    or ((os.getenv("HOME") or nix_home) .. "/.cache/wallust/gtk-colors.css")
 
 M.version = shell.state(0)
 
