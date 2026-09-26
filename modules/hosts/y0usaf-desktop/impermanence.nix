@@ -249,6 +249,9 @@ in {
         ++ lib.optionals config.user.gaming.core.enable [
           ".barony"
           ".local/share/Ultrapool"
+          # Godot games (Ultrapool, Luck be a Landlord) keep their saves in
+          # the engine's per-game user dirs, not under their own names.
+          ".local/share/godot/app_userdata"
         ]
         ++ [
           # Emulation / gaming saves appended above via gameSaves
