@@ -45,30 +45,6 @@ gone window left behind, or the keys go dead."
         (deck--front state :right)
         (first windows))))
 
-(defun deck--exclusive-edge (anchors)
-  "The edge an exclusive zone applies to, by the layer-shell rule."
-  (let ((set (sort (copy-list anchors) #'string< :key #'symbol-name)))
-    (cond ((equal set '(:top)) '(:top))
-          ((equal set '(:bottom)) '(:bottom))
-          ((equal set '(:left)) '(:left))
-          ((equal set '(:right)) '(:right))
-          ((equal set '(:left :right :top)) '(:top))
-          ((equal set '(:bottom :left :right)) '(:bottom))
-          ((equal set '(:bottom :left :top)) '(:left))
-          ((equal set '(:bottom :right :top)) '(:right))
-          (t nil))))
-
-(defun deck--layer-inset (layer edge)
-  "What LAYER reserves on EDGE: its exclusive zone plus that edge's margin."
-  (let ((zone (getf layer :exclusive-zone))
-        (margin (getf layer :margin)))
-    (if (and (getf layer :visible) (integerp zone) (plusp zone)
-             (member edge (deck--exclusive-edge (getf layer :anchors))))
-        (+ zone (ecase edge
-                  (:top (first margin)) (:right (second margin))
-                  (:bottom (third margin)) (:left (fourth margin))))
-        0)))
-
 (defun deck--output-of (outputs entry)
   (let ((cx (+ (getf entry :x) (floor (getf entry :width) 2)))
         (cy (+ (getf entry :y) (floor (getf entry :height) 2))))
@@ -78,27 +54,18 @@ gone window left behind, or the keys go dead."
              outputs)))
 
 (defun deck--area (snapshot)
-  "The focused window's output box and the area its exclusive zones leave free.
-A layer surface carries no output name here, so every mapped panel is charged
-against the output the layout is drawing on."
+  "The focused window's output box and the area its exclusive zones leave free."
   (let* ((outputs (context snapshot :outputs))
-         (focus (context snapshot :focus))
-         (entry (and focus (deck--layout-entry (context snapshot :layout) focus)))
-         (output (or (and entry (deck--output-of outputs entry)) (first outputs))))
-    (when output
-      (flet ((inset (edge)
-               (reduce #'+ (context snapshot :layers) :initial-value 0
-                       :key (lambda (layer) (deck--layer-inset layer edge)))))
-        (let ((left (inset :left)) (right (inset :right))
-              (top (inset :top)) (bottom (inset :bottom)))
-          (list :output output
-                :x (+ (getf output :x) left) :y (+ (getf output :y) top)
-                :width (max 1 (- (getf output :width) left right))
-                :height (max 1 (- (getf output :height) top bottom))))))))
+         (focus (previous-context snapshot :focus))
+         (entry (and focus (deck--layout-entry (previous-context snapshot :layout) focus)))
+         (output (or (and entry (deck--output-of outputs entry)) (first outputs)))
+         (area (and output (policy--area snapshot (getf output :name)))))
+    (when area
+      (list* :output output area))))
 
 (defun deck--box (state area id)
   "Where ID goes, or NIL when it is not in the window set."
-  (let* ((gaps +deck-gaps+)
+  (let* ((gaps (getf +layout+ :gaps))
          (x (+ (getf area :x) gaps)) (y (+ (getf area :y) gaps))
          (width (- (getf area :width) (* 2 gaps))) (height (- (getf area :height) (* 2 gaps))))
     (cond
@@ -121,7 +88,7 @@ against the output the layout is drawing on."
          (list (+ x (* column (+ cell-width gaps))) (+ y (* row (+ cell-height gaps)))
                cell-width cell-height)))
       (t
-       (let* ((ratio (nth (1- (getf state :ratio)) +deck-ratios+))
+       (let* ((ratio (nth (1- (getf state :ratio)) (getf +layout+ :ratios)))
               (left-width (floor (* (- width gaps) ratio)))
               (right-width (- width gaps left-width))
               (side (deck--side-of state id))
@@ -134,10 +101,10 @@ against the output the layout is drawing on."
                  (if (eql side :left) left-width right-width)
                  height)))))))
 
-(defun deck--places (snapshot state area)
-  "One place effect per live window: exactly one owner, no duplicates."
+(defun deck--places (managed state area)
+  "One place effect per managed window: exactly one owner, no duplicates."
   (let ((windows (deck--windows state)))
-    (loop for window in (context snapshot :windows)
+    (loop for window in managed
           for id = (getf window :id)
           for box = (deck--box state area id)
           append (list (if box
@@ -174,7 +141,7 @@ against the output the layout is drawing on."
          (side (deck--side-of state id))
          (column (deck--column state side))
          (index (position id column))
-         (other (and index (nth (+ index direction) column)))
+         (other (and index (>= (+ index direction) 0) (nth (+ index direction) column)))
          (order (deck--windows state))
          (mine (and other (position id order)))
          (theirs (and other (position other order))))
@@ -216,22 +183,25 @@ against the output the layout is drawing on."
       (deck--adopt-front state side id))
     state))
 
+(defun deck--set-fullscreen (state id on)
+  (setf (getf state :fullscreen) (remove id (getf state :fullscreen)))
+  (when on
+    (setf (getf state :floating) (remove id (getf state :floating)))
+    (push id (getf state :fullscreen))
+    (deck--focus-window state id))
+  state)
+
 (defun deck--toggle-floating (state area)
   (let ((id (deck--current state)))
-    (when id
-      (cond
-        ((member id (getf state :fullscreen))
-         (setf (getf state :fullscreen) (remove id (getf state :fullscreen))))
-        ((member id (getf state :floating))
-         (setf (getf state :floating) (remove id (getf state :floating))
-               (getf state :floats) (remove id (getf state :floats) :key #'car)))
-        (t
-         (let* ((width (floor (* (getf area :width) +deck-float-numerator+)))
-                (height (floor (* (getf area :height) +deck-float-numerator+)))
-                (x (+ (getf area :x) (floor (- (getf area :width) width) 2)))
-                (y (+ (getf area :y) (floor (- (getf area :height) height) 2))))
-           (push id (getf state :floating))
-           (push (cons id (list x y width height)) (getf state :floats))))))
+    (cond
+      ((null id))
+      ((member id (getf state :fullscreen)) (deck--set-fullscreen state id nil))
+      ((member id (getf state :floating))
+       (setf (getf state :floating) (remove id (getf state :floating))
+             (getf state :floats) (remove id (getf state :floats) :key #'car)))
+      (area
+       (push id (getf state :floating))
+       (push (cons id (policy--centred area (getf +layout+ :float-ratio))) (getf state :floats))))
     state))
 
 (defun deck--command (state area command)
@@ -251,29 +221,41 @@ against the output the layout is drawing on."
     ((equal command "to-right") (deck--to-column state :right))
     ((equal command "grid") (setf (getf state :grid) (not (getf state :grid))))
     ((equal command "ratio")
-     (setf (getf state :ratio) (1+ (mod (getf state :ratio) (length +deck-ratios+)))))
+     (setf (getf state :ratio) (1+ (mod (getf state :ratio) (length (getf +layout+ :ratios))))))
     ((equal command "floating") (deck--toggle-floating state area))
     ((equal command "fullscreen")
      (let ((id (deck--current state)))
-       (when id
-         (if (member id (getf state :fullscreen))
-             (setf (getf state :fullscreen) (remove id (getf state :fullscreen)))
-             (progn (setf (getf state :floating) (remove id (getf state :floating)))
-                    (push id (getf state :fullscreen)))))))
+       (when id (deck--set-fullscreen state id (not (member id (getf state :fullscreen)))))))
     (t state)))
 
-(defun deck--bindings ()
-  (mapcar (lambda (binding) (apply #'bind-key binding)) +deck-bindings+))
+(defun deck--request (state id request requested)
+  (case request
+    (:fullscreen (deck--set-fullscreen state id requested))
+    (:unfullscreen (deck--set-fullscreen state id nil))
+    (:activate
+     (let ((side (deck--side-of state id)))
+       (when (and side (deck--manageable-p state id)) (deck--adopt-front state side id))
+       (deck--focus-window state id))))
+  state)
+
+(defun deck--raises (state current)
+  (mapcar #'raise-window
+          (append (remove current (reverse (getf state :floating)))
+                  (when (member current (getf state :floating)) (list current))
+                  (getf state :fullscreen))))
 
 (define-extension "deck"
-    (:reads (:windows :outputs :layers :layout :focus :key :button)
-     :state (deck--state))
+    (:reads (:windows :rules :outputs :workareas :layout :focus :key :button :request)
+     :state (deck--state) :admission t)
     (snapshot state event)
-  (let* ((windows (context snapshot :windows))
+  (let* ((windows (remove-if (lambda (window) (policy--unmanaged-p snapshot window))
+                             (context snapshot :windows)))
          (ids (mapcar (lambda (window) (getf window :id)) windows))
-         (focused (context snapshot :focus))
+         (focused (previous-context snapshot :focus))
          (area (deck--area snapshot))
-         (type (getf event :type)))
+         (type (getf event :type))
+         (command (and (eq type :key) (equal (getf event :owner) "deck") (getf event :command)))
+         (terminal (and (equal command "terminal") (policy--terminal windows))))
     (when (eq type :unmap)
       (let ((gone (getf event :id)))
         (dolist (side '(:left :right))
@@ -313,21 +295,26 @@ against the output the layout is drawing on."
             (push (cons id side) (getf state :columns))
             (setf (getf state :windows) (append (getf state :windows) (list id)))
             (deck--adopt-front state side id)
-            (setf (getf state :focus) id)))))
-    (when (and (eq type :key) (equal (getf event :owner) "deck"))
-      (deck--command state area (getf event :command)))
+            (setf (getf state :focus) id)
+            (when (getf window :fullscreen-requested)
+              (deck--set-fullscreen state id t))))))
+    (when command
+      (deck--command state area command))
+    (when terminal
+      (deck--request state terminal :activate nil))
+    (when (and (member type '(:metadata :request)) (member (getf event :id) ids))
+      (deck--request state (getf event :id) (getf event :request) (getf event :requested)))
     (when (and (eq type :button) (eql (getf event :state) :pressed))
       (let ((id (getf event :id)))
-        (when (and (integerp id) (member id (deck--windows state))
-                   (deck--manageable-p state id) (deck--side-of state id))
-          (deck--adopt-front state (deck--side-of state id) id)
+        (when (and (integerp id) (member id (deck--windows state)))
+          (when (and (deck--manageable-p state id) (deck--side-of state id))
+            (deck--adopt-front state (deck--side-of state id) id))
           (deck--focus-window state id))))
-    (let* ((command (when (and (eq type :key) (equal (getf event :owner) "deck"))
-                      (getf event :command)))
-           (current (deck--current state)))
+    (let ((current (deck--current state)))
       (values state
-              (append (deck--bindings) (deck--places snapshot state area)
-                      (list (focus current)))
-              (cond ((and (equal command "close") current)
-                     (list (close-window current)))
-                    (t nil))))))
+              (append (mapcar (lambda (binding) (apply #'bind-key binding)) +layout-bindings+)
+                      (when area (deck--places windows state area))
+                      (deck--raises state current)
+                      (list (focus current :raise nil)))
+              (when (and (equal command "terminal") (null terminal))
+                (list (apply #'launch (policy--launch "terminal"))))))))

@@ -16,9 +16,6 @@ _: {
         bongo-cat.enable = true;
       };
       displays."eDP-1".scale = 1;
-      extraConfig = ''
-        wm.honor_client_fullscreen = true
-      '';
     };
   };
 }

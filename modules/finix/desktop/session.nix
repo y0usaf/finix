@@ -12,29 +12,23 @@
 
   tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
 
-  tomoeLuaPkg = flakeInputs.tomoe-lua.packages."${sys}".default;
   tomoePortalPkg =
     pkgs.runCommand "tomoe-portal" {
       meta.description = "xdg-desktop-portal ScreenCast backend metadata for tomoe";
     } ''
-      install -Dm644 ${tomoeLuaPkg}/share/xdg-desktop-portal/portals/tomoe.portal \
+      install -Dm644 ${tomoePkg}/share/xdg-desktop-portal/portals/tomoe.portal \
         $out/share/xdg-desktop-portal/portals/tomoe.portal
-      install -Dm644 ${tomoeLuaPkg}/share/xdg-desktop-portal/tomoe-portals.conf \
+      install -Dm644 ${tomoePkg}/share/xdg-desktop-portal/tomoe-portals.conf \
         $out/share/xdg-desktop-portal/tomoe-portals.conf
-      install -Dm644 ${tomoeLuaPkg}/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service \
+      install -Dm644 ${tomoePkg}/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service \
         $out/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service
     '';
 
-  deckPolicy = pkgs.writeText "tomoe-deck.lisp" config.user.ui.tomoe.lisp.deckText;
   starterPolicy = pkgs.writeText "tomoe-init.lisp" config.user.ui.tomoe.lisp.initText;
 in {
-  imports = [./lisp-config.nix];
-
   finit.services.seatd.runlevels = lib.mkForce "234";
 
-  xdg.portal.portals =
-    [pkgs.xdg-desktop-portal-gtk]
-    ++ lib.optional config.user.ui.tomoeLua.enable tomoePortalPkg;
+  xdg.portal.portals = [pkgs.xdg-desktop-portal-gtk tomoePortalPkg];
 
   environment.etc."xdg/xdg-desktop-portal/tomoe-portals.conf".text = ''
     [preferred]
@@ -106,8 +100,6 @@ in {
         policy="$HOME/.config/tomoe/init.lisp"
         ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/tomoe"
         ${pkgs.coreutils}/bin/install -m 0644 ${starterPolicy} "$policy"
-        deck="$HOME/.config/tomoe/deck.lisp"
-        ${pkgs.coreutils}/bin/install -m 0644 ${deckPolicy} "$deck"
         exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
           ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
           exec ${lib.getExe tomoePkg} --backend drm "$@"
