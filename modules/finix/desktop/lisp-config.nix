@@ -41,6 +41,7 @@
     (binding [":alt"] "3" ":discord")
     (binding [":alt"] "4" ":steam")
     (binding [":alt"] "5" ":obs")
+    (binding [":alt"] "9" ":power")
     (binding [":alt"] "t" ":terminal")
     (binding [":super"] "r" ":launcher")
     (binding [":alt"] "e" ":files")
