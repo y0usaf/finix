@@ -703,17 +703,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1788190630,
-        "narHash": "sha256-otWXS4R7dTWCe4w4lkKU+Wcv5VU3ktbWXTlQg9QRWgo=",
+        "lastModified": 1790342296,
+        "narHash": "sha256-0Vu4hjsRYloJsRCW9+3mL04HAOmV0oR1N6L8UFUO4hU=",
         "ref": "refs/heads/main",
-        "rev": "fbd28b06f607ac47d6225ca32fbee9ed69a964f1",
-        "revCount": 3,
+        "rev": "6ec9944210f1129e2711373ece93d425e7ea79fb",
+        "revCount": 19,
         "type": "git",
-        "url": "ssh://git@github.com/y0usaf/grok-bot-0.18-linux.git"
+        "url": "ssh://git@github.com/y0usaf/silva-bot.git"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@github.com/y0usaf/grok-bot-0.18-linux.git"
+        "url": "ssh://git@github.com/y0usaf/silva-bot.git"
       }
     },
     "home-manager": {

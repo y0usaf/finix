@@ -44,8 +44,10 @@
 
     grok-bot = {
       # Private repo: ssh fetcher (same as bolo). Unfree redistributed
-      # Anysphere/XAI artifacts, kept private.
-      url = "git+ssh://git@github.com/y0usaf/grok-bot-0.18-linux.git";
+      # Anysphere/XAI artifacts, kept private. Source moved from
+      # grok-bot-0.18-linux to silva-bot, which now carries the Linux port's
+      # build recipe (flake.nix + package.nix + the patch set) on main.
+      url = "git+ssh://git@github.com/y0usaf/silva-bot.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

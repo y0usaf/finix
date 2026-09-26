@@ -111,6 +111,21 @@ in {
           ".aws"
           ".mcp-auth"
 
+          # Silva Bot (Grok Bot 0.18 Linux port). The port moved to XDG
+          # roots named "silvabot"; these mirror the ~/.fx / ~/.hermes /
+          # ~/.prime entries and must survive the switch or a reboot would
+          # wipe settings, plugins and the local Docker runtime.
+          ".config/silvabot"      # settings.json, plugins/, source-map.json
+          ".local/share/silvabot" # agents, transcripts, host secrets, docker runtime
+          ".local/state/silvabot" # host.lock, tokens, crash/upgrade markers
+
+          # Legacy roots, retained until the migration has been confirmed:
+          # the pre-XDG layout must stay persisted or a second boot would
+          # lose whatever the first-run migration has not yet carried over.
+          ".cursor/sand-dev"
+          ".cursor/sand"
+          ".grokbot"
+
           # AI / dev tooling state
           ".fx" # fx settings, sessions, skills, and durable agent state
           ".omfx" # oh my fx profile settings (startup_mode and fork-only keys)
