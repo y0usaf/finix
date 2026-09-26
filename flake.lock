@@ -343,11 +343,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1789528806,
-        "narHash": "sha256-GiQIZPScHD8D0RiD1jzZIZze7Fr9PZEyauTMiFck7d4=",
+        "lastModified": 1790433226,
+        "narHash": "sha256-5YXBuVBisT2alnh9wBSs+U8k9IqOhkvvQ6fAyFNeh4o=",
         "owner": "y0usaf",
         "repo": "cudaterm",
-        "rev": "cfd52d2de89db203143210bd23806f17706d6d2c",
+        "rev": "be09087d574b3a1b96a0eaddd16aea7a48709d0b",
         "type": "github"
       },
       "original": {
@@ -418,11 +418,11 @@
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1790389858,
-        "narHash": "sha256-urjINqZHn+GQ4+WRkAuefcHNL91X80m88epnUFXJoPQ=",
+        "lastModified": 1790433663,
+        "narHash": "sha256-0iJZDJXrx28oAIXEGX868yWq7WGBlcpxTnpCQMCvKn0=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "c9124e123e688a875d2aab402ca34620a336049a",
+        "rev": "11b4676b5ff07fa86ed4fbe2028db112dc365ad5",
         "type": "github"
       },
       "original": {
@@ -1375,11 +1375,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787833531,
-        "narHash": "sha256-Xj30lG3Z6Bp7McNPSBe6a93ys9wnq+t0LwG/tCr+xt8=",
+        "lastModified": 1790348530,
+        "narHash": "sha256-cf+gc4Np9wWLqbS6R18uoHPUA5M4kx5IPLyhalcmWCk=",
         "owner": "getpaseo",
         "repo": "paseo",
-        "rev": "a8734a972495cf343f628d1017e87775767aade5",
+        "rev": "8cd989529e2d86bb6d1c8a775bf695fa5970c997",
         "type": "github"
       },
       "original": {
@@ -1909,16 +1909,16 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1790383203,
-        "narHash": "sha256-Uu8oS1uMtfk3kDGWfSlVhFFiiUPONwgovxHN8U+CwKU=",
+        "lastModified": 1790434514,
+        "narHash": "sha256-9zSSjC9GDdhwY0eIO/d9u+WtwBcICJwQkYIPIko7hdY=",
         "ref": "refs/heads/main",
-        "rev": "e1fe2847241f374db695f9040f05497285775402",
+        "rev": "e7ae300b487ac5c534085b312899e9543f4b5739",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
       },
       "original": {
-        "rev": "e1fe2847241f374db695f9040f05497285775402",
+        "rev": "e7ae300b487ac5c534085b312899e9543f4b5739",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
