@@ -193,7 +193,7 @@
     # to write the lock for the whole flake ("has an unlocked input"). Bump
     # after committing: `git -C ~/dev/maintaining/tomoe rev-parse HEAD` and
     # replace the rev below.
-    tomoe.url = "git+file:///home/y0usaf/dev/maintaining/tomoe?rev=c333228490023b8483600bd1b2cb96a8c2164810&shallow=1";
+    tomoe.url = "git+file:///home/y0usaf/dev/maintaining/tomoe?rev=e1fe2847241f374db695f9040f05497285775402&shallow=1";
 
     # Fallback compositor: the last Rust+Lua-era revision of the same
     # checkout, before the Lisp rewrite. `shallow=1` is required — the local
