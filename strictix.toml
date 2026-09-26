@@ -1,1 +1,12 @@
 ignore = ["tmp"]
+
+# One options.json per module system; regenerate with .strictix/generate.sh.
+[lint]
+schema = ".strictix/hosts.json"
+enabled = ["unused-option"]
+
+[schemas]
+"modules/finix/deploy.nix" = ".strictix/flake.json"
+"modules/finix/esp-island.nix" = ".strictix/flake.json"
+"modules/outputs.nix" = ".strictix/flake.json"
+"modules/hosts/android-phone" = ".strictix/droid.json"

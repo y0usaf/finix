@@ -207,18 +207,14 @@ in {
       # Match desktop: development trees live on dedicated durable subvolume.
       "${homeDir}/dev" = subvolMount "@dev";
     }
-    // builtins.listToAttrs (map (directory: {
-        name = directory;
-        value = {
+    // (lib.genAttrs (builtins.filter
+        (directory: !lib.hasPrefix "/etc/" directory && directory != "/root")
+        (map dirPath persistCfg.directories)) (directory: {
           device = "/persist${directory}";
           fsType = "btrfs";
           options = ["bind"];
           neededForBoot = true;
-        };
-      })
-      (builtins.filter
-        (directory: !lib.hasPrefix "/etc/" directory && directory != "/root")
-        (map dirPath persistCfg.directories)));
+        }));
 
   services = {
     docker.enable = true;

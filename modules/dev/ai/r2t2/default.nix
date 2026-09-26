@@ -56,7 +56,7 @@
   # upstream tree so the change is reviewable as a diff in this directory.
   patched = pkgs.applyPatches {
     name = "Confucius4-R2T2-patched";
-    src = src;
+    inherit src;
     patches = [./ws_server-memory-knobs.patch];
   };
 
@@ -140,7 +140,7 @@
   ];
 
   python = pkgs.python312;
-  uv = pkgs.uv;
+  inherit (pkgs) uv;
 
   # --- NixOS runtime environment -------------------------------------------
   # PyPI wheels (numpy, torch, vllm) need sonames NixOS does not put on the

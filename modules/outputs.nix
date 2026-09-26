@@ -6,16 +6,6 @@
   ...
 }: let
   cfg = config.finix;
-  tools =
-    (lib.evalModules {
-      specialArgs = {
-        pkgs = inputs.nixpkgs.legacyPackages.${system};
-        flakeInputs = inputs;
-      };
-      modules = [
-        ./dev/work/vercel/wrapper.nix
-      ];
-    }).config.user;
 in {
   imports = [./finix];
   options.flake = lib.mkOption {

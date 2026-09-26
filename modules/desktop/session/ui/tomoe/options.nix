@@ -14,7 +14,7 @@
     };
 
     displays = lib.mkOption {
-      type = lib.types.attrs;
+      type = lib.types.attrsOf lib.types.anything;
       default = {};
       description = ''
         Per-output display settings, keyed by output name. Serialized to
