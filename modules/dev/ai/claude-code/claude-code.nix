@@ -28,7 +28,7 @@
         # clauses themselves live in config.user.dev.prompts.ethics and
         # config.user.dev.prompts.noTests.
         exec ${lib.getExe pkgs.claude-code} \
-          --append-system-prompt ${lib.escapeShellArg (config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests)} \
+          --append-system-prompt ${lib.escapeShellArg (config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments)} \
           "$@"
       '')
     ];

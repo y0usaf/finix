@@ -157,7 +157,7 @@ in {
         # symlink would be dropped; deploy a real file with type = "copy".
         ".reasonix/REASONIX.md" = {
           type = "copy";
-          text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests;
+          text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
         };
 
         # Provider + default model, merged into the mutable ~/.reasonix/config.toml

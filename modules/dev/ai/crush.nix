@@ -21,6 +21,6 @@
     # blocks through that native channel; crush.json is untouched so user options
     # and defaults stay.
     manzil.users."${config.user.name}".files.".config/crush/CRUSH.md".text =
-      config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests;
+      config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
   };
 }

@@ -84,6 +84,8 @@
       ${config.user.dev.prompts.ethics}
 
       ${config.user.dev.prompts.noTests}
+
+      ${config.user.dev.prompts.noComments}
     '';
   };
 }
