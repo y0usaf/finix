@@ -173,24 +173,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hermes-bots-mod = {
-      url = "github:y0usaf/hermes-bots-mod/41b505132dc77f256faea85e2d36519f93238427";
-      flake = false;
-    };
-
-    hermes-desktop-terminal = {
-      url = "path:/home/y0usaf/dev/sandbox/hermes-desktop-terminal";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    hermes-agent = {
-      # Track upstream main; the flake.lock rev is the actual pin. Earlier inline
-      # rev pin (v2026.8.19) left the install ~1800 commits behind, missing the
-      # deleted-profile-resurrection fixes (#94842/#95188/#94426).
-      url = "github:NousResearch/hermes-agent/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # The compositor, from this checkout. git+file keeps the copy to the
     # committed tree (no 4 GB target/, no .git), and its own nixpkgs pin
     # supplies the wlroots 0.20.1 the native ABI was built against, so it must

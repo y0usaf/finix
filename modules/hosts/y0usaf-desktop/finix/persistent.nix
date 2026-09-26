@@ -90,7 +90,6 @@ in {
     ../../../finix/desktop
     ./boot.nix
     ./graphical.nix
-    ./hermes.nix
   ];
 
   # manzil dotfiles: native finix module (imported in finix/default.nix),
