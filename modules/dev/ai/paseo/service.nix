@@ -25,6 +25,10 @@
     else user;
   relayArgument = relay:
     lib.optionalString (!relay.enable) "--no-relay";
+  agentConfigEnv = lib.filterAttrs (_: value: value != null) {
+    CLAUDE_CONFIG_DIR = config.environment.variables.CLAUDE_CONFIG_DIR or null;
+    CODEX_HOME = config.environment.variables.CODEX_HOME or null;
+  };
 in {
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [paseo];
@@ -60,6 +64,7 @@ in {
           PASEO_HOME = homePaseo;
           PASEO_LISTEN = "${cfg.listenAddress}:${toString cfg.port}";
         }
+        // agentConfigEnv
         // cfg.environment;
       conditions = ["net/lo/up" "net/tailscale0/up"];
       log = true;
