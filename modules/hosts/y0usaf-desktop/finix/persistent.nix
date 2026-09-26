@@ -287,10 +287,8 @@ in {
     }
     # System allowlist (/var/lib/*, /var/log, /root) as fstab binds: mounted
     # early, before activation and services.
-    // builtins.listToAttrs (map (d: {
-        name = d;
-        value =
-          (dir: {
+    // (lib.genAttrs (builtins.filter (d: !lib.hasPrefix "/etc/" d && d != "/root")
+        (map dirPath persistCfg.directories)) (d: (dir: {
             device = "/persist${dir}";
             # finix's initrd generator requires a real fsType for neededForBoot binds;
             # mount.nix ignores it when the bind option is present.
@@ -298,10 +296,7 @@ in {
             options = ["bind"];
             neededForBoot = true;
           })
-          d;
-      })
-      (builtins.filter (d: !lib.hasPrefix "/etc/" d && d != "/root")
-        (map dirPath persistCfg.directories)));
+          d));
 
   # Cap nix-daemon (and every build it spawns) at 24 of 32 cores (75%).
   # cgroup v2 cpu.max = quota µs per 100ms period; 2400000 = 24 cores.
@@ -385,6 +380,10 @@ in {
         printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > /etc/resolv.conf || true
       ''}";
       conditions = ["net/lo/up"];
+      log = true;
+    };
+  };
+
   # Root is tmpfs, so /etc is rebuilt every boot and NetworkManager profiles
   # written by nmtui land in RAM. finix does not bind-mount /etc/* allowlist
   # entries (the fstab filter above drops them so a bind cannot shadow
@@ -406,10 +405,6 @@ in {
           ${pkgs.coreutils}/bin/install -m 0600 -o root -g root {} "$dst/" \;
       fi
     '';
-  };
-
-      log = true;
-    };
   };
 
   # The desktop must accept pushed closures + local rebuilds.
