@@ -40,6 +40,10 @@ in {
   options.user.dev.work.vercel.enable = lib.mkEnableOption "Vercel CLI";
 
   config = lib.mkIf config.user.dev.work.vercel.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".local/share/com.vercel.cli"
+      ".local/share/com.vercel.token"
+    ];
     environment.systemPackages = [
       (pkgs.runCommand "vercel-account-router" {} ''
         mkdir -p $out/bin
