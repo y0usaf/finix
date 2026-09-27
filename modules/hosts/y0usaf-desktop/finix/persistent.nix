@@ -52,12 +52,7 @@ in {
       inherit diskUuid;
       fallbackDevices = ["/dev/nvme0n1p5"];
     };
-    persistence.bindReplay = {
-      enable = true;
-      bindRoot = true;
-      directories = map dirPath persistCfg.users.y0usaf.directories;
-      files = map dirPath userFiles;
-    };
+    persistence.bindReplay.bindRoot = true;
   };
 
   hardware.firmware = [pkgs.linux-firmware];
@@ -265,18 +260,5 @@ in {
       conditions = ["net/lo/up"];
       log = true;
     };
-  };
-
-  system.activation.scripts.networkManagerConnections = {
-    deps = ["etc"];
-    text = ''
-      src=/persist/etc/NetworkManager/system-connections
-      dst=/etc/NetworkManager/system-connections
-      ${pkgs.coreutils}/bin/install -d -m 0700 "$dst"
-      if [ -d "$src" ]; then
-        ${pkgs.findutils}/bin/find "$src" -maxdepth 1 -type f -exec \
-          ${pkgs.coreutils}/bin/install -m 0600 -o root -g root {} "$dst/" \;
-      fi
-    '';
   };
 }
