@@ -95,7 +95,7 @@
     };
 
   launches = lib.mapAttrsToList (command: argv: [command argv]) {
-    cursor = [defaults.ide];
+    cursor = ["cursor"];
     browser = [defaults.browser];
     discord = [defaults.discord];
     steam = ["steam"];
