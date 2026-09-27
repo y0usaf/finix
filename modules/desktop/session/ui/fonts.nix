@@ -27,8 +27,8 @@
     fonts.packages = [
       flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default
       pkgs.noto-fonts-cjk-sans
-      pkgs.nerd-fonts.symbols-only
       pkgs.noto-fonts-color-emoji
+      pkgs.nerd-fonts.symbols-only
     ];
 
     manzil.users."${config.user.name}" = {
