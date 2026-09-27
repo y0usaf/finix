@@ -5,7 +5,6 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.programs.bolo;
   hfBase = "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/resolve/main";
   models = {
     "parakeet-v3-int8" = {
@@ -61,125 +60,52 @@
     '';
   };
 
-  buildBoloPackages = provider:
-    if provider == "cuda"
-    then {
-      bolod = flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}".bolod.override {
-        sherpa-onnx = sherpaOnnxGpu;
-      };
-      inherit (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}") bolo;
-    }
-    else flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}";
-
-  boloPkgs = buildBoloPackages cfg.provider;
-  autofillUdevRules = enabled:
-    lib.optional enabled (pkgs.writeTextFile {
-      name = "bolo-uinput-rules";
-      destination = "/lib/udev/rules.d/99-bolo-uinput.rules";
-      text = ''
-        KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
-      '';
-    });
-  autofillPipe = enabled: lib.mkIf enabled (lib.mkDefault "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool");
+  inherit (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}") bolo;
 
   bolod = pkgs.symlinkJoin {
     name = "bolod-wrapped";
-    paths = [boloPkgs.bolod];
+    paths = [
+      (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}".bolod.override {
+        sherpa-onnx = sherpaOnnxGpu;
+      })
+    ];
     nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = ''
-      wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath ([
-          pkgs.pipewire
-          pkgs.wl-clipboard
-          pkgs.libnotify
-          pkgs.coreutils
-        ]
-        ++ lib.optional cfg.autofill pkgs.dotool)}
+      wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath [
+        pkgs.pipewire
+        pkgs.wl-clipboard
+        pkgs.libnotify
+        pkgs.coreutils
+        pkgs.dotool
+      ]}
     '';
   };
 in {
-  options.user.programs.bolo = {
-    enable = lib.mkEnableOption "bolo speech-to-text daemon (bolod + thin client)";
-    model = lib.mkOption {
-      type = lib.types.enum (lib.attrNames models);
-      default = "parakeet-v3-int8";
-      description = "Active model; written to the bolod manifest.";
-    };
-    provider = lib.mkOption {
-      type = lib.types.enum ["cpu" "cuda"];
-      default = "cpu";
-      description = ''
-        onnxruntime execution provider. "cuda" rebuilds sherpa-onnx +
-        onnxruntime with cudaSupport (long first build). cpu is the
-        measured-sufficient default (12x real-time); cuda is opt-in.
-      '';
-    };
-    language = lib.mkOption {
-      type = lib.types.str;
-      default = "en";
-      description = "Dictation language hint recorded in the manifest.";
-    };
-    threads = lib.mkOption {
-      type = lib.types.nullOr lib.types.ints.positive;
-      default = null;
-      description = "Decoder threads; null = 50% of available cores (daemon default).";
-    };
-    pipeTo = lib.mkOption {
-      type = lib.types.str;
-      default = "";
-      description = "Optional command the transcript is piped to after copy.";
-    };
-    vocabulary = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.listOf lib.types.str);
-      default = {};
-      example = lib.literalExpression ''
-        {
-          Hyprland = ["hyper land"];
-          niri = [];
-        }
-      '';
-      description = ''
-        Transcript corrections: canonical word -> known mishearings.
-        bolod applies aliases exactly, then falls back to fuzzy matching
-        (vocabFuzzy) for undeclared mishearings. Policy lives in the host,
-        this module only compiles it into the manifest.
-      '';
-    };
-    vocabFuzzy = lib.mkOption {
-      type = lib.types.numbers.between 0.0 1.0;
-      default = 0.85;
-      description = ''
-        Similarity threshold for bolod's fuzzy vocabulary pass; 0 disables
-        it, leaving only exact alias/word matching.
-      '';
-    };
-    autofill = lib.mkEnableOption "typing the transcript into the focused window (dotool/uinput)";
-    tomoeKeybind = lib.mkOption {
-      type = lib.types.str;
-      default = "Alt+m";
-      description = ''
-        Tomoe push-to-talk bind (hold form), as modifiers from Super, Alt,
-        Ctrl, Shift and Mod joined to a keysym with "+": key-down spawns
-        bolo to start recording, key-up spawns it again to stop and
-        transcribe.
-      '';
-    };
-  };
+  options.user.programs.bolo.enable = lib.mkEnableOption "bolo speech-to-text daemon (bolod + thin client)";
 
-  config = lib.mkIf cfg.enable {
-    environment.systemPackages = [boloPkgs.bolo];
+  config = lib.mkIf config.user.programs.bolo.enable {
+    environment.systemPackages = [bolo];
 
-    services.udev.packages = autofillUdevRules cfg.autofill;
-
-    user.programs.bolo.pipeTo = autofillPipe cfg.autofill;
+    services.udev.packages = [
+      (pkgs.writeTextFile {
+        name = "bolo-uinput-rules";
+        destination = "/lib/udev/rules.d/99-bolo-uinput.rules";
+        text = ''
+          KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+        '';
+      })
+    ];
 
     manzil.users."${config.user.name}" = {
       files =
         {
           ".config/bolo/manifest.json".source = pkgs.writeText "bolo-manifest" (builtins.toJSON {
             version = 1;
-            active = cfg.model;
-            inherit (cfg) language provider threads;
-            pipe_to = cfg.pipeTo;
+            active = "parakeet-v3-int8";
+            language = "en";
+            provider = "cuda";
+            threads = null;
+            pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool";
             models = lib.mapAttrsToList (name: m:
               {
                 inherit name;
@@ -194,8 +120,17 @@ in {
                 tokens = "${modelDir name}/tokens.txt";
               })
             models;
-            vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) cfg.vocabulary;
-            vocab_fuzzy = cfg.vocabFuzzy;
+            vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) {
+              Hyprland = ["hyper land" "hipper land"];
+              niri = ["neary" "nyree"];
+              y0usaf = ["you sef" "yousef" "you saf"];
+              "sherpa-onnx" = ["sherpa onyx" "sherpa onix"];
+              tomoe = ["toe moe" "tomo eh"];
+              ekko = ["eck oh" "eh ko"];
+              moon = [];
+              finix = ["fee nix" "finnix" "fi nix"];
+            };
+            vocab_fuzzy = 0.85;
           });
         }
         // lib.foldl' (acc: name:
@@ -206,25 +141,15 @@ in {
         (lib.attrNames (lib.filterAttrs (_: m: m ? files) models));
     };
 
-    user.ui.tomoe.extraConfig = lib.mkIf config.user.ui.tomoe.enable (let
-      inherit (config.lib.generators) mkLispInline toLisp;
-      keys = lib.splitString "+" cfg.tomoeKeybind;
-      modifiers = {
-        Super = ":super";
-        Alt = ":alt";
-        Ctrl = ":control";
-        Shift = ":shift";
-        Mod = ":mod";
-      };
-    in ''
+    user.ui.tomoe.extraConfig = lib.mkIf config.user.ui.tomoe.enable ''
       (define-extension "bolo" (:reads (:key)) (snapshot state event)
         (declare (ignore snapshot))
         (values state
-                (list (service :bolod ${toLisp ["${bolod}/bin/bolod"]})
-                      (bind-key ${toLisp (map (key: mkLispInline modifiers.${key}) (lib.init keys))} ${toLisp (lib.last keys)}
+                (list (service :bolod (list "${bolod}/bin/bolod"))
+                      (bind-key (list :alt) "m"
                                 :press :release :release :description "Push-to-talk speech-to-text (bolo)"))
                 (when (and (eq (getf event :type) :key) (equal (getf event :owner) "bolo"))
-                  (list (launch ${toLisp "${boloPkgs.bolo}/bin/bolo"})))))
-    '');
+                  (list (launch "${bolo}/bin/bolo")))))
+    '';
   };
 }
