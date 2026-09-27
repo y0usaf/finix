@@ -7,10 +7,7 @@
   cfg = config.user.dev.r2t2;
   home = config.user.homeDirectory;
   user = config.user.name;
-  group =
-    if cfg.group != null
-    then cfg.group
-    else "users";
+  stateDir = "${home}/.local/share/r2t2";
 
   src = pkgs.fetchgit {
     url = "https://github.com/netease-youdao/Confucius4-R2T2";
@@ -120,9 +117,9 @@
     CC = "${pkgs.stdenv.cc}/bin/cc";
   };
 
-  envDir = "${cfg.stateDir}/.venv";
-  runDir = "${cfg.stateDir}/run";
-  logDir = "${cfg.stateDir}/logs";
+  envDir = "${stateDir}/.venv";
+  runDir = "${stateDir}/run";
+  logDir = "${stateDir}/logs";
 
   notifyScript = pkgs.writeText "r2t2-notify-ready.py" ''
     import os, socket
@@ -141,9 +138,9 @@
         sock.close()
   '';
 
-  installScript = pkgs.writeShellScriptBin cfg.installEnvPackageName ''
+  installScript = pkgs.writeShellScriptBin "r2t2-install" ''
     set -euo pipefail
-    mkdir -p ${lib.escapeShellArg cfg.stateDir}
+    mkdir -p ${lib.escapeShellArg stateDir}
     export PATH=${lib.makeBinPath [uv python pkgs.coreutils]}
 
     echo "r2t2-install: creating venv at ${envDir}"
@@ -174,97 +171,19 @@ in {
       default = 8272;
       description = "WebSocket port. WS URI is ws://<listenAddress>:<port>/asr_stream_api_v1.";
     };
-
-    gpuMemoryUtilization = lib.mkOption {
-      type = lib.types.float;
-      default = 0.20;
-      description = ''
-        vLLM gpu_memory_utilization (fraction of total VRAM). Defaults to the
-        measured working point (~4.75 GiB of 24 GiB): upstream's hardcoded 0.95
-        aborts on this shared GPU. Requires the applied patch.
-      '';
-    };
-
-    maxModelLen = lib.mkOption {
-      type = lib.types.ints.positive;
-      default = 4096;
-      description = "ASR_MAX_MODEL_LEN: vLLM max_model_len.";
-    };
-
-    maxNumBatchedTokens = lib.mkOption {
-      type = lib.types.ints.positive;
-      default = 256;
-      description = ''
-        ASR_MAX_NUM_BATCHED_TOKENS (implies max_num_seqs=1). 256 is the
-        measured working point for the streaming single-request workload.
-      '';
-    };
-
-    enforceEager = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "ASR_ENFORCE_EAGER: skip CUDA graphs (needed to fit the memory budget).";
-    };
-
-    skipMmProfiling = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        ASR_SKIP_MM_PROFILING: skip the multimodal-encoder profiling run,
-        which OOMs at this free-memory level.
-      '';
-    };
-
-    stateDir = lib.mkOption {
-      type = lib.types.str;
-      default = "${home}/.local/share/r2t2";
-      description = ''
-        Durable directory holding the uv venv, run directory, and logs. On a
-        homeReset host this MUST be an allowlisted path or it is wiped on
-        reboot; the module registers it under finix.persistence.allowlist
-        (a no-op on hosts without finix's persistence module).
-      '';
-    };
-
-    group = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = ''
-        Group the daemon runs as. Default: `users`, the primary group finit
-        needs on this fleet (there is no same-named user group).
-      '';
-    };
-
-    installEnvPackageName = lib.mkOption {
-      type = lib.types.str;
-      default = "r2t2-install";
-      description = "Name of the venv installer script placed on PATH when enabled.";
-    };
-
-    environment = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
-      default = {};
-      description = "Extra environment variables for the daemon (merged over the module defaults).";
-    };
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = cfg.gpuMemoryUtilization > 0.0 && cfg.gpuMemoryUtilization <= 1.0;
-        message = "user.dev.r2t2.gpuMemoryUtilization must be in (0, 1].";
-      }
-    ];
-
     environment.systemPackages = [installScript];
 
     finix.persistence.allowlist.users."${user}".directories = [
-      (lib.removePrefix "${home}/" cfg.stateDir)
+      (lib.removePrefix "${home}/" stateDir)
     ];
 
     finit.services.r2t2 = {
       description = "Confucius4-R2T2 streaming ASR server (vLLM, WebSocket)";
-      inherit user group;
+      inherit user;
+      group = "users";
 
       environment =
         {
@@ -272,14 +191,13 @@ in {
           PYTHONPATH = "${patched}";
           ASR_MODEL_PATH = "${weights}";
           VAD_MODEL_PATH = "${vad}";
-          ASR_GPU_MEMORY_UTILIZATION = toString cfg.gpuMemoryUtilization;
-          ASR_MAX_MODEL_LEN = toString cfg.maxModelLen;
-          ASR_MAX_NUM_BATCHED_TOKENS = toString cfg.maxNumBatchedTokens;
-          ASR_ENFORCE_EAGER = lib.optionalString cfg.enforceEager "1";
-          ASR_SKIP_MM_PROFILING = lib.optionalString cfg.skipMmProfiling "1";
+          ASR_GPU_MEMORY_UTILIZATION = toString 0.20;
+          ASR_MAX_MODEL_LEN = "4096";
+          ASR_MAX_NUM_BATCHED_TOKENS = "256";
+          ASR_ENFORCE_EAGER = "1";
+          ASR_SKIP_MM_PROFILING = "1";
         }
-        // runtimeEnv
-        // cfg.environment;
+        // runtimeEnv;
 
       path = [pkgs.coreutils pkgs.gnugrep pkgs.stdenv.cc];
 
@@ -302,7 +220,7 @@ in {
           sleep 1
         done
         if [ ! -x "$mypy" ]; then
-          echo "r2t2: venv missing at ${envDir}; run ${installScript}/bin/${cfg.installEnvPackageName} first" >&2
+          echo "r2t2: venv missing at ${envDir}; run ${installScript}/bin/r2t2-install first" >&2
           exit 1
         fi
 
