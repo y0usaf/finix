@@ -48,6 +48,9 @@ in {
   };
 
   config = {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".cache/wallust"
+    ];
     environment.systemPackages = [
       wallustPkg
       (pkgs.writeShellApplication {

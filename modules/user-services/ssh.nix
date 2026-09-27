@@ -11,6 +11,9 @@ in {
     enable = lib.mkEnableOption "SSH configuration module";
   };
   config = lib.mkIf config.user.services.ssh.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".ssh"
+    ];
     environment.systemPackages = [
       pkgs.openssh
     ];

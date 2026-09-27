@@ -8,6 +8,10 @@
     enable = lib.mkEnableOption "Obsidian module";
   };
   config = lib.mkIf config.user.programs.obsidian.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/obsidian"
+      ".obsidian"
+    ];
     environment.systemPackages = [
       (pkgs.obsidian.override {
         commandLineArgs = lib.concatStringsSep " " [

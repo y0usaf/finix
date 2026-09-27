@@ -8,6 +8,11 @@
     enable = lib.mkEnableOption "Stremio media center";
   };
   config = lib.mkIf config.user.programs.stremio.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".local/share/stremio"
+      ".local/share/stremio-linux-shell"
+      ".stremio-server"
+    ];
     environment.systemPackages = [
       (pkgs.rustPlatform.buildRustPackage (_finalAttrs: {
         pname = "stremio-linux-shell";

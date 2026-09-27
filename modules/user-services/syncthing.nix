@@ -224,6 +224,11 @@ in {
   };
 
   config = lib.mkIf config.user.services.syncthing.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/syncthing"
+      ".local/share/syncthing"
+      ".local/state/syncthing"
+    ];
     finit.services.syncthing = {
       description = "syncthing file sync (${userName})";
       user = userName;

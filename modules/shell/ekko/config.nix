@@ -18,6 +18,10 @@ in {
   };
 
   config = lib.mkIf ekko.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".cache/ekko"
+      ".config/ekko"
+    ];
     environment.systemPackages = [package];
     manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text =
       builtins.readFile ./init.lisp + "\n" + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp";

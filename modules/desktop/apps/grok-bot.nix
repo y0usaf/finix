@@ -14,6 +14,12 @@ in {
   };
 
   config = mkIf grokBotCfg.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/silvabot"
+      ".grokbot"
+      ".local/share/silvabot"
+      ".local/state/silvabot"
+    ];
     environment.systemPackages = [
       (grok-bot.override {
         commandLineArgs = [
