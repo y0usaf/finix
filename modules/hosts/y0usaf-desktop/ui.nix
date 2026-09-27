@@ -5,7 +5,6 @@
 }: {
   user.ui = {
     cudaterm.enable = true;
-    monstar.enable = lib.mkForce false;
     tomoe = {
       displays = {
         "DP-4" = {

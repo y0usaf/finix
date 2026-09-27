@@ -1,6 +1,7 @@
 _: {
   user.ui = {
     foot.lineHeight = "32px";
+    monstar.enable = true;
     tomoe = {
       layout = "sway";
       bar = {
