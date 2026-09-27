@@ -8,8 +8,9 @@
   user = config.user.name;
   home = config.user.homeDirectory;
   persistentHome = "/persist/home/${user}";
-  directoriesFile = pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") cfg.directories);
-  filesFile = pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}\n") cfg.files);
+  sorted = paths: lib.sort lib.lessThan (lib.unique paths);
+  directoriesFile = pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") (sorted cfg.directories));
+  filesFile = pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}\n") (sorted cfg.files));
 in {
   options.finix.persistence.bindReplay = {
     enable = lib.mkEnableOption "Finix user persistence bind replay";
