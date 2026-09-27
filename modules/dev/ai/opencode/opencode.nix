@@ -4,120 +4,12 @@
   pkgs,
   ...
 }: let
-  inherit (lib) types mkOption mkEnableOption mkIf optionalAttrs listToAttrs nameValuePair;
-  devCfg = config.user.dev;
-  cfg = devCfg.opencode;
   homeDir = config.user.homeDirectory;
   toJson = lib.generators.toJSON {};
-  mkStrOption = default: description:
-    mkOption {
-      type = types.str;
-      inherit default description;
-    };
-  mkBoolOption = default: description:
-    mkOption {
-      type = types.bool;
-      inherit default description;
-    };
-  mkOpencodeSettings = configCfg:
-    {
-      "$schema" = "https://opencode.ai/config.json";
-      inherit (configCfg) model;
-      autoupdate = true;
-      share = "manual";
-      disabled_providers = ["openai" "huggingface"];
-      instructions = [
-        "AGENTS.md"
-        ".cursor/rules/*.md"
-        "{file:${homeDir}/.config/opencode/claude-instructions.md}"
-        "{file:${homeDir}/.config/opencode/opencode-instructions.md}"
-      ];
-    }
-    // (optionalAttrs configCfg.enableLsps {lsp = {};})
-    // (optionalAttrs configCfg.enableOllama {
-      inherit
-        ({
-          provider = {
-            ollama = {
-              npm = "@ai-sdk/openai-compatible";
-              name = "Ollama (local)";
-              options = {
-                baseURL = "http://localhost:11434/v1";
-              };
-              models = {
-                "deepseek-coder-v2:16b" = {
-                  name = "DeepSeek Coder V2 (16B MoE)";
-                  description = "Excellent code reasoning, MoE with --cpu-moe optimization";
-                };
-                "qwen2.5-coder:32b" = {
-                  name = "Qwen 2.5 Coder (32B)";
-                  description = "State-of-the-art code generation and understanding";
-                };
-                "qwq:32b" = {
-                  name = "QwQ (32B Reasoning)";
-                  description = "DeepSeek's reasoning-specialized model for complex problems";
-                };
-                "qwen2.5:32b" = {
-                  name = "Qwen 2.5 (32B)";
-                  description = "Excellent multilingual and general-purpose capabilities";
-                };
-                "nomic-embed-text:latest" = {
-                  name = "Nomic Embed Text";
-                  description = "Embeddings for RAG workflows";
-                };
-              };
-            };
-          };
-        })
-        provider
-        ;
-    })
-    // (optionalAttrs configCfg.enableMcpServers {
-      mcp = listToAttrs (map
-        (spec:
-          nameValuePair spec.name {
-            type = "local";
-            command = [spec.command] ++ spec.args;
-            enabled = true;
-            inherit (spec) environment;
-          })
-        [
-          {
-            name = "Filesystem";
-            command = "npx";
-            args = ["-y" "@modelcontextprotocol/server-filesystem" homeDir];
-            environment = {};
-          }
-          {
-            name = "GitHub Repo MCP";
-            command = "npx";
-            args = ["-y" "github-repo-mcp"];
-            environment = {};
-          }
-          {
-            name = "Gemini MCP";
-            command = "npx";
-            args = ["-y" "gemini-mcp-tool"];
-            environment = {};
-          }
-        ]);
-    });
 in {
-  options.user.dev.opencode = {
-    enable = mkEnableOption "opencode AI coding agent";
+  options.user.dev.opencode.enable = lib.mkEnableOption "opencode AI coding agent";
 
-    theme = mkStrOption "system" "Theme to use for opencode";
-
-    model = mkStrOption "neuralwatt/glm-5.2" "Default model to use";
-
-    enableMcpServers = mkBoolOption false "Enable MCP servers for enhanced functionality";
-
-    enableLsps = mkBoolOption true "Enable LSP servers for diagnostics";
-
-    enableOllama = mkBoolOption false "Enable local Ollama provider for opencode";
-  };
-
-  config = mkIf cfg.enable {
+  config = lib.mkIf config.user.dev.opencode.enable {
     environment.systemPackages = [
       pkgs.opencode
       pkgs.uv
@@ -127,7 +19,20 @@ in {
       files = {
         ".config/opencode/opencode.json" = {
           generator = toJson;
-          value = mkOpencodeSettings cfg;
+          value = {
+            "$schema" = "https://opencode.ai/config.json";
+            model = "neuralwatt/glm-5.2";
+            autoupdate = true;
+            share = "manual";
+            disabled_providers = ["openai" "huggingface"];
+            instructions = [
+              "AGENTS.md"
+              ".cursor/rules/*.md"
+              "{file:${homeDir}/.config/opencode/claude-instructions.md}"
+              "{file:${homeDir}/.config/opencode/opencode-instructions.md}"
+            ];
+            lsp = {};
+          };
         };
 
         ".config/opencode/tui.json" = {
@@ -135,7 +40,7 @@ in {
           generator = toJson;
           value = {
             "$schema" = "https://opencode.ai/tui.json";
-            inherit (cfg) theme;
+            theme = "system";
           };
         };
 
