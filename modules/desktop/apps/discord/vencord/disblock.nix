@@ -3,7 +3,7 @@
   lib,
   ...
 }: {
-  config = lib.mkIf (config.user.programs.discord.stable.enable or false) {
+  config = lib.mkIf config.user.programs.discord.stable.enable {
     manzil.users."${config.user.name}".files.".config/Vencord/themes/disblock.css".text = ''
       :root {
         --display-clan-tags: none;

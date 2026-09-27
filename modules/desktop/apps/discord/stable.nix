@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: let
-  inherit (lib) concatStringsSep optional mkEnableOption mkOption mkIf types;
+  inherit (lib) concatStringsSep mkEnableOption mkIf;
 
   enableFeatures = [
     "WaylandWindowDecorations"
@@ -18,14 +18,6 @@
   inherit (config) user;
   userName = user.name;
   stableCfg = user.programs.discord.stable;
-  mkCommandLineArgs = cfg:
-    concatStringsSep " " (
-      optional (enableFeatures != []) "--enable-features=${concatStringsSep "," enableFeatures}"
-      ++ optional (disableFeatures != []) "--disable-features=${concatStringsSep "," disableFeatures}"
-      ++ optional (!cfg.smoothScroll) "--disable-smooth-scrolling"
-      ++ cfg.extraArgs
-    );
-
   legacyDir = "${flakeInputs.nixpkgs-discord-legacy}/pkgs/applications/networking/instant-messengers/discord";
   legacySource = (lib.importJSON "${legacyDir}/sources.json")."linux-stable";
   legacyDiscord = pkgs.callPackage "${legacyDir}/linux.nix" {
@@ -45,37 +37,21 @@ in {
   options.user.programs.discord.stable = {
     enable = mkEnableOption "Discord stable";
     pinLegacy = mkEnableOption "pin Discord to the legacy 0.0.125 release";
-    package = mkOption {
-      type = types.package;
-      default =
-        if stableCfg.pinLegacy
-        then legacyDiscord
-        else pkgs.discord;
-      defaultText = lib.literalExpression "pkgs.discord";
-      description = "Discord package to customize and install";
-    };
-    extraArgs = mkOption {
-      type = types.listOf types.str;
-      default = [];
-      description = "Extra command line arguments to pass to Discord";
-    };
-    minimizeToTray =
-      mkEnableOption "Minimize to tray on close"
-      // {default = false;};
-    smoothScroll =
-      mkEnableOption "Smooth scrolling"
-      // {default = true;};
   };
 
   config = mkIf stableCfg.enable {
     environment.systemPackages = [
-      (stableCfg.package.override {
-        commandLineArgs = mkCommandLineArgs stableCfg;
-        withOpenASAR = true;
-        disableUpdates = false;
-        withTTS = false;
-        enableAutoscroll = true;
-      })
+      ((
+          if stableCfg.pinLegacy
+          then legacyDiscord
+          else pkgs.discord
+        ).override {
+          commandLineArgs = "--enable-features=${concatStringsSep "," enableFeatures} --disable-features=${concatStringsSep "," disableFeatures}";
+          withOpenASAR = true;
+          disableUpdates = false;
+          withTTS = false;
+          enableAutoscroll = true;
+        })
     ];
 
     manzil.users."${userName}".files = {
@@ -84,7 +60,7 @@ in {
         value = {
           SKIP_HOST_UPDATE = true;
           SKIP_MODULE_UPDATE = true;
-          MINIMIZE_TO_TRAY = stableCfg.minimizeToTray;
+          MINIMIZE_TO_TRAY = false;
           OPEN_ON_STARTUP = false;
           DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
           enableHardwareAcceleration = true;
