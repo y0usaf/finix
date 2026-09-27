@@ -66,7 +66,7 @@
           inputs.finix.nixosModules.dhcpcd
           inputs.finix.nixosModules.getty
           inputs.finix.nixosModules.openssh
-          ./sudo
+          ./sudo.nix
           inputs.finix.nixosModules.sysklogd
           ./common.nix
           ./persistence/bind-replay.nix

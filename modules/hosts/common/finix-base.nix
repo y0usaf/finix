@@ -6,8 +6,5 @@ _: {
     openssh.enable = true;
   };
 
-  programs = {
-    bash.enable = true;
-    sudo.enable = true;
-  };
+  programs.bash.enable = true;
 }
