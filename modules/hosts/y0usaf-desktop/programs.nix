@@ -1,6 +1,5 @@
 _: {
   user.programs = {
-    creative.enable = true;
     media.enable = true;
     cmus.enable = true;
     obs.enable = true;

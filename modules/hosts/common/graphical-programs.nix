@@ -23,5 +23,6 @@
     slack.enable = lib.mkDefault true;
     btop.enable = lib.mkDefault true;
     grok-bot.enable = lib.mkDefault true;
+    creative.enable = lib.mkDefault true;
   };
 }
