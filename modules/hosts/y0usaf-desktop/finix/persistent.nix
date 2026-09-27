@@ -13,8 +13,6 @@
     options = ["subvol=${subvol}"] ++ btrfsOpts ++ extraOpts;
   };
 in {
-  imports = [../../../finix/desktop];
-
   networking.hostName = "y0usaf-desktop";
 
   finix = {

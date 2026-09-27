@@ -54,8 +54,6 @@
     exit "$failed"
   '';
 in {
-  imports = [../../../finix/desktop];
-
   networking.hostName = "y0usaf-framework";
 
   finix = {
