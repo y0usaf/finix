@@ -22,12 +22,6 @@ in {
       description = "btrfs disk UUID carrying the persist subvolume.";
     };
 
-    persistSubvol = lib.mkOption {
-      type = lib.types.str;
-      default = "@persist";
-      description = "btrfs subvolume the recorder self-mounts for log storage.";
-    };
-
     fallbackDevices = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
@@ -84,7 +78,7 @@ in {
           until mountpoint -q "$mnt"; do
             for dev in /dev/disk/by-uuid/${cfg.diskUuid} ${lib.concatStringsSep " " cfg.fallbackDevices}; do
               [ -b "$dev" ] || continue
-              mount -t btrfs -o subvol=${cfg.persistSubvol},commit=1 "$dev" "$mnt" 2>/dev/null && break 2
+              mount -t btrfs -o subvol=@persist,commit=1 "$dev" "$mnt" 2>/dev/null && break 2
             done
             sleep 1
           done
