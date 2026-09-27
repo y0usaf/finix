@@ -77,7 +77,6 @@ in {
       ".local/state/rush"
     ];
     environment.systemPackages = [
-      pkgs.rush
       pkgs.bat
     ];
 

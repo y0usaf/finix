@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   userName = config.user.name;
@@ -9,9 +8,6 @@
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".ssh"
-  ];
-  environment.systemPackages = [
-    pkgs.openssh
   ];
   manzil.users."${userName}".files = {
     ".ssh/config" = {

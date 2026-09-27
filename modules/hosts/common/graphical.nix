@@ -76,7 +76,6 @@
 
   environment.systemPackages = [
     pkgs.efibootmgr
-    pkgs.btrfs-progs
   ];
 
   networking.hosts."100.105.204.116" = ["y0usaf-server"];

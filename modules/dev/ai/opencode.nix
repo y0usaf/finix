@@ -11,7 +11,6 @@
   ];
   environment.systemPackages = [
     pkgs.opencode
-    pkgs.uv
     pkgs.nixd
   ];
   manzil.users."${config.user.name}" = {

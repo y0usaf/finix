@@ -99,14 +99,7 @@ in {
           exec ${lib.getExe tomoePkg} --backend drm "$@"
         ''} "$@"
       '')
-      pkgs.monstar
-      pkgs.grim
-      pkgs.slurp
-      pkgs.wl-clipboard-rs
-      pkgs.jq
       pkgs.xwayland-satellite
-      pkgs.ripgrep
-      pkgs.fd
     ];
   };
 
