@@ -40,12 +40,6 @@ _: {
           session_prev = "ctrl+k";
         };
       };
-      ttsrRules.tldr = {
-        minOutputLength = 2000;
-        scope = "text";
-        interruptMode = "never";
-        content = "TL;DR: summarize the preceding response in 3-5 concise bullets.";
-      };
     };
     paseo = {
       enable = true;
@@ -77,4 +71,11 @@ _: {
       apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
     };
   };
+
+  manzil.users.y0usaf.files.".omp/agent/rules/tldr.md".text = ''
+    ---
+    {"condition":["(?s).{2000,}"],"interruptMode":"never","scope":"text"}---
+
+    TL;DR: summarize the preceding response in 3-5 concise bullets.
+  '';
 }

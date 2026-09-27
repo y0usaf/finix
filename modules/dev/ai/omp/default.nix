@@ -8,32 +8,6 @@
   cfg = config.user.dev.omp;
   catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
-
-  conditionValue = rule:
-    if rule.condition != null
-    then rule.condition
-    else if rule.minOutputLength != null
-    then ["(?s).{${toString rule.minOutputLength},}"]
-    else null;
-  frontmatter = rule:
-    lib.filterAttrs (name: value:
-      value
-      != (
-        if name == "globs"
-        then []
-        else null
-      )) {
-      condition = conditionValue rule;
-      inherit (rule) astCondition scope globs interruptMode;
-    };
-
-  ruleFile = name: rule: {
-    name = ".omp/agent/rules/${name}.md";
-    value.text = let
-      frontmatterValue = frontmatter rule;
-      yaml = lib.generators.toYAML {} frontmatterValue;
-    in "${lib.optionalString (frontmatterValue != {}) "---\n${yaml}---\n\n"}${rule.content}\n";
-  };
 in {
   options.user.dev.omp = {
     enable = lib.mkEnableOption "omp (oh-my-pi) coding agent CLI";
@@ -43,49 +17,6 @@ in {
       default = {};
       description = "Keys merged into ~/.omp/config.json.";
     };
-
-    ttsrRules = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule (_: {
-        options = {
-          content = lib.mkOption {
-            type = lib.types.lines;
-            description = "Reminder injected when this TTSR matches.";
-          };
-          condition = lib.mkOption {
-            type = lib.types.nullOr (lib.types.either lib.types.str (lib.types.listOf lib.types.str));
-            default = null;
-            description = "Regex condition(s) matched against OMP streams.";
-          };
-          minOutputLength = lib.mkOption {
-            type = lib.types.nullOr lib.types.ints.positive;
-            default = null;
-            description = "Minimum streamed output characters before this TTSR matches.";
-          };
-          astCondition = lib.mkOption {
-            type = lib.types.nullOr (lib.types.either lib.types.str (lib.types.listOf lib.types.str));
-            default = null;
-            description = "ast-grep pattern(s) matched against edit/write streams.";
-          };
-          scope = lib.mkOption {
-            type = lib.types.nullOr (lib.types.either lib.types.str (lib.types.listOf lib.types.str));
-            default = null;
-            description = "TTSR stream scope, for example text.";
-          };
-          globs = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [];
-            description = "File globs limiting this rule.";
-          };
-          interruptMode = lib.mkOption {
-            type = lib.types.nullOr (lib.types.enum ["never" "prose-only" "tool-only" "always"]);
-            default = null;
-            description = "Per-rule interrupt behavior.";
-          };
-        };
-      }));
-      default = {};
-      description = "TTSR rules written to ~/.omp/agent/rules/<name>.md.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -93,41 +24,39 @@ in {
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".omp-full
     ];
 
-    manzil.users."${config.user.name}".files =
-      {
-        ".omp/agent/config.yml" = {
-          type = "merge";
-          format = "yaml";
-          clobber = true;
-          value = {
-            inherit (catalog) defaultThinkingLevel;
-            advisor.enabled = false;
-            modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-            modelRoles.advisor = "vercel-ai-gateway/openai/gpt-5.6-luna";
-          };
+    manzil.users."${config.user.name}".files = {
+      ".omp/agent/config.yml" = {
+        type = "merge";
+        format = "yaml";
+        clobber = true;
+        value = {
+          inherit (catalog) defaultThinkingLevel;
+          advisor.enabled = false;
+          modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
+          modelRoles.advisor = "vercel-ai-gateway/openai/gpt-5.6-luna";
         };
-        ".omp/config.json" = {
-          generator = toJSON;
-          value = cfg.settings;
+      };
+      ".omp/config.json" = {
+        generator = toJSON;
+        value = cfg.settings;
+      };
+      ".omp/agent/settings.json" = {
+        generator = toJSON;
+        value = {
+          inherit (catalog) defaultProvider;
+          inherit (catalog) defaultModel;
+          inherit (catalog) defaultThinkingLevel;
+          inherit (catalog) enabledModels;
+          packages = [
+            "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
+          ];
         };
-        ".omp/agent/settings.json" = {
-          generator = toJSON;
-          value = {
-            inherit (catalog) defaultProvider;
-            inherit (catalog) defaultModel;
-            inherit (catalog) defaultThinkingLevel;
-            inherit (catalog) enabledModels;
-            packages = [
-              "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
-            ];
-          };
-        };
-        ".omp/agent/models.json" = {
-          generator = toJSON;
-          value = catalog.models;
-        };
-        ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.ethics}\n\n${config.user.dev.prompts.noTests}\n\n${config.user.dev.prompts.noComments}\n";
-      }
-      // lib.listToAttrs (lib.mapAttrsToList ruleFile cfg.ttsrRules);
+      };
+      ".omp/agent/models.json" = {
+        generator = toJSON;
+        value = catalog.models;
+      };
+      ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.ethics}\n\n${config.user.dev.prompts.noTests}\n\n${config.user.dev.prompts.noComments}\n";
+    };
   };
 }
