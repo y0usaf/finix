@@ -105,7 +105,6 @@ in {
       pkgs.slurp
       pkgs.wl-clipboard-rs
       pkgs.jq
-      pkgs.swaybg
       pkgs.xwayland-satellite
       pkgs.ripgrep
       pkgs.fd

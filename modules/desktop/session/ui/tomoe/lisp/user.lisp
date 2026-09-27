@@ -15,6 +15,11 @@
               ((equal command "power") (list (output-power :toggle)))
               ((equal command "screenshot") (list (screenshot)))
               ((equal command "screenshot-screen") (list (screenshot :screen)))
+              ((equal command "play-pause") (list (media-control :play-pause)))
+              ((equal command "track-next") (list (media-control :next)))
+              ((equal command "track-prev") (list (media-control :previous)))
+              ((equal command "brightness-up") (list (adjust-brightness 5)))
+              ((equal command "brightness-down") (list (adjust-brightness -5)))
               (t
                (let ((argv (policy--launch command)))
                  (when argv (list (apply #'launch argv)))))))))

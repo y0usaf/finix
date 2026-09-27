@@ -16,7 +16,10 @@
     ++ lib.optionals (description != null) [(keyword "description") description];
 
   terminalAppId = "ekko-term";
-  wallpaper = ''swaybg -i "$(find ${lib.escapeShellArg config.user.paths.wallpapers} -type f | shuf -n 1)" -m fill'';
+  wallpaper = {
+    directory = config.user.paths.wallpapers;
+    bind = binding ["alt" "shift"] "c" "next" "Random Wallpaper";
+  };
 
   layouts = {
     deck = {
@@ -79,7 +82,6 @@
       (binding ["alt" "shift"] "e" "quit" null)
       (binding ["alt"] "g" "screenshot" "Screenshot")
       (binding ["alt" "shift"] "g" "screenshot-screen" "Screenshot Screen")
-      (binding ["alt" "shift"] "c" "wallpaper" "Random Wallpaper")
     ]
     ++ lib.mapAttrsToList (key: command: binding [] key command null) {
       XF86AudioRaiseVolume = "volume-up";
@@ -103,19 +105,12 @@
     launcher = ["sh" "-c" defaults.launcher];
     files = [defaults.fileManager];
     editor = [defaults.terminal "-e" defaults.editor];
-    wallpaper = ["sh" "-c" "killall swaybg; ${wallpaper} &"];
     volume-up = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"];
     volume-down = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"];
     volume-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
     mic-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"];
-    play-pause = ["playerctl" "play-pause"];
-    track-next = ["playerctl" "next"];
-    track-prev = ["playerctl" "previous"];
-    brightness-up = ["brightnessctl" "set" "5%+"];
-    brightness-down = ["brightnessctl" "set" "5%-"];
   };
 
-  sampler = pkgs.writeShellScript "tomoe-sysinfo" (builtins.readFile ./sysinfo.sh);
   palette = "${config.user.homeDirectory}/.cache/wallust/gtk-colors.css";
 
   barParameters = {
@@ -145,18 +140,9 @@
     palette-file = palette;
     palette-command = "mkdir -p ${lib.escapeShellArg (dirOf palette)} && { cat ${lib.escapeShellArg palette} 2>/dev/null || true; }";
     sysinfo = {
-      cpu = {
-        command = "${sampler} cpu";
-        interval = 1000;
-      };
-      memory = {
-        command = "${sampler} memory";
-        interval = 2000;
-      };
-      gpu = {
-        command = "${sampler} gpu auto ''";
-        interval = 2000;
-      };
+      cpu.interval = 1000;
+      memory.interval = 2000;
+      gpu.interval = 2000;
     };
     show = {
       cpu-temp = true;

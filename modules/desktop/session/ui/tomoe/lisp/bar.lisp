@@ -1,7 +1,5 @@
 (in-package #:tomoe-user)
 
-(defparameter +bar-runs+ '((:cpu :cpu-a :cpu-b) (:memory :memory-a :memory-b) (:gpu :gpu-a :gpu-b)))
-
 (defun bar--words (text)
   (let ((words nil) (start nil))
     (dotimes (index (1+ (length text)) (nreverse words))
@@ -39,33 +37,33 @@
 (defun bar--percent (part whole)
   (if (plusp whole) (max 0 (min 100 (round (* 100 part) whole))) 0))
 
-(defun bar--sample (probe previous event)
-  (let ((numbers (when (eql (getf event :code) 0)
-                   (mapcar (lambda (word) (parse-integer word :junk-allowed t))
-                           (bar--words (getf event :stdout)))))
-        (sample (copy-list previous)))
-    (destructuring-bind (&optional a b c d &rest more) numbers
-      (declare (ignore more))
-      (ecase probe
-        (:cpu
-         (when (and a b)
-           (let ((spent (- a (getf sample :total a))))
+(defun bar--sample (probe previous system)
+  (let ((sample (copy-list previous)))
+    (ecase probe
+      (:cpu
+       (let ((total (getf system :cpu-total)) (idle (getf system :cpu-idle)))
+         (when total
+           (let ((spent (- total (getf sample :total total))))
              (setf (getf sample :percent)
                    (if (plusp spent)
-                       (bar--percent (- spent (- b (getf sample :idle b))) spent)
+                       (bar--percent (- spent (- idle (getf sample :idle idle))) spent)
                        (getf sample :percent 0))
-                   (getf sample :total) a
-                   (getf sample :idle) b
-                   (getf sample :temp) (and c (round c 1000))))))
-        (:memory
-         (when (and a b)
-           (setf (getf sample :percent) (bar--percent (- a b) a)
-                 (getf sample :used) (round (- a b) 1024))))
-        (:gpu
-         (if (and a b c)
-             (setf (getf sample :util) (max 0 (min 100 a)) (getf sample :used) b
-                   (getf sample :total) c (getf sample :temp) d (getf sample :failures) 0)
-             (setf (getf sample :failures) (1+ (getf sample :failures 0)))))))
+                   (getf sample :total) total
+                   (getf sample :idle) idle
+                   (getf sample :temp) (getf system :cpu-temperature))))))
+      (:memory
+       (let ((total (getf system :memory-total)) (available (getf system :memory-available)))
+         (when total
+           (setf (getf sample :percent) (bar--percent (- total available) total)
+                 (getf sample :used) (round (- total available) 1024)))))
+      (:gpu
+       (let ((gpu (first (getf system :gpus))))
+         (cond (gpu (setf (getf sample :util) (max 0 (min 100 (getf gpu :busy)))
+                          (getf sample :used) (getf gpu :vram-used)
+                          (getf sample :total) (getf gpu :vram-total)
+                          (getf sample :temp) (getf gpu :temperature)
+                          (getf sample :failures) 0))
+               (system (setf (getf sample :failures) (1+ (getf sample :failures 0))))))))
     sample))
 
 (defun bar--labels (module state snapshot)
@@ -146,24 +144,17 @@
                                    :exclusive-zone (if exclusive thickness 0)
                                    :background "#00000000")))))
 
-(define-extension "bar" (:reads (:services) :state (list :palette nil :watch nil))
+(define-extension "bar" (:reads (:services :system) :state (list :palette nil :watch nil))
     (snapshot state event)
   (let* ((type (getf event :type))
          (name (getf event :name))
-         (sysinfo (getf +bar+ :sysinfo))
-         (probe (car (find name +bar-runs+ :key #'rest :test #'member))))
-    (flet ((run (probe)
-             (nth (mod (getf (getf state probe) :run 0) 2) (rest (assoc probe +bar-runs+))))
-           (live-p (probe)
+         (sysinfo (getf +bar+ :sysinfo)))
+    (flet ((live-p (probe)
              (and (getf sysinfo probe) (member probe (getf +bar+ :modules))
                   (< (getf (getf state probe) :failures 0) 3))))
       (cond
         ((and (eq type :timer) (getf sysinfo name))
-         (let ((sample (copy-list (getf state name))))
-           (setf (getf sample :run) (1+ (getf sample :run 0))
-                 (getf state name) sample)))
-        ((and (eq type :exec) probe (eq name (run probe)))
-         (setf (getf state probe) (bar--sample probe (getf state probe) event)))
+         (setf (getf state name) (bar--sample name (getf state name) (context snapshot :system))))
         ((and (eq type :exec) (eq name :palette) (eql (getf event :code) 0))
          (setf (getf state :palette) (or (bar--palette (getf event :stdout)) (getf state :palette))
                (getf state :watch) t))
@@ -179,8 +170,7 @@
                    (list (watch-file :palette (getf +bar+ :palette-file))))
                  (loop for probe in '(:cpu :memory :gpu)
                        when (live-p probe)
-                         append (list (interval probe (getf (getf sysinfo probe) :interval))
-                                      (exec-async (run probe) (getf (getf sysinfo probe) :command))))
+                         collect (interval probe (getf (getf sysinfo probe) :interval)))
                  (bar--surfaces (loop for module in (getf +bar+ :modules)
                                       collect (cons module (bar--labels module state snapshot)))
                                 palette))
