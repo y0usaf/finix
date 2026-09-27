@@ -33,6 +33,11 @@
     log = true;
   };
 
+  services.nix-daemon.settings = {
+    substituters = ["http://127.0.0.1:8787/cache"];
+    connect-timeout = 5;
+  };
+
   finit.services.atticd = {
     description = "attic binary cache server";
     command = pkgs.writeShellScript "atticd-run" ''
