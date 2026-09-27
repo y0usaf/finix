@@ -165,59 +165,6 @@
     "media.getusermedia.audio.processing.noise.enabled" = false;
     "media.getusermedia.audio.processing.hpf.enabled" = false;
   };
-
-  defaultPrefs = {
-    "browser.display.use_document_fonts" = 0;
-  };
-  pywalfoxNative = pkgs.pywalfox-native;
-  prefValue = pref:
-    builtins.toJSON (
-      if builtins.isBool pref || builtins.isInt pref || builtins.isString pref
-      then pref
-      else builtins.toString pref
-    );
-  attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
-  extraPrefs = locked:
-    (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") locked)
-    + "\n"
-    + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") defaultPrefs);
-  profiles = {
-    generator = lib.generators.toINI {};
-    value = {
-      Profile0 = {
-        Name = "default";
-        IsRelative = 1;
-        Path = userName;
-        Default = 1;
-      };
-      General = {
-        StartWithLastProfile = 1;
-        Version = 2;
-      };
-    };
-  };
-  pywalfox = {
-    generator = lib.generators.toJSON {};
-    value = {
-      name = "pywalfox";
-      description = "Native messaging host for Pywalfox";
-      path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
-        exec ${pywalfoxNative}/bin/pywalfox start
-      ''}";
-      type = "stdio";
-      allowed_extensions = ["pywalfox@frewacom.org"];
-    };
-  };
-  glide = pkgs.wrapFirefox (pkgs.callPackage "${flakeInputs.glide-browser}/package.nix" {}) {
-    pname = "glide-browser";
-    extraPrefs = extraPrefs (builtins.removeAttrs lockedPrefs ["browser.nova.enabled"]);
-    extraPolicies =
-      policies
-      // {
-        DisableFirefoxAccounts = false;
-        ExtensionSettings = builtins.removeAttrs policies.ExtensionSettings ["vimium-c@gdh1995.cn"];
-      };
-  };
 in {
   finix.persistence.allowlist.users.${userName}.directories = [
     ".config/glide"
@@ -227,18 +174,81 @@ in {
   ];
   environment.systemPackages = [
     (pkgs.librewolf-bin.override {
-      extraPrefs = extraPrefs lockedPrefs;
+      extraPrefs =
+        lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") lockedPrefs
+        + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
       extraPolicies = policies // {DisableFirefoxAccounts = false;};
     })
-    pywalfoxNative
-    glide
-    pywalfoxNative
+    pkgs.pywalfox-native
+    (pkgs.wrapFirefox (pkgs.callPackage "${flakeInputs.glide-browser}/package.nix" {}) {
+      pname = "glide-browser";
+      extraPrefs =
+        lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") (builtins.removeAttrs lockedPrefs ["browser.nova.enabled"])
+        + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
+      extraPolicies =
+        policies
+        // {
+          DisableFirefoxAccounts = false;
+          ExtensionSettings = builtins.removeAttrs policies.ExtensionSettings ["vimium-c@gdh1995.cn"];
+        };
+    })
+    pkgs.pywalfox-native
   ];
   manzil.users."${userName}".files = {
-    ".config/glide/glide/profiles.ini" = profiles;
-    ".glide-browser/native-messaging-hosts/pywalfox.json" = pywalfox;
-    ".librewolf/profiles.ini" = profiles;
+    ".config/glide/glide/profiles.ini" = {
+      generator = lib.generators.toINI {};
+      value = {
+        Profile0 = {
+          Name = "default";
+          IsRelative = 1;
+          Path = userName;
+          Default = 1;
+        };
+        General = {
+          StartWithLastProfile = 1;
+          Version = 2;
+        };
+      };
+    };
+    ".glide-browser/native-messaging-hosts/pywalfox.json" = {
+      generator = lib.generators.toJSON {};
+      value = {
+        name = "pywalfox";
+        description = "Native messaging host for Pywalfox";
+        path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
+          exec ${pkgs.pywalfox-native}/bin/pywalfox start
+        ''}";
+        type = "stdio";
+        allowed_extensions = ["pywalfox@frewacom.org"];
+      };
+    };
+    ".librewolf/profiles.ini" = {
+      generator = lib.generators.toINI {};
+      value = {
+        Profile0 = {
+          Name = "default";
+          IsRelative = 1;
+          Path = userName;
+          Default = 1;
+        };
+        General = {
+          StartWithLastProfile = 1;
+          Version = 2;
+        };
+      };
+    };
     ".librewolf/${userName}/chrome/userChrome.css".text = builtins.readFile ./userChrome.css;
-    ".librewolf/native-messaging-hosts/pywalfox.json" = pywalfox;
+    ".librewolf/native-messaging-hosts/pywalfox.json" = {
+      generator = lib.generators.toJSON {};
+      value = {
+        name = "pywalfox";
+        description = "Native messaging host for Pywalfox";
+        path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
+          exec ${pkgs.pywalfox-native}/bin/pywalfox start
+        ''}";
+        type = "stdio";
+        allowed_extensions = ["pywalfox@frewacom.org"];
+      };
+    };
   };
 }
