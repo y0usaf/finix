@@ -90,7 +90,8 @@
         ./diagnostics.nix
         inputs.manzil.finixModules.default
       ]
-      ++ frameworkModules;
+      ++ frameworkModules
+      ++ [./laptop.nix];
   };
 
   bootPackage =
