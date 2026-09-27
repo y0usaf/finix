@@ -40,16 +40,12 @@ in {
     ];
   };
 
-  environment = {
-    etc."modprobe.d/finix-server-blacklist.conf".text = ''
+  environment.etc = {
+    "modprobe.d/finix-server-blacklist.conf".text = ''
       blacklist iTCO_wdt
       blacklist iTCO_vendor_support
     '';
-    etc."finix-stage2".text = "persistent\n";
-    systemPackages = [
-      pkgs.nix
-      pkgs.efibootmgr
-    ];
+    "finix-stage2".text = "persistent\n";
   };
 
   fileSystems = {
