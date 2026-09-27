@@ -71,13 +71,7 @@
     ];
     nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = ''
-      wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath [
-        pkgs.pipewire
-        pkgs.wl-clipboard
-        pkgs.libnotify
-        pkgs.coreutils
-        pkgs.dotool
-      ]}
+      wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath [pkgs.dotool]}
     '';
   };
 in {
