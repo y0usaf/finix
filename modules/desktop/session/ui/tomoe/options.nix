@@ -19,8 +19,8 @@
       description = ''
         Per-output configure-output keywords, keyed by output name: `mode`
         ([W H] or [W H Hz]), `refresh`, `scale`, `position` ([X Y] physical
-        pixels), `disabled`, `mirror`, `vrr`. An empty attrset means tomoe
-        uses EDID-preferred modes for every output.
+        pixels), `disabled`, `mirror`, `vrr`, `icc` (an ICC profile path). An
+        empty attrset means tomoe uses EDID-preferred modes for every output.
       '';
       example = lib.literalExpression ''
         {

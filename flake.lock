@@ -1892,16 +1892,16 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1790474641,
-        "narHash": "sha256-zjK8DoVapB0Y/OGw1Ty9Ro77W4lKDtUGsZjE1yMFY+Q=",
+        "lastModified": 1790476040,
+        "narHash": "sha256-mNnnSAprttK0wpeuKB1bMrLn2Tx0pX0aqQDqVPYGMZw=",
         "ref": "refs/heads/main",
-        "rev": "13774c2299cd1bb846552785af7e178a44646a95",
+        "rev": "01ff60c7c1e8f2b93629ba0f74acb2aaf2c45d2a",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
       },
       "original": {
-        "rev": "13774c2299cd1bb846552785af7e178a44646a95",
+        "rev": "01ff60c7c1e8f2b93629ba0f74acb2aaf2c45d2a",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
