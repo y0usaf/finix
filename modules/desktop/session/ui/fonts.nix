@@ -6,60 +6,29 @@
   ...
 }: {
   options.user.ui.fonts = {
-    mainFont = lib.mkOption {
-      type = lib.types.package;
-      default = flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default;
-      description = "Main monospace font package";
-    };
     mainFontName = lib.mkOption {
       type = lib.types.str;
       default = "Departure Mono Ultra Condensed";
       description = "Main font family name";
     };
-    backup = lib.mkOption {
-      type = lib.types.submodule {
-        options = {
-          package = lib.mkOption {
-            type = lib.types.package;
-            default = pkgs.noto-fonts-cjk-sans;
-            description = "Backup font package";
-          };
-          name = lib.mkOption {
-            type = lib.types.str;
-            default = "Noto Sans CJK";
-            description = "Backup font family name";
-          };
-        };
-      };
-      default = {};
-      description = "Backup font configuration";
+    backup.name = lib.mkOption {
+      type = lib.types.str;
+      default = "Noto Sans CJK";
+      description = "Backup font family name";
     };
-    emoji = lib.mkOption {
-      type = lib.types.submodule {
-        options = {
-          package = lib.mkOption {
-            type = lib.types.package;
-            default = pkgs.noto-fonts-color-emoji;
-            description = "Emoji font package";
-          };
-          name = lib.mkOption {
-            type = lib.types.str;
-            default = "Noto Color Emoji";
-            description = "Emoji font family name";
-          };
-        };
-      };
-      default = {};
-      description = "Emoji font configuration";
+    emoji.name = lib.mkOption {
+      type = lib.types.str;
+      default = "Noto Color Emoji";
+      description = "Emoji font family name";
     };
   };
 
   config = {
     fonts.packages = [
-      config.user.ui.fonts.mainFont
-      config.user.ui.fonts.backup.package
+      flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default
+      pkgs.noto-fonts-cjk-sans
       pkgs.nerd-fonts.symbols-only
-      config.user.ui.fonts.emoji.package
+      pkgs.noto-fonts-color-emoji
     ];
 
     manzil.users."${config.user.name}" = {

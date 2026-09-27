@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   flakeInputs,
   ...
 }: {
@@ -8,7 +9,7 @@
   config.user.ui.cudaterm = {
     inherit (config.hardware.nvidia) enable;
     package = lib.mkIf config.hardware.nvidia.enable (flakeInputs.cudaterm.lib.mkFinixPackage {
-      fontFile = "${config.user.ui.fonts.mainFont}/share/fonts/truetype/DepartureMonoUltraCondensed-Regular.ttf";
+      fontFile = "${flakeInputs.fonts.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/fonts/truetype/DepartureMonoUltraCondensed-Regular.ttf";
       fontSize = config.user.appearance.termFontSize;
       lineHeight = let
         match = builtins.match "([0-9]+)px" config.user.ui.foot.lineHeight;
