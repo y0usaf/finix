@@ -19,7 +19,7 @@ in {
       font-size = ${computedFontSize}
       background-opacity = 0.82
       line-height = ${userUi.foot.lineHeight}
-      theme = ${config.user.homeDirectory}${lib.removePrefix "~" user.appearance.wallust.targets.monstar-colors.target}
+      theme = ${config.user.homeDirectory}/.cache/wallust/colors_monstar
     '';
   };
 }
