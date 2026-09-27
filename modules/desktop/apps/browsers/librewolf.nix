@@ -16,18 +16,6 @@
       else builtins.toString pref
     );
   attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
-  profilesIni = {
-    Profile0 = {
-      Name = "default";
-      IsRelative = 1;
-      Path = "default";
-      Default = 1;
-    };
-    General = {
-      StartWithLastProfile = 1;
-      Version = 2;
-    };
-  };
 in {
   config = lib.mkIf user.programs.librewolf.enable {
     environment.systemPackages = [
@@ -44,16 +32,18 @@ in {
       files = {
         "${librewolfConfig}/profiles.ini" = {
           generator = lib.generators.toINI {};
-          value =
-            profilesIni
-            // {
-              Profile0 =
-                profilesIni.Profile0
-                // {
-                  Name = "default";
-                  Path = userName;
-                };
+          value = {
+            Profile0 = {
+              Name = "default";
+              IsRelative = 1;
+              Path = userName;
+              Default = 1;
             };
+            General = {
+              StartWithLastProfile = 1;
+              Version = 2;
+            };
+          };
         };
         "${librewolfConfig}/${userName}/chrome/userChrome.css" = {
           text = browserShared.userChromeCss;

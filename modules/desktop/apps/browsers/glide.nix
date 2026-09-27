@@ -8,8 +8,6 @@
   inherit (config) user;
   browserShared = user.programs.browser.shared;
   userName = user.name;
-  glideConfig = ".config/glide/glide";
-  glideNativeHosts = ".glide-browser/native-messaging-hosts";
   pywalfoxNative = pkgs.pywalfox-native;
   prefValue = pref:
     builtins.toJSON (
@@ -37,7 +35,7 @@ in {
   config = lib.mkIf user.programs.glide.enable {
     environment.systemPackages = [glide pywalfoxNative];
     manzil.users."${userName}".files = {
-      "${glideConfig}/profiles.ini" = {
+      ".config/glide/glide/profiles.ini" = {
         generator = lib.generators.toINI {};
         value = {
           Profile0 = {
@@ -52,7 +50,7 @@ in {
           };
         };
       };
-      "${glideNativeHosts}/pywalfox.json" = {
+      ".glide-browser/native-messaging-hosts/pywalfox.json" = {
         generator = lib.generators.toJSON {};
         value = {
           name = "pywalfox";
