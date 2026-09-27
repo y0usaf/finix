@@ -26,51 +26,6 @@
       fi
     fi
   '';
-
-  desktopPackage = pkgs.stdenv.mkDerivation {
-    pname = "reasonix-desktop";
-    version = "1.25.1";
-    src = pkgs.fetchurl {
-      url = "https://github.com/esengine/DeepSeek-Reasonix/releases/download/desktop-v1.25.1/Reasonix-linux-amd64.tar.gz";
-      hash = "sha256-rpBp+EDUxII6IyEF9gU3J9I+ZQfn1EeviGxDPt0p9Q4=";
-    };
-
-    sourceRoot = ".";
-    nativeBuildInputs = [pkgs.autoPatchelfHook];
-    buildInputs = [
-      pkgs.webkitgtk_4_1
-      pkgs.gtk3
-      pkgs.gdk-pixbuf
-      pkgs.libsoup_3
-      pkgs.glib
-    ];
-    installPhase = ''
-      runHook preInstall
-      install -Dm755 reasonix-desktop "$out/bin/reasonix-desktop"
-      runHook postInstall
-    '';
-    meta = {
-      description = "Reasonix desktop (Wails shell)";
-      homepage = "https://github.com/esengine/deepseek-reasonix";
-      license = lib.licenses.mit;
-      platforms = ["x86_64-linux"];
-      mainProgram = "reasonix-desktop";
-    };
-  };
-
-  desktopWrapper = pkgs.writeShellScriptBin "reasonix-desktop" ''
-
-    ${seedKey}
-
-    export GDK_BACKEND=x11
-
-    export WEBKIT_DISABLE_DMABUF_RENDERER=1
-
-    export GDK_DPI_SCALE=${toString config.user.ui.gtk.scale}
-
-    exec ${desktopPackage}/bin/reasonix-desktop "$@"
-
-  '';
 in {
   options.user.dev.reasonix = {
     enable = lib.mkEnableOption "reasonix cache-first DeepSeek coding agent";
@@ -85,92 +40,66 @@ in {
         Reasonix resolves api_key_env only against that .env, not process env.
       '';
     };
-
-    desktop.enable = lib.mkEnableOption "reasonix desktop (Wails shell)";
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages =
-      [
-        (pkgs.writeShellScriptBin "reasonix" ''
-          ${seedKey}
-          for a in "$@"; do
-            if [ "$a" = "acp" ]; then
-              exec ${package}/bin/reasonix "$@"
-            fi
-            case "$a" in
-              -*);;
-              *) break;;
-            esac
-          done
-          exec ${package}/bin/reasonix --yolo "$@"
-        '')
-      ]
-      ++ lib.optional cfg.desktop.enable desktopWrapper;
+    environment.systemPackages = [
+      (pkgs.writeShellScriptBin "reasonix" ''
+        ${seedKey}
+        for a in "$@"; do
+          if [ "$a" = "acp" ]; then
+            exec ${package}/bin/reasonix "$@"
+          fi
+          case "$a" in
+            -*);;
+            *) break;;
+          esac
+        done
+        exec ${package}/bin/reasonix --yolo "$@"
+      '')
+    ];
 
-    manzil.users."${config.user.name}".files =
-      {
-        ".reasonix/REASONIX.md" = {
-          type = "copy";
-          text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
-        };
+    manzil.users."${config.user.name}".files = {
+      ".reasonix/REASONIX.md" = {
+        type = "copy";
+        text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
+      };
 
-        ".reasonix/config.toml" = {
-          type = "merge";
+      ".reasonix/config.toml" = {
+        type = "merge";
 
-          format = "toml";
+        format = "toml";
 
-          clobber = true;
+        clobber = true;
 
-          value = {
-            default_model = "glm-5.3-flash";
+        value = {
+          default_model = "glm-5.3-flash";
 
-            telemetry.cli_metrics = "off";
+          telemetry.cli_metrics = "off";
 
-            permissions.mode = "allow";
+          permissions.mode = "allow";
 
-            sandbox.bash = "off";
+          sandbox.bash = "off";
 
-            desktop.check_updates = false;
+          desktop.check_updates = false;
 
-            providers = [
-              {
-                name = "glm-5.3-flash";
+          providers = [
+            {
+              name = "glm-5.3-flash";
 
-                kind = "openai";
+              kind = "openai";
 
-                base_url = "https://ai-gateway.vercel.sh/v1";
+              base_url = "https://ai-gateway.vercel.sh/v1";
 
-                model = "glm-5.3-flash";
+              model = "glm-5.3-flash";
 
-                api_key_env = "AI_GATEWAY_API_KEY";
+              api_key_env = "AI_GATEWAY_API_KEY";
 
-                context_window = 1000000;
-              }
-            ];
-          };
-        };
-      }
-      // lib.optionalAttrs cfg.desktop.enable {
-        ".local/share/applications/reasonix.desktop" = {
-          generator = lib.generators.toINI {};
-
-          value."Desktop Entry" = {
-            Name = "Reasonix";
-
-            Comment = "Cache-first DeepSeek coding agent (desktop)";
-
-            Exec = "reasonix-desktop %U";
-
-            Terminal = "false";
-
-            Type = "Application";
-
-            Categories = "Development;Utility;";
-
-            Keywords = "ai;agent;assistant;deepseek;reasonix";
-          };
+              context_window = 1000000;
+            }
+          ];
         };
       };
+    };
   };
 }
