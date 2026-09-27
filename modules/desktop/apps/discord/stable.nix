@@ -40,6 +40,10 @@ in {
   };
 
   config = mkIf stableCfg.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/discord"
+      ".config/discordcanary"
+    ];
     environment.systemPackages = [
       ((
           if stableCfg.pinLegacy

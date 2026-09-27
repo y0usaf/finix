@@ -18,6 +18,11 @@
   attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
 in {
   config = lib.mkIf user.programs.librewolf.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".cache/librewolf"
+      ".config/librewolf"
+      ".librewolf"
+    ];
     environment.systemPackages = [
       (pkgs.librewolf-bin.override {
         extraPrefs =
