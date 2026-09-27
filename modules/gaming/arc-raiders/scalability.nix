@@ -4,7 +4,7 @@
   ...
 }: {
   config = lib.mkIf config.user.gaming.core.enable {
-    manzil.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path}/steamapps/compatdata/1808500/pfx/drive_c/users/steamuser/AppData/Local/PioneerGame/Saved/Config/WindowsClient/Scalability.ini" = {
+    manzil.users."${config.user.name}".files."${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam}/steamapps/compatdata/1808500/pfx/drive_c/users/steamuser/AppData/Local/PioneerGame/Saved/Config/WindowsClient/Scalability.ini" = {
       generator = lib.generators.toINI {};
       value = {
         "EffectsQuality@0" = {

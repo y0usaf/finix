@@ -14,7 +14,7 @@ in {
   };
 
   config = lib.mkIf user.gaming.solo-leveling-arise.enable {
-    manzil.users."${user.name}".files."${lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path}/steamapps/compatdata/2373990/pfx/user.reg" = {
+    manzil.users."${user.name}".files."${lib.removePrefix "${user.homeDirectory}/" user.paths.steam}/steamapps/compatdata/2373990/pfx/user.reg" = {
       type = "merge";
       format = "reg";
       clobber = true;

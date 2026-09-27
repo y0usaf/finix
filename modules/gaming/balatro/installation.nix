@@ -42,7 +42,7 @@
       name = "Aura";
     };
   };
-  steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path;
+  steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam;
 in {
   options.user.gaming.balatro = {
     enable = lib.mkEnableOption "Balatro mod management";

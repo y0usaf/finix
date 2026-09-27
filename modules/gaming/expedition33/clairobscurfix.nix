@@ -11,7 +11,7 @@
     sha256 = "160xv8gb95rn2kpcwv65j3q8fsi1wiayqchgn4gnkrh6g909qzrb";
     stripRoot = false;
   };
-  steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam.path;
+  steamPath = lib.removePrefix "${user.homeDirectory}/" user.paths.steam;
 in {
   config = lib.mkIf user.gaming.expedition33.enable {
     manzil.users."${config.user.name}".files = {
