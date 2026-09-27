@@ -201,7 +201,6 @@ in {
 
   services = {
     sysklogd.extraConfig = "*.* @192.168.2.66:514";
-    openssh.settings.Port = [2222];
     nix-daemon = {
       settings = {
         experimental-features = ["nix-command" "flakes"];
