@@ -36,7 +36,7 @@
       ++ [
         ../hosts/y0usaf-server/finix/services.nix
         ../hosts/y0usaf-server/finix/persistent.nix
-        ../hosts/y0usaf-server/finix/attic.nix
+        ../server/attic.nix
         ../hosts/y0usaf-server/finix/shell.nix
         ../hosts/y0usaf-server/finix/paseo.nix
         inputs.manzil.finixModules.default
