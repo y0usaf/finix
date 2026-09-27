@@ -1,53 +1,29 @@
 {
-  config,
   lib,
   pkgs,
   ...
 }: let
   diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
-  kmsgDump = tag: cmds: ''
-    {
-      ${cmds}
-    } 2>&1 | while IFS= read -r line; do
-      echo "${tag}: $line" > /dev/kmsg || true
-    done
-  '';
 in {
   networking.hostName = "y0usaf-server";
 
+  finix.diagnostics = {
+    enable = true;
+    inherit diskUuid;
+    fallbackDevices = ["/dev/sda2" "/dev/nvme0n1p2"];
+  };
+
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
-    initrd = {
-      availableKernelModules = [
-        "xhci_pci"
-        "ahci"
-        "sd_mod"
-        "nvme"
-        "r8169"
-        "igc"
-        "e1000e"
-      ];
-
-      finit.tasks.initrd-diag = {
-        description = "initrd diagnostics to kmsg";
-        script = ''
-          sleep 3
-          ${kmsgDump "finix-initrd" ''
-            echo "userspace is up"
-            cat /proc/partitions
-            ls /dev/disk/by-uuid 2>&1 || echo "no by-uuid dir"
-          ''}
-          for _ in $(seq 1 60); do
-            if [ -e /dev/disk/by-uuid/${diskUuid} ]; then
-              echo "finix-initrd: by-uuid symlink present" > /dev/kmsg || true
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "finix-initrd: by-uuid symlink NEVER appeared" > /dev/kmsg || true
-        '';
-      };
-    };
+    initrd.availableKernelModules = [
+      "xhci_pci"
+      "ahci"
+      "sd_mod"
+      "nvme"
+      "r8169"
+      "igc"
+      "e1000e"
+    ];
     kernelModules = [
       "intel_oc_wdt"
       "r8169"
@@ -272,89 +248,6 @@ in {
         conditions = ["net/lo/up"];
         log = true;
       };
-      stage2-diag = {
-        description = "stage-2 diagnostics to kmsg";
-        command = pkgs.writeShellScript "stage2-diag" ''
-          sleep 30
-          ${kmsgDump "finix-stage2" ''
-            ${config.finit.package}/bin/initctl status 2>&1
-            ${pkgs.iproute2}/bin/ip -4 -br addr 2>&1
-          ''}
-        '';
-        log = true;
-      };
-      boot-breadcrumb = {
-        description = "persist boot breadcrumbs";
-        command = "${pkgs.writeShellScript "boot-breadcrumb" ''
-          set -u
-          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.iproute2 pkgs.findutils]}
-
-          snapshot() {
-            echo "==== $1 $(${pkgs.coreutils}/bin/date -u +%Y-%m-%dT%H:%M:%SZ) ===="
-            echo '---- cmdline ----'
-            ${pkgs.coreutils}/bin/cat /proc/cmdline
-            echo '---- ip addr ----'
-            ${pkgs.iproute2}/bin/ip -4 -br addr 2>&1 || true
-            echo '---- routes ----'
-            ${pkgs.iproute2}/bin/ip route 2>&1 || true
-            echo '---- initctl status ----'
-            ${config.finit.package}/bin/initctl status 2>&1 || true
-            echo '---- mounts ----'
-            ${pkgs.util-linux}/bin/findmnt 2>&1 || true
-            echo '---- dmesg ----'
-            ${pkgs.util-linux}/bin/dmesg 2>&1 || true
-          }
-
-          for _ in $(seq 1 120); do
-            ${pkgs.util-linux}/bin/mountpoint -q /persist && break
-            sleep 1
-          done
-
-          if ! ${pkgs.util-linux}/bin/mountpoint -q /persist; then
-            echo "boot-breadcrumb: /persist never mounted" >&2
-            exit 1
-          fi
-
-          outdir=/persist/finix-boot
-          ${pkgs.coreutils}/bin/mkdir -p "$outdir"
-          ts=$(${pkgs.coreutils}/bin/date -u +%Y-%m-%dT%H-%M-%SZ)
-
-          snapshot early > "$outdir/boot-$ts.log" 2>&1 || true
-          ${pkgs.coreutils}/bin/sync || true
-
-          sleep 60
-          snapshot late >> "$outdir/boot-$ts.log" 2>&1 || true
-          ${pkgs.coreutils}/bin/sync || true
-
-          cd "$outdir"
-          ${pkgs.coreutils}/bin/ls -1t boot-*.log 2>/dev/null \
-            | ${pkgs.coreutils}/bin/tail -n +21 \
-            | ${pkgs.findutils}/bin/xargs -r ${pkgs.coreutils}/bin/rm -f
-        ''}";
-        log = true;
-      };
-    };
-    services.kmsg-recorder = {
-      description = "kmsg flight recorder to /persist";
-      log = true;
-      command = pkgs.writeShellScript "kmsg-recorder" ''
-        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.findutils]}
-        mnt=/run/kmsg-persist
-        mkdir -p "$mnt"
-        until mountpoint -q "$mnt"; do
-          for dev in /dev/disk/by-uuid/${diskUuid} /dev/sda2 /dev/nvme0n1p2; do
-            [ -b "$dev" ] || continue
-            mount -t btrfs -o subvol=@persist,commit=1 "$dev" "$mnt" 2>/dev/null && break 2
-          done
-          sleep 1
-        done
-        d="$mnt/finix-boot"
-        mkdir -p "$d"
-        ls -1t "$d"/kmsg-*.log 2>/dev/null | tail -n +21 | xargs -r rm -f
-        ts=$(date -u +%Y-%m-%dT%H-%M-%SZ)
-        echo "kmsg-recorder: writing to $d/kmsg-$ts.log" > /dev/kmsg
-        exec cat /dev/kmsg > "$d/kmsg-$ts.log"
-      '';
     };
   };
 }

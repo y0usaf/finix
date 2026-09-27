@@ -42,6 +42,7 @@
         ../hosts/y0usaf-server/finix/persistent.nix
         ../server/attic.nix
         ../server/programs.nix
+        ./diagnostics.nix
         inputs.manzil.finixModules.default
         ../hosts/common/finix-base.nix
         ../hosts/common/finix-btrfs.nix
