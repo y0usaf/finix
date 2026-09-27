@@ -34,7 +34,11 @@
         inputs.finix.nixosModules.nix-daemon
       ]
       ++ [
+        ../server/forgejo.nix
+        ../server/mediamtx.nix
+        ../server/syncthing.nix
         ../hosts/y0usaf-server/finix/services.nix
+        ../server/tailscale.nix
         ../hosts/y0usaf-server/finix/persistent.nix
         ../server/attic.nix
         ../hosts/y0usaf-server/finix/shell.nix
