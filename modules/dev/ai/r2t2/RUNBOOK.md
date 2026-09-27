@@ -2,10 +2,7 @@
 
 Declared by `modules/dev/ai/r2t2/default.nix` (`user.dev.r2t2`), enabled on
 the desktop host in `modules/hosts/y0usaf-desktop/dev.nix`. It replaces the
-hand-started feasibility process that lived at
-`/home/y0usaf/dev/sandbox/r2t2-20260918`. That sandbox `README.md` remains
-the authoritative description of the model, the message contract, and the
-NixOS environment hazards; this file references it rather than duplicating it.
+hand-started feasibility process from a since-retired sandbox.
 
 ## What runs
 
@@ -49,7 +46,7 @@ materialised once by a declared installer rather than rebuilt every boot:
 
     r2t2-install      # on PATH once the module is enabled
 
-It runs the sandbox `install.sh` pin set into `${stateDir}/.venv`
+It installs the pinned Python packages into `${stateDir}/.venv`
 (`~/.local/share/r2t2/.venv` by default). Re-run it after changing the pin
 set. It is idempotent and uses the local `uv` cache, so on this box it
 completes in about a second after the first time. The repo itself is on
@@ -65,8 +62,7 @@ persistence module that option assignment is simply unused.
 
 ## Environment variables (why each exists)
 
-Set by the module and handed to the daemon. The sandbox `env.sh` explains the
-crash each NixOS workaround prevents; the module reproduces them:
+Set by the module and handed to the daemon; each prevents a crash on NixOS:
 
 - `LD_LIBRARY_PATH` = `/run/opengl-driver/lib` + nix-store libstdc++
   (`pkgs.stdenv.cc.cc.lib`) + libz (`pkgs.zlib`). Without libz numpy fails to
@@ -129,10 +125,9 @@ sessions share this box.
 
 ## Message contract
 
-Unchanged from the sandbox; see
-`/home/y0usaf/dev/sandbox/r2t2-20260918/README.md` ("Message contract"). In
-brief: a JSON header frame (`secret_key` must be `test0102`), then raw 16 kHz
-mono int16 little-endian PCM binary frames, then the EOS text frame
+Defined by upstream `ws_server.py` (the v1 endpoint). In brief: a JSON header
+frame (`secret_key` must be `test0102`), then raw 16 kHz mono int16
+little-endian PCM binary frames, then the EOS text frame
 `YOUDAO_ONETIME_ASR_STREAM_EOS`. The server replies with JSON where `msg.text`
 is the new segment since the previous message; concatenate client-side.
 
