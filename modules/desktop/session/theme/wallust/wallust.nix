@@ -7,7 +7,7 @@
   wallustPkg = pkgs.wallust;
   wallustCfg = config.user.appearance.wallust;
 
-  inherit (lib.types) anything attrsOf lines listOf str submodule;
+  inherit (lib.types) anything attrsOf lines str submodule;
 in {
   options.user.appearance.wallust = {
     defaultTheme = lib.mkOption {
@@ -45,23 +45,6 @@ in {
       default = {};
       description = "Wallust [templates] entries keyed by target name.";
     };
-
-    startupDirs = lib.mkOption {
-      type = listOf str;
-      default = [
-        "~/.cache/wal"
-        "~/.cache/wallust"
-        "~/.config/Vencord/settings"
-        "~/.config/vesktop/settings"
-      ];
-      description = "Directories created before applying the default Wallust theme.";
-    };
-
-    reloadHooks = lib.mkOption {
-      type = listOf lines;
-      default = [];
-      description = "Shell snippets run by wt after Wallust and pywalfox updates.";
-    };
   };
 
   config = {
@@ -87,7 +70,7 @@ in {
 
           pywalfox --browser librewolf update
 
-          ${lib.concatStringsSep "\n" wallustCfg.reloadHooks}
+
         '';
       })
     ];

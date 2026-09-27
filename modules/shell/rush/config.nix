@@ -24,7 +24,7 @@ in {
         . /etc/profile
 
         if command -v wallust >/dev/null 2>&1; then
-          ${lib.concatMapStringsSep "\n" (dir: "mkdir -p \"$HOME${lib.removePrefix "~" dir}\"") wallustCfg.startupDirs}
+          ${lib.concatMapStringsSep "\n" (dir: "mkdir -p \"$HOME/${dir}\"") [".cache/wal" ".cache/wallust" ".config/Vencord/settings" ".config/vesktop/settings"]}
           ${wallustBin} cs "$HOME/.config/wallust/colorschemes/${wallustCfg.defaultTheme}.json"
         fi
 
