@@ -50,8 +50,6 @@ in {
     };
   });
 
-  boot.bootspec.enable = true;
-
   boot.loader.efi.canTouchEfiVariables = true;
 
   hardware.cpu.amd.updateMicrocode = true;
@@ -59,7 +57,6 @@ in {
   programs.limine = {
     enable = true;
 
-    enrollConfig = true;
     maxGenerations = 20;
 
     extraEntries = ''

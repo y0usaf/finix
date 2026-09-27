@@ -14,8 +14,5 @@ _: {
     clobberByDefault = true;
   };
 
-  services.getty = {
-    enable = true;
-    ttys = ["tty1" "tty2"];
-  };
+  services.getty.ttys = ["tty1" "tty2"];
 }

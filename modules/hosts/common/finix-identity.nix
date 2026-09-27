@@ -1,6 +1,3 @@
 _: {
-  finix.persistence.identity = {
-    enable = true;
-    root = "/persist";
-  };
+  finix.persistence.identity.enable = true;
 }
