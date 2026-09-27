@@ -30,7 +30,7 @@
     };
     "r2t2-streaming" = {
       engine = "r2t2-streaming";
-      uri = "ws://${config.user.dev.r2t2.listenAddress}:${toString config.user.dev.r2t2.port}/asr_stream_api_v1";
+      uri = "ws://127.0.0.1:8272/asr_stream_api_v1";
       language = "English";
     };
   };
