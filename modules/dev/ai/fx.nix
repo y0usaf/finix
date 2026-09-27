@@ -8,6 +8,10 @@
   options.user.dev.fx.enable = lib.mkEnableOption "fx coding agent";
 
   config = lib.mkIf config.user.dev.fx.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".fx"
+      ".omfx"
+    ];
     environment.systemPackages = [
       flakeInputs.oh-my-fx.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];

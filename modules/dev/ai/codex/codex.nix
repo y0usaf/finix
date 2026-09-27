@@ -11,6 +11,11 @@ in {
   options.user.dev.codex.enable = lib.mkEnableOption "Codex CLI";
 
   config = lib.mkIf config.user.dev.codex.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/Codex"
+      ".config/codex"
+      ".local/state/codex"
+    ];
     system.activation.scripts.codexReasoningPolicy = {
       deps = ["users"];
       text = let

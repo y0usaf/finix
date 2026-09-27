@@ -11,6 +11,9 @@ in {
   };
 
   config = lib.mkIf dev.rtk.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".local/share/rtk"
+    ];
     environment.systemPackages = [
       pkgs.rtk
     ];

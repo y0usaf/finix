@@ -10,6 +10,11 @@ in {
   options.user.dev.opencode.enable = lib.mkEnableOption "opencode AI coding agent";
 
   config = lib.mkIf config.user.dev.opencode.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/opencode"
+      ".local/share/ai.opencode.desktop"
+      ".local/share/opencode"
+    ];
     environment.systemPackages = [
       pkgs.opencode
       pkgs.uv
