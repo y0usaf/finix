@@ -29,6 +29,7 @@
     omp.enable = lib.mkDefault true;
     bun.enable = lib.mkDefault true;
     biome.enable = lib.mkDefault true;
+    latex.enable = lib.mkDefault true;
     npm.enable = lib.mkDefault true;
     docker.enable = lib.mkDefault true;
     gcloud.enable = lib.mkDefault true;
