@@ -3,11 +3,8 @@
   pkgs,
   flakeInputs,
   ...
-}: let
-  inherit (pkgs.stdenv.hostPlatform) system;
-  userAppearance = config.user.appearance;
-in {
-  environment.systemPackages = [flakeInputs.rudo.packages."${system}".default];
+}: {
+  environment.systemPackages = [flakeInputs.rudo.packages.${pkgs.stdenv.hostPlatform.system}.default];
 
   manzil.users."${config.user.name}".files = {
     ".config/rudo/config.toml" = {
@@ -16,7 +13,7 @@ in {
           opacity = 0.7;
         };
         font = {
-          size = userAppearance.termFontSize;
+          size = config.user.appearance.termFontSize;
           family = config.user.ui.fonts.mainFontName;
         };
         keybindings = {
