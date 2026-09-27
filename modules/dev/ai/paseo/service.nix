@@ -9,13 +9,6 @@
   inherit (pkgs.stdenv.hostPlatform) system;
   paseo = flakeInputs.paseo.packages."${system}".default;
   home = config.user.homeDirectory;
-  homePaseo = "${home}/${cfg.dataDir}";
-  serviceGroup = group: user:
-    if group != null
-    then group
-    else user;
-  relayArgument = relay:
-    lib.optionalString (!relay.enable) "--no-relay";
   agentConfigEnv = lib.filterAttrs (_: value: value != null) {
     CLAUDE_CONFIG_DIR = config.environment.variables.CLAUDE_CONFIG_DIR or null;
     CODEX_HOME = config.environment.variables.CODEX_HOME or null;
@@ -27,7 +20,7 @@ in {
     finit.services.paseo = {
       description = "Paseo - self-hosted daemon for AI coding agents";
       user = config.user.name;
-      group = serviceGroup cfg.group config.user.name;
+      group = "users";
       command = "${pkgs.writeShellScript "paseo-server-start" ''
         set -eu
         export PATH=${lib.concatStringsSep ":" [
@@ -47,16 +40,15 @@ in {
             export "$name"="$value"
           done
         fi
-        exec ${paseo}/bin/paseo-server ${relayArgument cfg.relay}
+        exec ${paseo}/bin/paseo-server ${lib.optionalString (!cfg.relay.enable) "--no-relay"}
       ''}";
       environment =
         {
           HOME = home;
-          PASEO_HOME = homePaseo;
-          PASEO_LISTEN = "${cfg.listenAddress}:${toString cfg.port}";
+          PASEO_HOME = "${home}/.paseo";
+          PASEO_LISTEN = "${cfg.listenAddress}:6767";
         }
-        // agentConfigEnv
-        // cfg.environment;
+        // agentConfigEnv;
       conditions = ["net/lo/up" "net/tailscale0/up"];
       log = true;
     };
