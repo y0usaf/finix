@@ -12,6 +12,9 @@ in {
   options.user.dev.prime-agent.enable = lib.mkEnableOption "Prime Agent coding agent";
 
   config = lib.mkIf cfg.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".prime"
+    ];
     environment.systemPackages = [
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".prime-agent
     ];

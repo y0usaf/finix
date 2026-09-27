@@ -7,6 +7,13 @@
   toJSON = lib.generators.toJSON {};
 in {
   config = lib.mkIf config.user.dev.pi.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/pi/agent"
+      ".config/pi-harness"
+      ".local/share/pi"
+      ".local/state/pi-harness"
+      ".pi"
+    ];
     manzil.users."${config.user.name}".files = {
       ".pi/agent/settings.json" = {
         generator = toJSON;

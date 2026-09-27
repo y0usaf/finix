@@ -11,6 +11,9 @@ in {
   options.user.dev.omp.enable = lib.mkEnableOption "omp (oh-my-pi) coding agent CLI";
 
   config = lib.mkIf config.user.dev.omp.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".omp"
+    ];
     environment.systemPackages = [
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".omp-full
     ];

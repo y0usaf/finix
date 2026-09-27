@@ -9,6 +9,11 @@
   };
 
   config = lib.mkIf config.user.dev.crush.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/crush"
+      ".crush"
+      ".local/share/crush"
+    ];
     environment.systemPackages = [
       pkgs.crush
     ];
