@@ -16,12 +16,9 @@
 in {
   networking.hostName = "y0usaf-desktop";
 
-  finix = {
-    diagnostics = {
-      inherit diskUuid;
-      fallbackDevices = ["/dev/nvme0n1p5"];
-    };
-    persistence.bindReplay.bindRoot = true;
+  finix.diagnostics = {
+    inherit diskUuid;
+    fallbackDevices = ["/dev/nvme0n1p5"];
   };
 
   hardware.firmware = [pkgs.linux-firmware];
