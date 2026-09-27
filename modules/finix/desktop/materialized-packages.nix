@@ -17,8 +17,6 @@
       pkgs.fuse3
       pkgs.shared-mime-info
       pkgs.strace
-    ]
-    ++ lib.optionals config.user.gaming.steam.enable [
       (
         if config.user.gaming.proton.enable
         then
