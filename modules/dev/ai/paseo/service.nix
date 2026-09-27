@@ -6,13 +6,8 @@
   ...
 }: let
   cfg = config.user.dev.paseo;
-  inherit (pkgs.stdenv.hostPlatform) system;
-  paseo = flakeInputs.paseo.packages."${system}".default;
+  paseo = flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default;
   home = config.user.homeDirectory;
-  agentConfigEnv = lib.filterAttrs (_: value: value != null) {
-    CLAUDE_CONFIG_DIR = config.environment.variables.CLAUDE_CONFIG_DIR or null;
-    CODEX_HOME = config.environment.variables.CODEX_HOME or null;
-  };
 in {
   options.user.dev.paseo = {
     listenAddress = lib.mkOption {
@@ -79,7 +74,10 @@ in {
           PASEO_HOME = "${home}/.paseo";
           PASEO_LISTEN = "${cfg.listenAddress}:6767";
         }
-        // agentConfigEnv;
+        // lib.filterAttrs (_: value: value != null) {
+          CLAUDE_CONFIG_DIR = config.environment.variables.CLAUDE_CONFIG_DIR or null;
+          CODEX_HOME = config.environment.variables.CODEX_HOME or null;
+        };
       conditions = ["net/lo/up" "net/tailscale0/up"];
       log = true;
     };
