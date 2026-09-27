@@ -130,21 +130,10 @@ in {
 
   services = {
     docker.enable = true;
-    nix-daemon = {
-      settings = {
-        experimental-features = ["nix-command" "flakes"];
-        sandbox = true;
-        auto-optimise-store = true;
-        substituters = [
-          "https://cache.nixos.org"
-          "http://192.168.2.66:8787/cache"
-          "http://y0usaf-server:8787/cache"
-        ];
-        trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
-        connect-timeout = 5;
-        fallback = true;
-        download-attempts = 1;
-      };
+    nix-daemon.settings = {
+      sandbox = true;
+      auto-optimise-store = true;
+      substituters = lib.mkBefore ["https://cache.nixos.org"];
     };
   };
 
