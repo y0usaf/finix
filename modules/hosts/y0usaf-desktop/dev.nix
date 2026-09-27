@@ -1,7 +1,6 @@
 _: {
   user.dev = {
     work = {
-      aws-cli.enable = true;
       ntn.enable = true;
       ramp.enable = true;
       vercel.enable = true;
