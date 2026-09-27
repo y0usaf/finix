@@ -25,10 +25,7 @@ in {
       StrictModes = lib.mkForce true;
     };
 
-    users.users.${user} = {
-      password = lib.mkForce null;
-      passwordFile = lib.mkForce "/persist/secrets/password-hashes/${user}";
-    };
+    users.users.${user}.passwordFile = lib.mkForce "/persist/secrets/password-hashes/${user}";
 
     system.activation.scripts = {
       persistentSshAuthorizedKeys = {
