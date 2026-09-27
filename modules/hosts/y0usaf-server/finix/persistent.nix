@@ -8,7 +8,6 @@ in {
   networking.hostName = "y0usaf-server";
 
   finix.diagnostics = {
-    enable = true;
     inherit diskUuid;
     fallbackDevices = ["/dev/sda2" "/dev/nvme0n1p2"];
   };

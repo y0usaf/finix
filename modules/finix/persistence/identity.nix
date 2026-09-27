@@ -9,7 +9,6 @@
   persistedSshDir = "/persist/etc/ssh";
 in {
   options.finix.persistence.identity = {
-    enable = lib.mkEnableOption "persistent Finix user and SSH identity";
     restoreMachineId = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -17,7 +16,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = {
     services.openssh.settings = {
       HostKey = lib.mkForce ["${persistedSshDir}/ssh_host_ed25519_key"];
       AuthorizedKeysFile = lib.mkForce ["${persistedSshDir}/authorized_keys.d/%u"];

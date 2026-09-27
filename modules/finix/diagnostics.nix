@@ -15,8 +15,6 @@
   '';
 in {
   options.finix.diagnostics = {
-    enable = lib.mkEnableOption "kmsg flight recorder + boot breadcrumbs";
-
     diskUuid = lib.mkOption {
       type = lib.types.str;
       description = "btrfs disk UUID carrying the persist subvolume.";
@@ -35,7 +33,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = {
     boot.initrd.finit.tasks.initrd-diag = {
       description = "initrd diagnostics to kmsg";
       script = ''

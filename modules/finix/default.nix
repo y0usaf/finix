@@ -46,7 +46,6 @@
         inputs.manzil.finixModules.default
         ../hosts/common/finix-base.nix
         ../hosts/common/finix-btrfs.nix
-        ../hosts/common/finix-identity.nix
         ../hosts/common/finix-nix-daemon.nix
         ../hosts/common/manzil.nix
         ../hosts/common/ssh-keys.nix
