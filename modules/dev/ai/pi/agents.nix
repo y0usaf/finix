@@ -3,16 +3,16 @@
   lib,
   ...
 }: let
-  cfg = config.user.dev.pi;
   catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
 in {
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.user.dev.pi.enable {
     manzil.users."${config.user.name}".files = {
       ".pi/agent/pi-agents.json" = {
         generator = toJSON;
         value = {
-          inherit (cfg.agents) maxDepth maxLiveAgents;
+          maxDepth = 999;
+          maxLiveAgents = 999;
           orchestrator = false;
           model = "${catalog.defaultProvider}/${catalog.defaultModel}";
           panelModels = [
