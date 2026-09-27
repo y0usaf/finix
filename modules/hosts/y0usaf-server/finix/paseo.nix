@@ -1,4 +1,4 @@
-{lib, ...}: {
+_: {
   user.dev = {
     paseo = {
       enable = true;

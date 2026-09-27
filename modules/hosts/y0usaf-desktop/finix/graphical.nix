@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{config, ...}: {
   hardware.nvidia = {
     enable = true;
     kernelModule = "closed";
