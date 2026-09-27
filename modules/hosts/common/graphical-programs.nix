@@ -7,7 +7,6 @@
     linear.enable = lib.mkDefault true;
     librewolf.enable = lib.mkDefault true;
     glide.enable = lib.mkDefault true;
-    grok-bot.enable = lib.mkDefault false;
     discord = {
       stable.enable = lib.mkDefault true;
       vesktop.enable = lib.mkDefault true;
