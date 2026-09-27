@@ -56,10 +56,8 @@ in {
     home = config.user.homeDirectory;
     persistentHome = "/persist/home/${user}";
     sorted = paths: lib.sort lib.lessThan (lib.unique paths);
-    directoriesFile = pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}
-") (sorted (map dirPath userPersist.directories)));
-    filesFile = pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}
-") (sorted (map dirPath userPersist.files)));
+    directoriesFile = pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") (sorted (map dirPath userPersist.directories)));
+    filesFile = pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}\n") (sorted (map dirPath userPersist.files)));
   in {
     environment.systemPackages = let
       inherit (config.users.users.${user}) uid;
