@@ -21,10 +21,7 @@ in {
       fallbackDevices = ["/dev/nvme0n1p5"];
     };
     persistence.allowlist.directories = [
-      {
-        directory = "/root";
-        mode = "0700";
-      }
+      "/root"
       "/var/lib/btrbk"
       "/var/lib/sbctl"
     ];

@@ -39,15 +39,9 @@ in {
        :class :mandatory))
   '';
 
-  finix.persistence.allowlist.users.${config.user.name}.directories =
-    map
-    (directory: {
-      inherit directory;
-      mode = "0700";
-    })
-    [
-      ".config/autolith"
-      ".local/share/autolith"
-      ".local/state/autolith"
-    ];
+  finix.persistence.allowlist.users.${config.user.name}.directories = [
+    ".config/autolith"
+    ".local/share/autolith"
+    ".local/state/autolith"
+  ];
 }
