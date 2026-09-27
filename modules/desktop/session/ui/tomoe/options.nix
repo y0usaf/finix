@@ -30,13 +30,6 @@
       '';
     };
 
-    settings = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
-      default = {};
-      example = {honor-xdg-activation-with-invalid-serial = true;};
-      description = "Compositor settings keywords passed to tomoe's `settings` effect.";
-    };
-
     extraConfig = lib.mkOption {
       type = lib.types.lines;
       default = "";
