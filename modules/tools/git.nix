@@ -4,24 +4,7 @@
   pkgs,
   ...
 }: {
-  options.user.tools.git = {
-    enable = lib.mkEnableOption "git configuration";
-    name = lib.mkOption {
-      type = lib.types.str;
-      default = "y0usaf";
-      description = "Git username.";
-    };
-    email = lib.mkOption {
-      type = lib.types.str;
-      default = "74448287+y0usaf@users.noreply.github.com";
-      description = "Git email address.";
-    };
-    editor = lib.mkOption {
-      type = lib.types.str;
-      default = "nvim";
-      description = "Default editor for git.";
-    };
-  };
+  options.user.tools.git.enable = lib.mkEnableOption "git configuration";
   config = lib.mkIf config.user.tools.git.enable {
     environment.systemPackages = [
       pkgs.git
@@ -31,11 +14,10 @@
       generator = lib.generators.toGitINI;
       value = {
         user = {
-          inherit (config.user.tools.git) name email;
+          name = "y0usaf";
+          email = "74448287+y0usaf@users.noreply.github.com";
         };
-        core = {
-          inherit (config.user.tools.git) editor;
-        };
+        core.editor = "nvim";
         init.defaultBranch = "main";
         pull.rebase = true;
         push.autoSetupRemote = true;
