@@ -56,12 +56,6 @@ inputs: let
               else basePkgs
             );
           }
-          {
-            options.lib = lib.mkOption {
-              type = lib.types.submodule {freeformType = lib.types.attrsOf (lib.types.attrsOf lib.types.unspecified);};
-              default = {};
-            };
-          }
           inputs.finix.nixosModules.bash
           inputs.finix.nixosModules.dhcpcd
           inputs.finix.nixosModules.getty
