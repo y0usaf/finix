@@ -4,32 +4,15 @@
   pkgs,
   flakeInputs,
   ...
-}: let
-  nhOpts = config.user.tools.nh;
-in {
-  options.user.tools.nh = {
-    enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
-    flake = lib.mkOption {
-      type = lib.types.nullOr (lib.types.either lib.types.singleLineStr lib.types.path);
-      default = null;
-      description = ''
-        The path that will be used for the NH_FLAKE environment variable.
-        NH_FLAKE is used by nh as the default flake for performing actions,
-        like 'nh os switch'. If not set, nh will look for a flake in the current
-        directory or prompt for the flake path.
-      '';
-    };
-  };
-  config = lib.mkIf nhOpts.enable {
+}: {
+  options.user.tools.nh.enable = lib.mkEnableOption "nh (Nix Helper) shell integration";
+
+  config = lib.mkIf config.user.tools.nh.enable {
     environment = {
       systemPackages = [
         flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
       ];
-      variables.NH_FLAKE = toString (
-        if nhOpts.flake != null
-        then nhOpts.flake
-        else config.user.paths.flake.path
-      );
+      variables.NH_FLAKE = config.user.paths.flake.path;
     };
     user.shell.rcExtra = lib.mkAfter ''
       nhs() {
