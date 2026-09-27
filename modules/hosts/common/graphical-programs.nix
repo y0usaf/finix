@@ -29,5 +29,6 @@
     obs.enable = lib.mkDefault true;
     qbittorrent.enable = lib.mkDefault true;
     stoat-desktop.enable = lib.mkDefault true;
+    emeraldian.enable = lib.mkDefault true;
   };
 }
