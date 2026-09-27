@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  flakeInputs,
   ...
 }: let
   userName = config.user.name;
@@ -18,35 +17,6 @@
     neededForBoot = true;
   };
 
-  persistCfg = config.finix.persistence.allowlist;
-  dirPath = entry:
-    if builtins.isAttrs entry
-    then entry.directory
-    else entry;
-  userPersist = persistCfg.users.${userName};
-  userFiles = userPersist.files;
-
-  splitPath = path: builtins.filter (part: part != "") (lib.splitString "/" path);
-  properAncestors = path: let
-    parts = splitPath path;
-  in
-    lib.init (lib.genList (index: lib.concatStringsSep "/" (lib.take (index + 1) parts)) (lib.length parts));
-  dirnameOf = path: let
-    parts = splitPath path;
-  in
-    lib.optional (lib.length parts > 1) (lib.concatStringsSep "/" (lib.init parts));
-  fileTemplateDirs = builtins.concatMap (file: let
-    dirname = dirnameOf (dirPath file);
-  in
-    dirname ++ lib.concatMap properAncestors dirname)
-  userFiles;
-  dirTemplateDirs = builtins.concatMap (directory: properAncestors (dirPath directory)) userPersist.directories;
-  homeTemplateDirs = dirTemplateDirs ++ fileTemplateDirs;
-  dataSubvolMounts =
-    map
-    (mountpoint: lib.removePrefix "${homeDir}/" mountpoint)
-    (builtins.filter (mountpoint: lib.hasPrefix "${homeDir}/" mountpoint) (builtins.attrNames config.fileSystems));
-  templateDirs = lib.sort lib.lessThan (lib.unique (dataSubvolMounts ++ homeTemplateDirs));
   healthPackage = pkgs.writeShellScriptBin "finix-framework-health" ''
     set -u
     export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.iproute2 pkgs.nftables pkgs.procps pkgs.shadow pkgs.util-linux]}
@@ -107,24 +77,6 @@ in {
     };
     systemPackages = [
       healthPackage
-      (pkgs.writeShellScriptBin "prep-home-blank" ''
-        set -euo pipefail
-        export PATH=${lib.makeBinPath [pkgs.btrfs-progs pkgs.coreutils pkgs.util-linux]}
-        mountpoint -q /btrfs || { echo "prep-home-blank: /btrfs is not mounted" >&2; exit 1; }
-        if btrfs subvolume show /btrfs/@home-blank >/dev/null 2>&1; then
-          [ "''${1:-}" = --force ] || { echo "prep-home-blank: exists; pass --force" >&2; exit 1; }
-          btrfs subvolume delete /btrfs/@home-blank
-        fi
-        btrfs subvolume create /btrfs/@home-blank
-        install -d -m 0700 -o ${toString uid} -g users /btrfs/@home-blank/${userName}
-        while IFS= read -r directory; do
-          [ -n "$directory" ] || continue
-          install -d -m 0755 -o ${toString uid} -g users "/btrfs/@home-blank/${userName}/$directory"
-        done <<'DIRECTORIES'
-        ${lib.concatStringsSep "\n" templateDirs}
-        DIRECTORIES
-        chown -R ${toString uid}:users /btrfs/@home-blank/${userName}
-      '')
     ];
   };
 
