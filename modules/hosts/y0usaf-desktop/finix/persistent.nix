@@ -31,17 +31,15 @@ in {
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
     extraModulePackages = [config.boot.kernelPackages.zenpower];
-    initrd = {
-      availableKernelModules = [
-        "nvme"
-        "thunderbolt"
-        "xhci_pci"
-        "ahci"
-        "usbhid"
-        "usb_storage"
-        "sd_mod"
-      ];
-    };
+    initrd.availableKernelModules = [
+      "nvme"
+      "thunderbolt"
+      "xhci_pci"
+      "ahci"
+      "usbhid"
+      "usb_storage"
+      "sd_mod"
+    ];
     kernelModules = [
       "kvm-amd"
       "k10temp"
@@ -111,38 +109,36 @@ in {
   users.users.y0usaf.uid = 1001;
   users.users.root.passwordFile = "/persist/secrets/password-hashes/root";
 
-  finit.tasks = {
-    net-fallback = {
-      description = "static IP fallback if DHCP fails";
-      command = "${pkgs.writeShellScript "desktop-net-fallback" ''
-        set -eu
-        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.iproute2 pkgs.gnugrep]}
+  finit.tasks.net-fallback = {
+    description = "static IP fallback if DHCP fails";
+    command = "${pkgs.writeShellScript "desktop-net-fallback" ''
+      set -eu
+      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.iproute2 pkgs.gnugrep]}
 
-        find_iface() {
-          for dev in /sys/class/net/en* /sys/class/net/eth*; do
-            [ -e "$dev" ] || continue
-            basename "$dev"
-            return 0
-          done
-          return 1
-        }
-
-        for _ in $(seq 1 45); do
-          if ${pkgs.iproute2}/bin/ip -4 addr show scope global 2>/dev/null \
-            | ${pkgs.gnugrep}/bin/grep -q 'inet '; then
-            exit 0
-          fi
-          sleep 1
+      find_iface() {
+        for dev in /sys/class/net/en* /sys/class/net/eth*; do
+          [ -e "$dev" ] || continue
+          basename "$dev"
+          return 0
         done
+        return 1
+      }
 
-        iface="$(find_iface)" || exit 1
-        ${pkgs.iproute2}/bin/ip link set "$iface" up || true
-        ${pkgs.iproute2}/bin/ip addr replace 192.168.2.28/24 dev "$iface" || true
-        ${pkgs.iproute2}/bin/ip route replace default via 192.168.2.1 dev "$iface" || true
-        printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > /etc/resolv.conf || true
-      ''}";
-      conditions = ["net/lo/up"];
-      log = true;
-    };
+      for _ in $(seq 1 45); do
+        if ${pkgs.iproute2}/bin/ip -4 addr show scope global 2>/dev/null \
+          | ${pkgs.gnugrep}/bin/grep -q 'inet '; then
+          exit 0
+        fi
+        sleep 1
+      done
+
+      iface="$(find_iface)" || exit 1
+      ${pkgs.iproute2}/bin/ip link set "$iface" up || true
+      ${pkgs.iproute2}/bin/ip addr replace 192.168.2.28/24 dev "$iface" || true
+      ${pkgs.iproute2}/bin/ip route replace default via 192.168.2.1 dev "$iface" || true
+      printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > /etc/resolv.conf || true
+    ''}";
+    conditions = ["net/lo/up"];
+    log = true;
   };
 }

@@ -1,5 +1,3 @@
 {
-  user.tools = {
-    "3d-printing".enable = true;
-  };
+  user.tools."3d-printing".enable = true;
 }
