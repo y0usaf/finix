@@ -59,9 +59,6 @@ in {
 
   environment = {
     etc = {
-      "modprobe.d/finix-desktop-blacklist.conf".text = ''
-        blacklist nouveau
-      '';
       "finix-stage2".text = "desktop-phase2.4\n";
     };
     systemPackages = [
