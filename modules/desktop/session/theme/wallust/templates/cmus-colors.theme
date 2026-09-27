@@ -1,0 +1,21 @@
+set color_win_fg=default
+set color_win_bg=default
+set color_win_dir=default
+
+set color_win_cur=5
+set color_win_cur_sel_fg=15
+set color_win_cur_sel_bg=5
+set color_separator=darkgray
+
+set color_cmdline_bg=default
+set color_cmdline_fg=default
+
+set color_statusline_fg=white
+set color_statusline_bg=5
+set color_statusline_progress_bg=5
+set color_statusline_progress_fg=white
+set color_win_title_fg=white
+set color_win_title_bg=5
+
+set color_error=1
+set color_info=2

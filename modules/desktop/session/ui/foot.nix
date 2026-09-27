@@ -24,7 +24,7 @@ in {
       generator = lib.generators.toINI {};
       value = {
         main = {
-          include = user.appearance.wallust.targets.foot-colors.target;
+          include = "~/.cache/wallust/colors_foot.ini";
           term = "xterm-256color";
           font =
             "${uiFonts.mainFontName}:size=${computedFontSize}, "
