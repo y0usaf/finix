@@ -85,7 +85,6 @@ in {
   imports = [
     ../../../finix/desktop
     ./firewall.nix
-    ./graphical.nix
     ./network.nix
     ./power.nix
   ];
@@ -153,7 +152,6 @@ in {
   };
 
   boot = {
-    bootspec.enable = true;
     kernelPackages = pkgs.linuxPackages_latest;
     initrd.availableKernelModules = ["nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod"];
     kernelModules = ["kvm-amd" "amdgpu"];

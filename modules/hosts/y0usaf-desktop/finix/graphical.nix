@@ -1,10 +1,7 @@
 {config, ...}: {
   hardware.nvidia = {
     enable = true;
-    kernelModule = "closed";
-    modesetting.enable = true;
     gsp.enable = false;
-    videoAcceleration = true;
   };
 
   boot.extraModulePackages = [config.hardware.nvidia.package.mod];

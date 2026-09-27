@@ -113,10 +113,7 @@ in {
   };
 
   services = {
-    getty = {
-      enable = true;
-      ttys = ["tty1" "ttyS0"];
-    };
+    getty.ttys = ["tty1" "ttyS0"];
     nix-daemon = {
       settings = {
         substituters = ["http://127.0.0.1:8787/cache"];
