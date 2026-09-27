@@ -106,18 +106,6 @@ in {
       "finix-stage2".text = "framework-trial-1\n";
     };
     systemPackages = [
-      pkgs.nix
-      pkgs.efibootmgr
-      pkgs.git
-      pkgs.curl
-      pkgs.iproute2
-      pkgs.iputils
-      pkgs.procps
-      pkgs.util-linux
-      pkgs.vim
-      pkgs.btrfs-progs
-      flakeInputs.pi-flake.packages.${pkgs.stdenv.hostPlatform.system}.pi
-      flakeInputs.nh.packages.${pkgs.stdenv.hostPlatform.system}.default
       healthPackage
       (pkgs.writeShellScriptBin "prep-home-blank" ''
         set -euo pipefail
