@@ -5,16 +5,10 @@
   flakeInputs,
   ...
 }: let
-  inherit (config.user) ui appearance;
-  gtkCfg = ui.gtk;
-  gtkScale = gtkCfg.scale;
-  cursorThemeName = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark.xcursorThemeName;
-  toINI = lib.generators.toINI {};
-  inherit (ui.fonts) mainFontName;
+  inherit (config.user.ui.fonts) mainFontName;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
-  backgroundColor = "transparent";
 in {
   options.user.ui.gtk = {
     scale = lib.mkOption {
@@ -30,20 +24,20 @@ in {
         pkgs.gtk3
         pkgs.gtk4
       ];
-      variables.GDK_DPI_SCALE = toString gtkScale;
+      variables.GDK_DPI_SCALE = toString config.user.ui.gtk.scale;
     };
     manzil.users."${config.user.name}" = {
       files = {
         ".config/gtk-3.0/settings.ini" = {
-          generator = toINI;
+          generator = lib.generators.toINI {};
           value = {
             Settings = {
               gtk-application-prefer-dark-theme = 1;
-              gtk-cursor-theme-name = cursorThemeName;
+              gtk-cursor-theme-name = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}.deepin-dark.xcursorThemeName;
               gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";
               gtk-xft-antialias = 1;
-              gtk-xft-dpi = toString appearance.dpi;
+              gtk-xft-dpi = toString config.user.appearance.dpi;
               gtk-xft-hinting = 1;
               gtk-xft-hintstyle = "hintslight";
               gtk-xft-rgba = "rgb";
@@ -56,7 +50,7 @@ in {
             * {
               font-family: "${mainFontName}";
               color: white;
-              background: ${backgroundColor};
+              background: transparent;
               outline-width: 0;
               outline-offset: 0;
               text-shadow: ${lib.concatStringsSep ",\n" (lib.concatLists (lib.genList
@@ -88,7 +82,7 @@ in {
             }
             /* Menu background styling */
             menu {
-              background: ${backgroundColor};
+              background: transparent;
             }
           '';
         };
@@ -105,11 +99,11 @@ in {
           ];
         };
         ".config/gtk-4.0/settings.ini" = {
-          generator = toINI;
+          generator = lib.generators.toINI {};
           value = {
             Settings = {
               gtk-application-prefer-dark-theme = 1;
-              gtk-cursor-theme-name = cursorThemeName;
+              gtk-cursor-theme-name = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}.deepin-dark.xcursorThemeName;
               gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";
             };

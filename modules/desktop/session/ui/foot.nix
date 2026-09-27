@@ -4,10 +4,7 @@
   pkgs,
   ...
 }: let
-  inherit (config) user;
-  userUi = user.ui;
-  uiFonts = userUi.fonts;
-  computedFontSize = toString user.appearance.termFontSize;
+  uiFonts = config.user.ui.fonts;
 in {
   options.user.ui.foot = {
     lineHeight = lib.mkOption {
@@ -27,15 +24,15 @@ in {
           include = "~/.cache/wallust/colors_foot.ini";
           term = "xterm-256color";
           font =
-            "${uiFonts.mainFontName}:size=${computedFontSize}, "
-            + lib.concatStringsSep ", " (map (name: "${name}:size=${computedFontSize}") [
+            "${uiFonts.mainFontName}:size=${toString config.user.appearance.termFontSize}, "
+            + lib.concatStringsSep ", " (map (name: "${name}:size=${toString config.user.appearance.termFontSize}") [
               "Symbols Nerd Font"
               uiFonts.backup.name
               uiFonts.emoji.name
             ]);
           "bold-text-in-bright" = "yes";
           "dpi-aware" = "yes";
-          "line-height" = userUi.foot.lineHeight;
+          "line-height" = config.user.ui.foot.lineHeight;
         };
 
         bell = {

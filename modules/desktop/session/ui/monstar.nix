@@ -3,11 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit (config) user;
-  userUi = user.ui;
-  computedFontSize = toString user.appearance.termFontSize;
-in {
+}: {
   user.defaults.terminal = lib.mkDefault "monstar";
 
   environment.systemPackages = [
@@ -16,9 +12,9 @@ in {
 
   manzil.users."${config.user.name}".files.".config/monstar/config" = {
     text = ''
-      font-size = ${computedFontSize}
+      font-size = ${toString config.user.appearance.termFontSize}
       background-opacity = 0.82
-      line-height = ${userUi.foot.lineHeight}
+      line-height = ${config.user.ui.foot.lineHeight}
       theme = ${config.user.homeDirectory}/.cache/wallust/colors_monstar
     '';
   };
