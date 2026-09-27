@@ -8,8 +8,8 @@
         x-scheme-handler/https=${config.user.defaults.browser}.desktop
         x-scheme-handler/ftp=${config.user.defaults.browser}.desktop
         x-scheme-handler/chrome=${config.user.defaults.browser}.desktop
-        x-scheme-handler/discord=${config.user.defaults.discord}.desktop
-        inode/directory=${config.user.defaults.fileManager}.desktop
+        x-scheme-handler/discord=discord.desktop
+        inode/directory=pcmanfm.desktop
         video/mp4=mpv.desktop
         video/x-matroska=mpv.desktop
         video/webm=mpv.desktop

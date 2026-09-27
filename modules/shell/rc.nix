@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  flakeDirectory = config.user.paths.flake;
+  flakeDirectory = "${config.user.homeDirectory}/finix";
 in {
   options.user.shell = {
     aliases = lib.mkOption {

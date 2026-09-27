@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  cfg = config.user.dev.r2t2;
   home = config.user.homeDirectory;
   user = config.user.name;
   stateDir = "${home}/.local/share/r2t2";
@@ -157,20 +156,6 @@
     echo "r2t2-install: the repo (r2t2 import) is provided via PYTHONPATH=${patched}; not installed into the venv."
   '';
 in {
-  options.user.dev.r2t2 = {
-    listenAddress = lib.mkOption {
-      type = lib.types.str;
-      default = "127.0.0.1";
-      description = "Address the server binds. Loopback by default (the sandbox binds 127.0.0.1).";
-    };
-
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 8272;
-      description = "WebSocket port. WS URI is ws://<listenAddress>:<port>/asr_stream_api_v1.";
-    };
-  };
-
   config = lib.mkIf config.hardware.nvidia.enable {
     environment.systemPackages = [installScript];
 
@@ -224,8 +209,8 @@ in {
 
         cd "$run"
         "$mypy" -u "$run/ws_server.py" \
-          --ip ${lib.escapeShellArg cfg.listenAddress} \
-          --port ${toString cfg.port} \
+          --ip 127.0.0.1 \
+          --port 8272 \
           --asr_model_path ${lib.escapeShellArg (toString weights)} \
           --vad_model_path ${lib.escapeShellArg (toString vad)} &
         server_pid=$!
@@ -238,7 +223,7 @@ in {
             wait "$server_pid"
             exit $?
           fi
-          if ${pkgs.netcat}/bin/nc -z ${lib.escapeShellArg cfg.listenAddress} ${toString cfg.port} 2>/dev/null; then
+          if ${pkgs.netcat}/bin/nc -z 127.0.0.1 8272 2>/dev/null; then
             ready=1
             break
           fi

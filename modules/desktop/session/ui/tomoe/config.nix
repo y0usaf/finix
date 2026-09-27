@@ -97,13 +97,13 @@
   launches = lib.mapAttrsToList (command: argv: [command argv]) {
     cursor = ["cursor"];
     browser = [defaults.browser];
-    discord = [defaults.discord];
+    discord = ["discord"];
     steam = ["steam"];
     obs = ["obs"];
     terminal = [defaults.terminal "--app-id" terminalAppId];
     launcher = ["sh" "-c" defaults.launcher];
-    files = [defaults.fileManager];
-    editor = [defaults.terminal "-e" defaults.editor];
+    files = ["pcmanfm"];
+    editor = [defaults.terminal "-e" "nvim"];
     volume-up = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"];
     volume-down = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"];
     volume-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
