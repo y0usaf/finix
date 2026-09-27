@@ -7,21 +7,6 @@
 in {
   options.finix.persistence.homeReset = {
     enable = lib.mkEnableOption "Btrfs home reset from a blank snapshot";
-    btrfsRoot = lib.mkOption {
-      type = lib.types.str;
-      default = "/sysroot/btrfs";
-      description = "Initrd mount containing the top-level Btrfs subvolumes.";
-    };
-    homeSubvolume = lib.mkOption {
-      type = lib.types.str;
-      default = "@home";
-      description = "Live home subvolume name.";
-    };
-    templateSubvolume = lib.mkOption {
-      type = lib.types.str;
-      default = "@home-blank";
-      description = "Blank home snapshot template.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -30,11 +15,11 @@ in {
         description = "rotate home back to the blank Btrfs template";
         conditions = ["task/mount-btrfs/success"];
         script = ''
-          B=${cfg.btrfsRoot}
-          live="$B/${cfg.homeSubvolume}"
-          fresh="$B/${cfg.homeSubvolume}-new"
-          previous="$B/${cfg.homeSubvolume}-lastboot"
-          template="$B/${cfg.templateSubvolume}"
+          B=/sysroot/btrfs
+          live="$B/@home"
+          fresh="$B/@home-new"
+          previous="$B/@home-lastboot"
+          template="$B/@home-blank"
 
           if ! btrfs subvolume show "$live" >/dev/null 2>&1; then
             if btrfs subvolume show "$fresh" >/dev/null 2>&1; then
