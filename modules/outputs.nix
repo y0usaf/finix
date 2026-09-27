@@ -103,9 +103,7 @@ inputs: let
         ./finix/diagnostics.nix
         inputs.manzil.finixModules.default
         ./core/user/user-config.nix
-        ./dev/ai/prompts/ethics.nix
-        ./dev/ai/prompts/no-tests.nix
-        ./dev/ai/prompts/no-comments.nix
+        ./dev/ai/prompts/policy.nix
         ./dev/ai/claude-code.nix
         ./dev/ai/paseo/service.nix
         ./tools/git.nix
