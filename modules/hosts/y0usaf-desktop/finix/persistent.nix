@@ -27,11 +27,7 @@ in {
 
   hardware.firmware = [pkgs.linux-firmware];
 
-  environment = {
-    etc = {
-      "finix-stage2".text = "desktop-phase2.4\n";
-    };
-  };
+  environment.etc."finix-stage2".text = "desktop-phase2.4\n";
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;

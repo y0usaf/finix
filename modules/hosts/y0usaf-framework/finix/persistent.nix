@@ -72,12 +72,8 @@ in {
   };
 
   environment = {
-    etc = {
-      "finix-stage2".text = "framework-trial-1\n";
-    };
-    systemPackages = [
-      healthPackage
-    ];
+    etc."finix-stage2".text = "framework-trial-1\n";
+    systemPackages = [healthPackage];
   };
 
   boot = {
