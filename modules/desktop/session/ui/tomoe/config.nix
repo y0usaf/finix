@@ -159,46 +159,42 @@
     frames = "${./assets/bongo-cat}";
   };
 
-  initText = lib.concatStringsSep "\n" ([
-      ''
-        (in-package #:tomoe-user)
-        (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ plist settings) cfg.displays)})
-        (defparameter +policy-settings+ ${toLisp ({honor-xdg-activation-with-invalid-serial = true;} // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
-        (defparameter +policy-wallpaper+ ${toLisp wallpaper})
-        (defparameter +policy-launcher+ ${toLisp {
-          app-id = "launcher";
-          ratio = mkLispInline "1/3";
-        }})
-        (defparameter +policy-hidden-window+ ${toLisp {
-          app-id = "steam_proton";
-          title-prefix = "Lovely";
-        }})
-        (defparameter +policy-terminal+ ${toLisp {
-          app-id = terminalAppId;
-          title-prefix = "ekko";
-        }})
-        (defparameter +policy-bindings+ ${toLisp userBindings})
-        (defparameter +policy-launches+ ${toLisp launches})
-        (defparameter +layout+ ${toLisp ({
-            gaps = 8;
-            float-ratio = mkLispInline "3/5";
-          }
-          // layout.parameters)})
-        (defparameter +layout-bindings+ ${toLisp (layout.bindings ++ [(binding ["alt"] "t" "terminal" "Terminal")])})
-      ''
-      (builtins.readFile ./lisp/policy.lisp)
-      (builtins.readFile layout.file)
-      (builtins.readFile ./lisp/user.lisp)
-    ]
-    ++ [
-      "(defparameter +bar+ ${toLisp barParameters})"
-      (builtins.readFile ./lisp/bar.lisp)
-    ]
-    ++ [
-      "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
-      (builtins.readFile ./lisp/bongo-cat.lisp)
-    ]
-    ++ [cfg.extraConfig]);
+  initText = lib.concatStringsSep "\n" [
+    ''
+      (in-package #:tomoe-user)
+      (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ plist settings) cfg.displays)})
+      (defparameter +policy-settings+ ${toLisp ({honor-xdg-activation-with-invalid-serial = true;} // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
+      (defparameter +policy-wallpaper+ ${toLisp wallpaper})
+      (defparameter +policy-launcher+ ${toLisp {
+        app-id = "launcher";
+        ratio = mkLispInline "1/3";
+      }})
+      (defparameter +policy-hidden-window+ ${toLisp {
+        app-id = "steam_proton";
+        title-prefix = "Lovely";
+      }})
+      (defparameter +policy-terminal+ ${toLisp {
+        app-id = terminalAppId;
+        title-prefix = "ekko";
+      }})
+      (defparameter +policy-bindings+ ${toLisp userBindings})
+      (defparameter +policy-launches+ ${toLisp launches})
+      (defparameter +layout+ ${toLisp ({
+          gaps = 8;
+          float-ratio = mkLispInline "3/5";
+        }
+        // layout.parameters)})
+      (defparameter +layout-bindings+ ${toLisp (layout.bindings ++ [(binding ["alt"] "t" "terminal" "Terminal")])})
+    ''
+    (builtins.readFile ./lisp/policy.lisp)
+    (builtins.readFile layout.file)
+    (builtins.readFile ./lisp/user.lisp)
+    "(defparameter +bar+ ${toLisp barParameters})"
+    (builtins.readFile ./lisp/bar.lisp)
+    "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
+    (builtins.readFile ./lisp/bongo-cat.lisp)
+    cfg.extraConfig
+  ];
 in {
   manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = initText;
 }
