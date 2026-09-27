@@ -5,11 +5,6 @@
       default = 12;
       description = "Font size used by terminal emulators (e.g. foot)";
     };
-    xcursorSize = lib.mkOption {
-      type = lib.types.int;
-      default = 24;
-      description = "Cursor size for XCursor-based applications and compositors.";
-    };
     hyprcursorSize = lib.mkOption {
       type = lib.types.int;
       default = 24;
@@ -19,11 +14,6 @@
       type = lib.types.int;
       default = 96;
       description = "Display DPI setting for the system";
-    };
-    opacity = lib.mkOption {
-      type = lib.types.float;
-      default = 0.1;
-      description = "Global UI opacity setting (0.0 = fully transparent, 1.0 = fully opaque)";
     };
   };
 }

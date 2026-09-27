@@ -2,13 +2,13 @@
   config,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: let
   inherit (config.user) ui appearance;
   gtkCfg = ui.gtk;
   gtkScale = gtkCfg.scale;
-  cursorThemeName = ui.cursor.package.xcursorThemeName;
-  inherit (appearance) xcursorSize;
+  cursorThemeName = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark.xcursorThemeName;
   toINI = lib.generators.toINI {};
   inherit (ui.fonts) mainFontName;
   shadowSize = "0.05rem";
@@ -40,7 +40,7 @@ in {
             Settings = {
               gtk-application-prefer-dark-theme = 1;
               gtk-cursor-theme-name = cursorThemeName;
-              gtk-cursor-theme-size = toString xcursorSize;
+              gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";
               gtk-xft-antialias = 1;
               gtk-xft-dpi = toString appearance.dpi;
@@ -110,7 +110,7 @@ in {
             Settings = {
               gtk-application-prefer-dark-theme = 1;
               gtk-cursor-theme-name = cursorThemeName;
-              gtk-cursor-theme-size = toString xcursorSize;
+              gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";
             };
           };

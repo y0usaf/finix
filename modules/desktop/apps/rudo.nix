@@ -13,7 +13,7 @@ in {
     ".config/rudo/config.toml" = {
       source = (pkgs.formats.toml {}).generate "rudo-config" {
         window = {
-          inherit (userAppearance) opacity;
+          opacity = 0.7;
         };
         font = {
           size = userAppearance.termFontSize;

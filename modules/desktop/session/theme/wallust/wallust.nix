@@ -10,12 +10,6 @@
   inherit (lib.types) anything attrsOf lines str submodule;
 in {
   options.user.appearance.wallust = {
-    defaultTheme = lib.mkOption {
-      type = str;
-      default = "dopamine";
-      description = "Default theme to apply on login.";
-    };
-
     colorschemes = lib.mkOption {
       type = attrsOf anything;
       default = {};
