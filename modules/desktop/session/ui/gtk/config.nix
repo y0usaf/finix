@@ -94,7 +94,16 @@ in {
           '';
         };
         ".config/gtk-3.0/bookmarks" = {
-          text = lib.concatStringsSep "\n" config.user.paths.bookmarks;
+          text = lib.concatStringsSep "\n" [
+            "file://${config.user.homeDirectory}/Downloads Downloads"
+            "file://${config.user.homeDirectory}/Documents Documents"
+            "file://${config.user.homeDirectory}/dev dev"
+            "file://${config.user.homeDirectory}/cu-workbench/repos CookUnity"
+            "file://${config.user.homeDirectory}/Music Music"
+            "file://${config.user.homeDirectory}/DCIM Pictures"
+            "file://${config.user.homeDirectory}/finix Finix"
+            "file:///tmp tmp"
+          ];
         };
         ".config/gtk-4.0/settings.ini" = {
           generator = toINI;
