@@ -1,18 +1,6 @@
-{lib, ...}: let
-  mkInternalStr = description:
-    lib.mkOption {
-      type = lib.types.str;
-      internal = true;
-      default = "";
-      inherit description;
-    };
-in {
+{lib, ...}: {
   options.user.dev.pi = {
     enable = lib.mkEnableOption "pi coding agent CLI";
-
-    readmePath = mkInternalStr "Path to the pi README.";
-    docsPath = mkInternalStr "Path to the pi docs directory.";
-    examplesPath = mkInternalStr "Path to the pi examples directory.";
 
     agents = {
       maxDepth = lib.mkOption {
