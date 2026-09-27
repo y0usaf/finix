@@ -16,7 +16,9 @@ The repository root retains flake inputs and lock metadata, licensing, and tool 
 
 `recursivelyImport.nix` remains at the repository root and recursively collects `.nix` module paths without exclusions. Pass those paths directly to `lib.evalModules`: do not pre-import them or filter out helpers. Path imports retain source locations and let the module system deduplicate shared imports.
 
-Every `.nix` file under `modules/` is a module, including package builders and data providers. Export shared values through declared options and consume `config`, rather than importing files as functions or data. Select directory roots for the relevant graph (flake outputs, shared system features, or host-specific features); keep host-only modules in that host's directory.
+Every `.nix` file under `modules/` is a module, including package builders and data providers. Export shared values through declared options and consume `config`, rather than importing files as functions or data.
+
+A host directory under `modules/hosts/` holds only facts about that machine: hardware, displays, disks and boot, network identity, keys, and which roles it takes. Everything else is general. A program's module owns its install, settings and persisted paths (`finix.persistence.allowlist`), keyed off roles or hardware facts such as `hardware.nvidia.enable`, never off a hostname. `modules/hosts/common/` is the graphical role; every graphical host loads it with the other graphical roots, and persisted paths no module owns go in `hosts/common/persist.nix`. `modules/finix/default.nix` picks each host's modules: the framework adds the laptop role in `modules/finix/laptop.nix`, and the server lists its modules explicitly, including those under `modules/server/`.
 
 `modules/outputs.nix` and `modules/finix/` compose the flake-level module graph. Feature packages and previews are exposed through the root flake's `packages`, `apps`, and `checks`; there are no nested preview flakes.
 
