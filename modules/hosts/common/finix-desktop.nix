@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -18,6 +19,7 @@
   };
 
   finit.services.dhcpcd.enable = lib.mkForce false;
+  users.users.${config.user.name}.extraGroups = ["networkmanager"];
 
   system.activation.scripts.networkManagerConnections = {
     deps = ["etc"];
