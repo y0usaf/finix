@@ -22,5 +22,6 @@
     tui-launcher.enable = lib.mkDefault true;
     slack.enable = lib.mkDefault true;
     btop.enable = lib.mkDefault true;
+    grok-bot.enable = lib.mkDefault true;
   };
 }
