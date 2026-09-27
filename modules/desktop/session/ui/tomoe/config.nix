@@ -194,7 +194,7 @@
       "(defparameter +bar+ ${toLisp barParameters})"
       (builtins.readFile ./lisp/bar.lisp)
     ]
-    ++ lib.optionals bar.bongo-cat.enable [
+    ++ [
       "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
       (builtins.readFile ./lisp/bongo-cat.lisp)
     ]

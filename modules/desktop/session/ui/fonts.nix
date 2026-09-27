@@ -6,11 +6,6 @@
   ...
 }: {
   options.user.ui.fonts = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable font configuration with main, backup, symbols, and emoji fonts";
-    };
     mainFont = lib.mkOption {
       type = lib.types.package;
       default = flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default;
@@ -59,7 +54,7 @@
     };
   };
 
-  config = lib.mkIf config.user.ui.fonts.enable {
+  config = {
     fonts.packages = [
       config.user.ui.fonts.mainFont
       config.user.ui.fonts.backup.package

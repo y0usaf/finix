@@ -1,34 +1,22 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  inherit (config.user) ui;
-in {
-  options.user.ui.wayland = {
-    enable = lib.mkEnableOption "Wayland configuration";
-  };
-  config = lib.mkIf ui.wayland.enable {
-    environment = {
-      systemPackages = [
-        pkgs.grim
-        pkgs.slurp
-        pkgs.wl-clipboard-rs
-        pkgs.hyprpicker
-      ];
-      variables = {
-        WLR_NO_HARDWARE_CURSORS = "1";
-        NIXOS_OZONE_WL = "1";
-        QT_QPA_PLATFORM = "wayland";
-        ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-        XDG_SESSION_TYPE = "wayland";
-        GDK_BACKEND = "wayland";
-        SDL_VIDEODRIVER = "wayland,x11";
-        CLUTTER_BACKEND = "wayland";
-        MOZ_ENABLE_WAYLAND = "1";
-        MOZ_USE_XINPUT2 = "1";
-      };
+{pkgs, ...}: {
+  environment = {
+    systemPackages = [
+      pkgs.grim
+      pkgs.slurp
+      pkgs.wl-clipboard-rs
+      pkgs.hyprpicker
+    ];
+    variables = {
+      WLR_NO_HARDWARE_CURSORS = "1";
+      NIXOS_OZONE_WL = "1";
+      QT_QPA_PLATFORM = "wayland";
+      ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+      XDG_SESSION_TYPE = "wayland";
+      GDK_BACKEND = "wayland";
+      SDL_VIDEODRIVER = "wayland,x11";
+      CLUTTER_BACKEND = "wayland";
+      MOZ_ENABLE_WAYLAND = "1";
+      MOZ_USE_XINPUT2 = "1";
     };
   };
 }

@@ -17,15 +17,14 @@
   backgroundColor = "transparent";
 in {
   options.user.ui.gtk = {
-    enable = lib.mkEnableOption "GTK theming and configuration using manzil";
     scale = lib.mkOption {
       type = lib.types.float;
-      default = 1.0;
+      default = 1.5;
       description = "Scaling factor for GTK applications (e.g., 1.0, 1.25, 1.5, 2.0)";
     };
   };
 
-  config = lib.mkIf gtkCfg.enable {
+  config = {
     environment = {
       systemPackages = [
         pkgs.gtk3

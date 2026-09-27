@@ -133,7 +133,7 @@ in {
         (lib.attrNames (lib.filterAttrs (_: m: m ? files) models));
     };
 
-    user.ui.tomoe.extraConfig = lib.mkIf config.user.ui.tomoe.enable ''
+    user.ui.tomoe.extraConfig = ''
       (define-extension "bolo" (:reads (:key)) (snapshot state event)
         (declare (ignore snapshot))
         (values state

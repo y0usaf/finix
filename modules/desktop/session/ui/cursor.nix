@@ -15,12 +15,6 @@
   };
 in {
   options.user.ui.cursor = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable cursor theme configuration";
-    };
-
     package = lib.mkOption {
       type = lib.types.package;
       default = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark;
@@ -32,7 +26,7 @@ in {
     };
   };
 
-  config = lib.mkIf cursor.enable {
+  config = {
     environment = {
       systemPackages = cursorPackage.cursorPackages or [cursorPackage];
       variables = cursorSessionVariables;
