@@ -41,8 +41,7 @@
         ../server/tailscale.nix
         ../hosts/y0usaf-server/finix/persistent.nix
         ../server/attic.nix
-        ../hosts/y0usaf-server/finix/shell.nix
-        ../hosts/y0usaf-server/finix/paseo.nix
+        ../server/programs.nix
         inputs.manzil.finixModules.default
         ../hosts/common/finix-base.nix
         ../hosts/common/finix-btrfs.nix
@@ -59,7 +58,6 @@
         ../dev/ai/paseo/service.nix
         ../tools/git.nix
         ../tools/tmux.nix
-        ../hosts/y0usaf-server/tools.nix
       ];
   };
 
