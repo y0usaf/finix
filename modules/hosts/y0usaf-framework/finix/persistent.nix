@@ -82,12 +82,7 @@
     exit "$failed"
   '';
 in {
-  imports = [
-    ../../../finix/desktop
-    ./firewall.nix
-    ./network.nix
-    ./power.nix
-  ];
+  imports = [../../../finix/desktop];
 
   networking.hostName = "y0usaf-framework";
 
