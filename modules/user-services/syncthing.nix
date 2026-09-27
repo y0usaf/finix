@@ -5,6 +5,8 @@
   ...
 }: let
   cfg = config.user.services.syncthing;
+  userName = config.user.name;
+  inherit (config.users.users.${userName}) home;
 
   devices = {
     desktop.id = "KII4S2Y-KWA6M4K-MCQAUOO-C6PMX4L-V5JVDPW-HHZF52D-HP57BNH-EKCCZQC";
@@ -219,16 +221,26 @@ in {
       default = null;
       description = "Folder attribute names enabled on this host; null enables all folders";
     };
-
-    seedConfigFile = lib.mkOption {
-      type = lib.types.path;
-      readOnly = true;
-      description = "Path to the generated declarative syncthing seed config.xml";
-      internal = true;
-    };
   };
 
   config = lib.mkIf config.user.services.syncthing.enable {
-    user.services.syncthing.seedConfigFile = seedConfigXml;
+    finit.services.syncthing = {
+      description = "syncthing file sync (${userName})";
+      user = userName;
+      environment.HOME = home;
+      path = [pkgs.coreutils pkgs.gnugrep];
+      command = let
+        cfgDir = "${home}/.config/syncthing";
+      in "${pkgs.writeShellScript "syncthing-seed" ''
+        set -e
+        CFG=${cfgDir}/config.xml
+        if [ ! -f "$CFG" ] || ! grep -q '<folder id=' "$CFG"; then
+          install -m 600 -o ${userName} -g users ${seedConfigXml} "$CFG"
+        fi
+        exec ${pkgs.syncthing}/bin/syncthing --config=${cfgDir} --data=${cfgDir} --gui-address=127.0.0.1:8384 --no-browser
+      ''}";
+      conditions = ["net/lo/up"];
+      log = true;
+    };
   };
 }
