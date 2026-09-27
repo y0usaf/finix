@@ -5,7 +5,6 @@
 }: let
   inherit (lib) mkEnableOption mkOption types;
   attrsOfAnything = types.attrsOf types.anything;
-  hwAccel = config.user.programs.browser.hardwareAccel;
   uiFonts = config.user.ui.fonts;
   fontList = lib.concatStringsSep ", " [
     uiFonts.mainFontName
@@ -18,61 +17,33 @@ in {
     librewolf.enable = mkEnableOption "LibreWolf browser";
     glide.enable = mkEnableOption "Glide browser";
 
-    browser = {
-      hardwareAccel = {
-        webrender = mkOption {
-          type = types.bool;
-          default = true;
-          description = "Enable WebRender in Firefox-family browsers.";
-        };
-
-        videoDecoding = mkOption {
-          type = types.bool;
-          default = true;
-          description = "Enable hardware video decoding in Firefox-family browsers.";
-        };
-
-        vaapi = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Enable VA-API acceleration in Firefox-family browsers.";
-        };
-
-        disabled = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Disable browser layer acceleration.";
-        };
+    browser.shared = {
+      policies = mkOption {
+        type = attrsOfAnything;
+        internal = true;
+        default = {};
+        description = "Shared Firefox-family browser policies.";
       };
 
-      shared = {
-        policies = mkOption {
-          type = attrsOfAnything;
-          internal = true;
-          default = {};
-          description = "Shared Firefox-family browser policies.";
-        };
+      lockedPrefs = mkOption {
+        type = attrsOfAnything;
+        internal = true;
+        default = {};
+        description = "Shared locked Firefox-family browser preferences.";
+      };
 
-        lockedPrefs = mkOption {
-          type = attrsOfAnything;
-          internal = true;
-          default = {};
-          description = "Shared locked Firefox-family browser preferences.";
-        };
+      defaultPrefs = mkOption {
+        type = attrsOfAnything;
+        internal = true;
+        default = {};
+        description = "Shared default Firefox-family browser preferences.";
+      };
 
-        defaultPrefs = mkOption {
-          type = attrsOfAnything;
-          internal = true;
-          default = {};
-          description = "Shared default Firefox-family browser preferences.";
-        };
-
-        userChromeCss = mkOption {
-          type = types.lines;
-          internal = true;
-          default = "";
-          description = "Shared Firefox-family userChrome.css content.";
-        };
+      userChromeCss = mkOption {
+        type = types.lines;
+        internal = true;
+        default = "";
+        description = "Shared Firefox-family userChrome.css content.";
       };
     };
   };
@@ -187,10 +158,10 @@ in {
       "browser.tabs.inTitlebar" = 0;
       "browser.toolbars.bookmarks.visibility" = "never";
 
-      "gfx.webrender.all" = hwAccel.webrender;
-      "media.hardware-video-decoding.enabled" = hwAccel.videoDecoding;
-      "media.ffmpeg.vaapi.enabled" = hwAccel.vaapi;
-      "layers.acceleration.disabled" = hwAccel.disabled;
+      "gfx.webrender.all" = true;
+      "media.hardware-video-decoding.enabled" = true;
+      "media.ffmpeg.vaapi.enabled" = false;
+      "layers.acceleration.disabled" = false;
 
       "browser.sessionstore.interval" = 15000;
       "network.http.max-persistent-connections-per-server" = 10;
