@@ -16,7 +16,7 @@
     ++ lib.optionals (description != null) [(keyword "description") description];
 
   terminalAppId = "ekko-term";
-  wallpaper = ''swaybg -i "$(find ${lib.escapeShellArg config.user.paths.wallpapers.static.path} -type f | shuf -n 1)" -m fill'';
+  wallpaper = ''swaybg -i "$(find ${lib.escapeShellArg config.user.paths.wallpapers} -type f | shuf -n 1)" -m fill'';
 
   layouts = {
     deck = {

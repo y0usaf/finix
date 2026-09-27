@@ -12,7 +12,7 @@
       systemPackages = [
         flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
       ];
-      variables.NH_FLAKE = config.user.paths.flake.path;
+      variables.NH_FLAKE = config.user.paths.flake;
     };
     user.shell.rcExtra = lib.mkAfter ''
       nhs() {

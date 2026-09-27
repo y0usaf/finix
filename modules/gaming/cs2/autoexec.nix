@@ -6,7 +6,7 @@
   inherit (lib) mkIf;
 in {
   config = mkIf config.user.gaming.core.enable (let
-    steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam.path;
+    steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam;
   in {
     manzil.users."${config.user.name}".files = {
       "${steamPath}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/autoexec.cfg".text = ''

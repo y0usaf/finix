@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.user.gaming.p4g;
-  steam = config.user.paths.steam.path;
+  steam = config.user.paths.steam;
   fetch = url: hash: pkgs.fetchurl {inherit url hash;};
   cep =
     fetch

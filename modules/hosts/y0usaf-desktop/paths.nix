@@ -2,7 +2,7 @@
   homeDir = config.user.homeDirectory;
 in {
   user.paths = {
-    wallpapers.static.path = "${homeDir}/DCIM/Wallpapers/32_9/";
+    wallpapers = "${homeDir}/DCIM/Wallpapers/32_9/";
     bookmarks = [
       "file://${homeDir}/Downloads Downloads"
       "file://${homeDir}/Documents Documents"
