@@ -10,14 +10,13 @@
   computedFontSize = toString user.appearance.termFontSize;
 in {
   options.user.ui.foot = {
-    enable = lib.mkEnableOption "foot terminal emulator";
     lineHeight = lib.mkOption {
       type = lib.types.str;
       default = "24px";
       description = "Foot line height";
     };
   };
-  config = lib.mkIf userUi.foot.enable {
+  config = {
     environment.systemPackages = [
       pkgs.foot
     ];

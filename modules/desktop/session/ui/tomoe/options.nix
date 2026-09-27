@@ -1,7 +1,5 @@
 {lib, ...}: {
   options.user.ui.tomoe = {
-    enable = lib.mkEnableOption "tomoe Wayland compositor";
-
     layout = lib.mkOption {
       type = lib.types.enum ["deck" "sway"];
       default = "deck";

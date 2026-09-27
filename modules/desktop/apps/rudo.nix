@@ -1,32 +1,29 @@
 {
   config,
-  lib,
   pkgs,
   flakeInputs,
   ...
 }: let
   inherit (pkgs.stdenv.hostPlatform) system;
   userAppearance = config.user.appearance;
-  uiFonts = config.user.ui.fonts;
 in {
   environment.systemPackages = [flakeInputs.rudo.packages."${system}".default];
 
   manzil.users."${config.user.name}".files = {
     ".config/rudo/config.toml" = {
-      source = (pkgs.formats.toml {}).generate "rudo-config" (lib.recursiveUpdate {
-          window = {
-            inherit (userAppearance) opacity;
-          };
-          font = {
-            size = userAppearance.termFontSize;
-          };
-          keybindings = {
-            copy = "ctrl+c";
-            paste = "ctrl+v";
-          };
-        } (lib.optionalAttrs uiFonts.enable {
-          font.family = uiFonts.mainFontName;
-        }));
+      source = (pkgs.formats.toml {}).generate "rudo-config" {
+        window = {
+          inherit (userAppearance) opacity;
+        };
+        font = {
+          size = userAppearance.termFontSize;
+          family = config.user.ui.fonts.mainFontName;
+        };
+        keybindings = {
+          copy = "ctrl+c";
+          paste = "ctrl+v";
+        };
+      };
     };
   };
 }

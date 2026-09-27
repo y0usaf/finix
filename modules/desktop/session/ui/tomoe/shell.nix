@@ -23,11 +23,5 @@
       default = false;
       description = "Whether the bar reserves exclusive space that windows tile around. Keep false for a pure overlay.";
     };
-
-    bongo-cat.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Render bongo cat in a bottom-center overlay that taps along with keyboard activity.";
-    };
   };
 }
