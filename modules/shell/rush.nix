@@ -4,8 +4,6 @@
   pkgs,
   ...
 }: let
-  wallustBin = "${pkgs.wallust}/bin/wallust";
-  flakeDirectory = "${config.user.homeDirectory}/finix";
   aliases =
     {
       wget = ''wget --hsts-file="$XDG_DATA_HOME/wget-hsts"'';
@@ -28,7 +26,7 @@
       pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i";
       pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
       buildtime = ''time (nix build "$NH_FLAKE#nixosConfigurations.$HOST.config.system.build.toplevel" --option eval-cache false)'';
-      hmpull = "git -C ${flakeDirectory} fetch origin && git -C ${flakeDirectory} reset --hard origin/main";
+      hmpull = "git -C ${config.user.homeDirectory}/finix fetch origin && git -C ${config.user.homeDirectory}/finix reset --hard origin/main";
     }
     // lib.optionalAttrs config.hardware.nvidia.enable {
       nvidia-settings = ''nvidia-settings --config="$XDG_CONFIG_HOME/nvidia/settings"'';
@@ -89,7 +87,7 @@ in {
 
         if command -v wallust >/dev/null 2>&1; then
           ${lib.concatMapStringsSep "\n" (dir: "mkdir -p \"$HOME/${dir}\"") [".cache/wal" ".cache/wallust" ".config/Vencord/settings" ".config/vesktop/settings"]}
-          ${wallustBin} cs "$HOME/.config/wallust/colorschemes/pantera.json"
+          ${pkgs.wallust}/bin/wallust cs "$HOME/.config/wallust/colorschemes/pantera.json"
         fi
 
         for file_path in "$HOME/Tokens"/*; do

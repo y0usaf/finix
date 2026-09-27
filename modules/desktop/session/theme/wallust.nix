@@ -3,17 +3,15 @@
   lib,
   pkgs,
   ...
-}: let
-  wallustPkg = pkgs.wallust;
-in {
+}: {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".cache/wallust"
   ];
   environment.systemPackages = [
-    wallustPkg
+    pkgs.wallust
     (pkgs.writeShellApplication {
       name = "wt";
-      runtimeInputs = [wallustPkg pkgs.pywalfox-native];
+      runtimeInputs = [pkgs.wallust pkgs.pywalfox-native];
       text = ''
         if [ -z "''${1:-}" ]; then
           echo "Usage: wt <command> [args...]"

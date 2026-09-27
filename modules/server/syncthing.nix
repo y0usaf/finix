@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  inherit (config.user) name homeDirectory;
+  inherit (config.user) homeDirectory;
 in {
   users = {
     users.nginx = {
@@ -18,8 +18,8 @@ in {
 
     services = {
       syncthing = {
-        description = "syncthing file sync (${name})";
-        user = name;
+        description = "syncthing file sync (${config.user.name})";
+        user = config.user.name;
         command = "${pkgs.syncthing}/bin/syncthing --config=${homeDirectory}/.config/syncthing --data=${homeDirectory}/.config/syncthing --gui-address=127.0.0.1:8384 --no-browser";
         environment.HOME = homeDirectory;
         conditions = ["net/lo/up"];

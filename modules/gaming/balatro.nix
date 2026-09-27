@@ -41,20 +41,19 @@
       name = "Aura";
     };
   };
-  steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam;
 in {
   manzil.users."${config.user.name}".files =
     lib.mapAttrs' (
       _: mod:
         lib.nameValuePair
-        "${steamPath}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
+        "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
         {
           source = mod.src;
         }
     )
     availableMods
     // {
-      "${steamPath}/steamapps/common/Balatro/version.dll" = {
+      "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam}/steamapps/common/Balatro/version.dll" = {
         source = "${pkgs.fetchzip {
           url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
           sha256 = "sha256-tFDiYDRW5arGz92Knug6XnyhxYatUQ7iR/Wxfz6Hjw4=";
