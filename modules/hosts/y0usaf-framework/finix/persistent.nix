@@ -104,9 +104,6 @@ in {
   environment = {
     etc = {
       "finix-stage2".text = "framework-trial-1\n";
-      "profile.d/nh.sh".text = ''
-        export NH_FLAKE=/home/y0usaf/finix
-      '';
     };
     systemPackages = [
       pkgs.nix

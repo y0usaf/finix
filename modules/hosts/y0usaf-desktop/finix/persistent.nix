@@ -63,9 +63,6 @@ in {
         blacklist nouveau
       '';
       "finix-stage2".text = "desktop-phase2.4\n";
-      "profile.d/nh.sh".text = ''
-        export NH_FLAKE=/home/y0usaf/finix
-      '';
     };
     systemPackages = [
       pkgs.nix
