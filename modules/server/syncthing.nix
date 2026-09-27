@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: let
+  inherit (config.user) name homeDirectory;
+in {
   users = {
     users.nginx = {
       isSystemUser = true;
@@ -12,10 +18,10 @@
 
     services = {
       syncthing = {
-        description = "syncthing file sync (y0usaf)";
-        user = "y0usaf";
-        command = "${pkgs.syncthing}/bin/syncthing --config=/home/y0usaf/.config/syncthing --data=/home/y0usaf/.config/syncthing --gui-address=127.0.0.1:8384 --no-browser";
-        environment.HOME = "/home/y0usaf";
+        description = "syncthing file sync (${name})";
+        user = name;
+        command = "${pkgs.syncthing}/bin/syncthing --config=${homeDirectory}/.config/syncthing --data=${homeDirectory}/.config/syncthing --gui-address=127.0.0.1:8384 --no-browser";
+        environment.HOME = homeDirectory;
         conditions = ["net/lo/up"];
         log = true;
       };
