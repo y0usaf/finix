@@ -1,7 +1,3 @@
-{config, ...}: let
-  homeDir = config.user.homeDirectory;
-in {
-  user.paths = {
-    wallpapers = "${homeDir}/DCIM/Wallpapers/32_9/";
-  };
+{config, ...}: {
+  user.paths.wallpapers = "${config.user.homeDirectory}/DCIM/Wallpapers/32_9/";
 }
