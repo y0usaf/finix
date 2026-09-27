@@ -4,7 +4,7 @@
   ...
 }: let
   inherit (lib) mkDefault mkOption;
-  inherit (lib.types) str bool submodule;
+  inherit (lib.types) str submodule;
   homeDir = config.user.homeDirectory;
   mkOpt = type: description: mkOption {inherit type description;};
   dirModule = submodule {
@@ -13,18 +13,11 @@
         type = str;
         description = "Absolute path to the directory";
       };
-      create = mkOption {
-        type = bool;
-        default = true;
-        description = "Whether to create the directory if it doesn't exist";
-      };
     };
   };
 in {
   options.user.paths = {
     flake = mkOpt dirModule "The directory where the flake lives.";
-    music = mkOpt dirModule "Directory for music files.";
-    dcim = mkOpt dirModule "Directory for pictures (DCIM).";
     steam = mkOpt dirModule "Directory for Steam.";
   };
 
@@ -34,15 +27,8 @@ in {
         flake = mkDefault {
           path = "${homeDir}/finix";
         };
-        music = mkDefault {
-          path = "${homeDir}/Music";
-        };
-        dcim = mkDefault {
-          path = "${homeDir}/DCIM";
-        };
         steam = mkDefault {
           path = "${homeDir}/.local/share/Steam";
-          create = false;
         };
       };
     };
