@@ -41,10 +41,12 @@
     dirname ++ lib.concatMap properAncestors dirname)
   userFiles;
   dirTemplateDirs = builtins.concatMap (directory: properAncestors (dirPath directory)) userPersist.directories;
-  homeTemplateDirs = lib.unique (dirTemplateDirs ++ fileTemplateDirs);
-  dataSubvolMounts = lib.unique (map
+  homeTemplateDirs = dirTemplateDirs ++ fileTemplateDirs;
+  dataSubvolMounts =
+    map
     (mountpoint: lib.removePrefix "${homeDir}/" mountpoint)
-    (builtins.filter (mountpoint: lib.hasPrefix "${homeDir}/" mountpoint) (builtins.attrNames config.fileSystems)));
+    (builtins.filter (mountpoint: lib.hasPrefix "${homeDir}/" mountpoint) (builtins.attrNames config.fileSystems));
+  templateDirs = lib.sort lib.lessThan (lib.unique (dataSubvolMounts ++ homeTemplateDirs));
   healthPackage = pkgs.writeShellScriptBin "finix-framework-health" ''
     set -u
     export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.iproute2 pkgs.nftables pkgs.procps pkgs.shadow pkgs.util-linux]}
@@ -139,7 +141,7 @@ in {
           [ -n "$directory" ] || continue
           install -d -m 0755 -o ${toString uid} -g users "/btrfs/@home-blank/${userName}/$directory"
         done <<'DIRECTORIES'
-        ${lib.concatStringsSep "\n" (dataSubvolMounts ++ homeTemplateDirs)}
+        ${lib.concatStringsSep "\n" templateDirs}
         DIRECTORIES
         chown -R ${toString uid}:users /btrfs/@home-blank/${userName}
       '')

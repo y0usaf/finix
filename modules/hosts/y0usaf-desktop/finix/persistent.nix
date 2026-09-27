@@ -36,11 +36,12 @@
     d ++ lib.concatMap properAncestors d)
   userFiles;
   dirTemplateDirs = builtins.concatMap (d: properAncestors (dirPath d)) persistCfg.users.y0usaf.directories;
-  homeTemplateDirs = lib.unique (dirTemplateDirs ++ fileTemplateDirs);
+  homeTemplateDirs = dirTemplateDirs ++ fileTemplateDirs;
 
   dataSubvolMounts =
-    lib.unique (map (mp: lib.removePrefix "/home/y0usaf/" mp)
-      (builtins.filter (mp: lib.hasPrefix "/home/y0usaf/" mp) (builtins.attrNames config.fileSystems)));
+    map (mp: lib.removePrefix "/home/y0usaf/" mp)
+    (builtins.filter (mp: lib.hasPrefix "/home/y0usaf/" mp) (builtins.attrNames config.fileSystems));
+  templateDirs = lib.sort lib.lessThan (lib.unique (dataSubvolMounts ++ homeTemplateDirs));
 in {
   imports = [../../../finix/desktop];
 
@@ -107,11 +108,11 @@ in {
           [ -n "$dir" ] || continue
           install -d -m 0755 -o 1001 -g users "/btrfs/@home-blank/y0usaf/$dir"
         done <<'DIRS'
-        ${lib.concatStringsSep "\n" (dataSubvolMounts ++ homeTemplateDirs)}
+        ${lib.concatStringsSep "\n" templateDirs}
         DIRS
 
         chown -R 1001:users /btrfs/@home-blank/y0usaf
-        echo "prep-home-blank: @home-blank ready ($((1 + ${toString (builtins.length (dataSubvolMounts ++ homeTemplateDirs))})) dirs)"
+        echo "prep-home-blank: @home-blank ready ($((1 + ${toString (builtins.length templateDirs)})) dirs)"
       '')
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi
       flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
