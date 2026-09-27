@@ -42,12 +42,7 @@
     lib.unique (map (mp: lib.removePrefix "/home/y0usaf/" mp)
       (builtins.filter (mp: lib.hasPrefix "/home/y0usaf/" mp) (builtins.attrNames config.fileSystems)));
 in {
-  imports = [
-    ../../../finix/desktop
-    ./boot.nix
-    ./graphical.nix
-    ./network.nix
-  ];
+  imports = [../../../finix/desktop];
 
   networking.hostName = "y0usaf-desktop";
 
