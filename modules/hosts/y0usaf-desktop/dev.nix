@@ -1,6 +1,5 @@
 _: {
   user.dev = {
-    prime-agent.enable = true;
     prompts.principles.enable = true;
     paseo = {
       enable = true;
