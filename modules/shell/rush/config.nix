@@ -6,7 +6,6 @@
 }: let
   inherit (config.user) shell;
 
-  wallustCfg = config.user.appearance.wallust;
   wallustBin = "${pkgs.wallust}/bin/wallust";
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
@@ -23,7 +22,7 @@ in {
 
       if command -v wallust >/dev/null 2>&1; then
         ${lib.concatMapStringsSep "\n" (dir: "mkdir -p \"$HOME/${dir}\"") [".cache/wal" ".cache/wallust" ".config/Vencord/settings" ".config/vesktop/settings"]}
-        ${wallustBin} cs "$HOME/.config/wallust/colorschemes/${wallustCfg.defaultTheme}.json"
+        ${wallustBin} cs "$HOME/.config/wallust/colorschemes/pantera.json"
       fi
 
       for file_path in "$HOME/Tokens"/*; do
