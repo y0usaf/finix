@@ -1,6 +1,5 @@
 _: {
   user.dev = {
-    ai.firstmate.enable = true;
     prime-agent.enable = true;
     prompts.principles.enable = true;
     paseo = {
