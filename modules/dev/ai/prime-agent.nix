@@ -4,10 +4,7 @@
   pkgs,
   flakeInputs,
   ...
-}: let
-  catalog = config.user.dev.modelCatalog;
-  toJSON = lib.generators.toJSON {};
-in {
+}: {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".prime"
   ];
@@ -17,9 +14,9 @@ in {
 
   manzil.users."${config.user.name}".files = {
     ".prime/agent/settings.json" = {
-      generator = toJSON;
+      generator = lib.generators.toJSON {};
       value = {
-        inherit (catalog) defaultProvider defaultModel defaultThinkingLevel enabledModels;
+        inherit (config.user.dev.modelCatalog) defaultProvider defaultModel defaultThinkingLevel enabledModels;
         rlmMaxDepth = 999;
         hideThinkingBlock = true;
         packages = [
@@ -29,8 +26,8 @@ in {
     };
 
     ".prime/agent/models.json" = {
-      generator = toJSON;
-      value = catalog.models;
+      generator = lib.generators.toJSON {};
+      value = config.user.dev.modelCatalog.models;
     };
 
     ".prime/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.ethics}\n\n${config.user.dev.prompts.noTests}\n\n${config.user.dev.prompts.noComments}\n";

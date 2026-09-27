@@ -4,15 +4,6 @@
   pkgs,
   ...
 }: let
-  roots = [
-    ".fx/skills"
-    ".pi/agent/skills"
-    ".config/phi/skills"
-    ".prime/agent/skills"
-    ".reasonix/skills"
-    ".omp/agent/skills"
-  ];
-
   skills = {
     anti-slop = {
       "SKILL.md".text = ''
@@ -332,6 +323,13 @@
   };
 in {
   manzil.users."${config.user.name}".files = lib.mkMerge (lib.concatLists (lib.mapAttrsToList (name: files:
-    map (root: lib.mapAttrs' (rel: spec: lib.nameValuePair "${root}/${name}/${rel}" spec) files) roots)
+    map (root: lib.mapAttrs' (rel: spec: lib.nameValuePair "${root}/${name}/${rel}" spec) files) [
+      ".fx/skills"
+      ".pi/agent/skills"
+      ".config/phi/skills"
+      ".prime/agent/skills"
+      ".reasonix/skills"
+      ".omp/agent/skills"
+    ])
   skills));
 }

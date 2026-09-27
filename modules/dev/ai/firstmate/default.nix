@@ -5,8 +5,6 @@
 }: let
   inherit (pkgs.stdenv.hostPlatform) system;
 
-  githubHomepage = name: "https://github.com/kunchenguid/${name}";
-
   mkNodeTool = {
     name,
     version,
@@ -40,7 +38,7 @@
 
       meta = {
         inherit description;
-        homepage = githubHomepage name;
+        homepage = "https://github.com/kunchenguid/${name}";
         license = lib.licenses.mit;
         mainProgram = name;
       };
@@ -95,7 +93,7 @@
 
       meta = {
         inherit description;
-        homepage = githubHomepage name;
+        homepage = "https://github.com/kunchenguid/${name}";
         license = lib.licenses.mit;
         mainProgram = name;
         platforms = ["x86_64-linux"];

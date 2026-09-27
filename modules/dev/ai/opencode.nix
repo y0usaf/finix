@@ -3,10 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  homeDir = config.user.homeDirectory;
-  toJson = lib.generators.toJSON {};
-in {
+}: {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".config/opencode"
     ".local/share/ai.opencode.desktop"
@@ -20,7 +17,7 @@ in {
   manzil.users."${config.user.name}" = {
     files = {
       ".config/opencode/opencode.json" = {
-        generator = toJson;
+        generator = lib.generators.toJSON {};
         value = {
           "$schema" = "https://opencode.ai/config.json";
           model = "neuralwatt/glm-5.2";
@@ -30,8 +27,8 @@ in {
           instructions = [
             "AGENTS.md"
             ".cursor/rules/*.md"
-            "{file:${homeDir}/.config/opencode/claude-instructions.md}"
-            "{file:${homeDir}/.config/opencode/opencode-instructions.md}"
+            "{file:${config.user.homeDirectory}/.config/opencode/claude-instructions.md}"
+            "{file:${config.user.homeDirectory}/.config/opencode/opencode-instructions.md}"
           ];
           lsp = {};
         };
@@ -39,7 +36,7 @@ in {
 
       ".config/opencode/tui.json" = {
         clobber = true;
-        generator = toJson;
+        generator = lib.generators.toJSON {};
         value = {
           "$schema" = "https://opencode.ai/tui.json";
           theme = "system";

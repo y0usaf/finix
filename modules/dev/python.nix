@@ -5,22 +5,6 @@
   ...
 }: let
   inherit (config.user) homeDirectory;
-  inherit (pkgs) cacert gcc binutils;
-  inherit (pkgs.stdenv) cc;
-  inherit (cc.bintools) dynamicLinker;
-  caCert = "${cacert}/etc/ssl/certs/ca-bundle.crt";
-  ccLib = cc.cc.lib;
-  userName = config.user.name;
-  ldLibPath = lib.makeLibraryPath [
-    ccLib
-    pkgs.zlib
-    pkgs.libGL
-    pkgs.glib
-    pkgs.libx11
-    pkgs.libxext
-    pkgs.libxrender
-  ];
-  pythonUserBase = "${homeDirectory}/.local/share/python";
 in {
   environment = {
     systemPackages = [
@@ -29,39 +13,47 @@ in {
       pkgs.ninja
       pkgs.meson
       pkgs.pkg-config
-      cacert
-      ccLib
+      pkgs.cacert
+      pkgs.stdenv.cc.cc.lib
       pkgs.zlib
       pkgs.libGL
       pkgs.glib
       pkgs.libx11
       pkgs.libxext
       pkgs.libxrender
-      gcc
-      binutils
+      pkgs.gcc
+      pkgs.binutils
     ];
     variables = {
       PYTHONSTARTUP = "${homeDirectory}/.config/python/pythonrc";
       PYTHON_HISTORY = "${homeDirectory}/.local/state/python_history";
-      PYTHONUSERBASE = pythonUserBase;
+      PYTHONUSERBASE = "${homeDirectory}/.local/share/python";
       PIP_CACHE_DIR = "${homeDirectory}/.cache/pip";
       VIRTUAL_ENV_HOME = "${homeDirectory}/.local/share/venvs";
-      SSL_CERT_FILE = caCert;
-      REQUESTS_CA_BUNDLE = caCert;
-      NIX_LD_LIBRARY_PATH = ldLibPath;
-      NIX_LD = dynamicLinker;
-      CC = "${gcc}/bin/gcc";
-      LD = "${binutils}/bin/ld";
+      SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      REQUESTS_CA_BUNDLE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [
+        pkgs.stdenv.cc.cc.lib
+        pkgs.zlib
+        pkgs.libGL
+        pkgs.glib
+        pkgs.libx11
+        pkgs.libxext
+        pkgs.libxrender
+      ];
+      NIX_LD = pkgs.stdenv.cc.bintools.dynamicLinker;
+      CC = "${pkgs.gcc}/bin/gcc";
+      LD = "${pkgs.binutils}/bin/ld";
     };
   };
-  manzil.users."${userName}".files = {
+  manzil.users."${config.user.name}".files = {
     ".config/python/pythonrc" = {
       text = ''
       '';
     };
   };
   user.shell.rcExtra = lib.mkAfter ''
-    PATH="${pythonUserBase}/bin:$PATH"
+    PATH="${homeDirectory}/.local/share/python/bin:$PATH"
 
     alias py="python3"
     alias pip="pip3"
