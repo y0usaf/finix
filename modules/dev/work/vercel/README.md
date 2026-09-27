@@ -6,8 +6,8 @@ shells: `vercel`, `vercel-personal`, and `vercel-work`.
 Plain `vercel` selects a login in this order:
 
 1. `VERCEL_ACCOUNT=personal` or `VERCEL_ACCOUNT=work`.
-2. The GitHub `origin` owner, configured by `personalOwners` and `workOwners`.
-   The default recognizes `y0usaf` as personal; no work owner is assumed.
+2. The GitHub `origin` owner: `y0usaf` routes to personal; no work owner is
+   configured.
 
 Unknown contexts fail with instructions. `--cwd` participates in routing.
 `--scope` and `vercel switch` select a team within that login. They do not change
