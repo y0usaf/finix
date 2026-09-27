@@ -16,18 +16,34 @@
 in {
   networking.hostName = "y0usaf-desktop";
 
-  finix.diagnostics = {
-    inherit diskUuid;
-    fallbackDevices = ["/dev/nvme0n1p5"];
+  finix = {
+    diagnostics = {
+      inherit diskUuid;
+      fallbackDevices = ["/dev/nvme0n1p5"];
+    };
+    persistence.allowlist.directories = [
+      {
+        directory = "/root";
+        mode = "0700";
+      }
+      "/var/lib/btrbk"
+      "/var/lib/sbctl"
+    ];
   };
 
-  hardware.firmware = [pkgs.linux-firmware];
+  hardware = {
+    firmware = [pkgs.linux-firmware];
+    nvidia = {
+      enable = true;
+      gsp.enable = false;
+    };
+  };
 
   environment.etc."finix-stage2".text = "desktop-phase2.4\n";
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
-    extraModulePackages = [config.boot.kernelPackages.zenpower];
+    extraModulePackages = [config.boot.kernelPackages.zenpower config.hardware.nvidia.package.mod];
     initrd.availableKernelModules = [
       "nvme"
       "thunderbolt"
@@ -57,6 +73,11 @@ in {
       "oops=panic"
       "softlockup_panic=1"
       "hung_task_panic=1"
+      "nvidia.NVreg_UsePageAttributeTable=1"
+      "nvidia.NVreg_EnableResizableBar=1"
+      "nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1"
+      "nvidia_modeset.disable_vrr_memclk_switch=1"
+      "nvidia.NVreg_TemporaryFilePath=/var/tmp"
     ];
   };
 
