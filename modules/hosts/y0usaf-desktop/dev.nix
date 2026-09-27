@@ -7,10 +7,6 @@ _: {
       vercel.enable = true;
     };
     ai.firstmate.enable = true;
-    pi.agents = {
-      maxDepth = 999;
-      maxLiveAgents = 999;
-    };
     prime-agent.enable = true;
     prompts.principles.enable = true;
     paseo = {
