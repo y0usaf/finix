@@ -3,49 +3,31 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit (lib) mkOption types;
-  dirPath = entry:
-    if builtins.isAttrs entry
-    then entry.directory
-    else entry;
-  directory = types.either types.str (types.submodule {
-    options = {
-      directory = mkOption {type = types.str;};
-      mode = mkOption {
-        type = types.str;
-        default = "0755";
-      };
-    };
-  });
-  paths = {
-    directories = mkOption {
-      type = types.listOf directory;
-      default = [];
-    };
-    files = mkOption {
-      type = types.listOf types.str;
-      default = [];
-    };
-  };
-in {
-  options.finix.persistence = {
-    allowlist = mkOption {
-      description = "Host persistence policy consumed by native Finix mount modules.";
-      default = {};
-      type = types.submodule {
-        options =
-          paths
-          // {
-            hideMounts = mkOption {
-              type = types.bool;
-              default = true;
+}: {
+  options.finix.persistence.allowlist = lib.mkOption {
+    description = "Host persistence policy consumed by native Finix mount modules.";
+    default = {};
+    type = lib.types.submodule {
+      options = {
+        directories = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+        };
+        users = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.submodule {
+            options = {
+              directories = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [];
+              };
+              files = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [];
+              };
             };
-            users = mkOption {
-              type = types.attrsOf (types.submodule {options = paths;});
-              default = {};
-            };
-          };
+          });
+          default = {};
+        };
       };
     };
   };
@@ -56,8 +38,8 @@ in {
     home = config.user.homeDirectory;
     persistentHome = "/persist/home/${user}";
     sorted = paths: lib.sort lib.lessThan (lib.unique paths);
-    directoriesFile = pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") (sorted (map dirPath userPersist.directories)));
-    filesFile = pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}\n") (sorted (map dirPath userPersist.files)));
+    directoriesFile = pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") (sorted userPersist.directories));
+    filesFile = pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}\n") (sorted userPersist.files));
   in {
     environment.systemPackages = let
       inherit (config.users.users.${user}) uid;
@@ -71,11 +53,11 @@ in {
       in
         lib.optional (lib.length parts > 1) (lib.concatStringsSep "/" (lib.init parts));
       fileTemplateDirs = builtins.concatMap (f: let
-        d = dirnameOf (dirPath f);
+        d = dirnameOf f;
       in
         d ++ lib.concatMap properAncestors d)
       userPersist.files;
-      dirTemplateDirs = builtins.concatMap (d: properAncestors (dirPath d)) userPersist.directories;
+      dirTemplateDirs = builtins.concatMap properAncestors userPersist.directories;
       dataSubvolMounts =
         map (mp: lib.removePrefix "${home}/" mp)
         (builtins.filter (mp: lib.hasPrefix "${home}/" mp) (builtins.attrNames config.fileSystems));
@@ -176,7 +158,7 @@ in {
     '';
 
     fileSystems = lib.genAttrs (builtins.filter (dir: !lib.hasPrefix "/etc/" dir && dir != "/root")
-      (map dirPath config.finix.persistence.allowlist.directories)) (dir: {
+      config.finix.persistence.allowlist.directories) (dir: {
       device = "/persist${dir}";
       fsType = "btrfs";
       options = ["bind"];
@@ -223,7 +205,7 @@ in {
         }
 
         failed=0
-        ${lib.optionalString (builtins.elem "/root" (map dirPath config.finix.persistence.allowlist.directories)) ''
+        ${lib.optionalString (builtins.elem "/root" config.finix.persistence.allowlist.directories) ''
           install -d -m 0700 /persist/root
           install -d -m 0700 /root
           mountpoint -q /root || mount --bind /persist/root /root || failed=1
@@ -259,7 +241,6 @@ in {
 
     finix.persistence = {
       allowlist = {
-        hideMounts = true;
         directories = [
           "/etc/NetworkManager/system-connections"
           "/etc/ssh"
@@ -271,7 +252,6 @@ in {
           "/var/lib/tailscale"
           "/var/log"
         ];
-        files = ["/etc/machine-id"];
         users.${config.user.name} = {
           directories = [
             ".azure"
