@@ -213,17 +213,13 @@
     </configuration>
   '';
 in {
-  options.user.services.syncthing = {
-    enable = lib.mkEnableOption "Syncthing service";
-
-    enabledFolders = lib.mkOption {
-      type = lib.types.nullOr (lib.types.listOf lib.types.str);
-      default = null;
-      description = "Folder attribute names enabled on this host; null enables all folders";
-    };
+  options.user.services.syncthing.enabledFolders = lib.mkOption {
+    type = lib.types.nullOr (lib.types.listOf lib.types.str);
+    default = null;
+    description = "Folder attribute names enabled on this host; null enables all folders";
   };
 
-  config = lib.mkIf config.user.services.syncthing.enable {
+  config = {
     finix.persistence.allowlist.users.${config.user.name}.directories = [
       ".config/syncthing"
       ".local/share/syncthing"
