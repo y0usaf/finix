@@ -3,8 +3,8 @@
 The desktop enables `user.gaming.p4g.enable`. `p4g-setup` pins CEP 13.99.4's
 full offline archive, Reloaded II 1.30.3, Windows Desktop Runtime 9.0.20 (x64
 and x86), and the Visual C++ redistributables. It preserves CEP's bundled mod
-selection, order, and user settings. Set `user.gaming.p4g.enabledMods` to an
-ordered list of mod IDs to override that selection.
+selection, order, and user settings; `enabledMods` in the module's settings
+takes an ordered list of mod IDs to override that selection.
 
 ```sh
 nix build --no-link .#p4g-setup
@@ -18,12 +18,12 @@ Setup must run as the Steam user. Steam must already have installed the game
 and created its Proton prefix by launching it once. Installation refuses to run
 while `P4G.exe` is active and does not stop Steam, OBS, or the desktop session.
 Keep P4G closed until installation finishes. For a nonstandard Steam layout,
-set `gameDirectory` and `prefixDirectory` explicitly.
+change `gameDirectory` and `prefixDirectory` in the module's settings.
 System activation does not run the setup helper automatically.
 
 The writable loader lives in `~/Games/P4G-CEP/generations`; `Games` is already
-persisted on the desktop. Changing `stateDirectory` requires arranging
-persistence for its new location. Each payload/configuration has its own
+persisted on the desktop. Changing the module's `stateDirectory` requires
+arranging persistence for its new location. Each payload/configuration has its own
 generation. Runtime caches and logs are writable; old generations remain for
 rollback. Preparation reuses existing generations without overwriting their
 runtime settings.

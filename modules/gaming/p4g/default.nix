@@ -5,6 +5,7 @@
   ...
 }: let
   cfg = config.user.gaming.p4g;
+  steam = config.user.paths.steam.path;
   fetch = url: hash: pkgs.fetchurl {inherit url hash;};
   cep =
     fetch
@@ -46,8 +47,11 @@
     '';
   settings = pkgs.writeText "p4g-settings.json" (builtins.toJSON {
     inherit payload;
-    inherit (cfg) stateDirectory gameDirectory prefixDirectory enabledMods;
-    steamDirectory = config.user.paths.steam.path;
+    stateDirectory = "${config.user.homeDirectory}/Games/P4G-CEP";
+    gameDirectory = "${steam}/steamapps/common/Persona 4 Golden";
+    prefixDirectory = "${steam}/steamapps/compatdata/1113000/pfx";
+    enabledMods = null;
+    steamDirectory = steam;
   });
   package = pkgs.writeShellApplication {
     name = "p4g-setup";
@@ -59,26 +63,6 @@
 in {
   options.user.gaming.p4g = {
     enable = lib.mkEnableOption "Persona 4 Golden Community Enhancement Pack";
-    gameDirectory = lib.mkOption {
-      type = lib.types.str;
-      default = "${config.user.paths.steam.path}/steamapps/common/Persona 4 Golden";
-      description = "Existing Steam installation of Persona 4 Golden.";
-    };
-    prefixDirectory = lib.mkOption {
-      type = lib.types.str;
-      default = "${builtins.dirOf (builtins.dirOf cfg.gameDirectory)}/compatdata/1113000/pfx";
-      description = "P4G's existing Proton prefix, normally in the same Steam library as the game.";
-    };
-    stateDirectory = lib.mkOption {
-      type = lib.types.str;
-      default = "${config.user.homeDirectory}/Games/P4G-CEP";
-      description = "Writable mod loader, caches, and setup backups outside Steam and Proton.";
-    };
-    enabledMods = lib.mkOption {
-      type = lib.types.nullOr (lib.types.listOf lib.types.str);
-      default = null;
-      description = "Ordered mod IDs, or null to use the CEP author's defaults.";
-    };
     package = lib.mkOption {
       type = lib.types.package;
       readOnly = true;
