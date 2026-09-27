@@ -70,7 +70,6 @@
           inputs.finix.nixosModules.sysklogd
           ./common.nix
           ./persistence/bind-replay.nix
-          ./persistence/home-reset.nix
           ./persistence/identity.nix
         ]
         ++ modules;
