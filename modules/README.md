@@ -1,7 +1,7 @@
 # Repository layout
 
-This is the layout finix-lean is moving the repo to. Until it finishes, some
-programs are still one-package modules, and a few files only import others.
+This is the layout finix-lean is moving the repo to. Until it finishes, parts
+of the code still break the rules below.
 
 This repository configures y0usaf's machines on finix: it owns system
 integration and user configuration, not application implementations.
@@ -32,7 +32,13 @@ the hostname. A program that needs only its package is a line in its
 category's package list. A host directory under `modules/hosts/` holds what
 is true of that machine alone: hardware, displays, disks and boot, network
 identity, keys, and where it departs from its role. Persisted paths no module
-owns go in `modules/hosts/common/persist.nix`.
+owns go in `modules/hosts/common/persist.nix` when both graphical hosts keep
+them, and in the host's directory when only that host does.
+
+`modules/finix/sudo.nix` configures sudo itself and takes only the privileges
+provider from finix's sudo module. Leave `programs.sudo.enable` off: it also
+installs the non-setuid sudo binary, which shadowed the
+`/run/wrappers/bin/sudo` wrapper on PATH (c9a60e8c).
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns.
