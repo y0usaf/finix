@@ -215,7 +215,10 @@
     ]
     ++ [cfg.extraConfig]);
 in {
-  user.ui.tomoe.settings.wait-for-frame-completion = lib.mkIf config.hardware.nvidia.enable (lib.mkDefault true);
+  user.ui.tomoe.settings = {
+    honor-xdg-activation-with-invalid-serial = true;
+    wait-for-frame-completion = lib.mkIf config.hardware.nvidia.enable (lib.mkDefault true);
+  };
 
   manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = initText;
 }

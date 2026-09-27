@@ -18,7 +18,6 @@
       };
 
       bar.modules = ["cpu" "memory" "gpu" "time" "date"];
-      settings.honor-xdg-activation-with-invalid-serial = true;
     };
   };
 }
