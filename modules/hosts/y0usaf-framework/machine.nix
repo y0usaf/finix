@@ -5,15 +5,11 @@
   ...
 }: let
   userName = config.user.name;
-  uid = 1000;
-  homeDir = "/home/${userName}";
   diskUuid = "6ae685dc-540e-42f2-b30a-104a8aac0e27";
-  espUuid = "6951-2BA6";
-  btrfsOpts = ["relatime" "ssd" "discard=async" "space_cache=v2"];
   subvolMount = subvol: {
     device = "/dev/disk/by-uuid/${diskUuid}";
     fsType = "btrfs";
-    options = ["subvol=${subvol}"] ++ btrfsOpts;
+    options = ["subvol=${subvol}" "relatime" "ssd" "discard=async" "space_cache=v2"];
     neededForBoot = true;
   };
 
@@ -34,7 +30,7 @@
     for mountpoint in /nix /persist /home /boot; do
       check mountpoint -q "$mountpoint"
     done
-    check test "$(id -u ${userName})" = ${toString uid}
+    check test "$(id -u ${userName})" = 1000
     check sh -c "ip -4 -br address show dev wlp191s0 scope global | grep -q '^wlp191s0.*UP'"
     check sh -c "ip -4 route show default | grep -q '^default '"
     check sh -c "ss -ltn | grep -q ':2222 '"
@@ -117,17 +113,17 @@ in {
     "/btrfs" = {
       device = "/dev/disk/by-uuid/${diskUuid}";
       fsType = "btrfs";
-      options = ["subvolid=5"] ++ btrfsOpts;
+      options = ["subvolid=5" "relatime" "ssd" "discard=async" "space_cache=v2"];
       neededForBoot = true;
     };
     "/boot" = {
-      device = "/dev/disk/by-uuid/${espUuid}";
+      device = "/dev/disk/by-uuid/6951-2BA6";
       fsType = "vfat";
       options = ["fmask=0077" "dmask=0077"];
       neededForBoot = true;
     };
-    "${homeDir}/.local/share/Steam" = subvolMount "@steam";
-    "${homeDir}/dev" = subvolMount "@dev";
+    "/home/${userName}/.local/share/Steam" = subvolMount "@steam";
+    "/home/${userName}/dev" = subvolMount "@dev";
   };
 
   services = {
@@ -151,7 +147,7 @@ in {
   };
 
   users.users.${userName} = {
-    inherit uid;
+    uid = 1000;
     extraGroups = ["docker"];
   };
 

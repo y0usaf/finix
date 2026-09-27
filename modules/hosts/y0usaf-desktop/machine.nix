@@ -6,11 +6,10 @@
 }: let
   diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
 
-  btrfsOpts = ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
   subvolMount = subvol: {
     device = "/dev/disk/by-uuid/${diskUuid}";
     fsType = "btrfs";
-    options = ["subvol=${subvol}"] ++ btrfsOpts;
+    options = ["subvol=${subvol}" "compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
     neededForBoot = true;
   };
 in {
@@ -102,7 +101,7 @@ in {
     "/btrfs" = {
       device = "/dev/disk/by-uuid/${diskUuid}";
       fsType = "btrfs";
-      options = ["subvolid=5"] ++ btrfsOpts;
+      options = ["subvolid=5" "compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
       neededForBoot = true;
     };
 

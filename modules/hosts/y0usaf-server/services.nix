@@ -3,10 +3,8 @@
   pkgs,
   ...
 }: let
-  diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
-
   subvol = name: opts: {
-    device = "/dev/disk/by-uuid/${diskUuid}";
+    device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
     fsType = "btrfs";
     options = ["subvol=${name}"] ++ opts;
     neededForBoot = true;
@@ -25,7 +23,7 @@ in {
     "/home/y0usaf/DCIM" = subvol "@dcim" [];
     "/home/y0usaf/Pictures" = subvol "@pictures" [];
     "/btrfs" = {
-      device = "/dev/disk/by-uuid/${diskUuid}";
+      device = "/dev/disk/by-uuid/9dfc38c4-5c75-471d-9106-80ff9175ab92";
       fsType = "btrfs";
       options = ["subvolid=5"];
       neededForBoot = true;

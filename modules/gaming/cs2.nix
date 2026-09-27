@@ -2,17 +2,15 @@
   config,
   lib,
   ...
-}: let
-  steamPath = lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam;
-in {
+}: {
   manzil.users."${config.user.name}".files = {
-    "${steamPath}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/autoexec.cfg".text = ''
+    "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/autoexec.cfg".text = ''
       alias +switchw "slot3; +lookatweapon"
       alias -switchw "-lookatweapon; lastinv"
       bind "[" +switchw
     '';
 
-    "${steamPath}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/video.txt".text = ''
+    "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/video.txt".text = ''
       "videoconfig"
       {
         "setting.defaultres"      "2560"
