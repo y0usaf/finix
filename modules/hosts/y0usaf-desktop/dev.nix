@@ -19,7 +19,6 @@ _: {
     biome.enable = true;
     latex.enable = true;
     upscale.enable = true;
-    r2t2.enable = true;
     phi.enable = true;
     reasonix.enable = true;
   };

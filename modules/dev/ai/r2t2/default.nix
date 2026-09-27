@@ -158,7 +158,7 @@
   '';
 in {
   options.user.dev.r2t2 = {
-    enable = lib.mkEnableOption "Confucius4-R2T2 streaming ASR server (resident vLLM WebSocket service)";
+    enable = lib.mkEnableOption "Confucius4-R2T2 streaming ASR server (resident vLLM WebSocket service)" // {default = config.hardware.nvidia.enable;};
 
     listenAddress = lib.mkOption {
       type = lib.types.str;
