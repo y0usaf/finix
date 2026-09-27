@@ -158,8 +158,6 @@
   '';
 in {
   options.user.dev.r2t2 = {
-    enable = lib.mkEnableOption "Confucius4-R2T2 streaming ASR server (resident vLLM WebSocket service)" // {default = config.hardware.nvidia.enable;};
-
     listenAddress = lib.mkOption {
       type = lib.types.str;
       default = "127.0.0.1";
@@ -173,7 +171,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.hardware.nvidia.enable {
     environment.systemPackages = [installScript];
 
     finix.persistence.allowlist.users."${user}".directories = [

@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   ...
@@ -49,9 +48,5 @@
     };
   };
 in {
-  options.user.dev.work.ntn.enable = lib.mkEnableOption "Notion CLI (ntn)";
-
-  config = lib.mkIf config.user.dev.work.ntn.enable {
-    environment.systemPackages = [package];
-  };
+  environment.systemPackages = [package];
 }

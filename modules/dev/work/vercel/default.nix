@@ -37,29 +37,25 @@
     owners = builtins.toJSON {y0usaf = "personal";};
   };
 in {
-  options.user.dev.work.vercel.enable = lib.mkEnableOption "Vercel CLI";
-
-  config = lib.mkIf config.user.dev.work.vercel.enable {
-    finix.persistence.allowlist.users.${config.user.name}.directories = [
-      ".local/share/com.vercel.cli"
-      ".local/share/com.vercel.token"
-    ];
-    environment.systemPackages = [
-      (pkgs.runCommand "vercel-account-router" {} ''
-        mkdir -p $out/bin
-        cat > $out/bin/vercel <<EOF
-        #!${pkgs.runtimeShell}
-        exec ${pkgs.python3}/bin/python3 ${script} "\$@"
-        EOF
-        for account in personal work; do
-          cat > $out/bin/vercel-$account <<EOF
-        #!${pkgs.runtimeShell}
-        export VERCEL_ACCOUNT=$account
-        exec $out/bin/vercel "\$@"
-        EOF
-        done
-        chmod +x $out/bin/*
-      '')
-    ];
-  };
+  finix.persistence.allowlist.users.${config.user.name}.directories = [
+    ".local/share/com.vercel.cli"
+    ".local/share/com.vercel.token"
+  ];
+  environment.systemPackages = [
+    (pkgs.runCommand "vercel-account-router" {} ''
+      mkdir -p $out/bin
+      cat > $out/bin/vercel <<EOF
+      #!${pkgs.runtimeShell}
+      exec ${pkgs.python3}/bin/python3 ${script} "\$@"
+      EOF
+      for account in personal work; do
+        cat > $out/bin/vercel-$account <<EOF
+      #!${pkgs.runtimeShell}
+      export VERCEL_ACCOUNT=$account
+      exec $out/bin/vercel "\$@"
+      EOF
+      done
+      chmod +x $out/bin/*
+    '')
+  ];
 }

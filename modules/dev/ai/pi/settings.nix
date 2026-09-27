@@ -6,7 +6,7 @@
   catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
 in {
-  config = lib.mkIf config.user.dev.pi.enable {
+  config = {
     finix.persistence.allowlist.users.${config.user.name}.directories = [
       ".config/pi/agent"
       ".config/pi-harness"

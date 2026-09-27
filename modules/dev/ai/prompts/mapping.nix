@@ -1,34 +1,12 @@
-{
-  config,
-  lib,
-  ...
-}: let
-  roots = map (entry: entry.root) (lib.filter (entry: entry.enabled) [
-    {
-      enabled = config.user.dev.fx.enable;
-      root = ".fx/skills";
-    }
-    {
-      enabled = config.user.dev.pi.enable;
-      root = ".pi/agent/skills";
-    }
-    {
-      enabled = config.user.dev.phi.enable;
-      root = ".config/phi/skills";
-    }
-    {
-      enabled = config.user.dev.prime-agent.enable;
-      root = ".prime/agent/skills";
-    }
-    {
-      enabled = config.user.dev.reasonix.enable;
-      root = ".reasonix/skills";
-    }
-    {
-      enabled = config.user.dev.omp.enable;
-      root = ".omp/agent/skills";
-    }
-  ]);
+{lib, ...}: let
+  roots = [
+    ".fx/skills"
+    ".pi/agent/skills"
+    ".config/phi/skills"
+    ".prime/agent/skills"
+    ".reasonix/skills"
+    ".omp/agent/skills"
+  ];
 
   mkSkill = name: files:
     map (root:
@@ -36,5 +14,5 @@
       files)
     roots;
 in {
-  config.lib.prompts = {inherit roots mkSkill;};
+  config.lib.prompts = {inherit mkSkill;};
 }

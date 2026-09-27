@@ -34,33 +34,29 @@
        :class :mandatory))
   '';
 in {
-  options.user.dev.autolith.enable = lib.mkEnableOption "Autolith live Common Lisp AI agent";
+  environment.systemPackages = [
+    (pkgs.symlinkJoin {
+      name = "autolith-full-access";
+      paths = [autolith];
+      nativeBuildInputs = [pkgs.makeWrapper];
+      postBuild = ''
+        wrapProgram "$out/bin/autolith" --add-flags "--permissions full"
+      '';
+      meta = autolith.meta // {mainProgram = "autolith";};
+    })
+  ];
 
-  config = lib.mkIf config.user.dev.autolith.enable {
-    environment.systemPackages = [
-      (pkgs.symlinkJoin {
-        name = "autolith-full-access";
-        paths = [autolith];
-        nativeBuildInputs = [pkgs.makeWrapper];
-        postBuild = ''
-          wrapProgram "$out/bin/autolith" --add-flags "--permissions full"
-        '';
-        meta = autolith.meta // {mainProgram = "autolith";};
-      })
+  manzil.users.${config.user.name}.files.".config/autolith/init.lisp".text = ethicsLisp + "\n" + policyLisp;
+
+  finix.persistence.allowlist.users.${config.user.name}.directories =
+    map
+    (directory: {
+      inherit directory;
+      mode = "0700";
+    })
+    [
+      ".config/autolith"
+      ".local/share/autolith"
+      ".local/state/autolith"
     ];
-
-    manzil.users.${config.user.name}.files.".config/autolith/init.lisp".text = ethicsLisp + "\n" + policyLisp;
-
-    finix.persistence.allowlist.users.${config.user.name}.directories =
-      map
-      (directory: {
-        inherit directory;
-        mode = "0700";
-      })
-      [
-        ".config/autolith"
-        ".local/share/autolith"
-        ".local/state/autolith"
-      ];
-  };
 }

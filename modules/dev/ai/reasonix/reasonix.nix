@@ -5,7 +5,6 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.dev.reasonix;
   inherit (pkgs.stdenv.hostPlatform) system;
   package = flakeInputs.reasonix-flake.packages."${system}".default;
   apiKeyFile = lib.escapeShellArg "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
@@ -28,65 +27,61 @@
     fi
   '';
 in {
-  options.user.dev.reasonix.enable = lib.mkEnableOption "reasonix cache-first DeepSeek coding agent";
+  environment.systemPackages = [
+    (pkgs.writeShellScriptBin "reasonix" ''
+      ${seedKey}
+      for a in "$@"; do
+        if [ "$a" = "acp" ]; then
+          exec ${package}/bin/reasonix "$@"
+        fi
+        case "$a" in
+          -*);;
+          *) break;;
+        esac
+      done
+      exec ${package}/bin/reasonix --yolo "$@"
+    '')
+  ];
 
-  config = lib.mkIf cfg.enable {
-    environment.systemPackages = [
-      (pkgs.writeShellScriptBin "reasonix" ''
-        ${seedKey}
-        for a in "$@"; do
-          if [ "$a" = "acp" ]; then
-            exec ${package}/bin/reasonix "$@"
-          fi
-          case "$a" in
-            -*);;
-            *) break;;
-          esac
-        done
-        exec ${package}/bin/reasonix --yolo "$@"
-      '')
-    ];
+  manzil.users."${config.user.name}".files = {
+    ".reasonix/REASONIX.md" = {
+      type = "copy";
+      text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
+    };
 
-    manzil.users."${config.user.name}".files = {
-      ".reasonix/REASONIX.md" = {
-        type = "copy";
-        text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
-      };
+    ".reasonix/config.toml" = {
+      type = "merge";
 
-      ".reasonix/config.toml" = {
-        type = "merge";
+      format = "toml";
 
-        format = "toml";
+      clobber = true;
 
-        clobber = true;
+      value = {
+        default_model = "glm-5.3-flash";
 
-        value = {
-          default_model = "glm-5.3-flash";
+        telemetry.cli_metrics = "off";
 
-          telemetry.cli_metrics = "off";
+        permissions.mode = "allow";
 
-          permissions.mode = "allow";
+        sandbox.bash = "off";
 
-          sandbox.bash = "off";
+        desktop.check_updates = false;
 
-          desktop.check_updates = false;
+        providers = [
+          {
+            name = "glm-5.3-flash";
 
-          providers = [
-            {
-              name = "glm-5.3-flash";
+            kind = "openai";
 
-              kind = "openai";
+            base_url = "https://ai-gateway.vercel.sh/v1";
 
-              base_url = "https://ai-gateway.vercel.sh/v1";
+            model = "glm-5.3-flash";
 
-              model = "glm-5.3-flash";
+            api_key_env = "AI_GATEWAY_API_KEY";
 
-              api_key_env = "AI_GATEWAY_API_KEY";
-
-              context_window = 1000000;
-            }
-          ];
-        };
+            context_window = 1000000;
+          }
+        ];
       };
     };
   };

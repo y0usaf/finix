@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   flakeInputs,
   ...
@@ -74,10 +73,8 @@
     - Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
   '';
 in {
-  config = lib.mkIf config.user.dev.pi.enable {
-    manzil.users."${config.user.name}".files = {
-      ".pi/agent/SYSTEM.md".text = systemPrompt;
-      ".pi/agent/DEFAULT_SYSTEM.md".text = piDefaultSystem;
-    };
+  manzil.users."${config.user.name}".files = {
+    ".pi/agent/SYSTEM.md".text = systemPrompt;
+    ".pi/agent/DEFAULT_SYSTEM.md".text = piDefaultSystem;
   };
 }
