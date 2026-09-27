@@ -2,8 +2,11 @@
   config,
   pkgs,
   lib,
+  flakeInputs,
   ...
 }: {
+  imports = ["${flakeInputs.finix}/modules/programs/sudo/providers.privileges.nix"];
+
   security.pam.services.sudo.text = ''
     account required pam_unix.so # unix (order 10900)
 
@@ -36,26 +39,6 @@
         root    ALL=(ALL:ALL)    SETENV: ALL
         %wheel  ALL=(ALL:ALL)    SETENV: ALL
       ''
-
-      (lib.concatMapStringsSep "\n" (
-          rule: let
-            runAs =
-              if rule.runAs == "*"
-              then "ALL"
-              else rule.runAs;
-            opts = lib.optionalString (!rule.requirePassword) "NOPASSWD:";
-          in ''
-            ${lib.concatMapStringsSep "\n" (
-                user: "${user} ALL = (${runAs}) ${opts} ${rule.command} ${toString rule.args}"
-              )
-              rule.users}
-            ${lib.concatMapStringsSep "\n" (
-                group: "%${group} ALL = (${runAs}) ${opts} ${rule.command} ${toString rule.args}"
-              )
-              rule.groups}
-          ''
-        )
-        config.providers.privileges.rules)
     ];
 
     source = let
@@ -96,5 +79,5 @@
     };
   };
 
-  providers.privileges.command = "/run/wrappers/bin/sudo";
+  providers.privileges.backend = "sudo";
 }
