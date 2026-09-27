@@ -139,7 +139,7 @@ in {
 
   users.users.${userName} = {
     inherit uid;
-    extraGroups = ["video" "render" "seat" "networkmanager" "docker"];
+    extraGroups = ["networkmanager" "docker"];
   };
 
   finit = {
