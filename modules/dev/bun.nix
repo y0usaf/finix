@@ -12,7 +12,7 @@
       pkgs.bun
     ];
     manzil.users."${config.user.name}".files.".config/bun/bunfig.toml" = {
-      generator = config.lib.generators.toTOML;
+      generator = (pkgs.formats.toml {}).generate "nix-generated.toml";
       value.install = {
         cache_dir = "${config.user.homeDirectory}/.cache/bun";
         global_dir = "${config.user.homeDirectory}/.local/share/bun";

@@ -107,7 +107,7 @@ in {
         wallustCfg.templates)
         // {
           ".config/wallust/wallust.toml" = {
-            generator = config.lib.generators.toTOML;
+            generator = (pkgs.formats.toml {}).generate "nix-generated.toml";
             value = {
               backend = "fastresize";
               color_space = "lch";
