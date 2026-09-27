@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789451455,
-        "narHash": "sha256-hQpHxF9hxJuUjMJyWWWyhm7JYW9Wuig8lfxyuQ0ENLo=",
+        "lastModified": 1790501814,
+        "narHash": "sha256-V27dwJyX5YTSoa6WRBI5ZMl/lZznSz3q6iNj7H5vU+I=",
         "ref": "refs/heads/main",
-        "rev": "3a16c7d19fedc5b49ffffa870505b13d7978c40a",
-        "revCount": 14,
+        "rev": "df9d379e8579ae9b97a5d3c06644ce90b9b13da7",
+        "revCount": 15,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/ash.git"
       },
@@ -49,11 +49,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1789844318,
-        "narHash": "sha256-YISOnfzQ7utKihMrHC56GJASCEM3JsNsPfhCRw1pK7Y=",
+        "lastModified": 1790503644,
+        "narHash": "sha256-tm1lJMZIsvq27Jo9aS1IMOJ+/N/Df2zLDarrUWmXGe4=",
         "ref": "refs/heads/main",
-        "rev": "decef237d58de5ddefb3570ec191c5ec99f9872c",
-        "revCount": 2,
+        "rev": "95c7c455b5e639fcee1d773e14fbce9a20e2944e",
+        "revCount": 4,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/bolo.git"
       },
@@ -343,11 +343,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1790433226,
-        "narHash": "sha256-5YXBuVBisT2alnh9wBSs+U8k9IqOhkvvQ6fAyFNeh4o=",
+        "lastModified": 1790504183,
+        "narHash": "sha256-IynieN1oO3Vc0AIdW/kUh299Z+QsfQcZVLYQasXnfTE=",
         "owner": "y0usaf",
         "repo": "cudaterm",
-        "rev": "be09087d574b3a1b96a0eaddd16aea7a48709d0b",
+        "rev": "8e8dd4cbef82537303eebd09766afdcb8e684dad",
         "type": "github"
       },
       "original": {
@@ -418,11 +418,11 @@
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1790433663,
-        "narHash": "sha256-0iJZDJXrx28oAIXEGX868yWq7WGBlcpxTnpCQMCvKn0=",
+        "lastModified": 1790501270,
+        "narHash": "sha256-xBWHmQywH1yIoPMT5d8APdYzEA3++cHwLP8AGMRHl4A=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "11b4676b5ff07fa86ed4fbe2028db112dc365ad5",
+        "rev": "44ff63bd8f8701fd2ef08744bf1a7985b9f1e5b8",
         "type": "github"
       },
       "original": {
@@ -1892,16 +1892,16 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1790502888,
-        "narHash": "sha256-EU09v+RaLWvtiVGDUVlf/XKvFi7OTufMYP13y5O9sKU=",
+        "lastModified": 1790504307,
+        "narHash": "sha256-x2T9LSfVPobWj3hRU+9vferx0wOhXuF3r5nl6S5AJBM=",
         "ref": "refs/heads/main",
-        "rev": "a7777f6715f22838cb624f902af0985c041ea5cc",
+        "rev": "b43267ecd8d0435913b602fd78eabae9f0916ea7",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
       },
       "original": {
-        "rev": "a7777f6715f22838cb624f902af0985c041ea5cc",
+        "rev": "b43267ecd8d0435913b602fd78eabae9f0916ea7",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
