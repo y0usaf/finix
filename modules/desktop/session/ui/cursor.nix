@@ -8,29 +8,37 @@
   xcursorSize = 18;
   cursorPackage = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark;
 in {
-  environment = {
-    systemPackages = cursorPackage.cursorPackages or [cursorPackage];
-    variables = cursorPackage.mkCursorSessionVariables {
-      inherit xcursorSize;
-      inherit (config.user.appearance) hyprcursorSize;
-    };
+  options.user.appearance.hyprcursorSize = lib.mkOption {
+    type = lib.types.int;
+    default = 24;
+    description = "Base Hyprcursor size at user.appearance.dpi.";
   };
 
-  manzil.users."${config.user.name}" = {
-    files = {
-      ".config/gtk-3.0/settings.ini" = {
-        text = lib.mkAfter ''
-          [Settings]
-          gtk-cursor-theme-name=${cursorPackage.xcursorThemeName}
-          gtk-cursor-theme-size=${toString xcursorSize}
-        '';
+  config = {
+    environment = {
+      systemPackages = cursorPackage.cursorPackages or [cursorPackage];
+      variables = cursorPackage.mkCursorSessionVariables {
+        inherit xcursorSize;
+        inherit (config.user.appearance) hyprcursorSize;
       };
-      ".config/gtk-4.0/settings.ini" = {
-        text = lib.mkAfter ''
-          [Settings]
-          gtk-cursor-theme-name=${cursorPackage.xcursorThemeName}
-          gtk-cursor-theme-size=${toString xcursorSize}
-        '';
+    };
+
+    manzil.users."${config.user.name}" = {
+      files = {
+        ".config/gtk-3.0/settings.ini" = {
+          text = lib.mkAfter ''
+            [Settings]
+            gtk-cursor-theme-name=${cursorPackage.xcursorThemeName}
+            gtk-cursor-theme-size=${toString xcursorSize}
+          '';
+        };
+        ".config/gtk-4.0/settings.ini" = {
+          text = lib.mkAfter ''
+            [Settings]
+            gtk-cursor-theme-name=${cursorPackage.xcursorThemeName}
+            gtk-cursor-theme-size=${toString xcursorSize}
+          '';
+        };
       };
     };
   };
