@@ -18,8 +18,4 @@ emit() {
 
 emit 'lib.concatMap (h: lib.optionAttrSetToDocList f.finixConfigurations.${h}.options)
         (builtins.attrNames f.finixConfigurations)' .strictix/hosts.json
-emit 'lib.optionAttrSetToDocList (lib.evalModules {
-        specialArgs = { inherit (f) inputs; system = "x86_64-linux"; };
-        modules = [ ./modules/outputs.nix ];
-      }).options' .strictix/flake.json
 emit 'lib.optionAttrSetToDocList f.nixOnDroidConfigurations.default.options' .strictix/droid.json

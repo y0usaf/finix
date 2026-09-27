@@ -160,12 +160,5 @@
     finix.url = "github:finix-community/finix";
   };
 
-  outputs = inputs:
-    (inputs.nixpkgs.lib.evalModules {
-      specialArgs = {
-        inherit inputs;
-        system = "x86_64-linux";
-      };
-      modules = [./modules/outputs.nix];
-    }).config.flake;
+  outputs = inputs: import ./modules/outputs.nix inputs;
 }
