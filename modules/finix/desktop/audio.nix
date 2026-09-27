@@ -107,25 +107,5 @@ in {
       command = "${waitSock} ${pkgs.pipewire}/bin/pipewire-pulse";
       log = true;
     };
-
-    syncthing = {
-      description = "syncthing file sync (${userName})";
-      user = userName;
-      environment.HOME = home;
-      path = [pkgs.coreutils pkgs.gnugrep];
-      command = let
-        cfgDir = "${home}/.config/syncthing";
-        seed = "${config.user.services.syncthing.seedConfigFile}";
-      in "${pkgs.writeShellScript "syncthing-seed" ''
-        set -e
-        CFG=${cfgDir}/config.xml
-        if [ ! -f "$CFG" ] || ! grep -q '<folder id=' "$CFG"; then
-          install -m 600 -o ${userName} -g users ${seed} "$CFG"
-        fi
-        exec ${pkgs.syncthing}/bin/syncthing --config=${cfgDir} --data=${cfgDir} --gui-address=127.0.0.1:8384 --no-browser
-      ''}";
-      conditions = ["net/lo/up"];
-      log = true;
-    };
   };
 }
