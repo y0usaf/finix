@@ -3,7 +3,89 @@
   lib,
   ...
 }: let
-  inherit (config.lib.generators) mkLispInline toLisp;
+  inherit
+    (lib)
+    concatStringsSep
+    filterAttrs
+    isAttrs
+    isList
+    isString
+    mapAttrsToList
+    replaceStrings
+    toUpper
+    unique
+    ;
+  inherit (builtins) attrNames length match typeOf;
+
+  quoteStr = s: ''"${replaceStrings ["\\" "\""] ["\\\\" "\\\""] s}"'';
+
+  floatStr = f: let
+    json = builtins.toJSON f;
+  in
+    if json == "null"
+    then throw "toLisp: cannot serialize a non-finite float"
+    else if match ".*[eE].*" json != null
+    then replaceStrings ["e" "E"] ["d" "d"] json
+    else "${json}d0";
+
+  keywordStr = k: ":|${replaceStrings ["\\" "|"] ["\\\\" "\\|"] (toUpper k)}|";
+
+  isInlineText = form: isString form && match "[[:space:]]*" form == null;
+
+  mkLispInline = form:
+    if isInlineText form
+    then {__toLispInline = form;}
+    else throw "mkLispInline: expected a nonblank string";
+
+  isInline = v: isAttrs v && v ? __toLispInline;
+
+  inlineStr = v:
+    if attrNames v == ["__toLispInline"] && isInlineText v.__toLispInline
+    then v.__toLispInline
+    else throw "toLisp: inline wrapper must contain only __toLispInline, a nonblank string";
+
+  listStr = vs:
+    if vs == []
+    then "nil"
+    else "(list ${concatStringsSep " " (map toLisp vs)})";
+
+  entry = k: v: "${keywordStr k} ${toLisp v}";
+
+  attrsStr = v: let
+    present = filterAttrs (_: x: x != null) v;
+    names = map toUpper (attrNames present);
+    entries = mapAttrsToList entry present;
+  in
+    if length names != length (unique names)
+    then throw "toLisp: keys collide after ASCII uppercasing"
+    else if entries == []
+    then "nil"
+    else "(list ${concatStringsSep " " entries})";
+
+  atoms = {
+    "null" = _: "nil";
+    bool = v:
+      if v
+      then "t"
+      else "nil";
+    float = floatStr;
+    int = toString;
+    path = v: quoteStr "${v}";
+    string = quoteStr;
+  };
+
+  atomStr = v:
+    (atoms.${typeOf v} or (throw "toLisp: cannot serialize ${typeOf v}")) v;
+
+  toLisp = v:
+    if isInline v
+    then inlineStr v
+    else if isAttrs v
+    then attrsStr v
+    else if isList v
+    then listStr v
+    else atomStr v;
+
   inherit (config.user) defaults;
   cfg = config.user.ui.tomoe;
   inherit (cfg) bar;
@@ -196,5 +278,67 @@
     cfg.extraConfig
   ];
 in {
-  manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = initText;
+  options.user.ui.tomoe = {
+    layout = lib.mkOption {
+      type = lib.types.enum ["deck" "sway"];
+      default = "deck";
+      description = ''
+        Window-management layout generated into ~/.config/tomoe/init.lisp:
+        "deck" = two 16:9 deck columns (the original ultrawide layout);
+        "sway" = manual h/v split trees over numbered workspaces
+        (Alt+J/K scroll workspaces, Alt+H/L focus left/right).
+      '';
+    };
+
+    displays = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+      default = {};
+      description = ''
+        Per-output configure-output keywords, keyed by output name: `mode`
+        ([W H] or [W H Hz]), `refresh`, `scale`, `position` ([X Y] physical
+        pixels), `disabled`, `mirror`, `vrr`, `icc` (an ICC profile path). An
+        empty attrset means tomoe uses EDID-preferred modes for every output.
+      '';
+      example = lib.literalExpression ''
+        {
+          "DP-1" = { mode = [5120 1440]; position = [0 0]; vrr = true; };
+          "eDP-1".disabled = true;
+        }
+      '';
+    };
+
+    extraConfig = lib.mkOption {
+      type = lib.types.lines;
+      default = "";
+      description = "Extra Common Lisp appended to the generated ~/.config/tomoe/init.lisp.";
+    };
+
+    bar = {
+      modules = lib.mkOption {
+        type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu"]);
+        default = ["time" "date"];
+        description = "Bar overlay modules to render.";
+      };
+
+      edges = lib.mkOption {
+        type = lib.types.listOf (lib.types.enum ["top" "bottom"]);
+        default = ["top" "bottom"];
+        description = "Screen edges that get a module bar. Single edge = no duplicated widgets.";
+      };
+
+      indent = lib.mkOption {
+        type = lib.types.ints.unsigned;
+        default = 0;
+        description = "Exclusive bars: lift the widget row this many px off the screen edge. Baked into the bar thickness so the exclusive zone covers it — windows never overlap the gap.";
+      };
+
+      exclusive = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether the bar reserves exclusive space that windows tile around. Keep false for a pure overlay.";
+      };
+    };
+  };
+
+  config.manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = initText;
 }
