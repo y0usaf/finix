@@ -27,11 +27,6 @@
       default = 12;
       description = "Font size used by terminal emulators (e.g. foot)";
     };
-    hyprcursorSize = lib.mkOption {
-      type = lib.types.int;
-      default = 24;
-      description = "Base Hyprcursor size at user.appearance.dpi.";
-    };
     dpi = lib.mkOption {
       type = lib.types.int;
       default = 96;
@@ -44,11 +39,6 @@
       type = lib.types.str;
       default = "${config.user.homeDirectory}/.local/share/Steam";
       description = "Directory for Steam.";
-    };
-    wallpapers = lib.mkOption {
-      type = lib.types.str;
-      default = "${config.user.homeDirectory}/DCIM/Wallpapers";
-      description = "Wallpaper directory for static images.";
     };
   };
 

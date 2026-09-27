@@ -278,6 +278,12 @@
     cfg.extraConfig
   ];
 in {
+  options.user.paths.wallpapers = lib.mkOption {
+    type = lib.types.str;
+    default = "${config.user.homeDirectory}/DCIM/Wallpapers";
+    description = "Wallpaper directory for static images.";
+  };
+
   options.user.ui.tomoe = {
     layout = lib.mkOption {
       type = lib.types.enum ["deck" "sway"];
