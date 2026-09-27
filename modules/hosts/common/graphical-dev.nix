@@ -31,6 +31,7 @@
     biome.enable = lib.mkDefault true;
     latex.enable = lib.mkDefault true;
     upscale.enable = lib.mkDefault true;
+    phi.enable = lib.mkDefault true;
     npm.enable = lib.mkDefault true;
     docker.enable = lib.mkDefault true;
     gcloud.enable = lib.mkDefault true;
