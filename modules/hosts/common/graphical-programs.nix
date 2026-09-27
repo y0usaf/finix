@@ -24,5 +24,6 @@
     btop.enable = lib.mkDefault true;
     grok-bot.enable = lib.mkDefault true;
     creative.enable = lib.mkDefault true;
+    media.enable = lib.mkDefault true;
   };
 }
