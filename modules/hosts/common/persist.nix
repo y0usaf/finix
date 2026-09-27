@@ -171,6 +171,12 @@ in {
       "mount-home".conditions = ["task/reset-home/success"];
     };
 
+    system.activation.scripts.persistentMachineId.text = ''
+      if [ -s /persist/etc/machine-id ]; then
+        ${pkgs.coreutils}/bin/install -m 0444 /persist/etc/machine-id /etc/machine-id
+      fi
+    '';
+
     fileSystems = lib.genAttrs (builtins.filter (dir: !lib.hasPrefix "/etc/" dir && dir != "/root")
       (map dirPath config.finix.persistence.allowlist.directories)) (dir: {
       device = "/persist${dir}";

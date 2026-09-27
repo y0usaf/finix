@@ -44,11 +44,6 @@
         ../server/programs.nix
         ./diagnostics.nix
         inputs.manzil.finixModules.default
-        ../hosts/common/finix-base.nix
-        ../hosts/common/finix-btrfs.nix
-        ../hosts/common/finix-nix-daemon.nix
-        ../hosts/common/manzil.nix
-        ../hosts/common/ssh-keys.nix
         ../core/user/user-config.nix
         ../dev/ai/prompts/ethics.nix
         ../dev/ai/prompts/no-tests.nix

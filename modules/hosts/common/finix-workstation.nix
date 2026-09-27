@@ -11,8 +11,6 @@
 
   networking.hosts."100.105.204.116" = ["y0usaf-server"];
 
-  finix.persistence.identity.restoreMachineId = true;
-
   manzil = {
     finit.conditions = ["task/persist-user-binds/success"];
     clobberByDefault = true;
