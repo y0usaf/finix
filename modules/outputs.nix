@@ -102,7 +102,6 @@ inputs: let
         ./server/programs.nix
         ./finix/diagnostics.nix
         inputs.manzil.finixModules.default
-        ./core/user/user-config.nix
         ./dev/ai/prompts/policy.nix
         ./dev/ai/claude-code.nix
         ./dev/ai/paseo/service.nix
