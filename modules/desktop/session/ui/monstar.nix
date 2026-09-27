@@ -7,10 +7,6 @@
   inherit (config) user;
   userUi = user.ui;
   computedFontSize = toString user.appearance.termFontSize;
-  monstarColorsTarget = lib.attrByPath ["user" "appearance" "wallust" "targets" "monstar-colors" "target"] null config;
-  monstarThemePath =
-    lib.optionalString (monstarColorsTarget != null)
-    "${config.user.homeDirectory}${lib.removePrefix "~" monstarColorsTarget}";
 in {
   options.user.ui.monstar = {
     enable = lib.mkEnableOption "monstar terminal emulator";
@@ -27,7 +23,7 @@ in {
         font-size = ${computedFontSize}
         background-opacity = 0.82
         line-height = ${userUi.foot.lineHeight}
-        ${lib.optionalString (monstarColorsTarget != null) "theme = ${monstarThemePath}"}
+        theme = ${config.user.homeDirectory}${lib.removePrefix "~" user.appearance.wallust.targets.monstar-colors.target}
       '';
     };
   };
