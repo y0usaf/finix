@@ -1,4 +1,4 @@
-_: {
+{lib, ...}: {
   services = {
     bluetooth.enable = true;
     polkit.enable = true;
@@ -6,7 +6,15 @@ _: {
     upower.enable = true;
     udisks2.enable = true;
     nftables.enable = true;
+    dhcpcd.enable = lib.mkForce false;
+    networkmanager = {
+      enable = true;
+      settings.main.rc-manager = "resolvconf";
+    };
   };
+
+  finit.services.dhcpcd.enable = lib.mkForce false;
+  programs.resolvconf.enable = true;
 
   hardware.i2c.enable = true;
 
