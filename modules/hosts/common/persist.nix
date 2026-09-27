@@ -45,6 +45,18 @@ in {
     };
   };
 
+  config.finix.persistence.bindReplay = let
+    dirPath = entry:
+      if builtins.isAttrs entry
+      then entry.directory
+      else entry;
+    userPersist = config.finix.persistence.allowlist.users.${config.user.name};
+  in {
+    enable = true;
+    directories = map dirPath userPersist.directories;
+    files = map dirPath userPersist.files;
+  };
+
   config.finix.persistence.allowlist = {
     hideMounts = true;
     directories = [
