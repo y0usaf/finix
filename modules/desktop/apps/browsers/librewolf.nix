@@ -46,7 +46,7 @@ in {
           };
         };
         "${librewolfConfig}/${userName}/chrome/userChrome.css" = {
-          text = browserShared.userChromeCss;
+          text = builtins.readFile ./userChrome.css;
         };
         "${librewolfConfig}/native-messaging-hosts/pywalfox.json" = {
           generator = lib.generators.toJSON {};
