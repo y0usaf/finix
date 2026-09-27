@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   inherit (lib) mkOption types;
@@ -48,6 +49,64 @@ in {
       };
     };
   };
+
+  config.environment.systemPackages = let
+    user = config.user.name;
+    inherit (config.users.users.${user}) home uid;
+    userPersist = config.finix.persistence.allowlist.users.${user};
+    splitPath = p: builtins.filter (s: s != "") (lib.splitString "/" p);
+    properAncestors = p: let
+      parts = splitPath p;
+    in
+      lib.init (lib.genList (i: lib.concatStringsSep "/" (lib.take (i + 1) parts)) (lib.length parts));
+    dirnameOf = p: let
+      parts = splitPath p;
+    in
+      lib.optional (lib.length parts > 1) (lib.concatStringsSep "/" (lib.init parts));
+    fileTemplateDirs = builtins.concatMap (f: let
+      d = dirnameOf (dirPath f);
+    in
+      d ++ lib.concatMap properAncestors d)
+    userPersist.files;
+    dirTemplateDirs = builtins.concatMap (d: properAncestors (dirPath d)) userPersist.directories;
+    dataSubvolMounts =
+      map (mp: lib.removePrefix "${home}/" mp)
+      (builtins.filter (mp: lib.hasPrefix "${home}/" mp) (builtins.attrNames config.fileSystems));
+    templateDirs = lib.sort lib.lessThan (lib.unique (dataSubvolMounts ++ dirTemplateDirs ++ fileTemplateDirs));
+  in [
+    (pkgs.writeShellScriptBin "prep-home-blank" ''
+      set -euo pipefail
+
+      export PATH=${lib.makeBinPath [pkgs.btrfs-progs pkgs.coreutils pkgs.util-linux]}
+
+      mountpoint -q /btrfs || {
+        echo "prep-home-blank: /btrfs is not a mountpoint" >&2
+        exit 1
+      }
+
+      if btrfs subvolume show /btrfs/@home-blank >/dev/null 2>&1; then
+        if [ "''${1:-}" != "--force" ]; then
+          echo "prep-home-blank: /btrfs/@home-blank already exists; rerun with --force to delete and recreate" >&2
+          exit 1
+        fi
+        echo "prep-home-blank: --force: deleting existing /btrfs/@home-blank"
+        btrfs subvolume delete /btrfs/@home-blank
+      fi
+
+      btrfs subvolume create /btrfs/@home-blank
+
+      install -d -m 0700 -o ${toString uid} -g users /btrfs/@home-blank/${user}
+      while IFS= read -r dir; do
+        [ -n "$dir" ] || continue
+        install -d -m 0755 -o ${toString uid} -g users "/btrfs/@home-blank/${user}/$dir"
+      done <<'DIRS'
+      ${lib.concatStringsSep "\n" templateDirs}
+      DIRS
+
+      chown -R ${toString uid}:users /btrfs/@home-blank/${user}
+      echo "prep-home-blank: @home-blank ready ($((1 + ${toString (builtins.length templateDirs)})) dirs)"
+    '')
+  ];
 
   config.fileSystems = lib.genAttrs (builtins.filter (directory: !lib.hasPrefix "/etc/" directory && directory != "/root")
     (map dirPath config.finix.persistence.allowlist.directories)) (directory: {

@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  flakeInputs,
   ...
 }: let
   diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
@@ -13,35 +12,6 @@
     fsType = "btrfs";
     options = ["subvol=${subvol}"] ++ btrfsOpts ++ extraOpts;
   };
-
-  persistCfg = config.finix.persistence.allowlist;
-  dirPath = e:
-    if builtins.isAttrs e
-    then e.directory
-    else e;
-  userFiles = persistCfg.users.y0usaf.files;
-
-  splitPath = p: builtins.filter (s: s != "") (lib.splitString "/" p);
-  properAncestors = p: let
-    parts = splitPath p;
-  in
-    lib.init (lib.genList (i: lib.concatStringsSep "/" (lib.take (i + 1) parts)) (lib.length parts));
-  dirnameOf = p: let
-    parts = splitPath p;
-  in
-    lib.optional (lib.length parts > 1) (lib.concatStringsSep "/" (lib.init parts));
-  fileTemplateDirs = builtins.concatMap (f: let
-    d = dirnameOf (dirPath f);
-  in
-    d ++ lib.concatMap properAncestors d)
-  userFiles;
-  dirTemplateDirs = builtins.concatMap (d: properAncestors (dirPath d)) persistCfg.users.y0usaf.directories;
-  homeTemplateDirs = dirTemplateDirs ++ fileTemplateDirs;
-
-  dataSubvolMounts =
-    map (mp: lib.removePrefix "/home/y0usaf/" mp)
-    (builtins.filter (mp: lib.hasPrefix "/home/y0usaf/" mp) (builtins.attrNames config.fileSystems));
-  templateDirs = lib.sort lib.lessThan (lib.unique (dataSubvolMounts ++ homeTemplateDirs));
 in {
   imports = [../../../finix/desktop];
 
@@ -61,40 +31,6 @@ in {
     etc = {
       "finix-stage2".text = "desktop-phase2.4\n";
     };
-    systemPackages = [
-      (pkgs.writeShellScriptBin "prep-home-blank" ''
-        set -euo pipefail
-
-        export PATH=${lib.makeBinPath [pkgs.btrfs-progs pkgs.coreutils pkgs.util-linux]}
-
-        mountpoint -q /btrfs || {
-          echo "prep-home-blank: /btrfs is not a mountpoint" >&2
-          exit 1
-        }
-
-        if btrfs subvolume show /btrfs/@home-blank >/dev/null 2>&1; then
-          if [ "''${1:-}" != "--force" ]; then
-            echo "prep-home-blank: /btrfs/@home-blank already exists; rerun with --force to delete and recreate" >&2
-            exit 1
-          fi
-          echo "prep-home-blank: --force: deleting existing /btrfs/@home-blank"
-          btrfs subvolume delete /btrfs/@home-blank
-        fi
-
-        btrfs subvolume create /btrfs/@home-blank
-
-        install -d -m 0700 -o 1001 -g users /btrfs/@home-blank/y0usaf
-        while IFS= read -r dir; do
-          [ -n "$dir" ] || continue
-          install -d -m 0755 -o 1001 -g users "/btrfs/@home-blank/y0usaf/$dir"
-        done <<'DIRS'
-        ${lib.concatStringsSep "\n" templateDirs}
-        DIRS
-
-        chown -R 1001:users /btrfs/@home-blank/y0usaf
-        echo "prep-home-blank: @home-blank ready ($((1 + ${toString (builtins.length templateDirs)})) dirs)"
-      '')
-    ];
   };
 
   boot = {
