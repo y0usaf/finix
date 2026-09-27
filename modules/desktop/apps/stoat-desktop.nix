@@ -9,6 +9,9 @@
   };
 
   config = lib.mkIf config.user.programs.stoat-desktop.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/stoat-desktop"
+    ];
     environment.systemPackages = [pkgs.stoat-desktop];
   };
 }

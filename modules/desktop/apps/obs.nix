@@ -7,6 +7,9 @@
 }: {
   options.user.programs.obs.enable = lib.mkEnableOption "OBS Studio";
   config = lib.mkIf config.user.programs.obs.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/obs-studio"
+    ];
     environment.systemPackages = [
       (pkgs.symlinkJoin {
         name = "obs-studio-with-cuda";

@@ -14,6 +14,9 @@ in {
   };
 
   config = lib.mkIf shell.rush.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".local/state/rush"
+    ];
     environment.systemPackages = [
       pkgs.rush
       pkgs.bat
