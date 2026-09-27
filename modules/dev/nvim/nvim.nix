@@ -11,6 +11,10 @@ in {
   };
 
   config = lib.mkIf config.user.dev.nvim.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".local/share/nvim"
+      ".local/state/nvim"
+    ];
     environment.systemPackages = [
       pkgs.ripgrep
       pkgs.fd

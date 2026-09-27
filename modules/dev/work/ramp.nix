@@ -68,6 +68,9 @@ in {
   options.user.dev.work.ramp.enable = lib.mkEnableOption "Ramp CLI";
 
   config = lib.mkIf cfg.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/ramp"
+    ];
     environment.systemPackages = [
       package
       pkgs.libsecret

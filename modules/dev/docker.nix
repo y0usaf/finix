@@ -8,6 +8,9 @@
     enable = lib.mkEnableOption "docker development environment";
   };
   config = lib.mkIf config.user.dev.docker.enable {
+    finix.persistence.allowlist.directories = [
+      "/var/lib/docker"
+    ];
     environment.systemPackages = [
       pkgs.docker-buildx
       pkgs.docker-credential-helpers
