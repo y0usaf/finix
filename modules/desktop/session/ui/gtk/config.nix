@@ -10,7 +10,6 @@
   cursorThemeName = ui.cursor.package.xcursorThemeName;
   inherit (appearance) xcursorSize;
   toINI = lib.generators.toINI {};
-  inherit (appearance) gtkFontSize;
   inherit (ui.fonts) mainFontName;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
@@ -43,7 +42,7 @@ in {
               gtk-application-prefer-dark-theme = 1;
               gtk-cursor-theme-name = cursorThemeName;
               gtk-cursor-theme-size = toString xcursorSize;
-              gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
+              gtk-font-name = "${mainFontName} 12";
               gtk-xft-antialias = 1;
               gtk-xft-dpi = toString appearance.dpi;
               gtk-xft-hinting = 1;
@@ -104,7 +103,7 @@ in {
               gtk-application-prefer-dark-theme = 1;
               gtk-cursor-theme-name = cursorThemeName;
               gtk-cursor-theme-size = toString xcursorSize;
-              gtk-font-name = "${mainFontName} ${toString gtkFontSize}";
+              gtk-font-name = "${mainFontName} 12";
             };
           };
         };

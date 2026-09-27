@@ -5,11 +5,6 @@
       default = 12;
       description = "Font size used by terminal emulators (e.g. foot)";
     };
-    gtkFontSize = lib.mkOption {
-      type = lib.types.int;
-      default = 12;
-      description = "Font size used by GTK applications";
-    };
     xcursorSize = lib.mkOption {
       type = lib.types.int;
       default = 24;
