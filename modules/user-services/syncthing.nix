@@ -177,12 +177,6 @@ in {
   options.user.services.syncthing = {
     enable = lib.mkEnableOption "Syncthing service";
 
-    user = lib.mkOption {
-      type = lib.types.str;
-      default = config.user.name;
-      description = "User to run Syncthing as";
-    };
-
     devices = lib.mkOption {
       type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
       default = {
@@ -207,28 +201,24 @@ in {
           label = "Tokens";
           path = "~/Tokens";
           devices = ["desktop" "laptop" "framework" "server" "phone"];
-          versioning.type = "trashcan";
         };
         music = {
           id = "oty33-aq3dt";
           label = "Music";
           path = "~/Music";
           devices = ["desktop" "laptop" "server" "phone"];
-          versioning.type = "trashcan";
         };
         dcim = {
           id = "ti9yk-zu3xs";
           label = "DCIM";
           path = "~/DCIM";
           devices = ["desktop" "laptop" "server" "phone"];
-          versioning.type = "trashcan";
         };
         pictures = {
           id = "zbxzv-35v4e";
           label = "Pictures";
           path = "~/Pictures";
           devices = ["desktop" "laptop" "server" "phone"];
-          versioning.type = "trashcan";
         };
       };
       description = "Syncthing folders configuration";
