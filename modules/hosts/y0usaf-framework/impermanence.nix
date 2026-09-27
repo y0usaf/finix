@@ -1,18 +1,42 @@
-{config, ...}: let
-  common = config.finix.persistence.shared;
-in {
+_: {
   finix.persistence.allowlist = {
     hideMounts = true;
-    directories =
-      common.systemDirectories
-      ++ [
-        "/var/lib/docker"
-        "/var/lib/bluetooth"
-      ];
-    files = common.systemFiles;
+    directories = [
+      "/var/lib/nixos"
+      "/var/lib/systemd/coredump"
+      "/var/log"
+      "/etc/ssh"
+      "/etc/NetworkManager/system-connections"
+      "/var/lib/NetworkManager"
+      "/var/lib/tailscale"
+      "/var/lib/manzil"
+      "/var/lib/docker"
+      "/var/lib/bluetooth"
+    ];
+    files = ["/etc/machine-id"];
     users.y0usaf = {
       directories =
-        builtins.filter (directory: directory != "Dev" && directory != "nixos") common.userDirectories
+        [
+          "Documents"
+          "Tokens"
+          ".ssh"
+          ".fx"
+          ".omfx"
+          ".mozilla"
+          ".librewolf"
+          ".local/share/pi"
+          ".config/gh"
+          ".config/gws"
+          ".config/librewolf"
+          ".config/glide"
+          ".local/state/nix"
+          ".config/pi/agent"
+          ".config/codex"
+          ".local/share/android"
+          ".config/claude"
+          ".local/share/azure"
+          ".local/state/bash"
+        ]
         ++ [
           "finix"
           "cu-workbench"
@@ -67,11 +91,7 @@ in {
           ".cache/ekko"
           ".cache/mesa_shader_cache"
         ];
-      files =
-        common.userFiles
-        ++ [
-          ".npmrc"
-        ];
+      files = [".npmrc"];
     };
   };
 }
