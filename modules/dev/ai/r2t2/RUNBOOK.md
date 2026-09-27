@@ -1,8 +1,8 @@
 # Confucius4-R2T2 streaming ASR server runbook
 
-Declared by `modules/dev/ai/r2t2/default.nix` (`user.dev.r2t2`), enabled on
-the desktop host in `modules/hosts/y0usaf-desktop/dev.nix`. It replaces the
-hand-started feasibility process from a since-retired sandbox.
+Declared by `modules/dev/ai/r2t2/default.nix` (`user.dev.r2t2`), which is on
+by default wherever `hardware.nvidia.enable` is set, so on the desktop. It
+replaces the hand-started feasibility process from a since-retired sandbox.
 
 ## What runs
 
@@ -24,7 +24,7 @@ hand-started feasibility process from a since-retired sandbox.
 
 ## Build and enable
 
-    # Evaluate the module (inert by default):
+    # Evaluate the module (on wherever hardware.nvidia.enable is set):
     nix eval --impure --apply 'x: builtins.attrNames x' \
       .#nixosConfigurations.y0usaf-desktop.config.user.dev.r2t2
 
