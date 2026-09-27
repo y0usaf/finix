@@ -56,12 +56,10 @@
 in {
   networking.hostName = "y0usaf-framework";
 
-  finix = {
-    diagnostics = {
-      inherit diskUuid;
-      fallbackDevices = ["/dev/nvme0n1p2"];
-      logDir = "finix-framework-boot";
-    };
+  finix.diagnostics = {
+    inherit diskUuid;
+    fallbackDevices = ["/dev/nvme0n1p2"];
+    logDir = "finix-framework-boot";
   };
 
   hardware = {
@@ -136,22 +134,18 @@ in {
     extraGroups = ["docker"];
   };
 
-  finit = {
-    tasks = {
-      framework-boot-health = {
-        description = "record first-boot health after network and services settle";
-        command = "${pkgs.writeShellScript "framework-boot-health" ''
-          export PATH=${lib.makeBinPath [pkgs.coreutils]}
-          for _ in $(seq 1 120); do
-            if ${healthPackage}/bin/finix-framework-health; then
-              exec ${healthPackage}/bin/finix-framework-health --record
-            fi
-            sleep 5
-          done
+  finit.tasks.framework-boot-health = {
+    description = "record first-boot health after network and services settle";
+    command = "${pkgs.writeShellScript "framework-boot-health" ''
+      export PATH=${lib.makeBinPath [pkgs.coreutils]}
+      for _ in $(seq 1 120); do
+        if ${healthPackage}/bin/finix-framework-health; then
           exec ${healthPackage}/bin/finix-framework-health --record
-        ''}";
-        log = true;
-      };
-    };
+        fi
+        sleep 5
+      done
+      exec ${healthPackage}/bin/finix-framework-health --record
+    ''}";
+    log = true;
   };
 }
