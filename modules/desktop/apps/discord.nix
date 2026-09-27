@@ -5,18 +5,7 @@
   flakeInputs,
   ...
 }: let
-  inherit (lib) concatStringsSep;
-
-  enableFeatures = [
-    "WaylandWindowDecorations"
-    "WaylandLinuxDrmSyncobj"
-  ];
-  disableFeatures = [
-    "WebRtcAllowInputVolumeAdjustment"
-    "ChromeWideEchoCancellation"
-  ];
-  inherit (config) user;
-  userName = user.name;
+  userName = config.user.name;
   legacyDir = "${flakeInputs.nixpkgs-discord-legacy}/pkgs/applications/networking/instant-messengers/discord";
   legacySource = (lib.importJSON "${legacyDir}/sources.json")."linux-stable";
   legacyDiscord = pkgs.callPackage "${legacyDir}/linux.nix" {
@@ -32,10 +21,8 @@
       mainProgram = "Discord";
     };
   };
-  wrapFonts = names: lib.concatStringsSep ", " (map (f: "\"${f}\"") names);
   inherit (config.user.ui) fonts;
-  uiFontList = [fonts.mainFontName fonts.backup.name];
-  primaryFont = wrapFonts (uiFontList ++ [fonts.emoji.name]);
+  primaryFont = ''"${fonts.mainFontName}", "${fonts.backup.name}", "${fonts.emoji.name}"'';
 in {
   finix.persistence.allowlist.users.${userName}.directories = [
     ".config/discord"
@@ -46,7 +33,7 @@ in {
   environment.systemPackages = [
     pkgs.vesktop
     (legacyDiscord.override {
-      commandLineArgs = "--enable-features=${concatStringsSep "," enableFeatures} --disable-features=${concatStringsSep "," disableFeatures}";
+      commandLineArgs = "--enable-features=WaylandWindowDecorations,WaylandLinuxDrmSyncobj --disable-features=WebRtcAllowInputVolumeAdjustment,ChromeWideEchoCancellation";
       withOpenASAR = true;
       disableUpdates = false;
       withTTS = false;
@@ -97,7 +84,7 @@ in {
         --font-primary: ${primaryFont} !important;
         --font-display: ${primaryFont} !important;
         --font-headline: ${primaryFont} !important;
-        --font-code: ${wrapFonts uiFontList} !important;
+        --font-code: "${fonts.mainFontName}", "${fonts.backup.name}" !important;
       }
     '';
 
