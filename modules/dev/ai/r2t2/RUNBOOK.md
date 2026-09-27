@@ -46,16 +46,15 @@ materialised once by a declared installer rather than rebuilt every boot:
 
     r2t2-install      # on PATH once the module is enabled
 
-It installs the pinned Python packages into `${stateDir}/.venv`
-(`~/.local/share/r2t2/.venv` by default). Re-run it after changing the pin
-set. It is idempotent and uses the local `uv` cache, so on this box it
-completes in about a second after the first time. The repo itself is on
-`PYTHONPATH` (the `r2t2` import) from the patched store tree; it is not
-pip-installed into the venv.
+It installs the pinned Python packages into `~/.local/share/r2t2/.venv`.
+Re-run it after changing the pin set. It is idempotent and uses the local `uv`
+cache, so on this box it completes in about a second after the first time. The
+repo itself is on `PYTHONPATH` (the `r2t2` import) from the patched store tree;
+it is not pip-installed into the venv.
 
 Durability: the desktop host has `finix.persistence.homeReset.enable = true`,
 which rotates `@home` back to `@home-blank` on every boot. The module
-therefore registers `stateDir` in
+therefore registers `~/.local/share/r2t2` in
 `finix.persistence.allowlist.users.y0usaf.directories`, so the venv survives a
 reboot and no manual download is needed. On a host without finix's
 persistence module that option assignment is simply unused.
@@ -84,20 +83,19 @@ Set by the module and handed to the daemon; each prevents a crash on NixOS:
 - `PYTHONPATH` = the patched store tree (provides the `r2t2` package).
 - `ASR_MODEL_PATH`, `VAD_MODEL_PATH`, and the memory knobs below.
 
-## Memory settings (defaults = the measured working point)
+## Memory settings (the measured working point)
 
 Upstream hardcodes `gpu_memory_utilization=0.95`; this box shares one 24 GiB
-RTX 4090 with other GPU residents, so that aborts on startup. Defaults:
+RTX 4090 with other GPU residents, so that aborts on startup. The module sets:
 
-- `gpuMemoryUtilization = 0.20` (about 4.75 GiB of 24 GiB)
-- `maxModelLen = 4096` (`ASR_MAX_MODEL_LEN`)
-- `maxNumBatchedTokens = 256` (`ASR_MAX_NUM_BATCHED_TOKENS`, implies
-  `max_num_seqs=1`)
-- `enforceEager = true` (`ASR_ENFORCE_EAGER=1`)
-- `skipMmProfiling = true` (`ASR_SKIP_MM_PROFILING=1`; skips the
-  multimodal-encoder profiling run, which OOMs at this free-memory level)
+- `ASR_GPU_MEMORY_UTILIZATION=0.20` (about 4.75 GiB of 24 GiB)
+- `ASR_MAX_MODEL_LEN=4096`
+- `ASR_MAX_NUM_BATCHED_TOKENS=256` (implies `max_num_seqs=1`)
+- `ASR_ENFORCE_EAGER=1` (skips CUDA graphs to fit the memory budget)
+- `ASR_SKIP_MM_PROFILING=1` (skips the multimodal-encoder profiling run,
+  which OOMs at this free-memory level)
 
-Measured at these defaults from the built artifacts: model load about
+Measured at these settings from the built artifacts: model load about
 3.86 GiB, engine build about 20 s, and the process holds about 5.7 GiB of
 VRAM (server ~0.5 GiB + vLLM `EngineCore` ~5.3 GiB).
 
@@ -114,9 +112,10 @@ Readiness: the wrapper starts the server, waits for the socket to accept a
 connection (up to 300 s; model load plus engine build is roughly 20 s), then
 sends `READY=1` to `$NOTIFY_SOCKET` (`notify:systemd`), which creates
 `service/r2t2/ready`. The wrapper runs the server from a writable copy at
-`${stateDir}/run/ws_server.py` because `ws_server.py` calls `os.makedirs` on
-`logs/` and `wav_tmp_store/` relative to `dirname(__file__)` at import time,
-a store path is read-only and the server would crash on import there.
+`~/.local/share/r2t2/run/ws_server.py` because `ws_server.py` calls
+`os.makedirs` on `logs/` and `wav_tmp_store/` relative to `dirname(__file__)`
+at import time, a store path is read-only and the server would crash on import
+there.
 
 To run it by hand without finit, start the server wrapper directly, exporting
 the module's rendered environment (the same vars finit would set). Stop it
