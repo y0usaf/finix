@@ -20,6 +20,11 @@
     pi.enable = lib.mkDefault true;
     prime-agent.enable = lib.mkDefault true;
     prompts.principles.enable = lib.mkDefault true;
+    paseo = {
+      enable = lib.mkDefault true;
+      desktop.enable = lib.mkDefault true;
+      environmentFiles = ["/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt"];
+    };
     rtk.enable = lib.mkDefault true;
     omp.enable = lib.mkDefault true;
     bun.enable = lib.mkDefault true;
