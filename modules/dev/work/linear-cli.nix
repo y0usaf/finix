@@ -51,5 +51,9 @@ in {
       package
       pkgs.libsecret
     ];
+
+    manzil.users."${config.user.name}".files.".config/linear/linear.toml".source = (pkgs.formats.toml {}).generate "linear-cli-config" {
+      workspace = "cook-unity";
+    };
   };
 }
