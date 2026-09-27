@@ -32,38 +32,36 @@
     extraPolicies = policies;
   };
 in {
-  config = lib.mkIf user.programs.glide.enable {
-    finix.persistence.allowlist.users.${config.user.name}.directories = [
-      ".config/glide"
-    ];
-    environment.systemPackages = [glide pywalfoxNative];
-    manzil.users."${userName}".files = {
-      ".config/glide/glide/profiles.ini" = {
-        generator = lib.generators.toINI {};
-        value = {
-          Profile0 = {
-            Name = "default";
-            IsRelative = 1;
-            Path = userName;
-            Default = 1;
-          };
-          General = {
-            StartWithLastProfile = 1;
-            Version = 2;
-          };
+  finix.persistence.allowlist.users.${config.user.name}.directories = [
+    ".config/glide"
+  ];
+  environment.systemPackages = [glide pywalfoxNative];
+  manzil.users."${userName}".files = {
+    ".config/glide/glide/profiles.ini" = {
+      generator = lib.generators.toINI {};
+      value = {
+        Profile0 = {
+          Name = "default";
+          IsRelative = 1;
+          Path = userName;
+          Default = 1;
+        };
+        General = {
+          StartWithLastProfile = 1;
+          Version = 2;
         };
       };
-      ".glide-browser/native-messaging-hosts/pywalfox.json" = {
-        generator = lib.generators.toJSON {};
-        value = {
-          name = "pywalfox";
-          description = "Native messaging host for Pywalfox";
-          path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
-            exec ${pywalfoxNative}/bin/pywalfox start
-          ''}";
-          type = "stdio";
-          allowed_extensions = ["pywalfox@frewacom.org"];
-        };
+    };
+    ".glide-browser/native-messaging-hosts/pywalfox.json" = {
+      generator = lib.generators.toJSON {};
+      value = {
+        name = "pywalfox";
+        description = "Native messaging host for Pywalfox";
+        path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
+          exec ${pywalfoxNative}/bin/pywalfox start
+        ''}";
+        type = "stdio";
+        allowed_extensions = ["pywalfox@frewacom.org"];
       };
     };
   };

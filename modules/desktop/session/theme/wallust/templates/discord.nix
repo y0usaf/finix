@@ -1,22 +1,15 @@
-{
-  config,
-  lib,
-  ...
-}: {
+_: {
   config.user.appearance.wallust = {
-    targets =
-      lib.optionalAttrs config.user.programs.discord.stable.enable {
-        "discord-colors" = {
-          template = "discord-colors.css";
-          target = "~/.config/Vencord/themes/wallust-colors.css";
-        };
-      }
-      // lib.optionalAttrs config.user.programs.discord.vesktop.enable {
-        "vesktop-colors" = {
-          template = "discord-colors.css";
-          target = "~/.config/vesktop/themes/wallust-colors.css";
-        };
+    targets = {
+      "discord-colors" = {
+        template = "discord-colors.css";
+        target = "~/.config/Vencord/themes/wallust-colors.css";
       };
+      "vesktop-colors" = {
+        template = "discord-colors.css";
+        target = "~/.config/vesktop/themes/wallust-colors.css";
+      };
+    };
 
     templates."discord-colors.css" = ''
       /* Discord color palette from wallust */

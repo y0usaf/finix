@@ -4,22 +4,17 @@
   pkgs,
   ...
 }: {
-  options.user.programs.gcp-console = {
-    enable = lib.mkEnableOption "Google Cloud Platform Console webapp";
-  };
-  config = lib.mkIf config.user.programs.gcp-console.enable {
-    manzil.users."${config.user.name}" = {
-      files = {
-        ".local/share/applications/gcp-console.desktop" = {
-          generator = lib.generators.toINI {};
-          value."Desktop Entry" = {
-            Name = "GCP Console";
-            Exec = "${lib.getExe pkgs.chromium} --app=https://console.cloud.google.com --enable-features=WebContentsForceDark %U";
-            Terminal = false;
-            Type = "Application";
-            Categories = "Development;Network;";
-            Comment = "Google Cloud Platform Console";
-          };
+  manzil.users."${config.user.name}" = {
+    files = {
+      ".local/share/applications/gcp-console.desktop" = {
+        generator = lib.generators.toINI {};
+        value."Desktop Entry" = {
+          Name = "GCP Console";
+          Exec = "${lib.getExe pkgs.chromium} --app=https://console.cloud.google.com --enable-features=WebContentsForceDark %U";
+          Terminal = false;
+          Type = "Application";
+          Categories = "Development;Network;";
+          Comment = "Google Cloud Platform Console";
         };
       };
     };
