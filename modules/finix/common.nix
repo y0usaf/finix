@@ -18,12 +18,6 @@
     PasswordAuthentication = false;
     PermitRootLogin = "no";
     KbdInteractiveAuthentication = false;
-    AuthorizedKeysFile = [
-      ".ssh/authorized_keys"
-      "/etc/ssh/authorized_keys.d/%u"
-    ];
-    UsePAM = false;
-    StrictModes = false;
   };
 
   finit.services.dhcpcd = {
