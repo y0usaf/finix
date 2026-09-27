@@ -37,10 +37,7 @@ _: {
     upscale.enable = true;
     r2t2.enable = true;
     phi.enable = true;
-    reasonix = {
-      enable = true;
-      apiKeyFile = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
-    };
+    reasonix.enable = true;
   };
 
   manzil.users.y0usaf.files.".omp/agent/rules/tldr.md".text = ''
