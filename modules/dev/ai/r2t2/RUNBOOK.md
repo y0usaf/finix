@@ -1,8 +1,7 @@
 # Confucius4-R2T2 streaming ASR server runbook
 
-Declared by `modules/dev/ai/r2t2/default.nix` (`user.dev.r2t2`), which is on
-by default wherever `hardware.nvidia.enable` is set, so on the desktop. It
-replaces the hand-started feasibility process from a since-retired sandbox.
+Declared by `modules/dev/ai/r2t2/default.nix`, which runs wherever
+`hardware.nvidia.enable` is set, so on the desktop. It replaces the hand-started feasibility process from a since-retired sandbox.
 
 ## What runs
 
@@ -20,13 +19,13 @@ replaces the hand-started feasibility process from a since-retired sandbox.
   unconditionally; a service without it is broken.
 - Supervisor: a finit `service` running as `y0usaf:users`, `respawn = true`,
   `notify = "systemd"`. It restarts on crash and on clean exit.
-- Port (default): 8272. WS URI: `ws://127.0.0.1:8272/asr_stream_api_v1`.
+- Port: 8272. WS URI: `ws://127.0.0.1:8272/asr_stream_api_v1`.
 
 ## Build and enable
 
-    # Evaluate the module (on wherever hardware.nvidia.enable is set):
+    # Evaluate the finit service (defined wherever hardware.nvidia.enable is set):
     nix eval --impure --apply 'x: builtins.attrNames x' \
-      .#nixosConfigurations.y0usaf-desktop.config.user.dev.r2t2
+      .#nixosConfigurations.y0usaf-desktop.config.finit.services.r2t2
 
     # Full system build (does NOT activate): the enabled desktop toplevel.
     nix build .#nixosConfigurations.y0usaf-desktop.config.system.build.toplevel
@@ -44,7 +43,7 @@ vLLM + torch cu128 as a pure nix package is a large lift, and PyPI wheels
 still need the `LD_LIBRARY_PATH`/TRITON environment below, so the venv is
 materialised once by a declared installer rather than rebuilt every boot:
 
-    r2t2-install      # on PATH once the module is enabled
+    r2t2-install      # on PATH on NVIDIA hosts
 
 It installs the pinned Python packages into `~/.local/share/r2t2/.venv`.
 Re-run it after changing the pin set. It is idempotent and uses the local `uv`
@@ -52,8 +51,8 @@ cache, so on this box it completes in about a second after the first time. The
 repo itself is on `PYTHONPATH` (the `r2t2` import) from the patched store tree;
 it is not pip-installed into the venv.
 
-Durability: the desktop host has `finix.persistence.homeReset.enable = true`,
-which rotates `@home` back to `@home-blank` on every boot. The module
+Durability: the graphical role (`modules/hosts/common/persist.nix`, the
+reset-home task) rotates `@home` back to `@home-blank` on every boot. The module
 therefore registers `~/.local/share/r2t2` in
 `finix.persistence.allowlist.users.y0usaf.directories`, so the venv survives a
 reboot and no manual download is needed. On a host without finix's
