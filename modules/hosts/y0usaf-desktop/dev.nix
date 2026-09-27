@@ -44,7 +44,6 @@ _: {
     paseo = {
       enable = true;
       desktop.enable = true;
-      reasonix.enable = false;
       environmentFiles = [
         "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt"
       ];
