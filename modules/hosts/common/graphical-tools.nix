@@ -7,5 +7,6 @@
     file-roller.enable = lib.mkDefault true;
     yt-dlp.enable = lib.mkDefault true;
     nicotine-plus.enable = lib.mkDefault true;
+    tmux.enable = lib.mkDefault true;
   };
 }
