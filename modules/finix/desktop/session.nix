@@ -134,10 +134,4 @@ in {
     session required pam_limits.so
     ${lib.optionalString config.services.elogind.enable "session optional ${config.services.elogind.package}/lib/security/pam_elogind.so"}
   '';
-
-  fonts.packages = [
-    flakeInputs.fonts.packages."${sys}".default
-    pkgs.noto-fonts-cjk-sans
-    pkgs.noto-fonts-color-emoji
-  ];
 }
