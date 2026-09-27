@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  cfg = config.user.gaming.p4g;
   inherit (config.user.paths) steam;
   fetch = url: hash: pkgs.fetchurl {inherit url hash;};
   cep =
@@ -61,18 +60,11 @@
     '';
   };
 in {
-  options.user.gaming.p4g = {
-    enable = lib.mkEnableOption "Persona 4 Golden Community Enhancement Pack";
-    package = lib.mkOption {
-      type = lib.types.package;
-      readOnly = true;
-      default = package;
-      description = "Pinned CEP payload and explicit, game-aware setup helper.";
-    };
-  };
+  options.user.gaming.p4g.enable = lib.mkEnableOption "Persona 4 Golden Community Enhancement Pack";
 
-  config = lib.mkIf cfg.enable {
-    environment.systemPackages = [cfg.package];
+  config = lib.mkIf config.user.gaming.p4g.enable {
+    system.build.p4g-setup = package;
+    environment.systemPackages = [package];
     finit.rlimits.nofile.hard = 524288;
     environment.etc."security/limits.conf".text = lib.mkAfter ''
       ${config.user.name} - nofile 524288
