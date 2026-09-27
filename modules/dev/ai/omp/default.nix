@@ -5,21 +5,12 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.dev.omp;
   catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
 in {
-  options.user.dev.omp = {
-    enable = lib.mkEnableOption "omp (oh-my-pi) coding agent CLI";
+  options.user.dev.omp.enable = lib.mkEnableOption "omp (oh-my-pi) coding agent CLI";
 
-    settings = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
-      default = {};
-      description = "Keys merged into ~/.omp/config.json.";
-    };
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.user.dev.omp.enable {
     environment.systemPackages = [
       flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".omp-full
     ];
@@ -38,8 +29,24 @@ in {
       };
       ".omp/config.json" = {
         generator = toJSON;
-        value = cfg.settings;
+        value = {
+          terminal_width_percent = 50;
+          panel_width_percent = 13;
+          ascii = true;
+          keybinds = {
+            project_next = "ctrl+l";
+            project_prev = "ctrl+h";
+            session_next = "ctrl+j";
+            session_prev = "ctrl+k";
+          };
+        };
       };
+      ".omp/agent/rules/tldr.md".text = ''
+        ---
+        {"condition":["(?s).{2000,}"],"interruptMode":"never","scope":"text"}---
+
+        TL;DR: summarize the preceding response in 3-5 concise bullets.
+      '';
       ".omp/agent/settings.json" = {
         generator = toJSON;
         value = {
