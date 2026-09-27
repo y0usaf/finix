@@ -40,9 +40,7 @@ in {
   boot.kernelModules = ["nf_tables"];
 
   services = {
-    openssh.settings = {
-      Port = [2200];
-    };
+    openssh.settings.Port = [2200];
     nftables = {
       enable = true;
       configFile = pkgs.writeText "finix-server.nft" ''
