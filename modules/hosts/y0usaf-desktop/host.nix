@@ -4,10 +4,7 @@ _: {
       workspace = "cook-unity";
     };
     gaming = {
-      proton = {
-        enable = true;
-        nativeWayland = false;
-      };
+      proton.enable = true;
       runelite = {
         enable = true;
         scale = 2.0;

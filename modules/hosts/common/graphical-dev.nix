@@ -22,9 +22,6 @@
     nvim.enable = lib.mkDefault true;
     python.enable = lib.mkDefault true;
     rust.enable = lib.mkDefault true;
-    opencode = {
-      enable = lib.mkDefault true;
-      enableMcpServers = lib.mkDefault false;
-    };
+    opencode.enable = lib.mkDefault true;
   };
 }

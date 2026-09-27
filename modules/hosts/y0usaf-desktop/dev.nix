@@ -57,10 +57,7 @@ _: {
     npm.enable = true;
     python.enable = true;
     rust.enable = true;
-    opencode = {
-      enable = true;
-      enableMcpServers = false;
-    };
+    opencode.enable = true;
     latex.enable = true;
     upscale.enable = true;
     r2t2.enable = true;
