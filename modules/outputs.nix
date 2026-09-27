@@ -38,7 +38,7 @@ in {
     packages."${system}" =
       cfg.packages
       // {
-        p4g-setup = cfg.hosts.y0usaf-desktop.config.user.gaming.p4g.package;
+        p4g-setup = cfg.hosts.y0usaf-desktop.config.system.build.p4g-setup;
         tomoe = inputs.tomoe.packages.${system}.default;
       };
 
