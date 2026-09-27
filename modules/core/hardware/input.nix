@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   rulesPkg = name: text:
     pkgs.writeTextFile {
       inherit name text;
@@ -19,14 +14,5 @@
     KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0df2", MODE="0660", TAG+="uaccess"
   '';
 in {
-  options.user.hardware.controllers = lib.mkOption {
-    type = lib.types.submodule {
-      options.enable = lib.mkEnableOption "game controller hidraw udev rules";
-    };
-    default = {};
-  };
-
-  config.services.udev.packages =
-    [vial]
-    ++ lib.optional config.user.hardware.controllers.enable dualsense;
+  services.udev.packages = [vial dualsense];
 }
