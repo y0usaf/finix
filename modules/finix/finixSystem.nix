@@ -12,7 +12,7 @@
       };
       overlays = [
         inputs.claude-code-nix.overlays.default
-        (final: prev: {
+        (_: _: {
           rush = inputs.rush.packages.${system}.default;
           monstar = inputs.monstar.packages.${system}.default;
           ash = inputs.ash.packages.${system}.default;
