@@ -6,18 +6,51 @@
 }: let
   cfg = config.user.services.syncthing;
 
-  folderDeviceIds = folderName: let
-    folder = cfg.folders.${folderName};
-    devId = name: cfg.devices.${name}.id;
-  in
-    map devId folder.devices;
+  devices = {
+    desktop.id = "KII4S2Y-KWA6M4K-MCQAUOO-C6PMX4L-V5JVDPW-HHZF52D-HP57BNH-EKCCZQC";
+    laptop.id = "EAHAPON-XKBJVGI-44SGTXR-WU6BF5U-WZKHJXS-7QNTBHQ-D4ICOVA-I346HQ7";
+    framework.id = "ICJT4KW-Q4KTA73-W2CO2HS-DCG6AFG-NXZTZPA-UI34ITG-4LW4NOT-BGB36AB";
+    server.id = "GY3T3SL-3JOOX3I-2SE72PF-V6ZSTIE-QI4EIYK-OBL6IDV-4IWLDDG-VM2ATAG";
+    phone = {
+      id = "JYAIN4T-MXQYDAP-2M6CSKX-KKRYVJC-5GMSRYP-LSZRRRV-QSOWY7W-YNQGOAC";
+      name = "SM-F946W";
+      compression = "never";
+    };
+  };
+
+  folders = {
+    tokens = {
+      id = "bv79n-fh4kx";
+      label = "Tokens";
+      path = "~/Tokens";
+      devices = ["desktop" "laptop" "framework" "server" "phone"];
+    };
+    music = {
+      id = "oty33-aq3dt";
+      label = "Music";
+      path = "~/Music";
+      devices = ["desktop" "laptop" "server" "phone"];
+    };
+    dcim = {
+      id = "ti9yk-zu3xs";
+      label = "DCIM";
+      path = "~/DCIM";
+      devices = ["desktop" "laptop" "server" "phone"];
+    };
+    pictures = {
+      id = "zbxzv-35v4e";
+      label = "Pictures";
+      path = "~/Pictures";
+      devices = ["desktop" "laptop" "server" "phone"];
+    };
+  };
 
   renderFolder = name: ''
-    <folder id="${cfg.folders.${name}.id}" label="${cfg.folders.${name}.label}" path="${cfg.folders.${name}.path}" type="sendreceive" rescanIntervalS="3600" fsWatcherEnabled="true" fsWatcherDelayS="10" fsWatcherTimeoutS="0" ignorePerms="false" autoNormalize="true">
+    <folder id="${folders.${name}.id}" label="${folders.${name}.label}" path="${folders.${name}.path}" type="sendreceive" rescanIntervalS="3600" fsWatcherEnabled="true" fsWatcherDelayS="10" fsWatcherTimeoutS="0" ignorePerms="false" autoNormalize="true">
         <filesystemType>basic</filesystemType>
         ${lib.concatMapStringsSep "\n" (id: ''      <device id="${id}" introducedBy="">
           <encryptionPassword></encryptionPassword>
-      </device>'') (folderDeviceIds name)}
+      </device>'') (map (d: devices.${d}.id) folders.${name}.devices)}
         <minDiskFree unit="%">1</minDiskFree>
         <versioning>
             <cleanupIntervalS>3600</cleanupIntervalS>
@@ -59,7 +92,7 @@
   '';
 
   renderDevice = name: let
-    dev = cfg.devices.${name};
+    dev = devices.${name};
     compression =
       dev.compression or "metadata";
   in ''
@@ -78,11 +111,11 @@
 
   enabledFolderNames =
     if cfg.enabledFolders == null
-    then builtins.attrNames cfg.folders
+    then builtins.attrNames folders
     else cfg.enabledFolders;
 
   folderXml = lib.concatMapStringsSep "\n" renderFolder enabledFolderNames;
-  deviceXml = lib.concatMapStringsSep "\n" renderDevice (builtins.attrNames cfg.devices);
+  deviceXml = lib.concatMapStringsSep "\n" renderDevice (builtins.attrNames devices);
 
   seedConfigXml = pkgs.writeText "syncthing-config.xml" ''
     <configuration version="52">
@@ -176,53 +209,6 @@
 in {
   options.user.services.syncthing = {
     enable = lib.mkEnableOption "Syncthing service";
-
-    devices = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
-      default = {
-        desktop.id = "KII4S2Y-KWA6M4K-MCQAUOO-C6PMX4L-V5JVDPW-HHZF52D-HP57BNH-EKCCZQC";
-        laptop.id = "EAHAPON-XKBJVGI-44SGTXR-WU6BF5U-WZKHJXS-7QNTBHQ-D4ICOVA-I346HQ7";
-        framework.id = "ICJT4KW-Q4KTA73-W2CO2HS-DCG6AFG-NXZTZPA-UI34ITG-4LW4NOT-BGB36AB";
-        server.id = "GY3T3SL-3JOOX3I-2SE72PF-V6ZSTIE-QI4EIYK-OBL6IDV-4IWLDDG-VM2ATAG";
-        phone = {
-          id = "JYAIN4T-MXQYDAP-2M6CSKX-KKRYVJC-5GMSRYP-LSZRRRV-QSOWY7W-YNQGOAC";
-          name = "SM-F946W";
-          compression = "never";
-        };
-      };
-      description = "Syncthing devices configuration";
-    };
-
-    folders = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
-      default = {
-        tokens = {
-          id = "bv79n-fh4kx";
-          label = "Tokens";
-          path = "~/Tokens";
-          devices = ["desktop" "laptop" "framework" "server" "phone"];
-        };
-        music = {
-          id = "oty33-aq3dt";
-          label = "Music";
-          path = "~/Music";
-          devices = ["desktop" "laptop" "server" "phone"];
-        };
-        dcim = {
-          id = "ti9yk-zu3xs";
-          label = "DCIM";
-          path = "~/DCIM";
-          devices = ["desktop" "laptop" "server" "phone"];
-        };
-        pictures = {
-          id = "zbxzv-35v4e";
-          label = "Pictures";
-          path = "~/Pictures";
-          devices = ["desktop" "laptop" "server" "phone"];
-        };
-      };
-      description = "Syncthing folders configuration";
-    };
 
     enabledFolders = lib.mkOption {
       type = lib.types.nullOr (lib.types.listOf lib.types.str);
