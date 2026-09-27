@@ -5,27 +5,21 @@
   flakeInputs,
   ...
 }: {
-  options.user.programs.obs = {
-    enable = lib.mkEnableOption "OBS Studio";
-    backgroundRemoval.enable = lib.mkEnableOption "OBS background removal plugin";
-  };
+  options.user.programs.obs.enable = lib.mkEnableOption "OBS Studio";
   config = lib.mkIf config.user.programs.obs.enable {
     environment.systemPackages = [
       (pkgs.symlinkJoin {
         name = "obs-studio-with-cuda";
         paths = [
           (pkgs.wrapOBS {
-            plugins =
-              lib.optional config.user.programs.obs.backgroundRemoval.enable
-              (pkgs.obs-studio-plugins.obs-backgroundremoval.override {onnxruntime = pkgs.onnxruntime.override {cudaSupport = false;};})
-              ++ [
-                pkgs.obs-studio-plugins.obs-vkcapture
-                pkgs.obs-studio-plugins.obs-pipewire-audio-capture
-                pkgs.obs-studio-plugins.obs-aitum-multistream
-                pkgs.obs-studio-plugins.obs-vertical-canvas
-                pkgs.obs-studio-plugins.obs-scale-to-sound
-                flakeInputs.obs-image-reaction.outputs.packages."${pkgs.stdenv.hostPlatform.system}".default
-              ];
+            plugins = [
+              pkgs.obs-studio-plugins.obs-vkcapture
+              pkgs.obs-studio-plugins.obs-pipewire-audio-capture
+              pkgs.obs-studio-plugins.obs-aitum-multistream
+              pkgs.obs-studio-plugins.obs-vertical-canvas
+              pkgs.obs-studio-plugins.obs-scale-to-sound
+              flakeInputs.obs-image-reaction.outputs.packages."${pkgs.stdenv.hostPlatform.system}".default
+            ];
           })
         ];
         buildInputs = [pkgs.makeWrapper];
