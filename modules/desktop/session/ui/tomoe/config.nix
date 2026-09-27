@@ -8,7 +8,6 @@
   inherit (config.user) defaults;
   cfg = config.user.ui.tomoe;
   inherit (cfg) bar;
-  inherit (bar) sysinfo;
 
   keyword = name: mkLispInline ":${name}";
   plist = attrs: lib.concatLists (lib.mapAttrsToList (name: value: [(keyword name) value]) attrs);
@@ -121,10 +120,10 @@
 
   barParameters = {
     modules = map keyword bar.modules;
-    center-between = lib.mapNullable (map keyword) bar.center-between;
+    center-between = map keyword ["time" "date"];
     edges = map keyword bar.edges;
     inherit (bar) exclusive indent;
-    font = "${lib.defaultTo "monospace" bar.font-family}, Bold";
+    font = "monospace, Bold";
     height = 24;
     spacing = 8;
     label-size = 14;
@@ -148,28 +147,30 @@
     sysinfo = {
       cpu = {
         command = "${sampler} cpu";
-        interval = sysinfo.cpu-interval;
+        interval = 1000;
       };
       memory = {
         command = "${sampler} memory";
-        interval = sysinfo.memory-interval;
+        interval = 2000;
       };
       gpu = {
-        command = "${sampler} gpu ${sysinfo.gpu-backend} ${lib.escapeShellArg (lib.defaultTo "" sysinfo.gpu-card)}";
-        interval = sysinfo.gpu-interval;
+        command = "${sampler} gpu auto ''";
+        interval = 2000;
       };
     };
     show = {
-      cpu-temp = sysinfo.show-cpu-temp;
-      gpu-temp = sysinfo.show-gpu-temp;
-      gpu-vram = sysinfo.show-gpu-vram;
-      memory-absolute = sysinfo.memory-style == "absolute";
+      cpu-temp = true;
+      gpu-temp = true;
+      gpu-vram = true;
+      memory-absolute = false;
     };
   };
 
   bongoParameters = {
-    inherit (bar.bongo-cat) height margin-bottom x-offset;
-    duration = bar.bongo-cat.keypress-duration;
+    height = 80;
+    margin-bottom = 6;
+    x-offset = -24;
+    duration = 100;
     frames = "${./assets/bongo-cat}";
   };
 
@@ -204,11 +205,11 @@
       (builtins.readFile layout.file)
       (builtins.readFile ./lisp/user.lisp)
     ]
-    ++ lib.optionals bar.enable [
+    ++ [
       "(defparameter +bar+ ${toLisp barParameters})"
       (builtins.readFile ./lisp/bar.lisp)
     ]
-    ++ lib.optionals (bar.enable && bar.bongo-cat.enable) [
+    ++ lib.optionals bar.bongo-cat.enable [
       "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
       (builtins.readFile ./lisp/bongo-cat.lisp)
     ]
