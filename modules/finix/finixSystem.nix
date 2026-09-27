@@ -62,19 +62,6 @@
               default = {};
             };
           }
-          {
-            options = {
-              boot.loader.limine.secureBoot.enable = lib.mkEnableOption "";
-              hardware.bluetooth.enable = lib.mkOption {
-                type = lib.types.bool;
-                default = true;
-              };
-              nix.settings.max-jobs = lib.mkOption {
-                type = lib.types.str;
-                default = "auto";
-              };
-            };
-          }
           inputs.finix.nixosModules.bash
           inputs.finix.nixosModules.dhcpcd
           inputs.finix.nixosModules.getty
