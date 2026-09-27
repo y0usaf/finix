@@ -148,7 +148,7 @@ inputs: let
     bootDriverName ? null,
     defaultHost,
     name,
-    system,
+    toplevel,
     sshHost ? null,
     sshPort ? null,
   }: let
@@ -180,7 +180,7 @@ inputs: let
         exit 1
       fi
 
-      system_path='${system}'
+      system_path='${toplevel}'
       remote_host="${
         if sshHost == null
         then "$host"
@@ -251,7 +251,7 @@ in {
   packages.${system} = {
     finix-server-persistent-deploy = mkDeploy {
       name = "finix-server-persistent-deploy";
-      system = hosts.y0usaf-server.config.system.topLevel;
+      toplevel = hosts.y0usaf-server.config.system.topLevel;
       defaultHost = "server";
       bootDriverName = "finix-server-boot";
       sshHost = "100.105.204.116";
@@ -260,7 +260,7 @@ in {
     finix-server-boot = let
       name = "finix-server-boot";
       defaultHost = "server";
-      system = hosts.y0usaf-server.config.system.topLevel;
+      toplevel = hosts.y0usaf-server.config.system.topLevel;
       ucodeImg = "${pkgs.microcode-intel}/intel-ucode.img";
       espIslandScript = pkgs.writeShellScript "finix-esp-island" ''
         set -euo pipefail
@@ -568,7 +568,7 @@ in {
             ;;
         esac
 
-        system_path='${system}'
+        system_path='${toplevel}'
         island='${espIslandScript}'
 
         cmdline_from_bootspec() {
@@ -652,10 +652,10 @@ in {
       '';
     finix-desktop-deploy = mkDeploy {
       name = "finix-desktop-deploy";
-      system = hosts.y0usaf-desktop.config.system.topLevel;
+      toplevel = hosts.y0usaf-desktop.config.system.topLevel;
       defaultHost = "local";
     };
-    p4g-setup = hosts.y0usaf-desktop.config.system.build.p4g-setup;
+    inherit (hosts.y0usaf-desktop.config.system.build) p4g-setup;
     tomoe = inputs.tomoe.packages.${system}.default;
   };
 

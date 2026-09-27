@@ -62,12 +62,14 @@
 in {
   options.user.gaming.p4g.enable = lib.mkEnableOption "Persona 4 Golden Community Enhancement Pack";
 
-  config = lib.mkIf config.user.gaming.p4g.enable {
-    system.build.p4g-setup = package;
-    environment.systemPackages = [package];
-    finit.rlimits.nofile.hard = 524288;
-    environment.etc."security/limits.conf".text = lib.mkAfter ''
-      ${config.user.name} - nofile 524288
-    '';
-  };
+  config = lib.mkMerge [
+    {system.build.p4g-setup = package;}
+    (lib.mkIf config.user.gaming.p4g.enable {
+      environment.systemPackages = [package];
+      finit.rlimits.nofile.hard = 524288;
+      environment.etc."security/limits.conf".text = lib.mkAfter ''
+        ${config.user.name} - nofile 524288
+      '';
+    })
+  ];
 }
