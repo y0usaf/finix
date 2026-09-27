@@ -7,22 +7,12 @@
   cfg = config.finix.persistence.bindReplay;
   user = config.user.name;
   home = config.user.homeDirectory;
-  persistentHome = "${cfg.root}/home/${user}";
+  persistentHome = "/persist/home/${user}";
   directoriesFile = pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") cfg.directories);
   filesFile = pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}\n") cfg.files);
 in {
   options.finix.persistence.bindReplay = {
     enable = lib.mkEnableOption "Finix user persistence bind replay";
-    root = lib.mkOption {
-      type = lib.types.str;
-      default = "/persist";
-      description = "Root of persistent system state.";
-    };
-    group = lib.mkOption {
-      type = lib.types.str;
-      default = "users";
-      description = "Primary group used for persistent user paths.";
-    };
     directories = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
@@ -48,15 +38,15 @@ in {
         export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux]}
 
         for _ in $(seq 1 120); do
-          mountpoint -q ${cfg.root} && mountpoint -q /home && break
+          mountpoint -q /persist && mountpoint -q /home && break
           sleep 1
         done
-        mountpoint -q ${cfg.root} || { echo "persist-user-binds: ${cfg.root} never mounted" >&2; exit 1; }
+        mountpoint -q /persist || { echo "persist-user-binds: /persist never mounted" >&2; exit 1; }
         mountpoint -q /home || { echo "persist-user-binds: /home never mounted" >&2; exit 1; }
 
-        install -d -m 0700 -o ${user} -g ${cfg.group} ${home}
+        install -d -m 0700 -o ${user} -g users ${home}
         install -d -m 0755 ${persistentHome}
-        chown ${user}:${cfg.group} ${home} || true
+        chown ${user}:users ${home} || true
 
         ensure_parents() {
           base="$1"
@@ -73,18 +63,18 @@ in {
             [ -n "$built" ] && built="$built/$component" || built="$component"
             directory="$base/$built"
             if [ -d "$directory" ]; then
-              chown ${user}:${cfg.group} "$directory" || true
+              chown ${user}:users "$directory" || true
             else
-              install -d -m 0755 -o ${user} -g ${cfg.group} "$directory" || true
+              install -d -m 0755 -o ${user} -g users "$directory" || true
             fi
           done
         }
 
         failed=0
         ${lib.optionalString cfg.bindRoot ''
-          install -d -m 0700 ${cfg.root}/root
+          install -d -m 0700 /persist/root
           install -d -m 0700 /root
-          mountpoint -q /root || mount --bind ${cfg.root}/root /root || failed=1
+          mountpoint -q /root || mount --bind /persist/root /root || failed=1
         ''}
 
         while IFS= read -r relative; do
@@ -93,8 +83,8 @@ in {
           dst="${home}/$relative"
           ensure_parents ${persistentHome} "$relative"
           ensure_parents ${home} "$relative"
-          [ -d "$src" ] || install -d -o ${user} -g ${cfg.group} "$src" || { failed=1; continue; }
-          [ -d "$dst" ] || install -d -o ${user} -g ${cfg.group} "$dst" || { failed=1; continue; }
+          [ -d "$src" ] || install -d -o ${user} -g users "$src" || { failed=1; continue; }
+          [ -d "$dst" ] || install -d -o ${user} -g users "$dst" || { failed=1; continue; }
           mountpoint -q "$dst" || mount --bind "$src" "$dst" || failed=1
         done < ${directoriesFile}
 
@@ -104,8 +94,8 @@ in {
           dst="${home}/$relative"
           ensure_parents ${persistentHome} "$relative"
           ensure_parents ${home} "$relative"
-          [ -f "$src" ] || install -o ${user} -g ${cfg.group} -m 0600 /dev/null "$src" || { failed=1; continue; }
-          [ -f "$dst" ] || install -o ${user} -g ${cfg.group} -m 0600 /dev/null "$dst" || { failed=1; continue; }
+          [ -f "$src" ] || install -o ${user} -g users -m 0600 /dev/null "$src" || { failed=1; continue; }
+          [ -f "$dst" ] || install -o ${user} -g users -m 0600 /dev/null "$dst" || { failed=1; continue; }
           mountpoint -q "$dst" || mount --bind "$src" "$dst" || failed=1
         done < ${filesFile}
 

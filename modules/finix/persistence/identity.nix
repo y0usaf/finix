@@ -6,20 +6,10 @@
 }: let
   cfg = config.finix.persistence.identity;
   user = config.user.name;
-  persistedSshDir = "${cfg.root}/etc/ssh";
+  persistedSshDir = "/persist/etc/ssh";
 in {
   options.finix.persistence.identity = {
     enable = lib.mkEnableOption "persistent Finix user and SSH identity";
-    root = lib.mkOption {
-      type = lib.types.str;
-      default = "/persist";
-      description = "Root of persistent system state.";
-    };
-    userPasswordFile = lib.mkOption {
-      type = lib.types.str;
-      default = "${cfg.root}/secrets/password-hashes/${user}";
-      description = "Persistent password hash for the primary user.";
-    };
     restoreMachineId = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -37,7 +27,7 @@ in {
 
     users.users.${user} = {
       password = lib.mkForce null;
-      passwordFile = lib.mkForce cfg.userPasswordFile;
+      passwordFile = lib.mkForce "/persist/secrets/password-hashes/${user}";
     };
 
     system.activation.scripts = {
@@ -52,8 +42,8 @@ in {
       };
       persistentMachineId = lib.mkIf cfg.restoreMachineId {
         text = ''
-          if [ -s ${cfg.root}/etc/machine-id ]; then
-            ${pkgs.coreutils}/bin/install -m 0444 ${cfg.root}/etc/machine-id /etc/machine-id
+          if [ -s /persist/etc/machine-id ]; then
+            ${pkgs.coreutils}/bin/install -m 0444 /persist/etc/machine-id /etc/machine-id
           fi
         '';
       };
