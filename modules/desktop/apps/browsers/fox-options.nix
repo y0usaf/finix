@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  inherit (lib) mkEnableOption mkOption types;
+  inherit (lib) mkOption types;
   attrsOfAnything = types.attrsOf types.anything;
   uiFonts = config.user.ui.fonts;
   fontList = lib.concatStringsSep ", " [
@@ -14,9 +14,6 @@
   ];
 in {
   options.user.programs = {
-    librewolf.enable = mkEnableOption "LibreWolf browser";
-    glide.enable = mkEnableOption "Glide browser";
-
     browser.shared = {
       policies = mkOption {
         type = attrsOfAnything;

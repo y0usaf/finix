@@ -75,9 +75,7 @@
     '';
   };
 in {
-  options.user.programs.bolo.enable = lib.mkEnableOption "bolo speech-to-text daemon (bolod + thin client)" // {default = config.hardware.nvidia.enable;};
-
-  config = lib.mkIf config.user.programs.bolo.enable {
+  config = lib.mkIf config.hardware.nvidia.enable {
     environment.systemPackages = [bolo];
 
     services.udev.packages = [

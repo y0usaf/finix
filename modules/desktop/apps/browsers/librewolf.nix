@@ -17,53 +17,51 @@
     );
   attrsToLines = f: attrs: lib.concatMapAttrsStringSep "\n" f attrs;
 in {
-  config = lib.mkIf user.programs.librewolf.enable {
-    finix.persistence.allowlist.users.${config.user.name}.directories = [
-      ".cache/librewolf"
-      ".config/librewolf"
-      ".librewolf"
-    ];
-    environment.systemPackages = [
-      (pkgs.librewolf-bin.override {
-        extraPrefs =
-          (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") browserShared.lockedPrefs)
-          + "\n"
-          + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") browserShared.defaultPrefs);
-        extraPolicies = browserShared.policies // {DisableFirefoxAccounts = false;};
-      })
-      pywalfoxNative
-    ];
-    manzil.users."${userName}" = {
-      files = {
-        "${librewolfConfig}/profiles.ini" = {
-          generator = lib.generators.toINI {};
-          value = {
-            Profile0 = {
-              Name = "default";
-              IsRelative = 1;
-              Path = userName;
-              Default = 1;
-            };
-            General = {
-              StartWithLastProfile = 1;
-              Version = 2;
-            };
+  finix.persistence.allowlist.users.${config.user.name}.directories = [
+    ".cache/librewolf"
+    ".config/librewolf"
+    ".librewolf"
+  ];
+  environment.systemPackages = [
+    (pkgs.librewolf-bin.override {
+      extraPrefs =
+        (attrsToLines (name: value: "lockPref(\"${name}\", ${prefValue value});") browserShared.lockedPrefs)
+        + "\n"
+        + (attrsToLines (name: value: "defaultPref(\"${name}\", ${prefValue value});") browserShared.defaultPrefs);
+      extraPolicies = browserShared.policies // {DisableFirefoxAccounts = false;};
+    })
+    pywalfoxNative
+  ];
+  manzil.users."${userName}" = {
+    files = {
+      "${librewolfConfig}/profiles.ini" = {
+        generator = lib.generators.toINI {};
+        value = {
+          Profile0 = {
+            Name = "default";
+            IsRelative = 1;
+            Path = userName;
+            Default = 1;
+          };
+          General = {
+            StartWithLastProfile = 1;
+            Version = 2;
           };
         };
-        "${librewolfConfig}/${userName}/chrome/userChrome.css" = {
-          text = builtins.readFile ./userChrome.css;
-        };
-        "${librewolfConfig}/native-messaging-hosts/pywalfox.json" = {
-          generator = lib.generators.toJSON {};
-          value = {
-            name = "pywalfox";
-            description = "Native messaging host for Pywalfox";
-            path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
-              exec ${pywalfoxNative}/bin/pywalfox start
-            ''}";
-            type = "stdio";
-            allowed_extensions = ["pywalfox@frewacom.org"];
-          };
+      };
+      "${librewolfConfig}/${userName}/chrome/userChrome.css" = {
+        text = builtins.readFile ./userChrome.css;
+      };
+      "${librewolfConfig}/native-messaging-hosts/pywalfox.json" = {
+        generator = lib.generators.toJSON {};
+        value = {
+          name = "pywalfox";
+          description = "Native messaging host for Pywalfox";
+          path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
+            exec ${pywalfoxNative}/bin/pywalfox start
+          ''}";
+          type = "stdio";
+          allowed_extensions = ["pywalfox@frewacom.org"];
         };
       };
     };
