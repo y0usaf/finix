@@ -4,9 +4,7 @@
   pkgs,
   flakeInputs,
   ...
-}: let
-  userName = config.user.name;
-in {
+}: {
   imports = [
     flakeInputs.finix.nixosModules.bluetooth
     flakeInputs.finix.nixosModules.polkit
@@ -23,7 +21,7 @@ in {
       };
       Policy.AutoEnable = true;
     };
-    polkit.adminIdentities = ["unix-user:${userName}"];
+    polkit.adminIdentities = ["unix-user:${config.user.name}"];
 
     udev.packages = [
       (pkgs.writeTextFile {
@@ -103,5 +101,5 @@ in {
     lp = {};
     dialout = {};
   };
-  users.users.${userName}.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
+  users.users.${config.user.name}.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
 }

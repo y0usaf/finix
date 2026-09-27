@@ -41,41 +41,28 @@
       ''
     ];
 
-    source = let
-      value =
-        pkgs.runCommand "sudoers.in"
-        {
-          src = pkgs.writeText "sudoers.in" config.environment.etc."sudoers".text;
-          preferLocalBuild = true;
-        }
-        "${pkgs.buildPackages.sudo}/sbin/visudo -f $src -c && cp $src $out";
-    in
-      lib.mkForce value;
+    source = lib.mkForce (pkgs.runCommand "sudoers.in"
+      {
+        src = pkgs.writeText "sudoers.in" config.environment.etc."sudoers".text;
+        preferLocalBuild = true;
+      }
+      "${pkgs.buildPackages.sudo}/sbin/visudo -f $src -c && cp $src $out");
   };
 
-  security.wrappers = let
-    owner = "root";
-    group = "root";
-    setuid = true;
-    permissions = "u+rx,g+x,o+x";
-  in {
+  security.wrappers = {
     sudo = {
       source = lib.getExe pkgs.sudo;
-      inherit
-        owner
-        group
-        setuid
-        permissions
-        ;
+      owner = "root";
+      group = "root";
+      setuid = true;
+      permissions = "u+rx,g+x,o+x";
     };
     sudoedit = {
       source = "${pkgs.sudo}/bin/sudoedit";
-      inherit
-        owner
-        group
-        setuid
-        permissions
-        ;
+      owner = "root";
+      group = "root";
+      setuid = true;
+      permissions = "u+rx,g+x,o+x";
     };
   };
 

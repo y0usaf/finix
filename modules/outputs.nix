@@ -34,7 +34,6 @@ inputs: let
       ];
     };
   basePkgs = mkPkgs false;
-  cudaPkgs = mkPkgs true;
   pkgs = basePkgs;
 
   mkFinixSystem = {
@@ -52,7 +51,7 @@ inputs: let
           {
             nixpkgs.pkgs = lib.mkDefault (
               if cudaSupport
-              then cudaPkgs
+              then mkPkgs true
               else basePkgs
             );
           }
@@ -253,9 +252,6 @@ in {
     };
     finix-server-boot = let
       name = "finix-server-boot";
-      defaultHost = "server";
-      toplevel = hosts.y0usaf-server.config.system.topLevel;
-      ucodeImg = "${pkgs.microcode-intel}/intel-ucode.img";
       espIslandScript = pkgs.writeShellScript "finix-esp-island" ''
         set -euo pipefail
         export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.gnugrep pkgs.gnused pkgs.efibootmgr pkgs.diffutils]}
@@ -427,7 +423,7 @@ in {
 
           copy_changed "$system/kernel" "$island/kernels/$slot/kernel"
           tmp_initrd=$(mktemp /tmp/finix-island-initrd.XXXXXX)
-          cat ${ucodeImg} "$system/initrd" > "$tmp_initrd"
+          cat ${pkgs.microcode-intel}/intel-ucode.img "$system/initrd" > "$tmp_initrd"
           copy_changed "$tmp_initrd" "$island/kernels/$slot/initrd"
           rm -f "$tmp_initrd"
           write_file "$island/kernels/$slot/cmdline" "$cmdline"
@@ -546,7 +542,7 @@ in {
       pkgs.writeShellScriptBin name ''
         set -euo pipefail
 
-        host="''${1:-${defaultHost}}"
+        host="''${1:-server}"
         action="''${2:-status}"
         case "$host" in
           *[!A-Za-z0-9_.:@-]*)
@@ -562,7 +558,7 @@ in {
             ;;
         esac
 
-        system_path='${toplevel}'
+        system_path='${hosts.y0usaf-server.config.system.topLevel}'
         island='${espIslandScript}'
 
         cmdline_from_bootspec() {

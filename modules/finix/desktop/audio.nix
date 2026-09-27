@@ -6,10 +6,9 @@
 }: let
   userName = config.user.name;
   user = config.users.users.${userName};
-  inherit (user) home;
   runtimeDir = "/run/user/${toString user.uid}";
   svcEnv = {
-    HOME = home;
+    HOME = user.home;
     XDG_RUNTIME_DIR = runtimeDir;
     LADSPA_PATH = "${pkgs.rnnoise-plugin.ladspa}/lib/ladspa";
   };
@@ -22,11 +21,6 @@
     done
     echo "wait-pipewire-sock: pipewire-0 never appeared" >&2
     exit 1
-  '';
-
-  pipewireRt = pkgs.writeShellScript "pipewire-rt" ''
-    export PATH=${lib.makeBinPath [pkgs.coreutils]}
-    nice -n -20 "$@"
   '';
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
@@ -93,7 +87,10 @@ in {
         done
         echo "wait-runtime-dir: ${runtimeDir} never appeared" >&2
         exit 1
-      ''} ${pipewireRt} ${pkgs.pipewire}/bin/pipewire";
+      ''} ${pkgs.writeShellScript "pipewire-rt" ''
+        export PATH=${lib.makeBinPath [pkgs.coreutils]}
+        nice -n -20 "$@"
+      ''} ${pkgs.pipewire}/bin/pipewire";
       log = true;
     };
     wireplumber = {

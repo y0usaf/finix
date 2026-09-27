@@ -8,25 +8,24 @@
   sys = pkgs.stdenv.hostPlatform.system;
   userName = config.user.name;
   user = config.users.users.${userName};
-  runtimeDir = "/run/user/${toString user.uid}";
 
   tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
-
-  tomoePortalPkg =
-    pkgs.runCommand "tomoe-portal" {
-      meta.description = "xdg-desktop-portal ScreenCast backend metadata for tomoe";
-    } ''
-      install -Dm644 ${tomoePkg}/share/xdg-desktop-portal/portals/tomoe.portal \
-        $out/share/xdg-desktop-portal/portals/tomoe.portal
-      install -Dm644 ${tomoePkg}/share/xdg-desktop-portal/tomoe-portals.conf \
-        $out/share/xdg-desktop-portal/tomoe-portals.conf
-      install -Dm644 ${tomoePkg}/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service \
-        $out/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service
-    '';
 in {
   finit.services.seatd.runlevels = lib.mkForce "234";
 
-  xdg.portal.portals = [pkgs.xdg-desktop-portal-gtk tomoePortalPkg];
+  xdg.portal.portals = [
+    pkgs.xdg-desktop-portal-gtk
+    (pkgs.runCommand "tomoe-portal" {
+        meta.description = "xdg-desktop-portal ScreenCast backend metadata for tomoe";
+      } ''
+        install -Dm644 ${tomoePkg}/share/xdg-desktop-portal/portals/tomoe.portal \
+          $out/share/xdg-desktop-portal/portals/tomoe.portal
+        install -Dm644 ${tomoePkg}/share/xdg-desktop-portal/tomoe-portals.conf \
+          $out/share/xdg-desktop-portal/tomoe-portals.conf
+        install -Dm644 ${tomoePkg}/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service \
+          $out/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service
+      '')
+  ];
 
   environment.etc."xdg/xdg-desktop-portal/tomoe-portals.conf".text = ''
     [preferred]
@@ -38,7 +37,7 @@ in {
     description = "runtime dir for ${userName}";
     command = pkgs.writeShellScript "xdg-runtime-dir" ''
       export PATH=${lib.makeBinPath [pkgs.coreutils]}
-      install -d -m 0700 -o ${userName} -g users ${runtimeDir}
+      install -d -m 0700 -o ${userName} -g users /run/user/${toString user.uid}
     '';
     log = true;
   };
