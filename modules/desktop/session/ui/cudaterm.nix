@@ -6,7 +6,7 @@
 }: {
   imports = [flakeInputs.cudaterm.finixModules.default];
   config.user.ui.cudaterm = {
-    enable = config.hardware.nvidia.enable;
+    inherit (config.hardware.nvidia) enable;
     package = lib.mkIf config.hardware.nvidia.enable (flakeInputs.cudaterm.lib.mkFinixPackage {
       fontFile = "${config.user.ui.fonts.mainFont}/share/fonts/truetype/DepartureMonoUltraCondensed-Regular.ttf";
       fontSize = config.user.appearance.termFontSize;
