@@ -17,6 +17,9 @@
         CUDA_DISABLE_PERF_BOOST = "1";
         NVIDIA_DRIVER_CAPABILITIES = "all";
       };
+      etc."modprobe.d/finix-desktop-blacklist.conf".text = ''
+        blacklist nouveau
+      '';
       etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool.json".text = lib.generators.toJSON {} {
         rules = [
           {
