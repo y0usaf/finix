@@ -1,8 +1,5 @@
 _: {
   user.dev = {
-    work = {
-      vercel.enable = true;
-    };
     ai.firstmate.enable = true;
     prime-agent.enable = true;
     prompts.principles.enable = true;

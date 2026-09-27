@@ -13,6 +13,7 @@
       aws-cli.enable = lib.mkDefault true;
       ntn.enable = lib.mkDefault true;
       ramp.enable = lib.mkDefault true;
+      vercel.enable = lib.mkDefault true;
     };
     ai.agent-slack.enable = lib.mkDefault true;
     pi.enable = lib.mkDefault true;
