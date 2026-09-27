@@ -1,9 +1,7 @@
 # Repository layout
 
-This is the layout finix-lean is moving the repo to. Until it finishes, the
-flake level still runs an evalModules (`modules/outputs.nix`, `modules/finix/`),
-some programs are still one-package modules, and a few files only import
-others.
+This is the layout finix-lean is moving the repo to. Until it finishes, some
+programs are still one-package modules, and a few files only import others.
 
 This repository configures y0usaf's machines on finix: it owns system
 integration and user configuration, not application implementations.
@@ -19,7 +17,8 @@ runs at flake level.
 
 A host is a list of modules. The graphical hosts load every `.nix` file under
 the graphical roots, so each of those files is a module; the server names its
-modules one by one. `modules/finix/default.nix` holds each host's list.
+modules one by one. The `hosts` attrset in `modules/outputs.nix` holds each
+host's list.
 `modules/hosts/common/` is the graphical role.
 
 Loading a module turns it on. A module declares an option only when the hosts
