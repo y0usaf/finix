@@ -1,5 +1,10 @@
 # Repository layout
 
+This is the layout finix-lean is moving the repo to. Until it finishes, the
+flake level still runs an evalModules (`modules/outputs.nix`, `modules/finix/`),
+some programs are still one-package modules, and a few files only import
+others.
+
 This repository configures y0usaf's machines on finix: it owns system
 integration and user configuration, not application implementations.
 Headlong operations live in `~/dev/developing/headlong-ops`. A project that
@@ -14,7 +19,8 @@ runs at flake level.
 
 A host is a list of modules. The graphical hosts load every `.nix` file under
 the graphical roots, so each of those files is a module; the server names its
-modules one by one. `modules/hosts/common/` is the graphical role.
+modules one by one. `modules/finix/default.nix` holds each host's list.
+`modules/hosts/common/` is the graphical role.
 
 Loading a module turns it on. A module declares an option only when the hosts
 that load it need different values, or when three or more modules read the
@@ -26,7 +32,8 @@ and decides from hardware facts such as `hardware.nvidia.enable`, never from
 the hostname. A program that needs only its package is a line in its
 category's package list. A host directory under `modules/hosts/` holds what
 is true of that machine alone: hardware, displays, disks and boot, network
-identity, keys, and where it departs from its role.
+identity, keys, and where it departs from its role. Persisted paths no module
+owns go in `modules/hosts/common/persist.nix`.
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns.
