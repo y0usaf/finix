@@ -8,12 +8,13 @@
   cfg = config.user.dev.reasonix;
   inherit (pkgs.stdenv.hostPlatform) system;
   package = flakeInputs.reasonix-flake.packages."${system}".default;
+  apiKeyFile = lib.escapeShellArg "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
 
   seedKey = ''
     state_home="''${REASONIX_STATE_HOME:-$HOME/.reasonix}"
     env_file="$state_home/.env"
-    if [ -r ${lib.escapeShellArg cfg.apiKeyFile} ]; then
-      key="$(${pkgs.coreutils}/bin/tr -d '[:space:]' < ${lib.escapeShellArg cfg.apiKeyFile})"
+    if [ -r ${apiKeyFile} ]; then
+      key="$(${pkgs.coreutils}/bin/tr -d '[:space:]' < ${apiKeyFile})"
       if [ -n "$key" ] && ! ${pkgs.gnugrep}/bin/grep -qxF "AI_GATEWAY_API_KEY=$key" "$env_file" 2>/dev/null; then
         ${pkgs.coreutils}/bin/mkdir -p "$state_home"
         tmp="$(${pkgs.coreutils}/bin/mktemp "$state_home/.env.XXXXXX")"
@@ -27,20 +28,7 @@
     fi
   '';
 in {
-  options.user.dev.reasonix = {
-    enable = lib.mkEnableOption "reasonix cache-first DeepSeek coding agent";
-
-    apiKeyFile = lib.mkOption {
-      type = lib.types.str;
-      example = "/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt";
-      description = ''
-        Path (string, not path literal) to a file containing the Vercel AI
-        Gateway key. The `reasonix` wrapper seeds it into the global
-        $REASONIX_STATE_HOME/.env at launch — never into the Nix store.
-        Reasonix resolves api_key_env only against that .env, not process env.
-      '';
-    };
-  };
+  options.user.dev.reasonix.enable = lib.mkEnableOption "reasonix cache-first DeepSeek coding agent";
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
