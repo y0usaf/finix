@@ -14,5 +14,8 @@ _: {
     clobberByDefault = true;
   };
 
-  services.getty.ttys = ["tty1" "tty2"];
+  services = {
+    getty.ttys = ["tty1" "tty2"];
+    openssh.settings.Port = [2222];
+  };
 }

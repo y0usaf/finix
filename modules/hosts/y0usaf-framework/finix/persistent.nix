@@ -199,7 +199,6 @@ in {
 
   services = {
     docker.enable = true;
-    openssh.settings.Port = [2222];
     nix-daemon = {
       settings = {
         experimental-features = ["nix-command" "flakes"];
