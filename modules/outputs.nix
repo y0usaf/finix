@@ -95,9 +95,9 @@ inputs: let
         ./server/forgejo.nix
         ./server/mediamtx.nix
         ./server/syncthing.nix
-        ./hosts/y0usaf-server/finix/services.nix
+        ./hosts/y0usaf-server/services.nix
         ./server/tailscale.nix
-        ./hosts/y0usaf-server/finix/persistent.nix
+        ./hosts/y0usaf-server/machine.nix
         ./server/attic.nix
         ./server/programs.nix
         ./finix/diagnostics.nix
