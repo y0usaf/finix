@@ -1,7 +1,6 @@
 _: {
   user.dev = {
     work = {
-      ramp.enable = true;
       vercel.enable = true;
     };
     ai.firstmate.enable = true;
