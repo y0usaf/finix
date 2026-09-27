@@ -86,18 +86,6 @@ in {
       default = {};
       description = "TTSR rules written to ~/.omp/agent/rules/<name>.md.";
     };
-    advisor = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Advisor on/off. Merged into ~/.omp/agent/config.yml at activation (manzil merge; TUI rewrites survive, keys re-merge).";
-      };
-      model = lib.mkOption {
-        type = lib.types.str;
-        default = "vercel-ai-gateway/openai/gpt-5.6-luna";
-        description = "Model id assigned to the advisor role.";
-      };
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -113,9 +101,9 @@ in {
           clobber = true;
           value = {
             inherit (catalog) defaultThinkingLevel;
-            advisor.enabled = cfg.advisor.enable;
+            advisor.enabled = false;
             modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-            modelRoles.advisor = cfg.advisor.model;
+            modelRoles.advisor = "vercel-ai-gateway/openai/gpt-5.6-luna";
           };
         };
         ".omp/config.json" = {
