@@ -25,19 +25,6 @@
       default = 96;
       description = "Display DPI setting for the system";
     };
-    animations = lib.mkOption {
-      type = lib.types.submodule {
-        options = {
-          enable = lib.mkOption {
-            type = lib.types.bool;
-            default = true;
-            description = "Whether to enable animations globally across all applications";
-          };
-        };
-      };
-      default = {};
-      description = "Global animation configuration for the system";
-    };
     opacity = lib.mkOption {
       type = lib.types.float;
       default = 0.1;
