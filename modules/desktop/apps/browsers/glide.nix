@@ -33,6 +33,9 @@
   };
 in {
   config = lib.mkIf user.programs.glide.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/glide"
+    ];
     environment.systemPackages = [glide pywalfoxNative];
     manzil.users."${userName}".files = {
       ".config/glide/glide/profiles.ini" = {

@@ -9,6 +9,10 @@
   };
 
   config = lib.mkIf config.user.programs.discord.vesktop.enable {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/Vencord"
+      ".config/vesktop"
+    ];
     environment.systemPackages = [pkgs.vesktop];
 
     manzil.users."${config.user.name}".files = {
