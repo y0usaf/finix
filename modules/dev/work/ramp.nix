@@ -67,6 +67,5 @@ in {
         sourceProvenance = [lib.sourceTypes.binaryNativeCode];
       };
     })
-    pkgs.libsecret
   ];
 }

@@ -5,8 +5,6 @@
 }: {
   environment.systemPackages = [
     pkgs.yt-dlp-light
-    pkgs.uv
-    pkgs.ffmpeg
     pkgs.rsgain
   ];
   user.shell.rcExtra = lib.mkAfter ''

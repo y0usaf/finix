@@ -192,7 +192,6 @@ in {
           ExtensionSettings = builtins.removeAttrs policies.ExtensionSettings ["vimium-c@gdh1995.cn"];
         };
     })
-    pkgs.pywalfox-native
   ];
   manzil.users."${userName}".files = {
     ".config/glide/glide/profiles.ini" = {

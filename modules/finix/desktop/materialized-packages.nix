@@ -13,7 +13,6 @@
     pkgs.bind
     pkgs.btrbk
     pkgs.fuse3
-    pkgs.shared-mime-info
     pkgs.strace
     (
       if config.user.gaming.proton.enable

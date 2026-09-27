@@ -10,8 +10,6 @@
   environment.systemPackages = [
     pkgs.crane
     pkgs.rustup
-    pkgs.pkg-config
     pkgs.openssl
-    pkgs.gcc
   ];
 }

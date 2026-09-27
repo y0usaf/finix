@@ -8,7 +8,6 @@
     ".local/state/nvim"
   ];
   environment.systemPackages = [
-    pkgs.ripgrep
     pkgs.fd
     pkgs.tree-sitter
     (pkgs.tree-sitter.withPlugins (p: [
@@ -61,9 +60,7 @@
     pkgs.nil
     pkgs.pyright
     pkgs.stylua
-    pkgs.alejandra
     pkgs.black
-    pkgs.curl
     pkgs.jq
   ];
 
