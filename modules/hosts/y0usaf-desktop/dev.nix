@@ -1,6 +1,5 @@
 _: {
   user.dev = {
-    prompts.principles.enable = true;
     paseo = {
       enable = true;
       desktop.enable = true;
