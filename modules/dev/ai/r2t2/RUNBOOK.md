@@ -35,8 +35,8 @@ replaces the hand-started feasibility process from a since-retired sandbox.
     nix flake check
 
 Activation is `nh os switch` / boot, deliberately out of scope here. Building
-only proves the closure; enabling the module on the host makes the finit
-service part of that closure.
+only proves the closure; on an NVIDIA host the finit service is part of that
+closure.
 
 ## Python environment (the one manual step)
 
