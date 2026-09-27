@@ -4,7 +4,7 @@
   ...
 }: {
   config.user.appearance.wallust = {
-    targets = lib.optionalAttrs (lib.attrByPath ["user" "programs" "cmus" "enable"] false config) {
+    targets = lib.optionalAttrs config.user.programs.cmus.enable {
       "cmus-colors" = {
         template = "cmus-colors.theme";
         target = "~/.config/cmus/wallust-auto.theme";
