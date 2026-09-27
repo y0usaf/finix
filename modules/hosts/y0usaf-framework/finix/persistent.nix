@@ -145,45 +145,36 @@ in {
     ];
   };
 
-  fileSystems =
-    {
-      "/" = {
-        device = "none";
-        fsType = "tmpfs";
-        options = ["mode=755" "size=4G"];
-      };
-      "/tmp" = {
-        device = "none";
-        fsType = "tmpfs";
-        options = ["mode=1777" "size=8G" "nosuid" "nodev" "strictatime"];
-        neededForBoot = true;
-      };
-      "/nix" = subvolMount "@nix";
-      "/persist" = subvolMount "@persist";
-      "/home" = subvolMount "@home";
-      "/btrfs" = {
-        device = "/dev/disk/by-uuid/${diskUuid}";
-        fsType = "btrfs";
-        options = ["subvolid=5"] ++ btrfsOpts;
-        neededForBoot = true;
-      };
-      "/boot" = {
-        device = "/dev/disk/by-uuid/${espUuid}";
-        fsType = "vfat";
-        options = ["fmask=0077" "dmask=0077"];
-        neededForBoot = true;
-      };
-      "${homeDir}/.local/share/Steam" = subvolMount "@steam";
-      "${homeDir}/dev" = subvolMount "@dev";
-    }
-    // (lib.genAttrs (builtins.filter
-      (directory: !lib.hasPrefix "/etc/" directory && directory != "/root")
-      (map dirPath persistCfg.directories)) (directory: {
-      device = "/persist${directory}";
-      fsType = "btrfs";
-      options = ["bind"];
+  fileSystems = {
+    "/" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = ["mode=755" "size=4G"];
+    };
+    "/tmp" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = ["mode=1777" "size=8G" "nosuid" "nodev" "strictatime"];
       neededForBoot = true;
-    }));
+    };
+    "/nix" = subvolMount "@nix";
+    "/persist" = subvolMount "@persist";
+    "/home" = subvolMount "@home";
+    "/btrfs" = {
+      device = "/dev/disk/by-uuid/${diskUuid}";
+      fsType = "btrfs";
+      options = ["subvolid=5"] ++ btrfsOpts;
+      neededForBoot = true;
+    };
+    "/boot" = {
+      device = "/dev/disk/by-uuid/${espUuid}";
+      fsType = "vfat";
+      options = ["fmask=0077" "dmask=0077"];
+      neededForBoot = true;
+    };
+    "${homeDir}/.local/share/Steam" = subvolMount "@steam";
+    "${homeDir}/dev" = subvolMount "@dev";
+  };
 
   services = {
     docker.enable = true;
