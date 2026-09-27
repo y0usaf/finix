@@ -18,15 +18,25 @@
 
         ## Code
 
+        - **One job.** A project states its job in one sentence and what it won't
+          do; goal and parity files obey it. A reference lends qualities, never a
+          feature list. Ship parts together, but each could run as its own process.
         - **Least code.** Prefer deletion to addition. Abstract on the third need.
         - **Least power.** Lowest rung that works: constant < data < config <
           pure function < code with I/O or state.
-        - **Unix.** Decisions stay out of machinery. Narrow interfaces.
-          Machine-readable output. State inspectable without a debugger. Fail
-          loudly on bad input; stay silent on success. Generate what you would
-          hand-maintain. Measure before optimizing.
+        - **Least deps.** Take a dependency only for knowledge you'd otherwise
+          rediscover; when the interface under it is simpler (sysfs, /proc, one
+          D-Bus call), use that. Ship every dependency you keep inside the package.
+        - **Unix.** Decisions stay out of machinery. Narrow interfaces: a feature
+          lands in the module that owns it. Machine-readable output. State
+          inspectable without a debugger. Fail loudly on bad input; stay silent
+          on success. Generate what you would hand-maintain. Measure before
+          optimizing.
 
         ## Architecture, when a system has these parts
+
+        The first three govern parts sharing one process; between processes the
+        kernel already reverts and isolates.
 
         - **Clean unmount.** Anything mounted at runtime reverts all its effects
           on unmount and declares what it reads; a changed dependency updates
@@ -43,10 +53,11 @@
 
         ## Verification
 
-        Through Nix: `nix build`, `nix flake check`, `nix run`. Cargo builds do not
-        land in the store. `cargo fmt`, `clippy` and `nix fmt` run natively. Forks
-        keep upstream's build. Claim it works only after a command exits zero,
-        and quote it.
+        Through Nix, locally: `nix build`, `nix flake check`, `nix run`; no CI.
+        Cargo builds do not land in the store. `cargo fmt`, `clippy` and `nix fmt`
+        run natively. Forks keep upstream's build. Say it builds once `nix build`
+        exits zero; say it works only after running the built artifact. Quote the
+        command. A commit that deletes a check says so.
 
         ## Filesystem
 
