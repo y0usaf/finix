@@ -110,9 +110,9 @@ in {
       '')
     ];
 
-    fileSystems = lib.genAttrs (builtins.filter (directory: !lib.hasPrefix "/etc/" directory && directory != "/root")
-      (map dirPath config.finix.persistence.allowlist.directories)) (directory: {
-      device = "/persist${directory}";
+    fileSystems = lib.genAttrs (builtins.filter (dir: !lib.hasPrefix "/etc/" dir && dir != "/root")
+      (map dirPath config.finix.persistence.allowlist.directories)) (dir: {
+      device = "/persist${dir}";
       fsType = "btrfs";
       options = ["bind"];
       neededForBoot = true;
