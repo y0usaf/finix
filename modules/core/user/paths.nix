@@ -21,16 +21,5 @@ in {
       default = "${homeDir}/DCIM/Wallpapers";
       description = "Wallpaper directory for static images.";
     };
-    bookmarks = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [
-        "file://${homeDir}/Downloads Downloads"
-        "file://${homeDir}/Documents Documents"
-        "file://${homeDir}/dev dev"
-        "file://${homeDir}/finix Finix"
-        "file:///tmp tmp"
-      ];
-      description = "GTK bookmarks for file manager";
-    };
   };
 }

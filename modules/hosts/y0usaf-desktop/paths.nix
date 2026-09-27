@@ -3,15 +3,5 @@
 in {
   user.paths = {
     wallpapers = "${homeDir}/DCIM/Wallpapers/32_9/";
-    bookmarks = [
-      "file://${homeDir}/Downloads Downloads"
-      "file://${homeDir}/Documents Documents"
-      "file://${homeDir}/dev dev"
-      "file://${homeDir}/cu-workbench/repos CookUnity"
-      "file://${homeDir}/Music Music"
-      "file://${homeDir}/DCIM Pictures"
-      "file://${homeDir}/finix Finix"
-      "file:///tmp tmp"
-    ];
   };
 }
