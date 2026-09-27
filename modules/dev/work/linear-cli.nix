@@ -5,9 +5,6 @@
   flakeInputs,
   ...
 }: let
-  cfg = config.user.dev.work.linear-cli;
-  tomlFormat = pkgs.formats.toml {};
-
   linear-cli-src = flakeInputs.linear-cli;
   package = (import (toString flakeInputs.deno2nix) {inherit pkgs;}).lib.buildDenoPackage {
     pname = "linear";
@@ -47,26 +44,12 @@
     };
   };
 in {
-  options.user.dev.work.linear-cli = {
-    enable = lib.mkEnableOption "Linear CLI";
+  options.user.dev.work.linear-cli.enable = lib.mkEnableOption "Linear CLI";
 
-    settings = lib.mkOption {
-      inherit (tomlFormat) type;
-      default = {};
-      description = "Linear CLI settings written to ~/.config/linear/linear.toml.";
-    };
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.user.dev.work.linear-cli.enable {
     environment.systemPackages = [
       package
       pkgs.libsecret
     ];
-
-    manzil.users."${config.user.name}".files = lib.optionalAttrs (builtins.length (builtins.attrNames cfg.settings) > 0) {
-      ".config/linear/linear.toml" = {
-        source = tomlFormat.generate "linear-cli-config" cfg.settings;
-      };
-    };
   };
 }
