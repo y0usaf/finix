@@ -111,26 +111,7 @@ in {
 
   finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
 
-  services = {
-    sysklogd.extraConfig = "*.* @192.168.2.66:514";
-    nix-daemon = {
-      settings = {
-        experimental-features = ["nix-command" "flakes"];
-        substituters = [
-          "http://192.168.2.66:8787/cache"
-          "http://y0usaf-server:8787/cache"
-          "https://cuda-maintainers.cachix.org"
-        ];
-        trusted-public-keys = [
-          "cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="
-          "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-        ];
-        connect-timeout = 5;
-        fallback = true;
-        download-attempts = 1;
-      };
-    };
-  };
+  services.sysklogd.extraConfig = "*.* @192.168.2.66:514";
 
   users.users.y0usaf.uid = 1001;
   users.users.root.passwordFile = "/persist/secrets/password-hashes/root";
