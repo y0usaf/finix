@@ -27,5 +27,6 @@
     media.enable = lib.mkDefault true;
     cmus.enable = lib.mkDefault true;
     obs.enable = lib.mkDefault true;
+    qbittorrent.enable = lib.mkDefault true;
   };
 }
