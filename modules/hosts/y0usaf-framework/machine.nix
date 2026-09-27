@@ -68,8 +68,18 @@ in {
   };
 
   environment = {
-    etc."finix-stage2".text = "framework-trial-1\n";
-    systemPackages = [healthPackage];
+    etc = {
+      "finix-stage2".text = "framework-trial-1\n";
+      "elogind/logind.conf".text = lib.mkForce ''
+        [Login]
+        HandlePowerKey=poweroff
+        HandleLidSwitch=suspend
+        HandleLidSwitchExternalPower=suspend
+        HandleLidSwitchDocked=ignore
+        LidSwitchIgnoreInhibited=no
+      '';
+    };
+    systemPackages = [pkgs.acpi healthPackage];
   };
 
   boot = {
@@ -121,12 +131,23 @@ in {
   };
 
   services = {
+    elogind.enable = true;
+    power-profiles-daemon = {
+      enable = true;
+      extraGroups = [config.services.seatd.group];
+    };
+    fwupd.enable = true;
     docker.enable = true;
     nix-daemon.settings = {
       sandbox = true;
       auto-optimise-store = true;
       substituters = lib.mkBefore ["https://cache.nixos.org"];
     };
+  };
+
+  programs = {
+    brightnessctl.enable = true;
+    zzz.enable = true;
   };
 
   users.users.${userName} = {

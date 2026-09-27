@@ -140,8 +140,7 @@ inputs: let
           inputs.manzil.finixModules.default
         ]
         ++ graphicalModules
-        ++ nixFiles [./hosts/y0usaf-framework]
-        ++ [./finix/laptop.nix];
+        ++ nixFiles [./hosts/y0usaf-framework];
     };
   };
 
