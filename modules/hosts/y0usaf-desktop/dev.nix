@@ -1,7 +1,6 @@
 _: {
   user.dev = {
     work = {
-      ntn.enable = true;
       ramp.enable = true;
       vercel.enable = true;
     };
