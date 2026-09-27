@@ -4,6 +4,10 @@
   ...
 }: let
   inherit (lib) mkOption types;
+  dirPath = entry:
+    if builtins.isAttrs entry
+    then entry.directory
+    else entry;
   directory = types.either types.str (types.submodule {
     options = {
       directory = mkOption {type = types.str;};
@@ -45,11 +49,15 @@ in {
     };
   };
 
+  config.fileSystems = lib.genAttrs (builtins.filter (directory: !lib.hasPrefix "/etc/" directory && directory != "/root")
+    (map dirPath config.finix.persistence.allowlist.directories)) (directory: {
+    device = "/persist${directory}";
+    fsType = "btrfs";
+    options = ["bind"];
+    neededForBoot = true;
+  });
+
   config.finix.persistence.bindReplay = let
-    dirPath = entry:
-      if builtins.isAttrs entry
-      then entry.directory
-      else entry;
     userPersist = config.finix.persistence.allowlist.users.${config.user.name};
   in {
     enable = true;

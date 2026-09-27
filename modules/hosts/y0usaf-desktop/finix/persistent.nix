@@ -134,54 +134,44 @@ in {
     ];
   };
 
-  fileSystems =
-    {
-      "/" = {
-        device = "none";
-        fsType = "tmpfs";
-        options = ["mode=755" "size=4G"];
-      };
+  fileSystems = {
+    "/" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = ["mode=755" "size=4G"];
+    };
 
-      "/tmp" = {
-        device = "none";
-        fsType = "tmpfs";
-        options = ["mode=1777" "size=16G" "nosuid" "nodev" "strictatime"];
-        neededForBoot = true;
-      };
+    "/tmp" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = ["mode=1777" "size=16G" "nosuid" "nodev" "strictatime"];
+      neededForBoot = true;
+    };
 
-      "/nix" = subvolMount "@nix" [] // {neededForBoot = true;};
-      "/persist" = subvolMount "@persist" [] // {neededForBoot = true;};
-      "/home" = subvolMount "@home" [] // {neededForBoot = true;};
+    "/nix" = subvolMount "@nix" [] // {neededForBoot = true;};
+    "/persist" = subvolMount "@persist" [] // {neededForBoot = true;};
+    "/home" = subvolMount "@home" [] // {neededForBoot = true;};
 
-      "/btrfs" = {
-        device = "/dev/disk/by-uuid/${diskUuid}";
-        fsType = "btrfs";
-        options = ["subvolid=5"] ++ btrfsOpts;
-        neededForBoot = true;
-      };
+    "/btrfs" = {
+      device = "/dev/disk/by-uuid/${diskUuid}";
+      fsType = "btrfs";
+      options = ["subvolid=5"] ++ btrfsOpts;
+      neededForBoot = true;
+    };
 
-      "/boot" = {
-        device = "/dev/disk/by-uuid/31F2-1AE7";
-        fsType = "vfat";
-        options = ["fmask=0077" "dmask=0077" "noatime"];
-        neededForBoot = true;
-      };
+    "/boot" = {
+      device = "/dev/disk/by-uuid/31F2-1AE7";
+      fsType = "vfat";
+      options = ["fmask=0077" "dmask=0077" "noatime"];
+      neededForBoot = true;
+    };
 
-      "/home/y0usaf/.local/share/Steam" = subvolMount "@steam" [] // {neededForBoot = true;};
-      "/home/y0usaf/dev" = subvolMount "@dev" [] // {neededForBoot = true;};
-      "/home/y0usaf/Pictures" = subvolMount "@pictures" [] // {neededForBoot = true;};
-      "/home/y0usaf/DCIM" = subvolMount "@dcim" [] // {neededForBoot = true;};
-      "/home/y0usaf/Music" = subvolMount "@music" [] // {neededForBoot = true;};
-    }
-    // (lib.genAttrs (builtins.filter (d: !lib.hasPrefix "/etc/" d && d != "/root")
-      (map dirPath persistCfg.directories)) (d:
-      (dir: {
-        device = "/persist${dir}";
-        fsType = "btrfs";
-        options = ["bind"];
-        neededForBoot = true;
-      })
-      d));
+    "/home/y0usaf/.local/share/Steam" = subvolMount "@steam" [] // {neededForBoot = true;};
+    "/home/y0usaf/dev" = subvolMount "@dev" [] // {neededForBoot = true;};
+    "/home/y0usaf/Pictures" = subvolMount "@pictures" [] // {neededForBoot = true;};
+    "/home/y0usaf/DCIM" = subvolMount "@dcim" [] // {neededForBoot = true;};
+    "/home/y0usaf/Music" = subvolMount "@music" [] // {neededForBoot = true;};
+  };
 
   finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
 
