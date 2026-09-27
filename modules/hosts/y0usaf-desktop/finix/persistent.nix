@@ -62,15 +62,6 @@ in {
       "finix-stage2".text = "desktop-phase2.4\n";
     };
     systemPackages = [
-      pkgs.nix
-      pkgs.efibootmgr
-      pkgs.git
-      pkgs.curl
-      pkgs.iproute2
-      pkgs.iputils
-      pkgs.procps
-      pkgs.util-linux
-      pkgs.vim
       (pkgs.writeShellScriptBin "prep-home-blank" ''
         set -euo pipefail
 
@@ -103,8 +94,6 @@ in {
         chown -R 1001:users /btrfs/@home-blank/y0usaf
         echo "prep-home-blank: @home-blank ready ($((1 + ${toString (builtins.length templateDirs)})) dirs)"
       '')
-      flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi
-      flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
     ];
   };
 
