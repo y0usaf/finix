@@ -104,22 +104,20 @@ in {
       neededForBoot = true;
     };
 
-    "/var/log" = (dir: {
-      device = "/persist${dir}";
+    "/var/log" = {
+      device = "/persist/var/log";
       fsType = "btrfs";
       options = ["bind"];
       neededForBoot = true;
-    }) "/var/log";
+    };
   };
 
   services = {
     getty.ttys = ["tty1" "ttyS0"];
-    nix-daemon = {
-      settings = {
-        substituters = ["http://127.0.0.1:8787/cache"];
-        trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
-        connect-timeout = 5;
-      };
+    nix-daemon.settings = {
+      substituters = ["http://127.0.0.1:8787/cache"];
+      trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
+      connect-timeout = 5;
     };
   };
 
