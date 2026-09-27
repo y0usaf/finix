@@ -3,6 +3,8 @@
   lib,
   ...
 }: {
+  imports = [../../finix/desktop];
+
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
