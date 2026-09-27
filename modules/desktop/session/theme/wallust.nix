@@ -28,8 +28,6 @@
         fi
 
         pywalfox --browser librewolf update
-
-
       '';
     })
   ];
