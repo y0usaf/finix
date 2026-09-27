@@ -1,11 +1,6 @@
 _: {
   user.ui = {
-    foot = {
-      enable = true;
-      lineHeight = "32px";
-    };
-    monstar.enable = true;
-    gtk.scale = 1.5;
+    foot.lineHeight = "32px";
     tomoe = {
       layout = "sway";
       bar = {
@@ -13,7 +8,6 @@ _: {
         edges = ["bottom"];
         exclusive = true;
         indent = 8;
-        bongo-cat.enable = true;
       };
       displays."eDP-1".scale = 1;
     };
