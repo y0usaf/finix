@@ -178,7 +178,7 @@
       ''
         (in-package #:tomoe-user)
         (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ plist settings) cfg.displays)})
-        (defparameter +policy-settings+ ${toLisp cfg.settings})
+        (defparameter +policy-settings+ ${toLisp ({honor-xdg-activation-with-invalid-serial = true;} // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
         (defparameter +policy-wallpaper+ ${toLisp wallpaper})
         (defparameter +policy-launcher+ ${toLisp {
           app-id = "launcher";
@@ -215,10 +215,5 @@
     ]
     ++ [cfg.extraConfig]);
 in {
-  user.ui.tomoe.settings = {
-    honor-xdg-activation-with-invalid-serial = true;
-    wait-for-frame-completion = lib.mkIf config.hardware.nvidia.enable (lib.mkDefault true);
-  };
-
   manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = initText;
 }
