@@ -17,15 +17,6 @@ in {
       readmePath = "${piSrc}/README.md";
       docsPath = "${piSrc}/docs";
       examplesPath = "${piSrc}/examples";
-      settings = {
-        symbols = {
-          preset = "ascii";
-          overrides = {};
-        };
-        recap = {
-          placement = "above";
-        };
-      };
     };
   };
 }
