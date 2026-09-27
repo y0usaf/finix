@@ -8,18 +8,12 @@
 
   environment.systemPackages = [pkgs.nix pkgs.efibootmgr];
 
-  user = {
-    tools = {
-      git.enable = true;
-      tmux.enable = true;
+  user.dev = {
+    paseo = {
+      enable = true;
+      relay.enable = false;
+      environmentFiles = ["/home/y0usaf/Tokens/ANTHROPIC_API_KEY.txt"];
     };
-    dev = {
-      paseo = {
-        enable = true;
-        relay.enable = false;
-        environmentFiles = ["/home/y0usaf/Tokens/ANTHROPIC_API_KEY.txt"];
-      };
-      claude-code.enable = true;
-    };
+    claude-code.enable = true;
   };
 }
