@@ -7,10 +7,11 @@
   diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
 
   btrfsOpts = ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
-  subvolMount = subvol: extraOpts: {
+  subvolMount = subvol: {
     device = "/dev/disk/by-uuid/${diskUuid}";
     fsType = "btrfs";
-    options = ["subvol=${subvol}"] ++ btrfsOpts ++ extraOpts;
+    options = ["subvol=${subvol}"] ++ btrfsOpts;
+    neededForBoot = true;
   };
 in {
   networking.hostName = "y0usaf-desktop";
@@ -78,9 +79,9 @@ in {
       neededForBoot = true;
     };
 
-    "/nix" = subvolMount "@nix" [] // {neededForBoot = true;};
-    "/persist" = subvolMount "@persist" [] // {neededForBoot = true;};
-    "/home" = subvolMount "@home" [] // {neededForBoot = true;};
+    "/nix" = subvolMount "@nix";
+    "/persist" = subvolMount "@persist";
+    "/home" = subvolMount "@home";
 
     "/btrfs" = {
       device = "/dev/disk/by-uuid/${diskUuid}";
@@ -96,11 +97,11 @@ in {
       neededForBoot = true;
     };
 
-    "/home/y0usaf/.local/share/Steam" = subvolMount "@steam" [] // {neededForBoot = true;};
-    "/home/y0usaf/dev" = subvolMount "@dev" [] // {neededForBoot = true;};
-    "/home/y0usaf/Pictures" = subvolMount "@pictures" [] // {neededForBoot = true;};
-    "/home/y0usaf/DCIM" = subvolMount "@dcim" [] // {neededForBoot = true;};
-    "/home/y0usaf/Music" = subvolMount "@music" [] // {neededForBoot = true;};
+    "/home/y0usaf/.local/share/Steam" = subvolMount "@steam";
+    "/home/y0usaf/dev" = subvolMount "@dev";
+    "/home/y0usaf/Pictures" = subvolMount "@pictures";
+    "/home/y0usaf/DCIM" = subvolMount "@dcim";
+    "/home/y0usaf/Music" = subvolMount "@music";
   };
 
   finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
