@@ -13,17 +13,6 @@ _: {
     };
     prime-agent.enable = true;
     prompts.principles.enable = true;
-    omp.settings = {
-      terminal_width_percent = 50;
-      panel_width_percent = 13;
-      ascii = true;
-      keybinds = {
-        project_next = "ctrl+l";
-        project_prev = "ctrl+h";
-        session_next = "ctrl+j";
-        session_prev = "ctrl+k";
-      };
-    };
     paseo = {
       enable = true;
       desktop.enable = true;
@@ -38,11 +27,4 @@ _: {
     phi.enable = true;
     reasonix.enable = true;
   };
-
-  manzil.users.y0usaf.files.".omp/agent/rules/tldr.md".text = ''
-    ---
-    {"condition":["(?s).{2000,}"],"interruptMode":"never","scope":"text"}---
-
-    TL;DR: summarize the preceding response in 3-5 concise bullets.
-  '';
 }
