@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<profile>
+ <name>Samsung LS49AG95 EDID</name>
+ <description>Samsung Odyssey Neo G9 (LS49AG95) from EDID</description>
+ <copyright>No copyright, use freely</copyright>
+ <manufacturer>Samsung</manufacturer>
+ <model>LS49AG95</model>
+ <license>CC0</license>
+ <data_source>edid</data_source>
+ <gamma>2.2</gamma>
+ <whitepoint>D65</whitepoint>
+ <primaries>
+  <red>
+   <x>0.6943</x>
+   <y>0.2929</y>
+   <Y>0.192465</Y>
+  </red>
+  <green>
+   <x>0.2744</x>
+   <y>0.6591</y>
+   <Y>0.735896</Y>
+  </green>
+  <blue>
+   <x>0.1484</x>
+   <y>0.0566</y>
+   <Y>0.071639</Y>
+  </blue>
+ </primaries>
+</profile>
