@@ -106,7 +106,7 @@ inputs: let
         ./dev/ai/prompts/ethics.nix
         ./dev/ai/prompts/no-tests.nix
         ./dev/ai/prompts/no-comments.nix
-        ./dev/ai/claude-code/claude-code.nix
+        ./dev/ai/claude-code.nix
         ./dev/ai/paseo/service.nix
         ./tools/git.nix
         ./tools/tmux.nix
