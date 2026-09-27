@@ -79,6 +79,8 @@ in {
     "100.90.54.18" = ["syncthing-desktop"];
   };
 
+  user.dev.paseo.listenAddress = "100.105.204.116";
+
   providers.scheduler = {
     backend = "cron";
     tasks.btrbk-snapshots = {
