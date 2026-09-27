@@ -25,5 +25,6 @@
     grok-bot.enable = lib.mkDefault true;
     creative.enable = lib.mkDefault true;
     media.enable = lib.mkDefault true;
+    cmus.enable = lib.mkDefault true;
   };
 }
