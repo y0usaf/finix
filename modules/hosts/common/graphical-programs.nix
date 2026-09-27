@@ -26,5 +26,6 @@
     creative.enable = lib.mkDefault true;
     media.enable = lib.mkDefault true;
     cmus.enable = lib.mkDefault true;
+    obs.enable = lib.mkDefault true;
   };
 }
