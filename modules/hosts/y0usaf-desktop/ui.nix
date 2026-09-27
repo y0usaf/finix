@@ -4,7 +4,6 @@
   ...
 }: {
   user.ui = {
-    cudaterm.enable = true;
     tomoe = {
       displays = {
         "DP-4" = {

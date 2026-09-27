@@ -1,7 +1,6 @@
 _: {
   user.programs = {
     grok-bot.enable = true;
-    bolo.enable = true;
     creative.enable = true;
     media.enable = true;
     cmus.enable = true;
