@@ -179,7 +179,7 @@ in {
       executable = true;
       text = ''
         #!${lib.getExe pkgs.python3}
-        ${builtins.readFile ./ship/scripts/system-flake.py}
+        ${builtins.readFile ./ship-system-flake.py}
       '';
     };
   });
