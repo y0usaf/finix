@@ -5,7 +5,7 @@
   flakeInputs,
   ...
 }: {
-  imports = ["${flakeInputs.finix}/modules/programs/sudo/providers.privileges.nix"];
+  imports = [flakeInputs.finix.nixosModules.sudo];
 
   security.pam.services.sudo.text = ''
     account required pam_unix.so # unix (order 10900)
