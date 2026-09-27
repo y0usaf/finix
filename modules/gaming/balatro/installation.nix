@@ -17,10 +17,6 @@
       src = fetchGitHub "SpectralPack" "Talisman" "372d66c64bf987987cffbe31f731b3d1732526f3" "sha256-xvEeSHS8wkj7UxvEJ8KYWB7CE9ToHPgXO652XBuJ1j0=";
       name = "Talisman";
     };
-    cryptid = {
-      src = fetchGitHub "SpectralPack" "Cryptid" "bca501cbeea487b8ca80198c46e3a4a198856de0" "sha256-RkM1bgUR+quYv+oIbGiEN/DYq70lmhiWIElCnyGATd8=";
-      name = "Cryptid";
-    };
     multiplayer = {
       src = fetchGitHub "Balatro-Multiplayer" "BalatroMultiplayer" "c7b1c210f0d6699819222b1767ee9469878d1c52" "sha256-rEHQ7DJd66gE7+5fTmnuBMUngv32W5qYbHgSU9EdIyw=";
       name = "BalatroMultiplayer";
@@ -40,10 +36,6 @@
     stickersalwaysshown = {
       src = fetchGitHub "SirMaiquis" "Balatro-Stickers-Always-Shown" "v1.4.0" "sha256-raCsA7E7JpFjoc6/gGzpRnP7r/3lU9W3rgc9L4BdTT8=";
       name = "StickersAlwaysShown";
-    };
-    handybalatro = {
-      src = fetchGitHub "SleepyG11" "HandyBalatro" "v1.5.1" "sha256-Z8CDCt2LSjZ1/T5Pjw1Y4sXqrZ817sdOrElbbOwwZq8=";
-      name = "HandyBalatro";
     };
     aura = {
       src = fetchGitHub "SpectralPack" "Aura" "dbb6496d163d15e86b0afb6879d32b891164af05" "sha256-4WHbRAUCHGtU/MwJeSQX9NdS7TX6zlsTffxl43f0JJA=";
@@ -76,15 +68,12 @@ in {
         List of mod names to enable. Available mods:
         - steamodded: Steamodded/smods (core modding framework)
         - talisman: SpectralPack/Talisman
-        - cryptid: SpectralPack/Cryptid
         - multiplayer: Balatro-Multiplayer/BalatroMultiplayer
         - cardsleeves: larswijn/CardSleeves
         - jokerdisplay: nh6574/JokerDisplay (shows joker calculations)
         - pokermon: InertSteak/Pokermon (Pokemon-themed jokers)
         - stickersalwaysshown: SirMaiquis/Balatro-Stickers-Always-Shown (keeps stickers visible on jokers)
-        - handybalatro: SleepyG11/HandyBalatro (Quality of Life controls and shortcuts)
         - aura: SpectralPack/Aura (visual enhancement mod)
-        - ultimatespeedup: sse2/balatro-ultimate-speedup-mod (additional speed options)
       '';
     };
   };
