@@ -44,16 +44,12 @@
     };
   };
 in {
-  options.user.dev.work.linear-cli.enable = lib.mkEnableOption "Linear CLI";
+  environment.systemPackages = [
+    package
+    pkgs.libsecret
+  ];
 
-  config = lib.mkIf config.user.dev.work.linear-cli.enable {
-    environment.systemPackages = [
-      package
-      pkgs.libsecret
-    ];
-
-    manzil.users."${config.user.name}".files.".config/linear/linear.toml".source = (pkgs.formats.toml {}).generate "linear-cli-config" {
-      workspace = "cook-unity";
-    };
+  manzil.users."${config.user.name}".files.".config/linear/linear.toml".source = (pkgs.formats.toml {}).generate "linear-cli-config" {
+    workspace = "cook-unity";
   };
 }

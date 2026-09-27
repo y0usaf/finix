@@ -8,12 +8,8 @@
 
   environment.systemPackages = [pkgs.nix pkgs.efibootmgr];
 
-  user.dev = {
-    paseo = {
-      enable = true;
-      relay.enable = false;
-      environmentFiles = ["/home/y0usaf/Tokens/ANTHROPIC_API_KEY.txt"];
-    };
-    claude-code.enable = true;
+  user.dev.paseo = {
+    relay.enable = false;
+    environmentFiles = ["/home/y0usaf/Tokens/ANTHROPIC_API_KEY.txt"];
   };
 }

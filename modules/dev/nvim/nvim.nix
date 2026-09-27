@@ -1,16 +1,11 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }: let
   userAppearance = config.user.appearance;
 in {
-  options.user.dev.nvim = {
-    enable = lib.mkEnableOption "Enhanced Neovim with MNW wrapper";
-  };
-
-  config = lib.mkIf config.user.dev.nvim.enable {
+  config = {
     finix.persistence.allowlist.users.${config.user.name}.directories = [
       ".local/share/nvim"
       ".local/state/nvim"

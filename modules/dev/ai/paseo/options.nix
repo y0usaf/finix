@@ -2,8 +2,6 @@
   inherit (lib) types;
 in {
   options.user.dev.paseo = {
-    enable = lib.mkEnableOption "Paseo daemon for coding-agent orchestration";
-
     listenAddress = lib.mkOption {
       type = types.str;
       default = "127.0.0.1";
