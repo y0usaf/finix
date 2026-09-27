@@ -29,54 +29,47 @@
     assets."${pkgs.stdenv.hostPlatform.system}"
     or (throw "ramp: unsupported system '${pkgs.stdenv.hostPlatform.system}'");
   binName = builtins.replaceStrings [".tar.gz"] [""] asset.tarball;
-in {
-  options.user.dev.work.ramp = {
-    enable = lib.mkEnableOption "Ramp CLI";
+  package = pkgs.stdenvNoCC.mkDerivation {
+    pname = "ramp";
+    inherit version;
 
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = pkgs.stdenvNoCC.mkDerivation {
-        pname = "ramp";
-        inherit version;
+    src = pkgs.fetchurl {
+      url = "https://github.com/ramp-public/ramp-cli/releases/download/v${version}/${asset.tarball}";
+      inherit (asset) hash;
+    };
 
-        src = pkgs.fetchurl {
-          url = "https://github.com/ramp-public/ramp-cli/releases/download/v${version}/${asset.tarball}";
-          inherit (asset) hash;
-        };
+    nativeBuildInputs = [pkgs.autoPatchelfHook];
+    buildInputs = [pkgs.zlib];
 
-        nativeBuildInputs = [pkgs.autoPatchelfHook];
-        buildInputs = [pkgs.zlib];
+    dontStrip = true;
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out/share/ramp $out/bin
+      cp -r . $out/share/ramp/main.dist
+      ln -s $out/share/ramp/main.dist/${binName} $out/bin/ramp
+      runHook postInstall
+    '';
 
-        dontStrip = true;
-        installPhase = ''
-          runHook preInstall
-          mkdir -p $out/share/ramp $out/bin
-          cp -r . $out/share/ramp/main.dist
-          ln -s $out/share/ramp/main.dist/${binName} $out/bin/ramp
-          runHook postInstall
-        '';
-
-        meta = {
-          description = "CLI for the Ramp spend management platform";
-          homepage = "https://github.com/ramp-public/ramp-cli";
-          license = lib.licenses.mit;
-          mainProgram = "ramp";
-          platforms = [
-            "aarch64-darwin"
-            "x86_64-darwin"
-            "aarch64-linux"
-            "x86_64-linux"
-          ];
-          sourceProvenance = [lib.sourceTypes.binaryNativeCode];
-        };
-      };
-      description = "Ramp CLI package to install.";
+    meta = {
+      description = "CLI for the Ramp spend management platform";
+      homepage = "https://github.com/ramp-public/ramp-cli";
+      license = lib.licenses.mit;
+      mainProgram = "ramp";
+      platforms = [
+        "aarch64-darwin"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
+      sourceProvenance = [lib.sourceTypes.binaryNativeCode];
     };
   };
+in {
+  options.user.dev.work.ramp.enable = lib.mkEnableOption "Ramp CLI";
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
-      cfg.package
+      package
       pkgs.libsecret
     ];
   };
