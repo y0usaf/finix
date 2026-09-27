@@ -69,7 +69,6 @@
           ./sudo.nix
           inputs.finix.nixosModules.sysklogd
           ./common.nix
-          ./persistence/bind-replay.nix
           ./persistence/identity.nix
         ]
         ++ modules;
