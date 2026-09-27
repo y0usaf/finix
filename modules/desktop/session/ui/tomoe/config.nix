@@ -216,10 +216,5 @@
 in {
   user.ui.tomoe.settings.wait-for-frame-completion = lib.mkIf config.hardware.nvidia.enable (lib.mkDefault true);
 
-  manzil.users."${config.user.name}".files.".config/tomoe/init.lisp" = {
-    type = "copy";
-    clobber = true;
-    permissions = "0644";
-    text = initText;
-  };
+  manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = initText;
 }
