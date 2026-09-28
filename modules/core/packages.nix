@@ -18,5 +18,10 @@
     pkgs.statix
     pkgs.deadnix
     pkgs.bluez-tools
+    pkgs.rsync
+    pkgs.bind
+    pkgs.btrbk
+    pkgs.fuse3
+    pkgs.strace
   ];
 }
