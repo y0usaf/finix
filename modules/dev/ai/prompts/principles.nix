@@ -4,8 +4,8 @@
       # Principles
 
       Build up from a floor that always works: small parts with one job each,
-      shipped together, each removable without residue. When rules conflict,
-      this decides.
+      shipped together, each removable without residue. When the rules below
+      conflict, this decides.
 
       For personal projects. In work repos, forks, upstream checkouts and
       `~/dev/ref`, that repo's conventions win. Edit this file only when asked;
@@ -15,8 +15,9 @@
 
       - **One job.** A project's README opens with its job in one sentence and
         what it won't do; goal and parity files obey it. A reference lends
-        qualities, never a feature list.
-      - **Least code.** Prefer deletion to addition.
+        qualities, never a feature list. Ship parts together, but each could
+        run as its own process.
+      - **Least code.** Prefer deletion to addition. Abstract on the third need.
       - **Least power.** Lowest rung that works: constant < data < config <
         pure function < code with I/O or state.
       - **Least deps.** Take a dependency only for knowledge you'd otherwise
@@ -24,24 +25,28 @@
         that. Ship every dependency you keep inside the package.
       - **Unix.** Decisions stay out of machinery. Narrow interfaces: a feature
         lands in the module that owns it. Machine-readable output. State
-        inspectable without a debugger. Fail loudly on bad input. Generate what
-        you would hand-maintain. Measure before optimizing.
+        inspectable without a debugger. Fail loudly on bad input; a command
+        that succeeds prints only its result. Generate what you would
+        hand-maintain. Measure before optimizing.
 
       ## Architecture, when a system has these parts
 
       - **Floor first.** The floor is the least a system needs for you to reach
         it, see its state and fix it: silva's gateway and web UI, tomoe with its
         default bindings. It starts with nothing above it and never waits on or
-        dies with what's above it; anything that could crash or hang it runs in
-        another process, from the same binary if you like. `nix run` with no
-        config reaches the floor; break any part above it and the floor stays
-        up and says what broke.
+        dies with what's above it. Anything that could crash it runs in another
+        process, from the same binary if you like; anything that could hang it
+        runs there or under a budget. `nix run` with no config reaches the
+        floor; break any part above it and the floor stays up and says what
+        broke.
       - **Clean unmount.** Anything mounted at runtime reverts all its effects
-        on unmount, child processes and lock files included, and declares what
-        it reads; a changed dependency updates exactly its consumers. Snapshot,
-        mount, exercise, unmount, diff: residue is a bug; after a kill, the
-        next start comes up clean. Ref: github.com/cordiverse/paper
-      - **No privileged path.** Built-ins use the public API a stranger would.
+        on unmount, child processes, locks and sockets included, and declares
+        what it reads; a changed dependency updates exactly its consumers.
+        Snapshot, mount, exercise, unmount, diff: residue is a bug. After a
+        kill, the next start clears what the dead run left and keeps its data.
+        Ref: github.com/cordiverse/paper
+      - **No privileged path.** Built-ins use the public API a stranger would,
+        and the system still starts without them.
       - **Daemon, thin client.** State that outlives its viewer lives in a
         daemon. One integer wire version; breaking changes reject old clients
         explicitly.
@@ -51,7 +56,9 @@
       Through Nix, locally: `nix build`, `nix flake check`, `nix run`; no CI.
       `cargo fmt`, `clippy` and `nix fmt` run natively. Say it builds once
       `nix build` exits zero; say it works only after running the built
-      artifact. Quote the command. A commit that deletes a check says so.
+      artifact. Exercise instances you start (own socket, private bus,
+      `env -i`), never the running session. Quote the command. A commit that
+      deletes a check says so.
 
       ## Filesystem
 
