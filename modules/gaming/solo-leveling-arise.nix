@@ -5,13 +5,7 @@
 }: let
   inherit (config) user;
 in {
-  options.user.gaming.solo-leveling-arise = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable Solo Leveling: Arise configuration";
-    };
-  };
+  options.user.gaming.solo-leveling-arise.enable = lib.mkEnableOption "Solo Leveling: Arise configuration";
 
   config = lib.mkIf user.gaming.solo-leveling-arise.enable {
     manzil.users."${user.name}".files."${lib.removePrefix "${user.homeDirectory}/" user.paths.steam}/steamapps/compatdata/2373990/pfx/user.reg" = {
