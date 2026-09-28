@@ -228,6 +228,11 @@
     hash = "sha256-Amji9hOtJveumg4xb4ulHVerGnYbQ8KbfVkOKQfUs7Y=";
   };
 
+  switchButton = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/TOM-BadEN/Nintendo-Switch-Sounds-Effect/70614a3e0b912068476ed54d9836d08e8d6878b0/WAV/SeVgc_Info_OperateOthers.wav";
+    hash = "sha256-X581tiK275PT9+6O8V1HKc69zDmNllrEcIcKm7xk9xs=";
+  };
+
   sounds = pkgs.runCommand "tomoe-sounds" {nativeBuildInputs = [pkgs.ffmpeg];} ''
     mkdir $out
     for i in 1 2 3; do
@@ -240,7 +245,8 @@
   soundParameters = {
     key = map (i: "${sounds}/click-${toString i}.wav") [1 2 3];
     key-gain = -18;
-    key-spread = 0.35;
+    button = "${switchButton}";
+    button-gain = -23.3;
     close = "${sounds}/close.wav";
     close-gain = -6;
   };
