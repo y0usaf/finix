@@ -15,7 +15,6 @@
   };
 
   services = {
-    mdevd.enable = lib.mkForce false;
     udev.enable = true;
     seatd.enable = true;
     dbus.enable = true;
@@ -25,7 +24,6 @@
     upower.enable = true;
     udisks2.enable = true;
     nftables.enable = true;
-    dhcpcd.enable = lib.mkForce false;
     networkmanager = {
       enable = true;
       settings.main.rc-manager = "resolvconf";
@@ -49,7 +47,6 @@
     };
   };
 
-  finit.services.dhcpcd.enable = lib.mkForce false;
   users.users.${config.user.name}.extraGroups = ["networkmanager" "video" "render" "seat"];
 
   system.activation.scripts.networkManagerConnections = {

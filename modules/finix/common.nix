@@ -35,9 +35,7 @@ in {
     boot.initrd.supportedFilesystems.btrfs.enable = true;
 
     services = {
-      mdevd.enable = true;
       sysklogd.enable = true;
-      dhcpcd.enable = true;
       openssh = {
         enable = true;
         settings = {
@@ -60,21 +58,11 @@ in {
 
     manzil.forceByDefault = true;
 
-    finit = {
-      services.dhcpcd = {
-        command = lib.mkForce (
-          "${lib.getExe config.services.dhcpcd.package} -B "
-          + lib.escapeShellArgs config.services.dhcpcd.extraArgs
-        );
-        type = lib.mkForce null;
-        pid = lib.mkForce null;
-      };
-      tasks = {
-        remount-nix-store.enable = false;
-        ssh-keygen.command = lib.mkForce (pkgs.writeShellScript "check-host-keys" ''
-          [ -s ${persistedSshDir}/ssh_host_ed25519_key ]
-        '');
-      };
+    finit.tasks = {
+      remount-nix-store.enable = false;
+      ssh-keygen.command = lib.mkForce (pkgs.writeShellScript "check-host-keys" ''
+        [ -s ${persistedSshDir}/ssh_host_ed25519_key ]
+      '');
     };
 
     system.activation.scripts.persistentSshAuthorizedKeys = {

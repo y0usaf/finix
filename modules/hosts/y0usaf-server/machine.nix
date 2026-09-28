@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -84,11 +85,21 @@ in {
   };
 
   services = {
+    mdevd.enable = true;
+    dhcpcd.enable = true;
     getty.ttys = ["tty1" "ttyS0"];
     nix-daemon.settings.trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
   };
 
   finit = {
+    services.dhcpcd = {
+      command = lib.mkForce (
+        "${lib.getExe config.services.dhcpcd.package} -B "
+        + lib.escapeShellArgs config.services.dhcpcd.extraArgs
+      );
+      type = lib.mkForce null;
+      pid = lib.mkForce null;
+    };
     services.watchdog-keepalive = {
       description = "persistent watchdog keepalive";
       command = "${pkgs.writeShellScript "persistent-watchdog-keepalive" ''
