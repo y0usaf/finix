@@ -36,12 +36,7 @@ in {
         homepage = "https://github.com/ramp-public/ramp-cli";
         license = lib.licenses.mit;
         mainProgram = "ramp";
-        platforms = [
-          "aarch64-darwin"
-          "x86_64-darwin"
-          "aarch64-linux"
-          "x86_64-linux"
-        ];
+        platforms = ["x86_64-linux"];
         sourceProvenance = [lib.sourceTypes.binaryNativeCode];
       };
     })

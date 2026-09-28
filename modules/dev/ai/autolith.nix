@@ -4,18 +4,16 @@
   pkgs,
   flakeInputs,
   ...
-}: let
-  autolith = flakeInputs.autolith.packages.${pkgs.stdenv.hostPlatform.system}.default;
-in {
+}: {
   environment.systemPackages = [
     (pkgs.symlinkJoin {
       name = "autolith-full-access";
-      paths = [autolith];
+      paths = [flakeInputs.autolith.packages.${pkgs.stdenv.hostPlatform.system}.default];
       nativeBuildInputs = [pkgs.makeWrapper];
       postBuild = ''
         wrapProgram "$out/bin/autolith" --add-flags "--permissions full"
       '';
-      meta = autolith.meta // {mainProgram = "autolith";};
+      meta = flakeInputs.autolith.packages.${pkgs.stdenv.hostPlatform.system}.default.meta // {mainProgram = "autolith";};
     })
   ];
 
