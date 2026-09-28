@@ -10,7 +10,7 @@
     sha256 = "sha256-Bz2EFv+kUXaZY2vb66RsqOb6n4kZkGp/49xh5/SgTHc=";
     stripRoot = false;
   };
-  gameDir = "${lib.removePrefix "${user.homeDirectory}/" user.paths.steam}/steamapps/common/ELDEN RING/Game";
+  gameDir = "${user.paths.steam}/steamapps/common/ELDEN RING/Game";
 in {
   options.user.gaming.elden-ring.enable = lib.mkEnableOption "Elden Ring configuration";
 

@@ -37,8 +37,8 @@
   options.user.paths = {
     steam = lib.mkOption {
       type = lib.types.str;
-      default = "${config.user.homeDirectory}/.local/share/Steam";
-      description = "Directory for Steam.";
+      default = ".local/share/Steam";
+      description = "Steam's directory, relative to the home directory.";
     };
   };
 
