@@ -33,12 +33,7 @@ in {
         homepage = "https://developers.notion.com/cli";
         license = lib.licenses.mit;
         mainProgram = "ntn";
-        platforms = [
-          "x86_64-linux"
-          "aarch64-linux"
-          "x86_64-darwin"
-          "aarch64-darwin"
-        ];
+        platforms = ["x86_64-linux"];
       };
     })
   ];
