@@ -8,6 +8,9 @@
     concatStringsSep
     filterAttrs
     isAttrs
+    isBool
+    isFloat
+    isInt
     isList
     isString
     mapAttrsToList
@@ -15,92 +18,65 @@
     toUpper
     unique
     ;
-  inherit (builtins) attrNames length match typeOf;
-
-  quoteStr = s: ''"${replaceStrings ["\\" "\""] ["\\\\" "\\\""] s}"'';
-
-  floatStr = f: let
-    json = builtins.toJSON f;
-  in
-    if json == "null"
-    then throw "toLisp: cannot serialize a non-finite float"
-    else if match ".*[eE].*" json != null
-    then replaceStrings ["e" "E"] ["d" "d"] json
-    else "${json}d0";
-
-  keywordStr = k: ":|${replaceStrings ["\\" "|"] ["\\\\" "\\|"] (toUpper k)}|";
-
-  isInlineText = form: isString form && match "[[:space:]]*" form == null;
+  inherit (builtins) attrNames isPath length match typeOf;
 
   mkLispInline = form:
-    if isInlineText form
+    if isString form && match "[[:space:]]*" form == null
     then {__toLispInline = form;}
     else throw "mkLispInline: expected a nonblank string";
 
-  isInline = v: isAttrs v && v ? __toLispInline;
-
-  inlineStr = v:
-    if attrNames v == ["__toLispInline"] && isInlineText v.__toLispInline
+  toLisp = v:
+    if isAttrs v && v ? __toLispInline
     then v.__toLispInline
-    else throw "toLisp: inline wrapper must contain only __toLispInline, a nonblank string";
-
-  listStr = vs:
-    if vs == []
+    else if isAttrs v
+    then let
+      present = filterAttrs (_: x: x != null) v;
+      entries = mapAttrsToList (k: x: ":|${replaceStrings ["\\" "|"] ["\\\\" "\\|"] (toUpper k)}| ${toLisp x}") present;
+    in
+      if length entries != length (unique (map toUpper (attrNames present)))
+      then throw "toLisp: keys collide after ASCII uppercasing"
+      else if entries == []
+      then "nil"
+      else "(list ${concatStringsSep " " entries})"
+    else if isList v
+    then
+      if v == []
+      then "nil"
+      else "(list ${concatStringsSep " " (map toLisp v)})"
+    else if isString v
+    then ''"${replaceStrings ["\\" "\""] ["\\\\" "\\\""] v}"''
+    else if isPath v
+    then toLisp "${v}"
+    else if v == null
     then "nil"
-    else "(list ${concatStringsSep " " (map toLisp vs)})";
-
-  entry = k: v: "${keywordStr k} ${toLisp v}";
-
-  attrsStr = v: let
-    present = filterAttrs (_: x: x != null) v;
-    names = map toUpper (attrNames present);
-    entries = mapAttrsToList entry present;
-  in
-    if length names != length (unique names)
-    then throw "toLisp: keys collide after ASCII uppercasing"
-    else if entries == []
-    then "nil"
-    else "(list ${concatStringsSep " " entries})";
-
-  atoms = {
-    "null" = _: "nil";
-    bool = v:
+    else if isBool v
+    then
       if v
       then "t"
-      else "nil";
-    float = floatStr;
-    int = toString;
-    path = v: quoteStr "${v}";
-    string = quoteStr;
-  };
-
-  atomStr = v:
-    (atoms.${typeOf v} or (throw "toLisp: cannot serialize ${typeOf v}")) v;
-
-  toLisp = v:
-    if isInline v
-    then inlineStr v
-    else if isAttrs v
-    then attrsStr v
-    else if isList v
-    then listStr v
-    else atomStr v;
+      else "nil"
+    else if isInt v
+    then toString v
+    else if isFloat v
+    then let
+      json = builtins.toJSON v;
+    in
+      if json == "null"
+      then throw "toLisp: cannot serialize a non-finite float"
+      else if match ".*[eE].*" json != null
+      then replaceStrings ["e" "E"] ["d" "d"] json
+      else "${json}d0"
+    else throw "toLisp: cannot serialize ${typeOf v}";
 
   inherit (config.user) defaults;
   cfg = config.user.ui.tomoe;
   inherit (cfg) bar;
 
   keyword = name: mkLispInline ":${name}";
-  plist = attrs: lib.concatLists (lib.mapAttrsToList (name: value: [(keyword name) value]) attrs);
   binding = modifiers: key: command: description:
     [(map keyword modifiers) key (keyword command)]
     ++ lib.optionals (description != null) [(keyword "description") description];
 
   terminalAppId = "ekko-term";
-  wallpaper = {
-    directory = config.user.paths.wallpapers;
-    bind = binding ["alt" "shift"] "c" "next" "Random Wallpaper";
-  };
 
   layouts = {
     deck = {
@@ -240,43 +216,6 @@
     duration = 100;
     frames = "${./assets/bongo-cat}";
   };
-
-  initText = lib.concatStringsSep "\n" [
-    ''
-      (in-package #:tomoe-user)
-      (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ plist settings) cfg.displays)})
-      (defparameter +policy-settings+ ${toLisp ({honor-xdg-activation-with-invalid-serial = true;} // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
-      (defparameter +policy-wallpaper+ ${toLisp wallpaper})
-      (defparameter +policy-launcher+ ${toLisp {
-        app-id = "launcher";
-        ratio = mkLispInline "1/3";
-      }})
-      (defparameter +policy-hidden-window+ ${toLisp {
-        app-id = "steam_proton";
-        title-prefix = "Lovely";
-      }})
-      (defparameter +policy-terminal+ ${toLisp {
-        app-id = terminalAppId;
-        title-prefix = "ekko";
-      }})
-      (defparameter +policy-bindings+ ${toLisp userBindings})
-      (defparameter +policy-launches+ ${toLisp launches})
-      (defparameter +layout+ ${toLisp ({
-          gaps = 8;
-          float-ratio = mkLispInline "3/5";
-        }
-        // layout.parameters)})
-      (defparameter +layout-bindings+ ${toLisp (layout.bindings ++ [(binding ["alt"] "t" "terminal" "Terminal")])})
-    ''
-    (builtins.readFile ./lisp/policy.lisp)
-    (builtins.readFile layout.file)
-    (builtins.readFile ./lisp/user.lisp)
-    "(defparameter +bar+ ${toLisp barParameters})"
-    (builtins.readFile ./lisp/bar.lisp)
-    "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
-    (builtins.readFile ./lisp/bongo-cat.lisp)
-    cfg.extraConfig
-  ];
 in {
   options.user.paths.wallpapers = lib.mkOption {
     type = lib.types.str;
@@ -346,5 +285,43 @@ in {
     };
   };
 
-  config.manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = initText;
+  config.manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = lib.concatStringsSep "\n" [
+    ''
+      (in-package #:tomoe-user)
+      (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ lib.concatLists (lib.mapAttrsToList (key: value: [(keyword key) value]) settings)) cfg.displays)})
+      (defparameter +policy-settings+ ${toLisp ({honor-xdg-activation-with-invalid-serial = true;} // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
+      (defparameter +policy-wallpaper+ ${toLisp {
+        directory = config.user.paths.wallpapers;
+        bind = binding ["alt" "shift"] "c" "next" "Random Wallpaper";
+      }})
+      (defparameter +policy-launcher+ ${toLisp {
+        app-id = "launcher";
+        ratio = mkLispInline "1/3";
+      }})
+      (defparameter +policy-hidden-window+ ${toLisp {
+        app-id = "steam_proton";
+        title-prefix = "Lovely";
+      }})
+      (defparameter +policy-terminal+ ${toLisp {
+        app-id = terminalAppId;
+        title-prefix = "ekko";
+      }})
+      (defparameter +policy-bindings+ ${toLisp userBindings})
+      (defparameter +policy-launches+ ${toLisp launches})
+      (defparameter +layout+ ${toLisp ({
+          gaps = 8;
+          float-ratio = mkLispInline "3/5";
+        }
+        // layout.parameters)})
+      (defparameter +layout-bindings+ ${toLisp (layout.bindings ++ [(binding ["alt"] "t" "terminal" "Terminal")])})
+    ''
+    (builtins.readFile ./lisp/policy.lisp)
+    (builtins.readFile layout.file)
+    (builtins.readFile ./lisp/user.lisp)
+    "(defparameter +bar+ ${toLisp barParameters})"
+    (builtins.readFile ./lisp/bar.lisp)
+    "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
+    (builtins.readFile ./lisp/bongo-cat.lisp)
+    cfg.extraConfig
+  ];
 }
