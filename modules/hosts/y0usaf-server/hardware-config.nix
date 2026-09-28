@@ -1,13 +1,11 @@
 {
-  config,
   lib,
   pkgs,
   ...
 }: let
   diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
+  btrfs = (import ../shared.nix {inherit lib pkgs;}).btrfs diskUuid;
 in {
-  networking.hostName = "y0usaf-server";
-
   finix.diagnostics = {
     inherit diskUuid;
     fallbackDevices = ["/dev/sda2" "/dev/nvme0n1p2"];
@@ -40,13 +38,10 @@ in {
     ];
   };
 
-  environment.etc = {
-    "modprobe.d/finix-server-blacklist.conf".text = ''
-      blacklist iTCO_wdt
-      blacklist iTCO_vendor_support
-    '';
-    "finix-stage2".text = "persistent\n";
-  };
+  environment.etc."modprobe.d/finix-server-blacklist.conf".text = ''
+    blacklist iTCO_wdt
+    blacklist iTCO_vendor_support
+  '';
 
   fileSystems = {
     "/" = {
@@ -55,19 +50,13 @@ in {
       options = ["mode=755" "size=2G"];
     };
 
-    "/nix" = {
-      device = "/dev/disk/by-uuid/${diskUuid}";
-      fsType = "btrfs";
-      options = ["subvol=@nix" "noatime"];
-      neededForBoot = true;
-    };
-
-    "/persist" = {
-      device = "/dev/disk/by-uuid/${diskUuid}";
-      fsType = "btrfs";
-      options = ["subvol=@persist" "compress=zstd" "noatime"];
-      neededForBoot = true;
-    };
+    "/nix" = btrfs ["noatime"] "subvol=@nix";
+    "/persist" = btrfs ["compress=zstd" "noatime"] "subvol=@persist";
+    "/home" = btrfs ["compress=zstd" "noatime"] "subvol=@home";
+    "/home/y0usaf/Music" = btrfs [] "subvol=@music";
+    "/home/y0usaf/DCIM" = btrfs [] "subvol=@dcim";
+    "/home/y0usaf/Pictures" = btrfs [] "subvol=@pictures";
+    "/btrfs" = btrfs [] "subvolid=5";
 
     "/boot" = {
       device = "/dev/disk/by-uuid/41B0-E342";
@@ -75,31 +64,9 @@ in {
       options = ["umask=0077" "noatime"];
       neededForBoot = true;
     };
-
-    "/var/log" = {
-      device = "/persist/var/log";
-      fsType = "btrfs";
-      options = ["bind"];
-      neededForBoot = true;
-    };
-  };
-
-  services = {
-    mdevd.enable = true;
-    dhcpcd.enable = true;
-    getty.ttys = ["tty1" "ttyS0"];
-    nix-daemon.settings.trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
   };
 
   finit = {
-    services.dhcpcd = {
-      command = lib.mkForce (
-        "${lib.getExe config.services.dhcpcd.package} -B "
-        + lib.escapeShellArgs config.services.dhcpcd.extraArgs
-      );
-      type = lib.mkForce null;
-      pid = lib.mkForce null;
-    };
     services.watchdog-keepalive = {
       description = "persistent watchdog keepalive";
       command = "${pkgs.writeShellScript "persistent-watchdog-keepalive" ''
@@ -138,38 +105,6 @@ in {
       log = true;
     };
     tasks = {
-      net-fallback = {
-        description = "static IP fallback if DHCP fails";
-        command = "${pkgs.writeShellScript "persistent-net-fallback" ''
-          set -eu
-          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.iproute2 pkgs.gnugrep]}
-
-          find_iface() {
-            for dev in /sys/class/net/en* /sys/class/net/eth*; do
-              [ -e "$dev" ] || continue
-              basename "$dev"
-              return 0
-            done
-            return 1
-          }
-
-          for _ in $(seq 1 45); do
-            if ${pkgs.iproute2}/bin/ip -4 addr show scope global 2>/dev/null \
-              | ${pkgs.gnugrep}/bin/grep -q 'inet '; then
-              exit 0
-            fi
-            sleep 1
-          done
-
-          iface="$(find_iface)" || exit 1
-          ${pkgs.iproute2}/bin/ip link set "$iface" up || true
-          ${pkgs.iproute2}/bin/ip addr replace 192.168.2.66/24 dev "$iface" || true
-          ${pkgs.iproute2}/bin/ip route replace default via 192.168.2.1 dev "$iface" || true
-          printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > /etc/resolv.conf || true
-        ''}";
-        conditions = ["net/lo/up"];
-        log = true;
-      };
       bootnext-deadman = {
         description = "EFI BootNext dead-man switch for the Finix island";
         command = "${pkgs.writeShellScript "persistent-bootnext-deadman" ''

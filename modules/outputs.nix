@@ -81,11 +81,11 @@ inputs: let
         ./server/forgejo.nix
         ./server/mediamtx.nix
         ./server/syncthing.nix
-        ./hosts/y0usaf-server/services.nix
+        ./hosts/y0usaf-server/config.nix
         ./server/tailscale.nix
-        ./hosts/y0usaf-server/machine.nix
+        ./hosts/y0usaf-server/hardware-config.nix
         ./server/attic.nix
-        ./server/programs.nix
+        ./server/packages.nix
         ./finix/diagnostics.nix
         inputs.manzil.finixModules.default
         ./dev/ai/prompts/policy.nix
