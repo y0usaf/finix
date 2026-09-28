@@ -142,7 +142,7 @@
                                    :anchors (if (or seam exclusive) (list edge :left :right) (list edge))
                                    :height thickness :layer (if exclusive :top :overlay)
                                    :exclusive-zone (if exclusive thickness 0)
-                                   :background "#00000000")))))
+                                   :background "#00000000" :click-through t)))))
 
 (define-extension "bar" (:reads (:services :system) :state (list :palette nil :watch nil))
     (snapshot state event)
