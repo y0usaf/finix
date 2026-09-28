@@ -97,7 +97,7 @@ inputs: let
         inputs.manzil.finixModules.default
         ./dev/ai/prompts/policy.nix
         ./dev/ai/claude-code.nix
-        ./dev/ai/paseo/service.nix
+        ./dev/ai/paseo.nix
         ./tools/git.nix
         ./tools/tmux.nix
       ];
