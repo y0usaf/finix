@@ -1,6 +1,8 @@
 {
   config,
   lib,
+  pkgs,
+  flakeInputs,
   ...
 }: let
   mkLispInline = form:
@@ -199,13 +201,19 @@
     duration = 100;
     frames = "${./assets/bongo-cat}";
   };
-in {
-  options.user.paths.wallpapers = lib.mkOption {
-    type = lib.types.str;
-    default = "${config.user.homeDirectory}/DCIM/Wallpapers";
-    description = "Wallpaper directory for static images.";
-  };
 
+  shaderDir = "${flakeInputs.tomoe.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/tomoe/examples/shaders";
+
+  shaderWallpaperParameters = {
+    shaders = [
+      ["${shaderDir}/flow.glsl" 15]
+      ["${shaderDir}/stars.glsl" 20]
+      ["${shaderDir}/grain.glsl" 12]
+      ["${shaderDir}/cubes.glsl" 30]
+    ];
+    bind = binding ["alt" "shift"] "b" "next" "Next Wallpaper";
+  };
+in {
   options.user.ui.tomoe = {
     layout = lib.mkOption {
       type = lib.types.enum ["deck" "sway"];
@@ -273,10 +281,6 @@ in {
       (in-package #:tomoe-user)
       (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ lib.concatLists (lib.mapAttrsToList (key: value: [(keyword key) value]) settings)) cfg.displays)})
       (defparameter +policy-settings+ ${toLisp ({honor-xdg-activation-with-invalid-serial = true;} // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
-      (defparameter +policy-wallpaper+ ${toLisp {
-        directory = config.user.paths.wallpapers;
-        bind = binding ["alt" "shift"] "c" "next" "Random Wallpaper";
-      }})
       (defparameter +policy-launcher+ ${toLisp {
         app-id = "launcher";
         ratio = mkLispInline "1/3";
@@ -305,6 +309,8 @@ in {
     (builtins.readFile ./lisp/bar.lisp)
     "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
     (builtins.readFile ./lisp/bongo-cat.lisp)
+    "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
+    (builtins.readFile ./lisp/shader-wallpaper.lisp)
     cfg.extraConfig
   ];
 }

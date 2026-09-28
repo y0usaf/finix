@@ -34,8 +34,7 @@
   (declare (ignore snapshot event))
   (values state
           (append (mapcar (lambda (display) (apply #'configure-output display)) +policy-displays+)
-                  (list (apply #'settings +policy-settings+)
-                        (publish-state :wallpaper-settings +policy-wallpaper+)))
+                  (list (apply #'settings +policy-settings+)))
           nil))
 
 (define-extension "rules" () (snapshot state event)

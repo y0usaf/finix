@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   ...
@@ -75,8 +74,6 @@
       termFontSize = 16;
       hyprcursorSize = 36;
     };
-
-    paths.wallpapers = "${config.user.homeDirectory}/DCIM/Wallpapers/32_9/";
 
     ui.tomoe.bar.modules = ["cpu" "memory" "gpu" "time" "date"];
 
