@@ -37,31 +37,17 @@
     userPersist = config.finix.persistence.allowlist.users.${user};
     home = config.user.homeDirectory;
     persistentHome = "/persist/home/${user}";
-    sorted = paths: lib.sort lib.lessThan (lib.unique paths);
-    directoriesFile = pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") (sorted userPersist.directories));
-    filesFile = pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}\n") (sorted userPersist.files));
   in {
     environment.systemPackages = let
       inherit (config.users.users.${user}) uid;
-      splitPath = p: builtins.filter (s: s != "") (lib.splitString "/" p);
-      properAncestors = p: let
-        parts = splitPath p;
-      in
-        lib.init (lib.genList (i: lib.concatStringsSep "/" (lib.take (i + 1) parts)) (lib.length parts));
-      dirnameOf = p: let
-        parts = splitPath p;
-      in
-        lib.optional (lib.length parts > 1) (lib.concatStringsSep "/" (lib.init parts));
-      fileTemplateDirs = builtins.concatMap (f: let
-        d = dirnameOf f;
-      in
-        d ++ lib.concatMap properAncestors d)
-      userPersist.files;
-      dirTemplateDirs = builtins.concatMap properAncestors userPersist.directories;
-      dataSubvolMounts =
-        map (mp: lib.removePrefix "${home}/" mp)
-        (builtins.filter (mp: lib.hasPrefix "${home}/" mp) (builtins.attrNames config.fileSystems));
-      templateDirs = lib.sort lib.lessThan (lib.unique (dataSubvolMounts ++ dirTemplateDirs ++ fileTemplateDirs));
+      templateDirs = lib.sort lib.lessThan (lib.unique (
+        map (lib.removePrefix "${home}/") (builtins.filter (lib.hasPrefix "${home}/") (builtins.attrNames config.fileSystems))
+        ++ builtins.concatMap (path: let
+          parts = builtins.filter (s: s != "") (lib.splitString "/" path);
+        in
+          lib.init (lib.genList (i: lib.concatStringsSep "/" (lib.take (i + 1) parts)) (lib.length parts)))
+        (userPersist.directories ++ userPersist.files)
+      ));
     in [
       (pkgs.writeShellScriptBin "prep-home-blank" ''
         set -euo pipefail
@@ -220,7 +206,7 @@
           [ -d "$src" ] || install -d -o ${user} -g users "$src" || { failed=1; continue; }
           [ -d "$dst" ] || install -d -o ${user} -g users "$dst" || { failed=1; continue; }
           mountpoint -q "$dst" || mount --bind "$src" "$dst" || failed=1
-        done < ${directoriesFile}
+        done < ${pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") (lib.sort lib.lessThan (lib.unique userPersist.directories)))}
 
         while IFS= read -r relative; do
           [ -n "$relative" ] || continue
@@ -231,7 +217,7 @@
           [ -f "$src" ] || install -o ${user} -g users -m 0600 /dev/null "$src" || { failed=1; continue; }
           [ -f "$dst" ] || install -o ${user} -g users -m 0600 /dev/null "$dst" || { failed=1; continue; }
           mountpoint -q "$dst" || mount --bind "$src" "$dst" || failed=1
-        done < ${filesFile}
+        done < ${pkgs.writeText "persist-user-files" (lib.concatMapStrings (path: "${path}\n") (lib.sort lib.lessThan (lib.unique userPersist.files)))}
 
         [ "$failed" = 0 ] || { echo "persist-user-binds: some binds failed" >&2; exit 1; }
         echo "persist-user-binds: allowlist mounted"
