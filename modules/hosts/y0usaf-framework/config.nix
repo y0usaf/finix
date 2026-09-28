@@ -4,15 +4,6 @@
   pkgs,
   ...
 }: let
-  userName = config.user.name;
-  diskUuid = "6ae685dc-540e-42f2-b30a-104a8aac0e27";
-  subvolMount = subvol: {
-    device = "/dev/disk/by-uuid/${diskUuid}";
-    fsType = "btrfs";
-    options = ["subvol=${subvol}" "relatime" "ssd" "discard=async" "space_cache=v2"];
-    neededForBoot = true;
-  };
-
   healthPackage = pkgs.writeShellScriptBin "finix-framework-health" ''
     set -u
     export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.iproute2 pkgs.nftables pkgs.procps pkgs.shadow pkgs.util-linux]}
@@ -30,7 +21,7 @@
     for mountpoint in /nix /persist /home /boot; do
       check mountpoint -q "$mountpoint"
     done
-    check test "$(id -u ${userName})" = 1000
+    check test "$(id -u ${config.user.name})" = 1000
     check sh -c "ip -4 -br address show dev wlp191s0 scope global | grep -q '^wlp191s0.*UP'"
     check sh -c "ip -4 route show default | grep -q '^default '"
     check sh -c "ss -ltn | grep -q ':2222 '"
@@ -52,17 +43,6 @@
 in {
   networking.hostName = "y0usaf-framework";
 
-  finix.diagnostics = {
-    inherit diskUuid;
-    fallbackDevices = ["/dev/nvme0n1p2"];
-    logDir = "finix-framework-boot";
-  };
-
-  hardware = {
-    firmware = [pkgs.linux-firmware];
-    cpu.amd.updateMicrocode = true;
-  };
-
   environment = {
     etc = {
       "finix-stage2".text = "framework-trial-1\n";
@@ -78,54 +58,6 @@ in {
     systemPackages = [pkgs.acpi healthPackage];
   };
 
-  boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
-    initrd.availableKernelModules = ["nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod"];
-    kernelModules = ["kvm-amd" "amdgpu"];
-    supportedFilesystems.efivarfs.enable = true;
-    kernelParams = [
-      "amd_pstate=active"
-      "amdgpu.ppfeaturemask=0xffffffff"
-      "amdgpu.dpm=1"
-      "console=tty0"
-      "panic=30"
-      "oops=panic"
-      "softlockup_panic=1"
-      "hung_task_panic=1"
-    ];
-  };
-
-  fileSystems = {
-    "/" = {
-      device = "none";
-      fsType = "tmpfs";
-      options = ["mode=755" "size=4G"];
-    };
-    "/tmp" = {
-      device = "none";
-      fsType = "tmpfs";
-      options = ["mode=1777" "size=8G" "nosuid" "nodev" "strictatime"];
-      neededForBoot = true;
-    };
-    "/nix" = subvolMount "@nix";
-    "/persist" = subvolMount "@persist";
-    "/home" = subvolMount "@home";
-    "/btrfs" = {
-      device = "/dev/disk/by-uuid/${diskUuid}";
-      fsType = "btrfs";
-      options = ["subvolid=5" "relatime" "ssd" "discard=async" "space_cache=v2"];
-      neededForBoot = true;
-    };
-    "/boot" = {
-      device = "/dev/disk/by-uuid/6951-2BA6";
-      fsType = "vfat";
-      options = ["fmask=0077" "dmask=0077"];
-      neededForBoot = true;
-    };
-    "/home/${userName}/.local/share/Steam" = subvolMount "@steam";
-    "/home/${userName}/dev" = subvolMount "@dev";
-  };
-
   services = {
     elogind.enable = true;
     power-profiles-daemon = {
@@ -139,6 +71,20 @@ in {
       auto-optimise-store = true;
       substituters = lib.mkBefore ["https://cache.nixos.org"];
     };
+    nftables.configFile = (import ../shared.nix {inherit lib pkgs;}).nftables "finix-framework.nft" {
+      input = ''
+        udp sport 67 udp dport 68 accept comment "DHCPv4 client"
+        udp sport 547 udp dport 546 accept comment "DHCPv6 client"
+        udp dport 41641 accept comment "Tailscale direct path"
+
+        iifname "wlp191s0" tcp dport 22000 accept comment "Syncthing TLS transport"
+        iifname "wlp191s0" udp dport { 21027, 22000 } accept comment "Syncthing discovery and QUIC"
+      '';
+      forward = ''
+        iifname "docker0" accept
+        oifname "docker0" accept
+      '';
+    };
   };
 
   programs = {
@@ -146,7 +92,7 @@ in {
     zzz.enable = true;
   };
 
-  users.users.${userName} = {
+  users.users.${config.user.name} = {
     uid = 1000;
     extraGroups = ["docker"];
   };
@@ -178,7 +124,6 @@ in {
           exclusive = true;
           indent = 8;
         };
-        displays."eDP-1".scale = 1;
       };
     };
   };
