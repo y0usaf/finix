@@ -9,7 +9,7 @@
 
   manzil.users."${config.user.name}".files = {
     ".config/devin/AGENTS.md".text =
-      config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
+      config.user.dev.prompts.shared;
     ".config/devin/config.json" = {
       type = "merge";
       format = "json";

@@ -13,5 +13,5 @@
   ];
 
   manzil.users."${config.user.name}".files.".config/crush/CRUSH.md".text =
-    config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
+    config.user.dev.prompts.shared;
 }

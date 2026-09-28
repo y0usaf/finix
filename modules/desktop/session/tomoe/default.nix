@@ -223,6 +223,8 @@
 
   peekParameters.bind = binding ["alt"] "p" "toggle" "Peek at the Desktop";
 in {
+  config.user.dev.prompts.host = ["`TOMOE_SOCKET`, `WAYLAND_DISPLAY` and `DBUS_SESSION_BUS_ADDRESS` in your environment point at the live tomoe session and its bus."];
+
   options.user.ui.tomoe = {
     layout = lib.mkOption {
       type = lib.types.enum ["deck" "sway"];

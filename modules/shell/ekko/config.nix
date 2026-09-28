@@ -9,6 +9,8 @@
     ".cache/ekko"
     ".config/ekko"
   ];
+  user.dev.prompts.host = ["`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals."];
+
   environment.systemPackages = [flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default];
   manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text =
     builtins.readFile ./init.lisp + "\n" + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp";

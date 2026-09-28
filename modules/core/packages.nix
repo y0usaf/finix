@@ -23,5 +23,8 @@
     pkgs.btrbk
     pkgs.fuse3
     pkgs.strace
+    pkgs.bc
+    pkgs.file
+    pkgs.hostname-debian
   ];
 }

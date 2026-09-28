@@ -24,7 +24,7 @@
     (pkgs.writeShellScriptBin "codex" ''
       exec ${lib.getExe flakeInputs.codex-cli-nix.packages."${pkgs.stdenv.hostPlatform.system}".default} \
         --dangerously-bypass-approvals-and-sandbox \
-        --config ${lib.escapeShellArg "developer_instructions=${builtins.toJSON (builtins.readFile ./system-prompt.md + "\n\n" + config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments)}"} \
+        --config ${lib.escapeShellArg "developer_instructions=${builtins.toJSON (builtins.readFile ./system-prompt.md + "\n\n" + config.user.dev.prompts.shared)}"} \
         "$@"
     '')
   ];

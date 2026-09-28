@@ -63,6 +63,6 @@ in {
       generator = toJSON;
       value = catalog.models;
     };
-    ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.ethics}\n\n${config.user.dev.prompts.noTests}\n\n${config.user.dev.prompts.noComments}\n";
+    ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n";
   };
 }

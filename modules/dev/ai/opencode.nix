@@ -26,7 +26,6 @@
           instructions = [
             "AGENTS.md"
             ".cursor/rules/*.md"
-            "{file:${config.user.homeDirectory}/.config/opencode/claude-instructions.md}"
             "{file:${config.user.homeDirectory}/.config/opencode/opencode-instructions.md}"
           ];
           lsp = {};
@@ -40,13 +39,6 @@
           "$schema" = "https://opencode.ai/tui.json";
           theme = "system";
         };
-      };
-
-      ".config/opencode/claude-instructions.md" = {
-        text = ''
-          Give candid, evidence-based feedback. State concrete strengths and
-          problems when relevant. Avoid reflexive praise and filler.
-        '';
       };
 
       ".config/opencode/opencode-instructions.md" = {
@@ -117,12 +109,7 @@
           - Skip greetings, filler, repeated plans, recaps, and unsolicited
             next steps. Add detail when the task requires it.
 
-          ${config.user.dev.prompts.ethics}
-
-          Tests:
-          ${config.user.dev.prompts.noTests}
-
-          ${config.user.dev.prompts.noComments}
+          ${config.user.dev.prompts.shared}
         '';
       };
     };
