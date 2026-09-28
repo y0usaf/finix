@@ -3,8 +3,6 @@
   pkgs,
   ...
 }: let
-  inherit (pkgs.stdenv.hostPlatform) system;
-
   mkNodeTool = {
     name,
     version,
@@ -48,8 +46,6 @@
     name,
     version,
     description,
-    tag ? "v${version}",
-    asset,
     hash,
     dynamic ? false,
   }:
@@ -58,15 +54,7 @@
       inherit version;
 
       src = pkgs.fetchurl {
-        url = "https://github.com/kunchenguid/${name}/releases/download/${tag}/${name}-${tag}-${
-          {
-            "x86_64-linux" = asset;
-          }
-          .${
-            system
-          }
-          or (throw "${name}: no release asset recorded for system '${system}'")
-        }.tar.gz";
+        url = "https://github.com/kunchenguid/${name}/releases/download/v${version}/${name}-v${version}-linux-amd64.tar.gz";
         inherit hash;
       };
 
@@ -148,7 +136,6 @@ in {
       name = "treehouse";
       version = "2.3.0";
       description = "Isolated per-task working copies for AI agents";
-      asset = "linux-amd64";
       hash = "sha256-lP0rLCDDWqwd3ClBMXiQrYLJkW9czsusSlDNp4Pu0Q8=";
       dynamic = true;
     })
@@ -157,7 +144,6 @@ in {
       name = "no-mistakes";
       version = "1.79.0";
       description = "Validation pipeline that reviews, tests, and opens pull requests";
-      asset = "linux-amd64";
       hash = "sha256-0XjIpRNHY7jl9tglRaOnYoX7vNwT0JAg0QkeyAo/jaY=";
     })
   ];
