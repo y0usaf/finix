@@ -100,7 +100,7 @@ in {
       home = "/home/y0usaf";
       shell = "${pkgs.rush}/bin/rush";
       extraGroups = ["wheel"];
-      passwordFile = lib.mkForce "/persist/secrets/password-hashes/${user}";
+      passwordFile = "/persist/secrets/password-hashes/${user}";
     };
   };
 }
