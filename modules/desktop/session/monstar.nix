@@ -1,11 +1,8 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }: {
-  user.defaults.terminal = lib.mkDefault "monstar";
-
   environment.systemPackages = [
     pkgs.monstar
   ];

@@ -11,7 +11,7 @@
     };
     terminal = lib.mkOption {
       type = lib.types.str;
-      default = "foot";
+      default = "monstar";
       description = "Default terminal emulator";
     };
     launcher = lib.mkOption {
