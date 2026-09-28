@@ -38,7 +38,7 @@ in {
           PasswordAuthentication = false;
           PermitRootLogin = "no";
           HostKey = lib.mkForce ["${persistedSshDir}/ssh_host_ed25519_key"];
-          AuthorizedKeysFile = ["${persistedSshDir}/authorized_keys.d/%u"];
+          AuthorizedKeysFile = lib.mkForce ["${persistedSshDir}/authorized_keys.d/%u"];
         };
       };
       nix-daemon = {
