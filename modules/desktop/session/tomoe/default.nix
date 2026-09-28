@@ -3,69 +3,52 @@
   lib,
   ...
 }: let
-  inherit
-    (lib)
-    concatStringsSep
-    filterAttrs
-    isAttrs
-    isBool
-    isFloat
-    isInt
-    isList
-    isString
-    mapAttrsToList
-    replaceStrings
-    toUpper
-    unique
-    ;
-  inherit (builtins) attrNames isPath length match typeOf;
-
   mkLispInline = form:
-    if isString form && match "[[:space:]]*" form == null
+    if lib.isString form && builtins.match "[[:space:]]*" form == null
     then {__toLispInline = form;}
     else throw "mkLispInline: expected a nonblank string";
 
   toLisp = v:
-    if isAttrs v && v ? __toLispInline
+    if lib.isAttrs v && v ? __toLispInline
     then v.__toLispInline
-    else if isAttrs v
+    else if lib.isAttrs v
     then let
-      present = filterAttrs (_: x: x != null) v;
-      entries = mapAttrsToList (k: x: ":|${replaceStrings ["\\" "|"] ["\\\\" "\\|"] (toUpper k)}| ${toLisp x}") present;
+      present = lib.filterAttrs (_: x: x != null) v;
+      entries = lib.mapAttrsToList (k: x: ":|${lib.replaceStrings ["\\" "|"] ["\\\\" "\\|"] (lib.toUpper k)}| ${toLisp x}") present;
     in
-      if length entries != length (unique (map toUpper (attrNames present)))
+      if builtins.length entries != builtins.length (lib.unique (map lib.toUpper (builtins.attrNames present)))
       then throw "toLisp: keys collide after ASCII uppercasing"
       else if entries == []
       then "nil"
-      else "(list ${concatStringsSep " " entries})"
-    else if isList v
+      else "(list ${lib.concatStringsSep " " entries})"
+    else if lib.isList v
     then
       if v == []
       then "nil"
-      else "(list ${concatStringsSep " " (map toLisp v)})"
-    else if isString v
-    then ''"${replaceStrings ["\\" "\""] ["\\\\" "\\\""] v}"''
-    else if isPath v
+      else "(list ${lib.concatStringsSep " " (map toLisp v)})"
+    else if lib.isString v
+    then ''"${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] v}"''
+    else if builtins.isPath v
     then toLisp "${v}"
     else if v == null
     then "nil"
-    else if isBool v
+    else if lib.isBool v
     then
       if v
       then "t"
       else "nil"
-    else if isInt v
+    else if lib.isInt v
     then toString v
-    else if isFloat v
+    else if lib.isFloat v
     then let
       json = builtins.toJSON v;
     in
       if json == "null"
       then throw "toLisp: cannot serialize a non-finite float"
-      else if match ".*[eE].*" json != null
-      then replaceStrings ["e" "E"] ["d" "d"] json
+      else if builtins.match ".*[eE].*" json != null
+      then lib.replaceStrings ["e" "E"] ["d" "d"] json
       else "${json}d0"
-    else throw "toLisp: cannot serialize ${typeOf v}";
+    else throw "toLisp: cannot serialize ${builtins.typeOf v}";
 
   inherit (config.user) defaults;
   cfg = config.user.ui.tomoe;

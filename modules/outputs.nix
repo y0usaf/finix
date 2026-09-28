@@ -16,13 +16,11 @@ inputs: let
           monstar = inputs.monstar.packages.${system}.default;
           ash = inputs.ash.packages.${system}.default;
         })
-        (_: prev: let
-          prevObsPlugins = prev.obs-studio-plugins;
-        in {
+        (_: prev: {
           obs-studio-plugins =
-            prevObsPlugins
+            prev.obs-studio-plugins
             // {
-              obs-vertical-canvas = prevObsPlugins.obs-vertical-canvas.overrideAttrs (old: {
+              obs-vertical-canvas = prev.obs-studio-plugins.obs-vertical-canvas.overrideAttrs (old: {
                 postPatch =
                   (old.postPatch or "")
                   + ''
