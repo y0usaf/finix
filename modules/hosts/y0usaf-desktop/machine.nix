@@ -56,10 +56,6 @@ in {
       "zenpower"
       "igc"
     ];
-    supportedFilesystems = {
-      btrfs.enable = true;
-      efivarfs.enable = true;
-    };
     kernelParams = [
       "amd_pstate=active"
       "mitigations=off"
