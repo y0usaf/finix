@@ -222,6 +222,28 @@
   };
 
   peekParameters.bind = binding ["alt"] "p" "toggle" "Peek at the Desktop";
+
+  switchClick = pkgs.fetchurl {
+    url = "https://quicksounds.com/uploads/tracks/918151184_174749704_164721627.mp3";
+    hash = "sha256-Amji9hOtJveumg4xb4ulHVerGnYbQ8KbfVkOKQfUs7Y=";
+  };
+
+  sounds = pkgs.runCommand "tomoe-sounds" {nativeBuildInputs = [pkgs.ffmpeg];} ''
+    mkdir $out
+    for i in 1 2 3; do
+      ffmpeg -v error -i ${./assets/sounds}/click_00$i.ogg -ar 48000 -ac 2 -c:a pcm_s16le $out/click-$i.wav
+    done
+    ffmpeg -v error -i ${switchClick} -ar 48000 -ac 2 -c:a pcm_s16le \
+      -af 'silenceremove=start_periods=1:start_threshold=-50dB,atrim=0:0.45,afade=t=out:st=0.35:d=0.1' $out/close.wav
+  '';
+
+  soundParameters = {
+    key = map (i: "${sounds}/click-${toString i}.wav") [1 2 3];
+    key-gain = -18;
+    key-spread = 0.35;
+    close = "${sounds}/close.wav";
+    close-gain = -6;
+  };
 in {
   config.user.dev.prompts.host = ["`TOMOE_SOCKET`, `WAYLAND_DISPLAY` and `DBUS_SESSION_BUS_ADDRESS` in your environment point at the live tomoe session and its bus."];
 
@@ -324,6 +346,8 @@ in {
     (builtins.readFile ./lisp/shader-wallpaper.lisp)
     "(defparameter +peek+ ${toLisp peekParameters})"
     (builtins.readFile ./lisp/peek.lisp)
+    "(defparameter +sounds+ ${toLisp soundParameters})"
+    (builtins.readFile ./lisp/sounds.lisp)
     cfg.extraConfig
   ];
 }

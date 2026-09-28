@@ -145,7 +145,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    tomoe.url = "git+file:///home/y0usaf/dev/maintaining/tomoe?rev=69416db4314dff61be3467570f14a258b1c0fd26&shallow=1";
+    tomoe.url = "git+file:///home/y0usaf/dev/maintaining/tomoe?rev=2e9381dbc83e5b9300f7b0229a2755b16e5959fa&shallow=1";
 
     strictix = {
       url = "github:y0usaf/strictix";
