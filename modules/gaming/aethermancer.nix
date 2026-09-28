@@ -3,13 +3,7 @@
   lib,
   ...
 }: {
-  options.user.gaming.aethermancer = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable Aethermancer configuration";
-    };
-  };
+  options.user.gaming.aethermancer.enable = lib.mkEnableOption "Aethermancer configuration";
   config = lib.mkIf config.user.gaming.aethermancer.enable {
     manzil.users."${config.user.name}".files.".config/unity3d/moi rai games/Aethermancer/prefs".text = ''
       <unity_prefs version_major="1" version_minor="1">
