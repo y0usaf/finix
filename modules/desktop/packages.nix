@@ -9,6 +9,7 @@
     pkgs.pulsemixer
     pkgs.xdg-utils
     pkgs.polkit_gnome
+    pkgs.gvfs
     pkgs.pcmanfm
     pkgs.mpv
     pkgs.ffmpeg

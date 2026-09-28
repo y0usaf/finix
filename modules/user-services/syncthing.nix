@@ -220,6 +220,7 @@ in {
   };
 
   config = {
+    environment.systemPackages = [pkgs.syncthing];
     finix.persistence.allowlist.users.${config.user.name}.directories = [
       ".config/syncthing"
       ".local/share/syncthing"

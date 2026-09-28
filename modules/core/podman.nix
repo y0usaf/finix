@@ -5,6 +5,7 @@
 }: {
   environment = {
     systemPackages = [
+      pkgs.podman
       (pkgs.writeShellScriptBin "docker" ''
         exec ${pkgs.podman}/bin/podman "$@"
       '')
