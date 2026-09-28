@@ -6,7 +6,6 @@
   ...
 }: let
   userName = config.user.name;
-  user = config.users.users.${userName};
 
   tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
 in {
@@ -36,7 +35,7 @@ in {
     description = "runtime dir for ${userName}";
     command = pkgs.writeShellScript "xdg-runtime-dir" ''
       export PATH=${lib.makeBinPath [pkgs.coreutils]}
-      install -d -m 0700 -o ${userName} -g users /run/user/${toString user.uid}
+      install -d -m 0700 -o ${userName} -g users /run/user/${toString config.users.users.${userName}.uid}
     '';
     log = true;
   };
