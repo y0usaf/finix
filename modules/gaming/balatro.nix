@@ -46,14 +46,14 @@ in {
     lib.mapAttrs' (
       _: mod:
         lib.nameValuePair
-        "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
+        "${config.user.paths.steam}/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro/Mods/${mod.name}"
         {
           source = mod.src;
         }
     )
     availableMods
     // {
-      "${lib.removePrefix "${config.user.homeDirectory}/" config.user.paths.steam}/steamapps/common/Balatro/version.dll" = {
+      "${config.user.paths.steam}/steamapps/common/Balatro/version.dll" = {
         source = "${pkgs.fetchzip {
           url = "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.8.0/lovely-x86_64-pc-windows-msvc.zip";
           sha256 = "sha256-tFDiYDRW5arGz92Knug6XnyhxYatUQ7iR/Wxfz6Hjw4=";

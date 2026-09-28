@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  inherit (config.user.paths) steam;
+  steam = "${config.user.homeDirectory}/${config.user.paths.steam}";
   fetch = url: hash: pkgs.fetchurl {inherit url hash;};
   cep =
     fetch
