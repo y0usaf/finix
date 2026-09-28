@@ -1,8 +1,5 @@
 # Repository layout
 
-This is the layout finix-lean is moving the repo to. Until it finishes, parts
-of the code still break the rules below.
-
 This repository configures y0usaf's machines on finix: it owns system
 integration and user configuration, not application implementations.
 Headlong operations live in `~/dev/developing/headlong-ops`. A project that
@@ -15,11 +12,19 @@ Don't create root-level `nix/`, `tests/` or `previews/` directories.
 builds every output with let bindings and plain functions. No module system
 runs at flake level.
 
-A host is a list of modules. The graphical hosts load every `.nix` file under
-the graphical roots, so each of those files is a module; the server names its
-modules one by one. The `hosts` attrset in `modules/outputs.nix` holds each
-host's list.
-`modules/hosts/common/` is the graphical role.
+A host is a list of modules, and the `hosts` attrset in `modules/outputs.nix`
+holds each host's list. Every host loads `modules/finix/common.nix`,
+`diagnostics.nix` and `sudo.nix`: the settings all hosts share, boot
+diagnostics and sudo. The graphical hosts load every `.nix` file under the
+graphical roots (`core`, `desktop`, `dev`, `gaming`, `shell`, `tools`,
+`user-services` and `hosts/common`), so each of those files is a module; the
+server names its modules one by one: its role in `modules/server/`, its host
+files and a few program modules.
+`modules/hosts/common/` is the graphical role. Its system layer,
+`modules/finix/desktop/`, is imported from `graphical.nix` instead of loaded
+as a root. Roots load in path order, and a list option merges in load order,
+so moving a module moves its packages, kernel modules and udev rules within
+those lists and changes the build.
 
 Loading a module turns it on. A module declares an option only when the hosts
 that load it need different values, or when three or more modules read the
@@ -29,11 +34,23 @@ uses is a let binding in that module.
 A program's module owns its packages, settings, dotfiles and persisted paths,
 and decides from hardware facts such as `hardware.nvidia.enable`, never from
 the hostname. A program that needs only its package is a line in its
-category's package list. A host directory under `modules/hosts/` holds what
-is true of that machine alone: hardware, displays, disks and boot, network
-identity, keys, and where it departs from its role. Persisted paths no module
-owns go in `modules/hosts/common/persist.nix` when both graphical hosts keep
-them, and in the host's directory when only that host does.
+category's package list: `core/packages.nix`, `desktop/packages.nix`,
+`dev/packages.nix`, `tools/packages.nix`, `gaming/core.nix` or
+`server/packages.nix`. `tools/tmux.nix` stays a module of its own because the
+server loads it by name. Persisted paths no module owns go in
+`modules/hosts/common/persist.nix` when both graphical hosts keep them, and in
+the host's `config.nix` when only that host does.
+
+Each host directory under `modules/hosts/` holds what is true of that machine
+alone, in two files beside its keys and other non-Nix files.
+`hardware-config.nix` holds facts about the machine: disks, btrfs subvolumes
+and mount options, boot, kernel and initrd modules, firmware, GPU and
+displays. `config.nix` holds the host's choices: hostname, open ports,
+host-only persisted paths, services, and where it departs from its role.
+`modules/hosts/shared.nix` holds the machinery the hosts share, a btrfs mount
+builder and the nftables ruleset, which each host calls with its own values;
+hosts import it, and no host list loads it. `modules/hosts/android-phone/` is
+the nix-on-droid phone.
 
 `modules/finix/sudo.nix` configures sudo itself and takes only the privileges
 provider from finix's sudo module. Leave `programs.sudo.enable` off: it also
@@ -41,6 +58,8 @@ installs the non-setuid sudo binary, which shadowed the
 `/run/wrappers/bin/sudo` wrapper on PATH (c9a60e8c).
 
 A directory holds a category or one module's assets. No file exists only to
-import others or to set values another module owns.
+import others or to set values another module owns, except
+`modules/finix/desktop/default.nix`, whose import keeps the graphical role's
+system layer at its place in that merge order.
 
 Validate with `nix build --no-link`, so no result link lands in the repo.
