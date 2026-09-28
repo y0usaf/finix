@@ -5,28 +5,24 @@
   ...
 }: let
   home = config.user.homeDirectory;
-  user = config.user.name;
   stateDir = "${home}/.local/share/r2t2";
-
-  src = pkgs.fetchgit {
-    url = "https://github.com/netease-youdao/Confucius4-R2T2";
-    rev = "80c22e6140bcb9166fb9906798894fc8b18c8309";
-    hash = "sha256-J965AYB3eh+FD4c790QiyDnaFT3TccW0bYXHGO7AeH4=";
-    fetchLFS = false;
-    fetchSubmodules = false;
-  };
 
   patched = pkgs.applyPatches {
     name = "Confucius4-R2T2-patched";
-    inherit src;
+    src = pkgs.fetchgit {
+      url = "https://github.com/netease-youdao/Confucius4-R2T2";
+      rev = "80c22e6140bcb9166fb9906798894fc8b18c8309";
+      hash = "sha256-J965AYB3eh+FD4c790QiyDnaFT3TccW0bYXHGO7AeH4=";
+      fetchLFS = false;
+      fetchSubmodules = false;
+    };
     patches = [./ws_server-memory-knobs.patch];
   };
 
   hfRev = "185ce639118ad1362d049ca0d8ed04b6ec5cd6c9";
-  hfBase = "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/${hfRev}";
   hfFile = name: hash:
     pkgs.fetchurl {
-      url = "${hfBase}/${name}";
+      url = "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/${hfRev}/${name}";
       inherit hash;
     };
 
@@ -97,28 +93,9 @@
   ];
 
   python = pkgs.python312;
-  inherit (pkgs) uv;
 
   cuda = pkgs.cudaPackages;
-  ldLibraryPath = lib.concatStringsSep ":" [
-    "/run/opengl-driver/lib"
-    "${pkgs.stdenv.cc.cc.lib}/lib"
-    "${pkgs.zlib}/lib"
-  ];
-  runtimeEnv = {
-    LD_LIBRARY_PATH = ldLibraryPath;
-    TRITON_LIBCUDA_PATH = "/run/opengl-driver/lib";
-    TRITON_PTXAS_PATH = "${cuda.cuda_nvcc}/bin/ptxas";
-    TRITON_CUOBJDUMP_PATH = "${cuda.cuda_cuobjdump}/bin/cuobjdump";
-    TRITON_NVDISASM_PATH = "${cuda.cuda_nvdisasm}/bin/nvdisasm";
-    PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True";
-    VLLM_WORKER_MULTIPROC_METHOD = "spawn";
-    CC = "${pkgs.stdenv.cc}/bin/cc";
-  };
-
   envDir = "${stateDir}/.venv";
-  runDir = "${stateDir}/run";
-  logDir = "${stateDir}/logs";
 
   notifyScript = pkgs.writeText "r2t2-notify-ready.py" ''
     import os, socket
@@ -140,7 +117,7 @@
   installScript = pkgs.writeShellScriptBin "r2t2-install" ''
     set -euo pipefail
     mkdir -p ${lib.escapeShellArg stateDir}
-    export PATH=${lib.makeBinPath [uv python pkgs.coreutils]}
+    export PATH=${lib.makeBinPath [pkgs.uv python pkgs.coreutils]}
 
     echo "r2t2-install: creating venv at ${envDir}"
     uv venv --python ${python}/bin/python3.12 ${envDir}
@@ -159,28 +136,38 @@ in {
   config = lib.mkIf config.hardware.nvidia.enable {
     environment.systemPackages = [installScript];
 
-    finix.persistence.allowlist.users."${user}".directories = [
+    finix.persistence.allowlist.users."${config.user.name}".directories = [
       (lib.removePrefix "${home}/" stateDir)
     ];
 
     finit.services.r2t2 = {
       description = "Confucius4-R2T2 streaming ASR server (vLLM, WebSocket)";
-      inherit user;
+      user = config.user.name;
       group = "users";
 
-      environment =
-        {
-          HOME = home;
-          PYTHONPATH = "${patched}";
-          ASR_MODEL_PATH = "${weights}";
-          VAD_MODEL_PATH = "${vad}";
-          ASR_GPU_MEMORY_UTILIZATION = toString 0.20;
-          ASR_MAX_MODEL_LEN = "4096";
-          ASR_MAX_NUM_BATCHED_TOKENS = "256";
-          ASR_ENFORCE_EAGER = "1";
-          ASR_SKIP_MM_PROFILING = "1";
-        }
-        // runtimeEnv;
+      environment = {
+        HOME = home;
+        PYTHONPATH = "${patched}";
+        ASR_MODEL_PATH = "${weights}";
+        VAD_MODEL_PATH = "${vad}";
+        ASR_GPU_MEMORY_UTILIZATION = toString 0.20;
+        ASR_MAX_MODEL_LEN = "4096";
+        ASR_MAX_NUM_BATCHED_TOKENS = "256";
+        ASR_ENFORCE_EAGER = "1";
+        ASR_SKIP_MM_PROFILING = "1";
+        LD_LIBRARY_PATH = lib.concatStringsSep ":" [
+          "/run/opengl-driver/lib"
+          "${pkgs.stdenv.cc.cc.lib}/lib"
+          "${pkgs.zlib}/lib"
+        ];
+        TRITON_LIBCUDA_PATH = "/run/opengl-driver/lib";
+        TRITON_PTXAS_PATH = "${cuda.cuda_nvcc}/bin/ptxas";
+        TRITON_CUOBJDUMP_PATH = "${cuda.cuda_cuobjdump}/bin/cuobjdump";
+        TRITON_NVDISASM_PATH = "${cuda.cuda_nvdisasm}/bin/nvdisasm";
+        PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True";
+        VLLM_WORKER_MULTIPROC_METHOD = "spawn";
+        CC = "${pkgs.stdenv.cc}/bin/cc";
+      };
 
       path = [pkgs.coreutils pkgs.gnugrep pkgs.stdenv.cc];
 
@@ -192,8 +179,8 @@ in {
         set -eu
         export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep python pkgs.stdenv.cc]}
 
-        run=${lib.escapeShellArg runDir}
-        mkdir -p "$run" ${lib.escapeShellArg logDir}
+        run=${lib.escapeShellArg "${stateDir}/run"}
+        mkdir -p "$run" ${lib.escapeShellArg "${stateDir}/logs"}
         install -m 0644 ${patched}/ws_server.py "$run/ws_server.py"
         mkdir -p "$run/logs/requests" "$run/wav_tmp_store"
 

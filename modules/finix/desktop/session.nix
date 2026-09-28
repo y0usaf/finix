@@ -5,11 +5,10 @@
   flakeInputs,
   ...
 }: let
-  sys = pkgs.stdenv.hostPlatform.system;
   userName = config.user.name;
   user = config.users.users.${userName};
 
-  tomoePkg = flakeInputs.tomoe.packages."${sys}".default;
+  tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
 in {
   finit.services.seatd.runlevels = lib.mkForce "234";
 
@@ -68,7 +67,7 @@ in {
         export GDK_BACKEND=wayland
         export SDL_VIDEODRIVER=wayland,x11
         export CLUTTER_BACKEND=wayland
-        export XCURSOR_THEME=${flakeInputs.cursors.packages."${sys}".deepin-dark.xcursorThemeName}
+        export XCURSOR_THEME=${flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark.xcursorThemeName}
         export XCURSOR_SIZE=24
         case ":''${XDG_DATA_DIRS:-}:" in
           *":/run/current-system/sw/share:"*) ;;
