@@ -4,15 +4,7 @@
   ...
 }: let
   version = "0.22.10";
-  distDir =
-    {
-      x86_64-linux = "ntn-linux-x64";
-      aarch64-linux = "ntn-linux-arm64";
-      x86_64-darwin = "ntn-darwin-x64";
-      aarch64-darwin = "ntn-darwin-arm64";
-    }.${
-      pkgs.stdenv.hostPlatform.system
-    };
+  distDir = "ntn-linux-x64";
 in {
   environment.systemPackages = [
     (pkgs.stdenvNoCC.mkDerivation {

@@ -4,9 +4,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.user.services.syncthing;
   userName = config.user.name;
-  inherit (config.users.users.${userName}) home;
 
   devices = {
     desktop.id = "KII4S2Y-KWA6M4K-MCQAUOO-C6PMX4L-V5JVDPW-HHZF52D-HP57BNH-EKCCZQC";
@@ -99,10 +97,8 @@
 
   renderDevice = name: let
     dev = devices.${name};
-    compression =
-      dev.compression or "metadata";
   in ''
-    <device id="${dev.id}" name="${dev.name or name}" compression="${compression}" introducer="false" skipIntroductionRemovals="false" introducedBy="">
+    <device id="${dev.id}" name="${dev.name or name}" compression="${dev.compression or "metadata"}" introducer="false" skipIntroductionRemovals="false" introducedBy="">
         <address>dynamic</address>
         <paused>false</paused>
         <autoAcceptFolders>false</autoAcceptFolders>
@@ -115,18 +111,14 @@
     </device>
   '';
 
-  enabledFolderNames =
-    if cfg.enabledFolders == null
-    then builtins.attrNames folders
-    else cfg.enabledFolders;
-
-  folderXml = lib.concatMapStringsSep "\n" renderFolder enabledFolderNames;
-  deviceXml = lib.concatMapStringsSep "\n" renderDevice (builtins.attrNames devices);
-
   seedConfigXml = pkgs.writeText "syncthing-config.xml" ''
     <configuration version="52">
-    ${folderXml}
-    ${deviceXml}
+    ${lib.concatMapStringsSep "\n" renderFolder (
+      if config.user.services.syncthing.enabledFolders == null
+      then builtins.attrNames folders
+      else config.user.services.syncthing.enabledFolders
+    )}
+    ${lib.concatMapStringsSep "\n" renderDevice (builtins.attrNames devices)}
     <gui enabled="true" tls="false" sendBasicAuthPrompt="false">
         <address>127.0.0.1:8384</address>
         <metricsWithoutAuth>false</metricsWithoutAuth>
@@ -229,10 +221,10 @@ in {
     finit.services.syncthing = {
       description = "syncthing file sync (${userName})";
       user = userName;
-      environment.HOME = home;
+      environment.HOME = config.users.users.${userName}.home;
       path = [pkgs.coreutils pkgs.gnugrep];
       command = let
-        cfgDir = "${home}/.config/syncthing";
+        cfgDir = "${config.users.users.${userName}.home}/.config/syncthing";
       in "${pkgs.writeShellScript "syncthing-seed" ''
         set -e
         CFG=${cfgDir}/config.xml
