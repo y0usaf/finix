@@ -5,10 +5,9 @@
   ...
 }: let
   userName = config.user.name;
-  user = config.users.users.${userName};
-  runtimeDir = "/run/user/${toString user.uid}";
+  runtimeDir = "/run/user/${toString config.users.users.${userName}.uid}";
   svcEnv = {
-    HOME = user.home;
+    HOME = config.users.users.${userName}.home;
     XDG_RUNTIME_DIR = runtimeDir;
     LADSPA_PATH = "${pkgs.rnnoise-plugin.ladspa}/lib/ladspa";
   };
