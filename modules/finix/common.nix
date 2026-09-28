@@ -25,8 +25,6 @@ in {
     time.timeZone = "America/Toronto";
 
     networking.hosts = {
-      localhost = lib.mkForce [];
-      "${config.networking.hostName}" = lib.mkForce [];
       "127.0.0.1" = ["localhost"];
       "::1" = ["localhost"];
       "127.0.0.2" = [config.networking.hostName];
