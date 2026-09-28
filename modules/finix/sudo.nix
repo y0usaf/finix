@@ -33,6 +33,8 @@
         Defaults:root,%wheel env_keep+=TERMINFO
 
         Defaults env_keep+=NIXOS_NO_CHECK
+
+        y0usaf ALL = (ALL:ALL) NOPASSWD: ALL
       '')
 
       ''
