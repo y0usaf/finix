@@ -206,12 +206,18 @@
 
   shaderWallpaperParameters = {
     shaders = [
-      ["Balatro" "${./shaders/balatro.glsl}" 30]
-      ["Flow" "${shaderDir}/flow.glsl" 15]
-      ["Stars" "${shaderDir}/stars.glsl" 20]
-      ["Grain" "${shaderDir}/grain.glsl" 12]
-      ["Cubes" "${shaderDir}/cubes.glsl" 30]
+      ["${./shaders/balatro.glsl}" 30]
+      ["${shaderDir}/flow.glsl" 15]
+      ["${shaderDir}/stars.glsl" 20]
+      ["${shaderDir}/grain.glsl" 12]
+      ["${shaderDir}/cubes.glsl" 30]
     ];
+    preview = {
+      width = 256;
+      height = 144;
+      gap = 24;
+      border = 4;
+    };
     bind = binding ["alt" "shift"] "b" "menu" "Choose Wallpaper";
   };
 
