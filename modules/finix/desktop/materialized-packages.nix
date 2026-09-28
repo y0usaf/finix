@@ -5,7 +5,6 @@
   ...
 }: {
   environment.systemPackages = [
-    pkgs.tailscale
     pkgs.syncthing
     pkgs.podman
     pkgs.gvfs
