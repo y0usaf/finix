@@ -29,5 +29,5 @@
                                                                    :width width :height height)))
                                            :anchors '(:bottom)
                                            :margin (list 0 0 (getf +bongo-cat+ :margin-bottom) 0)
-                                           :layer :overlay :background "#00000000")))
+                                           :layer :overlay :background "#00000000" :click-through t)))
               nil))))
