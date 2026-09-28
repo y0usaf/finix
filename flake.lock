@@ -891,11 +891,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787372347,
-        "narHash": "sha256-Foo41OtooHMiBITAFKdOhitmjrMZqcGy1epJNz7sNQ4=",
+        "lastModified": 1789370898,
+        "narHash": "sha256-QBlvSGth1NfAWw7iePOzFlrz0/pX6CfkFCcPALdySNI=",
         "owner": "ryoppippi",
         "repo": "nix-bun",
-        "rev": "fee8f233ad9409be44259b4f428f83ecb2812e37",
+        "rev": "48e887d7955c1c05b8d4627ed39bafe4bf2455a7",
         "type": "github"
       },
       "original": {
@@ -1316,11 +1316,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1788892928,
-        "narHash": "sha256-cwpM39q3smI2PluzN48iqXN3It9WvKchhoQhgqBnS3Q=",
+        "lastModified": 1790600578,
+        "narHash": "sha256-O7tEIQdCipujZ5HQ7G3thYnOf8kfQM/CsHH4axBsfuU=",
         "owner": "can1357",
         "repo": "oh-my-pi",
-        "rev": "a33cc26824e3c91edd9fa42d681f10dceb4ac2f0",
+        "rev": "cabfa74e1f6b4e8f53d1afb71b652c024db339fd",
         "type": "github"
       },
       "original": {
@@ -1401,15 +1401,16 @@
         ],
         "oh-my-pi": "oh-my-pi_2",
         "piSrc": "piSrc",
+        "primeAgentCatalogSrc": "primeAgentCatalogSrc",
         "primeAgentSrc": "primeAgentSrc",
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1789542997,
-        "narHash": "sha256-cvrfA1REngAIHMfbSGL546lHcjFsKvS1bOfsMlJCnZg=",
+        "lastModified": 1790606328,
+        "narHash": "sha256-BFjYOpoPYvlYIpiV/VZD6/xFHtoOTsF8KwMwnY4hB2w=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "ba755ba39fefb68ff92906149d74d8e961ba96a8",
+        "rev": "db1af691af541fa76e72709c71665180e2539b57",
         "type": "github"
       },
       "original": {
@@ -1446,28 +1447,44 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1788881454,
-        "narHash": "sha256-24TjUxk1H6AX3TRYljCb8JivkZftEgvunuYKzUUiCuE=",
+        "lastModified": 1790600108,
+        "narHash": "sha256-XjZiiJb3F6AJ/lw9XPbcyMDdUUdXOeTDAheyYzIZ1A8=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "6160683a4a8012f0d1cd30c145df18b4ca6f5176",
+        "rev": "c1449660c83fd00a7c71d5f7e1bd29fafd400550",
         "type": "github"
       },
       "original": {
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "6160683a4a8012f0d1cd30c145df18b4ca6f5176",
+        "rev": "c1449660c83fd00a7c71d5f7e1bd29fafd400550",
+        "type": "github"
+      }
+    },
+    "primeAgentCatalogSrc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790116558,
+        "narHash": "sha256-gNJ9UDaqcEzGcXrPd6XFU38eyZv+lko29ZdEmuZwRO8=",
+        "owner": "PrimeIntellect-ai",
+        "repo": "prime-agent-catalog",
+        "rev": "d3f43ad14d87caa99662d7a62f0d658ab12afa86",
+        "type": "github"
+      },
+      "original": {
+        "owner": "PrimeIntellect-ai",
+        "repo": "prime-agent-catalog",
         "type": "github"
       }
     },
     "primeAgentSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1788906120,
-        "narHash": "sha256-H7slYT1bFpbjL/MVpPIBr0GIiluijHy/Zc5KMyM6uss=",
+        "lastModified": 1790529879,
+        "narHash": "sha256-HbmWgdaqyXVRaXmgWJaVY4DO9Zk+GM3keKzz6Bg59P8=",
         "ref": "main",
-        "rev": "0894de1ded368f175b41baeb16ba3a58ec66f828",
-        "revCount": 4650,
+        "rev": "2d24ad4e6b2d1ee8e6919af6f108e980a14d550e",
+        "revCount": 4865,
         "type": "git",
         "url": "https://github.com/PrimeIntellect-ai/prime-agent"
       },
