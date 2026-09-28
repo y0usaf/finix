@@ -32,19 +32,4 @@
       mode = "0644";
     };
   };
-
-  security.wrappers = {
-    newuidmap = {
-      setuid = true;
-      owner = "root";
-      group = "root";
-      source = "${pkgs.shadow}/bin/newuidmap";
-    };
-    newgidmap = {
-      setuid = true;
-      owner = "root";
-      group = "root";
-      source = "${pkgs.shadow}/bin/newgidmap";
-    };
-  };
 }
