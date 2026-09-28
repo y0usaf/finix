@@ -32,8 +32,6 @@ in {
       "127.0.0.2" = [config.networking.hostName];
     };
 
-    boot.initrd.supportedFilesystems.btrfs.enable = true;
-
     services = {
       sysklogd.enable = true;
       openssh = {
