@@ -206,13 +206,16 @@
 
   shaderWallpaperParameters = {
     shaders = [
-      ["${shaderDir}/flow.glsl" 15]
-      ["${shaderDir}/stars.glsl" 20]
-      ["${shaderDir}/grain.glsl" 12]
-      ["${shaderDir}/cubes.glsl" 30]
+      ["Balatro" "${./shaders/balatro.glsl}" 30]
+      ["Flow" "${shaderDir}/flow.glsl" 15]
+      ["Stars" "${shaderDir}/stars.glsl" 20]
+      ["Grain" "${shaderDir}/grain.glsl" 12]
+      ["Cubes" "${shaderDir}/cubes.glsl" 30]
     ];
-    bind = binding ["alt" "shift"] "b" "next" "Next Wallpaper";
+    bind = binding ["alt" "shift"] "b" "menu" "Choose Wallpaper";
   };
+
+  peekParameters.bind = binding ["alt"] "p" "toggle" "Peek at the Desktop";
 in {
   options.user.ui.tomoe = {
     layout = lib.mkOption {
@@ -311,6 +314,8 @@ in {
     (builtins.readFile ./lisp/bongo-cat.lisp)
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
     (builtins.readFile ./lisp/shader-wallpaper.lisp)
+    "(defparameter +peek+ ${toLisp peekParameters})"
+    (builtins.readFile ./lisp/peek.lisp)
     cfg.extraConfig
   ];
 }
