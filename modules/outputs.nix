@@ -1,6 +1,6 @@
 inputs: let
   system = "x86_64-linux";
-  inherit (basePkgs) lib;
+  inherit (pkgs) lib;
 
   mkPkgs = cudaSupport:
     import (toString inputs.nixpkgs) {
@@ -33,8 +33,7 @@ inputs: let
         })
       ];
     };
-  basePkgs = mkPkgs false;
-  pkgs = basePkgs;
+  pkgs = mkPkgs false;
 
   mkFinixSystem = {
     modules,
@@ -42,18 +41,14 @@ inputs: let
   }:
     inputs.finix.lib.finixSystem {
       inherit lib;
-      specialArgs = {
-        modulesPath = toString inputs.nixpkgs + "/nixos/modules";
-        flakeInputs = inputs;
-      };
+      specialArgs.flakeInputs = inputs;
       modules =
         [
           {
-            nixpkgs.pkgs = lib.mkDefault (
+            nixpkgs.pkgs =
               if cudaSupport
               then mkPkgs true
-              else basePkgs
-            );
+              else pkgs;
           }
           inputs.finix.nixosModules.bash
           inputs.finix.nixosModules.dhcpcd
@@ -138,16 +133,14 @@ inputs: let
   };
 
   mkDeploy = {
-    bootDriverName ? null,
+    bootDriverName ? "",
     defaultHost,
     name,
     toplevel,
     sshHost ? null,
     sshPort ? null,
   }: let
-    bootDriver = lib.optionalString (bootDriverName != null) bootDriverName;
     portStr = lib.optionalString (sshPort != null) (toString sshPort);
-    portOpt = lib.optionalString (sshPort != null) ":${toString sshPort}";
   in
     pkgs.writeShellScriptBin name ''
       set -euo pipefail
@@ -167,9 +160,9 @@ inputs: let
           exit 2
           ;;
       esac
-      if [ "$action" = boot ] && [ -n '${bootDriver}' ]; then
+      if [ "$action" = boot ] && [ -n '${bootDriverName}' ]; then
         echo "${name}: 'boot' cannot stage a boot slot on this host (stc has no bootloader here)." >&2
-        echo "  use: ${bootDriver} install, then oneshot, then promote" >&2
+        echo "  use: ${bootDriverName} install, then oneshot, then promote" >&2
         exit 1
       fi
 
@@ -201,7 +194,7 @@ inputs: let
         exit 0
       fi
 
-      remote_store="ssh://$remote_host${portOpt}?remote-program=/run/current-system/sw/bin/nix-store"
+      remote_store="ssh://$remote_host${lib.optionalString (sshPort != null) ":${toString sshPort}"}?remote-program=/run/current-system/sw/bin/nix-store"
 
       echo "==> copying persistent finix closure to $remote_host"
       nix copy --to "$remote_store" "$system_path"
