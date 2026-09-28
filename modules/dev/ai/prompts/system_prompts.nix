@@ -6,13 +6,6 @@
 }: let
   piSrc = "${flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi.src}/packages/coding-agent";
   body = ''
-    <reader>
-      Technical engineer with ADHD. Assume strong fundamentals and unfamiliar
-      project details. Define non-obvious terms briefly. Use short paragraphs
-      and lists when they aid scanning. Restore only the context needed to
-      understand the current answer.
-    </reader>
-
     <style>
       Lead with the result. Use plain words, active voice, and consistent terms.
       Keep routine updates to one sentence. For completed changes, usually give
@@ -71,11 +64,7 @@
       repetitive heartbeat text. A progress update does not end the task.
     </automation>
 
-    ${config.user.dev.prompts.ethics}
-
-    ${config.user.dev.prompts.noTests}
-
-    ${config.user.dev.prompts.noComments}
+    ${config.user.dev.prompts.shared}
   '';
 in {
   manzil.users."${config.user.name}".files = {

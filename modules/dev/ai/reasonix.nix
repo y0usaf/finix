@@ -38,7 +38,7 @@
   manzil.users."${config.user.name}".files = {
     ".reasonix/REASONIX.md" = {
       type = "copy";
-      text = config.user.dev.prompts.ethics + "\n\n" + config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments;
+      text = config.user.dev.prompts.shared;
     };
 
     ".reasonix/config.toml" = {

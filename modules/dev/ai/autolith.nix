@@ -18,22 +18,13 @@
   ];
 
   manzil.users.${config.user.name}.files.".config/autolith/init.lisp".text = ''
-    (define-context-contributor ethics-policy (request)
-      "Deliver the shared compaction/ethics instructions with every provider request."
+    (define-context-contributor shared-policy (request)
+      "Deliver the instructions every harness shares with every provider request."
       (declare (ignore request))
       (make-context-contribution
-       :identifier "ethics-policy"
-       :instruction "${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] config.user.dev.prompts.ethics}"
+       :identifier "shared-policy"
+       :instruction "${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] config.user.dev.prompts.shared}"
        :priority 39
-       :class :mandatory))
-
-    (define-context-contributor code-policy (request)
-      "Deliver the shared no-test and no-comment policies with every provider request."
-      (declare (ignore request))
-      (make-context-contribution
-       :identifier "code-policy"
-       :instruction "${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] (config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments)}"
-       :priority 40
        :class :mandatory))
   '';
 
