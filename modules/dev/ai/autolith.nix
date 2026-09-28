@@ -23,7 +23,7 @@
       (declare (ignore request))
       (make-context-contribution
        :identifier "ethics-policy"
-       :instruction ${"\"" + lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] config.user.dev.prompts.ethics + "\""}
+       :instruction "${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] config.user.dev.prompts.ethics}"
        :priority 39
        :class :mandatory))
 
@@ -32,7 +32,7 @@
       (declare (ignore request))
       (make-context-contribution
        :identifier "code-policy"
-       :instruction ${"\"" + lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] (config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments) + "\""}
+       :instruction "${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] (config.user.dev.prompts.noTests + "\n\n" + config.user.dev.prompts.noComments)}"
        :priority 40
        :class :mandatory))
   '';
