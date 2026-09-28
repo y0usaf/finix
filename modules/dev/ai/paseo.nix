@@ -6,7 +6,6 @@
   ...
 }: let
   cfg = config.user.dev.paseo;
-  paseo = flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default;
   home = config.user.homeDirectory;
 in {
   options.user.dev.paseo = {
@@ -41,7 +40,7 @@ in {
   };
 
   config = {
-    environment.systemPackages = [paseo];
+    environment.systemPackages = [flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default];
 
     finit.services.paseo = {
       description = "Paseo - self-hosted daemon for AI coding agents";
@@ -66,7 +65,7 @@ in {
             export "$name"="$value"
           done
         fi
-        exec ${paseo}/bin/paseo-server ${lib.optionalString (!cfg.relay.enable) "--no-relay"}
+        exec ${flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/paseo-server ${lib.optionalString (!cfg.relay.enable) "--no-relay"}
       ''}";
       environment =
         {
