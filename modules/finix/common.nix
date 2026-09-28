@@ -41,11 +41,8 @@ in {
         settings = {
           PasswordAuthentication = false;
           PermitRootLogin = "no";
-          KbdInteractiveAuthentication = false;
           HostKey = lib.mkForce ["${persistedSshDir}/ssh_host_ed25519_key"];
-          AuthorizedKeysFile = lib.mkForce ["${persistedSshDir}/authorized_keys.d/%u"];
-          UsePAM = lib.mkForce true;
-          StrictModes = lib.mkForce true;
+          AuthorizedKeysFile = ["${persistedSshDir}/authorized_keys.d/%u"];
         };
       };
       nix-daemon = {
