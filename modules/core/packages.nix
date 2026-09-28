@@ -17,5 +17,6 @@
     pkgs.alejandra
     pkgs.statix
     pkgs.deadnix
+    pkgs.bluez-tools
   ];
 }
