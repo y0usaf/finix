@@ -40,5 +40,6 @@
     pkgs.gamescope
     pkgs.gamemode
     pkgs.protontricks
+    pkgs.dualsensectl
   ];
 }
