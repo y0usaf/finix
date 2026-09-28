@@ -343,11 +343,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1790504183,
-        "narHash": "sha256-IynieN1oO3Vc0AIdW/kUh299Z+QsfQcZVLYQasXnfTE=",
+        "lastModified": 1790597975,
+        "narHash": "sha256-qkVAx/4xAq8uj84JlOTHIS4vC5hRhIcQU7lLK6a3cYQ=",
         "owner": "y0usaf",
         "repo": "cudaterm",
-        "rev": "8e8dd4cbef82537303eebd09766afdcb8e684dad",
+        "rev": "868cd7176ec388172504046eef74ce811001d495",
         "type": "github"
       },
       "original": {
@@ -418,11 +418,11 @@
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1790501270,
-        "narHash": "sha256-xBWHmQywH1yIoPMT5d8APdYzEA3++cHwLP8AGMRHl4A=",
+        "lastModified": 1790593734,
+        "narHash": "sha256-xESCq261Yd1/DLY7nasE0O41U0saXqalGt480zihnC0=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "44ff63bd8f8701fd2ef08744bf1a7985b9f1e5b8",
+        "rev": "0f579f0de0bc33ec0cdea552de4366fe06a4ee30",
         "type": "github"
       },
       "original": {
@@ -1892,16 +1892,16 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1790504307,
-        "narHash": "sha256-x2T9LSfVPobWj3hRU+9vferx0wOhXuF3r5nl6S5AJBM=",
+        "lastModified": 1790597938,
+        "narHash": "sha256-k4b+LK64/+CLRuYQcbaBY5L/cUcQwAB3WhDcn5moQFY=",
         "ref": "refs/heads/main",
-        "rev": "b43267ecd8d0435913b602fd78eabae9f0916ea7",
+        "rev": "7f78fe501083870209b49c3b90e9484f1e0bb708",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
       },
       "original": {
-        "rev": "b43267ecd8d0435913b602fd78eabae9f0916ea7",
+        "rev": "7f78fe501083870209b49c3b90e9484f1e0bb708",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
