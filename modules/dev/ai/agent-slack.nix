@@ -28,6 +28,7 @@
         homepage = "https://github.com/stablyai/agent-slack";
         license = lib.licenses.mit;
         mainProgram = "agent-slack";
+        platforms = ["x86_64-linux"];
         sourceProvenance = [lib.sourceTypes.binaryNativeCode];
       };
     })
