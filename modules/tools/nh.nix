@@ -10,9 +10,6 @@
       flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
     ];
     variables.NH_FLAKE = "${config.user.homeDirectory}/finix";
-    etc."profile.d/nh.sh".text = ''
-      export NH_FLAKE=/home/y0usaf/finix
-    '';
   };
   user.shell.rcExtra = lib.mkAfter ''
     nhs() {
