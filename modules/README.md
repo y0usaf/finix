@@ -58,12 +58,14 @@ its build reads gitignored Valve files that only a `path:` ref of the live
 checkout sees, and a locked `path:` input would fail every evaluation of this
 flake whenever that checkout changed. `config.nix` is the personal layer, a
 NixOS module that reuses `tools/git.nix` and `tools/tmux.nix` and links files
-with manzil. `deploy.nix` builds `finix-frame-deploy`, which extends the
-checkout's `nixosConfigurations.frame` with manzil's NixOS module, that layer
-and manzil's static aarch64 linker, cross-built on this machine (`--impure`),
-then copies and switches the Frame over ssh. The rest of the closure builds under the qemu
-aarch64 binfmt handler; `finix-frame-deploy` names the command that registers
-it when it is missing.
+with manzil; `bolo.nix` runs bolo on the CPU and fetches its speech model at
+boot into the big home partition, out of the small root. `deploy.nix` builds
+`finix-frame-deploy`, which extends the checkout's `nixosConfigurations.frame`
+with manzil's NixOS module, that layer, manzil's static aarch64 linker
+(cross-built on this machine) and bolo's aarch64 packages (`--impure`), then
+copies and switches the Frame over ssh. The rest of the closure builds under
+the qemu aarch64 binfmt handler; `finix-frame-deploy` names the command that
+registers it when it is missing.
 
 `modules/finix/sudo.nix` configures sudo itself and takes only the privileges
 provider from finix's sudo module. Leave `programs.sudo.enable` off: it also
