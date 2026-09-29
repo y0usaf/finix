@@ -207,9 +207,10 @@
   shaderWallpaperParameters = {
     shaders = [
       ["${./shaders/balatro.glsl}" 30]
-      ["${shaderDir}/flow.glsl" 15]
-      ["${shaderDir}/stars.glsl" 20]
-      ["${shaderDir}/grain.glsl" 12]
+      ["${shaderDir}/xmb.glsl" 30]
+      ["${shaderDir}/aurora.glsl" 30]
+      ["${shaderDir}/stars.glsl" 24]
+      ["${shaderDir}/towers.glsl" 24]
       ["${shaderDir}/cubes.glsl" 30]
     ];
     preview = {
