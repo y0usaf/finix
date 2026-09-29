@@ -6,3 +6,4 @@ enabled = ["unused-option"]
 
 [schemas]
 "modules/hosts/android-phone" = ".strictix/droid.json"
+"modules/hosts/steam-frame" = ""
