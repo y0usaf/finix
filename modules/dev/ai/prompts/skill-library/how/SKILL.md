@@ -5,6 +5,11 @@ description: "Use for \"how does X work\", code walkthroughs before changing som
 
 # How
 
+## Agent compatibility
+
+Use the active agent’s available tools and follow its permissions and delegation rules. Tool names and parameter examples below describe intent; translate them to the native API rather than sending unsupported fields. Select only models available in the current session, preserving each role’s purpose; use the parent model when model selection is unavailable. Respect concurrency limits and queue excess workers. If delegation is unavailable, perform the passes sequentially and disclose the loss of independent review. Use local execution when cloud workers are unavailable. Resolve supporting resources relative to this skill’s directory. Do not assume another named skill or plugin is installed; use an available equivalent or report the missing capability.
+
+
 Explore the codebase to answer "how does X work?" questions. Produce clear architectural explanations at the level of a senior engineer onboarding onto a subsystem. Enough to build a working mental model, not annotated source code.
 
 Two modes:
