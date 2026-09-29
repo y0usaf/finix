@@ -94,6 +94,8 @@ in {
         value = {
           inherit (catalog) defaultProvider defaultModel defaultThinkingLevel enabledModels;
           packages = [];
+          defaultTools = ["+codemode"];
+          codemode.mode = "only";
           compaction.enabled = false;
           showHardwareCursor = true;
           editorPaddingX = 0;
