@@ -96,9 +96,7 @@ in {
         generator = toJSON;
         value = {
           inherit (catalog) defaultProvider defaultModel defaultThinkingLevel enabledModels;
-          packages = [
-            "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
-          ];
+          packages = [];
           compaction.enabled = false;
           showHardwareCursor = true;
           editorPaddingX = 0;
@@ -118,19 +116,6 @@ in {
           quietStartup = true;
           doubleEscapeAction = "tree";
           treeFilterMode = "default";
-          extensionSettings = {
-            "codex-fast" = false;
-            "pi-compact" = {
-              tools = {
-                mode = "compact";
-                gap = false;
-              };
-              user = {
-                mode = "borderless";
-                gap = true;
-              };
-            };
-          };
           symbols = {
             preset = "ascii";
             overrides = {};
@@ -143,36 +128,6 @@ in {
       ".pi/agent/models.json" = {
         generator = toJSON;
         value = catalog.models;
-      };
-
-      ".pi/agent/pi-agents.json" = {
-        generator = toJSON;
-        value = {
-          maxDepth = 999;
-          maxLiveAgents = 999;
-          orchestrator = false;
-          model = "${catalog.defaultProvider}/${catalog.defaultModel}";
-          panelModels = [
-            "vercel-ai-gateway/moonshotai/kimi-k3"
-            "vercel-ai-gateway/anthropic/claude-fable-5"
-            "vercel-ai-gateway/openai/gpt-5.6-sol"
-          ];
-        };
-      };
-
-      ".pi/agent/caveman.json" = {
-        generator = toJSON;
-        value = {
-          defaultLevel = "ultra";
-          showStatus = true;
-        };
-      };
-
-      ".pi/agent/ponytail.json" = {
-        generator = toJSON;
-        value = {
-          defaultMode = "ultra";
-        };
       };
 
       ".pi/workflows/goal-loop.json".source = ./goal-loop.json;
