@@ -273,26 +273,6 @@
         "type": "github"
       }
     },
-    "codex-desktop-linux": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1785188398,
-        "narHash": "sha256-GAmPIzbtjJW3NIW4l1NNjMMgGhweQ5EKE3Qt4hRq+Qk=",
-        "owner": "y0usaf",
-        "repo": "codex-desktop-flake",
-        "rev": "04438379d11c15ff23d88f85d700fe781cf53fba",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "repo": "codex-desktop-flake",
-        "type": "github"
-      }
-    },
     "crane": {
       "locked": {
         "lastModified": 1784564969,
@@ -1538,7 +1518,6 @@
         "claude-code-nix": "claude-code-nix",
         "claude-desktop-linux": "claude-desktop-linux",
         "codex-cli-nix": "codex-cli-nix",
-        "codex-desktop-linux": "codex-desktop-linux",
         "cudaterm": "cudaterm",
         "cursors": "cursors",
         "deno2nix": "deno2nix",
