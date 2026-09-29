@@ -61,11 +61,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    codex-desktop-linux = {
-      url = "github:y0usaf/codex-desktop-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     claude-desktop-linux = {
       url = "github:aaddrick/claude-desktop-debian";
       inputs.nixpkgs.follows = "nixpkgs";

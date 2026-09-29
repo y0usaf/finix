@@ -6,7 +6,6 @@
   ...
 }: {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
-    ".config/Codex"
     ".config/codex"
     ".local/state/codex"
   ];
