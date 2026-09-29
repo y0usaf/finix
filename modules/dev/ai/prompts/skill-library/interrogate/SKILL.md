@@ -6,6 +6,11 @@ disable-model-invocation: true
 
 # Interrogate
 
+## Agent compatibility
+
+Use the active agent’s available tools and follow its permissions and delegation rules. Tool names and parameter examples below describe intent; translate them to the native API rather than sending unsupported fields. Select only models available in the current session, preserving each role’s purpose; use the parent model when model selection is unavailable. Respect concurrency limits and queue excess workers. If delegation is unavailable, perform the passes sequentially and disclose the loss of independent review. Use local execution when cloud workers are unavailable. Resolve supporting resources relative to this skill’s directory. Do not assume another named skill or plugin is installed; use an available equivalent or report the missing capability.
+
+
 Spawn one reviewer per configured model to adversarially review code changes. Each model gets the same prompt and rubric. The adversarial signal comes from model diversity, not assigned personas. Models differ in blind spots, priors, and reasoning patterns. Agreement across models is high-confidence signal; lone-model findings are worth reading but lower confidence.
 
 The deliverable is a synthesized verdict. Do NOT auto-apply changes.
@@ -33,7 +38,7 @@ Write one clear paragraph. Reviewers challenge whether the work achieves the int
 
 ## Step 3, Spawn Reviewers
 
-Launch all reviewers in a single message using the Pi agent orchestration. Use the `interrogate reviewers` list from `the Finix-managed Pi model configuration` when present, one reviewer per entry, extending or shrinking the Reviewer A/B/C/D labels below to the configured entry count; otherwise use the table defaults.
+Launch all reviewers in a single message using the active agent’s native subagent tools. Use the `interrogate reviewers` list from the active agent’s model configuration when present, one reviewer per entry, extending or shrinking the Reviewer A/B/C/D labels below to the configured entry count; otherwise use the table defaults.
 
 | Subagent | Default model |
 |----------|---------------|
@@ -47,7 +52,7 @@ For each reviewer:
 - `model`: the configured `interrogate reviewers` entry, or the table default with no configured line
 - `readonly`: `true`
 
-If a model slug is rejected as unresolvable when you try to spawn the subagent, check the valid slugs in the Pi agent orchestration's error message, pick the closest equivalent (prefer the highest-reasoning tier of the same family), spawn with the valid slug, and open a separate PR to update the configured value or default table. Do not block the review on the slug issue. If the configured value is `inherit-parent` or `auto`, omit `model` instead; never treat those aliases as broken slugs or enter this fallback for them.
+If a model slug is rejected as unresolvable when you try to spawn the subagent, check the valid slugs in the active agent’s native subagent tools's error message, pick the closest equivalent (prefer the highest-reasoning tier of the same family), spawn with the valid slug, and open a separate PR to update the configured value or default table. Do not block the review on the slug issue. If the configured value is `inherit-parent` or `auto`, omit `model` instead; never treat those aliases as broken slugs or enter this fallback for them.
 
 Read `references/reviewer-prompt.md` and fill in the template with:
 1. The stated intent
