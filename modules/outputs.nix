@@ -639,6 +639,7 @@ in {
     finix-frame-deploy = import ./hosts/steam-frame/deploy.nix {inherit inputs pkgs;};
     inherit (hosts.y0usaf-desktop.config.system.build) p4g-setup;
     tomoe = inputs.tomoe.packages.${system}.default;
+    chatgpt = hosts.y0usaf-desktop.config.system.build.chatgpt;
   };
 
   checks.${system}.y0usaf-desktop = hosts.y0usaf-desktop.config.system.build.toplevel;
