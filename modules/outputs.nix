@@ -636,6 +636,7 @@ in {
       toplevel = hosts.y0usaf-desktop.config.system.topLevel;
       defaultHost = "local";
     };
+    finix-frame-deploy = import ./hosts/steam-frame/deploy.nix {inherit inputs pkgs;};
     inherit (hosts.y0usaf-desktop.config.system.build) p4g-setup;
     tomoe = inputs.tomoe.packages.${system}.default;
   };

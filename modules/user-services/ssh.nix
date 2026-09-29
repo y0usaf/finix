@@ -56,6 +56,17 @@ in {
             IdentitiesOnly yes
             ForwardAgent yes
 
+        Host steam-frame frame-nixos
+            HostName frame-nixos.home
+            User steamos
+            IdentityFile ${homeDir}/.ssh/id_rsa_frame
+            IdentitiesOnly yes
+            ControlMaster no
+            ControlPath none
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            LogLevel error
+
         Host github.com
             HostName github.com
             User git
