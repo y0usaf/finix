@@ -19,9 +19,7 @@
         inherit (config.user.dev.modelCatalog) defaultProvider defaultModel defaultThinkingLevel enabledModels;
         rlmMaxDepth = 999;
         hideThinkingBlock = true;
-        packages = [
-          "/home/y0usaf/dev/maintaining/pi-flake/extensions/pi-vercel-ai-gateway"
-        ];
+        packages = [];
       };
     };
 
