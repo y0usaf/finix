@@ -7,12 +7,10 @@
 #define SPIN_AMOUNT 0.25
 #define SPIN_ROTATION -2.0
 #define SPEED 7.0
-#define PIXEL_FILTER 745.0
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float diagonal = length(iResolution.xy);
-    float pixel = diagonal / PIXEL_FILTER;
-    vec2 uv = (floor(fragCoord / pixel) * pixel - 0.5 * iResolution.xy) / diagonal;
+    vec2 uv = (fragCoord - 0.5 * iResolution.xy) / diagonal;
     float radius = length(uv);
     float angle = atan(uv.y, uv.x) + 302.2 + 0.2 * SPIN_ROTATION
                 - 20.0 * (SPIN_AMOUNT * radius + 1.0 - SPIN_AMOUNT);
