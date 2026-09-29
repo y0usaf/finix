@@ -4,6 +4,20 @@
   pkgs,
   ...
 }: let
+  roots = [
+    ".agents/skills"
+    ".config/codex/skills"
+    ".claude/skills"
+    ".config/opencode/skills"
+    ".fx/skills"
+    ".config/phi/skills"
+    ".prime/agent/skills"
+    ".reasonix/skills"
+    ".omp/agent/skills"
+  ];
+  library = lib.listToAttrs (map (path:
+    lib.nameValuePair (lib.removePrefix "${toString ./skill-library}/" (toString path)) {source = path;})
+  (lib.filesystem.listFilesRecursive ./skill-library));
   skills = {
     anti-slop = {
       "SKILL.md".text = ''
@@ -322,14 +336,10 @@
     };
   };
 in {
-  manzil.users."${config.user.name}".files = lib.mkMerge (lib.concatLists (lib.mapAttrsToList (name: files:
-    map (root: lib.mapAttrs' (rel: spec: lib.nameValuePair "${root}/${name}/${rel}" spec) files) [
-      ".fx/skills"
-      ".pi/agent/skills"
-      ".config/phi/skills"
-      ".prime/agent/skills"
-      ".reasonix/skills"
-      ".omp/agent/skills"
-    ])
-  skills));
+  manzil.users."${config.user.name}".files = lib.mkMerge (
+    (map (root: lib.mapAttrs' (rel: spec: lib.nameValuePair "${root}/${rel}" spec) library) roots)
+    ++ lib.concatLists (lib.mapAttrsToList (name: files:
+      map (root: lib.mapAttrs' (rel: spec: lib.nameValuePair "${root}/${name}/${rel}" spec) files) roots)
+    skills)
+  );
 }
