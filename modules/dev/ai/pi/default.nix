@@ -12,18 +12,15 @@ in {
     type = lib.types.attrsOf lib.types.anything;
     description = "Shared coding-agent provider and model catalog.";
     default = {
-      defaultProvider = "opencode-go";
+      defaultProvider = "vercel-ai-gateway";
       defaultModel = "deepseek-v4.1-flash";
       defaultThinkingLevel = "max";
 
       enabledModels = [
-        "vercel-ai-gateway/deepseek/deepseek-v4.1-flash@wafer"
+        "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"
         "opencode-go/deepseek-v4.1-flash"
-        "openai-codex/gpt-6-astra"
-        "vercel-ai-gateway/zai/glm-5.3-flash@wafer"
-        "vercel-ai-gateway/openai/gpt-5.6-luna@azure"
-        "openai-codex/gpt-5.6-luna"
-        "bonsai/bonsai"
+        "anthropic/claude-opus-5.5"
+        "anthropic/claude-sonnet-5.5"
       ];
 
       models = {
