@@ -101,9 +101,6 @@ in {
           editorPaddingX = 0;
           steeringMode = "one-at-a-time";
           transport = "sse";
-          skills = [
-            "${./skills}"
-          ];
           options = {
             skills_paths = [
               "./.codex/skills"
