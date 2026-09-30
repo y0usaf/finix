@@ -123,7 +123,49 @@ in {
       };
       ".pi/agent/models.json" = {
         generator = toJSON;
-        value = catalog.models;
+        value = lib.recursiveUpdate catalog.models {
+          providers.openai-codex.models = [
+            {
+              id = "gpt-6.1-sol";
+              name = "GPT-6.1 Sol";
+              api = "openai-codex-responses";
+              reasoning = true;
+              input = ["text" "image"];
+              cost = {
+                input = 2;
+                output = 10;
+                cacheRead = 0.1;
+                cacheWrite = 2.5;
+                tiers = [
+                  {
+                    inputTokensAbove = 272000;
+                    input = 4;
+                    output = 15;
+                    cacheRead = 0.2;
+                    cacheWrite = 5;
+                  }
+                ];
+              };
+              contextWindow = 272000;
+              maxTokens = 128000;
+              thinkingLevelMap = {
+                off = null;
+                minimal = "low";
+                low = "low";
+                medium = "medium";
+                high = "high";
+                xhigh = "xhigh";
+                max = "max";
+              };
+              compat = {
+                supportsOpenAIGrammarTools = true;
+                supportsAdditionalTools = true;
+                supportsToolSearch = true;
+                supportsMidConvoSystemMessages = true;
+              };
+            }
+          ];
+        };
       };
 
       ".pi/workflows/goal-loop.json".source = ./goal-loop.json;
