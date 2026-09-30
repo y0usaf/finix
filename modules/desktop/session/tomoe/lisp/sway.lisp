@@ -65,7 +65,7 @@
     best))
 
 (define-extension "sway"
-    (:reads (:windows :rules :workareas :outputs :focus :key :button :request)
+    (:reads (:windows :rules :workareas :outputs :focus :key :button :pointer :request :settings)
      :state (list :active 1 :workspaces nil :trees nil :split nil :focus nil
                   :fullscreen nil :floating nil)
      :admission t)
@@ -135,6 +135,11 @@
       (case type
         (:button
          (when (and (eq (getf event :state) :pressed) (member (getf event :id) (workspace active)))
+           (setf focused (getf event :id))))
+        (:pointer
+         (when (and (eq (getf event :state) :enter) (getf event :moved)
+                    (setting snapshot :focus-follows-mouse)
+                    (member (getf event :id) (workspace active)))
            (setf focused (getf event :id))))
         ((:metadata :request)
          (let ((id (getf event :id)))

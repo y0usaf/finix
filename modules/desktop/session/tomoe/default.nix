@@ -320,7 +320,12 @@ in {
     ''
       (in-package #:tomoe-user)
       (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ lib.concatLists (lib.mapAttrsToList (key: value: [(keyword key) value]) settings)) cfg.displays)})
-      (defparameter +policy-settings+ ${toLisp ({honor-xdg-activation-with-invalid-serial = true;} // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
+      (defparameter +policy-settings+ ${toLisp ({
+          honor-xdg-activation-with-invalid-serial = true;
+          focus-follows-mouse = true;
+          pointer-follows-focus = true;
+        }
+        // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
       (defparameter +policy-launcher+ ${toLisp {
         app-id = "launcher";
         ratio = mkLispInline "1/3";
