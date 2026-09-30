@@ -41,6 +41,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    silva.url = "git+ssh://git@github.com/y0usaf/silva.git";
+
     fonts = {
       url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";
