@@ -1888,16 +1888,16 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1790683392,
-        "narHash": "sha256-+/tIjrxok3KE5/DgAjY6gs47afuOi6MoYillFOaOvVE=",
+        "lastModified": 1790732030,
+        "narHash": "sha256-JNZdWN05zd0yx7FXlHLqm1yn4ToxgTd4UngqwP7lCXw=",
         "ref": "refs/heads/main",
-        "rev": "c873b03a8ce671199fedc3ca824e0a29b60ce02c",
+        "rev": "9fdd68fcfd68602e73183b8bcb2fa961c5a04339",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"
       },
       "original": {
-        "rev": "c873b03a8ce671199fedc3ca824e0a29b60ce02c",
+        "rev": "9fdd68fcfd68602e73183b8bcb2fa961c5a04339",
         "shallow": true,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/tomoe"

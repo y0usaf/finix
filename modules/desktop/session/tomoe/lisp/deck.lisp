@@ -245,7 +245,8 @@ gone window left behind, or the keys go dead."
                   (getf state :fullscreen))))
 
 (define-extension "deck"
-    (:reads (:windows :rules :outputs :workareas :layout :focus :key :button :request)
+    (:reads (:windows :rules :outputs :workareas :layout :focus :key :button :pointer :request
+             :settings)
      :state (deck--state) :admission t)
     (snapshot state event)
   (let* ((windows (remove-if (lambda (window) (policy--unmanaged-p snapshot window))
@@ -304,7 +305,9 @@ gone window left behind, or the keys go dead."
       (deck--request state terminal :activate nil))
     (when (and (member type '(:metadata :request)) (member (getf event :id) ids))
       (deck--request state (getf event :id) (getf event :request) (getf event :requested)))
-    (when (and (eq type :button) (eql (getf event :state) :pressed))
+    (when (or (and (eq type :button) (eql (getf event :state) :pressed))
+              (and (eq type :pointer) (eq (getf event :state) :enter) (getf event :moved)
+                   (setting snapshot :focus-follows-mouse)))
       (let ((id (getf event :id)))
         (when (and (integerp id) (member id (deck--windows state)))
           (when (and (deck--manageable-p state id) (deck--side-of state id))
