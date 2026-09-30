@@ -6,6 +6,7 @@
   ...
 }: let
   catalog = config.user.dev.modelCatalog;
+  inherit (config.user.dev.pi) fallbackModels;
   toJSON = lib.generators.toJSON {};
 in {
   options.user.dev.modelCatalog = lib.mkOption {
@@ -76,6 +77,17 @@ in {
     };
   };
 
+  options.user.dev.pi.fallbackModels = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    description = "Models pi tries in order, as provider/model. The first usable one answers; a transient failure moves the request to the next usable one.";
+    default = [
+      "anthropic/claude-opus-5-5"
+      "anthropic/claude-sonnet-5-5"
+      "openai-codex/gpt-6.1-sol"
+      "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"
+    ];
+  };
+
   config = {
     finix.persistence.allowlist.users.${config.user.name}.directories = [
       ".config/pi/agent"
@@ -92,7 +104,11 @@ in {
       ".pi/agent/settings.json" = {
         generator = toJSON;
         value = {
-          inherit (catalog) defaultProvider defaultModel defaultThinkingLevel enabledModels;
+          inherit (catalog) defaultThinkingLevel;
+          inherit fallbackModels;
+          defaultProvider = "fallback";
+          defaultModel = "chain";
+          enabledModels = ["fallback/chain"] ++ catalog.enabledModels;
           packages = [];
           defaultTools = ["+codemode"];
           codemode.mode = "only";
@@ -118,6 +134,7 @@ in {
           };
           recap = {
             placement = "above";
+            model = lib.head catalog.enabledModels;
           };
         };
       };
@@ -168,6 +185,7 @@ in {
         };
       };
 
+      ".pi/agent/extensions/fallback.ts".source = ./fallback.ts;
       ".pi/workflows/goal-loop.json".source = ./goal-loop.json;
     };
   };
