@@ -26,6 +26,9 @@
         udp dport 27031-27036 accept comment "steam remotePlay"
         tcp dport 2234 accept comment "nicotine-plus Soulseek"
         udp dport 2234 accept comment "nicotine-plus Soulseek"
+
+        iifname "eno1" tcp dport 9757 accept comment "WiVRn server for the Steam Frame"
+        iifname "eno1" udp dport 9757 accept comment "WiVRn server for the Steam Frame"
       '';
     };
     sysklogd.extraConfig = "*.* @192.168.2.66:514";
