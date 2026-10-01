@@ -17,6 +17,8 @@
 (define-extension "bongo-cat" (:reads (:activity :services :data)
                                :state (list :left nil :right nil :idle :idle-a :sleeping nil :frame 0))
     (snapshot state event)
+  (unless (getf state :idle) (setf (getf state :idle) :idle-a))
+  (unless (getf state :frame) (setf (getf state :frame) 0))
   (let ((name (getf event :name)))
     (case (getf event :type)
       (:activity
