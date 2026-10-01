@@ -155,43 +155,47 @@
 
   palette = "${config.user.homeDirectory}/.cache/wallust/gtk-colors.css";
 
+  frameTick = 33;
+
+  hudParameters = {
+    font = "monospace, Bold";
+    icon-font = "Symbols Nerd Font";
+    emoji-font = "Noto Color Emoji";
+    height = 30;
+    shadow = 3;
+  };
+
+  hudThemeParameters = {
+    palette-file = palette;
+    palette-command = "mkdir -p ${lib.escapeShellArg (dirOf palette)} && { cat ${lib.escapeShellArg palette} 2>/dev/null || true; }";
+    border = 2;
+    focus-flash = 220;
+    tick = frameTick;
+  };
+
   barParameters = {
     modules = map keyword bar.modules;
     center-between = map keyword ["time" "date"];
     edges = map keyword bar.edges;
     inherit (bar) exclusive indent;
-    font = "monospace, Bold";
-    height = 24;
-    spacing = 8;
-    label-size = 14;
-    label-gap = 4;
-    border = 1;
-    padding = [2.1 4.2 2.1 4.2];
-    widths = {
-      battery = 58;
-      time = 74;
-      date = 74;
-      network = 96;
-      cpu = 104;
-      memory = 84;
-      gpu = 150;
+    margin = 6;
+    gap = 8;
+    inset = 84;
+    time = "%H:%M";
+    date = "%a %d %b";
+    clock-tick = 200;
+    tick = frameTick;
+    sample = {
+      cpu = 500;
+      memory = 1000;
+      gpu = 1000;
     };
-    time = "%H:%M:%S";
-    date = "%d/%m/%y";
-    clock-interval = 1000;
-    palette-file = palette;
-    palette-command = "mkdir -p ${lib.escapeShellArg (dirOf palette)} && { cat ${lib.escapeShellArg palette} 2>/dev/null || true; }";
-    sysinfo = {
-      cpu.interval = 1000;
-      memory.interval = 2000;
-      gpu.interval = 2000;
-    };
-    show = {
-      cpu-temp = true;
-      gpu-temp = true;
-      gpu-vram = true;
-      memory-absolute = false;
-    };
+    segments = 12;
+    history = 28;
+    tau = 0.11;
+    flash = 400;
+    hot = 80;
+    media-width = 34;
   };
 
   bongoParameters = {
@@ -199,7 +203,42 @@
     margin-bottom = 6;
     x-offset = -24;
     duration = 100;
+    idle = 60000;
+    groove = 380;
+    strip = 32;
+    bounce = 6;
+    bounce-ms = 260;
+    tick = frameTick;
     frames = "${./assets/bongo-cat}";
+  };
+
+  comboParameters = {
+    hands = [
+      [800 "FLUSH FIVE" 16 (keyword "color3")]
+      [500 "FIVE OF A KIND" 12 (keyword "color1")]
+      [300 "STRAIGHT FLUSH" 8 (keyword "color5")]
+      [200 "FOUR OF A KIND" 7 (keyword "color1")]
+      [140 "FULL HOUSE" 4 (keyword "color3")]
+      [100 "FLUSH" 4 (keyword "color5")]
+      [70 "STRAIGHT" 4 (keyword "color2")]
+      [45 "THREE OF A KIND" 3 (keyword "color6")]
+      [25 "TWO PAIR" 2 (keyword "color4")]
+      [10 "PAIR" 2 (keyword "color4")]
+      [0 "HIGH CARD" 1 (keyword "color8")]
+    ];
+    window = 1200;
+    show = 3;
+    cash-min = 5;
+    hold = 2400;
+    roll = 600;
+    pop = 160;
+    shake = 320;
+    fire = 7;
+    drain-width = 160;
+    offset = 104;
+    side = 240;
+    lift = 52;
+    tick = frameTick;
   };
 
   shaderDir = "${flakeInputs.tomoe.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/tomoe/examples/shaders";
@@ -291,7 +330,7 @@ in {
 
     bar = {
       modules = lib.mkOption {
-        type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu"]);
+        type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu" "vram" "media"]);
         default = ["time" "date"];
         description = "Bar overlay modules to render.";
       };
@@ -350,10 +389,16 @@ in {
     (builtins.readFile ./lisp/policy.lisp)
     (builtins.readFile layout.file)
     (builtins.readFile ./lisp/user.lisp)
+    "(defparameter +hud+ ${toLisp hudParameters})"
+    (builtins.readFile ./lisp/hud.lisp)
+    "(defparameter +hud-theme+ ${toLisp hudThemeParameters})"
+    (builtins.readFile ./lisp/theme.lisp)
     "(defparameter +bar+ ${toLisp barParameters})"
     (builtins.readFile ./lisp/bar.lisp)
     "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
     (builtins.readFile ./lisp/bongo-cat.lisp)
+    "(defparameter +combo+ ${toLisp comboParameters})"
+    (builtins.readFile ./lisp/combo.lisp)
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
     (builtins.readFile ./lisp/shader-wallpaper.lisp)
     "(defparameter +peek+ ${toLisp peekParameters})"
