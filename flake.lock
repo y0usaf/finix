@@ -140,6 +140,7 @@
         "flake-parts": "flake-parts_8",
         "nixpkgs": [
           "pi-harness",
+          "pi-flake",
           "oh-my-pi",
           "nixpkgs-darwin-x64"
         ],
@@ -190,6 +191,7 @@
         "flake-parts": "flake-parts_7",
         "nixpkgs": [
           "pi-harness",
+          "pi-flake",
           "oh-my-pi",
           "nixpkgs"
         ],
@@ -303,31 +305,16 @@
         "type": "github"
       }
     },
-    "crane_3": {
-      "locked": {
-        "lastModified": 1787326676,
-        "narHash": "sha256-lWhBbBvC05/xwivKBBiM2YNizpmgqCgyOIzomvRuwxs=",
-        "owner": "ipetkov",
-        "repo": "crane",
-        "rev": "692f7e9ef2ece8125b466f66f2af532b3edaed0d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ipetkov",
-        "repo": "crane",
-        "type": "github"
-      }
-    },
     "cudaterm": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1790597975,
-        "narHash": "sha256-qkVAx/4xAq8uj84JlOTHIS4vC5hRhIcQU7lLK6a3cYQ=",
+        "lastModified": 1790826755,
+        "narHash": "sha256-5C/wXsoBgCxdErsH5GTtbgQFMkk4rXeirsqvTBlzbYY=",
         "owner": "y0usaf",
         "repo": "cudaterm",
-        "rev": "868cd7176ec388172504046eef74ce811001d495",
+        "rev": "a94440665d0121bdb27599359ec3332c0257f938",
         "type": "github"
       },
       "original": {
@@ -396,6 +383,28 @@
           "nixpkgs"
         ],
         "terminal-browser": "terminal-browser"
+      },
+      "locked": {
+        "lastModified": 1790593734,
+        "narHash": "sha256-xESCq261Yd1/DLY7nasE0O41U0saXqalGt480zihnC0=",
+        "owner": "y0usaf",
+        "repo": "ekko",
+        "rev": "0f579f0de0bc33ec0cdea552de4366fe06a4ee30",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "ekko",
+        "type": "github"
+      }
+    },
+    "ekko_2": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-harness",
+          "nixpkgs"
+        ],
+        "terminal-browser": "terminal-browser_2"
       },
       "locked": {
         "lastModified": 1790593734,
@@ -578,6 +587,7 @@
       "inputs": {
         "nixpkgs-lib": [
           "pi-harness",
+          "pi-flake",
           "oh-my-pi",
           "bun2nix",
           "nixpkgs"
@@ -601,6 +611,7 @@
       "inputs": {
         "nixpkgs-lib": [
           "pi-harness",
+          "pi-flake",
           "oh-my-pi",
           "bun2nix-darwin-x64",
           "nixpkgs"
@@ -888,16 +899,17 @@
       "inputs": {
         "nixpkgs": [
           "pi-harness",
+          "pi-flake",
           "oh-my-pi",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1787372347,
-        "narHash": "sha256-Foo41OtooHMiBITAFKdOhitmjrMZqcGy1epJNz7sNQ4=",
+        "lastModified": 1789370898,
+        "narHash": "sha256-QBlvSGth1NfAWw7iePOzFlrz0/pX6CfkFCcPALdySNI=",
         "owner": "ryoppippi",
         "repo": "nix-bun",
-        "rev": "fee8f233ad9409be44259b4f428f83ecb2812e37",
+        "rev": "48e887d7955c1c05b8d4627ed39bafe4bf2455a7",
         "type": "github"
       },
       "original": {
@@ -1167,6 +1179,22 @@
     },
     "nixpkgs_7": {
       "locked": {
+        "lastModified": 1790185690,
+        "narHash": "sha256-xJ+X4hBtOcAFGBOe5nAMyMUeF9foJBmIOu3NjBqBycU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "4975466d324710c576dc11ad614684e6bd8cad8e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_8": {
+      "locked": {
         "lastModified": 1782821651,
         "narHash": "sha256-D5jO0ME1lA9bDHnd5kVawBwItG/N4oZr3FlXmMzLec8=",
         "owner": "NixOS",
@@ -1339,11 +1367,11 @@
         "rust-overlay": "rust-overlay_4"
       },
       "locked": {
-        "lastModified": 1787674590,
-        "narHash": "sha256-jZuaK68nGfn4XTty9eVwD0mE/ZKKUbr2zx065WUK9b0=",
+        "lastModified": 1790600578,
+        "narHash": "sha256-O7tEIQdCipujZ5HQ7G3thYnOf8kfQM/CsHH4axBsfuU=",
         "owner": "can1357",
         "repo": "oh-my-pi",
-        "rev": "eab72e88e447a4be45bea2bc302995844c0c51a2",
+        "rev": "cabfa74e1f6b4e8f53d1afb71b652c024db339fd",
         "type": "github"
       },
       "original": {
@@ -1406,11 +1434,38 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1790717837,
-        "narHash": "sha256-8P9lpNKM0DgSlPlafoM6i+0ueTpeA6XkLr/9mt8+QWA=",
+        "lastModified": 1790807490,
+        "narHash": "sha256-twybchOFMTDZwqQSJa9A9a+JizXCXN+Ag2AKYRRMyrs=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "3606055cbb3688d89db99ac09399fd7ff8227baa",
+        "rev": "5369cb9fbf266bc93f9f873c16d373528a316090",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "ref": "main",
+        "repo": "pi-flake",
+        "type": "github"
+      }
+    },
+    "pi-flake_2": {
+      "inputs": {
+        "nixpkgs": [
+          "pi-harness",
+          "nixpkgs"
+        ],
+        "oh-my-pi": "oh-my-pi_3",
+        "piSrc": "piSrc_2",
+        "primeAgentCatalogSrc": "primeAgentCatalogSrc_2",
+        "primeAgentSrc": "primeAgentSrc_2",
+        "primeBunSrc": "primeBunSrc_2"
+      },
+      "locked": {
+        "lastModified": 1790797855,
+        "narHash": "sha256-hI5oOkvMpwI6iMOutFMzucquj5N4jVNdgg6kCT5tNGg=",
+        "owner": "y0usaf",
+        "repo": "pi-flake",
+        "rev": "597c5309520d15f895f9b38363c81534ea996b75",
         "type": "github"
       },
       "original": {
@@ -1422,19 +1477,18 @@
     },
     "pi-harness": {
       "inputs": {
-        "crane": "crane_3",
+        "ekko": "ekko_2",
         "nixpkgs": [
           "nixpkgs"
         ],
-        "oh-my-pi": "oh-my-pi_3",
-        "rust-overlay": "rust-overlay_5"
+        "pi-flake": "pi-flake_2"
       },
       "locked": {
-        "lastModified": 1788360574,
-        "narHash": "sha256-SGwjGSyK/CTQ4ENoxPQUBgTMWpN1+X+iFo2rta6k1H8=",
+        "lastModified": 1790800964,
+        "narHash": "sha256-JNFPI+Ff79b6LpBhXYmFnrXFr7BgCyvE/pdCHW4/jbE=",
         "ref": "main",
-        "rev": "5329d4f600236126098b35ee325f7db32c3a4179",
-        "revCount": 99,
+        "rev": "6cb89ca1a6edefe2f57f05ae2254a7bc1951100b",
+        "revCount": 103,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/amux.git"
       },
@@ -1445,6 +1499,23 @@
       }
     },
     "piSrc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790805928,
+        "narHash": "sha256-R2W77R6ccKIWvOdI+X9TkYoVcgFLgdaDbm7MOzt9lCU=",
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "17f3dccbef6c56cbc8cee73dbcfe2bba4f8734f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "17f3dccbef6c56cbc8cee73dbcfe2bba4f8734f9",
+        "type": "github"
+      }
+    },
+    "piSrc_2": {
       "flake": false,
       "locked": {
         "lastModified": 1790701468,
@@ -1477,6 +1548,22 @@
         "type": "github"
       }
     },
+    "primeAgentCatalogSrc_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790116558,
+        "narHash": "sha256-gNJ9UDaqcEzGcXrPd6XFU38eyZv+lko29ZdEmuZwRO8=",
+        "owner": "PrimeIntellect-ai",
+        "repo": "prime-agent-catalog",
+        "rev": "d3f43ad14d87caa99662d7a62f0d658ab12afa86",
+        "type": "github"
+      },
+      "original": {
+        "owner": "PrimeIntellect-ai",
+        "repo": "prime-agent-catalog",
+        "type": "github"
+      }
+    },
     "primeAgentSrc": {
       "flake": false,
       "locked": {
@@ -1494,7 +1581,40 @@
         "url": "https://github.com/PrimeIntellect-ai/prime-agent"
       }
     },
+    "primeAgentSrc_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790529879,
+        "narHash": "sha256-HbmWgdaqyXVRaXmgWJaVY4DO9Zk+GM3keKzz6Bg59P8=",
+        "ref": "main",
+        "rev": "2d24ad4e6b2d1ee8e6919af6f108e980a14d550e",
+        "revCount": 4865,
+        "type": "git",
+        "url": "https://github.com/PrimeIntellect-ai/prime-agent"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "https://github.com/PrimeIntellect-ai/prime-agent"
+      }
+    },
     "primeBunSrc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786415380,
+        "narHash": "sha256-FhtGYxtbWEvpqx4gMMSVpoCcScXlVD7waliS2PGxTkY=",
+        "owner": "sng-asyncfunc",
+        "repo": "prime-bun",
+        "rev": "25e980048030954a76f2070511c5882182b9063f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sng-asyncfunc",
+        "repo": "prime-bun",
+        "type": "github"
+      }
+    },
+    "primeBunSrc_2": {
       "flake": false,
       "locked": {
         "lastModified": 1786415380,
@@ -1565,6 +1685,7 @@
         "reasonix-flake": "reasonix-flake",
         "rudo": "rudo",
         "rush": "rush",
+        "silva": "silva",
         "strictix": "strictix",
         "tomoe": "tomoe"
       }
@@ -1677,6 +1798,7 @@
       "inputs": {
         "nixpkgs": [
           "pi-harness",
+          "pi-flake",
           "oh-my-pi",
           "nixpkgs"
         ]
@@ -1687,27 +1809,6 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "39db48099ad16834af7e27485a4babf9c28b3897",
-        "type": "github"
-      },
-      "original": {
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "type": "github"
-      }
-    },
-    "rust-overlay_5": {
-      "inputs": {
-        "nixpkgs": [
-          "pi-harness",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1787713867,
-        "narHash": "sha256-ZRYTEvDb8QZLCHRoMyIZle9V3Bvw905m0teeo1RvI7M=",
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "rev": "494680f9ffa2b4bf9f2df0f442c7096e44adfa00",
         "type": "github"
       },
       "original": {
@@ -1730,6 +1831,25 @@
         "owner": "andreymatin",
         "repo": "scss-reset",
         "type": "github"
+      }
+    },
+    "silva": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_7",
+        "terminal-electron": "terminal-electron"
+      },
+      "locked": {
+        "lastModified": 1790786596,
+        "narHash": "sha256-lyHadrTQ5kt3bS9apZtTUmMQ+J/sCy7XC5uItl/kjI0=",
+        "ref": "refs/heads/main",
+        "rev": "131541eb18ac92939eb9b46721b65d954e1392f0",
+        "revCount": 17,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/silva.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/silva.git"
       }
     },
     "strictix": {
@@ -1904,9 +2024,47 @@
         "type": "github"
       }
     },
+    "terminal-browser_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787294939,
+        "narHash": "sha256-JECCEkdd1sryzKt/hYRzCiSLl6u6tThnob8B1cLMjtE=",
+        "owner": "zenbu-labs",
+        "repo": "terminal-browser",
+        "rev": "cce10b6131d15bf46a3e4b8dc827e0544ff7fc65",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zenbu-labs",
+        "repo": "terminal-browser",
+        "rev": "cce10b6131d15bf46a3e4b8dc827e0544ff7fc65",
+        "type": "github"
+      }
+    },
+    "terminal-electron": {
+      "inputs": {
+        "nixpkgs": [
+          "silva",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790389267,
+        "narHash": "sha256-zRld3bGR7zvVoxluj93buhLU0JUpvySmKr1SnLSwTdo=",
+        "owner": "y0usaf",
+        "repo": "terminal-electron",
+        "rev": "234be87185cb2bd415ead034270f9b95d544ca2d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "terminal-electron",
+        "type": "github"
+      }
+    },
     "tomoe": {
       "inputs": {
-        "nixpkgs": "nixpkgs_7"
+        "nixpkgs": "nixpkgs_8"
       },
       "locked": {
         "lastModified": 1790827652,
@@ -2018,6 +2176,7 @@
       "inputs": {
         "nixpkgs": [
           "pi-harness",
+          "pi-flake",
           "oh-my-pi",
           "bun2nix",
           "nixpkgs"
@@ -2041,6 +2200,7 @@
       "inputs": {
         "nixpkgs": [
           "pi-harness",
+          "pi-flake",
           "oh-my-pi",
           "bun2nix-darwin-x64",
           "nixpkgs"
