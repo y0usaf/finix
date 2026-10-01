@@ -15,9 +15,6 @@
     ".reasonix/skills"
     ".omp/agent/skills"
   ];
-  library = lib.listToAttrs (map (path:
-    lib.nameValuePair (lib.removePrefix "${toString ./skill-library}/" (toString path)) {source = path;})
-  (lib.filesystem.listFilesRecursive ./skill-library));
   skills = {
     anti-slop = {
       "SKILL.md".text = ''
@@ -337,8 +334,7 @@
   };
 in {
   manzil.users."${config.user.name}".files = lib.mkMerge (
-    (map (root: lib.mapAttrs' (rel: spec: lib.nameValuePair "${root}/${rel}" spec) library) roots)
-    ++ lib.concatLists (lib.mapAttrsToList (name: files:
+    lib.concatLists (lib.mapAttrsToList (name: files:
       map (root: lib.mapAttrs' (rel: spec: lib.nameValuePair "${root}/${name}/${rel}" spec) files) roots)
     skills)
   );
