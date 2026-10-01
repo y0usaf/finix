@@ -78,7 +78,7 @@
       hyprcursorSize = 36;
     };
 
-    ui.tomoe.bar.modules = ["cpu" "memory" "gpu" "time" "date"];
+    ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram"];
 
     gaming = {
       p4g.enable = true;
