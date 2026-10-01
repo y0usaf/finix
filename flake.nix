@@ -58,6 +58,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    obs-twitch-tts = {
+      url = "github:y0usaf/obs-twitch-tts";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";

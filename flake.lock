@@ -1240,6 +1240,26 @@
         "type": "github"
       }
     },
+    "obs-twitch-tts": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790824804,
+        "narHash": "sha256-46T1AaGQJKBQRv0iyZivpC7w57Szfo61eHhPHoX5G20=",
+        "owner": "y0usaf",
+        "repo": "obs-twitch-tts",
+        "rev": "e0b65229391b75d926f6956738915b1eb532afbb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "obs-twitch-tts",
+        "type": "github"
+      }
+    },
     "oh-my-fx": {
       "inputs": {
         "nixpkgs": [
@@ -1535,6 +1555,7 @@
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-discord-legacy": "nixpkgs-discord-legacy",
         "obs-image-reaction": "obs-image-reaction",
+        "obs-twitch-tts": "obs-twitch-tts",
         "oh-my-fx": "oh-my-fx",
         "oh-my-pi": "oh-my-pi",
         "paseo": "paseo",
