@@ -57,46 +57,6 @@ in {
     '';
     systemPackages = [
       tomoePkg
-      (pkgs.writeShellScriptBin "tomoe-session" ''
-        export XDG_CURRENT_DESKTOP=tomoe
-        export XDG_SESSION_TYPE=wayland
-        export NIXOS_OZONE_WL=1
-        export QT_QPA_PLATFORM=wayland
-        export ELECTRON_OZONE_PLATFORM_HINT=wayland
-        export GDK_BACKEND=wayland
-        export SDL_VIDEODRIVER=wayland,x11
-        export CLUTTER_BACKEND=wayland
-        export XCURSOR_THEME=${flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark.xcursorThemeName}
-        export XCURSOR_SIZE=24
-        case ":''${XDG_DATA_DIRS:-}:" in
-          *":/run/current-system/sw/share:"*) ;;
-          *) export XDG_DATA_DIRS="/run/current-system/sw/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}" ;;
-        esac
-        export TERMINAL=${config.user.defaults.terminal}
-
-        export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
-        [ -d "$XDG_RUNTIME_DIR" ] || {
-          echo "tomoe-session: $XDG_RUNTIME_DIR missing (xdg-runtime-dir task failed?)" >&2
-          exit 1
-        }
-
-        ${lib.optionalString config.hardware.nvidia.enable ''
-          export WLR_NO_HARDWARE_CURSORS=1
-          export LIBVA_DRIVER_NAME=nvidia
-          export __GL_SYNC_TO_VBLANK=0
-          export __GL_VRR_ALLOWED=1
-          export __GL_MaxFramesAllowed=1
-          export __GL_YIELD=usleep
-          export CUDA_CACHE_PATH="$HOME/.cache/nv"
-          export CUDA_DISABLE_PERF_BOOST=1
-          export NVIDIA_DRIVER_CAPABILITIES=all
-        ''}
-        cd "$HOME"
-        exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.writeShellScript "tomoe-session-inner" ''
-          ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 &
-          exec ${lib.getExe tomoePkg} --backend drm "$@"
-        ''} "$@"
-      '')
       pkgs.xwayland-satellite
     ];
   };

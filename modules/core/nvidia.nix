@@ -15,6 +15,7 @@
         __GL_MaxFramesAllowed = "1";
         __GL_YIELD = "usleep";
         CUDA_DISABLE_PERF_BOOST = "1";
+        LIBVA_DRIVER_NAME = "nvidia";
         NVIDIA_DRIVER_CAPABILITIES = "all";
       };
       etc."modprobe.d/finix-desktop-blacklist.conf".text = ''
