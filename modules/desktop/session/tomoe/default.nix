@@ -111,7 +111,6 @@
 
   userBindings =
     [
-      (binding ["alt"] "1" "cursor" null)
       (binding ["alt"] "2" "browser" null)
       (binding ["alt"] "3" "discord" null)
       (binding ["alt"] "4" "steam" null)
@@ -138,7 +137,6 @@
     };
 
   launches = lib.mapAttrsToList (command: argv: [command argv]) {
-    cursor = ["cursor"];
     browser = [defaults.browser];
     discord = ["discord"];
     steam = ["steam"];
