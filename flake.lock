@@ -1434,11 +1434,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1790883607,
-        "narHash": "sha256-24T0WQurNRpEhzlhBh82LLmp08Bd99STWu5TlRuwltM=",
+        "lastModified": 1791037545,
+        "narHash": "sha256-w9xwQDFhNqnezG69hkvjuf3FJRDF05dFYFX2uuvQSjg=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "8a67d06f7aff069740046a8519eef59d08fa59d7",
+        "rev": "e538c6246f29cb159d7839a374fc9a5a85d5113a",
         "type": "github"
       },
       "original": {
@@ -2067,11 +2067,11 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1790986330,
-        "narHash": "sha256-eUE1iONYo1grtvtbT+iP5mxjpZF81u2nzyVhOdH9GiU=",
+        "lastModified": 1791037699,
+        "narHash": "sha256-VGJjvdLQfSvLbSzMBUXufXJte91kzGTIdRWKGlojbz4=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "421b62aff77448c0ac695b69f54a09349cb844e3",
+        "rev": "bc6e250794af2a11a7438b3b646079edfa9bda9c",
         "type": "github"
       },
       "original": {
