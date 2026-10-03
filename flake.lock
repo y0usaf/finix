@@ -310,11 +310,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1790826755,
-        "narHash": "sha256-5C/wXsoBgCxdErsH5GTtbgQFMkk4rXeirsqvTBlzbYY=",
+        "lastModified": 1790828895,
+        "narHash": "sha256-PEuQ9lIWEnTfm14TbdRVZAQAEixG07a1OgGMlAEmPaQ=",
         "owner": "y0usaf",
         "repo": "cudaterm",
-        "rev": "a94440665d0121bdb27599359ec3332c0257f938",
+        "rev": "875f8cb99e72b94392b77020b43dc24ec6ab434b",
         "type": "github"
       },
       "original": {
@@ -385,11 +385,11 @@
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1790593734,
-        "narHash": "sha256-xESCq261Yd1/DLY7nasE0O41U0saXqalGt480zihnC0=",
+        "lastModified": 1790886121,
+        "narHash": "sha256-vvucDkxW1XcVqPSQXLEL9wXRkPsYbyls5/d9oG0RtpQ=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "0f579f0de0bc33ec0cdea552de4366fe06a4ee30",
+        "rev": "ae3a7840150e416935cfc7d062bbc2cac6ee7e4e",
         "type": "github"
       },
       "original": {
@@ -1434,11 +1434,11 @@
         "primeBunSrc": "primeBunSrc"
       },
       "locked": {
-        "lastModified": 1790807490,
-        "narHash": "sha256-twybchOFMTDZwqQSJa9A9a+JizXCXN+Ag2AKYRRMyrs=",
+        "lastModified": 1790883607,
+        "narHash": "sha256-24T0WQurNRpEhzlhBh82LLmp08Bd99STWu5TlRuwltM=",
         "owner": "y0usaf",
         "repo": "pi-flake",
-        "rev": "5369cb9fbf266bc93f9f873c16d373528a316090",
+        "rev": "8a67d06f7aff069740046a8519eef59d08fa59d7",
         "type": "github"
       },
       "original": {
@@ -1501,17 +1501,17 @@
     "piSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1790805928,
-        "narHash": "sha256-R2W77R6ccKIWvOdI+X9TkYoVcgFLgdaDbm7MOzt9lCU=",
+        "lastModified": 1790880741,
+        "narHash": "sha256-CGznIVHXG6gr2F8vzHcR/v4P9xJgZHeMTt/CJ/kB78o=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "17f3dccbef6c56cbc8cee73dbcfe2bba4f8734f9",
+        "rev": "a13d35a742c6ef8462812a28fbe1d8c8b7431c32",
         "type": "github"
       },
       "original": {
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "17f3dccbef6c56cbc8cee73dbcfe2bba4f8734f9",
+        "rev": "a13d35a742c6ef8462812a28fbe1d8c8b7431c32",
         "type": "github"
       }
     },
@@ -1839,11 +1839,11 @@
         "terminal-electron": "terminal-electron"
       },
       "locked": {
-        "lastModified": 1790786596,
-        "narHash": "sha256-lyHadrTQ5kt3bS9apZtTUmMQ+J/sCy7XC5uItl/kjI0=",
+        "lastModified": 1790907199,
+        "narHash": "sha256-tSj9m75THH5cEeDoI2ZnI8xbOR8H0aMIuePpqxFeSAg=",
         "ref": "refs/heads/main",
-        "rev": "131541eb18ac92939eb9b46721b65d954e1392f0",
-        "revCount": 17,
+        "rev": "cca3a928cdd9ee3055537bbf73a8a5cc4bf93448",
+        "revCount": 144,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/silva.git"
       },
@@ -2067,19 +2067,17 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1790827652,
-        "narHash": "sha256-yrm4REMDiu4GLVz2dtg6tFFTrxQ9YlQmJCKB3tDog8M=",
-        "ref": "refs/heads/main",
-        "rev": "8eba41ee2a128f91d99b8b85e963958f065cbdf8",
-        "shallow": true,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/maintaining/tomoe"
+        "lastModified": 1790986330,
+        "narHash": "sha256-eUE1iONYo1grtvtbT+iP5mxjpZF81u2nzyVhOdH9GiU=",
+        "owner": "y0usaf",
+        "repo": "tomoe",
+        "rev": "421b62aff77448c0ac695b69f54a09349cb844e3",
+        "type": "github"
       },
       "original": {
-        "rev": "8eba41ee2a128f91d99b8b85e963958f065cbdf8",
-        "shallow": true,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/maintaining/tomoe"
+        "owner": "y0usaf",
+        "repo": "tomoe",
+        "type": "github"
       }
     },
     "treefmt-nix": {
