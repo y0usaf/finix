@@ -6,7 +6,7 @@
 }: let
   healthPackage = pkgs.writeShellScriptBin "finix-framework-health" ''
     set -u
-    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.iproute2 pkgs.nftables pkgs.procps pkgs.shadow pkgs.util-linux]}
+    export PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils pkgs.gnugrep pkgs.iproute2 pkgs.nftables pkgs.procps pkgs.shadow pkgs.util-linux]}
     failed=0
     check() {
       if "$@"; then
