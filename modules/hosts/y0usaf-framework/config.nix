@@ -16,7 +16,7 @@
         failed=1
       fi
     }
-    check test "$(cat /proc/1/comm)" = finit
+    check test "$(basename "$(readlink /proc/1/exe)")" = finit
     check grep -qx framework-trial-1 /etc/finix-stage2
     for mountpoint in /nix /persist /home /boot; do
       check mountpoint -q "$mountpoint"
