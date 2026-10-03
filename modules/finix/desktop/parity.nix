@@ -34,6 +34,7 @@
 
   boot.kernelModules = ["tun" "v4l2loopback" "zram" "uinput" "ntsync"];
   finit = {
+    services.polkit.command = lib.mkForce "${config.services.polkit.package.out}/lib/polkit-1/polkitd --no-debug --replace";
     services.tailscaled = {
       description = "tailscale mesh VPN daemon";
       command = "${pkgs.tailscale}/bin/tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/run/tailscale/tailscaled.sock --port=41641";
