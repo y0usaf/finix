@@ -4,18 +4,56 @@ local env = getfenv and getfenv(1)
 if type(env) == "table" and setfenv then pcall(setfenv, orig, env) end
 local ret = pack(orig(select(2, ...)))
 
-local START_DELAY, MIN_GAP, JITTER, MAX_CLAIMS = 10, 1.0, 0.6, 80
-local state = { off = false, gen = 0, seen = setmetatable({}, { __mode = "k" }) }
-local logger
+local MIN_GAP, JITTER, MAX_CLAIMS, STALE = 1.0, 0.6, 80, 15
+local MAIL_VIEW = "Guis.Panels.Chat.Component.MailNewComponent"
+local LOG_FILE = ".finix-aniimo/rewards.log"
+local state = { off = false, gen = 0, hooked = false, run = nil }
+local logger, paths
 
-local function log(msg)
-  msg = "[rewards] " .. tostring(msg)
+local function stamp()
+  local ok, s = pcall(os.date, "!%Y-%m-%dT%H:%M:%SZ")
+  if ok and type(s) == "string" then return s end
+  return tostring(os.time())
+end
+
+local function field(v)
+  if v == nil then return "-" end
+  return (tostring(v):gsub("[\t\r\n]", " "))
+end
+
+local function logPaths()
+  local list = {}
+  local ok, dp = pcall(function() return CS.UnityEngine.Application.dataPath end)
+  if ok and type(dp) == "string" and dp ~= "" then list[1] = dp .. "/../" .. LOG_FILE end
+  list[#list + 1] = LOG_FILE
+  return list
+end
+
+local function append(line)
+  paths = paths or logPaths()
+  for _, p in ipairs(paths) do
+    local f = io.open(p, "a")
+    if f then
+      f:write(line)
+      f:close()
+      return true
+    end
+  end
+end
+
+local function log(event, label, result)
+  pcall(function() append(table.concat({ stamp(), field(event), field(label), field(result) }, "\t") .. "\n") end)
+  local msg = "[rewards] " .. tostring(event) .. " " .. field(label) .. " " .. field(result)
   pcall(print, msg)
   if logger == nil then
     logger = false
     pcall(function() logger = require("Core.Log.LoggerManager").getLogger("RewardsMod") or false end)
   end
   if logger then pcall(function() logger:warn(msg) end) end
+end
+
+local function toast(text)
+  pcall(function() pg.global.ui.tips:showTextTip(text, nil, nil, nil, nil, nil, nil, true) end)
 end
 
 local function setting()
@@ -48,7 +86,6 @@ local function now()
   end
 end
 
-
 local function noop() end
 
 local function k(...)
@@ -57,24 +94,17 @@ local function k(...)
   return table.concat(t, ":")
 end
 
-local function mail(add)
-  local chat = pg.game and pg.game.chat
-  if has(chat, "checkHasRewardMail") and not chat.mailListRequestPending and chat.mailList and chat:checkHasRewardMail() then
-    add("mail:all", function(me) me:setAllMailGiftReceived() end)
-  end
-end
-
 local function act()
   local A, C, CA = req("Common.Utils.ActivityUtils"), req("Common.Const.ActivityConst"), req("Utils.ClientActivityUtils")
   if A and C and CA and C.EventType and C.TaskState and C.ActivityTaskType then return A, C, CA end
 end
 
-local function task(add, eid, tid, tag)
-  add(k(tag, "task", eid, tid), function(me) me:reqActReceiveTaskReward(tid, eid) end)
+local function task(add, eid, tid, tag, label)
+  add(k(tag, "task", eid, tid), label, function(me) me:reqActReceiveTaskReward(tid, eid) end)
 end
 
-local function group(add, eid, gid, tag)
-  add(k(tag, "group", eid, gid), function(me) me:reqActReceiveGroupTaskReward(gid, eid) end)
+local function group(add, eid, gid, tag, label)
+  add(k(tag, "group", eid, gid), label, function(me) me:reqActReceiveGroupTaskReward(gid, eid) end)
 end
 
 local function dailyActive(add)
@@ -90,10 +120,10 @@ local function dailyActive(add)
   for _, t in pairs(CA.getTaskInfoByActType(ET.DailyActive) or {}) do
     if type(t) == "table" and t.taskState == CAN then
       if t.taskType == AT.DailyActive_GetScore and not full then
-        task(add, eid, t.taskId, "daily")
+        task(add, eid, t.taskId, "daily", "Daily activity task " .. tostring(t.taskId))
       elseif t.taskType == AT.DailyActive_ScoreReward then
         local cfg = ETD[t.taskId]
-        if cfg and cfg.groupId then group(add, eid, cfg.groupId, "daily") end
+        if cfg and cfg.groupId then group(add, eid, cfg.groupId, "daily", "Daily activity score chest") end
       end
     end
   end
@@ -115,19 +145,20 @@ local function battlePass(add)
   if not eid or not A.isOprActivityOpen(eid) then return end
   if has(RD, "hasClaimableWeeklyTask") and cfg.weekTaskGroupId and RD.hasClaimableWeeklyTask() then
     local g = cfg.weekTaskGroupId[bp.weeklyNum or 0]
-    if g then group(add, eid, g, "bp") end
+    if g then group(add, eid, g, "bp", "Battle pass weekly tasks") end
   end
   if has(RD, "hasClaimableSeasonTask") and cfg.seasonTaskGroupId and RD.hasClaimableSeasonTask() then
-    group(add, eid, cfg.seasonTaskGroupId, "bp")
+    group(add, eid, cfg.seasonTaskGroupId, "bp", "Battle pass season tasks")
   end
   if cfg.awardTaskGroupId and has(A, "getActTaskIdsByGroupId") and has(A, "getActTaskState") then
     for _, tid in ipairs(A.getActTaskIdsByGroupId(cfg.awardTaskGroupId) or {}) do
-      if A.getActTaskState(pg.me, tid) == CAN then group(add, eid, cfg.awardTaskGroupId, "bp") break end
+      if A.getActTaskState(pg.me, tid) == CAN then group(add, eid, cfg.awardTaskGroupId, "bp", "Battle pass level rewards") break end
     end
   end
 end
 
 local mileage = {}
+local SEASON_FIELDS = { { "petTaskGroup", "pets" }, { "battleTaskGroup", "battle" }, { "eggTaskGroup", "eggs" }, { "homeTaskGroup", "home" } }
 
 local function seasonAchievement(add)
   local A, C, CA = act()
@@ -146,12 +177,12 @@ local function seasonAchievement(add)
       end
     end
   end
-  if mileage[eid] and ready(mileage[eid]) then group(add, eid, mileage[eid], "season") end
+  if mileage[eid] and ready(mileage[eid]) then group(add, eid, mileage[eid], "season", "Season achievement mileage") end
   local sa = SAD[eid]
   if type(sa) ~= "table" then return end
-  for _, field in ipairs({ "petTaskGroup", "battleTaskGroup", "eggTaskGroup", "homeTaskGroup" }) do
-    for _, g in ipairs(type(sa[field]) == "table" and sa[field] or {}) do
-      if ready(g) then group(add, eid, g, "season") end
+  for _, f in ipairs(SEASON_FIELDS) do
+    for _, g in ipairs(type(sa[f[1]]) == "table" and sa[f[1]] or {}) do
+      if ready(g) then group(add, eid, g, "season", "Season achievement " .. tostring(g) .. " (" .. f[2] .. ")") end
     end
   end
 end
@@ -166,7 +197,7 @@ local function sign(add)
       if CA.isGameEventTabOpen(eid) and A.isOprActivityOpen(eid) then
         for _, g in ipairs(CA.getSignTaskGroupIds(eid) or {}) do
           for _, tid in ipairs(A.getActTaskCanReceiveByGroupId(pg.me, g) or {}) do
-            task(add, eid, tid, "sign")
+            task(add, eid, tid, "sign", "Sign-in reward " .. tostring(tid))
           end
         end
       end
@@ -179,34 +210,34 @@ local function rogue(add)
   local REWARD = RDC and RDC.RedDotStyle and RDC.RedDotStyle.REWARD
   if not RU or REWARD == nil then return end
   if has(RU, "getRedDotWeeklyState") and RU.getRedDotWeeklyState() == REWARD then
-    add("rogue:weekly", function(me) me:getRogueAllWeeklyReward() end)
+    add("rogue:weekly", "Tower weekly boss reward", function(me) me:getRogueAllWeeklyReward() end)
   end
   if has(RU, "getRedDotSeasonWeeklyRewardState") and RU.getRedDotSeasonWeeklyRewardState() == REWARD then
-    add("rogue:seasonWeekly", function(me) me:getAllRogueSeasonWeeklyReward(0) end)
+    add("rogue:seasonWeekly", "Tower season weekly reward", function(me) me:getAllRogueSeasonWeeklyReward(0) end)
   end
   if has(RU, "getRedDotDailyState") and RU.getRedDotDailyState() == REWARD then
-    add("rogue:daily", function(me) me:getDailyReward() end)
+    add("rogue:daily", "Tower daily harvest", function(me) me:getDailyReward() end)
   end
 end
 
 local function monthCard(add)
   local mc, MU = pg.game and pg.game.monthCard, req("GameApp.MonthCard.MonthCardUtils")
   if has(mc, "requestClaimStoredReward") and has(MU, "hasStoredReward") and MU.hasStoredReward() then
-    add("monthcard:stored", function() mc:requestClaimStoredReward() end)
+    add("monthcard:stored", "Month card stored reward", function() mc:requestClaimStoredReward() end)
   end
 end
 
 local function homeBook(add)
   local HB = req("Utils.HomeBookRedDotUtils")
   if has(HB, "canReceiveScoreReward") and HB.canReceiveScoreReward() then
-    add("homebook:grade", function(me) me:reqReceiveHandbookGradeReward(noop) end)
+    add("homebook:grade", "Home handbook grade reward", function(me) me:reqReceiveHandbookGradeReward(noop) end)
   end
 end
 
 local function grabEggs(add)
   local GE = req("Guis.Utils.GrabEggsRankUtils")
   if has(GE, "hasClaimableReward") and GE.hasClaimableReward() then
-    add("grabeggs:rank", function(me) me:serverMsg("RPC_CS_GetRobEggLevelReward", 0, 0, 0) end)
+    add("grabeggs:rank", "Grab-eggs season rank reward", function(me) me:serverMsg("RPC_CS_GetRobEggLevelReward", 0, 0, 0) end)
   end
 end
 
@@ -223,12 +254,12 @@ local function course(add)
   for grade, levels in pairs(GD) do
     for level = 1, type(levels) == "table" and #levels or 0 do
       if m:canGetCourseGradeLevelReward(grade, level) then
-        add(k("course", "level", grade, level), function(me) me:getCourseLevelReward(grade, level, noop) end)
+        add(k("course", "level", grade, level), "Course grade " .. tostring(grade) .. " level " .. level, function(me) me:getCourseLevelReward(grade, level, noop) end)
       end
     end
     for _, c in ipairs(m:getGradeCourseList(grade) or {}) do
       if type(c) == "table" and c.id ~= nil and m:canGetCourseReward(c.id) then
-        add(k("course", "course", c.id), function(me) me:getCourseReward(c.id, noop) end)
+        add(k("course", "course", c.id), "Course " .. tostring(c.id), function(me) me:getCourseReward(c.id, noop) end)
       end
     end
   end
@@ -243,18 +274,19 @@ local function playerLevel(add)
     if type(d) == "table" and d.lvState == m.LEVEL_STATE.LEVEL_MATCH then lvs[#lvs + 1] = d.lv end
   end
   if #lvs == 0 then return end
-  add(k("playerlv", table.concat(lvs, ",")), function(me)
+  local list = table.concat(lvs, ",")
+  add(k("playerlv", list), "Player level rewards " .. list, function(me)
     local CH = require("Core.Common.CallbackHandler")
     me:serverMsg("RPC_CS_GetLevelReward", lvs, CH({ done = noop }, "done"))
   end)
 end
 
-local SOURCES = { mail, dailyActive, battlePass, seasonAchievement, sign, rogue, monthCard, homeBook, grabEggs, course, playerLevel }
+local SOURCES = { dailyActive, battlePass, seasonAchievement, sign, rogue, monthCard, homeBook, grabEggs, course, playerLevel }
 
 local function nextAction(tried)
   local found
-  local function add(key, fn)
-    if not found and not tried[key] then found = { key = key, fn = fn } end
+  local function add(key, label, fn)
+    if not found and not tried[key] then found = { key = key, label = label, fn = fn } end
   end
   for _, src in ipairs(SOURCES) do
     if found then break end
@@ -265,64 +297,126 @@ end
 
 local function delay() return MIN_GAP + math.random() * JITTER end
 
-local function run(player)
+local function run(player, mode)
   state.gen = state.gen + 1
-  local gen, tried, count, last = state.gen, {}, 0, nil
+  local gen, tried, last = state.gen, {}, nil
+  local cur = { count = 0, beat = now() }
+  state.run = cur
+  local verb = mode == "dry" and "would claim " or "claimed "
   local TM = require("Core.Timer.TimerManager")
   local tick
-  local function stop(why) if gen == state.gen then state.gen = state.gen + 1 end log("stopped: " .. why) end
-  local function fail(where, err) state.off = true stop("error in " .. where .. ": " .. tostring(err) .. "; disabled for this session") end
+  local function stop(why, text)
+    if gen == state.gen then state.gen = state.gen + 1 end
+    if state.run == cur then state.run = nil end
+    log("stop", why, cur.count)
+    toast(text or ("Rewards stopped (" .. why .. "), " .. verb .. cur.count))
+  end
+  local function fail(where, err)
+    state.off = true
+    log("error", where, tostring(err))
+    stop("error", "Rewards error at " .. where .. ", off until restart")
+  end
   local function again(sec)
     local ok, err = pcall(TM.addTimer, sec, tick)
     if not ok then fail("timer", err) end
   end
   tick = function()
     if gen ~= state.gen or state.off then return end
+    cur.beat = now() or cur.beat
     local s = setting()
     if killed(s) then return stop("kill switch") end
     if pg.me ~= player or player.destroyed then return stop("player changed") end
     local t, res = now()
     if t and last and t - last < MIN_GAP - 0.05 + res then return again(delay()) end
-    if count >= MAX_CLAIMS then return stop("cap of " .. MAX_CLAIMS .. " reached") end
+    if cur.count >= MAX_CLAIMS then return stop("cap of " .. MAX_CLAIMS .. " reached") end
     local ok, a = pcall(nextAction, tried)
     if not ok then return fail("readiness check", a) end
-    if not a then return stop("nothing left to claim, " .. count .. " sent") end
-    tried[a.key] = true
-    count, last = count + 1, t
-    if s == "dry" then
-      log("dry run, would claim " .. a.key)
+    if not a then return stop("nothing left", "Rewards: " .. verb .. cur.count .. ", nothing left") end
+    tried[a.key], last = true, t
+    if mode == "dry" or s == "dry" then
+      log("dry", a.label, "not sent")
+      toast("Rewards (dry run): " .. a.label)
     else
       local ok2, err = pcall(a.fn, player)
-      if not ok2 then return fail(a.key, err) end
-      log("claimed " .. a.key)
+      if not ok2 then return fail(a.label, err) end
+      log("claim", a.label, "ok")
+      toast("Rewards: " .. a.label)
     end
+    cur.count = cur.count + 1
     again(delay())
   end
-  again(START_DELAY)
+  log("start", mode == "dry" and "dry run" or "claim run", "ok")
+  toast(mode == "dry" and "Rewards: dry run, nothing will be sent" or "Rewards: claiming, one every 1-2 s")
+  again(delay())
 end
 
-local function onLogin(player)
-  if state.off or state.seen[player] then return end
-  state.seen[player] = true
-  if killed(setting()) then return log("off by kill switch") end
-  run(player)
+local function onPress()
+  if state.off then
+    log("press", "ignored", "disabled after error")
+    return toast("Rewards: off after an error, restart the game")
+  end
+  local cur, t = state.run, now()
+  if cur and t and cur.beat and t - cur.beat > STALE then
+    log("press", "stale run dropped", cur.count)
+    state.run, state.gen = nil, state.gen + 1
+    cur = nil
+  end
+  if cur then
+    log("press", "ignored", "running, " .. cur.count .. " so far")
+    return toast("Rewards: already running, " .. cur.count .. " so far")
+  end
+  local s = setting()
+  if killed(s) then
+    log("press", "ignored", "kill switch")
+    return toast("Rewards: off (ANIIMO_REWARDS=" .. s .. ")")
+  end
+  local me = pg.me
+  if type(me) ~= "table" then return log("press", "ignored", "no player") end
+  run(me, s == "dry" and "dry" or "claim")
+end
+
+local function wrapButton(view)
+  local btn = view.btnAllReadUButton
+  local click = btn and btn.luaClick
+  if not click then return log("hook", "mail button", "no click handler") end
+  btn.luaClick = function(...)
+    local r = pack(click(...))
+    local ok, err = pcall(onPress)
+    if not ok then
+      state.off = true
+      log("error", "button press", tostring(err))
+    end
+    return unpack(r, 1, r.n)
+  end
+end
+
+local function hookMail()
+  if state.hooked then return end
+  local M = req(MAIL_VIEW)
+  local base = M and rawget(M, "initView")
+  if type(base) ~= "function" then return log("hook", "mail panel", "initView not found") end
+  state.hooked = true
+  rawset(M, "initView", function(self, ...)
+    local r = pack(base(self, ...))
+    local ok, err = pcall(wrapButton, self)
+    if not ok then log("hook", "mail button", tostring(err)) end
+    return unpack(r, 1, r.n)
+  end)
+  log("hook", "mail panel", "ok")
 end
 
 local function install(cls)
   local vt = type(cls) == "table" and has(cls, "getVtbl") and cls.getVtbl()
   local base = type(vt) == "table" and rawget(vt, "onBecomePlayer")
-  if type(base) ~= "function" then return log("hook point not found; mod inactive") end
+  if type(base) ~= "function" then return log("hook", "onBecomePlayer", "not found") end
   rawset(vt, "onBecomePlayer", function(self, ...)
     local r = pack(base(self, ...))
-    local ok, err = pcall(onLogin, self)
-    if not ok then
-      state.off = true
-      log("error at login hook: " .. tostring(err) .. "; disabled for this session")
-    end
+    local ok, err = pcall(hookMail)
+    if not ok then log("hook", "mail panel", tostring(err)) end
     return unpack(r, 1, r.n)
   end)
 end
 
 local ok, err = pcall(install, ret[1])
-if not ok then log("install failed: " .. tostring(err)) end
+if not ok then log("hook", "install", tostring(err)) end
 return unpack(ret, 1, ret.n)
