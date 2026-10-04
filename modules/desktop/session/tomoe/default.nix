@@ -204,45 +204,14 @@
 
   bongoParameters = {
     height = 80;
-    margin-bottom = 6;
+    margin-bottom = 11;
     x-offset = -24;
     duration = 100;
     idle = 60000;
     groove = 380;
     strip = 32;
-    bounce = 6;
-    bounce-ms = 260;
     tick = frameTick;
     frames = "${./assets/bongo-cat}";
-  };
-
-  comboParameters = {
-    hands = [
-      [800 "FLUSH FIVE" 16 (keyword "color3")]
-      [500 "FIVE OF A KIND" 12 (keyword "color1")]
-      [300 "STRAIGHT FLUSH" 8 (keyword "color5")]
-      [200 "FOUR OF A KIND" 7 (keyword "color1")]
-      [140 "FULL HOUSE" 4 (keyword "color3")]
-      [100 "FLUSH" 4 (keyword "color5")]
-      [70 "STRAIGHT" 4 (keyword "color2")]
-      [45 "THREE OF A KIND" 3 (keyword "color6")]
-      [25 "TWO PAIR" 2 (keyword "color4")]
-      [10 "PAIR" 2 (keyword "color4")]
-      [0 "HIGH CARD" 1 (keyword "color8")]
-    ];
-    window = 1200;
-    show = 3;
-    cash-min = 5;
-    hold = 2400;
-    roll = 600;
-    pop = 160;
-    shake = 320;
-    fire = 7;
-    drain-width = 160;
-    offset = 104;
-    side = 240;
-    lift = 52;
-    tick = frameTick;
   };
 
   shaderDir = "${flakeInputs.tomoe.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/tomoe/examples/shaders";
@@ -410,8 +379,6 @@ in {
     )
     "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
     (builtins.readFile ./lisp/bongo-cat.lisp)
-    "(defparameter +combo+ ${toLisp comboParameters})"
-    (builtins.readFile ./lisp/combo.lisp)
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
     (builtins.readFile ./lisp/shader-wallpaper.lisp)
     "(defparameter +peek+ ${toLisp peekParameters})"
