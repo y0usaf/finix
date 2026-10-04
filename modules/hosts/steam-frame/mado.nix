@@ -1,8 +1,19 @@
 {
+  config,
   frameSession,
   madoPackages,
+  pkgs,
   ...
 }: {
+  frame.session.fhsPackages = [
+    (pkgs.makeDesktopItem {
+      name = "mado";
+      desktopName = "mado";
+      comment = "The PC's monitors as panels in the headset";
+      exec = "${config.systemd.package}/bin/systemctl --user restart mado";
+    })
+  ];
+
   systemd.user.services.mado = {
     description = "mado-view, the PC's mado stream in the headset";
     bindsTo = ["steamvr.service"];
