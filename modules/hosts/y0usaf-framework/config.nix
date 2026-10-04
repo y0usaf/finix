@@ -119,10 +119,9 @@ in {
       tomoe = {
         layout = "sway";
         bar = {
+          style = "gap";
           modules = ["time" "date" "battery" "network"];
           edges = ["bottom"];
-          exclusive = true;
-          indent = 8;
         };
       };
     };
