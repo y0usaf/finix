@@ -196,6 +196,12 @@
     media-width = 34;
   };
 
+  gapParameters = {
+    inherit (barParameters) modules center-between edges inset time date hot media-width;
+    font = "Departure Mono";
+    sample = 1000;
+  };
+
   bongoParameters = {
     height = 80;
     margin-bottom = 6;
@@ -327,6 +333,12 @@ in {
     };
 
     bar = {
+      style = lib.mkOption {
+        type = lib.types.enum ["panels" "gap"];
+        default = "panels";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing.";
+      };
+
       modules = lib.mkOption {
         type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu" "vram" "media"]);
         default = ["time" "date"];
@@ -342,13 +354,13 @@ in {
       indent = lib.mkOption {
         type = lib.types.ints.unsigned;
         default = 0;
-        description = "Exclusive bars: lift the widget row this many px off the screen edge. Baked into the bar thickness so the exclusive zone covers it — windows never overlap the gap.";
+        description = "Exclusive panel bars: lift the widget row this many px off the screen edge. Baked into the bar thickness so the exclusive zone covers it — windows never overlap the gap.";
       };
 
       exclusive = lib.mkOption {
         type = lib.types.bool;
         default = false;
-        description = "Whether the bar reserves exclusive space that windows tile around. Keep false for a pure overlay.";
+        description = "Whether the panel bar reserves exclusive space that windows tile around. Keep false for a pure overlay.";
       };
     };
   };
@@ -391,8 +403,11 @@ in {
     (builtins.readFile ./lisp/hud.lisp)
     "(defparameter +hud-theme+ ${toLisp hudThemeParameters})"
     (builtins.readFile ./lisp/theme.lisp)
-    "(defparameter +bar+ ${toLisp barParameters})"
-    (builtins.readFile ./lisp/bar.lisp)
+    (
+      if bar.style == "gap"
+      then "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/gap.lisp
+      else "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp
+    )
     "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
     (builtins.readFile ./lisp/bongo-cat.lisp)
     "(defparameter +combo+ ${toLisp comboParameters})"
