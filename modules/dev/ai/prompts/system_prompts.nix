@@ -4,7 +4,7 @@
   flakeInputs,
   ...
 }: let
-  piSrc = "${flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi.src}/packages/coding-agent";
+  piSrc = "${flakeInputs.pi}/packages/coding-agent";
   body = ''
     <style>
       Lead with the result. Use plain words, active voice, and consistent terms.

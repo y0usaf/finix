@@ -10,7 +10,6 @@
     ".claude/skills"
     ".fx/skills"
     ".config/phi/skills"
-    ".prime/agent/skills"
     ".omp/agent/skills"
   ];
   skills = {
