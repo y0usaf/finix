@@ -9,8 +9,12 @@
   config.user.ui.cudaterm = {
     inherit (config.hardware.nvidia) enable;
     package = lib.mkIf config.hardware.nvidia.enable (flakeInputs.cudaterm.lib.mkFinixPackage {
-      fontFile = "${flakeInputs.fonts.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/fonts/truetype/DepartureMonoUltraCondensed-Regular.ttf";
-      fontSize = config.user.appearance.termFontSize;
+      fontFile = "${flakeInputs.fonts.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/fonts/truetype/DepartureMonoSemiCondensed-Regular.ttf";
+      fontSize = let
+        pixels = config.user.appearance.termFontSize * 96.0 / 72.0;
+        grid = 11 * builtins.floor (pixels / 11 + 0.5);
+      in
+        grid * 72.0 / 96.0;
       lineHeight = let
         match = builtins.match "([0-9]+)px" config.user.ui.foot.lineHeight;
       in
