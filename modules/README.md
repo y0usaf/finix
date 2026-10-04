@@ -59,13 +59,14 @@ checkout sees, and a locked `path:` input would fail every evaluation of this
 flake whenever that checkout changed. `config.nix` is the personal layer, a
 NixOS module that reuses `tools/git.nix` and `tools/tmux.nix` and links files
 with manzil; `bolo.nix` runs bolo on the CPU and fetches its speech model at
-boot into the big home partition, out of the small root. `deploy.nix` builds
-`finix-frame-deploy`, which extends the checkout's `nixosConfigurations.frame`
-with manzil's NixOS module, that layer, manzil's static aarch64 linker
-(cross-built on this machine) and bolo's aarch64 packages (`--impure`), then
-copies and switches the Frame over ssh. The rest of the closure builds under
-the qemu aarch64 binfmt handler; `finix-frame-deploy` names the command that
-registers it when it is missing.
+boot into the big home partition, out of the small root; `mado.nix` runs
+mado-view whenever SteamVR runs, so the headset shows the PC's mado stream.
+`deploy.nix` builds `finix-frame-deploy`, which extends the checkout's
+`nixosConfigurations.frame` with manzil's NixOS module, that layer, manzil's
+static aarch64 linker (cross-built on this machine) and bolo's and mado's
+aarch64 packages (`--impure`), then copies and switches the Frame over ssh.
+The rest of the closure builds under the qemu aarch64 binfmt handler;
+`finix-frame-deploy` names the command that registers it when it is missing.
 
 `modules/finix/sudo.nix` configures sudo itself and takes only the privileges
 provider from finix's sudo module. Leave `programs.sudo.enable` off: it also

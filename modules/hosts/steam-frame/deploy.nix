@@ -6,7 +6,10 @@
     {repo}:
     let
       config = ((builtins.getFlake ("path:" + repo)).nixosConfigurations.frame.extendModules {
-        specialArgs.boloPackages = (builtins.getFlake "path:${inputs.bolo}").packages.aarch64-linux;
+        specialArgs = {
+          boloPackages = (builtins.getFlake "path:${inputs.bolo}").packages.aarch64-linux;
+          madoPackages = (builtins.getFlake "path:${inputs.mado}").packages.aarch64-linux;
+        };
         modules = [
           "${inputs.manzil}/nix/modules/nixos.nix"
           "${inputs.self}/modules/hosts/steam-frame/config.nix"
