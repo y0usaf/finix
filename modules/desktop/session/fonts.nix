@@ -8,7 +8,7 @@
   options.user.ui.fonts = {
     mainFontName = lib.mkOption {
       type = lib.types.str;
-      default = "Departure Mono Ultra Condensed";
+      default = "Departure Mono Semi Condensed";
       description = "Main font family name";
     };
     backup.name = lib.mkOption {
