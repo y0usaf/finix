@@ -64,7 +64,7 @@ gone window left behind, or the keys go dead."
       (list* :output output area))))
 
 (defun deck--box (state area id)
-  "Where ID goes, or NIL when it is not in the window set."
+  "Where ID goes, or NIL when it is not in the window set or sits in the column a narrow output hides."
   (let* ((gaps (getf +layout+ :gaps))
          (x (+ (getf area :x) gaps)) (y (+ (getf area :y) gaps))
          (width (- (getf area :width) (* 2 gaps))) (height (- (getf area :height) (* 2 gaps))))
@@ -87,6 +87,13 @@ gone window left behind, or the keys go dead."
               (row (floor index cols)))
          (list (+ x (* column (+ cell-width gaps))) (+ y (* row (+ cell-height gaps)))
                cell-width cell-height)))
+      ((< (getf area :width) (* 2 (getf area :height)))
+       (let* ((side (deck--side-of state id))
+              (column (deck--column state side))
+              (front (position (deck--front state side) column))
+              (index (position id column)))
+         (when (and index front (eql side (or (deck--side-of state (deck--current state)) :left)))
+           (list x (+ y (* (- index front) (+ height gaps))) width height))))
       (t
        (let* ((ratio (nth (1- (getf state :ratio)) (getf +layout+ :ratios)))
               (left-width (floor (* (- width gaps) ratio)))
