@@ -9,10 +9,10 @@
   config.user.ui.cudaterm = {
     inherit (config.hardware.nvidia) enable;
     package = lib.mkIf config.hardware.nvidia.enable (flakeInputs.cudaterm.lib.mkFinixPackage {
-      fontFile = "${flakeInputs.fonts.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/fonts/truetype/DepartureMonoSemiCondensed-Regular.ttf";
+      fontFile = "${flakeInputs.fonts.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/fonts/truetype/Moono-Regular.ttf";
       fontSize = let
         pixels = config.user.appearance.termFontSize * 96.0 / 72.0;
-        grid = 11 * builtins.floor (pixels / 11 + 0.5);
+        grid = 22 * lib.max 1 (builtins.floor (pixels / 22 + 0.5));
       in
         grid * 72.0 / 96.0;
       lineHeight = let
