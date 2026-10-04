@@ -8,6 +8,7 @@
     ../../tools/git.nix
     ../../tools/tmux.nix
     ./bolo.nix
+    ./mado.nix
   ];
 
   options.user.name = lib.mkOption {
