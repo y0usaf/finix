@@ -4,8 +4,8 @@
   ...
 }: {
   environment.systemPackages = [
-    (pkgs.lib.hiPrio flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".pi-full)
-    flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".durapi-full
+    (pkgs.lib.hiPrio flakeInputs.pi.packages."${pkgs.stdenv.hostPlatform.system}".default)
+    flakeInputs.durapi.packages."${pkgs.stdenv.hostPlatform.system}".default
     pkgs.texliveFull
     pkgs.texstudio
     pkgs.tectonic

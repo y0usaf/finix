@@ -12,7 +12,7 @@ in {
     ".omp"
   ];
   environment.systemPackages = [
-    flakeInputs.pi-flake.packages."${pkgs.stdenv.hostPlatform.system}".omp-full
+    flakeInputs.oh-my-pi.packages."${pkgs.stdenv.hostPlatform.system}".omp
   ];
 
   manzil.users."${config.user.name}".files = {
@@ -25,6 +25,11 @@ in {
         advisor.enabled = false;
         modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
         modelRoles.advisor = "vercel-ai-gateway/openai/gpt-5.6-luna";
+        extensions = [
+          "${flakeInputs.pi-chronobreak}"
+          "${flakeInputs.pi-recap}"
+          "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
+        ];
       };
     };
     ".omp/config.json" = {

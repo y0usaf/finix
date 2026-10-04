@@ -87,6 +87,7 @@ in {
     environment.systemPackages = [
       flakeInputs.pi-harness.packages."${pkgs.stdenv.hostPlatform.system}".default
     ];
+    environment.variables.PI_SKIP_VERSION_CHECK = "1";
     manzil.users."${config.user.name}".files = {
       ".pi/agent/settings.json" = {
         generator = toJSON;
@@ -94,7 +95,13 @@ in {
           inherit (catalog) defaultThinkingLevel enabledModels;
           defaultProvider = "anthropic";
           defaultModel = "claude-opus-5-5";
-          packages = [];
+          packages = [
+            "${flakeInputs.pi-chronobreak}"
+            "${flakeInputs.pi-rlm}"
+            "${flakeInputs.pi-recap}"
+            "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
+          ];
+          enableInstallTelemetry = false;
           defaultTools = ["+codemode"];
           codemode.mode = "only";
           compaction.enabled = false;

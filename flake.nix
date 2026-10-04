@@ -93,20 +93,46 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    pi-flake = {
-      url = "github:y0usaf/pi-flake?ref=main";
+    pi = {
+      url = "github:earendil-works/pi/v1.0.2";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
+    };
+
+    pi-chronobreak = {
+      url = "github:y0usaf/pi-chronobreak";
+      flake = false;
+    };
+
+    pi-rlm = {
+      url = "github:y0usaf/pi-rlm";
+      flake = false;
+    };
+
+    pi-recap = {
+      url = "github:y0usaf/pi-recap";
+      flake = false;
+    };
+
+    pi-donsetch = {
+      url = "github:y0usaf/pi-donsetch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    durapi = {
+      url = "github:y0usaf/durapi";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.pi.follows = "pi";
+      inputs.pi-donsetch.follows = "pi-donsetch";
     };
 
     pi-harness = {
       url = "git+ssh://git@github.com/y0usaf/amux.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.pi.follows = "pi";
     };
 
-    oh-my-pi = {
-      url = "github:can1357/oh-my-pi";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    oh-my-pi.url = "github:can1357/oh-my-pi";
 
     autolith.url = "github:y0usaf/autolith?ref=fix-clinedi-pin";
 
