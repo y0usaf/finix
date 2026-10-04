@@ -1630,26 +1630,6 @@
         "type": "github"
       }
     },
-    "reasonix-flake": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1786509038,
-        "narHash": "sha256-h+9kvFmoSPDGHX7y8h+alr5Ha+q/RunT2Glppm+VpZ4=",
-        "owner": "y0usaf",
-        "repo": "reasonix-flake",
-        "rev": "100e8cc240d7f074baae2821af66d302549e1e37",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "repo": "reasonix-flake",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "ash": "ash",
@@ -1682,7 +1662,6 @@
         "phi": "phi",
         "pi-flake": "pi-flake",
         "pi-harness": "pi-harness",
-        "reasonix-flake": "reasonix-flake",
         "rudo": "rudo",
         "rush": "rush",
         "silva": "silva",

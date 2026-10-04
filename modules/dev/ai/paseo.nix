@@ -93,12 +93,6 @@ in {
             FX_PERMISSION_MODE = "yolo";
           };
         };
-        reasonix = {
-          extends = "acp";
-          label = "Reasonix";
-          description = "Reasonix cache-first coding agent";
-          command = ["reasonix" "acp"];
-        };
       };
     };
   };
