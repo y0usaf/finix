@@ -8,11 +8,9 @@
     ".agents/skills"
     ".config/codex/skills"
     ".claude/skills"
-    ".config/opencode/skills"
     ".fx/skills"
     ".config/phi/skills"
     ".prime/agent/skills"
-    ".reasonix/skills"
     ".omp/agent/skills"
   ];
   skills = {
