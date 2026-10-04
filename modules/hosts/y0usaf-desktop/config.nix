@@ -79,6 +79,7 @@
     };
 
     ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram"];
+    ui.tomoe.bar.style = "gap";
 
     gaming = {
       p4g.enable = true;
