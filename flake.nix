@@ -170,6 +170,8 @@
 
     tomoe.url = "github:y0usaf/tomoe";
 
+    mado.url = "git+ssh://git@github.com/y0usaf/mado.git";
+
     strictix = {
       url = "github:y0usaf/strictix";
       inputs.nixpkgs.follows = "nixpkgs";
