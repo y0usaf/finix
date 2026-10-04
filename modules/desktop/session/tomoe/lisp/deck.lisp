@@ -14,6 +14,11 @@
   (let ((entry (deck--entry (getf state :columns) id))) (and entry (cdr entry))))
 (defun deck--column (state side)
   (remove-if-not (lambda (id) (eql (deck--side-of state id) side)) (deck--windows state)))
+(defparameter +deck--column-commands+
+  '("focus-left" "focus-right" "swap-columns" "to-left" "to-right" "ratio"))
+(defun deck--narrow-p (area)
+  (let ((output (and area (getf area :output))))
+    (and output (< (* 9 (getf output :width)) (* 21 (getf output :height))))))
 (defun deck--front (state side)
   "The window SIDE's deck shows in front. An adopted front counts only while it is
 still in that column: a front can outlive its window between a close and the
@@ -64,7 +69,7 @@ gone window left behind, or the keys go dead."
       (list* :output output area))))
 
 (defun deck--box (state area id)
-  "Where ID goes, or NIL when it is not in the window set or sits in the column a narrow output hides."
+  "Where ID goes, or NIL when it is not in the window set."
   (let* ((gaps (getf +layout+ :gaps))
          (x (+ (getf area :x) gaps)) (y (+ (getf area :y) gaps))
          (width (- (getf area :width) (* 2 gaps))) (height (- (getf area :height) (* 2 gaps))))
@@ -87,12 +92,12 @@ gone window left behind, or the keys go dead."
               (row (floor index cols)))
          (list (+ x (* column (+ cell-width gaps))) (+ y (* row (+ cell-height gaps)))
                cell-width cell-height)))
-      ((< (getf area :width) (* 2 (getf area :height)))
-       (let* ((side (deck--side-of state id))
-              (column (deck--column state side))
-              (front (position (deck--front state side) column))
+      ((deck--narrow-p area)
+       (let* ((column (remove-if-not (lambda (candidate) (deck--manageable-p state candidate))
+                                     (deck--windows state)))
+              (front (or (position (deck--current state) column) 0))
               (index (position id column)))
-         (when (and index front (eql side (or (deck--side-of state (deck--current state)) :left)))
+         (when index
            (list x (+ y (* (- index front) (+ height gaps))) width height))))
       (t
        (let* ((ratio (nth (1- (getf state :ratio)) (getf +layout+ :ratios)))
@@ -157,6 +162,14 @@ gone window left behind, or the keys go dead."
             (nth theirs order) id))
     state))
 
+(defun deck--reorder-all (state direction)
+  (let* ((order (deck--windows state))
+         (index (position (deck--current state) order))
+         (target (and index (+ index direction))))
+    (when (and target (< -1 target (length order)))
+      (rotatef (nth index order) (nth target order)))
+    state))
+
 (defun deck--cycle (state direction)
   "Focus the next or previous window in the window set, wrapping."
   (let* ((order (deck--windows state))
@@ -213,6 +226,13 @@ gone window left behind, or the keys go dead."
 
 (defun deck--command (state area command)
   (cond
+    ((and (deck--narrow-p area)
+          (or (member command +deck--column-commands+ :test #'equal)
+              (member command '("scroll-down" "scroll-up" "move-down" "move-up") :test #'equal)))
+     (cond ((equal command "scroll-down") (deck--cycle state 1))
+           ((equal command "scroll-up") (deck--cycle state -1))
+           ((equal command "move-down") (deck--reorder-all state 1))
+           ((equal command "move-up") (deck--reorder-all state -1))))
     ((equal command "focus-left")
      (deck--focus-window state (or (deck--front state :left) (deck--current state))))
     ((equal command "focus-right")
@@ -322,7 +342,13 @@ gone window left behind, or the keys go dead."
           (deck--focus-window state id))))
     (let ((current (deck--current state)))
       (values state
-              (append (mapcar (lambda (binding) (apply #'bind-key binding)) +layout-bindings+)
+              (append (mapcar (lambda (binding) (apply #'bind-key binding))
+                              (if (deck--narrow-p area)
+                                  (remove-if (lambda (binding)
+                                               (member (string-downcase (third binding))
+                                                       +deck--column-commands+ :test #'equal))
+                                             +layout-bindings+)
+                                  +layout-bindings+))
                       (when area (deck--places windows state area))
                       (deck--raises state current)
                       (list (focus current :raise nil)))
