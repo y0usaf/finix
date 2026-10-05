@@ -15,11 +15,12 @@
 
       - **One job.** A project's README opens with its job in one sentence and
         what it won't do; goal and parity files obey it. A reference lends
-        qualities, never a feature list. Ship parts together, but each could
-        run as its own process.
+        qualities, never a feature list. Each part can run as its own process.
       - **Least code.** Prefer deletion to addition. Abstract on the third need.
-      - **Least power.** Lowest rung that works: constant < data < config <
-        pure function < code with I/O or state.
+      - **Least power.** Lowest rung that works on any machine: constant <
+        data < config < pure function < code with I/O or state.
+      - **No hardcoding.** A value that could differ by machine or user is
+        discovered or read from config, and set in one place.
       - **Least deps.** Take a dependency only for knowledge you'd otherwise
         rediscover; when the interface under it is simpler (sysfs, /proc), use
         that. Ship every dependency you keep inside the package.
@@ -37,8 +38,7 @@
         dies with what's above it. Anything that could crash it runs in another
         process, from the same binary if you like; anything that could hang it
         runs there or under a budget. `nix run` with no config reaches the
-        floor; break any part above it and the floor stays up and says what
-        broke.
+        floor; break any part above it and the floor says what broke.
       - **Clean unmount.** Anything mounted at runtime reverts all its effects
         on unmount, child processes, locks and sockets included, and declares
         what it reads; a changed dependency updates exactly its consumers.
