@@ -33,6 +33,7 @@
        (when (eq name (getf state :idle)) (setf (getf state :sleeping) t))
        (when (eq name :groove) (incf (getf state :frame))))))
   (let* ((p (state-value snapshot :hud-palette))
+         (focal (state-value snapshot :focal-frame))
          (hot (state-value snapshot :hud-hot))
          (playing (equal (getf (service-state snapshot :mpris) :status) "Playing"))
          (frame (getf state :frame))
@@ -71,7 +72,10 @@
                                                                  :children (list (ui :column :height strip
                                                                                      :children (list overlay))
                                                                                  cat))))
-                                         :anchors '(:bottom)
-                                         :margin (list 0 0 (getf +bongo-cat+ :margin-bottom) 0)
+                                         :output (getf focal :output)
+                                         :anchors (if focal '(:top) '(:bottom))
+                                         :margin (if focal
+                                                     (list (- (+ (getf focal :top) (getf focal :height)) 6 strip height) 0 0 0)
+                                                     (list 0 0 (getf +bongo-cat+ :margin-bottom) 0))
                                          :layer :overlay :background "#00000000" :click-through t)))
             nil)))
