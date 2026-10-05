@@ -47,6 +47,13 @@
 in {
   manzil.users."${config.user.name}".files = {
     ".config/phi/SYSTEM.md".text = "${body}\n";
+    ".local/state/honey/agent/SYSTEM.md".text = ''
+      ${body}
+
+      <rules>
+        Use one edit call per file, with every change in its edits[].
+      </rules>
+    '';
     ".pi/agent/SYSTEM.md".text = ''
       ${body}
 
