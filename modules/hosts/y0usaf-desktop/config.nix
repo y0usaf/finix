@@ -32,6 +32,7 @@
       '';
     };
     sysklogd.extraConfig = "*.* @192.168.2.66:514";
+    networkmanager.settings.keyfile.unmanaged-devices = "interface-name:wlp96s0";
   };
 
   finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
