@@ -49,9 +49,8 @@
            - Rust: deserialize raw bytes / a `serde_json::Value` into a concrete struct at the boundary (serde derive). Let the parser hold the evidence, not ad-hoc `.as_str()` checks.
            - Dynamic languages too: validate input in one place and return a typed/slotted result; do not re-check shape deep in the call tree.
 
-        4. A cast must state the invariant it proved. Every cast needs a SAFETY comment naming what earlier step made it sound.
-           - TS: `// SAFETY: parseUserId validated the identifier before branding it.` above `const userId = value as UserId;`
-           - Rust: same, above an unavoidable `as` (never bare `transmute`) and above a `#[allow(...)]` forcing a cast.
+        4. A cast must follow the check that proves it, or the parser returns the narrow type and no cast is needed.
+           - Rust: never bare `transmute`; an unavoidable `as` sits right after the bounds check that makes it sound.
 
         5. Name the contract, not the shape of the container.
            - TS: no `function save(value: object)`, no `Record<string, unknown>` for a thing with real fields, no alias that merely hides `unknown` (`type ExternalValue = unknown`).
@@ -72,7 +71,6 @@
 
         ## Shipping checklist
         Every one of these must pass before shipping a changeset:
-        - Every cast/`downcast`/unwrap has a SAFETY comment naming what proved it.
         - No value widened then re-narrowed; `unknown` is parsed exactly once.
         - No reflective/dynamic dispatch where a plain typed call exists.
         - Every `unknown`/`Value`/`Any` is handled at a boundary, never mid-function.
