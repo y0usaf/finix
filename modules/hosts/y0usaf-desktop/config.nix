@@ -78,7 +78,7 @@
       hyprcursorSize = 36;
     };
 
-    ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram"];
+    ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram" "frame"];
     ui.tomoe.bar.style = "gap";
 
     gaming = {
