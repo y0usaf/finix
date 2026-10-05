@@ -309,7 +309,7 @@ in {
       };
 
       modules = lib.mkOption {
-        type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu" "vram" "media"]);
+        type = lib.types.listOf (lib.types.enum ["time" "date" "battery" "network" "cpu" "memory" "gpu" "vram" "media" "frame"]);
         default = ["time" "date"];
         description = "Bar overlay modules to render.";
       };

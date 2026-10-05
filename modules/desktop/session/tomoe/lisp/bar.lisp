@@ -159,13 +159,13 @@
                                           (bar--sweep p accent frac))))
                 :flash tick)))
 
-(defun bar--battery (p battery)
+(defun bar--battery (p battery &optional (label "BAT"))
   (let* ((percent (round (getf battery :percent 0)))
          (charging (getf battery :charging))
          (color (cond (charging (hud--c p :color2)) ((< percent 15) (hud--c p :color1))
                       ((< percent 30) (hud--c p :color3)) (t (hud--c p :color2)))))
     (hud--panel p color
-                (list* (hud--text "BAT" 11 (hud--dim p))
+                (list* (hud--text label 11 (hud--dim p))
                        (ui :row :align :end
                            :children (list (hud--text (format nil "~3D" percent) 16 (hud--c p :fg))
                                            (hud--text "%" 11 (hud--dim p))))
@@ -195,6 +195,11 @@
                                (hud--text (string-upcase (clock-text (getf +bar+ :date))) 14 (hud--c p :fg)))))
       (:battery (bar--battery p (service-state snapshot :battery)))
       (:network (bar--network p (service-state snapshot :network)))
+      (:frame (let ((frame (state-value snapshot :frame-battery)))
+                (when (getf frame :percent)
+                  (bar--battery p (list :percent (getf frame :percent)
+                                        :charging (not (equal (getf frame :status) "Discharging")))
+                                "VR"))))
       (:media (when media
                 (let ((color (hud--c p :color5)))
                   (hud--panel p color

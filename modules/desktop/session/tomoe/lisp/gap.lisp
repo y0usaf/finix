@@ -98,6 +98,16 @@
                             20)
                 (if online (hud--c p :color6) (hud--c p :color1)))))
 
+(defun gap--frame (p snapshot)
+  (let* ((battery (state-value snapshot :frame-battery))
+         (percent (getf battery :percent))
+         (powered (not (equal (getf battery :status) "Discharging"))))
+    (when percent
+      (gap--gauge p (if powered "VR+" "VR")
+                  (cond (powered (hud--c p :color2)) ((< percent 15) (hud--c p :color1))
+                        ((< percent 30) (hud--c p :color3)) (t (hud--c p :color2)))
+                  percent nil nil))))
+
 (defun gap--module (module p state snapshot)
   (let ((cpu (getf state :cpu)) (memory (getf state :memory)) (gpu (getf state :gpu)))
     (ecase module
@@ -106,6 +116,7 @@
       (:media (gap--media p snapshot))
       (:battery (gap--battery p snapshot))
       (:network (gap--network p snapshot))
+      (:frame (gap--frame p snapshot))
       (:cpu (gap--gauge p "CPU" (hud--c p :color4) (getf cpu :percent 0) (gap--degrees (getf cpu :temp))))
       (:memory (gap--gauge p "MEM" (hud--c p :color5) (getf memory :percent 0) (gap--gib (getf memory :used))))
       (:gpu (when (gap--gpu-p gpu)
