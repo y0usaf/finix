@@ -1,7 +1,7 @@
 # Confucius4-R2T2 streaming ASR server runbook
 
-Declared by `modules/dev/ai/r2t2/default.nix`, which runs wherever
-`hardware.nvidia.enable` is set, so on the desktop. It replaces the hand-started feasibility process from a since-retired sandbox.
+Declared by `modules/dev/ai/r2t2/default.nix`, which runs only where
+`user.dev.r2t2.enable` is set; it is off by default. It replaces the hand-started feasibility process from a since-retired sandbox.
 
 ## What runs
 
@@ -23,19 +23,19 @@ Declared by `modules/dev/ai/r2t2/default.nix`, which runs wherever
 
 ## Build and enable
 
-    # Evaluate the finit service (defined wherever hardware.nvidia.enable is set):
+    # Evaluate the finit service:
     nix eval --impure --apply 'x: builtins.attrNames x' \
       .#nixosConfigurations.y0usaf-desktop.config.finit.services.r2t2
 
-    # Full system build (does NOT activate): the enabled desktop toplevel.
+    # Full system build (does NOT activate):
     nix build .#nixosConfigurations.y0usaf-desktop.config.system.build.toplevel
 
     # Cheap whole-flake check:
     nix flake check
 
 Activation is `nh os switch` / boot, deliberately out of scope here. Building
-only proves the closure; on an NVIDIA host the finit service is part of that
-closure.
+only proves the closure; with `user.dev.r2t2.enable` set, the finit service is
+part of that closure.
 
 ## Python environment (the one manual step)
 
@@ -43,7 +43,7 @@ vLLM + torch cu128 as a pure nix package is a large lift, and PyPI wheels
 still need the `LD_LIBRARY_PATH`/TRITON environment below, so the venv is
 materialised once by a declared installer rather than rebuilt every boot:
 
-    r2t2-install      # on PATH on NVIDIA hosts
+    r2t2-install
 
 It installs the pinned Python packages into `~/.local/share/r2t2/.venv`.
 Re-run it after changing the pin set. It is idempotent and uses the local `uv`
