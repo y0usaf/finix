@@ -133,7 +133,9 @@
     echo "r2t2-install: the repo (r2t2 import) is provided via PYTHONPATH=${patched}; not installed into the venv."
   '';
 in {
-  config = lib.mkIf config.hardware.nvidia.enable {
+  options.user.dev.r2t2.enable = lib.mkEnableOption "Confucius4-R2T2 streaming ASR server";
+
+  config = lib.mkIf config.user.dev.r2t2.enable {
     environment.systemPackages = [installScript];
 
     finix.persistence.allowlist.users."${config.user.name}".directories = [
