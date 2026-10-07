@@ -1576,11 +1576,11 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1791095427,
-        "narHash": "sha256-qheukfei4+kcPaWr6Yx9Q7IYYr4QEPFT0V3yj8gnbGs=",
+        "lastModified": 1791332953,
+        "narHash": "sha256-ZXuo/H4QOT44Diq0+qUrJmGkp0sUs22Y1i3/J7yM+Ew=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "393e1452ebc51643d278c042bd2953467e6eeb83",
+        "rev": "25ebc2e8e34aa5dbb5f2da2551763577c5029c40",
         "type": "github"
       },
       "original": {
