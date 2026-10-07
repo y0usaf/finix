@@ -309,11 +309,11 @@
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1790886121,
-        "narHash": "sha256-vvucDkxW1XcVqPSQXLEL9wXRkPsYbyls5/d9oG0RtpQ=",
+        "lastModified": 1791226542,
+        "narHash": "sha256-ZWjm8Ur0mOTppzO4HyiCuuKdc0E+xQSZLlbKapaB2SQ=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "ae3a7840150e416935cfc7d062bbc2cac6ee7e4e",
+        "rev": "168cc7e8774ac5e0d32957f48a1bdeca4ff60046",
         "type": "github"
       },
       "original": {
@@ -627,11 +627,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1791132543,
-        "narHash": "sha256-O4d3r6MbrpKj+jH5Ga2tHXMwLl10Uk2j8HXMdG4iHXk=",
+        "lastModified": 1791214100,
+        "narHash": "sha256-T/btkNsRLRJ46++nK1VGN34i4ih0Qcs2gr1dTzq7qvw=",
         "ref": "refs/heads/main",
-        "rev": "db9bc28100ea6c30179ebf88a2b8750bc07e6ec4",
-        "revCount": 28,
+        "rev": "6aec2d2c87c4abfebeec7ff47592978c9e5acb6f",
+        "revCount": 66,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/mado.git"
       },
@@ -1246,11 +1246,11 @@
     "pi-rlm": {
       "flake": false,
       "locked": {
-        "lastModified": 1791077744,
-        "narHash": "sha256-kqv7gg9lcopk8mZ57seagxNod4IIc6pU9/uiMmTWLGg=",
+        "lastModified": 1791155887,
+        "narHash": "sha256-tA3iZeZBu5urz6r2Kt/LSpm2ZKkYu9AoGvHyG2oEp1g=",
         "owner": "y0usaf",
         "repo": "pi-rlm",
-        "rev": "fd2268ce96d50db918dcb5519afe2b9dd0218c12",
+        "rev": "bdd3e83bbbd2e03070e7a526560210d520f2f677",
         "type": "github"
       },
       "original": {
