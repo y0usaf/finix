@@ -12,7 +12,9 @@ inputs: let
       overlays = [
         inputs.claude-code-nix.overlays.default
         (_: _: {
-          rush = inputs.rush.packages.${system}.default;
+          rush = inputs.rush.packages.${system}.default.overrideAttrs (old: {
+            patches = (old.patches or []) ++ [./shell/rush-login-command.patch];
+          });
           monstar = inputs.monstar.packages.${system}.default;
           ash = inputs.ash.packages.${system}.default;
         })
