@@ -1043,11 +1043,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791156547,
-        "narHash": "sha256-zJsuCxKrAMc3kdu8HY6hG5YFxY7emA6x6rpJv/YpdGE=",
+        "lastModified": 1791410603,
+        "narHash": "sha256-05E9iAT+wBs9AclHxjcS7E2nJgx9SOcTN2ShAnpjoZU=",
         "owner": "y0usaf",
         "repo": "obs-twitch-tts",
-        "rev": "be100faf482f4e2ea448d641c787c5b6ff36a097",
+        "rev": "cc756a859ec7306a37685d67370b33cb428a4ec5",
         "type": "github"
       },
       "original": {
