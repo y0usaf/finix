@@ -1,0 +1,114 @@
+diff --git a/src/app.zig b/src/app.zig
+index 807f09e..b869bda 100644
+--- a/src/app.zig
++++ b/src/app.zig
+@@ -9,12 +9,13 @@ const function_autoload = @import("function_autoload.zig");
+ const host = @import("host.zig");
+ const interactive = @import("interactive.zig");
+ const shell = @import("shell.zig");
++const startup = @import("interactive/startup.zig");
+ 
+ const RushShell = shell.ShellWithBuiltins(host.RealHost, extensions.rush.registry);
+ 
+ const usage =
+     \\usage: rush [-l | --login] [--posix] [-i] [-u] [-x]
+-    \\       rush [--posix] [-i] [-u] [-x] -c SCRIPT [NAME [ARGS...]]
++    \\       rush [-l | --login] [--posix] [-i] [-u] [-x] -c SCRIPT [NAME [ARGS...]]
+     \\       rush [--posix] [-i] [-u] [-x] [--] SCRIPT [ARGS...]
+     \\       rush --help
+     \\       rush --version
+@@ -25,6 +26,7 @@ const EvalSourceOptions = struct {
+     state_options: shell.state.Options,
+     arg_zero: []const u8,
+     positionals: []const []const u8,
++    login: bool = false,
+ };
+ 
+ pub fn run(
+@@ -74,6 +76,7 @@ pub fn run(
+                 .state_options = command.options,
+                 .arg_zero = command.arg_zero,
+                 .positionals = command.positionals,
++                .login = command.login,
+             }, src);
+         },
+         .script_file => |script| {
+@@ -114,6 +117,11 @@ fn evalSource(
+     defer sh.deinit();
+     sh.setFunctionAutoload(autoloadRushFunction);
+ 
++    if (options.login) {
++        var source_id: shell.source.SourceId = src.id +% 1;
++        if (try startup.sourceLoginProfiles(&sh, &source_id)) |status| return status;
++    }
++
+     const evaluated = sh.evalSource(src) catch |err| {
+         // Parse errors already produced a positioned syntax diagnostic.
+         if (!shell.parser.isParseError(err)) try sh.host.writeAll(.stderr, "rush: shell error\n");
+diff --git a/src/interactive/startup.zig b/src/interactive/startup.zig
+index 2221d20..2f7c6c7 100644
+--- a/src/interactive/startup.zig
++++ b/src/interactive/startup.zig
+@@ -25,18 +25,7 @@ pub fn source(
+     }
+ 
+     if (login) {
+-        const system_profile = try std.fs.path.join(
+-            sh.allocator,
+-            &.{ build_config.sysconfdir, "rush", "profile.rush" },
+-        );
+-        defer sh.allocator.free(system_profile);
+-        if (try sourceFileIfExists(sh, source_id, system_profile)) |status| return status;
+-
+-        const user_profile = try userConfigPath(sh.allocator, sh.env, "profile.rush");
+-        defer if (user_profile) |path| sh.allocator.free(path);
+-        if (user_profile) |path| {
+-            if (try sourceFileIfExists(sh, source_id, path)) |status| return status;
+-        }
++        if (try sourceLoginProfiles(sh, source_id)) |status| return status;
+     }
+ 
+     const system_config = try std.fs.path.join(sh.allocator, &.{ build_config.sysconfdir, "rush", "config.rush" });
+@@ -52,6 +41,22 @@ pub fn source(
+     return null;
+ }
+ 
++pub fn sourceLoginProfiles(sh: anytype, source_id: *shell.source.SourceId) !?u8 {
++    const system_profile = try std.fs.path.join(
++        sh.allocator,
++        &.{ build_config.sysconfdir, "rush", "profile.rush" },
++    );
++    defer sh.allocator.free(system_profile);
++    if (try sourceFileIfExists(sh, source_id, system_profile)) |status| return status;
++
++    const user_profile = try userConfigPath(sh.allocator, sh.env, "profile.rush");
++    defer if (user_profile) |path| sh.allocator.free(path);
++    if (user_profile) |path| {
++        if (try sourceFileIfExists(sh, source_id, path)) |status| return status;
++    }
++    return null;
++}
++
+ fn expandEnvPath(sh: anytype, path: []const u8) ![]const u8 {
+     const scratch = try sh.beginScratchScope();
+     defer scratch.end();
+diff --git a/src/shell/invocation.zig b/src/shell/invocation.zig
+index ba20979..e551d78 100644
+--- a/src/shell/invocation.zig
++++ b/src/shell/invocation.zig
+@@ -36,6 +36,7 @@ pub const CommandString = struct {
+     script: []const u8,
+     arg_zero: []const u8,
+     positionals: []const []const u8 = &.{},
++    login: bool = false,
+ };
+ 
+ pub const ScriptFile = struct {
+@@ -102,6 +103,7 @@ pub fn parse(args: []const []const u8) ParseError!Invocation {
+                     .script = script,
+                     .arg_zero = arg_zero,
+                     .positionals = positionals,
++                    .login = login,
+                 } };
+             }
+             continue;
