@@ -34,6 +34,10 @@ in {
           id, shape, repo, branch, status, next step). Update it when you
           spawn, when a report arrives and when work lands; read it before
           you answer while any task is live.
+        - Parked: a parked or scoped row says when it is due, a date or an
+          event. At the start of each turn read the ledger; for each row now
+          due, ask one card offering to start it and mark the row
+          "carded <date>" so it comes back once.
         - Supervise: reports arrive on their own, so never poll; steer with
           tell, stop with cancel. Before accepting a report, read the diff
           and rerun its key check.
