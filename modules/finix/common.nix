@@ -31,7 +31,13 @@ in {
     };
 
     services = {
-      sysklogd.enable = true;
+      sysklogd = {
+        enable = true;
+        extraConfig = ''
+          rotate_size 256M
+          rotate_count 10
+        '';
+      };
       openssh = {
         enable = true;
         settings = {
