@@ -43,6 +43,11 @@
 
     silva.url = "git+ssh://git@github.com/y0usaf/silva.git";
 
+    nacre = {
+      url = "git+ssh://git@github.com/y0usaf/nacre.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     fonts = {
       url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";
