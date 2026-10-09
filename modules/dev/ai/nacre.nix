@@ -11,11 +11,11 @@
   user = config.users.users.${userName};
   runtimeDir = "/run/user/${toString user.uid}";
 
+  # Leaves PATH alone: it execs nacre-start, and bots inherit whatever PATH this sees.
   waitRuntimeDir = pkgs.writeShellScript "wait-nacre-runtime" ''
-    export PATH=${lib.makeBinPath [pkgs.coreutils]}
-    for _ in $(seq 1 60); do
+    for _ in $(${pkgs.coreutils}/bin/seq 1 60); do
       [ -d ${runtimeDir} ] && exec "$@"
-      sleep 1
+      ${pkgs.coreutils}/bin/sleep 1
     done
     echo "wait-nacre-runtime: ${runtimeDir} never appeared" >&2
     exit 1
@@ -29,7 +29,7 @@
       name=$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9_' '_')
       export "$name"="$(cat "$f")"
     done
-    exec ${lib.getExe nacre.default}
+    exec ${lib.getExe nacre.default} --wait
   '';
 in {
   options.user.dev.nacre = {
