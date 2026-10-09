@@ -82,6 +82,11 @@
     ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram" "frame"];
     ui.tomoe.bar.style = "gap";
 
+    dev.nacre = {
+      enable = true;
+      app.enable = true;
+    };
+
     gaming = {
       p4g.enable = true;
       solo-leveling-arise.enable = true;
