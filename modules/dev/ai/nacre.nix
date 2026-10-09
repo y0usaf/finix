@@ -77,7 +77,7 @@ in {
           "${user.home}/.local/state/nix/profile"
           "/nix/var/nix/profiles/default"
         ];
-        conditions = ["net/lo/up"];
+        conditions = ["net/lo/up" "task/persist-user-binds/success"];
         respawn = true;
         log = true;
       };
