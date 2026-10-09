@@ -680,6 +680,26 @@
         "type": "github"
       }
     },
+    "nacre": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791508965,
+        "narHash": "sha256-6Quz717DEdpexqUCoMbF+z7xJ+hgAqcXOPjXcgdu8hY=",
+        "ref": "refs/heads/main",
+        "rev": "68546eedb69fd5868d4a856e57dc4369efb6ffba",
+        "revCount": 284,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/nacre.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/nacre.git"
+      }
+    },
     "nh": {
       "inputs": {
         "nixpkgs": [
@@ -1281,6 +1301,7 @@
         "mado": "mado",
         "manzil": "manzil",
         "monstar": "monstar",
+        "nacre": "nacre",
         "nh": "nh",
         "nix-on-droid": "nix-on-droid",
         "nixpkgs": "nixpkgs_5",
