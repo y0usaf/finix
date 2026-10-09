@@ -73,6 +73,14 @@ provider from finix's sudo module. Leave `programs.sudo.enable` off: it also
 installs the non-setuid sudo binary, which shadowed the
 `/run/wrappers/bin/sudo` wrapper on PATH (c9a60e8c).
 
+`modules/finix/tailscale.nix` runs tailscaled on the server and, through
+`graphical.nix`, on the graphical hosts. It makes openresolv the owner of
+`/etc/resolv.conf` so that tailscaled (openresolv mode), dhcpcd and
+NetworkManager share it: tailscaled goes first with MagicDNS, DHCP servers
+follow and public servers come last with a one-second timeout, so DNS survives
+tailscaled being down. tailscaled starts after the `resolvconf` task because
+it picks its DNS mode from the header that task writes.
+
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
 `modules/finix/desktop/default.nix`, whose import keeps the graphical role's

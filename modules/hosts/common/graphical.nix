@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  imports = [../../finix/desktop];
+  imports = [../../finix/desktop ../../finix/tailscale.nix];
 
   hardware = {
     graphics = {
@@ -61,7 +61,6 @@
       fi
     '';
   };
-  programs.resolvconf.enable = true;
 
   xdg = {
     portal.enable = true;
