@@ -36,6 +36,7 @@
   };
 
   finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
+  finit.services.nacre.cgroup.settings."cpu.max" = 800000;
 
   users.users.y0usaf.uid = 1001;
   users.users.root.passwordFile = "/persist/secrets/password-hashes/root";
