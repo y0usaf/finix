@@ -15,8 +15,8 @@ in {
     hostName = "y0usaf-server";
     staticFallback.address = "192.168.2.66/24";
     hosts = {
-      "100.105.204.116" = ["forgejo" "syncthing-server"];
-      "100.90.54.18" = ["syncthing-desktop"];
+      ${config.tailnet.addresses.y0usaf-server} = ["forgejo" "syncthing-server"];
+      ${config.tailnet.addresses.y0usaf-desktop} = ["syncthing-desktop"];
     };
   };
 
@@ -72,7 +72,7 @@ in {
   };
 
   user.dev.paseo = {
-    listenAddress = "100.105.204.116";
+    listenAddress = config.tailnet.addresses.y0usaf-server;
     relay.enable = false;
     environmentFiles = ["/home/y0usaf/Tokens/ANTHROPIC_API_KEY.txt"];
   };

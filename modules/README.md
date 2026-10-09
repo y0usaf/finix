@@ -79,7 +79,10 @@ installs the non-setuid sudo binary, which shadowed the
 NetworkManager share it: tailscaled goes first with MagicDNS, DHCP servers
 follow and public servers come last with a one-second timeout, so DNS survives
 tailscaled being down. tailscaled starts after the `resolvconf` task because
-it picks its DNS mode from the header that task writes.
+it picks its DNS mode from the header that task writes. Hosts name each other
+by MagicDNS. `tailnet.addresses` keeps the addresses of the places that need
+one: the `rescue` and `rescue-root` ssh hosts, which must work when DNS is
+broken, paseo's listen bind and the server's hosts aliases.
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except

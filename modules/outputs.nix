@@ -242,7 +242,7 @@ in {
       toplevel = hosts.y0usaf-server.config.system.topLevel;
       defaultHost = "server";
       bootDriverName = "finix-server-boot";
-      sshHost = "100.105.204.116";
+      sshHost = "y0usaf-server.${hosts.y0usaf-server.config.tailnet.domain}";
       sshPort = 22;
     };
     finix-server-boot = let

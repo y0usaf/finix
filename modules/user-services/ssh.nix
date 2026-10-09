@@ -5,6 +5,7 @@
 }: let
   userName = config.user.name;
   homeDir = config.user.homeDirectory;
+  serverAddress = config.tailnet.addresses.y0usaf-server;
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".ssh"
@@ -28,14 +29,14 @@ in {
             ForwardAgent yes
 
         Host rescue server-ts
-            HostName 100.105.204.116
+            HostName ${serverAddress}
             User ${userName}
             IdentityFile ${homeDir}/.ssh/id_ed25519
             StrictHostKeyChecking accept-new
             UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
 
         Host rescue-root
-            HostName 100.105.204.116
+            HostName ${serverAddress}
             User root
             StrictHostKeyChecking accept-new
             UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
