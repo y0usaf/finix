@@ -85,6 +85,7 @@ inputs: let
         ./server/syncthing.nix
         ./hosts/y0usaf-server/config.nix
         ./finix/tailscale.nix
+        ./finix/static-net.nix
         ./hosts/y0usaf-server/hardware-config.nix
         ./server/attic.nix
         ./server/packages.nix
@@ -107,6 +108,7 @@ inputs: let
           inputs.finix.nixosModules.nftables
           inputs.finix.nixosModules.limine
           ./finix/diagnostics.nix
+          ./finix/static-net.nix
           inputs.manzil.finixModules.default
         ]
         ++ graphicalModules
