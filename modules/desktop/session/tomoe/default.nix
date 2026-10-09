@@ -219,6 +219,7 @@
   shaderWallpaperParameters = {
     shaders = [
       ["${./shaders/balatro.glsl}" 30]
+      ["${./shaders/meadow.glsl}" 30]
       ["${shaderDir}/xmb.glsl" 30]
       ["${shaderDir}/aurora.glsl" 30]
       ["${shaderDir}/stars.glsl" 24]
