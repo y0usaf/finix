@@ -84,7 +84,7 @@ inputs: let
         ./server/mediamtx.nix
         ./server/syncthing.nix
         ./hosts/y0usaf-server/config.nix
-        ./server/tailscale.nix
+        ./finix/tailscale.nix
         ./hosts/y0usaf-server/hardware-config.nix
         ./server/attic.nix
         ./server/packages.nix

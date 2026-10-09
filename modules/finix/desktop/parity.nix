@@ -32,36 +32,11 @@
     ];
   };
 
-  boot.kernelModules = ["tun" "v4l2loopback" "zram" "uinput" "ntsync"];
+  boot.kernelModules = ["v4l2loopback" "zram" "uinput" "ntsync"];
   finit = {
     services.polkit.command = lib.mkForce "${config.services.polkit.package.out}/lib/polkit-1/polkitd --no-debug --replace";
     services.rtkit-daemon.enable = false;
-    services.tailscaled = {
-      description = "tailscale mesh VPN daemon";
-      command = "${pkgs.tailscale}/bin/tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/run/tailscale/tailscaled.sock --port=41641";
-      path = [pkgs.iproute2 pkgs.iptables pkgs.procps];
-      conditions = ["net/lo/up"];
-      log = true;
-    };
     tasks = {
-      tailscale-ssh = {
-        description = "assert tailscale SSH rescue path";
-        conditions = ["net/lo/up"];
-        command = pkgs.writeShellScript "tailscale-ssh-assert" ''
-          set -u
-          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.tailscale]}
-          for _ in $(seq 1 60); do
-            if tailscale --socket=/run/tailscale/tailscaled.sock set --ssh 2>/dev/null; then
-              echo "tailscale-ssh: RunSSH asserted"
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "tailscale-ssh: could not assert --ssh" >&2
-          exit 1
-        '';
-        log = true;
-      };
       zram-swap = {
         description = "zram swap (50% RAM, zstd)";
         command = pkgs.writeShellScript "zram-swap" ''
@@ -91,7 +66,6 @@
 
   boot.extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
   environment = {
-    systemPackages = [pkgs.tailscale];
     etc."modprobe.d/v4l2loopback.conf".text = ''
       options v4l2loopback exclusive_caps=1
     '';
