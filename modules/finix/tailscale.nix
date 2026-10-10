@@ -47,13 +47,13 @@ in {
           pkgs.procps
           config.programs.resolvconf.package
         ];
-        conditions = ["net/lo/up" "task/resolvconf/success"];
+        conditions = ["net/lo/up"];
         log = true;
       };
 
       tasks.tailscale-prefs = {
         description = "assert tailscale SSH rescue path and MagicDNS";
-        conditions = ["net/lo/up"];
+        conditions = ["net/lo/up" "service/tailscaled/running"];
         command = pkgs.writeShellScript "tailscale-prefs" ''
           set -u
           export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.tailscale]}
