@@ -33,7 +33,7 @@
        (when (eq name (getf state :idle)) (setf (getf state :sleeping) t))
        (when (eq name :groove) (incf (getf state :frame))))))
   (let* ((p (state-value snapshot :hud-palette))
-         (focal (state-value snapshot :focal-frame))
+         (seat (state-value snapshot :bar-floor))
          (hot (state-value snapshot :hud-hot))
          (playing (equal (getf (service-state snapshot :mpris) :status) "Playing"))
          (frame (getf state :frame))
@@ -48,6 +48,7 @@
          (strip (round (* (getf +bongo-cat+ :strip) unit)))
          (offset (round (* (getf +bongo-cat+ :x-offset) unit)))
          (margin (getf +bongo-cat+ :margin-bottom))
+         (sink (round (* height (getf +bongo-cat+ :sink)) 360))
          (overlay (cond (sleepy (bongo-cat--bob (list (list "z" 10 (hud--c p :fg)) (list "Z" 13 (hud--c p :color4))
                                                       (list "z" 16 (hud--c p :color5)))
                                                 frame (round (* 118 unit)) 3 strip unit))
@@ -73,10 +74,10 @@
                                                                  :children (list (ui :column :height strip
                                                                                      :children (list overlay))
                                                                                  cat))))
-                                         :output (getf focal :output)
-                                         :anchors (if focal '(:top) '(:bottom))
-                                         :margin (if focal
-                                                     (list (- (+ (getf focal :top) (getf focal :height) 5) margin strip height) 0 0 0)
-                                                     (list 0 0 margin 0))
+                                         :output (getf seat :output)
+                                         :anchors (if seat '(:top) '(:bottom))
+                                         :margin (if seat
+                                                     (list (- (+ (getf seat :y) sink) margin strip height) 0 0 0)
+                                                     (list 0 0 (- margin sink) 0))
                                          :layer :overlay :background "#00000000" :click-through t)))
             nil)))
