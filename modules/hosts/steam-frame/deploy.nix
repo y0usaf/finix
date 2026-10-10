@@ -12,6 +12,7 @@
         };
         modules = [
           "${inputs.manzil}/nix/modules/nixos.nix"
+          (builtins.getFlake "path:${inputs.frame-charge}").nixosModules.default
           "${inputs.self}/modules/hosts/steam-frame/config.nix"
           {manzil.linker = (builtins.getFlake "path:${inputs.manzil}").packages.x86_64-linux.manzil-aarch64-linux-static;}
         ];
