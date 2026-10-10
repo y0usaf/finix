@@ -836,6 +836,8 @@ local SOURCES = {
   { "petres", petResearch }, { "bossrush", bossRush }, { "homecar", homeCar }, { "homeseason", homeSeason }, { "quest", questChapter },
 }
 
+local skipped = {}
+
 local function nextAction(tried)
   local found
   local function add(key, label, fn)
@@ -843,7 +845,11 @@ local function nextAction(tried)
   end
   for _, src in ipairs(SOURCES) do
     if found then break end
-    src[2](add, noop)
+    local ok, err = pcall(src[2], add, noop)
+    if not ok and not skipped[src[1]] then
+      skipped[src[1]] = true
+      log("skip", src[1], field(err))
+    end
   end
   return found
 end
@@ -862,23 +868,23 @@ local function counts(map)
   return table.concat(keys, ",")
 end
 
-local HOT = { ["2"] = true, ["true"] = true, Reward = true }
+local function hot(key) return key == "2" or key == "true" or key == "Reward" end
 
 local function diagSource(name, fn)
-  local n, ready, states, hot, cold = 0, 0, {}, {}, {}
+  local n, ready, states, heated, cold = 0, 0, {}, {}, {}
   local function seen(id, st)
     n = n + 1
     local key = short(st, 16)
     states[key] = (states[key] or 0) + 1
-    local list = HOT[key] and hot or cold
+    local list = hot(key) and heated or cold
     if #list < 5 then list[#list + 1] = short(id, 24) .. "=" .. key end
   end
   local function add() ready = ready + 1 end
   local ok, why = pcall(fn, add, seen)
-  for _, x in ipairs(cold) do if #hot < 5 then hot[#hot + 1] = x end end
+  for _, x in ipairs(cold) do if #heated < 5 then heated[#heated + 1] = x end end
   local parts = { "ready=" .. ready, "seen=" .. n }
   if n > 0 then parts[#parts + 1] = "states=" .. counts(states) end
-  if #hot > 0 then parts[#parts + 1] = "sample=" .. table.concat(hot, ",") end
+  if #heated > 0 then parts[#parts + 1] = "sample=" .. table.concat(heated, ",") end
   if not ok then parts[#parts + 1] = "err=" .. short(why, 160) elseif why then parts[#parts + 1] = "exit=" .. tostring(why) end
   log("diag", name, table.concat(parts, " "), true)
 end
