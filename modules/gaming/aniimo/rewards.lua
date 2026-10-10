@@ -827,6 +827,119 @@ local function questChapter(add, seen)
   end
 end
 
+local function monthCardDaily(add, seen)
+  local mc, MU, MC = pg.game and pg.game.monthCard, req("GameApp.MonthCard.MonthCardUtils"), req("GameApp.MonthCard.MonthCardConst")
+  if not (has(mc, "requestClaimDailyReward") and has(MU, "getDailyRewardState") and tab(MC) and tab(MC.DAILY_REWARD_STATE)) then return "deps" end
+  local s = MU.getDailyRewardState() == MC.DAILY_REWARD_STATE.AVAILABLE
+  seen("daily", s)
+  if s then add(k("monthcard", "daily", pg.me.mcLastReceiveDailyAwardTm), "Month card daily reward", function() mc:requestClaimDailyReward() end) end
+end
+
+local function puppetScore(add, seen)
+  local A, C = act()
+  local me = pg.me
+  if not (A and C and has(A, "getLuckyPetCanRewardList") and has(me, "reqActivityCatchScoreReward")) then return "deps" end
+  local eid = openEvents(C.EventType.PuppetCatch)[1]
+  if not eid then return "closed" end
+  local list, done = A.getLuckyPetCanRewardList(me), me.luckyPetDayRewarded
+  for i = 1, len(list) do
+    local ready = list[i] and not (tab(done) and done[i])
+    seen(i, ready)
+    if ready then
+      local arg = (i > 1 and list[i - 1] == true and tab(done) and done[i - 1] == true) and -1 or i
+      add(k("puppet", "score", eid, i), "Puppet catch score reward " .. i, function(p) p:reqActivityCatchScoreReward(eid, arg) end)
+    end
+  end
+end
+
+local function photoSurvey(add, seen)
+  local A, C = act()
+  local me = pg.me
+  if not (A and C and has(A, "getFormResearchCanRewardList") and has(me, "reqActivityPhotoRewardGet") and has(me, "reqActivityPhotoExtraRewardGet") and has(me, "reqActivityPhotoStageRewardGet")) then return "deps" end
+  local eid = openEvents(C.EventType.PuppetPhoto)[1]
+  if not eid then return "closed" end
+  seen("finish", me.formResearchFinish)
+  if me.formResearchFinish == true and me.formResearchRewarded ~= true then
+    add(k("photo", "reward", eid), "Photo survey reward", function(p) p:reqActivityPhotoRewardGet(eid) end)
+  end
+  if me.formResearchObRewardFin == true and me.formResearchObRewardRew ~= true then
+    add(k("photo", "extra", eid), "Photo survey extra reward", function(p) p:reqActivityPhotoExtraRewardGet(eid) end)
+  end
+  local list, done = A.getFormResearchCanRewardList(me), me.formResearchStageRewarded
+  for i = 1, len(list) do
+    local ready = list[i] and not (tab(done) and done[i])
+    seen(i, ready)
+    if ready then
+      local arg = (i > 1 and list[i - 1] == true and tab(done) and done[i - 1] == true) and -1 or i
+      add(k("photo", "stage", eid, i), "Photo survey stage reward " .. i, function(p) p:reqActivityPhotoStageRewardGet(eid, arg) end)
+    end
+  end
+end
+
+local function petSaveWeek(add, seen)
+  local _, C, CA = act()
+  local M = req("Guis.Panels.EventPetSaveManual.EventPetSaveManualModel")
+  if not (C and has(CA, "checkPetSaveCurWeek") and has(M, "getWeekArrival") and has(M, "receivedWeekSumyReward") and has(M, "getSubActId") and has(pg.me, "reqActivityPetSaveWeekSumyReward")) then return "deps" end
+  local eid = openEvents(C.EventType.PetSave)[1]
+  if not eid then return "closed" end
+  for week = 1, tonumber(CA.checkPetSaveCurWeek()) or 0 do
+    local sub = M.getSubActId(M, week)
+    local ready = M.getWeekArrival(M, week) and not M.receivedWeekSumyReward(M, sub)
+    seen(week, ready and true or false)
+    if ready then
+      add(k("petsave", "week", eid, sub), "Pet save weekly summary " .. week, function(me) me:reqActivityPetSaveWeekSumyReward(eid, sub, noop) end)
+    end
+  end
+end
+
+local function energyMatch(add, seen)
+  local A, C, CA = act()
+  local TD = req("Data.energy_match_theme_data")
+  local me = pg.me
+  if not (A and C and TD and has(A, "getNewEnergyTheme") and has(A, "getEnergyThemeId") and has(CA, "redDotReward_CheckVitalityRewardItem") and has(me, "serverActivityMsg")) then return "deps" end
+  local eid = openEvents(C.EventType.EnergyMatch)[1]
+  if not eid then return "closed" end
+  local theme, id = A.getNewEnergyTheme(me), A.getEnergyThemeId(me)
+  local row = tab(TD[theme]) and TD[theme][id]
+  for i, r in iv(tab(row) and row.award) do
+    local ready = CA.redDotReward_CheckVitalityRewardItem(theme, id, i) and true or false
+    seen(i, ready)
+    if ready and tab(r) and r.index ~= nil then
+      add(k("energy", "award", eid, r.index), "Vitality contest reward " .. tostring(r.index), function(p) p:serverActivityMsg(eid, "RPC_CS_GetEnergyMatchAward", r.index) end)
+    end
+  end
+end
+
+local function petArea(add, seen)
+  local map = pg.game and pg.game.map
+  if not has(map, "getPetAreaRewardsState") then return "deps" end
+  local any = false
+  for _, e in iv(map:getPetAreaRewardsState()) do
+    if tab(e) and e.smallAreaId ~= nil and tab(e.rewardState) then
+      for stage = 1, 3 do
+        if e.rewardState[stage] then
+          any = true
+          add(k("petarea", e.smallAreaId, stage), "Pet area reward " .. tostring(e.smallAreaId) .. " stage " .. stage, function(me) me:getPetAreaReward(e.smallAreaId, stage) end)
+        end
+      end
+    end
+  end
+  seen("any", any)
+end
+
+local function homeCampDispatch(add, seen)
+  local HLU, UI = req("Common.Utils.HomeLandUtils"), req("Const.UIConst")
+  if not (HLU and UI and tab(UI.HOME_CAMP_DISPATCH_STATE) and has(HLU, "getCampCarEntity") and pg.me) then return "deps" end
+  local car = pg.me.uid ~= nil and HLU.getCampCarEntity(pg.me.uid)
+  if not (tab(car) and has(car, "getPetsDispatchInfo") and has(car, "getCampPetDispatchState") and has(car, "finishDispatch")) then return "nocar" end
+  local ready = car:getPetsDispatchInfo() and car:getCampPetDispatchState() == UI.HOME_CAMP_DISPATCH_STATE.Finished and true or false
+  seen("camp", ready)
+  if ready then
+    local did = has(car, "getDispatchId") and car:getDispatchId() or 0
+    add(k("homecamp", "dispatch", did), "Home camp pet dispatch finish", function() car:finishDispatch() end)
+  end
+end
+
 local SOURCES = {
   { "daily", dailyActive }, { "battlepass", battlePass }, { "bpcycle", bpCycle }, { "season", seasonAchievement }, { "sign", sign },
   { "cross", crossPlatform }, { "firsttopup", firstTopup }, { "journey", journeyTrial }, { "dispatch", petDispatch }, { "growth", growthGift },
@@ -834,6 +947,8 @@ local SOURCES = {
   { "rogue", rogue }, { "monthcard", monthCard }, { "homebook", homeBook }, { "homebookcat", homeBookCategory }, { "grabeggs", grabEggs },
   { "grabeggsmode", grabEggsMode }, { "course", course }, { "playerlv", playerLevel }, { "gacha", lotteryTimes }, { "strain", specialTrain },
   { "petres", petResearch }, { "bossrush", bossRush }, { "homecar", homeCar }, { "homeseason", homeSeason }, { "quest", questChapter },
+  { "monthcarddaily", monthCardDaily }, { "puppet", puppetScore }, { "photo", photoSurvey }, { "petsave", petSaveWeek }, { "energy", energyMatch },
+  { "petarea", petArea }, { "homecamp", homeCampDispatch },
 }
 
 local skipped = {}
