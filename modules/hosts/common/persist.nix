@@ -153,6 +153,8 @@
       neededForBoot = true;
     });
 
+    finix.persistence.homeCondition = "task/persist-user-binds/success";
+
     finit.tasks.persist-user-binds = {
       description = "replay the user persistence allowlist as bind mounts";
       command = "${pkgs.writeShellScript "persist-user-binds" ''
