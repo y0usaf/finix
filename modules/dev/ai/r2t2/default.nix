@@ -142,6 +142,8 @@ in {
       (lib.removePrefix "${home}/" stateDir)
     ];
 
+    finix.persistence.homeServices = ["r2t2"];
+
     finit.services.r2t2 = {
       description = "Confucius4-R2T2 streaming ASR server (vLLM, WebSocket)";
       user = config.user.name;

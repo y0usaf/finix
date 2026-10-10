@@ -25,6 +25,7 @@ in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".local/state/wireplumber"
   ];
+  finix.persistence.homeServices = ["wireplumber"];
   users.users.${userName}.extraGroups = ["audio"];
 
   environment.etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = builtins.toJSON {
