@@ -60,6 +60,8 @@ in {
     (lib.mkIf cfg.enable {
       environment.systemPackages = [nacre.default];
 
+      finix.persistence.homeServices = ["nacre"];
+
       finit.services.nacre = {
         description = "nacre - bots as holo cards (${userName})";
         user = userName;
@@ -77,7 +79,7 @@ in {
           "${user.home}/.local/state/nix/profile"
           "/nix/var/nix/profiles/default"
         ];
-        conditions = ["net/lo/up" "task/persist-user-binds/success"];
+        conditions = ["net/lo/up"];
         respawn = true;
         log = true;
       };
