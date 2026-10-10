@@ -203,8 +203,8 @@
   };
 
   bongoParameters = {
-    height = 80;
-    margin-bottom = 11;
+    height = 120;
+    margin-bottom = 0;
     x-offset = -24;
     duration = 100;
     idle = 60000;
