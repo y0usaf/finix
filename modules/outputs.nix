@@ -57,6 +57,7 @@ inputs: let
           ./finix/sudo.nix
           inputs.finix.nixosModules.sysklogd
           ./finix/common.nix
+          ./finix/persist-order.nix
         ]
         ++ modules;
     };

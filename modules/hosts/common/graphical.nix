@@ -75,7 +75,7 @@
   ];
 
   manzil = {
-    finit.conditions = ["task/persist-user-binds/success"];
+    finit.conditions = [config.finix.persistence.homeCondition];
     clobberByDefault = true;
   };
 }
