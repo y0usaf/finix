@@ -120,17 +120,62 @@ local function k(...)
   return table.concat(t, ":")
 end
 
+local CLAIMS = {
+  task = { call = "reqActReceiveTaskReward" },
+  group = { call = "reqActReceiveGroupTaskReward" },
+  bpCycle = { rpc = "RPC_CS_ReceiveBpCycleReward", tail = { noop } },
+  rogueWeekly = { call = "getRogueAllWeeklyReward" },
+  rogueSeasonWeekly = { call = "getAllRogueSeasonWeeklyReward", tail = { 0 } },
+  rogueDaily = { call = "getDailyReward" },
+  monthCardStored = { on = "game.monthCard", call = "requestClaimStoredReward" },
+  monthCardDaily = { on = "game.monthCard", call = "requestClaimDailyReward" },
+  homeBookGrade = { call = "reqReceiveHandbookGradeReward", tail = { noop } },
+  homeBookCategory = { call = "reqReceiveCategoryProgressReward", tail = { noop } },
+  grabEggsRank = { rpc = "RPC_CS_GetRobEggLevelReward", tail = { 0, 0, 0 } },
+  grabEggsBox = { rpc = "RPC_CS_OpenRobEggLevelRewardBox" },
+  grabEggsCase = { rpc = "RPC_CS_GetShowCaseReward", tail = { noop } },
+  courseLevel = { call = "getCourseLevelReward", tail = { noop } },
+  course = { call = "getCourseReward", tail = { noop } },
+  playerLevel = { fn = function(me, lvs)
+    local CH = require("Core.Common.CallbackHandler")
+    me:serverMsg("RPC_CS_GetLevelReward", lvs, CH({ done = noop }, "done"))
+  end },
+  gachaTimes = { rpc = "RPC_CS_GachaClaimTimesReward", tail = { noop } },
+  trainChapter = { call = "getSpecialTrainChapterReward", tail = { noop } },
+  trainEntry = { call = "getSpecialTrainEntryReward", tail = { noop } },
+  trainBadge = { call = "getSpecialTrainBadgeReward", tail = { noop } },
+  trainExchange = { call = "getSpecialTrainBadgeContinuousReward", tail = { noop } },
+  petSpecies = { call = "getPetHandbookSpeciesCollectReward", tail = { -1 } },
+  petForm = { call = "getPetHandbookCountryCollectReward", tail = { -1 } },
+  petLevel = { call = "getPetHandbookCountryLevelReward", tail = { -1 } },
+  petTopic = { call = "reqGetPetTopicRewards" },
+  bossRush = { rpc = "RPC_CS_BossRushReceiveSeasonReward", tail = { noop } },
+  homeCarLevel = { call = "getHomeCarLevelReward", tail = { -1, noop } },
+  homeSeasonProgress = { rpc = "RPC_CS_ReceiveHomeSeasonCollectionReward" },
+  homeSeasonTask = { call = "reqReceiveHomeSeasonTaskReward", tail = { noop } },
+  homeSeasonMutation = { call = "reqReceiveHomeSeasonMutationReward", tail = { noop } },
+  questChapter = { call = "getChapterQuestProgressReward", tail = { noop } },
+  puppet = { call = "reqActivityCatchScoreReward" },
+  photoReward = { call = "reqActivityPhotoRewardGet" },
+  photoExtra = { call = "reqActivityPhotoExtraRewardGet" },
+  photoStage = { call = "reqActivityPhotoStageRewardGet" },
+  petSave = { call = "reqActivityPetSaveWeekSumyReward", tail = { noop } },
+  energy = { call = "serverActivityMsg" },
+  petArea = { call = "getPetAreaReward" },
+  homeCampFinish = { call = "finishDispatch" },
+}
+
 local function act()
   local A, C, CA = req("Common.Utils.ActivityUtils"), req("Common.Const.ActivityConst"), req("Utils.ClientActivityUtils")
   if A and C and CA and tab(C.EventType) and tab(C.TaskState) and tab(C.ActivityTaskType) then return A, C, CA end
 end
 
 local function task(add, eid, tid, tag, label)
-  add(k(tag, "task", tid), label, function(me) me:reqActReceiveTaskReward(tid, eid) end)
+  add(k(tag, "task", tid), label, "task", pack(tid, eid))
 end
 
 local function group(add, eid, gid, tag, label)
-  add(k(tag, "group", gid), label, function(me) me:reqActReceiveGroupTaskReward(gid, eid) end)
+  add(k(tag, "group", gid), label, "group", pack(gid, eid))
 end
 
 local function openEvents(et)
@@ -237,7 +282,7 @@ local function bpCycle(add, seen)
     local f, p = bp:getCycleRewardState(lv)
     seen(lv, tostring(f) .. "/" .. tostring(p))
     if f == CAN or p == CAN then
-      return add(k("bp", "cycle", x.phase), "Battle pass loop rewards", function(me) me:serverMsg("RPC_CS_ReceiveBpCycleReward", noop) end)
+      return add(k("bp", "cycle", x.phase), "Battle pass loop rewards", "bpCycle", pack())
     end
   end
 end
@@ -481,43 +526,6 @@ local function redBook(add, seen)
   end
 end
 
-local function rogue(add, seen)
-  local RU, RDC = req("Utils.RogueUtils"), req("Const.RedDotConst")
-  local REWARD = RDC and tab(RDC.RedDotStyle) and RDC.RedDotStyle.REWARD
-  if not RU or REWARD == nil then return "deps" end
-  if has(RU, "getRedDotWeeklyState") then
-    local s = RU.getRedDotWeeklyState()
-    seen("weekly", s)
-    if s == REWARD then add("rogue:weekly", "Tower weekly boss reward", function(me) me:getRogueAllWeeklyReward() end) end
-  end
-  if has(RU, "getRedDotSeasonWeeklyRewardState") then
-    local s = RU.getRedDotSeasonWeeklyRewardState()
-    seen("seasonWeekly", s)
-    if s == REWARD then add("rogue:seasonWeekly", "Tower season weekly reward", function(me) me:getAllRogueSeasonWeeklyReward(0) end) end
-  end
-  if has(RU, "getRedDotDailyState") then
-    local s = RU.getRedDotDailyState()
-    seen("daily", s)
-    if s == REWARD then add("rogue:daily", "Tower daily harvest", function(me) me:getDailyReward() end) end
-  end
-end
-
-local function monthCard(add, seen)
-  local mc, MU = pg.game and pg.game.monthCard, req("GameApp.MonthCard.MonthCardUtils")
-  if not (has(mc, "requestClaimStoredReward") and has(MU, "hasStoredReward")) then return "deps" end
-  local s = MU.hasStoredReward() and true or false
-  seen("stored", s)
-  if s then add("monthcard:stored", "Month card stored reward", function() mc:requestClaimStoredReward() end) end
-end
-
-local function homeBook(add, seen)
-  local HB = req("Utils.HomeBookRedDotUtils")
-  if not has(HB, "canReceiveScoreReward") then return "deps" end
-  local s = HB.canReceiveScoreReward() and true or false
-  seen("grade", s)
-  if s then add("homebook:grade", "Home handbook grade reward", function(me) me:reqReceiveHandbookGradeReward(noop) end) end
-end
-
 local function homeBookCategory(add, seen)
   local HB, HD = req("Utils.HomeBookRedDotUtils"), req("Utils.HomeBookDataUtils")
   local me = pg.me
@@ -530,18 +538,10 @@ local function homeBookCategory(add, seen)
       seen(e.id, s)
       if s then
         local n = has(me, "getHomeHandbookReceivedCategoryCount") and me:getHomeHandbookReceivedCategoryCount(e.id) or 0
-        add(k("homebook", "cat", e.id, n), "Home handbook category " .. tostring(e.id), function(p) p:reqReceiveCategoryProgressReward(e.id, noop) end)
+        add(k("homebook", "cat", e.id, n), "Home handbook category " .. tostring(e.id), "homeBookCategory", pack(e.id))
       end
     end
   end
-end
-
-local function grabEggs(add, seen)
-  local GE = req("Guis.Utils.GrabEggsRankUtils")
-  if not has(GE, "hasClaimableReward") then return "deps" end
-  local s = GE.hasClaimableReward() and true or false
-  seen("rank", s)
-  if s then add("grabeggs:rank", "Grab-eggs season rank reward", function(me) me:serverMsg("RPC_CS_GetRobEggLevelReward", 0, 0, 0) end) end
 end
 
 local function uiModel(name)
@@ -560,7 +560,7 @@ local function grabEggsMode(add, seen)
     if ready then
       for i, d in iv(m:buildBoxSlotList()) do
         if tab(d) and d.isReady and d.rewardId ~= nil then
-          add(k("grabeggs", "box", i, d.id), "Grab-eggs reward box " .. i, function(me) me:serverMsg("RPC_CS_OpenRobEggLevelRewardBox", d.rewardId) end)
+          add(k("grabeggs", "box", i, d.id), "Grab-eggs reward box " .. i, "grabEggsBox", pack(d.rewardId))
         end
       end
     end
@@ -575,7 +575,7 @@ local function grabEggsMode(add, seen)
       local pts, rec = tonumber(cs.allPoint) or 0, cs.rewardRecord
       for lv, n in kv(tab(g) and RW[g.reward]) do
         if tab(n) and (tonumber(n.nodePoint) or 0) <= pts and not ((tonumber(tab(rec) and rec[lv]) or 0) > 0) then
-          add(k("grabeggs", "case", lv), "Grab-eggs collection reward " .. tostring(lv), function(me) me:serverMsg("RPC_CS_GetShowCaseReward", 1001, lv, noop) end)
+          add(k("grabeggs", "case", lv), "Grab-eggs collection reward " .. tostring(lv), "grabEggsCase", pack(1001, lv))
         end
       end
     end
@@ -590,14 +590,14 @@ local function course(add, seen)
       local s = m:canGetCourseGradeLevelReward(grade, level) and true or false
       seen(k(grade, level), s)
       if s then
-        add(k("course", "level", grade, level), "Course grade " .. tostring(grade) .. " level " .. level, function(me) me:getCourseLevelReward(grade, level, noop) end)
+        add(k("course", "level", grade, level), "Course grade " .. tostring(grade) .. " level " .. level, "courseLevel", pack(grade, level))
       end
     end
     for _, c in iv(m:getGradeCourseList(grade)) do
       if tab(c) and c.id ~= nil then
         local s = m:canGetCourseReward(c.id) and true or false
         seen(c.id, s)
-        if s then add(k("course", "course", c.id), "Course " .. tostring(c.id), function(me) me:getCourseReward(c.id, noop) end) end
+        if s then add(k("course", "course", c.id), "Course " .. tostring(c.id), "course", pack(c.id)) end
       end
     end
   end
@@ -615,10 +615,7 @@ local function playerLevel(add, seen)
   end
   if #lvs == 0 or not m:redDot_CheckHasLvReward() then return end
   local list = table.concat(lvs, ",")
-  add(k("playerlv", list), "Player level rewards " .. list, function(me)
-    local CH = require("Core.Common.CallbackHandler")
-    me:serverMsg("RPC_CS_GetLevelReward", lvs, CH({ done = noop }, "done"))
-  end)
+  add(k("playerlv", list), "Player level rewards " .. list, "playerLevel", pack(lvs))
 end
 
 local function lotteryTimes(add, seen)
@@ -636,7 +633,7 @@ local function lotteryTimes(add, seen)
         for i, t in iv(list) do
           local n = tab(t) and tonumber(t.num)
           if n and n <= cnt and not (tab(got) and got[n] == true) then
-            add(k("gacha", d, i), "Draw-count reward " .. d .. " #" .. i, function(me) me:serverMsg("RPC_CS_GachaClaimTimesReward", d, i, noop) end)
+            add(k("gacha", d, i), "Draw-count reward " .. d .. " #" .. i, "gachaTimes", pack(d, i))
           end
         end
       end
@@ -655,7 +652,7 @@ local function specialTrain(add, seen)
     for _, ch in iv(m:getChapterTb()) do
       local id = tab(ch) and ch.chapterId
       if id and m:redDot_GetChapterPageState(id) then
-        add(k("strain", "chapter", id), "Special training chapter " .. tostring(id), function(me) me:getSpecialTrainChapterReward(id, noop) end)
+        add(k("strain", "chapter", id), "Special training chapter " .. tostring(id), "trainChapter", pack(id))
       end
     end
   end
@@ -667,7 +664,7 @@ local function specialTrain(add, seen)
         for c = cur, tt == SUB.COMPULSORY and 0 or cur, -1 do
           local ids = m:getAllCanGetSpecialTrainRewardList(c, tt)
           if len(ids) > 0 then
-            add(k("strain", "entry", c, tt), "Special training rewards " .. c .. "/" .. tostring(tt), function(me) me:getSpecialTrainEntryReward(ids, SRC.HANDBOOK, noop) end)
+            add(k("strain", "entry", c, tt), "Special training rewards " .. c .. "/" .. tostring(tt), "trainEntry", pack(ids, SRC.HANDBOOK))
           end
         end
       end
@@ -676,14 +673,14 @@ local function specialTrain(add, seen)
   if has(m, "getBadgeListTab") and has(m, "redDot_GetBadgeState") then
     for _, b in kv(m:getBadgeListTab(0)) do
       if tab(b) and m:redDot_GetBadgeState(b) then
-        add(k("strain", "badge", b.stageId), "Special training badge " .. tostring(b.stageId), function(me) me:getSpecialTrainBadgeReward(b.isFinal and true or false, noop) end)
+        add(k("strain", "badge", b.stageId), "Special training badge " .. tostring(b.stageId), "trainBadge", pack(b.isFinal and true or false))
       end
     end
   end
   if pg.me.isGetBadgeMaxReward and has(m, "getExchangeInfo") then
     local x = m:getExchangeInfo()
     if tab(x) and type(x.canExchangeNum) == "number" and x.canExchangeNum > 0 then
-      add("strain:exchange", "Special training badge exchange", function(me) me:getSpecialTrainBadgeContinuousReward(noop) end)
+      add("strain:exchange", "Special training badge exchange", "trainExchange", pack())
     end
   end
 end
@@ -697,13 +694,13 @@ local function petResearch(add, seen)
   local area, TAB = m.areaId, PRU.PET_SHOW_TAB
   if not area then return "noarea" end
   if PRU.checkCountryReward(area, TAB.SPECIES, PRU.REWARD_COLLECT) then
-    add(k("petres", "species", area), "Pet research species collection", function(me) me:getPetHandbookSpeciesCollectReward(area, -1) end)
+    add(k("petres", "species", area), "Pet research species collection", "petSpecies", pack(area))
   end
   if PRU.checkCountryReward(area, TAB.FORM, PRU.REWARD_COLLECT) then
-    add(k("petres", "form", area), "Pet research form collection", function(me) me:getPetHandbookCountryCollectReward(area, -1) end)
+    add(k("petres", "form", area), "Pet research form collection", "petForm", pack(area))
   end
   if PRU.checkCountryReward(area, TAB.SPECIES, PRU.REWARD_LEVEL) then
-    add(k("petres", "level", area), "Pet research country level", function(me) me:getPetHandbookCountryLevelReward(area, -1) end)
+    add(k("petres", "level", area), "Pet research country level", "petLevel", pack(area))
   end
   local CD, hb = req("Data.pet_research_content_data"), pg.me.petHandbookMap
   if CD and hb and has(PRU, "getPetResearchSpeciesList") and has(PRU, "_checkPetHasTopicReward") and has(PRU, "getPetAllTopicRewardByTemplateId") then
@@ -712,7 +709,7 @@ local function petResearch(add, seen)
       if tab(c) and c.isShow ~= 0 and (not has(PRU, "checkPetHasFormInCountry") or PRU.checkPetHasFormInCountry(id, area)) and PRU._checkPetHasTopicReward(id, hb) then
         local list = PRU.getPetAllTopicRewardByTemplateId(id)
         if len(list) > 0 then
-          add(k("petres", "topic", id, len(list)), "Pet topic rewards " .. tostring(id), function(me) me:reqGetPetTopicRewards(list) end)
+          add(k("petres", "topic", id, len(list)), "Pet topic rewards " .. tostring(id), "petTopic", pack(list))
         end
       end
     end
@@ -734,17 +731,9 @@ local function bossRush(add, seen)
           if type(lo) == "number" and type(hi) == "number" and lo <= cur and cur <= hi and tab(v) and (tonumber(v.awardId) or 0) > 0 then ok = true end
         end
       end
-      if ok then add(k("bossrush", cur, need), "Boss rush season reward " .. need, function(me) me:serverMsg("RPC_CS_BossRushReceiveSeasonReward", need, noop) end) end
+      if ok then add(k("bossrush", cur, need), "Boss rush season reward " .. need, "bossRush", pack(need)) end
     end
   end
-end
-
-local function homeCar(add, seen)
-  local m, R = uiModel("homeCarLevelUp"), req("Const.RedDotConst")
-  if not (m and R and has(m, "redDot_GetLevelRewardState") and has(m, "getHomeCarLevelReward")) then return "deps" end
-  local style = m:redDot_GetLevelRewardState()
-  seen("level", style)
-  if style == R.RedDotStyle.REWARD then add("homecar:level", "Home car level rewards", function() m:getHomeCarLevelReward(-1, noop) end) end
 end
 
 local function inStage(v, stage)
@@ -768,7 +757,7 @@ local function homeSeason(add, seen)
       local st = me.homeSeasonCollectionRewardStateMap
       for id, cfg in kv(CR) do
         if tab(cfg) and cfg.seasonId == s and tab(st) and st[id] == HU.COLLECTION_REWARD_STATE_CAN_RECEIVE then
-          add(k("homeseason", "progress", id), "Home season progress reward " .. tostring(id), function(p) p:serverMsg("RPC_CS_ReceiveHomeSeasonCollectionReward", id) end)
+          add(k("homeseason", "progress", id), "Home season progress reward " .. tostring(id), "homeSeasonProgress", pack(id))
         end
       end
     end
@@ -786,7 +775,7 @@ local function homeSeason(add, seen)
         for tid, cfg in kv(DT) do
           local p = tonumber(tab(pend) and pend[tid]) or 0
           if tab(cfg) and cfg.seasonId == s and (p > 0 or (inStage(cfg.stageId, me.homeSeasonStageId) and tab(stm) and stm[tid] == C.TaskState.Finihed_CanRecv)) then
-            add(k("homeseason", "task", tid, p), "Home season daily task " .. tostring(tid), function(q) q:reqReceiveHomeSeasonTaskReward(tid, noop) end)
+            add(k("homeseason", "task", tid, p), "Home season daily task " .. tostring(tid), "homeSeasonTask", pack(tid))
           end
         end
       elseif style == REWARD and md.type == MT.ITEM_COLLECT and MR and has(HU, "hasReceivableHomeSeasonMutationReward") and HU.hasReceivableHomeSeasonMutationReward(me, s) then
@@ -797,7 +786,7 @@ local function homeSeason(add, seen)
           if tab(cfg) and cfg.seasonId == s and (tonumber(cfg.needPoint) or 0) <= stars and not (tab(got) and got[id] == true) then ids[#ids + 1] = id end
         end
         if #ids > 0 then
-          add(k("homeseason", "mutation", s, #ids), "Home season collection rewards", function(q) q:reqReceiveHomeSeasonMutationReward(ids, noop) end)
+          add(k("homeseason", "mutation", s, #ids), "Home season collection rewards", "homeSeasonMutation", pack(ids))
         end
       end
     end
@@ -818,21 +807,13 @@ local function questChapter(add, seen)
           local info = m:getChapterProgressRewardInfo(ch)
           for _, r in iv(tab(info) and info.rewardList) do
             if tab(r) and r.canClaim and info.configId then
-              add(k("quest", "chapter", info.configId, r.rewardIndex), "Quest chapter reward " .. tostring(ch) .. " #" .. tostring(r.rewardIndex), function(me) me:getChapterQuestProgressReward(info.configId, r.rewardIndex, noop) end)
+              add(k("quest", "chapter", info.configId, r.rewardIndex), "Quest chapter reward " .. tostring(ch) .. " #" .. tostring(r.rewardIndex), "questChapter", pack(info.configId, r.rewardIndex))
             end
           end
         end
       end
     end
   end
-end
-
-local function monthCardDaily(add, seen)
-  local mc, MU, MC = pg.game and pg.game.monthCard, req("GameApp.MonthCard.MonthCardUtils"), req("GameApp.MonthCard.MonthCardConst")
-  if not (has(mc, "requestClaimDailyReward") and has(MU, "getDailyRewardState") and tab(MC) and tab(MC.DAILY_REWARD_STATE)) then return "deps" end
-  local s = MU.getDailyRewardState() == MC.DAILY_REWARD_STATE.AVAILABLE
-  seen("daily", s)
-  if s then add(k("monthcard", "daily", pg.me.mcLastReceiveDailyAwardTm), "Month card daily reward", function() mc:requestClaimDailyReward() end) end
 end
 
 local function puppetScore(add, seen)
@@ -847,7 +828,7 @@ local function puppetScore(add, seen)
     seen(i, ready)
     if ready then
       local arg = (i > 1 and list[i - 1] == true and tab(done) and done[i - 1] == true) and -1 or i
-      add(k("puppet", "score", eid, i), "Puppet catch score reward " .. i, function(p) p:reqActivityCatchScoreReward(eid, arg) end)
+      add(k("puppet", "score", eid, i), "Puppet catch score reward " .. i, "puppet", pack(eid, arg))
     end
   end
 end
@@ -860,10 +841,10 @@ local function photoSurvey(add, seen)
   if not eid then return "closed" end
   seen("finish", me.formResearchFinish)
   if me.formResearchFinish == true and me.formResearchRewarded ~= true then
-    add(k("photo", "reward", eid), "Photo survey reward", function(p) p:reqActivityPhotoRewardGet(eid) end)
+    add(k("photo", "reward", eid), "Photo survey reward", "photoReward", pack(eid))
   end
   if me.formResearchObRewardFin == true and me.formResearchObRewardRew ~= true then
-    add(k("photo", "extra", eid), "Photo survey extra reward", function(p) p:reqActivityPhotoExtraRewardGet(eid) end)
+    add(k("photo", "extra", eid), "Photo survey extra reward", "photoExtra", pack(eid))
   end
   local list, done = A.getFormResearchCanRewardList(me), me.formResearchStageRewarded
   for i = 1, len(list) do
@@ -871,7 +852,7 @@ local function photoSurvey(add, seen)
     seen(i, ready)
     if ready then
       local arg = (i > 1 and list[i - 1] == true and tab(done) and done[i - 1] == true) and -1 or i
-      add(k("photo", "stage", eid, i), "Photo survey stage reward " .. i, function(p) p:reqActivityPhotoStageRewardGet(eid, arg) end)
+      add(k("photo", "stage", eid, i), "Photo survey stage reward " .. i, "photoStage", pack(eid, arg))
     end
   end
 end
@@ -887,7 +868,7 @@ local function petSaveWeek(add, seen)
     local ready = M.getWeekArrival(M, week) and not M.receivedWeekSumyReward(M, sub)
     seen(week, ready and true or false)
     if ready then
-      add(k("petsave", "week", eid, sub), "Pet save weekly summary " .. week, function(me) me:reqActivityPetSaveWeekSumyReward(eid, sub, noop) end)
+      add(k("petsave", "week", eid, sub), "Pet save weekly summary " .. week, "petSave", pack(eid, sub))
     end
   end
 end
@@ -905,7 +886,7 @@ local function energyMatch(add, seen)
     local ready = CA.redDotReward_CheckVitalityRewardItem(theme, id, i) and true or false
     seen(i, ready)
     if ready and tab(r) and r.index ~= nil then
-      add(k("energy", "award", eid, r.index), "Vitality contest reward " .. tostring(r.index), function(p) p:serverActivityMsg(eid, "RPC_CS_GetEnergyMatchAward", r.index) end)
+      add(k("energy", "award", eid, r.index), "Vitality contest reward " .. tostring(r.index), "energy", pack(eid, "RPC_CS_GetEnergyMatchAward", r.index))
     end
   end
 end
@@ -919,7 +900,7 @@ local function petArea(add, seen)
       for stage = 1, 3 do
         if e.rewardState[stage] then
           any = true
-          add(k("petarea", e.smallAreaId, stage), "Pet area reward " .. tostring(e.smallAreaId) .. " stage " .. stage, function(me) me:getPetAreaReward(e.smallAreaId, stage) end)
+          add(k("petarea", e.smallAreaId, stage), "Pet area reward " .. tostring(e.smallAreaId) .. " stage " .. stage, "petArea", pack(e.smallAreaId, stage))
         end
       end
     end
@@ -936,27 +917,92 @@ local function homeCampDispatch(add, seen)
   seen("camp", ready)
   if ready then
     local did = has(car, "getDispatchId") and car:getDispatchId() or 0
-    add(k("homecamp", "dispatch", did), "Home camp pet dispatch finish", function() car:finishDispatch() end)
+    add(k("homecamp", "dispatch", did), "Home camp pet dispatch finish", "homeCampFinish", pack(), car)
   end
+end
+
+local function probe(row)
+  return { row.name, function(add, seen)
+    local M = row.ui and uiModel(row.ui) or req(row.mod)
+    if not has(M, row.fn) then return "deps" end
+    local want
+    if row.is == "reward" then
+      local R = req("Const.RedDotConst")
+      want = R and tab(R.RedDotStyle) and R.RedDotStyle.REWARD
+    elseif row.is then
+      want = req(row.is[1])
+      for i = 2, #row.is do want = tab(want) and want[row.is[i]] or nil end
+    end
+    if row.is and want == nil then return "deps" end
+    local v
+    if row.ui then v = M[row.fn](M) else v = M[row.fn]() end
+    local ready
+    if want ~= nil then ready = v == want else ready = v and true or false end
+    seen("state", want ~= nil and v or ready)
+    if not ready then return end
+    local key = row.stamp and k(row.name, pg.me[row.stamp]) or row.name
+    add(key, row.label, row.claim, pack(), row.ui and M or nil)
+  end }
 end
 
 local SOURCES = {
   { "daily", dailyActive }, { "battlepass", battlePass }, { "bpcycle", bpCycle }, { "season", seasonAchievement }, { "sign", sign },
   { "cross", crossPlatform }, { "firsttopup", firstTopup }, { "journey", journeyTrial }, { "dispatch", petDispatch }, { "growth", growthGift },
   { "littlefire", littleFire }, { "fishing", fishingCapture }, { "leylineup", leylineTreeUp }, { "redbook", redBook },
-  { "rogue", rogue }, { "monthcard", monthCard }, { "homebook", homeBook }, { "homebookcat", homeBookCategory }, { "grabeggs", grabEggs },
+  probe{ name = "rogue-weekly", mod = "Utils.RogueUtils", fn = "getRedDotWeeklyState", is = "reward", claim = "rogueWeekly", label = "Tower weekly boss reward" },
+  probe{ name = "rogue-seasonweekly", mod = "Utils.RogueUtils", fn = "getRedDotSeasonWeeklyRewardState", is = "reward", claim = "rogueSeasonWeekly", label = "Tower season weekly reward" },
+  probe{ name = "rogue-daily", mod = "Utils.RogueUtils", fn = "getRedDotDailyState", is = "reward", claim = "rogueDaily", label = "Tower daily harvest" },
+  probe{ name = "monthcard", mod = "GameApp.MonthCard.MonthCardUtils", fn = "hasStoredReward", claim = "monthCardStored", label = "Month card stored reward" },
+  probe{ name = "homebook", mod = "Utils.HomeBookRedDotUtils", fn = "canReceiveScoreReward", claim = "homeBookGrade", label = "Home handbook grade reward" },
+  { "homebookcat", homeBookCategory },
+  probe{ name = "grabeggs", mod = "Guis.Utils.GrabEggsRankUtils", fn = "hasClaimableReward", claim = "grabEggsRank", label = "Grab-eggs season rank reward" },
   { "grabeggsmode", grabEggsMode }, { "course", course }, { "playerlv", playerLevel }, { "gacha", lotteryTimes }, { "strain", specialTrain },
-  { "petres", petResearch }, { "bossrush", bossRush }, { "homecar", homeCar }, { "homeseason", homeSeason }, { "quest", questChapter },
-  { "monthcarddaily", monthCardDaily }, { "puppet", puppetScore }, { "photo", photoSurvey }, { "petsave", petSaveWeek }, { "energy", energyMatch },
+  { "petres", petResearch }, { "bossrush", bossRush },
+  probe{ name = "homecar", ui = "homeCarLevelUp", fn = "redDot_GetLevelRewardState", is = "reward", claim = "homeCarLevel", label = "Home car level rewards" },
+  { "homeseason", homeSeason }, { "quest", questChapter },
+  probe{ name = "monthcarddaily", mod = "GameApp.MonthCard.MonthCardUtils", fn = "getDailyRewardState", is = { "GameApp.MonthCard.MonthCardConst", "DAILY_REWARD_STATE", "AVAILABLE" }, stamp = "mcLastReceiveDailyAwardTm", claim = "monthCardDaily", label = "Month card daily reward" },
+  { "puppet", puppetScore }, { "photo", photoSurvey }, { "petsave", petSaveWeek }, { "energy", energyMatch },
   { "petarea", petArea }, { "homecamp", homeCampDispatch },
 }
 
 local skipped = {}
 
-local function nextAction(tried)
+local missing = {}
+
+local function receiver(spec, player, recv)
+  if recv ~= nil then return recv end
+  if not spec.on then return player end
+  local v = pg
+  for part in spec.on:gmatch("[^.]+") do v = tab(v) and v[part] or nil end
+  return v
+end
+
+local function perform(a)
+  local spec, list, n = CLAIMS[a.claim], {}, a.args.n
+  for i = 1, n do list[i] = a.args[i] end
+  for _, v in ipairs(spec.tail or {}) do
+    n = n + 1
+    list[n] = v
+  end
+  if spec.fn then return spec.fn(a.recv, unpack(list, 1, n)) end
+  if spec.rpc then return a.recv:serverMsg(spec.rpc, unpack(list, 1, n)) end
+  return a.recv[spec.call](a.recv, unpack(list, 1, n))
+end
+
+local function nextAction(tried, player)
   local found
-  local function add(key, label, fn)
-    if not found and not tried[key] then found = { key = key, label = label, fn = fn } end
+  local function add(key, label, claim, args, recv)
+    if found or tried[key] then return end
+    local spec = CLAIMS[claim]
+    local on = spec and receiver(spec, player, recv)
+    if not (spec and (spec.fn or has(on, spec.rpc and "serverMsg" or spec.call))) then
+      if not missing[claim] then
+        missing[claim] = true
+        log("skip", claim, "claim target missing")
+      end
+      return
+    end
+    found = { key = key, label = label, claim = claim, args = args, recv = on }
   end
   for _, src in ipairs(SOURCES) do
     if found then break end
@@ -1104,7 +1150,7 @@ local function run(player, mode)
     local t, res = now()
     if t and last and t - last < MIN_GAP - 0.05 + res then return again(delay()) end
     if cur.count >= MAX_CLAIMS then return stop("cap of " .. MAX_CLAIMS .. " reached") end
-    local ok, a = pcall(nextAction, tried)
+    local ok, a = pcall(nextAction, tried, player)
     if not ok then return fail("readiness check", a) end
     if not a then return stop("nothing left", "Rewards: " .. verb .. cur.count .. ", nothing left") end
     tried[a.key], last = true, t
@@ -1112,7 +1158,7 @@ local function run(player, mode)
       log("dry", a.label, "not sent")
       toast("Rewards (dry run): " .. a.label)
     else
-      local ok2, err = pcall(a.fn, player)
+      local ok2, err = pcall(perform, a)
       if not ok2 then return fail(a.label, err) end
       log("claim", a.label, "ok")
       toast("Rewards: " .. a.label)
