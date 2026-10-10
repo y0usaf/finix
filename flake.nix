@@ -119,6 +119,11 @@
       flake = false;
     };
 
+    pi-accounts = {
+      url = "github:y0usaf/pi-accounts";
+      flake = false;
+    };
+
     pi-donsetch = {
       url = "github:y0usaf/pi-donsetch";
       inputs.nixpkgs.follows = "nixpkgs";
