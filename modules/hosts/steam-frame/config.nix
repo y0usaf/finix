@@ -18,6 +18,7 @@
 
   config = {
     time.timeZone = "America/Toronto";
+    frame.charge.limit = 80;
 
     environment = {
       systemPackages = [pkgs.neovim];

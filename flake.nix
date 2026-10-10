@@ -182,6 +182,8 @@
 
     mado.url = "git+ssh://git@github.com/y0usaf/mado.git";
 
+    frame-charge.url = "github:y0usaf/frame-charge";
+
     strictix = {
       url = "github:y0usaf/strictix";
       inputs.nixpkgs.follows = "nixpkgs";
