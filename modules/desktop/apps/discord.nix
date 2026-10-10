@@ -33,7 +33,7 @@ in {
   environment.systemPackages = [
     pkgs.vesktop
     (legacyDiscord.override {
-      commandLineArgs = "--enable-features=WaylandWindowDecorations,WaylandLinuxDrmSyncobj --disable-features=WebRtcAllowInputVolumeAdjustment,ChromeWideEchoCancellation";
+      commandLineArgs = "--enable-features=WaylandWindowDecorations,WaylandLinuxDrmSyncobj --disable-smooth-scrolling";
       withOpenASAR = true;
       disableUpdates = false;
       withTTS = false;
