@@ -199,12 +199,14 @@
   gapParameters = {
     inherit (barParameters) modules center-between edges inset time date hot media-width;
     font = "Departure Mono";
+    inherit (bar) scale;
     sample = 1000;
   };
 
   bongoParameters = {
-    height = 120;
+    height = 80;
     margin-bottom = 0;
+    sink = 90;
     x-offset = -24;
     duration = 100;
     idle = 60000;
@@ -319,6 +321,12 @@ in {
         type = lib.types.listOf (lib.types.enum ["top" "bottom"]);
         default = ["top" "bottom"];
         description = "Screen edges that get a module bar. Single edge = no duplicated widgets.";
+      };
+
+      scale = lib.mkOption {
+        type = lib.types.numbers.positive;
+        default = 1;
+        description = "Gap bar size multiplier: text, meters, gaps and offsets grow with it.";
       };
 
       indent = lib.mkOption {

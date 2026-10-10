@@ -51,6 +51,7 @@
 
     ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram" "frame"];
     ui.tomoe.bar.style = "gap";
+    ui.tomoe.bar.scale = 1.5;
 
     dev.nacre = {
       enable = true;
