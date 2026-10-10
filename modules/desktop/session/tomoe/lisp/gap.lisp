@@ -167,10 +167,10 @@
                           (publish-state :hud-hot (and hot t))
                           (publish-state :bar-floor
                                          (when (member :bottom (getf +gap+ :edges))
-                                           (if focal
-                                               (list :output (getf focal :output)
-                                                     :y (+ (getf focal :top) (getf focal :height) (- lift) height))
-                                               (list :output (getf wide :name) :y (getf wide :height))))))
+                                           (cond (focal
+                                                  (list :output (getf focal :output)
+                                                        :y (+ (getf focal :top) (getf focal :height) (- lift) height)))
+                                                 (wide (list :output (getf wide :name) :y (getf wide :height)))))))
                     (loop for edge in (getf +gap+ :edges)
                           collect (if focal
                                       (shell-surface edge line :output (getf focal :output) :anchors '(:top :left)
