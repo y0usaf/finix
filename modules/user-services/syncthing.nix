@@ -218,6 +218,7 @@ in {
       ".local/share/syncthing"
       ".local/state/syncthing"
     ];
+    finix.persistence.homeServices = ["syncthing"];
     finit.services.syncthing = {
       description = "syncthing file sync (${userName})";
       user = userName;
