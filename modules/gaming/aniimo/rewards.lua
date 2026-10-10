@@ -942,13 +942,13 @@ local function probe(row)
     if not ready then return end
     local key = row.stamp and k(row.name, pg.me[row.stamp]) or row.name
     add(key, row.label, row.claim, pack(), row.ui and M or nil)
-  end }
+  end, covers = { row.fn } }
 end
 
 local SOURCES = {
   { "daily", dailyActive }, { "battlepass", battlePass }, { "bpcycle", bpCycle }, { "season", seasonAchievement }, { "sign", sign },
   { "cross", crossPlatform }, { "firsttopup", firstTopup }, { "journey", journeyTrial }, { "dispatch", petDispatch }, { "growth", growthGift },
-  { "littlefire", littleFire }, { "fishing", fishingCapture }, { "leylineup", leylineTreeUp }, { "redbook", redBook },
+  { "littlefire", littleFire }, { "fishing", fishingCapture, covers = { "getFishingCaptureRedDotState" } }, { "leylineup", leylineTreeUp }, { "redbook", redBook },
   probe{ name = "rogue-weekly", mod = "Utils.RogueUtils", fn = "getRedDotWeeklyState", is = "reward", claim = "rogueWeekly", label = "Tower weekly boss reward" },
   probe{ name = "rogue-seasonweekly", mod = "Utils.RogueUtils", fn = "getRedDotSeasonWeeklyRewardState", is = "reward", claim = "rogueSeasonWeekly", label = "Tower season weekly reward" },
   probe{ name = "rogue-daily", mod = "Utils.RogueUtils", fn = "getRedDotDailyState", is = "reward", claim = "rogueDaily", label = "Tower daily harvest" },
@@ -956,8 +956,8 @@ local SOURCES = {
   probe{ name = "homebook", mod = "Utils.HomeBookRedDotUtils", fn = "canReceiveScoreReward", claim = "homeBookGrade", label = "Home handbook grade reward" },
   { "homebookcat", homeBookCategory },
   probe{ name = "grabeggs", mod = "Guis.Utils.GrabEggsRankUtils", fn = "hasClaimableReward", claim = "grabEggsRank", label = "Grab-eggs season rank reward" },
-  { "grabeggsmode", grabEggsMode }, { "course", course }, { "playerlv", playerLevel }, { "gacha", lotteryTimes }, { "strain", specialTrain },
-  { "petres", petResearch }, { "bossrush", bossRush },
+  { "grabeggsmode", grabEggsMode }, { "course", course }, { "playerlv", playerLevel, covers = { "redDot_CheckHasLvReward" } }, { "gacha", lotteryTimes }, { "strain", specialTrain, covers = { "redDot_GetSpecialTrainState", "redDot_GetChapterPageState", "redDot_GetBadgeState" } },
+  { "petres", petResearch, covers = { "redDot_GetPetResearchState" } }, { "bossrush", bossRush },
   probe{ name = "homecar", ui = "homeCarLevelUp", fn = "redDot_GetLevelRewardState", is = "reward", claim = "homeCarLevel", label = "Home car level rewards" },
   { "homeseason", homeSeason }, { "quest", questChapter },
   probe{ name = "monthcarddaily", mod = "GameApp.MonthCard.MonthCardUtils", fn = "getDailyRewardState", is = { "GameApp.MonthCard.MonthCardConst", "DAILY_REWARD_STATE", "AVAILABLE" }, stamp = "mcLastReceiveDailyAwardTm", claim = "monthCardDaily", label = "Month card daily reward" },
@@ -1116,6 +1116,107 @@ local function diag()
   log("diag", "end", "-", true)
 end
 
+local DOT_FN = { "^redDot_Get", "^redDot_Check", "^getRedDot%w*State$" }
+local DOT_SKIP = { "Path", "Key", "Numb", "Num", "Save" }
+
+local function dotName(key)
+  if type(key) ~= "string" then return false end
+  local hit = false
+  for _, p in ipairs(DOT_FN) do
+    if key:find(p) then hit = true end
+  end
+  if not hit then return false end
+  for _, x in ipairs(DOT_SKIP) do
+    if key:find(x, 1, true) then return false end
+  end
+  return true
+end
+
+local function get(t, key)
+  if not tab(t) then return nil end
+  local ok, v = pcall(function() return t[key] end)
+  return ok and v or nil
+end
+
+local function dotMethods(owner)
+  local out, seen, queue, i = {}, {}, { owner }, 1
+  while queue[i] and i <= 12 do
+    local t = queue[i]
+    i = i + 1
+    if tab(t) and not seen[t] then
+      seen[t] = true
+      for key, v in kv(t) do
+        if type(v) == "function" and dotName(key) then out[#out + 1] = key end
+      end
+      local ok, mt = pcall(getmetatable, t)
+      local idx = ok and type(mt) == "table" and rawget(mt, "__index") or nil
+      if tab(idx) then queue[#queue + 1] = idx end
+      local sup = get(t, "super")
+      if tab(sup) then queue[#queue + 1] = sup end
+    end
+  end
+  table.sort(out)
+  return out
+end
+
+local function dotOwners()
+  local owners = {}
+  local ok, loaded = pcall(function() return package.loaded end)
+  if ok and tab(loaded) then
+    for name, m in kv(loaded) do
+      if type(name) == "string" and type(m) == "table" then owners[#owners + 1] = { name, m, false } end
+    end
+  end
+  table.sort(owners, function(a, b) return a[1] < b[1] end)
+  local ui, models = pg.global and pg.global.ui, {}
+  for name, p in kv(ui) do
+    local m = get(p, "model")
+    if tab(m) then models[#models + 1] = { "ui." .. tostring(name), m, true } end
+  end
+  table.sort(models, function(a, b) return a[1] < b[1] end)
+  for _, o in ipairs(models) do owners[#owners + 1] = o end
+  return owners
+end
+
+local function discover()
+  local R = req("Const.RedDotConst")
+  local REWARD = R and tab(R.RedDotStyle) and R.RedDotStyle.REWARD
+  if REWARD == nil then return log("discover", "skipped", "no RedDotStyle.REWARD", true) end
+  local covered = {}
+  for _, src in ipairs(SOURCES) do
+    for _, name in ipairs(src.covers or {}) do covered[name] = true end
+  end
+  local owners = dotOwners()
+  local st = { owners = #owners, fns = 0, reward = 0, covered = 0, errors = 0 }
+  local done, lines = {}, {}
+  for _, o in ipairs(owners) do
+    local ok, names = pcall(dotMethods, o[2])
+    for _, key in ipairs(ok and names or {}) do
+      local fn = get(o[2], key)
+      local id = o[3] and (tostring(o[2]) .. key) or fn
+      if type(fn) == "function" and not done[id] then
+        done[id] = true
+        st.fns = st.fns + 1
+        local okc, v
+        if o[3] then
+          okc, v = pcall(fn, o[2])
+        else
+          okc, v = pcall(fn)
+          if not okc then okc, v = pcall(fn, o[2]) end
+        end
+        if not okc then
+          st.errors = st.errors + 1
+        elseif v == REWARD then
+          st.reward = st.reward + 1
+          if covered[key] then st.covered = st.covered + 1 else lines[#lines + 1] = { key, o[1] } end
+        end
+      end
+    end
+  end
+  for _, l in ipairs(lines) do log("unclaimed", l[1], l[2], true) end
+  log("discover", "summary", "owners=" .. st.owners .. " fns=" .. st.fns .. " reward=" .. st.reward .. " covered=" .. st.covered .. " unclaimed=" .. #lines .. " errors=" .. st.errors, true)
+end
+
 local function delay() return MIN_GAP + math.random() * JITTER end
 
 local function run(player, mode)
@@ -1152,7 +1253,10 @@ local function run(player, mode)
     if cur.count >= MAX_CLAIMS then return stop("cap of " .. MAX_CLAIMS .. " reached") end
     local ok, a = pcall(nextAction, tried, player)
     if not ok then return fail("readiness check", a) end
-    if not a then return stop("nothing left", "Rewards: " .. verb .. cur.count .. ", nothing left") end
+    if not a then
+      pcall(discover)
+      return stop("nothing left", "Rewards: " .. verb .. cur.count .. ", nothing left")
+    end
     tried[a.key], last = true, t
     if mode == "dry" or s == "dry" then
       log("dry", a.label, "not sent")
