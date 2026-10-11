@@ -146,6 +146,8 @@ end
 local function startLocking(self)
   if not self._continuousThrowHeld or self.player ~= pg.me or self.player.currentContext ~= self then return clear(self) end
   if self._finixCatchTimer then return end
+  local id = pg.game.controller.lockHelper.forceLockActorId
+  if not id or id == 0 or not pg.getEntityByActorId(id) then return end
   prepare(self)
   if context ~= self then clear(context) end
   context = self
