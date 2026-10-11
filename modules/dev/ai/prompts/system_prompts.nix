@@ -9,7 +9,7 @@
 in {
   manzil.users."${config.user.name}".files = {
     ".config/phi/SYSTEM.md".text = "${body}\n";
-    ".local/state/boar/agent/SYSTEM.md".text = ''
+    ".local/state/boar-rs/agent/SYSTEM.md".text = ''
       ${body}
 
       <rules>
