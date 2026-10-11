@@ -14,7 +14,7 @@
         subagents = {
           depth = -1;
           concurrency = -1;
-          models = ["anthropic/claude-sonnet-5-5" "anthropic/claude-haiku-5-5"];
+          models = ["anthropic/claude-sonnet-5-5" "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"];
         };
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash";
         fusion.opus-sol = {
