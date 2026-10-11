@@ -19,17 +19,18 @@
   });
   patches = map (p: p // {name = p.mod;}) (lib.importJSON ./patches.json);
   rewards = lib.importJSON ./rewards.json // {wrapper = ./rewards.lua;};
-  mods = lib.optionals cfg.enable (builtins.filter (m: builtins.elem m.name cfg.mods) (patches ++ [rewards]));
+  catch = lib.importJSON ./catch.json // {wrapper = ./catch.lua;};
+  mods = lib.optionals cfg.enable (builtins.filter (m: builtins.elem m.name cfg.mods) (patches ++ [rewards catch]));
   settings = pkgs.writeText "aniimo-mods.json" (builtins.toJSON ({
       gameDirectory = "${config.user.homeDirectory}/${config.user.paths.steam}/steamapps/common/Aniimo";
       inherit mods;
     }
-    // lib.optionalAttrs (builtins.elem "rewards" (map (m: m.name) mods)) {luajit = lib.getExe luajit;}));
+    // lib.optionalAttrs (builtins.any (m: m ? wrapper) mods) {luajit = lib.getExe luajit;}));
 in {
   options.user.gaming.aniimo = {
     enable = lib.mkEnableOption "Aniimo Lua mods";
     mods = lib.mkOption {
-      type = lib.types.listOf (lib.types.enum ["camera" "movement" "rewards"]);
+      type = lib.types.listOf (lib.types.enum ["camera" "movement" "rewards" "catch"]);
       default = ["camera" "movement"];
     };
   };
