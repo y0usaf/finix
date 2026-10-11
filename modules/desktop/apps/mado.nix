@@ -5,6 +5,10 @@
   ...
 }: {
   config = lib.mkIf config.hardware.nvidia.enable {
-    user.ui.tomoe.extraConfig = flakeInputs.mado.lib.tomoe;
+    user.ui.tomoe.extraConfig =
+      flakeInputs.mado.lib.tomoe
+      + ''
+        (setf +mado-bitrate+ 300)
+      '';
   };
 }

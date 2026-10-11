@@ -645,13 +645,13 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1791654365,
-        "narHash": "sha256-CxfQeXt4XIyQC8ZMPiDDYRpLrCBPaqYP6dJurBJbi4o=",
-        "ref": "refs/heads/main",
-        "rev": "c702b0fa979e34020660b33df85eca48d6723a74",
-        "revCount": 70,
+        "lastModified": 1791678252,
+        "narHash": "sha256-hkH1qtkkUe7ZsCLzznw1sqMKsK0xB1cYp57h+XEKiAw=",
+        "ref": "main",
+        "rev": "f69a69e6572e27d39f70f04768a337291da2c7d7",
+        "revCount": 72,
         "type": "git",
-        "url": "ssh://git@github.com/y0usaf/mado.git"
+        "url": "file:///home/y0usaf/dev/developing/mado"
       },
       "original": {
         "type": "git",
