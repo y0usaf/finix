@@ -1,10 +1,11 @@
+local INTERVAL = 0.1
 local orig = ...
 local function pack(...) return { n = select("#", ...), ... } end
 local env = getfenv and getfenv(1)
 if type(env) == "table" and setfenv then pcall(setfenv, orig, env) end
 local ret = pack(orig(select(2, ...)))
-local off, paths, prob, ability, scenes
-local target
+local off, paths, prob, ability, scenes, timers
+local context
 
 local function log(event, id, detail)
   pcall(function()
@@ -22,11 +23,19 @@ local function log(event, id, detail)
       if f then f:write(line); f:close(); break end
     end
   end)
-  pcall(print, "[catch] " .. tostring(event) .. " " .. tostring(id) .. " " .. tostring(detail))
+end
+
+local function clear(self)
+  if not self then return end
+  local timer = self._finixCatchTimer
+  self._finixCatchTimer, self._finixCatchLast, self._finixCatchDistance = nil, nil, nil
+  if context == self then context = nil end
+  if timer then timers.removeTimer(timer) end
 end
 
 local function disable(err)
-  off, target = true, nil
+  off = true
+  pcall(clear, context)
   log("error", "disabled", err)
 end
 
@@ -38,10 +47,8 @@ local function prepare(self)
   local helper = pg.game.controller.lockHelper
   local camera = pg.game.camera.playerCameraMode.catchCamera
   if not self._finixCatchReady then
-    need(helper, "getLockableTargetList")
+    need(pg.global.entityMgr, "getAllEntities")
     need(helper, "checkTargetValid")
-    need(helper, "isTargetNoBlock")
-    need(helper, "getLockPos")
     need(helper, "tryForceLockTarget")
     need(helper, "canForceLock")
     need(camera, "setTarget")
@@ -52,93 +59,79 @@ local function prepare(self)
     need(prob, "clientGet")
     ability = ability or require("Data.ability_setting_global_const_data")
     scenes = scenes or require("Data.scene_data")
+    timers = timers or require("Core.Timer.TimerManager")
+    need(timers, "addRepeatTimer")
+    need(timers, "removeTimer")
     self._finixCatchReady = true
   end
   return helper, camera
 end
 
-local function observe(self)
-  if not self._continuousThrowHeld or self.player ~= pg.me or self.player.currentContext ~= self then
-    target = nil
-    return
-  end
-  local helper, camera = prepare(self)
-  if not camera:isActive() then target = nil; return end
-  local id = helper.forceLockActorId
-  local locked = id and id ~= 0 and pg.getEntityByActorId(id)
-  target = nil
-  if locked and not locked.isDestroyed and not locked.isTrapped and prob.clientGet(locked, self.itemId).canCatch then
-    target = locked
-    log("armed", locked.actorId, Vector3.Distance(pg.pawn:getPosition(), locked:getPosition()))
-  end
-end
-
 local function step(self)
-  if not self._continuousThrowHeld or self.player ~= pg.me or self.player.currentContext ~= self then
-    target = nil
-    return
-  end
-  local previous = target
-  if not previous then return observe(self) end
+  if not self._continuousThrowHeld or self.player ~= pg.me or self.player.currentContext ~= self then return clear(self) end
   local helper, camera = prepare(self)
-  if not camera:isActive() then target = nil; return end
-  local id = helper.forceLockActorId
-  if id and id ~= 0 and id ~= previous.actorId and pg.getEntityByActorId(id) then return observe(self) end
-  local old = pg.getEntityByActorId(previous.actorId)
-  if old and old.space and not old.isDestroyed then
-    if old.isTrapped then return end
-    if helper.forceLockActorId == 0 then
-      target = nil
-      log("stop", previous.actorId, "unlocked")
-      return
-    end
-    if helper.forceLockActorId ~= previous.actorId then return observe(self) end
-    return
-  end
-  log("target lost", previous.actorId, "gone")
-  target = nil
-  if not helper:canForceLock() or not pg.me.enableLockTarget then
-    self:stopContinuousThrow("catch_lock_unavailable")
-    return log("stop", previous.actorId, "lock unavailable")
-  end
-  if not self:checkBallCanThrow() then
-    self:stopContinuousThrow("catch_ball_unavailable")
-    return log("stop", previous.actorId, "ball unavailable")
-  end
-  local radius = scenes[pg.me.space.sceneId].forceLockDis or ability.forceLockDis
+  if not camera:isActive() or not helper:canForceLock() or not pg.me.enableLockTarget then return end
+  if not self:checkBallCanThrow() then return self:stopContinuousThrow("catch_ball_unavailable") end
+  local scene = scenes[pg.me.space.sceneId]
+  local radius = scene and scene.forceLockDis or ability.forceLockDis
   if pg.me.fogMaskRadius and pg.me.fogMaskRadius > 0 then radius = pg.me.fogMaskRadius end
   assert(type(radius) == "number" and radius > 0, "lock radius missing")
-  local count = helper:getLockableTargetList(pg.pawn, radius, false)
   local from = pg.pawn:getPosition()
-  local lockPos = helper:getLockPos(pg.me.actorId, 0)
-  local best, distance
-  for i = 1, count do
-    local ent = pg.getEntityByActorId(helper.actorList[i])
-    if ent and ent.actorId ~= previous.actorId and helper:checkTargetValid(ent, radius, nil, false)
-      and ent:canBeLocked() and camera:checkDistance(ent)
-      and helper:isTargetNoBlock(lockPos, ent) and prob.clientGet(ent, self.itemId).canCatch then
-      local d = Vector3.Distance(from, ent:getPosition())
-      if d <= radius and (not distance or d < distance) then best, distance = ent, d end
+  local candidates = {}
+  for _, ent in pairs(pg.global.entityMgr:getAllEntities()) do
+    if (ent.className == "ClientPuppet" or ent.className == "ClientPuppetGhost")
+      and ent.space == pg.me.space and not ent.destroyed and not ent.isDestroyed and not ent.isTrapped
+      and ent:canBeLocked() then
+      local distance = Vector3.Distance(from, ent:getPosition())
+      if distance <= radius and helper:checkTargetValid(ent, radius, nil, false)
+        and camera:checkDistance(ent) and prob.clientGet(ent, self.itemId).canCatch then
+        candidates[#candidates + 1] = { entity = ent, distance = distance }
+      end
     end
   end
-  if not best then
-    self:stopContinuousThrow("catch_nothing_left")
-    return log("nothing left", previous.actorId, radius)
+  if #candidates == 0 then return self:stopContinuousThrow("catch_nothing_left") end
+  table.sort(candidates, function(a, b)
+    if a.distance == b.distance then return a.entity.actorId < b.entity.actorId end
+    return a.distance < b.distance
+  end)
+  local nextIndex
+  for i, candidate in ipairs(candidates) do
+    if candidate.entity.actorId == self._finixCatchLast then nextIndex = i % #candidates + 1; break end
   end
-  helper:tryForceLockTarget(best.actorId, 0, radius)
-  if helper.forceLockActorId ~= best.actorId then
-    self:stopContinuousThrow("catch_lock_rejected")
-    return log("stop", best.actorId, "lock rejected")
+  if not nextIndex and self._finixCatchDistance then
+    for i, candidate in ipairs(candidates) do
+      if candidate.distance > self._finixCatchDistance
+        or (candidate.distance == self._finixCatchDistance and candidate.entity.actorId > self._finixCatchLast) then
+        nextIndex = i
+        break
+      end
+    end
   end
-  camera:setTarget(best)
-  target = best
-  log("new target", best.actorId, string.format("%.2f", distance))
+  local chosen = candidates[nextIndex or 1]
+  self._finixCatchLast, self._finixCatchDistance = chosen.entity.actorId, chosen.distance
+  helper:tryForceLockTarget(chosen.entity.actorId, 0, radius)
+  if helper.forceLockActorId ~= chosen.entity.actorId then return end
+  camera:setTarget(chosen.entity)
+  log("target", chosen.entity.actorId, string.format("%.2f", chosen.distance))
 end
 
 local function safely(fn, self)
   if off then return end
   local ok, err = pcall(fn, self)
   if not ok then disable(err) end
+end
+
+local function startLocking(self)
+  if not self._continuousThrowHeld or self.player ~= pg.me or self.player.currentContext ~= self then return clear(self) end
+  if self._finixCatchTimer then return end
+  prepare(self)
+  if context ~= self then clear(context) end
+  context = self
+  self._finixCatchLast, self._finixCatchDistance = nil, nil
+  safely(step, self)
+  if off or not self._continuousThrowHeld then return end
+  self._finixCatchTimer = timers.addRepeatTimer(INTERVAL, function() safely(step, self) end)
+  assert(self._finixCatchTimer, "lock timer missing")
 end
 
 local function install(cls)
@@ -149,16 +142,17 @@ local function install(cls)
   cls.startContinuousThrow = function(self, ...)
     local held = self._continuousThrowHeld
     local r = pack(start(self, ...))
-    if not held then target = nil; safely(observe, self) end
+    if not held then safely(startLocking, self) end
     return unpack(r, 1, r.n)
   end
   cls._tryContinuousThrow = function(self, ...)
-    safely(step, self)
+    safely(startLocking, self)
     return tick(self, ...)
   end
   cls.stopContinuousThrow = function(self, ...)
-    if target then log("stop", target.actorId, select(1, ...)) end
-    target = nil
+    if context == self then log("stop", self._finixCatchLast, select(1, ...)) end
+    local ok, err = pcall(clear, self)
+    if not ok then disable(err) end
     return stop(self, ...)
   end
   log("hook", "continuous throw", "ready")
