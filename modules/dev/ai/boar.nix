@@ -7,6 +7,7 @@
 }: {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".local/state/boar"
+    ".local/state/crest-auth"
   ];
   manzil.users."${config.user.name}".files = {
     ".local/state/boar/agent/settings.json" = {
