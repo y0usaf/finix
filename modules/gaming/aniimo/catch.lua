@@ -1,10 +1,11 @@
 local INTERVAL = 0.1
+local GRACE = 2
 local orig = ...
 local function pack(...) return { n = select("#", ...), ... } end
 local env = getfenv and getfenv(1)
 if type(env) == "table" and setfenv then pcall(setfenv, orig, env) end
 local ret = pack(orig(select(2, ...)))
-local off, paths, prob, ability, scenes, timers
+local off, paths, prob, ability, scenes, timers, clock
 local context
 
 local function log(event, id, detail)
@@ -29,6 +30,7 @@ local function clear(self)
   if not self then return end
   local timer = self._finixCatchTimer
   self._finixCatchTimer, self._finixCatchLast, self._finixCatchDistance = nil, nil, nil
+  self._finixCatchEmptySince, self._finixCatchPending = nil, nil
   if context == self then context = nil end
   if timer then timers.removeTimer(timer) end
 end
@@ -62,6 +64,8 @@ local function prepare(self)
     timers = timers or require("Core.Timer.TimerManager")
     need(timers, "addRepeatTimer")
     need(timers, "removeTimer")
+    clock = clock or require("Core.Common.Time")
+    need(clock, "getTickSecond")
     self._finixCatchReady = true
   end
   return helper, camera
@@ -70,26 +74,44 @@ end
 local function step(self)
   if not self._continuousThrowHeld or self.player ~= pg.me or self.player.currentContext ~= self then return clear(self) end
   local helper, camera = prepare(self)
-  if not camera:isActive() or not helper:canForceLock() or not pg.me.enableLockTarget then return end
+  if not camera:isActive() or not helper:canForceLock() or not pg.me.enableLockTarget then
+    self._finixCatchEmptySince = nil
+    return
+  end
   if not self:checkBallCanThrow() then return self:stopContinuousThrow("catch_ball_unavailable") end
   local scene = scenes[pg.me.space.sceneId]
   local radius = scene and scene.forceLockDis or ability.forceLockDis
   if pg.me.fogMaskRadius and pg.me.fogMaskRadius > 0 then radius = pg.me.fogMaskRadius end
   assert(type(radius) == "number" and radius > 0, "lock radius missing")
   local from = pg.pawn:getPosition()
-  local candidates = {}
+  local candidates, pending = {}, 0
   for _, ent in pairs(pg.global.entityMgr:getAllEntities()) do
     if (ent.className == "ClientPuppet" or ent.className == "ClientPuppetGhost")
-      and ent.space == pg.me.space and not ent.destroyed and not ent.isDestroyed and not ent.isTrapped
-      and ent:canBeLocked() then
+      and ent.space == pg.me.space and not ent.destroyed and not ent.isDestroyed then
       local distance = Vector3.Distance(from, ent:getPosition())
-      if distance <= radius and helper:checkTargetValid(ent, radius, nil, false)
-        and camera:checkDistance(ent) and prob.clientGet(ent, self.itemId).canCatch then
-        candidates[#candidates + 1] = { entity = ent, distance = distance }
+      if distance <= radius then
+        if ent.isTrapped then
+          pending = pending + 1
+        elseif ent:canBeLocked() and helper:checkTargetValid(ent, radius, nil, false)
+          and camera:checkDistance(ent) and prob.clientGet(ent, self.itemId).canCatch then
+          candidates[#candidates + 1] = { entity = ent, distance = distance }
+        end
       end
     end
   end
-  if #candidates == 0 then return self:stopContinuousThrow("catch_nothing_left") end
+  if #candidates == 0 then
+    if self._finixCatchPending ~= pending then log("wait", pending, "pending") end
+    self._finixCatchPending = pending
+    if pending > 0 then
+      self._finixCatchEmptySince = nil
+    else
+      local now = clock.getTickSecond()
+      self._finixCatchEmptySince = self._finixCatchEmptySince or now
+      if now - self._finixCatchEmptySince >= GRACE then return self:stopContinuousThrow("catch_nothing_left") end
+    end
+    return
+  end
+  self._finixCatchEmptySince, self._finixCatchPending = nil, nil
   table.sort(candidates, function(a, b)
     if a.distance == b.distance then return a.entity.actorId < b.entity.actorId end
     return a.distance < b.distance
@@ -128,6 +150,7 @@ local function startLocking(self)
   if context ~= self then clear(context) end
   context = self
   self._finixCatchLast, self._finixCatchDistance = nil, nil
+  self._finixCatchEmptySince, self._finixCatchPending = nil, nil
   safely(step, self)
   if off or not self._continuousThrowHeld then return end
   self._finixCatchTimer = timers.addRepeatTimer(INTERVAL, function() safely(step, self) end)
