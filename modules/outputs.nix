@@ -237,7 +237,7 @@ in {
       toplevel = hosts.y0usaf-server.config.system.topLevel;
       defaultHost = "server";
       sshHost = "y0usaf-server.${hosts.y0usaf-server.config.tailnet.domain}";
-      sshPort = builtins.head hosts.y0usaf-server.config.services.openssh.settings.Port;
+      sshPort = 22;
     };
     finix-desktop-deploy = mkDeploy {
       name = "finix-desktop-deploy";
