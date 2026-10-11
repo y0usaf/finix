@@ -17,6 +17,10 @@
           models = ["anthropic/claude-sonnet-5-5" "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"];
         };
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash";
+        fusion.opus-sol = {
+          lead = "anthropic/claude-opus-5-5";
+          sidekick = "openai-codex/gpt-6.1-sol";
+        };
         keys =
           {
             furrowNew = ["alt+t" "ctrl+n"];
