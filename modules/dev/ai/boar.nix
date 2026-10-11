@@ -4,17 +4,9 @@
   pkgs,
   flakeInputs,
   ...
-}: {
-  finix.persistence.allowlist.users.${config.user.name}.directories = [
-    ".local/state/boar"
-    ".local/state/boar-rs"
-    ".local/state/crest-auth"
-  ];
-  environment.systemPackages = [
-    flakeInputs.boar-rs.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
-  manzil.users."${config.user.name}".files = {
-    ".local/state/boar-rs/agent/settings.json" = {
+}: let
+  agentFiles = dir: {
+    "${dir}/settings.json" = {
       generator = lib.generators.toJSON {};
       value = {
         defaultTools = ["+codemode"];
@@ -44,7 +36,7 @@
           }) (lib.range 1 9));
       };
     };
-    ".local/state/boar-rs/agent/models.json" = {
+    "${dir}/models.json" = {
       generator = lib.generators.toJSON {};
       value.providers.anthropic.models = [
         {
@@ -63,7 +55,7 @@
         }
       ];
     };
-    ".local/state/boar-rs/agent/mcp.json" = {
+    "${dir}/mcp.json" = {
       generator = lib.generators.toJSON {};
       value.mcpServers.donsetch = {
         command = lib.getExe flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.donsetch;
@@ -71,4 +63,16 @@
       };
     };
   };
+in {
+  finix.persistence.allowlist.users.${config.user.name}.directories = [
+    ".local/state/boar"
+    ".local/state/boar-rs"
+    ".local/state/crest-auth"
+  ];
+  environment.systemPackages = [
+    flakeInputs.boar-rs.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ];
+  manzil.users."${config.user.name}".files =
+    agentFiles ".local/state/boar/agent"
+    // agentFiles ".local/state/boar-rs/agent";
 }
