@@ -67,7 +67,7 @@
       runelite.enable = true;
       aniimo = {
         enable = true;
-        mods = ["camera" "movement" "rewards"];
+        mods = ["camera" "movement" "rewards" "catch"];
       };
     };
 
