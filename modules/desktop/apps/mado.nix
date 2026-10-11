@@ -8,7 +8,7 @@
     user.ui.tomoe.extraConfig =
       flakeInputs.mado.lib.tomoe
       + ''
-        (setf +mado-bitrate+ 300)
+        (setf +mado-bitrate+ 200)
       '';
   };
 }
