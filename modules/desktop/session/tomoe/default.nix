@@ -227,6 +227,8 @@
       ["${shaderDir}/stars.glsl" 24]
       ["${shaderDir}/towers.glsl" 24]
       ["${shaderDir}/cubes.glsl" 30]
+      ["${shaderDir}/okazz-spheres.glsl" 30]
+      ["${shaderDir}/okazz-glyphs.glsl" 30]
     ];
     preview = {
       width = 256;
