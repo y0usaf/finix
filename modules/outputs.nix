@@ -236,8 +236,8 @@ in {
       name = "finix-server-persistent-deploy";
       toplevel = hosts.y0usaf-server.config.system.topLevel;
       defaultHost = "server";
-      sshHost = "y0usaf-server.${hosts.y0usaf-server.config.tailnet.domain}";
-      sshPort = 22;
+      sshHost = hosts.y0usaf-server.config.networking.hostName;
+      sshPort = builtins.head hosts.y0usaf-server.config.services.openssh.settings.Port;
     };
     finix-desktop-deploy = mkDeploy {
       name = "finix-desktop-deploy";
