@@ -13,7 +13,10 @@
 
   environment.systemPackages = [flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default];
   manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text =
-    builtins.readFile ./init.lisp + "\n" + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp";
+    builtins.readFile ./init.lisp
+    + "\n"
+    + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp"
+    + "\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\n";
 
   user.shell.rcExtra = lib.mkOrder 1600 ''
     if [ -z "''${EKKO_INSTANCE:-}" ] && [ -z "''${EKKO_SESSION_NAME:-}" ] &&

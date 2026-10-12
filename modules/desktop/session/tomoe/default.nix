@@ -220,6 +220,7 @@
 
   shaderWallpaperParameters = {
     shaders = [
+      ["${shaderDir}/okazz-spheres.glsl" 30]
       ["${./shaders/balatro.glsl}" 30]
       ["${./shaders/meadow.glsl}" 30]
       ["${shaderDir}/xmb.glsl" 30]
@@ -227,7 +228,6 @@
       ["${shaderDir}/stars.glsl" 24]
       ["${shaderDir}/towers.glsl" 24]
       ["${shaderDir}/cubes.glsl" 30]
-      ["${shaderDir}/okazz-spheres.glsl" 30]
       ["${shaderDir}/okazz-glyphs.glsl" 30]
     ];
     preview = {
