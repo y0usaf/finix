@@ -37,7 +37,7 @@
           . /run/mediamtx.env
           set +a
         fi
-        exec ${pkgs.mediamtx}/bin/mediamtx ${(pkgs.formats.yaml {}).generate "mediamtx.yaml" {
+        exec ${pkgs.mediamtx}/bin/mediamtx ${(pkgs.formats.yaml_1_2 {}).generate "mediamtx.yaml" {
           webrtc = true;
           webrtcAddress = ":4200";
           webrtcLocalUDPAddress = ":4200";
