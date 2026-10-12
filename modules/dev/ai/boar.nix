@@ -16,6 +16,9 @@
           concurrency = -1;
           models = ["anthropic/claude-sonnet-5-5" "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"];
         };
+        defaultProvider = "anthropic";
+        defaultModel = "claude-opus-5-5";
+        defaultThinkingLevel = "xhigh";
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash";
         fusion.opus-sol = {
           lead = "anthropic/claude-opus-5-5";
