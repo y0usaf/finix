@@ -746,11 +746,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791928146,
-        "narHash": "sha256-GS5+61GTmSBu/PFSR0j2Cw//+MfLZce5Wlwa2YY39Lo=",
+        "lastModified": 1791931237,
+        "narHash": "sha256-64qOB1UZzc0s8y7XV5YTq4zx89haBtnXGOClewHCa+I=",
         "ref": "refs/heads/main",
-        "rev": "bdfa46eac0e38d21248c2bd1d525df039b9cc05a",
-        "revCount": 313,
+        "rev": "71e320ec13f7989160b2e93211ff538c56381c29",
+        "revCount": 318,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/nacre.git"
       },
