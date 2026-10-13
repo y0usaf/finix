@@ -67,16 +67,16 @@
         "pi-durable": "pi-durable"
       },
       "locked": {
-        "lastModified": 1791833456,
-        "narHash": "sha256-P6+ppuCvb+l4Un/sZRv/pfkzL5a1UQQkN+86q+rSwKs=",
+        "lastModified": 1791867180,
+        "narHash": "sha256-N9MyvrToH6F3UBvVFJM/Xhfcy5N1oeJoYXqruTpjF+E=",
         "ref": "refs/heads/main",
-        "rev": "662d3559851dcbf3efa537470a088c97fa84937e",
-        "revCount": 442,
+        "rev": "8906fe811a7f557b1b1d29dd450b3657fc72912e",
+        "revCount": 470,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "662d3559851dcbf3efa537470a088c97fa84937e",
+        "rev": "8906fe811a7f557b1b1d29dd450b3657fc72912e",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
@@ -1195,11 +1195,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1791130643,
-        "narHash": "sha256-4ojzXCXw6LweiFqnwwpO/+y1myLGKT43pjJrhZO3Z/w=",
+        "lastModified": 1791850738,
+        "narHash": "sha256-PICSnJ5JizWNIJfA9HZIXFWnZWcEBuOpQDtDd+SJrm0=",
         "owner": "can1357",
         "repo": "oh-my-pi",
-        "rev": "898b09d32f147887a2242cf5ec9a1967bcac8873",
+        "rev": "818dd42b73ab1caad17fa06d4edcc3a97086dc57",
         "type": "github"
       },
       "original": {
@@ -1518,11 +1518,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786507911,
-        "narHash": "sha256-w5aZRLbiu7H6TqsYXVMdRKg0S4DRaJpxyqxx86AwxVk=",
+        "lastModified": 1791276535,
+        "narHash": "sha256-iwqAmHTX1IgzTumJR3JayNAQAo5xEmmOuGzB6b2pT/Q=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "39db48099ad16834af7e27485a4babf9c28b3897",
+        "rev": "b962e5d0c8cd97196c6a882d659fe451b52ad989",
         "type": "github"
       },
       "original": {
