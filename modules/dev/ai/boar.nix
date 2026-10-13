@@ -15,12 +15,6 @@
         subagents = {
           depth = -1;
           concurrency = -1;
-          roles = {
-            scout = "anthropic/claude-haiku-5-5";
-            worker = "anthropic/claude-sonnet-5-5";
-            checker = "anthropic/claude-opus-5-5";
-          };
-          defaultRole = "worker";
         };
         defaultProvider = "vercel-ai-gateway";
         defaultModel = "deepseek/deepseek-v4.1-flash-fast";
