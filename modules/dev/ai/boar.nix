@@ -10,6 +10,7 @@
       generator = lib.generators.toJSON {};
       value = {
         defaultTools = ["+codemode"];
+        disabledExtensions = ["contain"];
         codemode.mode = "only";
         subagents = {
           depth = -1;
