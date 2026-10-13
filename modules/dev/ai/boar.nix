@@ -22,8 +22,8 @@
           };
           defaultRole = "worker";
         };
-        defaultProvider = "anthropic";
-        defaultModel = "claude-opus-5-5";
+        defaultProvider = "vercel-ai-gateway";
+        defaultModel = "deepseek/deepseek-v4.1-flash-fast";
         defaultThinkingLevel = "xhigh";
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash";
         fusion.opus-sol = {
