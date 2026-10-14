@@ -13,7 +13,6 @@
         disabledExtensions = ["contain"];
         codemode.mode = "only";
         subagents = {
-          depth = -1;
           concurrency = -1;
         };
         defaultProvider = "vercel-ai-gateway";
