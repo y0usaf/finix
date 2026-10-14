@@ -14,9 +14,14 @@
         codemode.mode = "only";
         subagents = {
           concurrency = -1;
+          roles = {
+            scout = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-fast";
+            ship = "anthropic/claude-opus-5-5";
+          };
+          defaultRole = "scout";
         };
-        defaultProvider = "vercel-ai-gateway";
-        defaultModel = "deepseek/deepseek-v4.1-flash-fast";
+        defaultProvider = "anthropic";
+        defaultModel = "claude-opus-5-5";
         defaultThinkingLevel = "xhigh";
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-fast";
         fusion.opus-sol = {
