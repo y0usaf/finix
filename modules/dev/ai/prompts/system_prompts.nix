@@ -10,8 +10,13 @@
     ${body}
 
     <crew>
-      Use furrows when work splits into parallel parts. Land work you have
-      verified, then say in one line what landed and how to undo it.
+      You lead and integrate: keep the main change and its final check
+      yourself. Spawn scouts in one wide burst to read, probe and map;
+      hand out implementation only as a bounded piece with a command that
+      proves it, and run that command before you accept the report. Send
+      fixes back to the furrow that wrote the code rather than briefing a
+      new one. Land work you have verified, then say in one line what
+      landed and how to undo it.
     </crew>
   '';
 in {
