@@ -6,12 +6,13 @@ const int M = 29;
 const int N = 13;
 const int ARM = 4;
 const int LOOP = 52;
-const float HEX_SPEED = 0.35;
+const float HEX_SPEED = 0.7;
 const int STREAK_K = 176;
 const float STREAK_STEP = 0.057;
 const int STREAK_N = 132;
 const int STREAK_LOOP = 160;
-const float STREAK_SPEED = 0.16;
+const float STREAK_SPEED = 0.32;
+const float CYCLE = 1.8;
 
 const vec3 PAL[10] = vec3[10](
     vec3(1.000, 0.824, 0.122), vec3(1.000, 0.604, 0.122), vec3(1.000, 0.420, 0.369),
@@ -39,6 +40,11 @@ int fdiv(int a, int b) {
 
 int pmod(int a, int b) {
     return a - b * fdiv(a, b);
+}
+
+vec3 cycle(float f) {
+    int a = pmod(int(floor(f)), 9);
+    return mix(PAL[a], PAL[pmod(a + 1, 9)], fract(f));
 }
 
 vec2 rot(vec2 v, float a) {
@@ -82,6 +88,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float band = smoothstep(float(ARM) + 1.5, float(ARM) + 4.0, jr) * (1.0 - smoothstep(float(N) - 1.2, float(N), jr));
 
     vec3 col = vec3(0.0);
+    float phase = mod(iTime, CYCLE) * 9.0 / CYCLE;
 
     float c = float(STREAK_K) * STREAK_STEP / TAU;
     float ct = sqrt(1.0 + c * c);
@@ -109,7 +116,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         float dist = (length(d - dir * a) - th) * r / px;
         float cover = clamp(0.5 - dist, 0.0, 1.0) * smoothstep(0.6, 2.0, th * r / px);
         int pick = int(h0 * 16.0) % 13;
-        col = mix(col, PAL[min(pick, 9)] * (0.7 + 0.3 * h2), cover * band);
+        vec3 sc = pick > 8 ? PAL[9] : cycle(float(pick) - phase);
+        col = mix(col, sc * (0.7 + 0.3 * h2), cover * band);
     }
 
     float key[7];
@@ -144,7 +152,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         float fade = smoothstep(3.0, 9.0, size * scale / px);
         float cover = clamp(0.5 - dist, 0.0, 1.0) * fade;
         float rim = clamp(0.5 - dist - max(1.0, 0.03 * size * scale / px), 0.0, 1.0);
-        vec3 hc = PAL[int(h0 * 9.0)];
+        vec3 hc = cycle(h0 * 9.0 - phase);
         col = mix(col, hc * rim, cover);
     }
 
