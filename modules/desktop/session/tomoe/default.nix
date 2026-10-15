@@ -221,6 +221,7 @@
   shaderWallpaperParameters = {
     shaders = [
       ["${./shaders/hex-spiral.glsl}" 30]
+      ["${./shaders/dot-corridor.glsl}" 30]
       ["${shaderDir}/okazz-spheres.glsl" 30]
       ["${./shaders/balatro.glsl}" 30]
       ["${shaderDir}/xmb.glsl" 30]
