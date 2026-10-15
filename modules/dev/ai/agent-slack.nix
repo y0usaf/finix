@@ -6,12 +6,12 @@
   environment.systemPackages = [
     (pkgs.stdenvNoCC.mkDerivation {
       pname = "agent-slack";
-      version = "0.10.0";
+      version = "0.10.2";
       nativeBuildInputs = [pkgs.patchelf];
 
       src = pkgs.fetchurl {
-        url = "https://github.com/stablyai/agent-slack/releases/download/v0.10.0/agent-slack-linux-x64";
-        hash = "sha256-tbnTqhnyO+hxAyuey4LEw/HC1xTrY8Ee4J1i/wV8yt4=";
+        url = "https://github.com/stablyai/agent-slack/releases/download/v0.10.2/agent-slack-linux-x64";
+        hash = "sha256-rU1l1O4sg+x+ulk5UVaOi3yXIrcpcaCejK5uCQBX1IM=";
       };
 
       dontUnpack = true;
