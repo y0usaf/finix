@@ -11,9 +11,7 @@
 
     <crew>
       Use furrows when work splits into parallel parts. Land work you have
-      verified, then say in one line what landed and how to undo it. Ask
-      first only before what can't be undone or touches the live session:
-      push, rebuild or deploy, history rewrite, deleting the user's files.
+      verified, then say in one line what landed and how to undo it.
     </crew>
   '';
 in {

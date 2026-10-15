@@ -51,7 +51,13 @@ in {
 
         <comments>
           Write no code comments, and delete any your change makes wrong.
-        </comments>''
+        </comments>
+
+        <gate>
+          Ask first only before what can't be undone or touches the live
+          session: push, rebuild or deploy, history rewrite, deleting the
+          user's files.
+        </gate>''
       + lib.optionalString (host != []) "\n\n<host>\n${lib.concatMapStrings (fact: "  - ${fact}\n") host}</host>";
   };
 }
