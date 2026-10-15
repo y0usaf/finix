@@ -67,16 +67,16 @@
         "pi-durable": "pi-durable"
       },
       "locked": {
-        "lastModified": 1792094201,
-        "narHash": "sha256-N3fcQMY9JHuDPqdGt1+dr+QGExtfva2O1AvCcFLqxoo=",
+        "lastModified": 1792099678,
+        "narHash": "sha256-uaIp7ZUwK847pzRnd2RTvhFEum8GUwAinXEXv/75dA8=",
         "ref": "refs/heads/main",
-        "rev": "1eef7a4ebefbb7fcb07cb5d3d11005fac08514d0",
-        "revCount": 526,
+        "rev": "120bfa7bb141ad07d00b2950283e7cf423342840",
+        "revCount": 532,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "1eef7a4ebefbb7fcb07cb5d3d11005fac08514d0",
+        "rev": "120bfa7bb141ad07d00b2950283e7cf423342840",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
