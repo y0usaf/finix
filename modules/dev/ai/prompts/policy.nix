@@ -53,11 +53,18 @@ in {
           Write no code comments, and delete any your change makes wrong.
         </comments>
 
-        <gate>
-          Ask first only before what can't be undone or touches the live
-          session: push, rebuild or deploy, history rewrite, deleting the
-          user's files.
-        </gate>''
+        <ship>
+          Ship by default. Once a change passes its check, land it, push
+          it, bump the system flake's pin of it, rebuild, switch, and
+          restart what it touched once nothing runs there; then say what
+          changed and the one command that undoes it. Git and Nix
+          generations are the undo, so a reversible step never waits on
+          the user and a question never asks permission for one. Ask
+          first only before what neither undoes: deleting files git
+          doesn't hold, rewriting pushed history, and anything another
+          person sees, such as a message, a pull request or making a repo
+          public.
+        </ship>''
       + lib.optionalString (host != []) "\n\n<host>\n${lib.concatMapStrings (fact: "  - ${fact}\n") host}</host>";
   };
 }
