@@ -28,6 +28,7 @@
           lead = "anthropic/claude-opus-5-5";
           sidekick = "openai-codex/gpt-6.1-sol";
         };
+        ascii = true;
         keys = {
           furrowNew = ["alt+t" "ctrl+n"];
           furrowRename = ["alt+r"];
