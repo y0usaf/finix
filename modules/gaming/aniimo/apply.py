@@ -32,6 +32,14 @@ def read_dir(d):
     return xdf, xdt, md5(xdt_raw)
 
 
+def heal(d, backup):
+    xdf = d / "LuaScripts.xdf"
+    old = backup / "LuaScripts.xdf"
+    want = json.loads((d / "LuaScripts.xdt").read_bytes())["CMDataMD5"]
+    if old.exists() and md5(xdf.read_bytes()) != want and md5(old.read_bytes()) == want:
+        write_atomic(xdf, old.read_bytes())
+
+
 def entry_bytes(xdf, e):
     raw = xdf[e["CEOffset"] : e["CEOffset"] + e["CECSize"]]
     if e["CECSize"] != e["CESize"]:
@@ -169,8 +177,9 @@ def main():
         d = game / rel
         if not (d / "LuaScripts.xdt").exists():
             continue
-        _, _, cur_xdt_md5 = read_dir(d)
         backup = state_dir / rel.replace("/", "_")
+        heal(d, backup)
+        _, _, cur_xdt_md5 = read_dir(d)
         ours = state.get(rel) == cur_xdt_md5
         if not mods:
             if ours:
