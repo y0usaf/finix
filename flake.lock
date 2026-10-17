@@ -64,19 +64,19 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "pi-durable": "pi-durable"
+        "pi-rs": "pi-rs"
       },
       "locked": {
-        "lastModified": 1792256855,
-        "narHash": "sha256-mV485Jr5Hp1IHjT2rlWxsnn5qQQUyaV3R7aNj9GiLHE=",
+        "lastModified": 1792258033,
+        "narHash": "sha256-gIOg6YUxpoLO7hlfdXmh9tOGreOPK3ab07YcDrUu0L4=",
         "ref": "refs/heads/main",
-        "rev": "01a4e3f4df2b8d907fddd8bc6da70385c54f961e",
-        "revCount": 565,
+        "rev": "5422727410402a2fec1ccc6d65070df5cfabf08d",
+        "revCount": 567,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "01a4e3f4df2b8d907fddd8bc6da70385c54f961e",
+        "rev": "5422727410402a2fec1ccc6d65070df5cfabf08d",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
@@ -1326,23 +1326,6 @@
         "type": "github"
       }
     },
-    "pi-durable": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1792239501,
-        "narHash": "sha256-LBSEh41axjkrc86jQlIz8Iyx+LN8AcfUCs3wV6cJgL0=",
-        "ref": "main",
-        "rev": "66a2be5ee30a59e2f403cc3071821f1b95614006",
-        "revCount": 209,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/pi-durable-rs"
-      },
-      "original": {
-        "ref": "main",
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/pi-durable-rs"
-      }
-    },
     "pi-harness": {
       "inputs": {
         "ekko": "ekko_2",
@@ -1398,6 +1381,23 @@
         "owner": "y0usaf",
         "repo": "pi-rlm",
         "type": "github"
+      }
+    },
+    "pi-rs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792255389,
+        "narHash": "sha256-siqyF9xbx4aIfms8RtaqjnK/GOYyazigkA+ETRUCi4w=",
+        "ref": "main",
+        "rev": "93953dd01e632a4fcf6ad79b2b649f05546ece23",
+        "revCount": 231,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/pi-rs"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/pi-rs"
       }
     },
     "root": {
