@@ -67,16 +67,16 @@
         "pi-durable": "pi-durable"
       },
       "locked": {
-        "lastModified": 1792216995,
-        "narHash": "sha256-EfAr0/GRbKjVyKflKGxCQ7MVddLtJwC8iUe4u3w9uj0=",
+        "lastModified": 1792242615,
+        "narHash": "sha256-nxJ/Lo8GlJ0vsIzDlqgtj9kswanuoq6AUZvuDNqpfKo=",
         "ref": "refs/heads/main",
-        "rev": "e9f509a6f89c13e01c31fcdaff8b67adb2194879",
-        "revCount": 557,
+        "rev": "9dbd03c70e196f8c57bbd2a02e2142f36e0d522c",
+        "revCount": 560,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "e9f509a6f89c13e01c31fcdaff8b67adb2194879",
+        "rev": "9dbd03c70e196f8c57bbd2a02e2142f36e0d522c",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
@@ -1329,11 +1329,11 @@
     "pi-durable": {
       "flake": false,
       "locked": {
-        "lastModified": 1792037082,
-        "narHash": "sha256-VUJ7ZcFvw5pZ2BinUoST//9kazJ+vyCp94epgg+1sWc=",
+        "lastModified": 1792239501,
+        "narHash": "sha256-LBSEh41axjkrc86jQlIz8Iyx+LN8AcfUCs3wV6cJgL0=",
         "ref": "main",
-        "rev": "2cccb7ae73a1acdc16f7bd431c11070547b2648b",
-        "revCount": 208,
+        "rev": "66a2be5ee30a59e2f403cc3071821f1b95614006",
+        "revCount": 209,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/pi-durable-rs"
       },
