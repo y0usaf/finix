@@ -13,9 +13,9 @@
 
       ## Code
 
-      - **One job.** A project's README opens with its job in one sentence and
-        what it won't do; goal and parity files obey it. A reference lends
-        qualities, never a feature list. Each part can run as its own process.
+      - **One job.** A project's README opens with its job in one sentence;
+        goal and parity files obey it. A reference lends qualities, never a
+        feature list. Each part can run as its own process.
       - **Least code.** Prefer deletion to addition. Abstract on the third need.
       - **Least power.** Lowest rung that works on any machine: constant <
         data < config < pure function < code with I/O or state.
