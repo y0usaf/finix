@@ -48,6 +48,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    iets = {
+      url = "github:numtide/iets";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nacre = {
       url = "git+ssh://git@github.com/y0usaf/nacre.git";
       inputs.nixpkgs.follows = "nixpkgs";
