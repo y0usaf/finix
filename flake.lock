@@ -259,6 +259,26 @@
         "type": "github"
       }
     },
+    "crest": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792259537,
+        "narHash": "sha256-HGCTUOXJmoM1GXoV7pVnmCgbDrOkI0+boo32NAG2aBs=",
+        "ref": "refs/heads/main",
+        "rev": "72f8d78f4d3869ee3df55ddc2dd41408b4cb20a4",
+        "revCount": 711,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/crest.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/crest.git"
+      }
+    },
     "cudaterm": {
       "inputs": {
         "nixpkgs": "nixpkgs_3"
@@ -1445,6 +1465,7 @@
         "claude-code-nix": "claude-code-nix",
         "claude-desktop-linux": "claude-desktop-linux",
         "codex-cli-nix": "codex-cli-nix",
+        "crest": "crest",
         "cudaterm": "cudaterm",
         "cursors": "cursors",
         "deno2nix": "deno2nix",

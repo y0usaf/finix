@@ -48,6 +48,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    crest = {
+      url = "git+ssh://git@github.com/y0usaf/crest.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     iets = {
       url = "github:numtide/iets";
       inputs.nixpkgs.follows = "nixpkgs";
