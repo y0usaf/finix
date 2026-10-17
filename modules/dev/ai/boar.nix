@@ -28,19 +28,14 @@
           lead = "anthropic/claude-opus-5-5";
           sidekick = "openai-codex/gpt-6.1-sol";
         };
-        keys =
-          {
-            furrowNew = ["alt+t" "ctrl+n"];
-            furrowRename = ["alt+r"];
-            furrowClose = ["alt+w" "ctrl+shift+w" "ctrl+delete"];
-            furrowNext = ["alt+." "ctrl+."];
-            furrowPrev = ["alt+," "ctrl+,"];
-            quit = ["ctrl+shift+d"];
-          }
-          // lib.listToAttrs (map (n: {
-            name = "furrow${toString n}";
-            value = ["alt+${toString n}" "ctrl+${toString n}"];
-          }) (lib.range 1 9));
+        keys = {
+          furrowNew = ["alt+t" "ctrl+n"];
+          furrowRename = ["alt+r"];
+          furrowClose = ["alt+w" "ctrl+shift+w" "ctrl+delete"];
+          furrowNext = ["alt+." "ctrl+."];
+          furrowPrev = ["alt+," "ctrl+,"];
+          quit = ["ctrl+shift+d"];
+        };
       };
     };
     "${dir}/mcp.json" = {
