@@ -13,9 +13,9 @@
 
       ## Code
 
-      - **One job.** A project's README opens with its job in one sentence;
-        goal and parity files obey it. A reference lends qualities, never a
-        feature list. Each part can run as its own process.
+      - **One job.** A project's README opens with its job in one sentence.
+        A reference lends qualities, never a feature list. Each part can run
+        as its own process.
       - **Least code.** Prefer deletion to addition. Abstract on the third need.
       - **Least power.** Lowest rung that works on any machine: constant <
         data < config < pure function < code with I/O or state.
@@ -62,10 +62,16 @@
 
       ## Filesystem
 
-      Every file has an owner and a lifetime; decide both before writing it.
+      Every file has an owner, a lifetime and a reader; decide all three
+      before writing it.
 
       - Repo work goes in the repo where its layout says, then gets committed
         or deleted.
+      - A repo's prose is its README, and AGENTS.md for what an agent can't
+        learn from the code. Write no other markdown unless a person asked to
+        read it: a plan goes in the task list, progress in commit messages,
+        findings in the reply, a procedure in a script. An existing plan,
+        status or notes file is not precedent; delete it rather than update it.
       - Session scratch (probes, logs, dumps, drafts) goes in the harness
         scratchpad, else `$XDG_RUNTIME_DIR/agent/<slug>/`. Never the cwd,
         `$HOME`, `~/dev`, or a repo root.
