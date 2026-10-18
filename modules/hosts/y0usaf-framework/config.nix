@@ -71,19 +71,25 @@ in {
       auto-optimise-store = true;
       substituters = lib.mkBefore ["https://cache.nixos.org"];
     };
-    nftables.configFile = (import ../shared.nix {inherit lib pkgs;}).nftables "finix-framework.nft" {
-      input = ''
-        udp sport 67 udp dport 68 accept comment "DHCPv4 client"
-        udp sport 547 udp dport 546 accept comment "DHCPv6 client"
-        udp dport 41641 accept comment "Tailscale direct path"
+    nftables.tables = {
+      nixos-fw.enable = false;
+      filter = {
+        family = "inet";
+        content = (import ../shared.nix {inherit lib pkgs;}).filterTable {
+          input = ''
+            udp sport 67 udp dport 68 accept comment "DHCPv4 client"
+            udp sport 547 udp dport 546 accept comment "DHCPv6 client"
+            udp dport 41641 accept comment "Tailscale direct path"
 
-        iifname "wlp191s0" tcp dport 22000 accept comment "Syncthing TLS transport"
-        iifname "wlp191s0" udp dport { 21027, 22000 } accept comment "Syncthing discovery and QUIC"
-      '';
-      forward = ''
-        iifname "docker0" accept
-        oifname "docker0" accept
-      '';
+            iifname "wlp191s0" tcp dport 22000 accept comment "Syncthing TLS transport"
+            iifname "wlp191s0" udp dport { 21027, 22000 } accept comment "Syncthing discovery and QUIC"
+          '';
+          forward = ''
+            iifname "docker0" accept
+            oifname "docker0" accept
+          '';
+        };
+      };
     };
   };
 

@@ -28,7 +28,10 @@
       enable = true;
       settings.main.rc-manager = "resolvconf";
     };
-    getty.ttys = ["tty1" "tty2"];
+    getty = {
+      enable = true;
+      ttys = ["tty1" "tty2"];
+    };
     openssh.settings.Port = [2222];
     nix-daemon.settings = {
       experimental-features = ["nix-command" "flakes"];

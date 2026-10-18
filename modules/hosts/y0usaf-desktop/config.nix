@@ -14,9 +14,13 @@
   environment.etc."finix-stage2".text = "desktop-phase2.4\n";
 
   services = {
-    nftables.configFile = (import ../shared.nix {inherit lib pkgs;}).nftables "finix-desktop.nft" {
-      tailscaleComment = "tailnet peers are authenticated; primary sshd:2222 path";
-      input = ''
+    nftables.tables = {
+      nixos-fw.enable = false;
+      filter = {
+        family = "inet";
+        content = (import ../shared.nix {inherit lib pkgs;}).filterTable {
+          tailscaleComment = "tailnet peers are authenticated; primary sshd:2222 path";
+          input = ''
         udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
 
         iifname "eno1" tcp dport 2222 accept comment "sshd LAN fallback: independent of tailscale being up. Wired NIC only - never wlp96s0"
@@ -29,7 +33,9 @@
 
         iifname "eno1" tcp dport 9757 accept comment "mado for the Steam Frame"
         iifname "eno1" udp dport 9757 accept comment "mado for the Steam Frame"
-      '';
+          '';
+        };
+      };
     };
     sysklogd.extraConfig = "*.* @192.168.2.66:514";
     networkmanager.settings.keyfile.unmanaged-devices = "interface-name:wlp96s0";

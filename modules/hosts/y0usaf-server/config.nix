@@ -38,21 +38,30 @@ in {
   services = {
     mdevd.enable = true;
     dhcpcd.enable = true;
-    getty.ttys = ["tty1" "ttyS0"];
+    getty = {
+      enable = true;
+      ttys = ["tty1" "ttyS0"];
+    };
     nix-daemon.settings.trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
     openssh.settings.Port = [2200];
     nftables = {
       enable = true;
-      configFile = (import ../shared.nix {inherit lib pkgs;}).nftables "finix-server.nft" {
-        tailscaleComment = "tailnet peers are authenticated";
-        input = ''
-          udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
+      tables = {
+        nixos-fw.enable = false;
+        filter = {
+          family = "inet";
+          content = (import ../shared.nix {inherit lib pkgs;}).filterTable {
+            tailscaleComment = "tailnet peers are authenticated";
+            input = ''
+              udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
 
-          iifname "eth0" tcp dport 2200 accept comment "sshd LAN fallback: this box has no console and no IPMI, so the tailnet must not be its only way in"
+              iifname "eth0" tcp dport 2200 accept comment "sshd LAN fallback: this box has no console and no IPMI, so the tailnet must not be its only way in"
 
-          tcp dport { 80, 443, 2222, 3000, 22000, 4200, 8787 } accept comment "2222 = forgejo ssh, NOT sshd (that is the eth0 rule); 8787 attic cache (LAN builds, tailnet too slow)"
-          udp dport { 21027, 22000, 4200, 41641 } accept
-        '';
+              tcp dport { 80, 443, 2222, 3000, 22000, 4200, 8787 } accept comment "2222 = forgejo ssh, NOT sshd (that is the eth0 rule); 8787 attic cache (LAN builds, tailnet too slow)"
+              udp dport { 21027, 22000, 4200, 41641 } accept
+            '';
+          };
+        };
       };
     };
     cron.enable = true;
