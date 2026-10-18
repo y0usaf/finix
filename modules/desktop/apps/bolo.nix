@@ -96,8 +96,11 @@
       })
     ];
     nativeBuildInputs = [pkgs.makeWrapper];
+    # The daemon runs from finit with no inherited PATH: everything it spawns
+    # by name — `sh` for pipe_to, dotool for typing — has to come from here.
     postBuild = ''
-      wrapProgram $out/bin/bolod --prefix PATH : ${lib.makeBinPath [pkgs.dotool]}
+      wrapProgram $out/bin/bolod \
+        --prefix PATH : ${lib.makeBinPath [pkgs.dotool pkgs.bash pkgs.coreutils]}
     '';
   };
 in {
@@ -181,10 +184,11 @@ in {
       # Boot runs before the session exists: wait for PipeWire, or the capture
       # process dies before it opens the microphone.
       command = "${pkgs.writeShellScript "bolod-start" ''
-        export PATH=${lib.makeBinPath [pkgs.coreutils]}
-        for _ in $(seq 1 600); do
+        i=0
+        while [ "$i" -lt 600 ]; do
           [ -S ${runtimeDir}/pipewire-0 ] && exec ${bolod}/bin/bolod
-          sleep 1
+          ${pkgs.coreutils}/bin/sleep 1
+          i=$((i + 1))
         done
         echo "bolod-start: pipewire-0 never appeared" >&2
         exit 1
