@@ -52,9 +52,14 @@ in {
       '';
     };
   };
-  user.shell.rcExtra = lib.mkAfter ''
-    PATH="${homeDirectory}/.local/share/python/bin:$PATH"
+  environment.etc."profile.d/python-path.sh".text = ''
+    case ":$PATH:" in
+      *":${homeDirectory}/.local/share/python/bin:"*) ;;
+      *) export PATH="${homeDirectory}/.local/share/python/bin:$PATH" ;;
+    esac
+  '';
 
+  user.shell.rcExtra = lib.mkAfter ''
     alias py="python3"
     alias pip="pip3"
     alias venv="python3 -m venv"

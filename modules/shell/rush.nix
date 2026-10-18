@@ -44,34 +44,33 @@ in {
   };
 
   config = {
-    user.shell.rcExtra = lib.mkMerge [
-      (lib.mkBefore ''
-        temppkg() {
-          if [ -z "$1" ]; then
-            echo "Usage: temppkg package_name"
-            return 1
-          fi
-          nix-shell -p "$1" --run "exec $SHELL"
-        }
+    environment.etc."profile.d/local-bin.sh".text = ''
+      case ":$PATH:" in
+        *":$HOME/.local/bin:"*) ;;
+        *) export PATH="$HOME/.local/bin:$PATH" ;;
+      esac
+    '';
 
-        temprun() {
-          if [ -z "$1" ]; then
-            echo "Usage: temprun <package-name> [args...]"
-            return 1
-          fi
-          local pkg=$1
-          shift
-          nix run "nixpkgs#$pkg" -- "$@"
-        }
-        export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR"/npm
-      '')
-      ''
-        case ":$PATH:" in
-          *":$HOME/.local/bin:"*) ;;
-          *) PATH="$HOME/.local/bin:$PATH" ;;
-        esac
-      ''
-    ];
+    user.shell.rcExtra = lib.mkBefore ''
+      temppkg() {
+        if [ -z "$1" ]; then
+          echo "Usage: temppkg package_name"
+          return 1
+        fi
+        nix-shell -p "$1" --run "exec $SHELL"
+      }
+
+      temprun() {
+        if [ -z "$1" ]; then
+          echo "Usage: temprun <package-name> [args...]"
+          return 1
+        fi
+        local pkg=$1
+        shift
+        nix run "nixpkgs#$pkg" -- "$@"
+      }
+      export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR"/npm
+    '';
 
     finix.persistence.allowlist.users.${config.user.name}.directories = [
       ".local/state/rush"
