@@ -156,6 +156,9 @@ in {
               kws = {
                 model = "${kwsModel}";
                 keywords = "${keywords}";
+                # Measured on five takes of the real word in this voice: 4/5
+                # detected here, 1/5 at the 0.25 default, none at 0.5.
+                threshold = 0.05;
               };
               vad.model = "${vadModel}";
               # Parakeet's transducer silently drops everything past ~20 s of
