@@ -56,6 +56,8 @@ in {
             IdentityFile ${homeDir}/.ssh/id_ed25519
             IdentitiesOnly yes
             ForwardAgent yes
+            ProxyJump server
+            RequestTTY no
 
         Host steam-frame frame-nixos
             HostName frame-nixos.home
