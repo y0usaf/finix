@@ -186,6 +186,20 @@ in {
         run=${lib.escapeShellArg "${stateDir}/run"}
         mkdir -p "$run" ${lib.escapeShellArg "${stateDir}/logs"}
         install -m 0644 ${patched}/ws_server.py "$run/ws_server.py"
+        # The end-of-stream flush is capped at the per-chunk decode budget (~4
+        # tokens for 320 ms of audio), so the last word never completes:
+        # measured, "shazam" arrives as "Shaz" and "jarvis" as "John". Give the
+        # one flush at end of stream room to finish the utterance.
+        ${python}/bin/python - "$run/ws_server.py" <<'PY'
+import sys
+path = sys.argv[1]
+source = open(path).read()
+old = "first_max_new_tokens = max(1, int((step + lookahead) / 1280))"
+new = "first_max_new_tokens = max(256, int((step + lookahead) / 1280))"
+if source.count(old) != 2:
+    raise SystemExit(f"r2t2 patch: expected 2 flush budgets, found {source.count(old)}")
+open(path, "w").write(source.replace(old, new))
+PY
         mkdir -p "$run/logs/requests" "$run/wav_tmp_store"
 
         mypy=${envDir}/bin/python
