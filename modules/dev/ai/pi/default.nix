@@ -13,10 +13,11 @@ in {
     description = "Shared coding-agent provider and model catalog.";
     default = {
       defaultProvider = "vercel-ai-gateway";
-      defaultModel = "deepseek-v4.1-flash";
+      defaultModel = "deepseek/deepseek-v4.1-flash-1017";
       defaultThinkingLevel = "max";
 
       enabledModels = [
+        "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017"
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"
         "opencode-go/deepseek-v4.1-flash"
         "anthropic/claude-opus-5-5"
@@ -27,6 +28,25 @@ in {
         providers.vercel-ai-gateway.modelOverrides."zai/glm-5.3-flash" = {
           compat.vercelGatewayRouting.order = ["runware" "wafer"];
         };
+
+        providers.vercel-ai-gateway.models = [
+          {
+            id = "deepseek/deepseek-v4.1-flash-1017";
+            name = "DeepSeek V4.1 Flash 1017";
+            api = "anthropic-messages";
+            reasoning = true;
+            input = ["text" "image"];
+            compat.allowEmptySignature = true;
+            contextWindow = 1000000;
+            maxTokens = 384000;
+            cost = {
+              input = 0.15;
+              output = 0.6;
+              cacheRead = 0.003;
+              cacheWrite = 0;
+            };
+          }
+        ];
 
         providers.celeris = {
           name = "Celeris";
@@ -92,9 +112,7 @@ in {
       ".pi/agent/settings.json" = {
         generator = toJSON;
         value = {
-          inherit (catalog) defaultThinkingLevel enabledModels;
-          defaultProvider = "anthropic";
-          defaultModel = "claude-opus-5-5";
+          inherit (catalog) defaultProvider defaultModel defaultThinkingLevel enabledModels;
           packages = [
             "${flakeInputs.pi-chronobreak}"
             "${flakeInputs.pi-rlm}"
