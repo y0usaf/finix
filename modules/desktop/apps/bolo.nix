@@ -40,6 +40,29 @@
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
+  # Wake word: a 3.3M streaming zipformer that spots keywords on CPU while the
+  # recognizer stays idle, and silero for the endpoint decision.
+  kwsModel = pkgs.runCommand "sherpa-onnx-kws-model" {
+    src = pkgs.fetchurl {
+      url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2";
+      hash = "sha256-8XABO0cW5Btiub/YCWh8IHzveY75vGU01SThevm2Vho=";
+    };
+  } ''
+    mkdir -p $out
+    ${pkgs.bzip2}/bin/bunzip2 -c $src | ${pkgs.gnutar}/bin/tar -x --strip-components=1 -C $out
+  '';
+
+  vadModel = pkgs.fetchurl {
+    url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx";
+    hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
+  };
+
+  # The spotter's keyword file: BPE units, one keyword per line.
+  keywords = pkgs.writeText "bolo-keywords.txt" "▁JA R VI S\n";
+
+  userName = config.user.name;
+  uid = config.users.users.${userName}.uid;
+
   sherpaOnnxGpu = pkgs.stdenv.mkDerivation {
     pname = "sherpa-onnx-gpu-prebuilt";
     version = "1.13.3";
@@ -49,11 +72,11 @@
     };
     nativeBuildInputs = [pkgs.autoPatchelfHook];
     buildInputs = [
-      pkgs.cudaPackages.cuda_cudart
-      pkgs.cudaPackages.libcublas
-      pkgs.cudaPackages.libcurand
-      pkgs.cudaPackages.libcufft
-      pkgs.cudaPackages.cudnn
+      pkgs.cudaPackages_12.cuda_cudart
+      pkgs.cudaPackages_12.libcublas
+      pkgs.cudaPackages_12.libcurand
+      pkgs.cudaPackages_12.libcufft
+      pkgs.cudaPackages_12.cudnn
       pkgs.stdenv.cc.cc.lib
     ];
     installPhase = ''
@@ -126,6 +149,14 @@ in {
               finix = ["fee nix" "finnix" "fi nix"];
             };
             vocab_fuzzy = 0.85;
+            wake = {
+              kws = {
+                model = "${kwsModel}";
+                keywords = "${keywords}";
+              };
+              vad.model = "${vadModel}";
+              max_turn = 30.0;
+            };
           });
         }
         // lib.foldl' (acc: name:
@@ -136,15 +167,66 @@ in {
         (lib.attrNames (lib.filterAttrs (_: m: m ? files) models));
     };
 
+    finit.services.bolod = {
+      description = "bolo speech-to-text daemon (${userName})";
+      user = userName;
+      environment = {
+        HOME = config.user.homeDirectory;
+        XDG_RUNTIME_DIR = "/run/user/${toString uid}";
+        WAYLAND_DISPLAY = "tomoe-0";
+        DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/${toString uid}/tomoe.tomoe-0.bus";
+      };
+      # Boot runs before the session exists: wait for PipeWire, or the capture
+      # process dies before it opens the microphone.
+      command = "${pkgs.writeShellScript "bolod-start" ''
+        i=0
+        while [ "$i" -lt 600 ]; do
+          [ -S "$XDG_RUNTIME_DIR/pipewire-0" ] && exec ${bolod}/bin/bolod
+          sleep 1
+          i=$((i + 1))
+        done
+        echo "bolod: PipeWire never appeared in $XDG_RUNTIME_DIR" >&2
+        exit 1
+      ''}";
+      log = true;
+    };
+
     user.ui.tomoe.extraConfig = ''
       (define-extension "bolo" (:reads (:key)) (snapshot state event)
         (declare (ignore snapshot))
         (values state
-                (list (service :bolod (list "${bolod}/bin/bolod"))
-                      (bind-key (list :alt) "m"
+                (list (bind-key (list :alt) "m"
                                 :press :release :release :description "Push-to-talk speech-to-text (bolo)"))
                 (when (and (eq (getf event :type) :key) (equal (getf event :owner) "bolo"))
                   (list (launch "${bolo}/bin/bolo")))))
+
+      ;; The daemon writes its state file on every transition; this watches it
+      ;; and shows a pill while a turn is in flight.
+      (define-extension "bolo-state" (:reads () :state (list :state "idle"))
+          (snapshot state event)
+        (declare (ignore snapshot))
+        (let ((current (getf state :state)))
+          (when (eq (getf event :type) :watch)
+            (setf current (or (getf event :content) "idle")))
+          (when (string= current "") (setf current "idle"))
+          (values (list :state current)
+                  (append
+                    (list (watch-file :state "/run/user/${toString uid}/bolo/state"))
+                    (unless (string= current "idle")
+                      (list (shell-surface :bolo
+                            (ui :row :padding '(5 10 5 10) :gap 4 :radius 6
+                                :background "#1e1e2e"
+                                :children
+                                (list (ui :icon
+                                          :name (cond ((string= current "listening") "audio-input-microphone")
+                                                      ((string= current "transcribing") "process-working")
+                                                      (t "media-record"))
+                                          :size 18
+                                          :color (if (string= current "recording") "#f38ba8" "#cdd6f4"))
+                                      (ui :text :text current :size 12 :color "#cdd6f4")))
+                              :width 148 :height 28 :anchors '(:bottom :left) :margin 8
+                              :layer :top :exclusive-zone 0 :background "#00000000")))))
+                  nil)))
     '';
   };
 }
