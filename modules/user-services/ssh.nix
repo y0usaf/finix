@@ -59,6 +59,9 @@ in {
             ProxyJump server
             RequestTTY no
 
+        Host phone
+            RemoteCommand exec $HOME/.nix-profile/bin/bash -i
+
         Host steam-frame frame-nixos
             HostName frame-nixos.home
             User steamos
