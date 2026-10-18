@@ -227,7 +227,8 @@ in {
                (logical (if (and (listp out) (integerp (getf out :width)))
                             (/ (getf out :width) scale)
                             width)))
-          (list 44 (max 0 (round (- (/ logical 2) (/ width 2)))) 0 0)))
+          ;; Margin reads top, right, bottom, left.
+          (list 44 0 0 (max 0 (round (- (/ logical 2) (/ width 2)))))))
 
       (define-extension "bolo-state" (:reads (:outputs) :state (list :state "idle"))
           (snapshot state event)
