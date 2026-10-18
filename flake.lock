@@ -266,11 +266,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792259537,
-        "narHash": "sha256-HGCTUOXJmoM1GXoV7pVnmCgbDrOkI0+boo32NAG2aBs=",
+        "lastModified": 1792288939,
+        "narHash": "sha256-iec/jvZGzEYRG3Wby5kKIGfMp0DJozs42bOa6X3cCc0=",
         "ref": "refs/heads/main",
-        "rev": "72f8d78f4d3869ee3df55ddc2dd41408b4cb20a4",
-        "revCount": 711,
+        "rev": "d39071805dae186dc72faf91aa1d520c40027e2a",
+        "revCount": 713,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/crest.git"
       },
