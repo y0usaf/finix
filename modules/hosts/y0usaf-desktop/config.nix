@@ -64,6 +64,8 @@
       app.enable = true;
     };
 
+    dev.r2t2.enable = true;
+
     gaming = {
       p4g.enable = true;
       solo-leveling-arise.enable = true;
