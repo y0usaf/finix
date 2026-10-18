@@ -1,7 +1,4 @@
-{
-  lib,
-  ...
-}: let
+{lib, ...}: let
   indent = rules: lib.concatMapStringsSep "\n" (line: lib.optionalString (line != "") "    ${line}") (lib.splitString "\n" rules);
 in {
   btrfs = uuid: options: subvol: {
@@ -15,8 +12,7 @@ in {
     tailscaleComment ? null,
     input,
     forward ? "",
-  }:
-    ''
+  }: ''
       chain input {
         type filter hook input priority filter; policy drop;
 
@@ -30,5 +26,5 @@ in {
     ${lib.optionalString (forward != "") "\n"}  chain forward {
         type filter hook forward priority filter; policy drop;
     ${indent forward}  }
-    '';
+  '';
 }

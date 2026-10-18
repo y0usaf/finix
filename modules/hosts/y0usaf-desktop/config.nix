@@ -21,18 +21,18 @@
         content = (import ../shared.nix {inherit lib pkgs;}).filterTable {
           tailscaleComment = "tailnet peers are authenticated; primary sshd:2222 path";
           input = ''
-        udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
+            udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
 
-        iifname "eno1" tcp dport 2222 accept comment "sshd LAN fallback: independent of tailscale being up. Wired NIC only - never wlp96s0"
+            iifname "eno1" tcp dport 2222 accept comment "sshd LAN fallback: independent of tailscale being up. Wired NIC only - never wlp96s0"
 
-        tcp dport { 25565, 27015, 27036 } accept comment "minecraft host; steam dedicatedServer; steam remotePlay"
-        udp dport { 21027, 27015, 41641 } accept comment "syncthing LAN discovery; steam dedicatedServer; tailscale direct path (parity.nix --port=41641)"
-        udp dport 27031-27036 accept comment "steam remotePlay"
-        tcp dport 2234 accept comment "nicotine-plus Soulseek"
-        udp dport 2234 accept comment "nicotine-plus Soulseek"
+            tcp dport { 25565, 27015, 27036 } accept comment "minecraft host; steam dedicatedServer; steam remotePlay"
+            udp dport { 21027, 27015, 41641 } accept comment "syncthing LAN discovery; steam dedicatedServer; tailscale direct path (parity.nix --port=41641)"
+            udp dport 27031-27036 accept comment "steam remotePlay"
+            tcp dport 2234 accept comment "nicotine-plus Soulseek"
+            udp dport 2234 accept comment "nicotine-plus Soulseek"
 
-        iifname "eno1" tcp dport 9757 accept comment "mado for the Steam Frame"
-        iifname "eno1" udp dport 9757 accept comment "mado for the Steam Frame"
+            iifname "eno1" tcp dport 9757 accept comment "mado for the Steam Frame"
+            iifname "eno1" udp dport 9757 accept comment "mado for the Steam Frame"
           '';
         };
       };
