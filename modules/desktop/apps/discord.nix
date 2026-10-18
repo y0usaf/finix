@@ -12,6 +12,7 @@
     pname = "discord";
     inherit (legacySource) version;
     src = pkgs.fetchurl {inherit (legacySource) url hash;};
+    libunity = pkgs.emptyDirectory;
     branch = "stable";
     binaryName = "Discord";
     desktopName = "Discord";
