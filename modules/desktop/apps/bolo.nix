@@ -155,7 +155,9 @@ in {
                 keywords = "${keywords}";
               };
               vad.model = "${vadModel}";
-              max_turn = 30.0;
+              # Parakeet's transducer silently drops everything past ~20 s of
+              # audio, so a turn must be capped under that, not at 30.
+              max_turn = 18.0;
             };
           });
         }
