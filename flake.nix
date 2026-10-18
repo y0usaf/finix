@@ -209,6 +209,8 @@
     };
 
     finix.url = "github:finix-community/finix";
+
+    nixpkgs-librewolf.url = "github:NixOS/nixpkgs/56c02bc00adcf003215cc4bd996d6efaf4cff188";
   };
 
   outputs = inputs: import ./modules/outputs.nix inputs;

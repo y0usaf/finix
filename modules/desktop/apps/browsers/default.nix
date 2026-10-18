@@ -6,6 +6,7 @@
   ...
 }: let
   userName = config.user.name;
+  librewolfPkgs = import flakeInputs.nixpkgs-librewolf {inherit (pkgs.stdenv.hostPlatform) system;};
   uiFonts = config.user.ui.fonts;
   fontList = lib.concatStringsSep ", " [
     uiFonts.mainFontName
@@ -171,7 +172,7 @@ in {
     ".librewolf"
   ];
   environment.systemPackages = [
-    (pkgs.librewolf-bin.override {
+    (librewolfPkgs.librewolf-bin.override {
       extraPrefs =
         lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") lockedPrefs
         + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
