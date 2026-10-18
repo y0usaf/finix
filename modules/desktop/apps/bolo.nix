@@ -61,7 +61,7 @@
   keywords = pkgs.writeText "bolo-keywords.txt" "▁JA R VI S\n";
 
   userName = config.user.name;
-  uid = config.users.users.${userName}.uid;
+  runtimeDir = "/run/user/${toString config.users.users.${userName}.uid}";
 
   sherpaOnnxGpu = pkgs.stdenv.mkDerivation {
     pname = "sherpa-onnx-gpu-prebuilt";
@@ -173,21 +173,20 @@ in {
       description = "bolo speech-to-text daemon (${userName})";
       user = userName;
       environment = {
-        HOME = config.user.homeDirectory;
-        XDG_RUNTIME_DIR = "/run/user/${toString uid}";
+        HOME = config.users.users.${userName}.home;
+        XDG_RUNTIME_DIR = runtimeDir;
         WAYLAND_DISPLAY = "tomoe-0";
-        DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/${toString uid}/tomoe.tomoe-0.bus";
+        DBUS_SESSION_BUS_ADDRESS = "unix:path=${runtimeDir}/tomoe.tomoe-0.bus";
       };
       # Boot runs before the session exists: wait for PipeWire, or the capture
       # process dies before it opens the microphone.
       command = "${pkgs.writeShellScript "bolod-start" ''
-        i=0
-        while [ "$i" -lt 600 ]; do
-          [ -S "$XDG_RUNTIME_DIR/pipewire-0" ] && exec ${bolod}/bin/bolod
+        export PATH=${lib.makeBinPath [pkgs.coreutils]}
+        for _ in $(seq 1 600); do
+          [ -S ${runtimeDir}/pipewire-0 ] && exec ${bolod}/bin/bolod
           sleep 1
-          i=$((i + 1))
         done
-        echo "bolod: PipeWire never appeared in $XDG_RUNTIME_DIR" >&2
+        echo "bolod-start: pipewire-0 never appeared" >&2
         exit 1
       ''}";
       log = true;
@@ -213,7 +212,7 @@ in {
           (when (string= current "") (setf current "idle"))
           (values (list :state current)
                   (append
-                    (list (watch-file :state "/run/user/${toString uid}/bolo/state"))
+                    (list (watch-file :state "${runtimeDir}/bolo/state"))
                     (unless (string= current "idle")
                       (list (shell-surface :bolo
                             (ui :row :padding '(5 10 5 10) :gap 4 :radius 6
