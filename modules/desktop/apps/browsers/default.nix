@@ -72,9 +72,7 @@
         allowed_in_private_browsing = true;
       };
       "jid1-QoFqdK4qzUfGWQ@jetpack" = {
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/dark-background-light-text/latest.xpi";
-        installation_mode = "force_installed";
-        allowed_in_private_browsing = true;
+        installation_mode = "blocked";
       };
       "vimium-c@gdh1995.cn" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/vimium-c/latest.xpi";
