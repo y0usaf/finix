@@ -62,6 +62,26 @@ in {
       ssh-keygen.command = lib.mkForce (pkgs.writeShellScript "check-host-keys" ''
         [ -s ${persistedSshDir}/ssh_host_ed25519_key ]
       '');
+      efi-pstore-drain = {
+        description = "drain EFI pstore dumps so the NVRAM stays writable";
+        command = pkgs.writeShellScript "efi-pstore-drain" ''
+          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.e2fsprogs pkgs.util-linux]}
+          vars=/sys/firmware/efi/efivars
+          for _ in $(seq 1 30); do
+            mountpoint -q "$vars" && break
+            sleep 1
+          done
+          mountpoint -q "$vars" || exit 0
+          n=0
+          for f in "$vars"/dump-*; do
+            [ -e "$f" ] || continue
+            chattr -i "$f" 2>/dev/null || true
+            rm -f "$f" && n=$((n + 1))
+          done
+          [ "$n" -eq 0 ] || echo "efi-pstore-drain: removed $n stale crash dumps"
+        '';
+        log = true;
+      };
     };
 
     system.activation.scripts.persistentSshAuthorizedKeys = {
