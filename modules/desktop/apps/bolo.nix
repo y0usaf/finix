@@ -225,7 +225,7 @@ in {
                                           :color (if (string= current "recording") "#f38ba8" "#cdd6f4"))
                                       (ui :text :text current :size 12 :color "#cdd6f4")))
                               :width 148 :height 28 :anchors '(:bottom :left) :margin 8
-                              :layer :top :exclusive-zone 0 :background "#00000000")))))
+                              :layer :top :exclusive-zone 0 :background "#00000000"))))
                   nil)))
     '';
   };
