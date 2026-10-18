@@ -109,8 +109,7 @@
     };
 
     oh-my-fx = {
-      url = "github:y0usaf/oh-my-fx/e4fa282cc3f533bb91f02fcd4defab6ac8ec6755";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:y0usaf/oh-my-fx/8ea7aa8df1c82c915b6ea1d918f10a945e79b01d";
     };
 
     pi = {
