@@ -160,7 +160,14 @@ in {
                 # detected here, 1/5 at the 0.25 default, none at 0.5.
                 threshold = 0.05;
               };
-              vad.model = "${vadModel}";
+              vad = {
+                model = "${vadModel}";
+                # Quiet microphone: speech sits lower in the model's
+                # probabilities, so demand less and pause more before a turn
+                # ends. 0.6 s of silence cut sentences in half.
+                threshold = 0.35;
+                min_silence = 1.2;
+              };
               # Parakeet's transducer silently drops everything past ~20 s of
               # audio, so a turn must be capped under that, not at 30.
               max_turn = 18.0;
@@ -210,9 +217,21 @@ in {
 
       ;; The daemon writes its state file on every transition; this watches it
       ;; and shows a pill while a turn is in flight.
-      (define-extension "bolo-state" (:reads () :state (list :state "idle"))
+      ;; Centring has to be a margin: opposing anchors stretch a layer
+      ;; surface, so the offset comes from the output's logical width.
+      (defun bolo--margin (snapshot width)
+        (let* ((outputs (context snapshot :outputs))
+               (out (and (listp outputs) (car outputs)))
+               (scale (if (and (listp out) (integerp (getf out :scale-120)))
+                          (/ (getf out :scale-120) 120)
+                          1))
+               (logical (if (and (listp out) (integerp (getf out :width)))
+                            (/ (getf out :width) scale)
+                            width)))
+          (list 44 (max 0 (round (- (/ logical 2) (/ width 2)))) 0 0)))
+
+      (define-extension "bolo-state" (:reads (:outputs) :state (list :state "idle"))
           (snapshot state event)
-        (declare (ignore snapshot))
         (let ((current (getf state :state)))
           (when (eq (getf event :type) :watch)
             (setf current (or (getf event :content) "idle")))
@@ -232,8 +251,10 @@ in {
                                           :size 18
                                           :color (if (string= current "recording") "#f38ba8" "#cdd6f4"))
                                       (ui :text :text current :size 12 :color "#cdd6f4")))
-                              :width 148 :height 28 :anchors '(:bottom :left) :margin 8
-                              :layer :top :exclusive-zone 0 :background "#00000000"))))
+                              :width 148 :height 28 :anchors '(:top :left)
+                              :margin (bolo--margin snapshot 148)
+                              :layer :overlay :exclusive-zone 0
+                              :background "#00000000"))))
                   nil)))
     '';
   };
