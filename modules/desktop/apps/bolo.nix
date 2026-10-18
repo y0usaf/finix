@@ -219,9 +219,8 @@ in {
       ;; and shows a pill while a turn is in flight.
       ;; Centring has to be a margin: opposing anchors stretch a layer
       ;; surface, so the offset comes from the output's logical width.
-      (defun bolo--margin (snapshot width)
-        (let* ((outputs (context snapshot :outputs))
-               (out (and (listp outputs) (car outputs)))
+      (defun bolo--margin (outputs width)
+        (let* ((out (and (listp outputs) (car outputs)))
                (scale (if (and (listp out) (integerp (getf out :scale-120)))
                           (/ (getf out :scale-120) 120)
                           1))
@@ -252,7 +251,7 @@ in {
                                           :color (if (string= current "recording") "#f38ba8" "#cdd6f4"))
                                       (ui :text :text current :size 12 :color "#cdd6f4")))
                               :width 148 :height 28 :anchors '(:top :left)
-                              :margin (bolo--margin snapshot 148)
+                              :margin (bolo--margin (context snapshot :outputs) 148)
                               :layer :overlay :exclusive-zone 0
                               :background "#00000000"))))
                   nil)))
