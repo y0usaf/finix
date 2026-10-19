@@ -42,15 +42,16 @@
 
   # Wake word: a 3.3M streaming zipformer that spots keywords on CPU while the
   # recognizer stays idle, and silero for the endpoint decision.
-  kwsModel = pkgs.runCommand "sherpa-onnx-kws-model" {
-    src = pkgs.fetchurl {
-      url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2";
-      hash = "sha256-8XABO0cW5Btiub/YCWh8IHzveY75vGU01SThevm2Vho=";
-    };
-  } ''
-    mkdir -p $out
-    ${pkgs.bzip2}/bin/bunzip2 -c $src | ${pkgs.gnutar}/bin/tar -x --strip-components=1 -C $out
-  '';
+  kwsModel =
+    pkgs.runCommand "sherpa-onnx-kws-model" {
+      src = pkgs.fetchurl {
+        url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2";
+        hash = "sha256-8XABO0cW5Btiub/YCWh8IHzveY75vGU01SThevm2Vho=";
+      };
+    } ''
+      mkdir -p $out
+      ${pkgs.bzip2}/bin/bunzip2 -c $src | ${pkgs.gnutar}/bin/tar -x --strip-components=1 -C $out
+    '';
 
   vadModel = pkgs.fetchurl {
     url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx";
@@ -60,18 +61,93 @@
   # NVIDIA's parakeet-unified, exported by sherpa-onnx for streaming with
   # 1.12 s of lookahead: it decodes while you speak and only ever appends, at
   # 1.78 LibriSpeech-clean WER against 1.63 offline.
-  streamingModel = pkgs.runCommand "parakeet-unified-en-0.6b-streaming-1120ms" {
-    src = pkgs.fetchurl {
-      url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-unified-en-0.6b-int8-streaming-1120ms.tar.bz2";
-      hash = "sha256-R4gimm3QO+M/gkPM7kjjOo0V33tEjLmRULDM3dGwLXQ=";
-    };
-  } ''
-    mkdir -p $out
-    ${pkgs.bzip2}/bin/bunzip2 -c $src | ${pkgs.gnutar}/bin/tar -x --strip-components=1 -C $out
-  '';
+  streamingModel =
+    pkgs.runCommand "parakeet-unified-en-0.6b-streaming-1120ms" {
+      src = pkgs.fetchurl {
+        url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-unified-en-0.6b-int8-streaming-1120ms.tar.bz2";
+        hash = "sha256-R4gimm3QO+M/gkPM7kjjOo0V33tEjLmRULDM3dGwLXQ=";
+      };
+    } ''
+      mkdir -p $out
+      ${pkgs.bzip2}/bin/bunzip2 -c $src | ${pkgs.gnutar}/bin/tar -x --strip-components=1 -C $out
+    '';
 
   # The spotter's keyword file: BPE units, one keyword per line.
   keywords = pkgs.writeText "bolo-keywords.txt" "▁JA R VI S\n";
+
+  # The daemon reads this store path directly, so a manifest change is a
+  # service change and finit restarts bolod with it; reading the manzil copy
+  # raced the restart and loaded the previous manifest.
+  manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
+    version = 1;
+    active = "parakeet-unified";
+    language = "en";
+    provider = "cuda";
+    threads = null;
+    # The Scarlett's input reaches bolo at around -28 dBFS peak; the
+    # recognizer hears that as near-silence.
+    gain = 6.0;
+    # Each line is one increment and becomes one `type` command, so
+    # dotool types it as it arrives; a single unterminated line would
+    # be typed only when the turn ends.
+    pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\n'; while IFS= read -r line || [ -n \"$line\" ]; do printf 'type %s\\n' \"$line\"; done; } | dotool";
+    models =
+      [
+        {
+          name = "parakeet-unified";
+          engine = "sherpa-onnx-online-transducer";
+          encoder = "${streamingModel}/encoder.int8.onnx";
+          decoder = "${streamingModel}/decoder.int8.onnx";
+          joiner = "${streamingModel}/joiner.int8.onnx";
+          tokens = "${streamingModel}/tokens.txt";
+        }
+      ]
+      ++ lib.mapAttrsToList (name: m:
+        {
+          inherit name;
+          inherit (m) engine;
+        }
+        // lib.optionalAttrs (m ? uri) {inherit (m) uri;}
+        // lib.optionalAttrs (m ? language) {inherit (m) language;}
+        // lib.optionalAttrs (m ? files) {
+          encoder = "${modelDir name}/encoder.int8.onnx";
+          decoder = "${modelDir name}/decoder.int8.onnx";
+          joiner = "${modelDir name}/joiner.int8.onnx";
+          tokens = "${modelDir name}/tokens.txt";
+        })
+      models;
+    vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) {
+      Hyprland = ["hyper land" "hipper land"];
+      niri = ["neary" "nyree"];
+      y0usaf = ["you sef" "yousef" "you saf"];
+      "sherpa-onnx" = ["sherpa onyx" "sherpa onix"];
+      tomoe = ["toe moe" "tomo eh"];
+      ekko = ["eck oh" "eh ko"];
+      moon = [];
+      finix = ["fee nix" "finnix" "fi nix"];
+    };
+    vocab_fuzzy = 0.85;
+    wake = {
+      kws = {
+        model = "${kwsModel}";
+        keywords = "${keywords}";
+        # Measured on five takes of the real word in this voice: 4/5
+        # detected here, 1/5 at the 0.25 default, none at 0.5.
+        threshold = 0.05;
+      };
+      vad = {
+        model = "${vadModel}";
+        # Quiet microphone: speech sits lower in the model's
+        # probabilities, so demand less and pause more before a turn
+        # ends. 0.6 s of silence cut sentences in half.
+        threshold = 0.35;
+        min_silence = 1.2;
+      };
+      # A guard against a VAD that never closes the turn; the streaming
+      # engine has no clip length to stay under.
+      max_turn = 60.0;
+    };
+  });
 
   userName = config.user.name;
   runtimeDir = "/run/user/${toString config.users.users.${userName}.uid}";
@@ -133,74 +209,7 @@ in {
     manzil.users."${config.user.name}" = {
       files =
         {
-          ".config/bolo/manifest.json".source = pkgs.writeText "bolo-manifest" (builtins.toJSON {
-            version = 1;
-            active = "parakeet-unified";
-            language = "en";
-            provider = "cuda";
-            threads = null;
-            # The Scarlett's input reaches bolo at around -28 dBFS peak; the
-            # recognizer hears that as near-silence.
-            gain = 6.0;
-            # Each line is one increment and becomes one `type` command, so
-            # dotool types it as it arrives; a single unterminated line would
-            # be typed only when the turn ends.
-            pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\n'; while IFS= read -r line || [ -n \"$line\" ]; do printf 'type %s\\n' \"$line\"; done; } | dotool";
-            models = [
-              {
-                name = "parakeet-unified";
-                engine = "sherpa-onnx-online-transducer";
-                encoder = "${streamingModel}/encoder.int8.onnx";
-                decoder = "${streamingModel}/decoder.int8.onnx";
-                joiner = "${streamingModel}/joiner.int8.onnx";
-                tokens = "${streamingModel}/tokens.txt";
-              }
-            ] ++ lib.mapAttrsToList (name: m:
-              {
-                inherit name;
-                inherit (m) engine;
-              }
-              // lib.optionalAttrs (m ? uri) {inherit (m) uri;}
-              // lib.optionalAttrs (m ? language) {inherit (m) language;}
-              // lib.optionalAttrs (m ? files) {
-                encoder = "${modelDir name}/encoder.int8.onnx";
-                decoder = "${modelDir name}/decoder.int8.onnx";
-                joiner = "${modelDir name}/joiner.int8.onnx";
-                tokens = "${modelDir name}/tokens.txt";
-              })
-            models;
-            vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) {
-              Hyprland = ["hyper land" "hipper land"];
-              niri = ["neary" "nyree"];
-              y0usaf = ["you sef" "yousef" "you saf"];
-              "sherpa-onnx" = ["sherpa onyx" "sherpa onix"];
-              tomoe = ["toe moe" "tomo eh"];
-              ekko = ["eck oh" "eh ko"];
-              moon = [];
-              finix = ["fee nix" "finnix" "fi nix"];
-            };
-            vocab_fuzzy = 0.85;
-            wake = {
-              kws = {
-                model = "${kwsModel}";
-                keywords = "${keywords}";
-                # Measured on five takes of the real word in this voice: 4/5
-                # detected here, 1/5 at the 0.25 default, none at 0.5.
-                threshold = 0.05;
-              };
-              vad = {
-                model = "${vadModel}";
-                # Quiet microphone: speech sits lower in the model's
-                # probabilities, so demand less and pause more before a turn
-                # ends. 0.6 s of silence cut sentences in half.
-                threshold = 0.35;
-                min_silence = 1.2;
-              };
-              # Parakeet's transducer silently drops everything past ~20 s of
-              # audio, so a turn must be capped under that, not at 30.
-              max_turn = 18.0;
-            };
-          });
+          ".config/bolo/manifest.json".source = manifestFile;
         }
         // lib.foldl' (acc: name:
           acc
@@ -216,6 +225,7 @@ in {
       environment = {
         HOME = config.users.users.${userName}.home;
         XDG_RUNTIME_DIR = runtimeDir;
+        BOLO_MANIFEST = "${manifestFile}";
         WAYLAND_DISPLAY = "tomoe-0";
         DBUS_SESSION_BUS_ADDRESS = "unix:path=${runtimeDir}/tomoe.tomoe-0.bus";
       };
