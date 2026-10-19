@@ -23,6 +23,7 @@
         defaultProvider = "vercel-ai-gateway";
         defaultModel = "deepseek/deepseek-v4.1-flash-1017";
         defaultThinkingLevel = "xhigh";
+        messages.whenBusy = "steer";
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
         fusion.opus-sol = {
           lead = "anthropic/claude-opus-5-5";
