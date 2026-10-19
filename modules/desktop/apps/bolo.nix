@@ -57,6 +57,19 @@
     hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
   };
 
+  # NVIDIA's parakeet-unified, exported by sherpa-onnx for streaming with
+  # 1.12 s of lookahead: it decodes while you speak and only ever appends, at
+  # 1.78 LibriSpeech-clean WER against 1.63 offline.
+  streamingModel = pkgs.runCommand "parakeet-unified-en-0.6b-streaming-1120ms" {
+    src = pkgs.fetchurl {
+      url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-unified-en-0.6b-int8-streaming-1120ms.tar.bz2";
+      hash = "sha256-R4gimm3QO+M/gkPM7kjjOo0V33tEjLmRULDM3dGwLXQ=";
+    };
+  } ''
+    mkdir -p $out
+    ${pkgs.bzip2}/bin/bunzip2 -c $src | ${pkgs.gnutar}/bin/tar -x --strip-components=1 -C $out
+  '';
+
   # The spotter's keyword file: BPE units, one keyword per line.
   keywords = pkgs.writeText "bolo-keywords.txt" "▁JA R VI S\n";
 
@@ -122,12 +135,27 @@ in {
         {
           ".config/bolo/manifest.json".source = pkgs.writeText "bolo-manifest" (builtins.toJSON {
             version = 1;
-            active = "parakeet-v3-int8";
+            active = "parakeet-unified";
             language = "en";
             provider = "cuda";
             threads = null;
-            pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool";
-            models = lib.mapAttrsToList (name: m:
+            # The Scarlett's input reaches bolo at around -28 dBFS peak; the
+            # recognizer hears that as near-silence.
+            gain = 6.0;
+            # Each line is one increment and becomes one `type` command, so
+            # dotool types it as it arrives; a single unterminated line would
+            # be typed only when the turn ends.
+            pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\n'; while IFS= read -r line || [ -n \"$line\" ]; do printf 'type %s\\n' \"$line\"; done; } | dotool";
+            models = [
+              {
+                name = "parakeet-unified";
+                engine = "sherpa-onnx-online-transducer";
+                encoder = "${streamingModel}/encoder.int8.onnx";
+                decoder = "${streamingModel}/decoder.int8.onnx";
+                joiner = "${streamingModel}/joiner.int8.onnx";
+                tokens = "${streamingModel}/tokens.txt";
+              }
+            ] ++ lib.mapAttrsToList (name: m:
               {
                 inherit name;
                 inherit (m) engine;
