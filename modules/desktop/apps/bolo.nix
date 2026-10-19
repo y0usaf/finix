@@ -269,7 +269,7 @@ in {
         (declare (ignore snapshot))
         (values state
                 (list (bind-key (list :alt) "m"
-                                :press :release :release :description "Push-to-talk speech-to-text (bolo)"))
+                                :press :description "Toggle speech-to-text (bolo)"))
                 (when (and (eq (getf event :type) :key) (equal (getf event :owner) "bolo"))
                   (list (launch "${bolo}/bin/bolo")))))
 
