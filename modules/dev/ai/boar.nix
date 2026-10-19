@@ -72,6 +72,31 @@
           };
         }
       ];
+      value.providers.openrouter.models = [
+        {
+          id = "inception/mercury-3";
+          name = "Inception: Mercury 3";
+          contextWindow = 1000000;
+          maxTokens = 131072;
+          input = ["text"];
+          reasoning = true;
+          cost = {
+            input = 0.1;
+            output = 0.35;
+            cacheRead = 0.01;
+            cacheWrite = 0;
+          };
+          thinkingLevelMap = {
+            off = null;
+            minimal = null;
+            low = "low";
+            medium = "medium";
+            high = "high";
+            xhigh = null;
+            max = null;
+          };
+        }
+      ];
     };
     "${dir}/mcp.json" = {
       generator = lib.generators.toJSON {};
