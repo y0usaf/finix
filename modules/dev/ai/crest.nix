@@ -15,5 +15,6 @@ in {
     crest.crest-agent
     crest.crest-cell
     crest.ouro
+    crest.jev-review
   ];
 }
