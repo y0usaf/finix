@@ -16,7 +16,7 @@
           concurrency = -1;
           roles = {
             scout = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
-            ship = "openai-codex/gpt-6.1-sol";
+            ship = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
           };
           defaultRole = "scout";
         };
