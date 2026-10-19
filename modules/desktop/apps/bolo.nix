@@ -58,19 +58,32 @@
     hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
   };
 
-  # NVIDIA's parakeet-unified, exported by sherpa-onnx for streaming with
-  # 1.12 s of lookahead: it decodes while you speak and only ever appends, at
-  # 1.78 LibriSpeech-clean WER against 1.63 offline.
-  streamingModel =
-    pkgs.runCommand "parakeet-unified-en-0.6b-streaming-1120ms" {
-      src = pkgs.fetchurl {
-        url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-unified-en-0.6b-int8-streaming-1120ms.tar.bz2";
-        hash = "sha256-R4gimm3QO+M/gkPM7kjjOo0V33tEjLmRULDM3dGwLXQ=";
-      };
-    } ''
-      mkdir -p $out
-      ${pkgs.bzip2}/bin/bunzip2 -c $src | ${pkgs.gnutar}/bin/tar -x --strip-components=1 -C $out
+  # NVIDIA's parakeet-unified, streaming with 0.56 s of latency (0.16 s chunk,
+  # 0.40 s lookahead): it decodes while you speak and only ever appends, at
+  # 6.52 mean Open ASR WER against 6.29 at 1.12 s and 5.91 offline.
+  #
+  # fp32, not sherpa-onnx's published int8: onnxruntime's CUDA provider lacks
+  # the int8 matmul kernels, so the int8 encoder ran on the CPU and decoded
+  # 16.7 s of speech in 14.6 s at this latency; fp32 on the GPU takes 1.4 s.
+  # sherpa publishes no fp32 build, so it is generated and added by hand.
+  streamingModel = pkgs.requireFile {
+    name = "parakeet-unified-en-0.6b-streaming-560ms-fp32";
+    hashMode = "recursive";
+    hash = "sha256-0eL8XTQFjHBR33yP5/CFZJnkKcH19byvElBDR2HXnQE=";
+    message = ''
+      The fp32 streaming export of nvidia/parakeet-unified-en-0.6b is not in
+      the store. In a Python env with nemo_toolkit[asr], onnx, onnxruntime:
+
+        curl -LO https://huggingface.co/nvidia/parakeet-unified-en-0.6b/resolve/main/parakeet-unified-en-0.6b.nemo
+        curl -LO https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/scripts/nemo/parakeet-unified-en-0.6b/export_onnx_streaming.py
+        python export_onnx_streaming.py --latency 560ms
+        mkdir parakeet-unified-en-0.6b-streaming-560ms-fp32
+        cp encoder.onnx encoder.weights decoder.onnx joiner.onnx tokens.txt parakeet-unified-en-0.6b-streaming-560ms-fp32/
+        nix-store --add-fixed --recursive sha256 parakeet-unified-en-0.6b-streaming-560ms-fp32
+
+      An export is not byte-reproducible; update the hash to the new path's.
     '';
+  };
 
   # The spotter's keyword file: BPE units, one keyword per line.
   keywords = pkgs.writeText "bolo-keywords.txt" "▁JA R VI S\n";
@@ -96,9 +109,9 @@
         {
           name = "parakeet-unified";
           engine = "sherpa-onnx-online-transducer";
-          encoder = "${streamingModel}/encoder.int8.onnx";
-          decoder = "${streamingModel}/decoder.int8.onnx";
-          joiner = "${streamingModel}/joiner.int8.onnx";
+          encoder = "${streamingModel}/encoder.onnx";
+          decoder = "${streamingModel}/decoder.onnx";
+          joiner = "${streamingModel}/joiner.onnx";
           tokens = "${streamingModel}/tokens.txt";
         }
       ]
