@@ -104,6 +104,10 @@
         command = lib.getExe flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.donsetch;
         args = ["mcp"];
       };
+      value.mcpServers.jev = {
+        command = "${pkgs.nodejs}/bin/node";
+        args = ["${./jev-mcp.mjs}"];
+      };
     };
   };
 in {
