@@ -15,15 +15,15 @@
         subagents = {
           concurrency = -1;
           roles = {
-            scout = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-fast";
-            ship = "anthropic/claude-opus-5-5";
+            scout = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
+            ship = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
           };
           defaultRole = "scout";
         };
-        defaultProvider = "anthropic";
-        defaultModel = "claude-opus-5-5";
+        defaultProvider = "vercel-ai-gateway";
+        defaultModel = "deepseek/deepseek-v4.1-flash-1017";
         defaultThinkingLevel = "xhigh";
-        memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-fast";
+        memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
         fusion.opus-sol = {
           lead = "anthropic/claude-opus-5-5";
           sidekick = "openai-codex/gpt-6.1-sol";
@@ -38,6 +38,39 @@
           quit = ["ctrl+shift+d"];
         };
       };
+    };
+    "${dir}/models.json" = {
+      generator = lib.generators.toJSON {};
+      value.providers.vercel-ai-gateway.models = [
+        {
+          id = "deepseek/deepseek-v4.1-flash-1017";
+          name = "DeepSeek V4.1 Flash 1017";
+          contextWindow = 1048576;
+          maxTokens = 32768;
+          input = ["text" "image"];
+          reasoning = true;
+          cost = {
+            input = 0.075;
+            output = 0.3;
+            cacheRead = 0.0015;
+            cacheWrite = 0;
+          };
+        }
+        {
+          id = "deepseek/deepseek-v4.1-flash-1017-fast";
+          name = "DeepSeek V4.1 Flash 1017 Fast";
+          contextWindow = 1048576;
+          maxTokens = 32768;
+          input = ["text" "image"];
+          reasoning = true;
+          cost = {
+            input = 0.6;
+            output = 2.4;
+            cacheRead = 0.014;
+            cacheWrite = 0;
+          };
+        }
+      ];
     };
     "${dir}/mcp.json" = {
       generator = lib.generators.toJSON {};
