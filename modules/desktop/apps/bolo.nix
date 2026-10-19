@@ -222,6 +222,9 @@ in {
     finit.services.bolod = {
       description = "bolo speech-to-text daemon (${userName})";
       user = userName;
+      # bolod reads its manifest once at startup and has no SIGHUP handler, so
+      # a reconfiguration must stop and start it rather than signal it.
+      reload-signal = "none";
       environment = {
         HOME = config.users.users.${userName}.home;
         XDG_RUNTIME_DIR = runtimeDir;
