@@ -58,28 +58,32 @@
     hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
   };
 
-  # NVIDIA's parakeet-unified, streaming with 0.56 s of latency (0.16 s chunk,
-  # 0.40 s lookahead): it decodes while you speak and only ever appends, at
-  # 6.52 mean Open ASR WER against 6.29 at 1.12 s and 5.91 offline.
+  # NVIDIA's parakeet-unified, streaming with 0.32 s of latency (0.08 s chunk,
+  # 0.24 s lookahead): it decodes while you speak and only ever appends, at
+  # 6.92 mean Open ASR WER against 6.52 at 0.56 s and 5.91 offline. A word
+  # appears a median 0.22 s after it ends, against 0.50 s at 0.56 s latency.
+  # 0.24 s gains 0.04 s for 7.35 WER and twice the decode work.
   #
   # fp32, not sherpa-onnx's published int8: onnxruntime's CUDA provider lacks
   # the int8 matmul kernels, so the int8 encoder ran on the CPU and decoded
   # 16.7 s of speech in 14.6 s at this latency; fp32 on the GPU takes 1.4 s.
   # sherpa publishes no fp32 build, so it is generated and added by hand.
   streamingModel = pkgs.requireFile {
-    name = "parakeet-unified-en-0.6b-streaming-560ms-fp32";
+    name = "parakeet-unified-en-0.6b-streaming-320ms-fp32";
     hashMode = "recursive";
-    hash = "sha256-0eL8XTQFjHBR33yP5/CFZJnkKcH19byvElBDR2HXnQE=";
+    hash = "sha256-WNF98/EvTK8+Q2rhZVr3cYAt1va8UdkLdxJAilv1LoQ=";
     message = ''
       The fp32 streaming export of nvidia/parakeet-unified-en-0.6b is not in
       the store. In a Python env with nemo_toolkit[asr], onnx, onnxruntime:
 
         curl -LO https://huggingface.co/nvidia/parakeet-unified-en-0.6b/resolve/main/parakeet-unified-en-0.6b.nemo
         curl -LO https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/scripts/nemo/parakeet-unified-en-0.6b/export_onnx_streaming.py
-        python export_onnx_streaming.py --latency 560ms
-        mkdir parakeet-unified-en-0.6b-streaming-560ms-fp32
-        cp encoder.onnx encoder.weights decoder.onnx joiner.onnx tokens.txt parakeet-unified-en-0.6b-streaming-560ms-fp32/
-        nix-store --add-fixed --recursive sha256 parakeet-unified-en-0.6b-streaming-560ms-fp32
+        # The script has no 320ms preset; add it to LATENCY_PRESETS:
+        #   "320ms": {"left": 70, "chunk": 1, "right": 3},
+        python export_onnx_streaming.py --latency 320ms
+        mkdir parakeet-unified-en-0.6b-streaming-320ms-fp32
+        cp encoder.onnx encoder.weights decoder.onnx joiner.onnx tokens.txt parakeet-unified-en-0.6b-streaming-320ms-fp32/
+        nix-store --add-fixed --recursive sha256 parakeet-unified-en-0.6b-streaming-320ms-fp32
 
       An export is not byte-reproducible; update the hash to the new path's.
     '';
