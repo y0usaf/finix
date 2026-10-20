@@ -15,13 +15,13 @@
         subagents = {
           concurrency = -1;
           roles = {
-            scout = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
-            ship = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
+            scout = "openrouter/inception/mercury-3";
+            ship = "openrouter/inception/mercury-3";
           };
           defaultRole = "scout";
         };
-        defaultProvider = "vercel-ai-gateway";
-        defaultModel = "deepseek/deepseek-v4.1-flash-1017";
+        defaultProvider = "anthropic";
+        defaultModel = "claude-opus-5-5";
         defaultThinkingLevel = "xhigh";
         messages.whenBusy = "steer";
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
