@@ -15,8 +15,8 @@
         subagents = {
           concurrency = -1;
           roles = {
-            scout = "openrouter/inception/mercury-3";
-            ship = "openrouter/inception/mercury-3";
+            scout = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
+            ship = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
           };
           defaultRole = "scout";
         };
