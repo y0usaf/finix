@@ -49,7 +49,7 @@
     };
 
     crest = {
-      url = "git+ssh://git@github.com/y0usaf/crest.git";
+      url = "git+ssh://git@github.com/sylvarant-ai/crest.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

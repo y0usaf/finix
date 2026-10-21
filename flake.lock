@@ -266,17 +266,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1792546106,
-        "narHash": "sha256-C7Uva2llFCxNfyVFMqKKZQMfYBAGZ+iOEv/aH5kX1Co=",
+        "lastModified": 1792582105,
+        "narHash": "sha256-evzcgDCzUrydOkPOZfKusU3R68CVDhf/zaZSwQ+Aj7s=",
         "ref": "refs/heads/main",
-        "rev": "fb9f877aa8ea792e895004caa2cdbd38abac8216",
-        "revCount": 979,
+        "rev": "35fafcfe7afc590e6b1ee51a7084d495a6e0854f",
+        "revCount": 1004,
         "type": "git",
-        "url": "ssh://git@github.com/y0usaf/crest.git"
+        "url": "ssh://git@github.com/sylvarant-ai/crest.git"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@github.com/y0usaf/crest.git"
+        "url": "ssh://git@github.com/sylvarant-ai/crest.git"
       }
     },
     "cudaterm": {
