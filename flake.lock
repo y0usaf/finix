@@ -266,11 +266,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792545116,
-        "narHash": "sha256-27R9bRhM8JCofwGqUxUccAQeYMt0nZ/wgEpZOJ8ixHM=",
+        "lastModified": 1792546106,
+        "narHash": "sha256-C7Uva2llFCxNfyVFMqKKZQMfYBAGZ+iOEv/aH5kX1Co=",
         "ref": "refs/heads/main",
-        "rev": "3a613f6bc432408186d5c453339128bcdfac889a",
-        "revCount": 976,
+        "rev": "fb9f877aa8ea792e895004caa2cdbd38abac8216",
+        "revCount": 979,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/crest.git"
       },
@@ -1376,6 +1376,22 @@
         "type": "github"
       }
     },
+    "pi-ampersand": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792548795,
+        "narHash": "sha256-9EPAlF1wtbwfXkRtT73uaaZIg6/WEkZaaMxZ6LoGss0=",
+        "owner": "y0usaf",
+        "repo": "pi-ampersand",
+        "rev": "7893ced32b2d4ee740c9a6c5634a3b99c6f5b65e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "pi-ampersand",
+        "type": "github"
+      }
+    },
     "pi-chronobreak": {
       "flake": false,
       "locked": {
@@ -1526,6 +1542,7 @@
         "phi": "phi",
         "pi": "pi",
         "pi-accounts": "pi-accounts",
+        "pi-ampersand": "pi-ampersand",
         "pi-chronobreak": "pi-chronobreak",
         "pi-donsetch": "pi-donsetch",
         "pi-harness": "pi-harness",
