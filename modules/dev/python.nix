@@ -30,8 +30,8 @@ in {
       PYTHONUSERBASE = "${homeDirectory}/.local/share/python";
       PIP_CACHE_DIR = "${homeDirectory}/.cache/pip";
       VIRTUAL_ENV_HOME = "${homeDirectory}/.local/share/venvs";
-      SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
-      REQUESTS_CA_BUNDLE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      SSL_CERT_FILE = config.security.pki.caBundle;
+      REQUESTS_CA_BUNDLE = config.security.pki.caBundle;
       NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [
         pkgs.stdenv.cc.cc.lib
         pkgs.zlib

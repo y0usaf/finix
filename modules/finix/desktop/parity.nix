@@ -69,7 +69,6 @@
     etc."modprobe.d/v4l2loopback.conf".text = ''
       options v4l2loopback exclusive_caps=1
     '';
-    etc."ssl/certs/ca-certificates.crt".source = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
   };
 
   users.groups = {
