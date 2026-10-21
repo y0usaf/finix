@@ -138,6 +138,11 @@
       flake = false;
     };
 
+    pi-ampersand = {
+      url = "github:y0usaf/pi-ampersand";
+      flake = false;
+    };
+
     pi-donsetch = {
       url = "github:y0usaf/pi-donsetch";
       inputs.nixpkgs.follows = "nixpkgs";

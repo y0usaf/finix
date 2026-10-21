@@ -118,6 +118,7 @@ in {
             "${flakeInputs.pi-rlm}"
             "${flakeInputs.pi-recap}"
             "${flakeInputs.pi-accounts}"
+            "${flakeInputs.pi-ampersand}"
             "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
           ];
           enableInstallTelemetry = false;
