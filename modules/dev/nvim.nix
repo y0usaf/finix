@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  flakeInputs,
   ...
 }: {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
@@ -43,6 +44,7 @@
             pkgs.vimPlugins.lualine-nvim
             pkgs.vimPlugins.cyberdream-nvim
             pkgs.vimPlugins.toggleterm-nvim
+            flakeInputs.crest.packages.${pkgs.stdenv.hostPlatform.system}.crest-nvim
           ];
           opt = [];
         };
