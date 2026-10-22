@@ -51,11 +51,13 @@ inputs: let
               else pkgs;
           }
           inputs.finix.nixosModules.bash
+          inputs.finix.nixosModules.chronyd
           inputs.finix.nixosModules.dhcpcd
           inputs.finix.nixosModules.getty
           inputs.finix.nixosModules.openssh
           ./finix/sudo.nix
           inputs.finix.nixosModules.sysklogd
+          ./finix/chrony.nix
           ./finix/common.nix
           ./finix/emudhra-distrust.nix
           ./finix/persist-order.nix
