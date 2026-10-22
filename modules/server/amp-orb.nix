@@ -4,8 +4,12 @@
   ...
 }: let
   home = "/var/lib/amp-orb";
-  runtimeDir = "/run/amp-orb";
   tokenFile = "${home}/provider-token";
+  env = {
+    HOME = home;
+    XDG_RUNTIME_DIR = "/run/amp-orb";
+    TMPDIR = "${home}/tmp";
+  };
   podman = lib.getExe pkgs.podman;
 
   dispatch = pkgs.writeShellScript "amp-orb-dispatch" ''
@@ -13,7 +17,7 @@
     case "$ORB_OPERATION" in
       spawn)
         ${podman} container exists "$ORB_ID" ||
-          ${podman} create --init --pull newer --name "$ORB_ID" "$ORB_IMAGE" sleep infinity >/dev/null
+          ${podman} create --quiet --init --pull newer --name "$ORB_ID" "$ORB_IMAGE" sleep infinity >/dev/null
         ${podman} start "$ORB_ID" >/dev/null
         ${podman} exec --detach --env ORB_TOKEN ''${AMP_URL:+--env AMP_URL} "$ORB_ID" amp orb bootstrap >/dev/null
         ;;
@@ -52,7 +56,8 @@ in {
 
     systemPackages = [
       (pkgs.writeShellScriptBin "amp-orb-podman" ''
-        exec sudo -u amp-orb HOME=${home} XDG_RUNTIME_DIR=${runtimeDir} PATH=/run/wrappers/bin ${podman} "$@"
+        cd /
+        exec sudo -u amp-orb ${lib.concatStringsSep " " (lib.mapAttrsToList (n: v: "${n}=${v}") env)} PATH=/run/wrappers/bin ${podman} "$@"
       '')
     ];
   };
@@ -67,17 +72,15 @@ in {
   finit = {
     tmpfiles.rules = [
       "d /persist${home} 0700 amp-orb amp-orb"
-      "d ${runtimeDir} 0700 amp-orb amp-orb"
+      "d ${env.XDG_RUNTIME_DIR} 0700 amp-orb amp-orb"
+      "d ${env.TMPDIR} 0700 amp-orb amp-orb"
     ];
 
     services.amp-orb = {
       description = "Amp self-hosted orb provider";
       user = "amp-orb";
       group = "amp-orb";
-      environment = {
-        HOME = home;
-        XDG_RUNTIME_DIR = runtimeDir;
-      };
+      environment = env;
       path = [pkgs.coreutils pkgs.util-linux "/run/wrappers"];
       command = pkgs.writeShellScript "amp-orb-provider" ''
         set -eu
