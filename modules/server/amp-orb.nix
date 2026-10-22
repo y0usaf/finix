@@ -10,19 +10,27 @@
     XDG_RUNTIME_DIR = "/run/amp-orb";
     TMPDIR = "${home}/tmp";
   };
-  podman = lib.getExe pkgs.podman;
+  podman = "${lib.getExe pkgs.podman} --log-level=error";
 
   dispatch = pkgs.writeShellScript "amp-orb-dispatch" ''
     set -eu
     case "$ORB_OPERATION" in
       spawn)
-        ${podman} container exists "$ORB_ID" ||
-          ${podman} create --quiet --init --pull newer --name "$ORB_ID" "$ORB_IMAGE" sleep infinity >/dev/null
+        if ! ${podman} container exists "$ORB_ID"; then
+          image=$ORB_IMAGE pull=newer
+          if [ -n "''${ORB_SNAPSHOT_ID-}" ] && ${podman} image exists "$ORB_SNAPSHOT_ID"; then
+            image=$ORB_SNAPSHOT_ID pull=never
+          fi
+          ${podman} create --quiet --init --pull "$pull" --name "$ORB_ID" "$image" sleep infinity >/dev/null
+        fi
         ${podman} start "$ORB_ID" >/dev/null
         ${podman} exec --detach --env ORB_TOKEN ''${AMP_URL:+--env AMP_URL} "$ORB_ID" amp orb bootstrap >/dev/null
         ;;
       pause)
         ${podman} stop --ignore "$ORB_ID" >/dev/null
+        if [ -n "''${ORB_SNAPSHOT_ID-}" ]; then
+          ${podman} commit --quiet "$ORB_ID" "$ORB_SNAPSHOT_ID" >/dev/null
+        fi
         ;;
       delete)
         ${podman} rm --force --ignore "$ORB_ID" >/dev/null
