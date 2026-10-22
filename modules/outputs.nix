@@ -91,6 +91,7 @@ inputs: let
         ./hosts/y0usaf-server/hardware-config.nix
         ./hosts/y0usaf-server/boot.nix
         ./server/attic.nix
+        ./server/amp-orb.nix
         ./server/packages.nix
         ./finix/diagnostics.nix
         inputs.manzil.finixModules.default
@@ -112,6 +113,7 @@ inputs: let
           inputs.finix.nixosModules.limine
           ./finix/diagnostics.nix
           ./finix/static-net.nix
+          ./server/amp-orb.nix
           inputs.manzil.finixModules.default
         ]
         ++ graphicalModules
