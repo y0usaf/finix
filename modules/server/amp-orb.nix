@@ -96,7 +96,6 @@ in {
         export AMP_ORB_PROVIDER_TOKEN
         exec ${lib.getExe pkgs.amp-cli} orb provider ${dispatch}
       '';
-      conditions = ["net/route/default"];
       nohup = true;
       log = true;
     };
