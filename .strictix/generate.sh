@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 emit() {
   nix eval --impure --json --expr "
     let
-      f = builtins.getFlake (toString ./.);
+      f = builtins.getFlake (\"git+file://\" + toString ./.);
       lib = f.inputs.nixpkgs.lib;
       docs = $1;
     in {
