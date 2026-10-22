@@ -266,11 +266,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792634123,
-        "narHash": "sha256-hKteGjOd+n3D0QirYlhq/QOjLZOfFMbajXsEJx72xHs=",
+        "lastModified": 1792634603,
+        "narHash": "sha256-HlaiKX7zsgi33OIBhWiPGbjBs4V+EDZOMH5fhHJfL+4=",
         "ref": "refs/heads/main",
-        "rev": "a07c87542f8d57cd82e7451a7094cecba78a2f84",
-        "revCount": 1008,
+        "rev": "5c4b2b3ebe96d568529c3ab68e20912b6b541fbc",
+        "revCount": 1009,
         "type": "git",
         "url": "ssh://git@github.com/sylvarant-ai/crest.git"
       },
