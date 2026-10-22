@@ -13,6 +13,7 @@ in {
   environment.systemPackages = [
     crest.crest-cli
     crest.crest-auth
+    crest.crest-web
     crest.crest-agent
     crest.crest-cell
     crest.guild
