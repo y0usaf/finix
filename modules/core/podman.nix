@@ -32,4 +32,6 @@
       mode = "0644";
     };
   };
+
+  services.mdevd.hotplugRules = "net/tun 0:0 666";
 }
