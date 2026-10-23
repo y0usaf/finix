@@ -46,6 +46,38 @@ in {
               cacheWrite = 0;
             };
           }
+          {
+            id = "moonshotai/kimi-k3.1-pro";
+            name = "Kimi K3.1 Pro";
+            api = "anthropic-messages";
+            reasoning = true;
+            input = ["text" "image"];
+            compat.allowEmptySignature = true;
+            contextWindow = 1000000;
+            maxTokens = 131072;
+            cost = {
+              input = 2;
+              output = 10;
+              cacheRead = 0.2;
+              cacheWrite = 0;
+            };
+          }
+          {
+            id = "moonshotai/kimi-k3.1-pro-highspeed";
+            name = "Kimi K3.1 Pro High Speed";
+            api = "anthropic-messages";
+            reasoning = true;
+            input = ["text" "image"];
+            compat.allowEmptySignature = true;
+            contextWindow = 1000000;
+            maxTokens = 131072;
+            cost = {
+              input = 4;
+              output = 20;
+              cacheRead = 0.2;
+              cacheWrite = 0;
+            };
+          }
         ];
 
         providers.celeris = {
