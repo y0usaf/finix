@@ -580,11 +580,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792759782,
-        "narHash": "sha256-CKLzRzRJJKbTvhGDVKr8ruqrzm0GTocwapJcapf/Sck=",
+        "lastModified": 1792760913,
+        "narHash": "sha256-H72MUeKbMDNiXStd11JFnCRmeLevN5RYdI2S+HxHxlE=",
         "owner": "y0usaf",
         "repo": "fonts",
-        "rev": "9ad48e3a6b73bcabe548b37c62aa4ce6e32230e4",
+        "rev": "7325a6ee4653144a67d224230e897d922e2a8b95",
         "type": "github"
       },
       "original": {
