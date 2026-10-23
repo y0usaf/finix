@@ -19,6 +19,11 @@
       - **Least code.** Prefer deletion to addition. Abstract on the third need.
       - **Least power.** Lowest rung that works on any machine: constant <
         data < config < pure function < code with I/O or state.
+      - **Deterministic first.** What code can decide (lifecycle, cleanup,
+        routing, retries) is a state machine or a rule, not an agent call.
+        Spend model calls only on judgment.
+      - **Small engine, rich surface.** Few tools, commands and flags in the
+        machinery; play and polish belong in the UI, not the engine.
       - **No hardcoding.** A value that could differ by machine or user is
         discovered or read from config, and set in one place.
       - **Least deps.** Take a dependency only for knowledge you'd otherwise
