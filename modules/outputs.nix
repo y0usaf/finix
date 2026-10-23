@@ -109,6 +109,7 @@ inputs: let
       cudaSupport = true;
       modules =
         [
+          inputs.finix.nixosModules.cron
           inputs.finix.nixosModules.networkmanager
           inputs.finix.nixosModules.nix-daemon
           inputs.finix.nixosModules.nftables

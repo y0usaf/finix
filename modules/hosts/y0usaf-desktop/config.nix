@@ -12,6 +12,26 @@
   ];
 
   environment.etc."finix-stage2".text = "desktop-phase2.4\n";
+  environment.systemPackages = [pkgs.btrbk];
+
+  finit.tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
+
+  providers.scheduler = {
+    backend = "cron";
+    tasks.btrbk-snapshots = {
+      interval = "hourly";
+      command = "${lib.getExe pkgs.btrbk} -q -c ${pkgs.writeText "btrbk.conf" ''
+        timestamp_format long
+        snapshot_preserve_min 1d
+        snapshot_preserve 48h 14d 4w
+
+        volume /btrfs
+          snapshot_dir _snapshots
+          subvolume @persist
+          subvolume @dev
+      ''} run";
+    };
+  };
 
   services = {
     nftables.tables = {
@@ -38,6 +58,7 @@
       };
     };
     sysklogd.extraConfig = "*.* @192.168.2.66:514";
+    cron.enable = true;
     networkmanager.settings.keyfile.unmanaged-devices = "interface-name:wlp96s0";
   };
 
