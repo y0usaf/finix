@@ -42,7 +42,23 @@
     };
     "${dir}/models.json" = {
       generator = lib.generators.toJSON {};
+      value.providers.vercel-ai-gateway.apiKey = "!cat ${config.users.users.${config.user.name}.home}/Tokens/AI_GATEWAY_API_KEY.txt";
       value.providers.vercel-ai-gateway.models = [
+        {
+          id = "moonshotai/kimi-k3.1-pro";
+          name = "Kimi K3.1 Pro";
+          contextWindow = 1048576;
+          maxTokens = 1048576;
+          input = ["text" "image"];
+          reasoning = true;
+          compat.allowEmptySignature = true;
+          cost = {
+            input = 2;
+            output = 10;
+            cacheRead = 0.2;
+            cacheWrite = 0;
+          };
+        }
         {
           id = "deepseek/deepseek-v4.1-flash-1017";
           name = "DeepSeek V4.1 Flash 1017";
