@@ -17,6 +17,7 @@ in {
     crest.crest-agent
     crest.crest-cell
     crest.crest-map
+    crest.crest-mcp
     crest.guild
     crest.ouro
     crest.jev-review
