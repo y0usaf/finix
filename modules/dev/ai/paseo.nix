@@ -42,7 +42,10 @@ in {
   config = {
     environment.systemPackages = [flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default];
 
-    finix.persistence.homeServices = ["paseo"];
+    finix.persistence = {
+      homeServices = ["paseo"];
+      allowlist.users.${config.user.name}.directories = [".paseo"];
+    };
 
     finit.services.paseo = {
       description = "Paseo - self-hosted daemon for AI coding agents";

@@ -19,6 +19,12 @@ in {
   };
 
   config = {
+    finix.persistence.allowlist.users.${config.user.name}.directories = [
+      ".config/dconf"
+      ".local/share/applications"
+      ".local/share/icons"
+    ];
+
     environment = {
       systemPackages = [
         pkgs.gtk3

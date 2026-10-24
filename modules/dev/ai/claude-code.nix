@@ -19,6 +19,8 @@ in {
     skipDangerousModePermissionPrompt = true;
   };
 
+  finix.persistence.allowlist.users.${config.user.name}.directories = [".config/claude"];
+
   environment.systemPackages = [
     (pkgs.writeShellScriptBin "claude" ''
       exec ${lib.getExe pkgs.claude-code} \

@@ -168,8 +168,10 @@ in {
   finix.persistence.allowlist.users.${userName}.directories = [
     ".config/glide"
     ".cache/librewolf"
+    ".config/firefox"
     ".config/librewolf"
     ".librewolf"
+    ".mozilla"
   ];
   environment.systemPackages = [
     (librewolfPkgs.librewolf-bin.override {
