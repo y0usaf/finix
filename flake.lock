@@ -317,40 +317,6 @@
         "type": "github"
       }
     },
-    "deno2nix": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1771449470,
-        "narHash": "sha256-ZGKHKRB7K5aUIyJenXwOcX21F2yTXLa19q3YXQM3E48=",
-        "owner": "aMOPel",
-        "repo": "deno2nix",
-        "rev": "adb4dcea663cd61c19e01c8c36dd73db4af358a5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "aMOPel",
-        "ref": "custom-made-fetcher",
-        "repo": "deno2nix",
-        "type": "github"
-      }
-    },
-    "deno2nix_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1771449470,
-        "narHash": "sha256-ZGKHKRB7K5aUIyJenXwOcX21F2yTXLa19q3YXQM3E48=",
-        "owner": "aMOPel",
-        "repo": "deno2nix",
-        "rev": "adb4dcea663cd61c19e01c8c36dd73db4af358a5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "aMOPel",
-        "ref": "custom-made-fetcher",
-        "repo": "deno2nix",
-        "type": "github"
-      }
-    },
     "durapi": {
       "inputs": {
         "nixpkgs": [
@@ -717,17 +683,16 @@
     },
     "linear-cli": {
       "inputs": {
-        "deno2nix": "deno2nix_2",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1790430553,
-        "narHash": "sha256-X3Edg86oyGjQsNWUJo1obbmxzAnWkoUWSUgAJze7clM=",
+        "lastModified": 1792462431,
+        "narHash": "sha256-dPp0QJS16EJqT1PbfNA38SfT8PS9Xj+isuGWIcVfX2Q=",
         "owner": "y0usaf",
         "repo": "linear-cli",
-        "rev": "86440655279ca38336a208f77165c3f482e51d7d",
+        "rev": "07f74e74cb1b79e3992702f1ef9c3ce116551347",
         "type": "github"
       },
       "original": {
@@ -1514,7 +1479,6 @@
         "crest": "crest",
         "cudaterm": "cudaterm",
         "cursors": "cursors",
-        "deno2nix": "deno2nix",
         "durapi": "durapi",
         "ekko": "ekko",
         "emeraldian": "emeraldian",
