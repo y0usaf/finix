@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  host = config.user.dev.prompts.host;
+  inherit (config.user.dev.prompts) host;
 in {
   options.user.dev.prompts = {
     host = lib.mkOption {

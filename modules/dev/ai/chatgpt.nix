@@ -14,37 +14,37 @@
     };
 
     nativeBuildInputs = [pkgs.dpkg pkgs.autoPatchelfHook pkgs.makeWrapper];
-    buildInputs = with pkgs; [
-      alsa-lib
-      at-spi2-core
-      cairo
-      cups
-      dbus
-      expat
-      glib
-      gtk3
-      libdrm
-      libgbm
-      libglvnd
-      libnotify
-      libusb1
-      libx11
-      libxcb
-      libxcomposite
-      libxdamage
-      libxext
-      libxfixes
-      libxkbcommon
-      libxrandr
-      nspr
-      nss
-      openssl
-      pango
-      stdenv.cc.cc.lib
-      tpm2-tss
-      udev
+    buildInputs = [
+      pkgs.alsa-lib
+      pkgs.at-spi2-core
+      pkgs.cairo
+      pkgs.cups
+      pkgs.dbus
+      pkgs.expat
+      pkgs.glib
+      pkgs.gtk3
+      pkgs.libdrm
+      pkgs.libgbm
+      pkgs.libglvnd
+      pkgs.libnotify
+      pkgs.libusb1
+      pkgs.libx11
+      pkgs.libxcb
+      pkgs.libxcomposite
+      pkgs.libxdamage
+      pkgs.libxext
+      pkgs.libxfixes
+      pkgs.libxkbcommon
+      pkgs.libxrandr
+      pkgs.nspr
+      pkgs.nss
+      pkgs.openssl
+      pkgs.pango
+      pkgs.stdenv.cc.cc.lib
+      pkgs.tpm2-tss
+      pkgs.udev
     ];
-    runtimeDependencies = with pkgs; [libnotify libsecret libpulseaudio wayland];
+    runtimeDependencies = [pkgs.libnotify pkgs.libsecret pkgs.libpulseaudio pkgs.wayland];
 
     unpackPhase = ''
       runHook preUnpack

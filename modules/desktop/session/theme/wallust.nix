@@ -42,7 +42,7 @@
       (lib.importJSON ./colorschemes.json))
       // (lib.mapAttrs' (name: _:
         lib.nameValuePair ".config/wallust/templates/${name}" {
-          text = builtins.readFile ./templates/${name};
+          text = builtins.readFile (./templates + "/${name}");
         })
       (builtins.readDir ./templates))
       // {
