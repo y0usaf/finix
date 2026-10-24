@@ -61,6 +61,7 @@ inputs: let
           ./finix/common.nix
           ./finix/emudhra-distrust.nix
           ./finix/persist-order.nix
+          ./finix/persistence.nix
         ]
         ++ modules;
     };
@@ -77,47 +78,49 @@ inputs: let
     ./hosts/common
   ];
 
+  baseModules = [
+    inputs.finix.nixosModules.nix-daemon
+    inputs.finix.nixosModules.nftables
+    ./finix/diagnostics.nix
+    inputs.manzil.finixModules.default
+  ];
+
   hosts = {
     y0usaf-server = mkFinixSystem {
-      modules = [
-        inputs.finix.nixosModules.cron
-        inputs.finix.nixosModules.nftables
-        inputs.finix.nixosModules.postgresql
-        inputs.finix.nixosModules.nix-daemon
-        ./server/forgejo.nix
-        ./server/mediamtx.nix
-        ./server/syncthing.nix
-        ./hosts/y0usaf-server/config.nix
-        ./finix/tailscale.nix
-        ./finix/static-net.nix
-        ./hosts/y0usaf-server/hardware-config.nix
-        ./hosts/y0usaf-server/boot.nix
-        ./server/attic.nix
-        ./server/amp-orb.nix
-        ./server/packages.nix
-        ./finix/diagnostics.nix
-        inputs.manzil.finixModules.default
-        ./dev/ai/prompts/policy.nix
-        ./dev/ai/claude-code.nix
-        ./dev/ai/paseo.nix
-        ./tools/git.nix
-        ./tools/tmux.nix
-      ];
+      modules =
+        baseModules
+        ++ [
+          inputs.finix.nixosModules.cron
+          inputs.finix.nixosModules.postgresql
+          ./server/forgejo.nix
+          ./server/mediamtx.nix
+          ./server/syncthing.nix
+          ./hosts/y0usaf-server/config.nix
+          ./finix/tailscale.nix
+          ./finix/static-net.nix
+          ./hosts/y0usaf-server/hardware-config.nix
+          ./hosts/y0usaf-server/boot.nix
+          ./server/attic.nix
+          ./server/amp-orb.nix
+          ./server/packages.nix
+          ./dev/ai/prompts/policy.nix
+          ./dev/ai/claude-code.nix
+          ./dev/ai/paseo.nix
+          ./tools/git.nix
+          ./tools/tmux.nix
+        ];
     };
 
     y0usaf-desktop = mkFinixSystem {
       cudaSupport = true;
       modules =
-        [
+        baseModules
+        ++ [
           inputs.finix.nixosModules.cron
           inputs.finix.nixosModules.networkmanager
-          inputs.finix.nixosModules.nix-daemon
-          inputs.finix.nixosModules.nftables
           inputs.finix.nixosModules.limine
-          ./finix/diagnostics.nix
           ./finix/static-net.nix
           ./server/amp-orb.nix
-          inputs.manzil.finixModules.default
         ]
         ++ graphicalModules
         ++ nixFiles [./hosts/y0usaf-desktop];
@@ -125,17 +128,14 @@ inputs: let
 
     y0usaf-framework = mkFinixSystem {
       modules =
-        [
+        baseModules
+        ++ [
           inputs.finix.nixosModules.brightnessctl
           inputs.finix.nixosModules.docker
           inputs.finix.nixosModules.fwupd
           inputs.finix.nixosModules.networkmanager
-          inputs.finix.nixosModules.nftables
-          inputs.finix.nixosModules.nix-daemon
           inputs.finix.nixosModules.power-profiles-daemon
           inputs.finix.nixosModules.zzz
-          ./finix/diagnostics.nix
-          inputs.manzil.finixModules.default
         ]
         ++ graphicalModules
         ++ nixFiles [./hosts/y0usaf-framework];
@@ -251,12 +251,11 @@ in {
       defaultHost = "local";
     };
     finix-frame-deploy = import ./hosts/steam-frame/deploy.nix {inherit inputs pkgs;};
-    inherit (hosts.y0usaf-desktop.config.system.build) p4g-setup;
+    inherit (hosts.y0usaf-desktop.config.system.build) chatgpt p4g-setup;
     tomoe = inputs.tomoe.packages.${system}.default;
-    chatgpt = hosts.y0usaf-desktop.config.system.build.chatgpt;
   };
 
-  checks.${system}.y0usaf-desktop = hosts.y0usaf-desktop.config.system.build.toplevel;
+  checks.${system} = lib.mapAttrs' (name: host: lib.nameValuePair name host.config.system.build.toplevel) hosts;
 
   formatter.${system} = inputs.nixpkgs.legacyPackages.${system}.alejandra;
 }

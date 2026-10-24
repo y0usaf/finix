@@ -5,19 +5,17 @@
   ...
 }: let
   socket = "/run/tailscale/tailscaled.sock";
+  tailnet = import ../tailnet.nix;
 in {
   options.tailnet = {
     domain = lib.mkOption {
       type = lib.types.str;
-      default = "tail865e88.ts.net";
+      default = tailnet.domain;
       description = "MagicDNS suffix of the tailnet.";
     };
     addresses = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
-      default = {
-        y0usaf-server = "100.105.204.116";
-        y0usaf-desktop = "100.90.54.18";
-      };
+      default = tailnet.addresses;
       description = "Tailnet address of each machine, for the places that need an address rather than a name: rescue ssh, listen binds and hosts aliases.";
     };
   };

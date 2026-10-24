@@ -11,10 +11,15 @@
     "/var/lib/sbctl"
   ];
 
-  environment.etc."finix-stage2".text = "desktop-phase2.4\n";
   environment.systemPackages = [pkgs.btrbk];
 
-  finit.tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
+  finit = {
+    tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
+    services = {
+      nix-daemon.cgroup.settings."cpu.max" = 2400000;
+      nacre.cgroup.settings."cpu.max" = 800000;
+    };
+  };
 
   providers.scheduler = {
     backend = "cron";
@@ -62,10 +67,7 @@
     networkmanager.settings.keyfile.unmanaged-devices = "interface-name:wlp96s0";
   };
 
-  finit.services.nix-daemon.cgroup.settings."cpu.max" = 2400000;
-  finit.services.nacre.cgroup.settings."cpu.max" = 800000;
-
-  users.users.y0usaf.uid = 1001;
+  user.uid = 1001;
   users.users.root.passwordFile = "/persist/secrets/password-hashes/root";
 
   networking.staticFallback.address = "192.168.2.28/24";
@@ -97,6 +99,5 @@
         mods = ["camera" "movement" "rewards" "catch"];
       };
     };
-
   };
 }

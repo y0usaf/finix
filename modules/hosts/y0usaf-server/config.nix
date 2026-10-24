@@ -3,14 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  persistBind = dir: {
-    device = "/persist${dir}";
-    fsType = "btrfs";
-    options = ["bind"];
-    neededForBoot = true;
-  };
-in {
+}: {
   networking = {
     hostName = "y0usaf-server";
     staticFallback.address = "192.168.2.66/24";
@@ -21,17 +14,16 @@ in {
   };
 
   environment = {
-    etc."finix-stage2".text = "persistent\n";
     systemPackages = [pkgs.btrbk];
   };
 
-  fileSystems = {
-    "/var/log" = persistBind "/var/log";
-    "/var/lib/forgejo" = persistBind "/var/lib/forgejo";
-    "/var/lib/postgresql" = persistBind "/var/lib/postgresql";
-    "/var/lib/tailscale" = persistBind "/var/lib/tailscale";
-    "/var/lib/btrbk" = persistBind "/var/lib/btrbk";
-  };
+  finix.persistence.allowlist.directories = [
+    "/var/lib/btrbk"
+    "/var/lib/forgejo"
+    "/var/lib/postgresql"
+    "/var/lib/tailscale"
+    "/var/log"
+  ];
 
   boot.kernelModules = ["nf_tables"];
 

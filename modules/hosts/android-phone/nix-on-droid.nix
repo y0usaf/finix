@@ -14,6 +14,7 @@
   gitName = "y0usaf";
   tokensKey = "${homeDir}/Tokens/id_rsa_${gitName}";
   manzil = flakeInputs.manzil.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  tailnet = import ../../tailnet.nix;
 
   readKey = path: lib.removeSuffix "\n" (builtins.readFile path);
 
@@ -100,7 +101,7 @@
 
         ".ssh/known_hosts" = mkTextFile "known-hosts" ((lib.concatStringsSep "\n" (
             lib.mapAttrsToList (host: key: "${host} ${key}") {
-              "100.93.111.41" = readKey ./host-ssh-ed25519.pub;
+              "${tailnet.addresses.y0usaf-phone}" = readKey ./host-ssh-ed25519.pub;
               "192.168.2.34" = readKey ./host-ssh-ed25519.pub;
               "android-phone" = readKey ./host-ssh-ed25519.pub;
               "desktop" = readKey ../y0usaf-desktop/host-ssh-ed25519.pub;
@@ -137,7 +138,7 @@ in {
     motd = ''
       minimal nix-on-droid profile
       shell: bash
-      ssh: ssh -p ${toString sshdPort} ${phoneUser}@100.93.111.41
+      ssh: ssh -p ${toString sshdPort} ${phoneUser}@${tailnet.addresses.y0usaf-phone}
     '';
     sessionVariables = {
       EDITOR = "vim";

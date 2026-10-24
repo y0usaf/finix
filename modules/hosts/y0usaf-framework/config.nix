@@ -4,6 +4,8 @@
   pkgs,
   ...
 }: let
+  stage2 = "framework-trial-1";
+
   healthPackage = pkgs.writeShellScriptBin "finix-framework-health" ''
     set -u
     export PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils pkgs.gnugrep pkgs.iproute2 pkgs.nftables pkgs.procps pkgs.shadow pkgs.util-linux]}
@@ -17,7 +19,7 @@
       fi
     }
     check test "$(basename "$(readlink /proc/1/exe)")" = finit
-    check grep -qx framework-trial-1 /etc/finix-stage2
+    check grep -qx ${stage2} /etc/finix-stage2
     for mountpoint in /nix /persist /home /boot; do
       check mountpoint -q "$mountpoint"
     done
@@ -45,7 +47,7 @@ in {
 
   environment = {
     etc = {
-      "finix-stage2".text = "framework-trial-1\n";
+      "finix-stage2".text = "${stage2}\n";
       "elogind/logind.conf".text = lib.mkForce ''
         [Login]
         HandlePowerKey=poweroff
@@ -99,7 +101,6 @@ in {
   };
 
   users.users.${config.user.name} = {
-    uid = 1000;
     extraGroups = ["docker"];
   };
 

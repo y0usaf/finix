@@ -19,6 +19,12 @@ in {
       default = "/home/${config.user.name}";
       description = "Home directory path for the user";
     };
+
+    uid = lib.mkOption {
+      type = lib.types.int;
+      default = 1000;
+      description = "Numeric uid of the primary user. The persisted home is owned by this number, so changing it renumbers every file under /persist/home.";
+    };
   };
 
   config = {
@@ -121,6 +127,7 @@ in {
 
     users.users.y0usaf = {
       isNormalUser = true;
+      inherit (config.user) uid;
       home = "/home/y0usaf";
       shell = "${pkgs.rush}/bin/rush";
       extraGroups = ["wheel"];

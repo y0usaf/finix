@@ -50,7 +50,7 @@ in {
             ForwardAgent yes
 
         Host android-phone phone
-            HostName 100.93.111.41
+            HostName ${config.tailnet.addresses.y0usaf-phone}
             Port 8022
             User nix-on-droid
             IdentityFile ${homeDir}/.ssh/id_ed25519
