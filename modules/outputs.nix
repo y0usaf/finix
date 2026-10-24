@@ -251,6 +251,7 @@ in {
       defaultHost = "local";
     };
     finix-frame-deploy = import ./hosts/steam-frame/deploy.nix {inherit inputs pkgs;};
+    drift = import ./drift.nix {inherit lib pkgs hosts;};
     inherit (hosts.y0usaf-desktop.config.system.build) chatgpt p4g-setup;
     tomoe = inputs.tomoe.packages.${system}.default;
   };
