@@ -2,7 +2,11 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+let
+  cpuThreads = 32;
+  perThread = 100000;
+in {
   networking.hostName = "y0usaf-desktop";
 
   finix.persistence.allowlist.directories = [
@@ -16,8 +20,8 @@
   finit = {
     tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
     services = {
-      nix-daemon.cgroup.system."cpu.max" = 1600000;
-      nacre.cgroup.system."cpu.max" = 800000;
+      nix-daemon.cgroup.system."cpu.max" = cpuThreads / 2 * perThread;
+      nacre.cgroup.system."cpu.max" = cpuThreads / 4 * perThread;
     };
   };
 
