@@ -172,11 +172,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    deno2nix = {
-      url = "github:aMOPel/deno2nix?ref=custom-made-fetcher";
-      flake = false;
-    };
-
     nixpkgs-discord-legacy = {
       url = "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993";
       flake = false;
