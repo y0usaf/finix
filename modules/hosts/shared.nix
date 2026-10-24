@@ -8,6 +8,31 @@ in {
     neededForBoot = true;
   };
 
+  bashFiles = {interactive ? ""}: {
+    ".bashrc".text =
+      ''
+        case $- in
+          *i*) ;;
+          *) return ;;
+        esac
+
+      ''
+      + interactive
+      + ''
+        HISTSIZE=10000
+        HISTFILESIZE=10000
+        HISTCONTROL=ignoreboth:erasedups
+        shopt -s histappend checkwinsize
+
+        alias la="ls -a"
+        alias ll="ls -l"
+        alias lla="ls -la"
+      '';
+    ".bash_profile".text = ''
+      [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
+    '';
+  };
+
   filterTable = {
     tailscaleComment ? null,
     input,

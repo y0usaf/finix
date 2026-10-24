@@ -15,6 +15,19 @@
   tokensKey = "${homeDir}/Tokens/id_rsa_${gitName}";
   manzil = flakeInputs.manzil.packages."${pkgs.stdenv.hostPlatform.system}".default;
   tailnet = import ../../tailnet.nix;
+  bashFiles = (import ../shared.nix {inherit lib pkgs;}).bashFiles {
+    interactive = ''
+      export EDITOR=vim
+      export VISUAL=vim
+      export XDG_CACHE_HOME="${homeDir}/.cache"
+      export XDG_CONFIG_HOME="${homeDir}/.config"
+      export XDG_DATA_HOME="${homeDir}/.local/share"
+      export XDG_STATE_HOME="${homeDir}/.local/state"
+
+    '';
+  };
+  bashProfile = bashFiles.".bash_profile".text;
+  bashrc = bashFiles.".bashrc".text;
 
   readKey = path: lib.removeSuffix "\n" (builtins.readFile path);
 
@@ -45,32 +58,9 @@
           };
         });
 
-        ".bashrc" = mkTextFile "bashrc" ''
-          case $- in
-            *i*) ;;
-            *) return ;;
-          esac
+        ".bashrc" = mkTextFile "bashrc" bashrc;
 
-          export EDITOR=vim
-          export VISUAL=vim
-          export XDG_CACHE_HOME="${homeDir}/.cache"
-          export XDG_CONFIG_HOME="${homeDir}/.config"
-          export XDG_DATA_HOME="${homeDir}/.local/share"
-          export XDG_STATE_HOME="${homeDir}/.local/state"
-
-          HISTSIZE=10000
-          HISTFILESIZE=10000
-          HISTCONTROL=ignoreboth:erasedups
-          shopt -s histappend checkwinsize
-
-          alias la="ls -a"
-          alias ll="ls -l"
-          alias lla="ls -la"
-        '';
-
-        ".bash_profile" = mkTextFile "bash-profile" ''
-          [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
-        '';
+        ".bash_profile" = mkTextFile "bash-profile" bashProfile;
 
         ".ssh/config" = mkTextFile "ssh-config" ''
           AddKeysToAgent yes

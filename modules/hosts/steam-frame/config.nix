@@ -30,26 +30,7 @@
 
     manzil = {
       clobberByDefault = true;
-      users.${config.user.name}.files = {
-        ".bashrc".text = ''
-          case $- in
-            *i*) ;;
-            *) return ;;
-          esac
-
-          HISTSIZE=10000
-          HISTFILESIZE=10000
-          HISTCONTROL=ignoreboth:erasedups
-          shopt -s histappend checkwinsize
-
-          alias la="ls -a"
-          alias ll="ls -l"
-          alias lla="ls -la"
-        '';
-        ".bash_profile".text = ''
-          [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
-        '';
-      };
+      users.${config.user.name}.files = (import ../shared.nix {inherit lib pkgs;}).bashFiles {};
     };
   };
 }
