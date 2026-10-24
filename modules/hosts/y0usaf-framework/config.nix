@@ -26,7 +26,7 @@
     check test "$(id -u ${config.user.name})" = 1000
     check sh -c "ip -4 -br address show dev wlp191s0 scope global | grep -q '^wlp191s0.*UP'"
     check sh -c "ip -4 route show default | grep -q '^default '"
-    check sh -c "ss -ltn | grep -q ':2222 '"
+    check sh -c "ss -ltn | grep -q ':${toString (builtins.head config.services.openssh.settings.Port)} '"
     check nft list table inet filter
     check test -e /dev/dri/renderD128
     if [ "''${1:-}" = --record ]; then
