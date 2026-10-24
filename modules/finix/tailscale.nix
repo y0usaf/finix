@@ -8,11 +8,6 @@
   tailnet = import ../tailnet.nix;
 in {
   options.tailnet = {
-    domain = lib.mkOption {
-      type = lib.types.str;
-      default = tailnet.domain;
-      description = "MagicDNS suffix of the tailnet.";
-    };
     addresses = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = tailnet.addresses;
