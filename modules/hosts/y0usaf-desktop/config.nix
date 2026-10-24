@@ -4,10 +4,8 @@
   ...
 }:
 let
+  cpuThreads = 32;
   perThread = 100000;
-  cpuThreads = lib.toInt (lib.removeSuffix "\n" (builtins.readFile (
-    pkgs.runCommandLocal "cpu-threads" { } "nproc > $out"
-  )));
 in {
   networking.hostName = "y0usaf-desktop";
 
