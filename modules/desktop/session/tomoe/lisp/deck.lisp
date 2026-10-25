@@ -68,6 +68,44 @@ gone window left behind, or the keys go dead."
     (when area
       (list* :output output area))))
 
+(defun deck--left-width (state width)
+  "How wide the left column is, out of WIDTH less the seam between the columns."
+  (floor (* (- width (getf +layout+ :seam)) (nth (1- (getf state :ratio)) (getf +layout+ :ratios)))))
+
+(defun deck--grid-columns (state)
+  (ceiling (sqrt (count-if (lambda (id) (deck--manageable-p state id)) (deck--windows state)))))
+
+(defun deck--grid-extra (cols)
+  "How much wider than a window gap the middle of an even grid is: it splits on
+the deck's seam, so whatever stands there stays between the columns."
+  (if (evenp cols) (- (getf +layout+ :seam) (getf +layout+ :gaps)) 0))
+
+(defun deck--grid-cell (cols width)
+  (floor (- width (* (1- cols) (getf +layout+ :gaps)) (deck--grid-extra cols)) cols))
+
+(defun deck--split (state width)
+  "Where the seam starts within the tiled WIDTH, or NIL when the deck has no
+middle seam: a grid with an odd number of columns."
+  (if (getf state :grid)
+      (let ((cols (deck--grid-columns state)))
+        (when (and (plusp cols) (evenp cols))
+          (let ((half (/ cols 2)))
+            (+ (* half (deck--grid-cell cols width)) (* (1- half) (getf +layout+ :gaps))))))
+      (deck--left-width state width)))
+
+(defun deck--seam (state area)
+  "The free strip in the deck's middle seam on AREA, a window gap in from each
+side; NIL on a narrow output, while a window is fullscreen, in a grid with an
+odd number of columns, or when the seam is no wider than two gaps."
+  (let* ((gaps (getf +layout+ :gaps))
+         (x (and area (+ (getf area :x) gaps)))
+         (split (and area (deck--split state (- (getf area :width) (* 2 gaps)))))
+         (inner (- (getf +layout+ :seam) (* 2 gaps))))
+    (unless (or (null split) (getf state :fullscreen) (deck--narrow-p area) (not (plusp inner)))
+      (list :output (getf (getf area :output) :name)
+            :x (+ x split gaps) :y (+ (getf area :y) gaps)
+            :width inner :height (- (getf area :height) (* 2 gaps))))))
+
 (defun deck--box (state area id)
   "Where ID goes, or NIL when it is not in the window set."
   (let* ((gaps (getf +layout+ :gaps))
@@ -86,11 +124,12 @@ gone window left behind, or the keys go dead."
               (count (length wins))
               (cols (ceiling (sqrt count)))
               (rows (ceiling count cols))
-              (cell-width (floor (- width (* (1- cols) gaps)) cols))
+              (cell-width (deck--grid-cell cols width))
               (cell-height (floor (- height (* (1- rows) gaps)) rows))
               (column (mod index cols))
               (row (floor index cols)))
-         (list (+ x (* column (+ cell-width gaps))) (+ y (* row (+ cell-height gaps)))
+         (list (+ x (* column (+ cell-width gaps)) (if (>= column (/ cols 2)) (deck--grid-extra cols) 0))
+               (+ y (* row (+ cell-height gaps)))
                cell-width cell-height)))
       ((deck--narrow-p area)
        (let* ((column (remove-if-not (lambda (candidate) (deck--manageable-p state candidate))
@@ -100,15 +139,15 @@ gone window left behind, or the keys go dead."
          (when index
            (list x (+ y (* (- index front) (+ height gaps))) width height))))
       (t
-       (let* ((ratio (nth (1- (getf state :ratio)) (getf +layout+ :ratios)))
-              (left-width (floor (* (- width gaps) ratio)))
-              (right-width (- width gaps left-width))
+       (let* ((seam (getf +layout+ :seam))
+              (left-width (deck--left-width state width))
+              (right-width (- width seam left-width))
               (side (deck--side-of state id))
               (column (deck--column state side))
               (front (position (deck--front state side) column))
               (index (position id column)))
          (when (and side index front)
-           (list (if (eql side :left) x (+ x left-width gaps))
+           (list (if (eql side :left) x (+ x left-width seam))
                  (+ y (* (- index front) (+ height gaps)))
                  (if (eql side :left) left-width right-width)
                  height)))))))
@@ -350,6 +389,7 @@ gone window left behind, or the keys go dead."
                                              +layout-bindings+)
                                   +layout-bindings+))
                       (when area (deck--places windows state area))
+                      (list (publish-state :deck-seam (deck--seam state area)))
                       (deck--raises state current)
                       (list (focus current :raise nil)))
               (when (and (equal command "terminal") (null terminal))

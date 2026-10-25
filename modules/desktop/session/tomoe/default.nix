@@ -163,7 +163,14 @@
     shadow = 3;
   };
 
-  cassette = bar.style == "cassette";
+  cassette = lib.elem bar.style ["cassette" "spine"];
+
+  gaps = 8;
+
+  seam =
+    if bar.style == "spine"
+    then builtins.ceil (28.0 * bar.scale) + 2 * gaps
+    else gaps;
 
   hudThemeParameters =
     {
@@ -359,9 +366,9 @@ in {
 
     bar = {
       style = lib.mkOption {
-        type = lib.types.enum ["panels" "gap" "cassette"];
+        type = lib.types.enum ["panels" "gap" "cassette" "spine"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores wallust.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores wallust. spine: the same parts on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move.";
       };
 
       modules = lib.mkOption {
@@ -421,7 +428,7 @@ in {
       (defparameter +policy-bindings+ ${toLisp userBindings})
       (defparameter +policy-launches+ ${toLisp launches})
       (defparameter +layout+ ${toLisp ({
-          gaps = 8;
+          inherit gaps seam;
           float-ratio = mkLispInline "3/5";
         }
         // layout.parameters)})
@@ -438,7 +445,15 @@ in {
       if bar.style == "gap"
       then "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/gap.lisp
       else if cassette
-      then "(defparameter +cassette+ ${toLisp cassetteParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/cassette.lisp
+      then
+        "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
+        + builtins.readFile ./lisp/probe.lisp
+        + builtins.readFile ./lisp/cassette.lisp
+        + builtins.readFile (
+          if bar.style == "spine"
+          then ./lisp/spine.lisp
+          else ./lisp/plates.lisp
+        )
       else "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp
     )
     "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
