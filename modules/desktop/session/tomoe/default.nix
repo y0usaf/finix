@@ -243,12 +243,11 @@
     };
 
   glassParameters = {
-    passes = 3;
-    offset = 4;
+    inherit (config.user.appearance.glass) passes offset;
   };
 
   spineColors = {
-    face = "#00000000";
+    face = "#000000" + lib.fixedWidthString 2 "0" (lib.toHexString (builtins.floor (config.user.appearance.glass.opacity * 255 + 0.5)));
     shine = "#FFFFFF14";
     shade = "#00000066";
     ink = "#ECE7DC";

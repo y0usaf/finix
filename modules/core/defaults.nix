@@ -32,6 +32,23 @@
       default = 96;
       description = "Display DPI setting for the system";
     };
+    glass = {
+      opacity = lib.mkOption {
+        type = lib.types.numbers.between 0 1;
+        default = 0;
+        description = "Background opacity of terminals, GTK windows and the tomoe rail; the compositor's blur shows through the rest.";
+      };
+      passes = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 3;
+        description = "Blur passes behind glass surfaces.";
+      };
+      offset = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 4;
+        description = "Blur sample offset in pixels.";
+      };
+    };
   };
 
   options.user.paths = {

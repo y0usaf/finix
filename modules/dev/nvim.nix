@@ -120,7 +120,7 @@
         vim.opt.foldenable = true
 
         if vim.g.neovide then
-          vim.g.neovide_transparency = 0.700000
+          vim.g.neovide_transparency = ${toString config.user.appearance.glass.opacity}
         end
 
 

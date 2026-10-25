@@ -9,6 +9,7 @@
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
   shadowColor = "rgba(0, 0, 0, 0.3)";
+  glassOpacity = toString config.user.appearance.glass.opacity;
 in {
   options.user.ui.gtk = {
     scale = lib.mkOption {
@@ -89,6 +90,9 @@ in {
             /* Menu background styling */
             menu {
               background: transparent;
+            }
+            window {
+              background: rgba(0, 0, 0, ${glassOpacity});
             }
           '';
         };

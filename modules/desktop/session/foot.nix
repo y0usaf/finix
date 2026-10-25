@@ -50,7 +50,7 @@ in {
         };
 
         "colors-dark" = {
-          alpha = "0.82";
+          alpha = toString config.user.appearance.glass.opacity;
           "alpha-mode" = "matching";
         };
 

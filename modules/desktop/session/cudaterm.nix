@@ -8,7 +8,7 @@
   imports = [flakeInputs.cudaterm.finixModules.default];
   config.manzil.users."${config.user.name}".files.".config/cudaterm/config" = lib.mkIf config.hardware.nvidia.enable {
     text = ''
-      background-opacity = 0
+      background-opacity = ${toString config.user.appearance.glass.opacity}
     '';
   };
   config.user.ui.cudaterm = {
