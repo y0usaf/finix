@@ -227,33 +227,72 @@
     sample = 1000;
   };
 
-  cassetteParameters = {
-    inherit (gapParameters) modules center-between edges inset time date hot media-width font scale sample;
-    inherit (bar) exclusive;
-    segments = 10;
-    colors = {
-      face = "#E9E5DC";
-      shine = "#FBFAF6";
-      shade = "#BDB7AA";
-      ink = "#292928";
-      dim = "#6E6A62";
-      groove = "#B4AE9F";
-      hole = "#3C3A37";
-      lcd = "#C2C8B6";
-      rim = "#7D8273";
-      ghost = "#B3B9A6";
-      counter = "#1F1F1E";
-      counter-ghost = "#3A3935";
-      amber = "#F5A833";
-      orange = "#ED5C1C";
-      teal = "#218C87";
-      green = "#5E8F2E";
-      red = "#D63C1A";
-      led-off = "#D2CDC0";
-      paper = "#F7F4ED";
-      tape = "#5A4636";
-      shadow = "#29292859";
+  cassetteParameters =
+    {
+      inherit (gapParameters) modules center-between edges inset time date hot media-width font scale sample;
+      inherit (bar) exclusive;
+      segments = 10;
+      colors =
+        if bar.style == "spine"
+        then spineColors
+        else cassetteColors;
+    }
+    // lib.optionalAttrs (bar.style == "spine") {
+      radius = 4;
+      spine-title = 12;
+      blur = {
+        enabled = true;
+        passes = 3;
+        offset = 4;
+      };
     };
+
+  spineColors = {
+    face = "#12141780";
+    shine = "#FFFFFF14";
+    shade = "#00000066";
+    ink = "#ECE7DC";
+    dim = "#9A958A";
+    groove = "#FFFFFF1F";
+    hole = "#FFFFFF38";
+    lcd = "#1A1C17";
+    rim = "#FFFFFF2E";
+    ghost = "#2A2D25";
+    counter = "#0B0B0CCC";
+    counter-ghost = "#2B2A27";
+    amber = "#F5A833";
+    orange = "#ED5C1C";
+    teal = "#2BB0A8";
+    green = "#7DB343";
+    red = "#E5482A";
+    led-off = "#FFFFFF1A";
+    paper = "#00000033";
+    tape = "#9C7B5E";
+    shadow = "#00000059";
+  };
+
+  cassetteColors = {
+    face = "#E9E5DC";
+    shine = "#FBFAF6";
+    shade = "#BDB7AA";
+    ink = "#292928";
+    dim = "#6E6A62";
+    groove = "#B4AE9F";
+    hole = "#3C3A37";
+    lcd = "#C2C8B6";
+    rim = "#7D8273";
+    ghost = "#B3B9A6";
+    counter = "#1F1F1E";
+    counter-ghost = "#3A3935";
+    amber = "#F5A833";
+    orange = "#ED5C1C";
+    teal = "#218C87";
+    green = "#5E8F2E";
+    red = "#D63C1A";
+    led-off = "#D2CDC0";
+    paper = "#F7F4ED";
+    tape = "#5A4636";
+    shadow = "#29292859";
   };
 
   bongoParameters = {

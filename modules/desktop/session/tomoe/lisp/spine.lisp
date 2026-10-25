@@ -7,65 +7,63 @@
         when (plusp (length part)) collect part
         while i do (setf start (1+ i))))
 
-(defun spine--turned (text color)
-  (ui :text :text text :size (cassette--px 11) :line-height (cassette--px 11) :color color
-      :font (getf +cassette+ :font) :rotate 90))
-
-(defun spine--engraved (text color)
-  (ui :stack :children (list (ui :column :padding '(1 0 0 0) :children (list (spine--turned text (cassette--c :shine))))
-                             (spine--turned text color))))
+(defun spine--text (text color &optional (size 11))
+  (ui :text :text text :size (cassette--px size) :line-height (cassette--px size) :color color
+      :font (getf +cassette+ :font)))
 
 (defun spine--groove ()
-  (ui :column :align :stretch
-      :children (list (ui :rect :height 1 :background (cassette--c :groove))
-                      (ui :rect :height 1 :background (cassette--c :shine)))))
+  (ui :rect :height 1 :background (cassette--c :groove)))
 
 (defun spine--ladder (fraction)
   (let* ((count (getf +cassette+ :segments))
          (lit (round (* count (max 0 (min 1 fraction))))))
-    (ui :column :gap (cassette--px 1) :align :center
-        :children (loop for i from (1- count) downto 0
-                        collect (ui :rect :width (cassette--px 6) :height (cassette--px 4)
+    (ui :row :gap 1 :align :center
+        :children (loop for i below count
+                        collect (ui :rect :width (cassette--px 2) :height (cassette--px 3)
                                     :background (if (< i lit) (cassette--zone (/ (1+ i) count)) (cassette--c :led-off)))))))
 
 (defun spine--gauge (label percent detail &optional hot)
   (let ((percent (max 0 (min 100 (round (or percent 0))))))
-    (ui :row :gap (cassette--px 3) :align :start
-        :children (list (spine--ladder (/ percent 100))
-                        (spine--engraved (format nil "~A ~3D%~@[ ~A~]" label percent detail)
-                                         (if hot (cassette--c :orange) (cassette--c :ink)))))))
+    (ui :column :align :center :gap (cassette--px 2)
+        :children (list (spine--text label (cassette--c :dim) 7)
+                        (ui :row :align :end
+                            :children (list (spine--text (format nil "~D" percent) (cassette--c :ink))
+                                            (spine--text "%" (cassette--c :dim) 7)))
+                        (spine--ladder (/ percent 100))
+                        (when detail (spine--text detail (if hot (cassette--c :orange) (cassette--c :dim)) 7))))))
 
 (defun spine--counter ()
-  (ui :column :align :stretch
+  (ui :column :align :stretch :gap (cassette--px 1)
       :children (loop for part in (spine--parts (clock-text (getf +cassette+ :time)))
-                      collect (cassette--window part :face (cassette--c :counter) :rim (cassette--c :ink)
+                      collect (cassette--window part :face (cassette--c :counter) :rim (cassette--c :rim)
                                                      :ghost (cassette--c :counter-ghost) :ink (cassette--c :amber)))))
 
 (defun spine--date ()
-  (ui :column :align :center :gap (cassette--px 2)
-      :children (loop for part in (spine--parts (string-upcase (clock-text (getf +cassette+ :date))))
-                      collect (cassette--engraved part (cassette--c :ink)))))
+  (destructuring-bind (&optional day date month &rest rest)
+      (spine--parts (string-upcase (clock-text (getf +cassette+ :date))))
+    (declare (ignore rest))
+    (ui :column :align :center :gap (cassette--px 2)
+        :children (list (when day (spine--text day (cassette--c :dim) 7))
+                        (when date (spine--text date (cassette--c :ink)))
+                        (when month (spine--text month (cassette--c :dim) 7))))))
+
+(defun spine--stacked (text color)
+  (ui :column :align :center
+      :children (loop for c across (string-right-trim " " text)
+                      collect (spine--text (string c) color 8))))
 
 (defun spine--media (snapshot)
   (let* ((service (service-state snapshot :mpris))
          (status (getf service :status))
          (title (getf service :title))
-         (artist (getf service :artist))
          (length (getf service :length))
          (position (getf service :position))
          (played (if (and (realp length) (plusp length) (realp position)) (max 0 (min 1 (/ position length))) 0)))
     (when (and (stringp title) (plusp (length title)) (member status '("Playing" "Paused") :test #'equal))
-      (ui :column :align :center :gap (cassette--px 4) :padding (list (cassette--px 4) 0 (cassette--px 4) 0)
-          :background (cassette--c :paper) :border 1 :border-color (cassette--c :rim)
+      (ui :column :align :center :gap (cassette--px 4)
           :children (list (cassette--led (equal status "Playing"))
-                          (ui :rect :width (cassette--px 20) :height (cassette--px 2) :background (cassette--c :orange))
-                          (ui :rect :width (cassette--px 20) :height (cassette--px 2) :background (cassette--c :teal))
                           (cassette--reel (- 1 played))
-                          (spine--turned (cassette--fit (if (and (stringp artist) (plusp (length artist)))
-                                                            (format nil "~A - ~A" artist title)
-                                                            title)
-                                                        (getf +cassette+ :media-width))
-                                         (cassette--c :ink))
+                          (spine--stacked (cassette--fit title (getf +cassette+ :spine-title)) (cassette--c :ink))
                           (cassette--reel played))))))
 
 (defun spine--module (module state snapshot)
@@ -83,35 +81,29 @@
                              (cassette--gib (getf gpu :used)))))
       (:battery (let ((battery (service-state snapshot :battery)))
                   (spine--gauge (if (getf battery :charging) "CHG" "BAT") (getf battery :percent) nil)))
-      (:network (let* ((network (service-state snapshot :network)) (ssid (getf network :ssid)) (online (getf network :connected)))
-                  (ui :column :align :center :gap (cassette--px 4)
+      (:network (let ((online (getf (service-state snapshot :network) :connected)))
+                  (ui :column :align :center :gap (cassette--px 3)
                       :children (list (cassette--led online)
-                                      (spine--engraved (cassette--fit (cond ((and online (stringp ssid) (plusp (length ssid))) ssid)
-                                                                            (online "online")
-                                                                            (t "offline"))
-                                                                      16)
-                                                       (cassette--c :ink))))))
+                                      (spine--text (if online "NET" "OFF") (cassette--c :dim) 7)))))
       (:frame (let ((battery (state-value snapshot :frame-battery)))
                 (when (getf battery :percent)
                   (spine--gauge (if (equal (getf battery :status) "Discharging") "VR" "VR+") (getf battery :percent) nil)))))))
 
 (defun spine--cell (item)
-  (ui :row :justify :center :padding (list (cassette--px 5) 0 (cassette--px 5) 0) :children (list item)))
+  (ui :row :justify :center :padding (list (cassette--px 6) 0 (cassette--px 6) 0) :children (list item)))
 
-(defun spine--run (items justify)
-  (ui :column :height 0 :grow 1 :align :stretch :justify justify
+(defun spine--run (items)
+  (ui :column :height 0 :grow 1 :align :stretch :justify :center
       :children (loop for (item . rest) on (remove nil items)
                       collect (spine--cell item)
                       when rest collect (spine--groove))))
 
 (defun spine--body (items)
-  (ui :row :align :stretch :background (cassette--c :face) :border 1 :border-color (cassette--c :ink)
-      :children (list (ui :rect :width 1 :background (cassette--c :shine))
-                      (ui :column :width 0 :grow 1 :align :stretch
-                          :children (list (spine--cell (cassette--grille))
-                                          (spine--run items :center)
-                                          (spine--cell (cassette--grille))))
-                      (ui :rect :width 1 :background (cassette--c :shade)))))
+  (ui :column :align :stretch :background (cassette--c :face) :border 1 :border-color (cassette--c :rim)
+      :radius (cassette--px (getf +cassette+ :radius))
+      :children (list (spine--cell (cassette--grille))
+                      (spine--run items)
+                      (spine--cell (cassette--grille)))))
 
 (defun spine--covered-p (snapshot box)
   "Whether a placed window overlaps BOX. Tiled windows never reach the seam, so
@@ -137,7 +129,8 @@ this is a float or a fullscreen window, which the spine then sits beneath."
          (hot (loop for probe in '(:cpu :gpu) thereis (cassette--hot-p (getf (getf state probe) :temp)))))
     (values state
             (append (list (interval :sample (getf +cassette+ :sample))
-                          (publish-state :hud-hot (and hot t)))
+                          (publish-state :hud-hot (and hot t))
+                          (settings :blur (getf +cassette+ :blur)))
                     (when output
                       (list (shell-surface :spine (spine--body (loop for module in (getf +cassette+ :modules)
                                                                      collect (spine--module module state snapshot)))
@@ -146,5 +139,6 @@ this is a float or a fullscreen window, which the spine then sits beneath."
                                            :margin (list (round (- (getf seam :y) (getf output :y)) scale) 0 0
                                                          (round (- (getf seam :x) (getf output :x)) scale))
                                            :layer (if (spine--covered-p snapshot seam) :bottom :top)
-                                           :background "#00000000" :click-through t :slide t))))
+                                           :background "#00000000" :blur (cassette--px (getf +cassette+ :radius))
+                                           :click-through t :slide t))))
             nil)))
