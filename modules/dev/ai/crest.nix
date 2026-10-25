@@ -19,6 +19,7 @@ in {
     crest.crest-map
     crest.crest-mcp
     crest.crest-mux
+    crest.muntin
     crest.guild
     crest.ouro
     crest.jev-review
