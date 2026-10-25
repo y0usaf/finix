@@ -12,7 +12,8 @@
     gateway = {
       mode = "local";
       port = 18789;
-      bind = "tailnet";
+      bind = "loopback";
+      tailscale.mode = "serve";
       auth = {
         mode = "token";
         allowTailscale = true;
@@ -45,6 +46,9 @@ in {
       fi
       OPENCLAW_GATEWAY_TOKEN="$(cat ${state}/gateway-token)"
       export OPENCLAW_GATEWAY_TOKEN
+      install -m 0600 /dev/null ${state}/.env
+      printf 'OPENCLAW_GATEWAY_TOKEN=%s\nAI_GATEWAY_API_KEY=%s\n' \
+        "$OPENCLAW_GATEWAY_TOKEN" "''${AI_GATEWAY_API_KEY:-}" > ${state}/.env
       exec ${pkgs.openclaw}/bin/openclaw gateway
     ''}";
     environment = {
@@ -53,7 +57,7 @@ in {
       OPENCLAW_STATE_DIR = state;
       TMPDIR = "${state}/tmp";
     };
-    path = [pkgs.coreutils];
+    path = [pkgs.coreutils pkgs.tailscale];
     conditions = ["net/lo/up" "net/tailscale0/up"];
     log = true;
   };

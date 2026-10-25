@@ -220,6 +220,8 @@
 
   shaderWallpaperParameters = {
     shaders = [
+      ["${./shaders/cassette-squares.glsl}" 30]
+      ["${./shaders/cassette-led.glsl}" 30]
       ["${./shaders/hex-spiral.glsl}" 30]
       ["${./shaders/dot-corridor.glsl}" 30]
       ["${./shaders/su-ei.glsl}" 30]
