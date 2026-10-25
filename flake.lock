@@ -284,11 +284,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1792507377,
-        "narHash": "sha256-F1O8pwDJSZ3sX69YsEyQ/mtNAKHZhzI/Jmuouod+XkE=",
+        "lastModified": 1792937637,
+        "narHash": "sha256-6Lacjk63M/8iNMCVHYTnVcuzByM8DXiqreBHUDo95Mk=",
         "owner": "y0usaf",
         "repo": "cudaterm",
-        "rev": "9965706afab65bfa49da909c6b458dbf27cee3d3",
+        "rev": "2e3036033acfd548327a1072635fb22698fd4488",
         "type": "github"
       },
       "original": {

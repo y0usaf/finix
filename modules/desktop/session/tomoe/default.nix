@@ -248,7 +248,7 @@
   };
 
   spineColors = {
-    face = "#12141780";
+    face = "#00000000";
     shine = "#FFFFFF14";
     shade = "#00000066";
     ink = "#ECE7DC";

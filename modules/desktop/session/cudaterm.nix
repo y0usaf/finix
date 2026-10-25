@@ -6,6 +6,11 @@
   ...
 }: {
   imports = [flakeInputs.cudaterm.finixModules.default];
+  config.manzil.users."${config.user.name}".files.".config/cudaterm/config" = lib.mkIf config.hardware.nvidia.enable {
+    text = ''
+      background-opacity = 0
+    '';
+  };
   config.user.ui.cudaterm = {
     inherit (config.hardware.nvidia) enable;
     package = lib.mkIf config.hardware.nvidia.enable (flakeInputs.cudaterm.lib.mkFinixPackage {
