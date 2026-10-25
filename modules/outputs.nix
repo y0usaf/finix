@@ -8,6 +8,7 @@ inputs: let
       config = {
         allowUnfree = true;
         inherit cudaSupport;
+        permittedInsecurePackages = ["openclaw-2026.10.3"];
       };
       overlays = [
         inputs.claude-code-nix.overlays.default
@@ -106,6 +107,7 @@ inputs: let
           ./dev/ai/prompts/policy.nix
           ./dev/ai/claude-code.nix
           ./dev/ai/paseo.nix
+          ./server/openclaw.nix
           ./tools/git.nix
           ./tools/tmux.nix
         ];
