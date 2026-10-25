@@ -1791,11 +1791,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1792465401,
-        "narHash": "sha256-EHoQq0jv4Wjma6jK9YpnGODExU9QTMlVCgVigrWfAQk=",
+        "lastModified": 1792930258,
+        "narHash": "sha256-6uFHHqedUWOrJDwDBk2b+svW57SU4p5hBiEG+Pwf+yI=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "494e08d13233d5143d7e54c2acc76cfafdf34354",
+        "rev": "0d92d359562791f6ff35ef563368ee941d48c7b4",
         "type": "github"
       },
       "original": {
