@@ -1,36 +1,5 @@
 (in-package #:tomoe-user)
 
-(defun gap--sample (probe previous system)
-  (let ((sample (copy-list previous)))
-    (ecase probe
-      (:cpu
-       (let ((total (getf system :cpu-total)) (idle (getf system :cpu-idle)))
-         (when total
-           (let ((spent (- total (getf sample :total total))))
-             (setf (getf sample :percent)
-                   (if (plusp spent)
-                       (max 0 (min 100 (round (* 100 (- spent (- idle (getf sample :idle idle)))) spent)))
-                       (getf sample :percent 0))
-                   (getf sample :total) total
-                   (getf sample :idle) idle
-                   (getf sample :temp) (getf system :cpu-temperature))))))
-      (:memory
-       (let ((total (getf system :memory-total)) (available (getf system :memory-available)))
-         (when (and total (plusp total))
-           (setf (getf sample :percent) (round (* 100 (- total available)) total)
-                 (getf sample :used) (round (- total available) 1024)))))
-      (:gpu
-       (let ((gpu (first (getf system :gpus))))
-         (cond (gpu (setf (getf sample :percent) (max 0 (min 100 (getf gpu :busy)))
-                          (getf sample :used) (getf gpu :vram-used)
-                          (getf sample :total) (getf gpu :vram-total)
-                          (getf sample :temp) (getf gpu :temperature)
-                          (getf sample :failures) 0))
-               (system (setf (getf sample :failures) (1+ (getf sample :failures 0))))))))
-    sample))
-
-(defun gap--gpu-p (gpu) (and (getf gpu :percent) (< (getf gpu :failures 0) 3)))
-
 (defun gap--ascii (text) (remove-if (lambda (c) (> (char-code c) 126)) text))
 
 (defun gap--degrees (value) (if (realp value) (format nil "~2D°" (max 0 (min 99 (round value)))) "--°"))
@@ -122,9 +91,9 @@
       (:frame (gap--frame p snapshot))
       (:cpu (gap--gauge p "CPU" (hud--c p :color4) (getf cpu :percent 0) (gap--degrees (getf cpu :temp))))
       (:memory (gap--gauge p "MEM" (hud--c p :color5) (getf memory :percent 0) (gap--gib (getf memory :used))))
-      (:gpu (when (gap--gpu-p gpu)
+      (:gpu (when (probe--gpu-p gpu)
               (gap--gauge p "GPU" (hud--c p :color2) (getf gpu :percent 0) (gap--degrees (getf gpu :temp)))))
-      (:vram (when (gap--gpu-p gpu)
+      (:vram (when (probe--gpu-p gpu)
                (gap--gauge p "VRAM" (hud--c p :color6)
                            (if (plusp (or (getf gpu :total) 0)) (round (* 100 (or (getf gpu :used) 0)) (getf gpu :total)) 0)
                            (gap--gib (getf gpu :used))))))))
@@ -151,7 +120,7 @@
   (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))
     (let ((system (context snapshot :system)))
       (dolist (probe '(:cpu :memory :gpu))
-        (setf (getf state probe) (gap--sample probe (getf state probe) system)))))
+        (setf (getf state probe) (probe--sample probe (getf state probe) system)))))
   (let* ((p (state-value snapshot :hud-palette))
          (line (gap--line (loop for module in (getf +gap+ :modules)
                                 collect (gap--module module p state snapshot))))

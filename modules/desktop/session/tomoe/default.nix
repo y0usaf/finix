@@ -163,13 +163,30 @@
     shadow = 3;
   };
 
-  hudThemeParameters = {
-    palette-file = palette;
-    palette-command = "mkdir -p ${lib.escapeShellArg (dirOf palette)} && { cat ${lib.escapeShellArg palette} 2>/dev/null || true; }";
-    border = 2;
-    focus-flash = 220;
-    tick = frameTick;
-  };
+  cassette = bar.style == "cassette";
+
+  hudThemeParameters =
+    {
+      palette-file = palette;
+      palette-command = "mkdir -p ${lib.escapeShellArg (dirOf palette)} && { cat ${lib.escapeShellArg palette} 2>/dev/null || true; }";
+      border = 2;
+      focus-flash = 220;
+      tick = frameTick;
+    }
+    // lib.optionalAttrs cassette {
+      palette = {
+        bg = "#F4F1EA";
+        fg = "#292928";
+        accent = "#ED5C1C";
+        color1 = "#C8401A";
+        color2 = "#4E7A3A";
+        color3 = "#A86B0C";
+        color4 = "#2F5D8A";
+        color5 = "#8A4F7D";
+        color6 = "#218C87";
+        color8 = "#CCC7BA";
+      };
+    };
 
   barParameters = {
     modules = map keyword bar.modules;
@@ -201,6 +218,35 @@
     font = "Departure Mono";
     inherit (bar) scale;
     sample = 1000;
+  };
+
+  cassetteParameters = {
+    inherit (gapParameters) modules center-between edges inset time date hot media-width font scale sample;
+    inherit (bar) exclusive;
+    segments = 10;
+    colors = {
+      face = "#E9E5DC";
+      shine = "#FBFAF6";
+      shade = "#BDB7AA";
+      ink = "#292928";
+      dim = "#6E6A62";
+      groove = "#B4AE9F";
+      hole = "#3C3A37";
+      lcd = "#C2C8B6";
+      rim = "#7D8273";
+      ghost = "#B3B9A6";
+      counter = "#1F1F1E";
+      counter-ghost = "#3A3935";
+      amber = "#F5A833";
+      orange = "#ED5C1C";
+      teal = "#218C87";
+      green = "#5E8F2E";
+      red = "#D63C1A";
+      led-off = "#D2CDC0";
+      paper = "#F7F4ED";
+      tape = "#5A4636";
+      shadow = "#29292859";
+    };
   };
 
   bongoParameters = {
@@ -313,9 +359,9 @@ in {
 
     bar = {
       style = lib.mkOption {
-        type = lib.types.enum ["panels" "gap"];
+        type = lib.types.enum ["panels" "gap" "cassette"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores wallust.";
       };
 
       modules = lib.mkOption {
@@ -345,7 +391,7 @@ in {
       exclusive = lib.mkOption {
         type = lib.types.bool;
         default = false;
-        description = "Whether the panel bar reserves exclusive space that windows tile around. Keep false for a pure overlay.";
+        description = "Whether the panel or cassette bar reserves exclusive space that windows tile around. Keep false for a pure overlay.";
       };
     };
   };
@@ -390,7 +436,9 @@ in {
     (builtins.readFile ./lisp/theme.lisp)
     (
       if bar.style == "gap"
-      then "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/gap.lisp
+      then "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/gap.lisp
+      else if cassette
+      then "(defparameter +cassette+ ${toLisp cassetteParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/cassette.lisp
       else "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp
     )
     "(defparameter +bongo-cat+ ${toLisp bongoParameters})"

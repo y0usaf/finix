@@ -41,10 +41,11 @@
            (setf (getf state :palette) (or (theme--palette (getf event :content)) (getf state :palette)))))
     (unless (equal focus (getf state :focus))
       (setf (getf state :focus) focus (getf state :focus-at) (when focus (hud--now))))
-    (let* ((p (getf state :palette))
+    (let* ((fixed (getf +hud-theme+ :palette))
+           (p (or fixed (getf state :palette)))
            (flash (hud--decay (getf state :focus-at) (getf +hud-theme+ :focus-flash))))
       (values state
-              (append (list (exec-async :palette (getf +hud-theme+ :palette-command)))
+              (append (unless fixed (list (exec-async :palette (getf +hud-theme+ :palette-command))))
                       (when (getf state :watch) (list (watch-file :palette (getf +hud-theme+ :palette-file))))
                       (when (plusp flash) (list (interval :tick (getf +hud-theme+ :tick))))
                       (when p (list (publish-state :hud-palette p)))
