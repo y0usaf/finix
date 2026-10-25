@@ -18,6 +18,7 @@ in {
     crest.crest-cell
     crest.crest-map
     crest.crest-mcp
+    crest.crest-mux
     crest.guild
     crest.ouro
     crest.jev-review
