@@ -17,19 +17,19 @@
 (defun spine--ladder (fraction)
   (let* ((count (getf +cassette+ :segments))
          (lit (round (* count (max 0 (min 1 fraction))))))
-    (ui :row :gap 1 :align :center
-        :children (loop for i below count
-                        collect (ui :rect :width (cassette--px 2) :height (cassette--px 3)
+    (ui :column :gap (cassette--px 1) :align :center
+        :children (loop for i from (1- count) downto 0
+                        collect (ui :rect :width (cassette--px 8) :height (cassette--px 3)
                                     :background (if (< i lit) (cassette--zone (/ (1+ i) count)) (cassette--c :led-off)))))))
 
 (defun spine--gauge (label percent detail &optional hot)
   (let ((percent (max 0 (min 100 (round (or percent 0))))))
     (ui :column :align :center :gap (cassette--px 2)
         :children (list (spine--text label (cassette--c :dim) 7)
+                        (spine--ladder (/ percent 100))
                         (ui :row :align :end
                             :children (list (spine--text (format nil "~D" percent) (cassette--c :ink))
                                             (spine--text "%" (cassette--c :dim) 7)))
-                        (spine--ladder (/ percent 100))
                         (when detail (spine--text detail (if hot (cassette--c :orange) (cassette--c :dim)) 7))))))
 
 (defun spine--counter ()
@@ -129,8 +129,7 @@ this is a float or a fullscreen window, which the spine then sits beneath."
          (hot (loop for probe in '(:cpu :gpu) thereis (cassette--hot-p (getf (getf state probe) :temp)))))
     (values state
             (append (list (interval :sample (getf +cassette+ :sample))
-                          (publish-state :hud-hot (and hot t))
-                          (settings :blur (getf +cassette+ :blur)))
+                          (publish-state :hud-hot (and hot t)))
                     (when output
                       (list (shell-surface :spine (spine--body (loop for module in (getf +cassette+ :modules)
                                                                      collect (spine--module module state snapshot)))

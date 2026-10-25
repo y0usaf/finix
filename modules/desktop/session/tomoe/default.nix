@@ -240,12 +240,12 @@
     // lib.optionalAttrs (bar.style == "spine") {
       radius = 4;
       spine-title = 12;
-      blur = {
-        enabled = true;
-        passes = 3;
-        offset = 4;
-      };
     };
+
+  glassParameters = {
+    passes = 3;
+    offset = 4;
+  };
 
   spineColors = {
     face = "#12141780";
@@ -480,6 +480,8 @@ in {
     (builtins.readFile ./lisp/hud.lisp)
     "(defparameter +hud-theme+ ${toLisp hudThemeParameters})"
     (builtins.readFile ./lisp/theme.lisp)
+    "(defparameter +glass+ ${toLisp glassParameters})"
+    (builtins.readFile ./lisp/glass.lisp)
     (
       if bar.style == "gap"
       then "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/gap.lisp

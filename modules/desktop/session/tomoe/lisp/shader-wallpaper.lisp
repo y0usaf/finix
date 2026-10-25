@@ -5,7 +5,7 @@
     (let ((count (length shaders)))
       (list* (shell-surface :shader-menu (ui :column :on-click :cancel :background "#00000066")
                             :anchors '(:top :right :bottom :left) :layer :overlay
-                            :background "#00000000")
+                            :background "#00000000" :blur t)
              (keyboard-grab)
              (bind-key nil "Left" :up) (bind-key nil "h" :up)
              (bind-key nil "Right" :down) (bind-key nil "l" :down)
