@@ -27,8 +27,6 @@
 in {
   environment.systemPackages = [pkgs.openclaw];
 
-  finix.persistence.allowlist.users.${config.user.name}.directories = [".openclaw"];
-
   finit.services.openclaw = {
     description = "OpenClaw gateway: the phone-facing personal assistant";
     user = config.user.name;
