@@ -100,7 +100,6 @@
 
 (defun spine--body (items)
   (ui :column :align :stretch :background (cassette--c :face) :border 1 :border-color (cassette--c :rim)
-      :radius (cassette--px (getf +cassette+ :radius))
       :children (list (spine--cell (cassette--grille))
                       (spine--run items)
                       (spine--cell (cassette--grille)))))
@@ -138,6 +137,6 @@ this is a float or a fullscreen window, which the spine then sits beneath."
                                            :margin (list (round (- (getf seam :y) (getf output :y)) scale) 0 0
                                                          (round (- (getf seam :x) (getf output :x)) scale))
                                            :layer (if (spine--covered-p snapshot seam) :bottom :top)
-                                           :background "#00000000" :blur (cassette--px (getf +cassette+ :radius))
+                                           :background "#00000000" :blur t
                                            :click-through t :slide t))))
             nil)))

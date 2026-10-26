@@ -65,6 +65,7 @@ in {
             @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-5.css");
             @import url("file:///home/${userName}/.config/Vencord/themes/system-font.css");
             @import url("file:///home/${userName}/.config/Vencord/themes/wallust-colors.css");
+            @import url("file:///home/${userName}/.config/Vencord/themes/square.css");
           '';
         };
       };
@@ -76,6 +77,14 @@ in {
         --display-active-now: none;
         --display-hover-reaction-emoji: none;
         --bool-show-name-gradients: false;
+      }
+    '';
+
+    ".config/Vencord/themes/square.css".text = ''
+      *:not([class*="avatar"]):not([class*="avatar"] *),
+      *::before,
+      *::after {
+        border-radius: 0 !important;
       }
     '';
 

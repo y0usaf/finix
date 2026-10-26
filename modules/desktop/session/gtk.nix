@@ -60,6 +60,7 @@ in {
               background: transparent;
               outline-width: 0;
               outline-offset: 0;
+              border-radius: 0;
               text-shadow: ${lib.concatStringsSep ",\n" (lib.concatLists (lib.genList
               (_: [
                 "${shadowSize} 0 ${shadowRadius} ${shadowColor}"
@@ -83,7 +84,6 @@ in {
             }
             /* Button styling */
             button {
-              border-radius: 0.15rem;
               min-height: 1rem;
               padding: 0.05rem 0.25rem;
             }
@@ -108,6 +108,11 @@ in {
             "file:///tmp tmp"
           ];
         };
+        ".config/gtk-4.0/gtk.css".text = ''
+          * {
+            border-radius: 0;
+          }
+        '';
         ".config/gtk-4.0/settings.ini" = {
           generator = lib.generators.toINI {};
           value = {

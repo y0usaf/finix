@@ -238,7 +238,6 @@
         else cassetteColors;
     }
     // lib.optionalAttrs (bar.style == "spine") {
-      radius = 4;
       spine-title = 12;
     };
 
@@ -292,19 +291,6 @@
     paper = "#F7F4ED";
     tape = "#5A4636";
     shadow = "#29292859";
-  };
-
-  bongoParameters = {
-    height = 80;
-    margin-bottom = 0;
-    sink = 90;
-    x-offset = -24;
-    duration = 100;
-    idle = 60000;
-    groove = 380;
-    strip = 32;
-    tick = frameTick;
-    frames = "${./assets/bongo-cat}";
   };
 
   shaderDir = "${flakeInputs.tomoe.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/tomoe/examples/shaders";
@@ -496,8 +482,6 @@ in {
         )
       else "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp
     )
-    "(defparameter +bongo-cat+ ${toLisp bongoParameters})"
-    (builtins.readFile ./lisp/bongo-cat.lisp)
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
     (builtins.readFile ./lisp/shader-wallpaper.lisp)
     "(defparameter +peek+ ${toLisp peekParameters})"

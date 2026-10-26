@@ -299,7 +299,7 @@ in {
                     (list (watch-file :state "${runtimeDir}/bolo/state"))
                     (unless (string= current "idle")
                       (list (shell-surface :bolo
-                            (ui :row :padding '(5 10 5 10) :gap 4 :radius 6
+                            (ui :row :padding '(5 10 5 10) :gap 4
                                 :background "#1e1e2e"
                                 :children
                                 (list (ui :icon
