@@ -1,36 +1,8 @@
 (in-package #:tomoe-user)
 
-(defun cassette--groove ()
-  (ui :row :children (list (ui :rect :width 1 :height (cassette--px 10) :background (cassette--c :groove))
-                           (ui :rect :width 1 :height (cassette--px 10) :background (cassette--c :shine)))))
-
-(defun cassette--plate (items grille edge)
-  (let* ((parts (loop for (item . rest) on (remove nil items)
-                      collect (ui :row :gap (cassette--px 4) :align :center :children (remove nil item))
-                      when rest collect (cassette--groove)))
-         (body (ui :row :height (cassette--px 16) :align :center :gap (cassette--px 6)
-                   :padding (list 0 (cassette--px 6) 0 (cassette--px 6))
-                   :children (append (when (member grille '(:start :both)) (list (cassette--grille)))
-                                     parts
-                                     (when (member grille '(:end :both)) (list (cassette--grille)))))))
-    (when parts
-      (let ((plate (ui :column :align :stretch :background (cassette--c :face) :border 1 :border-color (cassette--c :ink)
-                       :children (list (ui :rect :height 1 :background (cassette--c :shine))
-                                       body
-                                       (ui :rect :height 1 :background (cassette--c :shade))))))
-        (if (eq edge :top)
-            (ui :column :align :stretch
-                :children (list plate (ui :row :height (cassette--shadow) :padding (list 0 0 0 (cassette--shadow))
-                                          :children (list (ui :rect :grow 1 :height (cassette--shadow) :background (cassette--c :shadow))))))
-            plate)))))
-
 (defun cassette--line (items edge)
-  (let* ((modules (getf +cassette+ :modules))
-         (pair (getf +cassette+ :center-between))
-         (inset (getf +cassette+ :inset))
-         (seam (loop for (a b) on modules
-                     for index from 1
-                     when (and b (eq a (first pair)) (eq b (second pair))) return index)))
+  (let ((inset (getf +cassette+ :inset))
+        (seam (cassette--split)))
     (flet ((half (plate justify padding)
              (ui :row :width 0 :grow 1 :justify justify :padding padding :children (remove nil (list plate)))))
       (ui :row :align :start :justify :center
@@ -38,10 +10,6 @@
                         (list (half (cassette--plate (subseq items 0 seam) :start edge) :end (list 0 inset 0 0))
                               (half (cassette--plate (nthcdr seam items) :end edge) :start (list 0 0 0 inset)))
                         (remove nil (list (cassette--plate items :both edge))))))))
-
-(defun cassette--shadow () (cassette--px 2))
-
-(defun cassette--height (edge) (+ (cassette--px 16) 4 (if (eq edge :top) (cassette--shadow) 0)))
 
 (define-extension "bar" (:reads (:system :services :data :outputs)
                          :state (list :cpu nil :memory nil :gpu nil))

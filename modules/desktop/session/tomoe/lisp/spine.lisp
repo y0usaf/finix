@@ -114,6 +114,30 @@ this is a float or a fullscreen window, which the spine then sits beneath."
                      (< (getf entry :y) (+ (getf box :y) (getf box :height)))
                      (< (getf box :y) (+ (getf entry :y) (getf entry :height))))))
 
+(defun spine--fullscreen-p (snapshot output)
+  (loop for entry in (context snapshot :layout)
+        thereis (and (getf entry :visible) (getf entry :fullscreen)
+                     (<= (getf entry :x) (getf output :x) (+ (getf entry :x) (getf entry :width) -1))
+                     (<= (getf entry :y) (getf output :y) (+ (getf entry :y) (getf entry :height) -1)))))
+
+(defun spine--plates (items output focal snapshot)
+  (let ((split (or (cassette--split) (length items)))
+        (layer (if (spine--fullscreen-p snapshot output) :bottom :top)))
+    (loop for edge in '(:top :bottom)
+          for plate = (cassette--plate (if (eq edge :top) (subseq items 0 split) (nthcdr split items)) :both edge)
+          for height = (cassette--height edge)
+          when plate
+            collect (apply #'shell-surface (intern (format nil "~A-~A" edge (getf output :name)) :keyword) plate
+                           :output (getf output :name) :layer layer
+                           :background "#00000000" :blur t :click-through t
+                           (if focal
+                               (list :anchors '(:top)
+                                     :margin (list (- (+ (getf focal :top) (if (eq edge :top) 0 (getf focal :height)))
+                                                      (round height 2))
+                                                   0 0 0))
+                               (list :anchors (list edge) :margin (if (eq edge :top) '(-1 0 0 0) '(0 0 -1 0))
+                                     :exclusive-zone (1- height)))))))
+
 (define-extension "bar" (:reads (:system :services :data :outputs :layout)
                          :state (list :cpu nil :memory nil :gpu nil))
     (snapshot state event)
@@ -125,6 +149,11 @@ this is a float or a fullscreen window, which the spine then sits beneath."
          (output (and seam (find (getf seam :output) (context snapshot :outputs)
                                  :key (lambda (o) (getf o :name)) :test #'equal)))
          (scale (and output (/ (getf output :scale-120 120) 120)))
+         (narrow (remove-if-not (lambda (o) (deck--narrow-p (list :output o))) (context snapshot :outputs)))
+         (focal (state-value snapshot :focal-frame))
+         (items (when narrow
+                  (loop for module in (getf +cassette+ :modules)
+                        collect (cassette--module module state snapshot))))
          (hot (loop for probe in '(:cpu :gpu) thereis (cassette--hot-p (getf (getf state probe) :temp)))))
     (values state
             (append (list (interval :sample (getf +cassette+ :sample))
@@ -138,5 +167,7 @@ this is a float or a fullscreen window, which the spine then sits beneath."
                                                          (round (- (getf seam :x) (getf output :x)) scale))
                                            :layer (if (spine--covered-p snapshot seam) :bottom :top)
                                            :background "#00000000" :blur t
-                                           :click-through t :slide t))))
+                                           :click-through t :slide t)))
+                    (loop for o in narrow
+                          append (spine--plates items o (and (equal (getf focal :output) (getf o :name)) focal) snapshot)))
             nil)))

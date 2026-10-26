@@ -121,3 +121,37 @@
         :children (loop repeat 4
                         collect (ui :row :gap hole
                                     :children (loop repeat 6 collect (ui :rect :width hole :height hole :background (cassette--c :hole))))))))
+
+(defun cassette--groove ()
+  (ui :row :children (list (ui :rect :width 1 :height (cassette--px 10) :background (cassette--c :groove))
+                           (ui :rect :width 1 :height (cassette--px 10) :background (cassette--c :shine)))))
+
+(defun cassette--plate (items grille edge)
+  (let* ((parts (loop for (item . rest) on (remove nil items)
+                      collect (ui :row :gap (cassette--px 4) :align :center :children (remove nil item))
+                      when rest collect (cassette--groove)))
+         (body (ui :row :height (cassette--px 16) :align :center :gap (cassette--px 6)
+                   :padding (list 0 (cassette--px 6) 0 (cassette--px 6))
+                   :children (append (when (member grille '(:start :both)) (list (cassette--grille)))
+                                     parts
+                                     (when (member grille '(:end :both)) (list (cassette--grille)))))))
+    (when parts
+      (let ((plate (ui :column :align :stretch :background (cassette--c :face) :border 1 :border-color (cassette--c :ink)
+                       :children (list (ui :rect :height 1 :background (cassette--c :shine))
+                                       body
+                                       (ui :rect :height 1 :background (cassette--c :shade))))))
+        (if (eq edge :top)
+            (ui :column :align :stretch
+                :children (list plate (ui :row :height (cassette--shadow) :padding (list 0 0 0 (cassette--shadow))
+                                          :children (list (ui :rect :grow 1 :height (cassette--shadow) :background (cassette--c :shadow))))))
+            plate)))))
+
+(defun cassette--shadow () (cassette--px 2))
+
+(defun cassette--height (edge) (+ (cassette--px 16) 4 (if (eq edge :top) (cassette--shadow) 0)))
+
+(defun cassette--split ()
+  (let ((pair (getf +cassette+ :center-between)))
+    (loop for (a b) on (getf +cassette+ :modules)
+          for index from 1
+          when (and b (eq a (first pair)) (eq b (second pair))) return index)))

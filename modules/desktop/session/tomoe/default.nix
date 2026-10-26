@@ -392,7 +392,7 @@ in {
       style = lib.mkOption {
         type = lib.types.enum ["panels" "gap" "cassette" "spine"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores wallust. spine: the same parts on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores wallust. spine: the same parts on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
       };
 
       modules = lib.mkOption {
