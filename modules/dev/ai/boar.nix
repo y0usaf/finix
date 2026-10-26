@@ -30,6 +30,7 @@
           sidekick = "openai-codex/gpt-6.1-sol";
         };
         ascii = true;
+        toolView = "headers";
         keys = {
           furrowNew = ["alt+t" "ctrl+n"];
           furrowRename = ["alt+r"];
