@@ -25,12 +25,13 @@
 (defun spine--gauge (label percent detail &optional hot)
   (let ((percent (max 0 (min 100 (round (or percent 0))))))
     (ui :column :align :center :gap (cassette--px 2)
-        :children (list (spine--text label (cassette--c :dim) 7)
-                        (spine--ladder (/ percent 100))
-                        (ui :row :align :end
-                            :children (list (spine--text (format nil "~D" percent) (cassette--c :ink))
-                                            (spine--text "%" (cassette--c :dim) 7)))
-                        (when detail (spine--text detail (if hot (cassette--c :orange) (cassette--c :dim)) 7))))))
+        :children (remove nil
+                          (list (spine--text label (cassette--c :dim) 7)
+                                (spine--ladder (/ percent 100))
+                                (ui :row :align :end
+                                    :children (list (spine--text (format nil "~D" percent) (cassette--c :ink))
+                                                    (spine--text "%" (cassette--c :dim) 7)))
+                                (when detail (spine--text detail (if hot (cassette--c :orange) (cassette--c :dim)) 7)))))))
 
 (defun spine--counter ()
   (ui :column :align :stretch :gap (cassette--px 1)
@@ -43,9 +44,10 @@
       (spine--parts (string-upcase (clock-text (getf +cassette+ :date))))
     (declare (ignore rest))
     (ui :column :align :center :gap (cassette--px 2)
-        :children (list (when day (spine--text day (cassette--c :dim) 7))
-                        (when date (spine--text date (cassette--c :ink)))
-                        (when month (spine--text month (cassette--c :dim) 7))))))
+        :children (remove nil
+                          (list (when day (spine--text day (cassette--c :dim) 7))
+                                (when date (spine--text date (cassette--c :ink)))
+                                (when month (spine--text month (cassette--c :dim) 7)))))))
 
 (defun spine--stacked (text color)
   (ui :column :align :center
