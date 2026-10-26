@@ -681,6 +681,26 @@
         "type": "github"
       }
     },
+    "leverage": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793020731,
+        "narHash": "sha256-yJcILU+cQfGcFKfhJ3dNmfWinVwz0UqNnbuWYap71Io=",
+        "ref": "refs/heads/main",
+        "rev": "882063f1734e79a2cfdf92c8c678e3823bd93139",
+        "revCount": 1,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/leverage-linux.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/leverage-linux.git"
+      }
+    },
     "linear-cli": {
       "inputs": {
         "nixpkgs": [
@@ -1488,6 +1508,7 @@
         "glide-browser": "glide-browser",
         "grok-bot": "grok-bot",
         "iets": "iets",
+        "leverage": "leverage",
         "linear-cli": "linear-cli",
         "mado": "mado",
         "manzil": "manzil",

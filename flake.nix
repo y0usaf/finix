@@ -93,6 +93,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    leverage = {
+      url = "git+ssh://git@github.com/y0usaf/leverage-linux.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
