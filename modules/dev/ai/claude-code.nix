@@ -13,7 +13,6 @@
     </shell>'';
 in {
   environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
-    model = "claude-sonnet-5-5";
     effortLevel = "xhigh";
     permissions.defaultMode = "bypassPermissions";
     skipDangerousModePermissionPrompt = true;
