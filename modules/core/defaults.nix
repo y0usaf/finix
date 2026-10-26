@@ -39,14 +39,14 @@
         description = "Background opacity of terminals, GTK windows and the tomoe rail; the compositor's blur shows through the rest.";
       };
       passes = lib.mkOption {
-        type = lib.types.ints.positive;
-        default = 3;
-        description = "Blur passes behind glass surfaces.";
+        type = lib.types.ints.between 1 31;
+        default = 5;
+        description = "Blur downsample passes behind glass surfaces; each pass doubles the radius spread.";
       };
       offset = lib.mkOption {
-        type = lib.types.ints.positive;
-        default = 4;
-        description = "Blur sample offset in pixels.";
+        type = lib.types.numbers.between 0 1000;
+        default = 8;
+        description = "Blur sample offset in texels per pass; wider taps smear more at the same radius.";
       };
     };
   };
