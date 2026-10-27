@@ -297,6 +297,23 @@
         "type": "github"
       }
     },
+    "cudaterm-data": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793017472,
+        "narHash": "sha256-xD9H4KYFJ11xm9Ijq+osKdc/tpRKY8FGdtAo4Sj+CKI=",
+        "owner": "y0usaf",
+        "repo": "cudaterm",
+        "rev": "c1acd3202c27275a8d8061ed7547dd45eb42637d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "cudaterm",
+        "rev": "c1acd3202c27275a8d8061ed7547dd45eb42637d",
+        "type": "github"
+      }
+    },
     "cursors": {
       "inputs": {
         "nixpkgs": [
@@ -345,17 +362,18 @@
     },
     "ekko": {
       "inputs": {
+        "cudaterm-data": "cudaterm-data",
         "nixpkgs": [
           "nixpkgs"
         ],
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1793109694,
-        "narHash": "sha256-Qr+thhvq9l3O6l30zdtFLKPZBljLoISrCEQkwDH7eQE=",
+        "lastModified": 1793112159,
+        "narHash": "sha256-M8I49oSqega6HC/GKL23/Cxn9VcOCrEiLUO3TetTSmg=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "f4f7712eb6fff91acd084bf431d515329f006074",
+        "rev": "cf25828bda81e8119feaa45b8ede2261b0c874d1",
         "type": "github"
       },
       "original": {
