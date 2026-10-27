@@ -29,7 +29,7 @@
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
         fusion.opus-sol = {
           lead = "anthropic/claude-opus-5-5";
-          sidekick = "openai-codex/gpt-6.1-sol";
+          peer = "openai-codex/gpt-6.1-sol";
           gate = ["git commit" "git push" "switch-to-configuration switch"];
         };
         ascii = true;
