@@ -23,6 +23,7 @@
         defaultProvider = "anthropic";
         defaultModel = "claude-opus-5-5";
         defaultThinkingLevel = "xhigh";
+        fallbackModel = "openai-codex/gpt-6.1-sol";
         messages.whenBusy = "steer";
         memory.model = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
         fusion.opus-sol = {
