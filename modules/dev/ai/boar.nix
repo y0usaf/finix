@@ -30,6 +30,7 @@
         fusion.opus-sol = {
           lead = "anthropic/claude-opus-5-5";
           sidekick = "openai-codex/gpt-6.1-sol";
+          gate = ["git commit" "git push" "switch-to-configuration switch"];
         };
         ascii = true;
         toolView = "headers";
