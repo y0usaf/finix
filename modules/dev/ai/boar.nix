@@ -15,7 +15,7 @@
         subagents = {
           concurrency = -1;
           roles = {
-            scout = "fusion/opus-sol";
+            scout = "fusion/flash-terra";
             ship = "fusion/opus-sol";
           };
           defaultRole = "scout";
@@ -30,6 +30,11 @@
         fusion.opus-sol = {
           lead = "anthropic/claude-opus-5-5";
           peer = "openai-codex/gpt-6.1-sol";
+          gate = ["git commit" "git push" "switch-to-configuration switch"];
+        };
+        fusion.flash-terra = {
+          lead = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
+          peer = "openai-codex/gpt-6.1-terra";
           gate = ["git commit" "git push" "switch-to-configuration switch"];
         };
         ascii = true;
