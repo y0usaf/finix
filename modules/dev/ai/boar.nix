@@ -117,6 +117,46 @@
           };
         }
       ];
+      value.providers.openai-codex.models = [
+        {
+          id = "gpt-6.1-terra";
+          name = "GPT-6.1 Terra";
+          contextWindow = 500000;
+          maxTokens = 128000;
+          input = ["text" "image"];
+          reasoning = true;
+          compat = {
+            supportsAdditionalTools = true;
+            supportsMidConvoSystemMessages = true;
+            supportsOpenAIGrammarTools = true;
+            supportsToolSearch = true;
+          };
+          cost = {
+            input = 1;
+            output = 5;
+            cacheRead = 0.05;
+            cacheWrite = 1.25;
+            tiers = [
+              {
+                inputTokensAbove = 272000;
+                input = 2;
+                output = 7.5;
+                cacheRead = 0.1;
+                cacheWrite = 2.5;
+              }
+            ];
+          };
+          thinkingLevelMap = {
+            off = null;
+            minimal = "low";
+            low = "low";
+            medium = "medium";
+            high = "high";
+            xhigh = "xhigh";
+            max = "max";
+          };
+        }
+      ];
     };
     "${dir}/mcp.json" = {
       generator = lib.generators.toJSON {};
