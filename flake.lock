@@ -351,11 +351,11 @@
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1793106094,
-        "narHash": "sha256-8tv3G420dIhugadk9ma2Ed7Baw61zZmmeALUAA0zda8=",
+        "lastModified": 1793109694,
+        "narHash": "sha256-Qr+thhvq9l3O6l30zdtFLKPZBljLoISrCEQkwDH7eQE=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "c1229d12f8b896aa8d06e4fbcd6b5183cd3c8039",
+        "rev": "f4f7712eb6fff91acd084bf431d515329f006074",
         "type": "github"
       },
       "original": {
