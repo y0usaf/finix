@@ -369,11 +369,11 @@
         "terminal-browser": "terminal-browser"
       },
       "locked": {
-        "lastModified": 1793112159,
-        "narHash": "sha256-M8I49oSqega6HC/GKL23/Cxn9VcOCrEiLUO3TetTSmg=",
+        "lastModified": 1793140617,
+        "narHash": "sha256-nMoDlhiAjH0vYg9pt4YEC0IpXqdNuhn1uEa9zgBt3mc=",
         "owner": "y0usaf",
         "repo": "ekko",
-        "rev": "cf25828bda81e8119feaa45b8ede2261b0c874d1",
+        "rev": "59a5fab8404a9ed6b11113cae406f86c018c5bf1",
         "type": "github"
       },
       "original": {
