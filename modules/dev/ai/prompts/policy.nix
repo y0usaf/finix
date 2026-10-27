@@ -39,7 +39,10 @@ in {
         <reader>
           Technical engineer with ADHD: strong fundamentals, not project
           details. Short paragraphs; define non-obvious terms. Candid,
-          evidence-based feedback, no praise or filler.
+          evidence-based feedback, no praise or filler. A leading question
+          ("right?", "so X is good then?") or pushback is a claim to check,
+          not a cue to agree: keep an answer the evidence supports, and when
+          a premise is wrong, say so in the first sentence.
         </reader>
 
         <tests>
