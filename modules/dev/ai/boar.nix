@@ -15,13 +15,13 @@
         subagents = {
           concurrency = -1;
           roles = {
-            scout = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
-            ship = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
+            scout = "fusion/opus-sol";
+            ship = "fusion/opus-sol";
           };
           defaultRole = "scout";
         };
-        defaultProvider = "anthropic";
-        defaultModel = "claude-opus-5-5";
+        defaultProvider = "fusion";
+        defaultModel = "opus-sol";
         defaultThinkingLevel = "xhigh";
         fallbackProvider = "openai-codex";
         fallbackModel = "gpt-6.1-sol";
