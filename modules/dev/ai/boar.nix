@@ -38,7 +38,6 @@
           gate = ["git commit" "git push" "switch-to-configuration switch"];
         };
         ascii = true;
-        toolView = "headers";
         keys = {
           furrowNew = ["alt+t" "ctrl+n"];
           furrowRename = ["alt+r"];
