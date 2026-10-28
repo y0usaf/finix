@@ -27,7 +27,7 @@ in
     set -euo pipefail
 
     host="''${1:-frame-nixos.home}"
-    repo="''${FRAME_REPO:-/home/y0usaf/dev/maintaining/steam-frame-nixos}"
+    repo="''${FRAME_REPO:-${inputs.steam-frame-nixos}}"
     case "$host" in
       *[!A-Za-z0-9_.:@-]*)
         echo "invalid host: $host" >&2

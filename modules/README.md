@@ -53,15 +53,16 @@ hosts import it, and no host list loads it. `modules/hosts/android-phone/` is
 the nix-on-droid phone.
 
 `modules/hosts/steam-frame/` is the Steam Frame, which runs NixOS, not finix.
-Its system is the external steam-frame-nixos project. It is not a flake input:
-its build reads gitignored Valve files that only a `path:` ref of the live
-checkout sees, and a locked `path:` input would fail every evaluation of this
-flake whenever that checkout changed. `config.nix` is the personal layer, a
-NixOS module that reuses `tools/git.nix` and `tools/tmux.nix` and links files
-with manzil; `bolo.nix` runs bolo on the CPU and fetches its speech model at
-boot into the big home partition, out of the small root; `mado.nix` runs
-mado-view whenever SteamVR runs, so the headset shows the PC's mado stream.
-`deploy.nix` builds `finix-frame-deploy`, which extends the checkout's
+Its system is the external steam-frame-nixos project, pinned as the
+non-flake input `steam-frame-nixos`; `nix flake update steam-frame-nixos`
+moves it, and `FRAME_REPO=<checkout>` deploys a local checkout instead.
+`config.nix` is the personal layer, a NixOS module that sets the SSH keys the
+project otherwise reads from its gitignored `authorized_keys`, reuses
+`tools/git.nix` and `tools/tmux.nix` and links files with manzil; `bolo.nix`
+runs bolo on the CPU and fetches its speech model at boot into the big home
+partition, out of the small root; `mado.nix` runs mado-view whenever SteamVR
+runs, so the headset shows the PC's mado stream. `deploy.nix` builds
+`finix-frame-deploy`, which extends the project's
 `nixosConfigurations.frame` with manzil's NixOS module, that layer, manzil's
 static aarch64 linker (cross-built on this machine) and bolo's and mado's
 aarch64 packages (`--impure`), then copies and switches the Frame over ssh.

@@ -203,6 +203,11 @@
 
     frame-charge.url = "github:y0usaf/frame-charge";
 
+    steam-frame-nixos = {
+      url = "github:y0usaf/steam-frame-nixos";
+      flake = false;
+    };
+
     strictix = {
       url = "github:y0usaf/strictix";
       inputs.nixpkgs.follows = "nixpkgs";

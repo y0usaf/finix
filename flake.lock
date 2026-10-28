@@ -1594,6 +1594,7 @@
         "rudo": "rudo",
         "rush": "rush",
         "silva": "silva",
+        "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
         "tomoe": "tomoe"
       }
@@ -1713,6 +1714,22 @@
       "original": {
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/silva.git"
+      }
+    },
+    "steam-frame-nixos": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793204783,
+        "narHash": "sha256-tEp49FB9HHsWHsFGCnxaFXhaDC8HX1YqOatO6OFd/+Q=",
+        "owner": "y0usaf",
+        "repo": "steam-frame-nixos",
+        "rev": "a3a25ace9cd5367a8bcb1ce52f49dca998211369",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "steam-frame-nixos",
+        "type": "github"
       }
     },
     "strictix": {
