@@ -25,6 +25,7 @@
     frame.storage.poolUuid = "4bac5c02-4a89-4377-8388-ce55ef171552";
     frame.wivrn.enable = true;
     frame.framecorder.enable = true;
+    frame.framecolor.enable = true;
     frame.beatSaber.mods = ["SongCore" "BeatSaverDownloader"];
     frame.session.fhsPackages = [pkgs.stremio-linux-shell];
     nixpkgs.config.allowUnfreePredicate = pkg: lib.getName pkg == "stremio-linux-shell";
