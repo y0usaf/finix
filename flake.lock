@@ -1719,11 +1719,11 @@
     "steam-frame-nixos": {
       "flake": false,
       "locked": {
-        "lastModified": 1793204783,
-        "narHash": "sha256-tEp49FB9HHsWHsFGCnxaFXhaDC8HX1YqOatO6OFd/+Q=",
+        "lastModified": 1793207210,
+        "narHash": "sha256-Tfx+aK6jgcEscDweUYtaXOMJf5sSknxAmispAl5QBEI=",
         "owner": "y0usaf",
         "repo": "steam-frame-nixos",
-        "rev": "a3a25ace9cd5367a8bcb1ce52f49dca998211369",
+        "rev": "e889b0d596d45ff1815b792a32bbd5f18d97e26b",
         "type": "github"
       },
       "original": {
