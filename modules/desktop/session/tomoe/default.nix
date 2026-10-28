@@ -219,8 +219,14 @@
       segments = 10;
       colors =
         if bar.style == "spine"
-        then spineColors
-        else cassetteColors;
+        then {
+          dark = spineColors;
+          light = spineLightColors;
+        }
+        else {
+          dark = cassetteColors;
+          light = cassetteColors;
+        };
     }
     // lib.optionalAttrs (bar.style == "spine") {
       spine-title = 12;
@@ -230,8 +236,34 @@
     inherit (config.user.appearance.glass) passes offset;
   };
 
+  glassAlpha = lib.fixedWidthString 2 "0" (lib.toHexString (builtins.floor (config.user.appearance.glass.opacity * 255 + 0.5)));
+
+  spineLightColors = {
+    face = "#FFFFFF" + glassAlpha;
+    shine = "#FFFFFF59";
+    shade = "#0000001F";
+    ink = "#292928";
+    dim = "#6E6A62";
+    groove = "#0000001F";
+    hole = "#00000038";
+    lcd = "#C2C8B6";
+    rim = "#0000002E";
+    ghost = "#B3B9A6";
+    counter = "#0B0B0CCC";
+    counter-ghost = "#2B2A27";
+    amber = "#F5A833";
+    orange = "#ED5C1C";
+    teal = "#218C87";
+    green = "#5E8F2E";
+    red = "#D63C1A";
+    led-off = "#0000001A";
+    paper = "#FFFFFF33";
+    tape = "#5A4636";
+    shadow = "#00000026";
+  };
+
   spineColors = {
-    face = "#000000" + lib.fixedWidthString 2 "0" (lib.toHexString (builtins.floor (config.user.appearance.glass.opacity * 255 + 0.5)));
+    face = "#000000" + glassAlpha;
     shine = "#FFFFFF14";
     shade = "#00000066";
     ink = "#ECE7DC";
@@ -282,20 +314,20 @@
 
   shaderWallpaperParameters = {
     shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
-      ["${./shaders/cassette-squares.glsl}" 30 "cassette"]
-      ["${./shaders/cassette-led.glsl}" 30 "cassette"]
-      ["${./shaders/hex-spiral.glsl}" 30 "dopamine"]
-      ["${./shaders/dot-corridor.glsl}" 30 "pantera"]
-      ["${./shaders/su-ei.glsl}" 30 "bumblebee"]
-      ["${./shaders/glass-mound.glsl}" 30 "cassette"]
-      ["${shaderDir}/okazz-spheres.glsl" 30 "pantera"]
-      ["${./shaders/balatro.glsl}" 30 "p5"]
-      ["${shaderDir}/xmb.glsl" 30 "p3"]
-      ["${shaderDir}/aurora.glsl" 30 "eva01"]
-      ["${shaderDir}/stars.glsl" 24 "pantera"]
-      ["${shaderDir}/towers.glsl" 24 "p3"]
-      ["${shaderDir}/cubes.glsl" 30 "crush"]
-      ["${shaderDir}/okazz-glyphs.glsl" 30 "dopamine"]
+      ["${./shaders/cassette-squares.glsl}" 30 "light"]
+      ["${./shaders/cassette-led.glsl}" 30 "light"]
+      ["${./shaders/hex-spiral.glsl}" 30 "dark"]
+      ["${./shaders/dot-corridor.glsl}" 30 "dark"]
+      ["${./shaders/su-ei.glsl}" 30 "light"]
+      ["${./shaders/glass-mound.glsl}" 30 "light"]
+      ["${shaderDir}/okazz-spheres.glsl" 30 "dark"]
+      ["${./shaders/balatro.glsl}" 30 "dark"]
+      ["${shaderDir}/xmb.glsl" 30 "dark"]
+      ["${shaderDir}/aurora.glsl" 30 "dark"]
+      ["${shaderDir}/stars.glsl" 24 "dark"]
+      ["${shaderDir}/towers.glsl" 24 "dark"]
+      ["${shaderDir}/cubes.glsl" 30 "dark"]
+      ["${shaderDir}/okazz-glyphs.glsl" 30 "dark"]
     ];
     preview = {
       width = 256;
@@ -377,7 +409,7 @@ in {
       style = lib.mkOption {
         type = lib.types.enum ["panels" "gap" "cassette" "spine"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. spine: the same parts on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. spine: the same parts, inked for the light or dark theme, on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
       };
 
       modules = lib.mkOption {

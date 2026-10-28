@@ -31,6 +31,16 @@
           for value = (theme--resolve name table)
           when value append (list (intern (string-upcase name) :keyword) value))))
 
+(defun theme--mode (p)
+  (let ((bg (getf p :bg)))
+    (if (and bg (= (length bg) 7)
+             (> (loop for i from 1 by 2
+                      for weight in '(0.2126 0.7152 0.0722)
+                      sum (* weight (parse-integer bg :start i :end (+ i 2) :radix 16)))
+                127.5))
+        :light
+        :dark)))
+
 (define-extension "theme" (:reads (:focus) :state (list :palette nil :watch nil :focus nil :focus-at nil))
     (snapshot state event)
   (let ((type (getf event :type)) (name (getf event :name)) (focus (context snapshot :focus)))
@@ -50,6 +60,7 @@
                       (when (getf state :watch) (list (watch-file :palette (getf +hud-theme+ :palette-file))))
                       (when (plusp flash) (list (interval :tick (getf +hud-theme+ :tick))))
                       (when p (list (publish-state :hud-palette p)
+                                    (publish-state :theme-mode (theme--mode p))
                                     (publish-state :theme (list :base (hud--c p :bg) :text (hud--c p :fg)
                                                                 :accent (hud--c p :accent) :error (hud--c p :color1)
                                                                 :surface1 (hud--c p :color8)

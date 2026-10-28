@@ -8,7 +8,7 @@
   inherit (config.user.ui.fonts) mainFontName;
   shadowSize = "0.05rem";
   shadowRadius = "0.05rem";
-  shadowColor = "rgba(0, 0, 0, 0.3)";
+  shadowColor = "alpha(@theme_bg_color, 0.3)";
   glassOpacity = toString config.user.appearance.glass.opacity;
 in {
   options.user.ui.gtk = {
@@ -39,7 +39,6 @@ in {
           generator = lib.generators.toINI {};
           value = {
             Settings = {
-              gtk-application-prefer-dark-theme = 1;
               gtk-cursor-theme-name = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}.deepin-dark.xcursorThemeName;
               gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";
@@ -56,7 +55,7 @@ in {
             /* Global element styling */
             * {
               font-family: "${mainFontName}";
-              color: white;
+              color: @theme_fg_color;
               background: transparent;
               outline-width: 0;
               outline-offset: 0;
@@ -92,7 +91,7 @@ in {
               background: transparent;
             }
             window {
-              background: rgba(0, 0, 0, ${glassOpacity});
+              background: alpha(@theme_bg_color, ${glassOpacity});
             }
           '';
         };
@@ -117,7 +116,6 @@ in {
           generator = lib.generators.toINI {};
           value = {
             Settings = {
-              gtk-application-prefer-dark-theme = 1;
               gtk-cursor-theme-name = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}.deepin-dark.xcursorThemeName;
               gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";

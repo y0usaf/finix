@@ -2,7 +2,9 @@
 
 (defun cassette--px (n) (max 1 (round (* n (getf +cassette+ :scale)))))
 
-(defun cassette--c (key) (getf (getf +cassette+ :colors) key))
+(defvar *cassette-mode* :dark)
+
+(defun cassette--c (key) (getf (getf (getf +cassette+ :colors) *cassette-mode*) key))
 
 (defun cassette--text (text color)
   (ui :text :text text :size (cassette--px 11) :line-height (cassette--px 11) :color color :font (getf +cassette+ :font)))

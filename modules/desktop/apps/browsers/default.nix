@@ -95,11 +95,6 @@
         installation_mode = "force_installed";
         allowed_in_private_browsing = true;
       };
-      "pywalfox@frewacom.org" = {
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/pywalfox/latest.xpi";
-        installation_mode = "force_installed";
-        allowed_in_private_browsing = true;
-      };
       "conventional-comments-addon@pullpo.io" = {
         install_url = "https://addons.mozilla.org/firefox/downloads/latest/conventional-comments-pullpo/latest.xpi";
         installation_mode = "force_installed";
@@ -111,8 +106,8 @@
   lockedPrefs = {
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
 
-    "browser.theme.content-theme" = 0;
-    "browser.theme.toolbar-theme" = 0;
+    "browser.theme.content-theme" = 2;
+    "browser.theme.toolbar-theme" = 2;
     "browser.uidensity" = 1;
     "browser.nova.enabled" = true;
 
@@ -180,7 +175,6 @@ in {
         + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
       extraPolicies = policies // {DisableFirefoxAccounts = false;};
     })
-    pkgs.pywalfox-native
     (pkgs.wrapFirefox (pkgs.callPackage "${flakeInputs.glide-browser}/package.nix" {}) {
       pname = "glide-browser";
       extraPrefs =
@@ -210,18 +204,6 @@ in {
         };
       };
     };
-    ".glide-browser/native-messaging-hosts/pywalfox.json" = {
-      generator = lib.generators.toJSON {};
-      value = {
-        name = "pywalfox";
-        description = "Native messaging host for Pywalfox";
-        path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
-          exec ${pkgs.pywalfox-native}/bin/pywalfox start
-        ''}";
-        type = "stdio";
-        allowed_extensions = ["pywalfox@frewacom.org"];
-      };
-    };
     ".librewolf/profiles.ini" = {
       generator = lib.generators.toINI {};
       value = {
@@ -238,17 +220,5 @@ in {
       };
     };
     ".librewolf/${userName}/chrome/userChrome.css".text = builtins.readFile ./userChrome.css;
-    ".librewolf/native-messaging-hosts/pywalfox.json" = {
-      generator = lib.generators.toJSON {};
-      value = {
-        name = "pywalfox";
-        description = "Native messaging host for Pywalfox";
-        path = "${pkgs.writeShellScript "pywalfox-wrapper" ''
-          exec ${pkgs.pywalfox-native}/bin/pywalfox start
-        ''}";
-        type = "stdio";
-        allowed_extensions = ["pywalfox@frewacom.org"];
-      };
-    };
   };
 }

@@ -6,7 +6,6 @@
   schemes = lib.importJSON ./colorschemes.json;
 
   targets = {
-    "colors.json" = [".cache/wal/colors.json"];
     "discord-colors.css" = [".config/Vencord/themes/palette.css" ".config/vesktop/themes/palette.css"];
     "foot-colors.ini" = [".cache/theme/foot.ini"];
     "gtk-colors.css" = [".cache/theme/gtk.css"];
@@ -14,13 +13,7 @@
   };
 
   render = scheme: text: let
-    values =
-      scheme.colors
-      // scheme.special
-      // {
-        alpha = "100";
-        wallpaper = "";
-      };
+    values = scheme.colors // scheme.special;
     hex = lib.removePrefix "#";
     channel = offset: value: toString (lib.fromHexString (builtins.substring offset 2 (hex value)));
     filters = {
@@ -51,12 +44,21 @@
     }) (builtins.readDir ./templates))
   schemes));
 
+  gtkThemes = {
+    dark = "Adwaita-dark";
+    light = "Adwaita";
+  };
+
+  adwaitaDark = pkgs.writeTextDir "share/themes/Adwaita-dark/gtk-3.0/gtk.css" ''
+    @import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
+  '';
+
   theme = pkgs.writeShellApplication {
     name = "theme";
-    runtimeInputs = [pkgs.coreutils pkgs.pywalfox-native];
+    runtimeInputs = [pkgs.coreutils pkgs.dconf];
     text = ''
       case "''${1:-}" in
-        ${lib.concatStringsSep " | " (builtins.attrNames schemes)}) ;;
+        ${lib.concatMapStringsSep "\n  " (name: "${name}) gtk=${gtkThemes.${name}} ;;") (builtins.attrNames schemes)}
         *)
           echo "usage: theme <${lib.concatStringsSep "|" (builtins.attrNames schemes)}>" >&2
           exit 1
@@ -82,7 +84,8 @@
         fi
       done
 
-      pywalfox update
+      dconf write /org/gnome/desktop/interface/color-scheme "'prefer-$1'"
+      dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk'"
     '';
   };
 in {
@@ -92,9 +95,9 @@ in {
     default = name:
       if schemes ? ${name}
       then "${lib.getExe theme} ${name}"
-      else throw "theme: no colour scheme named ${name} in colorschemes.json";
-    description = "The shell command that applies a named colour scheme from colorschemes.json to every themed program at once.";
+      else throw "theme: no colour scheme named ${name} in colorschemes.json; there is light and dark";
+    description = "The shell command that applies the light or dark colour scheme from colorschemes.json to every themed program at once, and sets the desktop colour-scheme and GTK theme that portal-aware and GTK3 apps follow live.";
   };
 
-  config.environment.systemPackages = [theme];
+  config.environment.systemPackages = [theme pkgs.dconf adwaitaDark];
 }
