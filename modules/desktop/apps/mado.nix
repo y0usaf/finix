@@ -16,9 +16,10 @@
                          (nil "d" :move-up :stop-up) (nil "s" :move-left :stop-left)
                          (nil "c" :move-down :stop-down) (nil "f" :move-right :stop-right))
                         ("R" "Centre the headset panels" (nil "r" :home))
-                        ("Shift R" "Make the main panel follow your head, or set it down" ((:shift) "r" :follow)))
+                        ("Shift R" "Make the main panel follow your head, or set it down" ((:shift) "r" :follow))
+                        ("T" "Show or hide the room around you" (nil "t" :passthrough)))
                       (remove-if (lambda (group)
-                                   (some (lambda (bind) (member (third bind) '(:move-up :home :follow)))
+                                   (some (lambda (bind) (member (third bind) '(:move-up :home :follow :passthrough)))
                                          (cddr group)))
                                  +mado-keys+)))
       '';
