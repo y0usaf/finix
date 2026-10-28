@@ -5,12 +5,14 @@
   toplevel = pkgs.writeText "steam-frame-toplevel.nix" ''
     {repo}:
     let
-      config = ((builtins.getFlake ("path:" + repo)).nixosConfigurations.frame.extendModules {
+      frame = builtins.getFlake ("path:" + repo);
+      config = (frame.inputs.nixpkgs.lib.nixosSystem {
         specialArgs = {
           boloPackages = (builtins.getFlake "path:${inputs.bolo}").packages.aarch64-linux;
           madoPackages = (builtins.getFlake "path:${inputs.mado}").packages.aarch64-linux;
         };
         modules = [
+          frame.nixosModules.default
           "${inputs.manzil}/nix/modules/nixos.nix"
           (builtins.getFlake "path:${inputs.frame-charge}").nixosModules.default
           "${inputs.self}/modules/hosts/steam-frame/config.nix"
