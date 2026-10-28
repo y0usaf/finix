@@ -100,11 +100,19 @@
                       collect (spine--cell item)
                       when rest collect (spine--groove))))
 
-(defun spine--body (items)
+(defun spine--tray-height (tray)
+  "Logical height of the tray slot that TRAY, a published :shelf-tray request
+of (:count N :size PX), asks for at the top of the spine."
+  (* (getf tray :count 0) (getf tray :size 0)))
+
+(defun spine--body (items &optional (tray-height 0))
   (ui :column :align :stretch :background (cassette--c :face) :border 1 :border-color (cassette--c :rim)
-      :children (list (spine--cell (cassette--grille))
-                      (spine--run items)
-                      (spine--cell (cassette--grille)))))
+      :children (remove nil
+                        (list (when (plusp tray-height)
+                                (ui :rect :height tray-height :background (cassette--c :counter)))
+                              (spine--cell (cassette--grille))
+                              (spine--run items)
+                              (spine--cell (cassette--grille))))))
 
 (defun spine--covered-p (snapshot box)
   "Whether a placed window overlaps BOX. Tiled windows never reach the seam, so
@@ -154,6 +162,7 @@ this is a float or a fullscreen window, which the spine then sits beneath."
          (scale (and output (/ (getf output :scale-120 120) 120)))
          (narrow (remove-if-not (lambda (o) (deck--narrow-p (list :output o))) (context snapshot :outputs)))
          (focal (state-value snapshot :focal-frame))
+         (tray-height (spine--tray-height (state-value snapshot :shelf-tray)))
          (items (when narrow
                   (loop for module in (getf +cassette+ :modules)
                         collect (cassette--module module state snapshot))))
@@ -161,9 +170,16 @@ this is a float or a fullscreen window, which the spine then sits beneath."
     (values state
             (append (list (interval :sample (getf +cassette+ :sample))
                           (publish-state :hud-hot (and hot t)))
+                    (when (and output (plusp tray-height))
+                      (list (publish-state :shelf-tray-rect
+                                           (list :output (getf seam :output)
+                                                 :x (getf seam :x) :y (+ (getf seam :y) (round scale))
+                                                 :width (getf seam :width)
+                                                 :height (round (* tray-height scale))))))
                     (when output
                       (list (shell-surface :spine (spine--body (loop for module in (getf +cassette+ :modules)
-                                                                     collect (spine--module module state snapshot)))
+                                                                     collect (spine--module module state snapshot))
+                                                               tray-height)
                                            :output (getf output :name) :anchors '(:top :left)
                                            :width (round (getf seam :width) scale) :height (round (getf seam :height) scale)
                                            :margin (list (round (- (getf seam :y) (getf output :y)) scale) 0 0
