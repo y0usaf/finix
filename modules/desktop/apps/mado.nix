@@ -1,10 +1,12 @@
 {
   config,
   lib,
+  pkgs,
   flakeInputs,
   ...
 }: {
   config = lib.mkIf config.hardware.nvidia.enable {
+    environment.systemPackages = [flakeInputs.mado.packages.${pkgs.stdenv.hostPlatform.system}.mado-send];
     user.ui.tomoe.extraConfig =
       flakeInputs.mado.lib.tomoe
       + ''
