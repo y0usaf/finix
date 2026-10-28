@@ -32,6 +32,12 @@
           peer = "openai-codex/gpt-6.1-sol";
           gate = ["git commit" "git push" "switch-to-configuration switch"];
         };
+        fusion.opus-sol-cosign = {
+          lead = "anthropic/claude-opus-5-5";
+          peer = "openai-codex/gpt-6.1-sol";
+          gate = ["git commit" "git push" "switch-to-configuration switch"];
+          cosign = true;
+        };
         fusion.terra-flash = {
           lead = "openai-codex/gpt-6.1-terra";
           peer = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
