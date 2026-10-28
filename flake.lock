@@ -1740,11 +1740,11 @@
     "steam-frame-nixos": {
       "flake": false,
       "locked": {
-        "lastModified": 1793207210,
-        "narHash": "sha256-Tfx+aK6jgcEscDweUYtaXOMJf5sSknxAmispAl5QBEI=",
+        "lastModified": 1793210199,
+        "narHash": "sha256-XhHf6Ykw1EIQNUi5PoGmxDVvRQPU0JleJj6PC+BUI7I=",
         "owner": "y0usaf",
         "repo": "steam-frame-nixos",
-        "rev": "e889b0d596d45ff1815b792a32bbd5f18d97e26b",
+        "rev": "c2d2ad34932719520fd598e0691b1fd702076edb",
         "type": "github"
       },
       "original": {
