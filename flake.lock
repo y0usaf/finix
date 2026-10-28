@@ -67,16 +67,16 @@
         "pi-rs": "pi-rs"
       },
       "locked": {
-        "lastModified": 1793192016,
-        "narHash": "sha256-o8agjO8U1TwsE55X3Kpe2DFB6awWlTiJrJXeZunBfPw=",
+        "lastModified": 1793196400,
+        "narHash": "sha256-VEMp2q1lJylzqi4mGCFUl6efTtHfmtFuJBSKsqnOmas=",
         "ref": "refs/heads/main",
-        "rev": "486d8f1fa383e07feedc68e8a07533f29418752e",
-        "revCount": 628,
+        "rev": "160a11d0e92f7ea014dfb02d06c9f72d5fcdd319",
+        "revCount": 629,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "486d8f1fa383e07feedc68e8a07533f29418752e",
+        "rev": "160a11d0e92f7ea014dfb02d06c9f72d5fcdd319",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
@@ -1491,11 +1491,11 @@
         "piAi": "piAi"
       },
       "locked": {
-        "lastModified": 1793189669,
-        "narHash": "sha256-lIURMydUvli/G14sOogCZ2mhJp+8cp9yaxw+QVo9/vE=",
+        "lastModified": 1793194795,
+        "narHash": "sha256-URwNbhQ6i5hDMRLgrzYHaK5tMe2IQQggtdTcWvD3jhQ=",
         "owner": "y0usaf",
         "repo": "pi-rs",
-        "rev": "9fac0ff6608d7cbb5cffa29f924624c292e83a2f",
+        "rev": "519816553cc88447c4cde4a73dd7f59efdd05335",
         "type": "github"
       },
       "original": {
