@@ -19,7 +19,6 @@ in {
       enabledModels = [
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017"
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"
-        "opencode-go/deepseek-v4.1-flash"
         "anthropic/claude-opus-5-5"
         "anthropic/claude-sonnet-5-5"
       ];
