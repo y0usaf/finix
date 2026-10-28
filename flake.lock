@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "agent-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793203753,
+        "narHash": "sha256-r9Yh7rqBveD6gNJ2qi+7aM+Baz9VSQqmtxHFrKGGA5A=",
+        "ref": "refs/heads/main",
+        "rev": "4ba4367049faf3699fcd38094775ef76196294b5",
+        "revCount": 4,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/agent-overlay.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/agent-overlay.git"
+      }
+    },
     "ash": {
       "inputs": {
         "nixpkgs": [
@@ -266,11 +286,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793106022,
-        "narHash": "sha256-XPp9biOWdRe6drjBXMuz/yNWs+XlHqF46D3vkGJjIMQ=",
+        "lastModified": 1793208895,
+        "narHash": "sha256-Httssu05I+y4ZsfoEICscgP6TxLd8vQhzxzHPUfF13c=",
         "ref": "refs/heads/main",
-        "rev": "85b8e9008ad7c0ede7efb80c3a18c401a716b9ac",
-        "revCount": 1220,
+        "rev": "b4f65d45459bb5a962f52582729dd76272188ff0",
+        "revCount": 1222,
         "type": "git",
         "url": "ssh://git@github.com/sylvarant-ai/crest.git"
       },
@@ -1547,6 +1567,7 @@
     },
     "root": {
       "inputs": {
+        "agent-overlay": "agent-overlay",
         "ash": "ash",
         "autolith": "autolith",
         "boar-rs": "boar-rs",
