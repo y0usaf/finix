@@ -151,7 +151,7 @@
     mic-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"];
   };
 
-  palette = "${config.user.homeDirectory}/.cache/wallust/gtk-colors.css";
+  palette = "${config.user.homeDirectory}/.cache/theme/gtk.css";
 
   frameTick = 33;
 
@@ -172,28 +172,13 @@
     then builtins.ceil (28.0 * bar.scale) + 2 * gaps
     else gaps;
 
-  hudThemeParameters =
-    {
-      palette-file = palette;
-      palette-command = "mkdir -p ${lib.escapeShellArg (dirOf palette)} && { cat ${lib.escapeShellArg palette} 2>/dev/null || true; }";
-      border = 2;
-      focus-flash = 220;
-      tick = frameTick;
-    }
-    // lib.optionalAttrs cassette {
-      palette = {
-        bg = "#F4F1EA";
-        fg = "#292928";
-        accent = "#ED5C1C";
-        color1 = "#C8401A";
-        color2 = "#4E7A3A";
-        color3 = "#A86B0C";
-        color4 = "#2F5D8A";
-        color5 = "#8A4F7D";
-        color6 = "#218C87";
-        color8 = "#CCC7BA";
-      };
-    };
+  hudThemeParameters = {
+    palette-file = palette;
+    palette-command = "mkdir -p ${lib.escapeShellArg (dirOf palette)} && { cat ${lib.escapeShellArg palette} 2>/dev/null || true; }";
+    border = 2;
+    focus-flash = 220;
+    tick = frameTick;
+  };
 
   barParameters = {
     modules = map keyword bar.modules;
@@ -296,21 +281,21 @@
   shaderDir = "${flakeInputs.tomoe.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/tomoe/examples/shaders";
 
   shaderWallpaperParameters = {
-    shaders = [
-      ["${./shaders/cassette-squares.glsl}" 30]
-      ["${./shaders/cassette-led.glsl}" 30]
-      ["${./shaders/hex-spiral.glsl}" 30]
-      ["${./shaders/dot-corridor.glsl}" 30]
-      ["${./shaders/su-ei.glsl}" 30]
-      ["${./shaders/glass-mound.glsl}" 30]
-      ["${shaderDir}/okazz-spheres.glsl" 30]
-      ["${./shaders/balatro.glsl}" 30]
-      ["${shaderDir}/xmb.glsl" 30]
-      ["${shaderDir}/aurora.glsl" 30]
-      ["${shaderDir}/stars.glsl" 24]
-      ["${shaderDir}/towers.glsl" 24]
-      ["${shaderDir}/cubes.glsl" 30]
-      ["${shaderDir}/okazz-glyphs.glsl" 30]
+    shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
+      ["${./shaders/cassette-squares.glsl}" 30 "cassette"]
+      ["${./shaders/cassette-led.glsl}" 30 "cassette"]
+      ["${./shaders/hex-spiral.glsl}" 30 "dopamine"]
+      ["${./shaders/dot-corridor.glsl}" 30 "pantera"]
+      ["${./shaders/su-ei.glsl}" 30 "bumblebee"]
+      ["${./shaders/glass-mound.glsl}" 30 "cassette"]
+      ["${shaderDir}/okazz-spheres.glsl" 30 "pantera"]
+      ["${./shaders/balatro.glsl}" 30 "p5"]
+      ["${shaderDir}/xmb.glsl" 30 "p3"]
+      ["${shaderDir}/aurora.glsl" 30 "eva01"]
+      ["${shaderDir}/stars.glsl" 24 "pantera"]
+      ["${shaderDir}/towers.glsl" 24 "p3"]
+      ["${shaderDir}/cubes.glsl" 30 "crush"]
+      ["${shaderDir}/okazz-glyphs.glsl" 30 "dopamine"]
     ];
     preview = {
       width = 256;
@@ -392,7 +377,7 @@ in {
       style = lib.mkOption {
         type = lib.types.enum ["panels" "gap" "cassette" "spine"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores wallust. spine: the same parts on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. spine: the same parts on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
       };
 
       modules = lib.mkOption {

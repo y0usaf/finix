@@ -34,7 +34,7 @@
 (define-extension "theme" (:reads (:focus) :state (list :palette nil :watch nil :focus nil :focus-at nil))
     (snapshot state event)
   (let ((type (getf event :type)) (name (getf event :name)) (focus (context snapshot :focus)))
-    (cond ((and (eq type :exec) (eq name :palette) (eql (getf event :code) 0))
+    (cond ((and (eq type :exec) (member name '(:palette :reread)) (eql (getf event :code) 0))
            (setf (getf state :palette) (or (theme--palette (getf event :stdout)) (getf state :palette))
                  (getf state :watch) t))
           ((and (eq type :watch) (eq name :palette))
@@ -45,7 +45,8 @@
            (p (or fixed (getf state :palette)))
            (flash (hud--decay (getf state :focus-at) (getf +hud-theme+ :focus-flash))))
       (values state
-              (append (unless fixed (list (exec-async :palette (getf +hud-theme+ :palette-command))))
+              (append (unless fixed (list (exec-async (if (getf state :watch) :reread :palette)
+                                                          (getf +hud-theme+ :palette-command))))
                       (when (getf state :watch) (list (watch-file :palette (getf +hud-theme+ :palette-file))))
                       (when (plusp flash) (list (interval :tick (getf +hud-theme+ :tick))))
                       (when p (list (publish-state :hud-palette p)

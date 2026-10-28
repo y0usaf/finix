@@ -7,8 +7,11 @@
     ".config/cmus"
   ];
   environment.systemPackages = [pkgs.cmus];
-  manzil.users."${config.user.name}".files.".config/cmus/rc".text = ''
-    colorscheme wallust-auto
+  manzil.users."${config.user.name}".files = {
+    ".config/cmus/rc".text = ''
+      colorscheme palette
 
-  '';
+    '';
+    ".config/cmus/palette.theme".text = builtins.readFile ./cmus.theme;
+  };
 }

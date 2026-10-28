@@ -64,7 +64,7 @@ in {
             @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-4.css");
             @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-5.css");
             @import url("file:///home/${userName}/.config/Vencord/themes/system-font.css");
-            @import url("file:///home/${userName}/.config/Vencord/themes/wallust-colors.css");
+            @import url("file:///home/${userName}/.config/Vencord/themes/palette.css");
             @import url("file:///home/${userName}/.config/Vencord/themes/square.css");
           '';
         };
@@ -155,7 +155,7 @@ in {
         autoUpdate = true;
         autoUpdateNotification = true;
         useQuickCss = true;
-        enabledThemes = ["wallust-colors.css"];
+        enabledThemes = ["palette.css"];
         themeLinks = [];
         frameless = false;
         transparent = false;

@@ -9,7 +9,6 @@
       wget = ''wget --hsts-file="$XDG_DATA_HOME/wget-hsts"'';
       lintcheck = "clear; statix check .; deadnix .";
       lintfix = "clear; statix fix .; deadnix .";
-      wallust = "wt";
       claude = "claude --allow-dangerously-skip-permissions";
       buncodex = "bunx --bun @openai/codex";
       gemini = "bunx --bun @google/gemini-cli@preview";
@@ -82,11 +81,6 @@ in {
     manzil.users."${config.user.name}".files = {
       ".config/rush/profile.rush".text = ''
         . /etc/profile
-
-        if command -v wallust >/dev/null 2>&1; then
-          ${lib.concatMapStringsSep "\n" (dir: "mkdir -p \"$HOME/${dir}\"") [".cache/wal" ".cache/wallust" ".config/Vencord/settings" ".config/vesktop/settings"]}
-          ${pkgs.wallust}/bin/wallust cs "$HOME/.config/wallust/colorschemes/pantera.json"
-        fi
 
         for file_path in "$HOME/Tokens"/*; do
           [ -f "$file_path" ] || continue

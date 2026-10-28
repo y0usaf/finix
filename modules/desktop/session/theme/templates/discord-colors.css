@@ -1,4 +1,3 @@
-/* Discord color palette from wallust */
 :root {
   --base-red: {{ color1 }} !important;
   --base-green: {{ color2 }} !important;

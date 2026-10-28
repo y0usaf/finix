@@ -49,6 +49,31 @@
       "cursor": "#0B0902"
     }
   },
+  "cassette": {
+    "colors": {
+      "color0": "#F4F1EA",
+      "color1": "#C8401A",
+      "color2": "#4E7A3A",
+      "color3": "#A86B0C",
+      "color4": "#2F5D8A",
+      "color5": "#8A4F7D",
+      "color6": "#218C87",
+      "color7": "#292928",
+      "color8": "#9A958A",
+      "color9": "#ED5C1C",
+      "color10": "#5E8F2E",
+      "color11": "#F5A833",
+      "color12": "#2F5D8A",
+      "color13": "#8A4F7D",
+      "color14": "#2BB0A8",
+      "color15": "#1F1F1E"
+    },
+    "special": {
+      "background": "#F4F1EA",
+      "foreground": "#292928",
+      "cursor": "#ED5C1C"
+    }
+  },
   "crush": {
     "colors": {
       "color0": "#241A50",

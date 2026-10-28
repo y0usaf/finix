@@ -21,7 +21,7 @@ in {
       generator = lib.generators.toINI {};
       value = {
         main = {
-          include = "~/.cache/wallust/colors_foot.ini";
+          include = "~/.cache/theme/foot.ini";
           term = "xterm-256color";
           font =
             "${uiFonts.mainFontName}:size=${toString config.user.appearance.termFontSize}, "

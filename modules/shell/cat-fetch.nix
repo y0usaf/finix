@@ -1,18 +1,10 @@
 {lib, ...}: {
   user.shell.rcExtra = lib.mkAfter ''
     print_cats() {
-      if [ -f "$HOME/.cache/wallust/shell-colors.sh" ]; then
-        . "$HOME/.cache/wallust/shell-colors.sh"
-        local tomoe_colour="$WALLUST_COLOR13" # Magenta
-        local moon_colour="$WALLUST_COLOR2"   # Green
-        local ekko_colour="$WALLUST_COLOR12"  # Cyan
-        local rudo_colour="$WALLUST_COLOR9"   # Bright red
-      else
-        local tomoe_colour='\033[38;5;13m'
-        local moon_colour='\033[38;5;2m'
-        local ekko_colour='\033[38;5;12m'
-        local rudo_colour='\033[38;5;9m'
-      fi
+      local tomoe_colour='\033[38;5;13m'
+      local moon_colour='\033[38;5;2m'
+      local ekko_colour='\033[38;5;12m'
+      local rudo_colour='\033[38;5;9m'
       local reset='\033[0m'
       echo -e "''${tomoe_colour} ⟋|､      ''${moon_colour}  ⟋|､      ''${ekko_colour}  ⟋|､      ''${rudo_colour}  ⟋|､
     ''${tomoe_colour}(°､ ｡ 7    ''${moon_colour}(°､ ｡ 7    ''${ekko_colour}(°､ ｡ 7    ''${rudo_colour}(°､ ｡ 7

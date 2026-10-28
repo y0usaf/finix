@@ -12,7 +12,7 @@
       font-size = ${toString config.user.appearance.termFontSize}
       background-opacity = ${toString config.user.appearance.glass.opacity}
       line-height = ${config.user.ui.foot.lineHeight}
-      theme = ${config.user.homeDirectory}/.cache/wallust/colors_monstar
+      theme = ${config.user.homeDirectory}/.cache/theme/monstar
     '';
   };
 }
