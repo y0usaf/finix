@@ -67,16 +67,16 @@
         "pi-rs": "pi-rs"
       },
       "locked": {
-        "lastModified": 1793191317,
-        "narHash": "sha256-9ViI0g93nLEiiZ1sKmCI8C/EYmtGoRBuqt1tF1b0VzE=",
+        "lastModified": 1793192016,
+        "narHash": "sha256-o8agjO8U1TwsE55X3Kpe2DFB6awWlTiJrJXeZunBfPw=",
         "ref": "refs/heads/main",
-        "rev": "e1d9432ef5f9ab280bf8019da7f7471393541c17",
-        "revCount": 627,
+        "rev": "486d8f1fa383e07feedc68e8a07533f29418752e",
+        "revCount": 628,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "e1d9432ef5f9ab280bf8019da7f7471393541c17",
+        "rev": "486d8f1fa383e07feedc68e8a07533f29418752e",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
@@ -1340,26 +1340,19 @@
       }
     },
     "pi": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "nixpkgs-darwin-x64": [
-          "nixpkgs"
-        ]
-      },
+      "flake": false,
       "locked": {
-        "lastModified": 1791074476,
-        "narHash": "sha256-DjWJE7KcCdNF/M3RrO76rKCSd6oFLo2dX9wFT0nwEXk=",
+        "lastModified": 1791531608,
+        "narHash": "sha256-D37ic+vmdwufO2t7d7kCNPrFCzTZnOWhjh2oaLw5gTI=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "cd32f7725fdbddbaecdff5b1e68491563394e0ca",
+        "rev": "f1b2e77f5b13b2a199b1052cb79c235451afe7d7",
         "type": "github"
       },
       "original": {
         "owner": "earendil-works",
-        "ref": "v1.0.2",
         "repo": "pi",
+        "rev": "f1b2e77f5b13b2a199b1052cb79c235451afe7d7",
         "type": "github"
       }
     },
@@ -1489,18 +1482,66 @@
       }
     },
     "pi-rs": {
-      "flake": false,
+      "inputs": {
+        "nixpkgs": [
+          "boar-rs",
+          "nixpkgs"
+        ],
+        "pi": "pi",
+        "piAi": "piAi"
+      },
       "locked": {
-        "lastModified": 1793185385,
-        "narHash": "sha256-s2HlPHGDbwFSI1QCz0ffF19E2Da8Ed1GRyuF5aD4Eoc=",
+        "lastModified": 1793189669,
+        "narHash": "sha256-lIURMydUvli/G14sOogCZ2mhJp+8cp9yaxw+QVo9/vE=",
         "owner": "y0usaf",
         "repo": "pi-rs",
-        "rev": "0a4c890204ed7e36a618ed9773f660943d00a0f2",
+        "rev": "9fac0ff6608d7cbb5cffa29f924624c292e83a2f",
         "type": "github"
       },
       "original": {
         "owner": "y0usaf",
         "repo": "pi-rs",
+        "type": "github"
+      }
+    },
+    "piAi": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792835293,
+        "narHash": "sha256-SSnay9tohxuDT7+OzHbvKvA/5E8/CobwoTC07+W5h5U=",
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "bdb151774ed6bef2b5676bbff4669f20a0c233fe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "bdb151774ed6bef2b5676bbff4669f20a0c233fe",
+        "type": "github"
+      }
+    },
+    "pi_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-darwin-x64": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791074476,
+        "narHash": "sha256-DjWJE7KcCdNF/M3RrO76rKCSd6oFLo2dX9wFT0nwEXk=",
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "cd32f7725fdbddbaecdff5b1e68491563394e0ca",
+        "type": "github"
+      },
+      "original": {
+        "owner": "earendil-works",
+        "ref": "v1.0.2",
+        "repo": "pi",
         "type": "github"
       }
     },
@@ -1542,7 +1583,7 @@
         "oh-my-pi": "oh-my-pi",
         "paseo": "paseo",
         "phi": "phi",
-        "pi": "pi",
+        "pi": "pi_2",
         "pi-accounts": "pi-accounts",
         "pi-ampersand": "pi-ampersand",
         "pi-chronobreak": "pi-chronobreak",
