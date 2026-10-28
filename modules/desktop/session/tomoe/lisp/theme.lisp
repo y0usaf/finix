@@ -51,7 +51,8 @@
                       (when p (list (publish-state :hud-palette p)
                                     (publish-state :theme (list :base (hud--c p :bg) :text (hud--c p :fg)
                                                                 :accent (hud--c p :accent) :error (hud--c p :color1)
-                                                                :surface1 (hud--c p :color8)))))
+                                                                :surface1 (hud--c p :color8)
+                                                                :subtext0 (hud--mix (hud--c p :bg) (hud--c p :fg) 0.78)))))
                       (list (settings :border (list :width (getf +hud-theme+ :border) :radius 0
                                                     :focused (hud--mix (hud--c p :accent) (hud--c p :fg) flash)
                                                     :unfocused (hud--c p :color8)))))
