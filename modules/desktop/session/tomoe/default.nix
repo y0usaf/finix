@@ -320,6 +320,7 @@
       ["${./shaders/dot-corridor.glsl}" 30 "dark"]
       ["${./shaders/su-ei.glsl}" 30 "light"]
       ["${./shaders/glass-mound.glsl}" 30 "light"]
+      ["${shaderDir}/liquify.glsl" 30 "light"]
       ["${shaderDir}/okazz-spheres.glsl" 30 "dark"]
       ["${./shaders/balatro.glsl}" 30 "dark"]
       ["${shaderDir}/xmb.glsl" 30 "dark"]
