@@ -2,8 +2,7 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   cpuThreads = 32;
   perThread = 100000;
 in {
@@ -19,8 +18,14 @@ in {
 
   finit = {
     tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
+    cgroups.build."cpu.weight" = 1;
     services = {
-      nix-daemon.cgroup.system."cpu.max" = cpuThreads / 2 * perThread;
+      nix-daemon.cgroup = lib.mkForce {
+        build = {
+          "cpu.max" = cpuThreads / 2 * perThread;
+          "pids.max" = 1048576;
+        };
+      };
       nacre.cgroup.system."cpu.max" = cpuThreads / 4 * perThread;
     };
   };
