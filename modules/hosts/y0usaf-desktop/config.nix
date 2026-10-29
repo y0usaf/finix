@@ -18,7 +18,7 @@ in {
 
   finit = {
     tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
-    cgroups.build."cpu.weight" = 1;
+    cgroups.build."cpu.idle" = 1;
     services = {
       nix-daemon.cgroup = lib.mkForce {
         build = {
