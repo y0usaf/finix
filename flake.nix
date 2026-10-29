@@ -201,11 +201,6 @@
 
     mado.url = "git+ssh://git@github.com/y0usaf/mado.git";
 
-    agent-overlay = {
-      url = "git+ssh://git@github.com/y0usaf/agent-overlay.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     frame-charge.url = "github:y0usaf/frame-charge";
 
     steam-frame-nixos = {

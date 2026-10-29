@@ -1,25 +1,5 @@
 {
   "nodes": {
-    "agent-overlay": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1793203753,
-        "narHash": "sha256-r9Yh7rqBveD6gNJ2qi+7aM+Baz9VSQqmtxHFrKGGA5A=",
-        "ref": "refs/heads/main",
-        "rev": "4ba4367049faf3699fcd38094775ef76196294b5",
-        "revCount": 4,
-        "type": "git",
-        "url": "ssh://git@github.com/y0usaf/agent-overlay.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/y0usaf/agent-overlay.git"
-      }
-    },
     "ash": {
       "inputs": {
         "nixpkgs": [
@@ -1567,7 +1547,6 @@
     },
     "root": {
       "inputs": {
-        "agent-overlay": "agent-overlay",
         "ash": "ash",
         "autolith": "autolith",
         "boar-rs": "boar-rs",
