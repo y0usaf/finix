@@ -54,11 +54,30 @@
         sourceProvenance = [lib.sourceTypes.binaryNativeCode];
       };
     };
+
+  registration =
+    pkgs.runCommand "tern-registration" {} ''
+      export HOME=$TMPDIR/home
+      export XDG_DATA_HOME=$HOME/.local/share
+      export XDG_CONFIG_HOME=$HOME/.config
+      export XDG_CACHE_HOME=$HOME/.cache
+      export XDG_STATE_HOME=$HOME/.local/state
+      mkdir -p "$HOME"
+      ${tern}/bin/tern register > /dev/null
+
+      install -d $out/share
+      cp -r "$XDG_DATA_HOME/applications" "$XDG_DATA_HOME/icons" $out/share/
+    '';
+
+  package = pkgs.symlinkJoin {
+    name = "tern-${version}";
+    paths = [tern registration];
+  };
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".config/tern"
     ".local/state/tern"
   ];
 
-  environment.systemPackages = [tern];
+  environment.systemPackages = [package];
 }
