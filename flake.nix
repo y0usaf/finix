@@ -44,7 +44,7 @@
     silva.url = "git+ssh://git@github.com/y0usaf/silva.git";
 
     boar-rs = {
-      url = "git+file:///home/y0usaf/dev/developing/boar-rs?rev=9f90c9a0ec58d0393938fe1adf1f80aa6d5adfba";
+      url = "git+file:///home/y0usaf/dev/developing/boar-rs?rev=7b3b495d65e174fe71e3cb34281c6e85b2b0729e";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
