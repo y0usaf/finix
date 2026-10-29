@@ -26,6 +26,7 @@
         fallbackProvider = "openai-codex";
         fallbackModel = "gpt-6.1-sol";
         messages.whenBusy = "steer";
+        furrows.openedIdleSeconds = 0;
         memory.model = "openai-codex/gpt-6-luna";
         fusion.opus-sol = {
           lead = "anthropic/claude-opus-5-5";
