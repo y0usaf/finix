@@ -21,7 +21,8 @@
   user.shell.rcExtra = lib.mkOrder 1600 ''
     if [ -z "''${EKKO_INSTANCE:-}" ] && [ -z "''${EKKO_SESSION_NAME:-}" ] &&
        [ -z "''${SSH_CONNECTION:-}" ] && [ -z "''${TMUX:-}" ] &&
-       [ -z "''${STY:-}" ] && [ "''${TERM:-}" != linux ] && [ -t 0 ] && [ -t 1 ]; then
+       [ -z "''${STY:-}" ] && [ -z "''${TERN_PANE:-}" ] &&
+       [ "''${TERM:-}" != linux ] && [ -t 0 ] && [ -t 1 ]; then
       case "$(${pkgs.coreutils}/bin/readlink /proc/self/fd/0)" in
         /dev/tty[0-9]*) ;;
         *) ${flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/ekko attach ;;
