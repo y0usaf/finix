@@ -30,6 +30,15 @@ in {
   config = {
     time.timeZone = "America/Toronto";
 
+    environment.etc."profile.d/system-path.sh".text = ''
+      case ":$PATH:" in
+        *:/run/current-system/sw/bin:*) ;;
+        *)
+          export PATH="$PATH:/etc/profiles/per-user/${user}/bin:${config.user.homeDirectory}/.nix-profile/bin:/run/wrappers/bin:/run/current-system/sw/bin"
+          ;;
+      esac
+    '';
+
     networking.hosts = {
       "127.0.0.1" = ["localhost"];
       "::1" = ["localhost"];
