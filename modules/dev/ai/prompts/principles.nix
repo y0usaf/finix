@@ -31,9 +31,9 @@
         that. Ship every dependency you keep inside the package.
       - **Unix.** Decisions stay out of machinery. Narrow interfaces: a feature
         lands in the module that owns it. Machine-readable output. State
-        inspectable without a debugger. Fail loudly on bad input; a command
-        that succeeds prints only its result. Generate what you would
-        hand-maintain. Measure before optimizing.
+        inspectable without a debugger. Fail loudly on bad input where it
+        enters; a command that succeeds prints only its result. Generate
+        what you would hand-maintain. Measure before optimizing.
 
       ## Architecture, when a system has these parts
 
