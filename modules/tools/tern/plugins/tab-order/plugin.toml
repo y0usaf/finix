@@ -1,0 +1,6 @@
+schema = 1
+id = "tab-order"
+name = "Tab Order"
+version = "0.1.0"
+description = "New tabs land right below the tab that had focus, not at the end of the list."
+window = "window.luau"

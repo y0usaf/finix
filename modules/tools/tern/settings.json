@@ -1,0 +1,43 @@
+{
+  "theme": "System",
+  "theme_dark": "titanium",
+  "copy_on_select": true,
+  "cursor": {
+    "programs": true
+  },
+  "contrast": "Always",
+  "layout": "Rail",
+  "font_size": 18,
+  "ui_font_size": 18,
+  "font_family": "Departure Mono",
+  "font_family_bold": "Departure Mono",
+  "font_family_italic": "Departure Mono",
+  "font_family_bold_italic": "Departure Mono",
+  "padding_x": 0,
+  "padding_y": 0,
+  "ui_font": "Departure Mono",
+  "code_font": "Departure Mono",
+  "tabs": "Vertical",
+  "system_title_bar": true,
+  "status_bar": true,
+  "material": "Glass",
+  "opacity": 0,
+  "blur": 0,
+  "surface_fold": true,
+  "agent_placement": "new_tab",
+  "snap_text": true,
+  "frames_queued": 1,
+  "renderer": "gpu",
+  "carly": {
+    "model": "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"
+  },
+  "keybinds": {
+    "ctrl+h": "focus_pane:left",
+    "ctrl+j": "next_tab",
+    "ctrl+k": "previous_tab",
+    "ctrl+l": "focus_pane:right",
+    "ctrl+shift+j": "move_tab_right",
+    "ctrl+shift+k": "move_tab_left",
+    "ctrl+tab": "show_previous_tab"
+  }
+}

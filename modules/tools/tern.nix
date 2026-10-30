@@ -73,11 +73,26 @@
     name = "tern-${version}";
     paths = [tern registration];
   };
+
+  configDir = ./tern;
+
+  files = lib.listToAttrs (map (file: {
+    name = ".config/tern/${lib.removePrefix "${toString configDir}/" (toString file)}";
+    value = {
+      type = "copy";
+      clobber = false;
+      force = false;
+      permissions = "0644";
+      source = file;
+    };
+  }) (lib.filesystem.listFilesRecursive configDir));
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".config/tern"
     ".local/state/tern"
   ];
+
+  manzil.users."${config.user.name}".files = files;
 
   environment.systemPackages = [package];
 }
