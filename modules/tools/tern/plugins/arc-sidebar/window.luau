@@ -90,10 +90,28 @@ local function promote(cx, list)
 	return kept
 end
 
+local FITS = 18
+
+local CENTRE = [[
+html.tabs-v #sidebar > nav.tn-vt {
+	display: flex !important;
+	flex-direction: column !important;
+	justify-content: center !important;
+	align-items: stretch !important;
+}
+html.tabs-v #sidebar > nav.tn-vt > .nav-group:first-child { margin-top: auto !important; }
+html.tabs-v #sidebar > nav.tn-vt > .nav-group:last-child { margin-bottom: auto !important; }
+]]
+
+local function centre()
+	tern.css("rail-centre", tab_count <= FITS and CENTRE or "")
+end
+
 local function recount(cx)
 	tab_count = #cx.session:tabs()
 	local current = cx.sessions:current()
 	space_name = current and current.name or ""
+	centre()
 	tern.chrome.refresh()
 end
 
@@ -104,6 +122,10 @@ tern.on("window_start", function(cx)
 		promote(cx, list)
 	end
 	recount(cx)
+	tern.timer(150, function()
+		centre()
+		tern.chrome.refresh()
+	end)
 end)
 
 tern.on("tab_created", function(_, cx)
