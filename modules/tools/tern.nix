@@ -7,6 +7,8 @@
   version = "0.9.7";
   build = "20261028-175324-c2f7563";
 
+  wpewebkit = import ../../pkgs/wpewebkit.nix {inherit pkgs;};
+
   src = pkgs.requireFile {
     name = "Tern-${version}-linux-x86_64.tar.gz";
     hashMode = "flat";
@@ -39,6 +41,8 @@
         libglvnd
         linux-pam
         webkitgtk_4_1
+        libwpe-fdo
+        wpewebkit
       ];
 
       installPhase = ''
