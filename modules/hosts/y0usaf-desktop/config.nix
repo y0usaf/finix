@@ -18,8 +18,31 @@ in {
 
   finit = {
     tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
-    cgroups.build."cpu.idle" = 1;
+    cgroups.build = {
+      "cpu.idle" = 1;
+      "cpu.max" = cpuThreads * perThread * 6 / 10;
+    };
     services = {
+      cargo-cgroup = {
+        description = "move session cargo builds into the build cgroup";
+        command = pkgs.writeShellScript "cargo-cgroup" ''
+          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.procps]}
+          cg=/sys/fs/cgroup/build/cargo
+          mkdir -p "$cg"
+          trap 'rmdir "$cg" 2>/dev/null; exit 0' TERM INT
+          while sleep 1; do
+            pids=$(pgrep -d, '^\.?(cargo|rustc|clippy-driver)')
+            while [ -n "$pids" ]; do
+              for pid in ''${pids//,/ }; do
+                case $(cat "/proc/$pid/cgroup" 2>/dev/null) in
+                  0::/user/*) echo "$pid" > "$cg/cgroup.procs" 2>/dev/null ;;
+                esac
+              done
+              pids=$(pgrep -d, -P "$pids")
+            done
+          done
+        '';
+      };
       nix-daemon.cgroup = lib.mkForce {
         build = {
           "cpu.max" = cpuThreads / 2 * perThread;
