@@ -67,16 +67,16 @@
         "pi-rs": "pi-rs"
       },
       "locked": {
-        "lastModified": 1793309694,
-        "narHash": "sha256-GPYSoNy6pEuHIfvOiTFa35GENDtpDuxlDpWtR9yo54A=",
+        "lastModified": 1793387174,
+        "narHash": "sha256-PAoeeoCH0PZPBxDxXalTC+m/leTn42BiNrc5MwJeRZ4=",
         "ref": "refs/heads/main",
-        "rev": "6dbed30a2009d41d1d50556fbbc3e466556976af",
-        "revCount": 647,
+        "rev": "fa0459b342efde1becc44fb6aee4e35cf344ccfd",
+        "revCount": 648,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "6dbed30a2009d41d1d50556fbbc3e466556976af",
+        "rev": "fa0459b342efde1becc44fb6aee4e35cf344ccfd",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
@@ -1488,14 +1488,15 @@
           "nixpkgs"
         ],
         "pi": "pi",
-        "piAi": "piAi"
+        "piAi": "piAi",
+        "piExtensions": "piExtensions"
       },
       "locked": {
-        "lastModified": 1793245106,
-        "narHash": "sha256-jwzyT98T2JUWa4dIYKQbGCTtd+K0eaXbFAoSEJSXYV8=",
+        "lastModified": 1793384890,
+        "narHash": "sha256-t5CQb8UlRZGPw32uOSU5y2vEd6A9My89JzcNQ4+Yz84=",
         "owner": "y0usaf",
         "repo": "pi-rs",
-        "rev": "6fcb768b4589e872bffe0f79e163e7e1935877af",
+        "rev": "18d6876fbb7bf1c76bfb25911d46727c00b172fe",
         "type": "github"
       },
       "original": {
@@ -1518,6 +1519,23 @@
         "owner": "earendil-works",
         "repo": "pi",
         "rev": "bdb151774ed6bef2b5676bbff4669f20a0c233fe",
+        "type": "github"
+      }
+    },
+    "piExtensions": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792621753,
+        "narHash": "sha256-N9NOpiiZTbOMDMV+CxvJAgtLjJJ1/8NJBGS0cFHkhsc=",
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "4a080252f06caf63a525d7873c5d94d3c23887e0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "4a080252f06caf63a525d7873c5d94d3c23887e0",
         "type": "github"
       }
     },
