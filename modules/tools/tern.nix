@@ -48,7 +48,7 @@
       installPhase = ''
         runHook preInstall
         install -Dm755 tern $out/bin/tern
-        wrapProgram $out/bin/tern --prefix GIO_EXTRA_MODULES : ${pkgs.glib-networking}/lib/gio/modules
+        wrapProgram $out/bin/tern --prefix GIO_EXTRA_MODULES : ${pkgs.glib-networking}/lib/gio/modules --prefix PATH : ${lib.makeBinPath [pkgs.bubblewrap]}
         runHook postInstall
       '';
 
