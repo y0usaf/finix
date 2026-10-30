@@ -1492,11 +1492,11 @@
         "piExtensions": "piExtensions"
       },
       "locked": {
-        "lastModified": 1793384890,
-        "narHash": "sha256-t5CQb8UlRZGPw32uOSU5y2vEd6A9My89JzcNQ4+Yz84=",
+        "lastModified": 1793395373,
+        "narHash": "sha256-x9hGVLbCWAxqVNCwdc7mH4wfTSJYwW8vxTXXLvmuOls=",
         "owner": "y0usaf",
         "repo": "pi-rs",
-        "rev": "18d6876fbb7bf1c76bfb25911d46727c00b172fe",
+        "rev": "83a60e1c88f08b56f0d61ea68c4b8544f35e6b39",
         "type": "github"
       },
       "original": {
