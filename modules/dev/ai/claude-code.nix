@@ -5,12 +5,12 @@
   ...
 }: let
   shell = ''
-    <shell>
-      In the Bash tool, `grep` and `find` are Claude Code's own ugrep and bfs.
-      grep skips binary files and, when recursive, gitignored ones, and can
-      reject complex regexes such as large bounded repeats. `command grep` and
-      `command find` run GNU grep and findutils.
-    </shell>'';
+    ## Shell
+
+    In the Bash tool, `grep` and `find` are Claude Code's own ugrep and bfs.
+    grep skips binary files and, when recursive, gitignored ones, and can
+    reject complex regexes such as large bounded repeats.
+    `command grep` and `command find` run GNU grep and findutils.'';
 in {
   environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
     effortLevel = "xhigh";
