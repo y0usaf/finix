@@ -67,16 +67,16 @@
         "pi-rs": "pi-rs"
       },
       "locked": {
-        "lastModified": 1793387174,
-        "narHash": "sha256-PAoeeoCH0PZPBxDxXalTC+m/leTn42BiNrc5MwJeRZ4=",
+        "lastModified": 1793398329,
+        "narHash": "sha256-l5M0k07Er3I1bVXc0cv850IRfZpGGbs2EssDEUMTU7Q=",
         "ref": "refs/heads/main",
-        "rev": "fa0459b342efde1becc44fb6aee4e35cf344ccfd",
-        "revCount": 648,
+        "rev": "c0e55085f9af7b379dc1118817188870d8242773",
+        "revCount": 650,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "fa0459b342efde1becc44fb6aee4e35cf344ccfd",
+        "rev": "c0e55085f9af7b379dc1118817188870d8242773",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
@@ -266,11 +266,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793289238,
-        "narHash": "sha256-4RbYkK/gyk5NyDHtwXM47TIltL1mkwnZRPqHQXWIHNM=",
+        "lastModified": 1793399203,
+        "narHash": "sha256-Gy0v924CIdCVqIKlVhyflugOhzHK8war8+XNeOnrpIg=",
         "ref": "refs/heads/main",
-        "rev": "76a11ac0f31fa6ec1ce9353b4ab4e4c6cec28d37",
-        "revCount": 1251,
+        "rev": "99fed92bfd3df535cff06f684c34ccdc8a9d988a",
+        "revCount": 1252,
         "type": "git",
         "url": "ssh://git@github.com/sylvarant-ai/crest.git"
       },
