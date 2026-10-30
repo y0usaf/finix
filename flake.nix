@@ -182,11 +182,6 @@
       flake = false;
     };
 
-    rudo = {
-      url = "github:y0usaf/rudo";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     ekko = {
       url = "github:y0usaf/ekko";
       inputs.nixpkgs.follows = "nixpkgs";

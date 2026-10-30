@@ -266,11 +266,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793244976,
-        "narHash": "sha256-avN81+gDE8IuSKUnLdY5pM8pTulLhatRqrxlo4KDp60=",
+        "lastModified": 1793289238,
+        "narHash": "sha256-4RbYkK/gyk5NyDHtwXM47TIltL1mkwnZRPqHQXWIHNM=",
         "ref": "refs/heads/main",
-        "rev": "28b8354ee79f50ddf2d7fcb13425caa9a4df283b",
-        "revCount": 1226,
+        "rev": "76a11ac0f31fa6ec1ce9353b4ab4e4c6cec28d37",
+        "revCount": 1251,
         "type": "git",
         "url": "ssh://git@github.com/sylvarant-ai/crest.git"
       },
@@ -284,11 +284,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1792937637,
-        "narHash": "sha256-6Lacjk63M/8iNMCVHYTnVcuzByM8DXiqreBHUDo95Mk=",
+        "lastModified": 1793017472,
+        "narHash": "sha256-xD9H4KYFJ11xm9Ijq+osKdc/tpRKY8FGdtAo4Sj+CKI=",
         "owner": "y0usaf",
         "repo": "cudaterm",
-        "rev": "2e3036033acfd548327a1072635fb22698fd4488",
+        "rev": "c1acd3202c27275a8d8061ed7547dd45eb42637d",
         "type": "github"
       },
       "original": {
@@ -1591,32 +1591,11 @@
         "pi-harness": "pi-harness",
         "pi-recap": "pi-recap",
         "pi-rlm": "pi-rlm",
-        "rudo": "rudo",
         "rush": "rush",
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
         "tomoe": "tomoe"
-      }
-    },
-    "rudo": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1776346068,
-        "narHash": "sha256-mpcg9s3LwAmigIPFiimJnl5JrUb6vJunvMjn+edU2Bg=",
-        "owner": "y0usaf",
-        "repo": "rudo",
-        "rev": "37b008af959295a813d379505357c1c40e798fd6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "repo": "rudo",
-        "type": "github"
       }
     },
     "rush": {
@@ -1887,11 +1866,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1793159977,
-        "narHash": "sha256-tVlGmoXfNDJe02mtxkTxo6DhxF+FrQYbrYl6nf8mXbE=",
+        "lastModified": 1793214538,
+        "narHash": "sha256-gOhIAz/h6Miapug/BLQPuBEv74tjGvK5O9LfOj9rOx0=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "2abbccb576832486f07bd75df5c0470973732b0e",
+        "rev": "2e5c871adad4e5b1d99cee72b320fce862a0cc47",
         "type": "github"
       },
       "original": {
