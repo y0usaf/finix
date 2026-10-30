@@ -1,5 +1,8 @@
 {
-  environment.etc."profile.d/tokens.sh".text = ''
+  config,
+  ...
+}: let
+  loader = ''
     for file_path in "$HOME/Tokens"/*; do
       [ -f "$file_path" ] || continue
       var_name=$(basename "$file_path" .txt)
@@ -18,4 +21,12 @@
     done
     unset file_path var_name content
   '';
+in {
+  manzil.users."${config.user.name}".files = {
+    ".config/tokens.sh".text = loader;
+
+    ".profile".text = ''
+      [ -r "$HOME/.config/tokens.sh" ] && . "$HOME/.config/tokens.sh"
+    '';
+  };
 }

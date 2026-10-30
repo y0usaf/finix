@@ -81,6 +81,7 @@ in {
     manzil.users."${config.user.name}".files = {
       ".config/rush/profile.rush".text = ''
         . /etc/profile
+        [ -r "$HOME/.config/tokens.sh" ] && . "$HOME/.config/tokens.sh"
       '';
 
       ".config/rush/config.rush".text = lib.mkMerge [
