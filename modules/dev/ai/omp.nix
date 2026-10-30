@@ -29,6 +29,7 @@ in {
           "${flakeInputs.pi-chronobreak}"
           "${flakeInputs.pi-recap}"
           "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
+          "${./omp-code-mode.ts}"
         ];
       };
     };
