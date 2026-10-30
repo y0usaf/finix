@@ -29,6 +29,7 @@ in {
           export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.procps]}
           cg=/sys/fs/cgroup/build/cargo
           mkdir -p "$cg"
+          echo ${toString (cpuThreads / 2 * perThread)} > "$cg/cpu.max" 2>/dev/null
           trap 'rmdir "$cg" 2>/dev/null; exit 0' TERM INT
           while sleep 1; do
             pids=$(pgrep -d, '^\.?(cargo|rustc|clippy-driver)')
