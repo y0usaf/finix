@@ -38,6 +38,7 @@
     "ctrl+l": "focus_pane:right",
     "ctrl+shift+j": "move_tab_right",
     "ctrl+shift+k": "move_tab_left",
-    "ctrl+tab": "show_previous_tab"
+    "ctrl+tab": "show_previous_tab",
+    "ctrl+delete": "close_tab"
   }
 }
