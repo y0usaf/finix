@@ -30,7 +30,7 @@
       pname = "tern";
       inherit version src;
 
-      nativeBuildInputs = [pkgs.autoPatchelfHook];
+      nativeBuildInputs = [pkgs.autoPatchelfHook pkgs.makeWrapper];
       buildInputs = [pkgs.stdenv.cc.cc.lib];
       runtimeDependencies = with pkgs; [
         wayland
@@ -38,11 +38,13 @@
         vulkan-loader
         libglvnd
         linux-pam
+        webkitgtk_4_1
       ];
 
       installPhase = ''
         runHook preInstall
         install -Dm755 tern $out/bin/tern
+        wrapProgram $out/bin/tern --prefix GIO_EXTRA_MODULES : ${pkgs.glib-networking}/lib/gio/modules
         runHook postInstall
       '';
 
