@@ -89,6 +89,8 @@
     };
   }) (lib.filesystem.listFilesRecursive configDir));
 in {
+  environment.variables.GIO_EXTRA_MODULES = lib.mkDefault "${pkgs.glib-networking}/lib/gio/modules";
+
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".config/tern"
     ".local/state/tern"
