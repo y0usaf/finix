@@ -13,20 +13,16 @@
   state = "${home}/.local/state/omp-box";
   json = lib.generators.toJSON {};
 
-  keyFiles = {
-    vercel-ai-gateway = "AI_GATEWAY_API_KEY";
-    openrouter = "OPENROUTER_API_KEY";
-    anthropic = "ANTHROPIC_API_KEY";
-    openai = "OPENAI_API_KEY";
-    gemini = "GEMINI_API_KEY";
-    celeris = "CELERIS_API_KEY";
-  };
+  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" { } (builtins.readFile ../../../omp-box/gateway-proxy.py);
+  gatewayUrl = "http://10.0.2.2:8899";
   files = {
     models = pkgs.writeText "models.json" (json catalog.models);
-    modelKeys = pkgs.writeText "models.yml" (
-      "providers:\n"
-      + lib.concatStrings (lib.mapAttrsToList (n: f: "  ${n}:\n    apiKey: \"!cat ${home}/Tokens/${f}.txt\"\n") keyFiles)
-    );
+    modelKeys = pkgs.writeText "models.yml" ''
+      providers:
+        vercel-ai-gateway:
+          baseUrl: ${gatewayUrl}
+          apiKey: "!echo unused"
+    '';
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel defaultThinkingLevel;
       inherit (catalog) enabledModels;
@@ -51,9 +47,9 @@
     specialArgs = {
       ompBox = {
         inherit user files;
-        shares = ["${home}/.omp/natives"] ++ cfg.shares;
+        shares = cfg.shares;
         sharesDir = "${state}/shares";
-        credentials = ["${home}/Tokens" "${home}/.config/git" "${home}/.config/gh"];
+        nativesDir = "${state}/natives";
         inherit (flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}) omp;
       };
     };
@@ -105,6 +101,18 @@ in {
       ''}";
     };
 
+    finit.services.omp-box-proxy = {
+      description = "omp gateway proxy";
+      user = user;
+      reload-signal = "none";
+      log = true;
+      environment = {
+        GATEWAY_KEY_FILE = "${home}/Tokens/AI_GATEWAY_API_KEY.txt";
+        HOME = home;
+      };
+      command = "${proxy}/bin/omp-gateway-proxy";
+    };
+
     finit.services.omp-box = {
       description = "omp NixOS microVM";
       user = user;
@@ -114,7 +122,9 @@ in {
         XDG_RUNTIME_DIR = "/run/user/${toString uid}";
       };
       command = "${pkgs.writeShellScript "omp-box-run" ''
-        mkdir -p ${state}/shares ${state}/grants ${home}/.omp/natives
+        mkdir -p ${state}/shares ${state}/grants ${state}/natives ${home}/.omp/natives
+        cp -al ${home}/.omp/natives/. ${state}/natives/ 2>/dev/null || cp -a ${home}/.omp/natives/. ${state}/natives/
+        for _ in $(seq 60); do ${pkgs.iproute2}/bin/ss -Hltn 'sport = :22422' | grep -q . || break; sleep 0.5; done
         rm -f ${state}/omp-box.sock ${state}/nixos.sock
         cd ${state}
         exec ${guest.config.microvm.declaredRunner}/bin/microvm-run
