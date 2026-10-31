@@ -193,6 +193,26 @@
         "type": "github"
       }
     },
+    "cleanker": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793467153,
+        "narHash": "sha256-/lsICGnf0mTpxZbXGcGHQ9xeuWXR2fHhr8ZS5xA0Jdw=",
+        "owner": "y0usaf",
+        "repo": "cleanker",
+        "rev": "dc70e04036a9f7ea6c4d8c0db42ce210d8f502c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "cleanker",
+        "type": "github"
+      }
+    },
     "codex-cli-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -1592,6 +1612,7 @@
         "bolo": "bolo",
         "claude-code-nix": "claude-code-nix",
         "claude-desktop-linux": "claude-desktop-linux",
+        "cleanker": "cleanker",
         "codex-cli-nix": "codex-cli-nix",
         "crest": "crest",
         "cudaterm": "cudaterm",

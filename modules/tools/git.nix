@@ -1,10 +1,11 @@
 {
   config,
+  flakeInputs,
   lib,
   pkgs,
   ...
 }: let
-  cleanker = import ../../pkgs/cleanker.nix {inherit pkgs;};
+  cleanker = flakeInputs.cleanker.packages."${pkgs.stdenv.hostPlatform.system}".default;
 in {
   environment.systemPackages = [
     pkgs.git
