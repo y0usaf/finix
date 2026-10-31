@@ -7,7 +7,8 @@ OWN_OWNERS = {"y0usaf","sylvarant-ai","Inscendai","thepresciencecompany","shodow
 LANG_OF_EXT = {"py":"Python","pyi":"Python","rs":"Rust","ts":"TypeScript","tsx":"Tsx","js":"JavaScript",
   "jsx":"JavaScript","mjs":"JavaScript","cjs":"JavaScript","go":"Go","nix":"Nix","lua":"Lua","c":"C","h":"C",
   "cpp":"Cpp","cc":"Cpp","hpp":"Cpp","cxx":"Cpp","cs":"CSharp","zig":"Zig","sh":"Bash","bash":"Bash","rb":"Ruby",
-  "swift":"Swift","kt":"Kotlin","scala":"Scala","ex":"Elixir","exs":"Elixir","hs":"Haskell","php":"Php","dart":"Dart"}
+  "swift":"Swift","kt":"Kotlin","scala":"Scala","ex":"Elixir","exs":"Elixir","hs":"Haskell","php":"Php","dart":"Dart",
+  "css":"Css","html":"Html","htm":"Html","yml":"Yaml","yaml":"Yaml"}
 KINDS = {"Rust":["line_comment","block_comment"],"Java":["line_comment","block_comment"],
          "Kotlin":["line_comment"],"Scala":["comment","block_comment"],"Dart":["comment","block_comment"]}
 DIRECTIVE = [
@@ -21,6 +22,9 @@ DIRECTIVE = [
   r"@vite-ignore", r"webpackIgnore", r"turbopackIgnore", r"webpackChunkName", r"webpackMode",
   r"@jest-environment", r"Copyright \(c\)", r"Copyright \d{4}", r"Permission is hereby granted",
   r"Apache License", r"MIT License", r"Licensed under", r"@generated", r"DO NOT EDIT",
+  r"^#\s*renovate:", r"^#\s*yamllint", r"^#\s*yaml-language-server", r"^#\s*editorconfig",
+  r"<!--\s*prettier-", r"<!--\s*markdownlint", r"<!--\s*htmlhint", r"<!--\s*cspell",
+  r"<!--#include", r"<!--\s*keep",
 ]
 DOC = [r"^///", r"^//!", r"^/\*\*", r"^/\*!"]
 KEEP_MD = [r"^README(\.|$)", r"^README$", r"^AGENTS\.md$"]
