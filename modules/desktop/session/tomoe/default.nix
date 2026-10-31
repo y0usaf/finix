@@ -485,6 +485,12 @@ in {
     (builtins.readFile ./lisp/theme.lisp)
     "(defparameter +glass+ ${toLisp glassParameters})"
     (builtins.readFile ./lisp/glass.lisp)
+    "(defparameter +window-shader+ ${toLisp {
+      shader = "${./shaders/window-lens.glsl}";
+      fps = 30;
+      bind = binding ["alt" "shift"] "s" "toggle" "Shader the focused window";
+    }})"
+    (builtins.readFile ./lisp/window-shader.lisp)
     (
       if bar.style == "gap"
       then "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/gap.lisp
