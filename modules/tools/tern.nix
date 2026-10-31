@@ -100,6 +100,39 @@
       source = file;
     };
   }) (lib.filesystem.listFilesRecursive configDir));
+
+  # `tern remote serve --user` admits any key in the target user's own
+  # ~/.ssh/authorized_keys. That is a different file from sshd's
+  # AuthorizedKeysFile here (/etc/ssh/authorized_keys.d/%u, forced in
+  # ./finix/common.nix), so a working `ssh server` says nothing about Tern:
+  # each host needs the other's key in that file. Only public halves live here.
+  ternPeers = {
+    y0usaf-desktop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6ZHkn1pACV406TM5yUCRt/874vybgpUW3sUKka9nAC y0usaf@y0usaf-desktop";
+    y0usaf-server = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINjN9qndKm1iN0ctrucDNRBkfcZqC7zbRKR8SCD9E7KW y0usaf@y0usaf-server";
+  };
+
+  # Append, never rewrite: the phone pairing adds its own key to this file, and
+  # it must stay a real writable file rather than a store symlink.
+  seedAuthorizedKeys = pkgs.writeShellScript "tern-seed-authorized-keys" ''
+    set -eu
+    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gawk]}
+    dir="$HOME/.ssh"
+    mkdir -p "$dir"
+    chmod 0700 "$dir"
+    auth="$dir/authorized_keys"
+    touch "$auth"
+    chmod 0600 "$auth"
+    add() {
+      kind="''${1%% *}"
+      blob="$(printf '%s' "$1" | cut -d' ' -f2)"
+      if awk -v k="$kind" -v b="$blob" '$1 == k && $2 == b { found = 1 } END { exit !found }' "$auth"; then
+        return 0
+      fi
+      printf '%s\n' "$1" >> "$auth"
+    }
+    ${lib.concatMapStringsSep "
+" (key: "add '${key}'") (lib.attrValues (lib.removeAttrs ternPeers [config.networking.hostName]))}
+  '';
 in {
   environment.variables.GIO_EXTRA_MODULES = lib.mkDefault "${pkgs.glib-networking}/lib/gio/modules";
 
@@ -110,6 +143,20 @@ in {
 
   manzil.users."${config.user.name}".files = files;
 
+  # A remote login starts a session daemon under XDG_RUNTIME_DIR. /run/user/<uid>
+  # normally appears at a graphical login (pam), which a headless host never has:
+  # the login then authenticates and fails to start the session with EACCES.
+  finit.tmpfiles.rules = [
+    "d /run/user/${toString config.users.users.${config.user.name}.uid} 0700 ${config.user.name} users"
+  ];
+
+  finit.tasks.tern-authorized-keys = {
+    description = "seed ~/.ssh/authorized_keys for tern remote (${config.user.name})";
+    user = config.user.name;
+    environment.HOME = config.user.homeDirectory;
+    command = seedAuthorizedKeys;
+  };
+
   finit.services.tern-remote = {
     description = "Tern remote sessions (${config.user.name})";
     user = config.user.name;
@@ -118,7 +165,7 @@ in {
       XDG_RUNTIME_DIR = "/run/user/${toString config.users.users.${config.user.name}.uid}";
     };
     command = "${package}/bin/tern remote serve --user --state-dir ${config.user.homeDirectory}/.config/tern";
-    conditions = ["net/lo/up"];
+    conditions = ["net/lo/up" "task/tmpfiles-setup/success"];
     log = true;
   };
 
