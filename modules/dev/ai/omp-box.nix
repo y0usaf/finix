@@ -13,8 +13,20 @@
   state = "${home}/.local/state/omp-box";
   json = lib.generators.toJSON {};
 
+  keyFiles = {
+    vercel-ai-gateway = "AI_GATEWAY_API_KEY";
+    openrouter = "OPENROUTER_API_KEY";
+    anthropic = "ANTHROPIC_API_KEY";
+    openai = "OPENAI_API_KEY";
+    gemini = "GEMINI_API_KEY";
+    celeris = "CELERIS_API_KEY";
+  };
   files = {
     models = pkgs.writeText "models.json" (json catalog.models);
+    modelKeys = pkgs.writeText "models.yml" (
+      "providers:\n"
+      + lib.concatStrings (lib.mapAttrsToList (n: f: "  ${n}:\n    apiKey: \"!cat ${home}/Tokens/${f}.txt\"\n") keyFiles)
+    );
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel defaultThinkingLevel;
       inherit (catalog) enabledModels;
@@ -38,6 +50,7 @@
         inherit user files;
         shares = ["${home}/.omp/natives"] ++ cfg.shares;
         sharesDir = "${state}/shares";
+        credentials = ["${home}/Tokens" "${home}/.config/git" "${home}/.config/gh"];
       };
     };
     modules = [
@@ -80,8 +93,10 @@ in {
                -o BatchMode=yes -o ConnectTimeout=1 ${user}@127.0.0.1 \
                mountpoint -q /mnt/shares 2>/dev/null; then
             ${pkg}/bin/omp-box reconcile
+            ${pkgs.coreutils}/bin/sleep 30
+          else
+            ${pkgs.coreutils}/bin/sleep 2
           fi
-          ${pkgs.coreutils}/bin/sleep 30
         done
       ''}";
     };

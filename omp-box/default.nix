@@ -28,18 +28,12 @@ let
       printf 'omp-box: %s is the box copy, not the host folder%s\n' "$PWD" "$hint" >&2
       seed="mkdir -p $(printf %q "$PWD") && "
     fi
-    env_prefix=""
-    for v in AI_GATEWAY_API_KEY OPENROUTER_API_KEY CELERIS_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY; do
-      eval "value=\''${''${v}:-}"
-      if [ -z "$value" ] && [ -r "$HOME/Tokens/$v.txt" ]; then value=$(cat "$HOME/Tokens/$v.txt"); fi
-      [ -n "$value" ] && env_prefix="$env_prefix$v=$(printf %q "$value") "
-    done
     tty=-T
     [ -t 0 ] && [ -t 1 ] && tty=-t
     exec ${pkgs.openssh}/bin/ssh -q -p 22422 -i "$key" \
       -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
       -o BatchMode=yes -o SendEnv=TERM $tty ${user}@127.0.0.1 \
-      "exec sh -c $(printf %q "$seed cd $(printf %q "$PWD") && exec env $env_prefix${omp}/bin/omp $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
+      "exec sh -c $(printf %q "$seed cd $(printf %q "$PWD") && exec ${omp}/bin/omp $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
   '';
   cli = pkgs.writeShellApplication {
     name = "omp-box";
