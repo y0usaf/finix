@@ -81,6 +81,12 @@
     paths = [tern registration];
   };
 
+  cmusTsp =
+    pkgs.writeScriptBin "cmus-tsp" ''
+      #!${pkgs.runtimeShell}
+      exec ${pkgs.python3}/bin/python3 ${config.user.homeDirectory}/dev/developing/tern-cmus/cmus-tsp "$@"
+    '';
+
   configDir = ./tern;
 
   files = lib.listToAttrs (map (file: {
@@ -103,5 +109,5 @@ in {
 
   manzil.users."${config.user.name}".files = files;
 
-  environment.systemPackages = [package];
+  environment.systemPackages = [package cmusTsp];
 }
