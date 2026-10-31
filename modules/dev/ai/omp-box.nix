@@ -67,20 +67,19 @@ in {
     finit.services.omp-box-grants = {
       description = "re-apply omp box folder grants";
       user = user;
-      depends = [ "omp-box" ];
       reload-signal = "none";
       environment = {
         HOME = home;
         XDG_STATE_HOME = "${home}/.local/state";
       };
       command = "${pkgs.writeShellScript "omp-box-grants" ''
-        for ((i = 0; i < 600; i++)); do
+        while :; do
           if ${pkgs.openssh}/bin/ssh -q -p 22422 -i ${state}/id_ed25519 \
                -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
                -o BatchMode=yes -o ConnectTimeout=1 ${user}@127.0.0.1 true 2>/dev/null; then
-            exec ${pkg}/bin/omp-box reconcile
+            ${pkg}/bin/omp-box reconcile
           fi
-          ${pkgs.coreutils}/bin/sleep 0.2
+          ${pkgs.coreutils}/bin/sleep 30
         done
       ''}";
     };
