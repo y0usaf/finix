@@ -349,7 +349,36 @@ for _, id in ipairs(LOCKED) do
 	end)
 end
 
+local FIXED = {
+	"pane_headers:never",
+	"pane_headers:split",
+	"pane_headers:always",
+	"status_bar",
+	"interface_style",
+}
+
+for _, id in ipairs(FIXED) do
+	pcall(function()
+		tern.override(id, function(cx)
+			cx:toast("info", "This config fixes the chrome")
+			return true
+		end)
+	end)
+end
+
+local PINNED = {
+	layout = "Rail",
+	tabs = "Horizontal",
+	pane_headers = "Never",
+	density = "Compact",
+	status_bar = true,
+	material = "Glass",
+}
+
 tern.on("window_start", function(cx)
+	pcall(function()
+		cx.settings:set_many(PINNED)
+	end)
 	if on.lock then
 		rail(cx)
 	end
