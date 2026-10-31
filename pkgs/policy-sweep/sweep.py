@@ -473,4 +473,8 @@ def main():
     print("TOTAL", dict(total))
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except BrokenPipeError:
+        sys.stdout = None
+        os._exit(0)
