@@ -2,5 +2,13 @@ schema = 1
 id = "ui-menu"
 name = "UI Menu"
 version = "0.1.0"
-description = "Palette toggles for this config's UI: rail width, spacing, rows, tabs, the rail lock, hidden chrome and the modals' frost."
+description = "Every UI tweak this config layers on Tern: a checklist block, palette toggles, and the rail lock."
+host = "host.luau"
 window = "window.luau"
+styles = ["ui-menu.css"]
+
+[[blocks]]
+id = "options"
+title = "UI options"
+icon = "sliders"
+palette = true

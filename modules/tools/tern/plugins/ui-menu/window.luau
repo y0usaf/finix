@@ -14,6 +14,27 @@ local TWEAKS = {
 		on = true,
 	},
 	{
+		id = "roomy",
+		label = "tall pickers",
+		group = "Chrome",
+		css = [[html.tn-themed #pick .cmdk.tn-pk {
+	display: flex;
+	flex-direction: column;
+	max-height: calc(87vh - 24px) !important;
+}
+html.tn-themed #pick .cmdk.tn-pk > .ck-top,
+html.tn-themed #pick .cmdk.tn-pk > .ck-foot {
+	flex: none;
+}
+html.tn-themed #pick .cmdk.tn-pk .ck-list {
+	max-height: none !important;
+	min-height: 0;
+	flex: 1 1 auto;
+}]],
+		on = true,
+		quiet = true,
+	},
+	{
 		id = "frost",
 		label = "modal frost",
 		group = "Glass",
@@ -30,6 +51,8 @@ html.tn-themed .tn-sc {
 }]],
 		on = true,
 	},
+
+
 	{
 		id = "width",
 		label = "rail width",
@@ -274,6 +297,21 @@ for _, t in ipairs(TWEAKS) do
 	by_id[t.id] = t
 end
 
+local saved = tern.kv.get("on")
+if type(saved) == "table" then
+	for _, t in ipairs(TWEAKS) do
+		if type(saved[t.id]) == "boolean" then
+			on[t.id] = saved[t.id]
+		end
+	end
+end
+
+local model = {}
+for _, t in ipairs(TWEAKS) do
+	model[#model + 1] = { id = t.id, label = t.label, group = t.group }
+end
+tern.kv.set("menu", model)
+
 local LOCKED = {
 	"layout:float",
 	"layout:tiles",
@@ -316,6 +354,20 @@ local function paint(t)
 	end
 end
 
+local function save(id)
+	local saved = tern.kv.get("on")
+	local out = if type(saved) == "table" then saved else {}
+	for _, t in ipairs(TWEAKS) do
+		if type(out[t.id]) ~= "boolean" then
+			out[t.id] = on[t.id]
+		end
+	end
+	if id then
+		out[id] = on[id]
+	end
+	tern.kv.set("on", out)
+end
+
 local function paint_all()
 	for _, t in ipairs(TWEAKS) do
 		paint(t)
@@ -329,32 +381,35 @@ local function toggle(cx, id)
 	end
 	on[id] = not on[id]
 	paint(t)
+	save(id)
 	if id == "lock" and on.lock then
 		rail(cx)
 	end
 	tern.chrome.refresh()
 end
 
-local function options(cx)
-	local items: { PickItem } = {}
-	for _, t in ipairs(TWEAKS) do
-		items[#items + 1] = {
-			label = t.label,
-			detail = on[t.id] and "on" or "off",
-			group = t.group,
-			current = on[t.id],
-			id = t.id,
-		}
-	end
-	cx:pick({ items = items, placeholder = "UI options", icon = "sliders", action = "toggle" })
-		:next(function(item: PickItem?, _err: string?, fresh: WindowCx?)
-			local next_cx = fresh or cx
-			if not item then
-				return
+local function watch()
+	tern.timer(250, function(cx)
+		local saved = tern.kv.get("on")
+		local changed = false
+		if type(saved) == "table" then
+			for _, t in ipairs(TWEAKS) do
+				local want = saved[t.id]
+				if type(want) == "boolean" and want ~= on[t.id] then
+					on[t.id] = want
+					paint(t)
+					if t.id == "lock" and want then
+						rail(cx)
+					end
+					changed = true
+				end
 			end
-			toggle(next_cx, item.id)
-			options(next_cx)
-		end)
+		end
+		if changed then
+			tern.chrome.refresh()
+		end
+		watch()
+	end)
 end
 
 tern.command({
@@ -362,7 +417,9 @@ tern.command({
 	title = "UI: options…",
 	icon = "sliders",
 	group = "UI",
-	run = options,
+	run = function(cx)
+		cx:new_block("ui-menu.options")
+	end,
 })
 
 for _, t in ipairs(TWEAKS) do
@@ -391,3 +448,5 @@ tern.chrome.status(function(pane)
 end)
 
 paint_all()
+save()
+watch()
