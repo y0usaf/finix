@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, bisect, collections, fnmatch, json, os, re, shutil, subprocess, sys, tempfile
+import argparse, bisect, collections, fnmatch, functools, json, os, re, shutil, subprocess, sys, tempfile
 
 SKIP_DIRS = {".git","node_modules","target","dist","build","result",".direnv","vendor","ref","corpus",
              "third_party","uv-cache",".venv","venv",".cache",".dioxus","engine-reference","subprojects"}
@@ -123,6 +123,36 @@ def error_nodes(files, lang):
     p = sh([ag(),"scan","--inline-rules",r,"--json=stream",*files])
     return sum(1 for l in p.stdout.splitlines() if '"ruleId"' in l)
 
+def scan_all(by_lang):
+    langs = [k for k, v in by_lang.items() if v]
+    if not langs: return {}
+    if len(langs) == 1:
+        lang = langs[0]
+        nodes = scan(by_lang[lang], lang) + embedded(by_lang[lang], lang)
+        out = collections.defaultdict(list)
+        for n in nodes: out[n["file"]].append(n)
+        return out
+    rules, files = [], []
+    for lang in langs:
+        ks = KINDS.get(lang, ["comment"])
+        rules.append("id: c_%s\nlanguage: %s\nrule:\n  any:\n%s" % (lang, lang, "".join("    - kind: %s\n" % k for k in ks)))
+        files.extend(by_lang[lang])
+    p = sh([ag(),"scan","--inline-rules","\n---\n".join(rules),"--json=stream",*files])
+    out = collections.defaultdict(list)
+    if p.returncode != 0 and not p.stdout.strip():
+        for lang in langs:
+            for n in scan(by_lang[lang], lang):
+                out[n["file"]].append(n)
+    else:
+        for line in p.stdout.splitlines():
+            if '"ruleId"' not in line: continue
+            try: n = json.loads(line)
+            except ValueError: continue
+            out[n["file"]].append(n)
+    for lang in langs:
+        for n in embedded(by_lang[lang], lang): out[n["file"]].append(n)
+    return out
+
 EMBED = {"Html": [("JavaScript","script_element","js"), ("Css","style_element","css")]}
 
 def embedded(files, lang):
@@ -143,14 +173,14 @@ def embedded(files, lang):
             os.unlink(tmp)
     return out
 
+KEEP_RE = re.compile("|".join("(?:%s)" % p for p in DIRECTIVE))
+DOC_RE = re.compile("|".join("(?:%s)" % p for p in DOC))
+
+@functools.lru_cache(maxsize=8192)
 def classified(text, strip_docs):
     t = text.strip()
-    for p in DIRECTIVE:
-        if re.search(p, t): return "keep"
-    if not strip_docs:
-        first = text.lstrip("\n")
-        for p in DOC:
-            if re.search(p, first): return "keep"
+    if KEEP_RE.search(t): return "keep"
+    if not strip_docs and DOC_RE.search(text.lstrip("\n")): return "keep"
     return "drop"
 
 def md_policy(rel):
@@ -188,12 +218,13 @@ def strip_src(src, nodes, strip_docs, containers=()):
         return starts[k] + len(lines[k])
     cuts = collections.defaultdict(list)
     dropped = set()
+    verdict = {id(n): classified(n["text"], strip_docs) for n in nodes}
     kept = [(n["range"]["byteOffset"]["start"], n["range"]["byteOffset"]["end"])
-            for n in nodes if classified(n["text"], strip_docs) == "keep"]
+            for n in nodes if verdict[id(n)] == "keep"]
     drops = [(n["range"]["byteOffset"]["start"], n["range"]["byteOffset"]["end"])
-             for n in nodes if classified(n["text"], strip_docs) == "drop"]
+             for n in nodes if verdict[id(n)] == "drop"]
     for n in nodes:
-        if classified(n["text"], strip_docs) == "keep": continue
+        if verdict[id(n)] == "keep": continue
         s = n["range"]["byteOffset"]["start"]; e = n["range"]["byteOffset"]["end"]
         inner = [c for c in containers
                  if c["range"]["byteOffset"]["start"] <= s and e <= c["range"]["byteOffset"]["end"]]
@@ -543,8 +574,7 @@ def main():
         s.add_argument("paths", nargs="*", default=[])
         s.add_argument("--strip-docs", action="store_true", help="also remove doc comments")
         s.add_argument("--format", action="store_true", help="run the repository formatter afterwards")
-        s.add_argument("--commit", action="store_true", help="commit each clean repository")
-        s.add_argument("--include-dirty", action="store_true")
+        s.add_argument("--commit", action="store_true", help="commit only the paths cleanker rewrote")
         s.add_argument("--force", action="store_true", help="touch explicitly disabled repos and referenced docs")
     for name in ("status","enroll","disenroll"):
         s = sub.add_parser(name)
@@ -576,10 +606,7 @@ def main():
     dry = a.cmd == "dry-run"
     total = collections.Counter()
     for path in repos:
-        was_clean = not dirty(path)
-        if not was_clean and not a.include_dirty:
-            print("%-52s skipped: dirty tree" % os.path.relpath(path, os.path.expanduser("~")))
-            total["dirty"] += 1; continue
+        index_before = git(path,"diff","--cached","--name-only").stdout.strip()
         ch = apply(path, a.strip_docs, dry=dry, fmt=a.format, force=a.force)
         n = collections.Counter(k for _, k, _ in ch)
         if not ch: continue
@@ -589,9 +616,18 @@ def main():
         for f, k, _ in ch:
             if k == "REJECT_SYNTAX": print("   rejected %s" % f)
         for k in n: total[k] += n[k]
-        if not dry and a.commit and was_clean:
-            git(path,"add","-u")
-            git(path,"commit","-q","-m","Clean comments and unreferenced prose")
+        if not dry and a.commit:
+            if index_before:
+                print("   not committed: the index already carries your changes")
+                total["uncommitted"] += 1
+                continue
+            touched = [f for f, k, _ in ch if k in {"strip","rm-md"}]
+            if touched:
+                git(path,"add","-u","--",*touched)
+                if git(path,"diff","--cached","--name-only").stdout.strip():
+                    git(path,"commit","-q","-m","Clean comments and unreferenced prose")
+                else:
+                    print("   nothing staged after cleaning")
     if dry: print("(dry run; nothing written)")
     print("total", dict(total))
 
