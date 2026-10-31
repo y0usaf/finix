@@ -11,6 +11,7 @@
   cfg = config.user.dev.ompBox;
   state = "${home}/.local/state/omp-box";
   json = lib.generators.toJSON {};
+  crest = flakeInputs.crest.packages.${pkgs.stdenv.hostPlatform.system};
 
   proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (builtins.readFile ../../../omp-box/gateway-proxy.py);
   gatewayUrl = "http://10.0.2.2:8899";
@@ -48,6 +49,7 @@
         inherit user files;
         shares = cfg.shares;
         sharesDir = "${state}/shares";
+        inherit crest;
         nativesDir = "${state}/natives";
         inherit (flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}) omp;
       };
