@@ -13,12 +13,13 @@ in {
     description = "Shared coding-agent provider and model catalog.";
     default = {
       defaultProvider = "vercel-ai-gateway";
-      defaultModel = "deepseek/deepseek-v4.1-flash-1017";
+      defaultModel = "deepseek/deepseek-v4.1-flash-1017-fast";
       defaultThinkingLevel = "max";
 
       enabledModels = [
-        "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017"
+        "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast"
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"
+        "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017"
         "anthropic/claude-opus-5-5"
         "anthropic/claude-sonnet-5-5"
       ];
@@ -42,6 +43,22 @@ in {
               input = 0.15;
               output = 0.6;
               cacheRead = 0.003;
+              cacheWrite = 0;
+            };
+          }
+          {
+            id = "deepseek/deepseek-v4.1-flash-1017-fast";
+            name = "DeepSeek V4.1 Flash 1017 Fast";
+            api = "anthropic-messages";
+            reasoning = true;
+            input = ["text" "image"];
+            compat.allowEmptySignature = true;
+            contextWindow = 1000000;
+            maxTokens = 384000;
+            cost = {
+              input = 0.6;
+              output = 2.4;
+              cacheRead = 0.014;
               cacheWrite = 0;
             };
           }
