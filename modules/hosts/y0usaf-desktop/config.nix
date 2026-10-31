@@ -56,6 +56,10 @@ in {
 
   providers.scheduler = {
     backend = "cron";
+    tasks.nix-gc = {
+      interval = "daily";
+      command = "${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +10 && ${pkgs.nix}/bin/nix-collect-garbage --delete-older-than 14d";
+    };
     tasks.btrbk-snapshots = {
       interval = "hourly";
       command = "${lib.getExe pkgs.btrbk} -q -c ${pkgs.writeText "btrbk.conf" ''
@@ -109,6 +113,10 @@ in {
     appearance = {
       termFontSize = 16;
       hyprcursorSize = 36;
+      glass = {
+        passes = 3;
+        offset = 4;
+      };
     };
 
     ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram" "frame"];
