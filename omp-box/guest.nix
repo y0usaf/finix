@@ -3,13 +3,14 @@ let
   user = ompBox.user;
   home = "/home/${user}";
   mountPoint = p: p;
+  fs9p = [ "trans=virtio" "version=9p2000.L" "msize=65536" "cache=loose" "x-systemd.after=systemd-modules-load.service" "x-initrd.mount" ];
 in {
   system.stateVersion = "24.05";
 
   microvm = {
     hypervisor = "qemu";
-    mem = 1024;
-    vcpu = 2;
+    mem = 4096;
+    vcpu = 4;
     shares =
       [ { tag = "ro-store"; source = "/nix/store"; mountPoint = "/nix/.ro-store"; } ]
       ++ map (p: { tag = "share-${builtins.substring 0 16 (builtins.hashString "sha1" p)}"; source = p; mountPoint = p; proto = "9p"; }) ompBox.shares
@@ -51,16 +52,22 @@ in {
   };
   security.sudo.wheelNeedsPassword = false;
 
-  fileSystems."${home}/.omp/run" = {
-    device = "tmpfs";
-    fsType = "tmpfs";
-    options = [ "mode=0700" "uid=1001" "gid=100" "size=512M" ];
-  };
-  fileSystems."${home}/.omp/agent" = {
-    device = "tmpfs";
-    fsType = "tmpfs";
-    options = [ "mode=0700" "uid=1001" "gid=100" "size=2G" ];
-  };
+  fileSystems = lib.mkMerge (
+    [ { "/nix/.ro-store".options = lib.mkForce fs9p; }
+      { "${home}/.omp/run" = {
+          device = "tmpfs";
+          fsType = "tmpfs";
+          options = [ "mode=0700" "uid=1001" "gid=100" "size=512M" ];
+        };
+      }
+      { "${home}/.omp/agent" = {
+          device = "tmpfs";
+          fsType = "tmpfs";
+          options = [ "mode=0700" "uid=1001" "gid=100" "size=2G" ];
+        };
+      }
+    ]
+  );
 
   systemd.services.omp-seed = {
     wantedBy = [ "multi-user.target" ];
