@@ -29,16 +29,9 @@ let
       seed="mkdir -p $(printf %q "$PWD") && "
     fi
     env_prefix=""
-    for file in "$HOME"/Tokens/*.txt; do
-      [ -f "$file" ] || continue
-      name=$(basename "$file" .txt)
-      case $name in [0-9]* | *[!A-Za-z0-9_]*) continue ;; esac
-      value=$(cat "$file") || continue
-      case $value in ''' | *[![:print:]]*) continue ;; esac
-      env_prefix="$env_prefix$name=$(printf %q "$value") "
-    done
-    for v in AI_GATEWAY_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY OPENROUTER_API_KEY GEMINI_API_KEY VERCEL_PERSONAL_TOKEN; do
+    for v in AI_GATEWAY_API_KEY OPENROUTER_API_KEY CELERIS_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY; do
       eval "value=\''${''${v}:-}"
+      if [ -z "$value" ] && [ -r "$HOME/Tokens/$v.txt" ]; then value=$(cat "$HOME/Tokens/$v.txt"); fi
       [ -n "$value" ] && env_prefix="$env_prefix$v=$(printf %q "$value") "
     done
     tty=-T
