@@ -10,7 +10,7 @@ let
       install -m 600 ${key} "$key"
     fi
     env_prefix=""
-    for v in ANTHROPIC_API_KEY OPENAI_API_KEY OPENROUTER_API_KEY GEMINI_API_KEY; do
+    for v in AI_GATEWAY_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY OPENROUTER_API_KEY GEMINI_API_KEY VERCEL_PERSONAL_TOKEN; do
       eval "value=\''${''${v}:-}"
       [ -n "$value" ] && env_prefix="$env_prefix$v=$(printf %q "$value") "
     done
