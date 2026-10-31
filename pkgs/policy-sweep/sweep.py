@@ -357,38 +357,33 @@ def hook() -> int:
     if os.path.exists(ig):
         patterns = [l.strip() for l in open(ig) if l.strip() and not l.lstrip().startswith("#")]
     bad = []
-    files = [f for f in staged(top) if not ignored(patterns, f)]
-    for f in files:
+    blobs, tmp_of = {}, {}
+    for f in staged(top):
+        if ignored(patterns, f): continue
         low = f.lower()
         if low.endswith((".md",".mdx")):
-            pol = md_policy(f)
-            if pol == "drop":
+            if md_policy(f) == "drop":
                 bad.append((f, 0, "markdown: only README and AGENTS survive; run `sweep apply --repo . --apply`"))
             continue
         ext = low.rsplit(".",1)[-1] if "." in os.path.basename(low) else ""
         lang = LANG_OF_EXT.get(ext)
         if not lang: continue
-        blob = subprocess.run(["git","-C",top,"show",":"+f],capture_output=True).stdout
-        fd, tmp = tempfile.mkstemp(suffix="." + ext, dir="/tmp")
+        data = subprocess.run(["git","-C",top,"show",":"+f],capture_output=True).stdout
+        fd, tmp = tempfile.mkstemp(suffix="." + ext)
         os.close(fd)
-        with open(tmp,"wb") as fh: fh.write(blob)
-        nodes = scan([tmp], lang)
-        if lang in {"TypeScript","Tsx","JavaScript"}:
-            containers = scan([tmp], lang, ["jsx_expression"])
-        else:
-            containers = []
-        adds = None
-        for n in nodes:
+        with open(tmp,"wb") as fh: fh.write(data)
+        blobs[f] = (lang, data, tmp)
+        tmp_of[tmp] = f
+    by_lang = collections.defaultdict(list)
+    for f, (lang, data, tmp) in blobs.items(): by_lang[lang].append(tmp)
+    for lang, tmps in by_lang.items():
+        for n in scan(tmps, lang):
+            f = tmp_of[n["file"]]
             if classified(n["text"], False) == "keep": continue
-            s = n["range"]["byteOffset"]["start"]
-            line = blob.count(b"\n", 0, s) + 1
-            if adds is None: adds = added_lines(top, f)
-            if line in adds or (n["range"]["start"]["line"] + 1) in adds:
+            line = blobs[f][1].count(b"\n", 0, n["range"]["byteOffset"]["start"]) + 1
+            if line in added_lines(top, f):
                 bad.append((f, line, n["text"].strip().splitlines()[0][:70]))
-        if containers:
-            for c in containers:
-                pass
-        os.unlink(tmp)
+    for _, _, tmp in blobs.values(): os.unlink(tmp)
     if not bad:
         return 0
     for f, line, why in bad:
