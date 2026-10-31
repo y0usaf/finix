@@ -388,7 +388,7 @@ def hook() -> int:
         return 0
     for f, line, why in bad:
         print("sweep: %s:%s: %s" % (f, line, why))
-    print("sweep: %d violation(s); `sweep apply --repo .` previews the fix, --apply writes it" % len(bad))
+    print("sweep: %d violation(s); `sweep apply --repo .` previews the fix, `--apply` writes it; SWEEP_SKIP=1 or --no-verify bypasses" % len(bad))
     return 1
 
 def main():
