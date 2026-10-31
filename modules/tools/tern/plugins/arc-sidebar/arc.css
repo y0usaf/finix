@@ -133,3 +133,26 @@ html.tabs-v #sidebar .nav-row[data-tc] .tn-tc {
 html.tabs-v #sidebar .nav-row[data-tc] .lbl {
 	font-weight: 550 !important;
 }
+
+html.tabs-v #sidebar > nav.tn-vt {
+	display: flex !important;
+	flex-direction: column !important;
+	justify-content: center !important;
+	align-items: stretch !important;
+}
+
+html.tabs-v #sidebar > nav.tn-vt > .nav-group:first-child {
+	margin-top: auto !important;
+}
+
+html.tabs-v #sidebar > nav.tn-vt > .nav-group:last-child {
+	margin-bottom: auto !important;
+}
+
+html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers {
+	margin-top: auto !important;
+}
+
+html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
+	margin-top: auto !important;
+}

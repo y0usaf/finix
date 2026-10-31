@@ -7,33 +7,31 @@ local tab_count = 0
 local pinned = 0
 local space_name = ""
 
-local function set_pref(cx, key, word: string): boolean
-	local spelled = word:sub(1, 1):upper() .. word:sub(2)
-	for _, value in ipairs({ word, spelled }) do
-		if pcall(function()
-			cx.settings:set(key, value)
-		end) then
-			local read, now = pcall(function()
-				return cx.settings:get(key)
-			end)
-			if read and type(now) == "string" and now:lower() == word then
-				return true
-			end
-		end
-	end
-	return false
+local ONLY = {
+	"layout:float",
+	"layout:tiles",
+	"layout:studio",
+	"next_layout",
+	"toggle_tab_orientation",
+	"tabs:vertical",
+}
+
+local function pin(cx: WindowCx)
+	pcall(function()
+		cx:action("layout:rail")
+	end)
+	pcall(function()
+		cx:action("tabs:horizontal")
+	end)
 end
 
-local function arc(cx): boolean
-	local layout = set_pref(cx, "layout", "rail")
-		or pcall(function()
-			cx:command("layout:rail")
+for _, id in ipairs(ONLY) do
+	pcall(function()
+		tern.override(id, function(cx: WindowCx): boolean
+			cx:toast("info", "The rail is the only layout")
+			return true
 		end)
-	local tabs = set_pref(cx, "tabs", "vertical")
-		or pcall(function()
-			cx:command("tabs:vertical")
-		end)
-	return layout and tabs
+	end)
 end
 
 local function pinned_list(): { number }
@@ -90,42 +88,20 @@ local function promote(cx, list)
 	return kept
 end
 
-local FITS = 18
-
-local CENTRE = [[
-html.tabs-v #sidebar > nav.tn-vt {
-	display: flex !important;
-	flex-direction: column !important;
-	justify-content: center !important;
-	align-items: stretch !important;
-}
-html.tabs-v #sidebar > nav.tn-vt > .nav-group:first-child { margin-top: auto !important; }
-html.tabs-v #sidebar > nav.tn-vt > .nav-group:last-child { margin-bottom: auto !important; }
-]]
-
-local function centre()
-	tern.css("rail-centre", tab_count <= FITS and CENTRE or "")
-end
-
 local function recount(cx)
 	tab_count = #cx.session:tabs()
 	local current = cx.sessions:current()
 	space_name = current and current.name or ""
-	centre()
 	tern.chrome.refresh()
 end
 
 tern.on("window_start", function(cx)
-	arc(cx)
+	pin(cx)
 	local list = pinned_list()
 	if #list > 0 then
 		promote(cx, list)
 	end
 	recount(cx)
-	tern.timer(150, function()
-		centre()
-		tern.chrome.refresh()
-	end)
 end)
 
 tern.on("tab_created", function(_, cx)
@@ -180,11 +156,8 @@ tern.command({
 	title = "Sidebar: Arc mode",
 	icon = "layout",
 	run = function(cx)
-		if arc(cx) then
-			cx:toast("success", "Arc sidebar")
-		else
-			cx:toast("error", "Could not switch to the rail layout")
-		end
+		pin(cx)
+		cx:toast("success", "Arc sidebar")
 		recount(cx)
 	end,
 })
@@ -270,3 +243,10 @@ tern.bind("ctrl+alt+p", "plugin.arc-sidebar.pin")
 tern.bind("ctrl+alt+j", "next_tab")
 tern.bind("ctrl+alt+k", "previous_tab")
 tern.bind("ctrl+alt+f", "focus_tabs")
+
+tern.timer(300, function(cx)
+	if cx then
+		pin(cx)
+		recount(cx)
+	end
+end)
