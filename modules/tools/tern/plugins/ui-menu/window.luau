@@ -14,6 +14,16 @@ local TWEAKS = {
 		on = true,
 	},
 	{
+		id = "files",
+		label = "files",
+		group = "Chrome",
+		css = [[html.tn-themed .tb-files {
+	display: none !important;
+}]],
+		on = true,
+		quiet = true,
+	},
+	{
 		id = "roomy",
 		label = "tall pickers",
 		group = "Chrome",
@@ -374,6 +384,20 @@ for _, id in ipairs(FIXED) do
 	pcall(function()
 		tern.override(id, function(cx)
 			cx:toast("info", "This config fixes the chrome")
+			return true
+		end)
+	end)
+end
+
+local FILES = { "files", "focus_files", "reveal_active_file" }
+
+for _, id in ipairs(FILES) do
+	pcall(function()
+		tern.override(id, function(cx)
+			if not on.files then
+				return false
+			end
+			cx:toast("info", "Files are off")
 			return true
 		end)
 	end)
