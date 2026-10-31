@@ -73,6 +73,7 @@ html.lay-rail.tabs-h #panel {
 		id = "spacing",
 		label = "rail spacing",
 		group = "Rail",
+		mode = "sidebar",
 		css = [[html.tabs-v #sidebar {
 	padding: 54px 8px 12px 10px !important;
 	gap: 1px !important;
@@ -88,6 +89,7 @@ html.tabs-v #sidebar .nav-group {
 		id = "heads",
 		label = "section heads",
 		group = "Rail",
+		mode = "sidebar",
 		css = [[html.tabs-v #sidebar .nav-head {
 	height: 24px !important;
 	padding: 0 8px !important;
@@ -104,6 +106,7 @@ html.tabs-v #sidebar .nav-group {
 		id = "rows",
 		label = "rail rows",
 		group = "Rail",
+		mode = "sidebar",
 		css = [[html.tabs-v #sidebar .nav-row {
 	height: 34px !important;
 	padding: 0 8px !important;
@@ -137,6 +140,7 @@ html.tabs-v #sidebar .nav-row .ico {
 		id = "keys",
 		label = "key hints",
 		group = "Rail",
+		mode = "sidebar",
 		css = [[html.tabs-v #sidebar .nav-row .meta.keys {
 	opacity: 0 !important;
 	transition: opacity 0.13s var(--ease) !important;
@@ -151,6 +155,7 @@ html.tabs-v #sidebar .nav-row:hover .meta.keys {
 		id = "colours",
 		label = "tab colours",
 		group = "Rail",
+		mode = "sidebar",
 		css = [[html.tabs-v #sidebar .nav-row[data-tc] .tn-tc {
 	width: 8px !important;
 	height: 8px !important;
@@ -165,6 +170,7 @@ html.tabs-v #sidebar .nav-row[data-tc] .lbl {
 		id = "find",
 		label = "rail find",
 		group = "Rail",
+		mode = "sidebar",
 		css = [[html.tabs-v .tn-vt-find {
 	height: 30px !important;
 	margin: 0 2px 8px !important;
@@ -179,6 +185,8 @@ html.tabs-v #sidebar .nav-row[data-tc] .lbl {
 		id = "chips",
 		label = "session chips",
 		group = "Rail",
+		needs = "sessions",
+		mode = "sidebar",
 		css = [[html.tabs-v #tabbar .tn-session-tab {
 	height: 26px !important;
 	padding: 0 9px !important;
@@ -313,9 +321,13 @@ if type(saved) == "table" then
 	end
 end
 
+local function mode(cx)
+	return if cx and cx.settings:get("tabs") == "Vertical" then "sidebar" else "rail"
+end
+
 local model = {}
 for _, t in ipairs(TWEAKS) do
-	model[#model + 1] = { id = t.id, label = t.label, group = t.group }
+	model[#model + 1] = { id = t.id, label = t.label, group = t.group, mode = t.mode, needs = t.needs }
 end
 tern.kv.set("menu", model)
 
@@ -353,6 +365,7 @@ tern.on("window_start", function(cx)
 	if on.lock then
 		rail(cx)
 	end
+	tern.kv.set("mode", mode(cx))
 end)
 
 for _, ms in ipairs({ 300, 1200 }) do
@@ -405,6 +418,12 @@ end
 
 local function watch()
 	tern.timer(250, function(cx)
+		if cx then
+			local m = mode(cx)
+			if tern.kv.get("mode") ~= m then
+				tern.kv.set("mode", m)
+			end
+		end
 		local saved = tern.kv.get("on")
 		local changed = false
 		if type(saved) == "table" then
