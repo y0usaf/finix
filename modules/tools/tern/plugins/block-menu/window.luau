@@ -23,7 +23,7 @@ local function menu(cx: WindowCx)
 		})
 	end
 	for _, block in ipairs(cx.session:block_types()) do
-		if block.kind ~= "canvas" and block.kind ~= "tern.canvas" then
+		if block.palette and block.kind ~= "canvas" and block.kind ~= "tern.canvas" then
 			table.insert(items, {
 				label = block.title,
 				detail = block.kind,
