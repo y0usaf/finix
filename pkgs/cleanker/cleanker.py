@@ -559,6 +559,7 @@ def main():
         s.add_argument("--strip-docs", action="store_true", help="also remove doc comments")
         s.add_argument("--format", action="store_true", help="run the repository formatter afterwards")
         s.add_argument("--force", action="store_true", help="touch explicitly disabled repos and referenced docs")
+        s.add_argument("--check", action="store_true", help="exit 1 when anything would change")
     for name in ("status","enroll","disenroll"):
         s = sub.add_parser(name)
         s.add_argument("paths", nargs="*", default=[])
@@ -600,6 +601,8 @@ def main():
         for k in n: total[k] += n[k]
     if dry: print("(dry run; nothing written)")
     print("total", dict(total))
+    if getattr(a, "check", False) and any(k in total for k in ("strip","rm-md")):
+        sys.exit(1)
 
 if __name__ == "__main__":
     try:
