@@ -4,6 +4,10 @@ pkgs.stdenv.mkDerivation {
   version = "1";
   src = ./policy-sweep;
   nativeBuildInputs = [pkgs.makeWrapper];
+  doCheck = true;
+  checkPhase = ''
+    ${pkgs.python3}/bin/python3 -m py_compile $src/sweep.py
+  '';
   installPhase = ''
     install -Dm755 $src/sweep.py $out/libexec/sweep.py
     mkdir -p $out/bin $out/share/git-hooks

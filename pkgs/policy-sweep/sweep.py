@@ -5,7 +5,7 @@ SKIP_DIRS = {".git","node_modules","target","dist","build","result",".direnv","v
              "third_party","uv-cache",".venv","venv",".cache",".dioxus","engine-reference","subprojects"}
 OWN_OWNERS = {"y0usaf","sylvarant-ai","Inscendai","thepresciencecompany","shodown96"}
 LANG_OF_EXT = {"py":"Python","pyi":"Python","rs":"Rust","ts":"TypeScript","tsx":"Tsx","js":"JavaScript",
-  "jsx":"JavaScript","mjs":"JavaScript","cjs":"JavaScript","go":"Go","nix":"Nix","lua":"Lua","c":"C","h":"Cpp",
+  "jsx":"JavaScript","mjs":"JavaScript","cjs":"JavaScript","go":"Go","nix":"Nix","lua":"Lua","c":"C","h":"C",
   "cpp":"Cpp","cc":"Cpp","hpp":"Cpp","cxx":"Cpp","cs":"CSharp","zig":"Zig","sh":"Bash","bash":"Bash","rb":"Ruby",
   "swift":"Swift","kt":"Kotlin","scala":"Scala","ex":"Elixir","exs":"Elixir","hs":"Haskell","php":"Php","dart":"Dart"}
 KINDS = {"Rust":["line_comment","block_comment"],"Java":["line_comment","block_comment"],
@@ -18,8 +18,11 @@ DIRECTIVE = [
   r"^#\s*strictix:", r"nolint", r"no cover", r"@jsxImportSource", r"@jsxRuntime",
   r"^//\s*SAFETY", r"^---@", r"istanbul ignore", r"c8 ignore", r"v8 ignore", r"jscpd:ignore",
   r"noinspection", r"@flow", r"fallthrough", r"^//\s*@vitest-environment", r"rome-ignore",
+  r"@vite-ignore", r"webpackIgnore", r"turbopackIgnore", r"webpackChunkName", r"webpackMode",
+  r"@jest-environment", r"Copyright \(c\)", r"Copyright \d{4}", r"Permission is hereby granted",
+  r"Apache License", r"MIT License", r"Licensed under", r"@generated", r"DO NOT EDIT",
 ]
-DOC = [r"^///", r"^//!", r"^/\*\*", r"^\*(?![\s/]*$)"]
+DOC = [r"^///", r"^//!", r"^/\*\*", r"^/\*!"]
 KEEP_MD = [r"^README(\.|$)", r"^README$", r"^AGENTS\.md$"]
 LEGAL_MD = [r"^LICEN[CS]E", r"^NOTICE", r"^PROVENANCE", r"^THIRD_PARTY"]
 _ag = None
@@ -98,6 +101,8 @@ def rule(lang, kinds=None):
 def scan(files, lang, kinds=None):
     if not files: return []
     p = sh([ag(),"scan","--inline-rules",rule(lang,kinds),"--json=stream",*files])
+    if p.returncode != 0 and not p.stdout.strip():
+        print("sweep: ast-grep failed for %s (%s)" % (lang, (p.stderr or "").strip().splitlines()[:1]), file=sys.stderr)
     out = []
     for line in p.stdout.splitlines():
         if '"ruleId"' in line:
@@ -154,10 +159,12 @@ def strip_src(src, nodes, strip_docs, containers=()):
         return bisect.bisect_right(starts, s) - 1, bisect.bisect_right(starts, e) - 1
     def line_end(k):
         return starts[k] + len(lines[k])
-    masks = collections.defaultdict(set)
+    cuts = collections.defaultdict(list)
     dropped = set()
     kept = [(n["range"]["byteOffset"]["start"], n["range"]["byteOffset"]["end"])
             for n in nodes if classified(n["text"], strip_docs) == "keep"]
+    drops = [(n["range"]["byteOffset"]["start"], n["range"]["byteOffset"]["end"])
+             for n in nodes if classified(n["text"], strip_docs) == "drop"]
     for n in nodes:
         if classified(n["text"], strip_docs) == "keep": continue
         s = n["range"]["byteOffset"]["start"]; e = n["range"]["byteOffset"]["end"]
@@ -167,36 +174,37 @@ def strip_src(src, nodes, strip_docs, containers=()):
             c = min(inner, key=lambda k: k["range"]["byteOffset"]["end"] - k["range"]["byteOffset"]["start"])
             cs0, ce0 = c["range"]["byteOffset"]["start"], c["range"]["byteOffset"]["end"]
             inside = data[cs0:ce0]
-            for a, b in kept + [(o["range"]["byteOffset"]["start"], o["range"]["byteOffset"]["end"])
-                                for o in nodes if classified(o["text"], strip_docs) == "drop"]:
+            for a, b in kept + drops:
                 if cs0 <= a and b <= ce0: inside = inside.replace(data[a:b], b"", 1)
             if inside.replace(b"{", b"").replace(b"}", b"").strip() == b"":
                 s, e = cs0, ce0
         i, j = span(s, e)
-        blank_before = data[starts[i]:s].strip() == b""
-        blank_after = data[e:line_end(j)].strip() == b""
-        if i == j and blank_before and blank_after:
+        if i == j and data[starts[i]:s].strip() == b"" and data[e:line_end(i)].strip() == b"":
             dropped.add(i); continue
-        if i < j:
-            if blank_before: dropped.add(i)
-            else: masks[i].update(range(s - starts[i], len(lines[i])))
-            for k in range(i + 1, j): dropped.add(k)
-            if blank_after:
-                dropped.add(j)
+        if i < j and data[starts[i]:s].strip() == b"" and data[e:line_end(j)].strip() == b"":
+            dropped.update(range(i, j + 1)); continue
+        k = i
+        while k <= j:
+            lo = s if k == i else starts[k]
+            hi = e if k == j else line_end(k)
+            if k < j and lo == starts[k] and hi == line_end(k):
+                dropped.add(k)
             else:
-                masks[j].update(range(0, min(e - starts[j] + 1, len(lines[j]))))
-            continue
-        cs, ce = s - starts[i], e - starts[i]
-        masks[i].update(range(cs, ce))
-        if cs > 0 and lines[i][cs-1:cs] == b" ": masks[i].add(cs - 1)
-        if lines[i][ce:ce+1] == b" ": masks[i].add(ce)
+                cuts[k].append((lo - starts[k], hi - starts[k]))
+            k += 1
     out, after_drop = [], False
     for i, l in enumerate(lines):
         if i in dropped:
             after_drop = True; continue
-        if i in masks:
-            mk = masks[i]
-            l = bytes(c for k, c in enumerate(l) if k not in mk)
+        if i in cuts:
+            for a, b in sorted(cuts[i], reverse=True):
+                a = max(0, a); b = min(len(l), b)
+                left = l[:a]; right = l[b:]
+                if left.rstrip() and right.lstrip():
+                    l = left + b" " + right
+                else:
+                    l = left + right
+            l = l.rstrip()
         if after_drop and l.strip() == b"" and out and out[-1].strip() == b"":
             after_drop = False; continue
         if l.strip(): after_drop = False
@@ -242,6 +250,17 @@ def error_map(files, lang):
             except ValueError: pass
     return out
 
+def refs_in(top, rel, files=None):
+    base = os.path.basename(rel)
+    hits = []
+    for f in (files if files is not None else tracked(top)):
+        if f.lower().endswith((".md",".mdx")) or f == rel: continue
+        if any(x in SKIP_DIRS for x in f.split("/")): continue
+        blob = subprocess.run(["git","-C",top,"show",":"+f],capture_output=True).stdout
+        if len(blob) > 2_000_000: continue
+        if rel.encode() in blob or base.encode() in blob: hits.append(f)
+    return hits
+
 def refs_to(repo, rel):
     hits = []
     for f in tracked(repo):
@@ -256,13 +275,16 @@ def refs_to(repo, rel):
             hits.append((f, "exact" if rel in t else "basename"))
     return hits
 
-def apply(repo, strip_docs=False, dry=False, fmt=False):
+def apply(repo, strip_docs=False, dry=False, fmt=False, force=False):
     changes = []
+    if not force and policy_reason(repo).startswith("explicit off"):
+        return [("", "skip-explicit-off", 0)]
+    exclude = ignore_patterns(repo)
     for lang, files in lang_files(repo).items():
         nodes = scan(files, lang)
         if not nodes: continue
         containers = {}
-        if lang in {"TypeScript","Tsx","JavaScript"}:
+        if lang == "Tsx":
             for c in scan(files, lang, ["jsx_expression"]):
                 containers.setdefault(c["file"], []).append(c)
         byfile = collections.defaultdict(list)
@@ -306,10 +328,14 @@ def apply(repo, strip_docs=False, dry=False, fmt=False):
         if pol == "legal":
             changes.append((os.path.join(repo,m), "keep-legal", 0)); continue
         if pol != "drop": continue
+        if ignored(exclude, m): continue
+        refs = refs_to(repo, m)
+        if refs and not force:
+            changes.append((os.path.join(repo,m), "keep-referenced", len(refs))); continue
         full = os.path.join(repo, m)
         if not os.path.exists(full):
             changes.append((full, "md-gone", 0)); continue
-        changes.append((full, "rm-md", len(refs_to(repo,m))))
+        changes.append((full, "rm-md", 0))
         if not dry: os.remove(full)
     return changes
 
@@ -385,6 +411,19 @@ def enroll(paths, on):
         done.append((p, enrolled(p)))
     return done
 
+def ignore_patterns(top):
+    raw = git(top,"show",":.sweepignore").stdout
+    if not raw:
+        path = os.path.join(top, ".sweepignore")
+        raw = open(path).read() if os.path.exists(path) else ""
+    out = []
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"): continue
+        if line in {"*", "**", "/*"}: continue
+        out.append(line)
+    return out
+
 def hook() -> int:
     top = git(os.getcwd(),"rev-parse","--show-toplevel").stdout.strip()
     if not top: return 0
@@ -392,24 +431,21 @@ def hook() -> int:
     gd = git(top,"rev-parse","--absolute-git-dir").stdout.strip()
     for marker in ("rebase-merge","rebase-apply","MERGE_HEAD","CHERRY_PICK_HEAD"):
         if os.path.exists(os.path.join(gd, marker)): return 0
-    if os.environ.get("SWEEP_SKIP"): return 0
+    if os.environ.get("SWEEP_SKIP") == "1": return 0
     if not os.environ.get("SWEEP_IN_HOOK"):
         env = dict(os.environ, SWEEP_IN_HOOK="1")
         for cand in (os.path.join(top, ".husky", "pre-commit"), os.path.join(gd, "hooks", "pre-commit")):
             if os.path.isfile(cand) and os.access(cand, os.X_OK):
                 if subprocess.run([cand], cwd=top, env=env).returncode: return 1
-    ig = os.path.join(top, ".sweepignore")
-    patterns = []
-    if os.path.exists(ig):
-        patterns = [l.strip() for l in open(ig) if l.strip() and not l.lstrip().startswith("#")]
+    patterns = ignore_patterns(top)
     bad = []
     blobs, tmp_of = {}, {}
     for f in staged(top):
-        if ignored(patterns, f): continue
+        if ignored(patterns, f) or any(x in SKIP_DIRS for x in f.split("/")): continue
         low = f.lower()
         if low.endswith((".md",".mdx")):
-            if md_policy(f) == "drop":
-                bad.append((f, 0, "markdown: only README and AGENTS survive; run `sweep apply --repo . --apply`"))
+            if md_policy(f) == "drop" and not refs_in(top, f):
+                bad.append((f, 0, "markdown: unreferenced prose; only README, AGENTS and machine-read docs survive"))
             continue
         ext = low.rsplit(".",1)[-1] if "." in os.path.basename(low) else ""
         lang = LANG_OF_EXT.get(ext)
@@ -447,10 +483,15 @@ def main():
     ap.add_argument("--format", action="store_true")
     ap.add_argument("--commit", action="store_true")
     ap.add_argument("--include-dirty", action="store_true")
+    ap.add_argument("--force", action="store_true")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
     if a.cmd == "hook":
-        sys.exit(hook())
+        try:
+            sys.exit(hook())
+        except Exception as exc:
+            print("sweep: policy check skipped (%s); commit allowed" % exc.__class__.__name__, file=sys.stderr)
+            sys.exit(0)
     if a.cmd in {"enroll","disenroll"}:
         paths = [os.path.abspath(x) for x in a.repo] or [r["path"] for r in default_scope(a.root)]
         for p, state in enroll(paths, a.cmd == "enroll"):
@@ -487,7 +528,7 @@ def main():
         was_clean = not dirty(path)
         if not was_clean and not a.include_dirty:
             print("SKIP dirty %s" % os.path.relpath(path, os.path.expanduser("~"))); total["skipped_dirty"] += 1; continue
-        ch = apply(path, a.strip_docs, dry=not a.apply, fmt=a.format)
+        ch = apply(path, a.strip_docs, dry=not a.apply, fmt=a.format, force=a.force)
         if not ch: continue
         n = collections.Counter(k for _, k, _ in ch)
         print("%-56s strips=%-4d md=%-3d legal=%-2d refs=%d rejects=%d" % (
