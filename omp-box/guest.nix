@@ -12,7 +12,8 @@ in {
     vcpu = 2;
     shares =
       [ { tag = "ro-store"; source = "/nix/store"; mountPoint = "/nix/.ro-store"; } ]
-      ++ map (p: { tag = "share-${builtins.hashString "sha1" p}"; source = p; mountPoint = p; proto = "9p"; }) ompBox.shares;
+      ++ map (p: { tag = "share-${builtins.hashString "sha1" p}"; source = p; mountPoint = p; proto = "9p"; }) ompBox.shares
+      ++ [ { tag = "shares"; source = ompBox.sharesDir; mountPoint = "/mnt/shares"; proto = "9p"; } ];
     interfaces = [ ];
     qemu.extraArgs = [
       "-netdev" "user,id=net0,hostfwd=tcp:127.0.0.1:22422-:22"

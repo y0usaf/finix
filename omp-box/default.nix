@@ -1,6 +1,7 @@
 { lib, pkgs, omp, shares ? [], user ? "y0usaf" }:
 let
   key = ./id_ed25519;
+  staticArms = lib.concatMapStringsSep "\n    " (p: ''case "$PWD/" in ${p}/*) allowed=1 ;; esac'') shares;
   wrapper = pkgs.writeShellScriptBin "omp" ''
     set -eu
     state="''${XDG_STATE_HOME:-$HOME/.local/state}/omp-box"
@@ -9,10 +10,19 @@ let
       mkdir -p "$state"
       install -m 600 ${key} "$key"
     fi
-    case "$PWD/" in
-      ${lib.concatMapStringsSep "\n      " (p: "${p}/*) ;;") shares}
-      *) printf 'omp-box: %s is not shared with the box (user.dev.ompBox.shares)\n' "$PWD" >&2; exit 66 ;;
-    esac
+    allowed=0
+    ${staticArms}
+    if [ -d "$state/grants" ]; then
+      for grant in "$state/grants"/*; do
+        [ -e "$grant" ] || continue
+        granted=$(cut -f1 "$grant")
+        case "$PWD/" in "$granted"/*) allowed=1 ;; esac
+      done
+    fi
+    if [ "$allowed" != 1 ]; then
+      printf 'omp-box: %s is not shared with the box (omp-box add %s)\n' "$PWD" "$PWD" >&2
+      exit 66
+    fi
     env_prefix=""
     for v in AI_GATEWAY_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY OPENROUTER_API_KEY GEMINI_API_KEY VERCEL_PERSONAL_TOKEN; do
       eval "value=\''${''${v}:-}"
@@ -25,11 +35,17 @@ let
       -o BatchMode=yes -o SendEnv=TERM $tty ${user}@127.0.0.1 \
       "exec sh -c $(printf %q "cd $(printf %q "$PWD") && exec env $env_prefix${omp}/bin/omp $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
   '';
+  cli = pkgs.writeShellApplication {
+    name = "omp-box";
+    runtimeInputs = [ pkgs.coreutils pkgs.util-linux pkgs.openssh pkgs.findutils ];
+    text = builtins.readFile ./omp-box.sh;
+  };
 in
 pkgs.symlinkJoin {
   name = "omp-box";
   paths = [
     wrapper
+    cli
     (pkgs.writeShellScriptBin "omp-host" ''exec ${omp}/bin/omp "$@"'')
   ];
 }
