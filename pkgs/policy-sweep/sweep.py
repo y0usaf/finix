@@ -98,13 +98,16 @@ def lang_files(repo):
         if l: out[l].append(os.path.join(repo,rel))
     return out
 
-def rule(lang, kinds=None):
+def rule(lang, kinds=None, inside=None):
     ks = kinds or KINDS.get(lang,["comment"])
-    return "id: c\nlanguage: %s\nrule:\n  any:\n%s" % (lang, "".join("    - kind: %s\n" % k for k in ks))
+    body = "  any:\n" + "".join("    - kind: %s\n" % k for k in ks)
+    if inside:
+        body = "  all:\n    - kind: %s\n    - inside:\n        kind: %s\n        stopBy: end\n" % (ks[0], inside)
+    return "id: c\nlanguage: %s\nrule:\n%s" % (lang, body)
 
-def scan(files, lang, kinds=None):
+def scan(files, lang, kinds=None, inside=None):
     if not files: return []
-    p = sh([ag(),"scan","--inline-rules",rule(lang,kinds),"--json=stream",*files])
+    p = sh([ag(),"scan","--inline-rules",rule(lang,kinds,inside),"--json=stream",*files])
     if p.returncode != 0 and not p.stdout.strip():
         print("sweep: ast-grep failed for %s (%s)" % (lang, (p.stderr or "").strip().splitlines()[:1]), file=sys.stderr)
     out = []
@@ -119,6 +122,26 @@ def error_nodes(files, lang):
     r = "id: e\nlanguage: %s\nrule:\n  kind: ERROR\n" % lang
     p = sh([ag(),"scan","--inline-rules",r,"--json=stream",*files])
     return sum(1 for l in p.stdout.splitlines() if '"ruleId"' in l)
+
+EMBED = {"Html": [("JavaScript","script_element","js"), ("Css","style_element","css")]}
+
+def embedded(files, lang):
+    out = []
+    for sub, host, ext in EMBED.get(lang, []):
+        hosts = scan(files, lang, ["raw_text"], inside=host)
+        for h in hosts:
+            data = h["text"].encode()
+            fd, tmp = tempfile.mkstemp(suffix="." + ext)
+            os.close(fd)
+            with open(tmp,"wb") as fh: fh.write(data)
+            base = h["range"]["byteOffset"]["start"]
+            for n in scan([tmp], sub):
+                out.append({"file": h["file"], "text": n["text"],
+                            "range": {"byteOffset": {"start": base + n["range"]["byteOffset"]["start"],
+                                                     "end": base + n["range"]["byteOffset"]["end"]},
+                                      "start": {"line": 0}, "end": {"line": 0}}})
+            os.unlink(tmp)
+    return out
 
 def classified(text, strip_docs):
     t = text.strip()
@@ -302,7 +325,7 @@ def apply(repo, strip_docs=False, dry=False, fmt=False, force=False):
         return [("", "skip-explicit-off", 0)]
     exclude = ignore_patterns(repo)
     for lang, files in lang_files(repo).items():
-        nodes = scan(files, lang)
+        nodes = scan(files, lang) + embedded(files, lang)
         if not nodes: continue
         containers = {}
         if lang == "Tsx":
@@ -484,7 +507,7 @@ def hook() -> int:
     by_lang = collections.defaultdict(list)
     for f, (lang, data, tmp) in blobs.items(): by_lang[lang].append(tmp)
     for lang, tmps in by_lang.items():
-        for n in scan(tmps, lang):
+        for n in scan(tmps, lang) + embedded(tmps, lang):
             f = tmp_of[n["file"]]
             if classified(n["text"], False) == "keep": continue
             line = blobs[f][1].count(b"\n", 0, n["range"]["byteOffset"]["start"]) + 1
