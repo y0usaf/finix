@@ -347,6 +347,11 @@ def hook() -> int:
     for marker in ("rebase-merge","rebase-apply","MERGE_HEAD","CHERRY_PICK_HEAD"):
         if os.path.exists(os.path.join(gd, marker)): return 0
     if os.environ.get("SWEEP_SKIP"): return 0
+    if not os.environ.get("SWEEP_IN_HOOK"):
+        env = dict(os.environ, SWEEP_IN_HOOK="1")
+        for cand in (os.path.join(top, ".husky", "pre-commit"), os.path.join(gd, "hooks", "pre-commit")):
+            if os.path.isfile(cand) and os.access(cand, os.X_OK):
+                if subprocess.run([cand], cwd=top, env=env).returncode: return 1
     ig = os.path.join(top, ".sweepignore")
     patterns = []
     if os.path.exists(ig):
