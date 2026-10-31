@@ -250,15 +250,32 @@ def error_map(files, lang):
             except ValueError: pass
     return out
 
-def refs_in(top, rel, files=None):
+def corpus(top, files):
+    parts = []
+    for f in files:
+        if f.lower().endswith((".md",".mdx")): continue
+        if any(x in SKIP_DIRS for x in f.split("/")): continue
+        p = os.path.join(top, f)
+        try:
+            if os.path.islink(p) or os.path.getsize(p) > 2_000_000: continue
+            with open(p, "rb") as fh: parts.append(fh.read())
+        except OSError: continue
+    return b"\n".join(parts)
+
+def refs_in(top, rel, files=None, blob=None):
     base = os.path.basename(rel)
+    if blob is not None:
+        return ["*"] if (rel.encode() in blob or base.encode() in blob) else []
     hits = []
     for f in (files if files is not None else tracked(top)):
         if f.lower().endswith((".md",".mdx")) or f == rel: continue
         if any(x in SKIP_DIRS for x in f.split("/")): continue
-        blob = subprocess.run(["git","-C",top,"show",":"+f],capture_output=True).stdout
-        if len(blob) > 2_000_000: continue
-        if rel.encode() in blob or base.encode() in blob: hits.append(f)
+        p = os.path.join(top, f)
+        try:
+            if os.path.getsize(p) > 2_000_000: continue
+            with open(p, "rb") as fh: data = fh.read()
+        except OSError: continue
+        if rel.encode() in data or base.encode() in data: hits.append(f)
     return hits
 
 def refs_to(repo, rel):
@@ -439,12 +456,16 @@ def hook() -> int:
                 if subprocess.run([cand], cwd=top, env=env).returncode: return 1
     patterns = ignore_patterns(top)
     bad = []
+    hay = None
     blobs, tmp_of = {}, {}
     for f in staged(top):
         if ignored(patterns, f) or any(x in SKIP_DIRS for x in f.split("/")): continue
         low = f.lower()
         if low.endswith((".md",".mdx")):
-            if md_policy(f) == "drop" and not refs_in(top, f):
+            if md_policy(f) == "drop":
+                if hay is None: hay = corpus(top, tracked(top))
+                if refs_in(top, f, blob=hay): continue
+            if md_policy(f) == "drop":
                 bad.append((f, 0, "markdown: unreferenced prose; only README, AGENTS and machine-read docs survive"))
             continue
         ext = low.rsplit(".",1)[-1] if "." in os.path.basename(low) else ""
