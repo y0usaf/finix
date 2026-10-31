@@ -19,9 +19,14 @@ let
         case "$PWD/" in "$granted"/*) allowed=1 ;; esac
       done
     fi
+    seed=""
     if [ "$allowed" != 1 ]; then
-      printf 'omp-box: %s is not shared with the box (omp-box add %s)\n' "$PWD" "$PWD" >&2
-      exit 66
+      base="''${PWD%/}"
+      hint=" (omp-box add $PWD to share it)"
+      case "$HOME/" in "$base"/*) hint=" (omp-box add a folder inside it to share)" ;; esac
+      case "$state/" in "$base"/*) hint=" (omp-box add a folder inside it to share)" ;; esac
+      printf 'omp-box: %s is the box copy, not the host folder%s\n' "$PWD" "$hint" >&2
+      seed="mkdir -p $(printf %q "$PWD") && "
     fi
     env_prefix=""
     for v in AI_GATEWAY_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY OPENROUTER_API_KEY GEMINI_API_KEY VERCEL_PERSONAL_TOKEN; do
@@ -33,7 +38,7 @@ let
     exec ${pkgs.openssh}/bin/ssh -q -p 22422 -i "$key" \
       -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
       -o BatchMode=yes -o SendEnv=TERM $tty ${user}@127.0.0.1 \
-      "exec sh -c $(printf %q "cd $(printf %q "$PWD") && exec env $env_prefix${omp}/bin/omp $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
+      "exec sh -c $(printf %q "$seed cd $(printf %q "$PWD") && exec env $env_prefix${omp}/bin/omp $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
   '';
   cli = pkgs.writeShellApplication {
     name = "omp-box";
