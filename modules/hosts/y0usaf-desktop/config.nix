@@ -95,6 +95,8 @@ in {
 
             iifname "eno1" tcp dport 9757 accept comment "mado for the Steam Frame"
             iifname "eno1" udp dport 9757 accept comment "mado for the Steam Frame"
+
+            iifname "eno1" udp dport 8376 accept comment "tern remote sessions over the LAN"
           '';
         };
       };
