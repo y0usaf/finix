@@ -31,7 +31,7 @@ mount_guest() {
   "${ssh[@]}" "$target" "set -e
     p=$(printf %q "$path")
     /run/wrappers/bin/sudo mkdir -p \"\$(dirname \"\$p\")\" \"\$p\"
-    /run/wrappers/bin/sudo mountpoint -q \"\$p\" || /run/wrappers/bin/sudo mount --bind $(printf %q "/mnt/shares/$name") \"\$p\"" 2>/dev/null
+    /run/wrappers/bin/sudo mountpoint -q \"\$p\" || /run/wrappers/bin/sudo mount --bind $(printf %q "/mnt/shares/$name") \"\$p\""
 }
 
 unmount_guest() {
