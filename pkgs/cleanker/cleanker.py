@@ -44,7 +44,7 @@ def ag():
     subprocess.run(["nix","build","--out-link",link,"nixpkgs#ast-grep"], capture_output=True)
     path = os.path.join(link, "bin", "ast-grep")
     if not os.path.exists(path):
-        raise SystemExit("sweep: ast-grep not found on PATH and nixpkgs#ast-grep would not build")
+        raise SystemExit("cleanker: ast-grep not found on PATH and nixpkgs#ast-grep would not build")
     open(cache,"w").write(path)
     _ag = path
     return _ag
@@ -109,7 +109,7 @@ def scan(files, lang, kinds=None, inside=None):
     if not files: return []
     p = sh([ag(),"scan","--inline-rules",rule(lang,kinds,inside),"--json=stream",*files])
     if p.returncode != 0 and not p.stdout.strip():
-        print("sweep: ast-grep failed for %s (%s)" % (lang, (p.stderr or "").strip().splitlines()[:1]), file=sys.stderr)
+        print("cleanker: ast-grep failed for %s (%s)" % (lang, (p.stderr or "").strip().splitlines()[:1]), file=sys.stderr)
     out = []
     for line in p.stdout.splitlines():
         if '"ruleId"' in line:
@@ -238,7 +238,7 @@ def strip_src(src, nodes, strip_docs, containers=()):
         out.append(l)
     return b"\n".join(out).decode()
 
-BINS = "/tmp/policy-sweep/bins"
+BINS = "/tmp/cleanker/bins"
 def tool(name, attr):
     os.makedirs(BINS, exist_ok=True)
     cache = os.path.join(BINS, name)
@@ -410,7 +410,7 @@ def added_lines(repo, path):
 def ignored(patterns, path):
     return any(fnmatch.fnmatch(path, pat) or path.startswith(pat.rstrip("/") + "/") for pat in patterns)
 
-SWEEP_KEY = "sweep.policy"
+SWEEP_KEY = "cleanker.policy"
 
 def setting(repo, key):
     v = git(repo,"config","--local","--get",key)
@@ -428,12 +428,12 @@ def policy_reason(repo):
     if local.returncode == 0:
         on = local.stdout.strip().lower() in {"true","1","yes","on"}
         return "explicit on" if on else "explicit off"
-    owners = setting(repo,"sweep.owners").replace(",", " ").split()
+    owners = setting(repo,"cleanker.owners").replace(",", " ").split()
     if owners:
         owner = remote_owner(repo)
         if owner and owner in owners: return "owner " + owner
         if not owner:
-            roots = setting(repo,"sweep.roots").replace(",", " ").split()
+            roots = setting(repo,"cleanker.roots").replace(",", " ").split()
             top = git(repo,"rev-parse","--show-toplevel").stdout.strip()
             for root in roots:
                 root = os.path.expanduser(root)
@@ -456,9 +456,9 @@ def enroll(paths, on):
     return done
 
 def ignore_patterns(top):
-    raw = git(top,"show",":.sweepignore").stdout
+    raw = git(top,"show",":.cleankerignore").stdout
     if not raw:
-        path = os.path.join(top, ".sweepignore")
+        path = os.path.join(top, ".cleankerignore")
         raw = open(path).read() if os.path.exists(path) else ""
     out = []
     for line in raw.splitlines():
@@ -475,9 +475,9 @@ def hook() -> int:
     gd = git(top,"rev-parse","--absolute-git-dir").stdout.strip()
     for marker in ("rebase-merge","rebase-apply","MERGE_HEAD","CHERRY_PICK_HEAD"):
         if os.path.exists(os.path.join(gd, marker)): return 0
-    if os.environ.get("SWEEP_SKIP") == "1": return 0
-    if not os.environ.get("SWEEP_IN_HOOK"):
-        env = dict(os.environ, SWEEP_IN_HOOK="1")
+    if os.environ.get("CLEANKER_SKIP") == "1": return 0
+    if not os.environ.get("CLEANKER_IN_HOOK"):
+        env = dict(os.environ, CLEANKER_IN_HOOK="1")
         for cand in (os.path.join(top, ".husky", "pre-commit"), os.path.join(gd, "hooks", "pre-commit")):
             if os.path.isfile(cand) and os.access(cand, os.X_OK):
                 if subprocess.run([cand], cwd=top, env=env).returncode: return 1
@@ -517,78 +517,83 @@ def hook() -> int:
     if not bad:
         return 0
     for f, line, why in bad:
-        print("sweep: %s:%s: %s" % (f, line, why))
-    print("sweep: %d violation(s); `sweep apply --repo .` previews the fix, `--apply` writes it; SWEEP_SKIP=1 or --no-verify bypasses" % len(bad))
+        print("cleanker: %s:%s: %s" % (f, line, why))
+    print("cleanker: %d violation(s); `cleanker dry-run` previews the fix, `cleanker clean` writes it; CLEANKER_SKIP=1 or --no-verify bypasses" % len(bad))
     return 1
 
+def paths_to_repos(args, root):
+    out = []
+    for raw in (args or [root]):
+        if raw is None: continue
+        p = os.path.abspath(os.path.expanduser(raw))
+        top = git(p,"rev-parse","--show-toplevel").stdout.strip()
+        if top: out.append(top)
+        elif os.path.isdir(p): out.extend(r["path"] for r in default_scope(p))
+        else: print("cleanker: %s is not a repository or a directory" % raw, file=sys.stderr)
+    seen = []
+    for p in out:
+        if p not in seen: seen.append(p)
+    return seen
+
 def main():
-    ap = argparse.ArgumentParser(prog="sweep")
-    ap.add_argument("cmd", choices=["check","apply","hook","enroll","disenroll","status"])
-    ap.add_argument("--root", default=os.path.expanduser("~/dev"))
-    ap.add_argument("--repo", action="append", default=[])
-    ap.add_argument("--strip-docs", action="store_true")
-    ap.add_argument("--apply", action="store_true")
-    ap.add_argument("--format", action="store_true")
-    ap.add_argument("--commit", action="store_true")
-    ap.add_argument("--include-dirty", action="store_true")
-    ap.add_argument("--force", action="store_true")
-    ap.add_argument("--json", action="store_true")
+    ap = argparse.ArgumentParser(prog="cleanker", description="Remove comments and unreferenced prose.")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    for name in ("clean","dry-run"):
+        s = sub.add_parser(name)
+        s.add_argument("paths", nargs="*", default=[])
+        s.add_argument("--strip-docs", action="store_true", help="also remove doc comments")
+        s.add_argument("--format", action="store_true", help="run the repository formatter afterwards")
+        s.add_argument("--commit", action="store_true", help="commit each clean repository")
+        s.add_argument("--include-dirty", action="store_true")
+        s.add_argument("--force", action="store_true", help="touch explicitly disabled repos and referenced docs")
+    for name in ("status","enroll","disenroll"):
+        s = sub.add_parser(name)
+        s.add_argument("paths", nargs="*", default=[])
+    sub.add_parser("hook", help="git pre-commit entry point")
     a = ap.parse_args()
+    root = os.path.expanduser("~/dev")
     if a.cmd == "hook":
         try:
             sys.exit(hook())
         except Exception as exc:
-            print("sweep: policy check skipped (%s); commit allowed" % exc.__class__.__name__, file=sys.stderr)
+            print("cleanker: policy check skipped (%s); commit allowed" % exc.__class__.__name__, file=sys.stderr)
             sys.exit(0)
+    scope_default = root if a.cmd in {"status","enroll","disenroll"} else "."
+    repos = paths_to_repos(a.paths or [scope_default], root)
     if a.cmd in {"enroll","disenroll"}:
-        paths = [os.path.abspath(x) for x in a.repo] or [r["path"] for r in default_scope(a.root)]
-        for p, state in enroll(paths, a.cmd == "enroll"):
-            print("%-56s %-12s %s" % (os.path.relpath(p, os.path.expanduser("~")),
-                                      "policy on" if state else "policy off", policy_reason(p) or "-"))
+        for p, state in enroll(repos, a.cmd == "enroll"):
+            print("%-56s %-8s %s" % (os.path.relpath(p, os.path.expanduser("~")),
+                                     "on" if state else "off", policy_reason(p) or "-"))
         return
     if a.cmd == "status":
-        rows = [(os.path.relpath(r["path"], os.path.expanduser("~")), policy_reason(r["path"])) for r in discover(a.root)]
+        rows = [(os.path.relpath(r["path"], os.path.expanduser("~")), policy_reason(r["path"])) for r in discover(root)]
         on = [r for r in rows if r[1] and not r[1].startswith("explicit off")]
         off = [r for r in rows if r not in on]
         print("enforced: %d   unenforced: %d" % (len(on), len(off)))
-        for path, why in on: print("  ON   %-48s %s" % (path, why))
+        for path, why in on: print("  on   %-48s %s" % (path, why))
         for path, why in off: print("  off  %-48s %s" % (path, why or "-"))
         return
-    if a.cmd == "check":
-        rows = inventory(a.root, a.strip_docs)
-        if a.json:
-            print(json.dumps(rows, indent=1)); return
-        for r in sorted(rows, key=lambda r: -sum(v["drop"] for v in r["langs"].values())):
-            drop = sum(v["drop"] for v in r["langs"].values())
-            keep = sum(v["keep"] for v in r["langs"].values())
-            if not drop and not r["md_drop"]: continue
-            langs = ",".join("%s:%d/%d" % (k,v["drop"],v["comments"]) for k,v in sorted(r["langs"].items(), key=lambda kv:-kv[1]["drop"]) if v["comments"])
-            print("%-58s own=%-5s zone=%-11s md=%-3d cmt=%d/%d %s" % (
-                os.path.relpath(r["path"], os.path.expanduser("~")), r["owned"], r["zone"], r["md_drop"], drop, drop+keep, langs))
-        return
-    if a.repo:
-        targets = [os.path.abspath(x) for x in a.repo]
-    else:
-        targets = [r["path"] for r in default_scope(a.root)]
+    dry = a.cmd == "dry-run"
     total = collections.Counter()
-    for path in targets:
-        if not os.path.isdir(os.path.join(path, ".git")): continue
+    for path in repos:
         was_clean = not dirty(path)
         if not was_clean and not a.include_dirty:
-            print("SKIP dirty %s" % os.path.relpath(path, os.path.expanduser("~"))); total["skipped_dirty"] += 1; continue
-        ch = apply(path, a.strip_docs, dry=not a.apply, fmt=a.format, force=a.force)
-        if not ch: continue
+            print("%-52s skipped: dirty tree" % os.path.relpath(path, os.path.expanduser("~")))
+            total["dirty"] += 1; continue
+        ch = apply(path, a.strip_docs, dry=dry, fmt=a.format, force=a.force)
         n = collections.Counter(k for _, k, _ in ch)
-        print("%-56s strips=%-4d md=%-3d legal=%-2d refs=%d rejects=%d" % (
-            os.path.relpath(path, os.path.expanduser("~")), n["strip"], n["rm-md"], n["keep-legal"],
-            sum(x for _,k,x in ch if k=="rm-md"), n["REJECT_SYNTAX"]))
-        for k in n: total[k] += n[k]
+        if not ch: continue
+        print("%-52s strip=%-4d md=%-3d referenced=%-3d legal=%-2d reject=%d" % (
+            os.path.relpath(path, os.path.expanduser("~")), n["strip"], n["rm-md"],
+            n["keep-referenced"], n["keep-legal"], n["REJECT_SYNTAX"]))
         for f, k, _ in ch:
-            if k == "REJECT_SYNTAX": print("   reject %s" % os.path.relpath(f, os.path.expanduser("~")))
-        if a.apply and a.commit and was_clean:
-            git(path,"add","-A")
-            git(path,"commit","-q","-m","Strip comments, drop docs except README/AGENTS")
-    print("TOTAL", dict(total))
+            if k == "REJECT_SYNTAX": print("   rejected %s" % f)
+        for k in n: total[k] += n[k]
+        if not dry and a.commit and was_clean:
+            git(path,"add","-u")
+            git(path,"commit","-q","-m","Clean comments and unreferenced prose")
+    if dry: print("(dry run; nothing written)")
+    print("total", dict(total))
 
 if __name__ == "__main__":
     try:

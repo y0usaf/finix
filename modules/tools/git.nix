@@ -4,12 +4,12 @@
   pkgs,
   ...
 }: let
-  policy-sweep = import ../../pkgs/policy-sweep.nix {inherit pkgs;};
+  cleanker = import ../../pkgs/cleanker.nix {inherit pkgs;};
 in {
   environment.systemPackages = [
     pkgs.git
     pkgs.openssh
-    policy-sweep
+    cleanker
   ];
   manzil.users."${config.user.name}".files.".config/git/config" = {
     generator = lib.generators.toGitINI;
@@ -19,9 +19,9 @@ in {
         email = "74448287+y0usaf@users.noreply.github.com";
       };
       core.editor = "nvim";
-      core.hooksPath = "${policy-sweep}/share/git-hooks";
-      sweep.owners = "y0usaf sylvarant-ai";
-      sweep.roots = "${config.user.homeDirectory}/dev/developing ${config.user.homeDirectory}/dev/maintaining";
+      core.hooksPath = "${cleanker}/share/git-hooks";
+      cleanker.owners = "y0usaf sylvarant-ai";
+      cleanker.roots = "${config.user.homeDirectory}/dev/developing ${config.user.homeDirectory}/dev/maintaining";
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
