@@ -43,7 +43,7 @@ apply_host() {
   local name=$1 path=$2 mode=$3
   mkdir -p "$shares/$name"
   case $mode in
-    copy) cp -a "$path/." "$shares/$name/" ;;
+    copy) cp -au "$path/." "$shares/$name/" ;;
     bind) findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1 || /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name" ;;
   esac
 }
@@ -126,8 +126,8 @@ cmd_reconcile() {
     [ -e "$f" ] || continue
     IFS=$'\t' read -r path mode < "$f"
     name=$(basename -- "$f")
-    apply_host "$name" "$path" "$mode"
-    mount_guest "$name" "$path"
+    apply_host "$name" "$path" "$mode" && mount_guest "$name" "$path" ||
+      printf 'omp-box: grant %s (%s) did not apply\n' "$name" "$path" >&2
   done
 }
 

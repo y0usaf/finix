@@ -7,13 +7,12 @@
 }: let
   user = config.user.name;
   home = config.users.users.${user}.home;
-  uid = config.users.users.${user}.uid;
   catalog = config.user.dev.modelCatalog;
   cfg = config.user.dev.ompBox;
   state = "${home}/.local/state/omp-box";
   json = lib.generators.toJSON {};
 
-  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" { } (builtins.readFile ../../../omp-box/gateway-proxy.py);
+  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (builtins.readFile ../../../omp-box/gateway-proxy.py);
   gatewayUrl = "http://10.0.2.2:8899";
   files = {
     models = pkgs.writeText "models.json" (json catalog.models);
@@ -54,7 +53,7 @@
       };
     };
     modules = [
-      { nixpkgs.pkgs = pkgs; }
+      {nixpkgs.pkgs = pkgs;}
       flakeInputs.microvm.nixosModules.microvm
       ../../../omp-box/guest.nix
     ];
@@ -73,7 +72,10 @@ in {
   };
 
   config = {
-    finix.persistence.allowlist.users.${user}.directories = [".local/state/omp-box"];
+    finix.persistence = {
+      allowlist.users.${user}.directories = [".local/state/omp-box"];
+      homeServices = ["omp-box" "omp-box-grants" "omp-box-proxy"];
+    };
     environment.systemPackages = [pkg];
     system.build.ompBoxRunner = guest.config.microvm.declaredRunner;
 
@@ -119,13 +121,12 @@ in {
       reload-signal = "none";
       environment = {
         HOME = home;
-        XDG_RUNTIME_DIR = "/run/user/${toString uid}";
       };
       command = "${pkgs.writeShellScript "omp-box-run" ''
         mkdir -p ${state}/shares ${state}/grants ${state}/natives ${home}/.omp/natives
-        cp -al ${home}/.omp/natives/. ${state}/natives/ 2>/dev/null || cp -a ${home}/.omp/natives/. ${state}/natives/
+        cp -al ${home}/.omp/natives/. ${state}/natives/ || cp -a ${home}/.omp/natives/. ${state}/natives/
         for _ in $(seq 60); do ${pkgs.iproute2}/bin/ss -Hltn 'sport = :22422' | grep -q . || break; sleep 0.5; done
-        rm -f ${state}/omp-box.sock ${state}/nixos.sock
+        rm -f ${state}/omp-box.sock
         cd ${state}
         exec ${guest.config.microvm.declaredRunner}/bin/microvm-run
       ''}";
