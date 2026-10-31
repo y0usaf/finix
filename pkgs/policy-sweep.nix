@@ -6,7 +6,7 @@ pkgs.stdenv.mkDerivation {
   nativeBuildInputs = [pkgs.makeWrapper];
   doCheck = true;
   checkPhase = ''
-    ${pkgs.python3}/bin/python3 -m py_compile $src/sweep.py
+    ${pkgs.python3}/bin/python3 -c 'import sys; compile(open(sys.argv[1]).read(), sys.argv[1], "exec")' $src/sweep.py
   '';
   installPhase = ''
     install -Dm755 $src/sweep.py $out/libexec/sweep.py
