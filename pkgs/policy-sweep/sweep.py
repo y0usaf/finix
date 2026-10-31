@@ -319,7 +319,7 @@ def dirty(repo):
 def default_scope(root):
     out = []
     for r in discover(root):
-        if not r["owned"]: continue
+        if not r["owned"] or r["owner"] == "Inscendai": continue
         rel = os.path.relpath(r["path"], os.path.expanduser("~/dev"))
         if rel.startswith(("contributing/","sandbox/")): continue
         if any(x in rel for x in (".spike-work","inscend-followup","grok-presets-scratch")): continue
@@ -340,9 +340,27 @@ def added_lines(repo, path):
 def ignored(patterns, path):
     return any(fnmatch.fnmatch(path, pat) or path.startswith(pat.rstrip("/") + "/") for pat in patterns)
 
+SWEEP_KEY = "sweep.policy"
+
+def enrolled(repo):
+    local = git(repo,"config","--local","--get",SWEEP_KEY)
+    if local.returncode == 0:
+        return local.stdout.strip().lower() in {"true","1","yes","on"}
+    merged = git(repo,"config","--get",SWEEP_KEY)
+    return merged.returncode == 0 and merged.stdout.strip().lower() in {"true","1","yes","on"}
+
+def enroll(paths, on):
+    done = []
+    for p in paths:
+        if on: git(p,"config","--local",SWEEP_KEY,"true")
+        else: git(p,"config","--local","--unset",SWEEP_KEY)
+        done.append((p, enrolled(p)))
+    return done
+
 def hook() -> int:
     top = git(os.getcwd(),"rev-parse","--show-toplevel").stdout.strip()
     if not top: return 0
+    if not enrolled(top): return 0
     gd = git(top,"rev-parse","--absolute-git-dir").stdout.strip()
     for marker in ("rebase-merge","rebase-apply","MERGE_HEAD","CHERRY_PICK_HEAD"):
         if os.path.exists(os.path.join(gd, marker)): return 0
@@ -393,7 +411,7 @@ def hook() -> int:
 
 def main():
     ap = argparse.ArgumentParser(prog="sweep")
-    ap.add_argument("cmd", choices=["check","apply","hook"])
+    ap.add_argument("cmd", choices=["check","apply","hook","enroll","disenroll","status"])
     ap.add_argument("--root", default=os.path.expanduser("~/dev"))
     ap.add_argument("--repo", action="append", default=[])
     ap.add_argument("--strip-docs", action="store_true")
@@ -405,6 +423,19 @@ def main():
     a = ap.parse_args()
     if a.cmd == "hook":
         sys.exit(hook())
+    if a.cmd in {"enroll","disenroll"}:
+        paths = [os.path.abspath(x) for x in a.repo] or [r["path"] for r in default_scope(a.root)]
+        for p, state in enroll(paths, a.cmd == "enroll"):
+            print("%-56s %s" % (os.path.relpath(p, os.path.expanduser("~")), "policy on" if state else "policy off"))
+        return
+    if a.cmd == "status":
+        rows = [(os.path.relpath(r["path"], os.path.expanduser("~")), r["owned"], enrolled(r["path"])) for r in discover(a.root)]
+        on = [r for r in rows if r[2]]
+        off = [r for r in rows if not r[2]]
+        print("enforced: %d   unenforced: %d" % (len(on), len(off)))
+        for path, owned, _ in on: print("  ON   %s" % path)
+        for path, owned, _ in off: print("  off  %s%s" % (path, "" if owned else "  (foreign)"))
+        return
     if a.cmd == "check":
         rows = inventory(a.root, a.strip_docs)
         if a.json:
