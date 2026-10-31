@@ -47,13 +47,7 @@ in {
     ];
   };
 
-  environment.systemPackages =
-    with pkgs;
-    [ompBox.omp python3 chromium git ripgrep curl gh jq fd gnumake gcc]
-    ++ [
-      ompBox.crest.crest-cli
-      ompBox.crest.crest-auth
-    ];
+  environment.systemPackages = with pkgs; [ompBox.omp python3 chromium git ripgrep curl gh jq fd gnumake gcc];
   documentation.enable = false;
 
   boot.kernelParams = ["console=ttyS0" "loglevel=4"];
