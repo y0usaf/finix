@@ -36,7 +36,7 @@
     specialArgs = {
       ompBox = {
         inherit user files;
-        inherit (cfg) shares;
+        shares = ["${home}/.omp/natives"] ++ cfg.shares;
         sharesDir = "${state}/shares";
       };
     };
@@ -63,9 +63,6 @@ in {
     finix.persistence.allowlist.users.${user}.directories = [".local/state/omp-box"];
     environment.systemPackages = [pkg];
     system.build.ompBoxRunner = guest.config.microvm.declaredRunner;
-    system.activationScripts.omp-box-shares = ''
-      install -d -m 755 -o ${user} -g users ${state}/shares ${state}/grants
-    '';
 
     finit.services.omp-box-grants = {
       description = "re-apply omp box folder grants";
@@ -77,13 +74,13 @@ in {
         XDG_STATE_HOME = "${home}/.local/state";
       };
       command = "${pkgs.writeShellScript "omp-box-grants" ''
-        for _ in $(seq 1 300); do
+        for ((i = 0; i < 600; i++)); do
           if ${pkgs.openssh}/bin/ssh -q -p 22422 -i ${state}/id_ed25519 \
                -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
                -o BatchMode=yes -o ConnectTimeout=1 ${user}@127.0.0.1 true 2>/dev/null; then
             exec ${pkg}/bin/omp-box reconcile
           fi
-          sleep 0.2
+          ${pkgs.coreutils}/bin/sleep 0.2
         done
       ''}";
     };
@@ -97,7 +94,8 @@ in {
         XDG_RUNTIME_DIR = "/run/user/${toString uid}";
       };
       command = "${pkgs.writeShellScript "omp-box-run" ''
-        mkdir -p ${state}
+        mkdir -p ${state}/shares ${state}/grants ${home}/.omp/natives
+        rm -f ${state}/omp-box.sock ${state}/nixos.sock
         cd ${state}
         exec ${guest.config.microvm.declaredRunner}/bin/microvm-run
       ''}";
