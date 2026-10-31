@@ -110,5 +110,17 @@ in {
 
   manzil.users."${config.user.name}".files = files;
 
+  finit.services.tern-remote = {
+    description = "Tern remote sessions (${config.user.name})";
+    user = config.user.name;
+    environment = {
+      HOME = config.user.homeDirectory;
+      XDG_RUNTIME_DIR = "/run/user/${toString config.users.users.${config.user.name}.uid}";
+    };
+    command = "${package}/bin/tern remote serve --user --state-dir ${config.user.homeDirectory}/.config/tern";
+    conditions = ["net/lo/up"];
+    log = true;
+  };
+
   environment.systemPackages = [package cmusTsp];
 }
