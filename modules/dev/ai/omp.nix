@@ -27,6 +27,7 @@ in {
           "${flakeInputs.pi-recap}"
           "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
           "${./omp-code-mode.ts}"
+          "${./omp-box-commands.ts}"
         ];
       };
     };
