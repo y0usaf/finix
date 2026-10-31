@@ -7,7 +7,7 @@ shares="$state/shares"
 key="$state/id_ed25519"
 port=22422
 target=y0usaf@127.0.0.1
-ssh=(ssh -q -p "$port" -i "$key" -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes)
+ssh=(ssh -q -p "$port" -i "$key" -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=2 -o ServerAliveInterval=2 -o ServerAliveCountMax=1)
 
 usage() {
   cat <<'EOF'
@@ -121,14 +121,18 @@ cmd_list() {
 
 cmd_reconcile() {
   [ -d "$grants" ] || return 0
-  local f path mode name
+  local f path mode name failed=0
   for f in "$grants"/*; do
     [ -e "$f" ] || continue
     IFS=$'\t' read -r path mode < "$f"
     name=$(basename -- "$f")
-    apply_host "$name" "$path" "$mode" && mount_guest "$name" "$path" ||
-      printf 'omp-box: grant %s (%s) did not apply\n' "$name" "$path" >&2
+    if apply_host "$name" "$path" "$mode" && mount_guest "$name" "$path"; then
+      continue
+    fi
+    printf 'omp-box: grant %s (%s) did not apply\n' "$name" "$path" >&2
+    failed=1
   done
+  return "$failed"
 }
 
 case ${1:-} in

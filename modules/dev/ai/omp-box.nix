@@ -37,7 +37,8 @@
         default: ${catalog.defaultProvider}/${catalog.defaultModel}
       advisor:
         enabled: false
-      extensions: []
+      extensions:
+        - "${./omp-code-mode.ts}"
     '';
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.shared}\n";
   };
@@ -92,10 +93,13 @@ in {
         while :; do
           if ${pkgs.openssh}/bin/ssh -q -p 22422 -i ${state}/id_ed25519 \
                -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-               -o BatchMode=yes -o ConnectTimeout=1 ${user}@127.0.0.1 \
+               -o BatchMode=yes -o ConnectTimeout=1 -o ServerAliveInterval=2 -o ServerAliveCountMax=1 ${user}@127.0.0.1 \
                mountpoint -q /mnt/shares 2>/dev/null; then
-            ${pkg}/bin/omp-box reconcile
-            ${pkgs.coreutils}/bin/sleep 30
+            if ${pkg}/bin/omp-box reconcile; then
+              ${pkgs.coreutils}/bin/sleep 30
+            else
+              ${pkgs.coreutils}/bin/sleep 2
+            fi
           else
             ${pkgs.coreutils}/bin/sleep 2
           fi
