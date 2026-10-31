@@ -74,6 +74,7 @@
       install -d $out/share
       cp -r "$XDG_DATA_HOME/applications" "$XDG_DATA_HOME/icons" $out/share/
       substituteInPlace $out/share/applications/*.desktop --replace-fail "/bin/.tern-wrapped" "/bin/tern"
+      printf 'Path=%s\n' ${config.user.homeDirectory} >> $out/share/applications/so.stencil.tern.desktop
     '';
 
   package = pkgs.symlinkJoin {
