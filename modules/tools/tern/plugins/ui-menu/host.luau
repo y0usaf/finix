@@ -1,4 +1,4 @@
-local function rows(): { any }
+local function model(): { any }
 	local saved = tern.kv.get("menu")
 	if type(saved) ~= "table" then
 		return {}
@@ -6,7 +6,7 @@ local function rows(): { any }
 	return saved
 end
 
-local function states(): { [string]: boolean }
+local function state(): { [string]: boolean }
 	local saved = tern.kv.get("on")
 	local out = {}
 	if type(saved) == "table" then
@@ -19,57 +19,61 @@ local function states(): { [string]: boolean }
 	return out
 end
 
-local function mode(): string
-	local m = tern.kv.get("mode")
-	return if type(m) == "string" then m else "rail"
+local function snapshot(): { [string]: boolean }
+	local out = {}
+	for _, row in ipairs(model()) do
+		if type(row) == "table" and type(row.id) == "string" then
+			out[row.id] = state()[row.id] == true
+		end
+	end
+	return out
 end
 
-local function shown(row, on, m): boolean
-	if type(row) ~= "table" or type(row.id) ~= "string" then
-		return false
+local function same(a, b): boolean
+	for k, v in pairs(b) do
+		if a[k] ~= v then
+			return false
+		end
 	end
-	if type(row.mode) == "string" and row.mode ~= m then
-		return false
-	end
-	if type(row.needs) == "string" and on[row.needs] ~= true then
-		return false
+	for k in pairs(a) do
+		if b[k] == nil then
+			return false
+		end
 	end
 	return true
 end
 
-local function signature(): string
-	return mode() .. "|" .. tern.json.encode(states())
-end
-
-local function watch(cx, last)
+local function watch(cx, state_now)
 	tern.timer(250, function()
 		if not cx then
 			return
 		end
-		local now = signature()
-		if now ~= last then
+		local next_now = snapshot()
+		if not same(state_now, next_now) then
+			for k, v in pairs(next_now) do
+				state_now[k] = v
+			end
 			cx:render()
-			last = now
 		end
-		watch(cx, last)
+		watch(cx, state_now)
 	end)
 end
 
 tern.block.define("options", {
 	init = function(cx, _args, _saved)
-		watch(cx, signature())
-		return {}
+		local now = snapshot()
+		watch(cx, now)
+		return now
 	end,
 	title = function()
 		return "UI options"
 	end,
-	view = function(_state, _cx)
-		local on = states()
-		local m = mode()
+	view = function(_state_now, _cx)
+		local on = state()
 		local nodes = {}
 		local group = nil
-		for _, row in ipairs(rows()) do
-			if shown(row, on, m) then
+		for _, row in ipairs(model()) do
+			if type(row) == "table" and type(row.id) == "string" then
 				local g = tostring(row.group or "Tweaks")
 				if g ~= group then
 					group = g
@@ -83,11 +87,11 @@ tern.block.define("options", {
 		end
 		return { main = tern.ui.col({ tern.ui.el("div", { class = "uo-list" }, nodes) }) }
 	end,
-	event = function(_state, ev, _cx)
+	event = function(_state_now, ev, _cx)
 		if ev.ev == "change" and type(ev.name) == "string" then
-			local on = states()
-			on[ev.name] = ev.checked == true
-			tern.kv.set("on", on)
+			local next_on = state()
+			next_on[ev.name] = ev.checked == true
+			tern.kv.set("on", next_on)
 		end
 	end,
 })
