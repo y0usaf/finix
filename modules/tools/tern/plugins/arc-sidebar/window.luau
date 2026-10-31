@@ -7,30 +7,12 @@ local tab_count = 0
 local pinned = 0
 local space_name = ""
 
-local ONLY = {
-	"layout:float",
-	"layout:tiles",
-	"layout:studio",
-	"next_layout",
-	"toggle_tab_orientation",
-	"tabs:vertical",
-}
-
-local function pin(cx: WindowCx)
+local function rail(cx: WindowCx)
 	pcall(function()
 		cx:action("layout:rail")
 	end)
 	pcall(function()
 		cx:action("tabs:horizontal")
-	end)
-end
-
-for _, id in ipairs(ONLY) do
-	pcall(function()
-		tern.override(id, function(cx: WindowCx): boolean
-			cx:toast("info", "The rail is the only layout")
-			return true
-		end)
 	end)
 end
 
@@ -96,7 +78,6 @@ local function recount(cx)
 end
 
 tern.on("window_start", function(cx)
-	pin(cx)
 	local list = pinned_list()
 	if #list > 0 then
 		promote(cx, list)
@@ -156,7 +137,7 @@ tern.command({
 	title = "Sidebar: Arc mode",
 	icon = "layout",
 	run = function(cx)
-		pin(cx)
+		rail(cx)
 		cx:toast("success", "Arc sidebar")
 		recount(cx)
 	end,
@@ -244,9 +225,3 @@ tern.bind("ctrl+alt+j", "next_tab")
 tern.bind("ctrl+alt+k", "previous_tab")
 tern.bind("ctrl+alt+f", "focus_tabs")
 
-tern.timer(300, function(cx)
-	if cx then
-		pin(cx)
-		recount(cx)
-	end
-end)

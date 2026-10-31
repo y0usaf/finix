@@ -2,6 +2,5 @@ schema = 1
 id = "arc-sidebar"
 name = "Arc Sidebar"
 version = "0.1.0"
-description = "Arc-style sidebar: vertical tabs on the glass rail, space chips, tab colours."
+description = "Arc sidebar behaviour: rail layout, tab pins and tab colours."
 window = "window.luau"
-styles = ["arc.css"]
