@@ -51,6 +51,7 @@
         shares = ["${home}/.omp/natives"] ++ cfg.shares;
         sharesDir = "${state}/shares";
         credentials = ["${home}/Tokens" "${home}/.config/git" "${home}/.config/gh"];
+        inherit (flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}) omp;
       };
     };
     modules = [

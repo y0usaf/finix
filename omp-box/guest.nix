@@ -24,7 +24,7 @@ in {
     ];
   };
 
-  environment.systemPackages = with pkgs; [ python3 chromium git ripgrep curl gh jq fd gnumake gcc ];
+  environment.systemPackages = with pkgs; [ ompBox.omp python3 chromium git ripgrep curl gh jq fd gnumake gcc ];
   documentation.enable = false;
 
   environment.interactiveShellInit = ''
