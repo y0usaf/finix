@@ -1,0 +1,7 @@
+schema = 1
+id = "attention"
+name = "Attention"
+version = "0.1.0"
+description = "Colours the pane status dot: violet when a notification lands, orange when an agent waits on you."
+window = "window.luau"
+styles = ["attention.css"]

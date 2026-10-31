@@ -1,0 +1,7 @@
+:is(.tn-dk-c, .tn-face)[data-st='bell'] {
+	--st: light-dark(#7c3aed, #c4a7ff);
+}
+
+:is(.tn-dk-c, .tn-face)[data-st='waiting'] {
+	--st: light-dark(#c2410c, #ff7a4d);
+}
