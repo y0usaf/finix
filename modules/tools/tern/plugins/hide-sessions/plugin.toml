@@ -1,0 +1,7 @@
+schema = 1
+id = "hide-sessions"
+name = "Hide Sessions"
+version = "0.1.0"
+description = "Hides the session switcher in the tab bar."
+window = "window.luau"
+styles = ["hide-sessions.css"]
