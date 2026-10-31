@@ -558,7 +558,6 @@ def main():
         s.add_argument("paths", nargs="*", default=[])
         s.add_argument("--strip-docs", action="store_true", help="also remove doc comments")
         s.add_argument("--format", action="store_true", help="run the repository formatter afterwards")
-        s.add_argument("--commit", action="store_true", help="commit only the paths cleanker rewrote")
         s.add_argument("--force", action="store_true", help="touch explicitly disabled repos and referenced docs")
     for name in ("status","enroll","disenroll"):
         s = sub.add_parser(name)
@@ -590,7 +589,6 @@ def main():
     dry = a.cmd == "dry-run"
     total = collections.Counter()
     for path in repos:
-        index_before = git(path,"diff","--cached","--name-only").stdout.strip()
         ch = apply(path, a.strip_docs, dry=dry, fmt=a.format, force=a.force)
         n = collections.Counter(k for _, k, _ in ch)
         if not ch: continue
@@ -600,18 +598,6 @@ def main():
         for f, k, _ in ch:
             if k == "REJECT_SYNTAX": print("   rejected %s" % f)
         for k in n: total[k] += n[k]
-        if not dry and a.commit:
-            if index_before:
-                print("   not committed: the index already carries your changes")
-                total["uncommitted"] += 1
-                continue
-            touched = [f for f, k, _ in ch if k in {"strip","rm-md"}]
-            if touched:
-                git(path,"add","-u","--",*touched)
-                if git(path,"diff","--cached","--name-only").stdout.strip():
-                    git(path,"commit","-q","-m","Clean comments and unreferenced prose")
-                else:
-                    print("   nothing staged after cleaning")
     if dry: print("(dry run; nothing written)")
     print("total", dict(total))
 
