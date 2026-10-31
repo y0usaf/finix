@@ -168,6 +168,11 @@
 
     oh-my-pi.url = "github:can1357/oh-my-pi";
 
+    microvm = {
+      url = "github:microvm-nix/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     autolith.url = "github:y0usaf/autolith?ref=fix-clinedi-pin";
 
     emeraldian.url = "github:y0usaf/emeraldian/4557d20ce664a12dec7d5acf3d76a467cf4972a4";

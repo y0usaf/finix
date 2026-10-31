@@ -86,6 +86,14 @@ inputs: let
     inputs.manzil.finixModules.default
   ];
 
+  ompBoxGuest = inputs.nixpkgs.lib.nixosSystem {
+    system = "x86_64-linux";
+    modules = [
+      inputs.microvm.nixosModules.microvm
+      ./../omp-box/guest.nix
+    ];
+  };
+
   hosts = {
     y0usaf-server = mkFinixSystem {
       modules =
@@ -256,6 +264,11 @@ in {
     drift = import ./drift.nix {inherit lib pkgs hosts;};
     inherit (hosts.y0usaf-desktop.config.system.build) chatgpt p4g-setup;
     tomoe = inputs.tomoe.packages.${system}.default;
+    omp-box-runner = ompBoxGuest.config.microvm.declaredRunner;
+    omp-box = pkgs.callPackage ./../omp-box {
+      omp = inputs.oh-my-pi.packages.${system}.omp;
+      runner = ompBoxGuest.config.microvm.declaredRunner;
+    };
   };
 
   checks.${system} = lib.mapAttrs' (name: host: lib.nameValuePair name host.config.system.build.toplevel) hosts;

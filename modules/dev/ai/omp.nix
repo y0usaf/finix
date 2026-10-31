@@ -12,7 +12,7 @@ in {
     ".omp"
   ];
   environment.systemPackages = [
-    flakeInputs.oh-my-pi.packages."${pkgs.stdenv.hostPlatform.system}".omp
+    flakeInputs.self.packages."${pkgs.stdenv.hostPlatform.system}".omp-box
   ];
 
   manzil.users."${config.user.name}".files = {
