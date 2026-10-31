@@ -2,18 +2,21 @@ local TWEAKS = {
 	{
 		id = "sessions",
 		label = "sessions",
+		group = "Chrome",
 		css = [[.tn-session-tab{display:none !important}]],
 		on = true,
 	},
 	{
 		id = "account",
 		label = "account",
+		group = "Chrome",
 		css = [[.tn-peers{display:none !important}]],
 		on = true,
 	},
 	{
 		id = "frost",
 		label = "modal frost",
+		group = "Glass",
 		css = [[html.tn-themed .cmdk,
 html.tn-themed .dlg-card,
 html.tn-themed .mdl,
@@ -30,6 +33,7 @@ html.tn-themed .tn-sc {
 	{
 		id = "width",
 		label = "rail width",
+		group = "Rail",
 		css = [[html.tabs-v {
 	--vt-w: 252px;
 }
@@ -45,6 +49,7 @@ html.lay-rail.tabs-h #panel {
 	{
 		id = "spacing",
 		label = "rail spacing",
+		group = "Rail",
 		css = [[html.tabs-v #sidebar {
 	padding: 54px 8px 12px 10px !important;
 	gap: 1px !important;
@@ -59,6 +64,7 @@ html.tabs-v #sidebar .nav-group {
 	{
 		id = "heads",
 		label = "section heads",
+		group = "Rail",
 		css = [[html.tabs-v #sidebar .nav-head {
 	height: 24px !important;
 	padding: 0 8px !important;
@@ -74,6 +80,7 @@ html.tabs-v #sidebar .nav-group {
 	{
 		id = "rows",
 		label = "rail rows",
+		group = "Rail",
 		css = [[html.tabs-v #sidebar .nav-row {
 	height: 34px !important;
 	padding: 0 8px !important;
@@ -106,6 +113,7 @@ html.tabs-v #sidebar .nav-row .ico {
 	{
 		id = "keys",
 		label = "key hints",
+		group = "Rail",
 		css = [[html.tabs-v #sidebar .nav-row .meta.keys {
 	opacity: 0 !important;
 	transition: opacity 0.13s var(--ease) !important;
@@ -119,6 +127,7 @@ html.tabs-v #sidebar .nav-row:hover .meta.keys {
 	{
 		id = "colours",
 		label = "tab colours",
+		group = "Rail",
 		css = [[html.tabs-v #sidebar .nav-row[data-tc] .tn-tc {
 	width: 8px !important;
 	height: 8px !important;
@@ -132,6 +141,7 @@ html.tabs-v #sidebar .nav-row[data-tc] .lbl {
 	{
 		id = "find",
 		label = "rail find",
+		group = "Rail",
 		css = [[html.tabs-v .tn-vt-find {
 	height: 30px !important;
 	margin: 0 2px 8px !important;
@@ -145,6 +155,7 @@ html.tabs-v #sidebar .nav-row[data-tc] .lbl {
 	{
 		id = "chips",
 		label = "session chips",
+		group = "Rail",
 		css = [[html.tabs-v #tabbar .tn-session-tab {
 	height: 26px !important;
 	padding: 0 9px !important;
@@ -163,6 +174,7 @@ html.tabs-v #tabbar .tn-session-tab:hover {
 	{
 		id = "tabs",
 		label = "tab rows",
+		group = "Rail",
 		css = [[html.lay-rail.tabs-h .tt {
 	height: 38px !important;
 	margin: 0 4px !important;
@@ -187,6 +199,7 @@ html.lay-rail.tabs-h .tt.on::after {
 	{
 		id = "buttons",
 		label = "rail buttons",
+		group = "Rail",
 		css = [[html.lay-rail.tabs-h .tb-row {
 	height: 28px !important;
 	margin: 2px 6px 0 !important;
@@ -203,6 +216,7 @@ html.lay-rail.tabs-h .tb-add {
 	{
 		id = "centering",
 		label = "rail centering",
+		group = "Rail",
 		css = [[html.tabs-v #sidebar > nav.tn-vt {
 	display: flex !important;
 	flex-direction: column !important;
@@ -221,6 +235,7 @@ html.tabs-v #sidebar > nav.tn-vt > .nav-group:last-child {
 	{
 		id = "bottom",
 		label = "rail bottom",
+		group = "Rail",
 		css = [[html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers {
 	order: 1 !important;
 	margin-top: 0 !important;
@@ -246,14 +261,17 @@ html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
 	{
 		id = "lock",
 		label = "rail lock",
+		group = "Layout",
 		on = true,
 	},
 }
 
 local on = {}
+local by_id = {}
 
 for _, t in ipairs(TWEAKS) do
 	on[t.id] = t.on
+	by_id[t.id] = t
 end
 
 local LOCKED = {
@@ -304,18 +322,56 @@ local function paint_all()
 	end
 end
 
+local function toggle(cx, id)
+	local t = by_id[id]
+	if not t then
+		return
+	end
+	on[id] = not on[id]
+	paint(t)
+	if id == "lock" and on.lock then
+		rail(cx)
+	end
+	tern.chrome.refresh()
+end
+
+local function options(cx)
+	local items: { PickItem } = {}
+	for _, t in ipairs(TWEAKS) do
+		items[#items + 1] = {
+			label = t.label,
+			detail = on[t.id] and "on" or "off",
+			group = t.group,
+			current = on[t.id],
+			id = t.id,
+		}
+	end
+	cx:pick({ items = items, placeholder = "UI options", icon = "sliders", action = "toggle" })
+		:next(function(item: PickItem?, _err: string?, fresh: WindowCx?)
+			local next_cx = fresh or cx
+			if not item then
+				return
+			end
+			toggle(next_cx, item.id)
+			options(next_cx)
+		end)
+end
+
+tern.command({
+	id = "options",
+	title = "UI: options…",
+	icon = "sliders",
+	group = "UI",
+	run = options,
+})
+
 for _, t in ipairs(TWEAKS) do
 	tern.command({
 		id = "toggle-" .. t.id,
 		group = "UI",
 		title = "UI: show or hide the " .. t.label,
 		run = function(cx)
-			on[t.id] = not on[t.id]
-			paint(t)
-			if t.id == "lock" and on.lock then
-				rail(cx)
-			end
-			tern.chrome.refresh()
+			toggle(cx, t.id)
 		end,
 	})
 end
