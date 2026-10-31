@@ -117,41 +117,39 @@ def scan(files, lang, kinds=None, inside=None):
             except ValueError: pass
     return out
 
-def error_nodes(files, lang):
-    if not files: return 0
-    r = "id: e\nlanguage: %s\nrule:\n  kind: ERROR\n" % lang
-    p = sh([ag(),"scan","--inline-rules",r,"--json=stream",*files])
-    return sum(1 for l in p.stdout.splitlines() if '"ruleId"' in l)
-
 def scan_all(by_lang):
     langs = [k for k, v in by_lang.items() if v]
-    if not langs: return {}
-    if len(langs) == 1:
-        lang = langs[0]
-        nodes = scan(by_lang[lang], lang) + embedded(by_lang[lang], lang)
-        out = collections.defaultdict(list)
-        for n in nodes: out[n["file"]].append(n)
-        return out
+    out = collections.defaultdict(list)
+    errs = collections.Counter()
+    containers = collections.defaultdict(list)
+    if not langs: return out, errs, containers
     rules, files = [], []
     for lang in langs:
         ks = KINDS.get(lang, ["comment"])
         rules.append("id: c_%s\nlanguage: %s\nrule:\n  any:\n%s" % (lang, lang, "".join("    - kind: %s\n" % k for k in ks)))
+        rules.append("id: e_%s\nlanguage: %s\nrule:\n  kind: ERROR\n" % (lang, lang))
+        if lang == "Tsx":
+            rules.append("id: j_%s\nlanguage: %s\nrule:\n  kind: jsx_expression\n" % (lang, lang))
         files.extend(by_lang[lang])
     p = sh([ag(),"scan","--inline-rules","\n---\n".join(rules),"--json=stream",*files])
-    out = collections.defaultdict(list)
     if p.returncode != 0 and not p.stdout.strip():
         for lang in langs:
-            for n in scan(by_lang[lang], lang):
-                out[n["file"]].append(n)
+            for n in scan(by_lang[lang], lang): out[n["file"]].append(n)
+            for n in scan(by_lang[lang], lang, ["ERROR"]): errs[n["file"]] += 1
+            if lang == "Tsx":
+                for c in scan(by_lang[lang], lang, ["jsx_expression"]): containers[c["file"]].append(c)
     else:
         for line in p.stdout.splitlines():
             if '"ruleId"' not in line: continue
             try: n = json.loads(line)
             except ValueError: continue
-            out[n["file"]].append(n)
+            rid = n["ruleId"]
+            if rid.startswith("e_"): errs[n["file"]] += 1
+            elif rid.startswith("j_"): containers[n["file"]].append(n)
+            else: out[n["file"]].append(n)
     for lang in langs:
         for n in embedded(by_lang[lang], lang): out[n["file"]].append(n)
-    return out
+    return out, errs, containers
 
 EMBED = {"Html": [("JavaScript","script_element","js"), ("Css","style_element","css")]}
 
@@ -297,17 +295,6 @@ def fmt_cmd(repo, lang, path):
         return [t,"format","--quiet",path] if t else None
     return None
 
-def error_map(files, lang):
-    if not files: return {}
-    r = "id: e\nlanguage: %s\nrule:\n  kind: ERROR\n" % lang
-    p = sh([ag(),"scan","--inline-rules",r,"--json=stream",*files])
-    out = collections.Counter()
-    for line in p.stdout.splitlines():
-        if '"ruleId"' in line:
-            try: out[json.loads(line)["file"]] += 1
-            except ValueError: pass
-    return out
-
 def corpus(top, files):
     parts = []
     for f in files:
@@ -355,16 +342,11 @@ def apply(repo, strip_docs=False, dry=False, fmt=False, force=False):
     if not force and policy_reason(repo).startswith("explicit off"):
         return [("", "skip-explicit-off", 0)]
     exclude = ignore_patterns(repo)
-    for lang, files in lang_files(repo).items():
-        nodes = scan(files, lang) + embedded(files, lang)
-        if not nodes: continue
-        containers = {}
-        if lang == "Tsx":
-            for c in scan(files, lang, ["jsx_expression"]):
-                containers.setdefault(c["file"], []).append(c)
-        byfile = collections.defaultdict(list)
-        for n in nodes: byfile[n["file"]].append(n)
-        before = error_map(list(byfile), lang)
+    lf = lang_files(repo)
+    nodes_by_file, errs_before, containers = scan_all(lf)
+    for lang, files in lf.items():
+        byfile = {f: nodes_by_file[f] for f in files if nodes_by_file.get(f)}
+        if not byfile: continue
         edited, orig = {}, {}
         for f, ns in byfile.items():
             src = open(f, encoding="utf-8", errors="surrogateescape").read()
@@ -375,19 +357,19 @@ def apply(repo, strip_docs=False, dry=False, fmt=False, force=False):
         if dry:
             for f in edited: changes.append((f, "strip", len(byfile[f])))
             continue
-        modes = {}
         for f, new in edited.items():
             try:
-                modes[f] = os.stat(f).st_mode
-                if not os.access(f, os.W_OK): os.chmod(f, modes[f] | 0o200)
+                mode = os.stat(f).st_mode
+                if not os.access(f, os.W_OK): os.chmod(f, mode | 0o200)
                 open(f,"w",encoding="utf-8",errors="surrogateescape").write(new)
-                os.chmod(f, modes[f])
-            except OSError as exc:
+                os.chmod(f, mode)
+            except OSError:
                 changes.append((f, "REJECT_IO", 0))
-        edited = {f: v for f, v in edited.items() if os.path.exists(f) and not any(c[0] == f and c[1] == "REJECT_IO" for c in changes)}
-        after = error_map(list(edited), lang)
+        bad_io = {f for f, k, _ in changes if k == "REJECT_IO"}
+        edited = {f: v for f, v in edited.items() if os.path.exists(f) and f not in bad_io}
+        _, errs_after, _ = scan_all({lang: list(edited)})
         for f in list(edited):
-            if before.get(f, 0) == 0 and after.get(f, 0) > 0:
+            if errs_before.get(f, 0) == 0 and errs_after.get(f, 0) > 0:
                 open(f,"w",encoding="utf-8",errors="surrogateescape").write(orig[f])
                 changes.append((f, "REJECT_SYNTAX", len(byfile[f])))
                 del edited[f]
@@ -537,9 +519,11 @@ def hook() -> int:
         tmp_of[tmp] = f
     by_lang = collections.defaultdict(list)
     for f, (lang, data, tmp) in blobs.items(): by_lang[lang].append(tmp)
-    for lang, tmps in by_lang.items():
-        for n in scan(tmps, lang) + embedded(tmps, lang):
-            f = tmp_of[n["file"]]
+    nodes_by_file, _, _ = scan_all(by_lang)
+    for tmp, found in nodes_by_file.items():
+        f = tmp_of.get(tmp)
+        if not f: continue
+        for n in found:
             if classified(n["text"], False) == "keep": continue
             line = blobs[f][1].count(b"\n", 0, n["range"]["byteOffset"]["start"]) + 1
             if line in added_lines(top, f):
