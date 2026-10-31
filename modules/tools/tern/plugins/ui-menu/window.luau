@@ -35,6 +35,19 @@ html.tn-themed #pick .cmdk.tn-pk .ck-list {
 		quiet = true,
 	},
 	{
+		id = "inbox",
+		label = "centred inbox",
+		group = "Chrome",
+		css = [[html.tn-themed #inbox {
+	left: 50% !important;
+	top: 50% !important;
+	transform: translate(-50%, -50%) !important;
+	transform-origin: 50% 50% !important;
+}]],
+		on = true,
+		quiet = true,
+	},
+	{
 		id = "frost",
 		label = "modal frost",
 		group = "Glass",
