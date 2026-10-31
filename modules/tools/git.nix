@@ -20,6 +20,8 @@ in {
       };
       core.editor = "nvim";
       core.hooksPath = "${policy-sweep}/share/git-hooks";
+      sweep.owners = "y0usaf sylvarant-ai";
+      sweep.roots = "${config.user.homeDirectory}/dev/developing ${config.user.homeDirectory}/dev/maintaining";
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;

@@ -342,12 +342,40 @@ def ignored(patterns, path):
 
 SWEEP_KEY = "sweep.policy"
 
-def enrolled(repo):
+def setting(repo, key):
+    v = git(repo,"config","--local","--get",key)
+    if v.returncode == 0: return v.stdout.strip()
+    v = git(repo,"config","--get",key)
+    return v.stdout.strip() if v.returncode == 0 else ""
+
+def remote_owner(repo):
+    rem = git(repo,"remote","get-url","origin").stdout.strip()
+    m = re.search(r"[:/]([^/:]+)/[^/]+?(?:\.git)?$", rem)
+    return m.group(1) if m else ""
+
+def policy_reason(repo):
     local = git(repo,"config","--local","--get",SWEEP_KEY)
     if local.returncode == 0:
-        return local.stdout.strip().lower() in {"true","1","yes","on"}
+        on = local.stdout.strip().lower() in {"true","1","yes","on"}
+        return "explicit on" if on else "explicit off"
+    owners = setting(repo,"sweep.owners").replace(",", " ").split()
+    if owners:
+        owner = remote_owner(repo)
+        if owner and owner in owners: return "owner " + owner
+        if not owner:
+            roots = setting(repo,"sweep.roots").replace(",", " ").split()
+            top = git(repo,"rev-parse","--show-toplevel").stdout.strip()
+            for root in roots:
+                root = os.path.expanduser(root)
+                if top == root or top.startswith(root.rstrip("/") + "/"): return "path " + root
     merged = git(repo,"config","--get",SWEEP_KEY)
-    return merged.returncode == 0 and merged.stdout.strip().lower() in {"true","1","yes","on"}
+    if merged.returncode == 0 and merged.stdout.strip().lower() in {"true","1","yes","on"}:
+        return "explicit on"
+    return ""
+
+def enrolled(repo):
+    reason = policy_reason(repo)
+    return bool(reason) and not reason.startswith("explicit off")
 
 def enroll(paths, on):
     done = []
@@ -426,15 +454,16 @@ def main():
     if a.cmd in {"enroll","disenroll"}:
         paths = [os.path.abspath(x) for x in a.repo] or [r["path"] for r in default_scope(a.root)]
         for p, state in enroll(paths, a.cmd == "enroll"):
-            print("%-56s %s" % (os.path.relpath(p, os.path.expanduser("~")), "policy on" if state else "policy off"))
+            print("%-56s %-12s %s" % (os.path.relpath(p, os.path.expanduser("~")),
+                                      "policy on" if state else "policy off", policy_reason(p) or "-"))
         return
     if a.cmd == "status":
-        rows = [(os.path.relpath(r["path"], os.path.expanduser("~")), r["owned"], enrolled(r["path"])) for r in discover(a.root)]
-        on = [r for r in rows if r[2]]
-        off = [r for r in rows if not r[2]]
+        rows = [(os.path.relpath(r["path"], os.path.expanduser("~")), policy_reason(r["path"])) for r in discover(a.root)]
+        on = [r for r in rows if r[1] and not r[1].startswith("explicit off")]
+        off = [r for r in rows if r not in on]
         print("enforced: %d   unenforced: %d" % (len(on), len(off)))
-        for path, owned, _ in on: print("  ON   %s" % path)
-        for path, owned, _ in off: print("  off  %s%s" % (path, "" if owned else "  (foreign)"))
+        for path, why in on: print("  ON   %-48s %s" % (path, why))
+        for path, why in off: print("  off  %-48s %s" % (path, why or "-"))
         return
     if a.cmd == "check":
         rows = inventory(a.root, a.strip_docs)
