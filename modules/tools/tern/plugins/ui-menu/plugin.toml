@@ -2,5 +2,5 @@ schema = 1
 id = "ui-menu"
 name = "UI Menu"
 version = "0.1.0"
-description = "Palette toggles for the parts of Tern's chrome this config hides."
+description = "Palette toggles for the chrome this config hides, and the modals' frost."
 window = "window.luau"

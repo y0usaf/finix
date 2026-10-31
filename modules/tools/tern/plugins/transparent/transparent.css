@@ -6,7 +6,7 @@ html.tn-themed.glass {
 	--tn-page-a: 0;
 	--tn-panel-a: 0;
 	--tv-bg: transparent;
-	--modal-filter: blur(40px) saturate(190%);
+	--modal-filter: none;
 	--modal-dim-filter: none;
 }
 
@@ -15,18 +15,6 @@ html.tn-themed *::before,
 html.tn-themed *::after {
 	backdrop-filter: none !important;
 	-webkit-backdrop-filter: none !important;
-}
-
-html.tn-themed .cmdk,
-html.tn-themed .dlg-card,
-html.tn-themed .mdl,
-html.tn-themed .pk-sheet,
-html.tn-themed .sf-overlay.modal > .sf-ov-card,
-html.tn-themed .sf-prefs .pf-editor > .sf-col,
-html.tn-themed .tn-hd,
-html.tn-themed .tn-sc {
-	-webkit-backdrop-filter: var(--modal-filter) !important;
-	backdrop-filter: var(--modal-filter) !important;
 }
 
 html.tn-themed body,

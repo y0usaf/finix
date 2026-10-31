@@ -11,6 +11,22 @@ local TWEAKS = {
 		css = ".tn-peers{display:none !important}",
 		on = true,
 	},
+	{
+		id = "frost",
+		label = "modal frost",
+		css = [[html.tn-themed .cmdk,
+html.tn-themed .dlg-card,
+html.tn-themed .mdl,
+html.tn-themed .pk-sheet,
+html.tn-themed .sf-overlay.modal > .sf-ov-card,
+html.tn-themed .sf-prefs .pf-editor > .sf-col,
+html.tn-themed .tn-hd,
+html.tn-themed .tn-sc {
+	-webkit-backdrop-filter: blur(40px) saturate(190%) !important;
+	backdrop-filter: blur(40px) saturate(190%) !important;
+}]],
+		on = true,
+	},
 }
 
 local on = {}
