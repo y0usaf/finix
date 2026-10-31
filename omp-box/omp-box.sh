@@ -24,6 +24,8 @@ up() { "${ssh[@]}" "$target" true 2>/dev/null; }
 
 fail() { printf 'omp-box: %s\n' "$*" >&2; exit 1; }
 
+covers() { local base=${1%/}; case "$2/" in "$base"/*) return 0 ;; *) return 1 ;; esac; }
+
 mount_guest() {
   local name=$1 path=$2
   "${ssh[@]}" "$target" "set -e
@@ -66,6 +68,8 @@ cmd_add() {
   [ -n "$path" ] || fail "add needs a path"
   path=$(realpath -e -- "$path")
   [ -d "$path" ] || fail "$path is not a directory"
+  if covers "$path" "$(realpath -m -- "$state")"; then fail "$path holds the share directory itself, so sharing it loops"; fi
+  if covers "$path" "$HOME"; then fail "$path covers $HOME, where the box keeps its own state; share a folder inside it"; fi
   local name
   name=$(basename -- "$path" | tr -cd 'A-Za-z0-9._-')
   [ -e "$grants/$name" ] && fail "grant '$name' already exists (rm it first)"
