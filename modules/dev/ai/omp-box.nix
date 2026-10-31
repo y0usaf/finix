@@ -33,6 +33,9 @@
       packages = [];
     });
     config = pkgs.writeText "config.yml" ''
+      setupVersion: 2
+      startup:
+        setupWizard: false
       defaultThinkingLevel: ${catalog.defaultThinkingLevel}
       modelRoles:
         advisor: vercel-ai-gateway/openai/gpt-5.6-luna
