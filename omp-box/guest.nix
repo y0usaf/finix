@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, lib, config, ompBox, ... }:
 let
-  user = "y0usaf";
+  user = ompBox.user;
   home = "/home/${user}";
+  mountPoint = p: p;
 in {
   system.stateVersion = "24.05";
 
@@ -9,11 +10,9 @@ in {
     hypervisor = "qemu";
     mem = 1024;
     vcpu = 2;
-    shares = [
-      { tag = "ro-store"; source = "/nix/store"; mountPoint = "/nix/.ro-store"; }
-      { tag = "home"; source = home; mountPoint = home; proto = "9p"; }
-      { tag = "host"; source = home; mountPoint = "/mnt/host"; proto = "9p"; }
-    ];
+    shares =
+      [ { tag = "ro-store"; source = "/nix/store"; mountPoint = "/nix/.ro-store"; } ]
+      ++ map (p: { tag = "share-${builtins.hashString "sha1" p}"; source = p; mountPoint = p; proto = "9p"; }) ompBox.shares;
     interfaces = [ ];
     qemu.extraArgs = [
       "-netdev" "user,id=net0,hostfwd=tcp:127.0.0.1:22422-:22"
@@ -68,14 +67,11 @@ in {
     script = ''
       set -eu
       dst=${home}/.omp/agent
-      src=/mnt/host/.omp/agent
       install -d -o 1001 -g 100 -m 700 "$dst"
-      for f in config.yml models.yml; do
-        [ -e "$src/$f" ] && install -o 1001 -g 100 -m 600 "$src/$f" "$dst/$f" || true
-      done
-      for d in agents extensions rules; do
-        [ -e "$src/$d" ] && [ ! -e "$dst/$d" ] && ln -s "$src/$d" "$dst/$d" || true
-      done
+      install -o 1001 -g 100 -m 600 ${ompBox.files.models} "$dst/models.json"
+      install -o 1001 -g 100 -m 600 ${ompBox.files.settings} "$dst/settings.json"
+      install -o 1001 -g 100 -m 600 ${ompBox.files.config} "$dst/config.yml"
+      install -o 1001 -g 100 -m 600 ${ompBox.files.appendSystem} "$dst/APPEND_SYSTEM.md"
     '';
   };
 }

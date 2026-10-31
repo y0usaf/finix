@@ -11,9 +11,6 @@ in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".omp"
   ];
-  environment.systemPackages = [
-    flakeInputs.self.packages."${pkgs.stdenv.hostPlatform.system}".omp-box
-  ];
 
   manzil.users."${config.user.name}".files = {
     ".omp/agent/config.yml" = {

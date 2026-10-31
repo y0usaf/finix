@@ -1,4 +1,4 @@
-{ lib, pkgs, omp, runner, user ? "y0usaf" }:
+{ lib, pkgs, omp, shares ? [], user ? "y0usaf" }:
 let
   key = ./id_ed25519;
   wrapper = pkgs.writeShellScriptBin "omp" ''
@@ -9,6 +9,10 @@ let
       mkdir -p "$state"
       install -m 600 ${key} "$key"
     fi
+    case "$PWD/" in
+      ${lib.concatMapStringsSep "\n      " (p: "${p}/*) ;;") shares}
+      *) printf 'omp-box: %s is not shared with the box (user.dev.ompBox.shares)\n' "$PWD" >&2; exit 66 ;;
+    esac
     env_prefix=""
     for v in AI_GATEWAY_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY OPENROUTER_API_KEY GEMINI_API_KEY VERCEL_PERSONAL_TOKEN; do
       eval "value=\''${''${v}:-}"
