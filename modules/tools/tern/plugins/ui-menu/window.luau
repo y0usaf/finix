@@ -251,6 +251,13 @@ html.tabs-v #sidebar > nav.tn-vt > .nav-group:first-child {
 }
 html.tabs-v #sidebar > nav.tn-vt > .nav-group:last-child {
 	margin-bottom: auto !important;
+}
+html.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {
+	margin-top: auto !important;
+	margin-bottom: auto !important;
+}
+html.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
+	margin-top: 0 !important;
 }]],
 		on = true,
 		quiet = true,
@@ -347,6 +354,14 @@ tern.on("window_start", function(cx)
 		rail(cx)
 	end
 end)
+
+for _, ms in ipairs({ 300, 1200 }) do
+	tern.timer(ms, function(cx)
+		if cx and on.lock then
+			rail(cx)
+		end
+	end)
+end
 
 local function paint(t)
 	if t.css then
