@@ -35,6 +35,7 @@ let
       -o BatchMode=yes -o SendEnv=TERM $tty ${user}@127.0.0.1 \
       "exec sh -c $(printf %q "$seed cd $(printf %q "$PWD") && exec ${omp}/bin/omp $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
   '';
+  local = pkgs.writeShellScriptBin "omp-local" ''exec ${omp}/bin/omp "$@"'';
   cli = pkgs.writeShellApplication {
     name = "omp-box";
     runtimeInputs = [ pkgs.coreutils pkgs.util-linux pkgs.openssh pkgs.findutils ];
@@ -46,6 +47,6 @@ pkgs.symlinkJoin {
   paths = [
     wrapper
     cli
-    (pkgs.writeShellScriptBin "omp-host" ''exec ${omp}/bin/omp "$@"'')
+    local
   ];
 }
