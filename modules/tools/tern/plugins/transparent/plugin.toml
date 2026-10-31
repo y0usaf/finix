@@ -1,0 +1,7 @@
+schema = 1
+id = "transparent"
+name = "Transparent"
+version = "0.1.0"
+description = "Clears every surface and backdrop blur, so the wallpaper shows through untouched."
+window = "window.luau"
+styles = ["transparent.css"]

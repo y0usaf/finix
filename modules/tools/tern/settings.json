@@ -20,7 +20,7 @@
   "tabs": "Vertical",
   "system_title_bar": true,
   "status_bar": true,
-  "material": "Glass",
+  "material": "Clear",
   "opacity": 0,
   "blur": 0,
   "surface_fold": true,

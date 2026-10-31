@@ -1,5 +1,7 @@
 (in-package #:tomoe-user)
 
+(defparameter +glass-blurless+ '("so.stencil.tern"))
+
 (defun glass--margin (passes offset)
   (min 4096 (truncate (* (expt 2 passes) (+ offset 2)))))
 
@@ -11,5 +13,7 @@
                                        (glass--margin (getf +glass+ :passes) (getf +glass+ :offset))
                                        +glass+))
                 (loop for window in (context snapshot :windows)
-                      collect (window-properties (getf window :id) :blur t)))
+                      collect (window-properties
+                                (getf window :id)
+                                :blur (not (member (getf window :app-id) +glass-blurless+ :test #'string=)))))
           nil))
