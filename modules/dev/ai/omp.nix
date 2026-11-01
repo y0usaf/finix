@@ -21,9 +21,10 @@ in {
       clobber = true;
       value = {
         inherit (catalog) defaultThinkingLevel;
-        advisor.enabled = false;
+        advisor.enabled = true;
         modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-        modelRoles.advisor = "vercel-ai-gateway/openai/gpt-5.6-luna";
+        modelRoles.advisor = catalog.advisorModel;
+        retry.fallbackChains = catalog.fallbackChains;
         extensions = [
           "${flakeInputs.pi-chronobreak}"
           "${flakeInputs.pi-recap}"

@@ -15,6 +15,11 @@ in {
       defaultProvider = "anthropic";
       defaultModel = "claude-opus-5-5";
       defaultThinkingLevel = "xhigh";
+      advisorModel = "openai-codex/gpt-6.1-sol:high";
+      fallbackChains = {
+        default = ["openai-codex/gpt-6.1-sol:xhigh"];
+        advisor = ["anthropic/claude-sonnet-5-5:high"];
+      };
 
       enabledModels = [
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast"

@@ -39,10 +39,12 @@
         setupWizard: false
       defaultThinkingLevel: ${catalog.defaultThinkingLevel}
       modelRoles:
-        advisor: vercel-ai-gateway/openai/gpt-5.6-luna
+        advisor: ${catalog.advisorModel}
         default: ${catalog.defaultProvider}/${catalog.defaultModel}
       advisor:
-        enabled: false
+        enabled: true
+      retry:
+        fallbackChains: ${builtins.toJSON catalog.fallbackChains}
       extensions:
         - "${./omp-code-mode.ts}"
     '';
