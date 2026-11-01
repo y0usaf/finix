@@ -1,5 +1,8 @@
 # Heartbeat
 
+- If an agent you started has finished, failed or is waiting for input, say which and what it needs.
+- If a long build, test run or `nh os switch` in any terminal finished or failed since the last heartbeat, say which.
+
 <!--
 Carly reads this checklist on every heartbeat (every 30 minutes by default, Settings › Carly) and speaks up only when something needs you. While it holds nothing but headings and comments, no heartbeat runs.
 
