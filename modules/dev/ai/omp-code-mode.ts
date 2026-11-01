@@ -133,6 +133,7 @@ function sessionId(ctx) {
 export default function codeMode(pi) {
 	let declarationText = "";
 	const insideEval = new Set();
+	const coded = new Set();
 
 	pi.setLabel("Code mode");
 
@@ -141,7 +142,9 @@ export default function codeMode(pi) {
 			insideEval.add(sessionId(ctx));
 			return undefined;
 		}
-		if (DIRECT_TOOLS.has(event.toolName) || insideEval.has(sessionId(ctx))) return undefined;
+		if (!coded.has(sessionId(ctx)) || DIRECT_TOOLS.has(event.toolName) || insideEval.has(sessionId(ctx))) {
+			return undefined;
+		}
 		return {
 			block: true,
 			reason: `Direct ${event.toolName} calls are disabled; call tool.${event.toolName}(args) from eval instead.`,
@@ -153,7 +156,7 @@ export default function codeMode(pi) {
 	});
 
 	pi.on("before_agent_start", async event => {
-		if (!Array.isArray(event.systemPrompt)) return undefined;
+		if (!Array.isArray(event.systemPrompt) || !pi.getActiveTools().includes("eval")) return undefined;
 		declarationText = declarationsFor(pi.getAllTools());
 		const systemPrompt = [...event.systemPrompt];
 		const index = systemPrompt.findIndex(
@@ -168,5 +171,14 @@ export default function codeMode(pi) {
 		return { systemPrompt };
 	});
 
-	pi.on("before_provider_request", async event => filterPayload(event.payload));
+	pi.on("before_provider_request", async (event, ctx) => {
+		const tools = Array.isArray(event.payload?.tools) ? event.payload.tools : [];
+		const evalName = `${CLAUDE_TOOL_PREFIX}eval`;
+		if (!tools.some(tool => toolName(tool) === "eval" || toolName(tool) === evalName)) {
+			coded.delete(sessionId(ctx));
+			return event.payload;
+		}
+		coded.add(sessionId(ctx));
+		return filterPayload(event.payload);
+	});
 }
