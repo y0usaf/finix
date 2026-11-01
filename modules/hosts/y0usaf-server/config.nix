@@ -51,6 +51,13 @@
 
               tcp dport { 80, 443, 2222, 3000, 22000, 4200, 8787 } accept comment "2222 = forgejo ssh, NOT sshd (that is the eth0 rule); 8787 attic cache (LAN builds, tailnet too slow)"
               udp dport { 21027, 22000, 4200, 41641 } accept
+
+              udp dport 51820 accept comment "wireguard mesh: desktop and phone peers dial in here"
+              iifname "wg0" accept comment "wireguard mesh: traffic from mesh peers that ends here"
+            '';
+            forward = ''
+              iifname "wg0" accept comment "wireguard mesh: this hub forwards between mesh peers"
+              oifname "wg0" accept
             '';
           };
         };

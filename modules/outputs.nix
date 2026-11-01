@@ -99,6 +99,7 @@ inputs: let
           ./hosts/y0usaf-server/config.nix
           ./finix/tailscale.nix
           ./finix/static-net.nix
+          ./hosts/wireguard.nix
           ./hosts/y0usaf-server/hardware-config.nix
           ./hosts/y0usaf-server/boot.nix
           ./server/attic.nix
@@ -123,6 +124,7 @@ inputs: let
           inputs.finix.nixosModules.networkmanager
           inputs.finix.nixosModules.limine
           ./finix/static-net.nix
+          ./hosts/wireguard.nix
           ./server/amp-orb.nix
         ]
         ++ graphicalModules

@@ -97,6 +97,8 @@ in {
             iifname "eno1" udp dport 9757 accept comment "mado for the Steam Frame"
 
             iifname "eno1" udp dport 8376 accept comment "tern remote sessions over the LAN"
+            iifname "eno1" udp dport 51820 accept comment "wireguard mesh: hub on the server"
+            iifname "wg0" accept comment "wireguard mesh: traffic from mesh peers that ends here"
           '';
         };
       };
