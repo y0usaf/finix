@@ -50,12 +50,6 @@ in {
         };
       };
     };
-    ".omp/agent/rules/tldr.md".text = ''
-      ---
-      {"condition":["(?s).{2000,}"],"interruptMode":"never","scope":"text"}---
-
-      TL;DR: summarize the preceding response in 3-5 concise bullets.
-    '';
     ".omp/agent/settings.json" = {
       generator = toJSON;
       value = {

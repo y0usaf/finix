@@ -10,31 +10,23 @@
     sufficiently detailed yet non-redundant, truthful and evidence-based,
     tightly aligned with the question, clear and logically structured, without
     sacrificing accuracy or necessary depth.
+
+    Write for a sharp engineer new to this project: plain words, the answer
+    first, short unless asked for more. Explain each name, acronym or flag in a
+    few words or leave it out. Simpler means fewer ideas, not a child's analogy.
   '';
 
   rules = ''
     ## Rules
 
-    - Write no markdown files and no code comments; delete any your change makes
-      wrong. Code states everything a comment would. A repo's README is its only
-      prose; an existing plan, status or notes file is not precedent.
-    - Write no tests, fixtures or snapshots unless asked, except end-to-end tests
-      that drive the built artifact through its public interface without mocks
-      under `nix flake check`, for behaviour a user would notice.
-  '';
-
-  shipping = ''
-    ## Shipping
-
-    Ship by default. Once a change passes its check, land it, push it, bump the
-    system flake's pin of it, rebuild, switch, and restart what it touched once
-    nothing runs there; then say what changed and the one command that undoes it.
-    Git and Nix generations are the undo, so a reversible step never waits on the
-    user and a question never asks permission for one. Ask first only before what
-    neither undoes: deleting files git doesn't hold, rewriting pushed history,
-    and anything another person sees, such as a message, a pull request or making
-    a repo public. Before retrying a write whose outcome is unknown, check
-    whether it took effect.
+    - No code comments; no markdown besides README.md and AGENTS.md.
+    - No tests unless asked, except end-to-end tests of the built artifact under
+      `nix flake check`.
+    - Ship what the user asks you to change: commit, push, bump its pin in
+      ~/finix, switch, and restart what it touched. A question gets an answer,
+      not a commit. Never ask permission for what git or Nix undoes; ask first
+      before deleting files git doesn't hold, rewriting pushed history, or
+      anything another person sees.
   '';
 
   hostFacts = ''
@@ -65,9 +57,9 @@ in {
       ["Init is finit, not systemd: `initctl` manages services and sysklogd writes /var/log; there is no `systemctl`, `journalctl` or `loginctl`."]
       ++ lib.optional ((config.fileSystems."/".fsType or null) == "tmpfs") "`/` is tmpfs: anything written outside a persistent mount is gone after a reboot."
     );
-    portable = lib.concatMapStringsSep "\n\n" (lib.removeSuffix "\n") [style rules shipping];
+    portable = lib.concatMapStringsSep "\n\n" (lib.removeSuffix "\n") [style rules];
     shared = lib.concatMapStringsSep "\n\n" (lib.removeSuffix "\n") (
-      [style rules shipping] ++ lib.optional (host != []) hostFacts
+      [style rules] ++ lib.optional (host != []) hostFacts
     );
   };
 }
