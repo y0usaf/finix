@@ -24,6 +24,7 @@ in {
         advisor.enabled = true;
         modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
         modelRoles.advisor = catalog.advisorModel;
+        modelRoles.smol = catalog.smolModel;
         retry.fallbackChains = catalog.fallbackChains;
         extensions = [
           "${flakeInputs.pi-chronobreak}"

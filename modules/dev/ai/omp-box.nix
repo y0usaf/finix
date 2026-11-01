@@ -41,6 +41,7 @@
       modelRoles:
         advisor: ${catalog.advisorModel}
         default: ${catalog.defaultProvider}/${catalog.defaultModel}
+        smol: ${catalog.smolModel}
       advisor:
         enabled: true
       retry:
