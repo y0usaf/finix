@@ -7,6 +7,7 @@
 }: let
   catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
+  flash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
 in {
   options.user.dev.modelCatalog = lib.mkOption {
     type = lib.types.attrsOf lib.types.anything;
@@ -16,10 +17,10 @@ in {
       defaultModel = "claude-opus-5-5";
       defaultThinkingLevel = "xhigh";
       advisorModel = "openai-codex/gpt-6.1-sol:high";
-      smolModel = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
+      smolModel = flash;
       fallbackChains = {
-        default = ["openai-codex/gpt-6.1-sol:xhigh"];
-        advisor = ["anthropic/claude-sonnet-5-5:high"];
+        default = ["openai-codex/gpt-6.1-sol:xhigh" flash];
+        advisor = [flash];
       };
 
       enabledModels = [
