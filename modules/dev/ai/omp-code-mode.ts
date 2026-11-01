@@ -9,6 +9,7 @@
  */
 
 const DIRECT_TOOLS = new Set(["eval", "think", "yield", "goal", "checkpoint", "rewind"]);
+const CLAUDE_TOOL_PREFIX = "_";
 const INVENTORY_HEADING = "\n# Tool Inventory\n";
 const MAX_DECLARATION_CHARS = 64 * 1024;
 const TS_IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
@@ -103,16 +104,23 @@ function toolName(tool) {
 	return typeof name === "string" ? name : undefined;
 }
 
+function isDirect(name) {
+	return (
+		DIRECT_TOOLS.has(name) ||
+		(name.startsWith(CLAUDE_TOOL_PREFIX) && DIRECT_TOOLS.has(name.slice(CLAUDE_TOOL_PREFIX.length)))
+	);
+}
+
 function filterPayload(payload) {
 	if (!payload || typeof payload !== "object" || !Array.isArray(payload.tools)) return payload;
 	const tools = payload.tools.filter(tool => {
 		const name = toolName(tool);
-		return name !== undefined && DIRECT_TOOLS.has(name);
+		return name !== undefined && isDirect(name);
 	});
 	const next = { ...payload, tools };
 	const choice = payload.tool_choice;
 	const forced = typeof choice === "string" ? choice : (choice?.name ?? choice?.function?.name);
-	if (typeof forced === "string" && forced !== "auto" && forced !== "none" && !DIRECT_TOOLS.has(forced)) {
+	if (typeof forced === "string" && forced !== "auto" && forced !== "none" && !isDirect(forced)) {
 		delete next.tool_choice;
 	}
 	return next;
