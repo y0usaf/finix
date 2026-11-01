@@ -12,6 +12,8 @@ in {
     ".omp"
   ];
 
+  environment.systemPackages = [pkgs.jq];
+
   manzil.users."${config.user.name}".files = {
     ".omp/agent/config.yml" = {
       type = "merge";
@@ -28,6 +30,7 @@ in {
           "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
           "${./omp-code-mode.ts}"
           "${./omp-box-commands.ts}"
+          "${./omp-crest-auth.ts}"
         ];
       };
     };
