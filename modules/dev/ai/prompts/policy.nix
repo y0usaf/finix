@@ -53,6 +53,11 @@ in {
       readOnly = true;
       description = "What every coding-agent harness receives: style, rules and this host's facts, in markdown, with no trailing newline.";
     };
+    portable = lib.mkOption {
+      type = lib.types.str;
+      readOnly = true;
+      description = "The shared prompt without this host's facts, for agents that run somewhere else, such as the omp box.";
+    };
   };
 
   config.user.dev.prompts = {
@@ -60,6 +65,7 @@ in {
       ["Init is finit, not systemd: `initctl` manages services and sysklogd writes /var/log; there is no `systemctl`, `journalctl` or `loginctl`."]
       ++ lib.optional ((config.fileSystems."/".fsType or null) == "tmpfs") "`/` is tmpfs: anything written outside a persistent mount is gone after a reboot."
     );
+    portable = lib.concatMapStringsSep "\n\n" (lib.removeSuffix "\n") [style rules shipping];
     shared = lib.concatMapStringsSep "\n\n" (lib.removeSuffix "\n") (
       [style rules shipping] ++ lib.optional (host != []) hostFacts
     );

@@ -49,7 +49,7 @@
       extensions:
         - "${./omp-code-mode.ts}"
     '';
-    appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.shared}\n";
+    appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
   };
 
   guest = flakeInputs.nixpkgs.lib.nixosSystem {
