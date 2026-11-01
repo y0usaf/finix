@@ -40,7 +40,7 @@
       defaultThinkingLevel: ${catalog.defaultThinkingLevel}
       modelRoles:
         advisor: vercel-ai-gateway/openai/gpt-5.6-luna
-        default: ${catalog.defaultProvider}/${catalog.defaultModel}
+        default: anthropic/claude-opus-5-5:xhigh
       advisor:
         enabled: false
       extensions:
