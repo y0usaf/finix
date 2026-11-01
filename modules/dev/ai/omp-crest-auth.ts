@@ -92,4 +92,12 @@ export default async function crest(pi: ExtensionAPI): Promise<void> {
 			},
 		});
 	}
+	pi.on("session_start", async (_event, ctx) => {
+		const current = ctx.models.current();
+		if (current === undefined) return;
+		const routed = ctx.models.resolve(`${current.provider}/${current.id}`);
+		if (routed !== undefined && routed.api !== current.api && routed.api === `crest-${routed.provider}`) {
+			await pi.setModel(routed);
+		}
+	});
 }
