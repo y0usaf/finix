@@ -21,6 +21,12 @@
         vercel-ai-gateway:
           baseUrl: ${gatewayUrl}
           apiKey: "!echo unused"
+        anthropic:
+          baseUrl: ${gatewayUrl}/anthropic
+          apiKey: "!echo sk-ant-oat-crest"
+        openai-codex:
+          baseUrl: ${gatewayUrl}/openai-codex
+          apiKey: "!echo crest"
     '';
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel defaultThinkingLevel;
@@ -114,6 +120,7 @@ in {
       log = true;
       environment = {
         GATEWAY_KEY_FILE = "${home}/Tokens/AI_GATEWAY_API_KEY.txt";
+        CREST_AUTH = "${flakeInputs.crest.packages.${pkgs.stdenv.hostPlatform.system}.crest-auth}/bin/crest-auth";
         HOME = home;
       };
       command = "${proxy}/bin/omp-gateway-proxy";
