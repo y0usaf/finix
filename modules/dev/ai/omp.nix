@@ -22,7 +22,7 @@ in {
       value = {
         inherit (catalog) defaultThinkingLevel;
         advisor.enabled = false;
-        modelRoles.default = "anthropic/claude-opus-5-5:xhigh";
+        modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
         modelRoles.advisor = "vercel-ai-gateway/openai/gpt-5.6-luna";
         extensions = [
           "${flakeInputs.pi-chronobreak}"

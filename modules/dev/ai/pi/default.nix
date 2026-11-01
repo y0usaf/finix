@@ -12,9 +12,9 @@ in {
     type = lib.types.attrsOf lib.types.anything;
     description = "Shared coding-agent provider and model catalog.";
     default = {
-      defaultProvider = "vercel-ai-gateway";
-      defaultModel = "deepseek/deepseek-v4.1-flash-1017-fast";
-      defaultThinkingLevel = "max";
+      defaultProvider = "anthropic";
+      defaultModel = "claude-opus-5-5";
+      defaultThinkingLevel = "xhigh";
 
       enabledModels = [
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast"
