@@ -90,16 +90,30 @@
 
   configDir = ./tern;
 
-  files = lib.listToAttrs (map (file: {
-    name = ".config/tern/${lib.removePrefix "${toString configDir}/" (toString file)}";
-    value = {
-      type = "copy";
-      clobber = false;
-      force = false;
-      permissions = "0644";
-      source = file;
-    };
-  }) (lib.filesystem.listFilesRecursive configDir));
+  devTree = "${config.user.homeDirectory}/dev";
+
+  configFiles = lib.filesystem.listFilesRecursive configDir;
+
+  relative = file: lib.removePrefix "${toString configDir}/" (toString file);
+
+  pointsIntoDevTree = file: lib.hasPrefix "${devTree}/" (lib.removeSuffix "\n" (builtins.readFile (toString file)));
+
+  devLinks = builtins.filter (file: lib.hasSuffix ".path" (toString file) && pointsIntoDevTree file) configFiles;
+
+  orphans = if lib.hasAttr devTree config.fileSystems then [] else devLinks;
+
+  files =
+    lib.listToAttrs (map (file: {
+      name = ".config/tern/${relative file}";
+      value = {
+        type = "copy";
+        clobber = false;
+        force = false;
+        permissions = "0644";
+        source = file;
+      };
+    }) (lib.subtractLists orphans configFiles))
+    // lib.genAttrs (map (file: ".config/tern/${relative file}") orphans) (_: {type = "delete";});
 
   # `tern remote serve --user` admits any key in the target user's own
   # ~/.ssh/authorized_keys. That is a different file from sshd's
