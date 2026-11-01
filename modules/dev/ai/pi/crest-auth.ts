@@ -10,7 +10,7 @@ import { builtinProviders } from "@earendil-works/pi-ai/providers/all";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { execFile } from "node:child_process";
 
-const PROVIDERS = new Set(["anthropic", "openai-codex"]);
+const PROVIDERS: Readonly<Record<string, true>> = { anthropic: true, "openai-codex": true };
 
 interface Token {
 	access: string;
@@ -151,7 +151,7 @@ export default async function crest(pi: ExtensionAPI): Promise<void> {
 	const providers = await signedIn();
 	for (const base of builtinProviders()) {
 		const oauth = base.auth.oauth;
-		if (!PROVIDERS.has(base.id) || !providers.has(base.id) || oauth === undefined) continue;
+		if (!Object.hasOwn(PROVIDERS, base.id) || !providers.has(base.id) || oauth === undefined) continue;
 		pi.registerProvider({
 			...base,
 			auth: {

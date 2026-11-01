@@ -3,7 +3,7 @@ import { getBundledModels } from "@oh-my-pi/pi-catalog/models";
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
 const PROVIDERS = ["anthropic", "openai-codex"] as const;
-const CHAT_KINDS = new Set(["chat", "tiny"]);
+const CHAT_KINDS: Readonly<Record<string, true>> = { chat: true, tiny: true };
 
 interface Token {
 	access: string;
@@ -84,7 +84,7 @@ export default async function crest(pi: ExtensionAPI): Promise<void> {
 			baseUrl,
 			apiKey: `!crest-auth json token ${provider} | jq -r .access`,
 			api,
-			models: bundled.map((model) => (CHAT_KINDS.has(model.kind ?? "chat") ? { ...model, api } : model)),
+			models: bundled.map((model) => (Object.hasOwn(CHAT_KINDS, model.kind ?? "chat") ? { ...model, api } : model)),
 			streamSimple(model, context, options) {
 				const target = wire.get(model.id);
 				if (target === undefined) throw new Error(`crest: ${provider} has no bundled model ${model.id}`);
