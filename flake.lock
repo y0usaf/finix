@@ -1397,22 +1397,6 @@
         "type": "github"
       }
     },
-    "pi-accounts": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791555505,
-        "narHash": "sha256-wZfM8dTNbliLUIMLOJggdRcWbZpfe2x+exapMxpU7p0=",
-        "owner": "y0usaf",
-        "repo": "pi-accounts",
-        "rev": "10ab0705165d5c116100efd0ab21ff2b506a93a2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "repo": "pi-accounts",
-        "type": "github"
-      }
-    },
     "pi-ampersand": {
       "flake": false,
       "locked": {
@@ -1645,7 +1629,6 @@
         "paseo": "paseo",
         "phi": "phi",
         "pi": "pi_2",
-        "pi-accounts": "pi-accounts",
         "pi-ampersand": "pi-ampersand",
         "pi-chronobreak": "pi-chronobreak",
         "pi-donsetch": "pi-donsetch",

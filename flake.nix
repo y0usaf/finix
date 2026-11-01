@@ -143,11 +143,6 @@
       flake = false;
     };
 
-    pi-accounts = {
-      url = "github:y0usaf/pi-accounts";
-      flake = false;
-    };
-
     pi-ampersand = {
       url = "github:y0usaf/pi-ampersand";
       flake = false;
