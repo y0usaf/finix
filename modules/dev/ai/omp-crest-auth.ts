@@ -82,7 +82,7 @@ export default async function crest(pi: ExtensionAPI): Promise<void> {
 		const wire = new Map(bundled.map((model) => [model.id, model]));
 		pi.registerProvider(provider, {
 			baseUrl,
-			apiKey: `!crest-auth json token ${provider} | jq -r .access`,
+			apiKey: `!crest-auth json token ${provider} | jq -er .access || echo crest-unavailable`,
 			api,
 			models: bundled.map((model) => (Object.hasOwn(CHAT_KINDS, model.kind ?? "chat") ? { ...model, api } : model)),
 			streamSimple(model, context, options) {
