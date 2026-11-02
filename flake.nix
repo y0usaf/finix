@@ -153,11 +153,6 @@
       flake = false;
     };
 
-    tern-chime = {
-      url = "github:H4vC/tern-chime";
-      flake = false;
-    };
-
     pi-ampersand = {
       url = "github:y0usaf/pi-ampersand";
       flake = false;

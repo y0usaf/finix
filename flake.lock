@@ -1640,7 +1640,6 @@
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
-        "tern-chime": "tern-chime",
         "tomoe": "tomoe",
         "omp-bot": "omp-bot"
       }
@@ -2000,22 +1999,6 @@
         "owner": "materemias",
         "ref": "v0.3.2",
         "repo": "omp-stretch",
-        "type": "github"
-      }
-    },
-    "tern-chime": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791469106,
-        "narHash": "sha256-nxRHyk0yge1gNv4CLr+zJS8zM0groMtsFJERsXWbIHE=",
-        "owner": "H4vC",
-        "repo": "tern-chime",
-        "rev": "45a8371b9cb0fbeedbebe3a38f4bbfb3b48fc4ab",
-        "type": "github"
-      },
-      "original": {
-        "owner": "H4vC",
-        "repo": "tern-chime",
         "type": "github"
       }
     },

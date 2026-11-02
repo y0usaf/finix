@@ -88,32 +88,31 @@
 
   ocean = "${pkgs.kdePackages.ocean-sound-theme}/share/sounds/ocean/stereo";
 
-  tuturu = pkgs.fetchurl {
+  tuturuClip = pkgs.fetchurl {
     url = "https://www.myinstants.com/media/sounds/tuturu_1.mp3";
     hash = "sha256-cFN85xl8zdwaziqtnrzakuC+1pSAAU9AUbHz1HPrdEA=";
   };
 
-  chimeLevel = -34;
+  tuturuLevel = -34;
 
-  chimeSounds = pkgs.runCommand "tern-chime-sounds" {nativeBuildInputs = [pkgs.ffmpeg-headless pkgs.gawk];} ''
+  tuturuSounds = pkgs.runCommand "tern-tuturu-sounds" {nativeBuildInputs = [pkgs.ffmpeg-headless pkgs.gawk];} ''
     mkdir $out
     level() {
       ffmpeg -nostats -loglevel error -i "$2" -af "''${3:-anull}" shaped.wav
       mean=$(ffmpeg -nostats -i shaped.wav -af volumedetect -f null - 2>&1 | awk '/mean_volume/ {print $(NF-1)}')
-      ffmpeg -nostats -loglevel error -i shaped.wav -af "volume=$(awk -v m="$mean" 'BEGIN {print ${toString chimeLevel} - m}')dB" -c:a libvorbis "$out/$1.ogg"
+      ffmpeg -nostats -loglevel error -i shaped.wav -af "volume=$(awk -v m="$mean" 'BEGIN {print ${toString tuturuLevel} - m}')dB" -c:a libvorbis "$out/$1.ogg"
       rm shaped.wav
     }
     level alert ${ocean}/dialog-question.oga
-    level yield ${tuturu} "aresample=48000,pan=mono|c0=0.5*c0+0.5*c1,highpass=f=80,equalizer=f=220:t=q:w=1:g=3,equalizer=f=650:t=q:w=1:g=-4,equalizer=f=3200:t=q:w=1:g=9,highshelf=f=6000:g=8,acompressor=threshold=-24dB:ratio=4:attack=3:release=60:makeup=2,alimiter=limit=0.9,asplit[near][far];[near]equalizer=f=150:t=q:w=1:g=4[right];[far]lowpass=f=2500,volume=-12dB,adelay=delays=22S:all=1[left];[right][left]join=inputs=2:channel_layout=stereo:map=0.0-FR|1.0-FL"
+    level yield ${tuturuClip} "aresample=48000,pan=mono|c0=0.5*c0+0.5*c1,highpass=f=80,equalizer=f=220:t=q:w=1:g=3,equalizer=f=650:t=q:w=1:g=-4,equalizer=f=3200:t=q:w=1:g=9,highshelf=f=6000:g=8,acompressor=threshold=-24dB:ratio=4:attack=3:release=60:makeup=2,alimiter=limit=0.9,asplit[near][far];[near]equalizer=f=150:t=q:w=1:g=4[right];[far]lowpass=f=2500,volume=-12dB,adelay=delays=22S:all=1[left];[right][left]join=inputs=2:channel_layout=stereo:map=0.0-FR|1.0-FL"
     level done ${ocean}/outcome-success.oga
   '';
 
-  chime = {
-    ".config/tern/plugins/chime.path".text = "${flakeInputs.tern-chime}\n";
-    ".local/state/tern/plugin-data/chime/sounds.toml".text = ''
-      alert = "${chimeSounds}/alert.ogg"
-      yield = "${chimeSounds}/yield.ogg"
-      done = "${chimeSounds}/done.ogg"
+  tuturu = {
+    ".local/state/tern/plugin-data/tuturu/sounds.toml".text = ''
+      alert = "${tuturuSounds}/alert.ogg"
+      yield = "${tuturuSounds}/yield.ogg"
+      done = "${tuturuSounds}/done.ogg"
       only_unfocused = true
       min_seconds = 30
     '';
@@ -190,7 +189,7 @@ in {
     ".local/state/tern"
   ];
 
-  manzil.users.${config.user.name}.files = files // chime;
+  manzil.users.${config.user.name}.files = files // tuturu;
 
   finit = {
     tmpfiles.rules = [
