@@ -48,6 +48,7 @@
         fallbackChains: ${builtins.toJSON catalog.fallbackChains}
       extensions:
         - "${./omp-code-mode.ts}"
+        - "${./omp-compact-eval.ts}"
     '';
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
   };
