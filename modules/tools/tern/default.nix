@@ -98,11 +98,13 @@
   chimeSounds = pkgs.runCommand "tern-chime-sounds" {nativeBuildInputs = [pkgs.ffmpeg-headless pkgs.gawk];} ''
     mkdir $out
     level() {
-      mean=$(ffmpeg -nostats -i "$2" -af volumedetect -f null - 2>&1 | awk '/mean_volume/ {print $(NF-1)}')
-      ffmpeg -nostats -loglevel error -i "$2" -af "volume=$(awk -v m="$mean" 'BEGIN {print ${toString chimeLevel} - m}')dB" -c:a libvorbis "$out/$1.ogg"
+      ffmpeg -nostats -loglevel error -i "$2" -af "''${3:-anull}" shaped.wav
+      mean=$(ffmpeg -nostats -i shaped.wav -af volumedetect -f null - 2>&1 | awk '/mean_volume/ {print $(NF-1)}')
+      ffmpeg -nostats -loglevel error -i shaped.wav -af "volume=$(awk -v m="$mean" 'BEGIN {print ${toString chimeLevel} - m}')dB" -c:a libvorbis "$out/$1.ogg"
+      rm shaped.wav
     }
     level alert ${ocean}/dialog-question.oga
-    level yield ${tuturu}
+    level yield ${tuturu} "highpass=f=90,equalizer=f=650:t=q:w=1:g=-3,equalizer=f=3500:t=q:w=1.2:g=6,highshelf=f=6000:g=5,acompressor=threshold=-20dB:ratio=3:attack=5:release=80"
     level done ${ocean}/outcome-success.oga
   '';
 
