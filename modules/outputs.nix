@@ -225,10 +225,8 @@ inputs: let
           "/run/wrappers/bin/sudo /run/current-system/sw/bin/sync"
       fi
     '';
-in {
-  nixosConfigurations = hosts // {y0usaf-server-finix = hosts.y0usaf-server;};
 
-  nixOnDroidConfigurations.default = inputs."nix-on-droid".lib.nixOnDroidConfiguration {
+  droid = inputs."nix-on-droid".lib.nixOnDroidConfiguration {
     pkgs = import (toString inputs.nixpkgs) {
       system = "aarch64-linux";
     };
@@ -240,7 +238,18 @@ in {
     ];
   };
 
+  lint = import ./lint.nix {inherit inputs lib pkgs hosts droid;};
+in {
+  nixosConfigurations = hosts // {y0usaf-server-finix = hosts.y0usaf-server;};
+
+  nixOnDroidConfigurations.default = droid;
+
   finixConfigurations = hosts;
+
+  apps.${system}.lint = {
+    type = "app";
+    program = lib.getExe lint.app;
+  };
 
   packages.${system} = {
     finix-server-persistent-deploy = mkDeploy {
@@ -261,7 +270,7 @@ in {
     tomoe = inputs.tomoe.packages.${system}.default;
   };
 
-  checks.${system} = lib.mapAttrs' (name: host: lib.nameValuePair name host.config.system.build.toplevel) hosts;
+  checks.${system} = lib.mapAttrs' (name: host: lib.nameValuePair name host.config.system.build.toplevel) hosts // {strictix = lint.check;};
 
   formatter.${system} = inputs.nixpkgs.legacyPackages.${system}.alejandra;
 }
