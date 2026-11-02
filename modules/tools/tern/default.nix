@@ -104,7 +104,7 @@
       rm shaped.wav
     }
     level alert ${ocean}/dialog-question.oga
-    level yield ${tuturu} "pan=mono|c0=0.5*c0+0.5*c1,highpass=f=80,equalizer=f=220:t=q:w=1:g=3,equalizer=f=650:t=q:w=1:g=-4,equalizer=f=3200:t=q:w=1:g=9,highshelf=f=6000:g=8,acompressor=threshold=-24dB:ratio=4:attack=3:release=60:makeup=2,alimiter=limit=0.9"
+    level yield ${tuturu} "aresample=48000,pan=mono|c0=0.5*c0+0.5*c1,highpass=f=80,equalizer=f=220:t=q:w=1:g=3,equalizer=f=650:t=q:w=1:g=-4,equalizer=f=3200:t=q:w=1:g=9,highshelf=f=6000:g=8,acompressor=threshold=-24dB:ratio=4:attack=3:release=60:makeup=2,alimiter=limit=0.9,asplit[right][shadow];[shadow]equalizer=f=150:t=q:w=1:g=4,volume=-12dB,adelay=delays=22S:all=1[left];[right][left]join=inputs=2:channel_layout=stereo"
     level done ${ocean}/outcome-success.oga
   '';
 
