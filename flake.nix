@@ -68,6 +68,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    omp-bot = {
+      url = "git+file:///home/y0usaf/dev/developing/omp-bot";
+      flake = false;
+    };
+
     fonts = {
       url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";

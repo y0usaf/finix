@@ -1641,7 +1641,8 @@
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
         "tern-chime": "tern-chime",
-        "tomoe": "tomoe"
+        "tomoe": "tomoe",
+        "omp-bot": "omp-bot"
       }
     },
     "rush": {
@@ -2016,6 +2017,22 @@
         "owner": "H4vC",
         "repo": "tern-chime",
         "type": "github"
+      }
+    },
+    "omp-bot": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793659461,
+        "narHash": "sha256-hEXtvureuaIqBVYxXy3Ax6ZXsN63G6gRpn2FzK9XMDM=",
+        "ref": "refs/heads/main",
+        "rev": "ad3894e6dd1370b20ec175e059b05f3f83cdd4a9",
+        "revCount": 6,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/omp-bot"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/omp-bot"
       }
     }
   },
