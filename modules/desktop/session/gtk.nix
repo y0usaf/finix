@@ -43,7 +43,7 @@ in {
               gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";
               gtk-xft-antialias = 1;
-              gtk-xft-dpi = toString config.user.appearance.dpi;
+              gtk-xft-dpi = config.user.appearance.dpi * 1024;
               gtk-xft-hinting = 1;
               gtk-xft-hintstyle = "hintslight";
               gtk-xft-rgba = "rgb";
