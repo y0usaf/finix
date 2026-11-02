@@ -1,0 +1,7 @@
+schema = 1
+id = "omp-chat"
+name = "omp chat"
+version = "0.1.0"
+description = "Sets omp's prose apart from its work: answers sit in bubbles, work steps hang off a rail."
+window = "window.luau"
+styles = ["omp-chat.css"]

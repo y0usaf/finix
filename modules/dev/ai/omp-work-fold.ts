@@ -1,9 +1,16 @@
 import { AssistantMessageComponent } from "@oh-my-pi/pi-tui/chat/assistant-message";
-import { LateDiagnosticsMessageComponent } from "@oh-my-pi/pi-tui/chat/late-diagnostics-message";
+import { BashExecutionComponent } from "@oh-my-pi/pi-tui/chat/bash-execution";
+import { CollabPromptMessageComponent } from "@oh-my-pi/pi-tui/chat/collab-prompt-message";
+import {
+	BranchSummaryMessageComponent,
+	CompactionSummaryMessageComponent,
+	HandoffSummaryMessageComponent,
+} from "@oh-my-pi/pi-tui/chat/compaction-summary-message";
+import { EvalExecutionComponent } from "@oh-my-pi/pi-tui/chat/eval-execution";
 import { ReadToolGroupComponent } from "@oh-my-pi/pi-tui/chat/read-tool-group";
-import { TodoReminderComponent } from "@oh-my-pi/pi-tui/chat/todo-reminder";
+import { SkillMessageComponent } from "@oh-my-pi/pi-tui/chat/skill-message";
 import { ToolExecutionComponent } from "@oh-my-pi/pi-tui/chat/tool-execution";
-import { TtsrNotificationComponent } from "@oh-my-pi/pi-tui/chat/ttsr-notification";
+import { CollapsedSyntheticMessageComponent, UserMessageComponent } from "@oh-my-pi/pi-tui/chat/user-message";
 import { TranscriptContainer } from "@oh-my-pi/pi-tui/chrome";
 import { col, elapsed, node, span, text } from "@oh-my-pi/pi-tui/native/describe";
 import { isNativeSettled, settleNative } from "@oh-my-pi/pi-tui/native/settle";
@@ -11,20 +18,24 @@ import { isNativeSettled, settleNative } from "@oh-my-pi/pi-tui/native/settle";
 const STATE = Symbol.for("finix.omp-work-fold.state");
 
 const TOOLS = [ToolExecutionComponent, ReadToolGroupComponent];
-const WORK = [
-	...TOOLS,
-	AssistantMessageComponent,
-	TtsrNotificationComponent,
-	LateDiagnosticsMessageComponent,
-	TodoReminderComponent,
+const INITIATORS = [
+	UserMessageComponent,
+	CollapsedSyntheticMessageComponent,
+	SkillMessageComponent,
+	CollabPromptMessageComponent,
+	BashExecutionComponent,
+	EvalExecutionComponent,
+	CompactionSummaryMessageComponent,
+	HandoffSummaryMessageComponent,
+	BranchSummaryMessageComponent,
 ];
 
 function isTool(block) {
 	return TOOLS.some(kind => block instanceof kind);
 }
 
-function isWork(block) {
-	return WORK.some(kind => block instanceof kind);
+function isInitiator(block) {
+	return INITIATORS.some(kind => block instanceof kind);
 }
 
 function isComponent(child) {
@@ -52,9 +63,7 @@ function install(state) {
 	const transcript = TranscriptContainer.prototype;
 	const assistant = AssistantMessageComponent.prototype;
 	const describeAssistant = assistant.describe;
-	const setTurnUsage = assistant.setTurnUsage;
 	const nativeBlocks = transcript.nativeBlocks;
-	const usage = new WeakMap();
 	const groups = new WeakMap();
 	const parts = new WeakMap();
 	const failures = new WeakMap();
@@ -68,14 +77,7 @@ function install(state) {
 		return describeAssistant.call(this, cx);
 	};
 
-	assistant.setTurnUsage = function (summary) {
-		if (summary) usage.set(this, summary);
-		else usage.delete(this);
-		return setTurnUsage.call(this, summary);
-	};
-
-	function answers(block) {
-		if (!(block instanceof AssistantMessageComponent)) return false;
+	function speaks(block) {
 		return (describe(block)?.c ?? []).some(child => !isComponent(child) && (child.k === "md" || child.key === "error"));
 	}
 
@@ -149,11 +151,20 @@ function install(state) {
 		return wrapper;
 	}
 
+	function spent(blocks, cx) {
+		let total = 0;
+		for (const block of blocks) {
+			const described = block.describe(cx);
+			if (isTool(block)) total += described?.p?.took ?? 0;
+			else for (const child of described?.c ?? []) if (isThinking(child)) total += child.p?.took ?? 0;
+		}
+		return total >= 1000 ? total : undefined;
+	}
+
 	class Work {
 		constructor() {
 			this.blocks = [];
 			this.live = false;
-			this.startedAt = performance.now();
 		}
 		render() {
 			return [];
@@ -162,33 +173,27 @@ function install(state) {
 		handleNativeEvent(event) {
 			if (event.type === "toggle" && event.key === "work") this.toggled = event.collapsed;
 		}
-		update(blocks, live, spent) {
-			if (live && !this.live) this.startedAt = state.running ? state.startedAt : performance.now();
-			if (!live && this.live && spent === undefined) this.measured = performance.now() - this.startedAt;
+		update(blocks, live) {
+			if (live && this.startedAt === undefined) this.startedAt = performance.now();
+			if (!live && this.live) this.endedAt = performance.now();
 			this.blocks = blocks;
 			this.live = live;
-			this.spent = spent ?? this.measured;
 		}
 		describe(cx) {
 			if (cx) state.cx = cx;
 			const failed = this.blocks.filter(block => isTool(block) && block.describe(cx)?.p?.status === "error");
 			const collapsed = this.toggled ?? !this.live;
-			const key = [...this.blocks, ...failed, collapsed, this.live, this.spent];
+			const wall =
+				this.startedAt !== undefined && this.endedAt !== undefined ? this.endedAt - this.startedAt : undefined;
+			const time = this.live ? undefined : (wall ?? spent(this.blocks, cx));
+			const key = [...this.blocks, ...failed, collapsed, this.live, time];
 			if (this.key && same(this.key, key)) return this.node;
 			this.key = key;
 			const steps = this.blocks.filter(isTool).length;
+			const count = `${steps} ${steps === 1 ? "step" : "steps"}`;
 			const label = this.live
-				? [text([span("Working", "muted")]), elapsed(performance.now() - this.startedAt)]
-				: [
-						text([
-							span(
-								this.spent === undefined
-									? `Worked · ${steps} ${steps === 1 ? "step" : "steps"}`
-									: `Worked for ${duration(this.spent)}`,
-								"muted",
-							),
-						]),
-					];
+				? [text([span("Working", "muted")]), elapsed(performance.now() - this.startedAt), text([span(`· ${count}`, "muted")])]
+				: [text([span(time === undefined ? count : `Worked for ${duration(time)} · ${count}`, "muted")])];
 			if (failed.length > 0) label.push(node("badge", { text: `${failed.length} failed`, tone: "error" }));
 			const head = node("row", { gap: "sm", align: "center" }, label, "head");
 			const body = collapsed ? this.blocks.filter(block => !failed.includes(block)) : this.blocks;
@@ -215,40 +220,33 @@ function install(state) {
 	transcript.nativeBlocks = function () {
 		const blocks = nativeBlocks.call(this);
 		const shown = [];
-		let i = 0;
-		while (i < blocks.length) {
-			if (!isWork(blocks[i])) {
-				shown.push(blocks[i++]);
-				continue;
+		let open = [];
+		const close = last => {
+			if (open.length === 0) return;
+			if (open.some(isTool)) {
+				const work = group(open[0]);
+				work.update(open, last && state.running);
+				shown.push(work);
+			} else {
+				shown.push(...open);
 			}
-			let end = i;
-			while (end < blocks.length && isWork(blocks[end])) end++;
-			const run = blocks.slice(i, end);
-			const lastTool = run.findLastIndex(isTool);
-			if (lastTool < 0) {
-				shown.push(...run);
-				i = end;
-				continue;
+			open = [];
+		};
+		for (const block of blocks) {
+			if (isInitiator(block)) {
+				close(false);
+				shown.push(block);
+			} else if (block instanceof AssistantMessageComponent && speaks(block)) {
+				if (thinks(block)) open.push(part(block, true));
+				close(false);
+				shown.push(thinks(block) ? part(block, false) : block);
+			} else if (isTool(block) || block instanceof AssistantMessageComponent || open.length > 0) {
+				open.push(block);
+			} else {
+				shown.push(block);
 			}
-			let answer = -1;
-			for (let k = run.length - 1; k > lastTool; k--) {
-				if (answers(run[k])) {
-					answer = k;
-					break;
-				}
-			}
-			const inside = answer < 0 ? run : run.slice(0, answer);
-			const after = answer < 0 ? [] : run.slice(answer);
-			if (answer >= 0 && thinks(run[answer])) {
-				inside.push(part(run[answer], true));
-				after[0] = part(run[answer], false);
-			}
-			const spent = run.map(block => usage.get(block)?.elapsedMs).find(ms => typeof ms === "number");
-			const work = group(run[0]);
-			work.update(inside, state.running && end === blocks.length, spent);
-			shown.push(work, ...after);
-			i = end;
 		}
+		close(true);
 		const previous = shownBy.get(this);
 		if (previous && same(previous, shown)) return previous;
 		shownBy.set(this, shown);
@@ -268,17 +266,14 @@ function install(state) {
 export default function workFold(pi) {
 	let state = globalThis[STATE];
 	if (!state) {
-		state = { running: false, startedAt: performance.now(), cx: undefined };
+		state = { running: false, cx: undefined };
 		globalThis[STATE] = state;
 		install(state);
 	}
 	pi.on("agent_start", async (_event, ctx) => {
-		if (!ctx.hasUI) return;
-		state.running = true;
-		state.startedAt = performance.now();
+		if (ctx.hasUI) state.running = true;
 	});
 	pi.on("agent_end", async (_event, ctx) => {
-		if (!ctx.hasUI) return;
-		state.running = false;
+		if (ctx.hasUI) state.running = false;
 	});
 }
