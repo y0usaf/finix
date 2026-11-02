@@ -1,41 +1,31 @@
-{config, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   browser = "${config.user.defaults.browser}.desktop";
+  web = ["text/html" "x-scheme-handler/http" "x-scheme-handler/https" "x-scheme-handler/ftp"];
+  handledBy = app: types: lib.genAttrs types (_: app);
 in {
-  manzil.users.${config.user.name}.files = {
-    ".config/mimeapps.list" = {
-      text = ''
-        [Default Applications]
-        text/html=${browser}
-        x-scheme-handler/http=${browser}
-        x-scheme-handler/https=${browser}
-        x-scheme-handler/ftp=${browser}
-        x-scheme-handler/chrome=${browser}
-        x-scheme-handler/discord=discord.desktop
-        inode/directory=pcmanfm.desktop
-        video/mp4=mpv.desktop
-        video/x-matroska=mpv.desktop
-        video/webm=mpv.desktop
-        image/jpeg=imv.desktop
-        image/png=imv.desktop
-        image/gif=imv.desktop
-        image/tiff=imv.desktop
-        image/bmp=imv.desktop
-        application/zip=file-roller.desktop
-        application/x-7z-compressed=file-roller.desktop
-        application/x-tar=file-roller.desktop
-        application/gzip=file-roller.desktop
-        application/x-compressed-tar=file-roller.desktop
-        application/x-extension-htm=${browser}
-        application/x-extension-html=${browser}
-        application/x-extension-shtml=${browser}
-        application/xhtml+xml=${browser}
-        application/x-extension-xhtml=${browser}
-        [Added Associations]
-        text/html=${browser}
-        x-scheme-handler/http=${browser}
-        x-scheme-handler/https=${browser}
-        x-scheme-handler/ftp=${browser}
-      '';
+  manzil.users.${config.user.name}.files.".config/mimeapps.list" = {
+    generator = lib.generators.toINI {};
+    value = {
+      "Default Applications" =
+        handledBy browser (web
+          ++ [
+            "x-scheme-handler/chrome"
+            "application/x-extension-htm"
+            "application/x-extension-html"
+            "application/x-extension-shtml"
+            "application/xhtml+xml"
+            "application/x-extension-xhtml"
+          ])
+        // handledBy "discord.desktop" ["x-scheme-handler/discord"]
+        // handledBy "pcmanfm.desktop" ["inode/directory"]
+        // handledBy "mpv.desktop" ["video/mp4" "video/x-matroska" "video/webm"]
+        // handledBy "imv.desktop" ["image/jpeg" "image/png" "image/gif" "image/tiff" "image/bmp"]
+        // handledBy "file-roller.desktop" ["application/zip" "application/x-7z-compressed" "application/x-tar" "application/gzip" "application/x-compressed-tar"];
+      "Added Associations" = handledBy browser web;
     };
   };
 }

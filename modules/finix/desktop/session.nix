@@ -25,11 +25,12 @@ in {
       '')
   ];
 
-  environment.etc."xdg/xdg-desktop-portal/tomoe-portals.conf".text = ''
-    [preferred]
-    default=*
-    org.freedesktop.impl.portal.ScreenCast=tomoe
-  '';
+  environment.etc."xdg/xdg-desktop-portal/tomoe-portals.conf".text = lib.generators.toINI {} {
+    preferred = {
+      default = "*";
+      "org.freedesktop.impl.portal.ScreenCast" = "tomoe";
+    };
+  };
 
   finit.tasks.xdg-runtime-dir = lib.mkIf (!config.services.elogind.enable) {
     description = "runtime dir for ${userName}";

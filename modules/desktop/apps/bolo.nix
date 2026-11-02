@@ -8,25 +8,25 @@
   hfBase = "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/resolve/main";
   models = {
     "parakeet-v3-int8" = {
-        engine = "sherpa-onnx-transducer";
-        files = {
-          "encoder.int8.onnx" = pkgs.fetchurl {
-            url = "${hfBase}/encoder.int8.onnx";
-            hash = "sha256-rPwrRFY3fhXQTwJDr1QLf+fJkvjYmNdRzxNMOlX9Ikc=";
-          };
-          "decoder.int8.onnx" = pkgs.fetchurl {
-            url = "${hfBase}/decoder.int8.onnx";
-            hash = "sha256-F55QxD0aneeciiQUmi+brG61mBgj8qLtiNZVskJI204=";
-          };
-          "joiner.int8.onnx" = pkgs.fetchurl {
-            url = "${hfBase}/joiner.int8.onnx";
-            hash = "sha256-MWTBP8KCEAlEDSD8tf3Hi/8otNsvjQ8LMpEBcZwJSLM=";
-          };
-          "tokens.txt" = pkgs.fetchurl {
-            url = "${hfBase}/tokens.txt";
-            hash = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
-          };
+      engine = "sherpa-onnx-transducer";
+      files = {
+        "encoder.int8.onnx" = pkgs.fetchurl {
+          url = "${hfBase}/encoder.int8.onnx";
+          hash = "sha256-rPwrRFY3fhXQTwJDr1QLf+fJkvjYmNdRzxNMOlX9Ikc=";
         };
+        "decoder.int8.onnx" = pkgs.fetchurl {
+          url = "${hfBase}/decoder.int8.onnx";
+          hash = "sha256-F55QxD0aneeciiQUmi+brG61mBgj8qLtiNZVskJI204=";
+        };
+        "joiner.int8.onnx" = pkgs.fetchurl {
+          url = "${hfBase}/joiner.int8.onnx";
+          hash = "sha256-MWTBP8KCEAlEDSD8tf3Hi/8otNsvjQ8LMpEBcZwJSLM=";
+        };
+        "tokens.txt" = pkgs.fetchurl {
+          url = "${hfBase}/tokens.txt";
+          hash = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
+        };
+      };
     };
   };
 

@@ -48,14 +48,15 @@ in {
   environment = {
     etc = {
       "finix-stage2".text = "${stage2}\n";
-      "elogind/logind.conf".text = lib.mkForce ''
-        [Login]
-        HandlePowerKey=poweroff
-        HandleLidSwitch=suspend
-        HandleLidSwitchExternalPower=suspend
-        HandleLidSwitchDocked=ignore
-        LidSwitchIgnoreInhibited=no
-      '';
+      "elogind/logind.conf".text = lib.mkForce (lib.generators.toINI {} {
+        Login = {
+          HandlePowerKey = "poweroff";
+          HandleLidSwitch = "suspend";
+          HandleLidSwitchExternalPower = "suspend";
+          HandleLidSwitchDocked = "ignore";
+          LidSwitchIgnoreInhibited = "no";
+        };
+      });
     };
     systemPackages = [pkgs.acpi healthPackage];
   };
