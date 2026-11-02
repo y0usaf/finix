@@ -171,9 +171,7 @@ function install(state) {
 		}
 		describe(cx) {
 			if (cx) state.cx = cx;
-			const failed = this.blocks.filter(
-				block => block instanceof ToolExecutionComponent && block.describe(cx)?.p?.status === "error",
-			);
+			const failed = this.blocks.filter(block => isTool(block) && block.describe(cx)?.p?.status === "error");
 			const collapsed = this.toggled ?? !this.live;
 			const key = [...this.blocks, ...failed, collapsed, this.live, this.spent];
 			if (this.key && same(this.key, key)) return this.node;
