@@ -6,9 +6,8 @@
   ...
 }: let
   hfBase = "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/resolve/main";
-  models =
-    {
-      "parakeet-v3-int8" = {
+  models = {
+    "parakeet-v3-int8" = {
         engine = "sherpa-onnx-transducer";
         files = {
           "encoder.int8.onnx" = pkgs.fetchurl {
@@ -28,15 +27,8 @@
             hash = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
           };
         };
-      };
-    }
-    // lib.optionalAttrs config.user.dev.r2t2.enable {
-      "r2t2-streaming" = {
-        engine = "r2t2-streaming";
-        uri = "ws://127.0.0.1:8272/asr_stream_api_v1";
-        language = "English";
-      };
     };
+  };
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
@@ -192,12 +184,12 @@
     '';
   };
 
-  inherit (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}") bolo;
+  inherit (flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system}) bolo;
 
   bolod = pkgs.symlinkJoin {
     name = "bolod-wrapped";
     paths = [
-      (flakeInputs.bolo.packages."${pkgs.stdenv.hostPlatform.system}".bolod.override {
+      (flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system}.bolod.override {
         sherpa-onnx = sherpaOnnxGpu;
       })
     ];
@@ -223,7 +215,7 @@ in {
       })
     ];
 
-    manzil.users."${config.user.name}" = {
+    manzil.users.${config.user.name} = {
       files =
         {
           ".config/bolo/manifest.json".source = manifestFile;
@@ -232,7 +224,7 @@ in {
           acc
           // lib.mapAttrs' (f: src:
             lib.nameValuePair ".local/share/bolo/models/${name}/${f}" {source = src;})
-          models."${name}".files) {}
+          models.${name}.files) {}
         (lib.attrNames (lib.filterAttrs (_: m: m ? files) models));
     };
 
