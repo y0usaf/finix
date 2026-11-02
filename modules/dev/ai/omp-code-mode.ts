@@ -111,6 +111,19 @@ function isDirect(name) {
 	);
 }
 
+function withoutDemotedToolChanges(messages, tools) {
+	const kept = new Set(tools.map(toolName));
+	return messages.flatMap(message => {
+		if (!Array.isArray(message?.content)) return [message];
+		const content = message.content.filter(
+			block =>
+				(block?.type !== "tool_addition" && block?.type !== "tool_removal") || kept.has(block.tool?.name),
+		);
+		if (content.length === message.content.length) return [message];
+		return content.length > 0 ? [{ ...message, content }] : [];
+	});
+}
+
 function filterPayload(payload) {
 	if (!payload || typeof payload !== "object" || !Array.isArray(payload.tools)) return payload;
 	const tools = payload.tools.filter(tool => {
@@ -118,6 +131,7 @@ function filterPayload(payload) {
 		return name !== undefined && isDirect(name);
 	});
 	const next = { ...payload, tools };
+	if (Array.isArray(payload.messages)) next.messages = withoutDemotedToolChanges(payload.messages, tools);
 	const choice = payload.tool_choice;
 	const forced = typeof choice === "string" ? choice : (choice?.name ?? choice?.function?.name);
 	if (typeof forced === "string" && forced !== "auto" && forced !== "none" && !isDirect(forced)) {
