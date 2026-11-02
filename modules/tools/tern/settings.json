@@ -25,6 +25,7 @@
   "opacity": 0,
   "blur": 0,
   "surface_fold": true,
+  "new_tabs": "Home",
   "agent_placement": "new_tab",
   "snap_text": true,
   "frames_queued": 1,
