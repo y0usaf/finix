@@ -61,8 +61,6 @@
     [(map keyword modifiers) key (keyword command)]
     ++ lib.optionals (description != null) [(keyword "description") description];
 
-  terminalAppId = "ekko-term";
-
   layouts = {
     deck = {
       file = ./lisp/deck.lisp;
@@ -141,7 +139,7 @@
     discord = ["discord"];
     steam = ["steam"];
     obs = ["obs"];
-    terminal = [defaults.terminal "--app-id" terminalAppId];
+    terminal = ["tern"];
     launcher = ["sh" "-c" defaults.launcher];
     files = ["pcmanfm"];
     editor = [defaults.terminal "-e" "nvim"];
@@ -463,10 +461,7 @@ in {
         app-id = "steam_proton";
         title-prefix = "Lovely";
       }})
-      (defparameter +policy-terminal+ ${toLisp {
-        app-id = terminalAppId;
-        title-prefix = "ekko";
-      }})
+      (defparameter +policy-terminal+ ${toLisp {app-id = "so.stencil.tern";}})
       (defparameter +policy-bindings+ ${toLisp userBindings})
       (defparameter +policy-launches+ ${toLisp launches})
       (defparameter +layout+ ${toLisp ({

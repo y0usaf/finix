@@ -8,10 +8,8 @@
   (second (assoc command +policy-launches+ :test #'equal)))
 
 (defun policy--terminal (windows)
-  (getf (find-if (lambda (window)
-                   (or (equal (getf window :app-id) (getf +policy-terminal+ :app-id))
-                       (policy--prefix-p (getf +policy-terminal+ :title-prefix) (getf window :title))))
-                 windows)
+  (getf (find (getf +policy-terminal+ :app-id) windows
+              :key (lambda (window) (getf window :app-id)) :test #'equal)
         :id))
 
 (defun policy--unmanaged-p (snapshot window)
