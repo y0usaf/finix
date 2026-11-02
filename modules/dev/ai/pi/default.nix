@@ -16,8 +16,10 @@ in {
       defaultProvider = "anthropic";
       defaultModel = "claude-opus-5-5";
       defaultThinkingLevel = "xhigh";
+      ompThinkingLevel = "auto";
       advisorModel = "openai-codex/gpt-6.1-sol:high";
       smolModel = flash;
+      judgeModel = flash;
       fallbackChains = {
         default = ["openai-codex/gpt-6.1-sol:xhigh" flash];
         advisor = [flash];

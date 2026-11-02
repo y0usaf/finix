@@ -29,7 +29,8 @@
           apiKey: "!echo crest"
     '';
     settings = pkgs.writeText "settings.json" (json {
-      inherit (catalog) defaultProvider defaultModel defaultThinkingLevel;
+      inherit (catalog) defaultProvider defaultModel;
+      defaultThinkingLevel = catalog.ompThinkingLevel;
       inherit (catalog) enabledModels;
       packages = [];
     });
@@ -37,11 +38,12 @@
       setupVersion: 2
       startup:
         setupWizard: false
-      defaultThinkingLevel: ${catalog.defaultThinkingLevel}
+      defaultThinkingLevel: ${catalog.ompThinkingLevel}
       modelRoles:
         advisor: ${catalog.advisorModel}
         default: ${catalog.defaultProvider}/${catalog.defaultModel}
         smol: ${catalog.smolModel}
+        judge: ${catalog.judgeModel}
       advisor:
         enabled: true
       retry:

@@ -41,6 +41,12 @@ server loads it by name. Persisted paths no module owns go in
 `modules/hosts/common/persist.nix` when both graphical hosts keep them, and in
 the host's `config.nix` when only that host does.
 
+`dev/ai/pi/default.nix` holds the shared model catalog. Omp uses
+`ompThinkingLevel = "auto"` and the DeepSeek V4.1 Flash 1017 Fast
+`judgeModel` for per-prompt effort selection. `dev/ai/omp.nix` applies these
+on the host, and `dev/ai/omp-box.nix` applies them in the microVM. Pi keeps
+its separate `defaultThinkingLevel = "xhigh"`; the advisor stays Sol at high.
+
 Each host directory under `modules/hosts/` holds what is true of that machine
 alone, in two files beside its keys and other non-Nix files.
 `hardware-config.nix` holds facts about the machine: disks, btrfs subvolumes

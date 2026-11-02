@@ -20,11 +20,12 @@ in {
       format = "yaml";
       clobber = true;
       value = {
-        inherit (catalog) defaultThinkingLevel;
+        defaultThinkingLevel = catalog.ompThinkingLevel;
         advisor.enabled = true;
         modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
         modelRoles.advisor = catalog.advisorModel;
         modelRoles.smol = catalog.smolModel;
+        modelRoles.judge = catalog.judgeModel;
         retry.fallbackChains = catalog.fallbackChains;
         extensions = [
           "${flakeInputs.pi-chronobreak}"
@@ -57,7 +58,7 @@ in {
       value = {
         inherit (catalog) defaultProvider;
         inherit (catalog) defaultModel;
-        inherit (catalog) defaultThinkingLevel;
+        defaultThinkingLevel = catalog.ompThinkingLevel;
         inherit (catalog) enabledModels;
         packages = [];
       };
