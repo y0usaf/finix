@@ -1,0 +1,14 @@
+# The sounds are built by ~/finix/modules/tools/tern/default.nix and named in
+# <plugin data>/sounds.toml, which wins over this file. These stay empty so a
+# missing override is silent rather than playing something else.
+alert = ""
+yield = ""
+done = ""
+
+# Chime only for panes you are not looking at. false chimes for the focused
+# pane too.
+only_unfocused = true
+
+# Shell commands running at least this long chime the done sound when they
+# finish. 0 chimes every finished command.
+min_seconds = 30
