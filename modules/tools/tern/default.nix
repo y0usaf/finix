@@ -7,7 +7,7 @@
   version = "0.9.7";
   build = "20261028-175324-c2f7563";
 
-  wpewebkit = import ../../pkgs/wpewebkit.nix {inherit pkgs;};
+  wpewebkit = import ../../../pkgs/wpewebkit.nix {inherit pkgs;};
 
   src = pkgs.requireFile {
     name = "Tern-${version}-linux-x86_64.tar.gz";
@@ -88,7 +88,7 @@
       exec ${pkgs.python3.withPackages (ps: [ps.numpy])}/bin/python3 ${config.user.homeDirectory}/dev/developing/tern-cmus/cmus-tsp "$@"
     '';
 
-  configDir = ./tern;
+  configDir = ./config;
 
   devTree = "${config.user.homeDirectory}/dev";
 

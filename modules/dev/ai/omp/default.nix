@@ -32,11 +32,11 @@ in {
           "${flakeInputs.pi-chronobreak}"
           "${flakeInputs.pi-recap}"
           "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
-          "${./omp-code-mode.ts}"
-          "${./omp-compact-eval.ts}"
-          "${./omp-work-fold.ts}"
-          "${./omp-box-commands.ts}"
-          "${./omp-crest-auth.ts}"
+          "${./code-mode.ts}"
+          "${./compact-eval.ts}"
+          "${./work-fold.ts}"
+          "${./box-commands.ts}"
+          "${./crest-auth.ts}"
         ];
       };
     };

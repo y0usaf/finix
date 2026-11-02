@@ -12,7 +12,7 @@
   state = "${home}/.local/state/omp-box";
   json = lib.generators.toJSON {};
 
-  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (builtins.readFile ../../../omp-box/gateway-proxy.py);
+  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (builtins.readFile ../../../../omp-box/gateway-proxy.py);
   gatewayUrl = "http://10.0.2.2:8899";
   files = {
     models = pkgs.writeText "models.json" (json catalog.models);
@@ -50,9 +50,9 @@
       retry:
         fallbackChains: ${builtins.toJSON catalog.fallbackChains}
       extensions:
-        - "${./omp-code-mode.ts}"
-        - "${./omp-compact-eval.ts}"
-        - "${./omp-work-fold.ts}"
+        - "${./code-mode.ts}"
+        - "${./compact-eval.ts}"
+        - "${./work-fold.ts}"
     '';
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
   };
@@ -70,11 +70,11 @@
     modules = [
       {nixpkgs.pkgs = pkgs;}
       flakeInputs.microvm.nixosModules.microvm
-      ../../../omp-box/guest.nix
+      ../../../../omp-box/guest.nix
     ];
   };
 
-  pkg = pkgs.callPackage ../../../omp-box {
+  pkg = pkgs.callPackage ../../../../omp-box {
     inherit user;
     inherit (cfg) shares;
     omp = flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;

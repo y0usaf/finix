@@ -43,8 +43,8 @@ the host's `config.nix` when only that host does.
 
 `dev/ai/pi/default.nix` holds the shared model catalog. Omp uses
 `ompThinkingLevel = "auto"` and the DeepSeek V4.1 Flash 1017 Fast
-`judgeModel` for per-prompt effort selection. `dev/ai/omp.nix` applies these
-on the host, and `dev/ai/omp-box.nix` applies them in the microVM. Pi keeps
+`judgeModel` for per-prompt effort selection. `dev/ai/omp/default.nix` applies these
+on the host, and `dev/ai/omp/box.nix` applies them in the microVM. Pi keeps
 its separate `defaultThinkingLevel = "xhigh"`; the advisor stays Sol at high.
 
 Each host directory under `modules/hosts/` holds what is true of that machine

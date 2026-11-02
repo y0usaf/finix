@@ -10,10 +10,10 @@ In Tern, omp's transcript gives each thing one level of attention:
 
 The pieces:
 
-- [omp-code-mode.ts](omp-code-mode.ts) asks for a short title on every eval cell, which becomes the step's name.
-- [omp-compact-eval.ts](omp-compact-eval.ts) folds eval steps to their title, drops language badges, and names untitled steps after the tool they call or their first line.
-- [omp-work-fold.ts](omp-work-fold.ts) builds the rows. Your messages, skill and collab prompts, `!`/`$` commands and compaction markers start a new stretch.
-- [../../tools/tern/plugins/omp-chat](../../tools/tern/plugins/omp-chat) is the Tern stylesheet for the answer bubble, the quieter sentences and the rail under an open row.
+- [code-mode.ts](code-mode.ts) asks for a short title on every eval cell, which becomes the step's name.
+- [compact-eval.ts](compact-eval.ts) folds eval steps to their title, drops language badges, and names untitled steps after the tool they call or their first line.
+- [work-fold.ts](work-fold.ts) builds the rows. Your messages, skill and collab prompts, `!`/`$` commands and compaction markers start a new stretch.
+- [../../../tools/tern/config/plugins/omp-chat](../../../tools/tern/config/plugins/omp-chat) is the Tern stylesheet for the answer bubble, the quieter sentences and the rail under an open row.
 
 omp is pinned by Nix, so its startup update check is off.
 

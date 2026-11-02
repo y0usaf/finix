@@ -110,7 +110,7 @@ inputs: let
           ./dev/ai/paseo.nix
           ./server/openclaw.nix
           ./tools/git.nix
-          ./tools/tern.nix
+          ./tools/tern
           ./tools/tmux.nix
         ];
     };
