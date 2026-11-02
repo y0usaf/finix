@@ -317,6 +317,15 @@ html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
 		group = "Layout",
 		on = true,
 	},
+	{
+		id = "turn-stats",
+		label = "hide turn stats",
+		group = "omp",
+		css = [[html.tn-themed [data-role='omp.turn.usage'] {
+	display: none !important;
+}]],
+		on = true,
+	},
 }
 
 local on = {}

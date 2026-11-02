@@ -59,17 +59,23 @@ function same(a, b) {
 	return a.length === b.length && a.every((item, i) => item === b[i]);
 }
 
+const INLINE = /`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)[^)]*\)/g;
+
 function headline(markdown) {
 	const line =
 		String(markdown ?? "")
 			.split("\n")
 			.map(row => row.replace(/^\s*(?:#{1,6}\s+|>\s*|[-*+]\s+|\d+[.)]\s+)/, "").trim())
 			.find(row => row.length > 0 && !row.startsWith("```")) ?? "";
-	const plain = line.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/(\*\*|__|~~)/g, "");
-	return plain.split(/(`[^`]+`)/).flatMap(piece => {
-		if (piece.length === 0) return [];
-		return piece.startsWith("`") && piece.endsWith("`") ? [span(piece.slice(1, -1), "code")] : [span(piece)];
-	});
+	const spans = [];
+	let at = 0;
+	for (const match of line.matchAll(INLINE)) {
+		if (match.index > at) spans.push(span(line.slice(at, match.index).replace(/(\*\*|__|~~)/g, "")));
+		spans.push(match[1] !== undefined ? span(match[1], "code") : span(match[2], "link", { href: match[3] }));
+		at = match.index + match[0].length;
+	}
+	if (at < line.length) spans.push(span(line.slice(at).replace(/(\*\*|__|~~)/g, "")));
+	return spans;
 }
 
 function install(state) {
@@ -230,15 +236,19 @@ function install(state) {
 			const count = `${steps} ${steps === 1 ? "step" : "steps"}`;
 			const prose = String(said?.c?.find(child => !isComponent(child) && child.k === "md")?.p?.text ?? "").trim();
 			const lead = note ? headline(prose) : [];
-			const whole = prose.split("\n").filter(line => line.trim().length > 0).length <= 1 && prose.length <= 90;
+			const whole = prose.split("\n").filter(line => line.trim().length > 0).length <= 1;
 			const label = [];
-			if (lead.length > 0) label.push(text(lead, { lines: 1, truncate: "end", shrink: 1 }));
-			else label.push(text([span(this.live ? "Working" : time === undefined ? "Worked" : `Worked for ${duration(time)}`)]));
+			if (lead.length > 0) {
+				const fit = collapsed ? { lines: 1, truncate: "end", title: prose } : { wrap: "word" };
+				label.push(text(lead, { ...fit, shrink: 1 }));
+			} else {
+				label.push(text([span(this.live ? "Working" : time === undefined ? "Worked" : `Worked for ${duration(time)}`)]));
+			}
 			if (this.live) label.push(elapsed(performance.now() - this.startedAt));
 			const meta = lead.length > 0 && time !== undefined ? `${count} · ${duration(time)}` : count;
 			label.push(text([span(meta, "dim")], { basis: "content" }));
 			if (failed.length > 0) label.push(node("badge", { text: `${failed.length} failed`, tone: "error" }));
-			const head = node("row", { gap: "sm", align: "center" }, label, "head");
+			const head = node("row", { gap: "sm", align: collapsed ? "center" : "baseline" }, label, "head");
 			const body = [
 				...(thought ? [thought] : []),
 				...(note && !whole ? [note] : []),
