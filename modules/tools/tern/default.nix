@@ -88,12 +88,30 @@
 
   ocean = "${pkgs.kdePackages.ocean-sound-theme}/share/sounds/ocean/stereo";
 
+  tuturu = pkgs.fetchurl {
+    url = "https://www.myinstants.com/media/sounds/tuturu_1.mp3";
+    hash = "sha256-cFN85xl8zdwaziqtnrzakuC+1pSAAU9AUbHz1HPrdEA=";
+  };
+
+  chimeLevel = -34;
+
+  chimeSounds = pkgs.runCommand "tern-chime-sounds" {nativeBuildInputs = [pkgs.ffmpeg-headless pkgs.gawk];} ''
+    mkdir $out
+    level() {
+      mean=$(ffmpeg -nostats -i "$2" -af volumedetect -f null - 2>&1 | awk '/mean_volume/ {print $(NF-1)}')
+      ffmpeg -nostats -loglevel error -i "$2" -af "volume=$(awk -v m="$mean" 'BEGIN {print ${toString chimeLevel} - m}')dB" -c:a libvorbis "$out/$1.ogg"
+    }
+    level alert ${ocean}/dialog-question.oga
+    level yield ${tuturu}
+    level done ${ocean}/outcome-success.oga
+  '';
+
   chime = {
     ".config/tern/plugins/chime.path".text = "${flakeInputs.tern-chime}\n";
     ".local/state/tern/plugin-data/chime/sounds.toml".text = ''
-      alert = "${ocean}/dialog-question.oga"
-      yield = "${ocean}/completion-success.oga"
-      done = "${ocean}/outcome-success.oga"
+      alert = "${chimeSounds}/alert.ogg"
+      yield = "${chimeSounds}/yield.ogg"
+      done = "${chimeSounds}/done.ogg"
       only_unfocused = true
       min_seconds = 30
     '';
