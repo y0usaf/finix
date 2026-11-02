@@ -108,6 +108,7 @@
 
     "browser.theme.content-theme" = 2;
     "browser.theme.toolbar-theme" = 2;
+    "layout.css.prefers-color-scheme.content-override" = 2;
     "browser.uidensity" = 1;
     "browser.nova.enabled" = true;
 
