@@ -84,6 +84,7 @@ function codeModeSection(declarations) {
 \`eval\` is the only tool callable directly. Every other session tool is reachable inside an eval cell as \`await tool.<name>(args)\`:
 plan several operations into one cell, run independent calls with \`Promise.all\`, and read \`result.text\` (plus \`result.details\`) instead of expecting a rendered tool card.
 Reserve separate cells for steps that must inspect earlier results.
+Give every cell a \`title\` of 2–5 words saying what it does, such as \`Reading provider config\`: the transcript shows titles, not code.
 
 \`\`\`ts
 ${declarations}

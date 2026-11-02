@@ -38,6 +38,7 @@
       setupVersion: 2
       startup:
         setupWizard: false
+        checkUpdate: false
       defaultThinkingLevel: ${catalog.ompThinkingLevel}
       modelRoles:
         advisor: ${catalog.advisorModel}

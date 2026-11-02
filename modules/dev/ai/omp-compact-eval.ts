@@ -17,6 +17,22 @@ function titles(cells) {
 	return cells.map(cell => (typeof cell?.title === "string" ? cell.title.trim() : "")).filter(Boolean);
 }
 
+const TOOL_CALL = /tool\.(\w+)\(\s*\{?\s*(?:["']?\w+["']?\s*[:=]\s*)?["'`]([^"'`\n]+)/;
+
+function summary(cells) {
+	for (const cell of cells) {
+		const code = String(cell?.code ?? "");
+		const call = TOOL_CALL.exec(code);
+		if (call) return [{ t: call[1] }, { t: ` ${call[2].trim()}`, s: "code" }];
+		const line = code
+			.split("\n")
+			.map(row => row.trim())
+			.find(row => row.length > 0 && !row.startsWith("#") && !row.startsWith("//"));
+		if (line) return [{ t: line, s: "code" }];
+	}
+	return undefined;
+}
+
 function tidy(view, cells, extra) {
 	if (!view) return view;
 	const tool = view.tool && { ...view.tool };
@@ -24,7 +40,11 @@ function tidy(view, cells, extra) {
 		const badges = (tool.badges ?? []).filter(badge => LANGUAGES[badge.text] !== true);
 		tool.badges = badges.length > 0 ? badges : undefined;
 		const named = titles(cells);
-		if ((!tool.title || tool.title === "Eval") && named.length > 0) tool.title = named[0];
+		if (!tool.title || tool.title === "Eval") {
+			const fallback = summary(cells);
+			if (named.length > 0) tool.title = named[0];
+			else if (fallback) tool.title = fallback;
+		}
 	}
 	return { ...view, tool, preview: "none", ...extra };
 }

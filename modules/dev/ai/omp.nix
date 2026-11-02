@@ -22,6 +22,7 @@ in {
       value = {
         defaultThinkingLevel = catalog.ompThinkingLevel;
         advisor.enabled = true;
+        startup.checkUpdate = false;
         modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
         modelRoles.advisor = catalog.advisorModel;
         modelRoles.smol = catalog.smolModel;

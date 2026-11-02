@@ -59,13 +59,28 @@ function same(a, b) {
 	return a.length === b.length && a.every((item, i) => item === b[i]);
 }
 
+function headline(markdown) {
+	const line =
+		String(markdown ?? "")
+			.split("\n")
+			.map(row => row.replace(/^\s*(?:#{1,6}\s+|>\s*|[-*+]\s+|\d+[.)]\s+)/, "").trim())
+			.find(row => row.length > 0 && !row.startsWith("```")) ?? "";
+	const plain = line.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/(\*\*|__|~~)/g, "");
+	return plain.split(/(`[^`]+`)/).flatMap(piece => {
+		if (piece.length === 0) return [];
+		return piece.startsWith("`") && piece.endsWith("`") ? [span(piece.slice(1, -1), "code")] : [span(piece)];
+	});
+}
+
 function install(state) {
 	const transcript = TranscriptContainer.prototype;
 	const assistant = AssistantMessageComponent.prototype;
 	const describeAssistant = assistant.describe;
+	const setTurnUsage = assistant.setTurnUsage;
 	const nativeBlocks = transcript.nativeBlocks;
+	const ends = new WeakSet();
 	const groups = new WeakMap();
-	const parts = new WeakMap();
+	const voices = new WeakMap();
 	const failures = new WeakMap();
 	const shownBy = new WeakMap();
 	const nodeBy = new WeakMap();
@@ -77,7 +92,14 @@ function install(state) {
 		return describeAssistant.call(this, cx);
 	};
 
+	assistant.setTurnUsage = function (summary) {
+		if (summary) ends.add(this);
+		else ends.delete(this);
+		return setTurnUsage.call(this, summary);
+	};
+
 	function speaks(block) {
+		if (!(block instanceof AssistantMessageComponent)) return false;
 		return (describe(block)?.c ?? []).some(child => !isComponent(child) && (child.k === "md" || child.key === "error"));
 	}
 
@@ -85,10 +107,10 @@ function install(state) {
 		return (describe(block)?.c ?? []).some(isThinking);
 	}
 
-	class Part {
-		constructor(source, thinking) {
+	class Voice {
+		constructor(source, mode) {
 			this.source = source;
-			this.thinking = thinking;
+			this.mode = mode;
 		}
 		render() {
 			return [];
@@ -102,20 +124,28 @@ function install(state) {
 			const whole = this.source.describe(cx);
 			if (whole === this.whole) return this.node;
 			this.whole = whole;
-			this.node = { ...whole, c: (whole?.c ?? []).filter(child => isThinking(child) === this.thinking) };
+			const thinking = this.mode === "thinking";
+			const children = (whole?.c ?? []).filter(child => isThinking(child) === thinking);
+			const p = this.mode === "note" ? { ...whole?.p, role: "omp.assistant.note" } : whole?.p;
+			this.node = { ...whole, p, c: children };
 			return this.node;
 		}
 	}
 
-	function part(source, thinking) {
-		let pair = parts.get(source);
-		if (!pair) {
-			pair = [new Part(source, false), new Part(source, true)];
-			parts.set(source, pair);
+	function voice(source, mode) {
+		let modes = voices.get(source);
+		if (!modes) {
+			modes = {};
+			voices.set(source, modes);
 		}
-		const chosen = pair[thinking ? 1 : 0];
+		modes[mode] ??= new Voice(source, mode);
+		const chosen = modes[mode];
 		if (isNativeSettled(source) && !isNativeSettled(chosen)) settleNative(chosen);
 		return chosen;
+	}
+
+	function answer(block) {
+		return thinks(block) ? voice(block, "prose") : block;
 	}
 
 	class Folded {
@@ -165,6 +195,7 @@ function install(state) {
 		constructor() {
 			this.blocks = [];
 			this.live = false;
+			this.ended = false;
 		}
 		render() {
 			return [];
@@ -173,34 +204,50 @@ function install(state) {
 		handleNativeEvent(event) {
 			if (event.type === "toggle" && event.key === "work") this.toggled = event.collapsed;
 		}
-		update(blocks, live) {
+		update(lead, blocks, live, ended) {
 			if (live && this.startedAt === undefined) this.startedAt = performance.now();
 			if (!live && this.live) this.endedAt = performance.now();
+			this.lead = lead;
 			this.blocks = blocks;
 			this.live = live;
+			this.ended = ended;
 		}
 		describe(cx) {
 			if (cx) state.cx = cx;
+			const note = this.lead && voice(this.lead.prose, "note");
+			const thought = this.lead?.thought;
+			const said = note ? note.describe(cx) : undefined;
 			const failed = this.blocks.filter(block => isTool(block) && block.describe(cx)?.p?.status === "error");
 			const collapsed = this.toggled ?? !this.live;
 			const wall =
 				this.startedAt !== undefined && this.endedAt !== undefined ? this.endedAt - this.startedAt : undefined;
 			const time = this.live ? undefined : (wall ?? spent(this.blocks, cx));
-			const key = [...this.blocks, ...failed, collapsed, this.live, time];
+			const shown = collapsed && this.ended ? failed : [];
+			const key = [said, thought, ...this.blocks, ...failed, collapsed, this.live, this.ended, time];
 			if (this.key && same(this.key, key)) return this.node;
 			this.key = key;
 			const steps = this.blocks.filter(isTool).length;
 			const count = `${steps} ${steps === 1 ? "step" : "steps"}`;
-			const label = this.live
-				? [text([span("Working", "muted")]), elapsed(performance.now() - this.startedAt), text([span(`· ${count}`, "muted")])]
-				: [text([span(time === undefined ? count : `Worked for ${duration(time)} · ${count}`, "muted")])];
+			const prose = String(said?.c?.find(child => !isComponent(child) && child.k === "md")?.p?.text ?? "").trim();
+			const lead = note ? headline(prose) : [];
+			const whole = prose.split("\n").filter(line => line.trim().length > 0).length <= 1 && prose.length <= 90;
+			const label = [];
+			if (lead.length > 0) label.push(text(lead, { lines: 1, truncate: "end", shrink: 1 }));
+			else label.push(text([span(this.live ? "Working" : time === undefined ? "Worked" : `Worked for ${duration(time)}`)]));
+			if (this.live) label.push(elapsed(performance.now() - this.startedAt));
+			const meta = lead.length > 0 && time !== undefined ? `${count} · ${duration(time)}` : count;
+			label.push(text([span(meta, "dim")], { basis: "content" }));
 			if (failed.length > 0) label.push(node("badge", { text: `${failed.length} failed`, tone: "error" }));
 			const head = node("row", { gap: "sm", align: "center" }, label, "head");
-			const body = collapsed ? this.blocks.filter(block => !failed.includes(block)) : this.blocks;
+			const body = [
+				...(thought ? [thought] : []),
+				...(note && !whole ? [note] : []),
+				...this.blocks.filter(block => !shown.includes(block)),
+			];
 			this.node = col(
 				[
 					node("section", { role: "omp.notice.work", collapsible: true, collapsed }, [head, ...body], "work"),
-					...(collapsed ? failed.map(folded) : []),
+					...shown.map(folded),
 				],
 				{ gap: "sm" },
 			);
@@ -220,33 +267,49 @@ function install(state) {
 	transcript.nativeBlocks = function () {
 		const blocks = nativeBlocks.call(this);
 		const shown = [];
+		let pending;
 		let open = [];
-		const close = last => {
-			if (open.length === 0) return;
+		const emit = asAnswer => {
+			if (pending.thought) shown.push(pending.thought);
+			shown.push(asAnswer ? answer(pending.prose) : voice(pending.prose, "note"));
+			pending = undefined;
+		};
+		const close = (ended, last) => {
 			if (open.some(isTool)) {
-				const work = group(open[0]);
-				work.update(open, last && state.running);
+				const work = group(pending?.prose ?? open[0]);
+				work.update(pending, open, last && state.running, ended);
 				shown.push(work);
+				pending = undefined;
 			} else {
+				if (pending) emit(ended);
 				shown.push(...open);
 			}
 			open = [];
 		};
 		for (const block of blocks) {
 			if (isInitiator(block)) {
-				close(false);
+				if (open.length > 0) close(true, false);
+				else if (pending) emit(true);
 				shown.push(block);
-			} else if (block instanceof AssistantMessageComponent && speaks(block)) {
-				if (thinks(block)) open.push(part(block, true));
-				close(false);
-				shown.push(thinks(block) ? part(block, false) : block);
-			} else if (isTool(block) || block instanceof AssistantMessageComponent || open.length > 0) {
+			} else if (speaks(block)) {
+				const thought = thinks(block) ? voice(block, "thinking") : undefined;
+				if (open.length > 0) {
+					if (thought) open.push(thought);
+					close(false, false);
+					pending = { prose: block };
+				} else {
+					if (pending) emit(false);
+					pending = { prose: block, thought };
+				}
+				if (ends.has(block)) emit(true);
+			} else if (isTool(block) || block instanceof AssistantMessageComponent || open.length > 0 || pending) {
 				open.push(block);
 			} else {
 				shown.push(block);
 			}
 		}
-		close(true);
+		if (open.length > 0) close(!state.running, true);
+		else if (pending) emit(!state.running);
 		const previous = shownBy.get(this);
 		if (previous && same(previous, shown)) return previous;
 		shownBy.set(this, shown);

@@ -1,15 +1,19 @@
 # omp transcript presentation
 
-In Tern, omp's transcript separates three things:
+In Tern, omp's transcript gives each thing one level of attention:
 
-- **What the model says** sits in a bubble on the left, opposite your messages on the right.
-- **Work** between two things the model says folds into one row: **Working** while it runs, **Worked for … · N steps** once it is done. Open the row to see each step, thought and notice in order; open a step to see its code and output. Failed steps stay listed under the folded row, which carries a failure count.
-- **Notices** from omp and extensions keep their own small rows, inside the work row when they land mid-work.
+- **The answer** that ends a turn sits in a bubble on the left, opposite your messages on the right.
+- **Work** folds into one row per stretch of steps. A row leads with the sentence the model wrote before those steps, then the step count and time; a row with no such sentence reads **Worked for …**. It stays open while it runs and folds when the next sentence or the answer arrives. Open it for the model's reasoning, the full sentence when it ran longer than the row, and each step; open a step for its code and output.
+- **Failures** show as a red count on their row. A failed step stays listed under the folded row only when the turn ended on it.
+- **Notices** from omp and extensions keep their own small rows, inside a work row when they land mid-work.
 
 The pieces:
 
-- [omp-compact-eval.ts](omp-compact-eval.ts) folds eval steps to their title, drops language badges, names multi-cell steps after their first cell and opens failures.
-- [omp-work-fold.ts](omp-work-fold.ts) groups work into rows. Your messages, skill and collab prompts, `!`/`$` commands and compaction markers start a new stretch; model prose ends one.
-- [../../tools/tern/plugins/omp-chat](../../tools/tern/plugins/omp-chat) is the Tern stylesheet for the bubbles and the rail under an open work row.
+- [omp-code-mode.ts](omp-code-mode.ts) asks for a short title on every eval cell, which becomes the step's name.
+- [omp-compact-eval.ts](omp-compact-eval.ts) folds eval steps to their title, drops language badges, and names untitled steps after the tool they call or their first line.
+- [omp-work-fold.ts](omp-work-fold.ts) builds the rows. Your messages, skill and collab prompts, `!`/`$` commands and compaction markers start a new stretch.
+- [../../tools/tern/plugins/omp-chat](../../tools/tern/plugins/omp-chat) is the Tern stylesheet for the answer bubble, the quieter sentences and the rail under an open row.
 
-Restart existing omp sessions after changing the extensions; `tern plugin reload` picks up the stylesheet. They use omp's exported UI internals and Tern's Reader classes; after upgrading either, check a running turn, a finished turn, an expanded row, a notice between two steps and a success → failure → success turn.
+omp is pinned by Nix, so its startup update check is off.
+
+Restart existing omp sessions after changing the extensions; `tern plugin reload` picks up the stylesheet. They use omp's exported UI internals and Tern's Reader classes; after upgrading either, check a running turn, a finished turn, an opened row, a notice between two steps and a success → failure → success turn.
