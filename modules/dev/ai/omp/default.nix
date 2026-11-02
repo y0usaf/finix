@@ -34,6 +34,7 @@ in {
           "${flakeInputs.pi-chronobreak}"
           "${flakeInputs.pi-recap}"
           "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}"
+          "${flakeInputs.omp-stretch}"
           "${./code-mode.ts}"
           "${./compact-eval.ts}"
           "${./work-fold.ts}"
@@ -71,5 +72,7 @@ in {
       value = catalog.models;
     };
     ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n";
+    ".omp/agent/WATCHDOG.md".text = "@${flakeInputs.omp-stretch}/advisor.md\n";
+    ".config/tern/plugins/omp-stretch.path".text = "${flakeInputs.omp-stretch}/tern-plugin\n";
   };
 }

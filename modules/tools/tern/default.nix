@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  flakeInputs,
   ...
 }: let
   version = "0.9.7";
@@ -85,6 +86,19 @@
     exec ${pkgs.python3.withPackages (ps: [ps.numpy])}/bin/python3 ${config.user.homeDirectory}/dev/developing/tern-cmus/cmus-tsp "$@"
   '';
 
+  ocean = "${pkgs.kdePackages.ocean-sound-theme}/share/sounds/ocean/stereo";
+
+  chime = {
+    ".config/tern/plugins/chime.path".text = "${flakeInputs.tern-chime}\n";
+    ".local/state/tern/plugin-data/chime/sounds.toml".text = ''
+      alert = "${ocean}/dialog-question.oga"
+      yield = "${ocean}/completion-success.oga"
+      done = "${ocean}/outcome-success.oga"
+      only_unfocused = true
+      min_seconds = 30
+    '';
+  };
+
   configDir = ./config;
 
   devTree = "${config.user.homeDirectory}/dev";
@@ -156,7 +170,7 @@ in {
     ".local/state/tern"
   ];
 
-  manzil.users.${config.user.name}.files = files;
+  manzil.users.${config.user.name}.files = files // chime;
 
   finit = {
     tmpfiles.rules = [
