@@ -85,7 +85,7 @@
   cmusTsp =
     pkgs.writeScriptBin "cmus-tsp" ''
       #!${pkgs.runtimeShell}
-      exec ${pkgs.python3}/bin/python3 ${config.user.homeDirectory}/dev/developing/tern-cmus/cmus-tsp "$@"
+      exec ${pkgs.python3.withPackages (ps: [ps.numpy])}/bin/python3 ${config.user.homeDirectory}/dev/developing/tern-cmus/cmus-tsp "$@"
     '';
 
   configDir = ./tern;

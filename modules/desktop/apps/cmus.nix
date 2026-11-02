@@ -4,13 +4,14 @@
   ...
 }: let
   cmusTsp = "${config.user.homeDirectory}/dev/developing/tern-cmus/cmus-tsp";
+  python = pkgs.python3.withPackages (ps: [ps.numpy]);
 
   shim = pkgs.writeScript "cmus-tsp-shim" ''
     #!${pkgs.runtimeShell}
     if [ -n "''${CMUS_TSP_CHILD-}" ] || [ "''${TERM_PROGRAM-}" != tern ]; then
       exec ${pkgs.cmus}/bin/cmus "$@"
     fi
-    exec ${pkgs.python3}/bin/python3 ${cmusTsp} "$@"
+    exec ${python}/bin/python3 ${cmusTsp} "$@"
   '';
 
   cmus = pkgs.symlinkJoin {
