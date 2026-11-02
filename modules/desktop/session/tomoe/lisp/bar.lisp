@@ -220,10 +220,7 @@
 (defun bar--surfaces (modules panels)
   (let* ((h (+ (getf +hud+ :height) (getf +hud+ :shadow)))
          (gap (getf +bar+ :gap))
-         (exclusive (getf +bar+ :exclusive))
-         (indent (if exclusive (getf +bar+ :indent) 0))
-         (thickness (+ h indent))
-         (margin (if exclusive 0 (getf +bar+ :margin)))
+         (margin (getf +bar+ :margin))
          (inset (getf +bar+ :inset))
          (pair (getf +bar+ :center-between))
          (seam (loop for (a b) on modules
@@ -234,18 +231,15 @@
                  :children (remove nil list))))
       (loop for edge in (getf +bar+ :edges)
             collect (shell-surface edge
-                                   (ui :row :height thickness :justify :center
-                                       :padding (cond ((zerop indent) 0)
-                                                      ((eq edge :top) (list indent 0 0 0))
-                                                      (t (list 0 0 indent 0)))
+                                   (ui :row :height h :justify :center
                                        :children (if seam
                                                      (list (half (subseq panels 0 seam) :end (list 0 inset 0 0))
                                                            (half (nthcdr seam panels) :start (list 0 0 0 inset)))
                                                      (list (ui :row :height h :gap gap :children (remove nil panels)))))
-                                   :anchors (if (or seam exclusive) (list edge :left :right) (list edge))
+                                   :anchors (if seam (list edge :left :right) (list edge))
                                    :margin (if (eq edge :top) (list margin 0 0 0) (list 0 0 margin 0))
-                                   :height thickness :layer (if exclusive :top :overlay)
-                                   :exclusive-zone (if exclusive thickness 0)
+                                   :height h :layer :overlay
+                                   :exclusive-zone 0
                                    :background "#00000000" :click-through t)))))
 
 (define-extension "bar" (:reads (:services :system :data)

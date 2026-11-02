@@ -46,6 +46,6 @@
                                                      :layer :overlay :background "#00000000" :click-through t)
                                       (shell-surface edge line :output (getf wide :name) :anchors (list edge :left :right)
                                                      :height height :margin (if (eq edge :top) '(-1 0 0 0) '(0 0 -1 0))
-                                                     :exclusive-zone (if (getf +cassette+ :exclusive) (- (cassette--height :bottom) 1) 0)
+                                                     :exclusive-zone 0
                                                      :layer :overlay :background "#00000000" :click-through t))))
             nil)))

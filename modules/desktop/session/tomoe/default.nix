@@ -174,7 +174,6 @@
     modules = map keyword bar.modules;
     center-between = map keyword ["time" "date"];
     edges = map keyword bar.edges;
-    inherit (bar) exclusive indent;
     margin = 6;
     gap = 8;
     inset = 84;
@@ -205,7 +204,6 @@
   cassetteParameters =
     {
       inherit (gapParameters) modules center-between edges inset time date hot media-width font scale sample;
-      inherit (bar) exclusive;
       segments = 10;
     }
     // (
@@ -435,18 +433,6 @@ in {
         type = lib.types.numbers.positive;
         default = 1;
         description = "Gap bar size multiplier: text, meters, gaps and offsets grow with it.";
-      };
-
-      indent = lib.mkOption {
-        type = lib.types.ints.unsigned;
-        default = 0;
-        description = "Exclusive panel bars: lift the widget row this many px off the screen edge. Baked into the bar thickness so the exclusive zone covers it — windows never overlap the gap.";
-      };
-
-      exclusive = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Whether the panel or cassette bar reserves exclusive space that windows tile around. Keep false for a pure overlay.";
       };
     };
   };
