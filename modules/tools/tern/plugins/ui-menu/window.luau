@@ -514,20 +514,6 @@ for _, t in ipairs(TWEAKS) do
 	})
 end
 
-tern.chrome.status(function(pane)
-	local out = {}
-	for _, t in ipairs(TWEAKS) do
-		if not t.quiet then
-			out[#out + 1] = {
-				text = (on[t.id] and "−" or "+") .. t.label,
-				tone = "muted",
-				command = "plugin.ui-menu.toggle-" .. t.id,
-			}
-		end
-	end
-	return out
-end)
-
 paint_all()
 save()
 watch()
