@@ -2,6 +2,7 @@
   "theme": "System",
   "theme_dark": "titanium",
   "copy_on_select": true,
+  "link_target": "Browser",
   "cursor": {
     "programs": true
   },
