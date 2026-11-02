@@ -1,5 +1,5 @@
 {config, ...}: {
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     "${config.user.paths.steam}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/autoexec.cfg".text = ''
       alias +switchw "slot3; +lookatweapon"
       alias -switchw "-lookatweapon; lastinv"

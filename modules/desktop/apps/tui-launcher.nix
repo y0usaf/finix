@@ -1,5 +1,5 @@
 {config, ...}: {
-  manzil.users."${config.user.name}".files.".config/scripts/tui-launcher.sh" = {
+  manzil.users.${config.user.name}.files.".config/scripts/tui-launcher.sh" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash

@@ -46,7 +46,7 @@ in {
       LD = "${pkgs.binutils}/bin/ld";
     };
   };
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".config/python/pythonrc" = {
       text = ''
       '';

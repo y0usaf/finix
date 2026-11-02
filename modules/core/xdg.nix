@@ -65,7 +65,7 @@ in {
     KERAS_HOME = "${xdgState}/keras";
   };
 
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".config/user-dirs.dirs" = {
       text = ''
         XDG_DESKTOP_DIR="${home}/Desktop"

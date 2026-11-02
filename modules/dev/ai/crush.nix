@@ -12,6 +12,6 @@
     pkgs.crush
   ];
 
-  manzil.users."${config.user.name}".files.".config/crush/CRUSH.md".text =
+  manzil.users.${config.user.name}.files.".config/crush/CRUSH.md".text =
     config.user.dev.prompts.shared;
 }

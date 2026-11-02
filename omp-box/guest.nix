@@ -3,7 +3,7 @@
   ompBox,
   ...
 }: let
-  user = ompBox.user;
+  inherit (ompBox) user;
   home = "/home/${user}";
 in {
   system.stateVersion = "24.05";
@@ -47,20 +47,24 @@ in {
     ];
   };
 
-  environment.systemPackages = with pkgs; [ompBox.omp python3 chromium git ripgrep curl gh jq fd gnumake gcc];
+  environment.systemPackages = [ompBox.omp pkgs.python3 pkgs.chromium pkgs.git pkgs.ripgrep pkgs.curl pkgs.gh pkgs.jq pkgs.fd pkgs.gnumake pkgs.gcc];
   documentation.enable = false;
 
   boot.kernelParams = ["console=ttyS0" "loglevel=4"];
 
-  networking.hostName = "omp-box";
-  networking.firewall.enable = false;
-  networking.useNetworkd = true;
+  networking = {
+    hostName = "omp-box";
+    firewall.enable = false;
+    useNetworkd = true;
+  };
   systemd.network.networks."10-eth0" = {
     matchConfig.Driver = "virtio_net";
-    networkConfig.Address = ["10.0.2.15/24"];
-    networkConfig.Gateway = "10.0.2.2";
-    networkConfig.DNS = ["10.0.2.3"];
-    networkConfig.Domains = ["home"];
+    networkConfig = {
+      Address = ["10.0.2.15/24"];
+      Gateway = "10.0.2.2";
+      DNS = ["10.0.2.3"];
+      Domains = ["home"];
+    };
   };
 
   services.openssh = {

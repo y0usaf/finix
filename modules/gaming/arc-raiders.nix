@@ -5,7 +5,7 @@
 }: let
   iniDir = "${config.user.paths.steam}/steamapps/compatdata/1808500/pfx/drive_c/users/steamuser/AppData/Local/PioneerGame/Saved/Config/WindowsClient";
 in {
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     "${iniDir}/Engine.ini" = {
       generator = lib.generators.toINI {};
       value = {

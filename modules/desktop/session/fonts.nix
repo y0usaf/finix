@@ -4,7 +4,9 @@
   pkgs,
   flakeInputs,
   ...
-}: {
+}: let
+  inherit (config.user.ui) fonts;
+in {
   options.user.ui.fonts = {
     mainFontName = lib.mkOption {
       type = lib.types.str;
@@ -25,13 +27,13 @@
 
   config = {
     fonts.packages = [
-      flakeInputs.fonts.packages."${pkgs.stdenv.hostPlatform.system}".default
+      flakeInputs.fonts.packages.${pkgs.stdenv.hostPlatform.system}.default
       pkgs.noto-fonts-cjk-sans
       pkgs.noto-fonts-color-emoji
       pkgs.nerd-fonts.symbols-only
     ];
 
-    manzil.users."${config.user.name}" = {
+    manzil.users.${config.user.name} = {
       files.".config/fontconfig/fonts.conf" = {
         text = ''
           <?xml version="1.0"?>
@@ -52,12 +54,12 @@
               <acceptfont>
                 <pattern>
                   <patelt name="family">
-                    <string>${config.user.ui.fonts.mainFontName}</string>
+                    <string>${fonts.mainFontName}</string>
                   </patelt>
                 </pattern>
                 <pattern>
                   <patelt name="family">
-                    <string>${config.user.ui.fonts.backup.name}</string>
+                    <string>${fonts.backup.name}</string>
                   </patelt>
                 </pattern>
                 <pattern>
@@ -67,7 +69,7 @@
                 </pattern>
                 <pattern>
                   <patelt name="family">
-                    <string>${config.user.ui.fonts.emoji.name}</string>
+                    <string>${fonts.emoji.name}</string>
                   </patelt>
                 </pattern>
               </acceptfont>
@@ -78,26 +80,26 @@
                 <string>*</string>
               </test>
               <edit name="family" mode="prepend">
-                <string>${config.user.ui.fonts.mainFontName}</string>
+                <string>${fonts.mainFontName}</string>
               </edit>
             </match>
             <!-- Fallback font configuration -->
             <alias binding="strong">
               <family>monospace</family>
               <prefer>
-                <family>${config.user.ui.fonts.mainFontName}</family>
-                <family>${config.user.ui.fonts.backup.name}</family>
+                <family>${fonts.mainFontName}</family>
+                <family>${fonts.backup.name}</family>
                 <family>Symbols Nerd Font</family>
-                <family>${config.user.ui.fonts.emoji.name}</family>
+                <family>${fonts.emoji.name}</family>
               </prefer>
             </alias>
             <alias binding="strong">
               <family>sans-serif</family>
               <prefer>
-                <family>${config.user.ui.fonts.mainFontName}</family>
-                <family>${config.user.ui.fonts.backup.name}</family>
+                <family>${fonts.mainFontName}</family>
+                <family>${fonts.backup.name}</family>
                 <family>Symbols Nerd Font</family>
-                <family>${config.user.ui.fonts.emoji.name}</family>
+                <family>${fonts.emoji.name}</family>
               </prefer>
             </alias>
             <!-- Font rendering options -->

@@ -10,7 +10,7 @@ in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".ssh"
   ];
-  manzil.users."${userName}".files = {
+  manzil.users.${userName}.files = {
     ".ssh/config" = {
       text = ''
         AddKeysToAgent yes

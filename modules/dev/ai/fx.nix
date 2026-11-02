@@ -12,7 +12,7 @@
     flakeInputs.oh-my-fx.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".fx/AGENTS.md" = {
       type = "copy";
       clobber = true;

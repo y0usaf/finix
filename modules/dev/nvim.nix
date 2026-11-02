@@ -66,7 +66,7 @@
     pkgs.jq
   ];
 
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".config/nvim/init.lua" = {
       text = ''
         vim.g.mapleader = " "

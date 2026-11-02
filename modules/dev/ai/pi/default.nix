@@ -33,12 +33,12 @@ in {
         "anthropic/claude-sonnet-5-5"
       ];
 
-      models = {
-        providers.vercel-ai-gateway.modelOverrides."zai/glm-5.3-flash" = {
+      models.providers = {
+        vercel-ai-gateway.modelOverrides."zai/glm-5.3-flash" = {
           compat.vercelGatewayRouting.order = ["runware" "wafer"];
         };
 
-        providers.vercel-ai-gateway.models = [
+        vercel-ai-gateway.models = [
           {
             id = "deepseek/deepseek-v4.1-flash-1017";
             name = "DeepSeek V4.1 Flash 1017";
@@ -105,7 +105,7 @@ in {
           }
         ];
 
-        providers.celeris = {
+        celeris = {
           name = "Celeris";
           baseUrl = "https://inference.celeris.ai/celeris-1-magnus/v1";
           api = "openai-completions";
@@ -127,7 +127,7 @@ in {
           ];
         };
 
-        providers.bonsai = {
+        bonsai = {
           name = "Bonsai (local)";
           baseUrl = "http://127.0.0.1:8891/v1";
           api = "openai-completions";
@@ -162,10 +162,10 @@ in {
       ".pi"
     ];
     environment.systemPackages = [
-      flakeInputs.pi-harness.packages."${pkgs.stdenv.hostPlatform.system}".default
+      flakeInputs.pi-harness.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
     environment.variables.PI_SKIP_VERSION_CHECK = "1";
-    manzil.users."${config.user.name}".files = {
+    manzil.users.${config.user.name}.files = {
       ".pi/agent/settings.json" = {
         generator = toJSON;
         value = {
@@ -175,7 +175,7 @@ in {
             "${flakeInputs.pi-rlm}"
             "${flakeInputs.pi-recap}"
             "${flakeInputs.pi-ampersand}"
-            "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
+            "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}"
           ];
           extensions = ["${./crest-auth.ts}"];
           enableInstallTelemetry = false;

@@ -1,5 +1,10 @@
-{ lib, pkgs, omp, shares ? [], user ? "y0usaf" }:
-let
+{
+  lib,
+  pkgs,
+  omp,
+  shares ? [],
+  user ? "y0usaf",
+}: let
   key = ./id_ed25519;
   staticArms = lib.concatMapStringsSep "\n    " (p: ''case "$PWD/" in ${p}/*) allowed=1 ;; esac'') shares;
   wrapper = pkgs.writeShellScriptBin "omp" ''
@@ -38,15 +43,15 @@ let
   local = pkgs.writeShellScriptBin "omp-local" ''exec ${omp}/bin/omp "$@"'';
   cli = pkgs.writeShellApplication {
     name = "omp-box";
-    runtimeInputs = [ pkgs.coreutils pkgs.util-linux pkgs.openssh pkgs.findutils ];
+    runtimeInputs = [pkgs.coreutils pkgs.util-linux pkgs.openssh pkgs.findutils];
     text = builtins.readFile ./omp-box.sh;
   };
 in
-pkgs.symlinkJoin {
-  name = "omp-box";
-  paths = [
-    wrapper
-    cli
-    local
-  ];
-}
+  pkgs.symlinkJoin {
+    name = "omp-box";
+    paths = [
+      wrapper
+      cli
+      local
+    ];
+  }

@@ -13,7 +13,7 @@
     pkgs.lm_sensors
     pkgs.fzf
     pkgs.ripgrep
-    flakeInputs.strictix.packages."${pkgs.stdenv.hostPlatform.system}".default
+    flakeInputs.strictix.packages.${pkgs.stdenv.hostPlatform.system}.default
     pkgs.alejandra
     pkgs.statix
     pkgs.deadnix

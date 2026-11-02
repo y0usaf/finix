@@ -33,7 +33,7 @@ in {
       ];
       variables.GDK_DPI_SCALE = toString config.user.ui.gtk.scale;
     };
-    manzil.users."${config.user.name}" = {
+    manzil.users.${config.user.name} = {
       files = {
         ".config/gtk-3.0/settings.ini" = {
           generator = lib.generators.toINI {};

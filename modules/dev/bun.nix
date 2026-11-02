@@ -9,7 +9,7 @@
   environment.systemPackages = [
     pkgs.bun
   ];
-  manzil.users."${config.user.name}".files.".config/bun/bunfig.toml" = {
+  manzil.users.${config.user.name}.files.".config/bun/bunfig.toml" = {
     generator = (pkgs.formats.toml {}).generate "nix-generated.toml";
     value.install = {
       cache_dir = "${config.user.homeDirectory}/.cache/bun";

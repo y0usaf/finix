@@ -7,7 +7,7 @@
   environment.systemPackages = [
     pkgs.biome
   ];
-  manzil.users."${config.user.name}".files.".config/biome/biome.json" = {
+  manzil.users.${config.user.name}.files.".config/biome/biome.json" = {
     generator = lib.generators.toJSON {};
     value = {
       "$schema" = "https://biomejs.dev/schemas/2.5.5/schema.json";

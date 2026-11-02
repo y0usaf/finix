@@ -182,7 +182,7 @@ in {
   environment.systemPackages = [
     flakeInputs.boar-rs.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
-  manzil.users."${config.user.name}".files =
+  manzil.users.${config.user.name}.files =
     agentFiles ".local/state/boar/agent"
     // agentFiles ".local/state/boar-rs/agent";
 }

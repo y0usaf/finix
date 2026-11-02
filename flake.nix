@@ -155,9 +155,11 @@
 
     durapi = {
       url = "github:y0usaf/durapi";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pi.follows = "pi";
-      inputs.pi-donsetch.follows = "pi-donsetch";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        pi.follows = "pi";
+        pi-donsetch.follows = "pi-donsetch";
+      };
     };
 
     pi-harness = {

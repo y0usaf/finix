@@ -189,7 +189,7 @@ in {
         };
     })
   ];
-  manzil.users."${userName}".files = {
+  manzil.users.${userName}.files = {
     ".config/glide/glide/profiles.ini" = {
       generator = lib.generators.toINI {};
       value = {

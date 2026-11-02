@@ -54,11 +54,11 @@
 
   sync = pkgs.writeShellApplication {
     name = "beat-saber-mods-sync";
-    runtimeInputs = with pkgs; [
-      coreutils
-      findutils
-      gnugrep
-      gnused
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.findutils
+      pkgs.gnugrep
+      pkgs.gnused
     ];
     text = ''
       export LC_ALL=C

@@ -6,7 +6,7 @@
   ...
 }: let
   xcursorSize = 18;
-  cursorPackage = flakeInputs.cursors.packages."${pkgs.stdenv.hostPlatform.system}".deepin-dark;
+  cursorPackage = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}.deepin-dark;
 in {
   options.user.appearance.hyprcursorSize = lib.mkOption {
     type = lib.types.int;
@@ -23,7 +23,7 @@ in {
       };
     };
 
-    manzil.users."${config.user.name}" = {
+    manzil.users.${config.user.name} = {
       files = {
         ".config/gtk-3.0/settings.ini" = {
           text = lib.mkAfter ''

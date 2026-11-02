@@ -61,7 +61,7 @@
     specialArgs = {
       ompBox = {
         inherit user files;
-        shares = cfg.shares;
+        inherit (cfg) shares;
         sharesDir = "${state}/shares";
         nativesDir = "${state}/natives";
         inherit (flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}) omp;
@@ -96,7 +96,7 @@ in {
 
     finit.services.omp-box-grants = {
       description = "re-apply omp box folder grants";
-      user = user;
+      inherit user;
       reload-signal = "none";
       log = true;
       environment = {
@@ -123,7 +123,7 @@ in {
 
     finit.services.omp-box-proxy = {
       description = "omp gateway proxy";
-      user = user;
+      inherit user;
       reload-signal = "none";
       log = true;
       environment = {
@@ -136,7 +136,7 @@ in {
 
     finit.services.omp-box = {
       description = "omp NixOS microVM";
-      user = user;
+      inherit user;
       reload-signal = "none";
       environment = {
         HOME = home;

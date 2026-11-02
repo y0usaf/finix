@@ -42,7 +42,7 @@
     };
   };
 in {
-  manzil.users."${config.user.name}".files =
+  manzil.users.${config.user.name}.files =
     lib.mapAttrs' (
       _: mod:
         lib.nameValuePair

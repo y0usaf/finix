@@ -10,6 +10,6 @@
     ".phi"
   ];
   environment.systemPackages = [
-    flakeInputs.phi.packages."${pkgs.stdenv.hostPlatform.system}".default
+    flakeInputs.phi.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 }

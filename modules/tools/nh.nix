@@ -7,7 +7,7 @@
 }: {
   environment = {
     systemPackages = [
-      flakeInputs.nh.packages."${pkgs.stdenv.hostPlatform.system}".default
+      flakeInputs.nh.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
     variables.NH_FLAKE = "${config.user.homeDirectory}/finix";
   };

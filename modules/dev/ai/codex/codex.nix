@@ -21,7 +21,7 @@
   };
   environment.systemPackages = [
     (pkgs.writeShellScriptBin "codex" ''
-      exec ${lib.getExe flakeInputs.codex-cli-nix.packages."${pkgs.stdenv.hostPlatform.system}".default} \
+      exec ${lib.getExe flakeInputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default} \
         --dangerously-bypass-approvals-and-sandbox \
         --config ${lib.escapeShellArg "developer_instructions=${builtins.toJSON config.user.dev.prompts.shared}"} \
         "$@"

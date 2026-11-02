@@ -42,38 +42,38 @@
     exec ${pkgs.util-linux}/bin/setsid -f "$@"
   '';
 
-  tools = with pkgs; [
-    coreutils
-    findutils
-    gnugrep
-    gnused
-    gawk
-    gnutar
-    gzip
-    procps
-    util-linux
-    systemd
-    jq
-    gum
-    fzf
-    socat
-    inotify-tools
-    curl
-    imagemagick
-    libnotify
-    fontconfig
-    wl-clipboard
-    wtype
-    grim
-    slurp
-    brightnessctl
-    pamixer
-    networkmanager
-    xdg-utils
-    xdg-terminal-exec
-    foot
-    hyprland
-    quickshell
+  tools = [
+    pkgs.coreutils
+    pkgs.findutils
+    pkgs.gnugrep
+    pkgs.gnused
+    pkgs.gawk
+    pkgs.gnutar
+    pkgs.gzip
+    pkgs.procps
+    pkgs.util-linux
+    pkgs.systemd
+    pkgs.jq
+    pkgs.gum
+    pkgs.fzf
+    pkgs.socat
+    pkgs.inotify-tools
+    pkgs.curl
+    pkgs.imagemagick
+    pkgs.libnotify
+    pkgs.fontconfig
+    pkgs.wl-clipboard
+    pkgs.wtype
+    pkgs.grim
+    pkgs.slurp
+    pkgs.brightnessctl
+    pkgs.pamixer
+    pkgs.networkmanager
+    pkgs.xdg-utils
+    pkgs.xdg-terminal-exec
+    pkgs.foot
+    pkgs.hyprland
+    pkgs.quickshell
   ];
 
   fontsConf = pkgs.writeText "fonts.conf" ''
@@ -82,10 +82,10 @@
     <fontconfig>
       <include>${
       pkgs.makeFontsConf {
-        fontDirectories = with pkgs; [
-          jetbrains-mono
-          nerd-fonts.symbols-only
-          liberation_ttf
+        fontDirectories = [
+          pkgs.jetbrains-mono
+          pkgs.nerd-fonts.symbols-only
+          pkgs.liberation_ttf
         ];
       }
     }</include>

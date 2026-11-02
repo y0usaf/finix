@@ -9,7 +9,7 @@
   ];
   environment.systemPackages = [pkgs.gh];
 
-  manzil.users."${config.user.name}".files.".config/gh/config.yml" = {
+  manzil.users.${config.user.name}.files.".config/gh/config.yml" = {
     generator = lib.generators.toYAML {};
     value = {
       version = "1";

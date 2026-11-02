@@ -5,14 +5,14 @@
   pkgs,
   ...
 }: let
-  cleanker = flakeInputs.cleanker.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  cleanker = flakeInputs.cleanker.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in {
   environment.systemPackages = [
     pkgs.git
     pkgs.openssh
     cleanker
   ];
-  manzil.users."${config.user.name}".files.".config/git/config" = {
+  manzil.users.${config.user.name}.files.".config/git/config" = {
     generator = lib.generators.toGitINI;
     value = {
       user = {

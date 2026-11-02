@@ -7,7 +7,7 @@
     pkgs.monstar
   ];
 
-  manzil.users."${config.user.name}".files.".config/monstar/config" = {
+  manzil.users.${config.user.name}.files.".config/monstar/config" = {
     text = ''
       font-size = ${toString config.user.appearance.termFontSize}
       background-opacity = ${toString config.user.appearance.glass.opacity}

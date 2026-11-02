@@ -28,7 +28,7 @@ in {
     ".config/cmus"
   ];
   environment.systemPackages = [cmus];
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".config/cmus/rc".text = ''
       colorscheme palette
       set softvol=true

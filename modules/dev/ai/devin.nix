@@ -7,7 +7,7 @@
     pkgs.devin-cli
   ];
 
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".config/devin/AGENTS.md".text =
       config.user.dev.prompts.shared;
     ".config/devin/config.json" = {

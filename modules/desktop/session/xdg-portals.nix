@@ -3,7 +3,7 @@
   lib,
   ...
 }: {
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".local/share/xdg-desktop-portal/portals/gnome.portal" = {
       generator = lib.generators.toINI {};
       value = {

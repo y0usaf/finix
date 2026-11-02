@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: let
+{config, ...}: let
   loader = ''
     for file_path in "$HOME/Tokens"/*; do
       [ -f "$file_path" ] || continue
@@ -22,7 +19,7 @@
     unset file_path var_name content
   '';
 in {
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".config/tokens.sh".text = loader;
 
     ".profile".text = ''

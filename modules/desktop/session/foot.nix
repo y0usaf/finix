@@ -17,7 +17,7 @@ in {
     environment.systemPackages = [
       pkgs.foot
     ];
-    manzil.users."${config.user.name}".files.".config/foot/foot.ini" = {
+    manzil.users.${config.user.name}.files.".config/foot/foot.ini" = {
       generator = lib.generators.toINI {};
       value = {
         main = {

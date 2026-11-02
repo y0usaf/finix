@@ -5,6 +5,7 @@
   ...
 }: let
   iniDir = "${config.user.paths.steam}/steamapps/compatdata/1903340/pfx/drive_c/users/steamuser/AppData/Local/Sandfall/Saved/Config/Windows";
+  win64 = "${config.user.paths.steam}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64";
   version = "0.0.13";
   clairObscurFix = pkgs.fetchzip {
     url = "https://codeberg.org/Lyall/ClairObscurFix/releases/download/${version}/ClairObscurFix_${version}.zip";
@@ -12,16 +13,16 @@
     stripRoot = false;
   };
 in {
-  manzil.users."${config.user.name}".files = {
-    "${config.user.paths.steam}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.asi" = {
+  manzil.users.${config.user.name}.files = {
+    "${win64}/ClairObscurFix.asi" = {
       source = "${clairObscurFix}/ClairObscurFix.asi";
     };
 
-    "${config.user.paths.steam}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/dsound.dll" = {
+    "${win64}/dsound.dll" = {
       source = "${clairObscurFix}/dsound.dll";
     };
 
-    "${config.user.paths.steam}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64/ClairObscurFix.ini" = {
+    "${win64}/ClairObscurFix.ini" = {
       generator = lib.generators.toINI {};
       value = {
         "Developer Console" = {

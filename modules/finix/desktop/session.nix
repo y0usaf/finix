@@ -7,7 +7,7 @@
 }: let
   userName = config.user.name;
 
-  tomoePkg = flakeInputs.tomoe.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  tomoePkg = flakeInputs.tomoe.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in {
   finit.services.seatd.runlevels = lib.mkForce "234";
 

@@ -14,7 +14,7 @@ in {
 
   environment.systemPackages = [pkgs.jq];
 
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     ".omp/agent/config.yml" = {
       type = "merge";
       format = "yaml";
@@ -23,15 +23,17 @@ in {
         defaultThinkingLevel = catalog.ompThinkingLevel;
         advisor.enabled = true;
         startup.checkUpdate = false;
-        modelRoles.default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-        modelRoles.advisor = catalog.advisorModel;
-        modelRoles.smol = catalog.smolModel;
-        modelRoles.judge = catalog.judgeModel;
+        modelRoles = {
+          default = "${catalog.defaultProvider}/${catalog.defaultModel}";
+          advisor = catalog.advisorModel;
+          smol = catalog.smolModel;
+          judge = catalog.judgeModel;
+        };
         retry.fallbackChains = catalog.fallbackChains;
         extensions = [
           "${flakeInputs.pi-chronobreak}"
           "${flakeInputs.pi-recap}"
-          "${flakeInputs.pi-donsetch.packages."${pkgs.stdenv.hostPlatform.system}".default}"
+          "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}"
           "${./code-mode.ts}"
           "${./compact-eval.ts}"
           "${./work-fold.ts}"

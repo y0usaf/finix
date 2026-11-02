@@ -1,5 +1,5 @@
 {config, ...}: {
-  manzil.users."${config.user.name}".files = {
+  manzil.users.${config.user.name}.files = {
     "AGENTS.md".text = ''
       # Principles
 

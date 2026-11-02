@@ -42,7 +42,7 @@ in {
     })
   ];
 
-  manzil.users."${userName}".files = {
+  manzil.users.${userName}.files = {
     ".config/discord/settings.json" = {
       generator = lib.generators.toJSON {};
       value = {

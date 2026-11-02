@@ -10,47 +10,43 @@
     then {__toLispInline = form;}
     else throw "mkLispInline: expected a nonblank string";
 
-  toLisp = v:
-    if lib.isAttrs v && v ? __toLispInline
-    then v.__toLispInline
-    else if lib.isAttrs v
-    then let
-      present = lib.filterAttrs (_: x: x != null) v;
-      entries = lib.mapAttrsToList (k: x: ":|${lib.replaceStrings ["\\" "|"] ["\\\\" "\\|"] (lib.toUpper k)}| ${toLisp x}") present;
-    in
-      if builtins.length entries != builtins.length (lib.unique (map lib.toUpper (builtins.attrNames present)))
-      then throw "toLisp: keys collide after ASCII uppercasing"
-      else if entries == []
-      then "nil"
-      else "(list ${lib.concatStringsSep " " entries})"
-    else if lib.isList v
-    then
-      if v == []
-      then "nil"
-      else "(list ${lib.concatStringsSep " " (map toLisp v)})"
-    else if lib.isString v
-    then ''"${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] v}"''
-    else if builtins.isPath v
-    then toLisp "${v}"
-    else if v == null
+  lispList = items:
+    if items == []
     then "nil"
-    else if lib.isBool v
-    then
+    else "(list ${lib.concatStringsSep " " items})";
+
+  lispAttrs = v: let
+    present = lib.filterAttrs (_: x: x != null) v;
+    entries = lib.mapAttrsToList (k: x: ":|${lib.replaceStrings ["\\" "|"] ["\\\\" "\\|"] (lib.toUpper k)}| ${toLisp x}") present;
+  in
+    if builtins.length entries != builtins.length (lib.unique (map lib.toUpper (builtins.attrNames present)))
+    then throw "toLisp: keys collide after ASCII uppercasing"
+    else lispList entries;
+
+  lispFloat = v: let
+    json = builtins.toJSON v;
+  in
+    if json == "null"
+    then throw "toLisp: cannot serialize a non-finite float"
+    else if builtins.match ".*[eE].*" json != null
+    then lib.replaceStrings ["e" "E"] ["d" "d"] json
+    else "${json}d0";
+
+  lispByType = {
+    set = v: v.__toLispInline or (lispAttrs v);
+    list = v: lispList (map toLisp v);
+    string = v: ''"${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] v}"'';
+    path = v: toLisp "${v}";
+    null = _: "nil";
+    bool = v:
       if v
       then "t"
-      else "nil"
-    else if lib.isInt v
-    then toString v
-    else if lib.isFloat v
-    then let
-      json = builtins.toJSON v;
-    in
-      if json == "null"
-      then throw "toLisp: cannot serialize a non-finite float"
-      else if builtins.match ".*[eE].*" json != null
-      then lib.replaceStrings ["e" "E"] ["d" "d"] json
-      else "${json}d0"
-    else throw "toLisp: cannot serialize ${builtins.typeOf v}";
+      else "nil";
+    int = toString;
+    float = lispFloat;
+  };
+
+  toLisp = v: lispByType.${builtins.typeOf v} or (throw "toLisp: cannot serialize ${builtins.typeOf v}") v;
 
   inherit (config.user) defaults;
   cfg = config.user.ui.tomoe;
@@ -159,8 +155,6 @@
     shadow = 3;
   };
 
-  cassette = lib.elem bar.style ["cassette" "spine"];
-
   gaps = 8;
 
   seam =
@@ -213,20 +207,23 @@
       inherit (gapParameters) modules center-between edges inset time date hot media-width font scale sample;
       inherit (bar) exclusive;
       segments = 10;
-      colors =
-        if bar.style == "spine"
-        then {
+    }
+    // (
+      if bar.style == "spine"
+      then {
+        colors = {
           dark = spineColors;
           light = spineLightColors;
-        }
-        else {
+        };
+        spine-title = 12;
+      }
+      else {
+        colors = {
           dark = cassetteColors;
           light = cassetteColors;
         };
-    }
-    // lib.optionalAttrs (bar.style == "spine") {
-      spine-title = 12;
-    };
+      }
+    );
 
   glassParameters = {
     inherit (config.user.appearance.glass) passes offset;
@@ -256,6 +253,19 @@
     paper = "#FFFFFF33";
     tape = "#5A4636";
     shadow = "#00000026";
+  };
+
+  barLisp = let
+    cassetteLisp = deck:
+      "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
+      + builtins.readFile ./lisp/probe.lisp
+      + builtins.readFile ./lisp/cassette.lisp
+      + builtins.readFile deck;
+  in {
+    panels = "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp;
+    gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/gap.lisp;
+    cassette = cassetteLisp ./lisp/plates.lisp;
+    spine = cassetteLisp ./lisp/spine.lisp;
   };
 
   spineColors = {
@@ -441,7 +451,7 @@ in {
     };
   };
 
-  config.manzil.users."${config.user.name}".files.".config/tomoe/init.lisp".text = lib.concatStringsSep "\n" [
+  config.manzil.users.${config.user.name}.files.".config/tomoe/init.lisp".text = lib.concatStringsSep "\n" [
     ''
       (in-package #:tomoe-user)
       (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ lib.concatLists (lib.mapAttrsToList (key: value: [(keyword key) value]) settings)) cfg.displays)})
@@ -478,21 +488,7 @@ in {
     (builtins.readFile ./lisp/theme.lisp)
     "(defparameter +glass+ ${toLisp glassParameters})"
     (builtins.readFile ./lisp/glass.lisp)
-    (
-      if bar.style == "gap"
-      then "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/gap.lisp
-      else if cassette
-      then
-        "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
-        + builtins.readFile ./lisp/probe.lisp
-        + builtins.readFile ./lisp/cassette.lisp
-        + builtins.readFile (
-          if bar.style == "spine"
-          then ./lisp/spine.lisp
-          else ./lisp/plates.lisp
-        )
-      else "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp
-    )
+    barLisp.${bar.style}
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
     (builtins.readFile ./lisp/shader-wallpaper.lisp)
     "(defparameter +peek+ ${toLisp peekParameters})"

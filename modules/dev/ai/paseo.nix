@@ -86,7 +86,7 @@ in {
       log = true;
     };
 
-    manzil.users."${config.user.name}".files.".paseo/config.json" = {
+    manzil.users.${config.user.name}.files.".paseo/config.json" = {
       type = "merge";
       format = "json";
       value.agents.providers = {

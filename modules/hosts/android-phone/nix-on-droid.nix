@@ -13,7 +13,7 @@
 
   gitName = "y0usaf";
   tokensKey = "${homeDir}/Tokens/id_rsa_${gitName}";
-  manzil = flakeInputs.manzil.packages."${pkgs.stdenv.hostPlatform.system}".default;
+  manzil = flakeInputs.manzil.packages.${pkgs.stdenv.hostPlatform.system}.default;
   tailnet = import ../../tailnet.nix;
   bashFiles = (import ../shared.nix {inherit lib pkgs;}).bashFiles {
     interactive = ''
@@ -29,7 +29,7 @@
   bashProfile = bashFiles.".bash_profile".text;
   bashrc = bashFiles.".bashrc".text;
 
-  readKey = path: lib.removeSuffix "\n" (builtins.readFile path);
+  readKey = path: lib.fileContents path;
 
   mkTextFile = name: text: {
     source = pkgs.writeText "android-phone-${name}" text;
@@ -91,7 +91,7 @@
 
         ".ssh/known_hosts" = mkTextFile "known-hosts" ((lib.concatStringsSep "\n" (
             lib.mapAttrsToList (host: key: "${host} ${key}") {
-              "${tailnet.addresses.y0usaf-phone}" = readKey ./host-ssh-ed25519.pub;
+              ${tailnet.addresses.y0usaf-phone} = readKey ./host-ssh-ed25519.pub;
               "192.168.2.34" = readKey ./host-ssh-ed25519.pub;
               "android-phone" = readKey ./host-ssh-ed25519.pub;
               "desktop" = readKey ../y0usaf-desktop/host-ssh-ed25519.pub;

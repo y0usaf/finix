@@ -15,7 +15,7 @@ in {
   options.user.gaming.elden-ring.enable = lib.mkEnableOption "Elden Ring configuration";
 
   config = lib.mkIf user.gaming.elden-ring.enable {
-    manzil.users."${user.name}".files = {
+    manzil.users.${user.name}.files = {
       "${gameDir}/ersc_launcher.exe" = {
         source = "${seamlessCoop}/ersc_launcher.exe";
       };
