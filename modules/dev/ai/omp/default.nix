@@ -34,7 +34,7 @@ in {
           "${flakeInputs.pi-chronobreak}"
           "${flakeInputs.pi-recap}"
           "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}"
-          "${flakeInputs.omp-stretch}"
+          "${flakeInputs.omp-stretch}/stretch.ts"
           "${./code-mode.ts}"
           "${./compact-eval.ts}"
           "${./work-fold.ts}"
