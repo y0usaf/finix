@@ -116,7 +116,6 @@
       (binding ["alt"] "9" "power" "Blank/Restore All Outputs")
       (binding ["super"] "r" "launcher" "Run an Application")
       (binding ["alt"] "e" "files" "File Manager")
-      (binding ["super" "shift"] "o" "editor" "Editor")
       (binding ["alt"] "q" "close" "Close Window")
       (binding ["alt" "shift"] "e" "quit" null)
       (binding ["alt"] "g" "screenshot" "Screenshot")
@@ -142,7 +141,6 @@
     terminal = ["tern"];
     launcher = ["sh" "-c" defaults.launcher];
     files = ["pcmanfm"];
-    editor = [defaults.terminal "-e" "nvim"];
     volume-up = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"];
     volume-down = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"];
     volume-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
