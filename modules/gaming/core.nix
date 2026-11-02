@@ -17,6 +17,7 @@
     ".local/share/Noobs Are Coming (Save)"
     ".local/share/PrismLauncher"
     ".local/share/Rocket League"
+    ".local/share/SlayTheSpire2"
     ".local/share/Smart Code ltd"
     ".local/share/SteamWorld Heist"
     ".local/share/Ultrapool"
