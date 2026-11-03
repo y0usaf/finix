@@ -67,7 +67,7 @@ inputs: let
         ++ modules;
     };
 
-  nixFiles = dirs: builtins.filter (f: lib.hasSuffix ".nix" (toString f)) (builtins.concatMap lib.filesystem.listFilesRecursive dirs);
+  nixFiles = dirs: builtins.filter (f: lib.hasSuffix ".nix" (toString f) && !lib.hasSuffix ".data.nix" (toString f)) (builtins.concatMap lib.filesystem.listFilesRecursive dirs);
   graphicalModules = nixFiles [
     ./core
     ./desktop

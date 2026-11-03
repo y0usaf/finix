@@ -1,0 +1,5 @@
+{
+  entry = "xfs/luascripts/Entities/SpaceEntities/ClientMainPlayer.lua";
+  entryMD5 = "d1278a28054813e09ca01faccafb6d64";
+  name = "rewards";
+}

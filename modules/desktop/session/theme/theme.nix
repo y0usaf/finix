@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  schemes = lib.importJSON ./colorschemes.json;
+  schemes = import ./colorschemes.data.nix;
 
   targets = {
     "discord-colors.css" = [".config/Vencord/themes/palette.css" ".config/vesktop/themes/palette.css"];
@@ -95,8 +95,8 @@ in {
     default = name:
       if schemes ? ${name}
       then "${lib.getExe theme} ${name}"
-      else throw "theme: no colour scheme named ${name} in colorschemes.json; there is light and dark";
-    description = "The shell command that applies the light or dark colour scheme from colorschemes.json to every themed program at once, and sets the desktop colour-scheme and GTK theme that portal-aware and GTK3 apps follow live.";
+      else throw "theme: no colour scheme named ${name} in colorschemes.data.nix; there is light and dark";
+    description = "The shell command that applies the light or dark colour scheme from colorschemes.data.nix to every themed program at once, and sets the desktop colour-scheme and GTK theme that portal-aware and GTK3 apps follow live.";
   };
 
   config.environment.systemPackages = [theme pkgs.dconf adwaitaDark];

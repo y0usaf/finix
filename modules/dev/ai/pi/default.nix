@@ -212,7 +212,10 @@ in {
         value = catalog.models;
       };
 
-      ".pi/workflows/goal-loop.json".source = ./goal-loop.json;
+      ".pi/workflows/goal-loop.json" = {
+        generator = lib.generators.toJSON {};
+        value = import ./goal-loop.data.nix;
+      };
     };
   };
 }

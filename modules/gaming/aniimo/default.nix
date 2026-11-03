@@ -17,9 +17,9 @@
     patches = (old.patches or []) ++ [./luajit-opcodes.patch];
     env = old.env // {NIX_CFLAGS_COMPILE = "${old.env.NIX_CFLAGS_COMPILE} -DLUAJIT_SECURITY_PRNG=0";};
   });
-  patches = map (p: p // {name = p.mod;}) (lib.importJSON ./patches.json);
-  rewards = lib.importJSON ./rewards.json // {wrapper = ./rewards.lua;};
-  catch = lib.importJSON ./catch.json // {wrapper = ./catch.lua;};
+  patches = map (p: p // {name = p.mod;}) (import ./patches.data.nix);
+  rewards = import ./rewards.data.nix // {wrapper = ./rewards.lua;};
+  catch = import ./catch.data.nix // {wrapper = ./catch.lua;};
   mods = lib.optionals cfg.enable (builtins.filter (m: builtins.elem m.name cfg.mods) (patches ++ [rewards catch]));
   settings = pkgs.writeText "aniimo-mods.json" (builtins.toJSON ({
       gameDirectory = "${config.user.homeDirectory}/${config.user.paths.steam}/steamapps/common/Aniimo";
