@@ -31,6 +31,7 @@ in {
   manzil.users.${userName}.files = {
     ".config/omp-bot/env".text = ''
       : "''${OMP_BIN:=${omp}/bin/omp}"
+      : "''${OMP_BOT_EXTENSION:=${./omp/crest-auth.ts}}"
     '';
     ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";
   };
