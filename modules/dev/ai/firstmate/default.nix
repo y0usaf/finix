@@ -9,6 +9,7 @@
     description,
     srcHash,
     npmDepsHash,
+    packageLock,
   }:
     pkgs.buildNpmPackage {
       pname = name;
@@ -26,7 +27,7 @@
 
           jq 'del(.devDependencies, .scripts)' $out/package.json > $out/package.json.new
           mv $out/package.json.new $out/package.json
-          cp ${./. + "/${name}.package-lock.json"} $out/package-lock.json
+          cp ${packageLock} $out/package-lock.json
         '';
 
       inherit npmDepsHash;
@@ -94,6 +95,7 @@ in {
 
     (mkNodeTool {
       name = "gh-axi";
+      packageLock = ./gh-axi.package-lock.json;
       version = "0.1.35";
       description = "GitHub CLI shaped for AI agents";
       srcHash = "sha256-9yWr5EfJkqPWzA2aYyWGcj7RzxbHlRpAvODHPgkD5q4=";
@@ -102,6 +104,7 @@ in {
 
     (mkNodeTool {
       name = "chrome-devtools-axi";
+      packageLock = ./chrome-devtools-axi.package-lock.json;
       version = "0.1.35";
       description = "Chrome DevTools Protocol driver for AI agents";
       srcHash = "sha256-XEwivpIae2OxEGblsXWR4NfNZ+ORf706tFz5X6qwpiw=";
@@ -110,6 +113,7 @@ in {
 
     (mkNodeTool {
       name = "tasks-axi";
+      packageLock = ./tasks-axi.package-lock.json;
       version = "0.2.5";
       description = "Task queue CLI for AI agents";
       srcHash = "sha256-Vv2AUAYDdK5eD4CLRoiLq3TZasO5Tn/8C6FKSt7QozA=";
@@ -118,6 +122,7 @@ in {
 
     (mkNodeTool {
       name = "quota-axi";
+      packageLock = ./quota-axi.package-lock.json;
       version = "0.1.49";
       description = "Provider quota and spend reporter for AI agents";
       srcHash = "sha256-UpXNEYFuTgG4qFZcJuvg7SKuW5o3RA3jEjkmebyzyQM=";
@@ -126,6 +131,7 @@ in {
 
     (mkNodeTool {
       name = "lavish-axi";
+      packageLock = ./lavish-axi.package-lock.json;
       version = "0.1.76";
       description = "Local presentation server for agent-built review boards";
       srcHash = "sha256-LReeEz+tGwZpCEreR3TaA65eh6SCohWwZntMjP3KqVs=";

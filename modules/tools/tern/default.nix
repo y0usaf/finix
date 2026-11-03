@@ -118,35 +118,61 @@
     '';
   };
 
-  configDir = ./config;
+  configFiles = {
+    "carly/HEARTBEAT.md" = ./config/carly/HEARTBEAT.md;
+    "carly/MEMORY.md" = ./config/carly/MEMORY.md;
+    "carly/SOUL.md" = ./config/carly/SOUL.md;
+    "carly/USER.md" = ./config/carly/USER.md;
+    "carly/memory/2026-10-29.md" = ./config/carly/memory/2026-10-29.md;
+    "carly/memory/2026-10-30.md" = ./config/carly/memory/2026-10-30.md;
+    "plugins/attention/attention.css" = ./config/plugins/attention/attention.css;
+    "plugins/attention/plugin.toml" = ./config/plugins/attention/plugin.toml;
+    "plugins/attention/window.luau" = ./config/plugins/attention/window.luau;
+    "plugins/block-menu/plugin.toml" = ./config/plugins/block-menu/plugin.toml;
+    "plugins/block-menu/window.luau" = ./config/plugins/block-menu/window.luau;
+    "plugins/cmus.path" = ./config/plugins/cmus.path;
+    "plugins/ekko.path" = ./config/plugins/ekko.path;
+    "plugins/nix-fail.path" = ./config/plugins/nix-fail.path;
+    "plugins/tab-order/plugin.toml" = ./config/plugins/tab-order/plugin.toml;
+    "plugins/tab-order/window.luau" = ./config/plugins/tab-order/window.luau;
+    "plugins/transparent/plugin.toml" = ./config/plugins/transparent/plugin.toml;
+    "plugins/transparent/transparent.css" = ./config/plugins/transparent/transparent.css;
+    "plugins/transparent/window.luau" = ./config/plugins/transparent/window.luau;
+    "plugins/tuturu/.gitignore" = ./config/plugins/tuturu/.gitignore;
+    "plugins/tuturu/README.md" = ./config/plugins/tuturu/README.md;
+    "plugins/tuturu/plugin.toml" = ./config/plugins/tuturu/plugin.toml;
+    "plugins/tuturu/scripts/play.vbs" = ./config/plugins/tuturu/scripts/play.vbs;
+    "plugins/tuturu/sounds.toml" = ./config/plugins/tuturu/sounds.toml;
+    "plugins/tuturu/src/window.luau" = ./config/plugins/tuturu/src/window.luau;
+    "plugins/ui-menu/host.luau" = ./config/plugins/ui-menu/host.luau;
+    "plugins/ui-menu/plugin.toml" = ./config/plugins/ui-menu/plugin.toml;
+    "plugins/ui-menu/rail.luau" = ./config/plugins/ui-menu/rail.luau;
+    "plugins/ui-menu/ui-menu.css" = ./config/plugins/ui-menu/ui-menu.css;
+    "plugins/ui-menu/window.luau" = ./config/plugins/ui-menu/window.luau;
+    "settings.json" = ./config/settings.json;
+  };
 
   devTree = "${config.user.homeDirectory}/dev";
 
-  configFiles = lib.filesystem.listFilesRecursive configDir;
+  pointsIntoDevTree = file: lib.hasPrefix "${devTree}/" (lib.fileContents file);
 
-  relative = file: lib.removePrefix "${toString configDir}/" (toString file);
-
-  pointsIntoDevTree = file: lib.hasPrefix "${devTree}/" (lib.fileContents (toString file));
-
-  devLinks = builtins.filter (file: lib.hasSuffix ".path" (toString file) && pointsIntoDevTree file) configFiles;
+  devLinks = lib.filterAttrs (name: file: lib.hasSuffix ".path" name && pointsIntoDevTree file) configFiles;
 
   orphans =
     if lib.hasAttr devTree config.fileSystems
-    then []
+    then {}
     else devLinks;
 
   files =
-    lib.listToAttrs (map (file: {
-      name = ".config/tern/${relative file}";
-      value = {
+    lib.mapAttrs' (name: file:
+      lib.nameValuePair ".config/tern/${name}" {
         type = "copy";
         clobber = false;
         force = false;
         permissions = "0644";
         source = file;
-      };
-    }) (lib.subtractLists orphans configFiles))
-    // lib.genAttrs (map (file: ".config/tern/${relative file}") orphans) (_: {type = "delete";});
+      }) (removeAttrs configFiles (lib.attrNames orphans))
+    // lib.mapAttrs' (name: _: lib.nameValuePair ".config/tern/${name}" {type = "delete";}) orphans;
 
   ternPeers = {
     y0usaf-desktop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6ZHkn1pACV406TM5yUCRt/874vybgpUW3sUKka9nAC y0usaf@y0usaf-desktop";

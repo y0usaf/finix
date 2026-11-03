@@ -371,6 +371,13 @@
 
   peekParameters.bind = binding ["alt"] "p" "toggle" "Peek at the Desktop";
 
+  kenneyInterfaceSounds = pkgs.fetchzip {
+    name = "kenney-interface-sounds";
+    url = "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip";
+    stripRoot = false;
+    hash = "sha256-nwNQDiuUl1yr3Axbw2FLA1MHSipHz4BE/iS+DW7ed4M=";
+  };
+
   switchClick = pkgs.fetchurl {
     url = "https://quicksounds.com/uploads/tracks/918151184_174749704_164721627.mp3";
     hash = "sha256-Amji9hOtJveumg4xb4ulHVerGnYbQ8KbfVkOKQfUs7Y=";
@@ -384,7 +391,7 @@
   sounds = pkgs.runCommand "tomoe-sounds" {nativeBuildInputs = [pkgs.ffmpeg];} ''
     mkdir $out
     for i in 1 2 3; do
-      ffmpeg -v error -i ${./assets/sounds}/click_00$i.ogg -ar 48000 -ac 2 -c:a pcm_s16le $out/click-$i.wav
+      ffmpeg -v error -i ${kenneyInterfaceSounds}/Audio/click_00$i.ogg -ar 48000 -ac 2 -c:a pcm_s16le $out/click-$i.wav
     done
     ffmpeg -v error -i ${switchClick} -ar 48000 -ac 2 -c:a pcm_s16le \
       -af 'silenceremove=start_periods=1:start_threshold=-50dB,atrim=0:0.45,afade=t=out:st=0.35:d=0.1' $out/close.wav

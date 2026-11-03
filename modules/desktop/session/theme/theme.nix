@@ -37,11 +37,20 @@
   in
     lib.concatMapStrings fill (builtins.split "[{][{] *([a-z0-9]+) *([|] *([a-z]+))? *[}][}]" text);
 
+  templates = {
+    "discord-colors.css" = ./templates/discord-colors.css;
+    "foot-colors.ini" = ./templates/foot-colors.ini;
+    "gtk-colors.css" = ./templates/gtk-colors.css;
+    "monstar-theme" = ./templates/monstar-theme;
+    "osc.sh" = ./templates/osc.sh;
+  };
+
   themes = pkgs.linkFarm "themes" (lib.concatLists (lib.mapAttrsToList (name: scheme:
-    lib.mapAttrsToList (template: _: {
+    lib.mapAttrsToList (template: file: {
       name = "${name}/${template}";
-      path = pkgs.writeText "${name}-${template}" (render scheme (builtins.readFile (./templates + "/${template}")));
-    }) (builtins.readDir ./templates))
+      path = pkgs.writeText "${name}-${template}" (render scheme (builtins.readFile file));
+    })
+    templates)
   schemes));
 
   gtkThemes = {
