@@ -2,6 +2,7 @@
   config,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   userName = config.user.name;
@@ -31,8 +32,8 @@ in {
   manzil.users.${userName}.files = {
     ".config/omp-bot/env".text = ''
       : "''${OMP_BIN:=${omp}/bin/omp}"
-      : "''${OMP_BOT_EXTENSION:=${./omp/crest-auth.ts}}"
-      : "''${OMP_BOT_OPTCHAT:=${./omp/optchat}}"
+      : "''${OMP_BOT_EXTENSION:=${generators.sourceFile "crest-auth.ts" (generators.tsSource (import ./omp/crest-auth.data.nix))}}"
+      : "''${OMP_BOT_OPTCHAT:=${generators.sourceDir pkgs "optchat" (import ./omp/optchat/optchat.data.nix {inherit generators;})}}"
     '';
     ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";
   };

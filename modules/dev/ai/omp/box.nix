@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   user = config.user.name;
@@ -50,10 +51,10 @@
       retry:
         fallbackChains: ${builtins.toJSON catalog.fallbackChains}
       extensions:
-        - "${./code-mode.ts}"
-        - "${./compact-eval.ts}"
-        - "${./work-fold.ts}"
-        - "${./optchat}/extension.ts"
+        - "${generators.sourceFile "code-mode.ts" (generators.tsSource (import ./code-mode.data.nix))}"
+        - "${generators.sourceFile "compact-eval.ts" (generators.tsSource (import ./compact-eval.data.nix))}"
+        - "${generators.sourceFile "work-fold.ts" (generators.tsSource (import ./work-fold.data.nix))}"
+        - "${generators.sourceDir pkgs "optchat" (import ./optchat/optchat.data.nix {inherit generators;})}/extension.ts"
     '';
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
   };

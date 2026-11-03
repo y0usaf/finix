@@ -2,6 +2,7 @@
   config,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   user = config.user.name;
@@ -20,7 +21,7 @@
       fi
       cd ${dir}
       exec ${omp}/bin/omp --mode rpc --no-ui --no-session --no-extensions --no-tools --no-lsp --no-skills --no-rules --no-title \
-        -e ${./optchat}/service.ts <>${dir}/optchatd.fifo >/dev/null
+        -e ${generators.sourceDir pkgs "optchat" (import ./optchat/optchat.data.nix {inherit generators;})}/service.ts <>${dir}/optchatd.fifo >/dev/null
     '';
   };
 

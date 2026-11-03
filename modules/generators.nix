@@ -62,14 +62,18 @@
 
   wrap = width: text:
     lib.optionalString (text != "") "${builtins.substring 0 width text}\n${wrap width (builtins.substring width (builtins.stringLength text) text)}";
-in {
-  cssSource = list: "${nodes list}\n";
 
   sourceFile = name: text:
     builtins.path {
       path = builtins.toFile name text;
       inherit name;
     };
+in {
+  cssSource = list: "${nodes list}\n";
+
+  inherit sourceFile;
+
+  sourceDir = pkgs: name: files: pkgs.runCommand name {} "mkdir $out\n${lib.concatStrings (lib.mapAttrsToList (file: text: "cp ${sourceFile file text} $out/${file}\n") files)}";
 
   jsonSource = value: jsonValue "" value + "\n";
 
@@ -98,4 +102,6 @@ in {
   pathSource = path: "${path}\n";
 
   markdownSource = lines;
+
+  tsSource = lines;
 }

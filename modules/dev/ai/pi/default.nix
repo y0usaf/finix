@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   catalog = config.user.dev.modelCatalog;
@@ -177,7 +178,7 @@ in {
             "${flakeInputs.pi-ampersand}"
             "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}"
           ];
-          extensions = ["${./crest-auth.ts}"];
+          extensions = ["${generators.sourceFile "crest-auth.ts" (generators.tsSource (import ./crest-auth.data.nix))}"];
           enableInstallTelemetry = false;
           defaultTools = ["+codemode"];
           codemode.mode = "only";

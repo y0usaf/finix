@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   catalog = config.user.dev.modelCatalog;
@@ -65,12 +66,12 @@ in {
           "${flakeInputs.pi-chronobreak}"
           "${flakeInputs.pi-recap}"
           "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}"
-          "${./code-mode.ts}"
-          "${./compact-eval.ts}"
-          "${./work-fold.ts}"
-          "${./box-commands.ts}"
-          "${./crest-auth.ts}"
-          "${./optchat}/extension.ts"
+          "${generators.sourceFile "code-mode.ts" (generators.tsSource (import ./code-mode.data.nix))}"
+          "${generators.sourceFile "compact-eval.ts" (generators.tsSource (import ./compact-eval.data.nix))}"
+          "${generators.sourceFile "work-fold.ts" (generators.tsSource (import ./work-fold.data.nix))}"
+          "${generators.sourceFile "box-commands.ts" (generators.tsSource (import ./box-commands.data.nix))}"
+          "${generators.sourceFile "crest-auth.ts" (generators.tsSource (import ./crest-auth.data.nix))}"
+          "${generators.sourceDir pkgs "optchat" (import ./optchat/optchat.data.nix {inherit generators;})}/extension.ts"
         ];
       };
     };
