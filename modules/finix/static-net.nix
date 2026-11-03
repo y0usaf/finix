@@ -12,11 +12,6 @@ in {
       example = "192.168.2.28/24";
       description = "Address with prefix length to assign when DHCP has not produced one.";
     };
-    gateway = lib.mkOption {
-      type = lib.types.str;
-      default = "192.168.2.1";
-      description = "Default gateway used with the static address.";
-    };
   };
 
   config.finit.tasks.net-fallback = {
@@ -44,7 +39,7 @@ in {
       iface="$(find_iface)" || exit 1
       ip link set "$iface" up || true
       ip addr replace ${cfg.address} dev "$iface" || true
-      ip route replace default via ${cfg.gateway} dev "$iface" || true
+      ip route replace default via 192.168.2.1 dev "$iface" || true
     '';
     conditions = ["net/lo/up"];
     log = true;

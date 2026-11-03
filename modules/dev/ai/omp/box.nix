@@ -8,7 +8,7 @@
   user = config.user.name;
   home = config.users.users.${user}.home;
   catalog = config.user.dev.modelCatalog;
-  cfg = config.user.dev.ompBox;
+  shares = [];
   state = "${home}/.local/state/omp-box";
   json = lib.generators.toJSON {};
 
@@ -62,7 +62,7 @@
     specialArgs = {
       ompBox = {
         inherit user files;
-        inherit (cfg) shares;
+        inherit shares;
         sharesDir = "${state}/shares";
         nativesDir = "${state}/natives";
         inherit (flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}) omp;
@@ -77,16 +77,10 @@
 
   pkg = pkgs.callPackage ../../../../omp-box {
     inherit user;
-    inherit (cfg) shares;
+    inherit shares;
     omp = flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
   };
 in {
-  options.user.dev.ompBox.shares = lib.mkOption {
-    type = lib.types.listOf lib.types.str;
-    default = [];
-    description = "Absolute host paths shared with the omp microVM.";
-  };
-
   config = {
     finix.persistence = {
       allowlist.users.${user}.directories = [".local/state/omp-box"];
