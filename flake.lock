@@ -1354,23 +1354,6 @@
         "url": "file:///home/y0usaf/dev/developing/omp-bot"
       }
     },
-    "omp-stretch": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1793134772,
-        "narHash": "sha256-H7lyeAkPr+fH0YaSYT1wVJRfik4QTdvSAxJ2JMJEoN4=",
-        "owner": "materemias",
-        "repo": "omp-stretch",
-        "rev": "50345cd3704602498155f9e40d11e476cfe8c95e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "materemias",
-        "ref": "v0.3.2",
-        "repo": "omp-stretch",
-        "type": "github"
-      }
-    },
     "paseo": {
       "inputs": {
         "nixpkgs": [
@@ -1660,7 +1643,6 @@
         "oh-my-fx": "oh-my-fx",
         "oh-my-pi": "oh-my-pi",
         "omp-bot": "omp-bot",
-        "omp-stretch": "omp-stretch",
         "paseo": "paseo",
         "phi": "phi",
         "pi": "pi_2",

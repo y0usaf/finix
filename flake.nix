@@ -148,11 +148,6 @@
       flake = false;
     };
 
-    omp-stretch = {
-      url = "github:materemias/omp-stretch/v0.3.2";
-      flake = false;
-    };
-
     pi-ampersand = {
       url = "github:y0usaf/pi-ampersand";
       flake = false;
