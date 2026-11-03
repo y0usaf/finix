@@ -12265,48 +12265,79 @@
         '')
       ];
     };
-    modules_dev_ai_codex_apply_reasoning_policy_data = [
-      "\"\"\"Reconcile only Codex's root reasoning setting, preserving other config.\"\"\""
-      "import os"
-      "from pathlib import Path"
-      "import re"
-      "import stat"
-      "import sys"
-      "import tempfile"
-      "import tomllib"
-      ""
-      "def apply(path):"
-      "    path = Path(path).expanduser().resolve()"
-      "    text = path.read_text() if path.exists() else ''"
-      "    before = tomllib.loads(text)"
-      "    header = re.search(r'^\\s*\\[', text, flags=re.MULTILINE)"
-      "    end = header.start() if header else len(text)"
-      "    root, rest = text[:end], text[end:]"
-      "    pattern = r'^(?:model_reasoning_effort|\"model_reasoning_effort\"|\\'model_reasoning_effort\\')\\s*=.*$'"
-      "    root, count = re.subn(pattern, 'model_reasoning_effort = \"low\"', root, flags=re.MULTILINE)"
-      "    if not count:"
-      "        root = 'model_reasoning_effort = \"low\"\\n' + root"
-      "    result = root + rest"
-      "    expected = {**before, 'model_reasoning_effort': 'low'}"
-      "    if tomllib.loads(result) != expected:"
-      "        raise ValueError('Refusing to change unrelated Codex settings')"
-      "    if result == text:"
-      "        return"
-      "    path.parent.mkdir(parents=True, exist_ok=True)"
-      "    mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else 0o600"
-      "    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix='.reasoning-policy-')"
-      "    try:"
-      "        with os.fdopen(fd, 'w') as stream:"
-      "            stream.write(result)"
-      "            os.fchmod(stream.fileno(), mode)"
-      "        os.replace(tmp, path)"
-      "    finally:"
-      "        if os.path.exists(tmp):"
-      "            os.unlink(tmp)"
-      "    assert tomllib.loads(path.read_text()) == expected"
-      ""
-      "if __name__ == '__main__':"
-      "    apply(sys.argv[1])"
+    modules_dev_ai_codex_apply_reasoning_policy_data = {
+      as,
+      blank,
+      call,
+      commas,
+      def,
+      dict,
+      dot,
+      finally,
+      if',
+      index,
+      kw,
+      pair,
+      raw,
+      slice,
+      sq,
+      starstar,
+      triple,
+      try,
+      with',
+      ...
+    }: [
+      (triple "Reconcile only Codex's root reasoning setting, preserving other config.")
+      ["import" "os"]
+      ["from" "pathlib" "import" "Path"]
+      ["import" "re"]
+      ["import" "stat"]
+      ["import" "sys"]
+      ["import" "tempfile"]
+      ["import" "tomllib"]
+      blank
+      (def "apply" ["path"] [
+        ["path" "=" (call (dot (call (dot (call "Path" ["path"]) "expanduser") []) "resolve") [])]
+        ["text" "=" (call "path.read_text" []) "if" (call "path.exists" []) "else" (sq "")]
+        ["before" "=" (call "tomllib.loads" ["text"])]
+        ["header" "=" (call "re.search" [(raw (sq "^\\s*\\[")) "text" (kw "flags" "re.MULTILINE")])]
+        ["end" "=" (call "header.start" []) "if" "header" "else" (call "len" ["text"])]
+        [(commas ["root" "rest"]) "=" (commas [(index "text" (slice null "end")) (index "text" (slice "end" null))])]
+        ["pattern" "=" (raw (sq "^(?:model_reasoning_effort|\"model_reasoning_effort\"|\\'model_reasoning_effort\\')\\s*=.*$"))]
+        [(commas ["root" "count"]) "=" (call "re.subn" ["pattern" (sq "model_reasoning_effort = \"low\"") "root" (kw "flags" "re.MULTILINE")])]
+        (if' ["not" "count"] [
+          ["root" "=" (sq "model_reasoning_effort = \"low\"\\n") "+" "root"]
+        ])
+        ["result" "=" "root" "+" "rest"]
+        ["expected" "=" (dict [(starstar "before") (pair (sq "model_reasoning_effort") (sq "low"))])]
+        (if' [(call "tomllib.loads" ["result"]) "!=" "expected"] [
+          ["raise" (call "ValueError" [(sq "Refusing to change unrelated Codex settings")])]
+        ])
+        (if' ["result" "==" "text"] [
+          "return"
+        ])
+        (call "path.parent.mkdir" [(kw "parents" "True") (kw "exist_ok" "True")])
+        ["mode" "=" (call "stat.S_IMODE" [(dot (call "path.stat" []) "st_mode")]) "if" (call "path.exists" []) "else" "0o600"]
+        [(commas ["fd" "tmp"]) "=" (call "tempfile.mkstemp" [(kw "dir" "path.parent") (kw "prefix" (sq ".reasoning-policy-"))])]
+        (try [
+            (with' [(as (call "os.fdopen" ["fd" (sq "w")]) "stream")] [
+              (call "stream.write" ["result"])
+              (call "os.fchmod" [(call "stream.fileno" []) "mode"])
+            ])
+            (call "os.replace" ["tmp" "path"])
+          ] [
+            (finally [
+              (if' (call "os.path.exists" ["tmp"]) [
+                (call "os.unlink" ["tmp"])
+              ])
+            ])
+          ])
+        ["assert" (call "tomllib.loads" [(call "path.read_text" [])]) "==" "expected"]
+      ])
+      blank
+      (if' ["__name__" "==" (sq "__main__")] [
+        (call "apply" [(index "sys.argv" 1)])
+      ])
     ];
     modules_dev_ai_codex_codex = {
       config,
@@ -12326,7 +12357,7 @@
           ${pkgs.util-linux}/bin/setpriv \
             --reuid "$(${pkgs.coreutils}/bin/id -u ${lib.escapeShellArg config.user.name})" \
             --regid "$(${pkgs.coreutils}/bin/id -g ${lib.escapeShellArg config.user.name})" \
-            --clear-groups ${pkgs.python3}/bin/python3 ${generators.sourceFile "apply-reasoning-policy.py" (generators.pythonSource modules_dev_ai_codex_apply_reasoning_policy_data)} \
+            --clear-groups ${pkgs.python3}/bin/python3 ${generators.sourceFile "apply-reasoning-policy.py" (generators.python.render (modules_dev_ai_codex_apply_reasoning_policy_data generators.python))} \
             ${lib.escapeShellArg "${config.users.users.${config.user.name}.home}/.config/codex/config.toml"}
         '';
       };
@@ -15334,7 +15365,7 @@
       state = "${home}/.local/state/omp-box";
       json = lib.generators.toJSON {};
 
-      proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.pythonSource omp_box_gateway_proxy_data);
+      proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.python.render (omp_box_gateway_proxy_data generators.python));
       gatewayUrl = "http://10.0.2.2:8899";
       files = {
         models = pkgs.writeText "models.json" (json catalog.models);
@@ -19559,7 +19590,7 @@
           #!${pkgs.runtimeShell}
           exec ${pkgs.python3}/bin/python3 ${pkgs.replaceVarsWith {
             name = "wrapper.py";
-            src = generators.sourceFile "wrapper.py" (generators.pythonSource modules_dev_work_vercel_wrapper_data);
+            src = generators.sourceFile "wrapper.py" (generators.python.render (modules_dev_work_vercel_wrapper_data generators.python));
             replacements = {
               vercel = package;
               inherit (pkgs) git;
@@ -23502,69 +23533,97 @@
         };
       };
     };
-    modules_dev_work_vercel_wrapper_data = [
-      "import os"
-      "import subprocess"
-      "import sys"
-      "from pathlib import Path"
-      ""
-      "args = sys.argv[1:]"
-      "cli = '@vercel@/bin/vercel'"
-      ""
-      ""
-      "def fail(message):"
-      "    sys.exit(f'vercel: {message}')"
-      ""
-      ""
-      "def run_cli(extra=()):"
-      "    os.execv(cli, [cli, *extra, *args])"
-      ""
-      ""
-      "if any(arg in ('--token', '-t', '--global-config', '-Q') or"
-      "       arg.startswith(('--token=', '--global-config=')) for arg in args):"
-      "    run_cli()"
-      ""
-      "if '--help' in args or '-h' in args or not args:"
-      "    print('Account routing: VERCEL_ACCOUNT=personal|work, then '"
-      "          'recognized GitHub origin owner.\\n'"
-      "          'Use vercel-personal login or vercel-work login to authenticate.\\n'"
-      "          'Inspect the selected login with vercel whoami.', flush=True)"
-      "    if args:"
-      "        run_cli()"
-      ""
-      "cwd = os.getcwd()"
-      "for index, arg in enumerate(args):"
-      "    if arg == '--cwd':"
-      "        if index + 1 == len(args):"
-      "            fail('--cwd requires a directory')"
-      "        cwd = args[index + 1]"
-      "    elif arg.startswith('--cwd='):"
-      "        cwd = arg.split('=', 1)[1]"
-      "if not Path(cwd).is_dir():"
-      "    fail(f'directory does not exist: {cwd}')"
-      ""
-      ""
-      "def git(*arguments):"
-      "    result = subprocess.run(['@git@/bin/git', '-C', cwd, *arguments],"
-      "                            capture_output=True, text=True)"
-      "    return result.stdout.strip() if result.returncode == 0 else ''"
-      ""
-      ""
-      "account = os.environ.get('VERCEL_ACCOUNT')"
-      "if not account:"
-      "    origin = git('remote', 'get-url', 'origin')"
-      "    for prefix in ('git@github.com:', 'https://github.com/', 'ssh://git@github.com/'):"
-      "        if origin.startswith(prefix):"
-      "            owner = origin.removeprefix(prefix).split('/')[0].lower()"
-      "            account = @owners@.get(owner, '')"
-      "            break"
-      "if account not in ('personal', 'work'):"
-      "    fail('use vercel-personal/vercel-work or set VERCEL_ACCOUNT=personal|work')"
-      ""
-      "profile = Path(os.environ.get('XDG_DATA_HOME', str(Path.home() / '.local/share'))) \\"
-      "    / 'com.vercel.cli' / 'profiles' / account"
-      "profile.mkdir(parents=True, exist_ok=True, mode=0o700)"
-      "run_cli(['--global-config', str(profile)])"
+    modules_dev_work_vercel_wrapper_data = {
+      aligned,
+      blank,
+      call,
+      commas,
+      def,
+      dot,
+      field,
+      for,
+      if',
+      ifElse,
+      index,
+      kw,
+      list,
+      rows,
+      slice,
+      sq,
+      star,
+      tuple,
+      ...
+    }: [
+      ["import" "os"]
+      ["import" "subprocess"]
+      ["import" "sys"]
+      ["from" "pathlib" "import" "Path"]
+      blank
+      ["args" "=" (index "sys.argv" (slice 1 null))]
+      ["cli" "=" (sq "@vercel@/bin/vercel")]
+      blank
+      blank
+      (def "fail" ["message"] [
+        (call "sys.exit" [(sq ["vercel: " (field "message")])])
+      ])
+      blank
+      blank
+      (def "run_cli" [(kw "extra" (tuple []))] [
+        (call "os.execv" ["cli" (list ["cli" (star "extra") (star "args")])])
+      ])
+      blank
+      blank
+      (if' (call "any" [(rows [["arg" "in" (tuple [(sq "--token") (sq "-t") (sq "--global-config") (sq "-Q")]) "or"] [(call "arg.startswith" [(tuple [(sq "--token=") (sq "--global-config=")])]) "for" "arg" "in" "args"]])]) [
+        (call "run_cli" [])
+      ])
+      blank
+      (if' [(sq "--help") "in" "args" "or" (sq "-h") "in" "args" "or" "not" "args"] [
+        (call "print" [(rows [(sq "Account routing: VERCEL_ACCOUNT=personal|work, then ") (sq "recognized GitHub origin owner.\\n") (sq "Use vercel-personal login or vercel-work login to authenticate.\\n") (sq "Inspect the selected login with vercel whoami.")]) (kw "flush" "True")])
+        (if' "args" [
+          (call "run_cli" [])
+        ])
+      ])
+      blank
+      ["cwd" "=" (call "os.getcwd" [])]
+      (for (commas ["index" "arg"]) (call "enumerate" ["args"]) [
+        (ifElse ["arg" "==" (sq "--cwd")] [
+            (if' ["index" "+" 1 "==" (call "len" ["args"])] [
+              (call "fail" [(sq "--cwd requires a directory")])
+            ])
+            ["cwd" "=" (index "args" ["index" "+" 1])]
+          ] (if' (call "arg.startswith" [(sq "--cwd=")]) [
+            ["cwd" "=" (index (call "arg.split" [(sq "=") 1]) 1)]
+          ]))
+      ])
+      (if' ["not" (call (dot (call "Path" ["cwd"]) "is_dir") [])] [
+        (call "fail" [(sq ["directory does not exist: " (field "cwd")])])
+      ])
+      blank
+      blank
+      (def "git" [(star "arguments")] [
+        ["result" "=" (call "subprocess.run" (aligned [(list [(sq "@git@/bin/git") (sq "-C") "cwd" (star "arguments")]) [(kw "capture_output" "True") (kw "text" "True")]]))]
+        ["return" (call "result.stdout.strip" []) "if" "result.returncode" "==" 0 "else" (sq "")]
+      ])
+      blank
+      blank
+      ["account" "=" (call "os.environ.get" [(sq "VERCEL_ACCOUNT")])]
+      (if' ["not" "account"] [
+        ["origin" "=" (call "git" [(sq "remote") (sq "get-url") (sq "origin")])]
+        (for "prefix" (tuple [(sq "git@github.com:") (sq "https://github.com/") (sq "ssh://git@github.com/")]) [
+          (if' (call "origin.startswith" ["prefix"]) [
+            ["owner" "=" (call (dot (index (call (dot (call "origin.removeprefix" ["prefix"]) "split") [(sq "/")]) 0) "lower") [])]
+            ["account" "=" (call "@owners@.get" ["owner" (sq "")])]
+            "break"
+          ])
+        ])
+      ])
+      (if' ["account" "not in" (tuple [(sq "personal") (sq "work")])] [
+        (call "fail" [(sq "use vercel-personal/vercel-work or set VERCEL_ACCOUNT=personal|work")])
+      ])
+      blank
+      (rows [["profile" "=" (call "Path" [(call "os.environ.get" [(sq "XDG_DATA_HOME") (call "str" [[(call "Path.home" []) "/" (sq ".local/share")]])])])] ["/" (sq "com.vercel.cli") "/" (sq "profiles") "/" "account"]])
+      (call "profile.mkdir" [(kw "parents" "True") (kw "exist_ok" "True") (kw "mode" "0o700")])
+      (call "run_cli" [(list [(sq "--global-config") (call "str" ["profile"])])])
     ];
     modules_drift = {
       lib,
@@ -24896,224 +24955,303 @@
 
       config.system.activation.scripts.aniimoMods.text = ''
         ${pkgs.util-linux}/bin/setpriv --reuid=${config.user.name} --regid=users --init-groups \
-          ${pkgs.python3}/bin/python3 ${generators.sourceFile "apply.py" (generators.pythonSource modules_gaming_aniimo_apply_data)} ${settings} || true
+          ${pkgs.python3}/bin/python3 ${generators.sourceFile "apply.py" (generators.python.render (modules_gaming_aniimo_apply_data generators.python))} ${settings} || true
       '';
     };
-    modules_gaming_aniimo_apply_data = [
-      "import hashlib"
-      "import json"
-      "import os"
-      "import shutil"
-      "import struct"
-      "import subprocess"
-      "import sys"
-      "import tempfile"
-      "import zlib"
-      "from pathlib import Path"
-      ""
-      "LUA_DIRS = [\"Aniimo_Data/StreamingAssets/cvs/res/lua\", \"Aniimo_Data/cvs/res/lua\"]"
-      "FILES = [\"LuaScripts.xdf\", \"LuaScripts.xdt\", \"LuaCacheVer.txt\"]"
-      ""
-      ""
-      "def md5(b):"
-      "    return hashlib.md5(b).hexdigest()"
-      ""
-      ""
-      "def die(msg):"
-      "    sys.exit(f\"aniimo-mods: {msg}\")"
-      ""
-      ""
-      "def read_dir(d):"
-      "    xdf = (d / \"LuaScripts.xdf\").read_bytes()"
-      "    xdt_raw = (d / \"LuaScripts.xdt\").read_bytes()"
-      "    xdt = json.loads(xdt_raw)"
-      "    if json.dumps(xdt, indent=4).encode() != xdt_raw:"
-      "        die(f\"{d}/LuaScripts.xdt does not round-trip; unknown format\")"
-      "    if md5(xdf) != xdt[\"CMDataMD5\"]:"
-      "        die(f\"{d}/LuaScripts.xdf does not match its xdt; verify game files\")"
-      "    return xdf, xdt, md5(xdt_raw)"
-      ""
-      ""
-      "def heal(d, backup):"
-      "    xdf = d / \"LuaScripts.xdf\""
-      "    old = backup / \"LuaScripts.xdf\""
-      "    want = json.loads((d / \"LuaScripts.xdt\").read_bytes())[\"CMDataMD5\"]"
-      "    if old.exists() and md5(xdf.read_bytes()) != want and md5(old.read_bytes()) == want:"
-      "        write_atomic(xdf, old.read_bytes())"
-      ""
-      ""
-      "def entry_bytes(xdf, e):"
-      "    raw = xdf[e[\"CEOffset\"] : e[\"CEOffset\"] + e[\"CECSize\"]]"
-      "    if e[\"CECSize\"] != e[\"CESize\"]:"
-      "        die(f\"{e['CEName']} is compressed; only stored entries can be modded\")"
-      "    return raw"
-      ""
-      ""
-      "def lua_bytes(b):"
-      "    return '\"' + \"\".join(f\"\\\\{c:03d}\" for c in b) + '\"'"
-      ""
-      ""
-      "def wrap(luajit, entry, orig, wrapper):"
-      "    src = ("
-      "        \"return (function(...)\\n\""
-      "        + Path(wrapper).read_text()"
-      "        + f\"\\nend)(assert(load({lua_bytes(orig)}, {lua_bytes(('@' + entry).encode())})), ...)\\n\""
-      "    )"
-      "    with tempfile.TemporaryDirectory() as t:"
-      "        name = Path(entry).name"
-      "        (Path(t) / name).write_text(src)"
-      "        subprocess.run([luajit, \"-b\", \"-g\", name, \"out.luac\"], cwd=t, check=True)"
-      "        return (Path(t) / \"out.luac\").read_bytes()"
-      ""
-      ""
-      "def patched_entries(xdf, xdt, mods, luajit):"
-      "    by_name = {e[\"CEName\"]: e for e in xdt[\"CMList\"]}"
-      "    out = {}"
-      "    for m in mods:"
-      "        e = by_name.get(m[\"entry\"])"
-      "        if e is None:"
-      "            die(f\"{m['name']}: entry {m['entry']} missing; game updated, re-pin\")"
-      "        data = out.get(m[\"entry\"]) or entry_bytes(xdf, e)"
-      "        if m[\"entry\"] not in out and md5(data) != m[\"entryMD5\"]:"
-      "            die(f\"{m['name']}: {m['entry']} changed (md5 {md5(data)}); game updated, re-pin\")"
-      "        if \"wrapper\" in m:"
-      "            data = wrap(luajit, m[\"entry\"], data, m[\"wrapper\"])"
-      "        else:"
-      "            data = bytearray(data)"
-      "            for ed in m[\"edits\"]:"
-      "                old, new, off = bytes.fromhex(ed[\"old\"]), bytes.fromhex(ed[\"new\"]), ed[\"offset\"]"
-      "                if len(old) != len(new) or data[off : off + len(old)] != old:"
-      "                    die(f\"{m['name']}: bytes at {m['entry']}+{off} differ from pin\")"
-      "                data[off : off + len(old)] = new"
-      "            data = bytes(data)"
-      "        out[m[\"entry\"]] = data"
-      "    return out"
-      ""
-      ""
-      "def rebuild(xdf, xdt, repl):"
-      "    eocd = xdf.rfind(b\"PK\\x05\\x06\")"
-      "    n, cd_size, cd_off = struct.unpack(\"<HII\", xdf[eocd + 10 : eocd + 20])"
-      "    cd = xdf[cd_off : cd_off + cd_size]"
-      "    out = bytearray()"
-      "    new_off = {}"
-      "    meta = {}"
-      "    p = 0"
-      "    while p < len(cd):"
-      "        nl, el, cl = struct.unpack(\"<HHH\", cd[p + 28 : p + 34])"
-      "        name = cd[p + 46 : p + 46 + nl].decode()"
-      "        lho = struct.unpack(\"<I\", cd[p + 42 : p + 46])[0]"
-      "        meta[name] = (p, 46 + nl + el + cl, lho)"
-      "        p += 46 + nl + el + cl"
-      "    if len(meta) != n:"
-      "        die(\"zip central directory count mismatch\")"
-      "    for name, (_, _, lho) in sorted(meta.items(), key=lambda kv: kv[1][2]):"
-      "        f = bytearray(xdf[lho : lho + 30])"
-      "        nl, el = struct.unpack(\"<HH\", f[26:30])"
-      "        csize = struct.unpack(\"<I\", f[18:22])[0]"
-      "        start = lho + 30 + nl + el"
-      "        data = xdf[start : start + csize]"
-      "        if name in repl:"
-      "            data = repl[name]"
-      "            struct.pack_into(\"<III\", f, 14, zlib.crc32(data), len(data), len(data))"
-      "        new_off[name] = (len(out), len(out) + 30 + nl + el, f)"
-      "        out += f + xdf[lho + 30 : start] + data"
-      "    new_cd = bytearray()"
-      "    for name, (p, ln, _) in sorted(meta.items(), key=lambda kv: kv[1][0]):"
-      "        r = bytearray(cd[p : p + ln])"
-      "        r[16:28] = new_off[name][2][14:26]"
-      "        struct.pack_into(\"<I\", r, 42, new_off[name][0])"
-      "        new_cd += r"
-      "    cd_start = len(out)"
-      "    out += new_cd"
-      "    tail = bytearray(xdf[eocd:])"
-      "    struct.pack_into(\"<II\", tail, 12, len(new_cd), cd_start)"
-      "    out += tail"
-      "    out = bytes(out)"
-      "    new_xdt = json.loads(json.dumps(xdt))"
-      "    for e in new_xdt[\"CMList\"]:"
-      "        e[\"CEOffset\"] = new_off[e[\"CEName\"]][1]"
-      "        if e[\"CEName\"] in repl:"
-      "            data = repl[e[\"CEName\"]]"
-      "            e[\"CEMD5\"], e[\"CESize\"], e[\"CECSize\"] = md5(data), len(data), len(data)"
-      "    new_xdt[\"CMDataLen\"] = len(out)"
-      "    new_xdt[\"CMDataMD5\"] = md5(out)"
-      "    return out, json.dumps(new_xdt, indent=4).encode()"
-      ""
-      ""
-      "def write_atomic(path, data):"
-      "    tmp = path.with_name(path.name + \".finix-tmp\")"
-      "    tmp.write_bytes(data)"
-      "    if path.exists():"
-      "        shutil.copymode(path, tmp)"
-      "    os.replace(tmp, path)"
-      ""
-      ""
-      "def install(d, xdf, xdt_raw):"
-      "    write_atomic(d / \"LuaScripts.xdf\", xdf)"
-      "    write_atomic(d / \"LuaScripts.xdt\", xdt_raw)"
-      "    ver = d / \"LuaCacheVer.txt\""
-      "    if ver.exists():"
-      "        prefix = ver.read_text().split(\",\")[0]"
-      "        write_atomic(ver, f\"{prefix},{len(xdt_raw)},{md5(xdt_raw)}\".encode())"
-      ""
-      ""
-      "def main():"
-      "    settings = json.loads(Path(sys.argv[1]).read_text())"
-      "    mods = settings[\"mods\"]"
-      "    game = Path(settings[\"gameDirectory\"])"
-      "    state_dir = game / \".finix-aniimo\""
-      "    if not (game / \"Aniimo.exe\").exists():"
-      "        if mods or state_dir.exists():"
-      "            die(f\"{game} has no Aniimo.exe; skipped\")"
-      "        return"
-      "    for cmdline in Path(\"/proc\").glob(\"[0-9]*/cmdline\"):"
-      "        try:"
-      "            if b\"Aniimo.exe\" in cmdline.read_bytes():"
-      "                die(\"Aniimo is running; skipped\")"
-      "        except OSError:"
-      "            pass"
-      "    state_file = state_dir / \"state.json\""
-      "    state = json.loads(state_file.read_text()) if state_file.exists() else {}"
-      "    changed = {}"
-      "    for rel in LUA_DIRS:"
-      "        d = game / rel"
-      "        if not (d / \"LuaScripts.xdt\").exists():"
-      "            continue"
-      "        backup = state_dir / rel.replace(\"/\", \"_\")"
-      "        heal(d, backup)"
-      "        _, _, cur_xdt_md5 = read_dir(d)"
-      "        ours = state.get(rel) == cur_xdt_md5"
-      "        if not mods:"
-      "            if ours:"
-      "                for f in FILES:"
-      "                    if (backup / f).exists():"
-      "                        write_atomic(d / f, (backup / f).read_bytes())"
-      "                changed[rel] = \"vanilla\""
-      "            state.pop(rel, None)"
-      "            continue"
-      "        if not ours:"
-      "            shutil.rmtree(backup, ignore_errors=True)"
-      "            backup.mkdir(parents=True)"
-      "            for f in FILES:"
-      "                if (d / f).exists():"
-      "                    shutil.copy2(d / f, backup / f)"
-      "        xdf, xdt, _ = read_dir(backup)"
-      "        new_xdf, new_xdt = rebuild(xdf, xdt, patched_entries(xdf, xdt, mods, settings.get(\"luajit\")))"
-      "        if md5(new_xdt) != cur_xdt_md5:"
-      "            install(d, new_xdf, new_xdt)"
-      "            changed[rel] = [m[\"name\"] for m in mods]"
-      "        state[rel] = md5(new_xdt)"
-      "    if state:"
-      "        state_dir.mkdir(exist_ok=True)"
-      "        write_atomic(state_file, json.dumps(state, indent=2).encode())"
-      "    else:"
-      "        shutil.rmtree(state_dir, ignore_errors=True)"
-      "    if changed:"
-      "        print(json.dumps({\"aniimo\": changed}))"
-      ""
-      ""
-      "if __name__ == \"__main__\":"
-      "    main()"
+    modules_gaming_aniimo_apply_data = {
+      as,
+      blank,
+      bytes,
+      call,
+      commas,
+      def,
+      dict,
+      dot,
+      except,
+      field,
+      for,
+      hang,
+      if',
+      ifElse,
+      index,
+      kw,
+      lambda,
+      list,
+      pair,
+      paren,
+      rows,
+      slice,
+      spec,
+      sq,
+      str,
+      try,
+      tuple,
+      while,
+      with',
+      ...
+    }: [
+      ["import" "hashlib"]
+      ["import" "json"]
+      ["import" "os"]
+      ["import" "shutil"]
+      ["import" "struct"]
+      ["import" "subprocess"]
+      ["import" "sys"]
+      ["import" "tempfile"]
+      ["import" "zlib"]
+      ["from" "pathlib" "import" "Path"]
+      blank
+      ["LUA_DIRS" "=" (list [(str "Aniimo_Data/StreamingAssets/cvs/res/lua") (str "Aniimo_Data/cvs/res/lua")])]
+      ["FILES" "=" (list [(str "LuaScripts.xdf") (str "LuaScripts.xdt") (str "LuaCacheVer.txt")])]
+      blank
+      blank
+      (def "md5" ["b"] [
+        ["return" (call (dot (call "hashlib.md5" ["b"]) "hexdigest") [])]
+      ])
+      blank
+      blank
+      (def "die" ["msg"] [
+        (call "sys.exit" [(str ["aniimo-mods: " (field "msg")])])
+      ])
+      blank
+      blank
+      (def "read_dir" ["d"] [
+        ["xdf" "=" (call (dot (paren ["d" "/" (str "LuaScripts.xdf")]) "read_bytes") [])]
+        ["xdt_raw" "=" (call (dot (paren ["d" "/" (str "LuaScripts.xdt")]) "read_bytes") [])]
+        ["xdt" "=" (call "json.loads" ["xdt_raw"])]
+        (if' [(call (dot (call "json.dumps" ["xdt" (kw "indent" 4)]) "encode") []) "!=" "xdt_raw"] [
+          (call "die" [(str [(field "d") "/LuaScripts.xdt does not round-trip; unknown format"])])
+        ])
+        (if' [(call "md5" ["xdf"]) "!=" (index "xdt" (str "CMDataMD5"))] [
+          (call "die" [(str [(field "d") "/LuaScripts.xdf does not match its xdt; verify game files"])])
+        ])
+        ["return" (commas ["xdf" "xdt" (call "md5" ["xdt_raw"])])]
+      ])
+      blank
+      blank
+      (def "heal" ["d" "backup"] [
+        ["xdf" "=" "d" "/" (str "LuaScripts.xdf")]
+        ["old" "=" "backup" "/" (str "LuaScripts.xdf")]
+        ["want" "=" (index (call "json.loads" [(call (dot (paren ["d" "/" (str "LuaScripts.xdt")]) "read_bytes") [])]) (str "CMDataMD5"))]
+        (if' [(call "old.exists" []) "and" (call "md5" [(call "xdf.read_bytes" [])]) "!=" "want" "and" (call "md5" [(call "old.read_bytes" [])]) "==" "want"] [
+          (call "write_atomic" ["xdf" (call "old.read_bytes" [])])
+        ])
+      ])
+      blank
+      blank
+      (def "entry_bytes" ["xdf" "e"] [
+        ["raw" "=" (index "xdf" (slice (index "e" (str "CEOffset")) [(index "e" (str "CEOffset")) "+" (index "e" (str "CECSize"))]))]
+        (if' [(index "e" (str "CECSize")) "!=" (index "e" (str "CESize"))] [
+          (call "die" [(str [(field (index "e" (sq "CEName"))) " is compressed; only stored entries can be modded"])])
+        ])
+        ["return" "raw"]
+      ])
+      blank
+      blank
+      (def "lua_bytes" ["b"] [
+        ["return" (sq "\"") "+" (call (dot (str "") "join") [[(str ["\\\\" (spec "c" "03d")]) "for" "c" "in" "b"]]) "+" (sq "\"")]
+      ])
+      blank
+      blank
+      (def "wrap" ["luajit" "entry" "orig" "wrapper"] [
+        ["src" "=" (hang (rows [(str "return (function(...)\\n") ["+" (call (dot (call "Path" ["wrapper"]) "read_text") [])] ["+" (str ["\\nend)(assert(load(" (field (call "lua_bytes" ["orig"])) ", " (field (call "lua_bytes" [(call (dot (paren [(sq "@") "+" "entry"]) "encode") [])])) ")), ...)\\n"])]]))]
+        (with' [(as (call "tempfile.TemporaryDirectory" []) "t")] [
+          ["name" "=" (dot (call "Path" ["entry"]) "name")]
+          (call (dot (paren [(call "Path" ["t"]) "/" "name"]) "write_text") ["src"])
+          (call "subprocess.run" [(list ["luajit" (str "-b") (str "-g") "name" (str "out.luac")]) (kw "cwd" "t") (kw "check" "True")])
+          ["return" (call (dot (paren [(call "Path" ["t"]) "/" (str "out.luac")]) "read_bytes") [])]
+        ])
+      ])
+      blank
+      blank
+      (def "patched_entries" ["xdf" "xdt" "mods" "luajit"] [
+        ["by_name" "=" (dict [[(pair (index "e" (str "CEName")) "e") "for" "e" "in" (index "xdt" (str "CMList"))]])]
+        ["out" "=" (dict [])]
+        (for "m" "mods" [
+          ["e" "=" (call "by_name.get" [(index "m" (str "entry"))])]
+          (if' ["e" "is" "None"] [
+            (call "die" [(str [(field (index "m" (sq "name"))) ": entry " (field (index "m" (sq "entry"))) " missing; game updated, re-pin"])])
+          ])
+          ["data" "=" (call "out.get" [(index "m" (str "entry"))]) "or" (call "entry_bytes" ["xdf" "e"])]
+          (if' [(index "m" (str "entry")) "not in" "out" "and" (call "md5" ["data"]) "!=" (index "m" (str "entryMD5"))] [
+            (call "die" [(str [(field (index "m" (sq "name"))) ": " (field (index "m" (sq "entry"))) " changed (md5 " (field (call "md5" ["data"])) "); game updated, re-pin"])])
+          ])
+          (ifElse [(str "wrapper") "in" "m"] [
+              ["data" "=" (call "wrap" ["luajit" (index "m" (str "entry")) "data" (index "m" (str "wrapper"))])]
+            ] [
+              ["data" "=" (call "bytearray" ["data"])]
+              (for "ed" (index "m" (str "edits")) [
+                [(commas ["old" "new" "off"]) "=" (commas [(call "bytes.fromhex" [(index "ed" (str "old"))]) (call "bytes.fromhex" [(index "ed" (str "new"))]) (index "ed" (str "offset"))])]
+                (if' [(call "len" ["old"]) "!=" (call "len" ["new"]) "or" (index "data" (slice "off" ["off" "+" (call "len" ["old"])])) "!=" "old"] [
+                  (call "die" [(str [(field (index "m" (sq "name"))) ": bytes at " (field (index "m" (sq "entry"))) "+" (field "off") " differ from pin"])])
+                ])
+                [(index "data" (slice "off" ["off" "+" (call "len" ["old"])])) "=" "new"]
+              ])
+              ["data" "=" (call "bytes" ["data"])]
+            ])
+          [(index "out" (index "m" (str "entry"))) "=" "data"]
+        ])
+        ["return" "out"]
+      ])
+      blank
+      blank
+      (def "rebuild" ["xdf" "xdt" "repl"] [
+        ["eocd" "=" (call "xdf.rfind" [(bytes (str "PK\\x05\\x06"))])]
+        [(commas ["n" "cd_size" "cd_off"]) "=" (call "struct.unpack" [(str "<HII") (index "xdf" (slice ["eocd" "+" 10] ["eocd" "+" 20]))])]
+        ["cd" "=" (index "xdf" (slice "cd_off" ["cd_off" "+" "cd_size"]))]
+        ["out" "=" (call "bytearray" [])]
+        ["new_off" "=" (dict [])]
+        ["meta" "=" (dict [])]
+        ["p" "=" 0]
+        (while ["p" "<" (call "len" ["cd"])] [
+          [(commas ["nl" "el" "cl"]) "=" (call "struct.unpack" [(str "<HHH") (index "cd" (slice ["p" "+" 28] ["p" "+" 34]))])]
+          ["name" "=" (call (dot (index "cd" (slice ["p" "+" 46] ["p" "+" 46 "+" "nl"])) "decode") [])]
+          ["lho" "=" (index (call "struct.unpack" [(str "<I") (index "cd" (slice ["p" "+" 42] ["p" "+" 46]))]) 0)]
+          [(index "meta" "name") "=" (tuple ["p" [46 "+" "nl" "+" "el" "+" "cl"] "lho"])]
+          ["p" "+=" 46 "+" "nl" "+" "el" "+" "cl"]
+        ])
+        (if' [(call "len" ["meta"]) "!=" "n"] [
+          (call "die" [(str "zip central directory count mismatch")])
+        ])
+        (for (commas ["name" (tuple ["_" "_" "lho"])]) (call "sorted" [(call "meta.items" []) (kw "key" (lambda ["kv"] (index (index "kv" 1) 2)))]) [
+          ["f" "=" (call "bytearray" [(index "xdf" (slice "lho" ["lho" "+" 30]))])]
+          [(commas ["nl" "el"]) "=" (call "struct.unpack" [(str "<HH") (index "f" (slice 26 30))])]
+          ["csize" "=" (index (call "struct.unpack" [(str "<I") (index "f" (slice 18 22))]) 0)]
+          ["start" "=" "lho" "+" 30 "+" "nl" "+" "el"]
+          ["data" "=" (index "xdf" (slice "start" ["start" "+" "csize"]))]
+          (if' ["name" "in" "repl"] [
+            ["data" "=" (index "repl" "name")]
+            (call "struct.pack_into" [(str "<III") "f" 14 (call "zlib.crc32" ["data"]) (call "len" ["data"]) (call "len" ["data"])])
+          ])
+          [(index "new_off" "name") "=" (tuple [(call "len" ["out"]) [(call "len" ["out"]) "+" 30 "+" "nl" "+" "el"] "f"])]
+          ["out" "+=" "f" "+" (index "xdf" (slice ["lho" "+" 30] "start")) "+" "data"]
+        ])
+        ["new_cd" "=" (call "bytearray" [])]
+        (for (commas ["name" (tuple ["p" "ln" "_"])]) (call "sorted" [(call "meta.items" []) (kw "key" (lambda ["kv"] (index (index "kv" 1) 0)))]) [
+          ["r" "=" (call "bytearray" [(index "cd" (slice "p" ["p" "+" "ln"]))])]
+          [(index "r" (slice 16 28)) "=" (index (index (index "new_off" "name") 2) (slice 14 26))]
+          (call "struct.pack_into" [(str "<I") "r" 42 (index (index "new_off" "name") 0)])
+          ["new_cd" "+=" "r"]
+        ])
+        ["cd_start" "=" (call "len" ["out"])]
+        ["out" "+=" "new_cd"]
+        ["tail" "=" (call "bytearray" [(index "xdf" (slice "eocd" null))])]
+        (call "struct.pack_into" [(str "<II") "tail" 12 (call "len" ["new_cd"]) "cd_start"])
+        ["out" "+=" "tail"]
+        ["out" "=" (call "bytes" ["out"])]
+        ["new_xdt" "=" (call "json.loads" [(call "json.dumps" ["xdt"])])]
+        (for "e" (index "new_xdt" (str "CMList")) [
+          [(index "e" (str "CEOffset")) "=" (index (index "new_off" (index "e" (str "CEName"))) 1)]
+          (if' [(index "e" (str "CEName")) "in" "repl"] [
+            ["data" "=" (index "repl" (index "e" (str "CEName")))]
+            [(commas [(index "e" (str "CEMD5")) (index "e" (str "CESize")) (index "e" (str "CECSize"))]) "=" (commas [(call "md5" ["data"]) (call "len" ["data"]) (call "len" ["data"])])]
+          ])
+        ])
+        [(index "new_xdt" (str "CMDataLen")) "=" (call "len" ["out"])]
+        [(index "new_xdt" (str "CMDataMD5")) "=" (call "md5" ["out"])]
+        ["return" (commas ["out" (call (dot (call "json.dumps" ["new_xdt" (kw "indent" 4)]) "encode") [])])]
+      ])
+      blank
+      blank
+      (def "write_atomic" ["path" "data"] [
+        ["tmp" "=" (call "path.with_name" [["path.name" "+" (str ".finix-tmp")]])]
+        (call "tmp.write_bytes" ["data"])
+        (if' (call "path.exists" []) [
+          (call "shutil.copymode" ["path" "tmp"])
+        ])
+        (call "os.replace" ["tmp" "path"])
+      ])
+      blank
+      blank
+      (def "install" ["d" "xdf" "xdt_raw"] [
+        (call "write_atomic" [["d" "/" (str "LuaScripts.xdf")] "xdf"])
+        (call "write_atomic" [["d" "/" (str "LuaScripts.xdt")] "xdt_raw"])
+        ["ver" "=" "d" "/" (str "LuaCacheVer.txt")]
+        (if' (call "ver.exists" []) [
+          ["prefix" "=" (index (call (dot (call "ver.read_text" []) "split") [(str ",")]) 0)]
+          (call "write_atomic" ["ver" (call (dot (str [(field "prefix") "," (field (call "len" ["xdt_raw"])) "," (field (call "md5" ["xdt_raw"]))]) "encode") [])])
+        ])
+      ])
+      blank
+      blank
+      (def "main" [] [
+        ["settings" "=" (call "json.loads" [(call (dot (call "Path" [(index "sys.argv" 1)]) "read_text") [])])]
+        ["mods" "=" (index "settings" (str "mods"))]
+        ["game" "=" (call "Path" [(index "settings" (str "gameDirectory"))])]
+        ["state_dir" "=" "game" "/" (str ".finix-aniimo")]
+        (if' ["not" (call (dot (paren ["game" "/" (str "Aniimo.exe")]) "exists") [])] [
+          (if' ["mods" "or" (call "state_dir.exists" [])] [
+            (call "die" [(str [(field "game") " has no Aniimo.exe; skipped"])])
+          ])
+          "return"
+        ])
+        (for "cmdline" (call (dot (call "Path" [(str "/proc")]) "glob") [(str "[0-9]*/cmdline")]) [
+          (try [
+              (if' [(bytes (str "Aniimo.exe")) "in" (call "cmdline.read_bytes" [])] [
+                (call "die" [(str "Aniimo is running; skipped")])
+              ])
+            ] [
+              (except "OSError" [
+                "pass"
+              ])
+            ])
+        ])
+        ["state_file" "=" "state_dir" "/" (str "state.json")]
+        ["state" "=" (call "json.loads" [(call "state_file.read_text" [])]) "if" (call "state_file.exists" []) "else" (dict [])]
+        ["changed" "=" (dict [])]
+        (for "rel" "LUA_DIRS" [
+          ["d" "=" "game" "/" "rel"]
+          (if' ["not" (call (dot (paren ["d" "/" (str "LuaScripts.xdt")]) "exists") [])] [
+            "continue"
+          ])
+          ["backup" "=" "state_dir" "/" (call "rel.replace" [(str "/") (str "_")])]
+          (call "heal" ["d" "backup"])
+          [(commas ["_" "_" "cur_xdt_md5"]) "=" (call "read_dir" ["d"])]
+          ["ours" "=" (call "state.get" ["rel"]) "==" "cur_xdt_md5"]
+          (if' ["not" "mods"] [
+            (if' "ours" [
+              (for "f" "FILES" [
+                (if' (call (dot (paren ["backup" "/" "f"]) "exists") []) [
+                  (call "write_atomic" [["d" "/" "f"] (call (dot (paren ["backup" "/" "f"]) "read_bytes") [])])
+                ])
+              ])
+              [(index "changed" "rel") "=" (str "vanilla")]
+            ])
+            (call "state.pop" ["rel" "None"])
+            "continue"
+          ])
+          (if' ["not" "ours"] [
+            (call "shutil.rmtree" ["backup" (kw "ignore_errors" "True")])
+            (call "backup.mkdir" [(kw "parents" "True")])
+            (for "f" "FILES" [
+              (if' (call (dot (paren ["d" "/" "f"]) "exists") []) [
+                (call "shutil.copy2" [["d" "/" "f"] ["backup" "/" "f"]])
+              ])
+            ])
+          ])
+          [(commas ["xdf" "xdt" "_"]) "=" (call "read_dir" ["backup"])]
+          [(commas ["new_xdf" "new_xdt"]) "=" (call "rebuild" ["xdf" "xdt" (call "patched_entries" ["xdf" "xdt" "mods" (call "settings.get" [(str "luajit")])])])]
+          (if' [(call "md5" ["new_xdt"]) "!=" "cur_xdt_md5"] [
+            (call "install" ["d" "new_xdf" "new_xdt"])
+            [(index "changed" "rel") "=" (list [[(index "m" (str "name")) "for" "m" "in" "mods"]])]
+          ])
+          [(index "state" "rel") "=" (call "md5" ["new_xdt"])]
+        ])
+        (ifElse "state" [
+            (call "state_dir.mkdir" [(kw "exist_ok" "True")])
+            (call "write_atomic" ["state_file" (call (dot (call "json.dumps" ["state" (kw "indent" 2)]) "encode") [])])
+          ] [
+            (call "shutil.rmtree" ["state_dir" (kw "ignore_errors" "True")])
+          ])
+        (if' "changed" [
+          (call "print" [(call "json.dumps" [(dict [(pair (str "aniimo") "changed")])])])
+        ])
+      ])
+      blank
+      blank
+      (if' ["__name__" "==" (str "__main__")] [
+        (call "main" [])
+      ])
     ];
     modules_gaming_aniimo_catch_data = {
       entry = "xfs/luascripts/GameApp/Capture/Context/CameraThrowContext.lua";
@@ -27782,7 +27920,7 @@
         name = "p4g-setup";
         runtimeInputs = [pkgs.python3 pkgs.protontricks pkgs.coreutils];
         text = ''
-          exec python3 ${generators.sourceFile "setup.py" (generators.pythonSource modules_gaming_p4g_setup_data)} ${settings} "$@"
+          exec python3 ${generators.sourceFile "setup.py" (generators.python.render (modules_gaming_p4g_setup_data generators.python))} ${settings} "$@"
         '';
       };
     in {
@@ -27799,226 +27937,283 @@
         })
       ];
     };
-    modules_gaming_p4g_setup_data = [
-      "\"\"\"Materialize pinned P4G mods; touch the Proton prefix only on explicit install.\"\"\""
-      ""
-      "import argparse"
-      "import fcntl"
-      "import hashlib"
-      "import json"
-      "import os"
-      "from pathlib import Path"
-      "import shlex"
-      "import shutil"
-      "import subprocess"
-      "import sys"
-      "import tempfile"
-      "from datetime import datetime, timezone"
-      ""
-      "def read_json(path):"
-      "    return json.loads(path.read_text(encoding=\"utf-8-sig\"))"
-      ""
-      "def write_json(path, data):"
-      "    path.parent.mkdir(parents=True, exist_ok=True)"
-      "    temporary = path.with_name(path.name + \".finix-new\")"
-      "    temporary.write_text(json.dumps(data, indent=2) + \"\\n\")"
-      "    temporary.replace(path)"
-      ""
-      "def windows_path(path):"
-      "    return \"Z:\" + str(path).replace(\"/\", \"\\\\\")"
-      ""
-      "def digest(path):"
-      "    with path.open(\"rb\") as source:"
-      "        return hashlib.file_digest(source, \"sha256\").hexdigest()"
-      ""
-      "def game_running():"
-      "    for process in Path(\"/proc\").glob(\"[0-9]*/comm\"):"
-      "        try:"
-      "            if process.read_text().strip().lower() == \"p4g.exe\":"
-      "                return True"
-      "        except (FileNotFoundError, ProcessLookupError, PermissionError):"
-      "            pass"
-      "    return False"
-      ""
-      "def require_stopped():"
-      "    if game_running():"
-      "        raise RuntimeError(\"P4G is running. Save and close it before installing or disabling mods.\")"
-      ""
-      "def configure_loader(root, game, enabled, final_root=None):"
-      "    app_file = root / \"Apps/p4g.exe/AppConfig.json\""
-      "    app = read_json(app_file)"
-      "    app.update(AppLocation=windows_path(game / \"P4G.exe\"),"
-      "               WorkingDirectory=windows_path(game), AutoInject=False, DontInject=False)"
-      "    if enabled is not None:"
-      "        app[\"EnabledMods\"] = enabled"
-      "        app[\"SortedMods\"] = enabled + [name for name in app.get(\"SortedMods\", []) if name not in enabled]"
-      "    mods = {read_json(p)[\"ModId\"]: read_json(p)"
-      "            for p in (root / \"Mods\").glob(\"*/ModConfig.json\")}"
-      "    pending, checked = list(app[\"EnabledMods\"]), set()"
-      "    while pending:"
-      "        name = pending.pop()"
-      "        if name in checked:"
-      "            continue"
-      "        if name not in mods:"
-      "            raise RuntimeError(f\"Enabled mod or dependency absent from pinned pack: {name}\")"
-      "        checked.add(name)"
-      "        pending.extend(mods[name].get(\"ModDependencies\", []))"
-      "    write_json(app_file, app)"
-      "    root = final_root or root"
-      "    return {"
-      "        \"LoaderPath64\": windows_path(root / \"Loader/X64/Reloaded.Mod.Loader.dll\"),"
-      "        \"LoaderPath32\": windows_path(root / \"Loader/X86/Reloaded.Mod.Loader.dll\"),"
-      "        \"LauncherPath\": windows_path(root / \"Reloaded-II.exe\"),"
-      "        \"Bootstrapper64Path\": windows_path(root / \"Loader/X64/Bootstrapper/Reloaded.Mod.Loader.Bootstrapper.dll\"),"
-      "        \"Bootstrapper32Path\": windows_path(root / \"Loader/X86/Bootstrapper/Reloaded.Mod.Loader.Bootstrapper.dll\"),"
-      "        \"ApplicationConfigDirectory\": windows_path(root / \"Apps\"),"
-      "        \"ModConfigDirectory\": windows_path(root / \"Mods\"),"
-      "        \"ModUserConfigDirectory\": windows_path(root / \"User/Mods\"),"
-      "        \"MiscConfigDirectory\": windows_path(root / \"User/Misc\"),"
-      "        \"PluginConfigDirectory\": windows_path(root / \"Plugins\"),"
-      "        \"UsePortableMode\": True,"
-      "        \"FirstLaunch\": False,"
-      "        \"ShowConsole\": False,"
-      "        \"SkipWineLaunchWarning\": True,"
-      "    }"
-      ""
-      "def prepare(settings, state, payload, game):"
-      "    generation_settings = {k: v for k, v in settings.items() if k != \"prefixDirectory\"}"
-      "    key = hashlib.sha256(json.dumps(generation_settings, sort_keys=True).encode()).hexdigest()[:16]"
-      "    root = state / \"generations\" / key"
-      "    if not root.exists():"
-      "        root.parent.mkdir(parents=True, exist_ok=True)"
-      "        temporary = Path(tempfile.mkdtemp(prefix=\".prepare-\", dir=root.parent))"
-      "        try:"
-      "            subprocess.run([\"cp\", \"-r\", \"--reflink=auto\", str(payload / \"Reloaded\") + \"/.\", str(temporary)], check=True)"
-      "            subprocess.run([\"chmod\", \"-R\", \"u+w\", str(temporary)], check=True)"
-      "            loader_config = configure_loader(temporary, game, settings[\"enabledMods\"], final_root=root)"
-      "            write_json(temporary / \"ReloadedII.json\", loader_config)"
-      "            (temporary / \"portable.txt\").touch()"
-      "            temporary.rename(root)"
-      "        finally:"
-      "            if temporary.exists():"
-      "                shutil.rmtree(temporary)"
-      "    loader_config = read_json(root / \"ReloadedII.json\")"
-      "    print(f\"Prepared CEP 13.99.4 + Reloaded II 1.30.3: {root}\", flush=True)"
-      "    return root, loader_config"
-      ""
-      "def wine(settings, arguments, log):"
-      "    env = os.environ | {\"STEAM_DIR\": settings[\"steamDirectory\"], \"WINEDEBUG\": \"-all\"}"
-      "    command = ('test \"$WINEPREFIX\" -ef ' + shlex.quote(settings[\"prefixDirectory\"])"
-      "               + ' || { echo \"Protontricks selected a different prefix\" >&2; exit 1; }; '"
-      "               + '\"$WINE\" ' + shlex.join(str(arg) for arg in arguments))"
-      "    result = subprocess.run([\"protontricks\", \"-c\", command, \"1113000\"],"
-      "                            env=env, stdout=log, stderr=subprocess.STDOUT)"
-      "    if result.returncode not in (0, 194):"
-      "        raise RuntimeError(f\"Proton setup exited {result.returncode}; see {log.name}\")"
-      ""
-      "def install(settings, state, payload, game, prefix, root, loader_config):"
-      "    require_stopped()"
-      "    manifest_path = game / \".finix-p4g.json\""
-      "    previous = read_json(manifest_path) if manifest_path.exists() else {\"files\": {}}"
-      "    files = {"
-      "        \"version.dll\": payload / \"Asi/ASILoader64.dll\","
-      "        \"Reloaded.Mod.Loader.Bootstrapper.asi\": root / \"Loader/X64/Bootstrapper/Reloaded.Mod.Loader.Bootstrapper.dll\","
-      "    }"
-      "    for name, source in files.items():"
-      "        target = game / name"
-      "        if target.exists() and digest(target) not in (digest(source), previous[\"files\"].get(name)):"
-      "            raise RuntimeError(f\"Refusing to replace an unmanaged or modified file: {target}\")"
-      "    timestamp = datetime.now(timezone.utc).strftime(\"%Y%m%dT%H%M%S.%fZ\")"
-      "    backup = state / \"backups\" / timestamp"
-      "    backup.mkdir(parents=True)"
-      "    print(f\"Backing up Proton prefix to {backup / 'pfx'}\", flush=True)"
-      "    subprocess.run([\"cp\", \"-a\", \"--reflink=auto\", str(prefix), str(backup / \"pfx\")], check=True)"
-      "    for name in [*files, \".finix-p4g.json\"]:"
-      "        source = game / name"
-      "        if source.exists():"
-      "            target = backup / \"game\" / name"
-      "            target.parent.mkdir(parents=True, exist_ok=True)"
-      "            shutil.copy2(source, target)"
-      "    marker = prefix / \".finix-p4g-runtimes.json\""
-      "    runtime_files = sorted((payload / \"Setup\").glob(\"*.exe\"))"
-      "    wanted = {p.name: digest(p) for p in runtime_files}"
-      "    installed = read_json(marker) if marker.exists() else None"
-      "    dotnet_present = all((prefix / \"drive_c\" / directory /"
-      "                          \"dotnet/shared/Microsoft.WindowsDesktop.App/9.0.20\").is_dir()"
-      "                         for directory in (\"Program Files\", \"Program Files (x86)\"))"
-      "    log_path = backup / \"setup.log\""
-      "    with log_path.open(\"w\") as log:"
-      "        if installed != wanted or not dotnet_present:"
-      "            for installer in runtime_files:"
-      "                require_stopped()"
-      "                print(f\"Installing {installer.name} (log: {log_path})\", flush=True)"
-      "                wine(settings, [str(installer), \"/install\", \"/quiet\", \"/norestart\"], log)"
-      "            write_json(marker, wanted)"
-      "        require_stopped()"
-      "        config_path = prefix / \"drive_c/users/steamuser/AppData/Roaming/Reloaded-Mod-Loader-II/ReloadedII.json\""
-      "        existing = read_json(config_path) if config_path.exists() else {}"
-      "        write_json(config_path, existing | loader_config)"
-      "        key = r\"HKCU\\Software\\Wine\\AppDefaults\\P4G.exe\\DllOverrides\""
-      "        for dll in (\"version\", \"msvcp140\", \"msvcp140_1\", \"msvcp140_2\", \"vcruntime140\", \"vcruntime140_1\"):"
-      "            wine(settings, [\"reg\", \"add\", key, \"/v\", dll, \"/t\", \"REG_SZ\", \"/d\", \"native,builtin\", \"/f\"], log)"
-      "    require_stopped()"
-      "    pending_manifest = game / \".finix-p4g.pending.json\""
-      "    write_json(pending_manifest, {\"files\": {n: digest(p) for n, p in files.items()},"
-      "                                  \"generation\": str(root), \"backup\": str(backup)})"
-      "    for name in reversed(files):"
-      "        target = game / name"
-      "        target.parent.mkdir(parents=True, exist_ok=True)"
-      "        temporary = target.with_name(target.name + \".finix-new\")"
-      "        shutil.copyfile(files[name], temporary)"
-      "        temporary.replace(target)"
-      "    pending_manifest.replace(manifest_path)"
-      "    print(\"Installed. Launch Persona 4 Golden through its normal Steam entry.\")"
-      ""
-      "def disable(game):"
-      "    require_stopped()"
-      "    path = game / \".finix-p4g.json\""
-      "    if not path.exists():"
-      "        raise RuntimeError(\"No finix-managed P4G installation found.\")"
-      "    manifest = read_json(path)"
-      "    for name, expected in manifest[\"files\"].items():"
-      "        target = game / name"
-      "        if target.exists() and digest(target) != expected:"
-      "            raise RuntimeError(f\"Refusing to remove a modified file: {target}\")"
-      "    for name in manifest[\"files\"]:"
-      "        (game / name).unlink(missing_ok=True)"
-      "    path.unlink()"
-      "    print(\"Mod injection disabled. Steam will launch vanilla P4G; backups and mod settings are retained.\")"
-      ""
-      "def main():"
-      "    parser = argparse.ArgumentParser(description=__doc__)"
-      "    parser.add_argument(\"settings\", type=Path)"
-      "    parser.add_argument(\"action\", choices=[\"prepare\", \"install\", \"disable\", \"status\"], nargs=\"?\", default=\"install\")"
-      "    args = parser.parse_args()"
-      "    settings = read_json(args.settings)"
-      "    state, payload, game = (Path(settings[k]) for k in (\"stateDirectory\", \"payload\", \"gameDirectory\"))"
-      "    prefix = Path(settings[\"prefixDirectory\"])"
-      "    if args.action == \"status\":"
-      "        print(json.dumps({\"running\": game_running(), \"installed\": (game / '.finix-p4g.json').exists(),"
-      "                          \"state\": str(state), \"prefix\": str(prefix)}, indent=2))"
-      "        return"
-      "    if os.geteuid() == 0:"
-      "        raise RuntimeError(\"Run p4g-setup as your Steam user, without sudo.\")"
-      "    if args.action in (\"install\", \"disable\"):"
-      "        require_stopped()"
-      "    if not (game / \"P4G.exe\").is_file() or not (prefix / \"system.reg\").is_file():"
-      "        raise RuntimeError(\"Install P4G in Steam and launch it once before setup.\")"
-      "    state.mkdir(parents=True, exist_ok=True)"
-      "    with (state / \".setup.lock\").open(\"w\") as lock:"
-      "        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)"
-      "        if args.action == \"disable\":"
-      "            disable(game)"
-      "            return"
-      "        root, loader_config = prepare(settings, state, payload, game)"
-      "        if args.action == \"install\":"
-      "            install(settings, state, payload, game, prefix, root, loader_config)"
-      ""
-      "if __name__ == \"__main__\":"
-      "    try:"
-      "        main()"
-      "    except (RuntimeError, OSError, json.JSONDecodeError, subprocess.CalledProcessError) as exc:"
-      "        sys.exit(f\"p4g-setup: {exc}\")"
+    modules_gaming_p4g_setup_data = {
+      aligned,
+      as,
+      blank,
+      call,
+      commas,
+      def,
+      dict,
+      dot,
+      except,
+      field,
+      finally,
+      for,
+      if',
+      index,
+      kw,
+      list,
+      pair,
+      paren,
+      raw,
+      rows,
+      slice,
+      sq,
+      star,
+      str,
+      triple,
+      try,
+      tuple,
+      while,
+      with',
+      ...
+    }: [
+      (triple "Materialize pinned P4G mods; touch the Proton prefix only on explicit install.")
+      blank
+      ["import" "argparse"]
+      ["import" "fcntl"]
+      ["import" "hashlib"]
+      ["import" "json"]
+      ["import" "os"]
+      ["from" "pathlib" "import" "Path"]
+      ["import" "shlex"]
+      ["import" "shutil"]
+      ["import" "subprocess"]
+      ["import" "sys"]
+      ["import" "tempfile"]
+      ["from" "datetime" "import" (commas ["datetime" "timezone"])]
+      blank
+      (def "read_json" ["path"] [
+        ["return" (call "json.loads" [(call "path.read_text" [(kw "encoding" (str "utf-8-sig"))])])]
+      ])
+      blank
+      (def "write_json" ["path" "data"] [
+        (call "path.parent.mkdir" [(kw "parents" "True") (kw "exist_ok" "True")])
+        ["temporary" "=" (call "path.with_name" [["path.name" "+" (str ".finix-new")]])]
+        (call "temporary.write_text" [[(call "json.dumps" ["data" (kw "indent" 2)]) "+" (str "\\n")]])
+        (call "temporary.replace" ["path"])
+      ])
+      blank
+      (def "windows_path" ["path"] [
+        ["return" (str "Z:") "+" (call (dot (call "str" ["path"]) "replace") [(str "/") (str "\\\\")])]
+      ])
+      blank
+      (def "digest" ["path"] [
+        (with' [(as (call "path.open" [(str "rb")]) "source")] [
+          ["return" (call (dot (call "hashlib.file_digest" ["source" (str "sha256")]) "hexdigest") [])]
+        ])
+      ])
+      blank
+      (def "game_running" [] [
+        (for "process" (call (dot (call "Path" [(str "/proc")]) "glob") [(str "[0-9]*/comm")]) [
+          (try [
+              (if' [(call (dot (call (dot (call "process.read_text" []) "strip") []) "lower") []) "==" (str "p4g.exe")] [
+                ["return" "True"]
+              ])
+            ] [
+              (except (tuple ["FileNotFoundError" "ProcessLookupError" "PermissionError"]) [
+                "pass"
+              ])
+            ])
+        ])
+        ["return" "False"]
+      ])
+      blank
+      (def "require_stopped" [] [
+        (if' (call "game_running" []) [
+          ["raise" (call "RuntimeError" [(str "P4G is running. Save and close it before installing or disabling mods.")])]
+        ])
+      ])
+      blank
+      (def "configure_loader" ["root" "game" "enabled" (kw "final_root" "None")] [
+        ["app_file" "=" "root" "/" (str "Apps/p4g.exe/AppConfig.json")]
+        ["app" "=" (call "read_json" ["app_file"])]
+        (call "app.update" (aligned [(kw "AppLocation" (call "windows_path" [["game" "/" (str "P4G.exe")]])) [(kw "WorkingDirectory" (call "windows_path" ["game"])) (kw "AutoInject" "False") (kw "DontInject" "False")]]))
+        (if' ["enabled" "is not" "None"] [
+          [(index "app" (str "EnabledMods")) "=" "enabled"]
+          [(index "app" (str "SortedMods")) "=" "enabled" "+" (list [["name" "for" "name" "in" (call "app.get" [(str "SortedMods") (list [])]) "if" "name" "not in" "enabled"]])]
+        ])
+        ["mods" "=" (dict [(rows [(pair (index (call "read_json" ["p"]) (str "ModId")) (call "read_json" ["p"])) ["for" "p" "in" (call (dot (paren ["root" "/" (str "Mods")]) "glob") [(str "*/ModConfig.json")])]])])]
+        [(commas ["pending" "checked"]) "=" (commas [(call "list" [(index "app" (str "EnabledMods"))]) (call "set" [])])]
+        (while "pending" [
+          ["name" "=" (call "pending.pop" [])]
+          (if' ["name" "in" "checked"] [
+            "continue"
+          ])
+          (if' ["name" "not in" "mods"] [
+            ["raise" (call "RuntimeError" [(str ["Enabled mod or dependency absent from pinned pack: " (field "name")])])]
+          ])
+          (call "checked.add" ["name"])
+          (call "pending.extend" [(call (dot (index "mods" "name") "get") [(str "ModDependencies") (list [])])])
+        ])
+        (call "write_json" ["app_file" "app"])
+        ["root" "=" "final_root" "or" "root"]
+        ["return" (dict (rows [(pair (str "LoaderPath64") (call "windows_path" [["root" "/" (str "Loader/X64/Reloaded.Mod.Loader.dll")]])) (pair (str "LoaderPath32") (call "windows_path" [["root" "/" (str "Loader/X86/Reloaded.Mod.Loader.dll")]])) (pair (str "LauncherPath") (call "windows_path" [["root" "/" (str "Reloaded-II.exe")]])) (pair (str "Bootstrapper64Path") (call "windows_path" [["root" "/" (str "Loader/X64/Bootstrapper/Reloaded.Mod.Loader.Bootstrapper.dll")]])) (pair (str "Bootstrapper32Path") (call "windows_path" [["root" "/" (str "Loader/X86/Bootstrapper/Reloaded.Mod.Loader.Bootstrapper.dll")]])) (pair (str "ApplicationConfigDirectory") (call "windows_path" [["root" "/" (str "Apps")]])) (pair (str "ModConfigDirectory") (call "windows_path" [["root" "/" (str "Mods")]])) (pair (str "ModUserConfigDirectory") (call "windows_path" [["root" "/" (str "User/Mods")]])) (pair (str "MiscConfigDirectory") (call "windows_path" [["root" "/" (str "User/Misc")]])) (pair (str "PluginConfigDirectory") (call "windows_path" [["root" "/" (str "Plugins")]])) (pair (str "UsePortableMode") "True") (pair (str "FirstLaunch") "False") (pair (str "ShowConsole") "False") (pair (str "SkipWineLaunchWarning") "True")]))]
+      ])
+      blank
+      (def "prepare" ["settings" "state" "payload" "game"] [
+        ["generation_settings" "=" (dict [[(pair "k" "v") "for" (commas ["k" "v"]) "in" (call "settings.items" []) "if" "k" "!=" (str "prefixDirectory")]])]
+        ["key" "=" (index (call (dot (call "hashlib.sha256" [(call (dot (call "json.dumps" ["generation_settings" (kw "sort_keys" "True")]) "encode") [])]) "hexdigest") []) (slice null 16))]
+        ["root" "=" "state" "/" (str "generations") "/" "key"]
+        (if' ["not" (call "root.exists" [])] [
+          (call "root.parent.mkdir" [(kw "parents" "True") (kw "exist_ok" "True")])
+          ["temporary" "=" (call "Path" [(call "tempfile.mkdtemp" [(kw "prefix" (str ".prepare-")) (kw "dir" "root.parent")])])]
+          (try [
+              (call "subprocess.run" [(list [(str "cp") (str "-r") (str "--reflink=auto") [(call "str" [["payload" "/" (str "Reloaded")]]) "+" (str "/.")] (call "str" ["temporary"])]) (kw "check" "True")])
+              (call "subprocess.run" [(list [(str "chmod") (str "-R") (str "u+w") (call "str" ["temporary"])]) (kw "check" "True")])
+              ["loader_config" "=" (call "configure_loader" ["temporary" "game" (index "settings" (str "enabledMods")) (kw "final_root" "root")])]
+              (call "write_json" [["temporary" "/" (str "ReloadedII.json")] "loader_config"])
+              (call (dot (paren ["temporary" "/" (str "portable.txt")]) "touch") [])
+              (call "temporary.rename" ["root"])
+            ] [
+              (finally [
+                (if' (call "temporary.exists" []) [
+                  (call "shutil.rmtree" ["temporary"])
+                ])
+              ])
+            ])
+        ])
+        ["loader_config" "=" (call "read_json" [["root" "/" (str "ReloadedII.json")]])]
+        (call "print" [(str ["Prepared CEP 13.99.4 + Reloaded II 1.30.3: " (field "root")]) (kw "flush" "True")])
+        ["return" (commas ["root" "loader_config"])]
+      ])
+      blank
+      (def "wine" ["settings" "arguments" "log"] [
+        ["env" "=" "os.environ" "|" (dict [(pair (str "STEAM_DIR") (index "settings" (str "steamDirectory"))) (pair (str "WINEDEBUG") (str "-all"))])]
+        ["command" "=" (paren (rows [[(sq "test \"$WINEPREFIX\" -ef ") "+" (call "shlex.quote" [(index "settings" (str "prefixDirectory"))])] ["+" (sq " || { echo \"Protontricks selected a different prefix\" >&2; exit 1; }; ")] ["+" (sq "\"$WINE\" ") "+" (call "shlex.join" [[(call "str" ["arg"]) "for" "arg" "in" "arguments"]])]]))]
+        ["result" "=" (call "subprocess.run" (aligned [(list [(str "protontricks") (str "-c") "command" (str "1113000")]) [(kw "env" "env") (kw "stdout" "log") (kw "stderr" "subprocess.STDOUT")]]))]
+        (if' ["result.returncode" "not in" (tuple [0 194])] [
+          ["raise" (call "RuntimeError" [(str ["Proton setup exited " (field "result.returncode") "; see " (field "log.name")])])]
+        ])
+      ])
+      blank
+      (def "install" ["settings" "state" "payload" "game" "prefix" "root" "loader_config"] [
+        (call "require_stopped" [])
+        ["manifest_path" "=" "game" "/" (str ".finix-p4g.json")]
+        ["previous" "=" (call "read_json" ["manifest_path"]) "if" (call "manifest_path.exists" []) "else" (dict [(pair (str "files") (dict []))])]
+        ["files" "=" (dict (rows [(pair (str "version.dll") ["payload" "/" (str "Asi/ASILoader64.dll")]) (pair (str "Reloaded.Mod.Loader.Bootstrapper.asi") ["root" "/" (str "Loader/X64/Bootstrapper/Reloaded.Mod.Loader.Bootstrapper.dll")])]))]
+        (for (commas ["name" "source"]) (call "files.items" []) [
+          ["target" "=" "game" "/" "name"]
+          (if' [(call "target.exists" []) "and" (call "digest" ["target"]) "not in" (tuple [(call "digest" ["source"]) (call (dot (index "previous" (str "files")) "get") ["name"])])] [
+            ["raise" (call "RuntimeError" [(str ["Refusing to replace an unmanaged or modified file: " (field "target")])])]
+          ])
+        ])
+        ["timestamp" "=" (call (dot (call "datetime.now" ["timezone.utc"]) "strftime") [(str "%Y%m%dT%H%M%S.%fZ")])]
+        ["backup" "=" "state" "/" (str "backups") "/" "timestamp"]
+        (call "backup.mkdir" [(kw "parents" "True")])
+        (call "print" [(str ["Backing up Proton prefix to " (field ["backup" "/" (sq "pfx")])]) (kw "flush" "True")])
+        (call "subprocess.run" [(list [(str "cp") (str "-a") (str "--reflink=auto") (call "str" ["prefix"]) (call "str" [["backup" "/" (str "pfx")]])]) (kw "check" "True")])
+        (for "name" (list [(star "files") (str ".finix-p4g.json")]) [
+          ["source" "=" "game" "/" "name"]
+          (if' (call "source.exists" []) [
+            ["target" "=" "backup" "/" (str "game") "/" "name"]
+            (call "target.parent.mkdir" [(kw "parents" "True") (kw "exist_ok" "True")])
+            (call "shutil.copy2" ["source" "target"])
+          ])
+        ])
+        ["marker" "=" "prefix" "/" (str ".finix-p4g-runtimes.json")]
+        ["runtime_files" "=" (call "sorted" [(call (dot (paren ["payload" "/" (str "Setup")]) "glob") [(str "*.exe")])])]
+        ["wanted" "=" (dict [[(pair "p.name" (call "digest" ["p"])) "for" "p" "in" "runtime_files"]])]
+        ["installed" "=" (call "read_json" ["marker"]) "if" (call "marker.exists" []) "else" "None"]
+        ["dotnet_present" "=" (call "all" [(rows [(call (dot (paren (rows [["prefix" "/" (str "drive_c") "/" "directory" "/"] (str "dotnet/shared/Microsoft.WindowsDesktop.App/9.0.20")])) "is_dir") []) ["for" "directory" "in" (tuple [(str "Program Files") (str "Program Files (x86)")])]])])]
+        ["log_path" "=" "backup" "/" (str "setup.log")]
+        (with' [(as (call "log_path.open" [(str "w")]) "log")] [
+          (if' ["installed" "!=" "wanted" "or" "not" "dotnet_present"] [
+            (for "installer" "runtime_files" [
+              (call "require_stopped" [])
+              (call "print" [(str ["Installing " (field "installer.name") " (log: " (field "log_path") ")"]) (kw "flush" "True")])
+              (call "wine" ["settings" (list [(call "str" ["installer"]) (str "/install") (str "/quiet") (str "/norestart")]) "log"])
+            ])
+            (call "write_json" ["marker" "wanted"])
+          ])
+          (call "require_stopped" [])
+          ["config_path" "=" "prefix" "/" (str "drive_c/users/steamuser/AppData/Roaming/Reloaded-Mod-Loader-II/ReloadedII.json")]
+          ["existing" "=" (call "read_json" ["config_path"]) "if" (call "config_path.exists" []) "else" (dict [])]
+          (call "write_json" ["config_path" ["existing" "|" "loader_config"]])
+          ["key" "=" (raw (str "HKCU\\Software\\Wine\\AppDefaults\\P4G.exe\\DllOverrides"))]
+          (for "dll" (tuple [(str "version") (str "msvcp140") (str "msvcp140_1") (str "msvcp140_2") (str "vcruntime140") (str "vcruntime140_1")]) [
+            (call "wine" ["settings" (list [(str "reg") (str "add") "key" (str "/v") "dll" (str "/t") (str "REG_SZ") (str "/d") (str "native,builtin") (str "/f")]) "log"])
+          ])
+        ])
+        (call "require_stopped" [])
+        ["pending_manifest" "=" "game" "/" (str ".finix-p4g.pending.json")]
+        (call "write_json" ["pending_manifest" (dict (aligned [(pair (str "files") (dict [[(pair "n" (call "digest" ["p"])) "for" (commas ["n" "p"]) "in" (call "files.items" [])]])) [(pair (str "generation") (call "str" ["root"])) (pair (str "backup") (call "str" ["backup"]))]]))])
+        (for "name" (call "reversed" ["files"]) [
+          ["target" "=" "game" "/" "name"]
+          (call "target.parent.mkdir" [(kw "parents" "True") (kw "exist_ok" "True")])
+          ["temporary" "=" (call "target.with_name" [["target.name" "+" (str ".finix-new")]])]
+          (call "shutil.copyfile" [(index "files" "name") "temporary"])
+          (call "temporary.replace" ["target"])
+        ])
+        (call "pending_manifest.replace" ["manifest_path"])
+        (call "print" [(str "Installed. Launch Persona 4 Golden through its normal Steam entry.")])
+      ])
+      blank
+      (def "disable" ["game"] [
+        (call "require_stopped" [])
+        ["path" "=" "game" "/" (str ".finix-p4g.json")]
+        (if' ["not" (call "path.exists" [])] [
+          ["raise" (call "RuntimeError" [(str "No finix-managed P4G installation found.")])]
+        ])
+        ["manifest" "=" (call "read_json" ["path"])]
+        (for (commas ["name" "expected"]) (call (dot (index "manifest" (str "files")) "items") []) [
+          ["target" "=" "game" "/" "name"]
+          (if' [(call "target.exists" []) "and" (call "digest" ["target"]) "!=" "expected"] [
+            ["raise" (call "RuntimeError" [(str ["Refusing to remove a modified file: " (field "target")])])]
+          ])
+        ])
+        (for "name" (index "manifest" (str "files")) [
+          (call (dot (paren ["game" "/" "name"]) "unlink") [(kw "missing_ok" "True")])
+        ])
+        (call "path.unlink" [])
+        (call "print" [(str "Mod injection disabled. Steam will launch vanilla P4G; backups and mod settings are retained.")])
+      ])
+      blank
+      (def "main" [] [
+        ["parser" "=" (call "argparse.ArgumentParser" [(kw "description" "__doc__")])]
+        (call "parser.add_argument" [(str "settings") (kw "type" "Path")])
+        (call "parser.add_argument" [(str "action") (kw "choices" (list [(str "prepare") (str "install") (str "disable") (str "status")])) (kw "nargs" (str "?")) (kw "default" (str "install"))])
+        ["args" "=" (call "parser.parse_args" [])]
+        ["settings" "=" (call "read_json" ["args.settings"])]
+        [(commas ["state" "payload" "game"]) "=" (paren [(call "Path" [(index "settings" "k")]) "for" "k" "in" (tuple [(str "stateDirectory") (str "payload") (str "gameDirectory")])])]
+        ["prefix" "=" (call "Path" [(index "settings" (str "prefixDirectory"))])]
+        (if' ["args.action" "==" (str "status")] [
+          (call "print" [(call "json.dumps" [(dict (aligned [[(pair (str "running") (call "game_running" [])) (pair (str "installed") (call (dot (paren ["game" "/" (sq ".finix-p4g.json")]) "exists") []))] [(pair (str "state") (call "str" ["state"])) (pair (str "prefix") (call "str" ["prefix"]))]])) (kw "indent" 2)])])
+          "return"
+        ])
+        (if' [(call "os.geteuid" []) "==" 0] [
+          ["raise" (call "RuntimeError" [(str "Run p4g-setup as your Steam user, without sudo.")])]
+        ])
+        (if' ["args.action" "in" (tuple [(str "install") (str "disable")])] [
+          (call "require_stopped" [])
+        ])
+        (if' ["not" (call (dot (paren ["game" "/" (str "P4G.exe")]) "is_file") []) "or" "not" (call (dot (paren ["prefix" "/" (str "system.reg")]) "is_file") [])] [
+          ["raise" (call "RuntimeError" [(str "Install P4G in Steam and launch it once before setup.")])]
+        ])
+        (call "state.mkdir" [(kw "parents" "True") (kw "exist_ok" "True")])
+        (with' [(as (call (dot (paren ["state" "/" (str ".setup.lock")]) "open") [(str "w")]) "lock")] [
+          (call "fcntl.flock" ["lock" ["fcntl.LOCK_EX" "|" "fcntl.LOCK_NB"]])
+          (if' ["args.action" "==" (str "disable")] [
+            (call "disable" ["game"])
+            "return"
+          ])
+          [(commas ["root" "loader_config"]) "=" (call "prepare" ["settings" "state" "payload" "game"])]
+          (if' ["args.action" "==" (str "install")] [
+            (call "install" ["settings" "state" "payload" "game" "prefix" "root" "loader_config"])
+          ])
+        ])
+      ])
+      blank
+      (if' ["__name__" "==" (str "__main__")] [
+        (try [
+            (call "main" [])
+          ] [
+            (except (as (tuple ["RuntimeError" "OSError" "json.JSONDecodeError" "subprocess.CalledProcessError"]) "exc") [
+              (call "sys.exit" [(str ["p4g-setup: " (field "exc")])])
+            ])
+          ])
+      ])
     ];
     modules_gaming_proton = {
       config,
@@ -29855,6 +30050,207 @@
         render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
       };
 
+      python = let
+        inherit (doc) hardline nest align;
+
+        commaJoin = lib.intersperse ", ";
+
+        rowItems = row:
+          if builtins.isList row
+          then row
+          else [row];
+
+        simple = value: value == null || builtins.isString value || builtins.isInt value;
+
+        separated = values: commaJoin (map (expr false) values);
+
+        rowsOf = rowList: map (row: separated (rowItems row)) rowList;
+
+        contents = {
+          list = open: close: tuple: values: [open (align (separated values)) (lib.optional (tuple && builtins.length values == 1) ",") close];
+          rows = open: close: _: value: let
+            rendered = rowsOf value.rows;
+            comma = lib.optionalString (builtins.length rendered > 1) ",";
+          in [open (nest 4 (map (row: [hardline row comma]) rendered)) hardline close];
+          aligned = open: close: _: value: [open (align (lib.intersperse ["," hardline] (rowsOf value.aligned))) close];
+        };
+
+        bracket = open: close: tuple: content: (contents.${kindOf content} or (throw "python: no bracket content ${kindOf content}")) open close tuple content;
+
+        pieces = {
+          string = lib.id;
+          field = value: ["{" (expr false value.field) "}"];
+          spec = value: ["{" (expr false value.spec.value) ":" value.spec.format "}"];
+        };
+
+        literal = quote: content:
+          if builtins.isList content
+          then ["f" quote (map (part: pieces.${kindOf part} part) content) quote]
+          else [quote content quote];
+
+        spaced = bare: values: lib.intersperse " " (map (expr bare) values);
+
+        continued = bare: row:
+          if bare
+          then nest 4 [" \\" hardline row]
+          else [hardline row];
+
+        bound = side: value: lib.optional (value != null) (side (expr false value));
+
+        forms = {
+          string = _: lib.id;
+          int = _: toString;
+          list = spaced;
+          rows = bare: value: let
+            rendered = map (row: spaced bare (rowItems row)) value.rows;
+          in [(builtins.head rendered) (map (continued bare) (builtins.tail rendered))];
+          str = _: value: literal "\"" value.str;
+          sq = _: value: literal "'" value.sq;
+          triple = _: value: literal "\"\"\"" value.triple;
+          raw = _: value: ["r" (expr false value.raw)];
+          bytes = _: value: ["b" (expr false value.bytes)];
+          call = _: value: [(expr false value.call.function) (bracket "(" ")" false value.call.arguments)];
+          dot = _: value: [(expr false value.dot.value) "." value.dot.name];
+          index = _: value: [(expr false value.index.value) "[" (align (expr false value.index.key)) "]"];
+          slice = _: value: let
+            inherit (value.slice) lower upper;
+            pad = lib.optionalString (!(simple lower && simple upper)) " ";
+          in [(bound (side: [side pad]) lower) ":" (bound (side: [pad side]) upper)];
+          "list'" = _: value: bracket "[" "]" false value."list'";
+          tuple = _: value: bracket "(" ")" true value.tuple;
+          set = _: value: bracket "{" "}" false value.set;
+          dict = _: value: bracket "{" "}" false value.dict;
+          paren = _: value: ["(" (align (expr false value.paren)) ")"];
+          hang = _: value: ["(" (nest 4 [hardline (expr false value.hang)]) hardline ")"];
+          commas = _: value: separated value.commas;
+          pair = _: value: [(expr false value.pair.key) ": " (expr false value.pair.value)];
+          kw = _: value: [value.kw.name "=" (expr false value.kw.value)];
+          star = _: value: ["*" (expr false value.star)];
+          starstar = _: value: ["**" (expr false value.starstar)];
+          neg = _: value: ["-" (expr false value.neg)];
+          invert = _: value: ["~" (expr false value.invert)];
+          lambda = _: value: ["lambda" (lib.optionals (value.lambda.params != []) [" " (separated value.lambda.params)]) ": " (expr false value.lambda.body)];
+          as = _: value: [(expr false value.as.value) " as " (expr false value.as.name)];
+        };
+
+        expr = bare: value: (forms.${kindOf value} or (throw "python: no expression ${kindOf value}")) bare value;
+
+        block = body: nest 4 (map (value: [hardline (entry value)]) body);
+
+        alternative = value:
+          if builtins.isList value
+          then [hardline "else:" (block value)]
+          else [hardline "el" (statement value)];
+
+        clauseForms = {
+          except = value: ["except" (lib.optionals (value.except.caught != null) [" " (expr true value.except.caught)]) ":" (block value.except.body)];
+          finally = value: ["finally:" (block value.finally)];
+        };
+
+        statements = {
+          comment = value: value.comment;
+          def = value: ["def " value.def.name (bracket "(" ")" false value.def.params) ":" (block value.def.body)];
+          async = value: ["async " (statement value.async)];
+          class = value: ["class " value.class.name (lib.optional (value.class.bases != null) (bracket "(" ")" false value.class.bases)) ":" (block value.class.body)];
+          "if" = value: ["if " (expr true value."if".test) ":" (block value."if".body) (lib.optional (value."if" ? otherwise) (alternative value."if".otherwise))];
+          for = value: ["for " (expr true value.for.target) " in " (expr true value.for.iter) ":" (block value.for.body)];
+          while = value: ["while " (expr true value.while.test) ":" (block value.while.body)];
+          "with" = value: ["with " (separated value."with".items) ":" (block value."with".body)];
+          try = value: ["try:" (block value.try.body) (map (clause: [hardline (clauseForms.${kindOf clause} clause)]) value.try.clauses)];
+        };
+
+        statement = value: (statements.${kindOf value} or (expr true)) value;
+
+        entry = value:
+          if value ? blank
+          then []
+          else statement value;
+      in {
+        blank = {blank = true;};
+
+        comment = string: {comment = string;};
+
+        str = content: {str = content;};
+
+        sq = content: {sq = content;};
+
+        triple = content: {triple = content;};
+
+        raw = value: {raw = value;};
+
+        bytes = value: {bytes = value;};
+
+        field = value: {field = value;};
+
+        spec = value: format: {spec = {inherit value format;};};
+
+        rows = values: {rows = values;};
+
+        aligned = values: {aligned = values;};
+
+        commas = values: {commas = values;};
+
+        call = function: arguments: {call = {inherit function arguments;};};
+
+        dot = value: name: {dot = {inherit value name;};};
+
+        index = value: key: {index = {inherit value key;};};
+
+        slice = lower: upper: {slice = {inherit lower upper;};};
+
+        list = values: {"list'" = values;};
+
+        tuple = values: {tuple = values;};
+
+        set = values: {set = values;};
+
+        dict = values: {dict = values;};
+
+        paren = value: {paren = value;};
+
+        hang = value: {hang = value;};
+
+        pair = key: value: {pair = {inherit key value;};};
+
+        kw = name: value: {kw = {inherit name value;};};
+
+        star = value: {star = value;};
+
+        starstar = value: {starstar = value;};
+
+        neg = value: {neg = value;};
+
+        invert = value: {invert = value;};
+
+        lambda = params: body: {lambda = {inherit params body;};};
+
+        as = value: name: {as = {inherit value name;};};
+
+        def = name: params: body: {def = {inherit name params body;};};
+
+        async = value: {async = value;};
+
+        class = name: bases: body: {class = {inherit name bases body;};};
+
+        if' = test: body: {"if" = {inherit test body;};};
+
+        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+
+        for = target: iter: body: {for = {inherit target iter body;};};
+
+        while = test: body: {while = {inherit test body;};};
+
+        with' = items: body: {"with" = {inherit items body;};};
+
+        try = body: clauses: {try = {inherit body clauses;};};
+
+        except = caught: body: {except = {inherit caught body;};};
+
+        finally = body: {finally = body;};
+
+        render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
+      };
+
       sourceFile = name: text:
         builtins.path {
           path = builtins.toFile name text;
@@ -29863,7 +30259,7 @@
     in {
       cssSource = list: "${nodes list}\n";
 
-      inherit doc glsl lisp lua luau markdown patch shell vbs;
+      inherit doc glsl lisp lua luau markdown patch python shell vbs;
 
       inherit sourceFile;
 
@@ -29896,8 +30292,6 @@
       tsSource = lines;
 
       javascriptSource = lines;
-
-      pythonSource = lines;
 
     };
     modules_hosts_android_phone_host_ssh_ed25519_data = {
@@ -32775,6 +33169,13 @@
           "carly-2026-10-30.md" = modules_tools_tern_config_carly_memory_2026_10_30_data;
           "tuturu-README.md" = modules_tools_tern_config_plugins_tuturu_README_data;
         };
+        python = {
+          "apply-reasoning-policy.py" = modules_dev_ai_codex_apply_reasoning_policy_data;
+          "gateway-proxy.py" = omp_box_gateway_proxy_data;
+          "wrapper.py" = modules_dev_work_vercel_wrapper_data;
+          "aniimo-apply.py" = modules_gaming_aniimo_apply_data;
+          "p4g-setup.py" = modules_gaming_p4g_setup_data;
+        };
         vbs = {
           "play.vbs" = modules_tools_tern_config_plugins_tuturu_scripts_play_data;
         };
@@ -32798,7 +33199,10 @@
         }))
       modules_desktop_session_theme_colorschemes_data;
 
-      rendered = lib.recursiveUpdate (lib.mapAttrs (language: lib.mapAttrs (_: syntax: generators.${language}.render (syntax generators.${language}))) trees) {shell = osc;};
+      rendered = lib.recursiveUpdate (lib.mapAttrs (language: lib.mapAttrs (_: syntax: generators.${language}.render (syntax generators.${language}))) trees) {
+        shell = osc;
+        python."wrapper.py" = builtins.replaceStrings ["@owners@"] ["{}"] (generators.python.render (trees.python."wrapper.py" generators.python));
+      };
 
       reader = pkgs.writeText "read.lisp" ''
         (let ((*read-eval* nil))
@@ -32839,6 +33243,7 @@
         luau = file: "${lib.getExe' pkgs.luau "luau-analyze"} --formatter=plain ${file} > analysis || true\nif grep -F SyntaxError analysis; then exit 1; fi\n";
         markdown = file: "${comrak} -e table -t xml ${file} > ast\n${comrak} -e table -t commonmark ${file} | ${comrak} -e table -t xml | cmp ast -\n";
         patch = file: "${lib.getExe pkgs.git} -C ${patched.${file.name}} apply --check ${file}\n";
+        python = file: "PYTHONPYCACHEPREFIX=$TMPDIR/pycache ${lib.getExe pkgs.python3} -m py_compile ${file}\n";
         shell = file: "${lib.getExe pkgs.bash} -n ${file}\n${lib.getExe pkgs.shellcheck} -s bash -S warning ${file}\n";
         vbs = file: "${strictix} import vbs ${file} > /dev/null\n";
       };
@@ -38076,243 +38481,299 @@
           local
         ];
       };
-    omp_box_gateway_proxy_data = [
-      "import asyncio"
-      "import base64"
-      "import json"
-      "import os"
-      "import ssl"
-      ""
-      "GATEWAY = \"ai-gateway.vercel.sh\""
-      "KEY_FILE = os.environ[\"GATEWAY_KEY_FILE\"]"
-      "CREST_AUTH = os.environ[\"CREST_AUTH\"]"
-      "HOST = os.environ.get(\"HOST\", \"127.0.0.1\")"
-      "PORT = int(os.environ.get(\"PORT\", \"8899\"))"
-      "CREST = {"
-      "    \"anthropic\": (\"api.anthropic.com\", \"\"),"
-      "    \"openai-codex\": (\"chatgpt.com\", \"/backend-api\"),"
-      "}"
-      "ACCOUNT = \"chatgpt-account-id\""
-      "RESIDENCY = \"x-openai-internal-codex-residency\""
-      "DROP = {"
-      "    \"host\","
-      "    \"authorization\","
-      "    \"x-api-key\","
-      "    \"cf-aig-authorization\","
-      "    \"connection\","
-      "    \"proxy-connection\","
-      "    \"accept-encoding\","
-      "}"
-      ""
-      ""
-      "class CrestError(Exception):"
-      "    pass"
-      ""
-      ""
-      "def header_name(raw):"
-      "    return raw.partition(\":\")[0].strip().lower()"
-      ""
-      ""
-      "def read_key():"
-      "    with open(KEY_FILE) as handle:"
-      "        return handle.read().strip()"
-      ""
-      ""
-      "async def crest_auth(*args):"
-      "    process = await asyncio.create_subprocess_exec("
-      "        CREST_AUTH,"
-      "        \"json\","
-      "        *args,"
-      "        stdout=asyncio.subprocess.PIPE,"
-      "        stderr=asyncio.subprocess.PIPE,"
-      "    )"
-      "    out, err = await process.communicate()"
-      "    if process.returncode != 0:"
-      "        detail = err.decode().strip() or f\"exit {process.returncode}\""
-      "        raise CrestError(f\"crest-auth json {' '.join(args)}: {detail}\")"
-      "    return out"
-      ""
-      ""
-      "async def crest_token(provider):"
-      "    return json.loads(await crest_auth(\"token\", provider))"
-      ""
-      ""
-      "async def successor(provider, tried):"
-      "    try:"
-      "        token = await crest_token(provider)"
-      "    except CrestError:"
-      "        return None"
-      "    return token if token.get(\"login\") not in tried else None"
-      ""
-      ""
-      "def residency(access):"
-      "    try:"
-      "        segment = access.split(\".\")[1]"
-      "        claims = json.loads("
-      "            base64.urlsafe_b64decode(segment + \"=\" * (-len(segment) % 4))"
-      "        )"
-      "    except (IndexError, ValueError):"
-      "        return None"
-      "    auth = claims.get(\"https://api.openai.com/auth\", {})"
-      "    for claim in (\"chatgpt_data_residency\", \"chatgpt_compute_residency\"):"
-      "        value = auth.get(claim)"
-      "        if isinstance(value, str) and value.strip():"
-      "            return value.strip()"
-      "    return None"
-      ""
-      ""
-      "def credentials(provider, token, names):"
-      "    if provider is None:"
-      "        return [f\"Authorization: Bearer {read_key()}\"]"
-      "    lines = [f\"Authorization: Bearer {token['access']}\"]"
-      "    if provider == \"openai-codex\":"
-      "        if ACCOUNT not in names and token.get(\"account_id\"):"
-      "            lines.append(f\"{ACCOUNT}: {token['account_id']}\")"
-      "        place = residency(token[\"access\"])"
-      "        if RESIDENCY not in names and place:"
-      "            lines.append(f\"{RESIDENCY}: {place}\")"
-      "    return lines"
-      ""
-      ""
-      "def route(path):"
-      "    for provider, (host, prefix) in CREST.items():"
-      "        mount = f\"/{provider}\""
-      "        if path == mount or path.startswith((f\"{mount}/\", f\"{mount}?\")):"
-      "            return provider, host, prefix + path.removeprefix(mount)"
-      "    return None, GATEWAY, path"
-      ""
-      ""
-      "async def read_body(reader, headers):"
-      "    length = 0"
-      "    chunked = False"
-      "    for raw in headers:"
-      "        name = header_name(raw)"
-      "        value = raw.partition(\":\")[2].strip()"
-      "        if name == \"content-length\":"
-      "            length = int(value)"
-      "        elif name == \"transfer-encoding\" and \"chunked\" in value.lower():"
-      "            chunked = True"
-      "    if not chunked:"
-      "        return await reader.readexactly(length) if length else b\"\""
-      "    data = bytearray()"
-      "    while True:"
-      "        line = await reader.readline()"
-      "        data += line"
-      "        size = int(line.split(b\";\")[0].strip() or b\"0\", 16)"
-      "        if size == 0:"
-      "            data += await reader.readline()"
-      "            return bytes(data)"
-      "        data += await reader.readexactly(size + 2)"
-      ""
-      ""
-      "async def exchange(host, request):"
-      "    context = ssl.create_default_context()"
-      "    reader, writer = await asyncio.open_connection("
-      "        host, 443, ssl=context, server_hostname=host"
-      "    )"
-      "    writer.write(request)"
-      "    await writer.drain()"
-      "    head = await reader.readuntil(b\"\\r\\n\\r\\n\")"
-      "    return reader, writer, head"
-      ""
-      ""
-      "async def pump(source, sink):"
-      "    while data := await source.read(65536):"
-      "        sink.write(data)"
-      "        await sink.drain()"
-      ""
-      ""
-      "async def relay(client_reader, client_writer, up_reader, up_writer, both):"
-      "    tasks = [asyncio.create_task(pump(up_reader, client_writer))]"
-      "    if both:"
-      "        tasks.append(asyncio.create_task(pump(client_reader, up_writer)))"
-      "    done, pending = await asyncio.wait("
-      "        tasks, return_when=asyncio.FIRST_COMPLETED"
-      "    )"
-      "    for task in pending:"
-      "        task.cancel()"
-      "    for task in done:"
-      "        task.exception()"
-      ""
-      ""
-      "def failure(status, message):"
-      "    body = message.encode()"
-      "    return ("
-      "        f\"HTTP/1.1 {status}\\r\\nContent-Type: text/plain\\r\\n\""
-      "        f\"Content-Length: {len(body)}\\r\\nConnection: close\\r\\n\\r\\n\""
-      "    ).encode() + body"
-      ""
-      ""
-      "async def handle(reader, writer):"
-      "    try:"
-      "        head = await reader.readuntil(b\"\\r\\n\\r\\n\")"
-      "        method, path, _ = head.decode(\"latin1\").split(\"\\r\\n\")[0].split(\" \", 2)"
-      "    except Exception:"
-      "        writer.close()"
-      "        return"
-      "    lines = [raw for raw in head.decode(\"latin1\").split(\"\\r\\n\")[1:] if raw]"
-      "    upgrade = any(header_name(raw) == \"upgrade\" for raw in lines)"
-      "    kept = [raw for raw in lines if header_name(raw) not in DROP]"
-      "    names = {header_name(raw) for raw in kept}"
-      "    provider, host, target = route(path)"
-      "    upstream = None"
-      "    answered = False"
-      "    try:"
-      "        body = await read_body(reader, kept)"
-      "        token = await crest_token(provider) if provider else None"
-      "        tried = set()"
-      "        while True:"
-      "            outgoing = ["
-      "                f\"{method} {target} HTTP/1.1\","
-      "                f\"Host: {host}\","
-      "                *credentials(provider, token, names),"
-      "                *kept,"
-      "                \"Connection: Upgrade\" if upgrade else \"Connection: close\","
-      "                \"\","
-      "                \"\","
-      "            ]"
-      "            up_reader, upstream, response = await exchange("
-      "                host, \"\\r\\n\".join(outgoing).encode(\"latin1\") + body"
-      "            )"
-      "            login = token.get(\"login\") if token else None"
-      "            if response.split(b\" \", 2)[1] == b\"429\" and login and not upgrade:"
-      "                tried.add(login)"
-      "                await crest_auth(\"cool\", login)"
-      "                following = await successor(provider, tried)"
-      "                if following:"
-      "                    upstream.close()"
-      "                    token = following"
-      "                    continue"
-      "            answered = True"
-      "            writer.write(response)"
-      "            await writer.drain()"
-      "            await relay(reader, writer, up_reader, upstream, upgrade)"
-      "            break"
-      "    except CrestError as error:"
-      "        if not answered:"
-      "            writer.write(failure(\"502 Bad Gateway\", str(error)))"
-      "    except Exception as error:"
-      "        if not answered:"
-      "            writer.write("
-      "                failure(\"502 Bad Gateway\", f\"upstream failed: {error}\")"
-      "            )"
-      "    finally:"
-      "        if upstream:"
-      "            upstream.close()"
-      "        try:"
-      "            await writer.drain()"
-      "        except Exception:"
-      "            pass"
-      "        writer.close()"
-      ""
-      ""
-      "async def main():"
-      "    server = await asyncio.start_server(handle, HOST, PORT)"
-      "    async with server:"
-      "        await server.serve_forever()"
-      ""
-      ""
-      "asyncio.run(main())"
+    omp_box_gateway_proxy_data = {
+      as,
+      async,
+      blank,
+      bytes,
+      call,
+      class,
+      commas,
+      def,
+      dict,
+      dot,
+      except,
+      field,
+      finally,
+      for,
+      hang,
+      if',
+      ifElse,
+      index,
+      kw,
+      list,
+      neg,
+      pair,
+      paren,
+      rows,
+      set,
+      slice,
+      sq,
+      star,
+      str,
+      try,
+      tuple,
+      while,
+      with',
+      ...
+    }: [
+      ["import" "asyncio"]
+      ["import" "base64"]
+      ["import" "json"]
+      ["import" "os"]
+      ["import" "ssl"]
+      blank
+      ["GATEWAY" "=" (str "ai-gateway.vercel.sh")]
+      ["KEY_FILE" "=" (index "os.environ" (str "GATEWAY_KEY_FILE"))]
+      ["CREST_AUTH" "=" (index "os.environ" (str "CREST_AUTH"))]
+      ["HOST" "=" (call "os.environ.get" [(str "HOST") (str "127.0.0.1")])]
+      ["PORT" "=" (call "int" [(call "os.environ.get" [(str "PORT") (str "8899")])])]
+      ["CREST" "=" (dict (rows [(pair (str "anthropic") (tuple [(str "api.anthropic.com") (str "")])) (pair (str "openai-codex") (tuple [(str "chatgpt.com") (str "/backend-api")]))]))]
+      ["ACCOUNT" "=" (str "chatgpt-account-id")]
+      ["RESIDENCY" "=" (str "x-openai-internal-codex-residency")]
+      ["DROP" "=" (set (rows [(str "host") (str "authorization") (str "x-api-key") (str "cf-aig-authorization") (str "connection") (str "proxy-connection") (str "accept-encoding")]))]
+      blank
+      blank
+      (class "CrestError" ["Exception"] [
+        "pass"
+      ])
+      blank
+      blank
+      (def "header_name" ["raw"] [
+        ["return" (call (dot (call (dot (index (call "raw.partition" [(str ":")]) 0) "strip") []) "lower") [])]
+      ])
+      blank
+      blank
+      (def "read_key" [] [
+        (with' [(as (call "open" ["KEY_FILE"]) "handle")] [
+          ["return" (call (dot (call "handle.read" []) "strip") [])]
+        ])
+      ])
+      blank
+      blank
+      (async (def "crest_auth" [(star "args")] [
+        ["process" "=" "await" (call "asyncio.create_subprocess_exec" (rows ["CREST_AUTH" (str "json") (star "args") (kw "stdout" "asyncio.subprocess.PIPE") (kw "stderr" "asyncio.subprocess.PIPE")]))]
+        [(commas ["out" "err"]) "=" "await" (call "process.communicate" [])]
+        (if' ["process.returncode" "!=" 0] [
+          ["detail" "=" (call (dot (call "err.decode" []) "strip") []) "or" (str ["exit " (field "process.returncode")])]
+          ["raise" (call "CrestError" [(str ["crest-auth json " (field (call (dot (sq " ") "join") ["args"])) ": " (field "detail")])])]
+        ])
+        ["return" "out"]
+      ]))
+      blank
+      blank
+      (async (def "crest_token" ["provider"] [
+        ["return" (call "json.loads" [["await" (call "crest_auth" [(str "token") "provider"])]])]
+      ]))
+      blank
+      blank
+      (async (def "successor" ["provider" "tried"] [
+        (try [
+            ["token" "=" "await" (call "crest_token" ["provider"])]
+          ] [
+            (except "CrestError" [
+              ["return" "None"]
+            ])
+          ])
+        ["return" "token" "if" (call "token.get" [(str "login")]) "not in" "tried" "else" "None"]
+      ]))
+      blank
+      blank
+      (def "residency" ["access"] [
+        (try [
+            ["segment" "=" (index (call "access.split" [(str ".")]) 1)]
+            ["claims" "=" (call "json.loads" (rows [(call "base64.urlsafe_b64decode" [["segment" "+" (str "=") "*" (paren [(neg (call "len" ["segment"])) "%" 4])]])]))]
+          ] [
+            (except (tuple ["IndexError" "ValueError"]) [
+              ["return" "None"]
+            ])
+          ])
+        ["auth" "=" (call "claims.get" [(str "https://api.openai.com/auth") (dict [])])]
+        (for "claim" (tuple [(str "chatgpt_data_residency") (str "chatgpt_compute_residency")]) [
+          ["value" "=" (call "auth.get" ["claim"])]
+          (if' [(call "isinstance" ["value" "str"]) "and" (call "value.strip" [])] [
+            ["return" (call "value.strip" [])]
+          ])
+        ])
+        ["return" "None"]
+      ])
+      blank
+      blank
+      (def "credentials" ["provider" "token" "names"] [
+        (if' ["provider" "is" "None"] [
+          ["return" (list [(str ["Authorization: Bearer " (field (call "read_key" []))])])]
+        ])
+        ["lines" "=" (list [(str ["Authorization: Bearer " (field (index "token" (sq "access")))])])]
+        (if' ["provider" "==" (str "openai-codex")] [
+          (if' ["ACCOUNT" "not in" "names" "and" (call "token.get" [(str "account_id")])] [
+            (call "lines.append" [(str [(field "ACCOUNT") ": " (field (index "token" (sq "account_id")))])])
+          ])
+          ["place" "=" (call "residency" [(index "token" (str "access"))])]
+          (if' ["RESIDENCY" "not in" "names" "and" "place"] [
+            (call "lines.append" [(str [(field "RESIDENCY") ": " (field "place")])])
+          ])
+        ])
+        ["return" "lines"]
+      ])
+      blank
+      blank
+      (def "route" ["path"] [
+        (for (commas ["provider" (tuple ["host" "prefix"])]) (call "CREST.items" []) [
+          ["mount" "=" (str ["/" (field "provider")])]
+          (if' ["path" "==" "mount" "or" (call "path.startswith" [(tuple [(str [(field "mount") "/"]) (str [(field "mount") "?"])])])] [
+            ["return" (commas ["provider" "host" ["prefix" "+" (call "path.removeprefix" ["mount"])]])]
+          ])
+        ])
+        ["return" (commas ["None" "GATEWAY" "path"])]
+      ])
+      blank
+      blank
+      (async (def "read_body" ["reader" "headers"] [
+        ["length" "=" 0]
+        ["chunked" "=" "False"]
+        (for "raw" "headers" [
+          ["name" "=" (call "header_name" ["raw"])]
+          ["value" "=" (call (dot (index (call "raw.partition" [(str ":")]) 2) "strip") [])]
+          (ifElse ["name" "==" (str "content-length")] [
+              ["length" "=" (call "int" ["value"])]
+            ] (if' ["name" "==" (str "transfer-encoding") "and" (str "chunked") "in" (call "value.lower" [])] [
+              ["chunked" "=" "True"]
+            ]))
+        ])
+        (if' ["not" "chunked"] [
+          ["return" "await" (call "reader.readexactly" ["length"]) "if" "length" "else" (bytes (str ""))]
+        ])
+        ["data" "=" (call "bytearray" [])]
+        (while "True" [
+          ["line" "=" "await" (call "reader.readline" [])]
+          ["data" "+=" "line"]
+          ["size" "=" (call "int" [[(call (dot (index (call "line.split" [(bytes (str ";"))]) 0) "strip") []) "or" (bytes (str "0"))] 16])]
+          (if' ["size" "==" 0] [
+            ["data" "+=" "await" (call "reader.readline" [])]
+            ["return" (call "bytes" ["data"])]
+          ])
+          ["data" "+=" "await" (call "reader.readexactly" [["size" "+" 2]])]
+        ])
+      ]))
+      blank
+      blank
+      (async (def "exchange" ["host" "request"] [
+        ["context" "=" (call "ssl.create_default_context" [])]
+        [(commas ["reader" "writer"]) "=" "await" (call "asyncio.open_connection" (rows [["host" 443 (kw "ssl" "context") (kw "server_hostname" "host")]]))]
+        (call "writer.write" ["request"])
+        ["await" (call "writer.drain" [])]
+        ["head" "=" "await" (call "reader.readuntil" [(bytes (str "\\r\\n\\r\\n"))])]
+        ["return" (commas ["reader" "writer" "head"])]
+      ]))
+      blank
+      blank
+      (async (def "pump" ["source" "sink"] [
+        (while ["data" ":=" "await" (call "source.read" [65536])] [
+          (call "sink.write" ["data"])
+          ["await" (call "sink.drain" [])]
+        ])
+      ]))
+      blank
+      blank
+      (async (def "relay" ["client_reader" "client_writer" "up_reader" "up_writer" "both"] [
+        ["tasks" "=" (list [(call "asyncio.create_task" [(call "pump" ["up_reader" "client_writer"])])])]
+        (if' "both" [
+          (call "tasks.append" [(call "asyncio.create_task" [(call "pump" ["client_reader" "up_writer"])])])
+        ])
+        [(commas ["done" "pending"]) "=" "await" (call "asyncio.wait" (rows [["tasks" (kw "return_when" "asyncio.FIRST_COMPLETED")]]))]
+        (for "task" "pending" [
+          (call "task.cancel" [])
+        ])
+        (for "task" "done" [
+          (call "task.exception" [])
+        ])
+      ]))
+      blank
+      blank
+      (def "failure" ["status" "message"] [
+        ["body" "=" (call "message.encode" [])]
+        ["return" (call (dot (hang (rows [(str ["HTTP/1.1 " (field "status") "\\r\\nContent-Type: text/plain\\r\\n"]) (str ["Content-Length: " (field (call "len" ["body"])) "\\r\\nConnection: close\\r\\n\\r\\n"])])) "encode") []) "+" "body"]
+      ])
+      blank
+      blank
+      (async (def "handle" ["reader" "writer"] [
+        (try [
+            ["head" "=" "await" (call "reader.readuntil" [(bytes (str "\\r\\n\\r\\n"))])]
+            [(commas ["method" "path" "_"]) "=" (call (dot (index (call (dot (call "head.decode" [(str "latin1")]) "split") [(str "\\r\\n")]) 0) "split") [(str " ") 2])]
+          ] [
+            (except "Exception" [
+              (call "writer.close" [])
+              "return"
+            ])
+          ])
+        ["lines" "=" (list [["raw" "for" "raw" "in" (index (call (dot (call "head.decode" [(str "latin1")]) "split") [(str "\\r\\n")]) (slice 1 null)) "if" "raw"]])]
+        ["upgrade" "=" (call "any" [[(call "header_name" ["raw"]) "==" (str "upgrade") "for" "raw" "in" "lines"]])]
+        ["kept" "=" (list [["raw" "for" "raw" "in" "lines" "if" (call "header_name" ["raw"]) "not in" "DROP"]])]
+        ["names" "=" (set [[(call "header_name" ["raw"]) "for" "raw" "in" "kept"]])]
+        [(commas ["provider" "host" "target"]) "=" (call "route" ["path"])]
+        ["upstream" "=" "None"]
+        ["answered" "=" "False"]
+        (try [
+            ["body" "=" "await" (call "read_body" ["reader" "kept"])]
+            ["token" "=" "await" (call "crest_token" ["provider"]) "if" "provider" "else" "None"]
+            ["tried" "=" (call "set" [])]
+            (while "True" [
+              ["outgoing" "=" (list (rows [(str [(field "method") " " (field "target") " HTTP/1.1"]) (str ["Host: " (field "host")]) (star (call "credentials" ["provider" "token" "names"])) (star "kept") [[(str "Connection: Upgrade") "if" "upgrade" "else" (str "Connection: close")]] (str "") (str "")]))]
+              [(commas ["up_reader" "upstream" "response"]) "=" "await" (call "exchange" (rows [["host" [(call (dot (call (dot (str "\\r\\n") "join") ["outgoing"]) "encode") [(str "latin1")]) "+" "body"]]]))]
+              ["login" "=" (call "token.get" [(str "login")]) "if" "token" "else" "None"]
+              (if' [(index (call "response.split" [(bytes (str " ")) 2]) 1) "==" (bytes (str "429")) "and" "login" "and" "not" "upgrade"] [
+                (call "tried.add" ["login"])
+                ["await" (call "crest_auth" [(str "cool") "login"])]
+                ["following" "=" "await" (call "successor" ["provider" "tried"])]
+                (if' "following" [
+                  (call "upstream.close" [])
+                  ["token" "=" "following"]
+                  "continue"
+                ])
+              ])
+              ["answered" "=" "True"]
+              (call "writer.write" ["response"])
+              ["await" (call "writer.drain" [])]
+              ["await" (call "relay" ["reader" "writer" "up_reader" "upstream" "upgrade"])]
+              "break"
+            ])
+          ] [
+            (except (as "CrestError" "error") [
+              (if' ["not" "answered"] [
+                (call "writer.write" [(call "failure" [(str "502 Bad Gateway") (call "str" ["error"])])])
+              ])
+            ])
+            (except (as "Exception" "error") [
+              (if' ["not" "answered"] [
+                (call "writer.write" (rows [(call "failure" [(str "502 Bad Gateway") (str ["upstream failed: " (field "error")])])]))
+              ])
+            ])
+            (finally [
+              (if' "upstream" [
+                (call "upstream.close" [])
+              ])
+              (try [
+                  ["await" (call "writer.drain" [])]
+                ] [
+                  (except "Exception" [
+                    "pass"
+                  ])
+                ])
+              (call "writer.close" [])
+            ])
+          ])
+      ]))
+      blank
+      blank
+      (async (def "main" [] [
+        ["server" "=" "await" (call "asyncio.start_server" ["handle" "HOST" "PORT"])]
+        (async (with' ["server"] [
+          ["await" (call "server.serve_forever" [])]
+        ]))
+      ]))
+      blank
+      blank
+      (call "asyncio.run" [(call "main" [])])
     ];
     omp_box_guest = {
       pkgs,
