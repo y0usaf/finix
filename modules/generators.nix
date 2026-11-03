@@ -2,7 +2,7 @@
   declarations = set:
     if builtins.isList set
     then set
-    else lib.mapAttrsToList (name: value: [name value]) set;
+    else throw "cssSource: `set` must be a list of [property value] pairs, because declaration order matters in CSS";
 
   declaration = pair: "  ${builtins.elemAt pair 0}: ${builtins.elemAt pair 1};\n";
 

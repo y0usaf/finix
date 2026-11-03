@@ -1,8 +1,4 @@
-{
-  generators,
-  values,
-  ...
-}:
+{generators, values, ...}:
 generators.cssSource [
   {
     select = ":root";
@@ -74,91 +70,92 @@ generators.cssSource [
   }
   {
     select = "body, .theme-dark:not(.custom-user-profile-theme), .theme-light:not(.custom-user-profile-theme)";
-    set = {
-      "--activity-card-background" = "var(--bg-3) !important";
-      "--background-accent" = "var(--bg-2) !important";
-      "--background-floating" = "var(--bg-3) !important";
-      "--background-nested-floating" = "var(--bg-4) !important";
-      "--background-mentioned" = "var(--mention) !important";
-      "--background-mentioned-hover" = "var(--mention-hover) !important";
-      "--background-message-highlight" = "var(--reply) !important";
-      "--background-message-highlight-hover" = "var(--reply-hover) !important";
-      "--background-message-hover" = "var(--message-hover) !important";
-      "--background-primary" = "var(--bg-4) !important";
-      "--background-secondary" = "var(--bg-3) !important";
-      "--background-secondary-alt" = "var(--bg-3) !important";
-      "--background-tertiary" = "var(--bg-4) !important";
-      "--bg-base-primary" = "var(--bg-4) !important";
-      "--bg-base-secondary" = "var(--bg-4) !important";
-      "--bg-base-tertiary" = "var(--bg-3) !important";
-      "--background-base-low" = "var(--bg-4) !important";
-      "--background-base-lower" = "var(--bg-4) !important";
-      "--background-base-lowest" = "var(--bg-4) !important";
-      "--background-mod-subtle" = "var(--hover) !important";
-      "--background-mod-normal" = "var(--active) !important";
-      "--background-mod-strong" = "var(--active-2) !important";
-      "--background-modifier-accent" = "var(--hover) !important";
-      "--background-modifier-active" = "var(--active) !important";
-      "--background-modifier-hover" = "var(--hover) !important";
-      "--background-modifier-selected" = "var(--active) !important";
-      "--background-surface-high" = "var(--bg-3) !important";
-      "--background-surface-higher" = "var(--bg-3) !important";
-      "--background-surface-highest" = "var(--bg-3) !important";
-      "--bg-surface-overlay" = "var(--bg-4) !important";
-      "--bg-surface-raised" = "var(--bg-3) !important";
-      "--text-brand" = "var(--accent-1) !important";
-      "--text-danger" = "var(--red-1) !important";
-      "--text-link" = "var(--accent-1) !important";
-      "--text-low-contrast" = "var(--text-4) !important";
-      "--text-muted" = "var(--text-5) !important";
-      "--text-muted-on-default" = "var(--text-4) !important";
-      "--text-normal" = "var(--text-3) !important";
-      "--text-positive" = "var(--green-1) !important";
-      "--text-primary" = "var(--text-3) !important";
-      "--text-secondary" = "var(--text-4) !important";
-      "--text-tertiary" = "var(--text-4) !important";
-      "--text-warning" = "var(--yellow-1) !important";
-      "--text-default" = "var(--text-3) !important";
-      "--border-faint" = "var(--border-light) !important";
-      "--border-subtle" = "var(--border) !important";
-      "--border-normal" = "var(--border) !important";
-      "--border-strong" = "var(--border) !important";
-      "--input-border" = "var(--border) !important";
-      "--status-danger" = "var(--red-2) !important";
-      "--status-dnd" = "var(--dnd) !important";
-      "--status-idle" = "var(--idle) !important";
-      "--status-offline" = "var(--offline) !important";
-      "--status-online" = "var(--online) !important";
-      "--status-positive" = "var(--green-2) !important";
-      "--status-speaking" = "var(--green-2) !important";
-      "--status-warning" = "var(--yellow-2) !important";
-      "--interactive-normal" = "var(--text-4) !important";
-      "--interactive-hover" = "var(--text-3) !important";
-      "--interactive-active" = "var(--text-3) !important";
-      "--interactive-muted" = "var(--text-5) !important";
-      "--bg-brand" = "var(--accent-2) !important";
-      "--brand-360" = "var(--accent-2) !important";
-      "--brand-500" = "var(--accent-2) !important";
-      "--blurple-50" = "var(--accent-2) !important";
-      "--mention-foreground" = "var(--accent-1) !important";
-      "--mention-background" = "color-mix(in srgb, var(--accent-2) 10%, transparent) !important";
-      "--input-background" = "var(--bg-3) !important";
-      "--channel-text-area-placeholder" = "var(--text-5) !important";
-      "--deprecated-text-input-bg" = "var(--bg-3) !important";
-      "--deprecated-text-input-border" = "var(--border-light) !important";
-      "--modal-background" = "var(--bg-4) !important";
-      "--modal-footer-background" = "var(--bg-4) !important";
-      "--scrollbar-auto-thumb" = "var(--bg-3) !important";
-      "--scrollbar-auto-track" = "transparent !important";
-      "--scrollbar-thin-thumb" = "var(--bg-3) !important";
-      "--scrollbar-thin-track" = "transparent !important";
-      "--chat-background-default" = "var(--bg-3) !important";
-      "--chat-text-muted" = "var(--text-5) !important";
-      "--white" = "var(--text-0) !important";
-      "--white-500" = "var(--text-0) !important";
-      "--background-code" = "var(--bg-3) !important";
-      "--card-primary-bg" = "var(--bg-3) !important";
-      "--card-secondary-bg" = "var(--bg-2) !important";
-    };
+    set = [
+      ["--activity-card-background" "var(--bg-3) !important"]
+      ["--background-accent" "var(--bg-2) !important"]
+      ["--background-floating" "var(--bg-3) !important"]
+      ["--background-nested-floating" "var(--bg-4) !important"]
+      ["--background-mentioned" "var(--mention) !important"]
+      ["--background-mentioned-hover" "var(--mention-hover) !important"]
+      ["--background-message-highlight" "var(--reply) !important"]
+      ["--background-message-highlight-hover" "var(--reply-hover) !important"]
+      ["--background-message-hover" "var(--message-hover) !important"]
+      ["--background-primary" "var(--bg-4) !important"]
+      ["--background-secondary" "var(--bg-3) !important"]
+      ["--background-secondary-alt" "var(--bg-3) !important"]
+      ["--background-tertiary" "var(--bg-4) !important"]
+      ["--bg-base-primary" "var(--bg-4) !important"]
+      ["--bg-base-secondary" "var(--bg-4) !important"]
+      ["--bg-base-tertiary" "var(--bg-3) !important"]
+      ["--background-base-low" "var(--bg-4) !important"]
+      ["--background-base-lower" "var(--bg-4) !important"]
+      ["--background-base-lowest" "var(--bg-4) !important"]
+      ["--background-mod-subtle" "var(--hover) !important"]
+      ["--background-mod-normal" "var(--active) !important"]
+      ["--background-mod-strong" "var(--active-2) !important"]
+      ["--background-modifier-accent" "var(--hover) !important"]
+      ["--background-modifier-active" "var(--active) !important"]
+      ["--background-modifier-hover" "var(--hover) !important"]
+      ["--background-modifier-selected" "var(--active) !important"]
+      ["--background-surface-high" "var(--bg-3) !important"]
+      ["--background-surface-higher" "var(--bg-3) !important"]
+      ["--background-surface-highest" "var(--bg-3) !important"]
+      ["--bg-surface-overlay" "var(--bg-4) !important"]
+      ["--bg-surface-raised" "var(--bg-3) !important"]
+      ["--text-brand" "var(--accent-1) !important"]
+      ["--text-danger" "var(--red-1) !important"]
+      ["--text-link" "var(--accent-1) !important"]
+      ["--text-low-contrast" "var(--text-4) !important"]
+      ["--text-muted" "var(--text-5) !important"]
+      ["--text-muted-on-default" "var(--text-4) !important"]
+      ["--text-normal" "var(--text-3) !important"]
+      ["--text-positive" "var(--green-1) !important"]
+      ["--text-primary" "var(--text-3) !important"]
+      ["--text-secondary" "var(--text-4) !important"]
+      ["--text-tertiary" "var(--text-4) !important"]
+      ["--text-warning" "var(--yellow-1) !important"]
+      ["--text-default" "var(--text-3) !important"]
+      ["--border-faint" "var(--border-light) !important"]
+      ["--border-subtle" "var(--border) !important"]
+      ["--border-normal" "var(--border) !important"]
+      ["--border-strong" "var(--border) !important"]
+      ["--input-border" "var(--border) !important"]
+      ["--status-danger" "var(--red-2) !important"]
+      ["--status-dnd" "var(--dnd) !important"]
+      ["--status-idle" "var(--idle) !important"]
+      ["--status-offline" "var(--offline) !important"]
+      ["--status-online" "var(--online) !important"]
+      ["--status-positive" "var(--green-2) !important"]
+      ["--status-speaking" "var(--green-2) !important"]
+      ["--status-warning" "var(--yellow-2) !important"]
+      ["--interactive-normal" "var(--text-4) !important"]
+      ["--interactive-hover" "var(--text-3) !important"]
+      ["--interactive-active" "var(--text-3) !important"]
+      ["--interactive-muted" "var(--text-5) !important"]
+      ["--bg-brand" "var(--accent-2) !important"]
+      ["--brand-360" "var(--accent-2) !important"]
+      ["--brand-500" "var(--accent-2) !important"]
+      ["--blurple-50" "var(--accent-2) !important"]
+      ["--mention-foreground" "var(--accent-1) !important"]
+      ["--mention-background" "color-mix(in srgb, var(--accent-2) 10%, transparent) !important"]
+      ["--input-background" "var(--bg-3) !important"]
+      ["--channel-text-area-placeholder" "var(--text-5) !important"]
+      ["--deprecated-text-input-bg" "var(--bg-3) !important"]
+      ["--deprecated-text-input-border" "var(--border-light) !important"]
+      ["--modal-background" "var(--bg-4) !important"]
+      ["--modal-footer-background" "var(--bg-4) !important"]
+      ["--scrollbar-auto-thumb" "var(--bg-3) !important"]
+      ["--scrollbar-auto-track" "transparent !important"]
+      ["--scrollbar-thin-thumb" "var(--bg-3) !important"]
+      ["--scrollbar-thin-track" "transparent !important"]
+      ["--chat-background-default" "var(--bg-3) !important"]
+      ["--chat-text-muted" "var(--text-5) !important"]
+      ["--white" "var(--text-0) !important"]
+      ["--white-500" "var(--text-0) !important"]
+      ["--background-code" "var(--bg-3) !important"]
+      ["--card-primary-bg" "var(--bg-3) !important"]
+      ["--card-secondary-bg" "var(--bg-2) !important"]
+    ];
   }
 ]
+
