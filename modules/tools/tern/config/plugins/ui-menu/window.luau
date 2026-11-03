@@ -1,3 +1,5 @@
+local Rail = require("./rail")
+
 local TWEAKS = {
 	{
 		id = "sessions",
@@ -260,6 +262,14 @@ html.lay-rail.tabs-h .tb-add {
 		quiet = true,
 	},
 	{
+		id = "t3rail",
+		label = "T3 rail",
+		group = "Rail",
+		css = Rail.css,
+		apply = Rail.apply,
+		on = true,
+	},
+	{
 		id = "centering",
 		label = "rail centering",
 		group = "Rail",
@@ -344,6 +354,10 @@ if type(saved) == "table" then
 		end
 	end
 end
+
+Rail.bind(function()
+	return on.t3rail == true
+end)
 
 local model = {}
 for _, t in ipairs(TWEAKS) do
@@ -472,6 +486,9 @@ local function toggle(cx, id)
 	on[id] = not on[id]
 	paint(t)
 	save(id)
+	if t.apply then
+		t.apply(cx)
+	end
 	if id == "lock" and on.lock then
 		rail(cx)
 	end
@@ -488,6 +505,9 @@ local function watch()
 				if type(want) == "boolean" and want ~= on[t.id] then
 					on[t.id] = want
 					paint(t)
+					if t.apply and cx then
+						t.apply(cx)
+					end
 					if t.id == "lock" and want then
 						rail(cx)
 					end
