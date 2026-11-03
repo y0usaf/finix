@@ -31706,6 +31706,50 @@
         reason = imported: (lib.findFirst (f: f.failed) {reason = null;} (failures imported)).reason;
       };
 
+      trees = {
+        lisp = {
+          "tomoe-bar.lisp" = modules_desktop_session_tomoe_lisp_bar_data;
+          "tomoe-cassette.lisp" = modules_desktop_session_tomoe_lisp_cassette_data;
+          "tomoe-deck.lisp" = modules_desktop_session_tomoe_lisp_deck_data;
+          "tomoe-gap.lisp" = modules_desktop_session_tomoe_lisp_gap_data;
+          "tomoe-glass.lisp" = modules_desktop_session_tomoe_lisp_glass_data;
+          "tomoe-hud.lisp" = modules_desktop_session_tomoe_lisp_hud_data;
+          "tomoe-peek.lisp" = modules_desktop_session_tomoe_lisp_peek_data;
+          "tomoe-plates.lisp" = modules_desktop_session_tomoe_lisp_plates_data;
+          "tomoe-policy.lisp" = modules_desktop_session_tomoe_lisp_policy_data;
+          "tomoe-shader-wallpaper.lisp" = modules_desktop_session_tomoe_lisp_shader_wallpaper_data;
+          "tomoe-spine.lisp" = modules_desktop_session_tomoe_lisp_spine_data;
+          "tomoe-sway.lisp" = modules_desktop_session_tomoe_lisp_sway_data;
+          "tomoe-theme.lisp" = modules_desktop_session_tomoe_lisp_theme_data;
+          "tomoe-user.lisp" = modules_desktop_session_tomoe_lisp_user_data;
+          "ekko-init.lisp" = modules_shell_ekko_init_data;
+        };
+        shell = {
+          "beat-saber-lock" = modules_hosts_steam_frame_beat_saber_lock_data;
+          "omp-box" = omp_box_omp_box_data;
+        };
+      };
+
+      osc = lib.mapAttrs' (name: scheme:
+        lib.nameValuePair "osc-${name}.sh" (modules_desktop_session_theme_templates_osc_data {
+          inherit generators;
+          values = scheme.colors // scheme.special;
+        }))
+      modules_desktop_session_theme_colorschemes_data;
+
+      rendered = lib.recursiveUpdate (lib.mapAttrs (language: lib.mapAttrs (_: syntax: generators.${language}.render (syntax generators.${language}))) trees) {shell = osc;};
+
+      reader = pkgs.writeText "read.lisp" ''
+        (let ((*read-eval* nil))
+          (with-open-file (source (sb-ext:posix-getenv "SOURCE"))
+            (loop for form = (read source nil source) until (eq form source))))
+      '';
+
+      languageChecks = {
+        lisp = file: "SOURCE=${file} ${lib.getExe pkgs.sbcl} --script ${reader}\n";
+        shell = file: "${lib.getExe pkgs.bash} -n ${file}\n${lib.getExe pkgs.shellcheck} -s bash -S warning ${file}\n";
+      };
+
       runner = pkgs.writeText "codec-runner.nix" ''
         candidate: let
           result = (builtins.getFlake "path:${inputs.self}").lib.lint.convert (builtins.fromJSON (builtins.readFile candidate));
@@ -31853,6 +31897,11 @@
           fi
         fi
         exec ${strictix} check "''${scope[@]}" --config ${config}
+      '';
+
+      codegen = pkgs.runCommand "codegen" {} ''
+        ${lib.concatStrings (lib.concatLists (lib.mapAttrsToList (language: files: lib.mapAttrsToList (name: text: languageChecks.${language} (pkgs.writeText name text)) files) rendered))}
+        touch $out
       '';
 
       check = pkgs.runCommand "strictix" {} ''
@@ -32267,7 +32316,12 @@
         tomoe = inputs.tomoe.packages.${system}.default;
       };
 
-      checks.${system} = lib.mapAttrs' (name: host: lib.nameValuePair name host.config.system.build.toplevel) hosts // {strictix = lint.check;};
+      checks.${system} =
+        lib.mapAttrs' (name: host: lib.nameValuePair name host.config.system.build.toplevel) hosts
+        // {
+          strictix = lint.check;
+          inherit (lint) codegen;
+        };
 
       formatter.${system} = inputs.nixpkgs.legacyPackages.${system}.alejandra;
     };
