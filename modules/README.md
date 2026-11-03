@@ -250,7 +250,8 @@ then runs each language's own check on every rendered tree, listed in its
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
-| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
+| VBScript (1 file) | bytes | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
+| TypeScript, JavaScript, Luau, Lua, Python, GLSL, patches, markdown | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except

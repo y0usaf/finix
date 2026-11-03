@@ -28858,6 +28858,78 @@
         render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
       };
 
+      vbs = let
+        inherit (doc) hardline;
+
+        tabs = depth: lib.strings.replicate depth "\t";
+
+        listed = values: lib.intersperse ", " (map expression values);
+
+        expressionForms = {
+          string = lib.id;
+          list = value: [(expression (builtins.head value)) "(" (listed (builtins.tail value)) ")"];
+          str = value: "\"${lib.replaceStrings ["\""] ["\"\""] value.str}\"";
+          op = value: lib.intersperse " " (map expression value.op);
+        };
+
+        expression = value: (expressionForms.${kindOf value} or (throw "vbs: no expression ${kindOf value}")) value;
+
+        block = depth: map (value: [hardline (entry depth value)]);
+
+        entry = depth: value:
+          if value ? blank
+          then []
+          else [(tabs depth) (statement depth value)];
+
+        conditional = depth: value: [
+          "If "
+          (expression value.test)
+          " Then"
+          (block (depth + 1) value.body)
+          (lib.optionals (value ? otherwise) [hardline (tabs depth) "Else" (block (depth + 1) value.otherwise)])
+          hardline
+          (tabs depth)
+          "End If"
+        ];
+
+        statementForms = {
+          list = _: value: [(expression (builtins.head value)) (lib.optionals (builtins.tail value != []) [" " (listed (builtins.tail value))])];
+          comment = _: value: value.comment;
+          option = _: value: "Option ${value.option}";
+          onError = _: value: "On Error ${value.onError}";
+          dim = _: value: ["Dim " (lib.intersperse ", " value.dim)];
+          assign = _: value: [value.assign.name " = " (expression value.assign.value)];
+          set = _: value: ["Set " value.set.name " = " (expression value.set.value)];
+          "if" = depth: value: conditional depth value."if";
+        };
+
+        statement = depth: value: (statementForms.${kindOf value} or (throw "vbs: no statement ${kindOf value}")) depth value;
+      in {
+        blank = {blank = true;};
+
+        comment = string: {comment = string;};
+
+        str = string: {str = string;};
+
+        op = values: {op = values;};
+
+        option = string: {option = string;};
+
+        onError = string: {onError = string;};
+
+        dim = names: {dim = names;};
+
+        assign = name: value: {assign = {inherit name value;};};
+
+        set = name: value: {set = {inherit name value;};};
+
+        if' = test: body: {"if" = {inherit test body;};};
+
+        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+
+        render = values: doc.render 80 (map (value: [(entry 0 value) hardline]) values);
+      };
+
       sourceFile = name: text:
         builtins.path {
           path = builtins.toFile name text;
@@ -28866,7 +28938,7 @@
     in {
       cssSource = list: "${nodes list}\n";
 
-      inherit doc lisp shell;
+      inherit doc lisp shell vbs;
 
       inherit sourceFile;
 
@@ -28903,8 +28975,6 @@
       javascriptSource = lines;
 
       luauSource = lines;
-
-      vbsSource = lines;
 
       luaSource = lines;
 
@@ -31728,6 +31798,9 @@
           "beat-saber-lock" = modules_hosts_steam_frame_beat_saber_lock_data;
           "omp-box" = omp_box_omp_box_data;
         };
+        vbs = {
+          "play.vbs" = modules_tools_tern_config_plugins_tuturu_scripts_play_data;
+        };
       };
 
       osc = lib.mapAttrs' (name: scheme:
@@ -31748,6 +31821,7 @@
       languageChecks = {
         lisp = file: "SOURCE=${file} ${lib.getExe pkgs.sbcl} --script ${reader}\n";
         shell = file: "${lib.getExe pkgs.bash} -n ${file}\n${lib.getExe pkgs.shellcheck} -s bash -S warning ${file}\n";
+        vbs = file: "${strictix} import vbs ${file} > /dev/null\n";
       };
 
       runner = pkgs.writeText "codec-runner.nix" ''
@@ -34113,7 +34187,7 @@
         "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource modules_tools_tern_config_plugins_tuturu_gitignore_data);
         "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdownSource modules_tools_tern_config_plugins_tuturu_README_data);
         "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource modules_tools_tern_config_plugins_tuturu_plugin_data);
-        "plugins/tuturu/scripts/play.vbs" = generators.sourceFile "play.vbs" (generators.vbsSource modules_tools_tern_config_plugins_tuturu_scripts_play_data);
+        "plugins/tuturu/scripts/play.vbs" = generators.sourceFile "play.vbs" (generators.vbs.render (modules_tools_tern_config_plugins_tuturu_scripts_play_data generators.vbs));
         "plugins/tuturu/sounds.toml" = generators.sourceFile "sounds.toml" (generators.tomlSource modules_tools_tern_config_plugins_tuturu_sounds_data);
         "plugins/tuturu/src/window.luau" = generators.sourceFile "window.luau" (generators.luauSource modules_tools_tern_config_plugins_tuturu_src_window_data);
         "plugins/ui-menu/host.luau" = generators.sourceFile "host.luau" (generators.luauSource modules_tools_tern_config_plugins_ui_menu_host_data);
@@ -34552,41 +34626,53 @@
     ];
     modules_tools_tern_config_plugins_tuturu_gitignore_data = ["tern.d.luau" ".DS_Store" "Thumbs.db"];
     modules_tools_tern_config_plugins_tuturu_plugin_data = [[["schema" 1] ["id" "tuturu"] ["name" "Tuturu"] ["version" "0.1.0"] ["description" "Plays a sound when a pane raises an unseen alert, an agent yields, or a long command finishes."] ["icon" "bell"] ["window" "src/window.luau"]]];
-    modules_tools_tern_config_plugins_tuturu_scripts_play_data = [
-      "' Chime hidden player launcher (Windows)."
-      "'"
-      "' Run with wscript.exe (a GUI-subsystem host: no console window of its own)."
-      "' It runs PowerShell hidden (window style 0 from creation, so not even a"
-      "' flash) and waits for playback. PowerShell is a console-subsystem program,"
-      "' so spawning it directly pops a console box on every chime; -WindowStyle"
-      "' Hidden only hides it after it appears."
-      "'"
-      "' Usage: wscript.exe //Nologo play.vbs <wav-file>"
-      "' Exit code is PowerShell's; it never shows an error dialog."
-      ""
-      "Option Explicit"
-      "On Error Resume Next"
-      ""
-      "If WScript.Arguments.Count = 0 Then"
-      "\tWScript.Quit 1"
-      "End If"
-      ""
-      "Dim sh, wav, cmd"
-      "Set sh = CreateObject(\"WScript.Shell\")"
-      "If Err.Number <> 0 Then"
-      "\tWScript.Quit 1"
-      "End If"
-      ""
-      "wav = WScript.Arguments(0)"
-      "wav = Replace(wav, \"'\", \"''\")"
-      "cmd = \"powershell -NoProfile -NonInteractive -WindowStyle Hidden -Command \"\"(New-Object Media.SoundPlayer '\" & wav & \"').PlaySync()\"\"\""
-      ""
-      "Dim code"
-      "code = sh.Run(cmd, 0, True)"
-      "If Err.Number <> 0 Then"
-      "\tWScript.Quit 1"
-      "End If"
-      "WScript.Quit code"
+    modules_tools_tern_config_plugins_tuturu_scripts_play_data = {
+      assign,
+      blank,
+      comment,
+      dim,
+      if',
+      onError,
+      op,
+      option,
+      set,
+      str,
+      ...
+    }: [
+      (comment "' Chime hidden player launcher (Windows).")
+      (comment "'")
+      (comment "' Run with wscript.exe (a GUI-subsystem host: no console window of its own).")
+      (comment "' It runs PowerShell hidden (window style 0 from creation, so not even a")
+      (comment "' flash) and waits for playback. PowerShell is a console-subsystem program,")
+      (comment "' so spawning it directly pops a console box on every chime; -WindowStyle")
+      (comment "' Hidden only hides it after it appears.")
+      (comment "'")
+      (comment "' Usage: wscript.exe //Nologo play.vbs <wav-file>")
+      (comment "' Exit code is PowerShell's; it never shows an error dialog.")
+      blank
+      (option "Explicit")
+      (onError "Resume Next")
+      blank
+      (if' (op ["WScript.Arguments.Count" "=" "0"]) [
+        ["WScript.Quit" "1"]
+      ])
+      blank
+      (dim ["sh" "wav" "cmd"])
+      (set "sh" ["CreateObject" (str "WScript.Shell")])
+      (if' (op ["Err.Number" "<>" "0"]) [
+        ["WScript.Quit" "1"]
+      ])
+      blank
+      (assign "wav" ["WScript.Arguments" "0"])
+      (assign "wav" ["Replace" "wav" (str "'") (str "''")])
+      (assign "cmd" (op [(str "powershell -NoProfile -NonInteractive -WindowStyle Hidden -Command \"(New-Object Media.SoundPlayer '") "&" "wav" "&" (str "').PlaySync()\"")]))
+      blank
+      (dim ["code"])
+      (assign "code" ["sh.Run" "cmd" "0" "True"])
+      (if' (op ["Err.Number" "<>" "0"]) [
+        ["WScript.Quit" "1"]
+      ])
+      ["WScript.Quit" "code"]
     ];
     modules_tools_tern_config_plugins_tuturu_sounds_data = [[{comment = "The sounds are built by ~/finix/modules/tools/tern/default.nix and named in";} {comment = "<plugin data>/sounds.toml, which wins over this file. These stay empty so a";} {comment = "missing override is silent rather than playing something else.";} ["alert" ""] ["yield" ""] ["done" ""]] [{comment = "Chime only for panes you are not looking at. false chimes for the focused";} {comment = "pane too.";} ["only_unfocused" true]] [{comment = "Shell commands running at least this long chime the done sound when they";} {comment = "finish. 0 chimes every finished command.";} ["min_seconds" 30]]];
     modules_tools_tern_config_plugins_tuturu_src_window_data = [
