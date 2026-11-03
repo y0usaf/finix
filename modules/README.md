@@ -138,8 +138,8 @@ byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
 groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp, shell,
-Luau, VBScript, patches, markdown and GLSL are syntax trees (below). The other
-code and prose (TypeScript, JavaScript, Lua and Python) are still line lists,
+Luau, VBScript, patches, markdown, GLSL and Lua are syntax trees (below). The
+other code and prose (TypeScript, JavaScript and Python) are still line lists,
 one string per line, whose `<language>Source` generators only join the lines. A
 file passed by path comes from `generators.sourceFile`, whose store path is the
 one the file had; `generators.sourceDir` builds the optchat directory from its
@@ -349,6 +349,30 @@ broken cast. From `tomoe/shaders/glass-mound.data.nix`, abridged:
 ]
 ```
 
+Lua (`generators.lua`): a call is a Nix list, its head first; a name, a
+dotted path (`pg.me:getPosition` as a call's head), a number or `...` is a
+string, an integer may be a Nix integer, and `null`, `true` and `false` are
+`nil`, `true` and `false`. `str` and `sq` are string literals, `table` a table
+of positional values, `field name value` and `key k v`, `fn params body` a
+function, `op [a "and" b]` a run of one binary operator, `not`, `neg`, `len`
+and `bnot` the unary ones, and `dot`, `method`, `index`, `paren` and `apply`
+(`f{...}`) the rest. A statement is a call, `"break"`, `";"`, `local names
+values`, `assign targets values`, `function` or `localFunction name params
+body`, `return values`, `if' test body`, `ifElse test body otherwise` (an
+`if` node as `otherwise` is `elseif`), `forIn`, `forNum`, `while`, `repeat` or
+`do`. A body is a list of statements, one per line two spaces in, or `inline [
+... ]` on the keyword's line; `rows` puts each row of a table's fields on its
+own line, and breaks an `op` before a row's first operator, two spaces in.
+From `aniimo/catch-lua.data.nix`, abridged:
+
+```nix
+(localFunction "safely" ["fn" "self"] [
+  (if' "off" (inline [(return [])]))
+  (local ["ok" "err"] [["pcall" "fn" "self"]])
+  (if' (not "ok") (inline [["disable" "err"]]))
+])
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -379,7 +403,8 @@ then runs each language's own check on every rendered tree, listed in its
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
 | markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
 | GLSL (7 files) | bytes | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
-| TypeScript, JavaScript, Lua, Python | line lists, not converted yet | none |
+| Lua (3 files) | bytes | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
+| TypeScript, JavaScript, Python | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
