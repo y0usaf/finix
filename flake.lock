@@ -765,11 +765,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1793233854,
-        "narHash": "sha256-u8xkHl5Gq3SfI6S2jgVufsruo5ClL8HHwuBdiC5zKbA=",
+        "lastModified": 1793646481,
+        "narHash": "sha256-2rwWMDlNBTs6gouNlgxxpedvD/FG0Yj/WKWcCYdy9UE=",
         "ref": "refs/heads/main",
-        "rev": "968cea0ae1b763dfedcd530a5a7a56987022fd2a",
-        "revCount": 100,
+        "rev": "c5c2e3f5859135b45686c1895d008ce21ec253d6",
+        "revCount": 101,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/mado.git"
       },
@@ -1338,6 +1338,39 @@
         "type": "github"
       }
     },
+    "omp-bot": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793665683,
+        "narHash": "sha256-V/zG26oiFxs0APP0TBYr4DvmLYJ75prVg6GZ2fUvCNE=",
+        "ref": "refs/heads/main",
+        "rev": "958630bb77f85d29f4bbfd7da924c311068d9fb9",
+        "revCount": 15,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/omp-bot"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/omp-bot"
+      }
+    },
+    "omp-stretch": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793134772,
+        "narHash": "sha256-H7lyeAkPr+fH0YaSYT1wVJRfik4QTdvSAxJ2JMJEoN4=",
+        "owner": "materemias",
+        "repo": "omp-stretch",
+        "rev": "50345cd3704602498155f9e40d11e476cfe8c95e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "materemias",
+        "ref": "v0.3.2",
+        "repo": "omp-stretch",
+        "type": "github"
+      }
+    },
     "paseo": {
       "inputs": {
         "nixpkgs": [
@@ -1626,6 +1659,7 @@
         "obs-twitch-tts": "obs-twitch-tts",
         "oh-my-fx": "oh-my-fx",
         "oh-my-pi": "oh-my-pi",
+        "omp-bot": "omp-bot",
         "omp-stretch": "omp-stretch",
         "paseo": "paseo",
         "phi": "phi",
@@ -1640,8 +1674,7 @@
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
-        "tomoe": "tomoe",
-        "omp-bot": "omp-bot"
+        "tomoe": "tomoe"
       }
     },
     "rush": {
@@ -1983,39 +2016,6 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
-      }
-    },
-    "omp-stretch": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1793134772,
-        "narHash": "sha256-H7lyeAkPr+fH0YaSYT1wVJRfik4QTdvSAxJ2JMJEoN4=",
-        "owner": "materemias",
-        "repo": "omp-stretch",
-        "rev": "50345cd3704602498155f9e40d11e476cfe8c95e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "materemias",
-        "ref": "v0.3.2",
-        "repo": "omp-stretch",
-        "type": "github"
-      }
-    },
-    "omp-bot": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1793664276,
-        "narHash": "sha256-3rbqvDjyiKOwyrVcOEanO6z6dFbU5XPSWEN1C4qkfl4=",
-        "ref": "refs/heads/main",
-        "rev": "1ce8b0cad24f198172ea67fcaed7782b43498cef",
-        "revCount": 14,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/omp-bot"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/omp-bot"
       }
     }
   },
