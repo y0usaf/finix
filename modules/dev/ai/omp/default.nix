@@ -98,7 +98,10 @@ in {
         packages = [];
       };
     };
-    ".omp/agent/models.yml".text = builtins.readFile ./models.yml;
+    ".omp/agent/models.yml" = {
+      generator = lib.generators.toYAML {};
+      value = import ./models.data.nix;
+    };
     ".omp/agent/models.json" = {
       generator = toJSON;
       value = catalog.models;
