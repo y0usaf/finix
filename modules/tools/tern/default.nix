@@ -144,7 +144,7 @@
     "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource (import ./config/plugins/tuturu/gitignore.data.nix));
     "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdownSource (import ./config/plugins/tuturu/README.data.nix));
     "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource (import ./config/plugins/tuturu/plugin.data.nix));
-    "plugins/tuturu/scripts/play.vbs" = ./config/plugins/tuturu/scripts/play.vbs;
+    "plugins/tuturu/scripts/play.vbs" = generators.sourceFile "play.vbs" (generators.vbsSource (import ./config/plugins/tuturu/scripts/play.data.nix));
     "plugins/tuturu/sounds.toml" = generators.sourceFile "sounds.toml" (generators.tomlSource (import ./config/plugins/tuturu/sounds.data.nix));
     "plugins/tuturu/src/window.luau" = generators.sourceFile "window.luau" (generators.luauSource (import ./config/plugins/tuturu/src/window.data.nix));
     "plugins/ui-menu/host.luau" = generators.sourceFile "host.luau" (generators.luauSource (import ./config/plugins/ui-menu/host.data.nix));
