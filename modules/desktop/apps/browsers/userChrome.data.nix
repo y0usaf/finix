@@ -85,14 +85,17 @@
       ["display" "none !important"]
     ];
   }
-  { at = "@media (-moz-platform: linux)"; rules = [
-    {
-      select = "#notification-popup[side=\"top\"], #permission-popup[side=\"top\"], #identity-popup[side=\"top\"], #protections-popup[side=\"top\"], #editBookmarkPanel[side=\"top\"], #appMenu-popup[side=\"top\"], #unified-extensions-panel[side=\"top\"], #downloadsPanel[side=\"top\"], #widget-overflow[side=\"top\"], #confirmation-hint[side=\"top\"], #customizationui-widget-panel[side=\"top\"]:not(:has(#allTabsMenu-allTabsView))";
-      set = [
-        ["margin-top" "var(--popup-offset-top) !important"]
-      ];
-    }
-  ]; }
+  {
+    at = "@media (-moz-platform: linux)";
+    rules = [
+      {
+        select = "#notification-popup[side=\"top\"], #permission-popup[side=\"top\"], #identity-popup[side=\"top\"], #protections-popup[side=\"top\"], #editBookmarkPanel[side=\"top\"], #appMenu-popup[side=\"top\"], #unified-extensions-panel[side=\"top\"], #downloadsPanel[side=\"top\"], #widget-overflow[side=\"top\"], #confirmation-hint[side=\"top\"], #customizationui-widget-panel[side=\"top\"]:not(:has(#allTabsMenu-allTabsView))";
+        set = [
+          ["margin-top" "var(--popup-offset-top) !important"]
+        ];
+      }
+    ];
+  }
   {
     select = ".panel-viewstack";
     set = [
@@ -132,16 +135,19 @@
       ["border-radius" "0 !important"]
     ];
   }
-  { at = "@media (prefers-reduced-motion: reduce)"; rules = [
-    {
-      select = "*";
-      set = [
-        ["animation" "none !important"]
-        ["transition" "none !important"]
-        ["scroll-behavior" "auto !important"]
-      ];
-    }
-  ]; }
+  {
+    at = "@media (prefers-reduced-motion: reduce)";
+    rules = [
+      {
+        select = "*";
+        set = [
+          ["animation" "none !important"]
+          ["transition" "none !important"]
+          ["scroll-behavior" "auto !important"]
+        ];
+      }
+    ];
+  }
   {
     select = "#statuspanel, .titlebar-buttonbox-container, .titlebar-spacer, .toolbar-spring, .urlbarView-row[label=\"LibreWolf Suggest\"], toolbarspring";
     set = [
@@ -337,4 +343,3 @@
     ];
   }
 ]
-

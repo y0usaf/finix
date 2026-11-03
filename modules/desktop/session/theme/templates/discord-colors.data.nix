@@ -1,4 +1,8 @@
-{generators, values, ...}:
+{
+  generators,
+  values,
+  ...
+}:
 generators.cssSource [
   {
     select = ":root";
@@ -158,4 +162,3 @@ generators.cssSource [
     ];
   }
 ]
-
