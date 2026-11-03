@@ -137,9 +137,9 @@ The configuration reads no file but Nix. Data a module reads lives in a
 byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
-groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp and
-shell are syntax trees (below). The other code and prose (TypeScript,
-JavaScript, Luau, Lua, Python, GLSL, VBScript, patches and markdown) are still
+groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp,
+shell and Luau are syntax trees (below). The other code and prose (TypeScript,
+JavaScript, Lua, Python, GLSL, VBScript, patches and markdown) are still
 line lists, one string per line, whose `<language>Source` generators only join
 the lines. A file passed by path comes from `generators.sourceFile`, whose
 store path is the one the file had; `generators.sourceDir` builds the optchat
@@ -225,6 +225,45 @@ blank
 ])
 ```
 
+Luau (`generators.luau`): a call is a Nix list, its function first. A name,
+a dotted path (`cx.session`, or `cx.session:focused` heading a call), a number
+or `nil`, `true` and `false` is a string (an integer may be a Nix integer).
+`str` is a quoted string, in the quote StyLua picks, whose parts may include
+`unicode "2061"` escapes; `long` is a `[[...]]` string. `table` holds values,
+`field name value` and `pair key value`; `infix [a ".." b ".." c]` is a run of
+one operator (another operator is a nested `infix`); `unary`, `paren`, `dot`,
+`colon`, `idx`, `fn params body`, `ifExpr [test value ... otherwise]` and
+`cast` are the rest, `tuple` is an expression list (or a tuple type) and
+`typed x type` annotates a name or, around a parameter list, gives a function's
+return type. A type is a name, `opt`, `table` or `tuple`. A statement is a
+call, a keyword (`"return"`, `"break"`), `local`, `assign`, `update "+=" target
+value`, `return`, `function`, `localFunction`, `if'`, `ifElse` (whose
+`otherwise` is an `elseif` when it is itself an `if'` or `ifElse`), `for`,
+`forRange`, `while`, `type` or `trailing statement comment`; a body is a list
+of statements, one per line a tab in. `rows` writes a call (one argument per
+line), a table (one entry per line, with `blank` and `comment` entries), an
+`infix` run (a line per operator), a `colon` (on its own line) or an `ifExpr`
+(then a list of the rows of its parts) over several lines, the way StyLua
+breaks them. From `tern/config/plugins/tab-order/window.data.nix`, abridged:
+
+```nix
+{assign, blank, fn, if', infix, localFunction, opt, str, tuple, typed, unary, ...}: [
+  (localFunction "place" [(typed "cx" "WindowCx") (typed "id" "number") (typed "anchor" (opt "number"))] [
+    (if' (infix [(unary "not" "anchor") "or" (infix ["anchor" "==" "id"])]) [
+      "return"
+    ])
+    (if' (infix ["info.position" ">" (infix ["at.position" "+" 1])]) [
+      ["cx.layout:order_tab" "id" (infix ["at.position" "+" 1])]
+    ])
+  ])
+  blank
+  ["tern.on" (str "window_start") (fn [(typed "cx" "WindowCx")] [
+    (assign ["last" "previous"] (tuple ["nil" "nil"]))
+    ["note" ["focused_tab" "cx"]]
+  ])]
+]
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -250,7 +289,8 @@ then runs each language's own check on every rendered tree, listed in its
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
-| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
+| Luau (8 files) | bytes | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
+| TypeScript, JavaScript, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
