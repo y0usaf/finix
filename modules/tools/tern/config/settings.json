@@ -1,46 +1,44 @@
 {
   "theme": "System",
-  "theme_dark": "titanium",
+  "theme_dark": "pond-night",
+  "theme_light": "pond",
   "copy_on_select": true,
-  "link_target": "Browser",
   "cursor": {
-    "programs": true
+    "programs": true,
+    "trail": "warp"
   },
+  "link_target": "Browser",
   "contrast": "Always",
   "layout": "Rail",
-  "font_size": 18,
-  "ui_font_size": 18,
-  "font_family": "Departure Mono",
-  "font_family_bold": "Departure Mono",
-  "font_family_italic": "Departure Mono",
-  "font_family_bold_italic": "Departure Mono",
+  "font_size": 20,
   "padding_x": 0,
   "padding_y": 0,
-  "ui_font": "Departure Mono",
-  "code_font": "Departure Mono",
-  "tabs": "Vertical",
   "system_title_bar": true,
   "status_bar": true,
-  "material": "Clear",
+  "material": "Glass",
   "opacity": 0,
   "blur": 0,
+  "plugins_disabled": [
+    "chime",
+    "transparent"
+  ],
   "surface_fold": true,
   "new_tabs": "Home",
   "agent_placement": "new_tab",
   "snap_text": true,
-  "frames_queued": 1,
+  "msaa": "8x",
   "renderer": "gpu",
   "carly": {
     "model": "openai-codex/gpt-6.1-terra:high"
   },
   "keybinds": {
+    "ctrl+delete": "close_tab",
     "ctrl+h": "focus_pane:left",
     "ctrl+j": "next_tab",
     "ctrl+k": "previous_tab",
     "ctrl+l": "focus_pane:right",
     "ctrl+shift+j": "move_tab_right",
     "ctrl+shift+k": "move_tab_left",
-    "ctrl+tab": "show_previous_tab",
-    "ctrl+delete": "close_tab"
+    "ctrl+tab": "show_previous_tab"
   }
 }

@@ -73,6 +73,16 @@
       flake = false;
     };
 
+    tern-pond = {
+      url = "git+file:///home/y0usaf/dev/developing/tern-pond";
+      flake = false;
+    };
+
+    tern-themes = {
+      url = "git+file:///home/y0usaf/dev/developing/tern-themes";
+      flake = false;
+    };
+
     fonts = {
       url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";

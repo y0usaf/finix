@@ -1656,6 +1656,8 @@
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
+        "tern-pond": "tern-pond",
+        "tern-themes": "tern-themes",
         "tomoe": "tomoe"
       }
     },
@@ -1936,6 +1938,38 @@
         "owner": "y0usaf",
         "repo": "terminal-electron",
         "type": "github"
+      }
+    },
+    "tern-pond": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793746283,
+        "narHash": "sha256-buzR4HndscOoKzcuUsceNxYG1LhVSz0FO2DrpfHHESM=",
+        "ref": "refs/heads/main",
+        "rev": "a71c951374f94cdd91ce60862b618248c73ca922",
+        "revCount": 11,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-pond"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-pond"
+      }
+    },
+    "tern-themes": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793741923,
+        "narHash": "sha256-II347lhELr8cUXAp23hBllpsAmYeS6BWq63X7F7HPQE=",
+        "ref": "refs/heads/main",
+        "rev": "00fd30bcc89c4f1c7a12e40f9f9c06a13aa10376",
+        "revCount": 7,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-themes"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-themes"
       }
     },
     "tomoe": {

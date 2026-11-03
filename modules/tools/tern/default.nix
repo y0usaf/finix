@@ -138,6 +138,10 @@
     "plugins/cmus.path" = ./config/plugins/cmus.path;
     "plugins/ekko.path" = ./config/plugins/ekko.path;
     "plugins/nix-fail.path" = ./config/plugins/nix-fail.path;
+    "plugins/pond/motion.css" = "${flakeInputs.tern-pond}/motion.css";
+    "plugins/pond/plugin.toml" = "${flakeInputs.tern-pond}/plugin.toml";
+    "plugins/pond/pond.css" = "${flakeInputs.tern-pond}/pond.css";
+    "plugins/pond/window.luau" = "${flakeInputs.tern-pond}/window.luau";
     "plugins/tab-order/plugin.toml" = ./config/plugins/tab-order/plugin.toml;
     "plugins/tab-order/window.luau" = ./config/plugins/tab-order/window.luau;
     "plugins/transparent/plugin.toml" = ./config/plugins/transparent/plugin.toml;
@@ -155,6 +159,8 @@
     "plugins/ui-menu/ui-menu.css" = stylesheet "ui-menu.css" (import ./config/plugins/ui-menu/ui-menu.data.nix);
     "plugins/ui-menu/window.luau" = ./config/plugins/ui-menu/window.luau;
     "settings.json" = ./config/settings.json;
+    "themes/pond-night.css" = "${flakeInputs.tern-themes}/pond-night.css";
+    "themes/pond.css" = "${flakeInputs.tern-themes}/pond.css";
   };
 
   devTree = "${config.user.homeDirectory}/dev";
