@@ -116,4 +116,6 @@ in {
   lispSource = lines;
 
   pythonSource = lines;
+
+  glslSource = lines;
 }

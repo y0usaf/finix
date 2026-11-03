@@ -345,15 +345,15 @@
 
   shaderWallpaperParameters = {
     shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
-      ["${./shaders/cassette-squares.glsl}" 30 "light"]
-      ["${./shaders/cassette-led.glsl}" 30 "light"]
-      ["${./shaders/hex-spiral.glsl}" 30 "dark"]
-      ["${./shaders/dot-corridor.glsl}" 30 "dark"]
-      ["${./shaders/su-ei.glsl}" 30 "light"]
-      ["${./shaders/glass-mound.glsl}" 30 "light"]
+      ["${generators.sourceFile "cassette-squares.glsl" (generators.glslSource (import ./shaders/cassette-squares.data.nix))}" 30 "light"]
+      ["${generators.sourceFile "cassette-led.glsl" (generators.glslSource (import ./shaders/cassette-led.data.nix))}" 30 "light"]
+      ["${generators.sourceFile "hex-spiral.glsl" (generators.glslSource (import ./shaders/hex-spiral.data.nix))}" 30 "dark"]
+      ["${generators.sourceFile "dot-corridor.glsl" (generators.glslSource (import ./shaders/dot-corridor.data.nix))}" 30 "dark"]
+      ["${generators.sourceFile "su-ei.glsl" (generators.glslSource (import ./shaders/su-ei.data.nix))}" 30 "light"]
+      ["${generators.sourceFile "glass-mound.glsl" (generators.glslSource (import ./shaders/glass-mound.data.nix))}" 30 "light"]
       ["${shaderDir}/liquify.glsl" 30 "light"]
       ["${shaderDir}/okazz-spheres.glsl" 30 "dark"]
-      ["${./shaders/balatro.glsl}" 30 "dark"]
+      ["${generators.sourceFile "balatro.glsl" (generators.glslSource (import ./shaders/balatro.data.nix))}" 30 "dark"]
       ["${shaderDir}/xmb.glsl" 30 "dark"]
       ["${shaderDir}/aurora.glsl" 30 "dark"]
       ["${shaderDir}/stars.glsl" 24 "dark"]
