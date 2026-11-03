@@ -8,9 +8,14 @@ reusable skills and their tests with the module or project that owns them.
 Runtime state and credentials stay outside the source tree and the Nix store.
 Don't create root-level `nix/`, `tests/` or `previews/` directories.
 
-`flake.nix` holds the inputs and hands them to `modules/outputs.nix`, which
-builds every output with let bindings and plain functions. No module system
-runs at flake level.
+`flake.nix` is the whole configuration: `strictix merge . --entry flake.nix
+--out flake.nix --expand nixFiles` collapsed the tree into it, one let binding
+per file under its `outputs`, named after the file's path, with
+`merge_manifest` recording each binding's path and the expanded `nixFiles`
+calls. The paths below are those manifest paths; `strictix split . --merged
+flake.nix` writes the tree back byte for byte, and `nix run .#lint` lints each
+binding at its path. `modules/outputs.nix` builds every output with let
+bindings and plain functions. No module system runs at flake level.
 
 A host is a list of modules, and the `hosts` attrset in `modules/outputs.nix`
 holds each host's list. Every host loads `modules/finix/common.nix`,
