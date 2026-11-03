@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "github:y0usaf/strictix";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=b37f03c27eafd6452080416068904e4fdaa2a658";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
