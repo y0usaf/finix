@@ -30217,7 +30217,7 @@
           doc = ["@@ -${span value.hunk.start old} +${span start new} @@" (lib.optionalString (value.hunk ? heading) " ${value.hunk.heading}") hardline (map change value.hunk.lines)];
         };
 
-        hunks = values:
+        hunkDocs = values:
           (builtins.foldl' (state: value: let
               next = header state.delta value;
             in {
@@ -30235,7 +30235,7 @@
           hardline
           "+++ b/${value.file.path}"
           hardline
-          (hunks value.file.hunks)
+          (hunkDocs value.file.hunks)
         ];
       in {
         file = path: hunks: {file = {inherit path hunks;};};
@@ -30981,7 +30981,12 @@
 
         alphabetic = op: builtins.match "[a-z]+" op != null;
 
-        hangs = value: value ? arrow && value.arrow.body ? below || value ? pre && hangs value.pre.value;
+        hangForms = {
+          arrow = value: value.arrow.body ? below;
+          pre = value: hangs value.pre.value;
+        };
+
+        hangs = value: (hangForms.${kindOf value} or never) value;
 
         entry = mark: last: value:
           if value ? blank
@@ -30990,47 +30995,53 @@
           then [hardline value.comment]
           else [hardline (expr value) (lib.optionalString (!last) mark)];
 
-        delimited = open: close: mark: padded: final: items: let
+        broken = open: close: mark: final: rows: let
+          count = builtins.length rows;
+        in [open (nest 1 (lib.imap1 (index: entry mark (index == count && final (lib.last rows))) rows)) hardline close];
+
+        flat = open: close: mark: padded: items: let
           pad = lib.optionalString padded " ";
-          count = builtins.length items.rows;
-          hug = !padded && mark == "," && items != [] && hangs (lib.last items);
-        in
+          hug = !padded && mark == "," && hangs (lib.last items);
+        in [
+          open
+          pad
+          (lib.intersperse "${mark} " (map expr items))
+          (
+            if hug
+            then [mark hardline]
+            else pad
+          )
+          close
+        ];
+
+        delimited = open: close: mark: padded: final: items:
           if items ? rows
-          then [open (nest 1 (lib.imap1 (index: entry mark (index == count && final (lib.last items.rows))) items.rows)) hardline close]
+          then broken open close mark final items.rows
           else if items == []
           then open + close
-          else [
-            open
-            pad
-            (lib.intersperse "${mark} " (map expr items))
-            (
-              if hug
-              then [mark hardline]
-              else pad
-            )
-            close
-          ];
+          else flat open close mark padded items;
 
         never = _: false;
 
-        terminated = value:
-          if value ? pre
-          then terminated value.pre.value
-          else if value ? method
-          then value.method.body == null
-          else !(value ? comment);
+        terminatedForms = {
+          pre = value: terminated value.pre.value;
+          method = value: value.method.body == null;
+          comment = never;
+        };
+
+        terminated = value: (terminatedForms.${kindOf value} or (_: true)) value;
 
         rest = value: value ? pre && value.pre.op == "..." || value ? comment;
 
         array = delimited "[" "]" "," false never;
 
-        arguments = delimited "(" ")" "," false never;
+        argumentList = delimited "(" ")" "," false never;
 
-        parameters = value:
+        parameterList = value:
           if builtins.isString value
           then value
           else if value ? typed
-          then [(parameters value.typed.value) ": " (expr value.typed.type)]
+          then [(parameterList value.typed.value) ": " (expr value.typed.type)]
           else delimited "(" ")" "," false rest value;
 
         hang = value:
@@ -31057,7 +31068,7 @@
           then " ${value}"
           else [hardline (expr value)];
 
-        path = value:
+        access = value:
           if lib.hasPrefix "?." value
           then value
           else ".${value}";
@@ -31079,7 +31090,7 @@
           then [(expr value) ";"]
           else expr value;
 
-        members = values:
+        memberBlock = values:
           if values == []
           then "{}"
           else ["{" (nest 1 (map (value: [hardline (member value)]) values)) hardline "}"];
@@ -31094,43 +31105,56 @@
           then ["(" (nest 1 [hardline (expr value.below)]) hardline ")"]
           else ["(" (expr value) ")"];
 
-        declaration = kind: value: [
+        binding = kind: value: [
           kind
           " "
           (expr value.target)
           (lib.optionals (value.value != null) [" =" (hang value.value)])
         ];
 
-        names = value:
-          if builtins.isList value || value ? rows
-          then delimited "{" "}" "," true never value
-          else if value ? pre
-          then [value.pre.op " " (names value.pre.value)]
-          else expr value;
+        nameForms = {
+          list = delimited "{" "}" "," true never;
+          rows = delimited "{" "}" "," true never;
+          pre = value: [value.pre.op " " (names value.pre.value)];
+        };
 
-        otherwise = value:
+        names = value: (nameForms.${kindOf value} or expr) value;
+
+        alternative = value:
           if builtins.isList value
           then ["else " (block value)]
           else ["else " (statement value)];
 
-        loop = word: kind: value: ["for" word " (" kind " " (expr value.target) " " value.op " " (expr value.subject) ")" (consequent value.body)];
+        loop = word: kind: value: ["for" word " (" kind " " (expr value.target) " ${value.op} " (expr value.subject) ")" (consequent value.body)];
 
-        arm = value:
-          if value ? blank
-          then []
-          else
-            value.comment or  [
-              (
-                if value.case.test == null
-                then "default:"
-                else ["case " (expr value.case.test) ":"]
-              )
-              (
-                if value.case.body ? braces
-                then [" " (block value.case.body.braces)]
-                else nest 1 (map (one: [hardline (line one)]) value.case.body)
-              )
-            ];
+        label = test:
+          if test == null
+          then "default:"
+          else ["case " (expr test) ":"];
+
+        clauseBody = body:
+          if body ? braces
+          then [" " (block body.braces)]
+          else nest 1 (map (one: [hardline (line one)]) body);
+
+        armForms = {
+          blank = _: [];
+          comment = value: value.comment;
+          case = value: [(label value.case.test) (clauseBody value.case.body)];
+        };
+
+        arm = value: armForms.${kindOf value} value;
+
+        initForms = {
+          const = value: binding "const" value.const;
+          "let" = value: binding "let" value."let";
+        };
+
+        initializer = value: (initForms.${kindOf value} or expr) value;
+
+        forClause = value: [";" (lib.optionals (value != null) [" " (expr value)])];
+
+        expressionStatement = value: [(expr value) ";"];
 
         handler = value:
           if value ? finally
@@ -31139,8 +31163,8 @@
 
         statementForms = {
           comment = value: value.comment;
-          const = value: [(declaration "const" value.const) ";"];
-          "let" = value: [(declaration "let" value."let") ";"];
+          const = value: [(binding "const" value.const) ";"];
+          "let" = value: [(binding "let" value."let") ";"];
           return = value:
             if value.return == null
             then "return;"
@@ -31160,24 +31184,14 @@
                 then " "
                 else hardline
               )
-              (otherwise test.otherwise)
+              (alternative test.otherwise)
             ])
           ];
-          for = value: let
-            part = lib.optionals (value.for.condition != null) [" " (expr value.for.condition)];
-          in [
+          for = value: [
             "for ("
-            (lib.optional (value.for.init != null) (
-              if value.for.init ? const
-              then declaration "const" value.for.init.const
-              else if value.for.init ? "let"
-              then declaration "let" value.for.init."let"
-              else expr value.for.init
-            ))
-            ";"
-            part
-            ";"
-            (lib.optionals (value.for.update != null) [" " (expr value.for.update)])
+            (lib.optional (value.for.init != null) (initializer value.for.init))
+            (forClause value.for.condition)
+            (forClause value.for.update)
             ")"
             (consequent value.for.body)
           ];
@@ -31195,10 +31209,10 @@
           pre = value:
             if alphabetic value.pre.op
             then [value.pre.op " " (statement value.pre.value)]
-            else [(expr value) ";"];
+            else expressionStatement value;
         };
 
-        statement = value: (statementForms.${kindOf value} or (value: [(expr value) ";"])) value;
+        statement = value: (statementForms.${kindOf value} or expressionStatement) value;
 
         forms = {
           string = lib.id;
@@ -31208,24 +31222,26 @@
           array = value: array value.array;
           str = value: "\"${value.str}\"";
           sq = value: "'${value.sq}'";
-          tpl = value: [
-            "`"
+          tpl = value: let
+            tick = "`";
+          in [
+            tick
             (map (part:
               if builtins.isString part
               then part
               else ["\${" (expr part.sub) "}"])
             value.tpl)
-            "`"
+            tick
           ];
           regex = value: "/${value.regex.pattern}/${value.regex.flags}";
           obj = value: delimited "{" "}" "," true never value.obj;
           shape = value: delimited "{" "}" ";" true never value.shape;
           prop = value: [(expr value.prop.key) ":" (hang value.prop.value)];
           typed = value: [(expr value.typed.value) ": " (expr value.typed.type)];
-          call = value: [(expr value.call.callee) (arguments value.call.arguments)];
-          new = value: ["new " (expr value.new.callee) (arguments value.new.arguments)];
+          call = value: [(expr value.call.callee) (argumentList value.call.arguments)];
+          new = value: ["new " (expr value.new.callee) (argumentList value.new.arguments)];
           generic = value: [(expr value.generic.callee) (delimited "<" ">" "," false never value.generic.types)];
-          dot = value: [(expr value.dot.value) (path value.dot.path)];
+          dot = value: [(expr value.dot.value) (access value.dot.path)];
           idx = value: [(expr value.idx.value) "[" (expr value.idx.index) "]"];
           pre = value: [value.pre.op (lib.optionalString (alphabetic value.pre.op) " ") (expr value.pre.value)];
           post = value: [(expr value.post.value) value.post.op];
@@ -31236,7 +31252,7 @@
           ternary = value: [(expr value.ternary.test) (branch "?" value.ternary.yes) (branch ":" value.ternary.no)];
           paren = value: parenthesized value.paren;
           arrow = value: [
-            (parameters value.arrow.parameters)
+            (parameterList value.arrow.parameters)
             " =>"
             (
               if builtins.isList value.arrow.body
@@ -31244,11 +31260,11 @@
               else hang value.arrow.body
             )
           ];
-          fn = value: ["function" (lib.optionalString (value.fn.name != null) " ${value.fn.name}") (lib.optionalString (value.fn.name == null) " ") (parameters value.fn.parameters) " " (block value.fn.body)];
-          method = value: [(expr value.method.key) (parameters value.method.parameters) (lib.optionals (value.method.body != null) [" " (block value.method.body)])];
+          fn = value: ["function" (lib.optionalString (value.fn.name != null) " ${value.fn.name}") (lib.optionalString (value.fn.name == null) " ") (parameterList value.fn.parameters) " " (block value.fn.body)];
+          method = value: [(expr value.method.key) (parameterList value.method.parameters) (lib.optionals (value.method.body != null) [" " (block value.method.body)])];
           chain = value: [(expr (builtins.head value.chain)) (map (link: nest 1 [hardline "." (expr link)]) (builtins.tail value.chain))];
-          class = value: ["class " (expr value.class.head) " " (members value.class.members)];
-          interface = value: ["interface " (expr value.interface.head) " " (members value.interface.members)];
+          class = value: ["class " (expr value.class.head) " " (memberBlock value.class.members)];
+          interface = value: ["interface " (expr value.interface.head) " " (memberBlock value.interface.members)];
         };
 
         expr = value: (forms.${kindOf value} or (throw "ts: no expression ${kindOf value}")) value;
@@ -34416,12 +34432,12 @@
 
       treeChecks = {
         ts = files: let
-          tree = pkgs.linkFarm "ts" (lib.mapAttrsToList (name: text: {
+          farm = pkgs.linkFarm "ts" (lib.mapAttrsToList (name: text: {
               inherit name;
               path = pkgs.writeText (baseNameOf name) text;
             })
             files);
-          tsc = flags: names: "${lib.getExe' pkgs.typescript "tsc"} --noEmit --strict false --skipLibCheck --allowImportingTsExtensions --preserveSymlinks --target es2022 --module esnext --moduleResolution bundler --lib es2023,dom ${flags}${ambient} ${lib.concatMapStringsSep " " (name: "${tree}/${name}") names}\n";
+          tsc = flags: names: "${lib.getExe' pkgs.typescript "tsc"} --noEmit --strict false --skipLibCheck --allowImportingTsExtensions --preserveSymlinks --target es2022 --module esnext --moduleResolution bundler --lib es2023,dom ${flags}${ambient} ${lib.concatMapStringsSep " " (name: "${farm}/${name}") names}\n";
         in
           tsc "" (lib.subtractLists untyped (lib.attrNames files)) + tsc "--noCheck " untyped;
       };
