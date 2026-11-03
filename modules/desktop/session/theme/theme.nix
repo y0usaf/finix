@@ -27,38 +27,15 @@
     };
   };
 
-  render = {
-    values,
-    filters,
-    ...
-  }: text: let
-    fill = part:
-      if builtins.isString part
-      then part
-      else let
-        filter = builtins.elemAt part 2;
-      in
-        (
-          if filter == null
-          then lib.id
-          else filters.${filter}
-        )
-        values.${builtins.elemAt part 0};
-  in
-    lib.concatMapStrings fill (builtins.split "[{][{] *([a-z0-9]+) *([|] *([a-z]+))? *[}][}]" text);
-
   templates = {
     "discord-colors.css" = import ./templates/discord-colors.data.nix;
-    "foot-colors.ini" = ./templates/foot-colors.ini;
+    "foot-colors.ini" = import ./templates/foot-colors.data.nix;
     "gtk-colors.css" = import ./templates/gtk-colors.data.nix;
-    "monstar-theme" = ./templates/monstar-theme;
-    "osc.sh" = ./templates/osc.sh;
+    "monstar-theme" = import ./templates/monstar-theme.data.nix;
+    "osc.sh" = import ./templates/osc.data.nix;
   };
 
-  instantiate = scheme: template:
-    if builtins.isFunction template
-    then template (scope scheme)
-    else render (scope scheme) (builtins.readFile template);
+  instantiate = scheme: template: template (scope scheme);
 
   themes = pkgs.linkFarm "themes" (lib.concatLists (lib.mapAttrsToList (name: scheme:
     lib.mapAttrsToList (template: source: {

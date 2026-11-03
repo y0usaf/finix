@@ -1,5 +1,6 @@
 {
   config,
+  generators,
   pkgs,
   ...
 }: let
@@ -35,6 +36,6 @@ in {
       set softvol_state=100 100
 
     '';
-    ".config/cmus/palette.theme".text = builtins.readFile ./cmus.theme;
+    ".config/cmus/palette.theme".text = generators.cmusThemeSource (import ./cmus.data.nix);
   };
 }
