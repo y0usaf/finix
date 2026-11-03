@@ -225,6 +225,36 @@ blank
 ])
 ```
 
+JavaScript (`generators.javascript`): a call is a Nix list, its callee
+first; an identifier, member path (`process.env.KEY`, `params?.name`) or
+number is a string (an integer may be a Nix integer); `str` is a string
+literal, `obj` an object whose entries are a shorthand name or a `[key value]`
+list, `array` an array, `op [a "+" b]` operands and the operators between
+them (assignment too), `paren`, `dot` (a property of something that is not a
+path), `not`, `typeof`, `await`, `new`, `async` and `arrow params body`. A
+statement is an expression, `const name value`, `let' name value` (`null`
+for none), `import' names source`, `function name params body`, `if'`,
+`ifElse`, `while`, `try' body param handler` (`null` for `catch {`),
+`return value` (`null` for `return;`), `throw'` or `continue`. A body is a
+list of statements in braces, one per line two spaces in, `inline [ ... ]`
+on one line, or a single statement that is not an expression, written
+without braces. `obj` and `array` are on one line unless `rows`, one entry
+per line; `op (rows ...)` breaks after each operator, two spaces in; an
+object on one line whose last value is broken closes without its space
+(`{ id, result: {` ... `}}`). From `dev/ai/jev-mcp.data.nix`, abridged:
+
+```nix
+(const "API_KEY" ["resolveKey"])
+(async (function "callSystemOne" ["state" "questions"] [
+  (if' (not "API_KEY") (throw' (new ["Error" (str "TYPESAFE_API_KEY not set")])))
+  (const "res" (await ["fetch" "ENDPOINT" (obj (rows [
+    ["method" (str "POST")]
+    ["body" ["JSON.stringify" (obj [["model" "MODEL"] "state" "questions"])]]
+  ]))]))
+  (try' (inline [(op ["detail" "=" ["JSON.stringify" (op ["j.detail" "||" "j"])]])]) null (inline []))
+]))
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -250,7 +280,8 @@ then runs each language's own check on every rendered tree, listed in its
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
-| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
+| JavaScript (1 file) | bytes | `node --check` |
+| TypeScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
