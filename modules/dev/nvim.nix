@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   flakeInputs,
   ...
@@ -72,39 +73,36 @@
         vim.g.mapleader = " "
         vim.g.maplocalleader = "\\"
 
-        vim.opt.number = true
-        vim.opt.relativenumber = true
-        vim.opt.signcolumn = "yes"
-        vim.opt.wrap = true
-        vim.opt.linebreak = true
-        vim.opt.breakindent = true
-        vim.opt.showbreak = "↪ "
-        vim.opt.termguicolors = true
-        vim.opt.scrolloff = 8
-        vim.opt.sidescrolloff = 8
-        vim.opt.cursorline = true
-        vim.opt.pumheight = 15
-        vim.opt.showmode = false
-        vim.opt.laststatus = 2
-        vim.opt.cmdheight = 1
-
-        vim.opt.expandtab = true
-        vim.opt.tabstop = 2
-        vim.opt.shiftwidth = 2
-
-        vim.opt.clipboard = "unnamedplus"
-        vim.opt.mouse = "a"
-
-        vim.opt.ignorecase = true
-        vim.opt.smartcase = true
-
-        vim.opt.updatetime = 250
-        vim.opt.timeoutlen = 300
-
-        vim.opt.splitbelow = true
-        vim.opt.splitright = true
-        vim.opt.splitkeep = "screen"
-        vim.opt.virtualedit = "onemore"
+        for k, v in pairs(${lib.generators.toLua {} {
+          number = true;
+          relativenumber = true;
+          signcolumn = "yes";
+          wrap = true;
+          linebreak = true;
+          breakindent = true;
+          showbreak = "↪ ";
+          termguicolors = true;
+          scrolloff = 8;
+          sidescrolloff = 8;
+          cursorline = true;
+          pumheight = 15;
+          showmode = false;
+          laststatus = 2;
+          cmdheight = 1;
+          expandtab = true;
+          tabstop = 2;
+          shiftwidth = 2;
+          clipboard = "unnamedplus";
+          mouse = "a";
+          ignorecase = true;
+          smartcase = true;
+          updatetime = 250;
+          timeoutlen = 300;
+          splitbelow = true;
+          splitright = true;
+          splitkeep = "screen";
+          virtualedit = "onemore";
+        }}) do vim.opt[k] = v end
 
         vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
         vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
@@ -113,98 +111,100 @@
         vim.g.loaded_netrw = 1
         vim.g.loaded_netrwPlugin = 1
 
-        vim.opt.foldmethod = "indent"
-        vim.opt.foldcolumn = "1"
-        vim.opt.foldlevel = 99
-        vim.opt.foldlevelstart = 99
-        vim.opt.foldenable = true
+        for k, v in pairs(${lib.generators.toLua {} {
+          foldmethod = "indent";
+          foldcolumn = "1";
+          foldlevel = 99;
+          foldlevelstart = 99;
+          foldenable = true;
+        }}) do vim.opt[k] = v end
 
         if vim.g.neovide then
           vim.g.neovide_transparency = ${toString config.user.appearance.glass.opacity}
         end
 
 
-        require("neo-tree").setup({
-          close_if_last_window = true,
-          popup_border_style = "rounded",
-          enable_git_status = true,
-          enable_diagnostics = true,
+        require("neo-tree").setup(${lib.generators.toLua {} {
+          close_if_last_window = true;
+          popup_border_style = "rounded";
+          enable_git_status = true;
+          enable_diagnostics = true;
           default_component_configs = {
             indent = {
-              indent_size = 2,
-              padding = 1,
-            },
+              indent_size = 2;
+              padding = 1;
+            };
             icon = {
-              folder_closed = "",
-              folder_open = "",
-              folder_empty = "ﰊ",
-              default = "*",
-            },
+              folder_closed = "";
+              folder_open = "";
+              folder_empty = "ﰊ";
+              default = "*";
+            };
             git_status = {
               symbols = {
-                added = "✚",
-                deleted = "✖",
-                modified = "",
-                renamed = "",
-                untracked = "",
-                ignored = "",
-                unstaged = "",
-                staged = "",
-                conflict = "",
-              }
-            },
-          },
+                added = "✚";
+                deleted = "✖";
+                modified = "";
+                renamed = "";
+                untracked = "";
+                ignored = "";
+                unstaged = "";
+                staged = "";
+                conflict = "";
+              };
+            };
+          };
           window = {
-            position = "left",
-            width = 40,
+            position = "left";
+            width = 40;
             mappings = {
-              ["<space>"] = "toggle_node",
-              ["<2-LeftMouse>"] = "open",
-              ["<cr>"] = "open",
-              ["o"] = "open",
-              ["S"] = "open_split",
-              ["s"] = "open_vsplit",
-              ["t"] = "open_tabnew",
-              ["C"] = "close_node",
-              ["a"] = "add",
-              ["A"] = "add_directory",
-              ["d"] = "delete",
-              ["r"] = "rename",
-              ["y"] = "copy_to_clipboard",
-              ["x"] = "cut_to_clipboard",
-              ["p"] = "paste_from_clipboard",
-              ["c"] = "copy",
-              ["m"] = "move",
-              ["q"] = "close_window",
-              ["R"] = "refresh",
-            }
-          },
+              "<space>" = "toggle_node";
+              "<2-LeftMouse>" = "open";
+              "<cr>" = "open";
+              o = "open";
+              S = "open_split";
+              s = "open_vsplit";
+              t = "open_tabnew";
+              C = "close_node";
+              a = "add";
+              A = "add_directory";
+              d = "delete";
+              r = "rename";
+              y = "copy_to_clipboard";
+              x = "cut_to_clipboard";
+              p = "paste_from_clipboard";
+              c = "copy";
+              m = "move";
+              q = "close_window";
+              R = "refresh";
+            };
+          };
           filesystem = {
             filtered_items = {
-              visible = false,
-              hide_dotfiles = false,
-              hide_gitignored = false,
-            },
+              visible = false;
+              hide_dotfiles = false;
+              hide_gitignored = false;
+            };
             follow_current_file = {
-              enabled = true,
-            },
-            use_libuv_file_watcher = true,
-          },
+              enabled = true;
+            };
+            use_libuv_file_watcher = true;
+          };
           git_status = {
             window = {
-              position = "float",
+              position = "float";
               mappings = {
-                ["A"] = "git_add_all",
-                ["gu"] = "git_unstage_file",
-                ["ga"] = "git_add_file",
-                ["gr"] = "git_revert_file",
-                ["gc"] = "git_commit",
-                ["gp"] = "git_push",
-                ["gg"] = "git_commit_and_push",
-              }
-            }
-          }
-        })
+                A = "git_add_all";
+                gu = "git_unstage_file";
+                ga = "git_add_file";
+                gr = "git_revert_file";
+                gc = "git_commit";
+                gp = "git_push";
+                gg = "git_commit_and_push";
+              };
+            };
+          };
+        }})
 
         require("telescope").setup({})
         pcall(require("telescope").load_extension, "fzf")
@@ -276,104 +276,231 @@
           },
         })
 
-        require("cyberdream").setup({
-          transparent = true,
-          italic_comments = true,
-          borderless_pickers = true,
-          lualine_style = "default",
+        require("cyberdream").setup(${lib.generators.toLua {} {
+          transparent = true;
+          italic_comments = true;
+          borderless_pickers = true;
+          lualine_style = "default";
           theme = {
-            variant = "default",
+            variant = "default";
             highlights = {
-              Normal = { bg = "NONE", fg = "#e8e6e1" },
-              NormalNC = { bg = "NONE", fg = "#d1ccc8" },
-
-              CursorLine = { bg = "#1a1f1a" },
-              CursorColumn = { bg = "#1a1f1a" },
-              Visual = { bg = "#2a3d2a" },
-
-              Search = { bg = "#3d3a2a", fg = "#d4a574" },
-              IncSearch = { bg = "#4a4630", fg = "#e8c49d" },
-
-              DiagnosticError = { fg = "#e8997d" },
-              DiagnosticWarn = { fg = "#d4a574" },
-              DiagnosticInfo = { fg = "#7b9fb5" },
-              DiagnosticHint = { fg = "#a8b5a8" },
-              DiagnosticOk = { fg = "#a8c9a0" },
-
-              Error = { fg = "#e8997d" },
-              ErrorMsg = { fg = "#e8997d" },
-              WarningMsg = { fg = "#d4a574" },
-
-              String = { fg = "#a8c9a0" },        -- sage green
-              Function = { fg = "#7b9fb5" },      -- soft blue (dopamine cool)
-              Keyword = { fg = "#5a7d6b" },       -- forest green
-              Type = { fg = "#a8b5a8" },          -- sage (muted)
-              Constant = { fg = "#d4a574" },      -- gold (dopamine warm)
-              Special = { fg = "#e8997d" },       -- coral (dopamine warm)
-              Comment = { fg = "#7a8178", italic = true },
-
-              FloatBorder = { fg = "#a8b5a8" },
-              WinSeparator = { fg = "#3a3f3a" },
-              VertSplit = { fg = "#3a3f3a" },
-
-              LineNr = { fg = "#5a5f5a" },
-              CursorLineNr = { fg = "#a8b5a8" },
-              SignColumn = { bg = "NONE" },
-              FoldColumn = { fg = "#5a7d6b", bg = "NONE" },
-
-              TabLine = { bg = "NONE", fg = "#7a7f7a" },
-              TabLineSel = { bg = "#2a3d2a", fg = "#a8b5a8" },
-              TabLineFill = { bg = "NONE" },
-
-              StatusLine = { bg = "#1a1f1a", fg = "#e8e6e1" },
-              StatusLineNC = { bg = "NONE", fg = "#7a7f7a" },
-
-              Pmenu = { bg = "#1a1f1a", fg = "#e8e6e1" },
-              PmenuSel = { bg = "#2a3d2a", fg = "#e8c49d" },
-              PmenuBorder = { fg = "#5a7d6b" },
-              PmenuThumb = { bg = "#5a7d6b" },
-
-              DiffAdd = { fg = "#a8c9a0" },
-              DiffDelete = { fg = "#e8997d" },
-              DiffChange = { fg = "#d4a574" },
-              DiffText = { fg = "#e8c49d", bold = true },
-
-              Folded = { bg = "#2a3d2a", fg = "#a8b5a8" },
-
-              SpellBad = { sp = "#e8997d", undercurl = true },
-              SpellCap = { sp = "#d4a574", undercurl = true },
-              SpellLocal = { sp = "#7b9fb5", undercurl = true },
-              SpellRare = { sp = "#a8b5a8", undercurl = true },
-
-              MatchParen = { fg = "#e8c49d", bold = true },
-
-              VisualNOS = { bg = "#2a3d2a" },
-            },
-          },
-        })
+              Normal = {
+                bg = "NONE";
+                fg = "#e8e6e1";
+              };
+              NormalNC = {
+                bg = "NONE";
+                fg = "#d1ccc8";
+              };
+              CursorLine = {
+                bg = "#1a1f1a";
+              };
+              CursorColumn = {
+                bg = "#1a1f1a";
+              };
+              Visual = {
+                bg = "#2a3d2a";
+              };
+              Search = {
+                bg = "#3d3a2a";
+                fg = "#d4a574";
+              };
+              IncSearch = {
+                bg = "#4a4630";
+                fg = "#e8c49d";
+              };
+              DiagnosticError = {
+                fg = "#e8997d";
+              };
+              DiagnosticWarn = {
+                fg = "#d4a574";
+              };
+              DiagnosticInfo = {
+                fg = "#7b9fb5";
+              };
+              DiagnosticHint = {
+                fg = "#a8b5a8";
+              };
+              DiagnosticOk = {
+                fg = "#a8c9a0";
+              };
+              Error = {
+                fg = "#e8997d";
+              };
+              ErrorMsg = {
+                fg = "#e8997d";
+              };
+              WarningMsg = {
+                fg = "#d4a574";
+              };
+              String = {
+                fg = "#a8c9a0";
+              };
+              Function = {
+                fg = "#7b9fb5";
+              };
+              Keyword = {
+                fg = "#5a7d6b";
+              };
+              Type = {
+                fg = "#a8b5a8";
+              };
+              Constant = {
+                fg = "#d4a574";
+              };
+              Special = {
+                fg = "#e8997d";
+              };
+              Comment = {
+                fg = "#7a8178";
+                italic = true;
+              };
+              FloatBorder = {
+                fg = "#a8b5a8";
+              };
+              WinSeparator = {
+                fg = "#3a3f3a";
+              };
+              VertSplit = {
+                fg = "#3a3f3a";
+              };
+              LineNr = {
+                fg = "#5a5f5a";
+              };
+              CursorLineNr = {
+                fg = "#a8b5a8";
+              };
+              SignColumn = {
+                bg = "NONE";
+              };
+              FoldColumn = {
+                fg = "#5a7d6b";
+                bg = "NONE";
+              };
+              TabLine = {
+                bg = "NONE";
+                fg = "#7a7f7a";
+              };
+              TabLineSel = {
+                bg = "#2a3d2a";
+                fg = "#a8b5a8";
+              };
+              TabLineFill = {
+                bg = "NONE";
+              };
+              StatusLine = {
+                bg = "#1a1f1a";
+                fg = "#e8e6e1";
+              };
+              StatusLineNC = {
+                bg = "NONE";
+                fg = "#7a7f7a";
+              };
+              Pmenu = {
+                bg = "#1a1f1a";
+                fg = "#e8e6e1";
+              };
+              PmenuSel = {
+                bg = "#2a3d2a";
+                fg = "#e8c49d";
+              };
+              PmenuBorder = {
+                fg = "#5a7d6b";
+              };
+              PmenuThumb = {
+                bg = "#5a7d6b";
+              };
+              DiffAdd = {
+                fg = "#a8c9a0";
+              };
+              DiffDelete = {
+                fg = "#e8997d";
+              };
+              DiffChange = {
+                fg = "#d4a574";
+              };
+              DiffText = {
+                fg = "#e8c49d";
+                bold = true;
+              };
+              Folded = {
+                bg = "#2a3d2a";
+                fg = "#a8b5a8";
+              };
+              SpellBad = {
+                sp = "#e8997d";
+                undercurl = true;
+              };
+              SpellCap = {
+                sp = "#d4a574";
+                undercurl = true;
+              };
+              SpellLocal = {
+                sp = "#7b9fb5";
+                undercurl = true;
+              };
+              SpellRare = {
+                sp = "#a8b5a8";
+                undercurl = true;
+              };
+              MatchParen = {
+                fg = "#e8c49d";
+                bold = true;
+              };
+              VisualNOS = {
+                bg = "#2a3d2a";
+              };
+            };
+          };
+        }})
         vim.cmd.colorscheme("cyberdream")
 
-        require("lualine").setup({
+        require("lualine").setup(${lib.generators.toLua {} {
           options = {
-            theme = "cyberdream",
-            globalstatus = true,
-            section_separators = { left = "", right = "" },
-            component_separators = { left = "│", right = "│" },
-          },
+            theme = "cyberdream";
+            globalstatus = true;
+            section_separators = {
+              left = "";
+              right = "";
+            };
+            component_separators = {
+              left = "│";
+              right = "│";
+            };
+          };
           sections = {
-            lualine_a = { "mode" },
-            lualine_b = { "branch", "diff" },
-            lualine_c = { "filename" },
-            lualine_x = { "encoding", "fileformat", "filetype" },
-            lualine_y = { "progress" },
-            lualine_z = { "location" },
-          },
-        })
+            lualine_a = [
+              "mode"
+            ];
+            lualine_b = [
+              "branch"
+              "diff"
+            ];
+            lualine_c = [
+              "filename"
+            ];
+            lualine_x = [
+              "encoding"
+              "fileformat"
+              "filetype"
+            ];
+            lualine_y = [
+              "progress"
+            ];
+            lualine_z = [
+              "location"
+            ];
+          };
+        }})
 
-        require("gitsigns").setup({ current_line_blame = true })
+        require("gitsigns").setup(${lib.generators.toLua {} {
+          current_line_blame = true;
+        }})
         require("Comment").setup({})
         require("nvim-autopairs").setup({})
-        require("toggleterm").setup({ direction = "float" })
+        require("toggleterm").setup(${lib.generators.toLua {} {
+          direction = "float";
+        }})
 
         local keymap = vim.keymap.set
         local builtin = require("telescope.builtin")
