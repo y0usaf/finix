@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   agentFiles = dir: {
@@ -169,7 +170,7 @@
       };
       value.mcpServers.jev = {
         command = "${pkgs.nodejs}/bin/node";
-        args = ["${./jev-mcp.mjs}"];
+        args = ["${generators.sourceFile "jev-mcp.mjs" (generators.javascriptSource (import ./jev-mcp.data.nix))}"];
       };
     };
   };

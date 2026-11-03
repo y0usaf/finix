@@ -104,4 +104,6 @@ in {
   markdownSource = lines;
 
   tsSource = lines;
+
+  javascriptSource = lines;
 }
