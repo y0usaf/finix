@@ -104,11 +104,24 @@ in {
     [ $# -gt 0 ] && shift
     [ "$command" = fix ] || exec ${strictix} "$command" "$@" --config ${config}
     set -euo pipefail
-    ${strictix} fix "$@" --config ${config} || true
-    case " $* " in *" --dry-run "*) exit ;; esac
+    scope=()
+    dry=
+    for arg in "$@"; do
+      if [ "$arg" = --dry-run ]; then dry=1; else scope+=("$arg"); fi
+    done
     work=$(mktemp -d)
     trap 'rm -rf "$work"' EXIT
-    ${strictix} check --format json --config ${config} > "$work/diags.json" || true
+    diagnose() {
+      ${strictix} check --format json "''${scope[@]}" --config ${config} > "$work/diags.json" 2> "$work/err" || true
+      if ! ${jq} -e .files "$work/diags.json" > /dev/null 2>&1; then
+        cat "$work/err" >&2
+        exit 2
+      fi
+    }
+    diagnose
+    ${strictix} fix "$@" --config ${config} || true
+    [ -z "$dry" ] || exit 0
+    diagnose
     ${jq} -c '.files[] | .path as $file | .diagnostics[] | select(.code == "codec-candidate") | .codec + {file: $file}' "$work/diags.json" > "$work/candidates"
     n=0
     touched=()
@@ -184,7 +197,7 @@ in {
         done
       fi
     fi
-    exec ${strictix} check --config ${config}
+    exec ${strictix} check "''${scope[@]}" --config ${config}
   '';
 
   check = pkgs.runCommand "strictix" {} ''
