@@ -136,6 +136,16 @@ in {
         data=$(realpath -m --relative-to="$(dirname "$file")" "$datafile")
         case $data in ../*) ;; *) data=./$data ;; esac
         label="$label $target"
+        if [ -e "$datafile" ]; then
+          echo "withheld $label: $datafile already exists"
+          continue
+        fi
+        touch "$work/claims"
+        claimed=$(${jq} -Rr --arg d "$datafile" 'split("\t") | select(.[0] == $d) | .[1]' "$work/claims" | head -n1)
+        if [ -n "$claimed" ] && [ "$claimed" != "$target" ]; then
+          echo "withheld $label: $datafile is also the destination for $claimed"
+          continue
+        fi
       fi
       ${jq} --rawfile text "$work/$n.txt" --arg data "$data" '. + {text: $text, data: $data}' <<<"$c" > "$work/$n.json"
       if ! nix eval --impure --json --expr "import ${runner} $work/$n.json" > "$work/$n.out" 2> "$work/$n.err"; then
@@ -148,6 +158,7 @@ in {
         continue
       fi
       printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$file" "$start" "$end" "$n" "''${target:-}" "''${datafile:-}" >> "$work/accepted"
+      [ -n "$datafile" ] && printf '%s\t%s\n' "$datafile" "$target" >> "$work/claims"
       echo "converted $label"
     done < "$work/candidates"
     if [ -s "$work/accepted" ]; then
