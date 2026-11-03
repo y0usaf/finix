@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   mkLispInline = form:
@@ -85,7 +86,7 @@
 
   layouts = {
     deck = {
-      file = ./lisp/deck.lisp;
+      text = generators.lispSource (import ./lisp/deck.data.nix);
       parameters.ratios = map mkLispInline ["1/2" "21/32" "11/32"];
       bindings = [
         (binding ["alt"] "h" "focus-left" "Focus Left Column")
@@ -107,7 +108,7 @@
       ];
     };
     sway = {
-      file = ./lisp/sway.lisp;
+      text = generators.lispSource (import ./lisp/sway.data.nix);
       parameters.workspaces = 9;
       bindings = [
         (binding ["alt"] "h" "focus-left" "Focus Left")
@@ -283,13 +284,13 @@
     cassetteLisp = deck:
       "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
       + probeLisp
-      + builtins.readFile ./lisp/cassette.lisp
-      + builtins.readFile deck;
+      + generators.lispSource (import ./lisp/cassette.data.nix)
+      + deck;
   in {
-    panels = "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp;
-    gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + probeLisp + builtins.readFile ./lisp/gap.lisp;
-    cassette = cassetteLisp ./lisp/plates.lisp;
-    spine = cassetteLisp ./lisp/spine.lisp;
+    panels = "(defparameter +bar+ ${toLisp barParameters})\n" + generators.lispSource (import ./lisp/bar.data.nix);
+    gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + probeLisp + generators.lispSource (import ./lisp/gap.data.nix);
+    cassette = cassetteLisp (generators.lispSource (import ./lisp/plates.data.nix));
+    spine = cassetteLisp (generators.lispSource (import ./lisp/spine.data.nix));
   };
 
   spineColors = {
@@ -498,20 +499,20 @@ in {
         // layout.parameters)})
       (defparameter +layout-bindings+ ${toLisp (layout.bindings ++ [(binding ["alt"] "t" "terminal" "Terminal")])})
     ''
-    (builtins.readFile ./lisp/policy.lisp)
-    (builtins.readFile layout.file)
-    (builtins.readFile ./lisp/user.lisp)
+    (generators.lispSource (import ./lisp/policy.data.nix))
+    layout.text
+    (generators.lispSource (import ./lisp/user.data.nix))
     "(defparameter +hud+ ${toLisp hudParameters})"
-    (builtins.readFile ./lisp/hud.lisp)
+    (generators.lispSource (import ./lisp/hud.data.nix))
     "(defparameter +hud-theme+ ${toLisp hudThemeParameters})"
-    (builtins.readFile ./lisp/theme.lisp)
+    (generators.lispSource (import ./lisp/theme.data.nix))
     "(defparameter +glass+ ${toLisp glassParameters})"
-    (builtins.readFile ./lisp/glass.lisp)
+    (generators.lispSource (import ./lisp/glass.data.nix))
     barLisp.${bar.style}
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
-    (builtins.readFile ./lisp/shader-wallpaper.lisp)
+    (generators.lispSource (import ./lisp/shader-wallpaper.data.nix))
     "(defparameter +peek+ ${toLisp peekParameters})"
-    (builtins.readFile ./lisp/peek.lisp)
+    (generators.lispSource (import ./lisp/peek.data.nix))
     "(defparameter +sounds+ ${toLisp soundParameters})"
     (lispFile [["in-package" "#:tomoe-user"] ["define-extension" {str = "sounds";} [] ["snapshot" "state" "event"] ["declare" ["ignore" "snapshot" "event"]] ["values" "state" ["list" ["sound" ":key" ["getf" "+sounds+" ":key"] ":gain" ["getf" "+sounds+" ":key-gain"]] ["sound" ":button" ["getf" "+sounds+" ":button"] ":gain" ["getf" "+sounds+" ":button-gain"]] ["sound" ":close" ["getf" "+sounds+" ":close"] ":gain" ["getf" "+sounds+" ":close-gain"]]] "nil"]]])
     cfg.extraConfig

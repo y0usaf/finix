@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
@@ -13,7 +14,7 @@
 
   environment.systemPackages = [flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default];
   manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text =
-    builtins.readFile ./init.lisp
+    lib.removeSuffix "\n" (generators.lispSource (import ./init.data.nix))
     + "\n"
     + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp"
     + "\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\n";

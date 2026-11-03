@@ -112,4 +112,6 @@ in {
   vbsSource = lines;
 
   luaSource = lines;
+
+  lispSource = lines;
 }
