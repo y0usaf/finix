@@ -13,9 +13,15 @@
     ./beat-saber.nix
   ];
 
-  options.user.name = lib.mkOption {
-    type = lib.types.str;
-    default = "steamos";
+  options.user = {
+    name = lib.mkOption {
+      type = lib.types.str;
+      default = "steamos";
+    };
+    homeDirectory = lib.mkOption {
+      type = lib.types.str;
+      default = "/home/steamos";
+    };
   };
 
   config = {

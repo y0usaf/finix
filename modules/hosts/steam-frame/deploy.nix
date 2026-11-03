@@ -10,6 +10,7 @@
         specialArgs = {
           boloPackages = (builtins.getFlake "path:${inputs.bolo}").packages.aarch64-linux;
           madoPackages = (builtins.getFlake "path:${inputs.mado}").packages.aarch64-linux;
+          flakeInputs.cleanker = builtins.getFlake "path:${inputs.cleanker}";
         };
         modules = [
           frame.nixosModules.default
