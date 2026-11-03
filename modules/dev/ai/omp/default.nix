@@ -24,6 +24,38 @@ in {
         defaultThinkingLevel = catalog.ompThinkingLevel;
         advisor.enabled = true;
         startup.checkUpdate = false;
+        setupVersion = 2;
+        symbolPreset = "unicode";
+        theme.dark = "titanium";
+        composer.tokenRate = false;
+        disabledExtensions = [];
+        dev.autoqaConsent = "granted";
+        colorBlindMode = false;
+        hideThinkingBlock = true;
+        statusLine = {
+          sessionAccent = true;
+          contextLine = "embedded";
+        };
+        tui = {
+          renderMermaid = true;
+          scrollbackRebuild = true;
+        };
+        display = {
+          shimmer = "classic";
+          smoothStreaming = true;
+        };
+        task = {
+          showResolvedModelBadge = false;
+          eager = "preferred";
+          enableLsp = false;
+        };
+        edit.mode = "hashline";
+        astGrep.enabled = true;
+        github.enabled = true;
+        eval.js = false;
+        codexResets.autoRedeem = "no";
+        title.icons = "nf+emoji";
+        interruptMode = "immediate";
         modelRoles = {
           default = "${catalog.defaultProvider}/${catalog.defaultModel}";
           advisor = catalog.advisorModel;
