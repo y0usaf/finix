@@ -10,6 +10,32 @@
     then {__toLispInline = form;}
     else throw "mkLispInline: expected a nonblank string";
 
+  lispPrefix = {
+    quote = "'";
+    quasi = "`";
+    unquote = ",";
+    splice = ",@";
+    function = "#'";
+  };
+
+  lispSourceByType = {
+    list = form: "(${lib.concatMapStringsSep " " lispSource form})";
+    int = toString;
+    string = lib.id;
+    set = form: let
+      kind = builtins.head (builtins.attrNames form);
+    in
+      if kind == "str"
+      then ''"${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] form.str}"''
+      else lispPrefix.${kind} + lispSource form.${kind};
+  };
+
+  lispSource = form: lispSourceByType.${builtins.typeOf form} form;
+
+  lispFile = forms: lib.concatMapStrings (form: lispSource form + "\n") forms;
+
+  probeLisp = lispFile [["in-package" "#:tomoe-user"] ["defun" "probe--sample" ["probe" "previous" "system"] ["let" [["sample" ["copy-list" "previous"]]] ["ecase" "probe" [":cpu" ["let" [["total" ["getf" "system" ":cpu-total"]] ["idle" ["getf" "system" ":cpu-idle"]]] ["when" "total" ["let" [["spent" ["-" "total" ["getf" "sample" ":total" "total"]]]] ["setf" ["getf" "sample" ":percent"] ["if" ["plusp" "spent"] ["max" 0 ["min" 100 ["round" ["*" 100 ["-" "spent" ["-" "idle" ["getf" "sample" ":idle" "idle"]]]] "spent"]]] ["getf" "sample" ":percent" 0]] ["getf" "sample" ":total"] "total" ["getf" "sample" ":idle"] "idle" ["getf" "sample" ":temp"] ["getf" "system" ":cpu-temperature"]]]]]] [":memory" ["let" [["total" ["getf" "system" ":memory-total"]] ["available" ["getf" "system" ":memory-available"]]] ["when" ["and" "total" ["plusp" "total"]] ["setf" ["getf" "sample" ":percent"] ["round" ["*" 100 ["-" "total" "available"]] "total"] ["getf" "sample" ":used"] ["round" ["-" "total" "available"] 1024]]]]] [":gpu" ["let" [["gpu" ["first" ["getf" "system" ":gpus"]]]] ["cond" ["gpu" ["setf" ["getf" "sample" ":percent"] ["max" 0 ["min" 100 ["getf" "gpu" ":busy"]]] ["getf" "sample" ":used"] ["getf" "gpu" ":vram-used"] ["getf" "sample" ":total"] ["getf" "gpu" ":vram-total"] ["getf" "sample" ":temp"] ["getf" "gpu" ":temperature"] ["getf" "sample" ":failures"] 0]] ["system" ["setf" ["getf" "sample" ":failures"] ["1+" ["getf" "sample" ":failures" 0]]]]]]]] "sample"]] ["defun" "probe--gpu-p" ["gpu"] ["and" ["getf" "gpu" ":percent"] ["<" ["getf" "gpu" ":failures" 0] 3]]]];
+
   lispList = items:
     if items == []
     then "nil"
@@ -256,12 +282,12 @@
   barLisp = let
     cassetteLisp = deck:
       "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
-      + builtins.readFile ./lisp/probe.lisp
+      + probeLisp
       + builtins.readFile ./lisp/cassette.lisp
       + builtins.readFile deck;
   in {
     panels = "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp;
-    gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/gap.lisp;
+    gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + probeLisp + builtins.readFile ./lisp/gap.lisp;
     cassette = cassetteLisp ./lisp/plates.lisp;
     spine = cassetteLisp ./lisp/spine.lisp;
   };
@@ -480,7 +506,7 @@ in {
     "(defparameter +peek+ ${toLisp peekParameters})"
     (builtins.readFile ./lisp/peek.lisp)
     "(defparameter +sounds+ ${toLisp soundParameters})"
-    (builtins.readFile ./lisp/sounds.lisp)
+    (lispFile [["in-package" "#:tomoe-user"] ["define-extension" {str = "sounds";} [] ["snapshot" "state" "event"] ["declare" ["ignore" "snapshot" "event"]] ["values" "state" ["list" ["sound" ":key" ["getf" "+sounds+" ":key"] ":gain" ["getf" "+sounds+" ":key-gain"]] ["sound" ":button" ["getf" "+sounds+" ":button"] ":gain" ["getf" "+sounds+" ":button-gain"]] ["sound" ":close" ["getf" "+sounds+" ":close"] ":gain" ["getf" "+sounds+" ":close-gain"]]] "nil"]]])
     cfg.extraConfig
   ];
 }
