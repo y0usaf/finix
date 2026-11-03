@@ -1943,11 +1943,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1793676148,
-        "narHash": "sha256-m0ddq8q48QDVeWdSSkjRHkxk2k0n5n4OcOWouV7EyHw=",
+        "lastModified": 1793696808,
+        "narHash": "sha256-tFWG6aA+LGDWyGEGZMdvqOdgPnOzOxsLGxPXss4eYSA=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "0d4c6f4df8587a59f40f2db9d3b1a38fb7334696",
+        "rev": "93a84ad65042680cc7c140e73434cca65d9705ee",
         "type": "github"
       },
       "original": {
