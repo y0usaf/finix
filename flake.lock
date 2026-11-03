@@ -1656,7 +1656,7 @@
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
-        "tern-pond": "tern-pond",
+        "tern-ozette": "tern-ozette",
         "tern-themes": "tern-themes",
         "tomoe": "tomoe"
       }
@@ -1940,30 +1940,30 @@
         "type": "github"
       }
     },
-    "tern-pond": {
+    "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1793746283,
-        "narHash": "sha256-buzR4HndscOoKzcuUsceNxYG1LhVSz0FO2DrpfHHESM=",
+        "lastModified": 1793747509,
+        "narHash": "sha256-qHb0fGsmagnihYvuwpuK4dC3WH7ZUDqygS9E97/JM7g=",
         "ref": "refs/heads/main",
-        "rev": "a71c951374f94cdd91ce60862b618248c73ca922",
-        "revCount": 11,
+        "rev": "ee5a036df13bda221aaef094c31e4fecefe2da6b",
+        "revCount": 12,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-pond"
+        "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-pond"
+        "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       }
     },
     "tern-themes": {
       "flake": false,
       "locked": {
-        "lastModified": 1793741923,
-        "narHash": "sha256-II347lhELr8cUXAp23hBllpsAmYeS6BWq63X7F7HPQE=",
+        "lastModified": 1793747516,
+        "narHash": "sha256-KqU8eI967j3+UudHbMEutSUyUJPMDQmnlQ6uXas5Nuk=",
         "ref": "refs/heads/main",
-        "rev": "00fd30bcc89c4f1c7a12e40f9f9c06a13aa10376",
-        "revCount": 7,
+        "rev": "19e93f91d8243710a247a7dab12a8a002fc553a3",
+        "revCount": 8,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-themes"
       },

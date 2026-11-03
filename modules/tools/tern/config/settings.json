@@ -1,7 +1,7 @@
 {
   "theme": "System",
-  "theme_dark": "pond-night",
-  "theme_light": "pond",
+  "theme_dark": "ozette-night",
+  "theme_light": "ozette",
   "copy_on_select": true,
   "cursor": {
     "programs": true,

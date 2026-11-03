@@ -73,8 +73,8 @@
       flake = false;
     };
 
-    tern-pond = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-pond";
+    tern-ozette = {
+      url = "git+file:///home/y0usaf/dev/developing/tern-ozette";
       flake = false;
     };
 
