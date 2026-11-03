@@ -10,6 +10,7 @@
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".omp"
+    ".local/share/omp"
   ];
 
   environment.systemPackages = [pkgs.jq];
