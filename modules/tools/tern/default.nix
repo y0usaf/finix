@@ -128,6 +128,8 @@
     "carly/USER.md" = ./config/carly/USER.md;
     "carly/memory/2026-10-29.md" = ./config/carly/memory/2026-10-29.md;
     "carly/memory/2026-10-30.md" = ./config/carly/memory/2026-10-30.md;
+    "plugins/agent-tabs/plugin.toml" = ./config/plugins/agent-tabs/plugin.toml;
+    "plugins/agent-tabs/window.luau" = ./config/plugins/agent-tabs/window.luau;
     "plugins/attention/attention.css" = stylesheet "attention.css" (import ./config/plugins/attention/attention.data.nix);
     "plugins/attention/plugin.toml" = ./config/plugins/attention/plugin.toml;
     "plugins/attention/window.luau" = ./config/plugins/attention/window.luau;
