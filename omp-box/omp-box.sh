@@ -4,7 +4,7 @@ set -euo pipefail
 state="${XDG_STATE_HOME:-$HOME/.local/state}/omp-box"
 grants="$state/grants"
 shares="$state/shares"
-key="$state/id_ed25519"
+key="$state/ssh-key"
 port=22422
 target=y0usaf@127.0.0.1
 ssh=(ssh -q -p "$port" -i "$key" -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=2 -o ServerAliveInterval=2 -o ServerAliveCountMax=1)

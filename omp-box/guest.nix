@@ -31,6 +31,13 @@ in {
       ]
       ++ [
         {
+          tag = "auth";
+          source = ompBox.authDir;
+          mountPoint = "/etc/ssh/omp-box";
+          proto = "9p";
+          readOnly = true;
+        }
+        {
           tag = "natives";
           source = ompBox.nativesDir;
           mountPoint = "${home}/.omp/natives";
@@ -71,6 +78,7 @@ in {
     enable = true;
     settings.PermitRootLogin = "no";
     settings.PasswordAuthentication = false;
+    authorizedKeysFiles = ["/etc/ssh/omp-box/authorized_keys"];
   };
 
   users.groups.users.gid = 100;
@@ -79,7 +87,6 @@ in {
     uid = 1001;
     group = "users";
     extraGroups = ["wheel"];
-    openssh.authorizedKeys.keyFiles = [./id_ed25519.pub];
   };
   security.sudo.wheelNeedsPassword = false;
 

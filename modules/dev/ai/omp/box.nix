@@ -64,6 +64,7 @@
         inherit user files;
         inherit shares;
         sharesDir = "${state}/shares";
+        authDir = "${state}/auth";
         nativesDir = "${state}/natives";
         inherit (flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}) omp;
       };
@@ -100,7 +101,7 @@ in {
       };
       command = "${pkgs.writeShellScript "omp-box-grants" ''
         while :; do
-          if ${pkgs.openssh}/bin/ssh -q -p 22422 -i ${state}/id_ed25519 \
+          if ${pkgs.openssh}/bin/ssh -q -p 22422 -i ${state}/ssh-key \
                -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
                -o BatchMode=yes -o ConnectTimeout=1 -o ServerAliveInterval=2 -o ServerAliveCountMax=1 ${user}@127.0.0.1 \
                mountpoint -q /mnt/shares 2>/dev/null; then
@@ -137,7 +138,10 @@ in {
         HOME = home;
       };
       command = "${pkgs.writeShellScript "omp-box-run" ''
-        mkdir -p ${state}/shares ${state}/grants ${state}/natives ${home}/.omp/natives
+        mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${home}/.omp/natives
+        rm -f ${state}/id_ed25519
+        [ -f ${state}/ssh-key ] || ${pkgs.openssh}/bin/ssh-keygen -q -t ed25519 -N "" -C omp-box -f ${state}/ssh-key
+        cp ${state}/ssh-key.pub ${state}/auth/authorized_keys
         cp -al ${home}/.omp/natives/. ${state}/natives/ || cp -a ${home}/.omp/natives/. ${state}/natives/
         for _ in $(seq 60); do ${pkgs.iproute2}/bin/ss -Hltn 'sport = :22422' | grep -q . || break; sleep 0.5; done
         rm -f ${state}/omp-box.sock

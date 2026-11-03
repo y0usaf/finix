@@ -5,16 +5,11 @@
   shares ? [],
   user ? "y0usaf",
 }: let
-  key = ./id_ed25519;
   staticArms = lib.concatMapStringsSep "\n    " (p: ''case "$PWD/" in ${p}/*) allowed=1 ;; esac'') shares;
   wrapper = pkgs.writeShellScriptBin "omp" ''
     set -eu
     state="''${XDG_STATE_HOME:-$HOME/.local/state}/omp-box"
-    key="$state/id_ed25519"
-    if [ ! -f "$key" ]; then
-      mkdir -p "$state"
-      install -m 600 ${key} "$key"
-    fi
+    key="$state/ssh-key"
     allowed=0
     ${staticArms}
     if [ -d "$state/grants" ]; then
