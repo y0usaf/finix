@@ -101,7 +101,7 @@
         '')
         paths)
       targets)}
-      osc=$(sh "$dir/osc.sh")
+      osc=$(${pkgs.runtimeShell} "$dir/osc.sh")
       for tty in /dev/pts/[0-9]*; do
         if [ -O "$tty" ] && [ -w "$tty" ]; then
           printf '%s' "$osc" 2>/dev/null >"$tty" || :
