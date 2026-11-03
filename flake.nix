@@ -6199,15 +6199,15 @@
 
       shaderWallpaperParameters = {
         shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
-          ["${generators.sourceFile "cassette-squares.glsl" (generators.glslSource modules_desktop_session_tomoe_shaders_cassette_squares_data)}" 30 "light"]
-          ["${generators.sourceFile "cassette-led.glsl" (generators.glslSource modules_desktop_session_tomoe_shaders_cassette_led_data)}" 30 "light"]
-          ["${generators.sourceFile "hex-spiral.glsl" (generators.glslSource modules_desktop_session_tomoe_shaders_hex_spiral_data)}" 30 "dark"]
-          ["${generators.sourceFile "dot-corridor.glsl" (generators.glslSource modules_desktop_session_tomoe_shaders_dot_corridor_data)}" 30 "dark"]
-          ["${generators.sourceFile "su-ei.glsl" (generators.glslSource modules_desktop_session_tomoe_shaders_su_ei_data)}" 30 "light"]
-          ["${generators.sourceFile "glass-mound.glsl" (generators.glslSource modules_desktop_session_tomoe_shaders_glass_mound_data)}" 30 "light"]
+          ["${generators.sourceFile "cassette-squares.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_cassette_squares_data generators.glsl))}" 30 "light"]
+          ["${generators.sourceFile "cassette-led.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_cassette_led_data generators.glsl))}" 30 "light"]
+          ["${generators.sourceFile "hex-spiral.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_hex_spiral_data generators.glsl))}" 30 "dark"]
+          ["${generators.sourceFile "dot-corridor.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_dot_corridor_data generators.glsl))}" 30 "dark"]
+          ["${generators.sourceFile "su-ei.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_su_ei_data generators.glsl))}" 30 "light"]
+          ["${generators.sourceFile "glass-mound.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_glass_mound_data generators.glsl))}" 30 "light"]
           ["${shaderDir}/liquify.glsl" 30 "light"]
           ["${shaderDir}/okazz-spheres.glsl" 30 "dark"]
-          ["${generators.sourceFile "balatro.glsl" (generators.glslSource modules_desktop_session_tomoe_shaders_balatro_data)}" 30 "dark"]
+          ["${generators.sourceFile "balatro.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_balatro_data generators.glsl))}" 30 "dark"]
           ["${shaderDir}/xmb.glsl" 30 "dark"]
           ["${shaderDir}/aurora.glsl" 30 "dark"]
           ["${shaderDir}/stars.glsl" 24 "dark"]
@@ -11092,628 +11092,710 @@
         ])
       ])
     ];
-    modules_desktop_session_tomoe_shaders_balatro_data = [
-      "#define HEX(c) (vec3(((c) >> 16) & 0xff, ((c) >> 8) & 0xff, (c) & 0xff) / 255.0)"
-      "#define COLOR_1 HEX(0xde443b)"
-      "#define COLOR_2 HEX(0x006bb4)"
-      "#define COLOR_3 HEX(0x162325)"
-      "#define CONTRAST 3.5"
-      "#define LIGHTING 0.4"
-      "#define SPIN_AMOUNT 0.25"
-      "#define SPIN_ROTATION -2.0"
-      "#define SPEED 7.0"
-      ""
-      "void mainImage(out vec4 fragColor, in vec2 fragCoord) {"
-      "    float diagonal = length(iResolution.xy);"
-      "    vec2 uv = (fragCoord - 0.5 * iResolution.xy) / diagonal;"
-      "    float radius = length(uv);"
-      "    float angle = atan(uv.y, uv.x) + 302.2 + 0.2 * SPIN_ROTATION"
-      "                - 20.0 * (SPIN_AMOUNT * radius + 1.0 - SPIN_AMOUNT);"
-      "    uv = radius * vec2(cos(angle), sin(angle)) * 30.0;"
-      "    float t = iTime * SPEED;"
-      "    vec2 uv2 = vec2(uv.x + uv.y);"
-      "    for (int i = 0; i < 5; i++) {"
-      "        uv2 += sin(max(uv.x, uv.y)) + uv;"
-      "        uv += 0.5 * vec2(cos(5.1123314 + 0.353 * uv2.y + t * 0.131121), sin(uv2.x - 0.113 * t));"
-      "        uv -= cos(uv.x + uv.y) - sin(uv.x * 0.711 - uv.y);"
-      "    }"
-      "    float contrast = 0.25 * CONTRAST + 0.5 * SPIN_AMOUNT + 1.2;"
-      "    float paint = clamp(length(uv) * 0.035 * contrast, 0.0, 2.0);"
-      "    float c1 = max(0.0, 1.0 - contrast * abs(1.0 - paint));"
-      "    float c2 = max(0.0, 1.0 - contrast * abs(paint));"
-      "    float c3 = 1.0 - min(1.0, c1 + c2);"
-      "    float light = (LIGHTING - 0.2) * max(c1 * 5.0 - 4.0, 0.0) + LIGHTING * max(c2 * 5.0 - 4.0, 0.0);"
-      "    vec3 color = (0.3 / CONTRAST) * COLOR_1"
-      "               + (1.0 - 0.3 / CONTRAST) * (COLOR_1 * c1 + COLOR_2 * c2 + COLOR_3 * c3) + light;"
-      "    fragColor = vec4(color, 1.0);"
-      "}"
+    modules_desktop_session_tomoe_shaders_balatro_data = {
+      blank,
+      call,
+      define,
+      fn,
+      for,
+      rows,
+      ...
+    }: [
+      (define (call "HEX" ["c"]) [[(call "vec3" [[[["c"] ">>" 16] "&" "0xff"] [[["c"] ">>" 8] "&" "0xff"] [["c"] "&" "0xff"]]) "/" "255.0"]])
+      (define "COLOR_1" (call "HEX" ["0xde443b"]))
+      (define "COLOR_2" (call "HEX" ["0x006bb4"]))
+      (define "COLOR_3" (call "HEX" ["0x162325"]))
+      (define "CONTRAST" "3.5")
+      (define "LIGHTING" "0.4")
+      (define "SPIN_AMOUNT" "0.25")
+      (define "SPIN_ROTATION" "-2.0")
+      (define "SPEED" "7.0")
+      blank
+      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+        ["float" "diagonal" "=" (call "length" ["iResolution.xy"])]
+        ["vec2" "uv" "=" ["fragCoord" "-" "0.5" "*" "iResolution.xy"] "/" "diagonal"]
+        ["float" "radius" "=" (call "length" ["uv"])]
+        (rows [
+          ["float" "angle" "=" (call "atan" ["uv.y" "uv.x"]) "+" "302.2" "+" "0.2" "*" "SPIN_ROTATION"]
+          ["-" "20.0" "*" ["SPIN_AMOUNT" "*" "radius" "+" "1.0" "-" "SPIN_AMOUNT"]]
+        ])
+        ["uv" "=" "radius" "*" (call "vec2" [(call "cos" ["angle"]) (call "sin" ["angle"])]) "*" "30.0"]
+        ["float" "t" "=" "iTime" "*" "SPEED"]
+        ["vec2" "uv2" "=" (call "vec2" [["uv.x" "+" "uv.y"]])]
+        (for ["int" "i" "=" 0] ["i" "<" 5] "i++" [
+          ["uv2" "+=" (call "sin" [(call "max" ["uv.x" "uv.y"])]) "+" "uv"]
+          ["uv" "+=" "0.5" "*" (call "vec2" [(call "cos" [["5.1123314" "+" "0.353" "*" "uv2.y" "+" "t" "*" "0.131121"]]) (call "sin" [["uv2.x" "-" "0.113" "*" "t"]])])]
+          ["uv" "-=" (call "cos" [["uv.x" "+" "uv.y"]]) "-" (call "sin" [["uv.x" "*" "0.711" "-" "uv.y"]])]
+        ])
+        ["float" "contrast" "=" "0.25" "*" "CONTRAST" "+" "0.5" "*" "SPIN_AMOUNT" "+" "1.2"]
+        ["float" "paint" "=" (call "clamp" [[(call "length" ["uv"]) "*" "0.035" "*" "contrast"] "0.0" "2.0"])]
+        ["float" "c1" "=" (call "max" ["0.0" ["1.0" "-" "contrast" "*" (call "abs" [["1.0" "-" "paint"]])]])]
+        ["float" "c2" "=" (call "max" ["0.0" ["1.0" "-" "contrast" "*" (call "abs" ["paint"])]])]
+        ["float" "c3" "=" "1.0" "-" (call "min" ["1.0" ["c1" "+" "c2"]])]
+        ["float" "light" "=" ["LIGHTING" "-" "0.2"] "*" (call "max" [["c1" "*" "5.0" "-" "4.0"] "0.0"]) "+" "LIGHTING" "*" (call "max" [["c2" "*" "5.0" "-" "4.0"] "0.0"])]
+        (rows [
+          ["vec3" "color" "=" ["0.3" "/" "CONTRAST"] "*" "COLOR_1"]
+          ["+" ["1.0" "-" "0.3" "/" "CONTRAST"] "*" ["COLOR_1" "*" "c1" "+" "COLOR_2" "*" "c2" "+" "COLOR_3" "*" "c3"] "+" "light"]
+        ])
+        ["fragColor" "=" (call "vec4" ["color" "1.0"])]
+      ])
     ];
-    modules_desktop_session_tomoe_shaders_cassette_led_data = [
-      "const vec3 SHELL = vec3(0.914, 0.898, 0.863);"
-      "const vec3 PUTTY = vec3(0.800, 0.780, 0.730);"
-      "const vec3 GRAPHITE = vec3(0.160, 0.160, 0.155);"
-      "const vec3 ORANGE = vec3(0.930, 0.360, 0.110);"
-      "const vec3 AMBER = vec3(0.960, 0.660, 0.200);"
-      "const vec2 LIGHT = vec2(-0.6, 0.8);"
-      ""
-      "float hash(vec2 p) {"
-      "    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);"
-      "}"
-      ""
-      "const float ROWS = 46.0;"
-      "const float SPEED = 1.0;"
-      "const float BPM = 128.0;"
-      "const float WAVE = 1.5;"
-      "const float RIPPLE = 0.7;"
-      "const float RIPPLE_SPEED = 0.7;"
-      ""
-      "float base(vec2 c, float t, float aspect) {"
-      "    float s = t * 0.5;"
-      "    vec2 a = vec2(aspect * (0.22 + 0.08 * sin(s * 0.37)), 0.30 + 0.12 * cos(s * 0.41));"
-      "    vec2 b = vec2(aspect * (0.78 + 0.08 * cos(s * 0.29)), 0.70 + 0.10 * sin(s * 0.47));"
-      "    float wa = sin(length(c - a) * 18.0 - t * WAVE);"
-      "    float wb = sin(length(c - b) * 14.0 - t * WAVE * 0.8);"
-      "    return 0.5 + 0.25 * (wa + wb);"
-      "}"
-      ""
-      "float ripples(vec2 c, float t, float aspect) {"
-      "    float every = 120.0 / BPM;"
-      "    float life = 4.0 * every;"
-      "    float n = floor(t / every);"
-      "    float age = t - n * every;"
-      "    float r = 0.0;"
-      "    for (int k = 0; k < 4; k++) {"
-      "        float m = n - float(k);"
-      "        float tm = age + float(k) * every;"
-      "        float x = tm / life;"
-      "        vec2 o = vec2(hash(vec2(m, 3.7)) * aspect, hash(vec2(m, 9.1)));"
-      "        float d = length(c - o) - tm * RIPPLE_SPEED;"
-      "        float env = smoothstep(0.0, 0.04, x) * (1.0 - smoothstep(0.2, 1.0, x));"
-      "        r += (mod(m, 2.0) < 0.5 ? 1.0 : 0.7) * env * exp(-d * d * 120.0);"
-      "    }"
-      "    return RIPPLE * r;"
-      "}"
-      ""
-      "const float LEVELS = 8.0;"
-      ""
-      "float level(vec2 cell, float pitch, vec2 off, float t, float aspect) {"
-      "    vec2 p = ((cell + 0.5) * pitch + off) / iResolution.y;"
-      "    float b = smoothstep(0.40, 0.98, base(p, t, aspect) * 0.95);"
-      "    float lift = clamp(ripples(p, t, aspect), 0.0, 1.0);"
-      "    b = 1.0 - (1.0 - b) * (1.0 - lift);"
-      "    return floor(b * b * LEVELS + 0.5) / LEVELS;"
-      "}"
-      ""
-      "vec3 led(float b) {"
-      "    return mix(ORANGE, AMBER, 0.55 * smoothstep(0.6, 1.0, b)) * b;"
-      "}"
-      ""
-      "void mainImage(out vec4 fragColor, in vec2 fragCoord) {"
-      "    float t = iTime * SPEED;"
-      "    float aspect = iResolution.x / iResolution.y;"
-      "    float pitch = floor(iResolution.y / ROWS);"
-      "    vec2 off = 0.5 * mod(iResolution.xy, pitch);"
-      "    vec2 cell = floor((fragCoord - off) / pitch);"
-      "    vec2 center = (cell + 0.5) * pitch + off;"
-      "    float b = level(cell, pitch, off, t, aspect);"
-      "    float hs = 0.5 * floor(pitch * 0.62 + 0.5);"
-      "    vec2 q = fragCoord - center;"
-      "    vec2 aq = abs(q);"
-      "    float dist = max(aq.x, aq.y);"
-      "    vec2 dir = aq.x > aq.y ? vec2(sign(q.x), 0.0) : vec2(0.0, sign(q.y));"
-      "    vec2 l = normalize(LIGHT);"
-      "    vec2 sv = fragCoord / iResolution.xy;"
-      "    vec3 panel = SHELL * mix(0.94, 1.02, 0.55 * sv.y + 0.45 * (1.0 - sv.x));"
-      "    float rim = smoothstep(hs + 2.5, hs, dist) * dot(dir, -l);"
-      "    panel *= 1.0 + 0.10 * rim;"
-      "    float w = 0.0;"
-      "    for (int j = -2; j <= 2; j++) {"
-      "        for (int i = -2; i <= 2; i++) {"
-      "            vec2 nc = cell + vec2(float(i), float(j));"
-      "            vec2 d = abs(fragCoord - ((nc + 0.5) * pitch + off)) / pitch;"
-      "            float e = max(max(d.x, d.y) - 0.31, 0.0);"
-      "            w += level(nc, pitch, off, t, aspect) * exp(-e * e * 9.0);"
-      "        }"
-      "    }"
-      "    panel = mix(panel, panel * vec3(1.03, 0.80, 0.62), clamp(w * 0.28, 0.0, 0.75));"
-      "    float wall = max(1.0, hs * 0.22);"
-      "    float lit = clamp(dot(dir, -l), 0.0, 1.0);"
-      "    vec3 side = mix(GRAPHITE * 0.7, PUTTY * 0.8, lit) + led(b) * 0.35;"
-      "    vec3 face = GRAPHITE * 0.85 + led(b) * (1.0 + 0.12 * (1.0 - dist / (hs - wall)));"
-      "    vec3 hole = mix(face, side, step(hs - wall, dist) * (0.4 + 0.6 * lit));"
-      "    float inside = 1.0 - step(hs, dist);"
-      "    vec3 color = mix(panel, hole, inside);"
-      "    color += (hash(fragCoord) - 0.5) * 0.012;"
-      "    fragColor = vec4(color, 1.0);"
-      "}"
+    modules_desktop_session_tomoe_shaders_cassette_led_data = {
+      blank,
+      call,
+      fn,
+      for,
+      ...
+    }: [
+      ["const" "vec3" "SHELL" "=" (call "vec3" ["0.914" "0.898" "0.863"])]
+      ["const" "vec3" "PUTTY" "=" (call "vec3" ["0.800" "0.780" "0.730"])]
+      ["const" "vec3" "GRAPHITE" "=" (call "vec3" ["0.160" "0.160" "0.155"])]
+      ["const" "vec3" "ORANGE" "=" (call "vec3" ["0.930" "0.360" "0.110"])]
+      ["const" "vec3" "AMBER" "=" (call "vec3" ["0.960" "0.660" "0.200"])]
+      ["const" "vec2" "LIGHT" "=" (call "vec2" ["-0.6" "0.8"])]
+      blank
+      (fn ["float" (call "hash" [["vec2" "p"]])] [
+        ["return" (call "fract" [[(call "sin" [(call "dot" ["p" (call "vec2" ["127.1" "311.7"])])]) "*" "43758.5453"]])]
+      ])
+      blank
+      ["const" "float" "ROWS" "=" "46.0"]
+      ["const" "float" "SPEED" "=" "1.0"]
+      ["const" "float" "BPM" "=" "128.0"]
+      ["const" "float" "WAVE" "=" "1.5"]
+      ["const" "float" "RIPPLE" "=" "0.7"]
+      ["const" "float" "RIPPLE_SPEED" "=" "0.7"]
+      blank
+      (fn ["float" (call "base" [["vec2" "c"] ["float" "t"] ["float" "aspect"]])] [
+        ["float" "s" "=" "t" "*" "0.5"]
+        ["vec2" "a" "=" (call "vec2" [["aspect" "*" ["0.22" "+" "0.08" "*" (call "sin" [["s" "*" "0.37"]])]] ["0.30" "+" "0.12" "*" (call "cos" [["s" "*" "0.41"]])]])]
+        ["vec2" "b" "=" (call "vec2" [["aspect" "*" ["0.78" "+" "0.08" "*" (call "cos" [["s" "*" "0.29"]])]] ["0.70" "+" "0.10" "*" (call "sin" [["s" "*" "0.47"]])]])]
+        ["float" "wa" "=" (call "sin" [[(call "length" [["c" "-" "a"]]) "*" "18.0" "-" "t" "*" "WAVE"]])]
+        ["float" "wb" "=" (call "sin" [[(call "length" [["c" "-" "b"]]) "*" "14.0" "-" "t" "*" "WAVE" "*" "0.8"]])]
+        ["return" "0.5" "+" "0.25" "*" ["wa" "+" "wb"]]
+      ])
+      blank
+      (fn ["float" (call "ripples" [["vec2" "c"] ["float" "t"] ["float" "aspect"]])] [
+        ["float" "every" "=" "120.0" "/" "BPM"]
+        ["float" "life" "=" "4.0" "*" "every"]
+        ["float" "n" "=" (call "floor" [["t" "/" "every"]])]
+        ["float" "age" "=" "t" "-" "n" "*" "every"]
+        ["float" "r" "=" "0.0"]
+        (for ["int" "k" "=" 0] ["k" "<" 4] "k++" [
+          ["float" "m" "=" "n" "-" (call "float" ["k"])]
+          ["float" "tm" "=" "age" "+" (call "float" ["k"]) "*" "every"]
+          ["float" "x" "=" "tm" "/" "life"]
+          ["vec2" "o" "=" (call "vec2" [[(call "hash" [(call "vec2" ["m" "3.7"])]) "*" "aspect"] (call "hash" [(call "vec2" ["m" "9.1"])])])]
+          ["float" "d" "=" (call "length" [["c" "-" "o"]]) "-" "tm" "*" "RIPPLE_SPEED"]
+          ["float" "env" "=" (call "smoothstep" ["0.0" "0.04" "x"]) "*" ["1.0" "-" (call "smoothstep" ["0.2" "1.0" "x"])]]
+          ["r" "+=" [(call "mod" ["m" "2.0"]) "<" "0.5" "?" "1.0" ":" "0.7"] "*" "env" "*" (call "exp" [["-d" "*" "d" "*" "120.0"]])]
+        ])
+        ["return" "RIPPLE" "*" "r"]
+      ])
+      blank
+      ["const" "float" "LEVELS" "=" "8.0"]
+      blank
+      (fn ["float" (call "level" [["vec2" "cell"] ["float" "pitch"] ["vec2" "off"] ["float" "t"] ["float" "aspect"]])] [
+        ["vec2" "p" "=" [["cell" "+" "0.5"] "*" "pitch" "+" "off"] "/" "iResolution.y"]
+        ["float" "b" "=" (call "smoothstep" ["0.40" "0.98" [(call "base" ["p" "t" "aspect"]) "*" "0.95"]])]
+        ["float" "lift" "=" (call "clamp" [(call "ripples" ["p" "t" "aspect"]) "0.0" "1.0"])]
+        ["b" "=" "1.0" "-" ["1.0" "-" "b"] "*" ["1.0" "-" "lift"]]
+        ["return" (call "floor" [["b" "*" "b" "*" "LEVELS" "+" "0.5"]]) "/" "LEVELS"]
+      ])
+      blank
+      (fn ["vec3" (call "led" [["float" "b"]])] [
+        ["return" (call "mix" ["ORANGE" "AMBER" ["0.55" "*" (call "smoothstep" ["0.6" "1.0" "b"])]]) "*" "b"]
+      ])
+      blank
+      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+        ["float" "t" "=" "iTime" "*" "SPEED"]
+        ["float" "aspect" "=" "iResolution.x" "/" "iResolution.y"]
+        ["float" "pitch" "=" (call "floor" [["iResolution.y" "/" "ROWS"]])]
+        ["vec2" "off" "=" "0.5" "*" (call "mod" ["iResolution.xy" "pitch"])]
+        ["vec2" "cell" "=" (call "floor" [[["fragCoord" "-" "off"] "/" "pitch"]])]
+        ["vec2" "center" "=" ["cell" "+" "0.5"] "*" "pitch" "+" "off"]
+        ["float" "b" "=" (call "level" ["cell" "pitch" "off" "t" "aspect"])]
+        ["float" "hs" "=" "0.5" "*" (call "floor" [["pitch" "*" "0.62" "+" "0.5"]])]
+        ["vec2" "q" "=" "fragCoord" "-" "center"]
+        ["vec2" "aq" "=" (call "abs" ["q"])]
+        ["float" "dist" "=" (call "max" ["aq.x" "aq.y"])]
+        ["vec2" "dir" "=" "aq.x" ">" "aq.y" "?" (call "vec2" [(call "sign" ["q.x"]) "0.0"]) ":" (call "vec2" ["0.0" (call "sign" ["q.y"])])]
+        ["vec2" "l" "=" (call "normalize" ["LIGHT"])]
+        ["vec2" "sv" "=" "fragCoord" "/" "iResolution.xy"]
+        ["vec3" "panel" "=" "SHELL" "*" (call "mix" ["0.94" "1.02" ["0.55" "*" "sv.y" "+" "0.45" "*" ["1.0" "-" "sv.x"]]])]
+        ["float" "rim" "=" (call "smoothstep" [["hs" "+" "2.5"] "hs" "dist"]) "*" (call "dot" ["dir" "-l"])]
+        ["panel" "*=" "1.0" "+" "0.10" "*" "rim"]
+        ["float" "w" "=" "0.0"]
+        (for ["int" "j" "=" (-2)] ["j" "<=" 2] "j++" [
+          (for ["int" "i" "=" (-2)] ["i" "<=" 2] "i++" [
+            ["vec2" "nc" "=" "cell" "+" (call "vec2" [(call "float" ["i"]) (call "float" ["j"])])]
+            ["vec2" "d" "=" (call "abs" [["fragCoord" "-" [["nc" "+" "0.5"] "*" "pitch" "+" "off"]]]) "/" "pitch"]
+            ["float" "e" "=" (call "max" [[(call "max" ["d.x" "d.y"]) "-" "0.31"] "0.0"])]
+            ["w" "+=" (call "level" ["nc" "pitch" "off" "t" "aspect"]) "*" (call "exp" [["-e" "*" "e" "*" "9.0"]])]
+          ])
+        ])
+        ["panel" "=" (call "mix" ["panel" ["panel" "*" (call "vec3" ["1.03" "0.80" "0.62"])] (call "clamp" [["w" "*" "0.28"] "0.0" "0.75"])])]
+        ["float" "wall" "=" (call "max" ["1.0" ["hs" "*" "0.22"]])]
+        ["float" "lit" "=" (call "clamp" [(call "dot" ["dir" "-l"]) "0.0" "1.0"])]
+        ["vec3" "side" "=" (call "mix" [["GRAPHITE" "*" "0.7"] ["PUTTY" "*" "0.8"] "lit"]) "+" (call "led" ["b"]) "*" "0.35"]
+        ["vec3" "face" "=" "GRAPHITE" "*" "0.85" "+" (call "led" ["b"]) "*" ["1.0" "+" "0.12" "*" ["1.0" "-" "dist" "/" ["hs" "-" "wall"]]]]
+        ["vec3" "hole" "=" (call "mix" ["face" "side" [(call "step" [["hs" "-" "wall"] "dist"]) "*" ["0.4" "+" "0.6" "*" "lit"]]])]
+        ["float" "inside" "=" "1.0" "-" (call "step" ["hs" "dist"])]
+        ["vec3" "color" "=" (call "mix" ["panel" "hole" "inside"])]
+        ["color" "+=" [(call "hash" ["fragCoord"]) "-" "0.5"] "*" "0.012"]
+        ["fragColor" "=" (call "vec4" ["color" "1.0"])]
+      ])
     ];
-    modules_desktop_session_tomoe_shaders_cassette_squares_data = [
-      "const vec3 SHELL = vec3(0.914, 0.898, 0.863);"
-      "const vec3 PUTTY = vec3(0.800, 0.780, 0.730);"
-      "const vec3 GRAPHITE = vec3(0.160, 0.160, 0.155);"
-      "const vec3 ORANGE = vec3(0.930, 0.360, 0.110);"
-      "const vec2 LIGHT = vec2(-0.6, 0.8);"
-      ""
-      "float hash(vec2 p) {"
-      "    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);"
-      "}"
-      ""
-      "const float ROWS = 46.0;"
-      "const float SPEED = 1.0;"
-      "const float BPM = 128.0;"
-      "const float WAVE = 1.5;"
-      "const float RIPPLE = 0.7;"
-      "const float RIPPLE_SPEED = 0.7;"
-      ""
-      "float base(vec2 c, float t, float aspect) {"
-      "    float s = t * 0.5;"
-      "    vec2 a = vec2(aspect * (0.22 + 0.08 * sin(s * 0.37)), 0.30 + 0.12 * cos(s * 0.41));"
-      "    vec2 b = vec2(aspect * (0.78 + 0.08 * cos(s * 0.29)), 0.70 + 0.10 * sin(s * 0.47));"
-      "    float wa = sin(length(c - a) * 18.0 - t * WAVE);"
-      "    float wb = sin(length(c - b) * 14.0 - t * WAVE * 0.8);"
-      "    return 0.5 + 0.25 * (wa + wb);"
-      "}"
-      ""
-      "float ripples(vec2 c, float t, float aspect) {"
-      "    float every = 120.0 / BPM;"
-      "    float life = 4.0 * every;"
-      "    float n = floor(t / every);"
-      "    float age = t - n * every;"
-      "    float r = 0.0;"
-      "    for (int k = 0; k < 4; k++) {"
-      "        float m = n - float(k);"
-      "        float tm = age + float(k) * every;"
-      "        float x = tm / life;"
-      "        vec2 o = vec2(hash(vec2(m, 3.7)) * aspect, hash(vec2(m, 9.1)));"
-      "        float d = length(c - o) - tm * RIPPLE_SPEED;"
-      "        float env = smoothstep(0.0, 0.04, x) * (1.0 - smoothstep(0.2, 1.0, x));"
-      "        r += (mod(m, 2.0) < 0.5 ? 1.0 : 0.7) * env * exp(-d * d * 120.0);"
-      "    }"
-      "    return RIPPLE * r;"
-      "}"
-      ""
-      "void mainImage(out vec4 fragColor, in vec2 fragCoord) {"
-      "    float t = iTime * SPEED;"
-      "    float aspect = iResolution.x / iResolution.y;"
-      "    float pitch = floor(iResolution.y / ROWS);"
-      "    vec2 off = 0.5 * mod(iResolution.xy, pitch);"
-      "    vec2 cell = floor((fragCoord - off) / pitch);"
-      "    vec2 center = (cell + 0.5) * pitch + off;"
-      "    vec2 p = center / iResolution.y;"
-      "    float f = clamp(base(p, t, aspect) * 0.95 + ripples(p, t, aspect), 0.0, 1.0);"
-      "    float hs = 0.5 * floor(pitch * (0.12 + 0.60 * f * f) + 0.5);"
-      "    vec2 q = fragCoord - center;"
-      "    vec2 aq = abs(q);"
-      "    float dist = max(aq.x, aq.y);"
-      "    vec2 dir = aq.x > aq.y ? vec2(sign(q.x), 0.0) : vec2(0.0, sign(q.y));"
-      "    vec2 l = normalize(LIGHT);"
-      "    vec2 sv = fragCoord / iResolution.xy;"
-      "    vec3 panel = SHELL * mix(0.94, 1.02, 0.55 * sv.y + 0.45 * (1.0 - sv.x));"
-      "    float rim = smoothstep(hs + 2.5, hs, dist) * dot(dir, -l);"
-      "    panel *= 1.0 + 0.10 * rim;"
-      "    float glow = smoothstep(0.86, 0.98, f);"
-      "    vec3 backing = mix(GRAPHITE, ORANGE, glow);"
-      "    float lit = clamp(dot(dir, -l), 0.0, 1.0);"
-      "    vec3 wall = mix(GRAPHITE * 0.7, PUTTY * 0.8, lit);"
-      "    vec3 hole = mix(backing, wall, step(hs - max(1.0, hs * 0.22), dist) * (0.4 + 0.6 * lit));"
-      "    float inside = 1.0 - step(hs, dist);"
-      "    vec3 color = mix(panel, hole, inside);"
-      "    color += (hash(fragCoord) - 0.5) * 0.012;"
-      "    fragColor = vec4(color, 1.0);"
-      "}"
+    modules_desktop_session_tomoe_shaders_cassette_squares_data = {
+      blank,
+      call,
+      fn,
+      for,
+      ...
+    }: [
+      ["const" "vec3" "SHELL" "=" (call "vec3" ["0.914" "0.898" "0.863"])]
+      ["const" "vec3" "PUTTY" "=" (call "vec3" ["0.800" "0.780" "0.730"])]
+      ["const" "vec3" "GRAPHITE" "=" (call "vec3" ["0.160" "0.160" "0.155"])]
+      ["const" "vec3" "ORANGE" "=" (call "vec3" ["0.930" "0.360" "0.110"])]
+      ["const" "vec2" "LIGHT" "=" (call "vec2" ["-0.6" "0.8"])]
+      blank
+      (fn ["float" (call "hash" [["vec2" "p"]])] [
+        ["return" (call "fract" [[(call "sin" [(call "dot" ["p" (call "vec2" ["127.1" "311.7"])])]) "*" "43758.5453"]])]
+      ])
+      blank
+      ["const" "float" "ROWS" "=" "46.0"]
+      ["const" "float" "SPEED" "=" "1.0"]
+      ["const" "float" "BPM" "=" "128.0"]
+      ["const" "float" "WAVE" "=" "1.5"]
+      ["const" "float" "RIPPLE" "=" "0.7"]
+      ["const" "float" "RIPPLE_SPEED" "=" "0.7"]
+      blank
+      (fn ["float" (call "base" [["vec2" "c"] ["float" "t"] ["float" "aspect"]])] [
+        ["float" "s" "=" "t" "*" "0.5"]
+        ["vec2" "a" "=" (call "vec2" [["aspect" "*" ["0.22" "+" "0.08" "*" (call "sin" [["s" "*" "0.37"]])]] ["0.30" "+" "0.12" "*" (call "cos" [["s" "*" "0.41"]])]])]
+        ["vec2" "b" "=" (call "vec2" [["aspect" "*" ["0.78" "+" "0.08" "*" (call "cos" [["s" "*" "0.29"]])]] ["0.70" "+" "0.10" "*" (call "sin" [["s" "*" "0.47"]])]])]
+        ["float" "wa" "=" (call "sin" [[(call "length" [["c" "-" "a"]]) "*" "18.0" "-" "t" "*" "WAVE"]])]
+        ["float" "wb" "=" (call "sin" [[(call "length" [["c" "-" "b"]]) "*" "14.0" "-" "t" "*" "WAVE" "*" "0.8"]])]
+        ["return" "0.5" "+" "0.25" "*" ["wa" "+" "wb"]]
+      ])
+      blank
+      (fn ["float" (call "ripples" [["vec2" "c"] ["float" "t"] ["float" "aspect"]])] [
+        ["float" "every" "=" "120.0" "/" "BPM"]
+        ["float" "life" "=" "4.0" "*" "every"]
+        ["float" "n" "=" (call "floor" [["t" "/" "every"]])]
+        ["float" "age" "=" "t" "-" "n" "*" "every"]
+        ["float" "r" "=" "0.0"]
+        (for ["int" "k" "=" 0] ["k" "<" 4] "k++" [
+          ["float" "m" "=" "n" "-" (call "float" ["k"])]
+          ["float" "tm" "=" "age" "+" (call "float" ["k"]) "*" "every"]
+          ["float" "x" "=" "tm" "/" "life"]
+          ["vec2" "o" "=" (call "vec2" [[(call "hash" [(call "vec2" ["m" "3.7"])]) "*" "aspect"] (call "hash" [(call "vec2" ["m" "9.1"])])])]
+          ["float" "d" "=" (call "length" [["c" "-" "o"]]) "-" "tm" "*" "RIPPLE_SPEED"]
+          ["float" "env" "=" (call "smoothstep" ["0.0" "0.04" "x"]) "*" ["1.0" "-" (call "smoothstep" ["0.2" "1.0" "x"])]]
+          ["r" "+=" [(call "mod" ["m" "2.0"]) "<" "0.5" "?" "1.0" ":" "0.7"] "*" "env" "*" (call "exp" [["-d" "*" "d" "*" "120.0"]])]
+        ])
+        ["return" "RIPPLE" "*" "r"]
+      ])
+      blank
+      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+        ["float" "t" "=" "iTime" "*" "SPEED"]
+        ["float" "aspect" "=" "iResolution.x" "/" "iResolution.y"]
+        ["float" "pitch" "=" (call "floor" [["iResolution.y" "/" "ROWS"]])]
+        ["vec2" "off" "=" "0.5" "*" (call "mod" ["iResolution.xy" "pitch"])]
+        ["vec2" "cell" "=" (call "floor" [[["fragCoord" "-" "off"] "/" "pitch"]])]
+        ["vec2" "center" "=" ["cell" "+" "0.5"] "*" "pitch" "+" "off"]
+        ["vec2" "p" "=" "center" "/" "iResolution.y"]
+        ["float" "f" "=" (call "clamp" [[(call "base" ["p" "t" "aspect"]) "*" "0.95" "+" (call "ripples" ["p" "t" "aspect"])] "0.0" "1.0"])]
+        ["float" "hs" "=" "0.5" "*" (call "floor" [["pitch" "*" ["0.12" "+" "0.60" "*" "f" "*" "f"] "+" "0.5"]])]
+        ["vec2" "q" "=" "fragCoord" "-" "center"]
+        ["vec2" "aq" "=" (call "abs" ["q"])]
+        ["float" "dist" "=" (call "max" ["aq.x" "aq.y"])]
+        ["vec2" "dir" "=" "aq.x" ">" "aq.y" "?" (call "vec2" [(call "sign" ["q.x"]) "0.0"]) ":" (call "vec2" ["0.0" (call "sign" ["q.y"])])]
+        ["vec2" "l" "=" (call "normalize" ["LIGHT"])]
+        ["vec2" "sv" "=" "fragCoord" "/" "iResolution.xy"]
+        ["vec3" "panel" "=" "SHELL" "*" (call "mix" ["0.94" "1.02" ["0.55" "*" "sv.y" "+" "0.45" "*" ["1.0" "-" "sv.x"]]])]
+        ["float" "rim" "=" (call "smoothstep" [["hs" "+" "2.5"] "hs" "dist"]) "*" (call "dot" ["dir" "-l"])]
+        ["panel" "*=" "1.0" "+" "0.10" "*" "rim"]
+        ["float" "glow" "=" (call "smoothstep" ["0.86" "0.98" "f"])]
+        ["vec3" "backing" "=" (call "mix" ["GRAPHITE" "ORANGE" "glow"])]
+        ["float" "lit" "=" (call "clamp" [(call "dot" ["dir" "-l"]) "0.0" "1.0"])]
+        ["vec3" "wall" "=" (call "mix" [["GRAPHITE" "*" "0.7"] ["PUTTY" "*" "0.8"] "lit"])]
+        ["vec3" "hole" "=" (call "mix" ["backing" "wall" [(call "step" [["hs" "-" (call "max" ["1.0" ["hs" "*" "0.22"]])] "dist"]) "*" ["0.4" "+" "0.6" "*" "lit"]]])]
+        ["float" "inside" "=" "1.0" "-" (call "step" ["hs" "dist"])]
+        ["vec3" "color" "=" (call "mix" ["panel" "hole" "inside"])]
+        ["color" "+=" [(call "hash" ["fragCoord"]) "-" "0.5"] "*" "0.012"]
+        ["fragColor" "=" (call "vec4" ["color" "1.0"])]
+      ])
     ];
-    modules_desktop_session_tomoe_shaders_dot_corridor_data = [
-      "const float TAU = 6.28318531;"
-      "const float FOCAL = 0.92;"
-      "const float WIDE = 2.4;"
-      "const float LW = 0.2;"
-      "const float DY = 0.41;"
-      "const float RAD = 0.19;"
-      "const float YMAX = 16.0;"
-      "const float ZOOM = 1.1;"
-      "const float HUE_PERIOD = 1.8;"
-      "const float SIDES = 13.0;"
-      "const int BAND = 5;"
-      "const int LOOP = 1000;"
-      ""
-      "float hash(ivec2 c) {"
-      "    uvec2 v = uvec2(c) * uvec2(1597334673u, 3812015801u);"
-      "    uint n = (v.x ^ v.y) * 1597334673u;"
-      "    n ^= n >> 16;"
-      "    n *= 2246822519u;"
-      "    n ^= n >> 13;"
-      "    return float(n) * (1.0 / 4294967296.0);"
-      "}"
-      ""
-      "int pmod(int a, int b) {"
-      "    return a - b * int(floor(float(a) / float(b)));"
-      "}"
-      ""
-      "vec3 hsv(float h, float s, float v) {"
-      "    vec3 k = clamp(abs(fract(h + vec3(0.0, 2.0, 1.0) / 3.0) * 6.0 - 3.0) - 1.0, 0.0, 1.0);"
-      "    return v * mix(vec3(1.0), k, s);"
-      "}"
-      ""
-      "void mainImage(out vec4 fragColor, in vec2 fragCoord) {"
-      "    float px = 1.0 / max(0.5 * iResolution.y * FOCAL, 0.5 * iResolution.x / WIDE);"
-      "    vec2 s = max(abs(fragCoord - 0.5 * iResolution.xy) * px, vec2(1e-6, 0.0));"
-      "    vec3 col = vec3(0.0);"
-      "    float alpha = 0.0;"
-      ""
-      "    float shift = mod(iTime * ZOOM, float(LOOP) * LW);"
-      "    float spin = fract(iTime / HUE_PERIOD);"
-      "    float w = log(s.x) - shift;"
-      "    float u = s.y / s.x;"
-      "    int c0 = int(floor(w / LW + 0.5));"
-      "    int imax = int(YMAX / DY);"
-      ""
-      "    for (int dc = 2; dc >= -2; dc--) {"
-      "        int c = c0 + dc;"
-      "        int cc = pmod(c, LOOP);"
-      "        float lift = 0.5 * float(cc & 1);"
-      "        int i0 = int(floor(u / DY - lift + 0.5));"
-      "        for (int di = -1; di <= 1; di++) {"
-      "            int i = i0 + di;"
-      "            if (i < 0 || i > imax) continue;"
-      "            ivec2 id = ivec2(cc, i);"
-      "            float h0 = hash(id);"
-      "            float h1 = hash(id + ivec2(4099, 17));"
-      "            float h2 = hash(id + ivec2(31, 7919));"
-      "            float h3 = hash(id + ivec2(613, 3));"
-      "            if (h2 > 0.9) continue;"
-      "            float sx = exp((float(c) + 0.3 * (h3 - 0.5)) * LW + shift);"
-      "            vec2 centre = sx * vec2(1.0, (float(i) + lift + 0.3 * (fract(h3 * 7.0) - 0.5)) * DY);"
-      "            float rho = max(RAD * (0.5 + 0.5 * h1) * sx, 0.6 * px);"
-      "            vec2 q = s - centre;"
-      "            float len = length(q);"
-      "            if (len > rho + px) continue;"
-      "            float sector = TAU / SIDES;"
-      "            float a = mod(atan(q.y, q.x) + h0 * TAU, sector) - 0.5 * sector;"
-      "            float dist = (len * cos(a) - rho * cos(0.5 * sector)) / px;"
-      "            float cover = clamp(0.5 - dist, 0.0, 1.0);"
-      "            float sat = h2 < 0.1 ? 0.0 : (h2 < 0.2 ? 0.35 : 0.92);"
-      "            float val = h2 > 0.82 ? 0.55 : 1.0;"
-      "            float hue = hash(ivec2(cc / BAND, int(h0 * 4.0) + 101));"
-      "            col += (1.0 - alpha) * cover * hsv(hue + spin, sat, val);"
-      "            alpha += (1.0 - alpha) * cover;"
-      "        }"
-      "    }"
-      ""
-      "    fragColor = vec4(col, 1.0);"
-      "}"
+    modules_desktop_session_tomoe_shaders_dot_corridor_data = {
+      bare,
+      blank,
+      call,
+      fn,
+      for,
+      if',
+      ...
+    }: [
+      ["const" "float" "TAU" "=" "6.28318531"]
+      ["const" "float" "FOCAL" "=" "0.92"]
+      ["const" "float" "WIDE" "=" "2.4"]
+      ["const" "float" "LW" "=" "0.2"]
+      ["const" "float" "DY" "=" "0.41"]
+      ["const" "float" "RAD" "=" "0.19"]
+      ["const" "float" "YMAX" "=" "16.0"]
+      ["const" "float" "ZOOM" "=" "1.1"]
+      ["const" "float" "HUE_PERIOD" "=" "1.8"]
+      ["const" "float" "SIDES" "=" "13.0"]
+      ["const" "int" "BAND" "=" 5]
+      ["const" "int" "LOOP" "=" 1000]
+      blank
+      (fn ["float" (call "hash" [["ivec2" "c"]])] [
+        ["uvec2" "v" "=" (call "uvec2" ["c"]) "*" (call "uvec2" ["1597334673u" "3812015801u"])]
+        ["uint" "n" "=" ["v.x" "^" "v.y"] "*" "1597334673u"]
+        ["n" "^=" "n" ">>" 16]
+        ["n" "*=" "2246822519u"]
+        ["n" "^=" "n" ">>" 13]
+        ["return" (call "float" ["n"]) "*" ["1.0" "/" "4294967296.0"]]
+      ])
+      blank
+      (fn ["int" (call "pmod" [["int" "a"] ["int" "b"]])] [
+        ["return" "a" "-" "b" "*" (call "int" [(call "floor" [[(call "float" ["a"]) "/" (call "float" ["b"])]])])]
+      ])
+      blank
+      (fn ["vec3" (call "hsv" [["float" "h"] ["float" "s"] ["float" "v"]])] [
+        ["vec3" "k" "=" (call "clamp" [[(call "abs" [[(call "fract" [["h" "+" (call "vec3" ["0.0" "2.0" "1.0"]) "/" "3.0"]]) "*" "6.0" "-" "3.0"]]) "-" "1.0"] "0.0" "1.0"])]
+        ["return" "v" "*" (call "mix" [(call "vec3" ["1.0"]) "k" "s"])]
+      ])
+      blank
+      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+        ["float" "px" "=" "1.0" "/" (call "max" [["0.5" "*" "iResolution.y" "*" "FOCAL"] ["0.5" "*" "iResolution.x" "/" "WIDE"]])]
+        ["vec2" "s" "=" (call "max" [[(call "abs" [["fragCoord" "-" "0.5" "*" "iResolution.xy"]]) "*" "px"] (call "vec2" ["1e-6" "0.0"])])]
+        ["vec3" "col" "=" (call "vec3" ["0.0"])]
+        ["float" "alpha" "=" "0.0"]
+        blank
+        ["float" "shift" "=" (call "mod" [["iTime" "*" "ZOOM"] [(call "float" ["LOOP"]) "*" "LW"]])]
+        ["float" "spin" "=" (call "fract" [["iTime" "/" "HUE_PERIOD"]])]
+        ["float" "w" "=" (call "log" ["s.x"]) "-" "shift"]
+        ["float" "u" "=" "s.y" "/" "s.x"]
+        ["int" "c0" "=" (call "int" [(call "floor" [["w" "/" "LW" "+" "0.5"]])])]
+        ["int" "imax" "=" (call "int" [["YMAX" "/" "DY"]])]
+        blank
+        (for ["int" "dc" "=" 2] ["dc" ">=" (-2)] "dc--" [
+          ["int" "c" "=" "c0" "+" "dc"]
+          ["int" "cc" "=" (call "pmod" ["c" "LOOP"])]
+          ["float" "lift" "=" "0.5" "*" (call "float" [["cc" "&" 1]])]
+          ["int" "i0" "=" (call "int" [(call "floor" [["u" "/" "DY" "-" "lift" "+" "0.5"]])])]
+          (for ["int" "di" "=" (-1)] ["di" "<=" 1] "di++" [
+            ["int" "i" "=" "i0" "+" "di"]
+            (if' ["i" "<" 0 "||" "i" ">" "imax"] (bare "continue"))
+            ["ivec2" "id" "=" (call "ivec2" ["cc" "i"])]
+            ["float" "h0" "=" (call "hash" ["id"])]
+            ["float" "h1" "=" (call "hash" [["id" "+" (call "ivec2" [4099 17])]])]
+            ["float" "h2" "=" (call "hash" [["id" "+" (call "ivec2" [31 7919])]])]
+            ["float" "h3" "=" (call "hash" [["id" "+" (call "ivec2" [613 3])]])]
+            (if' ["h2" ">" "0.9"] (bare "continue"))
+            ["float" "sx" "=" (call "exp" [[[(call "float" ["c"]) "+" "0.3" "*" ["h3" "-" "0.5"]] "*" "LW" "+" "shift"]])]
+            ["vec2" "centre" "=" "sx" "*" (call "vec2" ["1.0" [[(call "float" ["i"]) "+" "lift" "+" "0.3" "*" [(call "fract" [["h3" "*" "7.0"]]) "-" "0.5"]] "*" "DY"]])]
+            ["float" "rho" "=" (call "max" [["RAD" "*" ["0.5" "+" "0.5" "*" "h1"] "*" "sx"] ["0.6" "*" "px"]])]
+            ["vec2" "q" "=" "s" "-" "centre"]
+            ["float" "len" "=" (call "length" ["q"])]
+            (if' ["len" ">" "rho" "+" "px"] (bare "continue"))
+            ["float" "sector" "=" "TAU" "/" "SIDES"]
+            ["float" "a" "=" (call "mod" [[(call "atan" ["q.y" "q.x"]) "+" "h0" "*" "TAU"] "sector"]) "-" "0.5" "*" "sector"]
+            ["float" "dist" "=" ["len" "*" (call "cos" ["a"]) "-" "rho" "*" (call "cos" [["0.5" "*" "sector"]])] "/" "px"]
+            ["float" "cover" "=" (call "clamp" [["0.5" "-" "dist"] "0.0" "1.0"])]
+            ["float" "sat" "=" "h2" "<" "0.1" "?" "0.0" ":" ["h2" "<" "0.2" "?" "0.35" ":" "0.92"]]
+            ["float" "val" "=" "h2" ">" "0.82" "?" "0.55" ":" "1.0"]
+            ["float" "hue" "=" (call "hash" [(call "ivec2" [["cc" "/" "BAND"] [(call "int" [["h0" "*" "4.0"]]) "+" 101]])])]
+            ["col" "+=" ["1.0" "-" "alpha"] "*" "cover" "*" (call "hsv" [["hue" "+" "spin"] "sat" "val"])]
+            ["alpha" "+=" ["1.0" "-" "alpha"] "*" "cover"]
+          ])
+        ])
+        blank
+        ["fragColor" "=" (call "vec4" ["col" "1.0"])]
+      ])
     ];
-    modules_desktop_session_tomoe_shaders_glass_mound_data = [
-      "const vec3 PAPER = vec3(0.972, 0.976, 0.976);"
-      "const vec3 MIST = vec3(0.955, 0.962, 0.968);"
-      "const vec3 INK = vec3(0.09, 0.11, 0.15);"
-      "const vec3 SLATE = vec3(0.22, 0.27, 0.34);"
-      "const vec3 TEAL = vec3(0.07, 0.32, 0.43);"
-      "const vec3 LILAC = vec3(0.87, 0.76, 0.96);"
-      "const float IOR = 1.33;"
-      "const float SPREAD = 0.045;"
-      "const float SPEED = 0.5;"
-      "const float RING = 1.35;"
-      "const float TUBE = 0.33;"
-      "const float SINK = -1.0;"
-      "const float TILT = 1.0;"
-      "const float SWAY = 0.35;"
-      "const float FOG_TOP = -0.2;"
-      "const float FOG_BOTTOM = -1.1;"
-      "const float SOFT = 0.05;"
-      "const float BEND = 0.7;"
-      ""
-      "mat2 rot(float a) {"
-      "    float c = cos(a);"
-      "    float s = sin(a);"
-      "    return mat2(c, -s, s, c);"
-      "}"
-      ""
-      "float map(vec3 p, float t) {"
-      "    vec3 q = p - vec3(0.0, SINK, 0.0);"
-      "    q.xz *= rot(0.35 * sin(t * 0.21));"
-      "    q.yz *= rot(TILT + SWAY * sin(t * 0.17));"
-      "    q.xy *= rot(0.12 * sin(t * 0.31));"
-      "    float a = atan(q.z, q.x);"
-      "    float tube = TUBE * (1.0 + 0.28 * sin(a * 2.0 + t * 0.7) + 0.12 * sin(a * 3.0 - t * 0.5));"
-      "    float ring = RING * (1.0 + 0.08 * sin(a * 2.0 - t * 0.4));"
-      "    float d = length(vec2(length(q.xz) - ring, q.y)) - tube;"
-      "    d += 0.04 * sin(2.1 * p.x + t) * sin(1.7 * p.y - 0.8 * t) * sin(1.9 * p.z + 1.1 * t);"
-      "    return d * 0.8;"
-      "}"
-      ""
-      "vec3 normal(vec3 p, float t) {"
-      "    vec2 e = vec2(0.002, 0.0);"
-      "    return normalize(vec3(map(p + e.xyy, t) - map(p - e.xyy, t),"
-      "                          map(p + e.yxy, t) - map(p - e.yxy, t),"
-      "                          map(p + e.yyx, t) - map(p - e.yyx, t)));"
-      "}"
-      ""
-      "float band(float x, float c, float w) {"
-      "    float k = (x - c) / w;"
-      "    return exp(-k * k);"
-      "}"
-      ""
-      "vec3 env(vec3 d) {"
-      "    vec3 c = PAPER;"
-      "    float x = d.x + 0.5 * d.z;"
-      "    c = mix(c, LILAC, 0.9 * band(d.y, -0.07, 0.06));"
-      "    c = mix(c, INK, 0.95 * band(d.y, 0.12, 0.13));"
-      "    c = mix(c, TEAL, band(d.y, 0.34, 0.2) * smoothstep(-0.9, 0.1, x));"
-      "    c = mix(c, SLATE, 0.7 * band(d.y, 0.3, 0.14) * smoothstep(0.1, -0.9, x));"
-      "    c = mix(c, LILAC, 0.45 * band(d.y, 0.52, 0.06));"
-      "    c = mix(c, PAPER, 0.85 * band(x, -0.5, 0.12) * smoothstep(0.15, 0.4, d.y));"
-      "    return c;"
-      "}"
-      ""
-      "vec3 shade(vec3 p, vec3 rd, float t) {"
-      "    vec3 n = normal(p, t);"
-      "    float c = max(dot(-rd, n), 0.0);"
-      "    float f = 0.25 + 0.75 * pow(1.0 - c, 2.0);"
-      "    vec3 through;"
-      "    for (int k = 0; k < 3; k++) {"
-      "        through[k] = env(normalize(rd - n * (BEND + (float(k) - 1.0) * SPREAD * 1.5)))[k];"
-      "    }"
-      "    vec3 col = mix(through, env(reflect(rd, n)), f);"
-      "    return mix(col, MIST, smoothstep(FOG_TOP, FOG_BOTTOM, p.y));"
-      "}"
-      ""
-      "void mainImage(out vec4 fragColor, in vec2 fragCoord) {"
-      "    vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;"
-      "    float t = iTime * SPEED;"
-      "    vec3 ro = vec3(0.0, 0.5, 6.0);"
-      "    vec3 fw = normalize(vec3(0.0, 0.5, 0.0) - ro);"
-      "    vec3 rt = normalize(cross(fw, vec3(0.0, 1.0, 0.0)));"
-      "    vec3 up = cross(rt, fw);"
-      "    vec3 rd = normalize(uv.x * rt + uv.y * up + 1.6 * fw);"
-      "    float s = 0.0;"
-      "    float near = 1e9;"
-      "    float at = 0.0;"
-      "    bool hit = false;"
-      "    for (int i = 0; i < 110; i++) {"
-      "        float d = map(ro + rd * s, t);"
-      "        if (d < near) { near = d; at = s; }"
-      "        if (d < 0.001) { hit = true; break; }"
-      "        s += d;"
-      "        if (s > 12.0) break;"
-      "    }"
-      "    vec3 col = PAPER;"
-      "    if (hit) {"
-      "        col = shade(ro + rd * s, rd, t);"
-      "    } else if (near < SOFT) {"
-      "        float a = 1.0 - smoothstep(0.0, SOFT, near);"
-      "        col = mix(PAPER, shade(ro + rd * at, rd, t), 0.55 * a * a);"
-      "    }"
-      "    col = mix(PAPER, col, smoothstep(0.0, 0.14, fragCoord.y / iResolution.y));"
-      "    fragColor = vec4(col, 1.0);"
-      "}"
+    modules_desktop_session_tomoe_shaders_glass_mound_data = {
+      bare,
+      blank,
+      call,
+      fn,
+      for,
+      if',
+      ifElse,
+      index,
+      inline,
+      rows,
+      ...
+    }: [
+      ["const" "vec3" "PAPER" "=" (call "vec3" ["0.972" "0.976" "0.976"])]
+      ["const" "vec3" "MIST" "=" (call "vec3" ["0.955" "0.962" "0.968"])]
+      ["const" "vec3" "INK" "=" (call "vec3" ["0.09" "0.11" "0.15"])]
+      ["const" "vec3" "SLATE" "=" (call "vec3" ["0.22" "0.27" "0.34"])]
+      ["const" "vec3" "TEAL" "=" (call "vec3" ["0.07" "0.32" "0.43"])]
+      ["const" "vec3" "LILAC" "=" (call "vec3" ["0.87" "0.76" "0.96"])]
+      ["const" "float" "IOR" "=" "1.33"]
+      ["const" "float" "SPREAD" "=" "0.045"]
+      ["const" "float" "SPEED" "=" "0.5"]
+      ["const" "float" "RING" "=" "1.35"]
+      ["const" "float" "TUBE" "=" "0.33"]
+      ["const" "float" "SINK" "=" "-1.0"]
+      ["const" "float" "TILT" "=" "1.0"]
+      ["const" "float" "SWAY" "=" "0.35"]
+      ["const" "float" "FOG_TOP" "=" "-0.2"]
+      ["const" "float" "FOG_BOTTOM" "=" "-1.1"]
+      ["const" "float" "SOFT" "=" "0.05"]
+      ["const" "float" "BEND" "=" "0.7"]
+      blank
+      (fn ["mat2" (call "rot" [["float" "a"]])] [
+        ["float" "c" "=" (call "cos" ["a"])]
+        ["float" "s" "=" (call "sin" ["a"])]
+        ["return" (call "mat2" ["c" "-s" "s" "c"])]
+      ])
+      blank
+      (fn ["float" (call "map" [["vec3" "p"] ["float" "t"]])] [
+        ["vec3" "q" "=" "p" "-" (call "vec3" ["0.0" "SINK" "0.0"])]
+        ["q.xz" "*=" (call "rot" [["0.35" "*" (call "sin" [["t" "*" "0.21"]])]])]
+        ["q.yz" "*=" (call "rot" [["TILT" "+" "SWAY" "*" (call "sin" [["t" "*" "0.17"]])]])]
+        ["q.xy" "*=" (call "rot" [["0.12" "*" (call "sin" [["t" "*" "0.31"]])]])]
+        ["float" "a" "=" (call "atan" ["q.z" "q.x"])]
+        ["float" "tube" "=" "TUBE" "*" ["1.0" "+" "0.28" "*" (call "sin" [["a" "*" "2.0" "+" "t" "*" "0.7"]]) "+" "0.12" "*" (call "sin" [["a" "*" "3.0" "-" "t" "*" "0.5"]])]]
+        ["float" "ring" "=" "RING" "*" ["1.0" "+" "0.08" "*" (call "sin" [["a" "*" "2.0" "-" "t" "*" "0.4"]])]]
+        ["float" "d" "=" (call "length" [(call "vec2" [[(call "length" ["q.xz"]) "-" "ring"] "q.y"])]) "-" "tube"]
+        ["d" "+=" "0.04" "*" (call "sin" [["2.1" "*" "p.x" "+" "t"]]) "*" (call "sin" [["1.7" "*" "p.y" "-" "0.8" "*" "t"]]) "*" (call "sin" [["1.9" "*" "p.z" "+" "1.1" "*" "t"]])]
+        ["return" "d" "*" "0.8"]
+      ])
+      blank
+      (fn ["vec3" (call "normal" [["vec3" "p"] ["float" "t"]])] [
+        ["vec2" "e" "=" (call "vec2" ["0.002" "0.0"])]
+        [
+          "return"
+          (call "normalize" [
+            (call "vec3" (rows [
+              [[(call "map" [["p" "+" "e.xyy"] "t"]) "-" (call "map" [["p" "-" "e.xyy"] "t"])]]
+              [[(call "map" [["p" "+" "e.yxy"] "t"]) "-" (call "map" [["p" "-" "e.yxy"] "t"])]]
+              [[(call "map" [["p" "+" "e.yyx"] "t"]) "-" (call "map" [["p" "-" "e.yyx"] "t"])]]
+            ]))
+          ])
+        ]
+      ])
+      blank
+      (fn ["float" (call "band" [["float" "x"] ["float" "c"] ["float" "w"]])] [
+        ["float" "k" "=" ["x" "-" "c"] "/" "w"]
+        ["return" (call "exp" [["-k" "*" "k"]])]
+      ])
+      blank
+      (fn ["vec3" (call "env" [["vec3" "d"]])] [
+        ["vec3" "c" "=" "PAPER"]
+        ["float" "x" "=" "d.x" "+" "0.5" "*" "d.z"]
+        ["c" "=" (call "mix" ["c" "LILAC" ["0.9" "*" (call "band" ["d.y" "-0.07" "0.06"])]])]
+        ["c" "=" (call "mix" ["c" "INK" ["0.95" "*" (call "band" ["d.y" "0.12" "0.13"])]])]
+        ["c" "=" (call "mix" ["c" "TEAL" [(call "band" ["d.y" "0.34" "0.2"]) "*" (call "smoothstep" ["-0.9" "0.1" "x"])]])]
+        ["c" "=" (call "mix" ["c" "SLATE" ["0.7" "*" (call "band" ["d.y" "0.3" "0.14"]) "*" (call "smoothstep" ["0.1" "-0.9" "x"])]])]
+        ["c" "=" (call "mix" ["c" "LILAC" ["0.45" "*" (call "band" ["d.y" "0.52" "0.06"])]])]
+        ["c" "=" (call "mix" ["c" "PAPER" ["0.85" "*" (call "band" ["x" "-0.5" "0.12"]) "*" (call "smoothstep" ["0.15" "0.4" "d.y"])]])]
+        ["return" "c"]
+      ])
+      blank
+      (fn ["vec3" (call "shade" [["vec3" "p"] ["vec3" "rd"] ["float" "t"]])] [
+        ["vec3" "n" "=" (call "normal" ["p" "t"])]
+        ["float" "c" "=" (call "max" [(call "dot" ["-rd" "n"]) "0.0"])]
+        ["float" "f" "=" "0.25" "+" "0.75" "*" (call "pow" [["1.0" "-" "c"] "2.0"])]
+        ["vec3" "through"]
+        (for ["int" "k" "=" 0] ["k" "<" 3] "k++" [
+          [(index "through" "k") "=" (index (call "env" [(call "normalize" [["rd" "-" "n" "*" ["BEND" "+" [(call "float" ["k"]) "-" "1.0"] "*" "SPREAD" "*" "1.5"]]])]) "k")]
+        ])
+        ["vec3" "col" "=" (call "mix" ["through" (call "env" [(call "reflect" ["rd" "n"])]) "f"])]
+        ["return" (call "mix" ["col" "MIST" (call "smoothstep" ["FOG_TOP" "FOG_BOTTOM" "p.y"])])]
+      ])
+      blank
+      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+        ["vec2" "uv" "=" ["fragCoord" "-" "0.5" "*" "iResolution.xy"] "/" "iResolution.y"]
+        ["float" "t" "=" "iTime" "*" "SPEED"]
+        ["vec3" "ro" "=" (call "vec3" ["0.0" "0.5" "6.0"])]
+        ["vec3" "fw" "=" (call "normalize" [[(call "vec3" ["0.0" "0.5" "0.0"]) "-" "ro"]])]
+        ["vec3" "rt" "=" (call "normalize" [(call "cross" ["fw" (call "vec3" ["0.0" "1.0" "0.0"])])])]
+        ["vec3" "up" "=" (call "cross" ["rt" "fw"])]
+        ["vec3" "rd" "=" (call "normalize" [["uv.x" "*" "rt" "+" "uv.y" "*" "up" "+" "1.6" "*" "fw"]])]
+        ["float" "s" "=" "0.0"]
+        ["float" "near" "=" "1e9"]
+        ["float" "at" "=" "0.0"]
+        ["bool" "hit" "=" "false"]
+        (for ["int" "i" "=" 0] ["i" "<" 110] "i++" [
+          ["float" "d" "=" (call "map" [["ro" "+" "rd" "*" "s"] "t"])]
+          (if' ["d" "<" "near"] (inline [["near" "=" "d"] ["at" "=" "s"]]))
+          (if' ["d" "<" "0.001"] (inline [["hit" "=" "true"] "break"]))
+          ["s" "+=" "d"]
+          (if' ["s" ">" "12.0"] (bare "break"))
+        ])
+        ["vec3" "col" "=" "PAPER"]
+        (ifElse "hit" [
+            ["col" "=" (call "shade" [["ro" "+" "rd" "*" "s"] "rd" "t"])]
+          ] (if' ["near" "<" "SOFT"] [
+            ["float" "a" "=" "1.0" "-" (call "smoothstep" ["0.0" "SOFT" "near"])]
+            ["col" "=" (call "mix" ["PAPER" (call "shade" [["ro" "+" "rd" "*" "at"] "rd" "t"]) ["0.55" "*" "a" "*" "a"]])]
+          ]))
+        ["col" "=" (call "mix" ["PAPER" "col" (call "smoothstep" ["0.0" "0.14" ["fragCoord.y" "/" "iResolution.y"]])])]
+        ["fragColor" "=" (call "vec4" ["col" "1.0"])]
+      ])
     ];
-    modules_desktop_session_tomoe_shaders_hex_spiral_data = [
-      "const float PI = 3.14159265;"
-      "const float TAU = 6.28318531;"
-      "const float S3 = 0.86602540;"
-      "const vec2 CENTER = vec2(0.4, 0.58);"
-      "const int M = 29;"
-      "const int N = 13;"
-      "const int ARM = 4;"
-      "const int LOOP = 52;"
-      "const float HEX_SPEED = 0.7;"
-      "const int STREAK_K = 176;"
-      "const float STREAK_STEP = 0.057;"
-      "const int STREAK_N = 132;"
-      "const int STREAK_LOOP = 160;"
-      "const float STREAK_SPEED = 0.32;"
-      "const float CYCLE = 1.8;"
-      ""
-      "const vec3 PAL[10] = vec3[10]("
-      "    vec3(1.000, 0.824, 0.122), vec3(1.000, 0.604, 0.122), vec3(1.000, 0.420, 0.369),"
-      "    vec3(1.000, 0.361, 0.784), vec3(0.706, 0.420, 1.000), vec3(0.184, 0.420, 1.000),"
-      "    vec3(0.122, 0.722, 1.000), vec3(0.122, 0.839, 0.706), vec3(0.482, 0.878, 0.165),"
-      "    vec3(0.957, 0.957, 0.957)"
-      ");"
-      ""
-      "const ivec2 NEAR[7] = ivec2[7]("
-      "    ivec2(0, 0), ivec2(1, 0), ivec2(-1, 0), ivec2(0, 1), ivec2(0, -1), ivec2(1, -1), ivec2(-1, 1)"
-      ");"
-      ""
-      "float hash(ivec2 c) {"
-      "    uvec2 v = uvec2(c) * uvec2(1597334673u, 3812015801u);"
-      "    uint n = (v.x ^ v.y) * 1597334673u;"
-      "    n ^= n >> 16;"
-      "    n *= 2246822519u;"
-      "    n ^= n >> 13;"
-      "    return float(n) * (1.0 / 4294967296.0);"
-      "}"
-      ""
-      "int fdiv(int a, int b) {"
-      "    return int(floor(float(a) / float(b)));"
-      "}"
-      ""
-      "int pmod(int a, int b) {"
-      "    return a - b * fdiv(a, b);"
-      "}"
-      ""
-      "vec3 cycle(float f) {"
-      "    int a = pmod(int(floor(f)), 9);"
-      "    return mix(PAL[a], PAL[pmod(a + 1, 9)], fract(f));"
-      "}"
-      ""
-      "vec2 rot(vec2 v, float a) {"
-      "    float c = cos(a), s = sin(a);"
-      "    return vec2(c * v.x - s * v.y, s * v.x + c * v.y);"
-      "}"
-      ""
-      "vec2 cart(ivec2 a) {"
-      "    return vec2(float(a.x) + 0.5 * float(a.y), S3 * float(a.y));"
-      "}"
-      ""
-      "ivec2 nearest(vec2 h) {"
-      "    float y = h.y / S3;"
-      "    vec3 c = vec3(h.x - 0.5 * y, y, -h.x - 0.5 * y);"
-      "    vec3 r = floor(c + 0.5);"
-      "    vec3 d = abs(r - c);"
-      "    if (d.x > d.y && d.x > d.z) r.x = -r.y - r.z;"
-      "    else if (d.y > d.z) r.y = -r.x - r.z;"
-      "    return ivec2(r.xy);"
-      "}"
-      ""
-      "float hexDist(vec2 q) {"
-      "    return max(abs(q.x), max(abs(0.5 * q.x + S3 * q.y), abs(-0.5 * q.x + S3 * q.y)));"
-      "}"
-      ""
-      "void mainImage(out vec4 fragColor, in vec2 fragCoord) {"
-      "    float px = 1.0 / iResolution.y;"
-      "    vec2 p = (fragCoord - CENTER * iResolution.xy) * px;"
-      "    float r = max(length(p), 1e-5);"
-      "    vec2 w = vec2(log(r), atan(p.y, p.x));"
-      ""
-      "    vec2 vc = cart(ivec2(M, N));"
-      "    float k = TAU / length(vc);"
-      "    float rho = 0.5 * PI - atan(vc.y, vc.x);"
-      "    vec2 drift = cart(ivec2(1, -1));"
-      "    float tt = mod(iTime * HEX_SPEED, float(LOOP));"
-      "    vec2 hw = rot(w, -rho) / k - tt * drift;"
-      "    ivec2 base = nearest(hw);"
-      ""
-      "    float jr = mod(hw.y / S3 + 0.5, float(N));"
-      "    float band = smoothstep(float(ARM) + 1.5, float(ARM) + 4.0, jr) * (1.0 - smoothstep(float(N) - 1.2, float(N), jr));"
-      ""
-      "    vec3 col = vec3(0.0);"
-      "    float phase = mod(iTime, CYCLE) * 9.0 / CYCLE;"
-      ""
-      "    float c = float(STREAK_K) * STREAK_STEP / TAU;"
-      "    float ct = sqrt(1.0 + c * c);"
-      "    float dth = TAU / float(STREAK_N);"
-      "    float ts = mod(iTime * STREAK_SPEED, float(STREAK_LOOP) * STREAK_STEP);"
-      "    float sig = w.x - ts - c * w.y;"
-      "    int is0 = int(floor(sig / STREAK_STEP));"
-      "    int it0 = int(floor(w.y / dth));"
-      "    for (int o = 0; o < 9; o++) {"
-      "        int it = it0 + o % 3 - 1;"
-      "        int is = is0 + o / 3 - 1;"
-      "        int q = fdiv(it, STREAK_N);"
-      "        ivec2 id = ivec2(pmod(is + STREAK_K * q, STREAK_LOOP), it - q * STREAK_N);"
-      "        float h0 = hash(id);"
-      "        float h1 = hash(id + ivec2(7, 131));"
-      "        float h2 = hash(id + ivec2(53, 17));"
-      "        if (h0 > 0.8) continue;"
-      "        float sm = (float(is) + 0.5 + 0.8 * (h1 - 0.5)) * STREAK_STEP;"
-      "        vec2 dir = rot(vec2(c, 1.0) / ct, 0.6 * (h2 - 0.5));"
-      "        float tc = (float(it) + 0.5 + 0.6 * (h2 - 0.5)) * dth;"
-      "        vec2 d = vec2(sig - sm + c * (w.y - tc), w.y - tc);"
-      "        float len = (0.22 + 0.22 * h1) * dth * ct;"
-      "        float th = (0.2 + 0.08 * h2) * STREAK_STEP / ct;"
-      "        float a = clamp(dot(d, dir), -len, len);"
-      "        float dist = (length(d - dir * a) - th) * r / px;"
-      "        float cover = clamp(0.5 - dist, 0.0, 1.0) * smoothstep(0.6, 2.0, th * r / px);"
-      "        int pick = int(h0 * 16.0) % 13;"
-      "        vec3 sc = pick > 8 ? PAL[9] : cycle(float(pick) - phase);"
-      "        col = mix(col, sc * (0.7 + 0.3 * h2), cover * band);"
-      "    }"
-      ""
-      "    float key[7];"
-      "    int ord[7];"
-      "    vec2 outward = rot(vec2(1.0, 0.0), -rho);"
-      "    for (int i = 0; i < 7; i++) {"
-      "        key[i] = dot(cart(NEAR[i]), outward);"
-      "        ord[i] = i;"
-      "    }"
-      "    for (int i = 1; i < 7; i++) {"
-      "        for (int j = i; j > 0 && key[ord[j - 1]] > key[ord[j]]; j--) {"
-      "            int t = ord[j];"
-      "            ord[j] = ord[j - 1];"
-      "            ord[j - 1] = t;"
-      "        }"
-      "    }"
-      ""
-      "    int wrap = (M + N) * LOOP;"
-      "    for (int i = 0; i < 7; i++) {"
-      "        ivec2 cell = base + NEAR[ord[i]];"
-      "        if (pmod(cell.y, N) >= ARM) continue;"
-      "        int id = pmod(cell.x * N - cell.y * M, wrap);"
-      "        float h0 = hash(ivec2(id, 911));"
-      "        float h1 = hash(ivec2(id, 37));"
-      "        vec2 wc = rot(cart(cell) + tt * drift, rho) * k;"
-      "        float rc = exp(wc.x);"
-      "        vec2 sc = rc * vec2(cos(wc.y), sin(wc.y));"
-      "        float scale = k * rc;"
-      "        vec2 q = rot(p - sc, -(wc.y + rho)) / scale;"
-      "        float size = 0.5 * (0.88 + 0.36 * h1);"
-      "        float dist = (hexDist(q) - size) * scale / px;"
-      "        float fade = smoothstep(3.0, 9.0, size * scale / px);"
-      "        float cover = clamp(0.5 - dist, 0.0, 1.0) * fade;"
-      "        float rim = clamp(0.5 - dist - max(1.0, 0.03 * size * scale / px), 0.0, 1.0);"
-      "        vec3 hc = cycle(h0 * 9.0 - phase);"
-      "        col = mix(col, hc * rim, cover);"
-      "    }"
-      ""
-      "    fragColor = vec4(col, 1.0);"
-      "}"
+    modules_desktop_session_tomoe_shaders_hex_spiral_data = {
+      bare,
+      blank,
+      call,
+      fn,
+      for,
+      if',
+      ifElse,
+      index,
+      rows,
+      unary,
+      ...
+    }: [
+      ["const" "float" "PI" "=" "3.14159265"]
+      ["const" "float" "TAU" "=" "6.28318531"]
+      ["const" "float" "S3" "=" "0.86602540"]
+      ["const" "vec2" "CENTER" "=" (call "vec2" ["0.4" "0.58"])]
+      ["const" "int" "M" "=" 29]
+      ["const" "int" "N" "=" 13]
+      ["const" "int" "ARM" "=" 4]
+      ["const" "int" "LOOP" "=" 52]
+      ["const" "float" "HEX_SPEED" "=" "0.7"]
+      ["const" "int" "STREAK_K" "=" 176]
+      ["const" "float" "STREAK_STEP" "=" "0.057"]
+      ["const" "int" "STREAK_N" "=" 132]
+      ["const" "int" "STREAK_LOOP" "=" 160]
+      ["const" "float" "STREAK_SPEED" "=" "0.32"]
+      ["const" "float" "CYCLE" "=" "1.8"]
+      blank
+      [
+        "const"
+        "vec3"
+        (index "PAL" 10)
+        "="
+        (call (index "vec3" 10) (rows [
+          []
+          [(call "vec3" ["1.000" "0.824" "0.122"]) (call "vec3" ["1.000" "0.604" "0.122"]) (call "vec3" ["1.000" "0.420" "0.369"])]
+          [(call "vec3" ["1.000" "0.361" "0.784"]) (call "vec3" ["0.706" "0.420" "1.000"]) (call "vec3" ["0.184" "0.420" "1.000"])]
+          [(call "vec3" ["0.122" "0.722" "1.000"]) (call "vec3" ["0.122" "0.839" "0.706"]) (call "vec3" ["0.482" "0.878" "0.165"])]
+          [(call "vec3" ["0.957" "0.957" "0.957"])]
+        ]))
+      ]
+      blank
+      [
+        "const"
+        "ivec2"
+        (index "NEAR" 7)
+        "="
+        (call (index "ivec2" 7) (rows [
+          []
+          [(call "ivec2" [0 0]) (call "ivec2" [1 0]) (call "ivec2" [(-1) 0]) (call "ivec2" [0 1]) (call "ivec2" [0 (-1)]) (call "ivec2" [1 (-1)]) (call "ivec2" [(-1) 1])]
+        ]))
+      ]
+      blank
+      (fn ["float" (call "hash" [["ivec2" "c"]])] [
+        ["uvec2" "v" "=" (call "uvec2" ["c"]) "*" (call "uvec2" ["1597334673u" "3812015801u"])]
+        ["uint" "n" "=" ["v.x" "^" "v.y"] "*" "1597334673u"]
+        ["n" "^=" "n" ">>" 16]
+        ["n" "*=" "2246822519u"]
+        ["n" "^=" "n" ">>" 13]
+        ["return" (call "float" ["n"]) "*" ["1.0" "/" "4294967296.0"]]
+      ])
+      blank
+      (fn ["int" (call "fdiv" [["int" "a"] ["int" "b"]])] [
+        ["return" (call "int" [(call "floor" [[(call "float" ["a"]) "/" (call "float" ["b"])]])])]
+      ])
+      blank
+      (fn ["int" (call "pmod" [["int" "a"] ["int" "b"]])] [
+        ["return" "a" "-" "b" "*" (call "fdiv" ["a" "b"])]
+      ])
+      blank
+      (fn ["vec3" (call "cycle" [["float" "f"]])] [
+        ["int" "a" "=" (call "pmod" [(call "int" [(call "floor" ["f"])]) 9])]
+        ["return" (call "mix" [(index "PAL" "a") (index "PAL" (call "pmod" [["a" "+" 1] 9])) (call "fract" ["f"])])]
+      ])
+      blank
+      (fn ["vec2" (call "rot" [["vec2" "v"] ["float" "a"]])] [
+        ["float" "c" "=" (call "cos" ["a"]) "," "s" "=" (call "sin" ["a"])]
+        ["return" (call "vec2" [["c" "*" "v.x" "-" "s" "*" "v.y"] ["s" "*" "v.x" "+" "c" "*" "v.y"]])]
+      ])
+      blank
+      (fn ["vec2" (call "cart" [["ivec2" "a"]])] [
+        ["return" (call "vec2" [[(call "float" ["a.x"]) "+" "0.5" "*" (call "float" ["a.y"])] ["S3" "*" (call "float" ["a.y"])]])]
+      ])
+      blank
+      (fn ["ivec2" (call "nearest" [["vec2" "h"]])] [
+        ["float" "y" "=" "h.y" "/" "S3"]
+        ["vec3" "c" "=" (call "vec3" [["h.x" "-" "0.5" "*" "y"] "y" ["-h.x" "-" "0.5" "*" "y"]])]
+        ["vec3" "r" "=" (call "floor" [["c" "+" "0.5"]])]
+        ["vec3" "d" "=" (call "abs" [["r" "-" "c"]])]
+        (ifElse ["d.x" ">" "d.y" "&&" "d.x" ">" "d.z"] (bare ["r.x" "=" "-r.y" "-" "r.z"]) (if' ["d.y" ">" "d.z"] (bare ["r.y" "=" "-r.x" "-" "r.z"])))
+        ["return" (call "ivec2" ["r.xy"])]
+      ])
+      blank
+      (fn ["float" (call "hexDist" [["vec2" "q"]])] [
+        ["return" (call "max" [(call "abs" ["q.x"]) (call "max" [(call "abs" [["0.5" "*" "q.x" "+" "S3" "*" "q.y"]]) (call "abs" [["-0.5" "*" "q.x" "+" "S3" "*" "q.y"]])])])]
+      ])
+      blank
+      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+        ["float" "px" "=" "1.0" "/" "iResolution.y"]
+        ["vec2" "p" "=" ["fragCoord" "-" "CENTER" "*" "iResolution.xy"] "*" "px"]
+        ["float" "r" "=" (call "max" [(call "length" ["p"]) "1e-5"])]
+        ["vec2" "w" "=" (call "vec2" [(call "log" ["r"]) (call "atan" ["p.y" "p.x"])])]
+        blank
+        ["vec2" "vc" "=" (call "cart" [(call "ivec2" ["M" "N"])])]
+        ["float" "k" "=" "TAU" "/" (call "length" ["vc"])]
+        ["float" "rho" "=" "0.5" "*" "PI" "-" (call "atan" ["vc.y" "vc.x"])]
+        ["vec2" "drift" "=" (call "cart" [(call "ivec2" [1 (-1)])])]
+        ["float" "tt" "=" (call "mod" [["iTime" "*" "HEX_SPEED"] (call "float" ["LOOP"])])]
+        ["vec2" "hw" "=" (call "rot" ["w" "-rho"]) "/" "k" "-" "tt" "*" "drift"]
+        ["ivec2" "base" "=" (call "nearest" ["hw"])]
+        blank
+        ["float" "jr" "=" (call "mod" [["hw.y" "/" "S3" "+" "0.5"] (call "float" ["N"])])]
+        ["float" "band" "=" (call "smoothstep" [[(call "float" ["ARM"]) "+" "1.5"] [(call "float" ["ARM"]) "+" "4.0"] "jr"]) "*" ["1.0" "-" (call "smoothstep" [[(call "float" ["N"]) "-" "1.2"] (call "float" ["N"]) "jr"])]]
+        blank
+        ["vec3" "col" "=" (call "vec3" ["0.0"])]
+        ["float" "phase" "=" (call "mod" ["iTime" "CYCLE"]) "*" "9.0" "/" "CYCLE"]
+        blank
+        ["float" "c" "=" (call "float" ["STREAK_K"]) "*" "STREAK_STEP" "/" "TAU"]
+        ["float" "ct" "=" (call "sqrt" [["1.0" "+" "c" "*" "c"]])]
+        ["float" "dth" "=" "TAU" "/" (call "float" ["STREAK_N"])]
+        ["float" "ts" "=" (call "mod" [["iTime" "*" "STREAK_SPEED"] [(call "float" ["STREAK_LOOP"]) "*" "STREAK_STEP"]])]
+        ["float" "sig" "=" "w.x" "-" "ts" "-" "c" "*" "w.y"]
+        ["int" "is0" "=" (call "int" [(call "floor" [["sig" "/" "STREAK_STEP"]])])]
+        ["int" "it0" "=" (call "int" [(call "floor" [["w.y" "/" "dth"]])])]
+        (for ["int" "o" "=" 0] ["o" "<" 9] "o++" [
+          ["int" "it" "=" "it0" "+" "o" "%" 3 "-" 1]
+          ["int" "is" "=" "is0" "+" "o" "/" 3 "-" 1]
+          ["int" "q" "=" (call "fdiv" ["it" "STREAK_N"])]
+          ["ivec2" "id" "=" (call "ivec2" [(call "pmod" [["is" "+" "STREAK_K" "*" "q"] "STREAK_LOOP"]) ["it" "-" "q" "*" "STREAK_N"]])]
+          ["float" "h0" "=" (call "hash" ["id"])]
+          ["float" "h1" "=" (call "hash" [["id" "+" (call "ivec2" [7 131])]])]
+          ["float" "h2" "=" (call "hash" [["id" "+" (call "ivec2" [53 17])]])]
+          (if' ["h0" ">" "0.8"] (bare "continue"))
+          ["float" "sm" "=" [(call "float" ["is"]) "+" "0.5" "+" "0.8" "*" ["h1" "-" "0.5"]] "*" "STREAK_STEP"]
+          ["vec2" "dir" "=" (call "rot" [[(call "vec2" ["c" "1.0"]) "/" "ct"] ["0.6" "*" ["h2" "-" "0.5"]]])]
+          ["float" "tc" "=" [(call "float" ["it"]) "+" "0.5" "+" "0.6" "*" ["h2" "-" "0.5"]] "*" "dth"]
+          ["vec2" "d" "=" (call "vec2" [["sig" "-" "sm" "+" "c" "*" ["w.y" "-" "tc"]] ["w.y" "-" "tc"]])]
+          ["float" "len" "=" ["0.22" "+" "0.22" "*" "h1"] "*" "dth" "*" "ct"]
+          ["float" "th" "=" ["0.2" "+" "0.08" "*" "h2"] "*" "STREAK_STEP" "/" "ct"]
+          ["float" "a" "=" (call "clamp" [(call "dot" ["d" "dir"]) "-len" "len"])]
+          ["float" "dist" "=" [(call "length" [["d" "-" "dir" "*" "a"]]) "-" "th"] "*" "r" "/" "px"]
+          ["float" "cover" "=" (call "clamp" [["0.5" "-" "dist"] "0.0" "1.0"]) "*" (call "smoothstep" ["0.6" "2.0" ["th" "*" "r" "/" "px"]])]
+          ["int" "pick" "=" (call "int" [["h0" "*" "16.0"]]) "%" 13]
+          ["vec3" "sc" "=" "pick" ">" 8 "?" (index "PAL" 9) ":" (call "cycle" [[(call "float" ["pick"]) "-" "phase"]])]
+          ["col" "=" (call "mix" ["col" ["sc" "*" ["0.7" "+" "0.3" "*" "h2"]] ["cover" "*" "band"]])]
+        ])
+        blank
+        ["float" (index "key" 7)]
+        ["int" (index "ord" 7)]
+        ["vec2" "outward" "=" (call "rot" [(call "vec2" ["1.0" "0.0"]) "-rho"])]
+        (for ["int" "i" "=" 0] ["i" "<" 7] "i++" [
+          [(index "key" "i") "=" (call "dot" [(call "cart" [(index "NEAR" "i")]) "outward"])]
+          [(index "ord" "i") "=" "i"]
+        ])
+        (for ["int" "i" "=" 1] ["i" "<" 7] "i++" [
+          (for ["int" "j" "=" "i"] ["j" ">" 0 "&&" (index "key" (index "ord" ["j" "-" 1])) ">" (index "key" (index "ord" "j"))] "j--" [
+            ["int" "t" "=" (index "ord" "j")]
+            [(index "ord" "j") "=" (index "ord" ["j" "-" 1])]
+            [(index "ord" ["j" "-" 1]) "=" "t"]
+          ])
+        ])
+        blank
+        ["int" "wrap" "=" ["M" "+" "N"] "*" "LOOP"]
+        (for ["int" "i" "=" 0] ["i" "<" 7] "i++" [
+          ["ivec2" "cell" "=" "base" "+" (index "NEAR" (index "ord" "i"))]
+          (if' [(call "pmod" ["cell.y" "N"]) ">=" "ARM"] (bare "continue"))
+          ["int" "id" "=" (call "pmod" [["cell.x" "*" "N" "-" "cell.y" "*" "M"] "wrap"])]
+          ["float" "h0" "=" (call "hash" [(call "ivec2" ["id" 911])])]
+          ["float" "h1" "=" (call "hash" [(call "ivec2" ["id" 37])])]
+          ["vec2" "wc" "=" (call "rot" [[(call "cart" ["cell"]) "+" "tt" "*" "drift"] "rho"]) "*" "k"]
+          ["float" "rc" "=" (call "exp" ["wc.x"])]
+          ["vec2" "sc" "=" "rc" "*" (call "vec2" [(call "cos" ["wc.y"]) (call "sin" ["wc.y"])])]
+          ["float" "scale" "=" "k" "*" "rc"]
+          ["vec2" "q" "=" (call "rot" [["p" "-" "sc"] (unary "-" ["wc.y" "+" "rho"])]) "/" "scale"]
+          ["float" "size" "=" "0.5" "*" ["0.88" "+" "0.36" "*" "h1"]]
+          ["float" "dist" "=" [(call "hexDist" ["q"]) "-" "size"] "*" "scale" "/" "px"]
+          ["float" "fade" "=" (call "smoothstep" ["3.0" "9.0" ["size" "*" "scale" "/" "px"]])]
+          ["float" "cover" "=" (call "clamp" [["0.5" "-" "dist"] "0.0" "1.0"]) "*" "fade"]
+          ["float" "rim" "=" (call "clamp" [["0.5" "-" "dist" "-" (call "max" ["1.0" ["0.03" "*" "size" "*" "scale" "/" "px"]])] "0.0" "1.0"])]
+          ["vec3" "hc" "=" (call "cycle" [["h0" "*" "9.0" "-" "phase"]])]
+          ["col" "=" (call "mix" ["col" ["hc" "*" "rim"] "cover"])]
+        ])
+        blank
+        ["fragColor" "=" (call "vec4" ["col" "1.0"])]
+      ])
     ];
-    modules_desktop_session_tomoe_shaders_su_ei_data = [
-      "const float TAU = 6.28318531;"
-      "const float RIBS = 18.0;"
-      "const float DRIFT = 0.18;"
-      "const float DISPERSE = 0.05;"
-      "const float FLASH_PERIOD = 7.0;"
-      "const float WANDER = 61.0;"
-      "const float TWIST_PERIOD = 43.0;"
-      "const vec3 BASE_A = vec3(0.60, 0.68, 0.73);"
-      "const vec3 BASE_B = vec3(0.69, 0.66, 0.70);"
-      ""
-      "float shade(float u, float aa) {"
-      "    float acc = 0.0;"
-      "    for (int k = -1; k <= 1; k++) {"
-      "        float d = fract(u + float(k) * aa * 0.35);"
-      "        acc += 0.86 + 0.14 * smoothstep(0.0, 1.0, d) + 0.32 * exp((d - 1.0) / 0.05) - 0.20 * exp(-d / 0.07);"
-      "    }"
-      "    return acc / 3.0;"
-      "}"
-      ""
-      "vec3 flame(float k) {"
-      "    vec3 cyan = vec3(0.25, 0.85, 1.0);"
-      "    vec3 blue = vec3(0.35, 0.45, 1.0);"
-      "    vec3 pink = vec3(1.0, 0.25, 0.75);"
-      "    vec3 orange = vec3(1.0, 0.62, 0.25);"
-      "    vec3 yellow = vec3(1.0, 0.93, 0.45);"
-      "    vec3 c = mix(cyan, blue, smoothstep(-0.30, -0.12, k));"
-      "    c = mix(c, pink, smoothstep(-0.12, -0.02, k));"
-      "    c = mix(c, orange, smoothstep(0.0, 0.10, k));"
-      "    return mix(c, yellow, smoothstep(0.08, 0.35, k));"
-      "}"
-      ""
-      "void mainImage(out vec4 fragColor, in vec2 fragCoord) {"
-      "    float aspect = iResolution.x / iResolution.y;"
-      "    vec2 p = fragCoord / iResolution.y;"
-      "    float t = iTime;"
-      ""
-      "    vec2 c = vec2(aspect + 0.45 + 0.3 * sin(TAU * t / WANDER), 0.3 + 0.9 * sin(TAU * t / (WANDER * 0.71)));"
-      "    vec2 q = p - c;"
-      "    float r = length(q);"
-      "    float th = atan(q.y, -q.x);"
-      "    float twist = 0.35 * sin(TAU * t / TWIST_PERIOD);"
-      "    float bend = 0.035 * sin(2.1 * p.y + 1.3 * p.x + 0.11 * t);"
-      ""
-      "    float u = RIBS * (r + twist * th / TAU + bend) - DRIFT * t;"
-      "    float aa = fwidth(u);"
-      "    vec3 s = vec3(shade(u - DISPERSE, aa), shade(u, aa), shade(u + DISPERSE, aa));"
-      ""
-      "    vec3 base = mix(BASE_A, BASE_B, smoothstep(-0.2, 1.2, p.y + 0.3 * sin(p.x * 0.9 + 0.07 * t)));"
-      "    vec3 col = base * s;"
-      ""
-      "    float rib = floor(u);"
-      "    float d = fract(u);"
-      "    float reach = 0.30 + 0.12 * sin(rib * 0.61 + t * 1.3) + 0.08 * sin(rib * 1.7 - t * 0.7);"
-      "    float tipY = reach * (0.35 + 0.65 * pow(1.0 - abs(2.0 * d - 1.0), 0.8));"
-      "    float k = p.y - tipY;"
-      "    float sweep = 0.5 + 0.5 * sin(TAU * t / FLASH_PERIOD - 3.5 * p.x / max(aspect, 1.0) + 0.9 * p.y);"
-      "    float flash = smoothstep(0.62, 0.97, sweep);"
-      "    vec3 hot = flame(k) * (0.82 + 0.25 * d);"
-      "    col = mix(col, hot * s, flash * (0.65 + 0.35 * d));"
-      ""
-      "    vec2 v = fragCoord / iResolution.xy - 0.5;"
-      "    col *= 1.0 - 0.15 * dot(v, v);"
-      "    fragColor = vec4(clamp(col, 0.0, 1.0), 1.0);"
-      "}"
+    modules_desktop_session_tomoe_shaders_su_ei_data = {
+      blank,
+      call,
+      fn,
+      for,
+      ...
+    }: [
+      ["const" "float" "TAU" "=" "6.28318531"]
+      ["const" "float" "RIBS" "=" "18.0"]
+      ["const" "float" "DRIFT" "=" "0.18"]
+      ["const" "float" "DISPERSE" "=" "0.05"]
+      ["const" "float" "FLASH_PERIOD" "=" "7.0"]
+      ["const" "float" "WANDER" "=" "61.0"]
+      ["const" "float" "TWIST_PERIOD" "=" "43.0"]
+      ["const" "vec3" "BASE_A" "=" (call "vec3" ["0.60" "0.68" "0.73"])]
+      ["const" "vec3" "BASE_B" "=" (call "vec3" ["0.69" "0.66" "0.70"])]
+      blank
+      (fn ["float" (call "shade" [["float" "u"] ["float" "aa"]])] [
+        ["float" "acc" "=" "0.0"]
+        (for ["int" "k" "=" (-1)] ["k" "<=" 1] "k++" [
+          ["float" "d" "=" (call "fract" [["u" "+" (call "float" ["k"]) "*" "aa" "*" "0.35"]])]
+          ["acc" "+=" "0.86" "+" "0.14" "*" (call "smoothstep" ["0.0" "1.0" "d"]) "+" "0.32" "*" (call "exp" [[["d" "-" "1.0"] "/" "0.05"]]) "-" "0.20" "*" (call "exp" [["-d" "/" "0.07"]])]
+        ])
+        ["return" "acc" "/" "3.0"]
+      ])
+      blank
+      (fn ["vec3" (call "flame" [["float" "k"]])] [
+        ["vec3" "cyan" "=" (call "vec3" ["0.25" "0.85" "1.0"])]
+        ["vec3" "blue" "=" (call "vec3" ["0.35" "0.45" "1.0"])]
+        ["vec3" "pink" "=" (call "vec3" ["1.0" "0.25" "0.75"])]
+        ["vec3" "orange" "=" (call "vec3" ["1.0" "0.62" "0.25"])]
+        ["vec3" "yellow" "=" (call "vec3" ["1.0" "0.93" "0.45"])]
+        ["vec3" "c" "=" (call "mix" ["cyan" "blue" (call "smoothstep" ["-0.30" "-0.12" "k"])])]
+        ["c" "=" (call "mix" ["c" "pink" (call "smoothstep" ["-0.12" "-0.02" "k"])])]
+        ["c" "=" (call "mix" ["c" "orange" (call "smoothstep" ["0.0" "0.10" "k"])])]
+        ["return" (call "mix" ["c" "yellow" (call "smoothstep" ["0.08" "0.35" "k"])])]
+      ])
+      blank
+      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+        ["float" "aspect" "=" "iResolution.x" "/" "iResolution.y"]
+        ["vec2" "p" "=" "fragCoord" "/" "iResolution.y"]
+        ["float" "t" "=" "iTime"]
+        blank
+        ["vec2" "c" "=" (call "vec2" [["aspect" "+" "0.45" "+" "0.3" "*" (call "sin" [["TAU" "*" "t" "/" "WANDER"]])] ["0.3" "+" "0.9" "*" (call "sin" [["TAU" "*" "t" "/" ["WANDER" "*" "0.71"]]])]])]
+        ["vec2" "q" "=" "p" "-" "c"]
+        ["float" "r" "=" (call "length" ["q"])]
+        ["float" "th" "=" (call "atan" ["q.y" "-q.x"])]
+        ["float" "twist" "=" "0.35" "*" (call "sin" [["TAU" "*" "t" "/" "TWIST_PERIOD"]])]
+        ["float" "bend" "=" "0.035" "*" (call "sin" [["2.1" "*" "p.y" "+" "1.3" "*" "p.x" "+" "0.11" "*" "t"]])]
+        blank
+        ["float" "u" "=" "RIBS" "*" ["r" "+" "twist" "*" "th" "/" "TAU" "+" "bend"] "-" "DRIFT" "*" "t"]
+        ["float" "aa" "=" (call "fwidth" ["u"])]
+        ["vec3" "s" "=" (call "vec3" [(call "shade" [["u" "-" "DISPERSE"] "aa"]) (call "shade" ["u" "aa"]) (call "shade" [["u" "+" "DISPERSE"] "aa"])])]
+        blank
+        ["vec3" "base" "=" (call "mix" ["BASE_A" "BASE_B" (call "smoothstep" ["-0.2" "1.2" ["p.y" "+" "0.3" "*" (call "sin" [["p.x" "*" "0.9" "+" "0.07" "*" "t"]])]])])]
+        ["vec3" "col" "=" "base" "*" "s"]
+        blank
+        ["float" "rib" "=" (call "floor" ["u"])]
+        ["float" "d" "=" (call "fract" ["u"])]
+        ["float" "reach" "=" "0.30" "+" "0.12" "*" (call "sin" [["rib" "*" "0.61" "+" "t" "*" "1.3"]]) "+" "0.08" "*" (call "sin" [["rib" "*" "1.7" "-" "t" "*" "0.7"]])]
+        ["float" "tipY" "=" "reach" "*" ["0.35" "+" "0.65" "*" (call "pow" [["1.0" "-" (call "abs" [["2.0" "*" "d" "-" "1.0"]])] "0.8"])]]
+        ["float" "k" "=" "p.y" "-" "tipY"]
+        ["float" "sweep" "=" "0.5" "+" "0.5" "*" (call "sin" [["TAU" "*" "t" "/" "FLASH_PERIOD" "-" "3.5" "*" "p.x" "/" (call "max" ["aspect" "1.0"]) "+" "0.9" "*" "p.y"]])]
+        ["float" "flash" "=" (call "smoothstep" ["0.62" "0.97" "sweep"])]
+        ["vec3" "hot" "=" (call "flame" ["k"]) "*" ["0.82" "+" "0.25" "*" "d"]]
+        ["col" "=" (call "mix" ["col" ["hot" "*" "s"] ["flash" "*" ["0.65" "+" "0.35" "*" "d"]]])]
+        blank
+        ["vec2" "v" "=" "fragCoord" "/" "iResolution.xy" "-" "0.5"]
+        ["col" "*=" "1.0" "-" "0.15" "*" (call "dot" ["v" "v"])]
+        ["fragColor" "=" (call "vec4" [(call "clamp" ["col" "0.0" "1.0"]) "1.0"])]
+      ])
     ];
     modules_desktop_session_wayland = {pkgs, ...}: {
       environment = {
@@ -28858,6 +28940,142 @@
         render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
       };
 
+      glsl = let
+        inherit (doc) hardline nest align;
+
+        assignments = ["=" "+=" "-=" "*=" "/=" "%=" "<<=" ">>=" "&=" "^=" "|="];
+
+        atom = value: builtins.isString value || builtins.isInt value;
+
+        spaced = values: lib.imap0 (index: value: [(lib.optionalString (index > 0 && value != ",") " ") (item value)]) values;
+
+        written = values: lib.concatStrings (lib.imap0 (index: value: lib.optionalString (index > 0 && value != ",") " " + toString value) values);
+
+        rowItems = row: row.row or row;
+
+        broken = rowList: let
+          first = builtins.head rowList;
+          operator = lib.lists.findFirstIndex (value: builtins.elem value assignments) null first;
+          before = lib.take operator first;
+          default =
+            if operator != null && lib.all atom before
+            then builtins.stringLength (written (before ++ ["="])) - 1
+            else null;
+          by = row:
+            row.at or (
+              if default == null
+              then throw "glsl: a row after the first needs at when the first has no assignment"
+              else default
+            );
+        in
+          align [(spaced first) (map (row: nest (by row) [hardline (spaced (rowItems row))]) (builtins.tail rowList))];
+
+        listed = values: lib.intersperse ", " (map expression values);
+
+        args = value:
+          if value ? rows
+          then
+            if builtins.head value.rows == []
+            then [(nest 4 [hardline (lib.intersperse ["," hardline] (map listed (builtins.tail value.rows)))]) hardline]
+            else align (lib.intersperse ["," hardline] (map listed value.rows))
+          else listed value;
+
+        forms = {
+          string = lib.id;
+          int = toString;
+          list = spaced;
+          rows = value: broken value.rows;
+          call = value: [(item value.call.function) "(" (args value.call.arguments) ")"];
+          index = value: [(item value.index.base) "[" (expression value.index.at) "]"];
+          field = value: [(item value.field.base) "." value.field.name];
+          unary = value: [value.unary.operator (item value.unary.operand)];
+        };
+
+        expression = value: (forms.${kindOf value} or (throw "glsl: no expression ${kindOf value}")) value;
+
+        item = value:
+          if builtins.isList value
+          then ["(" (spaced value) ")"]
+          else expression value;
+
+        block = value:
+          if value ? inline
+          then ["{ " (lib.intersperse " " (map statement value.inline)) " }"]
+          else ["{" (nest 4 (map (one: [hardline (entry one)]) value)) hardline "}"];
+
+        clause = value:
+          if value ? bare
+          then [" " (statement value.bare)]
+          else [" " (block value)];
+
+        alternative = value: otherwise: [
+          (
+            if value ? bare
+            then hardline
+            else " "
+          )
+          "else"
+          (
+            if otherwise ? "if"
+            then [" " (statement otherwise)]
+            else clause otherwise
+          )
+        ];
+
+        statementForms = {
+          comment = value: value.comment;
+          fn = value: [(expression value.fn.signature) " " (block value.fn.body)];
+          define = value: ["#define " (expression value.define.name) " " (expression value.define.body)];
+          "if" = value: ["if (" (expression value."if".test) ")" (clause value."if".body) (lib.optional (value."if" ? otherwise) (alternative value."if".body value."if".otherwise))];
+          for = value: ["for (" (lib.intersperse "; " (map expression [value.for.init value.for.test value.for.step])) ")" (clause value.for.body)];
+          while = value: ["while (" (expression value.while.test) ")" (clause value.while.body)];
+        };
+
+        statement = value: (statementForms.${kindOf value} or (_: [(expression value) ";"])) value;
+
+        entry = value:
+          if value ? blank
+          then []
+          else statement value;
+      in {
+        blank = {blank = true;};
+
+        comment = string: {comment = string;};
+
+        inline = values: {inline = values;};
+
+        bare = value: {bare = value;};
+
+        rows = rowList: {rows = rowList;};
+
+        at = by: row: {
+          at = by;
+          inherit row;
+        };
+
+        call = function: arguments: {call = {inherit function arguments;};};
+
+        index = base: at: {index = {inherit base at;};};
+
+        field = base: name: {field = {inherit base name;};};
+
+        unary = operator: operand: {unary = {inherit operator operand;};};
+
+        fn = signature: body: {fn = {inherit signature body;};};
+
+        define = name: body: {define = {inherit name body;};};
+
+        if' = test: body: {"if" = {inherit test body;};};
+
+        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+
+        for = init: test: step: body: {for = {inherit init test step body;};};
+
+        while = test: body: {while = {inherit test body;};};
+
+        render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
+      };
+
       sourceFile = name: text:
         builtins.path {
           path = builtins.toFile name text;
@@ -28866,7 +29084,7 @@
     in {
       cssSource = list: "${nodes list}\n";
 
-      inherit doc lisp shell;
+      inherit doc glsl lisp shell;
 
       inherit sourceFile;
 
@@ -28909,8 +29127,6 @@
       luaSource = lines;
 
       pythonSource = lines;
-
-      glslSource = lines;
 
       patchSource = lines;
     };
@@ -31728,6 +31944,15 @@
           "beat-saber-lock" = modules_hosts_steam_frame_beat_saber_lock_data;
           "omp-box" = omp_box_omp_box_data;
         };
+        glsl = {
+          "balatro.glsl" = modules_desktop_session_tomoe_shaders_balatro_data;
+          "cassette-led.glsl" = modules_desktop_session_tomoe_shaders_cassette_led_data;
+          "cassette-squares.glsl" = modules_desktop_session_tomoe_shaders_cassette_squares_data;
+          "dot-corridor.glsl" = modules_desktop_session_tomoe_shaders_dot_corridor_data;
+          "glass-mound.glsl" = modules_desktop_session_tomoe_shaders_glass_mound_data;
+          "hex-spiral.glsl" = modules_desktop_session_tomoe_shaders_hex_spiral_data;
+          "su-ei.glsl" = modules_desktop_session_tomoe_shaders_su_ei_data;
+        };
       };
 
       osc = lib.mapAttrs' (name: scheme:
@@ -31745,7 +31970,29 @@
             (loop for form = (read source nil source) until (eq form source))))
       '';
 
+      prelude = pkgs.writeText "prelude.frag" ''
+        #version 300 es
+        precision highp float;
+        precision highp int;
+        uniform vec3 iResolution;
+        uniform float iTime;
+        uniform int iFrame;
+        uniform vec4 iMouse;
+        uniform sampler2D iChannel0;
+        in vec2 v_local;
+        out vec4 tomoe_color;
+        #line 1
+      '';
+
+      entry = pkgs.writeText "entry.frag" ''
+
+        void main() {
+            mainImage(tomoe_color, vec2(v_local.x, iResolution.y - v_local.y));
+        }
+      '';
+
       languageChecks = {
+        glsl = file: "cat ${prelude} ${file} ${entry} > shader.frag\n${lib.getExe' pkgs.glslang "glslangValidator"} -S frag shader.frag\n";
         lisp = file: "SOURCE=${file} ${lib.getExe pkgs.sbcl} --script ${reader}\n";
         shell = file: "${lib.getExe pkgs.bash} -n ${file}\n${lib.getExe pkgs.shellcheck} -s bash -S warning ${file}\n";
       };
@@ -38111,6 +38358,9 @@
           before = "graphicalModules";
         }
       ];
+      verbatim = {
+        "modules/desktop/session/tomoe/lisp/sway.data.nix" = "{\n      blank,\n      function,\n      quote,\n      rows,\n      str,\n      ...\n    }: [\n      [\"in-package\" \"#:tomoe-user\"]\n      blank\n      (rows [\n        [\"defun\" \"sway--leaves\" [\"tree\"]]\n        (rows [\n          [\"cond\" [[\"null\" \"tree\"] \"nil\"]]\n          [[[\"integerp\" \"tree\"] [\"list\" \"tree\"]]]\n          [[\"t\" [\"loop\" \"for\" \"kid\" \"in\" [\"rest\" \"tree\"] \"append\" [\"sway--leaves\" \"kid\"]]]]\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--prune\" [\"tree\" \"keep\"]]\n        (rows [\n          [\"cond\" [[\"null\" \"tree\"] \"nil\"]]\n          [[[\"integerp\" \"tree\"] [\"when\" [\"member\" \"tree\" \"keep\"] \"tree\"]]]\n          [\n            [\n              \"t\"\n              (rows [\n                [\n                  \"let\"\n                  [\n                    [\n                      \"kids\"\n                      (rows [\n                        [\"loop\" \"for\" \"kid\" \"in\" [\"rest\" \"tree\"]]\n                        [\"for\" \"pruned\" \"=\" [\"sway--prune\" \"kid\" \"keep\"]]\n                        [\"when pruned\" \"collect pruned\"]\n                      ])\n                    ]\n                  ]\n                ]\n                [[\"if\" [\"rest\" \"kids\"] [\"cons\" [\"first\" \"tree\"] \"kids\"] [\"first\" \"kids\"]]]\n              ])\n            ]\n          ]\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--insert\" [\"tree\" \"target\" \"id\" \"direction\"]]\n        (rows [\n          [\"cond\" [[\"integerp\" \"tree\"] [\"if\" [\"eql\" \"tree\" \"target\"] [\"list\" \"direction\" \"tree\" \"id\"] \"tree\"]]]\n          (rows [\n            [[\"and\" [\"eq\" [\"first\" \"tree\"] \"direction\"] [\"member\" \"target\" [\"rest\" \"tree\"]]]]\n            (rows [\n              [\"let\" [[\"tail\" [\"member\" \"target\" [\"rest\" \"tree\"]]]]]\n              [[\"append\" [\"ldiff\" \"tree\" [\"rest\" \"tail\"]] [\"list\" \"id\"] [\"rest\" \"tail\"]]]\n            ])\n          ])\n          [\n            [\n              \"t\"\n              (rows [\n                [\"cons\" [\"first\" \"tree\"]]\n                (rows [\n                  [\"loop\" \"for\" \"kid\" \"in\" [\"rest\" \"tree\"]]\n                  [\n                    \"collect\"\n                    (rows [\n                      [\"if\" [\"member\" \"target\" [\"sway--leaves\" \"kid\"]]]\n                      [[\"sway--insert\" \"kid\" \"target\" \"id\" \"direction\"]]\n                      \"kid\"\n                    ])\n                  ]\n                ])\n              ])\n            ]\n          ]\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--swap\" [\"tree\" \"a\" \"b\"]]\n        (rows [\n          [\"cond\" [[\"eql\" \"tree\" \"a\"] \"b\"]]\n          [[[\"eql\" \"tree\" \"b\"] \"a\"]]\n          [[[\"atom\" \"tree\"] \"tree\"]]\n          [[\"t\" [\"cons\" [\"first\" \"tree\"] [\"loop\" \"for\" \"kid\" \"in\" [\"rest\" \"tree\"] \"collect\" [\"sway--swap\" \"kid\" \"a\" \"b\"]]]]]\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--boxes\" [\"tree\" \"x\" \"y\" \"width\" \"height\" \"gap\"]]\n        (rows [\n          [\"if\" [\"integerp\" \"tree\"]]\n          [[\"list\" [\"list\" \"tree\" \"x\" \"y\" \"width\" \"height\"]]]\n          (rows [\n            [\n              \"let*\"\n              (rows [\n                [[\"kids\" [\"rest\" \"tree\"]]]\n                [[\"horizontal\" [\"eq\" [\"first\" \"tree\"] \":h\"]]]\n                [[\"origin\" [\"if\" \"horizontal\" \"x\" \"y\"]]]\n                [[\"span\" [\"if\" \"horizontal\" \"width\" \"height\"]]]\n                [[\"step\" [\"floor\" [\"-\" \"span\" [\"*\" [\"1-\" [\"length\" \"kids\"]] \"gap\"]] [\"length\" \"kids\"]]]]\n                [[\"start\" \"origin\"]]\n              ])\n            ]\n            (rows [\n              [\"loop\" \"for\" [\"kid\" \".\" \"more\"] \"on\" \"kids\"]\n              [\"for\" \"size\" \"=\" [\"if\" \"more\" \"step\" [\"-\" [\"+\" \"origin\" \"span\"] \"start\"]]]\n              [\n                \"append\"\n                (rows [\n                  [\"if\" \"horizontal\"]\n                  [[\"sway--boxes\" \"kid\" \"start\" \"y\" \"size\" \"height\" \"gap\"]]\n                  [[\"sway--boxes\" \"kid\" \"x\" \"start\" \"width\" \"size\" \"gap\"]]\n                ])\n              ]\n              [\"do\" [\"incf\" \"start\" [\"+\" \"size\" \"gap\"]]]\n            ])\n          ])\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--neighbour\" [\"boxes\" \"id\" \"dx\" \"dy\"]]\n        (rows [\n          [\"let\" [[\"from\" [\"assoc\" \"id\" \"boxes\"]] [\"best\" \"nil\"] [\"distance\" \"nil\"]]]\n          (rows [\n            [\"flet\" [[\"centre\" [\"box\"] [\"list\" [\"+\" [\"second\" \"box\"] [\"/\" [\"fourth\" \"box\"] 2]] [\"+\" [\"third\" \"box\"] [\"/\" [\"fifth\" \"box\"] 2]]]]]]\n            (rows [\n              [\"when\" \"from\"]\n              (rows [\n                [\"destructuring-bind\" [\"fx\" \"fy\"] [\"centre\" \"from\"]]\n                (rows [\n                  [\"dolist\" [\"box\" \"boxes\"]]\n                  (rows [\n                    [\"destructuring-bind\" [\"cx\" \"cy\"] [\"centre\" \"box\"]]\n                    (rows [\n                      [\n                        \"let*\"\n                        (rows [\n                          [[\"ddx\" [\"-\" \"cx\" \"fx\"]] [\"ddy\" [\"-\" \"cy\" \"fy\"]]]\n                          [[\"along\" [\"if\" [\"zerop\" \"dx\"] \"ddy\" \"ddx\"]]]\n                          [[\"across\" [\"if\" [\"zerop\" \"dx\"] \"ddx\" \"ddy\"]]]\n                          [[\"far\" [\"+\" [\"abs\" \"ddx\"] [\"abs\" \"ddy\"]]]]\n                        ])\n                      ]\n                      (rows [\n                        [\n                          \"when\"\n                          (rows [\n                            [\"and\" [\"not\" [\"eq\" \"box\" \"from\"]]]\n                            [[\"eq\" [\"plusp\" \"along\"] [\"plusp\" [\"+\" \"dx\" \"dy\"]]]]\n                            [[\">\" [\"abs\" \"along\"] [\"abs\" \"across\"]]]\n                            [[\"or\" [\"null\" \"distance\"] [\"<\" \"far\" \"distance\"]]]\n                          ])\n                        ]\n                        [[\"setf\" \"best\" [\"first\" \"box\"] \"distance\" \"far\"]]\n                      ])\n                    ])\n                  ])\n                ])\n              ])\n            ])\n          ])\n          \"best\"\n        ])\n      ])\n      blank\n      (rows [\n        [\"define-extension\" (str \"sway\")]\n        (rows [\n          [\":reads\" [\":windows\" \":rules\" \":workareas\" \":outputs\" \":focus\" \":key\" \":button\" \":pointer\" \":request\" \":settings\"]]\n          [\n            \":state\"\n            (rows [\n              [\"list\" \":active\" 1 \":workspaces\" \"nil\" \":trees\" \"nil\" \":split\" \"nil\" \":focus\" \"nil\"]\n              [\":fullscreen\" \"nil\" \":floating\" \"nil\"]\n            ])\n          ]\n          [\":admission\" \"t\"]\n        ])\n        [[\"snapshot\" \"state\" \"event\"]]\n        (rows [\n          [\n            \"let*\"\n            (rows [\n              [\n                [\n                  \"windows\"\n                  (rows [\n                    [\"remove-if\" [\"lambda\" [\"window\"] [\"policy--unmanaged-p\" \"snapshot\" \"window\"]]]\n                    [[\"context\" \"snapshot\" \":windows\"]]\n                  ])\n                ]\n              ]\n              [[\"ids\" [\"mapcar\" [\"lambda\" [\"window\"] [\"getf\" \"window\" \":id\"]] \"windows\"]]]\n              [[\"count\" [\"getf\" \"+layout+\" \":workspaces\"]]]\n              [[\"gap\" [\"getf\" \"+layout+\" \":gaps\"]]]\n              [[\"area\" [\"policy--area\" \"snapshot\"]]]\n              [\n                [\n                  \"output\"\n                  [\n                    \"and\"\n                    \"area\"\n                    (rows [\n                      [\"find\" [\"getf\" \"area\" \":name\"] [\"context\" \"snapshot\" \":outputs\"]]\n                      [\":test\" (function \"equal\") \":key\" [\"lambda\" [\"output\"] [\"getf\" \"output\" \":name\"]]]\n                    ])\n                  ]\n                ]\n              ]\n              [[\"type\" [\"getf\" \"event\" \":type\"]]]\n              [[\"command\" [\"and\" [\"eq\" \"type\" \":key\"] [\"equal\" [\"getf\" \"event\" \":owner\"] (str \"sway\")] [\"getf\" \"event\" \":command\"]]]]\n              [\n                [\n                  \"motion\"\n                  [\n                    \"rest\"\n                    (rows [\n                      [\n                        \"assoc\"\n                        \"command\"\n                        (quote (rows [\n                          [[(str \"focus-left\") (-1) 0] [(str \"focus-right\") 1 0]]\n                          [[(str \"focus-up\") 0 (-1)] [(str \"focus-down\") 0 1]]\n                        ]))\n                      ]\n                      [\":test\" (function \"equal\")]\n                    ])\n                  ]\n                ]\n              ]\n              [[\"active\" [\"max\" 1 [\"min\" \"count\" [\"getf\" \"state\" \":active\"]]]]]\n              [\n                [\n                  \"workspaces\"\n                  (rows [\n                    [\"loop\" \"for index below count\"]\n                    [\n                      \"collect\"\n                      (rows [\n                        [\"remove-if-not\" [\"lambda\" [\"id\"] [\"member\" \"id\" \"ids\"]]]\n                        [[\"nth\" \"index\" [\"getf\" \"state\" \":workspaces\"]]]\n                      ])\n                    ]\n                  ])\n                ]\n              ]\n              [[\"trees\" [\"loop\" \"for index below count\" \"collect\" [\"nth\" \"index\" [\"getf\" \"state\" \":trees\"]]]]]\n              [[\"split\" [\"remove-if-not\" [\"lambda\" [\"entry\"] [\"member\" [\"car\" \"entry\"] \"ids\"]] [\"getf\" \"state\" \":split\"]]]]\n              [[\"focused\" [\"getf\" \"state\" \":focus\"]]]\n              [[\"fullscreen\" [\"remove-if-not\" [\"lambda\" [\"id\"] [\"member\" \"id\" \"ids\"]] [\"getf\" \"state\" \":fullscreen\"]]]]\n              [[\"floating\" [\"remove-if-not\" [\"lambda\" [\"entry\"] [\"member\" [\"car\" \"entry\"] \"ids\"]] [\"getf\" \"state\" \":floating\"]]]]\n              [[\"external\" [\"previous-context\" \"snapshot\" \":focus\"]]]\n              [[\"terminal\" [\"and\" [\"equal\" \"command\" (str \"terminal\")] [\"policy--terminal\" \"windows\"]]]]\n              [[\"new\" \"nil\"]]\n            ])\n          ]\n          (rows [\n            [\n              \"labels\"\n              (rows [\n                [[\"workspace\" [\"number\"] [\"nth\" [\"1-\" \"number\"] \"workspaces\"]]]\n                [\n                  [\n                    \"home\"\n                    [\"id\"]\n                    (rows [\n                      [\"loop\" \"for list in workspaces\" \"for number from 1\"]\n                      [\"when\" [\"member\" \"id\" \"list\"] \"return number\"]\n                    ])\n                  ]\n                ]\n                (rows [\n                  [\"boxes\" [\"tree\"]]\n                  (rows [\n                    [\"when\" [\"and\" \"tree\" \"area\"]]\n                    (rows [\n                      [\"sway--boxes\" \"tree\" [\"+\" [\"getf\" \"area\" \":x\"] \"gap\"] [\"+\" [\"getf\" \"area\" \":y\"] \"gap\"]]\n                      [[\"-\" [\"getf\" \"area\" \":width\"] [\"*\" 2 \"gap\"]] [\"-\" [\"getf\" \"area\" \":height\"] [\"*\" 2 \"gap\"]] \"gap\"]\n                    ])\n                  ])\n                ])\n                (rows [\n                  [\"arrange\" [\"number\"]]\n                  (rows [\n                    [\n                      \"let*\"\n                      (rows [\n                        [\n                          [\n                            \"keep\"\n                            (rows [\n                              [\"remove-if\" [\"lambda\" [\"id\"] [\"or\" [\"member\" \"id\" \"fullscreen\"] [\"assoc\" \"id\" \"floating\"]]]]\n                              [[\"workspace\" \"number\"]]\n                            ])\n                          ]\n                        ]\n                        [[\"tree\" [\"sway--prune\" [\"nth\" [\"1-\" \"number\"] \"trees\"] \"keep\"]]]\n                      ])\n                    ]\n                    (rows [\n                      [\"dolist\" [\"id\" \"keep\"]]\n                      (rows [\n                        [\"unless\" [\"member\" \"id\" [\"sway--leaves\" \"tree\"]]]\n                        (rows [\n                          [\"setf\" \"tree\"]\n                          (rows [\n                            [\"if\" [\"null\" \"tree\"]]\n                            \"id\"\n                            (rows [\n                              [\n                                \"let*\"\n                                (rows [\n                                  [[\"leaves\" [\"sway--leaves\" \"tree\"]]]\n                                  [[\"target\" [\"if\" [\"member\" \"focused\" \"leaves\"] \"focused\" [\"car\" [\"last\" \"leaves\"]]]]]\n                                  [[\"box\" [\"assoc\" \"target\" [\"boxes\" \"tree\"]]]]\n                                  [\n                                    [\n                                      \"direction\"\n                                      (rows [\n                                        [\"or\" [\"cdr\" [\"assoc\" \"target\" \"split\"]]]\n                                        [[\"if\" [\"and\" \"box\" [\">\" [\"fifth\" \"box\"] [\"fourth\" \"box\"]]] \":v\" \":h\"]]\n                                      ])\n                                    ]\n                                  ]\n                                ])\n                              ]\n                              [[\"setf\" \"split\" [\"remove\" \"target\" \"split\" \":key\" (function \"car\")]]]\n                              [[\"sway--insert\" \"tree\" \"target\" \"id\" \"direction\"]]\n                            ])\n                          ])\n                        ])\n                      ])\n                    ])\n                    [[\"setf\" [\"nth\" [\"1-\" \"number\"] \"trees\"] \"tree\"]]\n                  ])\n                ])\n                [[\"arrange-all\" [] [\"loop\" \"for number from 1 to count\" \"do\" [\"arrange\" \"number\"]]]]\n                (rows [\n                  [\"switch\" [\"number\"]]\n                  [[\"setf\" \"active\" \"number\" \"focused\" [\"car\" [\"last\" [\"workspace\" \"number\"]]]]]\n                ])\n                [[\"neighbour\" [\"direction\"] [\"1+\" [\"mod\" [\"+\" \"active\" (-1) \"direction\"] \"count\"]]]]\n              ])\n            ]\n            (rows [\n              [\"when\" [\"and\" [\"member\" \"external\" \"ids\"] [\"not\" [\"eql\" \"external\" \"focused\"]]]]\n              [[\"setf\" \"focused\" \"external\" \"active\" [\"or\" [\"home\" \"external\"] \"active\"]]]\n            ])\n            (rows [\n              [\"let\" [[\"known\" [\"loop\" \"for list in workspaces\" \"append list\"]]]]\n              (rows [\n                [\"dolist\" [\"window\" \"windows\"]]\n                (rows [\n                  [\"let\" [[\"id\" [\"getf\" \"window\" \":id\"]]]]\n                  (rows [\n                    [\"unless\" [\"member\" \"id\" \"known\"]]\n                    [[\"setf\" [\"nth\" [\"1-\" \"active\"] \"workspaces\"] [\"append\" [\"workspace\" \"active\"] [\"list\" \"id\"]]]]\n                    [[\"when\" [\"getf\" \"window\" \":fullscreen-requested\"] [\"push\" \"id\" \"fullscreen\"]]]\n                    [[\"push\" \"id\" \"new\"]]\n                  ])\n                ])\n              ])\n            ])\n            (rows [\n              [\"case\" \"type\"]\n              (rows [\n                \":button\"\n                (rows [\n                  [\"when\" [\"and\" [\"eq\" [\"getf\" \"event\" \":state\"] \":pressed\"] [\"member\" [\"getf\" \"event\" \":id\"] [\"workspace\" \"active\"]]]]\n                  [[\"setf\" \"focused\" [\"getf\" \"event\" \":id\"]]]\n                ])\n              ])\n              (rows [\n                \":pointer\"\n                (rows [\n                  [\n                    \"when\"\n                    (rows [\n                      [\"and\" [\"eq\" [\"getf\" \"event\" \":state\"] \":enter\"] [\"getf\" \"event\" \":moved\"]]\n                      [[\"setting\" \"snapshot\" \":focus-follows-mouse\"]]\n                      [[\"member\" [\"getf\" \"event\" \":id\"] [\"workspace\" \"active\"]]]\n                    ])\n                  ]\n                  [[\"setf\" \"focused\" [\"getf\" \"event\" \":id\"]]]\n                ])\n              ])\n              (rows [\n                [[\":metadata\" \":request\"]]\n                (rows [\n                  [\"let\" [[\"id\" [\"getf\" \"event\" \":id\"]]]]\n                  (rows [\n                    [\"when\" [\"member\" \"id\" \"ids\"]]\n                    (rows [\n                      [\"case\" [\"getf\" \"event\" \":request\"]]\n                      (rows [\n                        \":fullscreen\"\n                        [[\"setf\" \"fullscreen\" [\"remove\" \"id\" \"fullscreen\"]]]\n                        [[\"when\" [\"getf\" \"event\" \":requested\"] [\"push\" \"id\" \"fullscreen\"] [\"setf\" \"focused\" \"id\"]]]\n                      ])\n                      [[\":unfullscreen\" [\"setf\" \"fullscreen\" [\"remove\" \"id\" \"fullscreen\"]]]]\n                      [[\":activate\" [\"setf\" \"active\" [\"or\" [\"home\" \"id\"] \"active\"] \"focused\" \"id\"]]]\n                    ])\n                  ])\n                ])\n              ])\n            ])\n            (rows [\n              [\"when\" \"terminal\"]\n              [[\"setf\" \"active\" [\"or\" [\"home\" \"terminal\"] \"active\"] \"focused\" \"terminal\"]]\n            ])\n            [[\"arrange-all\"]]\n            (rows [\n              [\"let\" [[\"current\" [\"and\" [\"member\" \"focused\" [\"workspace\" \"active\"]] \"focused\"]]]]\n              (rows [\n                \"cond\"\n                [[[\"null\" \"command\"]]]\n                (rows [\n                  \"motion\"\n                  (rows [\n                    [\"let\" [[\"target\" [\"apply\" (function \"sway--neighbour\") [\"boxes\" [\"nth\" [\"1-\" \"active\"] \"trees\"]] \"current\" \"motion\"]]]]\n                    [[\"when\" \"target\" [\"setf\" \"focused\" \"target\"]]]\n                  ])\n                ])\n                [[[\"equal\" \"command\" (str \"workspace-next\")] [\"switch\" [\"neighbour\" 1]]]]\n                [[[\"equal\" \"command\" (str \"workspace-previous\")] [\"switch\" [\"neighbour\" (-1)]]]]\n                [[[\"null\" \"current\"]]]\n                (rows [\n                  [[\"member\" \"command\" (quote [(str \"move-next\") (str \"move-previous\")]) \":test\" (function \"equal\")]]\n                  (rows [\n                    [\"let\" [[\"number\" [\"neighbour\" [\"if\" [\"equal\" \"command\" (str \"move-next\")] 1 (-1)]]]]]\n                    (rows [\n                      [\"setf\" [\"nth\" [\"1-\" \"active\"] \"workspaces\"] [\"remove\" \"current\" [\"workspace\" \"active\"]]]\n                      [[\"nth\" [\"1-\" \"number\"] \"workspaces\"] [\"append\" [\"workspace\" \"number\"] [\"list\" \"current\"]]]\n                    ])\n                    [[\"switch\" \"number\"]]\n                  ])\n                ])\n                (rows [\n                  [[\"member\" \"command\" (quote [(str \"swap-previous\") (str \"swap-next\")]) \":test\" (function \"equal\")]]\n                  (rows [\n                    [\n                      \"let*\"\n                      (rows [\n                        [[\"leaves\" [\"sway--leaves\" [\"nth\" [\"1-\" \"active\"] \"trees\"]]]]\n                        [[\"index\" [\"position\" \"current\" \"leaves\"]]]\n                        [[\"other\" [\"and\" \"index\" [\"+\" \"index\" [\"if\" [\"equal\" \"command\" (str \"swap-next\")] 1 (-1)]]]]]\n                      ])\n                    ]\n                    (rows [\n                      [\"when\" [\"and\" \"other\" [\"<\" (-1) \"other\" [\"length\" \"leaves\"]]]]\n                      (rows [\n                        [\"setf\" [\"nth\" [\"1-\" \"active\"] \"trees\"]]\n                        [[\"sway--swap\" [\"nth\" [\"1-\" \"active\"] \"trees\"] \"current\" [\"nth\" \"other\" \"leaves\"]]]\n                      ])\n                    ])\n                  ])\n                ])\n                (rows [\n                  [[\"equal\" \"command\" (str \"split-horizontal\")]]\n                  [[\"setf\" \"split\" [\"acons\" \"current\" \":h\" [\"remove\" \"current\" \"split\" \":key\" (function \"car\")]]]]\n                ])\n                (rows [\n                  [[\"equal\" \"command\" (str \"split-vertical\")]]\n                  [[\"setf\" \"split\" [\"acons\" \"current\" \":v\" [\"remove\" \"current\" \"split\" \":key\" (function \"car\")]]]]\n                ])\n                (rows [\n                  [[\"equal\" \"command\" (str \"fullscreen\")]]\n                  (rows [\n                    [\"if\" [\"member\" \"current\" \"fullscreen\"]]\n                    [[\"setf\" \"fullscreen\" [\"remove\" \"current\" \"fullscreen\"]]]\n                    [[\"push\" \"current\" \"fullscreen\"]]\n                  ])\n                ])\n                (rows [\n                  [[\"equal\" \"command\" (str \"floating\")]]\n                  (rows [\n                    [\"cond\" [[\"member\" \"current\" \"fullscreen\"] [\"setf\" \"fullscreen\" [\"remove\" \"current\" \"fullscreen\"]]]]\n                    [[[\"assoc\" \"current\" \"floating\"] [\"setf\" \"floating\" [\"remove\" \"current\" \"floating\" \":key\" (function \"car\")]]]]\n                    [\n                      [\n                        \"area\"\n                        (rows [\n                          [\"push\" [\"cons\" \"current\" [\"policy--centred\" \"area\" [\"getf\" \"+layout+\" \":float-ratio\"]]]]\n                          \"floating\"\n                        ])\n                      ]\n                    ]\n                  ])\n                ])\n              ])\n            ])\n            [[\"arrange-all\"]]\n            (rows [\n              [\"let\" [[\"arrived\" [\"remove-if-not\" [\"lambda\" [\"id\"] [\"member\" \"id\" [\"workspace\" \"active\"]]] \"new\"]]]]\n              [[\"when\" \"arrived\" [\"setf\" \"focused\" [\"first\" \"arrived\"]]]]\n            ])\n            (rows [\n              [\"unless\" [\"member\" \"focused\" [\"workspace\" \"active\"]]]\n              [[\"setf\" \"focused\" [\"car\" [\"last\" [\"workspace\" \"active\"]]]]]\n            ])\n            (rows [\n              [\"let\" [[\"effects\" \"nil\"]]]\n              (rows [\n                [\"dolist\" [\"id\" \"ids\"]]\n                (rows [\n                  [\n                    \"let*\"\n                    (rows [\n                      [[\"number\" [\"home\" \"id\"]]]\n                      [[\"shown\" [\"eql\" \"number\" \"active\"]]]\n                      [\n                        [\n                          \"box\"\n                          (rows [\n                            [\n                              \"cond\"\n                              (rows [\n                                [[\"member\" \"id\" \"fullscreen\"]]\n                                [\n                                  [\n                                    \"and\"\n                                    \"output\"\n                                    (rows [\n                                      [\"list\" [\"getf\" \"output\" \":x\"] [\"getf\" \"output\" \":y\"]]\n                                      [[\"getf\" \"output\" \":width\"] [\"getf\" \"output\" \":height\"]]\n                                    ])\n                                  ]\n                                ]\n                              ])\n                            ]\n                            [[[\"cdr\" [\"assoc\" \"id\" \"floating\"]]]]\n                            [[\"t\" [\"rest\" [\"assoc\" \"id\" [\"boxes\" [\"nth\" [\"1-\" \"number\"] \"trees\"]]]]]]\n                          ])\n                        ]\n                      ]\n                    ])\n                  ]\n                  (rows [\n                    [\n                      \"push\"\n                      (rows [\n                        [\"if\" \"box\"]\n                        (rows [\n                          [\"destructuring-bind\" [\"x\" \"y\" \"width\" \"height\"] \"box\"]\n                          [[\"place\" \"id\" \"x\" \"y\" [\"max\" 1 \"width\"] [\"max\" 1 \"height\"] \"shown\"]]\n                        ])\n                        [[\"if\" \"shown\" [\"show-window\" \"id\"] [\"hide-window\" \"id\"]]]\n                      ])\n                    ]\n                    \"effects\"\n                  ])\n                  [[\"push\" [\"fullscreen\" \"id\" [\"and\" [\"member\" \"id\" \"fullscreen\"] \"t\"]] \"effects\"]]\n                ])\n              ])\n              (rows [\n                [\n                  \"let\"\n                  [\n                    [\n                      \"floats\"\n                      (rows [\n                        [\"remove-if\" [\"lambda\" [\"id\"] [\"member\" \"id\" \"fullscreen\"]]]\n                        [[\"mapcar\" (function \"car\") [\"reverse\" \"floating\"]]]\n                      ])\n                    ]\n                  ]\n                ]\n                (rows [\n                  [\n                    \"dolist\"\n                    [\n                      \"id\"\n                      (rows [\n                        [\"append\" [\"remove\" \"focused\" \"floats\"]]\n                        [[\"when\" [\"member\" \"focused\" \"floats\"] [\"list\" \"focused\"]]]\n                        \"fullscreen\"\n                      ])\n                    ]\n                  ]\n                  [[\"when\" [\"member\" \"id\" [\"workspace\" \"active\"]] [\"push\" [\"raise-window\" \"id\"] \"effects\"]]]\n                ])\n              ])\n              [[\"push\" [\"focus\" \"focused\" \":raise\" \"nil\"] \"effects\"]]\n              [[\"push\" [\"settings\" \":animations\" \"nil\"] \"effects\"]]\n              [[\"dolist\" [\"binding\" \"+layout-bindings+\"] [\"push\" [\"apply\" (function \"bind-key\") \"binding\"] \"effects\"]]]\n              (rows [\n                [\n                  \"values\"\n                  (rows [\n                    [\"list\" \":active\" \"active\" \":workspaces\" \"workspaces\" \":trees\" \"trees\" \":split\" \"split\"]\n                    [\":focus\" \"focused\" \":fullscreen\" \"fullscreen\" \":floating\" \"floating\"]\n                  ])\n                ]\n                [[\"nreverse\" \"effects\"]]\n                (rows [\n                  [\"when\" [\"and\" [\"equal\" \"command\" (str \"terminal\")] [\"null\" \"terminal\"]]]\n                  [[\"list\" [\"apply\" (function \"launch\") [\"policy--launch\" (str \"terminal\")]]]]\n                ])\n              ])\n            ])\n          ])\n        ])\n      ])\n    ]\n";
+      };
       module_values = [
         {
           file = "modules/outputs.nix";
