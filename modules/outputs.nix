@@ -237,6 +237,7 @@ inputs: let
     };
     extraSpecialArgs = {
       flakeInputs = inputs;
+      inherit generators;
     };
     modules = [
       ./hosts/android-phone/nix-on-droid.nix

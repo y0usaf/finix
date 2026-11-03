@@ -83,4 +83,8 @@ in {
   shellSource = lines;
 
   xmlSource = root: "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n${xmlElement "" root}";
+
+  sshPublicKey = key: "${key.type} ${key.key} ${key.comment}";
+
+  sshKeySource = key: "${key.type} ${key.key} ${key.comment}\n";
 }

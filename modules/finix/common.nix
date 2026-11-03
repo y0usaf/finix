@@ -1,5 +1,6 @@
 {
   config,
+  generators,
   lib,
   pkgs,
   ...
@@ -111,10 +112,10 @@ in {
 
     environment = {
       etc."ssh/authorized_keys.d/y0usaf".text = ''
-        ${lib.fileContents ../hosts/y0usaf-desktop/user-ssh.pub}
-        ${lib.fileContents ../hosts/y0usaf-framework/user-ssh.pub}
-        ${lib.fileContents ../hosts/y0usaf-server/user-ssh.pub}
-        ${lib.fileContents ../hosts/android-phone/user-ssh.pub}
+        ${generators.sshPublicKey (import ../hosts/y0usaf-desktop/user-ssh.data.nix)}
+        ${generators.sshPublicKey (import ../hosts/y0usaf-framework/user-ssh.data.nix)}
+        ${generators.sshPublicKey (import ../hosts/y0usaf-server/user-ssh.data.nix)}
+        ${generators.sshPublicKey (import ../hosts/android-phone/user-ssh.data.nix)}
       '';
       shells = [
         "/run/current-system/sw/bin/rush"

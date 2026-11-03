@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   phoneUser = config.user.userName;
@@ -28,8 +29,6 @@
   };
   bashProfile = bashFiles.".bash_profile".text;
   bashrc = bashFiles.".bashrc".text;
-
-  readKey = path: lib.fileContents path;
 
   mkTextFile = name: text: {
     source = pkgs.writeText "android-phone-${name}" text;
@@ -91,13 +90,13 @@
 
         ".ssh/known_hosts" = mkTextFile "known-hosts" ((lib.concatStringsSep "\n" (
             lib.mapAttrsToList (host: key: "${host} ${key}") {
-              ${tailnet.addresses.y0usaf-phone} = readKey ./host-ssh-ed25519.pub;
-              "192.168.2.34" = readKey ./host-ssh-ed25519.pub;
-              "android-phone" = readKey ./host-ssh-ed25519.pub;
-              "desktop" = readKey ../y0usaf-desktop/host-ssh-ed25519.pub;
-              "server" = readKey ../y0usaf-server/host-ssh-ed25519.pub;
-              "y0usaf-desktop" = readKey ../y0usaf-desktop/host-ssh-ed25519.pub;
-              "y0usaf-server" = readKey ../y0usaf-server/host-ssh-ed25519.pub;
+              ${tailnet.addresses.y0usaf-phone} = generators.sshPublicKey (import ./host-ssh-ed25519.data.nix);
+              "192.168.2.34" = generators.sshPublicKey (import ./host-ssh-ed25519.data.nix);
+              "android-phone" = generators.sshPublicKey (import ./host-ssh-ed25519.data.nix);
+              "desktop" = generators.sshPublicKey (import ../y0usaf-desktop/host-ssh-ed25519.data.nix);
+              "server" = generators.sshPublicKey (import ../y0usaf-server/host-ssh-ed25519.data.nix);
+              "y0usaf-desktop" = generators.sshPublicKey (import ../y0usaf-desktop/host-ssh-ed25519.data.nix);
+              "y0usaf-server" = generators.sshPublicKey (import ../y0usaf-server/host-ssh-ed25519.data.nix);
             }
           ))
           + "\n");
@@ -165,8 +164,8 @@ in {
     sshd = ''
             $DRY_RUN_CMD mkdir $VERBOSE_ARG --parents "${homeDir}/.ssh"
             $DRY_RUN_CMD cp ${pkgs.writeText "android-phone-authorized_keys" ''
-        ${builtins.readFile ../y0usaf-desktop/user-ssh.pub}
-        ${builtins.readFile ../y0usaf-server/user-ssh.pub}
+        ${generators.sshKeySource (import ../y0usaf-desktop/user-ssh.data.nix)}
+        ${generators.sshKeySource (import ../y0usaf-server/user-ssh.data.nix)}
       ''} "${homeDir}/.ssh/authorized_keys"
             $DRY_RUN_CMD chmod 700 "${homeDir}/.ssh"
             $DRY_RUN_CMD chmod 600 "${homeDir}/.ssh/authorized_keys"
