@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=b37f03c27eafd6452080416068904e4fdaa2a658";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=61db8fca4dba8e9dbc3a754defca296445e97385";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -28775,6 +28775,7 @@
       pkgs,
       hosts,
       droid,
+      generators,
     }: let
       strictix = lib.getExe' inputs.strictix.packages.${pkgs.stdenv.hostPlatform.system}.default "strictix";
 
@@ -28798,9 +28799,40 @@
           parse = builtins.fromTOML;
           render = v: builtins.readFile ((pkgs.formats.toml {}).generate "x.toml" v);
         };
+        lisp = {
+          extensions = ["lisp"];
+          generator = "lispSource";
+        };
+        shell = {
+          extensions = ["sh" "bash"];
+          generator = "shellSource";
+        };
       };
 
-      convert = c: let
+      importers = lib.attrNames (lib.filterAttrs (_: c: !(c ? parse)) codecs);
+
+      tree = c: let
+        load = "generators.${c.id}.render (import ${c.data} {inherit generators;})";
+      in {
+        inherit (c) nix;
+        replacement =
+          if c.kind == "text"
+          then "(generators.${c.id}.render (${lib.removePrefix "{generators}:\n" c.nix}))"
+          else if c.loader == "source"
+          then "(generators.sourceFile ${lib.strings.escapeNixString (baseNameOf c.target)} (${load}))"
+          else load;
+        reason = imported:
+          if generators.${c.id}.render (imported {inherit generators;}) == c.text
+          then null
+          else "rendering the syntax tree does not reproduce the text byte for byte";
+      };
+
+      convert = c:
+        if lib.elem c.id importers
+        then tree c
+        else value c;
+
+      value = c: let
         codec = codecs.${c.id};
         value = codec.parse c.text;
         nix = lib.generators.toPretty {multiline = true;} value;
@@ -28845,7 +28877,7 @@
       jq = lib.getExe pkgs.jq;
 
       config = (pkgs.formats.toml {}).generate "strictix.toml" {
-        codecs = lib.mapAttrs (_: c: {inherit (c) extensions;}) codecs;
+        codecs = lib.mapAttrs (_: c: {inherit (c) extensions;} // lib.optionalAttrs (c ? generator) {inherit (c) generator;}) codecs;
         lint = {
           schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
           enabled = ["unused-option" "never-enabled-option"];
@@ -28905,6 +28937,16 @@
               echo "withheld $label: $(grep -m1 'error:' "$work/$n.err")"
               continue
             fi
+          elif [ "$(get loader)" = lines ]; then
+            target=$(get target)
+            datafile=$target
+            data=$(realpath -m --relative-to="$(dirname "$file")" "$datafile")
+            case $data in ../*) ;; *) data=./$data ;; esac
+            label="$label $target"
+            if ! nix eval --impure --raw --expr "builtins.concatStringsSep \"\" (map (line: line + \"\n\") (import $(realpath "$target")))" > "$work/$n.txt" 2> "$work/$n.err"; then
+              echo "withheld $label: $(grep -m1 'error:' "$work/$n.err")"
+              continue
+            fi
           else
             target=$(get target)
             cp "$target" "$work/$n.txt"
@@ -28924,7 +28966,17 @@
               continue
             fi
           fi
-          ${jq} --rawfile text "$work/$n.txt" --arg data "$data" '. + {text: $text, data: $data}' <<<"$c" > "$work/$n.json"
+          extra=()
+          if [[ " ${lib.concatStringsSep " " importers} " == *" $(get id) "* ]]; then
+            input=$work/$n.txt
+            [ "$(get loader)" = lines ] && input=$target
+            if ! ${strictix} import "$(get id)" "$input" > "$work/$n.nix" 2> "$work/$n.err"; then
+              echo "withheld $label: $(cat "$work/$n.err")"
+              continue
+            fi
+            extra=(--rawfile nix "$work/$n.nix")
+          fi
+          ${jq} --rawfile text "$work/$n.txt" --arg data "$data" "''${extra[@]}" '. + $ARGS.named' <<<"$c" > "$work/$n.json"
           if ! nix eval --impure --json --expr "import ${runner} $work/$n.json" > "$work/$n.out" 2> "$work/$n.err"; then
             echo "withheld $label: $(grep -m1 'error:' "$work/$n.err")"
             continue
@@ -28942,7 +28994,7 @@
           while IFS=$'\t' read -r file start end n target datafile; do
             if [ -n "$datafile" ]; then
               ${jq} -j .nix "$work/$n.out" > "$datafile"
-              printf '%s\n' "$target" >> "$work/sources"
+              [ "$target" = "$datafile" ] || printf '%s\n' "$target" >> "$work/sources"
               touched+=("$datafile")
             fi
             { head -c "$start" "$file"; ${jq} -j .replacement "$work/$n.out"; tail -c +$((end + 1)) "$file"; } > "$work/splice"
@@ -29326,7 +29378,7 @@
         ];
       };
 
-      lint = modules_lint {inherit inputs lib pkgs hosts droid;};
+      lint = modules_lint {inherit inputs lib pkgs hosts droid generators;};
     in {
       nixosConfigurations = hosts // {y0usaf-server-finix = hosts.y0usaf-server;};
 
