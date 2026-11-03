@@ -106,4 +106,8 @@ in {
   tsSource = lines;
 
   javascriptSource = lines;
+
+  luauSource = lines;
+
+  vbsSource = lines;
 }
