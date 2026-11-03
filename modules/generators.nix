@@ -16,6 +16,27 @@
     else "${n.at};";
 
   nodes = lib.concatMapStringsSep "\n\n" node;
+
+  jsonValue = prefix: value: let
+    inner = prefix + "  ";
+    items = open: close: list:
+      if list == []
+      then open + close
+      else "${open}\n${lib.concatMapStringsSep ",\n" (item: inner + item) list}\n${prefix}${close}";
+  in
+    if builtins.isAttrs value
+    then items "{" "}" (map (key: "${builtins.toJSON key}: ${jsonValue inner value.${key}}") (value.__keys or (builtins.attrNames value)))
+    else if builtins.isList value
+    then items "[" "]" (map (jsonValue inner) value)
+    else builtins.toJSON value;
 in {
   cssSource = list: "${nodes list}\n";
+
+  sourceFile = name: text:
+    builtins.path {
+      path = builtins.toFile name text;
+      inherit name;
+    };
+
+  jsonSource = value: jsonValue "" value + "\n";
 }

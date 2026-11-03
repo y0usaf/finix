@@ -86,7 +86,7 @@
     lint = {
       schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
       enabled = ["unused-option" "never-enabled-option"];
-      generated = ["modules/hosts/steam-frame/beat-saber/beatmods.json"];
+      generated = ["modules/hosts/steam-frame/beat-saber/beatmods.data.nix"];
     };
     schemas = {
       "modules/hosts/android-phone" = schema "droid" (lib.optionAttrSetToDocList droid.options);

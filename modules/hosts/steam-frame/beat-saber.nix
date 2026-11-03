@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  lock = lib.importJSON ./beat-saber/beatmods.json;
+  lock = import ./beat-saber/beatmods.data.nix;
   wanted = config.frame.beatSaber.mods;
 
   closure = map (m: m.key) (

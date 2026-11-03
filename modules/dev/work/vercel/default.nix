@@ -1,5 +1,6 @@
 {
   config,
+  generators,
   lib,
   pkgs,
   ...
@@ -16,8 +17,8 @@
     sourceRoot = "package";
 
     postPatch = ''
-      cp ${./package.json} package.json
-      cp ${./package-lock.json} package-lock.json
+      cp ${generators.sourceFile "package.json" (generators.jsonSource (import ./package.data.nix))} package.json
+      cp ${generators.sourceFile "package-lock.json" (generators.jsonSource (import ./package-lock.data.nix))} package-lock.json
     '';
 
     npmDepsHash = "sha256-4TBcL7MbOq51n0DKHdOUgp4amf2ZAl7bMPErggHQL0c=";

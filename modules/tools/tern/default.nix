@@ -152,7 +152,7 @@
     "plugins/ui-menu/rail.luau" = ./config/plugins/ui-menu/rail.luau;
     "plugins/ui-menu/ui-menu.css" = stylesheet "ui-menu.css" (import ./config/plugins/ui-menu/ui-menu.data.nix);
     "plugins/ui-menu/window.luau" = ./config/plugins/ui-menu/window.luau;
-    "settings.json" = ./config/settings.json;
+    "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource (import ./config/settings.data.nix));
   };
 
   devTree = "${config.user.homeDirectory}/dev";
