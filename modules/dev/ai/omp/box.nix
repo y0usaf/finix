@@ -13,7 +13,7 @@
   state = "${home}/.local/state/omp-box";
   json = lib.generators.toJSON {};
 
-  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (builtins.readFile ../../../../omp-box/gateway-proxy.py);
+  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.pythonSource (import ../../../../omp-box/gateway-proxy.data.nix));
   gatewayUrl = "http://10.0.2.2:8899";
   files = {
     models = pkgs.writeText "models.json" (json catalog.models);

@@ -114,4 +114,6 @@ in {
   luaSource = lines;
 
   lispSource = lines;
+
+  pythonSource = lines;
 }

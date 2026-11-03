@@ -42,10 +42,14 @@ in {
       mkdir -p $out/bin
       cat > $out/bin/vercel <<EOF
       #!${pkgs.runtimeShell}
-      exec ${pkgs.python3}/bin/python3 ${pkgs.replaceVars ./wrapper.py {
-        vercel = package;
-        inherit (pkgs) git;
-        owners = builtins.toJSON {y0usaf = "personal";};
+      exec ${pkgs.python3}/bin/python3 ${pkgs.replaceVarsWith {
+        name = "wrapper.py";
+        src = generators.sourceFile "wrapper.py" (generators.pythonSource (import ./wrapper.data.nix));
+        replacements = {
+          vercel = package;
+          inherit (pkgs) git;
+          owners = builtins.toJSON {y0usaf = "personal";};
+        };
       }} "\$@"
       EOF
       for account in personal work; do

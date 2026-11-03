@@ -38,6 +38,6 @@ in {
 
   config.system.activation.scripts.aniimoMods.text = ''
     ${pkgs.util-linux}/bin/setpriv --reuid=${config.user.name} --regid=users --init-groups \
-      ${pkgs.python3}/bin/python3 ${./apply.py} ${settings} || true
+      ${pkgs.python3}/bin/python3 ${generators.sourceFile "apply.py" (generators.pythonSource (import ./apply.data.nix))} ${settings} || true
   '';
 }
