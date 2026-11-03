@@ -80,6 +80,7 @@
   pkg = pkgs.callPackage ../../../../omp-box {
     inherit user;
     inherit shares;
+    inherit generators;
     omp = flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
   };
 in {

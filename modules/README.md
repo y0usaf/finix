@@ -94,9 +94,9 @@ lock screen are unavailable.
 
 `beat-saber.nix` installs BeatMods mods into Beat Saber by name, from
 `frame.beatSaber.mods` in `config.nix`; BSIPA and each mod's dependencies come
-along. `beat-saber/beatmods.json` pins every verified mod for one game version
-with hashes, `beat-saber/lock.sh <game version>` regenerates it, and a name
-not in it fails the build. BeatMods has mods for 1.44.1, so the game needs
+along. `beat-saber/beatmods.data.nix` pins every verified mod for one game version
+with hashes; `nix run .#beat-saber-lock -- <game version>` prints a fresh lock as
+Nix data to replace it with, and a name not in it fails the build. BeatMods has mods for 1.44.1, so the game needs
 Steam's `1.44.1_legacy` branch, and its launch options must be
 `/run/current-system/sw/bin/beat-saber-mods %command%`. Each launch copies the
 declared set into the game folder, deletes files of the previous set, and

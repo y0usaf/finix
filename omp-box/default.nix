@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  generators,
   omp,
   shares ? [],
   user ? "y0usaf",
@@ -39,7 +40,7 @@
   cli = pkgs.writeShellApplication {
     name = "omp-box";
     runtimeInputs = [pkgs.coreutils pkgs.util-linux pkgs.openssh pkgs.findutils];
-    text = builtins.readFile ./omp-box.sh;
+    text = generators.shellSource (import ./omp-box.data.nix);
   };
 in
   pkgs.symlinkJoin {

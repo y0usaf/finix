@@ -256,9 +256,20 @@ in {
 
   finixConfigurations = hosts;
 
-  apps.${system}.lint = {
-    type = "app";
-    program = lib.getExe lint.app;
+  apps.${system} = {
+    lint = {
+      type = "app";
+      program = lib.getExe lint.app;
+    };
+    beat-saber-lock = {
+      type = "app";
+      program = lib.getExe (pkgs.writeShellApplication {
+        name = "beat-saber-lock";
+        runtimeInputs = [pkgs.coreutils pkgs.curl pkgs.findutils pkgs.jq pkgs.alejandra];
+        excludeShellChecks = ["SC2016"];
+        text = generators.shellSource (import ./hosts/steam-frame/beat-saber/lock.data.nix);
+      });
+    };
   };
 
   packages.${system} = {
