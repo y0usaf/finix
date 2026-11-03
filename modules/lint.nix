@@ -66,15 +66,7 @@
 
   runner = pkgs.writeText "codec-runner.nix" ''
     candidate: let
-      pkgs = import ${pkgs.path} {system = "${pkgs.stdenv.hostPlatform.system}";};
-      lint = import ${./lint.nix} {
-        inherit pkgs;
-        inherit (pkgs) lib;
-        inputs = {};
-        hosts = {};
-        droid = {};
-      };
-      result = lint.convert (builtins.fromJSON (builtins.readFile candidate));
+      result = (builtins.getFlake "path:${inputs.self}").lib.lint.convert (builtins.fromJSON (builtins.readFile candidate));
     in
       result // {reason = result.reason (import (builtins.toFile "data.nix" result.nix));}
   '';

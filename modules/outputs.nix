@@ -252,7 +252,10 @@ in {
 
   nixosModules.steam-frame = ./hosts/steam-frame/config.nix;
 
-  lib = {inherit generators;};
+  lib = {
+    inherit generators;
+    lint = {inherit (lint) convert;};
+  };
 
   finixConfigurations = hosts;
 
