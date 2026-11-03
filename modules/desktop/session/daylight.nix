@@ -41,6 +41,11 @@
       exec ${program}
     '';
 
+  darkmanCli = pkgs.runCommand "darkman-cli" {} ''
+    mkdir -p $out/bin
+    ln -s ${pkgs.darkman}/bin/darkman $out/bin/darkman
+  '';
+
   nightLightToggle = pkgs.writeShellScript "night-light-toggle" ''
     exec ${pkgs.procps}/bin/pkill -USR1 -u ${userName} -f '^${gammastep} '
   '';
@@ -52,7 +57,7 @@
 in {
   finix.persistence.homeServices = ["darkman" "gammastep"];
 
-  environment.systemPackages = [pkgs.darkman pkgs.gammastep];
+  environment.systemPackages = [darkmanCli pkgs.gammastep];
 
   finit.services = {
     darkman = {
