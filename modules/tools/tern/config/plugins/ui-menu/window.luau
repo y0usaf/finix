@@ -320,6 +320,72 @@ html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
 		on = true,
 	},
 	{
+		id = "answer-bubbles",
+		label = "answer bubbles",
+		group = "omp",
+		css = [[.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md {
+	align-self: flex-start;
+	max-width: 82%;
+	padding: 10px 16px;
+	border-radius: 18px 18px 18px 6px;
+	background: var(--l1);
+	box-shadow:
+		0 0 0 1px var(--l1),
+		0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)),
+		inset 0 1px 0 var(--glass-hi);
+}
+
+.sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body {
+	box-shadow:
+		0 0 0 1px var(--l1),
+		0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)),
+		inset 0 1px 0 var(--glass-hi);
+}
+
+.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md .md > :last-child {
+	margin-bottom: 0;
+}]],
+		on = true,
+	},
+	{
+		id = "work-rail",
+		label = "work steps on a rail",
+		group = "omp",
+		css = [[.sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md {
+	font-size: 13px;
+	color: var(--t2);
+}
+
+.sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md > :last-child {
+	margin-bottom: 0;
+}
+
+.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head {
+	font-size: 13px;
+	color: var(--t2);
+}
+
+.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head .sf-t-dim {
+	color: var(--t4);
+}
+
+.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-body {
+	margin-left: 7px;
+	padding-left: 15px;
+	box-shadow: inset 1px 0 0 var(--l2);
+}]],
+		on = true,
+	},
+	{
+		id = "row-keys",
+		label = "hide rail row shortcuts",
+		group = "Rail",
+		css = [[html.tn-themed #tabbar .tb-row .kbds {
+	display: none !important;
+}]],
+		on = true,
+	},
+	{
 		id = "turn-stats",
 		label = "hide turn stats",
 		group = "omp",

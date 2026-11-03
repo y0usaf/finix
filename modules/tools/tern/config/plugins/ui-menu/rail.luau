@@ -478,17 +478,17 @@ html.lay-rail.tabs-h .tb-tabs .tt:not([title^="\2064"]) + .tt[title^="\2064"]::a
 			label = "status rings and lines",
 			group = "Rail",
 			css = [[
-html.lay-rail.tabs-h .tb-tabs .tt .tn-dk::before,
-html.lay-rail.tabs-h .tb-tabs .tt .tn-dk::after {
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::before,
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::after {
 	display: none !important;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt .tn-dk-c {
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c {
 	position: relative;
 	overflow: visible !important;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206A"], [title*="\206B"], [title*="\206C"], [title*="\206D"]) .tn-dk-c::before {
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*="\206A"], [title*="\206B"], [title*="\206C"], [title*="\206D"]) .tn-dk-c::before {
 	content: "";
 	position: absolute;
 	box-sizing: border-box;
@@ -496,7 +496,7 @@ html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206A"], [title*="\206B"], [title*
 	pointer-events: none;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt[title*="\206A"] .tn-dk-c::before {
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc])[title*="\206A"] .tn-dk-c::before {
 	left: -4px;
 	top: -4px;
 	width: calc(100% + 8px);
@@ -505,7 +505,7 @@ html.lay-rail.tabs-h .tb-tabs .tt[title*="\206A"] .tn-dk-c::before {
 	animation: arc-spin 2.4s linear infinite;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206B"], [title*="\206C"], [title*="\206D"]) .tn-dk-c::before {
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*="\206B"], [title*="\206C"], [title*="\206D"]) .tn-dk-c::before {
 	right: -3px;
 	bottom: -3px;
 	width: 10px;
@@ -566,7 +566,7 @@ html.lay-rail.tabs-h .tb-tabs .tt[title*="\206D"] .sub::before {
 	}
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt .tn-dk-c::after {
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c::after {
 	display: none !important;
 }
 
@@ -574,7 +574,7 @@ html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206A"], [title*="\206B"], [title*
 	display: none !important;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt .sub::after {
+html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206A"], [title*="\206B"], [title*="\206C"], [title*="\206D"]) .sub::after {
 	display: none !important;
 }
 ]],
@@ -612,11 +612,11 @@ html.lay-rail.tabs-h .tb-tabs .tt {
 	height: 38px !important;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"] {
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"]:not([data-tc]) {
 	height: 20px !important;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"] .sub {
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"]:not([data-tc]) .sub {
 	display: none !important;
 }
 ]],
