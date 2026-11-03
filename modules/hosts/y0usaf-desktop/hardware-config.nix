@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
@@ -173,7 +174,7 @@ in {
     ui.tomoe.displays = {
       "DP-4" = {
         mode = [5120 1440];
-        icc = "${pkgs.runCommand "ls49ag95.icc" {} "${lib.getExe' pkgs.colord "cd-create-profile"} -o $out ${./ls49ag95.iccprofile.xml}"}";
+        icc = "${pkgs.runCommand "ls49ag95.icc" {} "${lib.getExe' pkgs.colord "cd-create-profile"} -o $out ${generators.sourceFile "ls49ag95.iccprofile.xml" (generators.xmlSource (import ./ls49ag95.iccprofile.data.nix))}"}";
       };
       "HDMI-A-2" = {
         mode = [1920 1080 60];

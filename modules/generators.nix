@@ -54,6 +54,11 @@
   lines = lib.concatMapStrings (line: "${line}\n");
 
   keyValueSource = prefix: lib.concatMapStringsSep "\n" (lib.concatMapStrings (pair: "${prefix}${builtins.elemAt pair 0}=${builtins.elemAt pair 1}\n"));
+
+  xmlElement = prefix: element:
+    if element ? children
+    then "${prefix}<${element.name}>\n${lib.concatMapStrings (xmlElement "${prefix} ") element.children}${prefix}</${element.name}>\n"
+    else "${prefix}<${element.name}>${element.text}</${element.name}>\n";
 in {
   cssSource = list: "${nodes list}\n";
 
@@ -76,4 +81,6 @@ in {
   cmusThemeSource = keyValueSource "set ";
 
   shellSource = lines;
+
+  xmlSource = root: "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n${xmlElement "" root}";
 }
