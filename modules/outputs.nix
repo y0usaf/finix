@@ -249,6 +249,10 @@ in {
 
   nixOnDroidConfigurations.default = droid;
 
+  nixosModules.steam-frame = ./hosts/steam-frame/config.nix;
+
+  lib = {inherit generators;};
+
   finixConfigurations = hosts;
 
   apps.${system}.lint = {

@@ -6,17 +6,19 @@
     {repo}:
     let
       frame = builtins.getFlake ("path:" + repo);
+      finix = builtins.getFlake "path:${inputs.self}";
       config = (frame.inputs.nixpkgs.lib.nixosSystem {
         specialArgs = {
           boloPackages = (builtins.getFlake "path:${inputs.bolo}").packages.aarch64-linux;
           madoPackages = (builtins.getFlake "path:${inputs.mado}").packages.aarch64-linux;
           flakeInputs.cleanker = builtins.getFlake "path:${inputs.cleanker}";
+          inherit (finix.lib) generators;
         };
         modules = [
           frame.nixosModules.default
           "${inputs.manzil}/nix/modules/nixos.nix"
           (builtins.getFlake "path:${inputs.frame-charge}").nixosModules.default
-          "${inputs.self}/modules/hosts/steam-frame/config.nix"
+          finix.nixosModules.steam-frame
           {manzil.linker = (builtins.getFlake "path:${inputs.manzil}").packages.x86_64-linux.manzil-aarch64-linux-static;}
         ];
       }).config;
