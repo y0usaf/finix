@@ -165,7 +165,7 @@ in {
       while IFS=$'\t' read -r file start end n target datafile; do
         if [ -n "$datafile" ]; then
           ${jq} -j .nix "$work/$n.out" > "$datafile"
-          rm -f "$target"
+          printf '%s\n' "$target" >> "$work/sources"
           touched+=("$datafile")
         fi
         { head -c "$start" "$file"; ${jq} -j .replacement "$work/$n.out"; tail -c +$((end + 1)) "$file"; } > "$work/splice"
@@ -173,6 +173,16 @@ in {
         touched+=("$file")
       done < <(sort -t$'\t' -k1,1 -k2,2nr "$work/accepted")
       nix fmt -- "''${touched[@]}"
+      if [ -s "$work/sources" ]; then
+        sort -u "$work/sources" | while read -r target; do
+          users=$(grep -rIlF --exclude-dir=.git -e "$(basename "$target")" . | grep -vxF "./$target" || true)
+          if [ -n "$users" ]; then
+            echo "kept $target: still referenced by $(echo $users)"
+          else
+            rm -f "$target"
+          fi
+        done
+      fi
     fi
     exec ${strictix} check --config ${config}
   '';
