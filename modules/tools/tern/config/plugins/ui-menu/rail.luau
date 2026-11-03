@@ -475,13 +475,9 @@ html.lay-rail.tabs-h .tb-tabs .tt:not([title^="\2064"]) + .tt[title^="\2064"]::a
 		},
 		{
 			id = "rail_status",
-			label = "status marks",
+			label = "status rings and lines",
 			group = "Rail",
 			css = [[
-html.lay-rail.tabs-h .tb-tabs .tt .tn-dk-c > * {
-	visibility: hidden !important;
-}
-
 html.lay-rail.tabs-h .tb-tabs .tt .tn-dk::before,
 html.lay-rail.tabs-h .tb-tabs .tt .tn-dk::after {
 	display: none !important;
@@ -489,31 +485,33 @@ html.lay-rail.tabs-h .tb-tabs .tt .tn-dk::after {
 
 html.lay-rail.tabs-h .tb-tabs .tt .tn-dk-c {
 	position: relative;
-	background: none !important;
-	box-shadow: none !important;
+	overflow: visible !important;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt .tn-dk-c::before {
+html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206A"], [title*="\206B"], [title*="\206C"], [title*="\206D"]) .tn-dk-c::before {
 	content: "";
 	position: absolute;
-	left: 3px;
-	top: 3px;
-	width: 13px;
-	height: 13px;
 	box-sizing: border-box;
 	border-radius: 50%;
-	border: 1.5px solid var(--t4);
-	background: none;
+	pointer-events: none;
 }
 
 html.lay-rail.tabs-h .tb-tabs .tt[title*="\206A"] .tn-dk-c::before {
+	left: -4px;
+	top: -4px;
+	width: calc(100% + 8px);
+	height: calc(100% + 8px);
 	border: 2px dashed var(--pill);
 	animation: arc-spin 2.4s linear infinite;
 }
 
 html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206B"], [title*="\206C"], [title*="\206D"]) .tn-dk-c::before {
-	border: none;
+	right: -3px;
+	bottom: -3px;
+	width: 10px;
+	height: 10px;
 	background: var(--pill);
+	box-shadow: 0 0 0 2px var(--panel);
 }
 
 html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206A"], [title*="\206B"], [title*="\206C"], [title*="\206D"]) .sub {
@@ -572,22 +570,12 @@ html.lay-rail.tabs-h .tb-tabs .tt .tn-dk-c::after {
 	display: none !important;
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt .tn-dk-c {
-	filter: none !important;
-	background-image: none !important;
-}
-
 html.lay-rail.tabs-h .tb-tabs .tt:is([title*="\206A"], [title*="\206B"], [title*="\206C"], [title*="\206D"]) .sub > * {
 	display: none !important;
 }
 
 html.lay-rail.tabs-h .tb-tabs .tt .sub::after {
 	display: none !important;
-}
-
-html.lay-rail.tabs-h .tb-tabs .tt .tn-dk {
-	background: none !important;
-	box-shadow: none !important;
 }
 ]],
 			apply = apply,
