@@ -15,7 +15,7 @@
       rev = "4c2441c16ce3c4e312aaefecc6d40c4fe21de97c";
       hash = "sha256-S1oVxgqitKPENLIbBfrmY8w8GgBQR6Byr52RjPpqz8g=";
     };
-    patches = (old.patches or []) ++ [./luajit-opcodes.patch];
+    patches = (old.patches or []) ++ [(generators.sourceFile "luajit-opcodes.patch" (generators.patchSource (import ./luajit-opcodes.data.nix)))];
     env = old.env // {NIX_CFLAGS_COMPILE = "${old.env.NIX_CFLAGS_COMPILE} -DLUAJIT_SECURITY_PRNG=0";};
   });
   patches = map (p: p // {name = p.mod;}) (import ./patches.data.nix);

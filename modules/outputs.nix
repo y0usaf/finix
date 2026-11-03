@@ -14,7 +14,7 @@ inputs: let
         inputs.claude-code-nix.overlays.default
         (_: _: {
           rush = inputs.rush.packages.${system}.default.overrideAttrs (old: {
-            patches = (old.patches or []) ++ [./shell/rush-login-command.patch];
+            patches = (old.patches or []) ++ [(generators.sourceFile "rush-login-command.patch" (generators.patchSource (import ./shell/rush-login-command.data.nix)))];
           });
           monstar = inputs.monstar.packages.${system}.default;
           ash = inputs.ash.packages.${system}.default;

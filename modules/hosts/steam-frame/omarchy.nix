@@ -35,7 +35,7 @@
   '';
 
   aquamarine = pkgs.aquamarine.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./omarchy/aquamarine-gamescope.patch];
+    patches = (old.patches or []) ++ [(generators.sourceFile "aquamarine-gamescope.patch" (generators.patchSource (import ./omarchy/aquamarine-gamescope.data.nix)))];
   });
 
   uwsmApp = pkgs.writeShellScriptBin "uwsm-app" ''

@@ -118,4 +118,6 @@ in {
   pythonSource = lines;
 
   glslSource = lines;
+
+  patchSource = lines;
 }
