@@ -10,6 +10,11 @@
   ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
     PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${./secrets}/omp-secret.ts "$@"
   '';
+  ompUntil = pkgs.writeShellApplication {
+    name = "omp-until";
+    runtimeInputs = [pkgs.coreutils];
+    text = builtins.readFile ./omp-until.sh;
+  };
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".omp"
@@ -17,7 +22,7 @@ in {
     ".local/state/omp-secrets"
   ];
 
-  environment.systemPackages = [pkgs.jq pkgs.age ompSecret];
+  environment.systemPackages = [pkgs.jq pkgs.age ompSecret ompUntil];
 
   manzil.users.${config.user.name}.files = {
     ".omp/agent/config.yml" = {
