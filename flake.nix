@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=61db8fca4dba8e9dbc3a754defca296445e97385";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=8bac418dadbb01624e99431cdeed406e107facd8";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -25511,89 +25511,80 @@
       wrap = width: text:
         lib.optionalString (text != "") "${builtins.substring 0 width text}\n${wrap width (builtins.substring width (builtins.stringLength text) text)}";
 
+      kindOf = value:
+        if builtins.isAttrs value
+        then builtins.head (builtins.attrNames value)
+        else builtins.typeOf value;
+
       doc = let
-        cons = i: flat: d: tail: {
-          head = {inherit i flat d;};
+        cons = margin: flat: part: tail: {
+          head = {inherit margin flat part;};
           inherit tail;
         };
 
-        push = i: flat: docs: rest: builtins.foldl' (tail: d: cons i flat d tail) rest (lib.reverseList docs);
+        push = margin: flat: parts: rest: builtins.foldl' (tail: part: cons margin flat part tail) rest (lib.reverseList parts);
 
-        lastLine = text: lib.last (lib.splitString "\n" text);
+        multiline = lib.hasInfix "\n";
 
-        multiline = text: lib.hasInfix "\n" text;
+        firstLine = string: builtins.head (lib.splitString "\n" string);
 
-        fits = width: stack:
-          if width < 0
-          then false
-          else if stack == null
-          then true
-          else let
-            inherit (stack.head) i flat d;
-            rest = stack.tail;
-          in
-            if builtins.isString d
-            then
-              if multiline d
-              then !flat && builtins.stringLength (builtins.head (lib.splitString "\n" d)) <= width
-              else fits (width - builtins.stringLength d) rest
-            else if builtins.isList d
-            then fits width (push i flat d rest)
-            else if d ? break
-            then flat && d.break != null && fits (width - builtins.stringLength d.break) rest || !flat
-            else fits width (cons i flat (d.group or d.nest.doc or d.align) rest);
+        lastLine = string: lib.last (lib.splitString "\n" string);
 
-        emit = state: out: col: pad: stack: let
-          next = {
+        inner = part: part.group or part.align or part.nest.part;
+
+        fitting = {
+          string = width: frame: rest:
+            if multiline frame.part
+            then !frame.flat && builtins.stringLength (firstLine frame.part) <= width
+            else fits (width - builtins.stringLength frame.part) rest;
+          list = width: frame: rest: fits width (push frame.margin frame.flat frame.part rest);
+          break = width: frame: rest: !frame.flat || frame.part.break != null && fits (width - builtins.stringLength frame.part.break) rest;
+          nest = width: frame: rest: fits width (cons frame.margin frame.flat (inner frame.part) rest);
+          align = fitting.nest;
+          group = fitting.nest;
+        };
+
+        fits = width: stack: width >= 0 && (stack == null || fitting.${kindOf stack.head.part} width stack.head stack.tail);
+
+        emit = state: out: column: pad: stack:
+          builtins.seq column (builtins.seq out {
             key = state.key + 1;
-            inherit out col pad stack;
-          };
-        in
-          builtins.seq col (builtins.seq out next);
+            inherit out column pad stack;
+          });
 
-        text = state: d: let
-          lead = lib.optionalString (state.pad != null && d != "") (lib.strings.replicate state.pad " ");
-          col =
-            if multiline d
-            then builtins.stringLength (lastLine d)
-            else if d == ""
-            then state.col
-            else
-              (
-                if state.pad == null
-                then state.col
-                else state.pad
-              )
-              + builtins.stringLength d;
-        in
-          emit state (lead + d) col (
-            if d == ""
-            then state.pad
-            else null
-          );
+        start = state:
+          if state.pad == null
+          then state.column
+          else state.pad;
 
-        step = width: state: let
-          inherit (state.stack.head) i flat d;
-          rest = state.stack.tail;
-          move = stack: emit state "" state.col state.pad stack;
-          open = flat': inner: move (cons i flat' inner rest);
-        in
-          if builtins.isString d
-          then text state d rest
-          else if builtins.isList d
-          then move (push i flat d rest)
-          else if d ? break
-          then
-            if flat && d.break != null
-            then text state d.break rest
-            else emit state "\n" i i rest
-          else if d ? nest
-          then move (cons (i + d.nest.by) flat d.nest.doc rest)
-          else if d ? align
-          then move (cons state.col flat d.align rest)
-          else if flat || width == null || fits (width - state.col) (cons i true d.group rest)
-          then open true d.group
-          else open false d.group;
+        after = state: string:
+          if multiline string
+          then builtins.stringLength (lastLine string)
+          else start state + builtins.stringLength string;
+
+        write = state: string:
+          if string == ""
+          then emit state "" state.column state.pad
+          else emit state (lib.optionalString (state.pad != null) (lib.strings.replicate state.pad " ") + string) (after state string) null;
+
+        move = state: emit state "" state.column state.pad;
+
+        steps = {
+          string = _: state: frame: write state frame.part;
+          list = _: state: frame: rest: move state (push frame.margin frame.flat frame.part rest);
+          break = _: state: frame:
+            if frame.flat && frame.part.break != null
+            then write state frame.part.break
+            else emit state "\n" 0 frame.margin;
+          nest = _: state: frame: rest: move state (cons (frame.margin + frame.part.nest.by) frame.flat frame.part.nest.part rest);
+          align = _: state: frame: rest: move state (cons (start state) frame.flat frame.part.align rest);
+          group = width: state: frame: rest: let
+            flat = frame.flat || width == null || fits (width - start state) (cons frame.margin true frame.part.group rest);
+          in
+            move state (cons frame.margin flat frame.part.group rest);
+        };
+
+        step = width: state: steps.${kindOf state.stack.head.part} width state state.stack.head state.stack.tail;
       in {
         line = {break = " ";};
 
@@ -25601,21 +25592,21 @@
 
         hardline = {break = null;};
 
-        nest = by: doc: {nest = {inherit by doc;};};
+        nest = by: part: {nest = {inherit by part;};};
 
-        align = doc: {align = doc;};
+        align = part: {align = part;};
 
-        group = doc: {group = doc;};
+        group = part: {group = part;};
 
-        render = width: doc:
+        render = width: part:
           lib.concatMapStrings (state: state.out) (builtins.genericClosure {
             startSet = [
               {
                 key = 0;
                 out = "";
-                col = 0;
+                column = 0;
                 pad = null;
-                stack = cons 0 false doc null;
+                stack = cons 0 false part null;
               }
             ];
             operator = state: lib.optional (state.stack != null) (step width state);
@@ -25677,107 +25668,94 @@
 
         symbol = head: builtins.isString head && builtins.match "[:#\"].*|[-+]?([0-9]+([./][0-9]*)?|[.][0-9]+)([eEdD][-+]?[0-9]+)?" head == null;
 
-        offset = head: local: index: firstRow:
-          if local
-          then
-            if index > 1
-            then 2
-            else 4
-          else if builtins.isString head && bodies ? ${head}
-          then
-            if index > bodies.${head}
-            then 2
-            else 4
-          else if symbol head && firstRow >= 2
+        bodyOffset = distinguished: index:
+          if index > distinguished
+          then 2
+          else 4;
+
+        headOffset = head: firstRow:
+          if symbol head && firstRow >= 2
           then builtins.stringLength head + 2
           else if head == "cond"
           then 2
           else 1;
 
+        offset = head: local: index: firstRow:
+          if local
+          then bodyOffset 1 index
+          else if builtins.isString head && bodies ? ${head}
+          then bodyOffset bodies.${head} index
+          else headOffset head firstRow;
+
         escape = lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""];
 
-        rowItems = row:
-          if builtins.isList row
-          then row
-          else if row ? blank
-          then []
-          else if row ? at
-          then rowItems row.row
-          else [row];
+        rowShapes = {
+          list = lib.id;
+          blank = _: [];
+          at = row: rowItems row.row;
+        };
 
-        spaced = items: lib.intersperse " " items;
+        rowItems = row: (rowShapes.${kindOf row} or lib.toList) row;
 
-        form = local: value:
+        spaced = lib.intersperse " ";
+
+        forms =
+          {
+            string = _: lib.id;
+            int = _: toString;
+            list = _: plain false;
+            str = _: value: "\"${escape value.str}\"";
+            comment = _: value: value.comment;
+            rows = local: value: broken local false value.rows;
+            wrap = local: value: fill local value.wrap;
+          }
+          // lib.mapAttrs (kind: mark: _: value: [mark (form false value.${kind})]) prefixes;
+
+        form = local: value: (forms.${kindOf value} or (throw "lisp: no form ${kindOf value}")) local value;
+
+        bindingList = value: builtins.isList value || value ? rows;
+
+        definitions = value:
           if builtins.isList value
-          then list local value
-          else if builtins.isString value
-          then value
-          else if builtins.isInt value
-          then toString value
-          else if value ? str
-          then "\"${escape value.str}\""
-          else if value ? comment
-          then value.comment
-          else if value ? rows
-          then rows local value.rows
-          else if value ? wrap
-          then wrap local value.wrap
-          else let
-            kind = builtins.head (builtins.attrNames value);
-          in
-            if prefixes ? ${kind}
-            then [prefixes.${kind} (form false value.${kind})]
-            else throw "lisp: no form ${kind}";
+          then plain true value
+          else broken false true value.rows;
 
-        items = local: head: values:
+        items = children: values: let
+          binds = builtins.elem (builtins.head values) locals;
+        in
           lib.imap0 (index: value:
-            if index == 1 && builtins.elem head locals && builtins.isList value
-            then list' true value
-            else if index == 1 && builtins.elem head locals && value ? rows
-            then rows' true value.rows
-            else form local value)
+            if binds && index == 1 && bindingList value
+            then definitions value
+            else form children value)
           values;
 
-        list = local: values: list' false values;
+        plain = children: values: ["(" (spaced (items children values)) ")"];
 
-        list' = children: values: ["(" (spaced (items children (lib.head values) values)) ")"];
-
-        rows = local: rows'' local false;
-
-        rows' = children: rows'' false children;
-
-        rows'' = local: children: rowList: let
+        broken = local: children: rowList: let
           firstRow = rowItems (builtins.head rowList);
           head = builtins.head firstRow;
-          all = lib.concatMap rowItems rowList;
-          rendered = items children head all;
+          rendered = items children (lib.concatMap rowItems rowList);
           starts = builtins.foldl' (acc: row: acc ++ [(lib.last acc + builtins.length (rowItems row))]) [0] rowList;
-          slice = start: count: lib.sublist start count rendered;
-          row = index: value: let
-            start = builtins.elemAt starts index;
-            count = builtins.length (rowItems value);
-            by =
-              if value ? at
-              then value.at
-              else offset head local start (builtins.length firstRow);
-          in
+          by = index: row: row.at or (offset head local (builtins.elemAt starts index) (builtins.length firstRow));
+          written = index: row: spaced (lib.sublist (builtins.elemAt starts index) (builtins.length (rowItems row)) rendered);
+          placed = index: row:
             if index == 0
-            then spaced (slice start count)
-            else if value ? blank
+            then written index row
+            else if row ? blank
             then hardline
-            else nest by [hardline (spaced (slice start count))];
+            else nest (by index row) [hardline (written index row)];
         in
-          if lib.any (value: value ? comment) (lib.last (map rowItems rowList))
+          if lib.any (value: value ? comment) (rowItems (lib.last rowList))
           then throw "lisp: a comment cannot end a list's last row"
-          else align ["(" (lib.imap0 row rowList) ")"];
+          else align ["(" (lib.imap0 placed rowList) ")"];
 
-        wrap = local: values: let
+        fill = local: values: let
           head = builtins.head values;
           kept =
             if builtins.isString head && bodies ? ${head}
             then bodies.${head} + 1
             else lib.min 2 (builtins.length values);
-          rendered = items false head values;
+          rendered = items false values;
         in
           group (align [
             "("
@@ -25793,9 +25771,9 @@
       in {
         blank = {blank = true;};
 
-        str = text: {str = text;};
+        str = string: {str = string;};
 
-        comment = text: {comment = text;};
+        comment = string: {comment = string;};
 
         rows = rowList: {rows = rowList;};
 
@@ -25816,159 +25794,138 @@
 
         function = value: {function = value;};
 
-        render = forms: doc.render 80 (map top forms);
+        render = values: doc.render 80 (map top values);
       };
 
       shell = let
         inherit (doc) hardline nest;
 
-        spaced = items: lib.intersperse " " items;
+        spaced = lib.intersperse " ";
 
-        kind = value: builtins.head (builtins.attrNames value);
+        quoting = {
+          dq = _: true;
+          sq = _: true;
+          ansic = _: true;
+          word = value: quoted (builtins.head value.word);
+        };
 
-        quoted = value: builtins.isAttrs value && (value ? dq || value ? sq || value ? ansic || value ? word && quoted (builtins.head value.word));
+        quoted = value: (quoting.${kindOf value} or (_: false)) value;
 
-        part = value:
-          if builtins.isString value
-          then value
-          else word value;
+        wordForms = {
+          string = lib.id;
+          dq = value: ["\"" (map word (lib.toList value.dq)) "\""];
+          sq = value: "'${value.sq}'";
+          ansic = value: "$'${value.ansic}'";
+          sub = value: ["$(" (sequence value.sub) ")"];
+          word = value: map word value.word;
+          array = value: ["(" (spaced (map word value.array)) ")"];
+          assign = value: [value.assign.name "=" (word value.assign.value)];
+          redir = value: [value.redir.op (lib.optionalString (quoted value.redir.target) " ") (word value.redir.target)];
+          heredoc = value: "<<${value.heredoc.start}";
+        };
 
-        word = value:
-          if builtins.isString value
-          then value
-          else if value ? dq
-          then ["\"" (map part (lib.toList value.dq)) "\""]
-          else if value ? sq
-          then "'${value.sq}'"
-          else if value ? ansic
-          then "$'${value.ansic}'"
-          else if value ? sub
-          then ["$(" (sequence value.sub) ")"]
-          else if value ? word
-          then map word value.word
-          else if value ? array
-          then ["(" (spaced (map word value.array)) ")"]
-          else if value ? assign
-          then [value.assign.name "=" (word value.assign.value)]
-          else if value ? redir
-          then [value.redir.op (lib.optionalString (quoted value.redir.target) " ") (word value.redir.target)]
-          else if value ? heredoc
-          then "<<${value.heredoc.start}"
-          else throw "shell: no word ${kind value}";
+        word = value: (wordForms.${kindOf value} or (throw "shell: no word ${kindOf value}")) value;
 
-        heredocs = value:
-          if builtins.isList value
-          then lib.concatMap heredocs value
-          else if value ? heredoc
-          then ["\n${value.heredoc.body}${lib.removePrefix "'" (lib.removeSuffix "'" value.heredoc.start)}"]
-          else if value ? pipe
-          then heredocs (value.pipe.rows or value.pipe)
-          else if value ? chain
-          then heredocs (value.chain.rows or value.chain)
-          else [];
+        delimiter = start: lib.removePrefix "'" (lib.removeSuffix "'" start);
 
-        sequence = statements: lib.intersperse "; " (map statement statements);
+        documents = {
+          list = lib.concatMap heredocs;
+          heredoc = value: ["\n${value.heredoc.body}${delimiter value.heredoc.start}"];
+          pipe = value: heredocs (value.pipe.rows or value.pipe);
+          chain = value: heredocs (value.chain.rows or value.chain);
+        };
 
-        joined = operator: stages:
-          if stages ? rows
-          then [(statement (builtins.head stages.rows)) (map (stage: nest 2 [operator hardline (statement stage)]) (builtins.tail stages.rows))]
-          else lib.intersperse (operator + " ") (map statement stages);
+        heredocs = value: (documents.${kindOf value} or (_: [])) value;
 
-        chain = items: let
-          rows = items ? rows;
-          list = items.rows or items;
-        in
-          lib.imap0 (index: item:
-            if lib.mod index 2 == 1
-            then
-              if rows
-              then nest 2 [" ${item}" hardline]
-              else " ${item} "
-            else statement item)
-          list;
+        sequence = values: lib.intersperse "; " (map statement values);
 
-        line = value:
+        stages = operator: value:
+          if value ? rows
+          then [(statement (builtins.head value.rows)) (map (stage: nest 2 [operator hardline (statement stage)]) (builtins.tail value.rows))]
+          else lib.intersperse "${operator} " (map statement value);
+
+        link = broke: index: value:
+          if lib.mod index 2 == 0
+          then statement value
+          else if broke
+          then nest 2 [" ${value}" hardline]
+          else " ${value} ";
+
+        chain = value: lib.imap0 (link (value ? rows)) (value.rows or value);
+
+        entry = value:
           if value ? blank
           then []
           else if value ? inline
           then sequence value.inline
           else [(statement value) (heredocs value)];
 
-        block = statements: nest 2 (map (value: [hardline (line value)]) statements);
+        indented = values: map (value: [hardline (entry value)]) values;
 
-        body = open: close: value:
+        block = values: nest 2 (indented values);
+
+        enclosed = open: close: value:
           if value ? inline
           then [open " " (sequence value.inline) "; " close]
           else [open (block value) hardline close];
+
+        branch = value:
+          if value ? inline
+          then [" " (sequence value.inline) "; "]
+          else [(block value) hardline];
+
+        alternative = value:
+          if value ? inline
+          then ["else " (sequence value.inline) "; "]
+          else ["else" (block value) hardline];
 
         arm = value: let
           patterns = lib.intersperse "|" (map word (lib.toList value.arm.patterns));
         in
           if value.arm.body ? inline
           then [patterns ") " (sequence value.arm.body.inline) " ;;"]
-          else [patterns ")" (nest 2 [(block' value.arm.body) hardline ";;"])];
+          else [patterns ")" (nest 2 [(indented value.arm.body) hardline ";;"])];
 
-        block' = statements: map (value: [hardline (line value)]) statements;
+        armList = value:
+          if value ? inline
+          then [" in " (spaced (map arm value.inline)) " esac"]
+          else [" in" (nest 2 (map (one: [hardline (arm one)]) value)) hardline "esac"];
 
-        statement = value:
-          if builtins.isList value
-          then spaced (map word value)
-          else if value ? comment
-          then value.comment
-          else if value ? assign
-          then word value
-          else if value ? pipe
-          then joined " |" value.pipe
-          else if value ? chain
-          then chain value.chain
-          else if value ? fn
-          then [value.fn.name "() " (body "{" "}" value.fn.body)]
-          else if value ? braces
-          then body "{" "}" value.braces
-          else if value ? "if"
-          then
-            ["if " (statement value."if".test) "; then"]
-            ++ (
-              if value."if".body ? inline
-              then [" " (sequence value."if".body.inline) "; "]
-              else [(block value."if".body) hardline]
-            )
-            ++ lib.optionals (value."if" ? otherwise) (
-              if value."if".otherwise ? inline
-              then ["else " (sequence value."if".otherwise.inline) "; "]
-              else ["else" (block value."if".otherwise) hardline]
-            )
-            ++ ["fi"]
-          else if value ? for
-          then ["for ${value.for.name} in " (spaced (map word value.for.words)) "; " (body "do" "done" value.for.body)]
-          else if value ? while
-          then ["while " (statement value.while.test) "; " (body "do" "done" value.while.body)]
-          else if value ? case
-          then
-            if value.case.arms ? inline
-            then ["case " (word value.case.subject) " in " (spaced (map arm value.case.arms.inline)) " esac"]
-            else ["case " (word value.case.subject) " in" (nest 2 (map (a: [hardline (arm a)]) value.case.arms)) hardline "esac"]
-          else throw "shell: no statement ${kind value}";
+        statementForms = {
+          list = value: spaced (map word value);
+          comment = value: value.comment;
+          assign = word;
+          pipe = value: stages " |" value.pipe;
+          chain = value: chain value.chain;
+          fn = value: [value.fn.name "() " (enclosed "{" "}" value.fn.body)];
+          braces = value: enclosed "{" "}" value.braces;
+          "if" = value: ["if " (statement value."if".test) "; then" (branch value."if".body) (lib.optional (value."if" ? otherwise) (alternative value."if".otherwise)) "fi"];
+          for = value: ["for ${value.for.name} in " (spaced (map word value.for.words)) "; " (enclosed "do" "done" value.for.body)];
+          while = value: ["while " (statement value.while.test) "; " (enclosed "do" "done" value.while.body)];
+          case = value: ["case " (word value.case.subject) (armList value.case.arms)];
+        };
+
+        statement = value: (statementForms.${kindOf value} or (throw "shell: no statement ${kindOf value}")) value;
       in {
         blank = {blank = true;};
 
-        comment = text: {comment = text;};
+        comment = string: {comment = string;};
 
-        inline = statements: {inline = statements;};
+        inline = values: {inline = values;};
 
-        rows = items: {rows = items;};
+        rows = values: {rows = values;};
 
         dq = parts: {dq = parts;};
 
-        sq = text: {sq = text;};
+        sq = string: {sq = string;};
 
-        ansic = text: {ansic = text;};
+        ansic = string: {ansic = string;};
 
-        sub = statements: {sub = statements;};
+        sub = values: {sub = values;};
 
         word = parts: {word = parts;};
 
-        array = words: {array = words;};
+        array = values: {array = values;};
 
         assign = name: value: {assign = {inherit name value;};};
 
@@ -25976,19 +25933,17 @@
 
         heredoc = start: body: {heredoc = {inherit start body;};};
 
-        pipe = stages: {pipe = stages;};
+        pipe = values: {pipe = values;};
 
-        chain = items: {chain = items;};
+        chain = values: {chain = values;};
 
         fn = name: body: {fn = {inherit name body;};};
 
-        braces = body: {braces = body;};
+        braces = value: {braces = value;};
 
         if' = test: body: {"if" = {inherit test body;};};
 
-        ifElse = test: body: otherwise: {
-          "if" = {inherit test body otherwise;};
-        };
+        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
 
         for = name: words: body: {for = {inherit name words body;};};
 
@@ -25998,7 +25953,7 @@
 
         arm = patterns: body: {arm = {inherit patterns body;};};
 
-        render = statements: doc.render 80 (map (value: [(line value) hardline]) statements);
+        render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
       };
 
       sourceFile = name: text:
@@ -28812,17 +28767,17 @@
       importers = lib.attrNames (lib.filterAttrs (_: c: !(c ? parse)) codecs);
 
       tree = c: let
-        load = "generators.${c.id}.render (import ${c.data} {inherit generators;})";
+        load = "generators.${c.id}.render (import ${c.data} generators.${c.id})";
       in {
         inherit (c) nix;
         replacement =
           if c.kind == "text"
-          then "(generators.${c.id}.render (${lib.removePrefix "{generators}:\n" c.nix}))"
+          then "(generators.${c.id}.render ((${c.nix}) generators.${c.id}))"
           else if c.loader == "source"
           then "(generators.sourceFile ${lib.strings.escapeNixString (baseNameOf c.target)} (${load}))"
           else load;
         reason = imported:
-          if generators.${c.id}.render (imported {inherit generators;}) == c.text
+          if generators.${c.id}.render (imported generators.${c.id}) == c.text
           then null
           else "rendering the syntax tree does not reproduce the text byte for byte";
       };
@@ -28830,9 +28785,9 @@
       convert = c:
         if lib.elem c.id importers
         then tree c
-        else value c;
+        else literal c;
 
-      value = c: let
+      literal = c: let
         codec = codecs.${c.id};
         value = codec.parse c.text;
         nix = lib.generators.toPretty {multiline = true;} value;
