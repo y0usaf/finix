@@ -69,6 +69,7 @@ in {
           "${./compact-eval.ts}"
           "${./work-fold.ts}"
           "${./box-commands.ts}"
+          "${./cwd.ts}"
           "${./crest-auth.ts}"
           "${./optchat}/extension.ts"
         ];
