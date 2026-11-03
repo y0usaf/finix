@@ -110,4 +110,6 @@ in {
   luauSource = lines;
 
   vbsSource = lines;
+
+  luaSource = lines;
 }

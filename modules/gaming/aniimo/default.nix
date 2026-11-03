@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  generators,
   ...
 }: let
   cfg = config.user.gaming.aniimo;
@@ -18,8 +19,8 @@
     env = old.env // {NIX_CFLAGS_COMPILE = "${old.env.NIX_CFLAGS_COMPILE} -DLUAJIT_SECURITY_PRNG=0";};
   });
   patches = map (p: p // {name = p.mod;}) (import ./patches.data.nix);
-  rewards = import ./rewards.data.nix // {wrapper = ./rewards.lua;};
-  catch = import ./catch.data.nix // {wrapper = ./catch.lua;};
+  rewards = import ./rewards.data.nix // {wrapper = generators.sourceFile "rewards.lua" (generators.luaSource (import ./rewards-lua.data.nix));};
+  catch = import ./catch.data.nix // {wrapper = generators.sourceFile "catch.lua" (generators.luaSource (import ./catch-lua.data.nix));};
   mods = lib.optionals cfg.enable (builtins.filter (m: builtins.elem m.name cfg.mods) (patches ++ [rewards catch]));
   settings = pkgs.writeText "aniimo-mods.json" (builtins.toJSON ({
       gameDirectory = "${config.user.homeDirectory}/${config.user.paths.steam}/steamapps/common/Aniimo";

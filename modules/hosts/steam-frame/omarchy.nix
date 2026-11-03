@@ -2,6 +2,7 @@
   lib,
   pkgs,
   frameSession,
+  generators,
   ...
 }: let
   width = 1920;
@@ -113,7 +114,7 @@
     export LD_LIBRARY_PATH=${aquamarine}/lib
     unset DISPLAY
     [ -e "$HOME/.local/state/omarchy/current/theme" ] || OMARCHY_THEME_HEADLESS=1 omarchy-theme-set "Tokyo Night"
-    exec ${pkgs.hyprland}/bin/Hyprland -c ${./omarchy/hyprland.lua}
+    exec ${pkgs.hyprland}/bin/Hyprland -c ${generators.sourceFile "hyprland.lua" (generators.luaSource (import ./omarchy/hyprland.data.nix))}
   '';
 
   overlay = lib.concatStringsSep " " [
