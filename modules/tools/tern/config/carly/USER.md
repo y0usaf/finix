@@ -7,4 +7,3 @@
 - Runs several omp/rush agent tabs at once in `/tmp`, each named with a glyph prefix and its task (`󰕮 DECK: …`, `󰇷 PR3544: …`), and expects agents to be told exactly what to do next.
 - Terse, candid, pushes back on hand-waving; lead with the result, skip preambles.
 - Plays with terminal UI for its own sake (deck layouts, sidebar chrome, status-line stats), so small reversible experiments are welcome.
-- Wants to talk only to Carly: she starts and steers the omp agents and reports what they did.
