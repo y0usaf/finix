@@ -31,6 +31,8 @@ in {
       pkgs.noto-fonts-cjk-sans
       pkgs.noto-fonts-color-emoji
       pkgs.nerd-fonts.symbols-only
+      pkgs.crimson-pro
+      pkgs.ibm-plex
     ];
 
     manzil.users.${config.user.name} = {
@@ -65,6 +67,16 @@ in {
                 <pattern>
                   <patelt name="family">
                     <string>Symbols Nerd Font</string>
+                  </patelt>
+                </pattern>
+                <pattern>
+                  <patelt name="family">
+                    <string>Crimson Pro</string>
+                  </patelt>
+                </pattern>
+                <pattern>
+                  <patelt name="family">
+                    <string>IBM Plex Mono</string>
                   </patelt>
                 </pattern>
                 <pattern>
