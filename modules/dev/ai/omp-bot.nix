@@ -9,7 +9,7 @@
   runtimeDir = "/run/user/${toString user.uid}";
   omp = flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
   src = flakeInputs.omp-bot;
-  tools = [pkgs.bun pkgs.jq pkgs.util-linux];
+  tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age];
   command = name:
     pkgs.writeShellScriptBin name ''
       PATH=${pkgs.lib.makeBinPath tools}:$PATH exec ${src}/bin/${name} "$@"
@@ -26,7 +26,7 @@ in {
     homeServices = ["omp-botd"];
   };
 
-  environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl")];
+  environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl") pkgs.age];
 
   manzil.users.${userName}.files = {
     ".config/omp-bot/env".text = ''
