@@ -217,6 +217,7 @@ in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".config/tern"
     ".local/state/tern"
+    ".local/state/brain"
   ];
 
   manzil.users.${config.user.name}.files = files // tuturu;
