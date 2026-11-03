@@ -96,4 +96,6 @@ in {
   gitignoreSource = lines;
 
   pathSource = path: "${path}\n";
+
+  markdownSource = lines;
 }

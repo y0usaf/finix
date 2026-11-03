@@ -122,12 +122,12 @@
   stylesheet = name: nodes: pkgs.writeText name (generators.cssSource nodes);
 
   configFiles = {
-    "carly/HEARTBEAT.md" = ./config/carly/HEARTBEAT.md;
-    "carly/MEMORY.md" = ./config/carly/MEMORY.md;
-    "carly/SOUL.md" = ./config/carly/SOUL.md;
-    "carly/USER.md" = ./config/carly/USER.md;
-    "carly/memory/2026-10-29.md" = ./config/carly/memory/2026-10-29.md;
-    "carly/memory/2026-10-30.md" = ./config/carly/memory/2026-10-30.md;
+    "carly/HEARTBEAT.md" = generators.sourceFile "HEARTBEAT.md" (generators.markdownSource (import ./config/carly/HEARTBEAT.data.nix));
+    "carly/MEMORY.md" = generators.sourceFile "MEMORY.md" (generators.markdownSource (import ./config/carly/MEMORY.data.nix));
+    "carly/SOUL.md" = generators.sourceFile "SOUL.md" (generators.markdownSource (import ./config/carly/SOUL.data.nix));
+    "carly/USER.md" = generators.sourceFile "USER.md" (generators.markdownSource (import ./config/carly/USER.data.nix));
+    "carly/memory/2026-10-29.md" = generators.sourceFile "2026-10-29.md" (generators.markdownSource (import ./config/carly/memory/2026-10-29.data.nix));
+    "carly/memory/2026-10-30.md" = generators.sourceFile "2026-10-30.md" (generators.markdownSource (import ./config/carly/memory/2026-10-30.data.nix));
     "plugins/attention/attention.css" = stylesheet "attention.css" (import ./config/plugins/attention/attention.data.nix);
     "plugins/attention/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource (import ./config/plugins/attention/plugin.data.nix));
     "plugins/attention/window.luau" = ./config/plugins/attention/window.luau;
@@ -142,7 +142,7 @@
     "plugins/transparent/transparent.css" = stylesheet "transparent.css" (import ./config/plugins/transparent/transparent.data.nix);
     "plugins/transparent/window.luau" = ./config/plugins/transparent/window.luau;
     "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource (import ./config/plugins/tuturu/gitignore.data.nix));
-    "plugins/tuturu/README.md" = ./config/plugins/tuturu/README.md;
+    "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdownSource (import ./config/plugins/tuturu/README.data.nix));
     "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource (import ./config/plugins/tuturu/plugin.data.nix));
     "plugins/tuturu/scripts/play.vbs" = ./config/plugins/tuturu/scripts/play.vbs;
     "plugins/tuturu/sounds.toml" = generators.sourceFile "sounds.toml" (generators.tomlSource (import ./config/plugins/tuturu/sounds.data.nix));
