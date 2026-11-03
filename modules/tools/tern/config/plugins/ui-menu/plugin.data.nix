@@ -1,1 +1,0 @@
-[[["schema" 1] ["id" "ui-menu"] ["name" "UI Menu"] ["version" "0.1.0"] ["description" "Every UI tweak this config layers on Tern: a checklist block, palette toggles, and the rail lock."] ["host" "host.luau"] ["window" "window.luau"] ["styles" ["ui-menu.css"]]] [{arrayTable = "blocks";} ["id" "options"] ["title" "UI options"] ["icon" "sliders"] ["palette" true]]]

@@ -1,1 +1,0 @@
-["tern.d.luau" ".DS_Store" "Thumbs.db"]
