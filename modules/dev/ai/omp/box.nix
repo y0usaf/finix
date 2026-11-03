@@ -53,6 +53,7 @@
         - "${./code-mode.ts}"
         - "${./compact-eval.ts}"
         - "${./work-fold.ts}"
+        - "${./optchat}/extension.ts"
     '';
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
   };

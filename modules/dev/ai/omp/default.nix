@@ -40,6 +40,7 @@ in {
           "${./work-fold.ts}"
           "${./box-commands.ts}"
           "${./crest-auth.ts}"
+          "${./optchat}/extension.ts"
         ];
       };
     };
