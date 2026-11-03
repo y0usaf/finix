@@ -48,6 +48,7 @@ in {
     };
     path = tools ++ [pkgs.coreutils "/run/current-system/sw" "/run/wrappers"];
     respawn = true;
+    stop-timeout = 130;
     log = true;
   };
 }
