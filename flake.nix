@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=8bac418dadbb01624e99431cdeed406e107facd8";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=a799b4a790731efce240ac600a34d5c34d2953c0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -24790,13 +24790,8 @@
       luajit = (pkgs.luajit.override {enable52Compat = true;}).overrideAttrs (old: {
         pname = "luajit-aniimo";
         version = "2.1.0-beta3-unstable-2022-06-23";
-        src = pkgs.fetchFromGitHub {
-          owner = "LuaJIT";
-          repo = "LuaJIT";
-          rev = "4c2441c16ce3c4e312aaefecc6d40c4fe21de97c";
-          hash = "sha256-S1oVxgqitKPENLIbBfrmY8w8GgBQR6Byr52RjPpqz8g=";
-        };
-        patches = (old.patches or []) ++ [(generators.sourceFile "luajit-opcodes.patch" (generators.patchSource modules_gaming_aniimo_luajit_opcodes_data))];
+        src = pkgs.fetchFromGitHub modules_gaming_aniimo_luajit_data;
+        patches = (old.patches or []) ++ [(generators.sourceFile "luajit-opcodes.patch" (generators.patch.render (modules_gaming_aniimo_luajit_opcodes_data generators.patch)))];
         env = old.env // {NIX_CFLAGS_COMPILE = "${old.env.NIX_CFLAGS_COMPILE} -DLUAJIT_SECURITY_PRNG=0";};
       });
       patches = map (p: p // {name = p.mod;}) modules_gaming_aniimo_patches_data;
@@ -25233,144 +25228,158 @@
       "if not ok then disable(err) end"
       "return unpack(ret, 1, ret.n)"
     ];
-    modules_gaming_aniimo_luajit_opcodes_data = [
-      "--- a/src/lj_bc.h"
-      "+++ b/src/lj_bc.h"
-      "@@ -69,90 +69,71 @@"
-      " ** M = multiple args/results"
-      " */"
-      " #define BCDEF(_) \\"
-      "-  /* Comparison ops. ORDER OPR. */ \\"
-      "   _(ISLT,\tvar,\t___,\tvar,\tlt) \\"
-      "   _(ISGE,\tvar,\t___,\tvar,\tlt) \\"
-      "   _(ISLE,\tvar,\t___,\tvar,\tle) \\"
-      "   _(ISGT,\tvar,\t___,\tvar,\tle) \\"
-      "-  \\"
-      "-  _(ISEQV,\tvar,\t___,\tvar,\teq) \\"
-      "-  _(ISNEV,\tvar,\t___,\tvar,\teq) \\"
-      "   _(ISEQS,\tvar,\t___,\tstr,\teq) \\"
-      "   _(ISNES,\tvar,\t___,\tstr,\teq) \\"
-      "   _(ISEQN,\tvar,\t___,\tnum,\teq) \\"
-      "   _(ISNEN,\tvar,\t___,\tnum,\teq) \\"
-      "+  _(ISEQV,\tvar,\t___,\tvar,\teq) \\"
-      "+  _(ISNEV,\tvar,\t___,\tvar,\teq) \\"
-      "   _(ISEQP,\tvar,\t___,\tpri,\teq) \\"
-      "   _(ISNEP,\tvar,\t___,\tpri,\teq) \\"
-      "-  \\"
-      "-  /* Unary test and copy ops. */ \\"
-      "   _(ISTC,\tdst,\t___,\tvar,\t___) \\"
-      "   _(ISFC,\tdst,\t___,\tvar,\t___) \\"
-      "   _(IST,\t___,\t___,\tvar,\t___) \\"
-      "   _(ISF,\t___,\t___,\tvar,\t___) \\"
-      "   _(ISTYPE,\tvar,\t___,\tlit,\t___) \\"
-      "   _(ISNUM,\tvar,\t___,\tlit,\t___) \\"
-      "-  \\"
-      "-  /* Unary ops. */ \\"
-      "   _(MOV,\tdst,\t___,\tvar,\t___) \\"
-      "   _(NOT,\tdst,\t___,\tvar,\t___) \\"
-      "   _(UNM,\tdst,\t___,\tvar,\tunm) \\"
-      "   _(LEN,\tdst,\t___,\tvar,\tlen) \\"
-      "-  \\"
-      "-  /* Binary ops. ORDER OPR. VV last, POW must be next. */ \\"
-      "   _(ADDVN,\tdst,\tvar,\tnum,\tadd) \\"
-      "   _(SUBVN,\tdst,\tvar,\tnum,\tsub) \\"
-      "   _(MULVN,\tdst,\tvar,\tnum,\tmul) \\"
-      "   _(DIVVN,\tdst,\tvar,\tnum,\tdiv) \\"
-      "   _(MODVN,\tdst,\tvar,\tnum,\tmod) \\"
-      "-  \\"
-      "   _(ADDNV,\tdst,\tvar,\tnum,\tadd) \\"
-      "   _(SUBNV,\tdst,\tvar,\tnum,\tsub) \\"
-      "   _(MULNV,\tdst,\tvar,\tnum,\tmul) \\"
-      "   _(DIVNV,\tdst,\tvar,\tnum,\tdiv) \\"
-      "   _(MODNV,\tdst,\tvar,\tnum,\tmod) \\"
-      "-  \\"
-      "   _(ADDVV,\tdst,\tvar,\tvar,\tadd) \\"
-      "   _(SUBVV,\tdst,\tvar,\tvar,\tsub) \\"
-      "   _(MULVV,\tdst,\tvar,\tvar,\tmul) \\"
-      "   _(DIVVV,\tdst,\tvar,\tvar,\tdiv) \\"
-      "   _(MODVV,\tdst,\tvar,\tvar,\tmod) \\"
-      "-  \\"
-      "   _(POW,\tdst,\tvar,\tvar,\tpow) \\"
-      "   _(CAT,\tdst,\trbase,\trbase,\tconcat) \\"
-      "-  \\"
-      "-  /* Constant ops. */ \\"
-      "   _(KSTR,\tdst,\t___,\tstr,\t___) \\"
-      "   _(KCDATA,\tdst,\t___,\tcdata,\t___) \\"
-      "   _(KSHORT,\tdst,\t___,\tlits,\t___) \\"
-      "   _(KNUM,\tdst,\t___,\tnum,\t___) \\"
-      "   _(KPRI,\tdst,\t___,\tpri,\t___) \\"
-      "   _(KNIL,\tbase,\t___,\tbase,\t___) \\"
-      "-  \\"
-      "-  /* Upvalue and function ops. */ \\"
-      "-  _(UGET,\tdst,\t___,\tuv,\t___) \\"
-      "-  _(USETV,\tuv,\t___,\tvar,\t___) \\"
-      "   _(USETS,\tuv,\t___,\tstr,\t___) \\"
-      "   _(USETN,\tuv,\t___,\tnum,\t___) \\"
-      "   _(USETP,\tuv,\t___,\tpri,\t___) \\"
-      "-  _(UCLO,\trbase,\t___,\tjump,\t___) \\"
-      "+  _(UGET,\tdst,\t___,\tuv,\t___) \\"
-      "+  _(USETV,\tuv,\t___,\tvar,\t___) \\"
-      "   _(FNEW,\tdst,\t___,\tfunc,\tgc) \\"
-      "-  \\"
-      "-  /* Table ops. */ \\"
-      "-  _(TNEW,\tdst,\t___,\tlit,\tgc) \\"
-      "+  _(UCLO,\trbase,\t___,\tjump,\t___) \\"
-      "   _(TDUP,\tdst,\t___,\ttab,\tgc) \\"
-      "-  _(GGET,\tdst,\t___,\tstr,\tindex) \\"
-      "-  _(GSET,\tvar,\t___,\tstr,\tnewindex) \\"
-      "-  _(TGETV,\tdst,\tvar,\tvar,\tindex) \\"
-      "+  _(TNEW,\tdst,\t___,\tlit,\tgc) \\"
-      "   _(TGETS,\tdst,\tvar,\tstr,\tindex) \\"
-      "   _(TGETB,\tdst,\tvar,\tlit,\tindex) \\"
-      "   _(TGETR,\tdst,\tvar,\tvar,\tindex) \\"
-      "+  _(GGET,\tdst,\t___,\tstr,\tindex) \\"
-      "+  _(GSET,\tvar,\t___,\tstr,\tnewindex) \\"
-      "+  _(TGETV,\tdst,\tvar,\tvar,\tindex) \\"
-      "+  _(TSETM,\tbase,\t___,\tnum,\tnewindex) \\"
-      "+  _(TSETR,\tvar,\tvar,\tvar,\tnewindex) \\"
-      "   _(TSETV,\tvar,\tvar,\tvar,\tnewindex) \\"
-      "   _(TSETS,\tvar,\tvar,\tstr,\tnewindex) \\"
-      "   _(TSETB,\tvar,\tvar,\tlit,\tnewindex) \\"
-      "-  _(TSETM,\tbase,\t___,\tnum,\tnewindex) \\"
-      "-  _(TSETR,\tvar,\tvar,\tvar,\tnewindex) \\"
-      "-  \\"
-      "-  /* Calls and vararg handling. T = tail call. */ \\"
-      "   _(CALLM,\tbase,\tlit,\tlit,\tcall) \\"
-      "   _(CALL,\tbase,\tlit,\tlit,\tcall) \\"
-      "   _(CALLMT,\tbase,\t___,\tlit,\tcall) \\"
-      "@@ -161,32 +142,22 @@"
-      "   _(ITERN,\tbase,\tlit,\tlit,\tcall) \\"
-      "   _(VARG,\tbase,\tlit,\tlit,\t___) \\"
-      "   _(ISNEXT,\tbase,\t___,\tjump,\t___) \\"
-      "-  \\"
-      "-  /* Returns. */ \\"
-      "   _(RETM,\tbase,\t___,\tlit,\t___) \\"
-      "   _(RET,\trbase,\t___,\tlit,\t___) \\"
-      "   _(RET0,\trbase,\t___,\tlit,\t___) \\"
-      "   _(RET1,\trbase,\t___,\tlit,\t___) \\"
-      "-  \\"
-      "-  /* Loops and branches. I/J = interp/JIT, I/C/L = init/call/loop. */ \\"
-      "   _(FORI,\tbase,\t___,\tjump,\t___) \\"
-      "   _(JFORI,\tbase,\t___,\tjump,\t___) \\"
-      "-  \\"
-      "   _(FORL,\tbase,\t___,\tjump,\t___) \\"
-      "   _(IFORL,\tbase,\t___,\tjump,\t___) \\"
-      "   _(JFORL,\tbase,\t___,\tlit,\t___) \\"
-      "-  \\"
-      "   _(ITERL,\tbase,\t___,\tjump,\t___) \\"
-      "   _(IITERL,\tbase,\t___,\tjump,\t___) \\"
-      "   _(JITERL,\tbase,\t___,\tlit,\t___) \\"
-      "-  \\"
-      "   _(LOOP,\trbase,\t___,\tjump,\t___) \\"
-      "   _(ILOOP,\trbase,\t___,\tjump,\t___) \\"
-      "   _(JLOOP,\trbase,\t___,\tlit,\t___) \\"
-      "-  \\"
-      "   _(JMP,\trbase,\t___,\tjump,\t___) \\"
-      "-  \\"
-      "-  /* Function headers. I/J = interp/JIT, F/V/C = fixarg/vararg/C func. */ \\"
-      "   _(FUNCF,\trbase,\t___,\t___,\t___) \\"
-      "   _(IFUNCF,\trbase,\t___,\t___,\t___) \\"
-      "   _(JFUNCF,\trbase,\t___,\tlit,\t___) \\"
+    modules_gaming_aniimo_luajit_data = {
+      owner = "LuaJIT";
+      repo = "LuaJIT";
+      rev = "4c2441c16ce3c4e312aaefecc6d40c4fe21de97c";
+      hash = "sha256-S1oVxgqitKPENLIbBfrmY8w8GgBQR6Byr52RjPpqz8g=";
+    };
+    modules_gaming_aniimo_luajit_opcodes_data = {
+      add,
+      del,
+      file,
+      hunk,
+      ...
+    }: [
+      (file "src/lj_bc.h" [
+        (hunk 69 [
+          "** M = multiple args/results"
+          "*/"
+          "#define BCDEF(_) \\"
+          (del "  /* Comparison ops. ORDER OPR. */ \\")
+          "  _(ISLT,\tvar,\t___,\tvar,\tlt) \\"
+          "  _(ISGE,\tvar,\t___,\tvar,\tlt) \\"
+          "  _(ISLE,\tvar,\t___,\tvar,\tle) \\"
+          "  _(ISGT,\tvar,\t___,\tvar,\tle) \\"
+          (del "  \\")
+          (del "  _(ISEQV,\tvar,\t___,\tvar,\teq) \\")
+          (del "  _(ISNEV,\tvar,\t___,\tvar,\teq) \\")
+          "  _(ISEQS,\tvar,\t___,\tstr,\teq) \\"
+          "  _(ISNES,\tvar,\t___,\tstr,\teq) \\"
+          "  _(ISEQN,\tvar,\t___,\tnum,\teq) \\"
+          "  _(ISNEN,\tvar,\t___,\tnum,\teq) \\"
+          (add "  _(ISEQV,\tvar,\t___,\tvar,\teq) \\")
+          (add "  _(ISNEV,\tvar,\t___,\tvar,\teq) \\")
+          "  _(ISEQP,\tvar,\t___,\tpri,\teq) \\"
+          "  _(ISNEP,\tvar,\t___,\tpri,\teq) \\"
+          (del "  \\")
+          (del "  /* Unary test and copy ops. */ \\")
+          "  _(ISTC,\tdst,\t___,\tvar,\t___) \\"
+          "  _(ISFC,\tdst,\t___,\tvar,\t___) \\"
+          "  _(IST,\t___,\t___,\tvar,\t___) \\"
+          "  _(ISF,\t___,\t___,\tvar,\t___) \\"
+          "  _(ISTYPE,\tvar,\t___,\tlit,\t___) \\"
+          "  _(ISNUM,\tvar,\t___,\tlit,\t___) \\"
+          (del "  \\")
+          (del "  /* Unary ops. */ \\")
+          "  _(MOV,\tdst,\t___,\tvar,\t___) \\"
+          "  _(NOT,\tdst,\t___,\tvar,\t___) \\"
+          "  _(UNM,\tdst,\t___,\tvar,\tunm) \\"
+          "  _(LEN,\tdst,\t___,\tvar,\tlen) \\"
+          (del "  \\")
+          (del "  /* Binary ops. ORDER OPR. VV last, POW must be next. */ \\")
+          "  _(ADDVN,\tdst,\tvar,\tnum,\tadd) \\"
+          "  _(SUBVN,\tdst,\tvar,\tnum,\tsub) \\"
+          "  _(MULVN,\tdst,\tvar,\tnum,\tmul) \\"
+          "  _(DIVVN,\tdst,\tvar,\tnum,\tdiv) \\"
+          "  _(MODVN,\tdst,\tvar,\tnum,\tmod) \\"
+          (del "  \\")
+          "  _(ADDNV,\tdst,\tvar,\tnum,\tadd) \\"
+          "  _(SUBNV,\tdst,\tvar,\tnum,\tsub) \\"
+          "  _(MULNV,\tdst,\tvar,\tnum,\tmul) \\"
+          "  _(DIVNV,\tdst,\tvar,\tnum,\tdiv) \\"
+          "  _(MODNV,\tdst,\tvar,\tnum,\tmod) \\"
+          (del "  \\")
+          "  _(ADDVV,\tdst,\tvar,\tvar,\tadd) \\"
+          "  _(SUBVV,\tdst,\tvar,\tvar,\tsub) \\"
+          "  _(MULVV,\tdst,\tvar,\tvar,\tmul) \\"
+          "  _(DIVVV,\tdst,\tvar,\tvar,\tdiv) \\"
+          "  _(MODVV,\tdst,\tvar,\tvar,\tmod) \\"
+          (del "  \\")
+          "  _(POW,\tdst,\tvar,\tvar,\tpow) \\"
+          "  _(CAT,\tdst,\trbase,\trbase,\tconcat) \\"
+          (del "  \\")
+          (del "  /* Constant ops. */ \\")
+          "  _(KSTR,\tdst,\t___,\tstr,\t___) \\"
+          "  _(KCDATA,\tdst,\t___,\tcdata,\t___) \\"
+          "  _(KSHORT,\tdst,\t___,\tlits,\t___) \\"
+          "  _(KNUM,\tdst,\t___,\tnum,\t___) \\"
+          "  _(KPRI,\tdst,\t___,\tpri,\t___) \\"
+          "  _(KNIL,\tbase,\t___,\tbase,\t___) \\"
+          (del "  \\")
+          (del "  /* Upvalue and function ops. */ \\")
+          (del "  _(UGET,\tdst,\t___,\tuv,\t___) \\")
+          (del "  _(USETV,\tuv,\t___,\tvar,\t___) \\")
+          "  _(USETS,\tuv,\t___,\tstr,\t___) \\"
+          "  _(USETN,\tuv,\t___,\tnum,\t___) \\"
+          "  _(USETP,\tuv,\t___,\tpri,\t___) \\"
+          (del "  _(UCLO,\trbase,\t___,\tjump,\t___) \\")
+          (add "  _(UGET,\tdst,\t___,\tuv,\t___) \\")
+          (add "  _(USETV,\tuv,\t___,\tvar,\t___) \\")
+          "  _(FNEW,\tdst,\t___,\tfunc,\tgc) \\"
+          (del "  \\")
+          (del "  /* Table ops. */ \\")
+          (del "  _(TNEW,\tdst,\t___,\tlit,\tgc) \\")
+          (add "  _(UCLO,\trbase,\t___,\tjump,\t___) \\")
+          "  _(TDUP,\tdst,\t___,\ttab,\tgc) \\"
+          (del "  _(GGET,\tdst,\t___,\tstr,\tindex) \\")
+          (del "  _(GSET,\tvar,\t___,\tstr,\tnewindex) \\")
+          (del "  _(TGETV,\tdst,\tvar,\tvar,\tindex) \\")
+          (add "  _(TNEW,\tdst,\t___,\tlit,\tgc) \\")
+          "  _(TGETS,\tdst,\tvar,\tstr,\tindex) \\"
+          "  _(TGETB,\tdst,\tvar,\tlit,\tindex) \\"
+          "  _(TGETR,\tdst,\tvar,\tvar,\tindex) \\"
+          (add "  _(GGET,\tdst,\t___,\tstr,\tindex) \\")
+          (add "  _(GSET,\tvar,\t___,\tstr,\tnewindex) \\")
+          (add "  _(TGETV,\tdst,\tvar,\tvar,\tindex) \\")
+          (add "  _(TSETM,\tbase,\t___,\tnum,\tnewindex) \\")
+          (add "  _(TSETR,\tvar,\tvar,\tvar,\tnewindex) \\")
+          "  _(TSETV,\tvar,\tvar,\tvar,\tnewindex) \\"
+          "  _(TSETS,\tvar,\tvar,\tstr,\tnewindex) \\"
+          "  _(TSETB,\tvar,\tvar,\tlit,\tnewindex) \\"
+          (del "  _(TSETM,\tbase,\t___,\tnum,\tnewindex) \\")
+          (del "  _(TSETR,\tvar,\tvar,\tvar,\tnewindex) \\")
+          (del "  \\")
+          (del "  /* Calls and vararg handling. T = tail call. */ \\")
+          "  _(CALLM,\tbase,\tlit,\tlit,\tcall) \\"
+          "  _(CALL,\tbase,\tlit,\tlit,\tcall) \\"
+          "  _(CALLMT,\tbase,\t___,\tlit,\tcall) \\"
+        ])
+        (hunk 161 [
+          "  _(ITERN,\tbase,\tlit,\tlit,\tcall) \\"
+          "  _(VARG,\tbase,\tlit,\tlit,\t___) \\"
+          "  _(ISNEXT,\tbase,\t___,\tjump,\t___) \\"
+          (del "  \\")
+          (del "  /* Returns. */ \\")
+          "  _(RETM,\tbase,\t___,\tlit,\t___) \\"
+          "  _(RET,\trbase,\t___,\tlit,\t___) \\"
+          "  _(RET0,\trbase,\t___,\tlit,\t___) \\"
+          "  _(RET1,\trbase,\t___,\tlit,\t___) \\"
+          (del "  \\")
+          (del "  /* Loops and branches. I/J = interp/JIT, I/C/L = init/call/loop. */ \\")
+          "  _(FORI,\tbase,\t___,\tjump,\t___) \\"
+          "  _(JFORI,\tbase,\t___,\tjump,\t___) \\"
+          (del "  \\")
+          "  _(FORL,\tbase,\t___,\tjump,\t___) \\"
+          "  _(IFORL,\tbase,\t___,\tjump,\t___) \\"
+          "  _(JFORL,\tbase,\t___,\tlit,\t___) \\"
+          (del "  \\")
+          "  _(ITERL,\tbase,\t___,\tjump,\t___) \\"
+          "  _(IITERL,\tbase,\t___,\tjump,\t___) \\"
+          "  _(JITERL,\tbase,\t___,\tlit,\t___) \\"
+          (del "  \\")
+          "  _(LOOP,\trbase,\t___,\tjump,\t___) \\"
+          "  _(ILOOP,\trbase,\t___,\tjump,\t___) \\"
+          "  _(JLOOP,\trbase,\t___,\tlit,\t___) \\"
+          (del "  \\")
+          "  _(JMP,\trbase,\t___,\tjump,\t___) \\"
+          (del "  \\")
+          (del "  /* Function headers. I/J = interp/JIT, F/V/C = fixarg/vararg/C func. */ \\")
+          "  _(FUNCF,\trbase,\t___,\t___,\t___) \\"
+          "  _(IFUNCF,\trbase,\t___,\t___,\t___) \\"
+          "  _(JFUNCF,\trbase,\t___,\tlit,\t___) \\"
+        ])
+      ])
     ];
     modules_gaming_aniimo_patches_data = [
       {
@@ -29226,6 +29235,74 @@
         render = values: doc.render 80 (map (value: [(entry 0 value) hardline]) values);
       };
 
+      patch = let
+        inherit (doc) hardline;
+
+        marks = {
+          string = text: " ${text}";
+          add = value: "+${value.add}";
+          del = value: "-${value.del}";
+        };
+
+        change = value: [((marks.${kindOf value} or (throw "patch: no change ${kindOf value}")) value) hardline];
+
+        span = start: count:
+          if count == 1
+          then toString start
+          else "${toString start},${toString count}";
+
+        counted = kind: lib.count (value: kindOf value != kind);
+
+        empty = count:
+          if count == 0
+          then 1
+          else 0;
+
+        header = delta: value: let
+          old = counted "add" value.hunk.lines;
+          new = counted "del" value.hunk.lines;
+          start = value.hunk.start + delta + empty old - empty new;
+        in {
+          delta = delta + new - old;
+          doc = ["@@ -${span value.hunk.start old} +${span start new} @@" (lib.optionalString (value.hunk ? heading) " ${value.hunk.heading}") hardline (map change value.hunk.lines)];
+        };
+
+        hunks = values:
+          (builtins.foldl' (state: value: let
+              next = header state.delta value;
+            in {
+              inherit (next) delta;
+              docs = state.docs ++ [next.doc];
+            }) {
+              delta = 0;
+              docs = [];
+            }
+            values).docs;
+
+        file = value: [
+          (lib.optionals (value.file ? index) ["diff --git a/${value.file.path} b/${value.file.path}" hardline "index ${value.file.index}" hardline])
+          "--- a/${value.file.path}"
+          hardline
+          "+++ b/${value.file.path}"
+          hardline
+          (hunks value.file.hunks)
+        ];
+      in {
+        file = path: hunks: {file = {inherit path hunks;};};
+
+        git = path: index: hunks: {file = {inherit path index hunks;};};
+
+        hunk = start: lines: {hunk = {inherit start lines;};};
+
+        section = start: heading: lines: {hunk = {inherit start heading lines;};};
+
+        add = text: {add = text;};
+
+        del = text: {del = text;};
+
+        render = values: doc.render null (map file values);
+      };
+
       sourceFile = name: text:
         builtins.path {
           path = builtins.toFile name text;
@@ -29234,7 +29311,7 @@
     in {
       cssSource = list: "${nodes list}\n";
 
-      inherit doc lisp luau shell vbs;
+      inherit doc lisp luau patch shell vbs;
 
       inherit sourceFile;
 
@@ -29275,8 +29352,6 @@
       pythonSource = lines;
 
       glslSource = lines;
-
-      patchSource = lines;
     };
     modules_hosts_android_phone_host_ssh_ed25519_data = {
       __keys = ["type" "key" "comment"];
@@ -30772,7 +30847,7 @@
       '';
 
       aquamarine = pkgs.aquamarine.overrideAttrs (old: {
-        patches = (old.patches or []) ++ [(generators.sourceFile "aquamarine-gamescope.patch" (generators.patchSource modules_hosts_steam_frame_omarchy_aquamarine_gamescope_data))];
+        patches = (old.patches or []) ++ [(generators.sourceFile "aquamarine-gamescope.patch" (generators.patch.render (modules_hosts_steam_frame_omarchy_aquamarine_gamescope_data generators.patch)))];
       });
 
       uwsmApp = pkgs.writeShellScriptBin "uwsm-app" ''
@@ -30888,52 +30963,59 @@
         };
       };
     };
-    modules_hosts_steam_frame_omarchy_aquamarine_gamescope_data = [
-      "diff --git a/src/backend/Wayland.cpp b/src/backend/Wayland.cpp"
-      "index 8905adc..c6de7cc 100644"
-      "--- a/src/backend/Wayland.cpp"
-      "+++ b/src/backend/Wayland.cpp"
-      "@@ -122,11 +122,11 @@ bool Aquamarine::CWaylandBackend::start() {"
-      "             initSeat();"
-      "         } else if (NAME == \"xdg_wm_base\") {"
-      "             TRACE(backend->log(AQ_LOG_TRACE, std::format(\"  > binding to global: {} (version {}) with id {}\", name, 6, id)));"
-      "-            waylandState.xdg = makeShared<CCXdgWmBase>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &xdg_wm_base_interface, 6));"
-      "+            waylandState.xdg = makeShared<CCXdgWmBase>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &xdg_wm_base_interface, std::min(version, 6u)));"
-      "             initShell();"
-      "         } else if (NAME == \"wl_compositor\") {"
-      "             TRACE(backend->log(AQ_LOG_TRACE, std::format(\"  > binding to global: {} (version {}) with id {}\", name, 6, id)));"
-      "-            waylandState.compositor = makeShared<CCWlCompositor>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &wl_compositor_interface, 6));"
-      "+            waylandState.compositor = makeShared<CCWlCompositor>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &wl_compositor_interface, std::min(version, 6u)));"
-      "         } else if (NAME == \"wl_shm\") {"
-      "             TRACE(backend->log(AQ_LOG_TRACE, std::format(\"  > binding to global: {} (version {}) with id {}\", name, 1, id)));"
-      "             waylandState.shm = makeShared<CCWlShm>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &wl_shm_interface, 1));"
-      "@@ -541,9 +541,14 @@ Aquamarine::CWaylandOutput::CWaylandOutput(const std::string& name_, Hyprutils::"
-      "     waylandState.xdgToplevel->setConfigure([this](CCXdgToplevel* r, int32_t w, int32_t h, wl_array* arr) {"
-      "         backend->backend->log(AQ_LOG_DEBUG, std::format(\"Output {}: configure toplevel with {}x{}\", name, w, h));"
-      "         if (w == 0 || h == 0) {"
-      "-            backend->backend->log(AQ_LOG_DEBUG, std::format(\"Output {}: w/h is 0, sending default hardcoded 1280x720\", name));"
-      "-            w = 1280;"
-      "-            h = 720;"
-      "+            if (waylandState.surfaceSize.x > 0 && waylandState.surfaceSize.y > 0) {"
-      "+                w = waylandState.surfaceSize.x;"
-      "+                h = waylandState.surfaceSize.y;"
-      "+            } else {"
-      "+                backend->backend->log(AQ_LOG_DEBUG, std::format(\"Output {}: w/h is 0, sending default hardcoded 1280x720\", name));"
-      "+                w = 1280;"
-      "+                h = 720;"
-      "+            }"
-      "         }"
-      "         events.state.emit(SStateEvent{.size = {w, h}});"
-      "         // Kick off the first frame synchronously: the consumer expects events.frame in"
-      "@@ -567,6 +572,8 @@ Aquamarine::CWaylandOutput::CWaylandOutput(const std::string& name_, Hyprutils::"
-      " "
-      "     inputRegion->sendDestroy();"
-      " "
-      "+    wl_display_flush(backend->waylandState.display);"
-      "+"
-      "     backend->backend->log(AQ_LOG_DEBUG, std::format(\"Output {}: initialized\", name));"
-      " }"
-      " "
+    modules_hosts_steam_frame_omarchy_aquamarine_gamescope_data = {
+      add,
+      del,
+      git,
+      section,
+      ...
+    }: [
+      (git "src/backend/Wayland.cpp" "8905adc..c6de7cc 100644" [
+        (section 122 "bool Aquamarine::CWaylandBackend::start() {" [
+          "            initSeat();"
+          "        } else if (NAME == \"xdg_wm_base\") {"
+          "            TRACE(backend->log(AQ_LOG_TRACE, std::format(\"  > binding to global: {} (version {}) with id {}\", name, 6, id)));"
+          (del "            waylandState.xdg = makeShared<CCXdgWmBase>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &xdg_wm_base_interface, 6));")
+          (add "            waylandState.xdg = makeShared<CCXdgWmBase>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &xdg_wm_base_interface, std::min(version, 6u)));")
+          "            initShell();"
+          "        } else if (NAME == \"wl_compositor\") {"
+          "            TRACE(backend->log(AQ_LOG_TRACE, std::format(\"  > binding to global: {} (version {}) with id {}\", name, 6, id)));"
+          (del "            waylandState.compositor = makeShared<CCWlCompositor>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &wl_compositor_interface, 6));")
+          (add "            waylandState.compositor = makeShared<CCWlCompositor>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &wl_compositor_interface, std::min(version, 6u)));")
+          "        } else if (NAME == \"wl_shm\") {"
+          "            TRACE(backend->log(AQ_LOG_TRACE, std::format(\"  > binding to global: {} (version {}) with id {}\", name, 1, id)));"
+          "            waylandState.shm = makeShared<CCWlShm>((wl_proxy*)wl_registry_bind((wl_registry*)waylandState.registry->resource(), id, &wl_shm_interface, 1));"
+        ])
+        (section 541 "Aquamarine::CWaylandOutput::CWaylandOutput(const std::string& name_, Hyprutils::" [
+          "    waylandState.xdgToplevel->setConfigure([this](CCXdgToplevel* r, int32_t w, int32_t h, wl_array* arr) {"
+          "        backend->backend->log(AQ_LOG_DEBUG, std::format(\"Output {}: configure toplevel with {}x{}\", name, w, h));"
+          "        if (w == 0 || h == 0) {"
+          (del "            backend->backend->log(AQ_LOG_DEBUG, std::format(\"Output {}: w/h is 0, sending default hardcoded 1280x720\", name));")
+          (del "            w = 1280;")
+          (del "            h = 720;")
+          (add "            if (waylandState.surfaceSize.x > 0 && waylandState.surfaceSize.y > 0) {")
+          (add "                w = waylandState.surfaceSize.x;")
+          (add "                h = waylandState.surfaceSize.y;")
+          (add "            } else {")
+          (add "                backend->backend->log(AQ_LOG_DEBUG, std::format(\"Output {}: w/h is 0, sending default hardcoded 1280x720\", name));")
+          (add "                w = 1280;")
+          (add "                h = 720;")
+          (add "            }")
+          "        }"
+          "        events.state.emit(SStateEvent{.size = {w, h}});"
+          "        // Kick off the first frame synchronously: the consumer expects events.frame in"
+        ])
+        (section 567 "Aquamarine::CWaylandOutput::CWaylandOutput(const std::string& name_, Hyprutils::" [
+          ""
+          "    inputRegion->sendDestroy();"
+          ""
+          (add "    wl_display_flush(backend->waylandState.display);")
+          (add "")
+          "    backend->backend->log(AQ_LOG_DEBUG, std::format(\"Output {}: initialized\", name));"
+          "}"
+          ""
+        ])
+      ])
     ];
     modules_hosts_steam_frame_omarchy_hyprland_data = [
       "dofile(os.getenv(\"OMARCHY_PATH\") .. \"/default/hypr/bootstrap.lua\")"
@@ -32105,6 +32187,17 @@
         vbs = {
           "play.vbs" = modules_tools_tern_config_plugins_tuturu_scripts_play_data;
         };
+        patch = {
+          "luajit-opcodes.patch" = modules_gaming_aniimo_luajit_opcodes_data;
+          "aquamarine-gamescope.patch" = modules_hosts_steam_frame_omarchy_aquamarine_gamescope_data;
+          "rush-login-command.patch" = modules_shell_rush_login_command_data;
+        };
+      };
+
+      patched = {
+        "luajit-opcodes.patch" = pkgs.fetchFromGitHub modules_gaming_aniimo_luajit_data;
+        "aquamarine-gamescope.patch" = pkgs.aquamarine.src;
+        "rush-login-command.patch" = inputs.rush.packages.${pkgs.stdenv.hostPlatform.system}.default.src;
       };
 
       osc = lib.mapAttrs' (name: scheme:
@@ -32125,6 +32218,7 @@
       languageChecks = {
         lisp = file: "SOURCE=${file} ${lib.getExe pkgs.sbcl} --script ${reader}\n";
         luau = file: "${lib.getExe' pkgs.luau "luau-analyze"} --formatter=plain ${file} > analysis || true\nif grep -F SyntaxError analysis; then exit 1; fi\n";
+        patch = file: "${lib.getExe pkgs.git} -C ${patched.${file.name}} apply --check ${file}\n";
         shell = file: "${lib.getExe pkgs.bash} -n ${file}\n${lib.getExe pkgs.shellcheck} -s bash -S warning ${file}\n";
         vbs = file: "${strictix} import vbs ${file} > /dev/null\n";
       };
@@ -32279,7 +32373,7 @@
       '';
 
       codegen = pkgs.runCommand "codegen" {} ''
-        ${lib.concatStrings (lib.concatLists (lib.mapAttrsToList (language: files: lib.mapAttrsToList (name: text: languageChecks.${language} (pkgs.writeText name text)) files) rendered))}
+        ${lib.concatStrings (lib.concatLists (lib.mapAttrsToList (language: files: lib.mapAttrsToList (name: text: languageChecks.${language} name (pkgs.writeText name text)) files) rendered))}
         touch $out
       '';
 
@@ -32305,7 +32399,7 @@
             inputs.claude-code-nix.overlays.default
             (_: _: {
               rush = inputs.rush.packages.${system}.default.overrideAttrs (old: {
-                patches = (old.patches or []) ++ [(generators.sourceFile "rush-login-command.patch" (generators.patchSource modules_shell_rush_login_command_data))];
+                patches = (old.patches or []) ++ [(generators.sourceFile "rush-login-command.patch" (generators.patch.render (modules_shell_rush_login_command_data generators.patch)))];
               });
               monstar = inputs.monstar.packages.${system}.default;
               ash = inputs.ash.packages.${system}.default;
@@ -34136,55 +34230,66 @@
         };
       };
     };
-    modules_shell_rush_login_command_data = [
-      "--- a/src/shell/invocation.zig"
-      "+++ b/src/shell/invocation.zig"
-      "@@ -37,6 +37,7 @@"
-      "     script: []const u8,"
-      "     arg_zero: []const u8,"
-      "     positionals: []const []const u8 = &.{},"
-      "+    login: bool = false,"
-      " };"
-      " "
-      " pub const ScriptFile = struct {"
-      "@@ -113,6 +114,7 @@"
-      "             .script = args[index],"
-      "             .arg_zero = if (operands.len == 0) args[0] else operands[0],"
-      "             .positionals = if (operands.len <= 1) &.{} else operands[1..],"
-      "+            .login = login,"
-      "         } };"
-      "     }"
-      "     if (!standard_input and index < args.len) {"
-      "--- a/src/app.zig"
-      "+++ b/src/app.zig"
-      "@@ -28,6 +28,7 @@"
-      "     state_options: shell.state.Options,"
-      "     arg_zero: []const u8,"
-      "     positionals: []const []const u8,"
-      "+    login: bool = false,"
-      " };"
-      " "
-      " pub fn run("
-      "@@ -87,6 +88,7 @@"
-      "                 .state_options = command.options,"
-      "                 .arg_zero = command.arg_zero,"
-      "                 .positionals = command.positionals,"
-      "+                .login = command.login,"
-      "             }, src);"
-      "         },"
-      "         .script_file => |script| {"
-      "@@ -133,9 +135,9 @@"
-      "     try shell.builtin.initializeSignals(&sh);"
-      "     sh.setFunctionAutoload(autoloadRushFunction);"
-      " "
-      "-    if (options.state_options.interactive) {"
-      "+    if (options.state_options.interactive or options.login) {"
-      "         var source_id = src.id +% 1;"
-      "-        if (try startup.source(&sh, &source_id, false)) |status| return status;"
-      "+        if (try startup.source(&sh, &source_id, options.login)) |status| return status;"
-      "     }"
-      " "
-      "     const evaluated = sh.evalSource(src) catch |err| {"
+    modules_shell_rush_login_command_data = {
+      add,
+      del,
+      file,
+      hunk,
+      ...
+    }: [
+      (file "src/shell/invocation.zig" [
+        (hunk 37 [
+          "    script: []const u8,"
+          "    arg_zero: []const u8,"
+          "    positionals: []const []const u8 = &.{},"
+          (add "    login: bool = false,")
+          "};"
+          ""
+          "pub const ScriptFile = struct {"
+        ])
+        (hunk 113 [
+          "            .script = args[index],"
+          "            .arg_zero = if (operands.len == 0) args[0] else operands[0],"
+          "            .positionals = if (operands.len <= 1) &.{} else operands[1..],"
+          (add "            .login = login,")
+          "        } };"
+          "    }"
+          "    if (!standard_input and index < args.len) {"
+        ])
+      ])
+      (file "src/app.zig" [
+        (hunk 28 [
+          "    state_options: shell.state.Options,"
+          "    arg_zero: []const u8,"
+          "    positionals: []const []const u8,"
+          (add "    login: bool = false,")
+          "};"
+          ""
+          "pub fn run("
+        ])
+        (hunk 87 [
+          "                .state_options = command.options,"
+          "                .arg_zero = command.arg_zero,"
+          "                .positionals = command.positionals,"
+          (add "                .login = command.login,")
+          "            }, src);"
+          "        },"
+          "        .script_file => |script| {"
+        ])
+        (hunk 133 [
+          "    try shell.builtin.initializeSignals(&sh);"
+          "    sh.setFunctionAutoload(autoloadRushFunction);"
+          ""
+          (del "    if (options.state_options.interactive) {")
+          (add "    if (options.state_options.interactive or options.login) {")
+          "        var source_id = src.id +% 1;"
+          (del "        if (try startup.source(&sh, &source_id, false)) |status| return status;")
+          (add "        if (try startup.source(&sh, &source_id, options.login)) |status| return status;")
+          "    }"
+          ""
+          "    const evaluated = sh.evalSource(src) catch |err| {"
+        ])
+      ])
     ];
     modules_shell_tokens = {config, ...}: let
       loader = ''
@@ -38039,6 +38144,7 @@
         modules_gaming_aniimo_apply_data = "modules/gaming/aniimo/apply.data.nix";
         modules_gaming_aniimo_catch_data = "modules/gaming/aniimo/catch.data.nix";
         modules_gaming_aniimo_catch_lua_data = "modules/gaming/aniimo/catch-lua.data.nix";
+        modules_gaming_aniimo_luajit_data = "modules/gaming/aniimo/luajit.data.nix";
         modules_gaming_aniimo_luajit_opcodes_data = "modules/gaming/aniimo/luajit-opcodes.data.nix";
         modules_gaming_aniimo_patches_data = "modules/gaming/aniimo/patches.data.nix";
         modules_gaming_aniimo_rewards_data = "modules/gaming/aniimo/rewards.data.nix";
