@@ -3,12 +3,6 @@ import * as os from "node:os";
 import * as path from "node:path";
 
 export const DIR = process.env.OPTCHAT_DIR || path.join(os.homedir(), ".local/state/optchat");
-export const LOG = path.join(DIR, "log");
-export const MAIN = path.join(DIR, "main");
-export const TREE = path.join(DIR, "tree.jsonl");
-export const VIEW = path.join(DIR, "view.json");
-export const VIEW_TEXT = path.join(DIR, "view.txt");
-export const SPEND = path.join(DIR, "spend.jsonl");
 export const CHUNK = 1024;
 export const NODE = 512;
 export const PLACEHOLDER = "(not summarized yet: zoom it)";
@@ -40,7 +34,31 @@ export interface ViewState {
 	built: boolean;
 }
 
-export const chunkPath = (k: number) => path.join(MAIN, `${String(k).padStart(6, "0")}.jsonl`);
+export interface Store {
+	dir: string;
+	log: string;
+	main: string;
+	tree: string;
+	view: string;
+	viewText: string;
+	spend: string;
+}
+
+export function open(dir: string): Store {
+	return {
+		dir,
+		log: path.join(dir, "log"),
+		main: path.join(dir, "main"),
+		tree: path.join(dir, "tree.jsonl"),
+		view: path.join(dir, "view.json"),
+		viewText: path.join(dir, "view.txt"),
+		spend: path.join(dir, "spend.jsonl"),
+	};
+}
+
+export const STORE = open(DIR);
+
+export const chunkPath = (store: Store, k: number) => path.join(store.main, `${String(k).padStart(6, "0")}.jsonl`);
 export const line = (m: Entry) => `${m.kind}[${m.name}]: ${m.text}`;
 export const bytes = (text: string) => Buffer.byteLength(text, "utf8");
 export const flat = (text: string) => text.replaceAll("\n", " ");
@@ -60,17 +78,17 @@ export function writeAtomic(file: string, text: string): void {
 	fs.renameSync(temp, file);
 }
 
-export function readState(): ViewState | undefined {
+export function readState(store: Store): ViewState | undefined {
 	try {
-		return JSON.parse(fs.readFileSync(VIEW, "utf8")) as ViewState;
+		return JSON.parse(fs.readFileSync(store.view, "utf8")) as ViewState;
 	} catch {
 		return undefined;
 	}
 }
 
-export function readView(): string {
+export function readView(store: Store): string {
 	try {
-		return fs.readFileSync(VIEW_TEXT, "utf8");
+		return fs.readFileSync(store.viewText, "utf8");
 	} catch {
 		return EMPTY_VIEW;
 	}
@@ -122,9 +140,11 @@ export class Tail {
 export class Messages {
 	#cache = new Map<number, { size: number; rows: string[] }>();
 
+	constructor(readonly store: Store) {}
+
 	get(i: number): Message | undefined {
 		const k = Math.floor(i / CHUNK);
-		const file = chunkPath(k);
+		const file = chunkPath(this.store, k);
 		let size: number;
 		try {
 			size = fs.statSync(file).size;

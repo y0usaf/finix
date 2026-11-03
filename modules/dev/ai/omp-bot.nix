@@ -32,6 +32,7 @@ in {
     ".config/omp-bot/env".text = ''
       : "''${OMP_BIN:=${omp}/bin/omp}"
       : "''${OMP_BOT_EXTENSION:=${./omp/crest-auth.ts}}"
+      : "''${OMP_BOT_OPTCHAT:=${./omp/optchat}}"
     '';
     ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";
   };

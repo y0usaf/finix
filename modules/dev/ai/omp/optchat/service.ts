@@ -7,17 +7,12 @@ import {
 	CHUNK,
 	DIR,
 	type Entry,
-	LOG,
-	MAIN,
 	type Message,
 	Messages,
 	NODE,
 	type NodeLine,
-	SPEND,
-	TREE,
+	STORE,
 	Tail,
-	VIEW,
-	VIEW_TEXT,
 	bytes,
 	chunkPath,
 	flat,
@@ -39,13 +34,29 @@ const RETRY_MAX = 600_000;
 const RULER = "-".repeat(NODE);
 const LOCK = path.join(DIR, "optchatd.pid");
 
-const COMPACT_PROMPT = `You write the memory shared by one person's omp chats: coding-agent
+const BOT = process.env.OPTCHAT_BOT;
+
+const SHARED_INTRO = `You write the memory shared by one person's omp chats: coding-agent
 sessions on their computer, each its own conversation, all logged into
 one memory. Each message names, in brackets, the chat it came from, as
 talk[Chat], and has a kind: user (the person's words in that chat), work
 (text an agent or tool sent into the chat in the person's place, not the
 person's words), talk (the agent's replies). Tool calls and their results
-are not logged; the agent's replies say what they found and did.
+are not logged; the agent's replies say what they found and did.`;
+
+const BOT_INTRO = `You write the memory of ${BOT}, one of a person's persistent bots: an
+omp coding agent that keeps one conversation for good and sees all but
+its latest turns only through this memory; below, "the chats" means this
+bot. Each message is tagged [${BOT}] and has a kind: user (what the bot
+received: the person typing to it live, or a background task, which
+starts with "[omp-bot task ID, attempt N, from ...]" naming who asked,
+such as the person, another bot, or "reply:Bot" for another bot's answer
+to a task this bot gave it), work (text a tool sent in the person's
+place), talk (the bot's replies). Only text the person typed live is the
+person's own words. Tool calls and their results are not logged; the
+bot's replies say what they found and did.`;
+
+const COMPACT_PROMPT = `${BOT ? BOT_INTRO : SHARED_INTRO}
 
 Over the messages grows a binary tree of one-line summaries. First, each
 message is compressed alone into a line (a short message is its own
@@ -132,7 +143,7 @@ function lock(): void {
 }
 
 class Memory {
-	readonly messages = new Messages();
+	readonly messages = new Messages(STORE);
 	readonly seen = new Map<string, number>();
 	readonly tails = new Map<string, Tail>();
 	readonly written = new Set<string>();
@@ -152,15 +163,15 @@ class Memory {
 	}
 
 	load(): void {
-		fs.mkdirSync(LOG, { recursive: true });
-		fs.mkdirSync(MAIN, { recursive: true });
+		fs.mkdirSync(STORE.log, { recursive: true });
+		fs.mkdirSync(STORE.main, { recursive: true });
 		const texts: string[] = [];
-		for (let k = 0; fs.existsSync(chunkPath(k)); k++) {
-			for (const row of complete(chunkPath(k)).split("\n")) {
+		for (let k = 0; fs.existsSync(chunkPath(STORE, k)); k++) {
+			for (const row of complete(chunkPath(STORE, k)).split("\n")) {
 				if (!row) continue;
 				const message = JSON.parse(row) as Message;
 				if (message.i !== texts.length) {
-					throw new Error(`${chunkPath(k)} holds message ${message.i} where ${texts.length} belongs`);
+					throw new Error(`${chunkPath(STORE, k)} holds message ${message.i} where ${texts.length} belongs`);
 				}
 				this.tree.msgs.push({ time: message.time, session: message.session });
 				this.seen.set(message.session, Math.max(this.seen.get(message.session) ?? 0, message.src + 1));
@@ -171,10 +182,10 @@ class Memory {
 		texts.forEach((text, i) => {
 			if (bytes(text) <= NODE) this.tree.nodes[0][i] = text;
 		});
-		for (const row of complete(TREE).split("\n")) {
+		for (const row of complete(STORE.tree).split("\n")) {
 			if (!row) continue;
 			const node = JSON.parse(row) as NodeLine;
-			if (!this.tree.has(node)) throw new Error(`${TREE} holds node ${node.l},${node.i} beyond the log`);
+			if (!this.tree.has(node)) throw new Error(`${STORE.tree} holds node ${node.l},${node.i} beyond the log`);
 			this.tree.nodes[node.l][node.i] = node.text;
 			this.written.add(key(node.l, node.i));
 		}
@@ -185,7 +196,7 @@ class Memory {
 				if (text !== "" && !this.written.has(key(l, i))) this.pending.push({ l, i, text });
 			});
 		});
-		const state = readState();
+		const state = readState(STORE);
 		if (!state?.levels?.length || !this.tree.restore(state.levels)) this.tree.layout();
 		this.flush();
 		this.save();
@@ -204,12 +215,12 @@ class Memory {
 
 	ingest(): void {
 		const fresh: { session: string; src: number; entry: Entry }[] = [];
-		for (const name of fs.readdirSync(LOG)) {
+		for (const name of fs.readdirSync(STORE.log)) {
 			if (!name.endsWith(".jsonl")) continue;
 			const session = name.slice(0, -".jsonl".length);
 			let tail = this.tails.get(session);
 			if (tail === undefined) {
-				tail = new Tail(path.join(LOG, name));
+				tail = new Tail(path.join(STORE.log, name));
 				tail.skip(this.seen.get(session) ?? 0);
 				this.tails.set(session, tail);
 			}
@@ -229,7 +240,7 @@ class Memory {
 		for (const { session, src, entry } of fresh) {
 			const i = this.tree.msgs.length;
 			const message: Message = { i, kind: entry.kind, text: entry.text, time: entry.time, name: entry.name, session, src };
-			fs.appendFileSync(chunkPath(Math.floor(i / CHUNK)), `${JSON.stringify(message)}\n`);
+			fs.appendFileSync(chunkPath(STORE, Math.floor(i / CHUNK)), `${JSON.stringify(message)}\n`);
 			this.tree.add({ time: entry.time, session }, line(message));
 			this.dirty = true;
 		}
@@ -238,7 +249,7 @@ class Memory {
 	flush(): void {
 		const rows = this.pending.splice(0).filter((node) => !this.written.has(key(node.l, node.i)));
 		if (!rows.length) return;
-		fs.appendFileSync(TREE, rows.map((node) => `${JSON.stringify(node)}\n`).join(""));
+		fs.appendFileSync(STORE.tree, rows.map((node) => `${JSON.stringify(node)}\n`).join(""));
 		for (const node of rows) this.written.add(key(node.l, node.i));
 		this.dirty = true;
 	}
@@ -291,9 +302,9 @@ class Memory {
 		if (!this.dirty) return;
 		const levels = this.tree.levels();
 		const messages = this.tree.msgs.length;
-		writeAtomic(VIEW_TEXT, this.tree.render(levels, messages));
+		writeAtomic(STORE.viewText, this.tree.render(levels, messages));
 		writeAtomic(
-			VIEW,
+			STORE.view,
 			JSON.stringify({ messages, levels, seen: Object.fromEntries(this.seen), built: this.tree.first() === messages }),
 		);
 		this.dirty = false;
@@ -308,7 +319,7 @@ class Memory {
 			task = `Compaction: merge lines ${start(a)}+${2 ** a.l} and ${start(b)}+${2 ** b.l}, adjacent, into one line of ${ask}<chat> may hold their messages, ${start(p)} to ${end(p) - 1}, in more detail: take details of them from there too.\n<input>\n${flat(this.tree.text(a))}\n${flat(this.tree.text(b))}\n</input>`;
 		} else {
 			const message = this.messages.get(p.i);
-			if (message === undefined) throw new Error(`message ${p.i} is missing from ${MAIN}`);
+			if (message === undefined) throw new Error(`message ${p.i} is missing from ${STORE.main}`);
 			task = `Compaction: compress message ${p.i} into one line of ${ask}<input>\n${line(message)}\n</input>`;
 		}
 		const view = this.tree.upTo(p.l > 0 ? end(p) : start(p));
@@ -356,7 +367,7 @@ class Memory {
 			cost: usage.cost.total,
 			stop: reply.stopReason,
 		};
-		fs.appendFileSync(SPEND, `${JSON.stringify(row)}\n`);
+		fs.appendFileSync(STORE.spend, `${JSON.stringify(row)}\n`);
 	}
 }
 

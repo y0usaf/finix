@@ -3,16 +3,16 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
 	type Entry,
-	LOG,
-	MAIN,
 	Messages,
 	PLACEHOLDER,
-	TREE,
+	STORE,
+	type Store,
 	Tail,
 	bytes,
 	flat,
 	key,
 	line,
+	open,
 	readState,
 	readView,
 	when,
@@ -22,6 +22,10 @@ const PIN = "optchat-pin";
 const CAP = 30_000;
 const RECENT = 64_000;
 const ROW = /^(\d+)\+(\d+)\|/;
+const BOT = process.env.OPTCHAT_BOT;
+const RULES = process.env.OPTCHAT_RULES;
+const BOTS = process.env.OPTCHAT_BOTS;
+const RAW = Number(process.env.OPTCHAT_RAW) || 128_000;
 
 const INTRO = `# Shared memory
 
@@ -50,10 +54,48 @@ you need, such as a decision, a past attempt or where a file is, before
 you act, guess or ask. date(id) gives the date and time of message id.
 recent() shows what every chat logged after this view was taken.`;
 
+const BOT_INTRO = `# Your memory
+
+Your conversation lives in OptChat memory, not in this context. Every
+message you receive (the user typing live, background tasks, answers
+from other bots) and every reply you write is logged into it. Below is
+its view: everything logged before your latest turns, oldest first,
+inside <chat> tags, as one-line summaries. Each line is
+
+  id+n|text   the n messages from id on, summarized (newlines shown as spaces)
+
+Each item is tagged with its kind: user (what you received), work (text
+a tool sent in the user's place), talk (your replies). Recent lines
+cover one message each; the older the messages, the more a line covers.
+A message not summarized yet shows as "${PLACEHOLDER}". Your latest
+turns follow in full, tool calls and results included; older turns exist
+only as these lines, and their tool calls and results are gone, so say in
+your replies what you learned that will matter later.
+
+The zoom, date and recent tools read the memory. zoom(id, n) opens line
+id+n into the two lines of n/2 messages it was made from; zoom(id, 1)
+gives message id in full. Zoom whenever a summary only mentions something
+you need, such as a decision, a past attempt or where a file is, before
+you act, guess or ask. date(id) gives the date and time of message id.
+recent() shows what was logged after this view was taken. Give any of
+them a bot name to read that bot's memory instead, read-only; memories()
+lists the bots that keep one.`;
+
+const RULES_INTRO = `# Standing rules
+
+The rules the user set you, kept word for word and never summarized.
+They hold until the user changes them. When the user sets you a new
+standing rule, pin_rule adds it here.`;
+
+
 interface Pin {
 	view: string;
 	upto: number;
 	time: number;
+}
+
+interface Snapshot extends Pin {
+	anchor: number;
 }
 
 interface Block {
@@ -119,17 +161,17 @@ function pins(ctx: ExtensionContext): Pin[] {
 }
 
 function take(): Pin {
-	return { view: readView(), upto: readState()?.messages ?? 0, time: Date.now() };
+	return { view: readView(STORE), upto: readState(STORE)?.messages ?? 0, time: Date.now() };
 }
 
-function recent(since: number): string {
-	const rows = readView()
+function recent(store: Store, since: number, empty: string): string {
+	const rows = readView(store)
 		.split("\n")
 		.filter((row) => {
 			const match = ROW.exec(row);
 			return match !== null && Number(match[1]) + Number(match[2]) > since;
 		});
-	if (!rows.length) return "Nothing was logged after this chat's view was taken.";
+	if (!rows.length) return empty;
 	const kept: string[] = [];
 	let size = 0;
 	for (let k = rows.length - 1; k >= 0 && size < RECENT; k--) {
@@ -139,29 +181,58 @@ function recent(since: number): string {
 	return `<chat>\n${kept.join("\n")}\n</chat>`;
 }
 
-export default function optchat(pi: ExtensionAPI): void {
-	const z = pi.zod;
-	const messages = new Messages();
-	const tree = new Tail(TREE);
-	const nodes = new Map<string, string>();
-	let enabled = false;
+function rowsOf(message: Logged, name: string): string[] {
+	const time = typeof message.timestamp === "number" ? message.timestamp : Date.now();
+	return entriesOf(message).map(
+		({ kind, text }) => `${JSON.stringify({ kind, text: capText(text), time, name } satisfies Entry)}\n`,
+	);
+}
 
-	const active = (ctx: ExtensionContext) => enabled && ctx.agent?.kind === "main";
-	const result = (text: string) => ({ content: [{ type: "text" as const, text }] });
+function countLines(file: string): number {
+	let data: Buffer;
+	try {
+		data = fs.readFileSync(file);
+	} catch {
+		return 0;
+	}
+	let n = 0;
+	for (let at = data.indexOf(10); at >= 0; at = data.indexOf(10, at + 1)) n++;
+	return n;
+}
 
-	function node(l: number, i: number): string | undefined {
-		for (const row of tree.read()) {
+function rules(): string {
+	let text = "";
+	try {
+		text = fs.readFileSync(RULES as string, "utf8").trim();
+	} catch {}
+	return `${RULES_INTRO}\n\n<rules>\n${text || "None yet."}\n</rules>`;
+}
+
+const sized = (message: unknown) => bytes(JSON.stringify(message));
+
+class Reader {
+	readonly messages: Messages;
+	readonly tree: Tail;
+	readonly nodes = new Map<string, string>();
+
+	constructor(readonly store: Store) {
+		this.messages = new Messages(store);
+		this.tree = new Tail(store.tree);
+	}
+
+	node(l: number, i: number): string | undefined {
+		for (const row of this.tree.read()) {
 			if (!row) continue;
 			try {
 				const parsed = JSON.parse(row) as { l: number; i: number; text: string };
-				nodes.set(key(parsed.l, parsed.i), parsed.text);
+				this.nodes.set(key(parsed.l, parsed.i), parsed.text);
 			} catch {}
 		}
-		return nodes.get(key(l, i));
+		return this.nodes.get(key(l, i));
 	}
 
-	function zoom(id: number, n: number): string {
-		const total = readState()?.messages ?? 0;
+	zoom(id: number, n: number): string {
+		const total = readState(this.store)?.messages ?? 0;
 		if (
 			!Number.isSafeInteger(id) ||
 			!Number.isSafeInteger(n) ||
@@ -175,50 +246,199 @@ export default function optchat(pi: ExtensionAPI): void {
 			return `No line ${id}+${n}.`;
 		}
 		if (n === 1) {
-			const message = messages.get(id);
+			const message = this.messages.get(id);
 			return message ? `${id}+1|${line(message)}` : `No message ${id}.`;
 		}
 		const half = n / 2;
 		const l = Math.log2(half);
-		return [id, id + half].map((at) => `${at}+${half}|${flat(node(l, at / half) ?? PLACEHOLDER)}`).join("\n");
+		return [id, id + half].map((at) => `${at}+${half}|${flat(this.node(l, at / half) ?? PLACEHOLDER)}`).join("\n");
+	}
+
+	date(id: number): string {
+		const message = this.messages.get(id);
+		return message ? when(message.time) : `No message ${id}.`;
+	}
+}
+
+export default function optchat(pi: ExtensionAPI): void {
+	const z = pi.zod;
+	const own = new Reader(STORE);
+	const readers = new Map<string, Reader>();
+	let enabled = false;
+	let snap: Snapshot | undefined;
+
+	const active = (ctx: ExtensionContext) => enabled && ctx.agent?.kind === "main";
+	const result = (text: string) => ({ content: [{ type: "text" as const, text }] });
+	const which = BOTS ? { bot: z.string().optional() } : {};
+	const whose = BOTS ? "; with bot, that bot's memory, read-only" : "";
+
+	function reader(bot: string | undefined): Reader | string {
+		if (!bot || bot === BOT) return own;
+		const dir = BOTS && !bot.startsWith(".") && !bot.includes("/") ? path.join(BOTS, bot, "optchat") : undefined;
+		if (dir === undefined || !fs.existsSync(path.join(dir, "view.json"))) return `No bot named ${bot} keeps a memory.`;
+		let found = readers.get(dir);
+		if (found === undefined) {
+			found = new Reader(open(dir));
+			readers.set(dir, found);
+		}
+		return found;
+	}
+
+	function read(bot: string | undefined, run: (memory: Reader) => string) {
+		const memory = reader(bot);
+		return result(typeof memory === "string" ? memory : run(memory));
 	}
 
 	pi.registerTool({
 		name: "zoom",
 		label: "Zoom memory",
-		description:
-			"Open the line id+n of the shared memory view into the two lines of n/2 messages under it; n = 1 gives message id whole.",
-		parameters: z.object({ id: z.number(), n: z.number() }),
+		description: `Open the line id+n of the memory view into the two lines of n/2 messages under it; n = 1 gives message id whole${whose}.`,
+		parameters: z.object({ id: z.number(), n: z.number(), ...which }),
 		async execute(_toolCallId, params) {
-			return result(zoom(params.id, params.n));
+			return read((params as { bot?: string }).bot, (memory) => memory.zoom(params.id, params.n));
 		},
 	});
 	pi.registerTool({
 		name: "date",
 		label: "Memory date",
-		description: "The date and time of shared memory message id.",
-		parameters: z.object({ id: z.number() }),
+		description: `The date and time of memory message id${whose}.`,
+		parameters: z.object({ id: z.number(), ...which }),
 		async execute(_toolCallId, params) {
-			const message = messages.get(params.id);
-			return result(message ? when(message.time) : `No message ${params.id}.`);
+			return read((params as { bot?: string }).bot, (memory) => memory.date(params.id));
 		},
 	});
 	pi.registerTool({
 		name: "recent",
 		label: "Recent memory",
-		description: "The shared memory lines every chat logged after this chat's view was taken.",
-		parameters: z.object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			return result(recent(pins(ctx).at(-1)?.upto ?? 0));
+		description: `The memory lines logged after this chat's view was taken${BOTS ? "; with bot, that bot's latest lines, read-only" : ""}.`,
+		parameters: z.object({ ...which }),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const bot = (params as { bot?: string }).bot;
+			return read(bot, (memory) =>
+				memory === own
+					? recent(own.store, BOT ? (snap?.upto ?? 0) : (pins(ctx).at(-1)?.upto ?? 0), "Nothing was logged after this chat's view was taken.")
+					: recent(memory.store, 0, `${bot} has logged nothing yet.`),
+			);
 		},
 	});
+	if (BOTS) {
+		pi.registerTool({
+			name: "memories",
+			label: "Bot memories",
+			description: "The bots that keep a memory, with how many messages each holds; pass a name as bot to zoom, date or recent.",
+			parameters: z.object({}),
+			async execute() {
+				const rows: string[] = [];
+				let names: string[] = [];
+				try {
+					names = fs.readdirSync(BOTS).sort();
+				} catch {}
+				for (const name of names) {
+					const state = readState(open(path.join(BOTS, name, "optchat")));
+					if (state !== undefined) rows.push(`${name}: ${state.messages} messages${name === BOT ? " (you)" : ""}`);
+				}
+				return result(rows.length ? rows.join("\n") : "No bot keeps a memory yet.");
+			},
+		});
+	}
+	if (BOT && RULES) {
+		pi.registerTool({
+			name: "pin_rule",
+			label: "Pin rule",
+			description:
+				"Add a standing rule the user just set you to your pinned rules, in their words, so it stays in your context word for word and is never summarized. Only for rules the user gave.",
+			parameters: z.object({ rule: z.string() }),
+			async execute(_toolCallId, params) {
+				const rule = params.rule.trim().replace(/\s*\n\s*/g, " ");
+				if (!rule) return result("No rule given.");
+				fs.mkdirSync(path.dirname(RULES), { recursive: true });
+				fs.appendFileSync(RULES, `- ${rule}\n`);
+				return result(`Pinned: ${rule}`);
+			},
+		});
+	}
+
+	function backfill(ctx: ExtensionContext): void {
+		const file = path.join(STORE.log, `${ctx.sessionManager.getSessionId()}.jsonl`);
+		if (fs.existsSync(file)) return;
+		const rows = ctx.sessionManager
+			.getBranch()
+			.flatMap((entry) => (entry.type === "message" ? rowsOf(entry.message as Logged, BOT as string) : []));
+		fs.writeFileSync(file, rows.join(""));
+	}
+
+	function repin(messages: Logged[], session: string): number {
+		const state = readState(STORE);
+		const view = readView(STORE);
+		const rows = view.split("\n");
+		const last = rows.findLast((row) => ROW.test(row));
+		const match = last === undefined ? null : ROW.exec(last);
+		const upto = match === null ? 0 : Number(match[1]) + Number(match[2]);
+		const lag = Math.max(0, countLines(path.join(STORE.log, `${session}.jsonl`)) - (state?.seen?.[session] ?? 0));
+		let pick = -1;
+		let pickNeed = 0;
+		let pickLogged = 0;
+		let need = lag;
+		let logged = 0;
+		let size = 0;
+		for (let k = messages.length - 1; k >= 0; k--) {
+			size += sized(messages[k]);
+			if (entriesOf(messages[k]).length) {
+				need--;
+				logged++;
+			}
+			if (messages[k].role === "toolResult") continue;
+			if (pick >= 0 && pickNeed <= 0 && size > RAW / 2) break;
+			pick = k;
+			pickNeed = need;
+			pickLogged = logged;
+		}
+		let cut = upto;
+		for (let left = pickLogged - lag; left > 0 && cut > 0 && own.messages.get(cut - 1)?.session === session; left--) cut--;
+		const kept = rows.filter((row) => {
+			const at = ROW.exec(row);
+			return at === null || Number(at[1]) < cut;
+		});
+		snap = { view: kept.join("\n"), upto, time: Date.now(), anchor: pick < 0 ? 0 : (messages[pick].timestamp ?? 0) };
+		return pick < 0 ? 0 : pick;
+	}
+
+	function window(messages: Logged[]): number {
+		if (snap === undefined) return -1;
+		let at = messages.length;
+		while (at > 0 && (messages[at - 1].timestamp ?? 0) >= snap.anchor) at--;
+		while (at < messages.length && messages[at].role === "toolResult") at++;
+		if (at === messages.length) return -1;
+		let size = 0;
+		for (let k = at; k < messages.length; k++) size += sized(messages[k]);
+		return size > RAW ? -1 : at;
+	}
+
+	function bot(messages: Logged[], session: string): Logged[] {
+		let at = window(messages);
+		if (at < 0) at = repin(messages, session);
+		const pinned = snap as Snapshot;
+		const head = [
+			...(RULES ? [{ type: "text", text: rules() }] : []),
+			{ type: "text", text: `${BOT_INTRO}\n\n${pinned.view}` },
+		];
+		const recentTurns = messages.slice(at);
+		const first = recentTurns[0];
+		if (first?.role !== "user") return [{ role: "user", content: head, timestamp: pinned.time }, ...recentTurns];
+		const content = typeof first.content === "string" ? [{ type: "text", text: first.content }] : (first.content as Block[]);
+		return [{ ...first, content: [...head, ...content] }, ...recentTurns.slice(1)];
+	}
 
 	function start(ctx: ExtensionContext): void {
+		snap = undefined;
 		enabled =
 			ctx.agent?.kind === "main" &&
 			(ctx.mode === "tui" || ctx.mode === "rpc") &&
 			ctx.sessionManager.getSessionFile() !== undefined &&
-			fs.existsSync(MAIN);
+			(BOT !== undefined || fs.existsSync(STORE.main));
+		if (!enabled || BOT === undefined) return;
+		fs.mkdirSync(STORE.log, { recursive: true });
+		backfill(ctx);
 	}
 
 	pi.on("session_start", async (_event, ctx) => start(ctx));
@@ -226,18 +446,17 @@ export default function optchat(pi: ExtensionAPI): void {
 
 	pi.on("message_end", async (event, ctx) => {
 		if (!active(ctx)) return;
-		const message = event.message as Logged;
 		const session = ctx.sessionManager.getSessionId();
-		const name = chatName(pi.getSessionName(), session);
-		const time = typeof message.timestamp === "number" ? message.timestamp : Date.now();
-		const rows = entriesOf(message).map(
-			({ kind, text }) => `${JSON.stringify({ kind, text: capText(text), time, name } satisfies Entry)}\n`,
-		);
-		if (rows.length) fs.appendFileSync(path.join(LOG, `${session}.jsonl`), rows.join(""));
+		const rows = rowsOf(event.message as Logged, BOT ?? chatName(pi.getSessionName(), session));
+		if (rows.length) fs.appendFileSync(path.join(STORE.log, `${session}.jsonl`), rows.join(""));
 	});
 
 	pi.on("context", async (event, ctx) => {
 		if (!active(ctx)) return undefined;
+		if (BOT) {
+			const messages = bot(event.messages as Logged[], ctx.sessionManager.getSessionId());
+			return { messages: messages as typeof event.messages };
+		}
 		let pin = pins(ctx).at(-1);
 		if (pin === undefined) {
 			pin = take();
@@ -252,6 +471,6 @@ export default function optchat(pi: ExtensionAPI): void {
 	});
 
 	pi.on("session_compact", async (_event, ctx) => {
-		if (active(ctx)) pi.appendEntry(PIN, take());
+		if (active(ctx) && !BOT) pi.appendEntry(PIN, take());
 	});
 }
