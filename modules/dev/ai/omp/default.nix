@@ -17,9 +17,7 @@ in {
 
   manzil.users.${config.user.name}.files = {
     ".omp/agent/config.yml" = {
-      type = "merge";
-      format = "yaml";
-      clobber = true;
+      generator = lib.generators.toYAML {};
       value = {
         defaultThinkingLevel = catalog.ompThinkingLevel;
         advisor.enabled = true;
@@ -100,6 +98,7 @@ in {
         packages = [];
       };
     };
+    ".omp/agent/models.yml".text = builtins.readFile ./models.yml;
     ".omp/agent/models.json" = {
       generator = toJSON;
       value = catalog.models;

@@ -9,6 +9,7 @@ in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".local/state/ouro"
     ".local/state/guild"
+    ".local/state/crest-auth"
   ];
   environment.systemPackages = [
     crest.crest-cli

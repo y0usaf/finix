@@ -177,7 +177,6 @@ in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".local/state/boar"
     ".local/state/boar-rs"
-    ".local/state/crest-auth"
   ];
   environment.systemPackages = [
     flakeInputs.boar-rs.packages.${pkgs.stdenv.hostPlatform.system}.default
