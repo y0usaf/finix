@@ -137,9 +137,9 @@ The configuration reads no file but Nix. Data a module reads lives in a
 byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
-groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp and
-shell are syntax trees (below). The other code and prose (TypeScript,
-JavaScript, Luau, Lua, Python, GLSL, VBScript, patches and markdown) are still
+groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp,
+shell and TypeScript are syntax trees (below). The other code and prose
+(JavaScript, Luau, Lua, Python, GLSL, VBScript, patches and markdown) are still
 line lists, one string per line, whose `<language>Source` generators only join
 the lines. A file passed by path comes from `generators.sourceFile`, whose
 store path is the one the file had; `generators.sourceDir` builds the optchat
@@ -153,7 +153,8 @@ directory from its files.
 newline), `hardline`, `nest n d` (d's newlines indent n further), `align d`
 (d's newlines indent to the current column) or `group d` (d flat when it fits
 the width, else broken). `doc.render width d` lays it out; a `null` width
-never breaks a group. Layout is a `builtins.genericClosure` stack machine, one
+never breaks a group; `doc.renderWith unit width d` writes each column of
+indentation as `unit` (a tab for TypeScript) instead of a space. Layout is a `builtins.genericClosure` stack machine, one
 step per document node with the column forced at each step, so neither
 recursion depth nor thunk chains grow with the file; indentation is written
 lazily, so blank lines carry no trailing spaces. Columns count bytes. Tomoe's
@@ -225,6 +226,42 @@ blank
 ])
 ```
 
+TypeScript (`generators.ts`): a name, a number or a dotted path of names
+(`ctx.ui.notify`, `result?.details`) is a string, an array a Nix list, and a
+statement or expression a constructor: `str` and `sq` (string literals as
+written), `tpl` (a template, its parts text and `sub`), `regex`, `obj` of
+`prop` and spread `pre "..."`, `call`, `new`, `dot` and `idx` on a value that
+is not a name, `generic` (`<...>`), `pre` and `post` operators and keywords
+(`!`, `await`, `export`, `async`, `type`), `infix [a "&&" b]` for every binary
+operator, assignment, `as` and union, `ternary`, `paren`, `arrow`, `fn`,
+`method`, `typed x T` (`x: T`; a parameter list with its return type),
+`shape`, `class`, `interface` and `type`; statements are `const`, `let'`,
+`return`, `throw'`, `if'`, `ifElse`, `for`, `forOf`, `forIn`, `forAwait`,
+`while`, `switch` of `case`, `try` with `catch` and `finally`, `import'`, and
+any expression (written with its `;`). A body is a list of statements, a block
+one per line a tab in; an arrow's array body is `array`. The printer gives
+prettier's spacing and blocks; the tree keeps the breaks it chose: `rows` for a
+list, an argument list or an operator chain one item per line (with the
+trailing comma), `below x` for `x` on the next line one level in (after `=`,
+`:`, `=>`, `?` and `:` of a ternary, inside `(`), and `chain` for a member
+chain one `.link` per line. A file indented by spaces is `spaces 2 [ ... ]`.
+From `omp/compact-eval.data.nix`, abridged:
+
+```nix
+(fn "summary" ["cells"] [
+  (forOf "const" "cell" "cells" [
+    (const "code" (call "String" [(infix ["cell?.code" "??" (str "")])]))
+    (const "line" (chain [
+      "code"
+      (call "split" [(str "\\n")])
+      (call "map" [(arrow "row" (call "row.trim" []))])
+    ]))
+    (if' "line" (return [(obj [(prop "t" "line") (prop "s" (str "code"))])]))
+  ])
+  (return "undefined")
+])
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -240,6 +277,12 @@ nixFiles`). A template that interpolates Nix values
 which keeps the interpolations inside the tree's strings. Once a language has
 no line lists left, its `<language>Source` generator and its codec go.
 
+The flake formatter is alejandra at upstream commit 97ca3d24 (a flake input),
+which memoizes trial formats; 4.0.0 is exponential in nested constructor
+applications and takes minutes on a deep TypeScript tree. It formats every
+other file byte for byte as 4.0.0 does; swap to a release once one includes
+it.
+
 Every converted file passed its gate. A language whose printer can reproduce
 its files gates on bytes at conversion; one that cannot gates on its official
 formatter's output for both sides. `checks.codegen` (`modules/lint.nix`)
@@ -250,7 +293,8 @@ then runs each language's own check on every rendered tree, listed in its
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
-| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
+| TypeScript (10 files) | bytes | `tsc --noEmit` (TypeScript 7) with an ambient stub of the omp, pi and Node modules they import; `work-fold.ts` and `compact-eval.ts`, untyped as written, get `--noCheck` (syntax and imports only) |
+| JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
