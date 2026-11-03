@@ -323,7 +323,8 @@ html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
 		id = "answer-bubbles",
 		label = "answer bubbles",
 		group = "omp",
-		css = [[.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md {
+		css = [[.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md,
+.sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md {
 	align-self: flex-start;
 	max-width: 82%;
 	padding: 10px 16px;
@@ -342,7 +343,8 @@ html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
 		inset 0 1px 0 var(--glass-hi);
 }
 
-.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md .md > :last-child {
+.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md .md > :last-child,
+.sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md .md > :last-child {
 	margin-bottom: 0;
 }]],
 		on = true,
@@ -391,6 +393,81 @@ html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
 		group = "omp",
 		css = [[html.tn-themed [data-role='omp.turn.usage'] {
 	display: none !important;
+}]],
+		on = true,
+	},
+	{
+		id = "chat-look",
+		label = "Grok chat",
+		group = "omp chat",
+		css = [[:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] [data-role^='omp.thinking'],
+:root:not(#s0):not(#s1) [data-role='omp.chat.dock'] :is([data-role='omp.composer.usage'], [data-role='omp.composer.extras']) {
+	display: none !important;
+}
+
+:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body {
+	max-width: min(80%, 560px);
+}
+
+:root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md {
+	align-self: auto;
+	max-width: none;
+	padding: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+}
+
+:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .md {
+	font-size: 15px;
+	line-height: 22px;
+}
+
+:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] {
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+}
+
+:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-head {
+	display: none;
+}
+
+:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-body {
+	padding: 0;
+}
+
+:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] [data-role='omp.advisor.note'] {
+	color: var(--ink3, var(--t4));
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] [data-role='omp.advisor.note']::before {
+	content: "Advisor · ";
+}]],
+		on = true,
+	},
+	{
+		id = "chat-frost",
+		label = "frosted bubbles",
+		group = "omp chat",
+		css = [[:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'] {
+	background: var(--frost, light-dark(var(--pop-bg), var(--raise)));
+	backdrop-filter: blur(18px) saturate(130%);
+	box-shadow: 0 0 0 1px var(--line, var(--l2));
+}]],
+		on = true,
+	},
+	{
+		id = "chat-still",
+		label = "no streaming",
+		group = "omp chat",
+		css = [[:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .md.streaming {
+	display: none;
 }]],
 		on = true,
 	},
