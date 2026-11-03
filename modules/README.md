@@ -137,10 +137,10 @@ The configuration reads no file but Nix. Data a module reads lives in a
 byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
-groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp, shell,
-Luau, VBScript, patches, markdown, GLSL, Lua, Python, JavaScript and TypeScript
-are syntax trees (below). A file passed by path comes from
-`generators.sourceFile`, whose store path is the one the file had;
+groups, an XML element tree, SSH key fields, PEM base64 blocks and gitignore
+patterns. Lisp, shell, Luau, VBScript, patches, markdown, GLSL, Lua, Python,
+JavaScript and TypeScript are syntax trees (below). A file passed by path comes
+from `generators.sourceFile`, whose store path is the one the file had;
 `generators.sourceDir` builds the optchat directory from its files.
 
 ### Code as syntax trees

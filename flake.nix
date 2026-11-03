@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=84ae5b306c6cb0e0bfbd1db6be560c9301d6ce79";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=ecc1422d1655c00323ce7da8b6977bf24981ec69";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -29356,8 +29356,6 @@
         + lib.concatMapStrings (key: lib.optionalString (package ? ${key}) "${key} = ${builtins.toJSON package.${key}}\n") ["name" "version" "source" "checksum"]
         + lib.optionalString (package ? dependencies) "dependencies = [\n${lib.concatMapStrings (dependency: " ${builtins.toJSON dependency},\n") package.dependencies}]\n";
 
-      lines = lib.concatMapStrings (line: "${line}\n");
-
       keyValueSource = prefix: lib.concatMapStringsSep "\n" (lib.concatMapStrings (pair: "${prefix}${builtins.elemAt pair 0}=${builtins.elemAt pair 1}\n"));
 
       xmlElement = prefix: element:
@@ -31406,10 +31404,9 @@
 
       pemSource = pem: lib.concatMapStrings (block: "-----BEGIN ${pem.label}-----\n${wrap pem.width block}-----END ${pem.label}-----\n") pem.blocks;
 
-      gitignoreSource = lines;
+      gitignoreSource = lib.concatMapStrings (pattern: "${pattern}\n");
 
       pathSource = path: "${path}\n";
-
     };
     modules_hosts_android_phone_host_ssh_ed25519_data = {
       __keys = ["type" "key" "comment"];
