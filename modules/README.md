@@ -137,9 +137,9 @@ The configuration reads no file but Nix. Data a module reads lives in a
 byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
-groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp and
-shell are syntax trees (below). The other code and prose (TypeScript,
-JavaScript, Luau, Lua, Python, GLSL, VBScript, patches and markdown) are still
+groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp,
+shell and Python are syntax trees (below). The other code and prose
+(TypeScript, JavaScript, Luau, Lua, GLSL, VBScript, patches and markdown) are still
 line lists, one string per line, whose `<language>Source` generators only join
 the lines. A file passed by path comes from `generators.sourceFile`, whose
 store path is the one the file had; `generators.sourceDir` builds the optchat
@@ -225,6 +225,51 @@ blank
 ])
 ```
 
+Python (`generators.python`): a statement is a Nix list of words (`["import"
+"os"]`, `["x" "=" y]`, `["return" a "if" b "else" c]`) or a string (`"pass"`),
+an expression on its own, or `def name params body`, `class name bases body`,
+`if' test body`, `ifElse test body otherwise` (`otherwise` a body for `else:`,
+or an `if` node for `elif`), `for target iter body`, `while test body`,
+`with' items body`, `try body [(except caught body) (finally body)]` and
+`async` around any of them; a body is a list of statements, four spaces in.
+A name, dotted name or number is a string (an integer may be a Nix integer);
+a list of words is an expression written with single spaces, its operators and
+keywords words of their own. The rest is constructors: `call f args`, `dot x
+name`, `index x key`, `slice lower upper` (spaced around `:` when a bound is not
+a name or number, as black does), `list`, `tuple`, `set`, `dict` with `pair k
+v`, `paren`, `commas` (a tuple without brackets), `kw name value`, `star`,
+`starstar`, `neg`, `invert`, `lambda params body` and `as value name`. String
+literals keep their source body: `str` (`"..."`), `sq` (`'...'`) and `triple`
+(`"""..."""`), with `raw` and `bytes` for the `r` and `b` prefixes; a body that
+is a list is an f-string of text, `field x` and `spec x "03d"`. Brackets lay
+out by their contents: a list of items on one line, `rows` hanging one row a
+line four spaces in with the closing bracket on its own line and a trailing
+comma when there are several rows (black's layout), `aligned` with the rows
+after the first under the first item; `hang x` is a parenthesis hanging its
+expression. An expression of words broken over lines is `rows` too: inside a
+bracket its lines align with the bracket's contents, at statement level they
+end in a backslash and continue four spaces in. `@name@` placeholders for
+`replaceVars` are names. From `codex/apply-reasoning-policy.data.nix`,
+abridged:
+
+```nix
+{as, blank, call, commas, def, dot, if', index, kw, raw, slice, sq, triple, ...}: [
+  (triple "Reconcile only Codex's root reasoning setting, preserving other config.")
+  ["import" "os"]
+  ["from" "pathlib" "import" "Path"]
+  blank
+  (def "apply" ["path"] [
+    ["path" "=" (call (dot (call (dot (call "Path" ["path"]) "expanduser") []) "resolve") [])]
+    ["text" "=" (call "path.read_text" []) "if" (call "path.exists" []) "else" (sq "")]
+    ["header" "=" (call "re.search" [(raw (sq "^\\s*\\[")) "text" (kw "flags" "re.MULTILINE")])]
+    [(commas ["root" "rest"]) "=" (commas [(index "text" (slice null "end")) (index "text" (slice "end" null))])]
+    (if' ["not" "count"] [
+      ["root" "=" (sq "model_reasoning_effort = \"low\"\\n") "+" "root"]
+    ])
+  ])
+]
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -250,7 +295,8 @@ then runs each language's own check on every rendered tree, listed in its
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
-| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
+| Python (5 files) | bytes | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
+| TypeScript, JavaScript, Luau, Lua, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
