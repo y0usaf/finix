@@ -72,6 +72,7 @@ in {
           "${./code-mode.ts}"
           "${./compact-eval.ts}"
           "${./work-fold.ts}"
+          "${./chat-look.ts}"
           "${./box-commands.ts}"
           "${./cwd.ts}"
           "${./secrets}/secrets.ts"

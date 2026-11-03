@@ -34,6 +34,8 @@ in {
       : "''${OMP_BOT_EXTENSION:=${./omp/crest-auth.ts}}"
       : "''${OMP_BOT_CWD_EXTENSION:=${./omp/cwd.ts}}"
       : "''${OMP_BOT_SECRETS_EXTENSION:=${./omp/secrets}/secrets.ts}"
+      : "''${OMP_BOT_WORK_FOLD_EXTENSION:=${./omp/work-fold.ts}}"
+      : "''${OMP_BOT_CHAT_LOOK_EXTENSION:=${./omp/chat-look.ts}}"
       : "''${OMP_BOT_OPTCHAT:=${./omp/optchat}}"
     '';
     ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";

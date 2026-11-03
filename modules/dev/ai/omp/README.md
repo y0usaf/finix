@@ -14,6 +14,7 @@ The pieces:
 - [code-mode.ts](code-mode.ts) asks for a short title on every eval cell, which becomes the step's name.
 - [compact-eval.ts](compact-eval.ts) folds eval steps to their title, drops language badges, and names untitled steps after the tool they call or their first line.
 - [work-fold.ts](work-fold.ts) builds the rows. Your messages, skill and collab prompts, `!`/`$` commands and compaction markers start a new stretch.
+- [chat-look.ts](chat-look.ts) wraps each of your messages and the model's in an `omp.chat.msg` block, advisor notes in `omp.chat.advice` and the composer area in `omp.chat.dock`, for the chat looks to style. With tool activity hidden it tells the model so, to say in words what it found and ran. omp-bot loads it and `work-fold.ts` into every bot.
 - The answer bubble, the quieter sentences, the rail under an open row and the chat looks are tweaks in the [UI Menu](../../../tools/tern/config/plugins/ui-menu/window.luau) Tern plugin.
 
 omp is pinned by Nix, so its startup update check is off.
