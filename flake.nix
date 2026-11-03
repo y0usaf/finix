@@ -12106,7 +12106,7 @@
           };
           value.mcpServers.jev = {
             command = "${pkgs.nodejs}/bin/node";
-            args = ["${generators.sourceFile "jev-mcp.mjs" (generators.javascriptSource modules_dev_ai_jev_mcp_data)}"];
+            args = ["${generators.sourceFile "jev-mcp.mjs" (generators.javascript.render (modules_dev_ai_jev_mcp_data generators.javascript))}"];
           };
         };
       };
@@ -14971,126 +14971,223 @@
         };
       };
     };
-    modules_dev_ai_jev_mcp_data = [
-      "#!/usr/bin/env node"
-      ""
-      "import { readFileSync } from \"node:fs\";"
-      "import { homedir } from \"node:os\";"
-      "import { join } from \"node:path\";"
-      ""
-      "const ENDPOINT = \"https://api.typesafe.ai/v1/systemone\";"
-      "const MODEL = \"jev-latest\";"
-      "const VERSION = \"2025-11-25\";"
-      ""
-      "function resolveKey() {"
-      "  if (process.env.TYPESAFE_API_KEY) return process.env.TYPESAFE_API_KEY.trim();"
-      "  try {"
-      "    return readFileSync(join(homedir(), \"Tokens/TYPESAFE_API_KEY.txt\"), \"utf8\").trim();"
-      "  } catch {"
-      "    return null;"
-      "  }"
-      "}"
-      ""
-      "const API_KEY = resolveKey();"
-      ""
-      "const TOOL = {"
-      "  name: \"jev_decision\","
-      "  description: \"Make fast, type-safe structured decisions with TypeSafe Jev (System One). \" +"
-      "    \"Given a state (text or JSON) and a map of questions, returns a typed answer per question with \" +"
-      "    \"calibrated probabilities and confidence. Three question primitives: noul (yes/no probability), \" +"
-      "    \"choice (pick one of up to 255 options, with criteria map), score (rate along an ordered rubric \" +"
-      "    \"list of 2-10 levels). All questions evaluate in parallel in one round trip.\","
-      "  inputSchema: {"
-      "    type: \"object\","
-      "    properties: {"
-      "      state: { type: \"string\", description: \"The program/document state to judge (plain text or JSON).\" },"
-      "      questions: {"
-      "        type: \"object\","
-      "        description: \"Map of answer-key -> question spec. Each spec: {type: 'noul'|'choice'|'score', instructions: string, criteria?: object|string[]}. \" +"
-      "          \"choice criteria is an object of option -> description; score criteria is an ordered array of level labels; noul criteria optional.\","
-      "        additionalProperties: {"
-      "          type: \"object\","
-      "          properties: {"
-      "            type: { type: \"string\", enum: [\"noul\", \"choice\", \"score\"] },"
-      "            instructions: { type: \"string\" },"
-      "            criteria: { type: \"object\" }"
-      "          },"
-      "          required: [\"type\", \"instructions\"]"
-      "        }"
-      "      }"
-      "    },"
-      "    required: [\"state\", \"questions\"]"
-      "  }"
-      "};"
-      ""
-      "let buf = \"\";"
-      "process.stdin.on(\"data\", (chunk) => {"
-      "  buf += chunk.toString();"
-      "  let idx;"
-      "  while ((idx = buf.indexOf(\"\\n\")) >= 0) {"
-      "    const line = buf.slice(0, idx).trim();"
-      "    buf = buf.slice(idx + 1);"
-      "    if (!line) continue;"
-      "    let msg;"
-      "    try { msg = JSON.parse(line); } catch { continue; }"
-      "    handle(msg);"
-      "  }"
-      "});"
-      ""
-      "function send(obj) { process.stdout.write(JSON.stringify(obj) + \"\\n\"); }"
-      ""
-      "async function callSystemOne(state, questions) {"
-      "  if (!API_KEY) throw new Error(\"TYPESAFE_API_KEY not set and ~/Tokens/TYPESAFE_API_KEY.txt unreadable\");"
-      "  const res = await fetch(ENDPOINT, {"
-      "    method: \"POST\","
-      "    headers: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + API_KEY },"
-      "    body: JSON.stringify({ model: MODEL, state, questions })"
-      "  });"
-      "  const text = await res.text();"
-      "  if (!res.ok) {"
-      "    let detail = text;"
-      "    try { const j = JSON.parse(text); detail = JSON.stringify(j.detail || j); } catch {}"
-      "    throw new Error(\"Jev API HTTP \" + res.status + \": \" + detail.slice(0, 500));"
-      "  }"
-      "  return JSON.parse(text);"
-      "}"
-      ""
-      "async function handle(msg) {"
-      "  const { id, method, params } = msg;"
-      "  if (method === \"initialize\") {"
-      "    return send({ jsonrpc: \"2.0\", id, result: {"
-      "      protocolVersion: VERSION,"
-      "      capabilities: { tools: {} },"
-      "      serverInfo: { name: \"jev-mcp\", version: \"0.1.0\" }"
-      "    }});"
-      "  }"
-      "  if (method === \"ping\") return send({ jsonrpc: \"2.0\", id, result: {} });"
-      "  if (method === \"notifications/initialized\") return;"
-      "  if (method === \"tools/list\") {"
-      "    return send({ jsonrpc: \"2.0\", id, result: { tools: [TOOL] } });"
-      "  }"
-      "  if (method === \"tools/call\") {"
-      "    const name = params?.name;"
-      "    const args = params?.arguments || {};"
-      "    try {"
-      "      if (name !== \"jev_decision\") throw new Error(\"Unknown tool: \" + name);"
-      "      if (typeof args.state !== \"string\" || !args.state.trim()) throw new Error(\"state is required and must be a string\");"
-      "      if (!args.questions || typeof args.questions !== \"object\") throw new Error(\"questions map is required\");"
-      "      const data = await callSystemOne(args.state, args.questions);"
-      "      return send({ jsonrpc: \"2.0\", id, result: {"
-      "        content: [{ type: \"text\", text: JSON.stringify(data, null, 2) }],"
-      "        structuredContent: data,"
-      "        isError: false"
-      "      }});"
-      "    } catch (e) {"
-      "      return send({ jsonrpc: \"2.0\", id, result: {"
-      "        content: [{ type: \"text\", text: \"Error: \" + e.message }],"
-      "        isError: true"
-      "      }});"
-      "    }"
-      "  }"
-      "  send({ jsonrpc: \"2.0\", id, error: { code: -32601, message: \"Method not found: \" + method } });"
-      "}"
+    modules_dev_ai_jev_mcp_data = {
+      array,
+      arrow,
+      async,
+      await,
+      blank,
+      comment,
+      const,
+      continue,
+      dot,
+      function,
+      if',
+      import',
+      inline,
+      let',
+      new,
+      not,
+      obj,
+      op,
+      paren,
+      return,
+      rows,
+      str,
+      throw',
+      try',
+      typeof,
+      while,
+      ...
+    }: [
+      (comment "#!/usr/bin/env node")
+      blank
+      (import' ["readFileSync"] "node:fs")
+      (import' ["homedir"] "node:os")
+      (import' ["join"] "node:path")
+      blank
+      (const "ENDPOINT" (str "https://api.typesafe.ai/v1/systemone"))
+      (const "MODEL" (str "jev-latest"))
+      (const "VERSION" (str "2025-11-25"))
+      blank
+      (function "resolveKey" [] [
+        (if' "process.env.TYPESAFE_API_KEY" (return ["process.env.TYPESAFE_API_KEY.trim"]))
+        (try' [
+            (return [(dot ["readFileSync" ["join" ["homedir"] (str "Tokens/TYPESAFE_API_KEY.txt")] (str "utf8")] "trim")])
+          ]
+          null [
+            (return "null")
+          ])
+      ])
+      blank
+      (const "API_KEY" ["resolveKey"])
+      blank
+      (const "TOOL" (obj (rows [
+        ["name" (str "jev_decision")]
+        [
+          "description"
+          (op (rows [
+            (str "Make fast, type-safe structured decisions with TypeSafe Jev (System One). ")
+            "+"
+            (str "Given a state (text or JSON) and a map of questions, returns a typed answer per question with ")
+            "+"
+            (str "calibrated probabilities and confidence. Three question primitives: noul (yes/no probability), ")
+            "+"
+            (str "choice (pick one of up to 255 options, with criteria map), score (rate along an ordered rubric ")
+            "+"
+            (str "list of 2-10 levels). All questions evaluate in parallel in one round trip.")
+          ]))
+        ]
+        [
+          "inputSchema"
+          (obj (rows [
+            ["type" (str "object")]
+            [
+              "properties"
+              (obj (rows [
+                ["state" (obj [["type" (str "string")] ["description" (str "The program/document state to judge (plain text or JSON).")]])]
+                [
+                  "questions"
+                  (obj (rows [
+                    ["type" (str "object")]
+                    [
+                      "description"
+                      (op (rows [
+                        (str "Map of answer-key -> question spec. Each spec: {type: 'noul'|'choice'|'score', instructions: string, criteria?: object|string[]}. ")
+                        "+"
+                        (str "choice criteria is an object of option -> description; score criteria is an ordered array of level labels; noul criteria optional.")
+                      ]))
+                    ]
+                    [
+                      "additionalProperties"
+                      (obj (rows [
+                        ["type" (str "object")]
+                        [
+                          "properties"
+                          (obj (rows [
+                            ["type" (obj [["type" (str "string")] ["enum" (array [(str "noul") (str "choice") (str "score")])]])]
+                            ["instructions" (obj [["type" (str "string")]])]
+                            ["criteria" (obj [["type" (str "object")]])]
+                          ]))
+                        ]
+                        ["required" (array [(str "type") (str "instructions")])]
+                      ]))
+                    ]
+                  ]))
+                ]
+              ]))
+            ]
+            ["required" (array [(str "state") (str "questions")])]
+          ]))
+        ]
+      ])))
+      blank
+      (let' "buf" (str ""))
+      [
+        "process.stdin.on"
+        (str "data")
+        (arrow ["chunk"] [
+          (op ["buf" "+=" ["chunk.toString"]])
+          (let' "idx" null)
+          (while (op [(paren (op ["idx" "=" ["buf.indexOf" (str "\\n")]])) ">=" 0]) [
+            (const "line" [(dot ["buf.slice" 0 "idx"] "trim")])
+            (op ["buf" "=" ["buf.slice" (op ["idx" "+" 1])]])
+            (if' (not "line") continue)
+            (let' "msg" null)
+            (try' (inline [(op ["msg" "=" ["JSON.parse" "line"]])]) null (inline [continue]))
+            ["handle" "msg"]
+          ])
+        ])
+      ]
+      blank
+      (function "send" ["obj"] (inline [["process.stdout.write" (op [["JSON.stringify" "obj"] "+" (str "\\n")])]]))
+      blank
+      (async (function "callSystemOne" ["state" "questions"] [
+        (if' (not "API_KEY") (throw' (new ["Error" (str "TYPESAFE_API_KEY not set and ~/Tokens/TYPESAFE_API_KEY.txt unreadable")])))
+        (const "res" (await [
+          "fetch"
+          "ENDPOINT"
+          (obj (rows [
+            ["method" (str "POST")]
+            ["headers" (obj [[(str "Content-Type") (str "application/json")] [(str "Authorization") (op [(str "Bearer ") "+" "API_KEY"])]])]
+            ["body" ["JSON.stringify" (obj [["model" "MODEL"] "state" "questions"])]]
+          ]))
+        ]))
+        (const "text" (await ["res.text"]))
+        (if' (not "res.ok") [
+          (let' "detail" "text")
+          (try' (inline [(const "j" ["JSON.parse" "text"]) (op ["detail" "=" ["JSON.stringify" (op ["j.detail" "||" "j"])]])]) null (inline []))
+          (throw' (new ["Error" (op [(str "Jev API HTTP ") "+" "res.status" "+" (str ": ") "+" ["detail.slice" 0 500]])]))
+        ])
+        (return ["JSON.parse" "text"])
+      ]))
+      blank
+      (async (function "handle" ["msg"] [
+        (const (obj ["id" "method" "params"]) "msg")
+        (if' (op ["method" "===" (str "initialize")]) [
+          (return [
+            "send"
+            (obj [
+              ["jsonrpc" (str "2.0")]
+              "id"
+              [
+                "result"
+                (obj (rows [
+                  ["protocolVersion" "VERSION"]
+                  ["capabilities" (obj [["tools" (obj [])]])]
+                  ["serverInfo" (obj [["name" (str "jev-mcp")] ["version" (str "0.1.0")]])]
+                ]))
+              ]
+            ])
+          ])
+        ])
+        (if' (op ["method" "===" (str "ping")]) (return ["send" (obj [["jsonrpc" (str "2.0")] "id" ["result" (obj [])]])]))
+        (if' (op ["method" "===" (str "notifications/initialized")]) (return null))
+        (if' (op ["method" "===" (str "tools/list")]) [
+          (return ["send" (obj [["jsonrpc" (str "2.0")] "id" ["result" (obj [["tools" (array ["TOOL"])]])]])])
+        ])
+        (if' (op ["method" "===" (str "tools/call")]) [
+          (const "name" "params?.name")
+          (const "args" (op ["params?.arguments" "||" (obj [])]))
+          (try' [
+              (if' (op ["name" "!==" (str "jev_decision")]) (throw' (new ["Error" (op [(str "Unknown tool: ") "+" "name"])])))
+              (if' (op [(typeof "args.state") "!==" (str "string") "||" (not ["args.state.trim"])]) (throw' (new ["Error" (str "state is required and must be a string")])))
+              (if' (op [(not "args.questions") "||" (typeof "args.questions") "!==" (str "object")]) (throw' (new ["Error" (str "questions map is required")])))
+              (const "data" (await ["callSystemOne" "args.state" "args.questions"]))
+              (return [
+                "send"
+                (obj [
+                  ["jsonrpc" (str "2.0")]
+                  "id"
+                  [
+                    "result"
+                    (obj (rows [
+                      ["content" (array [(obj [["type" (str "text")] ["text" ["JSON.stringify" "data" "null" 2]]])])]
+                      ["structuredContent" "data"]
+                      ["isError" "false"]
+                    ]))
+                  ]
+                ])
+              ])
+            ] "e" [
+              (return [
+                "send"
+                (obj [
+                  ["jsonrpc" (str "2.0")]
+                  "id"
+                  [
+                    "result"
+                    (obj (rows [
+                      ["content" (array [(obj [["type" (str "text")] ["text" (op [(str "Error: ") "+" "e.message"])]])])]
+                      ["isError" "true"]
+                    ]))
+                  ]
+                ])
+              ])
+            ])
+        ])
+        ["send" (obj [["jsonrpc" (str "2.0")] "id" ["error" (obj [["code" (-32601)] ["message" (op [(str "Method not found: ") "+" "method"])]])]])]
+      ]))
     ];
     modules_dev_ai_nacre = {
       config,
@@ -30251,6 +30348,152 @@
         render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
       };
 
+      javascript = let
+        inherit (doc) hardline nest;
+
+        commas = lib.intersperse ", ";
+
+        broken = value: builtins.isAttrs value && (value.obj or value.array or null) ? rows;
+
+        layout = open: close: item: values:
+          if values ? rows
+          then [open (nest 2 (lib.imap1 (index: value: [hardline (item value) (lib.optional (index < builtins.length values.rows) ",")]) values.rows)) hardline close]
+          else [open (commas (map item values)) close];
+
+        entry = value:
+          if builtins.isList value
+          then [(expression (builtins.head value)) ": " (expression (lib.last value))]
+          else value;
+
+        hugged = entries: builtins.isList (lib.last entries) && broken (lib.last (lib.last entries));
+
+        braced = entries:
+          if entries ? rows || entries == []
+          then layout "{" "}" entry entries
+          else layout "{ " (lib.optionalString (!hugged entries) " " + "}") entry entries;
+
+        operation = parts:
+          if parts ? rows
+          then [(expression (builtins.head parts.rows)) (lib.genList (index: nest 2 [" " (builtins.elemAt parts.rows (2 * index + 1)) hardline (expression (builtins.elemAt parts.rows (2 * index + 2)))]) (builtins.length parts.rows / 2))]
+          else lib.intersperse " " (map expression parts);
+
+        braces = value:
+          if value ? inline
+          then
+            if value.inline == []
+            then "{}"
+            else ["{ " (lib.intersperse " " (map statement value.inline)) " }"]
+          else ["{" (nest 2 (map (one: [hardline (statement one)]) value)) hardline "}"];
+
+        clause = value:
+          if builtins.isList value || value ? inline
+          then braces value
+          else statement value;
+
+        concise = value:
+          if builtins.isList value || value ? inline
+          then braces value
+          else expression value;
+
+        expressionForms = {
+          string = lib.id;
+          int = toString;
+          list = value: [(expression (builtins.head value)) "(" (commas (map expression (builtins.tail value))) ")"];
+          str = value: "\"${value.str}\"";
+          obj = value: braced value.obj;
+          array = value: layout "[" "]" expression value.array;
+          op = value: operation value.op;
+          paren = value: ["(" (expression value.paren) ")"];
+          dot = value: [(expression value.dot.object) "." value.dot.name];
+          not = value: ["!" (expression value.not)];
+          typeof = value: ["typeof " (expression value.typeof)];
+          await = value: ["await " (expression value.await)];
+          new = value: ["new " (expression value.new)];
+          async = value: ["async " (expression value.async)];
+          arrow = value: ["(" (commas value.arrow.params) ") => " (concise value.arrow.body)];
+          function = value: ["function " value.function.name "(" (commas value.function.params) ") " (braces value.function.body)];
+        };
+
+        expression = value: (expressionForms.${kindOf value} or (throw "javascript: no expression ${kindOf value}")) value;
+
+        statementForms = {
+          blank = _: "";
+          comment = value: value.comment;
+          const = value: ["const " (expression value.const.name) " = " (expression value.const.value) ";"];
+          "let" = value: ["let " (expression value."let".name) (lib.optionals (value."let".value != null) [" = " (expression value."let".value)]) ";"];
+          import = value: ["import { " (commas value.import.names) " } from \"" value.import.source "\";"];
+          function = expression;
+          async = expression;
+          return = value:
+            if value.return == null
+            then "return;"
+            else ["return " (expression value.return) ";"];
+          throw = value: ["throw " (expression value.throw) ";"];
+          continue = _: "continue;";
+          "if" = value: ["if (" (expression value."if".test) ") " (clause value."if".body) (lib.optionals (value."if" ? otherwise) [" else " (clause value."if".otherwise)])];
+          while = value: ["while (" (expression value.while.test) ") " (clause value.while.body)];
+          try = value: ["try " (braces value.try.body) " catch " (lib.optional (value.try.param != null) "(${value.try.param}) ") (braces value.try.handler)];
+        };
+
+        statement = value: (statementForms.${kindOf value} or (_: [(expression value) ";"])) value;
+      in {
+        blank = {blank = true;};
+
+        continue = {continue = true;};
+
+        comment = string: {comment = string;};
+
+        inline = values: {inline = values;};
+
+        rows = values: {rows = values;};
+
+        str = string: {str = string;};
+
+        obj = entries: {obj = entries;};
+
+        array = values: {array = values;};
+
+        op = parts: {op = parts;};
+
+        paren = value: {paren = value;};
+
+        dot = object: name: {dot = {inherit object name;};};
+
+        not = value: {not = value;};
+
+        typeof = value: {typeof = value;};
+
+        await = value: {await = value;};
+
+        new = value: {new = value;};
+
+        async = value: {async = value;};
+
+        arrow = params: body: {arrow = {inherit params body;};};
+
+        function = name: params: body: {function = {inherit name params body;};};
+
+        const = name: value: {const = {inherit name value;};};
+
+        let' = name: value: {"let" = {inherit name value;};};
+
+        import' = names: source: {import = {inherit names source;};};
+
+        return = value: {return = value;};
+
+        throw' = value: {throw = value;};
+
+        if' = test: body: {"if" = {inherit test body;};};
+
+        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+
+        while = test: body: {while = {inherit test body;};};
+
+        try' = body: param: handler: {try = {inherit body param handler;};};
+
+        render = values: doc.render 80 (map (value: [(statement value) hardline]) values);
+      };
+
       sourceFile = name: text:
         builtins.path {
           path = builtins.toFile name text;
@@ -30259,7 +30502,7 @@
     in {
       cssSource = list: "${nodes list}\n";
 
-      inherit doc glsl lisp lua luau markdown patch python shell vbs;
+      inherit doc glsl javascript lisp lua luau markdown patch python shell vbs;
 
       inherit sourceFile;
 
@@ -30290,8 +30533,6 @@
       pathSource = path: "${path}\n";
 
       tsSource = lines;
-
-      javascriptSource = lines;
 
     };
     modules_hosts_android_phone_host_ssh_ed25519_data = {
@@ -33132,6 +33373,9 @@
           "tomoe-user.lisp" = modules_desktop_session_tomoe_lisp_user_data;
           "ekko-init.lisp" = modules_shell_ekko_init_data;
         };
+        javascript = {
+          "jev-mcp.mjs" = modules_dev_ai_jev_mcp_data;
+        };
         lua = {
           "aniimo-catch.lua" = modules_gaming_aniimo_catch_lua_data;
           "aniimo-rewards.lua" = modules_gaming_aniimo_rewards_lua_data;
@@ -33235,6 +33479,7 @@
 
       languageChecks = {
         glsl = file: "cat ${prelude} ${file} ${entry} > shader.frag\n${lib.getExe' pkgs.glslang "glslangValidator"} -S frag shader.frag\n";
+        javascript = file: "${lib.getExe pkgs.nodejs} --check ${file}\n";
         lisp = file: "SOURCE=${file} ${lib.getExe pkgs.sbcl} --script ${reader}\n";
         lua = file:
           if builtins.elem file.name luajit

@@ -138,12 +138,12 @@ byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
 groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp, shell,
-Luau, VBScript, patches, markdown, GLSL, Lua and Python are syntax trees
-(below). The other code and prose (TypeScript and JavaScript) are still line
-lists, one string per line, whose `<language>Source` generators only join the
-lines. A file passed by path comes from `generators.sourceFile`, whose store
-path is the one the file had; `generators.sourceDir` builds the optchat
-directory from its files.
+Luau, VBScript, patches, markdown, GLSL, Lua, Python and JavaScript are syntax
+trees (below). The other code and prose (TypeScript) are still line lists, one
+string per line, whose `<language>Source` generators only join the lines. A file
+passed by path comes from `generators.sourceFile`, whose store path is the one
+the file had; `generators.sourceDir` builds the optchat directory from its
+files.
 
 ### Code as syntax trees
 
@@ -418,6 +418,36 @@ abridged:
 ]
 ```
 
+JavaScript (`generators.javascript`): a call is a Nix list, its callee
+first; an identifier, member path (`process.env.KEY`, `params?.name`) or
+number is a string (an integer may be a Nix integer); `str` is a string
+literal, `obj` an object whose entries are a shorthand name or a `[key value]`
+list, `array` an array, `op [a "+" b]` operands and the operators between
+them (assignment too), `paren`, `dot` (a property of something that is not a
+path), `not`, `typeof`, `await`, `new`, `async` and `arrow params body`. A
+statement is an expression, `const name value`, `let' name value` (`null`
+for none), `import' names source`, `function name params body`, `if'`,
+`ifElse`, `while`, `try' body param handler` (`null` for `catch {`),
+`return value` (`null` for `return;`), `throw'` or `continue`. A body is a
+list of statements in braces, one per line two spaces in, `inline [ ... ]`
+on one line, or a single statement that is not an expression, written
+without braces. `obj` and `array` are on one line unless `rows`, one entry
+per line; `op (rows ...)` breaks after each operator, two spaces in; an
+object on one line whose last value is broken closes without its space
+(`{ id, result: {` ... `}}`). From `dev/ai/jev-mcp.data.nix`, abridged:
+
+```nix
+(const "API_KEY" ["resolveKey"])
+(async (function "callSystemOne" ["state" "questions"] [
+  (if' (not "API_KEY") (throw' (new ["Error" (str "TYPESAFE_API_KEY not set")])))
+  (const "res" (await ["fetch" "ENDPOINT" (obj (rows [
+    ["method" (str "POST")]
+    ["body" ["JSON.stringify" (obj [["model" "MODEL"] "state" "questions"])]]
+  ]))]))
+  (try' (inline [(op ["detail" "=" ["JSON.stringify" (op ["j.detail" "||" "j"])]])]) null (inline []))
+]))
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -450,7 +480,8 @@ then runs each language's own check on every rendered tree, listed in its
 | GLSL (7 files) | bytes | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
 | Lua (3 files) | bytes | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
 | Python (5 files) | bytes | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
-| TypeScript, JavaScript | line lists, not converted yet | none |
+| JavaScript (1 file) | bytes | `node --check` |
+| TypeScript | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
