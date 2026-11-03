@@ -137,9 +137,9 @@ The configuration reads no file but Nix. Data a module reads lives in a
 byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
-groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp and
-shell are syntax trees (below). The other code and prose (TypeScript,
-JavaScript, Luau, Lua, Python, GLSL, VBScript, patches and markdown) are still
+groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp,
+shell and patches are syntax trees (below). The other code and prose
+(TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript and markdown) are still
 line lists, one string per line, whose `<language>Source` generators only join
 the lines. A file passed by path comes from `generators.sourceFile`, whose
 store path is the one the file had; `generators.sourceDir` builds the optchat
@@ -225,6 +225,27 @@ blank
 ])
 ```
 
+Patches (`generators.patch`): a patch is a list of files, `file path hunks`
+(`--- a/path`, `+++ b/path`) or `git path index hunks`, which adds the
+`diff --git` and `index` lines. A hunk is `hunk start lines` or `section start
+heading lines` (the text after `@@`), `start` the old file's first line. A
+context line is a string, a changed line `add` or `del`. The printer counts
+each hunk's lines and derives its new start from the hunks before it, so the
+`@@` header is never written by hand. From
+`shell/rush/login-command.data.nix`, abridged:
+
+```nix
+{add, file, hunk, ...}: [
+  (file "src/shell/invocation.zig" [
+    (hunk 37 [
+      "    positionals: []const []const u8 = &.{},"
+      (add "    login: bool = false,")
+      "};"
+    ])
+  ])
+]
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -250,7 +271,8 @@ then runs each language's own check on every rendered tree, listed in its
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
-| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
+| patches (3 files) | bytes | `git apply --check` against the source each patches |
+| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, markdown | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
