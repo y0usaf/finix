@@ -7,13 +7,17 @@
 }: let
   catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
+  ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
+    PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${./secrets}/omp-secret.ts "$@"
+  '';
 in {
   finix.persistence.allowlist.users.${config.user.name}.directories = [
     ".omp"
     ".local/share/omp"
+    ".local/state/omp-secrets"
   ];
 
-  environment.systemPackages = [pkgs.jq];
+  environment.systemPackages = [pkgs.jq pkgs.age ompSecret];
 
   manzil.users.${config.user.name}.files = {
     ".omp/agent/config.yml" = {
@@ -70,6 +74,7 @@ in {
           "${./work-fold.ts}"
           "${./box-commands.ts}"
           "${./cwd.ts}"
+          "${./secrets}/secrets.ts"
           "${./crest-auth.ts}"
           "${./optchat}/extension.ts"
         ];
