@@ -1341,11 +1341,11 @@
     "omp-bot": {
       "flake": false,
       "locked": {
-        "lastModified": 1793676068,
-        "narHash": "sha256-utAFbHoeodTcj+pOBtuwnRpJPqeAijAC9W5I60ZBANY=",
+        "lastModified": 1793708942,
+        "narHash": "sha256-NeW7K5pg6donl+ywjcIADOuHdZDo6rAnXhGtVRXTDXw=",
         "ref": "refs/heads/main",
-        "rev": "0548af1e043ab9e249ba0a2c7d821bdc2c330bab",
-        "revCount": 25,
+        "rev": "78ddd7fb255001e3f6dc8e5f4f930384d57d6ae6",
+        "revCount": 26,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/omp-bot"
       },
