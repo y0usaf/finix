@@ -138,8 +138,8 @@ byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
 groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp, shell,
-Luau, VBScript and patches are syntax trees (below). The other code and prose
-(TypeScript, JavaScript, Lua, Python, GLSL and markdown) are still line lists,
+Luau, VBScript, patches and markdown are syntax trees (below). The other code
+and prose (TypeScript, JavaScript, Lua, Python and GLSL) are still line lists,
 one string per line, whose `<language>Source` generators only join the lines. A
 file passed by path comes from `generators.sourceFile`, whose store path is the
 one the file had; `generators.sourceDir` builds the optchat directory from its
@@ -293,6 +293,26 @@ each hunk's lines and derives its new start from the hunks before it, so the
 ]
 ```
 
+Markdown (`generators.markdown`): a paragraph is a string or a list of
+inlines, `wrap` a paragraph filled to 78 columns, `heading level text`,
+`bullets [ ... ]` a tight `- ` list of paragraphs, `table [header rows...]` a
+`| a | b |` table under a `|---|` row, and `comment` an HTML comment. An
+inline is a string, `code`, `strong`, `em` or `link text url`. From
+`tern/config/plugins/tuturu/README.data.nix`, abridged:
+
+```nix
+{blank, code, heading, table, wrap, ...}: [
+  (heading 2 "Sounds")
+  blank
+  (wrap [(code "~/finix/modules/tools/tern/default.nix") " builds the three sounds and writes " (code "~/.local/state/tern/plugin-data/tuturu/sounds.toml") " to name them:"])
+  blank
+  (table [
+    ["Trigger" "Sound"]
+    [[(code "yield") ": an omp agent finished its turn"] "Tuturu, at the right ear"]
+  ])
+]
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -321,7 +341,8 @@ then runs each language's own check on every rendered tree, listed in its
 | Luau (8 files) | bytes | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
 | VBScript (1 file) | bytes | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
-| TypeScript, JavaScript, Lua, Python, GLSL, markdown | line lists, not converted yet | none |
+| markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
+| TypeScript, JavaScript, Lua, Python, GLSL | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except

@@ -29303,6 +29303,72 @@
         render = values: doc.render null (map file values);
       };
 
+      markdown = let
+        inherit (doc) hardline line group nest;
+
+        words = string: lib.intersperse (group line) (lib.splitString " " string);
+
+        inlineForms = {
+          string = flow: value:
+            if flow
+            then words value
+            else value;
+          list = flow: map (inline flow);
+          code = _: value: "`${value.code}`";
+          strong = flow: value: ["**" (inline flow value.strong) "**"];
+          em = flow: value: ["*" (inline flow value.em) "*"];
+          link = flow: value: ["[" (inline flow value.link.text) "](${value.link.url})"];
+        };
+
+        inline = flow: value: (inlineForms.${kindOf value} or (throw "markdown: no inline ${kindOf value}")) flow value;
+
+        paragraph = value:
+          if value ? wrap
+          then inline true value.wrap
+          else inline false value;
+
+        cells = row: ["| " (lib.intersperse " | " (map (inline false) row)) " |"];
+
+        blockForms = {
+          string = paragraph;
+          list = paragraph;
+          wrap = paragraph;
+          heading = value: [(lib.strings.replicate value.heading.level "#") " " (inline false value.heading.text)];
+          bullets = value: lib.intersperse hardline (map (item: ["- " (nest 2 (paragraph item))]) value.bullets);
+          comment = value: "<!--${value.comment}-->";
+          table = value:
+            lib.intersperse hardline ([(cells (builtins.head value.table)) "|${lib.concatStrings (map (_: "---|") (builtins.head value.table))}"]
+              ++ map cells (builtins.tail value.table));
+        };
+
+        block = value:
+          if value ? blank
+          then []
+          else (blockForms.${kindOf value} or (throw "markdown: no block ${kindOf value}")) value;
+      in {
+        blank = {blank = true;};
+
+        comment = string: {comment = string;};
+
+        wrap = value: {wrap = value;};
+
+        code = string: {code = string;};
+
+        strong = value: {strong = value;};
+
+        em = value: {em = value;};
+
+        link = text: url: {link = {inherit text url;};};
+
+        heading = level: text: {heading = {inherit level text;};};
+
+        bullets = items: {bullets = items;};
+
+        table = rows: {table = rows;};
+
+        render = values: doc.render 78 (map (value: [(block value) hardline]) values);
+      };
+
       sourceFile = name: text:
         builtins.path {
           path = builtins.toFile name text;
@@ -29311,7 +29377,7 @@
     in {
       cssSource = list: "${nodes list}\n";
 
-      inherit doc lisp luau patch shell vbs;
+      inherit doc lisp luau markdown patch shell vbs;
 
       inherit sourceFile;
 
@@ -29340,8 +29406,6 @@
       gitignoreSource = lines;
 
       pathSource = path: "${path}\n";
-
-      markdownSource = lines;
 
       tsSource = lines;
 
@@ -32184,6 +32248,15 @@
           "tern-ui-menu-rail.luau" = modules_tools_tern_config_plugins_ui_menu_rail_data;
           "tern-ui-menu-window.luau" = modules_tools_tern_config_plugins_ui_menu_window_data;
         };
+        markdown = {
+          "carly-HEARTBEAT.md" = modules_tools_tern_config_carly_HEARTBEAT_data;
+          "carly-MEMORY.md" = modules_tools_tern_config_carly_MEMORY_data;
+          "carly-SOUL.md" = modules_tools_tern_config_carly_SOUL_data;
+          "carly-USER.md" = modules_tools_tern_config_carly_USER_data;
+          "carly-2026-10-29.md" = modules_tools_tern_config_carly_memory_2026_10_29_data;
+          "carly-2026-10-30.md" = modules_tools_tern_config_carly_memory_2026_10_30_data;
+          "tuturu-README.md" = modules_tools_tern_config_plugins_tuturu_README_data;
+        };
         vbs = {
           "play.vbs" = modules_tools_tern_config_plugins_tuturu_scripts_play_data;
         };
@@ -32218,10 +32291,13 @@
       languageChecks = {
         lisp = file: "SOURCE=${file} ${lib.getExe pkgs.sbcl} --script ${reader}\n";
         luau = file: "${lib.getExe' pkgs.luau "luau-analyze"} --formatter=plain ${file} > analysis || true\nif grep -F SyntaxError analysis; then exit 1; fi\n";
+        markdown = file: "${comrak} -e table -t xml ${file} > ast\n${comrak} -e table -t commonmark ${file} | ${comrak} -e table -t xml | cmp ast -\n";
         patch = file: "${lib.getExe pkgs.git} -C ${patched.${file.name}} apply --check ${file}\n";
         shell = file: "${lib.getExe pkgs.bash} -n ${file}\n${lib.getExe pkgs.shellcheck} -s bash -S warning ${file}\n";
         vbs = file: "${strictix} import vbs ${file} > /dev/null\n";
       };
+
+      comrak = lib.getExe pkgs.comrak;
 
       runner = pkgs.writeText "codec-runner.nix" ''
         candidate: let
@@ -34575,12 +34651,12 @@
       stylesheet = name: nodes: pkgs.writeText name (generators.cssSource nodes);
 
       configFiles = {
-        "carly/HEARTBEAT.md" = generators.sourceFile "HEARTBEAT.md" (generators.markdownSource modules_tools_tern_config_carly_HEARTBEAT_data);
-        "carly/MEMORY.md" = generators.sourceFile "MEMORY.md" (generators.markdownSource modules_tools_tern_config_carly_MEMORY_data);
-        "carly/SOUL.md" = generators.sourceFile "SOUL.md" (generators.markdownSource modules_tools_tern_config_carly_SOUL_data);
-        "carly/USER.md" = generators.sourceFile "USER.md" (generators.markdownSource modules_tools_tern_config_carly_USER_data);
-        "carly/memory/2026-10-29.md" = generators.sourceFile "2026-10-29.md" (generators.markdownSource modules_tools_tern_config_carly_memory_2026_10_29_data);
-        "carly/memory/2026-10-30.md" = generators.sourceFile "2026-10-30.md" (generators.markdownSource modules_tools_tern_config_carly_memory_2026_10_30_data);
+        "carly/HEARTBEAT.md" = generators.sourceFile "HEARTBEAT.md" (generators.markdown.render (modules_tools_tern_config_carly_HEARTBEAT_data generators.markdown));
+        "carly/MEMORY.md" = generators.sourceFile "MEMORY.md" (generators.markdown.render (modules_tools_tern_config_carly_MEMORY_data generators.markdown));
+        "carly/SOUL.md" = generators.sourceFile "SOUL.md" (generators.markdown.render (modules_tools_tern_config_carly_SOUL_data generators.markdown));
+        "carly/USER.md" = generators.sourceFile "USER.md" (generators.markdown.render (modules_tools_tern_config_carly_USER_data generators.markdown));
+        "carly/memory/2026-10-29.md" = generators.sourceFile "2026-10-29.md" (generators.markdown.render (modules_tools_tern_config_carly_memory_2026_10_29_data generators.markdown));
+        "carly/memory/2026-10-30.md" = generators.sourceFile "2026-10-30.md" (generators.markdown.render (modules_tools_tern_config_carly_memory_2026_10_30_data generators.markdown));
         "plugins/attention/attention.css" = stylesheet "attention.css" modules_tools_tern_config_plugins_attention_attention_data;
         "plugins/attention/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource modules_tools_tern_config_plugins_attention_plugin_data);
         "plugins/attention/window.luau" = generators.sourceFile "window.luau" (lib.removeSuffix "\n" (generators.luau.render (modules_tools_tern_config_plugins_attention_window_data generators.luau)));
@@ -34595,7 +34671,7 @@
         "plugins/transparent/transparent.css" = stylesheet "transparent.css" modules_tools_tern_config_plugins_transparent_transparent_data;
         "plugins/transparent/window.luau" = generators.sourceFile "window.luau" (lib.removeSuffix "\n" (generators.luau.render (modules_tools_tern_config_plugins_transparent_window_data generators.luau)));
         "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource modules_tools_tern_config_plugins_tuturu_gitignore_data);
-        "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdownSource modules_tools_tern_config_plugins_tuturu_README_data);
+        "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdown.render (modules_tools_tern_config_plugins_tuturu_README_data generators.markdown));
         "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource modules_tools_tern_config_plugins_tuturu_plugin_data);
         "plugins/tuturu/scripts/play.vbs" = generators.sourceFile "play.vbs" (generators.vbs.render (modules_tools_tern_config_plugins_tuturu_scripts_play_data generators.vbs));
         "plugins/tuturu/sounds.toml" = generators.sourceFile "sounds.toml" (generators.tomlSource modules_tools_tern_config_plugins_tuturu_sounds_data);
@@ -34693,79 +34769,129 @@
 
       environment.systemPackages = [package cmusTsp];
     };
-    modules_tools_tern_config_carly_HEARTBEAT_data = [
-      "# Heartbeat"
-      ""
-      "- If an agent you started has finished, failed or is waiting for input, say which and what it needs."
-      "- If a long build, test run or `nh os switch` in any terminal finished or failed since the last heartbeat, say which."
-      ""
-      "<!--"
-      "Carly reads this checklist on every heartbeat (every 30 minutes by default, Settings › Carly) and speaks up only when something needs you. While it holds nothing but headings and comments, no heartbeat runs."
-      ""
-      "Examples:"
-      "- Tell me when a long build or test run in any terminal finishes or fails."
-      "- If a pane shows a merge conflict or a crashed dev server, say which."
-      "- Remind me of anything I asked you to follow up on today."
-      "-->"
+    modules_tools_tern_config_carly_HEARTBEAT_data = {
+      blank,
+      bullets,
+      code,
+      comment,
+      heading,
+      ...
+    }: [
+      (heading 1 "Heartbeat")
+      blank
+      (bullets [
+        "If an agent you started has finished, failed or is waiting for input, say which and what it needs."
+        ["If a long build, test run or " (code "nh os switch") " in any terminal finished or failed since the last heartbeat, say which."]
+      ])
+      blank
+      (comment "\nCarly reads this checklist on every heartbeat (every 30 minutes by default, Settings › Carly) and speaks up only when something needs you. While it holds nothing but headings and comments, no heartbeat runs.\n\nExamples:\n- Tell me when a long build or test run in any terminal finishes or fails.\n- If a pane shows a merge conflict or a crashed dev server, say which.\n- Remind me of anything I asked you to follow up on today.\n")
     ];
-    modules_tools_tern_config_carly_MEMORY_data = [
-      "# Memory"
-      ""
-      "<!-- Durable facts and decisions worth knowing at the start of every conversation: projects, where things live, how the user works. Keep it short and current; details belong in the daily notes (memory/YYYY-MM-DD.md). -->"
-      ""
-      "- **DECK** (cards in Tern, the way his Ekko does them) lives in the ekko window plugin at `~/dev/developing/tern-ekko` (`window.luau`, `ekko.css`, `plugin.toml`) — a plain directory, not a git repo, so edits need no commit. Cards are Tern tabs (Vertical), Ctrl-J/K flip them, and the plugin owns the status line: deck position `N/M name ●`, cpu/mem/gpu/vram/load/clock, and a Cards picker (`plugin.ekko.cards`, Ctrl-P c). Reload with `tern plugin reload ekko`; plugin stylesheets reload only with the plugin (`tern ctl css reload` ignores them). The stats must self-start at load, because `window_start` does not run again on a reload."
-      "- Tern is a closed binary from build.stencil.so, installed by `~/finix/modules/tools/tern/default.nix` (0.9.7, commit c2f7563); plugin docs at docs.stencil.so/tern, layout guide at `guides/layout.html`. Its layout is fixed policy: the arrangement verbs are new_tab/split/focus/close/move/resize/tab — no placement verb, no rects."
-      "- His reference terminals are his own: Ekko (`~/dev/maintaining/ekko`, Common Lisp, gets its deck from `place-panes`/layout providers) and Cudaterm (`~/dev/maintaining/cudaterm`)."
-      "- Measured 2026-10-29: CSS moves a pane's box (front `[349,0,2174,1388]`, back `[-3000,0,2174,1388]`) but the PTY grid stays at its split size (95×63) — Tern sizes panes from its split math, not the DOM box, so CSS is chrome only and there is no in-window deck; parking reflows PTYs. Untested lead: picture-in-picture panes place in corners, dock to edges and can be hidden (\"Hide pictures in picture\") — worth testing whether a hidden PiP keeps its grid size."
-      "- Measuring habits that work: stub-load `window.luau` in the Lua VM (`loadstring('return function(tern) ' .. src .. ' end')()`) to unit-test handlers; `tern ctl dump` (~11 MB JSON, run inside a Tern pane) for DOM geometry; `tern inspect --json` for every pane's cols/rows; a scratch shell pane via `cx.layout:split(target, dir, { command = 'sh' })`. `tern ctl state` describes only the shown tab and calls the tab list `decks`; `cx.layout:new_tab()` returns the new pane id, not the tab id."
-      "- My own memory flush fails with `No API key found for google-vertex` (seen 2026-10-29 22:55); workspace writes still work."
-      "- **PR3544** is a review of the tlc webhooks PR, checked out at `/tmp/tlc`."
+    modules_tools_tern_config_carly_MEMORY_data = {
+      blank,
+      bullets,
+      code,
+      comment,
+      heading,
+      strong,
+      ...
+    }: [
+      (heading 1 "Memory")
+      blank
+      (comment " Durable facts and decisions worth knowing at the start of every conversation: projects, where things live, how the user works. Keep it short and current; details belong in the daily notes (memory/YYYY-MM-DD.md). ")
+      blank
+      (bullets [
+        [(strong "DECK") " (cards in Tern, the way his Ekko does them) lives in the ekko window plugin at " (code "~/dev/developing/tern-ekko") " (" (code "window.luau") ", " (code "ekko.css") ", " (code "plugin.toml") ") — a plain directory, not a git repo, so edits need no commit. Cards are Tern tabs (Vertical), Ctrl-J/K flip them, and the plugin owns the status line: deck position " (code "N/M name ●") ", cpu/mem/gpu/vram/load/clock, and a Cards picker (" (code "plugin.ekko.cards") ", Ctrl-P c). Reload with " (code "tern plugin reload ekko") "; plugin stylesheets reload only with the plugin (" (code "tern ctl css reload") " ignores them). The stats must self-start at load, because " (code "window_start") " does not run again on a reload."]
+        ["Tern is a closed binary from build.stencil.so, installed by " (code "~/finix/modules/tools/tern/default.nix") " (0.9.7, commit c2f7563); plugin docs at docs.stencil.so/tern, layout guide at " (code "guides/layout.html") ". Its layout is fixed policy: the arrangement verbs are new_tab/split/focus/close/move/resize/tab — no placement verb, no rects."]
+        ["His reference terminals are his own: Ekko (" (code "~/dev/maintaining/ekko") ", Common Lisp, gets its deck from " (code "place-panes") "/layout providers) and Cudaterm (" (code "~/dev/maintaining/cudaterm") ")."]
+        ["Measured 2026-10-29: CSS moves a pane's box (front " (code "[349,0,2174,1388]") ", back " (code "[-3000,0,2174,1388]") ") but the PTY grid stays at its split size (95×63) — Tern sizes panes from its split math, not the DOM box, so CSS is chrome only and there is no in-window deck; parking reflows PTYs. Untested lead: picture-in-picture panes place in corners, dock to edges and can be hidden (\"Hide pictures in picture\") — worth testing whether a hidden PiP keeps its grid size."]
+        ["Measuring habits that work: stub-load " (code "window.luau") " in the Lua VM (" (code "loadstring('return function(tern) ' .. src .. ' end')()") ") to unit-test handlers; " (code "tern ctl dump") " (~11 MB JSON, run inside a Tern pane) for DOM geometry; " (code "tern inspect --json") " for every pane's cols/rows; a scratch shell pane via " (code "cx.layout:split(target, dir, { command = 'sh' })") ". " (code "tern ctl state") " describes only the shown tab and calls the tab list " (code "decks") "; " (code "cx.layout:new_tab()") " returns the new pane id, not the tab id."]
+        ["My own memory flush fails with " (code "No API key found for google-vertex") " (seen 2026-10-29 22:55); workspace writes still work."]
+        [(strong "PR3544") " is a review of the tlc webhooks PR, checked out at " (code "/tmp/tlc") "."]
+      ])
     ];
-    modules_tools_tern_config_carly_SOUL_data = [
-      "# Carly"
-      ""
+    modules_tools_tern_config_carly_SOUL_data = {
+      blank,
+      bullets,
+      code,
+      comment,
+      heading,
+      ...
+    }: [
+      (heading 1 "Carly")
+      blank
       "You are Carly, the assistant who lives in the user's terminal. You are quick, warm and plain-spoken: a capable colleague at the next desk, not a butler and not a chatbot."
-      ""
-      "- Do the thing, then say what you did in a sentence. Skip preambles, apologies and offers of further help."
-      "- When unsure what they mean, ask one short question instead of guessing at something irreversible."
-      "- Never type a command that deletes, overwrites, pushes, deploys or spends money unless they asked for exactly that."
-      "- Their screens can hold secrets: use what you read to help, never repeat tokens or passwords back."
-      "- Have opinions when asked; keep them short."
-      ""
-      "## Agents"
-      ""
+      blank
+      (bullets [
+        "Do the thing, then say what you did in a sentence. Skip preambles, apologies and offers of further help."
+        "When unsure what they mean, ask one short question instead of guessing at something irreversible."
+        "Never type a command that deletes, overwrites, pushes, deploys or spends money unless they asked for exactly that."
+        "Their screens can hold secrets: use what you read to help, never repeat tokens or passwords back."
+        "Have opinions when asked; keep them short."
+      ])
+      blank
+      (heading 2 "Agents")
+      blank
       "The user would rather talk only to you, so you run the agents."
-      ""
-      "- Real work (a change, a fix, a build, research across many files) goes to an agent, not into chat: `cx.agents.start({ prompt = ..., cwd = ... })`, one agent per task, `cwd` the repo it touches, the prompt self-contained with the goal, the constraints and how to check it worked."
-      "- Check `cx.agents.list()` first; steer a running agent with `cx.agents.ask` instead of starting a twin."
-      "- Have it report back with `cx.agents.get(pane):tocarly('finished', ...)`, read the result with `cx.agents.transcript`, and tell the user the outcome in a sentence or two, with anything that needs them."
-      "- Leave the user's own agent tabs alone unless asked."
-      ""
-      "<!-- This file is Carly's. She may rewrite it as she learns how you like to work; you may too. -->"
+      blank
+      (bullets [
+        ["Real work (a change, a fix, a build, research across many files) goes to an agent, not into chat: " (code "cx.agents.start({ prompt = ..., cwd = ... })") ", one agent per task, " (code "cwd") " the repo it touches, the prompt self-contained with the goal, the constraints and how to check it worked."]
+        ["Check " (code "cx.agents.list()") " first; steer a running agent with " (code "cx.agents.ask") " instead of starting a twin."]
+        ["Have it report back with " (code "cx.agents.get(pane):tocarly('finished', ...)") ", read the result with " (code "cx.agents.transcript") ", and tell the user the outcome in a sentence or two, with anything that needs them."]
+        "Leave the user's own agent tabs alone unless asked."
+      ])
+      blank
+      (comment " This file is Carly's. She may rewrite it as she learns how you like to work; you may too. ")
     ];
-    modules_tools_tern_config_carly_USER_data = [
-      "# User"
-      ""
-      "<!-- Stable facts and preferences about the user, written as directives (\"Prefers pnpm over npm\", \"Calls the main repo 'stencil'\"). Supersede a line in place when it changes; don't append a contradiction. -->"
-      ""
-      "- Works in Tern but measures it against his own terminals, Ekko (`~/dev/maintaining/ekko`, Common Lisp) and Cudaterm; wants Tern to do Ekko's deck layout."
-      "- Hates jank: a PTY reflowing (SIGWINCH) when a pane or card changes is unacceptable. Prove claims with a measurement, not an argument."
-      "- Runs several omp/rush agent tabs at once in `/tmp`, each named with a glyph prefix and its task (`󰕮 DECK: …`, `󰇷 PR3544: …`), and expects agents to be told exactly what to do next."
-      "- Terse, candid, pushes back on hand-waving; lead with the result, skip preambles."
-      "- Plays with terminal UI for its own sake (deck layouts, sidebar chrome, status-line stats), so small reversible experiments are welcome."
-      "- Wants to talk only to Carly: she starts and steers the omp agents and reports what they did."
+    modules_tools_tern_config_carly_USER_data = {
+      blank,
+      bullets,
+      code,
+      comment,
+      heading,
+      ...
+    }: [
+      (heading 1 "User")
+      blank
+      (comment " Stable facts and preferences about the user, written as directives (\"Prefers pnpm over npm\", \"Calls the main repo 'stencil'\"). Supersede a line in place when it changes; don't append a contradiction. ")
+      blank
+      (bullets [
+        ["Works in Tern but measures it against his own terminals, Ekko (" (code "~/dev/maintaining/ekko") ", Common Lisp) and Cudaterm; wants Tern to do Ekko's deck layout."]
+        "Hates jank: a PTY reflowing (SIGWINCH) when a pane or card changes is unacceptable. Prove claims with a measurement, not an argument."
+        ["Runs several omp/rush agent tabs at once in " (code "/tmp") ", each named with a glyph prefix and its task (" (code "󰕮 DECK: …") ", " (code "󰇷 PR3544: …") "), and expects agents to be told exactly what to do next."]
+        "Terse, candid, pushes back on hand-waving; lead with the result, skip preambles."
+        "Plays with terminal UI for its own sake (deck layouts, sidebar chrome, status-line stats), so small reversible experiments are welcome."
+        "Wants to talk only to Carly: she starts and steers the omp agents and reports what they did."
+      ])
     ];
-    modules_tools_tern_config_carly_memory_2026_10_29_data = [
-      "# 2026-10-29"
-      ""
-      "- 23:00 DECK chat (tab 1 agent, pane 433791696898) is idle after its last turn: deck = Tern tabs as cards, Ctrl-J/K next/prev card, system stats in the status line via the ekko window plugin (`~/dev/developing/tern-ekko/window.luau`, ekko.css — not a git repo). Its one open question to the user: trim Tern's sidebar to just the card list (hide `button.nav-head` session group line and/or `div.tn-vt-find` Filter tabs). No plugin handler failures in the log since 21:43. Mistake of mine: `cx.session:focused()` returns a PaneInfo, not a pane id; passing it as `cx.layout:split()`'s target launched a duplicate `rush` agent that copied the PR3544 session into a new file. Killed the pane; the real PR3544 session (pane 618475290644) is untouched, no stray text in the copy. Remaining residue: `.omp/agent/sessions/-tmp/2026-10-30T02-58-23-697Z_*` (empty-ish copy, 962 KB) and its dir."
-      "- 23:07 Deck work (ekko plugin `~/dev/developing/tern-ekko/window.luau`, now 575 lines, no git here): added a **deck position indicator** to the native status line — `N/M <card name> ●` where the name is the tab's user-given name else its title clipped to 18 chars, warning tone and a busy dot while a command runs, clickable (`command = plugin.ekko.cards`) — plus a **Cards picker** (`plugin.ekko.cards`, Ctrl-P c, or click the indicator) listing every card with program, pane count and cwd; selecting focuses that card's block. Also made the system stats **self-start at plugin load**: `window_start` does not fire on `tern plugin reload`, so the cpu/mem/gpu segments had silently vanished since my first reload. Verified: stub-loaded the plugin in the Lua VM (status formatter returns `2/2 PR3544 ●` + stats + nil for an unknown pane); live DOM width test through `tern ctl dump` in a scratch pane — the ekko status span went 113px → 425px with a 40-char marker → 253px with the real label, and the stats spans came back after the load-time tick. Scratch pane closed, scratch files deleted. Ceiling, again: Tern has no placement verb (Ekko's `place-panes` parks a card off-screen at full size); `park` collapses the split and reflows the PTY, which is the jank. Cards = tabs is the honest approximation. Found: `settings.json`'s `\"ctrl+tab\": \"plugin.ekko.swap_sides\"` is dropped — a Tern preset owns ctrl+tab (\"plugin bind left out: the preset binds these keys\"), so that bind never worked."
-      "- 23:12 Answered \"why can't a plugin do the deck?\" by measuring it in a scratch tab (two `sh` panes, tab 674309865501, now closed; `ekko.css` restored from backup and plugin reloaded, nothing left behind): - With CSS `section.tn-pane.on { position: fixed; left: 349px; width: 2174px; height: 1388px }` and `section.tn-pane.dim { left: -3000px; ... }`, the pane **boxes** obeyed (front [349,0,2174,1388], back [-3000,0,2174,1388], both visible=true) — but both **PTY grids stayed 95×63**. Tern sizes a pane from its own split math, not from the DOM box, so CSS can move a pane but cannot give it a full-size grid or keep a full-size card off-screen. The app only gives a full grid to panes in the tab's split tree, and everything in the tree is tiled; removing one from the tree is `park`, which reflows it on return. That single missing input is the deck. - `tern ctl css reload` reports `{\"reloaded\":[],\"unchanged\":0}` for an edited *plugin* stylesheet — plugin CSS needs `tern plugin reload <id>`. - `tern inspect --json` lists every pane in every tab with `cols`/`rows`, shown or not; `tern ctl state` only describes the *shown* tab of that window. - `cx.layout:new_tab(launch, reveal)` returns the new **pane** id, not the tab id; `cx.layout:split(target, dir, {command=...})` is how to get a plain shell pane."
+    modules_tools_tern_config_carly_memory_2026_10_29_data = {
+      blank,
+      bullets,
+      code,
+      em,
+      heading,
+      strong,
+      ...
+    }: [
+      (heading 1 "2026-10-29")
+      blank
+      (bullets [
+        ["23:00 DECK chat (tab 1 agent, pane 433791696898) is idle after its last turn: deck = Tern tabs as cards, Ctrl-J/K next/prev card, system stats in the status line via the ekko window plugin (" (code "~/dev/developing/tern-ekko/window.luau") ", ekko.css — not a git repo). Its one open question to the user: trim Tern's sidebar to just the card list (hide " (code "button.nav-head") " session group line and/or " (code "div.tn-vt-find") " Filter tabs). No plugin handler failures in the log since 21:43. Mistake of mine: " (code "cx.session:focused()") " returns a PaneInfo, not a pane id; passing it as " (code "cx.layout:split()") "'s target launched a duplicate " (code "rush") " agent that copied the PR3544 session into a new file. Killed the pane; the real PR3544 session (pane 618475290644) is untouched, no stray text in the copy. Remaining residue: " (code ".omp/agent/sessions/-tmp/2026-10-30T02-58-23-697Z_*") " (empty-ish copy, 962 KB) and its dir."]
+        ["23:07 Deck work (ekko plugin " (code "~/dev/developing/tern-ekko/window.luau") ", now 575 lines, no git here): added a " (strong "deck position indicator") " to the native status line — " (code "N/M <card name> ●") " where the name is the tab's user-given name else its title clipped to 18 chars, warning tone and a busy dot while a command runs, clickable (" (code "command = plugin.ekko.cards") ") — plus a " (strong "Cards picker") " (" (code "plugin.ekko.cards") ", Ctrl-P c, or click the indicator) listing every card with program, pane count and cwd; selecting focuses that card's block. Also made the system stats " (strong "self-start at plugin load") ": " (code "window_start") " does not fire on " (code "tern plugin reload") ", so the cpu/mem/gpu segments had silently vanished since my first reload. Verified: stub-loaded the plugin in the Lua VM (status formatter returns " (code "2/2 PR3544 ●") " + stats + nil for an unknown pane); live DOM width test through " (code "tern ctl dump") " in a scratch pane — the ekko status span went 113px → 425px with a 40-char marker → 253px with the real label, and the stats spans came back after the load-time tick. Scratch pane closed, scratch files deleted. Ceiling, again: Tern has no placement verb (Ekko's " (code "place-panes") " parks a card off-screen at full size); " (code "park") " collapses the split and reflows the PTY, which is the jank. Cards = tabs is the honest approximation. Found: " (code "settings.json") "'s " (code "\"ctrl+tab\": \"plugin.ekko.swap_sides\"") " is dropped — a Tern preset owns ctrl+tab (\"plugin bind left out: the preset binds these keys\"), so that bind never worked."]
+        ["23:12 Answered \"why can't a plugin do the deck?\" by measuring it in a scratch tab (two " (code "sh") " panes, tab 674309865501, now closed; " (code "ekko.css") " restored from backup and plugin reloaded, nothing left behind): - With CSS " (code "section.tn-pane.on { position: fixed; left: 349px; width: 2174px; height: 1388px }") " and " (code "section.tn-pane.dim { left: -3000px; ... }") ", the pane " (strong "boxes") " obeyed (front [349,0,2174,1388], back [-3000,0,2174,1388], both visible=true) — but both " (strong "PTY grids stayed 95×63") ". Tern sizes a pane from its own split math, not from the DOM box, so CSS can move a pane but cannot give it a full-size grid or keep a full-size card off-screen. The app only gives a full grid to panes in the tab's split tree, and everything in the tree is tiled; removing one from the tree is " (code "park") ", which reflows it on return. That single missing input is the deck. - " (code "tern ctl css reload") " reports " (code "{\"reloaded\":[],\"unchanged\":0}") " for an edited " (em "plugin") " stylesheet — plugin CSS needs " (code "tern plugin reload <id>") ". - " (code "tern inspect --json") " lists every pane in every tab with " (code "cols") "/" (code "rows") ", shown or not; " (code "tern ctl state") " only describes the " (em "shown") " tab of that window. - " (code "cx.layout:new_tab(launch, reveal)") " returns the new " (strong "pane") " id, not the tab id; " (code "cx.layout:split(target, dir, {command=...})") " is how to get a plain shell pane."]
+      ])
     ];
-    modules_tools_tern_config_carly_memory_2026_10_30_data = [
-      "# 2026-10-30"
-      ""
-      "- 04:04 - Conversation closed on the deck idea. Shipped today in `~/dev/developing/tern-ekko/window.luau`: status-line deck indicator (`N/M name ●`, clickable) + Cards picker (`plugin.ekko.cards`, Ctrl-P c), and a load-time tick so the cpu/mem/gpu stats survive `tern plugin reload`. Open follow-ups: (1) test whether a hidden picture-in-picture pane keeps its grid size — if yes, PiP is the deck primitive Tern lacks; (2) offered the two-column deck (second window on its own session, tomoe-tiled, ~900 MiB); (3) `ctrl+tab` in settings.json is dropped by a Tern preset, so it never worked; (4) the DECK agent still awaits his call on trimming Tern's sidebar header (hide `button.nav-head` and/or `div.tn-vt-find`); (5) leftover junk session copy `~/.omp/agent/sessions/-tmp/2026-10-30T02-58-23-697Z_*` from my bad split, still undeleted."
+    modules_tools_tern_config_carly_memory_2026_10_30_data = {
+      blank,
+      bullets,
+      code,
+      heading,
+      ...
+    }: [
+      (heading 1 "2026-10-30")
+      blank
+      (bullets [
+        ["04:04 - Conversation closed on the deck idea. Shipped today in " (code "~/dev/developing/tern-ekko/window.luau") ": status-line deck indicator (" (code "N/M name ●") ", clickable) + Cards picker (" (code "plugin.ekko.cards") ", Ctrl-P c), and a load-time tick so the cpu/mem/gpu stats survive " (code "tern plugin reload") ". Open follow-ups: (1) test whether a hidden picture-in-picture pane keeps its grid size — if yes, PiP is the deck primitive Tern lacks; (2) offered the two-column deck (second window on its own session, tomoe-tiled, ~900 MiB); (3) " (code "ctrl+tab") " in settings.json is dropped by a Tern preset, so it never worked; (4) the DECK agent still awaits his call on trimming Tern's sidebar header (hide " (code "button.nav-head") " and/or " (code "div.tn-vt-find") "); (5) leftover junk session copy " (code "~/.omp/agent/sessions/-tmp/2026-10-30T02-58-23-697Z_*") " from my bad split, still undeleted."]
+      ])
     ];
     modules_tools_tern_config_plugins_attention_attention_data = [
       {
@@ -35067,41 +35193,40 @@
       }
     ];
     modules_tools_tern_config_plugins_transparent_window_data = {blank, ...}: [blank];
-    modules_tools_tern_config_plugins_tuturu_README_data = [
-      "# Tuturu"
-      ""
-      "A sound when something needs you: a pane's unseen alert (terminal bell, agent"
-      "waiting or finished out of sight, exited program), an omp agent yielding its"
-      "turn, or a long shell command finishing. Sounds never overlap, and one"
-      "window's sound suppresses the same moment's in every other window."
-      ""
-      "Vendored from [H4vC/tern-chime](https://github.com/H4vC/tern-chime) and kept"
-      "here like the rest of `modules/tools/tern/config/plugins`: Tern copies this"
-      "folder to `~/.config/tern/plugins/tuturu`."
-      ""
-      "## Sounds"
-      ""
-      "`~/finix/modules/tools/tern/default.nix` builds the three sounds and writes"
-      "`~/.local/state/tern/plugin-data/tuturu/sounds.toml` to name them:"
-      ""
-      "| Trigger | Sound |"
-      "|---|---|"
-      "| `alert`: terminal bell, an agent waiting, a pane alert | Plasma Ocean `dialog-question` |"
-      "| `yield`: an omp agent finished its turn | Tuturu, at the right ear |"
-      "| `done`: a shell command that ran `min_seconds` | Plasma Ocean `outcome-success` |"
-      ""
-      "Every sound is levelled to the same average loudness (`chimeLevel`, −34 dB),"
-      "and the shipped `sounds.toml` names no files, so a missing override is silent."
-      "That file still carries the knobs: `only_unfocused`, `min_seconds`."
-      ""
-      "To change a sound, edit the build in `default.nix`; to try one by hand without"
-      "a rebuild, name your own file in the plugin data folder's `sounds.toml`."
-      ""
-      "## Palette"
-      ""
-      "**Tuturu: Mute / unmute** (the status line shows `tuturu muted` while muted),"
-      "**Tuturu: Play test sound**, **Tuturu: Reload sounds**, **Tuturu: Diagnose"
-      "panes and agents** (writes what it sees to `<plugin data>/diagnose.txt`)."
+    modules_tools_tern_config_plugins_tuturu_README_data = {
+      blank,
+      code,
+      heading,
+      link,
+      strong,
+      table,
+      wrap,
+      ...
+    }: [
+      (heading 1 "Tuturu")
+      blank
+      (wrap "A sound when something needs you: a pane's unseen alert (terminal bell, agent waiting or finished out of sight, exited program), an omp agent yielding its turn, or a long shell command finishing. Sounds never overlap, and one window's sound suppresses the same moment's in every other window.")
+      blank
+      (wrap ["Vendored from " (link "H4vC/tern-chime" "https://github.com/H4vC/tern-chime") " and kept here like the rest of " (code "modules/tools/tern/config/plugins") ": Tern copies this folder to " (code "~/.config/tern/plugins/tuturu") "."])
+      blank
+      (heading 2 "Sounds")
+      blank
+      (wrap [(code "~/finix/modules/tools/tern/default.nix") " builds the three sounds and writes " (code "~/.local/state/tern/plugin-data/tuturu/sounds.toml") " to name them:"])
+      blank
+      (table [
+        ["Trigger" "Sound"]
+        [[(code "alert") ": terminal bell, an agent waiting, a pane alert"] ["Plasma Ocean " (code "dialog-question")]]
+        [[(code "yield") ": an omp agent finished its turn"] "Tuturu, at the right ear"]
+        [[(code "done") ": a shell command that ran " (code "min_seconds")] ["Plasma Ocean " (code "outcome-success")]]
+      ])
+      blank
+      (wrap ["Every sound is levelled to the same average loudness (" (code "chimeLevel") ", −34 dB), and the shipped " (code "sounds.toml") " names no files, so a missing override is silent. That file still carries the knobs: " (code "only_unfocused") ", " (code "min_seconds") "."])
+      blank
+      (wrap ["To change a sound, edit the build in " (code "default.nix") "; to try one by hand without a rebuild, name your own file in the plugin data folder's " (code "sounds.toml") "."])
+      blank
+      (heading 2 "Palette")
+      blank
+      (wrap [(strong "Tuturu: Mute / unmute") " (the status line shows " (code "tuturu muted") " while muted), " (strong "Tuturu: Play test sound") ", " (strong "Tuturu: Reload sounds") ", " (strong "Tuturu: Diagnose panes and agents") " (writes what it sees to " (code "<plugin data>/diagnose.txt") ")."])
     ];
     modules_tools_tern_config_plugins_tuturu_gitignore_data = ["tern.d.luau" ".DS_Store" "Thumbs.db"];
     modules_tools_tern_config_plugins_tuturu_plugin_data = [[["schema" 1] ["id" "tuturu"] ["name" "Tuturu"] ["version" "0.1.0"] ["description" "Plays a sound when a pane raises an unseen alert, an agent yields, or a long command finishes."] ["icon" "bell"] ["window" "src/window.luau"]]];
