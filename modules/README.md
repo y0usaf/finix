@@ -137,13 +137,120 @@ The configuration reads no file but Nix. Data a module reads lives in a
 byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
-groups, an XML element tree, SSH key fields and PEM base64 blocks. Code and
-prose (TypeScript, JavaScript, Luau, Lua, Lisp, Python, shell, GLSL, VBScript,
-patches and markdown) are kept as line lists, one string per line, not as a
-syntax tree: their `<language>Source` generators only join the lines. A file
-passed by path comes from `generators.sourceFile`, whose store path is the one
-the file had; `generators.sourceDir` builds the optchat directory from its
-files.
+groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp and
+shell are syntax trees (below). The other code and prose (TypeScript,
+JavaScript, Luau, Lua, Python, GLSL, VBScript, patches and markdown) are still
+line lists, one string per line, whose `<language>Source` generators only join
+the lines. A file passed by path comes from `generators.sourceFile`, whose
+store path is the one the file had; `generators.sourceDir` builds the optchat
+directory from its files.
+
+### Code as syntax trees
+
+`generators.doc` is a Wadler/Leijen pretty-printer. A document is a string
+(text; it may hold newlines, which reset the column), a list (concatenation),
+`line` (a space, or a newline when its group breaks), `softline` (nothing, or a
+newline), `hardline`, `nest n d` (d's newlines indent n further), `align d`
+(d's newlines indent to the current column) or `group d` (d flat when it fits
+the width, else broken). `doc.render width d` lays it out; a `null` width
+never breaks a group. Layout is a `builtins.genericClosure` stack machine, one
+step per document node with the column forced at each step, so neither
+recursion depth nor thunk chains grow with the file; indentation is written
+lazily, so blank lines carry no trailing spaces. Columns count bytes. Tomoe's
+`deck.lisp` (400 lines, 20 KB, the largest converted file) renders in 0.03 s
+and 12 MB of allocation; 4000 lines take 0.27 s and 130 MB.
+
+A language is `generators.<language>`: constructor functions and `render`, a
+function from a list of top-level nodes to text, built on `generators.doc`.
+Nodes are Nix values: a plain list or string where the language's own shape is
+a list of words (a Lisp list or symbol, a shell command or word), otherwise a
+one-attribute set made by a constructor (`str "x"` is `{str = "x";}`), so a
+printer dispatches on the node's kind. Comments and blank lines are nodes
+(`comment`, `blank`); nothing in a file is lost. The printer owns the layout
+the language's style decides; the tree records only what it cannot decide,
+with names every language shares: `rows` (written over several lines),
+`inline` (written on one line), `at n` (an indent the rules do not give) and
+`blank`; `wrap` asks for a width-aware layout instead. A data file is a
+function of the constructors it uses, rendered with
+`generators.<language>.render (import ./x.data.nix generators.<language>)`.
+
+Lisp (`generators.lisp`): a list is a Nix list, a symbol or number a string
+(an integer may be a Nix integer), `str` a string literal, and `quote`,
+`quasi`, `unquote`, `splice` and `function` the reader prefixes `'`, `` ` ``,
+`,`, `,@` and `#'`. A list without `rows` prints on one line. `rows [ ... ]`
+holds one row per source line: a list of the items on that line, or one item
+that is not a plain list. Rows after the first indent by Emacs' Common Lisp
+rules: the body of `defun`, `let`, `when` and the other forms in `bodies` by
+2 and their distinguished arguments by 4, the local functions of `flet`,
+`labels` and `macrolet` like a `defun`, a call's arguments under its first
+argument, `cond` clauses by 2, anything else under the head. From
+`tomoe/lisp/deck.data.nix`, abridged:
+
+```nix
+{blank, function, quote, rows, str, ...}: [
+  ["in-package" "#:tomoe-user"]
+  blank
+  ["defun" "deck--fronts" ["state"] ["getf" "state" ":fronts"]]
+  (rows [
+    ["defun" "deck--side-of" ["state" "id"]]
+    [["let" [["entry" ["deck--entry" ["getf" "state" ":columns"] "id"]]] ["and" "entry" ["cdr" "entry"]]]]
+  ])
+  (rows [
+    ["defparameter" "+deck--column-commands+"]
+    (quote [(str "focus-left") (str "focus-right") (str "swap-columns")])
+  ])
+]
+```
+
+Shell (`generators.shell`): a command is a Nix list of words. A word is a
+string (written as it is), `dq` (a double-quoted string, its parts strings
+and `sub`), `sq`, `ansic` (`$'...'`), `sub` (`$(...)`), `word` (parts written
+together), `array`, `assign name value`, `redir op target` (spaced before a
+quoted target) or `heredoc start body`. A statement is a command, `assign`,
+`pipe`, `chain [a "&&" b]`, `fn name body`, `braces`, `if' test body`,
+`ifElse test body otherwise`, `for name words body`, `while test body` or
+`case subject [(arm patterns body)]`. A body is a list of statements, one per
+line two spaces in, or `inline [ ... ]` on one line; `rows` breaks a pipe or
+chain after each operator. From `omp-box/omp-box.data.nix`, abridged:
+
+```nix
+(fn "fail" (inline [["printf" (sq "omp-box: %s\\n") (dq "$*") (redir ">&" "2")] ["exit" "1"]]))
+blank
+(fn "cmd_rm" [
+  ["local" (assign "name" "\${1:-}")]
+  (chain [["[" "-n" (dq "$name") "]"] "||" ["fail" (dq "rm needs a name")]])
+  ["local" "path" "mode"]
+  [(assign "IFS" (ansic "\\t")) "read" "-r" "path" "mode" (redir "<" (dq "$grants/$name"))]
+  (if' ["up"] (inline [["unmount_guest" (dq "$path")]]))
+])
+```
+
+Converting is mechanical: `strictix import <language> FILE` parses the file
+with the language's tree-sitter grammar and prints its tree, and refuses
+layout the printer would not give back (a double space, a trailing comment).
+In `modules/lint.nix`, a codec `<id> = {extensions = []; generator =
+"<language>Source";};` makes strictix flag `generators.<language>Source
+(import ./x.data.nix)`, and `nix run .#lint -- fix` runs the import, rewrites
+the data file and the call, and keeps the change only when
+`generators.<id>.render` returns the line list's text byte for byte. Lint fix
+edits files, so it runs on a split tree (`strictix split . --merged
+flake.nix`, then `strictix merge . --entry flake.nix --out flake.nix --expand
+nixFiles`). A template that interpolates Nix values
+(`theme/templates/osc.data.nix`) is converted in place by `strictix import`,
+which keeps the interpolations inside the tree's strings. Once a language has
+no line lists left, its `<language>Source` generator and its codec go.
+
+Every converted file passed its gate. A language whose printer can reproduce
+its files gates on bytes at conversion; one that cannot gates on its official
+formatter's output for both sides. `checks.codegen` (`modules/lint.nix`)
+then runs each language's own check on every rendered tree, listed in its
+`trees`:
+
+| Language | Gate at conversion | `checks.codegen` |
+| --- | --- | --- |
+| Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
+| shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
+| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
