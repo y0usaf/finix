@@ -225,6 +225,26 @@ blank
 ])
 ```
 
+Markdown (`generators.markdown`): a paragraph is a string or a list of
+inlines, `wrap` a paragraph filled to 78 columns, `heading level text`,
+`bullets [ ... ]` a tight `- ` list of paragraphs, `table [header rows...]` a
+`| a | b |` table under a `|---|` row, and `comment` an HTML comment. An
+inline is a string, `code`, `strong`, `em` or `link text url`. From
+`tern/config/plugins/tuturu/README.data.nix`, abridged:
+
+```nix
+{blank, code, heading, table, wrap, ...}: [
+  (heading 2 "Sounds")
+  blank
+  (wrap [(code "~/finix/modules/tools/tern/default.nix") " builds the three sounds and writes " (code "~/.local/state/tern/plugin-data/tuturu/sounds.toml") " to name them:"])
+  blank
+  (table [
+    ["Trigger" "Sound"]
+    [[(code "yield") ": an omp agent finished its turn"] "Tuturu, at the right ear"]
+  ])
+]
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -250,7 +270,8 @@ then runs each language's own check on every rendered tree, listed in its
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
-| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
+| markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
+| TypeScript, JavaScript, Luau, Lua, Python, GLSL, VBScript, patches | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
