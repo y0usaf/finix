@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   version = "0.9.7";
@@ -118,6 +119,8 @@
     '';
   };
 
+  stylesheet = name: nodes: pkgs.writeText name (generators.cssSource nodes);
+
   configFiles = {
     "carly/HEARTBEAT.md" = ./config/carly/HEARTBEAT.md;
     "carly/MEMORY.md" = ./config/carly/MEMORY.md;
@@ -125,7 +128,7 @@
     "carly/USER.md" = ./config/carly/USER.md;
     "carly/memory/2026-10-29.md" = ./config/carly/memory/2026-10-29.md;
     "carly/memory/2026-10-30.md" = ./config/carly/memory/2026-10-30.md;
-    "plugins/attention/attention.css" = ./config/plugins/attention/attention.css;
+    "plugins/attention/attention.css" = stylesheet "attention.css" (import ./config/plugins/attention/attention.data.nix);
     "plugins/attention/plugin.toml" = ./config/plugins/attention/plugin.toml;
     "plugins/attention/window.luau" = ./config/plugins/attention/window.luau;
     "plugins/block-menu/plugin.toml" = ./config/plugins/block-menu/plugin.toml;
@@ -136,7 +139,7 @@
     "plugins/tab-order/plugin.toml" = ./config/plugins/tab-order/plugin.toml;
     "plugins/tab-order/window.luau" = ./config/plugins/tab-order/window.luau;
     "plugins/transparent/plugin.toml" = ./config/plugins/transparent/plugin.toml;
-    "plugins/transparent/transparent.css" = ./config/plugins/transparent/transparent.css;
+    "plugins/transparent/transparent.css" = stylesheet "transparent.css" (import ./config/plugins/transparent/transparent.data.nix);
     "plugins/transparent/window.luau" = ./config/plugins/transparent/window.luau;
     "plugins/tuturu/.gitignore" = ./config/plugins/tuturu/.gitignore;
     "plugins/tuturu/README.md" = ./config/plugins/tuturu/README.md;
@@ -147,7 +150,7 @@
     "plugins/ui-menu/host.luau" = ./config/plugins/ui-menu/host.luau;
     "plugins/ui-menu/plugin.toml" = ./config/plugins/ui-menu/plugin.toml;
     "plugins/ui-menu/rail.luau" = ./config/plugins/ui-menu/rail.luau;
-    "plugins/ui-menu/ui-menu.css" = ./config/plugins/ui-menu/ui-menu.css;
+    "plugins/ui-menu/ui-menu.css" = stylesheet "ui-menu.css" (import ./config/plugins/ui-menu/ui-menu.data.nix);
     "plugins/ui-menu/window.luau" = ./config/plugins/ui-menu/window.luau;
     "settings.json" = ./config/settings.json;
   };

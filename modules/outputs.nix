@@ -36,13 +36,18 @@ inputs: let
     };
   pkgs = mkPkgs false;
 
+  generators = import ./generators.nix {inherit lib;};
+
   mkFinixSystem = {
     modules,
     cudaSupport ? false,
   }:
     inputs.finix.lib.finixSystem {
       inherit lib;
-      specialArgs.flakeInputs = inputs;
+      specialArgs = {
+        flakeInputs = inputs;
+        inherit generators;
+      };
       modules =
         [
           {

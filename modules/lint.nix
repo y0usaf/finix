@@ -93,6 +93,7 @@
       "modules/hosts/steam-frame" = "";
       "modules/hosts/shared.nix" = "";
       "omp-box" = "";
+      "modules/generators.nix" = "";
       "modules/lint.nix" = "";
     };
   };

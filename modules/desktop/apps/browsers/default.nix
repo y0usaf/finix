@@ -3,6 +3,7 @@
   lib,
   pkgs,
   flakeInputs,
+  generators,
   ...
 }: let
   userName = config.user.name;
@@ -220,6 +221,6 @@ in {
         };
       };
     };
-    ".librewolf/${userName}/chrome/userChrome.css".text = builtins.readFile ./userChrome.css;
+    ".librewolf/${userName}/chrome/userChrome.css".text = generators.cssSource (import ./userChrome.data.nix);
   };
 }

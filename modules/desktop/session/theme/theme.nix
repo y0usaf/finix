@@ -1,4 +1,5 @@
 {
+  generators,
   lib,
   pkgs,
   ...
@@ -12,16 +13,25 @@
     "monstar-theme" = [".cache/theme/monstar"];
   };
 
-  render = scheme: text: let
-    values = scheme.colors // scheme.special;
+  scope = scheme: let
     hex = lib.removePrefix "#";
     channel = offset: value: toString (lib.fromHexString (builtins.substring offset 2 (hex value)));
+  in {
+    inherit generators;
+    values = scheme.colors // scheme.special;
     filters = {
       strip = hex;
       red = channel 0;
       green = channel 2;
       blue = channel 4;
     };
+  };
+
+  render = {
+    values,
+    filters,
+    ...
+  }: text: let
     fill = part:
       if builtins.isString part
       then part
@@ -38,17 +48,22 @@
     lib.concatMapStrings fill (builtins.split "[{][{] *([a-z0-9]+) *([|] *([a-z]+))? *[}][}]" text);
 
   templates = {
-    "discord-colors.css" = ./templates/discord-colors.css;
+    "discord-colors.css" = import ./templates/discord-colors.data.nix;
     "foot-colors.ini" = ./templates/foot-colors.ini;
-    "gtk-colors.css" = ./templates/gtk-colors.css;
+    "gtk-colors.css" = import ./templates/gtk-colors.data.nix;
     "monstar-theme" = ./templates/monstar-theme;
     "osc.sh" = ./templates/osc.sh;
   };
 
+  instantiate = scheme: template:
+    if builtins.isFunction template
+    then template (scope scheme)
+    else render (scope scheme) (builtins.readFile template);
+
   themes = pkgs.linkFarm "themes" (lib.concatLists (lib.mapAttrsToList (name: scheme:
-    lib.mapAttrsToList (template: file: {
+    lib.mapAttrsToList (template: source: {
       name = "${name}/${template}";
-      path = pkgs.writeText "${name}-${template}" (render scheme (builtins.readFile file));
+      path = pkgs.writeText "${name}-${template}" (instantiate scheme source);
     })
     templates)
   schemes));
