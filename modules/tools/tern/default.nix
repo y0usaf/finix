@@ -141,7 +141,7 @@
     "plugins/transparent/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource (import ./config/plugins/transparent/plugin.data.nix));
     "plugins/transparent/transparent.css" = stylesheet "transparent.css" (import ./config/plugins/transparent/transparent.data.nix);
     "plugins/transparent/window.luau" = ./config/plugins/transparent/window.luau;
-    "plugins/tuturu/.gitignore" = ./config/plugins/tuturu/.gitignore;
+    "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource (import ./config/plugins/tuturu/gitignore.data.nix));
     "plugins/tuturu/README.md" = ./config/plugins/tuturu/README.md;
     "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource (import ./config/plugins/tuturu/plugin.data.nix));
     "plugins/tuturu/scripts/play.vbs" = ./config/plugins/tuturu/scripts/play.vbs;
