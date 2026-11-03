@@ -5749,27 +5749,29 @@
       values,
       ...
     }:
-      generators.shellSource [
-        "printf '\\033]10;${values.foreground}\\007'"
-        "printf '\\033]11;${values.background}\\007'"
-        "printf '\\033]12;${values.cursor}\\007'"
-        "printf '\\033]4;0;${values.color0}\\007'"
-        "printf '\\033]4;1;${values.color1}\\007'"
-        "printf '\\033]4;2;${values.color2}\\007'"
-        "printf '\\033]4;3;${values.color3}\\007'"
-        "printf '\\033]4;4;${values.color4}\\007'"
-        "printf '\\033]4;5;${values.color5}\\007'"
-        "printf '\\033]4;6;${values.color6}\\007'"
-        "printf '\\033]4;7;${values.color7}\\007'"
-        "printf '\\033]4;8;${values.color8}\\007'"
-        "printf '\\033]4;9;${values.color9}\\007'"
-        "printf '\\033]4;10;${values.color10}\\007'"
-        "printf '\\033]4;11;${values.color11}\\007'"
-        "printf '\\033]4;12;${values.color12}\\007'"
-        "printf '\\033]4;13;${values.color13}\\007'"
-        "printf '\\033]4;14;${values.color14}\\007'"
-        "printf '\\033]4;15;${values.color15}\\007'"
-      ];
+      generators.shell.render (let
+        inherit (generators.shell) sq;
+      in [
+        ["printf" (sq "\\033]10;${values.foreground}\\007")]
+        ["printf" (sq "\\033]11;${values.background}\\007")]
+        ["printf" (sq "\\033]12;${values.cursor}\\007")]
+        ["printf" (sq "\\033]4;0;${values.color0}\\007")]
+        ["printf" (sq "\\033]4;1;${values.color1}\\007")]
+        ["printf" (sq "\\033]4;2;${values.color2}\\007")]
+        ["printf" (sq "\\033]4;3;${values.color3}\\007")]
+        ["printf" (sq "\\033]4;4;${values.color4}\\007")]
+        ["printf" (sq "\\033]4;5;${values.color5}\\007")]
+        ["printf" (sq "\\033]4;6;${values.color6}\\007")]
+        ["printf" (sq "\\033]4;7;${values.color7}\\007")]
+        ["printf" (sq "\\033]4;8;${values.color8}\\007")]
+        ["printf" (sq "\\033]4;9;${values.color9}\\007")]
+        ["printf" (sq "\\033]4;10;${values.color10}\\007")]
+        ["printf" (sq "\\033]4;11;${values.color11}\\007")]
+        ["printf" (sq "\\033]4;12;${values.color12}\\007")]
+        ["printf" (sq "\\033]4;13;${values.color13}\\007")]
+        ["printf" (sq "\\033]4;14;${values.color14}\\007")]
+        ["printf" (sq "\\033]4;15;${values.color15}\\007")]
+      ]);
     modules_desktop_session_theme_theme = {
       generators,
       lib,
@@ -28882,8 +28884,6 @@
 
       cmusThemeSource = keyValueSource "set ";
 
-      shellSource = lines;
-
       xmlSource = root: "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n${xmlElement "" root}";
 
       sshPublicKey = key: "${key.type} ${key.key} ${key.comment}";
@@ -30076,44 +30076,38 @@
         };
       };
     };
-    modules_hosts_steam_frame_beat_saber_lock_data = [
-      "v=\${1:?usage: beat-saber-lock GAME_VERSION}"
-      "tmp=$(mktemp -d)"
-      "trap 'rm -rf \"$tmp\"' EXIT"
-      ""
-      "curl -fsS -o \"$tmp/mods.json\" \"https://beatmods.com/api/mods?gameName=BeatSaber&gameVersion=$v&status=verified&platform=steampc\""
-      ""
-      "jq -r '.mods[].latest.zipHash' \"$tmp/mods.json\" |"
-      "  xargs -P 8 -I '{}' sh -c '"
-      "    set -e"
-      "    curl -fsS -o \"$1/$2.zip\" \"https://beatmods.com/cdn/mod/$2.zip\""
-      "    echo \"$2  $1/$2.zip\" | md5sum -c --quiet"
-      "    nix hash file --sri --type sha256 \"$1/$2.zip\" > \"$1/$2.sri\""
-      "  ' _ \"$tmp\" '{}'"
-      ""
-      "for f in \"$tmp\"/*.sri; do"
-      "  h=\${f##*/}"
-      "  jq -n --arg k \"\${h%.sri}\" --rawfile v \"$f\" '{($k): ($v | rtrimstr(\"\\n\"))}'"
-      "done | jq -s add > \"$tmp/sri.json\""
-      ""
-      "jq -S --arg v \"$v\" --slurpfile sri \"$tmp/sri.json\" '"
-      "  if (.mods | length) == 0 then error(\"BeatMods has no verified mods for \\($v)\") else . end"
-      "  | (.mods | map({ key: (.latest.id | tostring), value: .mod.name }) | from_entries) as $names"
-      "  | {"
-      "      gameVersion: $v,"
-      "      mods: (.mods | map({"
-      "        key: .mod.name,"
-      "        value: {"
-      "          version: .latest.modVersion,"
-      "          url: \"https://beatmods.com/cdn/mod/\\(.latest.zipHash).zip\","
-      "          hash: $sri[0][.latest.zipHash],"
-      "          depends: [.latest.dependencies[] | $names[tostring] // error(\"\\(.) is not a verified \\($v) mod\")] | sort"
-      "        }"
-      "      }) | from_entries)"
-      "    }"
-      "' \"$tmp/mods.json\" > \"$tmp/beatmods.json\""
-      ""
-      "nix eval --impure --expr \"builtins.fromJSON (builtins.readFile $tmp/beatmods.json)\" | alejandra --quiet"
+    modules_hosts_steam_frame_beat_saber_lock_data = {
+      assign,
+      blank,
+      dq,
+      for,
+      pipe,
+      redir,
+      rows,
+      sq,
+      sub,
+      word,
+      ...
+    }: [
+      (assign "v" "\${1:?usage: beat-saber-lock GAME_VERSION}")
+      (assign "tmp" (sub [["mktemp" "-d"]]))
+      ["trap" (sq "rm -rf \"$tmp\"") "EXIT"]
+      blank
+      ["curl" "-fsS" "-o" (dq "$tmp/mods.json") (dq "https://beatmods.com/api/mods?gameName=BeatSaber&gameVersion=$v&status=verified&platform=steampc")]
+      blank
+      (pipe (rows [["jq" "-r" (sq ".mods[].latest.zipHash") (dq "$tmp/mods.json")] ["xargs" "-P" "8" "-I" (sq "{}") "sh" "-c" (sq "\n    set -e\n    curl -fsS -o \"$1/$2.zip\" \"https://beatmods.com/cdn/mod/$2.zip\"\n    echo \"$2  $1/$2.zip\" | md5sum -c --quiet\n    nix hash file --sri --type sha256 \"$1/$2.zip\" > \"$1/$2.sri\"\n  ") "_" (dq "$tmp") (sq "{}")]]))
+      blank
+      (pipe [
+        (for "f" [(word [(dq "$tmp") "/*.sri"])] [
+          (assign "h" "\${f##*/}")
+          ["jq" "-n" "--arg" "k" (dq "\${h%.sri}") "--rawfile" "v" (dq "$f") (sq "{($k): ($v | rtrimstr(\"\\n\"))}")]
+        ])
+        ["jq" "-s" "add" (redir ">" (dq "$tmp/sri.json"))]
+      ])
+      blank
+      ["jq" "-S" "--arg" "v" (dq "$v") "--slurpfile" "sri" (dq "$tmp/sri.json") (sq "\n  if (.mods | length) == 0 then error(\"BeatMods has no verified mods for \\($v)\") else . end\n  | (.mods | map({ key: (.latest.id | tostring), value: .mod.name }) | from_entries) as $names\n  | {\n      gameVersion: $v,\n      mods: (.mods | map({\n        key: .mod.name,\n        value: {\n          version: .latest.modVersion,\n          url: \"https://beatmods.com/cdn/mod/\\(.latest.zipHash).zip\",\n          hash: $sri[0][.latest.zipHash],\n          depends: [.latest.dependencies[] | $names[tostring] // error(\"\\(.) is not a verified \\($v) mod\")] | sort\n        }\n      }) | from_entries)\n    }\n") (dq "$tmp/mods.json") (redir ">" (dq "$tmp/beatmods.json"))]
+      blank
+      (pipe [["nix" "eval" "--impure" "--expr" (dq "builtins.fromJSON (builtins.readFile $tmp/beatmods.json)")] ["alejandra" "--quiet"]])
     ];
     modules_hosts_steam_frame_bolo = {
       config,
@@ -31652,10 +31646,6 @@
           parse = builtins.fromTOML;
           render = v: builtins.readFile ((pkgs.formats.toml {}).generate "x.toml" v);
         };
-        shell = {
-          extensions = [];
-          generator = "shellSource";
-        };
       };
 
       importers = lib.attrNames (lib.filterAttrs (_: c: !(c ? parse)) codecs);
@@ -32253,7 +32243,7 @@
             name = "beat-saber-lock";
             runtimeInputs = [pkgs.coreutils pkgs.curl pkgs.findutils pkgs.jq pkgs.alejandra];
             excludeShellChecks = ["SC2016"];
-            text = generators.shellSource modules_hosts_steam_frame_beat_saber_lock_data;
+            text = generators.shell.render (modules_hosts_steam_frame_beat_saber_lock_data generators.shell);
           });
         };
       };
@@ -37060,7 +37050,7 @@
       cli = pkgs.writeShellApplication {
         name = "omp-box";
         runtimeInputs = [pkgs.coreutils pkgs.util-linux pkgs.openssh pkgs.findutils];
-        text = generators.shellSource omp_box_omp_box_data;
+        text = generators.shell.render (omp_box_omp_box_data generators.shell);
       };
     in
       pkgs.symlinkJoin {
@@ -37429,151 +37419,173 @@
         '';
       };
     };
-    omp_box_omp_box_data = [
-      "#!/usr/bin/env bash"
-      "set -euo pipefail"
-      ""
-      "state=\"\${XDG_STATE_HOME:-$HOME/.local/state}/omp-box\""
-      "grants=\"$state/grants\""
-      "shares=\"$state/shares\""
-      "key=\"$state/ssh-key\""
-      "port=22422"
-      "target=y0usaf@127.0.0.1"
-      "ssh=(ssh -q -p \"$port\" -i \"$key\" -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=2 -o ServerAliveInterval=2 -o ServerAliveCountMax=1)"
-      ""
-      "usage() {"
-      "  cat <<'EOF'"
-      "usage: omp-box <command>"
-      ""
-      "  list [--json]        granted folders"
-      "  add PATH [--copy]    share PATH into the box at the same path"
-      "  rm NAME              revoke a grant"
-      "  reconcile            re-apply every grant (after a box restart)"
-      "EOF"
-      "}"
-      ""
-      "up() { \"\${ssh[@]}\" \"$target\" true 2>/dev/null; }"
-      ""
-      "fail() { printf 'omp-box: %s\\n' \"$*\" >&2; exit 1; }"
-      ""
-      "covers() { local base=\${1%/}; case \"$2/\" in \"$base\"/*) return 0 ;; *) return 1 ;; esac; }"
-      ""
-      "mount_guest() {"
-      "  local name=$1 path=$2"
-      "  \"\${ssh[@]}\" \"$target\" \"set -e"
-      "    p=$(printf %q \"$path\")"
-      "    /run/wrappers/bin/sudo mkdir -p \\\"\\$(dirname \\\"\\$p\\\")\\\" \\\"\\$p\\\""
-      "    /run/wrappers/bin/sudo mountpoint -q \\\"\\$p\\\" || /run/wrappers/bin/sudo mount --bind $(printf %q \"/mnt/shares/$name\") \\\"\\$p\\\"\""
-      "}"
-      ""
-      "unmount_guest() {"
-      "  local path=$1"
-      "  \"\${ssh[@]}\" \"$target\" \"/run/wrappers/bin/sudo mountpoint -q $(printf %q \"$path\") && /run/wrappers/bin/sudo umount $(printf %q \"$path\") || true\" 2>/dev/null || true"
-      "}"
-      ""
-      "apply_host() {"
-      "  local name=$1 path=$2 mode=$3"
-      "  mkdir -p \"$shares/$name\""
-      "  case $mode in"
-      "    copy) cp -au \"$path/.\" \"$shares/$name/\" ;;"
-      "    bind) findmnt -n -o TARGET \"$shares/$name\" >/dev/null 2>&1 || /run/wrappers/bin/sudo -n mount --bind \"$path\" \"$shares/$name\" ;;"
-      "  esac"
-      "}"
-      ""
-      "drop_host() {"
-      "  local name=$1 mode=$2"
-      "  if [ \"$mode\" = bind ]; then"
-      "    findmnt -n -o TARGET \"$shares/$name\" >/dev/null 2>&1 && /run/wrappers/bin/sudo -n umount \"$shares/$name\" || true"
-      "  fi"
-      "  rm -rf \"\${shares:?}/\${name:?}\""
-      "}"
-      ""
-      "cmd_add() {"
-      "  local path=\"\" mode=bind"
-      "  while [ $# -gt 0 ]; do"
-      "    case $1 in"
-      "      --copy) mode=copy ;;"
-      "      *) path=$1 ;;"
-      "    esac"
-      "    shift"
-      "  done"
-      "  [ -n \"$path\" ] || fail \"add needs a path\""
-      "  path=$(realpath -e -- \"$path\")"
-      "  [ -d \"$path\" ] || fail \"$path is not a directory\""
-      "  if covers \"$path\" \"$(realpath -m -- \"$state\")\"; then fail \"$path holds the share directory itself, so sharing it loops\"; fi"
-      "  if covers \"$path\" \"$HOME\"; then fail \"$path covers $HOME, where the box keeps its own state; share a folder inside it\"; fi"
-      "  local name"
-      "  name=$(basename -- \"$path\" | tr -cd 'A-Za-z0-9._-')"
-      "  [ -e \"$grants/$name\" ] && fail \"grant '$name' already exists (rm it first)\""
-      "  mkdir -p \"$grants\" \"$shares\""
-      "  apply_host \"$name\" \"$path\" \"$mode\""
-      "  printf '%s\\t%s\\n' \"$path\" \"$mode\" > \"$grants/$name\""
-      "  if up; then mount_guest \"$name\" \"$path\" || fail \"granted on the host, but the box did not take it\"; fi"
-      "  printf '%s  %s  %s\\n' \"$name\" \"$mode\" \"$path\""
-      "}"
-      ""
-      "cmd_rm() {"
-      "  local name=\${1:-}"
-      "  [ -n \"$name\" ] || fail \"rm needs a name\""
-      "  [ -e \"$grants/$name\" ] || fail \"no grant '$name'\""
-      "  local path mode"
-      "  IFS=$'\\t' read -r path mode < \"$grants/$name\""
-      "  if up; then unmount_guest \"$path\"; fi"
-      "  drop_host \"$name\" \"$mode\""
-      "  rm -f \"$grants/$name\""
-      "  printf 'removed %s\\n' \"$name\""
-      "}"
-      ""
-      "cmd_list() {"
-      "  local json=0"
-      "  [ \"\${1:-}\" = --json ] && json=1"
-      "  if [ \"$json\" = 1 ]; then"
-      "    printf '['"
-      "    local first=1 name path mode"
-      "    for f in \"$grants\"/*; do"
-      "      [ -e \"$f\" ] || continue"
-      "      IFS=$'\\t' read -r path mode < \"$f\""
-      "      name=$(basename -- \"$f\")"
-      "      [ \"$first\" = 1 ] || printf ','"
-      "      first=0"
-      "      printf '{\"name\":\"%s\",\"path\":\"%s\",\"mode\":\"%s\"}' \"$name\" \"$path\" \"$mode\""
-      "    done"
-      "    printf ']\\n'"
-      "    return"
-      "  fi"
-      "  local name"
-      "  for f in \"$grants\"/*; do"
-      "    [ -e \"$f\" ] || continue"
-      "    local path mode"
-      "    IFS=$'\\t' read -r path mode < \"$f\""
-      "    name=$(basename -- \"$f\")"
-      "    printf '%-16s %-5s %s\\n' \"$name\" \"$mode\" \"$path\""
-      "  done"
-      "}"
-      ""
-      "cmd_reconcile() {"
-      "  [ -d \"$grants\" ] || return 0"
-      "  local f path mode name failed=0"
-      "  for f in \"$grants\"/*; do"
-      "    [ -e \"$f\" ] || continue"
-      "    IFS=$'\\t' read -r path mode < \"$f\""
-      "    name=$(basename -- \"$f\")"
-      "    if apply_host \"$name\" \"$path\" \"$mode\" && mount_guest \"$name\" \"$path\"; then"
-      "      continue"
-      "    fi"
-      "    printf 'omp-box: grant %s (%s) did not apply\\n' \"$name\" \"$path\" >&2"
-      "    failed=1"
-      "  done"
-      "  return \"$failed\""
-      "}"
-      ""
-      "case \${1:-} in"
-      "  list) shift; cmd_list \"$@\" ;;"
-      "  add) shift; cmd_add \"$@\" ;;"
-      "  rm) shift; cmd_rm \"$@\" ;;"
-      "  reconcile) cmd_reconcile ;;"
-      "  *) usage; exit 2 ;;"
-      "esac"
+    omp_box_omp_box_data = {
+      ansic,
+      arm,
+      array,
+      assign,
+      blank,
+      case,
+      chain,
+      comment,
+      dq,
+      fn,
+      for,
+      heredoc,
+      if',
+      inline,
+      pipe,
+      redir,
+      sq,
+      sub,
+      while,
+      word,
+      ...
+    }: [
+      (comment "#!/usr/bin/env bash")
+      ["set" "-euo" "pipefail"]
+      blank
+      (assign "state" (dq "\${XDG_STATE_HOME:-$HOME/.local/state}/omp-box"))
+      (assign "grants" (dq "$state/grants"))
+      (assign "shares" (dq "$state/shares"))
+      (assign "key" (dq "$state/ssh-key"))
+      (assign "port" "22422")
+      (assign "target" "y0usaf@127.0.0.1")
+      (assign "ssh" (array ["ssh" "-q" "-p" (dq "$port") "-i" (dq "$key") "-o" "LogLevel=ERROR" "-o" "UserKnownHostsFile=/dev/null" "-o" "StrictHostKeyChecking=no" "-o" "BatchMode=yes" "-o" "ConnectTimeout=2" "-o" "ServerAliveInterval=2" "-o" "ServerAliveCountMax=1"]))
+      blank
+      (fn "usage" [
+        [
+          "cat"
+          (heredoc "'EOF'" ''
+            usage: omp-box <command>
+
+              list [--json]        granted folders
+              add PATH [--copy]    share PATH into the box at the same path
+              rm NAME              revoke a grant
+              reconcile            re-apply every grant (after a box restart)
+          '')
+        ]
+      ])
+      blank
+      (fn "up" (inline [[(dq "\${ssh[@]}") (dq "$target") "true" (redir "2>" "/dev/null")]]))
+      blank
+      (fn "fail" (inline [["printf" (sq "omp-box: %s\\n") (dq "$*") (redir ">&" "2")] ["exit" "1"]]))
+      blank
+      (fn "covers" (inline [["local" (assign "base" "\${1%/}")] (case (dq "$2/") (inline [(arm (word [(dq "$base") "/*"]) (inline [["return" "0"]])) (arm "*" (inline [["return" "1"]]))]))]))
+      blank
+      (fn "mount_guest" [
+        ["local" (assign "name" "$1") (assign "path" "$2")]
+        [
+          (dq "\${ssh[@]}")
+          (dq "$target")
+          (dq [
+            ''
+              set -e
+                  p=''
+            (sub [["printf" "%q" (dq "$path")]])
+            "\n    /run/wrappers/bin/sudo mkdir -p \\\"\\$(dirname \\\"\\$p\\\")\\\" \\\"\\$p\\\"\n    /run/wrappers/bin/sudo mountpoint -q \\\"\\$p\\\" || /run/wrappers/bin/sudo mount --bind "
+            (sub [["printf" "%q" (dq "/mnt/shares/$name")]])
+            " \\\"\\$p\\\""
+          ])
+        ]
+      ])
+      blank
+      (fn "unmount_guest" [
+        ["local" (assign "path" "$1")]
+        (chain [[(dq "\${ssh[@]}") (dq "$target") (dq ["/run/wrappers/bin/sudo mountpoint -q " (sub [["printf" "%q" (dq "$path")]]) " && /run/wrappers/bin/sudo umount " (sub [["printf" "%q" (dq "$path")]]) " || true"]) (redir "2>" "/dev/null")] "||" ["true"]])
+      ])
+      blank
+      (fn "apply_host" [
+        ["local" (assign "name" "$1") (assign "path" "$2") (assign "mode" "$3")]
+        ["mkdir" "-p" (dq "$shares/$name")]
+        (case "$mode" [(arm "copy" (inline [["cp" "-au" (dq "$path/.") (dq "$shares/$name/")]])) (arm "bind" (inline [(chain [["findmnt" "-n" "-o" "TARGET" (dq "$shares/$name") (redir ">" "/dev/null") (redir "2>&" "1")] "||" ["/run/wrappers/bin/sudo" "-n" "mount" "--bind" (dq "$path") (dq "$shares/$name")]])]))])
+      ])
+      blank
+      (fn "drop_host" [
+        ["local" (assign "name" "$1") (assign "mode" "$2")]
+        (if' ["[" (dq "$mode") "=" "bind" "]"] [
+          (chain [["findmnt" "-n" "-o" "TARGET" (dq "$shares/$name") (redir ">" "/dev/null") (redir "2>&" "1")] "&&" ["/run/wrappers/bin/sudo" "-n" "umount" (dq "$shares/$name")] "||" ["true"]])
+        ])
+        ["rm" "-rf" (dq "\${shares:?}/\${name:?}")]
+      ])
+      blank
+      (fn "cmd_add" [
+        ["local" (assign "path" (dq "")) (assign "mode" "bind")]
+        (while ["[" "$#" "-gt" "0" "]"] [
+          (case "$1" [(arm "--copy" (inline [(assign "mode" "copy")])) (arm "*" (inline [(assign "path" "$1")]))])
+          ["shift"]
+        ])
+        (chain [["[" "-n" (dq "$path") "]"] "||" ["fail" (dq "add needs a path")]])
+        (assign "path" (sub [["realpath" "-e" "--" (dq "$path")]]))
+        (chain [["[" "-d" (dq "$path") "]"] "||" ["fail" (dq "$path is not a directory")]])
+        (if' ["covers" (dq "$path") (dq [(sub [["realpath" "-m" "--" (dq "$state")]])])] (inline [["fail" (dq "$path holds the share directory itself, so sharing it loops")]]))
+        (if' ["covers" (dq "$path") (dq "$HOME")] (inline [["fail" (dq "$path covers $HOME, where the box keeps its own state; share a folder inside it")]]))
+        ["local" "name"]
+        (assign "name" (sub [(pipe [["basename" "--" (dq "$path")] ["tr" "-cd" (sq "A-Za-z0-9._-")]])]))
+        (chain [["[" "-e" (dq "$grants/$name") "]"] "&&" ["fail" (dq "grant '$name' already exists (rm it first)")]])
+        ["mkdir" "-p" (dq "$grants") (dq "$shares")]
+        ["apply_host" (dq "$name") (dq "$path") (dq "$mode")]
+        ["printf" (sq "%s\\t%s\\n") (dq "$path") (dq "$mode") (redir ">" (dq "$grants/$name"))]
+        (if' ["up"] (inline [(chain [["mount_guest" (dq "$name") (dq "$path")] "||" ["fail" (dq "granted on the host, but the box did not take it")]])]))
+        ["printf" (sq "%s  %s  %s\\n") (dq "$name") (dq "$mode") (dq "$path")]
+      ])
+      blank
+      (fn "cmd_rm" [
+        ["local" (assign "name" "\${1:-}")]
+        (chain [["[" "-n" (dq "$name") "]"] "||" ["fail" (dq "rm needs a name")]])
+        (chain [["[" "-e" (dq "$grants/$name") "]"] "||" ["fail" (dq "no grant '$name'")]])
+        ["local" "path" "mode"]
+        [(assign "IFS" (ansic "\\t")) "read" "-r" "path" "mode" (redir "<" (dq "$grants/$name"))]
+        (if' ["up"] (inline [["unmount_guest" (dq "$path")]]))
+        ["drop_host" (dq "$name") (dq "$mode")]
+        ["rm" "-f" (dq "$grants/$name")]
+        ["printf" (sq "removed %s\\n") (dq "$name")]
+      ])
+      blank
+      (fn "cmd_list" [
+        ["local" (assign "json" "0")]
+        (chain [["[" (dq "\${1:-}") "=" "--json" "]"] "&&" (assign "json" "1")])
+        (if' ["[" (dq "$json") "=" "1" "]"] [
+          ["printf" (sq "[")]
+          ["local" (assign "first" "1") "name" "path" "mode"]
+          (for "f" [(word [(dq "$grants") "/*"])] [
+            (chain [["[" "-e" (dq "$f") "]"] "||" ["continue"]])
+            [(assign "IFS" (ansic "\\t")) "read" "-r" "path" "mode" (redir "<" (dq "$f"))]
+            (assign "name" (sub [["basename" "--" (dq "$f")]]))
+            (chain [["[" (dq "$first") "=" "1" "]"] "||" ["printf" (sq ",")]])
+            (assign "first" "0")
+            ["printf" (sq "{\"name\":\"%s\",\"path\":\"%s\",\"mode\":\"%s\"}") (dq "$name") (dq "$path") (dq "$mode")]
+          ])
+          ["printf" (sq "]\\n")]
+          ["return"]
+        ])
+        ["local" "name"]
+        (for "f" [(word [(dq "$grants") "/*"])] [
+          (chain [["[" "-e" (dq "$f") "]"] "||" ["continue"]])
+          ["local" "path" "mode"]
+          [(assign "IFS" (ansic "\\t")) "read" "-r" "path" "mode" (redir "<" (dq "$f"))]
+          (assign "name" (sub [["basename" "--" (dq "$f")]]))
+          ["printf" (sq "%-16s %-5s %s\\n") (dq "$name") (dq "$mode") (dq "$path")]
+        ])
+      ])
+      blank
+      (fn "cmd_reconcile" [
+        (chain [["[" "-d" (dq "$grants") "]"] "||" ["return" "0"]])
+        ["local" "f" "path" "mode" "name" (assign "failed" "0")]
+        (for "f" [(word [(dq "$grants") "/*"])] [
+          (chain [["[" "-e" (dq "$f") "]"] "||" ["continue"]])
+          [(assign "IFS" (ansic "\\t")) "read" "-r" "path" "mode" (redir "<" (dq "$f"))]
+          (assign "name" (sub [["basename" "--" (dq "$f")]]))
+          (if' (chain [["apply_host" (dq "$name") (dq "$path") (dq "$mode")] "&&" ["mount_guest" (dq "$name") (dq "$path")]]) [
+            ["continue"]
+          ])
+          ["printf" (sq "omp-box: grant %s (%s) did not apply\\n") (dq "$name") (dq "$path") (redir ">&" "2")]
+          (assign "failed" "1")
+        ])
+        ["return" (dq "$failed")]
+      ])
+      blank
+      (case "\${1:-}" [(arm "list" (inline [["shift"] ["cmd_list" (dq "$@")]])) (arm "add" (inline [["shift"] ["cmd_add" (dq "$@")]])) (arm "rm" (inline [["shift"] ["cmd_rm" (dq "$@")]])) (arm "reconcile" (inline [["cmd_reconcile"]])) (arm "*" (inline [["usage"] ["exit" "2"]]))])
     ];
     pkgs_wpewebkit = {pkgs, ...}: let
       inherit (pkgs) lib;
