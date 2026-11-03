@@ -262,14 +262,6 @@ html.lay-rail.tabs-h .tb-add {
 		quiet = true,
 	},
 	{
-		id = "t3rail",
-		label = "T3 rail",
-		group = "Rail",
-		css = Rail.css,
-		apply = Rail.apply,
-		on = true,
-	},
-	{
 		id = "centering",
 		label = "rail centering",
 		group = "Rail",
@@ -341,6 +333,10 @@ html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
 local on = {}
 local by_id = {}
 
+for _, t in ipairs(Rail.tweaks) do
+	table.insert(TWEAKS, t)
+end
+
 for _, t in ipairs(TWEAKS) do
 	on[t.id] = t.on
 	by_id[t.id] = t
@@ -355,9 +351,7 @@ if type(saved) == "table" then
 	end
 end
 
-Rail.bind(function()
-	return on.t3rail == true
-end)
+Rail.bind(on)
 
 local model = {}
 for _, t in ipairs(TWEAKS) do

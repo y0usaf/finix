@@ -1,4 +1,13 @@
-local enabled: () -> boolean = function()
+local on: { [string]: boolean } = {}
+
+local MARKED = { "rail_sections", "rail_status", "rail_ages", "rail_compact" }
+
+local function enabled(): boolean
+	for _, id in ipairs(MARKED) do
+		if on[id] then
+			return true
+		end
+	end
 	return false
 end
 
@@ -221,13 +230,15 @@ local function arrange(cx)
 	marks = {}
 	for _, tab in ipairs(cx.session:tabs()) do
 		local status, stamp = tab_view(cx, tab)
-		local section = if pins[tab.id]
+		local section = if not on.rail_sections
+			then "idle"
+			elseif pins[tab.id]
 			then "pinned"
 			elseif status == "input" then "needs"
 			elseif status == "working" then "working"
 			else "idle"
 		local age = if stamp then utf8.char(AGE_BASE + age_index(math.max(0, now - stamp))) else ""
-		marks[tab.id] = SECTION_MARK[section] .. STATUS_MARK[status] .. age
+		marks[tab.id] = SECTION_MARK[section] .. STATUS_MARK[if on.rail_status then status else "idle"] .. age
 		local list = sessions[tab.session] or {}
 		sessions[tab.session] = list
 		list[#list + 1] = { tab = tab, section = section }
@@ -239,9 +250,11 @@ local function arrange(cx)
 			end
 			return a.tab.position < b.tab.position
 		end)
-		for position, entry in ipairs(list) do
-			if entry.tab.position ~= position then
-				cx.layout:order_tab(entry.tab.id, position)
+		if on.rail_sections then
+			for position, entry in ipairs(list) do
+				if entry.tab.position ~= position then
+					cx.layout:order_tab(entry.tab.id, position)
+				end
 			end
 		end
 	end
@@ -349,7 +362,7 @@ tern.command({
 	icon = "pin",
 	run = function(cx)
 		local tab = focused_tab(cx)
-		if tab and enabled() then
+		if tab and on.rail_sections then
 			cx:toast("info", toggle("rail_pins", tab) and "Pinned" or "Unpinned")
 			arrange(cx)
 		end
@@ -385,36 +398,16 @@ tern.bind("ctrl+alt+j", "next_tab")
 tern.bind("ctrl+alt+k", "previous_tab")
 tern.bind("ctrl+alt+f", "focus_tabs")
 
-local CSS = [[
+return {
+	tweaks = {
+		{
+			id = "rail_sections",
+			label = "sections: pinned, needs you, working, idle",
+			group = "Rail",
+			css = [[
 html.lay-rail.tabs-h .tb-tabs .tt {
 	position: relative;
-	height: 38px !important;
-	border-radius: 8px !important;
 	overflow: visible !important;
-	box-shadow: none !important;
-	color: var(--t3) !important;
-}
-
-html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"] {
-	height: 20px !important;
-}
-
-html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"] .sub {
-	display: none !important;
-}
-
-html.lay-rail.tabs-h .tb-tabs .tt:hover {
-	background: color-mix(in srgb, var(--t1) 6%, transparent) !important;
-}
-
-html.lay-rail.tabs-h .tb-tabs .tt.on {
-	background: var(--panel) !important;
-	box-shadow: inset 0 0 0 1px var(--l2) !important;
-	color: var(--t1) !important;
-}
-
-html.lay-rail.tabs-h .tb-tabs .tt.on .nm {
-	font-weight: 600;
 }
 
 html.lay-rail.tabs-h .tb-tabs .tt::before,
@@ -476,7 +469,15 @@ html.lay-rail.tabs-h .tb-tabs .tt[title^="\2064"]:first-child::after,
 html.lay-rail.tabs-h .tb-tabs .tt:not([title^="\2064"]) + .tt[title^="\2064"]::after {
 	content: "Idle";
 }
-
+]],
+			apply = apply,
+			on = true,
+		},
+		{
+			id = "rail_status",
+			label = "status marks",
+			group = "Rail",
+			css = [[
 html.lay-rail.tabs-h .tb-tabs .tt .tn-dk-c > * {
 	visibility: hidden !important;
 }
@@ -558,16 +559,6 @@ html.lay-rail.tabs-h .tb-tabs .tt[title*="\206D"] .sub::before {
 	content: "Failed · unseen";
 }
 
-html.lay-rail.tabs-h .tb-tabs .tt .mk .hint {
-	display: none !important;
-}
-
-html.lay-rail.tabs-h .tb-tabs .tt .mk::before {
-	font-size: 11px;
-	color: var(--t4);
-	font-family: Geist, system-ui, sans-serif;
-}
-
 @keyframes arc-spin {
 	from {
 		transform: rotate(0deg);
@@ -598,7 +589,85 @@ html.lay-rail.tabs-h .tb-tabs .tt .tn-dk {
 	background: none !important;
 	box-shadow: none !important;
 }
+]],
+			apply = apply,
+			on = true,
+		},
+		{
+			id = "rail_ages",
+			label = "ages",
+			group = "Rail",
+			css = [[
+html.lay-rail.tabs-h .tb-tabs .tt .mk .hint {
+	display: none !important;
+}
 
+html.lay-rail.tabs-h .tb-tabs .tt .mk::before {
+	font-size: 11px;
+	color: var(--t4);
+	font-family: Geist, system-ui, sans-serif;
+}
+]] .. "\n" .. age_css(),
+			apply = apply,
+			on = true,
+		},
+		{
+			id = "rail_compact",
+			label = "one-line idle rows",
+			group = "Rail",
+			css = [[
+html.lay-rail.tabs-h .tb-tabs .tt {
+	height: 38px !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"] {
+	height: 20px !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"] .sub {
+	display: none !important;
+}
+]],
+			apply = apply,
+			on = true,
+		},
+		{
+			id = "rail_card",
+			label = "selected tab card",
+			group = "Rail",
+			css = [[
+html.lay-rail.tabs-h .tb-tabs .tt {
+	border-radius: 8px !important;
+	box-shadow: none !important;
+	color: var(--t3) !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:hover {
+	background: color-mix(in srgb, var(--t1) 6%, transparent) !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.on {
+	background: var(--panel) !important;
+	box-shadow: inset 0 0 0 1px var(--l2) !important;
+	color: var(--t1) !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.on .nm {
+	font-weight: 600;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.on::before,
+html.lay-rail.tabs-h .tb-tabs .tt.on::after {
+	display: none !important;
+}
+]],
+			on = true,
+		},
+		{
+			id = "rail_header",
+			label = "+ and bell in the header",
+			group = "Rail",
+			css = [[
 html.lay-rail.tabs-h #tabbar .tb-in {
 	position: relative !important;
 }
@@ -635,12 +704,11 @@ html.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge .tn-ib-pip {
 	margin: 0 !important;
 	transform: scale(0.8);
 }
-]]
-
-return {
-	css = CSS .. "\n" .. age_css(),
-	apply = apply,
-	bind = function(is_on: () -> boolean)
-		enabled = is_on
+]],
+			on = true,
+		},
+	},
+	bind = function(state: { [string]: boolean })
+		on = state
 	end,
 }
