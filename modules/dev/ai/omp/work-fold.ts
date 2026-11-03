@@ -1,5 +1,6 @@
 import { AssistantMessageComponent } from "@oh-my-pi/pi-tui/chat/assistant-message";
 import { BashExecutionComponent } from "@oh-my-pi/pi-tui/chat/bash-execution";
+import { chatTranscriptDisplayPreferences } from "@oh-my-pi/pi-tui/chat/display-preferences";
 import { CollabPromptMessageComponent } from "@oh-my-pi/pi-tui/chat/collab-prompt-message";
 import {
 	BranchSummaryMessageComponent,
@@ -276,6 +277,7 @@ function install(state) {
 
 	transcript.nativeBlocks = function () {
 		const blocks = nativeBlocks.call(this);
+		if (chatTranscriptDisplayPreferences.hideToolActivity) return blocks;
 		const shown = [];
 		let pending;
 		let open = [];
