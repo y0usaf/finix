@@ -94,4 +94,6 @@ in {
   pemSource = pem: lib.concatMapStrings (block: "-----BEGIN ${pem.label}-----\n${wrap pem.width block}-----END ${pem.label}-----\n") pem.blocks;
 
   gitignoreSource = lines;
+
+  pathSource = path: "${path}\n";
 }

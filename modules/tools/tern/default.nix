@@ -133,9 +133,9 @@
     "plugins/attention/window.luau" = ./config/plugins/attention/window.luau;
     "plugins/block-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource (import ./config/plugins/block-menu/plugin.data.nix));
     "plugins/block-menu/window.luau" = ./config/plugins/block-menu/window.luau;
-    "plugins/cmus.path" = ./config/plugins/cmus.path;
-    "plugins/ekko.path" = ./config/plugins/ekko.path;
-    "plugins/nix-fail.path" = ./config/plugins/nix-fail.path;
+    "plugins/cmus.path" = generators.sourceFile "cmus.path" (generators.pathSource (import ./config/plugins/cmus.data.nix));
+    "plugins/ekko.path" = generators.sourceFile "ekko.path" (generators.pathSource (import ./config/plugins/ekko.data.nix));
+    "plugins/nix-fail.path" = generators.sourceFile "nix-fail.path" (generators.pathSource (import ./config/plugins/nix-fail.data.nix));
     "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource (import ./config/plugins/tab-order/plugin.data.nix));
     "plugins/tab-order/window.luau" = ./config/plugins/tab-order/window.luau;
     "plugins/transparent/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource (import ./config/plugins/transparent/plugin.data.nix));
