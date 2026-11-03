@@ -48,7 +48,7 @@ on the host, and `dev/ai/omp/box.nix` applies them in the microVM. Pi keeps
 its separate `defaultThinkingLevel = "xhigh"`; the advisor stays Sol at high.
 
 Each host directory under `modules/hosts/` holds what is true of that machine
-alone, in two files beside its keys and other non-Nix files.
+alone, in two files beside its keys and other data.
 `hardware-config.nix` holds facts about the machine: disks, btrfs subvolumes
 and mount options, boot, kernel and initrd modules, firmware, GPU and
 displays. `config.nix` holds the host's choices: hostname, open ports,
@@ -126,6 +126,19 @@ it picks its DNS mode from the header that task writes. Hosts name each other
 by MagicDNS. `tailnet.addresses` keeps the addresses of the places that need
 one: the `rescue` and `rescue-root` ssh hosts, which must work when DNS is
 broken, paseo's listen bind and the server's hosts aliases.
+
+The configuration reads no file but Nix. Data a module reads lives in a
+`.data.nix` beside it and is rendered by a generator in `modules/generators.nix`,
+byte-identical to the file it replaced. Data formats are structured: JSON values
+(an object lists its key order in `__keys` only when that differs from
+`builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
+groups, an XML element tree, SSH key fields and PEM base64 blocks. Code and
+prose (TypeScript, JavaScript, Luau, Lua, Lisp, Python, shell, GLSL, VBScript,
+patches and markdown) are kept as line lists, one string per line, not as a
+syntax tree: their `<language>Source` generators only join the lines. A file
+passed by path comes from `generators.sourceFile`, whose store path is the one
+the file had; `generators.sourceDir` builds the optchat directory from its
+files.
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
