@@ -19,13 +19,11 @@ import {
 } from "./store.ts";
 
 const PIN = "optchat-pin";
-const HEAD = "# Shared memory";
 const CAP = 30_000;
-const WAIT = 60_000;
 const RECENT = 64_000;
 const ROW = /^(\d+)\+(\d+)\|/;
 
-const INTRO = `${HEAD}
+const INTRO = `# Shared memory
 
 Every omp chat on this computer, on the host and in the box, logs the
 user's messages and the agent's replies into one shared memory. Below is
@@ -43,7 +41,7 @@ that will matter later. Recent lines cover one message each; the older
 the messages, the more a line covers. A message not summarized yet shows
 as "${PLACEHOLDER}". Read other chats' lines as what else is
 going on and answer only this chat's messages; this chat's own turns
-since the view was taken follow it in full.
+follow in full, or as omp's summary once it has compacted them.
 
 The zoom, date and recent tools read the memory. zoom(id, n) opens line
 id+n into the two lines of n/2 messages it was made from; zoom(id, 1)
@@ -53,7 +51,7 @@ you act, guess or ask. date(id) gives the date and time of message id.
 recent() shows what every chat logged after this view was taken.`;
 
 interface Pin {
-	view?: string;
+	view: string;
 	upto: number;
 	time: number;
 }
@@ -69,7 +67,6 @@ interface Logged {
 	attribution?: string;
 	stopReason?: string;
 	timestamp?: number;
-	summary?: unknown;
 }
 
 function joinText(content: unknown): string {
@@ -113,33 +110,16 @@ function chatName(title: string | undefined, session: string): string {
 	return `chat ${session.slice(-6)}`;
 }
 
-function countLines(file: string): number {
-	try {
-		const data = fs.readFileSync(file);
-		let n = 0;
-		for (let at = data.indexOf(10); at >= 0; at = data.indexOf(10, at + 1)) n++;
-		return n;
-	} catch {
-		return 0;
-	}
-}
-
 function pins(ctx: ExtensionContext): Pin[] {
 	return ctx.sessionManager
 		.getBranch()
 		.filter((entry) => entry.type === "custom" && entry.customType === PIN)
 		.map((entry) => (entry as { data?: Pin }).data)
-		.filter((pin): pin is Pin => pin !== undefined && typeof pin.upto === "number");
+		.filter((pin): pin is Pin => typeof pin?.view === "string" && typeof pin.upto === "number");
 }
 
-async function caughtUp(session: string, signal: AbortSignal | undefined): Promise<void> {
-	const logged = countLines(path.join(LOG, `${session}.jsonl`));
-	const until = Date.now() + WAIT;
-	while (Date.now() < until && !signal?.aborted) {
-		const state = readState();
-		if (state !== undefined && (state.seen[session] ?? 0) >= logged && state.built) return;
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	}
+function take(): Pin {
+	return { view: readView(), upto: readState()?.messages ?? 0, time: Date.now() };
 }
 
 function recent(since: number): string {
@@ -258,15 +238,9 @@ export default function optchat(pi: ExtensionAPI): void {
 
 	pi.on("context", async (event, ctx) => {
 		if (!active(ctx)) return undefined;
-		const history = event.messages as Logged[];
-		const compacted = history.some(
-			(message) =>
-				message.role === "compactionSummary" && typeof message.summary === "string" && message.summary.startsWith(HEAD),
-		);
-		if (compacted) return undefined;
-		let pin = pins(ctx).findLast((entry) => typeof entry.view === "string");
+		let pin = pins(ctx).at(-1);
 		if (pin === undefined) {
-			pin = { view: readView(), upto: readState()?.messages ?? 0, time: Date.now() };
+			pin = take();
 			pi.appendEntry(PIN, pin);
 		}
 		const block = { type: "text" as const, text: `${INTRO}\n\n${pin.view}` };
@@ -277,24 +251,7 @@ export default function optchat(pi: ExtensionAPI): void {
 		return { messages: event.messages.with(at, { ...first, content: [block, ...content] }) };
 	});
 
-	pi.on("session_before_compact", async (event, ctx) => {
-		if (!active(ctx)) return undefined;
-		await caughtUp(ctx.sessionManager.getSessionId(), event.signal);
-		const upto = readState()?.messages ?? 0;
-		return {
-			compaction: {
-				summary: `${INTRO}\n\n${readView()}`,
-				shortSummary: `Shared memory view of ${upto} messages`,
-				firstKeptEntryId: event.preparation.firstKeptEntryId,
-				tokensBefore: event.preparation.tokensBefore,
-				details: { optchat: upto },
-			},
-		};
-	});
-
-	pi.on("session_compact", async (event, ctx) => {
-		if (!active(ctx)) return;
-		const upto = (event.compactionEntry.details as { optchat?: unknown } | undefined)?.optchat;
-		if (typeof upto === "number") pi.appendEntry(PIN, { upto, time: Date.now() } satisfies Pin);
+	pi.on("session_compact", async (_event, ctx) => {
+		if (active(ctx)) pi.appendEntry(PIN, take());
 	});
 }
