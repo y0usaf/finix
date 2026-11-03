@@ -73,36 +73,120 @@
         vim.g.mapleader = " "
         vim.g.maplocalleader = "\\"
 
-        for k, v in pairs(${lib.generators.toLua {} {
-          number = true;
-          relativenumber = true;
-          signcolumn = "yes";
-          wrap = true;
-          linebreak = true;
-          breakindent = true;
-          showbreak = "↪ ";
-          termguicolors = true;
-          scrolloff = 8;
-          sidescrolloff = 8;
-          cursorline = true;
-          pumheight = 15;
-          showmode = false;
-          laststatus = 2;
-          cmdheight = 1;
-          expandtab = true;
-          tabstop = 2;
-          shiftwidth = 2;
-          clipboard = "unnamedplus";
-          mouse = "a";
-          ignorecase = true;
-          smartcase = true;
-          updatetime = 250;
-          timeoutlen = 300;
-          splitbelow = true;
-          splitright = true;
-          splitkeep = "screen";
-          virtualedit = "onemore";
-        }}) do vim.opt[k] = v end
+        for _, o in ipairs(${lib.generators.toLua {} [
+          [
+            "number"
+            true
+          ]
+          [
+            "relativenumber"
+            true
+          ]
+          [
+            "signcolumn"
+            "yes"
+          ]
+          [
+            "wrap"
+            true
+          ]
+          [
+            "linebreak"
+            true
+          ]
+          [
+            "breakindent"
+            true
+          ]
+          [
+            "showbreak"
+            "↪ "
+          ]
+          [
+            "termguicolors"
+            true
+          ]
+          [
+            "scrolloff"
+            8
+          ]
+          [
+            "sidescrolloff"
+            8
+          ]
+          [
+            "cursorline"
+            true
+          ]
+          [
+            "pumheight"
+            15
+          ]
+          [
+            "showmode"
+            false
+          ]
+          [
+            "laststatus"
+            2
+          ]
+          [
+            "cmdheight"
+            1
+          ]
+          [
+            "expandtab"
+            true
+          ]
+          [
+            "tabstop"
+            2
+          ]
+          [
+            "shiftwidth"
+            2
+          ]
+          [
+            "clipboard"
+            "unnamedplus"
+          ]
+          [
+            "mouse"
+            "a"
+          ]
+          [
+            "ignorecase"
+            true
+          ]
+          [
+            "smartcase"
+            true
+          ]
+          [
+            "updatetime"
+            250
+          ]
+          [
+            "timeoutlen"
+            300
+          ]
+          [
+            "splitbelow"
+            true
+          ]
+          [
+            "splitright"
+            true
+          ]
+          [
+            "splitkeep"
+            "screen"
+          ]
+          [
+            "virtualedit"
+            "onemore"
+          ]
+        ]}) do vim.opt[o[1]] = o[2] end
 
         vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
         vim.opt.fillchars = { eob = " ", fold = " ", foldsep = " ", diff = "/" }
@@ -111,13 +195,28 @@
         vim.g.loaded_netrw = 1
         vim.g.loaded_netrwPlugin = 1
 
-        for k, v in pairs(${lib.generators.toLua {} {
-          foldmethod = "indent";
-          foldcolumn = "1";
-          foldlevel = 99;
-          foldlevelstart = 99;
-          foldenable = true;
-        }}) do vim.opt[k] = v end
+        for _, o in ipairs(${lib.generators.toLua {} [
+          [
+            "foldmethod"
+            "indent"
+          ]
+          [
+            "foldcolumn"
+            "1"
+          ]
+          [
+            "foldlevel"
+            99
+          ]
+          [
+            "foldlevelstart"
+            99
+          ]
+          [
+            "foldenable"
+            true
+          ]
+        ]}) do vim.opt[o[1]] = o[2] end
 
         if vim.g.neovide then
           vim.g.neovide_transparency = ${toString config.user.appearance.glass.opacity}
