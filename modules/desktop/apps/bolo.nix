@@ -32,8 +32,6 @@
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
-  # Wake word: a 3.3M streaming zipformer that spots keywords on CPU while the
-  # recognizer stays idle, and silero for the endpoint decision.
   kwsModel =
     pkgs.runCommand "sherpa-onnx-kws-model" {
       src = pkgs.fetchurl {
@@ -50,16 +48,6 @@
     hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
   };
 
-  # NVIDIA's parakeet-unified, streaming with 0.32 s of latency (0.08 s chunk,
-  # 0.24 s lookahead): it decodes while you speak and only ever appends, at
-  # 6.92 mean Open ASR WER against 6.52 at 0.56 s and 5.91 offline. A word
-  # appears a median 0.22 s after it ends, against 0.50 s at 0.56 s latency.
-  # 0.24 s gains 0.04 s for 7.35 WER and twice the decode work.
-  #
-  # fp32, not sherpa-onnx's published int8: onnxruntime's CUDA provider lacks
-  # the int8 matmul kernels, so the int8 encoder ran on the CPU and decoded
-  # 16.7 s of speech in 14.6 s at this latency; fp32 on the GPU takes 1.4 s.
-  # sherpa publishes no fp32 build, so it is generated and added by hand.
   streamingModel = pkgs.requireFile {
     name = "parakeet-unified-en-0.6b-streaming-320ms-fp32";
     hashMode = "recursive";
@@ -81,24 +69,15 @@
     '';
   };
 
-  # The spotter's keyword file: BPE units, one keyword per line.
   keywords = pkgs.writeText "bolo-keywords.txt" "▁JA R VI S\n";
 
-  # The daemon reads this store path directly, so a manifest change is a
-  # service change and finit restarts bolod with it; reading the manzil copy
-  # raced the restart and loaded the previous manifest.
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
     active = "parakeet-unified";
     language = "en";
     provider = "cuda";
     threads = null;
-    # The Scarlett's input reaches bolo at around -28 dBFS peak; the
-    # recognizer hears that as near-silence.
     gain = 6.0;
-    # Each line is one increment and becomes one `type` command, so
-    # dotool types it as it arrives; a single unterminated line would
-    # be typed only when the turn ends.
     pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\n'; while IFS= read -r line || [ -n \"$line\" ]; do printf 'type %s\\n' \"$line\"; done; } | dotool";
     models =
       [
@@ -140,20 +119,13 @@
       kws = {
         model = "${kwsModel}";
         keywords = "${keywords}";
-        # Measured on five takes of the real word in this voice: 4/5
-        # detected here, 1/5 at the 0.25 default, none at 0.5.
         threshold = 0.05;
       };
       vad = {
         model = "${vadModel}";
-        # Quiet microphone: speech sits lower in the model's
-        # probabilities, so demand less and pause more before a turn
-        # ends. 0.6 s of silence cut sentences in half.
         threshold = 0.35;
         min_silence = 1.2;
       };
-      # A guard against a VAD that never closes the turn; the streaming
-      # engine has no clip length to stay under.
       max_turn = 60.0;
     };
   });
@@ -194,8 +166,6 @@
       })
     ];
     nativeBuildInputs = [pkgs.makeWrapper];
-    # The daemon runs from finit with no inherited PATH: everything it spawns
-    # by name — `sh` for pipe_to, dotool for typing — has to come from here.
     postBuild = ''
       wrapProgram $out/bin/bolod \
         --prefix PATH : ${lib.makeBinPath [pkgs.dotool pkgs.bash pkgs.coreutils]}
@@ -231,8 +201,6 @@ in {
     finit.services.bolod = {
       description = "bolo speech-to-text daemon (${userName})";
       user = userName;
-      # bolod reads its manifest once at startup and has no SIGHUP handler, so
-      # a reconfiguration must stop and start it rather than signal it.
       reload-signal = "none";
       environment = {
         HOME = config.users.users.${userName}.home;
@@ -241,8 +209,6 @@ in {
         WAYLAND_DISPLAY = "tomoe-0";
         DBUS_SESSION_BUS_ADDRESS = "unix:path=${runtimeDir}/tomoe.tomoe-0.bus";
       };
-      # Boot runs before the session exists: wait for PipeWire, or the capture
-      # process dies before it opens the microphone.
       command = "${pkgs.writeShellScript "bolod-start" ''
         i=0
         while [ "$i" -lt 600 ]; do

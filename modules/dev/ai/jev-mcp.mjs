@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-// Jev (TypeSafe System One) MCP server for boar. No dependencies.
-// Exposes one tool: jev_decision — typed noul/choice/score decisions
-// against POST https://api.typesafe.ai/v1/systemone
 
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";

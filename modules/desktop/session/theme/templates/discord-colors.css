@@ -76,7 +76,6 @@
   --reply-hover: linear-gradient(to right, color-mix(in srgb, var(--text-3) 5%, transparent) 40%, transparent) !important;
 }
 
-/* Discord CSS variable mappings */
 body,
 .theme-dark:not(.custom-user-profile-theme),
 .theme-light:not(.custom-user-profile-theme) {

@@ -148,18 +148,11 @@
     }) (lib.subtractLists orphans configFiles))
     // lib.genAttrs (map (file: ".config/tern/${relative file}") orphans) (_: {type = "delete";});
 
-  # `tern remote serve --user` admits any key in the target user's own
-  # ~/.ssh/authorized_keys. That is a different file from sshd's
-  # AuthorizedKeysFile here (/etc/ssh/authorized_keys.d/%u, forced in
-  # ./finix/common.nix), so a working `ssh server` says nothing about Tern:
-  # each host needs the other's key in that file. Only public halves live here.
   ternPeers = {
     y0usaf-desktop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6ZHkn1pACV406TM5yUCRt/874vybgpUW3sUKka9nAC y0usaf@y0usaf-desktop";
     y0usaf-server = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINjN9qndKm1iN0ctrucDNRBkfcZqC7zbRKR8SCD9E7KW y0usaf@y0usaf-server";
   };
 
-  # Append, never rewrite: the phone pairing adds its own key to this file, and
-  # it must stay a real writable file rather than a store symlink.
   seedAuthorizedKeys =
     pkgs.writeShellScript "tern-seed-authorized-keys" ''
       set -eu
