@@ -138,8 +138,8 @@ byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
 groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp, shell,
-Luau, VBScript, patches and markdown are syntax trees (below). The other code
-and prose (TypeScript, JavaScript, Lua, Python and GLSL) are still line lists,
+Luau, VBScript, patches, markdown and GLSL are syntax trees (below). The other
+code and prose (TypeScript, JavaScript, Lua and Python) are still line lists,
 one string per line, whose `<language>Source` generators only join the lines. A
 file passed by path comes from `generators.sourceFile`, whose store path is the
 one the file had; `generators.sourceDir` builds the optchat directory from its
@@ -158,7 +158,8 @@ step per document node with the column forced at each step, so neither
 recursion depth nor thunk chains grow with the file; indentation is written
 lazily, so blank lines carry no trailing spaces. Columns count bytes. Tomoe's
 `deck.lisp` (400 lines, 20 KB, the largest converted file) renders in 0.03 s
-and 12 MB of allocation; 4000 lines take 0.27 s and 130 MB.
+and 12 MB of allocation; 4000 lines take 0.27 s and 130 MB. GLSL breaks a file into more nodes: tomoe's
+`hex-spiral.glsl` (160 lines, 5.4 KB) renders in 0.13 s and 40 MB.
 
 A language is `generators.<language>`: constructor functions and `render`, a
 function from a list of top-level nodes to text, built on `generators.doc`.
@@ -313,6 +314,41 @@ inline is a string, `code`, `strong`, `em` or `link text url`. From
 ]
 ```
 
+GLSL (`generators.glsl`): a statement or expression is a Nix list of words,
+written spaced (no space before `,`), and ends in `;` as a statement; a list
+among the words is a parenthesis. A word is a string (a name, a number, a
+field like `uv.x` or a prefix like `-q.y`; an integer may be a Nix integer) or
+`call f args`, `index base at`, `field base name` and `unary op operand` where
+the base or operand is not a word. A statement is also `fn signature body`,
+`define name value` (`#define`), `if' test body`, `ifElse test body otherwise`
+(an `if'` as `otherwise` is `else if`), `for init test step body` or
+`while test body`. A body is a list of statements, one per line four spaces
+in, `inline [ ... ]` (`{ a; b; }`) or `bare s` (unbraced). `rows` breaks a
+statement's words over lines, each row after the first under the first
+assignment operator unless `at n`; `rows` as `call`'s arguments puts each row
+under the first argument, or, when the first row is empty, four spaces in
+with `)` on its own line. The importer parses `float(x)` and the other scalar
+constructors as calls, since tree-sitter-glsl reads `(float(x) + y)` as a
+broken cast. From `tomoe/shaders/glass-mound.data.nix`, abridged:
+
+```nix
+{call, fn, for, if', inline, rows, ...}: [
+  ["const" "float" "IOR" "=" "1.33"]
+  (fn ["vec3" (call "normal" [["vec3" "p"] ["float" "t"]])] [
+    ["vec2" "e" "=" (call "vec2" ["0.002" "0.0"])]
+    ["return" (call "normalize" [(call "vec3" (rows [
+      [[(call "map" [["p" "+" "e.xyy"] "t"]) "-" (call "map" [["p" "-" "e.xyy"] "t"])]]
+      [[(call "map" [["p" "+" "e.yxy"] "t"]) "-" (call "map" [["p" "-" "e.yxy"] "t"])]]
+    ]))])]
+  ])
+  (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+    (for ["int" "i" "=" 0] ["i" "<" 110] "i++" [
+      (if' ["d" "<" "near"] (inline [["near" "=" "d"] ["at" "=" "s"]]))
+    ])
+  ])
+]
+```
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -342,7 +378,8 @@ then runs each language's own check on every rendered tree, listed in its
 | VBScript (1 file) | bytes | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
 | markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
-| TypeScript, JavaScript, Lua, Python, GLSL | line lists, not converted yet | none |
+| GLSL (7 files) | bytes | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
+| TypeScript, JavaScript, Lua, Python | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
