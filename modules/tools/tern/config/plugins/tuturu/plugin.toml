@@ -1,7 +1,0 @@
-schema = 1
-id = "tuturu"
-name = "Tuturu"
-version = "0.1.0"
-description = "Plays a sound when a pane raises an unseen alert, an agent yields, or a long command finishes."
-icon = "bell"
-window = "src/window.luau"

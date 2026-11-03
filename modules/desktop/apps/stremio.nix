@@ -1,5 +1,6 @@
 {
   config,
+  generators,
   lib,
   pkgs,
   ...
@@ -22,7 +23,7 @@
       };
 
       cargoLock = {
-        lockFile = ./stremio-Cargo.lock;
+        lockFile = generators.sourceFile "stremio-Cargo.lock" (generators.cargoLockSource (import ./stremio-Cargo.data.nix));
       };
 
       postPatch = ''
