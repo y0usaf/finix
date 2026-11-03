@@ -134,7 +134,8 @@ broken, paseo's listen bind and the server's hosts aliases.
 
 The configuration reads no file but Nix. Data a module reads lives in a
 `.data.nix` beside it and is rendered by a generator in `modules/generators.nix`,
-byte-identical to the file it replaced. Data formats are structured: JSON values
+byte-identical to the file it replaced (GLSL, read for meaning, renders a
+reformatted file of the same program; below). Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
 groups, an XML element tree, SSH key fields, PEM base64 blocks and gitignore
@@ -157,8 +158,8 @@ step per document node with the column forced at each step, so neither
 recursion depth nor thunk chains grow with the file; indentation is written
 lazily, so blank lines carry no trailing spaces. Columns count bytes. Tomoe's
 `deck.lisp` (400 lines, 20 KB, the largest converted file) renders in 0.03 s
-and 12 MB of allocation; 4000 lines take 0.27 s and 130 MB. GLSL breaks a file into more nodes: tomoe's
-`hex-spiral.glsl` (160 lines, 5.4 KB) renders in 0.13 s and 40 MB.
+and 12 MB of allocation; 4000 lines take 0.27 s and 130 MB. Tomoe's `hex-spiral.glsl` (165 lines, 5.5 KB) renders
+in 0.03 s and 7 MB.
 
 A language is `generators.<language>`: constructor functions and `render`, a
 function from a list of top-level nodes to text, built on `generators.doc`.
@@ -166,7 +167,8 @@ Nodes are Nix values: a plain list or string where the language's own shape is
 a list of words (a Lisp list or symbol, a shell command or word), otherwise a
 one-attribute set made by a constructor (`str "x"` is `{str = "x";}`), so a
 printer dispatches on the node's kind. Comments and blank lines are nodes
-(`comment`, `blank`); nothing in a file is lost. The printer owns the layout
+(`comment`, `blank`); nothing in a file is lost, except in GLSL, whose tree
+keeps meaning only (below). The printer owns the layout
 the language's style decides; the tree records only what it cannot decide,
 with names every language shares: `rows` (written over several lines),
 `inline` (written on one line), `at n` (an indent the rules do not give) and
@@ -313,39 +315,66 @@ inline is a string, `code`, `strong`, `em` or `link text url`. From
 ]
 ```
 
-GLSL (`generators.glsl`): a statement or expression is a Nix list of words,
-written spaced (no space before `,`), and ends in `;` as a statement; a list
-among the words is a parenthesis. A word is a string (a name, a number, a
-field like `uv.x` or a prefix like `-q.y`; an integer may be a Nix integer) or
-`call f args`, `index base at`, `field base name` and `unary op operand` where
-the base or operand is not a word. A statement is also `fn signature body`,
-`define name value` (`#define`), `if' test body`, `ifElse test body otherwise`
-(an `if'` as `otherwise` is `else if`), `for init test step body` or
-`while test body`. A body is a list of statements, one per line four spaces
-in, `inline [ ... ]` (`{ a; b; }`) or `bare s` (unbraced). `rows` breaks a
-statement's words over lines, each row after the first under the first
-assignment operator unless `at n`; `rows` as `call`'s arguments puts each row
-under the first argument, or, when the first row is empty, four spaces in
-with `)` on its own line. The importer parses `float(x)` and the other scalar
-constructors as calls, since tree-sitter-glsl reads `(float(x) + y)` as a
-broken cast. From `tomoe/shaders/glass-mound.data.nix`, abridged:
+GLSL (`generators.glsl`) is read for meaning, not layout. `render` takes a
+shader, `{defines, consts, fns}`, attribute sets keyed by name, since a name is
+declared once and the order of independent declarations means nothing. The
+printer derives the order GLSL needs (definition before use): `#define`s by
+name, then constants, then functions, each after what it references (a constant
+after the constants its value names, a function after the functions it calls),
+ties by name, and a cycle is an error. A value is a native Nix value: an
+integer, a float or a boolean is itself, `unsigned 7` is `7u`, a string is a
+name or a dotted field path (`"uv.x"`, checked). A float prints as its shortest
+round-trip form (`builtins.toJSON`) with a decimal point always present
+(`1e-05` is `1.0e-5`), so it denotes the double Nix holds, which is the double
+the source's literal denoted. `vec2 0.4 0.58` (every scalar, vector and matrix
+type is a constructor of that name) and `call "mix" a b t` are calls that take
+any number of arguments; `array "vec3" [ ... ]` is `vec3[n](...)`, its length
+`n`. An infix expression is a list alternating operands and operators, `["a"
+"*" "b" "+" 1.0]`; the printer parses it by GLSL precedence (left
+associative), so a nested list is a grouping the precedence does not give and
+the printer writes the parentheses that grouping needs and no others. `neg`,
+`not`, `bitNot`, `inc`, `dec`, `preInc`, `preDec`, `cond test yes no`, `index
+base at` and `field base name` are the other expressions. A constant's type is
+its value's constructor (`CENTER = vec2 0.4 0.58;` is `const vec2 CENTER`, a
+float `const float`, an array `const vec3 PAL[10]`), else `typed "float" [ ...
+]`. A define is an expression or `macro ["c"] body`, written in parentheses
+with each parameter parenthesized unless it is a name, call, field, index or
+number. A function is `fn returns params body`, a parameter a list of words
+(`["out" "vec4" "fragColor"]`). A body is a list of statements: `var type name
+value` (`null` for none; a type is a word, a list of qualifier words and the
+type, or `sized "float" 7`), `assign target value`, `update "+=" target
+value`, `return value`, `break`, `continue`, `if' test body`, `ifElse test
+body otherwise` (an `if'` as `otherwise` is `else if`), `for init test step
+body`, `while test body`, `comment "text"` or an expression. `commented "text"
+declaration` keeps a comment above a declaration; a shader without comments
+has none. A branch of one simple statement is written on the `if` line, any
+other body braced, four spaces in; an infix expression too long for 100
+columns breaks before its loosest operator, four spaces further in. Blank
+lines, spacing, redundant parentheses, a literal's spelling (`1.000`, `0xff`)
+and a declarator list (`float c = cos(a), s = sin(a);` is two `var`s) are not
+kept. From `tomoe/shaders/glass-mound.data.nix`, abridged:
 
 ```nix
-{call, fn, for, if', inline, rows, ...}: [
-  ["const" "float" "IOR" "=" "1.33"]
-  (fn ["vec3" (call "normal" [["vec3" "p"] ["float" "t"]])] [
-    ["vec2" "e" "=" (call "vec2" ["0.002" "0.0"])]
-    ["return" (call "normalize" [(call "vec3" (rows [
-      [[(call "map" [["p" "+" "e.xyy"] "t"]) "-" (call "map" [["p" "-" "e.xyy"] "t"])]]
-      [[(call "map" [["p" "+" "e.yxy"] "t"]) "-" (call "map" [["p" "-" "e.yxy"] "t"])]]
-    ]))])]
-  ])
-  (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
-    (for ["int" "i" "=" 0] ["i" "<" 110] "i++" [
-      (if' ["d" "<" "near"] (inline [["near" "=" "d"] ["at" "=" "s"]]))
-    ])
-  ])
-]
+{assign, call, fn, for, if', var, vec2, vec3, ...}: {
+  consts = {
+    IOR = 1.33;
+    SINK = -1.0;
+  };
+  fns = {
+    normal = fn "vec3" [["vec3" "p"] ["float" "t"]] [
+      (var "vec2" "e" (vec2 0.002 0.0))
+      (return (call "normalize" (vec3
+        [(call "map" ["p" "+" "e.xyy"] "t") "-" (call "map" ["p" "-" "e.xyy"] "t")]
+        [(call "map" ["p" "+" "e.yxy"] "t") "-" (call "map" ["p" "-" "e.yxy"] "t")]
+        [(call "map" ["p" "+" "e.yyx"] "t") "-" (call "map" ["p" "-" "e.yyx"] "t")])))
+    ];
+    mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+      (for (var "int" "i" 0) ["i" "<" 110] (inc "i") [
+        (if' ["d" "<" "near"] [(assign "near" "d") (assign "at" "s")])
+      ])
+    ];
+  };
+}
 ```
 
 Lua (`generators.lua`): a call is a Nix list, its head first; a name, a
@@ -506,7 +535,9 @@ it.
 
 Every converted file passed its gate. A language whose printer can reproduce
 its files gates on bytes at conversion; one that cannot gates on its official
-formatter's output for both sides. `checks.codegen` (`modules/lint.nix`)
+formatter's output for both sides; GLSL, whose tree keeps meaning and not
+layout, gates on formatter equality after canonicalization and on rendered
+pixels. `checks.codegen` (`modules/lint.nix`)
 then runs each language's own check on every rendered tree, listed in its
 `trees`:
 
@@ -518,11 +549,552 @@ then runs each language's own check on every rendered tree, listed in its
 | VBScript (1 file) | bytes | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
 | markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
-| GLSL (7 files) | bytes | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
+| GLSL (7 files) | `nix run .#glsl-gate -- ORIGINAL GENERATED ...`: both sides, canonicalized (top-level declarations sorted, every operator parenthesized, literals as their values, one declarator per declaration, every branch braced) and run through clang-format 21 with a pinned style, are equal; both pass glslangValidator; four 640×360 frames of each, rendered by llvmpipe into float32 targets, are bit-identical | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
 | Lua (3 files) | bytes | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
 | Python (5 files) | bytes | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
 | JavaScript (1 file) | bytes | `node --check` |
 | TypeScript (10 files) | bytes | `tsc --noEmit` (TypeScript 7) with an ambient stub of the omp, pi and Node modules they import; `work-fold.ts` and `compact-eval.ts`, untyped as written, get `--noCheck` (syntax and imports only) |
+
+### GLSL before and after
+
+The seven shaders went from word lists, which kept every byte, to keyed
+declarations, by `strictix import glsl` on each rendered file;
+`strictix import glsl` of the new rendering gives the same tree back. The
+rendered text changes where the tree no longer records it: declaration order
+(derived), blank lines, redundant parentheses (`(0.3 / CONTRAST) * COLOR_1` is
+`0.3 / CONTRAST * COLOR_1`, `((c) >> 16) & 0xff` is `(c) >> 16 & 255`),
+literal spelling (`1.000` is `1.0`, `0.86602540` is `0.8660254`, `1e-5` is
+`1.0e-5`, `0xde443b` is `14566459`), declarator lists and line breaks. The
+grouping the parser sees is unchanged, and each literal denotes the same double,
+so a compiler that reads literals through doubles builds the same program;
+Mesa reads a float literal straight to single precision, where two spellings of
+one double could round apart only if that double lay exactly halfway between
+two floats, and the frame gate shows no pixel differs. The shader store paths
+change:
+
+| Shader | Before | After |
+| --- | --- | --- |
+| `balatro.glsl` | `wqqd8rsq4p8hpjldfc6hkqsd9g4d8anv` | `cbkwq5xm5flwhiwp4fk15h4zsyrz6lv6` |
+| `cassette-led.glsl` | `xj1ncvj97cnkfkyn797wizyyjca177bs` | `vi7w2rj7rvb70ylswxpx3h4bd6nwxz84` |
+| `cassette-squares.glsl` | `wh2pnzy25420m6kpk2wa11619b6lr706` | `l38m45qbymnlkc168j9dzwbnn2vns26c` |
+| `dot-corridor.glsl` | `xr7d0nwww7609kwl2p170mnsh8j18lrh` | `yz5giznzzjp098ispsqhpd3fvpw5pbsn` |
+| `glass-mound.glsl` | `v24vp2yq9fw938f555i747kas83bcgb5` | `hfmndx9c9mxh220mga1r39rw859pldjf` |
+| `hex-spiral.glsl` | `04yg5rvi5vg69cymp0cwmsi4l1a2iccc` | `18f1yk28zmp46digxbakp1081kyfy3wj` |
+| `su-ei.glsl` | `yq0qiqac5yg6b8igk4fpwmzpf32rf1jg` | `9sl74yc2grlzfpvxq812qskhvyggc57r` |
+
+and with them, and with the strictix input pinned to the importer's commit, the
+system derivations of the two desktop hosts (`y0usaf-server` is unchanged):
+
+| Check | Before | After |
+| --- | --- | --- |
+| `y0usaf-desktop` | `w6yqzw2vj5r57mv401qyl8g5pi1vn0l4-finix-system.drv` | `bjmh5wbwc4hbfqns2bpz8plm1zjxw0kz-finix-system.drv` |
+| `y0usaf-framework` | `xh9xnlvricwg56b9n3489ak1xzhq3y3b-finix-system.drv` | `bg9his3z2cqzk00g57i8kxzw6mq1ffal-finix-system.drv` |
+
+`balatro.glsl`, the smallest:
+
+<table>
+<tr><th>Before: words</th><th>After: keyed declarations</th></tr>
+<tr>
+<td valign="top">
+
+<pre>
+{
+  blank,
+  call,
+  define,
+  fn,
+  for,
+  rows,
+  ...
+}: [
+  (define (call "HEX" ["c"]) [[(call "vec3" [[[["c"] "&gt;&gt;" 16] "&amp;" "0xff"] [[["c"] "&gt;&gt;" 8] "&amp;" "0xff"] [["c"] "&amp;" "0xff"]]) "/" "255.0"]])
+  (define "COLOR_1" (call "HEX" ["0xde443b"]))
+  (define "COLOR_2" (call "HEX" ["0x006bb4"]))
+  (define "COLOR_3" (call "HEX" ["0x162325"]))
+  (define "CONTRAST" "3.5")
+  (define "LIGHTING" "0.4")
+  (define "SPIN_AMOUNT" "0.25")
+  (define "SPIN_ROTATION" "-2.0")
+  (define "SPEED" "7.0")
+  blank
+  (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+    ["float" "diagonal" "=" (call "length" ["iResolution.xy"])]
+    ["vec2" "uv" "=" ["fragCoord" "-" "0.5" "*" "iResolution.xy"] "/" "diagonal"]
+    ["float" "radius" "=" (call "length" ["uv"])]
+    (rows [
+      ["float" "angle" "=" (call "atan" ["uv.y" "uv.x"]) "+" "302.2" "+" "0.2" "*" "SPIN_ROTATION"]
+      ["-" "20.0" "*" ["SPIN_AMOUNT" "*" "radius" "+" "1.0" "-" "SPIN_AMOUNT"]]
+    ])
+    ["uv" "=" "radius" "*" (call "vec2" [(call "cos" ["angle"]) (call "sin" ["angle"])]) "*" "30.0"]
+    ["float" "t" "=" "iTime" "*" "SPEED"]
+    ["vec2" "uv2" "=" (call "vec2" [["uv.x" "+" "uv.y"]])]
+    (for ["int" "i" "=" 0] ["i" "&lt;" 5] "i++" [
+      ["uv2" "+=" (call "sin" [(call "max" ["uv.x" "uv.y"])]) "+" "uv"]
+      ["uv" "+=" "0.5" "*" (call "vec2" [(call "cos" [["5.1123314" "+" "0.353" "*" "uv2.y" "+" "t" "*" "0.131121"]]) (call "sin" [["uv2.x" "-" "0.113" "*" "t"]])])]
+      ["uv" "-=" (call "cos" [["uv.x" "+" "uv.y"]]) "-" (call "sin" [["uv.x" "*" "0.711" "-" "uv.y"]])]
+    ])
+    ["float" "contrast" "=" "0.25" "*" "CONTRAST" "+" "0.5" "*" "SPIN_AMOUNT" "+" "1.2"]
+    ["float" "paint" "=" (call "clamp" [[(call "length" ["uv"]) "*" "0.035" "*" "contrast"] "0.0" "2.0"])]
+    ["float" "c1" "=" (call "max" ["0.0" ["1.0" "-" "contrast" "*" (call "abs" [["1.0" "-" "paint"]])]])]
+    ["float" "c2" "=" (call "max" ["0.0" ["1.0" "-" "contrast" "*" (call "abs" ["paint"])]])]
+    ["float" "c3" "=" "1.0" "-" (call "min" ["1.0" ["c1" "+" "c2"]])]
+    ["float" "light" "=" ["LIGHTING" "-" "0.2"] "*" (call "max" [["c1" "*" "5.0" "-" "4.0"] "0.0"]) "+" "LIGHTING" "*" (call "max" [["c2" "*" "5.0" "-" "4.0"] "0.0"])]
+    (rows [
+      ["vec3" "color" "=" ["0.3" "/" "CONTRAST"] "*" "COLOR_1"]
+      ["+" ["1.0" "-" "0.3" "/" "CONTRAST"] "*" ["COLOR_1" "*" "c1" "+" "COLOR_2" "*" "c2" "+" "COLOR_3" "*" "c3"] "+" "light"]
+    ])
+    ["fragColor" "=" (call "vec4" ["color" "1.0"])]
+  ])
+]
+</pre>
+
+</td>
+<td valign="top">
+
+<pre>
+{
+  assign,
+  call,
+  fn,
+  for,
+  inc,
+  macro,
+  update,
+  var,
+  vec2,
+  vec3,
+  vec4,
+  ...
+}: {
+  defines = {
+    COLOR_1 = call "HEX" 14566459;
+    COLOR_2 = call "HEX" 27572;
+    COLOR_3 = call "HEX" 1450789;
+    CONTRAST = 3.5;
+    HEX = macro ["c"] [(vec3 ["c" "&gt;&gt;" 16 "&amp;" 255] ["c" "&gt;&gt;" 8 "&amp;" 255] ["c" "&amp;" 255]) "/" 255.0];
+    LIGHTING = 0.4;
+    SPEED = 7.0;
+    SPIN_AMOUNT = 0.25;
+    SPIN_ROTATION = -2.0;
+  };
+  fns = {
+    mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+      (var "float" "diagonal" (call "length" "iResolution.xy"))
+      (var "vec2" "uv" [["fragCoord" "-" 0.5 "*" "iResolution.xy"] "/" "diagonal"])
+      (var "float" "radius" (call "length" "uv"))
+      (var "float" "angle" [(call "atan" "uv.y" "uv.x") "+" 302.2 "+" 0.2 "*" "SPIN_ROTATION" "-" 20.0 "*" ["SPIN_AMOUNT" "*" "radius" "+" 1.0 "-" "SPIN_AMOUNT"]])
+      (assign "uv" ["radius" "*" (vec2 (call "cos" "angle") (call "sin" "angle")) "*" 30.0])
+      (var "float" "t" ["iTime" "*" "SPEED"])
+      (var "vec2" "uv2" (vec2 ["uv.x" "+" "uv.y"]))
+      (for (var "int" "i" 0) ["i" "&lt;" 5] (inc "i") [
+        (update "+=" "uv2" [(call "sin" (call "max" "uv.x" "uv.y")) "+" "uv"])
+        (update "+=" "uv" [0.5 "*" (vec2 (call "cos" [5.1123314 "+" 0.353 "*" "uv2.y" "+" "t" "*" 0.131121]) (call "sin" ["uv2.x" "-" 0.113 "*" "t"]))])
+        (update "-=" "uv" [(call "cos" ["uv.x" "+" "uv.y"]) "-" (call "sin" ["uv.x" "*" 0.711 "-" "uv.y"])])
+      ])
+      (var "float" "contrast" [0.25 "*" "CONTRAST" "+" 0.5 "*" "SPIN_AMOUNT" "+" 1.2])
+      (var "float" "paint" (call "clamp" [(call "length" "uv") "*" 0.035 "*" "contrast"] 0.0 2.0))
+      (var "float" "c1" (call "max" 0.0 [1.0 "-" "contrast" "*" (call "abs" [1.0 "-" "paint"])]))
+      (var "float" "c2" (call "max" 0.0 [1.0 "-" "contrast" "*" (call "abs" "paint")]))
+      (var "float" "c3" [1.0 "-" (call "min" 1.0 ["c1" "+" "c2"])])
+      (var "float" "light" [["LIGHTING" "-" 0.2] "*" (call "max" ["c1" "*" 5.0 "-" 4.0] 0.0) "+" "LIGHTING" "*" (call "max" ["c2" "*" 5.0 "-" 4.0] 0.0)])
+      (var "vec3" "color" [0.3 "/" "CONTRAST" "*" "COLOR_1" "+" [1.0 "-" 0.3 "/" "CONTRAST"] "*" ["COLOR_1" "*" "c1" "+" "COLOR_2" "*" "c2" "+" "COLOR_3" "*" "c3"] "+" "light"])
+      (assign "fragColor" (vec4 "color" 1.0))
+    ];
+  };
+}
+</pre>
+
+</td>
+</tr>
+</table>
+
+`hex-spiral.glsl`:
+
+<details>
+<summary>hex-spiral, before and after</summary>
+
+<table>
+<tr><th>Before: words</th><th>After: keyed declarations</th></tr>
+<tr>
+<td valign="top">
+
+<pre>
+{
+  bare,
+  blank,
+  call,
+  fn,
+  for,
+  if',
+  ifElse,
+  index,
+  rows,
+  unary,
+  ...
+}: [
+  ["const" "float" "PI" "=" "3.14159265"]
+  ["const" "float" "TAU" "=" "6.28318531"]
+  ["const" "float" "S3" "=" "0.86602540"]
+  ["const" "vec2" "CENTER" "=" (call "vec2" ["0.4" "0.58"])]
+  ["const" "int" "M" "=" 29]
+  ["const" "int" "N" "=" 13]
+  ["const" "int" "ARM" "=" 4]
+  ["const" "int" "LOOP" "=" 52]
+  ["const" "float" "HEX_SPEED" "=" "0.7"]
+  ["const" "int" "STREAK_K" "=" 176]
+  ["const" "float" "STREAK_STEP" "=" "0.057"]
+  ["const" "int" "STREAK_N" "=" 132]
+  ["const" "int" "STREAK_LOOP" "=" 160]
+  ["const" "float" "STREAK_SPEED" "=" "0.32"]
+  ["const" "float" "CYCLE" "=" "1.8"]
+  blank
+  [
+    "const"
+    "vec3"
+    (index "PAL" 10)
+    "="
+    (call (index "vec3" 10) (rows [
+      []
+      [(call "vec3" ["1.000" "0.824" "0.122"]) (call "vec3" ["1.000" "0.604" "0.122"]) (call "vec3" ["1.000" "0.420" "0.369"])]
+      [(call "vec3" ["1.000" "0.361" "0.784"]) (call "vec3" ["0.706" "0.420" "1.000"]) (call "vec3" ["0.184" "0.420" "1.000"])]
+      [(call "vec3" ["0.122" "0.722" "1.000"]) (call "vec3" ["0.122" "0.839" "0.706"]) (call "vec3" ["0.482" "0.878" "0.165"])]
+      [(call "vec3" ["0.957" "0.957" "0.957"])]
+    ]))
+  ]
+  blank
+  [
+    "const"
+    "ivec2"
+    (index "NEAR" 7)
+    "="
+    (call (index "ivec2" 7) (rows [
+      []
+      [(call "ivec2" [0 0]) (call "ivec2" [1 0]) (call "ivec2" [(-1) 0]) (call "ivec2" [0 1]) (call "ivec2" [0 (-1)]) (call "ivec2" [1 (-1)]) (call "ivec2" [(-1) 1])]
+    ]))
+  ]
+  blank
+  (fn ["float" (call "hash" [["ivec2" "c"]])] [
+    ["uvec2" "v" "=" (call "uvec2" ["c"]) "*" (call "uvec2" ["1597334673u" "3812015801u"])]
+    ["uint" "n" "=" ["v.x" "^" "v.y"] "*" "1597334673u"]
+    ["n" "^=" "n" "&gt;&gt;" 16]
+    ["n" "*=" "2246822519u"]
+    ["n" "^=" "n" "&gt;&gt;" 13]
+    ["return" (call "float" ["n"]) "*" ["1.0" "/" "4294967296.0"]]
+  ])
+  blank
+  (fn ["int" (call "fdiv" [["int" "a"] ["int" "b"]])] [
+    ["return" (call "int" [(call "floor" [[(call "float" ["a"]) "/" (call "float" ["b"])]])])]
+  ])
+  blank
+  (fn ["int" (call "pmod" [["int" "a"] ["int" "b"]])] [
+    ["return" "a" "-" "b" "*" (call "fdiv" ["a" "b"])]
+  ])
+  blank
+  (fn ["vec3" (call "cycle" [["float" "f"]])] [
+    ["int" "a" "=" (call "pmod" [(call "int" [(call "floor" ["f"])]) 9])]
+    ["return" (call "mix" [(index "PAL" "a") (index "PAL" (call "pmod" [["a" "+" 1] 9])) (call "fract" ["f"])])]
+  ])
+  blank
+  (fn ["vec2" (call "rot" [["vec2" "v"] ["float" "a"]])] [
+    ["float" "c" "=" (call "cos" ["a"]) "," "s" "=" (call "sin" ["a"])]
+    ["return" (call "vec2" [["c" "*" "v.x" "-" "s" "*" "v.y"] ["s" "*" "v.x" "+" "c" "*" "v.y"]])]
+  ])
+  blank
+  (fn ["vec2" (call "cart" [["ivec2" "a"]])] [
+    ["return" (call "vec2" [[(call "float" ["a.x"]) "+" "0.5" "*" (call "float" ["a.y"])] ["S3" "*" (call "float" ["a.y"])]])]
+  ])
+  blank
+  (fn ["ivec2" (call "nearest" [["vec2" "h"]])] [
+    ["float" "y" "=" "h.y" "/" "S3"]
+    ["vec3" "c" "=" (call "vec3" [["h.x" "-" "0.5" "*" "y"] "y" ["-h.x" "-" "0.5" "*" "y"]])]
+    ["vec3" "r" "=" (call "floor" [["c" "+" "0.5"]])]
+    ["vec3" "d" "=" (call "abs" [["r" "-" "c"]])]
+    (ifElse ["d.x" "&gt;" "d.y" "&amp;&amp;" "d.x" "&gt;" "d.z"] (bare ["r.x" "=" "-r.y" "-" "r.z"]) (if' ["d.y" "&gt;" "d.z"] (bare ["r.y" "=" "-r.x" "-" "r.z"])))
+    ["return" (call "ivec2" ["r.xy"])]
+  ])
+  blank
+  (fn ["float" (call "hexDist" [["vec2" "q"]])] [
+    ["return" (call "max" [(call "abs" ["q.x"]) (call "max" [(call "abs" [["0.5" "*" "q.x" "+" "S3" "*" "q.y"]]) (call "abs" [["-0.5" "*" "q.x" "+" "S3" "*" "q.y"]])])])]
+  ])
+  blank
+  (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
+    ["float" "px" "=" "1.0" "/" "iResolution.y"]
+    ["vec2" "p" "=" ["fragCoord" "-" "CENTER" "*" "iResolution.xy"] "*" "px"]
+    ["float" "r" "=" (call "max" [(call "length" ["p"]) "1e-5"])]
+    ["vec2" "w" "=" (call "vec2" [(call "log" ["r"]) (call "atan" ["p.y" "p.x"])])]
+    blank
+    ["vec2" "vc" "=" (call "cart" [(call "ivec2" ["M" "N"])])]
+    ["float" "k" "=" "TAU" "/" (call "length" ["vc"])]
+    ["float" "rho" "=" "0.5" "*" "PI" "-" (call "atan" ["vc.y" "vc.x"])]
+    ["vec2" "drift" "=" (call "cart" [(call "ivec2" [1 (-1)])])]
+    ["float" "tt" "=" (call "mod" [["iTime" "*" "HEX_SPEED"] (call "float" ["LOOP"])])]
+    ["vec2" "hw" "=" (call "rot" ["w" "-rho"]) "/" "k" "-" "tt" "*" "drift"]
+    ["ivec2" "base" "=" (call "nearest" ["hw"])]
+    blank
+    ["float" "jr" "=" (call "mod" [["hw.y" "/" "S3" "+" "0.5"] (call "float" ["N"])])]
+    ["float" "band" "=" (call "smoothstep" [[(call "float" ["ARM"]) "+" "1.5"] [(call "float" ["ARM"]) "+" "4.0"] "jr"]) "*" ["1.0" "-" (call "smoothstep" [[(call "float" ["N"]) "-" "1.2"] (call "float" ["N"]) "jr"])]]
+    blank
+    ["vec3" "col" "=" (call "vec3" ["0.0"])]
+    ["float" "phase" "=" (call "mod" ["iTime" "CYCLE"]) "*" "9.0" "/" "CYCLE"]
+    blank
+    ["float" "c" "=" (call "float" ["STREAK_K"]) "*" "STREAK_STEP" "/" "TAU"]
+    ["float" "ct" "=" (call "sqrt" [["1.0" "+" "c" "*" "c"]])]
+    ["float" "dth" "=" "TAU" "/" (call "float" ["STREAK_N"])]
+    ["float" "ts" "=" (call "mod" [["iTime" "*" "STREAK_SPEED"] [(call "float" ["STREAK_LOOP"]) "*" "STREAK_STEP"]])]
+    ["float" "sig" "=" "w.x" "-" "ts" "-" "c" "*" "w.y"]
+    ["int" "is0" "=" (call "int" [(call "floor" [["sig" "/" "STREAK_STEP"]])])]
+    ["int" "it0" "=" (call "int" [(call "floor" [["w.y" "/" "dth"]])])]
+    (for ["int" "o" "=" 0] ["o" "&lt;" 9] "o++" [
+      ["int" "it" "=" "it0" "+" "o" "%" 3 "-" 1]
+      ["int" "is" "=" "is0" "+" "o" "/" 3 "-" 1]
+      ["int" "q" "=" (call "fdiv" ["it" "STREAK_N"])]
+      ["ivec2" "id" "=" (call "ivec2" [(call "pmod" [["is" "+" "STREAK_K" "*" "q"] "STREAK_LOOP"]) ["it" "-" "q" "*" "STREAK_N"]])]
+      ["float" "h0" "=" (call "hash" ["id"])]
+      ["float" "h1" "=" (call "hash" [["id" "+" (call "ivec2" [7 131])]])]
+      ["float" "h2" "=" (call "hash" [["id" "+" (call "ivec2" [53 17])]])]
+      (if' ["h0" "&gt;" "0.8"] (bare "continue"))
+      ["float" "sm" "=" [(call "float" ["is"]) "+" "0.5" "+" "0.8" "*" ["h1" "-" "0.5"]] "*" "STREAK_STEP"]
+      ["vec2" "dir" "=" (call "rot" [[(call "vec2" ["c" "1.0"]) "/" "ct"] ["0.6" "*" ["h2" "-" "0.5"]]])]
+      ["float" "tc" "=" [(call "float" ["it"]) "+" "0.5" "+" "0.6" "*" ["h2" "-" "0.5"]] "*" "dth"]
+      ["vec2" "d" "=" (call "vec2" [["sig" "-" "sm" "+" "c" "*" ["w.y" "-" "tc"]] ["w.y" "-" "tc"]])]
+      ["float" "len" "=" ["0.22" "+" "0.22" "*" "h1"] "*" "dth" "*" "ct"]
+      ["float" "th" "=" ["0.2" "+" "0.08" "*" "h2"] "*" "STREAK_STEP" "/" "ct"]
+      ["float" "a" "=" (call "clamp" [(call "dot" ["d" "dir"]) "-len" "len"])]
+      ["float" "dist" "=" [(call "length" [["d" "-" "dir" "*" "a"]]) "-" "th"] "*" "r" "/" "px"]
+      ["float" "cover" "=" (call "clamp" [["0.5" "-" "dist"] "0.0" "1.0"]) "*" (call "smoothstep" ["0.6" "2.0" ["th" "*" "r" "/" "px"]])]
+      ["int" "pick" "=" (call "int" [["h0" "*" "16.0"]]) "%" 13]
+      ["vec3" "sc" "=" "pick" "&gt;" 8 "?" (index "PAL" 9) ":" (call "cycle" [[(call "float" ["pick"]) "-" "phase"]])]
+      ["col" "=" (call "mix" ["col" ["sc" "*" ["0.7" "+" "0.3" "*" "h2"]] ["cover" "*" "band"]])]
+    ])
+    blank
+    ["float" (index "key" 7)]
+    ["int" (index "ord" 7)]
+    ["vec2" "outward" "=" (call "rot" [(call "vec2" ["1.0" "0.0"]) "-rho"])]
+    (for ["int" "i" "=" 0] ["i" "&lt;" 7] "i++" [
+      [(index "key" "i") "=" (call "dot" [(call "cart" [(index "NEAR" "i")]) "outward"])]
+      [(index "ord" "i") "=" "i"]
+    ])
+    (for ["int" "i" "=" 1] ["i" "&lt;" 7] "i++" [
+      (for ["int" "j" "=" "i"] ["j" "&gt;" 0 "&amp;&amp;" (index "key" (index "ord" ["j" "-" 1])) "&gt;" (index "key" (index "ord" "j"))] "j--" [
+        ["int" "t" "=" (index "ord" "j")]
+        [(index "ord" "j") "=" (index "ord" ["j" "-" 1])]
+        [(index "ord" ["j" "-" 1]) "=" "t"]
+      ])
+    ])
+    blank
+    ["int" "wrap" "=" ["M" "+" "N"] "*" "LOOP"]
+    (for ["int" "i" "=" 0] ["i" "&lt;" 7] "i++" [
+      ["ivec2" "cell" "=" "base" "+" (index "NEAR" (index "ord" "i"))]
+      (if' [(call "pmod" ["cell.y" "N"]) "&gt;=" "ARM"] (bare "continue"))
+      ["int" "id" "=" (call "pmod" [["cell.x" "*" "N" "-" "cell.y" "*" "M"] "wrap"])]
+      ["float" "h0" "=" (call "hash" [(call "ivec2" ["id" 911])])]
+      ["float" "h1" "=" (call "hash" [(call "ivec2" ["id" 37])])]
+      ["vec2" "wc" "=" (call "rot" [[(call "cart" ["cell"]) "+" "tt" "*" "drift"] "rho"]) "*" "k"]
+      ["float" "rc" "=" (call "exp" ["wc.x"])]
+      ["vec2" "sc" "=" "rc" "*" (call "vec2" [(call "cos" ["wc.y"]) (call "sin" ["wc.y"])])]
+      ["float" "scale" "=" "k" "*" "rc"]
+      ["vec2" "q" "=" (call "rot" [["p" "-" "sc"] (unary "-" ["wc.y" "+" "rho"])]) "/" "scale"]
+      ["float" "size" "=" "0.5" "*" ["0.88" "+" "0.36" "*" "h1"]]
+      ["float" "dist" "=" [(call "hexDist" ["q"]) "-" "size"] "*" "scale" "/" "px"]
+      ["float" "fade" "=" (call "smoothstep" ["3.0" "9.0" ["size" "*" "scale" "/" "px"]])]
+      ["float" "cover" "=" (call "clamp" [["0.5" "-" "dist"] "0.0" "1.0"]) "*" "fade"]
+      ["float" "rim" "=" (call "clamp" [["0.5" "-" "dist" "-" (call "max" ["1.0" ["0.03" "*" "size" "*" "scale" "/" "px"]])] "0.0" "1.0"])]
+      ["vec3" "hc" "=" (call "cycle" [["h0" "*" "9.0" "-" "phase"]])]
+      ["col" "=" (call "mix" ["col" ["hc" "*" "rim"] "cover"])]
+    ])
+    blank
+    ["fragColor" "=" (call "vec4" ["col" "1.0"])]
+  ])
+]
+</pre>
+
+</td>
+<td valign="top">
+
+<pre>
+{
+  array,
+  assign,
+  call,
+  cond,
+  continue,
+  dec,
+  float,
+  fn,
+  for,
+  if',
+  ifElse,
+  inc,
+  index,
+  int,
+  ivec2,
+  neg,
+  return,
+  sized,
+  unsigned,
+  update,
+  uvec2,
+  var,
+  vec2,
+  vec3,
+  vec4,
+  ...
+}: {
+  consts = {
+    ARM = 4;
+    CENTER = vec2 0.4 0.58;
+    CYCLE = 1.8;
+    HEX_SPEED = 0.7;
+    LOOP = 52;
+    M = 29;
+    N = 13;
+    NEAR = array "ivec2" [(ivec2 0 0) (ivec2 1 0) (ivec2 (-1) 0) (ivec2 0 1) (ivec2 0 (-1)) (ivec2 1 (-1)) (ivec2 (-1) 1)];
+    PAL = array "vec3" [(vec3 1.0 0.824 0.122) (vec3 1.0 0.604 0.122) (vec3 1.0 0.42 0.369) (vec3 1.0 0.361 0.784) (vec3 0.706 0.42 1.0) (vec3 0.184 0.42 1.0) (vec3 0.122 0.722 1.0) (vec3 0.122 0.839 0.706) (vec3 0.482 0.878 0.165) (vec3 0.957 0.957 0.957)];
+    PI = 3.14159265;
+    S3 = 0.8660254;
+    STREAK_K = 176;
+    STREAK_LOOP = 160;
+    STREAK_N = 132;
+    STREAK_SPEED = 0.32;
+    STREAK_STEP = 0.057;
+    TAU = 6.28318531;
+  };
+  fns = {
+    cart = fn "vec2" [["ivec2" "a"]] [
+      (return (vec2 [(float "a.x") "+" 0.5 "*" (float "a.y")] ["S3" "*" (float "a.y")]))
+    ];
+    cycle = fn "vec3" [["float" "f"]] [
+      (var "int" "a" (call "pmod" (int (call "floor" "f")) 9))
+      (return (call "mix" (index "PAL" "a") (index "PAL" (call "pmod" ["a" "+" 1] 9)) (call "fract" "f")))
+    ];
+    fdiv = fn "int" [["int" "a"] ["int" "b"]] [
+      (return (int (call "floor" [(float "a") "/" (float "b")])))
+    ];
+    hash = fn "float" [["ivec2" "c"]] [
+      (var "uvec2" "v" [(uvec2 "c") "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
+      (var "uint" "n" [["v.x" "^" "v.y"] "*" (unsigned 1597334673)])
+      (update "^=" "n" ["n" "&gt;&gt;" 16])
+      (update "*=" "n" (unsigned 2246822519))
+      (update "^=" "n" ["n" "&gt;&gt;" 13])
+      (return [(float "n") "*" [1.0 "/" 4294967296.0]])
+    ];
+    hexDist = fn "float" [["vec2" "q"]] [
+      (return (call "max" (call "abs" "q.x") (call "max" (call "abs" [0.5 "*" "q.x" "+" "S3" "*" "q.y"]) (call "abs" [(-0.5) "*" "q.x" "+" "S3" "*" "q.y"]))))
+    ];
+    mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+      (var "float" "px" [1.0 "/" "iResolution.y"])
+      (var "vec2" "p" [["fragCoord" "-" "CENTER" "*" "iResolution.xy"] "*" "px"])
+      (var "float" "r" (call "max" (call "length" "p") 1.0e-5))
+      (var "vec2" "w" (vec2 (call "log" "r") (call "atan" "p.y" "p.x")))
+      (var "vec2" "vc" (call "cart" (ivec2 "M" "N")))
+      (var "float" "k" ["TAU" "/" (call "length" "vc")])
+      (var "float" "rho" [0.5 "*" "PI" "-" (call "atan" "vc.y" "vc.x")])
+      (var "vec2" "drift" (call "cart" (ivec2 1 (-1))))
+      (var "float" "tt" (call "mod" ["iTime" "*" "HEX_SPEED"] (float "LOOP")))
+      (var "vec2" "hw" [(call "rot" "w" (neg "rho")) "/" "k" "-" "tt" "*" "drift"])
+      (var "ivec2" "base" (call "nearest" "hw"))
+      (var "float" "jr" (call "mod" ["hw.y" "/" "S3" "+" 0.5] (float "N")))
+      (var "float" "band" [(call "smoothstep" [(float "ARM") "+" 1.5] [(float "ARM") "+" 4.0] "jr") "*" [1.0 "-" (call "smoothstep" [(float "N") "-" 1.2] (float "N") "jr")]])
+      (var "vec3" "col" (vec3 0.0))
+      (var "float" "phase" [(call "mod" "iTime" "CYCLE") "*" 9.0 "/" "CYCLE"])
+      (var "float" "c" [(float "STREAK_K") "*" "STREAK_STEP" "/" "TAU"])
+      (var "float" "ct" (call "sqrt" [1.0 "+" "c" "*" "c"]))
+      (var "float" "dth" ["TAU" "/" (float "STREAK_N")])
+      (var "float" "ts" (call "mod" ["iTime" "*" "STREAK_SPEED"] [(float "STREAK_LOOP") "*" "STREAK_STEP"]))
+      (var "float" "sig" ["w.x" "-" "ts" "-" "c" "*" "w.y"])
+      (var "int" "is0" (int (call "floor" ["sig" "/" "STREAK_STEP"])))
+      (var "int" "it0" (int (call "floor" ["w.y" "/" "dth"])))
+      (for (var "int" "o" 0) ["o" "&lt;" 9] (inc "o") [
+        (var "int" "it" ["it0" "+" "o" "%" 3 "-" 1])
+        (var "int" "is" ["is0" "+" "o" "/" 3 "-" 1])
+        (var "int" "q" (call "fdiv" "it" "STREAK_N"))
+        (var "ivec2" "id" (ivec2 (call "pmod" ["is" "+" "STREAK_K" "*" "q"] "STREAK_LOOP") ["it" "-" "q" "*" "STREAK_N"]))
+        (var "float" "h0" (call "hash" "id"))
+        (var "float" "h1" (call "hash" ["id" "+" (ivec2 7 131)]))
+        (var "float" "h2" (call "hash" ["id" "+" (ivec2 53 17)]))
+        (if' ["h0" "&gt;" 0.8] [
+          continue
+        ])
+        (var "float" "sm" [[(float "is") "+" 0.5 "+" 0.8 "*" ["h1" "-" 0.5]] "*" "STREAK_STEP"])
+        (var "vec2" "dir" (call "rot" [(vec2 "c" 1.0) "/" "ct"] [0.6 "*" ["h2" "-" 0.5]]))
+        (var "float" "tc" [[(float "it") "+" 0.5 "+" 0.6 "*" ["h2" "-" 0.5]] "*" "dth"])
+        (var "vec2" "d" (vec2 ["sig" "-" "sm" "+" "c" "*" ["w.y" "-" "tc"]] ["w.y" "-" "tc"]))
+        (var "float" "len" [[0.22 "+" 0.22 "*" "h1"] "*" "dth" "*" "ct"])
+        (var "float" "th" [[0.2 "+" 0.08 "*" "h2"] "*" "STREAK_STEP" "/" "ct"])
+        (var "float" "a" (call "clamp" (call "dot" "d" "dir") (neg "len") "len"))
+        (var "float" "dist" [[(call "length" ["d" "-" "dir" "*" "a"]) "-" "th"] "*" "r" "/" "px"])
+        (var "float" "cover" [(call "clamp" [0.5 "-" "dist"] 0.0 1.0) "*" (call "smoothstep" 0.6 2.0 ["th" "*" "r" "/" "px"])])
+        (var "int" "pick" [(int ["h0" "*" 16.0]) "%" 13])
+        (var "vec3" "sc" (cond ["pick" "&gt;" 8] (index "PAL" 9) (call "cycle" [(float "pick") "-" "phase"])))
+        (assign "col" (call "mix" "col" ["sc" "*" [0.7 "+" 0.3 "*" "h2"]] ["cover" "*" "band"]))
+      ])
+      (var (sized "float" 7) "key" null)
+      (var (sized "int" 7) "ord" null)
+      (var "vec2" "outward" (call "rot" (vec2 1.0 0.0) (neg "rho")))
+      (for (var "int" "i" 0) ["i" "&lt;" 7] (inc "i") [
+        (assign (index "key" "i") (call "dot" (call "cart" (index "NEAR" "i")) "outward"))
+        (assign (index "ord" "i") "i")
+      ])
+      (for (var "int" "i" 1) ["i" "&lt;" 7] (inc "i") [
+        (for (var "int" "j" "i") ["j" "&gt;" 0 "&amp;&amp;" (index "key" (index "ord" ["j" "-" 1])) "&gt;" (index "key" (index "ord" "j"))] (dec "j") [
+          (var "int" "t" (index "ord" "j"))
+          (assign (index "ord" "j") (index "ord" ["j" "-" 1]))
+          (assign (index "ord" ["j" "-" 1]) "t")
+        ])
+      ])
+      (var "int" "wrap" [["M" "+" "N"] "*" "LOOP"])
+      (for (var "int" "i" 0) ["i" "&lt;" 7] (inc "i") [
+        (var "ivec2" "cell" ["base" "+" (index "NEAR" (index "ord" "i"))])
+        (if' [(call "pmod" "cell.y" "N") "&gt;=" "ARM"] [
+          continue
+        ])
+        (var "int" "id" (call "pmod" ["cell.x" "*" "N" "-" "cell.y" "*" "M"] "wrap"))
+        (var "float" "h0" (call "hash" (ivec2 "id" 911)))
+        (var "float" "h1" (call "hash" (ivec2 "id" 37)))
+        (var "vec2" "wc" [(call "rot" [(call "cart" "cell") "+" "tt" "*" "drift"] "rho") "*" "k"])
+        (var "float" "rc" (call "exp" "wc.x"))
+        (var "vec2" "sc" ["rc" "*" (vec2 (call "cos" "wc.y") (call "sin" "wc.y"))])
+        (var "float" "scale" ["k" "*" "rc"])
+        (var "vec2" "q" [(call "rot" ["p" "-" "sc"] (neg ["wc.y" "+" "rho"])) "/" "scale"])
+        (var "float" "size" [0.5 "*" [0.88 "+" 0.36 "*" "h1"]])
+        (var "float" "dist" [[(call "hexDist" "q") "-" "size"] "*" "scale" "/" "px"])
+        (var "float" "fade" (call "smoothstep" 3.0 9.0 ["size" "*" "scale" "/" "px"]))
+        (var "float" "cover" [(call "clamp" [0.5 "-" "dist"] 0.0 1.0) "*" "fade"])
+        (var "float" "rim" (call "clamp" [0.5 "-" "dist" "-" (call "max" 1.0 [0.03 "*" "size" "*" "scale" "/" "px"])] 0.0 1.0))
+        (var "vec3" "hc" (call "cycle" ["h0" "*" 9.0 "-" "phase"]))
+        (assign "col" (call "mix" "col" ["hc" "*" "rim"] "cover"))
+      ])
+      (assign "fragColor" (vec4 "col" 1.0))
+    ];
+    nearest = fn "ivec2" [["vec2" "h"]] [
+      (var "float" "y" ["h.y" "/" "S3"])
+      (var "vec3" "c" (vec3 ["h.x" "-" 0.5 "*" "y"] "y" [(neg "h.x") "-" 0.5 "*" "y"]))
+      (var "vec3" "r" (call "floor" ["c" "+" 0.5]))
+      (var "vec3" "d" (call "abs" ["r" "-" "c"]))
+      (ifElse ["d.x" "&gt;" "d.y" "&amp;&amp;" "d.x" "&gt;" "d.z"] [
+          (assign "r.x" [(neg "r.y") "-" "r.z"])
+        ] (if' ["d.y" "&gt;" "d.z"] [
+          (assign "r.y" [(neg "r.x") "-" "r.z"])
+        ]))
+      (return (ivec2 "r.xy"))
+    ];
+    pmod = fn "int" [["int" "a"] ["int" "b"]] [
+      (return ["a" "-" "b" "*" (call "fdiv" "a" "b")])
+    ];
+    rot = fn "vec2" [["vec2" "v"] ["float" "a"]] [
+      (var "float" "c" (call "cos" "a"))
+      (var "float" "s" (call "sin" "a"))
+      (return (vec2 ["c" "*" "v.x" "-" "s" "*" "v.y"] ["s" "*" "v.x" "+" "c" "*" "v.y"]))
+    ];
+  };
+}
+</pre>
+
+</td>
+</tr>
+</table>
+
+</details>
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except

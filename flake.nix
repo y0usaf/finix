@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=ecc1422d1655c00323ce7da8b6977bf24981ec69";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=cadb928056ae58ef6faa417e882c4a667f51ac78";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -11097,710 +11097,742 @@
       ])
     ];
     modules_desktop_session_tomoe_shaders_balatro_data = {
-      blank,
+      assign,
       call,
-      define,
       fn,
       for,
-      rows,
+      inc,
+      macro,
+      update,
+      var,
+      vec2,
+      vec3,
+      vec4,
       ...
-    }: [
-      (define (call "HEX" ["c"]) [[(call "vec3" [[[["c"] ">>" 16] "&" "0xff"] [[["c"] ">>" 8] "&" "0xff"] [["c"] "&" "0xff"]]) "/" "255.0"]])
-      (define "COLOR_1" (call "HEX" ["0xde443b"]))
-      (define "COLOR_2" (call "HEX" ["0x006bb4"]))
-      (define "COLOR_3" (call "HEX" ["0x162325"]))
-      (define "CONTRAST" "3.5")
-      (define "LIGHTING" "0.4")
-      (define "SPIN_AMOUNT" "0.25")
-      (define "SPIN_ROTATION" "-2.0")
-      (define "SPEED" "7.0")
-      blank
-      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
-        ["float" "diagonal" "=" (call "length" ["iResolution.xy"])]
-        ["vec2" "uv" "=" ["fragCoord" "-" "0.5" "*" "iResolution.xy"] "/" "diagonal"]
-        ["float" "radius" "=" (call "length" ["uv"])]
-        (rows [
-          ["float" "angle" "=" (call "atan" ["uv.y" "uv.x"]) "+" "302.2" "+" "0.2" "*" "SPIN_ROTATION"]
-          ["-" "20.0" "*" ["SPIN_AMOUNT" "*" "radius" "+" "1.0" "-" "SPIN_AMOUNT"]]
-        ])
-        ["uv" "=" "radius" "*" (call "vec2" [(call "cos" ["angle"]) (call "sin" ["angle"])]) "*" "30.0"]
-        ["float" "t" "=" "iTime" "*" "SPEED"]
-        ["vec2" "uv2" "=" (call "vec2" [["uv.x" "+" "uv.y"]])]
-        (for ["int" "i" "=" 0] ["i" "<" 5] "i++" [
-          ["uv2" "+=" (call "sin" [(call "max" ["uv.x" "uv.y"])]) "+" "uv"]
-          ["uv" "+=" "0.5" "*" (call "vec2" [(call "cos" [["5.1123314" "+" "0.353" "*" "uv2.y" "+" "t" "*" "0.131121"]]) (call "sin" [["uv2.x" "-" "0.113" "*" "t"]])])]
-          ["uv" "-=" (call "cos" [["uv.x" "+" "uv.y"]]) "-" (call "sin" [["uv.x" "*" "0.711" "-" "uv.y"]])]
-        ])
-        ["float" "contrast" "=" "0.25" "*" "CONTRAST" "+" "0.5" "*" "SPIN_AMOUNT" "+" "1.2"]
-        ["float" "paint" "=" (call "clamp" [[(call "length" ["uv"]) "*" "0.035" "*" "contrast"] "0.0" "2.0"])]
-        ["float" "c1" "=" (call "max" ["0.0" ["1.0" "-" "contrast" "*" (call "abs" [["1.0" "-" "paint"]])]])]
-        ["float" "c2" "=" (call "max" ["0.0" ["1.0" "-" "contrast" "*" (call "abs" ["paint"])]])]
-        ["float" "c3" "=" "1.0" "-" (call "min" ["1.0" ["c1" "+" "c2"]])]
-        ["float" "light" "=" ["LIGHTING" "-" "0.2"] "*" (call "max" [["c1" "*" "5.0" "-" "4.0"] "0.0"]) "+" "LIGHTING" "*" (call "max" [["c2" "*" "5.0" "-" "4.0"] "0.0"])]
-        (rows [
-          ["vec3" "color" "=" ["0.3" "/" "CONTRAST"] "*" "COLOR_1"]
-          ["+" ["1.0" "-" "0.3" "/" "CONTRAST"] "*" ["COLOR_1" "*" "c1" "+" "COLOR_2" "*" "c2" "+" "COLOR_3" "*" "c3"] "+" "light"]
-        ])
-        ["fragColor" "=" (call "vec4" ["color" "1.0"])]
-      ])
-    ];
+    }: {
+      defines = {
+        COLOR_1 = call "HEX" 14566459;
+        COLOR_2 = call "HEX" 27572;
+        COLOR_3 = call "HEX" 1450789;
+        CONTRAST = 3.5;
+        HEX = macro ["c"] [(vec3 ["c" ">>" 16 "&" 255] ["c" ">>" 8 "&" 255] ["c" "&" 255]) "/" 255.0];
+        LIGHTING = 0.4;
+        SPEED = 7.0;
+        SPIN_AMOUNT = 0.25;
+        SPIN_ROTATION = -2.0;
+      };
+      fns = {
+        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+          (var "float" "diagonal" (call "length" "iResolution.xy"))
+          (var "vec2" "uv" [["fragCoord" "-" 0.5 "*" "iResolution.xy"] "/" "diagonal"])
+          (var "float" "radius" (call "length" "uv"))
+          (var "float" "angle" [(call "atan" "uv.y" "uv.x") "+" 302.2 "+" 0.2 "*" "SPIN_ROTATION" "-" 20.0 "*" ["SPIN_AMOUNT" "*" "radius" "+" 1.0 "-" "SPIN_AMOUNT"]])
+          (assign "uv" ["radius" "*" (vec2 (call "cos" "angle") (call "sin" "angle")) "*" 30.0])
+          (var "float" "t" ["iTime" "*" "SPEED"])
+          (var "vec2" "uv2" (vec2 ["uv.x" "+" "uv.y"]))
+          (for (var "int" "i" 0) ["i" "<" 5] (inc "i") [
+            (update "+=" "uv2" [(call "sin" (call "max" "uv.x" "uv.y")) "+" "uv"])
+            (update "+=" "uv" [0.5 "*" (vec2 (call "cos" [5.1123314 "+" 0.353 "*" "uv2.y" "+" "t" "*" 0.131121]) (call "sin" ["uv2.x" "-" 0.113 "*" "t"]))])
+            (update "-=" "uv" [(call "cos" ["uv.x" "+" "uv.y"]) "-" (call "sin" ["uv.x" "*" 0.711 "-" "uv.y"])])
+          ])
+          (var "float" "contrast" [0.25 "*" "CONTRAST" "+" 0.5 "*" "SPIN_AMOUNT" "+" 1.2])
+          (var "float" "paint" (call "clamp" [(call "length" "uv") "*" 0.035 "*" "contrast"] 0.0 2.0))
+          (var "float" "c1" (call "max" 0.0 [1.0 "-" "contrast" "*" (call "abs" [1.0 "-" "paint"])]))
+          (var "float" "c2" (call "max" 0.0 [1.0 "-" "contrast" "*" (call "abs" "paint")]))
+          (var "float" "c3" [1.0 "-" (call "min" 1.0 ["c1" "+" "c2"])])
+          (var "float" "light" [["LIGHTING" "-" 0.2] "*" (call "max" ["c1" "*" 5.0 "-" 4.0] 0.0) "+" "LIGHTING" "*" (call "max" ["c2" "*" 5.0 "-" 4.0] 0.0)])
+          (var "vec3" "color" [0.3 "/" "CONTRAST" "*" "COLOR_1" "+" [1.0 "-" 0.3 "/" "CONTRAST"] "*" ["COLOR_1" "*" "c1" "+" "COLOR_2" "*" "c2" "+" "COLOR_3" "*" "c3"] "+" "light"])
+          (assign "fragColor" (vec4 "color" 1.0))
+        ];
+      };
+    };
     modules_desktop_session_tomoe_shaders_cassette_led_data = {
-      blank,
+      assign,
       call,
+      cond,
+      float,
       fn,
       for,
+      inc,
+      neg,
+      return,
+      update,
+      var,
+      vec2,
+      vec3,
+      vec4,
       ...
-    }: [
-      ["const" "vec3" "SHELL" "=" (call "vec3" ["0.914" "0.898" "0.863"])]
-      ["const" "vec3" "PUTTY" "=" (call "vec3" ["0.800" "0.780" "0.730"])]
-      ["const" "vec3" "GRAPHITE" "=" (call "vec3" ["0.160" "0.160" "0.155"])]
-      ["const" "vec3" "ORANGE" "=" (call "vec3" ["0.930" "0.360" "0.110"])]
-      ["const" "vec3" "AMBER" "=" (call "vec3" ["0.960" "0.660" "0.200"])]
-      ["const" "vec2" "LIGHT" "=" (call "vec2" ["-0.6" "0.8"])]
-      blank
-      (fn ["float" (call "hash" [["vec2" "p"]])] [
-        ["return" (call "fract" [[(call "sin" [(call "dot" ["p" (call "vec2" ["127.1" "311.7"])])]) "*" "43758.5453"]])]
-      ])
-      blank
-      ["const" "float" "ROWS" "=" "46.0"]
-      ["const" "float" "SPEED" "=" "1.0"]
-      ["const" "float" "BPM" "=" "128.0"]
-      ["const" "float" "WAVE" "=" "1.5"]
-      ["const" "float" "RIPPLE" "=" "0.7"]
-      ["const" "float" "RIPPLE_SPEED" "=" "0.7"]
-      blank
-      (fn ["float" (call "base" [["vec2" "c"] ["float" "t"] ["float" "aspect"]])] [
-        ["float" "s" "=" "t" "*" "0.5"]
-        ["vec2" "a" "=" (call "vec2" [["aspect" "*" ["0.22" "+" "0.08" "*" (call "sin" [["s" "*" "0.37"]])]] ["0.30" "+" "0.12" "*" (call "cos" [["s" "*" "0.41"]])]])]
-        ["vec2" "b" "=" (call "vec2" [["aspect" "*" ["0.78" "+" "0.08" "*" (call "cos" [["s" "*" "0.29"]])]] ["0.70" "+" "0.10" "*" (call "sin" [["s" "*" "0.47"]])]])]
-        ["float" "wa" "=" (call "sin" [[(call "length" [["c" "-" "a"]]) "*" "18.0" "-" "t" "*" "WAVE"]])]
-        ["float" "wb" "=" (call "sin" [[(call "length" [["c" "-" "b"]]) "*" "14.0" "-" "t" "*" "WAVE" "*" "0.8"]])]
-        ["return" "0.5" "+" "0.25" "*" ["wa" "+" "wb"]]
-      ])
-      blank
-      (fn ["float" (call "ripples" [["vec2" "c"] ["float" "t"] ["float" "aspect"]])] [
-        ["float" "every" "=" "120.0" "/" "BPM"]
-        ["float" "life" "=" "4.0" "*" "every"]
-        ["float" "n" "=" (call "floor" [["t" "/" "every"]])]
-        ["float" "age" "=" "t" "-" "n" "*" "every"]
-        ["float" "r" "=" "0.0"]
-        (for ["int" "k" "=" 0] ["k" "<" 4] "k++" [
-          ["float" "m" "=" "n" "-" (call "float" ["k"])]
-          ["float" "tm" "=" "age" "+" (call "float" ["k"]) "*" "every"]
-          ["float" "x" "=" "tm" "/" "life"]
-          ["vec2" "o" "=" (call "vec2" [[(call "hash" [(call "vec2" ["m" "3.7"])]) "*" "aspect"] (call "hash" [(call "vec2" ["m" "9.1"])])])]
-          ["float" "d" "=" (call "length" [["c" "-" "o"]]) "-" "tm" "*" "RIPPLE_SPEED"]
-          ["float" "env" "=" (call "smoothstep" ["0.0" "0.04" "x"]) "*" ["1.0" "-" (call "smoothstep" ["0.2" "1.0" "x"])]]
-          ["r" "+=" [(call "mod" ["m" "2.0"]) "<" "0.5" "?" "1.0" ":" "0.7"] "*" "env" "*" (call "exp" [["-d" "*" "d" "*" "120.0"]])]
-        ])
-        ["return" "RIPPLE" "*" "r"]
-      ])
-      blank
-      ["const" "float" "LEVELS" "=" "8.0"]
-      blank
-      (fn ["float" (call "level" [["vec2" "cell"] ["float" "pitch"] ["vec2" "off"] ["float" "t"] ["float" "aspect"]])] [
-        ["vec2" "p" "=" [["cell" "+" "0.5"] "*" "pitch" "+" "off"] "/" "iResolution.y"]
-        ["float" "b" "=" (call "smoothstep" ["0.40" "0.98" [(call "base" ["p" "t" "aspect"]) "*" "0.95"]])]
-        ["float" "lift" "=" (call "clamp" [(call "ripples" ["p" "t" "aspect"]) "0.0" "1.0"])]
-        ["b" "=" "1.0" "-" ["1.0" "-" "b"] "*" ["1.0" "-" "lift"]]
-        ["return" (call "floor" [["b" "*" "b" "*" "LEVELS" "+" "0.5"]]) "/" "LEVELS"]
-      ])
-      blank
-      (fn ["vec3" (call "led" [["float" "b"]])] [
-        ["return" (call "mix" ["ORANGE" "AMBER" ["0.55" "*" (call "smoothstep" ["0.6" "1.0" "b"])]]) "*" "b"]
-      ])
-      blank
-      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
-        ["float" "t" "=" "iTime" "*" "SPEED"]
-        ["float" "aspect" "=" "iResolution.x" "/" "iResolution.y"]
-        ["float" "pitch" "=" (call "floor" [["iResolution.y" "/" "ROWS"]])]
-        ["vec2" "off" "=" "0.5" "*" (call "mod" ["iResolution.xy" "pitch"])]
-        ["vec2" "cell" "=" (call "floor" [[["fragCoord" "-" "off"] "/" "pitch"]])]
-        ["vec2" "center" "=" ["cell" "+" "0.5"] "*" "pitch" "+" "off"]
-        ["float" "b" "=" (call "level" ["cell" "pitch" "off" "t" "aspect"])]
-        ["float" "hs" "=" "0.5" "*" (call "floor" [["pitch" "*" "0.62" "+" "0.5"]])]
-        ["vec2" "q" "=" "fragCoord" "-" "center"]
-        ["vec2" "aq" "=" (call "abs" ["q"])]
-        ["float" "dist" "=" (call "max" ["aq.x" "aq.y"])]
-        ["vec2" "dir" "=" "aq.x" ">" "aq.y" "?" (call "vec2" [(call "sign" ["q.x"]) "0.0"]) ":" (call "vec2" ["0.0" (call "sign" ["q.y"])])]
-        ["vec2" "l" "=" (call "normalize" ["LIGHT"])]
-        ["vec2" "sv" "=" "fragCoord" "/" "iResolution.xy"]
-        ["vec3" "panel" "=" "SHELL" "*" (call "mix" ["0.94" "1.02" ["0.55" "*" "sv.y" "+" "0.45" "*" ["1.0" "-" "sv.x"]]])]
-        ["float" "rim" "=" (call "smoothstep" [["hs" "+" "2.5"] "hs" "dist"]) "*" (call "dot" ["dir" "-l"])]
-        ["panel" "*=" "1.0" "+" "0.10" "*" "rim"]
-        ["float" "w" "=" "0.0"]
-        (for ["int" "j" "=" (-2)] ["j" "<=" 2] "j++" [
-          (for ["int" "i" "=" (-2)] ["i" "<=" 2] "i++" [
-            ["vec2" "nc" "=" "cell" "+" (call "vec2" [(call "float" ["i"]) (call "float" ["j"])])]
-            ["vec2" "d" "=" (call "abs" [["fragCoord" "-" [["nc" "+" "0.5"] "*" "pitch" "+" "off"]]]) "/" "pitch"]
-            ["float" "e" "=" (call "max" [[(call "max" ["d.x" "d.y"]) "-" "0.31"] "0.0"])]
-            ["w" "+=" (call "level" ["nc" "pitch" "off" "t" "aspect"]) "*" (call "exp" [["-e" "*" "e" "*" "9.0"]])]
+    }: {
+      consts = {
+        AMBER = vec3 0.96 0.66 0.2;
+        BPM = 128.0;
+        GRAPHITE = vec3 0.16 0.16 0.155;
+        LEVELS = 8.0;
+        LIGHT = vec2 (-0.6) 0.8;
+        ORANGE = vec3 0.93 0.36 0.11;
+        PUTTY = vec3 0.8 0.78 0.73;
+        RIPPLE = 0.7;
+        RIPPLE_SPEED = 0.7;
+        ROWS = 46.0;
+        SHELL = vec3 0.914 0.898 0.863;
+        SPEED = 1.0;
+        WAVE = 1.5;
+      };
+      fns = {
+        base = fn "float" [["vec2" "c"] ["float" "t"] ["float" "aspect"]] [
+          (var "float" "s" ["t" "*" 0.5])
+          (var "vec2" "a" (vec2 ["aspect" "*" [0.22 "+" 0.08 "*" (call "sin" ["s" "*" 0.37])]] [0.3 "+" 0.12 "*" (call "cos" ["s" "*" 0.41])]))
+          (var "vec2" "b" (vec2 ["aspect" "*" [0.78 "+" 0.08 "*" (call "cos" ["s" "*" 0.29])]] [0.7 "+" 0.1 "*" (call "sin" ["s" "*" 0.47])]))
+          (var "float" "wa" (call "sin" [(call "length" ["c" "-" "a"]) "*" 18.0 "-" "t" "*" "WAVE"]))
+          (var "float" "wb" (call "sin" [(call "length" ["c" "-" "b"]) "*" 14.0 "-" "t" "*" "WAVE" "*" 0.8]))
+          (return [0.5 "+" 0.25 "*" ["wa" "+" "wb"]])
+        ];
+        hash = fn "float" [["vec2" "p"]] [
+          (return (call "fract" [(call "sin" (call "dot" "p" (vec2 127.1 311.7))) "*" 43758.5453]))
+        ];
+        led = fn "vec3" [["float" "b"]] [
+          (return [(call "mix" "ORANGE" "AMBER" [0.55 "*" (call "smoothstep" 0.6 1.0 "b")]) "*" "b"])
+        ];
+        level = fn "float" [["vec2" "cell"] ["float" "pitch"] ["vec2" "off"] ["float" "t"] ["float" "aspect"]] [
+          (var "vec2" "p" [[["cell" "+" 0.5] "*" "pitch" "+" "off"] "/" "iResolution.y"])
+          (var "float" "b" (call "smoothstep" 0.4 0.98 [(call "base" "p" "t" "aspect") "*" 0.95]))
+          (var "float" "lift" (call "clamp" (call "ripples" "p" "t" "aspect") 0.0 1.0))
+          (assign "b" [1.0 "-" [1.0 "-" "b"] "*" [1.0 "-" "lift"]])
+          (return [(call "floor" ["b" "*" "b" "*" "LEVELS" "+" 0.5]) "/" "LEVELS"])
+        ];
+        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+          (var "float" "t" ["iTime" "*" "SPEED"])
+          (var "float" "aspect" ["iResolution.x" "/" "iResolution.y"])
+          (var "float" "pitch" (call "floor" ["iResolution.y" "/" "ROWS"]))
+          (var "vec2" "off" [0.5 "*" (call "mod" "iResolution.xy" "pitch")])
+          (var "vec2" "cell" (call "floor" [["fragCoord" "-" "off"] "/" "pitch"]))
+          (var "vec2" "center" [["cell" "+" 0.5] "*" "pitch" "+" "off"])
+          (var "float" "b" (call "level" "cell" "pitch" "off" "t" "aspect"))
+          (var "float" "hs" [0.5 "*" (call "floor" ["pitch" "*" 0.62 "+" 0.5])])
+          (var "vec2" "q" ["fragCoord" "-" "center"])
+          (var "vec2" "aq" (call "abs" "q"))
+          (var "float" "dist" (call "max" "aq.x" "aq.y"))
+          (var "vec2" "dir" (cond ["aq.x" ">" "aq.y"] (vec2 (call "sign" "q.x") 0.0) (vec2 0.0 (call "sign" "q.y"))))
+          (var "vec2" "l" (call "normalize" "LIGHT"))
+          (var "vec2" "sv" ["fragCoord" "/" "iResolution.xy"])
+          (var "vec3" "panel" ["SHELL" "*" (call "mix" 0.94 1.02 [0.55 "*" "sv.y" "+" 0.45 "*" [1.0 "-" "sv.x"]])])
+          (var "float" "rim" [(call "smoothstep" ["hs" "+" 2.5] "hs" "dist") "*" (call "dot" "dir" (neg "l"))])
+          (update "*=" "panel" [1.0 "+" 0.1 "*" "rim"])
+          (var "float" "w" 0.0)
+          (for (var "int" "j" (-2)) ["j" "<=" 2] (inc "j") [
+            (for (var "int" "i" (-2)) ["i" "<=" 2] (inc "i") [
+              (var "vec2" "nc" ["cell" "+" (vec2 (float "i") (float "j"))])
+              (var "vec2" "d" [(call "abs" ["fragCoord" "-" [["nc" "+" 0.5] "*" "pitch" "+" "off"]]) "/" "pitch"])
+              (var "float" "e" (call "max" [(call "max" "d.x" "d.y") "-" 0.31] 0.0))
+              (update "+=" "w" [(call "level" "nc" "pitch" "off" "t" "aspect") "*" (call "exp" [(neg "e") "*" "e" "*" 9.0])])
+            ])
           ])
-        ])
-        ["panel" "=" (call "mix" ["panel" ["panel" "*" (call "vec3" ["1.03" "0.80" "0.62"])] (call "clamp" [["w" "*" "0.28"] "0.0" "0.75"])])]
-        ["float" "wall" "=" (call "max" ["1.0" ["hs" "*" "0.22"]])]
-        ["float" "lit" "=" (call "clamp" [(call "dot" ["dir" "-l"]) "0.0" "1.0"])]
-        ["vec3" "side" "=" (call "mix" [["GRAPHITE" "*" "0.7"] ["PUTTY" "*" "0.8"] "lit"]) "+" (call "led" ["b"]) "*" "0.35"]
-        ["vec3" "face" "=" "GRAPHITE" "*" "0.85" "+" (call "led" ["b"]) "*" ["1.0" "+" "0.12" "*" ["1.0" "-" "dist" "/" ["hs" "-" "wall"]]]]
-        ["vec3" "hole" "=" (call "mix" ["face" "side" [(call "step" [["hs" "-" "wall"] "dist"]) "*" ["0.4" "+" "0.6" "*" "lit"]]])]
-        ["float" "inside" "=" "1.0" "-" (call "step" ["hs" "dist"])]
-        ["vec3" "color" "=" (call "mix" ["panel" "hole" "inside"])]
-        ["color" "+=" [(call "hash" ["fragCoord"]) "-" "0.5"] "*" "0.012"]
-        ["fragColor" "=" (call "vec4" ["color" "1.0"])]
-      ])
-    ];
+          (assign "panel" (call "mix" "panel" ["panel" "*" (vec3 1.03 0.8 0.62)] (call "clamp" ["w" "*" 0.28] 0.0 0.75)))
+          (var "float" "wall" (call "max" 1.0 ["hs" "*" 0.22]))
+          (var "float" "lit" (call "clamp" (call "dot" "dir" (neg "l")) 0.0 1.0))
+          (var "vec3" "side" [(call "mix" ["GRAPHITE" "*" 0.7] ["PUTTY" "*" 0.8] "lit") "+" (call "led" "b") "*" 0.35])
+          (var "vec3" "face" ["GRAPHITE" "*" 0.85 "+" (call "led" "b") "*" [1.0 "+" 0.12 "*" [1.0 "-" "dist" "/" ["hs" "-" "wall"]]]])
+          (var "vec3" "hole" (call "mix" "face" "side" [(call "step" ["hs" "-" "wall"] "dist") "*" [0.4 "+" 0.6 "*" "lit"]]))
+          (var "float" "inside" [1.0 "-" (call "step" "hs" "dist")])
+          (var "vec3" "color" (call "mix" "panel" "hole" "inside"))
+          (update "+=" "color" [[(call "hash" "fragCoord") "-" 0.5] "*" 0.012])
+          (assign "fragColor" (vec4 "color" 1.0))
+        ];
+        ripples = fn "float" [["vec2" "c"] ["float" "t"] ["float" "aspect"]] [
+          (var "float" "every" [120.0 "/" "BPM"])
+          (var "float" "life" [4.0 "*" "every"])
+          (var "float" "n" (call "floor" ["t" "/" "every"]))
+          (var "float" "age" ["t" "-" "n" "*" "every"])
+          (var "float" "r" 0.0)
+          (for (var "int" "k" 0) ["k" "<" 4] (inc "k") [
+            (var "float" "m" ["n" "-" (float "k")])
+            (var "float" "tm" ["age" "+" (float "k") "*" "every"])
+            (var "float" "x" ["tm" "/" "life"])
+            (var "vec2" "o" (vec2 [(call "hash" (vec2 "m" 3.7)) "*" "aspect"] (call "hash" (vec2 "m" 9.1))))
+            (var "float" "d" [(call "length" ["c" "-" "o"]) "-" "tm" "*" "RIPPLE_SPEED"])
+            (var "float" "env" [(call "smoothstep" 0.0 0.04 "x") "*" [1.0 "-" (call "smoothstep" 0.2 1.0 "x")]])
+            (update "+=" "r" [(cond [(call "mod" "m" 2.0) "<" 0.5] 1.0 0.7) "*" "env" "*" (call "exp" [(neg "d") "*" "d" "*" 120.0])])
+          ])
+          (return ["RIPPLE" "*" "r"])
+        ];
+      };
+    };
     modules_desktop_session_tomoe_shaders_cassette_squares_data = {
-      blank,
+      assign,
       call,
+      cond,
+      float,
       fn,
       for,
+      inc,
+      neg,
+      return,
+      update,
+      var,
+      vec2,
+      vec3,
+      vec4,
       ...
-    }: [
-      ["const" "vec3" "SHELL" "=" (call "vec3" ["0.914" "0.898" "0.863"])]
-      ["const" "vec3" "PUTTY" "=" (call "vec3" ["0.800" "0.780" "0.730"])]
-      ["const" "vec3" "GRAPHITE" "=" (call "vec3" ["0.160" "0.160" "0.155"])]
-      ["const" "vec3" "ORANGE" "=" (call "vec3" ["0.930" "0.360" "0.110"])]
-      ["const" "vec2" "LIGHT" "=" (call "vec2" ["-0.6" "0.8"])]
-      blank
-      (fn ["float" (call "hash" [["vec2" "p"]])] [
-        ["return" (call "fract" [[(call "sin" [(call "dot" ["p" (call "vec2" ["127.1" "311.7"])])]) "*" "43758.5453"]])]
-      ])
-      blank
-      ["const" "float" "ROWS" "=" "46.0"]
-      ["const" "float" "SPEED" "=" "1.0"]
-      ["const" "float" "BPM" "=" "128.0"]
-      ["const" "float" "WAVE" "=" "1.5"]
-      ["const" "float" "RIPPLE" "=" "0.7"]
-      ["const" "float" "RIPPLE_SPEED" "=" "0.7"]
-      blank
-      (fn ["float" (call "base" [["vec2" "c"] ["float" "t"] ["float" "aspect"]])] [
-        ["float" "s" "=" "t" "*" "0.5"]
-        ["vec2" "a" "=" (call "vec2" [["aspect" "*" ["0.22" "+" "0.08" "*" (call "sin" [["s" "*" "0.37"]])]] ["0.30" "+" "0.12" "*" (call "cos" [["s" "*" "0.41"]])]])]
-        ["vec2" "b" "=" (call "vec2" [["aspect" "*" ["0.78" "+" "0.08" "*" (call "cos" [["s" "*" "0.29"]])]] ["0.70" "+" "0.10" "*" (call "sin" [["s" "*" "0.47"]])]])]
-        ["float" "wa" "=" (call "sin" [[(call "length" [["c" "-" "a"]]) "*" "18.0" "-" "t" "*" "WAVE"]])]
-        ["float" "wb" "=" (call "sin" [[(call "length" [["c" "-" "b"]]) "*" "14.0" "-" "t" "*" "WAVE" "*" "0.8"]])]
-        ["return" "0.5" "+" "0.25" "*" ["wa" "+" "wb"]]
-      ])
-      blank
-      (fn ["float" (call "ripples" [["vec2" "c"] ["float" "t"] ["float" "aspect"]])] [
-        ["float" "every" "=" "120.0" "/" "BPM"]
-        ["float" "life" "=" "4.0" "*" "every"]
-        ["float" "n" "=" (call "floor" [["t" "/" "every"]])]
-        ["float" "age" "=" "t" "-" "n" "*" "every"]
-        ["float" "r" "=" "0.0"]
-        (for ["int" "k" "=" 0] ["k" "<" 4] "k++" [
-          ["float" "m" "=" "n" "-" (call "float" ["k"])]
-          ["float" "tm" "=" "age" "+" (call "float" ["k"]) "*" "every"]
-          ["float" "x" "=" "tm" "/" "life"]
-          ["vec2" "o" "=" (call "vec2" [[(call "hash" [(call "vec2" ["m" "3.7"])]) "*" "aspect"] (call "hash" [(call "vec2" ["m" "9.1"])])])]
-          ["float" "d" "=" (call "length" [["c" "-" "o"]]) "-" "tm" "*" "RIPPLE_SPEED"]
-          ["float" "env" "=" (call "smoothstep" ["0.0" "0.04" "x"]) "*" ["1.0" "-" (call "smoothstep" ["0.2" "1.0" "x"])]]
-          ["r" "+=" [(call "mod" ["m" "2.0"]) "<" "0.5" "?" "1.0" ":" "0.7"] "*" "env" "*" (call "exp" [["-d" "*" "d" "*" "120.0"]])]
-        ])
-        ["return" "RIPPLE" "*" "r"]
-      ])
-      blank
-      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
-        ["float" "t" "=" "iTime" "*" "SPEED"]
-        ["float" "aspect" "=" "iResolution.x" "/" "iResolution.y"]
-        ["float" "pitch" "=" (call "floor" [["iResolution.y" "/" "ROWS"]])]
-        ["vec2" "off" "=" "0.5" "*" (call "mod" ["iResolution.xy" "pitch"])]
-        ["vec2" "cell" "=" (call "floor" [[["fragCoord" "-" "off"] "/" "pitch"]])]
-        ["vec2" "center" "=" ["cell" "+" "0.5"] "*" "pitch" "+" "off"]
-        ["vec2" "p" "=" "center" "/" "iResolution.y"]
-        ["float" "f" "=" (call "clamp" [[(call "base" ["p" "t" "aspect"]) "*" "0.95" "+" (call "ripples" ["p" "t" "aspect"])] "0.0" "1.0"])]
-        ["float" "hs" "=" "0.5" "*" (call "floor" [["pitch" "*" ["0.12" "+" "0.60" "*" "f" "*" "f"] "+" "0.5"]])]
-        ["vec2" "q" "=" "fragCoord" "-" "center"]
-        ["vec2" "aq" "=" (call "abs" ["q"])]
-        ["float" "dist" "=" (call "max" ["aq.x" "aq.y"])]
-        ["vec2" "dir" "=" "aq.x" ">" "aq.y" "?" (call "vec2" [(call "sign" ["q.x"]) "0.0"]) ":" (call "vec2" ["0.0" (call "sign" ["q.y"])])]
-        ["vec2" "l" "=" (call "normalize" ["LIGHT"])]
-        ["vec2" "sv" "=" "fragCoord" "/" "iResolution.xy"]
-        ["vec3" "panel" "=" "SHELL" "*" (call "mix" ["0.94" "1.02" ["0.55" "*" "sv.y" "+" "0.45" "*" ["1.0" "-" "sv.x"]]])]
-        ["float" "rim" "=" (call "smoothstep" [["hs" "+" "2.5"] "hs" "dist"]) "*" (call "dot" ["dir" "-l"])]
-        ["panel" "*=" "1.0" "+" "0.10" "*" "rim"]
-        ["float" "glow" "=" (call "smoothstep" ["0.86" "0.98" "f"])]
-        ["vec3" "backing" "=" (call "mix" ["GRAPHITE" "ORANGE" "glow"])]
-        ["float" "lit" "=" (call "clamp" [(call "dot" ["dir" "-l"]) "0.0" "1.0"])]
-        ["vec3" "wall" "=" (call "mix" [["GRAPHITE" "*" "0.7"] ["PUTTY" "*" "0.8"] "lit"])]
-        ["vec3" "hole" "=" (call "mix" ["backing" "wall" [(call "step" [["hs" "-" (call "max" ["1.0" ["hs" "*" "0.22"]])] "dist"]) "*" ["0.4" "+" "0.6" "*" "lit"]]])]
-        ["float" "inside" "=" "1.0" "-" (call "step" ["hs" "dist"])]
-        ["vec3" "color" "=" (call "mix" ["panel" "hole" "inside"])]
-        ["color" "+=" [(call "hash" ["fragCoord"]) "-" "0.5"] "*" "0.012"]
-        ["fragColor" "=" (call "vec4" ["color" "1.0"])]
-      ])
-    ];
+    }: {
+      consts = {
+        BPM = 128.0;
+        GRAPHITE = vec3 0.16 0.16 0.155;
+        LIGHT = vec2 (-0.6) 0.8;
+        ORANGE = vec3 0.93 0.36 0.11;
+        PUTTY = vec3 0.8 0.78 0.73;
+        RIPPLE = 0.7;
+        RIPPLE_SPEED = 0.7;
+        ROWS = 46.0;
+        SHELL = vec3 0.914 0.898 0.863;
+        SPEED = 1.0;
+        WAVE = 1.5;
+      };
+      fns = {
+        base = fn "float" [["vec2" "c"] ["float" "t"] ["float" "aspect"]] [
+          (var "float" "s" ["t" "*" 0.5])
+          (var "vec2" "a" (vec2 ["aspect" "*" [0.22 "+" 0.08 "*" (call "sin" ["s" "*" 0.37])]] [0.3 "+" 0.12 "*" (call "cos" ["s" "*" 0.41])]))
+          (var "vec2" "b" (vec2 ["aspect" "*" [0.78 "+" 0.08 "*" (call "cos" ["s" "*" 0.29])]] [0.7 "+" 0.1 "*" (call "sin" ["s" "*" 0.47])]))
+          (var "float" "wa" (call "sin" [(call "length" ["c" "-" "a"]) "*" 18.0 "-" "t" "*" "WAVE"]))
+          (var "float" "wb" (call "sin" [(call "length" ["c" "-" "b"]) "*" 14.0 "-" "t" "*" "WAVE" "*" 0.8]))
+          (return [0.5 "+" 0.25 "*" ["wa" "+" "wb"]])
+        ];
+        hash = fn "float" [["vec2" "p"]] [
+          (return (call "fract" [(call "sin" (call "dot" "p" (vec2 127.1 311.7))) "*" 43758.5453]))
+        ];
+        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+          (var "float" "t" ["iTime" "*" "SPEED"])
+          (var "float" "aspect" ["iResolution.x" "/" "iResolution.y"])
+          (var "float" "pitch" (call "floor" ["iResolution.y" "/" "ROWS"]))
+          (var "vec2" "off" [0.5 "*" (call "mod" "iResolution.xy" "pitch")])
+          (var "vec2" "cell" (call "floor" [["fragCoord" "-" "off"] "/" "pitch"]))
+          (var "vec2" "center" [["cell" "+" 0.5] "*" "pitch" "+" "off"])
+          (var "vec2" "p" ["center" "/" "iResolution.y"])
+          (var "float" "f" (call "clamp" [(call "base" "p" "t" "aspect") "*" 0.95 "+" (call "ripples" "p" "t" "aspect")] 0.0 1.0))
+          (var "float" "hs" [0.5 "*" (call "floor" ["pitch" "*" [0.12 "+" 0.6 "*" "f" "*" "f"] "+" 0.5])])
+          (var "vec2" "q" ["fragCoord" "-" "center"])
+          (var "vec2" "aq" (call "abs" "q"))
+          (var "float" "dist" (call "max" "aq.x" "aq.y"))
+          (var "vec2" "dir" (cond ["aq.x" ">" "aq.y"] (vec2 (call "sign" "q.x") 0.0) (vec2 0.0 (call "sign" "q.y"))))
+          (var "vec2" "l" (call "normalize" "LIGHT"))
+          (var "vec2" "sv" ["fragCoord" "/" "iResolution.xy"])
+          (var "vec3" "panel" ["SHELL" "*" (call "mix" 0.94 1.02 [0.55 "*" "sv.y" "+" 0.45 "*" [1.0 "-" "sv.x"]])])
+          (var "float" "rim" [(call "smoothstep" ["hs" "+" 2.5] "hs" "dist") "*" (call "dot" "dir" (neg "l"))])
+          (update "*=" "panel" [1.0 "+" 0.1 "*" "rim"])
+          (var "float" "glow" (call "smoothstep" 0.86 0.98 "f"))
+          (var "vec3" "backing" (call "mix" "GRAPHITE" "ORANGE" "glow"))
+          (var "float" "lit" (call "clamp" (call "dot" "dir" (neg "l")) 0.0 1.0))
+          (var "vec3" "wall" (call "mix" ["GRAPHITE" "*" 0.7] ["PUTTY" "*" 0.8] "lit"))
+          (var "vec3" "hole" (call "mix" "backing" "wall" [(call "step" ["hs" "-" (call "max" 1.0 ["hs" "*" 0.22])] "dist") "*" [0.4 "+" 0.6 "*" "lit"]]))
+          (var "float" "inside" [1.0 "-" (call "step" "hs" "dist")])
+          (var "vec3" "color" (call "mix" "panel" "hole" "inside"))
+          (update "+=" "color" [[(call "hash" "fragCoord") "-" 0.5] "*" 0.012])
+          (assign "fragColor" (vec4 "color" 1.0))
+        ];
+        ripples = fn "float" [["vec2" "c"] ["float" "t"] ["float" "aspect"]] [
+          (var "float" "every" [120.0 "/" "BPM"])
+          (var "float" "life" [4.0 "*" "every"])
+          (var "float" "n" (call "floor" ["t" "/" "every"]))
+          (var "float" "age" ["t" "-" "n" "*" "every"])
+          (var "float" "r" 0.0)
+          (for (var "int" "k" 0) ["k" "<" 4] (inc "k") [
+            (var "float" "m" ["n" "-" (float "k")])
+            (var "float" "tm" ["age" "+" (float "k") "*" "every"])
+            (var "float" "x" ["tm" "/" "life"])
+            (var "vec2" "o" (vec2 [(call "hash" (vec2 "m" 3.7)) "*" "aspect"] (call "hash" (vec2 "m" 9.1))))
+            (var "float" "d" [(call "length" ["c" "-" "o"]) "-" "tm" "*" "RIPPLE_SPEED"])
+            (var "float" "env" [(call "smoothstep" 0.0 0.04 "x") "*" [1.0 "-" (call "smoothstep" 0.2 1.0 "x")]])
+            (update "+=" "r" [(cond [(call "mod" "m" 2.0) "<" 0.5] 1.0 0.7) "*" "env" "*" (call "exp" [(neg "d") "*" "d" "*" 120.0])])
+          ])
+          (return ["RIPPLE" "*" "r"])
+        ];
+      };
+    };
     modules_desktop_session_tomoe_shaders_dot_corridor_data = {
-      bare,
-      blank,
+      assign,
       call,
+      cond,
+      continue,
+      dec,
+      float,
       fn,
       for,
       if',
+      inc,
+      int,
+      ivec2,
+      return,
+      unsigned,
+      update,
+      uvec2,
+      var,
+      vec2,
+      vec3,
+      vec4,
       ...
-    }: [
-      ["const" "float" "TAU" "=" "6.28318531"]
-      ["const" "float" "FOCAL" "=" "0.92"]
-      ["const" "float" "WIDE" "=" "2.4"]
-      ["const" "float" "LW" "=" "0.2"]
-      ["const" "float" "DY" "=" "0.41"]
-      ["const" "float" "RAD" "=" "0.19"]
-      ["const" "float" "YMAX" "=" "16.0"]
-      ["const" "float" "ZOOM" "=" "1.1"]
-      ["const" "float" "HUE_PERIOD" "=" "1.8"]
-      ["const" "float" "SIDES" "=" "13.0"]
-      ["const" "int" "BAND" "=" 5]
-      ["const" "int" "LOOP" "=" 1000]
-      blank
-      (fn ["float" (call "hash" [["ivec2" "c"]])] [
-        ["uvec2" "v" "=" (call "uvec2" ["c"]) "*" (call "uvec2" ["1597334673u" "3812015801u"])]
-        ["uint" "n" "=" ["v.x" "^" "v.y"] "*" "1597334673u"]
-        ["n" "^=" "n" ">>" 16]
-        ["n" "*=" "2246822519u"]
-        ["n" "^=" "n" ">>" 13]
-        ["return" (call "float" ["n"]) "*" ["1.0" "/" "4294967296.0"]]
-      ])
-      blank
-      (fn ["int" (call "pmod" [["int" "a"] ["int" "b"]])] [
-        ["return" "a" "-" "b" "*" (call "int" [(call "floor" [[(call "float" ["a"]) "/" (call "float" ["b"])]])])]
-      ])
-      blank
-      (fn ["vec3" (call "hsv" [["float" "h"] ["float" "s"] ["float" "v"]])] [
-        ["vec3" "k" "=" (call "clamp" [[(call "abs" [[(call "fract" [["h" "+" (call "vec3" ["0.0" "2.0" "1.0"]) "/" "3.0"]]) "*" "6.0" "-" "3.0"]]) "-" "1.0"] "0.0" "1.0"])]
-        ["return" "v" "*" (call "mix" [(call "vec3" ["1.0"]) "k" "s"])]
-      ])
-      blank
-      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
-        ["float" "px" "=" "1.0" "/" (call "max" [["0.5" "*" "iResolution.y" "*" "FOCAL"] ["0.5" "*" "iResolution.x" "/" "WIDE"]])]
-        ["vec2" "s" "=" (call "max" [[(call "abs" [["fragCoord" "-" "0.5" "*" "iResolution.xy"]]) "*" "px"] (call "vec2" ["1e-6" "0.0"])])]
-        ["vec3" "col" "=" (call "vec3" ["0.0"])]
-        ["float" "alpha" "=" "0.0"]
-        blank
-        ["float" "shift" "=" (call "mod" [["iTime" "*" "ZOOM"] [(call "float" ["LOOP"]) "*" "LW"]])]
-        ["float" "spin" "=" (call "fract" [["iTime" "/" "HUE_PERIOD"]])]
-        ["float" "w" "=" (call "log" ["s.x"]) "-" "shift"]
-        ["float" "u" "=" "s.y" "/" "s.x"]
-        ["int" "c0" "=" (call "int" [(call "floor" [["w" "/" "LW" "+" "0.5"]])])]
-        ["int" "imax" "=" (call "int" [["YMAX" "/" "DY"]])]
-        blank
-        (for ["int" "dc" "=" 2] ["dc" ">=" (-2)] "dc--" [
-          ["int" "c" "=" "c0" "+" "dc"]
-          ["int" "cc" "=" (call "pmod" ["c" "LOOP"])]
-          ["float" "lift" "=" "0.5" "*" (call "float" [["cc" "&" 1]])]
-          ["int" "i0" "=" (call "int" [(call "floor" [["u" "/" "DY" "-" "lift" "+" "0.5"]])])]
-          (for ["int" "di" "=" (-1)] ["di" "<=" 1] "di++" [
-            ["int" "i" "=" "i0" "+" "di"]
-            (if' ["i" "<" 0 "||" "i" ">" "imax"] (bare "continue"))
-            ["ivec2" "id" "=" (call "ivec2" ["cc" "i"])]
-            ["float" "h0" "=" (call "hash" ["id"])]
-            ["float" "h1" "=" (call "hash" [["id" "+" (call "ivec2" [4099 17])]])]
-            ["float" "h2" "=" (call "hash" [["id" "+" (call "ivec2" [31 7919])]])]
-            ["float" "h3" "=" (call "hash" [["id" "+" (call "ivec2" [613 3])]])]
-            (if' ["h2" ">" "0.9"] (bare "continue"))
-            ["float" "sx" "=" (call "exp" [[[(call "float" ["c"]) "+" "0.3" "*" ["h3" "-" "0.5"]] "*" "LW" "+" "shift"]])]
-            ["vec2" "centre" "=" "sx" "*" (call "vec2" ["1.0" [[(call "float" ["i"]) "+" "lift" "+" "0.3" "*" [(call "fract" [["h3" "*" "7.0"]]) "-" "0.5"]] "*" "DY"]])]
-            ["float" "rho" "=" (call "max" [["RAD" "*" ["0.5" "+" "0.5" "*" "h1"] "*" "sx"] ["0.6" "*" "px"]])]
-            ["vec2" "q" "=" "s" "-" "centre"]
-            ["float" "len" "=" (call "length" ["q"])]
-            (if' ["len" ">" "rho" "+" "px"] (bare "continue"))
-            ["float" "sector" "=" "TAU" "/" "SIDES"]
-            ["float" "a" "=" (call "mod" [[(call "atan" ["q.y" "q.x"]) "+" "h0" "*" "TAU"] "sector"]) "-" "0.5" "*" "sector"]
-            ["float" "dist" "=" ["len" "*" (call "cos" ["a"]) "-" "rho" "*" (call "cos" [["0.5" "*" "sector"]])] "/" "px"]
-            ["float" "cover" "=" (call "clamp" [["0.5" "-" "dist"] "0.0" "1.0"])]
-            ["float" "sat" "=" "h2" "<" "0.1" "?" "0.0" ":" ["h2" "<" "0.2" "?" "0.35" ":" "0.92"]]
-            ["float" "val" "=" "h2" ">" "0.82" "?" "0.55" ":" "1.0"]
-            ["float" "hue" "=" (call "hash" [(call "ivec2" [["cc" "/" "BAND"] [(call "int" [["h0" "*" "4.0"]]) "+" 101]])])]
-            ["col" "+=" ["1.0" "-" "alpha"] "*" "cover" "*" (call "hsv" [["hue" "+" "spin"] "sat" "val"])]
-            ["alpha" "+=" ["1.0" "-" "alpha"] "*" "cover"]
+    }: {
+      consts = {
+        BAND = 5;
+        DY = 0.41;
+        FOCAL = 0.92;
+        HUE_PERIOD = 1.8;
+        LOOP = 1000;
+        LW = 0.2;
+        RAD = 0.19;
+        SIDES = 13.0;
+        TAU = 6.28318531;
+        WIDE = 2.4;
+        YMAX = 16.0;
+        ZOOM = 1.1;
+      };
+      fns = {
+        hash = fn "float" [["ivec2" "c"]] [
+          (var "uvec2" "v" [(uvec2 "c") "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
+          (var "uint" "n" [["v.x" "^" "v.y"] "*" (unsigned 1597334673)])
+          (update "^=" "n" ["n" ">>" 16])
+          (update "*=" "n" (unsigned 2246822519))
+          (update "^=" "n" ["n" ">>" 13])
+          (return [(float "n") "*" [1.0 "/" 4294967296.0]])
+        ];
+        hsv = fn "vec3" [["float" "h"] ["float" "s"] ["float" "v"]] [
+          (var "vec3" "k" (call "clamp" [(call "abs" [(call "fract" ["h" "+" (vec3 0.0 2.0 1.0) "/" 3.0]) "*" 6.0 "-" 3.0]) "-" 1.0] 0.0 1.0))
+          (return ["v" "*" (call "mix" (vec3 1.0) "k" "s")])
+        ];
+        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+          (var "float" "px" [1.0 "/" (call "max" [0.5 "*" "iResolution.y" "*" "FOCAL"] [0.5 "*" "iResolution.x" "/" "WIDE"])])
+          (var "vec2" "s" (call "max" [(call "abs" ["fragCoord" "-" 0.5 "*" "iResolution.xy"]) "*" "px"] (vec2 1.0e-6 0.0)))
+          (var "vec3" "col" (vec3 0.0))
+          (var "float" "alpha" 0.0)
+          (var "float" "shift" (call "mod" ["iTime" "*" "ZOOM"] [(float "LOOP") "*" "LW"]))
+          (var "float" "spin" (call "fract" ["iTime" "/" "HUE_PERIOD"]))
+          (var "float" "w" [(call "log" "s.x") "-" "shift"])
+          (var "float" "u" ["s.y" "/" "s.x"])
+          (var "int" "c0" (int (call "floor" ["w" "/" "LW" "+" 0.5])))
+          (var "int" "imax" (int ["YMAX" "/" "DY"]))
+          (for (var "int" "dc" 2) ["dc" ">=" (-2)] (dec "dc") [
+            (var "int" "c" ["c0" "+" "dc"])
+            (var "int" "cc" (call "pmod" "c" "LOOP"))
+            (var "float" "lift" [0.5 "*" (float ["cc" "&" 1])])
+            (var "int" "i0" (int (call "floor" ["u" "/" "DY" "-" "lift" "+" 0.5])))
+            (for (var "int" "di" (-1)) ["di" "<=" 1] (inc "di") [
+              (var "int" "i" ["i0" "+" "di"])
+              (if' ["i" "<" 0 "||" "i" ">" "imax"] [
+                continue
+              ])
+              (var "ivec2" "id" (ivec2 "cc" "i"))
+              (var "float" "h0" (call "hash" "id"))
+              (var "float" "h1" (call "hash" ["id" "+" (ivec2 4099 17)]))
+              (var "float" "h2" (call "hash" ["id" "+" (ivec2 31 7919)]))
+              (var "float" "h3" (call "hash" ["id" "+" (ivec2 613 3)]))
+              (if' ["h2" ">" 0.9] [
+                continue
+              ])
+              (var "float" "sx" (call "exp" [[(float "c") "+" 0.3 "*" ["h3" "-" 0.5]] "*" "LW" "+" "shift"]))
+              (var "vec2" "centre" ["sx" "*" (vec2 1.0 [[(float "i") "+" "lift" "+" 0.3 "*" [(call "fract" ["h3" "*" 7.0]) "-" 0.5]] "*" "DY"])])
+              (var "float" "rho" (call "max" ["RAD" "*" [0.5 "+" 0.5 "*" "h1"] "*" "sx"] [0.6 "*" "px"]))
+              (var "vec2" "q" ["s" "-" "centre"])
+              (var "float" "len" (call "length" "q"))
+              (if' ["len" ">" "rho" "+" "px"] [
+                continue
+              ])
+              (var "float" "sector" ["TAU" "/" "SIDES"])
+              (var "float" "a" [(call "mod" [(call "atan" "q.y" "q.x") "+" "h0" "*" "TAU"] "sector") "-" 0.5 "*" "sector"])
+              (var "float" "dist" [["len" "*" (call "cos" "a") "-" "rho" "*" (call "cos" [0.5 "*" "sector"])] "/" "px"])
+              (var "float" "cover" (call "clamp" [0.5 "-" "dist"] 0.0 1.0))
+              (var "float" "sat" (cond ["h2" "<" 0.1] 0.0 (cond ["h2" "<" 0.2] 0.35 0.92)))
+              (var "float" "val" (cond ["h2" ">" 0.82] 0.55 1.0))
+              (var "float" "hue" (call "hash" (ivec2 ["cc" "/" "BAND"] [(int ["h0" "*" 4.0]) "+" 101])))
+              (update "+=" "col" [[1.0 "-" "alpha"] "*" "cover" "*" (call "hsv" ["hue" "+" "spin"] "sat" "val")])
+              (update "+=" "alpha" [[1.0 "-" "alpha"] "*" "cover"])
+            ])
           ])
-        ])
-        blank
-        ["fragColor" "=" (call "vec4" ["col" "1.0"])]
-      ])
-    ];
+          (assign "fragColor" (vec4 "col" 1.0))
+        ];
+        pmod = fn "int" [["int" "a"] ["int" "b"]] [
+          (return ["a" "-" "b" "*" (int (call "floor" [(float "a") "/" (float "b")]))])
+        ];
+      };
+    };
     modules_desktop_session_tomoe_shaders_glass_mound_data = {
-      bare,
-      blank,
+      assign,
+      break,
       call,
+      float,
       fn,
       for,
       if',
       ifElse,
+      inc,
       index,
-      inline,
-      rows,
+      mat2,
+      neg,
+      return,
+      update,
+      var,
+      vec2,
+      vec3,
+      vec4,
       ...
-    }: [
-      ["const" "vec3" "PAPER" "=" (call "vec3" ["0.972" "0.976" "0.976"])]
-      ["const" "vec3" "MIST" "=" (call "vec3" ["0.955" "0.962" "0.968"])]
-      ["const" "vec3" "INK" "=" (call "vec3" ["0.09" "0.11" "0.15"])]
-      ["const" "vec3" "SLATE" "=" (call "vec3" ["0.22" "0.27" "0.34"])]
-      ["const" "vec3" "TEAL" "=" (call "vec3" ["0.07" "0.32" "0.43"])]
-      ["const" "vec3" "LILAC" "=" (call "vec3" ["0.87" "0.76" "0.96"])]
-      ["const" "float" "IOR" "=" "1.33"]
-      ["const" "float" "SPREAD" "=" "0.045"]
-      ["const" "float" "SPEED" "=" "0.5"]
-      ["const" "float" "RING" "=" "1.35"]
-      ["const" "float" "TUBE" "=" "0.33"]
-      ["const" "float" "SINK" "=" "-1.0"]
-      ["const" "float" "TILT" "=" "1.0"]
-      ["const" "float" "SWAY" "=" "0.35"]
-      ["const" "float" "FOG_TOP" "=" "-0.2"]
-      ["const" "float" "FOG_BOTTOM" "=" "-1.1"]
-      ["const" "float" "SOFT" "=" "0.05"]
-      ["const" "float" "BEND" "=" "0.7"]
-      blank
-      (fn ["mat2" (call "rot" [["float" "a"]])] [
-        ["float" "c" "=" (call "cos" ["a"])]
-        ["float" "s" "=" (call "sin" ["a"])]
-        ["return" (call "mat2" ["c" "-s" "s" "c"])]
-      ])
-      blank
-      (fn ["float" (call "map" [["vec3" "p"] ["float" "t"]])] [
-        ["vec3" "q" "=" "p" "-" (call "vec3" ["0.0" "SINK" "0.0"])]
-        ["q.xz" "*=" (call "rot" [["0.35" "*" (call "sin" [["t" "*" "0.21"]])]])]
-        ["q.yz" "*=" (call "rot" [["TILT" "+" "SWAY" "*" (call "sin" [["t" "*" "0.17"]])]])]
-        ["q.xy" "*=" (call "rot" [["0.12" "*" (call "sin" [["t" "*" "0.31"]])]])]
-        ["float" "a" "=" (call "atan" ["q.z" "q.x"])]
-        ["float" "tube" "=" "TUBE" "*" ["1.0" "+" "0.28" "*" (call "sin" [["a" "*" "2.0" "+" "t" "*" "0.7"]]) "+" "0.12" "*" (call "sin" [["a" "*" "3.0" "-" "t" "*" "0.5"]])]]
-        ["float" "ring" "=" "RING" "*" ["1.0" "+" "0.08" "*" (call "sin" [["a" "*" "2.0" "-" "t" "*" "0.4"]])]]
-        ["float" "d" "=" (call "length" [(call "vec2" [[(call "length" ["q.xz"]) "-" "ring"] "q.y"])]) "-" "tube"]
-        ["d" "+=" "0.04" "*" (call "sin" [["2.1" "*" "p.x" "+" "t"]]) "*" (call "sin" [["1.7" "*" "p.y" "-" "0.8" "*" "t"]]) "*" (call "sin" [["1.9" "*" "p.z" "+" "1.1" "*" "t"]])]
-        ["return" "d" "*" "0.8"]
-      ])
-      blank
-      (fn ["vec3" (call "normal" [["vec3" "p"] ["float" "t"]])] [
-        ["vec2" "e" "=" (call "vec2" ["0.002" "0.0"])]
-        [
-          "return"
-          (call "normalize" [
-            (call "vec3" (rows [
-              [[(call "map" [["p" "+" "e.xyy"] "t"]) "-" (call "map" [["p" "-" "e.xyy"] "t"])]]
-              [[(call "map" [["p" "+" "e.yxy"] "t"]) "-" (call "map" [["p" "-" "e.yxy"] "t"])]]
-              [[(call "map" [["p" "+" "e.yyx"] "t"]) "-" (call "map" [["p" "-" "e.yyx"] "t"])]]
+    }: {
+      consts = {
+        BEND = 0.7;
+        FOG_BOTTOM = -1.1;
+        FOG_TOP = -0.2;
+        INK = vec3 0.09 0.11 0.15;
+        IOR = 1.33;
+        LILAC = vec3 0.87 0.76 0.96;
+        MIST = vec3 0.955 0.962 0.968;
+        PAPER = vec3 0.972 0.976 0.976;
+        RING = 1.35;
+        SINK = -1.0;
+        SLATE = vec3 0.22 0.27 0.34;
+        SOFT = 0.05;
+        SPEED = 0.5;
+        SPREAD = 0.045;
+        SWAY = 0.35;
+        TEAL = vec3 0.07 0.32 0.43;
+        TILT = 1.0;
+        TUBE = 0.33;
+      };
+      fns = {
+        band = fn "float" [["float" "x"] ["float" "c"] ["float" "w"]] [
+          (var "float" "k" [["x" "-" "c"] "/" "w"])
+          (return (call "exp" [(neg "k") "*" "k"]))
+        ];
+        env = fn "vec3" [["vec3" "d"]] [
+          (var "vec3" "c" "PAPER")
+          (var "float" "x" ["d.x" "+" 0.5 "*" "d.z"])
+          (assign "c" (call "mix" "c" "LILAC" [0.9 "*" (call "band" "d.y" (-0.07) 0.06)]))
+          (assign "c" (call "mix" "c" "INK" [0.95 "*" (call "band" "d.y" 0.12 0.13)]))
+          (assign "c" (call "mix" "c" "TEAL" [(call "band" "d.y" 0.34 0.2) "*" (call "smoothstep" (-0.9) 0.1 "x")]))
+          (assign "c" (call "mix" "c" "SLATE" [0.7 "*" (call "band" "d.y" 0.3 0.14) "*" (call "smoothstep" 0.1 (-0.9) "x")]))
+          (assign "c" (call "mix" "c" "LILAC" [0.45 "*" (call "band" "d.y" 0.52 0.06)]))
+          (assign "c" (call "mix" "c" "PAPER" [0.85 "*" (call "band" "x" (-0.5) 0.12) "*" (call "smoothstep" 0.15 0.4 "d.y")]))
+          (return "c")
+        ];
+        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+          (var "vec2" "uv" [["fragCoord" "-" 0.5 "*" "iResolution.xy"] "/" "iResolution.y"])
+          (var "float" "t" ["iTime" "*" "SPEED"])
+          (var "vec3" "ro" (vec3 0.0 0.5 6.0))
+          (var "vec3" "fw" (call "normalize" [(vec3 0.0 0.5 0.0) "-" "ro"]))
+          (var "vec3" "rt" (call "normalize" (call "cross" "fw" (vec3 0.0 1.0 0.0))))
+          (var "vec3" "up" (call "cross" "rt" "fw"))
+          (var "vec3" "rd" (call "normalize" ["uv.x" "*" "rt" "+" "uv.y" "*" "up" "+" 1.6 "*" "fw"]))
+          (var "float" "s" 0.0)
+          (var "float" "near" 1000000000.0)
+          (var "float" "at" 0.0)
+          (var "bool" "hit" false)
+          (for (var "int" "i" 0) ["i" "<" 110] (inc "i") [
+            (var "float" "d" (call "map" ["ro" "+" "rd" "*" "s"] "t"))
+            (if' ["d" "<" "near"] [
+              (assign "near" "d")
+              (assign "at" "s")
+            ])
+            (if' ["d" "<" 0.001] [
+              (assign "hit" true)
+              break
+            ])
+            (update "+=" "s" "d")
+            (if' ["s" ">" 12.0] [
+              break
+            ])
+          ])
+          (var "vec3" "col" "PAPER")
+          (ifElse "hit" [
+              (assign "col" (call "shade" ["ro" "+" "rd" "*" "s"] "rd" "t"))
+            ] (if' ["near" "<" "SOFT"] [
+              (var "float" "a" [1.0 "-" (call "smoothstep" 0.0 "SOFT" "near")])
+              (assign "col" (call "mix" "PAPER" (call "shade" ["ro" "+" "rd" "*" "at"] "rd" "t") [0.55 "*" "a" "*" "a"]))
             ]))
+          (assign "col" (call "mix" "PAPER" "col" (call "smoothstep" 0.0 0.14 ["fragCoord.y" "/" "iResolution.y"])))
+          (assign "fragColor" (vec4 "col" 1.0))
+        ];
+        map = fn "float" [["vec3" "p"] ["float" "t"]] [
+          (var "vec3" "q" ["p" "-" (vec3 0.0 "SINK" 0.0)])
+          (update "*=" "q.xz" (call "rot" [0.35 "*" (call "sin" ["t" "*" 0.21])]))
+          (update "*=" "q.yz" (call "rot" ["TILT" "+" "SWAY" "*" (call "sin" ["t" "*" 0.17])]))
+          (update "*=" "q.xy" (call "rot" [0.12 "*" (call "sin" ["t" "*" 0.31])]))
+          (var "float" "a" (call "atan" "q.z" "q.x"))
+          (var "float" "tube" ["TUBE" "*" [1.0 "+" 0.28 "*" (call "sin" ["a" "*" 2.0 "+" "t" "*" 0.7]) "+" 0.12 "*" (call "sin" ["a" "*" 3.0 "-" "t" "*" 0.5])]])
+          (var "float" "ring" ["RING" "*" [1.0 "+" 0.08 "*" (call "sin" ["a" "*" 2.0 "-" "t" "*" 0.4])]])
+          (var "float" "d" [(call "length" (vec2 [(call "length" "q.xz") "-" "ring"] "q.y")) "-" "tube"])
+          (update "+=" "d" [0.04 "*" (call "sin" [2.1 "*" "p.x" "+" "t"]) "*" (call "sin" [1.7 "*" "p.y" "-" 0.8 "*" "t"]) "*" (call "sin" [1.9 "*" "p.z" "+" 1.1 "*" "t"])])
+          (return ["d" "*" 0.8])
+        ];
+        normal = fn "vec3" [["vec3" "p"] ["float" "t"]] [
+          (var "vec2" "e" (vec2 0.002 0.0))
+          (return (call "normalize" (vec3 [(call "map" ["p" "+" "e.xyy"] "t") "-" (call "map" ["p" "-" "e.xyy"] "t")] [(call "map" ["p" "+" "e.yxy"] "t") "-" (call "map" ["p" "-" "e.yxy"] "t")] [(call "map" ["p" "+" "e.yyx"] "t") "-" (call "map" ["p" "-" "e.yyx"] "t")])))
+        ];
+        rot = fn "mat2" [["float" "a"]] [
+          (var "float" "c" (call "cos" "a"))
+          (var "float" "s" (call "sin" "a"))
+          (return (mat2 "c" (neg "s") "s" "c"))
+        ];
+        shade = fn "vec3" [["vec3" "p"] ["vec3" "rd"] ["float" "t"]] [
+          (var "vec3" "n" (call "normal" "p" "t"))
+          (var "float" "c" (call "max" (call "dot" (neg "rd") "n") 0.0))
+          (var "float" "f" [0.25 "+" 0.75 "*" (call "pow" [1.0 "-" "c"] 2.0)])
+          (var "vec3" "through" null)
+          (for (var "int" "k" 0) ["k" "<" 3] (inc "k") [
+            (assign (index "through" "k") (index (call "env" (call "normalize" ["rd" "-" "n" "*" ["BEND" "+" [(float "k") "-" 1.0] "*" "SPREAD" "*" 1.5]])) "k"))
           ])
-        ]
-      ])
-      blank
-      (fn ["float" (call "band" [["float" "x"] ["float" "c"] ["float" "w"]])] [
-        ["float" "k" "=" ["x" "-" "c"] "/" "w"]
-        ["return" (call "exp" [["-k" "*" "k"]])]
-      ])
-      blank
-      (fn ["vec3" (call "env" [["vec3" "d"]])] [
-        ["vec3" "c" "=" "PAPER"]
-        ["float" "x" "=" "d.x" "+" "0.5" "*" "d.z"]
-        ["c" "=" (call "mix" ["c" "LILAC" ["0.9" "*" (call "band" ["d.y" "-0.07" "0.06"])]])]
-        ["c" "=" (call "mix" ["c" "INK" ["0.95" "*" (call "band" ["d.y" "0.12" "0.13"])]])]
-        ["c" "=" (call "mix" ["c" "TEAL" [(call "band" ["d.y" "0.34" "0.2"]) "*" (call "smoothstep" ["-0.9" "0.1" "x"])]])]
-        ["c" "=" (call "mix" ["c" "SLATE" ["0.7" "*" (call "band" ["d.y" "0.3" "0.14"]) "*" (call "smoothstep" ["0.1" "-0.9" "x"])]])]
-        ["c" "=" (call "mix" ["c" "LILAC" ["0.45" "*" (call "band" ["d.y" "0.52" "0.06"])]])]
-        ["c" "=" (call "mix" ["c" "PAPER" ["0.85" "*" (call "band" ["x" "-0.5" "0.12"]) "*" (call "smoothstep" ["0.15" "0.4" "d.y"])]])]
-        ["return" "c"]
-      ])
-      blank
-      (fn ["vec3" (call "shade" [["vec3" "p"] ["vec3" "rd"] ["float" "t"]])] [
-        ["vec3" "n" "=" (call "normal" ["p" "t"])]
-        ["float" "c" "=" (call "max" [(call "dot" ["-rd" "n"]) "0.0"])]
-        ["float" "f" "=" "0.25" "+" "0.75" "*" (call "pow" [["1.0" "-" "c"] "2.0"])]
-        ["vec3" "through"]
-        (for ["int" "k" "=" 0] ["k" "<" 3] "k++" [
-          [(index "through" "k") "=" (index (call "env" [(call "normalize" [["rd" "-" "n" "*" ["BEND" "+" [(call "float" ["k"]) "-" "1.0"] "*" "SPREAD" "*" "1.5"]]])]) "k")]
-        ])
-        ["vec3" "col" "=" (call "mix" ["through" (call "env" [(call "reflect" ["rd" "n"])]) "f"])]
-        ["return" (call "mix" ["col" "MIST" (call "smoothstep" ["FOG_TOP" "FOG_BOTTOM" "p.y"])])]
-      ])
-      blank
-      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
-        ["vec2" "uv" "=" ["fragCoord" "-" "0.5" "*" "iResolution.xy"] "/" "iResolution.y"]
-        ["float" "t" "=" "iTime" "*" "SPEED"]
-        ["vec3" "ro" "=" (call "vec3" ["0.0" "0.5" "6.0"])]
-        ["vec3" "fw" "=" (call "normalize" [[(call "vec3" ["0.0" "0.5" "0.0"]) "-" "ro"]])]
-        ["vec3" "rt" "=" (call "normalize" [(call "cross" ["fw" (call "vec3" ["0.0" "1.0" "0.0"])])])]
-        ["vec3" "up" "=" (call "cross" ["rt" "fw"])]
-        ["vec3" "rd" "=" (call "normalize" [["uv.x" "*" "rt" "+" "uv.y" "*" "up" "+" "1.6" "*" "fw"]])]
-        ["float" "s" "=" "0.0"]
-        ["float" "near" "=" "1e9"]
-        ["float" "at" "=" "0.0"]
-        ["bool" "hit" "=" "false"]
-        (for ["int" "i" "=" 0] ["i" "<" 110] "i++" [
-          ["float" "d" "=" (call "map" [["ro" "+" "rd" "*" "s"] "t"])]
-          (if' ["d" "<" "near"] (inline [["near" "=" "d"] ["at" "=" "s"]]))
-          (if' ["d" "<" "0.001"] (inline [["hit" "=" "true"] "break"]))
-          ["s" "+=" "d"]
-          (if' ["s" ">" "12.0"] (bare "break"))
-        ])
-        ["vec3" "col" "=" "PAPER"]
-        (ifElse "hit" [
-            ["col" "=" (call "shade" [["ro" "+" "rd" "*" "s"] "rd" "t"])]
-          ] (if' ["near" "<" "SOFT"] [
-            ["float" "a" "=" "1.0" "-" (call "smoothstep" ["0.0" "SOFT" "near"])]
-            ["col" "=" (call "mix" ["PAPER" (call "shade" [["ro" "+" "rd" "*" "at"] "rd" "t"]) ["0.55" "*" "a" "*" "a"]])]
-          ]))
-        ["col" "=" (call "mix" ["PAPER" "col" (call "smoothstep" ["0.0" "0.14" ["fragCoord.y" "/" "iResolution.y"]])])]
-        ["fragColor" "=" (call "vec4" ["col" "1.0"])]
-      ])
-    ];
+          (var "vec3" "col" (call "mix" "through" (call "env" (call "reflect" "rd" "n")) "f"))
+          (return (call "mix" "col" "MIST" (call "smoothstep" "FOG_TOP" "FOG_BOTTOM" "p.y")))
+        ];
+      };
+    };
     modules_desktop_session_tomoe_shaders_hex_spiral_data = {
-      bare,
-      blank,
+      array,
+      assign,
       call,
+      cond,
+      continue,
+      dec,
+      float,
       fn,
       for,
       if',
       ifElse,
+      inc,
       index,
-      rows,
-      unary,
+      int,
+      ivec2,
+      neg,
+      return,
+      sized,
+      unsigned,
+      update,
+      uvec2,
+      var,
+      vec2,
+      vec3,
+      vec4,
       ...
-    }: [
-      ["const" "float" "PI" "=" "3.14159265"]
-      ["const" "float" "TAU" "=" "6.28318531"]
-      ["const" "float" "S3" "=" "0.86602540"]
-      ["const" "vec2" "CENTER" "=" (call "vec2" ["0.4" "0.58"])]
-      ["const" "int" "M" "=" 29]
-      ["const" "int" "N" "=" 13]
-      ["const" "int" "ARM" "=" 4]
-      ["const" "int" "LOOP" "=" 52]
-      ["const" "float" "HEX_SPEED" "=" "0.7"]
-      ["const" "int" "STREAK_K" "=" 176]
-      ["const" "float" "STREAK_STEP" "=" "0.057"]
-      ["const" "int" "STREAK_N" "=" 132]
-      ["const" "int" "STREAK_LOOP" "=" 160]
-      ["const" "float" "STREAK_SPEED" "=" "0.32"]
-      ["const" "float" "CYCLE" "=" "1.8"]
-      blank
-      [
-        "const"
-        "vec3"
-        (index "PAL" 10)
-        "="
-        (call (index "vec3" 10) (rows [
-          []
-          [(call "vec3" ["1.000" "0.824" "0.122"]) (call "vec3" ["1.000" "0.604" "0.122"]) (call "vec3" ["1.000" "0.420" "0.369"])]
-          [(call "vec3" ["1.000" "0.361" "0.784"]) (call "vec3" ["0.706" "0.420" "1.000"]) (call "vec3" ["0.184" "0.420" "1.000"])]
-          [(call "vec3" ["0.122" "0.722" "1.000"]) (call "vec3" ["0.122" "0.839" "0.706"]) (call "vec3" ["0.482" "0.878" "0.165"])]
-          [(call "vec3" ["0.957" "0.957" "0.957"])]
-        ]))
-      ]
-      blank
-      [
-        "const"
-        "ivec2"
-        (index "NEAR" 7)
-        "="
-        (call (index "ivec2" 7) (rows [
-          []
-          [(call "ivec2" [0 0]) (call "ivec2" [1 0]) (call "ivec2" [(-1) 0]) (call "ivec2" [0 1]) (call "ivec2" [0 (-1)]) (call "ivec2" [1 (-1)]) (call "ivec2" [(-1) 1])]
-        ]))
-      ]
-      blank
-      (fn ["float" (call "hash" [["ivec2" "c"]])] [
-        ["uvec2" "v" "=" (call "uvec2" ["c"]) "*" (call "uvec2" ["1597334673u" "3812015801u"])]
-        ["uint" "n" "=" ["v.x" "^" "v.y"] "*" "1597334673u"]
-        ["n" "^=" "n" ">>" 16]
-        ["n" "*=" "2246822519u"]
-        ["n" "^=" "n" ">>" 13]
-        ["return" (call "float" ["n"]) "*" ["1.0" "/" "4294967296.0"]]
-      ])
-      blank
-      (fn ["int" (call "fdiv" [["int" "a"] ["int" "b"]])] [
-        ["return" (call "int" [(call "floor" [[(call "float" ["a"]) "/" (call "float" ["b"])]])])]
-      ])
-      blank
-      (fn ["int" (call "pmod" [["int" "a"] ["int" "b"]])] [
-        ["return" "a" "-" "b" "*" (call "fdiv" ["a" "b"])]
-      ])
-      blank
-      (fn ["vec3" (call "cycle" [["float" "f"]])] [
-        ["int" "a" "=" (call "pmod" [(call "int" [(call "floor" ["f"])]) 9])]
-        ["return" (call "mix" [(index "PAL" "a") (index "PAL" (call "pmod" [["a" "+" 1] 9])) (call "fract" ["f"])])]
-      ])
-      blank
-      (fn ["vec2" (call "rot" [["vec2" "v"] ["float" "a"]])] [
-        ["float" "c" "=" (call "cos" ["a"]) "," "s" "=" (call "sin" ["a"])]
-        ["return" (call "vec2" [["c" "*" "v.x" "-" "s" "*" "v.y"] ["s" "*" "v.x" "+" "c" "*" "v.y"]])]
-      ])
-      blank
-      (fn ["vec2" (call "cart" [["ivec2" "a"]])] [
-        ["return" (call "vec2" [[(call "float" ["a.x"]) "+" "0.5" "*" (call "float" ["a.y"])] ["S3" "*" (call "float" ["a.y"])]])]
-      ])
-      blank
-      (fn ["ivec2" (call "nearest" [["vec2" "h"]])] [
-        ["float" "y" "=" "h.y" "/" "S3"]
-        ["vec3" "c" "=" (call "vec3" [["h.x" "-" "0.5" "*" "y"] "y" ["-h.x" "-" "0.5" "*" "y"]])]
-        ["vec3" "r" "=" (call "floor" [["c" "+" "0.5"]])]
-        ["vec3" "d" "=" (call "abs" [["r" "-" "c"]])]
-        (ifElse ["d.x" ">" "d.y" "&&" "d.x" ">" "d.z"] (bare ["r.x" "=" "-r.y" "-" "r.z"]) (if' ["d.y" ">" "d.z"] (bare ["r.y" "=" "-r.x" "-" "r.z"])))
-        ["return" (call "ivec2" ["r.xy"])]
-      ])
-      blank
-      (fn ["float" (call "hexDist" [["vec2" "q"]])] [
-        ["return" (call "max" [(call "abs" ["q.x"]) (call "max" [(call "abs" [["0.5" "*" "q.x" "+" "S3" "*" "q.y"]]) (call "abs" [["-0.5" "*" "q.x" "+" "S3" "*" "q.y"]])])])]
-      ])
-      blank
-      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
-        ["float" "px" "=" "1.0" "/" "iResolution.y"]
-        ["vec2" "p" "=" ["fragCoord" "-" "CENTER" "*" "iResolution.xy"] "*" "px"]
-        ["float" "r" "=" (call "max" [(call "length" ["p"]) "1e-5"])]
-        ["vec2" "w" "=" (call "vec2" [(call "log" ["r"]) (call "atan" ["p.y" "p.x"])])]
-        blank
-        ["vec2" "vc" "=" (call "cart" [(call "ivec2" ["M" "N"])])]
-        ["float" "k" "=" "TAU" "/" (call "length" ["vc"])]
-        ["float" "rho" "=" "0.5" "*" "PI" "-" (call "atan" ["vc.y" "vc.x"])]
-        ["vec2" "drift" "=" (call "cart" [(call "ivec2" [1 (-1)])])]
-        ["float" "tt" "=" (call "mod" [["iTime" "*" "HEX_SPEED"] (call "float" ["LOOP"])])]
-        ["vec2" "hw" "=" (call "rot" ["w" "-rho"]) "/" "k" "-" "tt" "*" "drift"]
-        ["ivec2" "base" "=" (call "nearest" ["hw"])]
-        blank
-        ["float" "jr" "=" (call "mod" [["hw.y" "/" "S3" "+" "0.5"] (call "float" ["N"])])]
-        ["float" "band" "=" (call "smoothstep" [[(call "float" ["ARM"]) "+" "1.5"] [(call "float" ["ARM"]) "+" "4.0"] "jr"]) "*" ["1.0" "-" (call "smoothstep" [[(call "float" ["N"]) "-" "1.2"] (call "float" ["N"]) "jr"])]]
-        blank
-        ["vec3" "col" "=" (call "vec3" ["0.0"])]
-        ["float" "phase" "=" (call "mod" ["iTime" "CYCLE"]) "*" "9.0" "/" "CYCLE"]
-        blank
-        ["float" "c" "=" (call "float" ["STREAK_K"]) "*" "STREAK_STEP" "/" "TAU"]
-        ["float" "ct" "=" (call "sqrt" [["1.0" "+" "c" "*" "c"]])]
-        ["float" "dth" "=" "TAU" "/" (call "float" ["STREAK_N"])]
-        ["float" "ts" "=" (call "mod" [["iTime" "*" "STREAK_SPEED"] [(call "float" ["STREAK_LOOP"]) "*" "STREAK_STEP"]])]
-        ["float" "sig" "=" "w.x" "-" "ts" "-" "c" "*" "w.y"]
-        ["int" "is0" "=" (call "int" [(call "floor" [["sig" "/" "STREAK_STEP"]])])]
-        ["int" "it0" "=" (call "int" [(call "floor" [["w.y" "/" "dth"]])])]
-        (for ["int" "o" "=" 0] ["o" "<" 9] "o++" [
-          ["int" "it" "=" "it0" "+" "o" "%" 3 "-" 1]
-          ["int" "is" "=" "is0" "+" "o" "/" 3 "-" 1]
-          ["int" "q" "=" (call "fdiv" ["it" "STREAK_N"])]
-          ["ivec2" "id" "=" (call "ivec2" [(call "pmod" [["is" "+" "STREAK_K" "*" "q"] "STREAK_LOOP"]) ["it" "-" "q" "*" "STREAK_N"]])]
-          ["float" "h0" "=" (call "hash" ["id"])]
-          ["float" "h1" "=" (call "hash" [["id" "+" (call "ivec2" [7 131])]])]
-          ["float" "h2" "=" (call "hash" [["id" "+" (call "ivec2" [53 17])]])]
-          (if' ["h0" ">" "0.8"] (bare "continue"))
-          ["float" "sm" "=" [(call "float" ["is"]) "+" "0.5" "+" "0.8" "*" ["h1" "-" "0.5"]] "*" "STREAK_STEP"]
-          ["vec2" "dir" "=" (call "rot" [[(call "vec2" ["c" "1.0"]) "/" "ct"] ["0.6" "*" ["h2" "-" "0.5"]]])]
-          ["float" "tc" "=" [(call "float" ["it"]) "+" "0.5" "+" "0.6" "*" ["h2" "-" "0.5"]] "*" "dth"]
-          ["vec2" "d" "=" (call "vec2" [["sig" "-" "sm" "+" "c" "*" ["w.y" "-" "tc"]] ["w.y" "-" "tc"]])]
-          ["float" "len" "=" ["0.22" "+" "0.22" "*" "h1"] "*" "dth" "*" "ct"]
-          ["float" "th" "=" ["0.2" "+" "0.08" "*" "h2"] "*" "STREAK_STEP" "/" "ct"]
-          ["float" "a" "=" (call "clamp" [(call "dot" ["d" "dir"]) "-len" "len"])]
-          ["float" "dist" "=" [(call "length" [["d" "-" "dir" "*" "a"]]) "-" "th"] "*" "r" "/" "px"]
-          ["float" "cover" "=" (call "clamp" [["0.5" "-" "dist"] "0.0" "1.0"]) "*" (call "smoothstep" ["0.6" "2.0" ["th" "*" "r" "/" "px"]])]
-          ["int" "pick" "=" (call "int" [["h0" "*" "16.0"]]) "%" 13]
-          ["vec3" "sc" "=" "pick" ">" 8 "?" (index "PAL" 9) ":" (call "cycle" [[(call "float" ["pick"]) "-" "phase"]])]
-          ["col" "=" (call "mix" ["col" ["sc" "*" ["0.7" "+" "0.3" "*" "h2"]] ["cover" "*" "band"]])]
-        ])
-        blank
-        ["float" (index "key" 7)]
-        ["int" (index "ord" 7)]
-        ["vec2" "outward" "=" (call "rot" [(call "vec2" ["1.0" "0.0"]) "-rho"])]
-        (for ["int" "i" "=" 0] ["i" "<" 7] "i++" [
-          [(index "key" "i") "=" (call "dot" [(call "cart" [(index "NEAR" "i")]) "outward"])]
-          [(index "ord" "i") "=" "i"]
-        ])
-        (for ["int" "i" "=" 1] ["i" "<" 7] "i++" [
-          (for ["int" "j" "=" "i"] ["j" ">" 0 "&&" (index "key" (index "ord" ["j" "-" 1])) ">" (index "key" (index "ord" "j"))] "j--" [
-            ["int" "t" "=" (index "ord" "j")]
-            [(index "ord" "j") "=" (index "ord" ["j" "-" 1])]
-            [(index "ord" ["j" "-" 1]) "=" "t"]
+    }: {
+      consts = {
+        ARM = 4;
+        CENTER = vec2 0.4 0.58;
+        CYCLE = 1.8;
+        HEX_SPEED = 0.7;
+        LOOP = 52;
+        M = 29;
+        N = 13;
+        NEAR = array "ivec2" [(ivec2 0 0) (ivec2 1 0) (ivec2 (-1) 0) (ivec2 0 1) (ivec2 0 (-1)) (ivec2 1 (-1)) (ivec2 (-1) 1)];
+        PAL = array "vec3" [(vec3 1.0 0.824 0.122) (vec3 1.0 0.604 0.122) (vec3 1.0 0.42 0.369) (vec3 1.0 0.361 0.784) (vec3 0.706 0.42 1.0) (vec3 0.184 0.42 1.0) (vec3 0.122 0.722 1.0) (vec3 0.122 0.839 0.706) (vec3 0.482 0.878 0.165) (vec3 0.957 0.957 0.957)];
+        PI = 3.14159265;
+        S3 = 0.8660254;
+        STREAK_K = 176;
+        STREAK_LOOP = 160;
+        STREAK_N = 132;
+        STREAK_SPEED = 0.32;
+        STREAK_STEP = 0.057;
+        TAU = 6.28318531;
+      };
+      fns = {
+        cart = fn "vec2" [["ivec2" "a"]] [
+          (return (vec2 [(float "a.x") "+" 0.5 "*" (float "a.y")] ["S3" "*" (float "a.y")]))
+        ];
+        cycle = fn "vec3" [["float" "f"]] [
+          (var "int" "a" (call "pmod" (int (call "floor" "f")) 9))
+          (return (call "mix" (index "PAL" "a") (index "PAL" (call "pmod" ["a" "+" 1] 9)) (call "fract" "f")))
+        ];
+        fdiv = fn "int" [["int" "a"] ["int" "b"]] [
+          (return (int (call "floor" [(float "a") "/" (float "b")])))
+        ];
+        hash = fn "float" [["ivec2" "c"]] [
+          (var "uvec2" "v" [(uvec2 "c") "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
+          (var "uint" "n" [["v.x" "^" "v.y"] "*" (unsigned 1597334673)])
+          (update "^=" "n" ["n" ">>" 16])
+          (update "*=" "n" (unsigned 2246822519))
+          (update "^=" "n" ["n" ">>" 13])
+          (return [(float "n") "*" [1.0 "/" 4294967296.0]])
+        ];
+        hexDist = fn "float" [["vec2" "q"]] [
+          (return (call "max" (call "abs" "q.x") (call "max" (call "abs" [0.5 "*" "q.x" "+" "S3" "*" "q.y"]) (call "abs" [(-0.5) "*" "q.x" "+" "S3" "*" "q.y"]))))
+        ];
+        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+          (var "float" "px" [1.0 "/" "iResolution.y"])
+          (var "vec2" "p" [["fragCoord" "-" "CENTER" "*" "iResolution.xy"] "*" "px"])
+          (var "float" "r" (call "max" (call "length" "p") 1.0e-5))
+          (var "vec2" "w" (vec2 (call "log" "r") (call "atan" "p.y" "p.x")))
+          (var "vec2" "vc" (call "cart" (ivec2 "M" "N")))
+          (var "float" "k" ["TAU" "/" (call "length" "vc")])
+          (var "float" "rho" [0.5 "*" "PI" "-" (call "atan" "vc.y" "vc.x")])
+          (var "vec2" "drift" (call "cart" (ivec2 1 (-1))))
+          (var "float" "tt" (call "mod" ["iTime" "*" "HEX_SPEED"] (float "LOOP")))
+          (var "vec2" "hw" [(call "rot" "w" (neg "rho")) "/" "k" "-" "tt" "*" "drift"])
+          (var "ivec2" "base" (call "nearest" "hw"))
+          (var "float" "jr" (call "mod" ["hw.y" "/" "S3" "+" 0.5] (float "N")))
+          (var "float" "band" [(call "smoothstep" [(float "ARM") "+" 1.5] [(float "ARM") "+" 4.0] "jr") "*" [1.0 "-" (call "smoothstep" [(float "N") "-" 1.2] (float "N") "jr")]])
+          (var "vec3" "col" (vec3 0.0))
+          (var "float" "phase" [(call "mod" "iTime" "CYCLE") "*" 9.0 "/" "CYCLE"])
+          (var "float" "c" [(float "STREAK_K") "*" "STREAK_STEP" "/" "TAU"])
+          (var "float" "ct" (call "sqrt" [1.0 "+" "c" "*" "c"]))
+          (var "float" "dth" ["TAU" "/" (float "STREAK_N")])
+          (var "float" "ts" (call "mod" ["iTime" "*" "STREAK_SPEED"] [(float "STREAK_LOOP") "*" "STREAK_STEP"]))
+          (var "float" "sig" ["w.x" "-" "ts" "-" "c" "*" "w.y"])
+          (var "int" "is0" (int (call "floor" ["sig" "/" "STREAK_STEP"])))
+          (var "int" "it0" (int (call "floor" ["w.y" "/" "dth"])))
+          (for (var "int" "o" 0) ["o" "<" 9] (inc "o") [
+            (var "int" "it" ["it0" "+" "o" "%" 3 "-" 1])
+            (var "int" "is" ["is0" "+" "o" "/" 3 "-" 1])
+            (var "int" "q" (call "fdiv" "it" "STREAK_N"))
+            (var "ivec2" "id" (ivec2 (call "pmod" ["is" "+" "STREAK_K" "*" "q"] "STREAK_LOOP") ["it" "-" "q" "*" "STREAK_N"]))
+            (var "float" "h0" (call "hash" "id"))
+            (var "float" "h1" (call "hash" ["id" "+" (ivec2 7 131)]))
+            (var "float" "h2" (call "hash" ["id" "+" (ivec2 53 17)]))
+            (if' ["h0" ">" 0.8] [
+              continue
+            ])
+            (var "float" "sm" [[(float "is") "+" 0.5 "+" 0.8 "*" ["h1" "-" 0.5]] "*" "STREAK_STEP"])
+            (var "vec2" "dir" (call "rot" [(vec2 "c" 1.0) "/" "ct"] [0.6 "*" ["h2" "-" 0.5]]))
+            (var "float" "tc" [[(float "it") "+" 0.5 "+" 0.6 "*" ["h2" "-" 0.5]] "*" "dth"])
+            (var "vec2" "d" (vec2 ["sig" "-" "sm" "+" "c" "*" ["w.y" "-" "tc"]] ["w.y" "-" "tc"]))
+            (var "float" "len" [[0.22 "+" 0.22 "*" "h1"] "*" "dth" "*" "ct"])
+            (var "float" "th" [[0.2 "+" 0.08 "*" "h2"] "*" "STREAK_STEP" "/" "ct"])
+            (var "float" "a" (call "clamp" (call "dot" "d" "dir") (neg "len") "len"))
+            (var "float" "dist" [[(call "length" ["d" "-" "dir" "*" "a"]) "-" "th"] "*" "r" "/" "px"])
+            (var "float" "cover" [(call "clamp" [0.5 "-" "dist"] 0.0 1.0) "*" (call "smoothstep" 0.6 2.0 ["th" "*" "r" "/" "px"])])
+            (var "int" "pick" [(int ["h0" "*" 16.0]) "%" 13])
+            (var "vec3" "sc" (cond ["pick" ">" 8] (index "PAL" 9) (call "cycle" [(float "pick") "-" "phase"])))
+            (assign "col" (call "mix" "col" ["sc" "*" [0.7 "+" 0.3 "*" "h2"]] ["cover" "*" "band"]))
           ])
-        ])
-        blank
-        ["int" "wrap" "=" ["M" "+" "N"] "*" "LOOP"]
-        (for ["int" "i" "=" 0] ["i" "<" 7] "i++" [
-          ["ivec2" "cell" "=" "base" "+" (index "NEAR" (index "ord" "i"))]
-          (if' [(call "pmod" ["cell.y" "N"]) ">=" "ARM"] (bare "continue"))
-          ["int" "id" "=" (call "pmod" [["cell.x" "*" "N" "-" "cell.y" "*" "M"] "wrap"])]
-          ["float" "h0" "=" (call "hash" [(call "ivec2" ["id" 911])])]
-          ["float" "h1" "=" (call "hash" [(call "ivec2" ["id" 37])])]
-          ["vec2" "wc" "=" (call "rot" [[(call "cart" ["cell"]) "+" "tt" "*" "drift"] "rho"]) "*" "k"]
-          ["float" "rc" "=" (call "exp" ["wc.x"])]
-          ["vec2" "sc" "=" "rc" "*" (call "vec2" [(call "cos" ["wc.y"]) (call "sin" ["wc.y"])])]
-          ["float" "scale" "=" "k" "*" "rc"]
-          ["vec2" "q" "=" (call "rot" [["p" "-" "sc"] (unary "-" ["wc.y" "+" "rho"])]) "/" "scale"]
-          ["float" "size" "=" "0.5" "*" ["0.88" "+" "0.36" "*" "h1"]]
-          ["float" "dist" "=" [(call "hexDist" ["q"]) "-" "size"] "*" "scale" "/" "px"]
-          ["float" "fade" "=" (call "smoothstep" ["3.0" "9.0" ["size" "*" "scale" "/" "px"]])]
-          ["float" "cover" "=" (call "clamp" [["0.5" "-" "dist"] "0.0" "1.0"]) "*" "fade"]
-          ["float" "rim" "=" (call "clamp" [["0.5" "-" "dist" "-" (call "max" ["1.0" ["0.03" "*" "size" "*" "scale" "/" "px"]])] "0.0" "1.0"])]
-          ["vec3" "hc" "=" (call "cycle" [["h0" "*" "9.0" "-" "phase"]])]
-          ["col" "=" (call "mix" ["col" ["hc" "*" "rim"] "cover"])]
-        ])
-        blank
-        ["fragColor" "=" (call "vec4" ["col" "1.0"])]
-      ])
-    ];
+          (var (sized "float" 7) "key" null)
+          (var (sized "int" 7) "ord" null)
+          (var "vec2" "outward" (call "rot" (vec2 1.0 0.0) (neg "rho")))
+          (for (var "int" "i" 0) ["i" "<" 7] (inc "i") [
+            (assign (index "key" "i") (call "dot" (call "cart" (index "NEAR" "i")) "outward"))
+            (assign (index "ord" "i") "i")
+          ])
+          (for (var "int" "i" 1) ["i" "<" 7] (inc "i") [
+            (for (var "int" "j" "i") ["j" ">" 0 "&&" (index "key" (index "ord" ["j" "-" 1])) ">" (index "key" (index "ord" "j"))] (dec "j") [
+              (var "int" "t" (index "ord" "j"))
+              (assign (index "ord" "j") (index "ord" ["j" "-" 1]))
+              (assign (index "ord" ["j" "-" 1]) "t")
+            ])
+          ])
+          (var "int" "wrap" [["M" "+" "N"] "*" "LOOP"])
+          (for (var "int" "i" 0) ["i" "<" 7] (inc "i") [
+            (var "ivec2" "cell" ["base" "+" (index "NEAR" (index "ord" "i"))])
+            (if' [(call "pmod" "cell.y" "N") ">=" "ARM"] [
+              continue
+            ])
+            (var "int" "id" (call "pmod" ["cell.x" "*" "N" "-" "cell.y" "*" "M"] "wrap"))
+            (var "float" "h0" (call "hash" (ivec2 "id" 911)))
+            (var "float" "h1" (call "hash" (ivec2 "id" 37)))
+            (var "vec2" "wc" [(call "rot" [(call "cart" "cell") "+" "tt" "*" "drift"] "rho") "*" "k"])
+            (var "float" "rc" (call "exp" "wc.x"))
+            (var "vec2" "sc" ["rc" "*" (vec2 (call "cos" "wc.y") (call "sin" "wc.y"))])
+            (var "float" "scale" ["k" "*" "rc"])
+            (var "vec2" "q" [(call "rot" ["p" "-" "sc"] (neg ["wc.y" "+" "rho"])) "/" "scale"])
+            (var "float" "size" [0.5 "*" [0.88 "+" 0.36 "*" "h1"]])
+            (var "float" "dist" [[(call "hexDist" "q") "-" "size"] "*" "scale" "/" "px"])
+            (var "float" "fade" (call "smoothstep" 3.0 9.0 ["size" "*" "scale" "/" "px"]))
+            (var "float" "cover" [(call "clamp" [0.5 "-" "dist"] 0.0 1.0) "*" "fade"])
+            (var "float" "rim" (call "clamp" [0.5 "-" "dist" "-" (call "max" 1.0 [0.03 "*" "size" "*" "scale" "/" "px"])] 0.0 1.0))
+            (var "vec3" "hc" (call "cycle" ["h0" "*" 9.0 "-" "phase"]))
+            (assign "col" (call "mix" "col" ["hc" "*" "rim"] "cover"))
+          ])
+          (assign "fragColor" (vec4 "col" 1.0))
+        ];
+        nearest = fn "ivec2" [["vec2" "h"]] [
+          (var "float" "y" ["h.y" "/" "S3"])
+          (var "vec3" "c" (vec3 ["h.x" "-" 0.5 "*" "y"] "y" [(neg "h.x") "-" 0.5 "*" "y"]))
+          (var "vec3" "r" (call "floor" ["c" "+" 0.5]))
+          (var "vec3" "d" (call "abs" ["r" "-" "c"]))
+          (ifElse ["d.x" ">" "d.y" "&&" "d.x" ">" "d.z"] [
+              (assign "r.x" [(neg "r.y") "-" "r.z"])
+            ] (if' ["d.y" ">" "d.z"] [
+              (assign "r.y" [(neg "r.x") "-" "r.z"])
+            ]))
+          (return (ivec2 "r.xy"))
+        ];
+        pmod = fn "int" [["int" "a"] ["int" "b"]] [
+          (return ["a" "-" "b" "*" (call "fdiv" "a" "b")])
+        ];
+        rot = fn "vec2" [["vec2" "v"] ["float" "a"]] [
+          (var "float" "c" (call "cos" "a"))
+          (var "float" "s" (call "sin" "a"))
+          (return (vec2 ["c" "*" "v.x" "-" "s" "*" "v.y"] ["s" "*" "v.x" "+" "c" "*" "v.y"]))
+        ];
+      };
+    };
     modules_desktop_session_tomoe_shaders_su_ei_data = {
-      blank,
+      assign,
       call,
+      float,
       fn,
       for,
+      inc,
+      neg,
+      return,
+      update,
+      var,
+      vec2,
+      vec3,
+      vec4,
       ...
-    }: [
-      ["const" "float" "TAU" "=" "6.28318531"]
-      ["const" "float" "RIBS" "=" "18.0"]
-      ["const" "float" "DRIFT" "=" "0.18"]
-      ["const" "float" "DISPERSE" "=" "0.05"]
-      ["const" "float" "FLASH_PERIOD" "=" "7.0"]
-      ["const" "float" "WANDER" "=" "61.0"]
-      ["const" "float" "TWIST_PERIOD" "=" "43.0"]
-      ["const" "vec3" "BASE_A" "=" (call "vec3" ["0.60" "0.68" "0.73"])]
-      ["const" "vec3" "BASE_B" "=" (call "vec3" ["0.69" "0.66" "0.70"])]
-      blank
-      (fn ["float" (call "shade" [["float" "u"] ["float" "aa"]])] [
-        ["float" "acc" "=" "0.0"]
-        (for ["int" "k" "=" (-1)] ["k" "<=" 1] "k++" [
-          ["float" "d" "=" (call "fract" [["u" "+" (call "float" ["k"]) "*" "aa" "*" "0.35"]])]
-          ["acc" "+=" "0.86" "+" "0.14" "*" (call "smoothstep" ["0.0" "1.0" "d"]) "+" "0.32" "*" (call "exp" [[["d" "-" "1.0"] "/" "0.05"]]) "-" "0.20" "*" (call "exp" [["-d" "/" "0.07"]])]
-        ])
-        ["return" "acc" "/" "3.0"]
-      ])
-      blank
-      (fn ["vec3" (call "flame" [["float" "k"]])] [
-        ["vec3" "cyan" "=" (call "vec3" ["0.25" "0.85" "1.0"])]
-        ["vec3" "blue" "=" (call "vec3" ["0.35" "0.45" "1.0"])]
-        ["vec3" "pink" "=" (call "vec3" ["1.0" "0.25" "0.75"])]
-        ["vec3" "orange" "=" (call "vec3" ["1.0" "0.62" "0.25"])]
-        ["vec3" "yellow" "=" (call "vec3" ["1.0" "0.93" "0.45"])]
-        ["vec3" "c" "=" (call "mix" ["cyan" "blue" (call "smoothstep" ["-0.30" "-0.12" "k"])])]
-        ["c" "=" (call "mix" ["c" "pink" (call "smoothstep" ["-0.12" "-0.02" "k"])])]
-        ["c" "=" (call "mix" ["c" "orange" (call "smoothstep" ["0.0" "0.10" "k"])])]
-        ["return" (call "mix" ["c" "yellow" (call "smoothstep" ["0.08" "0.35" "k"])])]
-      ])
-      blank
-      (fn ["void" (call "mainImage" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]])] [
-        ["float" "aspect" "=" "iResolution.x" "/" "iResolution.y"]
-        ["vec2" "p" "=" "fragCoord" "/" "iResolution.y"]
-        ["float" "t" "=" "iTime"]
-        blank
-        ["vec2" "c" "=" (call "vec2" [["aspect" "+" "0.45" "+" "0.3" "*" (call "sin" [["TAU" "*" "t" "/" "WANDER"]])] ["0.3" "+" "0.9" "*" (call "sin" [["TAU" "*" "t" "/" ["WANDER" "*" "0.71"]]])]])]
-        ["vec2" "q" "=" "p" "-" "c"]
-        ["float" "r" "=" (call "length" ["q"])]
-        ["float" "th" "=" (call "atan" ["q.y" "-q.x"])]
-        ["float" "twist" "=" "0.35" "*" (call "sin" [["TAU" "*" "t" "/" "TWIST_PERIOD"]])]
-        ["float" "bend" "=" "0.035" "*" (call "sin" [["2.1" "*" "p.y" "+" "1.3" "*" "p.x" "+" "0.11" "*" "t"]])]
-        blank
-        ["float" "u" "=" "RIBS" "*" ["r" "+" "twist" "*" "th" "/" "TAU" "+" "bend"] "-" "DRIFT" "*" "t"]
-        ["float" "aa" "=" (call "fwidth" ["u"])]
-        ["vec3" "s" "=" (call "vec3" [(call "shade" [["u" "-" "DISPERSE"] "aa"]) (call "shade" ["u" "aa"]) (call "shade" [["u" "+" "DISPERSE"] "aa"])])]
-        blank
-        ["vec3" "base" "=" (call "mix" ["BASE_A" "BASE_B" (call "smoothstep" ["-0.2" "1.2" ["p.y" "+" "0.3" "*" (call "sin" [["p.x" "*" "0.9" "+" "0.07" "*" "t"]])]])])]
-        ["vec3" "col" "=" "base" "*" "s"]
-        blank
-        ["float" "rib" "=" (call "floor" ["u"])]
-        ["float" "d" "=" (call "fract" ["u"])]
-        ["float" "reach" "=" "0.30" "+" "0.12" "*" (call "sin" [["rib" "*" "0.61" "+" "t" "*" "1.3"]]) "+" "0.08" "*" (call "sin" [["rib" "*" "1.7" "-" "t" "*" "0.7"]])]
-        ["float" "tipY" "=" "reach" "*" ["0.35" "+" "0.65" "*" (call "pow" [["1.0" "-" (call "abs" [["2.0" "*" "d" "-" "1.0"]])] "0.8"])]]
-        ["float" "k" "=" "p.y" "-" "tipY"]
-        ["float" "sweep" "=" "0.5" "+" "0.5" "*" (call "sin" [["TAU" "*" "t" "/" "FLASH_PERIOD" "-" "3.5" "*" "p.x" "/" (call "max" ["aspect" "1.0"]) "+" "0.9" "*" "p.y"]])]
-        ["float" "flash" "=" (call "smoothstep" ["0.62" "0.97" "sweep"])]
-        ["vec3" "hot" "=" (call "flame" ["k"]) "*" ["0.82" "+" "0.25" "*" "d"]]
-        ["col" "=" (call "mix" ["col" ["hot" "*" "s"] ["flash" "*" ["0.65" "+" "0.35" "*" "d"]]])]
-        blank
-        ["vec2" "v" "=" "fragCoord" "/" "iResolution.xy" "-" "0.5"]
-        ["col" "*=" "1.0" "-" "0.15" "*" (call "dot" ["v" "v"])]
-        ["fragColor" "=" (call "vec4" [(call "clamp" ["col" "0.0" "1.0"]) "1.0"])]
-      ])
-    ];
+    }: {
+      consts = {
+        BASE_A = vec3 0.6 0.68 0.73;
+        BASE_B = vec3 0.69 0.66 0.7;
+        DISPERSE = 0.05;
+        DRIFT = 0.18;
+        FLASH_PERIOD = 7.0;
+        RIBS = 18.0;
+        TAU = 6.28318531;
+        TWIST_PERIOD = 43.0;
+        WANDER = 61.0;
+      };
+      fns = {
+        flame = fn "vec3" [["float" "k"]] [
+          (var "vec3" "cyan" (vec3 0.25 0.85 1.0))
+          (var "vec3" "blue" (vec3 0.35 0.45 1.0))
+          (var "vec3" "pink" (vec3 1.0 0.25 0.75))
+          (var "vec3" "orange" (vec3 1.0 0.62 0.25))
+          (var "vec3" "yellow" (vec3 1.0 0.93 0.45))
+          (var "vec3" "c" (call "mix" "cyan" "blue" (call "smoothstep" (-0.3) (-0.12) "k")))
+          (assign "c" (call "mix" "c" "pink" (call "smoothstep" (-0.12) (-0.02) "k")))
+          (assign "c" (call "mix" "c" "orange" (call "smoothstep" 0.0 0.1 "k")))
+          (return (call "mix" "c" "yellow" (call "smoothstep" 0.08 0.35 "k")))
+        ];
+        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
+          (var "float" "aspect" ["iResolution.x" "/" "iResolution.y"])
+          (var "vec2" "p" ["fragCoord" "/" "iResolution.y"])
+          (var "float" "t" "iTime")
+          (var "vec2" "c" (vec2 ["aspect" "+" 0.45 "+" 0.3 "*" (call "sin" ["TAU" "*" "t" "/" "WANDER"])] [0.3 "+" 0.9 "*" (call "sin" ["TAU" "*" "t" "/" ["WANDER" "*" 0.71]])]))
+          (var "vec2" "q" ["p" "-" "c"])
+          (var "float" "r" (call "length" "q"))
+          (var "float" "th" (call "atan" "q.y" (neg "q.x")))
+          (var "float" "twist" [0.35 "*" (call "sin" ["TAU" "*" "t" "/" "TWIST_PERIOD"])])
+          (var "float" "bend" [0.035 "*" (call "sin" [2.1 "*" "p.y" "+" 1.3 "*" "p.x" "+" 0.11 "*" "t"])])
+          (var "float" "u" ["RIBS" "*" ["r" "+" "twist" "*" "th" "/" "TAU" "+" "bend"] "-" "DRIFT" "*" "t"])
+          (var "float" "aa" (call "fwidth" "u"))
+          (var "vec3" "s" (vec3 (call "shade" ["u" "-" "DISPERSE"] "aa") (call "shade" "u" "aa") (call "shade" ["u" "+" "DISPERSE"] "aa")))
+          (var "vec3" "base" (call "mix" "BASE_A" "BASE_B" (call "smoothstep" (-0.2) 1.2 ["p.y" "+" 0.3 "*" (call "sin" ["p.x" "*" 0.9 "+" 0.07 "*" "t"])])))
+          (var "vec3" "col" ["base" "*" "s"])
+          (var "float" "rib" (call "floor" "u"))
+          (var "float" "d" (call "fract" "u"))
+          (var "float" "reach" [0.3 "+" 0.12 "*" (call "sin" ["rib" "*" 0.61 "+" "t" "*" 1.3]) "+" 0.08 "*" (call "sin" ["rib" "*" 1.7 "-" "t" "*" 0.7])])
+          (var "float" "tipY" ["reach" "*" [0.35 "+" 0.65 "*" (call "pow" [1.0 "-" (call "abs" [2.0 "*" "d" "-" 1.0])] 0.8)]])
+          (var "float" "k" ["p.y" "-" "tipY"])
+          (var "float" "sweep" [0.5 "+" 0.5 "*" (call "sin" ["TAU" "*" "t" "/" "FLASH_PERIOD" "-" 3.5 "*" "p.x" "/" (call "max" "aspect" 1.0) "+" 0.9 "*" "p.y"])])
+          (var "float" "flash" (call "smoothstep" 0.62 0.97 "sweep"))
+          (var "vec3" "hot" [(call "flame" "k") "*" [0.82 "+" 0.25 "*" "d"]])
+          (assign "col" (call "mix" "col" ["hot" "*" "s"] ["flash" "*" [0.65 "+" 0.35 "*" "d"]]))
+          (var "vec2" "v" ["fragCoord" "/" "iResolution.xy" "-" 0.5])
+          (update "*=" "col" [1.0 "-" 0.15 "*" (call "dot" "v" "v")])
+          (assign "fragColor" (vec4 (call "clamp" "col" 0.0 1.0) 1.0))
+        ];
+        shade = fn "float" [["float" "u"] ["float" "aa"]] [
+          (var "float" "acc" 0.0)
+          (for (var "int" "k" (-1)) ["k" "<=" 1] (inc "k") [
+            (var "float" "d" (call "fract" ["u" "+" (float "k") "*" "aa" "*" 0.35]))
+            (update "+=" "acc" [0.86 "+" 0.14 "*" (call "smoothstep" 0.0 1.0 "d") "+" 0.32 "*" (call "exp" [["d" "-" 1.0] "/" 0.05]) "-" 0.2 "*" (call "exp" [(neg "d") "/" 0.07])])
+          ])
+          (return ["acc" "/" 3.0])
+        ];
+      };
+    };
     modules_desktop_session_wayland = {pkgs, ...}: {
       environment = {
         systemPackages = [
@@ -30320,140 +30352,463 @@
       };
 
       glsl = let
-        inherit (doc) hardline nest align;
+        inherit (doc) hardline nest group line;
 
-        assignments = ["=" "+=" "-=" "*=" "/=" "%=" "<<=" ">>=" "&=" "^=" "|="];
-
-        atom = value: builtins.isString value || builtins.isInt value;
-
-        spaced = values: lib.imap0 (index: value: [(lib.optionalString (index > 0 && value != ",") " ") (item value)]) values;
-
-        written = values: lib.concatStrings (lib.imap0 (index: value: lib.optionalString (index > 0 && value != ",") " " + toString value) values);
-
-        rowItems = row: row.row or row;
-
-        broken = rowList: let
-          first = builtins.head rowList;
-          operator = lib.lists.findFirstIndex (value: builtins.elem value assignments) null first;
-          before = lib.take operator first;
-          default =
-            if operator != null && lib.all atom before
-            then builtins.stringLength (written (before ++ ["="])) - 1
-            else null;
-          by = row:
-            row.at or (
-              if default == null
-              then throw "glsl: a row after the first needs at when the first has no assignment"
-              else default
-            );
-        in
-          align [(spaced first) (map (row: nest (by row) [hardline (spaced (rowItems row))]) (builtins.tail rowList))];
-
-        listed = values: lib.intersperse ", " (map expression values);
-
-        args = value:
-          if value ? rows
-          then
-            if builtins.head value.rows == []
-            then [(nest 4 [hardline (lib.intersperse ["," hardline] (map listed (builtins.tail value.rows)))]) hardline]
-            else align (lib.intersperse ["," hardline] (map listed value.rows))
-          else listed value;
-
-        forms = {
-          string = lib.id;
-          int = toString;
-          list = spaced;
-          rows = value: broken value.rows;
-          call = value: [(item value.call.function) "(" (args value.call.arguments) ")"];
-          index = value: [(item value.index.base) "[" (expression value.index.at) "]"];
-          field = value: [(item value.field.base) "." value.field.name];
-          unary = value: [value.unary.operator (item value.unary.operand)];
+        binary = {
+          "*" = 12;
+          "/" = 12;
+          "%" = 12;
+          "+" = 11;
+          "-" = 11;
+          "<<" = 10;
+          ">>" = 10;
+          "<" = 9;
+          ">" = 9;
+          "<=" = 9;
+          ">=" = 9;
+          "==" = 8;
+          "!=" = 8;
+          "&" = 7;
+          "^" = 6;
+          "|" = 5;
+          "&&" = 4;
+          "^^" = 3;
+          "||" = 2;
         };
 
-        expression = value: (forms.${kindOf value} or (throw "glsl: no expression ${kindOf value}")) value;
+        types =
+          ["bool" "int" "uint" "float"]
+          ++ lib.concatMap (n: ["vec${n}" "ivec${n}" "uvec${n}" "bvec${n}" "mat${n}"] ++ map (m: "mat${n}x${m}") ["2" "3" "4"]) ["2" "3" "4"];
 
-        item = value:
-          if builtins.isList value
-          then ["(" (spaced value) ")"]
-          else expression value;
+        identifier = value:
+          if builtins.match "[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*" value != null
+          then value
+          else throw "glsl: `${value}` is not a name";
 
-        block = value:
-          if value ? inline
-          then ["{ " (lib.intersperse " " (map statement value.inline)) " }"]
-          else ["{" (nest 4 (map (one: [hardline (entry one)]) value)) hardline "}"];
+        pointed = mantissa:
+          if lib.hasInfix "." mantissa
+          then mantissa
+          else "${mantissa}.0";
 
-        clause = value:
-          if value ? bare
-          then [" " (statement value.bare)]
-          else [" " (block value)];
+        float = value: let
+          text = builtins.toJSON value;
+          parts = builtins.match "(-?[0-9.]+)e[+]?(-?)0*([0-9]+)" text;
+        in
+          if parts == null
+          then text
+          else "${pointed (builtins.head parts)}e${builtins.elemAt parts 1}${builtins.elemAt parts 2}";
 
-        alternative = value: otherwise: [
+        infix = items: let
+          count = builtins.length items;
+          operators = lib.genList (index: builtins.elemAt items (2 * index + 1)) (count / 2);
+          precedences = map (operator: binary.${operator} or (throw "glsl: `${toString operator}` is not a binary operator")) operators;
+          lowest = lib.foldl' lib.min 99 precedences;
+          at = lib.foldl' (found: index:
+            if builtins.elemAt precedences index == lowest
+            then index
+            else found)
+          0 (lib.range 0 (builtins.length operators - 1));
+        in
+          if count == 1
+          then builtins.head items
+          else if lib.mod count 2 == 0
+          then throw "glsl: an infix list alternates operands and operators and ends in an operand"
+          else {
+            binary = {
+              operator = builtins.elemAt operators at;
+              left = infix (lib.take (2 * at + 1) items);
+              right = infix (lib.drop (2 * at + 2) items);
+            };
+          };
+
+        kind = value:
+          if builtins.isAttrs value
+          then
+            if value ? call
+            then "call"
+            else builtins.head (builtins.attrNames value)
+          else builtins.typeOf value;
+
+        atom = text: {
+          precedence = 15;
+          doc = text;
+        };
+
+        signed = value: text: {
+          precedence =
+            if value < 0
+            then 13
+            else 15;
+          doc = text;
+        };
+
+        paren = least: printed:
+          if printed.precedence < least
+          then ["(" printed.doc ")"]
+          else printed.doc;
+
+        argumentList = scope: values: ["(" (lib.intersperse ", " (map (value: paren 1 (expression scope value)) values)) ")"];
+
+        rows = scope: values: ["(" (nest 4 (lib.intersperse "," (map (value: [hardline (paren 1 (expression scope value))]) values))) hardline ")"];
+
+        negative = value: (builtins.isInt value || builtins.isFloat value) && value < 0 || kind value == "unary";
+
+        forms = scope: {
+          int = value: signed value (toString value);
+          float = value: signed value (float value);
+          bool = value:
+            atom (
+              if value
+              then "true"
+              else "false"
+            );
+          string = value: let
+            path = lib.splitString "." (identifier value);
+          in
+            atom (
+              if builtins.elem (builtins.head path) scope
+              then lib.concatStringsSep "." (["(${builtins.head path})"] ++ builtins.tail path)
+              else value
+            );
+          list = value: expression scope (infix value);
+          binary = value: let
+            precedence = binary.${value.binary.operator};
+          in {
+            inherit precedence;
+            doc = group [(paren precedence (expression scope value.binary.left)) (nest 4 [line value.binary.operator " " (paren (precedence + 1) (expression scope value.binary.right))])];
+          };
+          unary = value: {
+            precedence = 13;
+            doc = [
+              value.unary.operator
+              (paren (
+                if negative value.unary.operand
+                then 14
+                else 13
+              ) (expression scope value.unary.operand))
+            ];
+          };
+          postfix = value: {
+            precedence = 14;
+            doc = [(paren 14 (expression scope value.postfix.operand)) value.postfix.operator];
+          };
+          call = value: {
+            precedence = 14;
+            doc = [(identifier value.call.function) (argumentList scope value.call.arguments)];
+          };
+          array = value: {
+            precedence = 14;
+            doc = [(identifier value.array.type) "[${toString (builtins.length value.array.elements)}]" (rows scope value.array.elements)];
+          };
+          index = value: {
+            precedence = 14;
+            doc = [(paren 14 (expression scope value.index.base)) "[" (paren 0 (expression scope value.index.at)) "]"];
+          };
+          field = value: {
+            precedence = 14;
+            doc = [(paren 14 (expression scope value.field.base)) "." (identifier value.field.name)];
+          };
+          cond = value: {
+            precedence = 1;
+            doc = [(paren 2 (expression scope value.cond.test)) " ? " (paren 1 (expression scope value.cond.yes)) " : " (paren 1 (expression scope value.cond.no))];
+          };
+          unsigned = value: atom "${toString value.unsigned}u";
+        };
+
+        expression = scope: value: ((forms scope).${kind value} or (throw "glsl: no expression ${kind value}")) value;
+
+        written = value: (expression [] value).doc;
+
+        typeDoc = value:
+          if value ? sized
+          then typeDoc value.sized.type
+          else lib.concatStringsSep " " (map identifier (lib.toList value));
+
+        declarator = type: target: [(typeDoc type) " " (identifier target) (lib.optional (type ? sized) "[${toString type.sized.size}]")];
+
+        simple = value: !builtins.elem (kind value) ["if" "for" "while" "comment"];
+
+        block = body: ["{" (nest 4 (map (one: [hardline (statement one)]) body)) hardline "}"];
+
+        single = body: builtins.length body == 1 && simple (builtins.head body);
+
+        clause = body:
+          if single body
+          then [" " (statement (builtins.head body))]
+          else [" " (block body)];
+
+        alternative = body: otherwise: [
           (
-            if value ? bare
+            if single body
             then hardline
             else " "
           )
           "else"
           (
-            if otherwise ? "if"
+            if builtins.isAttrs otherwise
             then [" " (statement otherwise)]
             else clause otherwise
           )
         ];
 
+        header = value:
+          if value == null
+          then ""
+          else if kind value == "var"
+          then [(declarator value.var.type value.var.name) (lib.optionals (value.var.value != null) [" = " (written value.var.value)])]
+          else written value;
+
         statementForms = {
-          comment = value: value.comment;
-          fn = value: [(expression value.fn.signature) " " (block value.fn.body)];
-          define = value: ["#define " (expression value.define.name) " " (expression value.define.body)];
-          "if" = value: ["if (" (expression value."if".test) ")" (clause value."if".body) (lib.optional (value."if" ? otherwise) (alternative value."if".body value."if".otherwise))];
-          for = value: ["for (" (lib.intersperse "; " (map expression [value.for.init value.for.test value.for.step])) ")" (clause value.for.body)];
-          while = value: ["while (" (expression value.while.test) ")" (clause value.while.body)];
+          comment = value: "// ${value.comment}";
+          var = value: [(header value) ";"];
+          assign = value: [(written value.assign.target) " = " (written value.assign.value) ";"];
+          update = value: [(written value.update.target) " ${value.update.operator} " (written value.update.value) ";"];
+          return = value:
+            if value.return == null
+            then "return;"
+            else ["return " (written value.return) ";"];
+          jump = value: "${value.jump};";
+          "if" = value: ["if (" (written value."if".test) ")" (clause value."if".body) (lib.optional (value."if" ? otherwise) (alternative value."if".body value."if".otherwise))];
+          for = value: ["for (" (lib.intersperse "; " [(header value.for.init) (written value.for.test) (written value.for.step)]) ") " (block value.for.body)];
+          while = value: ["while (" (written value.while.test) ") " (block value.while.body)];
         };
 
-        statement = value: (statementForms.${kindOf value} or (_: [(expression value) ";"])) value;
+        statement = value: (statementForms.${kind value} or (_: [(written value) ";"])) value;
 
-        entry = value:
-          if value ? blank
-          then []
-          else statement value;
-      in {
-        blank = {blank = true;};
+        noted = value: print:
+          if value ? commented
+          then ["// ${value.commented.text}" hardline (print value.commented.declaration)]
+          else print value;
 
-        comment = string: {comment = string;};
+        names = value:
+          if builtins.isString value
+          then [(builtins.head (lib.splitString "." value))]
+          else if builtins.isList value
+          then lib.concatMap names value
+          else if builtins.isAttrs value
+          then lib.concatMap names (builtins.attrValues (removeAttrs value ["__functor"]))
+          else [];
 
-        inline = values: {inline = values;};
+        calls = value:
+          if builtins.isList value
+          then lib.concatMap calls value
+          else if builtins.isAttrs value
+          then lib.optional (value ? call) value.call.function ++ lib.concatMap calls (builtins.attrValues (removeAttrs value ["__functor"]))
+          else [];
 
-        bare = value: {bare = value;};
+        ordered = dependencies: let
+          go = done: let
+            left = builtins.filter (one: !builtins.elem one done) (builtins.attrNames dependencies);
+            next = lib.findFirst (one: lib.all (other: builtins.elem other done) dependencies.${one}) null left;
+          in
+            if left == []
+            then done
+            else if next == null
+            then throw "glsl: ${lib.concatStringsSep ", " left} depend on each other"
+            else go (done ++ [next]);
+        in
+          go [];
 
-        rows = rowList: {rows = rowList;};
+        among = set: key: found: builtins.filter (one: one != key && set ? ${one}) (lib.unique found);
 
-        at = by: row: {
-          at = by;
-          inherit row;
+        bare = value:
+          if value ? commented
+          then bare value.commented.declaration
+          else value;
+
+        untyped = throw "glsl: a constant's type is its value's constructor; write `typed type value` for this one";
+
+        typeForms = {
+          float = _: "float";
+          int = _: "int";
+          bool = _: "bool";
+          unsigned = _: "uint";
+          array = value: {
+            sized = {
+              inherit (value.array) type;
+              size = builtins.length value.array.elements;
+            };
+          };
+          typed = value: value.typed.type;
+          call = value:
+            if builtins.elem value.call.function types
+            then value.call.function
+            else untyped;
         };
 
-        call = function: arguments: {call = {inherit function arguments;};};
+        inferred = value: (typeForms.${kind value} or (_: untyped)) value;
 
-        index = base: at: {index = {inherit base at;};};
+        constant = key: value: let
+          type = inferred value;
+          init =
+            if kind value == "typed"
+            then value.typed.value
+            else value;
+        in ["const " (declarator type key) " = " (written init) ";"];
 
-        field = base: name: {field = {inherit base name;};};
+        number = value: builtins.elem (builtins.typeOf value) ["int" "float"];
 
-        unary = operator: operand: {unary = {inherit operator operand;};};
+        define = key: value: let
+          macro =
+            value.macro or {
+              params = [];
+              body = value;
+            };
+        in [
+          "#define ${identifier key}"
+          (lib.optionalString (value ? macro) "(${lib.concatMapStringsSep ", " identifier macro.params})")
+          " "
+          (paren (
+            if number macro.body
+            then 0
+            else 14
+          ) (expression macro.params macro.body))
+        ];
 
-        fn = signature: body: {fn = {inherit signature body;};};
+        call = callee: let
+          applied = list: {
+            call = {
+              function = callee;
+              arguments = list;
+            };
+            __functor = _: argument: applied (list ++ [argument]);
+          };
+        in
+          applied [];
 
-        define = name: body: {define = {inherit name body;};};
+        definition = key: value: [
+          (typeDoc value.fn.returns)
+          " ${identifier key}("
+          (lib.intersperse ", " (map typeDoc value.fn.params))
+          ") "
+          (block value.fn.body)
+        ];
+      in
+        lib.genAttrs types call
+        // {
+          inherit call;
 
-        if' = test: body: {"if" = {inherit test body;};};
+          array = type: elements: {array = {inherit type elements;};};
 
-        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+          index = base: at: {index = {inherit base at;};};
 
-        for = init: test: step: body: {for = {inherit init test step body;};};
+          field = base: member: {
+            field = {
+              inherit base;
+              name = member;
+            };
+          };
 
-        while = test: body: {while = {inherit test body;};};
+          neg = operand: {
+            unary = {
+              operator = "-";
+              inherit operand;
+            };
+          };
 
-        render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
-      };
+          not = operand: {
+            unary = {
+              operator = "!";
+              inherit operand;
+            };
+          };
+
+          bitNot = operand: {
+            unary = {
+              operator = "~";
+              inherit operand;
+            };
+          };
+
+          preInc = operand: {
+            unary = {
+              operator = "++";
+              inherit operand;
+            };
+          };
+
+          preDec = operand: {
+            unary = {
+              operator = "--";
+              inherit operand;
+            };
+          };
+
+          inc = operand: {
+            postfix = {
+              operator = "++";
+              inherit operand;
+            };
+          };
+
+          dec = operand: {
+            postfix = {
+              operator = "--";
+              inherit operand;
+            };
+          };
+
+          cond = test: yes: no: {cond = {inherit test yes no;};};
+
+          unsigned = value: {unsigned = value;};
+
+          sized = type: size: {sized = {inherit type size;};};
+
+          typed = type: value: {typed = {inherit type value;};};
+
+          macro = params: body: {macro = {inherit params body;};};
+
+          var = type: target: value: {
+            var = {
+              inherit type value;
+              name = target;
+            };
+          };
+
+          assign = target: value: {assign = {inherit target value;};};
+
+          update = operator: target: value: {update = {inherit operator target value;};};
+
+          return = value: {return = value;};
+
+          break = {jump = "break";};
+
+          continue = {jump = "continue";};
+
+          if' = test: body: {"if" = {inherit test body;};};
+
+          ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+
+          for = init: test: step: body: {for = {inherit init test step body;};};
+
+          while = test: body: {while = {inherit test body;};};
+
+          comment = text: {comment = text;};
+
+          commented = text: subject: {
+            commented = {
+              inherit text;
+              declaration = subject;
+            };
+          };
+
+          fn = returns: params: body: {fn = {inherit returns params body;};};
+
+          render = {
+            defines ? {},
+            consts ? {},
+            fns ? {},
+          }: let
+            constOrder = ordered (builtins.mapAttrs (key: value: among consts key (names (bare value))) consts);
+            fnOrder = ordered (builtins.mapAttrs (key: value: among fns key (calls (bare value))) fns);
+            sections = builtins.filter (section: section != []) [
+              (lib.optional (defines != {}) (lib.intersperse hardline (lib.mapAttrsToList (key: value: noted value (define key)) defines)))
+              (lib.optional (consts != {}) (lib.intersperse hardline (map (key: noted consts.${key} (constant key)) constOrder)))
+              (map (key: noted fns.${key} (definition key)) fnOrder)
+            ];
+          in
+            doc.render 100 [(lib.intersperse [hardline hardline] (lib.concatLists sections)) hardline];
+        };
 
       lua = let
         inherit (doc) hardline nest;
@@ -34396,6 +34751,190 @@
 
       comrak = lib.getExe pkgs.comrak;
 
+      glslGate = pkgs.writeShellApplication {
+        name = "glsl-gate";
+        runtimeInputs = [pkgs.clang-tools pkgs.glslang];
+        runtimeEnv = {
+          GLSL_GRAMMAR = "${pkgs.tree-sitter-grammars.tree-sitter-glsl}/parser";
+          GLSL_PRELUDE = prelude;
+          GLSL_ENTRY = entry;
+          GLSL_STYLE = pkgs.writeText "clang-format" ''
+            BasedOnStyle: LLVM
+            IndentWidth: 4
+            ColumnLimit: 100
+            MaxEmptyLinesToKeep: 0
+          '';
+          __EGL_VENDOR_LIBRARY_FILENAMES = "${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json";
+          LD_LIBRARY_PATH = "${pkgs.libglvnd}/lib";
+        };
+        text = ''
+          exec ${pkgs.python3.withPackages (ps: [ps.moderngl ps.tree-sitter])}/bin/python ${pkgs.writeText "glsl-gate.py" ''
+            import ctypes
+            import difflib
+            import os
+            import re
+            import struct
+            import subprocess
+            import sys
+            import tempfile
+
+            import moderngl
+            from tree_sitter import Language, Parser
+
+            grammar = ctypes.cdll.LoadLibrary(os.environ["GLSL_GRAMMAR"])
+            grammar.tree_sitter_glsl.restype = ctypes.c_void_p
+            parser = Parser(Language(grammar.tree_sitter_glsl()))
+            masked = re.compile(r"(?<![A-Za-z0-9_])(bool|double|float|int|uint)\(")
+            frames = [(640, 360, t) for t in (0.0, 1.7, 13.3, 61.25)]
+
+
+            def parse(source):
+                text = masked.sub(lambda m: "_" + m.group(1)[1:] + "(", source)
+                return parser.parse(text.encode()), source.encode()
+
+
+            def number(text):
+                sign = ""
+                if text.startswith("-"):
+                    sign, text = "-", text[1:]
+                unsigned = text[-1] in "uU"
+                digits = text[:-1] if unsigned else text
+                if digits[:2].lower() == "0x":
+                    value = str(int(digits, 16))
+                elif any(c in digits for c in ".eE"):
+                    value = repr(float(digits))
+                else:
+                    value = str(int(digits, 10))
+                return sign + value + ("u" if unsigned else "")
+
+
+            def canon(node, source):
+                kind = node.type
+                named = node.named_children
+                if kind == "parenthesized_expression" and len(named) == 1:
+                    return canon(named[0], source)
+                if kind == "number_literal":
+                    return number(source[node.start_byte:node.end_byte].decode())
+                if kind == "binary_expression":
+                    left = canon(node.child_by_field_name("left"), source)
+                    right = canon(node.child_by_field_name("right"), source)
+                    return "(" + left + " " + node.child_by_field_name("operator").type + " " + right + ")"
+                if kind == "unary_expression":
+                    operator = node.child_by_field_name("operator").type
+                    argument = node.child_by_field_name("argument")
+                    while argument.type == "parenthesized_expression" and len(argument.named_children) == 1:
+                        argument = argument.named_children[0]
+                    if operator == "-" and argument.type == "number_literal":
+                        return number("-" + source[argument.start_byte:argument.end_byte].decode())
+                    return "(" + operator + canon(argument, source) + ")"
+                if kind == "conditional_expression":
+                    parts = [canon(node.child_by_field_name(f), source) for f in ("condition", "consequence", "alternative")]
+                    return "(" + parts[0] + " ? " + parts[1] + " : " + parts[2] + ")"
+                if kind in ("if_statement", "for_statement", "while_statement", "else_clause"):
+                    out = []
+                    for child in node.children:
+                        if child.is_named and child.type not in ("compound_statement", "parenthesized_expression", "condition_clause", "if_statement", "else_clause", "declaration") and child.type.endswith("statement"):
+                            out.append("{ " + canon(child, source) + " }")
+                        else:
+                            out.append(canon(child, source))
+                    return " ".join(out)
+                if kind == "declaration" and len(node.children_by_field_name("declarator")) > 1:
+                    head = []
+                    for child in node.children:
+                        if child.id == node.child_by_field_name("declarator").id:
+                            break
+                        head.append(canon(child, source))
+                    return " ".join(" ".join(head) + " " + canon(d, source) + ";" for d in node.children_by_field_name("declarator"))
+                if kind in ("preproc_def", "preproc_function_def"):
+                    name = canon(node.child_by_field_name("name"), source)
+                    params = node.child_by_field_name("parameters")
+                    if params is not None:
+                        name += "(" + ", ".join(canon(p, source) for p in params.named_children) + ")"
+                    body = source[node.child_by_field_name("value").start_byte:node.child_by_field_name("value").end_byte].decode().strip()
+                    tree, wrapped = parse("int _ = " + body + ";\n")
+                    value = tree.root_node.child(0).child_by_field_name("declarator").child_by_field_name("value")
+                    return "#define " + name + " " + canon(value, wrapped) + "\n"
+                if node.child_count == 0:
+                    return source[node.start_byte:node.end_byte].decode()
+                return " ".join(canon(child, source) for child in node.children)
+
+
+            def normal(source):
+                tree, raw = parse(source)
+                if tree.root_node.has_error:
+                    sys.exit("the grammar does not parse the shader")
+                items = sorted(canon(child, raw).strip() for child in tree.root_node.children)
+                text = "\n".join(items) + "\n"
+                return subprocess.run(["clang-format", "--style=file:" + os.environ["GLSL_STYLE"], "--assume-filename=shader.glsl"], input=text, capture_output=True, text=True, check=True).stdout
+
+
+            def validate(path):
+                shader = open(os.environ["GLSL_PRELUDE"]).read() + open(path).read() + open(os.environ["GLSL_ENTRY"]).read()
+                with tempfile.TemporaryDirectory() as directory:
+                    frag = os.path.join(directory, "shader.frag")
+                    with open(frag, "w") as out:
+                        out.write(shader)
+                    subprocess.run(["glslangValidator", "-S", "frag", frag], check=True, stdout=subprocess.DEVNULL)
+                return shader
+
+
+            def render(context, shader):
+                vertex = "#version 330 core\nin vec2 pos;\nout vec2 v_local;\nuniform vec3 iResolution;\nvoid main() { v_local = (pos * 0.5 + 0.5) * iResolution.xy; v_local.y = iResolution.y - v_local.y; gl_Position = vec4(pos, 0.0, 1.0); }\n"
+                program = context.program(vertex_shader=vertex, fragment_shader=shader.replace("#version 300 es", "#version 330 core", 1))
+                quad = context.buffer(struct.pack("8f", -1, -1, 1, -1, -1, 1, 1, 1))
+                array = context.vertex_array(program, [(quad, "2f", "pos")])
+                out = []
+                for width, height, time in frames:
+                    target = context.texture((width, height), 4, dtype="f4")
+                    framebuffer = context.framebuffer(color_attachments=[target])
+                    framebuffer.use()
+                    framebuffer.clear()
+                    program["iResolution"].value = (width, height, 1.0)
+                    if "iTime" in program:
+                        program["iTime"].value = time
+                    array.render(moderngl.TRIANGLE_STRIP)
+                    out.append(framebuffer.read(components=4, dtype="f4"))
+                return out
+
+
+            def software():
+                for index in range(8):
+                    try:
+                        context = moderngl.create_standalone_context(backend="egl", device_index=index)
+                    except Exception:
+                        continue
+                    if "llvmpipe" in context.info["GL_RENDERER"]:
+                        return context
+                    context.release()
+                sys.exit("no llvmpipe EGL device")
+
+
+            def main():
+                context = software()
+                renderer = context.info["GL_RENDERER"]
+                failed = False
+                pairs = sys.argv[1:]
+                if not pairs or len(pairs) % 2:
+                    sys.exit("usage: glsl-gate ORIGINAL GENERATED [ORIGINAL GENERATED ...]")
+                for original, generated in zip(pairs[::2], pairs[1::2]):
+                    label = os.path.basename(generated)
+                    before, after = normal(open(original).read()), normal(open(generated).read())
+                    if before != after:
+                        failed = True
+                        sys.stdout.writelines(difflib.unified_diff(before.splitlines(True), after.splitlines(True), original, generated))
+                        continue
+                    images = [render(context, validate(path)) for path in (original, generated)]
+                    same = sum(a == b for a, b in zip(*images))
+                    print(f"{label}: clang-format equal, glslang ok, {same}/{len(frames)} frames bit-identical ({renderer})")
+                    failed |= same != len(frames)
+                sys.exit(1 if failed else 0)
+
+
+            main()
+          ''} "$@"
+        '';
+      };
+
       ambient = pkgs.writeText "ambient.d.ts" ''
         declare module "@oh-my-pi/pi-coding-agent" {
           export type ExtensionAPI = any;
@@ -34468,7 +35007,7 @@
         };
       };
     in {
-      inherit convert;
+      inherit convert glslGate;
 
       app = pkgs.writeShellScriptBin "lint" ''
         command=''${1:-check}
@@ -35007,6 +35546,7 @@
         drift = modules_drift {inherit lib pkgs hosts;};
         inherit (hosts.y0usaf-desktop.config.system.build) chatgpt p4g-setup;
         tomoe = inputs.tomoe.packages.${system}.default;
+        glsl-gate = lint.glslGate;
       };
 
       checks.${system} =
