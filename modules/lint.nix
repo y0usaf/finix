@@ -5,7 +5,7 @@
   hosts,
   droid,
 }: let
-  strictix = lib.getExe inputs.strictix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  strictix = lib.getExe' inputs.strictix.packages.${pkgs.stdenv.hostPlatform.system}.default "strictix";
 
   schema = name: docs:
     pkgs.writeText "${name}-options.json" (builtins.toJSON {
@@ -20,6 +20,7 @@
     lint = {
       schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
       enabled = ["unused-option" "never-enabled-option"];
+      generated = ["modules/hosts/steam-frame/beat-saber/beatmods.json"];
     };
     schemas = {
       "modules/hosts/android-phone" = schema "droid" (lib.optionAttrSetToDocList droid.options);
