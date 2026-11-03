@@ -5887,31 +5887,7 @@
         then {__toLispInline = form;}
         else throw "mkLispInline: expected a nonblank string";
 
-      lispPrefix = {
-        quote = "'";
-        quasi = "`";
-        unquote = ",";
-        splice = ",@";
-        function = "#'";
-      };
-
-      lispSourceByType = {
-        list = form: "(${lib.concatMapStringsSep " " lispSource form})";
-        int = toString;
-        string = lib.id;
-        set = form: let
-          kind = builtins.head (builtins.attrNames form);
-        in
-          if kind == "str"
-          then ''"${lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""] form.str}"''
-          else lispPrefix.${kind} + lispSource form.${kind};
-      };
-
-      lispSource = form: lispSourceByType.${builtins.typeOf form} form;
-
-      lispFile = forms: lib.concatMapStrings (form: lispSource form + "\n") forms;
-
-      probeLisp = lispFile [["in-package" "#:tomoe-user"] ["defun" "probe--sample" ["probe" "previous" "system"] ["let" [["sample" ["copy-list" "previous"]]] ["ecase" "probe" [":cpu" ["let" [["total" ["getf" "system" ":cpu-total"]] ["idle" ["getf" "system" ":cpu-idle"]]] ["when" "total" ["let" [["spent" ["-" "total" ["getf" "sample" ":total" "total"]]]] ["setf" ["getf" "sample" ":percent"] ["if" ["plusp" "spent"] ["max" 0 ["min" 100 ["round" ["*" 100 ["-" "spent" ["-" "idle" ["getf" "sample" ":idle" "idle"]]]] "spent"]]] ["getf" "sample" ":percent" 0]] ["getf" "sample" ":total"] "total" ["getf" "sample" ":idle"] "idle" ["getf" "sample" ":temp"] ["getf" "system" ":cpu-temperature"]]]]]] [":memory" ["let" [["total" ["getf" "system" ":memory-total"]] ["available" ["getf" "system" ":memory-available"]]] ["when" ["and" "total" ["plusp" "total"]] ["setf" ["getf" "sample" ":percent"] ["round" ["*" 100 ["-" "total" "available"]] "total"] ["getf" "sample" ":used"] ["round" ["-" "total" "available"] 1024]]]]] [":gpu" ["let" [["gpu" ["first" ["getf" "system" ":gpus"]]]] ["cond" ["gpu" ["setf" ["getf" "sample" ":percent"] ["max" 0 ["min" 100 ["getf" "gpu" ":busy"]]] ["getf" "sample" ":used"] ["getf" "gpu" ":vram-used"] ["getf" "sample" ":total"] ["getf" "gpu" ":vram-total"] ["getf" "sample" ":temp"] ["getf" "gpu" ":temperature"] ["getf" "sample" ":failures"] 0]] ["system" ["setf" ["getf" "sample" ":failures"] ["1+" ["getf" "sample" ":failures" 0]]]]]]]] "sample"]] ["defun" "probe--gpu-p" ["gpu"] ["and" ["getf" "gpu" ":percent"] ["<" ["getf" "gpu" ":failures" 0] 3]]]];
+      probeLisp = generators.lisp.render [["in-package" "#:tomoe-user"] ["defun" "probe--sample" ["probe" "previous" "system"] ["let" [["sample" ["copy-list" "previous"]]] ["ecase" "probe" [":cpu" ["let" [["total" ["getf" "system" ":cpu-total"]] ["idle" ["getf" "system" ":cpu-idle"]]] ["when" "total" ["let" [["spent" ["-" "total" ["getf" "sample" ":total" "total"]]]] ["setf" ["getf" "sample" ":percent"] ["if" ["plusp" "spent"] ["max" 0 ["min" 100 ["round" ["*" 100 ["-" "spent" ["-" "idle" ["getf" "sample" ":idle" "idle"]]]] "spent"]]] ["getf" "sample" ":percent" 0]] ["getf" "sample" ":total"] "total" ["getf" "sample" ":idle"] "idle" ["getf" "sample" ":temp"] ["getf" "system" ":cpu-temperature"]]]]]] [":memory" ["let" [["total" ["getf" "system" ":memory-total"]] ["available" ["getf" "system" ":memory-available"]]] ["when" ["and" "total" ["plusp" "total"]] ["setf" ["getf" "sample" ":percent"] ["round" ["*" 100 ["-" "total" "available"]] "total"] ["getf" "sample" ":used"] ["round" ["-" "total" "available"] 1024]]]]] [":gpu" ["let" [["gpu" ["first" ["getf" "system" ":gpus"]]]] ["cond" ["gpu" ["setf" ["getf" "sample" ":percent"] ["max" 0 ["min" 100 ["getf" "gpu" ":busy"]]] ["getf" "sample" ":used"] ["getf" "gpu" ":vram-used"] ["getf" "sample" ":total"] ["getf" "gpu" ":vram-total"] ["getf" "sample" ":temp"] ["getf" "gpu" ":temperature"] ["getf" "sample" ":failures"] 0]] ["system" ["setf" ["getf" "sample" ":failures"] ["1+" ["getf" "sample" ":failures" 0]]]]]]]] "sample"]] ["defun" "probe--gpu-p" ["gpu"] ["and" ["getf" "gpu" ":percent"] ["<" ["getf" "gpu" ":failures" 0] 3]]]];
 
       lispList = items:
         if items == []
@@ -5962,7 +5938,7 @@
 
       layouts = {
         deck = {
-          text = generators.lispSource modules_desktop_session_tomoe_lisp_deck_data;
+          text = generators.lisp.render (modules_desktop_session_tomoe_lisp_deck_data generators.lisp);
           parameters.ratios = map mkLispInline ["1/2" "21/32" "11/32"];
           bindings = [
             (binding ["alt"] "h" "focus-left" "Focus Left Column")
@@ -5984,7 +5960,7 @@
           ];
         };
         sway = {
-          text = generators.lispSource modules_desktop_session_tomoe_lisp_sway_data;
+          text = generators.lisp.render (modules_desktop_session_tomoe_lisp_sway_data generators.lisp);
           parameters.workspaces = 9;
           bindings = [
             (binding ["alt"] "h" "focus-left" "Focus Left")
@@ -6160,13 +6136,13 @@
         cassetteLisp = deck:
           "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
           + probeLisp
-          + generators.lispSource modules_desktop_session_tomoe_lisp_cassette_data
+          + generators.lisp.render (modules_desktop_session_tomoe_lisp_cassette_data generators.lisp)
           + deck;
       in {
-        panels = "(defparameter +bar+ ${toLisp barParameters})\n" + generators.lispSource modules_desktop_session_tomoe_lisp_bar_data;
-        gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + probeLisp + generators.lispSource modules_desktop_session_tomoe_lisp_gap_data;
-        cassette = cassetteLisp (generators.lispSource modules_desktop_session_tomoe_lisp_plates_data);
-        spine = cassetteLisp (generators.lispSource modules_desktop_session_tomoe_lisp_spine_data);
+        panels = "(defparameter +bar+ ${toLisp barParameters})\n" + generators.lisp.render (modules_desktop_session_tomoe_lisp_bar_data generators.lisp);
+        gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + probeLisp + generators.lisp.render (modules_desktop_session_tomoe_lisp_gap_data generators.lisp);
+        cassette = cassetteLisp (generators.lisp.render (modules_desktop_session_tomoe_lisp_plates_data generators.lisp));
+        spine = cassetteLisp (generators.lisp.render (modules_desktop_session_tomoe_lisp_spine_data generators.lisp));
       };
 
       spineColors = {
@@ -6375,1820 +6351,4744 @@
             // layout.parameters)})
           (defparameter +layout-bindings+ ${toLisp (layout.bindings ++ [(binding ["alt"] "t" "terminal" "Terminal")])})
         ''
-        (generators.lispSource modules_desktop_session_tomoe_lisp_policy_data)
+        (generators.lisp.render (modules_desktop_session_tomoe_lisp_policy_data generators.lisp))
         layout.text
-        (generators.lispSource modules_desktop_session_tomoe_lisp_user_data)
+        (generators.lisp.render (modules_desktop_session_tomoe_lisp_user_data generators.lisp))
         "(defparameter +hud+ ${toLisp hudParameters})"
-        (generators.lispSource modules_desktop_session_tomoe_lisp_hud_data)
+        (generators.lisp.render (modules_desktop_session_tomoe_lisp_hud_data generators.lisp))
         "(defparameter +hud-theme+ ${toLisp hudThemeParameters})"
-        (generators.lispSource modules_desktop_session_tomoe_lisp_theme_data)
+        (generators.lisp.render (modules_desktop_session_tomoe_lisp_theme_data generators.lisp))
         "(defparameter +glass+ ${toLisp glassParameters})"
-        (generators.lispSource modules_desktop_session_tomoe_lisp_glass_data)
+        (generators.lisp.render (modules_desktop_session_tomoe_lisp_glass_data generators.lisp))
         barLisp.${bar.style}
         "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
-        (generators.lispSource modules_desktop_session_tomoe_lisp_shader_wallpaper_data)
+        (generators.lisp.render (modules_desktop_session_tomoe_lisp_shader_wallpaper_data generators.lisp))
         "(defparameter +peek+ ${toLisp peekParameters})"
-        (generators.lispSource modules_desktop_session_tomoe_lisp_peek_data)
+        (generators.lisp.render (modules_desktop_session_tomoe_lisp_peek_data generators.lisp))
         "(defparameter +sounds+ ${toLisp soundParameters})"
-        (lispFile [["in-package" "#:tomoe-user"] ["define-extension" {str = "sounds";} [] ["snapshot" "state" "event"] ["declare" ["ignore" "snapshot" "event"]] ["values" "state" ["list" ["sound" ":key" ["getf" "+sounds+" ":key"] ":gain" ["getf" "+sounds+" ":key-gain"]] ["sound" ":button" ["getf" "+sounds+" ":button"] ":gain" ["getf" "+sounds+" ":button-gain"]] ["sound" ":close" ["getf" "+sounds+" ":close"] ":gain" ["getf" "+sounds+" ":close-gain"]]] "nil"]]])
+        (generators.lisp.render [["in-package" "#:tomoe-user"] ["define-extension" {str = "sounds";} [] ["snapshot" "state" "event"] ["declare" ["ignore" "snapshot" "event"]] ["values" "state" ["list" ["sound" ":key" ["getf" "+sounds+" ":key"] ":gain" ["getf" "+sounds+" ":key-gain"]] ["sound" ":button" ["getf" "+sounds+" ":button"] ":gain" ["getf" "+sounds+" ":button-gain"]] ["sound" ":close" ["getf" "+sounds+" ":close"] ":gain" ["getf" "+sounds+" ":close-gain"]]] "nil"]]])
         cfg.extraConfig
       ];
     };
-    modules_desktop_session_tomoe_lisp_bar_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defparameter +bar-probes+ '((:cpu :cpu) (:memory :memory) (:gpu :gpu) (:vram :gpu)))"
-      ""
-      "(defun bar--sample (probe previous system)"
-      "  (let ((sample (copy-list previous)))"
-      "    (ecase probe"
-      "      (:cpu"
-      "       (let ((total (getf system :cpu-total)) (idle (getf system :cpu-idle)))"
-      "         (when total"
-      "           (let ((spent (- total (getf sample :total total))))"
-      "             (setf (getf sample :percent)"
-      "                   (if (plusp spent)"
-      "                       (max 0 (min 100 (round (* 100 (- spent (- idle (getf sample :idle idle)))) spent)))"
-      "                       (getf sample :percent 0))"
-      "                   (getf sample :total) total"
-      "                   (getf sample :idle) idle"
-      "                   (getf sample :temp) (getf system :cpu-temperature))))))"
-      "      (:memory"
-      "       (let ((total (getf system :memory-total)) (available (getf system :memory-available)))"
-      "         (when (and total (plusp total))"
-      "           (setf (getf sample :percent) (round (* 100 (- total available)) total)"
-      "                 (getf sample :used) (round (- total available) 1024)))))"
-      "      (:gpu"
-      "       (let ((gpu (first (getf system :gpus))))"
-      "         (cond (gpu (setf (getf sample :util) (max 0 (min 100 (getf gpu :busy)))"
-      "                          (getf sample :used) (getf gpu :vram-used)"
-      "                          (getf sample :total) (getf gpu :vram-total)"
-      "                          (getf sample :temp) (getf gpu :temperature)"
-      "                          (getf sample :failures) 0))"
-      "               (system (setf (getf sample :failures) (1+ (getf sample :failures 0))))))))"
-      "    sample))"
-      ""
-      "(defun bar--target (module state)"
-      "  (let ((gpu (getf state :gpu)))"
-      "    (ecase module"
-      "      (:cpu (getf (getf state :cpu) :percent 0))"
-      "      (:memory (getf (getf state :memory) :percent 0))"
-      "      (:gpu (getf gpu :util 0))"
-      "      (:vram (if (plusp (or (getf gpu :total) 0))"
-      "                 (round (* 100 (or (getf gpu :used) 0)) (getf gpu :total))"
-      "                 0)))))"
-      ""
-      "(defun bar--metric (m target push)"
-      "  (let ((m (copy-list m)) (old (getf m :target)))"
-      "    (when (and old (or (>= (- target old) 25) (and (>= target 90) (< old 90))))"
-      "      (setf (getf m :flash-at) (hud--now)))"
-      "    (when push"
-      "      (setf (getf m :history) (last (append (getf m :history) (list target)) (getf +bar+ :history))))"
-      "    (setf (getf m :target) target)"
-      "    (when (or (null (getf m :shown)) (< (abs (- target (getf m :shown))) 3))"
-      "      (setf (getf m :shown) (float target 1d0)))"
-      "    m))"
-      ""
-      "(defun bar--ease (m dt)"
-      "  (let* ((m (copy-list m)) (shown (getf m :shown)) (target (getf m :target))"
-      "         (next (+ target (* (- shown target) (exp (- (/ dt (getf +bar+ :tau))))))))"
-      "    (setf (getf m :shown) (if (< (abs (- next target)) 0.3) (float target 1d0) next))"
-      "    m))"
-      ""
-      "(defun bar--moving-p (m)"
-      "  (or (/= (getf m :shown) (getf m :target))"
-      "      (plusp (hud--decay (getf m :flash-at) (getf +bar+ :flash)))))"
-      ""
-      "(defun bar--segments (p value accent &optional (zones t))"
-      "  (let* ((count (getf +bar+ :segments))"
-      "         (filled (* count (max 0 (min 1 value)))))"
-      "    (ui :row :gap 1 :align :center"
-      "        :children (loop for i below count"
-      "                        for lit = (max 0 (min 1 (- filled i)))"
-      "                        collect (ui :rect :width 4 :height 14"
-      "                                    :background (hud--mix (hud--off p)"
-      "                                                          (if zones (hud--heat (* 100 (/ (1+ i) count)) accent p) accent)"
-      "                                                          lit))))))"
-      ""
-      "(defun bar--spark (p history accent)"
-      "  (let* ((h 16) (count (length history))"
-      "         (scale (max 20 (reduce #'max history :initial-value 0))))"
-      "    (ui :row :gap 1 :align :end :height h"
-      "        :children (append (loop repeat (- (getf +bar+ :history) count)"
-      "                                collect (ui :rect :width 2 :height 1 :background (hud--off p)))"
-      "                          (loop for v in history"
-      "                                for i from 1"
-      "                                collect (ui :rect :width 2 :height (max 1 (round (* h v) scale))"
-      "                                            :background (hud--mix (hud--c p :bg) (hud--heat v accent p)"
-      "                                                                  (+ 0.3 (* 0.7 (/ i count))))))))))"
-      ""
-      "(defun bar--temp-color (p value)"
-      "  (cond ((not (realp value)) (hud--dim p))"
-      "        ((>= value (getf +bar+ :hot)) (hud--c p :color1))"
-      "        ((>= value (- (getf +bar+ :hot) 10)) (hud--c p :color3))"
-      "        (t (hud--dim p 0.75))))"
-      ""
-      "(defun bar--gauge (p accent label m detail detail-color)"
-      "  (let* ((shown (getf m :shown 0))"
-      "         (color (hud--heat (round shown) accent p))"
-      "         (flash (hud--decay (getf m :flash-at) (getf +bar+ :flash))))"
-      "    (hud--panel p color"
-      "                (list* (hud--text label 11 (hud--dim p))"
-      "                       (ui :row :align :end"
-      "                           :children (list (hud--text (format nil \"~3D\" (round shown)) 16 (hud--mix (hud--c p :fg) color flash))"
-      "                                           (hud--text \"%\" 11 (hud--dim p))))"
-      "                       (bar--segments p (/ shown 100) accent)"
-      "                       (bar--spark p (getf m :history) accent)"
-      "                       (when detail (list (hud--text detail 12 (or detail-color (hud--dim p 0.75))))))"
-      "                :flash flash)))"
-      ""
-      "(defun bar--degrees (value) (when (realp value) (format nil \"~D°\" (round value))))"
-      ""
-      "(defun bar--gib (mib) (when (realp mib) (format nil \"~,1FG\" (/ mib 1024d0))))"
-      ""
-      "(defun bar--truncate (text limit)"
-      "  (if (<= (length text) limit) text (concatenate 'string (subseq text 0 (1- limit)) \"…\")))"
-      ""
-      "(defun bar--nonempty (value) (and (stringp value) (plusp (length value)) value))"
-      ""
-      "(defun bar--media (snapshot state now)"
-      "  (let* ((service (service-state snapshot :mpris))"
-      "         (status (getf service :status))"
-      "         (title (bar--nonempty (getf service :title)))"
-      "         (artist (bar--nonempty (getf service :artist)))"
-      "         (key (list (getf service :player-name) title status (getf service :position))))"
-      "    (unless (equal key (getf state :media-key))"
-      "      (setf (getf state :media-key) key (getf state :media-at) now))"
-      "    (values (when (and title (member status '(\"Playing\" \"Paused\") :test #'equal))"
-      "              (let* ((length (or (getf service :length) 0))"
-      "                     (playing (equal status \"Playing\"))"
-      "                     (elapsed (if playing (- now (getf state :media-at now)) 0))"
-      "                     (position (min length (+ (or (getf service :position) 0) elapsed))))"
-      "                (list :playing playing"
-      "                      :label (string-upcase (bar--truncate (if artist (format nil \"~A - ~A\" artist title) title)"
-      "                                                           (getf +bar+ :media-width)))"
-      "                      :value (if (plusp length) (/ position length) 0))))"
-      "            state)))"
-      ""
-      "(defun bar--sweep (p color value)"
-      "  (ui :progress :height 2 :radius 0 :value value :color color :track (hud--off p)))"
-      ""
-      "(defun bar--eq (color playing now)"
-      "  (ui :row :gap 1 :align :end :height 14"
-      "      :children (loop for i below 5"
-      "                      collect (ui :rect :width 2"
-      "                                  :height (if playing"
-      "                                              (+ 2 (round (* 12 (abs (sin (+ (* now (+ 5.3 (* 2.1 i))) (* 1.7 i)))))))"
-      "                                              2)"
-      "                                  :background color))))"
-      ""
-      "(defun bar--clock (p state now)"
-      "  (let* ((fg (hud--c p :fg)) (accent (hud--c p :accent))"
-      "         (sec (getf state :sec 0))"
-      "         (tick (hud--decay (getf state :minute-at) 700))"
-      "         (frac (/ (+ sec (min 1 (- now (getf state :sec-at now)))) 60)))"
-      "    (hud--panel p accent"
-      "                (list (hud--icon #xF0150 14 accent)"
-      "                      (ui :column :gap 1 :align :stretch"
-      "                          :children (list (ui :row :align :end"
-      "                                              :children (list (hud--text (getf state :minute) 18 (hud--mix fg accent tick))"
-      "                                                              (hud--text (format nil \":~2,'0D\" sec) 12 (hud--dim p))))"
-      "                                          (bar--sweep p accent frac))))"
-      "                :flash tick)))"
-      ""
-      "(defun bar--battery (p battery &optional (label \"BAT\"))"
-      "  (let* ((percent (round (getf battery :percent 0)))"
-      "         (charging (getf battery :charging))"
-      "         (color (cond (charging (hud--c p :color2)) ((< percent 15) (hud--c p :color1))"
-      "                      ((< percent 30) (hud--c p :color3)) (t (hud--c p :color2)))))"
-      "    (hud--panel p color"
-      "                (list* (hud--text label 11 (hud--dim p))"
-      "                       (ui :row :align :end"
-      "                           :children (list (hud--text (format nil \"~3D\" percent) 16 (hud--c p :fg))"
-      "                                           (hud--text \"%\" 11 (hud--dim p))))"
-      "                       (bar--segments p (/ percent 100) color nil)"
-      "                       (when charging (list (hud--icon #xF140B 13 color)))))))"
-      ""
-      "(defun bar--network (p network)"
-      "  (let* ((ssid (getf network :ssid))"
-      "         (online (getf network :connected))"
-      "         (label (cond ((and online (stringp ssid) (plusp (length ssid))) (string-upcase (remove (code-char 0) ssid)))"
-      "                      (online \"ONLINE\")"
-      "                      (t \"OFFLINE\")))"
-      "         (color (if online (hud--c p :color6) (hud--c p :color1))))"
-      "    (hud--panel p color (list (hud--icon (if online #xF05A9 #xF05AA) 14 color)"
-      "                              (hud--text (bar--truncate label 20) 14 (hud--c p :fg))))))"
-      ""
-      "(defun bar--gpu-p (state)"
-      "  (let ((gpu (getf state :gpu)))"
-      "    (and (getf gpu :util) (< (getf gpu :failures 0) 3))))"
-      ""
-      "(defun bar--module (module p state snapshot metrics media now)"
-      "  (let ((cpu (getf state :cpu)) (gpu (getf state :gpu)))"
-      "    (ecase module"
-      "      (:time (bar--clock p state now))"
-      "      (:date (hud--panel p (hud--c p :color4)"
-      "                         (list (hud--icon #xF00ED 14 (hud--c p :color4))"
-      "                               (hud--text (string-upcase (clock-text (getf +bar+ :date))) 14 (hud--c p :fg)))))"
-      "      (:battery (bar--battery p (service-state snapshot :battery)))"
-      "      (:network (bar--network p (service-state snapshot :network)))"
-      "      (:frame (let ((frame (state-value snapshot :frame-battery)))"
-      "                (when (getf frame :percent)"
-      "                  (bar--battery p (list :percent (getf frame :percent)"
-      "                                        :charging (not (equal (getf frame :status) \"Discharging\")))"
-      "                                \"VR\"))))"
-      "      (:media (when media"
-      "                (let ((color (hud--c p :color5)))"
-      "                  (hud--panel p color"
-      "                              (list (bar--eq color (getf media :playing) now)"
-      "                                    (ui :column :gap 3 :align :stretch"
-      "                                        :children (list (hud--text (getf media :label) 13 (hud--c p :fg))"
-      "                                                        (bar--sweep p color (getf media :value)))))))))"
-      "      (:cpu (bar--gauge p (hud--c p :color4) \"CPU\" (getf metrics :cpu)"
-      "                        (bar--degrees (getf cpu :temp)) (bar--temp-color p (getf cpu :temp))))"
-      "      (:memory (bar--gauge p (hud--c p :color5) \"MEM\" (getf metrics :memory)"
-      "                           (bar--gib (getf (getf state :memory) :used)) nil))"
-      "      (:gpu (when (bar--gpu-p state)"
-      "              (bar--gauge p (hud--c p :color2) \"GPU\" (getf metrics :gpu)"
-      "                          (bar--degrees (getf gpu :temp)) (bar--temp-color p (getf gpu :temp)))))"
-      "      (:vram (when (bar--gpu-p state)"
-      "               (bar--gauge p (hud--c p :color6) \"VRAM\" (getf metrics :vram) (bar--gib (getf gpu :used)) nil))))))"
-      ""
-      "(defun bar--surfaces (modules panels)"
-      "  (let* ((h (+ (getf +hud+ :height) (getf +hud+ :shadow)))"
-      "         (gap (getf +bar+ :gap))"
-      "         (margin (getf +bar+ :margin))"
-      "         (inset (getf +bar+ :inset))"
-      "         (pair (getf +bar+ :center-between))"
-      "         (seam (loop for (a b) on modules"
-      "                     for index from 1"
-      "                     when (and b (eq a (first pair)) (eq b (second pair))) return index)))"
-      "    (flet ((half (list justify padding)"
-      "             (ui :row :width 0 :grow 1 :height h :gap gap :justify justify :padding padding"
-      "                 :children (remove nil list))))"
-      "      (loop for edge in (getf +bar+ :edges)"
-      "            collect (shell-surface edge"
-      "                                   (ui :row :height h :justify :center"
-      "                                       :children (if seam"
-      "                                                     (list (half (subseq panels 0 seam) :end (list 0 inset 0 0))"
-      "                                                           (half (nthcdr seam panels) :start (list 0 0 0 inset)))"
-      "                                                     (list (ui :row :height h :gap gap :children (remove nil panels)))))"
-      "                                   :anchors (if seam (list edge :left :right) (list edge))"
-      "                                   :margin (if (eq edge :top) (list margin 0 0 0) (list 0 0 margin 0))"
-      "                                   :height h :layer :overlay"
-      "                                   :exclusive-zone 0"
-      "                                   :background \"#00000000\" :click-through t)))))"
-      ""
-      "(define-extension \"bar\" (:reads (:services :system :data)"
-      "                         :state (list :cpu nil :memory nil :gpu nil :metrics nil :at nil"
-      "                                      :sec nil :sec-at nil :minute nil :minute-at nil))"
-      "    (snapshot state event)"
-      "  (let* ((modules (getf +bar+ :modules))"
-      "         (probes (remove-duplicates (loop for module in modules"
-      "                                          for source = (second (assoc module +bar-probes+))"
-      "                                          when source collect source)))"
-      "         (probe (and (eq (getf event :type) :timer) (find (getf event :name) probes))))"
-      "    (when probe"
-      "      (setf (getf state probe) (bar--sample probe (getf state probe) (context snapshot :system))))"
-      "    (let* ((p (state-value snapshot :hud-palette))"
-      "           (now (hud--now))"
-      "           (dt (if (getf state :at) (- now (getf state :at)) 0))"
-      "           (metrics (loop for (module source) in +bar-probes+"
-      "                          when (member module modules)"
-      "                            append (list module (bar--ease (bar--metric (getf (getf state :metrics) module)"
-      "                                                                        (bar--target module state)"
-      "                                                                        (eq source probe))"
-      "                                                           dt))))"
-      "           (sec (or (parse-integer (clock-text \"%S\") :junk-allowed t) 0))"
-      "           (minute (clock-text (getf +bar+ :time))))"
-      "      (setf (getf state :metrics) metrics (getf state :at) now)"
-      "      (unless (eql sec (getf state :sec))"
-      "        (setf (getf state :sec) sec (getf state :sec-at) now))"
-      "      (unless (equal minute (getf state :minute))"
-      "        (setf (getf state :minute-at) (when (getf state :minute) now) (getf state :minute) minute))"
-      "      (multiple-value-bind (media next) (if (member :media modules) (bar--media snapshot state now) (values nil state))"
-      "        (setf state next)"
-      "        (let* ((cpu-temp (getf (getf state :cpu) :temp))"
-      "               (gpu-temp (getf (getf state :gpu) :temp))"
-      "               (limit (getf +bar+ :hot))"
-      "               (hot (or (and (realp cpu-temp) (>= cpu-temp limit)) (and (realp gpu-temp) (>= gpu-temp limit))))"
-      "               (moving (loop for (nil m) on metrics by #'cddr thereis (bar--moving-p m)))"
-      "               (panels (loop for module in modules"
-      "                             collect (bar--module module p state snapshot metrics media now))))"
-      "          (values state"
-      "                  (append (list (interval :clock (getf +bar+ :clock-tick)))"
-      "                          (loop for source in probes"
-      "                                when (< (getf (getf state source) :failures 0) 3)"
-      "                                  collect (interval source (getf (getf +bar+ :sample) source)))"
-      "                          (when moving (list (interval :fast (getf +bar+ :tick))))"
-      "                          (list (publish-state :hud-hot (and hot t)))"
-      "                          (bar--surfaces modules panels))"
-      "                  nil))))))"
+    modules_desktop_session_tomoe_lisp_bar_data = {
+      at,
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      ["defparameter" "+bar-probes+" (quote [[":cpu" ":cpu"] [":memory" ":memory"] [":gpu" ":gpu"] [":vram" ":gpu"]])]
+      blank
+      (rows [
+        ["defun" "bar--sample" ["probe" "previous" "system"]]
+        (rows [
+          ["let" [["sample" ["copy-list" "previous"]]]]
+          (rows [
+            ["ecase" "probe"]
+            (rows [
+              ":cpu"
+              (rows [
+                ["let" [["total" ["getf" "system" ":cpu-total"]] ["idle" ["getf" "system" ":cpu-idle"]]]]
+                (rows [
+                  ["when" "total"]
+                  (rows [
+                    ["let" [["spent" ["-" "total" ["getf" "sample" ":total" "total"]]]]]
+                    (rows [
+                      ["setf" ["getf" "sample" ":percent"]]
+                      (rows [
+                        ["if" ["plusp" "spent"]]
+                        [["max" 0 ["min" 100 ["round" ["*" 100 ["-" "spent" ["-" "idle" ["getf" "sample" ":idle" "idle"]]]] "spent"]]]]
+                        [["getf" "sample" ":percent" 0]]
+                      ])
+                      [["getf" "sample" ":total"] "total"]
+                      [["getf" "sample" ":idle"] "idle"]
+                      [["getf" "sample" ":temp"] ["getf" "system" ":cpu-temperature"]]
+                    ])
+                  ])
+                ])
+              ])
+            ])
+            (rows [
+              ":memory"
+              (rows [
+                ["let" [["total" ["getf" "system" ":memory-total"]] ["available" ["getf" "system" ":memory-available"]]]]
+                (rows [
+                  ["when" ["and" "total" ["plusp" "total"]]]
+                  (rows [
+                    ["setf" ["getf" "sample" ":percent"] ["round" ["*" 100 ["-" "total" "available"]] "total"]]
+                    [["getf" "sample" ":used"] ["round" ["-" "total" "available"] 1024]]
+                  ])
+                ])
+              ])
+            ])
+            (rows [
+              ":gpu"
+              (rows [
+                ["let" [["gpu" ["first" ["getf" "system" ":gpus"]]]]]
+                (rows [
+                  [
+                    "cond"
+                    [
+                      "gpu"
+                      (rows [
+                        ["setf" ["getf" "sample" ":util"] ["max" 0 ["min" 100 ["getf" "gpu" ":busy"]]]]
+                        [["getf" "sample" ":used"] ["getf" "gpu" ":vram-used"]]
+                        [["getf" "sample" ":total"] ["getf" "gpu" ":vram-total"]]
+                        [["getf" "sample" ":temp"] ["getf" "gpu" ":temperature"]]
+                        [["getf" "sample" ":failures"] 0]
+                      ])
+                    ]
+                  ]
+                  [["system" ["setf" ["getf" "sample" ":failures"] ["1+" ["getf" "sample" ":failures" 0]]]]]
+                ])
+              ])
+            ])
+          ])
+          "sample"
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--target" ["module" "state"]]
+        (rows [
+          ["let" [["gpu" ["getf" "state" ":gpu"]]]]
+          (rows [
+            ["ecase" "module"]
+            [[":cpu" ["getf" ["getf" "state" ":cpu"] ":percent" 0]]]
+            [[":memory" ["getf" ["getf" "state" ":memory"] ":percent" 0]]]
+            [[":gpu" ["getf" "gpu" ":util" 0]]]
+            [
+              [
+                ":vram"
+                (rows [
+                  ["if" ["plusp" ["or" ["getf" "gpu" ":total"] 0]]]
+                  [["round" ["*" 100 ["or" ["getf" "gpu" ":used"] 0]] ["getf" "gpu" ":total"]]]
+                  0
+                ])
+              ]
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--metric" ["m" "target" "push"]]
+        (rows [
+          ["let" [["m" ["copy-list" "m"]] ["old" ["getf" "m" ":target"]]]]
+          (rows [
+            ["when" ["and" "old" ["or" [">=" ["-" "target" "old"] 25] ["and" [">=" "target" 90] ["<" "old" 90]]]]]
+            [["setf" ["getf" "m" ":flash-at"] ["hud--now"]]]
+          ])
+          (rows [
+            ["when" "push"]
+            [["setf" ["getf" "m" ":history"] ["last" ["append" ["getf" "m" ":history"] ["list" "target"]] ["getf" "+bar+" ":history"]]]]
+          ])
+          [["setf" ["getf" "m" ":target"] "target"]]
+          (rows [
+            ["when" ["or" ["null" ["getf" "m" ":shown"]] ["<" ["abs" ["-" "target" ["getf" "m" ":shown"]]] 3]]]
+            [["setf" ["getf" "m" ":shown"] ["float" "target" "1d0"]]]
+          ])
+          "m"
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--ease" ["m" "dt"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["m" ["copy-list" "m"]] ["shown" ["getf" "m" ":shown"]] ["target" ["getf" "m" ":target"]]]
+              [["next" ["+" "target" ["*" ["-" "shown" "target"] ["exp" ["-" ["/" "dt" ["getf" "+bar+" ":tau"]]]]]]]]
+            ])
+          ]
+          [["setf" ["getf" "m" ":shown"] ["if" ["<" ["abs" ["-" "next" "target"]] "0.3"] ["float" "target" "1d0"] "next"]]]
+          "m"
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--moving-p" ["m"]]
+        (rows [
+          ["or" ["/=" ["getf" "m" ":shown"] ["getf" "m" ":target"]]]
+          [["plusp" ["hud--decay" ["getf" "m" ":flash-at"] ["getf" "+bar+" ":flash"]]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--segments" ["p" "value" "accent" "&optional" ["zones" "t"]]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["count" ["getf" "+bar+" ":segments"]]]
+              [["filled" ["*" "count" ["max" 0 ["min" 1 "value"]]]]]
+            ])
+          ]
+          (rows [
+            ["ui" ":row" ":gap" 1 ":align" ":center"]
+            [
+              ":children"
+              (rows [
+                ["loop" "for i below count"]
+                ["for" "lit" "=" ["max" 0 ["min" 1 ["-" "filled" "i"]]]]
+                [
+                  "collect"
+                  (rows [
+                    ["ui" ":rect" ":width" 4 ":height" 14]
+                    [
+                      ":background"
+                      (rows [
+                        ["hud--mix" ["hud--off" "p"]]
+                        [["if" "zones" ["hud--heat" ["*" 100 ["/" ["1+" "i"] "count"]] "accent" "p"] "accent"]]
+                        "lit"
+                      ])
+                    ]
+                  ])
+                ]
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--spark" ["p" "history" "accent"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["h" 16] ["count" ["length" "history"]]]
+              [["scale" ["max" 20 ["reduce" (function "max") "history" ":initial-value" 0]]]]
+            ])
+          ]
+          (rows [
+            ["ui" ":row" ":gap" 1 ":align" ":end" ":height" "h"]
+            [
+              ":children"
+              (rows [
+                [
+                  "append"
+                  (rows [
+                    ["loop" "repeat" ["-" ["getf" "+bar+" ":history"] "count"]]
+                    ["collect" ["ui" ":rect" ":width" 2 ":height" 1 ":background" ["hud--off" "p"]]]
+                  ])
+                ]
+                (rows [
+                  ["loop" "for v in history"]
+                  "for i from 1"
+                  [
+                    "collect"
+                    (rows [
+                      ["ui" ":rect" ":width" 2 ":height" ["max" 1 ["round" ["*" "h" "v"] "scale"]]]
+                      [
+                        ":background"
+                        (rows [
+                          ["hud--mix" ["hud--c" "p" ":bg"] ["hud--heat" "v" "accent" "p"]]
+                          [["+" "0.3" ["*" "0.7" ["/" "i" "count"]]]]
+                        ])
+                      ]
+                    ])
+                  ]
+                ])
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--temp-color" ["p" "value"]]
+        (rows [
+          ["cond" [["not" ["realp" "value"]] ["hud--dim" "p"]]]
+          [[[">=" "value" ["getf" "+bar+" ":hot"]] ["hud--c" "p" ":color1"]]]
+          [[[">=" "value" ["-" ["getf" "+bar+" ":hot"] 10]] ["hud--c" "p" ":color3"]]]
+          [["t" ["hud--dim" "p" "0.75"]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--gauge" ["p" "accent" "label" "m" "detail" "detail-color"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["shown" ["getf" "m" ":shown" 0]]]
+              [["color" ["hud--heat" ["round" "shown"] "accent" "p"]]]
+              [["flash" ["hud--decay" ["getf" "m" ":flash-at"] ["getf" "+bar+" ":flash"]]]]
+            ])
+          ]
+          (rows [
+            ["hud--panel" "p" "color"]
+            (rows [
+              ["list*" ["hud--text" "label" 11 ["hud--dim" "p"]]]
+              (rows [
+                ["ui" ":row" ":align" ":end"]
+                [
+                  ":children"
+                  (rows [
+                    ["list" ["hud--text" ["format" "nil" (str "~3D") ["round" "shown"]] 16 ["hud--mix" ["hud--c" "p" ":fg"] "color" "flash"]]]
+                    [["hud--text" (str "%") 11 ["hud--dim" "p"]]]
+                  ])
+                ]
+              ])
+              [["bar--segments" "p" ["/" "shown" 100] "accent"]]
+              [["bar--spark" "p" ["getf" "m" ":history"] "accent"]]
+              [["when" "detail" ["list" ["hud--text" "detail" 12 ["or" "detail-color" ["hud--dim" "p" "0.75"]]]]]]
+            ])
+            [":flash" "flash"]
+          ])
+        ])
+      ])
+      blank
+      ["defun" "bar--degrees" ["value"] ["when" ["realp" "value"] ["format" "nil" (str "~D°") ["round" "value"]]]]
+      blank
+      ["defun" "bar--gib" ["mib"] ["when" ["realp" "mib"] ["format" "nil" (str "~,1FG") ["/" "mib" "1024d0"]]]]
+      blank
+      (rows [
+        ["defun" "bar--truncate" ["text" "limit"]]
+        [["if" ["<=" ["length" "text"] "limit"] "text" ["concatenate" (quote "string") ["subseq" "text" 0 ["1-" "limit"]] (str "…")]]]
+      ])
+      blank
+      ["defun" "bar--nonempty" ["value"] ["and" ["stringp" "value"] ["plusp" ["length" "value"]] "value"]]
+      blank
+      (rows [
+        ["defun" "bar--media" ["snapshot" "state" "now"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["service" ["service-state" "snapshot" ":mpris"]]]
+              [["status" ["getf" "service" ":status"]]]
+              [["title" ["bar--nonempty" ["getf" "service" ":title"]]]]
+              [["artist" ["bar--nonempty" ["getf" "service" ":artist"]]]]
+              [["key" ["list" ["getf" "service" ":player-name"] "title" "status" ["getf" "service" ":position"]]]]
+            ])
+          ]
+          (rows [
+            ["unless" ["equal" "key" ["getf" "state" ":media-key"]]]
+            [["setf" ["getf" "state" ":media-key"] "key" ["getf" "state" ":media-at"] "now"]]
+          ])
+          (rows [
+            [
+              "values"
+              (rows [
+                ["when" ["and" "title" ["member" "status" (quote [(str "Playing") (str "Paused")]) ":test" (function "equal")]]]
+                (rows [
+                  [
+                    "let*"
+                    (rows [
+                      [["length" ["or" ["getf" "service" ":length"] 0]]]
+                      [["playing" ["equal" "status" (str "Playing")]]]
+                      [["elapsed" ["if" "playing" ["-" "now" ["getf" "state" ":media-at" "now"]] 0]]]
+                      [["position" ["min" "length" ["+" ["or" ["getf" "service" ":position"] 0] "elapsed"]]]]
+                    ])
+                  ]
+                  (rows [
+                    ["list" ":playing" "playing"]
+                    [
+                      ":label"
+                      [
+                        "string-upcase"
+                        (rows [
+                          ["bar--truncate" ["if" "artist" ["format" "nil" (str "~A - ~A") "artist" "title"] "title"]]
+                          [["getf" "+bar+" ":media-width"]]
+                        ])
+                      ]
+                    ]
+                    [":value" ["if" ["plusp" "length"] ["/" "position" "length"] 0]]
+                  ])
+                ])
+              ])
+            ]
+            "state"
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--sweep" ["p" "color" "value"]]
+        [["ui" ":progress" ":height" 2 ":radius" 0 ":value" "value" ":color" "color" ":track" ["hud--off" "p"]]]
+      ])
+      blank
+      (rows [
+        ["defun" "bar--eq" ["color" "playing" "now"]]
+        (rows [
+          ["ui" ":row" ":gap" 1 ":align" ":end" ":height" 14]
+          [
+            ":children"
+            (rows [
+              ["loop" "for i below 5"]
+              [
+                "collect"
+                (rows [
+                  ["ui" ":rect" ":width" 2]
+                  [
+                    ":height"
+                    (rows [
+                      ["if" "playing"]
+                      [["+" 2 ["round" ["*" 12 ["abs" ["sin" ["+" ["*" "now" ["+" "5.3" ["*" "2.1" "i"]]] ["*" "1.7" "i"]]]]]]]]
+                      2
+                    ])
+                  ]
+                  [":background" "color"]
+                ])
+              ]
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--clock" ["p" "state" "now"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["fg" ["hud--c" "p" ":fg"]] ["accent" ["hud--c" "p" ":accent"]]]
+              [["sec" ["getf" "state" ":sec" 0]]]
+              [["tick" ["hud--decay" ["getf" "state" ":minute-at"] 700]]]
+              [["frac" ["/" ["+" "sec" ["min" 1 ["-" "now" ["getf" "state" ":sec-at" "now"]]]] 60]]]
+            ])
+          ]
+          (rows [
+            ["hud--panel" "p" "accent"]
+            (rows [
+              ["list" ["hud--icon" "#xF0150" 14 "accent"]]
+              (rows [
+                ["ui" ":column" ":gap" 1 ":align" ":stretch"]
+                [
+                  ":children"
+                  (rows [
+                    [
+                      "list"
+                      (rows [
+                        ["ui" ":row" ":align" ":end"]
+                        [
+                          ":children"
+                          (rows [
+                            ["list" ["hud--text" ["getf" "state" ":minute"] 18 ["hud--mix" "fg" "accent" "tick"]]]
+                            [["hud--text" ["format" "nil" (str ":~2,'0D") "sec"] 12 ["hud--dim" "p"]]]
+                          ])
+                        ]
+                      ])
+                    ]
+                    [["bar--sweep" "p" "accent" "frac"]]
+                  ])
+                ]
+              ])
+            ])
+            [":flash" "tick"]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--battery" ["p" "battery" "&optional" ["label" (str "BAT")]]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["percent" ["round" ["getf" "battery" ":percent" 0]]]]
+              [["charging" ["getf" "battery" ":charging"]]]
+              [
+                [
+                  "color"
+                  (rows [
+                    ["cond" ["charging" ["hud--c" "p" ":color2"]] [["<" "percent" 15] ["hud--c" "p" ":color1"]]]
+                    [[["<" "percent" 30] ["hud--c" "p" ":color3"]] ["t" ["hud--c" "p" ":color2"]]]
+                  ])
+                ]
+              ]
+            ])
+          ]
+          (rows [
+            ["hud--panel" "p" "color"]
+            (rows [
+              ["list*" ["hud--text" "label" 11 ["hud--dim" "p"]]]
+              (rows [
+                ["ui" ":row" ":align" ":end"]
+                [
+                  ":children"
+                  (rows [
+                    ["list" ["hud--text" ["format" "nil" (str "~3D") "percent"] 16 ["hud--c" "p" ":fg"]]]
+                    [["hud--text" (str "%") 11 ["hud--dim" "p"]]]
+                  ])
+                ]
+              ])
+              [["bar--segments" "p" ["/" "percent" 100] "color" "nil"]]
+              [["when" "charging" ["list" ["hud--icon" "#xF140B" 13 "color"]]]]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--network" ["p" "network"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["ssid" ["getf" "network" ":ssid"]]]
+              [["online" ["getf" "network" ":connected"]]]
+              [
+                [
+                  "label"
+                  (rows [
+                    ["cond" [["and" "online" ["stringp" "ssid"] ["plusp" ["length" "ssid"]]] ["string-upcase" ["remove" ["code-char" 0] "ssid"]]]]
+                    [["online" (str "ONLINE")]]
+                    [["t" (str "OFFLINE")]]
+                  ])
+                ]
+              ]
+              [["color" ["if" "online" ["hud--c" "p" ":color6"] ["hud--c" "p" ":color1"]]]]
+            ])
+          ]
+          [
+            [
+              "hud--panel"
+              "p"
+              "color"
+              (rows [
+                ["list" ["hud--icon" ["if" "online" "#xF05A9" "#xF05AA"] 14 "color"]]
+                [["hud--text" ["bar--truncate" "label" 20] 14 ["hud--c" "p" ":fg"]]]
+              ])
+            ]
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--gpu-p" ["state"]]
+        (rows [
+          ["let" [["gpu" ["getf" "state" ":gpu"]]]]
+          [["and" ["getf" "gpu" ":util"] ["<" ["getf" "gpu" ":failures" 0] 3]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--module" ["module" "p" "state" "snapshot" "metrics" "media" "now"]]
+        (rows [
+          ["let" [["cpu" ["getf" "state" ":cpu"]] ["gpu" ["getf" "state" ":gpu"]]]]
+          (rows [
+            ["ecase" "module"]
+            [[":time" ["bar--clock" "p" "state" "now"]]]
+            [
+              [
+                ":date"
+                (rows [
+                  ["hud--panel" "p" ["hud--c" "p" ":color4"]]
+                  (rows [
+                    ["list" ["hud--icon" "#xF00ED" 14 ["hud--c" "p" ":color4"]]]
+                    [["hud--text" ["string-upcase" ["clock-text" ["getf" "+bar+" ":date"]]] 14 ["hud--c" "p" ":fg"]]]
+                  ])
+                ])
+              ]
+            ]
+            [[":battery" ["bar--battery" "p" ["service-state" "snapshot" ":battery"]]]]
+            [[":network" ["bar--network" "p" ["service-state" "snapshot" ":network"]]]]
+            [
+              [
+                ":frame"
+                (rows [
+                  ["let" [["frame" ["state-value" "snapshot" ":frame-battery"]]]]
+                  (rows [
+                    ["when" ["getf" "frame" ":percent"]]
+                    (rows [
+                      [
+                        "bar--battery"
+                        "p"
+                        (rows [
+                          ["list" ":percent" ["getf" "frame" ":percent"]]
+                          [":charging" ["not" ["equal" ["getf" "frame" ":status"] (str "Discharging")]]]
+                        ])
+                      ]
+                      (str "VR")
+                    ])
+                  ])
+                ])
+              ]
+            ]
+            [
+              [
+                ":media"
+                (rows [
+                  ["when" "media"]
+                  (rows [
+                    ["let" [["color" ["hud--c" "p" ":color5"]]]]
+                    (rows [
+                      ["hud--panel" "p" "color"]
+                      (rows [
+                        ["list" ["bar--eq" "color" ["getf" "media" ":playing"] "now"]]
+                        (rows [
+                          ["ui" ":column" ":gap" 3 ":align" ":stretch"]
+                          [
+                            ":children"
+                            (rows [
+                              ["list" ["hud--text" ["getf" "media" ":label"] 13 ["hud--c" "p" ":fg"]]]
+                              [["bar--sweep" "p" "color" ["getf" "media" ":value"]]]
+                            ])
+                          ]
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ]
+            ]
+            [
+              [
+                ":cpu"
+                (rows [
+                  ["bar--gauge" "p" ["hud--c" "p" ":color4"] (str "CPU") ["getf" "metrics" ":cpu"]]
+                  [["bar--degrees" ["getf" "cpu" ":temp"]] ["bar--temp-color" "p" ["getf" "cpu" ":temp"]]]
+                ])
+              ]
+            ]
+            [
+              [
+                ":memory"
+                (rows [
+                  ["bar--gauge" "p" ["hud--c" "p" ":color5"] (str "MEM") ["getf" "metrics" ":memory"]]
+                  [["bar--gib" ["getf" ["getf" "state" ":memory"] ":used"]] "nil"]
+                ])
+              ]
+            ]
+            [
+              [
+                ":gpu"
+                (rows [
+                  ["when" ["bar--gpu-p" "state"]]
+                  (rows [
+                    ["bar--gauge" "p" ["hud--c" "p" ":color2"] (str "GPU") ["getf" "metrics" ":gpu"]]
+                    [["bar--degrees" ["getf" "gpu" ":temp"]] ["bar--temp-color" "p" ["getf" "gpu" ":temp"]]]
+                  ])
+                ])
+              ]
+            ]
+            [
+              [
+                ":vram"
+                (rows [
+                  ["when" ["bar--gpu-p" "state"]]
+                  [["bar--gauge" "p" ["hud--c" "p" ":color6"] (str "VRAM") ["getf" "metrics" ":vram"] ["bar--gib" ["getf" "gpu" ":used"]] "nil"]]
+                ])
+              ]
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "bar--surfaces" ["modules" "panels"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["h" ["+" ["getf" "+hud+" ":height"] ["getf" "+hud+" ":shadow"]]]]
+              [["gap" ["getf" "+bar+" ":gap"]]]
+              [["margin" ["getf" "+bar+" ":margin"]]]
+              [["inset" ["getf" "+bar+" ":inset"]]]
+              [["pair" ["getf" "+bar+" ":center-between"]]]
+              [
+                [
+                  "seam"
+                  (rows [
+                    ["loop" "for" ["a" "b"] "on" "modules"]
+                    "for index from 1"
+                    ["when" ["and" "b" ["eq" "a" ["first" "pair"]] ["eq" "b" ["second" "pair"]]] "return index"]
+                  ])
+                ]
+              ]
+            ])
+          ]
+          (rows [
+            [
+              "flet"
+              [
+                (rows [
+                  ["half" ["list" "justify" "padding"]]
+                  (rows [
+                    ["ui" ":row" ":width" 0 ":grow" 1 ":height" "h" ":gap" "gap" ":justify" "justify" ":padding" "padding"]
+                    [":children" ["remove" "nil" "list"]]
+                  ])
+                ])
+              ]
+            ]
+            (rows [
+              ["loop" "for" "edge" "in" ["getf" "+bar+" ":edges"]]
+              [
+                "collect"
+                (rows [
+                  ["shell-surface" "edge"]
+                  (rows [
+                    ["ui" ":row" ":height" "h" ":justify" ":center"]
+                    [
+                      ":children"
+                      (rows [
+                        ["if" "seam"]
+                        (rows [
+                          ["list" ["half" ["subseq" "panels" 0 "seam"] ":end" ["list" 0 "inset" 0 0]]]
+                          [["half" ["nthcdr" "seam" "panels"] ":start" ["list" 0 0 0 "inset"]]]
+                        ])
+                        [["list" ["ui" ":row" ":height" "h" ":gap" "gap" ":children" ["remove" "nil" "panels"]]]]
+                      ])
+                    ]
+                  ])
+                  [":anchors" ["if" "seam" ["list" "edge" ":left" ":right"] ["list" "edge"]]]
+                  [":margin" ["if" ["eq" "edge" ":top"] ["list" "margin" 0 0 0] ["list" 0 0 "margin" 0]]]
+                  [":height" "h" ":layer" ":overlay"]
+                  [":exclusive-zone" 0]
+                  [":background" (str "#00000000") ":click-through" "t"]
+                ])
+              ]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        [
+          "define-extension"
+          (str "bar")
+          (rows [
+            [":reads" [":services" ":system" ":data"]]
+            [
+              ":state"
+              (rows [
+                ["list" ":cpu" "nil" ":memory" "nil" ":gpu" "nil" ":metrics" "nil" ":at" "nil"]
+                [":sec" "nil" ":sec-at" "nil" ":minute" "nil" ":minute-at" "nil"]
+              ])
+            ]
+          ])
+        ]
+        [["snapshot" "state" "event"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["modules" ["getf" "+bar+" ":modules"]]]
+              [
+                [
+                  "probes"
+                  [
+                    "remove-duplicates"
+                    (rows [
+                      ["loop" "for module in modules"]
+                      ["for" "source" "=" ["second" ["assoc" "module" "+bar-probes+"]]]
+                      ["when source" "collect source"]
+                    ])
+                  ]
+                ]
+              ]
+              [["probe" ["and" ["eq" ["getf" "event" ":type"] ":timer"] ["find" ["getf" "event" ":name"] "probes"]]]]
+            ])
+          ]
+          (rows [
+            ["when" "probe"]
+            [["setf" ["getf" "state" "probe"] ["bar--sample" "probe" ["getf" "state" "probe"] ["context" "snapshot" ":system"]]]]
+          ])
+          (rows [
+            [
+              "let*"
+              (rows [
+                [["p" ["state-value" "snapshot" ":hud-palette"]]]
+                [["now" ["hud--now"]]]
+                [["dt" ["if" ["getf" "state" ":at"] ["-" "now" ["getf" "state" ":at"]] 0]]]
+                [
+                  [
+                    "metrics"
+                    (rows [
+                      ["loop" "for" ["module" "source"] "in" "+bar-probes+"]
+                      ["when" ["member" "module" "modules"]]
+                      (at 8 [
+                        "append"
+                        [
+                          "list"
+                          "module"
+                          (rows [
+                            [
+                              "bar--ease"
+                              (rows [
+                                ["bar--metric" ["getf" ["getf" "state" ":metrics"] "module"]]
+                                [["bar--target" "module" "state"]]
+                                [["eq" "source" "probe"]]
+                              ])
+                            ]
+                            "dt"
+                          ])
+                        ]
+                      ])
+                    ])
+                  ]
+                ]
+                [["sec" ["or" ["parse-integer" ["clock-text" (str "%S")] ":junk-allowed" "t"] 0]]]
+                [["minute" ["clock-text" ["getf" "+bar+" ":time"]]]]
+              ])
+            ]
+            [["setf" ["getf" "state" ":metrics"] "metrics" ["getf" "state" ":at"] "now"]]
+            (rows [
+              ["unless" ["eql" "sec" ["getf" "state" ":sec"]]]
+              [["setf" ["getf" "state" ":sec"] "sec" ["getf" "state" ":sec-at"] "now"]]
+            ])
+            (rows [
+              ["unless" ["equal" "minute" ["getf" "state" ":minute"]]]
+              [["setf" ["getf" "state" ":minute-at"] ["when" ["getf" "state" ":minute"] "now"] ["getf" "state" ":minute"] "minute"]]
+            ])
+            (rows [
+              ["multiple-value-bind" ["media" "next"] ["if" ["member" ":media" "modules"] ["bar--media" "snapshot" "state" "now"] ["values" "nil" "state"]]]
+              [["setf" "state" "next"]]
+              (rows [
+                [
+                  "let*"
+                  (rows [
+                    [["cpu-temp" ["getf" ["getf" "state" ":cpu"] ":temp"]]]
+                    [["gpu-temp" ["getf" ["getf" "state" ":gpu"] ":temp"]]]
+                    [["limit" ["getf" "+bar+" ":hot"]]]
+                    [["hot" ["or" ["and" ["realp" "cpu-temp"] [">=" "cpu-temp" "limit"]] ["and" ["realp" "gpu-temp"] [">=" "gpu-temp" "limit"]]]]]
+                    [["moving" ["loop" "for" ["nil" "m"] "on" "metrics" "by" (function "cddr") "thereis" ["bar--moving-p" "m"]]]]
+                    [
+                      [
+                        "panels"
+                        (rows [
+                          ["loop" "for module in modules"]
+                          ["collect" ["bar--module" "module" "p" "state" "snapshot" "metrics" "media" "now"]]
+                        ])
+                      ]
+                    ]
+                  ])
+                ]
+                (rows [
+                  ["values" "state"]
+                  (rows [
+                    ["append" ["list" ["interval" ":clock" ["getf" "+bar+" ":clock-tick"]]]]
+                    (rows [
+                      ["loop" "for source in probes"]
+                      ["when" ["<" ["getf" ["getf" "state" "source"] ":failures" 0] 3]]
+                      (at 8 ["collect" ["interval" "source" ["getf" ["getf" "+bar+" ":sample"] "source"]]])
+                    ])
+                    [["when" "moving" ["list" ["interval" ":fast" ["getf" "+bar+" ":tick"]]]]]
+                    [["list" ["publish-state" ":hud-hot" ["and" "hot" "t"]]]]
+                    [["bar--surfaces" "modules" "panels"]]
+                  ])
+                  "nil"
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_cassette_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun cassette--px (n) (max 1 (round (* n (getf +cassette+ :scale)))))"
-      ""
-      "(defvar *cassette-mode* :dark)"
-      ""
-      "(defun cassette--c (key) (getf (getf (getf +cassette+ :colors) *cassette-mode*) key))"
-      ""
-      "(defun cassette--text (text color)"
-      "  (ui :text :text text :size (cassette--px 11) :line-height (cassette--px 11) :color color :font (getf +cassette+ :font)))"
-      ""
-      "(defun cassette--engraved (text color)"
-      "  (ui :stack :children (list (ui :column :padding '(1 0 0 0) :children (list (cassette--text text (cassette--c :shine))))"
-      "                             (cassette--text text color))))"
-      ""
-      "(defun cassette--ghost (text) (map 'string (lambda (c) (if (digit-char-p c) #\\8 c)) text))"
-      ""
-      "(defun cassette--window (text &key (face (cassette--c :lcd)) (rim (cassette--c :rim)) (ghost (cassette--c :ghost))"
-      "                                   (ink (cassette--c :ink)) (shown text))"
-      "  (ui :column :background face :border 1 :border-color rim"
-      "      :children (list (ui :rect :height 1 :background rim)"
-      "                      (ui :row :height (cassette--px 11) :align :center :padding (list 0 (cassette--px 3) 0 (cassette--px 3))"
-      "                          :children (list (ui :stack :children (list (cassette--text (cassette--ghost text) ghost)"
-      "                                                                     (cassette--text shown ink))))))))"
-      ""
-      "(defun cassette--zone (x)"
-      "  (cond ((> x 0.84) (cassette--c :red)) ((> x 0.6) (cassette--c :amber)) (t (cassette--c :green))))"
-      ""
-      "(defun cassette--ladder (fraction)"
-      "  (let* ((count (getf +cassette+ :segments))"
-      "         (lit (round (* count (max 0 (min 1 fraction))))))"
-      "    (ui :row :gap (cassette--px 1) :align :center"
-      "        :children (loop for i below count"
-      "                        collect (ui :rect :width (cassette--px 4) :height (cassette--px 8)"
-      "                                    :background (if (< i lit) (cassette--zone (/ (1+ i) count)) (cassette--c :led-off)))))))"
-      ""
-      "(defun cassette--led (on)"
-      "  (ui :rect :width (cassette--px 3) :height (cassette--px 3) :background (if on (cassette--c :orange) (cassette--c :led-off))))"
-      ""
-      "(defun cassette--gauge (label percent detail &optional hot)"
-      "  (let ((percent (max 0 (min 100 (round (or percent 0))))))"
-      "    (list (cassette--engraved label (cassette--c :ink))"
-      "          (cassette--window (format nil \"~3D%\" percent))"
-      "          (cassette--ladder (/ percent 100))"
-      "          (when detail (cassette--engraved detail (if hot (cassette--c :orange) (cassette--c :dim)))))))"
-      ""
-      "(defun cassette--degrees (value) (if (realp value) (format nil \"~2D°\" (max 0 (min 99 (round value)))) \"--°\"))"
-      ""
-      "(defun cassette--gib (mib) (if (realp mib) (format nil \"~4,1FG\" (/ mib 1024d0)) \"--.-G\"))"
-      ""
-      "(defun cassette--hot-p (value) (and (realp value) (>= value (getf +cassette+ :hot))))"
-      ""
-      "(defun cassette--fit (text width)"
-      "  (let ((clean (string-upcase (remove-if (lambda (c) (> (char-code c) 126)) text))))"
-      "    (format nil \"~vA\" width (if (> (length clean) width) (concatenate 'string (subseq clean 0 (- width 2)) \"..\") clean))))"
-      ""
-      "(defun cassette--reel (amount)"
-      "  (let* ((box (cassette--px 12))"
-      "         (hub (cassette--px 4))"
-      "         (size (+ hub (* 2 (round (* (- box hub) (max 0 (min 1 amount))) 2)))))"
-      "    (ui :stack :width box :height box"
-      "        :children (list (ui :row :width box :height box :justify :center :align :center"
-      "                            :children (list (ui :circular-progress :size size :thickness (max 1 (/ (- size hub) 2)) :value 1"
-      "                                                :color (cassette--c :tape) :track (cassette--c :tape))))"
-      "                        (ui :row :width box :height box :justify :center :align :center"
-      "                            :children (list (ui :circular-progress :size hub :thickness 1 :value 1"
-      "                                                :color (cassette--c :ink) :track (cassette--c :ink))))))))"
-      ""
-      "(defun cassette--media (snapshot)"
-      "  (let* ((service (service-state snapshot :mpris))"
-      "         (status (getf service :status))"
-      "         (title (getf service :title))"
-      "         (artist (getf service :artist))"
-      "         (length (getf service :length))"
-      "         (position (getf service :position))"
-      "         (played (if (and (realp length) (plusp length) (realp position)) (max 0 (min 1 (/ position length))) 0)))"
-      "    (when (and (stringp title) (plusp (length title)) (member status '(\"Playing\" \"Paused\") :test #'equal))"
-      "      (list (cassette--led (equal status \"Playing\"))"
-      "            (ui :row :height (cassette--px 12) :align :center :gap (cassette--px 3) :padding (list 0 (cassette--px 4) 0 0)"
-      "                :background (cassette--c :paper) :border 1 :border-color (cassette--c :rim)"
-      "                :children (list (ui :rect :width (cassette--px 2) :height (- (cassette--px 12) 2) :background (cassette--c :orange))"
-      "                                (ui :rect :width (cassette--px 2) :height (- (cassette--px 12) 2) :background (cassette--c :teal))"
-      "                                (cassette--reel (- 1 played))"
-      "                                (cassette--text (cassette--fit (if (and (stringp artist) (plusp (length artist)))"
-      "                                                                   (format nil \"~A - ~A\" artist title)"
-      "                                                                   title)"
-      "                                                               (getf +cassette+ :media-width))"
-      "                                                (cassette--c :ink))"
-      "                                (cassette--reel played)))))))"
-      ""
-      "(defun cassette--counter ()"
-      "  (let ((time (clock-text (getf +cassette+ :time))))"
-      "    (list (cassette--window time :face (cassette--c :counter) :rim (cassette--c :ink) :ghost (cassette--c :counter-ghost)"
-      "                                 :ink (cassette--c :amber)"
-      "                                 :shown (if (oddp (parse-integer (clock-text \"%S\"))) (substitute #\\Space #\\: time) time)))))"
-      ""
-      "(defun cassette--module (module state snapshot)"
-      "  (let ((cpu (getf state :cpu)) (memory (getf state :memory)) (gpu (getf state :gpu)))"
-      "    (ecase module"
-      "      (:time (cassette--counter))"
-      "      (:date (list (cassette--engraved (string-upcase (clock-text (getf +cassette+ :date))) (cassette--c :ink))))"
-      "      (:media (cassette--media snapshot))"
-      "      (:cpu (cassette--gauge \"CPU\" (getf cpu :percent) (cassette--degrees (getf cpu :temp)) (cassette--hot-p (getf cpu :temp))))"
-      "      (:memory (cassette--gauge \"MEM\" (getf memory :percent) (cassette--gib (getf memory :used))))"
-      "      (:gpu (when (probe--gpu-p gpu)"
-      "              (cassette--gauge \"GPU\" (getf gpu :percent) (cassette--degrees (getf gpu :temp)) (cassette--hot-p (getf gpu :temp)))))"
-      "      (:vram (when (probe--gpu-p gpu)"
-      "               (cassette--gauge \"VRAM\" (if (plusp (or (getf gpu :total) 0)) (round (* 100 (or (getf gpu :used) 0)) (getf gpu :total)) 0)"
-      "                                (cassette--gib (getf gpu :used)))))"
-      "      (:battery (let ((battery (service-state snapshot :battery)))"
-      "                  (cassette--gauge (if (getf battery :charging) \"CHG\" \"BAT\") (getf battery :percent) nil)))"
-      "      (:network (let* ((network (service-state snapshot :network)) (ssid (getf network :ssid)) (online (getf network :connected)))"
-      "                  (list (cassette--led online)"
-      "                        (cassette--engraved (cassette--fit (cond ((and online (stringp ssid) (plusp (length ssid))) ssid) (online \"online\") (t \"offline\")) 16)"
-      "                                            (cassette--c :ink)))))"
-      "      (:frame (let ((battery (state-value snapshot :frame-battery)))"
-      "                (when (getf battery :percent)"
-      "                  (cassette--gauge (if (equal (getf battery :status) \"Discharging\") \"VR\" \"VR+\") (getf battery :percent) nil)))))))"
-      ""
-      "(defun cassette--grille ()"
-      "  (let ((hole (cassette--px 1)))"
-      "    (ui :column :gap hole"
-      "        :children (loop repeat 4"
-      "                        collect (ui :row :gap hole"
-      "                                    :children (loop repeat 6 collect (ui :rect :width hole :height hole :background (cassette--c :hole))))))))"
-      ""
-      "(defun cassette--groove ()"
-      "  (ui :row :children (list (ui :rect :width 1 :height (cassette--px 10) :background (cassette--c :groove))"
-      "                           (ui :rect :width 1 :height (cassette--px 10) :background (cassette--c :shine)))))"
-      ""
-      "(defun cassette--plate (items grille edge)"
-      "  (let* ((parts (loop for (item . rest) on (remove nil items)"
-      "                      collect (ui :row :gap (cassette--px 4) :align :center :children (remove nil item))"
-      "                      when rest collect (cassette--groove)))"
-      "         (body (ui :row :height (cassette--px 16) :align :center :gap (cassette--px 6)"
-      "                   :padding (list 0 (cassette--px 6) 0 (cassette--px 6))"
-      "                   :children (append (when (member grille '(:start :both)) (list (cassette--grille)))"
-      "                                     parts"
-      "                                     (when (member grille '(:end :both)) (list (cassette--grille)))))))"
-      "    (when parts"
-      "      (let ((plate (ui :column :align :stretch :background (cassette--c :face) :border 1 :border-color (cassette--c :ink)"
-      "                       :children (list (ui :rect :height 1 :background (cassette--c :shine))"
-      "                                       body"
-      "                                       (ui :rect :height 1 :background (cassette--c :shade))))))"
-      "        (if (eq edge :top)"
-      "            (ui :column :align :stretch"
-      "                :children (list plate (ui :row :height (cassette--shadow) :padding (list 0 0 0 (cassette--shadow))"
-      "                                          :children (list (ui :rect :grow 1 :height (cassette--shadow) :background (cassette--c :shadow))))))"
-      "            plate)))))"
-      ""
-      "(defun cassette--shadow () (cassette--px 2))"
-      ""
-      "(defun cassette--height (edge) (+ (cassette--px 16) 4 (if (eq edge :top) (cassette--shadow) 0)))"
-      ""
-      "(defun cassette--split ()"
-      "  (let ((pair (getf +cassette+ :center-between)))"
-      "    (loop for (a b) on (getf +cassette+ :modules)"
-      "          for index from 1"
-      "          when (and b (eq a (first pair)) (eq b (second pair))) return index)))"
+    modules_desktop_session_tomoe_lisp_cassette_data = {
+      at,
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      ["defun" "cassette--px" ["n"] ["max" 1 ["round" ["*" "n" ["getf" "+cassette+" ":scale"]]]]]
+      blank
+      ["defvar" "*cassette-mode*" ":dark"]
+      blank
+      ["defun" "cassette--c" ["key"] ["getf" ["getf" ["getf" "+cassette+" ":colors"] "*cassette-mode*"] "key"]]
+      blank
+      (rows [
+        ["defun" "cassette--text" ["text" "color"]]
+        [["ui" ":text" ":text" "text" ":size" ["cassette--px" 11] ":line-height" ["cassette--px" 11] ":color" "color" ":font" ["getf" "+cassette+" ":font"]]]
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--engraved" ["text" "color"]]
+        [
+          [
+            "ui"
+            ":stack"
+            ":children"
+            (rows [
+              ["list" ["ui" ":column" ":padding" (quote [1 0 0 0]) ":children" ["list" ["cassette--text" "text" ["cassette--c" ":shine"]]]]]
+              [["cassette--text" "text" "color"]]
+            ])
+          ]
+        ]
+      ])
+      blank
+      ["defun" "cassette--ghost" ["text"] ["map" (quote "string") ["lambda" ["c"] ["if" ["digit-char-p" "c"] "#\\8" "c"]] "text"]]
+      blank
+      (rows [
+        [
+          "defun"
+          "cassette--window"
+          (rows [
+            ["text" "&key" ["face" ["cassette--c" ":lcd"]] ["rim" ["cassette--c" ":rim"]] ["ghost" ["cassette--c" ":ghost"]]]
+            (at 11 [["ink" ["cassette--c" ":ink"]] ["shown" "text"]])
+          ])
+        ]
+        (rows [
+          ["ui" ":column" ":background" "face" ":border" 1 ":border-color" "rim"]
+          [
+            ":children"
+            (rows [
+              ["list" ["ui" ":rect" ":height" 1 ":background" "rim"]]
+              (rows [
+                ["ui" ":row" ":height" ["cassette--px" 11] ":align" ":center" ":padding" ["list" 0 ["cassette--px" 3] 0 ["cassette--px" 3]]]
+                [
+                  ":children"
+                  [
+                    "list"
+                    [
+                      "ui"
+                      ":stack"
+                      ":children"
+                      (rows [
+                        ["list" ["cassette--text" ["cassette--ghost" "text"] "ghost"]]
+                        [["cassette--text" "shown" "ink"]]
+                      ])
+                    ]
+                  ]
+                ]
+              ])
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--zone" ["x"]]
+        [["cond" [[">" "x" "0.84"] ["cassette--c" ":red"]] [[">" "x" "0.6"] ["cassette--c" ":amber"]] ["t" ["cassette--c" ":green"]]]]
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--ladder" ["fraction"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["count" ["getf" "+cassette+" ":segments"]]]
+              [["lit" ["round" ["*" "count" ["max" 0 ["min" 1 "fraction"]]]]]]
+            ])
+          ]
+          (rows [
+            ["ui" ":row" ":gap" ["cassette--px" 1] ":align" ":center"]
+            [
+              ":children"
+              (rows [
+                ["loop" "for i below count"]
+                [
+                  "collect"
+                  (rows [
+                    ["ui" ":rect" ":width" ["cassette--px" 4] ":height" ["cassette--px" 8]]
+                    [":background" ["if" ["<" "i" "lit"] ["cassette--zone" ["/" ["1+" "i"] "count"]] ["cassette--c" ":led-off"]]]
+                  ])
+                ]
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--led" ["on"]]
+        [["ui" ":rect" ":width" ["cassette--px" 3] ":height" ["cassette--px" 3] ":background" ["if" "on" ["cassette--c" ":orange"] ["cassette--c" ":led-off"]]]]
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--gauge" ["label" "percent" "detail" "&optional" "hot"]]
+        (rows [
+          ["let" [["percent" ["max" 0 ["min" 100 ["round" ["or" "percent" 0]]]]]]]
+          (rows [
+            ["list" ["cassette--engraved" "label" ["cassette--c" ":ink"]]]
+            [["cassette--window" ["format" "nil" (str "~3D%") "percent"]]]
+            [["cassette--ladder" ["/" "percent" 100]]]
+            [["when" "detail" ["cassette--engraved" "detail" ["if" "hot" ["cassette--c" ":orange"] ["cassette--c" ":dim"]]]]]
+          ])
+        ])
+      ])
+      blank
+      ["defun" "cassette--degrees" ["value"] ["if" ["realp" "value"] ["format" "nil" (str "~2D°") ["max" 0 ["min" 99 ["round" "value"]]]] (str "--°")]]
+      blank
+      ["defun" "cassette--gib" ["mib"] ["if" ["realp" "mib"] ["format" "nil" (str "~4,1FG") ["/" "mib" "1024d0"]] (str "--.-G")]]
+      blank
+      ["defun" "cassette--hot-p" ["value"] ["and" ["realp" "value"] [">=" "value" ["getf" "+cassette+" ":hot"]]]]
+      blank
+      (rows [
+        ["defun" "cassette--fit" ["text" "width"]]
+        (rows [
+          ["let" [["clean" ["string-upcase" ["remove-if" ["lambda" ["c"] [">" ["char-code" "c"] 126]] "text"]]]]]
+          [["format" "nil" (str "~vA") "width" ["if" [">" ["length" "clean"] "width"] ["concatenate" (quote "string") ["subseq" "clean" 0 ["-" "width" 2]] (str "..")] "clean"]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--reel" ["amount"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["box" ["cassette--px" 12]]]
+              [["hub" ["cassette--px" 4]]]
+              [["size" ["+" "hub" ["*" 2 ["round" ["*" ["-" "box" "hub"] ["max" 0 ["min" 1 "amount"]]] 2]]]]]
+            ])
+          ]
+          (rows [
+            ["ui" ":stack" ":width" "box" ":height" "box"]
+            [
+              ":children"
+              (rows [
+                [
+                  "list"
+                  (rows [
+                    ["ui" ":row" ":width" "box" ":height" "box" ":justify" ":center" ":align" ":center"]
+                    [
+                      ":children"
+                      [
+                        "list"
+                        (rows [
+                          ["ui" ":circular-progress" ":size" "size" ":thickness" ["max" 1 ["/" ["-" "size" "hub"] 2]] ":value" 1]
+                          [":color" ["cassette--c" ":tape"] ":track" ["cassette--c" ":tape"]]
+                        ])
+                      ]
+                    ]
+                  ])
+                ]
+                (rows [
+                  ["ui" ":row" ":width" "box" ":height" "box" ":justify" ":center" ":align" ":center"]
+                  [
+                    ":children"
+                    [
+                      "list"
+                      (rows [
+                        ["ui" ":circular-progress" ":size" "hub" ":thickness" 1 ":value" 1]
+                        [":color" ["cassette--c" ":ink"] ":track" ["cassette--c" ":ink"]]
+                      ])
+                    ]
+                  ]
+                ])
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--media" ["snapshot"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["service" ["service-state" "snapshot" ":mpris"]]]
+              [["status" ["getf" "service" ":status"]]]
+              [["title" ["getf" "service" ":title"]]]
+              [["artist" ["getf" "service" ":artist"]]]
+              [["length" ["getf" "service" ":length"]]]
+              [["position" ["getf" "service" ":position"]]]
+              [["played" ["if" ["and" ["realp" "length"] ["plusp" "length"] ["realp" "position"]] ["max" 0 ["min" 1 ["/" "position" "length"]]] 0]]]
+            ])
+          ]
+          (rows [
+            ["when" ["and" ["stringp" "title"] ["plusp" ["length" "title"]] ["member" "status" (quote [(str "Playing") (str "Paused")]) ":test" (function "equal")]]]
+            (rows [
+              ["list" ["cassette--led" ["equal" "status" (str "Playing")]]]
+              (rows [
+                ["ui" ":row" ":height" ["cassette--px" 12] ":align" ":center" ":gap" ["cassette--px" 3] ":padding" ["list" 0 ["cassette--px" 4] 0 0]]
+                [":background" ["cassette--c" ":paper"] ":border" 1 ":border-color" ["cassette--c" ":rim"]]
+                [
+                  ":children"
+                  (rows [
+                    ["list" ["ui" ":rect" ":width" ["cassette--px" 2] ":height" ["-" ["cassette--px" 12] 2] ":background" ["cassette--c" ":orange"]]]
+                    [["ui" ":rect" ":width" ["cassette--px" 2] ":height" ["-" ["cassette--px" 12] 2] ":background" ["cassette--c" ":teal"]]]
+                    [["cassette--reel" ["-" 1 "played"]]]
+                    (rows [
+                      [
+                        "cassette--text"
+                        (rows [
+                          [
+                            "cassette--fit"
+                            (rows [
+                              ["if" ["and" ["stringp" "artist"] ["plusp" ["length" "artist"]]]]
+                              [["format" "nil" (str "~A - ~A") "artist" "title"]]
+                              "title"
+                            ])
+                          ]
+                          [["getf" "+cassette+" ":media-width"]]
+                        ])
+                      ]
+                      [["cassette--c" ":ink"]]
+                    ])
+                    [["cassette--reel" "played"]]
+                  ])
+                ]
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--counter" []]
+        (rows [
+          ["let" [["time" ["clock-text" ["getf" "+cassette+" ":time"]]]]]
+          [
+            [
+              "list"
+              (rows [
+                ["cassette--window" "time" ":face" ["cassette--c" ":counter"] ":rim" ["cassette--c" ":ink"] ":ghost" ["cassette--c" ":counter-ghost"]]
+                (at 23 [":ink" ["cassette--c" ":amber"]])
+                (at 23 [":shown" ["if" ["oddp" ["parse-integer" ["clock-text" (str "%S")]]] ["substitute" "#\\Space" "#\\:" "time"] "time"]])
+              ])
+            ]
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--module" ["module" "state" "snapshot"]]
+        (rows [
+          ["let" [["cpu" ["getf" "state" ":cpu"]] ["memory" ["getf" "state" ":memory"]] ["gpu" ["getf" "state" ":gpu"]]]]
+          (rows [
+            ["ecase" "module"]
+            [[":time" ["cassette--counter"]]]
+            [[":date" ["list" ["cassette--engraved" ["string-upcase" ["clock-text" ["getf" "+cassette+" ":date"]]] ["cassette--c" ":ink"]]]]]
+            [[":media" ["cassette--media" "snapshot"]]]
+            [[":cpu" ["cassette--gauge" (str "CPU") ["getf" "cpu" ":percent"] ["cassette--degrees" ["getf" "cpu" ":temp"]] ["cassette--hot-p" ["getf" "cpu" ":temp"]]]]]
+            [[":memory" ["cassette--gauge" (str "MEM") ["getf" "memory" ":percent"] ["cassette--gib" ["getf" "memory" ":used"]]]]]
+            [
+              [
+                ":gpu"
+                (rows [
+                  ["when" ["probe--gpu-p" "gpu"]]
+                  [["cassette--gauge" (str "GPU") ["getf" "gpu" ":percent"] ["cassette--degrees" ["getf" "gpu" ":temp"]] ["cassette--hot-p" ["getf" "gpu" ":temp"]]]]
+                ])
+              ]
+            ]
+            [
+              [
+                ":vram"
+                (rows [
+                  ["when" ["probe--gpu-p" "gpu"]]
+                  (rows [
+                    ["cassette--gauge" (str "VRAM") ["if" ["plusp" ["or" ["getf" "gpu" ":total"] 0]] ["round" ["*" 100 ["or" ["getf" "gpu" ":used"] 0]] ["getf" "gpu" ":total"]] 0]]
+                    [["cassette--gib" ["getf" "gpu" ":used"]]]
+                  ])
+                ])
+              ]
+            ]
+            [
+              [
+                ":battery"
+                (rows [
+                  ["let" [["battery" ["service-state" "snapshot" ":battery"]]]]
+                  [["cassette--gauge" ["if" ["getf" "battery" ":charging"] (str "CHG") (str "BAT")] ["getf" "battery" ":percent"] "nil"]]
+                ])
+              ]
+            ]
+            [
+              [
+                ":network"
+                (rows [
+                  ["let*" [["network" ["service-state" "snapshot" ":network"]] ["ssid" ["getf" "network" ":ssid"]] ["online" ["getf" "network" ":connected"]]]]
+                  (rows [
+                    ["list" ["cassette--led" "online"]]
+                    (rows [
+                      ["cassette--engraved" ["cassette--fit" ["cond" [["and" "online" ["stringp" "ssid"] ["plusp" ["length" "ssid"]]] "ssid"] ["online" (str "online")] ["t" (str "offline")]] 16]]
+                      [["cassette--c" ":ink"]]
+                    ])
+                  ])
+                ])
+              ]
+            ]
+            [
+              [
+                ":frame"
+                (rows [
+                  ["let" [["battery" ["state-value" "snapshot" ":frame-battery"]]]]
+                  (rows [
+                    ["when" ["getf" "battery" ":percent"]]
+                    [["cassette--gauge" ["if" ["equal" ["getf" "battery" ":status"] (str "Discharging")] (str "VR") (str "VR+")] ["getf" "battery" ":percent"] "nil"]]
+                  ])
+                ])
+              ]
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--grille" []]
+        (rows [
+          ["let" [["hole" ["cassette--px" 1]]]]
+          (rows [
+            ["ui" ":column" ":gap" "hole"]
+            [
+              ":children"
+              (rows [
+                ["loop" "repeat 4"]
+                [
+                  "collect"
+                  (rows [
+                    ["ui" ":row" ":gap" "hole"]
+                    [":children" ["loop" "repeat 6" "collect" ["ui" ":rect" ":width" "hole" ":height" "hole" ":background" ["cassette--c" ":hole"]]]]
+                  ])
+                ]
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--groove" []]
+        [
+          [
+            "ui"
+            ":row"
+            ":children"
+            (rows [
+              ["list" ["ui" ":rect" ":width" 1 ":height" ["cassette--px" 10] ":background" ["cassette--c" ":groove"]]]
+              [["ui" ":rect" ":width" 1 ":height" ["cassette--px" 10] ":background" ["cassette--c" ":shine"]]]
+            ])
+          ]
+        ]
+      ])
+      blank
+      (rows [
+        ["defun" "cassette--plate" ["items" "grille" "edge"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [
+                [
+                  "parts"
+                  (rows [
+                    ["loop" "for" ["item" "." "rest"] "on" ["remove" "nil" "items"]]
+                    ["collect" ["ui" ":row" ":gap" ["cassette--px" 4] ":align" ":center" ":children" ["remove" "nil" "item"]]]
+                    ["when rest" "collect" ["cassette--groove"]]
+                  ])
+                ]
+              ]
+              [
+                [
+                  "body"
+                  (rows [
+                    ["ui" ":row" ":height" ["cassette--px" 16] ":align" ":center" ":gap" ["cassette--px" 6]]
+                    [":padding" ["list" 0 ["cassette--px" 6] 0 ["cassette--px" 6]]]
+                    [
+                      ":children"
+                      (rows [
+                        ["append" ["when" ["member" "grille" (quote [":start" ":both"])] ["list" ["cassette--grille"]]]]
+                        "parts"
+                        [["when" ["member" "grille" (quote [":end" ":both"])] ["list" ["cassette--grille"]]]]
+                      ])
+                    ]
+                  ])
+                ]
+              ]
+            ])
+          ]
+          (rows [
+            ["when" "parts"]
+            (rows [
+              [
+                "let"
+                [
+                  [
+                    "plate"
+                    (rows [
+                      ["ui" ":column" ":align" ":stretch" ":background" ["cassette--c" ":face"] ":border" 1 ":border-color" ["cassette--c" ":ink"]]
+                      [
+                        ":children"
+                        (rows [
+                          ["list" ["ui" ":rect" ":height" 1 ":background" ["cassette--c" ":shine"]]]
+                          "body"
+                          [["ui" ":rect" ":height" 1 ":background" ["cassette--c" ":shade"]]]
+                        ])
+                      ]
+                    ])
+                  ]
+                ]
+              ]
+              (rows [
+                ["if" ["eq" "edge" ":top"]]
+                (rows [
+                  ["ui" ":column" ":align" ":stretch"]
+                  [
+                    ":children"
+                    [
+                      "list"
+                      "plate"
+                      (rows [
+                        ["ui" ":row" ":height" ["cassette--shadow"] ":padding" ["list" 0 0 0 ["cassette--shadow"]]]
+                        [":children" ["list" ["ui" ":rect" ":grow" 1 ":height" ["cassette--shadow"] ":background" ["cassette--c" ":shadow"]]]]
+                      ])
+                    ]
+                  ]
+                ])
+                "plate"
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      ["defun" "cassette--shadow" [] ["cassette--px" 2]]
+      blank
+      ["defun" "cassette--height" ["edge"] ["+" ["cassette--px" 16] 4 ["if" ["eq" "edge" ":top"] ["cassette--shadow"] 0]]]
+      blank
+      (rows [
+        ["defun" "cassette--split" []]
+        (rows [
+          ["let" [["pair" ["getf" "+cassette+" ":center-between"]]]]
+          (rows [
+            ["loop" "for" ["a" "b"] "on" ["getf" "+cassette+" ":modules"]]
+            "for index from 1"
+            ["when" ["and" "b" ["eq" "a" ["first" "pair"]] ["eq" "b" ["second" "pair"]]] "return index"]
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_deck_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun deck--state ()"
-      "  (list :grid nil :ratio 1 :focus nil"
-      "        :columns nil :windows nil"
-      "        :fronts (list (cons :left nil) (cons :right nil))"
-      "        :floating nil :floats nil :fullscreen nil))"
-      ""
-      "(defun deck--entry (list id) (assoc id list))"
-      "(defun deck--layout-entry (layout id) (find id layout :key (lambda (entry) (getf entry :id))))"
-      "(defun deck--windows (state) (getf state :windows))"
-      "(defun deck--fronts (state) (getf state :fronts))"
-      "(defun deck--side-of (state id)"
-      "  (let ((entry (deck--entry (getf state :columns) id))) (and entry (cdr entry))))"
-      "(defun deck--column (state side)"
-      "  (remove-if-not (lambda (id) (eql (deck--side-of state id) side)) (deck--windows state)))"
-      "(defparameter +deck--column-commands+"
-      "  '(\"focus-left\" \"focus-right\" \"swap-columns\" \"to-left\" \"to-right\" \"ratio\"))"
-      "(defun deck--narrow-p (area)"
-      "  (let ((output (and area (getf area :output))))"
-      "    (and output (< (* 9 (getf output :width)) (* 21 (getf output :height))))))"
-      "(defun deck--front (state side)"
-      "  \"The window SIDE's deck shows in front. An adopted front counts only while it is"
-      "still in that column: a front can outlive its window between a close and the"
-      "handoff that replaces it, and a column placed against a front that is gone would"
-      "be placed nowhere and show nothing at all.\""
-      "  (let* ((entry (assoc side (deck--fronts state)))"
-      "         (recorded (and entry (cdr entry)))"
-      "         (column (deck--column state side)))"
-      "    (if (member recorded column) recorded (first column))))"
-      "(defun deck--after-front (state order side gone)"
-      "  \"The window that takes the front of SIDE in ORDER once GONE closes, or NIL when"
-      "the column empties. GONE still sits in ORDER, so the entry after it — wrapping,"
-      "the way a scroll does — is the window a scroll would have revealed.\""
-      "  (let* ((column (remove-if-not (lambda (id) (eql (deck--side-of state id) side)) order))"
-      "         (index (position gone column))"
-      "         (next (and index (nth (mod (1+ index) (length column)) column))))"
-      "    (unless (eql next gone) next)))"
-      "(defun deck--manageable-p (state id)"
-      "  (and (not (member id (getf state :fullscreen))) (not (member id (getf state :floating)))))"
-      ""
-      "(defun deck--current (state)"
-      "  \"The window a command acts on: the focused one while it is in the window set,"
-      "otherwise whatever the deck still shows. A command must never depend on an id a"
-      "gone window left behind, or the keys go dead.\""
-      "  (let ((focus (getf state :focus))"
-      "        (windows (deck--windows state)))"
-      "    (or (and (member focus windows) focus)"
-      "        (deck--front state :left)"
-      "        (deck--front state :right)"
-      "        (first windows))))"
-      ""
-      "(defun deck--output-of (outputs entry)"
-      "  (let ((cx (+ (getf entry :x) (floor (getf entry :width) 2)))"
-      "        (cy (+ (getf entry :y) (floor (getf entry :height) 2))))"
-      "    (find-if (lambda (output)"
-      "               (and (<= (getf output :x) cx (+ (getf output :x) (getf output :width)))"
-      "                    (<= (getf output :y) cy (+ (getf output :y) (getf output :height)))))"
-      "             outputs)))"
-      ""
-      "(defun deck--area (snapshot)"
-      "  \"The focused window's output box and the area its exclusive zones leave free.\""
-      "  (let* ((outputs (context snapshot :outputs))"
-      "         (focus (previous-context snapshot :focus))"
-      "         (entry (and focus (deck--layout-entry (previous-context snapshot :layout) focus)))"
-      "         (output (or (and entry (deck--output-of outputs entry)) (first outputs)))"
-      "         (area (and output (policy--area snapshot (getf output :name)))))"
-      "    (when area"
-      "      (list* :output output area))))"
-      ""
-      "(defun deck--left-width (state width)"
-      "  \"How wide the left column is, out of WIDTH less the seam between the columns.\""
-      "  (floor (* (- width (getf +layout+ :seam)) (nth (1- (getf state :ratio)) (getf +layout+ :ratios)))))"
-      ""
-      "(defun deck--grid-columns (state)"
-      "  (ceiling (sqrt (count-if (lambda (id) (deck--manageable-p state id)) (deck--windows state)))))"
-      ""
-      "(defun deck--grid-extra (cols)"
-      "  \"How much wider than a window gap the middle of an even grid is: it splits on"
-      "the deck's seam, so whatever stands there stays between the columns.\""
-      "  (if (evenp cols) (- (getf +layout+ :seam) (getf +layout+ :gaps)) 0))"
-      ""
-      "(defun deck--grid-cell (cols width)"
-      "  (floor (- width (* (1- cols) (getf +layout+ :gaps)) (deck--grid-extra cols)) cols))"
-      ""
-      "(defun deck--split (state width)"
-      "  \"Where the seam starts within the tiled WIDTH, or NIL when the deck has no"
-      "middle seam: a grid with an odd number of columns.\""
-      "  (if (getf state :grid)"
-      "      (let ((cols (deck--grid-columns state)))"
-      "        (when (and (plusp cols) (evenp cols))"
-      "          (let ((half (/ cols 2)))"
-      "            (+ (* half (deck--grid-cell cols width)) (* (1- half) (getf +layout+ :gaps))))))"
-      "      (deck--left-width state width)))"
-      ""
-      "(defun deck--seam (state area)"
-      "  \"The free strip in the deck's middle seam on AREA, a window gap in from each"
-      "side; NIL on a narrow output, while a window is fullscreen, in a grid with an"
-      "odd number of columns, or when the seam is no wider than two gaps.\""
-      "  (let* ((gaps (getf +layout+ :gaps))"
-      "         (x (and area (+ (getf area :x) gaps)))"
-      "         (split (and area (deck--split state (- (getf area :width) (* 2 gaps)))))"
-      "         (inner (- (getf +layout+ :seam) (* 2 gaps))))"
-      "    (unless (or (null split) (getf state :fullscreen) (deck--narrow-p area) (not (plusp inner)))"
-      "      (list :output (getf (getf area :output) :name)"
-      "            :x (+ x split gaps) :y (+ (getf area :y) gaps)"
-      "            :width inner :height (- (getf area :height) (* 2 gaps))))))"
-      ""
-      "(defun deck--box (state area id)"
-      "  \"Where ID goes, or NIL when it is not in the window set.\""
-      "  (let* ((gaps (getf +layout+ :gaps))"
-      "         (x (+ (getf area :x) gaps)) (y (+ (getf area :y) gaps))"
-      "         (width (- (getf area :width) (* 2 gaps))) (height (- (getf area :height) (* 2 gaps))))"
-      "    (cond"
-      "      ((not (member id (deck--windows state))) nil)"
-      "      ((member id (getf state :fullscreen))"
-      "       (let ((output (getf area :output)))"
-      "         (list (getf output :x) (getf output :y) (getf output :width) (getf output :height))))"
-      "      ((member id (getf state :floating)) (cdr (deck--entry (getf state :floats) id)))"
-      "      ((getf state :grid)"
-      "       (let* ((wins (remove-if-not (lambda (candidate) (deck--manageable-p state candidate))"
-      "                                   (deck--windows state)))"
-      "              (index (position id wins))"
-      "              (count (length wins))"
-      "              (cols (ceiling (sqrt count)))"
-      "              (rows (ceiling count cols))"
-      "              (cell-width (deck--grid-cell cols width))"
-      "              (cell-height (floor (- height (* (1- rows) gaps)) rows))"
-      "              (column (mod index cols))"
-      "              (row (floor index cols)))"
-      "         (list (+ x (* column (+ cell-width gaps)) (if (>= column (/ cols 2)) (deck--grid-extra cols) 0))"
-      "               (+ y (* row (+ cell-height gaps)))"
-      "               cell-width cell-height)))"
-      "      ((deck--narrow-p area)"
-      "       (let* ((column (remove-if-not (lambda (candidate) (deck--manageable-p state candidate))"
-      "                                     (deck--windows state)))"
-      "              (front (or (position (deck--current state) column) 0))"
-      "              (index (position id column)))"
-      "         (when index"
-      "           (list x (+ y (* (- index front) (+ height gaps))) width height))))"
-      "      (t"
-      "       (let* ((seam (getf +layout+ :seam))"
-      "              (left-width (deck--left-width state width))"
-      "              (right-width (- width seam left-width))"
-      "              (side (deck--side-of state id))"
-      "              (column (deck--column state side))"
-      "              (front (position (deck--front state side) column))"
-      "              (index (position id column)))"
-      "         (when (and side index front)"
-      "           (list (if (eql side :left) x (+ x left-width seam))"
-      "                 (+ y (* (- index front) (+ height gaps)))"
-      "                 (if (eql side :left) left-width right-width)"
-      "                 height)))))))"
-      ""
-      "(defun deck--places (managed state area)"
-      "  \"One place effect per managed window: exactly one owner, no duplicates.\""
-      "  (let ((windows (deck--windows state)))"
-      "    (loop for window in managed"
-      "          for id = (getf window :id)"
-      "          for box = (deck--box state area id)"
-      "          append (list (if box"
-      "                           (apply #'place id (append box (list t)))"
-      "                           (place id 0 0 (max 1 (getf window :width))"
-      "                                  (max 1 (getf window :height)) nil)))"
-      "          append (list (fullscreen id (and box (member id windows)"
-      "                                           (member id (getf state :fullscreen))"
-      "                                           t))))))"
-      ""
-      "(defun deck--focus-window (state id)"
-      "  (setf (getf state :focus) id)"
-      "  state)"
-      ""
-      "(defun deck--adopt-front (state side id)"
-      "  (let ((fronts (deck--fronts state)))"
-      "    (setf (cdr (assoc side fronts)) id))"
-      "  state)"
-      ""
-      "(defun deck--rotate (state direction)"
-      "  \"Scroll the side holding the current window; the deck wraps.\""
-      "  (let* ((id (deck--current state))"
-      "         (side (deck--side-of state id))"
-      "         (column (deck--column state side)))"
-      "    (when (and side column)"
-      "      (let* ((index (position id column))"
-      "             (target (nth (mod (+ index direction) (length column)) column)))"
-      "        (deck--adopt-front state side target)"
-      "        (deck--focus-window state target)))))"
-      ""
-      "(defun deck--reorder (state direction)"
-      "  \"Swap the current window with its neighbour in its own column's order.\""
-      "  (let* ((id (deck--current state))"
-      "         (side (deck--side-of state id))"
-      "         (column (deck--column state side))"
-      "         (index (position id column))"
-      "         (other (and index (>= (+ index direction) 0) (nth (+ index direction) column)))"
-      "         (order (deck--windows state))"
-      "         (mine (and other (position id order)))"
-      "         (theirs (and other (position other order))))"
-      "    (when (and other mine theirs)"
-      "      (setf (nth mine order) other"
-      "            (nth theirs order) id))"
-      "    state))"
-      ""
-      "(defun deck--reorder-all (state direction)"
-      "  (let* ((order (deck--windows state))"
-      "         (index (position (deck--current state) order))"
-      "         (target (and index (+ index direction))))"
-      "    (when (and target (< -1 target (length order)))"
-      "      (rotatef (nth index order) (nth target order)))"
-      "    state))"
-      ""
-      "(defun deck--cycle (state direction)"
-      "  \"Focus the next or previous window in the window set, wrapping.\""
-      "  (let* ((order (deck--windows state))"
-      "         (id (deck--current state))"
-      "         (index (or (position id order) 0))"
-      "         (target (and order (nth (mod (+ index direction) (length order)) order))))"
-      "    (when target"
-      "      (let ((side (deck--side-of state target)))"
-      "        (when side (deck--adopt-front state side target)))"
-      "      (deck--focus-window state target))))"
-      ""
-      "(defun deck--swap-columns (state)"
-      "  (dolist (entry (getf state :columns))"
-      "    (setf (cdr entry) (if (eql (cdr entry) :left) :right :left)))"
-      "  (let ((fronts (deck--fronts state)))"
-      "    (let ((left (cdr (assoc :left fronts))) (right (cdr (assoc :right fronts))))"
-      "      (setf (cdr (assoc :left fronts)) right (cdr (assoc :right fronts)) left)))"
-      "  state)"
-      ""
-      "(defun deck--to-column (state side)"
-      "  \"Send the current window to SIDE, where it becomes that deck's front.\""
-      "  (let* ((id (deck--current state))"
-      "         (previous (deck--side-of state id)))"
-      "    (when (and id (deck--manageable-p state id))"
-      "      (when (and previous (not (eql previous side)) (eql id (deck--front state previous)))"
-      "        (let* ((column (deck--column state previous))"
-      "               (index (position id column))"
-      "               (next (and index (nth (mod (1+ index) (length column)) column))))"
-      "          (deck--adopt-front state previous (if (and next (not (eql next id))) next nil))))"
-      "      (setf (cdr (assoc id (getf state :columns))) side)"
-      "      (deck--adopt-front state side id))"
-      "    state))"
-      ""
-      "(defun deck--set-fullscreen (state id on)"
-      "  (setf (getf state :fullscreen) (remove id (getf state :fullscreen)))"
-      "  (when on"
-      "    (setf (getf state :floating) (remove id (getf state :floating)))"
-      "    (push id (getf state :fullscreen))"
-      "    (deck--focus-window state id))"
-      "  state)"
-      ""
-      "(defun deck--toggle-floating (state area)"
-      "  (let ((id (deck--current state)))"
-      "    (cond"
-      "      ((null id))"
-      "      ((member id (getf state :fullscreen)) (deck--set-fullscreen state id nil))"
-      "      ((member id (getf state :floating))"
-      "       (setf (getf state :floating) (remove id (getf state :floating))"
-      "             (getf state :floats) (remove id (getf state :floats) :key #'car)))"
-      "      (area"
-      "       (push id (getf state :floating))"
-      "       (push (cons id (policy--centred area (getf +layout+ :float-ratio))) (getf state :floats))))"
-      "    state))"
-      ""
-      "(defun deck--command (state area command)"
-      "  (cond"
-      "    ((and (deck--narrow-p area)"
-      "          (or (member command +deck--column-commands+ :test #'equal)"
-      "              (member command '(\"scroll-down\" \"scroll-up\" \"move-down\" \"move-up\") :test #'equal)))"
-      "     (cond ((equal command \"scroll-down\") (deck--cycle state 1))"
-      "           ((equal command \"scroll-up\") (deck--cycle state -1))"
-      "           ((equal command \"move-down\") (deck--reorder-all state 1))"
-      "           ((equal command \"move-up\") (deck--reorder-all state -1))))"
-      "    ((equal command \"focus-left\")"
-      "     (deck--focus-window state (or (deck--front state :left) (deck--current state))))"
-      "    ((equal command \"focus-right\")"
-      "     (deck--focus-window state (or (deck--front state :right) (deck--current state))))"
-      "    ((equal command \"scroll-down\") (deck--rotate state 1))"
-      "    ((equal command \"scroll-up\") (deck--rotate state -1))"
-      "    ((equal command \"next\") (deck--cycle state 1))"
-      "    ((equal command \"previous\") (deck--cycle state -1))"
-      "    ((equal command \"swap-columns\") (deck--swap-columns state))"
-      "    ((equal command \"move-down\") (deck--reorder state 1))"
-      "    ((equal command \"move-up\") (deck--reorder state -1))"
-      "    ((equal command \"to-left\") (deck--to-column state :left))"
-      "    ((equal command \"to-right\") (deck--to-column state :right))"
-      "    ((equal command \"grid\") (setf (getf state :grid) (not (getf state :grid))))"
-      "    ((equal command \"ratio\")"
-      "     (setf (getf state :ratio) (1+ (mod (getf state :ratio) (length (getf +layout+ :ratios))))))"
-      "    ((equal command \"floating\") (deck--toggle-floating state area))"
-      "    ((equal command \"fullscreen\")"
-      "     (let ((id (deck--current state)))"
-      "       (when id (deck--set-fullscreen state id (not (member id (getf state :fullscreen)))))))"
-      "    (t state)))"
-      ""
-      "(defun deck--request (state id request requested)"
-      "  (case request"
-      "    (:fullscreen (deck--set-fullscreen state id requested))"
-      "    (:unfullscreen (deck--set-fullscreen state id nil))"
-      "    (:activate"
-      "     (let ((side (deck--side-of state id)))"
-      "       (when (and side (deck--manageable-p state id)) (deck--adopt-front state side id))"
-      "       (deck--focus-window state id))))"
-      "  state)"
-      ""
-      "(defun deck--raises (state current)"
-      "  (mapcar #'raise-window"
-      "          (append (remove current (reverse (getf state :floating)))"
-      "                  (when (member current (getf state :floating)) (list current))"
-      "                  (getf state :fullscreen))))"
-      ""
-      "(define-extension \"deck\""
-      "    (:reads (:windows :rules :outputs :workareas :layout :focus :key :button :pointer :request"
-      "             :settings)"
-      "     :state (deck--state) :admission t)"
-      "    (snapshot state event)"
-      "  (let* ((windows (remove-if (lambda (window) (policy--unmanaged-p snapshot window))"
-      "                             (context snapshot :windows)))"
-      "         (ids (mapcar (lambda (window) (getf window :id)) windows))"
-      "         (focused (previous-context snapshot :focus))"
-      "         (area (deck--area snapshot))"
-      "         (type (getf event :type))"
-      "         (command (and (eq type :key) (equal (getf event :owner) \"deck\") (getf event :command)))"
-      "         (terminal (and (equal command \"terminal\") (policy--terminal windows))))"
-      "    (when (eq type :unmap)"
-      "      (let ((gone (getf event :id)))"
-      "        (dolist (side '(:left :right))"
-      "          (when (eql gone (cdr (assoc side (getf state :fronts))))"
-      "            (let ((next (deck--after-front state (deck--windows state) side gone)))"
-      "              (setf (cdr (assoc side (getf state :fronts))) next)"
-      "              (when (and next (eql gone (getf state :focus)))"
-      "                (setf (getf state :focus) next)))))))"
-      "    (setf (getf state :windows) (remove-if-not (lambda (id) (member id ids)) (getf state :windows))"
-      "          (getf state :columns) (remove-if-not (lambda (entry) (member (car entry) ids))"
-      "                                               (getf state :columns))"
-      "          (getf state :fronts)"
-      "          (loop for entry in (getf state :fronts)"
-      "                collect (if (and (cdr entry) (not (member (cdr entry) ids)))"
-      "                            (cons (car entry) nil)"
-      "                            entry))"
-      "          (getf state :floating) (remove-if-not (lambda (id) (member id ids)) (getf state :floating))"
-      "          (getf state :floats) (remove-if-not (lambda (entry) (member (car entry) ids))"
-      "                                              (getf state :floats))"
-      "          (getf state :fullscreen) (remove-if-not (lambda (id) (member id ids))"
-      "                                                  (getf state :fullscreen)))"
-      "    (unless (member (getf state :focus) ids) (setf (getf state :focus) nil))"
-      "    (when (and focused (not (eql focused (getf state :focus)))"
-      "               (member focused (deck--windows state))"
-      "               (deck--manageable-p state focused))"
-      "      (let ((side (deck--side-of state focused)))"
-      "        (when side"
-      "          (deck--adopt-front state side focused)"
-      "          (deck--focus-window state focused))))"
-      "    (dolist (window windows)"
-      "      (let ((id (getf window :id)))"
-      "        (unless (or (deck--side-of state id) (member id (getf state :floating)))"
-      "          (let* ((focus-side (and focused (deck--side-of state focused)))"
-      "                 (left (length (deck--column state :left)))"
-      "                 (right (length (deck--column state :right)))"
-      "                 (side (or focus-side (if (<= left right) :left :right))))"
-      "            (push (cons id side) (getf state :columns))"
-      "            (setf (getf state :windows) (append (getf state :windows) (list id)))"
-      "            (deck--adopt-front state side id)"
-      "            (setf (getf state :focus) id)"
-      "            (when (getf window :fullscreen-requested)"
-      "              (deck--set-fullscreen state id t))))))"
-      "    (when command"
-      "      (deck--command state area command))"
-      "    (when terminal"
-      "      (deck--request state terminal :activate nil))"
-      "    (when (and (member type '(:metadata :request)) (member (getf event :id) ids))"
-      "      (deck--request state (getf event :id) (getf event :request) (getf event :requested)))"
-      "    (when (or (and (eq type :button) (eql (getf event :state) :pressed))"
-      "              (and (eq type :pointer) (eq (getf event :state) :enter) (getf event :moved)"
-      "                   (setting snapshot :focus-follows-mouse)))"
-      "      (let ((id (getf event :id)))"
-      "        (when (and (integerp id) (member id (deck--windows state)))"
-      "          (when (and (deck--manageable-p state id) (deck--side-of state id))"
-      "            (deck--adopt-front state (deck--side-of state id) id))"
-      "          (deck--focus-window state id))))"
-      "    (let ((current (deck--current state)))"
-      "      (values state"
-      "              (append (mapcar (lambda (binding) (apply #'bind-key binding))"
-      "                              (if (deck--narrow-p area)"
-      "                                  (remove-if (lambda (binding)"
-      "                                               (member (string-downcase (third binding))"
-      "                                                       +deck--column-commands+ :test #'equal))"
-      "                                             +layout-bindings+)"
-      "                                  +layout-bindings+))"
-      "                      (when area (deck--places windows state area))"
-      "                      (list (publish-state :deck-seam (deck--seam state area)))"
-      "                      (deck--raises state current)"
-      "                      (list (focus current :raise nil)))"
-      "              (when (and (equal command \"terminal\") (null terminal))"
-      "                (list (apply #'launch (policy--launch \"terminal\"))))))))"
+    modules_desktop_session_tomoe_lisp_deck_data = {
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "deck--state" []]
+        (rows [
+          ["list" ":grid" "nil" ":ratio" 1 ":focus" "nil"]
+          [":columns" "nil" ":windows" "nil"]
+          [":fronts" ["list" ["cons" ":left" "nil"] ["cons" ":right" "nil"]]]
+          [":floating" "nil" ":floats" "nil" ":fullscreen" "nil"]
+        ])
+      ])
+      blank
+      ["defun" "deck--entry" ["list" "id"] ["assoc" "id" "list"]]
+      ["defun" "deck--layout-entry" ["layout" "id"] ["find" "id" "layout" ":key" ["lambda" ["entry"] ["getf" "entry" ":id"]]]]
+      ["defun" "deck--windows" ["state"] ["getf" "state" ":windows"]]
+      ["defun" "deck--fronts" ["state"] ["getf" "state" ":fronts"]]
+      (rows [
+        ["defun" "deck--side-of" ["state" "id"]]
+        [["let" [["entry" ["deck--entry" ["getf" "state" ":columns"] "id"]]] ["and" "entry" ["cdr" "entry"]]]]
+      ])
+      (rows [
+        ["defun" "deck--column" ["state" "side"]]
+        [["remove-if-not" ["lambda" ["id"] ["eql" ["deck--side-of" "state" "id"] "side"]] ["deck--windows" "state"]]]
+      ])
+      (rows [
+        ["defparameter" "+deck--column-commands+"]
+        (quote [(str "focus-left") (str "focus-right") (str "swap-columns") (str "to-left") (str "to-right") (str "ratio")])
+      ])
+      (rows [
+        ["defun" "deck--narrow-p" ["area"]]
+        (rows [
+          ["let" [["output" ["and" "area" ["getf" "area" ":output"]]]]]
+          [["and" "output" ["<" ["*" 9 ["getf" "output" ":width"]] ["*" 21 ["getf" "output" ":height"]]]]]
+        ])
+      ])
+      (rows [
+        ["defun" "deck--front" ["state" "side"]]
+        (str ''
+          The window SIDE's deck shows in front. An adopted front counts only while it is
+          still in that column: a front can outlive its window between a close and the
+          handoff that replaces it, and a column placed against a front that is gone would
+          be placed nowhere and show nothing at all.'')
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["entry" ["assoc" "side" ["deck--fronts" "state"]]]]
+              [["recorded" ["and" "entry" ["cdr" "entry"]]]]
+              [["column" ["deck--column" "state" "side"]]]
+            ])
+          ]
+          [["if" ["member" "recorded" "column"] "recorded" ["first" "column"]]]
+        ])
+      ])
+      (rows [
+        ["defun" "deck--after-front" ["state" "order" "side" "gone"]]
+        (str ''
+          The window that takes the front of SIDE in ORDER once GONE closes, or NIL when
+          the column empties. GONE still sits in ORDER, so the entry after it — wrapping,
+          the way a scroll does — is the window a scroll would have revealed.'')
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["column" ["remove-if-not" ["lambda" ["id"] ["eql" ["deck--side-of" "state" "id"] "side"]] "order"]]]
+              [["index" ["position" "gone" "column"]]]
+              [["next" ["and" "index" ["nth" ["mod" ["1+" "index"] ["length" "column"]] "column"]]]]
+            ])
+          ]
+          [["unless" ["eql" "next" "gone"] "next"]]
+        ])
+      ])
+      (rows [
+        ["defun" "deck--manageable-p" ["state" "id"]]
+        [["and" ["not" ["member" "id" ["getf" "state" ":fullscreen"]]] ["not" ["member" "id" ["getf" "state" ":floating"]]]]]
+      ])
+      blank
+      (rows [
+        ["defun" "deck--current" ["state"]]
+        (str ''
+          The window a command acts on: the focused one while it is in the window set,
+          otherwise whatever the deck still shows. A command must never depend on an id a
+          gone window left behind, or the keys go dead.'')
+        (rows [
+          [
+            "let"
+            (rows [
+              [["focus" ["getf" "state" ":focus"]]]
+              [["windows" ["deck--windows" "state"]]]
+            ])
+          ]
+          (rows [
+            ["or" ["and" ["member" "focus" "windows"] "focus"]]
+            [["deck--front" "state" ":left"]]
+            [["deck--front" "state" ":right"]]
+            [["first" "windows"]]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--output-of" ["outputs" "entry"]]
+        (rows [
+          [
+            "let"
+            (rows [
+              [["cx" ["+" ["getf" "entry" ":x"] ["floor" ["getf" "entry" ":width"] 2]]]]
+              [["cy" ["+" ["getf" "entry" ":y"] ["floor" ["getf" "entry" ":height"] 2]]]]
+            ])
+          ]
+          (rows [
+            [
+              "find-if"
+              (rows [
+                ["lambda" ["output"]]
+                (rows [
+                  ["and" ["<=" ["getf" "output" ":x"] "cx" ["+" ["getf" "output" ":x"] ["getf" "output" ":width"]]]]
+                  [["<=" ["getf" "output" ":y"] "cy" ["+" ["getf" "output" ":y"] ["getf" "output" ":height"]]]]
+                ])
+              ])
+            ]
+            "outputs"
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--area" ["snapshot"]]
+        (str "The focused window's output box and the area its exclusive zones leave free.")
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["outputs" ["context" "snapshot" ":outputs"]]]
+              [["focus" ["previous-context" "snapshot" ":focus"]]]
+              [["entry" ["and" "focus" ["deck--layout-entry" ["previous-context" "snapshot" ":layout"] "focus"]]]]
+              [["output" ["or" ["and" "entry" ["deck--output-of" "outputs" "entry"]] ["first" "outputs"]]]]
+              [["area" ["and" "output" ["policy--area" "snapshot" ["getf" "output" ":name"]]]]]
+            ])
+          ]
+          (rows [
+            ["when" "area"]
+            [["list*" ":output" "output" "area"]]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--left-width" ["state" "width"]]
+        (str "How wide the left column is, out of WIDTH less the seam between the columns.")
+        [["floor" ["*" ["-" "width" ["getf" "+layout+" ":seam"]] ["nth" ["1-" ["getf" "state" ":ratio"]] ["getf" "+layout+" ":ratios"]]]]]
+      ])
+      blank
+      (rows [
+        ["defun" "deck--grid-columns" ["state"]]
+        [["ceiling" ["sqrt" ["count-if" ["lambda" ["id"] ["deck--manageable-p" "state" "id"]] ["deck--windows" "state"]]]]]
+      ])
+      blank
+      (rows [
+        ["defun" "deck--grid-extra" ["cols"]]
+        (str ''
+          How much wider than a window gap the middle of an even grid is: it splits on
+          the deck's seam, so whatever stands there stays between the columns.'')
+        [["if" ["evenp" "cols"] ["-" ["getf" "+layout+" ":seam"] ["getf" "+layout+" ":gaps"]] 0]]
+      ])
+      blank
+      (rows [
+        ["defun" "deck--grid-cell" ["cols" "width"]]
+        [["floor" ["-" "width" ["*" ["1-" "cols"] ["getf" "+layout+" ":gaps"]] ["deck--grid-extra" "cols"]] "cols"]]
+      ])
+      blank
+      (rows [
+        ["defun" "deck--split" ["state" "width"]]
+        (str ''
+          Where the seam starts within the tiled WIDTH, or NIL when the deck has no
+          middle seam: a grid with an odd number of columns.'')
+        (rows [
+          ["if" ["getf" "state" ":grid"]]
+          (rows [
+            ["let" [["cols" ["deck--grid-columns" "state"]]]]
+            (rows [
+              ["when" ["and" ["plusp" "cols"] ["evenp" "cols"]]]
+              (rows [
+                ["let" [["half" ["/" "cols" 2]]]]
+                [["+" ["*" "half" ["deck--grid-cell" "cols" "width"]] ["*" ["1-" "half"] ["getf" "+layout+" ":gaps"]]]]
+              ])
+            ])
+          ])
+          [["deck--left-width" "state" "width"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--seam" ["state" "area"]]
+        (str ''
+          The free strip in the deck's middle seam on AREA, a window gap in from each
+          side; NIL on a narrow output, while a window is fullscreen, in a grid with an
+          odd number of columns, or when the seam is no wider than two gaps.'')
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["gaps" ["getf" "+layout+" ":gaps"]]]
+              [["x" ["and" "area" ["+" ["getf" "area" ":x"] "gaps"]]]]
+              [["split" ["and" "area" ["deck--split" "state" ["-" ["getf" "area" ":width"] ["*" 2 "gaps"]]]]]]
+              [["inner" ["-" ["getf" "+layout+" ":seam"] ["*" 2 "gaps"]]]]
+            ])
+          ]
+          (rows [
+            ["unless" ["or" ["null" "split"] ["getf" "state" ":fullscreen"] ["deck--narrow-p" "area"] ["not" ["plusp" "inner"]]]]
+            (rows [
+              ["list" ":output" ["getf" ["getf" "area" ":output"] ":name"]]
+              [":x" ["+" "x" "split" "gaps"] ":y" ["+" ["getf" "area" ":y"] "gaps"]]
+              [":width" "inner" ":height" ["-" ["getf" "area" ":height"] ["*" 2 "gaps"]]]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--box" ["state" "area" "id"]]
+        (str "Where ID goes, or NIL when it is not in the window set.")
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["gaps" ["getf" "+layout+" ":gaps"]]]
+              [["x" ["+" ["getf" "area" ":x"] "gaps"]] ["y" ["+" ["getf" "area" ":y"] "gaps"]]]
+              [["width" ["-" ["getf" "area" ":width"] ["*" 2 "gaps"]]] ["height" ["-" ["getf" "area" ":height"] ["*" 2 "gaps"]]]]
+            ])
+          ]
+          (rows [
+            "cond"
+            [[["not" ["member" "id" ["deck--windows" "state"]]] "nil"]]
+            (rows [
+              [["member" "id" ["getf" "state" ":fullscreen"]]]
+              (rows [
+                ["let" [["output" ["getf" "area" ":output"]]]]
+                [["list" ["getf" "output" ":x"] ["getf" "output" ":y"] ["getf" "output" ":width"] ["getf" "output" ":height"]]]
+              ])
+            ])
+            [[["member" "id" ["getf" "state" ":floating"]] ["cdr" ["deck--entry" ["getf" "state" ":floats"] "id"]]]]
+            (rows [
+              [["getf" "state" ":grid"]]
+              (rows [
+                [
+                  "let*"
+                  (rows [
+                    [
+                      [
+                        "wins"
+                        (rows [
+                          ["remove-if-not" ["lambda" ["candidate"] ["deck--manageable-p" "state" "candidate"]]]
+                          [["deck--windows" "state"]]
+                        ])
+                      ]
+                    ]
+                    [["index" ["position" "id" "wins"]]]
+                    [["count" ["length" "wins"]]]
+                    [["cols" ["ceiling" ["sqrt" "count"]]]]
+                    [["rows" ["ceiling" "count" "cols"]]]
+                    [["cell-width" ["deck--grid-cell" "cols" "width"]]]
+                    [["cell-height" ["floor" ["-" "height" ["*" ["1-" "rows"] "gaps"]] "rows"]]]
+                    [["column" ["mod" "index" "cols"]]]
+                    [["row" ["floor" "index" "cols"]]]
+                  ])
+                ]
+                (rows [
+                  ["list" ["+" "x" ["*" "column" ["+" "cell-width" "gaps"]] ["if" [">=" "column" ["/" "cols" 2]] ["deck--grid-extra" "cols"] 0]]]
+                  [["+" "y" ["*" "row" ["+" "cell-height" "gaps"]]]]
+                  ["cell-width" "cell-height"]
+                ])
+              ])
+            ])
+            (rows [
+              [["deck--narrow-p" "area"]]
+              (rows [
+                [
+                  "let*"
+                  (rows [
+                    [
+                      [
+                        "column"
+                        (rows [
+                          ["remove-if-not" ["lambda" ["candidate"] ["deck--manageable-p" "state" "candidate"]]]
+                          [["deck--windows" "state"]]
+                        ])
+                      ]
+                    ]
+                    [["front" ["or" ["position" ["deck--current" "state"] "column"] 0]]]
+                    [["index" ["position" "id" "column"]]]
+                  ])
+                ]
+                (rows [
+                  ["when" "index"]
+                  [["list" "x" ["+" "y" ["*" ["-" "index" "front"] ["+" "height" "gaps"]]] "width" "height"]]
+                ])
+              ])
+            ])
+            (rows [
+              "t"
+              (rows [
+                [
+                  "let*"
+                  (rows [
+                    [["seam" ["getf" "+layout+" ":seam"]]]
+                    [["left-width" ["deck--left-width" "state" "width"]]]
+                    [["right-width" ["-" "width" "seam" "left-width"]]]
+                    [["side" ["deck--side-of" "state" "id"]]]
+                    [["column" ["deck--column" "state" "side"]]]
+                    [["front" ["position" ["deck--front" "state" "side"] "column"]]]
+                    [["index" ["position" "id" "column"]]]
+                  ])
+                ]
+                (rows [
+                  ["when" ["and" "side" "index" "front"]]
+                  (rows [
+                    ["list" ["if" ["eql" "side" ":left"] "x" ["+" "x" "left-width" "seam"]]]
+                    [["+" "y" ["*" ["-" "index" "front"] ["+" "height" "gaps"]]]]
+                    [["if" ["eql" "side" ":left"] "left-width" "right-width"]]
+                    "height"
+                  ])
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--places" ["managed" "state" "area"]]
+        (str "One place effect per managed window: exactly one owner, no duplicates.")
+        (rows [
+          ["let" [["windows" ["deck--windows" "state"]]]]
+          (rows [
+            ["loop" "for window in managed"]
+            ["for" "id" "=" ["getf" "window" ":id"]]
+            ["for" "box" "=" ["deck--box" "state" "area" "id"]]
+            [
+              "append"
+              [
+                "list"
+                (rows [
+                  ["if" "box"]
+                  [["apply" (function "place") "id" ["append" "box" ["list" "t"]]]]
+                  (rows [
+                    ["place" "id" 0 0 ["max" 1 ["getf" "window" ":width"]]]
+                    [["max" 1 ["getf" "window" ":height"]] "nil"]
+                  ])
+                ])
+              ]
+            ]
+            [
+              "append"
+              [
+                "list"
+                [
+                  "fullscreen"
+                  "id"
+                  (rows [
+                    ["and" "box" ["member" "id" "windows"]]
+                    [["member" "id" ["getf" "state" ":fullscreen"]]]
+                    "t"
+                  ])
+                ]
+              ]
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--focus-window" ["state" "id"]]
+        [["setf" ["getf" "state" ":focus"] "id"]]
+        "state"
+      ])
+      blank
+      (rows [
+        ["defun" "deck--adopt-front" ["state" "side" "id"]]
+        (rows [
+          ["let" [["fronts" ["deck--fronts" "state"]]]]
+          [["setf" ["cdr" ["assoc" "side" "fronts"]] "id"]]
+        ])
+        "state"
+      ])
+      blank
+      (rows [
+        ["defun" "deck--rotate" ["state" "direction"]]
+        (str "Scroll the side holding the current window; the deck wraps.")
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["id" ["deck--current" "state"]]]
+              [["side" ["deck--side-of" "state" "id"]]]
+              [["column" ["deck--column" "state" "side"]]]
+            ])
+          ]
+          (rows [
+            ["when" ["and" "side" "column"]]
+            (rows [
+              [
+                "let*"
+                (rows [
+                  [["index" ["position" "id" "column"]]]
+                  [["target" ["nth" ["mod" ["+" "index" "direction"] ["length" "column"]] "column"]]]
+                ])
+              ]
+              [["deck--adopt-front" "state" "side" "target"]]
+              [["deck--focus-window" "state" "target"]]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--reorder" ["state" "direction"]]
+        (str "Swap the current window with its neighbour in its own column's order.")
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["id" ["deck--current" "state"]]]
+              [["side" ["deck--side-of" "state" "id"]]]
+              [["column" ["deck--column" "state" "side"]]]
+              [["index" ["position" "id" "column"]]]
+              [["other" ["and" "index" [">=" ["+" "index" "direction"] 0] ["nth" ["+" "index" "direction"] "column"]]]]
+              [["order" ["deck--windows" "state"]]]
+              [["mine" ["and" "other" ["position" "id" "order"]]]]
+              [["theirs" ["and" "other" ["position" "other" "order"]]]]
+            ])
+          ]
+          (rows [
+            ["when" ["and" "other" "mine" "theirs"]]
+            (rows [
+              ["setf" ["nth" "mine" "order"] "other"]
+              [["nth" "theirs" "order"] "id"]
+            ])
+          ])
+          "state"
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--reorder-all" ["state" "direction"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["order" ["deck--windows" "state"]]]
+              [["index" ["position" ["deck--current" "state"] "order"]]]
+              [["target" ["and" "index" ["+" "index" "direction"]]]]
+            ])
+          ]
+          (rows [
+            ["when" ["and" "target" ["<" (-1) "target" ["length" "order"]]]]
+            [["rotatef" ["nth" "index" "order"] ["nth" "target" "order"]]]
+          ])
+          "state"
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--cycle" ["state" "direction"]]
+        (str "Focus the next or previous window in the window set, wrapping.")
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["order" ["deck--windows" "state"]]]
+              [["id" ["deck--current" "state"]]]
+              [["index" ["or" ["position" "id" "order"] 0]]]
+              [["target" ["and" "order" ["nth" ["mod" ["+" "index" "direction"] ["length" "order"]] "order"]]]]
+            ])
+          ]
+          (rows [
+            ["when" "target"]
+            (rows [
+              ["let" [["side" ["deck--side-of" "state" "target"]]]]
+              [["when" "side" ["deck--adopt-front" "state" "side" "target"]]]
+            ])
+            [["deck--focus-window" "state" "target"]]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--swap-columns" ["state"]]
+        (rows [
+          ["dolist" ["entry" ["getf" "state" ":columns"]]]
+          [["setf" ["cdr" "entry"] ["if" ["eql" ["cdr" "entry"] ":left"] ":right" ":left"]]]
+        ])
+        (rows [
+          ["let" [["fronts" ["deck--fronts" "state"]]]]
+          (rows [
+            ["let" [["left" ["cdr" ["assoc" ":left" "fronts"]]] ["right" ["cdr" ["assoc" ":right" "fronts"]]]]]
+            [["setf" ["cdr" ["assoc" ":left" "fronts"]] "right" ["cdr" ["assoc" ":right" "fronts"]] "left"]]
+          ])
+        ])
+        "state"
+      ])
+      blank
+      (rows [
+        ["defun" "deck--to-column" ["state" "side"]]
+        (str "Send the current window to SIDE, where it becomes that deck's front.")
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["id" ["deck--current" "state"]]]
+              [["previous" ["deck--side-of" "state" "id"]]]
+            ])
+          ]
+          (rows [
+            ["when" ["and" "id" ["deck--manageable-p" "state" "id"]]]
+            (rows [
+              ["when" ["and" "previous" ["not" ["eql" "previous" "side"]] ["eql" "id" ["deck--front" "state" "previous"]]]]
+              (rows [
+                [
+                  "let*"
+                  (rows [
+                    [["column" ["deck--column" "state" "previous"]]]
+                    [["index" ["position" "id" "column"]]]
+                    [["next" ["and" "index" ["nth" ["mod" ["1+" "index"] ["length" "column"]] "column"]]]]
+                  ])
+                ]
+                [["deck--adopt-front" "state" "previous" ["if" ["and" "next" ["not" ["eql" "next" "id"]]] "next" "nil"]]]
+              ])
+            ])
+            [["setf" ["cdr" ["assoc" "id" ["getf" "state" ":columns"]]] "side"]]
+            [["deck--adopt-front" "state" "side" "id"]]
+          ])
+          "state"
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--set-fullscreen" ["state" "id" "on"]]
+        [["setf" ["getf" "state" ":fullscreen"] ["remove" "id" ["getf" "state" ":fullscreen"]]]]
+        (rows [
+          ["when" "on"]
+          [["setf" ["getf" "state" ":floating"] ["remove" "id" ["getf" "state" ":floating"]]]]
+          [["push" "id" ["getf" "state" ":fullscreen"]]]
+          [["deck--focus-window" "state" "id"]]
+        ])
+        "state"
+      ])
+      blank
+      (rows [
+        ["defun" "deck--toggle-floating" ["state" "area"]]
+        (rows [
+          ["let" [["id" ["deck--current" "state"]]]]
+          (rows [
+            "cond"
+            [[["null" "id"]]]
+            [[["member" "id" ["getf" "state" ":fullscreen"]] ["deck--set-fullscreen" "state" "id" "nil"]]]
+            (rows [
+              [["member" "id" ["getf" "state" ":floating"]]]
+              (rows [
+                ["setf" ["getf" "state" ":floating"] ["remove" "id" ["getf" "state" ":floating"]]]
+                [["getf" "state" ":floats"] ["remove" "id" ["getf" "state" ":floats"] ":key" (function "car")]]
+              ])
+            ])
+            (rows [
+              "area"
+              [["push" "id" ["getf" "state" ":floating"]]]
+              [["push" ["cons" "id" ["policy--centred" "area" ["getf" "+layout+" ":float-ratio"]]] ["getf" "state" ":floats"]]]
+            ])
+          ])
+          "state"
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--command" ["state" "area" "command"]]
+        (rows [
+          "cond"
+          (rows [
+            (rows [
+              ["and" ["deck--narrow-p" "area"]]
+              (rows [
+                ["or" ["member" "command" "+deck--column-commands+" ":test" (function "equal")]]
+                [["member" "command" (quote [(str "scroll-down") (str "scroll-up") (str "move-down") (str "move-up")]) ":test" (function "equal")]]
+              ])
+            ])
+            (rows [
+              ["cond" [["equal" "command" (str "scroll-down")] ["deck--cycle" "state" 1]]]
+              [[["equal" "command" (str "scroll-up")] ["deck--cycle" "state" (-1)]]]
+              [[["equal" "command" (str "move-down")] ["deck--reorder-all" "state" 1]]]
+              [[["equal" "command" (str "move-up")] ["deck--reorder-all" "state" (-1)]]]
+            ])
+          ])
+          (rows [
+            [["equal" "command" (str "focus-left")]]
+            [["deck--focus-window" "state" ["or" ["deck--front" "state" ":left"] ["deck--current" "state"]]]]
+          ])
+          (rows [
+            [["equal" "command" (str "focus-right")]]
+            [["deck--focus-window" "state" ["or" ["deck--front" "state" ":right"] ["deck--current" "state"]]]]
+          ])
+          [[["equal" "command" (str "scroll-down")] ["deck--rotate" "state" 1]]]
+          [[["equal" "command" (str "scroll-up")] ["deck--rotate" "state" (-1)]]]
+          [[["equal" "command" (str "next")] ["deck--cycle" "state" 1]]]
+          [[["equal" "command" (str "previous")] ["deck--cycle" "state" (-1)]]]
+          [[["equal" "command" (str "swap-columns")] ["deck--swap-columns" "state"]]]
+          [[["equal" "command" (str "move-down")] ["deck--reorder" "state" 1]]]
+          [[["equal" "command" (str "move-up")] ["deck--reorder" "state" (-1)]]]
+          [[["equal" "command" (str "to-left")] ["deck--to-column" "state" ":left"]]]
+          [[["equal" "command" (str "to-right")] ["deck--to-column" "state" ":right"]]]
+          [[["equal" "command" (str "grid")] ["setf" ["getf" "state" ":grid"] ["not" ["getf" "state" ":grid"]]]]]
+          (rows [
+            [["equal" "command" (str "ratio")]]
+            [["setf" ["getf" "state" ":ratio"] ["1+" ["mod" ["getf" "state" ":ratio"] ["length" ["getf" "+layout+" ":ratios"]]]]]]
+          ])
+          [[["equal" "command" (str "floating")] ["deck--toggle-floating" "state" "area"]]]
+          (rows [
+            [["equal" "command" (str "fullscreen")]]
+            (rows [
+              ["let" [["id" ["deck--current" "state"]]]]
+              [["when" "id" ["deck--set-fullscreen" "state" "id" ["not" ["member" "id" ["getf" "state" ":fullscreen"]]]]]]
+            ])
+          ])
+          [["t" "state"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck--request" ["state" "id" "request" "requested"]]
+        (rows [
+          ["case" "request"]
+          [[":fullscreen" ["deck--set-fullscreen" "state" "id" "requested"]]]
+          [[":unfullscreen" ["deck--set-fullscreen" "state" "id" "nil"]]]
+          (rows [
+            ":activate"
+            (rows [
+              ["let" [["side" ["deck--side-of" "state" "id"]]]]
+              [["when" ["and" "side" ["deck--manageable-p" "state" "id"]] ["deck--adopt-front" "state" "side" "id"]]]
+              [["deck--focus-window" "state" "id"]]
+            ])
+          ])
+        ])
+        "state"
+      ])
+      blank
+      (rows [
+        ["defun" "deck--raises" ["state" "current"]]
+        (rows [
+          ["mapcar" (function "raise-window")]
+          (rows [
+            ["append" ["remove" "current" ["reverse" ["getf" "state" ":floating"]]]]
+            [["when" ["member" "current" ["getf" "state" ":floating"]] ["list" "current"]]]
+            [["getf" "state" ":fullscreen"]]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["define-extension" (str "deck")]
+        (rows [
+          [
+            ":reads"
+            (rows [
+              [":windows" ":rules" ":outputs" ":workareas" ":layout" ":focus" ":key" ":button" ":pointer" ":request"]
+              ":settings"
+            ])
+          ]
+          [":state" ["deck--state"] ":admission" "t"]
+        ])
+        [["snapshot" "state" "event"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [
+                [
+                  "windows"
+                  (rows [
+                    ["remove-if" ["lambda" ["window"] ["policy--unmanaged-p" "snapshot" "window"]]]
+                    [["context" "snapshot" ":windows"]]
+                  ])
+                ]
+              ]
+              [["ids" ["mapcar" ["lambda" ["window"] ["getf" "window" ":id"]] "windows"]]]
+              [["focused" ["previous-context" "snapshot" ":focus"]]]
+              [["area" ["deck--area" "snapshot"]]]
+              [["type" ["getf" "event" ":type"]]]
+              [["command" ["and" ["eq" "type" ":key"] ["equal" ["getf" "event" ":owner"] (str "deck")] ["getf" "event" ":command"]]]]
+              [["terminal" ["and" ["equal" "command" (str "terminal")] ["policy--terminal" "windows"]]]]
+            ])
+          ]
+          (rows [
+            ["when" ["eq" "type" ":unmap"]]
+            (rows [
+              ["let" [["gone" ["getf" "event" ":id"]]]]
+              (rows [
+                ["dolist" ["side" (quote [":left" ":right"])]]
+                (rows [
+                  ["when" ["eql" "gone" ["cdr" ["assoc" "side" ["getf" "state" ":fronts"]]]]]
+                  (rows [
+                    ["let" [["next" ["deck--after-front" "state" ["deck--windows" "state"] "side" "gone"]]]]
+                    [["setf" ["cdr" ["assoc" "side" ["getf" "state" ":fronts"]]] "next"]]
+                    (rows [
+                      ["when" ["and" "next" ["eql" "gone" ["getf" "state" ":focus"]]]]
+                      [["setf" ["getf" "state" ":focus"] "next"]]
+                    ])
+                  ])
+                ])
+              ])
+            ])
+          ])
+          (rows [
+            ["setf" ["getf" "state" ":windows"] ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]] ["getf" "state" ":windows"]]]
+            [
+              ["getf" "state" ":columns"]
+              (rows [
+                ["remove-if-not" ["lambda" ["entry"] ["member" ["car" "entry"] "ids"]]]
+                [["getf" "state" ":columns"]]
+              ])
+            ]
+            [["getf" "state" ":fronts"]]
+            (rows [
+              ["loop" "for" "entry" "in" ["getf" "state" ":fronts"]]
+              [
+                "collect"
+                (rows [
+                  ["if" ["and" ["cdr" "entry"] ["not" ["member" ["cdr" "entry"] "ids"]]]]
+                  [["cons" ["car" "entry"] "nil"]]
+                  "entry"
+                ])
+              ]
+            ])
+            [["getf" "state" ":floating"] ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]] ["getf" "state" ":floating"]]]
+            [
+              ["getf" "state" ":floats"]
+              (rows [
+                ["remove-if-not" ["lambda" ["entry"] ["member" ["car" "entry"] "ids"]]]
+                [["getf" "state" ":floats"]]
+              ])
+            ]
+            [
+              ["getf" "state" ":fullscreen"]
+              (rows [
+                ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]]]
+                [["getf" "state" ":fullscreen"]]
+              ])
+            ]
+          ])
+          [["unless" ["member" ["getf" "state" ":focus"] "ids"] ["setf" ["getf" "state" ":focus"] "nil"]]]
+          (rows [
+            [
+              "when"
+              (rows [
+                ["and" "focused" ["not" ["eql" "focused" ["getf" "state" ":focus"]]]]
+                [["member" "focused" ["deck--windows" "state"]]]
+                [["deck--manageable-p" "state" "focused"]]
+              ])
+            ]
+            (rows [
+              ["let" [["side" ["deck--side-of" "state" "focused"]]]]
+              (rows [
+                ["when" "side"]
+                [["deck--adopt-front" "state" "side" "focused"]]
+                [["deck--focus-window" "state" "focused"]]
+              ])
+            ])
+          ])
+          (rows [
+            ["dolist" ["window" "windows"]]
+            (rows [
+              ["let" [["id" ["getf" "window" ":id"]]]]
+              (rows [
+                ["unless" ["or" ["deck--side-of" "state" "id"] ["member" "id" ["getf" "state" ":floating"]]]]
+                (rows [
+                  [
+                    "let*"
+                    (rows [
+                      [["focus-side" ["and" "focused" ["deck--side-of" "state" "focused"]]]]
+                      [["left" ["length" ["deck--column" "state" ":left"]]]]
+                      [["right" ["length" ["deck--column" "state" ":right"]]]]
+                      [["side" ["or" "focus-side" ["if" ["<=" "left" "right"] ":left" ":right"]]]]
+                    ])
+                  ]
+                  [["push" ["cons" "id" "side"] ["getf" "state" ":columns"]]]
+                  [["setf" ["getf" "state" ":windows"] ["append" ["getf" "state" ":windows"] ["list" "id"]]]]
+                  [["deck--adopt-front" "state" "side" "id"]]
+                  [["setf" ["getf" "state" ":focus"] "id"]]
+                  (rows [
+                    ["when" ["getf" "window" ":fullscreen-requested"]]
+                    [["deck--set-fullscreen" "state" "id" "t"]]
+                  ])
+                ])
+              ])
+            ])
+          ])
+          (rows [
+            ["when" "command"]
+            [["deck--command" "state" "area" "command"]]
+          ])
+          (rows [
+            ["when" "terminal"]
+            [["deck--request" "state" "terminal" ":activate" "nil"]]
+          ])
+          (rows [
+            ["when" ["and" ["member" "type" (quote [":metadata" ":request"])] ["member" ["getf" "event" ":id"] "ids"]]]
+            [["deck--request" "state" ["getf" "event" ":id"] ["getf" "event" ":request"] ["getf" "event" ":requested"]]]
+          ])
+          (rows [
+            [
+              "when"
+              (rows [
+                ["or" ["and" ["eq" "type" ":button"] ["eql" ["getf" "event" ":state"] ":pressed"]]]
+                (rows [
+                  ["and" ["eq" "type" ":pointer"] ["eq" ["getf" "event" ":state"] ":enter"] ["getf" "event" ":moved"]]
+                  [["setting" "snapshot" ":focus-follows-mouse"]]
+                ])
+              ])
+            ]
+            (rows [
+              ["let" [["id" ["getf" "event" ":id"]]]]
+              (rows [
+                ["when" ["and" ["integerp" "id"] ["member" "id" ["deck--windows" "state"]]]]
+                (rows [
+                  ["when" ["and" ["deck--manageable-p" "state" "id"] ["deck--side-of" "state" "id"]]]
+                  [["deck--adopt-front" "state" ["deck--side-of" "state" "id"] "id"]]
+                ])
+                [["deck--focus-window" "state" "id"]]
+              ])
+            ])
+          ])
+          (rows [
+            ["let" [["current" ["deck--current" "state"]]]]
+            (rows [
+              ["values" "state"]
+              (rows [
+                [
+                  "append"
+                  (rows [
+                    ["mapcar" ["lambda" ["binding"] ["apply" (function "bind-key") "binding"]]]
+                    (rows [
+                      ["if" ["deck--narrow-p" "area"]]
+                      (rows [
+                        [
+                          "remove-if"
+                          (rows [
+                            ["lambda" ["binding"]]
+                            (rows [
+                              ["member" ["string-downcase" ["third" "binding"]]]
+                              ["+deck--column-commands+" ":test" (function "equal")]
+                            ])
+                          ])
+                        ]
+                        "+layout-bindings+"
+                      ])
+                      "+layout-bindings+"
+                    ])
+                  ])
+                ]
+                [["when" "area" ["deck--places" "windows" "state" "area"]]]
+                [["list" ["publish-state" ":deck-seam" ["deck--seam" "state" "area"]]]]
+                [["deck--raises" "state" "current"]]
+                [["list" ["focus" "current" ":raise" "nil"]]]
+              ])
+              (rows [
+                ["when" ["and" ["equal" "command" (str "terminal")] ["null" "terminal"]]]
+                [["list" ["apply" (function "launch") ["policy--launch" (str "terminal")]]]]
+              ])
+            ])
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_gap_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun gap--ascii (text) (remove-if (lambda (c) (> (char-code c) 126)) text))"
-      ""
-      "(defun gap--degrees (value) (if (realp value) (format nil \"~2D°\" (max 0 (min 99 (round value)))) \"--°\"))"
-      ""
-      "(defun gap--gib (mib) (if (realp mib) (format nil \"~4,1FG\" (/ mib 1024d0)) \"--.-G\"))"
-      ""
-      "(defun gap--fit (text width)"
-      "  (format nil \"~vA\" width (if (> (length text) width) (concatenate 'string (subseq text 0 (- width 2)) \"..\") text)))"
-      ""
-      "(defun gap--px (n) (max 1 (round (* n (getf +gap+ :scale)))))"
-      ""
-      "(defun gap--text (text color)"
-      "  (ui :text :text text :size (gap--px 11) :line-height (gap--px 11) :color color :font (getf +gap+ :font)))"
-      ""
-      "(defun gap--item (p children)"
-      "  (ui :stack :children (list (ui :column :align :stretch"
-      "                                 :children (list (ui :rect :height (gap--px 3))"
-      "                                                 (ui :rect :height (gap--px 8) :background (hud--alpha (hud--c p :bg) \"e6\"))))"
-      "                             (ui :row :height (gap--px 11) :align :end :gap (gap--px 4)"
-      "                                 :padding (list 0 (gap--px 4) 0 (gap--px 4))"
-      "                                 :children (remove nil children)))))"
-      ""
-      "(defun gap--meter (p value accent zones)"
-      "  (let ((filled (* 12 (max 0 (min 1 value)))))"
-      "    (ui :row :gap (gap--px 1) :height (gap--px 8) :align :end"
-      "        :children (loop for i below 12"
-      "                        collect (ui :rect :width (gap--px 3) :height (gap--px 8)"
-      "                                    :background (hud--mix (hud--off p)"
-      "                                                          (if zones (hud--heat (* 100 (/ (1+ i) 12)) accent p) accent)"
-      "                                                          (max 0 (min 1 (- filled i)))))))))"
-      ""
-      "(defun gap--gauge (p label accent percent detail &optional (zones t))"
-      "  (gap--item p (list (gap--text label accent)"
-      "                     (gap--text (format nil \"~3D%\" (max 0 (min 100 percent))) (hud--c p :fg))"
-      "                     (gap--meter p (/ percent 100) accent zones)"
-      "                     (when detail (gap--text detail (hud--dim p 0.75))))))"
-      ""
-      "(defun gap--words (p &rest parts)"
-      "  (gap--item p (loop for (text color) on parts by #'cddr collect (gap--text text (or color (hud--c p :fg))))))"
-      ""
-      "(defun gap--media (p snapshot)"
-      "  (let* ((service (service-state snapshot :mpris))"
-      "         (status (getf service :status))"
-      "         (title (getf service :title))"
-      "         (artist (getf service :artist)))"
-      "    (when (and (stringp title) (plusp (length title)) (member status '(\"Playing\" \"Paused\") :test #'equal))"
-      "      (gap--words p (if (equal status \"Playing\") \">>\" \"||\") (hud--c p :color5)"
-      "                  (gap--fit (gap--ascii (string-upcase (if (and (stringp artist) (plusp (length artist)))"
-      "                                                            (format nil \"~A - ~A\" artist title)"
-      "                                                            title)))"
-      "                            (round (getf +gap+ :media-width) (getf +gap+ :scale)))"
-      "                  nil))))"
-      ""
-      "(defun gap--battery (p snapshot)"
-      "  (let* ((battery (service-state snapshot :battery))"
-      "         (percent (round (getf battery :percent 0)))"
-      "         (color (cond ((getf battery :charging) (hud--c p :color2)) ((< percent 15) (hud--c p :color1))"
-      "                      ((< percent 30) (hud--c p :color3)) (t (hud--c p :color2)))))"
-      "    (gap--gauge p (if (getf battery :charging) \"CHG\" \"BAT\") color percent nil nil)))"
-      ""
-      "(defun gap--network (p snapshot)"
-      "  (let* ((network (service-state snapshot :network))"
-      "         (ssid (getf network :ssid))"
-      "         (online (getf network :connected)))"
-      "    (gap--words p (gap--fit (cond ((and online (stringp ssid) (plusp (length ssid))) (gap--ascii (string-upcase ssid)))"
-      "                                  (online \"ONLINE\")"
-      "                                  (t \"OFFLINE\"))"
-      "                            20)"
-      "                (if online (hud--c p :color6) (hud--c p :color1)))))"
-      ""
-      "(defun gap--frame (p snapshot)"
-      "  (let* ((battery (state-value snapshot :frame-battery))"
-      "         (percent (getf battery :percent))"
-      "         (powered (not (equal (getf battery :status) \"Discharging\"))))"
-      "    (when percent"
-      "      (gap--gauge p (if powered \"VR+\" \"VR\")"
-      "                  (cond (powered (hud--c p :color2)) ((< percent 15) (hud--c p :color1))"
-      "                        ((< percent 30) (hud--c p :color3)) (t (hud--c p :color2)))"
-      "                  percent nil nil))))"
-      ""
-      "(defun gap--module (module p state snapshot)"
-      "  (let ((cpu (getf state :cpu)) (memory (getf state :memory)) (gpu (getf state :gpu)))"
-      "    (ecase module"
-      "      (:time (gap--words p (clock-text (getf +gap+ :time)) nil))"
-      "      (:date (gap--words p (string-upcase (clock-text (getf +gap+ :date))) nil))"
-      "      (:media (gap--media p snapshot))"
-      "      (:battery (gap--battery p snapshot))"
-      "      (:network (gap--network p snapshot))"
-      "      (:frame (gap--frame p snapshot))"
-      "      (:cpu (gap--gauge p \"CPU\" (hud--c p :color4) (getf cpu :percent 0) (gap--degrees (getf cpu :temp))))"
-      "      (:memory (gap--gauge p \"MEM\" (hud--c p :color5) (getf memory :percent 0) (gap--gib (getf memory :used))))"
-      "      (:gpu (when (probe--gpu-p gpu)"
-      "              (gap--gauge p \"GPU\" (hud--c p :color2) (getf gpu :percent 0) (gap--degrees (getf gpu :temp)))))"
-      "      (:vram (when (probe--gpu-p gpu)"
-      "               (gap--gauge p \"VRAM\" (hud--c p :color6)"
-      "                           (if (plusp (or (getf gpu :total) 0)) (round (* 100 (or (getf gpu :used) 0)) (getf gpu :total)) 0)"
-      "                           (gap--gib (getf gpu :used))))))))"
-      ""
-      "(defun gap--line (panels)"
-      "  (let* ((modules (getf +gap+ :modules))"
-      "         (pair (getf +gap+ :center-between))"
-      "         (inset (getf +gap+ :inset))"
-      "         (seam (loop for (a b) on modules"
-      "                     for index from 1"
-      "                     when (and b (eq a (first pair)) (eq b (second pair))) return index)))"
-      "    (flet ((half (items justify padding)"
-      "             (ui :row :width 0 :grow 1 :height (gap--px 11) :gap (gap--px 6) :align :end :justify justify :padding padding"
-      "                 :children (remove nil items))))"
-      "      (ui :row :height (gap--px 11) :align :end :justify :center"
-      "          :children (if seam"
-      "                        (list (half (subseq panels 0 seam) :end (list 0 inset 0 0))"
-      "                              (half (nthcdr seam panels) :start (list 0 0 0 inset)))"
-      "                        (list (ui :row :height (gap--px 11) :gap (gap--px 6) :align :end :children (remove nil panels))))))))"
-      ""
-      "(define-extension \"bar\" (:reads (:system :services :data :outputs)"
-      "                         :state (list :cpu nil :memory nil :gpu nil))"
-      "    (snapshot state event)"
-      "  (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))"
-      "    (let ((system (context snapshot :system)))"
-      "      (dolist (probe '(:cpu :memory :gpu))"
-      "        (setf (getf state probe) (probe--sample probe (getf state probe) system)))))"
-      "  (let* ((p (state-value snapshot :hud-palette))"
-      "         (line (gap--line (loop for module in (getf +gap+ :modules)"
-      "                                collect (gap--module module p state snapshot))))"
-      "         (focal (state-value snapshot :focal-frame))"
-      "         (wide (first (sort (copy-list (context snapshot :outputs)) #'> :key (lambda (o) (getf o :width)))))"
-      "         (height (gap--px 11))"
-      "         (lift (gap--px 6))"
-      "         (hot (loop for probe in '(:cpu :gpu)"
-      "                    for temp = (getf (getf state probe) :temp)"
-      "                    thereis (and (realp temp) (>= temp (getf +gap+ :hot))))))"
-      "    (values state"
-      "            (append (list (interval :sample (getf +gap+ :sample))"
-      "                          (publish-state :hud-hot (and hot t))"
-      "                          (publish-state :bar-floor"
-      "                                         (when (member :bottom (getf +gap+ :edges))"
-      "                                           (cond (focal"
-      "                                                  (list :output (getf focal :output)"
-      "                                                        :y (+ (getf focal :top) (getf focal :height) (- lift) height)))"
-      "                                                 (wide (list :output (getf wide :name) :y (getf wide :height)))))))"
-      "                    (loop for edge in (getf +gap+ :edges)"
-      "                          collect (if focal"
-      "                                      (shell-surface edge line :output (getf focal :output) :anchors '(:top :left)"
-      "                                                     :width (getf focal :width) :height height"
-      "                                                     :margin (list (- (if (eq edge :top)"
-      "                                                                          (getf focal :top)"
-      "                                                                          (+ (getf focal :top) (getf focal :height)))"
-      "                                                                      lift)"
-      "                                                                   0 0 (getf focal :left))"
-      "                                                     :layer :overlay :background \"#00000000\" :click-through t)"
-      "                                      (shell-surface edge line :output (getf wide :name) :anchors (list edge :left :right)"
-      "                                                     :height height :margin (if (eq edge :top) (list (- (gap--px 3)) 0 0 0) 0)"
-      "                                                     :layer :overlay :background \"#00000000\" :click-through t))))"
-      "            nil)))"
+    modules_desktop_session_tomoe_lisp_gap_data = {
+      at,
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      ["defun" "gap--ascii" ["text"] ["remove-if" ["lambda" ["c"] [">" ["char-code" "c"] 126]] "text"]]
+      blank
+      ["defun" "gap--degrees" ["value"] ["if" ["realp" "value"] ["format" "nil" (str "~2D°") ["max" 0 ["min" 99 ["round" "value"]]]] (str "--°")]]
+      blank
+      ["defun" "gap--gib" ["mib"] ["if" ["realp" "mib"] ["format" "nil" (str "~4,1FG") ["/" "mib" "1024d0"]] (str "--.-G")]]
+      blank
+      (rows [
+        ["defun" "gap--fit" ["text" "width"]]
+        [["format" "nil" (str "~vA") "width" ["if" [">" ["length" "text"] "width"] ["concatenate" (quote "string") ["subseq" "text" 0 ["-" "width" 2]] (str "..")] "text"]]]
+      ])
+      blank
+      ["defun" "gap--px" ["n"] ["max" 1 ["round" ["*" "n" ["getf" "+gap+" ":scale"]]]]]
+      blank
+      (rows [
+        ["defun" "gap--text" ["text" "color"]]
+        [["ui" ":text" ":text" "text" ":size" ["gap--px" 11] ":line-height" ["gap--px" 11] ":color" "color" ":font" ["getf" "+gap+" ":font"]]]
+      ])
+      blank
+      (rows [
+        ["defun" "gap--item" ["p" "children"]]
+        [
+          [
+            "ui"
+            ":stack"
+            ":children"
+            (rows [
+              [
+                "list"
+                (rows [
+                  ["ui" ":column" ":align" ":stretch"]
+                  [
+                    ":children"
+                    (rows [
+                      ["list" ["ui" ":rect" ":height" ["gap--px" 3]]]
+                      [["ui" ":rect" ":height" ["gap--px" 8] ":background" ["hud--alpha" ["hud--c" "p" ":bg"] (str "e6")]]]
+                    ])
+                  ]
+                ])
+              ]
+              (rows [
+                ["ui" ":row" ":height" ["gap--px" 11] ":align" ":end" ":gap" ["gap--px" 4]]
+                [":padding" ["list" 0 ["gap--px" 4] 0 ["gap--px" 4]]]
+                [":children" ["remove" "nil" "children"]]
+              ])
+            ])
+          ]
+        ]
+      ])
+      blank
+      (rows [
+        ["defun" "gap--meter" ["p" "value" "accent" "zones"]]
+        (rows [
+          ["let" [["filled" ["*" 12 ["max" 0 ["min" 1 "value"]]]]]]
+          (rows [
+            ["ui" ":row" ":gap" ["gap--px" 1] ":height" ["gap--px" 8] ":align" ":end"]
+            [
+              ":children"
+              (rows [
+                ["loop" "for i below 12"]
+                [
+                  "collect"
+                  (rows [
+                    ["ui" ":rect" ":width" ["gap--px" 3] ":height" ["gap--px" 8]]
+                    [
+                      ":background"
+                      (rows [
+                        ["hud--mix" ["hud--off" "p"]]
+                        [["if" "zones" ["hud--heat" ["*" 100 ["/" ["1+" "i"] 12]] "accent" "p"] "accent"]]
+                        [["max" 0 ["min" 1 ["-" "filled" "i"]]]]
+                      ])
+                    ]
+                  ])
+                ]
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "gap--gauge" ["p" "label" "accent" "percent" "detail" "&optional" ["zones" "t"]]]
+        [
+          [
+            "gap--item"
+            "p"
+            (rows [
+              ["list" ["gap--text" "label" "accent"]]
+              [["gap--text" ["format" "nil" (str "~3D%") ["max" 0 ["min" 100 "percent"]]] ["hud--c" "p" ":fg"]]]
+              [["gap--meter" "p" ["/" "percent" 100] "accent" "zones"]]
+              [["when" "detail" ["gap--text" "detail" ["hud--dim" "p" "0.75"]]]]
+            ])
+          ]
+        ]
+      ])
+      blank
+      (rows [
+        ["defun" "gap--words" ["p" "&rest" "parts"]]
+        [["gap--item" "p" ["loop" "for" ["text" "color"] "on" "parts" "by" (function "cddr") "collect" ["gap--text" "text" ["or" "color" ["hud--c" "p" ":fg"]]]]]]
+      ])
+      blank
+      (rows [
+        ["defun" "gap--media" ["p" "snapshot"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["service" ["service-state" "snapshot" ":mpris"]]]
+              [["status" ["getf" "service" ":status"]]]
+              [["title" ["getf" "service" ":title"]]]
+              [["artist" ["getf" "service" ":artist"]]]
+            ])
+          ]
+          (rows [
+            ["when" ["and" ["stringp" "title"] ["plusp" ["length" "title"]] ["member" "status" (quote [(str "Playing") (str "Paused")]) ":test" (function "equal")]]]
+            (rows [
+              ["gap--words" "p" ["if" ["equal" "status" (str "Playing")] (str ">>") (str "||")] ["hud--c" "p" ":color5"]]
+              (rows [
+                [
+                  "gap--fit"
+                  [
+                    "gap--ascii"
+                    [
+                      "string-upcase"
+                      (rows [
+                        ["if" ["and" ["stringp" "artist"] ["plusp" ["length" "artist"]]]]
+                        (at 5 [["format" "nil" (str "~A - ~A") "artist" "title"]])
+                        (at 5 "title")
+                      ])
+                    ]
+                  ]
+                ]
+                [["round" ["getf" "+gap+" ":media-width"] ["getf" "+gap+" ":scale"]]]
+              ])
+              "nil"
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "gap--battery" ["p" "snapshot"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["battery" ["service-state" "snapshot" ":battery"]]]
+              [["percent" ["round" ["getf" "battery" ":percent" 0]]]]
+              [
+                [
+                  "color"
+                  (rows [
+                    ["cond" [["getf" "battery" ":charging"] ["hud--c" "p" ":color2"]] [["<" "percent" 15] ["hud--c" "p" ":color1"]]]
+                    [[["<" "percent" 30] ["hud--c" "p" ":color3"]] ["t" ["hud--c" "p" ":color2"]]]
+                  ])
+                ]
+              ]
+            ])
+          ]
+          [["gap--gauge" "p" ["if" ["getf" "battery" ":charging"] (str "CHG") (str "BAT")] "color" "percent" "nil" "nil"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "gap--network" ["p" "snapshot"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["network" ["service-state" "snapshot" ":network"]]]
+              [["ssid" ["getf" "network" ":ssid"]]]
+              [["online" ["getf" "network" ":connected"]]]
+            ])
+          ]
+          (rows [
+            [
+              "gap--words"
+              "p"
+              (rows [
+                [
+                  "gap--fit"
+                  (rows [
+                    ["cond" [["and" "online" ["stringp" "ssid"] ["plusp" ["length" "ssid"]]] ["gap--ascii" ["string-upcase" "ssid"]]]]
+                    [["online" (str "ONLINE")]]
+                    [["t" (str "OFFLINE")]]
+                  ])
+                ]
+                20
+              ])
+            ]
+            [["if" "online" ["hud--c" "p" ":color6"] ["hud--c" "p" ":color1"]]]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "gap--frame" ["p" "snapshot"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["battery" ["state-value" "snapshot" ":frame-battery"]]]
+              [["percent" ["getf" "battery" ":percent"]]]
+              [["powered" ["not" ["equal" ["getf" "battery" ":status"] (str "Discharging")]]]]
+            ])
+          ]
+          (rows [
+            ["when" "percent"]
+            (rows [
+              ["gap--gauge" "p" ["if" "powered" (str "VR+") (str "VR")]]
+              (rows [
+                ["cond" ["powered" ["hud--c" "p" ":color2"]] [["<" "percent" 15] ["hud--c" "p" ":color1"]]]
+                [[["<" "percent" 30] ["hud--c" "p" ":color3"]] ["t" ["hud--c" "p" ":color2"]]]
+              ])
+              ["percent" "nil" "nil"]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "gap--module" ["module" "p" "state" "snapshot"]]
+        (rows [
+          ["let" [["cpu" ["getf" "state" ":cpu"]] ["memory" ["getf" "state" ":memory"]] ["gpu" ["getf" "state" ":gpu"]]]]
+          (rows [
+            ["ecase" "module"]
+            [[":time" ["gap--words" "p" ["clock-text" ["getf" "+gap+" ":time"]] "nil"]]]
+            [[":date" ["gap--words" "p" ["string-upcase" ["clock-text" ["getf" "+gap+" ":date"]]] "nil"]]]
+            [[":media" ["gap--media" "p" "snapshot"]]]
+            [[":battery" ["gap--battery" "p" "snapshot"]]]
+            [[":network" ["gap--network" "p" "snapshot"]]]
+            [[":frame" ["gap--frame" "p" "snapshot"]]]
+            [[":cpu" ["gap--gauge" "p" (str "CPU") ["hud--c" "p" ":color4"] ["getf" "cpu" ":percent" 0] ["gap--degrees" ["getf" "cpu" ":temp"]]]]]
+            [[":memory" ["gap--gauge" "p" (str "MEM") ["hud--c" "p" ":color5"] ["getf" "memory" ":percent" 0] ["gap--gib" ["getf" "memory" ":used"]]]]]
+            [
+              [
+                ":gpu"
+                (rows [
+                  ["when" ["probe--gpu-p" "gpu"]]
+                  [["gap--gauge" "p" (str "GPU") ["hud--c" "p" ":color2"] ["getf" "gpu" ":percent" 0] ["gap--degrees" ["getf" "gpu" ":temp"]]]]
+                ])
+              ]
+            ]
+            [
+              [
+                ":vram"
+                (rows [
+                  ["when" ["probe--gpu-p" "gpu"]]
+                  (rows [
+                    ["gap--gauge" "p" (str "VRAM") ["hud--c" "p" ":color6"]]
+                    [["if" ["plusp" ["or" ["getf" "gpu" ":total"] 0]] ["round" ["*" 100 ["or" ["getf" "gpu" ":used"] 0]] ["getf" "gpu" ":total"]] 0]]
+                    [["gap--gib" ["getf" "gpu" ":used"]]]
+                  ])
+                ])
+              ]
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "gap--line" ["panels"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["modules" ["getf" "+gap+" ":modules"]]]
+              [["pair" ["getf" "+gap+" ":center-between"]]]
+              [["inset" ["getf" "+gap+" ":inset"]]]
+              [
+                [
+                  "seam"
+                  (rows [
+                    ["loop" "for" ["a" "b"] "on" "modules"]
+                    "for index from 1"
+                    ["when" ["and" "b" ["eq" "a" ["first" "pair"]] ["eq" "b" ["second" "pair"]]] "return index"]
+                  ])
+                ]
+              ]
+            ])
+          ]
+          (rows [
+            [
+              "flet"
+              [
+                (rows [
+                  ["half" ["items" "justify" "padding"]]
+                  (rows [
+                    ["ui" ":row" ":width" 0 ":grow" 1 ":height" ["gap--px" 11] ":gap" ["gap--px" 6] ":align" ":end" ":justify" "justify" ":padding" "padding"]
+                    [":children" ["remove" "nil" "items"]]
+                  ])
+                ])
+              ]
+            ]
+            (rows [
+              ["ui" ":row" ":height" ["gap--px" 11] ":align" ":end" ":justify" ":center"]
+              [
+                ":children"
+                (rows [
+                  ["if" "seam"]
+                  (rows [
+                    ["list" ["half" ["subseq" "panels" 0 "seam"] ":end" ["list" 0 "inset" 0 0]]]
+                    [["half" ["nthcdr" "seam" "panels"] ":start" ["list" 0 0 0 "inset"]]]
+                  ])
+                  [["list" ["ui" ":row" ":height" ["gap--px" 11] ":gap" ["gap--px" 6] ":align" ":end" ":children" ["remove" "nil" "panels"]]]]
+                ])
+              ]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        [
+          "define-extension"
+          (str "bar")
+          (rows [
+            [":reads" [":system" ":services" ":data" ":outputs"]]
+            [":state" ["list" ":cpu" "nil" ":memory" "nil" ":gpu" "nil"]]
+          ])
+        ]
+        [["snapshot" "state" "event"]]
+        (rows [
+          ["when" ["and" ["eq" ["getf" "event" ":type"] ":timer"] ["eq" ["getf" "event" ":name"] ":sample"]]]
+          (rows [
+            ["let" [["system" ["context" "snapshot" ":system"]]]]
+            (rows [
+              ["dolist" ["probe" (quote [":cpu" ":memory" ":gpu"])]]
+              [["setf" ["getf" "state" "probe"] ["probe--sample" "probe" ["getf" "state" "probe"] "system"]]]
+            ])
+          ])
+        ])
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["p" ["state-value" "snapshot" ":hud-palette"]]]
+              [
+                [
+                  "line"
+                  [
+                    "gap--line"
+                    (rows [
+                      ["loop" "for" "module" "in" ["getf" "+gap+" ":modules"]]
+                      ["collect" ["gap--module" "module" "p" "state" "snapshot"]]
+                    ])
+                  ]
+                ]
+              ]
+              [["focal" ["state-value" "snapshot" ":focal-frame"]]]
+              [["wide" ["first" ["sort" ["copy-list" ["context" "snapshot" ":outputs"]] (function ">") ":key" ["lambda" ["o"] ["getf" "o" ":width"]]]]]]
+              [["height" ["gap--px" 11]]]
+              [["lift" ["gap--px" 6]]]
+              [
+                [
+                  "hot"
+                  (rows [
+                    ["loop" "for" "probe" "in" (quote [":cpu" ":gpu"])]
+                    ["for" "temp" "=" ["getf" ["getf" "state" "probe"] ":temp"]]
+                    ["thereis" ["and" ["realp" "temp"] [">=" "temp" ["getf" "+gap+" ":hot"]]]]
+                  ])
+                ]
+              ]
+            ])
+          ]
+          (rows [
+            ["values" "state"]
+            (rows [
+              [
+                "append"
+                (rows [
+                  ["list" ["interval" ":sample" ["getf" "+gap+" ":sample"]]]
+                  [["publish-state" ":hud-hot" ["and" "hot" "t"]]]
+                  (rows [
+                    ["publish-state" ":bar-floor"]
+                    (rows [
+                      ["when" ["member" ":bottom" ["getf" "+gap+" ":edges"]]]
+                      (rows [
+                        [
+                          "cond"
+                          (rows [
+                            "focal"
+                            (rows [
+                              ["list" ":output" ["getf" "focal" ":output"]]
+                              [":y" ["+" ["getf" "focal" ":top"] ["getf" "focal" ":height"] ["-" "lift"] "height"]]
+                            ])
+                          ])
+                        ]
+                        [["wide" ["list" ":output" ["getf" "wide" ":name"] ":y" ["getf" "wide" ":height"]]]]
+                      ])
+                    ])
+                  ])
+                ])
+              ]
+              (rows [
+                ["loop" "for" "edge" "in" ["getf" "+gap+" ":edges"]]
+                [
+                  "collect"
+                  (rows [
+                    ["if" "focal"]
+                    (rows [
+                      ["shell-surface" "edge" "line" ":output" ["getf" "focal" ":output"] ":anchors" (quote [":top" ":left"])]
+                      [":width" ["getf" "focal" ":width"] ":height" "height"]
+                      [
+                        ":margin"
+                        (rows [
+                          [
+                            "list"
+                            (rows [
+                              [
+                                "-"
+                                (rows [
+                                  ["if" ["eq" "edge" ":top"]]
+                                  [["getf" "focal" ":top"]]
+                                  [["+" ["getf" "focal" ":top"] ["getf" "focal" ":height"]]]
+                                ])
+                              ]
+                              "lift"
+                            ])
+                          ]
+                          [0 0 ["getf" "focal" ":left"]]
+                        ])
+                      ]
+                      [":layer" ":overlay" ":background" (str "#00000000") ":click-through" "t"]
+                    ])
+                    (rows [
+                      ["shell-surface" "edge" "line" ":output" ["getf" "wide" ":name"] ":anchors" ["list" "edge" ":left" ":right"]]
+                      [":height" "height" ":margin" ["if" ["eq" "edge" ":top"] ["list" ["-" ["gap--px" 3]] 0 0 0] 0]]
+                      [":layer" ":overlay" ":background" (str "#00000000") ":click-through" "t"]
+                    ])
+                  ])
+                ]
+              ])
+            ])
+            "nil"
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_glass_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun glass--margin (passes offset)"
-      "  (min 4096 (truncate (* (expt 2 passes) (+ offset 2)))))"
-      ""
-      "(define-extension \"glass\" (:reads (:windows) :state nil) (snapshot state event)"
-      "  (declare (ignore event))"
-      "  (values state"
-      "          (cons (settings :blur (list* :enabled t"
-      "                                       :anti-artifact-margin"
-      "                                       (glass--margin (getf +glass+ :passes) (getf +glass+ :offset))"
-      "                                       +glass+))"
-      "                (loop for window in (context snapshot :windows)"
-      "                      collect (window-properties (getf window :id) :blur t)))"
-      "          nil))"
+    modules_desktop_session_tomoe_lisp_glass_data = {
+      blank,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "glass--margin" ["passes" "offset"]]
+        [["min" 4096 ["truncate" ["*" ["expt" 2 "passes"] ["+" "offset" 2]]]]]
+      ])
+      blank
+      (rows [
+        ["define-extension" (str "glass") [":reads" [":windows"] ":state" "nil"] ["snapshot" "state" "event"]]
+        [["declare" ["ignore" "event"]]]
+        (rows [
+          ["values" "state"]
+          (rows [
+            [
+              "cons"
+              [
+                "settings"
+                ":blur"
+                (rows [
+                  ["list*" ":enabled" "t"]
+                  ":anti-artifact-margin"
+                  [["glass--margin" ["getf" "+glass+" ":passes"] ["getf" "+glass+" ":offset"]]]
+                  "+glass+"
+                ])
+              ]
+            ]
+            (rows [
+              ["loop" "for" "window" "in" ["context" "snapshot" ":windows"]]
+              ["collect" ["window-properties" ["getf" "window" ":id"] ":blur" "t"]]
+            ])
+          ])
+          "nil"
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_hud_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun hud--now ()"
-      "  (/ (float (get-internal-real-time) 1d0) internal-time-units-per-second))"
-      ""
-      "(defun hud--since (at)"
-      "  (if at (* 1000 (- (hud--now) at)) most-positive-fixnum))"
-      ""
-      "(defun hud--decay (at ms)"
-      "  (let ((elapsed (hud--since at)))"
-      "    (if (< elapsed ms) (- 1 (/ elapsed ms)) 0)))"
-      ""
-      "(defun hud--c (p key)"
-      "  (or (getf p key)"
-      "      (theme (case key"
-      "               (:bg :base) ((:fg :color15) :text) (:color1 :red) (:color2 :green) (:color3 :yellow)"
-      "               (:color4 :blue) (:color5 :mauve) (:color6 :sky) (:color8 :surface2) (t :accent)))))"
-      ""
-      "(defun hud--hex2 (n) (format nil \"~2,'0X\" (max 0 (min 255 (round n)))))"
-      ""
-      "(defun hud--alpha (hex aa) (if (= (length hex) 7) (concatenate 'string hex aa) hex))"
-      ""
-      "(defun hud--fade (hex fraction) (hud--alpha hex (hud--hex2 (* 255 fraction))))"
-      ""
-      "(defun hud--mix (a b f)"
-      "  (cond ((<= f 0) a)"
-      "        ((and (= (length a) 7) (= (length b) 7))"
-      "         (format nil \"#~{~A~}\""
-      "                 (loop for i from 1 by 2 repeat 3"
-      "                       collect (hud--hex2 (+ (* (- 1 f) (parse-integer a :start i :end (+ i 2) :radix 16))"
-      "                                             (* f (parse-integer b :start i :end (+ i 2) :radix 16)))))))"
-      "        (t b)))"
-      ""
-      "(defun hud--text (text size color &optional (font (getf +hud+ :font)))"
-      "  (ui :text :text text :size size :color color :font font))"
-      ""
-      "(defun hud--icon (code size color)"
-      "  (hud--text (string (code-char code)) size color (getf +hud+ :icon-font)))"
-      ""
-      "(defun hud--dim (p &optional (fraction 0.6)) (hud--fade (hud--c p :fg) fraction))"
-      ""
-      "(defun hud--off (p) (hud--mix (hud--c p :bg) (hud--c p :fg) 0.14))"
-      ""
-      "(defun hud--heat (percent accent p)"
-      "  (cond ((>= percent 90) (hud--c p :color1)) ((>= percent 70) (hud--c p :color3)) (t accent)))"
-      ""
-      "(defun hud--frame (p accent flash content &key height)"
-      "  (let* ((s (getf +hud+ :shadow))"
-      "         (edge (hud--mix accent (hud--c p :fg) flash))"
-      "         (body (ui :row :height height :align :stretch"
-      "                   :background (hud--alpha (hud--c p :bg) \"eb\")"
-      "                   :border 1 :border-color (hud--alpha edge (if (plusp flash) \"ff\" \"b3\"))"
-      "                   :children (list (ui :rect :width 3 :background edge) content))))"
-      "    (ui :stack :children (list (ui :row :padding (list s 0 0 s) :align :stretch"
-      "                                   :children (list (ui :rect :grow 1 :background (hud--mix (hud--c p :bg) edge 0.6))))"
-      "                               (ui :row :padding (list 0 s s 0) :children (list body))))))"
-      ""
-      "(defun hud--panel (p accent children &key (flash 0))"
-      "  (hud--frame p accent flash (ui :row :align :center :gap 8 :padding '(0 10 0 8) :children children)"
-      "              :height (getf +hud+ :height)))"
+    modules_desktop_session_tomoe_lisp_hud_data = {
+      blank,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "hud--now" []]
+        [["/" ["float" ["get-internal-real-time"] "1d0"] "internal-time-units-per-second"]]
+      ])
+      blank
+      (rows [
+        ["defun" "hud--since" ["at"]]
+        [["if" "at" ["*" 1000 ["-" ["hud--now"] "at"]] "most-positive-fixnum"]]
+      ])
+      blank
+      (rows [
+        ["defun" "hud--decay" ["at" "ms"]]
+        (rows [
+          ["let" [["elapsed" ["hud--since" "at"]]]]
+          [["if" ["<" "elapsed" "ms"] ["-" 1 ["/" "elapsed" "ms"]] 0]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "hud--c" ["p" "key"]]
+        (rows [
+          ["or" ["getf" "p" "key"]]
+          [
+            [
+              "theme"
+              (rows [
+                ["case" "key"]
+                [[":bg" ":base"] [[":fg" ":color15"] ":text"] [":color1" ":red"] [":color2" ":green"] [":color3" ":yellow"]]
+                [[":color4" ":blue"] [":color5" ":mauve"] [":color6" ":sky"] [":color8" ":surface2"] ["t" ":accent"]]
+              ])
+            ]
+          ]
+        ])
+      ])
+      blank
+      ["defun" "hud--hex2" ["n"] ["format" "nil" (str "~2,'0X") ["max" 0 ["min" 255 ["round" "n"]]]]]
+      blank
+      ["defun" "hud--alpha" ["hex" "aa"] ["if" ["=" ["length" "hex"] 7] ["concatenate" (quote "string") "hex" "aa"] "hex"]]
+      blank
+      ["defun" "hud--fade" ["hex" "fraction"] ["hud--alpha" "hex" ["hud--hex2" ["*" 255 "fraction"]]]]
+      blank
+      (rows [
+        ["defun" "hud--mix" ["a" "b" "f"]]
+        (rows [
+          ["cond" [["<=" "f" 0] "a"]]
+          (rows [
+            [["and" ["=" ["length" "a"] 7] ["=" ["length" "b"] 7]]]
+            (rows [
+              ["format" "nil" (str "#~{~A~}")]
+              (rows [
+                ["loop" "for i from 1 by 2" "repeat 3"]
+                [
+                  "collect"
+                  [
+                    "hud--hex2"
+                    (rows [
+                      ["+" ["*" ["-" 1 "f"] ["parse-integer" "a" ":start" "i" ":end" ["+" "i" 2] ":radix" 16]]]
+                      [["*" "f" ["parse-integer" "b" ":start" "i" ":end" ["+" "i" 2] ":radix" 16]]]
+                    ])
+                  ]
+                ]
+              ])
+            ])
+          ])
+          [["t" "b"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "hud--text" ["text" "size" "color" "&optional" ["font" ["getf" "+hud+" ":font"]]]]
+        [["ui" ":text" ":text" "text" ":size" "size" ":color" "color" ":font" "font"]]
+      ])
+      blank
+      (rows [
+        ["defun" "hud--icon" ["code" "size" "color"]]
+        [["hud--text" ["string" ["code-char" "code"]] "size" "color" ["getf" "+hud+" ":icon-font"]]]
+      ])
+      blank
+      ["defun" "hud--dim" ["p" "&optional" ["fraction" "0.6"]] ["hud--fade" ["hud--c" "p" ":fg"] "fraction"]]
+      blank
+      ["defun" "hud--off" ["p"] ["hud--mix" ["hud--c" "p" ":bg"] ["hud--c" "p" ":fg"] "0.14"]]
+      blank
+      (rows [
+        ["defun" "hud--heat" ["percent" "accent" "p"]]
+        [["cond" [[">=" "percent" 90] ["hud--c" "p" ":color1"]] [[">=" "percent" 70] ["hud--c" "p" ":color3"]] ["t" "accent"]]]
+      ])
+      blank
+      (rows [
+        ["defun" "hud--frame" ["p" "accent" "flash" "content" "&key" "height"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["s" ["getf" "+hud+" ":shadow"]]]
+              [["edge" ["hud--mix" "accent" ["hud--c" "p" ":fg"] "flash"]]]
+              [
+                [
+                  "body"
+                  (rows [
+                    ["ui" ":row" ":height" "height" ":align" ":stretch"]
+                    [":background" ["hud--alpha" ["hud--c" "p" ":bg"] (str "eb")]]
+                    [":border" 1 ":border-color" ["hud--alpha" "edge" ["if" ["plusp" "flash"] (str "ff") (str "b3")]]]
+                    [":children" ["list" ["ui" ":rect" ":width" 3 ":background" "edge"] "content"]]
+                  ])
+                ]
+              ]
+            ])
+          ]
+          [
+            [
+              "ui"
+              ":stack"
+              ":children"
+              (rows [
+                [
+                  "list"
+                  (rows [
+                    ["ui" ":row" ":padding" ["list" "s" 0 0 "s"] ":align" ":stretch"]
+                    [":children" ["list" ["ui" ":rect" ":grow" 1 ":background" ["hud--mix" ["hud--c" "p" ":bg"] "edge" "0.6"]]]]
+                  ])
+                ]
+                [["ui" ":row" ":padding" ["list" 0 "s" "s" 0] ":children" ["list" "body"]]]
+              ])
+            ]
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "hud--panel" ["p" "accent" "children" "&key" ["flash" 0]]]
+        (rows [
+          ["hud--frame" "p" "accent" "flash" ["ui" ":row" ":align" ":center" ":gap" 8 ":padding" (quote [0 10 0 8]) ":children" "children"]]
+          [":height" ["getf" "+hud+" ":height"]]
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_peek_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(define-extension \"peek\" (:reads (:key :windows) :state nil) (snapshot hidden event)"
-      "  (let ((live (mapcar (lambda (window) (getf window :id)) (context snapshot :windows))))"
-      "    (setf hidden (cond ((and (eq (getf event :type) :key) (equal (getf event :owner) \"peek\"))"
-      "                        (unless hidden live))"
-      "                       ((subsetp live hidden) (intersection hidden live))))"
-      "    (values hidden"
-      "            (list* (apply #'bind-key (getf +peek+ :bind))"
-      "                   (when hidden (cons (focus nil) (mapcar #'hide-window hidden))))"
-      "            nil)))"
+    modules_desktop_session_tomoe_lisp_peek_data = {
+      blank,
+      function,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["define-extension" (str "peek") [":reads" [":key" ":windows"] ":state" "nil"] ["snapshot" "hidden" "event"]]
+        (rows [
+          ["let" [["live" ["mapcar" ["lambda" ["window"] ["getf" "window" ":id"]] ["context" "snapshot" ":windows"]]]]]
+          [
+            [
+              "setf"
+              "hidden"
+              (rows [
+                [
+                  "cond"
+                  (rows [
+                    [["and" ["eq" ["getf" "event" ":type"] ":key"] ["equal" ["getf" "event" ":owner"] (str "peek")]]]
+                    [["unless" "hidden" "live"]]
+                  ])
+                ]
+                [[["subsetp" "live" "hidden"] ["intersection" "hidden" "live"]]]
+              ])
+            ]
+          ]
+          (rows [
+            ["values" "hidden"]
+            (rows [
+              ["list*" ["apply" (function "bind-key") ["getf" "+peek+" ":bind"]]]
+              [["when" "hidden" ["cons" ["focus" "nil"] ["mapcar" (function "hide-window") "hidden"]]]]
+            ])
+            "nil"
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_plates_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun cassette--line (items edge)"
-      "  (let ((inset (getf +cassette+ :inset))"
-      "        (seam (cassette--split)))"
-      "    (flet ((half (plate justify padding)"
-      "             (ui :row :width 0 :grow 1 :justify justify :padding padding :children (remove nil (list plate)))))"
-      "      (ui :row :align :start :justify :center"
-      "          :children (if seam"
-      "                        (list (half (cassette--plate (subseq items 0 seam) :start edge) :end (list 0 inset 0 0))"
-      "                              (half (cassette--plate (nthcdr seam items) :end edge) :start (list 0 0 0 inset)))"
-      "                        (remove nil (list (cassette--plate items :both edge))))))))"
-      ""
-      "(define-extension \"bar\" (:reads (:system :services :data :outputs)"
-      "                         :state (list :cpu nil :memory nil :gpu nil))"
-      "    (snapshot state event)"
-      "  (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))"
-      "    (let ((system (context snapshot :system)))"
-      "      (dolist (probe '(:cpu :memory :gpu))"
-      "        (setf (getf state probe) (probe--sample probe (getf state probe) system)))))"
-      "  (let* ((items (loop for module in (getf +cassette+ :modules)"
-      "                      collect (cassette--module module state snapshot)))"
-      "         (focal (state-value snapshot :focal-frame))"
-      "         (wide (first (sort (copy-list (context snapshot :outputs)) #'> :key (lambda (o) (getf o :width)))))"
-      "         (height (cassette--height :bottom))"
-      "         (hot (loop for probe in '(:cpu :gpu) thereis (cassette--hot-p (getf (getf state probe) :temp)))))"
-      "    (values state"
-      "            (append (list (interval :sample (getf +cassette+ :sample))"
-      "                          (publish-state :hud-hot (and hot t))"
-      "                          (publish-state :bar-floor"
-      "                                         (when (member :bottom (getf +cassette+ :edges))"
-      "                                           (cond (focal (list :output (getf focal :output)"
-      "                                                              :y (+ (getf focal :top) (getf focal :height) (round height 2))))"
-      "                                                 (wide (list :output (getf wide :name) :y (getf wide :height)))))))"
-      "                    (loop for edge in (getf +cassette+ :edges)"
-      "                          for line = (cassette--line items edge)"
-      "                          for height = (cassette--height edge)"
-      "                          collect (if focal"
-      "                                      (shell-surface edge line :output (getf focal :output) :anchors '(:top :left)"
-      "                                                     :width (getf focal :width) :height height"
-      "                                                     :margin (list (- (if (eq edge :top)"
-      "                                                                          (getf focal :top)"
-      "                                                                          (+ (getf focal :top) (getf focal :height)))"
-      "                                                                      (round height 2))"
-      "                                                                   0 0 (getf focal :left))"
-      "                                                     :layer :overlay :background \"#00000000\" :click-through t)"
-      "                                      (shell-surface edge line :output (getf wide :name) :anchors (list edge :left :right)"
-      "                                                     :height height :margin (if (eq edge :top) '(-1 0 0 0) '(0 0 -1 0))"
-      "                                                     :exclusive-zone 0"
-      "                                                     :layer :overlay :background \"#00000000\" :click-through t))))"
-      "            nil)))"
+    modules_desktop_session_tomoe_lisp_plates_data = {
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "cassette--line" ["items" "edge"]]
+        (rows [
+          [
+            "let"
+            (rows [
+              [["inset" ["getf" "+cassette+" ":inset"]]]
+              [["seam" ["cassette--split"]]]
+            ])
+          ]
+          (rows [
+            [
+              "flet"
+              [
+                (rows [
+                  ["half" ["plate" "justify" "padding"]]
+                  [["ui" ":row" ":width" 0 ":grow" 1 ":justify" "justify" ":padding" "padding" ":children" ["remove" "nil" ["list" "plate"]]]]
+                ])
+              ]
+            ]
+            (rows [
+              ["ui" ":row" ":align" ":start" ":justify" ":center"]
+              [
+                ":children"
+                (rows [
+                  ["if" "seam"]
+                  (rows [
+                    ["list" ["half" ["cassette--plate" ["subseq" "items" 0 "seam"] ":start" "edge"] ":end" ["list" 0 "inset" 0 0]]]
+                    [["half" ["cassette--plate" ["nthcdr" "seam" "items"] ":end" "edge"] ":start" ["list" 0 0 0 "inset"]]]
+                  ])
+                  [["remove" "nil" ["list" ["cassette--plate" "items" ":both" "edge"]]]]
+                ])
+              ]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        [
+          "define-extension"
+          (str "bar")
+          (rows [
+            [":reads" [":system" ":services" ":data" ":outputs"]]
+            [":state" ["list" ":cpu" "nil" ":memory" "nil" ":gpu" "nil"]]
+          ])
+        ]
+        [["snapshot" "state" "event"]]
+        (rows [
+          ["when" ["and" ["eq" ["getf" "event" ":type"] ":timer"] ["eq" ["getf" "event" ":name"] ":sample"]]]
+          (rows [
+            ["let" [["system" ["context" "snapshot" ":system"]]]]
+            (rows [
+              ["dolist" ["probe" (quote [":cpu" ":memory" ":gpu"])]]
+              [["setf" ["getf" "state" "probe"] ["probe--sample" "probe" ["getf" "state" "probe"] "system"]]]
+            ])
+          ])
+        ])
+        (rows [
+          [
+            "let*"
+            (rows [
+              [
+                [
+                  "items"
+                  (rows [
+                    ["loop" "for" "module" "in" ["getf" "+cassette+" ":modules"]]
+                    ["collect" ["cassette--module" "module" "state" "snapshot"]]
+                  ])
+                ]
+              ]
+              [["focal" ["state-value" "snapshot" ":focal-frame"]]]
+              [["wide" ["first" ["sort" ["copy-list" ["context" "snapshot" ":outputs"]] (function ">") ":key" ["lambda" ["o"] ["getf" "o" ":width"]]]]]]
+              [["height" ["cassette--height" ":bottom"]]]
+              [["hot" ["loop" "for" "probe" "in" (quote [":cpu" ":gpu"]) "thereis" ["cassette--hot-p" ["getf" ["getf" "state" "probe"] ":temp"]]]]]
+            ])
+          ]
+          (rows [
+            ["values" "state"]
+            (rows [
+              [
+                "append"
+                (rows [
+                  ["list" ["interval" ":sample" ["getf" "+cassette+" ":sample"]]]
+                  [["publish-state" ":hud-hot" ["and" "hot" "t"]]]
+                  (rows [
+                    ["publish-state" ":bar-floor"]
+                    (rows [
+                      ["when" ["member" ":bottom" ["getf" "+cassette+" ":edges"]]]
+                      (rows [
+                        [
+                          "cond"
+                          [
+                            "focal"
+                            (rows [
+                              ["list" ":output" ["getf" "focal" ":output"]]
+                              [":y" ["+" ["getf" "focal" ":top"] ["getf" "focal" ":height"] ["round" "height" 2]]]
+                            ])
+                          ]
+                        ]
+                        [["wide" ["list" ":output" ["getf" "wide" ":name"] ":y" ["getf" "wide" ":height"]]]]
+                      ])
+                    ])
+                  ])
+                ])
+              ]
+              (rows [
+                ["loop" "for" "edge" "in" ["getf" "+cassette+" ":edges"]]
+                ["for" "line" "=" ["cassette--line" "items" "edge"]]
+                ["for" "height" "=" ["cassette--height" "edge"]]
+                [
+                  "collect"
+                  (rows [
+                    ["if" "focal"]
+                    (rows [
+                      ["shell-surface" "edge" "line" ":output" ["getf" "focal" ":output"] ":anchors" (quote [":top" ":left"])]
+                      [":width" ["getf" "focal" ":width"] ":height" "height"]
+                      [
+                        ":margin"
+                        (rows [
+                          [
+                            "list"
+                            (rows [
+                              [
+                                "-"
+                                (rows [
+                                  ["if" ["eq" "edge" ":top"]]
+                                  [["getf" "focal" ":top"]]
+                                  [["+" ["getf" "focal" ":top"] ["getf" "focal" ":height"]]]
+                                ])
+                              ]
+                              [["round" "height" 2]]
+                            ])
+                          ]
+                          [0 0 ["getf" "focal" ":left"]]
+                        ])
+                      ]
+                      [":layer" ":overlay" ":background" (str "#00000000") ":click-through" "t"]
+                    ])
+                    (rows [
+                      ["shell-surface" "edge" "line" ":output" ["getf" "wide" ":name"] ":anchors" ["list" "edge" ":left" ":right"]]
+                      [":height" "height" ":margin" ["if" ["eq" "edge" ":top"] (quote [(-1) 0 0 0]) (quote [0 0 (-1) 0])]]
+                      [":exclusive-zone" 0]
+                      [":layer" ":overlay" ":background" (str "#00000000") ":click-through" "t"]
+                    ])
+                  ])
+                ]
+              ])
+            ])
+            "nil"
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_policy_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun policy--prefix-p (prefix text)"
-      "  (and (stringp text) (>= (length text) (length prefix))"
-      "       (string= prefix text :end2 (length prefix))))"
-      ""
-      "(defun policy--launch (command)"
-      "  (second (assoc command +policy-launches+ :test #'equal)))"
-      ""
-      "(defun policy--terminal (windows)"
-      "  (getf (find (getf +policy-terminal+ :app-id) windows"
-      "              :key (lambda (window) (getf window :app-id)) :test #'equal)"
-      "        :id))"
-      ""
-      "(defun policy--unmanaged-p (snapshot window)"
-      "  (let ((properties (rules-for snapshot window)))"
-      "    (or (cdr (assoc :float properties)) (cdr (assoc :hidden properties)))))"
-      ""
-      "(defun policy--area (snapshot &optional name)"
-      "  (let ((areas (context snapshot :workareas)))"
-      "    (or (find name areas :test #'equal :key (lambda (area) (getf area :name)))"
-      "        (first areas))))"
-      ""
-      "(defun policy--centred (area ratio)"
-      "  (let ((width (max 1 (floor (* (getf area :width) ratio))))"
-      "        (height (max 1 (floor (* (getf area :height) ratio)))))"
-      "    (list (+ (getf area :x) (floor (- (getf area :width) width) 2))"
-      "          (+ (getf area :y) (floor (- (getf area :height) height) 2))"
-      "          width height)))"
-      ""
-      "(define-extension \"session\" () (snapshot state event)"
-      "  (declare (ignore snapshot event))"
-      "  (values state"
-      "          (append (mapcar (lambda (display) (apply #'configure-output display)) +policy-displays+)"
-      "                  (list (apply #'settings +policy-settings+)))"
-      "          nil))"
-      ""
-      "(define-extension \"rules\" () (snapshot state event)"
-      "  (declare (ignore snapshot event))"
-      "  (values state"
-      "          (list (window-rule :launcher :app-id (getf +policy-launcher+ :app-id)"
-      "                             :properties '((:float . t)) :reads '(:workareas)"
-      "                             :apply (lambda (window snapshot state event)"
-      "                                      (declare (ignore event))"
-      "                                      (let ((id (getf window :id))"
-      "                                            (area (policy--area snapshot)))"
-      "                                        (values state"
-      "                                                (append (when area"
-      "                                                          (list (apply #'place id (policy--centred"
-      "                                                                                   area (getf +policy-launcher+ :ratio)))))"
-      "                                                        (list (focus id)))"
-      "                                                nil))))"
-      "                (window-rule :hidden :app-id (getf +policy-hidden-window+ :app-id)"
-      "                             :match (lambda (window snapshot)"
-      "                                      (declare (ignore snapshot))"
-      "                                      (policy--prefix-p (getf +policy-hidden-window+ :title-prefix)"
-      "                                                        (getf window :title)))"
-      "                             :properties '((:hidden . t))"
-      "                             :apply (lambda (window snapshot state event)"
-      "                                      (declare (ignore snapshot event))"
-      "                                      (values state (list (hide-window (getf window :id))) nil))))"
-      "          nil))"
+    modules_desktop_session_tomoe_lisp_policy_data = {
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "policy--prefix-p" ["prefix" "text"]]
+        (rows [
+          ["and" ["stringp" "text"] [">=" ["length" "text"] ["length" "prefix"]]]
+          [["string=" "prefix" "text" ":end2" ["length" "prefix"]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "policy--launch" ["command"]]
+        [["second" ["assoc" "command" "+policy-launches+" ":test" (function "equal")]]]
+      ])
+      blank
+      (rows [
+        ["defun" "policy--terminal" ["windows"]]
+        (rows [
+          [
+            "getf"
+            (rows [
+              ["find" ["getf" "+policy-terminal+" ":app-id"] "windows"]
+              [":key" ["lambda" ["window"] ["getf" "window" ":app-id"]] ":test" (function "equal")]
+            ])
+          ]
+          ":id"
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "policy--unmanaged-p" ["snapshot" "window"]]
+        (rows [
+          ["let" [["properties" ["rules-for" "snapshot" "window"]]]]
+          [["or" ["cdr" ["assoc" ":float" "properties"]] ["cdr" ["assoc" ":hidden" "properties"]]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "policy--area" ["snapshot" "&optional" "name"]]
+        (rows [
+          ["let" [["areas" ["context" "snapshot" ":workareas"]]]]
+          (rows [
+            ["or" ["find" "name" "areas" ":test" (function "equal") ":key" ["lambda" ["area"] ["getf" "area" ":name"]]]]
+            [["first" "areas"]]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "policy--centred" ["area" "ratio"]]
+        (rows [
+          [
+            "let"
+            (rows [
+              [["width" ["max" 1 ["floor" ["*" ["getf" "area" ":width"] "ratio"]]]]]
+              [["height" ["max" 1 ["floor" ["*" ["getf" "area" ":height"] "ratio"]]]]]
+            ])
+          ]
+          (rows [
+            ["list" ["+" ["getf" "area" ":x"] ["floor" ["-" ["getf" "area" ":width"] "width"] 2]]]
+            [["+" ["getf" "area" ":y"] ["floor" ["-" ["getf" "area" ":height"] "height"] 2]]]
+            ["width" "height"]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["define-extension" (str "session") [] ["snapshot" "state" "event"]]
+        [["declare" ["ignore" "snapshot" "event"]]]
+        (rows [
+          ["values" "state"]
+          (rows [
+            ["append" ["mapcar" ["lambda" ["display"] ["apply" (function "configure-output") "display"]] "+policy-displays+"]]
+            [["list" ["apply" (function "settings") "+policy-settings+"]]]
+          ])
+          "nil"
+        ])
+      ])
+      blank
+      (rows [
+        ["define-extension" (str "rules") [] ["snapshot" "state" "event"]]
+        [["declare" ["ignore" "snapshot" "event"]]]
+        (rows [
+          ["values" "state"]
+          (rows [
+            [
+              "list"
+              (rows [
+                ["window-rule" ":launcher" ":app-id" ["getf" "+policy-launcher+" ":app-id"]]
+                [":properties" (quote [[":float" "." "t"]]) ":reads" (quote [":workareas"])]
+                [
+                  ":apply"
+                  (rows [
+                    ["lambda" ["window" "snapshot" "state" "event"]]
+                    [["declare" ["ignore" "event"]]]
+                    (rows [
+                      [
+                        "let"
+                        (rows [
+                          [["id" ["getf" "window" ":id"]]]
+                          [["area" ["policy--area" "snapshot"]]]
+                        ])
+                      ]
+                      (rows [
+                        ["values" "state"]
+                        (rows [
+                          [
+                            "append"
+                            (rows [
+                              ["when" "area"]
+                              [
+                                [
+                                  "list"
+                                  [
+                                    "apply"
+                                    (function "place")
+                                    "id"
+                                    (rows [
+                                      "policy--centred"
+                                      ["area" ["getf" "+policy-launcher+" ":ratio"]]
+                                    ])
+                                  ]
+                                ]
+                              ]
+                            ])
+                          ]
+                          [["list" ["focus" "id"]]]
+                        ])
+                        "nil"
+                      ])
+                    ])
+                  ])
+                ]
+              ])
+            ]
+            (rows [
+              ["window-rule" ":hidden" ":app-id" ["getf" "+policy-hidden-window+" ":app-id"]]
+              [
+                ":match"
+                (rows [
+                  ["lambda" ["window" "snapshot"]]
+                  [["declare" ["ignore" "snapshot"]]]
+                  (rows [
+                    ["policy--prefix-p" ["getf" "+policy-hidden-window+" ":title-prefix"]]
+                    [["getf" "window" ":title"]]
+                  ])
+                ])
+              ]
+              [":properties" (quote [[":hidden" "." "t"]])]
+              [
+                ":apply"
+                (rows [
+                  ["lambda" ["window" "snapshot" "state" "event"]]
+                  [["declare" ["ignore" "snapshot" "event"]]]
+                  [["values" "state" ["list" ["hide-window" ["getf" "window" ":id"]]] "nil"]]
+                ])
+              ]
+            ])
+          ])
+          "nil"
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_shader_wallpaper_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun shader-wallpaper--menu (shaders chosen outputs)"
-      "  (destructuring-bind (&key width height gap border) (getf +shader-wallpaper+ :preview)"
-      "    (let ((count (length shaders)))"
-      "      (list* (shell-surface :shader-menu (ui :column :on-click :cancel :background \"#00000066\")"
-      "                            :anchors '(:top :right :bottom :left) :layer :overlay"
-      "                            :background \"#00000000\" :blur t)"
-      "             (keyboard-grab)"
-      "             (bind-key nil \"Left\" :up) (bind-key nil \"h\" :up)"
-      "             (bind-key nil \"Right\" :down) (bind-key nil \"l\" :down)"
-      "             (bind-key nil \"Return\" :select) (bind-key nil \"Escape\" :cancel)"
-      "             (loop for output in outputs"
-      "                   for scale = (getf output :scale-120 120)"
-      "                   for output-width = (floor (* (getf output :width) 120) scale)"
-      "                   for output-height = (floor (* (getf output :height) 120) scale)"
-      "                   for tile-width = (min width (floor (- output-width (* (1+ count) gap)) count))"
-      "                   for tile-height = (floor (* height tile-width) width)"
-      "                   for left = (floor (- output-width (- (* count (+ tile-width gap)) gap)) 2)"
-      "                   for top = (floor (- output-height tile-height) 2)"
-      "                   nconc (loop for (path fps) in shaders"
-      "                               for index from 0"
-      "                               collect (shell-surface"
-      "                                        (intern (format nil \"SHADER-PREVIEW-~A-~D\" (getf output :name) index)"
-      "                                                :keyword)"
-      "                                        (ui :stack :width tile-width :height tile-height"
-      "                                            :border (if (= index chosen) border 0)"
-      "                                            :border-color (theme :accent)"
-      "                                            :on-click (intern (format nil \"SELECT-~D\" index) :keyword)"
-      "                                            :on-hover (intern (format nil \"HOVER-~D\" index) :keyword))"
-      "                                        :output (getf output :name) :anchors '(:top :left)"
-      "                                        :margin (list top 0 0 (+ left (* index (+ tile-width gap))))"
-      "                                        :width tile-width :height tile-height :layer :overlay"
-      "                                        :background (list :shader path :fps fps))))))))"
-      ""
-      "(define-extension \"shader-wallpaper\" (:reads (:key :ui :outputs) :state nil) (snapshot state event)"
-      "  (let* ((shaders (getf +shader-wallpaper+ :shaders))"
-      "         (count (length shaders)))"
-      "    (destructuring-bind (&key (index 0) menu) state"
-      "      (when (equal (getf event :owner) \"shader-wallpaper\")"
-      "        (if (equal (getf event :command) \"menu\")"
-      "            (setf menu index)"
-      "            (multiple-value-bind (action choice) (and menu (menu-choice event menu count))"
-      "              (case action"
-      "                (:select (setf index choice menu nil))"
-      "                (:cancel (setf menu nil))"
-      "                (:move (setf menu choice))))))"
-      "      (setf index (mod index count) menu (and menu (mod menu count)))"
-      "      (let ((shown (nth (or menu index) shaders))"
-      "            (command (third (nth index shaders))))"
-      "        (values (list :index index :menu menu)"
-      "                (list* (apply #'bind-key (getf +shader-wallpaper+ :bind))"
-      "                       (shell-surface :shader-wallpaper (ui :stack)"
-      "                                      :anchors '(:top :right :bottom :left) :layer :background"
-      "                                      :background (list :shader (first shown) :fps (second shown)))"
-      "                       (append (when command (list (exec-async :theme command)))"
-      "                               (when menu (shader-wallpaper--menu shaders menu (context snapshot :outputs)))))"
-      "                nil)))))"
+    modules_desktop_session_tomoe_lisp_shader_wallpaper_data = {
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "shader-wallpaper--menu" ["shaders" "chosen" "outputs"]]
+        (rows [
+          ["destructuring-bind" ["&key" "width" "height" "gap" "border"] ["getf" "+shader-wallpaper+" ":preview"]]
+          (rows [
+            ["let" [["count" ["length" "shaders"]]]]
+            (rows [
+              [
+                "list*"
+                (rows [
+                  ["shell-surface" ":shader-menu" ["ui" ":column" ":on-click" ":cancel" ":background" (str "#00000066")]]
+                  [":anchors" (quote [":top" ":right" ":bottom" ":left"]) ":layer" ":overlay"]
+                  [":background" (str "#00000000") ":blur" "t"]
+                ])
+              ]
+              [["keyboard-grab"]]
+              [["bind-key" "nil" (str "Left") ":up"] ["bind-key" "nil" (str "h") ":up"]]
+              [["bind-key" "nil" (str "Right") ":down"] ["bind-key" "nil" (str "l") ":down"]]
+              [["bind-key" "nil" (str "Return") ":select"] ["bind-key" "nil" (str "Escape") ":cancel"]]
+              (rows [
+                ["loop" "for output in outputs"]
+                ["for" "scale" "=" ["getf" "output" ":scale-120" 120]]
+                ["for" "output-width" "=" ["floor" ["*" ["getf" "output" ":width"] 120] "scale"]]
+                ["for" "output-height" "=" ["floor" ["*" ["getf" "output" ":height"] 120] "scale"]]
+                ["for" "tile-width" "=" ["min" "width" ["floor" ["-" "output-width" ["*" ["1+" "count"] "gap"]] "count"]]]
+                ["for" "tile-height" "=" ["floor" ["*" "height" "tile-width"] "width"]]
+                ["for" "left" "=" ["floor" ["-" "output-width" ["-" ["*" "count" ["+" "tile-width" "gap"]] "gap"]] 2]]
+                ["for" "top" "=" ["floor" ["-" "output-height" "tile-height"] 2]]
+                [
+                  "nconc"
+                  (rows [
+                    ["loop" "for" ["path" "fps"] "in" "shaders"]
+                    "for index from 0"
+                    [
+                      "collect"
+                      (rows [
+                        "shell-surface"
+                        (rows [
+                          ["intern" ["format" "nil" (str "SHADER-PREVIEW-~A-~D") ["getf" "output" ":name"] "index"]]
+                          ":keyword"
+                        ])
+                        (rows [
+                          ["ui" ":stack" ":width" "tile-width" ":height" "tile-height"]
+                          [":border" ["if" ["=" "index" "chosen"] "border" 0]]
+                          [":border-color" ["theme" ":accent"]]
+                          [":on-click" ["intern" ["format" "nil" (str "SELECT-~D") "index"] ":keyword"]]
+                          [":on-hover" ["intern" ["format" "nil" (str "HOVER-~D") "index"] ":keyword"]]
+                        ])
+                        [":output" ["getf" "output" ":name"] ":anchors" (quote [":top" ":left"])]
+                        [":margin" ["list" "top" 0 0 ["+" "left" ["*" "index" ["+" "tile-width" "gap"]]]]]
+                        [":width" "tile-width" ":height" "tile-height" ":layer" ":overlay"]
+                        [":background" ["list" ":shader" "path" ":fps" "fps"]]
+                      ])
+                    ]
+                  ])
+                ]
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["define-extension" (str "shader-wallpaper") [":reads" [":key" ":ui" ":outputs"] ":state" "nil"] ["snapshot" "state" "event"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["shaders" ["getf" "+shader-wallpaper+" ":shaders"]]]
+              [["count" ["length" "shaders"]]]
+            ])
+          ]
+          (rows [
+            ["destructuring-bind" ["&key" ["index" 0] "menu"] "state"]
+            (rows [
+              ["when" ["equal" ["getf" "event" ":owner"] (str "shader-wallpaper")]]
+              (rows [
+                ["if" ["equal" ["getf" "event" ":command"] (str "menu")]]
+                [["setf" "menu" "index"]]
+                (rows [
+                  ["multiple-value-bind" ["action" "choice"] ["and" "menu" ["menu-choice" "event" "menu" "count"]]]
+                  (rows [
+                    ["case" "action"]
+                    [[":select" ["setf" "index" "choice" "menu" "nil"]]]
+                    [[":cancel" ["setf" "menu" "nil"]]]
+                    [[":move" ["setf" "menu" "choice"]]]
+                  ])
+                ])
+              ])
+            ])
+            [["setf" "index" ["mod" "index" "count"] "menu" ["and" "menu" ["mod" "menu" "count"]]]]
+            (rows [
+              [
+                "let"
+                (rows [
+                  [["shown" ["nth" ["or" "menu" "index"] "shaders"]]]
+                  [["command" ["third" ["nth" "index" "shaders"]]]]
+                ])
+              ]
+              (rows [
+                ["values" ["list" ":index" "index" ":menu" "menu"]]
+                (rows [
+                  ["list*" ["apply" (function "bind-key") ["getf" "+shader-wallpaper+" ":bind"]]]
+                  (rows [
+                    ["shell-surface" ":shader-wallpaper" ["ui" ":stack"]]
+                    [":anchors" (quote [":top" ":right" ":bottom" ":left"]) ":layer" ":background"]
+                    [":background" ["list" ":shader" ["first" "shown"] ":fps" ["second" "shown"]]]
+                  ])
+                  (rows [
+                    ["append" ["when" "command" ["list" ["exec-async" ":theme" "command"]]]]
+                    [["when" "menu" ["shader-wallpaper--menu" "shaders" "menu" ["context" "snapshot" ":outputs"]]]]
+                  ])
+                ])
+                "nil"
+              ])
+            ])
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_spine_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun spine--parts (text)"
-      "  (loop with start = 0"
-      "        for i = (position-if (lambda (c) (member c '(#\\: #\\Space))) text :start start)"
-      "        for part = (subseq text start i)"
-      "        when (plusp (length part)) collect part"
-      "        while i do (setf start (1+ i))))"
-      ""
-      "(defun spine--text (text color &optional (size 11))"
-      "  (ui :text :text text :size (cassette--px size) :line-height (cassette--px size) :color color"
-      "      :font (getf +cassette+ :font)))"
-      ""
-      "(defun spine--groove ()"
-      "  (ui :rect :height 1 :background (cassette--c :groove)))"
-      ""
-      "(defun spine--ladder (fraction)"
-      "  (let* ((count (getf +cassette+ :segments))"
-      "         (lit (round (* count (max 0 (min 1 fraction))))))"
-      "    (ui :column :gap (cassette--px 1) :align :center"
-      "        :children (loop for i from (1- count) downto 0"
-      "                        collect (ui :rect :width (cassette--px 8) :height (cassette--px 3)"
-      "                                    :background (if (< i lit) (cassette--zone (/ (1+ i) count)) (cassette--c :led-off)))))))"
-      ""
-      "(defun spine--gauge (label percent detail &optional hot)"
-      "  (let ((percent (max 0 (min 100 (round (or percent 0))))))"
-      "    (ui :column :align :center :gap (cassette--px 2)"
-      "        :children (remove nil"
-      "                          (list (spine--text label (cassette--c :dim) 7)"
-      "                                (spine--ladder (/ percent 100))"
-      "                                (ui :row :align :end"
-      "                                    :children (list (spine--text (format nil \"~D\" percent) (cassette--c :ink))"
-      "                                                    (spine--text \"%\" (cassette--c :dim) 7)))"
-      "                                (when detail (spine--text detail (if hot (cassette--c :orange) (cassette--c :dim)) 7)))))))"
-      ""
-      "(defun spine--counter ()"
-      "  (ui :column :align :stretch :gap (cassette--px 1)"
-      "      :children (loop for part in (spine--parts (clock-text (getf +cassette+ :time)))"
-      "                      collect (cassette--window part :face (cassette--c :counter) :rim (cassette--c :rim)"
-      "                                                     :ghost (cassette--c :counter-ghost) :ink (cassette--c :amber)))))"
-      ""
-      "(defun spine--date ()"
-      "  (destructuring-bind (&optional day date month &rest rest)"
-      "      (spine--parts (string-upcase (clock-text (getf +cassette+ :date))))"
-      "    (declare (ignore rest))"
-      "    (ui :column :align :center :gap (cassette--px 2)"
-      "        :children (remove nil"
-      "                          (list (when day (spine--text day (cassette--c :dim) 7))"
-      "                                (when date (spine--text date (cassette--c :ink)))"
-      "                                (when month (spine--text month (cassette--c :dim) 7)))))))"
-      ""
-      "(defun spine--stacked (text color)"
-      "  (ui :column :align :center"
-      "      :children (loop for c across (string-right-trim \" \" text)"
-      "                      collect (spine--text (string c) color 8))))"
-      ""
-      "(defun spine--media (snapshot)"
-      "  (let* ((service (service-state snapshot :mpris))"
-      "         (status (getf service :status))"
-      "         (title (getf service :title))"
-      "         (length (getf service :length))"
-      "         (position (getf service :position))"
-      "         (played (if (and (realp length) (plusp length) (realp position)) (max 0 (min 1 (/ position length))) 0)))"
-      "    (when (and (stringp title) (plusp (length title)) (member status '(\"Playing\" \"Paused\") :test #'equal))"
-      "      (ui :column :align :center :gap (cassette--px 4)"
-      "          :children (list (cassette--led (equal status \"Playing\"))"
-      "                          (cassette--reel (- 1 played))"
-      "                          (spine--stacked (cassette--fit title (getf +cassette+ :spine-title)) (cassette--c :ink))"
-      "                          (cassette--reel played))))))"
-      ""
-      "(defun spine--module (module state snapshot)"
-      "  (let ((cpu (getf state :cpu)) (memory (getf state :memory)) (gpu (getf state :gpu)))"
-      "    (ecase module"
-      "      (:time (spine--counter))"
-      "      (:date (spine--date))"
-      "      (:media (spine--media snapshot))"
-      "      (:cpu (spine--gauge \"CPU\" (getf cpu :percent) (cassette--degrees (getf cpu :temp)) (cassette--hot-p (getf cpu :temp))))"
-      "      (:memory (spine--gauge \"MEM\" (getf memory :percent) (cassette--gib (getf memory :used))))"
-      "      (:gpu (when (probe--gpu-p gpu)"
-      "              (spine--gauge \"GPU\" (getf gpu :percent) (cassette--degrees (getf gpu :temp)) (cassette--hot-p (getf gpu :temp)))))"
-      "      (:vram (when (probe--gpu-p gpu)"
-      "               (spine--gauge \"VRAM\" (if (plusp (or (getf gpu :total) 0)) (round (* 100 (or (getf gpu :used) 0)) (getf gpu :total)) 0)"
-      "                             (cassette--gib (getf gpu :used)))))"
-      "      (:battery (let ((battery (service-state snapshot :battery)))"
-      "                  (spine--gauge (if (getf battery :charging) \"CHG\" \"BAT\") (getf battery :percent) nil)))"
-      "      (:network (let ((online (getf (service-state snapshot :network) :connected)))"
-      "                  (ui :column :align :center :gap (cassette--px 3)"
-      "                      :children (list (cassette--led online)"
-      "                                      (spine--text (if online \"NET\" \"OFF\") (cassette--c :dim) 7)))))"
-      "      (:frame (let ((battery (state-value snapshot :frame-battery)))"
-      "                (when (getf battery :percent)"
-      "                  (spine--gauge (if (equal (getf battery :status) \"Discharging\") \"VR\" \"VR+\") (getf battery :percent) nil)))))))"
-      ""
-      "(defun spine--cell (item)"
-      "  (ui :row :justify :center :padding (list (cassette--px 6) 0 (cassette--px 6) 0) :children (list item)))"
-      ""
-      "(defun spine--run (items)"
-      "  (ui :column :height 0 :grow 1 :align :stretch :justify :center"
-      "      :children (loop for (item . rest) on (remove nil items)"
-      "                      collect (spine--cell item)"
-      "                      when rest collect (spine--groove))))"
-      ""
-      "(defun spine--tray-height (tray)"
-      "  \"Logical height of the tray slot that TRAY, a published :shelf-tray request"
-      "of (:count N :size PX), asks for at the top of the spine.\""
-      "  (* (getf tray :count 0) (getf tray :size 0)))"
-      ""
-      "(defun spine--body (items &optional (tray-height 0))"
-      "  (ui :column :align :stretch :background (cassette--c :face) :border 1 :border-color (cassette--c :rim)"
-      "      :children (remove nil"
-      "                        (list (when (plusp tray-height)"
-      "                                (ui :rect :height tray-height :background (cassette--c :counter)))"
-      "                              (spine--cell (cassette--grille))"
-      "                              (spine--run items)"
-      "                              (spine--cell (cassette--grille))))))"
-      ""
-      "(defun spine--covered-p (snapshot box)"
-      "  \"Whether a placed window overlaps BOX. Tiled windows never reach the seam, so"
-      "this is a float or a fullscreen window, which the spine then sits beneath.\""
-      "  (loop for entry in (context snapshot :layout)"
-      "        thereis (and (getf entry :visible)"
-      "                     (< (getf entry :x) (+ (getf box :x) (getf box :width)))"
-      "                     (< (getf box :x) (+ (getf entry :x) (getf entry :width)))"
-      "                     (< (getf entry :y) (+ (getf box :y) (getf box :height)))"
-      "                     (< (getf box :y) (+ (getf entry :y) (getf entry :height))))))"
-      ""
-      "(defun spine--fullscreen-p (snapshot output)"
-      "  (loop for entry in (context snapshot :layout)"
-      "        thereis (and (getf entry :visible) (getf entry :fullscreen)"
-      "                     (<= (getf entry :x) (getf output :x) (+ (getf entry :x) (getf entry :width) -1))"
-      "                     (<= (getf entry :y) (getf output :y) (+ (getf entry :y) (getf entry :height) -1)))))"
-      ""
-      "(defun spine--plates (items output focal snapshot)"
-      "  (let ((split (or (cassette--split) (length items)))"
-      "        (layer (if (spine--fullscreen-p snapshot output) :bottom :top)))"
-      "    (loop for edge in '(:top :bottom)"
-      "          for plate = (cassette--plate (if (eq edge :top) (subseq items 0 split) (nthcdr split items)) :both edge)"
-      "          for height = (cassette--height edge)"
-      "          when plate"
-      "            collect (apply #'shell-surface (intern (format nil \"~A-~A\" edge (getf output :name)) :keyword) plate"
-      "                           :output (getf output :name) :layer layer"
-      "                           :background \"#00000000\" :blur t :click-through t"
-      "                           (if focal"
-      "                               (list :anchors '(:top)"
-      "                                     :margin (list (- (+ (getf focal :top) (if (eq edge :top) 0 (getf focal :height)))"
-      "                                                      (round height 2))"
-      "                                                   0 0 0))"
-      "                               (list :anchors (list edge) :margin (if (eq edge :top) '(-1 0 0 0) '(0 0 -1 0))"
-      "                                     :exclusive-zone (1- height)))))))"
-      ""
-      "(define-extension \"bar\" (:reads (:system :services :data :outputs :layout)"
-      "                         :state (list :cpu nil :memory nil :gpu nil))"
-      "    (snapshot state event)"
-      "  (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))"
-      "    (let ((system (context snapshot :system)))"
-      "      (dolist (probe '(:cpu :memory :gpu))"
-      "        (setf (getf state probe) (probe--sample probe (getf state probe) system)))))"
-      "  (let* ((*cassette-mode* (state-value snapshot :theme-mode :dark))"
-      "         (seam (state-value snapshot :deck-seam))"
-      "         (output (and seam (find (getf seam :output) (context snapshot :outputs)"
-      "                                 :key (lambda (o) (getf o :name)) :test #'equal)))"
-      "         (scale (and output (/ (getf output :scale-120 120) 120)))"
-      "         (narrow (remove-if-not (lambda (o) (deck--narrow-p (list :output o))) (context snapshot :outputs)))"
-      "         (focal (state-value snapshot :focal-frame))"
-      "         (tray-height (spine--tray-height (state-value snapshot :shelf-tray)))"
-      "         (items (when narrow"
-      "                  (loop for module in (getf +cassette+ :modules)"
-      "                        collect (cassette--module module state snapshot))))"
-      "         (hot (loop for probe in '(:cpu :gpu) thereis (cassette--hot-p (getf (getf state probe) :temp)))))"
-      "    (values state"
-      "            (append (list (interval :sample (getf +cassette+ :sample))"
-      "                          (publish-state :hud-hot (and hot t)))"
-      "                    (when (and output (plusp tray-height))"
-      "                      (list (publish-state :shelf-tray-rect"
-      "                                           (list :output (getf seam :output)"
-      "                                                 :x (getf seam :x) :y (+ (getf seam :y) (round scale))"
-      "                                                 :width (getf seam :width)"
-      "                                                 :height (round (* tray-height scale))))))"
-      "                    (when output"
-      "                      (list (shell-surface :spine (spine--body (loop for module in (getf +cassette+ :modules)"
-      "                                                                     collect (spine--module module state snapshot))"
-      "                                                               tray-height)"
-      "                                           :output (getf output :name) :anchors '(:top :left)"
-      "                                           :width (round (getf seam :width) scale) :height (round (getf seam :height) scale)"
-      "                                           :margin (list (round (- (getf seam :y) (getf output :y)) scale) 0 0"
-      "                                                         (round (- (getf seam :x) (getf output :x)) scale))"
-      "                                           :layer (if (spine--covered-p snapshot seam) :bottom :top)"
-      "                                           :background \"#00000000\" :blur t"
-      "                                           :click-through t :slide t)))"
-      "                    (loop for o in narrow"
-      "                          append (spine--plates items o (and (equal (getf focal :output) (getf o :name)) focal) snapshot)))"
-      "            nil)))"
+    modules_desktop_session_tomoe_lisp_spine_data = {
+      at,
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "spine--parts" ["text"]]
+        (rows [
+          [
+            "loop"
+            ''
+              with start = 0
+                      for''
+            "i"
+            "="
+            ["position-if" ["lambda" ["c"] ["member" "c" (quote ["#\\:" "#\\Space"])]] "text" ":start" "start"]
+          ]
+          ["for" "part" "=" ["subseq" "text" "start" "i"]]
+          ["when" ["plusp" ["length" "part"]] "collect part"]
+          ["while i" "do" ["setf" "start" ["1+" "i"]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--text" ["text" "color" "&optional" ["size" 11]]]
+        (rows [
+          ["ui" ":text" ":text" "text" ":size" ["cassette--px" "size"] ":line-height" ["cassette--px" "size"] ":color" "color"]
+          [":font" ["getf" "+cassette+" ":font"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--groove" []]
+        [["ui" ":rect" ":height" 1 ":background" ["cassette--c" ":groove"]]]
+      ])
+      blank
+      (rows [
+        ["defun" "spine--ladder" ["fraction"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["count" ["getf" "+cassette+" ":segments"]]]
+              [["lit" ["round" ["*" "count" ["max" 0 ["min" 1 "fraction"]]]]]]
+            ])
+          ]
+          (rows [
+            ["ui" ":column" ":gap" ["cassette--px" 1] ":align" ":center"]
+            [
+              ":children"
+              (rows [
+                ["loop" "for" "i" "from" ["1-" "count"] "downto" 0]
+                [
+                  "collect"
+                  (rows [
+                    ["ui" ":rect" ":width" ["cassette--px" 8] ":height" ["cassette--px" 3]]
+                    [":background" ["if" ["<" "i" "lit"] ["cassette--zone" ["/" ["1+" "i"] "count"]] ["cassette--c" ":led-off"]]]
+                  ])
+                ]
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--gauge" ["label" "percent" "detail" "&optional" "hot"]]
+        (rows [
+          ["let" [["percent" ["max" 0 ["min" 100 ["round" ["or" "percent" 0]]]]]]]
+          (rows [
+            ["ui" ":column" ":align" ":center" ":gap" ["cassette--px" 2]]
+            [
+              ":children"
+              (rows [
+                ["remove" "nil"]
+                (rows [
+                  ["list" ["spine--text" "label" ["cassette--c" ":dim"] 7]]
+                  [["spine--ladder" ["/" "percent" 100]]]
+                  (rows [
+                    ["ui" ":row" ":align" ":end"]
+                    [
+                      ":children"
+                      (rows [
+                        ["list" ["spine--text" ["format" "nil" (str "~D") "percent"] ["cassette--c" ":ink"]]]
+                        [["spine--text" (str "%") ["cassette--c" ":dim"] 7]]
+                      ])
+                    ]
+                  ])
+                  [["when" "detail" ["spine--text" "detail" ["if" "hot" ["cassette--c" ":orange"] ["cassette--c" ":dim"]] 7]]]
+                ])
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--counter" []]
+        (rows [
+          ["ui" ":column" ":align" ":stretch" ":gap" ["cassette--px" 1]]
+          [
+            ":children"
+            (rows [
+              ["loop" "for" "part" "in" ["spine--parts" ["clock-text" ["getf" "+cassette+" ":time"]]]]
+              [
+                "collect"
+                (rows [
+                  ["cassette--window" "part" ":face" ["cassette--c" ":counter"] ":rim" ["cassette--c" ":rim"]]
+                  (at 23 [":ghost" ["cassette--c" ":counter-ghost"] ":ink" ["cassette--c" ":amber"]])
+                ])
+              ]
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--date" []]
+        (rows [
+          ["destructuring-bind" ["&optional" "day" "date" "month" "&rest" "rest"]]
+          [["spine--parts" ["string-upcase" ["clock-text" ["getf" "+cassette+" ":date"]]]]]
+          [["declare" ["ignore" "rest"]]]
+          (rows [
+            ["ui" ":column" ":align" ":center" ":gap" ["cassette--px" 2]]
+            [
+              ":children"
+              (rows [
+                ["remove" "nil"]
+                (rows [
+                  ["list" ["when" "day" ["spine--text" "day" ["cassette--c" ":dim"] 7]]]
+                  [["when" "date" ["spine--text" "date" ["cassette--c" ":ink"]]]]
+                  [["when" "month" ["spine--text" "month" ["cassette--c" ":dim"] 7]]]
+                ])
+              ])
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--stacked" ["text" "color"]]
+        (rows [
+          ["ui" ":column" ":align" ":center"]
+          [
+            ":children"
+            (rows [
+              ["loop" "for" "c" "across" ["string-right-trim" (str " ") "text"]]
+              ["collect" ["spine--text" ["string" "c"] "color" 8]]
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--media" ["snapshot"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["service" ["service-state" "snapshot" ":mpris"]]]
+              [["status" ["getf" "service" ":status"]]]
+              [["title" ["getf" "service" ":title"]]]
+              [["length" ["getf" "service" ":length"]]]
+              [["position" ["getf" "service" ":position"]]]
+              [["played" ["if" ["and" ["realp" "length"] ["plusp" "length"] ["realp" "position"]] ["max" 0 ["min" 1 ["/" "position" "length"]]] 0]]]
+            ])
+          ]
+          (rows [
+            ["when" ["and" ["stringp" "title"] ["plusp" ["length" "title"]] ["member" "status" (quote [(str "Playing") (str "Paused")]) ":test" (function "equal")]]]
+            (rows [
+              ["ui" ":column" ":align" ":center" ":gap" ["cassette--px" 4]]
+              [
+                ":children"
+                (rows [
+                  ["list" ["cassette--led" ["equal" "status" (str "Playing")]]]
+                  [["cassette--reel" ["-" 1 "played"]]]
+                  [["spine--stacked" ["cassette--fit" "title" ["getf" "+cassette+" ":spine-title"]] ["cassette--c" ":ink"]]]
+                  [["cassette--reel" "played"]]
+                ])
+              ]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--module" ["module" "state" "snapshot"]]
+        (rows [
+          ["let" [["cpu" ["getf" "state" ":cpu"]] ["memory" ["getf" "state" ":memory"]] ["gpu" ["getf" "state" ":gpu"]]]]
+          (rows [
+            ["ecase" "module"]
+            [[":time" ["spine--counter"]]]
+            [[":date" ["spine--date"]]]
+            [[":media" ["spine--media" "snapshot"]]]
+            [[":cpu" ["spine--gauge" (str "CPU") ["getf" "cpu" ":percent"] ["cassette--degrees" ["getf" "cpu" ":temp"]] ["cassette--hot-p" ["getf" "cpu" ":temp"]]]]]
+            [[":memory" ["spine--gauge" (str "MEM") ["getf" "memory" ":percent"] ["cassette--gib" ["getf" "memory" ":used"]]]]]
+            [
+              [
+                ":gpu"
+                (rows [
+                  ["when" ["probe--gpu-p" "gpu"]]
+                  [["spine--gauge" (str "GPU") ["getf" "gpu" ":percent"] ["cassette--degrees" ["getf" "gpu" ":temp"]] ["cassette--hot-p" ["getf" "gpu" ":temp"]]]]
+                ])
+              ]
+            ]
+            [
+              [
+                ":vram"
+                (rows [
+                  ["when" ["probe--gpu-p" "gpu"]]
+                  (rows [
+                    ["spine--gauge" (str "VRAM") ["if" ["plusp" ["or" ["getf" "gpu" ":total"] 0]] ["round" ["*" 100 ["or" ["getf" "gpu" ":used"] 0]] ["getf" "gpu" ":total"]] 0]]
+                    [["cassette--gib" ["getf" "gpu" ":used"]]]
+                  ])
+                ])
+              ]
+            ]
+            [
+              [
+                ":battery"
+                (rows [
+                  ["let" [["battery" ["service-state" "snapshot" ":battery"]]]]
+                  [["spine--gauge" ["if" ["getf" "battery" ":charging"] (str "CHG") (str "BAT")] ["getf" "battery" ":percent"] "nil"]]
+                ])
+              ]
+            ]
+            [
+              [
+                ":network"
+                (rows [
+                  ["let" [["online" ["getf" ["service-state" "snapshot" ":network"] ":connected"]]]]
+                  (rows [
+                    ["ui" ":column" ":align" ":center" ":gap" ["cassette--px" 3]]
+                    [
+                      ":children"
+                      (rows [
+                        ["list" ["cassette--led" "online"]]
+                        [["spine--text" ["if" "online" (str "NET") (str "OFF")] ["cassette--c" ":dim"] 7]]
+                      ])
+                    ]
+                  ])
+                ])
+              ]
+            ]
+            [
+              [
+                ":frame"
+                (rows [
+                  ["let" [["battery" ["state-value" "snapshot" ":frame-battery"]]]]
+                  (rows [
+                    ["when" ["getf" "battery" ":percent"]]
+                    [["spine--gauge" ["if" ["equal" ["getf" "battery" ":status"] (str "Discharging")] (str "VR") (str "VR+")] ["getf" "battery" ":percent"] "nil"]]
+                  ])
+                ])
+              ]
+            ]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--cell" ["item"]]
+        [["ui" ":row" ":justify" ":center" ":padding" ["list" ["cassette--px" 6] 0 ["cassette--px" 6] 0] ":children" ["list" "item"]]]
+      ])
+      blank
+      (rows [
+        ["defun" "spine--run" ["items"]]
+        (rows [
+          ["ui" ":column" ":height" 0 ":grow" 1 ":align" ":stretch" ":justify" ":center"]
+          [
+            ":children"
+            (rows [
+              ["loop" "for" ["item" "." "rest"] "on" ["remove" "nil" "items"]]
+              ["collect" ["spine--cell" "item"]]
+              ["when rest" "collect" ["spine--groove"]]
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--tray-height" ["tray"]]
+        (str ''
+          Logical height of the tray slot that TRAY, a published :shelf-tray request
+          of (:count N :size PX), asks for at the top of the spine.'')
+        [["*" ["getf" "tray" ":count" 0] ["getf" "tray" ":size" 0]]]
+      ])
+      blank
+      (rows [
+        ["defun" "spine--body" ["items" "&optional" ["tray-height" 0]]]
+        (rows [
+          ["ui" ":column" ":align" ":stretch" ":background" ["cassette--c" ":face"] ":border" 1 ":border-color" ["cassette--c" ":rim"]]
+          [
+            ":children"
+            (rows [
+              ["remove" "nil"]
+              (rows [
+                [
+                  "list"
+                  (rows [
+                    ["when" ["plusp" "tray-height"]]
+                    [["ui" ":rect" ":height" "tray-height" ":background" ["cassette--c" ":counter"]]]
+                  ])
+                ]
+                [["spine--cell" ["cassette--grille"]]]
+                [["spine--run" "items"]]
+                [["spine--cell" ["cassette--grille"]]]
+              ])
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--covered-p" ["snapshot" "box"]]
+        (str ''
+          Whether a placed window overlaps BOX. Tiled windows never reach the seam, so
+          this is a float or a fullscreen window, which the spine then sits beneath.'')
+        (rows [
+          ["loop" "for" "entry" "in" ["context" "snapshot" ":layout"]]
+          [
+            "thereis"
+            (rows [
+              ["and" ["getf" "entry" ":visible"]]
+              [["<" ["getf" "entry" ":x"] ["+" ["getf" "box" ":x"] ["getf" "box" ":width"]]]]
+              [["<" ["getf" "box" ":x"] ["+" ["getf" "entry" ":x"] ["getf" "entry" ":width"]]]]
+              [["<" ["getf" "entry" ":y"] ["+" ["getf" "box" ":y"] ["getf" "box" ":height"]]]]
+              [["<" ["getf" "box" ":y"] ["+" ["getf" "entry" ":y"] ["getf" "entry" ":height"]]]]
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--fullscreen-p" ["snapshot" "output"]]
+        (rows [
+          ["loop" "for" "entry" "in" ["context" "snapshot" ":layout"]]
+          [
+            "thereis"
+            (rows [
+              ["and" ["getf" "entry" ":visible"] ["getf" "entry" ":fullscreen"]]
+              [["<=" ["getf" "entry" ":x"] ["getf" "output" ":x"] ["+" ["getf" "entry" ":x"] ["getf" "entry" ":width"] (-1)]]]
+              [["<=" ["getf" "entry" ":y"] ["getf" "output" ":y"] ["+" ["getf" "entry" ":y"] ["getf" "entry" ":height"] (-1)]]]
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "spine--plates" ["items" "output" "focal" "snapshot"]]
+        (rows [
+          [
+            "let"
+            (rows [
+              [["split" ["or" ["cassette--split"] ["length" "items"]]]]
+              [["layer" ["if" ["spine--fullscreen-p" "snapshot" "output"] ":bottom" ":top"]]]
+            ])
+          ]
+          (rows [
+            ["loop" "for" "edge" "in" (quote [":top" ":bottom"])]
+            ["for" "plate" "=" ["cassette--plate" ["if" ["eq" "edge" ":top"] ["subseq" "items" 0 "split"] ["nthcdr" "split" "items"]] ":both" "edge"]]
+            ["for" "height" "=" ["cassette--height" "edge"]]
+            "when plate"
+            (at 8 [
+              "collect"
+              (rows [
+                ["apply" (function "shell-surface") ["intern" ["format" "nil" (str "~A-~A") "edge" ["getf" "output" ":name"]] ":keyword"] "plate"]
+                [":output" ["getf" "output" ":name"] ":layer" "layer"]
+                [":background" (str "#00000000") ":blur" "t" ":click-through" "t"]
+                (rows [
+                  ["if" "focal"]
+                  (rows [
+                    ["list" ":anchors" (quote [":top"])]
+                    [
+                      ":margin"
+                      (rows [
+                        [
+                          "list"
+                          (rows [
+                            ["-" ["+" ["getf" "focal" ":top"] ["if" ["eq" "edge" ":top"] 0 ["getf" "focal" ":height"]]]]
+                            [["round" "height" 2]]
+                          ])
+                        ]
+                        [0 0 0]
+                      ])
+                    ]
+                  ])
+                  (rows [
+                    ["list" ":anchors" ["list" "edge"] ":margin" ["if" ["eq" "edge" ":top"] (quote [(-1) 0 0 0]) (quote [0 0 (-1) 0])]]
+                    [":exclusive-zone" ["1-" "height"]]
+                  ])
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        [
+          "define-extension"
+          (str "bar")
+          (rows [
+            [":reads" [":system" ":services" ":data" ":outputs" ":layout"]]
+            [":state" ["list" ":cpu" "nil" ":memory" "nil" ":gpu" "nil"]]
+          ])
+        ]
+        [["snapshot" "state" "event"]]
+        (rows [
+          ["when" ["and" ["eq" ["getf" "event" ":type"] ":timer"] ["eq" ["getf" "event" ":name"] ":sample"]]]
+          (rows [
+            ["let" [["system" ["context" "snapshot" ":system"]]]]
+            (rows [
+              ["dolist" ["probe" (quote [":cpu" ":memory" ":gpu"])]]
+              [["setf" ["getf" "state" "probe"] ["probe--sample" "probe" ["getf" "state" "probe"] "system"]]]
+            ])
+          ])
+        ])
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["*cassette-mode*" ["state-value" "snapshot" ":theme-mode" ":dark"]]]
+              [["seam" ["state-value" "snapshot" ":deck-seam"]]]
+              [
+                [
+                  "output"
+                  [
+                    "and"
+                    "seam"
+                    (rows [
+                      ["find" ["getf" "seam" ":output"] ["context" "snapshot" ":outputs"]]
+                      [":key" ["lambda" ["o"] ["getf" "o" ":name"]] ":test" (function "equal")]
+                    ])
+                  ]
+                ]
+              ]
+              [["scale" ["and" "output" ["/" ["getf" "output" ":scale-120" 120] 120]]]]
+              [["narrow" ["remove-if-not" ["lambda" ["o"] ["deck--narrow-p" ["list" ":output" "o"]]] ["context" "snapshot" ":outputs"]]]]
+              [["focal" ["state-value" "snapshot" ":focal-frame"]]]
+              [["tray-height" ["spine--tray-height" ["state-value" "snapshot" ":shelf-tray"]]]]
+              [
+                [
+                  "items"
+                  (rows [
+                    ["when" "narrow"]
+                    (rows [
+                      ["loop" "for" "module" "in" ["getf" "+cassette+" ":modules"]]
+                      ["collect" ["cassette--module" "module" "state" "snapshot"]]
+                    ])
+                  ])
+                ]
+              ]
+              [["hot" ["loop" "for" "probe" "in" (quote [":cpu" ":gpu"]) "thereis" ["cassette--hot-p" ["getf" ["getf" "state" "probe"] ":temp"]]]]]
+            ])
+          ]
+          (rows [
+            ["values" "state"]
+            (rows [
+              [
+                "append"
+                (rows [
+                  ["list" ["interval" ":sample" ["getf" "+cassette+" ":sample"]]]
+                  [["publish-state" ":hud-hot" ["and" "hot" "t"]]]
+                ])
+              ]
+              (rows [
+                ["when" ["and" "output" ["plusp" "tray-height"]]]
+                [
+                  [
+                    "list"
+                    (rows [
+                      ["publish-state" ":shelf-tray-rect"]
+                      (rows [
+                        ["list" ":output" ["getf" "seam" ":output"]]
+                        [":x" ["getf" "seam" ":x"] ":y" ["+" ["getf" "seam" ":y"] ["round" "scale"]]]
+                        [":width" ["getf" "seam" ":width"]]
+                        [":height" ["round" ["*" "tray-height" "scale"]]]
+                      ])
+                    ])
+                  ]
+                ]
+              ])
+              (rows [
+                ["when" "output"]
+                [
+                  [
+                    "list"
+                    (rows [
+                      [
+                        "shell-surface"
+                        ":spine"
+                        (rows [
+                          [
+                            "spine--body"
+                            (rows [
+                              ["loop" "for" "module" "in" ["getf" "+cassette+" ":modules"]]
+                              ["collect" ["spine--module" "module" "state" "snapshot"]]
+                            ])
+                          ]
+                          "tray-height"
+                        ])
+                      ]
+                      [":output" ["getf" "output" ":name"] ":anchors" (quote [":top" ":left"])]
+                      [":width" ["round" ["getf" "seam" ":width"] "scale"] ":height" ["round" ["getf" "seam" ":height"] "scale"]]
+                      [
+                        ":margin"
+                        (rows [
+                          ["list" ["round" ["-" ["getf" "seam" ":y"] ["getf" "output" ":y"]] "scale"] 0 0]
+                          [["round" ["-" ["getf" "seam" ":x"] ["getf" "output" ":x"]] "scale"]]
+                        ])
+                      ]
+                      [":layer" ["if" ["spine--covered-p" "snapshot" "seam"] ":bottom" ":top"]]
+                      [":background" (str "#00000000") ":blur" "t"]
+                      [":click-through" "t" ":slide" "t"]
+                    ])
+                  ]
+                ]
+              ])
+              (rows [
+                ["loop" "for o in narrow"]
+                ["append" ["spine--plates" "items" "o" ["and" ["equal" ["getf" "focal" ":output"] ["getf" "o" ":name"]] "focal"] "snapshot"]]
+              ])
+            ])
+            "nil"
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_sway_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun sway--leaves (tree)"
-      "  (cond ((null tree) nil)"
-      "        ((integerp tree) (list tree))"
-      "        (t (loop for kid in (rest tree) append (sway--leaves kid)))))"
-      ""
-      "(defun sway--prune (tree keep)"
-      "  (cond ((null tree) nil)"
-      "        ((integerp tree) (when (member tree keep) tree))"
-      "        (t (let ((kids (loop for kid in (rest tree)"
-      "                             for pruned = (sway--prune kid keep)"
-      "                             when pruned collect pruned)))"
-      "             (if (rest kids) (cons (first tree) kids) (first kids))))))"
-      ""
-      "(defun sway--insert (tree target id direction)"
-      "  (cond ((integerp tree) (if (eql tree target) (list direction tree id) tree))"
-      "        ((and (eq (first tree) direction) (member target (rest tree)))"
-      "         (let ((tail (member target (rest tree))))"
-      "           (append (ldiff tree (rest tail)) (list id) (rest tail))))"
-      "        (t (cons (first tree)"
-      "                 (loop for kid in (rest tree)"
-      "                       collect (if (member target (sway--leaves kid))"
-      "                                   (sway--insert kid target id direction)"
-      "                                   kid))))))"
-      ""
-      "(defun sway--swap (tree a b)"
-      "  (cond ((eql tree a) b)"
-      "        ((eql tree b) a)"
-      "        ((atom tree) tree)"
-      "        (t (cons (first tree) (loop for kid in (rest tree) collect (sway--swap kid a b))))))"
-      ""
-      "(defun sway--boxes (tree x y width height gap)"
-      "  (if (integerp tree)"
-      "      (list (list tree x y width height))"
-      "      (let* ((kids (rest tree))"
-      "             (horizontal (eq (first tree) :h))"
-      "             (origin (if horizontal x y))"
-      "             (span (if horizontal width height))"
-      "             (step (floor (- span (* (1- (length kids)) gap)) (length kids)))"
-      "             (start origin))"
-      "        (loop for (kid . more) on kids"
-      "              for size = (if more step (- (+ origin span) start))"
-      "              append (if horizontal"
-      "                         (sway--boxes kid start y size height gap)"
-      "                         (sway--boxes kid x start width size gap))"
-      "              do (incf start (+ size gap))))))"
-      ""
-      "(defun sway--neighbour (boxes id dx dy)"
-      "  (let ((from (assoc id boxes)) (best nil) (distance nil))"
-      "    (flet ((centre (box) (list (+ (second box) (/ (fourth box) 2)) (+ (third box) (/ (fifth box) 2)))))"
-      "      (when from"
-      "        (destructuring-bind (fx fy) (centre from)"
-      "          (dolist (box boxes)"
-      "            (destructuring-bind (cx cy) (centre box)"
-      "              (let* ((ddx (- cx fx)) (ddy (- cy fy))"
-      "                     (along (if (zerop dx) ddy ddx))"
-      "                     (across (if (zerop dx) ddx ddy))"
-      "                     (far (+ (abs ddx) (abs ddy))))"
-      "                (when (and (not (eq box from))"
-      "                           (eq (plusp along) (plusp (+ dx dy)))"
-      "                           (> (abs along) (abs across))"
-      "                           (or (null distance) (< far distance)))"
-      "                  (setf best (first box) distance far))))))))"
-      "    best))"
-      ""
-      "(define-extension \"sway\""
-      "    (:reads (:windows :rules :workareas :outputs :focus :key :button :pointer :request :settings)"
-      "     :state (list :active 1 :workspaces nil :trees nil :split nil :focus nil"
-      "                  :fullscreen nil :floating nil)"
-      "     :admission t)"
-      "    (snapshot state event)"
-      "  (let* ((windows (remove-if (lambda (window) (policy--unmanaged-p snapshot window))"
-      "                             (context snapshot :windows)))"
-      "         (ids (mapcar (lambda (window) (getf window :id)) windows))"
-      "         (count (getf +layout+ :workspaces))"
-      "         (gap (getf +layout+ :gaps))"
-      "         (area (policy--area snapshot))"
-      "         (output (and area (find (getf area :name) (context snapshot :outputs)"
-      "                                 :test #'equal :key (lambda (output) (getf output :name)))))"
-      "         (type (getf event :type))"
-      "         (command (and (eq type :key) (equal (getf event :owner) \"sway\") (getf event :command)))"
-      "         (motion (rest (assoc command '((\"focus-left\" -1 0) (\"focus-right\" 1 0)"
-      "                                        (\"focus-up\" 0 -1) (\"focus-down\" 0 1))"
-      "                              :test #'equal)))"
-      "         (active (max 1 (min count (getf state :active))))"
-      "         (workspaces (loop for index below count"
-      "                           collect (remove-if-not (lambda (id) (member id ids))"
-      "                                                  (nth index (getf state :workspaces)))))"
-      "         (trees (loop for index below count collect (nth index (getf state :trees))))"
-      "         (split (remove-if-not (lambda (entry) (member (car entry) ids)) (getf state :split)))"
-      "         (focused (getf state :focus))"
-      "         (fullscreen (remove-if-not (lambda (id) (member id ids)) (getf state :fullscreen)))"
-      "         (floating (remove-if-not (lambda (entry) (member (car entry) ids)) (getf state :floating)))"
-      "         (external (previous-context snapshot :focus))"
-      "         (terminal (and (equal command \"terminal\") (policy--terminal windows)))"
-      "         (new nil))"
-      "    (labels ((workspace (number) (nth (1- number) workspaces))"
-      "             (home (id) (loop for list in workspaces for number from 1"
-      "                              when (member id list) return number))"
-      "             (boxes (tree)"
-      "               (when (and tree area)"
-      "                 (sway--boxes tree (+ (getf area :x) gap) (+ (getf area :y) gap)"
-      "                              (- (getf area :width) (* 2 gap)) (- (getf area :height) (* 2 gap)) gap)))"
-      "             (arrange (number)"
-      "               (let* ((keep (remove-if (lambda (id) (or (member id fullscreen) (assoc id floating)))"
-      "                                       (workspace number)))"
-      "                      (tree (sway--prune (nth (1- number) trees) keep)))"
-      "                 (dolist (id keep)"
-      "                   (unless (member id (sway--leaves tree))"
-      "                     (setf tree"
-      "                           (if (null tree)"
-      "                               id"
-      "                               (let* ((leaves (sway--leaves tree))"
-      "                                      (target (if (member focused leaves) focused (car (last leaves))))"
-      "                                      (box (assoc target (boxes tree)))"
-      "                                      (direction (or (cdr (assoc target split))"
-      "                                                     (if (and box (> (fifth box) (fourth box))) :v :h))))"
-      "                                 (setf split (remove target split :key #'car))"
-      "                                 (sway--insert tree target id direction))))))"
-      "                 (setf (nth (1- number) trees) tree)))"
-      "             (arrange-all () (loop for number from 1 to count do (arrange number)))"
-      "             (switch (number)"
-      "               (setf active number focused (car (last (workspace number)))))"
-      "             (neighbour (direction) (1+ (mod (+ active -1 direction) count))))"
-      "      (when (and (member external ids) (not (eql external focused)))"
-      "        (setf focused external active (or (home external) active)))"
-      "      (let ((known (loop for list in workspaces append list)))"
-      "        (dolist (window windows)"
-      "          (let ((id (getf window :id)))"
-      "            (unless (member id known)"
-      "              (setf (nth (1- active) workspaces) (append (workspace active) (list id)))"
-      "              (when (getf window :fullscreen-requested) (push id fullscreen))"
-      "              (push id new)))))"
-      "      (case type"
-      "        (:button"
-      "         (when (and (eq (getf event :state) :pressed) (member (getf event :id) (workspace active)))"
-      "           (setf focused (getf event :id))))"
-      "        (:pointer"
-      "         (when (and (eq (getf event :state) :enter) (getf event :moved)"
-      "                    (setting snapshot :focus-follows-mouse)"
-      "                    (member (getf event :id) (workspace active)))"
-      "           (setf focused (getf event :id))))"
-      "        ((:metadata :request)"
-      "         (let ((id (getf event :id)))"
-      "           (when (member id ids)"
-      "             (case (getf event :request)"
-      "               (:fullscreen"
-      "                (setf fullscreen (remove id fullscreen))"
-      "                (when (getf event :requested) (push id fullscreen) (setf focused id)))"
-      "               (:unfullscreen (setf fullscreen (remove id fullscreen)))"
-      "               (:activate (setf active (or (home id) active) focused id)))))))"
-      "      (when terminal"
-      "        (setf active (or (home terminal) active) focused terminal))"
-      "      (arrange-all)"
-      "      (let ((current (and (member focused (workspace active)) focused)))"
-      "        (cond"
-      "          ((null command))"
-      "          (motion"
-      "           (let ((target (apply #'sway--neighbour (boxes (nth (1- active) trees)) current motion)))"
-      "             (when target (setf focused target))))"
-      "          ((equal command \"workspace-next\") (switch (neighbour 1)))"
-      "          ((equal command \"workspace-previous\") (switch (neighbour -1)))"
-      "          ((null current))"
-      "          ((member command '(\"move-next\" \"move-previous\") :test #'equal)"
-      "           (let ((number (neighbour (if (equal command \"move-next\") 1 -1))))"
-      "             (setf (nth (1- active) workspaces) (remove current (workspace active))"
-      "                   (nth (1- number) workspaces) (append (workspace number) (list current)))"
-      "             (switch number)))"
-      "          ((member command '(\"swap-previous\" \"swap-next\") :test #'equal)"
-      "           (let* ((leaves (sway--leaves (nth (1- active) trees)))"
-      "                  (index (position current leaves))"
-      "                  (other (and index (+ index (if (equal command \"swap-next\") 1 -1)))))"
-      "             (when (and other (< -1 other (length leaves)))"
-      "               (setf (nth (1- active) trees)"
-      "                     (sway--swap (nth (1- active) trees) current (nth other leaves))))))"
-      "          ((equal command \"split-horizontal\")"
-      "           (setf split (acons current :h (remove current split :key #'car))))"
-      "          ((equal command \"split-vertical\")"
-      "           (setf split (acons current :v (remove current split :key #'car))))"
-      "          ((equal command \"fullscreen\")"
-      "           (if (member current fullscreen)"
-      "               (setf fullscreen (remove current fullscreen))"
-      "               (push current fullscreen)))"
-      "          ((equal command \"floating\")"
-      "           (cond ((member current fullscreen) (setf fullscreen (remove current fullscreen)))"
-      "                 ((assoc current floating) (setf floating (remove current floating :key #'car)))"
-      "                 (area (push (cons current (policy--centred area (getf +layout+ :float-ratio)))"
-      "                             floating))))))"
-      "      (arrange-all)"
-      "      (let ((arrived (remove-if-not (lambda (id) (member id (workspace active))) new)))"
-      "        (when arrived (setf focused (first arrived))))"
-      "      (unless (member focused (workspace active))"
-      "        (setf focused (car (last (workspace active)))))"
-      "      (let ((effects nil))"
-      "        (dolist (id ids)"
-      "          (let* ((number (home id))"
-      "                 (shown (eql number active))"
-      "                 (box (cond ((member id fullscreen)"
-      "                             (and output (list (getf output :x) (getf output :y)"
-      "                                               (getf output :width) (getf output :height))))"
-      "                            ((cdr (assoc id floating)))"
-      "                            (t (rest (assoc id (boxes (nth (1- number) trees))))))))"
-      "            (push (if box"
-      "                      (destructuring-bind (x y width height) box"
-      "                        (place id x y (max 1 width) (max 1 height) shown))"
-      "                      (if shown (show-window id) (hide-window id)))"
-      "                  effects)"
-      "            (push (fullscreen id (and (member id fullscreen) t)) effects)))"
-      "        (let ((floats (remove-if (lambda (id) (member id fullscreen))"
-      "                                 (mapcar #'car (reverse floating)))))"
-      "          (dolist (id (append (remove focused floats)"
-      "                              (when (member focused floats) (list focused))"
-      "                              fullscreen))"
-      "            (when (member id (workspace active)) (push (raise-window id) effects))))"
-      "        (push (focus focused :raise nil) effects)"
-      "        (push (settings :animations nil) effects)"
-      "        (dolist (binding +layout-bindings+) (push (apply #'bind-key binding) effects))"
-      "        (values (list :active active :workspaces workspaces :trees trees :split split"
-      "                      :focus focused :fullscreen fullscreen :floating floating)"
-      "                (nreverse effects)"
-      "                (when (and (equal command \"terminal\") (null terminal))"
-      "                  (list (apply #'launch (policy--launch \"terminal\")))))))))"
+    modules_desktop_session_tomoe_lisp_sway_data = {
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "sway--leaves" ["tree"]]
+        (rows [
+          ["cond" [["null" "tree"] "nil"]]
+          [[["integerp" "tree"] ["list" "tree"]]]
+          [["t" ["loop" "for" "kid" "in" ["rest" "tree"] "append" ["sway--leaves" "kid"]]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "sway--prune" ["tree" "keep"]]
+        (rows [
+          ["cond" [["null" "tree"] "nil"]]
+          [[["integerp" "tree"] ["when" ["member" "tree" "keep"] "tree"]]]
+          [
+            [
+              "t"
+              (rows [
+                [
+                  "let"
+                  [
+                    [
+                      "kids"
+                      (rows [
+                        ["loop" "for" "kid" "in" ["rest" "tree"]]
+                        ["for" "pruned" "=" ["sway--prune" "kid" "keep"]]
+                        ["when pruned" "collect pruned"]
+                      ])
+                    ]
+                  ]
+                ]
+                [["if" ["rest" "kids"] ["cons" ["first" "tree"] "kids"] ["first" "kids"]]]
+              ])
+            ]
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "sway--insert" ["tree" "target" "id" "direction"]]
+        (rows [
+          ["cond" [["integerp" "tree"] ["if" ["eql" "tree" "target"] ["list" "direction" "tree" "id"] "tree"]]]
+          (rows [
+            [["and" ["eq" ["first" "tree"] "direction"] ["member" "target" ["rest" "tree"]]]]
+            (rows [
+              ["let" [["tail" ["member" "target" ["rest" "tree"]]]]]
+              [["append" ["ldiff" "tree" ["rest" "tail"]] ["list" "id"] ["rest" "tail"]]]
+            ])
+          ])
+          [
+            [
+              "t"
+              (rows [
+                ["cons" ["first" "tree"]]
+                (rows [
+                  ["loop" "for" "kid" "in" ["rest" "tree"]]
+                  [
+                    "collect"
+                    (rows [
+                      ["if" ["member" "target" ["sway--leaves" "kid"]]]
+                      [["sway--insert" "kid" "target" "id" "direction"]]
+                      "kid"
+                    ])
+                  ]
+                ])
+              ])
+            ]
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "sway--swap" ["tree" "a" "b"]]
+        (rows [
+          ["cond" [["eql" "tree" "a"] "b"]]
+          [[["eql" "tree" "b"] "a"]]
+          [[["atom" "tree"] "tree"]]
+          [["t" ["cons" ["first" "tree"] ["loop" "for" "kid" "in" ["rest" "tree"] "collect" ["sway--swap" "kid" "a" "b"]]]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "sway--boxes" ["tree" "x" "y" "width" "height" "gap"]]
+        (rows [
+          ["if" ["integerp" "tree"]]
+          [["list" ["list" "tree" "x" "y" "width" "height"]]]
+          (rows [
+            [
+              "let*"
+              (rows [
+                [["kids" ["rest" "tree"]]]
+                [["horizontal" ["eq" ["first" "tree"] ":h"]]]
+                [["origin" ["if" "horizontal" "x" "y"]]]
+                [["span" ["if" "horizontal" "width" "height"]]]
+                [["step" ["floor" ["-" "span" ["*" ["1-" ["length" "kids"]] "gap"]] ["length" "kids"]]]]
+                [["start" "origin"]]
+              ])
+            ]
+            (rows [
+              ["loop" "for" ["kid" "." "more"] "on" "kids"]
+              ["for" "size" "=" ["if" "more" "step" ["-" ["+" "origin" "span"] "start"]]]
+              [
+                "append"
+                (rows [
+                  ["if" "horizontal"]
+                  [["sway--boxes" "kid" "start" "y" "size" "height" "gap"]]
+                  [["sway--boxes" "kid" "x" "start" "width" "size" "gap"]]
+                ])
+              ]
+              ["do" ["incf" "start" ["+" "size" "gap"]]]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "sway--neighbour" ["boxes" "id" "dx" "dy"]]
+        (rows [
+          ["let" [["from" ["assoc" "id" "boxes"]] ["best" "nil"] ["distance" "nil"]]]
+          (rows [
+            ["flet" [["centre" ["box"] ["list" ["+" ["second" "box"] ["/" ["fourth" "box"] 2]] ["+" ["third" "box"] ["/" ["fifth" "box"] 2]]]]]]
+            (rows [
+              ["when" "from"]
+              (rows [
+                ["destructuring-bind" ["fx" "fy"] ["centre" "from"]]
+                (rows [
+                  ["dolist" ["box" "boxes"]]
+                  (rows [
+                    ["destructuring-bind" ["cx" "cy"] ["centre" "box"]]
+                    (rows [
+                      [
+                        "let*"
+                        (rows [
+                          [["ddx" ["-" "cx" "fx"]] ["ddy" ["-" "cy" "fy"]]]
+                          [["along" ["if" ["zerop" "dx"] "ddy" "ddx"]]]
+                          [["across" ["if" ["zerop" "dx"] "ddx" "ddy"]]]
+                          [["far" ["+" ["abs" "ddx"] ["abs" "ddy"]]]]
+                        ])
+                      ]
+                      (rows [
+                        [
+                          "when"
+                          (rows [
+                            ["and" ["not" ["eq" "box" "from"]]]
+                            [["eq" ["plusp" "along"] ["plusp" ["+" "dx" "dy"]]]]
+                            [[">" ["abs" "along"] ["abs" "across"]]]
+                            [["or" ["null" "distance"] ["<" "far" "distance"]]]
+                          ])
+                        ]
+                        [["setf" "best" ["first" "box"] "distance" "far"]]
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            ])
+          ])
+          "best"
+        ])
+      ])
+      blank
+      (rows [
+        ["define-extension" (str "sway")]
+        (rows [
+          [":reads" [":windows" ":rules" ":workareas" ":outputs" ":focus" ":key" ":button" ":pointer" ":request" ":settings"]]
+          [
+            ":state"
+            (rows [
+              ["list" ":active" 1 ":workspaces" "nil" ":trees" "nil" ":split" "nil" ":focus" "nil"]
+              [":fullscreen" "nil" ":floating" "nil"]
+            ])
+          ]
+          [":admission" "t"]
+        ])
+        [["snapshot" "state" "event"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [
+                [
+                  "windows"
+                  (rows [
+                    ["remove-if" ["lambda" ["window"] ["policy--unmanaged-p" "snapshot" "window"]]]
+                    [["context" "snapshot" ":windows"]]
+                  ])
+                ]
+              ]
+              [["ids" ["mapcar" ["lambda" ["window"] ["getf" "window" ":id"]] "windows"]]]
+              [["count" ["getf" "+layout+" ":workspaces"]]]
+              [["gap" ["getf" "+layout+" ":gaps"]]]
+              [["area" ["policy--area" "snapshot"]]]
+              [
+                [
+                  "output"
+                  [
+                    "and"
+                    "area"
+                    (rows [
+                      ["find" ["getf" "area" ":name"] ["context" "snapshot" ":outputs"]]
+                      [":test" (function "equal") ":key" ["lambda" ["output"] ["getf" "output" ":name"]]]
+                    ])
+                  ]
+                ]
+              ]
+              [["type" ["getf" "event" ":type"]]]
+              [["command" ["and" ["eq" "type" ":key"] ["equal" ["getf" "event" ":owner"] (str "sway")] ["getf" "event" ":command"]]]]
+              [
+                [
+                  "motion"
+                  [
+                    "rest"
+                    (rows [
+                      [
+                        "assoc"
+                        "command"
+                        (quote (rows [
+                          [[(str "focus-left") (-1) 0] [(str "focus-right") 1 0]]
+                          [[(str "focus-up") 0 (-1)] [(str "focus-down") 0 1]]
+                        ]))
+                      ]
+                      [":test" (function "equal")]
+                    ])
+                  ]
+                ]
+              ]
+              [["active" ["max" 1 ["min" "count" ["getf" "state" ":active"]]]]]
+              [
+                [
+                  "workspaces"
+                  (rows [
+                    ["loop" "for index below count"]
+                    [
+                      "collect"
+                      (rows [
+                        ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]]]
+                        [["nth" "index" ["getf" "state" ":workspaces"]]]
+                      ])
+                    ]
+                  ])
+                ]
+              ]
+              [["trees" ["loop" "for index below count" "collect" ["nth" "index" ["getf" "state" ":trees"]]]]]
+              [["split" ["remove-if-not" ["lambda" ["entry"] ["member" ["car" "entry"] "ids"]] ["getf" "state" ":split"]]]]
+              [["focused" ["getf" "state" ":focus"]]]
+              [["fullscreen" ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]] ["getf" "state" ":fullscreen"]]]]
+              [["floating" ["remove-if-not" ["lambda" ["entry"] ["member" ["car" "entry"] "ids"]] ["getf" "state" ":floating"]]]]
+              [["external" ["previous-context" "snapshot" ":focus"]]]
+              [["terminal" ["and" ["equal" "command" (str "terminal")] ["policy--terminal" "windows"]]]]
+              [["new" "nil"]]
+            ])
+          ]
+          (rows [
+            [
+              "labels"
+              (rows [
+                [["workspace" ["number"] ["nth" ["1-" "number"] "workspaces"]]]
+                [
+                  [
+                    "home"
+                    ["id"]
+                    (rows [
+                      ["loop" "for list in workspaces" "for number from 1"]
+                      ["when" ["member" "id" "list"] "return number"]
+                    ])
+                  ]
+                ]
+                (rows [
+                  ["boxes" ["tree"]]
+                  (rows [
+                    ["when" ["and" "tree" "area"]]
+                    (rows [
+                      ["sway--boxes" "tree" ["+" ["getf" "area" ":x"] "gap"] ["+" ["getf" "area" ":y"] "gap"]]
+                      [["-" ["getf" "area" ":width"] ["*" 2 "gap"]] ["-" ["getf" "area" ":height"] ["*" 2 "gap"]] "gap"]
+                    ])
+                  ])
+                ])
+                (rows [
+                  ["arrange" ["number"]]
+                  (rows [
+                    [
+                      "let*"
+                      (rows [
+                        [
+                          [
+                            "keep"
+                            (rows [
+                              ["remove-if" ["lambda" ["id"] ["or" ["member" "id" "fullscreen"] ["assoc" "id" "floating"]]]]
+                              [["workspace" "number"]]
+                            ])
+                          ]
+                        ]
+                        [["tree" ["sway--prune" ["nth" ["1-" "number"] "trees"] "keep"]]]
+                      ])
+                    ]
+                    (rows [
+                      ["dolist" ["id" "keep"]]
+                      (rows [
+                        ["unless" ["member" "id" ["sway--leaves" "tree"]]]
+                        (rows [
+                          ["setf" "tree"]
+                          (rows [
+                            ["if" ["null" "tree"]]
+                            "id"
+                            (rows [
+                              [
+                                "let*"
+                                (rows [
+                                  [["leaves" ["sway--leaves" "tree"]]]
+                                  [["target" ["if" ["member" "focused" "leaves"] "focused" ["car" ["last" "leaves"]]]]]
+                                  [["box" ["assoc" "target" ["boxes" "tree"]]]]
+                                  [
+                                    [
+                                      "direction"
+                                      (rows [
+                                        ["or" ["cdr" ["assoc" "target" "split"]]]
+                                        [["if" ["and" "box" [">" ["fifth" "box"] ["fourth" "box"]]] ":v" ":h"]]
+                                      ])
+                                    ]
+                                  ]
+                                ])
+                              ]
+                              [["setf" "split" ["remove" "target" "split" ":key" (function "car")]]]
+                              [["sway--insert" "tree" "target" "id" "direction"]]
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                    [["setf" ["nth" ["1-" "number"] "trees"] "tree"]]
+                  ])
+                ])
+                [["arrange-all" [] ["loop" "for number from 1 to count" "do" ["arrange" "number"]]]]
+                (rows [
+                  ["switch" ["number"]]
+                  [["setf" "active" "number" "focused" ["car" ["last" ["workspace" "number"]]]]]
+                ])
+                [["neighbour" ["direction"] ["1+" ["mod" ["+" "active" (-1) "direction"] "count"]]]]
+              ])
+            ]
+            (rows [
+              ["when" ["and" ["member" "external" "ids"] ["not" ["eql" "external" "focused"]]]]
+              [["setf" "focused" "external" "active" ["or" ["home" "external"] "active"]]]
+            ])
+            (rows [
+              ["let" [["known" ["loop" "for list in workspaces" "append list"]]]]
+              (rows [
+                ["dolist" ["window" "windows"]]
+                (rows [
+                  ["let" [["id" ["getf" "window" ":id"]]]]
+                  (rows [
+                    ["unless" ["member" "id" "known"]]
+                    [["setf" ["nth" ["1-" "active"] "workspaces"] ["append" ["workspace" "active"] ["list" "id"]]]]
+                    [["when" ["getf" "window" ":fullscreen-requested"] ["push" "id" "fullscreen"]]]
+                    [["push" "id" "new"]]
+                  ])
+                ])
+              ])
+            ])
+            (rows [
+              ["case" "type"]
+              (rows [
+                ":button"
+                (rows [
+                  ["when" ["and" ["eq" ["getf" "event" ":state"] ":pressed"] ["member" ["getf" "event" ":id"] ["workspace" "active"]]]]
+                  [["setf" "focused" ["getf" "event" ":id"]]]
+                ])
+              ])
+              (rows [
+                ":pointer"
+                (rows [
+                  [
+                    "when"
+                    (rows [
+                      ["and" ["eq" ["getf" "event" ":state"] ":enter"] ["getf" "event" ":moved"]]
+                      [["setting" "snapshot" ":focus-follows-mouse"]]
+                      [["member" ["getf" "event" ":id"] ["workspace" "active"]]]
+                    ])
+                  ]
+                  [["setf" "focused" ["getf" "event" ":id"]]]
+                ])
+              ])
+              (rows [
+                [[":metadata" ":request"]]
+                (rows [
+                  ["let" [["id" ["getf" "event" ":id"]]]]
+                  (rows [
+                    ["when" ["member" "id" "ids"]]
+                    (rows [
+                      ["case" ["getf" "event" ":request"]]
+                      (rows [
+                        ":fullscreen"
+                        [["setf" "fullscreen" ["remove" "id" "fullscreen"]]]
+                        [["when" ["getf" "event" ":requested"] ["push" "id" "fullscreen"] ["setf" "focused" "id"]]]
+                      ])
+                      [[":unfullscreen" ["setf" "fullscreen" ["remove" "id" "fullscreen"]]]]
+                      [[":activate" ["setf" "active" ["or" ["home" "id"] "active"] "focused" "id"]]]
+                    ])
+                  ])
+                ])
+              ])
+            ])
+            (rows [
+              ["when" "terminal"]
+              [["setf" "active" ["or" ["home" "terminal"] "active"] "focused" "terminal"]]
+            ])
+            [["arrange-all"]]
+            (rows [
+              ["let" [["current" ["and" ["member" "focused" ["workspace" "active"]] "focused"]]]]
+              (rows [
+                "cond"
+                [[["null" "command"]]]
+                (rows [
+                  "motion"
+                  (rows [
+                    ["let" [["target" ["apply" (function "sway--neighbour") ["boxes" ["nth" ["1-" "active"] "trees"]] "current" "motion"]]]]
+                    [["when" "target" ["setf" "focused" "target"]]]
+                  ])
+                ])
+                [[["equal" "command" (str "workspace-next")] ["switch" ["neighbour" 1]]]]
+                [[["equal" "command" (str "workspace-previous")] ["switch" ["neighbour" (-1)]]]]
+                [[["null" "current"]]]
+                (rows [
+                  [["member" "command" (quote [(str "move-next") (str "move-previous")]) ":test" (function "equal")]]
+                  (rows [
+                    ["let" [["number" ["neighbour" ["if" ["equal" "command" (str "move-next")] 1 (-1)]]]]]
+                    (rows [
+                      ["setf" ["nth" ["1-" "active"] "workspaces"] ["remove" "current" ["workspace" "active"]]]
+                      [["nth" ["1-" "number"] "workspaces"] ["append" ["workspace" "number"] ["list" "current"]]]
+                    ])
+                    [["switch" "number"]]
+                  ])
+                ])
+                (rows [
+                  [["member" "command" (quote [(str "swap-previous") (str "swap-next")]) ":test" (function "equal")]]
+                  (rows [
+                    [
+                      "let*"
+                      (rows [
+                        [["leaves" ["sway--leaves" ["nth" ["1-" "active"] "trees"]]]]
+                        [["index" ["position" "current" "leaves"]]]
+                        [["other" ["and" "index" ["+" "index" ["if" ["equal" "command" (str "swap-next")] 1 (-1)]]]]]
+                      ])
+                    ]
+                    (rows [
+                      ["when" ["and" "other" ["<" (-1) "other" ["length" "leaves"]]]]
+                      (rows [
+                        ["setf" ["nth" ["1-" "active"] "trees"]]
+                        [["sway--swap" ["nth" ["1-" "active"] "trees"] "current" ["nth" "other" "leaves"]]]
+                      ])
+                    ])
+                  ])
+                ])
+                (rows [
+                  [["equal" "command" (str "split-horizontal")]]
+                  [["setf" "split" ["acons" "current" ":h" ["remove" "current" "split" ":key" (function "car")]]]]
+                ])
+                (rows [
+                  [["equal" "command" (str "split-vertical")]]
+                  [["setf" "split" ["acons" "current" ":v" ["remove" "current" "split" ":key" (function "car")]]]]
+                ])
+                (rows [
+                  [["equal" "command" (str "fullscreen")]]
+                  (rows [
+                    ["if" ["member" "current" "fullscreen"]]
+                    [["setf" "fullscreen" ["remove" "current" "fullscreen"]]]
+                    [["push" "current" "fullscreen"]]
+                  ])
+                ])
+                (rows [
+                  [["equal" "command" (str "floating")]]
+                  (rows [
+                    ["cond" [["member" "current" "fullscreen"] ["setf" "fullscreen" ["remove" "current" "fullscreen"]]]]
+                    [[["assoc" "current" "floating"] ["setf" "floating" ["remove" "current" "floating" ":key" (function "car")]]]]
+                    [
+                      [
+                        "area"
+                        (rows [
+                          ["push" ["cons" "current" ["policy--centred" "area" ["getf" "+layout+" ":float-ratio"]]]]
+                          "floating"
+                        ])
+                      ]
+                    ]
+                  ])
+                ])
+              ])
+            ])
+            [["arrange-all"]]
+            (rows [
+              ["let" [["arrived" ["remove-if-not" ["lambda" ["id"] ["member" "id" ["workspace" "active"]]] "new"]]]]
+              [["when" "arrived" ["setf" "focused" ["first" "arrived"]]]]
+            ])
+            (rows [
+              ["unless" ["member" "focused" ["workspace" "active"]]]
+              [["setf" "focused" ["car" ["last" ["workspace" "active"]]]]]
+            ])
+            (rows [
+              ["let" [["effects" "nil"]]]
+              (rows [
+                ["dolist" ["id" "ids"]]
+                (rows [
+                  [
+                    "let*"
+                    (rows [
+                      [["number" ["home" "id"]]]
+                      [["shown" ["eql" "number" "active"]]]
+                      [
+                        [
+                          "box"
+                          (rows [
+                            [
+                              "cond"
+                              (rows [
+                                [["member" "id" "fullscreen"]]
+                                [
+                                  [
+                                    "and"
+                                    "output"
+                                    (rows [
+                                      ["list" ["getf" "output" ":x"] ["getf" "output" ":y"]]
+                                      [["getf" "output" ":width"] ["getf" "output" ":height"]]
+                                    ])
+                                  ]
+                                ]
+                              ])
+                            ]
+                            [[["cdr" ["assoc" "id" "floating"]]]]
+                            [["t" ["rest" ["assoc" "id" ["boxes" ["nth" ["1-" "number"] "trees"]]]]]]
+                          ])
+                        ]
+                      ]
+                    ])
+                  ]
+                  (rows [
+                    [
+                      "push"
+                      (rows [
+                        ["if" "box"]
+                        (rows [
+                          ["destructuring-bind" ["x" "y" "width" "height"] "box"]
+                          [["place" "id" "x" "y" ["max" 1 "width"] ["max" 1 "height"] "shown"]]
+                        ])
+                        [["if" "shown" ["show-window" "id"] ["hide-window" "id"]]]
+                      ])
+                    ]
+                    "effects"
+                  ])
+                  [["push" ["fullscreen" "id" ["and" ["member" "id" "fullscreen"] "t"]] "effects"]]
+                ])
+              ])
+              (rows [
+                [
+                  "let"
+                  [
+                    [
+                      "floats"
+                      (rows [
+                        ["remove-if" ["lambda" ["id"] ["member" "id" "fullscreen"]]]
+                        [["mapcar" (function "car") ["reverse" "floating"]]]
+                      ])
+                    ]
+                  ]
+                ]
+                (rows [
+                  [
+                    "dolist"
+                    [
+                      "id"
+                      (rows [
+                        ["append" ["remove" "focused" "floats"]]
+                        [["when" ["member" "focused" "floats"] ["list" "focused"]]]
+                        "fullscreen"
+                      ])
+                    ]
+                  ]
+                  [["when" ["member" "id" ["workspace" "active"]] ["push" ["raise-window" "id"] "effects"]]]
+                ])
+              ])
+              [["push" ["focus" "focused" ":raise" "nil"] "effects"]]
+              [["push" ["settings" ":animations" "nil"] "effects"]]
+              [["dolist" ["binding" "+layout-bindings+"] ["push" ["apply" (function "bind-key") "binding"] "effects"]]]
+              (rows [
+                [
+                  "values"
+                  (rows [
+                    ["list" ":active" "active" ":workspaces" "workspaces" ":trees" "trees" ":split" "split"]
+                    [":focus" "focused" ":fullscreen" "fullscreen" ":floating" "floating"]
+                  ])
+                ]
+                [["nreverse" "effects"]]
+                (rows [
+                  ["when" ["and" ["equal" "command" (str "terminal")] ["null" "terminal"]]]
+                  [["list" ["apply" (function "launch") ["policy--launch" (str "terminal")]]]]
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_theme_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(defun theme--words (line)"
-      "  (let ((words nil) (start nil))"
-      "    (dotimes (i (1+ (length line)) (nreverse words))"
-      "      (if (and (< i (length line)) (not (member (char line i) '(#\\Space #\\Tab #\\; #\\Return))))"
-      "          (unless start (setf start i))"
-      "          (when start (push (subseq line start i) words) (setf start nil))))))"
-      ""
-      "(defun theme--hex-p (value)"
-      "  (and (member (length value) '(4 7 9)) (char= (char value 0) #\\#)"
-      "       (every (lambda (c) (digit-char-p c 16)) (subseq value 1))))"
-      ""
-      "(defun theme--resolve (name table)"
-      "  (loop with key = name"
-      "        repeat 8"
-      "        do (let ((value (cdr (assoc key table :test #'equal))))"
-      "             (cond ((null value) (return nil))"
-      "                   ((char= (char value 0) #\\@) (setf key (subseq value 1)))"
-      "                   ((theme--hex-p value) (return value))"
-      "                   (t (return nil))))))"
-      ""
-      "(defun theme--palette (css)"
-      "  (let ((table nil))"
-      "    (with-input-from-string (in css)"
-      "      (loop for line = (read-line in nil) while line"
-      "            do (let ((words (theme--words line)))"
-      "                 (when (and (= 3 (length words)) (equal (first words) \"@define-color\"))"
-      "                   (push (cons (second words) (third words)) table)))))"
-      "    (loop for (name) in (reverse table)"
-      "          for value = (theme--resolve name table)"
-      "          when value append (list (intern (string-upcase name) :keyword) value))))"
-      ""
-      "(defun theme--mode (p)"
-      "  (let ((bg (getf p :bg)))"
-      "    (if (and bg (= (length bg) 7)"
-      "             (> (loop for i from 1 by 2"
-      "                      for weight in '(0.2126 0.7152 0.0722)"
-      "                      sum (* weight (parse-integer bg :start i :end (+ i 2) :radix 16)))"
-      "                127.5))"
-      "        :light"
-      "        :dark)))"
-      ""
-      "(define-extension \"theme\" (:reads (:focus) :state (list :palette nil :watch nil :focus nil :focus-at nil))"
-      "    (snapshot state event)"
-      "  (let ((type (getf event :type)) (name (getf event :name)) (focus (context snapshot :focus)))"
-      "    (cond ((and (eq type :exec) (member name '(:palette :reread)) (eql (getf event :code) 0))"
-      "           (setf (getf state :palette) (or (theme--palette (getf event :stdout)) (getf state :palette))"
-      "                 (getf state :watch) t))"
-      "          ((and (eq type :watch) (eq name :palette))"
-      "           (setf (getf state :palette) (or (theme--palette (getf event :content)) (getf state :palette)))))"
-      "    (unless (equal focus (getf state :focus))"
-      "      (setf (getf state :focus) focus (getf state :focus-at) (when focus (hud--now))))"
-      "    (let* ((fixed (getf +hud-theme+ :palette))"
-      "           (p (or fixed (getf state :palette)))"
-      "           (flash (hud--decay (getf state :focus-at) (getf +hud-theme+ :focus-flash))))"
-      "      (values state"
-      "              (append (unless fixed (list (exec-async (if (getf state :watch) :reread :palette)"
-      "                                                          (getf +hud-theme+ :palette-command))))"
-      "                      (when (getf state :watch) (list (watch-file :palette (getf +hud-theme+ :palette-file))))"
-      "                      (when (plusp flash) (list (interval :tick (getf +hud-theme+ :tick))))"
-      "                      (when p (list (publish-state :hud-palette p)"
-      "                                    (publish-state :theme-mode (theme--mode p))"
-      "                                    (publish-state :theme (list :base (hud--c p :bg) :text (hud--c p :fg)"
-      "                                                                :accent (hud--c p :accent) :error (hud--c p :color1)"
-      "                                                                :surface1 (hud--c p :color8)"
-      "                                                                :subtext0 (hud--mix (hud--c p :bg) (hud--c p :fg) 0.78)))))"
-      "                      (list (settings :border (list :width (getf +hud-theme+ :border) :radius 0"
-      "                                                    :focused (hud--mix (hud--c p :accent) (hud--c p :fg) flash)"
-      "                                                    :unfocused (hud--c p :color8)))))"
-      "              nil))))"
+    modules_desktop_session_tomoe_lisp_theme_data = {
+      at,
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["defun" "theme--words" ["line"]]
+        (rows [
+          ["let" [["words" "nil"] ["start" "nil"]]]
+          (rows [
+            ["dotimes" ["i" ["1+" ["length" "line"]] ["nreverse" "words"]]]
+            (rows [
+              ["if" ["and" ["<" "i" ["length" "line"]] ["not" ["member" ["char" "line" "i"] (quote ["#\\Space" "#\\Tab" "#\\;" "#\\Return"])]]]]
+              [["unless" "start" ["setf" "start" "i"]]]
+              [["when" "start" ["push" ["subseq" "line" "start" "i"] "words"] ["setf" "start" "nil"]]]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "theme--hex-p" ["value"]]
+        (rows [
+          ["and" ["member" ["length" "value"] (quote [4 7 9])] ["char=" ["char" "value" 0] "#\\#"]]
+          [["every" ["lambda" ["c"] ["digit-char-p" "c" 16]] ["subseq" "value" 1]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "theme--resolve" ["name" "table"]]
+        (rows [
+          [
+            "loop"
+            ''
+              with key = name
+                      repeat 8''
+          ]
+          [
+            "do"
+            (rows [
+              ["let" [["value" ["cdr" ["assoc" "key" "table" ":test" (function "equal")]]]]]
+              (rows [
+                ["cond" [["null" "value"] ["return" "nil"]]]
+                [[["char=" ["char" "value" 0] "#\\@"] ["setf" "key" ["subseq" "value" 1]]]]
+                [[["theme--hex-p" "value"] ["return" "value"]]]
+                [["t" ["return" "nil"]]]
+              ])
+            ])
+          ]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "theme--palette" ["css"]]
+        (rows [
+          ["let" [["table" "nil"]]]
+          (rows [
+            ["with-input-from-string" ["in" "css"]]
+            (rows [
+              ["loop" "for" "line" "=" ["read-line" "in" "nil"] "while line"]
+              [
+                "do"
+                (rows [
+                  ["let" [["words" ["theme--words" "line"]]]]
+                  (rows [
+                    ["when" ["and" ["=" 3 ["length" "words"]] ["equal" ["first" "words"] (str "@define-color")]]]
+                    [["push" ["cons" ["second" "words"] ["third" "words"]] "table"]]
+                  ])
+                ])
+              ]
+            ])
+          ])
+          (rows [
+            ["loop" "for" ["name"] "in" ["reverse" "table"]]
+            ["for" "value" "=" ["theme--resolve" "name" "table"]]
+            ["when value" "append" ["list" ["intern" ["string-upcase" "name"] ":keyword"] "value"]]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "theme--mode" ["p"]]
+        (rows [
+          ["let" [["bg" ["getf" "p" ":bg"]]]]
+          (rows [
+            [
+              "if"
+              (rows [
+                ["and" "bg" ["=" ["length" "bg"] 7]]
+                (rows [
+                  [
+                    ">"
+                    (rows [
+                      ["loop" "for i from 1 by 2"]
+                      ["for" "weight" "in" (quote ["0.2126" "0.7152" "0.0722"])]
+                      ["sum" ["*" "weight" ["parse-integer" "bg" ":start" "i" ":end" ["+" "i" 2] ":radix" 16]]]
+                    ])
+                  ]
+                  "127.5"
+                ])
+              ])
+            ]
+            ":light"
+            ":dark"
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["define-extension" (str "theme") [":reads" [":focus"] ":state" ["list" ":palette" "nil" ":watch" "nil" ":focus" "nil" ":focus-at" "nil"]]]
+        [["snapshot" "state" "event"]]
+        (rows [
+          ["let" [["type" ["getf" "event" ":type"]] ["name" ["getf" "event" ":name"]] ["focus" ["context" "snapshot" ":focus"]]]]
+          (rows [
+            [
+              "cond"
+              (rows [
+                [["and" ["eq" "type" ":exec"] ["member" "name" (quote [":palette" ":reread"])] ["eql" ["getf" "event" ":code"] 0]]]
+                (rows [
+                  ["setf" ["getf" "state" ":palette"] ["or" ["theme--palette" ["getf" "event" ":stdout"]] ["getf" "state" ":palette"]]]
+                  [["getf" "state" ":watch"] "t"]
+                ])
+              ])
+            ]
+            (rows [
+              [["and" ["eq" "type" ":watch"] ["eq" "name" ":palette"]]]
+              [["setf" ["getf" "state" ":palette"] ["or" ["theme--palette" ["getf" "event" ":content"]] ["getf" "state" ":palette"]]]]
+            ])
+          ])
+          (rows [
+            ["unless" ["equal" "focus" ["getf" "state" ":focus"]]]
+            [["setf" ["getf" "state" ":focus"] "focus" ["getf" "state" ":focus-at"] ["when" "focus" ["hud--now"]]]]
+          ])
+          (rows [
+            [
+              "let*"
+              (rows [
+                [["fixed" ["getf" "+hud-theme+" ":palette"]]]
+                [["p" ["or" "fixed" ["getf" "state" ":palette"]]]]
+                [["flash" ["hud--decay" ["getf" "state" ":focus-at"] ["getf" "+hud-theme+" ":focus-flash"]]]]
+              ])
+            ]
+            (rows [
+              ["values" "state"]
+              (rows [
+                [
+                  "append"
+                  [
+                    "unless"
+                    "fixed"
+                    [
+                      "list"
+                      (rows [
+                        ["exec-async" ["if" ["getf" "state" ":watch"] ":reread" ":palette"]]
+                        (at 16 [["getf" "+hud-theme+" ":palette-command"]])
+                      ])
+                    ]
+                  ]
+                ]
+                [["when" ["getf" "state" ":watch"] ["list" ["watch-file" ":palette" ["getf" "+hud-theme+" ":palette-file"]]]]]
+                [["when" ["plusp" "flash"] ["list" ["interval" ":tick" ["getf" "+hud-theme+" ":tick"]]]]]
+                [
+                  [
+                    "when"
+                    "p"
+                    (rows [
+                      ["list" ["publish-state" ":hud-palette" "p"]]
+                      [["publish-state" ":theme-mode" ["theme--mode" "p"]]]
+                      [
+                        [
+                          "publish-state"
+                          ":theme"
+                          (rows [
+                            ["list" ":base" ["hud--c" "p" ":bg"] ":text" ["hud--c" "p" ":fg"]]
+                            [":accent" ["hud--c" "p" ":accent"] ":error" ["hud--c" "p" ":color1"]]
+                            [":surface1" ["hud--c" "p" ":color8"]]
+                            [":subtext0" ["hud--mix" ["hud--c" "p" ":bg"] ["hud--c" "p" ":fg"] "0.78"]]
+                          ])
+                        ]
+                      ]
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    "list"
+                    [
+                      "settings"
+                      ":border"
+                      (rows [
+                        ["list" ":width" ["getf" "+hud-theme+" ":border"] ":radius" 0]
+                        [":focused" ["hud--mix" ["hud--c" "p" ":accent"] ["hud--c" "p" ":fg"] "flash"]]
+                        [":unfocused" ["hud--c" "p" ":color8"]]
+                      ])
+                    ]
+                  ]
+                ]
+              ])
+              "nil"
+            ])
+          ])
+        ])
+      ])
     ];
-    modules_desktop_session_tomoe_lisp_user_data = [
-      "(in-package #:tomoe-user)"
-      ""
-      "(define-extension \"user\" (:reads (:key :focus) :state nil) (snapshot state event)"
-      "  (declare (ignore state))"
-      "  (let ((command (when (and (eq (getf event :type) :key)"
-      "                            (equal (getf event :owner) \"user\"))"
-      "                   (getf event :command)))"
-      "        (focused (context snapshot :focus)))"
-      "    (values nil"
-      "            (mapcar (lambda (binding) (apply #'bind-key binding)) +policy-bindings+)"
-      "            (cond"
-      "              ((null command) nil)"
-      "              ((equal command \"close\") (when focused (list (close-window focused))))"
-      "              ((equal command \"quit\") (list (quit)))"
-      "              ((equal command \"power\") (list (output-power :toggle)))"
-      "              ((equal command \"screenshot\") (list (screenshot)))"
-      "              ((equal command \"screenshot-screen\") (list (screenshot :screen)))"
-      "              ((equal command \"play-pause\") (list (media-control :play-pause)))"
-      "              ((equal command \"track-next\") (list (media-control :next)))"
-      "              ((equal command \"track-prev\") (list (media-control :previous)))"
-      "              ((equal command \"brightness-up\") (list (adjust-brightness 5)))"
-      "              ((equal command \"brightness-down\") (list (adjust-brightness -5)))"
-      "              (t"
-      "               (let ((argv (policy--launch command)))"
-      "                 (when argv (list (apply #'launch argv)))))))))"
+    modules_desktop_session_tomoe_lisp_user_data = {
+      blank,
+      function,
+      rows,
+      str,
+      ...
+    }: [
+      ["in-package" "#:tomoe-user"]
+      blank
+      (rows [
+        ["define-extension" (str "user") [":reads" [":key" ":focus"] ":state" "nil"] ["snapshot" "state" "event"]]
+        [["declare" ["ignore" "state"]]]
+        (rows [
+          [
+            "let"
+            (rows [
+              [
+                [
+                  "command"
+                  (rows [
+                    [
+                      "when"
+                      (rows [
+                        ["and" ["eq" ["getf" "event" ":type"] ":key"]]
+                        [["equal" ["getf" "event" ":owner"] (str "user")]]
+                      ])
+                    ]
+                    [["getf" "event" ":command"]]
+                  ])
+                ]
+              ]
+              [["focused" ["context" "snapshot" ":focus"]]]
+            ])
+          ]
+          (rows [
+            ["values" "nil"]
+            [["mapcar" ["lambda" ["binding"] ["apply" (function "bind-key") "binding"]] "+policy-bindings+"]]
+            (rows [
+              "cond"
+              [[["null" "command"] "nil"]]
+              [[["equal" "command" (str "close")] ["when" "focused" ["list" ["close-window" "focused"]]]]]
+              [[["equal" "command" (str "quit")] ["list" ["quit"]]]]
+              [[["equal" "command" (str "power")] ["list" ["output-power" ":toggle"]]]]
+              [[["equal" "command" (str "screenshot")] ["list" ["screenshot"]]]]
+              [[["equal" "command" (str "screenshot-screen")] ["list" ["screenshot" ":screen"]]]]
+              [[["equal" "command" (str "play-pause")] ["list" ["media-control" ":play-pause"]]]]
+              [[["equal" "command" (str "track-next")] ["list" ["media-control" ":next"]]]]
+              [[["equal" "command" (str "track-prev")] ["list" ["media-control" ":previous"]]]]
+              [[["equal" "command" (str "brightness-up")] ["list" ["adjust-brightness" 5]]]]
+              [[["equal" "command" (str "brightness-down")] ["list" ["adjust-brightness" (-5)]]]]
+              (rows [
+                "t"
+                (rows [
+                  ["let" [["argv" ["policy--launch" "command"]]]]
+                  [["when" "argv" ["list" ["apply" (function "launch") "argv"]]]]
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
     ];
     modules_desktop_session_tomoe_shaders_balatro_data = [
       "#define HEX(c) (vec3(((c) >> 16) & 0xff, ((c) >> 8) & 0xff, (c) & 0xff) / 255.0)"
@@ -26008,8 +28908,6 @@
 
       luaSource = lines;
 
-      lispSource = lines;
-
       pythonSource = lines;
 
       glslSource = lines;
@@ -28754,12 +31652,8 @@
           parse = builtins.fromTOML;
           render = v: builtins.readFile ((pkgs.formats.toml {}).generate "x.toml" v);
         };
-        lisp = {
-          extensions = ["lisp"];
-          generator = "lispSource";
-        };
         shell = {
-          extensions = ["sh" "bash"];
+          extensions = [];
           generator = "shellSource";
         };
       };
@@ -29859,7 +32753,7 @@
 
       environment.systemPackages = [flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default];
       manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text =
-        lib.removeSuffix "\n" (generators.lispSource modules_shell_ekko_init_data)
+        lib.removeSuffix "\n" (generators.lisp.render (modules_shell_ekko_init_data generators.lisp))
         + "\n"
         + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp"
         + "\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\n";
@@ -29876,323 +32770,835 @@
         fi
       '';
     };
-    modules_shell_ekko_init_data = [
-      "(defpackage #:ekko-deck"
-      "  (:use #:cl #:ekko/extensions))"
-      "(in-package #:ekko-deck)"
-      ""
-      "(defparameter +ratios+ '(1/2 2/3 1/3)"
-      "  \"Ctrl+r column split cycle, like tomoe's 16:9+16:9 / 21:9+11:9 / 11:9+21:9.\")"
-      ""
-      "(defun pane-id (pane) (getf pane :id))"
-      ""
-      "(defun sorted-panes (snapshot)"
-      "  (sort (copy-list (value snapshot :panes)) #'< :key #'pane-id))"
-      ""
-      "(defun tiled-p (pane)"
-      "  (not (or (getf pane :minimized) (getf pane :floating))))"
-      ""
-      "(defun deck-state (snapshot)"
-      "  (rest (assoc \"deck\" (value snapshot :component-state) :test #'equal)))"
-      ""
-      "(defun state-list (state key)"
-      "  (let ((value (getf state key)))"
-      "    (and (listp value) value)))"
-      ""
-      "(defun deck-model (snapshot)"
-      "  \"Resolve the workspace into (:left :right) ordered column id lists, their"
-      "tiled subsets (:vl :vr), front ids (:fl :fr), :ratio, :grid and :pending."
-      "Dead panes drop out; unassigned panes join the :pending column — the deck a"
-      "command last worked in, like a spawn joining the focused window's column in"
-      "tomoe — or balance into the shorter one (ties go left), and take its front.\""
-      "  (let* ((state (deck-state snapshot))"
-      "         (panes (sorted-panes snapshot))"
-      "         (live (mapcar #'pane-id panes))"
-      "         (visible (mapcar #'pane-id (remove-if-not #'tiled-p panes)))"
-      "         (left (remove-if-not (lambda (id) (member id live))"
-      "                              (state-list state :left)))"
-      "         (right (remove-if-not (lambda (id) (member id live))"
-      "                               (state-list state :right)))"
-      "         (pending (let ((p (getf state :pending))) (and (member p '(:left :right)) p)))"
-      "         (new (remove-if (lambda (id) (or (member id left) (member id right)))"
-      "                         live)))"
-      "    (dolist (id new)"
-      "      (if (or (eq pending :left)"
-      "              (and (null pending) (<= (length left) (length right))))"
-      "          (setf left (append left (list id)))"
-      "          (setf right (append right (list id)))))"
-      "    (flet ((subset (col) (remove-if-not (lambda (id) (member id visible)) col))"
-      "           (joined (col) (car (last (remove-if-not (lambda (id) (member id col)) new)))))"
-      "      (let ((vl (subset left)) (vr (subset right))"
-      "            (focus (value snapshot :focus)))"
-      "        (flet ((front (col vcol stored)"
-      "                 (or (joined col)"
-      "                     (and (member focus vcol) focus)"
-      "                     (and (member stored vcol) stored)"
-      "                     (first vcol))))"
-      "          (list :left left :right right :vl vl :vr vr"
-      "                :fl (front left vl (getf state :fl))"
-      "                :fr (front right vr (getf state :fr))"
-      "                :ratio (let ((r (getf state :ratio))) (if (integerp r) r 0))"
-      "                :grid (and (getf state :grid) t)"
-      "                :pending pending"
-      "                :visible visible))))))"
-      ""
-      "(defun model-state (model)"
-      "  (list :left (getf model :left) :right (getf model :right)"
-      "        :fl (getf model :fl) :fr (getf model :fr)"
-      "        :ratio (getf model :ratio) :grid (getf model :grid)"
-      "        :pending (getf model :pending)))"
-      ""
-      "(defun fit-insets (width height insets)"
-      "  (let* ((top (min (first insets) (max 0 (1- height))))"
-      "         (left (min (fourth insets) (max 0 (1- width))))"
-      "         (bottom (min (third insets) (max 0 (- height top 1))))"
-      "         (right (min (second insets) (max 0 (- width left 1)))))"
-      "    (list top right bottom left)))"
-      ""
-      "(defun deck-viewport (snapshot)"
-      "  (let* ((viewport (value snapshot :viewport)) (geometry (value snapshot :geometry))"
-      "         (cols (getf viewport :cols)) (rows (getf viewport :rows))"
-      "         (insets (fit-insets cols rows (getf geometry :viewport-insets '(0 0 1 0)))))"
-      "    (values (fourth insets) (first insets)"
-      "            (- cols (second insets) (fourth insets))"
-      "            (- rows (first insets) (third insets)))))"
-      ""
-      "(defun deck-frame (snapshot id x y width height)"
-      "  (let* ((geometry (value snapshot :geometry))"
-      "         (requested (copy-list (getf geometry :pane-insets '(1 0 0 0))))"
-      "         (boundary (getf geometry :boundary-insets)))"
-      "    (when boundary"
-      "      (multiple-value-bind (left top vw vh) (deck-viewport snapshot)"
-      "        (loop for outside in (list (= y top) (= (+ x width) (+ left vw))"
-      "                                   (= (+ y height) (+ top vh)) (= x left))"
-      "              for index from 0 when outside do (setf (nth index requested) (nth index boundary)))))"
-      "    (let ((insets (fit-insets width height requested)))"
-      "      (list :pane id :x (+ x (fourth insets)) :y (+ y (first insets))"
-      "            :cols (- width (second insets) (fourth insets))"
-      "            :rows (- height (first insets) (third insets))"
-      "            :outer (list x y width height)))))"
-      ""
-      "(defun floating-rect (pane index left top width height)"
-      "  (destructuring-bind (x y w h)"
-      "      (let ((f (getf pane :floating)))"
-      "        (if (and (listp f) (= (length f) 4)) f"
-      "            (list (+ left (* 3 (mod index 8))) (+ top (mod index 8))"
-      "                  (max 12 (floor (* width 3) 4)) (max 4 (floor (* height 3) 4)))))"
-      "    (let ((w (min width (max 12 w))) (h (min height (max 4 h))))"
-      "      (list (max left (min x (+ left width (- w))))"
-      "            (max top (min y (+ top height (- h)))) w h))))"
-      ""
-      "(defun deck-columns (snapshot model x y w h gap)"
-      "  (let* ((ratio (nth (mod (getf model :ratio) (length +ratios+)) +ratios+))"
-      "         (lw (max 1 (min (- w gap 1) (floor (* (- w gap) ratio)))))"
-      "         (rw (max 1 (- w gap lw))))"
-      "    (flet ((place (vcol front cx cw)"
-      "             (let ((fi (or (position front vcol) 0)))"
-      "               (loop for id in vcol for i from 0"
-      "                     collect (deck-frame snapshot id cx (+ y (* (- i fi) h)) cw h)))))"
-      "      (append (place (getf model :vl) (getf model :fl) x lw)"
-      "              (place (getf model :vr) (getf model :fr) (+ x lw gap) rw)))))"
-      ""
-      "(defun deck-grid (snapshot model x y w h gap)"
-      "  (let* ((ids (getf model :visible)) (n (length ids)))"
-      "    (when (plusp n)"
-      "      (let* ((cols (max 1 (ceiling (sqrt n))))"
-      "             (rows (ceiling n cols))"
-      "             (cw (max 1 (floor (- w (* (1- cols) gap)) cols)))"
-      "             (ch (max 1 (floor (- h (* (1- rows) gap)) rows))))"
-      "        (loop for id in ids for i from 0"
-      "              collect (deck-frame snapshot id"
-      "                                  (+ x (* (mod i cols) (+ cw gap)))"
-      "                                  (+ y (* (floor i cols) (+ ch gap)))"
-      "                                  cw ch))))))"
-      ""
-      "(defun deck-place (snapshot event)"
-      "  (declare (ignore event))"
-      "  (let* ((model (deck-model snapshot))"
-      "         (gap (first (getf (value snapshot :geometry) :split-gaps '(1 0))))"
-      "         (focus (value snapshot :focus)))"
-      "    (multiple-value-bind (x y w h) (deck-viewport snapshot)"
-      "      (let ((placements"
-      "              (append (if (getf model :grid)"
-      "                          (deck-grid snapshot model x y w h gap)"
-      "                          (deck-columns snapshot model x y w h gap))"
-      "                      (loop for pane in (sorted-panes snapshot) for i from 0"
-      "                            when (getf pane :floating)"
-      "                            collect (apply #'deck-frame snapshot (pane-id pane)"
-      "                                           (floating-rect pane i x y w h))))))"
-      "        (when (and (value snapshot :zoom)"
-      "                   (find focus placements :key (lambda (pl) (getf pl :pane))))"
-      "          (setf placements"
-      "                (append (loop for pl in placements"
-      "                              unless (eql focus (getf pl :pane))"
-      "                              collect (let ((hidden (copy-list pl)))"
-      "                                        (setf (getf hidden :visible) nil)"
-      "                                        hidden))"
-      "                        (list (deck-frame snapshot focus x y w h)))))"
-      "        (list (action :place-panes ':version 1 ':placements placements"
-      "                      ':camera '(0 0)))))))"
-      ""
-      "(defun column-of (model focus)"
-      "  (cond ((member focus (getf model :vl)) :left)"
-      "        ((member focus (getf model :vr)) :right)))"
-      ""
-      "(defun focus-column (side)"
-      "  (lambda (snapshot event)"
-      "    (declare (ignore event))"
-      "    (let* ((model (deck-model snapshot))"
-      "           (front (getf model (if (eq side :left) :fl :fr))))"
-      "      (when front"
-      "        (setf (getf model :pending) side)"
-      "        (list (action :focus ':pane front)"
-      "              (action :set-state ':value (model-state model)))))))"
-      ""
-      "(defun scroll-deck (dir)"
-      "  (lambda (snapshot event)"
-      "    (declare (ignore event))"
-      "    (let* ((model (deck-model snapshot))"
-      "           (side (column-of model (value snapshot :focus))))"
-      "      (when side"
-      "        (let ((vcol (getf model (if (eq side :left) :vl :vr)))"
-      "              (fkey (if (eq side :left) :fl :fr)))"
-      "          (when (> (length vcol) 1)"
-      "            (let ((target (nth (mod (+ (or (position (getf model fkey) vcol) 0) dir)"
-      "                                   (length vcol))"
-      "                               vcol)))"
-      "              (setf (getf model fkey) target"
-      "                    (getf model :pending) side)"
-      "              (list (action :focus ':pane target)"
-      "                    (action :set-state ':value (model-state model))))))))))"
-      ""
-      "(defun move-in-deck (dir)"
-      "  (lambda (snapshot event)"
-      "    (declare (ignore event))"
-      "    (let* ((model (deck-model snapshot))"
-      "           (focus (value snapshot :focus))"
-      "           (side (cond ((member focus (getf model :left)) :left)"
-      "                       ((member focus (getf model :right)) :right))))"
-      "      (when side"
-      "        (let* ((col (getf model side))"
-      "               (i (position focus col)) (j (and i (+ i dir))))"
-      "          (when (and j (<= 0 j) (< j (length col)))"
-      "            (rotatef (nth i col) (nth j col))"
-      "            (setf (getf model :pending) side)"
-      "            (list (action :set-state ':value (model-state model)))))))))"
-      ""
-      "(defun swap-columns (snapshot event)"
-      "  (declare (ignore event))"
-      "  (let ((model (deck-model snapshot)))"
-      "    (rotatef (getf model :left) (getf model :right))"
-      "    (rotatef (getf model :vl) (getf model :vr))"
-      "    (rotatef (getf model :fl) (getf model :fr))"
-      "    (let ((focus (value snapshot :focus)))"
-      "      (setf (getf model :pending)"
-      "            (cond ((member focus (getf model :left)) :left)"
-      "                  ((member focus (getf model :right)) :right)"
-      "                  (t (getf model :pending)))))"
-      "    (list (action :set-state ':value (model-state model)))))"
-      ""
-      "(defun to-column (target)"
-      "  (lambda (snapshot event)"
-      "    (declare (ignore event))"
-      "    (let* ((model (deck-model snapshot))"
-      "           (focus (value snapshot :focus))"
-      "           (side (cond ((member focus (getf model :left)) :left)"
-      "                       ((member focus (getf model :right)) :right))))"
-      "      (when (and side (not (eq side target)))"
-      "        (let* ((col (getf model side)) (i (position focus col))"
-      "               (skey (if (eq side :left) :fl :fr))"
-      "               (tkey (if (eq target :left) :left :right))"
-      "               (tfkey (if (eq target :left) :fl :fr)))"
-      "          (when (eql focus (getf model skey))"
-      "            (setf (getf model skey) (nth (mod (1+ i) (length col)) col)))"
-      "          (setf (getf model side) (remove focus col)"
-      "                (getf model tkey) (append (getf model tkey) (list focus))"
-      "                (getf model tfkey) focus"
-      "                (getf model :pending) target)"
-      "          (list (action :set-state ':value (model-state model))))))))"
-      ""
-      "(defun close-pane (snapshot event)"
-      "  (declare (ignore event))"
-      "  (let* ((model (deck-model snapshot))"
-      "         (focus (value snapshot :focus))"
-      "         (side (column-of model focus)))"
-      "    (if side"
-      "        (let* ((vcol (getf model (if (eq side :left) :vl :vr)))"
-      "               (fkey (if (eq side :left) :fl :fr))"
-      "               (target (and (> (length vcol) 1)"
-      "                            (nth (mod (1+ (or (position focus vcol) 0))"
-      "                                      (length vcol))"
-      "                                 vcol))))"
-      "          (if target"
-      "              (progn (setf (getf model fkey) target"
-      "                           (getf model :pending) side)"
-      "                     (list (action :close ':focus target)"
-      "                           (action :set-state ':value (model-state model))))"
-      "              (list (action :close))))"
-      "        (list (action :close)))))"
-      ""
-      "(register-component :id ':deck :reads '(:panes :focus :component-state))"
-      "(register-layout-provider :component ':deck :name \"deck\" :api-version 1"
-      "                          :reads '(:panes :focus :viewport :geometry"
-      "                                   :component-state :zoom)"
-      "                          :handler #'deck-place)"
-      "(set-option :component ':deck :name ':layout-provider :value \"deck\")"
-      "(set-option :component ':deck :name ':split-gaps :value '(1 0))"
-      ""
-      "(register-command :component ':deck :name \"deck-focus-left\" :handler (focus-column :left))"
-      "(register-command :component ':deck :name \"deck-focus-right\" :handler (focus-column :right))"
-      "(register-command :component ':deck :name \"deck-scroll-down\" :handler (scroll-deck 1))"
-      "(register-command :component ':deck :name \"deck-scroll-up\" :handler (scroll-deck -1))"
-      "(register-command :component ':deck :name \"deck-move-down\" :handler (move-in-deck 1))"
-      "(register-command :component ':deck :name \"deck-move-up\" :handler (move-in-deck -1))"
-      "(register-command :component ':deck :name \"deck-swap-columns\" :handler #'swap-columns)"
-      "(register-command :component ':deck :name \"deck-to-left\" :handler (to-column :left))"
-      "(register-command :component ':deck :name \"deck-to-right\" :handler (to-column :right))"
-      "(register-command :component ':deck :name \"deck-close\" :handler #'close-pane)"
-      "(register-command :component ':deck :name \"deck-new\""
-      "                  :handler (lambda (snapshot event) (declare (ignore event))"
-      "                             (let* ((model (deck-model snapshot))"
-      "                                    (side (column-of model (value snapshot :focus))))"
-      "                               (when side (setf (getf model :pending) side))"
-      "                               (list (action :split ':axis ':columns)"
-      "                                     (action :set-state ':value (model-state model))))))"
-      "(register-command :component ':deck :name \"deck-grid-toggle\""
-      "                  :handler (lambda (snapshot event) (declare (ignore event))"
-      "                             (let ((model (deck-model snapshot)))"
-      "                               (setf (getf model :grid) (not (getf model :grid)))"
-      "                               (list (action :set-state ':value (model-state model))))))"
-      "(register-command :component ':deck :name \"deck-ratio-cycle\""
-      "                  :handler (lambda (snapshot event) (declare (ignore event))"
-      "                             (let ((model (deck-model snapshot)))"
-      "                               (setf (getf model :ratio)"
-      "                                     (mod (1+ (getf model :ratio)) (length +ratios+)))"
-      "                               (list (action :set-state ':value (model-state model))))))"
-      "(register-command :component ':deck :name \"deck-mode\""
-      "                  :handler (lambda (snapshot event) (declare (ignore snapshot event))"
-      "                             (list (action :set-keymap ':name ':deck))))"
-      ""
-      "(when (find ':normal (getf (registry) ':keymaps)"
-      "            :key (lambda (m) (getf m ':name)))"
-      "  (register-keymap :component ':deck :name ':deck :unbound ':ignore)"
-      "  (dolist (spec '((\"C-h\" . \"deck-focus-left\") (\"C-l\" . \"deck-focus-right\")"
-      "                  (\"C-j\" . \"deck-scroll-down\") (\"C-k\" . \"deck-scroll-up\")"
-      "                  (\"C-o\" . \"deck-grid-toggle\") (\"C-r\" . \"deck-ratio-cycle\")"
-      "                  (\"C-d\" . \"deck-mode\")"
-      "                  (\"C-[\" . \"deck-to-left\") (\"C-]\" . \"deck-to-right\")"
-      "                  (\"C-Tab\" . \"deck-swap-columns\")"
-      "                  (\"C-J\" . \"deck-move-down\") (\"C-K\" . \"deck-move-up\")))"
-      "    (bind-key :component ':deck :map ':normal :key (car spec) :command (cdr spec)))"
-      "  (dolist (spec '((\"h\" . \"deck-focus-left\") (\"l\" . \"deck-focus-right\")"
-      "                  (\"j\" . \"deck-scroll-down\") (\"k\" . \"deck-scroll-up\")"
-      "                  (\"J\" . \"deck-move-down\") (\"K\" . \"deck-move-up\")"
-      "                  (\"H\" . \"deck-swap-columns\") (\"L\" . \"deck-swap-columns\")"
-      "                  (\"[\" . \"deck-to-left\") (\"]\" . \"deck-to-right\")"
-      "                  (\"o\" . \"deck-grid-toggle\") (\"r\" . \"deck-ratio-cycle\")"
-      "                  (\"n\" . \"deck-new\") (\"q\" . \"deck-close\")"
-      "                  (\"Escape\" . \"normal-mode\") (\"Enter\" . \"normal-mode\")))"
-      "    (bind-key :component ':deck :map ':deck :key (car spec) :command (cdr spec))))"
+    modules_shell_ekko_init_data = {
+      at,
+      blank,
+      function,
+      quote,
+      rows,
+      str,
+      ...
+    }: [
+      (rows [
+        ["defpackage" "#:ekko-deck"]
+        [[":use" "#:cl" "#:ekko/extensions"]]
+      ])
+      ["in-package" "#:ekko-deck"]
+      blank
+      (rows [
+        ["defparameter" "+ratios+" (quote ["1/2" "2/3" "1/3"])]
+        (str "Ctrl+r column split cycle, like tomoe's 16:9+16:9 / 21:9+11:9 / 11:9+21:9.")
+      ])
+      blank
+      ["defun" "pane-id" ["pane"] ["getf" "pane" ":id"]]
+      blank
+      (rows [
+        ["defun" "sorted-panes" ["snapshot"]]
+        [["sort" ["copy-list" ["value" "snapshot" ":panes"]] (function "<") ":key" (function "pane-id")]]
+      ])
+      blank
+      (rows [
+        ["defun" "tiled-p" ["pane"]]
+        [["not" ["or" ["getf" "pane" ":minimized"] ["getf" "pane" ":floating"]]]]
+      ])
+      blank
+      (rows [
+        ["defun" "deck-state" ["snapshot"]]
+        [["rest" ["assoc" (str "deck") ["value" "snapshot" ":component-state"] ":test" (function "equal")]]]
+      ])
+      blank
+      (rows [
+        ["defun" "state-list" ["state" "key"]]
+        (rows [
+          ["let" [["value" ["getf" "state" "key"]]]]
+          [["and" ["listp" "value"] "value"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck-model" ["snapshot"]]
+        (str ''
+          Resolve the workspace into (:left :right) ordered column id lists, their
+          tiled subsets (:vl :vr), front ids (:fl :fr), :ratio, :grid and :pending.
+          Dead panes drop out; unassigned panes join the :pending column — the deck a
+          command last worked in, like a spawn joining the focused window's column in
+          tomoe — or balance into the shorter one (ties go left), and take its front.'')
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["state" ["deck-state" "snapshot"]]]
+              [["panes" ["sorted-panes" "snapshot"]]]
+              [["live" ["mapcar" (function "pane-id") "panes"]]]
+              [["visible" ["mapcar" (function "pane-id") ["remove-if-not" (function "tiled-p") "panes"]]]]
+              [
+                [
+                  "left"
+                  (rows [
+                    ["remove-if-not" ["lambda" ["id"] ["member" "id" "live"]]]
+                    [["state-list" "state" ":left"]]
+                  ])
+                ]
+              ]
+              [
+                [
+                  "right"
+                  (rows [
+                    ["remove-if-not" ["lambda" ["id"] ["member" "id" "live"]]]
+                    [["state-list" "state" ":right"]]
+                  ])
+                ]
+              ]
+              [["pending" ["let" [["p" ["getf" "state" ":pending"]]] ["and" ["member" "p" (quote [":left" ":right"])] "p"]]]]
+              [
+                [
+                  "new"
+                  (rows [
+                    ["remove-if" ["lambda" ["id"] ["or" ["member" "id" "left"] ["member" "id" "right"]]]]
+                    "live"
+                  ])
+                ]
+              ]
+            ])
+          ]
+          (rows [
+            ["dolist" ["id" "new"]]
+            (rows [
+              [
+                "if"
+                (rows [
+                  ["or" ["eq" "pending" ":left"]]
+                  [["and" ["null" "pending"] ["<=" ["length" "left"] ["length" "right"]]]]
+                ])
+              ]
+              [["setf" "left" ["append" "left" ["list" "id"]]]]
+              [["setf" "right" ["append" "right" ["list" "id"]]]]
+            ])
+          ])
+          (rows [
+            [
+              "flet"
+              (rows [
+                [["subset" ["col"] ["remove-if-not" ["lambda" ["id"] ["member" "id" "visible"]] "col"]]]
+                [["joined" ["col"] ["car" ["last" ["remove-if-not" ["lambda" ["id"] ["member" "id" "col"]] "new"]]]]]
+              ])
+            ]
+            (rows [
+              [
+                "let"
+                (rows [
+                  [["vl" ["subset" "left"]] ["vr" ["subset" "right"]]]
+                  [["focus" ["value" "snapshot" ":focus"]]]
+                ])
+              ]
+              (rows [
+                [
+                  "flet"
+                  [
+                    (rows [
+                      ["front" ["col" "vcol" "stored"]]
+                      (rows [
+                        ["or" ["joined" "col"]]
+                        [["and" ["member" "focus" "vcol"] "focus"]]
+                        [["and" ["member" "stored" "vcol"] "stored"]]
+                        [["first" "vcol"]]
+                      ])
+                    ])
+                  ]
+                ]
+                (rows [
+                  ["list" ":left" "left" ":right" "right" ":vl" "vl" ":vr" "vr"]
+                  [":fl" ["front" "left" "vl" ["getf" "state" ":fl"]]]
+                  [":fr" ["front" "right" "vr" ["getf" "state" ":fr"]]]
+                  [":ratio" ["let" [["r" ["getf" "state" ":ratio"]]] ["if" ["integerp" "r"] "r" 0]]]
+                  [":grid" ["and" ["getf" "state" ":grid"] "t"]]
+                  [":pending" "pending"]
+                  [":visible" "visible"]
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "model-state" ["model"]]
+        (rows [
+          ["list" ":left" ["getf" "model" ":left"] ":right" ["getf" "model" ":right"]]
+          [":fl" ["getf" "model" ":fl"] ":fr" ["getf" "model" ":fr"]]
+          [":ratio" ["getf" "model" ":ratio"] ":grid" ["getf" "model" ":grid"]]
+          [":pending" ["getf" "model" ":pending"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "fit-insets" ["width" "height" "insets"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["top" ["min" ["first" "insets"] ["max" 0 ["1-" "height"]]]]]
+              [["left" ["min" ["fourth" "insets"] ["max" 0 ["1-" "width"]]]]]
+              [["bottom" ["min" ["third" "insets"] ["max" 0 ["-" "height" "top" 1]]]]]
+              [["right" ["min" ["second" "insets"] ["max" 0 ["-" "width" "left" 1]]]]]
+            ])
+          ]
+          [["list" "top" "right" "bottom" "left"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck-viewport" ["snapshot"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["viewport" ["value" "snapshot" ":viewport"]] ["geometry" ["value" "snapshot" ":geometry"]]]
+              [["cols" ["getf" "viewport" ":cols"]] ["rows" ["getf" "viewport" ":rows"]]]
+              [["insets" ["fit-insets" "cols" "rows" ["getf" "geometry" ":viewport-insets" (quote [0 0 1 0])]]]]
+            ])
+          ]
+          (rows [
+            ["values" ["fourth" "insets"] ["first" "insets"]]
+            [["-" "cols" ["second" "insets"] ["fourth" "insets"]]]
+            [["-" "rows" ["first" "insets"] ["third" "insets"]]]
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck-frame" ["snapshot" "id" "x" "y" "width" "height"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["geometry" ["value" "snapshot" ":geometry"]]]
+              [["requested" ["copy-list" ["getf" "geometry" ":pane-insets" (quote [1 0 0 0])]]]]
+              [["boundary" ["getf" "geometry" ":boundary-insets"]]]
+            ])
+          ]
+          (rows [
+            ["when" "boundary"]
+            (rows [
+              ["multiple-value-bind" ["left" "top" "vw" "vh"] ["deck-viewport" "snapshot"]]
+              (rows [
+                [
+                  "loop"
+                  "for"
+                  "outside"
+                  "in"
+                  (rows [
+                    ["list" ["=" "y" "top"] ["=" ["+" "x" "width"] ["+" "left" "vw"]]]
+                    [["=" ["+" "y" "height"] ["+" "top" "vh"]] ["=" "x" "left"]]
+                  ])
+                ]
+                ["for index from 0" "when outside" "do" ["setf" ["nth" "index" "requested"] ["nth" "index" "boundary"]]]
+              ])
+            ])
+          ])
+          (rows [
+            ["let" [["insets" ["fit-insets" "width" "height" "requested"]]]]
+            (rows [
+              ["list" ":pane" "id" ":x" ["+" "x" ["fourth" "insets"]] ":y" ["+" "y" ["first" "insets"]]]
+              [":cols" ["-" "width" ["second" "insets"] ["fourth" "insets"]]]
+              [":rows" ["-" "height" ["first" "insets"] ["third" "insets"]]]
+              [":outer" ["list" "x" "y" "width" "height"]]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "floating-rect" ["pane" "index" "left" "top" "width" "height"]]
+        (rows [
+          ["destructuring-bind" ["x" "y" "w" "h"]]
+          (rows [
+            ["let" [["f" ["getf" "pane" ":floating"]]]]
+            (rows [
+              ["if" ["and" ["listp" "f"] ["=" ["length" "f"] 4]] "f"]
+              (rows [
+                ["list" ["+" "left" ["*" 3 ["mod" "index" 8]]] ["+" "top" ["mod" "index" 8]]]
+                [["max" 12 ["floor" ["*" "width" 3] 4]] ["max" 4 ["floor" ["*" "height" 3] 4]]]
+              ])
+            ])
+          ])
+          (rows [
+            ["let" [["w" ["min" "width" ["max" 12 "w"]]] ["h" ["min" "height" ["max" 4 "h"]]]]]
+            (rows [
+              ["list" ["max" "left" ["min" "x" ["+" "left" "width" ["-" "w"]]]]]
+              [["max" "top" ["min" "y" ["+" "top" "height" ["-" "h"]]]] "w" "h"]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck-columns" ["snapshot" "model" "x" "y" "w" "h" "gap"]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["ratio" ["nth" ["mod" ["getf" "model" ":ratio"] ["length" "+ratios+"]] "+ratios+"]]]
+              [["lw" ["max" 1 ["min" ["-" "w" "gap" 1] ["floor" ["*" ["-" "w" "gap"] "ratio"]]]]]]
+              [["rw" ["max" 1 ["-" "w" "gap" "lw"]]]]
+            ])
+          ]
+          (rows [
+            [
+              "flet"
+              [
+                (rows [
+                  ["place" ["vcol" "front" "cx" "cw"]]
+                  (rows [
+                    ["let" [["fi" ["or" ["position" "front" "vcol"] 0]]]]
+                    (rows [
+                      ["loop" "for id in vcol" "for i from 0"]
+                      ["collect" ["deck-frame" "snapshot" "id" "cx" ["+" "y" ["*" ["-" "i" "fi"] "h"]] "cw" "h"]]
+                    ])
+                  ])
+                ])
+              ]
+            ]
+            (rows [
+              ["append" ["place" ["getf" "model" ":vl"] ["getf" "model" ":fl"] "x" "lw"]]
+              [["place" ["getf" "model" ":vr"] ["getf" "model" ":fr"] ["+" "x" "lw" "gap"] "rw"]]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck-grid" ["snapshot" "model" "x" "y" "w" "h" "gap"]]
+        (rows [
+          ["let*" [["ids" ["getf" "model" ":visible"]] ["n" ["length" "ids"]]]]
+          (rows [
+            ["when" ["plusp" "n"]]
+            (rows [
+              [
+                "let*"
+                (rows [
+                  [["cols" ["max" 1 ["ceiling" ["sqrt" "n"]]]]]
+                  [["rows" ["ceiling" "n" "cols"]]]
+                  [["cw" ["max" 1 ["floor" ["-" "w" ["*" ["1-" "cols"] "gap"]] "cols"]]]]
+                  [["ch" ["max" 1 ["floor" ["-" "h" ["*" ["1-" "rows"] "gap"]] "rows"]]]]
+                ])
+              ]
+              (rows [
+                ["loop" "for id in ids" "for i from 0"]
+                [
+                  "collect"
+                  (rows [
+                    ["deck-frame" "snapshot" "id"]
+                    [["+" "x" ["*" ["mod" "i" "cols"] ["+" "cw" "gap"]]]]
+                    [["+" "y" ["*" ["floor" "i" "cols"] ["+" "ch" "gap"]]]]
+                    ["cw" "ch"]
+                  ])
+                ]
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "deck-place" ["snapshot" "event"]]
+        [["declare" ["ignore" "event"]]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["model" ["deck-model" "snapshot"]]]
+              [["gap" ["first" ["getf" ["value" "snapshot" ":geometry"] ":split-gaps" (quote [1 0])]]]]
+              [["focus" ["value" "snapshot" ":focus"]]]
+            ])
+          ]
+          (rows [
+            ["multiple-value-bind" ["x" "y" "w" "h"] ["deck-viewport" "snapshot"]]
+            (rows [
+              [
+                "let"
+                [
+                  (rows [
+                    "placements"
+                    (at 2 (rows [
+                      [
+                        "append"
+                        (rows [
+                          ["if" ["getf" "model" ":grid"]]
+                          [["deck-grid" "snapshot" "model" "x" "y" "w" "h" "gap"]]
+                          [["deck-columns" "snapshot" "model" "x" "y" "w" "h" "gap"]]
+                        ])
+                      ]
+                      (rows [
+                        ["loop" "for" "pane" "in" ["sorted-panes" "snapshot"] "for i from 0"]
+                        ["when" ["getf" "pane" ":floating"]]
+                        [
+                          "collect"
+                          (rows [
+                            ["apply" (function "deck-frame") "snapshot" ["pane-id" "pane"]]
+                            [["floating-rect" "pane" "i" "x" "y" "w" "h"]]
+                          ])
+                        ]
+                      ])
+                    ]))
+                  ])
+                ]
+              ]
+              (rows [
+                [
+                  "when"
+                  (rows [
+                    ["and" ["value" "snapshot" ":zoom"]]
+                    [["find" "focus" "placements" ":key" ["lambda" ["pl"] ["getf" "pl" ":pane"]]]]
+                  ])
+                ]
+                (rows [
+                  ["setf" "placements"]
+                  (rows [
+                    [
+                      "append"
+                      (rows [
+                        ["loop" "for pl in placements"]
+                        ["unless" ["eql" "focus" ["getf" "pl" ":pane"]]]
+                        [
+                          "collect"
+                          (rows [
+                            ["let" [["hidden" ["copy-list" "pl"]]]]
+                            [["setf" ["getf" "hidden" ":visible"] "nil"]]
+                            "hidden"
+                          ])
+                        ]
+                      ])
+                    ]
+                    [["list" ["deck-frame" "snapshot" "focus" "x" "y" "w" "h"]]]
+                  ])
+                ])
+              ])
+              [
+                [
+                  "list"
+                  (rows [
+                    ["action" ":place-panes" (quote ":version") 1 (quote ":placements") "placements"]
+                    [(quote ":camera") (quote [0 0])]
+                  ])
+                ]
+              ]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "column-of" ["model" "focus"]]
+        (rows [
+          ["cond" [["member" "focus" ["getf" "model" ":vl"]] ":left"]]
+          [[["member" "focus" ["getf" "model" ":vr"]] ":right"]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "focus-column" ["side"]]
+        (rows [
+          ["lambda" ["snapshot" "event"]]
+          [["declare" ["ignore" "event"]]]
+          (rows [
+            [
+              "let*"
+              (rows [
+                [["model" ["deck-model" "snapshot"]]]
+                [["front" ["getf" "model" ["if" ["eq" "side" ":left"] ":fl" ":fr"]]]]
+              ])
+            ]
+            (rows [
+              ["when" "front"]
+              [["setf" ["getf" "model" ":pending"] "side"]]
+              (rows [
+                ["list" ["action" ":focus" (quote ":pane") "front"]]
+                [["action" ":set-state" (quote ":value") ["model-state" "model"]]]
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "scroll-deck" ["dir"]]
+        (rows [
+          ["lambda" ["snapshot" "event"]]
+          [["declare" ["ignore" "event"]]]
+          (rows [
+            [
+              "let*"
+              (rows [
+                [["model" ["deck-model" "snapshot"]]]
+                [["side" ["column-of" "model" ["value" "snapshot" ":focus"]]]]
+              ])
+            ]
+            (rows [
+              ["when" "side"]
+              (rows [
+                [
+                  "let"
+                  (rows [
+                    [["vcol" ["getf" "model" ["if" ["eq" "side" ":left"] ":vl" ":vr"]]]]
+                    [["fkey" ["if" ["eq" "side" ":left"] ":fl" ":fr"]]]
+                  ])
+                ]
+                (rows [
+                  ["when" [">" ["length" "vcol"] 1]]
+                  (rows [
+                    [
+                      "let"
+                      [
+                        [
+                          "target"
+                          (rows [
+                            [
+                              "nth"
+                              (rows [
+                                ["mod" ["+" ["or" ["position" ["getf" "model" "fkey"] "vcol"] 0] "dir"]]
+                                (at 4 [["length" "vcol"]])
+                              ])
+                            ]
+                            "vcol"
+                          ])
+                        ]
+                      ]
+                    ]
+                    (rows [
+                      ["setf" ["getf" "model" "fkey"] "target"]
+                      [["getf" "model" ":pending"] "side"]
+                    ])
+                    (rows [
+                      ["list" ["action" ":focus" (quote ":pane") "target"]]
+                      [["action" ":set-state" (quote ":value") ["model-state" "model"]]]
+                    ])
+                  ])
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "move-in-deck" ["dir"]]
+        (rows [
+          ["lambda" ["snapshot" "event"]]
+          [["declare" ["ignore" "event"]]]
+          (rows [
+            [
+              "let*"
+              (rows [
+                [["model" ["deck-model" "snapshot"]]]
+                [["focus" ["value" "snapshot" ":focus"]]]
+                [
+                  [
+                    "side"
+                    (rows [
+                      ["cond" [["member" "focus" ["getf" "model" ":left"]] ":left"]]
+                      [[["member" "focus" ["getf" "model" ":right"]] ":right"]]
+                    ])
+                  ]
+                ]
+              ])
+            ]
+            (rows [
+              ["when" "side"]
+              (rows [
+                [
+                  "let*"
+                  (rows [
+                    [["col" ["getf" "model" "side"]]]
+                    [["i" ["position" "focus" "col"]] ["j" ["and" "i" ["+" "i" "dir"]]]]
+                  ])
+                ]
+                (rows [
+                  ["when" ["and" "j" ["<=" 0 "j"] ["<" "j" ["length" "col"]]]]
+                  [["rotatef" ["nth" "i" "col"] ["nth" "j" "col"]]]
+                  [["setf" ["getf" "model" ":pending"] "side"]]
+                  [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "swap-columns" ["snapshot" "event"]]
+        [["declare" ["ignore" "event"]]]
+        (rows [
+          ["let" [["model" ["deck-model" "snapshot"]]]]
+          [["rotatef" ["getf" "model" ":left"] ["getf" "model" ":right"]]]
+          [["rotatef" ["getf" "model" ":vl"] ["getf" "model" ":vr"]]]
+          [["rotatef" ["getf" "model" ":fl"] ["getf" "model" ":fr"]]]
+          (rows [
+            ["let" [["focus" ["value" "snapshot" ":focus"]]]]
+            (rows [
+              ["setf" ["getf" "model" ":pending"]]
+              (rows [
+                ["cond" [["member" "focus" ["getf" "model" ":left"]] ":left"]]
+                [[["member" "focus" ["getf" "model" ":right"]] ":right"]]
+                [["t" ["getf" "model" ":pending"]]]
+              ])
+            ])
+          ])
+          [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "to-column" ["target"]]
+        (rows [
+          ["lambda" ["snapshot" "event"]]
+          [["declare" ["ignore" "event"]]]
+          (rows [
+            [
+              "let*"
+              (rows [
+                [["model" ["deck-model" "snapshot"]]]
+                [["focus" ["value" "snapshot" ":focus"]]]
+                [
+                  [
+                    "side"
+                    (rows [
+                      ["cond" [["member" "focus" ["getf" "model" ":left"]] ":left"]]
+                      [[["member" "focus" ["getf" "model" ":right"]] ":right"]]
+                    ])
+                  ]
+                ]
+              ])
+            ]
+            (rows [
+              ["when" ["and" "side" ["not" ["eq" "side" "target"]]]]
+              (rows [
+                [
+                  "let*"
+                  (rows [
+                    [["col" ["getf" "model" "side"]] ["i" ["position" "focus" "col"]]]
+                    [["skey" ["if" ["eq" "side" ":left"] ":fl" ":fr"]]]
+                    [["tkey" ["if" ["eq" "target" ":left"] ":left" ":right"]]]
+                    [["tfkey" ["if" ["eq" "target" ":left"] ":fl" ":fr"]]]
+                  ])
+                ]
+                (rows [
+                  ["when" ["eql" "focus" ["getf" "model" "skey"]]]
+                  [["setf" ["getf" "model" "skey"] ["nth" ["mod" ["1+" "i"] ["length" "col"]] "col"]]]
+                ])
+                (rows [
+                  ["setf" ["getf" "model" "side"] ["remove" "focus" "col"]]
+                  [["getf" "model" "tkey"] ["append" ["getf" "model" "tkey"] ["list" "focus"]]]
+                  [["getf" "model" "tfkey"] "focus"]
+                  [["getf" "model" ":pending"] "target"]
+                ])
+                [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (rows [
+        ["defun" "close-pane" ["snapshot" "event"]]
+        [["declare" ["ignore" "event"]]]
+        (rows [
+          [
+            "let*"
+            (rows [
+              [["model" ["deck-model" "snapshot"]]]
+              [["focus" ["value" "snapshot" ":focus"]]]
+              [["side" ["column-of" "model" "focus"]]]
+            ])
+          ]
+          (rows [
+            ["if" "side"]
+            (rows [
+              [
+                "let*"
+                (rows [
+                  [["vcol" ["getf" "model" ["if" ["eq" "side" ":left"] ":vl" ":vr"]]]]
+                  [["fkey" ["if" ["eq" "side" ":left"] ":fl" ":fr"]]]
+                  [
+                    [
+                      "target"
+                      (rows [
+                        ["and" [">" ["length" "vcol"] 1]]
+                        (rows [
+                          [
+                            "nth"
+                            (rows [
+                              ["mod" ["1+" ["or" ["position" "focus" "vcol"] 0]]]
+                              [["length" "vcol"]]
+                            ])
+                          ]
+                          "vcol"
+                        ])
+                      ])
+                    ]
+                  ]
+                ])
+              ]
+              (rows [
+                ["if" "target"]
+                (rows [
+                  [
+                    "progn"
+                    (rows [
+                      ["setf" ["getf" "model" "fkey"] "target"]
+                      [["getf" "model" ":pending"] "side"]
+                    ])
+                  ]
+                  (at 7 (rows [
+                    ["list" ["action" ":close" (quote ":focus") "target"]]
+                    [["action" ":set-state" (quote ":value") ["model-state" "model"]]]
+                  ]))
+                ])
+                [["list" ["action" ":close"]]]
+              ])
+            ])
+            [["list" ["action" ":close"]]]
+          ])
+        ])
+      ])
+      blank
+      ["register-component" ":id" (quote ":deck") ":reads" (quote [":panes" ":focus" ":component-state"])]
+      (rows [
+        ["register-layout-provider" ":component" (quote ":deck") ":name" (str "deck") ":api-version" 1]
+        [
+          ":reads"
+          (quote (rows [
+            [":panes" ":focus" ":viewport" ":geometry"]
+            [":component-state" ":zoom"]
+          ]))
+        ]
+        [":handler" (function "deck-place")]
+      ])
+      ["set-option" ":component" (quote ":deck") ":name" (quote ":layout-provider") ":value" (str "deck")]
+      ["set-option" ":component" (quote ":deck") ":name" (quote ":split-gaps") ":value" (quote [1 0])]
+      blank
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-focus-left") ":handler" ["focus-column" ":left"]]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-focus-right") ":handler" ["focus-column" ":right"]]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-scroll-down") ":handler" ["scroll-deck" 1]]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-scroll-up") ":handler" ["scroll-deck" (-1)]]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-move-down") ":handler" ["move-in-deck" 1]]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-move-up") ":handler" ["move-in-deck" (-1)]]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-swap-columns") ":handler" (function "swap-columns")]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-to-left") ":handler" ["to-column" ":left"]]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-to-right") ":handler" ["to-column" ":right"]]
+      ["register-command" ":component" (quote ":deck") ":name" (str "deck-close") ":handler" (function "close-pane")]
+      (rows [
+        ["register-command" ":component" (quote ":deck") ":name" (str "deck-new")]
+        [
+          ":handler"
+          (rows [
+            ["lambda" ["snapshot" "event"] ["declare" ["ignore" "event"]]]
+            (rows [
+              [
+                "let*"
+                (rows [
+                  [["model" ["deck-model" "snapshot"]]]
+                  [["side" ["column-of" "model" ["value" "snapshot" ":focus"]]]]
+                ])
+              ]
+              [["when" "side" ["setf" ["getf" "model" ":pending"] "side"]]]
+              (rows [
+                ["list" ["action" ":split" (quote ":axis") (quote ":columns")]]
+                [["action" ":set-state" (quote ":value") ["model-state" "model"]]]
+              ])
+            ])
+          ])
+        ]
+      ])
+      (rows [
+        ["register-command" ":component" (quote ":deck") ":name" (str "deck-grid-toggle")]
+        [
+          ":handler"
+          (rows [
+            ["lambda" ["snapshot" "event"] ["declare" ["ignore" "event"]]]
+            (rows [
+              ["let" [["model" ["deck-model" "snapshot"]]]]
+              [["setf" ["getf" "model" ":grid"] ["not" ["getf" "model" ":grid"]]]]
+              [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
+            ])
+          ])
+        ]
+      ])
+      (rows [
+        ["register-command" ":component" (quote ":deck") ":name" (str "deck-ratio-cycle")]
+        [
+          ":handler"
+          (rows [
+            ["lambda" ["snapshot" "event"] ["declare" ["ignore" "event"]]]
+            (rows [
+              ["let" [["model" ["deck-model" "snapshot"]]]]
+              (rows [
+                ["setf" ["getf" "model" ":ratio"]]
+                [["mod" ["1+" ["getf" "model" ":ratio"]] ["length" "+ratios+"]]]
+              ])
+              [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
+            ])
+          ])
+        ]
+      ])
+      (rows [
+        ["register-command" ":component" (quote ":deck") ":name" (str "deck-mode")]
+        [
+          ":handler"
+          (rows [
+            ["lambda" ["snapshot" "event"] ["declare" ["ignore" "snapshot" "event"]]]
+            [["list" ["action" ":set-keymap" (quote ":name") (quote ":deck")]]]
+          ])
+        ]
+      ])
+      blank
+      (rows [
+        [
+          "when"
+          (rows [
+            ["find" (quote ":normal") ["getf" ["registry"] (quote ":keymaps")]]
+            [":key" ["lambda" ["m"] ["getf" "m" (quote ":name")]]]
+          ])
+        ]
+        [["register-keymap" ":component" (quote ":deck") ":name" (quote ":deck") ":unbound" (quote ":ignore")]]
+        (rows [
+          [
+            "dolist"
+            [
+              "spec"
+              (quote (rows [
+                [[(str "C-h") "." (str "deck-focus-left")] [(str "C-l") "." (str "deck-focus-right")]]
+                [[(str "C-j") "." (str "deck-scroll-down")] [(str "C-k") "." (str "deck-scroll-up")]]
+                [[(str "C-o") "." (str "deck-grid-toggle")] [(str "C-r") "." (str "deck-ratio-cycle")]]
+                [[(str "C-d") "." (str "deck-mode")]]
+                [[(str "C-[") "." (str "deck-to-left")] [(str "C-]") "." (str "deck-to-right")]]
+                [[(str "C-Tab") "." (str "deck-swap-columns")]]
+                [[(str "C-J") "." (str "deck-move-down")] [(str "C-K") "." (str "deck-move-up")]]
+              ]))
+            ]
+          ]
+          [["bind-key" ":component" (quote ":deck") ":map" (quote ":normal") ":key" ["car" "spec"] ":command" ["cdr" "spec"]]]
+        ])
+        (rows [
+          [
+            "dolist"
+            [
+              "spec"
+              (quote (rows [
+                [[(str "h") "." (str "deck-focus-left")] [(str "l") "." (str "deck-focus-right")]]
+                [[(str "j") "." (str "deck-scroll-down")] [(str "k") "." (str "deck-scroll-up")]]
+                [[(str "J") "." (str "deck-move-down")] [(str "K") "." (str "deck-move-up")]]
+                [[(str "H") "." (str "deck-swap-columns")] [(str "L") "." (str "deck-swap-columns")]]
+                [[(str "[") "." (str "deck-to-left")] [(str "]") "." (str "deck-to-right")]]
+                [[(str "o") "." (str "deck-grid-toggle")] [(str "r") "." (str "deck-ratio-cycle")]]
+                [[(str "n") "." (str "deck-new")] [(str "q") "." (str "deck-close")]]
+                [[(str "Escape") "." (str "normal-mode")] [(str "Enter") "." (str "normal-mode")]]
+              ]))
+            ]
+          ]
+          [["bind-key" ":component" (quote ":deck") ":map" (quote ":deck") ":key" ["car" "spec"] ":command" ["cdr" "spec"]]]
+        ])
+      ])
     ];
     modules_shell_rush = {
       config,
