@@ -137,12 +137,12 @@ The configuration reads no file but Nix. Data a module reads lives in a
 byte-identical to the file it replaced. Data formats are structured: JSON values
 (an object lists its key order in `__keys` only when that differs from
 `builtins.attrNames`), TOML groups, Cargo.lock packages, INI and `key=value`
-groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp,
-shell and Luau are syntax trees (below). The other code and prose (TypeScript,
-JavaScript, Lua, Python, GLSL, VBScript, patches and markdown) are still
-line lists, one string per line, whose `<language>Source` generators only join
-the lines. A file passed by path comes from `generators.sourceFile`, whose
-store path is the one the file had; `generators.sourceDir` builds the optchat
+groups, an XML element tree, SSH key fields and PEM base64 blocks. Lisp, shell,
+Luau and VBScript are syntax trees (below). The other code and prose
+(TypeScript, JavaScript, Lua, Python, GLSL, patches and markdown) are still line
+lists, one string per line, whose `<language>Source` generators only join the
+lines. A file passed by path comes from `generators.sourceFile`, whose store
+path is the one the file had; `generators.sourceDir` builds the optchat
 directory from its files.
 
 ### Code as syntax trees
@@ -264,6 +264,14 @@ breaks them. From `tern/config/plugins/tab-order/window.data.nix`, abridged:
 ]
 ```
 
+VBScript (`generators.vbs`): a statement that is a Nix list is an invocation
+(`["WScript.Quit" "1"]`, `WScript.Quit 1`), and a list inside an expression a
+call (`["sh.Run" "cmd" "0" "True"]`); an identifier, number or member path is a
+string, `str` a string literal (its quotes doubled on output) and `op` operands
+and operators written spaced. Statements are `option`, `onError`, `dim names`,
+`assign name value`, `set name value`, `if' test body` and
+`ifElse test body otherwise`, bodies one tab in.
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
@@ -290,7 +298,8 @@ then runs each language's own check on every rendered tree, listed in its
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
 | Luau (8 files) | bytes | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
-| TypeScript, JavaScript, Lua, Python, GLSL, VBScript, patches, markdown | line lists, not converted yet | none |
+| VBScript (1 file) | bytes | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
+| TypeScript, JavaScript, Lua, Python, GLSL, patches, markdown | line lists, not converted yet | none |
 
 A directory holds a category or one module's assets. No file exists only to
 import others or to set values another module owns, except
