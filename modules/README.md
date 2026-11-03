@@ -225,6 +225,14 @@ blank
 ])
 ```
 
+VBScript (`generators.vbs`): a statement that is a Nix list is an invocation
+(`["WScript.Quit" "1"]`, `WScript.Quit 1`), and a list inside an expression a
+call (`["sh.Run" "cmd" "0" "True"]`); an identifier, number or member path is a
+string, `str` a string literal (its quotes doubled on output) and `op` operands
+and operators written spaced. Statements are `option`, `onError`, `dim names`,
+`assign name value`, `set name value`, `if' test body` and
+`ifElse test body otherwise`, bodies one tab in.
+
 Converting is mechanical: `strictix import <language> FILE` parses the file
 with the language's tree-sitter grammar and prints its tree, and refuses
 layout the printer would not give back (a double space, a trailing comment).
