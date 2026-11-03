@@ -59,6 +59,9 @@
     if element ? children
     then "${prefix}<${element.name}>\n${lib.concatMapStrings (xmlElement "${prefix} ") element.children}${prefix}</${element.name}>\n"
     else "${prefix}<${element.name}>${element.text}</${element.name}>\n";
+
+  wrap = width: text:
+    lib.optionalString (text != "") "${builtins.substring 0 width text}\n${wrap width (builtins.substring width (builtins.stringLength text) text)}";
 in {
   cssSource = list: "${nodes list}\n";
 
@@ -87,4 +90,6 @@ in {
   sshPublicKey = key: "${key.type} ${key.key} ${key.comment}";
 
   sshKeySource = key: "${key.type} ${key.key} ${key.comment}\n";
+
+  pemSource = pem: lib.concatMapStrings (block: "-----BEGIN ${pem.label}-----\n${wrap pem.width block}-----END ${pem.label}-----\n") pem.blocks;
 }
