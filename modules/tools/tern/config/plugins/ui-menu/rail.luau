@@ -602,6 +602,10 @@ html.lay-rail.tabs-h .tb-tabs .tt .mk .hint {
 	display: none !important;
 }
 
+html.lay-rail.tabs-h .tb-tabs .tt .mk {
+	flex: none !important;
+}
+
 html.lay-rail.tabs-h .tb-tabs .tt .mk::before {
 	font-size: 11px;
 	color: var(--t4);
