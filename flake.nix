@@ -24800,8 +24800,8 @@
         env = old.env // {NIX_CFLAGS_COMPILE = "${old.env.NIX_CFLAGS_COMPILE} -DLUAJIT_SECURITY_PRNG=0";};
       });
       patches = map (p: p // {name = p.mod;}) modules_gaming_aniimo_patches_data;
-      rewards = modules_gaming_aniimo_rewards_data // {wrapper = generators.sourceFile "rewards.lua" (generators.luaSource modules_gaming_aniimo_rewards_lua_data);};
-      catch = modules_gaming_aniimo_catch_data // {wrapper = generators.sourceFile "catch.lua" (generators.luaSource modules_gaming_aniimo_catch_lua_data);};
+      rewards = modules_gaming_aniimo_rewards_data // {wrapper = generators.sourceFile "rewards.lua" (generators.lua.render (modules_gaming_aniimo_rewards_lua_data generators.lua));};
+      catch = modules_gaming_aniimo_catch_data // {wrapper = generators.sourceFile "catch.lua" (generators.lua.render (modules_gaming_aniimo_catch_lua_data generators.lua));};
       mods = lib.optionals cfg.enable (builtins.filter (m: builtins.elem m.name cfg.mods) (patches ++ [rewards catch]));
       settings = pkgs.writeText "aniimo-mods.json" (builtins.toJSON ({
           gameDirectory = "${config.user.homeDirectory}/${config.user.paths.steam}/steamapps/common/Aniimo";
@@ -25043,195 +25043,228 @@
       entryMD5 = "44bbb0782be5511990b8a2d6fdd5a793";
       name = "catch";
     };
-    modules_gaming_aniimo_catch_lua_data = [
-      "local INTERVAL = 0.1"
-      "local GRACE = 2"
-      "local orig = ..."
-      "local function pack(...) return { n = select(\"#\", ...), ... } end"
-      "local env = getfenv and getfenv(1)"
-      "if type(env) == \"table\" and setfenv then pcall(setfenv, orig, env) end"
-      "local ret = pack(orig(select(2, ...)))"
-      "local off, paths, prob, ability, scenes, timers, clock"
-      "local context"
-      ""
-      "local function log(event, id, detail)"
-      "  pcall(function()"
-      "    if not paths then"
-      "      paths = { \".finix-aniimo/catch.log\" }"
-      "      local ok, dp = pcall(function() return CS.UnityEngine.Application.dataPath end)"
-      "      if ok and type(dp) == \"string\" and dp ~= \"\" then"
-      "        table.insert(paths, 1, dp .. \"/../.finix-aniimo/catch.log\")"
-      "      end"
-      "    end"
-      "    local function field(v) return tostring(v or \"-\"):gsub(\"[\\t\\r\\n]\", \" \") end"
-      "    local line = table.concat({ os.date(\"!%Y-%m-%dT%H:%M:%SZ\"), field(event), field(id), field(detail) }, \"\\t\") .. \"\\n\""
-      "    for _, p in ipairs(paths) do"
-      "      local f = io.open(p, \"a\")"
-      "      if f then f:write(line); f:close(); break end"
-      "    end"
-      "  end)"
-      "end"
-      ""
-      "local function clear(self)"
-      "  if not self then return end"
-      "  local timer = self._finixCatchTimer"
-      "  self._finixCatchTimer, self._finixCatchLast, self._finixCatchDistance = nil, nil, nil"
-      "  self._finixCatchEmptySince, self._finixCatchPending = nil, nil"
-      "  if context == self then context = nil end"
-      "  if timer then timers.removeTimer(timer) end"
-      "end"
-      ""
-      "local function disable(err)"
-      "  off = true"
-      "  pcall(clear, context)"
-      "  log(\"error\", \"disabled\", err)"
-      "end"
-      ""
-      "local function need(owner, name)"
-      "  assert(owner and type(owner[name]) == \"function\", name .. \" missing\")"
-      "end"
-      ""
-      "local function prepare(self)"
-      "  local helper = pg.game.controller.lockHelper"
-      "  local camera = pg.game.camera.playerCameraMode.catchCamera"
-      "  if not self._finixCatchReady then"
-      "    need(pg.global.entityMgr, \"getAllEntities\")"
-      "    need(helper, \"checkTargetValid\")"
-      "    need(helper, \"tryForceLockTarget\")"
-      "    need(helper, \"canForceLock\")"
-      "    need(camera, \"setTarget\")"
-      "    need(camera, \"checkDistance\")"
-      "    need(camera, \"isActive\")"
-      "    need(self, \"checkBallCanThrow\")"
-      "    prob = prob or require(\"Common.Utils.CatchProbContext\")"
-      "    need(prob, \"clientGet\")"
-      "    ability = ability or require(\"Data.ability_setting_global_const_data\")"
-      "    scenes = scenes or require(\"Data.scene_data\")"
-      "    timers = timers or require(\"Core.Timer.TimerManager\")"
-      "    need(timers, \"addRepeatTimer\")"
-      "    need(timers, \"removeTimer\")"
-      "    clock = clock or require(\"Core.Common.Time\")"
-      "    need(clock, \"getTickSecond\")"
-      "    self._finixCatchReady = true"
-      "  end"
-      "  return helper, camera"
-      "end"
-      ""
-      "local function step(self)"
-      "  if not self._continuousThrowHeld or self.player ~= pg.me or self.player.currentContext ~= self then return clear(self) end"
-      "  local helper, camera = prepare(self)"
-      "  if not camera:isActive() or not helper:canForceLock() or not pg.me.enableLockTarget then"
-      "    self._finixCatchEmptySince = nil"
-      "    return"
-      "  end"
-      "  if not self:checkBallCanThrow() then return self:stopContinuousThrow(\"catch_ball_unavailable\") end"
-      "  local scene = scenes[pg.me.space.sceneId]"
-      "  local radius = scene and scene.forceLockDis or ability.forceLockDis"
-      "  if pg.me.fogMaskRadius and pg.me.fogMaskRadius > 0 then radius = pg.me.fogMaskRadius end"
-      "  assert(type(radius) == \"number\" and radius > 0, \"lock radius missing\")"
-      "  local from = pg.pawn:getPosition()"
-      "  local candidates, pending = {}, 0"
-      "  for _, ent in pairs(pg.global.entityMgr:getAllEntities()) do"
-      "    if (ent.className == \"ClientPuppet\" or ent.className == \"ClientPuppetGhost\")"
-      "      and ent.space == pg.me.space and not ent.destroyed and not ent.isDestroyed then"
-      "      local distance = Vector3.Distance(from, ent:getPosition())"
-      "      if distance <= radius then"
-      "        if ent.isTrapped then"
-      "          pending = pending + 1"
-      "        elseif ent:canBeLocked() and helper:checkTargetValid(ent, radius, nil, false)"
-      "          and camera:checkDistance(ent) and prob.clientGet(ent, self.itemId).canCatch then"
-      "          candidates[#candidates + 1] = { entity = ent, distance = distance }"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "  if #candidates == 0 then"
-      "    if self._finixCatchPending ~= pending then log(\"wait\", pending, \"pending\") end"
-      "    self._finixCatchPending = pending"
-      "    if pending > 0 then"
-      "      self._finixCatchEmptySince = nil"
-      "    else"
-      "      local now = clock.getTickSecond()"
-      "      self._finixCatchEmptySince = self._finixCatchEmptySince or now"
-      "      if now - self._finixCatchEmptySince >= GRACE then return self:stopContinuousThrow(\"catch_nothing_left\") end"
-      "    end"
-      "    return"
-      "  end"
-      "  self._finixCatchEmptySince, self._finixCatchPending = nil, nil"
-      "  table.sort(candidates, function(a, b)"
-      "    if a.distance == b.distance then return a.entity.actorId < b.entity.actorId end"
-      "    return a.distance < b.distance"
-      "  end)"
-      "  local nextIndex"
-      "  for i, candidate in ipairs(candidates) do"
-      "    if candidate.entity.actorId == self._finixCatchLast then nextIndex = i % #candidates + 1; break end"
-      "  end"
-      "  if not nextIndex and self._finixCatchDistance then"
-      "    for i, candidate in ipairs(candidates) do"
-      "      if candidate.distance > self._finixCatchDistance"
-      "        or (candidate.distance == self._finixCatchDistance and candidate.entity.actorId > self._finixCatchLast) then"
-      "        nextIndex = i"
-      "        break"
-      "      end"
-      "    end"
-      "  end"
-      "  local chosen = candidates[nextIndex or 1]"
-      "  self._finixCatchLast, self._finixCatchDistance = chosen.entity.actorId, chosen.distance"
-      "  helper:tryForceLockTarget(chosen.entity.actorId, 0, radius)"
-      "  if helper.forceLockActorId ~= chosen.entity.actorId then return end"
-      "  camera:setTarget(chosen.entity)"
-      "  log(\"target\", chosen.entity.actorId, string.format(\"%.2f\", chosen.distance))"
-      "end"
-      ""
-      "local function safely(fn, self)"
-      "  if off then return end"
-      "  local ok, err = pcall(fn, self)"
-      "  if not ok then disable(err) end"
-      "end"
-      ""
-      "local function startLocking(self)"
-      "  if not self._continuousThrowHeld or self.player ~= pg.me or self.player.currentContext ~= self then return clear(self) end"
-      "  if self._finixCatchTimer then return end"
-      "  local id = pg.game.controller.lockHelper.forceLockActorId"
-      "  if not id or id == 0 or not pg.getEntityByActorId(id) then return end"
-      "  prepare(self)"
-      "  if context ~= self then clear(context) end"
-      "  context = self"
-      "  self._finixCatchLast, self._finixCatchDistance = nil, nil"
-      "  self._finixCatchEmptySince, self._finixCatchPending = nil, nil"
-      "  safely(step, self)"
-      "  if off or not self._continuousThrowHeld then return end"
-      "  self._finixCatchTimer = timers.addRepeatTimer(INTERVAL, function() safely(step, self) end)"
-      "  assert(self._finixCatchTimer, \"lock timer missing\")"
-      "end"
-      ""
-      "local function install(cls)"
-      "  local start, tick, stop = rawget(cls, \"startContinuousThrow\"), rawget(cls, \"_tryContinuousThrow\"), rawget(cls, \"stopContinuousThrow\")"
-      "  assert(type(start) == \"function\", \"startContinuousThrow missing\")"
-      "  assert(type(tick) == \"function\", \"_tryContinuousThrow missing\")"
-      "  assert(type(stop) == \"function\", \"stopContinuousThrow missing\")"
-      "  cls.startContinuousThrow = function(self, ...)"
-      "    local held = self._continuousThrowHeld"
-      "    local r = pack(start(self, ...))"
-      "    if not held then safely(startLocking, self) end"
-      "    return unpack(r, 1, r.n)"
-      "  end"
-      "  cls._tryContinuousThrow = function(self, ...)"
-      "    safely(startLocking, self)"
-      "    return tick(self, ...)"
-      "  end"
-      "  cls.stopContinuousThrow = function(self, ...)"
-      "    if context == self then log(\"stop\", self._finixCatchLast, select(1, ...)) end"
-      "    local ok, err = pcall(clear, self)"
-      "    if not ok then disable(err) end"
-      "    return stop(self, ...)"
-      "  end"
-      "  log(\"hook\", \"continuous throw\", \"ready\")"
-      "end"
-      ""
-      "local ok, err = pcall(install, ret[1])"
-      "if not ok then disable(err) end"
-      "return unpack(ret, 1, ret.n)"
+    modules_gaming_aniimo_catch_lua_data = {
+      assign,
+      blank,
+      dot,
+      field,
+      fn,
+      forIn,
+      if',
+      ifElse,
+      index,
+      inline,
+      len,
+      local,
+      localFunction,
+      method,
+      not,
+      op,
+      paren,
+      return,
+      rows,
+      str,
+      table,
+      ...
+    }: [
+      (local "INTERVAL" ["0.1"])
+      (local "GRACE" [2])
+      (local "orig" ["..."])
+      (localFunction "pack" ["..."] (inline [(return [(table [(field "n" ["select" (str "#") "..."]) "..."])])]))
+      (local "env" [(op ["getfenv" "and" ["getfenv" 1]])])
+      (if' (op [(op [["type" "env"] "==" (str "table")]) "and" "setfenv"]) (inline [["pcall" "setfenv" "orig" "env"]]))
+      (local "ret" [["pack" ["orig" ["select" 2 "..."]]]])
+      (local ["off" "paths" "prob" "ability" "scenes" "timers" "clock"] [])
+      (local "context" [])
+      blank
+      (localFunction "log" ["event" "id" "detail"] [
+        [
+          "pcall"
+          (fn [] [
+            (if' (not "paths") [
+              (assign "paths" [(table [(str ".finix-aniimo/catch.log")])])
+              (local ["ok" "dp"] [["pcall" (fn [] (inline [(return ["CS.UnityEngine.Application.dataPath"])]))]])
+              (if' (op ["ok" "and" (op [["type" "dp"] "==" (str "string")]) "and" (op ["dp" "~=" (str "")])]) [
+                ["table.insert" "paths" 1 (op ["dp" ".." (str "/../.finix-aniimo/catch.log")])]
+              ])
+            ])
+            (localFunction "field" ["v"] (inline [(return [[(method ["tostring" (op ["v" "or" (str "-")])] "gsub") (str "[\\t\\r\\n]") (str " ")]])]))
+            (local "line" [(op [["table.concat" (table [["os.date" (str "!%Y-%m-%dT%H:%M:%SZ")] ["field" "event"] ["field" "id"] ["field" "detail"]]) (str "\\t")] ".." (str "\\n")])])
+            (forIn ["_" "p"] [["ipairs" "paths"]] [
+              (local "f" [["io.open" "p" (str "a")]])
+              (if' "f" (inline [["f:write" "line"] ";" ["f:close"] ";" "break"]))
+            ])
+          ])
+        ]
+      ])
+      blank
+      (localFunction "clear" ["self"] [
+        (if' (not "self") (inline [(return [])]))
+        (local "timer" ["self._finixCatchTimer"])
+        (assign ["self._finixCatchTimer" "self._finixCatchLast" "self._finixCatchDistance"] [null null null])
+        (assign ["self._finixCatchEmptySince" "self._finixCatchPending"] [null null])
+        (if' (op ["context" "==" "self"]) (inline [(assign "context" [null])]))
+        (if' "timer" (inline [["timers.removeTimer" "timer"]]))
+      ])
+      blank
+      (localFunction "disable" ["err"] [
+        (assign "off" [true])
+        ["pcall" "clear" "context"]
+        ["log" (str "error") (str "disabled") "err"]
+      ])
+      blank
+      (localFunction "need" ["owner" "name"] [
+        ["assert" (op ["owner" "and" (op [["type" (index "owner" "name")] "==" (str "function")])]) (op ["name" ".." (str " missing")])]
+      ])
+      blank
+      (localFunction "prepare" ["self"] [
+        (local "helper" ["pg.game.controller.lockHelper"])
+        (local "camera" ["pg.game.camera.playerCameraMode.catchCamera"])
+        (if' (not "self._finixCatchReady") [
+          ["need" "pg.global.entityMgr" (str "getAllEntities")]
+          ["need" "helper" (str "checkTargetValid")]
+          ["need" "helper" (str "tryForceLockTarget")]
+          ["need" "helper" (str "canForceLock")]
+          ["need" "camera" (str "setTarget")]
+          ["need" "camera" (str "checkDistance")]
+          ["need" "camera" (str "isActive")]
+          ["need" "self" (str "checkBallCanThrow")]
+          (assign "prob" [(op ["prob" "or" ["require" (str "Common.Utils.CatchProbContext")]])])
+          ["need" "prob" (str "clientGet")]
+          (assign "ability" [(op ["ability" "or" ["require" (str "Data.ability_setting_global_const_data")]])])
+          (assign "scenes" [(op ["scenes" "or" ["require" (str "Data.scene_data")]])])
+          (assign "timers" [(op ["timers" "or" ["require" (str "Core.Timer.TimerManager")]])])
+          ["need" "timers" (str "addRepeatTimer")]
+          ["need" "timers" (str "removeTimer")]
+          (assign "clock" [(op ["clock" "or" ["require" (str "Core.Common.Time")]])])
+          ["need" "clock" (str "getTickSecond")]
+          (assign "self._finixCatchReady" [true])
+        ])
+        (return ["helper" "camera"])
+      ])
+      blank
+      (localFunction "step" ["self"] [
+        (if' (op [(not "self._continuousThrowHeld") "or" (op ["self.player" "~=" "pg.me"]) "or" (op ["self.player.currentContext" "~=" "self"])]) (inline [(return [["clear" "self"]])]))
+        (local ["helper" "camera"] [["prepare" "self"]])
+        (if' (op [(not ["camera:isActive"]) "or" (not ["helper:canForceLock"]) "or" (not "pg.me.enableLockTarget")]) [
+          (assign "self._finixCatchEmptySince" [null])
+          (return [])
+        ])
+        (if' (not ["self:checkBallCanThrow"]) (inline [(return [["self:stopContinuousThrow" (str "catch_ball_unavailable")]])]))
+        (local "scene" [(index "scenes" "pg.me.space.sceneId")])
+        (local "radius" [(op [(op ["scene" "and" "scene.forceLockDis"]) "or" "ability.forceLockDis"])])
+        (if' (op ["pg.me.fogMaskRadius" "and" (op ["pg.me.fogMaskRadius" ">" 0])]) (inline [(assign "radius" ["pg.me.fogMaskRadius"])]))
+        ["assert" (op [(op [["type" "radius"] "==" (str "number")]) "and" (op ["radius" ">" 0])]) (str "lock radius missing")]
+        (local "from" [["pg.pawn:getPosition"]])
+        (local ["candidates" "pending"] [(table []) 0])
+        (forIn ["_" "ent"] [["pairs" ["pg.global.entityMgr:getAllEntities"]]] [
+          (if' (op (rows [[(paren (op [(op ["ent.className" "==" (str "ClientPuppet")]) "or" (op ["ent.className" "==" (str "ClientPuppetGhost")])]))] ["and" (op ["ent.space" "==" "pg.me.space"]) "and" (not "ent.destroyed") "and" (not "ent.isDestroyed")]])) [
+            (local "distance" [["Vector3.Distance" "from" ["ent:getPosition"]]])
+            (if' (op ["distance" "<=" "radius"]) [
+              (ifElse "ent.isTrapped" [
+                  (assign "pending" [(op ["pending" "+" 1])])
+                ] (if' (op (rows [[["ent:canBeLocked"] "and" ["helper:checkTargetValid" "ent" "radius" null false]] ["and" ["camera:checkDistance" "ent"] "and" (dot ["prob.clientGet" "ent" "self.itemId"] "canCatch")]])) [
+                  (assign (index "candidates" (op [(len "candidates") "+" 1])) [(table [(field "entity" "ent") (field "distance" "distance")])])
+                ]))
+            ])
+          ])
+        ])
+        (if' (op [(len "candidates") "==" 0]) [
+          (if' (op ["self._finixCatchPending" "~=" "pending"]) (inline [["log" (str "wait") "pending" (str "pending")]]))
+          (assign "self._finixCatchPending" ["pending"])
+          (ifElse (op ["pending" ">" 0]) [
+              (assign "self._finixCatchEmptySince" [null])
+            ] [
+              (local "now" [["clock.getTickSecond"]])
+              (assign "self._finixCatchEmptySince" [(op ["self._finixCatchEmptySince" "or" "now"])])
+              (if' (op [(op ["now" "-" "self._finixCatchEmptySince"]) ">=" "GRACE"]) (inline [(return [["self:stopContinuousThrow" (str "catch_nothing_left")]])]))
+            ])
+          (return [])
+        ])
+        (assign ["self._finixCatchEmptySince" "self._finixCatchPending"] [null null])
+        [
+          "table.sort"
+          "candidates"
+          (fn ["a" "b"] [
+            (if' (op ["a.distance" "==" "b.distance"]) (inline [(return [(op ["a.entity.actorId" "<" "b.entity.actorId"])])]))
+            (return [(op ["a.distance" "<" "b.distance"])])
+          ])
+        ]
+        (local "nextIndex" [])
+        (forIn ["i" "candidate"] [["ipairs" "candidates"]] [
+          (if' (op ["candidate.entity.actorId" "==" "self._finixCatchLast"]) (inline [(assign "nextIndex" [(op [(op ["i" "%" (len "candidates")]) "+" 1])]) ";" "break"]))
+        ])
+        (if' (op [(not "nextIndex") "and" "self._finixCatchDistance"]) [
+          (forIn ["i" "candidate"] [["ipairs" "candidates"]] [
+            (if' (op (rows [[(op ["candidate.distance" ">" "self._finixCatchDistance"])] ["or" (paren (op [(op ["candidate.distance" "==" "self._finixCatchDistance"]) "and" (op ["candidate.entity.actorId" ">" "self._finixCatchLast"])]))]])) [
+              (assign "nextIndex" ["i"])
+              "break"
+            ])
+          ])
+        ])
+        (local "chosen" [(index "candidates" (op ["nextIndex" "or" 1]))])
+        (assign ["self._finixCatchLast" "self._finixCatchDistance"] ["chosen.entity.actorId" "chosen.distance"])
+        ["helper:tryForceLockTarget" "chosen.entity.actorId" 0 "radius"]
+        (if' (op ["helper.forceLockActorId" "~=" "chosen.entity.actorId"]) (inline [(return [])]))
+        ["camera:setTarget" "chosen.entity"]
+        ["log" (str "target") "chosen.entity.actorId" ["string.format" (str "%.2f") "chosen.distance"]]
+      ])
+      blank
+      (localFunction "safely" ["fn" "self"] [
+        (if' "off" (inline [(return [])]))
+        (local ["ok" "err"] [["pcall" "fn" "self"]])
+        (if' (not "ok") (inline [["disable" "err"]]))
+      ])
+      blank
+      (localFunction "startLocking" ["self"] [
+        (if' (op [(not "self._continuousThrowHeld") "or" (op ["self.player" "~=" "pg.me"]) "or" (op ["self.player.currentContext" "~=" "self"])]) (inline [(return [["clear" "self"]])]))
+        (if' "self._finixCatchTimer" (inline [(return [])]))
+        (local "id" ["pg.game.controller.lockHelper.forceLockActorId"])
+        (if' (op [(not "id") "or" (op ["id" "==" 0]) "or" (not ["pg.getEntityByActorId" "id"])]) (inline [(return [])]))
+        ["prepare" "self"]
+        (if' (op ["context" "~=" "self"]) (inline [["clear" "context"]]))
+        (assign "context" ["self"])
+        (assign ["self._finixCatchLast" "self._finixCatchDistance"] [null null])
+        (assign ["self._finixCatchEmptySince" "self._finixCatchPending"] [null null])
+        ["safely" "step" "self"]
+        (if' (op ["off" "or" (not "self._continuousThrowHeld")]) (inline [(return [])]))
+        (assign "self._finixCatchTimer" [["timers.addRepeatTimer" "INTERVAL" (fn [] (inline [["safely" "step" "self"]]))]])
+        ["assert" "self._finixCatchTimer" (str "lock timer missing")]
+      ])
+      blank
+      (localFunction "install" ["cls"] [
+        (local ["start" "tick" "stop"] [["rawget" "cls" (str "startContinuousThrow")] ["rawget" "cls" (str "_tryContinuousThrow")] ["rawget" "cls" (str "stopContinuousThrow")]])
+        ["assert" (op [["type" "start"] "==" (str "function")]) (str "startContinuousThrow missing")]
+        ["assert" (op [["type" "tick"] "==" (str "function")]) (str "_tryContinuousThrow missing")]
+        ["assert" (op [["type" "stop"] "==" (str "function")]) (str "stopContinuousThrow missing")]
+        (assign "cls.startContinuousThrow" [
+          (fn ["self" "..."] [
+            (local "held" ["self._continuousThrowHeld"])
+            (local "r" [["pack" ["start" "self" "..."]]])
+            (if' (not "held") (inline [["safely" "startLocking" "self"]]))
+            (return [["unpack" "r" 1 "r.n"]])
+          ])
+        ])
+        (assign "cls._tryContinuousThrow" [
+          (fn ["self" "..."] [
+            ["safely" "startLocking" "self"]
+            (return [["tick" "self" "..."]])
+          ])
+        ])
+        (assign "cls.stopContinuousThrow" [
+          (fn ["self" "..."] [
+            (if' (op ["context" "==" "self"]) (inline [["log" (str "stop") "self._finixCatchLast" ["select" 1 "..."]]]))
+            (local ["ok" "err"] [["pcall" "clear" "self"]])
+            (if' (not "ok") (inline [["disable" "err"]]))
+            (return [["stop" "self" "..."]])
+          ])
+        ])
+        ["log" (str "hook") (str "continuous throw") (str "ready")]
+      ])
+      blank
+      (local ["ok" "err"] [["pcall" "install" (index "ret" 1)]])
+      (if' (not "ok") (inline [["disable" "err"]]))
+      (return [["unpack" "ret" 1 "ret.n"]])
     ];
     modules_gaming_aniimo_luajit_opcodes_data = [
       "--- a/src/lj_bc.h"
@@ -25407,1355 +25440,1416 @@
       entryMD5 = "d1278a28054813e09ca01faccafb6d64";
       name = "rewards";
     };
-    modules_gaming_aniimo_rewards_lua_data = [
-      "local orig = ..."
-      "local function pack(...) return { n = select(\"#\", ...), ... } end"
-      "local env = getfenv and getfenv(1)"
-      "if type(env) == \"table\" and setfenv then pcall(setfenv, orig, env) end"
-      "local ret = pack(orig(select(2, ...)))"
-      ""
-      "local MIN_GAP, JITTER, MAX_CLAIMS, STALE = 1.0, 0.6, 300, 15"
-      "local MAIL_VIEW = \"Guis.Panels.Chat.Component.MailNewComponent\""
-      "local LOG_FILE = \".finix-aniimo/rewards.log\""
-      "local state = { off = false, gen = 0, hooked = false, run = nil }"
-      "local logger, paths"
-      ""
-      "local function stamp()"
-      "  local ok, s = pcall(os.date, \"!%Y-%m-%dT%H:%M:%SZ\")"
-      "  if ok and type(s) == \"string\" then return s end"
-      "  return tostring(os.time())"
-      "end"
-      ""
-      "local function field(v)"
-      "  if v == nil then return \"-\" end"
-      "  return (tostring(v):gsub(\"[\\t\\r\\n]\", \" \"))"
-      "end"
-      ""
-      "local function logPaths()"
-      "  local list = {}"
-      "  local ok, dp = pcall(function() return CS.UnityEngine.Application.dataPath end)"
-      "  if ok and type(dp) == \"string\" and dp ~= \"\" then list[1] = dp .. \"/../\" .. LOG_FILE end"
-      "  list[#list + 1] = LOG_FILE"
-      "  return list"
-      "end"
-      ""
-      "local function append(line)"
-      "  paths = paths or logPaths()"
-      "  for _, p in ipairs(paths) do"
-      "    local f = io.open(p, \"a\")"
-      "    if f then"
-      "      f:write(line)"
-      "      f:close()"
-      "      return true"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function log(event, label, result, quiet)"
-      "  pcall(function() append(table.concat({ stamp(), field(event), field(label), field(result) }, \"\\t\") .. \"\\n\") end)"
-      "  if quiet then return end"
-      "  local msg = \"[rewards] \" .. tostring(event) .. \" \" .. field(label) .. \" \" .. field(result)"
-      "  pcall(print, msg)"
-      "  if logger == nil then"
-      "    logger = false"
-      "    pcall(function() logger = require(\"Core.Log.LoggerManager\").getLogger(\"RewardsMod\") or false end)"
-      "  end"
-      "  if logger then pcall(function() logger:warn(msg) end) end"
-      "end"
-      ""
-      "local function toast(text)"
-      "  pcall(function() pg.global.ui.tips:showTextTip(text, nil, nil, nil, nil, nil, nil, true) end)"
-      "end"
-      ""
-      "local function setting()"
-      "  local v = type(env) == \"table\" and rawget(env, \"ANIIMO_REWARDS\") or nil"
-      "  if v == nil and type(os) == \"table\" and os.getenv then"
-      "    local ok, e = pcall(os.getenv, \"ANIIMO_REWARDS\")"
-      "    if ok then v = e end"
-      "  end"
-      "  return v ~= nil and tostring(v) or \"\""
-      "end"
-      ""
-      "local function tab(v)"
-      "  local t = type(v)"
-      "  return t == \"table\" or t == \"userdata\""
-      "end"
-      ""
-      "local function req(name)"
-      "  local ok, m = pcall(require, name)"
-      "  if ok and tab(m) then return m end"
-      "end"
-      ""
-      "local function has(t, k)"
-      "  if not tab(t) then return false end"
-      "  local ok, v = pcall(function() return t[k] end)"
-      "  return ok and type(v) == \"function\""
-      "end"
-      ""
-      "local function iter(f, v)"
-      "  if tab(v) then"
-      "    local ok, a, b, c = pcall(f, v)"
-      "    if ok and type(a) == \"function\" then return a, b, c end"
-      "  end"
-      "  return next, {}, nil"
-      "end"
-      "local function kv(v) return iter(pairs, v) end"
-      "local function iv(v) return iter(ipairs, v) end"
-      ""
-      "local function len(v)"
-      "  if not tab(v) then return 0 end"
-      "  local ok, n = pcall(function() return #v end)"
-      "  return ok and type(n) == \"number\" and n or 0"
-      "end"
-      ""
-      "local function killed(s) return s == \"0\" or s == \"off\" end"
-      ""
-      "local function now()"
-      "  local T = req(\"Core.Common.Time\")"
-      "  if has(T, \"getRealMillisecond\") then"
-      "    local ok, t = pcall(T.getRealMillisecond)"
-      "    if ok and type(t) == \"number\" then return t / 1000, 0.001 end"
-      "  end"
-      "  if type(os) == \"table\" and os.time then"
-      "    local ok, t = pcall(os.time)"
-      "    if ok and type(t) == \"number\" then return t, 1 end"
-      "  end"
-      "end"
-      ""
-      "local function noop() end"
-      ""
-      "local function k(...)"
-      "  local t = { ... }"
-      "  for i = 1, select(\"#\", ...) do t[i] = tostring(t[i]) end"
-      "  return table.concat(t, \":\")"
-      "end"
-      ""
-      "local CLAIMS = {"
-      "  task = { call = \"reqActReceiveTaskReward\" },"
-      "  group = { call = \"reqActReceiveGroupTaskReward\" },"
-      "  bpCycle = { rpc = \"RPC_CS_ReceiveBpCycleReward\", tail = { noop } },"
-      "  rogueWeekly = { call = \"getRogueAllWeeklyReward\" },"
-      "  rogueSeasonWeekly = { call = \"getAllRogueSeasonWeeklyReward\", tail = { 0 } },"
-      "  rogueDaily = { call = \"getDailyReward\" },"
-      "  monthCardStored = { on = \"game.monthCard\", call = \"requestClaimStoredReward\" },"
-      "  monthCardDaily = { on = \"game.monthCard\", call = \"requestClaimDailyReward\" },"
-      "  homeBookGrade = { call = \"reqReceiveHandbookGradeReward\", tail = { noop } },"
-      "  homeBookCategory = { call = \"reqReceiveCategoryProgressReward\", tail = { noop } },"
-      "  grabEggsRank = { rpc = \"RPC_CS_GetRobEggLevelReward\", tail = { 0, 0, 0 } },"
-      "  grabEggsBox = { rpc = \"RPC_CS_OpenRobEggLevelRewardBox\" },"
-      "  grabEggsCase = { rpc = \"RPC_CS_GetShowCaseReward\", tail = { noop } },"
-      "  courseLevel = { call = \"getCourseLevelReward\", tail = { noop } },"
-      "  course = { call = \"getCourseReward\", tail = { noop } },"
-      "  playerLevel = { fn = function(me, lvs)"
-      "    local CH = require(\"Core.Common.CallbackHandler\")"
-      "    me:serverMsg(\"RPC_CS_GetLevelReward\", lvs, CH({ done = noop }, \"done\"))"
-      "  end },"
-      "  gachaTimes = { rpc = \"RPC_CS_GachaClaimTimesReward\", tail = { noop } },"
-      "  trainChapter = { call = \"getSpecialTrainChapterReward\", tail = { noop } },"
-      "  trainEntry = { call = \"getSpecialTrainEntryReward\", tail = { noop } },"
-      "  trainBadge = { call = \"getSpecialTrainBadgeReward\", tail = { noop } },"
-      "  trainExchange = { call = \"getSpecialTrainBadgeContinuousReward\", tail = { noop } },"
-      "  petSpecies = { call = \"getPetHandbookSpeciesCollectReward\", tail = { -1 } },"
-      "  petForm = { call = \"getPetHandbookCountryCollectReward\", tail = { -1 } },"
-      "  petLevel = { call = \"getPetHandbookCountryLevelReward\", tail = { -1 } },"
-      "  petTopic = { call = \"reqGetPetTopicRewards\" },"
-      "  bossRush = { rpc = \"RPC_CS_BossRushReceiveSeasonReward\", tail = { noop } },"
-      "  homeCarLevel = { call = \"getHomeCarLevelReward\", tail = { -1, noop } },"
-      "  homeSeasonProgress = { rpc = \"RPC_CS_ReceiveHomeSeasonCollectionReward\" },"
-      "  homeSeasonTask = { call = \"reqReceiveHomeSeasonTaskReward\", tail = { noop } },"
-      "  homeSeasonMutation = { call = \"reqReceiveHomeSeasonMutationReward\", tail = { noop } },"
-      "  questChapter = { call = \"getChapterQuestProgressReward\", tail = { noop } },"
-      "  puppet = { call = \"reqActivityCatchScoreReward\" },"
-      "  photoReward = { call = \"reqActivityPhotoRewardGet\" },"
-      "  photoExtra = { call = \"reqActivityPhotoExtraRewardGet\" },"
-      "  photoStage = { call = \"reqActivityPhotoStageRewardGet\" },"
-      "  petSave = { call = \"reqActivityPetSaveWeekSumyReward\", tail = { noop } },"
-      "  energy = { call = \"serverActivityMsg\" },"
-      "  petArea = { call = \"getPetAreaReward\" },"
-      "  homeCampFinish = { call = \"finishDispatch\" },"
-      "}"
-      ""
-      "local function act()"
-      "  local A, C, CA = req(\"Common.Utils.ActivityUtils\"), req(\"Common.Const.ActivityConst\"), req(\"Utils.ClientActivityUtils\")"
-      "  if A and C and CA and tab(C.EventType) and tab(C.TaskState) and tab(C.ActivityTaskType) then return A, C, CA end"
-      "end"
-      ""
-      "local function task(add, eid, tid, tag, label)"
-      "  add(k(tag, \"task\", tid), label, \"task\", pack(tid, eid))"
-      "end"
-      ""
-      "local function group(add, eid, gid, tag, label)"
-      "  add(k(tag, \"group\", gid), label, \"group\", pack(gid, eid))"
-      "end"
-      ""
-      "local function openEvents(et)"
-      "  local A, _, CA = act()"
-      "  local POST = req(\"Data.game_event_type_post_data\")"
-      "  local list = {}"
-      "  if not (A and POST and et ~= nil and has(CA, \"isGameEventTabOpen\") and has(CA, \"isEventOpen\") and has(A, \"getOprActivityUnlockCond\")) then return list end"
-      "  for eid in kv(POST[et]) do"
-      "    if CA.isGameEventTabOpen(eid) and CA.isEventOpen(eid) and A.getOprActivityUnlockCond(eid) then list[#list + 1] = eid end"
-      "  end"
-      "  table.sort(list, function(a, b) return tostring(a) < tostring(b) end)"
-      "  return list"
-      "end"
-      ""
-      "local function taskInfos(add, seen, et, eid, tag, name, list)"
-      "  local _, C = act()"
-      "  local CAN = C.TaskState.Finihed_CanRecv"
-      "  for _, t in iv(list) do"
-      "    if tab(t) and t.taskId ~= nil then"
-      "      seen(t.taskId, t.taskState)"
-      "      if t.taskState == CAN then task(add, eid, t.taskId, tag, name .. \" \" .. tostring(t.taskId)) end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function dailyActive(add, seen)"
-      "  local A, C, CA = act()"
-      "  local ETD = req(\"Data.event_task_data\")"
-      "  if not (A and ETD and has(A, \"isOprActivityOpenByType\") and has(CA, \"getTaskInfoByActType\")) then return \"deps\" end"
-      "  local ET, AT, CAN = C.EventType, C.ActivityTaskType, C.TaskState.Finihed_CanRecv"
-      "  local ok, eid = A.isOprActivityOpenByType(ET.DailyActive)"
-      "  if not ok or not eid then return \"closed\" end"
-      "  local UI = req(\"Utils.LuaUIUtils\")"
-      "  local full = true"
-      "  if has(UI, \"isDailyActiveScoreFull\") then full = UI.isDailyActiveScoreFull() and true or false end"
-      "  for _, t in kv(CA.getTaskInfoByActType(ET.DailyActive)) do"
-      "    if tab(t) then"
-      "      seen(t.taskId, t.taskState)"
-      "      if t.taskState == CAN then"
-      "        if t.taskType == AT.DailyActive_GetScore and not full then"
-      "          task(add, eid, t.taskId, \"daily\", \"Daily activity task \" .. tostring(t.taskId))"
-      "        elseif t.taskType == AT.DailyActive_ScoreReward then"
-      "          local cfg = ETD[t.taskId]"
-      "          if tab(cfg) and cfg.groupId then group(add, eid, cfg.groupId, \"daily\", \"Daily activity score chest\") end"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function groupTasks(seen, g)"
-      "  local A = act()"
-      "  if g == nil then return end"
-      "  for _, tid in iv(A.getActTaskIdsByGroupId(g)) do seen(tid, A.getActTaskState(pg.me, tid)) end"
-      "end"
-      ""
-      "local function bpContext()"
-      "  local A, C = act()"
-      "  local GED, BPD = req(\"Data.game_event_data\"), req(\"Data.event_battlepass_data\")"
-      "  if not (A and GED and BPD and has(A, \"getActivityData\") and has(A, \"isOprActivityOpen\")) then return nil, \"deps\" end"
-      "  local bp = A.getActivityData(pg.me, C.EventType.BattlePass)"
-      "  local phase = tab(bp) and tab(bp.activityBase) and bp.activityBase.activityPhase"
-      "  local cfg = phase and BPD[phase]"
-      "  if not tab(cfg) then return nil, \"nophase\" end"
-      "  local eid"
-      "  for id, e in kv(GED) do"
-      "    if tab(e) and e.eventType == C.EventType.BattlePass and e.phase == phase then eid = id end"
-      "  end"
-      "  if not eid or not A.isOprActivityOpen(eid) then return nil, \"closed\" end"
-      "  return { A = A, C = C, bp = bp, phase = phase, cfg = cfg, eid = eid }"
-      "end"
-      ""
-      "local function battlePass(add, seen)"
-      "  local x, why = bpContext()"
-      "  if not x then return why end"
-      "  local A, cfg, eid, bp = x.A, x.cfg, x.eid, x.bp"
-      "  local CAN = x.C.TaskState.Finihed_CanRecv"
-      "  local RD = req(\"Utils.CashShopRedDotUtils\")"
-      "  local wg = tab(cfg.weekTaskGroupId) and cfg.weekTaskGroupId[bp.weeklyNum or 0] or nil"
-      "  local sg, ag = cfg.seasonTaskGroupId, cfg.awardTaskGroupId"
-      "  if has(A, \"getActTaskIdsByGroupId\") and has(A, \"getActTaskState\") then"
-      "    for _, g in ipairs({ wg, sg, ag }) do groupTasks(seen, g) end"
-      "  end"
-      "  if wg and has(RD, \"hasClaimableWeeklyTask\") and RD.hasClaimableWeeklyTask() then group(add, eid, wg, \"bp\", \"Battle pass weekly tasks\") end"
-      "  if sg and has(RD, \"hasClaimableSeasonTask\") and RD.hasClaimableSeasonTask() then group(add, eid, sg, \"bp\", \"Battle pass season tasks\") end"
-      "  if ag and has(A, \"getActTaskIdsByGroupId\") and has(A, \"getActTaskState\") then"
-      "    for _, tid in iv(A.getActTaskIdsByGroupId(ag)) do"
-      "      if A.getActTaskState(pg.me, tid) == CAN then group(add, eid, ag, \"bp\", \"Battle pass level rewards\") break end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function bpCycle(add, seen)"
-      "  local x, why = bpContext()"
-      "  if not x then return why end"
-      "  local SC, bp, C = req(\"Data.sys_config_data\"), x.bp, x.C"
-      "  if not (SC and has(bp, \"getCycleRewardState\")) then return \"deps\" end"
-      "  seen(\"unlock\", bp.unlockCycleReward)"
-      "  if bp.unlockCycleReward ~= 1 then return end"
-      "  local CAN = C.TaskState.Finihed_CanRecv"
-      "  local lo = (tonumber(SC.BATTLE_PASS_LEVEL_UP_MAX) or 0) + 1"
-      "  local hi = math.min(tonumber(bp.bpLevel) or 0, tonumber(bp.cycleRewardShowMaxlv) or 0)"
-      "  for lv = lo, hi do"
-      "    local f, p = bp:getCycleRewardState(lv)"
-      "    seen(lv, tostring(f) .. \"/\" .. tostring(p))"
-      "    if f == CAN or p == CAN then"
-      "      return add(k(\"bp\", \"cycle\", x.phase), \"Battle pass loop rewards\", \"bpCycle\", pack())"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local mileage = {}"
-      "local SEASON_FIELDS = { { \"petTaskGroup\", \"pets\" }, { \"battleTaskGroup\", \"battle\" }, { \"eggTaskGroup\", \"eggs\" }, { \"homeTaskGroup\", \"home\" } }"
-      ""
-      "local function seasonAchievement(add, seen)"
-      "  local A, C, CA = act()"
-      "  if not (A and has(A, \"isOprActivityTabOpenByType\") and has(A, \"getActTaskCanReceiveByGroupId\") and has(A, \"getActTaskIdsByGroupId\") and has(A, \"getActTaskState\") and has(CA, \"isGameEventTabOpen\")) then return \"deps\" end"
-      "  local ok, eid = A.isOprActivityTabOpenByType(C.EventType.SeasonAchievements, pg.me)"
-      "  if not ok or not eid or not CA.isGameEventTabOpen(eid) then return \"closed\" end"
-      "  local ETD, SAD = req(\"Data.event_task_data\"), req(\"Data.event_season_achievement_data\")"
-      "  local AT, SUB, TS = C.ActivityTaskType, C.ActivityTaskSubType, C.TaskState"
-      "  local done = {}"
-      "  local function emit(g, label)"
-      "    if g ~= nil and not done[g] then"
-      "      done[g] = true"
-      "      group(add, eid, g, \"season\", label)"
-      "    end"
-      "  end"
-      "  if ETD and tab(SUB) and mileage[eid] == nil then"
-      "    mileage[eid] = false"
-      "    for _, cfg in kv(ETD) do"
-      "      if tab(cfg) and cfg.activityId == eid and cfg.actTaskType == AT.Active_AchievementTask and cfg.actSubTaskType == SUB.AchiTask_SeasonAchieve_Mileage then"
-      "        mileage[eid] = cfg.groupId or false"
-      "        break"
-      "      end"
-      "    end"
-      "  end"
-      "  local mg = mileage[eid]"
-      "  if mg then"
-      "    local ready = false"
-      "    for _, tid in iv(A.getActTaskIdsByGroupId(mg)) do"
-      "      if ETD[tid] ~= nil then"
-      "        local s = A.getActTaskState(pg.me, tid) or TS.UnFinished"
-      "        seen(tid, s)"
-      "        if s == TS.Finihed_CanRecv then ready = true end"
-      "      end"
-      "    end"
-      "    if ready then emit(mg, \"Season achievement mileage\") end"
-      "  end"
-      "  local sa = SAD and SAD[eid]"
-      "  if not tab(sa) then return mg and nil or \"noconfig\" end"
-      "  for _, f in ipairs(SEASON_FIELDS) do"
-      "    for _, g in iv(sa[f[1]]) do"
-      "      groupTasks(seen, g)"
-      "      if len(A.getActTaskCanReceiveByGroupId(pg.me, g)) > 0 then emit(g, \"Season achievement \" .. tostring(g) .. \" (\" .. f[2] .. \")\") end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function sign(add, seen)"
-      "  local A, C, CA = act()"
-      "  local POST = req(\"Data.game_event_type_post_data\")"
-      "  if not (A and POST and has(A, \"isOprActivityOpen\") and has(A, \"getActTaskCanReceiveByGroupId\") and has(A, \"getActTaskIdsByGroupId\") and has(A, \"getActTaskState\") and has(CA, \"isGameEventTabOpen\") and has(CA, \"getSignTaskGroupIds\")) then return \"deps\" end"
-      "  local ET, CAN = C.EventType, C.TaskState.Finihed_CanRecv"
-      "  for _, et in ipairs({ ET.SignNewbie, ET.SignVersion, ET.LongTermSign }) do"
-      "    for eid in kv(POST[et]) do"
-      "      if CA.isGameEventTabOpen(eid) and A.isOprActivityOpen(eid) then"
-      "        for _, g in iv(CA.getSignTaskGroupIds(eid)) do"
-      "          for _, tid in iv(A.getActTaskIdsByGroupId(g)) do"
-      "            local s = A.getActTaskState(pg.me, tid)"
-      "            seen(tid, s)"
-      "            if s == CAN then task(add, eid, tid, \"sign\", \"Sign-in reward \" .. tostring(tid)) end"
-      "          end"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function crossPlatform(add, seen)"
-      "  local _, C, CA = act()"
-      "  if not (C and has(CA, \"getTaskInfoByActType\")) then return \"deps\" end"
-      "  local et = C.EventType.CrossPlatform"
-      "  local eid = openEvents(et)[1]"
-      "  if not eid then return \"closed\" end"
-      "  taskInfos(add, seen, et, eid, \"cross\", \"Cross-platform task\", CA.getTaskInfoByActType(et))"
-      "end"
-      ""
-      "local function firstTopup(add, seen)"
-      "  local _, C, CA = act()"
-      "  if not (C and has(CA, \"getTaskInfoByTaskType\")) then return \"deps\" end"
-      "  local et = C.EventType.FirstTopup"
-      "  local eid = openEvents(et)[1]"
-      "  if not eid then return \"closed\" end"
-      "  taskInfos(add, seen, et, eid, \"firsttopup\", \"First top-up reward\", CA.getTaskInfoByTaskType(et, C.ActivityTaskType.Active_AchievementTask))"
-      "end"
-      ""
-      "local function journeyTrial(add, seen)"
-      "  local _, C, CA = act()"
-      "  local T = tab(CA) and CA.REUNION_TRAINING_TASK_TYPE"
-      "  if not (C and tab(T) and has(CA, \"getTaskInfoList\")) then return \"deps\" end"
-      "  local eid = openEvents(C.EventType.JourneyTrial)[1]"
-      "  if not eid then return \"closed\" end"
-      "  local CAN = C.TaskState.Finihed_CanRecv"
-      "  local function try(t, tag)"
-      "    if tab(t) and t.taskId ~= nil then"
-      "      seen(t.taskId, t.taskState)"
-      "      if t.taskState == CAN then task(add, eid, t.taskId, \"journey\", \"Journey of Trials \" .. tag .. \" \" .. tostring(t.taskId)) end"
-      "    end"
-      "  end"
-      "  for _, t in iv(CA.getTaskInfoList(T.normal, true)) do try(t, \"task\") end"
-      "  for _, t in iv(CA.getTaskInfoList(T.row, true)) do try(t, \"row\") end"
-      "  local fin = CA.getTaskInfoList(T.final, true)"
-      "  if tab(fin) then try(fin[1], \"final\") end"
-      "end"
-      ""
-      "local function petDispatch(add, seen)"
-      "  local A, C, CA = act()"
-      "  local TT = C and C.ActivityTaskType"
-      "  if not (A and has(A, \"getActivityData\") and has(CA, \"getTaskInfoByActType\") and TT.PetDispatch_Dispatch and TT.PetDispatch_StageScore) then return \"deps\" end"
-      "  local et = C.EventType.PetDispatch"
-      "  local eid = openEvents(et)[1]"
-      "  if not eid then return \"closed\" end"
-      "  local data = A.getActivityData(pg.me, et)"
-      "  if not tab(data) then return \"nodata\" end"
-      "  local PDU = req(\"GameApp.PetDispatch.PetDispatchUtils\")"
-      "  local clues = {}"
-      "  if has(PDU, \"getCurrentStageClues\") then"
-      "    for _, c in kv(PDU.getCurrentStageClues(data.eventPhase)) do"
-      "      if tab(c) and c.taskId ~= nil then clues[c.taskId] = true end"
-      "    end"
-      "  end"
-      "  local CAN = C.TaskState.Finihed_CanRecv"
-      "  for _, t in kv(CA.getTaskInfoByActType(et)) do"
-      "    if tab(t) and t.taskId ~= nil then"
-      "      seen(t.taskId, t.taskState)"
-      "      if t.taskState == CAN then"
-      "        if t.taskType == TT.PetDispatch_Dispatch and clues[t.taskId] then"
-      "          task(add, eid, t.taskId, \"dispatch\", \"Pet dispatch clue reward \" .. tostring(t.taskId))"
-      "        elseif t.taskType == TT.PetDispatch_StageScore then"
-      "          task(add, eid, t.taskId, \"dispatch\", \"Pet dispatch progress reward \" .. tostring(t.taskId))"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function growthGift(add, seen)"
-      "  local A, C, CA = act()"
-      "  local ATD = req(\"Data.activate_tasks_data\")"
-      "  if not (A and ATD and has(A, \"getActivityData\") and has(CA, \"getTaskInfoList\")) then return \"deps\" end"
-      "  local et = C.EventType.GrowthGift"
-      "  local d = A.getActivityData(pg.me, et)"
-      "  seen(\"receivedPetFlag\", tab(d) and d.receivedPetFlag or nil)"
-      "  if not (tab(d) and d.receivedPetFlag == 1) then return \"noegg\" end"
-      "  for _, eid in ipairs(openEvents(et)) do"
-      "    local cfg = ATD[eid]"
-      "    local g = tab(cfg) and tab(cfg.foreverTaskGroup) and cfg.foreverTaskGroup[1]"
-      "    if g then taskInfos(add, seen, et, eid, \"growth\", \"Growth gift collection reward\", CA.getTaskInfoList(g, true)) end"
-      "  end"
-      "end"
-      ""
-      "local function littleFire(add, seen)"
-      "  local _, C, CA = act()"
-      "  if not (C and has(CA, \"getTaskInfoByTaskType\")) then return \"deps\" end"
-      "  local et, TT, CAN = C.EventType.LittleFirePerson, C.ActivityTaskType, C.TaskState.Finihed_CanRecv"
-      "  local eid = openEvents(et)[1]"
-      "  if not eid then return \"closed\" end"
-      "  for _, name in ipairs({ \"LittleFire_PersonReward\", \"LittleFire_GlobalReward\" }) do"
-      "    if TT[name] ~= nil then"
-      "      for _, t in kv(CA.getTaskInfoByTaskType(et, TT[name])) do"
-      "        if tab(t) then"
-      "          seen(t.taskId, t.taskState)"
-      "          if t.taskState == CAN and t.taskGroupId ~= nil then group(add, eid, t.taskGroupId, \"littlefire\", \"Little Fire progress reward\") end"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "  for _, name in ipairs({ \"Active_DailyTask\", \"Active_WeeklyTask\", \"Active_AchievementTask\" }) do"
-      "    if TT[name] ~= nil then taskInfos(add, seen, et, eid, \"littlefire\", \"Little Fire task\", CA.getTaskInfoByTaskType(et, TT[name])) end"
-      "  end"
-      "end"
-      ""
-      "local function fishingCapture(add, seen)"
-      "  local _, C, CA = act()"
-      "  local ATD = req(\"Data.activate_tasks_data\")"
-      "  if not (C and ATD and has(CA, \"getFishingCaptureRedDotState\")) then return \"deps\" end"
-      "  for _, eid in ipairs(openEvents(C.EventType.FishingCapture)) do"
-      "    local cfg = ATD[eid]"
-      "    local gid = tab(cfg) and tab(cfg.foreverTaskGroup) and cfg.foreverTaskGroup[1]"
-      "    local st = CA.getFishingCaptureRedDotState(eid)"
-      "    local n = tab(st) and len(st.rewardTaskIds) or 0"
-      "    seen(eid, n)"
-      "    if gid and n > 0 then group(add, eid, gid, \"fishing\", \"Fishing capture progress rewards\") end"
-      "  end"
-      "end"
-      ""
-      "local function leylineTreeUp(add, seen)"
-      "  local A, C, CA = act()"
-      "  local ETD = req(\"Data.event_task_data\")"
-      "  if not (A and ETD and has(A, \"getActTaskMap\") and has(CA, \"_isInLeylineTreeUpTime\")) then return \"deps\" end"
-      "  local et = C.EventType.LeylineTreeUp"
-      "  if not CA._isInLeylineTreeUpTime() then return \"closed\" end"
-      "  local eid = openEvents(et)[1]"
-      "  if not eid then return \"closed\" end"
-      "  local CAN = C.TaskState.Finihed_CanRecv"
-      "  for tid, t in kv(A.getActTaskMap(pg.me, et)) do"
-      "    if ETD[tid] ~= nil and tab(t) then"
-      "      seen(tid, t.state)"
-      "      if t.state == CAN then task(add, eid, tid, \"leylineup\", \"Leyline tree event task \" .. tostring(tid)) end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function redBook(add, seen)"
-      "  local A, C = act()"
-      "  local ATD, ETD = req(\"Data.activate_tasks_data\"), req(\"Data.event_task_data\")"
-      "  if not (A and ATD and ETD and has(A, \"getActTaskIdsByGroupId\") and has(A, \"getActTaskState\")) then return \"deps\" end"
-      "  local CAN = C.TaskState.Finihed_CanRecv"
-      "  local function sortv(id)"
-      "    local c = ETD[id]"
-      "    return tab(c) and tonumber(c.sort) or math.huge"
-      "  end"
-      "  for _, eid in ipairs(openEvents(C.EventType.RedBook or 115)) do"
-      "    local cfg = ATD[eid]"
-      "    local grp = tab(cfg) and cfg.foreverTaskGroup"
-      "    if tab(grp) then"
-      "      local ids = {}"
-      "      for _, tid in iv(A.getActTaskIdsByGroupId(grp[1])) do ids[#ids + 1] = tid end"
-      "      table.sort(ids, function(a, b)"
-      "        local sa, sb = sortv(a), sortv(b)"
-      "        if sa == sb then return a < b end"
-      "        return sa < sb"
-      "      end)"
-      "      local t2"
-      "      for _, tid in iv(A.getActTaskIdsByGroupId(grp[2])) do t2 = tid break end"
-      "      local shown, done = { ids[1], ids[2], (t2 ~= nil and ETD[t2] ~= nil) and t2 or nil }, {}"
-      "      for i = 1, 3 do"
-      "        local tid = shown[i]"
-      "        if tid ~= nil and not done[tid] then"
-      "          done[tid] = true"
-      "          local s = A.getActTaskState(pg.me, tid)"
-      "          seen(tid, s)"
-      "          if s == CAN then task(add, eid, tid, \"redbook\", \"RedNote event task \" .. tostring(tid)) end"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function homeBookCategory(add, seen)"
-      "  local HB, HD = req(\"Utils.HomeBookRedDotUtils\"), req(\"Utils.HomeBookDataUtils\")"
-      "  local me = pg.me"
-      "  if not (has(HB, \"canReceiveCategoryReward\") and has(HD, \"getFirstCategories\") and has(me, \"reqReceiveCategoryProgressReward\")) then return \"deps\" end"
-      "  for _, e in iv(HD.getFirstCategories()) do"
-      "    if tab(e) and e.id ~= nil then"
-      "      local cond = tab(e.config) and e.config.unlockCondition or nil"
-      "      local unlocked = cond == nil or cond == 0 or (tab(me.triggerMap) and me.triggerMap:isCompleteOrMeetCondition(cond) == true)"
-      "      local s = HB.canReceiveCategoryReward(e.id, unlocked) and true or false"
-      "      seen(e.id, s)"
-      "      if s then"
-      "        local n = has(me, \"getHomeHandbookReceivedCategoryCount\") and me:getHomeHandbookReceivedCategoryCount(e.id) or 0"
-      "        add(k(\"homebook\", \"cat\", e.id, n), \"Home handbook category \" .. tostring(e.id), \"homeBookCategory\", pack(e.id))"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function uiModel(name)"
-      "  local ui = pg.global and pg.global.ui"
-      "  local p = tab(ui) and ui[name]"
-      "  local m = tab(p) and p.model"
-      "  return tab(m) and m or nil"
-      "end"
-      ""
-      "local function grabEggsMode(add, seen)"
-      "  local m = uiModel(\"grabEggsMode\")"
-      "  if not m then return \"deps\" end"
-      "  if has(m, \"hasReadyRewardBox\") and has(m, \"buildBoxSlotList\") then"
-      "    local ready = m:hasReadyRewardBox() and true or false"
-      "    seen(\"boxes\", ready)"
-      "    if ready then"
-      "      for i, d in iv(m:buildBoxSlotList()) do"
-      "        if tab(d) and d.isReady and d.rewardId ~= nil then"
-      "          add(k(\"grabeggs\", \"box\", i, d.id), \"Grab-eggs reward box \" .. i, \"grabEggsBox\", pack(d.rewardId))"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "  local cs = tab(pg.me.showCases) and pg.me.showCases[1001]"
-      "  local GD, RW = req(\"Data.egg_book_group_data\"), req(\"Data.egg_book_reward_data\")"
-      "  if tab(cs) and GD and RW and has(m, \"hasCollectionReward\") then"
-      "    local ready = m:hasCollectionReward(cs) and true or false"
-      "    seen(\"case1001\", ready)"
-      "    if ready then"
-      "      local g = GD[1001]"
-      "      local pts, rec = tonumber(cs.allPoint) or 0, cs.rewardRecord"
-      "      for lv, n in kv(tab(g) and RW[g.reward]) do"
-      "        if tab(n) and (tonumber(n.nodePoint) or 0) <= pts and not ((tonumber(tab(rec) and rec[lv]) or 0) > 0) then"
-      "          add(k(\"grabeggs\", \"case\", lv), \"Grab-eggs collection reward \" .. tostring(lv), \"grabEggsCase\", pack(1001, lv))"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function course(add, seen)"
-      "  local m, GD = uiModel(\"questCourseV2\"), req(\"Data.guide_course_grade_data\")"
-      "  if not (m and GD and has(m, \"canGetCourseGradeLevelReward\") and has(m, \"getGradeCourseList\") and has(m, \"canGetCourseReward\")) then return \"deps\" end"
-      "  for grade, levels in kv(GD) do"
-      "    for level = 1, len(levels) do"
-      "      local s = m:canGetCourseGradeLevelReward(grade, level) and true or false"
-      "      seen(k(grade, level), s)"
-      "      if s then"
-      "        add(k(\"course\", \"level\", grade, level), \"Course grade \" .. tostring(grade) .. \" level \" .. level, \"courseLevel\", pack(grade, level))"
-      "      end"
-      "    end"
-      "    for _, c in iv(m:getGradeCourseList(grade)) do"
-      "      if tab(c) and c.id ~= nil then"
-      "        local s = m:canGetCourseReward(c.id) and true or false"
-      "        seen(c.id, s)"
-      "        if s then add(k(\"course\", \"course\", c.id), \"Course \" .. tostring(c.id), \"course\", pack(c.id)) end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function playerLevel(add, seen)"
-      "  local m = uiModel(\"playerLvReward\")"
-      "  if not (m and has(m, \"redDot_CheckHasLvReward\") and has(m, \"getPlayerLvDataList\") and tab(m.LEVEL_STATE)) then return \"deps\" end"
-      "  local lvs = {}"
-      "  for _, d in iv(m:getPlayerLvDataList()) do"
-      "    if tab(d) then"
-      "      seen(d.lv, d.lvState)"
-      "      if d.lvState == m.LEVEL_STATE.LEVEL_MATCH then lvs[#lvs + 1] = d.lv end"
-      "    end"
-      "  end"
-      "  if #lvs == 0 or not m:redDot_CheckHasLvReward() then return end"
-      "  local list = table.concat(lvs, \",\")"
-      "  add(k(\"playerlv\", list), \"Player level rewards \" .. list, \"playerLevel\", pack(lvs))"
-      "end"
-      ""
-      "local function lotteryTimes(add, seen)"
-      "  local LU, GT = req(\"Utils.LotteryUtils\"), req(\"Data.gacha_times_data\")"
-      "  if not (has(LU, \"hasClaimableTimesReward\") and GT) then return \"deps\" end"
-      "  for drawId, list in kv(GT) do"
-      "    local d = tonumber(drawId)"
-      "    if d and tab(list) then"
-      "      local s = LU.hasClaimableTimesReward(d) and true or false"
-      "      seen(d, s)"
-      "      if s then"
-      "        local g = tab(pg.me.gachaMap) and pg.me.gachaMap[d]"
-      "        local cnt = tab(g) and tonumber(g.drawCount) or 0"
-      "        local got = tab(g) and g.claimedTimesRewardNums"
-      "        for i, t in iv(list) do"
-      "          local n = tab(t) and tonumber(t.num)"
-      "          if n and n <= cnt and not (tab(got) and got[n] == true) then"
-      "            add(k(\"gacha\", d, i), \"Draw-count reward \" .. d .. \" #\" .. i, \"gachaTimes\", pack(d, i))"
-      "          end"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function specialTrain(add, seen)"
-      "  local m, QU, QC, R = uiModel(\"SpecialTrainNew\"), req(\"GameApp.Quest.QuestUtils\"), req(\"Common.Const.QuestConst\"), req(\"Const.RedDotConst\")"
-      "  if not (m and QU and QC and R and has(m, \"redDot_GetSpecialTrainState\") and has(QU, \"getCurChapterId\")) then return \"deps\" end"
-      "  local style = m:redDot_GetSpecialTrainState()"
-      "  seen(\"hud\", style)"
-      "  if style ~= R.RedDotStyle.REWARD then return end"
-      "  local cur = tonumber(QU.getCurChapterId()) or 0"
-      "  if cur > 0 and has(m, \"getChapterTb\") and has(m, \"redDot_GetChapterPageState\") then"
-      "    for _, ch in iv(m:getChapterTb()) do"
-      "      local id = tab(ch) and ch.chapterId"
-      "      if id and m:redDot_GetChapterPageState(id) then"
-      "        add(k(\"strain\", \"chapter\", id), \"Special training chapter \" .. tostring(id), \"trainChapter\", pack(id))"
-      "      end"
-      "    end"
-      "  end"
-      "  local SRC, SUB = QC.SPECIAL_TRAIN_REWARD_SRC_TYPE, QC.QUEST_TRAIN_SUB_TYPE"
-      "  if tab(SRC) and tab(SUB) and has(m, \"getPageTypeTb\") and has(m, \"getAllCanGetSpecialTrainRewardList\") then"
-      "    for _, pt in iv(m:getPageTypeTb()) do"
-      "      local tt = tab(pt) and pt.trainType"
-      "      if tt then"
-      "        for c = cur, tt == SUB.COMPULSORY and 0 or cur, -1 do"
-      "          local ids = m:getAllCanGetSpecialTrainRewardList(c, tt)"
-      "          if len(ids) > 0 then"
-      "            add(k(\"strain\", \"entry\", c, tt), \"Special training rewards \" .. c .. \"/\" .. tostring(tt), \"trainEntry\", pack(ids, SRC.HANDBOOK))"
-      "          end"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "  if has(m, \"getBadgeListTab\") and has(m, \"redDot_GetBadgeState\") then"
-      "    for _, b in kv(m:getBadgeListTab(0)) do"
-      "      if tab(b) and m:redDot_GetBadgeState(b) then"
-      "        add(k(\"strain\", \"badge\", b.stageId), \"Special training badge \" .. tostring(b.stageId), \"trainBadge\", pack(b.isFinal and true or false))"
-      "      end"
-      "    end"
-      "  end"
-      "  if pg.me.isGetBadgeMaxReward and has(m, \"getExchangeInfo\") then"
-      "    local x = m:getExchangeInfo()"
-      "    if tab(x) and type(x.canExchangeNum) == \"number\" and x.canExchangeNum > 0 then"
-      "      add(\"strain:exchange\", \"Special training badge exchange\", \"trainExchange\", pack())"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function petResearch(add, seen)"
-      "  local m, PRU, R = uiModel(\"petResearch\"), req(\"Guis.Utils.PetResearchUtils\"), req(\"Const.RedDotConst\")"
-      "  if not (m and PRU and R and tab(PRU.PET_SHOW_TAB) and has(m, \"redDot_GetPetResearchState\") and has(PRU, \"checkCountryReward\")) then return \"deps\" end"
-      "  local style = m:redDot_GetPetResearchState()"
-      "  seen(\"hud\", style)"
-      "  if style ~= R.RedDotStyle.REWARD then return end"
-      "  local area, TAB = m.areaId, PRU.PET_SHOW_TAB"
-      "  if not area then return \"noarea\" end"
-      "  if PRU.checkCountryReward(area, TAB.SPECIES, PRU.REWARD_COLLECT) then"
-      "    add(k(\"petres\", \"species\", area), \"Pet research species collection\", \"petSpecies\", pack(area))"
-      "  end"
-      "  if PRU.checkCountryReward(area, TAB.FORM, PRU.REWARD_COLLECT) then"
-      "    add(k(\"petres\", \"form\", area), \"Pet research form collection\", \"petForm\", pack(area))"
-      "  end"
-      "  if PRU.checkCountryReward(area, TAB.SPECIES, PRU.REWARD_LEVEL) then"
-      "    add(k(\"petres\", \"level\", area), \"Pet research country level\", \"petLevel\", pack(area))"
-      "  end"
-      "  local CD, hb = req(\"Data.pet_research_content_data\"), pg.me.petHandbookMap"
-      "  if CD and hb and has(PRU, \"getPetResearchSpeciesList\") and has(PRU, \"_checkPetHasTopicReward\") and has(PRU, \"getPetAllTopicRewardByTemplateId\") then"
-      "    for _, id in kv(PRU.getPetResearchSpeciesList(area)) do"
-      "      local c = CD[id]"
-      "      if tab(c) and c.isShow ~= 0 and (not has(PRU, \"checkPetHasFormInCountry\") or PRU.checkPetHasFormInCountry(id, area)) and PRU._checkPetHasTopicReward(id, hb) then"
-      "        local list = PRU.getPetAllTopicRewardByTemplateId(id)"
-      "        if len(list) > 0 then"
-      "          add(k(\"petres\", \"topic\", id, len(list)), \"Pet topic rewards \" .. tostring(id), \"petTopic\", pack(list))"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function bossRush(add, seen)"
-      "  local BU, SR = req(\"Utils.BossRushUtils\"), req(\"Data.bossrush_season_reward_data\")"
-      "  if not (BU and SR and has(BU, \"hasUnreceivedSeasonReward\") and has(BU, \"getCurSeasonStar\") and has(BU, \"isSeasonRewardReceived\")) then return \"deps\" end"
-      "  local any = BU.hasUnreceivedSeasonReward() and true or false"
-      "  seen(\"hud\", any)"
-      "  if not any then return end"
-      "  local cur, star = tonumber(pg.me.curBossRushSeasonId) or 0, tonumber(BU.getCurSeasonStar()) or 0"
-      "  for need, cfg in kv(SR) do"
-      "    if type(need) == \"number\" and need <= star and tab(cfg) and not BU.isSeasonRewardReceived(need) then"
-      "      local ok = false"
-      "      for lo, row in kv(cfg) do"
-      "        for hi, v in kv(row) do"
-      "          if type(lo) == \"number\" and type(hi) == \"number\" and lo <= cur and cur <= hi and tab(v) and (tonumber(v.awardId) or 0) > 0 then ok = true end"
-      "        end"
-      "      end"
-      "      if ok then add(k(\"bossrush\", cur, need), \"Boss rush season reward \" .. need, \"bossRush\", pack(need)) end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function inStage(v, stage)"
-      "  if type(v) == \"number\" then return v == stage end"
-      "  for _, x in kv(v) do if x == stage then return true end end"
-      "  return false"
-      "end"
-      ""
-      "local function homeSeason(add, seen)"
-      "  local HU, KC, R = req(\"Utils.HomeSeasonUtils\"), req(\"Common.Const.Const\"), req(\"Const.RedDotConst\")"
-      "  local _, C = act()"
-      "  local me = pg.me"
-      "  if not (HU and KC and R and C and tab(KC.HOMELAND_SEASON_MODULE_TYPE) and has(HU, \"isSeasonAvailable\")) then return \"deps\" end"
-      "  if not HU.isSeasonAvailable(me) then return \"closed\" end"
-      "  local s, REWARD, MT = me.homeSeasonId, R.RedDotStyle.REWARD, KC.HOMELAND_SEASON_MODULE_TYPE"
-      "  local CR = req(\"Data.home_season_collection_reward_data\")"
-      "  if CR and has(HU, \"getProgressRewardRedDotStyle\") then"
-      "    local style = HU.getProgressRewardRedDotStyle(me)"
-      "    seen(\"progress\", style)"
-      "    if style == REWARD then"
-      "      local st = me.homeSeasonCollectionRewardStateMap"
-      "      for id, cfg in kv(CR) do"
-      "        if tab(cfg) and cfg.seasonId == s and tab(st) and st[id] == HU.COLLECTION_REWARD_STATE_CAN_RECEIVE then"
-      "          add(k(\"homeseason\", \"progress\", id), \"Home season progress reward \" .. tostring(id), \"homeSeasonProgress\", pack(id))"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "  local HSD, HMD, DT, MR = req(\"Data.home_season_data\"), req(\"Data.home_season_module_data\"), req(\"Data.home_season_daily_task_data\"), req(\"Data.home_season_mutation_collection_reward_data\")"
-      "  local season = HSD and HSD[s]"
-      "  if not (HMD and tab(season) and has(HU, \"getHomeSeasonModuleRedDotStyle\")) then return end"
-      "  for _, mid in iv(season.funcRefIds) do"
-      "    local md = HMD[mid]"
-      "    if tab(md) and md.seasonId == s then"
-      "      local style = HU.getHomeSeasonModuleRedDotStyle(me, s, mid, md.type)"
-      "      seen(k(\"module\", mid), style)"
-      "      if style == REWARD and md.type == MT.DAILY_QUEST and DT then"
-      "        local pend, stm = me.homeSeasonTaskPendingRewardMap, me.homeSeasonTaskStateMap"
-      "        for tid, cfg in kv(DT) do"
-      "          local p = tonumber(tab(pend) and pend[tid]) or 0"
-      "          if tab(cfg) and cfg.seasonId == s and (p > 0 or (inStage(cfg.stageId, me.homeSeasonStageId) and tab(stm) and stm[tid] == C.TaskState.Finihed_CanRecv)) then"
-      "            add(k(\"homeseason\", \"task\", tid, p), \"Home season daily task \" .. tostring(tid), \"homeSeasonTask\", pack(tid))"
-      "          end"
-      "        end"
-      "      elseif style == REWARD and md.type == MT.ITEM_COLLECT and MR and has(HU, \"hasReceivableHomeSeasonMutationReward\") and HU.hasReceivableHomeSeasonMutationReward(me, s) then"
-      "        local stars = tonumber(tab(me.homeSeasonMutationStarBySeason) and me.homeSeasonMutationStarBySeason[s]) or 0"
-      "        local got = me.homeSeasonMutationRewardReceived"
-      "        local ids = {}"
-      "        for id, cfg in kv(MR) do"
-      "          if tab(cfg) and cfg.seasonId == s and (tonumber(cfg.needPoint) or 0) <= stars and not (tab(got) and got[id] == true) then ids[#ids + 1] = id end"
-      "        end"
-      "        if #ids > 0 then"
-      "          add(k(\"homeseason\", \"mutation\", s, #ids), \"Home season collection rewards\", \"homeSeasonMutation\", pack(ids))"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function questChapter(add, seen)"
-      "  local m, QC = uiModel(\"quest\"), req(\"Data.quest_catalog\")"
-      "  if not (m and QC and has(m, \"isChapterProgressRewardCanClaim\") and has(m, \"getChapterProgressRewardInfo\")) then return \"deps\" end"
-      "  local done = {}"
-      "  for _, cat in kv(QC) do"
-      "    for _, ch in iv(tab(cat) and cat.chapters) do"
-      "      if not done[ch] then"
-      "        done[ch] = true"
-      "        local s = m:isChapterProgressRewardCanClaim(ch) and true or false"
-      "        seen(ch, s)"
-      "        if s then"
-      "          local info = m:getChapterProgressRewardInfo(ch)"
-      "          for _, r in iv(tab(info) and info.rewardList) do"
-      "            if tab(r) and r.canClaim and info.configId then"
-      "              add(k(\"quest\", \"chapter\", info.configId, r.rewardIndex), \"Quest chapter reward \" .. tostring(ch) .. \" #\" .. tostring(r.rewardIndex), \"questChapter\", pack(info.configId, r.rewardIndex))"
-      "            end"
-      "          end"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function puppetScore(add, seen)"
-      "  local A, C = act()"
-      "  local me = pg.me"
-      "  if not (A and C and has(A, \"getLuckyPetCanRewardList\") and has(me, \"reqActivityCatchScoreReward\")) then return \"deps\" end"
-      "  local eid = openEvents(C.EventType.PuppetCatch)[1]"
-      "  if not eid then return \"closed\" end"
-      "  local list, done = A.getLuckyPetCanRewardList(me), me.luckyPetDayRewarded"
-      "  for i = 1, len(list) do"
-      "    local ready = list[i] and not (tab(done) and done[i])"
-      "    seen(i, ready)"
-      "    if ready then"
-      "      local arg = (i > 1 and list[i - 1] == true and tab(done) and done[i - 1] == true) and -1 or i"
-      "      add(k(\"puppet\", \"score\", eid, i), \"Puppet catch score reward \" .. i, \"puppet\", pack(eid, arg))"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function photoSurvey(add, seen)"
-      "  local A, C = act()"
-      "  local me = pg.me"
-      "  if not (A and C and has(A, \"getFormResearchCanRewardList\") and has(me, \"reqActivityPhotoRewardGet\") and has(me, \"reqActivityPhotoExtraRewardGet\") and has(me, \"reqActivityPhotoStageRewardGet\")) then return \"deps\" end"
-      "  local eid = openEvents(C.EventType.PuppetPhoto)[1]"
-      "  if not eid then return \"closed\" end"
-      "  seen(\"finish\", me.formResearchFinish)"
-      "  if me.formResearchFinish == true and me.formResearchRewarded ~= true then"
-      "    add(k(\"photo\", \"reward\", eid), \"Photo survey reward\", \"photoReward\", pack(eid))"
-      "  end"
-      "  if me.formResearchObRewardFin == true and me.formResearchObRewardRew ~= true then"
-      "    add(k(\"photo\", \"extra\", eid), \"Photo survey extra reward\", \"photoExtra\", pack(eid))"
-      "  end"
-      "  local list, done = A.getFormResearchCanRewardList(me), me.formResearchStageRewarded"
-      "  for i = 1, len(list) do"
-      "    local ready = list[i] and not (tab(done) and done[i])"
-      "    seen(i, ready)"
-      "    if ready then"
-      "      local arg = (i > 1 and list[i - 1] == true and tab(done) and done[i - 1] == true) and -1 or i"
-      "      add(k(\"photo\", \"stage\", eid, i), \"Photo survey stage reward \" .. i, \"photoStage\", pack(eid, arg))"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function petSaveWeek(add, seen)"
-      "  local _, C, CA = act()"
-      "  local M = req(\"Guis.Panels.EventPetSaveManual.EventPetSaveManualModel\")"
-      "  if not (C and has(CA, \"checkPetSaveCurWeek\") and has(M, \"getWeekArrival\") and has(M, \"receivedWeekSumyReward\") and has(M, \"getSubActId\") and has(pg.me, \"reqActivityPetSaveWeekSumyReward\")) then return \"deps\" end"
-      "  local eid = openEvents(C.EventType.PetSave)[1]"
-      "  if not eid then return \"closed\" end"
-      "  for week = 1, tonumber(CA.checkPetSaveCurWeek()) or 0 do"
-      "    local sub = M.getSubActId(M, week)"
-      "    local ready = M.getWeekArrival(M, week) and not M.receivedWeekSumyReward(M, sub)"
-      "    seen(week, ready and true or false)"
-      "    if ready then"
-      "      add(k(\"petsave\", \"week\", eid, sub), \"Pet save weekly summary \" .. week, \"petSave\", pack(eid, sub))"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function energyMatch(add, seen)"
-      "  local A, C, CA = act()"
-      "  local TD = req(\"Data.energy_match_theme_data\")"
-      "  local me = pg.me"
-      "  if not (A and C and TD and has(A, \"getNewEnergyTheme\") and has(A, \"getEnergyThemeId\") and has(CA, \"redDotReward_CheckVitalityRewardItem\") and has(me, \"serverActivityMsg\")) then return \"deps\" end"
-      "  local eid = openEvents(C.EventType.EnergyMatch)[1]"
-      "  if not eid then return \"closed\" end"
-      "  local theme, id = A.getNewEnergyTheme(me), A.getEnergyThemeId(me)"
-      "  local row = tab(TD[theme]) and TD[theme][id]"
-      "  for i, r in iv(tab(row) and row.award) do"
-      "    local ready = CA.redDotReward_CheckVitalityRewardItem(theme, id, i) and true or false"
-      "    seen(i, ready)"
-      "    if ready and tab(r) and r.index ~= nil then"
-      "      add(k(\"energy\", \"award\", eid, r.index), \"Vitality contest reward \" .. tostring(r.index), \"energy\", pack(eid, \"RPC_CS_GetEnergyMatchAward\", r.index))"
-      "    end"
-      "  end"
-      "end"
-      ""
-      "local function petArea(add, seen)"
-      "  local map = pg.game and pg.game.map"
-      "  if not has(map, \"getPetAreaRewardsState\") then return \"deps\" end"
-      "  local any = false"
-      "  for _, e in iv(map:getPetAreaRewardsState()) do"
-      "    if tab(e) and e.smallAreaId ~= nil and tab(e.rewardState) then"
-      "      for stage = 1, 3 do"
-      "        if e.rewardState[stage] then"
-      "          any = true"
-      "          add(k(\"petarea\", e.smallAreaId, stage), \"Pet area reward \" .. tostring(e.smallAreaId) .. \" stage \" .. stage, \"petArea\", pack(e.smallAreaId, stage))"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "  seen(\"any\", any)"
-      "end"
-      ""
-      "local function homeCampDispatch(add, seen)"
-      "  local HLU, UI = req(\"Common.Utils.HomeLandUtils\"), req(\"Const.UIConst\")"
-      "  if not (HLU and UI and tab(UI.HOME_CAMP_DISPATCH_STATE) and has(HLU, \"getCampCarEntity\") and pg.me) then return \"deps\" end"
-      "  local car = pg.me.uid ~= nil and HLU.getCampCarEntity(pg.me.uid)"
-      "  if not (tab(car) and has(car, \"getPetsDispatchInfo\") and has(car, \"getCampPetDispatchState\") and has(car, \"finishDispatch\")) then return \"nocar\" end"
-      "  local ready = car:getPetsDispatchInfo() and car:getCampPetDispatchState() == UI.HOME_CAMP_DISPATCH_STATE.Finished and true or false"
-      "  seen(\"camp\", ready)"
-      "  if ready then"
-      "    local did = has(car, \"getDispatchId\") and car:getDispatchId() or 0"
-      "    add(k(\"homecamp\", \"dispatch\", did), \"Home camp pet dispatch finish\", \"homeCampFinish\", pack(), car)"
-      "  end"
-      "end"
-      ""
-      "local function probe(row)"
-      "  return { row.name, function(add, seen)"
-      "    local M = row.ui and uiModel(row.ui) or req(row.mod)"
-      "    if not has(M, row.fn) then return \"deps\" end"
-      "    local want"
-      "    if row.is == \"reward\" then"
-      "      local R = req(\"Const.RedDotConst\")"
-      "      want = R and tab(R.RedDotStyle) and R.RedDotStyle.REWARD"
-      "    elseif row.is then"
-      "      want = req(row.is[1])"
-      "      for i = 2, #row.is do want = tab(want) and want[row.is[i]] or nil end"
-      "    end"
-      "    if row.is and want == nil then return \"deps\" end"
-      "    local v"
-      "    if row.ui then v = M[row.fn](M) else v = M[row.fn]() end"
-      "    local ready"
-      "    if want ~= nil then ready = v == want else ready = v and true or false end"
-      "    seen(\"state\", want ~= nil and v or ready)"
-      "    if not ready then return end"
-      "    local key = row.stamp and k(row.name, pg.me[row.stamp]) or row.name"
-      "    add(key, row.label, row.claim, pack(), row.ui and M or nil)"
-      "  end, covers = { row.fn } }"
-      "end"
-      ""
-      "local SOURCES = {"
-      "  { \"daily\", dailyActive }, { \"battlepass\", battlePass }, { \"bpcycle\", bpCycle }, { \"season\", seasonAchievement }, { \"sign\", sign },"
-      "  { \"cross\", crossPlatform }, { \"firsttopup\", firstTopup }, { \"journey\", journeyTrial }, { \"dispatch\", petDispatch }, { \"growth\", growthGift },"
-      "  { \"littlefire\", littleFire }, { \"fishing\", fishingCapture, covers = { \"getFishingCaptureRedDotState\" } }, { \"leylineup\", leylineTreeUp }, { \"redbook\", redBook },"
-      "  probe{ name = \"rogue-weekly\", mod = \"Utils.RogueUtils\", fn = \"getRedDotWeeklyState\", is = \"reward\", claim = \"rogueWeekly\", label = \"Tower weekly boss reward\" },"
-      "  probe{ name = \"rogue-seasonweekly\", mod = \"Utils.RogueUtils\", fn = \"getRedDotSeasonWeeklyRewardState\", is = \"reward\", claim = \"rogueSeasonWeekly\", label = \"Tower season weekly reward\" },"
-      "  probe{ name = \"rogue-daily\", mod = \"Utils.RogueUtils\", fn = \"getRedDotDailyState\", is = \"reward\", claim = \"rogueDaily\", label = \"Tower daily harvest\" },"
-      "  probe{ name = \"monthcard\", mod = \"GameApp.MonthCard.MonthCardUtils\", fn = \"hasStoredReward\", claim = \"monthCardStored\", label = \"Month card stored reward\" },"
-      "  probe{ name = \"homebook\", mod = \"Utils.HomeBookRedDotUtils\", fn = \"canReceiveScoreReward\", claim = \"homeBookGrade\", label = \"Home handbook grade reward\" },"
-      "  { \"homebookcat\", homeBookCategory },"
-      "  probe{ name = \"grabeggs\", mod = \"Guis.Utils.GrabEggsRankUtils\", fn = \"hasClaimableReward\", claim = \"grabEggsRank\", label = \"Grab-eggs season rank reward\" },"
-      "  { \"grabeggsmode\", grabEggsMode }, { \"course\", course }, { \"playerlv\", playerLevel, covers = { \"redDot_CheckHasLvReward\" } }, { \"gacha\", lotteryTimes }, { \"strain\", specialTrain, covers = { \"redDot_GetSpecialTrainState\", \"redDot_GetChapterPageState\", \"redDot_GetBadgeState\" } },"
-      "  { \"petres\", petResearch, covers = { \"redDot_GetPetResearchState\" } }, { \"bossrush\", bossRush },"
-      "  probe{ name = \"homecar\", ui = \"homeCarLevelUp\", fn = \"redDot_GetLevelRewardState\", is = \"reward\", claim = \"homeCarLevel\", label = \"Home car level rewards\" },"
-      "  { \"homeseason\", homeSeason }, { \"quest\", questChapter },"
-      "  probe{ name = \"monthcarddaily\", mod = \"GameApp.MonthCard.MonthCardUtils\", fn = \"getDailyRewardState\", is = { \"GameApp.MonthCard.MonthCardConst\", \"DAILY_REWARD_STATE\", \"AVAILABLE\" }, stamp = \"mcLastReceiveDailyAwardTm\", claim = \"monthCardDaily\", label = \"Month card daily reward\" },"
-      "  { \"puppet\", puppetScore }, { \"photo\", photoSurvey }, { \"petsave\", petSaveWeek }, { \"energy\", energyMatch },"
-      "  { \"petarea\", petArea }, { \"homecamp\", homeCampDispatch },"
-      "}"
-      ""
-      "local skipped = {}"
-      ""
-      "local missing = {}"
-      ""
-      "local function receiver(spec, player, recv)"
-      "  if recv ~= nil then return recv end"
-      "  if not spec.on then return player end"
-      "  local v = pg"
-      "  for part in spec.on:gmatch(\"[^.]+\") do v = tab(v) and v[part] or nil end"
-      "  return v"
-      "end"
-      ""
-      "local function perform(a)"
-      "  local spec, list, n = CLAIMS[a.claim], {}, a.args.n"
-      "  for i = 1, n do list[i] = a.args[i] end"
-      "  for _, v in ipairs(spec.tail or {}) do"
-      "    n = n + 1"
-      "    list[n] = v"
-      "  end"
-      "  if spec.fn then return spec.fn(a.recv, unpack(list, 1, n)) end"
-      "  if spec.rpc then return a.recv:serverMsg(spec.rpc, unpack(list, 1, n)) end"
-      "  return a.recv[spec.call](a.recv, unpack(list, 1, n))"
-      "end"
-      ""
-      "local function nextAction(tried, player)"
-      "  local found"
-      "  local function add(key, label, claim, args, recv)"
-      "    if found or tried[key] then return end"
-      "    local spec = CLAIMS[claim]"
-      "    local on = spec and receiver(spec, player, recv)"
-      "    if not (spec and (spec.fn or has(on, spec.rpc and \"serverMsg\" or spec.call))) then"
-      "      if not missing[claim] then"
-      "        missing[claim] = true"
-      "        log(\"skip\", claim, \"claim target missing\")"
-      "      end"
-      "      return"
-      "    end"
-      "    found = { key = key, label = label, claim = claim, args = args, recv = on }"
-      "  end"
-      "  for _, src in ipairs(SOURCES) do"
-      "    if found then break end"
-      "    local ok, err = pcall(src[2], add, noop)"
-      "    if not ok and not skipped[src[1]] then"
-      "      skipped[src[1]] = true"
-      "      log(\"skip\", src[1], field(err))"
-      "    end"
-      "  end"
-      "  return found"
-      "end"
-      ""
-      "local function short(v, n)"
-      "  local s = field(v)"
-      "  if #s > n then s = s:sub(1, n) .. \"~\" end"
-      "  return s"
-      "end"
-      ""
-      "local function counts(map)"
-      "  local keys = {}"
-      "  for key in pairs(map) do keys[#keys + 1] = key end"
-      "  table.sort(keys)"
-      "  for i, key in ipairs(keys) do keys[i] = key .. \":\" .. map[key] end"
-      "  return table.concat(keys, \",\")"
-      "end"
-      ""
-      "local function hot(key) return key == \"2\" or key == \"true\" or key == \"Reward\" end"
-      ""
-      "local function diagSource(name, fn)"
-      "  local n, ready, states, heated, cold = 0, 0, {}, {}, {}"
-      "  local function seen(id, st)"
-      "    n = n + 1"
-      "    local key = short(st, 16)"
-      "    states[key] = (states[key] or 0) + 1"
-      "    local list = hot(key) and heated or cold"
-      "    if #list < 5 then list[#list + 1] = short(id, 24) .. \"=\" .. key end"
-      "  end"
-      "  local function add() ready = ready + 1 end"
-      "  local ok, why = pcall(fn, add, seen)"
-      "  for _, x in ipairs(cold) do if #heated < 5 then heated[#heated + 1] = x end end"
-      "  local parts = { \"ready=\" .. ready, \"seen=\" .. n }"
-      "  if n > 0 then parts[#parts + 1] = \"states=\" .. counts(states) end"
-      "  if #heated > 0 then parts[#parts + 1] = \"sample=\" .. table.concat(heated, \",\") end"
-      "  if not ok then parts[#parts + 1] = \"err=\" .. short(why, 160) elseif why then parts[#parts + 1] = \"exit=\" .. tostring(why) end"
-      "  log(\"diag\", name, table.concat(parts, \" \"), true)"
-      "end"
-      ""
-      "local DATA = { \"event_task_data\", \"game_event_data\", \"game_event_type_post_data\", \"event_season_achievement_data\", \"event_battlepass_data\", \"activate_tasks_data\", \"guide_course_grade_data\", \"quest_catalog\" }"
-      ""
-      "local function diagModules()"
-      "  local parts = {}"
-      "  for _, name in ipairs(DATA) do"
-      "    local ok, m = pcall(require, \"Data.\" .. name)"
-      "    local row = \"-\""
-      "    if ok and tab(m) then pcall(function() for _, v in pairs(m) do row = type(v) break end end) end"
-      "    parts[#parts + 1] = name .. \"=\" .. (ok and type(m) or \"err\") .. \"/\" .. row"
-      "  end"
-      "  log(\"diag\", \"data\", table.concat(parts, \" \"), true)"
-      "end"
-      ""
-      "local function flag(f, ...)"
-      "  if type(f) ~= \"function\" then return \"?\" end"
-      "  local ok, v = pcall(f, ...)"
-      "  if not ok then return \"E\" end"
-      "  return v and \"1\" or \"0\""
-      "end"
-      ""
-      "local function diagActivity()"
-      "  local A, C, CA = act()"
-      "  if not (A and C) then return log(\"diag\", \"act\", \"deps\", true) end"
-      "  local POST = req(\"Data.game_event_type_post_data\")"
-      "  local names = C.NewFrameEventAttriName"
-      "  local ets = {}"
-      "  for et in kv(names) do ets[#ets + 1] = et end"
-      "  table.sort(ets)"
-      "  for _, et in ipairs(ets) do"
-      "    local ok, err = pcall(function()"
-      "      local attr = names[et]"
-      "      local parts = { \"attr=\" .. tostring(attr), \"raw=\" .. (pg.me[attr] ~= nil and \"1\" or \"0\") }"
-      "      local d = has(A, \"getActivityData\") and A.getActivityData(pg.me, et) or nil"
-      "      local base = tab(d) and d.activityBase"
-      "      parts[#parts + 1] = \"aid=\" .. field(tab(base) and base.activityId or nil)"
-      "      local st, n = {}, 0"
-      "      for _, t in kv(tab(base) and base.activityTasks) do"
-      "        n = n + 1"
-      "        local key = short(tab(t) and t.state or nil, 8)"
-      "        st[key] = (st[key] or 0) + 1"
-      "      end"
-      "      parts[#parts + 1] = \"tasks=\" .. n"
-      "      if n > 0 then parts[#parts + 1] = \"states=\" .. counts(st) end"
-      "      local eids, m = {}, 0"
-      "      for eid in kv(POST and POST[et]) do"
-      "        m = m + 1"
-      "        if m <= 4 then"
-      "          eids[#eids + 1] = tostring(eid) .. \":T\" .. flag(A.isOprActivityTabOpen, eid, pg.me) .. \"G\" .. flag(CA.isGameEventTabOpen, eid) .. \"O\" .. flag(A.isOprActivityOpen, eid) .. \"E\" .. flag(CA.isEventOpen, eid)"
-      "        end"
-      "      end"
-      "      parts[#parts + 1] = \"eids=\" .. m .. (#eids > 0 and (\"[\" .. table.concat(eids, \",\") .. \"]\") or \"\")"
-      "      log(\"diag\", \"act \" .. tostring(et), table.concat(parts, \" \"), true)"
-      "    end)"
-      "    if not ok then log(\"diag\", \"act \" .. tostring(et), \"err=\" .. short(err, 160), true) end"
-      "  end"
-      "end"
-      ""
-      "local function diag()"
-      "  log(\"diag\", \"begin\", #SOURCES .. \" sources\", true)"
-      "  pcall(diagModules)"
-      "  for _, src in ipairs(SOURCES) do pcall(diagSource, src[1], src[2]) end"
-      "  local ok, err = pcall(diagActivity)"
-      "  if not ok then log(\"diag\", \"act\", \"err=\" .. short(err, 160), true) end"
-      "  log(\"diag\", \"end\", \"-\", true)"
-      "end"
-      ""
-      "local DOT_FN = { \"^redDot_Get\", \"^redDot_Check\", \"^getRedDot%w*State$\" }"
-      "local DOT_SKIP = { \"Path\", \"Key\", \"Numb\", \"Num\", \"Save\" }"
-      ""
-      "local function dotName(key)"
-      "  if type(key) ~= \"string\" then return false end"
-      "  local hit = false"
-      "  for _, p in ipairs(DOT_FN) do"
-      "    if key:find(p) then hit = true end"
-      "  end"
-      "  if not hit then return false end"
-      "  for _, x in ipairs(DOT_SKIP) do"
-      "    if key:find(x, 1, true) then return false end"
-      "  end"
-      "  return true"
-      "end"
-      ""
-      "local function get(t, key)"
-      "  if not tab(t) then return nil end"
-      "  local ok, v = pcall(function() return t[key] end)"
-      "  return ok and v or nil"
-      "end"
-      ""
-      "local function dotMethods(owner)"
-      "  local out, seen, queue, i = {}, {}, { owner }, 1"
-      "  while queue[i] and i <= 12 do"
-      "    local t = queue[i]"
-      "    i = i + 1"
-      "    if tab(t) and not seen[t] then"
-      "      seen[t] = true"
-      "      for key, v in kv(t) do"
-      "        if type(v) == \"function\" and dotName(key) then out[#out + 1] = key end"
-      "      end"
-      "      local ok, mt = pcall(getmetatable, t)"
-      "      local idx = ok and type(mt) == \"table\" and rawget(mt, \"__index\") or nil"
-      "      if tab(idx) then queue[#queue + 1] = idx end"
-      "      local sup = get(t, \"super\")"
-      "      if tab(sup) then queue[#queue + 1] = sup end"
-      "    end"
-      "  end"
-      "  table.sort(out)"
-      "  return out"
-      "end"
-      ""
-      "local function dotOwners()"
-      "  local owners = {}"
-      "  local ok, loaded = pcall(function() return package.loaded end)"
-      "  if ok and tab(loaded) then"
-      "    for name, m in kv(loaded) do"
-      "      if type(name) == \"string\" and type(m) == \"table\" then owners[#owners + 1] = { name, m, false } end"
-      "    end"
-      "  end"
-      "  table.sort(owners, function(a, b) return a[1] < b[1] end)"
-      "  local ui, models = pg.global and pg.global.ui, {}"
-      "  for name, p in kv(ui) do"
-      "    local m = get(p, \"model\")"
-      "    if tab(m) then models[#models + 1] = { \"ui.\" .. tostring(name), m, true } end"
-      "  end"
-      "  table.sort(models, function(a, b) return a[1] < b[1] end)"
-      "  for _, o in ipairs(models) do owners[#owners + 1] = o end"
-      "  return owners"
-      "end"
-      ""
-      "local function discover()"
-      "  local R = req(\"Const.RedDotConst\")"
-      "  local REWARD = R and tab(R.RedDotStyle) and R.RedDotStyle.REWARD"
-      "  if REWARD == nil then return log(\"discover\", \"skipped\", \"no RedDotStyle.REWARD\", true) end"
-      "  local covered = {}"
-      "  for _, src in ipairs(SOURCES) do"
-      "    for _, name in ipairs(src.covers or {}) do covered[name] = true end"
-      "  end"
-      "  local owners = dotOwners()"
-      "  local st = { owners = #owners, fns = 0, reward = 0, covered = 0, errors = 0 }"
-      "  local done, lines = {}, {}"
-      "  for _, o in ipairs(owners) do"
-      "    local ok, names = pcall(dotMethods, o[2])"
-      "    for _, key in ipairs(ok and names or {}) do"
-      "      local fn = get(o[2], key)"
-      "      local id = o[3] and (tostring(o[2]) .. key) or fn"
-      "      if type(fn) == \"function\" and not done[id] then"
-      "        done[id] = true"
-      "        st.fns = st.fns + 1"
-      "        local okc, v"
-      "        if o[3] then"
-      "          okc, v = pcall(fn, o[2])"
-      "        else"
-      "          okc, v = pcall(fn)"
-      "          if not okc then okc, v = pcall(fn, o[2]) end"
-      "        end"
-      "        if not okc then"
-      "          st.errors = st.errors + 1"
-      "        elseif v == REWARD then"
-      "          st.reward = st.reward + 1"
-      "          if covered[key] then st.covered = st.covered + 1 else lines[#lines + 1] = { key, o[1] } end"
-      "        end"
-      "      end"
-      "    end"
-      "  end"
-      "  for _, l in ipairs(lines) do log(\"unclaimed\", l[1], l[2], true) end"
-      "  log(\"discover\", \"summary\", \"owners=\" .. st.owners .. \" fns=\" .. st.fns .. \" reward=\" .. st.reward .. \" covered=\" .. st.covered .. \" unclaimed=\" .. #lines .. \" errors=\" .. st.errors, true)"
-      "end"
-      ""
-      "local function delay() return MIN_GAP + math.random() * JITTER end"
-      ""
-      "local function run(player, mode)"
-      "  state.gen = state.gen + 1"
-      "  local gen, tried, last = state.gen, {}, nil"
-      "  local cur = { count = 0, beat = now() }"
-      "  state.run = cur"
-      "  local verb = mode == \"dry\" and \"would claim \" or \"claimed \""
-      "  local TM = require(\"Core.Timer.TimerManager\")"
-      "  local tick"
-      "  local function stop(why, text)"
-      "    if gen == state.gen then state.gen = state.gen + 1 end"
-      "    if state.run == cur then state.run = nil end"
-      "    log(\"stop\", why, cur.count)"
-      "    toast(text or (\"Rewards stopped (\" .. why .. \"), \" .. verb .. cur.count))"
-      "  end"
-      "  local function fail(where, err)"
-      "    state.off = true"
-      "    log(\"error\", where, tostring(err))"
-      "    stop(\"error\", \"Rewards error at \" .. where .. \", off until restart\")"
-      "  end"
-      "  local function again(sec)"
-      "    local ok, err = pcall(TM.addTimer, sec, tick)"
-      "    if not ok then fail(\"timer\", err) end"
-      "  end"
-      "  tick = function()"
-      "    if gen ~= state.gen or state.off then return end"
-      "    cur.beat = now() or cur.beat"
-      "    local s = setting()"
-      "    if killed(s) then return stop(\"kill switch\") end"
-      "    if pg.me ~= player or player.destroyed then return stop(\"player changed\") end"
-      "    local t, res = now()"
-      "    if t and last and t - last < MIN_GAP - 0.05 + res then return again(delay()) end"
-      "    if cur.count >= MAX_CLAIMS then return stop(\"cap of \" .. MAX_CLAIMS .. \" reached\") end"
-      "    local ok, a = pcall(nextAction, tried, player)"
-      "    if not ok then return fail(\"readiness check\", a) end"
-      "    if not a then"
-      "      pcall(discover)"
-      "      return stop(\"nothing left\", \"Rewards: \" .. verb .. cur.count .. \", nothing left\")"
-      "    end"
-      "    tried[a.key], last = true, t"
-      "    if mode == \"dry\" or s == \"dry\" then"
-      "      log(\"dry\", a.label, \"not sent\")"
-      "      toast(\"Rewards (dry run): \" .. a.label)"
-      "    else"
-      "      local ok2, err = pcall(perform, a)"
-      "      if not ok2 then return fail(a.label, err) end"
-      "      log(\"claim\", a.label, \"ok\")"
-      "      toast(\"Rewards: \" .. a.label)"
-      "    end"
-      "    cur.count = cur.count + 1"
-      "    again(delay())"
-      "  end"
-      "  log(\"start\", mode == \"dry\" and \"dry run\" or \"claim run\", \"ok\")"
-      "  pcall(diag)"
-      "  toast(mode == \"dry\" and \"Rewards: dry run, nothing will be sent\" or \"Rewards: claiming, one every 1-2 s\")"
-      "  again(delay())"
-      "end"
-      ""
-      "local function onPress()"
-      "  if state.off then"
-      "    log(\"press\", \"ignored\", \"disabled after error\")"
-      "    return toast(\"Rewards: off after an error, restart the game\")"
-      "  end"
-      "  local cur, t = state.run, now()"
-      "  if cur and t and cur.beat and t - cur.beat > STALE then"
-      "    log(\"press\", \"stale run dropped\", cur.count)"
-      "    state.run, state.gen = nil, state.gen + 1"
-      "    cur = nil"
-      "  end"
-      "  if cur then"
-      "    log(\"press\", \"ignored\", \"running, \" .. cur.count .. \" so far\")"
-      "    return toast(\"Rewards: already running, \" .. cur.count .. \" so far\")"
-      "  end"
-      "  local s = setting()"
-      "  if killed(s) then"
-      "    log(\"press\", \"ignored\", \"kill switch\")"
-      "    return toast(\"Rewards: off (ANIIMO_REWARDS=\" .. s .. \")\")"
-      "  end"
-      "  local me = pg.me"
-      "  if type(me) ~= \"table\" then return log(\"press\", \"ignored\", \"no player\") end"
-      "  run(me, s == \"dry\" and \"dry\" or \"claim\")"
-      "end"
-      ""
-      "local function wrapButton(view)"
-      "  local btn = view.btnAllReadUButton"
-      "  local click = btn and btn.luaClick"
-      "  if not click then return log(\"hook\", \"mail button\", \"no click handler\") end"
-      "  btn.luaClick = function(...)"
-      "    local r = pack(click(...))"
-      "    local ok, err = pcall(onPress)"
-      "    if not ok then"
-      "      state.off = true"
-      "      log(\"error\", \"button press\", tostring(err))"
-      "    end"
-      "    return unpack(r, 1, r.n)"
-      "  end"
-      "end"
-      ""
-      "local function hookMail()"
-      "  if state.hooked then return end"
-      "  local M = req(MAIL_VIEW)"
-      "  local base = M and rawget(M, \"initView\")"
-      "  if type(base) ~= \"function\" then return log(\"hook\", \"mail panel\", \"initView not found\") end"
-      "  state.hooked = true"
-      "  rawset(M, \"initView\", function(self, ...)"
-      "    local r = pack(base(self, ...))"
-      "    local ok, err = pcall(wrapButton, self)"
-      "    if not ok then log(\"hook\", \"mail button\", tostring(err)) end"
-      "    return unpack(r, 1, r.n)"
-      "  end)"
-      "  log(\"hook\", \"mail panel\", \"ok\")"
-      "end"
-      ""
-      "local function install(cls)"
-      "  local vt = type(cls) == \"table\" and has(cls, \"getVtbl\") and cls.getVtbl()"
-      "  local base = type(vt) == \"table\" and rawget(vt, \"onBecomePlayer\")"
-      "  if type(base) ~= \"function\" then return log(\"hook\", \"onBecomePlayer\", \"not found\") end"
-      "  rawset(vt, \"onBecomePlayer\", function(self, ...)"
-      "    local r = pack(base(self, ...))"
-      "    local ok, err = pcall(hookMail)"
-      "    if not ok then log(\"hook\", \"mail panel\", tostring(err)) end"
-      "    return unpack(r, 1, r.n)"
-      "  end)"
-      "end"
-      ""
-      "local ok, err = pcall(install, ret[1])"
-      "if not ok then log(\"hook\", \"install\", tostring(err)) end"
-      "return unpack(ret, 1, ret.n)"
+    modules_gaming_aniimo_rewards_lua_data = {
+      apply,
+      assign,
+      blank,
+      dot,
+      field,
+      fn,
+      forIn,
+      forNum,
+      if',
+      ifElse,
+      index,
+      inline,
+      len,
+      local,
+      localFunction,
+      method,
+      not,
+      op,
+      paren,
+      return,
+      rows,
+      str,
+      table,
+      while,
+      ...
+    }: [
+      (local "orig" ["..."])
+      (localFunction "pack" ["..."] (inline [(return [(table [(field "n" ["select" (str "#") "..."]) "..."])])]))
+      (local "env" [(op ["getfenv" "and" ["getfenv" 1]])])
+      (if' (op [(op [["type" "env"] "==" (str "table")]) "and" "setfenv"]) (inline [["pcall" "setfenv" "orig" "env"]]))
+      (local "ret" [["pack" ["orig" ["select" 2 "..."]]]])
+      blank
+      (local ["MIN_GAP" "JITTER" "MAX_CLAIMS" "STALE"] ["1.0" "0.6" 300 15])
+      (local "MAIL_VIEW" [(str "Guis.Panels.Chat.Component.MailNewComponent")])
+      (local "LOG_FILE" [(str ".finix-aniimo/rewards.log")])
+      (local "state" [(table [(field "off" false) (field "gen" 0) (field "hooked" false) (field "run" null)])])
+      (local ["logger" "paths"] [])
+      blank
+      (localFunction "stamp" [] [
+        (local ["ok" "s"] [["pcall" "os.date" (str "!%Y-%m-%dT%H:%M:%SZ")]])
+        (if' (op ["ok" "and" (op [["type" "s"] "==" (str "string")])]) (inline [(return ["s"])]))
+        (return [["tostring" ["os.time"]]])
+      ])
+      blank
+      (localFunction "field" ["v"] [
+        (if' (op ["v" "==" null]) (inline [(return [(str "-")])]))
+        (return [(paren [(method ["tostring" "v"] "gsub") (str "[\\t\\r\\n]") (str " ")])])
+      ])
+      blank
+      (localFunction "logPaths" [] [
+        (local "list" [(table [])])
+        (local ["ok" "dp"] [["pcall" (fn [] (inline [(return ["CS.UnityEngine.Application.dataPath"])]))]])
+        (if' (op ["ok" "and" (op [["type" "dp"] "==" (str "string")]) "and" (op ["dp" "~=" (str "")])]) (inline [(assign (index "list" 1) [(op ["dp" ".." (str "/../") ".." "LOG_FILE"])])]))
+        (assign (index "list" (op [(len "list") "+" 1])) ["LOG_FILE"])
+        (return ["list"])
+      ])
+      blank
+      (localFunction "append" ["line"] [
+        (assign "paths" [(op ["paths" "or" ["logPaths"]])])
+        (forIn ["_" "p"] [["ipairs" "paths"]] [
+          (local "f" [["io.open" "p" (str "a")]])
+          (if' "f" [
+            ["f:write" "line"]
+            ["f:close"]
+            (return [true])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "log" ["event" "label" "result" "quiet"] [
+        ["pcall" (fn [] (inline [["append" (op [["table.concat" (table [["stamp"] ["field" "event"] ["field" "label"] ["field" "result"]]) (str "\\t")] ".." (str "\\n")])]]))]
+        (if' "quiet" (inline [(return [])]))
+        (local "msg" [(op [(str "[rewards] ") ".." ["tostring" "event"] ".." (str " ") ".." ["field" "label"] ".." (str " ") ".." ["field" "result"]])])
+        ["pcall" "print" "msg"]
+        (if' (op ["logger" "==" null]) [
+          (assign "logger" [false])
+          ["pcall" (fn [] (inline [(assign "logger" [(op [[(dot ["require" (str "Core.Log.LoggerManager")] "getLogger") (str "RewardsMod")] "or" false])])]))]
+        ])
+        (if' "logger" (inline [["pcall" (fn [] (inline [["logger:warn" "msg"]]))]]))
+      ])
+      blank
+      (localFunction "toast" ["text"] [
+        ["pcall" (fn [] (inline [["pg.global.ui.tips:showTextTip" "text" null null null null null null true]]))]
+      ])
+      blank
+      (localFunction "setting" [] [
+        (local "v" [(op [(op [(op [["type" "env"] "==" (str "table")]) "and" ["rawget" "env" (str "ANIIMO_REWARDS")]]) "or" null])])
+        (if' (op [(op ["v" "==" null]) "and" (op [["type" "os"] "==" (str "table")]) "and" "os.getenv"]) [
+          (local ["ok" "e"] [["pcall" "os.getenv" (str "ANIIMO_REWARDS")]])
+          (if' "ok" (inline [(assign "v" ["e"])]))
+        ])
+        (return [(op [(op [(op ["v" "~=" null]) "and" ["tostring" "v"]]) "or" (str "")])])
+      ])
+      blank
+      (localFunction "tab" ["v"] [
+        (local "t" [["type" "v"]])
+        (return [(op [(op ["t" "==" (str "table")]) "or" (op ["t" "==" (str "userdata")])])])
+      ])
+      blank
+      (localFunction "req" ["name"] [
+        (local ["ok" "m"] [["pcall" "require" "name"]])
+        (if' (op ["ok" "and" ["tab" "m"]]) (inline [(return ["m"])]))
+      ])
+      blank
+      (localFunction "has" ["t" "k"] [
+        (if' (not ["tab" "t"]) (inline [(return [false])]))
+        (local ["ok" "v"] [["pcall" (fn [] (inline [(return [(index "t" "k")])]))]])
+        (return [(op ["ok" "and" (op [["type" "v"] "==" (str "function")])])])
+      ])
+      blank
+      (localFunction "iter" ["f" "v"] [
+        (if' ["tab" "v"] [
+          (local ["ok" "a" "b" "c"] [["pcall" "f" "v"]])
+          (if' (op ["ok" "and" (op [["type" "a"] "==" (str "function")])]) (inline [(return ["a" "b" "c"])]))
+        ])
+        (return ["next" (table []) null])
+      ])
+      (localFunction "kv" ["v"] (inline [(return [["iter" "pairs" "v"]])]))
+      (localFunction "iv" ["v"] (inline [(return [["iter" "ipairs" "v"]])]))
+      blank
+      (localFunction "len" ["v"] [
+        (if' (not ["tab" "v"]) (inline [(return [0])]))
+        (local ["ok" "n"] [["pcall" (fn [] (inline [(return [(len "v")])]))]])
+        (return [(op [(op ["ok" "and" (op [["type" "n"] "==" (str "number")]) "and" "n"]) "or" 0])])
+      ])
+      blank
+      (localFunction "killed" ["s"] (inline [(return [(op [(op ["s" "==" (str "0")]) "or" (op ["s" "==" (str "off")])])])]))
+      blank
+      (localFunction "now" [] [
+        (local "T" [["req" (str "Core.Common.Time")]])
+        (if' ["has" "T" (str "getRealMillisecond")] [
+          (local ["ok" "t"] [["pcall" "T.getRealMillisecond"]])
+          (if' (op ["ok" "and" (op [["type" "t"] "==" (str "number")])]) (inline [(return [(op ["t" "/" 1000]) "0.001"])]))
+        ])
+        (if' (op [(op [["type" "os"] "==" (str "table")]) "and" "os.time"]) [
+          (local ["ok" "t"] [["pcall" "os.time"]])
+          (if' (op ["ok" "and" (op [["type" "t"] "==" (str "number")])]) (inline [(return ["t" 1])]))
+        ])
+      ])
+      blank
+      (localFunction "noop" [] (inline []))
+      blank
+      (localFunction "k" ["..."] [
+        (local "t" [(table ["..."])])
+        (forNum "i" [1 ["select" (str "#") "..."]] (inline [(assign (index "t" "i") [["tostring" (index "t" "i")]])]))
+        (return [["table.concat" "t" (str ":")]])
+      ])
+      blank
+      (local "CLAIMS" [
+        (table (rows [
+          (field "task" (table [(field "call" (str "reqActReceiveTaskReward"))]))
+          (field "group" (table [(field "call" (str "reqActReceiveGroupTaskReward"))]))
+          (field "bpCycle" (table [(field "rpc" (str "RPC_CS_ReceiveBpCycleReward")) (field "tail" (table ["noop"]))]))
+          (field "rogueWeekly" (table [(field "call" (str "getRogueAllWeeklyReward"))]))
+          (field "rogueSeasonWeekly" (table [(field "call" (str "getAllRogueSeasonWeeklyReward")) (field "tail" (table [0]))]))
+          (field "rogueDaily" (table [(field "call" (str "getDailyReward"))]))
+          (field "monthCardStored" (table [(field "on" (str "game.monthCard")) (field "call" (str "requestClaimStoredReward"))]))
+          (field "monthCardDaily" (table [(field "on" (str "game.monthCard")) (field "call" (str "requestClaimDailyReward"))]))
+          (field "homeBookGrade" (table [(field "call" (str "reqReceiveHandbookGradeReward")) (field "tail" (table ["noop"]))]))
+          (field "homeBookCategory" (table [(field "call" (str "reqReceiveCategoryProgressReward")) (field "tail" (table ["noop"]))]))
+          (field "grabEggsRank" (table [(field "rpc" (str "RPC_CS_GetRobEggLevelReward")) (field "tail" (table [0 0 0]))]))
+          (field "grabEggsBox" (table [(field "rpc" (str "RPC_CS_OpenRobEggLevelRewardBox"))]))
+          (field "grabEggsCase" (table [(field "rpc" (str "RPC_CS_GetShowCaseReward")) (field "tail" (table ["noop"]))]))
+          (field "courseLevel" (table [(field "call" (str "getCourseLevelReward")) (field "tail" (table ["noop"]))]))
+          (field "course" (table [(field "call" (str "getCourseReward")) (field "tail" (table ["noop"]))]))
+          (field "playerLevel" (table [
+            (field "fn" (fn ["me" "lvs"] [
+              (local "CH" [["require" (str "Core.Common.CallbackHandler")]])
+              ["me:serverMsg" (str "RPC_CS_GetLevelReward") "lvs" ["CH" (table [(field "done" "noop")]) (str "done")]]
+            ]))
+          ]))
+          (field "gachaTimes" (table [(field "rpc" (str "RPC_CS_GachaClaimTimesReward")) (field "tail" (table ["noop"]))]))
+          (field "trainChapter" (table [(field "call" (str "getSpecialTrainChapterReward")) (field "tail" (table ["noop"]))]))
+          (field "trainEntry" (table [(field "call" (str "getSpecialTrainEntryReward")) (field "tail" (table ["noop"]))]))
+          (field "trainBadge" (table [(field "call" (str "getSpecialTrainBadgeReward")) (field "tail" (table ["noop"]))]))
+          (field "trainExchange" (table [(field "call" (str "getSpecialTrainBadgeContinuousReward")) (field "tail" (table ["noop"]))]))
+          (field "petSpecies" (table [(field "call" (str "getPetHandbookSpeciesCollectReward")) (field "tail" (table [(-1)]))]))
+          (field "petForm" (table [(field "call" (str "getPetHandbookCountryCollectReward")) (field "tail" (table [(-1)]))]))
+          (field "petLevel" (table [(field "call" (str "getPetHandbookCountryLevelReward")) (field "tail" (table [(-1)]))]))
+          (field "petTopic" (table [(field "call" (str "reqGetPetTopicRewards"))]))
+          (field "bossRush" (table [(field "rpc" (str "RPC_CS_BossRushReceiveSeasonReward")) (field "tail" (table ["noop"]))]))
+          (field "homeCarLevel" (table [(field "call" (str "getHomeCarLevelReward")) (field "tail" (table [(-1) "noop"]))]))
+          (field "homeSeasonProgress" (table [(field "rpc" (str "RPC_CS_ReceiveHomeSeasonCollectionReward"))]))
+          (field "homeSeasonTask" (table [(field "call" (str "reqReceiveHomeSeasonTaskReward")) (field "tail" (table ["noop"]))]))
+          (field "homeSeasonMutation" (table [(field "call" (str "reqReceiveHomeSeasonMutationReward")) (field "tail" (table ["noop"]))]))
+          (field "questChapter" (table [(field "call" (str "getChapterQuestProgressReward")) (field "tail" (table ["noop"]))]))
+          (field "puppet" (table [(field "call" (str "reqActivityCatchScoreReward"))]))
+          (field "photoReward" (table [(field "call" (str "reqActivityPhotoRewardGet"))]))
+          (field "photoExtra" (table [(field "call" (str "reqActivityPhotoExtraRewardGet"))]))
+          (field "photoStage" (table [(field "call" (str "reqActivityPhotoStageRewardGet"))]))
+          (field "petSave" (table [(field "call" (str "reqActivityPetSaveWeekSumyReward")) (field "tail" (table ["noop"]))]))
+          (field "energy" (table [(field "call" (str "serverActivityMsg"))]))
+          (field "petArea" (table [(field "call" (str "getPetAreaReward"))]))
+          (field "homeCampFinish" (table [(field "call" (str "finishDispatch"))]))
+        ]))
+      ])
+      blank
+      (localFunction "act" [] [
+        (local ["A" "C" "CA"] [["req" (str "Common.Utils.ActivityUtils")] ["req" (str "Common.Const.ActivityConst")] ["req" (str "Utils.ClientActivityUtils")]])
+        (if' (op ["A" "and" "C" "and" "CA" "and" ["tab" "C.EventType"] "and" ["tab" "C.TaskState"] "and" ["tab" "C.ActivityTaskType"]]) (inline [(return ["A" "C" "CA"])]))
+      ])
+      blank
+      (localFunction "task" ["add" "eid" "tid" "tag" "label"] [
+        ["add" ["k" "tag" (str "task") "tid"] "label" (str "task") ["pack" "tid" "eid"]]
+      ])
+      blank
+      (localFunction "group" ["add" "eid" "gid" "tag" "label"] [
+        ["add" ["k" "tag" (str "group") "gid"] "label" (str "group") ["pack" "gid" "eid"]]
+      ])
+      blank
+      (localFunction "openEvents" ["et"] [
+        (local ["A" "_" "CA"] [["act"]])
+        (local "POST" [["req" (str "Data.game_event_type_post_data")]])
+        (local "list" [(table [])])
+        (if' (not (paren (op ["A" "and" "POST" "and" (op ["et" "~=" null]) "and" ["has" "CA" (str "isGameEventTabOpen")] "and" ["has" "CA" (str "isEventOpen")] "and" ["has" "A" (str "getOprActivityUnlockCond")]]))) (inline [(return ["list"])]))
+        (forIn "eid" [["kv" (index "POST" "et")]] [
+          (if' (op [["CA.isGameEventTabOpen" "eid"] "and" ["CA.isEventOpen" "eid"] "and" ["A.getOprActivityUnlockCond" "eid"]]) (inline [(assign (index "list" (op [(len "list") "+" 1])) ["eid"])]))
+        ])
+        ["table.sort" "list" (fn ["a" "b"] (inline [(return [(op [["tostring" "a"] "<" ["tostring" "b"]])])]))]
+        (return ["list"])
+      ])
+      blank
+      (localFunction "taskInfos" ["add" "seen" "et" "eid" "tag" "name" "list"] [
+        (local ["_" "C"] [["act"]])
+        (local "CAN" ["C.TaskState.Finihed_CanRecv"])
+        (forIn ["_" "t"] [["iv" "list"]] [
+          (if' (op [["tab" "t"] "and" (op ["t.taskId" "~=" null])]) [
+            ["seen" "t.taskId" "t.taskState"]
+            (if' (op ["t.taskState" "==" "CAN"]) (inline [["task" "add" "eid" "t.taskId" "tag" (op ["name" ".." (str " ") ".." ["tostring" "t.taskId"]])]]))
+          ])
+        ])
+      ])
+      blank
+      (localFunction "dailyActive" ["add" "seen"] [
+        (local ["A" "C" "CA"] [["act"]])
+        (local "ETD" [["req" (str "Data.event_task_data")]])
+        (if' (not (paren (op ["A" "and" "ETD" "and" ["has" "A" (str "isOprActivityOpenByType")] "and" ["has" "CA" (str "getTaskInfoByActType")]]))) (inline [(return [(str "deps")])]))
+        (local ["ET" "AT" "CAN"] ["C.EventType" "C.ActivityTaskType" "C.TaskState.Finihed_CanRecv"])
+        (local ["ok" "eid"] [["A.isOprActivityOpenByType" "ET.DailyActive"]])
+        (if' (op [(not "ok") "or" (not "eid")]) (inline [(return [(str "closed")])]))
+        (local "UI" [["req" (str "Utils.LuaUIUtils")]])
+        (local "full" [true])
+        (if' ["has" "UI" (str "isDailyActiveScoreFull")] (inline [(assign "full" [(op [(op [["UI.isDailyActiveScoreFull"] "and" true]) "or" false])])]))
+        (forIn ["_" "t"] [["kv" ["CA.getTaskInfoByActType" "ET.DailyActive"]]] [
+          (if' ["tab" "t"] [
+            ["seen" "t.taskId" "t.taskState"]
+            (if' (op ["t.taskState" "==" "CAN"]) [
+              (ifElse (op [(op ["t.taskType" "==" "AT.DailyActive_GetScore"]) "and" (not "full")]) [
+                  ["task" "add" "eid" "t.taskId" (str "daily") (op [(str "Daily activity task ") ".." ["tostring" "t.taskId"]])]
+                ] (if' (op ["t.taskType" "==" "AT.DailyActive_ScoreReward"]) [
+                  (local "cfg" [(index "ETD" "t.taskId")])
+                  (if' (op [["tab" "cfg"] "and" "cfg.groupId"]) (inline [["group" "add" "eid" "cfg.groupId" (str "daily") (str "Daily activity score chest")]]))
+                ]))
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "groupTasks" ["seen" "g"] [
+        (local "A" [["act"]])
+        (if' (op ["g" "==" null]) (inline [(return [])]))
+        (forIn ["_" "tid"] [["iv" ["A.getActTaskIdsByGroupId" "g"]]] (inline [["seen" "tid" ["A.getActTaskState" "pg.me" "tid"]]]))
+      ])
+      blank
+      (localFunction "bpContext" [] [
+        (local ["A" "C"] [["act"]])
+        (local ["GED" "BPD"] [["req" (str "Data.game_event_data")] ["req" (str "Data.event_battlepass_data")]])
+        (if' (not (paren (op ["A" "and" "GED" "and" "BPD" "and" ["has" "A" (str "getActivityData")] "and" ["has" "A" (str "isOprActivityOpen")]]))) (inline [(return [null (str "deps")])]))
+        (local "bp" [["A.getActivityData" "pg.me" "C.EventType.BattlePass"]])
+        (local "phase" [(op [["tab" "bp"] "and" ["tab" "bp.activityBase"] "and" "bp.activityBase.activityPhase"])])
+        (local "cfg" [(op ["phase" "and" (index "BPD" "phase")])])
+        (if' (not ["tab" "cfg"]) (inline [(return [null (str "nophase")])]))
+        (local "eid" [])
+        (forIn ["id" "e"] [["kv" "GED"]] [
+          (if' (op [["tab" "e"] "and" (op ["e.eventType" "==" "C.EventType.BattlePass"]) "and" (op ["e.phase" "==" "phase"])]) (inline [(assign "eid" ["id"])]))
+        ])
+        (if' (op [(not "eid") "or" (not ["A.isOprActivityOpen" "eid"])]) (inline [(return [null (str "closed")])]))
+        (return [(table [(field "A" "A") (field "C" "C") (field "bp" "bp") (field "phase" "phase") (field "cfg" "cfg") (field "eid" "eid")])])
+      ])
+      blank
+      (localFunction "battlePass" ["add" "seen"] [
+        (local ["x" "why"] [["bpContext"]])
+        (if' (not "x") (inline [(return ["why"])]))
+        (local ["A" "cfg" "eid" "bp"] ["x.A" "x.cfg" "x.eid" "x.bp"])
+        (local "CAN" ["x.C.TaskState.Finihed_CanRecv"])
+        (local "RD" [["req" (str "Utils.CashShopRedDotUtils")]])
+        (local "wg" [(op [(op [["tab" "cfg.weekTaskGroupId"] "and" (index "cfg.weekTaskGroupId" (op ["bp.weeklyNum" "or" 0]))]) "or" null])])
+        (local ["sg" "ag"] ["cfg.seasonTaskGroupId" "cfg.awardTaskGroupId"])
+        (if' (op [["has" "A" (str "getActTaskIdsByGroupId")] "and" ["has" "A" (str "getActTaskState")]]) [
+          (forIn ["_" "g"] [["ipairs" (table ["wg" "sg" "ag"])]] (inline [["groupTasks" "seen" "g"]]))
+        ])
+        (if' (op ["wg" "and" ["has" "RD" (str "hasClaimableWeeklyTask")] "and" ["RD.hasClaimableWeeklyTask"]]) (inline [["group" "add" "eid" "wg" (str "bp") (str "Battle pass weekly tasks")]]))
+        (if' (op ["sg" "and" ["has" "RD" (str "hasClaimableSeasonTask")] "and" ["RD.hasClaimableSeasonTask"]]) (inline [["group" "add" "eid" "sg" (str "bp") (str "Battle pass season tasks")]]))
+        (if' (op ["ag" "and" ["has" "A" (str "getActTaskIdsByGroupId")] "and" ["has" "A" (str "getActTaskState")]]) [
+          (forIn ["_" "tid"] [["iv" ["A.getActTaskIdsByGroupId" "ag"]]] [
+            (if' (op [["A.getActTaskState" "pg.me" "tid"] "==" "CAN"]) (inline [["group" "add" "eid" "ag" (str "bp") (str "Battle pass level rewards")] "break"]))
+          ])
+        ])
+      ])
+      blank
+      (localFunction "bpCycle" ["add" "seen"] [
+        (local ["x" "why"] [["bpContext"]])
+        (if' (not "x") (inline [(return ["why"])]))
+        (local ["SC" "bp" "C"] [["req" (str "Data.sys_config_data")] "x.bp" "x.C"])
+        (if' (not (paren (op ["SC" "and" ["has" "bp" (str "getCycleRewardState")]]))) (inline [(return [(str "deps")])]))
+        ["seen" (str "unlock") "bp.unlockCycleReward"]
+        (if' (op ["bp.unlockCycleReward" "~=" 1]) (inline [(return [])]))
+        (local "CAN" ["C.TaskState.Finihed_CanRecv"])
+        (local "lo" [(op [(paren (op [["tonumber" "SC.BATTLE_PASS_LEVEL_UP_MAX"] "or" 0])) "+" 1])])
+        (local "hi" [["math.min" (op [["tonumber" "bp.bpLevel"] "or" 0]) (op [["tonumber" "bp.cycleRewardShowMaxlv"] "or" 0])]])
+        (forNum "lv" ["lo" "hi"] [
+          (local ["f" "p"] [["bp:getCycleRewardState" "lv"]])
+          ["seen" "lv" (op [["tostring" "f"] ".." (str "/") ".." ["tostring" "p"]])]
+          (if' (op [(op ["f" "==" "CAN"]) "or" (op ["p" "==" "CAN"])]) [
+            (return [["add" ["k" (str "bp") (str "cycle") "x.phase"] (str "Battle pass loop rewards") (str "bpCycle") ["pack"]]])
+          ])
+        ])
+      ])
+      blank
+      (local "mileage" [(table [])])
+      (local "SEASON_FIELDS" [(table [(table [(str "petTaskGroup") (str "pets")]) (table [(str "battleTaskGroup") (str "battle")]) (table [(str "eggTaskGroup") (str "eggs")]) (table [(str "homeTaskGroup") (str "home")])])])
+      blank
+      (localFunction "seasonAchievement" ["add" "seen"] [
+        (local ["A" "C" "CA"] [["act"]])
+        (if' (not (paren (op ["A" "and" ["has" "A" (str "isOprActivityTabOpenByType")] "and" ["has" "A" (str "getActTaskCanReceiveByGroupId")] "and" ["has" "A" (str "getActTaskIdsByGroupId")] "and" ["has" "A" (str "getActTaskState")] "and" ["has" "CA" (str "isGameEventTabOpen")]]))) (inline [(return [(str "deps")])]))
+        (local ["ok" "eid"] [["A.isOprActivityTabOpenByType" "C.EventType.SeasonAchievements" "pg.me"]])
+        (if' (op [(not "ok") "or" (not "eid") "or" (not ["CA.isGameEventTabOpen" "eid"])]) (inline [(return [(str "closed")])]))
+        (local ["ETD" "SAD"] [["req" (str "Data.event_task_data")] ["req" (str "Data.event_season_achievement_data")]])
+        (local ["AT" "SUB" "TS"] ["C.ActivityTaskType" "C.ActivityTaskSubType" "C.TaskState"])
+        (local "done" [(table [])])
+        (localFunction "emit" ["g" "label"] [
+          (if' (op [(op ["g" "~=" null]) "and" (not (index "done" "g"))]) [
+            (assign (index "done" "g") [true])
+            ["group" "add" "eid" "g" (str "season") "label"]
+          ])
+        ])
+        (if' (op ["ETD" "and" ["tab" "SUB"] "and" (op [(index "mileage" "eid") "==" null])]) [
+          (assign (index "mileage" "eid") [false])
+          (forIn ["_" "cfg"] [["kv" "ETD"]] [
+            (if' (op [["tab" "cfg"] "and" (op ["cfg.activityId" "==" "eid"]) "and" (op ["cfg.actTaskType" "==" "AT.Active_AchievementTask"]) "and" (op ["cfg.actSubTaskType" "==" "SUB.AchiTask_SeasonAchieve_Mileage"])]) [
+              (assign (index "mileage" "eid") [(op ["cfg.groupId" "or" false])])
+              "break"
+            ])
+          ])
+        ])
+        (local "mg" [(index "mileage" "eid")])
+        (if' "mg" [
+          (local "ready" [false])
+          (forIn ["_" "tid"] [["iv" ["A.getActTaskIdsByGroupId" "mg"]]] [
+            (if' (op [(index "ETD" "tid") "~=" null]) [
+              (local "s" [(op [["A.getActTaskState" "pg.me" "tid"] "or" "TS.UnFinished"])])
+              ["seen" "tid" "s"]
+              (if' (op ["s" "==" "TS.Finihed_CanRecv"]) (inline [(assign "ready" [true])]))
+            ])
+          ])
+          (if' "ready" (inline [["emit" "mg" (str "Season achievement mileage")]]))
+        ])
+        (local "sa" [(op ["SAD" "and" (index "SAD" "eid")])])
+        (if' (not ["tab" "sa"]) (inline [(return [(op [(op ["mg" "and" null]) "or" (str "noconfig")])])]))
+        (forIn ["_" "f"] [["ipairs" "SEASON_FIELDS"]] [
+          (forIn ["_" "g"] [["iv" (index "sa" (index "f" 1))]] [
+            ["groupTasks" "seen" "g"]
+            (if' (op [["len" ["A.getActTaskCanReceiveByGroupId" "pg.me" "g"]] ">" 0]) (inline [["emit" "g" (op [(str "Season achievement ") ".." ["tostring" "g"] ".." (str " (") ".." (index "f" 2) ".." (str ")")])]]))
+          ])
+        ])
+      ])
+      blank
+      (localFunction "sign" ["add" "seen"] [
+        (local ["A" "C" "CA"] [["act"]])
+        (local "POST" [["req" (str "Data.game_event_type_post_data")]])
+        (if' (not (paren (op ["A" "and" "POST" "and" ["has" "A" (str "isOprActivityOpen")] "and" ["has" "A" (str "getActTaskCanReceiveByGroupId")] "and" ["has" "A" (str "getActTaskIdsByGroupId")] "and" ["has" "A" (str "getActTaskState")] "and" ["has" "CA" (str "isGameEventTabOpen")] "and" ["has" "CA" (str "getSignTaskGroupIds")]]))) (inline [(return [(str "deps")])]))
+        (local ["ET" "CAN"] ["C.EventType" "C.TaskState.Finihed_CanRecv"])
+        (forIn ["_" "et"] [["ipairs" (table ["ET.SignNewbie" "ET.SignVersion" "ET.LongTermSign"])]] [
+          (forIn "eid" [["kv" (index "POST" "et")]] [
+            (if' (op [["CA.isGameEventTabOpen" "eid"] "and" ["A.isOprActivityOpen" "eid"]]) [
+              (forIn ["_" "g"] [["iv" ["CA.getSignTaskGroupIds" "eid"]]] [
+                (forIn ["_" "tid"] [["iv" ["A.getActTaskIdsByGroupId" "g"]]] [
+                  (local "s" [["A.getActTaskState" "pg.me" "tid"]])
+                  ["seen" "tid" "s"]
+                  (if' (op ["s" "==" "CAN"]) (inline [["task" "add" "eid" "tid" (str "sign") (op [(str "Sign-in reward ") ".." ["tostring" "tid"]])]]))
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "crossPlatform" ["add" "seen"] [
+        (local ["_" "C" "CA"] [["act"]])
+        (if' (not (paren (op ["C" "and" ["has" "CA" (str "getTaskInfoByActType")]]))) (inline [(return [(str "deps")])]))
+        (local "et" ["C.EventType.CrossPlatform"])
+        (local "eid" [(index ["openEvents" "et"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        ["taskInfos" "add" "seen" "et" "eid" (str "cross") (str "Cross-platform task") ["CA.getTaskInfoByActType" "et"]]
+      ])
+      blank
+      (localFunction "firstTopup" ["add" "seen"] [
+        (local ["_" "C" "CA"] [["act"]])
+        (if' (not (paren (op ["C" "and" ["has" "CA" (str "getTaskInfoByTaskType")]]))) (inline [(return [(str "deps")])]))
+        (local "et" ["C.EventType.FirstTopup"])
+        (local "eid" [(index ["openEvents" "et"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        ["taskInfos" "add" "seen" "et" "eid" (str "firsttopup") (str "First top-up reward") ["CA.getTaskInfoByTaskType" "et" "C.ActivityTaskType.Active_AchievementTask"]]
+      ])
+      blank
+      (localFunction "journeyTrial" ["add" "seen"] [
+        (local ["_" "C" "CA"] [["act"]])
+        (local "T" [(op [["tab" "CA"] "and" "CA.REUNION_TRAINING_TASK_TYPE"])])
+        (if' (not (paren (op ["C" "and" ["tab" "T"] "and" ["has" "CA" (str "getTaskInfoList")]]))) (inline [(return [(str "deps")])]))
+        (local "eid" [(index ["openEvents" "C.EventType.JourneyTrial"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        (local "CAN" ["C.TaskState.Finihed_CanRecv"])
+        (localFunction "try" ["t" "tag"] [
+          (if' (op [["tab" "t"] "and" (op ["t.taskId" "~=" null])]) [
+            ["seen" "t.taskId" "t.taskState"]
+            (if' (op ["t.taskState" "==" "CAN"]) (inline [["task" "add" "eid" "t.taskId" (str "journey") (op [(str "Journey of Trials ") ".." "tag" ".." (str " ") ".." ["tostring" "t.taskId"]])]]))
+          ])
+        ])
+        (forIn ["_" "t"] [["iv" ["CA.getTaskInfoList" "T.normal" true]]] (inline [["try" "t" (str "task")]]))
+        (forIn ["_" "t"] [["iv" ["CA.getTaskInfoList" "T.row" true]]] (inline [["try" "t" (str "row")]]))
+        (local "fin" [["CA.getTaskInfoList" "T.final" true]])
+        (if' ["tab" "fin"] (inline [["try" (index "fin" 1) (str "final")]]))
+      ])
+      blank
+      (localFunction "petDispatch" ["add" "seen"] [
+        (local ["A" "C" "CA"] [["act"]])
+        (local "TT" [(op ["C" "and" "C.ActivityTaskType"])])
+        (if' (not (paren (op ["A" "and" ["has" "A" (str "getActivityData")] "and" ["has" "CA" (str "getTaskInfoByActType")] "and" "TT.PetDispatch_Dispatch" "and" "TT.PetDispatch_StageScore"]))) (inline [(return [(str "deps")])]))
+        (local "et" ["C.EventType.PetDispatch"])
+        (local "eid" [(index ["openEvents" "et"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        (local "data" [["A.getActivityData" "pg.me" "et"]])
+        (if' (not ["tab" "data"]) (inline [(return [(str "nodata")])]))
+        (local "PDU" [["req" (str "GameApp.PetDispatch.PetDispatchUtils")]])
+        (local "clues" [(table [])])
+        (if' ["has" "PDU" (str "getCurrentStageClues")] [
+          (forIn ["_" "c"] [["kv" ["PDU.getCurrentStageClues" "data.eventPhase"]]] [
+            (if' (op [["tab" "c"] "and" (op ["c.taskId" "~=" null])]) (inline [(assign (index "clues" "c.taskId") [true])]))
+          ])
+        ])
+        (local "CAN" ["C.TaskState.Finihed_CanRecv"])
+        (forIn ["_" "t"] [["kv" ["CA.getTaskInfoByActType" "et"]]] [
+          (if' (op [["tab" "t"] "and" (op ["t.taskId" "~=" null])]) [
+            ["seen" "t.taskId" "t.taskState"]
+            (if' (op ["t.taskState" "==" "CAN"]) [
+              (ifElse (op [(op ["t.taskType" "==" "TT.PetDispatch_Dispatch"]) "and" (index "clues" "t.taskId")]) [
+                  ["task" "add" "eid" "t.taskId" (str "dispatch") (op [(str "Pet dispatch clue reward ") ".." ["tostring" "t.taskId"]])]
+                ] (if' (op ["t.taskType" "==" "TT.PetDispatch_StageScore"]) [
+                  ["task" "add" "eid" "t.taskId" (str "dispatch") (op [(str "Pet dispatch progress reward ") ".." ["tostring" "t.taskId"]])]
+                ]))
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "growthGift" ["add" "seen"] [
+        (local ["A" "C" "CA"] [["act"]])
+        (local "ATD" [["req" (str "Data.activate_tasks_data")]])
+        (if' (not (paren (op ["A" "and" "ATD" "and" ["has" "A" (str "getActivityData")] "and" ["has" "CA" (str "getTaskInfoList")]]))) (inline [(return [(str "deps")])]))
+        (local "et" ["C.EventType.GrowthGift"])
+        (local "d" [["A.getActivityData" "pg.me" "et"]])
+        ["seen" (str "receivedPetFlag") (op [(op [["tab" "d"] "and" "d.receivedPetFlag"]) "or" null])]
+        (if' (not (paren (op [["tab" "d"] "and" (op ["d.receivedPetFlag" "==" 1])]))) (inline [(return [(str "noegg")])]))
+        (forIn ["_" "eid"] [["ipairs" ["openEvents" "et"]]] [
+          (local "cfg" [(index "ATD" "eid")])
+          (local "g" [(op [["tab" "cfg"] "and" ["tab" "cfg.foreverTaskGroup"] "and" (index "cfg.foreverTaskGroup" 1)])])
+          (if' "g" (inline [["taskInfos" "add" "seen" "et" "eid" (str "growth") (str "Growth gift collection reward") ["CA.getTaskInfoList" "g" true]]]))
+        ])
+      ])
+      blank
+      (localFunction "littleFire" ["add" "seen"] [
+        (local ["_" "C" "CA"] [["act"]])
+        (if' (not (paren (op ["C" "and" ["has" "CA" (str "getTaskInfoByTaskType")]]))) (inline [(return [(str "deps")])]))
+        (local ["et" "TT" "CAN"] ["C.EventType.LittleFirePerson" "C.ActivityTaskType" "C.TaskState.Finihed_CanRecv"])
+        (local "eid" [(index ["openEvents" "et"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        (forIn ["_" "name"] [["ipairs" (table [(str "LittleFire_PersonReward") (str "LittleFire_GlobalReward")])]] [
+          (if' (op [(index "TT" "name") "~=" null]) [
+            (forIn ["_" "t"] [["kv" ["CA.getTaskInfoByTaskType" "et" (index "TT" "name")]]] [
+              (if' ["tab" "t"] [
+                ["seen" "t.taskId" "t.taskState"]
+                (if' (op [(op ["t.taskState" "==" "CAN"]) "and" (op ["t.taskGroupId" "~=" null])]) (inline [["group" "add" "eid" "t.taskGroupId" (str "littlefire") (str "Little Fire progress reward")]]))
+              ])
+            ])
+          ])
+        ])
+        (forIn ["_" "name"] [["ipairs" (table [(str "Active_DailyTask") (str "Active_WeeklyTask") (str "Active_AchievementTask")])]] [
+          (if' (op [(index "TT" "name") "~=" null]) (inline [["taskInfos" "add" "seen" "et" "eid" (str "littlefire") (str "Little Fire task") ["CA.getTaskInfoByTaskType" "et" (index "TT" "name")]]]))
+        ])
+      ])
+      blank
+      (localFunction "fishingCapture" ["add" "seen"] [
+        (local ["_" "C" "CA"] [["act"]])
+        (local "ATD" [["req" (str "Data.activate_tasks_data")]])
+        (if' (not (paren (op ["C" "and" "ATD" "and" ["has" "CA" (str "getFishingCaptureRedDotState")]]))) (inline [(return [(str "deps")])]))
+        (forIn ["_" "eid"] [["ipairs" ["openEvents" "C.EventType.FishingCapture"]]] [
+          (local "cfg" [(index "ATD" "eid")])
+          (local "gid" [(op [["tab" "cfg"] "and" ["tab" "cfg.foreverTaskGroup"] "and" (index "cfg.foreverTaskGroup" 1)])])
+          (local "st" [["CA.getFishingCaptureRedDotState" "eid"]])
+          (local "n" [(op [(op [["tab" "st"] "and" ["len" "st.rewardTaskIds"]]) "or" 0])])
+          ["seen" "eid" "n"]
+          (if' (op ["gid" "and" (op ["n" ">" 0])]) (inline [["group" "add" "eid" "gid" (str "fishing") (str "Fishing capture progress rewards")]]))
+        ])
+      ])
+      blank
+      (localFunction "leylineTreeUp" ["add" "seen"] [
+        (local ["A" "C" "CA"] [["act"]])
+        (local "ETD" [["req" (str "Data.event_task_data")]])
+        (if' (not (paren (op ["A" "and" "ETD" "and" ["has" "A" (str "getActTaskMap")] "and" ["has" "CA" (str "_isInLeylineTreeUpTime")]]))) (inline [(return [(str "deps")])]))
+        (local "et" ["C.EventType.LeylineTreeUp"])
+        (if' (not ["CA._isInLeylineTreeUpTime"]) (inline [(return [(str "closed")])]))
+        (local "eid" [(index ["openEvents" "et"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        (local "CAN" ["C.TaskState.Finihed_CanRecv"])
+        (forIn ["tid" "t"] [["kv" ["A.getActTaskMap" "pg.me" "et"]]] [
+          (if' (op [(op [(index "ETD" "tid") "~=" null]) "and" ["tab" "t"]]) [
+            ["seen" "tid" "t.state"]
+            (if' (op ["t.state" "==" "CAN"]) (inline [["task" "add" "eid" "tid" (str "leylineup") (op [(str "Leyline tree event task ") ".." ["tostring" "tid"]])]]))
+          ])
+        ])
+      ])
+      blank
+      (localFunction "redBook" ["add" "seen"] [
+        (local ["A" "C"] [["act"]])
+        (local ["ATD" "ETD"] [["req" (str "Data.activate_tasks_data")] ["req" (str "Data.event_task_data")]])
+        (if' (not (paren (op ["A" "and" "ATD" "and" "ETD" "and" ["has" "A" (str "getActTaskIdsByGroupId")] "and" ["has" "A" (str "getActTaskState")]]))) (inline [(return [(str "deps")])]))
+        (local "CAN" ["C.TaskState.Finihed_CanRecv"])
+        (localFunction "sortv" ["id"] [
+          (local "c" [(index "ETD" "id")])
+          (return [(op [(op [["tab" "c"] "and" ["tonumber" "c.sort"]]) "or" "math.huge"])])
+        ])
+        (forIn ["_" "eid"] [["ipairs" ["openEvents" (op ["C.EventType.RedBook" "or" 115])]]] [
+          (local "cfg" [(index "ATD" "eid")])
+          (local "grp" [(op [["tab" "cfg"] "and" "cfg.foreverTaskGroup"])])
+          (if' ["tab" "grp"] [
+            (local "ids" [(table [])])
+            (forIn ["_" "tid"] [["iv" ["A.getActTaskIdsByGroupId" (index "grp" 1)]]] (inline [(assign (index "ids" (op [(len "ids") "+" 1])) ["tid"])]))
+            [
+              "table.sort"
+              "ids"
+              (fn ["a" "b"] [
+                (local ["sa" "sb"] [["sortv" "a"] ["sortv" "b"]])
+                (if' (op ["sa" "==" "sb"]) (inline [(return [(op ["a" "<" "b"])])]))
+                (return [(op ["sa" "<" "sb"])])
+              ])
+            ]
+            (local "t2" [])
+            (forIn ["_" "tid"] [["iv" ["A.getActTaskIdsByGroupId" (index "grp" 2)]]] (inline [(assign "t2" ["tid"]) "break"]))
+            (local ["shown" "done"] [(table [(index "ids" 1) (index "ids" 2) (op [(op [(paren (op [(op ["t2" "~=" null]) "and" (op [(index "ETD" "t2") "~=" null])])) "and" "t2"]) "or" null])]) (table [])])
+            (forNum "i" [1 3] [
+              (local "tid" [(index "shown" "i")])
+              (if' (op [(op ["tid" "~=" null]) "and" (not (index "done" "tid"))]) [
+                (assign (index "done" "tid") [true])
+                (local "s" [["A.getActTaskState" "pg.me" "tid"]])
+                ["seen" "tid" "s"]
+                (if' (op ["s" "==" "CAN"]) (inline [["task" "add" "eid" "tid" (str "redbook") (op [(str "RedNote event task ") ".." ["tostring" "tid"]])]]))
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "homeBookCategory" ["add" "seen"] [
+        (local ["HB" "HD"] [["req" (str "Utils.HomeBookRedDotUtils")] ["req" (str "Utils.HomeBookDataUtils")]])
+        (local "me" ["pg.me"])
+        (if' (not (paren (op [["has" "HB" (str "canReceiveCategoryReward")] "and" ["has" "HD" (str "getFirstCategories")] "and" ["has" "me" (str "reqReceiveCategoryProgressReward")]]))) (inline [(return [(str "deps")])]))
+        (forIn ["_" "e"] [["iv" ["HD.getFirstCategories"]]] [
+          (if' (op [["tab" "e"] "and" (op ["e.id" "~=" null])]) [
+            (local "cond" [(op [(op [["tab" "e.config"] "and" "e.config.unlockCondition"]) "or" null])])
+            (local "unlocked" [(op [(op ["cond" "==" null]) "or" (op ["cond" "==" 0]) "or" (paren (op [["tab" "me.triggerMap"] "and" (op [["me.triggerMap:isCompleteOrMeetCondition" "cond"] "==" true])]))])])
+            (local "s" [(op [(op [["HB.canReceiveCategoryReward" "e.id" "unlocked"] "and" true]) "or" false])])
+            ["seen" "e.id" "s"]
+            (if' "s" [
+              (local "n" [(op [(op [["has" "me" (str "getHomeHandbookReceivedCategoryCount")] "and" ["me:getHomeHandbookReceivedCategoryCount" "e.id"]]) "or" 0])])
+              ["add" ["k" (str "homebook") (str "cat") "e.id" "n"] (op [(str "Home handbook category ") ".." ["tostring" "e.id"]]) (str "homeBookCategory") ["pack" "e.id"]]
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "uiModel" ["name"] [
+        (local "ui" [(op ["pg.global" "and" "pg.global.ui"])])
+        (local "p" [(op [["tab" "ui"] "and" (index "ui" "name")])])
+        (local "m" [(op [["tab" "p"] "and" "p.model"])])
+        (return [(op [(op [["tab" "m"] "and" "m"]) "or" null])])
+      ])
+      blank
+      (localFunction "grabEggsMode" ["add" "seen"] [
+        (local "m" [["uiModel" (str "grabEggsMode")]])
+        (if' (not "m") (inline [(return [(str "deps")])]))
+        (if' (op [["has" "m" (str "hasReadyRewardBox")] "and" ["has" "m" (str "buildBoxSlotList")]]) [
+          (local "ready" [(op [(op [["m:hasReadyRewardBox"] "and" true]) "or" false])])
+          ["seen" (str "boxes") "ready"]
+          (if' "ready" [
+            (forIn ["i" "d"] [["iv" ["m:buildBoxSlotList"]]] [
+              (if' (op [["tab" "d"] "and" "d.isReady" "and" (op ["d.rewardId" "~=" null])]) [
+                ["add" ["k" (str "grabeggs") (str "box") "i" "d.id"] (op [(str "Grab-eggs reward box ") ".." "i"]) (str "grabEggsBox") ["pack" "d.rewardId"]]
+              ])
+            ])
+          ])
+        ])
+        (local "cs" [(op [["tab" "pg.me.showCases"] "and" (index "pg.me.showCases" 1001)])])
+        (local ["GD" "RW"] [["req" (str "Data.egg_book_group_data")] ["req" (str "Data.egg_book_reward_data")]])
+        (if' (op [["tab" "cs"] "and" "GD" "and" "RW" "and" ["has" "m" (str "hasCollectionReward")]]) [
+          (local "ready" [(op [(op [["m:hasCollectionReward" "cs"] "and" true]) "or" false])])
+          ["seen" (str "case1001") "ready"]
+          (if' "ready" [
+            (local "g" [(index "GD" 1001)])
+            (local ["pts" "rec"] [(op [["tonumber" "cs.allPoint"] "or" 0]) "cs.rewardRecord"])
+            (forIn ["lv" "n"] [["kv" (op [["tab" "g"] "and" (index "RW" "g.reward")])]] [
+              (if' (op [["tab" "n"] "and" (op [(paren (op [["tonumber" "n.nodePoint"] "or" 0])) "<=" "pts"]) "and" (not (paren (op [(paren (op [["tonumber" (op [["tab" "rec"] "and" (index "rec" "lv")])] "or" 0])) ">" 0])))]) [
+                ["add" ["k" (str "grabeggs") (str "case") "lv"] (op [(str "Grab-eggs collection reward ") ".." ["tostring" "lv"]]) (str "grabEggsCase") ["pack" 1001 "lv"]]
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "course" ["add" "seen"] [
+        (local ["m" "GD"] [["uiModel" (str "questCourseV2")] ["req" (str "Data.guide_course_grade_data")]])
+        (if' (not (paren (op ["m" "and" "GD" "and" ["has" "m" (str "canGetCourseGradeLevelReward")] "and" ["has" "m" (str "getGradeCourseList")] "and" ["has" "m" (str "canGetCourseReward")]]))) (inline [(return [(str "deps")])]))
+        (forIn ["grade" "levels"] [["kv" "GD"]] [
+          (forNum "level" [1 ["len" "levels"]] [
+            (local "s" [(op [(op [["m:canGetCourseGradeLevelReward" "grade" "level"] "and" true]) "or" false])])
+            ["seen" ["k" "grade" "level"] "s"]
+            (if' "s" [
+              ["add" ["k" (str "course") (str "level") "grade" "level"] (op [(str "Course grade ") ".." ["tostring" "grade"] ".." (str " level ") ".." "level"]) (str "courseLevel") ["pack" "grade" "level"]]
+            ])
+          ])
+          (forIn ["_" "c"] [["iv" ["m:getGradeCourseList" "grade"]]] [
+            (if' (op [["tab" "c"] "and" (op ["c.id" "~=" null])]) [
+              (local "s" [(op [(op [["m:canGetCourseReward" "c.id"] "and" true]) "or" false])])
+              ["seen" "c.id" "s"]
+              (if' "s" (inline [["add" ["k" (str "course") (str "course") "c.id"] (op [(str "Course ") ".." ["tostring" "c.id"]]) (str "course") ["pack" "c.id"]]]))
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "playerLevel" ["add" "seen"] [
+        (local "m" [["uiModel" (str "playerLvReward")]])
+        (if' (not (paren (op ["m" "and" ["has" "m" (str "redDot_CheckHasLvReward")] "and" ["has" "m" (str "getPlayerLvDataList")] "and" ["tab" "m.LEVEL_STATE"]]))) (inline [(return [(str "deps")])]))
+        (local "lvs" [(table [])])
+        (forIn ["_" "d"] [["iv" ["m:getPlayerLvDataList"]]] [
+          (if' ["tab" "d"] [
+            ["seen" "d.lv" "d.lvState"]
+            (if' (op ["d.lvState" "==" "m.LEVEL_STATE.LEVEL_MATCH"]) (inline [(assign (index "lvs" (op [(len "lvs") "+" 1])) ["d.lv"])]))
+          ])
+        ])
+        (if' (op [(op [(len "lvs") "==" 0]) "or" (not ["m:redDot_CheckHasLvReward"])]) (inline [(return [])]))
+        (local "list" [["table.concat" "lvs" (str ",")]])
+        ["add" ["k" (str "playerlv") "list"] (op [(str "Player level rewards ") ".." "list"]) (str "playerLevel") ["pack" "lvs"]]
+      ])
+      blank
+      (localFunction "lotteryTimes" ["add" "seen"] [
+        (local ["LU" "GT"] [["req" (str "Utils.LotteryUtils")] ["req" (str "Data.gacha_times_data")]])
+        (if' (not (paren (op [["has" "LU" (str "hasClaimableTimesReward")] "and" "GT"]))) (inline [(return [(str "deps")])]))
+        (forIn ["drawId" "list"] [["kv" "GT"]] [
+          (local "d" [["tonumber" "drawId"]])
+          (if' (op ["d" "and" ["tab" "list"]]) [
+            (local "s" [(op [(op [["LU.hasClaimableTimesReward" "d"] "and" true]) "or" false])])
+            ["seen" "d" "s"]
+            (if' "s" [
+              (local "g" [(op [["tab" "pg.me.gachaMap"] "and" (index "pg.me.gachaMap" "d")])])
+              (local "cnt" [(op [(op [["tab" "g"] "and" ["tonumber" "g.drawCount"]]) "or" 0])])
+              (local "got" [(op [["tab" "g"] "and" "g.claimedTimesRewardNums"])])
+              (forIn ["i" "t"] [["iv" "list"]] [
+                (local "n" [(op [["tab" "t"] "and" ["tonumber" "t.num"]])])
+                (if' (op ["n" "and" (op ["n" "<=" "cnt"]) "and" (not (paren (op [["tab" "got"] "and" (op [(index "got" "n") "==" true])])))]) [
+                  ["add" ["k" (str "gacha") "d" "i"] (op [(str "Draw-count reward ") ".." "d" ".." (str " #") ".." "i"]) (str "gachaTimes") ["pack" "d" "i"]]
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "specialTrain" ["add" "seen"] [
+        (local ["m" "QU" "QC" "R"] [["uiModel" (str "SpecialTrainNew")] ["req" (str "GameApp.Quest.QuestUtils")] ["req" (str "Common.Const.QuestConst")] ["req" (str "Const.RedDotConst")]])
+        (if' (not (paren (op ["m" "and" "QU" "and" "QC" "and" "R" "and" ["has" "m" (str "redDot_GetSpecialTrainState")] "and" ["has" "QU" (str "getCurChapterId")]]))) (inline [(return [(str "deps")])]))
+        (local "style" [["m:redDot_GetSpecialTrainState"]])
+        ["seen" (str "hud") "style"]
+        (if' (op ["style" "~=" "R.RedDotStyle.REWARD"]) (inline [(return [])]))
+        (local "cur" [(op [["tonumber" ["QU.getCurChapterId"]] "or" 0])])
+        (if' (op [(op ["cur" ">" 0]) "and" ["has" "m" (str "getChapterTb")] "and" ["has" "m" (str "redDot_GetChapterPageState")]]) [
+          (forIn ["_" "ch"] [["iv" ["m:getChapterTb"]]] [
+            (local "id" [(op [["tab" "ch"] "and" "ch.chapterId"])])
+            (if' (op ["id" "and" ["m:redDot_GetChapterPageState" "id"]]) [
+              ["add" ["k" (str "strain") (str "chapter") "id"] (op [(str "Special training chapter ") ".." ["tostring" "id"]]) (str "trainChapter") ["pack" "id"]]
+            ])
+          ])
+        ])
+        (local ["SRC" "SUB"] ["QC.SPECIAL_TRAIN_REWARD_SRC_TYPE" "QC.QUEST_TRAIN_SUB_TYPE"])
+        (if' (op [["tab" "SRC"] "and" ["tab" "SUB"] "and" ["has" "m" (str "getPageTypeTb")] "and" ["has" "m" (str "getAllCanGetSpecialTrainRewardList")]]) [
+          (forIn ["_" "pt"] [["iv" ["m:getPageTypeTb"]]] [
+            (local "tt" [(op [["tab" "pt"] "and" "pt.trainType"])])
+            (if' "tt" [
+              (forNum "c" ["cur" (op [(op [(op ["tt" "==" "SUB.COMPULSORY"]) "and" 0]) "or" "cur"]) (-1)] [
+                (local "ids" [["m:getAllCanGetSpecialTrainRewardList" "c" "tt"]])
+                (if' (op [["len" "ids"] ">" 0]) [
+                  ["add" ["k" (str "strain") (str "entry") "c" "tt"] (op [(str "Special training rewards ") ".." "c" ".." (str "/") ".." ["tostring" "tt"]]) (str "trainEntry") ["pack" "ids" "SRC.HANDBOOK"]]
+                ])
+              ])
+            ])
+          ])
+        ])
+        (if' (op [["has" "m" (str "getBadgeListTab")] "and" ["has" "m" (str "redDot_GetBadgeState")]]) [
+          (forIn ["_" "b"] [["kv" ["m:getBadgeListTab" 0]]] [
+            (if' (op [["tab" "b"] "and" ["m:redDot_GetBadgeState" "b"]]) [
+              ["add" ["k" (str "strain") (str "badge") "b.stageId"] (op [(str "Special training badge ") ".." ["tostring" "b.stageId"]]) (str "trainBadge") ["pack" (op [(op ["b.isFinal" "and" true]) "or" false])]]
+            ])
+          ])
+        ])
+        (if' (op ["pg.me.isGetBadgeMaxReward" "and" ["has" "m" (str "getExchangeInfo")]]) [
+          (local "x" [["m:getExchangeInfo"]])
+          (if' (op [["tab" "x"] "and" (op [["type" "x.canExchangeNum"] "==" (str "number")]) "and" (op ["x.canExchangeNum" ">" 0])]) [
+            ["add" (str "strain:exchange") (str "Special training badge exchange") (str "trainExchange") ["pack"]]
+          ])
+        ])
+      ])
+      blank
+      (localFunction "petResearch" ["add" "seen"] [
+        (local ["m" "PRU" "R"] [["uiModel" (str "petResearch")] ["req" (str "Guis.Utils.PetResearchUtils")] ["req" (str "Const.RedDotConst")]])
+        (if' (not (paren (op ["m" "and" "PRU" "and" "R" "and" ["tab" "PRU.PET_SHOW_TAB"] "and" ["has" "m" (str "redDot_GetPetResearchState")] "and" ["has" "PRU" (str "checkCountryReward")]]))) (inline [(return [(str "deps")])]))
+        (local "style" [["m:redDot_GetPetResearchState"]])
+        ["seen" (str "hud") "style"]
+        (if' (op ["style" "~=" "R.RedDotStyle.REWARD"]) (inline [(return [])]))
+        (local ["area" "TAB"] ["m.areaId" "PRU.PET_SHOW_TAB"])
+        (if' (not "area") (inline [(return [(str "noarea")])]))
+        (if' ["PRU.checkCountryReward" "area" "TAB.SPECIES" "PRU.REWARD_COLLECT"] [
+          ["add" ["k" (str "petres") (str "species") "area"] (str "Pet research species collection") (str "petSpecies") ["pack" "area"]]
+        ])
+        (if' ["PRU.checkCountryReward" "area" "TAB.FORM" "PRU.REWARD_COLLECT"] [
+          ["add" ["k" (str "petres") (str "form") "area"] (str "Pet research form collection") (str "petForm") ["pack" "area"]]
+        ])
+        (if' ["PRU.checkCountryReward" "area" "TAB.SPECIES" "PRU.REWARD_LEVEL"] [
+          ["add" ["k" (str "petres") (str "level") "area"] (str "Pet research country level") (str "petLevel") ["pack" "area"]]
+        ])
+        (local ["CD" "hb"] [["req" (str "Data.pet_research_content_data")] "pg.me.petHandbookMap"])
+        (if' (op ["CD" "and" "hb" "and" ["has" "PRU" (str "getPetResearchSpeciesList")] "and" ["has" "PRU" (str "_checkPetHasTopicReward")] "and" ["has" "PRU" (str "getPetAllTopicRewardByTemplateId")]]) [
+          (forIn ["_" "id"] [["kv" ["PRU.getPetResearchSpeciesList" "area"]]] [
+            (local "c" [(index "CD" "id")])
+            (if' (op [["tab" "c"] "and" (op ["c.isShow" "~=" 0]) "and" (paren (op [(not ["has" "PRU" (str "checkPetHasFormInCountry")]) "or" ["PRU.checkPetHasFormInCountry" "id" "area"]])) "and" ["PRU._checkPetHasTopicReward" "id" "hb"]]) [
+              (local "list" [["PRU.getPetAllTopicRewardByTemplateId" "id"]])
+              (if' (op [["len" "list"] ">" 0]) [
+                ["add" ["k" (str "petres") (str "topic") "id" ["len" "list"]] (op [(str "Pet topic rewards ") ".." ["tostring" "id"]]) (str "petTopic") ["pack" "list"]]
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "bossRush" ["add" "seen"] [
+        (local ["BU" "SR"] [["req" (str "Utils.BossRushUtils")] ["req" (str "Data.bossrush_season_reward_data")]])
+        (if' (not (paren (op ["BU" "and" "SR" "and" ["has" "BU" (str "hasUnreceivedSeasonReward")] "and" ["has" "BU" (str "getCurSeasonStar")] "and" ["has" "BU" (str "isSeasonRewardReceived")]]))) (inline [(return [(str "deps")])]))
+        (local "any" [(op [(op [["BU.hasUnreceivedSeasonReward"] "and" true]) "or" false])])
+        ["seen" (str "hud") "any"]
+        (if' (not "any") (inline [(return [])]))
+        (local ["cur" "star"] [(op [["tonumber" "pg.me.curBossRushSeasonId"] "or" 0]) (op [["tonumber" ["BU.getCurSeasonStar"]] "or" 0])])
+        (forIn ["need" "cfg"] [["kv" "SR"]] [
+          (if' (op [(op [["type" "need"] "==" (str "number")]) "and" (op ["need" "<=" "star"]) "and" ["tab" "cfg"] "and" (not ["BU.isSeasonRewardReceived" "need"])]) [
+            (local "ok" [false])
+            (forIn ["lo" "row"] [["kv" "cfg"]] [
+              (forIn ["hi" "v"] [["kv" "row"]] [
+                (if' (op [(op [["type" "lo"] "==" (str "number")]) "and" (op [["type" "hi"] "==" (str "number")]) "and" (op ["lo" "<=" "cur"]) "and" (op ["cur" "<=" "hi"]) "and" ["tab" "v"] "and" (op [(paren (op [["tonumber" "v.awardId"] "or" 0])) ">" 0])]) (inline [(assign "ok" [true])]))
+              ])
+            ])
+            (if' "ok" (inline [["add" ["k" (str "bossrush") "cur" "need"] (op [(str "Boss rush season reward ") ".." "need"]) (str "bossRush") ["pack" "need"]]]))
+          ])
+        ])
+      ])
+      blank
+      (localFunction "inStage" ["v" "stage"] [
+        (if' (op [["type" "v"] "==" (str "number")]) (inline [(return [(op ["v" "==" "stage"])])]))
+        (forIn ["_" "x"] [["kv" "v"]] (inline [(if' (op ["x" "==" "stage"]) (inline [(return [true])]))]))
+        (return [false])
+      ])
+      blank
+      (localFunction "homeSeason" ["add" "seen"] [
+        (local ["HU" "KC" "R"] [["req" (str "Utils.HomeSeasonUtils")] ["req" (str "Common.Const.Const")] ["req" (str "Const.RedDotConst")]])
+        (local ["_" "C"] [["act"]])
+        (local "me" ["pg.me"])
+        (if' (not (paren (op ["HU" "and" "KC" "and" "R" "and" "C" "and" ["tab" "KC.HOMELAND_SEASON_MODULE_TYPE"] "and" ["has" "HU" (str "isSeasonAvailable")]]))) (inline [(return [(str "deps")])]))
+        (if' (not ["HU.isSeasonAvailable" "me"]) (inline [(return [(str "closed")])]))
+        (local ["s" "REWARD" "MT"] ["me.homeSeasonId" "R.RedDotStyle.REWARD" "KC.HOMELAND_SEASON_MODULE_TYPE"])
+        (local "CR" [["req" (str "Data.home_season_collection_reward_data")]])
+        (if' (op ["CR" "and" ["has" "HU" (str "getProgressRewardRedDotStyle")]]) [
+          (local "style" [["HU.getProgressRewardRedDotStyle" "me"]])
+          ["seen" (str "progress") "style"]
+          (if' (op ["style" "==" "REWARD"]) [
+            (local "st" ["me.homeSeasonCollectionRewardStateMap"])
+            (forIn ["id" "cfg"] [["kv" "CR"]] [
+              (if' (op [["tab" "cfg"] "and" (op ["cfg.seasonId" "==" "s"]) "and" ["tab" "st"] "and" (op [(index "st" "id") "==" "HU.COLLECTION_REWARD_STATE_CAN_RECEIVE"])]) [
+                ["add" ["k" (str "homeseason") (str "progress") "id"] (op [(str "Home season progress reward ") ".." ["tostring" "id"]]) (str "homeSeasonProgress") ["pack" "id"]]
+              ])
+            ])
+          ])
+        ])
+        (local ["HSD" "HMD" "DT" "MR"] [["req" (str "Data.home_season_data")] ["req" (str "Data.home_season_module_data")] ["req" (str "Data.home_season_daily_task_data")] ["req" (str "Data.home_season_mutation_collection_reward_data")]])
+        (local "season" [(op ["HSD" "and" (index "HSD" "s")])])
+        (if' (not (paren (op ["HMD" "and" ["tab" "season"] "and" ["has" "HU" (str "getHomeSeasonModuleRedDotStyle")]]))) (inline [(return [])]))
+        (forIn ["_" "mid"] [["iv" "season.funcRefIds"]] [
+          (local "md" [(index "HMD" "mid")])
+          (if' (op [["tab" "md"] "and" (op ["md.seasonId" "==" "s"])]) [
+            (local "style" [["HU.getHomeSeasonModuleRedDotStyle" "me" "s" "mid" "md.type"]])
+            ["seen" ["k" (str "module") "mid"] "style"]
+            (ifElse (op [(op ["style" "==" "REWARD"]) "and" (op ["md.type" "==" "MT.DAILY_QUEST"]) "and" "DT"]) [
+                (local ["pend" "stm"] ["me.homeSeasonTaskPendingRewardMap" "me.homeSeasonTaskStateMap"])
+                (forIn ["tid" "cfg"] [["kv" "DT"]] [
+                  (local "p" [(op [["tonumber" (op [["tab" "pend"] "and" (index "pend" "tid")])] "or" 0])])
+                  (if' (op [["tab" "cfg"] "and" (op ["cfg.seasonId" "==" "s"]) "and" (paren (op [(op ["p" ">" 0]) "or" (paren (op [["inStage" "cfg.stageId" "me.homeSeasonStageId"] "and" ["tab" "stm"] "and" (op [(index "stm" "tid") "==" "C.TaskState.Finihed_CanRecv"])]))]))]) [
+                    ["add" ["k" (str "homeseason") (str "task") "tid" "p"] (op [(str "Home season daily task ") ".." ["tostring" "tid"]]) (str "homeSeasonTask") ["pack" "tid"]]
+                  ])
+                ])
+              ] (if' (op [(op ["style" "==" "REWARD"]) "and" (op ["md.type" "==" "MT.ITEM_COLLECT"]) "and" "MR" "and" ["has" "HU" (str "hasReceivableHomeSeasonMutationReward")] "and" ["HU.hasReceivableHomeSeasonMutationReward" "me" "s"]]) [
+                (local "stars" [(op [["tonumber" (op [["tab" "me.homeSeasonMutationStarBySeason"] "and" (index "me.homeSeasonMutationStarBySeason" "s")])] "or" 0])])
+                (local "got" ["me.homeSeasonMutationRewardReceived"])
+                (local "ids" [(table [])])
+                (forIn ["id" "cfg"] [["kv" "MR"]] [
+                  (if' (op [["tab" "cfg"] "and" (op ["cfg.seasonId" "==" "s"]) "and" (op [(paren (op [["tonumber" "cfg.needPoint"] "or" 0])) "<=" "stars"]) "and" (not (paren (op [["tab" "got"] "and" (op [(index "got" "id") "==" true])])))]) (inline [(assign (index "ids" (op [(len "ids") "+" 1])) ["id"])]))
+                ])
+                (if' (op [(len "ids") ">" 0]) [
+                  ["add" ["k" (str "homeseason") (str "mutation") "s" (len "ids")] (str "Home season collection rewards") (str "homeSeasonMutation") ["pack" "ids"]]
+                ])
+              ]))
+          ])
+        ])
+      ])
+      blank
+      (localFunction "questChapter" ["add" "seen"] [
+        (local ["m" "QC"] [["uiModel" (str "quest")] ["req" (str "Data.quest_catalog")]])
+        (if' (not (paren (op ["m" "and" "QC" "and" ["has" "m" (str "isChapterProgressRewardCanClaim")] "and" ["has" "m" (str "getChapterProgressRewardInfo")]]))) (inline [(return [(str "deps")])]))
+        (local "done" [(table [])])
+        (forIn ["_" "cat"] [["kv" "QC"]] [
+          (forIn ["_" "ch"] [["iv" (op [["tab" "cat"] "and" "cat.chapters"])]] [
+            (if' (not (index "done" "ch")) [
+              (assign (index "done" "ch") [true])
+              (local "s" [(op [(op [["m:isChapterProgressRewardCanClaim" "ch"] "and" true]) "or" false])])
+              ["seen" "ch" "s"]
+              (if' "s" [
+                (local "info" [["m:getChapterProgressRewardInfo" "ch"]])
+                (forIn ["_" "r"] [["iv" (op [["tab" "info"] "and" "info.rewardList"])]] [
+                  (if' (op [["tab" "r"] "and" "r.canClaim" "and" "info.configId"]) [
+                    ["add" ["k" (str "quest") (str "chapter") "info.configId" "r.rewardIndex"] (op [(str "Quest chapter reward ") ".." ["tostring" "ch"] ".." (str " #") ".." ["tostring" "r.rewardIndex"]]) (str "questChapter") ["pack" "info.configId" "r.rewardIndex"]]
+                  ])
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "puppetScore" ["add" "seen"] [
+        (local ["A" "C"] [["act"]])
+        (local "me" ["pg.me"])
+        (if' (not (paren (op ["A" "and" "C" "and" ["has" "A" (str "getLuckyPetCanRewardList")] "and" ["has" "me" (str "reqActivityCatchScoreReward")]]))) (inline [(return [(str "deps")])]))
+        (local "eid" [(index ["openEvents" "C.EventType.PuppetCatch"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        (local ["list" "done"] [["A.getLuckyPetCanRewardList" "me"] "me.luckyPetDayRewarded"])
+        (forNum "i" [1 ["len" "list"]] [
+          (local "ready" [(op [(index "list" "i") "and" (not (paren (op [["tab" "done"] "and" (index "done" "i")])))])])
+          ["seen" "i" "ready"]
+          (if' "ready" [
+            (local "arg" [(op [(op [(paren (op [(op ["i" ">" 1]) "and" (op [(index "list" (op ["i" "-" 1])) "==" true]) "and" ["tab" "done"] "and" (op [(index "done" (op ["i" "-" 1])) "==" true])])) "and" (-1)]) "or" "i"])])
+            ["add" ["k" (str "puppet") (str "score") "eid" "i"] (op [(str "Puppet catch score reward ") ".." "i"]) (str "puppet") ["pack" "eid" "arg"]]
+          ])
+        ])
+      ])
+      blank
+      (localFunction "photoSurvey" ["add" "seen"] [
+        (local ["A" "C"] [["act"]])
+        (local "me" ["pg.me"])
+        (if' (not (paren (op ["A" "and" "C" "and" ["has" "A" (str "getFormResearchCanRewardList")] "and" ["has" "me" (str "reqActivityPhotoRewardGet")] "and" ["has" "me" (str "reqActivityPhotoExtraRewardGet")] "and" ["has" "me" (str "reqActivityPhotoStageRewardGet")]]))) (inline [(return [(str "deps")])]))
+        (local "eid" [(index ["openEvents" "C.EventType.PuppetPhoto"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        ["seen" (str "finish") "me.formResearchFinish"]
+        (if' (op [(op ["me.formResearchFinish" "==" true]) "and" (op ["me.formResearchRewarded" "~=" true])]) [
+          ["add" ["k" (str "photo") (str "reward") "eid"] (str "Photo survey reward") (str "photoReward") ["pack" "eid"]]
+        ])
+        (if' (op [(op ["me.formResearchObRewardFin" "==" true]) "and" (op ["me.formResearchObRewardRew" "~=" true])]) [
+          ["add" ["k" (str "photo") (str "extra") "eid"] (str "Photo survey extra reward") (str "photoExtra") ["pack" "eid"]]
+        ])
+        (local ["list" "done"] [["A.getFormResearchCanRewardList" "me"] "me.formResearchStageRewarded"])
+        (forNum "i" [1 ["len" "list"]] [
+          (local "ready" [(op [(index "list" "i") "and" (not (paren (op [["tab" "done"] "and" (index "done" "i")])))])])
+          ["seen" "i" "ready"]
+          (if' "ready" [
+            (local "arg" [(op [(op [(paren (op [(op ["i" ">" 1]) "and" (op [(index "list" (op ["i" "-" 1])) "==" true]) "and" ["tab" "done"] "and" (op [(index "done" (op ["i" "-" 1])) "==" true])])) "and" (-1)]) "or" "i"])])
+            ["add" ["k" (str "photo") (str "stage") "eid" "i"] (op [(str "Photo survey stage reward ") ".." "i"]) (str "photoStage") ["pack" "eid" "arg"]]
+          ])
+        ])
+      ])
+      blank
+      (localFunction "petSaveWeek" ["add" "seen"] [
+        (local ["_" "C" "CA"] [["act"]])
+        (local "M" [["req" (str "Guis.Panels.EventPetSaveManual.EventPetSaveManualModel")]])
+        (if' (not (paren (op ["C" "and" ["has" "CA" (str "checkPetSaveCurWeek")] "and" ["has" "M" (str "getWeekArrival")] "and" ["has" "M" (str "receivedWeekSumyReward")] "and" ["has" "M" (str "getSubActId")] "and" ["has" "pg.me" (str "reqActivityPetSaveWeekSumyReward")]]))) (inline [(return [(str "deps")])]))
+        (local "eid" [(index ["openEvents" "C.EventType.PetSave"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        (forNum "week" [1 (op [["tonumber" ["CA.checkPetSaveCurWeek"]] "or" 0])] [
+          (local "sub" [["M.getSubActId" "M" "week"]])
+          (local "ready" [(op [["M.getWeekArrival" "M" "week"] "and" (not ["M.receivedWeekSumyReward" "M" "sub"])])])
+          ["seen" "week" (op [(op ["ready" "and" true]) "or" false])]
+          (if' "ready" [
+            ["add" ["k" (str "petsave") (str "week") "eid" "sub"] (op [(str "Pet save weekly summary ") ".." "week"]) (str "petSave") ["pack" "eid" "sub"]]
+          ])
+        ])
+      ])
+      blank
+      (localFunction "energyMatch" ["add" "seen"] [
+        (local ["A" "C" "CA"] [["act"]])
+        (local "TD" [["req" (str "Data.energy_match_theme_data")]])
+        (local "me" ["pg.me"])
+        (if' (not (paren (op ["A" "and" "C" "and" "TD" "and" ["has" "A" (str "getNewEnergyTheme")] "and" ["has" "A" (str "getEnergyThemeId")] "and" ["has" "CA" (str "redDotReward_CheckVitalityRewardItem")] "and" ["has" "me" (str "serverActivityMsg")]]))) (inline [(return [(str "deps")])]))
+        (local "eid" [(index ["openEvents" "C.EventType.EnergyMatch"] 1)])
+        (if' (not "eid") (inline [(return [(str "closed")])]))
+        (local ["theme" "id"] [["A.getNewEnergyTheme" "me"] ["A.getEnergyThemeId" "me"]])
+        (local "row" [(op [["tab" (index "TD" "theme")] "and" (index (index "TD" "theme") "id")])])
+        (forIn ["i" "r"] [["iv" (op [["tab" "row"] "and" "row.award"])]] [
+          (local "ready" [(op [(op [["CA.redDotReward_CheckVitalityRewardItem" "theme" "id" "i"] "and" true]) "or" false])])
+          ["seen" "i" "ready"]
+          (if' (op ["ready" "and" ["tab" "r"] "and" (op ["r.index" "~=" null])]) [
+            ["add" ["k" (str "energy") (str "award") "eid" "r.index"] (op [(str "Vitality contest reward ") ".." ["tostring" "r.index"]]) (str "energy") ["pack" "eid" (str "RPC_CS_GetEnergyMatchAward") "r.index"]]
+          ])
+        ])
+      ])
+      blank
+      (localFunction "petArea" ["add" "seen"] [
+        (local "map" [(op ["pg.game" "and" "pg.game.map"])])
+        (if' (not ["has" "map" (str "getPetAreaRewardsState")]) (inline [(return [(str "deps")])]))
+        (local "any" [false])
+        (forIn ["_" "e"] [["iv" ["map:getPetAreaRewardsState"]]] [
+          (if' (op [["tab" "e"] "and" (op ["e.smallAreaId" "~=" null]) "and" ["tab" "e.rewardState"]]) [
+            (forNum "stage" [1 3] [
+              (if' (index "e.rewardState" "stage") [
+                (assign "any" [true])
+                ["add" ["k" (str "petarea") "e.smallAreaId" "stage"] (op [(str "Pet area reward ") ".." ["tostring" "e.smallAreaId"] ".." (str " stage ") ".." "stage"]) (str "petArea") ["pack" "e.smallAreaId" "stage"]]
+              ])
+            ])
+          ])
+        ])
+        ["seen" (str "any") "any"]
+      ])
+      blank
+      (localFunction "homeCampDispatch" ["add" "seen"] [
+        (local ["HLU" "UI"] [["req" (str "Common.Utils.HomeLandUtils")] ["req" (str "Const.UIConst")]])
+        (if' (not (paren (op ["HLU" "and" "UI" "and" ["tab" "UI.HOME_CAMP_DISPATCH_STATE"] "and" ["has" "HLU" (str "getCampCarEntity")] "and" "pg.me"]))) (inline [(return [(str "deps")])]))
+        (local "car" [(op [(op ["pg.me.uid" "~=" null]) "and" ["HLU.getCampCarEntity" "pg.me.uid"]])])
+        (if' (not (paren (op [["tab" "car"] "and" ["has" "car" (str "getPetsDispatchInfo")] "and" ["has" "car" (str "getCampPetDispatchState")] "and" ["has" "car" (str "finishDispatch")]]))) (inline [(return [(str "nocar")])]))
+        (local "ready" [(op [(op [["car:getPetsDispatchInfo"] "and" (op [["car:getCampPetDispatchState"] "==" "UI.HOME_CAMP_DISPATCH_STATE.Finished"]) "and" true]) "or" false])])
+        ["seen" (str "camp") "ready"]
+        (if' "ready" [
+          (local "did" [(op [(op [["has" "car" (str "getDispatchId")] "and" ["car:getDispatchId"]]) "or" 0])])
+          ["add" ["k" (str "homecamp") (str "dispatch") "did"] (str "Home camp pet dispatch finish") (str "homeCampFinish") ["pack"] "car"]
+        ])
+      ])
+      blank
+      (localFunction "probe" ["row"] [
+        (return [
+          (table [
+            "row.name"
+            (fn ["add" "seen"] [
+              (local "M" [(op [(op ["row.ui" "and" ["uiModel" "row.ui"]]) "or" ["req" "row.mod"]])])
+              (if' (not ["has" "M" "row.fn"]) (inline [(return [(str "deps")])]))
+              (local "want" [])
+              (ifElse (op ["row.is" "==" (str "reward")]) [
+                  (local "R" [["req" (str "Const.RedDotConst")]])
+                  (assign "want" [(op ["R" "and" ["tab" "R.RedDotStyle"] "and" "R.RedDotStyle.REWARD"])])
+                ] (if' "row.is" [
+                  (assign "want" [["req" (index "row.is" 1)]])
+                  (forNum "i" [2 (len "row.is")] (inline [(assign "want" [(op [(op [["tab" "want"] "and" (index "want" (index "row.is" "i"))]) "or" null])])]))
+                ]))
+              (if' (op ["row.is" "and" (op ["want" "==" null])]) (inline [(return [(str "deps")])]))
+              (local "v" [])
+              (ifElse "row.ui" (inline [(assign "v" [[(index "M" "row.fn") "M"]])]) (inline [(assign "v" [[(index "M" "row.fn")]])]))
+              (local "ready" [])
+              (ifElse (op ["want" "~=" null]) (inline [(assign "ready" [(op ["v" "==" "want"])])]) (inline [(assign "ready" [(op [(op ["v" "and" true]) "or" false])])]))
+              ["seen" (str "state") (op [(op [(op ["want" "~=" null]) "and" "v"]) "or" "ready"])]
+              (if' (not "ready") (inline [(return [])]))
+              (local "key" [(op [(op ["row.stamp" "and" ["k" "row.name" (index "pg.me" "row.stamp")]]) "or" "row.name"])])
+              ["add" "key" "row.label" "row.claim" ["pack"] (op [(op ["row.ui" "and" "M"]) "or" null])]
+            ])
+            (field "covers" (table ["row.fn"]))
+          ])
+        ])
+      ])
+      blank
+      (local "SOURCES" [
+        (table (rows [
+          [(table [(str "daily") "dailyActive"]) (table [(str "battlepass") "battlePass"]) (table [(str "bpcycle") "bpCycle"]) (table [(str "season") "seasonAchievement"]) (table [(str "sign") "sign"])]
+          [(table [(str "cross") "crossPlatform"]) (table [(str "firsttopup") "firstTopup"]) (table [(str "journey") "journeyTrial"]) (table [(str "dispatch") "petDispatch"]) (table [(str "growth") "growthGift"])]
+          [(table [(str "littlefire") "littleFire"]) (table [(str "fishing") "fishingCapture" (field "covers" (table [(str "getFishingCaptureRedDotState")]))]) (table [(str "leylineup") "leylineTreeUp"]) (table [(str "redbook") "redBook"])]
+          (apply "probe" (table [(field "name" (str "rogue-weekly")) (field "mod" (str "Utils.RogueUtils")) (field "fn" (str "getRedDotWeeklyState")) (field "is" (str "reward")) (field "claim" (str "rogueWeekly")) (field "label" (str "Tower weekly boss reward"))]))
+          (apply "probe" (table [(field "name" (str "rogue-seasonweekly")) (field "mod" (str "Utils.RogueUtils")) (field "fn" (str "getRedDotSeasonWeeklyRewardState")) (field "is" (str "reward")) (field "claim" (str "rogueSeasonWeekly")) (field "label" (str "Tower season weekly reward"))]))
+          (apply "probe" (table [(field "name" (str "rogue-daily")) (field "mod" (str "Utils.RogueUtils")) (field "fn" (str "getRedDotDailyState")) (field "is" (str "reward")) (field "claim" (str "rogueDaily")) (field "label" (str "Tower daily harvest"))]))
+          (apply "probe" (table [(field "name" (str "monthcard")) (field "mod" (str "GameApp.MonthCard.MonthCardUtils")) (field "fn" (str "hasStoredReward")) (field "claim" (str "monthCardStored")) (field "label" (str "Month card stored reward"))]))
+          (apply "probe" (table [(field "name" (str "homebook")) (field "mod" (str "Utils.HomeBookRedDotUtils")) (field "fn" (str "canReceiveScoreReward")) (field "claim" (str "homeBookGrade")) (field "label" (str "Home handbook grade reward"))]))
+          (table [(str "homebookcat") "homeBookCategory"])
+          (apply "probe" (table [(field "name" (str "grabeggs")) (field "mod" (str "Guis.Utils.GrabEggsRankUtils")) (field "fn" (str "hasClaimableReward")) (field "claim" (str "grabEggsRank")) (field "label" (str "Grab-eggs season rank reward"))]))
+          [(table [(str "grabeggsmode") "grabEggsMode"]) (table [(str "course") "course"]) (table [(str "playerlv") "playerLevel" (field "covers" (table [(str "redDot_CheckHasLvReward")]))]) (table [(str "gacha") "lotteryTimes"]) (table [(str "strain") "specialTrain" (field "covers" (table [(str "redDot_GetSpecialTrainState") (str "redDot_GetChapterPageState") (str "redDot_GetBadgeState")]))])]
+          [(table [(str "petres") "petResearch" (field "covers" (table [(str "redDot_GetPetResearchState")]))]) (table [(str "bossrush") "bossRush"])]
+          (apply "probe" (table [(field "name" (str "homecar")) (field "ui" (str "homeCarLevelUp")) (field "fn" (str "redDot_GetLevelRewardState")) (field "is" (str "reward")) (field "claim" (str "homeCarLevel")) (field "label" (str "Home car level rewards"))]))
+          [(table [(str "homeseason") "homeSeason"]) (table [(str "quest") "questChapter"])]
+          (apply "probe" (table [(field "name" (str "monthcarddaily")) (field "mod" (str "GameApp.MonthCard.MonthCardUtils")) (field "fn" (str "getDailyRewardState")) (field "is" (table [(str "GameApp.MonthCard.MonthCardConst") (str "DAILY_REWARD_STATE") (str "AVAILABLE")])) (field "stamp" (str "mcLastReceiveDailyAwardTm")) (field "claim" (str "monthCardDaily")) (field "label" (str "Month card daily reward"))]))
+          [(table [(str "puppet") "puppetScore"]) (table [(str "photo") "photoSurvey"]) (table [(str "petsave") "petSaveWeek"]) (table [(str "energy") "energyMatch"])]
+          [(table [(str "petarea") "petArea"]) (table [(str "homecamp") "homeCampDispatch"])]
+        ]))
+      ])
+      blank
+      (local "skipped" [(table [])])
+      blank
+      (local "missing" [(table [])])
+      blank
+      (localFunction "receiver" ["spec" "player" "recv"] [
+        (if' (op ["recv" "~=" null]) (inline [(return ["recv"])]))
+        (if' (not "spec.on") (inline [(return ["player"])]))
+        (local "v" ["pg"])
+        (forIn "part" [["spec.on:gmatch" (str "[^.]+")]] (inline [(assign "v" [(op [(op [["tab" "v"] "and" (index "v" "part")]) "or" null])])]))
+        (return ["v"])
+      ])
+      blank
+      (localFunction "perform" ["a"] [
+        (local ["spec" "list" "n"] [(index "CLAIMS" "a.claim") (table []) "a.args.n"])
+        (forNum "i" [1 "n"] (inline [(assign (index "list" "i") [(index "a.args" "i")])]))
+        (forIn ["_" "v"] [["ipairs" (op ["spec.tail" "or" (table [])])]] [
+          (assign "n" [(op ["n" "+" 1])])
+          (assign (index "list" "n") ["v"])
+        ])
+        (if' "spec.fn" (inline [(return [["spec.fn" "a.recv" ["unpack" "list" 1 "n"]]])]))
+        (if' "spec.rpc" (inline [(return [["a.recv:serverMsg" "spec.rpc" ["unpack" "list" 1 "n"]]])]))
+        (return [[(index "a.recv" "spec.call") "a.recv" ["unpack" "list" 1 "n"]]])
+      ])
+      blank
+      (localFunction "nextAction" ["tried" "player"] [
+        (local "found" [])
+        (localFunction "add" ["key" "label" "claim" "args" "recv"] [
+          (if' (op ["found" "or" (index "tried" "key")]) (inline [(return [])]))
+          (local "spec" [(index "CLAIMS" "claim")])
+          (local "on" [(op ["spec" "and" ["receiver" "spec" "player" "recv"]])])
+          (if' (not (paren (op ["spec" "and" (paren (op ["spec.fn" "or" ["has" "on" (op [(op ["spec.rpc" "and" (str "serverMsg")]) "or" "spec.call"])]]))]))) [
+            (if' (not (index "missing" "claim")) [
+              (assign (index "missing" "claim") [true])
+              ["log" (str "skip") "claim" (str "claim target missing")]
+            ])
+            (return [])
+          ])
+          (assign "found" [(table [(field "key" "key") (field "label" "label") (field "claim" "claim") (field "args" "args") (field "recv" "on")])])
+        ])
+        (forIn ["_" "src"] [["ipairs" "SOURCES"]] [
+          (if' "found" (inline ["break"]))
+          (local ["ok" "err"] [["pcall" (index "src" 2) "add" "noop"]])
+          (if' (op [(not "ok") "and" (not (index "skipped" (index "src" 1)))]) [
+            (assign (index "skipped" (index "src" 1)) [true])
+            ["log" (str "skip") (index "src" 1) ["field" "err"]]
+          ])
+        ])
+        (return ["found"])
+      ])
+      blank
+      (localFunction "short" ["v" "n"] [
+        (local "s" [["field" "v"]])
+        (if' (op [(len "s") ">" "n"]) (inline [(assign "s" [(op [["s:sub" 1 "n"] ".." (str "~")])])]))
+        (return ["s"])
+      ])
+      blank
+      (localFunction "counts" ["map"] [
+        (local "keys" [(table [])])
+        (forIn "key" [["pairs" "map"]] (inline [(assign (index "keys" (op [(len "keys") "+" 1])) ["key"])]))
+        ["table.sort" "keys"]
+        (forIn ["i" "key"] [["ipairs" "keys"]] (inline [(assign (index "keys" "i") [(op ["key" ".." (str ":") ".." (index "map" "key")])])]))
+        (return [["table.concat" "keys" (str ",")]])
+      ])
+      blank
+      (localFunction "hot" ["key"] (inline [(return [(op [(op ["key" "==" (str "2")]) "or" (op ["key" "==" (str "true")]) "or" (op ["key" "==" (str "Reward")])])])]))
+      blank
+      (localFunction "diagSource" ["name" "fn"] [
+        (local ["n" "ready" "states" "heated" "cold"] [0 0 (table []) (table []) (table [])])
+        (localFunction "seen" ["id" "st"] [
+          (assign "n" [(op ["n" "+" 1])])
+          (local "key" [["short" "st" 16]])
+          (assign (index "states" "key") [(op [(paren (op [(index "states" "key") "or" 0])) "+" 1])])
+          (local "list" [(op [(op [["hot" "key"] "and" "heated"]) "or" "cold"])])
+          (if' (op [(len "list") "<" 5]) (inline [(assign (index "list" (op [(len "list") "+" 1])) [(op [["short" "id" 24] ".." (str "=") ".." "key"])])]))
+        ])
+        (localFunction "add" [] (inline [(assign "ready" [(op ["ready" "+" 1])])]))
+        (local ["ok" "why"] [["pcall" "fn" "add" "seen"]])
+        (forIn ["_" "x"] [["ipairs" "cold"]] (inline [(if' (op [(len "heated") "<" 5]) (inline [(assign (index "heated" (op [(len "heated") "+" 1])) ["x"])]))]))
+        (local "parts" [(table [(op [(str "ready=") ".." "ready"]) (op [(str "seen=") ".." "n"])])])
+        (if' (op ["n" ">" 0]) (inline [(assign (index "parts" (op [(len "parts") "+" 1])) [(op [(str "states=") ".." ["counts" "states"]])])]))
+        (if' (op [(len "heated") ">" 0]) (inline [(assign (index "parts" (op [(len "parts") "+" 1])) [(op [(str "sample=") ".." ["table.concat" "heated" (str ",")]])])]))
+        (ifElse (not "ok") (inline [(assign (index "parts" (op [(len "parts") "+" 1])) [(op [(str "err=") ".." ["short" "why" 160]])])]) (if' "why" (inline [(assign (index "parts" (op [(len "parts") "+" 1])) [(op [(str "exit=") ".." ["tostring" "why"]])])])))
+        ["log" (str "diag") "name" ["table.concat" "parts" (str " ")] true]
+      ])
+      blank
+      (local "DATA" [(table [(str "event_task_data") (str "game_event_data") (str "game_event_type_post_data") (str "event_season_achievement_data") (str "event_battlepass_data") (str "activate_tasks_data") (str "guide_course_grade_data") (str "quest_catalog")])])
+      blank
+      (localFunction "diagModules" [] [
+        (local "parts" [(table [])])
+        (forIn ["_" "name"] [["ipairs" "DATA"]] [
+          (local ["ok" "m"] [["pcall" "require" (op [(str "Data.") ".." "name"])]])
+          (local "row" [(str "-")])
+          (if' (op ["ok" "and" ["tab" "m"]]) (inline [["pcall" (fn [] (inline [(forIn ["_" "v"] [["pairs" "m"]] (inline [(assign "row" [["type" "v"]]) "break"]))]))]]))
+          (assign (index "parts" (op [(len "parts") "+" 1])) [(op ["name" ".." (str "=") ".." (paren (op [(op ["ok" "and" ["type" "m"]]) "or" (str "err")])) ".." (str "/") ".." "row"])])
+        ])
+        ["log" (str "diag") (str "data") ["table.concat" "parts" (str " ")] true]
+      ])
+      blank
+      (localFunction "flag" ["f" "..."] [
+        (if' (op [["type" "f"] "~=" (str "function")]) (inline [(return [(str "?")])]))
+        (local ["ok" "v"] [["pcall" "f" "..."]])
+        (if' (not "ok") (inline [(return [(str "E")])]))
+        (return [(op [(op ["v" "and" (str "1")]) "or" (str "0")])])
+      ])
+      blank
+      (localFunction "diagActivity" [] [
+        (local ["A" "C" "CA"] [["act"]])
+        (if' (not (paren (op ["A" "and" "C"]))) (inline [(return [["log" (str "diag") (str "act") (str "deps") true]])]))
+        (local "POST" [["req" (str "Data.game_event_type_post_data")]])
+        (local "names" ["C.NewFrameEventAttriName"])
+        (local "ets" [(table [])])
+        (forIn "et" [["kv" "names"]] (inline [(assign (index "ets" (op [(len "ets") "+" 1])) ["et"])]))
+        ["table.sort" "ets"]
+        (forIn ["_" "et"] [["ipairs" "ets"]] [
+          (local ["ok" "err"] [
+            [
+              "pcall"
+              (fn [] [
+                (local "attr" [(index "names" "et")])
+                (local "parts" [(table [(op [(str "attr=") ".." ["tostring" "attr"]]) (op [(str "raw=") ".." (paren (op [(op [(op [(index "pg.me" "attr") "~=" null]) "and" (str "1")]) "or" (str "0")]))])])])
+                (local "d" [(op [(op [["has" "A" (str "getActivityData")] "and" ["A.getActivityData" "pg.me" "et"]]) "or" null])])
+                (local "base" [(op [["tab" "d"] "and" "d.activityBase"])])
+                (assign (index "parts" (op [(len "parts") "+" 1])) [(op [(str "aid=") ".." ["field" (op [(op [["tab" "base"] "and" "base.activityId"]) "or" null])]])])
+                (local ["st" "n"] [(table []) 0])
+                (forIn ["_" "t"] [["kv" (op [["tab" "base"] "and" "base.activityTasks"])]] [
+                  (assign "n" [(op ["n" "+" 1])])
+                  (local "key" [["short" (op [(op [["tab" "t"] "and" "t.state"]) "or" null]) 8]])
+                  (assign (index "st" "key") [(op [(paren (op [(index "st" "key") "or" 0])) "+" 1])])
+                ])
+                (assign (index "parts" (op [(len "parts") "+" 1])) [(op [(str "tasks=") ".." "n"])])
+                (if' (op ["n" ">" 0]) (inline [(assign (index "parts" (op [(len "parts") "+" 1])) [(op [(str "states=") ".." ["counts" "st"]])])]))
+                (local ["eids" "m"] [(table []) 0])
+                (forIn "eid" [["kv" (op ["POST" "and" (index "POST" "et")])]] [
+                  (assign "m" [(op ["m" "+" 1])])
+                  (if' (op ["m" "<=" 4]) [
+                    (assign (index "eids" (op [(len "eids") "+" 1])) [(op [["tostring" "eid"] ".." (str ":T") ".." ["flag" "A.isOprActivityTabOpen" "eid" "pg.me"] ".." (str "G") ".." ["flag" "CA.isGameEventTabOpen" "eid"] ".." (str "O") ".." ["flag" "A.isOprActivityOpen" "eid"] ".." (str "E") ".." ["flag" "CA.isEventOpen" "eid"]])])
+                  ])
+                ])
+                (assign (index "parts" (op [(len "parts") "+" 1])) [(op [(str "eids=") ".." "m" ".." (paren (op [(op [(op [(len "eids") ">" 0]) "and" (paren (op [(str "[") ".." ["table.concat" "eids" (str ",")] ".." (str "]")]))]) "or" (str "")]))])])
+                ["log" (str "diag") (op [(str "act ") ".." ["tostring" "et"]]) ["table.concat" "parts" (str " ")] true]
+              ])
+            ]
+          ])
+          (if' (not "ok") (inline [["log" (str "diag") (op [(str "act ") ".." ["tostring" "et"]]) (op [(str "err=") ".." ["short" "err" 160]]) true]]))
+        ])
+      ])
+      blank
+      (localFunction "diag" [] [
+        ["log" (str "diag") (str "begin") (op [(len "SOURCES") ".." (str " sources")]) true]
+        ["pcall" "diagModules"]
+        (forIn ["_" "src"] [["ipairs" "SOURCES"]] (inline [["pcall" "diagSource" (index "src" 1) (index "src" 2)]]))
+        (local ["ok" "err"] [["pcall" "diagActivity"]])
+        (if' (not "ok") (inline [["log" (str "diag") (str "act") (op [(str "err=") ".." ["short" "err" 160]]) true]]))
+        ["log" (str "diag") (str "end") (str "-") true]
+      ])
+      blank
+      (local "DOT_FN" [(table [(str "^redDot_Get") (str "^redDot_Check") (str "^getRedDot%w*State$")])])
+      (local "DOT_SKIP" [(table [(str "Path") (str "Key") (str "Numb") (str "Num") (str "Save")])])
+      blank
+      (localFunction "dotName" ["key"] [
+        (if' (op [["type" "key"] "~=" (str "string")]) (inline [(return [false])]))
+        (local "hit" [false])
+        (forIn ["_" "p"] [["ipairs" "DOT_FN"]] [
+          (if' ["key:find" "p"] (inline [(assign "hit" [true])]))
+        ])
+        (if' (not "hit") (inline [(return [false])]))
+        (forIn ["_" "x"] [["ipairs" "DOT_SKIP"]] [
+          (if' ["key:find" "x" 1 true] (inline [(return [false])]))
+        ])
+        (return [true])
+      ])
+      blank
+      (localFunction "get" ["t" "key"] [
+        (if' (not ["tab" "t"]) (inline [(return [null])]))
+        (local ["ok" "v"] [["pcall" (fn [] (inline [(return [(index "t" "key")])]))]])
+        (return [(op [(op ["ok" "and" "v"]) "or" null])])
+      ])
+      blank
+      (localFunction "dotMethods" ["owner"] [
+        (local ["out" "seen" "queue" "i"] [(table []) (table []) (table ["owner"]) 1])
+        (while (op [(index "queue" "i") "and" (op ["i" "<=" 12])]) [
+          (local "t" [(index "queue" "i")])
+          (assign "i" [(op ["i" "+" 1])])
+          (if' (op [["tab" "t"] "and" (not (index "seen" "t"))]) [
+            (assign (index "seen" "t") [true])
+            (forIn ["key" "v"] [["kv" "t"]] [
+              (if' (op [(op [["type" "v"] "==" (str "function")]) "and" ["dotName" "key"]]) (inline [(assign (index "out" (op [(len "out") "+" 1])) ["key"])]))
+            ])
+            (local ["ok" "mt"] [["pcall" "getmetatable" "t"]])
+            (local "idx" [(op [(op ["ok" "and" (op [["type" "mt"] "==" (str "table")]) "and" ["rawget" "mt" (str "__index")]]) "or" null])])
+            (if' ["tab" "idx"] (inline [(assign (index "queue" (op [(len "queue") "+" 1])) ["idx"])]))
+            (local "sup" [["get" "t" (str "super")]])
+            (if' ["tab" "sup"] (inline [(assign (index "queue" (op [(len "queue") "+" 1])) ["sup"])]))
+          ])
+        ])
+        ["table.sort" "out"]
+        (return ["out"])
+      ])
+      blank
+      (localFunction "dotOwners" [] [
+        (local "owners" [(table [])])
+        (local ["ok" "loaded"] [["pcall" (fn [] (inline [(return ["package.loaded"])]))]])
+        (if' (op ["ok" "and" ["tab" "loaded"]]) [
+          (forIn ["name" "m"] [["kv" "loaded"]] [
+            (if' (op [(op [["type" "name"] "==" (str "string")]) "and" (op [["type" "m"] "==" (str "table")])]) (inline [(assign (index "owners" (op [(len "owners") "+" 1])) [(table ["name" "m" false])])]))
+          ])
+        ])
+        ["table.sort" "owners" (fn ["a" "b"] (inline [(return [(op [(index "a" 1) "<" (index "b" 1)])])]))]
+        (local ["ui" "models"] [(op ["pg.global" "and" "pg.global.ui"]) (table [])])
+        (forIn ["name" "p"] [["kv" "ui"]] [
+          (local "m" [["get" "p" (str "model")]])
+          (if' ["tab" "m"] (inline [(assign (index "models" (op [(len "models") "+" 1])) [(table [(op [(str "ui.") ".." ["tostring" "name"]]) "m" true])])]))
+        ])
+        ["table.sort" "models" (fn ["a" "b"] (inline [(return [(op [(index "a" 1) "<" (index "b" 1)])])]))]
+        (forIn ["_" "o"] [["ipairs" "models"]] (inline [(assign (index "owners" (op [(len "owners") "+" 1])) ["o"])]))
+        (return ["owners"])
+      ])
+      blank
+      (localFunction "discover" [] [
+        (local "R" [["req" (str "Const.RedDotConst")]])
+        (local "REWARD" [(op ["R" "and" ["tab" "R.RedDotStyle"] "and" "R.RedDotStyle.REWARD"])])
+        (if' (op ["REWARD" "==" null]) (inline [(return [["log" (str "discover") (str "skipped") (str "no RedDotStyle.REWARD") true]])]))
+        (local "covered" [(table [])])
+        (forIn ["_" "src"] [["ipairs" "SOURCES"]] [
+          (forIn ["_" "name"] [["ipairs" (op ["src.covers" "or" (table [])])]] (inline [(assign (index "covered" "name") [true])]))
+        ])
+        (local "owners" [["dotOwners"]])
+        (local "st" [(table [(field "owners" (len "owners")) (field "fns" 0) (field "reward" 0) (field "covered" 0) (field "errors" 0)])])
+        (local ["done" "lines"] [(table []) (table [])])
+        (forIn ["_" "o"] [["ipairs" "owners"]] [
+          (local ["ok" "names"] [["pcall" "dotMethods" (index "o" 2)]])
+          (forIn ["_" "key"] [["ipairs" (op [(op ["ok" "and" "names"]) "or" (table [])])]] [
+            (local "fn" [["get" (index "o" 2) "key"]])
+            (local "id" [(op [(op [(index "o" 3) "and" (paren (op [["tostring" (index "o" 2)] ".." "key"]))]) "or" "fn"])])
+            (if' (op [(op [["type" "fn"] "==" (str "function")]) "and" (not (index "done" "id"))]) [
+              (assign (index "done" "id") [true])
+              (assign "st.fns" [(op ["st.fns" "+" 1])])
+              (local ["okc" "v"] [])
+              (ifElse (index "o" 3) [
+                  (assign ["okc" "v"] [["pcall" "fn" (index "o" 2)]])
+                ] [
+                  (assign ["okc" "v"] [["pcall" "fn"]])
+                  (if' (not "okc") (inline [(assign ["okc" "v"] [["pcall" "fn" (index "o" 2)]])]))
+                ])
+              (ifElse (not "okc") [
+                  (assign "st.errors" [(op ["st.errors" "+" 1])])
+                ] (if' (op ["v" "==" "REWARD"]) [
+                  (assign "st.reward" [(op ["st.reward" "+" 1])])
+                  (ifElse (index "covered" "key") (inline [(assign "st.covered" [(op ["st.covered" "+" 1])])]) (inline [(assign (index "lines" (op [(len "lines") "+" 1])) [(table ["key" (index "o" 1)])])]))
+                ]))
+            ])
+          ])
+        ])
+        (forIn ["_" "l"] [["ipairs" "lines"]] (inline [["log" (str "unclaimed") (index "l" 1) (index "l" 2) true]]))
+        ["log" (str "discover") (str "summary") (op [(str "owners=") ".." "st.owners" ".." (str " fns=") ".." "st.fns" ".." (str " reward=") ".." "st.reward" ".." (str " covered=") ".." "st.covered" ".." (str " unclaimed=") ".." (len "lines") ".." (str " errors=") ".." "st.errors"]) true]
+      ])
+      blank
+      (localFunction "delay" [] (inline [(return [(op ["MIN_GAP" "+" (op [["math.random"] "*" "JITTER"])])])]))
+      blank
+      (localFunction "run" ["player" "mode"] [
+        (assign "state.gen" [(op ["state.gen" "+" 1])])
+        (local ["gen" "tried" "last"] ["state.gen" (table []) null])
+        (local "cur" [(table [(field "count" 0) (field "beat" ["now"])])])
+        (assign "state.run" ["cur"])
+        (local "verb" [(op [(op [(op ["mode" "==" (str "dry")]) "and" (str "would claim ")]) "or" (str "claimed ")])])
+        (local "TM" [["require" (str "Core.Timer.TimerManager")]])
+        (local "tick" [])
+        (localFunction "stop" ["why" "text"] [
+          (if' (op ["gen" "==" "state.gen"]) (inline [(assign "state.gen" [(op ["state.gen" "+" 1])])]))
+          (if' (op ["state.run" "==" "cur"]) (inline [(assign "state.run" [null])]))
+          ["log" (str "stop") "why" "cur.count"]
+          ["toast" (op ["text" "or" (paren (op [(str "Rewards stopped (") ".." "why" ".." (str "), ") ".." "verb" ".." "cur.count"]))])]
+        ])
+        (localFunction "fail" ["where" "err"] [
+          (assign "state.off" [true])
+          ["log" (str "error") "where" ["tostring" "err"]]
+          ["stop" (str "error") (op [(str "Rewards error at ") ".." "where" ".." (str ", off until restart")])]
+        ])
+        (localFunction "again" ["sec"] [
+          (local ["ok" "err"] [["pcall" "TM.addTimer" "sec" "tick"]])
+          (if' (not "ok") (inline [["fail" (str "timer") "err"]]))
+        ])
+        (assign "tick" [
+          (fn [] [
+            (if' (op [(op ["gen" "~=" "state.gen"]) "or" "state.off"]) (inline [(return [])]))
+            (assign "cur.beat" [(op [["now"] "or" "cur.beat"])])
+            (local "s" [["setting"]])
+            (if' ["killed" "s"] (inline [(return [["stop" (str "kill switch")]])]))
+            (if' (op [(op ["pg.me" "~=" "player"]) "or" "player.destroyed"]) (inline [(return [["stop" (str "player changed")]])]))
+            (local ["t" "res"] [["now"]])
+            (if' (op ["t" "and" "last" "and" (op [(op ["t" "-" "last"]) "<" (op [(op ["MIN_GAP" "-" "0.05"]) "+" "res"])])]) (inline [(return [["again" ["delay"]]])]))
+            (if' (op ["cur.count" ">=" "MAX_CLAIMS"]) (inline [(return [["stop" (op [(str "cap of ") ".." "MAX_CLAIMS" ".." (str " reached")])]])]))
+            (local ["ok" "a"] [["pcall" "nextAction" "tried" "player"]])
+            (if' (not "ok") (inline [(return [["fail" (str "readiness check") "a"]])]))
+            (if' (not "a") [
+              ["pcall" "discover"]
+              (return [["stop" (str "nothing left") (op [(str "Rewards: ") ".." "verb" ".." "cur.count" ".." (str ", nothing left")])]])
+            ])
+            (assign [(index "tried" "a.key") "last"] [true "t"])
+            (ifElse (op [(op ["mode" "==" (str "dry")]) "or" (op ["s" "==" (str "dry")])]) [
+                ["log" (str "dry") "a.label" (str "not sent")]
+                ["toast" (op [(str "Rewards (dry run): ") ".." "a.label"])]
+              ] [
+                (local ["ok2" "err"] [["pcall" "perform" "a"]])
+                (if' (not "ok2") (inline [(return [["fail" "a.label" "err"]])]))
+                ["log" (str "claim") "a.label" (str "ok")]
+                ["toast" (op [(str "Rewards: ") ".." "a.label"])]
+              ])
+            (assign "cur.count" [(op ["cur.count" "+" 1])])
+            ["again" ["delay"]]
+          ])
+        ])
+        ["log" (str "start") (op [(op [(op ["mode" "==" (str "dry")]) "and" (str "dry run")]) "or" (str "claim run")]) (str "ok")]
+        ["pcall" "diag"]
+        ["toast" (op [(op [(op ["mode" "==" (str "dry")]) "and" (str "Rewards: dry run, nothing will be sent")]) "or" (str "Rewards: claiming, one every 1-2 s")])]
+        ["again" ["delay"]]
+      ])
+      blank
+      (localFunction "onPress" [] [
+        (if' "state.off" [
+          ["log" (str "press") (str "ignored") (str "disabled after error")]
+          (return [["toast" (str "Rewards: off after an error, restart the game")]])
+        ])
+        (local ["cur" "t"] ["state.run" ["now"]])
+        (if' (op ["cur" "and" "t" "and" "cur.beat" "and" (op [(op ["t" "-" "cur.beat"]) ">" "STALE"])]) [
+          ["log" (str "press") (str "stale run dropped") "cur.count"]
+          (assign ["state.run" "state.gen"] [null (op ["state.gen" "+" 1])])
+          (assign "cur" [null])
+        ])
+        (if' "cur" [
+          ["log" (str "press") (str "ignored") (op [(str "running, ") ".." "cur.count" ".." (str " so far")])]
+          (return [["toast" (op [(str "Rewards: already running, ") ".." "cur.count" ".." (str " so far")])]])
+        ])
+        (local "s" [["setting"]])
+        (if' ["killed" "s"] [
+          ["log" (str "press") (str "ignored") (str "kill switch")]
+          (return [["toast" (op [(str "Rewards: off (ANIIMO_REWARDS=") ".." "s" ".." (str ")")])]])
+        ])
+        (local "me" ["pg.me"])
+        (if' (op [["type" "me"] "~=" (str "table")]) (inline [(return [["log" (str "press") (str "ignored") (str "no player")]])]))
+        ["run" "me" (op [(op [(op ["s" "==" (str "dry")]) "and" (str "dry")]) "or" (str "claim")])]
+      ])
+      blank
+      (localFunction "wrapButton" ["view"] [
+        (local "btn" ["view.btnAllReadUButton"])
+        (local "click" [(op ["btn" "and" "btn.luaClick"])])
+        (if' (not "click") (inline [(return [["log" (str "hook") (str "mail button") (str "no click handler")]])]))
+        (assign "btn.luaClick" [
+          (fn ["..."] [
+            (local "r" [["pack" ["click" "..."]]])
+            (local ["ok" "err"] [["pcall" "onPress"]])
+            (if' (not "ok") [
+              (assign "state.off" [true])
+              ["log" (str "error") (str "button press") ["tostring" "err"]]
+            ])
+            (return [["unpack" "r" 1 "r.n"]])
+          ])
+        ])
+      ])
+      blank
+      (localFunction "hookMail" [] [
+        (if' "state.hooked" (inline [(return [])]))
+        (local "M" [["req" "MAIL_VIEW"]])
+        (local "base" [(op ["M" "and" ["rawget" "M" (str "initView")]])])
+        (if' (op [["type" "base"] "~=" (str "function")]) (inline [(return [["log" (str "hook") (str "mail panel") (str "initView not found")]])]))
+        (assign "state.hooked" [true])
+        [
+          "rawset"
+          "M"
+          (str "initView")
+          (fn ["self" "..."] [
+            (local "r" [["pack" ["base" "self" "..."]]])
+            (local ["ok" "err"] [["pcall" "wrapButton" "self"]])
+            (if' (not "ok") (inline [["log" (str "hook") (str "mail button") ["tostring" "err"]]]))
+            (return [["unpack" "r" 1 "r.n"]])
+          ])
+        ]
+        ["log" (str "hook") (str "mail panel") (str "ok")]
+      ])
+      blank
+      (localFunction "install" ["cls"] [
+        (local "vt" [(op [(op [["type" "cls"] "==" (str "table")]) "and" ["has" "cls" (str "getVtbl")] "and" ["cls.getVtbl"]])])
+        (local "base" [(op [(op [["type" "vt"] "==" (str "table")]) "and" ["rawget" "vt" (str "onBecomePlayer")]])])
+        (if' (op [["type" "base"] "~=" (str "function")]) (inline [(return [["log" (str "hook") (str "onBecomePlayer") (str "not found")]])]))
+        [
+          "rawset"
+          "vt"
+          (str "onBecomePlayer")
+          (fn ["self" "..."] [
+            (local "r" [["pack" ["base" "self" "..."]]])
+            (local ["ok" "err"] [["pcall" "hookMail"]])
+            (if' (not "ok") (inline [["log" (str "hook") (str "mail panel") ["tostring" "err"]]]))
+            (return [["unpack" "r" 1 "r.n"]])
+          ])
+        ]
+      ])
+      blank
+      (local ["ok" "err"] [["pcall" "install" (index "ret" 1)]])
+      (if' (not "ok") (inline [["log" (str "hook") (str "install") ["tostring" "err"]]]))
+      (return [["unpack" "ret" 1 "ret.n"]])
     ];
     modules_gaming_arc_raiders = {
       config,
@@ -28858,6 +28952,180 @@
         render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
       };
 
+      lua = let
+        inherit (doc) hardline nest;
+
+        spaced = lib.intersperse " ";
+
+        commas = values: lib.intersperse ", " (map expression values);
+
+        joined = values: lib.concatStringsSep ", " (lib.toList values);
+
+        unary = {
+          not = "not ";
+          neg = "-";
+          len = "#";
+          bnot = "~";
+        };
+
+        fieldForms = {
+          field = value: [value.field.name " = " (expression value.field.value)];
+          key = value: ["[" (expression value.key.key) "] = " (expression value.key.value)];
+        };
+
+        field = value: (fieldForms.${kindOf value} or expression) value;
+
+        fieldRow = row: [hardline (lib.intersperse ", " (map field (lib.toList row))) ","];
+
+        braces = fields:
+          if fields ? rows
+          then ["{" (nest 2 (map fieldRow fields.rows)) hardline "}"]
+          else if fields == []
+          then "{}"
+          else ["{ " (lib.intersperse ", " (map field fields)) " }"];
+
+        operation = items:
+          if items ? rows
+          then [(operation (builtins.head items.rows)) (map (row: nest 2 [hardline (operation row)]) (builtins.tail items.rows))]
+          else spaced (map expression items);
+
+        function = head: value: [head "(" (joined value.params) ")" (block value.body) "end"];
+
+        expressions =
+          {
+            string = lib.id;
+            int = toString;
+            bool = lib.boolToString;
+            null = _: "nil";
+            list = value: [(expression (builtins.head value)) "(" (commas (builtins.tail value)) ")"];
+            str = value: "\"${value.str}\"";
+            sq = value: "'${value.sq}'";
+            table = value: braces value.table;
+            fn = value: function "function" value.fn;
+            apply = value: [(expression value.apply.head) (expression value.apply.arg)];
+            paren = value: ["(" (expression value.paren) ")"];
+            op = value: operation value.op;
+            dot = value: [(expression value.dot.table) "." value.dot.name];
+            method = value: [(expression value.method.table) ":" value.method.name];
+            index = value: [(expression value.index.table) "[" (expression value.index.key) "]"];
+          }
+          // lib.mapAttrs (kind: mark: value: [mark (expression value.${kind})]) unary;
+
+        expression = value: (expressions.${kindOf value} or (throw "lua: no expression ${kindOf value}")) value;
+
+        sequence = values: lib.imap0 (index: value: [(lib.optionalString (index > 0 && value != ";") " ") (statement value)]) values;
+
+        block = value:
+          if value ? inline
+          then [" " (sequence value.inline) (lib.optionalString (value.inline != []) " ")]
+          else [(nest 2 (map (one: [hardline (entry one)]) value)) hardline];
+
+        assigned = values: lib.optionals (values != []) [" = " (commas values)];
+
+        clause = value: [
+          (expression value.test)
+          " then"
+          (block value.body)
+          (
+            if !(value ? otherwise)
+            then "end"
+            else if value.otherwise ? "if"
+            then ["elseif " (clause value.otherwise."if")]
+            else ["else" (block value.otherwise) "end"]
+          )
+        ];
+
+        statements = {
+          list = expression;
+          string = lib.id;
+          comment = value: value.comment;
+          local = value: ["local " (joined value.local.names) (assigned value.local.values)];
+          assign = value: [(commas (lib.toList value.assign.targets)) (assigned value.assign.values)];
+          function = value: function "function ${value.function.name}" value.function;
+          localFunction = value: function "local function ${value.localFunction.name}" value.localFunction;
+          return = value: ["return" (lib.optionals (value.return != []) [" " (commas value.return)])];
+          "if" = value: ["if " (clause value."if")];
+          forIn = value: ["for " (joined value.forIn.names) " in " (commas value.forIn.values) " do" (block value.forIn.body) "end"];
+          forNum = value: ["for ${value.forNum.name} = " (commas value.forNum.range) " do" (block value.forNum.body) "end"];
+          while = value: ["while " (expression value.while.test) " do" (block value.while.body) "end"];
+          repeat = value: ["repeat" (block value.repeat.body) "until " (expression value.repeat.test)];
+          do = value: ["do" (block value.do) "end"];
+        };
+
+        statement = value: (statements.${kindOf value} or (throw "lua: no statement ${kindOf value}")) value;
+
+        entry = value:
+          if value ? blank
+          then []
+          else statement value;
+      in {
+        blank = {blank = true;};
+
+        comment = string: {comment = string;};
+
+        inline = values: {inline = values;};
+
+        rows = values: {rows = values;};
+
+        str = string: {str = string;};
+
+        sq = string: {sq = string;};
+
+        table = fields: {table = fields;};
+
+        field = name: value: {field = {inherit name value;};};
+
+        key = key: value: {key = {inherit key value;};};
+
+        fn = params: body: {fn = {inherit params body;};};
+
+        apply = head: arg: {apply = {inherit head arg;};};
+
+        paren = value: {paren = value;};
+
+        op = items: {op = items;};
+
+        not = value: {not = value;};
+
+        neg = value: {neg = value;};
+
+        len = value: {len = value;};
+
+        bnot = value: {bnot = value;};
+
+        dot = table: name: {dot = {inherit table name;};};
+
+        method = table: name: {method = {inherit table name;};};
+
+        index = table: key: {index = {inherit table key;};};
+
+        local = names: values: {local = {inherit names values;};};
+
+        assign = targets: values: {assign = {inherit targets values;};};
+
+        function = name: params: body: {function = {inherit name params body;};};
+
+        localFunction = name: params: body: {localFunction = {inherit name params body;};};
+
+        return = values: {return = values;};
+
+        if' = test: body: {"if" = {inherit test body;};};
+
+        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+
+        forIn = names: values: body: {forIn = {inherit names values body;};};
+
+        forNum = name: range: body: {forNum = {inherit name range body;};};
+
+        while = test: body: {while = {inherit test body;};};
+
+        repeat = body: test: {repeat = {inherit body test;};};
+
+        do = body: {do = body;};
+
+        render = values: doc.render 80 (map (value: [(entry value) hardline]) values);
+      };
+
       sourceFile = name: text:
         builtins.path {
           path = builtins.toFile name text;
@@ -28866,7 +29134,7 @@
     in {
       cssSource = list: "${nodes list}\n";
 
-      inherit doc lisp shell;
+      inherit doc lisp lua shell;
 
       inherit sourceFile;
 
@@ -28905,8 +29173,6 @@
       luauSource = lines;
 
       vbsSource = lines;
-
-      luaSource = lines;
 
       pythonSource = lines;
 
@@ -30487,7 +30753,7 @@
         export LD_LIBRARY_PATH=${aquamarine}/lib
         unset DISPLAY
         [ -e "$HOME/.local/state/omarchy/current/theme" ] || OMARCHY_THEME_HEADLESS=1 omarchy-theme-set "Tokyo Night"
-        exec ${pkgs.hyprland}/bin/Hyprland -c ${generators.sourceFile "hyprland.lua" (generators.luaSource modules_hosts_steam_frame_omarchy_hyprland_data)}
+        exec ${pkgs.hyprland}/bin/Hyprland -c ${generators.sourceFile "hyprland.lua" (generators.lua.render (modules_hosts_steam_frame_omarchy_hyprland_data generators.lua))}
       '';
 
       overlay = lib.concatStringsSep " " [
@@ -30571,29 +30837,50 @@
       " }"
       " "
     ];
-    modules_hosts_steam_frame_omarchy_hyprland_data = [
-      "dofile(os.getenv(\"OMARCHY_PATH\") .. \"/default/hypr/bootstrap.lua\")"
-      ""
-      "package.loaded[\"default.hypr.autostart\"] = true"
-      ""
-      "hl.config({"
-      "  misc = { disable_watchdog_warning = true },"
-      "  xwayland = { enabled = false },"
-      "})"
-      ""
-      "hl.monitor({"
-      "  output = \"\","
-      "  mode = os.getenv(\"OMARCHY_MODE\"),"
-      "  position = \"0x0\","
-      "  scale = tonumber(os.getenv(\"OMARCHY_SCALE\")),"
-      "})"
-      ""
-      "require(\"default.hypr.omarchy\")"
-      "require(\"default.hypr.toggles\")"
-      ""
-      "hl.on(\"hyprland.start\", function()"
-      "  hl.exec_cmd(\"omarchy-launch-shell\")"
-      "end)"
+    modules_hosts_steam_frame_omarchy_hyprland_data = {
+      assign,
+      blank,
+      field,
+      fn,
+      index,
+      op,
+      rows,
+      str,
+      table,
+      ...
+    }: [
+      ["dofile" (op [["os.getenv" (str "OMARCHY_PATH")] ".." (str "/default/hypr/bootstrap.lua")])]
+      blank
+      (assign (index "package.loaded" (str "default.hypr.autostart")) [true])
+      blank
+      [
+        "hl.config"
+        (table (rows [
+          (field "misc" (table [(field "disable_watchdog_warning" true)]))
+          (field "xwayland" (table [(field "enabled" false)]))
+        ]))
+      ]
+      blank
+      [
+        "hl.monitor"
+        (table (rows [
+          (field "output" (str ""))
+          (field "mode" ["os.getenv" (str "OMARCHY_MODE")])
+          (field "position" (str "0x0"))
+          (field "scale" ["tonumber" ["os.getenv" (str "OMARCHY_SCALE")]])
+        ]))
+      ]
+      blank
+      ["require" (str "default.hypr.omarchy")]
+      ["require" (str "default.hypr.toggles")]
+      blank
+      [
+        "hl.on"
+        (str "hyprland.start")
+        (fn [] [
+          ["hl.exec_cmd" (str "omarchy-launch-shell")]
+        ])
+      ]
     ];
     modules_hosts_wireguard = {
       config,
@@ -31724,6 +32011,11 @@
           "tomoe-user.lisp" = modules_desktop_session_tomoe_lisp_user_data;
           "ekko-init.lisp" = modules_shell_ekko_init_data;
         };
+        lua = {
+          "aniimo-catch.lua" = modules_gaming_aniimo_catch_lua_data;
+          "aniimo-rewards.lua" = modules_gaming_aniimo_rewards_lua_data;
+          "omarchy-hyprland.lua" = modules_hosts_steam_frame_omarchy_hyprland_data;
+        };
         shell = {
           "beat-saber-lock" = modules_hosts_steam_frame_beat_saber_lock_data;
           "omp-box" = omp_box_omp_box_data;
@@ -31745,8 +32037,14 @@
             (loop for form = (read source nil source) until (eq form source))))
       '';
 
+      luajit = ["aniimo-catch.lua" "aniimo-rewards.lua"];
+
       languageChecks = {
         lisp = file: "SOURCE=${file} ${lib.getExe pkgs.sbcl} --script ${reader}\n";
+        lua = file:
+          if builtins.elem file.name luajit
+          then "${lib.getExe pkgs.luajit} -bl ${file} > /dev/null\n"
+          else "${lib.getExe' pkgs.lua5_5 "luac"} -p ${file}\n";
         shell = file: "${lib.getExe pkgs.bash} -n ${file}\n${lib.getExe pkgs.shellcheck} -s bash -S warning ${file}\n";
       };
 
