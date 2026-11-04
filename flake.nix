@@ -1133,6 +1133,7 @@
               "${secrets}/secrets.ts"
               "${generators.sourceFile "crest-auth.ts" (generators.ts.render (omp_crest_auth_data generators.ts))}"
               "${generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;})}/extension.ts"
+              "${flakeInputs.omp-bot}/omp/ompd.ts"
             ];
           };
         };
