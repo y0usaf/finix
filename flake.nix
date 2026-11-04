@@ -1232,10 +1232,34 @@
         appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
       };
 
+      # How omp-bot's boxed bots reach the box (bin/omp-bot-box): the same key and port the omp wrapper uses.
+      sshConfig = pkgs.writeText "omp-box-ssh-config" ''
+        Host *
+          HostName 127.0.0.1
+          Port 22422
+          User ${user}
+          IdentityFile ${state}/ssh-key
+          IdentitiesOnly yes
+          BatchMode yes
+          LogLevel ERROR
+          UserKnownHostsFile /dev/null
+          StrictHostKeyChecking no
+          ConnectTimeout 5
+          ServerAliveInterval 10
+          ServerAliveCountMax 3
+      '';
+
       guest = flakeInputs.nixpkgs.lib.nixosSystem {
         specialArgs.ompBox = {
           inherit user files;
           inherit shares;
+          # Headless Chromium the box keeps running, each with its DevTools on 127.0.0.1:PORT inside the box
+          # for a boxed bot's browser.cdpUrl. A profile lives on a share (a bot's persist path), and its browser
+          # waits until that share is mounted.
+          browsers.baobao = {
+            profile = "${home}/.local/state/baobao/chromium";
+            port = 9222;
+          };
           sharesDir = "${state}/shares";
           authDir = "${state}/auth";
           nativesDir = "${state}/natives";
@@ -1262,6 +1286,11 @@
         };
         environment.systemPackages = [pkg];
         system.build.ompBoxRunner = guest.config.microvm.declaredRunner;
+
+        manzil.users.${user}.files.".config/omp-bot/box.env".text = ''
+          export OMP_BOT_BOX_SSH_CONFIG=${sshConfig}
+          unset OMP_BOT_EXTENSION OMP_BOT_SECRETS_EXTENSION OMPD_SERVICE
+        '';
 
         finit.services.omp-box-grants = {
           description = "re-apply omp box folder grants";
@@ -12599,6 +12628,11 @@
                     type = lib.types.listOf lib.types.str;
                     default = [];
                   };
+                  directorySources = lib.mkOption {
+                    description = "Programs persist-user-binds runs at boot, as root, that print more directories to persist, relative to home, one per line, read from state that itself persists (omp-bot's roster). An entry that is absolute, holds `.` or `..`, or resolves outside home is skipped, and a failing entry never fails the boot.";
+                    type = lib.types.listOf lib.types.path;
+                    default = [];
+                  };
                 };
               });
               default = {};
@@ -15176,16 +15210,39 @@
               mountpoint -q /root || mount --bind /persist/root /root || failed=1
             ''}
 
-            while IFS= read -r relative; do
-              [ -n "$relative" ] || continue
+            bind_directory() {
+              relative="$1"
               src="${persistentHome}/$relative"
               dst="${home}/$relative"
               ensure_parents ${persistentHome} "$relative"
               ensure_parents ${home} "$relative"
-              [ -d "$src" ] || install -d -o ${user} -g users "$src" || { failed=1; continue; }
-              [ -d "$dst" ] || install -d -o ${user} -g users "$dst" || { failed=1; continue; }
-              mountpoint -q "$dst" || mount --bind "$src" "$dst" || failed=1
+              [ -d "$src" ] || install -d -o ${user} -g users "$src" || return 1
+              [ -d "$dst" ] || install -d -o ${user} -g users "$dst" || return 1
+              mountpoint -q "$dst" || mount --bind "$src" "$dst"
+            }
+
+            while IFS= read -r relative; do
+              [ -n "$relative" ] || continue
+              bind_directory "$relative" || failed=1
             done < ${pkgs.writeText "persist-user-directories" (lib.concatMapStrings (path: "${path}\n") (lib.sort lib.lessThan (lib.unique userPersist.directories)))}
+
+            for source in ${lib.escapeShellArgs userPersist.directorySources}; do
+              "$source" | while IFS= read -r relative; do
+                [ -n "$relative" ] || continue
+                case "/$relative/" in
+                  */../* | */./* | *//*) echo "persist-user-binds: $source: skipping '$relative', not a plain path inside home" >&2; continue ;;
+                esac
+                case "$(realpath -m "${home}/$relative")/" in
+                  ${home}/*) ;;
+                  *) echo "persist-user-binds: $source: skipping '$relative', which resolves outside ${home}" >&2; continue ;;
+                esac
+                case "$(realpath -m "${persistentHome}/$relative")/" in
+                  ${persistentHome}/*) ;;
+                  *) echo "persist-user-binds: $source: skipping '$relative', which resolves outside ${persistentHome}" >&2; continue ;;
+                esac
+                bind_directory "$relative" || echo "persist-user-binds: $source: '$relative' did not mount" >&2
+              done || echo "persist-user-binds: $source failed" >&2
+            done
 
             while IFS= read -r relative; do
               [ -n "$relative" ] || continue
@@ -19919,7 +19976,62 @@
       runtimeDir = "/run/user/${toString user.uid}";
       omp = flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
       src = flakeInputs.omp-bot;
-      tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age];
+      tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
+      persistentHome = "/persist/home/${userName}";
+      # Prints the persist paths of every bot on the persisted roster, relative to home, for persist-user-binds.
+      persistPaths = pkgs.writeShellScript "omp-bot-persist-paths" ''
+        roster=${persistentHome}/.local/state/omp-bot/bots.json
+        [ -r "$roster" ] || exit 0
+        ${pkgs.jq}/bin/jq -r '.[] | objects | .persist | arrays | .[] | strings' "$roster" | while IFS= read -r path; do
+          case $path in
+            "~/"?*) printf '%s\n' "''${path#"~/"}" ;;
+            ${user.home}/?*) printf '%s\n' "''${path#${user.home}/}" ;;
+            *) echo "omp-bot-persist-paths: $path is not inside ${user.home}, so it is not persisted" >&2 ;;
+          esac
+        done
+      '';
+      # bin/omp-bot's OMP_BOT_PERSIST hook. mount PATH: keep PATH in ${persistentHome} from now on, copying
+      # what it holds the first time, and bind it over PATH (persist-user-binds does it at boot). purge PATH:
+      # unmount it and delete both copies, only ever called by omp-bot-remove --purge.
+      persist = pkgs.writeShellScript "omp-bot-persist" ''
+        set -euo pipefail
+        export PATH=${pkgs.lib.makeBinPath [pkgs.coreutils pkgs.util-linux]}:$PATH
+        usage="usage: omp-bot-persist mount|purge PATH..."
+        [ $# -ge 2 ] || { echo "$usage" >&2; exit 2; }
+        cmd=$1
+        shift
+        for path in "$@"; do
+          case $path in
+            ${user.home}/?*) relative=''${path#${user.home}/} ;;
+            *) echo "omp-bot-persist: $path is not inside ${user.home}" >&2; exit 1 ;;
+          esac
+          case "/$relative/" in
+            */../* | */./* | *//*) echo "omp-bot-persist: $path is not a plain path" >&2; exit 1 ;;
+          esac
+          src=${persistentHome}/$relative
+          case $cmd in
+            mount)
+              mountpoint -q "$path" && continue
+              if [ ! -d "$src" ]; then
+                mkdir -p "$(dirname "$src")"
+                rm -rf "$src.new"
+                if [ -d "$path" ]; then cp -a "$path" "$src.new"; else mkdir "$src.new"; fi
+                mv "$src.new" "$src"
+              elif [ -n "$(ls -A "$path" 2>/dev/null)" ]; then
+                echo "omp-bot-persist: $src already holds $path; mounting it over what $path gained since boot" >&2
+              fi
+              mkdir -p "$path"
+              /run/wrappers/bin/sudo -n mount --bind "$src" "$path"
+              echo "$path"
+              ;;
+            purge)
+              while mountpoint -q "$path"; do /run/wrappers/bin/sudo -n umount "$path"; done
+              rm -rf -- "$src" "$path"
+              ;;
+            *) echo "$usage" >&2; exit 2 ;;
+          esac
+        done
+      '';
       command = name:
         pkgs.writeShellScriptBin name ''
           PATH=${pkgs.lib.makeBinPath tools}:$PATH exec ${src}/bin/${name} "$@"
@@ -19938,11 +20050,14 @@
       '';
     in {
       finix.persistence = {
-        allowlist.users.${userName}.directories = [".local/state/omp-bot"];
+        allowlist.users.${userName} = {
+          directories = [".local/state/omp-bot"];
+          directorySources = [persistPaths];
+        };
         homeServices = ["omp-botd" "ompd"];
       };
 
-      environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl") pkgs.age];
+      environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl") pkgs.age pkgs.gnutar];
 
       manzil.users.${userName}.files = {
         ".config/omp-bot/env".text = ''
@@ -19954,6 +20069,7 @@
           : "''${OMP_BOT_CHAT_LOOK_EXTENSION:=${generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts))}}"
           : "''${OMP_BOT_OPTCHAT:=${generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;})}}"
           export OMPD_SERVICE="''${OMPD_SERVICE-1}"
+          : "''${OMP_BOT_PERSIST:=${persist}}"
         '';
         ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";
       };
@@ -20117,7 +20233,9 @@
             usage: omp-box <command>
 
               list [--json]        granted folders
-              add PATH [--copy]    share PATH into the box at the same path
+              add PATH [--copy] [--name NAME]
+                                   share PATH into the box at the same path, as grant NAME
+                                   (default: PATH's folder name)
               rm NAME              revoke a grant
               reconcile            re-apply every grant (after a box restart)
           '')
@@ -20171,9 +20289,9 @@
       }: [
         ["local" (assign name (var 1)) (assign mode (var 2))]
         (if' (test [(dq (var mode)) "=" "bind"]) [
-          (chain [["findmnt" "-n" "-o" "TARGET" (dq [(var shares) "/" (var name)]) (redir ">" "/dev/null") (redir "2>&" 1)] "&&" ["/run/wrappers/bin/sudo" "-n" "umount" (dq [(var shares) "/" (var name)])] "||" ["true"]])
+          (if' ["findmnt" "-n" "-o" "TARGET" (dq [(var shares) "/" (var name)]) (redir ">" "/dev/null") (redir "2>&" 1)] (inline [(chain [["/run/wrappers/bin/sudo" "-n" "umount" (dq [(var shares) "/" (var name)])] "||" [fail (dq ["could not unmount " (var shares) "/" (var name) ", so the grant stays"])]])]))
         ])
-        ["rm" "-rf" (dq [(required shares "") "/" (required name "")])]
+        (chain [["findmnt" "-n" "-o" "TARGET" (dq [(var shares) "/" (var name)]) (redir ">" "/dev/null") (redir "2>&" 1)] "||" ["rm" "-rf" (dq [(required shares "") "/" (required name "")])]])
       ]))
       blank
       (fn cmd_add ({
@@ -20181,9 +20299,9 @@
         mode,
         name,
       }: [
-        ["local" (assign path (dq "")) (assign mode "bind")]
+        ["local" (assign path (dq "")) (assign mode "bind") (assign name (dq ""))]
         (while (test [(var argCount) "-gt" 0]) [
-          (case (var 1) [(arm "--copy" (inline [(assign mode "copy")])) (arm "*" (inline [(assign path (var 1))]))])
+          (case (var 1) [(arm "--copy" (inline [(assign mode "copy")])) (arm "--name" (inline [(assign name (default 2 "")) ["shift"]])) (arm "*" (inline [(assign path (var 1))]))])
           ["shift"]
         ])
         (chain [(test (nonEmpty (dq (var path)))) "||" [fail (dq "add needs a path")]])
@@ -20191,8 +20309,9 @@
         (chain [(test (isDir (dq (var path)))) "||" [fail (dq [(var path) " is not a directory"])]])
         (if' [covers (dq (var path)) (dq (sub [["realpath" "-m" "--" (dq (var state))]]))] (inline [[fail (dq [(var path) " holds the share directory itself, so sharing it loops"])]]))
         (if' [covers (dq (var path)) (dq (var HOME))] (inline [[fail (dq [(var path) " covers " (var HOME) ", where the box keeps its own state; share a folder inside it"])]]))
-        ["local" name]
-        (assign name (sub [(pipe [["basename" "--" (dq (var path))] ["tr" "-cd" (sq "A-Za-z0-9._-")]])]))
+        (chain [(test (nonEmpty (dq (var name)))) "||" (assign name (sub [["basename" "--" (dq (var path))]]))])
+        (assign name (sub [(pipe [["printf" "%s" (dq (var name))] ["tr" "-cd" (sq "A-Za-z0-9._-")]])]))
+        (chain [(test (nonEmpty (dq (var name)))) "||" [fail (dq "the grant needs a name of letters, digits, '.', '_' or '-'")]])
         (chain [(test (exists (dq [(var grants) "/" (var name)]))) "&&" [fail (dq ["grant '" (var name) "' already exists (rm it first)"])]])
         ["mkdir" "-p" (dq (var grants)) (dq (var shares))]
         [apply_host (dq (var name)) (dq (var path)) (dq (var mode))]
@@ -20275,12 +20394,43 @@
       (case (default 1 "") [(arm "list" (inline [["shift"] [cmd_list (dq (var args))]])) (arm "add" (inline [["shift"] [cmd_add (dq (var args))]])) (arm "rm" (inline [["shift"] [cmd_rm (dq (var args))]])) (arm "reconcile" (inline [[cmd_reconcile]])) (arm "*" (inline [[usage] ["exit" 2]]))])
     ]);
     omp_box_guest = {
+      lib,
       pkgs,
       ompBox,
       ...
     }: let
       inherit (ompBox) user;
       home = "/home/${user}";
+      # Headless Chromium says HeadlessChrome in its user agent, which shops turn away; claim the same version as Chrome.
+      userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${lib.versions.major pkgs.chromium.version}.0.0.0 Safari/537.36";
+      browser = name: {
+        profile,
+        port,
+      }: {
+        description = "headless Chromium for ${name}, DevTools on 127.0.0.1:${toString port}";
+        wantedBy = ["multi-user.target"];
+        startLimitIntervalSec = 0;
+        environment.HOME = home;
+        serviceConfig = {
+          User = user;
+          Group = "users";
+          Restart = "always";
+          RestartSec = 5;
+        };
+        script = ''
+          profile=${lib.escapeShellArg profile}
+          if [ "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "$(dirname "$profile")")" != 9p ]; then
+            echo "$(dirname "$profile") is not shared into the box yet"
+            exit 1
+          fi
+          mkdir -p "$profile"
+          rm -f "$profile/SingletonLock" "$profile/SingletonCookie" "$profile/SingletonSocket"
+          exec ${pkgs.chromium}/bin/chromium --headless=new --user-data-dir="$profile" --password-store=basic \
+            --no-first-run --no-default-browser-check --disable-sync --noerrdialogs \
+            --remote-debugging-address=127.0.0.1 --remote-debugging-port=${toString port} \
+            --window-size=1280,900 --user-agent=${lib.escapeShellArg userAgent}
+        '';
+      };
     in {
       system.stateVersion = "24.05";
 
@@ -20330,7 +20480,8 @@
         ];
       };
 
-      environment.systemPackages = [ompBox.omp pkgs.python3 pkgs.chromium pkgs.git pkgs.ripgrep pkgs.curl pkgs.gh pkgs.jq pkgs.fd pkgs.gnumake pkgs.gcc];
+      environment.systemPackages = [ompBox.omp pkgs.bun pkgs.python3 pkgs.chromium pkgs.git pkgs.ripgrep pkgs.curl pkgs.gh pkgs.jq pkgs.fd pkgs.gnumake pkgs.gcc];
+      fonts.packages = [pkgs.noto-fonts-cjk-sans];
       documentation.enable = false;
 
       boot.kernelParams = ["console=ttyS0" "loglevel=4"];
@@ -20379,20 +20530,25 @@
         };
       };
 
-      systemd.services.omp-seed = {
-        wantedBy = ["multi-user.target"];
-        serviceConfig.Type = "oneshot";
-        script = ''
-          set -eu
-          dst=${home}/.omp/agent
-          install -d -o 1001 -g 100 -m 700 "$dst"
-          install -o 1001 -g 100 -m 600 ${ompBox.files.models} "$dst/models.json"
-          install -o 1001 -g 100 -m 600 ${ompBox.files.settings} "$dst/settings.json"
-          install -o 1001 -g 100 -m 600 ${ompBox.files.config} "$dst/config.yml"
-          install -o 1001 -g 100 -m 600 ${ompBox.files.modelKeys} "$dst/models.yml"
-          install -o 1001 -g 100 -m 600 ${ompBox.files.appendSystem} "$dst/APPEND_SYSTEM.md"
-        '';
-      };
+      systemd.services =
+        lib.mapAttrs' (name: settings: lib.nameValuePair "browser-${name}" (browser name settings)) ompBox.browsers
+        // {
+          omp-seed = {
+            wantedBy = ["multi-user.target"];
+            serviceConfig.Type = "oneshot";
+            script = ''
+              set -eu
+              dst=${home}/.omp/agent
+              install -d -o 1001 -g 100 -m 755 ${home}/.omp
+              install -d -o 1001 -g 100 -m 700 "$dst"
+              install -o 1001 -g 100 -m 600 ${ompBox.files.models} "$dst/models.json"
+              install -o 1001 -g 100 -m 600 ${ompBox.files.settings} "$dst/settings.json"
+              install -o 1001 -g 100 -m 600 ${ompBox.files.config} "$dst/config.yml"
+              install -o 1001 -g 100 -m 600 ${ompBox.files.modelKeys} "$dst/models.yml"
+              install -o 1001 -g 100 -m 600 ${ompBox.files.appendSystem} "$dst/APPEND_SYSTEM.md"
+            '';
+          };
+        };
     };
     omp_crest_auth_data = {
       Array,
