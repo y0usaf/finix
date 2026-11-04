@@ -467,11 +467,19 @@ formals are its parameters (listed in order, `[{fragColor = out vec4;}
 that declares names (an `if` branch, a `for`, which also binds its loop
 variable) is a lambda of them. `local v uvec2 value` declares a bound name
 with its type, at its place in the block. No identifier is a string: a typo is
-an undefined variable at evaluation. Every value carries its GLSL type, so a
-swizzle is an attribute (`c.x`, `p.yx`; `swizzle value "rgb"` for the other
-letter sets or an operand that is an infix list or a constructor call), and
-evaluation throws on what GLSL rejects where the types say so cheaply (`vec3 +
-vec2`, a `vec2`'s `.z`, a `float` local given a `vec2`). Numbers and booleans
+an undefined variable at evaluation. Every value carries its GLSL type and has
+exactly the swizzles its type has, in all three letter sets, as attributes
+(`c.x`, `p.yx`, `(vec3 p 1.0).bgr`, `(index PAL i).rgb`; a `vec2` has no `.z`,
+a `float` none); an infix list is Nix data, so `(a + b).xy` has no tree. The
+types are checked as GLSL ES 3.00 does, with no implicit conversion: arithmetic
+is componentwise on equal types or a scalar with a vector or matrix of its
+base type, `*` of a matrix and a vector or matrix is the linear-algebra product
+(`vec2 * mat2` is a `vec2`, `mat3x2 * vec3` a `vec2`), `%` and the bitwise and
+shift operators take integers, `<` and its kin scalars of one type, `&&`, `||`
+and `^^` booleans, `neg`, `not` and `bitNot` their operand types, and a `local`
+or `set` value, an `update`, a condition and both arms of `cond` must agree, so
+`vec3 + vec2`, `int + float`, `int + uint`, `p < q` of vectors or a `float`
+local given a `vec2` throws. Numbers and booleans
 are native Nix values, so a constant may be computed: `math.round 8
 (math.sqrt 3.0 / 2.0)` is hex-spiral's `S3`, and `rgb ozette.lavender` is
 `vec3(0.776, 0.651, 0.949)`, each channel of the hex colour over 255 rounded to
@@ -485,8 +493,10 @@ shortest round-trip form (`builtins.toJSON`) with a decimal point always
 present (`1e-05` is `1.0e-5`). The printer derives the order GLSL needs:
 `#define`s by name, then constants, then functions, each after what it
 references, ties by name, and a cycle is an error. A constant's type is its
-value's (`CENTER = vec2 0.4 0.58;` is `const vec2 CENTER`), else `typed float
-[ ... ]`. A define is a value or `macro ({c}: body)`, written in parentheses
+value's, by those rules (`CENTER = vec2 0.4 0.58;` is `const vec2 CENTER`,
+`[2.0 "*" PI]` a `float`); `typed float value` is only for a value whose type
+is unknown, a macro's result, and throws if it is not its value's. A define
+is a value or `macro ({c}: body)`, written in parentheses
 with its parameter parenthesized. The statements are `local`, `set target
 value`, `update target "+=" value`, `return`, `break`, `continue`, `if' test
 body`, `ifElse test body otherwise`, `for`, `while test body`, `comment` and an
