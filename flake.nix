@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=ee9b9e845f46c2050a7e167d40bc82050eda8c64";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=d8d22594c52938eaaf051904d21ad0829004af16";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -32747,6 +32747,119 @@
           quote
         ];
 
+        binary = {
+          "or" = 1;
+          "and" = 2;
+          "<" = 3;
+          ">" = 3;
+          "<=" = 3;
+          ">=" = 3;
+          "~=" = 3;
+          "==" = 3;
+          ".." = 4;
+          "+" = 5;
+          "-" = 5;
+          "*" = 6;
+          "/" = 6;
+          "//" = 6;
+          "%" = 6;
+          "^" = 8;
+        };
+
+        right = [".." "^"];
+
+        tree = infixTree {
+          language = "luau";
+          precedence = binary;
+          inherit right;
+          operand = lib.id;
+        };
+
+        globals = [
+          "AgentBlock"
+          "AgentFinishedEvent"
+          "AgentStateEvent"
+          "CommandFinishedEvent"
+          "FocusEvent"
+          "PaneInfo"
+          "PickItem"
+          "ProcessResult"
+          "StatusPaneInfo"
+          "StatusSegment"
+          "TabEvent"
+          "TabInfo"
+          "WindowCx"
+          "any"
+          "boolean"
+          "ipairs"
+          "math"
+          "number"
+          "os"
+          "pairs"
+          "pcall"
+          "proproblems"
+          "require"
+          "string"
+          "table"
+          "tern"
+          "tonumber"
+          "tostring"
+          "type"
+          "utf8"
+        ];
+
+        word = "[A-Za-z_][A-Za-z0-9_]*";
+
+        identifier = value:
+          if builtins.isString value && builtins.match word value != null
+          then value
+          else throw "luau: `${toString value}` is not a name";
+
+        named = spelled: {name = identifier spelled;};
+
+        nameOf = value: value.name or (throw "luau: a declaration names a bound name, not a ${kindOf value}");
+
+        declaredName = value:
+          nameOf (
+            if value ? typed
+            then value.typed.value
+            else value
+          );
+
+        declaring = {
+          local = value: map declaredName (lib.toList value.local.names);
+          localFunction = value: [(nameOf value.localFunction.name)];
+          type = value: [(nameOf value.type.name)];
+          trailing = value: declares value.trailing.statement;
+        };
+
+        declares = value: (declaring.${kindOf value} or (_: [])) value;
+
+        single = value:
+          if builtins.isAttrs value && builtins.length (builtins.attrNames value) == 1
+          then builtins.head (builtins.attrNames value)
+          else throw "luau: a parameter or loop variable is a one-attribute set, {name = type;} or {name = null;}";
+
+        bound = value: identifier (spelling (single value));
+
+        resolve = given: body: let
+          formals =
+            if builtins.isFunction body
+            then map spelling (builtins.attrNames (builtins.functionArgs body))
+            else [];
+          statements =
+            boundBlock {
+              language = "luau";
+              name = named;
+              declared = listed: given ++ lib.concatMap declares listed;
+            }
+            body;
+          unbound = lib.subtractLists formals (lib.concatMap declares statements);
+        in
+          if unbound != []
+          then throw "luau: ${lib.concatStringsSep ", " unbound} declared but not bound by its block"
+          else statements;
+
         modes = {
           value = {
             separator = " = ";
@@ -32759,7 +32872,7 @@
         };
 
         entryForms = mode: {
-          field = depth: value: [value.field.name mode.separator (mode.item depth value.field.value)];
+          field = depth: value: [(identifier value.field.name) mode.separator (mode.item depth value.field.value)];
           pair = depth: value: ["[" (mode.item depth value.pair.key) "]" mode.separator (mode.item depth value.pair.value)];
         };
 
@@ -32790,62 +32903,155 @@
 
         clauses = depth: parts: lib.imap0 (index: part: [(keyword (builtins.length parts - 1) index) " " (expression depth part)]) parts;
 
+        signed = value:
+          if value < 0
+          then 7
+          else 9;
+
+        strengths = {
+          int = signed;
+          float = signed;
+          binary = value: binary.${value.binary.operator};
+          infix = value: strength (tree value.infix);
+          unary = _: 7;
+          ifExpr = _: 0;
+          cast = _: 0;
+          rows = value: strength value.rows;
+        };
+
+        strength = value: (strengths.${kindOf value} or (_: 9)) value;
+
+        grouped = depth: needed: value:
+          if needed
+          then ["(" (expression depth value) ")"]
+          else expression depth value;
+
+        side = depth: operator: left: value: let
+          level = strength value;
+          tight = binary.${operator};
+        in
+          grouped depth (level < tight || level == tight && left == builtins.elem operator right) value;
+
+        prefix = value: builtins.elem (kindOf value) ["list" "name" "dot" "idx" "paren"] || kindOf value == "rows" && prefix value.rows;
+
+        prefixed = depth: value: grouped depth (!prefix value) value;
+
+        suffix = path:
+          if builtins.match ":${word}|${word}([.]${word})*(:${word})?" path == null
+          then throw "luau: `${toString path}` is not a field path"
+          else if lib.hasPrefix ":" path
+          then path
+          else ".${path}";
+
+        sameOperator = items: let
+          operators = lib.unique (lib.genList (index: builtins.elemAt items (2 * index + 1)) (builtins.length items / 2));
+        in
+          if builtins.length operators == 1
+          then builtins.head operators
+          else throw "luau: rows breaks an infix run of one operator";
+
+        brokenInfix = depth: items: let
+          operator = sameOperator items;
+          operands = lib.genList (index: builtins.elemAt items (2 * index)) (builtins.length items / 2 + 1);
+          last = builtins.length operands - 1;
+          leaning = builtins.elem operator right;
+          left = index:
+            if leaning
+            then index < last
+            else index == 0;
+        in [
+          (side (depth + 1) operator true (builtins.head operands))
+          (lib.imap1 (index: operand: [(newline (depth + 1)) operator " " (side (depth + 1) operator (left index) operand)]) (builtins.tail operands))
+        ];
+
+        callDepth = depth: head:
+          if head ? rows && head.rows ? dot
+          then depth + 1
+          else depth;
+
         brokenCall = depth: value: let
           inner = callDepth depth (builtins.head value);
-        in [(expression depth (builtins.head value)) "(" (lib.intersperse "," (map (argument: [(newline (inner + 1)) (expression (inner + 1) argument)]) (builtins.tail value))) (newline inner) ")"];
+        in [(prefixed depth (builtins.head value)) "(" (lib.intersperse "," (map (argument: [(newline (inner + 1)) (expression (inner + 1) argument)]) (builtins.tail value))) (newline inner) ")"];
 
         rowForms = {
           list = brokenCall;
           table = tableRows modes.value;
-          infix = depth: value: [(expression (depth + 1) (builtins.head value.infix)) (map (pair: [(newline (depth + 1)) (builtins.head pair) " " (expression (depth + 1) (lib.last pair))]) (pairs (builtins.tail value.infix)))];
+          infix = depth: value: brokenInfix depth value.infix;
           ifExpr = depth: value: let
             rows = value.ifExpr;
             parts = clauses (depth + 1) (lib.concatLists rows);
             starts = builtins.foldl' (acc: row: acc ++ [(lib.last acc + builtins.length row)]) [0] rows;
           in
             lib.imap0 (index: row: [(lib.optional (index > 0) (newline (depth + 1))) (spaced (lib.sublist (builtins.elemAt starts index) (builtins.length row) parts))]) rows;
-          colon = depth: value: [(expression depth value.colon.value) (newline (depth + 1)) ":" value.colon.name];
+          dot = depth: value: [(prefixed depth value.dot.value) (newline (depth + 1)) (suffix value.dot.path)];
         };
 
-        pairs = values:
-          if values == []
-          then []
-          else [(lib.take 2 values)] ++ pairs (lib.drop 2 values);
+        unary = depth: value: let
+          inherit (value.unary) operator operand;
+          level = strength operand;
+          doubled = operator == "-" && level == 7 && (!builtins.isAttrs operand || operand.unary.operator == "-");
+        in [
+          operator
+          (lib.optionalString (operator == "not") " ")
+          (grouped depth (level < 7 || doubled) operand)
+        ];
 
-        callDepth = depth: head:
-          if head ? rows && head.rows ? colon
-          then depth + 1
-          else depth;
+        parameters = params:
+          if params ? typed
+          then params.typed.value
+          else params;
+
+        variable = depth: value: let
+          kind = value.${single value};
+        in [
+          (bound value)
+          (lib.optionals (kind != null) [": " (type depth kind)])
+        ];
 
         signature = depth: value:
           if value ? typed
           then [(signature depth value.typed.value) ": " (type depth value.typed.type)]
-          else ["(" (comma (map (expression depth) value)) ")"];
+          else ["(" (comma (map (variable depth) value)) ")"];
 
-        function = depth: params: body: [
+        function = depth: params: body: let
+          statements = resolve (map bound (parameters params)) body;
+        in [
           (signature depth params)
           (
-            if body == []
+            if statements == []
             then " "
-            else block depth body
+            else lines depth statements
           )
           "end"
         ];
 
         expressionForms = {
-          string = _: lib.id;
+          string = _: value: throw "luau: the string `${value}` where an expression is expected; a name is a Nix variable, a literal is str";
           int = _: toString;
-          list = depth: value: [(expression depth (builtins.head value)) "(" (comma (map (expression (callDepth depth (builtins.head value))) (builtins.tail value))) ")"];
+          float = _: value: let
+            text = builtins.toJSON value;
+          in
+            if builtins.match "-?[0-9]+[.][0-9]+" text != null
+            then text
+            else throw "luau: the float ${text} has no decimal spelling";
+          bool = _: value:
+            if value
+            then "true"
+            else "false";
+          name = _: value: value.name;
+          nil = _: _: "nil";
+          hex = _: value: "0x${lib.toHexString value.hex}";
+          list = depth: value: [(prefixed depth (builtins.head value)) "(" (comma (map (expression (callDepth depth (builtins.head value))) (builtins.tail value))) ")"];
           str = _: value: quoted value.str;
           long = _: value: "[[${value.long}]]";
           table = table modes.value;
           rows = depth: value: rowForms.${kindOf value.rows} depth value.rows;
-          infix = depth: value: spaced (map (expression depth) value.infix);
-          unary = depth: value: [value.unary.op (lib.optionalString (value.unary.op == "not") " ") (expression depth value.unary.value)];
+          infix = depth: value: expression depth (tree value.infix);
+          binary = depth: value: [(side depth value.binary.operator true value.binary.left) " ${value.binary.operator} " (side depth value.binary.operator false value.binary.right)];
+          inherit unary;
           paren = depth: value: ["(" (expression depth value.paren) ")"];
-          dot = depth: value: [(expression depth value.dot.value) "." value.dot.name];
-          colon = depth: value: [(expression depth value.colon.value) ":" value.colon.name];
-          idx = depth: value: [(expression depth value.idx.value) "[" (expression depth value.idx.key) "]"];
+          dot = depth: value: [(prefixed depth value.dot.value) (suffix value.dot.path)];
+          idx = depth: value: [(prefixed depth value.idx.value) "[" (expression depth value.idx.key) "]"];
           fn = depth: value: ["function" (function depth value.fn.params value.fn.body)];
           ifExpr = depth: value: spaced (clauses depth value.ifExpr);
           cast = depth: value: [(expression depth value.cast.value) " :: " (type depth value.cast.type)];
@@ -32856,7 +33062,9 @@
         expression = depth: value: (expressionForms.${kindOf value} or (throw "luau: no expression ${kindOf value}")) depth value;
 
         typeForms = {
-          string = _: lib.id;
+          string = _: value: throw "luau: the string `${value}` where a type is expected; a type name is a Nix variable";
+          name = _: value: value.name;
+          nil = _: _: "nil";
           opt = depth: value: [(type depth value.opt) "?"];
           table = table modes.type;
           rows = depth: value: tableRows modes.type depth value.rows;
@@ -32875,17 +33083,19 @@
           then hardline
           else [(newline depth) (statement depth value)];
 
-        block = depth: values: [(map (line (depth + 1)) values) (newline depth)];
+        lines = depth: statements: [(map (line (depth + 1)) statements) (newline depth)];
+
+        block = depth: given: body: lines depth (resolve given body);
 
         alternative = depth: value:
           if value ? "if"
           then ["elseif " (clause depth value."if")]
-          else ["else" (block depth value) "end"];
+          else ["else" (block depth [] value) "end"];
 
         clause = depth: value: [
           (expression depth value.test)
           " then"
-          (block depth value.body)
+          (block depth [] value.body)
           (
             if value ? otherwise
             then alternative depth value.otherwise
@@ -32894,121 +33104,140 @@
         ];
 
         statementForms = {
-          string = _: lib.id;
+          string = _: value: throw "luau: the string `${value}` where a statement is expected";
           list = expression;
           rows = expression;
           comment = _: value: value.comment;
           local = depth: value: ["local " (targets depth value.local.names) " = " (expression depth value.local.value)];
           assign = depth: value: [(targets depth value.assign.targets) " = " (expression depth value.assign.value)];
-          update = depth: value: [(targets depth value.update.targets) " ${value.update.op} " (expression depth value.update.value)];
+          update = depth: value: [(targets depth value.update.targets) " ${value.update.operator} " (expression depth value.update.value)];
           return = depth: value: ["return " (expression depth value.return)];
-          function = depth: value: ["function " value.function.name (function depth value.function.params value.function.body)];
-          localFunction = depth: value: ["local function " value.localFunction.name (function depth value.localFunction.params value.localFunction.body)];
+          localFunction = depth: value: ["local function " (nameOf value.localFunction.name) (function depth value.localFunction.params value.localFunction.body)];
           "if" = depth: value: ["if " (clause depth value."if")];
-          for = depth: value: ["for " (targets depth value.for.names) " in " (expression depth value.for.values) " do" (block depth value.for.body) "end"];
-          forRange = depth: value: ["for ${value.forRange.name} = " (expression depth value.forRange.bounds) " do" (block depth value.forRange.body) "end"];
-          while = depth: value: ["while " (expression depth value.while.test) " do" (block depth value.while.body) "end"];
-          type = depth: value: ["type ${value.type.name} = " (type depth value.type.value)];
+          for = depth: value: ["for " (comma (map (variable depth) value.for.names)) " in " (expression depth value.for.values) " do" (block depth (map bound value.for.names) value.for.body) "end"];
+          forRange = depth: value: ["for " (variable depth value.forRange.name) " = " (expression depth value.forRange.bounds) " do" (block depth [(bound value.forRange.name)] value.forRange.body) "end"];
+          while = depth: value: ["while " (expression depth value.while.test) " do" (block depth [] value.while.body) "end"];
+          type = depth: value: ["type " (nameOf value.type.name) " = " (type depth value.type.value)];
           trailing = depth: value: [(statement depth value.trailing.statement) " " value.trailing.comment];
         };
 
-        statement = depth: value: (statementForms.${kindOf value} or (throw "luau: no statement ${kindOf value}")) depth value;
-      in {
-        blank = {blank = true;};
+        statement = depth: value:
+          if value ? __functor
+          then "return"
+          else (statementForms.${kindOf value} or (throw "luau: no statement ${kindOf value}")) depth value;
 
-        comment = string: {comment = string;};
+        prefixOperator = operator: operand: {unary = {inherit operator operand;};};
 
-        trailing = command: note: {
-          trailing = {
-            statement = command;
-            comment = note;
+        constructors = {
+          blank = {blank = true;};
+
+          comment = string: {comment = string;};
+
+          trailing = command: note: {
+            trailing = {
+              statement = command;
+              comment = note;
+            };
           };
-        };
 
-        rows = value: {rows = value;};
+          rows = value: {rows = value;};
 
-        str = value: {str = value;};
+          str = value: {str = value;};
 
-        unicode = code: {unicode = code;};
+          unicode = code: {unicode = code;};
 
-        long = string: {long = string;};
+          long = string: {long = string;};
 
-        table = entries: {table = entries;};
+          nil = {nil = true;};
 
-        field = name: value: {field = {inherit name value;};};
+          hex = value: {hex = value;};
 
-        pair = key: value: {pair = {inherit key value;};};
+          table = entries: {table = entries;};
 
-        infix = values: {infix = values;};
+          field = name: value: {field = {inherit name value;};};
 
-        unary = op: value: {unary = {inherit op value;};};
+          pair = key: value: {pair = {inherit key value;};};
 
-        paren = value: {paren = value;};
+          infix = values: {infix = values;};
 
-        dot = value: name: {dot = {inherit value name;};};
+          not = prefixOperator "not";
 
-        colon = value: name: {colon = {inherit value name;};};
+          neg = prefixOperator "-";
 
-        idx = value: key: {idx = {inherit value key;};};
+          len = prefixOperator "#";
 
-        fn = params: body: {fn = {inherit params body;};};
+          paren = value: {paren = value;};
 
-        ifExpr = parts: {ifExpr = parts;};
+          dot = value: path: {dot = {inherit value path;};};
 
-        cast = value: kind: {
-          cast = {
-            inherit value;
-            type = kind;
+          idx = value: key: {idx = {inherit value key;};};
+
+          fn = params: body: {fn = {inherit params body;};};
+
+          ifExpr = parts: {ifExpr = parts;};
+
+          cast = value: kind: {
+            cast = {
+              inherit value;
+              type = kind;
+            };
           };
-        };
 
-        tuple = values: {tuple = values;};
+          tuple = values: {tuple = values;};
 
-        typed = value: kind: {
-          typed = {
-            inherit value;
-            type = kind;
+          typed = value: kind: {
+            typed = {
+              inherit value;
+              type = kind;
+            };
           };
-        };
 
-        opt = kind: {opt = kind;};
+          opt = kind: {opt = kind;};
 
-        local = names: value: {local = {inherit names value;};};
+          local = names: value: {local = {inherit names value;};};
 
-        assign = names: value: {
-          assign = {
-            targets = names;
-            inherit value;
+          assign = names: value: {
+            assign = {
+              targets = names;
+              inherit value;
+            };
           };
-        };
 
-        update = op: names: value: {
-          update = {
-            inherit op value;
-            targets = names;
+          update = operator: names: value: {
+            update = {
+              inherit operator value;
+              targets = names;
+            };
           };
+
+          return = {__functor = _: value: {return = value;};};
+
+          localFunction = name: params: body: {localFunction = {inherit name params body;};};
+
+          if' = test: body: {"if" = {inherit test body;};};
+
+          ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+
+          for = names: values: body: {for = {inherit names values body;};};
+
+          forRange = name: bounds: body: {forRange = {inherit name bounds body;};};
+
+          while = test: body: {while = {inherit test body;};};
+
+          type = name: value: {type = {inherit name value;};};
+
+          render = body: doc.render null (map (value: [(lib.optional (!(value ? blank)) (statement 0 value)) hardline]) (resolve [] body));
         };
-
-        return = value: {return = value;};
-
-        function = name: params: body: {function = {inherit name params body;};};
-
-        localFunction = name: params: body: {localFunction = {inherit name params body;};};
-
-        if' = test: body: {"if" = {inherit test body;};};
-
-        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
-
-        for = names: values: body: {for = {inherit names values body;};};
-
-        forRange = name: bounds: body: {forRange = {inherit name bounds body;};};
-
-        while = test: body: {while = {inherit test body;};};
-
-        type = name: value: {type = {inherit name value;};};
-
-        render = values: doc.render null (map (value: [(lib.optional (!(value ? blank)) (statement 0 value)) hardline]) values);
-      };
+      in
+        constructors
+        // builtins.listToAttrs (map (global: {
+            name =
+              if constructors ? ${global}
+              then "${global}'"
+              else global;
+            value = named global;
+          })
+          globals);
 
       vbs = let
         inherit (doc) hardline;
@@ -41451,28 +41680,42 @@
     modules_tools_tern_config_plugins_attention_window_data = {blank, ...}: [blank];
     modules_tools_tern_config_plugins_block_menu_plugin_data = [[["schema" 1] ["id" "block-menu"] ["name" "Block Menu"] ["version" "0.1.0"] ["description" "Ctrl+N opens a menu of every block type: terminal, agent, browser, plugins, and the rest."] ["icon" "plus"] ["window" "window.luau"]]];
     modules_tools_tern_config_plugins_block_menu_window_data = {
+      PickItem,
+      WindowCx,
       blank,
-      colon,
       comment,
+      dot,
       field,
       fn,
       for,
       if',
       ifElse,
       infix,
+      ipairs,
       local,
       localFunction,
+      nil,
+      not,
       opt,
+      return,
       rows,
       str,
+      string,
       table,
+      table',
+      tern,
+      type',
       typed,
-      unary,
       ...
+    }: ({
+      blocks,
+      agents,
+      launch,
+      menu,
     }: [
       (comment "--!strict")
       blank
-      (local "blocks" (rows (table [
+      (local blocks (rows (table [
         (table [(field "label" (str "Terminal")) (field "detail" (str "shell block")) (field "icon" (str "terminal")) (field "action" (str "new_shell_block"))])
         (table [(field "label" (str "Browser")) (field "detail" (str "web page")) (field "icon" (str "globe")) (field "action" (str "new_browser_block"))])
         (table [(field "label" (str "Git")) (field "detail" (str "status, commits")) (field "icon" (str "branch")) (field "action" (str "new_git_block"))])
@@ -41482,227 +41725,293 @@
         (table [(field "label" (str "Screen")) (field "detail" (str "remote display")) (field "icon" (str "monitor")) (field "action" (str "new_screen_block"))])
       ])))
       blank
-      (local "agents" (rows (table [
+      (local agents (rows (table [
         (table [(field "label" (str "omp")) (field "icon" (str "app-omp")) (field "command" (str "omp"))])
         (table [(field "label" (str "Claude Code")) (field "icon" (str "app-claude")) (field "command" (str "tern acp claude"))])
         (table [(field "label" (str "Codex")) (field "icon" (str "app-codex")) (field "command" (str "tern acp codex"))])
       ])))
       blank
-      (localFunction "launch" [(typed "cx" "WindowCx") (typed "command" "string")] [
-        (local "placement" ["cx.settings:get" (str "agent_placement")])
-        (if' (infix ["placement" "==" (str "new_tab")]) [
-          ["cx.layout:new_tab" (table [(field "command" "command")])]
-          "return"
+      (localFunction launch [{cx = WindowCx;} {command = string;}] ({
+        cx,
+        command,
+        placement,
+        id,
+        info,
+      }: [
+        (local placement [(dot cx "settings:get") (str "agent_placement")])
+        (if' (infix [placement "==" (str "new_tab")]) [
+          [(dot cx "layout:new_tab") (table [(field "command" command)])]
+          return
         ])
-        (local "id" ["cx.session:focused"])
-        (local "info" (infix [(infix ["id" "and" ["cx.session:pane" "id"]]) "or" "nil"]))
-        (if' (unary "not" "info") [
-          ["cx.layout:new_tab" (table [(field "command" "command")])]
-          "return"
+        (local id [(dot cx "session:focused")])
+        (local info (infix [id "and" [(dot cx "session:pane") id] "or" nil]))
+        (if' (not info) [
+          [(dot cx "layout:new_tab") (table [(field "command" command)])]
+          return
         ])
-        (if' (infix ["placement" "==" (str "replace_if_alone")]) [
-          (local "tab" ["cx.session:tab_of" "info.pane"])
-          (local "layout" (infix ["tab" "and" ["cx.session:layout" "tab"]]))
-          (if' (infix ["layout" "and" "layout.root.pane"]) [
-            (local "pane" ["cx.layout:split" "info.pane" (str "right") (table [(field "command" "command")])])
-            (if' "pane" [
-              ["cx.layout:close" "info.pane"]
+        (if' (infix [placement "==" (str "replace_if_alone")]) ({
+          tab,
+          layout,
+        }: [
+          (local tab [(dot cx "session:tab_of") (dot info "pane")])
+          (local layout (infix [tab "and" [(dot cx "session:layout") tab]]))
+          (if' (infix [layout "and" (dot layout "root.pane")]) ({pane}: [
+            (local pane [(dot cx "layout:split") (dot info "pane") (str "right") (table [(field "command" command)])])
+            (if' pane [
+              [(dot cx "layout:close") (dot info "pane")]
             ])
-            "return"
-          ])
-        ])
-        ["cx.layout:split" "info.pane" (str "right") (table [(field "command" "command")])]
-      ])
+            return
+          ]))
+        ]))
+        [(dot cx "layout:split") (dot info "pane") (str "right") (table [(field "command" command)])]
+      ]))
       blank
-      (localFunction "menu" [(typed "cx" "WindowCx")] [
-        (local (typed "items" (table ["PickItem"])) (table []))
-        (for ["_" "row"] ["ipairs" "blocks"] [
+      (localFunction menu [{cx = WindowCx;}] ({
+        cx,
+        items,
+        custom,
+      }: [
+        (local (typed items (table [PickItem])) (table []))
+        (for [{_ = null;} {row = null;}] [ipairs blocks] ({
+          _,
+          row,
+        }: [
           [
-            "table.insert"
-            "items"
+            (dot table' "insert")
+            items
             (rows (table [
-              (field "label" "row.label")
-              (field "detail" "row.detail")
+              (field "label" (dot row "label"))
+              (field "detail" (dot row "detail"))
               (field "group" (str "Blocks"))
-              (field "icon" "row.icon")
-              (field "action" "row.action")
+              (field "icon" (dot row "icon"))
+              (field "action" (dot row "action"))
             ]))
           ]
-        ])
-        (for ["_" "row"] ["ipairs" "agents"] [
+        ]))
+        (for [{_ = null;} {row = null;}] [ipairs agents] ({
+          _,
+          row,
+        }: [
           [
-            "table.insert"
-            "items"
+            (dot table' "insert")
+            items
             (rows (table [
-              (field "label" "row.label")
+              (field "label" (dot row "label"))
               (field "group" (str "Agents"))
-              (field "icon" "row.icon")
-              (field "command" "row.command")
+              (field "icon" (dot row "icon"))
+              (field "command" (dot row "command"))
             ]))
           ]
-        ])
-        (local "custom" ["cx.settings:get" (str "agents.custom")])
-        (if' (infix [["type" "custom"] "==" (str "table")]) [
-          (for ["_" "entry"] ["ipairs" "custom"] [
-            (local "name" (infix [(infix [(infix [["type" "entry"] "==" (str "table")]) "and" "entry.name"]) "or" "nil"]))
-            (local "command" (infix [(infix [(infix [["type" "entry"] "==" (str "table")]) "and" "entry.command"]) "or" "nil"]))
-            (if' (infix [(infix [["type" "name"] "==" (str "string")]) "and" (infix [["type" "command"] "==" (str "string")]) "and" (infix ["name" "~=" (str "")]) "and" (infix ["command" "~=" (str "")])]) [
+        ]))
+        (local custom [(dot cx "settings:get") (str "agents.custom")])
+        (if' (infix [[type' custom] "==" (str "table")]) [
+          (for [{_ = null;} {entry = null;}] [ipairs custom] ({
+            _,
+            entry,
+            name,
+            command,
+          }: [
+            (local name (infix [[type' entry] "==" (str "table") "and" (dot entry "name") "or" nil]))
+            (local command (infix [[type' entry] "==" (str "table") "and" (dot entry "command") "or" nil]))
+            (if' (infix [[type' name] "==" (str "string") "and" [type' command] "==" (str "string") "and" name "~=" (str "") "and" command "~=" (str "")]) [
               [
-                "table.insert"
-                "items"
+                (dot table' "insert")
+                items
                 (rows (table [
-                  (field "label" "name")
+                  (field "label" name)
                   (field "group" (str "Agents"))
                   (field "icon" (str "puzzle"))
-                  (field "command" "command")
+                  (field "command" command)
                 ]))
               ]
             ])
-          ])
+          ]))
         ])
-        ["table.insert" "items" (table [(field "label" (str "Carly")) (field "group" (str "Agents")) (field "icon" (str "sparkle")) (field "action" (str "new_carly_block"))])]
-        (for ["_" "block"] ["ipairs" ["cx.session:block_types"]] [
-          (if' (infix ["block.palette" "and" (infix ["block.kind" "~=" (str "canvas")]) "and" (infix ["block.kind" "~=" (str "tern.canvas")])]) [
+        [(dot table' "insert") items (table [(field "label" (str "Carly")) (field "group" (str "Agents")) (field "icon" (str "sparkle")) (field "action" (str "new_carly_block"))])]
+        (for [{_ = null;} {block = null;}] [ipairs [(dot cx "session:block_types")]] ({
+          _,
+          block,
+        }: [
+          (if' (infix [(dot block "palette") "and" (dot block "kind") "~=" (str "canvas") "and" (dot block "kind") "~=" (str "tern.canvas")]) [
             [
-              "table.insert"
-              "items"
+              (dot table' "insert")
+              items
               (rows (table [
-                (field "label" "block.title")
-                (field "detail" "block.kind")
+                (field "label" (dot block "title"))
+                (field "detail" (dot block "kind"))
                 (field "group" (str "Plugins"))
-                (field "icon" "block.icon")
-                (field "kind" "block.kind")
+                (field "icon" (dot block "icon"))
+                (field "kind" (dot block "kind"))
               ]))
             ]
           ])
-        ])
+        ]))
         [
-          (rows (colon ["cx:pick" (table [(field "items" "items") (field "placeholder" (str "New block")) (field "icon" (str "plus")) (field "action" (str "create"))])] "next"))
-          (fn [(typed "item" (opt "PickItem")) (typed "_err" (opt "string")) (typed "fresh" (opt "WindowCx"))] [
-            (if' (unary "not" "item") [
-              "return"
+          (rows (dot [(dot cx ":pick") (table [(field "items" items) (field "placeholder" (str "New block")) (field "icon" (str "plus")) (field "action" (str "create"))])] ":next"))
+          (fn [{item = opt PickItem;} {_err = opt string;} {fresh = opt WindowCx;}] ({
+            item,
+            _err,
+            fresh,
+            next_cx,
+          }: [
+            (if' (not item) [
+              return
             ])
-            (local "next_cx" (infix ["fresh" "or" "cx"]))
-            (ifElse "item.command" [
-                ["launch" "next_cx" "item.command"]
-              ] (ifElse "item.kind" [
-                  ["next_cx:new_block" "item.kind"]
-                ] (if' "item.action" [
-                  ["next_cx:action" "item.action"]
+            (local next_cx (infix [fresh "or" cx]))
+            (ifElse (dot item "command") [
+                [launch next_cx (dot item "command")]
+              ] (ifElse (dot item "kind") [
+                  [(dot next_cx ":new_block") (dot item "kind")]
+                ] (if' (dot item "action") [
+                  [(dot next_cx ":action") (dot item "action")]
                 ])))
-          ])
+          ]))
         ]
-      ])
+      ]))
       blank
       [
-        "tern.command"
+        (dot tern "command")
         (rows (table [
           (field "id" (str "new_block"))
           (field "title" (str "New block…"))
           (field "icon" (str "plus"))
           (field "keys" (table [(str "ctrl+n")]))
-          (field "run" "menu")
+          (field "run" menu)
         ]))
       ]
-    ];
+    ]);
     modules_tools_tern_config_plugins_cmus_data = "/home/y0usaf/dev/developing/tern-cmus";
     modules_tools_tern_config_plugins_ekko_data = "/home/y0usaf/dev/developing/tern-ekko";
     modules_tools_tern_config_plugins_nix_fail_data = "/home/y0usaf/dev/developing/tern-nix-fail";
     modules_tools_tern_config_plugins_tab_order_plugin_data = [[["schema" 1] ["id" "tab-order"] ["name" "Tab Order"] ["version" "0.1.0"] ["description" "New tabs land right below the tab that had focus, not at the end of the list."] ["window" "window.luau"]]];
     modules_tools_tern_config_plugins_tab_order_window_data = {
+      FocusEvent,
+      TabEvent,
+      TabInfo,
+      WindowCx,
       assign,
       blank,
       comment,
+      dot,
       fn,
       for,
       if',
       infix,
+      ipairs,
       local,
       localFunction,
+      nil,
+      not,
+      number,
       opt,
       return,
       str,
+      tern,
       tuple,
       typed,
-      unary,
       ...
+    }: ({
+      last,
+      previous,
+      note,
+      focused_tab,
+      tab_info,
+      place,
     }: [
       (comment "--!strict")
       blank
-      (local (typed "last" (opt "number")) "nil")
-      (local (typed "previous" (opt "number")) "nil")
+      (local (typed last (opt number)) nil)
+      (local (typed previous (opt number)) nil)
       blank
-      (localFunction "note" [(typed "id" (opt "number"))] [
-        (if' (infix ["id" "and" (infix ["id" "~=" "last"])]) [
-          (assign "previous" "last")
-          (assign "last" "id")
+      (localFunction note [{id = opt number;}] ({id}: [
+        (if' (infix [id "and" id "~=" last]) [
+          (assign previous last)
+          (assign last id)
         ])
-      ])
+      ]))
       blank
-      (localFunction "focused_tab" (typed [(typed "cx" "WindowCx")] (opt "number")) [
-        (local "pane" ["cx.session:focused"])
-        (return (infix [(infix ["pane" "and" ["cx.session:tab_of" "pane"]]) "or" "nil"]))
-      ])
+      (localFunction focused_tab (typed [{cx = WindowCx;}] (opt number)) ({
+        cx,
+        pane,
+      }: [
+        (local pane [(dot cx "session:focused")])
+        (return (infix [pane "and" [(dot cx "session:tab_of") pane] "or" nil]))
+      ]))
       blank
-      (localFunction "tab_info" (typed [(typed "cx" "WindowCx") (typed "id" "number")] (opt "TabInfo")) [
-        (for ["_" "info"] ["ipairs" ["cx.session:tabs"]] [
-          (if' (infix ["info.id" "==" "id"]) [
-            (return "info")
+      (localFunction tab_info (typed [{cx = WindowCx;} {id = number;}] (opt TabInfo)) ({
+        cx,
+        id,
+      }: [
+        (for [{_ = null;} {info = null;}] [ipairs [(dot cx "session:tabs")]] ({
+          _,
+          info,
+        }: [
+          (if' (infix [(dot info "id") "==" id]) [
+            (return info)
           ])
-        ])
-        (return "nil")
-      ])
+        ]))
+        (return nil)
+      ]))
       blank
-      (localFunction "place" [(typed "cx" "WindowCx") (typed "id" "number") (typed "anchor" (opt "number"))] [
-        (if' (infix [(unary "not" "anchor") "or" (infix ["anchor" "==" "id"])]) [
-          "return"
+      (localFunction place [{cx = WindowCx;} {id = number;} {anchor = opt number;}] ({
+        cx,
+        id,
+        anchor,
+        info,
+        at,
+      }: [
+        (if' (infix [(not anchor) "or" anchor "==" id]) [
+          return
         ])
-        (local "info" ["tab_info" "cx" "id"])
-        (local "at" ["tab_info" "cx" "anchor"])
-        (if' (infix [(unary "not" "info") "or" (unary "not" "at") "or" (infix ["info.session" "~=" "at.session"])]) [
-          "return"
+        (local info [tab_info cx id])
+        (local at [tab_info cx anchor])
+        (if' (infix [(not info) "or" (not at) "or" (dot info "session") "~=" (dot at "session")]) [
+          return
         ])
-        (if' (infix ["info.position" ">" (infix ["at.position" "+" 1])]) [
-          ["cx.layout:order_tab" "id" (infix ["at.position" "+" 1])]
+        (if' (infix [(dot info "position") ">" (dot at "position") "+" 1]) [
+          [(dot cx "layout:order_tab") id (infix [(dot at "position") "+" 1])]
         ])
-      ])
+      ]))
       blank
       [
-        "tern.on"
+        (dot tern "on")
         (str "window_start")
-        (fn [(typed "cx" "WindowCx")] [
-          (assign ["last" "previous"] (tuple ["nil" "nil"]))
-          ["note" ["focused_tab" "cx"]]
-        ])
+        (fn [{cx = WindowCx;}] ({cx}: [
+          (assign [last previous] (tuple [nil nil]))
+          [note [focused_tab cx]]
+        ]))
       ]
       blank
       [
-        "tern.on"
+        (dot tern "on")
         (str "focus")
-        (fn [(typed "ev" "FocusEvent")] [
-          ["note" "ev.tab"]
-        ])
+        (fn [{ev = FocusEvent;}] ({ev}: [
+          [note (dot ev "tab")]
+        ]))
       ]
       blank
       [
-        "tern.timer"
+        (dot tern "timer")
         0
-        (fn [(typed "cx" (opt "WindowCx"))] [
-          ["note" (infix ["cx" "and" ["focused_tab" "cx"]])]
-        ])
+        (fn [{cx = opt WindowCx;}] ({cx}: [
+          [note (infix [cx "and" [focused_tab cx]])]
+        ]))
       ]
       blank
       [
-        "tern.on"
+        (dot tern "on")
         (str "tab_created")
-        (fn [(typed "ev" "TabEvent") (typed "cx" "WindowCx")] [
-          (if' (infix [["focused_tab" "cx"] "~=" "ev.tab"]) [
-            "return"
+        (fn [{ev = TabEvent;} {cx = WindowCx;}] ({
+          ev,
+          cx,
+        }: [
+          (if' (infix [[focused_tab cx] "~=" (dot ev "tab")]) [
+            return
           ])
-          ["place" "cx" "ev.tab" (infix [(infix [(infix ["last" "==" "ev.tab"]) "and" "previous"]) "or" "last"])]
-        ])
+          [place cx (dot ev "tab") (infix [last "==" (dot ev "tab") "and" previous "or" last])]
+        ]))
       ]
-    ];
+    ]);
     modules_tools_tern_config_plugins_transparent_plugin_data = [[["schema" 1] ["id" "transparent"] ["name" "Transparent"] ["version" "0.1.0"] ["description" "Clears every surface and backdrop blur, so the wallpaper shows through untouched."] ["window" "window.luau"] ["styles" ["transparent.css"]]]];
     modules_tools_tern_config_plugins_transparent_transparent_data = [
       {
@@ -41820,10 +42129,19 @@
     ];
     modules_tools_tern_config_plugins_tuturu_sounds_data = [[{comment = "The sounds are built by ~/finix/modules/tools/tern/default.nix and named in";} {comment = "<plugin data>/sounds.toml, which wins over this file. These stay empty so a";} {comment = "missing override is silent rather than playing something else.";} ["alert" ""] ["yield" ""] ["done" ""]] [{comment = "Chime only for panes you are not looking at. false chimes for the focused";} {comment = "pane too.";} ["only_unfocused" true]] [{comment = "Shell commands running at least this long chime the done sound when they";} {comment = "finish. 0 chimes every finished command.";} ["min_seconds" 30]]];
     modules_tools_tern_config_plugins_tuturu_src_window_data = {
+      AgentBlock,
+      CommandFinishedEvent,
+      PaneInfo,
+      ProcessResult,
+      StatusPaneInfo,
+      StatusSegment,
+      WindowCx,
       assign,
       blank,
+      boolean,
       cast,
       comment,
+      dot,
       field,
       fn,
       for,
@@ -41832,23 +42150,85 @@
       ifElse,
       ifExpr,
       infix,
+      len,
       local,
       localFunction,
+      math,
+      neg,
+      nil,
+      not,
+      number,
       opt,
+      os,
       pair,
       paren,
+      pcall,
+      proproblems,
       return,
       rows,
       str,
+      string,
       table,
+      table',
+      tern,
+      tonumber,
+      tostring,
       trailing,
       tuple,
       type,
+      type',
       typed,
-      unary,
       update,
       while,
       ...
+    }: ({
+      Config,
+      TICK_MS,
+      CONFIG_EVERY_TICKS,
+      MIN_GAP_MS,
+      CLAIM_WINDOW_S,
+      SEP,
+      DATA_SEP,
+      DATA_CONFIG,
+      PLUGIN_CONFIG,
+      trim,
+      strip_comment,
+      unquote,
+      default_config,
+      is_absolute,
+      resolve_path,
+      parse_config,
+      config,
+      config_source,
+      config_key,
+      warned,
+      read_config_file,
+      load_config,
+      snapshot_key,
+      maybe_reload_config,
+      is_muted,
+      refresh_muted,
+      claim_chime,
+      spawn,
+      linux_player,
+      linux_probe_failed,
+      linux_probing,
+      linux_queue,
+      LINUX_PLAYERS,
+      linux_argv,
+      probe_linux_player,
+      warned_no_player,
+      play_file,
+      last_chime_at,
+      chime,
+      list_agents,
+      alerts,
+      agent_state,
+      seeded,
+      tick_count,
+      tick_body,
+      tick,
+      startup_problems,
     }: [
       (comment "--!strict")
       (comment "-- Tuturu: a sound when a pane raises an unseen alert, an agent yields to you,")
@@ -41871,1181 +42251,1570 @@
       (comment "-- <plugin data>/sounds.toml, which wins when present so a reinstall keeps")
       (comment "-- your sounds. It is re-read every few seconds; no reload needed.")
       blank
-      (type "Config" (rows (table [
-        (field "sounds" (table [(pair "string" "string")]))
-        (field "only_unfocused" "boolean")
-        (field "min_seconds" "number")
+      (type Config (rows (table [
+        (field "sounds" (table [(pair string string)]))
+        (field "only_unfocused" boolean)
+        (field "min_seconds" number)
       ])))
       blank
-      (local "TICK_MS" 250)
-      (trailing (local "CONFIG_EVERY_TICKS" 20) "-- re-read sounds.toml about every 5 s")
-      (trailing (local "MIN_GAP_MS" 500) "-- chimes never overlap")
-      (trailing (local "CLAIM_WINDOW_S" 2) "-- cross-window dedup: one chime per moment")
+      (local TICK_MS 250)
+      (trailing (local CONFIG_EVERY_TICKS 20) "-- re-read sounds.toml about every 5 s")
+      (trailing (local MIN_GAP_MS 500) "-- chimes never overlap")
+      (trailing (local CLAIM_WINDOW_S 2) "-- cross-window dedup: one chime per moment")
       blank
-      (local "SEP" (ifExpr [(infix ["tern.runtime.os" "==" (str "windows")]) (str "\\") (str "/")]))
-      (local "DATA_SEP" (infix ["tern.plugin.data" ".." "SEP"]))
-      (local "DATA_CONFIG" (infix ["DATA_SEP" ".." (str "sounds.toml")]))
-      (local "PLUGIN_CONFIG" (infix ["tern.plugin.dir" ".." "SEP" ".." (str "sounds.toml")]))
+      (local SEP (ifExpr [(infix [(dot tern "runtime.os") "==" (str "windows")]) (str "\\") (str "/")]))
+      (local DATA_SEP (infix [(dot tern "plugin.data") ".." SEP]))
+      (local DATA_CONFIG (infix [DATA_SEP ".." (str "sounds.toml")]))
+      (local PLUGIN_CONFIG (infix [(dot tern "plugin.dir") ".." SEP ".." (str "sounds.toml")]))
       blank
       (comment "-- Config ----------------------------------------------------------------------------------")
       blank
-      (localFunction "trim" (typed [(typed "s" "string")] "string") [
-        (return (paren ["string.gsub" "s" (str "^%s*(.-)%s*$") (str "%1")]))
-      ])
+      (localFunction trim (typed [{s = string;}] string) ({s}: [
+        (return (paren [(dot string "gsub") s (str "^%s*(.-)%s*$") (str "%1")]))
+      ]))
       blank
       (comment "-- Cut a `#` comment, keeping `#` inside quotes.")
-      (localFunction "strip_comment" (typed [(typed "line" "string")] "string") [
-        (local "in_single" "false")
-        (local "in_double" "false")
-        (local "i" 1)
-        (while (infix ["i" "<=" (unary "#" "line")]) [
-          (local "c" ["string.sub" "line" "i" "i"])
-          (ifElse (infix [(infix ["c" "==" (str "\\")]) "and" (paren (infix ["in_single" "or" "in_double"]))]) [
-              (update "+=" "i" 2)
-            ] (ifElse (infix [(infix ["c" "==" (str "'")]) "and" (unary "not" "in_double")]) [
-                (assign "in_single" (unary "not" "in_single"))
-                (update "+=" "i" 1)
-              ] (ifElse (infix [(infix ["c" "==" (str "\"")]) "and" (unary "not" "in_single")]) [
-                  (assign "in_double" (unary "not" "in_double"))
-                  (update "+=" "i" 1)
-                ] (ifElse (infix [(infix ["c" "==" (str "#")]) "and" (unary "not" "in_single") "and" (unary "not" "in_double")]) [
-                    (return ["string.sub" "line" 1 (infix ["i" "-" 1])])
+      (localFunction strip_comment (typed [{line = string;}] string) ({
+        line,
+        in_single,
+        in_double,
+        i,
+      }: [
+        (local in_single false)
+        (local in_double false)
+        (local i 1)
+        (while (infix [i "<=" (len line)]) ({c}: [
+          (local c [(dot string "sub") line i i])
+          (ifElse (infix [c "==" (str "\\") "and" (infix [in_single "or" in_double])]) [
+              (update "+=" i 2)
+            ] (ifElse (infix [c "==" (str "'") "and" (not in_double)]) [
+                (assign in_single (not in_single))
+                (update "+=" i 1)
+              ] (ifElse (infix [c "==" (str "\"") "and" (not in_single)]) [
+                  (assign in_double (not in_double))
+                  (update "+=" i 1)
+                ] (ifElse (infix [c "==" (str "#") "and" (not in_single) "and" (not in_double)]) [
+                    (return [(dot string "sub") line 1 (infix [i "-" 1])])
                   ] [
-                    (update "+=" "i" 1)
+                    (update "+=" i 1)
                   ]))))
-        ])
-        (return "line")
-      ])
+        ]))
+        (return line)
+      ]))
       blank
       (comment "-- A quoted value without its quotes, or nil when not quoted. Only the")
       (comment "-- matching quote and the backslash unescape, so Windows paths work as-is")
       (comment "-- in double quotes (`\"C:\\sounds\\ping.wav\"` needs no doubling).")
-      (localFunction "unquote" (typed [(typed "s" "string")] (opt "string")) [
-        (if' (infix [(unary "#" "s") "<" 2]) [
-          (return "nil")
+      (localFunction unquote (typed [{s = string;}] (opt string)) ({
+        s,
+        first,
+        inner,
+      }: [
+        (if' (infix [(len s) "<" 2]) [
+          (return nil)
         ])
-        (local "first" ["string.sub" "s" 1 1])
-        (if' (infix [(infix ["first" "~=" (str "\"")]) "and" (infix ["first" "~=" (str "'")])]) [
-          (return "nil")
+        (local first [(dot string "sub") s 1 1])
+        (if' (infix [first "~=" (str "\"") "and" first "~=" (str "'")]) [
+          (return nil)
         ])
-        (if' (infix [["string.sub" "s" (unary "-" 1)] "~=" "first"]) [
-          (return "nil")
+        (if' (infix [[(dot string "sub") s (-1)] "~=" first]) [
+          (return nil)
         ])
-        (local "inner" ["string.sub" "s" 2 (unary "-" 2)])
-        (ifElse (infix ["first" "==" (str "\"")]) [
-            (assign "inner" ["string.gsub" "inner" (str "\\\"") (str "\"")])
-            (assign "inner" ["string.gsub" "inner" (str "\\\\") (str "\\")])
+        (local inner [(dot string "sub") s 2 (-2)])
+        (ifElse (infix [first "==" (str "\"")]) [
+            (assign inner [(dot string "gsub") inner (str "\\\"") (str "\"")])
+            (assign inner [(dot string "gsub") inner (str "\\\\") (str "\\")])
           ] [
-            (assign "inner" ["string.gsub" "inner" (str "\\'") (str "'")])
+            (assign inner [(dot string "gsub") inner (str "\\'") (str "'")])
           ])
-        (return "inner")
-      ])
+        (return inner)
+      ]))
       blank
-      (localFunction "default_config" (typed [] "Config") [
-        (local "dir" (infix ["tern.plugin.dir" ".." "SEP" ".." (str "sounds")]))
+      (localFunction default_config (typed [] Config) ({dir}: [
+        (local dir (infix [(dot tern "plugin.dir") ".." SEP ".." (str "sounds")]))
         (return (rows (table [
           (field "sounds" (rows (table [
-            (field "alert" (infix ["dir" ".." "SEP" ".." (str "alert.wav")]))
-            (field "yield" (infix ["dir" ".." "SEP" ".." (str "yield.wav")]))
-            (field "done" (infix ["dir" ".." "SEP" ".." (str "done.wav")]))
+            (field "alert" (infix [dir ".." SEP ".." (str "alert.wav")]))
+            (field "yield" (infix [dir ".." SEP ".." (str "yield.wav")]))
+            (field "done" (infix [dir ".." SEP ".." (str "done.wav")]))
           ])))
-          (field "only_unfocused" "true")
+          (field "only_unfocused" true)
           (field "min_seconds" 30)
         ])))
-      ])
+      ]))
       blank
-      (localFunction "is_absolute" (typed [(typed "p" "string")] "boolean") [
-        (if' (infix [["string.sub" "p" 1 1] "==" (str "/")]) [
-          (return "true")
+      (localFunction is_absolute (typed [{p = string;}] boolean) ({p}: [
+        (if' (infix [[(dot string "sub") p 1 1] "==" (str "/")]) [
+          (return true)
         ])
-        (return (infix [(infix [["string.match" "p" (str "^[A-Za-z]:[\\/]")] "~=" "nil"]) "or" (infix [["string.sub" "p" 1 2] "==" (str "\\\\")])]))
-      ])
+        (return (infix [[(dot string "match") p (str "^[A-Za-z]:[\\/]")] "~=" nil "or" [(dot string "sub") p 1 2] "==" (str "\\\\")]))
+      ]))
       blank
-      (localFunction "resolve_path" (typed [(typed "p" "string") (typed "base" "string")] "string") [
-        (if' (infix [["string.sub" "p" 1 1] "==" (str "~")]) [
-          (local "home" (infix [["tern.getenv" (str "HOME")] "or" ["tern.getenv" (str "USERPROFILE")] "or" (str "")]))
-          (if' (infix ["home" "~=" (str "")]) [
-            (assign "p" (infix ["home" ".." ["string.sub" "p" 2]]))
+      (localFunction resolve_path (typed [{p = string;} {base = string;}] string) ({
+        p,
+        base,
+      }: [
+        (if' (infix [[(dot string "sub") p 1 1] "==" (str "~")]) ({home}: [
+          (local home (infix [[(dot tern "getenv") (str "HOME")] "or" [(dot tern "getenv") (str "USERPROFILE")] "or" (str "")]))
+          (if' (infix [home "~=" (str "")]) [
+            (assign p (infix [home ".." [(dot string "sub") p 2]]))
           ])
+        ]))
+        (if' [is_absolute p] [
+          (return p)
         ])
-        (if' ["is_absolute" "p"] [
-          (return "p")
-        ])
-        (return (infix ["base" ".." "SEP" ".." "p"]))
-      ])
+        (return (infix [base ".." SEP ".." p]))
+      ]))
       blank
-      (localFunction "parse_config" (typed [(typed "text" "string") (typed "base" "string")] (tuple ["Config" (table ["string"])])) [
-        (local "config" ["default_config"])
-        (local (typed "problems" (table ["string"])) (table []))
-        (for "raw" ["string.gmatch" "text" (str "[^\r\n]+")] [
-          (local "line" ["trim" ["strip_comment" "raw"]])
-          (if' (infix ["line" "~=" (str "")]) [
-            (local ["key" "value"] ["string.match" "line" (str "^([A-Za-z_][%w_]*)%s*=%s*(.-)%s*$")])
-            (ifElse (infix [(infix ["key" "==" "nil"]) "or" (infix ["value" "==" "nil"]) "or" (infix ["value" "==" (str "")])]) [
-                ["table.insert" "problems" (infix [(str "Skipping line: ") ".." "line"])]
-              ] (ifElse (infix [(infix ["key" "==" (str "alert")]) "or" (infix ["key" "==" (str "yield")]) "or" (infix ["key" "==" (str "done")])]) [
-                  (local "quoted" ["unquote" "value"])
-                  (ifElse (infix ["quoted" "==" "nil"]) [
-                      ["table.insert" "problems" (infix ["key" ".." (str ": expected a quoted path, got ") ".." "value"])]
-                    ] (ifElse (infix ["quoted" "==" (str "")]) [
-                        (assign (idx "config.sounds" "key") (str ""))
+      (localFunction parse_config (typed [{text = string;} {base = string;}] (tuple [Config (table [string])])) ({
+        text,
+        base,
+        config,
+        problems,
+      }: [
+        (local config [default_config])
+        (local (typed problems (table [string])) (table []))
+        (for [{raw = null;}] [(dot string "gmatch") text (str "[^\r\n]+")] ({
+          raw,
+          line,
+        }: [
+          (local line [trim [strip_comment raw]])
+          (if' (infix [line "~=" (str "")]) ({
+            key,
+            value,
+          }: [
+            (local [key value] [(dot string "match") line (str "^([A-Za-z_][%w_]*)%s*=%s*(.-)%s*$")])
+            (ifElse (infix [key "==" nil "or" value "==" nil "or" value "==" (str "")]) [
+                [(dot table' "insert") problems (infix [(str "Skipping line: ") ".." line])]
+              ] (ifElse (infix [key "==" (str "alert") "or" key "==" (str "yield") "or" key "==" (str "done")]) ({quoted}: [
+                  (local quoted [unquote value])
+                  (ifElse (infix [quoted "==" nil]) [
+                      [(dot table' "insert") problems (infix [key ".." (str ": expected a quoted path, got ") ".." value])]
+                    ] (ifElse (infix [quoted "==" (str "")]) [
+                        (assign (idx (dot config "sounds") key) (str ""))
                       ] [
-                        (assign (idx "config.sounds" "key") ["resolve_path" "quoted" "base"])
+                        (assign (idx (dot config "sounds") key) [resolve_path quoted base])
                       ]))
-                ] (ifElse (infix ["key" "==" (str "only_unfocused")]) [
-                    (ifElse (infix ["value" "==" (str "true")]) [
-                        (assign "config.only_unfocused" "true")
-                      ] (ifElse (infix ["value" "==" (str "false")]) [
-                          (assign "config.only_unfocused" "false")
+                ]) (ifElse (infix [key "==" (str "only_unfocused")]) [
+                    (ifElse (infix [value "==" (str "true")]) [
+                        (assign (dot config "only_unfocused") true)
+                      ] (ifElse (infix [value "==" (str "false")]) [
+                          (assign (dot config "only_unfocused") false)
                         ] [
-                          ["table.insert" "problems" (infix [(str "only_unfocused: expected true or false, got ") ".." "value"])]
+                          [(dot table' "insert") problems (infix [(str "only_unfocused: expected true or false, got ") ".." value])]
                         ]))
-                  ] (ifElse (infix ["key" "==" (str "min_seconds")]) [
-                      (local "n" ["tonumber" "value"])
-                      (ifElse (infix [(infix ["n" "==" "nil"]) "or" (infix ["n" "<" 0])]) [
-                          ["table.insert" "proproblems" (infix [(str "min_seconds: expected seconds >= 0, got ") ".." "value"])]
+                  ] (ifElse (infix [key "==" (str "min_seconds")]) ({n}: [
+                      (local n [tonumber value])
+                      (ifElse (infix [n "==" nil "or" n "<" 0]) [
+                          [(dot table' "insert") proproblems (infix [(str "min_seconds: expected seconds >= 0, got ") ".." value])]
                         ] [
-                          (assign "config.min_seconds" "n")
+                          (assign (dot config "min_seconds") n)
                         ])
-                    ] [
-                      ["table.insert" "problems" (infix [(str "Unknown key: ") ".." "key"])]
+                    ]) [
+                      [(dot table' "insert") problems (infix [(str "Unknown key: ") ".." key])]
                     ]))))
-          ])
-        ])
-        (return (tuple ["config" "problems"]))
-      ])
+          ]))
+        ]))
+        (return (tuple [config problems]))
+      ]))
       blank
-      (local "config" ["default_config"])
-      (local "config_source" (str "(defaults)"))
-      (local (typed "config_key" (opt "string")) "nil")
-      (local (typed "warned" (table [(pair "string" "boolean")])) (table []))
+      (local config [default_config])
+      (local config_source (str "(defaults)"))
+      (local (typed config_key (opt string)) nil)
+      (local (typed warned (table [(pair string boolean)])) (table []))
       blank
       (comment "-- The data-folder config wins when it reads; the shipped one is the fallback.")
-      (localFunction "read_config_file" (typed [] (tuple [(opt "string") (opt "string")])) [
-        (for ["_" "path"] (table ["DATA_CONFIG" "PLUGIN_CONFIG"]) [
-          (local ["ok" "text"] ["pcall" "tern.fs.read" "path" (infix [64 "*" 1024])])
-          (if' (infix ["ok" "and" (infix [["type" "text"] "==" (str "string")])]) [
-            (return (tuple [(cast "text" "string") "path"]))
+      (localFunction read_config_file (typed [] (tuple [(opt string) (opt string)])) [
+        (for [{_ = null;} {path = null;}] (table [DATA_CONFIG PLUGIN_CONFIG]) ({
+          _,
+          path,
+          ok,
+          text,
+        }: [
+          (local [ok text] [pcall (dot tern "fs.read") path (infix [64 "*" 1024])])
+          (if' (infix [ok "and" [type' text] "==" (str "string")]) [
+            (return (tuple [(cast text string) path]))
           ])
-        ])
-        (return (tuple ["nil" "nil"]))
+        ]))
+        (return (tuple [nil nil]))
       ])
       blank
-      (localFunction "load_config" (typed [] (table ["string"])) [
-        (local ["text" "path"] ["read_config_file"])
-        (if' (infix [(infix ["text" "==" "nil"]) "or" (infix ["path" "==" "nil"])]) [
-          (assign "config" ["default_config"])
-          (assign "config_source" (str "(defaults)"))
-          (assign "warned" (table []))
+      (localFunction load_config (typed [] (table [string])) ({
+        text,
+        path,
+        parsed,
+        problems,
+      }: [
+        (local [text path] [read_config_file])
+        (if' (infix [text "==" nil "or" path "==" nil]) [
+          (assign config [default_config])
+          (assign config_source (str "(defaults)"))
+          (assign warned (table []))
           (return (table []))
         ])
-        (local ["parsed" "problems"] ["parse_config" "text" (ifExpr [(infix ["path" "==" "DATA_CONFIG"]) "tern.plugin.data" "tern.plugin.dir"])])
-        (assign "config" "parsed")
-        (assign "config_source" "path")
-        (assign "warned" (table []))
-        (for ["kind" "sound"] "config.sounds" [
-          (if' (infix [(infix ["sound" "~=" (str "")]) "and" (unary "not" ["tern.fs.exists" "sound"])]) [
-            ["table.insert" "problems" (infix ["kind" ".." (str ": file not found: ") ".." "sound"])]
+        (local [parsed problems] [parse_config text (ifExpr [(infix [path "==" DATA_CONFIG]) (dot tern "plugin.data") (dot tern "plugin.dir")])])
+        (assign config parsed)
+        (assign config_source path)
+        (assign warned (table []))
+        (for [{kind = null;} {sound = null;}] (dot config "sounds") ({
+          kind,
+          sound,
+        }: [
+          (if' (infix [sound "~=" (str "") "and" (not [(dot tern "fs.exists") sound])]) [
+            [(dot table' "insert") problems (infix [kind ".." (str ": file not found: ") ".." sound])]
           ])
-        ])
-        (return "problems")
-      ])
+        ]))
+        (return problems)
+      ]))
       blank
-      (localFunction "snapshot_key" (typed [] (opt "string")) [
-        (local ["text" "path"] ["read_config_file"])
-        (if' (infix [(infix ["text" "==" "nil"]) "or" (infix ["path" "==" "nil"])]) [
-          (return "nil")
+      (localFunction snapshot_key (typed [] (opt string)) ({
+        text,
+        path,
+      }: [
+        (local [text path] [read_config_file])
+        (if' (infix [text "==" nil "or" path "==" nil]) [
+          (return nil)
         ])
-        (return (infix ["path" ".." (str "\n") ".." "text"]))
-      ])
+        (return (infix [path ".." (str "\n") ".." text]))
+      ]))
       blank
-      (localFunction "maybe_reload_config" [] [
-        (local "key" ["snapshot_key"])
-        (if' (infix ["key" "==" "config_key"]) [
-          "return"
+      (localFunction maybe_reload_config [] ({
+        key,
+        problems,
+      }: [
+        (local key [snapshot_key])
+        (if' (infix [key "==" config_key]) [
+          return
         ])
-        (assign "config_key" "key")
-        (local "problems" ["load_config"])
-        (if' (infix [(unary "#" "problems") ">" 0]) [
-          ["tern.log.warn" (infix [(str "Tuturu: ") ".." ["table.concat" "problems" (str "; ")]])]
+        (assign config_key key)
+        (local problems [load_config])
+        (if' (infix [(len problems) ">" 0]) [
+          [(dot tern "log.warn") (infix [(str "Tuturu: ") ".." [(dot table' "concat") problems (str "; ")]])]
         ])
-      ])
+      ]))
       blank
       (comment "-- Mute + cross-window claim -----------------------------------------------------------------")
       blank
-      (local "is_muted" "false")
+      (local is_muted false)
       blank
-      (localFunction "refresh_muted" [] [
-        (local ["ok" "value"] ["pcall" "tern.kv.get" (str "muted")])
-        (assign "is_muted" (infix ["ok" "and" (infix ["value" "==" "true"])]))
-      ])
+      (localFunction refresh_muted [] ({
+        ok,
+        value,
+      }: [
+        (local [ok value] [pcall (dot tern "kv.get") (str "muted")])
+        (assign is_muted (infix [ok "and" value "==" true]))
+      ]))
       blank
       (comment "-- One chime per moment across windows: whoever claims it plays it.")
-      (localFunction "claim_chime" (typed [] "boolean") [
-        (local "now_s" ["os.time"])
-        (local ["ok" "at"] ["pcall" "tern.kv.get" (str "last_chime")])
-        (if' (infix ["ok" "and" (infix [["type" "at"] "==" (str "number")]) "and" (infix [(infix ["now_s" "-" (paren (cast "at" "number"))]) "<" "CLAIM_WINDOW_S"])]) [
-          (return "false")
+      (localFunction claim_chime (typed [] boolean) ({
+        now_s,
+        ok,
+        at,
+      }: [
+        (local now_s [(dot os "time")])
+        (local [ok at] [pcall (dot tern "kv.get") (str "last_chime")])
+        (if' (infix [ok "and" [type' at] "==" (str "number") "and" now_s "-" (cast at number) "<" CLAIM_WINDOW_S]) [
+          (return false)
         ])
-        ["pcall" "tern.kv.set" (str "last_chime") "now_s"]
-        (return "true")
-      ])
+        [pcall (dot tern "kv.set") (str "last_chime") now_s]
+        (return true)
+      ]))
       blank
       (comment "-- Playback ----------------------------------------------------------------------------------")
       blank
-      (localFunction "spawn" [(typed "argv" (table ["string"])) (typed "path" "string")] [
-        (local ["ok" "err"] [
-          "pcall"
+      (localFunction spawn [{argv = table [string];} {path = string;}] ({
+        argv,
+        path,
+        ok,
+        err,
+      }: [
+        (local [ok err] [
+          pcall
           (fn [] [
             [
-              "tern.process.run"
-              "argv"
+              (dot tern "process.run")
+              argv
               (table [(field "timeout_ms" 15000)])
-              (fn [(typed "result" "ProcessResult")] [
-                (ifElse "result.timed_out" [
-                    ["tern.log.warn" (infix [(str "Tuturu: playing ") ".." "path" ".." (str " timed out")])]
-                  ] (if' (infix ["result.status" "~=" 0]) [
-                    (local "detail" (ifExpr [(infix ["result.stderr" "~=" (str "")]) "result.stderr" (infix [(str "exit ") ".." ["tostring" "result.status"]])]))
-                    ["tern.log.warn" (infix [(str "Tuturu: couldn't play ") ".." "path" ".." (str ": ") ".." ["trim" "detail"]])]
-                  ]))
-              ])
+              (fn [{result = ProcessResult;}] ({result}: [
+                (ifElse (dot result "timed_out") [
+                    [(dot tern "log.warn") (infix [(str "Tuturu: playing ") ".." path ".." (str " timed out")])]
+                  ] (if' (infix [(dot result "status") "~=" 0]) ({detail}: [
+                    (local detail (ifExpr [(infix [(dot result "stderr") "~=" (str "")]) (dot result "stderr") (infix [(str "exit ") ".." [tostring (dot result "status")]])]))
+                    [(dot tern "log.warn") (infix [(str "Tuturu: couldn't play ") ".." path ".." (str ": ") ".." [trim detail]])]
+                  ])))
+              ]))
             ]
           ])
         ])
-        (if' (unary "not" "ok") [
-          ["tern.log.warn" (infix [(str "Tuturu: couldn't start the player: ") ".." ["tostring" "err"]])]
+        (if' (not ok) [
+          [(dot tern "log.warn") (infix [(str "Tuturu: couldn't start the player: ") ".." [tostring err]])]
         ])
-      ])
+      ]))
       blank
-      (local (typed "linux_player" (opt "string")) "nil")
-      (local "linux_probe_failed" "false")
-      (local "linux_probing" "false")
-      (local (typed "linux_queue" (table ["string"])) (table []))
+      (local (typed linux_player (opt string)) nil)
+      (local linux_probe_failed false)
+      (local linux_probing false)
+      (local (typed linux_queue (table [string])) (table []))
       blank
       (comment "-- Preference order: PipeWire-native first (pw-play ships with pipewire),")
       (comment "-- then PulseAudio, ALSA, then the heavy/general players.")
-      (local "LINUX_PLAYERS" (table [(str "pw-play") (str "paplay") (str "aplay") (str "ffplay") (str "play")]))
+      (local LINUX_PLAYERS (table [(str "pw-play") (str "paplay") (str "aplay") (str "ffplay") (str "play")]))
       blank
-      (localFunction "linux_argv" (typed [(typed "player" "string") (typed "path" "string")] (table ["string"])) [
-        (ifElse (infix ["player" "==" (str "ffplay")]) [
-            (return (table [(str "ffplay") (str "-nodisp") (str "-autoexit") (str "-loglevel") (str "quiet") "path"]))
-          ] (ifElse (infix ["player" "==" (str "play")]) [
-              (return (table [(str "play") (str "-q") "path"]))
-            ] (ifElse (infix ["player" "==" (str "aplay")]) [
-                (return (table [(str "aplay") (str "-q") "path"]))
-              ] (ifElse (infix ["player" "==" (str "paplay")]) [
-                  (return (table [(str "paplay") "path"]))
+      (localFunction linux_argv (typed [{player = string;} {path = string;}] (table [string])) ({
+        player,
+        path,
+      }: [
+        (ifElse (infix [player "==" (str "ffplay")]) [
+            (return (table [(str "ffplay") (str "-nodisp") (str "-autoexit") (str "-loglevel") (str "quiet") path]))
+          ] (ifElse (infix [player "==" (str "play")]) [
+              (return (table [(str "play") (str "-q") path]))
+            ] (ifElse (infix [player "==" (str "aplay")]) [
+                (return (table [(str "aplay") (str "-q") path]))
+              ] (ifElse (infix [player "==" (str "paplay")]) [
+                  (return (table [(str "paplay") path]))
                 ] [
-                  (return (table [(str "pw-play") "path"]))
+                  (return (table [(str "pw-play") path]))
                 ]))))
-      ])
+      ]))
       blank
-      (localFunction "probe_linux_player" [] [
-        (if' (infix ["linux_probing" "or" "linux_probe_failed" "or" (infix ["linux_player" "~=" "nil"])]) [
-          "return"
+      (localFunction probe_linux_player [] ({
+        names,
+        ok,
+        err,
+      }: [
+        (if' (infix [linux_probing "or" linux_probe_failed "or" linux_player "~=" nil]) [
+          return
         ])
-        (assign "linux_probing" "true")
+        (assign linux_probing true)
         (comment "-- One probe per player would serialize N spawns; instead ask sh for the")
         (comment "-- first match in preference order and read back which one answered.")
-        (local "names" ["table.concat" "LINUX_PLAYERS" (str " ")])
-        (local ["ok" "err"] [
-          "pcall"
+        (local names [(dot table' "concat") LINUX_PLAYERS (str " ")])
+        (local [ok err] [
+          pcall
           (fn [] [
             (rows [
-              "tern.process.run"
-              (table [(str "sh") (str "-c") (infix [(str "for p in ") ".." "names" ".." (str "; do command -v $p >/dev/null 2>&1 && { echo $p; exit 0; }; done; exit 1")])])
+              (dot tern "process.run")
+              (table [(str "sh") (str "-c") (infix [(str "for p in ") ".." names ".." (str "; do command -v $p >/dev/null 2>&1 && { echo $p; exit 0; }; done; exit 1")])])
               (table [(field "timeout_ms" 5000)])
-              (fn [(typed "result" "ProcessResult")] [
-                (assign "linux_probing" "false")
-                (local "name" ["string.match" "result.stdout" (str "([%w-]+)")])
-                (ifElse (infix [(infix ["result.status" "==" 0]) "and" (infix ["name" "~=" "nil"]) "and" (infix ["name" "~=" (str "")])]) [
-                    (assign "linux_player" "name")
-                    (for ["_" "path"] "linux_queue" [
-                      ["spawn" ["linux_argv" "name" "path"] "path"]
-                    ])
+              (fn [{result = ProcessResult;}] ({
+                result,
+                name,
+              }: [
+                (assign linux_probing false)
+                (local name [(dot string "match") (dot result "stdout") (str "([%w-]+)")])
+                (ifElse (infix [(dot result "status") "==" 0 "and" name "~=" nil "and" name "~=" (str "")]) [
+                    (assign linux_player name)
+                    (for [{_ = null;} {path = null;}] linux_queue ({
+                      _,
+                      path,
+                    }: [
+                      [spawn [linux_argv name path] path]
+                    ]))
                   ] [
-                    (assign "linux_probe_failed" "true")
-                    ["tern.log.warn" (infix [(str "Tuturu: no sound player found (need one of: ") ".." "names" ".." (str ")")])]
+                    (assign linux_probe_failed true)
+                    [(dot tern "log.warn") (infix [(str "Tuturu: no sound player found (need one of: ") ".." names ".." (str ")")])]
                   ])
-                (assign "linux_queue" (table []))
-              ])
+                (assign linux_queue (table []))
+              ]))
             ])
           ])
         ])
-        (if' (unary "not" "ok") [
-          (assign "linux_probing" "false")
-          (assign "linux_probe_failed" "true")
-          (assign "linux_queue" (table []))
-          ["tern.log.warn" (infix [(str "Tuturu: couldn't probe for a sound player: ") ".." ["tostring" "err"]])]
+        (if' (not ok) [
+          (assign linux_probing false)
+          (assign linux_probe_failed true)
+          (assign linux_queue (table []))
+          [(dot tern "log.warn") (infix [(str "Tuturu: couldn't probe for a sound player: ") ".." [tostring err]])]
         ])
-      ])
+      ]))
       blank
-      (local "warned_no_player" "false")
+      (local warned_no_player false)
       blank
-      (localFunction "play_file" [(typed "path" "string")] [
-        (local "os_name" "tern.runtime.os")
-        (ifElse (infix ["os_name" "==" (str "ios")]) [
-            "return"
-          ] (ifElse (infix ["os_name" "==" (str "windows")]) [
+      (localFunction play_file [{path = string;}] ({
+        path,
+        os_name,
+      }: [
+        (local os_name (dot tern "runtime.os"))
+        (ifElse (infix [os_name "==" (str "ios")]) [
+            return
+          ] (ifElse (infix [os_name "==" (str "windows")]) [
               (comment "-- Via wscript (a windowless GUI host): spawning hidden PowerShell")
               (comment "-- directly still flashes a console box on creation. SoundPlayer")
               (comment "-- takes WAV only.")
-              ["spawn" (table [(str "wscript.exe") (str "//Nologo") (infix ["tern.plugin.dir" ".." "SEP" ".." (str "scripts") ".." "SEP" ".." (str "play.vbs")]) "path"]) "path"]
-            ] (ifElse (infix ["os_name" "==" (str "macos")]) [
-                ["spawn" (table [(str "afplay") "path"]) "path"]
-              ] (ifElse (infix ["os_name" "==" (str "linux")]) [
-                  (local "player" "linux_player")
-                  (ifElse (infix ["player" "~=" "nil"]) [
-                      ["spawn" ["linux_argv" "player" "path"] "path"]
-                    ] (ifElse (unary "not" "linux_probe_failed") [
-                        ["table.insert" "linux_queue" "path"]
-                        ["probe_linux_player"]
-                      ] (if' (unary "not" "warned_no_player") [
-                        (assign "warned_no_player" "true")
-                        ["tern.log.warn" (str "Tuturu: silent (no Linux player; install pipewire-pulse, alsa-utils, sox or ffmpeg)")]
+              [spawn (table [(str "wscript.exe") (str "//Nologo") (infix [(dot tern "plugin.dir") ".." SEP ".." (str "scripts") ".." SEP ".." (str "play.vbs")]) path]) path]
+            ] (ifElse (infix [os_name "==" (str "macos")]) [
+                [spawn (table [(str "afplay") path]) path]
+              ] (ifElse (infix [os_name "==" (str "linux")]) ({player}: [
+                  (local player linux_player)
+                  (ifElse (infix [player "~=" nil]) [
+                      [spawn [linux_argv player path] path]
+                    ] (ifElse (not linux_probe_failed) [
+                        [(dot table' "insert") linux_queue path]
+                        [probe_linux_player]
+                      ] (if' (not warned_no_player) [
+                        (assign warned_no_player true)
+                        [(dot tern "log.warn") (str "Tuturu: silent (no Linux player; install pipewire-pulse, alsa-utils, sox or ffmpeg)")]
                       ])))
-                ] [
-                  ["tern.log.warn" (infix [(str "Tuturu: no player for ") ".." "os_name"])]
+                ]) [
+                  [(dot tern "log.warn") (infix [(str "Tuturu: no player for ") ".." os_name])]
                 ]))))
-      ])
+      ]))
       blank
-      (local "last_chime_at" (unary "-" "math.huge"))
+      (local last_chime_at (neg (dot math "huge")))
       blank
-      (localFunction "chime" [(typed "kind" "string") (typed "_pane" "number")] [
-        (local "path" (idx "config.sounds" "kind"))
-        (if' (infix [(infix ["path" "==" "nil"]) "or" (infix ["path" "==" (str "")]) "or" "is_muted"]) [
-          "return"
+      (localFunction chime [{kind = string;} {_pane = number;}] ({
+        kind,
+        _pane,
+        path,
+        ok_exists,
+        exists,
+        now,
+      }: [
+        (local path (idx (dot config "sounds") kind))
+        (if' (infix [path "==" nil "or" path "==" (str "") "or" is_muted]) [
+          return
         ])
-        (local ["ok_exists" "exists"] ["pcall" "tern.fs.exists" "path"])
-        (if' (infix [(unary "not" "ok_exists") "or" (unary "not" "exists")]) [
-          (if' (unary "not" (idx "warned" "path")) [
-            (assign (idx "warned" "path") "true")
-            ["tern.log.warn" (infix [(str "Tuturu: ") ".." "kind" ".." (str " sound not found: ") ".." "path"])]
+        (local [ok_exists exists] [pcall (dot tern "fs.exists") path])
+        (if' (infix [(not ok_exists) "or" (not exists)]) [
+          (if' (not (idx warned path)) [
+            (assign (idx warned path) true)
+            [(dot tern "log.warn") (infix [(str "Tuturu: ") ".." kind ".." (str " sound not found: ") ".." path])]
           ])
-          "return"
+          return
         ])
-        (local "now" ["tern.now"])
-        (if' (infix [(infix ["now" "-" "last_chime_at"]) "<" "MIN_GAP_MS"]) [
-          "return"
+        (local now [(dot tern "now")])
+        (if' (infix [now "-" last_chime_at "<" MIN_GAP_MS]) [
+          return
         ])
-        (if' (unary "not" ["claim_chime"]) [
-          "return"
+        (if' (not [claim_chime]) [
+          return
         ])
-        (assign "last_chime_at" "now")
-        ["play_file" "path"]
-      ])
+        (assign last_chime_at now)
+        [play_file path]
+      ]))
       blank
       (comment "-- Triggers ----------------------------------------------------------------------------------")
       blank
-      (localFunction "list_agents" (typed [(typed "cx" "WindowCx")] (table ["AgentBlock"])) [
-        (local ["ok" "agents"] [
-          "pcall"
+      (localFunction list_agents (typed [{cx = WindowCx;}] (table [AgentBlock])) ({
+        cx,
+        ok,
+        agents,
+      }: [
+        (local [ok agents] [
+          pcall
           (fn [] [
-            (return ["cx.agents:list"])
+            (return [(dot cx "agents:list")])
           ])
         ])
-        (if' "ok" [
-          (return (cast "agents" (table ["AgentBlock"])))
+        (if' ok [
+          (return (cast agents (table [AgentBlock])))
         ])
         (return (table []))
-      ])
+      ]))
       blank
-      (local (typed "alerts" (table [(pair "number" "boolean")])) (table []))
-      (local (typed "agent_state" (table [(pair "number" "string")])) (table []))
-      (local "seeded" "false")
-      (local "tick_count" 0)
+      (local (typed alerts (table [(pair number boolean)])) (table []))
+      (local (typed agent_state (table [(pair number string)])) (table []))
+      (local seeded false)
+      (local tick_count 0)
       blank
-      (localFunction "tick_body" [(typed "cx" "WindowCx")] [
-        (update "+=" "tick_count" 1)
-        (if' (infix [(infix ["tick_count" "%" "CONFIG_EVERY_TICKS"]) "==" 0]) [
-          ["maybe_reload_config"]
+      (localFunction tick_body [{cx = WindowCx;}] ({
+        cx,
+        candidates,
+        focused,
+        now_alerts,
+        now_states,
+      }: [
+        (update "+=" tick_count 1)
+        (if' (infix [tick_count "%" CONFIG_EVERY_TICKS "==" 0]) [
+          [maybe_reload_config]
         ])
-        ["refresh_muted"]
+        [refresh_muted]
         blank
         (comment "-- One candidate per pane; the alert edge wins over a same-tick yield.")
-        (local (typed "candidates" (table [(pair "number" "string")])) (table []))
-        (local (typed "focused" (table [(pair "number" "boolean")])) (table []))
+        (local (typed candidates (table [(pair number string)])) (table []))
+        (local (typed focused (table [(pair number boolean)])) (table []))
         blank
-        (local (typed "now_alerts" (table [(pair "number" "boolean")])) (table []))
-        (for ["_" "pane"] ["cx.session:panes"] [
-          (local "id" "pane.pane")
-          (local "alerted" (infix ["pane.alert" "==" "true"]))
-          (assign (idx "now_alerts" "id") "alerted")
-          (assign (idx "focused" "id") (infix ["pane.focused" "==" "true"]))
-          (if' (infix ["seeded" "and" "alerted" "and" (unary "not" (idx "alerts" "id"))]) [
-            (assign (idx "candidates" "id") (str "alert"))
+        (local (typed now_alerts (table [(pair number boolean)])) (table []))
+        (for [{_ = null;} {pane = null;}] [(dot cx "session:panes")] ({
+          _,
+          pane,
+          id,
+          alerted,
+        }: [
+          (local id (dot pane "pane"))
+          (local alerted (infix [(dot pane "alert") "==" true]))
+          (assign (idx now_alerts id) alerted)
+          (assign (idx focused id) (infix [(dot pane "focused") "==" true]))
+          (if' (infix [seeded "and" alerted "and" (not (idx alerts id))]) [
+            (assign (idx candidates id) (str "alert"))
           ])
-        ])
-        (assign "alerts" "now_alerts")
+        ]))
+        (assign alerts now_alerts)
         blank
-        (local (typed "now_states" (table [(pair "number" "string")])) (table []))
-        (for ["_" "agent"] ["list_agents" "cx"] [
-          (local "id" "agent.pane")
-          (assign (idx "now_states" "id") "agent.state")
-          (local "prev" (idx "agent_state" "id"))
-          (if' (infix [(infix ["prev" "==" (str "working")]) "and" (paren (infix [(infix ["agent.state" "==" (str "idle")]) "or" (infix ["agent.state" "==" (str "waiting_input")])]))]) [
-            (if' (infix [(idx "candidates" "id") "==" "nil"]) [
-              (assign (idx "candidates" "id") (ifExpr [(infix ["agent.state" "==" (str "waiting_input")]) (str "alert") (str "yield")]))
+        (local (typed now_states (table [(pair number string)])) (table []))
+        (for [{_ = null;} {agent = null;}] [list_agents cx] ({
+          _,
+          agent,
+          id,
+          prev,
+        }: [
+          (local id (dot agent "pane"))
+          (assign (idx now_states id) (dot agent "state"))
+          (local prev (idx agent_state id))
+          (if' (infix [prev "==" (str "working") "and" (infix [(dot agent "state") "==" (str "idle") "or" (dot agent "state") "==" (str "waiting_input")])]) [
+            (if' (infix [(idx candidates id) "==" nil]) [
+              (assign (idx candidates id) (ifExpr [(infix [(dot agent "state") "==" (str "waiting_input")]) (str "alert") (str "yield")]))
             ])
           ])
-        ])
-        (assign "agent_state" "now_states")
+        ]))
+        (assign agent_state now_states)
         blank
-        (for ["id" "kind"] "candidates" [
-          (ifElse (infix ["config.only_unfocused" "and" (idx "focused" "id")]) [
+        (for [{id = null;} {kind = null;}] candidates ({
+          id,
+          kind,
+        }: [
+          (ifElse (infix [(dot config "only_unfocused") "and" (idx focused id)]) [
               (comment "-- You are looking at it; no chime.")
             ] [
-              ["chime" "kind" "id"]
+              [chime kind id]
             ])
-        ])
-        (assign "seeded" "true")
-      ])
+        ]))
+        (assign seeded true)
+      ]))
       blank
       (comment "-- The timer re-arms first so one bad tick can't stop the loop.")
-      (localFunction "tick" [(typed "cx" (opt "WindowCx"))] [
-        ["tern.timer" "TICK_MS" "tick"]
-        (if' (infix ["cx" "==" "nil"]) [
-          "return"
+      (localFunction tick [{cx = opt WindowCx;}] ({
+        cx,
+        ok,
+        err,
+      }: [
+        [(dot tern "timer") TICK_MS tick]
+        (if' (infix [cx "==" nil]) [
+          return
         ])
-        (local ["ok" "err"] ["pcall" "tick_body" (cast "cx" "WindowCx")])
-        (if' (unary "not" "ok") [
-          ["tern.log.warn" (infix [(str "Chime tick failed: ") ".." ["tostring" "err"]])]
+        (local [ok err] [pcall tick_body (cast cx WindowCx)])
+        (if' (not ok) [
+          [(dot tern "log.warn") (infix [(str "Chime tick failed: ") ".." [tostring err]])]
         ])
-      ])
+      ]))
       blank
-      ["tern.timer" "TICK_MS" "tick"]
+      [(dot tern "timer") TICK_MS tick]
       blank
       [
-        "tern.on"
+        (dot tern "on")
         (str "command_finished")
-        (fn [(typed "ev" "CommandFinishedEvent") (typed "cx" "WindowCx")] [
-          (if' (infix ["ev.took_ms" "<" (infix ["config.min_seconds" "*" 1000])]) [
-            "return"
+        (fn [{ev = CommandFinishedEvent;} {cx = WindowCx;}] ({
+          ev,
+          cx,
+          ok,
+          info,
+        }: [
+          (if' (infix [(dot ev "took_ms") "<" (dot config "min_seconds") "*" 1000]) [
+            return
           ])
-          (local ["ok" "info"] [
-            "pcall"
-            (fn (typed [] (opt "PaneInfo")) [
-              (return ["cx.session:pane" "ev.pane"])
+          (local [ok info] [
+            pcall
+            (fn (typed [] (opt PaneInfo)) [
+              (return [(dot cx "session:pane") (dot ev "pane")])
             ])
           ])
-          (if' (infix [(unary "not" "ok") "or" (infix ["info" "==" "nil"])]) [
-            "return"
+          (if' (infix [(not ok) "or" info "==" nil]) [
+            return
           ])
-          (if' (infix ["config.only_unfocused" "and" "info.focused"]) [
-            "return"
+          (if' (infix [(dot config "only_unfocused") "and" (dot info "focused")]) [
+            return
           ])
-          ["chime" (str "done") "ev.pane"]
-        ])
+          [chime (str "done") (dot ev "pane")]
+        ]))
       ]
       blank
       (comment "-- Palette + status ----------------------------------------------------------------------------")
       blank
       [
-        "tern.command"
+        (dot tern "command")
         (rows (table [
           (field "id" (str "mute"))
           (field "title" (str "Tuturu: Mute / unmute"))
           (field "icon" (str "bell"))
-          (field "run" (fn [(typed "cx" "WindowCx")] [
-            (assign "is_muted" (unary "not" "is_muted"))
-            ["pcall" "tern.kv.set" (str "muted") "is_muted"]
-            ["tern.chrome.refresh"]
-            ["cx:toast" (str "info") (str "Chime") (ifExpr ["is_muted" (str "Muted") (str "Unmuted")])]
-          ]))
+          (field "run" (fn [{cx = WindowCx;}] ({cx}: [
+            (assign is_muted (not is_muted))
+            [pcall (dot tern "kv.set") (str "muted") is_muted]
+            [(dot tern "chrome.refresh")]
+            [(dot cx ":toast") (str "info") (str "Chime") (ifExpr [is_muted (str "Muted") (str "Unmuted")])]
+          ])))
         ]))
       ]
       blank
       [
-        "tern.command"
+        (dot tern "command")
         (rows (table [
           (field "id" (str "test"))
           (field "title" (str "Tuturu: Play test sound"))
           (field "icon" (str "bell"))
-          (field "run" (fn [(typed "cx" "WindowCx")] [
-            (local "path" (idx "config.sounds" (str "yield")))
-            (if' (infix [(infix ["path" "==" "nil"]) "or" (infix ["path" "==" (str "")])]) [
-              ["cx:toast" (str "error") (str "Chime") (str "No yield sound configured")]
-              "return"
+          (field "run" (fn [{cx = WindowCx;}] ({
+            cx,
+            path,
+            ok_exists,
+            exists,
+          }: [
+            (local path (idx (dot config "sounds") (str "yield")))
+            (if' (infix [path "==" nil "or" path "==" (str "")]) [
+              [(dot cx ":toast") (str "error") (str "Chime") (str "No yield sound configured")]
+              return
             ])
-            (local ["ok_exists" "exists"] ["pcall" "tern.fs.exists" "path"])
-            (if' (infix [(unary "not" "ok_exists") "or" (unary "not" "exists")]) [
-              ["cx:toast" (str "error") (str "Chime") (infix [(str "Missing: ") ".." "path"])]
-              "return"
+            (local [ok_exists exists] [pcall (dot tern "fs.exists") path])
+            (if' (infix [(not ok_exists) "or" (not exists)]) [
+              [(dot cx ":toast") (str "error") (str "Chime") (infix [(str "Missing: ") ".." path])]
+              return
             ])
-            ["play_file" "path"]
-            ["cx:toast" (str "info") (str "Chime") (infix [(str "Playing ") ".." "path"])]
-          ]))
+            [play_file path]
+            [(dot cx ":toast") (str "info") (str "Chime") (infix [(str "Playing ") ".." path])]
+          ])))
         ]))
       ]
       blank
       [
-        "tern.command"
+        (dot tern "command")
         (rows (table [
           (field "id" (str "reload"))
           (field "title" (str "Tuturu: Reload sounds"))
           (field "icon" (str "bell"))
-          (field "run" (fn [(typed "cx" "WindowCx")] [
-            (assign "config_key" ["snapshot_key"])
-            (local "problems" ["load_config"])
-            (ifElse (infix [(unary "#" "problems") "==" 0]) [
-                ["cx:toast" (str "info") (str "Chime") (infix [(str "Sounds reloaded from ") ".." "config_source"])]
+          (field "run" (fn [{cx = WindowCx;}] ({
+            cx,
+            problems,
+          }: [
+            (assign config_key [snapshot_key])
+            (local problems [load_config])
+            (ifElse (infix [(len problems) "==" 0]) [
+                [(dot cx ":toast") (str "info") (str "Chime") (infix [(str "Sounds reloaded from ") ".." config_source])]
               ] [
-                ["cx:toast" (str "error") (str "Chime") ["table.concat" "problems" (str "\n")]]
+                [(dot cx ":toast") (str "error") (str "Chime") [(dot table' "concat") problems (str "\n")]]
               ])
-          ]))
+          ])))
         ]))
       ]
       blank
       [
-        "tern.command"
+        (dot tern "command")
         (rows (table [
           (field "id" (str "diagnose"))
           (field "title" (str "Tuturu: Diagnose panes and agents"))
           (field "icon" (str "bell"))
-          (field "run" (fn [(typed "cx" "WindowCx")] [
-            (local (typed "lines" (table ["string"])) (table []))
-            ["table.insert" "lines" (infix [(str "config: ") ".." "config_source"])]
-            ["table.insert" "lines" (infix [(str "muted: ") ".." ["tostring" "is_muted"]])]
-            ["table.insert" "lines" (infix [(str "only_unfocused: ") ".." ["tostring" "config.only_unfocused"]])]
-            ["table.insert" "lines" (infix [(str "min_seconds: ") ".." ["tostring" "config.min_seconds"]])]
-            (for ["_" "kind"] (table [(str "alert") (str "yield") (str "done")]) [
-              (local "path" (idx "config.sounds" "kind"))
-              (local "mark" (str "(off)"))
-              (if' (infix [(infix ["path" "~=" "nil"]) "and" (infix ["path" "~=" (str "")])]) [
-                (local ["ok_exists" "exists"] ["pcall" "tern.fs.exists" "path"])
-                (assign "mark" (infix ["path" ".." (paren (ifExpr [(infix ["ok_exists" "and" "exists"]) (str "") (str "  MISSING")]))]))
-              ])
-              ["table.insert" "lines" (infix ["kind" ".." (str " = ") ".." "mark"])]
-            ])
-            ["table.insert" "lines" (str "")]
-            ["table.insert" "lines" (str "panes:")]
-            (for ["_" "pane"] ["cx.session:panes"] [
-              (rows ["table.insert" "lines" (rows (infix [(str "  ") ".." ["tostring" "pane.pane"] ".." (str " kind=") ".." ["tostring" "pane.kind"] ".." (str " program=") ".." ["tostring" "pane.program"] ".." (str " busy=") ".." ["tostring" "pane.busy"] ".." (str " alert=") ".." ["tostring" "pane.alert"] ".." (str " focused=") ".." ["tostring" "pane.focused"] ".." (str " at_prompt=") ".." ["tostring" "pane.at_prompt"] ".." (str " title=") ".." ["string.sub" "pane.title" 1 60]]))])
-            ])
-            ["table.insert" "lines" (str "")]
-            ["table.insert" "lines" (str "agents:")]
-            (for ["_" "agent"] ["list_agents" "cx"] [
-              (rows ["table.insert" "lines" (rows (infix [(str "  ") ".." ["tostring" "agent.pane"] ".." (str " state=") ".." "agent.state" ".." (str " command=") ".." ["tostring" "agent.command"] ".." (str " model=") ".." ["tostring" "agent.model"]]))])
-            ])
-            (local "out" (infix ["tern.plugin.data" ".." "SEP" ".." (str "diagnose.txt")]))
-            (local ["ok_write" "err"] ["pcall" "tern.fs.write" "out" (infix [["table.concat" "lines" (str "\n")] ".." (str "\n")])])
-            (ifElse "ok_write" [
-                ["cx:toast" (str "info") (str "Chime") (infix [(str "Wrote ") ".." "out"])]
+          (field "run" (fn [{cx = WindowCx;}] ({
+            cx,
+            lines,
+            out,
+            ok_write,
+            err,
+          }: [
+            (local (typed lines (table [string])) (table []))
+            [(dot table' "insert") lines (infix [(str "config: ") ".." config_source])]
+            [(dot table' "insert") lines (infix [(str "muted: ") ".." [tostring is_muted]])]
+            [(dot table' "insert") lines (infix [(str "only_unfocused: ") ".." [tostring (dot config "only_unfocused")]])]
+            [(dot table' "insert") lines (infix [(str "min_seconds: ") ".." [tostring (dot config "min_seconds")]])]
+            (for [{_ = null;} {kind = null;}] (table [(str "alert") (str "yield") (str "done")]) ({
+              _,
+              kind,
+              path,
+              mark,
+            }: [
+              (local path (idx (dot config "sounds") kind))
+              (local mark (str "(off)"))
+              (if' (infix [path "~=" nil "and" path "~=" (str "")]) ({
+                ok_exists,
+                exists,
+              }: [
+                (local [ok_exists exists] [pcall (dot tern "fs.exists") path])
+                (assign mark (infix [path ".." (ifExpr [(infix [ok_exists "and" exists]) (str "") (str "  MISSING")])]))
+              ]))
+              [(dot table' "insert") lines (infix [kind ".." (str " = ") ".." mark])]
+            ]))
+            [(dot table' "insert") lines (str "")]
+            [(dot table' "insert") lines (str "panes:")]
+            (for [{_ = null;} {pane = null;}] [(dot cx "session:panes")] ({
+              _,
+              pane,
+            }: [
+              (rows [(dot table' "insert") lines (rows (infix [(str "  ") ".." [tostring (dot pane "pane")] ".." (str " kind=") ".." [tostring (dot pane "kind")] ".." (str " program=") ".." [tostring (dot pane "program")] ".." (str " busy=") ".." [tostring (dot pane "busy")] ".." (str " alert=") ".." [tostring (dot pane "alert")] ".." (str " focused=") ".." [tostring (dot pane "focused")] ".." (str " at_prompt=") ".." [tostring (dot pane "at_prompt")] ".." (str " title=") ".." [(dot string "sub") (dot pane "title") 1 60]]))])
+            ]))
+            [(dot table' "insert") lines (str "")]
+            [(dot table' "insert") lines (str "agents:")]
+            (for [{_ = null;} {agent = null;}] [list_agents cx] ({
+              _,
+              agent,
+            }: [
+              (rows [(dot table' "insert") lines (rows (infix [(str "  ") ".." [tostring (dot agent "pane")] ".." (str " state=") ".." (dot agent "state") ".." (str " command=") ".." [tostring (dot agent "command")] ".." (str " model=") ".." [tostring (dot agent "model")]]))])
+            ]))
+            (local out (infix [(dot tern "plugin.data") ".." SEP ".." (str "diagnose.txt")]))
+            (local [ok_write err] [pcall (dot tern "fs.write") out (infix [[(dot table' "concat") lines (str "\n")] ".." (str "\n")])])
+            (ifElse ok_write [
+                [(dot cx ":toast") (str "info") (str "Chime") (infix [(str "Wrote ") ".." out])]
               ] [
-                ["cx:toast" (str "error") (str "Chime") (infix [(str "Couldn't write ") ".." "out" ".." (str ": ") ".." ["tostring" "err"]])]
+                [(dot cx ":toast") (str "error") (str "Chime") (infix [(str "Couldn't write ") ".." out ".." (str ": ") ".." [tostring err]])]
               ])
-          ]))
+          ])))
         ]))
       ]
       blank
       (comment "-- Mute is invisible otherwise; the segment shows it and clicks back to sound.")
       [
-        "tern.chrome.status"
-        (fn (typed [(typed "_pane" "StatusPaneInfo")] (opt (table ["StatusSegment"]))) [
-          (if' "is_muted" [
+        (dot tern "chrome.status")
+        (fn (typed [{_pane = StatusPaneInfo;}] (opt (table [StatusSegment]))) ({_pane}: [
+          (if' is_muted [
             (return (table [(table [(field "text" (str "tuturu muted")) (field "icon" (str "bell")) (field "tone" (str "muted")) (field "command" (str "plugin.tuturu.mute"))])]))
           ])
-          (return "nil")
-        ])
+          (return nil)
+        ]))
       ]
       blank
       (comment "-- Startup -------------------------------------------------------------------------------------")
       blank
-      ["refresh_muted"]
-      (assign "config_key" ["snapshot_key"])
-      (local "startup_problems" ["load_config"])
-      (if' (infix [(unary "#" "startup_problems") ">" 0]) [
-        ["tern.log.warn" (infix [(str "Tuturu: ") ".." ["table.concat" "startup_problems" (str "; ")]])]
+      [refresh_muted]
+      (assign config_key [snapshot_key])
+      (local startup_problems [load_config])
+      (if' (infix [(len startup_problems) ">" 0]) [
+        [(dot tern "log.warn") (infix [(str "Tuturu: ") ".." [(dot table' "concat") startup_problems (str "; ")]])]
       ])
-    ];
+    ]);
     modules_tools_tern_config_plugins_ui_menu_host_data = {
+      any,
       assign,
       blank,
+      boolean,
+      dot,
       field,
       fn,
       for,
       idx,
       if',
       infix,
+      ipairs,
+      len,
       local,
       localFunction,
+      nil,
+      not,
       pair,
+      pairs,
       return,
       rows,
       str,
+      string,
       table,
+      tern,
+      tostring,
+      type',
       typed,
-      unary,
       ...
+    }: ({
+      model,
+      state,
+      snapshot,
+      same,
+      watch,
     }: [
-      (localFunction "model" (typed [] (table ["any"])) [
-        (local "saved" ["tern.kv.get" (str "menu")])
-        (if' (infix [["type" "saved"] "~=" (str "table")]) [
+      (localFunction model (typed [] (table [any])) ({saved}: [
+        (local saved [(dot tern "kv.get") (str "menu")])
+        (if' (infix [[type' saved] "~=" (str "table")]) [
           (return (table []))
         ])
-        (return "saved")
-      ])
+        (return saved)
+      ]))
       blank
-      (localFunction "state" (typed [] (table [(pair "string" "boolean")])) [
-        (local "saved" ["tern.kv.get" (str "on")])
-        (local "out" (table []))
-        (if' (infix [["type" "saved"] "==" (str "table")]) [
-          (for ["k" "v"] ["pairs" "saved"] [
-            (if' (infix [["type" "k"] "==" (str "string")]) [
-              (assign (idx "out" "k") (infix ["v" "==" "true"]))
+      (localFunction state (typed [] (table [(pair string boolean)])) ({
+        saved,
+        out,
+      }: [
+        (local saved [(dot tern "kv.get") (str "on")])
+        (local out (table []))
+        (if' (infix [[type' saved] "==" (str "table")]) [
+          (for [{k = null;} {v = null;}] [pairs saved] ({
+            k,
+            v,
+          }: [
+            (if' (infix [[type' k] "==" (str "string")]) [
+              (assign (idx out k) (infix [v "==" true]))
             ])
-          ])
+          ]))
         ])
-        (return "out")
-      ])
+        (return out)
+      ]))
       blank
-      (localFunction "snapshot" (typed [] (table [(pair "string" "boolean")])) [
-        (local "out" (table []))
-        (for ["_" "row"] ["ipairs" ["model"]] [
-          (if' (infix [(infix [["type" "row"] "==" (str "table")]) "and" (infix [["type" "row.id"] "==" (str "string")])]) [
-            (assign (idx "out" "row.id") (infix [(idx ["state"] "row.id") "==" "true"]))
+      (localFunction snapshot (typed [] (table [(pair string boolean)])) ({out}: [
+        (local out (table []))
+        (for [{_ = null;} {row = null;}] [ipairs [model]] ({
+          _,
+          row,
+        }: [
+          (if' (infix [[type' row] "==" (str "table") "and" [type' (dot row "id")] "==" (str "string")]) [
+            (assign (idx out (dot row "id")) (infix [(idx [state] (dot row "id")) "==" true]))
           ])
-        ])
-        (return "out")
-      ])
+        ]))
+        (return out)
+      ]))
       blank
-      (localFunction "same" (typed ["a" "b"] "boolean") [
-        (for ["k" "v"] ["pairs" "b"] [
-          (if' (infix [(idx "a" "k") "~=" "v"]) [
-            (return "false")
+      (localFunction same (typed [{a = null;} {b = null;}] boolean) ({
+        a,
+        b,
+      }: [
+        (for [{k = null;} {v = null;}] [pairs b] ({
+          k,
+          v,
+        }: [
+          (if' (infix [(idx a k) "~=" v]) [
+            (return false)
           ])
-        ])
-        (for "k" ["pairs" "a"] [
-          (if' (infix [(idx "b" "k") "==" "nil"]) [
-            (return "false")
+        ]))
+        (for [{k = null;}] [pairs a] ({k}: [
+          (if' (infix [(idx b k) "==" nil]) [
+            (return false)
           ])
-        ])
-        (return "true")
-      ])
+        ]))
+        (return true)
+      ]))
       blank
-      (localFunction "watch" ["cx" "state_now"] [
+      (localFunction watch [{cx = null;} {state_now = null;}] ({
+        cx,
+        state_now,
+      }: [
         [
-          "tern.timer"
+          (dot tern "timer")
           250
-          (fn [] [
-            (if' (unary "not" "cx") [
-              "return"
+          (fn [] ({next_now}: [
+            (if' (not cx) [
+              return
             ])
-            (local "next_now" ["snapshot"])
-            (if' (unary "not" ["same" "state_now" "next_now"]) [
-              (for ["k" "v"] ["pairs" "next_now"] [
-                (assign (idx "state_now" "k") "v")
-              ])
-              ["cx:render"]
+            (local next_now [snapshot])
+            (if' (not [same state_now next_now]) [
+              (for [{k = null;} {v = null;}] [pairs next_now] ({
+                k,
+                v,
+              }: [
+                (assign (idx state_now k) v)
+              ]))
+              [(dot cx ":render")]
             ])
-            ["watch" "cx" "state_now"]
-          ])
+            [watch cx state_now]
+          ]))
         ]
-      ])
+      ]))
       blank
       [
-        "tern.block.define"
+        (dot tern "block.define")
         (str "options")
         (rows (table [
-          (field "init" (fn ["cx" "_args" "_saved"] [
-            (local "now" ["snapshot"])
-            ["watch" "cx" "now"]
-            (return "now")
-          ]))
+          (field "init" (fn [{cx = null;} {_args = null;} {_saved = null;}] ({
+            cx,
+            _args,
+            _saved,
+            now,
+          }: [
+            (local now [snapshot])
+            [watch cx now]
+            (return now)
+          ])))
           (field "title" (fn [] [
             (return (str "UI options"))
           ]))
-          (field "view" (fn ["_state_now" "_cx"] [
-            (local "on" ["state"])
-            (local "nodes" (table []))
-            (local "group" "nil")
-            (for ["_" "row"] ["ipairs" ["model"]] [
-              (if' (infix [(infix [["type" "row"] "==" (str "table")]) "and" (infix [["type" "row.id"] "==" (str "string")])]) [
-                (local "g" ["tostring" (infix ["row.group" "or" (str "Tweaks")])])
-                (if' (infix ["g" "~=" "group"]) [
-                  (assign "group" "g")
-                  (assign (idx "nodes" (infix [(unary "#" "nodes") "+" 1])) ["tern.ui.el" (str "div") (table [(field "class" (str "uo-group")) (field "text" "g")])])
+          (field "view" (fn [{_state_now = null;} {_cx = null;}] ({
+            _state_now,
+            _cx,
+            on,
+            nodes,
+            group,
+          }: [
+            (local on [state])
+            (local nodes (table []))
+            (local group nil)
+            (for [{_ = null;} {row = null;}] [ipairs [model]] ({
+              _,
+              row,
+            }: [
+              (if' (infix [[type' row] "==" (str "table") "and" [type' (dot row "id")] "==" (str "string")]) ({g}: [
+                (local g [tostring (infix [(dot row "group") "or" (str "Tweaks")])])
+                (if' (infix [g "~=" group]) [
+                  (assign group g)
+                  (assign (idx nodes (infix [(len nodes) "+" 1])) [(dot tern "ui.el") (str "div") (table [(field "class" (str "uo-group")) (field "text" g)])])
                 ])
-                (assign (idx "nodes" (infix [(unary "#" "nodes") "+" 1])) [
-                  "tern.ui.el"
+                (assign (idx nodes (infix [(len nodes) "+" 1])) [
+                  (dot tern "ui.el")
                   (str "label")
                   (table [(field "class" (str "uo-row"))])
                   (rows (table [
-                    ["tern.ui.el" (str "input") (table [(field "type" (str "checkbox")) (field "name" "row.id") (field "checked" (infix [(idx "on" "row.id") "==" "true"]))])]
-                    ["tern.ui.el" (str "span") (table [(field "class" (str "uo-name")) (field "text" ["tostring" (infix ["row.label" "or" "row.id"])])])]
+                    [(dot tern "ui.el") (str "input") (table [(field "type" (str "checkbox")) (field "name" (dot row "id")) (field "checked" (infix [(idx on (dot row "id")) "==" true]))])]
+                    [(dot tern "ui.el") (str "span") (table [(field "class" (str "uo-name")) (field "text" [tostring (infix [(dot row "label") "or" (dot row "id")])])])]
                   ]))
                 ])
-              ])
-            ])
-            (return (table [(field "main" ["tern.ui.col" (table [["tern.ui.el" (str "div") (table [(field "class" (str "uo-list"))]) "nodes"]])])]))
-          ]))
-          (field "event" (fn ["_state_now" "ev" "_cx"] [
-            (if' (infix [(infix ["ev.ev" "==" (str "change")]) "and" (infix [["type" "ev.name"] "==" (str "string")])]) [
-              (local "next_on" ["state"])
-              (assign (idx "next_on" "ev.name") (infix ["ev.checked" "==" "true"]))
-              ["tern.kv.set" (str "on") "next_on"]
-            ])
-          ]))
+              ]))
+            ]))
+            (return (table [(field "main" [(dot tern "ui.col") (table [[(dot tern "ui.el") (str "div") (table [(field "class" (str "uo-list"))]) nodes]])])]))
+          ])))
+          (field "event" (fn [{_state_now = null;} {ev = null;} {_cx = null;}] ({
+            _state_now,
+            ev,
+            _cx,
+          }: [
+            (if' (infix [(dot ev "ev") "==" (str "change") "and" [type' (dot ev "name")] "==" (str "string")]) ({next_on}: [
+              (local next_on [state])
+              (assign (idx next_on (dot ev "name")) (infix [(dot ev "checked") "==" true]))
+              [(dot tern "kv.set") (str "on") next_on]
+            ]))
+          ])))
         ]))
       ]
-    ];
+    ]);
     modules_tools_tern_config_plugins_ui_menu_plugin_data = [[["schema" 1] ["id" "ui-menu"] ["name" "UI Menu"] ["version" "0.1.0"] ["description" "Every UI tweak this config layers on Tern: a checklist block, palette toggles, and the rail lock."] ["host" "host.luau"] ["window" "window.luau"] ["styles" ["ui-menu.css"]]] [{arrayTable = "blocks";} ["id" "options"] ["title" "UI options"] ["icon" "sliders"] ["palette" true]]];
     modules_tools_tern_config_plugins_ui_menu_rail_data = {
+      AgentFinishedEvent,
+      AgentStateEvent,
+      TabInfo,
+      any,
       assign,
       blank,
-      colon,
+      boolean,
+      dot,
       field,
       fn,
       for,
       forRange,
+      hex,
       idx,
       if',
       ifElse,
       ifExpr,
       infix,
+      ipairs,
+      len,
       local,
       localFunction,
       long,
+      math,
+      nil,
+      not,
+      number,
       opt,
+      os,
       pair,
       paren,
+      pcall,
       return,
       rows,
       str,
+      string,
       table,
+      table',
+      tern,
+      tonumber,
+      tostring,
       tuple,
+      type',
       typed,
-      unary,
       unicode,
+      utf8,
       ...
+    }: ({
+      on,
+      MARKED,
+      enabled,
+      COLORS,
+      SHELLS,
+      SECTIONS,
+      SECTION_MARK,
+      STATUS_MARK,
+      AGE_BASE,
+      AGE_TICK_MS,
+      color_at,
+      agent_state,
+      unseen,
+      since,
+      marks,
+      age_slots,
+      AGES,
+      age_index,
+      age_css,
+      id_list,
+      toggle,
+      save_map,
+      load_map,
+      focused_tab,
+      load,
+      prune,
+      tab_view,
+      arrange,
+      tick,
+      apply,
+      strip_icon,
     }: [
-      (local (typed "on" (table [(pair "string" "boolean")])) (table []))
+      (local (typed on (table [(pair string boolean)])) (table []))
       blank
-      (local "MARKED" (table [(str "rail_sections") (str "rail_status") (str "rail_ages") (str "rail_compact")]))
+      (local MARKED (table [(str "rail_sections") (str "rail_status") (str "rail_ages") (str "rail_compact")]))
       blank
-      (localFunction "enabled" (typed [] "boolean") [
-        (for ["_" "id"] ["ipairs" "MARKED"] [
-          (if' (idx "on" "id") [
-            (return "true")
+      (localFunction enabled (typed [] boolean) [
+        (for [{_ = null;} {id = null;}] [ipairs MARKED] ({
+          _,
+          id,
+        }: [
+          (if' (idx on id) [
+            (return true)
           ])
-        ])
-        (return "false")
+        ]))
+        (return false)
       ])
       blank
-      (local "COLORS" (table [(str "red") (str "orange") (str "yellow") (str "green") (str "teal") (str "blue") (str "purple") (str "pink")]))
-      (local "SHELLS" (table [(field "zsh" "true") (field "bash" "true") (field "fish" "true") (field "nu" "true") (field "sh" "true") (field "dash" "true") (field "ksh" "true")]))
-      (local "SECTIONS" (table [(str "pinned") (str "needs") (str "working") (str "idle")]))
-      (local "SECTION_MARK" (table [(field "pinned" (str [(unicode "2061")])) (field "needs" (str [(unicode "2062")])) (field "working" (str [(unicode "2063")])) (field "idle" (str [(unicode "2064")]))]))
-      (local "STATUS_MARK" (rows (table [
+      (local COLORS (table [(str "red") (str "orange") (str "yellow") (str "green") (str "teal") (str "blue") (str "purple") (str "pink")]))
+      (local SHELLS (table [(field "zsh" true) (field "bash" true) (field "fish" true) (field "nu" true) (field "sh" true) (field "dash" true) (field "ksh" true)]))
+      (local SECTIONS (table [(str "pinned") (str "needs") (str "working") (str "idle")]))
+      (local SECTION_MARK (table [(field "pinned" (str [(unicode "2061")])) (field "needs" (str [(unicode "2062")])) (field "working" (str [(unicode "2063")])) (field "idle" (str [(unicode "2064")]))]))
+      (local STATUS_MARK (rows (table [
         (field "working" (str [(unicode "206A")]))
         (field "input" (str [(unicode "206B")]))
         (field "completed" (str [(unicode "206C")]))
         (field "failed" (str [(unicode "206D")]))
         (field "idle" (str [(unicode "206E")]))
       ])))
-      (local "AGE_BASE" "0xE0100")
-      (local "AGE_TICK_MS" 30000)
+      (local AGE_BASE (hex 917760))
+      (local AGE_TICK_MS 30000)
       blank
       blank
-      (local "color_at" 0)
-      (local (typed "agent_state" (table [(pair "number" "string")])) (table []))
-      (local (typed "unseen" (table [(pair "number" "string")])) (table []))
-      (local (typed "since" (table [(pair "number" "number")])) (table []))
-      (local (typed "marks" (table [(pair "number" "string")])) (table []))
+      (local color_at 0)
+      (local (typed agent_state (table [(pair number string)])) (table []))
+      (local (typed unseen (table [(pair number string)])) (table []))
+      (local (typed since (table [(pair number number)])) (table []))
+      (local (typed marks (table [(pair number string)])) (table []))
       blank
-      (localFunction "age_slots" (typed [] (table ["string"])) [
-        (local "labels" (table [(str "now")]))
-        (forRange "m" (tuple [1 59]) [
-          (assign (idx "labels" (infix [(unary "#" "labels") "+" 1])) (infix ["m" ".." (str "m")]))
+      (localFunction age_slots (typed [] (table [string])) ({labels}: [
+        (local labels (table [(str "now")]))
+        (forRange {m = null;} (tuple [1 59]) ({m}: [
+          (assign (idx labels (infix [(len labels) "+" 1])) (infix [m ".." (str "m")]))
+        ]))
+        (forRange {h = null;} (tuple [1 23]) ({h}: [
+          (assign (idx labels (infix [(len labels) "+" 1])) (infix [h ".." (str "h")]))
+        ]))
+        (forRange {d = null;} (tuple [1 30]) ({d}: [
+          (assign (idx labels (infix [(len labels) "+" 1])) (infix [d ".." (str "d")]))
+        ]))
+        (return labels)
+      ]))
+      blank
+      (local AGES [age_slots])
+      blank
+      (localFunction age_index (typed [{seconds = number;}] number) ({
+        seconds,
+        minutes,
+        hours,
+      }: [
+        (local minutes [(dot math "floor") (infix [seconds "/" 60])])
+        (if' (infix [minutes "<" 60]) [
+          (return minutes)
         ])
-        (forRange "h" (tuple [1 23]) [
-          (assign (idx "labels" (infix [(unary "#" "labels") "+" 1])) (infix ["h" ".." (str "h")]))
+        (local hours [(dot math "floor") (infix [minutes "/" 60])])
+        (if' (infix [hours "<" 24]) [
+          (return (infix [59 "+" hours]))
         ])
-        (forRange "d" (tuple [1 30]) [
-          (assign (idx "labels" (infix [(unary "#" "labels") "+" 1])) (infix ["d" ".." (str "d")]))
-        ])
-        (return "labels")
-      ])
+        (return (infix [82 "+" [(dot math "min") [(dot math "floor") (infix [hours "/" 24])] 30]]))
+      ]))
       blank
-      (local "AGES" ["age_slots"])
+      (localFunction age_css (typed [] string) ({
+        rules,
+        row,
+      }: [
+        (local rules (table []))
+        (local row (str "html.lay-rail.tabs-h .tb-tabs .tt"))
+        (for [{i = null;} {label = null;}] [ipairs AGES] ({
+          i,
+          label,
+          mark,
+        }: [
+          (local mark (infix [(str "[title*=\"\\") ".." [(dot string "format") (str "%X") (infix [AGE_BASE "+" i "-" 1])] ".." (str "\"]")]))
+          (assign (idx rules (infix [(len rules) "+" 1])) (infix [row ".." (str "[title*=\"\\206A\"]") ".." mark ".." (str " .sub::before { content: \"Working · ") ".." label ".." (str "\" !important; }")]))
+          (assign (idx rules (infix [(len rules) "+" 1])) (infix [row ".." (str ":not([title*=\"\\206A\"])") ".." mark ".." (str " .mk::before { content: \"") ".." label ".." (str "\" !important; }")]))
+        ]))
+        (return [(dot table' "concat") rules (str "\n")])
+      ]))
       blank
-      (localFunction "age_index" (typed [(typed "seconds" "number")] "number") [
-        (local "minutes" ["math.floor" (infix ["seconds" "/" 60])])
-        (if' (infix ["minutes" "<" 60]) [
-          (return "minutes")
-        ])
-        (local "hours" ["math.floor" (infix ["minutes" "/" 60])])
-        (if' (infix ["hours" "<" 24]) [
-          (return (infix [59 "+" "hours"]))
-        ])
-        (return (infix [82 "+" ["math.min" ["math.floor" (infix ["hours" "/" 24])] 30]]))
-      ])
-      blank
-      (localFunction "age_css" (typed [] "string") [
-        (local "rules" (table []))
-        (local "row" (str "html.lay-rail.tabs-h .tb-tabs .tt"))
-        (for ["i" "label"] ["ipairs" "AGES"] [
-          (local "mark" (infix [(str "[title*=\"\\") ".." ["string.format" (str "%X") (infix [(infix ["AGE_BASE" "+" "i"]) "-" 1])] ".." (str "\"]")]))
-          (assign (idx "rules" (infix [(unary "#" "rules") "+" 1])) (infix ["row" ".." (str "[title*=\"\\206A\"]") ".." "mark" ".." (str " .sub::before { content: \"Working · ") ".." "label" ".." (str "\" !important; }")]))
-          (assign (idx "rules" (infix [(unary "#" "rules") "+" 1])) (infix ["row" ".." (str ":not([title*=\"\\206A\"])") ".." "mark" ".." (str " .mk::before { content: \"") ".." "label" ".." (str "\" !important; }")]))
-        ])
-        (return ["table.concat" "rules" (str "\n")])
-      ])
-      blank
-      (localFunction "id_list" (typed [(typed "key" "string")] (table ["number"])) [
-        (local "saved" ["tern.kv.get" "key"])
-        (local "list" (table []))
-        (if' (infix [["type" "saved"] "==" (str "table")]) [
-          (for ["_" "id"] ["ipairs" "saved"] [
-            (if' (infix [["type" "id"] "==" (str "number")]) [
-              (assign (idx "list" (infix [(unary "#" "list") "+" 1])) "id")
+      (localFunction id_list (typed [{key = string;}] (table [number])) ({
+        key,
+        saved,
+        list,
+      }: [
+        (local saved [(dot tern "kv.get") key])
+        (local list (table []))
+        (if' (infix [[type' saved] "==" (str "table")]) [
+          (for [{_ = null;} {id = null;}] [ipairs saved] ({
+            _,
+            id,
+          }: [
+            (if' (infix [[type' id] "==" (str "number")]) [
+              (assign (idx list (infix [(len list) "+" 1])) id)
             ])
-          ])
+          ]))
         ])
-        (return "list")
-      ])
+        (return list)
+      ]))
       blank
-      (localFunction "toggle" (typed [(typed "key" "string") (typed "id" "number")] "boolean") [
-        (local "kept" (table []))
-        (local "had" "false")
-        (for ["_" "other"] ["ipairs" ["id_list" "key"]] [
-          (ifElse (infix ["other" "==" "id"]) [
-              (assign "had" "true")
+      (localFunction toggle (typed [{key = string;} {id = number;}] boolean) ({
+        key,
+        id,
+        kept,
+        had,
+      }: [
+        (local kept (table []))
+        (local had false)
+        (for [{_ = null;} {other = null;}] [ipairs [id_list key]] ({
+          _,
+          other,
+        }: [
+          (ifElse (infix [other "==" id]) [
+              (assign had true)
             ] [
-              (assign (idx "kept" (infix [(unary "#" "kept") "+" 1])) "other")
+              (assign (idx kept (infix [(len kept) "+" 1])) other)
             ])
+        ]))
+        (if' (not had) [
+          (assign (idx kept (infix [(len kept) "+" 1])) id)
         ])
-        (if' (unary "not" "had") [
-          (assign (idx "kept" (infix [(unary "#" "kept") "+" 1])) "id")
-        ])
-        ["tern.kv.set" "key" ["tern.json.array" "kept"]]
-        (return (unary "not" "had"))
-      ])
+        [(dot tern "kv.set") key [(dot tern "json.array") kept]]
+        (return (not had))
+      ]))
       blank
-      (localFunction "save_map" [(typed "key" "string") (typed "map" (table [(pair "number" "any")]))] [
-        (local "saved" (table []))
-        (for ["pane" "value"] "map" [
-          (assign (idx "saved" ["tostring" "pane"]) "value")
-        ])
-        ["tern.kv.set" "key" "saved"]
-      ])
+      (localFunction save_map [{key = string;} {map = table [(pair number any)];}] ({
+        key,
+        map,
+        saved,
+      }: [
+        (local saved (table []))
+        (for [{pane = null;} {value = null;}] map ({
+          pane,
+          value,
+        }: [
+          (assign (idx saved [tostring pane]) value)
+        ]))
+        [(dot tern "kv.set") key saved]
+      ]))
       blank
-      (localFunction "load_map" (typed [(typed "key" "string") (typed "kind" "string")] (table [(pair "number" "any")])) [
-        (local "map" (table []))
-        (local "saved" ["tern.kv.get" "key"])
-        (if' (infix [["type" "saved"] "==" (str "table")]) [
-          (for ["pane" "value"] "saved" [
-            (local "id" ["tonumber" "pane"])
-            (if' (infix ["id" "and" (infix [["type" "value"] "==" "kind"])]) [
-              (assign (idx "map" "id") "value")
+      (localFunction load_map (typed [{key = string;} {kind = string;}] (table [(pair number any)])) ({
+        key,
+        kind,
+        map,
+        saved,
+      }: [
+        (local map (table []))
+        (local saved [(dot tern "kv.get") key])
+        (if' (infix [[type' saved] "==" (str "table")]) [
+          (for [{pane = null;} {value = null;}] saved ({
+            pane,
+            value,
+            id,
+          }: [
+            (local id [tonumber pane])
+            (if' (infix [id "and" [type' value] "==" kind]) [
+              (assign (idx map id) value)
             ])
-          ])
+          ]))
         ])
-        (return "map")
-      ])
+        (return map)
+      ]))
       blank
-      (localFunction "focused_tab" (typed ["cx"] (opt "number")) [
-        (local "pane" ["cx.session:focused"])
-        (return (infix [(infix ["pane" "and" ["cx.session:tab_of" "pane"]]) "or" "nil"]))
-      ])
+      (localFunction focused_tab (typed [{cx = null;}] (opt number)) ({
+        cx,
+        pane,
+      }: [
+        (local pane [(dot cx "session:focused")])
+        (return (infix [pane "and" [(dot cx "session:tab_of") pane] "or" nil]))
+      ]))
       blank
-      (localFunction "load" ["cx"] [
-        (assign "unseen" ["load_map" (str "rail_unseen") (str "string")])
-        (assign "since" ["load_map" (str "rail_since") (str "number")])
-        (assign "agent_state" (table []))
-        (local ["ok" "list"] [
-          "pcall"
+      (localFunction load [{cx = null;}] ({
+        cx,
+        ok,
+        list,
+      }: [
+        (assign unseen [load_map (str "rail_unseen") (str "string")])
+        (assign since [load_map (str "rail_since") (str "number")])
+        (assign agent_state (table []))
+        (local [ok list] [
+          pcall
           (fn [] [
-            (return ["cx.agents:list"])
+            (return [(dot cx "agents:list")])
           ])
         ])
-        (if' "ok" [
-          (for ["_" "agent"] ["ipairs" "list"] [
-            (assign (idx "agent_state" "agent.pane") "agent.state")
-          ])
+        (if' ok [
+          (for [{_ = null;} {agent = null;}] [ipairs list] ({
+            _,
+            agent,
+          }: [
+            (assign (idx agent_state (dot agent "pane")) (dot agent "state"))
+          ]))
         ])
-      ])
+      ]))
       blank
-      (localFunction "prune" ["cx"] [
-        (local "focused" ["focused_tab" "cx"])
-        (local "live" (table []))
-        (for ["_" "pane"] ["ipairs" ["cx.session:panes"]] [
-          (assign (idx "live" "pane.pane") "pane.tab")
-        ])
-        (local "changed" "false")
-        (for "pane" "unseen" [
-          (if' (infix [(infix [(idx "live" "pane") "==" "nil"]) "or" (infix [(idx "live" "pane") "==" "focused"])]) [
-            (assign (idx "unseen" "pane") "nil")
-            (assign "changed" "true")
+      (localFunction prune [{cx = null;}] ({
+        cx,
+        focused,
+        live,
+        changed,
+        tabs,
+        pins,
+        kept,
+      }: [
+        (local focused [focused_tab cx])
+        (local live (table []))
+        (for [{_ = null;} {pane = null;}] [ipairs [(dot cx "session:panes")]] ({
+          _,
+          pane,
+        }: [
+          (assign (idx live (dot pane "pane")) (dot pane "tab"))
+        ]))
+        (local changed false)
+        (for [{pane = null;}] unseen ({pane}: [
+          (if' (infix [(idx live pane) "==" nil "or" (idx live pane) "==" focused]) [
+            (assign (idx unseen pane) nil)
+            (assign changed true)
           ])
+        ]))
+        (if' changed [
+          [save_map (str "rail_unseen") unseen]
         ])
-        (if' "changed" [
-          ["save_map" (str "rail_unseen") "unseen"]
-        ])
-        (assign "changed" "false")
-        (for "pane" "since" [
-          (if' (infix [(idx "live" "pane") "==" "nil"]) [
-            (assign (idx "since" "pane") "nil")
-            (assign "changed" "true")
+        (assign changed false)
+        (for [{pane = null;}] since ({pane}: [
+          (if' (infix [(idx live pane) "==" nil]) [
+            (assign (idx since pane) nil)
+            (assign changed true)
           ])
+        ]))
+        (if' changed [
+          [save_map (str "rail_since") since]
         ])
-        (if' "changed" [
-          ["save_map" (str "rail_since") "since"]
-        ])
-        (local "tabs" (table []))
-        (for ["_" "tab"] ["ipairs" ["cx.session:tabs"]] [
-          (assign (idx "tabs" "tab.id") "true")
-        ])
-        (local "pins" ["id_list" (str "rail_pins")])
-        (local "kept" (table []))
-        (for ["_" "id"] ["ipairs" "pins"] [
-          (if' (idx "tabs" "id") [
-            (assign (idx "kept" (infix [(unary "#" "kept") "+" 1])) "id")
+        (local tabs (table []))
+        (for [{_ = null;} {tab = null;}] [ipairs [(dot cx "session:tabs")]] ({
+          _,
+          tab,
+        }: [
+          (assign (idx tabs (dot tab "id")) true)
+        ]))
+        (local pins [id_list (str "rail_pins")])
+        (local kept (table []))
+        (for [{_ = null;} {id = null;}] [ipairs pins] ({
+          _,
+          id,
+        }: [
+          (if' (idx tabs id) [
+            (assign (idx kept (infix [(len kept) "+" 1])) id)
           ])
+        ]))
+        (if' (infix [(len kept) "~=" (len pins)]) [
+          [(dot tern "kv.set") (str "rail_pins") [(dot tern "json.array") kept]]
         ])
-        (if' (infix [(unary "#" "kept") "~=" (unary "#" "pins")]) [
-          ["tern.kv.set" (str "rail_pins") ["tern.json.array" "kept"]]
-        ])
-      ])
+      ]))
       blank
-      (localFunction "tab_view" (typed ["cx" (typed "tab" "TabInfo")] (tuple ["string" (opt "number")])) [
-        (local ["working" "input" "completed" "failed"] (tuple ["tab.busy" "false" "false" "false"]))
-        (local (typed "stamp" (opt "number")) "nil")
-        (for ["_" "pane"] ["ipairs" ["cx.session:panes"]] [
-          (if' (infix ["pane.tab" "==" "tab.id"]) [
-            (local "state" (idx "agent_state" "pane.pane"))
-            (ifElse (infix ["state" "==" (str "working")]) [
-                (assign "working" "true")
-              ] (if' (infix ["state" "==" (str "waiting_input")]) [
-                (assign "input" "true")
+      (localFunction tab_view (typed [{cx = null;} {tab = TabInfo;}] (tuple [string (opt number)])) ({
+        cx,
+        tab,
+        working,
+        input,
+        completed,
+        failed,
+        stamp,
+        status,
+      }: [
+        (local [working input completed failed] (tuple [(dot tab "busy") false false false]))
+        (local (typed stamp (opt number)) nil)
+        (for [{_ = null;} {pane = null;}] [ipairs [(dot cx "session:panes")]] ({
+          _,
+          pane,
+        }: [
+          (if' (infix [(dot pane "tab") "==" (dot tab "id")]) ({
+            state,
+            at,
+          }: [
+            (local state (idx agent_state (dot pane "pane")))
+            (ifElse (infix [state "==" (str "working")]) [
+                (assign working true)
+              ] (if' (infix [state "==" (str "waiting_input")]) [
+                (assign input true)
               ]))
-            (ifElse (infix [(idx "unseen" "pane.pane") "==" (str "failed")]) [
-                (assign "failed" "true")
-              ] (if' (infix [(idx "unseen" "pane.pane") "==" (str "done")]) [
-                (assign "completed" "true")
+            (ifElse (infix [(idx unseen (dot pane "pane")) "==" (str "failed")]) [
+                (assign failed true)
+              ] (if' (infix [(idx unseen (dot pane "pane")) "==" (str "done")]) [
+                (assign completed true)
               ]))
-            (local "at" (idx "since" "pane.pane"))
-            (if' (infix ["at" "and" (paren (infix [(unary "not" "stamp") "or" (infix ["at" ">" "stamp"])]))]) [
-              (assign "stamp" "at")
+            (local at (idx since (dot pane "pane")))
+            (if' (infix [at "and" (infix [(not stamp) "or" at ">" stamp])]) [
+              (assign stamp at)
             ])
-          ])
-        ])
-        (local "status" (rows (ifExpr [["input"] [(str "input")] ["working" (str "working")] ["failed" (str "failed")] ["completed" (str "completed")] [(str "idle")]])))
-        (return (tuple ["status" "stamp"]))
-      ])
+          ]))
+        ]))
+        (local status (rows (ifExpr [[input] [(str "input")] [working (str "working")] [failed (str "failed")] [completed (str "completed")] [(str "idle")]])))
+        (return (tuple [status stamp]))
+      ]))
       blank
-      (localFunction "arrange" ["cx"] [
-        ["prune" "cx"]
-        (local "pins" (table []))
-        (for ["_" "id"] ["ipairs" ["id_list" (str "rail_pins")]] [
-          (assign (idx "pins" "id") "true")
-        ])
-        (local "rank" (table []))
-        (for ["i" "name"] ["ipairs" "SECTIONS"] [
-          (assign (idx "rank" "name") "i")
-        ])
-        (local "now" ["os.time"])
-        (local (typed "sessions" (table [(pair "number" (table [(table [(field "tab" "TabInfo") (field "section" "string")])]))])) (table []))
-        (assign "marks" (table []))
-        (for ["_" "tab"] ["ipairs" ["cx.session:tabs"]] [
-          (local ["status" "stamp"] ["tab_view" "cx" "tab"])
-          (local "section" (rows (ifExpr [[(unary "not" "on.rail_sections")] [(str "idle")] [(idx "pins" "tab.id")] [(str "pinned")] [(infix ["status" "==" (str "input")]) (str "needs")] [(infix ["status" "==" (str "working")]) (str "working")] [(str "idle")]])))
-          (local "age" (ifExpr ["stamp" ["utf8.char" (infix ["AGE_BASE" "+" ["age_index" ["math.max" 0 (infix ["now" "-" "stamp"])]]])] (str "")]))
-          (assign (idx "marks" "tab.id") (infix [(idx "SECTION_MARK" "section") ".." (idx "STATUS_MARK" (ifExpr ["on.rail_status" "status" (str "idle")])) ".." "age"]))
-          (local "list" (infix [(idx "sessions" "tab.session") "or" (table [])]))
-          (assign (idx "sessions" "tab.session") "list")
-          (assign (idx "list" (infix [(unary "#" "list") "+" 1])) (table [(field "tab" "tab") (field "section" "section")]))
-        ])
-        (for ["_" "list"] "sessions" [
+      (localFunction arrange [{cx = null;}] ({
+        cx,
+        pins,
+        rank,
+        now,
+        sessions,
+      }: [
+        [prune cx]
+        (local pins (table []))
+        (for [{_ = null;} {id = null;}] [ipairs [id_list (str "rail_pins")]] ({
+          _,
+          id,
+        }: [
+          (assign (idx pins id) true)
+        ]))
+        (local rank (table []))
+        (for [{i = null;} {name = null;}] [ipairs SECTIONS] ({
+          i,
+          name,
+        }: [
+          (assign (idx rank name) i)
+        ]))
+        (local now [(dot os "time")])
+        (local (typed sessions (table [(pair number (table [(table [(field "tab" TabInfo) (field "section" string)])]))])) (table []))
+        (assign marks (table []))
+        (for [{_ = null;} {tab = null;}] [ipairs [(dot cx "session:tabs")]] ({
+          _,
+          tab,
+          status,
+          stamp,
+          section,
+          age,
+          list,
+        }: [
+          (local [status stamp] [tab_view cx tab])
+          (local section (rows (ifExpr [[(not (dot on "rail_sections"))] [(str "idle")] [(idx pins (dot tab "id"))] [(str "pinned")] [(infix [status "==" (str "input")]) (str "needs")] [(infix [status "==" (str "working")]) (str "working")] [(str "idle")]])))
+          (local age (ifExpr [stamp [(dot utf8 "char") (infix [AGE_BASE "+" [age_index [(dot math "max") 0 (infix [now "-" stamp])]]])] (str "")]))
+          (assign (idx marks (dot tab "id")) (infix [(idx SECTION_MARK section) ".." (idx STATUS_MARK (ifExpr [(dot on "rail_status") status (str "idle")])) ".." age]))
+          (local list (infix [(idx sessions (dot tab "session")) "or" (table [])]))
+          (assign (idx sessions (dot tab "session")) list)
+          (assign (idx list (infix [(len list) "+" 1])) (table [(field "tab" tab) (field "section" section)]))
+        ]))
+        (for [{_ = null;} {list = null;}] sessions ({
+          _,
+          list,
+        }: [
           [
-            "table.sort"
-            "list"
-            (fn ["a" "b"] [
-              (if' (infix ["a.section" "~=" "b.section"]) [
-                (return (infix [(idx "rank" "a.section") "<" (idx "rank" "b.section")]))
+            (dot table' "sort")
+            list
+            (fn [{a = null;} {b = null;}] ({
+              a,
+              b,
+            }: [
+              (if' (infix [(dot a "section") "~=" (dot b "section")]) [
+                (return (infix [(idx rank (dot a "section")) "<" (idx rank (dot b "section"))]))
               ])
-              (return (infix ["a.tab.position" "<" "b.tab.position"]))
-            ])
-          ]
-          (if' "on.rail_sections" [
-            (for ["position" "entry"] ["ipairs" "list"] [
-              (if' (infix ["entry.tab.position" "~=" "position"]) [
-                ["cx.layout:order_tab" "entry.tab.id" "position"]
-              ])
-            ])
-          ])
-        ])
-        ["tern.chrome.refresh"]
-      ])
-      blank
-      (localFunction "tick" ["cx"] [
-        (if' (infix ["cx" "and" ["enabled"]]) [
-          ["arrange" "cx"]
-        ])
-        ["tern.timer" "AGE_TICK_MS" "tick"]
-      ])
-      blank
-      (localFunction "apply" ["cx"] [
-        (ifElse ["enabled"] [
-            ["load" "cx"]
-            ["arrange" "cx"]
-          ] [
-            (assign "marks" (table []))
-            ["tern.chrome.refresh"]
-          ])
-      ])
-      blank
-      [
-        "tern.on"
-        (str "window_start")
-        (fn ["cx"] [
-          ["apply" "cx"]
-        ])
-      ]
-      blank
-      [
-        "tern.timer"
-        0
-        (fn ["cx"] [
-          (if' (infix ["cx" "and" ["enabled"]]) [
-            ["load" "cx"]
-          ])
-          ["tick" "cx"]
-        ])
-      ]
-      blank
-      (for ["_" "name"] ["ipairs" (table [(str "tab_created") (str "tab_closed") (str "pane_closed") (str "command_started") (str "command_finished") (str "focus")])] [
-        [
-          "tern.on"
-          "name"
-          (fn ["_" "cx"] [
-            (if' ["enabled"] [
-              ["arrange" "cx"]
-            ])
-          ])
-        ]
-      ])
-      blank
-      [
-        "tern.on"
-        (str "agent_state")
-        (fn [(typed "ev" "AgentStateEvent") "cx"] [
-          (if' (unary "not" ["enabled"]) [
-            "return"
-          ])
-          (assign (idx "agent_state" "ev.pane") "ev.new")
-          (if' (infix ["ev.old" "~=" "ev.new"]) [
-            (assign (idx "since" "ev.pane") ["os.time"])
-            ["save_map" (str "rail_since") "since"]
-          ])
-          (if' (infix [(infix ["ev.new" "==" (str "working")]) "and" (idx "unseen" "ev.pane")]) [
-            (assign (idx "unseen" "ev.pane") "nil")
-            ["save_map" (str "rail_unseen") "unseen"]
-          ])
-          ["arrange" "cx"]
-        ])
-      ]
-      blank
-      [
-        "tern.on"
-        (str "agent_finished")
-        (fn [(typed "ev" "AgentFinishedEvent") "cx"] [
-          (if' (unary "not" ["enabled"]) [
-            "return"
-          ])
-          (ifElse (infix [(infix ["ev.result" "==" (str "closed")]) "or" (infix ["ev.result" "==" (str "exited")])]) [
-              (assign (idx "unseen" "ev.pane") "nil")
-              (assign (idx "agent_state" "ev.pane") "nil")
-            ] (if' (infix [["cx.session:tab_of" "ev.pane"] "~=" ["focused_tab" "cx"]]) [
-              (assign (idx "unseen" "ev.pane") "ev.result")
+              (return (infix [(dot a "tab.position") "<" (dot b "tab.position")]))
             ]))
-          (assign (idx "since" "ev.pane") ["os.time"])
-          ["save_map" (str "rail_since") "since"]
-          ["save_map" (str "rail_unseen") "unseen"]
-          ["arrange" "cx"]
-        ])
-      ]
+          ]
+          (if' (dot on "rail_sections") [
+            (for [{position = null;} {entry = null;}] [ipairs list] ({
+              position,
+              entry,
+            }: [
+              (if' (infix [(dot entry "tab.position") "~=" position]) [
+                [(dot cx "layout:order_tab") (dot entry "tab.id") position]
+              ])
+            ]))
+          ])
+        ]))
+        [(dot tern "chrome.refresh")]
+      ]))
       blank
-      (localFunction "strip_icon" (typed [(typed "title" "string")] "string") [
-        (local ["ok" "first"] ["pcall" "utf8.codepoint" "title" 1])
-        (if' (infix ["ok" "and" "first" "and" (paren (infix [(paren (infix [(infix ["first" ">=" "0xE000"]) "and" (infix ["first" "<=" "0xF8FF"])])) "or" (infix ["first" ">=" "0xF0000"])]))]) [
-          (local "rest" (infix [["utf8.offset" "title" 2] "or" (infix [(unary "#" "title") "+" 1])]))
-          (return (paren [(colon ["title:sub" "rest"] "gsub") (str "^%s+") (str "")]))
+      (localFunction tick [{cx = null;}] ({cx}: [
+        (if' (infix [cx "and" [enabled]]) [
+          [arrange cx]
         ])
-        (return "title")
-      ])
+        [(dot tern "timer") AGE_TICK_MS tick]
+      ]))
+      blank
+      (localFunction apply [{cx = null;}] ({cx}: [
+        (ifElse [enabled] [
+            [load cx]
+            [arrange cx]
+          ] [
+            (assign marks (table []))
+            [(dot tern "chrome.refresh")]
+          ])
+      ]))
       blank
       [
-        "tern.chrome.tab_title"
-        (fn ["tab"] [
-          (if' (unary "not" ["enabled"]) [
-            (return "nil")
-          ])
-          (local "title" "tab.name")
-          (if' (infix [(unary "not" "title") "or" (infix ["title" "==" (str "")])]) [
-            (assign "title" ["strip_icon" (infix ["tab.title" "or" (str "")])])
-            (if' (idx "SHELLS" "tab.program") [
-              (assign "title" ["title:gsub" (str "^[^%s:]+@[^%s:]+:%s*") (str "")])
-            ])
-            (if' (infix ["title" "==" (str "")]) [
-              (local "cwd" (infix ["tab.cwd" "or" (str "")]))
-              (assign "title" (infix [["cwd:match" (str "([^/]+)/*$")] "or" "cwd"]))
-            ])
-          ])
-          (return (infix [(paren (infix [(idx "marks" "tab.id") "or" (str "")])) ".." "title"]))
-        ])
+        (dot tern "on")
+        (str "window_start")
+        (fn [{cx = null;}] ({cx}: [
+          [apply cx]
+        ]))
       ]
       blank
       [
-        "tern.command"
+        (dot tern "timer")
+        0
+        (fn [{cx = null;}] ({cx}: [
+          (if' (infix [cx "and" [enabled]]) [
+            [load cx]
+          ])
+          [tick cx]
+        ]))
+      ]
+      blank
+      (for [{_ = null;} {name = null;}] [ipairs (table [(str "tab_created") (str "tab_closed") (str "pane_closed") (str "command_started") (str "command_finished") (str "focus")])] ({
+        _,
+        name,
+      }: [
+        [
+          (dot tern "on")
+          name
+          (fn [{_ = null;} {cx = null;}] ({
+            _,
+            cx,
+          }: [
+            (if' [enabled] [
+              [arrange cx]
+            ])
+          ]))
+        ]
+      ]))
+      blank
+      [
+        (dot tern "on")
+        (str "agent_state")
+        (fn [{ev = AgentStateEvent;} {cx = null;}] ({
+          ev,
+          cx,
+        }: [
+          (if' (not [enabled]) [
+            return
+          ])
+          (assign (idx agent_state (dot ev "pane")) (dot ev "new"))
+          (if' (infix [(dot ev "old") "~=" (dot ev "new")]) [
+            (assign (idx since (dot ev "pane")) [(dot os "time")])
+            [save_map (str "rail_since") since]
+          ])
+          (if' (infix [(dot ev "new") "==" (str "working") "and" (idx unseen (dot ev "pane"))]) [
+            (assign (idx unseen (dot ev "pane")) nil)
+            [save_map (str "rail_unseen") unseen]
+          ])
+          [arrange cx]
+        ]))
+      ]
+      blank
+      [
+        (dot tern "on")
+        (str "agent_finished")
+        (fn [{ev = AgentFinishedEvent;} {cx = null;}] ({
+          ev,
+          cx,
+        }: [
+          (if' (not [enabled]) [
+            return
+          ])
+          (ifElse (infix [(dot ev "result") "==" (str "closed") "or" (dot ev "result") "==" (str "exited")]) [
+              (assign (idx unseen (dot ev "pane")) nil)
+              (assign (idx agent_state (dot ev "pane")) nil)
+            ] (if' (infix [[(dot cx "session:tab_of") (dot ev "pane")] "~=" [focused_tab cx]]) [
+              (assign (idx unseen (dot ev "pane")) (dot ev "result"))
+            ]))
+          (assign (idx since (dot ev "pane")) [(dot os "time")])
+          [save_map (str "rail_since") since]
+          [save_map (str "rail_unseen") unseen]
+          [arrange cx]
+        ]))
+      ]
+      blank
+      (localFunction strip_icon (typed [{title = string;}] string) ({
+        title,
+        ok,
+        first,
+      }: [
+        (local [ok first] [pcall (dot utf8 "codepoint") title 1])
+        (if' (infix [ok "and" first "and" (infix [(paren (infix [first ">=" (hex 57344) "and" first "<=" (hex 63743)])) "or" first ">=" (hex 983040)])]) ({rest}: [
+          (local rest (infix [[(dot utf8 "offset") title 2] "or" (len title) "+" 1]))
+          (return (paren [(dot [(dot title ":sub") rest] ":gsub") (str "^%s+") (str "")]))
+        ]))
+        (return title)
+      ]))
+      blank
+      [
+        (dot tern "chrome.tab_title")
+        (fn [{tab = null;}] ({
+          tab,
+          title,
+        }: [
+          (if' (not [enabled]) [
+            (return nil)
+          ])
+          (local title (dot tab "name"))
+          (if' (infix [(not title) "or" title "==" (str "")]) [
+            (assign title [strip_icon (infix [(dot tab "title") "or" (str "")])])
+            (if' (idx SHELLS (dot tab "program")) [
+              (assign title [(dot title ":gsub") (str "^[^%s:]+@[^%s:]+:%s*") (str "")])
+            ])
+            (if' (infix [title "==" (str "")]) ({cwd}: [
+              (local cwd (infix [(dot tab "cwd") "or" (str "")]))
+              (assign title (infix [[(dot cwd ":match") (str "([^/]+)/*$")] "or" cwd]))
+            ]))
+          ])
+          (return (infix [(infix [(idx marks (dot tab "id")) "or" (str "")]) ".." title]))
+        ]))
+      ]
+      blank
+      [
+        (dot tern "command")
         (rows (table [
           (field "id" (str "pin"))
           (field "title" (str "Sidebar: Pin or unpin this tab"))
           (field "icon" (str "pin"))
-          (field "run" (fn ["cx"] [
-            (local "tab" ["focused_tab" "cx"])
-            (if' (infix ["tab" "and" "on.rail_sections"]) [
-              ["cx:toast" (str "info") (infix [(infix [["toggle" (str "rail_pins") "tab"] "and" (str "Pinned")]) "or" (str "Unpinned")])]
-              ["arrange" "cx"]
+          (field "run" (fn [{cx = null;}] ({
+            cx,
+            tab,
+          }: [
+            (local tab [focused_tab cx])
+            (if' (infix [tab "and" (dot on "rail_sections")]) [
+              [(dot cx ":toast") (str "info") (infix [[toggle (str "rail_pins") tab] "and" (str "Pinned") "or" (str "Unpinned")])]
+              [arrange cx]
             ])
-          ]))
+          ])))
         ]))
       ]
       blank
       [
-        "tern.command"
+        (dot tern "command")
         (rows (table [
           (field "id" (str "colour"))
           (field "title" (str "Sidebar: Colour this tab"))
           (field "icon" (str "palette"))
-          (field "run" (fn ["cx"] [
-            (local "tab" ["focused_tab" "cx"])
-            (if' "tab" [
-              (assign "color_at" (infix [(infix ["color_at" "%" (unary "#" "COLORS")]) "+" 1]))
-              ["cx.layout:color_tab" "tab" (idx "COLORS" "color_at")]
+          (field "run" (fn [{cx = null;}] ({
+            cx,
+            tab,
+          }: [
+            (local tab [focused_tab cx])
+            (if' tab [
+              (assign color_at (infix [color_at "%" (len COLORS) "+" 1]))
+              [(dot cx "layout:color_tab") tab (idx COLORS color_at)]
             ])
-          ]))
+          ])))
         ]))
       ]
       blank
       [
-        "tern.command"
+        (dot tern "command")
         (rows (table [
           (field "id" (str "autohide"))
           (field "title" (str "Sidebar: Toggle auto-hide"))
           (field "icon" (str "sidebar"))
-          (field "run" (fn ["cx"] [
-            (local "hidden" (unary "not" ["cx.settings:get" (str "tabs_autohide")]))
-            ["cx.settings:set" (str "tabs_autohide") "hidden"]
-            ["cx:toast" (str "info") (infix [(infix ["hidden" "and" (str "Sidebar tucks away")]) "or" (str "Sidebar stays open")])]
-          ]))
+          (field "run" (fn [{cx = null;}] ({
+            cx,
+            hidden,
+          }: [
+            (local hidden (not [(dot cx "settings:get") (str "tabs_autohide")]))
+            [(dot cx "settings:set") (str "tabs_autohide") hidden]
+            [(dot cx ":toast") (str "info") (infix [hidden "and" (str "Sidebar tucks away") "or" (str "Sidebar stays open")])]
+          ])))
         ]))
       ]
       blank
-      ["tern.bind" (str "ctrl+alt+p") (str "plugin.ui-menu.pin")]
-      ["tern.bind" (str "ctrl+alt+j") (str "next_tab")]
-      ["tern.bind" (str "ctrl+alt+k") (str "previous_tab")]
-      ["tern.bind" (str "ctrl+alt+f") (str "focus_tabs")]
+      [(dot tern "bind") (str "ctrl+alt+p") (str "plugin.ui-menu.pin")]
+      [(dot tern "bind") (str "ctrl+alt+j") (str "next_tab")]
+      [(dot tern "bind") (str "ctrl+alt+k") (str "previous_tab")]
+      [(dot tern "bind") (str "ctrl+alt+f") (str "focus_tabs")]
       blank
       (return (rows (table [
         (field "tweaks" (rows (table [
@@ -43054,53 +43823,53 @@
             (field "label" (str "sections: pinned, needs you, working, idle"))
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\tposition: relative;\n\toverflow: visible !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"] {\n\tmargin-top: 34px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]::after {\n\tdisplay: block !important;\n\tposition: absolute;\n\tleft: 10px;\n\ttop: -26px;\n\twidth: auto;\n\theight: auto;\n\tbackground: none;\n\tbox-shadow: none;\n\tfont-size: 11px;\n\tfont-weight: 600;\n\tletter-spacing: 0.06em;\n\ttext-transform: uppercase;\n\tcolor: var(--t4);\n\tpointer-events: none;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"]::after {\n\tcontent: \"Pinned\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"]::after {\n\tcontent: \"Needs you\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"]::after {\n\tcontent: \"Working\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]::after {\n\tcontent: \"Idle\";\n}\n"))
-            (field "apply" "apply")
-            (field "on" "true")
+            (field "apply" apply)
+            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_status"))
             (field "label" (str "status rings and lines"))
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c {\n\tposition: relative;\n\toverflow: visible !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tcontent: \"\";\n\tposition: absolute;\n\tbox-sizing: border-box;\n\tborder-radius: 50%;\n\tpointer-events: none;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc])[title*=\"\\206A\"] .tn-dk-c::before {\n\tleft: -4px;\n\ttop: -4px;\n\twidth: calc(100% + 8px);\n\theight: calc(100% + 8px);\n\tborder: 2px dashed var(--pill);\n\tanimation: arc-spin 2.4s linear infinite;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tright: -3px;\n\tbottom: -3px;\n\twidth: 10px;\n\theight: 10px;\n\tbackground: var(--pill);\n\tbox-shadow: 0 0 0 2px var(--panel);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub {\n\tfont-size: 0 !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::before {\n\tfont-size: 12px;\n\tfont-weight: 500;\n\tfont-family: Geist, system-ui, sans-serif;\n\tcolor: var(--pill);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] {\n\t--pill: light-dark(#0f766e, #5eead4);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] .sub::before {\n\tcontent: \"Working\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] {\n\t--pill: light-dark(#b45309, #fbbf24);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] .sub::before {\n\tcontent: \"Awaiting input\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] {\n\t--pill: light-dark(#15803d, #4ade80);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] .sub::before {\n\tcontent: \"Done · unseen\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] {\n\t--pill: light-dark(#b91c1c, #f87171);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] .sub::before {\n\tcontent: \"Failed · unseen\";\n}\n\n@keyframes arc-spin {\n\tfrom {\n\t\ttransform: rotate(0deg);\n\t}\n\tto {\n\t\ttransform: rotate(360deg);\n\t}\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub > * {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::after {\n\tdisplay: none !important;\n}\n"))
-            (field "apply" "apply")
-            (field "on" "true")
+            (field "apply" apply)
+            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_ages"))
             (field "label" (str "ages"))
             (field "group" (str "Rail"))
-            (field "css" (infix [(long "\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk .hint {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk {\n\tflex: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk::before {\n\tfont-size: 11px;\n\tcolor: var(--t4);\n\tfont-family: Geist, system-ui, sans-serif;\n}\n") ".." (str "\n") ".." ["age_css"]]))
-            (field "apply" "apply")
-            (field "on" "true")
+            (field "css" (infix [(long "\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk .hint {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk {\n\tflex: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk::before {\n\tfont-size: 11px;\n\tcolor: var(--t4);\n\tfont-family: Geist, system-ui, sans-serif;\n}\n") ".." (str "\n") ".." [age_css]]))
+            (field "apply" apply)
+            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_compact"))
             (field "label" (str "one-line idle rows"))
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\theight: 38px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206E\"]:not([data-tc]) {\n\theight: 20px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206E\"]:not([data-tc]) .sub {\n\tdisplay: none !important;\n}\n"))
-            (field "apply" "apply")
-            (field "on" "true")
+            (field "apply" apply)
+            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_card"))
             (field "label" (str "selected tab card"))
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\tborder-radius: 8px !important;\n\tbox-shadow: none !important;\n\tcolor: var(--t3) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:hover {\n\tbackground: color-mix(in srgb, var(--t1) 6%, transparent) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on {\n\tbackground: var(--panel) !important;\n\tbox-shadow: inset 0 0 0 1px var(--l2) !important;\n\tcolor: var(--t1) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on .nm {\n\tfont-weight: 600;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt.on::after {\n\tdisplay: none !important;\n}\n"))
-            (field "on" "true")
+            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_header"))
             (field "label" (str "+ and bell in the header"))
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h #tabbar .tb-in {\n\tposition: relative !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tb-add,\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge {\n\tposition: absolute !important;\n\ttop: 4px !important;\n\twidth: 28px !important;\n\theight: 26px !important;\n\tmargin: 0 !important;\n\tpadding: 0 !important;\n\tjustify-content: center !important;\n\tgap: 0 !important;\n\tborder-radius: 7px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tb-add {\n\tright: 40px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge {\n\tright: 8px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > :is(.tb-add, .tn-ib-badge) :is(.lbl, .kbds) {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge .tn-ib-pip {\n\tposition: absolute !important;\n\ttop: 1px !important;\n\tright: 1px !important;\n\tmargin: 0 !important;\n\ttransform: scale(0.8);\n}\n"))
-            (field "on" "true")
+            (field "on" true)
           ]))
         ])))
-        (field "bind" (fn [(typed "state" (table [(pair "string" "boolean")]))] [
-          (assign "on" "state")
-        ]))
+        (field "bind" (fn [{state = table [(pair string boolean)];}] ({state}: [
+          (assign on state)
+        ])))
       ])))
-    ];
+    ]);
     modules_tools_tern_config_plugins_ui_menu_ui_menu_data = [
       {
         select = ".uo-list";
@@ -43157,6 +43926,7 @@
     modules_tools_tern_config_plugins_ui_menu_window_data = {
       assign,
       blank,
+      dot,
       field,
       fn,
       for,
@@ -43164,63 +43934,87 @@
       if',
       ifExpr,
       infix,
+      ipairs,
+      len,
       local,
       localFunction,
       long,
+      not,
+      pcall,
+      require,
       return,
       rows,
       str,
       table,
-      unary,
+      table',
+      tern,
+      type',
       ...
+    }: ({
+      Rail,
+      TWEAKS,
+      on,
+      by_id,
+      saved,
+      model,
+      LOCKED,
+      rail,
+      FIXED,
+      FILES,
+      PINNED,
+      paint,
+      save,
+      paint_all,
+      toggle,
+      watch,
     }: [
-      (local "Rail" ["require" (str "./rail")])
+      (local Rail [require (str "./rail")])
       blank
-      (local "TWEAKS" (rows (table [
+      (local TWEAKS (rows (table [
         (rows (table [
           (field "id" (str "sessions"))
           (field "label" (str "sessions"))
           (field "group" (str "Chrome"))
           (field "css" (long ".tn-session-tab{display:none !important}"))
-          (field "on" "true")
+          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "account"))
           (field "label" (str "account"))
           (field "group" (str "Chrome"))
           (field "css" (long ".tn-peers{display:none !important}"))
-          (field "on" "true")
+          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "files"))
           (field "label" (str "files"))
           (field "group" (str "Chrome"))
           (field "css" (long "html.tn-themed .tb-files {\n\tdisplay: none !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "roomy"))
           (field "label" (str "tall pickers"))
           (field "group" (str "Chrome"))
           (field "css" (long "html.tn-themed #pick .cmdk.tn-pk {\n\tdisplay: flex;\n\tflex-direction: column;\n\tmax-height: calc(87vh - 24px) !important;\n}\nhtml.tn-themed #pick .cmdk.tn-pk > .ck-top,\nhtml.tn-themed #pick .cmdk.tn-pk > .ck-foot {\n\tflex: none;\n}\nhtml.tn-themed #pick .cmdk.tn-pk .ck-list {\n\tmax-height: none !important;\n\tmin-height: 0;\n\tflex: 1 1 auto;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "inbox"))
           (field "label" (str "centred inbox"))
           (field "group" (str "Chrome"))
           (field "css" (long "html.tn-themed #inbox {\n\tleft: 50% !important;\n\ttop: 50% !important;\n\ttransform: translate(-50%, -50%) !important;\n\ttransform-origin: 50% 50% !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "frost"))
           (field "label" (str "modal frost"))
           (field "group" (str "Glass"))
           (field "css" (long "html.tn-themed .cmdk,\nhtml.tn-themed .dlg-card,\nhtml.tn-themed .mdl,\nhtml.tn-themed .pk-sheet,\nhtml.tn-themed .sf-overlay.modal > .sf-ov-card,\nhtml.tn-themed .sf-prefs .pf-editor > .sf-col,\nhtml.tn-themed .tn-hd,\nhtml.tn-themed .tn-sc {\n\t-webkit-backdrop-filter: blur(40px) saturate(190%) !important;\n\tbackdrop-filter: blur(40px) saturate(190%) !important;\n}"))
-          (field "on" "true")
+          (field "on" true)
         ]))
         blank
         blank
@@ -43229,163 +44023,175 @@
           (field "label" (str "rail width"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v {\n\t--vt-w: 252px;\n}\nhtml.lay-rail.tabs-h #tabbar {\n\twidth: 236px !important;\n}\nhtml.lay-rail.tabs-h #panel {\n\tleft: calc(236px * var(--tn-zoom, 1)) !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "spacing"))
           (field "label" (str "rail spacing"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v #sidebar {\n\tpadding: 54px 8px 12px 10px !important;\n\tgap: 1px !important;\n}\nhtml.tabs-v #sidebar .nav-group {\n\tgap: 1px !important;\n\tmargin-bottom: 10px !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "heads"))
           (field "label" (str "section heads"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v #sidebar .nav-head {\n\theight: 24px !important;\n\tpadding: 0 8px !important;\n\tfont-size: 11px !important;\n\tfont-weight: 600 !important;\n\tletter-spacing: 0.03em !important;\n\ttext-transform: uppercase !important;\n\tcolor: var(--t4) !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "rows"))
           (field "label" (str "rail rows"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v #sidebar .nav-row {\n\theight: 34px !important;\n\tpadding: 0 8px !important;\n\tgap: 9px !important;\n\tborder-radius: 9px !important;\n\tfont-size: 13px !important;\n\tcolor: var(--t2) !important;\n\ttransition:\n\t\tbackground-color 0.13s var(--ease),\n\t\tcolor 0.13s var(--ease),\n\t\tbox-shadow 0.13s var(--ease) !important;\n}\nhtml.tabs-v #sidebar .nav-row:hover {\n\tbackground: rgb(from var(--t1) r g b / 6%) !important;\n\tcolor: var(--t1) !important;\n}\nhtml.tabs-v #sidebar .nav-row.on,\nhtml.tabs-v #sidebar .nav-row.sel,\nhtml.tabs-v #sidebar .nav-row.focused {\n\tbackground: rgb(from var(--accent) r g b / 13%) !important;\n\tcolor: var(--t1) !important;\n\tbox-shadow: inset 2px 0 0 var(--accent) !important;\n}\nhtml.tabs-v #sidebar .nav-row .ico {\n\tcolor: inherit !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "keys"))
           (field "label" (str "key hints"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v #sidebar .nav-row .meta.keys {\n\topacity: 0 !important;\n\ttransition: opacity 0.13s var(--ease) !important;\n}\nhtml.tabs-v #sidebar .nav-row:hover .meta.keys {\n\topacity: 1 !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "colours"))
           (field "label" (str "tab colours"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v #sidebar .nav-row[data-tc] .tn-tc {\n\twidth: 8px !important;\n\theight: 8px !important;\n}\nhtml.tabs-v #sidebar .nav-row[data-tc] .lbl {\n\tfont-weight: 550 !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "find"))
           (field "label" (str "rail find"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v .tn-vt-find {\n\theight: 30px !important;\n\tmargin: 0 2px 8px !important;\n\tborder-radius: 9px !important;\n\tbackground: var(--l1) !important;\n\tbox-shadow: inset 0 0 0 1px var(--l2) !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "chips"))
           (field "label" (str "session chips"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v #tabbar .tn-session-tab {\n\theight: 26px !important;\n\tpadding: 0 9px !important;\n\tborder-radius: 8px !important;\n\tfont-size: 12px !important;\n\tcolor: var(--t2) !important;\n\ttransition: background-color 0.13s var(--ease), color 0.13s var(--ease) !important;\n}\nhtml.tabs-v #tabbar .tn-session-tab:hover {\n\tbackground: var(--l1) !important;\n\tcolor: var(--t1) !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "tabs"))
           (field "label" (str "tab rows"))
           (field "group" (str "Rail"))
           (field "css" (long "html.lay-rail.tabs-h .tt {\n\theight: 38px !important;\n\tmargin: 0 4px !important;\n\tpadding: 0 10px !important;\n\tborder-radius: 10px !important;\n\ttransition: background-color 0.13s var(--ease), color 0.13s var(--ease) !important;\n}\nhtml.lay-rail.tabs-h .tt:hover {\n\tbackground: var(--l1) !important;\n}\nhtml.lay-rail.tabs-h .tt.on {\n\tbackground: var(--panel) !important;\n\tbox-shadow: inset 2px 0 0 var(--accent) !important;\n}\nhtml.lay-rail.tabs-h .tt.on::before,\nhtml.lay-rail.tabs-h .tt.on::after {\n\tdisplay: none !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "buttons"))
           (field "label" (str "rail buttons"))
           (field "group" (str "Rail"))
           (field "css" (long "html.lay-rail.tabs-h .tb-row {\n\theight: 28px !important;\n\tmargin: 2px 6px 0 !important;\n\tpadding: 0 10px !important;\n\tborder-radius: 9px !important;\n}\nhtml.lay-rail.tabs-h .tb-add {\n\tmargin: 4px 6px 0 !important;\n\tborder-radius: 9px !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "centering"))
           (field "label" (str "rail centering"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tabs-v #sidebar > nav.tn-vt {\n\tdisplay: flex !important;\n\tflex-direction: column !important;\n\tjustify-content: center !important;\n\talign-items: stretch !important;\n}\nhtml.tabs-v #sidebar > nav.tn-vt > .nav-group:first-child {\n\tmargin-top: auto !important;\n}\nhtml.tabs-v #sidebar > nav.tn-vt > .nav-group:last-child {\n\tmargin-bottom: auto !important;\n}\nhtml.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {\n\tmargin-top: auto !important;\n\tmargin-bottom: auto !important;\n}\nhtml.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {\n\tmargin-top: 0 !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "bottom"))
           (field "label" (str "rail bottom"))
           (field "group" (str "Rail"))
           (field "css" (long "html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers {\n\torder: 1 !important;\n\tmargin-top: 0 !important;\n}\nhtml.lay-rail.tabs-h #tabbar {\n\toverflow-y: auto !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in {\n\tflex: none !important;\n\tmin-height: 100% !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {\n\tflex: none !important;\n\tmargin: 0 !important;\n\toverflow: visible !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {\n\tmargin-top: auto !important;\n}"))
-          (field "on" "true")
-          (field "quiet" "true")
+          (field "on" true)
+          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "lock"))
           (field "label" (str "rail lock"))
           (field "group" (str "Layout"))
-          (field "on" "true")
+          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "answer-bubbles"))
           (field "label" (str "answer bubbles"))
           (field "group" (str "omp"))
           (field "css" (long ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md {\n\talign-self: flex-start;\n\tmax-width: 82%;\n\tpadding: 10px 16px;\n\tborder-radius: 18px 18px 18px 6px;\n\tbackground: var(--l1);\n\tbox-shadow:\n\t\t0 0 0 1px var(--l1),\n\t\t0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)),\n\t\tinset 0 1px 0 var(--glass-hi);\n}\n\n.sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body {\n\tbox-shadow:\n\t\t0 0 0 1px var(--l1),\n\t\t0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)),\n\t\tinset 0 1px 0 var(--glass-hi);\n}\n\n.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md .md > :last-child {\n\tmargin-bottom: 0;\n}"))
-          (field "on" "true")
+          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "work-rail"))
           (field "label" (str "work steps on a rail"))
           (field "group" (str "omp"))
           (field "css" (long ".sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md {\n\tfont-size: 13px;\n\tcolor: var(--t2);\n}\n\n.sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md > :last-child {\n\tmargin-bottom: 0;\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head {\n\tfont-size: 13px;\n\tcolor: var(--t2);\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head .sf-t-dim {\n\tcolor: var(--t4);\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-body {\n\tmargin-left: 7px;\n\tpadding-left: 15px;\n\tbox-shadow: inset 1px 0 0 var(--l2);\n}"))
-          (field "on" "true")
+          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "row-keys"))
           (field "label" (str "hide rail row shortcuts"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tn-themed #tabbar .tb-row .kbds {\n\tdisplay: none !important;\n}"))
-          (field "on" "true")
+          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "turn-stats"))
           (field "label" (str "hide turn stats"))
           (field "group" (str "omp"))
           (field "css" (long "html.tn-themed [data-role='omp.turn.usage'] {\n\tdisplay: none !important;\n}"))
-          (field "on" "true")
+          (field "on" true)
         ]))
       ])))
       blank
-      (local "on" (table []))
-      (local "by_id" (table []))
+      (local on (table []))
+      (local by_id (table []))
       blank
-      (for ["_" "t"] ["ipairs" "Rail.tweaks"] [
-        ["table.insert" "TWEAKS" "t"]
-      ])
+      (for [{_ = null;} {t = null;}] [ipairs (dot Rail "tweaks")] ({
+        _,
+        t,
+      }: [
+        [(dot table' "insert") TWEAKS t]
+      ]))
       blank
-      (for ["_" "t"] ["ipairs" "TWEAKS"] [
-        (assign (idx "on" "t.id") "t.on")
-        (assign (idx "by_id" "t.id") "t")
-      ])
+      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+        _,
+        t,
+      }: [
+        (assign (idx on (dot t "id")) (dot t "on"))
+        (assign (idx by_id (dot t "id")) t)
+      ]))
       blank
-      (local "saved" ["tern.kv.get" (str "on")])
-      (if' (infix [["type" "saved"] "==" (str "table")]) [
-        (for ["_" "t"] ["ipairs" "TWEAKS"] [
-          (if' (infix [["type" (idx "saved" "t.id")] "==" (str "boolean")]) [
-            (assign (idx "on" "t.id") (idx "saved" "t.id"))
+      (local saved [(dot tern "kv.get") (str "on")])
+      (if' (infix [[type' saved] "==" (str "table")]) [
+        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+          _,
+          t,
+        }: [
+          (if' (infix [[type' (idx saved (dot t "id"))] "==" (str "boolean")]) [
+            (assign (idx on (dot t "id")) (idx saved (dot t "id")))
           ])
-        ])
+        ]))
       ])
       blank
-      ["Rail.bind" "on"]
+      [(dot Rail "bind") on]
       blank
-      (local "model" (table []))
-      (for ["_" "t"] ["ipairs" "TWEAKS"] [
-        (assign (idx "model" (infix [(unary "#" "model") "+" 1])) (table [(field "id" "t.id") (field "label" "t.label") (field "group" "t.group")]))
-      ])
-      ["tern.kv.set" (str "menu") "model"]
+      (local model (table []))
+      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+        _,
+        t,
+      }: [
+        (assign (idx model (infix [(len model) "+" 1])) (table [(field "id" (dot t "id")) (field "label" (dot t "label")) (field "group" (dot t "group"))]))
+      ]))
+      [(dot tern "kv.set") (str "menu") model]
       blank
-      (local "LOCKED" (rows (table [
+      (local LOCKED (rows (table [
         (str "layout:float")
         (str "layout:tiles")
         (str "layout:studio")
@@ -43394,41 +44200,44 @@
         (str "tabs:vertical")
       ])))
       blank
-      (localFunction "rail" ["cx"] [
+      (localFunction rail [{cx = null;}] ({cx}: [
         [
-          "pcall"
+          pcall
           (fn [] [
-            ["cx:action" (str "layout:rail")]
+            [(dot cx ":action") (str "layout:rail")]
           ])
         ]
         [
-          "pcall"
+          pcall
           (fn [] [
-            ["cx:action" (str "tabs:horizontal")]
+            [(dot cx ":action") (str "tabs:horizontal")]
           ])
         ]
-      ])
+      ]))
       blank
-      (for ["_" "id"] ["ipairs" "LOCKED"] [
+      (for [{_ = null;} {id = null;}] [ipairs LOCKED] ({
+        _,
+        id,
+      }: [
         [
-          "pcall"
+          pcall
           (fn [] [
             [
-              "tern.override"
-              "id"
-              (fn ["cx"] [
-                (if' (unary "not" "on.lock") [
-                  (return "false")
+              (dot tern "override")
+              id
+              (fn [{cx = null;}] ({cx}: [
+                (if' (not (dot on "lock")) [
+                  (return false)
                 ])
-                ["cx:toast" (str "info") (str "The rail is locked")]
-                (return "true")
-              ])
+                [(dot cx ":toast") (str "info") (str "The rail is locked")]
+                (return true)
+              ]))
             ]
           ])
         ]
-      ])
+      ]))
       blank
-      (local "FIXED" (rows (table [
+      (local FIXED (rows (table [
         (str "pane_headers:never")
         (str "pane_headers:split")
         (str "pane_headers:always")
@@ -43436,185 +44245,219 @@
         (str "interface_style")
       ])))
       blank
-      (for ["_" "id"] ["ipairs" "FIXED"] [
+      (for [{_ = null;} {id = null;}] [ipairs FIXED] ({
+        _,
+        id,
+      }: [
         [
-          "pcall"
+          pcall
           (fn [] [
             [
-              "tern.override"
-              "id"
-              (fn ["cx"] [
-                ["cx:toast" (str "info") (str "This config fixes the chrome")]
-                (return "true")
-              ])
+              (dot tern "override")
+              id
+              (fn [{cx = null;}] ({cx}: [
+                [(dot cx ":toast") (str "info") (str "This config fixes the chrome")]
+                (return true)
+              ]))
             ]
           ])
         ]
-      ])
+      ]))
       blank
-      (local "FILES" (table [(str "files") (str "focus_files") (str "reveal_active_file")]))
+      (local FILES (table [(str "files") (str "focus_files") (str "reveal_active_file")]))
       blank
-      (for ["_" "id"] ["ipairs" "FILES"] [
+      (for [{_ = null;} {id = null;}] [ipairs FILES] ({
+        _,
+        id,
+      }: [
         [
-          "pcall"
+          pcall
           (fn [] [
             [
-              "tern.override"
-              "id"
-              (fn ["cx"] [
-                (if' (unary "not" "on.files") [
-                  (return "false")
+              (dot tern "override")
+              id
+              (fn [{cx = null;}] ({cx}: [
+                (if' (not (dot on "files")) [
+                  (return false)
                 ])
-                ["cx:toast" (str "info") (str "Files are off")]
-                (return "true")
-              ])
+                [(dot cx ":toast") (str "info") (str "Files are off")]
+                (return true)
+              ]))
             ]
           ])
         ]
-      ])
+      ]))
       blank
-      (local "PINNED" (rows (table [
+      (local PINNED (rows (table [
         (field "layout" (str "Rail"))
         (field "tabs" (str "Horizontal"))
         (field "pane_headers" (str "Never"))
         (field "density" (str "Compact"))
-        (field "status_bar" "true")
+        (field "status_bar" true)
         (field "material" (str "Glass"))
       ])))
       blank
       [
-        "tern.on"
+        (dot tern "on")
         (str "window_start")
-        (fn ["cx"] [
+        (fn [{cx = null;}] ({cx}: [
           [
-            "pcall"
+            pcall
             (fn [] [
-              ["cx.settings:set_many" "PINNED"]
+              [(dot cx "settings:set_many") PINNED]
             ])
           ]
-          (if' "on.lock" [
-            ["rail" "cx"]
+          (if' (dot on "lock") [
+            [rail cx]
           ])
-        ])
+        ]))
       ]
       blank
-      (for ["_" "ms"] ["ipairs" (table [300 1200])] [
+      (for [{_ = null;} {ms = null;}] [ipairs (table [300 1200])] ({
+        _,
+        ms,
+      }: [
         [
-          "tern.timer"
-          "ms"
-          (fn ["cx"] [
-            (if' (infix ["cx" "and" "on.lock"]) [
-              ["rail" "cx"]
+          (dot tern "timer")
+          ms
+          (fn [{cx = null;}] ({cx}: [
+            (if' (infix [cx "and" (dot on "lock")]) [
+              [rail cx]
             ])
-          ])
+          ]))
         ]
-      ])
+      ]))
       blank
-      (localFunction "paint" ["t"] [
-        (if' "t.css" [
-          ["tern.css" (infix [(str "ui-menu-") ".." "t.id"]) (infix [(infix [(idx "on" "t.id") "and" "t.css"]) "or" (str "")])]
+      (localFunction paint [{t = null;}] ({t}: [
+        (if' (dot t "css") [
+          [(dot tern "css") (infix [(str "ui-menu-") ".." (dot t "id")]) (infix [(idx on (dot t "id")) "and" (dot t "css") "or" (str "")])]
         ])
-      ])
+      ]))
       blank
-      (localFunction "save" ["id"] [
-        (local "saved" ["tern.kv.get" (str "on")])
-        (local "out" (ifExpr [(infix [["type" "saved"] "==" (str "table")]) "saved" (table [])]))
-        (for ["_" "t"] ["ipairs" "TWEAKS"] [
-          (if' (infix [["type" (idx "out" "t.id")] "~=" (str "boolean")]) [
-            (assign (idx "out" "t.id") (idx "on" "t.id"))
+      (localFunction save [{id = null;}] ({
+        id,
+        saved,
+        out,
+      }: [
+        (local saved [(dot tern "kv.get") (str "on")])
+        (local out (ifExpr [(infix [[type' saved] "==" (str "table")]) saved (table [])]))
+        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+          _,
+          t,
+        }: [
+          (if' (infix [[type' (idx out (dot t "id"))] "~=" (str "boolean")]) [
+            (assign (idx out (dot t "id")) (idx on (dot t "id")))
           ])
+        ]))
+        (if' id [
+          (assign (idx out id) (idx on id))
         ])
-        (if' "id" [
-          (assign (idx "out" "id") (idx "on" "id"))
-        ])
-        ["tern.kv.set" (str "on") "out"]
+        [(dot tern "kv.set") (str "on") out]
+      ]))
+      blank
+      (localFunction paint_all [] [
+        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+          _,
+          t,
+        }: [
+          [paint t]
+        ]))
       ])
       blank
-      (localFunction "paint_all" [] [
-        (for ["_" "t"] ["ipairs" "TWEAKS"] [
-          ["paint" "t"]
+      (localFunction toggle [{cx = null;} {id = null;}] ({
+        cx,
+        id,
+        t,
+      }: [
+        (local t (idx by_id id))
+        (if' (not t) [
+          return
         ])
-      ])
+        (assign (idx on id) (not (idx on id)))
+        [paint t]
+        [save id]
+        (if' (dot t "apply") [
+          [(dot t "apply") cx]
+        ])
+        (if' (infix [id "==" (str "lock") "and" (dot on "lock")]) [
+          [rail cx]
+        ])
+        [(dot tern "chrome.refresh")]
+      ]))
       blank
-      (localFunction "toggle" ["cx" "id"] [
-        (local "t" (idx "by_id" "id"))
-        (if' (unary "not" "t") [
-          "return"
-        ])
-        (assign (idx "on" "id") (unary "not" (idx "on" "id")))
-        ["paint" "t"]
-        ["save" "id"]
-        (if' "t.apply" [
-          ["t.apply" "cx"]
-        ])
-        (if' (infix [(infix ["id" "==" (str "lock")]) "and" "on.lock"]) [
-          ["rail" "cx"]
-        ])
-        ["tern.chrome.refresh"]
-      ])
-      blank
-      (localFunction "watch" [] [
+      (localFunction watch [] [
         [
-          "tern.timer"
+          (dot tern "timer")
           250
-          (fn ["cx"] [
-            (local "saved" ["tern.kv.get" (str "on")])
-            (local "changed" "false")
-            (if' (infix [["type" "saved"] "==" (str "table")]) [
-              (for ["_" "t"] ["ipairs" "TWEAKS"] [
-                (local "want" (idx "saved" "t.id"))
-                (if' (infix [(infix [["type" "want"] "==" (str "boolean")]) "and" (infix ["want" "~=" (idx "on" "t.id")])]) [
-                  (assign (idx "on" "t.id") "want")
-                  ["paint" "t"]
-                  (if' (infix ["t.apply" "and" "cx"]) [
-                    ["t.apply" "cx"]
+          (fn [{cx = null;}] ({
+            cx,
+            saved,
+            changed,
+          }: [
+            (local saved [(dot tern "kv.get") (str "on")])
+            (local changed false)
+            (if' (infix [[type' saved] "==" (str "table")]) [
+              (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+                _,
+                t,
+                want,
+              }: [
+                (local want (idx saved (dot t "id")))
+                (if' (infix [[type' want] "==" (str "boolean") "and" want "~=" (idx on (dot t "id"))]) [
+                  (assign (idx on (dot t "id")) want)
+                  [paint t]
+                  (if' (infix [(dot t "apply") "and" cx]) [
+                    [(dot t "apply") cx]
                   ])
-                  (if' (infix [(infix ["t.id" "==" (str "lock")]) "and" "want"]) [
-                    ["rail" "cx"]
+                  (if' (infix [(dot t "id") "==" (str "lock") "and" want]) [
+                    [rail cx]
                   ])
-                  (assign "changed" "true")
+                  (assign changed true)
                 ])
-              ])
+              ]))
             ])
-            (if' "changed" [
-              ["tern.chrome.refresh"]
+            (if' changed [
+              [(dot tern "chrome.refresh")]
             ])
-            ["watch"]
-          ])
+            [watch]
+          ]))
         ]
       ])
       blank
       [
-        "tern.command"
+        (dot tern "command")
         (rows (table [
           (field "id" (str "options"))
           (field "title" (str "UI: options…"))
           (field "icon" (str "sliders"))
           (field "group" (str "UI"))
-          (field "run" (fn ["cx"] [
-            ["cx:new_block" (str "ui-menu.options")]
-          ]))
+          (field "run" (fn [{cx = null;}] ({cx}: [
+            [(dot cx ":new_block") (str "ui-menu.options")]
+          ])))
         ]))
       ]
       blank
-      (for ["_" "t"] ["ipairs" "TWEAKS"] [
+      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+        _,
+        t,
+      }: [
         [
-          "tern.command"
+          (dot tern "command")
           (rows (table [
-            (field "id" (infix [(str "toggle-") ".." "t.id"]))
+            (field "id" (infix [(str "toggle-") ".." (dot t "id")]))
             (field "group" (str "UI"))
-            (field "title" (infix [(str "UI: show or hide the ") ".." "t.label"]))
-            (field "run" (fn ["cx"] [
-              ["toggle" "cx" "t.id"]
-            ]))
+            (field "title" (infix [(str "UI: show or hide the ") ".." (dot t "label")]))
+            (field "run" (fn [{cx = null;}] ({cx}: [
+              [toggle cx (dot t "id")]
+            ])))
           ]))
         ]
-      ])
+      ]))
       blank
-      ["paint_all"]
-      ["save"]
-      ["watch"]
-    ];
+      [paint_all]
+      [save]
+      [watch]
+    ]);
     modules_tools_tern_config_settings_data = {
       __keys = ["theme" "theme_dark" "copy_on_select" "link_target" "cursor" "contrast" "layout" "font_size" "ui_font_size" "font_family" "font_family_bold" "font_family_italic" "font_family_bold_italic" "padding_x" "padding_y" "ui_font" "code_font" "tabs" "system_title_bar" "status_bar" "material" "opacity" "blur" "surface_fold" "new_tabs" "agent_placement" "snap_text" "frames_queued" "renderer" "carly" "keybinds"];
       theme = "System";

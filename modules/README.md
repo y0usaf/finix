@@ -227,44 +227,89 @@ blank
 ])
 ```
 
-Luau (`generators.luau`): a call is a Nix list, its function first. A name,
-a dotted path (`cx.session`, or `cx.session:focused` heading a call), a number
-or `nil`, `true` and `false` is a string (an integer may be a Nix integer).
-`str` is a quoted string, in the quote StyLua picks, whose parts may include
-`unicode "2061"` escapes; `long` is a `[[...]]` string. `table` holds values,
-`field name value` and `pair key value`; `infix [a ".." b ".." c]` is a run of
-one operator (another operator is a nested `infix`); `unary`, `paren`, `dot`,
-`colon`, `idx`, `fn params body`, `ifExpr [test value ... otherwise]` and
-`cast` are the rest, `tuple` is an expression list (or a tuple type) and
-`typed x type` annotates a name or, around a parameter list, gives a function's
-return type. A type is a name, `opt`, `table` or `tuple`. A statement is a
-call, a keyword (`"return"`, `"break"`), `local`, `assign`, `update "+=" target
-value`, `return`, `function`, `localFunction`, `if'`, `ifElse` (whose
+Luau (`generators.luau`) binds its names in Nix. A data file is a function
+of the constructors and of the Luau and Tern globals and builtin types it uses
+(`tern`, `string`, `table'`, `pcall`, `number`, `WindowCx`, ...; each an
+attribute of `generators.luau`), returning the file's block. A local, local
+function or type alias is a Nix binding: a block that declares names (the
+file, a function body, an `if` branch, a loop body) is a lambda whose formals
+are exactly those names, `({last, note}: [ ... ])`, and a block declaring
+nothing is a list. A function's parameters and a loop's variables are listed
+in order as one-attribute sets of their type, `[{cx = WindowCx;} {id =
+null;}]` (`null` when unannotated), and bound by the body's lambda. `render`
+calls each lambda with the names of its formals and throws on a formal its
+block does not declare or a declaration its block does not bind, so no
+identifier is a string and a typo is an undefined variable at evaluation. A
+name that is a Nix keyword or an attribute of `generators.luau` is spelled
+with a trailing `'` (`type'` is Luau's `type`, `table'` its `table`). A call
+is a Nix list, its function first; `dot base "session:focused"` is a field
+path, the method after `:`, on any expression. Literals are `str` (in the
+quote StyLua picks, its parts strings and `unicode "2061"` escapes), `long`
+(`[[...]]`), Nix integers, floats and booleans, `hex 57344` (`0xE000`) and
+`nil`. Operators are `infix [a "and" b "or" c]`, parsed by Luau precedence
+(`..` and `^` right associative), so a nested `infix` is a grouping the
+precedence does not give and the printer writes the parentheses it needs,
+those StyLua keeps around an `if` expression or a cast operand, and no others;
+`paren` is a parenthesis the printer would not write, one truncating a call to
+one value or one StyLua keeps around a binary expression precedence already
+groups (`rail.luau`'s `(first >= 0xE000 and first <= 0xF8FF) or ...`). `not`,
+`neg` and `len` are `not`, `-` and `#`. `table` holds values, `field name
+value` and `pair key value`; `fn params body`, `ifExpr [test value ...
+otherwise]`, `idx`, `cast`, `tuple` (an expression list or a tuple type) and
+`typed x type` (a local's annotation or, around a parameter list, a function's
+return type) are the rest. A type is a name, `nil`, `opt`, `table` or
+`tuple`. A statement is a call, `return` (alone, a bare `return`), `local`,
+`assign`, `update "+=" target value`, `localFunction`, `if'`, `ifElse` (whose
 `otherwise` is an `elseif` when it is itself an `if'` or `ifElse`), `for`,
-`forRange`, `while`, `type` or `trailing statement comment`; a body is a list
-of statements, one per line a tab in. `rows` writes a call (one argument per
-line), a table (one entry per line, with `blank` and `comment` entries), an
-`infix` run (a line per operator), a `colon` (on its own line) or an `ifExpr`
-(then a list of the rows of its parts) over several lines, the way StyLua
-breaks them. From `tern/config/plugins/tab-order/window.data.nix`, abridged:
+`forRange`, `while`, `type` or `trailing statement comment`; a body is written
+one statement per line a tab in. `rows` writes a call (one argument per line),
+a table (one entry per line, with `blank` and `comment` entries), an `infix`
+run of one operator (a line per operator), a method `dot` (on its own line) or
+an `ifExpr` (then a list of the rows of its parts) over several lines, the way
+StyLua breaks them. `tuturu/src/window.luau` passes an undeclared
+`proproblems` (a typo for `problems`) to `table.insert`; it is listed among
+the globals so the file renders as before. From
+`tern/config/plugins/tab-order/window.data.nix`, abridged:
 
 ```nix
-{assign, blank, fn, if', infix, localFunction, opt, str, tuple, typed, unary, ...}: [
-  (localFunction "place" [(typed "cx" "WindowCx") (typed "id" "number") (typed "anchor" (opt "number"))] [
-    (if' (infix [(unary "not" "anchor") "or" (infix ["anchor" "==" "id"])]) [
-      "return"
-    ])
-    (if' (infix ["info.position" ">" (infix ["at.position" "+" 1])]) [
-      ["cx.layout:order_tab" "id" (infix ["at.position" "+" 1])]
-    ])
-  ])
+{WindowCx, assign, blank, dot, fn, if', infix, local, localFunction, nil, not, number, opt, return, str, tern, tuple, typed, ...}: ({
+  last,
+  previous,
+  note,
+  focused_tab,
+  tab_info,
+  place,
+}: [
+  (local (typed last (opt number)) nil)
   blank
-  ["tern.on" (str "window_start") (fn [(typed "cx" "WindowCx")] [
-    (assign ["last" "previous"] (tuple ["nil" "nil"]))
-    ["note" ["focused_tab" "cx"]]
-  ])]
-]
+  (localFunction place [{cx = WindowCx;} {id = number;} {anchor = opt number;}] ({
+    cx,
+    id,
+    anchor,
+    info,
+    at,
+  }: [
+    (if' (infix [(not anchor) "or" anchor "==" id]) [
+      return
+    ])
+    (local info [tab_info cx id])
+    (local at [tab_info cx anchor])
+    (if' (infix [(dot info "position") ">" (dot at "position") "+" 1]) [
+      [(dot cx "layout:order_tab") id (infix [(dot at "position") "+" 1])]
+    ])
+  ]))
+  blank
+  [
+    (dot tern "on")
+    (str "window_start")
+    (fn [{cx = WindowCx;}] ({cx}: [
+      (assign [last previous] (tuple [nil nil]))
+      [note [focused_tab cx]]
+    ]))
+  ]
+])
 ```
+
 
 VBScript (`generators.vbs`): a statement that is a Nix list is an invocation
 (`["WScript.Quit" "1"]`, `WScript.Quit 1`), and a list inside an expression a
@@ -577,7 +622,7 @@ then runs each language's own check on every rendered tree, listed in its
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
-| Luau (8 files) | bytes | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
+| Luau (8 files) | bytes, at conversion and again when its names became Nix bindings | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
 | VBScript (1 file) | bytes | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
 | markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
