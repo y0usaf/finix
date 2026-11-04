@@ -12710,7 +12710,7 @@
 
         (mkNodeTool {
           name = "gh-axi";
-          packageLock = ./modules/dev/ai/firstmate/gh-axi.package-lock.json;
+          packageLock = ./locks/gh-axi.package-lock.json;
           version = "0.1.35";
           description = "GitHub CLI shaped for AI agents";
           srcHash = "sha256-9yWr5EfJkqPWzA2aYyWGcj7RzxbHlRpAvODHPgkD5q4=";
@@ -12719,7 +12719,7 @@
 
         (mkNodeTool {
           name = "chrome-devtools-axi";
-          packageLock = ./modules/dev/ai/firstmate/chrome-devtools-axi.package-lock.json;
+          packageLock = ./locks/chrome-devtools-axi.package-lock.json;
           version = "0.1.35";
           description = "Chrome DevTools Protocol driver for AI agents";
           srcHash = "sha256-XEwivpIae2OxEGblsXWR4NfNZ+ORf706tFz5X6qwpiw=";
@@ -12728,7 +12728,7 @@
 
         (mkNodeTool {
           name = "tasks-axi";
-          packageLock = ./modules/dev/ai/firstmate/tasks-axi.package-lock.json;
+          packageLock = ./locks/tasks-axi.package-lock.json;
           version = "0.2.5";
           description = "Task queue CLI for AI agents";
           srcHash = "sha256-Vv2AUAYDdK5eD4CLRoiLq3TZasO5Tn/8C6FKSt7QozA=";
@@ -12737,7 +12737,7 @@
 
         (mkNodeTool {
           name = "quota-axi";
-          packageLock = ./modules/dev/ai/firstmate/quota-axi.package-lock.json;
+          packageLock = ./locks/quota-axi.package-lock.json;
           version = "0.1.49";
           description = "Provider quota and spend reporter for AI agents";
           srcHash = "sha256-UpXNEYFuTgG4qFZcJuvg7SKuW5o3RA3jEjkmebyzyQM=";
@@ -12746,7 +12746,7 @@
 
         (mkNodeTool {
           name = "lavish-axi";
-          packageLock = ./modules/dev/ai/firstmate/lavish-axi.package-lock.json;
+          packageLock = ./locks/lavish-axi.package-lock.json;
           version = "0.1.76";
           description = "Local presentation server for agent-built review boards";
           srcHash = "sha256-LReeEz+tGwZpCEreR3TaA65eh6SCohWwZntMjP3KqVs=";
@@ -37400,7 +37400,7 @@
             hash = "sha256-Y5BkMviHM1+DcwUrrv4eqCLjawKfA4ZaohjgpFQjjFk=";
           };
 
-          cargoLock.lockFile = ./modules/desktop/apps/stremio-Cargo.lock;
+          cargoLock.lockFile = ./locks/stremio-Cargo.lock;
 
           postPatch = ''
             substituteInPlace src/app/video/imp.rs \
@@ -42326,7 +42326,7 @@
 
         postPatch = ''
           cp ${generators.sourceFile "package.json" (generators.jsonSource package_data)} package.json
-          cp ${./modules/dev/work/vercel/package-lock.json} package-lock.json
+          cp ${./locks/package-lock.json} package-lock.json
         '';
 
         npmDepsHash = "sha256-4TBcL7MbOq51n0DKHdOUgp4amf2ZAl7bMPErggHQL0c=";
