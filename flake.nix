@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=65596bd508daa82c350bbf1d88a1865a0c731c0f";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=57c6b7b8efbdbc0354453fd713acf9c444d6e13c";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -35659,18 +35659,33 @@
       markdown = let
         inherit (doc) hardline line group nest;
 
-        words = string: lib.intersperse (group line) (lib.splitString " " string);
+        literal = text:
+          if builtins.match ".*([`*\\<&]|~~|]\\(|]\\[|!\\[|(^|[^[:alnum:]])_|_($|[^[:alnum:]])).*" text != null
+          then throw "markdown: the text `${text}` holds markup; code, emphasis and links are constructors, and text is only literal"
+          else text;
+
+        words = string: lib.intersperse (group line) (lib.splitString " " (literal string));
+
+        codeSpan = text:
+          if text == "" || lib.hasInfix "`" text || lib.hasPrefix " " text || lib.hasSuffix " " text
+          then throw "markdown: the code span `${text}` is empty, holds a backtick or starts or ends with a space"
+          else "`${text}`";
+
+        destination = url:
+          if builtins.match "[^ ()<>]+" url != null
+          then url
+          else throw "markdown: the link destination `${url}` needs escaping";
 
         inlineForms = {
           string = flow: value:
             if flow
             then words value
-            else value;
+            else literal value;
           list = flow: map (inline flow);
-          code = _: value: "`${value.code}`";
+          code = _: value: codeSpan value.code;
           strong = flow: value: ["**" (inline flow value.strong) "**"];
           em = flow: value: ["*" (inline flow value.em) "*"];
-          link = flow: value: ["[" (inline flow value.link.text) "](${value.link.url})"];
+          link = flow: value: ["[" (inline flow value.link.text) "](${destination value.link.url})"];
         };
 
         inline = flow: value: (inlineForms.${kindOf value} or (throw "markdown: no inline ${kindOf value}")) flow value;
@@ -35680,18 +35695,28 @@
           then inline true value.wrap
           else inline false value;
 
-        cells = row: ["| " (lib.intersperse " | " (map (inline false) row)) " |"];
+        cells = width: row:
+          if builtins.length row != width
+          then throw "markdown: a table row of ${toString (builtins.length row)} cells under a header of ${toString width}"
+          else ["| " (lib.intersperse " | " (map (inline false) row)) " |"];
 
         blockForms = {
           string = paragraph;
           list = paragraph;
           wrap = paragraph;
-          heading = value: [(lib.strings.replicate value.heading.level "#") " " (inline false value.heading.text)];
+          heading = value:
+            if value.heading.level < 1 || value.heading.level > 6
+            then throw "markdown: no heading level ${toString value.heading.level}"
+            else [(lib.strings.replicate value.heading.level "#") " " (inline false value.heading.text)];
           bullets = value: lib.intersperse hardline (map (item: ["- " (nest 2 (paragraph item))]) value.bullets);
-          comment = value: "<!--${value.comment}-->";
-          table = value:
-            lib.intersperse hardline ([(cells (builtins.head value.table)) "|${lib.concatStrings (map (_: "---|") (builtins.head value.table))}"]
-              ++ map cells (builtins.tail value.table));
+          comment = value:
+            if lib.hasInfix "-->" value.comment
+            then throw "markdown: a comment holding `-->`"
+            else "<!--${value.comment}-->";
+          table = value: let
+            width = builtins.length value.table.header;
+          in
+            lib.intersperse hardline ([(cells width value.table.header) "|${lib.strings.replicate width "---|"}"] ++ map (cells width) value.table.rows);
         };
 
         block = value:
@@ -35717,7 +35742,7 @@
 
         bullets = items: {bullets = items;};
 
-        table = rows: {table = rows;};
+        table = header: rows: {table = {inherit header rows;};};
 
         render = values: doc.render 78 (map (value: [(block value) hardline]) values);
       };
@@ -45017,8 +45042,7 @@
       blank
       (wrap [(code "~/finix/modules/tools/tern/default.nix") " builds the three sounds and writes " (code "~/.local/state/tern/plugin-data/tuturu/sounds.toml") " to name them:"])
       blank
-      (table [
-        ["Trigger" "Sound"]
+      (table ["Trigger" "Sound"] [
         [[(code "alert") ": terminal bell, an agent waiting, a pane alert"] ["Plasma Ocean " (code "dialog-question")]]
         [[(code "yield") ": an omp agent finished its turn"] "Tuturu, at the right ear"]
         [[(code "done") ": a shell command that ran " (code "min_seconds")] ["Plasma Ocean " (code "outcome-success")]]

@@ -342,10 +342,14 @@ each hunk's lines and derives its new start from the hunks before it, so the
 
 Markdown (`generators.markdown`): a paragraph is a string or a list of
 inlines, `wrap` a paragraph filled to 78 columns, `heading level text`,
-`bullets [ ... ]` a tight `- ` list of paragraphs, `table [header rows...]` a
-`| a | b |` table under a `|---|` row, and `comment` an HTML comment. An
-inline is a string, `code`, `strong`, `em` or `link text url`. From
-`tern/config/plugins/tuturu/README.data.nix`, abridged:
+`bullets [ ... ]` a tight `- ` list of paragraphs, `table header rows` a
+`| a | b |` table, its header row over a `|---|` row and every row as wide as
+the header, and `comment` an HTML comment. An inline is text (a string),
+`code`, `strong`, `em` or `link text url`. Text is only literal: the printer
+throws on a string holding what would read as markup (`` ` ``, `*`, `\`, `<`,
+`&`, `~~`, `](`, `][`, `![`, an `_` at the edge of a word), so markup is always
+a constructor, and brackets that are no link (`[349,0,2174,1388]`) stay text.
+From `tern/config/plugins/tuturu/README.data.nix`, abridged:
 
 ```nix
 {blank, code, heading, table, wrap, ...}: [
@@ -353,8 +357,7 @@ inline is a string, `code`, `strong`, `em` or `link text url`. From
   blank
   (wrap [(code "~/finix/modules/tools/tern/default.nix") " builds the three sounds and writes " (code "~/.local/state/tern/plugin-data/tuturu/sounds.toml") " to name them:"])
   blank
-  (table [
-    ["Trigger" "Sound"]
+  (table ["Trigger" "Sound"] [
     [[(code "yield") ": an omp agent finished its turn"] "Tuturu, at the right ear"]
   ])
 ]
@@ -679,7 +682,7 @@ then runs each language's own check on every rendered tree, listed in its
 | Luau (8 files) | bytes, at conversion and again when its names became Nix bindings | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
 | VBScript (1 file) | bytes | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
-| markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
+| markdown (7 files) | bytes, again after text became only literal and a table's header typed | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
 | GLSL (15 files) | `nix run .#glsl-gate -- ORIGINAL GENERATED ...`: both sides, canonicalized (top-level declarations sorted, every operator parenthesized, literals as their values, one declarator per declaration, every branch braced) and run through clang-format 21 with a pinned style, are equal; both pass glslangValidator; four 640×360 frames of each, rendered by llvmpipe into float32 targets, are bit-identical | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
 | Lua (3 files) | bytes, at conversion and again when names became Nix bindings (the bound trees render the word-list trees' bytes) | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
 | Python (5 files) | bytes, again after re-import to bound typed trees | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
