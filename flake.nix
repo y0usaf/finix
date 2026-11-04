@@ -14451,6 +14451,7 @@
     };
     graphical = {
       config,
+      lib,
       pkgs,
       ...
     }: {
@@ -14517,6 +14518,26 @@
       fonts.fontconfig.enable = true;
 
       environment.systemPackages = [pkgs.efibootmgr];
+
+      environment.etc."udev/hwdb.bin".source = lib.mkIf config.services.udev.enable (lib.mkForce (pkgs.runCommand "hwdb.bin"
+        {
+          preferLocalBuild = true;
+          allowSubstitutes = false;
+          packages = lib.unique (map toString ([pkgs.udev] ++ config.services.udev.packages));
+        }
+        ''
+          mkdir -p etc/udev/hwdb.d
+          for i in $packages; do
+            for j in $i/{etc,lib,var/lib}/udev/hwdb.d/*; do
+              [ -e "$j" ] || continue
+              cp "$j" "etc/udev/hwdb.d/$(basename "$j")"
+            done
+          done
+          res="$(${pkgs.buildPackages.eudev}/bin/udevadm hwdb --update --root "$PWD" 2>&1)"
+          echo "$res"
+          [ -z "$(echo "$res" | grep -E '^(Error|Failed)')" ]
+          mv etc/udev/hwdb.bin "$out"
+        ''));
 
       manzil = {
         finit.conditions = [config.finix.persistence.homeCondition];
