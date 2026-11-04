@@ -696,12 +696,13 @@
       pkgs,
       ...
     }: let
+      version = "26.924.51851";
       unwrapped = pkgs.stdenv.mkDerivation {
         pname = "chatgpt";
-        version = "26.924.51851";
+        inherit version;
 
         src = pkgs.fetchurl {
-          url = "https://persistent.oaistatic.com/codex-app-prod/linux/deb/pool/main/c/chatgpt/chatgpt_26.924.51851_amd64.deb";
+          url = "https://persistent.oaistatic.com/codex-app-prod/linux/deb/pool/main/c/chatgpt/chatgpt_${version}_amd64.deb";
           hash = "sha256-fSW5n+ObA83D2DYx+yA9t3GGeIpTOHreDnBqJh6JaTU=";
         };
 
@@ -1266,6 +1267,7 @@
           description = "re-apply omp box folder grants";
           inherit user;
           reload-signal = "none";
+          respawn = true;
           log = true;
           environment = {
             HOME = home;
@@ -1293,6 +1295,7 @@
           description = "omp gateway proxy";
           inherit user;
           reload-signal = "none";
+          respawn = true;
           log = true;
           environment = {
             GATEWAY_KEY_FILE = "${home}/Tokens/AI_GATEWAY_API_KEY.txt";
@@ -1306,6 +1309,7 @@
           description = "omp NixOS microVM";
           inherit user;
           reload-signal = "none";
+          respawn = true;
           environment.HOME = home;
           command = "${pkgs.writeShellScript "omp-box-run" ''
             mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${home}/.omp/natives
@@ -1349,7 +1353,7 @@
 
         environmentFiles = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = ["/home/y0usaf/Tokens/AI_GATEWAY_API_KEY.txt"];
+          default = ["${home}/Tokens/AI_GATEWAY_API_KEY.txt"];
           description = ''
             Files whose contents become environment variables of the daemon (and
             therefore of every agent it spawns). Each file's basename, extension
@@ -1382,15 +1386,12 @@
               "${home}/.local/state/nix/profile/bin"
               "/nix/var/nix/profiles/default/bin"
             ]}:$PATH
-            if [ -n '${builtins.concatStringsSep " " cfg.environmentFiles}' ]; then
-              for f in ${builtins.concatStringsSep " " cfg.environmentFiles}; do
-                [ -r "$f" ] || continue
-                name=$(basename "$f"); name="''${name%.*}"
-                name=$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9_' '_')
-                value=$(cat "$f")
-                export "$name"="$value"
-              done
-            fi
+            for f in ${lib.escapeShellArgs cfg.environmentFiles}; do
+              [ -r "$f" ] || continue
+              name=$(basename "$f"); name="''${name%.*}"
+              name=$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9_' '_')
+              export "$name"="$(cat "$f")"
+            done
             exec ${flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/paseo-server ${lib.optionalString (!cfg.relay.enable) "--no-relay"}
           ''}";
           environment =
