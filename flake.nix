@@ -6277,15 +6277,15 @@
 
       shaderWallpaperParameters = {
         shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
-          ["${generators.sourceFile "cassette-squares.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_cassette_squares_data generators.glsl))}" 30 "light"]
-          ["${generators.sourceFile "cassette-led.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_cassette_led_data generators.glsl))}" 30 "light"]
-          ["${generators.sourceFile "hex-spiral.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_hex_spiral_data generators.glsl))}" 30 "dark"]
-          ["${generators.sourceFile "dot-corridor.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_dot_corridor_data generators.glsl))}" 30 "dark"]
-          ["${generators.sourceFile "su-ei.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_su_ei_data generators.glsl))}" 30 "light"]
-          ["${generators.sourceFile "glass-mound.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_glass_mound_data generators.glsl))}" 30 "light"]
+          ["${generators.sourceFile "cassette-squares.glsl" modules_desktop_session_tomoe_shaders_cassette_squares_data}" 30 "light"]
+          ["${generators.sourceFile "cassette-led.glsl" modules_desktop_session_tomoe_shaders_cassette_led_data}" 30 "light"]
+          ["${generators.sourceFile "hex-spiral.glsl" modules_desktop_session_tomoe_shaders_hex_spiral_data}" 30 "dark"]
+          ["${generators.sourceFile "dot-corridor.glsl" modules_desktop_session_tomoe_shaders_dot_corridor_data}" 30 "dark"]
+          ["${generators.sourceFile "su-ei.glsl" modules_desktop_session_tomoe_shaders_su_ei_data}" 30 "light"]
+          ["${generators.sourceFile "glass-mound.glsl" modules_desktop_session_tomoe_shaders_glass_mound_data}" 30 "light"]
           ["${shaderDir}/liquify.glsl" 30 "light"]
           ["${shaderDir}/okazz-spheres.glsl" 30 "dark"]
-          ["${generators.sourceFile "balatro.glsl" (generators.glsl.render (modules_desktop_session_tomoe_shaders_balatro_data generators.glsl))}" 30 "dark"]
+          ["${generators.sourceFile "balatro.glsl" modules_desktop_session_tomoe_shaders_balatro_data}" 30 "dark"]
           ["${shaderDir}/xmb.glsl" 30 "dark"]
           ["${shaderDir}/aurora.glsl" 30 "dark"]
           ["${shaderDir}/stars.glsl" 24 "dark"]
@@ -13497,1149 +13497,563 @@
             ])
         ])
     ];
-    modules_desktop_session_tomoe_shaders_balatro_data = {
-      abs,
-      atan2,
-      clamp,
-      cos,
-      float,
-      fn,
-      for,
-      iResolution,
-      iTime,
-      in',
-      inc,
-      int,
-      length,
-      local,
-      macro,
-      max,
-      min,
-      out,
-      set,
-      sin,
-      update,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      ...
-    }: self: let
-      inherit (self) COLOR_1 COLOR_2 COLOR_3 CONTRAST HEX LIGHTING SPEED SPIN_AMOUNT SPIN_ROTATION;
-    in {
-      defines = {
-        COLOR_1 = HEX 14566459;
-        COLOR_2 = HEX 27572;
-        COLOR_3 = HEX 1450789;
-        CONTRAST = 3.5;
-        HEX = macro ({c}: [(vec3 [c ">>" 16 "&" 255] [c ">>" 8 "&" 255] [c "&" 255]) "/" 255.0]);
-        LIGHTING = 0.4;
-        SPEED = 7.0;
-        SPIN_AMOUNT = 0.25;
-        SPIN_ROTATION = -2.0;
-      };
-      fns = {
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          diagonal,
-          uv,
-          radius,
-          angle,
-          t,
-          uv2,
-          contrast,
-          paint,
-          c1,
-          c2,
-          c3,
-          light,
-          color,
-        }: [
-          (local diagonal float (length iResolution.xy))
-          (local uv vec2 [[fragCoord "-" 0.5 "*" iResolution.xy] "/" diagonal])
-          (local radius float (length uv))
-          (local angle float [(atan2 uv.y uv.x) "+" 302.2 "+" 0.2 "*" SPIN_ROTATION "-" 20.0 "*" [SPIN_AMOUNT "*" radius "+" 1.0 "-" SPIN_AMOUNT]])
-          (set uv [radius "*" (vec2 (cos angle) (sin angle)) "*" 30.0])
-          (local t float [iTime "*" SPEED])
-          (local uv2 vec2 (vec2 [uv.x "+" uv.y]))
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 5];
-            step = inc i;
-            body = [
-              (update uv2 "+=" [(sin (max uv.x uv.y)) "+" uv])
-              (update uv "+=" [0.5 "*" (vec2 (cos [5.1123314 "+" 0.353 "*" uv2.y "+" t "*" 0.131121]) (sin [uv2.x "-" 0.113 "*" t]))])
-              (update uv "-=" [(cos [uv.x "+" uv.y]) "-" (sin [uv.x "*" 0.711 "-" uv.y])])
-            ];
-          }))
-          (local contrast float [0.25 "*" CONTRAST "+" 0.5 "*" SPIN_AMOUNT "+" 1.2])
-          (local paint float (clamp [(length uv) "*" 0.035 "*" contrast] 0.0 2.0))
-          (local c1 float (max 0.0 [1.0 "-" contrast "*" (abs [1.0 "-" paint])]))
-          (local c2 float (max 0.0 [1.0 "-" contrast "*" (abs paint)]))
-          (local c3 float [1.0 "-" (min 1.0 [c1 "+" c2])])
-          (local light float [[LIGHTING "-" 0.2] "*" (max [c1 "*" 5.0 "-" 4.0] 0.0) "+" LIGHTING "*" (max [c2 "*" 5.0 "-" 4.0] 0.0)])
-          (local color vec3 [0.3 "/" CONTRAST "*" COLOR_1 "+" [1.0 "-" 0.3 "/" CONTRAST] "*" [COLOR_1 "*" c1 "+" COLOR_2 "*" c2 "+" COLOR_3 "*" c3] "+" light])
-          (set fragColor (vec4 color 1.0))
-        ]);
-      };
-    };
-    modules_desktop_session_tomoe_shaders_cassette_data = {
-      cond,
-      cos,
-      dot,
-      exp,
-      float,
-      floor,
-      fn,
-      for,
-      fract,
-      inc,
-      int,
-      length,
-      local,
-      mod,
-      neg,
-      return,
-      sin,
-      smoothstep,
-      update,
-      vec2,
-      vec3,
-      ...
-    }: self: let
-      inherit (self) BPM RIPPLE RIPPLE_SPEED WAVE hash;
-    in {
-      consts = {
-        BPM = 128.0;
-        GRAPHITE = vec3 0.16 0.16 0.155;
-        LIGHT = vec2 (-0.6) 0.8;
-        ORANGE = vec3 0.93 0.36 0.11;
-        PUTTY = vec3 0.8 0.78 0.73;
-        RIPPLE = 0.7;
-        RIPPLE_SPEED = 0.7;
-        ROWS = 46.0;
-        SHELL = vec3 0.914 0.898 0.863;
-        SPEED = 1.0;
-        WAVE = 1.5;
-      };
-      fns = {
-        base = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
-          c,
-          t,
-          aspect,
-          s,
-          a,
-          b,
-          wa,
-          wb,
-        }: [
-          (local s float [t "*" 0.5])
-          (local a vec2 (vec2 [aspect "*" [0.22 "+" 0.08 "*" (sin [s "*" 0.37])]] [0.3 "+" 0.12 "*" (cos [s "*" 0.41])]))
-          (local b vec2 (vec2 [aspect "*" [0.78 "+" 0.08 "*" (cos [s "*" 0.29])]] [0.7 "+" 0.1 "*" (sin [s "*" 0.47])]))
-          (local wa float (sin [(length [c "-" a]) "*" 18.0 "-" t "*" WAVE]))
-          (local wb float (sin [(length [c "-" b]) "*" 14.0 "-" t "*" WAVE "*" 0.8]))
-          (return [0.5 "+" 0.25 "*" [wa "+" wb]])
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (return (fract [(sin (dot p (vec2 127.1 311.7))) "*" 43758.5453]))
-        ]);
-        ripples = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
-          c,
-          t,
-          aspect,
-          every,
-          life,
-          n,
-          age,
-          r,
-        }: [
-          (local every float [120.0 "/" BPM])
-          (local life float [4.0 "*" every])
-          (local n float (floor [t "/" every]))
-          (local age float [t "-" n "*" every])
-          (local r float 0.0)
-          (for ({
-            k,
-            m,
-            tm,
-            x,
-            o,
-            d,
-            env,
-          }: {
-            init = local k int 0;
-            test = [k "<" 4];
-            step = inc k;
-            body = [
-              (local m float [n "-" (float k)])
-              (local tm float [age "+" (float k) "*" every])
-              (local x float [tm "/" life])
-              (local o vec2 (vec2 [(hash (vec2 m 3.7)) "*" aspect] (hash (vec2 m 9.1))))
-              (local d float [(length [c "-" o]) "-" tm "*" RIPPLE_SPEED])
-              (local env float [(smoothstep 0.0 0.04 x) "*" [1.0 "-" (smoothstep 0.2 1.0 x)]])
-              (update r "+=" [(cond [(mod m 2.0) "<" 0.5] 1.0 0.7) "*" env "*" (exp [(neg d) "*" d "*" 120.0])])
-            ];
-          }))
-          (return [RIPPLE "*" r])
-        ]);
-      };
-    };
-    modules_desktop_session_tomoe_shaders_cassette_led_data = {
-      abs,
-      clamp,
-      cond,
-      dot,
-      exp,
-      float,
-      floor,
-      fn,
-      for,
-      iResolution,
-      iTime,
-      in',
-      inc,
-      int,
-      local,
-      max,
-      mix,
-      mod,
-      neg,
-      normalize,
-      out,
-      return,
-      set,
-      sign,
-      smoothstep,
-      step,
-      update,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      ...
-    } @ glsl: self: let
-      inherit (self) AMBER GRAPHITE LEVELS LIGHT ORANGE PUTTY ROWS SHELL SPEED base hash led level ripples;
-      cassette = modules_desktop_session_tomoe_shaders_cassette_data glsl self;
-    in {
-      consts =
-        cassette.consts
-        // {
-          AMBER = vec3 0.96 0.66 0.2;
-          LEVELS = 8.0;
-        };
-      fns =
-        cassette.fns
-        // {
-          led = fn vec3 [{b = float;}] ({b}: [
-            (return [(mix ORANGE AMBER [0.55 "*" (smoothstep 0.6 1.0 b)]) "*" b])
-          ]);
-          level = fn float [{cell = vec2;} {pitch = float;} {off = vec2;} {t = float;} {aspect = float;}] ({
-            cell,
-            pitch,
-            off,
-            t,
-            aspect,
-            p,
-            b,
-            lift,
-          }: [
-            (local p vec2 [[[cell "+" 0.5] "*" pitch "+" off] "/" iResolution.y])
-            (local b float (smoothstep 0.4 0.98 [(base p t aspect) "*" 0.95]))
-            (local lift float (clamp (ripples p t aspect) 0.0 1.0))
-            (set b [1.0 "-" [1.0 "-" b] "*" [1.0 "-" lift]])
-            (return [(floor [b "*" b "*" LEVELS "+" 0.5]) "/" LEVELS])
-          ]);
-          mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-            fragColor,
-            fragCoord,
-            t,
-            aspect,
-            pitch,
-            off,
-            cell,
-            center,
-            b,
-            hs,
-            q,
-            aq,
-            dist,
-            dir,
-            l,
-            sv,
-            panel,
-            rim,
-            w,
-            wall,
-            lit,
-            side,
-            face,
-            hole,
-            inside,
-            color,
-          }: [
-            (local t float [iTime "*" SPEED])
-            (local aspect float [iResolution.x "/" iResolution.y])
-            (local pitch float (floor [iResolution.y "/" ROWS]))
-            (local off vec2 [0.5 "*" (mod iResolution.xy pitch)])
-            (local cell vec2 (floor [[fragCoord "-" off] "/" pitch]))
-            (local center vec2 [[cell "+" 0.5] "*" pitch "+" off])
-            (local b float (level cell pitch off t aspect))
-            (local hs float [0.5 "*" (floor [pitch "*" 0.62 "+" 0.5])])
-            (local q vec2 [fragCoord "-" center])
-            (local aq vec2 (abs q))
-            (local dist float (max aq.x aq.y))
-            (local dir vec2 (cond [aq.x ">" aq.y] (vec2 (sign q.x) 0.0) (vec2 0.0 (sign q.y))))
-            (local l vec2 (normalize LIGHT))
-            (local sv vec2 [fragCoord "/" iResolution.xy])
-            (local panel vec3 [SHELL "*" (mix 0.94 1.02 [0.55 "*" sv.y "+" 0.45 "*" [1.0 "-" sv.x]])])
-            (local rim float [(smoothstep [hs "+" 2.5] hs dist) "*" (dot dir (neg l))])
-            (update panel "*=" [1.0 "+" 0.1 "*" rim])
-            (local w float 0.0)
-            (for ({j}: {
-              init = local j int (-2);
-              test = [j "<=" 2];
-              step = inc j;
-              body = [
-                (for ({
-                  i,
-                  nc,
-                  d,
-                  e,
-                }: {
-                  init = local i int (-2);
-                  test = [i "<=" 2];
-                  step = inc i;
-                  body = [
-                    (local nc vec2 [cell "+" (vec2 (float i) (float j))])
-                    (local d vec2 [(abs [fragCoord "-" [[nc "+" 0.5] "*" pitch "+" off]]) "/" pitch])
-                    (local e float (max [(max d.x d.y) "-" 0.31] 0.0))
-                    (update w "+=" [(level nc pitch off t aspect) "*" (exp [(neg e) "*" e "*" 9.0])])
-                  ];
-                }))
-              ];
-            }))
-            (set panel (mix panel [panel "*" (vec3 1.03 0.8 0.62)] (clamp [w "*" 0.28] 0.0 0.75)))
-            (local wall float (max 1.0 [hs "*" 0.22]))
-            (local lit float (clamp (dot dir (neg l)) 0.0 1.0))
-            (local side vec3 [(mix [GRAPHITE "*" 0.7] [PUTTY "*" 0.8] lit) "+" (led b) "*" 0.35])
-            (local face vec3 [GRAPHITE "*" 0.85 "+" (led b) "*" [1.0 "+" 0.12 "*" [1.0 "-" dist "/" [hs "-" wall]]]])
-            (local hole vec3 (mix face side [(step [hs "-" wall] dist) "*" [0.4 "+" 0.6 "*" lit]]))
-            (local inside float [1.0 "-" (step hs dist)])
-            (local color vec3 (mix panel hole inside))
-            (update color "+=" [[(hash fragCoord) "-" 0.5] "*" 0.012])
-            (set fragColor (vec4 color 1.0))
-          ]);
-        };
-    };
-    modules_desktop_session_tomoe_shaders_cassette_squares_data = {
-      abs,
-      clamp,
-      cond,
-      dot,
-      float,
-      floor,
-      fn,
-      iResolution,
-      iTime,
-      in',
-      local,
-      max,
-      mix,
-      mod,
-      neg,
-      normalize,
-      out,
-      set,
-      sign,
-      smoothstep,
-      step,
-      update,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      ...
-    } @ glsl: self: let
-      inherit (self) GRAPHITE LIGHT ORANGE PUTTY ROWS SHELL SPEED base hash ripples;
-      cassette = modules_desktop_session_tomoe_shaders_cassette_data glsl self;
-    in {
-      inherit (cassette) consts;
-      fns =
-        cassette.fns
-        // {
-          mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-            fragColor,
-            fragCoord,
-            t,
-            aspect,
-            pitch,
-            off,
-            cell,
-            center,
-            p,
-            f,
-            hs,
-            q,
-            aq,
-            dist,
-            dir,
-            l,
-            sv,
-            panel,
-            rim,
-            glow,
-            backing,
-            lit,
-            wall,
-            hole,
-            inside,
-            color,
-          }: [
-            (local t float [iTime "*" SPEED])
-            (local aspect float [iResolution.x "/" iResolution.y])
-            (local pitch float (floor [iResolution.y "/" ROWS]))
-            (local off vec2 [0.5 "*" (mod iResolution.xy pitch)])
-            (local cell vec2 (floor [[fragCoord "-" off] "/" pitch]))
-            (local center vec2 [[cell "+" 0.5] "*" pitch "+" off])
-            (local p vec2 [center "/" iResolution.y])
-            (local f float (clamp [(base p t aspect) "*" 0.95 "+" (ripples p t aspect)] 0.0 1.0))
-            (local hs float [0.5 "*" (floor [pitch "*" [0.12 "+" 0.6 "*" f "*" f] "+" 0.5])])
-            (local q vec2 [fragCoord "-" center])
-            (local aq vec2 (abs q))
-            (local dist float (max aq.x aq.y))
-            (local dir vec2 (cond [aq.x ">" aq.y] (vec2 (sign q.x) 0.0) (vec2 0.0 (sign q.y))))
-            (local l vec2 (normalize LIGHT))
-            (local sv vec2 [fragCoord "/" iResolution.xy])
-            (local panel vec3 [SHELL "*" (mix 0.94 1.02 [0.55 "*" sv.y "+" 0.45 "*" [1.0 "-" sv.x]])])
-            (local rim float [(smoothstep [hs "+" 2.5] hs dist) "*" (dot dir (neg l))])
-            (update panel "*=" [1.0 "+" 0.1 "*" rim])
-            (local glow float (smoothstep 0.86 0.98 f))
-            (local backing vec3 (mix GRAPHITE ORANGE glow))
-            (local lit float (clamp (dot dir (neg l)) 0.0 1.0))
-            (local wall vec3 (mix [GRAPHITE "*" 0.7] [PUTTY "*" 0.8] lit))
-            (local hole vec3 (mix backing wall [(step [hs "-" (max 1.0 [hs "*" 0.22])] dist) "*" [0.4 "+" 0.6 "*" lit]]))
-            (local inside float [1.0 "-" (step hs dist)])
-            (local color vec3 (mix panel hole inside))
-            (update color "+=" [[(hash fragCoord) "-" 0.5] "*" 0.012])
-            (set fragColor (vec4 color 1.0))
-          ]);
-        };
-    };
-    modules_desktop_session_tomoe_shaders_dot_corridor_data = {
-      abs,
-      atan2,
-      clamp,
-      cond,
-      continue,
-      cos,
-      dec,
-      exp,
-      float,
-      floor,
-      fn,
-      for,
-      fract,
-      iResolution,
-      iTime,
-      if',
-      in',
-      inc,
-      int,
-      ivec2,
-      length,
-      local,
-      log,
-      max,
-      mix,
-      mod,
-      out,
-      return,
-      set,
-      uint,
-      unsigned,
-      update,
-      uvec2,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      ...
-    }: self: let
-      inherit (self) BAND DY FOCAL HUE_PERIOD LOOP LW RAD SIDES TAU WIDE YMAX ZOOM hash hsv pmod;
-    in {
-      consts = {
-        BAND = 5;
-        DY = 0.41;
-        FOCAL = 0.92;
-        HUE_PERIOD = 1.8;
-        LOOP = 1000;
-        LW = 0.2;
-        RAD = 0.19;
-        SIDES = 13.0;
-        TAU = 6.28318531;
-        WIDE = 2.4;
-        YMAX = 16.0;
-        ZOOM = 1.1;
-      };
-      fns = {
-        hash = fn float [{c = ivec2;}] ({
-          c,
-          v,
-          n,
-        }: [
-          (local v uvec2 [(uvec2 c) "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
-          (local n uint [[v.x "^" v.y] "*" (unsigned 1597334673)])
-          (update n "^=" [n ">>" 16])
-          (update n "*=" (unsigned 2246822519))
-          (update n "^=" [n ">>" 13])
-          (return [(float n) "*" [1.0 "/" 4294967296.0]])
-        ]);
-        hsv = fn vec3 [{h = float;} {s = float;} {v = float;}] ({
-          h,
-          s,
-          v,
-          k,
-        }: [
-          (local k vec3 (clamp [(abs [(fract [h "+" (vec3 0.0 2.0 1.0) "/" 3.0]) "*" 6.0 "-" 3.0]) "-" 1.0] 0.0 1.0))
-          (return [v "*" (mix (vec3 1.0) k s)])
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          px,
-          s,
-          col,
-          alpha,
-          shift,
-          spin,
-          w,
-          u,
-          c0,
-          imax,
-        }: [
-          (local px float [1.0 "/" (max [0.5 "*" iResolution.y "*" FOCAL] [0.5 "*" iResolution.x "/" WIDE])])
-          (local s vec2 (max [(abs [fragCoord "-" 0.5 "*" iResolution.xy]) "*" px] (vec2 1.0e-6 0.0)))
-          (local col vec3 (vec3 0.0))
-          (local alpha float 0.0)
-          (local shift float (mod [iTime "*" ZOOM] [(float LOOP) "*" LW]))
-          (local spin float (fract [iTime "/" HUE_PERIOD]))
-          (local w float [(log s.x) "-" shift])
-          (local u float [s.y "/" s.x])
-          (local c0 int (int (floor [w "/" LW "+" 0.5])))
-          (local imax int (int [YMAX "/" DY]))
-          (for ({
-            dc,
-            c,
-            cc,
-            lift,
-            i0,
-          }: {
-            init = local dc int 2;
-            test = [dc ">=" (-2)];
-            step = dec dc;
-            body = [
-              (local c int [c0 "+" dc])
-              (local cc int (pmod c LOOP))
-              (local lift float [0.5 "*" (float [cc "&" 1])])
-              (local i0 int (int (floor [u "/" DY "-" lift "+" 0.5])))
-              (for ({
-                di,
-                i,
-                id,
-                h0,
-                h1,
-                h2,
-                h3,
-                sx,
-                centre,
-                rho,
-                q,
-                len,
-                sector,
-                a,
-                dist,
-                cover,
-                sat,
-                val,
-                hue,
-              }: {
-                init = local di int (-1);
-                test = [di "<=" 1];
-                step = inc di;
-                body = [
-                  (local i int [i0 "+" di])
-                  (if' [i "<" 0 "||" i ">" imax] [
-                    continue
-                  ])
-                  (local id ivec2 (ivec2 cc i))
-                  (local h0 float (hash id))
-                  (local h1 float (hash [id "+" (ivec2 4099 17)]))
-                  (local h2 float (hash [id "+" (ivec2 31 7919)]))
-                  (local h3 float (hash [id "+" (ivec2 613 3)]))
-                  (if' [h2 ">" 0.9] [
-                    continue
-                  ])
-                  (local sx float (exp [[(float c) "+" 0.3 "*" [h3 "-" 0.5]] "*" LW "+" shift]))
-                  (local centre vec2 [sx "*" (vec2 1.0 [[(float i) "+" lift "+" 0.3 "*" [(fract [h3 "*" 7.0]) "-" 0.5]] "*" DY])])
-                  (local rho float (max [RAD "*" [0.5 "+" 0.5 "*" h1] "*" sx] [0.6 "*" px]))
-                  (local q vec2 [s "-" centre])
-                  (local len float (length q))
-                  (if' [len ">" rho "+" px] [
-                    continue
-                  ])
-                  (local sector float [TAU "/" SIDES])
-                  (local a float [(mod [(atan2 q.y q.x) "+" h0 "*" TAU] sector) "-" 0.5 "*" sector])
-                  (local dist float [[len "*" (cos a) "-" rho "*" (cos [0.5 "*" sector])] "/" px])
-                  (local cover float (clamp [0.5 "-" dist] 0.0 1.0))
-                  (local sat float (cond [h2 "<" 0.1] 0.0 (cond [h2 "<" 0.2] 0.35 0.92)))
-                  (local val float (cond [h2 ">" 0.82] 0.55 1.0))
-                  (local hue float (hash (ivec2 [cc "/" BAND] [(int [h0 "*" 4.0]) "+" 101])))
-                  (update col "+=" [[1.0 "-" alpha] "*" cover "*" (hsv [hue "+" spin] sat val)])
-                  (update alpha "+=" [[1.0 "-" alpha] "*" cover])
-                ];
-              }))
-            ];
-          }))
-          (set fragColor (vec4 col 1.0))
-        ]);
-        pmod = fn int [{a = int;} {b = int;}] ({
-          a,
-          b,
-        }: [
-          (return [a "-" b "*" (int (floor [(float a) "/" (float b)]))])
-        ]);
-      };
-    };
-    modules_desktop_session_tomoe_shaders_glass_mound_data = {
-      atan2,
-      bool,
-      break,
-      cos,
-      cross,
-      dot,
-      exp,
-      float,
-      fn,
-      for,
-      iResolution,
-      iTime,
-      if',
-      ifElse,
-      in',
-      inc,
-      index,
-      int,
-      length,
-      local,
-      mat2,
-      max,
-      mix,
-      neg,
-      normalize,
-      out,
-      pow,
-      reflect,
-      return,
-      set,
-      sin,
-      smoothstep,
-      update,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      ...
-    }: self: let
-      inherit (self) BEND FOG_BOTTOM FOG_TOP INK LILAC MIST PAPER RING SINK SLATE SOFT SPEED SPREAD SWAY TEAL TILT TUBE band env map normal rot shade;
-    in {
-      consts = {
-        BEND = 0.7;
-        FOG_BOTTOM = -1.1;
-        FOG_TOP = -0.2;
-        INK = vec3 0.09 0.11 0.15;
-        IOR = 1.33;
-        LILAC = vec3 0.87 0.76 0.96;
-        MIST = vec3 0.955 0.962 0.968;
-        PAPER = vec3 0.972 0.976 0.976;
-        RING = 1.35;
-        SINK = -1.0;
-        SLATE = vec3 0.22 0.27 0.34;
-        SOFT = 0.05;
-        SPEED = 0.5;
-        SPREAD = 0.045;
-        SWAY = 0.35;
-        TEAL = vec3 0.07 0.32 0.43;
-        TILT = 1.0;
-        TUBE = 0.33;
-      };
-      fns = {
-        band = fn float [{x = float;} {c = float;} {w = float;}] ({
-          x,
-          c,
-          w,
-          k,
-        }: [
-          (local k float [[x "-" c] "/" w])
-          (return (exp [(neg k) "*" k]))
-        ]);
-        env = fn vec3 [{d = vec3;}] ({
-          d,
-          c,
-          x,
-        }: [
-          (local c vec3 PAPER)
-          (local x float [d.x "+" 0.5 "*" d.z])
-          (set c (mix c LILAC [0.9 "*" (band d.y (-0.07) 0.06)]))
-          (set c (mix c INK [0.95 "*" (band d.y 0.12 0.13)]))
-          (set c (mix c TEAL [(band d.y 0.34 0.2) "*" (smoothstep (-0.9) 0.1 x)]))
-          (set c (mix c SLATE [0.7 "*" (band d.y 0.3 0.14) "*" (smoothstep 0.1 (-0.9) x)]))
-          (set c (mix c LILAC [0.45 "*" (band d.y 0.52 0.06)]))
-          (set c (mix c PAPER [0.85 "*" (band x (-0.5) 0.12) "*" (smoothstep 0.15 0.4 d.y)]))
-          (return c)
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          t,
-          ro,
-          fw,
-          rt,
-          up,
-          rd,
-          s,
-          near,
-          at,
-          hit,
-          col,
-        }: [
-          (local uv vec2 [[fragCoord "-" 0.5 "*" iResolution.xy] "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local ro vec3 (vec3 0.0 0.5 6.0))
-          (local fw vec3 (normalize [(vec3 0.0 0.5 0.0) "-" ro]))
-          (local rt vec3 (normalize (cross fw (vec3 0.0 1.0 0.0))))
-          (local up vec3 (cross rt fw))
-          (local rd vec3 (normalize [uv.x "*" rt "+" uv.y "*" up "+" 1.6 "*" fw]))
-          (local s float 0.0)
-          (local near float 1000000000.0)
-          (local at float 0.0)
-          (local hit bool false)
-          (for ({
-            i,
-            d,
-          }: {
-            init = local i int 0;
-            test = [i "<" 110];
-            step = inc i;
-            body = [
-              (local d float (map [ro "+" rd "*" s] t))
-              (if' [d "<" near] [
-                (set near d)
-                (set at s)
-              ])
-              (if' [d "<" 0.001] [
-                (set hit true)
-                break
-              ])
-              (update s "+=" d)
-              (if' [s ">" 12.0] [
-                break
-              ])
-            ];
-          }))
-          (local col vec3 PAPER)
-          (ifElse hit [
-              (set col (shade [ro "+" rd "*" s] rd t))
-            ] (if' [near "<" SOFT] ({a}: [
-              (local a float [1.0 "-" (smoothstep 0.0 SOFT near)])
-              (set col (mix PAPER (shade [ro "+" rd "*" at] rd t) [0.55 "*" a "*" a]))
-            ])))
-          (set col (mix PAPER col (smoothstep 0.0 0.14 [fragCoord.y "/" iResolution.y])))
-          (set fragColor (vec4 col 1.0))
-        ]);
-        map = fn float [{p = vec3;} {t = float;}] ({
-          p,
-          t,
-          q,
-          a,
-          tube,
-          ring,
-          d,
-        }: [
-          (local q vec3 [p "-" (vec3 0.0 SINK 0.0)])
-          (update q.xz "*=" (rot [0.35 "*" (sin [t "*" 0.21])]))
-          (update q.yz "*=" (rot [TILT "+" SWAY "*" (sin [t "*" 0.17])]))
-          (update q.xy "*=" (rot [0.12 "*" (sin [t "*" 0.31])]))
-          (local a float (atan2 q.z q.x))
-          (local tube float [TUBE "*" [1.0 "+" 0.28 "*" (sin [a "*" 2.0 "+" t "*" 0.7]) "+" 0.12 "*" (sin [a "*" 3.0 "-" t "*" 0.5])]])
-          (local ring float [RING "*" [1.0 "+" 0.08 "*" (sin [a "*" 2.0 "-" t "*" 0.4])]])
-          (local d float [(length (vec2 [(length q.xz) "-" ring] q.y)) "-" tube])
-          (update d "+=" [0.04 "*" (sin [2.1 "*" p.x "+" t]) "*" (sin [1.7 "*" p.y "-" 0.8 "*" t]) "*" (sin [1.9 "*" p.z "+" 1.1 "*" t])])
-          (return [d "*" 0.8])
-        ]);
-        normal = fn vec3 [{p = vec3;} {t = float;}] ({
-          p,
-          t,
-          e,
-        }: [
-          (local e vec2 (vec2 0.002 0.0))
-          (return (normalize (vec3 [(map [p "+" e.xyy] t) "-" (map [p "-" e.xyy] t)] [(map [p "+" e.yxy] t) "-" (map [p "-" e.yxy] t)] [(map [p "+" e.yyx] t) "-" (map [p "-" e.yyx] t)])))
-        ]);
-        rot = fn mat2 [{a = float;}] ({
-          a,
-          c,
-          s,
-        }: [
-          (local c float (cos a))
-          (local s float (sin a))
-          (return (mat2 c (neg s) s c))
-        ]);
-        shade = fn vec3 [{p = vec3;} {rd = vec3;} {t = float;}] ({
-          p,
-          rd,
-          t,
-          n,
-          c,
-          f,
-          through,
-          col,
-        }: [
-          (local n vec3 (normal p t))
-          (local c float (max (dot (neg rd) n) 0.0))
-          (local f float [0.25 "+" 0.75 "*" (pow [1.0 "-" c] 2.0)])
-          (local through vec3 null)
-          (for ({k}: {
-            init = local k int 0;
-            test = [k "<" 3];
-            step = inc k;
-            body = [
-              (set (index through k) (index (env (normalize [rd "-" n "*" [BEND "+" [(float k) "-" 1.0] "*" SPREAD "*" 1.5]])) k))
-            ];
-          }))
-          (local col vec3 (mix through (env (reflect rd n)) f))
-          (return (mix col MIST (smoothstep FOG_TOP FOG_BOTTOM p.y)))
-        ]);
-      };
-    };
-    modules_desktop_session_tomoe_shaders_hex_spiral_data = {
-      abs,
-      array,
-      atan2,
-      clamp,
-      cond,
-      continue,
-      cos,
-      dec,
-      dot,
-      exp,
-      float,
-      floor,
-      fn,
-      for,
-      fract,
-      iResolution,
-      iTime,
-      if',
-      ifElse,
-      in',
-      inc,
-      index,
-      int,
-      ivec2,
-      length,
-      local,
-      log,
-      math,
-      max,
-      mix,
-      mod,
-      neg,
-      out,
-      return,
-      set,
-      sin,
-      sized,
-      smoothstep,
-      sqrt,
-      uint,
-      unsigned,
-      update,
-      uvec2,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      ...
-    }: self: let
-      inherit (self) ARM CENTER CYCLE HEX_SPEED LOOP M N NEAR PAL PI S3 STREAK_K STREAK_LOOP STREAK_N STREAK_SPEED STREAK_STEP TAU cart cycle fdiv hash hexDist nearest pmod rot;
-    in {
-      consts = {
-        ARM = 4;
-        CENTER = vec2 0.4 0.58;
-        CYCLE = 1.8;
-        HEX_SPEED = 0.7;
-        LOOP = 52;
-        M = 29;
-        N = 13;
-        NEAR = array ivec2 [(ivec2 0 0) (ivec2 1 0) (ivec2 (-1) 0) (ivec2 0 1) (ivec2 0 (-1)) (ivec2 1 (-1)) (ivec2 (-1) 1)];
-        PAL = array vec3 [(vec3 1.0 0.824 0.122) (vec3 1.0 0.604 0.122) (vec3 1.0 0.42 0.369) (vec3 1.0 0.361 0.784) (vec3 0.706 0.42 1.0) (vec3 0.184 0.42 1.0) (vec3 0.122 0.722 1.0) (vec3 0.122 0.839 0.706) (vec3 0.482 0.878 0.165) (vec3 0.957 0.957 0.957)];
-        PI = math.round 8 math.pi;
-        S3 = math.round 8 (math.sqrt 3.0 / 2.0);
-        STREAK_K = 176;
-        STREAK_LOOP = 160;
-        STREAK_N = 132;
-        STREAK_SPEED = 0.32;
-        STREAK_STEP = 0.057;
-        TAU = math.round 8 (2.0 * math.pi);
-      };
-      fns = {
-        cart = fn vec2 [{a = ivec2;}] ({a}: [
-          (return (vec2 [(float a.x) "+" 0.5 "*" (float a.y)] [S3 "*" (float a.y)]))
-        ]);
-        cycle = fn vec3 [{f = float;}] ({
-          f,
-          a,
-        }: [
-          (local a int (pmod (int (floor f)) 9))
-          (return (mix (index PAL a) (index PAL (pmod [a "+" 1] 9)) (fract f)))
-        ]);
-        fdiv = fn int [{a = int;} {b = int;}] ({
-          a,
-          b,
-        }: [
-          (return (int (floor [(float a) "/" (float b)])))
-        ]);
-        hash = fn float [{c = ivec2;}] ({
-          c,
-          v,
-          n,
-        }: [
-          (local v uvec2 [(uvec2 c) "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
-          (local n uint [[v.x "^" v.y] "*" (unsigned 1597334673)])
-          (update n "^=" [n ">>" 16])
-          (update n "*=" (unsigned 2246822519))
-          (update n "^=" [n ">>" 13])
-          (return [(float n) "*" [1.0 "/" 4294967296.0]])
-        ]);
-        hexDist = fn float [{q = vec2;}] ({q}: [
-          (return (max (abs q.x) (max (abs [0.5 "*" q.x "+" S3 "*" q.y]) (abs [(-0.5) "*" q.x "+" S3 "*" q.y]))))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          px,
-          p,
-          r,
-          w,
-          vc,
-          k,
-          rho,
-          drift,
-          tt,
-          hw,
-          base,
-          jr,
-          band,
-          col,
-          phase,
-          c,
-          ct,
-          dth,
-          ts,
-          sig,
-          is0,
-          it0,
-          key,
-          ord,
-          outward,
-          wrap,
-        }: [
-          (local px float [1.0 "/" iResolution.y])
-          (local p vec2 [[fragCoord "-" CENTER "*" iResolution.xy] "*" px])
-          (local r float (max (length p) 1.0e-5))
-          (local w vec2 (vec2 (log r) (atan2 p.y p.x)))
-          (local vc vec2 (cart (ivec2 M N)))
-          (local k float [TAU "/" (length vc)])
-          (local rho float [0.5 "*" PI "-" (atan2 vc.y vc.x)])
-          (local drift vec2 (cart (ivec2 1 (-1))))
-          (local tt float (mod [iTime "*" HEX_SPEED] (float LOOP)))
-          (local hw vec2 [(rot w (neg rho)) "/" k "-" tt "*" drift])
-          (local base ivec2 (nearest hw))
-          (local jr float (mod [hw.y "/" S3 "+" 0.5] (float N)))
-          (local band float [(smoothstep [(float ARM) "+" 1.5] [(float ARM) "+" 4.0] jr) "*" [1.0 "-" (smoothstep [(float N) "-" 1.2] (float N) jr)]])
-          (local col vec3 (vec3 0.0))
-          (local phase float [(mod iTime CYCLE) "*" 9.0 "/" CYCLE])
-          (local c float [(float STREAK_K) "*" STREAK_STEP "/" TAU])
-          (local ct float (sqrt [1.0 "+" c "*" c]))
-          (local dth float [TAU "/" (float STREAK_N)])
-          (local ts float (mod [iTime "*" STREAK_SPEED] [(float STREAK_LOOP) "*" STREAK_STEP]))
-          (local sig float [w.x "-" ts "-" c "*" w.y])
-          (local is0 int (int (floor [sig "/" STREAK_STEP])))
-          (local it0 int (int (floor [w.y "/" dth])))
-          (for ({
-            o,
-            it,
-            is,
-            q,
-            id,
-            h0,
-            h1,
-            h2,
-            sm,
-            dir,
-            tc,
-            d,
-            len,
-            th,
-            a,
-            dist,
-            cover,
-            pick,
-            sc,
-          }: {
-            init = local o int 0;
-            test = [o "<" 9];
-            step = inc o;
-            body = [
-              (local it int [it0 "+" o "%" 3 "-" 1])
-              (local is int [is0 "+" o "/" 3 "-" 1])
-              (local q int (fdiv it STREAK_N))
-              (local id ivec2 (ivec2 (pmod [is "+" STREAK_K "*" q] STREAK_LOOP) [it "-" q "*" STREAK_N]))
-              (local h0 float (hash id))
-              (local h1 float (hash [id "+" (ivec2 7 131)]))
-              (local h2 float (hash [id "+" (ivec2 53 17)]))
-              (if' [h0 ">" 0.8] [
-                continue
-              ])
-              (local sm float [[(float is) "+" 0.5 "+" 0.8 "*" [h1 "-" 0.5]] "*" STREAK_STEP])
-              (local dir vec2 (rot [(vec2 c 1.0) "/" ct] [0.6 "*" [h2 "-" 0.5]]))
-              (local tc float [[(float it) "+" 0.5 "+" 0.6 "*" [h2 "-" 0.5]] "*" dth])
-              (local d vec2 (vec2 [sig "-" sm "+" c "*" [w.y "-" tc]] [w.y "-" tc]))
-              (local len float [[0.22 "+" 0.22 "*" h1] "*" dth "*" ct])
-              (local th float [[0.2 "+" 0.08 "*" h2] "*" STREAK_STEP "/" ct])
-              (local a float (clamp (dot d dir) (neg len) len))
-              (local dist float [[(length [d "-" dir "*" a]) "-" th] "*" r "/" px])
-              (local cover float [(clamp [0.5 "-" dist] 0.0 1.0) "*" (smoothstep 0.6 2.0 [th "*" r "/" px])])
-              (local pick int [(int [h0 "*" 16.0]) "%" 13])
-              (local sc vec3 (cond [pick ">" 8] (index PAL 9) (cycle [(float pick) "-" phase])))
-              (set col (mix col [sc "*" [0.7 "+" 0.3 "*" h2]] [cover "*" band]))
-            ];
-          }))
-          (local key (sized float 7) null)
-          (local ord (sized int 7) null)
-          (local outward vec2 (rot (vec2 1.0 0.0) (neg rho)))
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 7];
-            step = inc i;
-            body = [
-              (set (index key i) (dot (cart (index NEAR i)) outward))
-              (set (index ord i) i)
-            ];
-          }))
-          (for ({i}: {
-            init = local i int 1;
-            test = [i "<" 7];
-            step = inc i;
-            body = [
-              (for ({
-                j,
-                t,
-              }: {
-                init = local j int i;
-                test = [j ">" 0 "&&" (index key (index ord [j "-" 1])) ">" (index key (index ord j))];
-                step = dec j;
-                body = [
-                  (local t int (index ord j))
-                  (set (index ord j) (index ord [j "-" 1]))
-                  (set (index ord [j "-" 1]) t)
-                ];
-              }))
-            ];
-          }))
-          (local wrap int [[M "+" N] "*" LOOP])
-          (for ({
-            i,
-            cell,
-            id,
-            h0,
-            h1,
-            wc,
-            rc,
-            sc,
-            scale,
-            q,
-            size,
-            dist,
-            fade,
-            cover,
-            rim,
-            hc,
-          }: {
-            init = local i int 0;
-            test = [i "<" 7];
-            step = inc i;
-            body = [
-              (local cell ivec2 [base "+" (index NEAR (index ord i))])
-              (if' [(pmod cell.y N) ">=" ARM] [
-                continue
-              ])
-              (local id int (pmod [cell.x "*" N "-" cell.y "*" M] wrap))
-              (local h0 float (hash (ivec2 id 911)))
-              (local h1 float (hash (ivec2 id 37)))
-              (local wc vec2 [(rot [(cart cell) "+" tt "*" drift] rho) "*" k])
-              (local rc float (exp wc.x))
-              (local sc vec2 [rc "*" (vec2 (cos wc.y) (sin wc.y))])
-              (local scale float [k "*" rc])
-              (local q vec2 [(rot [p "-" sc] (neg [wc.y "+" rho])) "/" scale])
-              (local size float [0.5 "*" [0.88 "+" 0.36 "*" h1]])
-              (local dist float [[(hexDist q) "-" size] "*" scale "/" px])
-              (local fade float (smoothstep 3.0 9.0 [size "*" scale "/" px]))
-              (local cover float [(clamp [0.5 "-" dist] 0.0 1.0) "*" fade])
-              (local rim float (clamp [0.5 "-" dist "-" (max 1.0 [0.03 "*" size "*" scale "/" px])] 0.0 1.0))
-              (local hc vec3 (cycle [h0 "*" 9.0 "-" phase]))
-              (set col (mix col [hc "*" rim] cover))
-            ];
-          }))
-          (set fragColor (vec4 col 1.0))
-        ]);
-        nearest = fn ivec2 [{h = vec2;}] ({
-          h,
-          y,
-          c,
-          r,
-          d,
-        }: [
-          (local y float [h.y "/" S3])
-          (local c vec3 (vec3 [h.x "-" 0.5 "*" y] y [(neg h.x) "-" 0.5 "*" y]))
-          (local r vec3 (floor [c "+" 0.5]))
-          (local d vec3 (abs [r "-" c]))
-          (ifElse [d.x ">" d.y "&&" d.x ">" d.z] [
-              (set r.x [(neg r.y) "-" r.z])
-            ] (if' [d.y ">" d.z] [
-              (set r.y [(neg r.x) "-" r.z])
-            ]))
-          (return (ivec2 r.xy))
-        ]);
-        pmod = fn int [{a = int;} {b = int;}] ({
-          a,
-          b,
-        }: [
-          (return [a "-" b "*" (fdiv a b)])
-        ]);
-        rot = fn vec2 [{v = vec2;} {a = float;}] ({
-          v,
-          a,
-          c,
-          s,
-        }: [
-          (local c float (cos a))
-          (local s float (sin a))
-          (return (vec2 [c "*" v.x "-" s "*" v.y] [s "*" v.x "+" c "*" v.y]))
-        ]);
-      };
-    };
+    modules_desktop_session_tomoe_shaders_balatro_data = ''
+      #define HEX(c) (vec3(((c) >> 16) & 0xff, ((c) >> 8) & 0xff, (c) & 0xff) / 255.0)
+      #define COLOR_1 HEX(0xde443b)
+      #define COLOR_2 HEX(0x006bb4)
+      #define COLOR_3 HEX(0x162325)
+      #define CONTRAST 3.5
+      #define LIGHTING 0.4
+      #define SPIN_AMOUNT 0.25
+      #define SPIN_ROTATION -2.0
+      #define SPEED 7.0
+
+      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          float diagonal = length(iResolution.xy);
+          vec2 uv = (fragCoord - 0.5 * iResolution.xy) / diagonal;
+          float radius = length(uv);
+          float angle = atan(uv.y, uv.x) + 302.2 + 0.2 * SPIN_ROTATION
+                      - 20.0 * (SPIN_AMOUNT * radius + 1.0 - SPIN_AMOUNT);
+          uv = radius * vec2(cos(angle), sin(angle)) * 30.0;
+          float t = iTime * SPEED;
+          vec2 uv2 = vec2(uv.x + uv.y);
+          for (int i = 0; i < 5; i++) {
+              uv2 += sin(max(uv.x, uv.y)) + uv;
+              uv += 0.5 * vec2(cos(5.1123314 + 0.353 * uv2.y + t * 0.131121), sin(uv2.x - 0.113 * t));
+              uv -= cos(uv.x + uv.y) - sin(uv.x * 0.711 - uv.y);
+          }
+          float contrast = 0.25 * CONTRAST + 0.5 * SPIN_AMOUNT + 1.2;
+          float paint = clamp(length(uv) * 0.035 * contrast, 0.0, 2.0);
+          float c1 = max(0.0, 1.0 - contrast * abs(1.0 - paint));
+          float c2 = max(0.0, 1.0 - contrast * abs(paint));
+          float c3 = 1.0 - min(1.0, c1 + c2);
+          float light = (LIGHTING - 0.2) * max(c1 * 5.0 - 4.0, 0.0) + LIGHTING * max(c2 * 5.0 - 4.0, 0.0);
+          vec3 color = (0.3 / CONTRAST) * COLOR_1
+                     + (1.0 - 0.3 / CONTRAST) * (COLOR_1 * c1 + COLOR_2 * c2 + COLOR_3 * c3) + light;
+          fragColor = vec4(color, 1.0);
+      }
+    '';
+    modules_desktop_session_tomoe_shaders_cassette_led_data = ''
+      const vec3 SHELL = vec3(0.914, 0.898, 0.863);
+      const vec3 PUTTY = vec3(0.800, 0.780, 0.730);
+      const vec3 GRAPHITE = vec3(0.160, 0.160, 0.155);
+      const vec3 ORANGE = vec3(0.930, 0.360, 0.110);
+      const vec3 AMBER = vec3(0.960, 0.660, 0.200);
+      const vec2 LIGHT = vec2(-0.6, 0.8);
+
+      float hash(vec2 p) {
+          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+      }
+
+      const float ROWS = 46.0;
+      const float SPEED = 1.0;
+      const float BPM = 128.0;
+      const float WAVE = 1.5;
+      const float RIPPLE = 0.7;
+      const float RIPPLE_SPEED = 0.7;
+
+      float base(vec2 c, float t, float aspect) {
+          float s = t * 0.5;
+          vec2 a = vec2(aspect * (0.22 + 0.08 * sin(s * 0.37)), 0.30 + 0.12 * cos(s * 0.41));
+          vec2 b = vec2(aspect * (0.78 + 0.08 * cos(s * 0.29)), 0.70 + 0.10 * sin(s * 0.47));
+          float wa = sin(length(c - a) * 18.0 - t * WAVE);
+          float wb = sin(length(c - b) * 14.0 - t * WAVE * 0.8);
+          return 0.5 + 0.25 * (wa + wb);
+      }
+
+      float ripples(vec2 c, float t, float aspect) {
+          float every = 120.0 / BPM;
+          float life = 4.0 * every;
+          float n = floor(t / every);
+          float age = t - n * every;
+          float r = 0.0;
+          for (int k = 0; k < 4; k++) {
+              float m = n - float(k);
+              float tm = age + float(k) * every;
+              float x = tm / life;
+              vec2 o = vec2(hash(vec2(m, 3.7)) * aspect, hash(vec2(m, 9.1)));
+              float d = length(c - o) - tm * RIPPLE_SPEED;
+              float env = smoothstep(0.0, 0.04, x) * (1.0 - smoothstep(0.2, 1.0, x));
+              r += (mod(m, 2.0) < 0.5 ? 1.0 : 0.7) * env * exp(-d * d * 120.0);
+          }
+          return RIPPLE * r;
+      }
+
+      const float LEVELS = 8.0;
+
+      float level(vec2 cell, float pitch, vec2 off, float t, float aspect) {
+          vec2 p = ((cell + 0.5) * pitch + off) / iResolution.y;
+          float b = smoothstep(0.40, 0.98, base(p, t, aspect) * 0.95);
+          float lift = clamp(ripples(p, t, aspect), 0.0, 1.0);
+          b = 1.0 - (1.0 - b) * (1.0 - lift);
+          return floor(b * b * LEVELS + 0.5) / LEVELS;
+      }
+
+      vec3 led(float b) {
+          return mix(ORANGE, AMBER, 0.55 * smoothstep(0.6, 1.0, b)) * b;
+      }
+
+      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          float t = iTime * SPEED;
+          float aspect = iResolution.x / iResolution.y;
+          float pitch = floor(iResolution.y / ROWS);
+          vec2 off = 0.5 * mod(iResolution.xy, pitch);
+          vec2 cell = floor((fragCoord - off) / pitch);
+          vec2 center = (cell + 0.5) * pitch + off;
+          float b = level(cell, pitch, off, t, aspect);
+          float hs = 0.5 * floor(pitch * 0.62 + 0.5);
+          vec2 q = fragCoord - center;
+          vec2 aq = abs(q);
+          float dist = max(aq.x, aq.y);
+          vec2 dir = aq.x > aq.y ? vec2(sign(q.x), 0.0) : vec2(0.0, sign(q.y));
+          vec2 l = normalize(LIGHT);
+          vec2 sv = fragCoord / iResolution.xy;
+          vec3 panel = SHELL * mix(0.94, 1.02, 0.55 * sv.y + 0.45 * (1.0 - sv.x));
+          float rim = smoothstep(hs + 2.5, hs, dist) * dot(dir, -l);
+          panel *= 1.0 + 0.10 * rim;
+          float w = 0.0;
+          for (int j = -2; j <= 2; j++) {
+              for (int i = -2; i <= 2; i++) {
+                  vec2 nc = cell + vec2(float(i), float(j));
+                  vec2 d = abs(fragCoord - ((nc + 0.5) * pitch + off)) / pitch;
+                  float e = max(max(d.x, d.y) - 0.31, 0.0);
+                  w += level(nc, pitch, off, t, aspect) * exp(-e * e * 9.0);
+              }
+          }
+          panel = mix(panel, panel * vec3(1.03, 0.80, 0.62), clamp(w * 0.28, 0.0, 0.75));
+          float wall = max(1.0, hs * 0.22);
+          float lit = clamp(dot(dir, -l), 0.0, 1.0);
+          vec3 side = mix(GRAPHITE * 0.7, PUTTY * 0.8, lit) + led(b) * 0.35;
+          vec3 face = GRAPHITE * 0.85 + led(b) * (1.0 + 0.12 * (1.0 - dist / (hs - wall)));
+          vec3 hole = mix(face, side, step(hs - wall, dist) * (0.4 + 0.6 * lit));
+          float inside = 1.0 - step(hs, dist);
+          vec3 color = mix(panel, hole, inside);
+          color += (hash(fragCoord) - 0.5) * 0.012;
+          fragColor = vec4(color, 1.0);
+      }
+    '';
+    modules_desktop_session_tomoe_shaders_cassette_squares_data = ''
+      const vec3 SHELL = vec3(0.914, 0.898, 0.863);
+      const vec3 PUTTY = vec3(0.800, 0.780, 0.730);
+      const vec3 GRAPHITE = vec3(0.160, 0.160, 0.155);
+      const vec3 ORANGE = vec3(0.930, 0.360, 0.110);
+      const vec2 LIGHT = vec2(-0.6, 0.8);
+
+      float hash(vec2 p) {
+          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+      }
+
+      const float ROWS = 46.0;
+      const float SPEED = 1.0;
+      const float BPM = 128.0;
+      const float WAVE = 1.5;
+      const float RIPPLE = 0.7;
+      const float RIPPLE_SPEED = 0.7;
+
+      float base(vec2 c, float t, float aspect) {
+          float s = t * 0.5;
+          vec2 a = vec2(aspect * (0.22 + 0.08 * sin(s * 0.37)), 0.30 + 0.12 * cos(s * 0.41));
+          vec2 b = vec2(aspect * (0.78 + 0.08 * cos(s * 0.29)), 0.70 + 0.10 * sin(s * 0.47));
+          float wa = sin(length(c - a) * 18.0 - t * WAVE);
+          float wb = sin(length(c - b) * 14.0 - t * WAVE * 0.8);
+          return 0.5 + 0.25 * (wa + wb);
+      }
+
+      float ripples(vec2 c, float t, float aspect) {
+          float every = 120.0 / BPM;
+          float life = 4.0 * every;
+          float n = floor(t / every);
+          float age = t - n * every;
+          float r = 0.0;
+          for (int k = 0; k < 4; k++) {
+              float m = n - float(k);
+              float tm = age + float(k) * every;
+              float x = tm / life;
+              vec2 o = vec2(hash(vec2(m, 3.7)) * aspect, hash(vec2(m, 9.1)));
+              float d = length(c - o) - tm * RIPPLE_SPEED;
+              float env = smoothstep(0.0, 0.04, x) * (1.0 - smoothstep(0.2, 1.0, x));
+              r += (mod(m, 2.0) < 0.5 ? 1.0 : 0.7) * env * exp(-d * d * 120.0);
+          }
+          return RIPPLE * r;
+      }
+
+      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          float t = iTime * SPEED;
+          float aspect = iResolution.x / iResolution.y;
+          float pitch = floor(iResolution.y / ROWS);
+          vec2 off = 0.5 * mod(iResolution.xy, pitch);
+          vec2 cell = floor((fragCoord - off) / pitch);
+          vec2 center = (cell + 0.5) * pitch + off;
+          vec2 p = center / iResolution.y;
+          float f = clamp(base(p, t, aspect) * 0.95 + ripples(p, t, aspect), 0.0, 1.0);
+          float hs = 0.5 * floor(pitch * (0.12 + 0.60 * f * f) + 0.5);
+          vec2 q = fragCoord - center;
+          vec2 aq = abs(q);
+          float dist = max(aq.x, aq.y);
+          vec2 dir = aq.x > aq.y ? vec2(sign(q.x), 0.0) : vec2(0.0, sign(q.y));
+          vec2 l = normalize(LIGHT);
+          vec2 sv = fragCoord / iResolution.xy;
+          vec3 panel = SHELL * mix(0.94, 1.02, 0.55 * sv.y + 0.45 * (1.0 - sv.x));
+          float rim = smoothstep(hs + 2.5, hs, dist) * dot(dir, -l);
+          panel *= 1.0 + 0.10 * rim;
+          float glow = smoothstep(0.86, 0.98, f);
+          vec3 backing = mix(GRAPHITE, ORANGE, glow);
+          float lit = clamp(dot(dir, -l), 0.0, 1.0);
+          vec3 wall = mix(GRAPHITE * 0.7, PUTTY * 0.8, lit);
+          vec3 hole = mix(backing, wall, step(hs - max(1.0, hs * 0.22), dist) * (0.4 + 0.6 * lit));
+          float inside = 1.0 - step(hs, dist);
+          vec3 color = mix(panel, hole, inside);
+          color += (hash(fragCoord) - 0.5) * 0.012;
+          fragColor = vec4(color, 1.0);
+      }
+    '';
+    modules_desktop_session_tomoe_shaders_dot_corridor_data = ''
+      const float TAU = 6.28318531;
+      const float FOCAL = 0.92;
+      const float WIDE = 2.4;
+      const float LW = 0.2;
+      const float DY = 0.41;
+      const float RAD = 0.19;
+      const float YMAX = 16.0;
+      const float ZOOM = 1.1;
+      const float HUE_PERIOD = 1.8;
+      const float SIDES = 13.0;
+      const int BAND = 5;
+      const int LOOP = 1000;
+
+      float hash(ivec2 c) {
+          uvec2 v = uvec2(c) * uvec2(1597334673u, 3812015801u);
+          uint n = (v.x ^ v.y) * 1597334673u;
+          n ^= n >> 16;
+          n *= 2246822519u;
+          n ^= n >> 13;
+          return float(n) * (1.0 / 4294967296.0);
+      }
+
+      int pmod(int a, int b) {
+          return a - b * int(floor(float(a) / float(b)));
+      }
+
+      vec3 hsv(float h, float s, float v) {
+          vec3 k = clamp(abs(fract(h + vec3(0.0, 2.0, 1.0) / 3.0) * 6.0 - 3.0) - 1.0, 0.0, 1.0);
+          return v * mix(vec3(1.0), k, s);
+      }
+
+      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          float px = 1.0 / max(0.5 * iResolution.y * FOCAL, 0.5 * iResolution.x / WIDE);
+          vec2 s = max(abs(fragCoord - 0.5 * iResolution.xy) * px, vec2(1e-6, 0.0));
+          vec3 col = vec3(0.0);
+          float alpha = 0.0;
+
+          float shift = mod(iTime * ZOOM, float(LOOP) * LW);
+          float spin = fract(iTime / HUE_PERIOD);
+          float w = log(s.x) - shift;
+          float u = s.y / s.x;
+          int c0 = int(floor(w / LW + 0.5));
+          int imax = int(YMAX / DY);
+
+          for (int dc = 2; dc >= -2; dc--) {
+              int c = c0 + dc;
+              int cc = pmod(c, LOOP);
+              float lift = 0.5 * float(cc & 1);
+              int i0 = int(floor(u / DY - lift + 0.5));
+              for (int di = -1; di <= 1; di++) {
+                  int i = i0 + di;
+                  if (i < 0 || i > imax) continue;
+                  ivec2 id = ivec2(cc, i);
+                  float h0 = hash(id);
+                  float h1 = hash(id + ivec2(4099, 17));
+                  float h2 = hash(id + ivec2(31, 7919));
+                  float h3 = hash(id + ivec2(613, 3));
+                  if (h2 > 0.9) continue;
+                  float sx = exp((float(c) + 0.3 * (h3 - 0.5)) * LW + shift);
+                  vec2 centre = sx * vec2(1.0, (float(i) + lift + 0.3 * (fract(h3 * 7.0) - 0.5)) * DY);
+                  float rho = max(RAD * (0.5 + 0.5 * h1) * sx, 0.6 * px);
+                  vec2 q = s - centre;
+                  float len = length(q);
+                  if (len > rho + px) continue;
+                  float sector = TAU / SIDES;
+                  float a = mod(atan(q.y, q.x) + h0 * TAU, sector) - 0.5 * sector;
+                  float dist = (len * cos(a) - rho * cos(0.5 * sector)) / px;
+                  float cover = clamp(0.5 - dist, 0.0, 1.0);
+                  float sat = h2 < 0.1 ? 0.0 : (h2 < 0.2 ? 0.35 : 0.92);
+                  float val = h2 > 0.82 ? 0.55 : 1.0;
+                  float hue = hash(ivec2(cc / BAND, int(h0 * 4.0) + 101));
+                  col += (1.0 - alpha) * cover * hsv(hue + spin, sat, val);
+                  alpha += (1.0 - alpha) * cover;
+              }
+          }
+
+          fragColor = vec4(col, 1.0);
+      }
+    '';
+    modules_desktop_session_tomoe_shaders_glass_mound_data = ''
+      const vec3 PAPER = vec3(0.972, 0.976, 0.976);
+      const vec3 MIST = vec3(0.955, 0.962, 0.968);
+      const vec3 INK = vec3(0.09, 0.11, 0.15);
+      const vec3 SLATE = vec3(0.22, 0.27, 0.34);
+      const vec3 TEAL = vec3(0.07, 0.32, 0.43);
+      const vec3 LILAC = vec3(0.87, 0.76, 0.96);
+      const float IOR = 1.33;
+      const float SPREAD = 0.045;
+      const float SPEED = 0.5;
+      const float RING = 1.35;
+      const float TUBE = 0.33;
+      const float SINK = -1.0;
+      const float TILT = 1.0;
+      const float SWAY = 0.35;
+      const float FOG_TOP = -0.2;
+      const float FOG_BOTTOM = -1.1;
+      const float SOFT = 0.05;
+      const float BEND = 0.7;
+
+      mat2 rot(float a) {
+          float c = cos(a);
+          float s = sin(a);
+          return mat2(c, -s, s, c);
+      }
+
+      float map(vec3 p, float t) {
+          vec3 q = p - vec3(0.0, SINK, 0.0);
+          q.xz *= rot(0.35 * sin(t * 0.21));
+          q.yz *= rot(TILT + SWAY * sin(t * 0.17));
+          q.xy *= rot(0.12 * sin(t * 0.31));
+          float a = atan(q.z, q.x);
+          float tube = TUBE * (1.0 + 0.28 * sin(a * 2.0 + t * 0.7) + 0.12 * sin(a * 3.0 - t * 0.5));
+          float ring = RING * (1.0 + 0.08 * sin(a * 2.0 - t * 0.4));
+          float d = length(vec2(length(q.xz) - ring, q.y)) - tube;
+          d += 0.04 * sin(2.1 * p.x + t) * sin(1.7 * p.y - 0.8 * t) * sin(1.9 * p.z + 1.1 * t);
+          return d * 0.8;
+      }
+
+      vec3 normal(vec3 p, float t) {
+          vec2 e = vec2(0.002, 0.0);
+          return normalize(vec3(map(p + e.xyy, t) - map(p - e.xyy, t),
+                                map(p + e.yxy, t) - map(p - e.yxy, t),
+                                map(p + e.yyx, t) - map(p - e.yyx, t)));
+      }
+
+      float band(float x, float c, float w) {
+          float k = (x - c) / w;
+          return exp(-k * k);
+      }
+
+      vec3 env(vec3 d) {
+          vec3 c = PAPER;
+          float x = d.x + 0.5 * d.z;
+          c = mix(c, LILAC, 0.9 * band(d.y, -0.07, 0.06));
+          c = mix(c, INK, 0.95 * band(d.y, 0.12, 0.13));
+          c = mix(c, TEAL, band(d.y, 0.34, 0.2) * smoothstep(-0.9, 0.1, x));
+          c = mix(c, SLATE, 0.7 * band(d.y, 0.3, 0.14) * smoothstep(0.1, -0.9, x));
+          c = mix(c, LILAC, 0.45 * band(d.y, 0.52, 0.06));
+          c = mix(c, PAPER, 0.85 * band(x, -0.5, 0.12) * smoothstep(0.15, 0.4, d.y));
+          return c;
+      }
+
+      vec3 shade(vec3 p, vec3 rd, float t) {
+          vec3 n = normal(p, t);
+          float c = max(dot(-rd, n), 0.0);
+          float f = 0.25 + 0.75 * pow(1.0 - c, 2.0);
+          vec3 through;
+          for (int k = 0; k < 3; k++) {
+              through[k] = env(normalize(rd - n * (BEND + (float(k) - 1.0) * SPREAD * 1.5)))[k];
+          }
+          vec3 col = mix(through, env(reflect(rd, n)), f);
+          return mix(col, MIST, smoothstep(FOG_TOP, FOG_BOTTOM, p.y));
+      }
+
+      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;
+          float t = iTime * SPEED;
+          vec3 ro = vec3(0.0, 0.5, 6.0);
+          vec3 fw = normalize(vec3(0.0, 0.5, 0.0) - ro);
+          vec3 rt = normalize(cross(fw, vec3(0.0, 1.0, 0.0)));
+          vec3 up = cross(rt, fw);
+          vec3 rd = normalize(uv.x * rt + uv.y * up + 1.6 * fw);
+          float s = 0.0;
+          float near = 1e9;
+          float at = 0.0;
+          bool hit = false;
+          for (int i = 0; i < 110; i++) {
+              float d = map(ro + rd * s, t);
+              if (d < near) { near = d; at = s; }
+              if (d < 0.001) { hit = true; break; }
+              s += d;
+              if (s > 12.0) break;
+          }
+          vec3 col = PAPER;
+          if (hit) {
+              col = shade(ro + rd * s, rd, t);
+          } else if (near < SOFT) {
+              float a = 1.0 - smoothstep(0.0, SOFT, near);
+              col = mix(PAPER, shade(ro + rd * at, rd, t), 0.55 * a * a);
+          }
+          col = mix(PAPER, col, smoothstep(0.0, 0.14, fragCoord.y / iResolution.y));
+          fragColor = vec4(col, 1.0);
+      }
+    '';
+    modules_desktop_session_tomoe_shaders_hex_spiral_data = ''
+      const float PI = 3.14159265;
+      const float TAU = 6.28318531;
+      const float S3 = 0.86602540;
+      const vec2 CENTER = vec2(0.4, 0.58);
+      const int M = 29;
+      const int N = 13;
+      const int ARM = 4;
+      const int LOOP = 52;
+      const float HEX_SPEED = 0.7;
+      const int STREAK_K = 176;
+      const float STREAK_STEP = 0.057;
+      const int STREAK_N = 132;
+      const int STREAK_LOOP = 160;
+      const float STREAK_SPEED = 0.32;
+      const float CYCLE = 1.8;
+
+      const vec3 PAL[10] = vec3[10](
+          vec3(1.000, 0.824, 0.122), vec3(1.000, 0.604, 0.122), vec3(1.000, 0.420, 0.369),
+          vec3(1.000, 0.361, 0.784), vec3(0.706, 0.420, 1.000), vec3(0.184, 0.420, 1.000),
+          vec3(0.122, 0.722, 1.000), vec3(0.122, 0.839, 0.706), vec3(0.482, 0.878, 0.165),
+          vec3(0.957, 0.957, 0.957)
+      );
+
+      const ivec2 NEAR[7] = ivec2[7](
+          ivec2(0, 0), ivec2(1, 0), ivec2(-1, 0), ivec2(0, 1), ivec2(0, -1), ivec2(1, -1), ivec2(-1, 1)
+      );
+
+      float hash(ivec2 c) {
+          uvec2 v = uvec2(c) * uvec2(1597334673u, 3812015801u);
+          uint n = (v.x ^ v.y) * 1597334673u;
+          n ^= n >> 16;
+          n *= 2246822519u;
+          n ^= n >> 13;
+          return float(n) * (1.0 / 4294967296.0);
+      }
+
+      int fdiv(int a, int b) {
+          return int(floor(float(a) / float(b)));
+      }
+
+      int pmod(int a, int b) {
+          return a - b * fdiv(a, b);
+      }
+
+      vec3 cycle(float f) {
+          int a = pmod(int(floor(f)), 9);
+          return mix(PAL[a], PAL[pmod(a + 1, 9)], fract(f));
+      }
+
+      vec2 rot(vec2 v, float a) {
+          float c = cos(a), s = sin(a);
+          return vec2(c * v.x - s * v.y, s * v.x + c * v.y);
+      }
+
+      vec2 cart(ivec2 a) {
+          return vec2(float(a.x) + 0.5 * float(a.y), S3 * float(a.y));
+      }
+
+      ivec2 nearest(vec2 h) {
+          float y = h.y / S3;
+          vec3 c = vec3(h.x - 0.5 * y, y, -h.x - 0.5 * y);
+          vec3 r = floor(c + 0.5);
+          vec3 d = abs(r - c);
+          if (d.x > d.y && d.x > d.z) r.x = -r.y - r.z;
+          else if (d.y > d.z) r.y = -r.x - r.z;
+          return ivec2(r.xy);
+      }
+
+      float hexDist(vec2 q) {
+          return max(abs(q.x), max(abs(0.5 * q.x + S3 * q.y), abs(-0.5 * q.x + S3 * q.y)));
+      }
+
+      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          float px = 1.0 / iResolution.y;
+          vec2 p = (fragCoord - CENTER * iResolution.xy) * px;
+          float r = max(length(p), 1e-5);
+          vec2 w = vec2(log(r), atan(p.y, p.x));
+
+          vec2 vc = cart(ivec2(M, N));
+          float k = TAU / length(vc);
+          float rho = 0.5 * PI - atan(vc.y, vc.x);
+          vec2 drift = cart(ivec2(1, -1));
+          float tt = mod(iTime * HEX_SPEED, float(LOOP));
+          vec2 hw = rot(w, -rho) / k - tt * drift;
+          ivec2 base = nearest(hw);
+
+          float jr = mod(hw.y / S3 + 0.5, float(N));
+          float band = smoothstep(float(ARM) + 1.5, float(ARM) + 4.0, jr) * (1.0 - smoothstep(float(N) - 1.2, float(N), jr));
+
+          vec3 col = vec3(0.0);
+          float phase = mod(iTime, CYCLE) * 9.0 / CYCLE;
+
+          float c = float(STREAK_K) * STREAK_STEP / TAU;
+          float ct = sqrt(1.0 + c * c);
+          float dth = TAU / float(STREAK_N);
+          float ts = mod(iTime * STREAK_SPEED, float(STREAK_LOOP) * STREAK_STEP);
+          float sig = w.x - ts - c * w.y;
+          int is0 = int(floor(sig / STREAK_STEP));
+          int it0 = int(floor(w.y / dth));
+          for (int o = 0; o < 9; o++) {
+              int it = it0 + o % 3 - 1;
+              int is = is0 + o / 3 - 1;
+              int q = fdiv(it, STREAK_N);
+              ivec2 id = ivec2(pmod(is + STREAK_K * q, STREAK_LOOP), it - q * STREAK_N);
+              float h0 = hash(id);
+              float h1 = hash(id + ivec2(7, 131));
+              float h2 = hash(id + ivec2(53, 17));
+              if (h0 > 0.8) continue;
+              float sm = (float(is) + 0.5 + 0.8 * (h1 - 0.5)) * STREAK_STEP;
+              vec2 dir = rot(vec2(c, 1.0) / ct, 0.6 * (h2 - 0.5));
+              float tc = (float(it) + 0.5 + 0.6 * (h2 - 0.5)) * dth;
+              vec2 d = vec2(sig - sm + c * (w.y - tc), w.y - tc);
+              float len = (0.22 + 0.22 * h1) * dth * ct;
+              float th = (0.2 + 0.08 * h2) * STREAK_STEP / ct;
+              float a = clamp(dot(d, dir), -len, len);
+              float dist = (length(d - dir * a) - th) * r / px;
+              float cover = clamp(0.5 - dist, 0.0, 1.0) * smoothstep(0.6, 2.0, th * r / px);
+              int pick = int(h0 * 16.0) % 13;
+              vec3 sc = pick > 8 ? PAL[9] : cycle(float(pick) - phase);
+              col = mix(col, sc * (0.7 + 0.3 * h2), cover * band);
+          }
+
+          float key[7];
+          int ord[7];
+          vec2 outward = rot(vec2(1.0, 0.0), -rho);
+          for (int i = 0; i < 7; i++) {
+              key[i] = dot(cart(NEAR[i]), outward);
+              ord[i] = i;
+          }
+          for (int i = 1; i < 7; i++) {
+              for (int j = i; j > 0 && key[ord[j - 1]] > key[ord[j]]; j--) {
+                  int t = ord[j];
+                  ord[j] = ord[j - 1];
+                  ord[j - 1] = t;
+              }
+          }
+
+          int wrap = (M + N) * LOOP;
+          for (int i = 0; i < 7; i++) {
+              ivec2 cell = base + NEAR[ord[i]];
+              if (pmod(cell.y, N) >= ARM) continue;
+              int id = pmod(cell.x * N - cell.y * M, wrap);
+              float h0 = hash(ivec2(id, 911));
+              float h1 = hash(ivec2(id, 37));
+              vec2 wc = rot(cart(cell) + tt * drift, rho) * k;
+              float rc = exp(wc.x);
+              vec2 sc = rc * vec2(cos(wc.y), sin(wc.y));
+              float scale = k * rc;
+              vec2 q = rot(p - sc, -(wc.y + rho)) / scale;
+              float size = 0.5 * (0.88 + 0.36 * h1);
+              float dist = (hexDist(q) - size) * scale / px;
+              float fade = smoothstep(3.0, 9.0, size * scale / px);
+              float cover = clamp(0.5 - dist, 0.0, 1.0) * fade;
+              float rim = clamp(0.5 - dist - max(1.0, 0.03 * size * scale / px), 0.0, 1.0);
+              vec3 hc = cycle(h0 * 9.0 - phase);
+              col = mix(col, hc * rim, cover);
+          }
+
+          fragColor = vec4(col, 1.0);
+      }
+    '';
     modules_desktop_session_tomoe_shaders_ozette_dark_data = {
       ozette,
       rgb,
@@ -15195,150 +14609,72 @@
         };
       };
     };
-    modules_desktop_session_tomoe_shaders_su_ei_data = {
-      abs,
-      atan2,
-      clamp,
-      dot,
-      exp,
-      float,
-      floor,
-      fn,
-      for,
-      fract,
-      fwidth,
-      iResolution,
-      iTime,
-      in',
-      inc,
-      int,
-      length,
-      local,
-      max,
-      mix,
-      neg,
-      out,
-      pow,
-      return,
-      set,
-      sin,
-      smoothstep,
-      update,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      ...
-    }: self: let
-      inherit (self) BASE_A BASE_B DISPERSE DRIFT FLASH_PERIOD RIBS TAU TWIST_PERIOD WANDER flame shade;
-    in {
-      consts = {
-        BASE_A = vec3 0.6 0.68 0.73;
-        BASE_B = vec3 0.69 0.66 0.7;
-        DISPERSE = 0.05;
-        DRIFT = 0.18;
-        FLASH_PERIOD = 7.0;
-        RIBS = 18.0;
-        TAU = 6.28318531;
-        TWIST_PERIOD = 43.0;
-        WANDER = 61.0;
-      };
-      fns = {
-        flame = fn vec3 [{k = float;}] ({
-          k,
-          cyan,
-          blue,
-          pink,
-          orange,
-          yellow,
-          c,
-        }: [
-          (local cyan vec3 (vec3 0.25 0.85 1.0))
-          (local blue vec3 (vec3 0.35 0.45 1.0))
-          (local pink vec3 (vec3 1.0 0.25 0.75))
-          (local orange vec3 (vec3 1.0 0.62 0.25))
-          (local yellow vec3 (vec3 1.0 0.93 0.45))
-          (local c vec3 (mix cyan blue (smoothstep (-0.3) (-0.12) k)))
-          (set c (mix c pink (smoothstep (-0.12) (-0.02) k)))
-          (set c (mix c orange (smoothstep 0.0 0.1 k)))
-          (return (mix c yellow (smoothstep 0.08 0.35 k)))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          aspect,
-          p,
-          t,
-          c,
-          q,
-          r,
-          th,
-          twist,
-          bend,
-          u,
-          aa,
-          s,
-          base,
-          col,
-          rib,
-          d,
-          reach,
-          tipY,
-          k,
-          sweep,
-          flash,
-          hot,
-          v,
-        }: [
-          (local aspect float [iResolution.x "/" iResolution.y])
-          (local p vec2 [fragCoord "/" iResolution.y])
-          (local t float iTime)
-          (local c vec2 (vec2 [aspect "+" 0.45 "+" 0.3 "*" (sin [TAU "*" t "/" WANDER])] [0.3 "+" 0.9 "*" (sin [TAU "*" t "/" [WANDER "*" 0.71]])]))
-          (local q vec2 [p "-" c])
-          (local r float (length q))
-          (local th float (atan2 q.y (neg q.x)))
-          (local twist float [0.35 "*" (sin [TAU "*" t "/" TWIST_PERIOD])])
-          (local bend float [0.035 "*" (sin [2.1 "*" p.y "+" 1.3 "*" p.x "+" 0.11 "*" t])])
-          (local u float [RIBS "*" [r "+" twist "*" th "/" TAU "+" bend] "-" DRIFT "*" t])
-          (local aa float (fwidth u))
-          (local s vec3 (vec3 (shade [u "-" DISPERSE] aa) (shade u aa) (shade [u "+" DISPERSE] aa)))
-          (local base vec3 (mix BASE_A BASE_B (smoothstep (-0.2) 1.2 [p.y "+" 0.3 "*" (sin [p.x "*" 0.9 "+" 0.07 "*" t])])))
-          (local col vec3 [base "*" s])
-          (local rib float (floor u))
-          (local d float (fract u))
-          (local reach float [0.3 "+" 0.12 "*" (sin [rib "*" 0.61 "+" t "*" 1.3]) "+" 0.08 "*" (sin [rib "*" 1.7 "-" t "*" 0.7])])
-          (local tipY float [reach "*" [0.35 "+" 0.65 "*" (pow [1.0 "-" (abs [2.0 "*" d "-" 1.0])] 0.8)]])
-          (local k float [p.y "-" tipY])
-          (local sweep float [0.5 "+" 0.5 "*" (sin [TAU "*" t "/" FLASH_PERIOD "-" 3.5 "*" p.x "/" (max aspect 1.0) "+" 0.9 "*" p.y])])
-          (local flash float (smoothstep 0.62 0.97 sweep))
-          (local hot vec3 [(flame k) "*" [0.82 "+" 0.25 "*" d]])
-          (set col (mix col [hot "*" s] [flash "*" [0.65 "+" 0.35 "*" d]]))
-          (local v vec2 [fragCoord "/" iResolution.xy "-" 0.5])
-          (update col "*=" [1.0 "-" 0.15 "*" (dot v v)])
-          (set fragColor (vec4 (clamp col 0.0 1.0) 1.0))
-        ]);
-        shade = fn float [{u = float;} {aa = float;}] ({
-          u,
-          aa,
-          acc,
-        }: [
-          (local acc float 0.0)
-          (for ({
-            k,
-            d,
-          }: {
-            init = local k int (-1);
-            test = [k "<=" 1];
-            step = inc k;
-            body = [
-              (local d float (fract [u "+" (float k) "*" aa "*" 0.35]))
-              (update acc "+=" [0.86 "+" 0.14 "*" (smoothstep 0.0 1.0 d) "+" 0.32 "*" (exp [[d "-" 1.0] "/" 0.05]) "-" 0.2 "*" (exp [(neg d) "/" 0.07])])
-            ];
-          }))
-          (return [acc "/" 3.0])
-        ]);
-      };
-    };
+    modules_desktop_session_tomoe_shaders_su_ei_data = ''
+      const float TAU = 6.28318531;
+      const float RIBS = 18.0;
+      const float DRIFT = 0.18;
+      const float DISPERSE = 0.05;
+      const float FLASH_PERIOD = 7.0;
+      const float WANDER = 61.0;
+      const float TWIST_PERIOD = 43.0;
+      const vec3 BASE_A = vec3(0.60, 0.68, 0.73);
+      const vec3 BASE_B = vec3(0.69, 0.66, 0.70);
+
+      float shade(float u, float aa) {
+          float acc = 0.0;
+          for (int k = -1; k <= 1; k++) {
+              float d = fract(u + float(k) * aa * 0.35);
+              acc += 0.86 + 0.14 * smoothstep(0.0, 1.0, d) + 0.32 * exp((d - 1.0) / 0.05) - 0.20 * exp(-d / 0.07);
+          }
+          return acc / 3.0;
+      }
+
+      vec3 flame(float k) {
+          vec3 cyan = vec3(0.25, 0.85, 1.0);
+          vec3 blue = vec3(0.35, 0.45, 1.0);
+          vec3 pink = vec3(1.0, 0.25, 0.75);
+          vec3 orange = vec3(1.0, 0.62, 0.25);
+          vec3 yellow = vec3(1.0, 0.93, 0.45);
+          vec3 c = mix(cyan, blue, smoothstep(-0.30, -0.12, k));
+          c = mix(c, pink, smoothstep(-0.12, -0.02, k));
+          c = mix(c, orange, smoothstep(0.0, 0.10, k));
+          return mix(c, yellow, smoothstep(0.08, 0.35, k));
+      }
+
+      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          float aspect = iResolution.x / iResolution.y;
+          vec2 p = fragCoord / iResolution.y;
+          float t = iTime;
+
+          vec2 c = vec2(aspect + 0.45 + 0.3 * sin(TAU * t / WANDER), 0.3 + 0.9 * sin(TAU * t / (WANDER * 0.71)));
+          vec2 q = p - c;
+          float r = length(q);
+          float th = atan(q.y, -q.x);
+          float twist = 0.35 * sin(TAU * t / TWIST_PERIOD);
+          float bend = 0.035 * sin(2.1 * p.y + 1.3 * p.x + 0.11 * t);
+
+          float u = RIBS * (r + twist * th / TAU + bend) - DRIFT * t;
+          float aa = fwidth(u);
+          vec3 s = vec3(shade(u - DISPERSE, aa), shade(u, aa), shade(u + DISPERSE, aa));
+
+          vec3 base = mix(BASE_A, BASE_B, smoothstep(-0.2, 1.2, p.y + 0.3 * sin(p.x * 0.9 + 0.07 * t)));
+          vec3 col = base * s;
+
+          float rib = floor(u);
+          float d = fract(u);
+          float reach = 0.30 + 0.12 * sin(rib * 0.61 + t * 1.3) + 0.08 * sin(rib * 1.7 - t * 0.7);
+          float tipY = reach * (0.35 + 0.65 * pow(1.0 - abs(2.0 * d - 1.0), 0.8));
+          float k = p.y - tipY;
+          float sweep = 0.5 + 0.5 * sin(TAU * t / FLASH_PERIOD - 3.5 * p.x / max(aspect, 1.0) + 0.9 * p.y);
+          float flash = smoothstep(0.62, 0.97, sweep);
+          vec3 hot = flame(k) * (0.82 + 0.25 * d);
+          col = mix(col, hot * s, flash * (0.65 + 0.35 * d));
+
+          vec2 v = fragCoord / iResolution.xy - 0.5;
+          col *= 1.0 - 0.15 * dot(v, v);
+          fragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+      }
+    '';
     modules_desktop_session_wayland = {pkgs, ...}: {
       environment = {
         systemPackages = [
@@ -45126,12 +44462,6 @@
           "omp-box" = omp_box_omp_box_data;
         };
         glsl = {
-          "balatro.glsl" = modules_desktop_session_tomoe_shaders_balatro_data;
-          "cassette-led.glsl" = modules_desktop_session_tomoe_shaders_cassette_led_data;
-          "cassette-squares.glsl" = modules_desktop_session_tomoe_shaders_cassette_squares_data;
-          "dot-corridor.glsl" = modules_desktop_session_tomoe_shaders_dot_corridor_data;
-          "glass-mound.glsl" = modules_desktop_session_tomoe_shaders_glass_mound_data;
-          "hex-spiral.glsl" = modules_desktop_session_tomoe_shaders_hex_spiral_data;
           "ozette-dark.glsl" = modules_desktop_session_tomoe_shaders_ozette_dark_data;
           "ozette-fields-dark.glsl" = modules_desktop_session_tomoe_shaders_ozette_fields_dark_data;
           "ozette-fields-light.glsl" = modules_desktop_session_tomoe_shaders_ozette_fields_light_data;
@@ -45140,7 +44470,6 @@
           "ozette-lilies-light.glsl" = modules_desktop_session_tomoe_shaders_ozette_lilies_light_data;
           "ozette-pond-dark.glsl" = modules_desktop_session_tomoe_shaders_ozette_pond_dark_data;
           "ozette-pond-light.glsl" = modules_desktop_session_tomoe_shaders_ozette_pond_light_data;
-          "su-ei.glsl" = modules_desktop_session_tomoe_shaders_su_ei_data;
         };
         luau = {
           "tern-attention-window.luau" = modules_tools_tern_config_plugins_attention_window_data;
@@ -45204,6 +44533,15 @@
       modules_desktop_session_theme_colorschemes_data;
 
       rendered = lib.recursiveUpdate (lib.mapAttrs (language: lib.mapAttrs (_: syntax: generators.${language}.render (syntax (generators.${language} // lib.optionalAttrs (language == "glsl") {ozette = modules_desktop_session_theme_ozette_data;})))) trees) {
+        glsl = {
+          "balatro.glsl" = modules_desktop_session_tomoe_shaders_balatro_data;
+          "cassette-led.glsl" = modules_desktop_session_tomoe_shaders_cassette_led_data;
+          "cassette-squares.glsl" = modules_desktop_session_tomoe_shaders_cassette_squares_data;
+          "dot-corridor.glsl" = modules_desktop_session_tomoe_shaders_dot_corridor_data;
+          "glass-mound.glsl" = modules_desktop_session_tomoe_shaders_glass_mound_data;
+          "hex-spiral.glsl" = modules_desktop_session_tomoe_shaders_hex_spiral_data;
+          "su-ei.glsl" = modules_desktop_session_tomoe_shaders_su_ei_data;
+        };
         luau."tern-agent-tabs-window.luau" = modules_tools_tern_config_plugins_agent_tabs_window_data;
         shell = osc;
         ts = lib.mapAttrs' (name: text: lib.nameValuePair "secrets/${name}" text) modules_dev_ai_omp_secrets_data;
@@ -52954,7 +52292,6 @@
         modules_desktop_session_tomoe_lisp_theme_data = "modules/desktop/session/tomoe/lisp/theme.data.nix";
         modules_desktop_session_tomoe_lisp_user_data = "modules/desktop/session/tomoe/lisp/user.data.nix";
         modules_desktop_session_tomoe_shaders_balatro_data = "modules/desktop/session/tomoe/shaders/balatro.data.nix";
-        modules_desktop_session_tomoe_shaders_cassette_data = "modules/desktop/session/tomoe/shaders/cassette.data.nix";
         modules_desktop_session_tomoe_shaders_cassette_led_data = "modules/desktop/session/tomoe/shaders/cassette-led.data.nix";
         modules_desktop_session_tomoe_shaders_cassette_squares_data = "modules/desktop/session/tomoe/shaders/cassette-squares.data.nix";
         modules_desktop_session_tomoe_shaders_dot_corridor_data = "modules/desktop/session/tomoe/shaders/dot-corridor.data.nix";
