@@ -19930,10 +19930,16 @@
         [ ! -r "$key" ] || export AI_GATEWAY_API_KEY="$(cat "$key")"
         exec ${src}/bin/omp-botd
       '';
+      ompd = pkgs.writeShellScript "ompd-start" ''
+        set -eu
+        logs=${user.home}/.local/state/omp-bot/logs
+        mkdir -p "$logs"
+        exec ${src}/bin/ompd serve --wait >>"$logs/ompd.log" 2>&1
+      '';
     in {
       finix.persistence = {
         allowlist.users.${userName}.directories = [".local/state/omp-bot"];
-        homeServices = ["omp-botd"];
+        homeServices = ["omp-botd" "ompd"];
       };
 
       environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl") pkgs.age];
@@ -19947,6 +19953,7 @@
           : "''${OMP_BOT_WORK_FOLD_EXTENSION:=${generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts))}}"
           : "''${OMP_BOT_CHAT_LOOK_EXTENSION:=${generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts))}}"
           : "''${OMP_BOT_OPTCHAT:=${generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;})}}"
+          export OMPD_SERVICE="''${OMPD_SERVICE-1}"
         '';
         ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";
       };
@@ -19964,6 +19971,20 @@
         respawn = true;
         stop-timeout = 130;
         log = true;
+      };
+
+      finit.services.ompd = {
+        description = "omp-bot job daemon (${userName})";
+        user = userName;
+        group = "users";
+        command = "${ompd}";
+        environment = {
+          HOME = user.home;
+          XDG_RUNTIME_DIR = runtimeDir;
+        };
+        path = tools ++ [pkgs.coreutils pkgs.bash "/run/current-system/sw" "/run/wrappers"];
+        cgroup.system.delegate = true;
+        respawn = true;
       };
     };
     omp_box = {
