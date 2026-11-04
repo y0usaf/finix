@@ -9475,8 +9475,8 @@
           [defun deck--after-front [state order side gone]]
           (str ''
             The window that takes the front of SIDE in ORDER once GONE closes, or NIL when
-            the column empties. GONE still sits in ORDER, so the entry after it — wrapping,
-            the way a scroll does — is the window a scroll would have revealed.'')
+            the column empties. GONE still sits in ORDER, so the entry after it is the window
+            a scroll would have revealed; at the bottom of the column, the one above it.'')
           ({
             column,
             index,
@@ -9488,7 +9488,7 @@
                 (rows [
                   [[column [remove-if-not ({id}: [lambda [id] [eql [deck--side-of state id] side]]) order]]]
                   [[index [position gone column]]]
-                  [[next [and index [nth [mod ["1+" index] [length column]] column]]]]
+                  [[next [and index [nth [if' ["<" ["1+" index] [length column]] ["1+" index] [max 0 ["1-" index]]] column]]]]
                 ])
               ]
               [[unless [eql next gone] next]]
@@ -18341,6 +18341,20 @@
             defined = lib.unique (lib.concatMap (host: map (o: lib.showOption o.loc) (lib.filter (o: lib.any (file: lib.hasPrefix "${inputs.self}" (toString file) || toString file == "<unknown-file>") o.declarations && o.definitionsWithLocations != []) (lib.collect lib.isOption host.options))) (builtins.attrValues hosts));
           };
           duplicate-definitions.min-leaves = 6;
+          flake-input-without-nixpkgs-follows.allow = [
+            "cudaterm"
+            "silva"
+            "oh-my-fx"
+            "oh-my-pi"
+            "autolith"
+            "emeraldian"
+            "tomoe"
+            "mado"
+            "frame-charge"
+            "finix"
+            "nixpkgs-librewolf"
+          ];
+          machine-local-default.allow = ["/home/steamos"];
           singleton-attrset.exempt = ["flake.nix" ".data.nix"];
           singleton-list.exempt = ["flake.nix" ".data.nix"];
           templated-bindings.exempt = ["flake.nix" ".data.nix"];

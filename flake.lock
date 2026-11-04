@@ -302,6 +302,21 @@
         "type": "github"
       }
     },
+    "crane_4": {
+      "locked": {
+        "lastModified": 1792350552,
+        "narHash": "sha256-292lvpvxTGKryKxh3/3tcIVi85CwYGdl4oOi113Sob8=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "e675a36b7377bebe41d548388a2501cbb16d380d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "crest": {
       "inputs": {
         "nixpkgs": [
@@ -780,6 +795,28 @@
         "type": "github"
       }
     },
+    "iets_2": {
+      "inputs": {
+        "crane": "crane_4",
+        "nixpkgs": [
+          "strictix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793793235,
+        "narHash": "sha256-mxssnXxlkMWoTA1twYvwu4nUkmTzxXXSBkS/6mYjCVc=",
+        "owner": "numtide",
+        "repo": "iets",
+        "rev": "c548a8cbb8d6947e7e76d0be3784891e490a74ae",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "iets",
+        "type": "github"
+      }
+    },
     "leverage": {
       "inputs": {
         "nixpkgs": [
@@ -993,6 +1030,31 @@
           "iets"
         ],
         "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793800992,
+        "narHash": "sha256-EuOFm5eCctf3MAPm1mUakLBGrgGbMA1N5pcmjeT4JXw=",
+        "owner": "y0usaf",
+        "repo": "nix-generators",
+        "rev": "66690dca1e0bbceb0e7ae84b944a2eb726c37930",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "nix-generators",
+        "type": "github"
+      }
+    },
+    "nix-generators_2": {
+      "inputs": {
+        "iets": [
+          "strictix",
+          "iets"
+        ],
+        "nixpkgs": [
+          "strictix",
           "nixpkgs"
         ]
       },
@@ -1895,16 +1957,18 @@
     },
     "strictix": {
       "inputs": {
+        "iets": "iets_2",
+        "nix-generators": "nix-generators_2",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1793794264,
-        "narHash": "sha256-ninp0UwBE1N0JDG4mGmDwdeIFvsxBpYIr17B6vq/DQo=",
+        "lastModified": 1793810473,
+        "narHash": "sha256-lSWnPePH/0gOwhT/lmkFzUcJcLGiTfK6P9ZgX/djhtk=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "51741182a699da2d4d16ca87e3e27ef127e5439f",
+        "rev": "81fb67026b673287d4944a360a48af89ec89ddf6",
         "type": "github"
       },
       "original": {
