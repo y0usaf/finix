@@ -33898,6 +33898,7 @@
         "plugins/cmus.path" = generators.sourceFile "cmus.path" (generators.pathSource plugins_cmus_data);
         "plugins/ekko.path" = generators.sourceFile "ekko.path" (generators.pathSource ekko_data);
         "plugins/nix-fail.path" = generators.sourceFile "nix-fail.path" (generators.pathSource nix_fail_data);
+        "plugins/ozette/cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
         "plugins/ozette/motion.css" = "${flakeInputs.tern-ozette}/motion.css";
         "plugins/ozette/plugin.toml" = "${flakeInputs.tern-ozette}/plugin.toml";
         "plugins/ozette/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
