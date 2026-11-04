@@ -204,26 +204,54 @@ argument, `cond` clauses by 2, anything else under the head. From
 ]
 ```
 
-Shell (`generators.shell`): a command is a Nix list of words. A word is a
-string (written as it is), `dq` (a double-quoted string, its parts strings
-and `sub`), `sq`, `ansic` (`$'...'`), `sub` (`$(...)`), `word` (parts written
-together), `array`, `assign name value`, `redir op target` (spaced before a
-quoted target) or `heredoc start body`. A statement is a command, `assign`,
-`pipe`, `chain [a "&&" b]`, `fn name body`, `braces`, `if' test body`,
-`ifElse test body otherwise`, `for name words body`, `while test body` or
-`case subject [(arm patterns body)]`. A body is a list of statements, one per
-line two spaces in, or `inline [ ... ]` on one line; `rows` breaks a pipe or
-chain after each operator. From `omp-box/omp-box.data.nix`, abridged:
+Shell (`generators.shell`): a data file is a function of the constructors
+and shell globals it uses whose value is the script, a lambda of the names the
+script declares (a plain list when it declares none). Bash scopes a name to
+the script or to a function, so those are the only lambdas: the script's binds
+its function names and every variable it sets (`assign`, `for`, `read`)
+outside a function or inside one without `local`, and a function body is a
+lambda of the names it declares `local` (`fn covers ({base}: inline [ ...
+])`); the generator calls each with name nodes and throws when a formal is not
+declared in its block. A name written as a word is the name (`local x`, `read
+-r path mode`, a call of the script's own function); its value is `var x`
+(`$x`, braced only where the next character would join it), and `default x
+w`, `required x w`, `dropPrefix`, `dropLongestPrefix`, `dropSuffix`,
+`dropLongestSuffix` and `elements x` are `${x:-w}`, `${x:?w}`, `${x#w}`,
+`${x##w}`, `${x%w}`, `${x%%w}` and `${x[@]}`. `var 1` is a positional
+parameter; `args`, `argsJoined`, `argCount` and `exitStatus` are `$@`, `$*`,
+`$#` and `$?`; the environment variables a script reads (`HOME`, `IFS`,
+`PATH`, `XDG_STATE_HOME`, from a fixed list) are attributes of
+`generators.shell`, so a misspelt name is a missing argument. A name that is a
+Nix keyword or an attribute of `generators.shell` ends in `'` (`for'`), as does
+a local named like a script-level name, which Nix would shadow (`cmd_reconcile`'s
+`f'`); the printer drops it. A command is a list of words, the language's own shape. A
+word is a string written as it is (a program, an option, a glob; a `$`, quote,
+blank or operator character in it throws), a Nix integer, a name, or a node:
+`dq` (a double-quoted string of unescaped text and `var`, `sub` and expansion
+nodes), `sq`, `ansic` (`$'...'`, unescaped), `sub` (`$(...)`), `word` (parts
+written together), `array`, `assign name value`, `redir op target` (spaced
+before a quoted target) or `heredoc delimiter body` (`<<'EOF'`). A statement
+is a command, `assign`, `test` (`[ ... ]` of a unary test, `nonEmpty`,
+`isEmpty`, `exists`, `isDir` or `isFile`, or a `[left "=" right]`
+comparison), `pipe`, `chain [a "&&" b]`, `fn name body`, `braces`, `if' test
+body`, `ifElse test body otherwise`, `for name words body`, `while test body`,
+`case subject [(arm patterns body)]`, `comment` or `shebang`. A body is a list
+of statements, one per line two spaces in, or `inline [ ... ]` on one line;
+`rows` breaks a pipe or chain after each operator. Code another program runs
+(a `trap` handler, an `sh -c` script, a jq program) is the text of its `sq`.
+From `omp-box/omp-box.data.nix`, abridged:
 
 ```nix
-(fn "fail" (inline [["printf" (sq "omp-box: %s\\n") (dq "$*") (redir ">&" "2")] ["exit" "1"]]))
-blank
-(fn "cmd_rm" [
-  ["local" (assign "name" "\${1:-}")]
-  (chain [["[" "-n" (dq "$name") "]"] "||" ["fail" (dq "rm needs a name")]])
-  ["local" "path" "mode"]
-  [(assign "IFS" (ansic "\\t")) "read" "-r" "path" "mode" (redir "<" (dq "$grants/$name"))]
-  (if' ["up"] (inline [["unmount_guest" (dq "$path")]]))
+{IFS, ansic, argsJoined, assign, blank, chain, default, dq, fn, if', inline, nonEmpty, redir, sq, test, var, ...}: ({grants, up, fail, unmount_guest, cmd_rm, ...}: [
+  (fn fail (inline [["printf" (sq "omp-box: %s\\n") (dq (var argsJoined)) (redir ">&" 2)] ["exit" 1]]))
+  blank
+  (fn cmd_rm ({name, path, mode}: [
+    ["local" (assign name (default 1 ""))]
+    (chain [(test (nonEmpty (dq (var name)))) "||" [fail (dq "rm needs a name")]])
+    ["local" path mode]
+    [(assign IFS (ansic "\t")) "read" "-r" path mode (redir "<" (dq [(var grants) "/" (var name)]))]
+    (if' [up] (inline [[unmount_guest (dq (var path))]]))
+  ]))
 ])
 ```
 
@@ -733,7 +761,7 @@ then runs each language's own check on every rendered tree, listed in its
 | Language | Gate at conversion | `checks.codegen` |
 | --- | --- | --- |
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
-| shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
+| shell (3 files) | bytes; binding names as Nix variables changed no rendered byte (`beat-saber-lock`, `omp-box` and both colour schemes' `osc.sh`) | `bash -n`, `shellcheck -S warning` |
 | Luau (8 files) | bytes, at conversion and again when its names became Nix bindings | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
 | VBScript (1 file) | bytes, again after its names became Nix bindings and its operators infix lists | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
