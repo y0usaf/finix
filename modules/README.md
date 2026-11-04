@@ -481,39 +481,66 @@ object on one line whose last value is broken closes without its space
 ]))
 ```
 
-TypeScript (`generators.ts`): a name, a number or a dotted path of names
-(`ctx.ui.notify`, `result?.details`) is a string, an array a Nix list, and a
-statement or expression a constructor: `str` and `sq` (string literals as
-written), `tpl` (a template, its parts text and `sub`), `regex`, `obj` of
-`prop` and spread `pre "..."`, `call`, `new`, `dot` and `idx` on a value that
-is not a name, `generic` (`<...>`), `pre` and `post` operators and keywords
-(`!`, `await`, `export`, `async`, `type`), `infix [a "&&" b]` for every binary
-operator, assignment, `as` and union, `ternary`, `paren`, `arrow`, `fn`,
-`method`, `typed x T` (`x: T`; a parameter list with its return type),
-`shape`, `class`, `interface` and `type`; statements are `const`, `let'`,
+TypeScript (`generators.ts`) keeps prettier's layout and binds every name.
+A data file is a function of the constructors and globals it uses and returns
+the file's top-level block: `{call, dot, string, ...}: ({toolRenderers,
+failed, ...}: [ ... ])`. Every identifier and type name is a Nix variable. A
+block that declares names is a lambda whose formals are exactly those names
+(the file, a block of an `if`, `while`, `try` or `case`, a `switch`), and so
+is a function, `fn`, `arrow` or `method`, of its parameters and its body's
+declarations (`({cell}: arrow cell ...)`), a `for` of its binding and body and
+a `catch` of its parameter and body; the generator calls the lambda with name
+nodes and throws when a formal is declared nowhere in it. JavaScript, Node
+and Bun globals and the builtin types (`JSON`, `Promise`, `Map`, `process`,
+`Bun`, `undefined`, `this`, `string`, `number`, `void`, `Record`, ...) are
+attributes of `generators.ts`, so a typo is a missing argument at evaluation;
+TypeScript's `null` and `as const`'s `const` are `null'` and `const'`, and a
+name a constructor or Nix already uses is spelled with a trailing `'`
+(`call'`; the printer drops it). Strings are text only: `str` and `sq`
+literals as written, `tpl` with `sub`, `regex`, `num` for a number Nix would
+spell differently (an integer is a Nix integer, `true` and `false` Nix
+booleans), member and property names (`dot x "a?.b"`, `prop "key" value`,
+`typed "key" T` and `field "key" value` in a class, an interface or a
+`shape`, `method "key" params body`), operator symbols and comments; a bare
+string where a value belongs throws. `infix [a "&&" b "||" c]` alternates
+operands and operators and is parsed by JavaScript's precedence (assignment
+and `**` to the right), a nested list is a grouping that precedence does not
+give, and the printer writes the parentheses that grouping needs plus those
+prettier adds (around `&&` inside `||`, `??` mixed with either, `%` next to
+`*` or `/`, an operand of a bitwise operator, `as` inside an operand or a
+ternary branch, `??` in a ternary branch, a ternary or object literal as an
+arrow's body on its line, a binary, ternary or `await` under a unary operator
+or member access, a function or union type inside `[]`). Unary operators and
+keywords are constructors: `not`, `neg`, `typeof`, `delete`, `await`,
+`spread`, `inc` and `dec` (postfix `++`, `--`), `nonNull`, `async`,
+`readonly`, `export`, `default`, `typeOnly` and `namespace` (`* as`). The
+rest are `call`, `optCall`, `new`, `generic`, `idx`, `optIdx`, `obj`, `array`,
+`arrayOf`, `union`, `intersection`, `is`, `opt`, `computed`, `ternary`,
+`extends`, `class`, `interface` and `type`; statements are `const`, `let'`,
 `return`, `throw'`, `if'`, `ifElse`, `for`, `forOf`, `forIn`, `forAwait`,
 `while`, `switch` of `case`, `try` with `catch` and `finally`, `import'`, and
-any expression (written with its `;`). A body is a list of statements, a block
-one per line a tab in; an arrow's array body is `array`. The printer gives
-prettier's spacing and blocks; the tree keeps the breaks it chose: `rows` for a
-list, an argument list or an operator chain one item per line (with the
-trailing comma), `below x` for `x` on the next line one level in (after `=`,
-`:`, `=>`, `?` and `:` of a ternary, inside `(`), and `chain` for a member
-chain one `.link` per line. A file indented by spaces is `spaces 2 [ ... ]`.
-From `omp/compact-eval.data.nix`, abridged:
+any expression (written with its `;`). The tree keeps only the breaks the
+printer cannot choose: `rows` for a list, an argument list or the loosest
+operator chain one item per line, `below x` for `x` on the next line one level
+in (after `=`, `:`, `=>`, `?` and `:` of a ternary, inside `(`; a broken
+`return` value is parenthesized), and `chain x` for a member chain broken
+before each call group, the groups prettier forms. A file indented by spaces is
+`spaces 2 ...`. From `omp/compact-eval.data.nix`, abridged:
 
 ```nix
-(fn "summary" ["cells"] [
-  (forOf "const" "cell" "cells" [
-    (const "code" (call "String" [(infix ["cell?.code" "??" (str "")])]))
-    (const "line" (chain [
-      "code"
-      (call "split" [(str "\\n")])
-      (call "map" [(arrow "row" (call "row.trim" []))])
+{String, array, arrow, call, chain, const, dot, fn, forOf, if', infix, obj, prop, return, str, undefined, ...}: ({failed, summary, ...}: [
+  ({result}: (fn failed [result] [
+    (if' (infix [(dot result "?.isError") "||" (dot result "?.details?.isError")]) (return true))
+    (return (call (dot (infix [(dot result "?.details?.cells") "??" (array [])]) "some") [({cell}: (arrow cell (infix [(dot cell "status") "===" (str "error")])))]))
+  ]))
+  ({cells}: (fn summary [cells] [
+    ({cell, code, line}: (forOf cell cells [
+      (const code (call String [(infix [(dot cell "?.code") "??" (str "")])]))
+      (const line (chain (call (dot (call (dot code "split") [(str "\\n")]) "map") [({row}: (arrow row (call (dot row "trim") [])))])))
+      (if' line (return (array [(obj [(prop "t" line) (prop "s" (str "code"))])])))
     ]))
-    (if' "line" (return [(obj [(prop "t" "line") (prop "s" (str "code"))])]))
-  ])
-  (return "undefined")
+    (return undefined)
+  ]))
 ])
 ```
 
@@ -558,7 +585,7 @@ then runs each language's own check on every rendered tree, listed in its
 | Lua (3 files) | bytes | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
 | Python (5 files) | bytes | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
 | JavaScript (1 file) | bytes | `node --check` |
-| TypeScript (10 files) | bytes | `tsc --noEmit` (TypeScript 7) with an ambient stub of the omp, pi and Node modules they import; `work-fold.ts` and `compact-eval.ts`, untyped as written, get `--noCheck` (syntax and imports only) |
+| TypeScript (10 files) | bytes, at conversion and again when re-imported with every name bound | `tsc --noEmit` (TypeScript 7) with an ambient stub of the omp, pi and Node modules they import; `work-fold.ts` and `compact-eval.ts`, untyped as written, get `--noCheck` (syntax and imports only) |
 
 ### GLSL before and after
 
